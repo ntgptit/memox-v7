@@ -18,8 +18,10 @@ import '../../domain/models/card_move_target_model.dart';
 import '../../domain/models/card_state_distribution_model.dart';
 import '../../domain/models/card_text_model.dart';
 import '../../domain/models/deck_context_model.dart';
+import '../../domain/models/tag_filter_model.dart';
 import '../../domain/models/tag_name_model.dart';
 import '../../domain/repositories/card_repository.dart';
+import '../../../trash/domain/repositories/content_trash_repository.dart';
 import '../datasources/card_list_read_data_source.dart';
 import '../datasources/deck_context_read_data_source.dart';
 import '../mappers/card_mapper.dart';
@@ -46,8 +48,12 @@ final class CardRepositoryImpl
   CardRepositoryImpl(
     AppDatabase database, {
     required DateTime Function() clock,
+    required ContentTrashRepository trash,
     String Function()? idGenerator,
-  }) : _cardDao = CardDao(database),
+  }) : // A named parameter cannot start with `_`, so the formal is impossible.
+       // ignore: prefer_initializing_formals
+       _trash = trash,
+       _cardDao = CardDao(database),
        _reads = CardListReadDataSource(CardDao(database)),
        _deckContextReads = DeckContextReadDataSource(database),
        _deckContextDao = CardDeckContextDao(database),
@@ -58,6 +64,10 @@ final class CardRepositoryImpl
 
   @override
   final CardDao _cardDao;
+
+  /// Trash's contract, for the batch half of a soft delete (BR-256).
+  @override
+  final ContentTrashRepository _trash;
 
   /// The list reads (windowed rows, filter counts), split out for size.
   final CardListReadDataSource _reads;
@@ -92,6 +102,7 @@ final class CardRepositoryImpl
     CardListSort sort = CardListSort.newest,
     String? searchTerm,
     DateTime? now,
+    TagFilter tags = TagFilter.none,
   }) => _reads.watchCardListItems(
     deckId,
     limit: limit,
@@ -99,6 +110,7 @@ final class CardRepositoryImpl
     sort: sort,
     searchTerm: searchTerm,
     now: now,
+    tags: tags,
   );
 
   @override
@@ -107,11 +119,13 @@ final class CardRepositoryImpl
     CardListFilter filter = CardListFilter.all,
     String? searchTerm,
     DateTime? now,
+    TagFilter tags = TagFilter.none,
   }) => _reads.watchFilteredCardCount(
     deckId,
     filter: filter,
     searchTerm: searchTerm,
     now: now,
+    tags: tags,
   );
 
   @override
@@ -233,14 +247,23 @@ final class CardRepositoryImpl
     return cardEntityFromRow(await _requireCardRow(cardId));
   });
 
-  /// Deletes a card, and hands the deck its content type back when that was
-  /// the last one (BR-163).
+  /// Moves a card to Trash, and hands the deck its content type back when that
+  /// was the last one (BR-256, BR-260).
   ///
   /// **One element into the bulk primitive.** A second transaction path for
   /// "just this card" is a second place for the emptied-deck rule to be
   /// forgotten; `deleteCards` owns it once (BR-166).
   @override
   Future<void> deleteCard(String cardId) => deleteCards(<String>[cardId]);
+
+  /// The same deletion, returning the one batch so the caller can offer Undo
+  /// (BR-256, BR-263).
+  @override
+  Future<String> deleteCardForUndo(String cardId) async {
+    final batchIds = await deleteCardsForUndo(<String>[cardId]);
+
+    return batchIds.single;
+  }
 
   @override
   Stream<List<TagEntity>> watchCardTags(String cardId) => _cardDao

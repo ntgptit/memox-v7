@@ -1,9 +1,12 @@
 import 'package:drift/drift.dart';
 
+import '../text/search_fold.dart';
 import 'connection.dart';
 
 part 'app_database.g.dart';
 part 'app_database_migrations.dart';
+part 'app_database_migrations_v5.dart';
+part 'app_database_migrations_v11.dart';
 
 /// The app's database.
 ///
@@ -13,14 +16,24 @@ part 'app_database_migrations.dart';
 /// putting them in SQL would make changing them a migration.
 @DriftDatabase(
   include: <String>{
+    'tables/trash.drift',
     'tables/decks.drift',
     'tables/cards.drift',
     'tables/tags.drift',
     'tables/study.drift',
+    'tables/settings.drift',
     'queries/study.drift',
+    'queries/settings.drift',
     'queries/deck.drift',
     'queries/card.drift',
     'queries/tag.drift',
+    // A read-only summary of `study_answers` (UC-12). It adds a statement and
+    // no table: `schemaVersion` is deliberately untouched by this file, because
+    // a named query is not a schema change.
+    'queries/progress.drift',
+    'queries/reminder.drift',
+    'queries/search.drift',
+    'queries/trash.drift',
   },
 )
 class AppDatabase extends _$AppDatabase {
@@ -31,7 +44,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.open() : super(openAppDatabaseConnection());
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -47,9 +60,15 @@ class AppDatabase extends _$AppDatabase {
       // Duplicated with `_upgradeToV5` on purpose: the two paths are genuinely
       // different, and a helper shared between them would have to name a schema
       // that means different things at each call site.
+      //
+      // Every column is named, including the two v8 added. They carry a
+      // `DEFAULT`, so omitting them would work — and would stop working the day
+      // an option arrives without one, silently, on fresh installs only.
       await customStatement(
-        'INSERT INTO app_settings (id, card_limit, new_card_order, updated_at) '
-        "VALUES (1, 20, 'created', CAST(strftime('%s', 'now') AS INTEGER))",
+        'INSERT INTO app_settings '
+        '(id, card_limit, new_card_order, theme_mode, language, updated_at) '
+        "VALUES (1, 20, 'created', 'system', 'system', "
+        "        CAST(strftime('%s', 'now') AS INTEGER))",
       );
     },
 
@@ -151,6 +170,73 @@ class AppDatabase extends _$AppDatabase {
       if (from < 7) {
         await _upgradeToV7();
       }
+
+      // v7 -> v8 (M99.27): the recall direction of BR-203.
+      //
+      // Three nullable columns and a backfill. Additive, so a v7 row upgrades
+      // without a value being invented for it — except for the one set of rows
+      // where NULL would be a lie: every `self_assess` review already served was
+      // asked from the Korean term, and leaving those unmarked would make
+      // "recognition" and "before the feature existed" the same stored value.
+      //
+      // Last, so it runs on top of whatever the v1…v7 steps just produced.
+      if (from < 8) {
+        await _upgradeToV8();
+      }
+
+      // v8 -> v9 (M99.28): the two appearance columns of BR-214 and BR-215.
+      //
+      // Two `ALTER TABLE ADD COLUMN`, and nothing else. Both are NOT NULL with
+      // a `DEFAULT 'system'`, so the one existing row upgrades to exactly the
+      // state a fresh install has — "follow the platform", which is what every
+      // build before this one did because it had no choice.
+      //
+      // **v9 rather than the v8 this arrived as.** Settings and the recall
+      // direction were written against the same base and both claimed v8; the
+      // direction's landed first, so this one runs on top of it. The two do not
+      // interact — different tables, both additive — but the order is now fixed
+      // and `migration_v9_test` upgrades from a v8 database, not a v7 one.
+      //
+      // **The `CHECK` on each column does not survive the `ALTER`, and that is
+      // accepted here rather than worked around.** SQLite applies a column
+      // constraint declared in `ADD COLUMN`, and `migrateAndValidate` compares
+      // the upgraded database against the declaration, so `migration_v9_test`
+      // is what proves the pair actually agree — asserting against this file
+      // would only agree with itself.
+      if (from < 9) {
+        await _upgradeToV9();
+      }
+
+      // v9 -> v10 (M99.29): the three reminder columns on `app_settings`
+      // (BR-218, BR-219, BR-221).
+      //
+      // Additive, so a v9 row upgrades in place. The source branch spread these
+      // over two versions; both of those numbers are taken here, and the
+      // intermediate state they described has never existed on this line.
+      //
+      // Last, so it runs on top of whatever the v1…v9 steps just produced.
+      if (from < 10) {
+        await _upgradeToV10();
+      }
+
+      // v10 -> v11 (M99.33): Trash. The one migration in this file that both
+      // adds structure and rebuilds a table.
+      //
+      // **The rebuild is not optional.** `study_sessions.end_reason` gains
+      // `content_deleted` (BR-259) and SQLite cannot alter a CHECK, so the
+      // table is created-copied-dropped-renamed exactly as v5 did for the same
+      // reason. Everything else here is additive, and every existing row stays
+      // active because `delete_batch_id` arrives NULL — which is what "old
+      // rows are active by default" means in practice.
+      //
+      // **v11 rather than the v8 this arrived as.** Trash was written against
+      // the same base as the recall direction (v8), Settings (v9) and the
+      // reminder (v10) and claimed the first free number it saw; it landed
+      // last, so it runs on top of all three. `migration_v11_test` upgrades
+      // from a v10 database, not a v7 one.
+      if (from < 11) {
+        await _upgradeToV11();
+      }
     },
 
     beforeOpen: (OpeningDetails details) async {
@@ -178,11 +264,14 @@ class AppDatabase extends _$AppDatabase {
   ///
   /// A loop rather than a batch: this runs once per device, inside the
   /// migration's transaction, and `customStatement` is the API that is certain
-  /// to be there. Folding is `CardText.fold`'s rule — trim, then Dart's
-  /// Unicode-aware `toLowerCase()` — restated here rather than imported, because
-  /// `core/` must not depend on a feature (AD-13). The pair is pinned by
-  /// `migration_test.dart`, which upgrades a v2 card holding `CÔNG NGHỆ` and
-  /// requires the folded column to read `công nghệ`.
+  /// to be there. Folding goes through [foldForSearch] — trim, then Dart's
+  /// Unicode-aware `toLowerCase()`. It used to be *restated* here, because the
+  /// rule lived in `CardText` and `core/` must not depend on a feature (AD-13);
+  /// M99.32 moved the rule itself into `core/text/`, so the backfill and the
+  /// column's writer now share one implementation instead of two copies that
+  /// agreed by inspection. The pair is pinned by `migration_test.dart`, which
+  /// upgrades a v2 card holding `CÔNG NGHỆ` and requires the folded column to
+  /// read `công nghệ`.
   Future<void> _backfillFoldedSides() async {
     final rows = await customSelect(
       'SELECT id, front, back FROM cards',
@@ -193,8 +282,8 @@ class AppDatabase extends _$AppDatabase {
       await customUpdate(
         'UPDATE cards SET front_folded = ?, back_folded = ? WHERE id = ?',
         variables: <Variable<Object>>[
-          Variable<String>(row.read<String>('front').trim().toLowerCase()),
-          Variable<String>(row.read<String>('back').trim().toLowerCase()),
+          Variable<String>(foldForSearch(row.read<String>('front'))),
+          Variable<String>(foldForSearch(row.read<String>('back'))),
           Variable<String>(row.read<String>('id')),
         ],
         // Stated even though nothing is listening mid-upgrade: `customUpdate`

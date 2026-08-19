@@ -8,6 +8,7 @@ import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_empty_state.dart';
 import '../../../../shared/widgets/mx_error_state.dart';
 import '../../../../shared/widgets/mx_loading_state.dart';
+import '../../domain/models/study_direction_model.dart';
 import '../../domain/models/study_mode.dart';
 import '../../domain/models/study_session_kind_model.dart';
 import '../../domain/models/study_turn_model.dart';
@@ -34,17 +35,34 @@ class StudySessionScreen extends ConsumerStatefulWidget {
     required this.deckId,
     required this.kind,
     this.reviewMode,
+    this.direction,
     this.shouldResume = false,
+    this.resumeSessionId,
     super.key,
   });
 
   final String deckId;
   final StudySessionKind kind;
 
+  /// The recall direction chosen at the entry point (BR-203).
+  ///
+  /// Null for every session outside the rule, and for a resume — which reads the
+  /// direction the session already carries rather than being told one (BR-207).
+  final StudySessionDirection? direction;
+
   /// Continue the session already open for this deck, rather than opening a new
   /// one (BR-103). [kind] and [reviewMode] are then the resumed session's own,
   /// passed for the title before the load returns.
   final bool shouldResume;
+
+  /// Which open session to continue, when the caller offered a particular one.
+  ///
+  /// Study Home lists a session and hands its id back, so the tap continues the
+  /// session that was on screen rather than "whatever is open for this deck" —
+  /// two different questions once a deck can have a newer session or one an
+  /// earlier study day left behind (BR-200, BR-103). Null from the per-deck
+  /// entry screen, which named no session to begin with.
+  final String? resumeSessionId;
 
   /// The mode the user chose, for a review session (BR-109). Null for a
   /// learning session, which walks the algorithm's whole sequence.
@@ -84,7 +102,9 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
             .start(
               kind: widget.kind,
               reviewMode: widget.reviewMode,
+              direction: widget.direction,
               shouldResume: widget.shouldResume,
+              resumeSessionId: widget.resumeSessionId,
             ),
       );
     });

@@ -8,10 +8,10 @@ import 'package:memox/features/deck/domain/models/deck_list_snapshot_model.dart'
 import 'package:memox/features/deck/domain/models/deck_path_segment_model.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
+import 'package:memox/features/deck/presentation/widgets/sections/deck_subheader_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_breadcrumb.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
-import 'package:memox/shared/widgets/mx_search_field.dart';
 
 import 'support/deck_screen_harness.dart';
 import 'support/fake_deck_repository.dart';
@@ -147,7 +147,7 @@ void main() {
     ) async {
       // Geometry, because "it looks left-aligned" is not a property any widget
       // exposes. The subheader's Column defaulted to centring its children; the
-      // search field is full width so it hid that, and only the breadcrumb —
+      // search field was full width so it hid that, and only the breadcrumb —
       // which is as wide as its own steps — showed a path floating in the middle
       // of a screen whose every other element starts at the gutter.
       await pumpDeckScreen(
@@ -162,16 +162,15 @@ void main() {
       // origin passed while every step still carried `sm` of leading padding,
       // so the box sat on the gutter and the word sat 8px inside it — which is
       // what a reader sees and what was reported.
-      // The field rests collapsed since the density pass, so the shared left
-      // edge is asserted against it opened — the state in which both exist.
-      final english = AppLocalizationsEn();
-      await tester.tap(find.bySemanticsLabel(english.deckSearchOpenLabel));
-      await tester.pumpAndSettle();
-
+      //
+      // **Measured against the strip's own box since M99.32**, which moved the
+      // search field out of this strip and onto its own screen. The claim is
+      // unchanged and so is what it catches: a breadcrumb whose first step
+      // carries its own leading padding sits inside the box rather than on it.
       expect(
         tester.getTopLeft(find.byIcon(Icons.home_outlined)).dx,
-        tester.getTopLeft(find.byType(MxSearchField)).dx,
-        reason: 'the path and the search field share one left edge',
+        tester.getRect(find.byType(DeckSubheaderWidget)).left,
+        reason: 'the path starts on the strip it sits in, not centred in it',
       );
     });
 

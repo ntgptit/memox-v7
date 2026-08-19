@@ -17,10 +17,13 @@ import '../../states/card_submit_state.dart';
 /// **Counts nothing.** Unlike a deck, a card takes only itself and its own
 /// history; the message is a fixed sentence, so there is no impact read
 /// to make before asking.
+/// [onDeleted] receives the deletion's batch id, which is what an Undo
+/// affordance acts on (BR-263); it is null only when the write failed, which
+/// the dialog has already reported.
 Future<void> showCardDeleteConfirm(
   BuildContext context, {
   required String cardId,
-  required VoidCallback onDeleted,
+  required ValueChanged<String?> onDeleted,
 }) => showDialog<void>(
   context: context,
   builder: (dialogContext) => _DeleteCardDialog(
@@ -30,7 +33,7 @@ Future<void> showCardDeleteConfirm(
   ),
 );
 
-class _DeleteCardDialog extends StatelessWidget {
+class _DeleteCardDialog extends StatefulWidget {
   const _DeleteCardDialog({
     required this.cardId,
     required this.onDeleted,
@@ -38,12 +41,20 @@ class _DeleteCardDialog extends StatelessWidget {
   });
 
   final String cardId;
-  final VoidCallback onDeleted;
+  final ValueChanged<String?> onDeleted;
   final VoidCallback onClose;
 
   @override
+  State<_DeleteCardDialog> createState() => _DeleteCardDialogState();
+}
+
+class _DeleteCardDialogState extends State<_DeleteCardDialog> {
+  /// The batch the write created, held only until the dialog closes.
+  String? _batchId;
+
+  @override
   Widget build(BuildContext context) {
-    final provider = cardDeleteProvider(cardId);
+    final provider = cardDeleteProvider(widget.cardId);
 
     return Consumer(
       builder: (context, ref, child) {
@@ -51,8 +62,9 @@ class _DeleteCardDialog extends StatelessWidget {
 
         ref.listen<CardSubmitState>(provider, (previous, next) {
           if (!next.shouldClose || (previous?.shouldClose ?? false)) return;
-          onClose();
-          onDeleted();
+          widget.onClose();
+          // Captured by `onConfirm` below, one frame before this fires.
+          widget.onDeleted(_batchId);
         });
 
         return MxConfirmDialog(
@@ -62,10 +74,14 @@ class _DeleteCardDialog extends StatelessWidget {
               : context.l10n.cardDeleteConfirmMessage,
           confirmLabel: context.l10n.cardDeleteConfirmAction,
           cancelLabel: context.l10n.commonCancelAction,
-          variant: MxConfirmDialogVariant.destructive,
+          // Soft delete (BR-256): cautious, not destructive — see the
+          // deck dialog for the whole argument.
+          variant: MxConfirmDialogVariant.cautious,
           isSubmitting: submit.isSubmitting,
-          onConfirm: () => ref.read(provider.notifier).submit(),
-          onCancel: onClose,
+          onConfirm: () async {
+            _batchId = await ref.read(provider.notifier).submit();
+          },
+          onCancel: widget.onClose,
         );
       },
     );

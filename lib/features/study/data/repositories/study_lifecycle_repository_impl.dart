@@ -66,6 +66,11 @@ mixin _StudyLifecycleOperations {
     return row == null ? null : studySessionEntityFromRow(row);
   }
 
+  Future<StudySessionEntity?> sessionById(String sessionId) async {
+    final row = await _dao.sessionById(sessionId);
+    return row == null ? null : studySessionEntityFromRow(row);
+  }
+
   // No `@override`: this mixin does not declare `implements StudyRepository`,
   // and neither does `endSession` above it. The concrete repository is what
   // satisfies the interface.

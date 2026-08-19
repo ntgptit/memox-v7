@@ -30,16 +30,47 @@ abstract final class RouteNames {
   /// branch and the bottom bar remains visible.
   static const String deckDetail = 'deckDetail';
 
-  /// The study surface. Branch 1 of the shell.
+  /// The study surface. Branch 1 of the shell, and the tab's own home: the
+  /// resume card and the root decks ranked by what is waiting in them (UC-14).
   static const String study = 'study';
 
-  /// The progress surface. Branch 2 of the shell — a presentation-only
-  /// placeholder until the statistics feature exists (AD-19).
+  /// One root deck's study entry, reached **from the Study tab**. A child of
+  /// [study], so it pushes onto the Study branch: the bottom bar stays and Back
+  /// returns to the list that offered the deck.
+  ///
+  /// **A second name onto the same screen, and not a duplicate of [deckStudy].**
+  /// They differ in the only thing a route decides — which branch the push lands
+  /// in, and therefore where Back goes. Reusing [deckStudy] here would move the
+  /// user to the Library tab for tapping Study on the Study tab, and Back would
+  /// then land on a deck list they never opened.
+  static const String studyDeck = 'studyDeck';
+
+  /// The progress surface. Branch 2 of the shell — Progress by Deck at the
+  /// library level, every root deck (UC-12).
+  ///
+  /// No longer the placeholder AD-19 describes: M99.23 and M99.24 built the
+  /// screen it stood in for.
   static const String progress = 'progress';
+
+  /// One deck's progress level. A child of [progress], so drilling in stays
+  /// inside the Progress branch and Back returns to the level above (UC-12).
+  static const String progressDeck = 'progressDeck';
 
   /// The settings surface. Branch 3 of the shell — a presentation-only
   /// placeholder until app settings exist (AD-19).
   static const String settings = 'settings';
+
+  /// The daily-reminder screen. A child of [settings], so it stays in the
+  /// Settings branch and Back returns to it (UC-17).
+  static const String reminderSettings = 'reminderSettings';
+
+  /// Global Library Search (UC-20). A child of [decks], so the bottom bar stays
+  /// and Back returns to the level the user searched from.
+  ///
+  /// **The one name two features speak.** The Library header pushes it and the
+  /// search feature owns the screen; neither may import the other's widgets
+  /// (AD-13), so the route name in `core/` is the whole of the coupling.
+  static const String librarySearch = 'librarySearch';
 
   /// The starter template catalog. A child of [decks], so it stays inside the
   /// Library branch and Back returns to the (possibly empty) list that offered
@@ -68,6 +99,31 @@ abstract final class RouteNames {
   /// the Decks branch and leaving it lands back on the list whose stream
   /// already shows what was imported (M4.12).
   static const String cardImport = 'cardImport';
+
+  /// The tag catalog (UC-18). A child of [decks] rather than of a deck,
+  /// because a tag belongs to no deck (BR-93, BR-230) — nesting it under
+  /// `/decks/<id>` would say the opposite in the URL.
+  ///
+  /// **A name is what makes the two entry points possible without an import.**
+  /// The deck list and the card list both open it, and they live in two
+  /// features that may not see each other's `presentation/`; a shared route
+  /// name in `core/` is the whole of what they need (AD-13).
+  static const String tagCatalog = 'tagCatalog';
+
+  /// One card, read-only, with its study history (UC-19). A child of
+  /// [cardList], so it pushes onto the Decks branch: the bottom bar stays and
+  /// Back returns to the list with its filter, window and selection intact
+  /// (BR-246, M4.15).
+  static const String cardDetail = 'cardDetail';
+
+  /// Trash (UC-21). A child of [decks], so it stays in the Library branch and
+  /// Back returns to the list a restored deck reappears in.
+  ///
+  /// **Library, not Settings** (AD-22). Trash holds Library content, and
+  /// Settings is a placeholder branch (AD-19) — putting a data-recovery entry
+  /// two taps deep in an unrelated branch is how a user learns it exists only
+  /// after they needed it.
+  static const String trash = 'trash';
 }
 
 /// Names of the path parameters routes carry.

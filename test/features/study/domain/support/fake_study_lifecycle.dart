@@ -47,4 +47,21 @@ mixin _FakeStudyLifecycleStubs implements StudyRepository {
     required DateTime endedAt,
     required StudySessionEndReason reason,
   }) async => 0;
+
+  /// What a deletion asked this fake to close (BR-259). Recorded rather than
+  /// simulated: the closing itself is exercised against a real database in
+  /// `test/features/trash/`, and what a *caller* owes is the id sets.
+  final List<({List<String> deckIds, List<String> cardIds})>
+  deletionInvalidations = <({List<String> deckIds, List<String> cardIds})>[];
+
+  @override
+  Future<int> invalidateSessionsForDeletedContent({
+    required List<String> deckIds,
+    required List<String> cardIds,
+    required DateTime endedAt,
+  }) async {
+    deletionInvalidations.add((deckIds: deckIds, cardIds: cardIds));
+
+    return 0;
+  }
 }

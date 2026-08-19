@@ -35,6 +35,7 @@ class MxTextButton extends StatefulWidget {
     this.icon,
     this.trailingIcon,
     this.isDestructive = false,
+    this.accent,
     super.key,
   });
 
@@ -53,6 +54,19 @@ class MxTextButton extends StatefulWidget {
   /// Danger as a label: the text goes `semanticColors.danger`.
   final bool isDestructive;
 
+  /// The link's ink, when the surface behind it is not the page.
+  ///
+  /// **A parameter rather than a `TextButtonTheme` at the call site.**
+  /// `TextButtonTheme.of` returns the nearest data and does **not** merge with
+  /// the ancestor, so wrapping this button to change one colour silently drops
+  /// the rest of `buildTextButtonTheme` — zero padding, a 48 minimum, start
+  /// alignment, no splash — and the button then renders 12dp indented, 40 tall,
+  /// with a ripple no other text button in the app has. `TextButton.style`
+  /// merges; this goes through it, exactly as [isDestructive] does.
+  ///
+  /// Null keeps `primaryAccent`, which is right on the page.
+  final Color? accent;
+
   @override
   State<MxTextButton> createState() => _MxTextButtonState();
 }
@@ -68,15 +82,19 @@ class _MxTextButtonState extends State<MxTextButton> {
     super.dispose();
   }
 
-  /// The theme's resolver with `danger` as its accent — the same link, a
-  /// different pair. Null otherwise, so `textButtonTheme` applies untouched.
-  ButtonStyle? _destructiveStyle(BuildContext context) {
-    if (!widget.isDestructive) return null;
+  /// The theme's resolver with a different accent — the same link, a different
+  /// pair. Null when neither is asked for, so `textButtonTheme` applies
+  /// untouched.
+  ButtonStyle? _accentStyle(BuildContext context) {
+    final Color? accent = widget.isDestructive
+        ? context.semanticColors.danger
+        : widget.accent;
+    if (accent == null) return null;
 
     final foreground = textLinkForeground(
       context.colors,
       context.semanticColors,
-      accent: context.semanticColors.danger,
+      accent: accent,
     );
 
     return ButtonStyle(foregroundColor: foreground, iconColor: foreground);
@@ -87,7 +105,7 @@ class _MxTextButtonState extends State<MxTextButton> {
     return TextButton(
       statesController: _states,
       onPressed: widget.onPressed,
-      style: _destructiveStyle(context),
+      style: _accentStyle(context),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         spacing: AppSpacing.xs,

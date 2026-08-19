@@ -28,7 +28,7 @@ các bước gốc. Ý nghĩa mức sẵn sàng, hồ sơ thực thi, chuẩn b�
 | IT-NAV-008 | `01-navigation-and-continuity.md` | READY | `HOST-WIDGET` | — | SETUP-STUDY-SCOPE | CLEAN-RESET | UC-05, BR-101, M5.15 |
 | IT-NAV-009 | `01-navigation-and-continuity.md` | READY | `HOST-WIDGET` | — | S-STUDY-REVIEW-EB-V2 | CLEAN-RESET | UC-05, BR-101, BR-146, M5.15 |
 | IT-NAV-010 | `01-navigation-and-continuity.md` | READY | `HOST-WIDGET` | IT-PLAT-005 | SETUP-STUDY-EB-5-FULL | CLEAN-RESET | UC-05 A3, BR-82, docs/wireframes/m5-study-modes.md |
-| IT-NAV-011 | `01-navigation-and-continuity.md` | READY | `HOST-WIDGET` | — | SETUP-EMPTY | CLEAN-RESET | AD-19, M99.7 |
+| IT-NAV-011 | `01-navigation-and-continuity.md` | READY | `HOST-WIDGET` | — | SETUP-EMPTY | CLEAN-RESET | AD-19, UC-12, BR-190, M99.7 |
 | IT-NAV-012 | `01-navigation-and-continuity.md` | READY | `HOST-WIDGET` | — | SETUP-CARD-BASIC | CLEAN-RESET | UC-10, AD-20 |
 
 ## Vòng đời bộ thẻ gốc

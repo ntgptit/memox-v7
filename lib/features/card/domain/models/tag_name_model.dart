@@ -1,3 +1,4 @@
+import '../../../../core/text/search_fold.dart';
 import '../failures/tag_validation_failure.dart';
 
 /// C0, DEL and C1 — every character that carries no glyph.
@@ -58,7 +59,7 @@ final class TagName {
       );
     }
 
-    return (name: TagName._(trimmed, trimmed.toLowerCase()), problem: null);
+    return (name: TagName._(trimmed, foldForSearch(trimmed)), problem: null);
   }
 
   /// Reads a name that is **already stored**, without BR-93's length limit —
@@ -82,8 +83,27 @@ final class TagName {
       );
     }
 
-    return (name: TagName._(trimmed, trimmed.toLowerCase()), problem: null);
+    return (name: TagName._(trimmed, foldForSearch(trimmed)), problem: null);
   }
+
+  /// BR-93's fold, applied to text that is **not** a name being created.
+  ///
+  /// **`CardText.fold`'s reason, for the sixth field.** A tag search compares a
+  /// typed term against the stored `name_folded` column, and both sides have to
+  /// go through the same rule or the comparison is between two different
+  /// foldings — the defect `searchPredicate` had to be repaired out of, where
+  /// SQLite's ASCII-only `lower()` sat on one side and Dart's on the other.
+  ///
+  /// **Deliberately not [parse] or [fromStored].** A search term is not a name:
+  /// it may be longer than the limit, and refusing it would turn "I typed too
+  /// much" into "no filter at all", which shows *more* rows rather than fewer.
+  /// It is not stored text either, so [fromStored] would be the read affordance
+  /// applied to something that was never read — the boundary
+  /// `card_transfer_boundary_test.dart` protects.
+  ///
+  /// Returns the empty string for a blank term, which every caller reads as
+  /// "no search".
+  static String fold(String raw) => raw.trim().toLowerCase();
 
   /// Whether two names collide under BR-93's case-insensitive uniqueness.
   ///

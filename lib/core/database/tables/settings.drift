@@ -1,0 +1,77 @@
+-- Application-wide options, for the one local profile (BR-210).
+--
+-- **Its own file since v9, and it was never a study table.** `app_settings`
+-- arrived inside `tables/study.drift` because study defaults were the only
+-- thing in it. v9 adds theme and language, and a table holding the app's
+-- appearance inside the study feature's schema file is a place nobody would
+-- look for it. v10 adds the daily reminder, which is neither study nor
+-- appearance and belongs here for the same reason.
+
+-- Exactly one row (BR-147, BR-210).
+--
+-- A one-row table with real columns rather than key-value: key-value reads more
+-- flexibly and turns every value into TEXT and every read into an unchecked
+-- cast, while this shape lets `drift_dev` type-check at build time and makes
+-- adding an option a migration -- the right level of ceremony for something
+-- that changes how people study.
+CREATE TABLE app_settings (
+    -- The CHECK is what keeps the table at one row. Without it, "the settings"
+    -- becomes "whichever row the query happened to read first".
+    id INTEGER NOT NULL PRIMARY KEY CHECK (id = 1),
+
+    -- A ceiling PER SESSION, not per day (BR-24). The number of sessions in a
+    -- day is deliberately unlimited.
+    card_limit INTEGER NOT NULL DEFAULT 20,
+
+    new_card_order TEXT NOT NULL DEFAULT 'created'
+        CHECK (new_card_order IN ('created', 'random')),
+
+    -- The user's CHOICE, not the resolved brightness (BR-214, AD-11).
+    --
+    -- Storing `'light'` because the platform happens to be light today makes an
+    -- explicit choice indistinguishable from following the system, and it stops
+    -- being true the moment the OS setting changes.
+    theme_mode TEXT NOT NULL DEFAULT 'system'
+        CHECK (theme_mode IN ('system', 'light', 'dark')),
+
+    -- The same shape, for the locale (BR-215).
+    --
+    -- `language`, not `locale`: the column holds BR-215's three values, not a
+    -- BCP-47 tag. There is no script, variant or region in `supportedLocales`,
+    -- and a column that promises more than it accepts is one somebody writes
+    -- `vi-VN` into.
+    language TEXT NOT NULL DEFAULT 'system'
+        CHECK (language IN ('system', 'en', 'vi')),
+
+    -- The daily reminder (BR-218). Off until the user turns it on, which is
+    -- also what keeps the app from asking for the notification permission
+    -- before there is anything to ask for.
+    reminder_enabled INTEGER NOT NULL DEFAULT 0
+        CHECK (reminder_enabled IN (0, 1)),
+
+    -- Minute of the day in LOCAL time, 0..1439; 1200 is 20:00 (BR-219).
+    --
+    -- **Deliberately not stored as UTC**, unlike every DATETIME in this schema.
+    -- Those are instants; this is a time of day. Converting it on write makes
+    -- the reminder drift by exactly the offset change when the user crosses a
+    -- timezone -- they set 20:00 and get 23:00, with nothing to explain why.
+    reminder_minute_of_day INTEGER NOT NULL DEFAULT 1200
+        CHECK (reminder_minute_of_day BETWEEN 0 AND 1439),
+
+    -- When the last summary was actually posted (BR-221). NULL until one has
+    -- been.
+    --
+    -- **The day-skip has to outlive the run that decided it.** A wake-up
+    -- deferred past local midnight serves the day it lands in, so the next run
+    -- belongs to the day after that -- but the app reconciles its schedule on
+    -- every launch, and a reconcile that could not see this column recomputed
+    -- from `now` and put the skipped day back. Two alerts in one local day, and
+    -- the only trace of the decision was a local variable in an isolate that
+    -- had already exited.
+    --
+    -- UTC, like every other instant here; the local day it belongs to is
+    -- resolved by whoever reads it, against the offset in force then.
+    reminder_last_delivered_at DATETIME NULL,
+
+    updated_at DATETIME NOT NULL
+);

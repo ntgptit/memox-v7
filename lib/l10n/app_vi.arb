@@ -24,21 +24,222 @@
   "@progressTitle": {
     "description": "App bar title of the Progress branch."
   },
-  "progressPlaceholderTitle": "Tính năng Tiến độ đang được phát triển",
-  "@progressPlaceholderTitle": {
-    "description": "Heading of the Progress placeholder (AD-19)."
+  "progressLoadingLabel": "Đang tải tiến độ của bạn",
+  "@progressLoadingLabel": {
+    "description": "Screen-reader label announced while the Progress screen is loading."
   },
-  "progressPlaceholderMessage": "Các lượt học hiện tại vẫn được lưu để sử dụng khi tính năng hoàn tất.",
-  "@progressPlaceholderMessage": {
-    "description": "Body of the Progress placeholder: study history is already recorded, nothing is lost while waiting."
+  "progressStreakSectionLabel": "Chuỗi hiện tại",
+  "@progressStreakSectionLabel": {
+    "description": "Heading of the hero section (W2)."
+  },
+  "progressStreakDaysLabel": "{count, plural, other{{count} ngày}}",
+  "@progressStreakDaysLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "The hero headline (BR-197). Vietnamese has one plural form, so `other` covers every count."
+  },
+  "progressStreakTodayLine": "{count, plural, =0{Chưa có thẻ nào hôm nay} other{{count} thẻ hôm nay}}",
+  "@progressStreakTodayLine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "The line under the hero headline when the streak includes today (BR-228)."
+  },
+  "progressStreakHeldLine": "Chưa có thẻ nào hôm nay — chuỗi đang được giữ từ hôm qua",
+  "@progressStreakHeldLine": {
+    "description": "The hero's supporting line when today has no activity but yesterday does (BR-197, A1)."
+  },
+  "progressStreakZeroLine": "Học hôm nay để bắt đầu một chuỗi",
+  "@progressStreakZeroLine": {
+    "description": "The hero's supporting line when the streak is zero (P6)."
+  },
+  "progressStreakSemanticsHeadline": "{streak, plural, other{Chuỗi hiện tại, {streak} ngày}}",
+  "@progressStreakSemanticsHeadline": {
+    "placeholders": {
+      "streak": {
+        "type": "int"
+      }
+    },
+    "description": "The first clause of the hero's announcement (W6.4). The second clause is the visible supporting line, joined on by `progressStreakSemantics`."
+  },
+  "progressStreakSemantics": "{headline}. {support}",
+  "@progressStreakSemantics": {
+    "placeholders": {
+      "headline": {
+        "type": "String"
+      },
+      "support": {
+        "type": "String"
+      }
+    },
+    "description": "The hero announcement, one clause then the sentence the screen shows."
+  },
+  "progressTodaySectionLabel": "Hôm nay",
+  "@progressTodaySectionLabel": {
+    "description": "Heading of the Today section (W3)."
+  },
+  "progressTodayCardsLabel": "{count, plural, =0{Chưa có thẻ nào} other{{count} thẻ}}",
+  "@progressTodayCardsLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "The Today total; the unit is mandatory because the count is distinct cards (BR-228)."
+  },
+  "progressTodayLearningLabel": "Đang học",
+  "@progressTodayLearningLabel": {
+    "description": "Half of the Today breakdown (BR-195)."
+  },
+  "progressTodayReviewingLabel": "Đang ôn",
+  "@progressTodayReviewingLabel": {
+    "description": "The other half of the Today breakdown (BR-195)."
+  },
+  "progressTodayPartitionNote": "Đang học và Đang ôn cộng lại bằng tổng hôm nay — mỗi thẻ chỉ tính một lần, dù bạn gặp nó theo cách nào.",
+  "@progressTodayPartitionNote": {
+    "description": "One line explaining that the two halves are a partition (BR-195)."
+  },
+  "progressWeekSectionLabel": "Hoạt động hằng ngày",
+  "@progressWeekSectionLabel": {
+    "description": "Heading of the activity chart (W4). Names what the chart is rather than its window — see the English entry (X9)."
+  },
+  "progressWeekTodayLabel": "Hôm nay",
+  "@progressWeekTodayLabel": {
+    "description": "Row label of the last row of the chart."
+  },
+  "progressWeekdayShortLabel": "{weekday, select, 1{T2} 2{T3} 3{T4} 4{T5} 5{T6} 6{T7} 7{CN} other{}}",
+  "@progressWeekdayShortLabel": {
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      }
+    },
+    "description": "Row labels of the chart, keyed by Dart's DateTime.weekday (1 = Monday). Vietnamese numbers its weekdays from Sunday, so Monday is T2 and Sunday is CN."
+  },
+  "progressWeekDaySemantics": "{day}: {count, plural, =0{chưa có thẻ nào} other{{count} thẻ}}",
+  "@progressWeekDaySemantics": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "What a screen reader announces for one row of the chart (W6.4)."
+  },
+  "progressEmptyTitle": "Chưa có hoạt động học nào",
+  "@progressEmptyTitle": {
+    "description": "Heading of the lifetime-empty face (A2, P7)."
+  },
+  "progressEmptyMessage": "Trả lời thẻ đầu tiên và chuỗi của bạn bắt đầu từ hôm nay.",
+  "@progressEmptyMessage": {
+    "description": "Body of the lifetime-empty face."
+  },
+  "progressEmptyAction": "Bắt đầu học",
+  "@progressEmptyAction": {
+    "description": "The call to action on the lifetime-empty face; it navigates to the Study branch for real (P7)."
+  },
+  "progressErrorTitle": "Không tải được tiến độ",
+  "@progressErrorTitle": {
+    "description": "Heading of the error face (E1)."
+  },
+  "progressErrorMessage": "Lịch sử học của bạn vẫn an toàn. Hãy thử lại sau giây lát.",
+  "@progressErrorMessage": {
+    "description": "Body of the error face; never carries the failure's own message (BR-52)."
+  },
+  "progressErrorRetryAction": "Thử lại",
+  "@progressErrorRetryAction": {
+    "description": "Retry on the error face; it re-opens the read and never writes (BR-226)."
   },
   "settingsTitle": "Cài đặt",
   "@settingsTitle": {
     "description": "App bar title of the Settings branch."
   },
-  "settingsPlaceholderTitle": "Các tùy chọn ứng dụng đang được phát triển",
-  "@settingsPlaceholderTitle": {
-    "description": "Heading of the Settings placeholder (AD-19)."
+  "settingsLoadingLabel": "Đang tải cài đặt",
+  "@settingsLoadingLabel": {
+    "description": "Screen-reader label announced while the settings row is read."
+  },
+  "settingsLoadErrorTitle": "Không tải được cài đặt",
+  "@settingsLoadErrorTitle": {
+    "description": "Whole-screen error when the settings stream fails (UC-17 E3)."
+  },
+  "settingsSaveErrorTitle": "Chưa lưu được",
+  "@settingsSaveErrorTitle": {
+    "description": "Title of the in-section error band when a settings write fails (UC-17 E2, BR-224)."
+  },
+  "settingsStudyDefaultsSection": "Mặc định học",
+  "@settingsStudyDefaultsSection": {
+    "description": "Heading of the group holding the app-wide card limit and new-card order (BR-219)."
+  },
+  "settingsStudyDefaultsNote": "Áp dụng cho phiên bạn bắt đầu sau khi lưu. Phiên đang chạy giữ nguyên trần của nó.",
+  "@settingsStudyDefaultsNote": {
+    "description": "States BR-221 on the global screen. Longer than studyOptionsNextSessionNote for the reason given in the English ARB."
+  },
+  "settingsAppearanceSection": "Giao diện",
+  "@settingsAppearanceSection": {
+    "description": "Heading of the theme group (BR-222)."
+  },
+  "settingsThemeSystem": "Theo hệ thống",
+  "@settingsThemeSystem": {
+    "description": "Theme choice: follow the platform's brightness (BR-214)."
+  },
+  "settingsThemeLight": "Sáng",
+  "@settingsThemeLight": {
+    "description": "Theme choice: always light (BR-214)."
+  },
+  "settingsThemeDark": "Tối",
+  "@settingsThemeDark": {
+    "description": "Theme choice: always dark (BR-214)."
+  },
+  "settingsLanguageSection": "Ngôn ngữ",
+  "@settingsLanguageSection": {
+    "description": "Heading of the language group (BR-223)."
+  },
+  "settingsLanguageSystem": "Theo hệ thống",
+  "@settingsLanguageSystem": {
+    "description": "Language choice: resolve from the platform's preferred locales (BR-215)."
+  },
+  "settingsLanguageEnglish": "English",
+  "@settingsLanguageEnglish": {
+    "description": "Language choice. An endonym, deliberately untranslated."
+  },
+  "settingsLanguageVietnamese": "Tiếng Việt",
+  "@settingsLanguageVietnamese": {
+    "description": "Language choice. An endonym, deliberately untranslated."
+  },
+  "settingsResetAction": "Khôi phục mặc định",
+  "@settingsResetAction": {
+    "description": "Puts every app option back to its default (BR-225). Worded away from Reset learning progress (BR-42)."
+  },
+  "settingsResetDescription": "Đưa các tuỳ chọn ứng dụng về mặc định. Deck và tiến độ học của bạn không bị ảnh hưởng.",
+  "@settingsResetDescription": {
+    "description": "Shown under the reset action at rest, not only inside the confirmation (BR-225)."
+  },
+  "settingsResetConfirmTitle": "Khôi phục tuỳ chọn ứng dụng?",
+  "@settingsResetConfirmTitle": {
+    "description": "Title of the reset confirmation sheet (UC-17 A3)."
+  },
+  "settingsResetConfirmAction": "Khôi phục",
+  "@settingsResetConfirmAction": {
+    "description": "Confirms the reset."
+  },
+  "settingsSavingLabel": "Đang lưu",
+  "@settingsSavingLabel": {
+    "description": "Announced while a settings group is being written (BR-224)."
+  },
+  "studyOptionsUseAppDefaults": "Dùng mặc định của ứng dụng",
+  "@studyOptionsUseAppDefaults": {
+    "description": "Clears this root deck's study-options override (BR-220)."
+  },
+  "studyOptionsOverrideNote": "Deck này đang dùng giá trị riêng thay cho mặc định của ứng dụng.",
+  "@studyOptionsOverrideNote": {
+    "description": "Shown on a deck whose root carries an override (BR-220)."
   },
   "decksTitle": "Thư viện",
   "@decksTitle": {
@@ -66,7 +267,7 @@
   },
   "retryAction": "Thử lại",
   "@retryAction": {
-    "description": "Button that re-runs a failed read. On the deck list it re-subscribes to the database stream."
+    "description": "The app-wide retry label, on every surface that offers recovery from a failed operation — a read that did not land, a write that was refused, a platform call that was rejected. Deliberately generic and shared across the app rather than owned by any one screen: some callers retry a stream subscription, others re-send a write, and the daily-reminder band re-runs whichever of enable, disable or change-time failed. A label naming one of those would be wrong on the rest, which is why this description names no count and no list — an earlier version said \"three surfaces\" while there were nine, and a wrong count is an invitation to specialise the label after checking only some of them."
   },
   "deckCreateRootAction": "Bộ thẻ mới",
   "@deckCreateRootAction": {
@@ -140,57 +341,6 @@
     },
     "description": "Mở đầu dòng meta của một deck khi nó có deck con. Chỉ đếm con trực tiếp — đúng thứ sẽ thấy khi mở."
   },
-  "deckSearchHintRoot": "Tìm trong toàn bộ thư viện",
-  "@deckSearchHintRoot": {
-    "description": "Placeholder ở cấp gốc. Nêu phạm vi chứ không nêu hành động."
-  },
-  "deckSearchHintInDeck": "Tìm trong {name}",
-  "@deckSearchHintInDeck": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    },
-    "description": "Cùng placeholder đó khi đang ở trong một deck."
-  },
-  "deckSearchClearLabel": "Xoá tìm kiếm",
-  "@deckSearchClearLabel": {
-    "description": "Nút làm trống ô tìm kiếm."
-  },
-  "deckSearchMatchCountLabel": "{count, plural, other{{count} kết quả trong {scope}}}",
-  "@deckSearchMatchCountLabel": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "scope": {
-        "type": "String"
-      }
-    },
-    "description": "Tiêu đề danh sách kết quả, có nhắc lại phạm vi."
-  },
-  "deckSearchScopeLibrary": "thư viện",
-  "@deckSearchScopeLibrary": {
-    "description": "Từ chỉ phạm vi khi tìm ở cấp gốc."
-  },
-  "deckSearchEmptyTitle": "Không deck nào khớp “{query}”",
-  "@deckSearchEmptyTitle": {
-    "placeholders": {
-      "query": {
-        "type": "String"
-      }
-    },
-    "description": "Dùng nháy cong quanh chữ người dùng gõ."
-  },
-  "deckSearchEmptyMessage": "Không có gì trong {scope} mang tên đó.",
-  "@deckSearchEmptyMessage": {
-    "placeholders": {
-      "scope": {
-        "type": "String"
-      }
-    },
-    "description": "Nói rõ đã tìm ở đâu."
-  },
   "deckStarterLibraryAction": "Xem thư viện mẫu",
   "@deckStarterLibraryAction": {
     "description": "Empty-root CTA that opens the starter template catalog (UC-01)."
@@ -261,14 +411,6 @@
         "type": "String"
       }
     }
-  },
-  "deckSearchOpenLabel": "Tìm bộ thẻ",
-  "@deckSearchOpenLabel": {
-    "description": "Opens the search field in the Library subheader. The field is collapsed to this control at rest."
-  },
-  "deckSearchCloseLabel": "Đóng tìm kiếm",
-  "@deckSearchCloseLabel": {
-    "description": "Collapses the search field; if a query is running it is cleared first, so no result set survives its own input."
   },
   "deckNoCardsLabel": "Chưa có thẻ nào",
   "@deckNoCardsLabel": {
@@ -508,7 +650,7 @@
     },
     "description": "Title of the delete confirmation. Names the deck so the user can tell which one they are about to lose (BR-04)."
   },
-  "deckDeleteImpactMessage": "{deckCount, plural, =0{} other{{deckCount} bộ thẻ con và }}{cardCount, plural, =0{không có thẻ nào} other{{cardCount} thẻ}} sẽ bị xoá theo. Không thể hoàn tác.",
+  "deckDeleteImpactMessage": "{deckCount, plural, =0{} other{{deckCount} bộ thẻ con và }}{cardCount, plural, =0{không có thẻ nào} other{{cardCount} thẻ}} vào Trash cùng nó. Bạn khôi phục được trong 30 ngày.",
   "@deckDeleteImpactMessage": {
     "placeholders": {
       "deckCount": {
@@ -518,11 +660,11 @@
         "type": "int"
       }
     },
-    "description": "Body of the delete confirmation, stating exactly how many sub-decks and cards go with the deck (BR-04)."
+    "description": "Body of the delete confirmation, stating exactly how many sub-decks and cards go with the deck (BR-04) and that the deletion is recoverable (BR-256)."
   },
-  "deckDeleteConfirmAction": "Xoá",
+  "deckDeleteConfirmAction": "Chuyển vào Trash",
   "@deckDeleteConfirmAction": {
-    "description": "Destructive confirm button of the delete-deck dialog."
+    "description": "Confirm button of the delete-deck dialog. Names where the deck goes rather than implying it is destroyed (BR-256)."
   },
   "deckMoveAction": "Di chuyển",
   "@deckMoveAction": {
@@ -572,7 +714,7 @@
   "@deckMoveRejectTooDeep": {
     "description": "Reason a move target is unavailable: the move would push the tree past the maximum depth (BR-55)."
   },
-  "deckWriteErrorTitle": "Không lưu được",
+  "deckWriteErrorTitle": "Chưa lưu được",
   "@deckWriteErrorTitle": {
     "description": "Heading shown when a deck write fails for a reason the user cannot fix inline."
   },
@@ -1148,22 +1290,22 @@
     },
     "description": "Title of the bulk delete confirmation. Names the number rather than asking a generic 'are you sure' (UC-04 A6)."
   },
-  "cardBulkDeleteMessage": "Lịch sử học của chúng cũng bị xoá. Không thể hoàn tác.",
+  "cardBulkDeleteMessage": "Lịch sử học đi cùng chúng và quay lại nếu bạn khôi phục. Trash giữ trong 30 ngày.",
   "@cardBulkDeleteMessage": {
-    "description": "Body of the bulk delete confirmation: what is lost beyond the cards themselves."
+    "description": "Body of the bulk delete confirmation: what happens to the history, and for how long it can be undone (BR-256, BR-259)."
   },
-  "cardBulkDeleteConfirmAction": "Xoá thẻ",
+  "cardBulkDeleteConfirmAction": "Chuyển vào Trash",
   "@cardBulkDeleteConfirmAction": {
-    "description": "Destructive confirm button of the bulk delete dialog."
+    "description": "Confirm button of the bulk delete dialog (BR-256)."
   },
-  "cardBulkDeletedMessage": "Đã xoá {count} thẻ",
+  "cardBulkDeletedMessage": "{count, plural, =1{Đã chuyển 1 thẻ vào Trash} other{Đã chuyển {count} thẻ vào Trash}}",
   "@cardBulkDeletedMessage": {
     "placeholders": {
       "count": {
         "type": "int"
       }
     },
-    "description": "Result message after a bulk delete commits. A statement of what happened, deliberately not an Undo: this build cannot restore the study history it cascaded."
+    "description": "Result message after a bulk delete commits. It reports where the cards went, because they are recoverable from there (BR-256); Undo is offered for a single deletion only (BR-263)."
   },
   "cardBulkMovedMessage": "Đã chuyển {count} thẻ",
   "@cardBulkMovedMessage": {
@@ -1223,13 +1365,13 @@
   "@cardDeleteConfirmTitle": {
     "description": "Title of the card delete confirmation dialog (UC-04 A5)."
   },
-  "cardDeleteConfirmMessage": "Thẻ và lịch sử học của nó sẽ bị xóa. Không thể hoàn tác.",
+  "cardDeleteConfirmMessage": "Thẻ và lịch sử học của nó vào Trash. Bạn khôi phục được trong 30 ngày.",
   "@cardDeleteConfirmMessage": {
-    "description": "Body of the card delete confirmation. Deleting the last card also returns the deck to unset (BR-163)."
+    "description": "Body of the card delete confirmation. Deleting the last active card also returns the deck to unset (BR-260)."
   },
-  "cardDeleteConfirmAction": "Xóa",
+  "cardDeleteConfirmAction": "Chuyển vào Trash",
   "@cardDeleteConfirmAction": {
-    "description": "Confirm button on the card delete dialog."
+    "description": "Confirm button on the card delete dialog (BR-256)."
   },
   "cardDeleteFailed": "Không xóa được thẻ này. Hãy thử lại.",
   "@cardDeleteFailed": {
@@ -1450,6 +1592,59 @@
   "studyChooseModeTitle": "Bạn muốn ôn kiểu nào?",
   "@studyChooseModeTitle": {
     "description": "Title of the review mode chooser (BR-146)."
+  },
+  "studyDirectionTitle": "Hỏi thẻ theo chiều nào?",
+  "@studyDirectionTitle": {
+    "description": "Title of the recall-direction chooser, shown before a self-assess review of an SM-2 deck (BR-203)."
+  },
+  "studyDirectionBody": "Phiên đã bắt đầu thì không đổi được nữa.",
+  "@studyDirectionBody": {
+    "description": "Supporting line under the direction chooser title. States the lock (BR-207) before the choice rather than after it."
+  },
+  "studyDirectionKoreanFirst": "Tiếng Hàn trước",
+  "@studyDirectionKoreanFirst": {
+    "description": "Name of the Korean-to-meaning direction (BR-204)."
+  },
+  "studyDirectionKoreanFirstBody": "Nhìn tiếng Hàn, nhớ lại nghĩa.",
+  "@studyDirectionKoreanFirstBody": {
+    "description": "One line describing the Korean-to-meaning direction."
+  },
+  "studyDirectionMeaningFirst": "Nghĩa trước",
+  "@studyDirectionMeaningFirst": {
+    "description": "Name of the meaning-to-Korean direction (BR-204)."
+  },
+  "studyDirectionMeaningFirstBody": "Nhìn nghĩa, nhớ lại từ tiếng Hàn.",
+  "@studyDirectionMeaningFirstBody": {
+    "description": "One line describing the meaning-to-Korean direction."
+  },
+  "studyDirectionMixed": "Trộn hai chiều",
+  "@studyDirectionMixed": {
+    "description": "Name of the mixed direction (BR-205)."
+  },
+  "studyDirectionMixedBody": "Mỗi thẻ hỏi một chiều, chia đều hai bên.",
+  "@studyDirectionMixedBody": {
+    "description": "One line describing the mixed direction. 'Chia đều' is a promise the assignment keeps to within one card (BR-205)."
+  },
+  "studyDirectionRecommendedOption": "Nên chọn — {line}",
+  "@studyDirectionRecommendedOption": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    },
+    "description": "The recommended option's supporting line. **The marker leads.** It used to trail — `{line} — Recommended` — and `MxListTile` caps a subtitle at two lines, so at textScaler 2.0 on a 320dp screen the line needs about three and the marker is the first thing the ellipsis takes. The option the app recommends then carried no sign that it was recommended, which is exactly what choosing a marker over a trailing badge was meant to avoid. Each locale places its own marker via the placeholder."
+  },
+  "studyDirectionNothingDue": "Không còn thẻ nào đến hạn để ôn.",
+  "@studyDirectionNothingDue": {
+    "description": "Shown in the direction chooser when the last due card went while the sheet was open (UC-15 E2, BR-145). Distinct from studyDirectionFailed because this one cannot be retried — cards come due with time, not with another tap, and telling the user to try again would be advice that cannot work."
+  },
+  "studyDirectionStart": "Bắt đầu ôn",
+  "@studyDirectionStart": {
+    "description": "Confirms the chosen direction and starts the session (BR-207)."
+  },
+  "studyDirectionFailed": "Chưa mở được phiên ôn. Thử lại nhé.",
+  "@studyDirectionFailed": {
+    "description": "Shown in the direction chooser when starting was refused — usually because the deck changed while the sheet was open (BR-13, BR-83). The chosen option is kept."
   },
   "studyModeBrowse": "Xem lại",
   "@studyModeBrowse": {
@@ -1990,646 +2185,1887 @@
   "cardImportRowIssueTagCharacter": "Có thẻ phân loại chứa ký tự không dùng được",
   "cardImportMoreRowsLabel": "…và {count} dòng nữa",
   "@cardImportTitle": {
-      "description": "App bar title of the import wizard (UC-10)."
+    "description": "App bar title of the import wizard (UC-10)."
   },
   "@cardImportBreadcrumbLabel": {
-      "description": "The wizard's own, non-tappable breadcrumb segment."
+    "description": "The wizard's own, non-tappable breadcrumb segment."
   },
   "@cardImportDeckContextLabel": {
-      "placeholders": {
-          "deckName": {
-              "type": "String"
-          },
-          "count": {
-              "type": "int"
-          }
+    "placeholders": {
+      "deckName": {
+        "type": "String"
       },
-      "description": "Context chip under the breadcrumb: target deck and its current card count."
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Context chip under the breadcrumb: target deck and its current card count."
   },
   "@cardImportStepSemantics": {
-      "placeholders": {
-          "step": {
-              "type": "int"
-          }
-      },
-      "description": "Screen-reader label of one stepper node."
+    "placeholders": {
+      "step": {
+        "type": "int"
+      }
+    },
+    "description": "Screen-reader label of one stepper node."
   },
   "@cardImportStepSourceLabel": {
-      "description": "Stepper label of step 1."
+    "description": "Stepper label of step 1."
   },
   "@cardImportStepPreviewLabel": {
-      "description": "Stepper label of step 2."
+    "description": "Stepper label of step 2."
   },
   "@cardImportStepImportLabel": {
-      "description": "Stepper label of step 3."
+    "description": "Stepper label of step 3."
   },
   "@cardImportChooseSourceHeading": {
-      "description": "Heading over the two source options."
+    "description": "Heading over the two source options."
   },
   "@cardImportUploadOptionTitle": {
-      "description": "Title of the upload source card."
+    "description": "Title of the upload source card."
   },
   "@cardImportUploadOptionSubtitle": {
-      "description": "Formats the upload card names. Never mentions .apkg — out of scope."
+    "description": "Formats the upload card names. Never mentions .apkg — out of scope."
   },
   "@cardImportPasteOptionTitle": {
-      "description": "Title of the paste source card."
+    "description": "Title of the paste source card."
   },
   "@cardImportPasteOptionSubtitle": {
-      "description": "What the paste card accepts."
+    "description": "What the paste card accepts."
   },
   "@cardImportChoosePrompt": {
-      "description": "Prompt in the upload panel. No drag-and-drop copy: not a primary capability on Android."
+    "description": "Prompt in the upload panel. No drag-and-drop copy: not a primary capability on Android."
   },
   "@cardImportChooseFileAction": {
-      "description": "Button opening the system file picker."
+    "description": "Button opening the system file picker."
   },
   "@cardImportReplaceFileAction": {
-      "description": "Button replacing the already-picked file."
+    "description": "Button replacing the already-picked file."
   },
   "@cardImportPastePlaceholder": {
-      "placeholders": {
-          "newline": {
-              "type": "String"
-          }
-      },
-      "description": "Placeholder of the paste box — sample shape, not user data."
+    "placeholders": {
+      "newline": {
+        "type": "String"
+      }
+    },
+    "description": "Placeholder of the paste box — sample shape, not user data."
   },
   "@cardImportPasteLabel": {
-      "description": "Label of the paste text box."
+    "description": "Label of the paste text box."
   },
   "@cardImportInfoTitle": {
-      "description": "Title of the info panel on the Source step."
+    "description": "Title of the info panel on the Source step."
   },
   "@cardImportInfoBody": {
-      "description": "Body of the info panel. Never hardcodes a column order — mapping decides."
+    "description": "Body of the info panel. Never hardcodes a column order — mapping decides."
   },
   "@cardImportInfoBusinessHint": {
-      "description": "One-line content guidance under the info body."
+    "description": "One-line content guidance under the info body."
   },
   "@cardImportPreviewAction": {
-      "description": "Primary action of the Source step."
+    "description": "Primary action of the Source step."
   },
   "@cardImportParsingLabel": {
-      "description": "Loading label while the source parses."
+    "description": "Loading label while the source parses."
   },
   "@cardImportSheetLabel": {
-      "description": "Label of the XLSX sheet selector."
+    "description": "Label of the XLSX sheet selector."
   },
   "@cardImportHeaderToggleLabel": {
-      "description": "Toggle deciding whether row 1 is data (UC-10 A3)."
+    "description": "Toggle deciding whether row 1 is data (UC-10 A3)."
   },
   "@cardImportColumnFallbackLabel": {
-      "placeholders": {
-          "letter": {
-              "type": "String"
-          }
-      },
-      "description": "Stable name of an unmapped column when there is no header."
+    "placeholders": {
+      "letter": {
+        "type": "String"
+      }
+    },
+    "description": "Stable name of an unmapped column when there is no header."
   },
   "@cardImportMappingHeading": {
-      "description": "Heading over the mapping list."
+    "description": "Heading over the mapping list."
   },
   "@cardImportIgnoreColumnLabel": {
-      "description": "Mapping choice that drops a source column."
+    "description": "Mapping choice that drops a source column."
   },
   "@cardImportFieldFrontLabel": {
-      "description": "Mapping destination: the card's front."
+    "description": "Mapping destination: the card's front."
   },
   "@cardImportFieldBackLabel": {
-      "description": "Mapping destination: the card's back."
+    "description": "Mapping destination: the card's back."
   },
   "@cardImportFieldExampleLabel": {
-      "description": "Mapping destination: the example detail."
+    "description": "Mapping destination: the example detail."
   },
   "@cardImportFieldHintLabel": {
-      "description": "Mapping destination: the hint detail."
+    "description": "Mapping destination: the hint detail."
   },
   "@cardImportFieldPronunciationLabel": {
-      "description": "Mapping destination: the pronunciation detail."
+    "description": "Mapping destination: the pronunciation detail."
   },
   "@cardImportFieldTagsLabel": {
-      "description": "Mapping destination: the semicolon-separated tags cell."
+    "description": "Mapping destination: the semicolon-separated tags cell."
   },
   "@cardImportMappingRequiredNote": {
-      "description": "Inline note when the required mapping is incomplete (BR-169)."
+    "description": "Inline note when the required mapping is incomplete (BR-169)."
   },
   "@cardImportIncludeDuplicatesLabel": {
-      "description": "Toggle writing duplicates as new cards (BR-170)."
+    "description": "Toggle writing duplicates as new cards (BR-170)."
   },
   "@cardImportRowStatusReadyLabel": {
-      "description": "Row status chip."
+    "description": "Row status chip."
   },
   "@cardImportRowStatusInvalidLabel": {
-      "description": "Row status chip."
+    "description": "Row status chip."
   },
   "@cardImportRowStatusDuplicateExistingLabel": {
-      "description": "Row status chip: duplicate of an existing card (BR-170)."
+    "description": "Row status chip: duplicate of an existing card (BR-170)."
   },
   "@cardImportRowStatusDuplicateInFileLabel": {
-      "description": "Row status chip: repeats an earlier row (BR-170)."
+    "description": "Row status chip: repeats an earlier row (BR-170)."
   },
   "@cardImportStatusDuplicateChipLabel": {
-      "description": "Preview summary chip word covering both duplicate kinds; rows spell out existing vs in-file (M4.12 state 4)."
+    "description": "Preview summary chip word covering both duplicate kinds; rows spell out existing vs in-file (M4.12 state 4)."
   },
   "@cardImportRowStatusBlankLabel": {
-      "description": "Row status chip: skipped empty row."
+    "description": "Row status chip: skipped empty row."
   },
   "@cardImportRowNumberLabel": {
-      "placeholders": {
-          "number": {
-              "type": "int"
-          }
-      },
-      "description": "Source row number on one preview row."
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    },
+    "description": "Source row number on one preview row."
   },
   "@cardImportContinueAction": {
-      "description": "Primary action of the Preview step."
+    "description": "Primary action of the Preview step."
   },
   "@cardImportBackAction": {
-      "description": "Secondary action returning to the previous step."
+    "description": "Secondary action returning to the previous step."
   },
   "@cardImportConfirmHeading": {
-      "description": "Heading of the confirm view on step 3."
+    "description": "Heading of the confirm view on step 3."
   },
   "@cardImportConfirmImportRowLabel": {
-      "description": "Confirm summary row: how many cards the one transaction will write (UC-10 step 6)."
+    "description": "Confirm summary row: how many cards the one transaction will write (UC-10 step 6)."
   },
   "@cardImportConfirmDuplicatesIncludedRowLabel": {
-      "description": "Confirm summary row when Include duplicates is on: duplicates counted into the batch (BR-170)."
+    "description": "Confirm summary row when Include duplicates is on: duplicates counted into the batch (BR-170)."
   },
   "@cardImportBarSourceHint": {
-      "description": "Reassurance line under the sticky bar on the Source step (M4.12 state 1)."
+    "description": "Reassurance line under the sticky bar on the Source step (M4.12 state 1)."
   },
   "@cardImportBarParsingHint": {
-      "description": "Reassurance line under the sticky bar while the decode runs (M4.12 state 2)."
+    "description": "Reassurance line under the sticky bar while the decode runs (M4.12 state 2)."
   },
   "@cardImportBarImportHint": {
-      "description": "Reassurance line under the sticky bar on Preview and Confirm (M4.12 states 3-4)."
+    "description": "Reassurance line under the sticky bar on Preview and Confirm (M4.12 states 3-4)."
   },
   "@cardImportConfirmTargetLabel": {
-      "placeholders": {
-          "deckName": {
-              "type": "String"
-          }
-      },
-      "description": "Confirm line naming the target deck."
+    "placeholders": {
+      "deckName": {
+        "type": "String"
+      }
+    },
+    "description": "Confirm line naming the target deck."
   },
   "@cardImportSubmitAction": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Primary action committing the batch (BR-171)."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Primary action committing the batch (BR-171)."
   },
   "@cardImportSubmittingLabel": {
-      "description": "Progress label while the one transaction runs."
+    "description": "Progress label while the one transaction runs."
   },
   "@cardImportTryAgainAction": {
-      "description": "Recovery action after a failed commit (UC-10 E5)."
+    "description": "Recovery action after a failed commit (UC-10 E5)."
   },
   "@cardImportResultHeading": {
-      "description": "Heading of the result view."
+    "description": "Heading of the result view."
   },
   "@cardImportResultImportedLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Result line."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Result line."
   },
   "@cardImportResultDuplicatesLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Result line."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Result line."
   },
   "@cardImportResultInvalidLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Result line."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Result line."
   },
   "@cardImportViewCardsAction": {
-      "description": "Result action returning to the card list."
+    "description": "Result action returning to the card list."
   },
   "@cardImportAnotherAction": {
-      "description": "Result action resetting the draft, keeping the deck."
+    "description": "Result action resetting the draft, keeping the deck."
   },
   "@cardImportDiscardTitle": {
-      "description": "Title of the dirty-draft confirm on Close/Back."
+    "description": "Title of the dirty-draft confirm on Close/Back."
   },
   "@cardImportDiscardMessage": {
-      "description": "Body of the dirty-draft confirm."
+    "description": "Body of the dirty-draft confirm."
   },
   "@cardImportDiscardConfirmAction": {
-      "description": "Confirming button of the dirty-draft dialog."
+    "description": "Confirming button of the dirty-draft dialog."
   },
   "@cardImportEntryAction": {
-      "description": "The entry point label in the card list menu, empty state and unset-deck sheet."
+    "description": "The entry point label in the card list menu, empty state and unset-deck sheet."
   },
   "@cardImportErrorUnsupportedFile": {
-      "description": "Typed error: unsupported extension."
+    "description": "Typed error: unsupported extension."
   },
   "@cardImportErrorInvalidEncoding": {
-      "description": "Typed error: wrong encoding (BR-173)."
+    "description": "Typed error: wrong encoding (BR-173)."
   },
   "@cardImportErrorEmptySource": {
-      "description": "Typed error: empty file or pasted text."
+    "description": "Typed error: empty file or pasted text."
   },
   "@cardImportErrorEmptySheet": {
-      "description": "Typed error: empty XLSX sheet."
+    "description": "Typed error: empty XLSX sheet."
   },
   "@cardImportErrorUnreadableFile": {
-      "description": "Typed error: corrupt or protected file."
+    "description": "Typed error: corrupt or protected file."
   },
   "@cardImportParseErrorTitle": {
-      "description": "Title over a typed parse error on the Preview step."
+    "description": "Title over a typed parse error on the Preview step."
   },
   "@cardImportRowIssueTagTooLong": {
-      "description": "Row reason: tag name over the BR-93 limit."
+    "description": "Row reason: tag name over the BR-93 limit."
   },
   "@cardImportRowIssueTooManyTags": {
-      "description": "Row reason: over the BR-94 cap."
+    "description": "Row reason: over the BR-94 cap."
   },
   "@cardImportRowIssueTagCharacter": {
-      "description": "Row reason: a tag name carries a control character (BR-93), which the tag queries' char(31) join cannot survive."
+    "description": "Row reason: a tag name carries a control character (BR-93), which the tag queries' char(31) join cannot survive."
   },
   "@cardImportMoreRowsLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Footer under the truncated preview list."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Footer under the truncated preview list."
   },
   "cardImportFileMetaLabel": "{extension} · {size}",
   "@cardImportFileMetaLabel": {
-      "placeholders": {
-          "extension": {
-              "type": "String"
-          },
-          "size": {
-              "type": "String"
-          }
+    "placeholders": {
+      "extension": {
+        "type": "String"
       },
-      "description": "Extension and size line under the picked file's name (M4.12 W2)."
+      "size": {
+        "type": "String"
+      }
+    },
+    "description": "Extension and size line under the picked file's name (M4.12 W2)."
   },
   "cardImportFileSizeKilobytes": "{count} KB",
   "@cardImportFileSizeKilobytes": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "File size in kilobytes, rounded up so nothing reads as zero."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "File size in kilobytes, rounded up so nothing reads as zero."
   },
   "cardImportFileSizeMegabytes": "{count} MB",
   "@cardImportFileSizeMegabytes": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "File size in megabytes, rounded up."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "File size in megabytes, rounded up."
   },
   "cardImportStepNamedSemantics": "{step} · {label}",
   "@cardImportStepNamedSemantics": {
-      "placeholders": {
-          "step": {
-              "type": "String"
-          },
-          "label": {
-              "type": "String"
-          }
+    "placeholders": {
+      "step": {
+        "type": "String"
       },
-      "description": "Screen-reader label of one stepper node: its position sentence plus the step's name."
+      "label": {
+        "type": "String"
+      }
+    },
+    "description": "Screen-reader label of one stepper node: its position sentence plus the step's name."
   },
   "cardImportResultsTitle": "Kết quả nhập",
   "@cardImportResultsTitle": {
-      "description": "App bar title once the wizard is showing an outcome (M4.12 states 6-8)."
+    "description": "App bar title once the wizard is showing an outcome (M4.12 states 6-8)."
   },
   "cardImportFileReadyStatus": "Sẵn sàng xem trước",
   "@cardImportFileReadyStatus": {
-      "description": "Status line on the picked-file summary before parsing (state 1)."
+    "description": "Status line on the picked-file summary before parsing (state 1)."
   },
   "cardImportFileParsingStatus": "Đang phân tích…",
   "@cardImportFileParsingStatus": {
-      "description": "Status line on the source summary while the decode runs (state 2)."
+    "description": "Status line on the source summary while the decode runs (state 2)."
   },
   "cardImportFileRowsDetected": "Đã nhận {count} dòng",
   "@cardImportFileRowsDetected": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Status line on the source summary once the document loaded."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Status line on the source summary once the document loaded."
   },
   "cardImportRemoveFileLabel": "Bỏ tệp",
   "@cardImportRemoveFileLabel": {
-      "description": "Semantic label and tooltip of the X that clears the picked file."
+    "description": "Semantic label and tooltip of the X that clears the picked file."
   },
   "cardImportPastedSourceLabel": "Văn bản đã dán",
   "@cardImportPastedSourceLabel": {
-      "description": "Stands in for a filename when the source is the paste box — the content itself is private and never echoed (BR-173)."
+    "description": "Stands in for a filename when the source is the paste box — the content itself is private and never echoed (BR-173)."
   },
   "cardImportParsingFileTitle": "Đang đọc tệp của bạn…",
   "@cardImportParsingFileTitle": {
-      "description": "Loading panel title while a picked file decodes (state 2)."
+    "description": "Loading panel title while a picked file decodes (state 2)."
   },
   "cardImportParsingPasteTitle": "Đang đọc các dòng đã dán…",
   "@cardImportParsingPasteTitle": {
-      "description": "Loading panel title while pasted rows decode."
+    "description": "Loading panel title while pasted rows decode."
   },
   "cardImportParsingReassurance": "Chưa có thẻ nào được thêm cho tới khi bạn xác nhận Nhập.",
   "@cardImportParsingReassurance": {
-      "description": "Reassurance under the parsing loader: preview never writes (BR-171)."
+    "description": "Reassurance under the parsing loader: preview never writes (BR-171)."
   },
   "cardImportParsingAction": "Đang phân tích…",
   "@cardImportParsingAction": {
-      "description": "Disabled primary-action label while the decode runs (state 2)."
+    "description": "Disabled primary-action label while the decode runs (state 2)."
   },
   "cardImportPreviewHeading": "2 · Xem trước",
   "@cardImportPreviewHeading": {
-      "description": "Section heading over the preview block, numbered like the source heading."
+    "description": "Section heading over the preview block, numbered like the source heading."
   },
   "cardImportPreviewReadyOfTotal": "{ready}/{total} sẵn sàng",
   "@cardImportPreviewReadyOfTotal": {
-      "placeholders": {
-          "ready": {
-              "type": "int"
-          },
-          "total": {
-              "type": "int"
-          }
+    "placeholders": {
+      "ready": {
+        "type": "int"
       },
-      "description": "Right-aligned readiness line beside the preview heading (state 3)."
+      "total": {
+        "type": "int"
+      }
+    },
+    "description": "Right-aligned readiness line beside the preview heading (state 3)."
   },
   "cardImportStatusCountChip": "{label} · {count}",
   "@cardImportStatusCountChip": {
-      "placeholders": {
-          "label": {
-              "type": "String"
-          },
-          "count": {
-              "type": "int"
-          }
+    "placeholders": {
+      "label": {
+        "type": "String"
       },
-      "description": "One status chip: a row-status label and how many rows carry it."
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "One status chip: a row-status label and how many rows carry it."
   },
   "cardImportEmptyCellLabel": "(trống)",
   "@cardImportEmptyCellLabel": {
-      "description": "Placeholder for a required cell the row did not fill (state 4)."
+    "description": "Placeholder for a required cell the row did not fill (state 4)."
   },
   "cardImportInfoTagsHint": "Tag nằm chung một ô, phân tách bằng dấu ;",
   "@cardImportInfoTagsHint": {
-      "description": "Info-panel line stating the tags separator contract (BR-169)."
+    "description": "Info-panel line stating the tags separator contract (BR-169)."
   },
   "cardImportSubmittingTitle": "Đang nhập {count} thẻ…",
   "@cardImportSubmittingTitle": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Submit panel title while the one transaction runs (state 5)."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Submit panel title while the one transaction runs (state 5)."
   },
   "cardImportSubmittingBody": "Đang lưu tất cả thẻ cùng lúc. Đừng đóng ứng dụng.",
   "@cardImportSubmittingBody": {
-      "description": "Submit panel body: the write is atomic, so it is one save, not a count-up."
+    "description": "Submit panel body: the write is atomic, so it is one save, not a count-up."
   },
   "cardImportSuccessTitle": "Nhập hoàn tất",
   "@cardImportSuccessTitle": {
-      "description": "Success hero title (state 6)."
+    "description": "Success hero title (state 6)."
   },
   "cardImportSuccessBody": "Đã thêm {count} thẻ vào {deckName}. Các thẻ đã sẵn sàng để học.",
   "@cardImportSuccessBody": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          },
-          "deckName": {
-              "type": "String"
-          }
+    "placeholders": {
+      "count": {
+        "type": "int"
       },
-      "description": "Success hero body."
+      "deckName": {
+        "type": "String"
+      }
+    },
+    "description": "Success hero body."
   },
   "cardImportSkipsTitle": "Đã nhập nhưng có dòng bị bỏ qua",
   "@cardImportSkipsTitle": {
-      "description": "Warning hero title when rows were left out (state 7)."
+    "description": "Warning hero title when rows were left out (state 7)."
   },
   "cardImportSkipsBody": "Đã thêm {count} thẻ. Một số dòng đã bị bỏ qua.",
   "@cardImportSkipsBody": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Warning hero body — never claims every skip was a validation issue."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Warning hero body — never claims every skip was a validation issue."
   },
   "cardImportZeroTitle": "Không có thẻ mới được thêm",
   "@cardImportZeroTitle": {
-      "description": "Outcome title when the transaction succeeded but wrote nothing — not a failure."
+    "description": "Outcome title when the transaction succeeded but wrote nothing — not a failure."
   },
   "cardImportZeroBody": "Mọi dòng đều trùng với thẻ đã có trong bộ thẻ nên đã bị bỏ qua.",
   "@cardImportZeroBody": {
-      "description": "Zero-added body: the recheck inside the transaction found only duplicates (BR-170)."
+    "description": "Zero-added body: the recheck inside the transaction found only duplicates (BR-170)."
   },
   "cardImportFailureTitle": "Không thể hoàn tất nhập",
   "@cardImportFailureTitle": {
-      "description": "Failure hero title (state 8)."
+    "description": "Failure hero title (state 8)."
   },
   "cardImportFailureBody": "Không có thẻ nào được thêm. Nguồn của bạn không thay đổi và bộ thẻ không bị ảnh hưởng.",
   "@cardImportFailureBody": {
-      "description": "Failure hero body — says source, not file, because the source may be pasted rows."
+    "description": "Failure hero body — says source, not file, because the source may be pasted rows."
   },
   "cardImportAddedRowLabel": "Đã thêm",
   "@cardImportAddedRowLabel": {
-      "description": "Result summary row: cards the transaction wrote (CardImportResult.imported)."
+    "description": "Result summary row: cards the transaction wrote (CardImportResult.imported)."
   },
   "cardImportInvalidSkippedRowLabel": "Dòng không hợp lệ đã bỏ qua",
   "@cardImportInvalidSkippedRowLabel": {
-      "description": "Result summary row, shown only when the preview counted invalid rows."
+    "description": "Result summary row, shown only when the preview counted invalid rows."
   },
   "cardImportDuplicatesSkippedRowLabel": "Thẻ trùng đã bỏ qua",
   "@cardImportDuplicatesSkippedRowLabel": {
-      "description": "Result summary row, from the transaction's own recheck (BR-170)."
+    "description": "Result summary row, from the transaction's own recheck (BR-170)."
   },
   "cardImportBlankIgnoredRowLabel": "Dòng trống đã bỏ qua",
   "@cardImportBlankIgnoredRowLabel": {
-      "description": "Neutral result summary row — blank rows are skipped by design (BR-169)."
+    "description": "Neutral result summary row — blank rows are skipped by design (BR-169)."
   },
   "cardImportFixInvalidHint": "Sửa các dòng không hợp lệ trong nguồn rồi nhập lại để thêm chúng.",
   "@cardImportFixInvalidHint": {
-      "description": "Helper under a with-skips result when invalid rows exist."
+    "description": "Helper under a with-skips result when invalid rows exist."
   },
   "cardImportDuplicatesHint": "Thẻ trùng đã bị bỏ qua theo thiết lập nhập.",
   "@cardImportDuplicatesHint": {
-      "description": "Helper when only duplicates were skipped — duplicates are a setting, not a broken file."
+    "description": "Helper when only duplicates were skipped — duplicates are a setting, not a broken file."
   },
   "cardImportBackToPreviewAction": "Quay lại xem trước",
   "@cardImportBackToPreviewAction": {
-      "description": "Secondary action on a commit failure: back to the intact draft (state 8)."
+    "description": "Secondary action on a commit failure: back to the intact draft (state 8)."
   },
   "cardImportStepStateSemantics": "{step} · {label} · {state}",
   "@cardImportStepStateSemantics": {
-      "placeholders": {
-          "step": {
-              "type": "String"
-          },
-          "label": {
-              "type": "String"
-          },
-          "state": {
-              "type": "String"
-          }
+    "placeholders": {
+      "step": {
+        "type": "String"
       },
-      "description": "Screen-reader label of one stepper node: position, name and progress state."
+      "label": {
+        "type": "String"
+      },
+      "state": {
+        "type": "String"
+      }
+    },
+    "description": "Screen-reader label of one stepper node: position, name and progress state."
   },
   "cardImportStepStateCompleted": "đã hoàn thành",
   "@cardImportStepStateCompleted": {
-      "description": "Stepper node state read to a screen reader."
+    "description": "Stepper node state read to a screen reader."
   },
   "cardImportStepStateCurrent": "hiện tại",
   "@cardImportStepStateCurrent": {
-      "description": "Stepper node state read to a screen reader."
+    "description": "Stepper node state read to a screen reader."
   },
   "cardImportStepStateUpcoming": "sắp tới",
   "@cardImportStepStateUpcoming": {
-      "description": "Stepper node state read to a screen reader."
+    "description": "Stepper node state read to a screen reader."
   },
   "cardImportSourceStatusLine": "{meta} · {status}",
   "@cardImportSourceStatusLine": {
-      "placeholders": {
-          "meta": {
-              "type": "String"
-          },
-          "status": {
-              "type": "String"
-          }
+    "placeholders": {
+      "meta": {
+        "type": "String"
       },
-      "description": "Source summary status line: the extension-and-size pair plus the phase status (ready / parsing / rows detected)."
+      "status": {
+        "type": "String"
+      }
+    },
+    "description": "Source summary status line: the extension-and-size pair plus the phase status (ready / parsing / rows detected)."
   },
   "cardExportEntryAction": "Xuất thẻ",
   "@cardExportEntryAction": {
-      "description": "The export entry point in the card list overflow menu, and the title of the export sheet it opens (M4.13 W1, W2)."
+    "description": "The export entry point in the card list overflow menu, and the title of the export sheet it opens (M4.13 W1, W2)."
   },
   "cardExportSelectionAction": "Xuất thẻ đã chọn",
   "@cardExportSelectionAction": {
-      "description": "The export entry point on the multi-select action bar; opens the sheet scoped to the selected ids (M4.13 W1, BR-174)."
+    "description": "The export entry point on the multi-select action bar; opens the sheet scoped to the selected ids (M4.13 W1, BR-174)."
   },
   "cardExportScopeAllLabel": "{count, plural, other{Toàn bộ {count} thẻ trong bộ thẻ này}}",
   "@cardExportScopeAllLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Read-only scope summary for the whole-deck scope. The number is the deck's direct card count, not the rows currently listed (BR-174)."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Read-only scope summary for the whole-deck scope. The number is the deck's direct card count, not the rows currently listed (BR-174)."
   },
   "cardExportScopeSelectedLabel": "{count, plural, other{{count} thẻ đã chọn}}",
   "@cardExportScopeSelectedLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Read-only scope summary for the selection scope: how many distinct ids the export covers (BR-174)."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Read-only scope summary for the selection scope: how many distinct ids the export covers (BR-174)."
   },
   "cardExportFormatHeading": "Định dạng",
   "@cardExportFormatHeading": {
-      "description": "Group label above the three format options in the export sheet."
+    "description": "Group label above the three format options in the export sheet."
   },
   "cardExportRecommendedBadge": "Nên dùng",
   "@cardExportRecommendedBadge": {
-      "description": "Badge on the CSV option. Readable text, never a coloured dot alone (M4.13 E3, W6)."
+    "description": "Badge on the CSV option. Readable text, never a coloured dot alone (M4.13 E3, W6)."
   },
   "cardExportCsvSubtitle": "Mở được bằng mọi phần mềm bảng tính hoặc trình soạn thảo.",
   "@cardExportCsvSubtitle": {
-      "description": "One-line hint under the CSV format option saying what can open the file."
+    "description": "One-line hint under the CSV format option saying what can open the file."
   },
   "cardExportTsvSubtitle": "Ngăn cách bằng tab, cho công cụ cần tab.",
   "@cardExportTsvSubtitle": {
-      "description": "One-line hint under the TSV format option saying what can open the file."
+    "description": "One-line hint under the TSV format option saying what can open the file."
   },
   "cardExportXlsxSubtitle": "Bảng tính cho Excel hoặc Google Sheets.",
   "@cardExportXlsxSubtitle": {
-      "description": "One-line hint under the XLSX format option saying what can open the file."
+    "description": "One-line hint under the XLSX format option saying what can open the file."
   },
   "cardExportIncludesLine": "Gồm mặt trước, mặt sau, ví dụ, gợi ý, phát âm và thẻ phân loại.",
   "@cardExportIncludesLine": {
-      "description": "States what the file carries — the six canonical fields, in AD-20's order (BR-175). The field names in the file itself are never localized (BR-179)."
+    "description": "States what the file carries — the six canonical fields, in AD-20's order (BR-175). The field names in the file itself are never localized (BR-179)."
   },
   "cardExportExcludesLine": "Tiến độ học và lịch sử ôn tập không nằm trong tệp.",
   "@cardExportExcludesLine": {
-      "description": "Info line, not a warning: export is content transfer, not a backup, so re-importing starts every card new (BR-175, M4.13 E4)."
+    "description": "Info line, not a warning: export is content transfer, not a backup, so re-importing starts every card new (BR-175, M4.13 E4)."
   },
   "cardExportSubmitAction": "{count, plural, other{Xuất {count} thẻ}}",
   "@cardExportSubmitAction": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Primary action of the export sheet. The number is the scope's card count."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Primary action of the export sheet. The number is the scope's card count."
   },
   "cardExportSubmittingLabel": "Đang xuất…",
   "@cardExportSubmittingLabel": {
-      "description": "Label the primary action takes while the file is being built and handed over. Real text, not a silent spinner (M4.13 W6)."
+    "description": "Label the primary action takes while the file is being built and handed over. Real text, not a silent spinner (M4.13 W6)."
   },
   "cardExportSharedMessage": "Đã bàn giao thẻ của bạn cho hệ thống để chia sẻ.",
   "@cardExportSharedMessage": {
-      "description": "Confirmation after the share sheet accepted the file. It must never claim the file was saved, or name a folder — the OS does not tell the app where it went (BR-181, M4.13 E9)."
+    "description": "Confirmation after the share sheet accepted the file. It must never claim the file was saved, or name a folder — the OS does not tell the app where it went (BR-181, M4.13 E9)."
   },
   "cardExportErrorTitle": "Chưa xuất xong",
   "@cardExportErrorTitle": {
-      "description": "Title of the in-sheet error band for the reasons a retry can fix (M4.13 W3 states 5–6)."
+    "description": "Title of the in-sheet error band for the reasons a retry can fix (M4.13 W3 states 5–6)."
   },
   "cardExportScopeChangedTitle": "Danh sách thẻ đã thay đổi",
   "@cardExportScopeChangedTitle": {
-      "description": "Title of the in-sheet error band when the scope itself is no longer valid, so there is nothing to retry (M4.13 W3 state 7)."
+    "description": "Title of the in-sheet error band when the scope itself is no longer valid, so there is nothing to retry (M4.13 W3 state 7)."
   },
   "cardExportErrorEmptyScope": "Bộ thẻ này không còn thẻ nào để xuất.",
   "@cardExportErrorEmptyScope": {
-      "description": "Typed error: the scope holds no cards (UC-11 E5, BR-174)."
+    "description": "Typed error: the scope holds no cards (UC-11 E5, BR-174)."
   },
   "cardExportErrorStaleSelection": "Một số thẻ bạn chọn không còn trong bộ thẻ này. Hãy chọn lại rồi xuất.",
   "@cardExportErrorStaleSelection": {
-      "description": "Typed error: a selected id was deleted or moved, so the whole request failed rather than exporting part of it (UC-11 E6, BR-174)."
+    "description": "Typed error: a selected id was deleted or moved, so the whole request failed rather than exporting part of it (UC-11 E6, BR-174)."
   },
   "cardExportErrorDeckMissing": "Bộ thẻ này không còn tồn tại.",
   "@cardExportErrorDeckMissing": {
-      "description": "Typed error: the deck itself is gone (UC-11 E3). Distinct from an empty deck, which can be refilled."
+    "description": "Typed error: the deck itself is gone (UC-11 E3). Distinct from an empty deck, which can be refilled."
   },
   "cardExportErrorReadFailed": "Không đọc được thẻ. Không có gì bị thay đổi.",
   "@cardExportErrorReadFailed": {
-      "description": "Typed error: the snapshot read failed (UC-11 E3). Export is read-only, so there is nothing to undo (BR-178)."
+    "description": "Typed error: the snapshot read failed (UC-11 E3). Export is read-only, so there is nothing to undo (BR-178)."
   },
   "cardExportErrorEncodeFailed": "Không tạo được tệp từ những thẻ này.",
   "@cardExportErrorEncodeFailed": {
-      "description": "Typed error: encoding failed (UC-11 E4). Deliberately distinct from a read failure, and no partial file is handed on."
+    "description": "Typed error: encoding failed (UC-11 E4). Deliberately distinct from a read failure, and no partial file is handed on."
   },
   "cardExportErrorShareUnavailable": "Thiết bị này không có cách nào để chia sẻ tệp.",
   "@cardExportErrorShareUnavailable": {
-      "description": "Typed error: the platform has no share sheet (UC-11 E1). Names no path and no file name (BR-181)."
+    "description": "Typed error: the platform has no share sheet (UC-11 E1). Names no path and no file name (BR-181)."
   },
   "cardExportErrorSharePlatformError": "Thiết bị không nhận được tệp. Không có gì được lưu.",
   "@cardExportErrorSharePlatformError": {
-      "description": "Typed error: the platform channel threw while sharing (UC-11 E2). Names no path and no file name (BR-180, BR-181)."
+    "description": "Typed error: the platform channel threw while sharing (UC-11 E2). Names no path and no file name (BR-180, BR-181)."
   },
   "cardExportRetryAction": "Thử lại",
   "@cardExportRetryAction": {
-      "description": "Recovery action in the export error band; re-submits the same scope and format (M4.13 E8)."
+    "description": "Recovery action in the export error band; re-submits the same scope and format (M4.13 E8)."
   },
   "cardExportCloseAction": "Đóng",
   "@cardExportCloseAction": {
-      "description": "The only action left when the scope is no longer valid — there is nothing to retry until the user selects again (M4.13 W3 state 7)."
+    "description": "The only action left when the scope is no longer valid — there is nothing to retry until the user selects again (M4.13 W3 state 7)."
+  },
+  "progressRange7Label": "7 ngày",
+  "@progressRange7Label": {
+    "description": "Range selector pill for the 7-day window (BR-220)."
+  },
+  "progressRange30Label": "30 ngày",
+  "@progressRange30Label": {
+    "description": "Range selector pill for the 30-day window (BR-220)."
+  },
+  "progressRange7SemanticLabel": "7 ngày gần nhất",
+  "@progressRange7SemanticLabel": {
+    "description": "Screen-reader expansion of progressRange7Label."
+  },
+  "progressRange30SemanticLabel": "30 ngày gần nhất",
+  "@progressRange30SemanticLabel": {
+    "description": "Screen-reader expansion of progressRange30Label."
+  },
+  "progressRangeSelectorSemanticLabel": "Khoảng thời gian thống kê",
+  "@progressRangeSelectorSemanticLabel": {
+    "description": "Group label for the two range pills."
+  },
+  "progressSummaryLast7DaysTitle": "7 ngày gần nhất",
+  "@progressSummaryLast7DaysTitle": {
+    "description": "Heading of the summary panel while the 7-day window is selected."
+  },
+  "progressSummaryLast30DaysTitle": "30 ngày gần nhất",
+  "@progressSummaryLast30DaysTitle": {
+    "description": "Heading of the summary panel while the 30-day window is selected."
+  },
+  "progressActiveCardsMetricWord": "thẻ đã học",
+  "@progressActiveCardsMetricWord": {
+    "description": "Word beside the distinct-card count (BR-219)."
+  },
+  "progressActiveDaysMetricWord": "ngày có học",
+  "@progressActiveDaysMetricWord": {
+    "description": "Word beside the distinct local-day count (BR-219)."
+  },
+  "progressLearningMetricWord": "học mới",
+  "@progressLearningMetricWord": {
+    "description": "Word beside the learning half of the card-day partition (BR-222). Short on purpose: it has to survive a 320dp cell at text scale 2.0. The unit is stated once by progressCardDayUnitNote."
+  },
+  "progressReviewingMetricWord": "ôn tập",
+  "@progressReviewingMetricWord": {
+    "description": "Word beside the reviewing half of the card-day partition (BR-222). Short for the same reason as progressLearningMetricWord."
+  },
+  "progressCardDayUnitNote": "Học mới và ôn tập đếm theo thẻ-ngày — một thẻ trong một ngày.",
+  "@progressCardDayUnitNote": {
+    "description": "Caption under the summary panel's metric grid, naming the unit the bottom row counts."
+  },
+  "progressActiveCardsSemanticLabel": "{count, plural, =0{Chưa học thẻ nào} other{Đã học {count} thẻ}}",
+  "@progressActiveCardsSemanticLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Screen-reader sentence for the distinct-card metric."
+  },
+  "progressActiveDaysSemanticLabel": "{count, plural, =0{Không có ngày nào có học} other{{count} ngày có học}}",
+  "@progressActiveDaysSemanticLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Screen-reader sentence for the active-day metric."
+  },
+  "progressLearningSemanticLabel": "{count, plural, =0{Không có thẻ-ngày học mới} other{{count} thẻ-ngày học mới}}",
+  "@progressLearningSemanticLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Screen-reader sentence for the learning half of the partition (BR-222)."
+  },
+  "progressReviewingSemanticLabel": "{count, plural, =0{Không có thẻ-ngày ôn tập} other{{count} thẻ-ngày ôn tập}}",
+  "@progressReviewingSemanticLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Screen-reader sentence for the reviewing half of the partition (BR-222)."
+  },
+  "progressDeckRowSemanticLabel": "{name}, trong {path}, {range}",
+  "@progressDeckRowSemanticLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "range": {
+        "type": "String"
+      },
+      "path": {
+        "type": "String"
+      }
+    },
+    "description": "Screen-reader sentence naming a deck row, where it sits and which window its figures cover."
+  },
+  "progressDeckRootRowSemanticLabel": "{name}, {range}",
+  "@progressDeckRootRowSemanticLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "range": {
+        "type": "String"
+      }
+    },
+    "description": "Screen-reader sentence for a deck row with no ancestors; still carries the window."
+  },
+  "progressPathSeparator": " › ",
+  "@progressPathSeparator": {
+    "description": "Glyph between two steps of a deck path on a progress row."
+  },
+  "progressEmptyDecksTitle": "Chưa có bộ thẻ nào",
+  "@progressEmptyDecksTitle": {
+    "description": "Top level with no decks at all."
+  },
+  "progressEmptyDecksMessage": "Tạo một bộ thẻ trong thư viện, lượt học của bạn sẽ hiện ở đây.",
+  "@progressEmptyDecksMessage": {
+    "description": "Body of the no-decks state."
+  },
+  "progressEmptySubDecksTitle": "Không có bộ thẻ con",
+  "@progressEmptySubDecksTitle": {
+    "description": "A deck level whose deck holds cards rather than sub-decks."
+  },
+  "progressEmptySubDecksMessage": "Bộ thẻ này chứa thẻ, nên số liệu tổng ở trên đã là toàn bộ.",
+  "@progressEmptySubDecksMessage": {
+    "description": "Body of the no-sub-decks state."
+  },
+  "progressNoActivityTitle": "Chưa học gì trong khoảng này",
+  "@progressNoActivityTitle": {
+    "description": "Decks exist but none was answered inside the selected window (BR-220)."
+  },
+  "progressNoActivityMessage": "Chuyển sang khoảng dài hơn, hoặc học một bộ thẻ để bắt đầu ghi nhận.",
+  "@progressNoActivityMessage": {
+    "description": "Body of the all-zero state."
+  },
+  "progressDeckMissingTitle": "Bộ thẻ này không còn tồn tại",
+  "@progressDeckMissingTitle": {
+    "description": "The deck named by /progress/:deckId is gone."
+  },
+  "progressDeckMissingMessage": "Có thể nó đã bị xoá. Quay lại để xem những bộ thẻ còn lại.",
+  "@progressDeckMissingMessage": {
+    "description": "Body of the deck-missing state."
+  },
+  "progressDeckMissingBackAction": "Về trang tiến độ",
+  "@progressDeckMissingBackAction": {
+    "description": "Returns to the library level of Progress by Deck."
+  },
+  "progressPlaceholderTitle": "Tính năng Tiến độ đang được phát triển",
+  "@progressPlaceholderTitle": {
+    "description": "Heading of the Progress placeholder (AD-19)."
+  },
+  "progressPlaceholderMessage": "Các lượt học hiện tại vẫn được lưu để sử dụng khi tính năng hoàn tất.",
+  "@progressPlaceholderMessage": {
+    "description": "Body of the Progress placeholder: study history is already recorded, nothing is lost while waiting."
+  },
+  "studyHomeTitle": "Học",
+  "@studyHomeTitle": {
+    "description": "App-bar title of the Study tab's home screen (UC-14)."
+  },
+  "studyHomeSupportingCopy": "Chọn một bộ thẻ, hoặc học tiếp phiên đang dở.",
+  "@studyHomeSupportingCopy": {
+    "description": "One line under the title saying what the screen is for. Read-only: nothing on this screen opens a session by itself (BR-200)."
+  },
+  "studyHomeSupportingCopyNoResume": "Chọn một bộ thẻ để bắt đầu.",
+  "@studyHomeSupportingCopyNoResume": {
+    "description": "The same line when no session is open. The other half of the pair promises somewhere to carry on from; with nothing to resume that half is a lie, and BR-200 makes \"nothing open\" the common case because it needs four conditions at once."
+  },
+  "studyHomeLoadingLabel": "Đang tải bộ thẻ",
+  "@studyHomeLoadingLabel": {
+    "description": "Screen-reader label for the Study home spinner. A bare spinner announces nothing at all."
+  },
+  "studyHomeResumeTitle": "Đang học dở",
+  "@studyHomeResumeTitle": {
+    "description": "Heading of the Resume card, shown only when a session of today's study day is still open (BR-200, BR-103)."
+  },
+  "studyHomeResumeSubtitle": "{kind} · {mode}",
+  "@studyHomeResumeSubtitle": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      },
+      "mode": {
+        "type": "String"
+      }
+    },
+    "description": "The open session's own kind and stage, both stored on the session and never inferred (BR-76, BR-98)."
+  },
+  "studyHomeResumeAction": "Tiếp tục",
+  "@studyHomeResumeAction": {
+    "description": "Opens the session that is already there. It never creates a second one (BR-101)."
+  },
+  "studyHomeResumeSemanticLabel": "Tiếp tục {deck}",
+  "@studyHomeResumeSemanticLabel": {
+    "placeholders": {
+      "deck": {
+        "type": "String"
+      }
+    },
+    "description": "Screen-reader name for the Resume action, which names the deck because several rows below carry a similar verb."
+  },
+  "studyHomeNextTitle": "Học tiếp theo",
+  "@studyHomeNextTitle": {
+    "description": "Heading of the root-deck list, ordered by workload (BR-201)."
+  },
+  "studyHomeNothingDueMessage": "Hiện chưa có thẻ nào tới hạn. Bạn vẫn có thể mở bất kỳ bộ thẻ nào để học trước.",
+  "@studyHomeNothingDueMessage": {
+    "description": "Supporting line when every listed deck has an empty workload. Not an error and not an achievement — BR-29 makes a quiet schedule the product working."
+  },
+  "studyHomeWorkloadSemanticLabel": "{overdue} quá hạn, {dueToday} tới hạn hôm nay, {newCount} thẻ mới",
+  "@studyHomeWorkloadSemanticLabel": {
+    "placeholders": {
+      "overdue": {
+        "type": "int"
+      },
+      "dueToday": {
+        "type": "int"
+      },
+      "newCount": {
+        "type": "int"
+      }
+    },
+    "description": "The three counts as one screen-reader phrase, so a row is heard as one fact instead of three stray numbers."
+  },
+  "studyHomeStudyAction": "Học",
+  "@studyHomeStudyAction": {
+    "description": "Opens one root deck's study entry. The tap is the only thing on this screen that may lead to a write (BR-200)."
+  },
+  "studyHomeStudySemanticLabel": "Học {deck}",
+  "@studyHomeStudySemanticLabel": {
+    "placeholders": {
+      "deck": {
+        "type": "String"
+      }
+    },
+    "description": "Screen-reader name for a row's Study action. Every row carries the same word, so the deck name is what tells them apart."
+  },
+  "studyHomeEmptyLibraryTitle": "Chưa có gì để học",
+  "@studyHomeEmptyLibraryTitle": {
+    "description": "The library holds no deck at all — the first-run state (BR-202, UC-01)."
+  },
+  "studyHomeEmptyLibraryMessage": "Thêm một bộ thẻ dựng sẵn là có ngay những thẻ đầu tiên.",
+  "@studyHomeEmptyLibraryMessage": {
+    "description": "Copy of the empty-library state. Names the next step rather than the absence."
+  },
+  "studyHomeStarterAction": "Xem bộ thẻ dựng sẵn",
+  "@studyHomeStarterAction": {
+    "description": "Opens the starter catalog from the Study tab (UC-01). A real route, not a placeholder."
+  },
+  "studyHomeNoCardsTitle": "Bộ thẻ của bạn đang trống",
+  "@studyHomeNoCardsTitle": {
+    "description": "There are decks but not a card anywhere in them — a different state from an empty library, with a different next step (BR-202)."
+  },
+  "studyHomeNoCardsMessage": "Thêm thẻ trong thư viện, chúng sẽ xuất hiện ở đây.",
+  "@studyHomeNoCardsMessage": {
+    "description": "Copy of the no-cards state. It must not invent a due count for a deck that holds nothing."
+  },
+  "studyHomeOpenLibraryAction": "Mở thư viện",
+  "@studyHomeOpenLibraryAction": {
+    "description": "Takes the user to the deck tree, where cards are added."
+  },
+  "studyHomeErrorTitle": "Không tải được bộ thẻ",
+  "@studyHomeErrorTitle": {
+    "description": "Failure state of the Study tab. Names no table, no query and no path (AD-04)."
+  },
+  "studyHomeErrorMessage": "Không có gì bị thay đổi. Hãy thử lại sau giây lát.",
+  "@studyHomeErrorMessage": {
+    "description": "Says the read failed and that it wrote nothing — true by construction, because this screen has no write path (BR-200)."
+  },
+  "studyHomeDeckRowSemanticLabel": "{deckName}, {scheduler}, {workload}",
+  "@studyHomeDeckRowSemanticLabel": {
+    "placeholders": {
+      "deckName": {
+        "type": "String"
+      },
+      "scheduler": {
+        "type": "String"
+      },
+      "workload": {
+        "type": "String"
+      }
+    },
+    "description": "The whole deck row as one sentence for a screen reader: the deck, its algorithm and its workload. Without it the row is four unowned nodes and the counts name no deck — the same problem the Study button solves by carrying the deck name."
+  },
+  "studyHomeDeckRowPlainSemanticLabel": "{deckName}, {workload}",
+  "@studyHomeDeckRowPlainSemanticLabel": {
+    "placeholders": {
+      "deckName": {
+        "type": "String"
+      },
+      "workload": {
+        "type": "String"
+      }
+    },
+    "description": "The row sentence for a deck whose algorithm has no label to show. A sentence with an empty clause reads worse than the short form."
+  },
+  "studyHomeOverdueWord": "quá hạn",
+  "@studyHomeOverdueWord": {
+    "description": "The word half of a workload metric, rendered beside the numeral so the two can carry different ink — the numeral stays neutral and only the word takes the metric tint, which is the grammar the deck summary and Progress already use. What a screen reader hears is neither half but studyHomeWorkloadSemanticLabel, nested inside the row sentence."
+  },
+  "studyHomeDueTodayWord": "tới hạn hôm nay",
+  "@studyHomeDueTodayWord": {
+    "description": "The word half of a workload metric, rendered beside the numeral so the two can carry different ink — the numeral stays neutral and only the word takes the metric tint, which is the grammar the deck summary and Progress already use. What a screen reader hears is neither half but studyHomeWorkloadSemanticLabel, nested inside the row sentence."
+  },
+  "studyHomeNewWord": "thẻ mới",
+  "@studyHomeNewWord": {
+    "description": "The word half of a workload metric, rendered beside the numeral so the two can carry different ink — the numeral stays neutral and only the word takes the metric tint, which is the grammar the deck summary and Progress already use. What a screen reader hears is neither half but studyHomeWorkloadSemanticLabel, nested inside the row sentence."
+  },
+  "reminderTitle": "Nhắc hằng ngày",
+  "@reminderTitle": {
+    "description": "Tiêu đề màn nhắc học và nhãn hàng mở nó từ Settings. Cùng một chữ ở hai chỗ là cố ý: một hàng và màn nó mở ra phải đọc như một nơi (UC-17, M6 R1). Ngắn hơn nhãn toggle vì tiêu đề app bar không xuống dòng: bản dài hơn bị ellipsis ngay ở 390dp (M6 A1)."
+  },
+  "reminderToggleLabel": "Nhắc hằng ngày",
+  "@reminderToggleLabel": {
+    "description": "Nhãn hàng bật/tắt. Lặp lại **nguyên văn** tiêu đề màn vì hàng này là control chính của màn; một danh từ thứ hai cho cùng một thứ đọc thành một cài đặt thứ hai (M6 W3). Rút ngắn cùng lúc với reminderTitle: hai chuỗi khác nhau cách nhau 12dp trên cùng một màn là đúng thứ mô tả này cấm."
+  },
+  "reminderStatusOff": "Tắt",
+  "@reminderStatusOff": {
+    "description": "Giá trị accessibility của toggle khi tắt, để trạng thái không chỉ nằm ở màu (M6 R7, A3). Hàng ở Settings cố ý không hiện giá trị — xem M6 W1."
+  },
+  "reminderStatusOn": "Bật",
+  "@reminderStatusOn": {
+    "description": "Giá trị accessibility của toggle khi bật (M6 R7, A3)."
+  },
+  "reminderTimeLabel": "Giờ nhắc",
+  "@reminderTimeLabel": {
+    "description": "Nhãn hàng mở dialog chọn giờ, và cũng là tiêu đề của chính dialog đó (M6 W4, R6)."
+  },
+  "reminderDueOnlyNote": "Chỉ nhắc khi còn thẻ đến hạn.",
+  "@reminderDueOnlyNote": {
+    "description": "Dòng supporting thứ nhất. Phát biểu BR-220 theo ngôn ngữ người dùng: ngày không nợ gì thì không nhắc, và thẻ mới không bao giờ làm phát notification. Cố ý không doạ — đây là lời hứa về sự im lặng, không phải cảnh báo."
+  },
+  "reminderPrivacyNote": "Thông báo có thể hiện tên deck và số thẻ đến hạn, kể cả trên màn hình khoá.",
+  "@reminderPrivacyNote": {
+    "description": "Dòng supporting thứ hai. Công bố về màn hình khoá mà BR-222 yêu cầu, nói trước khi người dùng bật chứ không để họ tự phát hiện. Nêu đúng cái có thể xuất hiện — tên deck và một con số."
+  },
+  "reminderPermissionDeniedTitle": "Thông báo đang bị tắt",
+  "@reminderPermissionDeniedTitle": {
+    "description": "Tiêu đề banner khi hệ điều hành từ chối quyền notification (UC-17 E1, BR-228). Gọi tên trạng thái hệ thống, không đổ lỗi người dùng."
+  },
+  "reminderPermissionDeniedMessage": "Bật thông báo cho MemoX trong cài đặt thiết bị, rồi thử lại.",
+  "@reminderPermissionDeniedMessage": {
+    "description": "Đường khôi phục khi quyền bị từ chối. Android chỉ cho hỏi một lần nên lối về là cài đặt hệ thống; app không được tự hỏi lại (BR-228)."
+  },
+  "reminderUnavailableTitle": "Thiết bị này chưa dùng được nhắc học",
+  "@reminderUnavailableTitle": {
+    "description": "Tiêu đề banner khi nền tảng không có nhắc học trong bản build này (UC-17 E2, BR-229). Không kèm hành động, vì không có đường khôi phục và một nút không chạy được còn tệ hơn không nút."
+  },
+  "reminderUnavailableMessage": "Chưa có gì được bật và chưa có lịch nào.",
+  "@reminderUnavailableMessage": {
+    "description": "Thân banner không khả dụng. Nói điều người dùng cần biết nhất: không có trạng thái bật nửa vời nào bị bỏ lại (BR-229)."
+  },
+  "reminderScheduleErrorTitle": "Chưa đặt được lịch nhắc",
+  "@reminderScheduleErrorTitle": {
+    "description": "Tiêu đề banner khi quyền đã được cấp nhưng hệ điều hành từ chối công việc nền (UC-17 E3). Không nêu chi tiết kỹ thuật, vì Failure.message không bao giờ được render."
+  },
+  "reminderScheduleErrorMessage": "Chưa bật gì cả. Thử lại sau một lát.",
+  "@reminderScheduleErrorMessage": {
+    "description": "Thân banner lỗi đặt lịch. Xác nhận rằng cài đặt vẫn tắt — điều BR-228 bảo đảm và người dùng không tự nhìn ra được."
+  },
+  "reminderSaveErrorTitle": "Chưa lưu được thay đổi",
+  "@reminderSaveErrorTitle": {
+    "description": "Tiêu đề banner khi ghi settings thất bại (UC-17 E4). Khác lỗi đặt lịch vì lần thử lại chạy lại một bước khác."
+  },
+  "reminderLoadErrorTitle": "Không tải được nhắc học",
+  "@reminderLoadErrorTitle": {
+    "description": "Title of the whole-screen error state when the daily-reminder settings could not be READ. Deliberately not the save copy: nothing has been changed at this point, so \"Your change wasn't saved\" would describe an event that did not happen. Mirrors settingsLoadErrorTitle, which is the same situation one screen up."
+  },
+  "reminderSaveErrorMessage": "Nhắc học vẫn giữ nguyên như trước.",
+  "@reminderSaveErrorMessage": {
+    "description": "Thân banner lỗi lưu. Nói rõ người dùng đang ở trạng thái nào, vì màn vừa quay ngược lại dưới tay họ."
+  },
+  "reminderNotificationTitle": "Đến giờ học rồi",
+  "@reminderNotificationTitle": {
+    "description": "Tiêu đề notification (M6 N1). Không mang số đếm và không mang tên deck — chúng nằm ở thân, nên một tiêu đề bị cắt vẫn không lộ gì riêng tư."
+  },
+  "reminderNotificationBodyOneDeck": "{count, plural, other{{count} thẻ đến hạn trong {deck}}}",
+  "@reminderNotificationBodyOneDeck": {
+    "description": "Thân notification khi đúng một deck còn nợ (M6 N2, BR-222). Tên deck và số đếm là toàn bộ dữ liệu được phép ở đây. Tiếng Việt không chia số nhiều nên chỉ có nhánh other."
+  },
+  "reminderNotificationBodyManyDecks": "{others, plural, other{{count} thẻ đến hạn trong {deck} và {others} deck khác}}",
+  "@reminderNotificationBodyManyDecks": {
+    "description": "Thân notification khi nhiều hơn một deck còn nợ (M6 N3, BR-222). Deck được nêu tên là deck cấp bách nhất theo thứ tự BR-223; phần còn lại là một con số, không bao giờ là danh sách."
+  },
+  "reminderCancelErrorTitle": "Đã tắt nhắc, nhưng lịch cũ có thể còn",
+  "@reminderCancelErrorTitle": {
+    "description": "Tiêu đề banner khi cài đặt đã tắt nhưng lượt chạy nền đang chờ không huỷ được (BR-226). Cố ý không dùng copy của lỗi đặt lịch: người dùng vừa TẮT, mà bảo họ chưa BẬT gì cả là nói ngược điều vừa xảy ra."
+  },
+  "reminderCancelErrorMessage": "Nhắc học hằng ngày đã tắt. Thông báo từ trước đó có thể vẫn còn hiện; mở app một lần là hết.",
+  "@reminderCancelErrorMessage": {
+    "description": "Thân banner lỗi huỷ lịch. Nói kết quả người dùng quan tâm — nhắc đã tắt — và phần còn sót, không hứa quá điều BR-220 cho: lượt cũ đọc lại settings lúc fire và không hiện gì."
+  },
+  "reminderChannelName": "Nhắc học hằng ngày",
+  "@reminderChannelName": {
+    "description": "Tên kênh notification của Android, người dùng thấy trong cài đặt hệ thống của app. Là chuỗi người dùng nhìn thấy nên phải bản địa hoá, không hardcode ở call site."
+  },
+  "reminderChannelDescription": "Tóm tắt mỗi ngày một lần về số thẻ đang đến hạn.",
+  "@reminderChannelDescription": {
+    "description": "Mô tả kênh notification, hiện dưới tên kênh trong cài đặt hệ thống. Nói kênh mang gì, không nói về bất kỳ deck hay thẻ cụ thể nào (BR-222)."
+  },
+  "tagCatalogTitle": "Nhãn",
+  "@tagCatalogTitle": {
+    "description": "App bar title of the tag catalog screen (UC-18, M4.14 W2)."
+  },
+  "tagCatalogEntryAction": "Quản lý nhãn",
+  "@tagCatalogEntryAction": {
+    "description": "Opens the tag catalog. Used by the Library app bar icon and by the card list overflow menu (M4.14 T2)."
+  },
+  "tagCatalogLoadingLabel": "Đang tải nhãn",
+  "@tagCatalogLoadingLabel": {
+    "description": "Screen-reader label while the tag catalog is loading (M4.14 W3 face 1)."
+  },
+  "tagCatalogError": "Không tải được danh sách nhãn.",
+  "@tagCatalogError": {
+    "description": "Body of the catalog error state. Names no table and no query."
+  },
+  "tagCatalogEmptyTitle": "Chưa có nhãn nào",
+  "@tagCatalogEmptyTitle": {
+    "description": "Title when the catalog holds no tags at all (M4.14 W3 face 3)."
+  },
+  "tagCatalogEmptyMessage": "Nhãn xuất hiện ở đây sau khi bạn gắn nhãn cho một thẻ.",
+  "@tagCatalogEmptyMessage": {
+    "description": "Says where tags come from, because nothing on this screen can create one (M4.14 W2 item 1)."
+  },
+  "tagSearchHint": "Tìm nhãn",
+  "@tagSearchHint": {
+    "description": "Placeholder of the catalog search field (BR-230)."
+  },
+  "tagSearchClearLabel": "Xoá từ khoá tìm nhãn",
+  "@tagSearchClearLabel": {
+    "description": "Screen-reader label of the clear button inside the catalog search field."
+  },
+  "tagSearchEmptyTitle": "Không có nhãn nào khớp “{query}”",
+  "@tagSearchEmptyTitle": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    },
+    "description": "Title when a catalog search matches nothing. Quotes the term verbatim so the user sees what was searched for (M4.14 W3 face 4)."
+  },
+  "tagSearchEmptyMessage": "Thử từ ngắn hơn, hoặc kiểm tra lại chính tả.",
+  "@tagSearchEmptyMessage": {
+    "description": "Body of the catalog search-empty state."
+  },
+  "tagCardCount": "{count, plural, =0{Không có thẻ nào} other{{count} thẻ}}",
+  "@tagCardCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "How many cards carry a tag. Shown under the name on a catalog row and on a filter row (BR-230, M4.14 W2)."
+  },
+  "tagRowMenuSemantics": "Hành động cho nhãn {name}",
+  "@tagRowMenuSemantics": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    },
+    "description": "Tooltip and screen-reader label of a catalog row's overflow menu, named so a reader can tell rows apart (M4.14 W2)."
+  },
+  "tagRenameAction": "Đổi tên",
+  "@tagRenameAction": {
+    "description": "Catalog row menu item, and the rename sheet's primary action when the new name is free (BR-233)."
+  },
+  "tagDeleteAction": "Xoá nhãn",
+  "@tagDeleteAction": {
+    "description": "Catalog row menu item and the destructive confirm action. Carries the noun on purpose: a bare Delete reads as deleting cards (M4.14 T8, BR-235)."
+  },
+  "tagRenameTitle": "Đổi tên nhãn",
+  "@tagRenameTitle": {
+    "description": "Title of the rename sheet (M4.14 W4)."
+  },
+  "tagRenameFieldLabel": "Tên nhãn",
+  "@tagRenameFieldLabel": {
+    "description": "Label of the rename sheet's single input."
+  },
+  "tagMergeAction": "Gộp nhãn",
+  "@tagMergeAction": {
+    "description": "The rename sheet's primary action once the typed name collides with another tag. The label is the last thing read before the merge happens (BR-234, M4.14 W4 item 4)."
+  },
+  "tagMergeNotice": "“{target}” đã tồn tại. Thẻ của nhãn đó và thẻ của nhãn này sẽ cùng dùng “{target}”, và nhãn hiện tại sẽ biến mất.",
+  "@tagMergeNotice": {
+    "placeholders": {
+      "target": {
+        "type": "String"
+      }
+    },
+    "description": "The merge disclosure, shown while typing and before confirming. Names the target, because saying a merge will happen without saying into what is not a disclosure (BR-234, M4.14 W4 item 3)."
+  },
+  "tagMergedConfirmation": "Đã gộp “{name}”.",
+  "@tagMergedConfirmation": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    },
+    "description": "Confirms after the fact that a rename turned out to be a merge. Chosen from the outcome the transaction returned, not from what the form predicted (BR-234)."
+  },
+  "tagDeleteConfirmTitle": "Xoá nhãn?",
+  "@tagDeleteConfirmTitle": {
+    "description": "Title of the tag delete confirmation (M4.14 W5)."
+  },
+  "tagDeleteConfirmMessage": "{count, plural, other{“{name}” sẽ được gỡ khỏi {count} thẻ. Các thẻ đó vẫn còn nguyên.}}",
+  "@tagDeleteConfirmMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Body of the delete confirmation. States the count and says outright that the cards survive; must never imply cards are deleted (BR-235, M4.14 T8)."
+  },
+  "tagDeleteConfirmMessageUnused": "“{name}” không nằm trên thẻ nào. Xoá nó không làm đổi thẻ nào.",
+  "@tagDeleteConfirmMessageUnused": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    },
+    "description": "Body of the delete confirmation for a tag with no cards. A separate sentence rather than a zero count, which would be a sentence about nothing (M4.14 W5)."
+  },
+  "tagMissingError": "Nhãn này không còn tồn tại.",
+  "@tagMissingError": {
+    "description": "Typed failure: the tag was deleted or merged away between opening an overlay and submitting it (UC-18 E3)."
+  },
+  "tagWriteErrorTitle": "Chưa lưu được",
+  "@tagWriteErrorTitle": {
+    "description": "Title of the error band inside the tag rename/merge sheet. Shares its wording with deckWriteErrorTitle and settingsSaveErrorTitle: one situation, one sentence. The Vietnamese was two sentences until M99.30 — \"Không lưu được\" on deck and tag, \"Chưa lưu được\" on settings — and the owner settled on \"Chưa\", which says the write is recoverable, matching every place the title appears beside a retry."
+  },
+  "tagFilterTitle": "Lọc theo nhãn",
+  "@tagFilterTitle": {
+    "description": "Title of the multi-tag filter sheet on the card list (M4.14 W6)."
+  },
+  "tagFilterSubtitle": "Hiện thẻ mang bất kỳ nhãn nào đang chọn.",
+  "@tagFilterSubtitle": {
+    "description": "States the OR semantics in words. The only place a user learns that selecting a second tag widens the result rather than narrowing it (BR-231, M4.14 W6 item 2)."
+  },
+  "tagFilterClearAction": "Bỏ chọn",
+  "@tagFilterClearAction": {
+    "description": "Empties the filter sheet's draft selection (M4.14 W6 item 4, UC-18 A4)."
+  },
+  "tagFilterClearAllAction": "Bỏ lọc theo nhãn",
+  "@tagFilterClearAllAction": {
+    "description": "The action on the card list's no-result face when a tag selection is what emptied it (UC-18 A7). A separate key from the sheet's Clear on purpose: here the sheet is shut and nothing is visibly selected, so a bare verb has no object — and one key serving two surfaces means editing the sheet's button silently edits this one."
+  },
+  "tagFilterApplyAction": "Áp dụng",
+  "@tagFilterApplyAction": {
+    "description": "The filter sheet's primary action before the match count has arrived — the bare verb rather than a flickering zero (M4.14 T6)."
+  },
+  "tagFilterApplyActionCount": "{count, plural, =0{Không hiện thẻ nào} other{Hiện {count} thẻ}}",
+  "@tagFilterApplyActionCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "The filter sheet's primary action with the number of cards the draft matches, so the user can tell whether it is worth applying before closing the sheet (M4.14 T6)."
+  },
+  "tagFilterPillLabel": "Nhãn",
+  "@tagFilterPillLabel": {
+    "description": "The card list filter bar's tag pill when no tag is selected (M4.14 T3)."
+  },
+  "tagFilterPillCount": "Nhãn · {count}",
+  "@tagFilterPillCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "The tag pill when tags are selected. The number is the only thing on the bar that distinguishes no tag filter from a filter by three tags (M4.14 T4)."
+  },
+  "tagFilterPillSemantics": "{count, plural, other{Nhãn, đang chọn {count}}}",
+  "@tagFilterPillSemantics": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Screen-reader label of the tag pill while a filter is applied — the selected state must not be colour-only (M4.14 R)."
+  },
+  "cardDetailTitle": "Thẻ",
+  "@cardDetailTitle": {
+    "description": "App-bar title of the read-only card detail screen (UC-19, M4.15 W2). Deliberately a generic label, not the card's front: the front is content and content is never truncated (BR-240), while an app-bar title must be."
+  },
+  "cardDetailEditAction": "Sửa thẻ",
+  "@cardDetailEditAction": {
+    "description": "The one action on the detail app bar; opens the existing editor (BR-246, M4.15 V3). Visible, but not the default meaning of a tap."
+  },
+  "cardDetailLoadingLabel": "Đang tải thẻ",
+  "@cardDetailLoadingLabel": {
+    "description": "Semantic label while the content and state read is in flight (M4.15 W3 face 1)."
+  },
+  "cardDetailErrorMessage": "Không đọc được thẻ này.",
+  "@cardDetailErrorMessage": {
+    "description": "Top-level error face (UC-19 E3). Names no id, path or SQL (BR-53)."
+  },
+  "cardDetailNotFoundTitle": "Không tìm thấy thẻ",
+  "@cardDetailNotFoundTitle": {
+    "description": "Not-found face when the card never existed or was deleted while open (UC-19 E1/E2, BR-245)."
+  },
+  "cardDetailNotFoundMessage": "Thẻ này không còn tồn tại. Có thể nó đã bị xoá ở màn hình khác.",
+  "@cardDetailNotFoundMessage": {
+    "description": "Explains the not-found face without naming the id (BR-53, BR-245)."
+  },
+  "cardDetailBackToListAction": "Về danh sách thẻ",
+  "@cardDetailBackToListAction": {
+    "description": "The way out of the not-found face — the deck's card list is where the user can act again (UC-19 E1)."
+  },
+  "cardDetailExampleLabel": "Ví dụ",
+  "@cardDetailExampleLabel": {
+    "description": "Label of the optional example field; the row is absent entirely when the field is empty (BR-95, BR-240)."
+  },
+  "cardDetailHintLabel": "Gợi ý",
+  "@cardDetailHintLabel": {
+    "description": "Label of the optional hint field (BR-95, BR-240)."
+  },
+  "cardDetailPronunciationLabel": "Phát âm",
+  "@cardDetailPronunciationLabel": {
+    "description": "Label of the optional pronunciation field (BR-95, BR-240)."
+  },
+  "cardDetailTagsLabel": "Nhãn",
+  "@cardDetailTagsLabel": {
+    "description": "Label above the read-only tag chips on the detail screen (BR-93)."
+  },
+  "cardDetailFlaggedLabel": "Đã đánh dấu",
+  "@cardDetailFlaggedLabel": {
+    "description": "Shown only when the user has flagged the card; the detail screen never toggles it (BR-92, BR-239)."
+  },
+  "cardDetailStateSectionTitle": "Trạng thái hiện tại",
+  "@cardDetailStateSectionTitle": {
+    "description": "Heading of the schedule band — what is true now, as opposed to the history below it (BR-240, BR-244)."
+  },
+  "cardDetailDueLabel": "Tới hạn",
+  "@cardDetailDueLabel": {
+    "description": "When the card next comes due (BR-240)."
+  },
+  "cardDetailLearnedLabel": "Đã thuộc",
+  "@cardDetailLearnedLabel": {
+    "description": "When the card finished the learning chain; empty until it does (BR-144, BR-240)."
+  },
+  "cardDetailLastAnsweredLabel": "Trả lời gần nhất",
+  "@cardDetailLastAnsweredLabel": {
+    "description": "The last scheduled or relearning answer (BR-20, BR-240)."
+  },
+  "cardDetailReviewsLabel": "Số lượt ôn",
+  "@cardDetailReviewsLabel": {
+    "description": "Count of scheduled reviews (BR-20, BR-240). Not a score — BR-243 forbids derived numbers here."
+  },
+  "cardDetailLapsesLabel": "Số lần quên",
+  "@cardDetailLapsesLabel": {
+    "description": "Count of lapses (BR-20, BR-240)."
+  },
+  "cardDetailBoxLabel": "Hộp",
+  "@cardDetailBoxLabel": {
+    "description": "eight_box only; the sm2 fields are absent for such a card and vice versa (AD-08, BR-240)."
+  },
+  "cardDetailEaseLabel": "Hệ số dễ",
+  "@cardDetailEaseLabel": {
+    "description": "sm2 only (AD-08, BR-240)."
+  },
+  "cardDetailIntervalLabel": "Khoảng cách",
+  "@cardDetailIntervalLabel": {
+    "description": "sm2 only (AD-08, BR-240)."
+  },
+  "cardDetailRepetitionsLabel": "Số lần lặp",
+  "@cardDetailRepetitionsLabel": {
+    "description": "sm2 only (AD-08, BR-240)."
+  },
+  "cardDetailNotScheduledValue": "Chưa có lịch",
+  "@cardDetailNotScheduledValue": {
+    "description": "Value for a card that has not finished the learning chain, where due and learned are both null and travel together (BR-149, BR-240)."
+  },
+  "cardDetailDayCount": "{count, plural, other{{count} ngày}}",
+  "@cardDetailDayCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "The sm2 interval, in days (BR-240)."
+  },
+  "cardHistoryTitle": "Lịch sử học",
+  "@cardHistoryTitle": {
+    "description": "Heading of the timeline band (M4.15 W2)."
+  },
+  "cardHistoryEmptyTitle": "Chưa có lượt ôn nào",
+  "@cardHistoryEmptyTitle": {
+    "description": "Empty history, which is a valid state and never an error (BR-244, UC-19 A2)."
+  },
+  "cardHistoryEmptyMessage": "Các lượt ôn sẽ hiện ở đây sau khi thẻ này được học.",
+  "@cardHistoryEmptyMessage": {
+    "description": "Explains the empty timeline without implying something went wrong (BR-244)."
+  },
+  "cardHistoryGenerationLabel": "Chu kỳ học {generation}",
+  "@cardHistoryGenerationLabel": {
+    "placeholders": {
+      "generation": {
+        "type": "int"
+      }
+    },
+    "description": "Group heading for one scheduler generation; text rather than colour, so the grouping is readable without it (BR-243, M4.15 V6)."
+  },
+  "cardHistoryCurrentGenerationLabel": "Chu kỳ học hiện tại",
+  "@cardHistoryCurrentGenerationLabel": {
+    "description": "Group heading for the generation the card is on now — the one that keeps growing (BR-243)."
+  },
+  "cardHistoryLoadMoreAction": "Tải thêm",
+  "@cardHistoryLoadMoreAction": {
+    "description": "Tail action that appends the next keyset page (BR-241, M4.15 V5)."
+  },
+  "cardHistoryLoadingMoreLabel": "Đang tải thêm lượt ôn",
+  "@cardHistoryLoadingMoreLabel": {
+    "description": "Semantic label while a further page is in flight; the rows already shown stay put (M4.15 W3 face 5)."
+  },
+  "cardHistoryPageErrorMessage": "Không tải được trang tiếp theo.",
+  "@cardHistoryPageErrorMessage": {
+    "description": "Tail error band; everything already shown stays on screen (UC-19 E4)."
+  },
+  "cardHistoryPageErrorTitle": "Chưa tải thêm được",
+  "@cardHistoryPageErrorTitle": {
+    "description": "Title of the error band at the foot of the study-history timeline when a page fails to load (UC-19 E4). Everything already read stays above it; the band names what did not arrive rather than what was lost."
+  },
+  "cardHistoryLoadingLabel": "Đang tải lịch sử học",
+  "@cardHistoryLoadingLabel": {
+    "description": "Semantic label while the first page is in flight (M4.15 W3 face 1)."
+  },
+  "cardHistoryScheduleUnchanged": "Lịch không đổi",
+  "@cardHistoryScheduleUnchanged": {
+    "description": "A turn of the learning chain records history and moves no schedule; said explicitly so it does not read as missing data (BR-144, BR-242)."
+  },
+  "cardHistoryTimedOutLabel": "Hết giờ",
+  "@cardHistoryTimedOutLabel": {
+    "description": "The stored outcome reason, shown only when present — owning up to a blank and running out of time produce the same action (BR-131, BR-242)."
+  },
+  "cardHistoryHintUsedLabel": "Có dùng gợi ý",
+  "@cardHistoryHintUsedLabel": {
+    "description": "The stored fill-mode hint flag, recorded and deliberately without effect on the action (BR-136, BR-242)."
+  },
+  "cardHistoryNextDueLabel": "Tới hạn kế tiếp {date}",
+  "@cardHistoryNextDueLabel": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    },
+    "description": "The schedule this turn produced, when it produced one (BR-242)."
+  },
+  "cardHistoryBoxChange": "Hộp {from} → {to}",
+  "@cardHistoryBoxChange": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    },
+    "description": "eight_box before-and-after, from the stored columns of that row — never diffed from state (BR-76, BR-242). The arrow carries the direction without colour."
+  },
+  "cardHistoryEaseChange": "Hệ số dễ {from} → {to}",
+  "@cardHistoryEaseChange": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    },
+    "description": "sm2 ease factor before and after, from the stored columns of that row (BR-242)."
+  },
+  "cardHistoryIntervalChange": "Khoảng cách {from} → {to}",
+  "@cardHistoryIntervalChange": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    },
+    "description": "sm2 interval before and after, from the stored columns of that row (BR-242)."
+  },
+  "cardHistoryKindLearning": "Học mới",
+  "@cardHistoryKindLearning": {
+    "description": "The stored answer kind; never derived from the schedule delta (BR-75, BR-76)."
+  },
+  "cardHistoryKindScheduled": "Theo lịch",
+  "@cardHistoryKindScheduled": {
+    "description": "The stored answer kind (BR-75, BR-76)."
+  },
+  "cardHistoryKindRelearning": "Học lại",
+  "@cardHistoryKindRelearning": {
+    "description": "The stored answer kind (BR-75, BR-76)."
+  },
+  "cardHistoryEventTime": "{date} · {time}",
+  "@cardHistoryEventTime": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    },
+    "description": "Joins the locale-formatted date and time of one event; the parts come from MaterialLocalizations so neither is assembled by hand (M4.15 W6)."
+  },
+  "cardHistoryEventSemantics": "{time}. {mode}, {kind}, {action}. {schedule}",
+  "@cardHistoryEventSemantics": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "mode": {
+        "type": "String"
+      },
+      "kind": {
+        "type": "String"
+      },
+      "action": {
+        "type": "String"
+      },
+      "schedule": {
+        "type": "String"
+      }
+    },
+    "description": "One event read as a single sentence, so TalkBack announces the meaning of the turn instead of five loose labels (M4.15 W6)."
+  },
+  "cardDetailNeverAnsweredValue": "Chưa trả lời lần nào",
+  "@cardDetailNeverAnsweredValue": {
+    "description": "Value for `Last answered` on a card no turn has ever been recorded against. Distinct from cardDetailNotScheduledValue, which is about the schedule: a card can be unscheduled and answered, and saying \"not scheduled yet\" under \"Last answered\" answered a different question (BR-240)."
+  },
+  "cardHistoryAllShownLabel": "Đã hiện tất cả lượt ôn",
+  "@cardHistoryAllShownLabel": {
+    "description": "Tail line once every page of the history has been read, so the user is not offered a button with nothing behind it (UC-19 A5). Deliberately countless: BR-243 forbids any aggregate derived from history, and a count here would contradict the Reviews row above it, which counts only scheduled turns (BR-20)."
+  },
+  "cardHistoryBoxChangeSemantics": "Hộp từ {from} sang {to}",
+  "@cardHistoryBoxChangeSemantics": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    },
+    "description": "Spoken form of cardHistoryBoxChange, used only inside the event's semantics label. The visible line keeps the arrow, which reads in every language; a screen reader speaks it as \"right arrow\" or not at all, so the relation is spelled out here (M4.15 W6)."
+  },
+  "cardHistoryEaseChangeSemantics": "Hệ số dễ từ {from} sang {to}",
+  "@cardHistoryEaseChangeSemantics": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    },
+    "description": "Spoken form of cardHistoryEaseChange — see cardHistoryBoxChangeSemantics for why the arrow does not travel into the semantics label."
+  },
+  "cardHistoryIntervalChangeSemantics": "Khoảng cách từ {from} sang {to}",
+  "@cardHistoryIntervalChangeSemantics": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    },
+    "description": "Spoken form of cardHistoryIntervalChange — see cardHistoryBoxChangeSemantics."
+  },
+  "cardHistoryAbsentValueSemantics": "không ghi nhận",
+  "@cardHistoryAbsentValueSemantics": {
+    "description": "Spoken stand-in for a before-or-after column the row left null. The visible line shows an en dash, which most screen readers say nothing about at all (M4.15 W6, BR-242)."
+  },
+  "cardHistoryModeUnknownSemantics": "Chế độ không xác định",
+  "@cardHistoryModeUnknownSemantics": {
+    "description": "Spoken stand-in for a stored mode this build does not recognise (StudyMode.unknown). The visible line shows the same en dash placeholder an unrecorded column uses; a silent gap in a spoken sentence reads as data that failed to load."
+  },
+  "librarySearchTitle": "Tìm kiếm",
+  "@librarySearchTitle": {
+    "description": "App bar title of Global Library Search (UC-20). One word, because the field directly below it says what is being searched — a longer title would repeat the hint."
+  },
+  "librarySearchOpenLabel": "Tìm trong thư viện",
+  "@librarySearchOpenLabel": {
+    "description": "Semantic label and tooltip of the magnifier in the Library header, which opens the search screen. Names the scope rather than the action: the search covers the whole library, not the level the user is standing on."
+  },
+  "librarySearchHint": "Tìm deck, thẻ và nhãn",
+  "@librarySearchHint": {
+    "description": "Placeholder of the search field. Names all three things that are matched (BR-247), because a user who does not know cards are searched will not try."
+  },
+  "librarySearchClearLabel": "Xoá tìm kiếm",
+  "@librarySearchClearLabel": {
+    "description": "Semantic label and tooltip of the clear button inside the search field."
+  },
+  "librarySearchDecksGroupLabel": "Deck",
+  "@librarySearchDecksGroupLabel": {
+    "description": "Header of the deck section of the results. Decks are always listed before cards (BR-251)."
+  },
+  "librarySearchCardsGroupLabel": "Thẻ",
+  "@librarySearchCardsGroupLabel": {
+    "description": "Header of the card section of the results."
+  },
+  "librarySearchInitialTitle": "Tìm mọi thứ trong thư viện",
+  "@librarySearchInitialTitle": {
+    "description": "Heading of the state before anything is typed. Nothing has been read from the database at this point (BR-249)."
+  },
+  "librarySearchInitialMessage": "Nhập để tìm tên deck, mặt trước và mặt sau của thẻ, và tên nhãn.",
+  "@librarySearchInitialMessage": {
+    "description": "Body of the initial state. States the exact scope, so an empty result later reads as it is not there rather than as it does not search that."
+  },
+  "librarySearchNoResultsTitle": "Không có kết quả cho “{query}”",
+  "@librarySearchNoResultsTitle": {
+    "description": "Heading when a settled search matched nothing. \"query\" is echoed as typed — not the folded form — so the user can see the spelling that was searched.",
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "librarySearchNoResultsMessage": "Không có tên deck, thẻ hay nhãn nào trong thư viện chứa nội dung đó.",
+  "@librarySearchNoResultsMessage": {
+    "description": "Body of the empty-result state. Repeats the scope, because the most useful next thought is then it is somewhere else, or then I spelled it differently."
+  },
+  "librarySearchErrorTitle": "Không tìm được",
+  "@librarySearchErrorTitle": {
+    "description": "Heading when the first page of a search failed."
+  },
+  "librarySearchErrorMessage": "Đã xảy ra lỗi khi đọc thư viện. Vui lòng thử lại.",
+  "@librarySearchErrorMessage": {
+    "description": "Body of the search failure state. Deliberately generic: a database message names tables and can carry card content, and neither belongs on screen."
+  },
+  "librarySearchLoadingLabel": "Đang tìm",
+  "@librarySearchLoadingLabel": {
+    "description": "Screen-reader label of the spinner shown while the first page is being read. A bare spinner announces nothing at all."
+  },
+  "librarySearchLoadingMoreLabel": "Đang tải thêm kết quả",
+  "@librarySearchLoadingMoreLabel": {
+    "description": "Screen-reader label of the spinner under the last result while the next page is being read."
+  },
+  "librarySearchLoadMoreAction": "Xem thêm kết quả",
+  "@librarySearchLoadMoreAction": {
+    "description": "Button under the last result that opens the next page. Shown only while more results exist."
+  },
+  "librarySearchLoadMoreErrorMessage": "Không tải thêm được kết quả.",
+  "@librarySearchLoadMoreErrorMessage": {
+    "description": "Message replacing the load-more button when the next page failed. Everything already listed stays on screen — only this band changes."
+  },
+  "librarySearchLoadMoreErrorTitle": "Chưa tải thêm được",
+  "@librarySearchLoadMoreErrorTitle": {
+    "description": "Title of the error band under the last search result when loading the next page fails (UC-20). Everything already found stays above it; the band names what did not arrive. Same wording as the card-history page-error title because the situation is the same (D24)."
+  },
+  "librarySearchDeckResultSemantic": "Deck {name}",
+  "@librarySearchDeckResultSemantic": {
+    "description": "Screen-reader label of a deck result that sits at the top of the library, so it has no path above it. \"name\" comes first because the list mixes two kinds and the kind is what disambiguates them.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "librarySearchDeckResultInPathSemantic": "Deck {name}, trong {path}",
+  "@librarySearchDeckResultInPathSemantic": {
+    "description": "Screen-reader label of a deck result with ancestors. \"path\" is announced after \"name\" because the name is what the user searched for.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "librarySearchCardResultSemantic": "Thẻ {front}, {back}, trong {path}",
+  "@librarySearchCardResultSemantic": {
+    "description": "Screen-reader label of a card result. \"back\" is carried whole although the row clamps it to one line — an ellipsis is a layout decision, not a decision to drop content from the accessibility tree. \"path\" is the deck the card lives in.",
+    "placeholders": {
+      "front": {
+        "type": "String"
+      },
+      "back": {
+        "type": "String"
+      },
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "librarySearchMatchedTagLabel": "Nhãn: {tag}",
+  "@librarySearchMatchedTagLabel": {
+    "description": "Shown on a card result that matched through one of its tags rather than through its own text (BR-252). \"tag\" is the best-ranked matching tag; without it the row appears with no visible reason, which reads as a broken search.",
+    "placeholders": {
+      "tag": {
+        "type": "String"
+      }
+    }
+  },
+  "librarySearchPathSeparator": " › ",
+  "@librarySearchPathSeparator": {
+    "description": "Joins the deck names of a result path: Korean › Grammar › Nouns. It lives in the ARB because it is user-visible twice over — drawn on screen, and read aloud between every pair of names — so the glyph is a \"translator\" decision rather than a widget one. Keep the surrounding spaces."
+  },
+  "librarySearchCardResultTaggedSemantic": "Thẻ {front}, {back}, trong {path}, khớp nhãn {tag}",
+  "@librarySearchCardResultTaggedSemantic": {
+    "description": "Screen-reader label of a card result that matched through one of its tags rather than through its own text. \"tag\" is the reason the row is in the list, and with match highlighting deliberately absent it is the only reason a screen-reader user can be given — so it belongs in the label and not only in the visible chip. \"front\", \"back\" and \"path\" carry the same meaning as in librarySearchCardResultSemantic.",
+    "placeholders": {
+      "front": {
+        "type": "String"
+      },
+      "back": {
+        "type": "String"
+      },
+      "path": {
+        "type": "String"
+      },
+      "tag": {
+        "type": "String"
+      }
+    }
+  },
+  "studySummaryStoppedByDeletion": "Deck hoặc thẻ bạn đang học đã được chuyển vào Trash.",
+  "@studySummaryStoppedByDeletion": {
+    "description": "Explains a session invalidated because its material was deleted (BR-259)."
+  },
+  "trashTitle": "Trash",
+  "@trashTitle": {
+    "description": "Title of the Trash screen (UC-21)."
+  },
+  "trashEntryLabel": "Trash",
+  "@trashEntryLabel": {
+    "description": "App-bar action on the root deck list that opens Trash. Always visible, even when Trash is empty (wireframe T2)."
+  },
+  "trashRetentionNotice": "Mục ở đây bị xoá vĩnh viễn sau 30 ngày.",
+  "@trashRetentionNotice": {
+    "description": "One-line explanation above the Trash list (BR-264)."
+  },
+  "trashFilterAll": "Tất cả",
+  "@trashFilterAll": {
+    "description": "Trash filter chip: both kinds (wireframe T3)."
+  },
+  "trashFilterCards": "Thẻ",
+  "@trashFilterCards": {
+    "description": "Trash filter chip: cards only."
+  },
+  "trashFilterDecks": "Deck",
+  "@trashFilterDecks": {
+    "description": "Trash filter chip: decks only."
+  },
+  "trashEmptyTitle": "Trash trống",
+  "@trashEmptyTitle": {
+    "description": "Empty state title of the Trash screen (UC-21 A6)."
+  },
+  "trashEmptyMessage": "Deck và thẻ đã xoá nằm ở đây 30 ngày, để bạn lấy lại được.",
+  "@trashEmptyMessage": {
+    "description": "Empty state body of the Trash screen (BR-264)."
+  },
+  "trashEmptyCardsMessage": "Không có thẻ nào trong Trash.",
+  "@trashEmptyCardsMessage": {
+    "description": "Empty state when the Cards filter is on but only decks are in Trash."
+  },
+  "trashEmptyDecksMessage": "Không có deck nào trong Trash.",
+  "@trashEmptyDecksMessage": {
+    "description": "Empty state when the Decks filter is on but only cards are in Trash."
+  },
+  "trashDeletedDaysAgo": "{days, plural, =0{Đã xoá hôm nay} =1{Đã xoá 1 ngày trước} other{Đã xoá {days} ngày trước}}",
+  "@trashDeletedDaysAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    },
+    "description": "When an item was deleted, on the Trash row (wireframe T4)."
+  },
+  "trashDaysLeft": "{days, plural, =0{Bị xoá vĩnh viễn hôm nay} =1{Còn 1 ngày} other{Còn {days} ngày}}",
+  "@trashDaysLeft": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    },
+    "description": "How long until the batch is purged (BR-264). The only urgent number on the row (wireframe T4)."
+  },
+  "trashOriginLabel": "Từ",
+  "@trashOriginLabel": {
+    "description": "Prefix of the original path on a Trash row. Context only, never a promise about where a restore goes (BR-267)."
+  },
+  "trashOriginTopLevel": "Cấp trên cùng",
+  "@trashOriginTopLevel": {
+    "description": "Origin shown for a deleted top-level deck, which has no parent (BR-56)."
+  },
+  "trashBatchContents": "{deckCount, plural, =0{} =1{1 deck, } other{{deckCount} deck, }}{cardCount, plural, =0{không có thẻ} =1{1 thẻ} other{{cardCount} thẻ}}",
+  "@trashBatchContents": {
+    "placeholders": {
+      "deckCount": {
+        "type": "int"
+      },
+      "cardCount": {
+        "type": "int"
+      }
+    },
+    "description": "What a deck batch would bring back. Excludes anything already in Trash under an older batch (BR-258, BR-262)."
+  },
+  "trashRestoreAction": "Khôi phục",
+  "@trashRestoreAction": {
+    "description": "Row action that opens the restore target picker (BR-261)."
+  },
+  "trashPurgeAction": "Xoá vĩnh viễn",
+  "@trashPurgeAction": {
+    "description": "The only destructive action in Trash (BR-266)."
+  },
+  "trashRowMenuTitle": "Thao tác với mục này trong Trash",
+  "@trashRowMenuTitle": {
+    "description": "Title of the one-item overflow menu on a Trash row. Purge lives behind it so permanent deletion costs one tap more than Restore (wireframe m99-33 T6)."
+  },
+  "trashSelectAction": "Chọn",
+  "@trashSelectAction": {
+    "description": "Overflow action that turns on multi-select in Trash (BR-266)."
+  },
+  "trashSelectionCount": "{count, plural, other{Đã chọn {count}}}",
+  "@trashSelectionCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Title of the Trash app bar while selecting."
+  },
+  "trashSelectionCardsOnly": "Thẻ và deck được khôi phục riêng, nên lựa chọn này chỉ gồm thẻ.",
+  "@trashSelectionCardsOnly": {
+    "description": "Explains why deck rows stopped responding once a card was selected (BR-266)."
+  },
+  "trashSelectionDecksOnly": "Thẻ và deck được khôi phục riêng, nên lựa chọn này chỉ gồm deck.",
+  "@trashSelectionDecksOnly": {
+    "description": "Explains why card rows stopped responding once a deck was selected (BR-266)."
+  },
+  "trashRestoreTargetTitle": "Khôi phục vào",
+  "@trashRestoreTargetTitle": {
+    "description": "Title of the restore target picker (BR-261)."
+  },
+  "trashRestoreTargetTopLevel": "Cấp trên cùng",
+  "@trashRestoreTargetTopLevel": {
+    "description": "The single target a deleted top-level deck has (BR-261)."
+  },
+  "trashRestoreTargetEmpty": "Hiện chưa có nơi nào nhận lại được mục này.",
+  "@trashRestoreTargetEmpty": {
+    "description": "Shown when no target qualifies (UC-21 E1). The picker never draws a disabled row (wireframe T8)."
+  },
+  "trashRestoreConfirmAction": "Khôi phục vào đây",
+  "@trashRestoreConfirmAction": {
+    "description": "Primary action of the restore target picker. The user confirms even when a target was preselected (BR-262)."
+  },
+  "trashRestoredMessage": "Đã khôi phục",
+  "@trashRestoredMessage": {
+    "description": "Result message after a restore commits."
+  },
+  "trashPurgeConfirmTitle": "{count, plural, =1{Xoá vĩnh viễn 1 mục?} other{Xoá vĩnh viễn {count} mục?}}",
+  "@trashPurgeConfirmTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Title of the permanent-delete confirmation, naming the exact count (BR-266)."
+  },
+  "trashPurgeConfirmMessage": "Không thể hoàn tác. Lịch sử học của những mục này bị xoá theo.",
+  "@trashPurgeConfirmMessage": {
+    "description": "Body of the permanent-delete confirmation (BR-266)."
+  },
+  "trashPurgeConfirmAction": "Xoá vĩnh viễn",
+  "@trashPurgeConfirmAction": {
+    "description": "Destructive confirm button. The dialog opens with focus on Cancel (wireframe T11)."
+  },
+  "trashPurgeCancelAction": "Huỷ",
+  "@trashPurgeCancelAction": {
+    "description": "Safe default action of the permanent-delete confirmation (BR-266)."
+  },
+  "trashPurgedMessage": "{count, plural, =1{Đã xoá vĩnh viễn 1 mục} other{Đã xoá vĩnh viễn {count} mục}}",
+  "@trashPurgedMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Result message after a purge commits."
+  },
+  "trashLoadFailed": "Không mở được Trash. Thử lại.",
+  "@trashLoadFailed": {
+    "description": "Error state of the Trash list (UC-21 E5)."
+  },
+  "trashLoadErrorTitle": "Không mở được Trash",
+  "@trashLoadErrorTitle": {
+    "description": "Title of the full-screen error face when the Trash list itself fails to load. The \"Couldn’t …\" phrase carries the error, like every other screen-level load failure; the message below is the supporting line."
+  },
+  "trashRetryAction": "Thử lại",
+  "@trashRetryAction": {
+    "description": "Retry action on the Trash error state."
+  },
+  "trashConflictTargetNoLongerValid": "Deck đó không nhận được mục này nữa. Hãy chọn nơi khác.",
+  "@trashConflictTargetNoLongerValid": {
+    "description": "Copy for TrashConflictReason.targetNoLongerValid (UC-21 E2)."
+  },
+  "trashConflictTargetLevelMismatch": "Mục này không thể vào đó.",
+  "@trashConflictTargetLevelMismatch": {
+    "description": "Copy for TrashConflictReason.targetLevelMismatch (BR-261)."
+  },
+  "trashConflictUndoOriginUnavailable": "Không thể trả về chỗ cũ. Hãy khôi phục từ Trash.",
+  "@trashConflictUndoOriginUnavailable": {
+    "description": "Copy for TrashConflictReason.undoOriginUnavailable (BR-263, UC-21 E3)."
+  },
+  "trashConflictPurgeWouldTakeAnotherBatch": "Trong mục này còn thứ khác đang ở Trash, nên chưa xoá được.",
+  "@trashConflictPurgeWouldTakeAnotherBatch": {
+    "description": "Copy for TrashConflictReason.purgeWouldTakeAnotherBatch (BR-265, UC-21 E4)."
+  },
+  "trashConflictUnknownItemType": "Mục này bị xoá bởi một phiên bản mới hơn của ứng dụng.",
+  "@trashConflictUnknownItemType": {
+    "description": "Copy for TrashConflictReason.unknownItemType."
+  },
+  "trashConflictBatchHeightUnknowable": "Không đọc được cấu trúc của deck này, nên chưa khôi phục được.",
+  "@trashConflictBatchHeightUnknowable": {
+    "description": "Copy for TrashConflictReason.batchHeightUnknowable."
+  },
+  "trashMovedMessage": "Đã chuyển vào Trash",
+  "@trashMovedMessage": {
+    "description": "Snackbar shown after deleting one item, beside Undo (BR-256, wireframe T13)."
+  },
+  "trashUndoAction": "Hoàn tác",
+  "@trashUndoAction": {
+    "description": "Snackbar action that reverses the deletion just made (BR-263)."
+  },
+  "trashUndoFailed": "Không hoàn tác được.",
+  "@trashUndoFailed": {
+    "description": "Shown when Undo is refused (UC-21 E3)."
   }
 }

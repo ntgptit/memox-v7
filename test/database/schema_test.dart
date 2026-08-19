@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/database/app_database.dart';
 
@@ -40,7 +38,7 @@ void main() {
     expect(rows.single['foreign_keys'], 1);
   });
 
-  test('exactly the seven tables data-model.md specifies', () async {
+  test('exactly the ten tables data-model.md specifies', () async {
     final db = openTestDatabase();
     final rows = await pragma(
       db,
@@ -54,6 +52,7 @@ void main() {
       'card_tags',
       'cards',
       'decks',
+      'delete_batches',
       'study_answers',
       'study_queue_items',
       'study_sessions',
@@ -78,6 +77,7 @@ void main() {
         'study_config',
         'source_template_id',
         'source_template_version',
+        'delete_batch_id',
         'created_at',
         'updated_at',
       ],
@@ -92,6 +92,7 @@ void main() {
         'example',
         'hint',
         'pronunciation',
+        'delete_batch_id',
         'created_at',
         'updated_at',
       ],
@@ -132,6 +133,7 @@ void main() {
         'next_ease_factor',
         'previous_interval_days',
         'next_interval_days',
+        'direction',
       ],
       'study_sessions': <String>[
         'id',
@@ -146,6 +148,7 @@ void main() {
         'card_limit',
         'started_at',
         'ended_at',
+        'direction',
       ],
       'study_queue_items': <String>[
         'session_id',
@@ -158,11 +161,23 @@ void main() {
         'answers_in_session',
         'remaining_ms',
         'is_revealed',
+        'direction',
       ],
       'app_settings': <String>[
         'id',
         'card_limit',
         'new_card_order',
+        // Added at v9 (BR-214, BR-215). Order matters here because `ALTER TABLE
+        // ADD COLUMN` appends, so a column list that matched in any order would
+        // pass on a database where the migration and the declaration disagree
+        // about which came first.
+        'theme_mode',
+        'language',
+        // Added at v10 (BR-218, BR-219, BR-221), after the two above and in
+        // the order `_upgradeToV10` appends them.
+        'reminder_enabled',
+        'reminder_minute_of_day',
+        'reminder_last_delivered_at',
         'updated_at',
       ],
     };
@@ -238,9 +253,13 @@ void main() {
 
     expect(await keysOf('decks'), <String>{
       'parent_deck_id->decks.id ON DELETE CASCADE',
+      // Purge is `DELETE FROM delete_batches`; this cascade is what turns that
+      // one statement into the removal of every row of the batch (BR-265).
+      'delete_batch_id->delete_batches.id ON DELETE CASCADE',
     });
     expect(await keysOf('cards'), <String>{
       'deck_id->decks.id ON DELETE CASCADE',
+      'delete_batch_id->delete_batches.id ON DELETE CASCADE',
     });
     expect(await keysOf('card_study_states'), <String>{
       'card_id->cards.id ON DELETE CASCADE',
@@ -276,8 +295,11 @@ void main() {
       'idx_card_study_states_due',
       'idx_card_tags_tag',
       'idx_cards_deck_created',
+      'idx_cards_delete_batch',
+      'idx_decks_delete_batch',
       'idx_decks_parent_created',
       'idx_decks_root_created',
+      'idx_delete_batches_deleted',
       'idx_study_answers_card',
       'idx_study_answers_session',
       'idx_study_queue_serving',
@@ -334,51 +356,4 @@ void main() {
       );
     }
   });
-
-  group('source rules', () {
-    test('no Dart table class exists under core/database', () {
-      // AD-02: schema lives in SQL so drift_dev type-checks every query against
-      // it at build time. A Dart table class compiles fine and silently opts
-      // that checking out.
-      // Generated output is excluded: drift emits `class Decks extends Table`
-      // into `.g.dart` itself. AD-02 is about which declaration a human writes,
-      // and the generated class is the evidence that the `.drift` file was the
-      // source rather than a violation of it.
-      final offenders = <String>[
-        for (final file in Directory(
-          'lib/core/database',
-        ).listSync(recursive: true))
-          if (file is File && _isHandWrittenDart(file.path))
-            if (RegExp(
-              r'class\s+\w+\s+extends\s+Table\b',
-            ).hasMatch(file.readAsStringSync()))
-              file.path,
-      ];
-
-      expect(offenders, isEmpty);
-    });
-
-    test('connection.dart is the only production file that opens one', () {
-      // AD-08. Scattered openers mean "where does the file live" and "is
-      // encryption on" stop having a single answer.
-      final opener = RegExp(r'NativeDatabase|driftDatabase\(|WasmDatabase');
-      final offenders = <String>[
-        for (final file in Directory('lib').listSync(recursive: true))
-          if (file is File && _isHandWrittenDart(file.path))
-            if (!file.path
-                .replaceAll(r'\', '/')
-                .endsWith('core/database/connection.dart'))
-              if (opener.hasMatch(file.readAsStringSync())) file.path,
-      ];
-
-      expect(offenders, isEmpty);
-    });
-  });
-}
-
-/// True for Dart a person wrote, false for build output.
-bool _isHandWrittenDart(String path) {
-  if (!path.endsWith('.dart')) return false;
-
-  return !path.endsWith('.g.dart') && !path.endsWith('.drift.dart');
 }

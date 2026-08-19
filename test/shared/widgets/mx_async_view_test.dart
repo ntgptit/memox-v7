@@ -133,6 +133,103 @@ void main() {
 
       expect(find.byType(MxLoadingState), findsOneWidget);
     });
+
+    /// A **reload** — a dependency changed — is the other half of the policy,
+    /// and until now nothing in the repository built one.
+    ///
+    /// Both directions are asserted, and the `false` case reaches the default
+    /// by **omitting the argument**. That distinction is the finding: a version
+    /// of this loop that passed `false` explicitly still left the constructor
+    /// default measured by nothing, so flipping it to `true` — which this
+    /// widget's own doc calls the thing that would let stale values sit on
+    /// screen everywhere — made no test in the repository fail.
+    for (final ({String name, bool? shouldSkip, bool expectSpinner}) mode
+        in const <({String name, bool? shouldSkip, bool expectSpinner})>[
+          // `null` means **do not pass the argument**, which is the whole point
+          // of this case: passing `false` explicitly would test the parameter
+          // and leave the constructor default — the thing that decides every
+          // other screen's behaviour — measured by nothing. Flipping the
+          // default then makes this case, and only this case, fail.
+          (
+            name: 'by default drops to the spinner',
+            shouldSkip: null,
+            expectSpinner: true,
+          ),
+          (
+            name: 'keeps the previous value when opted in',
+            shouldSkip: true,
+            expectSpinner: false,
+          ),
+        ]) {
+      testWidgets('a reload ${mode.name}', (tester) async {
+        // Driven through two real providers so the state is the one Riverpod
+        // builds for a dependency change, not one hand-assembled here.
+        // `Provider` + `invalidate` rather than a state notifier: Riverpod 3
+        // dropped `StateProvider`, and what this needs is only that the value
+        // `provider` watches comes back different.
+        var seed = 1;
+        final dependency = Provider<int>((ref) => seed);
+        final provider = FutureProvider<String>(
+          (ref) async => 'value ${ref.watch(dependency)}',
+        );
+
+        await tester.pumpWidget(
+          ProviderScope(
+            child: MaterialApp(
+              theme: buildLightTheme(),
+              home: Scaffold(
+                body: Consumer(
+                  builder: (context, ref, child) => Column(
+                    children: <Widget>[
+                      Expanded(
+                        child: mode.shouldSkip == null
+                            ? MxAsyncView<String>(
+                                value: ref.watch(provider),
+                                loadingLabel: loadingLabel,
+                                data: (data) => Text(data),
+                                error: (error, stackTrace) =>
+                                    Text('failed: $error'),
+                              )
+                            : MxAsyncView<String>(
+                                value: ref.watch(provider),
+                                loadingLabel: loadingLabel,
+                                shouldSkipLoadingOnReload: mode.shouldSkip!,
+                                data: (data) => Text(data),
+                                error: (error, stackTrace) =>
+                                    Text('failed: $error'),
+                              ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          seed += 1;
+                          ref.invalidate(dependency);
+                        },
+                        child: const Text('change'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('value 1'), findsOneWidget);
+
+        await tester.tap(find.text('change'));
+        // One frame: the re-read has not completed, which is the only moment
+        // the two policies look different.
+        await tester.pump();
+
+        expect(
+          find.byType(MxLoadingState),
+          mode.expectSpinner ? findsOneWidget : findsNothing,
+        );
+
+        await tester.pumpAndSettle();
+        expect(find.text('value 2'), findsOneWidget);
+      });
+    }
   });
 
   group('loadingFrame', () {

@@ -10,6 +10,7 @@ import '../../../domain/models/card_due_badge_model.dart';
 import '../../../domain/models/card_list_item_model.dart';
 import '../support/card_due_badge_widget.dart';
 import '../support/card_state_widget.dart';
+import '../support/card_tag_chip_widget.dart';
 
 /// One card in the management list: a state dot, front over back with a state
 /// label and tag chips, and — when set — a flag over a due badge (D5, W1 §4.3).
@@ -54,7 +55,7 @@ class CardTileWidget extends StatelessWidget {
   final VoidCallback? onLongPress;
 
   /// Whether the list is selecting. The row changes what a tap *means*, so it
-  /// has to know: outside the mode a tap opens the editor, inside it toggles.
+  /// has to know: outside the mode a tap opens the read-only detail screen (M99.31, UC-19), inside it toggles.
   final bool isSelectionMode;
   final bool isSelected;
 
@@ -216,7 +217,7 @@ class _CardFace extends StatelessWidget {
                 letterSpacing: 0.6,
               ),
             ),
-            for (final tag in item.tagNames) _TagChip(name: tag),
+            for (final tag in item.tagNames) CardTagChipWidget(name: tag),
           ],
         ),
       ],
@@ -300,38 +301,6 @@ class _DueBadge extends StatelessWidget {
           style: context.texts.labelSmall?.copyWith(
             color: context.colors.onSurfaceVariant,
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// A read-only tag pill on the row (BR-93).
-///
-/// A filled `surfaceMuted` pill, the deck list's quiet-container language, rather
-/// than the old hairline outline: the label is `onSurfaceVariant` on the muted
-/// ground, which clears 4.5:1, and the fill lets a tag read as a chip at a glance
-/// without a border competing with the card's own.
-class _TagChip extends StatelessWidget {
-  const _TagChip({required this.name});
-
-  final String name;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: context.semanticColors.surfaceMuted,
-        borderRadius: BorderRadius.circular(AppRadius.pill),
-      ),
-      child: Text(
-        name,
-        style: context.texts.labelSmall?.copyWith(
-          color: context.colors.onSurfaceVariant,
         ),
       ),
     );

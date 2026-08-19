@@ -4,6 +4,7 @@ import '../models/new_card_order_model.dart';
 import '../models/study_action_model.dart';
 import '../models/study_card_limit_model.dart';
 import '../models/study_deck_context_model.dart';
+import '../models/study_direction_model.dart';
 import '../models/study_entry_summary_model.dart';
 import '../models/study_schedule_model.dart';
 import '../models/study_mode.dart';
@@ -84,6 +85,18 @@ abstract interface class StudyRepository {
     required NewCardOrder newCardOrder,
   });
 
+  /// Drops the root deck's override so the tree follows the app-wide defaults
+  /// again (BR-212).
+  ///
+  /// **[deckId] may be any deck in the tree; the write lands on its root**, the
+  /// same resolution [saveStudyOptions] does.
+  ///
+  /// It writes one column of `decks`. It MUST NOT touch learning progress,
+  /// history, sessions or the scheduler — this is the opposite end of the app
+  /// from Reset learning progress (BR-42), and the two are one word apart in
+  /// English.
+  Future<void> clearStudyOptionsOverride(String deckId);
+
   /// Opens a session and builds every stage's queue in one transaction.
   ///
   /// [stageSequence] comes from the algorithm (BR-97): the whole sequence for a
@@ -98,6 +111,13 @@ abstract interface class StudyRepository {
   ///
   /// Throws a refusal when the set is empty — for a review session that is
   /// BR-145, and it must leave no session row behind (BR-101).
+  ///
+  /// [direction] is the recall direction chosen before the session started
+  /// (BR-203), and null for every session the rule does not cover. Whether it
+  /// *may* be non-null is the caller's check — eligibility needs the root deck's
+  /// algorithm, which the use case has already read (BR-208). What happens here
+  /// is BR-205: a [StudySessionDirection.mixed] session assigns each queue row its
+  /// own direction, once, inside the same transaction that writes the row.
   Future<StudySessionEntity> openSession({
     required String deckId,
     required StudySessionKind kind,
@@ -105,6 +125,7 @@ abstract interface class StudyRepository {
     required int cardLimit,
     required NewCardOrder newCardOrder,
     required DateTime now,
+    StudySessionDirection? direction,
   });
 
   /// The next card to serve, or null when the current stage has nothing left to
@@ -133,6 +154,12 @@ abstract interface class StudyRepository {
   /// Refuses, without writing anything, when the session's generation no longer
   /// matches the root's (BR-84) — and marks the session `invalidated` when it
   /// does not.
+  ///
+  /// **The turn's direction is not a parameter** (BR-206). It is copied off the
+  /// queue row this call already reads, inside the same transaction, so the
+  /// history row cannot disagree with the row that decided how the card was
+  /// asked. A direction supplied from above would be one more thing a screen
+  /// could get wrong, and BR-76 has already paid for the general form of that.
   Future<StudyAnswerCommitModel> submitAnswer({
     required String sessionId,
     required String cardId,
@@ -265,6 +292,30 @@ abstract interface class StudyRepository {
     required StudySessionEndReason reason,
   });
 
+  /// Closes every open session that a deletion has just taken the material
+  /// out from under (BR-259).
+  ///
+  /// **Two id sets, because there are two ways a session can be affected and
+  /// only one of them is visible from the deck side.** A session opened *on* a
+  /// deck in [deckIds] is obvious; a session reviewing a whole tree whose queue
+  /// happens to hold a card in [cardIds] is not — its `deck_id` is the root,
+  /// which the deletion never touched.
+  ///
+  /// **Called from inside the deletion's transaction, before the rows are
+  /// marked.** Before, because the ids have to still describe live rows; inside,
+  /// because BR-259 requires the closing and the marking to be one atomic step
+  /// — a session left `in_progress` over deleted material is one that will
+  /// serve a card the user cannot see.
+  ///
+  /// The reason is not a parameter: unlike [invalidateSessionsForRoot], which
+  /// serves two different deck operations, there is exactly one event here and
+  /// it is `content_deleted`. Returns how many were closed.
+  Future<int> invalidateSessionsForDeletedContent({
+    required List<String> deckIds,
+    required List<String> cardIds,
+    required DateTime endedAt,
+  });
+
   /// Closes a session with a [status] and [reason] the matrix allows.
   ///
   /// Turns already written stay written, in every ending (BR-86): changing the
@@ -284,4 +335,19 @@ abstract interface class StudyRepository {
 
   /// The session currently open for [deckId], if any.
   Future<StudySessionEntity?> openSessionFor(String deckId);
+
+  /// One session by its own id, whatever its status.
+  ///
+  /// **The read a Resume needs, and [openSessionFor] is not it.** That one asks
+  /// "which session is open for this deck" and answers with the newest — which
+  /// is a different question from "the session the user was just offered". A
+  /// screen that listed a session and then resumed by deck id can hand the user
+  /// a *different* session: one opened later on the same deck, or one an earlier
+  /// study day left behind (BR-103). Both were reachable, and neither is what
+  /// the tap meant.
+  ///
+  /// Null when the row is gone. The status is returned as-is rather than
+  /// filtered here, so the caller can tell "no such session" from "that session
+  /// has ended" and say so.
+  Future<StudySessionEntity?> sessionById(String sessionId);
 }

@@ -7,6 +7,7 @@ import 'package:memox/features/study/domain/failures/study_refusal_failure.dart'
 import 'package:memox/features/study/domain/models/new_card_order_model.dart';
 import 'package:memox/features/study/domain/models/study_action_model.dart';
 import 'package:memox/features/study/domain/models/study_deck_context_model.dart';
+import 'package:memox/features/study/domain/models/study_direction_model.dart';
 import 'package:memox/features/study/domain/models/study_entry_summary_model.dart';
 import 'package:memox/features/study/domain/models/study_answer_commit_model.dart';
 import 'package:memox/features/study/domain/models/study_queue_item_status_model.dart';
@@ -21,6 +22,7 @@ import 'package:memox/features/study/domain/models/study_session_summary_model.d
 import 'package:memox/features/study/domain/models/study_session_status_model.dart';
 import 'package:memox/features/study/domain/repositories/study_repository.dart';
 
+part 'fake_study_answers.dart';
 part 'fake_study_lifecycle.dart';
 
 /// A `StudyRepository` a use-case test drives by hand, which **records
@@ -32,7 +34,7 @@ part 'fake_study_lifecycle.dart';
 /// its first read — and the alternative is a constructor flag for each, which
 /// spreads test-only branching through the double.
 base class FakeStudyRepository
-    with _FakeStudyLifecycleStubs
+    with _FakeStudyLifecycleStubs, _FakeStudyAnswerStubs
     implements StudyRepository {
   FakeStudyRepository({
     this.schedulerType = SchedulerType.eightBox,
@@ -49,35 +51,32 @@ base class FakeStudyRepository
   final NewCardOrder newCardOrder;
   final StudyScheduleModel? schedule;
   final bool stageExhausted;
+  @override
   final List<String> finishedCardIds;
 
   /// Makes [openSession] refuse the way the real one does when nothing is due.
   final bool openSessionFails;
 
-  final List<({StudySessionKind kind, List<StudyMode> stages, int limit})>
-  opened = <({StudySessionKind kind, List<StudyMode> stages, int limit})>[];
-
+  /// Every [openSession] call, with what it was asked to open.
+  ///
+  /// `direction` is recorded because BR-208's refusals are the interesting half:
+  /// a test proving `eight_box` cannot reach the feature has to be able to say
+  /// what the repository was — or was not — handed.
   final List<
     ({
-      String cardId,
-      StudyMode mode,
-      StudyAction action,
-      DateTime? nextDueAt,
-      int? nextBox,
-      int? nextIntervalDays,
-      double? nextEaseFactor,
+      StudySessionKind kind,
+      List<StudyMode> stages,
+      int limit,
+      StudySessionDirection? direction,
     })
   >
-  answers =
+  opened =
       <
         ({
-          String cardId,
-          StudyMode mode,
-          StudyAction action,
-          DateTime? nextDueAt,
-          int? nextBox,
-          int? nextIntervalDays,
-          double? nextEaseFactor,
+          StudySessionKind kind,
+          List<StudyMode> stages,
+          int limit,
+          StudySessionDirection? direction,
         })
       >[];
 
@@ -89,6 +88,11 @@ base class FakeStudyRepository
 
   StudySessionEntity? openSession_;
 
+  /// The root's **current** generation, which a test moves to simulate a Reset
+  /// landing between the read that offered a session and the tap that resumes
+  /// it. Sessions built by this fake freeze generation 1.
+  int schedulerGeneration = 1;
+
   @override
   Future<StudyDeckContextModel> deckContext(String deckId) async =>
       StudyDeckContextModel(
@@ -96,12 +100,20 @@ base class FakeStudyRepository
         deckName: 'Korean',
         rootDeckId: 'root',
         schedulerType: schedulerType,
-        schedulerGeneration: 1,
+        schedulerGeneration: schedulerGeneration,
       );
+
+  /// Whether [effectiveOptions] reports the values as a root override
+  /// (BR-212). Drives whether `Use app defaults` is offered at all.
+  bool isRootOverride = false;
 
   @override
   Future<StudyOptionsModel> effectiveOptions(String rootDeckId) async =>
-      StudyOptionsModel(cardLimit: cardLimit, newCardOrder: newCardOrder);
+      StudyOptionsModel(
+        cardLimit: cardLimit,
+        newCardOrder: newCardOrder,
+        isRootOverride: isRootOverride,
+      );
 
   @override
   Future<StudyScheduleModel?> scheduleOf(String cardId) async => schedule;
@@ -123,6 +135,7 @@ base class FakeStudyRepository
     required int cardLimit,
     required NewCardOrder newCardOrder,
     required DateTime now,
+    StudySessionDirection? direction,
   }) async {
     if (openSessionFails) {
       throw const ConflictFailure(
@@ -131,7 +144,12 @@ base class FakeStudyRepository
       );
     }
 
-    opened.add((kind: kind, stages: stageSequence, limit: cardLimit));
+    opened.add((
+      kind: kind,
+      stages: stageSequence,
+      limit: cardLimit,
+      direction: direction,
+    ));
 
     return StudySessionEntity(
       id: 'session-1',
@@ -146,52 +164,7 @@ base class FakeStudyRepository
       cardLimit: cardLimit,
       startedAt: now,
       endedAt: null,
-    );
-  }
-
-  @override
-  Future<StudyAnswerCommitModel> submitAnswer({
-    required String sessionId,
-    required String cardId,
-    required StudyMode mode,
-    required StudyAction action,
-    required DateTime now,
-    StudyOutcomeReason? outcomeReason,
-    int? comparisonVersion,
-    bool? usedHint,
-    DateTime? nextDueAt,
-    int? nextBox,
-    double? nextEaseFactor,
-    int? nextIntervalDays,
-  }) async {
-    final gate = submitGate;
-    if (gate != null) await gate.future;
-
-    answers.add((
-      cardId: cardId,
-      mode: mode,
-      action: action,
-      nextDueAt: nextDueAt,
-      nextBox: nextBox,
-      nextIntervalDays: nextIntervalDays,
-      nextEaseFactor: nextEaseFactor,
-    ));
-
-    // **Read from the mode's policy, not invented here.** The receipt is what
-    // the controller acts on, so a fake that always said `completed` would let
-    // a `match` lapse clear its slot in every widget test while the database
-    // keeps the row open (BR-118).
-    final retains =
-        action.isLapse &&
-        studyModeHandler(mode)?.lapsePolicy ==
-            StudyLapsePolicy.retainAndEnrollNextRound;
-
-    return StudyAnswerCommitModel(
-      cardId: cardId,
-      round: 1,
-      currentItemStatus: retains
-          ? StudyQueueItemStatus.pending
-          : StudyQueueItemStatus.completed,
+      direction: direction,
     );
   }
 
@@ -233,6 +206,20 @@ base class FakeStudyRepository
   Future<StudySessionEntity?> openSessionFor(String deckId) async =>
       openSession_;
 
+  /// Sessions this double can be asked for **by id**.
+  ///
+  /// Separate from [openSession_] on purpose: the whole point of resolving a
+  /// resume by id rather than by deck is that the two can disagree (BR-200), and
+  /// a double that answered both questions from one field could not express the
+  /// case the rule exists for.
+  final Map<String, StudySessionEntity> sessionsById =
+      <String, StudySessionEntity>{};
+
+  @override
+  Future<StudySessionEntity?> sessionById(String sessionId) async =>
+      sessionsById[sessionId] ??
+      (openSession_?.id == sessionId ? openSession_ : null);
+
   /// What was saved, and against which deck.
   ///
   /// The deck is recorded because BR-147 is about *where* the write lands: the
@@ -251,6 +238,13 @@ base class FakeStudyRepository
     cardLimit: cardLimit.value,
     order: newCardOrder,
   ));
+
+  /// Every deck whose override was cleared (BR-212), in call order.
+  final List<String> clearedOverrides = <String>[];
+
+  @override
+  Future<void> clearStudyOptionsOverride(String deckId) async =>
+      clearedOverrides.add(deckId);
 
   /// What the summary read returns, and what it was asked.
   ///
@@ -318,6 +312,7 @@ base class FakeStudyRepository
 
   /// Holds every write open: the window between the tap and the commit that
   /// BR-157 is about.
+  @override
   Completer<void>? submitGate;
 
   /// How many times a turn has been read. **A count, because the change under

@@ -42,6 +42,7 @@ StudyTurnModel fillTurnOf(
     answersInSession: 0,
     remainingMs: null,
     isRevealed: false,
+    direction: null,
   ),
   progress: StudyStageProgressModel(
     round: round,

@@ -6,8 +6,10 @@ import 'package:memox/app/config/env_config.dart';
 import 'package:memox/app/config/env_config_provider.dart';
 import 'package:memox/features/deck/di/deck_repository_provider.dart';
 import 'package:memox/app/mobile_frame_widget.dart';
+import 'package:memox/features/settings/di/app_settings_repository_provider.dart';
 
 import 'features/deck/presentation/support/fake_deck_repository.dart';
+import 'features/settings/domain/support/fake_app_settings_repository.dart';
 
 void main() {
   testWidgets('app builds and exposes its root widget', (tester) async {
@@ -17,6 +19,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          appSettingsRepositoryProvider.overrideWithValue(
+            FakeAppSettingsRepository(),
+          ),
           envConfigProvider.overrideWithValue(EnvConfig.development),
           deckRepositoryProvider.overrideWithValue(FakeDeckRepository()),
         ],

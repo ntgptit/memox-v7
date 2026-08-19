@@ -9,7 +9,7 @@
 /// would fix a URL shape before the screen exists to argue with it, and a
 /// constant nobody uses reads as a decision that has been made when it has
 /// not. [progress] and [settings] cleared that bar with AD-19: each is a real
-/// shell branch with a screen — a placeholder, but a rendered, navigable one.
+/// shell branch with a screen. Progress and Settings began as rendered, navigable placeholders (AD-19) and have since been filled in.
 abstract final class RoutePaths {
   /// The app's home, and the initial branch of the navigation shell: content
   /// management is what the user opens the app into.
@@ -26,6 +26,11 @@ abstract final class RoutePaths {
   /// list is the app's home, and a deck is addressable under a named collection
   /// so the URL says what it points at.
   static const String deckDetailRelative = 'decks/:deckId';
+
+  /// Global Library Search, **relative** to [decks] so the full location is
+  /// `/search` inside the Library branch — the bottom bar stays, and Back
+  /// returns to the level the search was opened from (UC-20).
+  static const String librarySearchRelative = 'search';
 
   /// The starter catalog, **relative** to [decks] so the full location is
   /// `/starter` inside the Library branch — the bottom bar stays, and Back
@@ -47,19 +52,73 @@ abstract final class RoutePaths {
   /// is `/decks/<id>/cards/import` (UC-10, wireframe M4.12).
   static const String cardImportRelative = 'import';
 
+  /// The tag catalog, **relative** to [decks] so the full location is `/tags`
+  /// inside the Library branch — the bottom bar stays and Back returns to
+  /// whatever offered it (UC-18, wireframe M4.14).
+  ///
+  /// Top-level rather than under a deck, and the URL is the argument: a tag
+  /// belongs to no deck (BR-93), so `/decks/<id>/tags` would name a scope that
+  /// does not exist. It cannot collide with [deckDetailRelative] either —
+  /// that pattern starts with the literal `decks/`.
+  static const String tagCatalogRelative = 'tags';
+
+  /// One card's read-only detail, **relative** to [cardListRelative]: the full
+  /// location is `/decks/<id>/cards/<cardId>` (UC-19, wireframe M4.15).
+  ///
+  /// **A bare parameter segment, so it must be registered last** among the card
+  /// list's children. go_router takes the first pattern that matches, and this
+  /// one would swallow `new` and `import` if it were declared above them —
+  /// tapping Add would open a detail screen for a card called "new". The order
+  /// is asserted in `card_detail_route_test.dart` rather than left to whoever edits
+  /// the route table next.
+  static const String cardDetailRelative = ':cardId';
+
+  /// Trash, **relative** to [decks] so the full location is `/trash` inside the
+  /// Library branch — the bottom bar stays and Back returns to the deck list
+  /// (UC-21, AD-22).
+  static const String trashRelative = 'trash';
+
   /// The study branch. A real path rather than a sub-path of `/` so that a
   /// deep link can open the app directly on the Study tab.
   static const String study = '/study';
+
+  /// One deck's study entry inside the Study branch, **relative** to [study]:
+  /// the full location is `/study/<id>`.
+  ///
+  /// Relative on purpose, for the reason [deckDetailRelative] gives — a leading
+  /// slash would make it a top-level route and the entry would then open with no
+  /// bottom bar and no branch to go back into.
+  ///
+  /// The deck is addressed by id and nothing else, because the Study tab has no
+  /// tree to place it in: it lists roots, and a root's id is the whole address.
+  static const String studyDeckRelative = ':deckId';
 
   /// One deck's study entry, relative to `/decks/:deckId`.
   static const String deckStudyRelative = 'study';
 
   /// The progress branch. A real path for the same reason as [study]: a deep
-  /// link must open the app directly on the Progress tab. The screen behind it
-  /// is a placeholder — the branch is scaffolded ahead of the feature (AD-19).
+  /// link must open the app directly on the Progress tab. It shows Progress by
+  /// Deck at the library level — every root deck (UC-12).
   static const String progress = '/progress';
 
+  /// One deck's progress level, relative to [progress].
+  ///
+  /// A child route rather than a sibling, so drilling in pushes onto the
+  /// Progress branch: the bottom bar stays, Back returns to the level above, and
+  /// switching to another tab and back finds the deck still open. Same shape and
+  /// same reasoning as [deckDetailRelative] inside the Library branch.
+  static const String progressDeckRelative = ':deckId';
+
   /// The settings branch. Same contract as [progress]: a real, deep-linkable
-  /// branch whose screen is a placeholder until app settings exist (AD-19).
+  /// branch filled in by M99.28 after starting as an AD-19 placeholder.
   static const String settings = '/settings';
+
+  /// The daily-reminder screen, **relative** to [settings] so the full location
+  /// is `/settings/reminders` and it nests inside the Settings branch — the
+  /// bottom bar stays and Back returns to the branch root (UC-17, M6 R1).
+  ///
+  /// The screen belongs to the reminder feature, not to Settings: the real
+  /// Settings screen does not exist yet, and a section embedded in the
+  /// placeholder would make one feature import another's presentation layer.
+  static const String reminderSettingsRelative = 'reminders';
 }

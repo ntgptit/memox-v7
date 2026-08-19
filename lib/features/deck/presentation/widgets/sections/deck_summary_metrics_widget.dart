@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_icon_size.dart';
-import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_metric_well.dart';
 import '../../../domain/models/deck_list_snapshot_model.dart';
 import '../items/deck_overdue_badge_widget.dart';
 
@@ -94,35 +93,6 @@ TextStyle? _numeralStyle(BuildContext context, {required bool isPrimary}) =>
     (isPrimary ? context.texts.headlineMedium : context.texts.titleLarge)
         ?.copyWith(color: context.colors.onSurface);
 
-/// The small icon well both metrics anchor on — same size, same radius, same
-/// padding, so Due and New read as two entries of one grammar and the only
-/// differences are the glyph and the semantic fill.
-class _MetricIconWell extends StatelessWidget {
-  const _MetricIconWell({
-    required this.icon,
-    required this.tint,
-    required this.wellColor,
-  });
-
-  final IconData icon;
-  final Color tint;
-  final Color wellColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: wellColor,
-        borderRadius: BorderRadius.circular(AppRadius.pill),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xs),
-        child: Icon(icon, size: AppIconSize.sm, color: tint),
-      ),
-    );
-  }
-}
-
 /// One hero metric: anchor, numeral, word — one shape for all four sets, so
 /// only the glyph, the semantic fill and the emphasis differ (BR-162).
 ///
@@ -161,7 +131,7 @@ class _HeroMetric extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.baseline,
       textBaseline: TextBaseline.alphabetic,
       children: <Widget>[
-        _MetricIconWell(icon: icon, tint: tint, wellColor: wellColor),
+        MxMetricWell(icon: icon, tint: tint, wellColor: wellColor),
         const SizedBox(width: AppSpacing.xs),
         // Flexible so the text owns the rest of its fixed-width grid cell:
         // a long word — `Overdue (+7d)` at double scale — wraps onto a
@@ -228,7 +198,10 @@ class _OverdueSummaryMetric extends StatelessWidget {
         child: _HeroMetric(
           count: count,
           word: word,
-          icon: Icons.event_busy,
+          // E5: outlined at rest, filled when there is a backlog. It was filled
+          // unconditionally, so a deck with nothing overdue still wore the
+          // solid crossed-out calendar.
+          icon: hasBacklog ? Icons.event_busy : Icons.event_busy_outlined,
           tint: hasBacklog
               ? context.colors.onErrorContainer
               : context.colors.onSurfaceVariant,
@@ -338,7 +311,10 @@ class _NewSummaryMetric extends StatelessWidget {
         child: _HeroMetric(
           count: count,
           word: context.l10n.deckHeroNewMetricWord,
-          icon: Icons.auto_awesome_outlined,
+          // E5 again, the other way round: outlined at rest **and** when there
+          // is work, so new cards never got the filled glyph the other two
+          // metrics use to say "something is here".
+          icon: count > 0 ? Icons.auto_awesome : Icons.auto_awesome_outlined,
           tint: ink,
           wellColor: semantic.surfaceMuted,
           wordInk: ink,

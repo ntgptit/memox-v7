@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/navigation/route_names.dart';
@@ -6,13 +7,14 @@ import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
 import '../overlays/card_confirm_widget.dart';
+import '../support/card_undo_widget.dart';
 
 /// The editor's delete band: the one destructive action on a card (UC-04 A2).
 ///
 /// Split out of `card_editor_screen.dart` at the 400-line guard, and the seam
 /// is a real one — the screen owns the form, this owns the one action that
 /// ends the screen and decides where the user lands afterwards.
-class CardDangerZoneWidget extends StatelessWidget {
+class CardDangerZoneWidget extends ConsumerWidget {
   const CardDangerZoneWidget({
     required this.deckId,
     required this.cardId,
@@ -40,7 +42,7 @@ class CardDangerZoneWidget extends StatelessWidget {
   );
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
@@ -59,7 +61,10 @@ class CardDangerZoneWidget extends StatelessWidget {
               : () => showCardDeleteConfirm(
                   context,
                   cardId: cardId,
-                  onDeleted: () => _leaveDeletedCard(context),
+                  onDeleted: (batchId) {
+                    _leaveDeletedCard(context);
+                    showCardMovedToTrash(context, ref, batchId: batchId);
+                  },
                 ),
         ),
       ],

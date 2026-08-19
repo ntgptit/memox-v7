@@ -7,6 +7,7 @@ import '../../domain/models/card_list_item_model.dart';
 import '../../domain/models/card_list_sort_model.dart';
 import '../../domain/models/card_state_distribution_model.dart';
 import '../../domain/models/card_state_model.dart';
+import '../../domain/models/tag_filter_model.dart';
 import 'card_dao.dart';
 import '../mappers/card_list_item_mapper.dart';
 import '../mappers/card_mapper.dart';
@@ -46,6 +47,7 @@ final class CardListReadDataSource {
     CardListSort sort = CardListSort.newest,
     String? searchTerm,
     DateTime? now,
+    TagFilter tags = TagFilter.none,
   }) {
     _requireWindow(limit);
 
@@ -57,6 +59,7 @@ final class CardListReadDataSource {
           sort: sort,
           searchTerm: searchTerm,
           now: now,
+          tags: tags,
         )
         .handleError(_rethrowMapped)
         .map(
@@ -75,12 +78,14 @@ final class CardListReadDataSource {
     CardListFilter filter = CardListFilter.all,
     String? searchTerm,
     DateTime? now,
+    TagFilter tags = TagFilter.none,
   }) => _dao
       .watchCardCount(
         deckId: deckId,
         filter: filter,
         searchTerm: searchTerm,
         now: now,
+        tags: tags,
       )
       .handleError(_rethrowMapped);
 

@@ -12,6 +12,7 @@ import 'package:memox/shared/widgets/mx_list_tile.dart';
 import 'package:memox/shared/widgets/mx_loading_state.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
+import 'package:memox/shared/widgets/mx_metric_well.dart';
 import 'package:memox/shared/widgets/mx_progress_bar.dart';
 import 'package:memox/shared/widgets/mx_search_field.dart';
 import 'package:memox/shared/widgets/mx_session_top_bar.dart';
@@ -133,6 +134,17 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
       closeLabel: kLongLabel,
     ),
     isInteractive: true,
+  ),
+  MxStressSpecimen(
+    // Fixed-size by construction — a glyph in a padded pill — so the stress
+    // here is that it stays that size when everything around it grows. A metric
+    // anchor that scaled with the text would break the grid it anchors.
+    name: 'MxMetricWell',
+    build: () => const MxMetricWell(
+      icon: Icons.event_busy,
+      tint: Colors.white,
+      wellColor: Colors.black26,
+    ),
   ),
   MxStressSpecimen(
     name: 'MxCard',

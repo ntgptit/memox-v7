@@ -12,6 +12,13 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        // `flutter_local_notifications` (the daily reminder, M99.29) ships
+        // java.time usage that needs core library desugaring on the minSdk
+        // this app supports. The AAR metadata check fails the build without
+        // it — but only a DEVICE build: host tests never touch Gradle, which
+        // is how the whole ten-PR batch reached its first emulator run
+        // before anything noticed.
+        isCoreLibraryDesugaringEnabled = true
     }
 
     defaultConfig {
@@ -73,4 +80,9 @@ kotlin {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // The desugaring runtime `isCoreLibraryDesugaringEnabled` above needs.
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }

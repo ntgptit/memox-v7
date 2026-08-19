@@ -46,9 +46,20 @@ void main() {
 
       await h.cardRepository.deleteCards(<String>[first.id, second.id]);
 
-      expect(await h.countAll('cards'), 0);
-      expect(await h.countAll('card_study_states'), 0);
+      // Two tombstones, no visible cards, and the deck unlocked (BR-260).
+      // Nothing is gone: every study state is still there for a restore to
+      // bring back (BR-259).
+      expect(await h.activeCardCount(tree.leaf.id), 0);
+      expect(await h.countAll('cards'), 2);
+      expect(await h.countAll('card_study_states'), 2);
       expect(await h.contentTypeOf(tree.leaf.id), 'unset');
+      // **One batch per card, not one for the pair** (BR-256): each is
+      // separately restorable, so each is its own row in Trash.
+      final firstBatch = await h.deleteBatchOfCard(first.id);
+      final secondBatch = await h.deleteBatchOfCard(second.id);
+      expect(firstBatch, isNotNull);
+      expect(secondBatch, isNotNull);
+      expect(firstBatch, isNot(secondBatch));
     });
 
     test('deleting some of them keeps the type', () async {

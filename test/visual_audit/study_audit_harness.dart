@@ -2,8 +2,10 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memox/core/time/clock_provider.dart';
 import 'package:memox/core/time/time_zone_provider.dart';
+import 'package:memox/features/study/di/study_home_repository_provider.dart';
 import 'package:memox/features/study/di/study_repository_provider.dart';
 
+import '../features/study/domain/support/fake_study_home_repository.dart';
 import '../features/study/domain/support/fake_study_repository.dart';
 
 /// The instant every Study audit renders at.
@@ -25,6 +27,24 @@ Widget studyScreenWith(FakeStudyRepository repository, Widget screen) {
   return ProviderScope(
     overrides: [
       studyRepositoryProvider.overrideWithValue(repository),
+      clockProvider.overrideWithValue(() => kStudyAuditNow),
+      utcOffsetProvider.overrideWithValue(() => const Duration(hours: 7)),
+    ],
+    child: screen,
+  );
+}
+
+/// The same wrapping for the Study tab's home screen, whose contract is the
+/// read-only one (UC-14).
+///
+/// **A second helper rather than a nullable argument on the first.** Study Home
+/// holds `StudyHomeRepository` and nothing else — that is what makes it unable
+/// to open a session (BR-200) — and an audit that handed it a session repository
+/// as well would quietly widen the surface the golden is taken over.
+Widget studyHomeScreenWith(FakeStudyHomeRepository repository, Widget screen) {
+  return ProviderScope(
+    overrides: [
+      studyHomeRepositoryProvider.overrideWithValue(repository),
       clockProvider.overrideWithValue(() => kStudyAuditNow),
       utcOffsetProvider.overrideWithValue(() => const Duration(hours: 7)),
     ],

@@ -28,11 +28,16 @@ CREATE TABLE study_sessions (
     -- `kind` rather than deriving it: "the user pressed exit" and "the OS
     -- reclaimed the app" are different events, and merging them makes the
     -- history say somebody gave up when they did not (BR-103).
+    --
+    -- `content_deleted` is the same argument again (BR-259): a session ended
+    -- because its material went to Trash is not a session ended by a reset, and
+    -- a label that is derived later can be derived wrongly. Adding it is what
+    -- made v8 a table rebuild — SQLite cannot alter a CHECK.
     end_reason TEXT NULL CHECK (
         end_reason IS NULL
         OR end_reason IN (
             'user_exit', 'scheduler_reset', 'stale_generation',
-            'persistence_error', 'interrupted'
+            'persistence_error', 'interrupted', 'content_deleted'
         )
     ),
 
@@ -56,7 +61,20 @@ CREATE TABLE study_sessions (
     card_limit INTEGER NOT NULL,
 
     started_at DATETIME NOT NULL,
-    ended_at DATETIME NULL
+    ended_at DATETIME NULL,
+
+    -- Which way this session asks, chosen before the first turn (BR-203).
+    --
+    -- NULL is the feature not applying, not a value nobody filled in: only a
+    -- `reviewing` session of an `sm2` deck running `self_assess` is eligible, and
+    -- every other session has no direction to have chosen. Enumerated here so a
+    -- row can never carry a fourth word; that it is only ever written for an
+    -- eligible session is the repository's guard, because the column cannot see
+    -- `session_kind` and the deck's algorithm at once.
+    direction TEXT NULL CHECK (
+        direction IS NULL
+        OR direction IN ('korean_to_meaning', 'meaning_to_korean', 'mixed')
+    )
 );
 
 -- The status × end_reason PAIR is deliberately not a CHECK constraint.
@@ -129,7 +147,18 @@ CREATE TABLE study_answers (
     previous_ease_factor REAL NULL,
     next_ease_factor REAL NULL,
     previous_interval_days INTEGER NULL,
-    next_interval_days INTEGER NULL
+    next_interval_days INTEGER NULL,
+
+    -- Which way the card was asked on this turn (BR-206).
+    --
+    -- **`mixed` cannot appear here**, and the enumeration is what says so: a
+    -- session may be mixed, a turn never is. Copied from the queue row inside the
+    -- write transaction rather than passed down from the screen — the same reason
+    -- `kind` and `outcome_reason` are stored rather than derived (BR-76, BR-131).
+    direction TEXT NULL CHECK (
+        direction IS NULL
+        OR direction IN ('korean_to_meaning', 'meaning_to_korean')
+    )
 );
 
 CREATE INDEX idx_study_answers_card ON study_answers (card_id, answered_at);
@@ -181,6 +210,20 @@ CREATE TABLE study_queue_items (
     remaining_ms INTEGER NULL,
     is_revealed INTEGER NOT NULL DEFAULT 0,
 
+    -- The way THIS card is asked, decided once when the round was written
+    -- (BR-205).
+    --
+    -- This row is what makes Mixed stable. `self_assess` brings a forgotten card
+    -- back in the same row after three others (BR-26), and BR-103 brings the whole
+    -- session back after the OS has taken the app away; a direction re-drawn at
+    -- either moment is a card that changed the question between two attempts at
+    -- it. A seed would survive a rebuild and not a change of seed recipe — a
+    -- column survives both.
+    direction TEXT NULL CHECK (
+        direction IS NULL
+        OR direction IN ('korean_to_meaning', 'meaning_to_korean')
+    ),
+
     -- A card appears exactly once per round per stage (BR-113, BR-117).
     PRIMARY KEY (session_id, mode, round, card_id)
 );
@@ -190,24 +233,7 @@ CREATE TABLE study_queue_items (
 CREATE INDEX idx_study_queue_serving
     ON study_queue_items (session_id, mode, round, status, available_at, position);
 
--- Exactly one row, for the local profile (BR-147).
---
--- A one-row table with real columns rather than key-value: key-value reads more
--- flexibly and turns every value into TEXT and every read into an unchecked
--- cast, while this shape lets `drift_dev` type-check at build time and makes
--- adding an option a migration -- the right level of ceremony for something
--- that changes how people study.
-CREATE TABLE app_settings (
-    -- The CHECK is what keeps the table at one row. Without it, "the settings"
-    -- becomes "whichever row the query happened to read first".
-    id INTEGER NOT NULL PRIMARY KEY CHECK (id = 1),
-
-    -- A ceiling PER SESSION, not per day (BR-24). The number of sessions in a
-    -- day is deliberately unlimited.
-    card_limit INTEGER NOT NULL DEFAULT 20,
-
-    new_card_order TEXT NOT NULL DEFAULT 'created'
-        CHECK (new_card_order IN ('created', 'random')),
-
-    updated_at DATETIME NOT NULL
-);
+-- `app_settings` moved to `tables/settings.drift` at v9, when it gained theme
+-- and language and stopped being a study table. Study still reads it through
+-- `queries/settings.drift`, which is why this note stays: the table is not
+-- gone, and grepping this file for it should say where it went.

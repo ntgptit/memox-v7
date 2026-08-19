@@ -22,10 +22,13 @@ import '../../controllers/deck_write_controller.dart';
 /// follows. Both dialogs read a provider, which the menu itself does not.
 
 /// The delete confirmation, with the impact read before it is shown (BR-04).
+/// [onDeleted] receives the deletion's batch id, which is what an Undo
+/// affordance acts on (BR-263). It is null only when the write failed, which
+/// the dialog has already reported.
 Future<void> showDeckDeleteConfirm(
   BuildContext context, {
   required DeckEntity deck,
-  required VoidCallback onDeleted,
+  required ValueChanged<String?> onDeleted,
 }) => showDialog<void>(
   context: context,
   builder: (dialogContext) => _DeleteDeckDialog(
@@ -48,7 +51,7 @@ class _DeleteDeckDialog extends ConsumerStatefulWidget {
   });
 
   final DeckEntity deck;
-  final VoidCallback onDeleted;
+  final ValueChanged<String?> onDeleted;
   final VoidCallback onClose;
 
   @override
@@ -60,6 +63,9 @@ class _DeleteDeckDialogState extends ConsumerState<_DeleteDeckDialog> {
     deckDeletionImpactProvider(widget.deck.id).future,
   );
 
+  /// The batch the write created, held only until the dialog closes.
+  String? _batchId;
+
   @override
   Widget build(BuildContext context) {
     final provider = deleteDeckControllerProvider(widget.deck.id);
@@ -68,7 +74,10 @@ class _DeleteDeckDialogState extends ConsumerState<_DeleteDeckDialog> {
     ref.listen<DeckSubmitState>(provider, (previous, next) {
       if (!next.shouldClose || (previous?.shouldClose ?? false)) return;
       widget.onClose();
-      widget.onDeleted();
+      // The batch id was captured by `onConfirm` below, one frame before this
+      // fires. Reading it here rather than threading it through the state keeps
+      // it as short-lived as it actually is.
+      widget.onDeleted(_batchId);
     });
 
     return FutureBuilder<DeckDeletionImpact>(
@@ -92,9 +101,15 @@ class _DeleteDeckDialogState extends ConsumerState<_DeleteDeckDialog> {
               : message,
           confirmLabel: context.l10n.deckDeleteConfirmAction,
           cancelLabel: context.l10n.commonCancelAction,
-          variant: MxConfirmDialogVariant.destructive,
+          // Soft delete since v8: the deck goes to Trash and comes back
+          // for thirty days, so it keeps the safe default focus and gives
+          // the destructive colour back to the one dialog that means it
+          // (BR-256, BR-266).
+          variant: MxConfirmDialogVariant.cautious,
           isSubmitting: submit.isSubmitting || impact == null,
-          onConfirm: () => ref.read(provider.notifier).submit(),
+          onConfirm: () async {
+            _batchId = await ref.read(provider.notifier).submit();
+          },
           onCancel: widget.onClose,
         );
       },

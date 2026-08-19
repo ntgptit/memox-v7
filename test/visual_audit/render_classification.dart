@@ -23,6 +23,24 @@ bool renderPaintsNothing(RenderObject node) {
       node is RenderLimitedBox ||
       node is RenderPositionedBox ||
       node is RenderSizedOverflowBox ||
+      // `FractionallySizedBox`. The sibling of `RenderSizedOverflowBox` above,
+      // in the same file and with the same shape: it re-sizes its child and
+      // inherits `RenderShiftedBox.paint`, which paints the child and nothing
+      // else. Reached the audits with the Progress chart, whose fill is a
+      // fraction of its track.
+      node is RenderFractionallySizedOverflowBox ||
+      // `Table`, **only when it draws neither a border nor a row decoration**.
+      // `RenderTable.paint` draws both itself, and it draws them independently:
+      // the row-decoration loop runs whether or not `border` is set. Guarding
+      // on `border` alone therefore vouched for a table whose `TableRow` carries
+      // a `BoxDecoration`, and that row colour would have been read by nobody —
+      // not reported, and not in the skip list either, because the early return
+      // happens before the sink is told. Both clauses are needed so a table that
+      // grows either one starts being reported again. The Progress chart's table
+      // has neither.
+      (node is RenderTable &&
+          node.border == null &&
+          node.rowDecorations.every((Decoration? d) => d == null)) ||
       node is RenderFittedBox ||
       node is RenderAspectRatio ||
       node is RenderBaseline ||

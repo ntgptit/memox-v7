@@ -32,7 +32,33 @@ mixin _StudyOptionsOperations {
       newCardOrder:
           override.newCardOrder ??
           NewCardOrder.fromDbValue(settings.newCardOrder),
+      // **Read from the parsed override, not from `root?.studyConfig != null`**
+      // (BR-212). A column holding malformed JSON parses to "no override" and
+      // the values above then come from the app defaults; reporting an override
+      // anyway would offer a `Use app defaults` that changes nothing visible.
+      isRootOverride: override != kNoStudyOptionsOverride,
     );
+  }
+
+  /// Drops the root's override so the tree follows the app-wide defaults again
+  /// (BR-212).
+  ///
+  /// **[deckId] may be any deck in the tree; the write lands on its root** —
+  /// the same resolution `saveStudyOptions` does, and for the same reason: a
+  /// sub-deck carries no options, so clearing "this deck's" override from two
+  /// levels down has to mean the root's.
+  ///
+  /// One `UPDATE` of one column. Nothing here can reach `card_study_states`,
+  /// `study_answers`, a session or the scheduler columns, which is what makes
+  /// "this is not Reset learning progress" a property of the code rather than a
+  /// promise in a comment.
+  Future<void> clearStudyOptionsOverride(String deckId) async {
+    final deck = await _dao.deckById(deckId);
+    if (deck == null) {
+      throw const NotFoundFailure(message: 'Deck not found');
+    }
+
+    await _dao.clearDeckStudyConfig(deck.rootDeckId);
   }
 
   Future<void> saveStudyOptions({

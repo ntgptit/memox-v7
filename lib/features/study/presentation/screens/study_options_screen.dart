@@ -41,6 +41,7 @@ class StudyOptionsScreen extends ConsumerWidget {
     });
 
     final submit = ref.watch(studyOptionsWriteControllerProvider(deckId));
+    final clear = ref.watch(studyOptionsClearControllerProvider(deckId));
 
     return MxContentShell(
       title: context.l10n.studyOptionsTitle,
@@ -54,12 +55,23 @@ class StudyOptionsScreen extends ConsumerWidget {
             message: context.l10n.studyOptionsNextSessionNote,
           ),
           data: (options) => StudyOptionsSectionWidget(
+            // Keyed on the resolved values so the draft re-seeds after
+            // `Use app defaults` swaps the override for the app defaults —
+            // without it the fields would keep showing the numbers that were
+            // just cleared.
+            key: ValueKey<String>(
+              '${options.cardLimit}-${options.newCardOrder.dbValue}-'
+              '${options.isRootOverride}',
+            ),
             initialCardLimit: options.cardLimit,
             initialNewCardOrder: options.newCardOrder,
             isSubmitting: submit.isSubmitting,
             cardLimitProblem: submit.cardLimitProblem,
+            isRootOverride: options.isRootOverride,
+            isClearing: clear.isSubmitting,
             onSave: (rawCardLimit, newCardOrder) =>
                 _save(ref, rawCardLimit, newCardOrder),
+            onUseAppDefaults: () => _useAppDefaults(ref),
           ),
         ),
       ),
@@ -78,4 +90,10 @@ class StudyOptionsScreen extends ConsumerWidget {
             .read(studyOptionsWriteControllerProvider(deckId).notifier)
             .submit(rawCardLimit: rawCardLimit, newCardOrder: newCardOrder),
       );
+
+  /// Clears the root's override (BR-212). The screen stays open on the app
+  /// defaults it has just adopted, which is the confirmation.
+  void _useAppDefaults(WidgetRef ref) => unawaited(
+    ref.read(studyOptionsClearControllerProvider(deckId).notifier).submit(),
+  );
 }

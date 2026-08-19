@@ -57,7 +57,7 @@ SQLite → watch() Stream → mapper → entity → AsyncValue → MxAsyncView �
 Reads are `Stream` (`watch`), writes are `Future`. Nothing refreshes manually: a
 write lands in SQLite, the stream re-emits, every screen watching it rebuilds.
 
-Eleven use cases in `domain/usecases/`, one per interaction (AD-12). Each takes
+Thirteen use cases in `domain/usecases/`, one per interaction (AD-12). Each takes
 the repository **contract**, never an implementation.
 
 **Two of them change the scheduler, and keeping them apart is the point.**
@@ -83,9 +83,12 @@ was one. There is now a `DeckName` value object that cannot hold an invalid valu
 the repository contract asks for one, and the answer to "has this been validated?"
 is the signature.
 
-Two of the four read use cases are thin, which is the accepted cost of a uniform
-layer; the other two do real work — the move-target read raises its own
-`NotFoundFailure`, and `SearchDecksUseCase` scopes and builds trails in memory.
+Two of the four read use cases are thin, which is the accepted cost of a
+uniform layer; the other two do real work — the move-target read raises its own
+`NotFoundFailure`, and the deletion-impact read exists so the confirmation
+dialog never states a number it does not have. (`SearchDecksUseCase` was a
+fifth read until M99.32 replaced the per-level deck search with Global Library
+Search, which owns its own slice under `lib/features/search/`.)
 Two more are gone rather than thin: `WatchDeckChildrenUseCase` and
 `GetDeckByIdUseCase` were composed in a controller to build one screen's read
 model, and that composition was two database snapshots — see §3.1.

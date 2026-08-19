@@ -4,6 +4,14 @@ import '../tables/study.drift';
 
 -- Business queries for a study session.
 --
+-- **Every statement reading `cards` or `decks` here reads the ACTIVE tree**
+-- (BR-257): a card in Trash is not new, not due, and not part of any count the
+-- study entry shows. The queue statements read `study_queue_items` alone and
+-- are allowlisted in `query_inventory_test.dart` — BR-259 closes a session the
+-- moment its material is deleted, so a queue row can only belong to a session
+-- that is already `invalidated`. `nextQueueItem` is the exception it explains
+-- for itself.
+--
 -- **Two card sets, never mixed** (BR-142). `learning` takes cards that have not
 -- finished the chain; `reviewing` takes cards that finished it and have come
 -- due. The old single "study queue" of BR-22 is gone, and with it the padding
@@ -41,6 +49,7 @@ INNER JOIN decks d ON d.id = c.deck_id
 INNER JOIN card_study_states s ON s.card_id = c.id
 WHERE d.root_deck_id = :rootDeckId
   AND s.learned_at IS NULL
+  AND c.delete_batch_id IS NULL AND d.delete_batch_id IS NULL
 ORDER BY c.created_at ASC, c.id ASC
 LIMIT :limit;
 
@@ -61,6 +70,7 @@ INNER JOIN decks d ON d.id = c.deck_id
 INNER JOIN card_study_states s ON s.card_id = c.id
 WHERE d.root_deck_id = :rootDeckId
   AND s.learned_at IS NULL
+  AND c.delete_batch_id IS NULL AND d.delete_batch_id IS NULL
 ORDER BY c.created_at ASC, c.id ASC;
 
 -- Cards that finished the chain and have come due, for a `reviewing` session.
@@ -75,6 +85,7 @@ INNER JOIN card_study_states s ON s.card_id = c.id
 WHERE d.root_deck_id = :rootDeckId
   AND s.learned_at IS NOT NULL
   AND s.due_at <= :now
+  AND c.delete_batch_id IS NULL AND d.delete_batch_id IS NULL
 ORDER BY s.due_at ASC, c.id ASC
 LIMIT :limit;
 
@@ -109,7 +120,8 @@ SELECT
 FROM cards c
 INNER JOIN decks d ON d.id = c.deck_id
 INNER JOIN card_study_states s ON s.card_id = c.id
-WHERE d.root_deck_id = (SELECT root_deck_id FROM decks WHERE id = :deckId);
+WHERE d.root_deck_id = (SELECT root_deck_id FROM decks WHERE id = :deckId)
+  AND c.delete_batch_id IS NULL AND d.delete_batch_id IS NULL;
 
 -- The next card to serve (BR-23, BR-26).
 --
@@ -125,14 +137,24 @@ WHERE d.root_deck_id = (SELECT root_deck_id FROM decks WHERE id = :deckId);
 -- An empty result with rows still `pending` means every remaining card is
 -- waiting out that gap, which is not the same as the stage being finished. That
 -- is why `pendingInStage` exists separately.
+--
+-- **The card is checked for a tombstone here and nowhere else in the queue.**
+-- BR-259 closes any session touching a deleted card in the same transaction as
+-- the delete, so this can only fire if that closing failed — and BR-259 also
+-- says outright that the queue must never serve a hidden card. Serving is the
+-- one place worth paying for the second check; the other queue statements
+-- count and inspect rows of a session that has already been invalidated, and a
+-- join on each of them would be a weaker copy of the real mechanism.
 nextQueueItem:
-SELECT *
-FROM study_queue_items
-WHERE session_id = :sessionId
-  AND mode = :mode
-  AND status = 'pending'
-  AND available_at <= :cursor
-ORDER BY round ASC, position ASC, card_id ASC
+SELECT q.*
+FROM study_queue_items q
+INNER JOIN cards c ON c.id = q.card_id
+WHERE q.session_id = :sessionId
+  AND q.mode = :mode
+  AND q.status = 'pending'
+  AND q.available_at <= :cursor
+  AND c.delete_batch_id IS NULL
+ORDER BY q.round ASC, q.position ASC, q.card_id ASC
 LIMIT 1;
 
 -- How many rows of this stage are still pending, at any round.
@@ -229,6 +251,27 @@ SELECT DISTINCT card_id AS cardId
 FROM study_queue_items
 WHERE session_id = :sessionId;
 
+-- Open sessions a deletion invalidates (BR-259).
+--
+-- Two statements rather than one union, because the two reasons are genuinely
+-- different: a session opened *on* a deck that is going away, and a session
+-- whose queue holds a card that is going away. The second is what catches a
+-- review of a root deck when a sub-deck three levels down is deleted — the
+-- session's `deck_id` is the root there, and the root is not in the batch.
+--
+-- Neither reads `cards`/`decks`, so neither needs the tombstone predicate: they
+-- take the id sets the deletion has already decided on, and they run *before*
+-- the marking so the ids still describe live rows.
+openSessionIdsForDecks:
+SELECT id FROM study_sessions
+WHERE status = 'in_progress' AND deck_id IN :deckIds;
+
+openSessionIdsForCards:
+SELECT DISTINCT q.session_id AS sessionId
+FROM study_queue_items q
+INNER JOIN study_sessions s ON s.id = q.session_id
+WHERE s.status = 'in_progress' AND q.card_id IN :cardIds;
+
 -- Sessions left open by an earlier study day (BR-103).
 staleOpenSessions:
 SELECT *
@@ -242,10 +285,6 @@ FROM study_sessions
 WHERE deck_id = :deckId AND status = 'in_progress'
 ORDER BY started_at DESC
 LIMIT 1;
-
--- The app-wide study defaults (BR-147). Always exactly one row.
-appSettingsRow:
-SELECT * FROM app_settings WHERE id = 1;
 
 -- The review set of one tree, and the same set counted per tree.
 --
@@ -263,6 +302,7 @@ INNER JOIN card_study_states s ON s.card_id = c.id
 WHERE d.root_deck_id = :rootDeckId
   AND s.learned_at IS NOT NULL
   AND s.due_at <= :now
+  AND c.delete_batch_id IS NULL AND d.delete_batch_id IS NULL
 ORDER BY s.due_at ASC, c.id ASC;
 
 dueCountPerRootDeck:
@@ -271,6 +311,7 @@ FROM cards c
 INNER JOIN decks d ON d.id = c.deck_id
 INNER JOIN card_study_states s ON s.card_id = c.id
 WHERE s.learned_at IS NOT NULL AND s.due_at <= :now
+  AND c.delete_batch_id IS NULL AND d.delete_batch_id IS NULL
 GROUP BY d.root_deck_id
 ORDER BY d.root_deck_id ASC;
 
@@ -295,6 +336,137 @@ UPDATE decks SET first_answered_at = :firstAnsweredAt
 WHERE id = (
     SELECT d.root_deck_id FROM cards c
     INNER JOIN decks d ON d.id = c.deck_id
-    WHERE c.id = :cardId
+    WHERE c.id = :cardId AND c.delete_batch_id IS NULL
   )
   AND first_answered_at IS NULL;
+
+-- The Study tab's own workload read: every root deck, with the three counts the
+-- Home list orders by (BR-200, BR-201).
+--
+-- **A statement of its own, and not `rootDeckSummaries` borrowed.** The two
+-- carry the same predicates on purpose and `query_test.dart` holds them to one
+-- answer on the same data and the same `:now` — the same contract every other
+-- pair of "count it" / "list it" queries in this file lives under. What they do
+-- **not** share is a reason to exist: the deck list needs a whole deck row, a
+-- learned gauge and a direct-child count, and Study Home needs none of those.
+-- Reusing the other statement would make a filter added for one screen a change
+-- in the behaviour of the other, which is the coupling AD-13 keeps out of reads.
+--
+-- **The due set is split at the local-day boundary, in the same grouped pass**
+-- (BR-162). `:startOfToday` is computed by the caller from `LocalDayModel`
+-- (BR-105); SQL never derives a local midnight, for the same reason `:now` is a
+-- parameter and not a clock function. The two halves partition the Reviewing set
+-- of BR-142 — no third session kind, no change to what a session serves.
+--
+-- **`new` is `learned_at IS NULL`**, character-for-character `newCardsInTree`'s
+-- predicate, so the number on the row and the session it opens count one set.
+--
+-- Bounded: one row per root deck, three grouped subqueries evaluated once each.
+-- The obvious Dart loop asking per deck is the N+1 this shape exists to refuse.
+--
+-- Roots with no cards are still returned. Filtering them out here would make
+-- "the library has decks but none of them holds a card" indistinguishable from
+-- "the library is empty", and those are two different screens (BR-202).
+--
+-- Ordering is `created_at` — a stable read order, **not** the order the list is
+-- drawn in. BR-201 ranks by workload and breaks ties on the case-folded name,
+-- and SQLite's `lower()` folds ASCII only: it leaves `Ô`, `Ê` and `Đ` alone, so
+-- a Vietnamese deck name would sort by whether it happened to start with a
+-- diacritic. The fold is Dart's, the same decision `CardText.folded` records.
+studyHomeRootWorkload:
+SELECT
+  d.id AS deckId,
+  d.name AS deckName,
+  d.scheduler_type AS schedulerType,
+  COALESCE(total.cardCount, 0) AS totalCardCount,
+  COALESCE(new.newCount, 0) AS newCount,
+  COALESCE(due.overdueCount, 0) AS overdueCount,
+  COALESCE(due.dueTodayCount, 0) AS dueTodayCount,
+  (
+    SELECT MIN(next.due_at) FROM card_study_states next
+    INNER JOIN cards nc ON nc.id = next.card_id
+    WHERE next.due_at > :now AND nc.delete_batch_id IS NULL
+  ) AS nextDueAt
+FROM decks d
+LEFT JOIN (
+    SELECT cd.root_deck_id AS rootDeckId, COUNT(*) AS cardCount
+    FROM cards c
+    INNER JOIN decks cd ON cd.id = c.deck_id
+    WHERE c.delete_batch_id IS NULL
+    GROUP BY cd.root_deck_id
+) total ON total.rootDeckId = d.id
+LEFT JOIN (
+    SELECT cd.root_deck_id AS rootDeckId, COUNT(*) AS newCount
+    FROM cards c
+    INNER JOIN decks cd ON cd.id = c.deck_id
+    INNER JOIN card_study_states s ON s.card_id = c.id
+    WHERE s.learned_at IS NULL AND c.delete_batch_id IS NULL
+    GROUP BY cd.root_deck_id
+) new ON new.rootDeckId = d.id
+LEFT JOIN (
+    SELECT cd.root_deck_id AS rootDeckId,
+           SUM(CASE WHEN s.due_at < :startOfToday THEN 1 ELSE 0 END)
+               AS overdueCount,
+           SUM(CASE WHEN s.due_at >= :startOfToday THEN 1 ELSE 0 END)
+               AS dueTodayCount
+    FROM cards c
+    INNER JOIN decks cd ON cd.id = c.deck_id
+    INNER JOIN card_study_states s ON s.card_id = c.id
+    WHERE s.learned_at IS NOT NULL AND s.due_at <= :now
+      AND c.delete_batch_id IS NULL
+    GROUP BY cd.root_deck_id
+) due ON due.rootDeckId = d.id
+WHERE d.parent_deck_id IS NULL AND d.delete_batch_id IS NULL
+ORDER BY d.created_at ASC, d.id ASC;
+
+-- The one session Study Home may offer to continue (BR-200).
+--
+-- **Every disqualification is a clause here, and none of them is a write.**
+-- Home renders; it does not repair. BR-103's repair — closing a session an
+-- earlier study day left open as `abandoned`/`interrupted` — still belongs to
+-- `abandonStaleSessions`, which runs when the user actually enters the flow. A
+-- Home screen that closed sessions would write to the database for scrolling
+-- past a card, and would do it on every rebuild.
+--
+-- So the four ways a session stops being resumable are read as filters:
+--
+-- * `status = 'in_progress'` — a session that ended is not offered back.
+-- * `started_at >= :dayStart` — a session from an earlier study day is over
+--   whether or not anybody has closed it yet (BR-103). Advertising it would
+--   promise a Resume that the next `abandonStaleSessions` cancels.
+-- * `root.scheduler_generation = s.scheduler_generation` — a session opened
+--   before a Reset can no longer write anything (BR-84), so offering to
+--   continue it offers a session that fails on its first answer. The INNER JOIN
+--   is the other half: a root that is gone matches nothing, and `deck_id`'s
+--   own cascade has already taken the session with a deleted deck.
+-- * `EXISTS (…queue…)` — the session holds no queue row at all. That is what
+--   "every card of the session was deleted" looks like from here, because
+--   `study_queue_items.card_id` cascades. Deliberately *not* narrowed to
+--   `status = 'pending'`: BR-200 says "the session's queue still holds at least
+--   one row", and a stricter clause would be a second, quieter rule. A session
+--   whose rows are all `completed` is closed in the same transaction that
+--   completes the last one, so it never reaches this query as `in_progress`.
+--
+-- Newest first: two open sessions on different decks is a state BR-101 does not
+-- forbid, and the one the user was last in is the one they mean.
+studyHomeResumeCandidate:
+SELECT
+  s.id AS sessionId,
+  s.deck_id AS deckId,
+  d.name AS deckName,
+  s.session_kind AS sessionKind,
+  s.current_mode AS currentMode
+FROM study_sessions s
+-- A deck in Trash is not resumable (BR-257); the delete flow also ends its
+-- open sessions as `content_deleted`, so this filter is the read-side twin
+-- of that write.
+INNER JOIN decks d ON d.id = s.deck_id AND d.delete_batch_id IS NULL
+INNER JOIN decks root ON root.id = s.root_deck_id
+WHERE s.status = 'in_progress'
+  AND s.started_at >= :dayStart
+  AND root.scheduler_generation = s.scheduler_generation
+  AND EXISTS (
+    SELECT 1 FROM study_queue_items q WHERE q.session_id = s.id
+  )
+ORDER BY s.started_at DESC, s.id ASC
+LIMIT 1;

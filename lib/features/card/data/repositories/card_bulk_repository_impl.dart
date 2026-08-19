@@ -15,6 +15,7 @@ part of 'card_repository_impl.dart';
 mixin _CardBulkOperations implements CardRepository {
   CardDao get _cardDao;
   CardDeckContextDao get _deckContextDao;
+  ContentTrashRepository get _trash;
   DateTime Function() get _clock;
   String Function() get _idGenerator;
 
@@ -59,17 +60,31 @@ mixin _CardBulkOperations implements CardRepository {
   );
 
   @override
-  Future<void> deleteCards(List<String> cardIds) => _guard(
-    () => _cardDao.runInTransaction(() async {
-      if (cardIds.isEmpty) return;
+  Future<void> deleteCards(List<String> cardIds) =>
+      deleteCardsForUndo(cardIds).then((_) {});
 
-      // Read the decks before the rows are gone: after the delete there is
-      // nothing left to say where these cards lived.
+  /// Moves cards to Trash and returns one batch per card (BR-256, BR-260).
+  ///
+  /// **The only delete path, and it is a soft one.** Every row stays, so ids,
+  /// study states, history and tag links are still there when a restore comes
+  /// (BR-259); what changes is that the cards leave every active surface in the
+  /// same instant (BR-257).
+  ///
+  /// The decks are still read *before* the marking, for the same reason as
+  /// before: `directCardCount` counts active cards, so after the marking there
+  /// is nothing left to say where these cards lived.
+  @override
+  Future<List<String>> deleteCardsForUndo(List<String> cardIds) => _guard(
+    () => _cardDao.runInTransaction(() async {
+      if (cardIds.isEmpty) return const <String>[];
+
       final rows = await _cardDao.cardDeckContextForIds(cardIds);
       _requireAllFound(cardIds, found: rows.length);
       final sources = <String>{for (final row in rows) row.deckId};
-      await _cardDao.deleteCardsByIds(cardIds);
+      final batchIds = await _trash.markCardsDeleted(cardIds);
       await _unsetEmptiedDecks(sources, now: _clock());
+
+      return batchIds;
     }),
   );
 
@@ -151,12 +166,14 @@ mixin _CardBulkOperations implements CardRepository {
     CardListFilter filter = CardListFilter.all,
     String? searchTerm,
     DateTime? now,
+    TagFilter tags = TagFilter.none,
   }) => _guard(
     () => _cardDao.cardIdsMatching(
       deckId: deckId,
       filter: filter,
       searchTerm: searchTerm,
       now: now,
+      tags: tags,
     ),
   );
 

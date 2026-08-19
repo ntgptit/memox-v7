@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/navigation/route_names.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/theme_context_extension.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
@@ -15,14 +14,17 @@ import '../../../../shared/widgets/mx_search_field.dart';
 import '../../domain/models/card_list_filter_model.dart';
 import '../../domain/models/card_list_item_model.dart';
 import '../../domain/models/deck_context_model.dart';
+import '../../domain/models/tag_filter_model.dart';
 import '../controllers/card_list_controller.dart';
 import '../controllers/card_list_filter_controller.dart';
+import '../controllers/card_list_tag_filter_controller.dart';
 import '../controllers/card_bulk_controller.dart';
 import '../controllers/card_selection_controller.dart';
 import '../controllers/deck_context_controller.dart';
 import '../widgets/sections/card_breadcrumb_widget.dart';
 import '../widgets/overlays/card_bulk_overlays_widget.dart';
 import '../widgets/overlays/card_export_sheet_widget.dart';
+import '../widgets/overlays/card_list_menu_widget.dart';
 import '../widgets/sections/card_filter_bar_widget.dart';
 import '../widgets/sections/card_list_body_widget.dart';
 import '../widgets/sections/card_selection_bar_widget.dart';
@@ -41,6 +43,11 @@ void _beginSelection(WidgetRef ref, String deckId) =>
 
 void _clearSelection(WidgetRef ref, String deckId) =>
     ref.read(cardSelectionProvider(deckId).notifier).clear();
+
+/// Drops every selected tag (UC-18 A7). A free function for the same reason as
+/// its neighbours above.
+void _clearTagFilter(WidgetRef ref, String deckId) =>
+    ref.read(cardListTagFilterProvider(deckId).notifier).apply(TagFilter.none);
 
 /// Re-subscribes both reads that render the card-list frame.
 ///
@@ -88,6 +95,20 @@ class CardListScreen extends ConsumerWidget {
       },
     );
   }
+
+  /// What a tap on a row means outside selection mode (BR-246).
+  ///
+  /// **It used to be [_openEditor].** A tap is the most-used gesture in the
+  /// list, so it has to lead to the reading surface rather than into a form
+  /// over real content; editing is one explicit action away, on the detail
+  /// screen's app bar.
+  void _openDetail(BuildContext context, String cardId) => context.goNamed(
+    RouteNames.cardDetail,
+    pathParameters: <String, String>{
+      RoutePathParams.deckId: deckId,
+      RoutePathParams.cardId: cardId,
+    },
+  );
 
   /// The bulk entry (UC-10): manual create stays the small-volume path (D4),
   /// import is where a whole file goes. Pushed, not gone-to: the wizard sits
@@ -159,39 +180,13 @@ class CardListScreen extends ConsumerWidget {
             tooltip: context.l10n.cardListNewAction,
             onPressed: () => _openEditor(context),
           ),
-        // Import lives in the overflow, not as a third icon (M4.12 W6): the
-        // bar already carries Select and Add at 320px, and bulk input is an
-        // occasional action. Hidden during selection for the same reason Add
-        // is — it leaves the screen.
+        // The overflow — import, export, tag catalog. Hidden during selection
+        // for the same reason Add is: every item leaves the screen.
         if (!selection.isSelecting)
-          PopupMenuButton<void>(
-            icon: const Icon(Icons.more_vert),
-            tooltip: context.l10n.cardSelectionMoreLabel,
-            itemBuilder: (menuContext) => <PopupMenuEntry<void>>[
-              PopupMenuItem<void>(
-                onTap: () => _openImport(context),
-                child: _MenuRow(
-                  icon: Icons.upload_file_outlined,
-                  label: menuContext.l10n.cardImportEntryAction,
-                ),
-              ),
-              // Export is offered only when there is something to export
-              // (M4.13 W1): an empty deck has no export path at all, not a
-              // greyed one — and a `deck`-type or root deck never reaches this
-              // screen, because neither holds cards directly.
-              if (deckTotal > 0)
-                PopupMenuItem<void>(
-                  onTap: () => exportDeckCards(
-                    context,
-                    deckId: deckId,
-                    deckCardCount: deckTotal,
-                  ),
-                  child: _MenuRow(
-                    icon: Icons.ios_share,
-                    label: menuContext.l10n.cardExportEntryAction,
-                  ),
-                ),
-            ],
+          CardListMenuWidget(
+            deckId: deckId,
+            deckTotal: deckTotal,
+            onImport: () => _openImport(context),
           ),
       ],
       // Back leaves selection first (UC-04 A6): a user who selected twenty
@@ -232,8 +227,17 @@ class CardListScreen extends ConsumerWidget {
                 data: (list) => list.isEmpty
                     ? _empty(
                         context,
+                        ref,
                         filter,
                         ref.watch(cardListSearchQueryProvider(deckId)),
+                        // A tag filter narrows the list exactly as the pills
+                        // do, so an empty result under one is "nothing
+                        // matched", never "this deck is empty" (M4.14 W7).
+                        // Without this the screen offers "add your first card"
+                        // to a user looking at a deck of 214.
+                        isTagFiltered: ref
+                            .watch(cardListTagFilterProvider(deckId))
+                            .isActive,
                       )
                     : CardListBodyWidget(
                         deckId: deckId,
@@ -242,8 +246,7 @@ class CardListScreen extends ConsumerWidget {
                         // until its first value arrives the window length is the
                         // honest floor.
                         total: count.value ?? list.length,
-                        onOpen: (item) =>
-                            _openEditor(context, cardId: item.card.id),
+                        onOpen: (item) => _openDetail(context, item.card.id),
                       ),
               ),
             ),
@@ -293,37 +296,29 @@ class CardListScreen extends ConsumerWidget {
 
   // An empty result means "add your first card" only when no filter is on;
   // otherwise it means the filter matched nothing (D3).
-  Widget _empty(BuildContext context, CardListFilter filter, String search) {
+  Widget _empty(
+    BuildContext context,
+    WidgetRef ref,
+    CardListFilter filter,
+    String search, {
+    required bool isTagFiltered,
+  }) {
     // A search that matched nothing names the term; a filter that matched
     // nothing says so; only a genuinely empty deck offers "add your first card".
     if (search.trim().isNotEmpty) return _NoSearchMatch(query: search.trim());
+    // The tag predicate gets a way out on the face itself (UC-18 A7): the four
+    // state pills are always visible so `All` is one tap away, but the tag
+    // selection lives behind a sheet, and without this the only exit is to
+    // reopen it and press Clear inside. The state filters keep the plain face —
+    // adding a second action to it would be a control that does nothing.
+    if (isTagFiltered) {
+      return _NoMatch(onClearTags: () => _clearTagFilter(ref, deckId));
+    }
     if (filter != CardListFilter.all) return const _NoMatch();
 
     return _Empty(
       onAdd: () => _openEditor(context),
       onImport: () => _openImport(context),
-    );
-  }
-}
-
-/// One overflow-menu row: a muted glyph and the action's words.
-///
-/// Extracted when Export joined Import — two hand-built `Row`s were already
-/// one copy apart, and the third would have been the one that drifted.
-class _MenuRow extends StatelessWidget {
-  const _MenuRow({required this.icon, required this.label});
-
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        Icon(icon, color: context.colors.onSurfaceVariant),
-        const SizedBox(width: AppSpacing.md),
-        Text(label, style: context.texts.bodyMedium),
-      ],
     );
   }
 }
@@ -371,8 +366,14 @@ class _NoSearchMatch extends StatelessWidget {
 }
 
 /// The filtered-empty state: the deck has cards, this filter matched none (D3).
+///
+/// [onClearTags] is present only when a tag selection is what emptied the list
+/// (UC-18 A7, M4.14 W7). A state pill leaves no such dead end — `All` is on
+/// screen beside it — so that face keeps the plain message and no action.
 class _NoMatch extends StatelessWidget {
-  const _NoMatch();
+  const _NoMatch({this.onClearTags});
+
+  final VoidCallback? onClearTags;
 
   @override
   Widget build(BuildContext context) {
@@ -380,6 +381,12 @@ class _NoMatch extends StatelessWidget {
       icon: Icons.filter_list_off,
       title: context.l10n.cardListNoMatchTitle,
       message: context.l10n.cardListNoMatchMessage,
+      // Named for what it clears. The sheet's own `Clear` is a different key:
+      // there a selection is on screen to clear, here it is not.
+      actionLabel: onClearTags == null
+          ? null
+          : context.l10n.tagFilterClearAllAction,
+      onAction: onClearTags,
     );
   }
 }

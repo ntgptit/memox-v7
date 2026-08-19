@@ -216,6 +216,17 @@ final class StudyDao {
     DecksCompanion(studyConfig: Value<String?>(studyConfig)),
   );
 
+  /// Puts the root back on the app-wide defaults (BR-212).
+  ///
+  /// A separate method rather than `updateDeckStudyConfig` taking a nullable
+  /// string: `Value<String?>(null)` and "leave this column alone" are one
+  /// keystroke apart in drift's companion API, and only one of them is a clear.
+  /// One column, and no other write can be smuggled in beside it.
+  Future<void> clearDeckStudyConfig(String deckId) =>
+      (_db.update(_db.decks)..where((d) => d.id.equals(deckId))).write(
+        const DecksCompanion(studyConfig: Value<String?>(null)),
+      );
+
   /// Stamps the root's `first_answered_at` the first time a card in its tree
   /// finishes the learning chain (BR-13), and does nothing on every later card.
   ///
@@ -272,6 +283,25 @@ final class StudyDao {
                 s.status.equals('in_progress'),
           ))
           .get();
+
+  /// Open sessions a deletion is about to invalidate (BR-259).
+  ///
+  /// Two reads rather than one, and both are array-bound so a subtree of two
+  /// hundred decks is one statement per side rather than two hundred.
+  Future<Set<String>> openSessionIdsTouching({
+    required List<String> deckIds,
+    required List<String> cardIds,
+  }) async {
+    final ids = <String>{};
+    if (deckIds.isNotEmpty) {
+      ids.addAll(await _db.openSessionIdsForDecks(deckIds).get());
+    }
+    if (cardIds.isNotEmpty) {
+      ids.addAll(await _db.openSessionIdsForCards(cardIds).get());
+    }
+
+    return ids;
+  }
 
   Future<void> insertAnswer(StudyAnswersCompanion answer) =>
       _db.into(_db.studyAnswers).insert(answer);

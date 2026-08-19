@@ -4,8 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/app/fallback/route_not_found_screen.dart';
 import 'package:memox/app/router/route_paths.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
-import 'package:memox/features/progress/presentation/screens/progress_placeholder_screen.dart';
-import 'package:memox/features/settings/presentation/screens/settings_placeholder_screen.dart';
+import 'package:memox/features/progress/presentation/screens/progress_screen.dart';
+import 'package:memox/features/settings/presentation/screens/settings_screen.dart';
 
 import '../../helpers/app_harness/host_widget_app.dart';
 import '../../helpers/fixtures/study_fixtures.dart';
@@ -84,14 +84,17 @@ void main() {
     });
   });
 
-  testWidgets('IT-NAV-011 · the scaffolded branches render their placeholders '
-      'without a session or a database write', (tester) async {
+  testWidgets('IT-NAV-011 · the Progress screen and the Settings placeholder '
+      'render without a session or a database write', (tester) async {
     // The strong half of AD-19's boundary, against the **real** wiring: the
-    // fake-repository test in `test/app/router/` proves the placeholders call
+    // fake-repository test in `test/app/router/` proves the two branches call
     // nothing on the study contract, but only a real database can prove no
-    // binding underneath them writes on its own. Every table is counted rather
-    // than the two obvious ones — the failure this guards against is precisely
-    // a write nobody expected.
+    // binding underneath them writes on its own. That got sharper at M99.23:
+    // Progress now runs a real aggregate query against this database on entry,
+    // so "opening the tab changes nothing" (BR-190) is a claim about a screen
+    // that genuinely reads. Every table is counted rather than the two obvious
+    // ones — the failure this guards against is precisely a write nobody
+    // expected.
     final db = createHostDatabase();
 
     Future<Map<String, int>> rowCounts() async => <String, int>{
@@ -108,12 +111,12 @@ void main() {
       app.router.go(RoutePaths.progress);
       await settleHostApp(tester);
       expect(app.router.state.uri.toString(), RoutePaths.progress);
-      expect(find.byType(ProgressPlaceholderScreen), findsOneWidget);
+      expect(find.byType(ProgressScreen), findsOneWidget);
 
       app.router.go(RoutePaths.settings);
       await settleHostApp(tester);
       expect(app.router.state.uri.toString(), RoutePaths.settings);
-      expect(find.byType(SettingsPlaceholderScreen), findsOneWidget);
+      expect(find.byType(SettingsScreen), findsOneWidget);
 
       app.router.go(RoutePaths.decks);
       await settleHostApp(tester);

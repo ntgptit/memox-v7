@@ -1,8 +1,12 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memox/features/card/di/card_detail_repository_provider.dart';
 import 'package:memox/features/card/di/card_repository_provider.dart';
+import 'package:memox/features/card/di/tag_catalog_repository_provider.dart';
 
+import '../features/card/presentation/support/fake_card_detail_repository.dart';
 import '../features/card/presentation/support/fake_card_repository.dart';
+import '../features/card/presentation/support/fake_tag_catalog_repository.dart';
 
 /// Wraps one card screen in a `ProviderScope` over a fake repository, for the
 /// visual audit.
@@ -19,6 +23,37 @@ import '../features/card/presentation/support/fake_card_repository.dart';
 Widget cardScreenWith(FakeCardRepository repository, Widget screen) {
   return ProviderScope(
     overrides: [cardRepositoryProvider.overrideWithValue(repository)],
+    child: screen,
+  );
+}
+
+/// The same wrapper for the tag catalog, over its own contract (UC-18).
+///
+/// A second function rather than a second parameter on the first: the catalog
+/// screen reads only `TagCatalogRepository`, and a card fake it never calls
+/// would be a dependency the audit does not have.
+Widget tagScreenWith(FakeTagCatalogRepository repository, Widget screen) {
+  return ProviderScope(
+    overrides: [tagCatalogRepositoryProvider.overrideWithValue(repository)],
+    child: screen,
+  );
+}
+
+/// The same, for a screen that reads the detail contract instead (UC-19).
+///
+/// A separate wrapper rather than a second override on the one above: the
+/// detail screen touches only `CardDetailRepository`, and handing it a fake of
+/// the management contract as well would say the screen depends on twenty-six
+/// methods it is forbidden to call (BR-239).
+///
+/// No router here either. Both of the screen's navigations happen on a tap, and
+/// the audit measures a resting frame.
+Widget cardDetailScreenWith(
+  FakeCardDetailRepository repository,
+  Widget screen,
+) {
+  return ProviderScope(
+    overrides: [cardDetailRepositoryProvider.overrideWithValue(repository)],
     child: screen,
   );
 }

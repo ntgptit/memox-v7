@@ -1,7 +1,12 @@
 import '../tables/cards.drift';
 import '../tables/tags.drift';
+import '../tables/study.drift';
 
 -- Typed queries for the Card side of the Deck/Card vertical (M4.9a).
+--
+-- **Every statement here reads ACTIVE cards.** A row carrying
+-- `delete_batch_id` is in Trash and belongs to no list, count, selection,
+-- export or duplicate check (BR-257). `query_inventory_test.dart` enforces it.
 --
 -- Pure card reads live here; queries a Deck use case needs about cards —
 -- `directCardCount` for the content-type reset, `subtreeCardCount` for the
@@ -33,7 +38,7 @@ import '../tables/tags.drift';
 -- `LIMIT` stops early instead of sorting the deck and putting a lid on it.
 cardsByDeck:
 SELECT * FROM cards
-WHERE deck_id = :deckId
+WHERE deck_id = :deckId AND delete_batch_id IS NULL
 ORDER BY created_at DESC, id DESC
 LIMIT :limit;
 
@@ -78,7 +83,7 @@ SELECT
   ) AS tag_names
 FROM cards c
 INNER JOIN card_study_states s ON s.card_id = c.id
-WHERE $predicate
+WHERE c.delete_batch_id IS NULL AND ($predicate)
 ORDER BY $order
 LIMIT :limit;
 
@@ -92,7 +97,7 @@ LIMIT :limit;
 cardCount:
 SELECT COUNT(*) FROM cards c
 INNER JOIN card_study_states s ON s.card_id = c.id
-WHERE $predicate;
+WHERE c.delete_batch_id IS NULL AND ($predicate);
 
 -- Just the ids a predicate matches, for Select all (BR-167).
 --
@@ -109,7 +114,7 @@ WHERE $predicate;
 cardIdsMatching:
 SELECT c.id FROM cards c
 INNER JOIN card_study_states s ON s.card_id = c.id
-WHERE $predicate;
+WHERE c.delete_batch_id IS NULL AND ($predicate);
 
 -- Where each card lives, and which tree that deck belongs to (BR-165).
 --
@@ -121,20 +126,29 @@ SELECT c.id AS cardId, d.id AS deckId, d.root_deck_id AS rootDeckId,
        d.parent_deck_id AS parentDeckId, d.content_type AS contentType
 FROM cards c
 INNER JOIN decks d ON d.id = c.deck_id
-WHERE c.id IN :cardIds;
+WHERE c.id IN :cardIds
+  AND c.delete_batch_id IS NULL AND d.delete_batch_id IS NULL;
 
 -- The three bulk writes. Each is one statement over an id list, so a batch is
 -- one round trip and one atomic step rather than N of each (BR-166).
+-- Two bulk writes, each one statement over an id list (BR-166).
+--
+-- **There is no `deleteCardsByIds` any more.** Deleting a card is a soft delete
+-- (BR-256), which is `markCardsDeleted` in `queries/trash.drift`; the only hard
+-- delete left in the app is purge, and that runs through the batch's cascade.
+-- A statement that hard-deletes by id would be a second way to lose a card's
+-- history, reachable from a bulk action.
+--
+-- Both refuse to touch a tombstone: a selection naming a card that has since
+-- gone to Trash is describing a database that has moved on, and the repository
+-- turns the short row count into a typed not-found rather than a partial write.
 moveCardsToDeck:
 UPDATE cards SET deck_id = :deckId, updated_at = :updatedAt
-WHERE id IN :cardIds;
-
-deleteCardsByIds:
-DELETE FROM cards WHERE id IN :cardIds;
+WHERE id IN :cardIds AND delete_batch_id IS NULL;
 
 setCardsFlagByIds:
 UPDATE cards SET is_flagged = :isFlagged, updated_at = :updatedAt
-WHERE id IN :cardIds;
+WHERE id IN :cardIds AND delete_batch_id IS NULL;
 
 -- How many tags each card in the batch already carries, for the BR-94 cap.
 -- Cards with no tags are absent from the result, which the caller reads as 0.
@@ -150,8 +164,104 @@ cardsAlreadyTagged:
 SELECT ct.card_id AS cardId FROM card_tags AS ct
 WHERE ct.card_id IN :cardIds AND ct.tag_id = :tagId;
 
+-- The active card, or no row — same contract as `deckById` (BR-257).
 cardById:
-SELECT * FROM cards WHERE id = :cardId;
+SELECT * FROM cards WHERE id = :cardId AND delete_batch_id IS NULL;
+
+-- ---- card detail and history (BR-239…BR-245) -------------------------------
+
+-- One card's content, its current schedule and its tag names, for the detail
+-- screen (BR-240).
+--
+-- **`cardListItems` narrowed to one id, and deliberately the same shape.** The
+-- two nested stars map to `Card` and `CardStudyState`, which the existing two
+-- mappers already turn into entities, and the tags ride along as the same
+-- `char(31)`-joined `GROUP_CONCAT` — so detail and the row it was opened from
+-- cannot disagree about a card's state or its chips.
+--
+-- **`INNER JOIN`, total for the same reason:** BR-09 creates the study state in
+-- the same transaction as the card, so no card can be missing one. A card id
+-- that matches nothing therefore means the card is gone, which is exactly the
+-- signal BR-245 needs — and it is why this returns no row rather than a row
+-- with nulls.
+--
+-- **The tag subquery's tables DO reach this statement's generated
+-- `readsFrom`**, so this watch needs no hand-merged `tableUpdates`. Checked in
+-- the generated code rather than inherited from the note on `cardListItems`
+-- above, which was written against an earlier drift and no longer describes
+-- what that statement generates either. Copying the workaround on the strength
+-- of the comment would have subscribed to the tag tables twice and emitted two
+-- frames for one tag edit. What is pinned is the behaviour, not the mechanism:
+-- `card_detail_repository_test.dart` asserts that adding a tag re-emits, so the
+-- day drift changes its mind the test is what says so.
+cardDetailById:
+SELECT
+  c.**,
+  s.**,
+  (
+    SELECT GROUP_CONCAT(t.name, char(31))
+    FROM card_tags ct
+    INNER JOIN tags t ON t.id = ct.tag_id
+    WHERE ct.card_id = c.id
+  ) AS tag_names
+FROM cards c
+INNER JOIN card_study_states s ON s.card_id = c.id
+-- A card in Trash reads as not-found on every active surface (BR-257): the
+-- detail screen's typed not-found face is exactly what a tombstoned card
+-- must produce, not its content.
+WHERE c.id = :cardId AND c.delete_batch_id IS NULL;
+
+-- The newest page of one card's review history (BR-241).
+--
+-- **`SELECT *`, so drift maps the row to `StudyAnswer` and one mapper turns it
+-- into the read model.** A hand-listed projection would be a second place the
+-- sixteen stored columns are named, and BR-242's whole point is that the screen
+-- shows what the row stored — a column dropped from a projection is a fact that
+-- silently stops being displayed.
+--
+-- **`answered_at DESC, id DESC`, and the tie-break is load-bearing.** Two turns
+-- of one session can share a millisecond; without `id` the order is not total,
+-- and a page boundary that falls inside a group of equal timestamps loses rows
+-- or repeats them no matter how the cursor is built.
+--
+-- `idx_study_answers_card (card_id, answered_at)` supplies the `card_id`
+-- equality and the leading sort term, scanned backwards. SQLite's block sort
+-- then orders only within each equal-`answered_at` group, so the `LIMIT` still
+-- stops early instead of sorting the card's whole history and putting a lid on
+-- it — `card_history_paging_test.dart` pins that by reading the query plan.
+--
+-- The caller asks for one row more than the page size and reports what it
+-- found: "is there another page" answered by the read rather than guessed from
+-- a short result.
+cardHistoryFirstPage:
+SELECT * FROM study_answers
+WHERE card_id = :cardId
+ORDER BY answered_at DESC, id DESC
+LIMIT :limit;
+
+-- The same page, resumed after a keyset cursor (BR-241).
+--
+-- **A second statement rather than a nullable cursor on the one above**, the
+-- same choice `flaggedCardsByDeck` makes and for the same reason: an
+-- `(:hasCursor = 0 OR …)` chain is a predicate SQLite cannot use the index to
+-- stop early through, which would undo exactly what the index is for.
+--
+-- The pair `(answered_at, id)` is compared long-hand rather than as an SQLite
+-- row value: drift's analyzer does not parse row-value comparison, and a
+-- statement that fails to type-check at build time is worse than three lines of
+-- explicit boolean algebra.
+--
+-- **Strictly after, never `<=`.** The cursor is the last row of the previous
+-- page; including it again is the duplicate BR-241 forbids.
+cardHistoryAfter:
+SELECT * FROM study_answers
+WHERE card_id = :cardId
+  AND (
+    answered_at < :answeredAt
+    OR (answered_at = :answeredAt AND id < :id)
+  )
+ORDER BY answered_at DESC, id DESC
+LIMIT :limit;
 
 studyStateByCard:
 SELECT * FROM card_study_states WHERE card_id = :cardId;
@@ -166,7 +276,7 @@ SELECT * FROM card_study_states WHERE card_id = :cardId;
 -- the composite index was measured to buy.
 flaggedCardsByDeck:
 SELECT * FROM cards
-WHERE deck_id = :deckId AND is_flagged = 1
+WHERE deck_id = :deckId AND is_flagged = 1 AND delete_batch_id IS NULL
 ORDER BY created_at DESC, id DESC
 LIMIT :limit;
 
@@ -210,7 +320,7 @@ SELECT
   ) THEN 1 ELSE 0 END) AS masteredCount
 FROM cards AS c
 INNER JOIN card_study_states AS s ON s.card_id = c.id
-WHERE c.deck_id = :deckId;
+WHERE c.deck_id = :deckId AND c.delete_batch_id IS NULL;
 
 -- The card list header: the deck's own name and the path of ancestors above it,
 -- in one statement so the title and the breadcrumb agree in the same frame (W1,
@@ -251,13 +361,17 @@ SELECT
         INNER JOIN decks d ON d.id = a.deck_id
     ) AS ancestryJson
 FROM decks self
-WHERE self.id = :deckId;
+WHERE self.id = :deckId AND self.delete_batch_id IS NULL;
 
 -- The duplicate identities already in one deck, for import's BR-170 check —
 -- one statement for the whole preview and again for the in-transaction
 -- recheck, never a per-row lookup.
+-- Active cards only. A card in Trash is not a duplicate an import has to
+-- avoid (BR-170): it is not visible, and refusing an import because of one
+-- would be refusing on evidence the user cannot see.
 cardKeysInDeck:
-SELECT front_folded, back_folded FROM cards WHERE deck_id = :deckId;
+SELECT front_folded, back_folded FROM cards
+WHERE deck_id = :deckId AND delete_batch_id IS NULL;
 
 -- The tags a batch would reuse, by folded identity (BR-93) — array-bound so
 -- an import with thirty distinct tags is one statement, not thirty.
@@ -275,7 +389,7 @@ SELECT * FROM tags WHERE name_folded IN :foldedNames;
 -- ancestry walk for a breadcrumb no export renders — and it returns no row for
 -- a deck that is gone, which is exactly the signal `deckMissing` needs.
 exportDeckName:
-SELECT name FROM decks WHERE id = :deckId;
+SELECT name FROM decks WHERE id = :deckId AND delete_batch_id IS NULL;
 
 -- Every card held **directly** by one deck, with its tags, for scope `all`
 -- (BR-174).
@@ -325,7 +439,7 @@ SELECT
     WHERE ct.card_id = c.id
   ) AS tagNames
 FROM cards c
-WHERE c.deck_id = :deckId
+WHERE c.deck_id = :deckId AND c.delete_batch_id IS NULL
 ORDER BY c.created_at ASC, c.id ASC;
 
 -- The same row, narrowed to an exact id set, for scope `selected` (BR-174).
@@ -362,4 +476,5 @@ SELECT
   ) AS tagNames
 FROM cards c
 WHERE c.deck_id = :deckId AND c.id IN :cardIds
+  AND c.delete_batch_id IS NULL
 ORDER BY c.created_at ASC, c.id ASC;

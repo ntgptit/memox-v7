@@ -2,18 +2,25 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/navigation/route_names.dart';
 import '../../features/card/presentation/providers/card_use_case_provider.dart';
+import '../../features/card/presentation/screens/card_detail_screen.dart';
 import '../../features/card/presentation/screens/card_editor_screen.dart';
 import '../../features/card/presentation/screens/card_import_screen.dart';
 import '../../features/card/presentation/screens/card_list_screen.dart';
+import '../../features/card/presentation/screens/tag_catalog_screen.dart';
 import '../../features/deck/presentation/screens/deck_list_screen.dart';
 import '../../features/deck/presentation/screens/starter_library_screen.dart';
-import '../../features/progress/presentation/screens/progress_placeholder_screen.dart';
-import '../../features/settings/presentation/screens/settings_placeholder_screen.dart';
+import '../../features/progress/presentation/screens/progress_deck_screen.dart';
+import '../../features/progress/presentation/screens/progress_screen.dart';
+import '../../features/reminder/presentation/screens/reminder_settings_screen.dart';
+import '../../features/settings/presentation/screens/settings_screen.dart';
+import '../../features/search/presentation/screens/library_search_screen.dart';
+import '../../features/trash/presentation/screens/trash_screen.dart';
 import '../../features/study/presentation/screens/study_entry_screen.dart';
+import '../../features/study/presentation/screens/study_home_screen.dart';
 import '../fallback/route_not_found_screen.dart';
 import '../shell/app_navigation_shell.dart';
-import '../../core/navigation/route_names.dart';
 import 'route_paths.dart';
 
 /// Composition of the route table, and nothing else.
@@ -45,9 +52,11 @@ final GoRouter appRouter = createAppRouter();
 /// scroll position while another is on screen. A plain set of top-level
 /// routes would rebuild the destination from scratch on every tab switch, which
 /// is the "why did my place in the list disappear" bug. Progress and Settings
-/// are branches ahead of their features (AD-19): each holds a single
-/// presentation-only placeholder route, so the deep-link contract and the tab
-/// order are settled before the content is.
+/// were both branches ahead of their features (AD-19), which is what settled
+/// the deep-link contract and the tab order before the content existed;
+/// Progress was filled in by M99.23/M99.24 and Settings by M99.28, and
+/// swapping a placeholder screen for the real one touched nothing in this
+/// file but the widget name.
 GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
   // Declared so the import wizard can mount on the root navigator, above
   // the shell. Created per call: a shared GlobalKey across two routers (as
@@ -74,6 +83,16 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
                 // depth is an argument rather than a different widget.
                 builder: (context, state) => const DeckListScreen(),
                 routes: <RouteBase>[
+                  // Global Library Search (UC-20), a sibling of the deck
+                  // detail: the results span decks and cards, so the surface
+                  // belongs to neither feature's screen, and a child route
+                  // keeps the bottom bar and sends Back to the level the
+                  // search was opened from.
+                  GoRoute(
+                    path: RoutePaths.librarySearchRelative,
+                    name: RouteNames.librarySearch,
+                    builder: (context, state) => const LibrarySearchScreen(),
+                  ),
                   // The starter catalog, a sibling of the deck detail so an
                   // empty library can offer content without leaving the
                   // branch (UC-01).
@@ -81,6 +100,25 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
                     path: RoutePaths.starterLibraryRelative,
                     name: RouteNames.starterLibrary,
                     builder: (context, state) => const StarterLibraryScreen(),
+                  ),
+                  // The tag catalog, a second sibling of the deck detail. A tag
+                  // belongs to no deck (BR-93, BR-230), so it sits beside the
+                  // tree rather than inside it — and staying in this branch is
+                  // what lets Back return to the card list a user opened it
+                  // from (UC-18).
+                  GoRoute(
+                    path: RoutePaths.tagCatalogRelative,
+                    name: RouteNames.tagCatalog,
+                    builder: (context, state) => const TagCatalogScreen(),
+                  ),
+                  // Trash, in the Library branch (AD-22). A sibling of the
+                  // starter catalog rather than a child of a deck: it lists
+                  // items from anywhere in the library, including decks that no
+                  // longer have a parent to hang off.
+                  GoRoute(
+                    path: RoutePaths.trashRelative,
+                    name: RouteNames.trash,
+                    builder: (context, state) => const TrashScreen(),
                   ),
                   // A child route, so a deck screen pushes onto the Decks
                   // branch: the bottom bar stays, Back returns to the list, and
@@ -162,6 +200,24 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
                                   state.pathParameters[RoutePathParams.cardId],
                             ),
                           ),
+                          // One card, read-only (UC-19). **Declared last on
+                          // purpose:** its path is a bare `:cardId`, and
+                          // go_router takes the first pattern that matches, so
+                          // above `new` or `import` it would swallow both and
+                          // the Add action would open a detail screen for a
+                          // card named "new". Nested under the list, so Back
+                          // returns to it with its filter, window and
+                          // selection intact (BR-246).
+                          GoRoute(
+                            path: RoutePaths.cardDetailRelative,
+                            name: RouteNames.cardDetail,
+                            builder: (context, state) => CardDetailScreen(
+                              deckId:
+                                  state.pathParameters[RoutePathParams.deckId]!,
+                              cardId:
+                                  state.pathParameters[RoutePathParams.cardId]!,
+                            ),
+                          ),
                         ],
                       ),
                     ],
@@ -175,31 +231,90 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
               GoRoute(
                 path: RoutePaths.study,
                 name: RouteNames.study,
-                // The fixture deck until a deck picker feeds this branch a
-                // real id (M5.9). The screen itself takes any deck.
-                builder: (context, state) =>
-                    const StudyEntryScreen(deckId: kStudyBranchDeckId),
+                // The tab's own screen at last (UC-14). It stood on a fixture
+                // deck id since M5.7 — a constant naming a row the seeder
+                // happened to write — so the Study tab showed one hard-coded
+                // deck in production and nothing at all in a database that
+                // never had it. Study Home reads the real library.
+                builder: (context, state) => const StudyHomeScreen(),
+                routes: <RouteBase>[
+                  // The deck the user picked, pushed onto the Study branch so
+                  // Back returns to the list that offered it and the bottom bar
+                  // stays. The same screen `deckStudy` builds — a study entry is
+                  // a study entry, and only the branch differs.
+                  GoRoute(
+                    path: RoutePaths.studyDeckRelative,
+                    name: RouteNames.studyDeck,
+                    // `pathParameters` is non-nullable in go_router and the
+                    // segment is required by the pattern, so a match cannot
+                    // occur without it.
+                    builder: (context, state) => StudyEntryScreen(
+                      deckId: state.pathParameters[RoutePathParams.deckId]!,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-          // The two scaffolded branches (AD-19). One route each, and the
-          // screens are presentation-only: entering, leaving or switching to
-          // them must read no repository, open no session and write nothing.
+          // Progress, at two levels (UC-12, UC-13). `/progress` is the
+          // overview the owner settled on — three sections under one header,
+          // then the range selector, the totals and the deck rows.
+          // `/progress/:deckId` is one deck's level, nested so drilling in
+          // pushes onto this branch: the bottom bar stays, Back returns to
+          // the level above, and switching tabs and back finds the deck still
+          // open. The branch around the feature did not move — same path,
+          // same name, same index — which is what AD-19 scaffolded it early
+          // to buy; landing both features cost this one `builder` plus one
+          // child route.
           StatefulShellBranch(
             routes: <RouteBase>[
               GoRoute(
                 path: RoutePaths.progress,
                 name: RouteNames.progress,
-                builder: (context, state) => const ProgressPlaceholderScreen(),
+                // No `deckId`: the library level, with the overview on top.
+                builder: (context, state) => const ProgressScreen(),
+                routes: <RouteBase>[
+                  GoRoute(
+                    path: RoutePaths.progressDeckRelative,
+                    name: RouteNames.progressDeck,
+                    // `pathParameters` is non-nullable in go_router and the
+                    // segment is required by the pattern, so a match cannot
+                    // occur without it. No fallback: inventing a deck id would
+                    // open somebody else's deck rather than fail.
+                    //
+                    // The overview is deliberately absent here: streak, today
+                    // and the seven-day chart are properties of the whole
+                    // library, so repeating them under one deck would answer a
+                    // question nobody asked at this level.
+                    builder: (context, state) => ProgressDeckScreen(
+                      deckId: state.pathParameters[RoutePathParams.deckId],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
+          // Settings was the last branch scaffolded ahead of its feature
+          // (AD-19) and left that state at M99.28 (UC-16). The path, the
+          // name and the branch order are unchanged — replacing the screen
+          // was the whole of it, which is what AD-19 was betting on.
           StatefulShellBranch(
             routes: <RouteBase>[
               GoRoute(
                 path: RoutePaths.settings,
                 name: RouteNames.settings,
-                builder: (context, state) => const SettingsPlaceholderScreen(),
+                builder: (context, state) => const SettingsScreen(),
+                routes: <RouteBase>[
+                  // The daily reminder, nested so its URL is
+                  // `/settings/reminders` and it stays inside the Settings
+                  // branch. The reminder feature owns the screen and the
+                  // settings feature never imports it (AD-13, M6 R1).
+                  GoRoute(
+                    path: RoutePaths.reminderSettingsRelative,
+                    name: RouteNames.reminderSettings,
+                    builder: (context, state) => const ReminderSettingsScreen(),
+                  ),
+                ],
               ),
             ],
           ),
@@ -270,11 +385,3 @@ Future<bool> _deckHoldsCards(ProviderContainer container, String deckId) async {
     return false;
   }
 }
-
-/// The deck the Study tab opens.
-///
-/// **A constant, and deliberately visible.** The Study branch of the navigation
-/// shell has no deck to point at yet — choosing one is the resume screen's job
-/// (M5.9). Naming it here rather than hiding a literal in the builder is what
-/// makes the gap something a reader trips over instead of inherits.
-const String kStudyBranchDeckId = 'fixture-root-a';

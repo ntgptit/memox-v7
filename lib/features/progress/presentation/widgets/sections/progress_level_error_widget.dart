@@ -1,0 +1,106 @@
+import 'package:flutter/material.dart';
+
+import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_content_shell.dart';
+import '../../../../../shared/widgets/mx_empty_state.dart';
+import '../../../../../shared/widgets/mx_error_state.dart';
+import '../support/progress_labels_widget.dart';
+import 'progress_level_header_widget.dart';
+
+/// The two ways a level can fail to render, told apart.
+///
+/// **A deleted deck is not an error.** Nothing went wrong: the deck the link
+/// names is gone, and re-reading will find it gone again — so Retry would offer
+/// an action guaranteed to fail. That branch gets an empty state and the one
+/// thing that helps, the way back to the level that still exists.
+///
+/// Everything else is a read failure, which a retry can genuinely fix, so it
+/// gets `MxErrorState` and a retry.
+///
+/// The failure object never reaches the screen: `progressErrorCopyOf` maps the
+/// *type* to ARB copy, and `Failure.message` is an unlocalized diagnostic
+/// written for a log.
+class ProgressLevelErrorWidget extends StatelessWidget {
+  const ProgressLevelErrorWidget({
+    required this.error,
+    required this.title,
+    required this.onRetry,
+    required this.onLeave,
+    this.header,
+    this.isRetrying = false,
+    super.key,
+  });
+
+  final Object error;
+
+  /// The app-bar title to keep while the level cannot render. Null where there
+  /// honestly is none — a deck's title is its name, and the name is in the data
+  /// that failed to arrive.
+  final String? title;
+
+  final VoidCallback onRetry;
+
+  /// Where a level whose deck is gone sends the user: the library level of
+  /// Progress, which is where the deck used to be listed.
+  final VoidCallback onLeave;
+
+  /// The whole-library overview, kept above the failure at the library level.
+  ///
+  /// A read that failed says nothing about the streak, and the user is not
+  /// helped by losing three sections that loaded. Null inside a deck.
+  final Widget? header;
+
+  /// True while the retry this widget started is still running, so the button
+  /// says so. Without it the control is a lie: the tap does nothing visible
+  /// until the answer lands, which reads as a dead button and earns a second
+  /// tap.
+  final bool isRetrying;
+
+  @override
+  Widget build(BuildContext context) {
+    final copy = progressErrorCopyOf(context, error);
+
+    return MxContentShell(
+      title: title,
+      // Zero for the same reason the loading and loaded faces use it: the band
+      // carries the gutter and `MxEmptyState`/`MxErrorState` pad themselves, so
+      // the shell's own padding was a second inset — 32dp a side instead of 16,
+      // and a visible snap when the read succeeded.
+      //
+      // **It moves a number inside a deck as well, where there is no band.**
+      // Both faces there go from 40dp a side to 24 at 390, and 36 to 24 at 320
+      // — the shell gutter drops and `MxEmptyState`/`MxErrorState`'s own `xl`
+      // is what remains. That is the inset `_emptyLevel` already uses on the
+      // same screen, so the change makes one screen agree with itself; it is
+      // recorded because it was not the reason for the edit.
+      padding: EdgeInsets.zero,
+      body: ProgressHeaderedBody(
+        header: header,
+        body: copy.isDeckMissing
+            ? MxEmptyState(
+                icon: Icons.folder_off_outlined,
+                title: copy.title,
+                message: copy.message,
+                actionLabel: context.l10n.progressDeckMissingBackAction,
+                onAction: onLeave,
+              )
+            : Semantics(
+                // **Announced, because it is no longer unmissable.** This face
+                // used to replace the whole screen; under the overview band it
+                // starts below the fold, so a reader who is not looking at the
+                // bottom of the screen gets no signal that the read failed at
+                // all. The overview's own error face has carried this since
+                // stage 1 — the two are one screen and should behave alike.
+                liveRegion: true,
+                child: MxErrorState(
+                  title: copy.title,
+                  message: copy.message,
+                  retryLabel: context.l10n.progressErrorRetryAction,
+                  onRetry: onRetry,
+                  isRetrying: isRetrying,
+                ),
+              ),
+      ),
+    );
+  }
+}

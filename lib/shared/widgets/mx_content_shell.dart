@@ -55,10 +55,6 @@ class MxContentShell extends StatefulWidget {
   /// field, or both.
   final Widget? subheader;
 
-  /// How tall the subheader is. `AppBar.bottom` needs the number up front, so a
-  /// caller stacking two rows in there — a path and a search field — has to say
-  /// so, and has to scale it with the text: at `textScaler` 2.0 a row that fit
-
   /// Screen padding. `null` resolves to the scale for the current width:
   /// [AppSpacing.lg], or [AppSpacing.md] below [AppBreakpoints.compact].
   final EdgeInsetsGeometry? padding;
@@ -98,7 +94,7 @@ class _MxContentShellState extends State<MxContentShell> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             if (widget.subheader != null)
-              _MxSubheader(
+              MxSubheaderBand(
                 gutter: _defaultPadding(context).left,
                 child: widget.subheader!,
               ),
@@ -159,17 +155,28 @@ class _MxContentShellState extends State<MxContentShell> {
   }
 }
 
-/// The pinned strip under the bar.
+/// A subheader strip: the screen's horizontal gutter plus the vertical rhythm
+/// the strip is entitled to.
 ///
-/// Carries the screen's horizontal gutter so its contents line up with the body
-/// below.
-/// **The top of the body, not `AppBar.bottom`.** It was the latter, which forces
-/// a height to be declared up front — and the height of this strip depends on the
-/// user's text scale, so a declared number is a guess that overflows the moment
-/// the guess is low. Above an `Expanded` body it takes the height it needs and
-/// stays just as pinned: nothing above the `Expanded` scrolls.
-class _MxSubheader extends StatelessWidget {
-  const _MxSubheader({required this.gutter, required this.child});
+/// **It carries no height of its own, and that is the point.** As
+/// [MxContentShell.subheader] it sits at the top of the body rather than in
+/// `AppBar.bottom`, because the latter forces a height to be declared up front
+/// — and this strip's height depends on the user's text scale, so a declared
+/// number is a guess that overflows the moment the guess is low. Above an
+/// `Expanded` body it takes the height it needs and is just as pinned: nothing
+/// above the `Expanded` scrolls.
+///
+/// **Public because one screen pins the band from inside its own scroll view.**
+/// `/progress` composes the overview above the deck level, so the range
+/// selector has to travel with the overview and only then stick — that is a
+/// `PinnedHeaderSliver`, and [MxContentShell.subheader] cannot express it,
+/// being above the body rather than in it. Same band, same padding rule; the
+/// widget exists so the compact-tier rule below is not four numbers copied to
+/// a second site. A caller pinning it itself supplies its own background —
+/// inside the body this widget is transparent, and content would scroll
+/// through it.
+class MxSubheaderBand extends StatelessWidget {
+  const MxSubheaderBand({required this.gutter, required this.child, super.key});
 
   final double gutter;
   final Widget child;

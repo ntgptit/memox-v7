@@ -18,15 +18,19 @@ Exit: 0 all good, 1 otherwise.
 import sqlite3, re, sys, pathlib, argparse
 
 SCHEMA = """
+CREATE TABLE delete_batches (id TEXT PRIMARY KEY, item_type TEXT NOT NULL,
+ root_item_id TEXT NOT NULL, deleted_at TEXT NOT NULL, owner_id TEXT NULL);
 CREATE TABLE decks (id TEXT PRIMARY KEY, name TEXT NOT NULL,
  parent_deck_id TEXT NULL REFERENCES decks(id) ON DELETE CASCADE,
  root_deck_id TEXT NOT NULL, content_type TEXT NOT NULL, owner_id TEXT NULL,
  scheduler_type TEXT NULL, scheduler_version INTEGER NULL, scheduler_config TEXT NULL,
  scheduler_generation INTEGER NULL, study_config TEXT NULL, first_answered_at TEXT NULL,
  source_template_id TEXT NULL, source_template_version INTEGER NULL,
- created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+ created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
+ delete_batch_id TEXT NULL REFERENCES delete_batches(id) ON DELETE CASCADE);
 CREATE TABLE cards (id TEXT PRIMARY KEY, deck_id TEXT NOT NULL REFERENCES decks(id) ON DELETE CASCADE,
- front TEXT NOT NULL, back TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+ front TEXT NOT NULL, back TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
+ delete_batch_id TEXT NULL REFERENCES delete_batches(id) ON DELETE CASCADE);
 CREATE TABLE card_study_states (card_id TEXT PRIMARY KEY REFERENCES cards(id) ON DELETE CASCADE,
  scheduler_type TEXT NOT NULL, scheduler_version INTEGER NOT NULL, scheduler_generation INTEGER NOT NULL,
  learned_at TEXT NULL, due_at TEXT NULL, last_answered_at TEXT NULL,
@@ -38,7 +42,7 @@ CREATE TABLE study_sessions (id TEXT PRIMARY KEY, deck_id TEXT NOT NULL REFERENC
  session_kind TEXT NOT NULL, current_mode TEXT NOT NULL,
  status TEXT NOT NULL, end_reason TEXT NULL, cursor INTEGER NOT NULL DEFAULT 0,
  card_limit INTEGER NOT NULL DEFAULT 20,
- started_at TEXT NOT NULL, ended_at TEXT NULL);
+ started_at TEXT NOT NULL, ended_at TEXT NULL, direction TEXT NULL);
 CREATE TABLE study_answers (id TEXT PRIMARY KEY, card_id TEXT NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
  session_id TEXT NOT NULL REFERENCES study_sessions(id), scheduler_type TEXT NOT NULL,
  scheduler_generation INTEGER NOT NULL, kind TEXT NOT NULL, mode TEXT NOT NULL, action TEXT NOT NULL,
@@ -46,7 +50,8 @@ CREATE TABLE study_answers (id TEXT PRIMARY KEY, card_id TEXT NOT NULL REFERENCE
  comparison_version INTEGER NULL, used_hint INTEGER NULL,
  next_due_at TEXT NULL, previous_box INTEGER NULL, next_box INTEGER NULL,
  previous_ease_factor REAL NULL, next_ease_factor REAL NULL,
- previous_interval_days INTEGER NULL, next_interval_days INTEGER NULL);
+ previous_interval_days INTEGER NULL, next_interval_days INTEGER NULL,
+ direction TEXT NULL);
 CREATE TABLE app_settings (id INTEGER PRIMARY KEY CHECK (id = 1),
  card_limit INTEGER NOT NULL DEFAULT 20,
  new_card_order TEXT NOT NULL DEFAULT 'created', updated_at TEXT NOT NULL);
@@ -57,6 +62,7 @@ CREATE TABLE study_queue_items (
  position INTEGER NOT NULL, status TEXT NOT NULL,
  available_at INTEGER NOT NULL DEFAULT 0, answers_in_session INTEGER NOT NULL DEFAULT 0,
  remaining_ms INTEGER NULL, is_revealed INTEGER NOT NULL DEFAULT 0,
+ direction TEXT NULL,
  PRIMARY KEY (session_id, mode, round, card_id));
 """
 
@@ -82,24 +88,24 @@ def good(c):
     -- `first_answered_at` set, because `c1` below carries a `learned_at`.
     -- A learned card under an unlocked root is invariant 30's violation
     -- (BR-13), so the fixture that claims to be valid has to be locked.
-    INSERT INTO decks VALUES('r','Root',NULL,'r','deck',NULL,'eight_box',1,NULL,1,NULL,'t',NULL,NULL,'t','t');
-    INSERT INTO decks VALUES('a','A','r','r','deck',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'t','t');
-    INSERT INTO decks VALUES('b','B','a','r','card',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'t','t');
-    INSERT INTO cards VALUES('c1','b','f','k','t','t');
+    INSERT INTO decks VALUES('r','Root',NULL,'r','deck',NULL,'eight_box',1,NULL,1,NULL,'t',NULL,NULL,'t','t',NULL);
+    INSERT INTO decks VALUES('a','A','r','r','deck',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'t','t',NULL);
+    INSERT INTO decks VALUES('b','B','a','r','card',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'t','t',NULL);
+    INSERT INTO cards VALUES('c1','b','f','k','t','t',NULL);
     INSERT INTO card_study_states VALUES('c1','eight_box',1,1,'t','t','t',1,0,1,NULL,NULL,NULL);
-    INSERT INTO study_sessions VALUES('s1','r','r',1,'reviewing','match','completed',NULL,1,20,'t','t');
-    INSERT INTO study_answers VALUES('h1','c1','s1','eight_box',1,'relearning','match','forgotten','t',NULL,NULL,NULL,NULL,1,1,NULL,NULL,NULL,NULL);
-    INSERT INTO study_queue_items VALUES('s1','browse',1,'c1',0,'completed',0,0,NULL,0);
-    INSERT INTO study_queue_items VALUES('s1','match',1,'c1',0,'completed',0,2,NULL,0);
+    INSERT INTO study_sessions VALUES('s1','r','r',1,'reviewing','match','completed',NULL,1,20,'t','t',NULL);
+    INSERT INTO study_answers VALUES('h1','c1','s1','eight_box',1,'relearning','match','forgotten','t',NULL,NULL,NULL,NULL,1,1,NULL,NULL,NULL,NULL,NULL);
+    INSERT INTO study_queue_items VALUES('s1','browse',1,'c1',0,'completed',0,0,NULL,0,NULL);
+    INSERT INTO study_queue_items VALUES('s1','match',1,'c1',0,'completed',0,2,NULL,0,NULL);
     """)
 
 # each: query-number -> SQL that introduces exactly that violation
 BAD = {
- 1: "INSERT INTO cards VALUES('cx','r','f','k','t','t');",
- 2: "INSERT INTO decks VALUES('u','U','a','r','unset',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'t','t');"
-    "INSERT INTO cards VALUES('cu','u','f','k','t','t');",
- 3: "INSERT INTO decks VALUES('z','Z','b','r','deck',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'t','t');",
- 4: "INSERT INTO cards VALUES('ca','a','f','k','t','t');",
+ 1: "INSERT INTO cards VALUES('cx','r','f','k','t','t',NULL);",
+ 2: "INSERT INTO decks VALUES('u','U','a','r','unset',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'t','t',NULL);"
+    "INSERT INTO cards VALUES('cu','u','f','k','t','t',NULL);",
+ 3: "INSERT INTO decks VALUES('z','Z','b','r','deck',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'t','t',NULL);",
+ 4: "INSERT INTO cards VALUES('ca','a','f','k','t','t',NULL);",
  5: "UPDATE decks SET content_type='card' WHERE id='r';",
  30: "UPDATE decks SET first_answered_at=NULL WHERE id='r';",
  6: "UPDATE decks SET root_deck_id='wrong' WHERE id='b';",
@@ -108,45 +114,65 @@ BAD = {
  9: "UPDATE card_study_states SET scheduler_generation=99 WHERE card_id='c1';",
  10:"UPDATE decks SET scheduler_type='sm2' WHERE id='a';",
  11:"UPDATE decks SET scheduler_type=NULL WHERE id='r';",
- 12:"INSERT INTO study_sessions VALUES('s2','r','r',1,'reviewing','match','completed','user_exit',0,20,'t','t');",
- 13:"INSERT INTO study_sessions VALUES('s3','r','r',1,'reviewing','match','abandoned','user_exit',0,20,'t',NULL);",
- 14:"INSERT INTO study_answers VALUES('h2','c1','s1','eight_box',1,'relearning','match','forgotten','t',NULL,NULL,NULL,NULL,1,5,NULL,NULL,NULL,NULL);",
+ 12:"INSERT INTO study_sessions VALUES('s2','r','r',1,'reviewing','match','completed','user_exit',0,20,'t','t',NULL);",
+ 13:"INSERT INTO study_sessions VALUES('s3','r','r',1,'reviewing','match','abandoned','user_exit',0,20,'t',NULL,NULL);",
+ 14:"INSERT INTO study_answers VALUES('h2','c1','s1','eight_box',1,'relearning','match','forgotten','t',NULL,NULL,NULL,NULL,1,5,NULL,NULL,NULL,NULL,NULL);",
  # A chain from the valid tree's 'a' (level 2) down to level 11 (BR-55).
- 16:"INSERT INTO study_queue_items VALUES('s1','match',1,'c1x',1,'pending',0,0,NULL,0);"
-    "INSERT INTO cards VALUES('c1x','b','f','k','t','t');",
- 17:"INSERT INTO study_queue_items VALUES('s1','match',1,'c1y',2,'completed',-1,0,NULL,0);"
-    "INSERT INTO cards VALUES('c1y','b','f','k','t','t');",
+ 16:"INSERT INTO study_queue_items VALUES('s1','match',1,'c1x',1,'pending',0,0,NULL,0,NULL);"
+    "INSERT INTO cards VALUES('c1x','b','f','k','t','t',NULL);",
+ 17:"INSERT INTO study_queue_items VALUES('s1','match',1,'c1y',2,'completed',-1,0,NULL,0,NULL);"
+    "INSERT INTO cards VALUES('c1y','b','f','k','t','t',NULL);",
  # 21 the trong mot phien: card_limit mac dinh la 20 (BR-24), nen 21 la vi pham.
  # Nguong doc tu chinh session chu khong viet cung, xem invariant 18.
  18:"".join(
-    "INSERT INTO cards VALUES('q%d','b','f','k','t','t');"
-    "INSERT INTO study_queue_items VALUES('s1','match',1,'q%d',%d,'completed',0,1,NULL,0);" % (n, n, n + 10)
+    "INSERT INTO cards VALUES('q%d','b','f','k','t','t',NULL);"
+    "INSERT INTO study_queue_items VALUES('s1','match',1,'q%d',%d,'completed',0,1,NULL,0,NULL);" % (n, n, n + 10)
     for n in range(21)
  ),
- 28:"INSERT INTO cards VALUES('c28','b','f','k','t','t');"
+ 28:"INSERT INTO cards VALUES('c28','b','f','k','t','t',NULL);"
     "INSERT INTO card_study_states VALUES('c28','eight_box',1,1,NULL,'t',NULL,0,0,1,NULL,NULL,NULL);",
- 24:"INSERT INTO cards VALUES('c24','b','f','k','t','t');"
+ 24:"INSERT INTO cards VALUES('c24','b','f','k','t','t',NULL);"
     "INSERT INTO card_study_states VALUES('c24','eight_box',1,1,'t',NULL,NULL,0,0,1,NULL,NULL,NULL);",
- 25:"INSERT INTO cards VALUES('c25','b','f','k','t','t');"
+ 25:"INSERT INTO cards VALUES('c25','b','f','k','t','t',NULL);"
     "INSERT INTO card_study_states VALUES('c25','eight_box',1,1,NULL,NULL,NULL,0,0,1,NULL,NULL,NULL);"
-    "INSERT INTO study_answers VALUES('h25','c25','s1','eight_box',1,'scheduled','match','forgotten','t',NULL,NULL,NULL,NULL,1,1,NULL,NULL,NULL,NULL);",
- 26:"INSERT INTO study_answers VALUES('h26','c1','s1','eight_box',1,'learning','match','forgotten','t',NULL,NULL,NULL,NULL,1,1,NULL,NULL,NULL,NULL);",
+    "INSERT INTO study_answers VALUES('h25','c25','s1','eight_box',1,'scheduled','match','forgotten','t',NULL,NULL,NULL,NULL,1,1,NULL,NULL,NULL,NULL,NULL);",
+ 26:"INSERT INTO study_answers VALUES('h26','c1','s1','eight_box',1,'learning','match','forgotten','t',NULL,NULL,NULL,NULL,1,1,NULL,NULL,NULL,NULL,NULL);",
  27:"UPDATE decks SET study_config='{}' WHERE id='b';",
  # A sub-deck that kept its type after everything left it (BR-163). 'a' is a
  # non-root 'deck' whose only child is 'b'; drop 'b' and its card and 'a' is
  # the empty typed deck invariant 29 exists to catch.
  29:"DELETE FROM decks WHERE id='b';",
- 21:"INSERT INTO cards VALUES('c21','b','f','k','t','t');"
-    "INSERT INTO study_queue_items VALUES('s1','match',1,'c21',9,'pending',0,0,500,0);",
- 22:"INSERT INTO study_answers VALUES('h22','c1','s1','eight_box',1,'scheduled','match','forgotten','t','timeout',NULL,NULL,NULL,1,1,NULL,NULL,NULL,NULL);",
- 23:"INSERT INTO study_answers VALUES('h23','c1','s1','eight_box',1,'scheduled','match','forgotten','t',NULL,1,0,NULL,1,1,NULL,NULL,NULL,NULL);",
- 19:"INSERT INTO cards VALUES('c19','b','f','k','t','t');"
-    "INSERT INTO study_queue_items VALUES('s1','match',3,'c19',0,'pending',0,0,NULL,0);",
- 20:"INSERT INTO cards VALUES('c20','b','f','k','t','t');"
-    "INSERT INTO study_queue_items VALUES('s1','match',2,'c20',0,'pending',0,0,NULL,0);",
+ 21:"INSERT INTO cards VALUES('c21','b','f','k','t','t',NULL);"
+    "INSERT INTO study_queue_items VALUES('s1','match',1,'c21',9,'pending',0,0,500,0,NULL);",
+ 22:"INSERT INTO study_answers VALUES('h22','c1','s1','eight_box',1,'scheduled','match','forgotten','t','timeout',NULL,NULL,NULL,1,1,NULL,NULL,NULL,NULL,NULL);",
+ 23:"INSERT INTO study_answers VALUES('h23','c1','s1','eight_box',1,'scheduled','match','forgotten','t',NULL,1,0,NULL,1,1,NULL,NULL,NULL,NULL,NULL);",
+ 19:"INSERT INTO cards VALUES('c19','b','f','k','t','t',NULL);"
+    "INSERT INTO study_queue_items VALUES('s1','match',3,'c19',0,'pending',0,0,NULL,0,NULL);",
+ 20:"INSERT INTO cards VALUES('c20','b','f','k','t','t',NULL);"
+    "INSERT INTO study_queue_items VALUES('s1','match',2,'c20',0,'pending',0,0,NULL,0,NULL);",
+ # A direction on a queue row whose session runs eight_box (BR-182). The valid
+ # tree's root is eight_box, so nothing about s1 may carry one.
+ 31:"INSERT INTO study_queue_items VALUES('s1','self_assess',1,'c1',5,'pending',0,0,NULL,0,'korean_to_meaning');",
+ # A turn claiming a direction its own queue row does not have (BR-185). The
+ # match row for c1 carries none, so the answer copied nothing.
+ 32:"INSERT INTO study_answers VALUES('h32','c1','s1','eight_box',1,'relearning','match','forgotten','t',NULL,NULL,NULL,NULL,1,1,NULL,NULL,NULL,NULL,'korean_to_meaning');",
+# ---- Trash (v11) ----------------------------------------------------------
+ # 'b' goes to Trash while its card stays active: the state that would make
+ # `delete_batch_id IS NULL` stop meaning "visible".
+ 33:"INSERT INTO delete_batches VALUES('bt1','deck','b','t2',NULL);"
+    "UPDATE decks SET delete_batch_id='bt1' WHERE id='b';",
+ 34:"INSERT INTO delete_batches VALUES('bt2','deck','a','t2',NULL);"
+    "UPDATE decks SET delete_batch_id='bt2' WHERE id='a';",
+ 35:"INSERT INTO delete_batches VALUES('bt3','deck','r','t2',NULL);",
+ # Ancestor deleted BEFORE its descendant — the ordering BR-265 leans on.
+ 36:"INSERT INTO delete_batches VALUES('bt4','deck','a','t1',NULL);"
+    "INSERT INTO delete_batches VALUES('bt5','deck','b','t9',NULL);"
+    "UPDATE decks SET delete_batch_id='bt4' WHERE id='a';"
+    "UPDATE decks SET delete_batch_id='bt5' WHERE id='b';",
+ 37:"INSERT INTO delete_batches VALUES('bt6','deck','nosuchdeck','t2',NULL);",
  15:"".join(
     "INSERT INTO decks VALUES('x%d','X','%s','r','deck',NULL,NULL,NULL,NULL,"
-    "NULL,NULL,NULL,NULL,NULL,'t','t');" % (n, 'a' if n == 3 else 'x%d' % (n - 1))
+    "NULL,NULL,NULL,NULL,NULL,'t','t',NULL);" % (n, 'a' if n == 3 else 'x%d' % (n - 1))
     for n in range(3, 12)
  ),
 }

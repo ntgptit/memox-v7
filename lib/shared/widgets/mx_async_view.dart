@@ -39,6 +39,7 @@ class MxAsyncView<T> extends StatelessWidget {
     required this.data,
     required this.error,
     this.loadingFrame,
+    this.shouldSkipLoadingOnReload = false,
     super.key,
   });
 
@@ -68,6 +69,33 @@ class MxAsyncView<T> extends StatelessWidget {
   /// already sits inside a shell.
   final Widget Function(Widget loading)? loadingFrame;
 
+  /// Keep the previous value on screen while a **reload** runs, not only a
+  /// refresh.
+  ///
+  /// Riverpod calls it a reload when a *dependency* changed, and a refresh when
+  /// something asked for the same thing again. The default here is `false`
+  /// because for most screens those two are the same event: the deck list's
+  /// dependency is the deck you are looking at, so a change means the previous
+  /// value answers a question nobody is asking any more, and holding it on
+  /// screen would be showing the wrong deck's contents.
+  ///
+  /// **The exception is a screen whose dependency is the instant it measures
+  /// against** — and two screens found it independently, which is why the flag
+  /// arrived twice in one integration batch. Progress watches
+  /// `progressNowProvider`, the instant its seven-day windows are anchored to;
+  /// Study Home watches a clock notifier so its due counts expire at the right
+  /// moment. Both move on **every app resume** and at every day boundary, and
+  /// in neither case has the user's question changed — only the measurement
+  /// point. With the flag off, a resume replaced populated content with a
+  /// full-screen spinner and the list lost its scroll position, which UC-12's
+  /// UI states and the wireframe's P8 forbid in as many words.
+  ///
+  /// Opt in only when the reload genuinely re-asks the same question. If the
+  /// dependency changes *what* is being asked, leave it off: stale data
+  /// presented as fresh is worse than a spinner — which is also why this is a
+  /// parameter rather than a changed default.
+  final bool shouldSkipLoadingOnReload;
+
   @override
   Widget build(BuildContext context) {
     return value.when(
@@ -78,9 +106,10 @@ class MxAsyncView<T> extends StatelessWidget {
       // populated list with a spinner every time the app resumes would be motion
       // in place of information.
       skipLoadingOnRefresh: true,
-      // Do not keep it across a reload. A dependency changing means the previous
-      // value answers a question nobody is asking any more.
-      skipLoadingOnReload: false,
+      // A reload is a dependency change, which usually means the previous value
+      // answers a question nobody is asking any more — so `false` by default,
+      // and the field's doc explains the two screens that are not like that.
+      skipLoadingOnReload: shouldSkipLoadingOnReload,
       loading: _buildLoading,
       data: data,
       error: error,

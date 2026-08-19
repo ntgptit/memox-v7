@@ -9,11 +9,19 @@ import 'components/control_components.dart';
 import 'components/feedback_components.dart';
 import 'components/form_components.dart';
 import 'components/overlay_components.dart';
+import 'screens/card_detail_screen_use_case.dart';
 import 'screens/card_export_sheet_use_case.dart';
 import 'screens/card_import_screen_use_case.dart';
 import 'screens/deck_list_screen_use_case.dart';
-import 'screens/placeholder_screens_use_case.dart';
+import 'screens/progress_deck_screen_use_case.dart';
+import 'screens/progress_screen_use_case.dart';
+import 'screens/reminder_screen_use_case.dart';
+import 'screens/settings_screen_use_case.dart';
+import 'screens/library_search_screen_use_case.dart';
 import 'screens/study_screens_use_case.dart';
+import 'screens/tag_catalog_screen_use_case.dart';
+import 'screens/tag_filter_sheet_use_case.dart';
+import 'screens/trash_screen_use_case.dart';
 import 'support/catalog_page.dart';
 import 'tokens/color_sections.dart';
 import 'tokens/scale_sections.dart';
@@ -118,11 +126,19 @@ class MemoxWidgetbook extends StatelessWidget {
         WidgetbookCategory(
           name: 'Screens',
           children: <WidgetbookNode>[
+            cardDetailScreenComponent(),
             cardExportSheetComponent(),
             cardImportScreenComponent(),
             deckListScreenComponent(),
+            progressScreenComponent(),
+            settingsScreenComponent(),
+            reminderSettingsScreenComponent(),
+            tagCatalogScreenComponent(),
+            tagFilterSheetComponent(),
+            librarySearchScreenComponent(),
             ...studyScreenComponents(),
-            ...placeholderScreenComponents(),
+            progressDeckScreenComponent(),
+            trashScreenComponent(),
           ],
         ),
         WidgetbookCategory(
@@ -159,6 +175,7 @@ class MemoxWidgetbook extends StatelessWidget {
             navigationBarComponent(),
             textFieldComponent(),
             cardComponent(),
+            metricWellComponent(),
             listTileComponent(),
             sessionTopBarComponent(),
             emptyStateComponent(),

@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/theme/app_breakpoints.dart';
 import '../core/theme/app_compact_scale.dart';
 import '../core/theme/app_theme.dart';
+import '../features/settings/domain/models/app_language_model.dart';
+import '../features/settings/domain/models/app_settings_model.dart';
+import '../features/settings/domain/models/app_theme_mode_model.dart';
+import '../features/settings/presentation/controllers/app_settings_controller.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../l10n/l10n_extension.dart';
 import 'mobile_frame_widget.dart';
@@ -17,7 +22,15 @@ import 'router/app_router.dart';
 ///
 /// * theme and design tokens — M3.4, M3.5
 /// * routing via `MaterialApp.router` — M4.1
-class MemoxApp extends StatelessWidget {
+/// * theme mode and locale from stored settings — M99.28
+///
+/// **The settings seam runs one way** (AD-13, AD-19). Theme and locale live on
+/// `MaterialApp`, which is `app/`, while the values that decide them belong to
+/// a feature — and a feature may never import `app/`. So the feature declares a
+/// provider and this file reads it; nothing is instantiated here, and the
+/// repository behind it is bound in `app/di/repository_bindings.dart` like
+/// every other one.
+class MemoxApp extends ConsumerWidget {
   const MemoxApp({this.router, super.key});
 
   /// Overridden only by tests.
@@ -33,7 +46,21 @@ class MemoxApp extends StatelessWidget {
   final GoRouter? router;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // `AsyncValue.value`, and the fallback is `AppSettingsModel.defaults` rather
+    // than an invented pair. Before the first emission — and if the read fails
+    // — the app follows the platform for both, which is exactly what "System"
+    // means and what every build before M99.28 did unconditionally (BR-214,
+    // BR-215). A spinner in place of the app while a local SQLite row is read
+    // would be a blank window instead of a one-frame resolution, which is the
+    // trade `FixtureSeederWidget` already refused for the deck list.
+    //
+    // A failed read is not swallowed: the settings screen renders the error
+    // through the same provider. What is refused here is letting a broken
+    // settings row take the whole app down with it.
+    final settings =
+        ref.watch(appSettingsProvider).value ?? AppSettingsModel.defaults;
+
     return MaterialApp.router(
       // Resolved here, never constructed here. `createAppRouter()` in this
       // method would build a new router on every rebuild, discarding the
@@ -51,11 +78,20 @@ class MemoxApp extends StatelessWidget {
       supportedLocales: AppLocalizations.supportedLocales,
       theme: buildLightTheme(),
       darkTheme: buildDarkTheme(),
-      // `themeMode` is deliberately not passed: MaterialApp already defaults
-      // to ThemeMode.system, and stating it trips avoid_redundant_argument_values
-      // — a lint this project promoted to error on purpose. Suppressing our own
-      // lint to restate a default would be the worse trade. The behaviour is
-      // pinned by test instead.
+      // The stored choice, resolved to Flutter's own enum here and nowhere
+      // else. `AppThemeMode.system` becomes `ThemeMode.system`, which is what
+      // makes the app keep following the platform rather than freezing at
+      // whatever it was on the frame this was read (BR-214).
+      themeMode: _themeModeOf(settings.themeMode),
+      // Instant, not a cross-fade. Material's 200ms theme animation renders
+      // intermediate colours — literally a third theme on the way between two
+      // — which BR-214 and the M99.28 wireframe both rule out. It is also what
+      // makes the cold-start resolution above read as "the app started dark"
+      // rather than as a fade somebody has to watch.
+      themeAnimationDuration: Duration.zero,
+      // Null for `system`, which is how `MaterialApp` is told to resolve from
+      // the platform's preferred locales over `supportedLocales` (BR-215).
+      locale: _localeOf(settings.language),
       // No `localeResolutionCallback` on purpose. Flutter's default resolution
       // already falls back to `supportedLocales.first` — which is `en`, the
       // template ARB — for an unsupported locale. A custom callback here was
@@ -73,6 +109,28 @@ class MemoxApp extends StatelessWidget {
       ),
     );
   }
+}
+
+/// The stored theme choice as Flutter's enum.
+///
+/// A `switch` in the composition root rather than a getter on [AppThemeMode]:
+/// `domain/` may not import Flutter, and this three-line mapping is the whole
+/// price of that boundary. Exhaustive, so a fourth choice fails to compile here
+/// instead of silently resolving to the system default.
+ThemeMode _themeModeOf(AppThemeMode mode) => switch (mode) {
+  AppThemeMode.system => ThemeMode.system,
+  AppThemeMode.light => ThemeMode.light,
+  AppThemeMode.dark => ThemeMode.dark,
+};
+
+/// The stored language choice as a [Locale], or null to follow the platform.
+///
+/// Built from [AppLanguage.languageCode] rather than from a second `switch`, so
+/// adding a language is one line in the enum and nothing here.
+Locale? _localeOf(AppLanguage language) {
+  final code = language.languageCode;
+
+  return code == null ? null : Locale(code);
 }
 
 /// Applies [applyCompactScale] when the surface is narrower than

@@ -9,7 +9,6 @@ import '../../domain/usecases/move_deck_use_case.dart';
 import '../../domain/usecases/rename_deck_use_case.dart';
 import '../../domain/usecases/change_unlocked_scheduler_use_case.dart';
 import '../../domain/usecases/reset_learning_progress_use_case.dart';
-import '../../domain/usecases/search_decks_use_case.dart';
 import '../../domain/usecases/watch_deck_move_targets_use_case.dart';
 import '../../domain/usecases/watch_deck_list_use_case.dart';
 
@@ -57,6 +56,11 @@ RenameDeckUseCase renameDeckUseCase(Ref ref) =>
 DeleteDeckUseCase deleteDeckUseCase(Ref ref) =>
     DeleteDeckUseCase(ref.watch(deckRepositoryProvider));
 
+/// The delete that reports its batch, for the one caller that offers Undo.
+@riverpod
+DeleteDeckForUndoUseCase deleteDeckForUndoUseCase(Ref ref) =>
+    DeleteDeckForUndoUseCase(ref.watch(deckRepositoryProvider));
+
 @riverpod
 ResetLearningProgressUseCase resetLearningProgressUseCase(Ref ref) =>
     ResetLearningProgressUseCase(ref.watch(deckRepositoryProvider));
@@ -80,8 +84,3 @@ GetDeckDeletionImpactUseCase getDeckDeletionImpactUseCase(Ref ref) =>
 @riverpod
 WatchDeckMoveTargetsUseCase watchDeckMoveTargetsUseCase(Ref ref) =>
     WatchDeckMoveTargetsUseCase(ref.watch(deckRepositoryProvider));
-
-/// Finding a deck by name, anywhere below where the user is standing.
-@riverpod
-SearchDecksUseCase searchDecksUseCase(Ref ref) =>
-    SearchDecksUseCase(ref.watch(deckRepositoryProvider));

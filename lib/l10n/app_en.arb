@@ -24,21 +24,222 @@
   "@progressTitle": {
     "description": "App bar title of the Progress branch. Kept separate from navigationProgressLabel for the same reason as decksTitle: a tab label competes for width, a title does not."
   },
-  "progressPlaceholderTitle": "Progress is being developed",
-  "@progressPlaceholderTitle": {
-    "description": "Heading of the Progress placeholder (AD-19). States plainly that the feature is not in this build rather than showing controls that do nothing."
+  "progressLoadingLabel": "Loading your progress",
+  "@progressLoadingLabel": {
+    "description": "Screen-reader label announced while the Progress screen is loading. A bare spinner announces nothing at all."
   },
-  "progressPlaceholderMessage": "Your current study activity is still saved for use when the feature is ready.",
-  "@progressPlaceholderMessage": {
-    "description": "Body of the Progress placeholder. Carries the one fact a learner needs while waiting: study history is already recorded (review_history is append-only), so nothing is lost before the feature ships."
+  "progressStreakSectionLabel": "Current streak",
+  "@progressStreakSectionLabel": {
+    "description": "Heading of the hero section (W2). Deliberately 'current', not 'longest': longest streak has no business rule behind it and is out of scope for v1 (BR-227)."
+  },
+  "progressStreakDaysLabel": "{count, plural, =0{0 days} =1{1 day} other{{count} days}}",
+  "@progressStreakDaysLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "The hero headline: how many consecutive local days have activity (BR-197). The unit is always spelled out -- a bare numeral at display size reads as a count of something the user has to guess at."
+  },
+  "progressStreakTodayLine": "{count, plural, =0{No cards today} =1{1 card today} other{{count} cards today}}",
+  "@progressStreakTodayLine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "The line under the hero headline when the streak includes today. 'Cards' is the unit on purpose: the count is distinct cards touched today, not answers given (BR-228)."
+  },
+  "progressStreakHeldLine": "No cards today — your streak is held from yesterday",
+  "@progressStreakHeldLine": {
+    "description": "The hero's supporting line when today has no activity but yesterday does (BR-197, A1). Without it a headline of '7 days' beside a Today section of zero reads as a contradiction."
+  },
+  "progressStreakZeroLine": "Study today to start a streak",
+  "@progressStreakZeroLine": {
+    "description": "The hero's supporting line when the streak is zero (P6). An invitation, never a reproach: the person reading it has just come back."
+  },
+  "progressStreakSemanticsHeadline": "{streak, plural, =0{Current streak, 0 days} =1{Current streak, 1 day} other{Current streak, {streak} days}}",
+  "@progressStreakSemanticsHeadline": {
+    "placeholders": {
+      "streak": {
+        "type": "int"
+      }
+    },
+    "description": "The first clause of the hero's announcement (W6.4). Read as separate nodes, the number and its unit arrive apart and the figure loses its meaning — so the headline is one clause. The second clause is the hero's visible supporting line, joined on by `progressStreakSemantics`, which owns the punctuation: a label built from counts alone drops the held-from-yesterday sentence that W2.5 exists to say."
+  },
+  "progressStreakSemantics": "{headline}. {support}",
+  "@progressStreakSemantics": {
+    "placeholders": {
+      "headline": {
+        "type": "String"
+      },
+      "support": {
+        "type": "String"
+      }
+    },
+    "description": "The hero announcement, one clause then the sentence the screen shows. Separate from the two halves because the separator is punctuation a screen reader pauses on, and punctuation is not the same in every language."
+  },
+  "progressTodaySectionLabel": "Today",
+  "@progressTodaySectionLabel": {
+    "description": "Heading of the Today section (W3)."
+  },
+  "progressTodayCardsLabel": "{count, plural, =0{No cards} =1{1 card} other{{count} cards}}",
+  "@progressTodayCardsLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "The Today total. The unit is mandatory: the count is distinct cards, and a user shown a bare number would reasonably read it as turns taken (BR-228)."
+  },
+  "progressTodayLearningLabel": "Learning",
+  "@progressTodayLearningLabel": {
+    "description": "Half of the Today breakdown: cards with at least one learning answer today (BR-195). Same word the learning session uses, so the two agree."
+  },
+  "progressTodayReviewingLabel": "Reviewing",
+  "@progressTodayReviewingLabel": {
+    "description": "The other half: cards whose answers today were scheduled or relearning only (BR-195)."
+  },
+  "progressTodayPartitionNote": "Learning and Reviewing add up to today's total — a card counts once, whichever way you met it.",
+  "@progressTodayPartitionNote": {
+    "description": "One line explaining that the two halves are a partition (BR-195). Not decoration: without it a user who answered the same card in both modes expects the halves to sum to more than the total."
+  },
+  "progressWeekSectionLabel": "Daily activity",
+  "@progressWeekSectionLabel": {
+    "description": "Heading of the activity chart (W4). Names what the chart is rather than its window: the chart is always seven days including today (BR-196) while the range selector below it switches 7/30, and both headings reading 'Last 7 days' contradicted each other the moment 30 was picked (X9)."
+  },
+  "progressWeekTodayLabel": "Today",
+  "@progressWeekTodayLabel": {
+    "description": "Row label of the last row of the chart. 'Today' rather than the weekday name, so the row that matters most is not something the reader has to work out from the date."
+  },
+  "progressWeekdayShortLabel": "{weekday, select, 1{Mon} 2{Tue} 3{Wed} 4{Thu} 5{Fri} 6{Sat} 7{Sun} other{}}",
+  "@progressWeekdayShortLabel": {
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      }
+    },
+    "description": "Row labels of the chart, keyed by Dart's DateTime.weekday (1 = Monday). Spelled out in ARB rather than taken from intl's DateFormat.E, which needs locale data initialised at startup for anything but English -- a bootstrap step and a test-flakiness source bought for seven words."
+  },
+  "progressWeekDaySemantics": "{day}: {count, plural, =0{no cards} =1{1 card} other{{count} cards}}",
+  "@progressWeekDaySemantics": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "What a screen reader announces for one row of the chart (W6.4). The bar and its track are decoration and are excluded from semantics, so this sentence is the whole of the row for a reader."
+  },
+  "progressEmptyTitle": "No study activity yet",
+  "@progressEmptyTitle": {
+    "description": "Heading of the lifetime-empty face (A2, P7). It replaces the whole screen rather than showing three sections of zeros, which read as a failed load."
+  },
+  "progressEmptyMessage": "Answer your first card and your streak starts today.",
+  "@progressEmptyMessage": {
+    "description": "Body of the lifetime-empty face. Says what will make the screen fill up, rather than restating that it is empty."
+  },
+  "progressEmptyAction": "Start studying",
+  "@progressEmptyAction": {
+    "description": "The call to action on the lifetime-empty face. It navigates to the Study branch for real (P7) -- a button that only says 'not yet' is a button that lies."
+  },
+  "progressErrorTitle": "Couldn't load your progress",
+  "@progressErrorTitle": {
+    "description": "Heading of the error face (E1). Names what failed, so it is not confused with a study session failing."
+  },
+  "progressErrorMessage": "Your study history is safe. Try again in a moment.",
+  "@progressErrorMessage": {
+    "description": "Body of the error face. Carries the fact the user actually worries about -- history is append-only and a failed read changes nothing -- and never the failure's own message, which can name a table (BR-52)."
+  },
+  "progressErrorRetryAction": "Try again",
+  "@progressErrorRetryAction": {
+    "description": "Retry on the error face. Re-opens the read; it never writes (BR-226)."
   },
   "settingsTitle": "Settings",
   "@settingsTitle": {
     "description": "App bar title of the Settings branch. Kept separate from navigationSettingsLabel for the same reason as decksTitle: a tab label competes for width, a title does not."
   },
-  "settingsPlaceholderTitle": "App settings are being developed",
-  "@settingsPlaceholderTitle": {
-    "description": "Heading of the Settings placeholder (AD-19). The whole message — there is no reassurance to add because no user preference exists yet to be kept or lost."
+  "settingsLoadingLabel": "Loading settings",
+  "@settingsLoadingLabel": {
+    "description": "Screen-reader label announced while the settings row is read. A bare spinner announces neither that something is happening nor when it stops."
+  },
+  "settingsLoadErrorTitle": "Couldn't load your settings",
+  "@settingsLoadErrorTitle": {
+    "description": "Whole-screen error when the settings stream fails (UC-17 E3). No control renders a value in this state — an invented default would be indistinguishable from a stored one."
+  },
+  "settingsSaveErrorTitle": "Couldn’t save",
+  "@settingsSaveErrorTitle": {
+    "description": "Title of the in-section error band when a settings write fails (UC-17 E2, BR-224). The body comes from the failure type through mxWriteFailure."
+  },
+  "settingsStudyDefaultsSection": "Study defaults",
+  "@settingsStudyDefaultsSection": {
+    "description": "Heading of the group holding the app-wide card limit and new-card order (BR-219). Plural 'defaults' on purpose: these are what a deck uses when it has chosen nothing of its own."
+  },
+  "settingsStudyDefaultsNote": "Applies to sessions you start after saving. A session already running keeps its own limit.",
+  "@settingsStudyDefaultsNote": {
+    "description": "States BR-221 on the global screen. Longer than studyOptionsNextSessionNote, which sits on a deck's own options screen: there the user is one tap from the session, here they may have one running in another tab."
+  },
+  "settingsAppearanceSection": "Appearance",
+  "@settingsAppearanceSection": {
+    "description": "Heading of the theme group (BR-222)."
+  },
+  "settingsThemeSystem": "System",
+  "@settingsThemeSystem": {
+    "description": "Theme choice: follow the platform's brightness and keep following it (BR-214). Separate from settingsLanguageSystem even though English spells them the same — a translator may need different words for a theme and a language."
+  },
+  "settingsThemeLight": "Light",
+  "@settingsThemeLight": {
+    "description": "Theme choice: always light, whatever the platform says (BR-214)."
+  },
+  "settingsThemeDark": "Dark",
+  "@settingsThemeDark": {
+    "description": "Theme choice: always dark, whatever the platform says (BR-214)."
+  },
+  "settingsLanguageSection": "Language",
+  "@settingsLanguageSection": {
+    "description": "Heading of the language group (BR-223)."
+  },
+  "settingsLanguageSystem": "System",
+  "@settingsLanguageSystem": {
+    "description": "Language choice: resolve from the platform's preferred locales, falling back to English (BR-215)."
+  },
+  "settingsLanguageEnglish": "English",
+  "@settingsLanguageEnglish": {
+    "description": "Language choice. An endonym, and it stays 'English' in every translation: somebody stuck in a language they cannot read has to be able to find the name of their own."
+  },
+  "settingsLanguageVietnamese": "Tiếng Việt",
+  "@settingsLanguageVietnamese": {
+    "description": "Language choice. An endonym, unchanged in every translation for the same reason as settingsLanguageEnglish."
+  },
+  "settingsResetAction": "Reset to defaults",
+  "@settingsResetAction": {
+    "description": "Puts every app option back to its default (BR-225). Deliberately worded away from 'Reset learning progress' (BR-42), which is a different action with different consequences."
+  },
+  "settingsResetDescription": "Puts app options back to their defaults. Your decks and learning progress are not affected.",
+  "@settingsResetDescription": {
+    "description": "Shown under the reset action at rest, not only inside the confirmation. Two actions in this app start with 'Reset', and the scope is the only thing that tells them apart (BR-225)."
+  },
+  "settingsResetConfirmTitle": "Reset app options?",
+  "@settingsResetConfirmTitle": {
+    "description": "Title of the reset confirmation sheet (UC-17 A3)."
+  },
+  "settingsResetConfirmAction": "Reset",
+  "@settingsResetConfirmAction": {
+    "description": "Confirms the reset. Short because the sheet's title and body already carry the scope."
+  },
+  "settingsSavingLabel": "Saving",
+  "@settingsSavingLabel": {
+    "description": "Announced while a settings group is being written (BR-224, wireframe W6). A group that only greys out reports its state by colour alone."
+  },
+  "studyOptionsUseAppDefaults": "Use app defaults",
+  "@studyOptionsUseAppDefaults": {
+    "description": "Clears this root deck's study-options override so it follows the app-wide defaults again (BR-220). Only shown when an override exists — there is nothing to clear otherwise."
+  },
+  "studyOptionsOverrideNote": "This deck uses its own values instead of the app defaults.",
+  "@studyOptionsOverrideNote": {
+    "description": "Shown on a deck whose root carries an override (BR-220), so the user knows why changing the app defaults did not change this deck."
   },
   "decksTitle": "Library",
   "@decksTitle": {
@@ -66,7 +267,7 @@
   },
   "retryAction": "Retry",
   "@retryAction": {
-    "description": "Button that re-runs a failed read. On the deck list it re-subscribes to the database stream."
+    "description": "The app-wide retry label, on every surface that offers recovery from a failed operation — a read that did not land, a write that was refused, a platform call that was rejected. Deliberately generic and shared across the app rather than owned by any one screen: some callers retry a stream subscription, others re-send a write, and the daily-reminder band re-runs whichever of enable, disable or change-time failed. A label naming one of those would be wrong on the rest, which is why this description names no count and no list — an earlier version said \"three surfaces\" while there were nine, and a wrong count is an invitation to specialise the label after checking only some of them."
   },
   "deckCreateRootAction": "New deck",
   "@deckCreateRootAction": {
@@ -140,57 +341,6 @@
     },
     "description": "Leads a deck row's meta line when the deck has children. Direct children only -- it counts what opening the row will show."
   },
-  "deckSearchHintRoot": "Search your whole library",
-  "@deckSearchHintRoot": {
-    "description": "Placeholder at the root level. Names the scope, not the action -- the user needs to know how wide the search reaches."
-  },
-  "deckSearchHintInDeck": "Search in {name}",
-  "@deckSearchHintInDeck": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    },
-    "description": "The same placeholder inside a deck, naming that deck as the scope."
-  },
-  "deckSearchClearLabel": "Clear search",
-  "@deckSearchClearLabel": {
-    "description": "The button that empties the search field."
-  },
-  "deckSearchMatchCountLabel": "{count, plural, =1{1 match in {scope}} other{{count} matches in {scope}}}",
-  "@deckSearchMatchCountLabel": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "scope": {
-        "type": "String"
-      }
-    },
-    "description": "Heads the result list. Names the scope again because a count without one is a number about nothing."
-  },
-  "deckSearchScopeLibrary": "your library",
-  "@deckSearchScopeLibrary": {
-    "description": "The scope word for a root-level search, used inside the count and the empty state."
-  },
-  "deckSearchEmptyTitle": "No decks match “{query}”",
-  "@deckSearchEmptyTitle": {
-    "placeholders": {
-      "query": {
-        "type": "String"
-      }
-    },
-    "description": "Curly quotes around the user's own words, as everywhere else a user's text appears in a sentence."
-  },
-  "deckSearchEmptyMessage": "Nothing in {scope} has that in its name.",
-  "@deckSearchEmptyMessage": {
-    "placeholders": {
-      "scope": {
-        "type": "String"
-      }
-    },
-    "description": "Says what was searched, so the user can tell an empty result from a search that looked in the wrong place."
-  },
   "deckStarterLibraryAction": "Browse starter library",
   "@deckStarterLibraryAction": {
     "description": "Empty-root CTA that opens the starter template catalog (UC-01)."
@@ -261,14 +411,6 @@
       }
     },
     "description": "Locale line on a starter template row."
-  },
-  "deckSearchOpenLabel": "Search decks",
-  "@deckSearchOpenLabel": {
-    "description": "Opens the search field in the Library subheader. The field is collapsed to this control at rest."
-  },
-  "deckSearchCloseLabel": "Close search",
-  "@deckSearchCloseLabel": {
-    "description": "Collapses the search field; if a query is running it is cleared first, so no result set survives its own input."
   },
   "deckNoCardsLabel": "No cards yet",
   "@deckNoCardsLabel": {
@@ -508,7 +650,7 @@
     },
     "description": "Title of the delete confirmation. Names the deck so the user can tell which one they are about to lose (BR-04)."
   },
-  "deckDeleteImpactMessage": "{deckCount, plural, =0{} =1{1 sub-deck and } other{{deckCount} sub-decks and }}{cardCount, plural, =0{no cards} =1{1 card} other{{cardCount} cards}} will be deleted too. This cannot be undone.",
+  "deckDeleteImpactMessage": "{deckCount, plural, =0{} =1{1 sub-deck and } other{{deckCount} sub-decks and }}{cardCount, plural, =0{no cards} =1{1 card} other{{cardCount} cards}} go to Trash with it. You can restore them for 30 days.",
   "@deckDeleteImpactMessage": {
     "placeholders": {
       "deckCount": {
@@ -518,11 +660,11 @@
         "type": "int"
       }
     },
-    "description": "Body of the delete confirmation, stating exactly how many sub-decks and cards go with the deck (BR-04)."
+    "description": "Body of the delete confirmation, stating exactly how many sub-decks and cards go with the deck (BR-04) and that the deletion is recoverable (BR-256)."
   },
-  "deckDeleteConfirmAction": "Delete",
+  "deckDeleteConfirmAction": "Move to Trash",
   "@deckDeleteConfirmAction": {
-    "description": "Destructive confirm button of the delete-deck dialog."
+    "description": "Confirm button of the delete-deck dialog. Names where the deck goes rather than implying it is destroyed (BR-256)."
   },
   "deckMoveAction": "Move",
   "@deckMoveAction": {
@@ -1148,22 +1290,22 @@
     },
     "description": "Title of the bulk delete confirmation. Names the number rather than asking a generic 'are you sure' (UC-04 A6)."
   },
-  "cardBulkDeleteMessage": "Their study history is deleted too. This can't be undone.",
+  "cardBulkDeleteMessage": "Their study history goes with them and comes back if you restore them. Trash keeps them for 30 days.",
   "@cardBulkDeleteMessage": {
-    "description": "Body of the bulk delete confirmation: what is lost beyond the cards themselves."
+    "description": "Body of the bulk delete confirmation: what happens to the history, and for how long it can be undone (BR-256, BR-259)."
   },
-  "cardBulkDeleteConfirmAction": "Delete cards",
+  "cardBulkDeleteConfirmAction": "Move to Trash",
   "@cardBulkDeleteConfirmAction": {
-    "description": "Destructive confirm button of the bulk delete dialog."
+    "description": "Confirm button of the bulk delete dialog (BR-256)."
   },
-  "cardBulkDeletedMessage": "{count} cards deleted",
+  "cardBulkDeletedMessage": "{count, plural, =1{1 card moved to Trash} other{{count} cards moved to Trash}}",
   "@cardBulkDeletedMessage": {
     "placeholders": {
       "count": {
         "type": "int"
       }
     },
-    "description": "Result message after a bulk delete commits. A statement of what happened, deliberately not an Undo: this build cannot restore the study history it cascaded."
+    "description": "Result message after a bulk delete commits. It reports where the cards went, because they are recoverable from there (BR-256); Undo is offered for a single deletion only (BR-263)."
   },
   "cardBulkMovedMessage": "{count} cards moved",
   "@cardBulkMovedMessage": {
@@ -1223,13 +1365,13 @@
   "@cardDeleteConfirmTitle": {
     "description": "Title of the card delete confirmation dialog (UC-04 A5)."
   },
-  "cardDeleteConfirmMessage": "The card and its study history are removed. This can't be undone.",
+  "cardDeleteConfirmMessage": "The card and its study history go to Trash. You can restore them for 30 days.",
   "@cardDeleteConfirmMessage": {
-    "description": "Body of the card delete confirmation, stating what is lost. Deleting the last card also returns the deck to unset (BR-163)."
+    "description": "Body of the card delete confirmation. Deleting the last active card also returns the deck to unset (BR-260)."
   },
-  "cardDeleteConfirmAction": "Delete",
+  "cardDeleteConfirmAction": "Move to Trash",
   "@cardDeleteConfirmAction": {
-    "description": "Confirm button on the card delete dialog."
+    "description": "Confirm button on the card delete dialog (BR-256)."
   },
   "cardDeleteFailed": "This card couldn't be deleted. Try again.",
   "@cardDeleteFailed": {
@@ -1450,6 +1592,59 @@
   "studyChooseModeTitle": "How do you want to review?",
   "@studyChooseModeTitle": {
     "description": "Title of the review mode chooser (BR-146)."
+  },
+  "studyDirectionTitle": "Which way should cards be asked?",
+  "@studyDirectionTitle": {
+    "description": "Title of the recall-direction chooser, shown before a self-assess review of an SM-2 deck (BR-203). It asks about the exercise rather than about the card's columns: a learner has no reason to know which side a card stores where."
+  },
+  "studyDirectionBody": "You can't change this once the session starts.",
+  "@studyDirectionBody": {
+    "description": "Supporting line under the direction chooser title. States the lock (BR-207) before the choice rather than after it — a choice that turns out to be irreversible only once it has been made is one the user was not really offered."
+  },
+  "studyDirectionKoreanFirst": "Korean first",
+  "@studyDirectionKoreanFirst": {
+    "description": "Name of the Korean-to-meaning direction (BR-204). Recognition: the exercise every review did before BR-203."
+  },
+  "studyDirectionKoreanFirstBody": "See the Korean, recall what it means.",
+  "@studyDirectionKoreanFirstBody": {
+    "description": "One line describing the Korean-to-meaning direction. Says what the learner will see and what they have to produce, in that order, because that is the order the card puts them in."
+  },
+  "studyDirectionMeaningFirst": "Meaning first",
+  "@studyDirectionMeaningFirst": {
+    "description": "Name of the meaning-to-Korean direction (BR-204). Production, which is the harder half of knowing a word."
+  },
+  "studyDirectionMeaningFirstBody": "See the meaning, recall the Korean.",
+  "@studyDirectionMeaningFirstBody": {
+    "description": "One line describing the meaning-to-Korean direction."
+  },
+  "studyDirectionMixed": "Mixed",
+  "@studyDirectionMixed": {
+    "description": "Name of the mixed direction (BR-205)."
+  },
+  "studyDirectionMixedBody": "Each card is asked one way or the other, split evenly.",
+  "@studyDirectionMixedBody": {
+    "description": "One line describing the mixed direction. 'Split evenly' is a promise the assignment keeps to within one card (BR-205) — it deliberately does not say 'at random', which would let a 14-of-20 session pass as working as described."
+  },
+  "studyDirectionRecommendedOption": "Recommended — {line}",
+  "@studyDirectionRecommendedOption": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    },
+    "description": "The recommended option's supporting line. **The marker leads.** It used to trail — `{line} — Recommended` — and `MxListTile` caps a subtitle at two lines, so at textScaler 2.0 on a 320dp screen the line needs about three and the marker is the first thing the ellipsis takes. The option the app recommends then carried no sign that it was recommended, which is exactly what choosing a marker over a trailing badge was meant to avoid. Each locale places its own marker via the placeholder."
+  },
+  "studyDirectionNothingDue": "Nothing is due to review any more.",
+  "@studyDirectionNothingDue": {
+    "description": "Shown in the direction chooser when the last due card went while the sheet was open (UC-15 E2, BR-145). Distinct from studyDirectionFailed because this one cannot be retried — cards come due with time, not with another tap, and telling the user to try again would be advice that cannot work."
+  },
+  "studyDirectionStart": "Start review",
+  "@studyDirectionStart": {
+    "description": "Confirms the chosen direction and starts the session. The list selects and this starts — tapping an option cannot start a session that is then locked to it (BR-207)."
+  },
+  "studyDirectionFailed": "Could not start the review. Try again.",
+  "@studyDirectionFailed": {
+    "description": "Shown in the direction chooser when starting was refused — usually because the deck changed while the sheet was open (BR-13, BR-83). The chosen option is kept, because losing it would charge the user for an error that was not theirs."
   },
   "studyModeBrowse": "Browse",
   "@studyModeBrowse": {
@@ -1917,719 +2112,1979 @@
   },
   "cardImportTitle": "Import cards",
   "@cardImportTitle": {
-      "description": "App bar title of the import wizard (UC-10)."
+    "description": "App bar title of the import wizard (UC-10)."
   },
   "cardImportBreadcrumbLabel": "Import",
   "@cardImportBreadcrumbLabel": {
-      "description": "The wizard's own, non-tappable breadcrumb segment."
+    "description": "The wizard's own, non-tappable breadcrumb segment."
   },
   "cardImportDeckContextLabel": "{deckName} · {count} cards",
   "@cardImportDeckContextLabel": {
-      "placeholders": {
-          "deckName": {
-              "type": "String"
-          },
-          "count": {
-              "type": "int"
-          }
+    "placeholders": {
+      "deckName": {
+        "type": "String"
       },
-      "description": "Context chip under the breadcrumb: target deck and its current card count."
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Context chip under the breadcrumb: target deck and its current card count."
   },
   "cardImportStepSemantics": "Step {step} of 3",
   "@cardImportStepSemantics": {
-      "placeholders": {
-          "step": {
-              "type": "int"
-          }
-      },
-      "description": "Screen-reader label of one stepper node."
+    "placeholders": {
+      "step": {
+        "type": "int"
+      }
+    },
+    "description": "Screen-reader label of one stepper node."
   },
   "cardImportStepSourceLabel": "Source",
   "@cardImportStepSourceLabel": {
-      "description": "Stepper label of step 1."
+    "description": "Stepper label of step 1."
   },
   "cardImportStepPreviewLabel": "Preview",
   "@cardImportStepPreviewLabel": {
-      "description": "Stepper label of step 2."
+    "description": "Stepper label of step 2."
   },
   "cardImportStepImportLabel": "Import",
   "@cardImportStepImportLabel": {
-      "description": "Stepper label of step 3."
+    "description": "Stepper label of step 3."
   },
   "cardImportChooseSourceHeading": "1 · Choose a source",
   "@cardImportChooseSourceHeading": {
-      "description": "Heading over the two source options."
+    "description": "Heading over the two source options."
   },
   "cardImportUploadOptionTitle": "Upload file",
   "@cardImportUploadOptionTitle": {
-      "description": "Title of the upload source card."
+    "description": "Title of the upload source card."
   },
   "cardImportUploadOptionSubtitle": "CSV, TSV, XLSX",
   "@cardImportUploadOptionSubtitle": {
-      "description": "Formats the upload card names. Never mentions .apkg — out of scope."
+    "description": "Formats the upload card names. Never mentions .apkg — out of scope."
   },
   "cardImportPasteOptionTitle": "Paste text",
   "@cardImportPasteOptionTitle": {
-      "description": "Title of the paste source card."
+    "description": "Title of the paste source card."
   },
   "cardImportPasteOptionSubtitle": "CSV or TSV rows",
   "@cardImportPasteOptionSubtitle": {
-      "description": "What the paste card accepts."
+    "description": "What the paste card accepts."
   },
   "cardImportChoosePrompt": "Choose a file to preview",
   "@cardImportChoosePrompt": {
-      "description": "Prompt in the upload panel. No drag-and-drop copy: not a primary capability on Android."
+    "description": "Prompt in the upload panel. No drag-and-drop copy: not a primary capability on Android."
   },
   "cardImportChooseFileAction": "Choose file",
   "@cardImportChooseFileAction": {
-      "description": "Button opening the system file picker."
+    "description": "Button opening the system file picker."
   },
   "cardImportReplaceFileAction": "Replace",
   "@cardImportReplaceFileAction": {
-      "description": "Button replacing the already-picked file."
+    "description": "Button replacing the already-picked file."
   },
   "cardImportPastePlaceholder": "front,back,tags{newline}사과,apple,fruit",
   "@cardImportPastePlaceholder": {
-      "placeholders": {
-          "newline": {
-              "type": "String"
-          }
-      },
-      "description": "Placeholder of the paste box — sample shape, not user data."
+    "placeholders": {
+      "newline": {
+        "type": "String"
+      }
+    },
+    "description": "Placeholder of the paste box — sample shape, not user data."
   },
   "cardImportPasteLabel": "Rows to import",
   "@cardImportPasteLabel": {
-      "description": "Label of the paste text box."
+    "description": "Label of the paste text box."
   },
   "cardImportInfoTitle": "Each row creates one card",
   "@cardImportInfoTitle": {
-      "description": "Title of the info panel on the Source step."
+    "description": "Title of the info panel on the Source step."
   },
   "cardImportInfoBody": "Front and Back are required. You will choose the matching columns in the next step.",
   "@cardImportInfoBody": {
-      "description": "Body of the info panel. Never hardcodes a column order — mapping decides."
+    "description": "Body of the info panel. Never hardcodes a column order — mapping decides."
   },
   "cardImportInfoBusinessHint": "Front stores the Korean term. Back stores its meaning.",
   "@cardImportInfoBusinessHint": {
-      "description": "One-line content guidance under the info body."
+    "description": "One-line content guidance under the info body."
   },
   "cardImportPreviewAction": "Preview import",
   "@cardImportPreviewAction": {
-      "description": "Primary action of the Source step."
+    "description": "Primary action of the Source step."
   },
   "cardImportParsingLabel": "Reading rows…",
   "@cardImportParsingLabel": {
-      "description": "Loading label while the source parses."
+    "description": "Loading label while the source parses."
   },
   "cardImportSheetLabel": "Sheet",
   "@cardImportSheetLabel": {
-      "description": "Label of the XLSX sheet selector."
+    "description": "Label of the XLSX sheet selector."
   },
   "cardImportHeaderToggleLabel": "First row contains headers",
   "@cardImportHeaderToggleLabel": {
-      "description": "Toggle deciding whether row 1 is data (UC-10 A3)."
+    "description": "Toggle deciding whether row 1 is data (UC-10 A3)."
   },
   "cardImportColumnFallbackLabel": "Column {letter}",
   "@cardImportColumnFallbackLabel": {
-      "placeholders": {
-          "letter": {
-              "type": "String"
-          }
-      },
-      "description": "Stable name of an unmapped column when there is no header."
+    "placeholders": {
+      "letter": {
+        "type": "String"
+      }
+    },
+    "description": "Stable name of an unmapped column when there is no header."
   },
   "cardImportMappingHeading": "Match columns",
   "@cardImportMappingHeading": {
-      "description": "Heading over the mapping list."
+    "description": "Heading over the mapping list."
   },
   "cardImportIgnoreColumnLabel": "Ignore",
   "@cardImportIgnoreColumnLabel": {
-      "description": "Mapping choice that drops a source column."
+    "description": "Mapping choice that drops a source column."
   },
   "cardImportFieldFrontLabel": "Front",
   "@cardImportFieldFrontLabel": {
-      "description": "Mapping destination: the card's front."
+    "description": "Mapping destination: the card's front."
   },
   "cardImportFieldBackLabel": "Back",
   "@cardImportFieldBackLabel": {
-      "description": "Mapping destination: the card's back."
+    "description": "Mapping destination: the card's back."
   },
   "cardImportFieldExampleLabel": "Example",
   "@cardImportFieldExampleLabel": {
-      "description": "Mapping destination: the example detail."
+    "description": "Mapping destination: the example detail."
   },
   "cardImportFieldHintLabel": "Hint",
   "@cardImportFieldHintLabel": {
-      "description": "Mapping destination: the hint detail."
+    "description": "Mapping destination: the hint detail."
   },
   "cardImportFieldPronunciationLabel": "Pronunciation",
   "@cardImportFieldPronunciationLabel": {
-      "description": "Mapping destination: the pronunciation detail."
+    "description": "Mapping destination: the pronunciation detail."
   },
   "cardImportFieldTagsLabel": "Tags",
   "@cardImportFieldTagsLabel": {
-      "description": "Mapping destination: the semicolon-separated tags cell."
+    "description": "Mapping destination: the semicolon-separated tags cell."
   },
   "cardImportMappingRequiredNote": "Front and Back must each have a column.",
   "@cardImportMappingRequiredNote": {
-      "description": "Inline note when the required mapping is incomplete (BR-169)."
+    "description": "Inline note when the required mapping is incomplete (BR-169)."
   },
   "cardImportIncludeDuplicatesLabel": "Include duplicates",
   "@cardImportIncludeDuplicatesLabel": {
-      "description": "Toggle writing duplicates as new cards (BR-170)."
+    "description": "Toggle writing duplicates as new cards (BR-170)."
   },
   "cardImportRowStatusReadyLabel": "Ready",
   "@cardImportRowStatusReadyLabel": {
-      "description": "Row status chip."
+    "description": "Row status chip."
   },
   "cardImportRowStatusInvalidLabel": "Invalid",
   "@cardImportRowStatusInvalidLabel": {
-      "description": "Row status chip."
+    "description": "Row status chip."
   },
   "cardImportRowStatusDuplicateExistingLabel": "Already in deck",
   "@cardImportRowStatusDuplicateExistingLabel": {
-      "description": "Row status chip: duplicate of an existing card (BR-170)."
+    "description": "Row status chip: duplicate of an existing card (BR-170)."
   },
   "cardImportRowStatusDuplicateInFileLabel": "Duplicate in file",
   "@cardImportRowStatusDuplicateInFileLabel": {
-      "description": "Row status chip: repeats an earlier row (BR-170)."
+    "description": "Row status chip: repeats an earlier row (BR-170)."
   },
   "cardImportRowStatusBlankLabel": "Blank",
   "@cardImportRowStatusBlankLabel": {
-      "description": "Row status chip: skipped empty row."
+    "description": "Row status chip: skipped empty row."
   },
   "cardImportStatusDuplicateChipLabel": "Duplicate",
   "@cardImportStatusDuplicateChipLabel": {
-      "description": "Preview summary chip word covering both duplicate kinds; rows spell out existing vs in-file (M4.12 state 4)."
+    "description": "Preview summary chip word covering both duplicate kinds; rows spell out existing vs in-file (M4.12 state 4)."
   },
   "cardImportRowNumberLabel": "Row {number}",
   "@cardImportRowNumberLabel": {
-      "placeholders": {
-          "number": {
-              "type": "int"
-          }
-      },
-      "description": "Source row number on one preview row."
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    },
+    "description": "Source row number on one preview row."
   },
   "cardImportContinueAction": "Continue",
   "@cardImportContinueAction": {
-      "description": "Primary action of the Preview step."
+    "description": "Primary action of the Preview step."
   },
   "cardImportBackAction": "Back",
   "@cardImportBackAction": {
-      "description": "Secondary action returning to the previous step."
+    "description": "Secondary action returning to the previous step."
   },
   "cardImportConfirmHeading": "Ready to import",
   "@cardImportConfirmHeading": {
-      "description": "Heading of the confirm view on step 3."
+    "description": "Heading of the confirm view on step 3."
   },
   "cardImportConfirmImportRowLabel": "Cards to import",
   "@cardImportConfirmImportRowLabel": {
-      "description": "Confirm summary row: how many cards the one transaction will write (UC-10 step 6)."
+    "description": "Confirm summary row: how many cards the one transaction will write (UC-10 step 6)."
   },
   "cardImportConfirmDuplicatesIncludedRowLabel": "Duplicates included",
   "@cardImportConfirmDuplicatesIncludedRowLabel": {
-      "description": "Confirm summary row when Include duplicates is on: duplicates counted into the batch (BR-170)."
+    "description": "Confirm summary row when Include duplicates is on: duplicates counted into the batch (BR-170)."
   },
   "cardImportBarSourceHint": "Next you'll preview every row before anything is imported.",
   "@cardImportBarSourceHint": {
-      "description": "Reassurance line under the sticky bar on the Source step (M4.12 state 1)."
+    "description": "Reassurance line under the sticky bar on the Source step (M4.12 state 1)."
   },
-  "cardImportBarParsingHint": "Reading your source \u2014 nothing is saved yet.",
+  "cardImportBarParsingHint": "Reading your source — nothing is saved yet.",
   "@cardImportBarParsingHint": {
-      "description": "Reassurance line under the sticky bar while the decode runs (M4.12 state 2)."
+    "description": "Reassurance line under the sticky bar while the decode runs (M4.12 state 2)."
   },
   "cardImportBarImportHint": "No cards are added until you tap Import.",
   "@cardImportBarImportHint": {
-      "description": "Reassurance line under the sticky bar on Preview and Confirm (M4.12 states 3-4)."
+    "description": "Reassurance line under the sticky bar on Preview and Confirm (M4.12 states 3-4)."
   },
   "cardImportConfirmTargetLabel": "Into {deckName}",
   "@cardImportConfirmTargetLabel": {
-      "placeholders": {
-          "deckName": {
-              "type": "String"
-          }
-      },
-      "description": "Confirm line naming the target deck."
+    "placeholders": {
+      "deckName": {
+        "type": "String"
+      }
+    },
+    "description": "Confirm line naming the target deck."
   },
   "cardImportSubmitAction": "Import {count} cards",
   "@cardImportSubmitAction": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Primary action committing the batch (BR-171)."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Primary action committing the batch (BR-171)."
   },
   "cardImportSubmittingLabel": "Importing…",
   "@cardImportSubmittingLabel": {
-      "description": "Progress label while the one transaction runs."
+    "description": "Progress label while the one transaction runs."
   },
   "cardImportTryAgainAction": "Try again",
   "@cardImportTryAgainAction": {
-      "description": "Recovery action after a failed commit (UC-10 E5)."
+    "description": "Recovery action after a failed commit (UC-10 E5)."
   },
   "cardImportResultHeading": "Import finished",
   "@cardImportResultHeading": {
-      "description": "Heading of the result view."
+    "description": "Heading of the result view."
   },
   "cardImportResultImportedLabel": "Imported: {count}",
   "@cardImportResultImportedLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Result line."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Result line."
   },
   "cardImportResultDuplicatesLabel": "Duplicates skipped: {count}",
   "@cardImportResultDuplicatesLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Result line."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Result line."
   },
   "cardImportResultInvalidLabel": "Invalid rows skipped: {count}",
   "@cardImportResultInvalidLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Result line."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Result line."
   },
   "cardImportViewCardsAction": "View cards",
   "@cardImportViewCardsAction": {
-      "description": "Result action returning to the card list."
+    "description": "Result action returning to the card list."
   },
   "cardImportAnotherAction": "Import another file",
   "@cardImportAnotherAction": {
-      "description": "Result action resetting the draft, keeping the deck."
+    "description": "Result action resetting the draft, keeping the deck."
   },
   "cardImportDiscardTitle": "Discard import?",
   "@cardImportDiscardTitle": {
-      "description": "Title of the dirty-draft confirm on Close/Back."
+    "description": "Title of the dirty-draft confirm on Close/Back."
   },
   "cardImportDiscardMessage": "Your chosen source and column choices will be lost.",
   "@cardImportDiscardMessage": {
-      "description": "Body of the dirty-draft confirm."
+    "description": "Body of the dirty-draft confirm."
   },
   "cardImportDiscardConfirmAction": "Discard",
   "@cardImportDiscardConfirmAction": {
-      "description": "Confirming button of the dirty-draft dialog."
+    "description": "Confirming button of the dirty-draft dialog."
   },
   "cardImportEntryAction": "Import cards",
   "@cardImportEntryAction": {
-      "description": "The entry point label in the card list menu, empty state and unset-deck sheet."
+    "description": "The entry point label in the card list menu, empty state and unset-deck sheet."
   },
   "cardImportErrorUnsupportedFile": "That file type is not supported. Choose a CSV, TSV or XLSX file.",
   "@cardImportErrorUnsupportedFile": {
-      "description": "Typed error: unsupported extension."
+    "description": "Typed error: unsupported extension."
   },
   "cardImportErrorInvalidEncoding": "The file is not UTF-8. Export it again as UTF-8 and retry.",
   "@cardImportErrorInvalidEncoding": {
-      "description": "Typed error: wrong encoding (BR-173)."
+    "description": "Typed error: wrong encoding (BR-173)."
   },
   "cardImportErrorEmptySource": "There are no rows to import in this source.",
   "@cardImportErrorEmptySource": {
-      "description": "Typed error: empty file or pasted text."
+    "description": "Typed error: empty file or pasted text."
   },
   "cardImportErrorEmptySheet": "This sheet has no rows. Pick another sheet.",
   "@cardImportErrorEmptySheet": {
-      "description": "Typed error: empty XLSX sheet."
+    "description": "Typed error: empty XLSX sheet."
   },
   "cardImportErrorUnreadableFile": "The file could not be read. Export a fresh copy and try again.",
   "@cardImportErrorUnreadableFile": {
-      "description": "Typed error: corrupt or protected file."
+    "description": "Typed error: corrupt or protected file."
   },
-  "cardImportParseErrorTitle": "Could not read the source",
+  "cardImportParseErrorTitle": "Couldn’t read the source",
   "@cardImportParseErrorTitle": {
-      "description": "Title over a typed parse error on the Preview step."
+    "description": "Title over a typed parse error on the Preview step."
   },
   "cardImportRowIssueTagTooLong": "A tag is longer than 50 characters",
   "@cardImportRowIssueTagTooLong": {
-      "description": "Row reason: tag name over the BR-93 limit."
+    "description": "Row reason: tag name over the BR-93 limit."
   },
   "cardImportRowIssueTooManyTags": "More than 10 tags",
   "@cardImportRowIssueTooManyTags": {
-      "description": "Row reason: over the BR-94 cap."
+    "description": "Row reason: over the BR-94 cap."
   },
   "cardImportRowIssueTagCharacter": "A tag contains a character that can't be used",
   "@cardImportRowIssueTagCharacter": {
-      "description": "Row reason: a tag name carries a control character (BR-93), which the tag queries' char(31) join cannot survive."
+    "description": "Row reason: a tag name carries a control character (BR-93), which the tag queries' char(31) join cannot survive."
   },
   "cardImportMoreRowsLabel": "…and {count} more rows",
   "@cardImportMoreRowsLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Footer under the truncated preview list."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Footer under the truncated preview list."
   },
   "cardImportFileMetaLabel": "{extension} · {size}",
   "@cardImportFileMetaLabel": {
-      "placeholders": {
-          "extension": {
-              "type": "String"
-          },
-          "size": {
-              "type": "String"
-          }
+    "placeholders": {
+      "extension": {
+        "type": "String"
       },
-      "description": "Extension and size line under the picked file's name (M4.12 W2)."
+      "size": {
+        "type": "String"
+      }
+    },
+    "description": "Extension and size line under the picked file's name (M4.12 W2)."
   },
   "cardImportFileSizeKilobytes": "{count} KB",
   "@cardImportFileSizeKilobytes": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "File size in kilobytes, rounded up so nothing reads as zero."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "File size in kilobytes, rounded up so nothing reads as zero."
   },
   "cardImportFileSizeMegabytes": "{count} MB",
   "@cardImportFileSizeMegabytes": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "File size in megabytes, rounded up."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "File size in megabytes, rounded up."
   },
   "cardImportStepNamedSemantics": "{step} · {label}",
   "@cardImportStepNamedSemantics": {
-      "placeholders": {
-          "step": {
-              "type": "String"
-          },
-          "label": {
-              "type": "String"
-          }
+    "placeholders": {
+      "step": {
+        "type": "String"
       },
-      "description": "Screen-reader label of one stepper node: its position sentence plus the step's name."
+      "label": {
+        "type": "String"
+      }
+    },
+    "description": "Screen-reader label of one stepper node: its position sentence plus the step's name."
   },
   "cardImportResultsTitle": "Import results",
   "@cardImportResultsTitle": {
-      "description": "App bar title once the wizard is showing an outcome (M4.12 states 6-8)."
+    "description": "App bar title once the wizard is showing an outcome (M4.12 states 6-8)."
   },
   "cardImportFileReadyStatus": "Ready to preview",
   "@cardImportFileReadyStatus": {
-      "description": "Status line on the picked-file summary before parsing (state 1)."
+    "description": "Status line on the picked-file summary before parsing (state 1)."
   },
   "cardImportFileParsingStatus": "Parsing…",
   "@cardImportFileParsingStatus": {
-      "description": "Status line on the source summary while the decode runs (state 2)."
+    "description": "Status line on the source summary while the decode runs (state 2)."
   },
   "cardImportFileRowsDetected": "{count} rows detected",
   "@cardImportFileRowsDetected": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Status line on the source summary once the document loaded."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Status line on the source summary once the document loaded."
   },
   "cardImportRemoveFileLabel": "Remove file",
   "@cardImportRemoveFileLabel": {
-      "description": "Semantic label and tooltip of the X that clears the picked file."
+    "description": "Semantic label and tooltip of the X that clears the picked file."
   },
   "cardImportPastedSourceLabel": "Pasted text",
   "@cardImportPastedSourceLabel": {
-      "description": "Stands in for a filename when the source is the paste box — the content itself is private and never echoed (BR-173)."
+    "description": "Stands in for a filename when the source is the paste box — the content itself is private and never echoed (BR-173)."
   },
   "cardImportParsingFileTitle": "Reading your file…",
   "@cardImportParsingFileTitle": {
-      "description": "Loading panel title while a picked file decodes (state 2)."
+    "description": "Loading panel title while a picked file decodes (state 2)."
   },
   "cardImportParsingPasteTitle": "Reading your rows…",
   "@cardImportParsingPasteTitle": {
-      "description": "Loading panel title while pasted rows decode."
+    "description": "Loading panel title while pasted rows decode."
   },
   "cardImportParsingReassurance": "No cards will be added until you confirm Import.",
   "@cardImportParsingReassurance": {
-      "description": "Reassurance under the parsing loader: preview never writes (BR-171)."
+    "description": "Reassurance under the parsing loader: preview never writes (BR-171)."
   },
   "cardImportParsingAction": "Parsing…",
   "@cardImportParsingAction": {
-      "description": "Disabled primary-action label while the decode runs (state 2)."
+    "description": "Disabled primary-action label while the decode runs (state 2)."
   },
   "cardImportPreviewHeading": "2 · Preview",
   "@cardImportPreviewHeading": {
-      "description": "Section heading over the preview block, numbered like the source heading."
+    "description": "Section heading over the preview block, numbered like the source heading."
   },
   "cardImportPreviewReadyOfTotal": "{ready} of {total} ready",
   "@cardImportPreviewReadyOfTotal": {
-      "placeholders": {
-          "ready": {
-              "type": "int"
-          },
-          "total": {
-              "type": "int"
-          }
+    "placeholders": {
+      "ready": {
+        "type": "int"
       },
-      "description": "Right-aligned readiness line beside the preview heading (state 3)."
+      "total": {
+        "type": "int"
+      }
+    },
+    "description": "Right-aligned readiness line beside the preview heading (state 3)."
   },
   "cardImportStatusCountChip": "{label} · {count}",
   "@cardImportStatusCountChip": {
-      "placeholders": {
-          "label": {
-              "type": "String"
-          },
-          "count": {
-              "type": "int"
-          }
+    "placeholders": {
+      "label": {
+        "type": "String"
       },
-      "description": "One status chip: a row-status label and how many rows carry it."
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "One status chip: a row-status label and how many rows carry it."
   },
   "cardImportEmptyCellLabel": "(empty)",
   "@cardImportEmptyCellLabel": {
-      "description": "Placeholder for a required cell the row did not fill (state 4)."
+    "description": "Placeholder for a required cell the row did not fill (state 4)."
   },
   "cardImportInfoTagsHint": "Tags share one cell, separated by ;",
   "@cardImportInfoTagsHint": {
-      "description": "Info-panel line stating the tags separator contract (BR-169)."
+    "description": "Info-panel line stating the tags separator contract (BR-169)."
   },
   "cardImportSubmittingTitle": "Importing {count} cards…",
   "@cardImportSubmittingTitle": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Submit panel title while the one transaction runs (state 5)."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Submit panel title while the one transaction runs (state 5)."
   },
   "cardImportSubmittingBody": "Saving all cards together. Don't close the app.",
   "@cardImportSubmittingBody": {
-      "description": "Submit panel body: the write is atomic, so it is one save, not a count-up."
+    "description": "Submit panel body: the write is atomic, so it is one save, not a count-up."
   },
   "cardImportSuccessTitle": "Import complete",
   "@cardImportSuccessTitle": {
-      "description": "Success hero title (state 6)."
+    "description": "Success hero title (state 6)."
   },
   "cardImportSuccessBody": "Added {count} cards to {deckName}. They are ready to study.",
   "@cardImportSuccessBody": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          },
-          "deckName": {
-              "type": "String"
-          }
+    "placeholders": {
+      "count": {
+        "type": "int"
       },
-      "description": "Success hero body."
+      "deckName": {
+        "type": "String"
+      }
+    },
+    "description": "Success hero body."
   },
   "cardImportSkipsTitle": "Imported with skips",
   "@cardImportSkipsTitle": {
-      "description": "Warning hero title when rows were left out (state 7)."
+    "description": "Warning hero title when rows were left out (state 7)."
   },
   "cardImportSkipsBody": "Added {count} cards. Some rows were skipped.",
   "@cardImportSkipsBody": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Warning hero body — never claims every skip was a validation issue."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Warning hero body — never claims every skip was a validation issue."
   },
   "cardImportZeroTitle": "No new cards added",
   "@cardImportZeroTitle": {
-      "description": "Outcome title when the transaction succeeded but wrote nothing — not a failure."
+    "description": "Outcome title when the transaction succeeded but wrote nothing — not a failure."
   },
   "cardImportZeroBody": "All rows matched cards already in the deck and were skipped.",
   "@cardImportZeroBody": {
-      "description": "Zero-added body: the recheck inside the transaction found only duplicates (BR-170)."
+    "description": "Zero-added body: the recheck inside the transaction found only duplicates (BR-170)."
   },
   "cardImportFailureTitle": "Import didn't finish",
   "@cardImportFailureTitle": {
-      "description": "Failure hero title (state 8)."
+    "description": "Failure hero title (state 8)."
   },
   "cardImportFailureBody": "No cards were added. Your source is unchanged and your deck is untouched.",
   "@cardImportFailureBody": {
-      "description": "Failure hero body — says source, not file, because the source may be pasted rows."
+    "description": "Failure hero body — says source, not file, because the source may be pasted rows."
   },
   "cardImportAddedRowLabel": "Added",
   "@cardImportAddedRowLabel": {
-      "description": "Result summary row: cards the transaction wrote (CardImportResult.imported)."
+    "description": "Result summary row: cards the transaction wrote (CardImportResult.imported)."
   },
   "cardImportInvalidSkippedRowLabel": "Invalid rows skipped",
   "@cardImportInvalidSkippedRowLabel": {
-      "description": "Result summary row, shown only when the preview counted invalid rows."
+    "description": "Result summary row, shown only when the preview counted invalid rows."
   },
   "cardImportDuplicatesSkippedRowLabel": "Duplicates skipped",
   "@cardImportDuplicatesSkippedRowLabel": {
-      "description": "Result summary row, from the transaction's own recheck (BR-170)."
+    "description": "Result summary row, from the transaction's own recheck (BR-170)."
   },
   "cardImportBlankIgnoredRowLabel": "Blank rows ignored",
   "@cardImportBlankIgnoredRowLabel": {
-      "description": "Neutral result summary row — blank rows are skipped by design (BR-169)."
+    "description": "Neutral result summary row — blank rows are skipped by design (BR-169)."
   },
   "cardImportFixInvalidHint": "Fix the invalid rows in your source and import again to add them.",
   "@cardImportFixInvalidHint": {
-      "description": "Helper under a with-skips result when invalid rows exist."
+    "description": "Helper under a with-skips result when invalid rows exist."
   },
   "cardImportDuplicatesHint": "Duplicates were skipped by your import settings.",
   "@cardImportDuplicatesHint": {
-      "description": "Helper when only duplicates were skipped — duplicates are a setting, not a broken file."
+    "description": "Helper when only duplicates were skipped — duplicates are a setting, not a broken file."
   },
   "cardImportBackToPreviewAction": "Back to preview",
   "@cardImportBackToPreviewAction": {
-      "description": "Secondary action on a commit failure: back to the intact draft (state 8)."
+    "description": "Secondary action on a commit failure: back to the intact draft (state 8)."
   },
   "cardImportStepStateSemantics": "{step} · {label} · {state}",
   "@cardImportStepStateSemantics": {
-      "placeholders": {
-          "step": {
-              "type": "String"
-          },
-          "label": {
-              "type": "String"
-          },
-          "state": {
-              "type": "String"
-          }
+    "placeholders": {
+      "step": {
+        "type": "String"
       },
-      "description": "Screen-reader label of one stepper node: position, name and progress state."
+      "label": {
+        "type": "String"
+      },
+      "state": {
+        "type": "String"
+      }
+    },
+    "description": "Screen-reader label of one stepper node: position, name and progress state."
   },
   "cardImportStepStateCompleted": "completed",
   "@cardImportStepStateCompleted": {
-      "description": "Stepper node state read to a screen reader."
+    "description": "Stepper node state read to a screen reader."
   },
   "cardImportStepStateCurrent": "current",
   "@cardImportStepStateCurrent": {
-      "description": "Stepper node state read to a screen reader."
+    "description": "Stepper node state read to a screen reader."
   },
   "cardImportStepStateUpcoming": "upcoming",
   "@cardImportStepStateUpcoming": {
-      "description": "Stepper node state read to a screen reader."
+    "description": "Stepper node state read to a screen reader."
   },
   "cardImportSourceStatusLine": "{meta} · {status}",
   "@cardImportSourceStatusLine": {
-      "placeholders": {
-          "meta": {
-              "type": "String"
-          },
-          "status": {
-              "type": "String"
-          }
+    "placeholders": {
+      "meta": {
+        "type": "String"
       },
-      "description": "Source summary status line: the extension-and-size pair plus the phase status (ready / parsing / rows detected)."
+      "status": {
+        "type": "String"
+      }
+    },
+    "description": "Source summary status line: the extension-and-size pair plus the phase status (ready / parsing / rows detected)."
   },
   "cardExportEntryAction": "Export cards",
   "@cardExportEntryAction": {
-      "description": "The export entry point in the card list overflow menu, and the title of the export sheet it opens (M4.13 W1, W2)."
+    "description": "The export entry point in the card list overflow menu, and the title of the export sheet it opens (M4.13 W1, W2)."
   },
   "cardExportSelectionAction": "Export selected",
   "@cardExportSelectionAction": {
-      "description": "The export entry point on the multi-select action bar; opens the sheet scoped to the selected ids (M4.13 W1, BR-174)."
+    "description": "The export entry point on the multi-select action bar; opens the sheet scoped to the selected ids (M4.13 W1, BR-174)."
   },
   "cardExportScopeAllLabel": "{count, plural, =1{All 1 card in this deck} other{All {count} cards in this deck}}",
   "@cardExportScopeAllLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Read-only scope summary for the whole-deck scope. The number is the deck's direct card count, not the rows currently listed (BR-174)."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Read-only scope summary for the whole-deck scope. The number is the deck's direct card count, not the rows currently listed (BR-174)."
   },
   "cardExportScopeSelectedLabel": "{count, plural, =1{1 selected card} other{{count} selected cards}}",
   "@cardExportScopeSelectedLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Read-only scope summary for the selection scope: how many distinct ids the export covers (BR-174)."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Read-only scope summary for the selection scope: how many distinct ids the export covers (BR-174)."
   },
   "cardExportFormatHeading": "Format",
   "@cardExportFormatHeading": {
-      "description": "Group label above the three format options in the export sheet."
+    "description": "Group label above the three format options in the export sheet."
   },
   "cardExportRecommendedBadge": "Recommended",
   "@cardExportRecommendedBadge": {
-      "description": "Badge on the CSV option. Readable text, never a coloured dot alone (M4.13 E3, W6)."
+    "description": "Badge on the CSV option. Readable text, never a coloured dot alone (M4.13 E3, W6)."
   },
   "cardExportCsvSubtitle": "Opens in any spreadsheet or text editor.",
   "@cardExportCsvSubtitle": {
-      "description": "One-line hint under the CSV format option saying what can open the file."
+    "description": "One-line hint under the CSV format option saying what can open the file."
   },
   "cardExportTsvSubtitle": "Tab-separated, for tools that expect tabs.",
   "@cardExportTsvSubtitle": {
-      "description": "One-line hint under the TSV format option saying what can open the file."
+    "description": "One-line hint under the TSV format option saying what can open the file."
   },
   "cardExportXlsxSubtitle": "A workbook for Excel or Google Sheets.",
   "@cardExportXlsxSubtitle": {
-      "description": "One-line hint under the XLSX format option saying what can open the file."
+    "description": "One-line hint under the XLSX format option saying what can open the file."
   },
   "cardExportIncludesLine": "Includes front, back, example, hint, pronunciation and tags.",
   "@cardExportIncludesLine": {
-      "description": "States what the file carries — the six canonical fields, in AD-20's order (BR-175). The field names in the file itself are never localized (BR-179)."
+    "description": "States what the file carries — the six canonical fields, in AD-20's order (BR-175). The field names in the file itself are never localized (BR-179)."
   },
   "cardExportExcludesLine": "Study progress and review history aren't in the file.",
   "@cardExportExcludesLine": {
-      "description": "Info line, not a warning: export is content transfer, not a backup, so re-importing starts every card new (BR-175, M4.13 E4)."
+    "description": "Info line, not a warning: export is content transfer, not a backup, so re-importing starts every card new (BR-175, M4.13 E4)."
   },
   "cardExportSubmitAction": "{count, plural, =1{Export 1 card} other{Export {count} cards}}",
   "@cardExportSubmitAction": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Primary action of the export sheet. The number is the scope's card count."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Primary action of the export sheet. The number is the scope's card count."
   },
   "cardExportSubmittingLabel": "Exporting…",
   "@cardExportSubmittingLabel": {
-      "description": "Label the primary action takes while the file is being built and handed over. Real text, not a silent spinner (M4.13 W6)."
+    "description": "Label the primary action takes while the file is being built and handed over. Real text, not a silent spinner (M4.13 W6)."
   },
   "cardExportSharedMessage": "Your cards were handed to the system to share.",
   "@cardExportSharedMessage": {
-      "description": "Confirmation after the share sheet accepted the file. It must never claim the file was saved, or name a folder — the OS does not tell the app where it went (BR-181, M4.13 E9)."
+    "description": "Confirmation after the share sheet accepted the file. It must never claim the file was saved, or name a folder — the OS does not tell the app where it went (BR-181, M4.13 E9)."
   },
   "cardExportErrorTitle": "Export didn't finish",
   "@cardExportErrorTitle": {
-      "description": "Title of the in-sheet error band for the reasons a retry can fix (M4.13 W3 states 5–6)."
+    "description": "Title of the in-sheet error band for the reasons a retry can fix (M4.13 W3 states 5–6)."
   },
   "cardExportScopeChangedTitle": "These cards have changed",
   "@cardExportScopeChangedTitle": {
-      "description": "Title of the in-sheet error band when the scope itself is no longer valid, so there is nothing to retry (M4.13 W3 state 7)."
+    "description": "Title of the in-sheet error band when the scope itself is no longer valid, so there is nothing to retry (M4.13 W3 state 7)."
   },
   "cardExportErrorEmptyScope": "There are no cards left to export in this deck.",
   "@cardExportErrorEmptyScope": {
-      "description": "Typed error: the scope holds no cards (UC-11 E5, BR-174)."
+    "description": "Typed error: the scope holds no cards (UC-11 E5, BR-174)."
   },
   "cardExportErrorStaleSelection": "Some of the cards you picked are no longer in this deck. Select again and export.",
   "@cardExportErrorStaleSelection": {
-      "description": "Typed error: a selected id was deleted or moved, so the whole request failed rather than exporting part of it (UC-11 E6, BR-174)."
+    "description": "Typed error: a selected id was deleted or moved, so the whole request failed rather than exporting part of it (UC-11 E6, BR-174)."
   },
   "cardExportErrorDeckMissing": "This deck no longer exists.",
   "@cardExportErrorDeckMissing": {
-      "description": "Typed error: the deck itself is gone (UC-11 E3). Distinct from an empty deck, which can be refilled."
+    "description": "Typed error: the deck itself is gone (UC-11 E3). Distinct from an empty deck, which can be refilled."
   },
   "cardExportErrorReadFailed": "The cards could not be read. Nothing was changed.",
   "@cardExportErrorReadFailed": {
-      "description": "Typed error: the snapshot read failed (UC-11 E3). Export is read-only, so there is nothing to undo (BR-178)."
+    "description": "Typed error: the snapshot read failed (UC-11 E3). Export is read-only, so there is nothing to undo (BR-178)."
   },
   "cardExportErrorEncodeFailed": "The file could not be built from these cards.",
   "@cardExportErrorEncodeFailed": {
-      "description": "Typed error: encoding failed (UC-11 E4). Deliberately distinct from a read failure, and no partial file is handed on."
+    "description": "Typed error: encoding failed (UC-11 E4). Deliberately distinct from a read failure, and no partial file is handed on."
   },
   "cardExportErrorShareUnavailable": "This device has no way to share a file.",
   "@cardExportErrorShareUnavailable": {
-      "description": "Typed error: the platform has no share sheet (UC-11 E1). Names no path and no file name (BR-181)."
+    "description": "Typed error: the platform has no share sheet (UC-11 E1). Names no path and no file name (BR-181)."
   },
   "cardExportErrorSharePlatformError": "Your device could not take the file. Nothing was saved.",
   "@cardExportErrorSharePlatformError": {
-      "description": "Typed error: the platform channel threw while sharing (UC-11 E2). Names no path and no file name (BR-180, BR-181)."
+    "description": "Typed error: the platform channel threw while sharing (UC-11 E2). Names no path and no file name (BR-180, BR-181)."
   },
   "cardExportRetryAction": "Try again",
   "@cardExportRetryAction": {
-      "description": "Recovery action in the export error band; re-submits the same scope and format (M4.13 E8)."
+    "description": "Recovery action in the export error band; re-submits the same scope and format (M4.13 E8)."
   },
   "cardExportCloseAction": "Close",
   "@cardExportCloseAction": {
-      "description": "The only action left when the scope is no longer valid — there is nothing to retry until the user selects again (M4.13 W3 state 7)."
+    "description": "The only action left when the scope is no longer valid — there is nothing to retry until the user selects again (M4.13 W3 state 7)."
+  },
+  "progressRange7Label": "7 days",
+  "@progressRange7Label": {
+    "description": "Range selector pill for the 7-day window (BR-220). Short because two pills share a row on a 320dp screen; progressRange7SemanticLabel carries the full phrase for a screen reader."
+  },
+  "progressRange30Label": "30 days",
+  "@progressRange30Label": {
+    "description": "Range selector pill for the 30-day window (BR-220)."
+  },
+  "progressRange7SemanticLabel": "Last 7 days",
+  "@progressRange7SemanticLabel": {
+    "description": "Screen-reader expansion of progressRange7Label. \"7 days\" alone does not say the window ends today."
+  },
+  "progressRange30SemanticLabel": "Last 30 days",
+  "@progressRange30SemanticLabel": {
+    "description": "Screen-reader expansion of progressRange30Label."
+  },
+  "progressRangeSelectorSemanticLabel": "Reporting window",
+  "@progressRangeSelectorSemanticLabel": {
+    "description": "Group label for the two range pills, so a screen reader announces what the choice is about before reading the options."
+  },
+  "progressSummaryLast7DaysTitle": "Last 7 days",
+  "@progressSummaryLast7DaysTitle": {
+    "description": "Heading of the summary panel while the 7-day window is selected. Repeats the window in words so a screenshot or a screen reader is unambiguous about which figures are shown."
+  },
+  "progressSummaryLast30DaysTitle": "Last 30 days",
+  "@progressSummaryLast30DaysTitle": {
+    "description": "Heading of the summary panel while the 30-day window is selected."
+  },
+  "progressActiveCardsMetricWord": "cards studied",
+  "@progressActiveCardsMetricWord": {
+    "description": "Word beside the distinct-card count (BR-219). \"Studied\" rather than \"reviewed\": the count includes learning turns, which are not reviews."
+  },
+  "progressActiveDaysMetricWord": "active days",
+  "@progressActiveDaysMetricWord": {
+    "description": "Word beside the distinct local-day count (BR-219). Days on which at least one card was answered."
+  },
+  "progressLearningMetricWord": "learning",
+  "@progressLearningMetricWord": {
+    "description": "Word beside the learning half of the card-day partition (BR-222). Short on purpose: the word has to survive a 320dp cell at text scale 2.0, where a longer one is clipped rather than wrapped. The unit it counts is stated once by progressCardDayUnitNote."
+  },
+  "progressReviewingMetricWord": "reviewing",
+  "@progressReviewingMetricWord": {
+    "description": "Word beside the reviewing half of the card-day partition (BR-222). Short for the same reason as progressLearningMetricWord."
+  },
+  "progressCardDayUnitNote": "Learning and reviewing count card-days — one card on one day.",
+  "@progressCardDayUnitNote": {
+    "description": "Caption under the summary panel's metric grid. Two units sit in that grid: cards and days on the top row, card-days on the bottom, and without this line 12 + 60 beside 45 reads as arithmetic that does not add up. It is a caption rather than four longer words because a word long enough to carry the unit is clipped in a 320dp cell at text scale 2.0."
+  },
+  "progressActiveCardsSemanticLabel": "{count, plural, =0{No cards studied} =1{1 card studied} other{{count} cards studied}}",
+  "@progressActiveCardsSemanticLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Screen-reader sentence for the distinct-card metric. A whole sentence rather than a number beside a word, because a reader announces the two separately and \"12\" then \"cards studied\" is heard as two facts."
+  },
+  "progressActiveDaysSemanticLabel": "{count, plural, =0{No active days} =1{1 active day} other{{count} active days}}",
+  "@progressActiveDaysSemanticLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Screen-reader sentence for the active-day metric."
+  },
+  "progressLearningSemanticLabel": "{count, plural, =0{No learning card-days} =1{1 learning card-day} other{{count} learning card-days}}",
+  "@progressLearningSemanticLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Screen-reader sentence for the learning half of the partition (BR-222). Says card-days, because the figure counts a card once per day and not once per answer."
+  },
+  "progressReviewingSemanticLabel": "{count, plural, =0{No reviewing card-days} =1{1 reviewing card-day} other{{count} reviewing card-days}}",
+  "@progressReviewingSemanticLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Screen-reader sentence for the reviewing half of the partition (BR-222)."
+  },
+  "progressDeckRowSemanticLabel": "{name}, in {path}, {range}",
+  "@progressDeckRowSemanticLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "range": {
+        "type": "String"
+      },
+      "path": {
+        "type": "String"
+      }
+    },
+    "description": "Screen-reader sentence naming a deck row, where it sits and which window its figures cover, read before the four metrics. Only used when the deck has ancestors; a root deck uses progressDeckRootRowSemanticLabel."
+  },
+  "progressDeckRootRowSemanticLabel": "{name}, {range}",
+  "@progressDeckRootRowSemanticLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "range": {
+        "type": "String"
+      }
+    },
+    "description": "Screen-reader sentence for a deck row with no ancestors. A root deck has no path, and a sentence with an empty clause reads worse than the name alone — but it still has to carry the window, because a reader swiping into the middle of a long list has no other way to know which one is on screen."
+  },
+  "progressPathSeparator": " › ",
+  "@progressPathSeparator": {
+    "description": "Glyph between two steps of a deck path on a progress row. Localizable because the mark that reads as \"contains\" is not the same in every script; the spaces around it are part of the value so the path can wrap at them."
+  },
+  "progressEmptyDecksTitle": "No decks yet",
+  "@progressEmptyDecksTitle": {
+    "description": "Top level with no decks at all. Distinct from progressNoActivityTitle: there is nothing to measure, not nothing measured."
+  },
+  "progressEmptyDecksMessage": "Create a deck in your library and your study activity will show up here.",
+  "@progressEmptyDecksMessage": {
+    "description": "Body of the no-decks state. Names the next step without offering a button, because the step is on another tab and a control that switches tabs from a progress screen reads as a detour."
+  },
+  "progressEmptySubDecksTitle": "No sub-decks here",
+  "@progressEmptySubDecksTitle": {
+    "description": "A deck level whose deck holds cards rather than sub-decks. Its own figures are still shown above; this states that there is nothing further to drill into."
+  },
+  "progressEmptySubDecksMessage": "This deck holds cards, so its own totals above are the whole story.",
+  "@progressEmptySubDecksMessage": {
+    "description": "Body of the no-sub-decks state. Points back at the summary rather than presenting the level as empty, because it is not: the deck has figures."
+  },
+  "progressNoActivityTitle": "Nothing studied in this window",
+  "@progressNoActivityTitle": {
+    "description": "Decks exist but none was answered inside the selected window (BR-220). Deliberately not an error and not a scold - zero is a normal reading."
+  },
+  "progressNoActivityMessage": "Switch to a longer window, or study a deck to start filling this in.",
+  "@progressNoActivityMessage": {
+    "description": "Body of the all-zero state. Offers the one action that can change the reading without leaving the screen - the other window - before suggesting studying."
+  },
+  "progressDeckMissingTitle": "This deck no longer exists",
+  "@progressDeckMissingTitle": {
+    "description": "The deck named by /progress/:deckId is gone - deleted while the screen was open, or a stale link. Distinct from an error: nothing failed."
+  },
+  "progressDeckMissingMessage": "It may have been deleted. Go back to see the decks you still have.",
+  "@progressDeckMissingMessage": {
+    "description": "Body of the deck-missing state. Retry is deliberately absent - re-reading will fail the same way - so the only offer is the way back."
+  },
+  "progressDeckMissingBackAction": "Back to progress",
+  "@progressDeckMissingBackAction": {
+    "description": "Returns to the library level of Progress by Deck from a level whose deck is gone."
+  },
+  "progressPlaceholderTitle": "Progress is being developed",
+  "@progressPlaceholderTitle": {
+    "description": "Heading of the Progress placeholder (AD-19). States plainly that the feature is not in this build rather than showing controls that do nothing."
+  },
+  "progressPlaceholderMessage": "Your current study activity is still saved for use when the feature is ready.",
+  "@progressPlaceholderMessage": {
+    "description": "Body of the Progress placeholder. Carries the one fact a learner needs while waiting: study history is already recorded (review_history is append-only), so nothing is lost before the feature ships."
+  },
+  "studyHomeTitle": "Study",
+  "@studyHomeTitle": {
+    "description": "App-bar title of the Study tab's home screen (UC-14)."
+  },
+  "studyHomeSupportingCopy": "Pick a deck, or carry on where you stopped.",
+  "@studyHomeSupportingCopy": {
+    "description": "One line under the title saying what the screen is for. Read-only: nothing on this screen opens a session by itself (BR-200)."
+  },
+  "studyHomeSupportingCopyNoResume": "Pick a deck to get started.",
+  "@studyHomeSupportingCopyNoResume": {
+    "description": "The same line when no session is open. The other half of the pair promises somewhere to carry on from; with nothing to resume that half is a lie, and BR-200 makes \"nothing open\" the common case because it needs four conditions at once."
+  },
+  "studyHomeLoadingLabel": "Loading your decks",
+  "@studyHomeLoadingLabel": {
+    "description": "Screen-reader label for the Study home spinner. A bare spinner announces nothing at all."
+  },
+  "studyHomeResumeTitle": "Carry on",
+  "@studyHomeResumeTitle": {
+    "description": "Heading of the Resume card, shown only when a session of today's study day is still open (BR-200, BR-103)."
+  },
+  "studyHomeResumeSubtitle": "{kind} · {mode}",
+  "@studyHomeResumeSubtitle": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      },
+      "mode": {
+        "type": "String"
+      }
+    },
+    "description": "The open session's own kind and stage, both stored on the session and never inferred (BR-76, BR-98)."
+  },
+  "studyHomeResumeAction": "Resume",
+  "@studyHomeResumeAction": {
+    "description": "Opens the session that is already there. It never creates a second one (BR-101)."
+  },
+  "studyHomeResumeSemanticLabel": "Resume {deck}",
+  "@studyHomeResumeSemanticLabel": {
+    "placeholders": {
+      "deck": {
+        "type": "String"
+      }
+    },
+    "description": "Screen-reader name for the Resume action, which names the deck because several rows below carry a similar verb."
+  },
+  "studyHomeNextTitle": "Study next",
+  "@studyHomeNextTitle": {
+    "description": "Heading of the root-deck list, ordered by workload (BR-201)."
+  },
+  "studyHomeNothingDueMessage": "Nothing is due right now. Any deck is still open if you want to get ahead.",
+  "@studyHomeNothingDueMessage": {
+    "description": "Supporting line when every listed deck has an empty workload. Not an error and not an achievement — BR-29 makes a quiet schedule the product working."
+  },
+  "studyHomeWorkloadSemanticLabel": "{overdue} overdue, {dueToday} due today, {newCount} new",
+  "@studyHomeWorkloadSemanticLabel": {
+    "placeholders": {
+      "overdue": {
+        "type": "int"
+      },
+      "dueToday": {
+        "type": "int"
+      },
+      "newCount": {
+        "type": "int"
+      }
+    },
+    "description": "The three counts as one screen-reader phrase, so a row is heard as one fact instead of three stray numbers."
+  },
+  "studyHomeStudyAction": "Study",
+  "@studyHomeStudyAction": {
+    "description": "Opens one root deck's study entry. The tap is the only thing on this screen that may lead to a write (BR-200)."
+  },
+  "studyHomeStudySemanticLabel": "Study {deck}",
+  "@studyHomeStudySemanticLabel": {
+    "placeholders": {
+      "deck": {
+        "type": "String"
+      }
+    },
+    "description": "Screen-reader name for a row's Study action. Every row carries the same word, so the deck name is what tells them apart."
+  },
+  "studyHomeEmptyLibraryTitle": "Nothing to study yet",
+  "@studyHomeEmptyLibraryTitle": {
+    "description": "The library holds no deck at all — the first-run state (BR-202, UC-01)."
+  },
+  "studyHomeEmptyLibraryMessage": "Add a ready-made deck and the first cards are waiting for you.",
+  "@studyHomeEmptyLibraryMessage": {
+    "description": "Copy of the empty-library state. Names the next step rather than the absence."
+  },
+  "studyHomeStarterAction": "Browse ready-made decks",
+  "@studyHomeStarterAction": {
+    "description": "Opens the starter catalog from the Study tab (UC-01). A real route, not a placeholder."
+  },
+  "studyHomeNoCardsTitle": "Your decks are empty",
+  "@studyHomeNoCardsTitle": {
+    "description": "There are decks but not a card anywhere in them — a different state from an empty library, with a different next step (BR-202)."
+  },
+  "studyHomeNoCardsMessage": "Add cards in your library and they will show up here.",
+  "@studyHomeNoCardsMessage": {
+    "description": "Copy of the no-cards state. It must not invent a due count for a deck that holds nothing."
+  },
+  "studyHomeOpenLibraryAction": "Open library",
+  "@studyHomeOpenLibraryAction": {
+    "description": "Takes the user to the deck tree, where cards are added."
+  },
+  "studyHomeErrorTitle": "Couldn’t load your decks",
+  "@studyHomeErrorTitle": {
+    "description": "Failure state of the Study tab. Names no table, no query and no path (AD-04)."
+  },
+  "studyHomeErrorMessage": "Nothing was changed. Try again in a moment.",
+  "@studyHomeErrorMessage": {
+    "description": "Says the read failed and that it wrote nothing — true by construction, because this screen has no write path (BR-200)."
+  },
+  "studyHomeDeckRowSemanticLabel": "{deckName}, {scheduler}, {workload}",
+  "@studyHomeDeckRowSemanticLabel": {
+    "placeholders": {
+      "deckName": {
+        "type": "String"
+      },
+      "scheduler": {
+        "type": "String"
+      },
+      "workload": {
+        "type": "String"
+      }
+    },
+    "description": "The whole deck row as one sentence for a screen reader: the deck, its algorithm and its workload. Without it the row is four unowned nodes and the counts name no deck — the same problem the Study button solves by carrying the deck name."
+  },
+  "studyHomeDeckRowPlainSemanticLabel": "{deckName}, {workload}",
+  "@studyHomeDeckRowPlainSemanticLabel": {
+    "placeholders": {
+      "deckName": {
+        "type": "String"
+      },
+      "workload": {
+        "type": "String"
+      }
+    },
+    "description": "The row sentence for a deck whose algorithm has no label to show. A sentence with an empty clause reads worse than the short form."
+  },
+  "studyHomeOverdueWord": "overdue",
+  "@studyHomeOverdueWord": {
+    "description": "The word half of a workload metric, rendered beside the numeral so the two can carry different ink — the numeral stays neutral and only the word takes the metric tint, which is the grammar the deck summary and Progress already use. What a screen reader hears is neither half but studyHomeWorkloadSemanticLabel, nested inside the row sentence."
+  },
+  "studyHomeDueTodayWord": "due today",
+  "@studyHomeDueTodayWord": {
+    "description": "The word half of a workload metric, rendered beside the numeral so the two can carry different ink — the numeral stays neutral and only the word takes the metric tint, which is the grammar the deck summary and Progress already use. What a screen reader hears is neither half but studyHomeWorkloadSemanticLabel, nested inside the row sentence."
+  },
+  "studyHomeNewWord": "new",
+  "@studyHomeNewWord": {
+    "description": "The word half of a workload metric, rendered beside the numeral so the two can carry different ink — the numeral stays neutral and only the word takes the metric tint, which is the grammar the deck summary and Progress already use. What a screen reader hears is neither half but studyHomeWorkloadSemanticLabel, nested inside the row sentence."
+  },
+  "reminderTitle": "Daily reminder",
+  "@reminderTitle": {
+    "description": "Title of the daily-reminder screen and label of the row that opens it from Settings. The same words in both places on purpose: a row and the screen it opens have to read as one place (UC-17, M6 R1)."
+  },
+  "reminderToggleLabel": "Daily reminder",
+  "@reminderToggleLabel": {
+    "description": "Label of the on/off row. Repeats the screen title because the row is the screen's primary control, and a second noun for the same thing reads as a second setting (M6 W3)."
+  },
+  "reminderStatusOff": "Off",
+  "@reminderStatusOff": {
+    "description": "Accessibility value of the toggle when the reminder is off, so the state is not carried by colour alone (M6 R7, A3). The Settings row deliberately shows no value — see M6 W1."
+  },
+  "reminderStatusOn": "On",
+  "@reminderStatusOn": {
+    "description": "Accessibility value of the toggle when the reminder is on (M6 R7, A3). The visible trailing value in Settings is the time itself, which says more."
+  },
+  "reminderTimeLabel": "Reminder time",
+  "@reminderTimeLabel": {
+    "description": "Label of the row that opens the time picker, and the picker dialog's own heading (M6 W4, R6)."
+  },
+  "reminderDueOnlyNote": "You'll only be reminded when cards are due.",
+  "@reminderDueOnlyNote": {
+    "description": "First supporting line under the card. States BR-220 in the user's terms: no reminder on a day with nothing owed, and new cards never trigger one. Deliberately not alarmist - it is a promise about silence, not a warning."
+  },
+  "reminderPrivacyNote": "The reminder can show a deck name and how many cards are due, including on your lock screen.",
+  "@reminderPrivacyNote": {
+    "description": "Second supporting line. The lock-screen disclosure BR-222 requires, said before the user opts in rather than discovered afterwards. It names exactly what can appear - a deck name and a count - so the absence of card content is stated by omission of any wider claim."
+  },
+  "reminderPermissionDeniedTitle": "Notifications are turned off",
+  "@reminderPermissionDeniedTitle": {
+    "description": "Error banner title after the OS refused the notification permission (UC-17 E1, BR-228). Names the system state, not a failure of the user."
+  },
+  "reminderPermissionDeniedMessage": "Turn them on for MemoX in your device settings, then try again.",
+  "@reminderPermissionDeniedMessage": {
+    "description": "Recovery for a refused permission. Android grants one prompt per app, so the route back is system settings; the app must not ask again on its own (BR-228)."
+  },
+  "reminderUnavailableTitle": "Reminders aren't available on this device",
+  "@reminderUnavailableTitle": {
+    "description": "Banner title when the platform has no reminder delivery in this build (UC-17 E2, BR-229). Carries no action, because there is no recovery and a button that cannot work is worse than none."
+  },
+  "reminderUnavailableMessage": "Nothing has been turned on, and nothing is scheduled.",
+  "@reminderUnavailableMessage": {
+    "description": "Body of the unavailable banner. Says what the user most needs to know - that no silent half-enabled state was left behind (BR-229)."
+  },
+  "reminderScheduleErrorTitle": "The reminder couldn't be scheduled",
+  "@reminderScheduleErrorTitle": {
+    "description": "Banner title when the OS accepted the permission but refused the background work (UC-17 E3). Names no technical detail, because Failure.message is never rendered."
+  },
+  "reminderScheduleErrorMessage": "Nothing was turned on. Try again in a moment.",
+  "@reminderScheduleErrorMessage": {
+    "description": "Body of the schedule-failure banner. Confirms the setting stayed off, which is what BR-228 guarantees and what the user cannot otherwise tell."
+  },
+  "reminderSaveErrorTitle": "Your change wasn't saved",
+  "@reminderSaveErrorTitle": {
+    "description": "Banner title when the settings write failed (UC-17 E4). Distinct from a schedule failure because the retry re-runs a different step."
+  },
+  "reminderLoadErrorTitle": "Couldn't load your reminder",
+  "@reminderLoadErrorTitle": {
+    "description": "Title of the whole-screen error state when the daily-reminder settings could not be READ. Deliberately not the save copy: nothing has been changed at this point, so \"Your change wasn't saved\" would describe an event that did not happen. Mirrors settingsLoadErrorTitle, which is the same situation one screen up."
+  },
+  "reminderSaveErrorMessage": "The reminder is still set the way it was.",
+  "@reminderSaveErrorMessage": {
+    "description": "Body of the save-failure banner. Tells the user which state they are in, since the screen has just reverted under them."
+  },
+  "reminderNotificationTitle": "Time to study",
+  "@reminderNotificationTitle": {
+    "description": "Notification title (M6 N1). Carries no count and no deck name - those are in the body, so a truncated title still says nothing private."
+  },
+  "reminderNotificationBodyOneDeck": "{count, plural, =1{1 card is due in {deck}} other{{count} cards are due in {deck}}}",
+  "@reminderNotificationBodyOneDeck": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "deck": {
+        "type": "String"
+      }
+    },
+    "description": "Notification body when exactly one deck owes something (M6 N2, BR-222). The deck name and the count are the only data allowed here."
+  },
+  "reminderNotificationBodyManyDecks": "{others, plural, =1{{count} cards are due in {deck} and 1 more deck} other{{count} cards are due in {deck} and {others} more decks}}",
+  "@reminderNotificationBodyManyDecks": {
+    "placeholders": {
+      "others": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      },
+      "deck": {
+        "type": "String"
+      }
+    },
+    "description": "Notification body when more than one deck owes something (M6 N3, BR-222). The named deck is the most urgent one by BR-223's ordering; the rest are a count, never a list. The plural is on the number of other decks - the card count is always above one here, because two decks owe at least one card each."
+  },
+  "reminderCancelErrorTitle": "The reminder is off, but a pending alert may remain",
+  "@reminderCancelErrorTitle": {
+    "description": "Banner title when the setting was turned off but the pending background run could not be cancelled (BR-226). Deliberately not the schedule-failure copy: the user just turned something OFF, and being told nothing was turned ON describes the opposite of what happened."
+  },
+  "reminderCancelErrorMessage": "Daily reminders are off. One from earlier may still be showing; opening the app clears it.",
+  "@reminderCancelErrorMessage": {
+    "description": "Body of the cancel-failure banner. States the outcome the user cares about — the setting is off — and what the residue is, without promising more than BR-220 gives: a stale run re-reads the setting at fire time and posts nothing."
+  },
+  "reminderChannelName": "Daily reminder",
+  "@reminderChannelName": {
+    "description": "Name of the Android notification channel, shown to the user in system settings under the app. User-visible, so it is localized rather than hardcoded at the call site."
+  },
+  "reminderChannelDescription": "A once-a-day summary of the cards you owe.",
+  "@reminderChannelDescription": {
+    "description": "Description of the Android notification channel, shown under its name in system settings. Says what the channel carries and nothing about any particular deck or card (BR-222)."
+  },
+  "tagCatalogTitle": "Tags",
+  "@tagCatalogTitle": {
+    "description": "App bar title of the tag catalog screen (UC-18, M4.14 W2)."
+  },
+  "tagCatalogEntryAction": "Manage tags",
+  "@tagCatalogEntryAction": {
+    "description": "Opens the tag catalog. Used by the Library app bar icon and by the card list overflow menu (M4.14 T2)."
+  },
+  "tagCatalogLoadingLabel": "Loading tags",
+  "@tagCatalogLoadingLabel": {
+    "description": "Screen-reader label while the tag catalog is loading (M4.14 W3 face 1)."
+  },
+  "tagCatalogError": "Your tags could not be loaded.",
+  "@tagCatalogError": {
+    "description": "Body of the catalog error state. Names no table and no query."
+  },
+  "tagCatalogEmptyTitle": "No tags yet",
+  "@tagCatalogEmptyTitle": {
+    "description": "Title when the catalog holds no tags at all (M4.14 W3 face 3)."
+  },
+  "tagCatalogEmptyMessage": "Tags appear here once you add one to a card.",
+  "@tagCatalogEmptyMessage": {
+    "description": "Says where tags come from, because nothing on this screen can create one (M4.14 W2 item 1)."
+  },
+  "tagSearchHint": "Search tags",
+  "@tagSearchHint": {
+    "description": "Placeholder of the catalog search field (BR-230)."
+  },
+  "tagSearchClearLabel": "Clear tag search",
+  "@tagSearchClearLabel": {
+    "description": "Screen-reader label of the clear button inside the catalog search field."
+  },
+  "tagSearchEmptyTitle": "No tags match “{query}”",
+  "@tagSearchEmptyTitle": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    },
+    "description": "Title when a catalog search matches nothing. Quotes the term verbatim so the user sees what was searched for (M4.14 W3 face 4)."
+  },
+  "tagSearchEmptyMessage": "Try a shorter word, or check the spelling.",
+  "@tagSearchEmptyMessage": {
+    "description": "Body of the catalog search-empty state."
+  },
+  "tagCardCount": "{count, plural, =0{No cards} =1{1 card} other{{count} cards}}",
+  "@tagCardCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "How many cards carry a tag. Shown under the name on a catalog row and on a filter row (BR-230, M4.14 W2)."
+  },
+  "tagRowMenuSemantics": "Actions for tag {name}",
+  "@tagRowMenuSemantics": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    },
+    "description": "Tooltip and screen-reader label of a catalog row's overflow menu, named so a reader can tell rows apart (M4.14 W2)."
+  },
+  "tagRenameAction": "Rename",
+  "@tagRenameAction": {
+    "description": "Catalog row menu item, and the rename sheet's primary action when the new name is free (BR-233)."
+  },
+  "tagDeleteAction": "Delete tag",
+  "@tagDeleteAction": {
+    "description": "Catalog row menu item and the destructive confirm action. Carries the noun on purpose: a bare Delete reads as deleting cards (M4.14 T8, BR-235)."
+  },
+  "tagRenameTitle": "Rename tag",
+  "@tagRenameTitle": {
+    "description": "Title of the rename sheet (M4.14 W4)."
+  },
+  "tagRenameFieldLabel": "Tag name",
+  "@tagRenameFieldLabel": {
+    "description": "Label of the rename sheet's single input."
+  },
+  "tagMergeAction": "Merge tags",
+  "@tagMergeAction": {
+    "description": "The rename sheet's primary action once the typed name collides with another tag. The label is the last thing read before the merge happens (BR-234, M4.14 W4 item 4)."
+  },
+  "tagMergeNotice": "“{target}” already exists. Its cards and this tag's cards will all use “{target}”, and this tag will be gone.",
+  "@tagMergeNotice": {
+    "placeholders": {
+      "target": {
+        "type": "String"
+      }
+    },
+    "description": "The merge disclosure, shown while typing and before confirming. Names the target, because saying a merge will happen without saying into what is not a disclosure (BR-234, M4.14 W4 item 3)."
+  },
+  "tagMergedConfirmation": "“{name}” was merged.",
+  "@tagMergedConfirmation": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    },
+    "description": "Confirms after the fact that a rename turned out to be a merge. Chosen from the outcome the transaction returned, not from what the form predicted (BR-234)."
+  },
+  "tagDeleteConfirmTitle": "Delete tag?",
+  "@tagDeleteConfirmTitle": {
+    "description": "Title of the tag delete confirmation (M4.14 W5)."
+  },
+  "tagDeleteConfirmMessage": "{count, plural, =1{“{name}” will be removed from 1 card. The card itself stays.} other{“{name}” will be removed from {count} cards. The cards themselves stay.}}",
+  "@tagDeleteConfirmMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Body of the delete confirmation. States the count and says outright that the cards survive; must never imply cards are deleted (BR-235, M4.14 T8)."
+  },
+  "tagDeleteConfirmMessageUnused": "“{name}” is not on any card. Deleting it changes no cards.",
+  "@tagDeleteConfirmMessageUnused": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    },
+    "description": "Body of the delete confirmation for a tag with no cards. A separate sentence rather than a zero count, which would be a sentence about nothing (M4.14 W5)."
+  },
+  "tagMissingError": "That tag no longer exists.",
+  "@tagMissingError": {
+    "description": "Typed failure: the tag was deleted or merged away between opening an overlay and submitting it (UC-18 E3)."
+  },
+  "tagWriteErrorTitle": "Couldn’t save",
+  "@tagWriteErrorTitle": {
+    "description": "Title of the error band inside the tag rename/merge sheet. Shares its wording with deckWriteErrorTitle and settingsSaveErrorTitle: one situation, one sentence. The Vietnamese was two sentences until M99.30 — \"Không lưu được\" on deck and tag, \"Chưa lưu được\" on settings — and the owner settled on \"Chưa\", which says the write is recoverable, matching every place the title appears beside a retry."
+  },
+  "tagFilterTitle": "Filter by tags",
+  "@tagFilterTitle": {
+    "description": "Title of the multi-tag filter sheet on the card list (M4.14 W6)."
+  },
+  "tagFilterSubtitle": "Shows cards with any of the selected tags.",
+  "@tagFilterSubtitle": {
+    "description": "States the OR semantics in words. The only place a user learns that selecting a second tag widens the result rather than narrowing it (BR-231, M4.14 W6 item 2)."
+  },
+  "tagFilterClearAction": "Clear",
+  "@tagFilterClearAction": {
+    "description": "Empties the filter sheet's draft selection (M4.14 W6 item 4, UC-18 A4)."
+  },
+  "tagFilterClearAllAction": "Clear tag filter",
+  "@tagFilterClearAllAction": {
+    "description": "The action on the card list's no-result face when a tag selection is what emptied it (UC-18 A7). A separate key from the sheet's Clear on purpose: here the sheet is shut and nothing is visibly selected, so a bare verb has no object — and one key serving two surfaces means editing the sheet's button silently edits this one."
+  },
+  "tagFilterApplyAction": "Apply",
+  "@tagFilterApplyAction": {
+    "description": "The filter sheet's primary action before the match count has arrived — the bare verb rather than a flickering zero (M4.14 T6)."
+  },
+  "tagFilterApplyActionCount": "{count, plural, =0{Show no cards} =1{Show 1 card} other{Show {count} cards}}",
+  "@tagFilterApplyActionCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "The filter sheet's primary action with the number of cards the draft matches, so the user can tell whether it is worth applying before closing the sheet (M4.14 T6)."
+  },
+  "tagFilterPillLabel": "Tags",
+  "@tagFilterPillLabel": {
+    "description": "The card list filter bar's tag pill when no tag is selected (M4.14 T3)."
+  },
+  "tagFilterPillCount": "Tags · {count}",
+  "@tagFilterPillCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "The tag pill when tags are selected. The number is the only thing on the bar that distinguishes no tag filter from a filter by three tags (M4.14 T4)."
+  },
+  "tagFilterPillSemantics": "{count, plural, =1{Tags, 1 selected} other{Tags, {count} selected}}",
+  "@tagFilterPillSemantics": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Screen-reader label of the tag pill while a filter is applied — the selected state must not be colour-only (M4.14 R)."
+  },
+  "cardDetailTitle": "Card",
+  "@cardDetailTitle": {
+    "description": "App-bar title of the read-only card detail screen (UC-19, M4.15 W2). Deliberately a generic label, not the card's front: the front is content and content is never truncated (BR-240), while an app-bar title must be."
+  },
+  "cardDetailEditAction": "Edit card",
+  "@cardDetailEditAction": {
+    "description": "The one action on the detail app bar; opens the existing editor (BR-246, M4.15 V3). Visible, but not the default meaning of a tap."
+  },
+  "cardDetailLoadingLabel": "Loading card",
+  "@cardDetailLoadingLabel": {
+    "description": "Semantic label while the content and state read is in flight (M4.15 W3 face 1)."
+  },
+  "cardDetailErrorMessage": "This card could not be read.",
+  "@cardDetailErrorMessage": {
+    "description": "Top-level error face (UC-19 E3). Names no id, path or SQL (BR-53)."
+  },
+  "cardDetailNotFoundTitle": "Card not found",
+  "@cardDetailNotFoundTitle": {
+    "description": "Not-found face when the card never existed or was deleted while open (UC-19 E1/E2, BR-245)."
+  },
+  "cardDetailNotFoundMessage": "This card no longer exists. It may have been deleted from another screen.",
+  "@cardDetailNotFoundMessage": {
+    "description": "Explains the not-found face without naming the id (BR-53, BR-245)."
+  },
+  "cardDetailBackToListAction": "Back to cards",
+  "@cardDetailBackToListAction": {
+    "description": "The way out of the not-found face — the deck's card list is where the user can act again (UC-19 E1)."
+  },
+  "cardDetailExampleLabel": "Example",
+  "@cardDetailExampleLabel": {
+    "description": "Label of the optional example field; the row is absent entirely when the field is empty (BR-95, BR-240)."
+  },
+  "cardDetailHintLabel": "Hint",
+  "@cardDetailHintLabel": {
+    "description": "Label of the optional hint field (BR-95, BR-240)."
+  },
+  "cardDetailPronunciationLabel": "Pronunciation",
+  "@cardDetailPronunciationLabel": {
+    "description": "Label of the optional pronunciation field (BR-95, BR-240)."
+  },
+  "cardDetailTagsLabel": "Tags",
+  "@cardDetailTagsLabel": {
+    "description": "Label above the read-only tag chips on the detail screen (BR-93)."
+  },
+  "cardDetailFlaggedLabel": "Flagged",
+  "@cardDetailFlaggedLabel": {
+    "description": "Shown only when the user has flagged the card; the detail screen never toggles it (BR-92, BR-239)."
+  },
+  "cardDetailStateSectionTitle": "Current state",
+  "@cardDetailStateSectionTitle": {
+    "description": "Heading of the schedule band — what is true now, as opposed to the history below it (BR-240, BR-244)."
+  },
+  "cardDetailDueLabel": "Due",
+  "@cardDetailDueLabel": {
+    "description": "When the card next comes due (BR-240)."
+  },
+  "cardDetailLearnedLabel": "Learned",
+  "@cardDetailLearnedLabel": {
+    "description": "When the card finished the learning chain; empty until it does (BR-144, BR-240)."
+  },
+  "cardDetailLastAnsweredLabel": "Last answered",
+  "@cardDetailLastAnsweredLabel": {
+    "description": "The last scheduled or relearning answer (BR-20, BR-240)."
+  },
+  "cardDetailReviewsLabel": "Reviews",
+  "@cardDetailReviewsLabel": {
+    "description": "Count of scheduled reviews (BR-20, BR-240). Not a score — BR-243 forbids derived numbers here."
+  },
+  "cardDetailLapsesLabel": "Lapses",
+  "@cardDetailLapsesLabel": {
+    "description": "Count of lapses (BR-20, BR-240)."
+  },
+  "cardDetailBoxLabel": "Box",
+  "@cardDetailBoxLabel": {
+    "description": "eight_box only; the sm2 fields are absent for such a card and vice versa (AD-08, BR-240)."
+  },
+  "cardDetailEaseLabel": "Ease",
+  "@cardDetailEaseLabel": {
+    "description": "sm2 only (AD-08, BR-240)."
+  },
+  "cardDetailIntervalLabel": "Interval",
+  "@cardDetailIntervalLabel": {
+    "description": "sm2 only (AD-08, BR-240)."
+  },
+  "cardDetailRepetitionsLabel": "Repetitions",
+  "@cardDetailRepetitionsLabel": {
+    "description": "sm2 only (AD-08, BR-240)."
+  },
+  "cardDetailNotScheduledValue": "Not scheduled yet",
+  "@cardDetailNotScheduledValue": {
+    "description": "Value for a card that has not finished the learning chain, where due and learned are both null and travel together (BR-149, BR-240)."
+  },
+  "cardDetailDayCount": "{count, plural, =1{1 day} other{{count} days}}",
+  "@cardDetailDayCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "The sm2 interval, in days (BR-240)."
+  },
+  "cardHistoryTitle": "Study history",
+  "@cardHistoryTitle": {
+    "description": "Heading of the timeline band (M4.15 W2)."
+  },
+  "cardHistoryEmptyTitle": "No reviews yet",
+  "@cardHistoryEmptyTitle": {
+    "description": "Empty history, which is a valid state and never an error (BR-244, UC-19 A2)."
+  },
+  "cardHistoryEmptyMessage": "Reviews appear here after this card has been studied.",
+  "@cardHistoryEmptyMessage": {
+    "description": "Explains the empty timeline without implying something went wrong (BR-244)."
+  },
+  "cardHistoryGenerationLabel": "Learning cycle {generation}",
+  "@cardHistoryGenerationLabel": {
+    "placeholders": {
+      "generation": {
+        "type": "int"
+      }
+    },
+    "description": "Group heading for one scheduler generation; text rather than colour, so the grouping is readable without it (BR-243, M4.15 V6)."
+  },
+  "cardHistoryCurrentGenerationLabel": "Current learning cycle",
+  "@cardHistoryCurrentGenerationLabel": {
+    "description": "Group heading for the generation the card is on now — the one that keeps growing (BR-243)."
+  },
+  "cardHistoryLoadMoreAction": "Load more",
+  "@cardHistoryLoadMoreAction": {
+    "description": "Tail action that appends the next keyset page (BR-241, M4.15 V5)."
+  },
+  "cardHistoryLoadingMoreLabel": "Loading more reviews",
+  "@cardHistoryLoadingMoreLabel": {
+    "description": "Semantic label while a further page is in flight; the rows already shown stay put (M4.15 W3 face 5)."
+  },
+  "cardHistoryPageErrorMessage": "The next page could not be loaded.",
+  "@cardHistoryPageErrorMessage": {
+    "description": "Tail error band; everything already shown stays on screen (UC-19 E4)."
+  },
+  "cardHistoryPageErrorTitle": "Couldn’t load more",
+  "@cardHistoryPageErrorTitle": {
+    "description": "Title of the error band at the foot of the study-history timeline when a page fails to load (UC-19 E4). Everything already read stays above it; the band names what did not arrive rather than what was lost."
+  },
+  "cardHistoryLoadingLabel": "Loading study history",
+  "@cardHistoryLoadingLabel": {
+    "description": "Semantic label while the first page is in flight (M4.15 W3 face 1)."
+  },
+  "cardHistoryScheduleUnchanged": "Schedule unchanged",
+  "@cardHistoryScheduleUnchanged": {
+    "description": "A turn of the learning chain records history and moves no schedule; said explicitly so it does not read as missing data (BR-144, BR-242)."
+  },
+  "cardHistoryTimedOutLabel": "Timed out",
+  "@cardHistoryTimedOutLabel": {
+    "description": "The stored outcome reason, shown only when present — owning up to a blank and running out of time produce the same action (BR-131, BR-242)."
+  },
+  "cardHistoryHintUsedLabel": "Hint used",
+  "@cardHistoryHintUsedLabel": {
+    "description": "The stored fill-mode hint flag, recorded and deliberately without effect on the action (BR-136, BR-242)."
+  },
+  "cardHistoryNextDueLabel": "Next due {date}",
+  "@cardHistoryNextDueLabel": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    },
+    "description": "The schedule this turn produced, when it produced one (BR-242)."
+  },
+  "cardHistoryBoxChange": "Box {from} → {to}",
+  "@cardHistoryBoxChange": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    },
+    "description": "eight_box before-and-after, from the stored columns of that row — never diffed from state (BR-76, BR-242). The arrow carries the direction without colour."
+  },
+  "cardHistoryEaseChange": "Ease {from} → {to}",
+  "@cardHistoryEaseChange": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    },
+    "description": "sm2 ease factor before and after, from the stored columns of that row (BR-242)."
+  },
+  "cardHistoryIntervalChange": "Interval {from} → {to}",
+  "@cardHistoryIntervalChange": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    },
+    "description": "sm2 interval before and after, from the stored columns of that row (BR-242)."
+  },
+  "cardHistoryKindLearning": "Learning",
+  "@cardHistoryKindLearning": {
+    "description": "The stored answer kind; never derived from the schedule delta (BR-75, BR-76)."
+  },
+  "cardHistoryKindScheduled": "Scheduled",
+  "@cardHistoryKindScheduled": {
+    "description": "The stored answer kind (BR-75, BR-76)."
+  },
+  "cardHistoryKindRelearning": "Relearning",
+  "@cardHistoryKindRelearning": {
+    "description": "The stored answer kind (BR-75, BR-76)."
+  },
+  "cardHistoryEventTime": "{date} · {time}",
+  "@cardHistoryEventTime": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    },
+    "description": "Joins the locale-formatted date and time of one event; the parts come from MaterialLocalizations so neither is assembled by hand (M4.15 W6)."
+  },
+  "cardHistoryEventSemantics": "{time}. {mode}, {kind}, {action}. {schedule}",
+  "@cardHistoryEventSemantics": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "mode": {
+        "type": "String"
+      },
+      "kind": {
+        "type": "String"
+      },
+      "action": {
+        "type": "String"
+      },
+      "schedule": {
+        "type": "String"
+      }
+    },
+    "description": "One event read as a single sentence, so TalkBack announces the meaning of the turn instead of five loose labels (M4.15 W6)."
+  },
+  "cardDetailNeverAnsweredValue": "Never answered",
+  "@cardDetailNeverAnsweredValue": {
+    "description": "Value for `Last answered` on a card no turn has ever been recorded against. Distinct from cardDetailNotScheduledValue, which is about the schedule: a card can be unscheduled and answered, and saying \"not scheduled yet\" under \"Last answered\" answered a different question (BR-240)."
+  },
+  "cardHistoryAllShownLabel": "All reviews shown",
+  "@cardHistoryAllShownLabel": {
+    "description": "Tail line once every page of the history has been read, so the user is not offered a button with nothing behind it (UC-19 A5). Deliberately countless: BR-243 forbids any aggregate derived from history, and a count here would contradict the Reviews row above it, which counts only scheduled turns (BR-20)."
+  },
+  "cardHistoryBoxChangeSemantics": "Box from {from} to {to}",
+  "@cardHistoryBoxChangeSemantics": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    },
+    "description": "Spoken form of cardHistoryBoxChange, used only inside the event's semantics label. The visible line keeps the arrow, which reads in every language; a screen reader speaks it as \"right arrow\" or not at all, so the relation is spelled out here (M4.15 W6)."
+  },
+  "cardHistoryEaseChangeSemantics": "Ease from {from} to {to}",
+  "@cardHistoryEaseChangeSemantics": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    },
+    "description": "Spoken form of cardHistoryEaseChange — see cardHistoryBoxChangeSemantics for why the arrow does not travel into the semantics label."
+  },
+  "cardHistoryIntervalChangeSemantics": "Interval from {from} to {to}",
+  "@cardHistoryIntervalChangeSemantics": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    },
+    "description": "Spoken form of cardHistoryIntervalChange — see cardHistoryBoxChangeSemantics."
+  },
+  "cardHistoryAbsentValueSemantics": "not recorded",
+  "@cardHistoryAbsentValueSemantics": {
+    "description": "Spoken stand-in for a before-or-after column the row left null. The visible line shows an en dash, which most screen readers say nothing about at all (M4.15 W6, BR-242)."
+  },
+  "cardHistoryModeUnknownSemantics": "Unknown mode",
+  "@cardHistoryModeUnknownSemantics": {
+    "description": "Spoken stand-in for a stored mode this build does not recognise (StudyMode.unknown). The visible line shows the same en dash placeholder an unrecorded column uses; a silent gap in a spoken sentence reads as data that failed to load."
+  },
+  "librarySearchTitle": "Search",
+  "@librarySearchTitle": {
+    "description": "App bar title of Global Library Search (UC-20). One word, because the field directly below it says what is being searched — a longer title would repeat the hint."
+  },
+  "librarySearchOpenLabel": "Search your library",
+  "@librarySearchOpenLabel": {
+    "description": "Semantic label and tooltip of the magnifier in the Library header, which opens the search screen. Names the scope rather than the action: the search covers the whole library, not the level the user is standing on."
+  },
+  "librarySearchHint": "Search decks, cards and tags",
+  "@librarySearchHint": {
+    "description": "Placeholder of the search field. Names all three things that are matched (BR-247), because a user who does not know cards are searched will not try."
+  },
+  "librarySearchClearLabel": "Clear search",
+  "@librarySearchClearLabel": {
+    "description": "Semantic label and tooltip of the clear button inside the search field."
+  },
+  "librarySearchDecksGroupLabel": "Decks",
+  "@librarySearchDecksGroupLabel": {
+    "description": "Header of the deck section of the results. Decks are always listed before cards (BR-251)."
+  },
+  "librarySearchCardsGroupLabel": "Cards",
+  "@librarySearchCardsGroupLabel": {
+    "description": "Header of the card section of the results."
+  },
+  "librarySearchInitialTitle": "Find anything in your library",
+  "@librarySearchInitialTitle": {
+    "description": "Heading of the state before anything is typed. Nothing has been read from the database at this point (BR-249)."
+  },
+  "librarySearchInitialMessage": "Type to search deck names, card fronts and backs, and tag names.",
+  "@librarySearchInitialMessage": {
+    "description": "Body of the initial state. States the exact scope, so an empty result later reads as it is not there rather than as it does not search that."
+  },
+  "librarySearchNoResultsTitle": "No results for “{query}”",
+  "@librarySearchNoResultsTitle": {
+    "description": "Heading when a settled search matched nothing. \"query\" is echoed as typed — not the folded form — so the user can see the spelling that was searched.",
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "librarySearchNoResultsMessage": "Nothing in your library has that in a deck name, a card, or a tag.",
+  "@librarySearchNoResultsMessage": {
+    "description": "Body of the empty-result state. Repeats the scope, because the most useful next thought is then it is somewhere else, or then I spelled it differently."
+  },
+  "librarySearchErrorTitle": "Couldn’t search",
+  "@librarySearchErrorTitle": {
+    "description": "Heading when the first page of a search failed."
+  },
+  "librarySearchErrorMessage": "Something went wrong while reading your library. Please try again.",
+  "@librarySearchErrorMessage": {
+    "description": "Body of the search failure state. Deliberately generic: a database message names tables and can carry card content, and neither belongs on screen."
+  },
+  "librarySearchLoadingLabel": "Searching",
+  "@librarySearchLoadingLabel": {
+    "description": "Screen-reader label of the spinner shown while the first page is being read. A bare spinner announces nothing at all."
+  },
+  "librarySearchLoadingMoreLabel": "Loading more results",
+  "@librarySearchLoadingMoreLabel": {
+    "description": "Screen-reader label of the spinner under the last result while the next page is being read."
+  },
+  "librarySearchLoadMoreAction": "Show more results",
+  "@librarySearchLoadMoreAction": {
+    "description": "Button under the last result that opens the next page. Shown only while more results exist."
+  },
+  "librarySearchLoadMoreErrorMessage": "Could not load more results.",
+  "@librarySearchLoadMoreErrorMessage": {
+    "description": "Message replacing the load-more button when the next page failed. Everything already listed stays on screen — only this band changes."
+  },
+  "librarySearchLoadMoreErrorTitle": "Couldn’t load more",
+  "@librarySearchLoadMoreErrorTitle": {
+    "description": "Title of the error band under the last search result when loading the next page fails (UC-20). Everything already found stays above it; the band names what did not arrive. Same wording as the card-history page-error title because the situation is the same (D24)."
+  },
+  "librarySearchDeckResultSemantic": "Deck {name}",
+  "@librarySearchDeckResultSemantic": {
+    "description": "Screen-reader label of a deck result that sits at the top of the library, so it has no path above it. \"name\" comes first because the list mixes two kinds and the kind is what disambiguates them.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "librarySearchDeckResultInPathSemantic": "Deck {name}, in {path}",
+  "@librarySearchDeckResultInPathSemantic": {
+    "description": "Screen-reader label of a deck result with ancestors. \"path\" is announced after \"name\" because the name is what the user searched for.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "librarySearchCardResultSemantic": "Card {front}, {back}, in {path}",
+  "@librarySearchCardResultSemantic": {
+    "description": "Screen-reader label of a card result. \"back\" is carried whole although the row clamps it to one line — an ellipsis is a layout decision, not a decision to drop content from the accessibility tree. \"path\" is the deck the card lives in.",
+    "placeholders": {
+      "front": {
+        "type": "String"
+      },
+      "back": {
+        "type": "String"
+      },
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "librarySearchMatchedTagLabel": "Tag: {tag}",
+  "@librarySearchMatchedTagLabel": {
+    "description": "Shown on a card result that matched through one of its tags rather than through its own text (BR-252). \"tag\" is the best-ranked matching tag; without it the row appears with no visible reason, which reads as a broken search.",
+    "placeholders": {
+      "tag": {
+        "type": "String"
+      }
+    }
+  },
+  "librarySearchPathSeparator": " › ",
+  "@librarySearchPathSeparator": {
+    "description": "Joins the deck names of a result path: Korean › Grammar › Nouns. It lives in the ARB because it is user-visible twice over — drawn on screen, and read aloud between every pair of names — so the glyph is a \"translator\" decision rather than a widget one. Keep the surrounding spaces."
+  },
+  "librarySearchCardResultTaggedSemantic": "Card {front}, {back}, in {path}, matched tag {tag}",
+  "@librarySearchCardResultTaggedSemantic": {
+    "description": "Screen-reader label of a card result that matched through one of its tags rather than through its own text. \"tag\" is the reason the row is in the list, and with match highlighting deliberately absent it is the only reason a screen-reader user can be given — so it belongs in the label and not only in the visible chip. \"front\", \"back\" and \"path\" carry the same meaning as in librarySearchCardResultSemantic.",
+    "placeholders": {
+      "front": {
+        "type": "String"
+      },
+      "back": {
+        "type": "String"
+      },
+      "path": {
+        "type": "String"
+      },
+      "tag": {
+        "type": "String"
+      }
+    }
+  },
+  "studySummaryStoppedByDeletion": "The deck or card you were studying was moved to Trash.",
+  "@studySummaryStoppedByDeletion": {
+    "description": "Explains a session invalidated because its material was deleted (BR-259)."
+  },
+  "trashTitle": "Trash",
+  "@trashTitle": {
+    "description": "Title of the Trash screen (UC-21)."
+  },
+  "trashEntryLabel": "Trash",
+  "@trashEntryLabel": {
+    "description": "App-bar action on the root deck list that opens Trash. Always visible, even when Trash is empty (wireframe T2)."
+  },
+  "trashRetentionNotice": "Items here are deleted forever after 30 days.",
+  "@trashRetentionNotice": {
+    "description": "One-line explanation above the Trash list (BR-264)."
+  },
+  "trashFilterAll": "All",
+  "@trashFilterAll": {
+    "description": "Trash filter chip: both kinds (wireframe T3)."
+  },
+  "trashFilterCards": "Cards",
+  "@trashFilterCards": {
+    "description": "Trash filter chip: cards only."
+  },
+  "trashFilterDecks": "Decks",
+  "@trashFilterDecks": {
+    "description": "Trash filter chip: decks only."
+  },
+  "trashEmptyTitle": "Nothing in Trash",
+  "@trashEmptyTitle": {
+    "description": "Empty state title of the Trash screen (UC-21 A6)."
+  },
+  "trashEmptyMessage": "Deleted decks and cards stay here for 30 days, so you can bring them back.",
+  "@trashEmptyMessage": {
+    "description": "Empty state body of the Trash screen (BR-264)."
+  },
+  "trashEmptyCardsMessage": "No cards in Trash.",
+  "@trashEmptyCardsMessage": {
+    "description": "Empty state when the Cards filter is on but only decks are in Trash."
+  },
+  "trashEmptyDecksMessage": "No decks in Trash.",
+  "@trashEmptyDecksMessage": {
+    "description": "Empty state when the Decks filter is on but only cards are in Trash."
+  },
+  "trashDeletedDaysAgo": "{days, plural, =0{Deleted today} =1{Deleted 1 day ago} other{Deleted {days} days ago}}",
+  "@trashDeletedDaysAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    },
+    "description": "When an item was deleted, on the Trash row (wireframe T4)."
+  },
+  "trashDaysLeft": "{days, plural, =0{Deleted forever today} =1{1 day left} other{{days} days left}}",
+  "@trashDaysLeft": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    },
+    "description": "How long until the batch is purged (BR-264). The only urgent number on the row (wireframe T4)."
+  },
+  "trashOriginLabel": "From",
+  "@trashOriginLabel": {
+    "description": "Prefix of the original path on a Trash row. Context only, never a promise about where a restore goes (BR-267)."
+  },
+  "trashOriginTopLevel": "Top level",
+  "@trashOriginTopLevel": {
+    "description": "Origin shown for a deleted top-level deck, which has no parent (BR-56)."
+  },
+  "trashBatchContents": "{deckCount, plural, =0{} =1{1 deck, } other{{deckCount} decks, }}{cardCount, plural, =0{no cards} =1{1 card} other{{cardCount} cards}}",
+  "@trashBatchContents": {
+    "placeholders": {
+      "deckCount": {
+        "type": "int"
+      },
+      "cardCount": {
+        "type": "int"
+      }
+    },
+    "description": "What a deck batch would bring back. Excludes anything already in Trash under an older batch (BR-258, BR-262)."
+  },
+  "trashRestoreAction": "Restore",
+  "@trashRestoreAction": {
+    "description": "Row action that opens the restore target picker (BR-261)."
+  },
+  "trashPurgeAction": "Delete permanently",
+  "@trashPurgeAction": {
+    "description": "The only destructive action in Trash (BR-266)."
+  },
+  "trashRowMenuTitle": "Trash item actions",
+  "@trashRowMenuTitle": {
+    "description": "Title of the one-item overflow menu on a Trash row. Purge lives behind it so permanent deletion costs one tap more than Restore (wireframe m99-33 T6)."
+  },
+  "trashSelectAction": "Select",
+  "@trashSelectAction": {
+    "description": "Overflow action that turns on multi-select in Trash (BR-266)."
+  },
+  "trashSelectionCount": "{count, plural, other{{count} selected}}",
+  "@trashSelectionCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Title of the Trash app bar while selecting."
+  },
+  "trashSelectionCardsOnly": "Cards and decks are restored separately, so this selection holds cards only.",
+  "@trashSelectionCardsOnly": {
+    "description": "Explains why deck rows stopped responding once a card was selected (BR-266)."
+  },
+  "trashSelectionDecksOnly": "Cards and decks are restored separately, so this selection holds decks only.",
+  "@trashSelectionDecksOnly": {
+    "description": "Explains why card rows stopped responding once a deck was selected (BR-266)."
+  },
+  "trashRestoreTargetTitle": "Restore to",
+  "@trashRestoreTargetTitle": {
+    "description": "Title of the restore target picker (BR-261)."
+  },
+  "trashRestoreTargetTopLevel": "Top level",
+  "@trashRestoreTargetTopLevel": {
+    "description": "The single target a deleted top-level deck has (BR-261)."
+  },
+  "trashRestoreTargetEmpty": "There is nowhere this can go back to right now.",
+  "@trashRestoreTargetEmpty": {
+    "description": "Shown when no target qualifies (UC-21 E1). The picker never draws a disabled row (wireframe T8)."
+  },
+  "trashRestoreConfirmAction": "Restore here",
+  "@trashRestoreConfirmAction": {
+    "description": "Primary action of the restore target picker. The user confirms even when a target was preselected (BR-262)."
+  },
+  "trashRestoredMessage": "Restored",
+  "@trashRestoredMessage": {
+    "description": "Result message after a restore commits."
+  },
+  "trashPurgeConfirmTitle": "{count, plural, =1{Delete 1 item permanently?} other{Delete {count} items permanently?}}",
+  "@trashPurgeConfirmTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Title of the permanent-delete confirmation, naming the exact count (BR-266)."
+  },
+  "trashPurgeConfirmMessage": "This cannot be undone. The study history of these items is deleted with them.",
+  "@trashPurgeConfirmMessage": {
+    "description": "Body of the permanent-delete confirmation (BR-266)."
+  },
+  "trashPurgeConfirmAction": "Delete permanently",
+  "@trashPurgeConfirmAction": {
+    "description": "Destructive confirm button. The dialog opens with focus on Cancel (wireframe T11)."
+  },
+  "trashPurgeCancelAction": "Cancel",
+  "@trashPurgeCancelAction": {
+    "description": "Safe default action of the permanent-delete confirmation (BR-266)."
+  },
+  "trashPurgedMessage": "{count, plural, =1{1 item deleted permanently} other{{count} items deleted permanently}}",
+  "@trashPurgedMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Result message after a purge commits."
+  },
+  "trashLoadFailed": "Trash couldn’t be opened. Try again.",
+  "@trashLoadFailed": {
+    "description": "Error state of the Trash list (UC-21 E5)."
+  },
+  "trashLoadErrorTitle": "Couldn’t open Trash",
+  "@trashLoadErrorTitle": {
+    "description": "Title of the full-screen error face when the Trash list itself fails to load. The \"Couldn’t …\" phrase carries the error, like every other screen-level load failure; the message below is the supporting line."
+  },
+  "trashRetryAction": "Try again",
+  "@trashRetryAction": {
+    "description": "Retry action on the Trash error state."
+  },
+  "trashConflictTargetNoLongerValid": "That deck can no longer take this item. Pick another one.",
+  "@trashConflictTargetNoLongerValid": {
+    "description": "Copy for TrashConflictReason.targetNoLongerValid (UC-21 E2)."
+  },
+  "trashConflictTargetLevelMismatch": "This item cannot go there.",
+  "@trashConflictTargetLevelMismatch": {
+    "description": "Copy for TrashConflictReason.targetLevelMismatch (BR-261)."
+  },
+  "trashConflictUndoOriginUnavailable": "It can’t go back where it was. Restore it from Trash instead.",
+  "@trashConflictUndoOriginUnavailable": {
+    "description": "Copy for TrashConflictReason.undoOriginUnavailable (BR-263, UC-21 E3)."
+  },
+  "trashConflictPurgeWouldTakeAnotherBatch": "Something else in Trash is still inside this one, so it can’t be deleted yet.",
+  "@trashConflictPurgeWouldTakeAnotherBatch": {
+    "description": "Copy for TrashConflictReason.purgeWouldTakeAnotherBatch (BR-265, UC-21 E4)."
+  },
+  "trashConflictUnknownItemType": "This item was deleted by a newer version of the app.",
+  "@trashConflictUnknownItemType": {
+    "description": "Copy for TrashConflictReason.unknownItemType."
+  },
+  "trashConflictBatchHeightUnknowable": "This deck’s structure could not be read, so it can’t be restored.",
+  "@trashConflictBatchHeightUnknowable": {
+    "description": "Copy for TrashConflictReason.batchHeightUnknowable."
+  },
+  "trashMovedMessage": "Moved to Trash",
+  "@trashMovedMessage": {
+    "description": "Snackbar shown after deleting one item, beside Undo (BR-256, wireframe T13)."
+  },
+  "trashUndoAction": "Undo",
+  "@trashUndoAction": {
+    "description": "Snackbar action that reverses the deletion just made (BR-263)."
+  },
+  "trashUndoFailed": "That couldn’t be undone.",
+  "@trashUndoFailed": {
+    "description": "Shown when Undo is refused (UC-21 E3)."
   }
 }

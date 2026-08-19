@@ -94,6 +94,7 @@ BR_FILE = "docs/business-rules.md"
 AD_FILE = "docs/architecture.md"
 UC_FILE = "docs/use-cases.md"
 WBS_FILE = "docs/wbs.md"
+STUDY_WBS_FILE = "docs/wbs-study.md"
 README_FILE = "docs/README.md"
 DM_FILE = "docs/data-model.md"
 
@@ -214,7 +215,16 @@ def _check_wbs_tasks() -> None:
         _ok(f"no duplicate WBS task IDs ({len(task_ids)} tasks)")
 
     # dependencies resolve
-    task_set = set(task_ids)
+    #
+    # **Against both ledgers, not just this one.** The Study feature keeps its
+    # own `### M5.x` sections in `docs/wbs-study.md`, so a task here that
+    # genuinely waits on one of them had no way to say so: naming it failed the
+    # check, and moving it into prose hid a real edge from the graph.
+    task_set = set(task_ids) | {
+        m.group(1)
+        for line in _lines(STUDY_WBS_FILE)
+        if (m := _TASK_HEAD_RE.match(line))
+    }
     edges: list[tuple[str, str]] = []
     cur = ""
     for line in _lines(WBS_FILE):
@@ -233,7 +243,8 @@ def _check_wbs_tasks() -> None:
         if dep not in task_set:
             _fail(
                 "WBS dependency points at a task that does not exist",
-                f"{task} depends on {dep}, which is not defined in {WBS_FILE}",
+                f"{task} depends on {dep}, defined in neither {WBS_FILE} nor "
+                f"{STUDY_WBS_FILE}",
             )
     if _problems == before:
         _ok(f"every WBS dependency resolves to a defined task ({len(edges)} edges)")
@@ -943,6 +954,218 @@ def _check_deck_flow_drift() -> None:
 # --- main -----------------------------------------------------------------
 
 
+
+# Every separator a range gets written with here — an ellipsis, three dots,
+# an en or em dash, or a tilde. The first version knew only the first two, so
+# a backwards range spelled any other way was invisible to a check whose whole
+# job is to see it.
+_TABLE_ID_RE = re.compile(r"^(BR|UC|AD|M\d+|[SWGVTRNED])[-.]?\d+[a-z]?$")
+_ID_RANGE_RE = re.compile(
+    r"\b(BR|UC|AD)-([0-9]{2,3})\s*(?:\u2026|\.\.\.|\u2013|\u2014|~)\s*"
+    r"(BR|UC|AD)-([0-9]{2,3})\b"
+)
+
+
+def _check_duplicate_table_ids() -> None:
+    """The same declared id twice in one table.
+
+    **A branch cut before a fact changed carries the old row, and the merge
+    keeps both.** `master-flow.md` ended a stage with two `UC-10` rows — one
+    saying the import wizard has three steps, one saying four — because #306 was
+    cut before the wizard lost a step. Neither row is malformed and every id in
+    them resolves, so nothing else in this file complains.
+
+    Narrower than "the same subject twice", which was tried first and reported
+    twenty-one rows that are all legitimate: validation tables repeat a field
+    name once per rule, state tables repeat a value once per transition. An
+    **id** in a first column is a unique key by definition, so a repeat is a
+    duplicated row and never a table shape.
+
+    Scoped per table rather than per file — a document may list `W1` in its
+    anatomy table and again in its geometry table, and those are two keys.
+    """
+    bad: list[str] = []
+    for path in _docs_md() + sorted(
+        p.relative_to(_REPO).as_posix()
+        for p in (_REPO / "docs" / "wireframes").glob("*.md")
+    ):
+        try:
+            text = (_REPO / path).read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            continue
+        seen: dict[str, int] = {}
+        in_table = False
+        for i, line in enumerate(text.splitlines(), start=1):
+            if not line.startswith("|"):
+                in_table = False
+                seen = {}
+                continue
+            if re.match(r"^\|[\s:-]+\|", line):
+                in_table = True
+                seen = {}
+                continue
+            if not in_table:
+                continue
+            cell = re.sub(r"[~*`]", "", line.split("|")[1]).strip()
+            if not _TABLE_ID_RE.match(cell):
+                continue
+            if cell in seen:
+                bad.append(f"{path}:{i}: {cell} is already a row at line {seen[cell]}")
+            seen[cell] = i
+    if bad:
+        for b in bad:
+            _fail("a table lists the same id twice", b)
+    else:
+        _ok("no table lists the same id twice")
+
+def _check_superseded_rows() -> None:
+    """A row marked superseded, with the row it superseded still beside it.
+
+    **The "deliberately not specified" table has produced this three times.**
+    A branch cut before a feature shipped carries the old row; the branch that
+    shipped it strikes the row through and adds the new one; the merge keeps
+    both, and the table then says a thing is out of scope and specified at the
+    same time. Neither row is wrong on its own, which is why five stages and
+    several audit rounds read past it.
+
+    Narrow on purpose. "The same subject twice in one table" was tried first and
+    reports twenty-one rows that are all legitimate — validation tables repeat a
+    field name once per rule, state tables repeat a value once per transition.
+    Striking a row through, though, means exactly one thing, and no table in
+    this repository does it for any other reason.
+    """
+    bad: list[str] = []
+    for path in _docs_md():
+        try:
+            text = (_REPO / path).read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            continue
+        struck: dict[str, int] = {}
+        plain: dict[str, int] = {}
+        for i, line in enumerate(text.splitlines(), start=1):
+            if not line.startswith("|") or line.count("|") < 3:
+                continue
+            cell = line.split("|")[1].strip()
+            key = re.sub(r"[~*`]", "", cell).strip().lower()
+            if not key:
+                continue
+            (struck if cell.startswith("~~") else plain)[key] = i
+        for key, line_no in struck.items():
+            if key in plain:
+                bad.append(
+                    f"{path}:{line_no}: '{key}' is struck through here and still "
+                    f"listed plain at line {plain[key]}"
+                )
+    if bad:
+        for b in bad:
+            _fail("a superseded table row survives beside its replacement", b)
+    else:
+        _ok("no table lists a subject as both superseded and current")
+
+
+
+def _check_duplicate_headings() -> None:
+    """One heading, once, per document.
+
+    **A second copy of a section does not read as a duplicate — it reads as the
+    section.** `use-cases.md` carried two `## Điều đã cố ý không đặc tả` tables
+    for several releases; each stage updated whichever copy it happened to open,
+    so one knew Progress had shipped and the other knew the daily reminder had,
+    and neither was wrong on its own. Three audit rounds looked straight past it
+    because every row in view was accurate.
+
+    Only `##`, which is the level a document's own sections live at; a document
+    made of like-shaped entries legitimately repeats a sub-heading under each.
+
+    **Scoped to the contract documents.** `docs/reviews/` and `docs/prompt/`
+    stay outside it — not by an exclude rule here, but because `_docs_md()`
+    only walks the top level plus `docs/it-scenarios/`. That is the right
+    outcome: a review report is written a round at a time and repeats
+    `## Verification` once per round, which is the shape of the thing rather
+    than a defect — three copies there mean three rounds, while two copies of
+    a section in `use-cases.md` mean two answers to one question. A round
+    report saved as a *top-level* `docs/*.md` would be inside the scope, so
+    keep those under `docs/reviews/`.
+    """
+    dupes: list[str] = []
+    for path in _docs_md():
+        try:
+            text = (_REPO / path).read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            continue
+        seen: dict[str, int] = {}
+        for i, line in enumerate(text.splitlines(), start=1):
+            # `## ` with the trailing space already excludes `###`.
+            if not line.startswith("## "):
+                continue
+            title = line[3:].strip()
+            if title in seen:
+                dupes.append(f"{path}:{i}: '{title}' already opened at line {seen[title]}")
+                continue
+            seen[title] = i
+    if dupes:
+        for d in dupes:
+            _fail("a section heading appears twice in one document", d)
+    else:
+        _ok("no document opens the same section twice")
+
+
+def _check_id_ranges() -> None:
+    """A cited range must count upwards.
+
+    **This exists because a renumbering wrote one that did not.** Shifting
+    `BR-182…BR-191` by its first endpoint alone produced `BR-192…BR-191`, which
+    names no rules at all — and it survived in five documents, because every id
+    in it resolves and nothing else looks at the pair. The check costs one regex
+    and catches the whole class.
+    """
+    bad: list[str] = []
+    for path in _tracked_text_files():
+        try:
+            text = (_REPO / path).read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            continue
+        for i, line in enumerate(text.splitlines(), start=1):
+            for m in _ID_RANGE_RE.finditer(line):
+                lo, hi = int(m.group(2)), int(m.group(4))
+                if m.group(1) != m.group(3):
+                    bad.append(f"{path}:{i}: {m.group(0)} spans two ID kinds")
+                elif lo >= hi:
+                    bad.append(f"{path}:{i}: {m.group(0)} does not count upwards")
+    if bad:
+        for b in bad:
+            _fail("cited range is backwards or empty", b)
+    else:
+        _ok("every cited ID range counts upwards")
+
+
+def _tracked_text_files() -> list[str]:
+    try:
+        out = subprocess.run(
+            ["git", "ls-files", "docs", "lib", "test", "widgetbook", "integration_test"],
+            capture_output=True, text=True, check=True, cwd=_REPO,
+        ).stdout.split()
+    except (OSError, subprocess.CalledProcessError):
+        return []
+    files = [
+        f for f in out
+        if f.endswith((".md", ".dart", ".drift", ".arb"))
+        and not f.endswith((".g.dart", ".freezed.dart"))
+    ]
+    # The same extra scope `_ref_files` takes: the root contract and every skill
+    # document. A range written there is as wrong as one written under `docs/`,
+    # and the first version of this check could see neither.
+    try:
+        extra = subprocess.run(
+            ["git", "ls-files", "CLAUDE.md", "AGENTS.md", ".claude/skills"],
+            capture_output=True, text=True, check=True, cwd=_REPO,
+        ).stdout.split()
+    except (OSError, subprocess.CalledProcessError):
+        extra = []
+    files.extend(f for f in extra if f.endswith(".md"))
+
+    return files
+
 def main() -> int:
     global _quiet, _REPO
     parser = argparse.ArgumentParser(add_help=False)
@@ -972,6 +1195,10 @@ def main() -> int:
         return 1
 
     _check_document_integrity()
+    _check_id_ranges()
+    _check_duplicate_headings()
+    _check_superseded_rows()
+    _check_duplicate_table_ids()
     _check_document_contract()
     _check_invariant_coverage()
     _check_invariant_self_test()

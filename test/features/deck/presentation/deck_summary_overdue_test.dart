@@ -150,16 +150,19 @@ void main() {
     testWidgets('nothing due: three anchors still stand, all quiet', (
       tester,
     ) async {
-      // Every metric keeps its icon anchor at zero — the shape is the
-      // metric's identity — and the due-today calendar rests outlined.
+      // Every metric keeps its icon anchor at zero — the shape is the metric's
+      // identity — and every one of them rests **outlined** (parity E5). The
+      // backlog calendar was filled even at zero and the sparkle was outlined
+      // even with work waiting; M99.26 made all three follow the count.
       await pumpLevel(
         tester,
         levelOf(due: 0, overdueCards: 0, overdueDays: 0, newCards: 5),
       );
 
-      expect(onPanel(find.byIcon(Icons.event_busy)), findsOneWidget);
+      expect(onPanel(find.byIcon(Icons.event_busy_outlined)), findsOneWidget);
       expect(onPanel(find.byIcon(Icons.event_outlined)), findsOneWidget);
-      expect(onPanel(find.byIcon(Icons.auto_awesome_outlined)), findsOneWidget);
+      // Five new cards, so this one is filled.
+      expect(onPanel(find.byIcon(Icons.auto_awesome)), findsOneWidget);
       expect(
         onPanel(find.byIcon(Icons.event_available_outlined)),
         findsOneWidget,

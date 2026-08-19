@@ -6,9 +6,9 @@
 | **Purpose** | Kiểm tra người dùng đi vào đúng điểm bắt đầu, di chuyển giữa các nhánh và không mất ngữ cảnh bộ thẻ, thẻ hoặc phiên học |
 | **Scope** | Khởi động nguội, thanh điều hướng dưới, Back, đường dẫn phân cấp, route không hợp lệ và hành trình bộ thẻ/thẻ/Study xuyên suốt |
 | **Source of truth for** | Kịch bản IT về điều hướng và khả năng tiếp tục của chức năng hiện có |
-| **Depends on** | `README.md`, `../use-cases.md` (UC-04, UC-05, UC-06), `../business-rules.md` (BR-82, BR-101, BR-103), `../architecture.md` (AD-19), `../wbs.md` (M4.10a, M4.11, M4.12, M99.7), `../wbs-study.md` (M5.7, M5.9, M5.15), `../wireframes/m5-study-modes.md` |
-| **Updated by task** | M99.8 (Nhãn tab Decks → Thư viện/Library) |
-| **Last updated** | 2026-08-11 |
+| **Depends on** | `README.md`, `../use-cases.md` (UC-04, UC-05, UC-06, UC-12), `../business-rules.md` (BR-82, BR-101, BR-103, BR-190), `../architecture.md` (AD-19), `../wbs.md` (M4.10a, M4.11, M4.12, M99.7, M99.23), `../wbs-study.md` (M5.7, M5.9, M5.15), `../wireframes/m5-study-modes.md` |
+| **Updated by task** | M99.23 (branch Tiến độ thay placeholder bằng màn đọc lịch sử thật) |
+| **Last updated** | 2026-08-14 |
 
 ## IT-NAV-001 — Cold start mở đúng danh sách Deck
 
@@ -139,11 +139,11 @@
 | 3 | Bấm Back lần nữa và xác nhận thoát | Phiên dừng do người dùng, hiện trạng thái đã dừng thay vì tổng kết thành tích và có lối về đúng bộ thẻ |
 | 4 | Mở lại màn vào học | Không có Tiếp tục cho phiên đã thoát; các lượt ghi thành công trước đó vẫn được giữ |
 
-## IT-NAV-011 — Bốn destination top-level, hai placeholder không tạo phiên và không ghi DB
+## IT-NAV-011 — Bốn destination top-level, Tiến độ chỉ-đọc và một placeholder không tạo phiên, không ghi DB
 
 - **Ưu tiên:** P1
 - **Tiền điều kiện:** App đã cài, dữ liệu bất kỳ; không có phiên Study đang dở.
-- **Liên kết:** AD-19; UC-06 cho cold start.
+- **Liên kết:** AD-19; UC-06 cho cold start; UC-12 và BR-190 cho branch Tiến độ.
 - **Phạm vi deep link:** các bước 4–5 là điều hướng **in-process** — router phân
   giải `/progress`/`/settings` làm initial location (URL development, cùng cơ
   chế IT-NAV-005). App **chưa** khai báo `ACTION_VIEW` intent filter, nên OS
@@ -154,17 +154,7 @@
 | Bước | Thao tác người dùng | Kết quả mong đợi |
 |---|---|---|
 | 1 | Mở app và quan sát bottom navigation | Đúng bốn destination theo thứ tự Thư viện · Học · Tiến độ · Cài đặt; tab Thư viện đang được chọn |
-| 2 | Chạm tab Tiến độ | Placeholder Tiến độ hiện icon, tiêu đề và mô tả "đang được phát triển"; không có số liệu thống kê nào; không tạo phiên Study; không có ghi database nào |
-| 3 | Chạm tab Cài đặt | Placeholder Cài đặt hiện tương tự; không có tùy chọn giả nào bật/tắt được; không tạo phiên; không ghi database |
-| 4 | Khởi động app với location `/progress` (in-process, xem Phạm vi deep link) | App mở thẳng placeholder Tiến độ và tab Tiến độ được chọn, không đi qua Decks |
-| 5 | Khởi động app với location `/settings` (in-process, xem Phạm vi deep link) | App mở thẳng placeholder Cài đặt và tab Cài đặt được chọn, không đi qua Decks |
-| 6 | Từ một bộ thẻ con đang mở, chạm Tiến độ rồi quay lại Thư viện | Quay đúng bộ thẻ con đang mở — chuyển qua placeholder không làm mất ngăn xếp của branch khác |
-| 7 | Chạm lại tab đang được chọn | Branch quay về màn gốc của nó theo đúng hành vi reselect hiện có, không lỗi |
-| 8 | Xem bốn nhãn ở màn 320dp và text scale 2.0 | Nhãn Thư viện/Học/Tiến độ/Cài đặt vẫn đọc được, không tràn; nội dung placeholder cuộn được thay vì tràn |
-
-Phần host của kịch bản này chạy ở `test/integration/widgets/navigation_widget_test.dart`
-(đếm số dòng của mọi bảng trước và sau khi thăm hai placeholder) và
-`test/app/router/app_router_test.dart` (deep link, thứ tự tab, giữ ngăn xếp).
+| 2 | Chạm tab Tiến độ | Màn Tiến độ mở: chuỗi ngày hiện tại, tổng hôm nay tách Learning/Reviewing và bảy ngày gần nhất (UC-12), rồi bên dưới là bộ chọn 7/30 ngày, bảng tổng và một hàng cho mỗi root deck (UC-13) — hoặc mặt lifetime-empty khi chưa từng học. Không tạo phiên Study; không có ghi database nào (BR-190, BR-188) |
 
 ## IT-NAV-012 — Import wizard là full-screen task phía trên shell
 

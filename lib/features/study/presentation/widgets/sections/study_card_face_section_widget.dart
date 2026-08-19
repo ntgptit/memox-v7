@@ -10,8 +10,11 @@ import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../domain/models/study_answer_commit_model.dart';
 import '../../../domain/models/study_action_model.dart';
+import '../../../domain/models/study_direction_model.dart';
 import '../../../domain/models/study_turn_model.dart';
 import '../support/study_labels_widget.dart';
+
+part 'study_card_face_pieces_widget.dart';
 
 /// Which face is the focal one, which is what decides both faces' roles.
 ///
@@ -68,6 +71,7 @@ class StudyCardFaceSectionWidget extends StatelessWidget {
     this.viewedCard,
     this.shouldShowBackImmediately = false,
     this.emphasis = StudyFaceEmphasis.promptFirst,
+    this.direction = StudyRecallDirection.koreanToMeaning,
     this.isLocked = false,
     super.key,
   });
@@ -109,6 +113,21 @@ class StudyCardFaceSectionWidget extends StatelessWidget {
   /// [StudyFaceEmphasis].
   final StudyFaceEmphasis emphasis;
 
+  /// Which face is the prompt and which is the reveal (BR-204).
+  ///
+  /// **It swaps the two halves' content, and nothing else.** The card's own
+  /// columns are untouched (BR-209), and the corner labels move with their
+  /// text, which is what tells the two directions apart without relying on
+  /// colour.
+  ///
+  /// **The type role travels with the face, not with the half** — see
+  /// `_selfAssessRole`. Position was right while the prompt was always the
+  /// ≤60-character front; reversed, it sized a 240-character meaning as one.
+  ///
+  /// Defaults to the direction every build before BR-203 used, so `browse` and
+  /// the learning chain draw exactly as they did.
+  final StudyRecallDirection direction;
+
   /// True while an answer is being written. The card **stays** visible and only
   /// the controls stop responding (BR-25).
   final bool isLocked;
@@ -123,6 +142,7 @@ class StudyCardFaceSectionWidget extends StatelessWidget {
     viewedCard: viewedCard,
     shouldShowBackImmediately: shouldShowBackImmediately,
     emphasis: emphasis,
+    direction: direction,
     isLocked: isLocked,
   );
 }
@@ -137,6 +157,7 @@ class _StudyCardFaceView extends StatefulWidget {
     required this.viewedCard,
     required this.shouldShowBackImmediately,
     required this.emphasis,
+    required this.direction,
     required this.isLocked,
   });
 
@@ -148,6 +169,7 @@ class _StudyCardFaceView extends StatefulWidget {
   final StudyCardModel? viewedCard;
   final bool shouldShowBackImmediately;
   final StudyFaceEmphasis emphasis;
+  final StudyRecallDirection direction;
   final bool isLocked;
 
   @override
@@ -201,12 +223,41 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
   /// back along the trail (BR-155).
   StudyCardModel get _card => widget.viewedCard ?? widget.turn.card;
 
+  /// The type role a `self_assess` half takes, chosen by the **face** it shows.
+  ///
+  /// The front is at most 60 characters and the back up to 240 (BR-08), so the
+  /// role follows the content: a rule written as "upper" and "lower" swaps the
+  /// sizes when the direction does.
+  TextStyle? _selfAssessRole(TextTheme texts, StudyCardFace face) =>
+      face == StudyCardFace.front ? texts.headlineMedium : texts.headlineSmall;
+
+  /// The text of one face of [_card].
+  ///
+  /// **A lookup, not an `if` at each of the four call sites.** The prompt half
+  /// and the reveal half each need a string and a label, and spelling the
+  /// direction out four times is four chances to spell one of them backwards —
+  /// which renders a card whose two halves are the same text and looks like a
+  /// data problem.
+  String _textOf(StudyCardFace face) =>
+      face == StudyCardFace.front ? _card.front : _card.back;
+
+  /// The corner label of one face, which names the column it came from.
+  ///
+  /// The label follows the content rather than the position, which is what makes
+  /// the two directions distinguishable without colour: the upper half of a
+  /// Meaning→Korean card says `BACK`, and a screen reader reads it in that order.
+  String _labelOf(BuildContext context, StudyCardFace face) =>
+      face == StudyCardFace.front
+      ? context.l10n.studyCardFaceFront
+      : context.l10n.studyCardFaceBack;
+
   @override
   Widget build(BuildContext context) {
     final texts = context.texts;
 
-    final l10n = context.l10n;
     final controls = _controls(context);
+    final promptFace = widget.direction.promptFace;
+    final revealFace = widget.direction.revealFace;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -235,19 +286,25 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
               children: <Widget>[
                 Expanded(
                   child: _CardHalf(
-                    label: l10n.studyCardFaceFront,
-                    text: _card.front,
+                    label: _labelOf(context, promptFace),
+                    text: _textOf(promptFace),
                     // The focal face — the term (BR-08) — at the title role and
                     // one step down in weight so it leads without shouting.
-                    // `self_assess` keeps the larger prompt role, because there
-                    // the front is the question and nothing shares the card.
+                    //
+                    // **`self_assess` sizes by which face this is, not by which
+                    // half.** The prompt half used to be `headlineMedium`
+                    // unconditionally, which was right while the prompt was
+                    // always the front (≤60 characters, BR-08). Reversing the
+                    // direction put a 240-character meaning there at 30dp — the
+                    // very thing the supporting half below says a heading role
+                    // is not for — and dropped the short Korean term to 24dp.
                     style:
                         widget.emphasis == StudyFaceEmphasis.backSupportingFront
                         ? AppTypography.withWeight(
                             texts.titleLarge!,
                             FontWeight.w500,
                           )
-                        : texts.headlineMedium,
+                        : _selfAssessRole(texts, promptFace),
                     // **The tight end is the one facing the rule, so it is only
                     // tight when there is a rule to face.** Before the flip
                     // `self_assess` is a single half filling the card, and the
@@ -270,15 +327,17 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
                   ),
                   Expanded(
                     child: _CardHalf(
-                      label: l10n.studyCardFaceBack,
-                      text: _card.back,
-                      // The supporting face: a meaning runs to 240 characters
-                      // (BR-08), which is a body role's job, not a heading's.
+                      label: _labelOf(context, revealFace),
+                      text: _textOf(revealFace),
+                      // The supporting face. Under the graded modes it is
+                      // always the meaning — 240 characters (BR-08), a body
+                      // role's job. Under `self_assess` it is whichever face
+                      // the prompt is not, so `_selfAssessRole` decides.
                       style:
                           widget.emphasis ==
                               StudyFaceEmphasis.backSupportingFront
                           ? texts.bodyLarge
-                          : texts.headlineSmall,
+                          : _selfAssessRole(texts, revealFace),
                       padding: const EdgeInsets.only(
                         top: AppSpacing.sm,
                         bottom: AppSpacing.lg,
@@ -338,58 +397,4 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
       ],
     ];
   }
-}
-
-/// One side of the card: a small muted label in the corner, and the text it
-/// names centred in what is left.
-///
-/// **The label is in the corner and the content is in the middle** (§3). Both
-/// halves are the same shape, so the eye reads them as two sides of one card
-/// rather than as a heading and a paragraph — and the centre is where the eye
-/// lands when a card flips.
-///
-/// The label is `Term`/`Meaning` rather than the design's `KOREAN`: no deck and
-/// no card carries a language, and printing one would put a field in the UI
-/// that does not exist in the data.
-class _CardHalf extends StatelessWidget {
-  const _CardHalf({
-    required this.label,
-    required this.text,
-    required this.style,
-    required this.padding,
-  });
-
-  final String label;
-  final String text;
-  final TextStyle? style;
-
-  /// Asymmetric on purpose — see the card above. Vertical only; the sides
-  /// belong to the card so that the rule between the halves can reach them.
-  final EdgeInsetsGeometry padding;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: padding,
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text(
-          label.toUpperCase(),
-          style: context.texts.labelSmall?.copyWith(
-            color: context.colors.onSurfaceVariant,
-            letterSpacing: AppTypography.sectionLabelTracking,
-          ),
-        ),
-        Expanded(
-          child: Center(
-            child: SingleChildScrollView(
-              // The half is a fixed share of the card, so at a large text scale
-              // a long meaning has to be able to move rather than overflow.
-              child: Text(text, style: style, textAlign: TextAlign.center),
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
 }

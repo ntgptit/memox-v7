@@ -100,9 +100,11 @@ class CardListBodyWidget extends ConsumerWidget {
             now: now,
             isSelectionMode: selection.isSelecting,
             isSelected: selection.isSelected(item.card.id),
-            // Inside the mode a tap toggles; outside it opens the editor. One
-            // gesture, two meanings, decided by the mode rather than by the
-            // row — which is why the row is told what the mode is.
+            // Inside the mode a tap toggles; outside it opens the read-only
+            // detail screen (M99.31, UC-19) — it used to open the editor, and
+            // the sibling comment on `CardTileWidget` said so too. One gesture,
+            // two meanings, decided by the mode rather than by the row — which
+            // is why the row is told what the mode is.
             onTap: () => selection.isSelecting
                 ? controller.toggle(item.card.id)
                 : onOpen(item),

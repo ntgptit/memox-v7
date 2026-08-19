@@ -32,6 +32,7 @@ void main() {
     cardLimit: 20,
     startedAt: now,
     endedAt: null,
+    direction: null,
   );
 
   group('starting something new', () {
@@ -115,6 +116,26 @@ void main() {
       expect(resumed.schedulerType, repository.schedulerType);
     });
 
+    test('a session from before a reset is refused, not resumed (BR-84, '
+        'BR-200)', () async {
+      // **A reset between the card being drawn and the finger landing on it.**
+      // The session froze generation 1 when it opened (BR-45); Reset learning
+      // progress increments the root's to 2. Resuming would hand back a working
+      // screen whose every write BR-84 rejects — the failure would arrive on the
+      // first answer, after the user had already started. "Nothing to resume" is
+      // the same honest answer the other three staleness checks give.
+      final repository = FakeStudyRepository()
+        ..openSession_ = openSession()
+        ..schedulerGeneration = 2;
+
+      expect(
+        () => ResumeStudySessionUseCase(
+          repository,
+        ).call('deck-1', sessionId: 'session-open'),
+        throwsA(isA<NotFoundFailure>()),
+      );
+    });
+
     test('with nothing open it refuses rather than opening one', () async {
       final repository = FakeStudyRepository();
 
@@ -123,6 +144,137 @@ void main() {
         throwsA(isA<NotFoundFailure>()),
       );
       expect(repository.opened, isEmpty);
+    });
+  });
+
+  /// Resuming a session that was **named**, which is what Study Home does.
+  ///
+  /// **"The open session of this deck" and "the session on the card that was
+  /// tapped" are two different questions**, and they only ever gave the same
+  /// answer by luck. Study Home lists a session it has already filtered by four
+  /// conditions (BR-200) and then hands its id back; resolving by deck instead
+  /// re-asks the looser question and can answer with a different row.
+  group('resuming a named session', () {
+    StudySessionEntity sessionOf({
+      required String id,
+      String deckId = 'deck-1',
+      StudySessionStatus status = StudySessionStatus.inProgress,
+    }) => StudySessionEntity(
+      id: id,
+      deckId: deckId,
+      rootDeckId: 'root',
+      schedulerGeneration: 1,
+      // A learning session, so no direction: BR-203 makes the choice reachable
+      // only from an `sm2` `self_assess` review.
+      direction: null,
+      kind: StudySessionKind.learning,
+      currentMode: StudyMode.recall,
+      status: status,
+      endReason: null,
+      cursor: 3,
+      cardLimit: 20,
+      startedAt: now,
+      endedAt: null,
+    );
+
+    test('opens the session named, not the deck-s newest', () async {
+      // The repro the deck-id path loses: Home filtered S2 out — its cards were
+      // deleted, so its queue is empty — and offered S1. `openSessionFor` orders
+      // by `started_at DESC`, so it answers S2, and the tap would have opened a
+      // session with nothing to serve.
+      final repository = FakeStudyRepository()
+        ..openSession_ = sessionOf(id: 'session-newer')
+        ..sessionsById['session-offered'] = sessionOf(id: 'session-offered');
+
+      final resumed = await ResumeStudySessionUseCase(
+        repository,
+      ).call('deck-1', sessionId: 'session-offered');
+
+      expect(resumed.session.id, 'session-offered');
+      expect(repository.opened, isEmpty);
+      expect(repository.ended, isEmpty);
+    });
+
+    test('refuses a session that ended between the read and the tap', () async {
+      // A list is a snapshot. Re-checking here rather than trusting the read is
+      // what stops the app opening a session that can no longer take an answer.
+      final repository = FakeStudyRepository()
+        ..sessionsById['session-1'] = sessionOf(
+          id: 'session-1',
+          status: StudySessionStatus.completed,
+        );
+
+      await expectLater(
+        ResumeStudySessionUseCase(
+          repository,
+        ).call('deck-1', sessionId: 'session-1'),
+        throwsA(isA<NotFoundFailure>()),
+      );
+      expect(repository.opened, isEmpty);
+    });
+
+    test('refuses a session belonging to another deck', () async {
+      final repository = FakeStudyRepository()
+        ..sessionsById['session-1'] = sessionOf(
+          id: 'session-1',
+          deckId: 'deck-other',
+        );
+
+      await expectLater(
+        ResumeStudySessionUseCase(
+          repository,
+        ).call('deck-1', sessionId: 'session-1'),
+        throwsA(isA<NotFoundFailure>()),
+      );
+    });
+
+    test('refuses a session an earlier study day left open', () async {
+      // The last of BR-200's four conditions to be re-checked at the tap. Home
+      // excludes yesterday's session from the list and re-reads at midnight, so
+      // the card does go — but only once that read lands, and a tap inside the
+      // gap resumed a session BR-103 calls `abandoned`/`interrupted`.
+      final repository = FakeStudyRepository()
+        ..sessionsById['session-1'] = sessionOf(id: 'session-1');
+
+      await expectLater(
+        ResumeStudySessionUseCase(repository).call(
+          'deck-1',
+          sessionId: 'session-1',
+          // One local day after the session started.
+          now: now.add(const Duration(days: 1)),
+          utcOffset: Duration.zero,
+        ),
+        throwsA(isA<NotFoundFailure>()),
+      );
+    });
+
+    test('accepts a session from earlier today', () async {
+      // The boundary on the other side: same study day, so it resumes. Without
+      // this the rule above could be satisfied by refusing everything.
+      final repository = FakeStudyRepository()
+        ..sessionsById['session-1'] = sessionOf(id: 'session-1');
+
+      final resumed = await ResumeStudySessionUseCase(repository).call(
+        'deck-1',
+        sessionId: 'session-1',
+        now: now.add(const Duration(hours: 6)),
+        utcOffset: Duration.zero,
+      );
+
+      expect(resumed.session.id, 'session-1');
+    });
+
+    test('refuses an id that names nothing', () async {
+      final repository = FakeStudyRepository()..openSession_ = openSession();
+
+      // And specifically does **not** fall back to the deck's open session: a
+      // fallback would resurrect exactly the behaviour the id exists to replace.
+      await expectLater(
+        ResumeStudySessionUseCase(
+          repository,
+        ).call('deck-1', sessionId: 'session-gone'),
+        throwsA(isA<NotFoundFailure>()),
+      );
     });
   });
 }

@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/features/study/di/study_home_repository_provider.dart';
 import 'package:memox/features/study/di/study_repository_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:memox/app/app.dart';
@@ -16,9 +17,12 @@ import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
+import 'package:memox/features/settings/di/app_settings_repository_provider.dart';
 
 import '../../features/deck/presentation/support/fake_deck_repository.dart';
+import '../../features/study/domain/support/fake_study_home_repository.dart';
 import '../../features/study/domain/support/fake_study_repository.dart';
+import '../../features/settings/domain/support/fake_app_settings_repository.dart';
 
 /// The nested deck route, exercised through the real app root.
 ///
@@ -59,7 +63,15 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          appSettingsRepositoryProvider.overrideWithValue(
+            FakeAppSettingsRepository(),
+          ),
           envConfigProvider.overrideWithValue(EnvConfig.development),
+          // The Study branch is Study Home since UC-14, which reads its own
+          // contract — a screen with no method that could open a session.
+          studyHomeRepositoryProvider.overrideWithValue(
+            FakeStudyHomeRepository(),
+          ),
           studyRepositoryProvider.overrideWithValue(FakeStudyRepository()),
           deckRepositoryProvider.overrideWithValue(
             repository ?? FakeDeckRepository(),

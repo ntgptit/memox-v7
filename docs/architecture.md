@@ -7,8 +7,8 @@
 | **Scope** | Quyết định ràng buộc nhiều tài liệu hoặc nhiều layer. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), hình dạng dữ liệu (`data-model.md`) |
 | **Source of truth for** | AD-xx · đánh đổi kiến trúc · phương án đã bị loại · lý do pin toolchain |
 | **Depends on** | `document-conventions.md`, `product.md` |
-| **Updated by task** | M99.21 (AD-20 · nửa encode của Card Transfer) |
-| **Last updated** | 2026-08-13 |
+| **Updated by task** | M99.33 (AD-22 · mô hình tombstone/batch của Trash, retention 30 ngày, purge an toàn); M99.24 (AD-19 · rule placeholder gắn với tình trạng branch; Progress đã tốt nghiệp) · M99.28 (AD-19 · Settings rời trạng thái placeholder — không còn branch nào là placeholder) · M99.29 (AD-21 · nhắc học chạy trong background worker) |
+| **Last updated** | 2026-08-19 |
 
 Format theo `document-conventions.md` §6.1. AD xếp theo số; ID vĩnh viễn (§7).
 
@@ -1325,18 +1325,29 @@ cả hai đều chạy được:
 | | |
 |---|---|
 | **Status** | accepted |
-| **Affected documents** | `product.md` · `it-scenarios/01-navigation-and-continuity.md` · `wbs.md` (M99.7) |
+| **Affected documents** | `product.md` · `it-scenarios/01-navigation-and-continuity.md` · `wbs.md` (M99.7, M99.23, M99.24) · `wireframes/m99-23-progress-overview.md` · `wireframes/m99-progress-by-deck.md` |
 
 **Decision.** Navigation shell khai báo đúng bốn `StatefulShellBranch`, theo thứ
 tự cố định: **Decks (0) · Study (1) · Progress (2) · Settings (3)**. Decks vẫn
-là cold-start branch (UC-06). Progress và Settings MUST chỉ có
-presentation-only placeholder screen: placeholder MUST NOT tạo domain entity,
-repository, provider, DAO, bảng, dữ liệu mẫu hay persistence nào — không đọc
-provider, không mở session, không ghi database khi vào, thoát hoặc chuyển tab.
+là cold-start branch (UC-06). Một branch **chưa có nghiệp vụ canonical**
+MUST chỉ có presentation-only placeholder screen: placeholder MUST NOT tạo
+domain entity, repository, provider, DAO, bảng, dữ liệu mẫu hay persistence nào
+— không đọc provider, không mở session, không ghi database khi vào, thoát hoặc
+chuyển tab. Ràng buộc này gắn với **tình trạng của branch**, không phải với tên
+của nó: nó áp cho mọi branch còn là scaffold, và **chấm dứt cho một branch ngay
+khi nghiệp vụ của branch đó được chốt trong `business-rules.md` và
+`use-cases.md`**. Tại thời điểm AD-19 được viết, hai branch còn scaffold là
+Progress và Settings. **Cả hai đã tốt nghiệp:** Progress ở M99.23
+(BR-190…BR-199, UC-12) với cấp deck thêm ở M99.24 (BR-182…BR-189, UC-13), và
+Settings ở M99.28 (BR-210…BR-217, UC-16). **Không branch nào còn là
+placeholder**, nên ràng buộc "chỉ placeholder" hiện không áp cho branch nào —
+nó vẫn đứng đây vì nó là điều kiện cho branch thứ năm, nếu có.
+
+Việc thay là **một screen đổi một screen**: path, `RouteNames` và branch index
+MUST giữ nguyên qua lần tốt nghiệp — đó chính là tài sản mà AD này mua trước.
 Mỗi branch có path thật (`/progress`, `/settings`) để deep link mở đúng tab.
 Thư viện starter thuộc branch Decks; MUST NOT có tab Profile chừng nào chưa có
 auth/profile domain (AD-03).
-
 **Context.** Sản phẩm cần IA ổn định cho năm study mode và các capability sắp
 tới (thống kê S2, tùy chọn ứng dụng), trong khi Progress và Settings chưa có
 nghiệp vụ canonical nào. Hai con đường đều xấu: chờ feature xong mới thêm tab
@@ -1348,11 +1359,32 @@ người dùng lẫn phiên làm việc sau tin là thật.
 **Consequences.** IA và deep-link contract đóng băng sớm: feature thật sau này
 thay một screen trong một branch có sẵn, không đụng router hay shell. Người
 dùng thấy rõ tính năng đang phát triển thay vì một tab đột nhiên xuất hiện.
-Giá phải trả: hai placeholder và test route của chúng phải được duy trì, và tab
+Giá phải trả: mỗi placeholder và test route của nó phải được duy trì, và tab
 scaffold dễ bị đọc nhầm là feature đã xong — WBS và `product.md` phải nói rõ
-điều ngược lại. Một hệ quả đã đo được: bốn destination vượt trần
+điều ngược lại. **Hệ quả đó đã được kiểm chứng ở M99.23:** thay placeholder
+Progress bằng vertical slice thật chạm đúng một dòng `builder` trong
+`app_router.dart`; shell, thứ tự branch, URL contract và test điều hướng không
+đổi dòng nào, đúng như AD này dự đoán. Cái *có* phải đổi là hai file test đi
+theo tên screen — companion visual audit ở đường dẫn gương (MX-VIS-001) và
+widget test của screen — nên "một screen đổi một screen" là đúng cho production
+tree và không đúng cho test tree. Một hệ quả đã đo được: bốn destination vượt trần
+
+điều ngược lại. **Một giá thứ hai đã hiện ra ở M99.23:** rule ban đầu viết tên
+hai branch vào một câu MUST, nên khi Progress có nghiệp vụ thật thì code hợp lệ
+lại vi phạm một AD đang `accepted`, và `check_docs.py` không thấy — nó kiểm ID
+và citation, không kiểm ngữ nghĩa. Vì thế rule nay gắn với *tình trạng* của
+branch: branch tiếp theo tốt nghiệp không cần sửa lại AD này nữa. Một hệ quả đã đo được: bốn destination vượt trần
 `4 × 120dp` của `MxNavigationBar` trên màn 393dp, nên cap bề rộng phải nhường
 cho bề rộng màn hình (M99.7) — đúng hành vi Material thiết kế cho even split.
+
+**M99.28 đã trả lời được câu hỏi mà quyết định này đặt cược vào.** Thay
+`SettingsPlaceholderScreen` bằng feature thật không đụng `app_router.dart`,
+không đụng `AppNavigationShell`, không đổi path và không đổi thứ tự tab — đúng
+điều AD này hứa. Cái nó **có** đụng là hai thứ AD này không dự đoán: theme và
+ngôn ngữ sống ở `MaterialApp`, tức ở `app/`, chứ không ở trong branch — nên một
+feature trong `features/` phải điều khiển được root widget mà vẫn không được
+import `app/` (AD-13). Seam là một provider domain mà `app/` đọc; hướng phụ
+thuộc vẫn chỉ đi một chiều.
 
 **Rejected alternatives.** Giữ hai tab cho tới khi mọi feature xong — trả chi
 phí sửa shell/contract/test lần nữa vào lúc đắt nhất. Fake statistics/settings
@@ -1440,3 +1472,124 @@ validation". Tái sử dụng Study Mode factory cho transfer — hai trục m�
 khác nhau; chung factory là chung lý do đổi. Chuẩn bị sẵn `encode()` rỗng
 "cho tương lai" — API chết không có test thật, và cái giá của thêm-sau đã
 được trả trước bằng ranh giới, không cần trả bằng code chết.
+
+## AD-21 · Nhắc học chạy trong background worker, không phải notification đặt sẵn
+
+| | |
+|---|---|
+| **Status** | accepted |
+| **Affected documents** | `business-rules.md` (BR-218…BR-229), `use-cases.md` (UC-17), `data-model.md` (`app_settings`, migration v10), `wireframes/m6-daily-reminders.md` |
+
+**Decision.** Nhắc học hằng ngày tách làm hai vai và mỗi vai một plugin:
+**WorkManager** giữ *thời điểm*, `flutter_local_notifications` giữ *hiển thị
+và quyền*. Đến giờ, một background worker chạy Dart thật: nó mở database, đọc
+lại workload đến hạn, và chỉ khi tổng còn > 0 mới dựng nội dung rồi hiện đúng
+một notification (BR-220, BR-221) — sau đó tự đặt lượt cho ngày kế tiếp. App
+**không** dùng `zonedSchedule` để nạp sẵn một notification lặp lại, và **không**
+khai báo quyền exact alarm ở bất kỳ flavor nào (BR-226).
+
+Ranh giới layer đi kèm quyết định này: `domain/` khai báo ba contract —
+settings, workload, và một `ReminderPlatformRepository` gộp capability, quyền,
+đặt lịch và hiển thị — còn `data/` giữ **toàn bộ** kiểu của plugin. Một adapter
+Android thật và một adapter `unsupported` cho mọi nền tảng còn lại thoả cùng
+contract đó, nên `domain/` và `presentation/` không có một dòng kiểm tra nền
+tảng nào (BR-229, AD-12, AD-13).
+
+**Context.** BR-222 cho phép notification nêu tên deck cấp bách nhất và tổng số
+thẻ. Ba con số đó **chỉ đúng tại thời điểm hiện tại**: người dùng học một phiên tối
+nay thì tổng đổi, và một notification đã nạp nội dung lúc đặt lịch vẫn hiện
+đúng giờ với số của hôm qua. `zonedSchedule` của
+`flutter_local_notifications` không chạy Dart lúc fire — hệ điều hành hiện một
+payload cố định — nên nó không thể thoả BR-220 lẫn BR-222 cùng lúc. Cái chạy
+được Dart đúng lúc fire là một worker.
+
+WorkManager là nguyên thuỷ đúng cho vế còn lại: nó **vốn dĩ** không chính xác,
+nên không cần và không có đường xin exact alarm; nó tự sống sót qua reboot và
+app update; và nó chạy trong một background isolate nên không cần app đang mở.
+Alarm chính xác thì ngược lại — Android 12+ bắt khai báo `SCHEDULE_EXACT_ALARM`
+hoặc `USE_EXACT_ALARM`, và một lời nhắc học không có lý do sản phẩm nào để đòi
+mức đặc quyền đó.
+
+**Consequences.** Được: nội dung notification luôn là số thật của lúc hiện
+(BR-220, BR-222); "không còn gì đến hạn" trở thành một nhánh **chạy được ở host
+test** thay vì một hành vi chỉ quan sát được trên máy thật; reboot và app update
+không cần code riêng.
+
+Phải trả: worker chạy trong isolate khác, nên nó mở **một connection thứ hai**
+tới cùng file SQLite và không thấy `ProviderScope` của app — composition root vì
+thế có một entry point riêng ở `lib/app/reminder/`, và mọi thứ nó cần phải dựng
+được mà không có widget tree, kể cả localization. Thời điểm fire là *xấp xỉ*:
+Doze và battery saver có thể đẩy lượt nhắc muộn vài phút tới hàng giờ, và đó là
+đánh đổi đã chấp nhận cho một lời nhắc học. Hai plugin native mới không kiểm
+chứng được ở host — host test dùng fake adapter, còn smoke thật trên
+emulator/thiết bị **hoãn sang integration worktree và được báo là chưa chạy**.
+
+**Rejected alternatives.** `zonedSchedule` lặp hằng ngày với
+`AndroidScheduleMode.inexactAllowWhileIdle` — rẻ nhất, và không thoả được
+BR-220 lẫn BR-222 vì không có Dart nào chạy lúc fire.
+`android_alarm_manager_plus` — chạy Dart được, nhưng manifest của nó mang theo
+quyền exact alarm, đúng thứ BR-226 cấm. Tự viết method channel và
+`NotificationManager` bằng Kotlin — thêm một bề mặt native phải tự bảo trì cho
+đúng cái mà hai plugin đã làm, và bề mặt đó là thứ ít kiểm chứng được nhất ở
+đây. Đặt lịch dựa trên "workload dự phóng tại thời điểm fire" tính sẵn lúc đặt
+lịch — đúng trong đa số trường hợp vì workload chỉ đổi khi app chạy, nhưng nó
+đổi *đảm bảo* của BR-220 thành một lập luận, và lập luận đó vỡ ngay lần đầu app
+bị kill giữa lúc ghi.
+
+---
+
+## AD-22 · Trash: tombstone một cột trên hàng, batch là bảng riêng, loại trừ là hợp đồng của query
+
+| | |
+|---|---|
+| **Status** | accepted |
+| **Affected documents** | `business-rules.md` (BR-256…BR-267), `use-cases.md` (UC-21), `data-model.md` (`delete_batches`, `decks.delete_batch_id`, `cards.delete_batch_id`, bất biến 31…35, schema v8), `wireframes/m99-33-trash-restore.md` |
+
+**Decision.** Soft-delete đánh dấu **tại chỗ**: `decks` và `cards` mỗi bảng thêm
+đúng **một** cột `delete_batch_id TEXT NULL REFERENCES delete_batches (id) ON
+DELETE CASCADE`. Không có bảng `trash` chứa bản sao, không có `deleted_at` trên
+hàng. Một lần xoá là một hàng trong `delete_batches` mang `item_type`,
+`root_item_id`, `deleted_at` và `owner_id`; mọi hàng thuộc lần xoá đó trỏ về nó.
+Hàng còn sống ⇔ `delete_batch_id IS NULL`, và **mọi** query đọc `cards`/`decks`
+hoặc mang điều kiện đó hoặc nằm trong một allowlist có lý do, do một test
+inventory quét `.drift` cưỡng chế. Purge là `DELETE FROM delete_batches`, để FK
+cascade làm phần còn lại. Route của Trash thuộc **branch Library**
+(`/trash`, `RouteNames.trash`) với entry là một action cố định trên app bar của
+danh sách root — không phải Settings, và không phải một mục ẩn trong overflow.
+
+**Context.** Trước v8, `deleteDeck` là `DELETE` thật và `ON DELETE CASCADE` kéo
+theo descendant deck, card, study state, `study_answers` và session của cả cây.
+Nội dung gõ lại được; lịch sử học thì không, và app là local-first nên không có
+backup nào để khôi phục từ đó (AD-03, AD-05).
+
+**Consequences.** Restore **là** move: nó gọi đúng `deckMoveRejection` mà UC-09
+dùng, nên độ sâu (BR-55), loại nội dung (BR-63/BR-64) và scheduler/generation
+(BR-70/BR-74) không có bản thứ hai để lệch. Ngược lại, mọi probe *đi xuống* —
+`subtreeHeightProbe`, `subtreeDeckIds` — phải lọc tombstone, vì một subtree đã
+xoá không được phép chặn một move hợp lệ trên cây đang sống; còn
+`updateSubtreeRootDeck` **cố ý không lọc**, vì một tombstone nằm trong subtree
+vẫn phải trỏ đúng root sau khi cha nó di chuyển (bất biến 6). Hai chiều ngược
+nhau trên cùng một cây là chỗ dễ sai nhất của thiết kế này, và là lý do bất biến
+31…35 tồn tại. `study_sessions.end_reason` phải nới `CHECK` để nhận
+`content_deleted`, tức là rebuild bảng — đó là phần đắt nhất của migration v8 và
+là lý do v8 không thể là data-only như v6/v7. Bất biến 1…5, 15 và 29 đổi nghĩa:
+chúng đo **hàng đang active**, nên mỗi câu thêm điều kiện lọc; không sửa chúng
+thì invariant 2 báo vi phạm cho mọi deck vừa được dọn rỗng đúng luật và invariant
+29 im lặng cho mọi deck lẽ ra phải `unset`.
+
+**Rejected alternatives.** *Bảng `trash` chứa bản sao hàng* — restore trở thành
+phép tái tạo, và `card_study_states`, `study_answers`, `card_tags` đều trỏ về
+`cards.id` bằng FK, nên phải nhân bản bốn quan hệ rồi ghép lại; BR-262 đòi giữ
+nguyên id/state/history, mà cách chắc chắn giữ nguyên là không động vào chúng.
+*`deleted_at` trên hàng cộng `delete_batch_id`* — hai nguồn sự thật cho một sự
+kiện trên cùng một hàng, và không gì bắt chúng bằng nhau. *Suy ra "đã xoá" từ
+tổ tiên* — mọi query active phải đi ngược cây, tức một recursive walk trong
+query nóng nhất của app; đánh dấu cả subtree lúc xoá đổi một lần ghi lấy vĩnh
+viễn một phép so sánh cột. *Bảng `deleted_items (item_type, item_id)` riêng* —
+giữ `cards`/`decks` không đổi, nhưng biến mọi loại trừ thành `NOT EXISTS` và bỏ
+mất cascade của FK khi purge. *Suy batch từ parent hiện tại* — hai batch chồng
+nhau trong một subtree là trạng thái hợp lệ và bình thường (xoá card hôm nay,
+xoá deck chứa nó tuần sau); parent trả lời *nó ở đâu*, không trả lời *nó đi cùng
+ai*. *Trash trong Settings* — Settings là placeholder (AD-19) và Trash chứa nội
+dung Library; đặt ở đó thì entry point của một tính năng khôi phục dữ liệu nằm
+sau hai lần chạm ở một branch không liên quan.

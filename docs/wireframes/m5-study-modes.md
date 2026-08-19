@@ -4,11 +4,11 @@
 |---|---|
 | **Status** | active |
 | **Purpose** | Chốt bố cục và hành vi của năm màn học trước khi viết code M5.7+ |
-| **Scope** | Khung phiên học, và năm màn `browse` · `match` · `guess` · `recall` · `fill`. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), luồng (`use-cases.md`), giá trị token (`design_system/tokens/`) |
-| **Source of truth for** | Bố cục màn học · phán quyết cho tám điểm design lệch với BR |
+| **Scope** | Khung phiên học, năm màn `browse` · `match` · `guess` · `recall` · `fill`, và sheet chọn chiều hỏi của `self_assess` (§9). Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), luồng (`use-cases.md`), giá trị token (`design_system/tokens/`) |
+| **Source of truth for** | Bố cục màn học · phán quyết cho tám điểm design lệch với BR · bố cục sheet chọn chiều và thẻ khi chiều bị đảo |
 | **Depends on** | `document-conventions.md`, `business-rules.md` (BR-108…BR-154), `wbs-study.md` (M5.7…M5.20) |
-| **Updated by task** | `fill` làm lại vùng đáp án lần hai — thẻ dưới **là** input surface, bỏ ô viền lồng trong thẻ, đề đổi sang `back` và chấm bằng `front_folded` (BR-134), phán quyết mặc lên viền thẻ, hàng CTA giữ đủ hai chỗ (§6, §8.10) · `recall` tách lật khỏi chấm — lật mở tự đánh giá, hết giờ ghi sai rồi chờ `Next` (§6.1, §8.12) · `guess` bỏ nền phán quyết — đúng/sai chỉ còn viền + chữ + icon, ba hàng còn lại lùi về 0.7 thay vì 0.36, reset theo lượt thay vì `cardId`, ngân sách đọc 800/1800ms (§5, §8.9, §8.12) · Rà soát UI 5 stage — `match` nhận cả hai chiều chọn và giữ trạng thái đủ lâu để đọc (§4, §8.8), chuyển feedback sang viền + chữ thay vì nền đặc (§4), đổi meaning sang trái, hạ thang chữ và nâng sàn hàng lên 112 (§4, §8.6), `guess` bỏ huy hiệu A–E (§5), `fill` làm lại vùng đáp án (§6), `browse` cân bằng hai mặt và đổi nhãn (§3) |
-| **Last updated** | 2026-08-11 |
+| **Updated by task** | M99.27 — §9: sheet chọn chiều hỏi (ba dòng chung mép, glyph chứ không chỉ màu, chạm chỉ chọn, sheet cuộn được) và thẻ khi chiều bị đảo (nhãn đi theo nội dung, ba phép đo ghim bằng `getRect`) · `fill` làm lại vùng đáp án lần hai — thẻ dưới **là** input surface, bỏ ô viền lồng trong thẻ, đề đổi sang `back` và chấm bằng `front_folded` (BR-134), phán quyết mặc lên viền thẻ, hàng CTA giữ đủ hai chỗ (§6, §8.10) · `recall` tách lật khỏi chấm — lật mở tự đánh giá, hết giờ ghi sai rồi chờ `Next` (§6.1, §8.12) · `guess` bỏ nền phán quyết — đúng/sai chỉ còn viền + chữ + icon, ba hàng còn lại lùi về 0.7 thay vì 0.36, reset theo lượt thay vì `cardId`, ngân sách đọc 800/1800ms (§5, §8.9, §8.12) · Rà soát UI 5 stage — `match` nhận cả hai chiều chọn và giữ trạng thái đủ lâu để đọc (§4, §8.8), chuyển feedback sang viền + chữ thay vì nền đặc (§4), đổi meaning sang trái, hạ thang chữ và nâng sàn hàng lên 112 (§4, §8.6), `guess` bỏ huy hiệu A–E (§5), `fill` làm lại vùng đáp án (§6), `browse` cân bằng hai mặt và đổi nhãn (§3) |
+| **Last updated** | 2026-08-13 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham chiếu bằng ID.
 
@@ -1042,3 +1042,93 @@ hình. Null vì thế có nghĩa là *giữ dòng gợi ý thường của mode*
 
 Đường dây ở lại cho `fill`: khi `Try again` / `Mark correct` được chốt thì hai
 trạng thái nhập/sai của nó đã có sẵn chỗ để nói.
+
+---
+
+## 9. Chiều hỏi của `self_assess` — sheet chọn và thẻ đảo (BR-203…BR-209)
+
+Tài liệu này không phát biểu lại luật. Phần dưới chỉ chốt **bố cục và hình học**;
+điều kiện khả dụng, cách gán `mixed` và ràng buộc "không đụng lịch" nằm ở
+BR-203…BR-209, luồng ở UC-15.
+
+### 9.1 Sheet chọn chiều
+
+Modal bottom sheet, mở từ Study Entry ngay sau `Review` trên deck `sm2` — không
+có màn chọn mode ở giữa vì thuật toán chỉ offer một mode (BR-146).
+
+```
+┌──────────────────────────────────────────────┐
+│  Which way should cards be asked?      title │
+│  You can't change this once the ses…   body  │
+│                                              │
+│  ◉  Korean first                             │
+│     Recommended — See the Korean, recall     │
+│     what it means.                           │
+│  ○  Meaning first                            │
+│     See the meaning, recall the Korean.      │
+│  ○  Mixed                                    │
+│     Each card is asked one way or the…       │
+│                                              │
+│  [        Start review                    ]  │
+└──────────────────────────────────────────────┘
+```
+
+**Ba dòng dùng `MxListTile`, nút dùng `MxActionButton` — không có thiết kế mới.**
+Gutter `AppSpacing.lg` bốn phía; khoảng cách title→body `xs`, body→danh sách
+`md`, danh sách→nút `lg`.
+
+**Nhãn `Recommended` nằm trong chính dòng mô tả, không phải badge `trailing` —
+và đây là quyết định layout chứ không phải copy.** `ListTile` cấp cho cột chữ
+phần **còn lại** sau leading và trailing, nên một badge chỉ bóp hẹp *đúng dòng
+nó gắn vào*: đo ở 320dp là **115dp chữ so với 216dp** của hai dòng kia, và dòng
+được khuyến nghị trở thành dòng duy nhất bị cắt mô tả — ngược hẳn với việc
+khuyến nghị nó. Ở text scale 2.0 badge còn ăn tới mức cột chữ chỉ còn ~41dp.
+
+Ràng buộc vì thế phát biểu theo **cột chữ**, không theo rect của tile: rect của
+ba tile luôn bằng nhau vì `CrossAxisAlignment.stretch`, nên đo tile không bao
+giờ thấy được lỗi này. Assertion đúng là `RenderParagraph.constraints.maxWidth`
+của cả ba title và cả ba mô tả phải bằng nhau, đo ở 320dp và 390dp × scale 1.0
+và 2.0 × EN và VI.
+
+**Trạng thái chọn không bao giờ chỉ bằng màu.** Glyph `radio_button_checked` /
+`radio_button_unchecked` ở `leading` là tín hiệu; `isSelected` của tile chỉ là
+phần củng cố. Đây là lý do sheet không dùng một dòng "đã chọn" tô nền.
+
+**Chạm chỉ chọn; `Start review` mới mở phiên.** Lựa chọn khoá suốt phiên
+(BR-207), nên một cú chạm nhầm không được phép tiêu mất một phiên. Trong lúc mở
+phiên: nút vào `isLoading` **giữ nhãn** (`shouldKeepLabelWhileLoading`) và ba
+dòng bị khoá `onTap` — chiều không được đổi dưới chân một request đã mang chiều
+cũ.
+
+**Sheet cuộn được và tôn trọng safe area dưới.** Một modal sheet bị chặn ở một
+phần chiều cao màn hình; ba dòng hai dòng chữ vượt ngưỡng đó trên máy thấp, và
+tràn thì nút `Start review` — thứ duy nhất kết thúc được câu hỏi — biến mất.
+`SingleChildScrollView` + `isScrollControlled` + `useSafeArea`. **Sheet chọn mode của BR-146
+nhận cùng cách sửa** trong cùng task: bốn mode kèm dòng lý do cũng vượt ngưỡng
+đó, và lỗi được tìm ra bởi chính test của sheet này.
+
+### 9.2 Thẻ khi chiều bị đảo
+
+Không có bố cục mới. Thẻ vẫn là §3/§8.3: **một thẻ chiếm toàn bộ chiều cao, chia
+đôi bằng hairline**, đề ở nửa trên và đáp án ở nửa dưới sau khi lật.
+
+Cái đổi là **nội dung** của hai nửa, và **nhãn đi theo nội dung**: một thẻ
+`meaning_to_korean` có nửa trên ghi `BACK` và nửa dưới ghi `FRONT`. Nhãn gọi tên
+cột chứ không gọi tên ngôn ngữ — cùng phán quyết §3 đã chốt, và ở đây nó còn là
+thứ phân biệt hai chiều cho người không đọc được nội dung.
+
+Ba phép đo bị ghim bằng `getRect`, phải **bằng nhau** ở cả hai chiều:
+
+| Đo | Vì sao ghim |
+|---|---|
+| rect của `MxCard` | đổi chỗ hai chuỗi là đúng thay đổi làm một nửa co lại |
+| rect của `Divider` | hairline lệch tâm vài pixel ở một chiều là thứ ảnh chụp một chiều không thấy |
+| rect của hàng action đầu tiên | nút nhích lên xuống theo chiều là dấu hiệu nửa trên đã đổi kích thước |
+
+Ngoài ra: mỗi `MxActionButton` giữ tối thiểu 48dp ở cả hai chiều; nghĩa dài 240 ký
+tự (BR-08) **làm đề** ở vai chữ lớn hơn phải không tràn ở 320dp; và EN/VI ×
+light/dark render sạch.
+
+**Không có hiệu ứng chuyển riêng cho chiều.** Chiều là thuộc tính của lượt, cố
+định từ lúc hàng đợi được ghi (BR-205) — nó không "đổi" trong lúc người dùng nhìn,
+nên không có gì để animate.

@@ -4,11 +4,11 @@
 |---|---|
 | **Status** | active |
 | **Purpose** | Cho thấy các use case nối vào nhau thành hành trình nào, thứ mà đọc từng UC riêng lẻ không thấy được |
-| **Scope** | Đồ thị chuyển tiếp giữa UC-01…UC-09, tách theo đối tượng nghiệp vụ. Ngoài phạm vi: nội dung của từng UC, mọi luật nghiệp vụ, và mọi chi tiết màn hình |
+| **Scope** | Đồ thị chuyển tiếp giữa UC-01…UC-20, tách theo đối tượng nghiệp vụ. Ngoài phạm vi: nội dung của từng UC, mọi luật nghiệp vụ, và mọi chi tiết màn hình |
 | **Source of truth for** | Đồ thị chuyển tiếp giữa các UC · điểm vào của từng luồng · ánh xạ UC → milestone xây nó |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md`, `use-cases.md` |
-| **Updated by task** | Nhánh `I` tách rõ đổi scheduler chưa khoá khỏi Reset, và nói ai đặt khoá (BR-12, BR-13, BR-164) |
-| **Last updated** | 2026-08-11 |
+| **Updated by task** | M99.32 — UC-20 vào bảng §6: tìm kiếm toàn thư viện từ header Library, kết quả card mở chi tiết chỉ đọc UC-19; UC-06 thôi quảng cáo tìm kiếm theo subtree đã bị thay thế; trước đó M99.31 — nhánh `J`: chạm một hàng card mở chi tiết chỉ đọc (UC-19), Edit thành action tường minh; bảng §6 bổ sung UC-10…UC-19 |
+| **Last updated** | 2026-08-16 |
 
 ---
 
@@ -155,10 +155,20 @@ flowchart TD
     F -->|"Thành công"| G["Giữ form mở và xoá trống các ô · UC-04 A4"]
     G --> B
 
+    C -->|"Chạm một hàng"| J["Chi tiết card, chỉ đọc · UC-19"]
+    J --> J1["Lịch sử học phân trang keyset, nhóm theo generation · UC-19, BR-241, BR-243"]
+    J -->|"Edit — action riêng, không phải cử chỉ chạm"| H
+    J -->|"Back"| B
+
     C -->|"Sửa"| H["Đổi nội dung; study state và history không đổi · UC-04 A1, BR-10"]
     C -->|"Xoá"| I["Xác nhận, xoá kèm study state và history của card đó · UC-04 A2"]
     I --> I1["Card cuối cùng bị xoá → deck tự về unset trong cùng transaction · BR-163"]
 ```
+
+**`J` đổi nghĩa của một lần chạm, và đó là cạnh dễ nhớ sai thứ hai ở đây.** Từ
+M99.31, chạm một hàng ở chế độ thường mở **chi tiết chỉ đọc**, không mở editor
+nữa; đường tới `H` đi qua một action `Edit` tường minh. Trong chế độ chọn nhiều
+thì chạm vẫn chỉ là chọn/bỏ chọn và **không** có đường nào tới `J` (BR-246).
 
 **`I1` là cạnh dễ vẽ sai nhất trong tài liệu này.** Xoá hết card **không** đưa
 deck về `unset`; muốn đổi loại phải qua nhánh `H` ở mục 3, và đó là một hành động
@@ -225,10 +235,15 @@ lại ở đây; cột cuối chỉ nói cái gì đã có trong `lib/` hôm nay
 | UC-03 | deck | M4.10 | Đổi tên, xoá kèm impact, đưa `content_type` về `unset` đã có. **Đổi chế độ ôn tập chưa có** — không có use case nào cho nó |
 | UC-04 | card | M4.11 | Đủ, và **nhiều hơn UC-04 mô tả**: cờ, tag và ba trường phụ (BR-92…BR-95) |
 | UC-05 | review | M5 | Chưa xây. `lib/features/study/` mới có một repository chưa có method và một placeholder screen |
-| UC-06 | deck | M4.10 | Đủ, cộng tìm kiếm toàn subtree — thứ UC-06 không nhắc tới |
+| UC-06 | deck | M4.10 | Đủ. Tìm kiếm theo subtree từng là phần thêm ngoài UC-06, đã bị thay bằng tìm kiếm toàn thư viện (UC-20, M99.32) |
 | UC-07 | review | M5 | Chưa xây |
 | UC-08 | deck | M4.10 | Đủ |
 | UC-09 | deck | M4.10 | Đủ |
+| UC-10 | card | M4.12 / M99.19 | Đủ — wizard import ba bước |
+| UC-11 | card | M99.21 | Đủ — sheet export ba format |
+| UC-18 | card | M99.30 | Đủ — catalog tag ở `/tags`, lọc nhiều tag trên card list, rename/gộp và xoá |
+| UC-19 | card | M99.31 | Đủ — chi tiết chỉ đọc cộng lịch sử phân trang keyset |
+| UC-20 | search | M99.32 | Đủ — tìm kiếm deck, hai mặt card và tag từ header Library; kết quả deck mở màn deck, kết quả card mở chi tiết chỉ đọc (UC-19) |
 
 ### Ba chỗ tài liệu và code đã lệch
 

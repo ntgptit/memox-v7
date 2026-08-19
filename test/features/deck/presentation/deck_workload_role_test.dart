@@ -340,6 +340,18 @@ void main() {
         AppMaterialRoles.onErrorDark,
         AppColors.dangerDark,
       ),
+      // **Study Home's overdue count, which is `danger` as *ink* rather than
+      // as a fill** — a pairing the app did not have before M5.26 and which
+      // its wireframe (S12) states without measuring. Body-size text on the
+      // card surface, so the same 4.5 floor as the rest of this table.
+      'danger ink on light surface': (
+        AppColors.dangerLight,
+        AppColors.surfaceLight,
+      ),
+      'danger ink on dark surface': (
+        AppColors.dangerDark,
+        AppColors.surfaceDark,
+      ),
     };
 
     for (final MapEntry(key: name, value: (fore, back)) in pairs.entries) {

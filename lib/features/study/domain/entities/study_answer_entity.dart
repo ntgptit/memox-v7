@@ -3,6 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../../deck/domain/models/scheduler_type_model.dart';
 import '../models/study_action_model.dart';
 import '../models/study_answer_kind_model.dart';
+import '../models/study_direction_model.dart';
 import '../models/study_mode.dart';
 import '../models/study_outcome_reason_model.dart';
 
@@ -53,6 +54,17 @@ abstract class StudyAnswerEntity with _$StudyAnswerEntity {
 
     /// The canonical action — never the label the screen showed (BR-132).
     required StudyAction action,
+
+    /// Which way the card was asked on this turn (BR-206).
+    ///
+    /// **Copied from the queue row inside the write transaction, never supplied
+    /// by the screen.** A direction the UI passes down is a direction the UI can
+    /// get wrong, and BR-76 and BR-98 have already paid for the general form of
+    /// that mistake: a stored fact inferred from the shape of what was on screen
+    /// cannot be recomputed once it is wrong.
+    ///
+    /// Null for every turn outside BR-203's eligibility.
+    required StudyRecallDirection? direction,
 
     required DateTime answeredAt,
 

@@ -1,10 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/database/app_database.dart';
-
 import 'invariant_queries.dart';
+import 'support/invariant_fixture.dart';
 import 'support/test_database.dart';
 
-/// The 15 data invariants, run against a real database.
+/// The data invariants, run against a real database.
 ///
 /// Each is checked **both ways**. Clean on valid data proves the query does not
 /// cry wolf; firing on its own violation proves it is connected to anything at
@@ -14,76 +13,10 @@ import 'support/test_database.dart';
 ///
 /// The violating fixture introduces exactly one defect, so a query that fires is
 /// firing on its own subject rather than on collateral damage from the seed.
+///
+/// The five Trash cases live in `invariants_trash_test.dart`; the fixture and
+/// the both-ways helper they share are in `support/invariant_fixture.dart`.
 void main() {
-  /// A valid three-level tree: root → branch → leaf, with a card, a state, a
-  /// session and one history row.
-  ///
-  /// Three levels because BR-55 says the tree nests, and a one-level fixture
-  /// would let Q6 and Q9 pass with the `COALESCE` root-finding BR-57 forbids.
-  Future<void> seedValid(AppDatabase db) async {
-    await insertRootDeck(db, id: 'root');
-    await insertSubDeck(
-      db,
-      id: 'branch',
-      parentId: 'root',
-      rootDeckId: 'root',
-      contentType: 'deck',
-    );
-    await insertSubDeck(
-      db,
-      id: 'leaf',
-      parentId: 'branch',
-      rootDeckId: 'root',
-      contentType: 'card',
-    );
-    await insertCard(db, id: 'card-1', deckId: 'leaf');
-    await insertReviewState(db, cardId: 'card-1');
-    await insertSession(
-      db,
-      id: 'session-1',
-      deckId: 'root',
-      rootDeckId: 'root',
-    );
-    await insertHistory(
-      db,
-      id: 'history-1',
-      cardId: 'card-1',
-      sessionId: 'session-1',
-    );
-  }
-
-  /// Runs one invariant and returns the offending ids.
-  Future<List<String>> check(AppDatabase db, String id) =>
-      violations(db, invariantQueries[id]!);
-
-  /// Asserts the pair: silent on the valid tree, and firing once [breakIt] has
-  /// introduced this invariant's own defect.
-  void invariant(
-    String id,
-    String description, {
-    required Future<void> Function(AppDatabase db) breakIt,
-    required List<String> expectOffenders,
-  }) {
-    group('$id — $description', () {
-      test('clean on a valid three-level tree', () async {
-        final db = openTestDatabase();
-        await seedValid(db);
-
-        expect(await check(db, id), isEmpty);
-      });
-
-      test('fires on its own violation', () async {
-        final db = openTestDatabase();
-        await seedValid(db);
-        await breakIt(db);
-
-        // Unordered: the invariant queries specify no ORDER BY, and Q8's
-        // recursive walk returns rows in whatever order the CTE produced.
-        expect(await check(db, id), unorderedEquals(expectOffenders));
-      });
-    });
-  }
-
   test('every invariant this suite claims to run is present', () {
     // The list itself is a claim. Losing one would leave the rest green and no
     // sign that the missing one ever existed.
@@ -92,22 +25,35 @@ void main() {
     // becoming Q16 and Q17: the host set is a subset of the document's
     // numbering, and renumbering to close the gap would make every citation of
     // an invariant ambiguous about which document version it meant.
-    expect(invariantQueries.keys, hasLength(17));
+    expect(invariantQueries.keys, hasLength(24));
     expect(
       invariantQueries.keys,
       containsAll(<String>[for (var i = 1; i <= 15; i++) 'Q$i']),
     );
-    expect(invariantQueries.keys, containsAll(<String>['Q29', 'Q30']));
+    expect(
+      invariantQueries.keys,
+      containsAll(<String>[
+        'Q29',
+        'Q30',
+        'Q31',
+        'Q32',
+        'Q33',
+        'Q34',
+        'Q35',
+        'Q36',
+        'Q37',
+      ]),
+    );
   });
 
-  invariant(
+  invariantTest(
     'Q1',
     'root deck holds cards directly (BR-58)',
     breakIt: (db) => insertCard(db, id: 'bad-card', deckId: 'root'),
     expectOffenders: <String>['bad-card'],
   );
 
-  invariant(
+  invariantTest(
     'Q2',
     'unset deck already has content (BR-60, BR-62)',
     breakIt: (db) async {
@@ -122,7 +68,7 @@ void main() {
     expectOffenders: <String>['unset-deck'],
   );
 
-  invariant(
+  invariantTest(
     'Q3',
     'card deck has sub-decks (BR-63)',
     breakIt: (db) => insertSubDeck(
@@ -134,14 +80,14 @@ void main() {
     expectOffenders: <String>['leaf'],
   );
 
-  invariant(
+  invariantTest(
     'Q4',
     'deck deck holds cards directly (BR-64)',
     breakIt: (db) => insertCard(db, id: 'card-on-branch', deckId: 'branch'),
     expectOffenders: <String>['branch'],
   );
 
-  invariant(
+  invariantTest(
     'Q5',
     'root does not carry content_type = deck',
     breakIt: (db) => db.customStatement(
@@ -150,7 +96,7 @@ void main() {
     expectOffenders: <String>['root'],
   );
 
-  invariant(
+  invariantTest(
     'Q6',
     'descendant points at the wrong root (BR-72)',
     breakIt: (db) async {
@@ -164,7 +110,7 @@ void main() {
     expectOffenders: <String>['leaf'],
   );
 
-  invariant(
+  invariantTest(
     'Q7',
     'root does not point at itself (BR-56)',
     breakIt: (db) => db.customStatement(
@@ -173,7 +119,7 @@ void main() {
     expectOffenders: <String>['root'],
   );
 
-  invariant(
+  invariantTest(
     'Q8',
     'cycle in the deck tree (BR-69)',
     breakIt: (db) async {
@@ -186,7 +132,7 @@ void main() {
     expectOffenders: <String>['branch', 'leaf', 'root'],
   );
 
-  invariant(
+  invariantTest(
     'Q9',
     'card state disagrees with its root scheduler (BR-48, BR-49)',
     breakIt: (db) => db.customStatement(
@@ -196,7 +142,7 @@ void main() {
     expectOffenders: <String>['card-1'],
   );
 
-  invariant(
+  invariantTest(
     'Q10',
     'sub-deck carries scheduler columns (BR-06)',
     breakIt: (db) => db.customStatement(
@@ -205,7 +151,7 @@ void main() {
     expectOffenders: <String>['branch'],
   );
 
-  invariant(
+  invariantTest(
     'Q11',
     'root is missing its scheduler (BR-11)',
     breakIt: (db) => db.customStatement(
@@ -214,7 +160,7 @@ void main() {
     expectOffenders: <String>['root'],
   );
 
-  invariant(
+  invariantTest(
     'Q30',
     'the tree has learned cards but the scheduler is not locked (BR-13)',
     // The seed's card has no schedule, so it never finished the chain and the
@@ -241,7 +187,7 @@ void main() {
         "WHERE id = 'root'",
       );
 
-      expect(await check(db, 'Q30'), isEmpty);
+      expect(await checkInvariant(db, 'Q30'), isEmpty);
     });
 
     test('a learned card under a locked root is valid', () async {
@@ -256,11 +202,11 @@ void main() {
         "WHERE id = 'root'",
       );
 
-      expect(await check(db, 'Q30'), isEmpty);
+      expect(await checkInvariant(db, 'Q30'), isEmpty);
     });
   });
 
-  invariant(
+  invariantTest(
     'Q12',
     'invalid status × end_reason (BR-79…BR-85)',
     breakIt: (db) => db.customStatement(
@@ -270,7 +216,7 @@ void main() {
     expectOffenders: <String>['session-1'],
   );
 
-  invariant(
+  invariantTest(
     'Q13',
     'ended session has no ended_at',
     breakIt: (db) => db.customStatement(
@@ -280,7 +226,7 @@ void main() {
     expectOffenders: <String>['session-1'],
   );
 
-  invariant(
+  invariantTest(
     'Q14',
     'a relearning review changed the schedule (BR-78)',
     breakIt: (db) => insertHistory(
@@ -295,7 +241,7 @@ void main() {
     expectOffenders: <String>['history-bad'],
   );
 
-  invariant(
+  invariantTest(
     'Q15',
     'a deck deeper than 10 levels (BR-55)',
     breakIt: (db) async {
@@ -319,7 +265,7 @@ void main() {
     expectOffenders: <String>['d11'],
   );
 
-  invariant(
+  invariantTest(
     'Q29',
     'a sub-deck kept its type after everything left it (BR-163)',
     breakIt: (db) => insertSubDeck(
@@ -342,8 +288,75 @@ void main() {
     await seedValid(db);
     await insertRootDeck(db, id: 'empty-root');
 
-    expect(await check(db, 'Q29'), isEmpty);
+    expect(await checkInvariant(db, 'Q29'), isEmpty);
   });
+
+  invariantTest(
+    'Q31',
+    'a recall direction outside where BR-203 allows one',
+    // The seed's session is `reviewing`/`self_assess` but its root runs
+    // `eight_box`, which is the combination BR-203 names first: the algorithm
+    // never offers `self_assess` in a review, so nothing about this session may
+    // carry a direction.
+    breakIt: (db) => db.customStatement(
+      'INSERT INTO study_queue_items (session_id, mode, round, card_id, '
+      'position, status, direction) '
+      "VALUES ('session-1', 'self_assess', 1, 'card-1', 0, 'pending', "
+      "'meaning_to_korean')",
+    ),
+    expectOffenders: <String>['session-1'],
+  );
+
+  group('Q31 — a queue row without a direction is the ordinary case', () {
+    test('an eight_box stage with no direction is valid', () async {
+      // The overwhelming majority of rows: every learning chain, every graded
+      // mode, every `eight_box` deck. An invariant firing here would call the
+      // app's normal state corrupt.
+      final db = openTestDatabase();
+      await seedValid(db);
+      await db.customStatement(
+        'INSERT INTO study_queue_items (session_id, mode, round, card_id, '
+        'position, status) '
+        "VALUES ('session-1', 'self_assess', 1, 'card-1', 0, 'pending')",
+      );
+
+      expect(await checkInvariant(db, 'Q31'), isEmpty);
+    });
+  });
+
+  invariantTest(
+    'Q31',
+    'a session carries a direction its own kind and mode forbid',
+    // The repository's own guard, seen from the data. The seed's session is
+    // `reviewing`/`self_assess`, so moving its mode to `match` while it keeps a
+    // direction is exactly the row BR-203 says cannot exist — and it is the one
+    // an ineligible `openSession` would have written before the guard existed.
+    breakIt: (db) => db.customStatement(
+      "UPDATE study_sessions SET current_mode = 'match', "
+      "direction = 'mixed' WHERE id = 'session-1'",
+    ),
+    expectOffenders: <String>['session-1'],
+  );
+
+  invariantTest(
+    'Q32',
+    "a turn's direction disagrees with the queue row it came from (BR-206)",
+    // The history row is copied from the queue row inside one transaction, so
+    // the two can only differ if something inferred one of them. Broken here by
+    // giving the answer a direction its row does not have.
+    breakIt: (db) async {
+      await db.customStatement(
+        'INSERT INTO study_queue_items (session_id, mode, round, card_id, '
+        'position, status) '
+        "VALUES ('session-1', 'self_assess', 1, 'card-1', 0, 'completed')",
+      );
+      await db.customStatement(
+        "UPDATE study_answers SET direction = 'korean_to_meaning' "
+        "WHERE id = 'history-1'",
+      );
+    },
+    expectOffenders: <String>['history-1'],
+  );
 
   test('one defect trips only the invariants that genuinely cover it', () async {
     // Guards the pairs above from passing for the wrong reason: if every
@@ -362,7 +375,7 @@ void main() {
     await insertCard(db, id: 'bad-card', deckId: 'root');
 
     for (final id in invariantQueries.keys) {
-      final rows = await check(db, id);
+      final rows = await checkInvariant(db, id);
 
       expect(
         rows.isNotEmpty,

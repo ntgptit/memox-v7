@@ -98,6 +98,22 @@ void main() {
       );
     });
 
+    test('holdsCards outranks alreadyParent — the restore path treats the '
+        'latter as a green light (BR-64)', () {
+      expect(
+        rejectionFor(
+          source: deck(id: 's', parentDeckId: 't', rootDeckId: 'r1'),
+          target: deck(
+            id: 't',
+            parentDeckId: 'r1',
+            rootDeckId: 'r1',
+            contentType: DeckContentType.card,
+          ),
+        ),
+        DeckMoveRejection.holdsCards,
+      );
+    });
+
     test('a target holding cards cannot hold decks (BR-64)', () {
       expect(
         rejectionFor(

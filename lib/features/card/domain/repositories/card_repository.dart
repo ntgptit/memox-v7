@@ -8,6 +8,7 @@ import '../models/card_move_target_model.dart';
 import '../models/card_state_distribution_model.dart';
 import '../models/card_text_model.dart';
 import '../models/deck_context_model.dart';
+import '../models/tag_filter_model.dart';
 import '../models/tag_name_model.dart';
 
 /// Contract for card management inside a deck (UC-04, UC-08).
@@ -51,6 +52,12 @@ abstract interface class CardRepository {
   /// window contract hold across all four (C1, C2). [now] is only read by
   /// [CardListFilter.due]; the caller passes the composition-root clock so no
   /// widget touches the wall clock.
+  ///
+  /// [tags] narrows further, by OR **within** the selected tags and AND with
+  /// everything above (BR-231). [TagFilter.none] applies no tag predicate at
+  /// all, so this read is unchanged for every caller that does not filter by
+  /// tag. A card carrying three of the selected tags still occupies exactly one
+  /// row of the window — the predicate is an existence test, not a join.
   Stream<List<CardListItemModel>> watchCardListItems(
     String deckId, {
     required int limit,
@@ -58,15 +65,21 @@ abstract interface class CardRepository {
     CardListSort sort = CardListSort.newest,
     String? searchTerm,
     DateTime? now,
+    TagFilter tags = TagFilter.none,
   });
 
   /// How many cards a [filter] would show — the "showing N of M" denominator and
   /// the pill counts (D3). Its own statement per filter, like the reads.
+  ///
+  /// Takes [tags] for the same reason it takes [searchTerm]: the count and the
+  /// list must be the same predicate, or the header says "Showing 12 of 3"
+  /// (BR-231).
   Stream<int> watchFilteredCardCount(
     String deckId, {
     CardListFilter filter = CardListFilter.all,
     String? searchTerm,
     DateTime? now,
+    TagFilter tags = TagFilter.none,
   });
 
   /// The deck's four-state distribution, for the progress panel (D5, BR-88…91).
@@ -144,10 +157,15 @@ abstract interface class CardRepository {
     CardDetailText? pronunciation,
   });
 
-  /// Deletes a card; its study state and history cascade. Deleting the last
-  /// card returns the deck to `unset` in the same write — BR-163 makes the type
-  /// system state, not a setting.
+  /// Moves a card to Trash (BR-256). Its study state, history and tags stay
+  /// with it until the batch is purged (BR-259). Removing the deck's last
+  /// active card returns it to `unset` in the same write — BR-260 makes the
+  /// type system state, not a setting.
   Future<void> deleteCard(String cardId);
+
+  /// The same deletion, returning the one batch id so the caller can offer Undo
+  /// (BR-256, BR-263).
+  Future<String> deleteCardForUndo(String cardId);
 
   /// Moves [cardIds] into [targetDeckId] — one transaction, all or nothing
   /// (BR-165, BR-166).
@@ -168,9 +186,16 @@ abstract interface class CardRepository {
     required String targetDeckId,
   });
 
-  /// Deletes [cardIds] with their study state and history — one transaction
-  /// (BR-166). A deck left empty goes back to `unset` (BR-163).
+  /// Moves [cardIds] to Trash in one atomic write — BR-166, BR-256. A deck left
+  /// with no active cards goes back to `unset` (BR-260).
   Future<void> deleteCards(List<String> cardIds);
+
+  /// The same deletion, returning **one batch per card**, in the order given
+  /// (BR-256).
+  ///
+  /// One batch each rather than one for the selection: the item root is
+  /// singular, and a user who deletes fifty cards may want three of them back.
+  Future<List<String>> deleteCardsForUndo(List<String> cardIds);
 
   /// Sets the flag on [cardIds] to [isFlagged] (BR-92, BR-166).
   ///
@@ -214,6 +239,7 @@ abstract interface class CardRepository {
     CardListFilter filter = CardListFilter.all,
     String? searchTerm,
     DateTime? now,
+    TagFilter tags = TagFilter.none,
   });
 
   /// Sets the user's flag on a card (BR-92).

@@ -13,8 +13,10 @@ import 'package:memox/app/router/app_router.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/features/deck/domain/repositories/deck_repository.dart';
 import 'package:memox/l10n/generated/app_localizations.dart';
+import 'package:memox/features/settings/di/app_settings_repository_provider.dart';
 
 import '../../../../database/support/test_database.dart';
+import '../../../../features/settings/domain/support/fake_app_settings_repository.dart';
 
 /// Pumps a deck screen with a repository under it, at a chosen size and scale.
 ///
@@ -58,6 +60,9 @@ Future<GoRouter> pumpDeckApp(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
+        appSettingsRepositoryProvider.overrideWithValue(
+          FakeAppSettingsRepository(),
+        ),
         envConfigProvider.overrideWithValue(EnvConfig.development),
         deckRepositoryProvider.overrideWithValue(repository),
         clockProvider.overrideWithValue(() => deckTestNow),
@@ -99,6 +104,9 @@ Future<void> pumpDeckScreen(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
+        appSettingsRepositoryProvider.overrideWithValue(
+          FakeAppSettingsRepository(),
+        ),
         envConfigProvider.overrideWithValue(EnvConfig.development),
         deckRepositoryProvider.overrideWithValue(repository),
         clockProvider.overrideWithValue(() => deckTestNow),

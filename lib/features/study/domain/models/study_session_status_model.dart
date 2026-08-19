@@ -28,7 +28,8 @@ enum StudySessionStatus {
           reason == StudySessionEndReason.interrupted,
     invalidated =>
       reason == StudySessionEndReason.schedulerReset ||
-          reason == StudySessionEndReason.staleGeneration,
+          reason == StudySessionEndReason.staleGeneration ||
+          reason == StudySessionEndReason.contentDeleted,
     failed => reason == StudySessionEndReason.persistenceError,
   };
 
@@ -63,7 +64,16 @@ enum StudySessionEndReason {
   staleGeneration('stale_generation'),
 
   /// A write failed in a way the session could not continue past (BR-85).
-  persistenceError('persistence_error');
+  persistenceError('persistence_error'),
+
+  /// The deck or card the session was running on went to Trash (BR-259).
+  ///
+  /// **Separate from [schedulerReset], and for the reason BR-76 gives about
+  /// `kind`:** both end a session because the ground moved, but one is a
+  /// scheduler being rewritten and the other is the material disappearing. A
+  /// history that merges them cannot be un-merged later, and only one of them
+  /// is undone by pressing Undo.
+  contentDeleted('content_deleted');
 
   const StudySessionEndReason(this.dbValue);
 

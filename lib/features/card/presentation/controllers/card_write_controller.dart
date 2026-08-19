@@ -71,17 +71,27 @@ class CardDelete extends _$CardDelete {
   @override
   CardSubmitState build(String cardId) => const CardSubmitState();
 
-  Future<void> submit() async {
-    if (!state.canSubmit) return;
+  /// Deletes, and **returns the batch id** so the caller can offer Undo
+  /// (BR-256, BR-263).
+  ///
+  /// The id is a return value rather than a field on the state: it is useful
+  /// for one frame, and a stale one names a batch that has since been restored
+  /// or purged.
+  Future<String?> submit() async {
+    if (!state.canSubmit) return null;
 
     state = const CardSubmitState(isSubmitting: true);
     try {
-      await ref.read(deleteCardUseCaseProvider)(cardId);
-      if (!ref.mounted) return;
+      final batchId = await ref.read(deleteCardForUndoUseCaseProvider)(cardId);
+      if (!ref.mounted) return batchId;
       state = const CardSubmitState(outcome: SubmitOutcome.savedAndClose);
+
+      return batchId;
     } on Failure catch (failure) {
-      if (!ref.mounted) return;
+      if (!ref.mounted) return null;
       state = CardSubmitState(failure: failure);
+
+      return null;
     }
   }
 

@@ -23,9 +23,9 @@ import '../widgets/sections/deck_level_error_widget.dart';
 import '../widgets/sections/deck_list_sliver_widget.dart';
 import '../widgets/sections/deck_summary_section_widget.dart';
 import '../widgets/sections/deck_list_toolbar_widget.dart';
-import '../widgets/sections/deck_level_body_widget.dart';
 import '../widgets/sections/deck_subheader_widget.dart';
 import '../widgets/sections/deck_card_handoff_widget.dart';
+import '../widgets/support/deck_undo_widget.dart';
 
 /// The toolbar's two commands, bound to a `ref`.
 ///
@@ -108,7 +108,7 @@ class DeckListScreen extends StatelessWidget {
 }
 
 /// A level that loaded: its chrome, and whatever the current view of it shows.
-class _DeckLevel extends StatelessWidget {
+class _DeckLevel extends ConsumerWidget {
   const _DeckLevel({
     required this.snapshot,
     required this.filter,
@@ -124,13 +124,29 @@ class _DeckLevel extends StatelessWidget {
   final ValueChanged<DeckListSort> onSortChanged;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final parent = snapshot.parent;
 
     return MxContentShell(
       // The level names itself: the app at the root, the deck below it.
       title: parent?.name ?? context.l10n.decksTitle,
       actions: <Widget>[
+        // The tag catalog (UC-18, M4.14 T2). **Only at the root level**, which
+        // is the Library: a tag belongs to no deck (BR-93), so offering it
+        // inside one would suggest a scope that does not exist — and the deck
+        // level's bar already carries create plus the deck's own overflow.
+        //
+        // Always visible, even with no decks and no tags: a catalog that is
+        // empty is an answer, and hiding the door would leave a user who
+        // wondered "which tags do I have?" with nowhere to look. By route name,
+        // so the deck feature never imports the card feature's screen (AD-13).
+        if (parent == null)
+          MxIconButton(
+            icon: Icons.sell_outlined,
+            semanticLabel: context.l10n.tagCatalogEntryAction,
+            tooltip: context.l10n.tagCatalogEntryAction,
+            onPressed: () => context.goNamed(RouteNames.tagCatalog),
+          ),
         // **Create is an app-bar action, not a floating one.** A button hovering
         // over the bottom-right of a scrolling list covers whatever row is
         // there, and on a deck card that is its overflow menu — an inset only
@@ -151,6 +167,17 @@ class _DeckLevel extends StatelessWidget {
             tooltip: _createLabel(context, parent),
             onPressed: () => _startCreate(context, parent),
           ),
+        // **Trash lives on the root level's bar and nowhere else** (AD-22,
+        // wireframe T1/T2). It is always here, with no badge: a user needs to
+        // know a recovery surface exists *before* they delete something, and a
+        // count would turn an ordinary place into one that looks like a task.
+        if (parent == null)
+          MxIconButton(
+            icon: Icons.delete_outline,
+            semanticLabel: context.l10n.trashEntryLabel,
+            tooltip: context.l10n.trashEntryLabel,
+            onPressed: () => context.goNamed(RouteNames.trash),
+          ),
         // Only when there is a deck to act on: the root level is not a deck,
         // and the rows have their own menus.
         if (parent != null)
@@ -165,7 +192,10 @@ class _DeckLevel extends StatelessWidget {
               // level** — not to the root — is where the deck was, and its
               // siblings are what the user was browsing. Landing at the root
               // reads as though more than the one deck had gone.
-              onDeleted: () => leaveDeletedDeck(context, parent),
+              onDeleted: (batchId) {
+                leaveDeletedDeck(context, parent);
+                showDeckMovedToTrash(context, ref, batchId: batchId);
+              },
             ),
           ),
       ],
@@ -183,10 +213,7 @@ class _DeckLevel extends StatelessWidget {
       // Above every body state, including the empty ones — "where am I" is most
       // worth answering on a level with nothing in it to recognise.
       subheader: DeckSubheaderWidget(snapshot: snapshot),
-      body: DeckLevelBodyWidget(
-        snapshot: snapshot,
-        buildLevel: () => _body(context, parent),
-      ),
+      body: _body(context, parent),
     );
   }
 

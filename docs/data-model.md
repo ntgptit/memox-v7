@@ -7,11 +7,11 @@
 | **Scope** | Bảng, cột, index, quan hệ, query bất biến. Ngoài phạm vi: SQL runtime (`lib/core/database/`, chưa tồn tại) |
 | **Source of truth for** | Schema · cột và kiểu · index · query bất biến · thứ tự migration |
 | **Depends on** | `document-conventions.md`, `architecture.md`, `business-rules.md` |
-| **Updated by task** | Bất biến 30 (khoá scheduler theo BR-13) và ai ghi `first_answered_at` — kể cả backfill v7; ma trận `end_reason` nhận thêm BR-164 |
-| **Last updated** | 2026-08-12 |
+| **Updated by task** | M99.33 — Trash: bảng `delete_batches`, cột `delete_batch_id` trên `decks`/`cards`, `end_reason = content_deleted`, bất biến 33…37, và bất biến 1…5/15/29 đo trên hàng đang active · M99.28 — `app_settings.theme_mode` và `app_settings.language` (BR-214, BR-215), migration v9, và bảng thứ tự migration bổ sung v6/v7 vốn bị bỏ sót · M99.29 — ba cột nhắc học trên `app_settings`, migration v10 (nhánh nguồn chia làm hai bước v8 và v9; cả hai số đó đã thuộc feature khác) |
+| **Last updated** | 2026-08-13 |
 
 Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm ở
-`lib/core/database/tables/`, hiện ở **schema v4**.
+`lib/core/database/tables/`, hiện ở **schema v10**.
 
 **`review` vẫn còn nghĩa thứ hai trong repo, và nó không đổi.** Ở `docs/reviews/`,
 "vòng review UI/UX", "code review" — đó là *rà soát*, không phải *ôn tập*. Đợt đổi
@@ -34,6 +34,9 @@ tra ngược được từ cột về luật nếu không có bảng này. Ngư�
 | `study_queue_items.available_at` | BR-26 |
 | `study_queue_items.answers_in_session` | BR-77 (lượt đầu), BR-104 (trần 3) |
 | `study_queue_items.remaining_ms` · `is_revealed` | BR-133 |
+| `study_sessions.direction` | BR-203 (điều kiện), BR-205 (`mixed`), BR-207 (khoá) |
+| `study_queue_items.direction` | BR-205 — gán một lần, sống qua comeback và restart |
+| `study_answers.direction` | BR-206 — chép từ dòng hàng đợi, không suy luận |
 | `study_answers.mode` | BR-98 |
 | `study_answers.outcome_reason` | BR-131 |
 | `study_answers.comparison_version` | BR-135 |
@@ -111,6 +114,7 @@ deck_templates (asset JSON ở MVP)
 | `first_answered_at` | DATETIME NULL | NULL = chưa thẻ nào hoàn tất chuỗi học mới ở generation hiện tại → scheduler mở khoá (BR-12). Được đặt bởi chính lần hoàn tất đầu tiên, cùng transaction (BR-13, BR-144); chỉ Reset đưa về NULL (BR-44). Cột có từ v1 nhưng không bản nào ghi nó cho tới khi BR-13 có code, nên migration v7 điền lại bằng `MIN(learned_at)` của cây cho root đã học xong ít nhất một thẻ |
 | `source_template_id` | TEXT NULL | NULL = deck tự tạo (BR-34) |
 | `source_template_version` | INTEGER NULL | version tại thời điểm sao chép |
+| `delete_batch_id` | TEXT NULL | NULL = deck đang active. Khác NULL = tombstone thuộc batch đó (BR-256, BR-258). → `delete_batches(id)` ON DELETE CASCADE |
 | `created_at` | DATETIME NOT NULL | UTC |
 | `updated_at` | DATETIME NOT NULL | UTC |
 
@@ -200,6 +204,7 @@ trả lời được mọi lookup cũ, giữ cả hai chỉ khiến mỗi insert
 | `example` | TEXT NULL | Tuỳ chọn (BR-95) |
 | `hint` | TEXT NULL | Tuỳ chọn (BR-95) |
 | `pronunciation` | TEXT NULL | Tuỳ chọn (BR-95) |
+| `delete_batch_id` | TEXT NULL | NULL = card đang active. Khác NULL = tombstone thuộc batch đó (BR-256, BR-258). → `delete_batches(id)` ON DELETE CASCADE |
 | `created_at` | DATETIME NOT NULL | UTC |
 | `updated_at` | DATETIME NOT NULL | UTC |
 
@@ -324,6 +329,7 @@ xoá (cascade).
 | `outcome_reason` | TEXT NULL | `timeout` khi hết giờ ở `recall` (BR-131); NULL khi người dùng tự trả lời |
 | `comparison_version` | INTEGER NULL | chỉ `fill`: phiên bản chính sách so khớp đã dùng (BR-135) |
 | `used_hint` | INTEGER NULL | chỉ `fill`: 0 \| 1. Ghi nhận, không đổi `action` (BR-136) |
+| `direction` | TEXT NULL | `korean_to_meaning` \| `meaning_to_korean` (BR-206). NULL ở mọi lượt ngoài BR-203. **Không bao giờ `mixed`** — phiên trộn, lượt thì không (BR-205) |
 | `action` | TEXT NOT NULL | `forgotten`/`remembered` hoặc `again`/`hard`/`good`/`easy` |
 | `answered_at` | DATETIME NOT NULL | UTC |
 | `next_due_at` | DATETIME NULL | hạn sau khi đánh giá |
@@ -359,9 +365,10 @@ bảng đầu tiên cần nhìn khi bàn về kích thước DB.
 | `session_kind` | TEXT NOT NULL | `learning` \| `reviewing` (BR-142) |
 | `current_mode` | TEXT NOT NULL | stage đang chạy: `browse` \| `self_assess` \| `match` \| `guess` \| `recall` \| `fill` (BR-108, BR-98). Phiên `reviewing` chỉ có một giá trị suốt phiên |
 | `status` | TEXT NOT NULL | `in_progress` \| `completed` \| `abandoned` \| `invalidated` \| `failed` (BR-79) |
-| `end_reason` | TEXT NULL | `user_exit` \| `scheduler_reset` \| `stale_generation` \| `persistence_error` \| `interrupted` (BR-80). NULL khi `in_progress` hoặc `completed` |
+| `end_reason` | TEXT NULL | `user_exit` \| `scheduler_reset` \| `stale_generation` \| `persistence_error` \| `interrupted` \| `content_deleted` (BR-80, BR-259). NULL khi `in_progress` hoặc `completed` |
 | `cursor` | INTEGER NOT NULL DEFAULT 0 | số lượt đã phục vụ trong phiên; nền của BR-26 |
 | `card_limit` | INTEGER NOT NULL | số thẻ tối đa của phiên, chốt lúc mở (BR-24, BR-139). Mặc định 20 |
+| `direction` | TEXT NULL | `korean_to_meaning` \| `meaning_to_korean` \| `mixed` (BR-203, BR-205). Chốt lúc mở và khoá suốt phiên (BR-207). NULL ở mọi phiên ngoài BR-203 |
 | `started_at` | DATETIME NOT NULL | UTC |
 | `ended_at` | DATETIME NULL | NULL khi `in_progress` |
 
@@ -375,6 +382,7 @@ Ma trận `status` × `end_reason` hợp lệ:
 | `abandoned` | `interrupted` | phiên của ngày học trước còn `in_progress` khi mở app (BR-103) |
 | `invalidated` | `scheduler_reset` | scheduler của root bị ghi lại dưới chân phiên: reset khi phiên đang mở (BR-83), hoặc đổi scheduler khi chưa khoá (BR-164) |
 | `invalidated` | `stale_generation` | phiên generation cũ cố ghi lượt học (BR-84) |
+| `invalidated` | `content_deleted` | deck hoặc card mà phiên đang chạy trên đó bị chuyển vào Trash (BR-259) |
 | `failed` | `persistence_error` | lỗi không thể tiếp tục (BR-85) |
 
 Mọi tổ hợp khác là dữ liệu sai.
@@ -419,6 +427,7 @@ Hàng đợi của một phiên (BR-102). Một dòng cho mỗi thẻ được n
 | `answers_in_session` | INTEGER NOT NULL DEFAULT 0 | số lượt đã đánh giá; `0` ⇒ lượt tới là `scheduled` (BR-77) |
 | `remaining_ms` | INTEGER NULL | chỉ `recall`: thời gian còn lại của lượt đang dở (BR-133). NULL ở mọi stage khác |
 | `is_revealed` | INTEGER NOT NULL DEFAULT 0 | chỉ `recall`: đáp án đã lật chưa, để Resume không che lại (BR-133) |
+| `direction` | TEXT NULL | `korean_to_meaning` \| `meaning_to_korean` — chiều thật của **thẻ này**, gán một lần lúc dựng round (BR-205). NULL ở mọi stage ngoài `self_assess` của một phiên đủ điều kiện (BR-203) |
 
 PK là `(session_id, mode, round, card_id)` — một thẻ xuất hiện đúng một lần **trong
 mỗi round của mỗi stage**, và mọi round có thứ tự độc lập (BR-113, BR-117).
@@ -459,23 +468,67 @@ nào, bỏ dở bao nhiêu" — thứ hiện không tồn tại ở bất kỳ �
 
 ## `app_settings`
 
-Một dòng, cho local profile. Mặc định toàn app của tùy chọn học (BR-147).
+Một dòng, cho local profile. Mặc định toàn app của tùy chọn học (BR-147) và hai
+tuỳ chọn trình bày (BR-214, BR-215).
 
 | Cột | Kiểu | Ghi chú |
 |---|---|---|
-| `id` | INTEGER PK | luôn `1`; `CHECK (id = 1)` giữ bảng ở đúng một dòng |
+| `id` | INTEGER PK | luôn `1`; `CHECK (id = 1)` giữ bảng ở đúng một dòng (BR-210) |
 | `card_limit` | INTEGER NOT NULL DEFAULT 20 | trần thẻ **mỗi phiên**, không phải mỗi ngày (BR-24) |
 | `new_card_order` | TEXT NOT NULL DEFAULT 'created' | `created` \| `random` (BR-148) |
+| `theme_mode` | TEXT NOT NULL DEFAULT 'system' | `system` \| `light` \| `dark` (BR-214). Thêm ở v9 |
+| `language` | TEXT NOT NULL DEFAULT 'system' | `system` \| `en` \| `vi` (BR-215). Thêm ở v9 |
+| `reminder_enabled` | INTEGER NOT NULL DEFAULT 0 | `0` \| `1`; mặc định tắt (BR-218). `CHECK (reminder_enabled IN (0, 1))` |
+| `reminder_minute_of_day` | INTEGER NOT NULL DEFAULT 1200 | phút trong ngày **theo giờ địa phương**, `1200` = 20:00 (BR-219). `CHECK (reminder_minute_of_day BETWEEN 0 AND 1439)` |
+| `reminder_last_delivered_at` | DATETIME NULL | lúc notification tóm tắt gần nhất được hiện; NULL nghĩa là chưa lần nào (BR-221). UTC |
 | `updated_at` | DATETIME NOT NULL | UTC |
+
+**`reminder_last_delivered_at` là bookkeeping của hệ thống, không phải lựa chọn
+của người dùng, và nó nằm cùng bảng vì lần hoà giải lịch cần đọc nó **cùng lúc**
+với giờ và cờ bật — hỏi riêng là hai snapshot của một dòng (AD-13). Nó được ghi
+bằng một `UPDATE` riêng chạm đúng một cột, vì người ghi nó là background isolate
+còn người ghi hai cột kia là người dùng đang mở app; gộp lại thì một lượt chạy
+nền có thể ghi đè lựa chọn vừa đổi.
+
+**Ba cột nhắc học là cột thật, không phải JSON trong `study_config`.** Chúng
+không phải tuỳ chọn học của một deck — không có ghi đè theo root, và không deck
+nào mang giá trị riêng — nên chúng thuộc đúng bảng một-dòng này. Đọc chúng ra
+kiểu đúng lúc build là điều một ô JSON không cho.
+
+**`reminder_minute_of_day` là giờ địa phương, và cố ý không quy đổi UTC.** Mọi
+cột `DATETIME` khác ở đây lưu UTC vì chúng là *thời điểm*; đây là một *giờ trong
+ngày*, và quy đổi nó sang UTC lúc lưu làm giờ nhắc trôi đúng bằng lượng offset
+đổi khi người dùng đi qua múi giờ khác — người dùng đặt 20:00 và nhận lúc 23:00
+mà không có gì nói cho họ biết tại sao (BR-219).
+
+Hai cột này chỉ có `CHECK`, không có bất biến trong mục `## Bất biến`. Lý do
+giống điều bất biến 12 nói ngược lại: một `CHECK` đã khiến giá trị ngoài miền
+không ghi được, nên một bất biến phủ chính miền đó là một test không dựng nổi
+vi phạm của chính nó.
 
 **Một bảng một dòng thay vì key-value.** Key-value đọc linh hoạt hơn nhưng mọi
 giá trị thành `TEXT` và mọi lần đọc thành một phép ép kiểu không ai kiểm; một
 dòng có cột thật thì `drift_dev` type-check ngay lúc build, và thêm một tùy chọn
-là một migration — đúng mức nghiêm túc cần có cho thứ đổi hành vi học.
+là một migration — đúng mức nghiêm túc cần có cho thứ đổi hành vi học. BR-210
+nâng điều đó lên thành rule, nên `SharedPreferences` cho theme và ngôn ngữ là
+lựa chọn đã bị loại: nó tách một nửa tuỳ chọn của app sang một store thứ hai,
+không có transaction chung với nửa còn lại và không watch được cùng một stream.
+
+**`theme_mode` và `language` giữ lựa chọn, không giữ kết quả đã giải.** `'system'`
+là một lựa chọn thật, khác hẳn với việc lưu `'light'` vì hôm nay platform đang
+sáng: giá trị đã giải hết đúng ngay khi người dùng đổi cài đặt hệ điều hành, và
+không có cách nào phân biệt được nó với một lựa chọn tường minh (AD-11).
+
+**`language` chứ không phải `locale`.** Cột giữ đúng ba giá trị của BR-215, không
+phải một BCP-47 tag đầy đủ — chưa có variant, script hay region nào trong
+`supportedLocales`, và một cột hứa hẹn nhiều hơn thứ nó nhận là một cột sẽ được
+ai đó ghi `vi-VN` vào.
 
 **Ghi đè nằm ở `decks.study_config`, không ở đây.** Deck root MAY mang JSON ghi
 đè; deck con MUST NOT (BR-147), cùng quy tắc cột scheduler đã theo từ BR-06. Giá
-trị hiệu lực = giá trị của root nếu có, ngược lại giá trị bảng này.
+trị hiệu lực = giá trị của root nếu có, ngược lại giá trị bảng này. Đổi bảng này
+MUST NOT ghi `study_config`, và xoá `study_config` MUST NOT ghi bảng này
+(BR-212).
 
 ## `deck_templates`
 
@@ -506,6 +559,36 @@ listing, hay tài liệu.
 
 ---
 
+## `delete_batches`
+
+Một hàng cho mỗi **lần xoá** của người dùng (BR-256). Hàng của `decks`/`cards`
+không bị chép đi đâu cả — chúng chỉ nhận `delete_batch_id`.
+
+| Cột | Kiểu | Ghi chú |
+|---|---|---|
+| `id` | TEXT PK | UUID sinh phía client (AD-03) |
+| `item_type` | TEXT NOT NULL | `'card'` \| `'deck'` — loại của **item root**, tức thứ người dùng đã chạm (BR-266) |
+| `root_item_id` | TEXT NOT NULL | id của card hoặc deck đó. Không phải FK: hai bảng đích, và cascade đã đi theo chiều ngược lại |
+| `deleted_at` | DATETIME NOT NULL | UTC. Mốc duy nhất của retention 30 ngày (BR-264) |
+| `owner_id` | TEXT NULL | NULL = local profile (AD-03) |
+
+```sql
+CREATE INDEX idx_delete_batches_deleted ON delete_batches (deleted_at, id);
+CREATE INDEX idx_decks_delete_batch ON decks (delete_batch_id);
+CREATE INDEX idx_cards_delete_batch ON cards (delete_batch_id);
+```
+
+**`deleted_at` sống ở đây và chỉ ở đây.** Đặt nó lên hàng nữa là hai nguồn sự
+thật cho một sự kiện, và không gì bắt chúng bằng nhau; `delete_batch_id IS NULL`
+đã trả lời trọn vẹn câu hỏi mà mọi query active cần hỏi.
+
+**Purge là `DELETE FROM delete_batches`,** và FK `ON DELETE CASCADE` từ
+`decks.delete_batch_id`/`cards.delete_batch_id` xoá hàng của batch; cascade sẵn
+có của `cards.deck_id`, `card_study_states`, `study_answers`, `study_queue_items`
+và `card_tags` lo phần còn lại (BR-265). Điều kiện tiên quyết của BR-265 —
+không descendant nào thuộc batch chưa eligible — phải được kiểm **trước** khi
+xoá, vì cascade theo `parent_deck_id` không biết batch là gì.
+
 ## Bất biến — phải kiểm tra được bằng query
 
 Mỗi query dưới đây **phải luôn trả về 0 dòng**. Chúng là đặc tả cho phần kiểm tra
@@ -513,42 +596,54 @@ dữ liệu ở Phase 11, và là nguồn của các trường hợp trong valid
 
 ### Cây deck
 
+**Từ v8, sáu câu đầu và câu 15 đo `delete_batch_id IS NULL`.** Chúng nói về cây
+người dùng đang nhìn thấy, và một tombstone không phải nội dung: không lọc thì
+invariant 2 báo vi phạm cho mọi deck vừa được dọn rỗng đúng BR-260, và invariant
+29 im lặng cho đúng những deck lẽ ra phải `unset`.
+
 ```sql
 -- 1. Root deck có card trực tiếp (BR-58)
 SELECT c.id FROM cards c
 JOIN decks d ON d.id = c.deck_id
-WHERE d.parent_deck_id IS NULL;
+WHERE d.parent_deck_id IS NULL AND c.delete_batch_id IS NULL;
 
 -- 2. content_type = 'unset' nhưng đã có nội dung (BR-60, BR-62)
 SELECT d.id FROM decks d
-WHERE d.content_type = 'unset'
-  AND (EXISTS (SELECT 1 FROM cards c WHERE c.deck_id = d.id)
-    OR EXISTS (SELECT 1 FROM decks s WHERE s.parent_deck_id = d.id));
+WHERE d.content_type = 'unset' AND d.delete_batch_id IS NULL
+  AND (EXISTS (SELECT 1 FROM cards c
+               WHERE c.deck_id = d.id AND c.delete_batch_id IS NULL)
+    OR EXISTS (SELECT 1 FROM decks s
+               WHERE s.parent_deck_id = d.id AND s.delete_batch_id IS NULL));
 
--- 29. Sub-deck đã rỗng nhưng vẫn mang type (BR-163)
+-- 29. Sub-deck đã rỗng nhưng vẫn mang type (BR-163, BR-260)
 --     Chiều ngược của invariant 2: 2 bắt `unset` còn nội dung, 29 bắt type còn
 --     lại sau khi nội dung đã đi hết. Root không tham gia — root luôn `deck`
 --     (BR-58), và một root rỗng là trạng thái bình thường.
 SELECT d.id
 FROM decks d
 WHERE d.parent_deck_id IS NOT NULL
+  AND d.delete_batch_id IS NULL
   AND d.content_type IN ('card', 'deck')
   AND NOT EXISTS (
-    SELECT 1 FROM cards c WHERE c.deck_id = d.id
+    SELECT 1 FROM cards c
+    WHERE c.deck_id = d.id AND c.delete_batch_id IS NULL
   )
   AND NOT EXISTS (
-    SELECT 1 FROM decks child WHERE child.parent_deck_id = d.id
+    SELECT 1 FROM decks child
+    WHERE child.parent_deck_id = d.id AND child.delete_batch_id IS NULL
   );
 
 -- 3. content_type = 'card' nhưng có deck con (BR-63)
 SELECT d.id FROM decks d
-WHERE d.content_type = 'card'
-  AND EXISTS (SELECT 1 FROM decks s WHERE s.parent_deck_id = d.id);
+WHERE d.content_type = 'card' AND d.delete_batch_id IS NULL
+  AND EXISTS (SELECT 1 FROM decks s
+              WHERE s.parent_deck_id = d.id AND s.delete_batch_id IS NULL);
 
 -- 4. content_type = 'deck' nhưng có card trực tiếp (BR-64)
 SELECT d.id FROM decks d
-WHERE d.content_type = 'deck'
-  AND EXISTS (SELECT 1 FROM cards c WHERE c.deck_id = d.id);
+WHERE d.content_type = 'deck' AND d.delete_batch_id IS NULL
+  AND EXISTS (SELECT 1 FROM cards c
+              WHERE c.deck_id = d.id AND c.delete_batch_id IS NULL);
 
 -- 5. Root deck không mang content_type = 'deck'
 SELECT d.id FROM decks d
@@ -576,25 +671,19 @@ WITH RECURSIVE up(start_id, node_id, depth) AS (
 SELECT DISTINCT start_id FROM up WHERE node_id = start_id;
 
 -- 15. Deck sâu hơn 10 cấp (BR-55)
---     Đi xuống từ mỗi root, root là cấp 1.
+--     Đi xuống từ mỗi root, root là cấp 1. Chỉ hàng đang active: một subtree
+--     đã nằm trong Trash không được tính vào giới hạn của cây đang sống, và
+--     restore mới là nơi độ sâu của nó được thẩm định lại (BR-261).
 WITH RECURSIVE levels(id, depth) AS (
-  SELECT id, 1 FROM decks WHERE parent_deck_id IS NULL
+  SELECT id, 1 FROM decks
+  WHERE parent_deck_id IS NULL AND delete_batch_id IS NULL
   UNION ALL
   SELECT d.id, l.depth + 1
   FROM decks d JOIN levels l ON d.parent_deck_id = l.id
-  WHERE l.depth < 64
+  WHERE l.depth < 64 AND d.delete_batch_id IS NULL
 )
 SELECT id FROM levels WHERE depth > 10;
-```
 
-Query 8 và 15 giới hạn `depth < 64` để bản thân chúng không thành vòng lặp vô
-hạn khi dữ liệu đã hỏng — một checker treo là checker vô dụng. Cap đó là của
-diagnostic checker; query production không dùng cap để cắt subtree (xem "Duyệt
-cây" ở trên).
-
-### Scheduler và generation
-
-```sql
 -- 9. Card study state không cùng scheduler hoặc generation với root (BR-48, BR-49)
 SELECT s.card_id FROM card_study_states s
 JOIN cards c ON c.id = s.card_id
@@ -645,7 +734,8 @@ WHERE NOT (
      (status = 'in_progress' AND end_reason IS NULL)
   OR (status = 'completed'   AND end_reason IS NULL)
   OR (status = 'abandoned'   AND end_reason IN ('user_exit','interrupted'))
-  OR (status = 'invalidated' AND end_reason IN ('scheduler_reset','stale_generation'))
+  OR (status = 'invalidated'
+      AND end_reason IN ('scheduler_reset','stale_generation','content_deleted'))
   OR (status = 'failed'      AND end_reason = 'persistence_error')
 );
 
@@ -711,6 +801,93 @@ WHERE (mode <> 'recall' AND (remaining_ms IS NOT NULL OR is_revealed <> 0))
 SELECT id FROM study_answers
 WHERE outcome_reason IS NOT NULL
   AND (outcome_reason <> 'timeout' OR mode <> 'recall');
+
+-- 31. Chiều hỏi nằm ngoài chỗ nó được phép (BR-203, BR-205)
+--     Bốn cách sai: một phiên mang chiều mà không phải `reviewing`/`self_assess`;
+--     một dòng hàng đợi mang chiều ở stage khác `self_assess`; một dòng mang
+--     chiều mà phiên của nó không mang; và một phiên có chiều mà dòng
+--     `self_assess` của nó lại trống — `mixed` gán cho **mọi** thẻ.
+--
+--     **Không có mệnh đề `sm2`, và đó là chủ ý.** `study_sessions` không mang
+--     `scheduler_type`; đọc thuật toán *hiện tại* của cây thì sai với đúng cây
+--     đã Reset sang thuật toán khác — nó vẫn từng chạy `sm2`, và BR-21 đặt cột
+--     ấy lên `study_answers` chính vì lý do này. Điều kiện `sm2` vì thế thuộc
+--     write path (BR-208), không thuộc một câu SQL đọc sau.
+SELECT s.id FROM study_sessions s
+WHERE (s.direction IS NOT NULL
+       AND (s.session_kind <> 'reviewing' OR s.current_mode <> 'self_assess'))
+   OR EXISTS (SELECT 1 FROM study_queue_items q
+              WHERE q.session_id = s.id
+                AND ((q.direction IS NOT NULL AND q.mode <> 'self_assess')
+                  OR (q.direction IS NOT NULL AND s.direction IS NULL)
+                  OR (s.direction IS NOT NULL AND q.mode = 'self_assess'
+                      AND q.direction IS NULL)));
+
+-- 32. Lượt lịch sử mang chiều mà dòng hàng đợi của nó không mang (BR-206)
+--     Chiều của lượt MUST là bản chép của dòng nó được trả lời trên. So với
+--     **tập** dòng của thẻ đó trong stage đó chứ không với một dòng: `study_answers`
+--     không mang `round`, nên "dòng nào" là câu hỏi bảng này không trả lời được —
+--     và một mode có nhiều round sẽ làm phép so một-một sai ngay khi nó eligible.
+SELECT a.id FROM study_answers a
+WHERE EXISTS (SELECT 1 FROM study_queue_items q
+              WHERE q.session_id = a.session_id AND q.card_id = a.card_id
+                AND q.mode = a.mode)
+  AND NOT EXISTS (SELECT 1 FROM study_queue_items q
+                  WHERE q.session_id = a.session_id AND q.card_id = a.card_id
+                    AND q.mode = a.mode AND q.direction IS a.direction);
+
+-- 33. Card đang active nằm trong một deck đã xoá (BR-256, BR-258)
+--     Xoá một deck đánh dấu mọi descendant đang active, và restore luôn gắn
+--     item vào một target đang active — nên không đường ghi nào tạo ra được
+--     hàng này. Đây là bất biến mà toàn bộ chiến lược loại trừ một cột đứng
+--     trên: nếu nó vỡ, "hàng còn sống ⇔ delete_batch_id IS NULL" không còn đúng
+--     và mọi query active bắt đầu nói dối.
+SELECT c.id FROM cards c
+JOIN decks d ON d.id = c.deck_id
+WHERE c.delete_batch_id IS NULL AND d.delete_batch_id IS NOT NULL;
+
+-- 34. Deck đang active nằm dưới một deck đã xoá (BR-256, BR-258)
+SELECT d.id FROM decks d
+JOIN decks p ON p.id = d.parent_deck_id
+WHERE d.delete_batch_id IS NULL AND p.delete_batch_id IS NOT NULL;
+
+-- 35. Batch không còn hàng nào (BR-265)
+--     Purge xoá batch và để cascade dọn hàng, nên chiều ngược lại — hàng biến
+--     mất mà batch còn — chỉ xảy ra khi một cascade theo parent_deck_id đã đi
+--     xuyên qua một batch mà điều kiện tiên quyết của BR-265 lẽ ra phải chặn.
+SELECT b.id FROM delete_batches b
+WHERE NOT EXISTS (SELECT 1 FROM decks d WHERE d.delete_batch_id = b.id)
+  AND NOT EXISTS (SELECT 1 FROM cards c WHERE c.delete_batch_id = b.id);
+
+-- 36. Tombstone bị xoá SAU tổ tiên đã xoá của nó (BR-258)
+--     Descendant luôn bị đánh dấu trước hoặc cùng lúc với tổ tiên, vì không
+--     thao tác nào chạm tới được thứ đã bị ẩn. Thứ tự đó là cái làm cho
+--     "batch eligible thì mọi descendant của nó cũng eligible" đúng, và BR-265
+--     dựa vào điều đó.
+SELECT d.id FROM decks d
+JOIN decks p ON p.id = d.parent_deck_id
+JOIN delete_batches db ON db.id = d.delete_batch_id
+JOIN delete_batches pb ON pb.id = p.delete_batch_id
+WHERE db.deleted_at > pb.deleted_at;
+
+-- 37. Batch không trỏ về một item root mang chính batch đó (BR-256)
+SELECT b.id FROM delete_batches b
+WHERE (b.item_type = 'deck' AND NOT EXISTS (
+         SELECT 1 FROM decks d
+         WHERE d.id = b.root_item_id AND d.delete_batch_id = b.id))
+   OR (b.item_type = 'card' AND NOT EXISTS (
+         SELECT 1 FROM cards c
+         WHERE c.id = b.root_item_id AND c.delete_batch_id = b.id));
+```
+
+Query 8 và 15 giới hạn `depth < 64` để bản thân chúng không thành vòng lặp vô
+hạn khi dữ liệu đã hỏng — một checker treo là checker vô dụng. Cap đó là của
+diagnostic checker; query production không dùng cap để cắt subtree (xem "Duyệt
+cây" ở trên).
+
+### Scheduler và generation
+
+```sql
 
 -- 19. Round nhảy số: stage có round N nhưng thiếu round N-1 (BR-115)
 SELECT q.session_id FROM study_queue_items q
@@ -795,6 +972,12 @@ và cờ — xem `docs/wireframes/m4-11-card-management.md`.
 | 3 | Cột `cards.front_folded`, `back_folded` + backfill bằng Dart — sửa search không khớp chữ hoa non-ASCII |
 | 4 | Đổi tên `card_review_states`→`card_study_states`, `review_history`→`study_answers` và sáu cột (M5.0l). Không thêm, không xoá, không đụng dòng nào |
 | 5 | Toàn bộ schema Study sau brainstorm: `learned_at`, `session_kind`, `current_mode`, `cursor`, `card_limit`, `mode`, `outcome_reason`, `comparison_version`, `used_hint`, `study_config`; bảng `study_queue_items`, `app_settings`; giá trị `learning` cho `kind` và `interrupted` cho `end_reason` (M5.0s) |
+| 6 | Chỉ dữ liệu, không DDL: đưa deck con rỗng còn mang `content_type` về `'unset'` (BR-163, invariant 29) (M99.15) |
+| 7 | Chỉ dữ liệu, không DDL: backfill `decks.first_answered_at` từ `MIN(learned_at)` của cây, để khoá scheduler của BR-13 có giá trị lưu trữ (invariant 30) (M99.16) |
+| 8 | Ba cột `direction` nullable trên `study_sessions`, `study_queue_items`, `study_answers` (BR-203…BR-206), cộng backfill `korean_to_meaning` cho đúng các dòng `self_assess` của phiên `reviewing` trên cây `sm2` — chiều mà mọi bản trước đã chạy (M99.27) |
+| 9 | Cột `app_settings.theme_mode`, `app_settings.language` — hai `ALTER TABLE ADD COLUMN` có `DEFAULT 'system'`, không đụng dòng nào (M99.28) |
+| 10 | Ba cột `app_settings.reminder_enabled`, `reminder_minute_of_day`, `reminder_last_delivered_at` — ba `ALTER TABLE … ADD COLUMN`, không đụng dòng nào. Nhánh nguồn chia làm hai bước v8 và v9; cả hai số đó đã thuộc feature khác trên nhánh tích hợp, và trạng thái trung gian mà chúng mô tả — đã cấu hình nhắc, chưa từng ghi lần gửi — chưa từng tồn tại ở đây (BR-218, BR-219, BR-221, M99.29) |
+| 11 | Trash: bảng `delete_batches`; cột `decks.delete_batch_id`, `cards.delete_batch_id` + ba index; nới `CHECK` của `study_sessions.end_reason` để nhận `content_deleted` (M99.33, BR-256…BR-267) |
 | _sau_ | Bảng `card_media` |
 | _sau_ | Cột sync (`is_pending_sync`, `version`) khi có backend (AD-03) |
 | _sau_ | `deck_templates` thành bảng runtime nếu tải template từ server |

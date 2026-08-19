@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 import 'package:memox/features/study/domain/entities/study_queue_item_entity.dart';
 import 'package:memox/features/study/domain/entities/study_session_entity.dart';
@@ -5,6 +8,7 @@ import 'package:memox/features/study/domain/models/new_card_order_model.dart';
 import 'package:memox/features/study/domain/models/study_action_model.dart';
 import 'package:memox/features/study/domain/models/study_card_limit_model.dart';
 import 'package:memox/features/study/domain/models/study_deck_context_model.dart';
+import 'package:memox/features/study/domain/models/study_direction_model.dart';
 import 'package:memox/features/study/domain/models/study_entry_summary_model.dart';
 import 'package:memox/features/study/domain/models/study_answer_commit_model.dart';
 import 'package:memox/features/study/domain/models/study_mode.dart';
@@ -16,6 +20,11 @@ import 'package:memox/features/study/domain/models/study_session_kind_model.dart
 import 'package:memox/features/study/domain/models/study_session_status_model.dart';
 import 'package:memox/features/study/domain/models/study_session_summary_model.dart';
 import 'package:memox/features/study/domain/models/study_turn_model.dart';
+import 'package:memox/features/study/domain/models/study_day_model.dart';
+import 'package:memox/features/study/domain/models/study_home_deck_model.dart';
+import 'package:memox/features/study/domain/models/study_home_model.dart';
+import 'package:memox/features/study/domain/models/study_home_resume_model.dart';
+import 'package:memox/features/study/domain/repositories/study_home_repository.dart';
 import 'package:memox/features/study/domain/repositories/study_repository.dart';
 
 /// The states of the Study screens worth putting in front of somebody.
@@ -25,29 +34,70 @@ enum StudyCatalogScenario {
   learningGuess('learning · guess', StudyMode.guess),
   learningRecall('learning · recall', StudyMode.recall),
   learningFill('learning · fill', StudyMode.fill),
-  reviewSelfAssess('review · self-assess (sm2)', StudyMode.selfAssess),
-  nothingDue('entry · nothing due', StudyMode.browse),
+  reviewSelfAssess('review · self-assess · Korean first', StudyMode.selfAssess),
+  reviewMeaningFirst(
+    'review · self-assess · Meaning first',
+    StudyMode.selfAssess,
+  ),
+  reviewMixed('review · self-assess · Mixed', StudyMode.selfAssess),
+  // Renamed at stage 3: this scenario renders a **deck** with nothing due, not
+  // the empty library — the caption sent anyone looking for the
+  // nothing-waiting line to the wrong screen.
+  nothingDue('entry · deck has nothing due', StudyMode.browse),
   nothingLeft('entry · everything learned', StudyMode.browse),
-  longContent('long Vietnamese content', StudyMode.browse);
+  longContent('long Vietnamese content', StudyMode.browse),
+  // Study Home's own states. The four below had no scenario at all, so
+  // more than half of what that screen renders was outside the catalogue —
+  // and `nothingDue`, whose caption promised one of them, renders the
+  // empty library instead.
+  homeEmptyLibrary('home · no decks yet', StudyMode.browse),
+  homeNoCards('home · decks, no cards', StudyMode.browse),
+  homeAllClear('home · nothing waiting', StudyMode.browse),
+  homeLoading('home · loading', StudyMode.browse),
+  homeError('home · read failed', StudyMode.browse);
 
   const StudyCatalogScenario(this.label, this.mode);
 
   final String label;
   final StudyMode mode;
 
-  bool get isReview => this == StudyCatalogScenario.reviewSelfAssess;
+  bool get isReview => direction != null;
+
+  /// The recall direction this scenario reviews in (BR-203).
+  ///
+  /// Null is what makes a scenario a *learning* one here: only an `sm2` review
+  /// of `self_assess` may carry a direction at all, so the two questions have one
+  /// answer and keeping them as two fields would let them disagree.
+  StudySessionDirection? get direction => switch (this) {
+    StudyCatalogScenario.reviewSelfAssess =>
+      StudySessionDirection.koreanToMeaning,
+    StudyCatalogScenario.reviewMeaningFirst =>
+      StudySessionDirection.meaningToKorean,
+    StudyCatalogScenario.reviewMixed => StudySessionDirection.mixed,
+    _ => null,
+  };
+
+  /// The direction the one catalog card is asked in.
+  ///
+  /// A `mixed` session assigns per card (BR-205); the catalog shows one card, so
+  /// it shows one of the two — the reversed one, because that is the half a
+  /// reviewer has not already seen in the two fixed scenarios.
+  StudyRecallDirection? get cardDirection =>
+      direction == StudySessionDirection.mixed
+      ? StudyRecallDirection.meaningToKorean
+      : direction?.fixedDirection;
 
   SchedulerType get scheduler =>
       isReview ? SchedulerType.sm2 : SchedulerType.eightBox;
 
   int get newCount => switch (this) {
     StudyCatalogScenario.nothingLeft => 0,
-    StudyCatalogScenario.reviewSelfAssess => 0,
+    _ when isReview => 0,
     _ => 5,
   };
 
   int get dueCount => switch (this) {
-    StudyCatalogScenario.reviewSelfAssess => 7,
+    _ when isReview => 7,
     StudyCatalogScenario.nothingLeft => 3,
     _ => 0,
   };
@@ -126,6 +176,7 @@ class StudyCatalogRepository implements StudyRepository {
     cardLimit: 20,
     startedAt: _t0,
     endedAt: null,
+    direction: scenario.direction,
   );
 
   @override
@@ -159,6 +210,7 @@ class StudyCatalogRepository implements StudyRepository {
     required int cardLimit,
     required NewCardOrder newCardOrder,
     required DateTime now,
+    StudySessionDirection? direction,
   }) async => _session;
 
   @override
@@ -174,6 +226,7 @@ class StudyCatalogRepository implements StudyRepository {
       answersInSession: 0,
       remainingMs: null,
       isRevealed: false,
+      direction: scenario.cardDirection,
     ),
     card: _cards.first,
     progress: const StudyStageProgressModel(
@@ -214,6 +267,11 @@ class StudyCatalogRepository implements StudyRepository {
   @override
   Future<StudySessionEntity?> openSessionFor(String deckId) async => null;
 
+  /// Null for the same reason [openSessionFor] is: the catalog never resumes,
+  /// it opens a fresh scenario every time the dropdown changes.
+  @override
+  Future<StudySessionEntity?> sessionById(String sessionId) async => null;
+
   @override
   Future<StudyScheduleModel?> scheduleOf(String cardId) async =>
       const StudyScheduleModel(box: 3);
@@ -235,6 +293,14 @@ class StudyCatalogRepository implements StudyRepository {
     required StudySessionEndReason reason,
   }) async => 0;
 
+  /// Nothing to close: the catalog has no sessions and no deletions (BR-259).
+  @override
+  Future<int> invalidateSessionsForDeletedContent({
+    required List<String> deckIds,
+    required List<String> cardIds,
+    required DateTime endedAt,
+  }) async => 0;
+
   // --- Writes: no-ops, so a control can be pressed without a database. ---
 
   @override
@@ -243,6 +309,9 @@ class StudyCatalogRepository implements StudyRepository {
     required StudyCardLimit cardLimit,
     required NewCardOrder newCardOrder,
   }) async {}
+
+  @override
+  Future<void> clearStudyOptionsOverride(String deckId) async {}
 
   @override
   Future<StudyAnswerCommitModel> submitAnswer({
@@ -305,3 +374,137 @@ class StudyCatalogRepository implements StudyRepository {
     required DateTime endedAt,
   }) async {}
 }
+
+/// Enough of [StudyHomeRepository] to show the Study tab's own screen (UC-14).
+///
+/// **The read-only contract, separate from the one above** — that split is what
+/// makes Study Home unable to open a session (BR-200), and a catalog double that
+/// merged the two would show a screen with a wider surface than production has.
+///
+/// Deterministic per scenario, like everything else here. The ordering is *not*
+/// re-implemented: the rows are handed over unsorted and `compareStudyHomeDecks`
+/// — the production comparator — puts them in order, so the catalog shows the
+/// ranking the app actually applies rather than one written twice.
+class StudyHomeCatalogRepository implements StudyHomeRepository {
+  StudyHomeCatalogRepository(this.scenario);
+
+  final StudyCatalogScenario scenario;
+
+  @override
+  Stream<StudyHomeModel> watchStudyHome(StudyDayModel day) {
+    // A stream that never answers, so the catalogue can hold the spinner still.
+    // `Stream.empty()` would not do it: an empty stream closes at once, and a
+    // closed stream with no value is a state Riverpod may render differently.
+    if (scenario == StudyCatalogScenario.homeLoading) {
+      return StreamController<StudyHomeModel>().stream;
+    }
+    if (scenario == StudyCatalogScenario.homeError) {
+      return Stream<StudyHomeModel>.error(
+        const DatabaseFailure(message: 'catalog: read failed'),
+      );
+    }
+
+    final decks = scenario.homeDecks..sort(compareStudyHomeDecks);
+
+    return Stream<StudyHomeModel>.value(
+      StudyHomeModel(
+        resume: scenario.homeResume,
+        decks: decks,
+        nextDueAt: null,
+        nextOverdueTickAt: null,
+      ),
+    );
+  }
+}
+
+/// The library each Study Home scenario shows.
+extension StudyHomeCatalogScenario on StudyCatalogScenario {
+  /// The session offered back, when the scenario has one open.
+  ///
+  /// Only the review scenario does. A Resume card on every state would make the
+  /// screen's most conditional element look unconditional.
+  StudyHomeResumeModel? get homeResume =>
+      this != StudyCatalogScenario.reviewSelfAssess
+      ? null
+      : const StudyHomeResumeModel(
+          sessionId: 'catalog-session',
+          deckId: 'catalog-deck',
+          deckName: 'Tiếng Hàn giao tiếp',
+          kind: StudySessionKind.reviewing,
+          currentMode: StudyMode.selfAssess,
+        );
+
+  List<StudyHomeDeckModel> get homeDecks => switch (this) {
+    // The first-run screen: no deck at all, so the catalog can show the starter
+    // call to action rather than only the populated list.
+    StudyCatalogScenario.nothingDue ||
+    StudyCatalogScenario.homeEmptyLibrary => <StudyHomeDeckModel>[],
+    // Decks that exist and hold nothing — a different screen from the one
+    // above, and the one BR-202 distinguishes it from.
+    StudyCatalogScenario.homeNoCards => <StudyHomeDeckModel>[
+      _homeDeck(id: 'catalog-empty', name: 'Bộ thẻ mới', totalCards: 0),
+      _homeDeck(
+        id: 'catalog-empty-2',
+        name: 'Ngữ pháp',
+        scheduler: SchedulerType.sm2,
+        totalCards: 0,
+      ),
+    ],
+    // Decks with cards and nothing waiting today: the "you are all caught up"
+    // line, which is neither empty nor a list with work in it.
+    StudyCatalogScenario.homeAllClear => <StudyHomeDeckModel>[
+      _homeDeck(id: 'catalog-clear', name: 'Tiếng Hàn giao tiếp'),
+      _homeDeck(
+        id: 'catalog-clear-2',
+        name: 'Kanji cơ bản',
+        scheduler: SchedulerType.sm2,
+      ),
+    ],
+    StudyCatalogScenario.longContent => <StudyHomeDeckModel>[
+      _homeDeck(
+        id: 'catalog-long',
+        name: 'Từ vựng chuyên ngành công nghệ thông tin và truyền thông',
+        overdue: 128,
+        dueToday: 64,
+        newCount: 256,
+      ),
+    ],
+    _ => <StudyHomeDeckModel>[
+      _homeDeck(id: 'catalog-deck', name: 'Tiếng Hàn giao tiếp', dueToday: 7),
+      _homeDeck(
+        id: 'catalog-kanji',
+        name: 'Kanji cơ bản',
+        scheduler: SchedulerType.sm2,
+        overdue: 3,
+        newCount: 12,
+      ),
+      _homeDeck(id: 'catalog-idioms', name: 'Thành ngữ'),
+    ],
+  };
+}
+
+StudyHomeDeckModel _homeDeck({
+  required String id,
+  required String name,
+  SchedulerType scheduler = SchedulerType.eightBox,
+  int overdue = 0,
+  int dueToday = 0,
+  int newCount = 0,
+
+  /// Stated only by the decks-with-no-cards scenario. The default below is
+  /// deliberately generous, and it used to be unconditional — which made
+  /// `hasNoCards` unreachable and took one of Study Home's seven states out of
+  /// the catalogue entirely.
+  int? totalCards,
+}) => StudyHomeDeckModel(
+  deckId: id,
+  deckName: name,
+  schedulerType: scheduler,
+  // Enough cards to hold the workload and then some, so a deck with nothing
+  // waiting still renders as a studiable deck rather than as the empty-library
+  // state (BR-202).
+  totalCardCount: totalCards ?? (overdue + dueToday + newCount + 20),
+  overdueCount: overdue,
+  dueTodayCount: dueToday,
+  newCount: newCount,
+);

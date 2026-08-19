@@ -13,6 +13,16 @@ import '../../core/theme/app_spacing.dart';
 /// existing at all rather than each caller configuring `showModalBottomSheet`
 /// again.
 ///
+/// **The bottom padding clears the keyboard *or* the system bar, whichever is
+/// larger.** `viewInsets` alone covers only the keyboard; with the keyboard
+/// down it is zero, and on an edge-to-edge Android target — which this app is,
+/// unavoidably, from API 35 — the gesture bar (24dp) or the three-button bar
+/// (48dp) is painted over the sheet. Measured on the tag filter sheet before
+/// this: the primary action ended 14dp above the bottom of a 852dp surface,
+/// entirely underneath the inset. `max` rather than a sum, because when the
+/// keyboard *is* up it already covers the system bar and adding both would push
+/// the actions a bar's height above the keyboard.
+///
 /// [reset] is called from the tap that opens the form, **not** from a widget
 /// life-cycle. Riverpod refuses a provider mutation during `build`, `initState`
 /// or `dispose`, and resetting from `dispose` additionally races the
@@ -35,7 +45,7 @@ Future<void> showMxFormSheet(
         left: AppSpacing.lg,
         right: AppSpacing.lg,
         top: AppSpacing.lg,
-        bottom: AppSpacing.lg + MediaQuery.viewInsetsOf(sheetContext).bottom,
+        bottom: AppSpacing.lg + _bottomObstruction(MediaQuery.of(sheetContext)),
       ),
       child: SingleChildScrollView(
         child: Consumer(
@@ -49,6 +59,13 @@ Future<void> showMxFormSheet(
     ),
   );
 }
+
+/// Whatever is covering the bottom of the sheet: the keyboard, or the system
+/// bar when the keyboard is down.
+double _bottomObstruction(MediaQueryData media) =>
+    media.viewInsets.bottom > media.viewPadding.bottom
+    ? media.viewInsets.bottom
+    : media.viewPadding.bottom;
 
 /// Closes its sheet the moment the operation reports that it should close.
 ///

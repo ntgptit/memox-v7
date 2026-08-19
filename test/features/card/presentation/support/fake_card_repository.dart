@@ -9,6 +9,7 @@ import 'package:memox/features/card/domain/models/card_list_sort_model.dart';
 import 'package:memox/features/card/domain/models/card_state_distribution_model.dart';
 import 'package:memox/features/card/domain/models/deck_context_model.dart';
 import 'package:memox/features/card/domain/models/card_text_model.dart';
+import 'package:memox/features/card/domain/models/tag_filter_model.dart';
 import 'package:memox/features/card/domain/models/tag_name_model.dart';
 import 'package:memox/features/card/domain/repositories/card_repository.dart';
 
@@ -95,6 +96,14 @@ final class FakeCardRepository extends FakeCardBulkRepository
   /// Per-filter pill counts a test can set; all-filter uses the count stream.
   final Map<CardListFilter, int> filterCounts = <CardListFilter, int>{};
 
+  /// What a tag-filtered count answers, keyed by how many tags are selected.
+  ///
+  /// **Present so a render can be honest about it.** Without it the fake
+  /// returns the deck total whatever the tag selection is, so a golden staged
+  /// to show "Apply · N cards" (M4.14 T6) shows the deck's 128 and proves
+  /// nothing about the feature it was made to illustrate.
+  final Map<int, int> tagFilterCounts = <int, int>{};
+
   /// Every sort the list read was asked for, in order — so a test can prove the
   /// sort control changed the query.
   final List<CardListSort> requestedSorts = <CardListSort>[];
@@ -102,6 +111,16 @@ final class FakeCardRepository extends FakeCardBulkRepository
   /// Every search term the list read was asked for — the parameter a use case
   /// once accepted and silently dropped, which is why it is recorded here.
   final List<String?> requestedSearchTerms = <String?>[];
+
+  /// Every tag selection the list read was asked for — recorded for the same
+  /// reason the search term is: a parameter that reaches the repository is the
+  /// only proof the screen's filter actually narrows the read (BR-231).
+  final List<TagFilter> requestedTagFilters = <TagFilter>[];
+
+  /// The tag selections the **count** read was asked for. Kept apart from the
+  /// list's: the two are separate statements, and the defect worth catching is
+  /// exactly one of them being told about the filter.
+  final List<TagFilter> requestedCountTagFilters = <TagFilter>[];
 
   @override
   Stream<List<CardListItemModel>> watchCardListItems(
@@ -111,11 +130,13 @@ final class FakeCardRepository extends FakeCardBulkRepository
     CardListSort sort = CardListSort.newest,
     String? searchTerm,
     DateTime? now,
+    TagFilter tags = TagFilter.none,
   }) {
     requestedLimits.add(limit);
     requestedFilters.add(filter);
     requestedSorts.add(sort);
     requestedSearchTerms.add(searchTerm);
+    requestedTagFilters.add(tags);
     final seeded = _seededItems;
     if (seeded != null) {
       return Stream<List<CardListItemModel>>.value(seeded);
@@ -130,7 +151,11 @@ final class FakeCardRepository extends FakeCardBulkRepository
     CardListFilter filter = CardListFilter.all,
     String? searchTerm,
     DateTime? now,
+    TagFilter tags = TagFilter.none,
   }) {
+    requestedCountTagFilters.add(tags);
+    final tagged = tagFilterCounts[tags.length];
+    if (tags.isActive && tagged != null) return Stream<int>.value(tagged);
     if (filter == CardListFilter.all) return watchCardCountByDeck(deckId);
 
     return Stream<int>.value(filterCounts[filter] ?? 0);
@@ -246,6 +271,26 @@ final class FakeCardRepository extends FakeCardBulkRepository
     deletes.add(cardId);
     final failure = nextCreateFailure;
     if (failure != null) throw failure;
+  }
+
+  /// Batch ids handed back by the Undo-aware delete, one per card (BR-256).
+  /// Derived from the id so a test can assert which card a batch belongs to
+  /// without the fake keeping a second map in step with `deletes`.
+  @override
+  Future<String> deleteCardForUndo(String cardId) async {
+    await deleteCard(cardId);
+
+    return 'batch-$cardId';
+  }
+
+  @override
+  Future<List<String>> deleteCardsForUndo(List<String> cardIds) async {
+    final batchIds = <String>[];
+    for (final cardId in cardIds) {
+      batchIds.add(await deleteCardForUndo(cardId));
+    }
+
+    return batchIds;
   }
 
   /// Recorded flag writes: (cardId, isFlagged).

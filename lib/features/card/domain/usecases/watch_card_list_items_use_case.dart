@@ -1,6 +1,7 @@
 import '../models/card_list_filter_model.dart';
 import '../models/card_list_item_model.dart';
 import '../models/card_list_sort_model.dart';
+import '../models/tag_filter_model.dart';
 import '../repositories/card_repository.dart';
 
 /// One deck's cards with their state and tags, for the management list, narrowed
@@ -21,11 +22,16 @@ class WatchCardListItemsUseCase {
     CardListSort sort = CardListSort.newest,
     String? searchTerm,
     DateTime? now,
+    TagFilter tags = TagFilter.none,
   }) => _repository.watchCardListItems(
     deckId,
     limit: limit,
     filter: filter,
     sort: sort,
+    // Forwarded explicitly for the reason the comment below gives: every
+    // parameter here is optional with a default, so dropping one compiles and
+    // shows up only as a filter that does nothing.
+    tags: tags,
     // Both of these were accepted here and then dropped on the floor — the
     // parameters are optional with defaults, so the call compiled and every
     // search typed into the card list filtered the count but never the rows

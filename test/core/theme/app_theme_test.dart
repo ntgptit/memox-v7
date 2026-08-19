@@ -7,10 +7,12 @@ import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_elevation.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/core/theme/theme_context_extension.dart';
+import 'package:memox/features/settings/di/app_settings_repository_provider.dart';
 
 import '../../features/deck/presentation/support/fake_deck_repository.dart';
 import '../../support/color_math.dart';
 import '../../support/theme_probe.dart';
+import '../../features/settings/domain/support/fake_app_settings_repository.dart';
 
 /// Readability and wiring. What the palette *is* — the ladder, the saturation
 /// discipline, the chroma budget — is asserted in `app_palette_test.dart`.
@@ -347,6 +349,9 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            appSettingsRepositoryProvider.overrideWithValue(
+              FakeAppSettingsRepository(),
+            ),
             deckRepositoryProvider.overrideWithValue(FakeDeckRepository()),
           ],
           child: const MemoxApp(),

@@ -1,3 +1,4 @@
+import '../models/study_direction_model.dart';
 import '../models/study_mode.dart';
 import '../models/study_session_kind_model.dart';
 import '../models/study_session_start_model.dart';
@@ -15,6 +16,10 @@ import 'start_study_session_use_case.dart';
 /// [shouldResume] is the caller's intent, taken from the route: Resume was
 /// offered because a session was open, and this is what acts on it. The other
 /// parameters describe the session that would be started if it were not.
+///
+/// [resumeSessionId] names *which* open session, when the caller offered a
+/// particular one. Null means "whichever is open for this deck", which is right
+/// only for a caller that never named one — see [ResumeStudySessionUseCase].
 final class OpenStudySessionUseCase {
   const OpenStudySessionUseCase(this._repository);
 
@@ -26,13 +31,30 @@ final class OpenStudySessionUseCase {
     required DateTime now,
     required Duration utcOffset,
     StudyMode? reviewMode,
+
+    /// The recall direction chosen before a new session (BR-203).
+    ///
+    /// **Ignored when resuming, and that is BR-207.** A session already carries
+    /// its direction on every row of its queue; asking again would offer a choice
+    /// that could not be applied, and applying it would change the question a
+    /// half-answered card had already been asked.
+    StudySessionDirection? direction,
     bool shouldResume = false,
+    String? resumeSessionId,
   }) => shouldResume
-      ? ResumeStudySessionUseCase(_repository).call(deckId)
+      ? ResumeStudySessionUseCase(_repository).call(
+          deckId,
+          sessionId: resumeSessionId,
+          // Passed through so the resume can re-check BR-103's study day at the
+          // moment of the tap, not only at the moment the list was drawn.
+          now: now,
+          utcOffset: utcOffset,
+        )
       : StartStudySessionUseCase(_repository).call(
           deckId: deckId,
           kind: kind,
           reviewMode: reviewMode,
+          direction: direction,
           now: now,
           utcOffset: utcOffset,
         );

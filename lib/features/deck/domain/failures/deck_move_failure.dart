@@ -79,10 +79,19 @@ DeckMoveRejection? deckMoveRejection({
   if (source.isRoot) return DeckMoveRejection.sourceIsRoot;
   if (target.id == source.id) return DeckMoveRejection.itself;
   if (isTargetInSourceSubtree) return DeckMoveRejection.ownDescendant;
-  if (target.id == source.parentDeckId) return DeckMoveRejection.alreadyParent;
+  // `holdsCards` before `alreadyParent`, and the order is load-bearing for
+  // restore, not for move. On a live move the parent of `source` can never be
+  // `card`-typed while holding `source`, so the reorder changes nothing
+  // there (invariant Q3 in `test/database/invariant_queries.dart` is the
+  // mechanical proof). On a restore/undo the origin parent may have
+  // emptied to `unset`
+  // and taken cards since (BR-260, BR-61) — and the restore path treats
+  // `alreadyParent` as a non-blocking answer, so reporting it first would
+  // wave a subtree into a card deck (BR-64, invariant Q3).
   if (target.contentType == DeckContentType.card) {
     return DeckMoveRejection.holdsCards;
   }
+  if (target.id == source.parentDeckId) return DeckMoveRejection.alreadyParent;
 
   // A missing root means the snapshot is inconsistent, or a row vanished mid
   // transaction. Refuse rather than allow a move whose scheduler pairing cannot
