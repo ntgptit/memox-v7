@@ -82,7 +82,9 @@ DeckMoveRejection? deckMoveRejection({
   // `holdsCards` before `alreadyParent`, and the order is load-bearing for
   // restore, not for move. On a live move the parent of `source` can never be
   // `card`-typed while holding `source`, so the reorder changes nothing
-  // there. On a restore/undo the origin parent may have emptied to `unset`
+  // there (invariant Q3 in `test/database/invariant_queries.dart` is the
+  // mechanical proof). On a restore/undo the origin parent may have
+  // emptied to `unset`
   // and taken cards since (BR-260, BR-61) — and the restore path treats
   // `alreadyParent` as a non-blocking answer, so reporting it first would
   // wave a subtree into a card deck (BR-64, invariant Q3).
