@@ -5,9 +5,10 @@ name: CI (full)
 # that before merging a milestone, and always before a release.
 #
 # What lives here (and why it is not on every PR):
-#   * a from-cold rerun of the full test suite + its count floor — PR CI already
-#     covers the same non-golden tests in parallel shards, while this job proves
-#     the suite can still run monolithically and has not silently shrunk;
+#   * a from-cold rerun of the full test suite + its count floor — PR CI runs the
+#     impact-selected non-golden subset (or all tests for high-risk changes),
+#     while this job independently proves the global suite still runs
+#     monolithically and has not silently shrunk;
 #   * goldens + the golden count floor — windows-bound pixel comparisons;
 #   * the web build (E2E channel) — a full dart2js compile;
 #   * clean-rebuild reproducibility — a second, from-nothing build_runner pass.

@@ -292,6 +292,19 @@ CI green.
 Run `.claude/skills/flutter-workflow/scripts/dod_check.sh` for the mechanical
 half of that list. The judgement half is still yours.
 
+During the inner loop, `.claude/skills/flutter-workflow/scripts/dod_check.sh
+--changed --base origin/main` MUST build the same immutable feature × layer ×
+risk verification plan used by PR CI. It runs only the selected host tests and
+Widgetbook surface. Layer ownership provides the starting set; reverse Dart
+imports add app, integration and cross-feature test consumers, and existing
+untracked tests are discoverable locally. Golden-only changes use runnable
+non-golden surrogates because Windows `ci-full` owns pixel comparison. Unknown
+paths and schema/shared/router/native/tooling changes promote themselves to the
+full non-golden host suite. A selected mandatory tool or guard missing from the
+environment MUST fail rather than report a skip. The default command without
+`--changed` remains the final full local gate; targeted success is not release
+evidence.
+
 ### A new feature means re-running the integration suite, on a device
 
 **Adding anything under `lib/features/` is not done until `integration_test/`

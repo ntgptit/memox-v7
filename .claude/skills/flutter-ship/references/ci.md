@@ -8,14 +8,33 @@
 > When they disagree with this template, **the workflow files win** — update
 > this file when the pipeline changes rather than the other way round.
 
-The live PR workflow classifies paths before installing Flutter:
+The live PR workflow builds an immutable verification plan before installing
+Flutter:
 
-- A pull request whose changed files are all under `docs/prompt/**` runs the
-  Python tooling tests and `check_prompt_contract.py` only. Missing review files,
-  malformed seven-field headers and incomplete implementation/review phase
-  contracts fail here. Empty and mixed changes fail safe to the code path.
-- The code path runs static verification, five shards covering the complete
-  non-golden host suite, and the Widgetbook smoke test as parallel jobs. Each
+- The planner classifies each path by feature, architecture layer, public
+  contract impact and risk. Scope grows monotonically through the declared
+  downstream feature graph; no rule can remove checks selected earlier.
+- Prompt and documentation changes stay on the Python contract path. Missing
+  review files, malformed seven-field headers and incomplete prompt phases fail
+  there without installing Flutter.
+- A feature `data` change starts with its data tests, a `presentation` change
+  with its presentation tests plus Widgetbook, and a domain contract expands
+  through downstream features. A reverse Dart-import closure then adds every
+  runnable transitive test consumer, including app, integration and
+  cross-feature harness tests that do not live under the owning layer.
+- Drift query changes additionally select database and integration contract
+  suites declaratively. Generated DAO code is ignored, so those edges cannot be
+  recovered from the source-level Dart import graph.
+- Golden-only files are never sent to a Linux shard that excludes the `golden`
+  tag; their changes select non-golden presentation surrogates plus Widgetbook,
+  while `ci-full.yml` remains the Windows pixel-comparison owner. Existing
+  untracked tests are part of the local changed-plan discovery universe.
+- The resulting runnable file list is balanced across one, two or five atomic
+  file-level shards according to measured test declarations.
+- Schema/migration, shared UI/theme, app router/DI, native/dependency, CI
+  tooling, empty and unknown change sets fail safe to all non-golden host tests
+  across five shards. This is also how the planner validates changes to itself.
+- Static verification remains global for every code path. Each selected host
   shard generates ignored code locally and uses `--reporter failures-only` to
   avoid printing thousands of successful test events.
 - The final `CI gate` job inspects every selected job result. It is the stable
@@ -26,8 +45,10 @@ The live PR workflow classifies paths before installing Flutter:
   full runner window without increasing coverage.
 
 `ci-full.yml` remains deliberately serial/from-cold where that is the evidence
-being sought: codegen reproducibility, monolithic suite + count floor, Windows
-goldens and the web build. It is not a substitute for the per-PR aggregate gate.
+being sought: codegen reproducibility, the complete monolithic suite + count
+floor, Windows goldens and the web build. It proves global coverage independently
+of the PR planner and is required at milestones/releases; it is not a substitute
+for the per-PR aggregate gate.
 
 Reference template:
 
