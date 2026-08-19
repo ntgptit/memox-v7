@@ -80,6 +80,9 @@ void main() {
     // a deck, a card inside it, and a flag — three different tables.
     await seedDeck(robot, <(String, String)>[('사과', 'apple')]);
     await robot.tapText('사과');
+    // Since M99.31 a tap opens the read-only detail; the editor is one
+    // explicit action away (UC-19).
+    await robot.tapBySemantics('Edit card');
     // By semantics, not by text: the editor's flag and close are icons carrying
     // their label as a tooltip, so there is no text on screen to tap.
     await robot.tapBySemantics(ItText.flagCard);

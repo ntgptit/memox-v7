@@ -2439,7 +2439,7 @@
   "@cardImportErrorUnreadableFile": {
     "description": "Typed error: corrupt or protected file."
   },
-  "cardImportParseErrorTitle": "Could not read the source",
+  "cardImportParseErrorTitle": "Couldn’t read the source",
   "@cardImportParseErrorTitle": {
     "description": "Title over a typed parse error on the Preview step."
   },

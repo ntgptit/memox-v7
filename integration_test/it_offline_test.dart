@@ -61,6 +61,9 @@ void main() {
     await robot.openDeck('Academic words');
     await robot.createCard('abandon', 'từ bỏ');
     await robot.tapText('abandon');
+    // Since M99.31 a tap opens the read-only detail; the editor is one
+    // explicit action away (UC-19).
+    await robot.tapBySemantics('Edit card');
     await robot.enterNthField(1, 'rời bỏ');
     await robot.tapText('Save changes');
     expect(find.text('rời bỏ'), findsWidgets);
@@ -77,9 +80,11 @@ void main() {
 
     // Step 5: deleting works with no network.
     await robot.tapText('abandon');
+    await robot.tapBySemantics('Edit card');
     await robot.scrollToText(ItText.deleteCard);
     await robot.tapText(ItText.deleteCard);
-    await robot.tapText(ItText.delete);
+    // The confirm names where the card goes since M99.33 (BR-256).
+    await robot.tapText('Move to Trash');
     expect(find.text('No cards yet'), findsWidgets);
   });
 
