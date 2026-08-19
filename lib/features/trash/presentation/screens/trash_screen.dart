@@ -53,9 +53,16 @@ class TrashScreen extends ConsumerWidget {
         // press: undiscoverable, and unreachable from a keyboard, which is the
         // channel the web E2E suite drives (AD-04).
         //
-        // It appears only when there is something to select, and disappears
-        // while selecting, because the bar already offers the way out.
-        if (!selection.isActive && (batches.value?.isNotEmpty ?? false))
+        // It appears only when there is something to select **under the
+        // active filter** — the unfiltered list can be non-empty while the
+        // body shows a filtered emptiness, and a Select that then silently
+        // does nothing is a live-looking dead end. Disappears while
+        // selecting, because the bar already offers the way out.
+        if (!selection.isActive &&
+            (batches.value?.any(
+                  (TrashBatchEntity batch) => filter.admits(batch.itemType),
+                ) ??
+                false))
           MxIconButton(
             icon: Icons.checklist,
             semanticLabel: l10n.trashSelectAction,
