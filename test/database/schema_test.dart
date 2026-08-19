@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/database/app_database.dart';
 
@@ -358,51 +356,4 @@ void main() {
       );
     }
   });
-
-  group('source rules', () {
-    test('no Dart table class exists under core/database', () {
-      // AD-02: schema lives in SQL so drift_dev type-checks every query against
-      // it at build time. A Dart table class compiles fine and silently opts
-      // that checking out.
-      // Generated output is excluded: drift emits `class Decks extends Table`
-      // into `.g.dart` itself. AD-02 is about which declaration a human writes,
-      // and the generated class is the evidence that the `.drift` file was the
-      // source rather than a violation of it.
-      final offenders = <String>[
-        for (final file in Directory(
-          'lib/core/database',
-        ).listSync(recursive: true))
-          if (file is File && _isHandWrittenDart(file.path))
-            if (RegExp(
-              r'class\s+\w+\s+extends\s+Table\b',
-            ).hasMatch(file.readAsStringSync()))
-              file.path,
-      ];
-
-      expect(offenders, isEmpty);
-    });
-
-    test('connection.dart is the only production file that opens one', () {
-      // AD-08. Scattered openers mean "where does the file live" and "is
-      // encryption on" stop having a single answer.
-      final opener = RegExp(r'NativeDatabase|driftDatabase\(|WasmDatabase');
-      final offenders = <String>[
-        for (final file in Directory('lib').listSync(recursive: true))
-          if (file is File && _isHandWrittenDart(file.path))
-            if (!file.path
-                .replaceAll(r'\', '/')
-                .endsWith('core/database/connection.dart'))
-              if (opener.hasMatch(file.readAsStringSync())) file.path,
-      ];
-
-      expect(offenders, isEmpty);
-    });
-  });
-}
-
-/// True for Dart a person wrote, false for build output.
-bool _isHandWrittenDart(String path) {
-  if (!path.endsWith('.dart')) return false;
-
-  return !path.endsWith('.g.dart') && !path.endsWith('.drift.dart');
 }

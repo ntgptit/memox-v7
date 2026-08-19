@@ -1,21 +1,71 @@
 {
   "version": 1,
   "feature_dependencies": {
-    "deck": ["card", "study", "search", "progress", "trash"],
-    "card": ["study", "tag", "search", "progress", "trash"],
-    "study": ["progress", "reminder", "settings", "trash"],
-    "tag": ["card", "search"],
-    "settings": ["study", "reminder"],
-    "trash": ["deck", "card", "tag", "search", "progress"]
+    "deck": [
+      "card",
+      "study",
+      "search",
+      "progress",
+      "trash"
+    ],
+    "card": [
+      "study",
+      "tag",
+      "search",
+      "progress",
+      "trash"
+    ],
+    "study": [
+      "progress",
+      "reminder",
+      "settings",
+      "trash"
+    ],
+    "tag": [
+      "card",
+      "search"
+    ],
+    "settings": [
+      "study",
+      "reminder"
+    ],
+    "trash": [
+      "deck",
+      "card",
+      "tag",
+      "search",
+      "progress"
+    ]
   },
   "database_query_features": {
-    "card": ["card"],
-    "deck": ["deck"],
-    "study": ["study"],
-    "tag": ["card", "tag"],
-    "progress": ["progress"],
-    "settings": ["settings"],
-    "trash": ["trash"]
+    "card": [
+      "card"
+    ],
+    "deck": [
+      "deck"
+    ],
+    "study": [
+      "study"
+    ],
+    "tag": [
+      "card",
+      "tag"
+    ],
+    "progress": [
+      "progress"
+    ],
+    "settings": [
+      "settings"
+    ],
+    "trash": [
+      "trash"
+    ],
+    "search": [
+      "search"
+    ],
+    "reminder": [
+      "reminder"
+    ]
   },
   "full_scope_prefixes": [
     ".github/",
