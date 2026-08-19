@@ -174,6 +174,11 @@ void main() {
             'the unfiltered list is non-empty, but nothing under the active '
             'filter is selectable',
       );
+
+      // And the return trip: back on All, the icon comes back.
+      await tester.tap(find.text(english.trashFilterAll));
+      await tester.pumpAndSettle();
+      expect(find.bySemanticsLabel(english.trashSelectAction), findsOneWidget);
     });
 
     Future<FakeTrashRepository> pumpMixed(WidgetTester tester) => pumpTrash(
