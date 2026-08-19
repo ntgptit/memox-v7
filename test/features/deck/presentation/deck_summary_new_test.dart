@@ -9,14 +9,9 @@ import 'package:memox/shared/widgets/mx_progress_bar.dart';
 import 'support/deck_screen_harness.dart';
 import 'support/fake_deck_repository.dart';
 
-/// The status-first hero: scope, the two workloads, then the learned line
-/// (BR-150).
-///
-/// **Two numbers, one focal point.** Due and New stay separate figures in a
-/// fixed order — that is BR-150 and it does not move — but their weight does:
-/// the workload that needs attention first speaks at the hero size and the
-/// other supports. Both numbers stay on screen at zero, because
-/// absence-means-zero is the convention this panel exists to kill.
+/// The hero with new cards in play (BR-150, owner mockup 2026-08-20): one
+/// numeral leads — what is due, or the new cards when nothing is — and New
+/// and Scheduled rest in the quiet context row below it.
 void main() {
   final english = AppLocalizationsEn();
 
@@ -25,31 +20,14 @@ void main() {
     matching: matching,
   );
 
-  Finder metric(int count, String word) =>
-      inSummary(find.textContaining('$count $word', findRichText: true));
+  /// The hero numeral's resolved size — the hierarchy under test, read from
+  /// the rendered style role rather than pinned to a pixel.
+  double sizeOfText(WidgetTester tester, String text) =>
+      tester.widget<Text>(inSummary(find.text(text)).first).style!.fontSize!;
 
-  /// The numeral's resolved size — the hierarchy under test, read from the
-  /// style role rather than pinned to a pixel.
-  double numeralSize(WidgetTester tester, int count, String word) {
-    // `findRichText` resolves to the underlying RichText; the numeral is the
-    // span whose text is the bare figure, found by walking rather than by
-    // index so a wrapping default-style span cannot break the read.
-    final rich = tester.widget<RichText>(metric(count, word));
-    double? size;
-    rich.text.visitChildren((InlineSpan span) {
-      if (span is TextSpan && span.text == '$count ') {
-        size = span.style?.fontSize;
-
-        return false;
-      }
-
-      return true;
-    });
-
-    return size!;
-  }
-
-  testWidgets('mixed: both metrics lead, learned line follows', (tester) async {
+  testWidgets('mixed: the due numeral leads, context rests below', (
+    tester,
+  ) async {
     await pumpDeckScreen(
       tester,
       repository: FakeDeckRepository.withSummaries(<DeckSummary>[
@@ -66,18 +44,27 @@ void main() {
     );
 
     expect(find.byType(DeckLevelSummaryWidget), findsOneWidget);
-    // No backlog: the twelve reviews are today's, and the overdue metric
-    // states its zero (BR-162).
-    expect(metric(0, english.deckHeroOverdueMetricWord), findsOneWidget);
-    expect(metric(12, english.deckHeroDueTodayMetricWord), findsOneWidget);
-    expect(metric(14, english.deckHeroNewMetricWord), findsOneWidget);
-    // With no overdue backlog, Due today is the focal point: its numeral
-    // speaks one typography role above New's. The order never changes — only
-    // the emphasis does.
+    expect(inSummary(find.text('12')), findsWidgets);
     expect(
-      numeralSize(tester, 12, english.deckHeroDueTodayMetricWord),
-      greaterThan(numeralSize(tester, 14, english.deckHeroNewMetricWord)),
+      inSummary(find.text(english.deckSummaryCardsDueWord)),
+      findsOneWidget,
     );
+    // No backlog: no breakdown subline (its zero would repeat the numeral).
+    expect(
+      inSummary(
+        find.textContaining(
+          english.deckSummaryOverduePart(0),
+          findRichText: true,
+        ),
+      ),
+      findsNothing,
+    );
+    // The context row: 14 new, and 180 − 12 − 14 = 154 scheduled ahead.
+    expect(inSummary(find.text('14')), findsWidgets);
+    expect(inSummary(find.text(english.deckHeroNewMetricWord)), findsWidgets);
+    expect(inSummary(find.text('154')), findsOneWidget);
+    // The hero numeral speaks above the context row's figures.
+    expect(sizeOfText(tester, '12'), greaterThan(sizeOfText(tester, '14')));
     // The learned line and its figure ride the shared progress component,
     // announced as one semantics node.
     expect(
@@ -88,9 +75,7 @@ void main() {
     );
   });
 
-  testWidgets('new-only: the zero stays on the due side, no completion claim', (
-    tester,
-  ) async {
+  testWidgets('new-only: the new cards take the hero (BR-150)', (tester) async {
     await pumpDeckScreen(
       tester,
       repository: FakeDeckRepository.withSummaries(<DeckSummary>[
@@ -106,14 +91,10 @@ void main() {
 
     // The panel opened by itself: new cards are work, so `auto` shows it.
     expect(find.byType(DeckLevelSummaryWidget), findsOneWidget);
-    expect(metric(0, english.deckHeroDueTodayMetricWord), findsOneWidget);
-    expect(metric(20, english.deckHeroNewMetricWord), findsOneWidget);
-    // With nothing due, New is the focal point and the zeroes rest at the
-    // supporting size — still on screen, just not the headline.
-    expect(
-      numeralSize(tester, 20, english.deckHeroNewMetricWord),
-      greaterThan(numeralSize(tester, 0, english.deckHeroDueTodayMetricWord)),
-    );
+    expect(inSummary(find.text('20')), findsWidgets);
+    expect(inSummary(find.text(english.deckHeroNewMetricWord)), findsWidgets);
+    // Nothing due, so no "cards due" headline to mislead with.
+    expect(inSummary(find.text(english.deckSummaryCardsDueWord)), findsNothing);
 
     final bar = tester.widget<MxProgressBar>(
       inSummary(find.byType(MxProgressBar)),
@@ -121,9 +102,8 @@ void main() {
     expect(bar.value, 0);
   });
 
-  testWidgets('both sets empty: two zeroes, stated, not a sentence', (
-    tester,
-  ) async {
+  testWidgets('both sets empty: the panel waits behind its link, then rests '
+      'quiet', (tester) async {
     await pumpDeckScreen(
       tester,
       repository: FakeDeckRepository.withSummaries(<DeckSummary>[
@@ -145,26 +125,18 @@ void main() {
     await tester.tap(find.text(english.deckSummaryShowAction));
     await tester.pumpAndSettle();
 
-    expect(metric(0, english.deckHeroOverdueMetricWord), findsOneWidget);
-    expect(metric(0, english.deckHeroDueTodayMetricWord), findsOneWidget);
-    expect(metric(0, english.deckHeroNewMetricWord), findsOneWidget);
-    // The eight learned cards rest until their next review — the fourth set
-    // is the only non-zero figure, and it still takes no headline: a resting
-    // card asks for nothing.
-    expect(metric(8, english.deckHeroScheduledMetricWord), findsOneWidget);
-    // Caught up: nothing is shouted. Every figure rests at the same
-    // supporting size — a hero with no workload has no headline to give.
+    // Caught up: the hero states its zero, and the eight learned cards rest
+    // in the context row — a resting card asks for nothing, so nothing is
+    // shouted and no CTA is offered.
+    expect(inSummary(find.text('0')), findsWidgets);
+    expect(inSummary(find.text('8')), findsOneWidget);
     expect(
-      numeralSize(tester, 0, english.deckHeroDueTodayMetricWord),
-      numeralSize(tester, 0, english.deckHeroNewMetricWord),
+      inSummary(find.text(english.deckHeroScheduledMetricWord)),
+      findsOneWidget,
     );
     expect(
-      numeralSize(tester, 0, english.deckHeroOverdueMetricWord),
-      numeralSize(tester, 0, english.deckHeroDueTodayMetricWord),
-    );
-    expect(
-      numeralSize(tester, 8, english.deckHeroScheduledMetricWord),
-      numeralSize(tester, 0, english.deckHeroDueTodayMetricWord),
+      inSummary(find.text(english.deckSummaryStudyDueAction(0))),
+      findsNothing,
     );
     // 100% learned: the shared bar carries the success moment on its own.
     final bar = tester.widget<MxProgressBar>(

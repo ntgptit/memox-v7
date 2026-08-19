@@ -154,9 +154,11 @@ void main() {
 
     // The app-bar title is the deck's name, not the generic label.
     expect(find.widgetWithText(AppBar, 'Phrasal verbs'), findsOneWidget);
-    // The breadcrumb names the ancestor and the root step above it.
+    // The breadcrumb names the ancestor and the root step above it — the
+    // root reads "All decks" since the Library redesign dropped the
+    // technical word (owner mockup, 2026-08-20).
     expect(find.text('English'), findsOneWidget);
-    expect(find.text('Root'), findsOneWidget);
+    expect(find.text('All decks'), findsOneWidget);
   });
 
   testWidgets('the progress panel shows the mastered percentage (D5)', (

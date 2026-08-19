@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../../../shared/widgets/mx_icon_button.dart';
 import '../../../../../shared/widgets/mx_progress_bar.dart';
@@ -43,10 +44,15 @@ class DeckLevelSummaryWidget extends StatelessWidget {
   const DeckLevelSummaryWidget({
     required this.snapshot,
     required this.onDismiss,
+    this.onStudyDue,
     super.key,
   });
 
   final DeckListSnapshot snapshot;
+
+  /// Starts studying what the hero counts. Null hides the CTA — the panel
+  /// stays honest on a level with nothing due.
+  final VoidCallback? onStudyDue;
 
   /// Hides the panel. **Dismissible on purpose**: it is the most useful thing on
   /// the screen on the day you opened the app to study, and the thing in the way
@@ -107,8 +113,10 @@ class DeckLevelSummaryWidget extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
+              // A chevron, not an X: this collapses to a one-line link and
+              // comes back — X promised removal (owner mockup, 2026-08-20).
               MxIconButton(
-                icon: Icons.close,
+                icon: Icons.expand_less,
                 semanticLabel: context.l10n.deckSummaryHideLabel,
                 onPressed: onDismiss,
               ),
@@ -134,6 +142,21 @@ class DeckLevelSummaryWidget extends StatelessWidget {
               valueLabel: context.l10n.deckLearnedPercentLabel(
                 (learnedCount / cardCount * 100).round(),
               ),
+            ),
+          ],
+          // The main task, on top of the screen instead of a scroll away
+          // (owner mockup, 2026-08-20). At the root it opens the Study tab —
+          // a session belongs to one root deck (BR-101), so a cross-deck
+          // session cannot honestly be offered; inside a deck it starts that
+          // deck's study. The caller decides which; null means nothing is
+          // due and the button would be a promise with no cards behind it.
+          if (onStudyDue != null) ...<Widget>[
+            const SizedBox(height: AppSpacing.lg),
+            MxActionButton(
+              label: context.l10n.deckSummaryStudyDueAction(
+                snapshot.levelDueCardCount,
+              ),
+              onPressed: onStudyDue,
             ),
           ],
         ],

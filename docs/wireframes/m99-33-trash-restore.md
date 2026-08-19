@@ -8,7 +8,7 @@
 | **Source of truth for** | Anatomy màn Trash · copy các panel Trash · hợp đồng geometry của Trash · responsive/a11y contract của Trash |
 | **Depends on** | `../use-cases.md` (UC-21), `../business-rules.md` (BR-256…BR-267), `../architecture.md` (AD-22), `m4-11-card-management.md` |
 | **Updated by task** | M99.33 |
-| **Last updated** | 2026-08-13 |
+| **Last updated** | 2026-08-20 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham chiếu bằng ID theo
 `document-conventions.md` §5; chỗ nào wireframe và BR có vẻ mâu thuẫn thì BR
@@ -25,6 +25,7 @@ trông giống nhau.
 |---|---|---|---|
 | T1 | Trash là **route riêng trong branch Library** (`/trash`), entry là một action cố định trên app bar của danh sách root | Trash chứa nội dung Library, không phải thiết lập. Đặt ở Settings thì lối vào của một tính năng cứu dữ liệu nằm sau hai lần chạm ở một branch không liên quan — và Settings hiện là placeholder (AD-19) | 2026-08-13 |
 | T2 | Entry point **luôn hiện**, kể cả khi Trash rỗng; không có badge đếm | Người dùng cần biết Trash tồn tại *trước* khi họ xoá nhầm, chứ không phải sau. Badge đếm biến một khu vực bình thường thành một thứ trông như cần xử lý | 2026-08-13 |
+| T2a | **Amend T1/T2:** entry dời từ action cố định trên app bar vào **overflow menu duy nhất của app bar root** (`showLibraryMenu`); vẫn luôn hiện trong menu đó, vẫn không badge | Redesign header Library (owner mockup 2026-08-20): bar chỉ giữ search, create và một kebab — Trash là hành động *thỉnh thoảng*, một tap sâu hơn nhưng vẫn khám phá được từ root trước khi ai đó xoá nhầm. Ghi nhận tại `docs/reviews/design-parity-checklist.md` (Library header pass) | 2026-08-20 |
 | T3 | Tách Cards / Decks bằng **filter chip trên một danh sách**, không phải `TabBar` | Trash hầu như luôn ngắn. Hai tab cho hai danh sách vài hàng là hai màn hình rỗng thay vì một; chip cũng giữ được trạng thái "All" mà tab không có, và All là mặc định đúng | 2026-08-13 |
 | T4 | Mỗi hàng nêu **tên · loại · đã xoá khi nào · còn lại bao nhiêu ngày · đường dẫn gốc**; deck nêu thêm số item đi kèm | Bốn câu hỏi người dùng thực sự hỏi trước khi khôi phục hoặc xoá hẳn. "Còn lại N ngày" là thứ duy nhất trong màn có tính khẩn, nên nó là thứ duy nhất được phép mang màu nhấn | 2026-08-13 |
 | T5 | Đường dẫn gốc là **dòng phụ, chữ nhỏ, không có affordance**; không phải nút, không phải link | BR-267 — nó là ngữ cảnh, không phải nơi item sẽ về. Một đường dẫn trông bấm được nói ngược lại BR-261 trước khi người dùng kịp đọc dialog | 2026-08-13 |

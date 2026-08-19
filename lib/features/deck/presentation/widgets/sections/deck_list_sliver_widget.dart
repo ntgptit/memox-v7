@@ -28,14 +28,10 @@ const double _kListBottomInset = AppSpacing.lg;
 /// they need different words and different actions.
 class DeckListSliverWidget extends ConsumerWidget {
   const DeckListSliverWidget({
-    required this.shouldShowScheduler,
     required this.summaries,
     required this.onClearFilter,
     super.key,
   });
-
-  /// Forwarded to every tile — see [DeckTileWidget.shouldShowScheduler].
-  final bool shouldShowScheduler;
 
   final List<DeckSummary> summaries;
   final VoidCallback onClearFilter;
@@ -77,7 +73,6 @@ class DeckListSliverWidget extends ConsumerWidget {
 
           return DeckTileWidget(
             summary: summary,
-            shouldShowScheduler: shouldShowScheduler,
             // By name, with the id as a path parameter. The literal path would
             // work today and break silently the first time the route moves.
             //

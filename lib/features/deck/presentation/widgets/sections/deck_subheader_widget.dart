@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../../../../core/navigation/route_names.dart';
-import '../../../../../l10n/l10n_extension.dart';
-import '../../../../../shared/widgets/mx_icon_button.dart';
 import '../../../domain/models/deck_list_snapshot_model.dart';
 import 'deck_path_widget.dart';
 
@@ -31,26 +27,11 @@ class DeckSubheaderWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        // `Expanded`, so the path starts on the screen gutter and the action
-        // sits on the opposite edge — the two ends of the strip every other
-        // element on the screen is aligned to.
-        Expanded(child: DeckPathWidget(snapshot: snapshot)),
-        MxIconButton(
-          icon: Icons.search,
-          semanticLabel: context.l10n.librarySearchOpenLabel,
-          tooltip: context.l10n.librarySearchOpenLabel,
-          // **`push`, not `go`.** Search is a *sibling* of the deck-detail
-          // route under `/`, so `go('/search')` rebuilds the branch's match
-          // list as `[/, /search]` and throws away every level below the root
-          // — Back from a search opened three decks deep then landed on the
-          // root list. Pushing keeps the stack the user built, which is what
-          // the wireframe's S2 and W4 promise. It stays on the branch
-          // navigator, so the bottom bar is unaffected.
-          onPressed: () => context.pushNamed(RouteNames.librarySearch),
-        ),
-      ],
-    );
+    // The strip is the breadcrumb alone now: search moved up into the app
+    // bar so the header reads as one row of actions over one line of place
+    // (owner mockup, 2026-08-20). The slot itself stays at every level —
+    // a band of chrome that comes and goes is what the path widget's own
+    // doc argues against.
+    return DeckPathWidget(snapshot: snapshot);
   }
 }

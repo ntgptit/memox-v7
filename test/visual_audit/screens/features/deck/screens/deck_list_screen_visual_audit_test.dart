@@ -65,17 +65,15 @@ void main() {
     anchors: deckAnchorsWithEmpty,
     allowances: <AuditSkipAllowance>[
       ...deckShellAllowances(
-        // Three: create, which came back to the app bar when the floating
-        // action was dropped; the tag catalog (M99.30, M4.14 T2) — the Library
-        // is where a library-level catalog belongs, and it is offered even
-        // with no decks, because an empty catalog is an answer; and Trash,
-        // which is on the root level's bar always — including here, because
-        // knowing the recovery surface exists matters most before anything
-        // has been deleted (AD-22, wireframe T2). The root level has no deck
-        // of its own to act on, the empty state's own button belongs to the
-        // `empty_state` item below, and there is no toolbar — with no decks
-        // there is nothing to filter.
-        screenIconButtons: 3,
+        // Two: create, which came back to the app bar when the floating
+        // action was dropped, and the bar's one overflow menu — where the tag
+        // catalog and Trash live now (owner mockup, 2026-08-20; wireframe T2
+        // amendment T2a). Both stay even with no decks: an empty catalog is
+        // an answer, and knowing the recovery surface exists matters most
+        // before anything has been deleted (AD-22). The empty state's own
+        // button belongs to the `empty_state` item below, and there is no
+        // toolbar — with no decks there is nothing to sort.
+        screenIconButtons: 2,
         screenItemId: 'deck_screen',
       ),
       // Two ways forward since UC-01: the starter catalog and the blank deck.
@@ -111,17 +109,19 @@ void main() {
     anchors: deckPlainAnchors,
     allowances: <AuditSkipAllowance>[
       ...deckShellAllowances(
-        // One action per row for three decks, plus the summary panel's close
-        // button, plus the app bar's create, tag catalog (M99.30) and Trash
-        // actions.
-        screenIconButtons: 7,
+        // One action per row for three decks, plus the summary panel's
+        // collapse chevron, plus the app bar's create and its one overflow
+        // menu (owner mockup, 2026-08-20 — tag catalog and Trash live inside
+        // it now; search is the shell's own count).
+        screenIconButtons: 6,
         screenItemId: 'deck_screen',
         // Every row is a tappable card now rather than a ListTile.
         tappableCards: 3,
-        // Filter and sort.
-        pills: 2,
-        // One deck in this fixture has cards due, so one Study action.
-        filledButtons: 1,
+        // Sort alone — the filter moved into the bar's overflow menu.
+        pills: 1,
+        // One deck in this fixture has cards due, so one Study action — and
+        // the summary panel's own Study CTA above the list.
+        filledButtons: 2,
       ),
       // One progress bar per deck that has cards; two of the three fixtures do.
       //
@@ -298,14 +298,16 @@ void main() {
       // strip's last step — the deck the user is in — is text rather than a
       // control, so it hosts no ink.
       ...deckShellAllowances(
-        // Four as before, plus the summary panel's close button.
+        // Four as before, plus the summary panel's collapse chevron.
         screenIconButtons: 6,
         screenItemId: 'deck_screen',
         hasBackButton: true,
         tappableCards: 3,
-        pills: 2,
-        // Two of the three children have cards due.
-        filledButtons: 2,
+        // Sort alone — the filter lives in the deck's own overflow now.
+        pills: 1,
+        // Two of the three children have cards due, and the summary panel's
+        // Study CTA makes a third filled action.
+        filledButtons: 3,
         breadcrumbSteps: 3,
       ),
       // Three cards, all with cards, plus the level summary's own bar.

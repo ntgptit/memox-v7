@@ -45,48 +45,60 @@ class DeckWorkloadLineWidget extends StatelessWidget {
 
     final semantic = context.semanticColors;
     final quiet = context.colors.onSurfaceVariant;
-    final hasDue = summary.dueCardCount > 0;
+    final overdueCount = summary.overdueCardCount;
+    final dueTodayCount = summary.dueCardCount - overdueCount;
+    final hasDue = dueTodayCount > 0;
     final hasNew = summary.newCardCount > 0;
-    // Composed outside the widget arguments: the count is data and the word
-    // comes from the ARB — there is no translatable literal here for the i18n
-    // guard to review, and hoisting makes that legible to it.
-    final dueLabel =
-        '${summary.dueCardCount} ${context.l10n.deckDueMetricWord}';
-    final newLabel =
-        '${summary.newCardCount} ${context.l10n.deckNewMetricWord}';
+    // **Overdue is its own count now** (owner mockup, 2026-08-20): it used to
+    // ride the icon as a `+7d` badge, which said how *old* the backlog was
+    // but not how *big* — and the tile said "12 due" for a deck where eight
+    // of the twelve had already missed their day. The three disjoint counts
+    // read in urgency order, overdue in the one semantic ink left on the
+    // card.
+    final overdueLabel = context.l10n.deckSummaryOverduePart(overdueCount);
+    final dueLabel = context.l10n.deckTileDueChipLabel(dueTodayCount);
+    final newLabel = context.l10n.deckTileNewChipLabel(summary.newCardCount);
+
+    Widget fact(String label, {Color? ink, bool isBold = false}) => Text(
+      label,
+      style: context.texts.bodySmall?.copyWith(
+        color: ink ?? quiet,
+        fontWeight: isBold ? FontWeight.w600 : null,
+      ),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
+
+    // The separator travels with the metric it introduces, so a line break
+    // can never strand a lone `·`.
+    Widget joined(Widget child) => Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Text('·', style: context.texts.bodySmall?.copyWith(color: quiet)),
+        const SizedBox(width: AppSpacing.xs),
+        child,
+      ],
+    );
+
+    final parts = <Widget>[
+      if (overdueCount > 0)
+        fact(overdueLabel, ink: semantic.danger, isBold: true),
+      if (hasDue) fact(dueLabel, ink: semantic.onStreakContainer, isBold: true),
+      if (hasNew) fact(newLabel, ink: semantic.info, isBold: true),
+    ];
+    // A filled deck with nothing pending still states both zeroes: an absent
+    // metric is ambiguous in exactly the way this line exists to prevent.
+    if (parts.isEmpty) {
+      parts.addAll(<Widget>[fact(dueLabel), fact(newLabel)]);
+    }
 
     return Wrap(
       spacing: AppSpacing.sm,
       runSpacing: AppSpacing.xs,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: <Widget>[
-        Text(
-          dueLabel,
-          style: context.texts.bodySmall?.copyWith(
-            color: hasDue ? semantic.onStreakContainer : quiet,
-            fontWeight: hasDue ? FontWeight.w600 : null,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        // The separator travels with the metric it introduces, so a line break
-        // can never strand a lone `·`.
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Text('·', style: context.texts.bodySmall?.copyWith(color: quiet)),
-            const SizedBox(width: AppSpacing.xs),
-            Text(
-              newLabel,
-              style: context.texts.bodySmall?.copyWith(
-                color: hasNew ? semantic.info : quiet,
-                fontWeight: hasNew ? FontWeight.w600 : null,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
+        for (final (index, part) in parts.indexed)
+          index == 0 ? part : joined(part),
       ],
     );
   }

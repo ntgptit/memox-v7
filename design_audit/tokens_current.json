@@ -535,12 +535,12 @@
       "carriesNoHue": false
     },
     "navigationBarTheme.indicatorColor": {
-      "hex": "#E4E6EC",
+      "hex": "#DCDCF2",
       "opaque": true,
-      "hue": 225.00000000000006,
-      "saturation": 0.17391304347826106,
-      "chroma": 0.03137254901960784,
-      "lightnessStar": 91.29928842412632,
+      "hue": 240.0,
+      "saturation": 0.45833333333333287,
+      "chroma": 0.08627450980392148,
+      "lightnessStar": 88.35837993267742,
       "classifiedAs": "role-or-on-color"
     },
     "dialogTheme.backgroundColor": {
@@ -1101,12 +1101,12 @@
       "carriesNoHue": false
     },
     "navigationBarTheme.indicatorColor": {
-      "hex": "#332F58",
+      "hex": "#2B2B6E",
       "opaque": true,
-      "hue": 245.85365853658539,
-      "saturation": 0.30370370370370364,
-      "chroma": 0.16078431372549018,
-      "lightnessStar": 21.731477494983153,
+      "hue": 240.0,
+      "saturation": 0.4379084967320261,
+      "chroma": 0.2627450980392157,
+      "lightnessStar": 21.45801835661775,
       "classifiedAs": "role-or-on-color"
     },
     "dialogTheme.backgroundColor": {

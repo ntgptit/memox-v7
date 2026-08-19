@@ -46,12 +46,29 @@ Future<void> showDeckActions(
   /// two lists to show, and the guess would be a warning about nothing on a deck
   /// nobody has studied.
   bool? hasLearnedCards,
+
+  /// The level's due-only view toggle, shown when the caller passes both.
+  /// The filter lives in this menu now — it and sort wore the same pill
+  /// clothes on the toolbar, and the rarer control moved off the row
+  /// (owner mockup, 2026-08-20). A view toggle in an action menu is
+  /// deliberate: it acts on the list the menu was opened over.
+  bool? isDueFilterActive,
+  VoidCallback? onToggleDueFilter,
 }) async {
   final action = await showModalBottomSheet<_DeckAction>(
     context: context,
     builder: (sheetContext) => MxActionSheet(
       title: sheetContext.l10n.deckActionsTitle,
       actions: <MxActionSheetAction>[
+        if (isDueFilterActive != null && onToggleDueFilter != null)
+          MxActionSheetAction(
+            label: isDueFilterActive
+                ? sheetContext.l10n.deckFilterAllLabel
+                : sheetContext.l10n.deckFilterDueLabel,
+            icon: Icons.filter_list,
+            onPressed: () =>
+                Navigator.of(sheetContext).pop(_DeckAction.toggleDueFilter),
+          ),
         MxActionSheetAction(
           label: sheetContext.l10n.deckRenameAction,
           icon: Icons.edit_outlined,
@@ -100,6 +117,8 @@ Future<void> showDeckActions(
   if (!context.mounted || action == null) return;
 
   switch (action) {
+    case _DeckAction.toggleDueFilter:
+      onToggleDueFilter?.call();
     case _DeckAction.rename:
       await showDeckRenameForm(context, deck: deck);
     case _DeckAction.move:
@@ -122,7 +141,14 @@ Future<void> showDeckActions(
 /// learning progress, which is the only way past the lock. Both kept long names
 /// after the content-type reset was removed (BR-163), because "reset" alone was
 /// never enough to tell any two of them apart.
-enum _DeckAction { rename, move, scheduler, resetProgress, delete }
+enum _DeckAction {
+  toggleDueFilter,
+  rename,
+  move,
+  scheduler,
+  resetProgress,
+  delete,
+}
 
 /// The rename form (UC-03).
 Future<void> showDeckRenameForm(

@@ -9,19 +9,19 @@ import 'package:memox/features/deck/di/deck_repository_provider.dart';
 import 'package:memox/features/deck/domain/models/deck_list_snapshot_model.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
-import 'package:memox/features/deck/presentation/widgets/items/deck_overdue_badge_widget.dart';
 import 'package:memox/features/deck/presentation/widgets/sections/deck_level_summary_widget.dart';
 import 'package:memox/l10n/generated/app_localizations.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
+import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_progress_bar.dart';
 
 import 'support/deck_screen_harness.dart';
 import 'support/fake_deck_repository.dart';
 
-/// The hero's four disjoint sets, inside a deck (BR-162): descending into A
-/// keeps the level's own breakdown on the 2×2 baseline-aligned grid —
-/// Overdue, Due today, New, Scheduled — and the oldest backlog's age stays
-/// worded into the overdue metric.
+/// The hero's metric band, inside a deck (owner mockup, 2026-08-20): one
+/// numeral answering "how much is waiting", the overdue/today breakdown as
+/// its subline, New and Scheduled demoted to the quiet context row, and the
+/// CTA that starts the study the numeral counted.
 ///
 /// The core fixture is the mandated scenario: A holds B and C; C carries the
 /// workload. The panel at A's level folds the child subtrees.
@@ -69,105 +69,125 @@ void main() {
     matching: matching,
   );
 
-  Finder metric(int count, String word) =>
-      onPanel(find.textContaining('$count $word', findRichText: true));
+  /// The hero numeral and its word are separate texts on one baseline row.
+  void expectHero(int count, String word) {
+    expect(onPanel(find.text('$count')), findsWidgets);
+    // The word may also appear in the quiet context row ("New").
+    expect(onPanel(find.text(word)), findsWidgets);
+  }
 
-  group('the hero breakdown inside a deck (BR-162)', () {
-    testWidgets('an overdue subtree keeps its cards and its days on the '
-        'panel', (tester) async {
+  group('the hero metric band (owner mockup, 2026-08-20)', () {
+    testWidgets('an overdue subtree folds into the one due numeral, with the '
+        'red half on the subline', (tester) async {
       // C: 7 due, all of them from before today, oldest a week old.
       await pumpLevel(tester, levelOf(due: 7, overdueCards: 7, overdueDays: 7));
 
+      expectHero(7, english.deckSummaryCardsDueWord);
       expect(
-        metric(7, english.deckHeroOverdueAgedMetricWord(7)),
+        onPanel(
+          find.textContaining(
+            english.deckSummaryOverduePart(7),
+            findRichText: true,
+          ),
+        ),
         findsOneWidget,
-        reason:
-            'the backlog count, with the age in words beside the set '
-            'name — no chip in the hero',
+        reason: 'the breakdown names the overdue share of the numeral',
       );
-      expect(metric(0, english.deckHeroDueTodayMetricWord), findsOneWidget);
-      expect(onPanel(find.byType(DeckOverdueBadgeWidget)), findsNothing);
-      expect(onPanel(find.byIcon(Icons.event_busy)), findsOneWidget);
+      expect(
+        onPanel(
+          find.textContaining(
+            english.deckSummaryDueTodayPart(0),
+            findRichText: true,
+          ),
+        ),
+        findsOneWidget,
+        reason: 'the split closes: 7 = 7 overdue + 0 today',
+      );
     });
 
-    testWidgets('mixed: the four sets are four figures', (tester) async {
-      // C: 40 cards, 15 due → 25 scheduled ahead; B holds 12 unscheduled
-      // rows with no due cards, so the level's fourth figure is 25 + 12.
+    testWidgets('mixed: one numeral, its split, and the quiet context row', (
+      tester,
+    ) async {
+      // C: 40 cards, 15 due of which 12 missed their day; B holds 5 new.
+      await pumpLevel(
+        tester,
+        levelOf(due: 15, overdueCards: 12, overdueDays: 7, newCards: 5),
+      );
+
+      expectHero(15, english.deckSummaryCardsDueWord);
+      expect(
+        onPanel(
+          find.textContaining(
+            english.deckSummaryOverduePart(12),
+            findRichText: true,
+          ),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        onPanel(
+          find.textContaining(
+            english.deckSummaryDueTodayPart(3),
+            findRichText: true,
+          ),
+        ),
+        findsOneWidget,
+      );
+      // New and Scheduled keep no semantic ink and no tiles — one quiet row.
+      // 40 - 15 due - 0 new in C leaves 25 scheduled; B's 12 rows hold 5 new
+      // and 7 unscheduled, so the level's resting figure is 32.
+      expect(onPanel(find.text('5')), findsWidgets);
+      expect(onPanel(find.text(english.deckHeroNewMetricWord)), findsWidgets);
+      expect(onPanel(find.text('32')), findsOneWidget);
+      expect(
+        onPanel(find.text(english.deckHeroScheduledMetricWord)),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('nothing overdue: no breakdown subline at all', (tester) async {
+      await pumpLevel(tester, levelOf(due: 7, overdueCards: 0, overdueDays: 0));
+
+      expectHero(7, english.deckSummaryCardsDueWord);
+      expect(
+        onPanel(
+          find.textContaining(
+            english.deckSummaryOverduePart(0),
+            findRichText: true,
+          ),
+        ),
+        findsNothing,
+        reason: 'with no overdue the subline would repeat the numeral above',
+      );
+    });
+
+    testWidgets('nothing due: new cards lead the hero instead (BR-150)', (
+      tester,
+    ) async {
+      await pumpLevel(
+        tester,
+        levelOf(due: 0, overdueCards: 0, overdueDays: 0, newCards: 5),
+      );
+
+      expectHero(5, english.deckHeroNewMetricWord);
+      expect(
+        onPanel(find.byType(MxActionButton)),
+        findsNothing,
+        reason: 'the CTA counts due cards, and there are none to promise',
+      );
+    });
+
+    testWidgets('the CTA states the count it starts', (tester) async {
       await pumpLevel(
         tester,
         levelOf(due: 15, overdueCards: 12, overdueDays: 7, newCards: 5),
       );
 
       expect(
-        metric(12, english.deckHeroOverdueAgedMetricWord(7)),
+        onPanel(find.text(english.deckSummaryStudyDueAction(15))),
         findsOneWidget,
+        reason: 'the button and the numeral count the same fold',
       );
-      expect(metric(3, english.deckHeroDueTodayMetricWord), findsOneWidget);
-      expect(metric(5, english.deckHeroNewMetricWord), findsOneWidget);
-      expect(
-        metric(32, english.deckHeroScheduledMetricWord),
-        findsOneWidget,
-        reason: 'the resting set closes the partition to the level total',
-      );
-    });
-
-    testWidgets('one day is already the overdue state', (tester) async {
-      await pumpLevel(tester, levelOf(due: 3, overdueCards: 3, overdueDays: 1));
-
-      expect(
-        metric(3, english.deckHeroOverdueAgedMetricWord(1)),
-        findsOneWidget,
-      );
-    });
-
-    testWidgets('a long backlog caps at 99+', (tester) async {
-      await pumpLevel(
-        tester,
-        levelOf(due: 3, overdueCards: 3, overdueDays: 120),
-      );
-
-      expect(
-        metric(3, english.deckHeroOverdueAgedCapMetricWord),
-        findsOneWidget,
-      );
-      expect(
-        metric(3, english.deckHeroOverdueAgedMetricWord(120)),
-        findsNothing,
-      );
-    });
-
-    testWidgets('due today: filled calendar on, no badge anywhere', (
-      tester,
-    ) async {
-      await pumpLevel(tester, levelOf(due: 7, overdueCards: 0, overdueDays: 0));
-
-      expect(metric(0, english.deckHeroOverdueMetricWord), findsOneWidget);
-      expect(metric(7, english.deckHeroDueTodayMetricWord), findsOneWidget);
-      expect(onPanel(find.byIcon(Icons.event)), findsOneWidget);
-      expect(onPanel(find.byType(DeckOverdueBadgeWidget)), findsNothing);
-    });
-
-    testWidgets('nothing due: three anchors still stand, all quiet', (
-      tester,
-    ) async {
-      // Every metric keeps its icon anchor at zero — the shape is the metric's
-      // identity — and every one of them rests **outlined** (parity E5). The
-      // backlog calendar was filled even at zero and the sparkle was outlined
-      // even with work waiting; M99.26 made all three follow the count.
-      await pumpLevel(
-        tester,
-        levelOf(due: 0, overdueCards: 0, overdueDays: 0, newCards: 5),
-      );
-
-      expect(onPanel(find.byIcon(Icons.event_busy_outlined)), findsOneWidget);
-      expect(onPanel(find.byIcon(Icons.event_outlined)), findsOneWidget);
-      // Five new cards, so this one is filled.
-      expect(onPanel(find.byIcon(Icons.auto_awesome)), findsOneWidget);
-      expect(
-        onPanel(find.byIcon(Icons.event_available_outlined)),
-        findsOneWidget,
-      );
-      expect(onPanel(find.byType(DeckOverdueBadgeWidget)), findsNothing);
     });
 
     testWidgets('the eyebrow scopes the panel to today', (tester) async {
@@ -176,9 +196,8 @@ void main() {
       expect(onPanel(find.text(english.deckSummaryTodayLabel)), findsOneWidget);
     });
 
-    testWidgets('the screen reader hears four sentences, each once', (
-      tester,
-    ) async {
+    testWidgets('the screen reader hears the numeral, the backlog with its '
+        'age, and the context row', (tester) async {
       await pumpLevel(
         tester,
         levelOf(due: 15, overdueCards: 12, overdueDays: 7, newCards: 5),
@@ -186,16 +205,16 @@ void main() {
 
       expect(
         onPanel(
+          find.bySemanticsLabel(english.deckHeroDueTodaySemanticLabel(15)),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        onPanel(
           find.bySemanticsLabel(english.deckHeroOverdueSemanticLabel(12, 7)),
         ),
         findsOneWidget,
         reason: 'the sentence carries both units: cards and days',
-      );
-      expect(
-        onPanel(
-          find.bySemanticsLabel(english.deckHeroDueTodaySemanticLabel(3)),
-        ),
-        findsOneWidget,
       );
       expect(
         onPanel(find.bySemanticsLabel(english.deckHeroNewSemanticLabel(5))),
@@ -209,76 +228,13 @@ void main() {
       );
     });
 
-    testWidgets('the numerals of each row share one baseline', (tester) async {
-      // Row one mixes type roles on purpose — a primary `headlineMedium`
-      // beside a supporting `titleLarge` — and a top-aligned row would hang
-      // the taller line box's baseline below its neighbour's. The grid rows
-      // align on the alphabetic baseline instead, and this measures the
-      // rendered result rather than trusting the flag.
-      double baselineOf(int count, String word) {
-        final finder = metric(count, word);
-        final rich = tester.widget<RichText>(finder);
-        final box = tester.renderObject<RenderBox>(finder);
-        final painter = TextPainter(
-          text: rich.text,
-          textDirection: TextDirection.ltr,
-          textScaler: rich.textScaler,
-        )..layout(maxWidth: box.size.width);
-        final metrics = painter.computeLineMetrics().first;
-
-        return tester.getTopLeft(finder).dy + metrics.baseline;
-      }
-
-      await pumpLevel(
-        tester,
-        levelOf(due: 15, overdueCards: 12, overdueDays: 7, newCards: 5),
-      );
-
-      expect(
-        (baselineOf(12, english.deckHeroOverdueAgedMetricWord(7)) -
-                baselineOf(3, english.deckHeroDueTodayMetricWord))
-            .abs(),
-        lessThanOrEqualTo(0.5),
-        reason: 'primary and supporting numerals sit on one baseline',
-      );
-      expect(
-        (baselineOf(5, english.deckHeroNewMetricWord) -
-                baselineOf(32, english.deckHeroScheduledMetricWord))
-            .abs(),
-        lessThanOrEqualTo(0.5),
-      );
-    });
-
-    testWidgets('the grid keeps two aligned columns even with the aged word', (
-      tester,
-    ) async {
-      // The regression this pins: the overdue cell used to size itself around
-      // a chip, so the second column of its row started further right than
-      // the second column of the row below. Fixed-width cells align them.
+    testWidgets('the learned bar still closes the panel', (tester) async {
       await pumpLevel(
         tester,
         levelOf(due: 15, overdueCards: 12, overdueDays: 7, newCards: 5),
       );
 
       expect(onPanel(find.byType(MxProgressBar)), findsOneWidget);
-      final dueTodayLeft = tester
-          .getTopLeft(metric(3, english.deckHeroDueTodayMetricWord))
-          .dx;
-      final scheduledLeft = tester
-          .getTopLeft(metric(32, english.deckHeroScheduledMetricWord))
-          .dx;
-      expect(
-        dueTodayLeft,
-        scheduledLeft,
-        reason: 'the right column shares one left edge across both rows',
-      );
-      final overdueLeft = tester
-          .getTopLeft(metric(12, english.deckHeroOverdueAgedMetricWord(7)))
-          .dx;
-      final newLeft = tester
-          .getTopLeft(metric(5, english.deckHeroNewMetricWord))
-          .dx;
-      expect(overdueLeft, newLeft);
     });
 
     testWidgets('compact width at double scale wraps without overflow', (
@@ -292,14 +248,17 @@ void main() {
       );
 
       // `flutter_test` turns RenderFlex overflow into a failure by itself;
-      // reaching these assertions means the wrapped layout held, with every
-      // figure still on screen.
+      // reaching these assertions means the layout held.
+      expectHero(15, english.deckSummaryCardsDueWord);
       expect(
-        metric(12, english.deckHeroOverdueAgedMetricWord(7)),
+        onPanel(
+          find.textContaining(
+            english.deckSummaryOverduePart(12),
+            findRichText: true,
+          ),
+        ),
         findsOneWidget,
       );
-      expect(metric(3, english.deckHeroDueTodayMetricWord), findsOneWidget);
-      expect(metric(46, english.deckHeroNewMetricWord), findsOneWidget);
     });
 
     testWidgets('dark theme renders the same grammar', (tester) async {
@@ -309,21 +268,25 @@ void main() {
         isDark: true,
       );
 
+      expectHero(7, english.deckSummaryCardsDueWord);
       expect(
-        metric(7, english.deckHeroOverdueAgedMetricWord(7)),
+        onPanel(
+          find.textContaining(
+            english.deckSummaryOverduePart(7),
+            findRichText: true,
+          ),
+        ),
         findsOneWidget,
       );
-      expect(onPanel(find.byIcon(Icons.event_busy)), findsOneWidget);
     });
 
-    testWidgets('local midnight turns +7d into +8d with no write anywhere', (
-      tester,
-    ) async {
+    testWidgets('local midnight ages the backlog sentence with no write '
+        'anywhere', (tester) async {
       // The whole path on screen: the controller's midnight tick re-reads,
-      // the mapper re-derives day count and partition from the new `now`,
-      // and the panel's badge moves — while the database has not seen a
-      // single write. The fake stands in for the mapper's read-time
-      // arithmetic: what it serves depends only on the clock it is read at.
+      // the mapper re-derives the day count from the new `now`, and the
+      // panel's screen-reader sentence — the one place the age lives now —
+      // moves, while the database has not seen a single write. The fake
+      // stands in for the mapper's read-time arithmetic.
       final DateTime start = deckTestNow;
       final DateTime midnight = start.add(const Duration(hours: 5));
       DateTime current = start;
@@ -361,11 +324,10 @@ void main() {
       await tester.pump();
       await tester.pump();
 
-      // Before the boundary: the tile's chip and the panel's worded age
-      // agree on seven days.
-      expect(find.text(english.deckOverdueBadgeLabel(7)), findsOneWidget);
       expect(
-        metric(7, english.deckHeroOverdueAgedMetricWord(7)),
+        onPanel(
+          find.bySemanticsLabel(english.deckHeroOverdueSemanticLabel(7, 7)),
+        ),
         findsOneWidget,
       );
 
@@ -373,12 +335,18 @@ void main() {
       await tester.pump(const Duration(hours: 5, minutes: 1));
       await tester.pump();
 
-      expect(find.text(english.deckOverdueBadgeLabel(8)), findsOneWidget);
       expect(
-        metric(7, english.deckHeroOverdueAgedMetricWord(8)),
+        onPanel(
+          find.bySemanticsLabel(english.deckHeroOverdueSemanticLabel(7, 8)),
+        ),
         findsOneWidget,
       );
-      expect(find.text(english.deckOverdueBadgeLabel(7)), findsNothing);
+      expect(
+        onPanel(
+          find.bySemanticsLabel(english.deckHeroOverdueSemanticLabel(7, 7)),
+        ),
+        findsNothing,
+      );
     });
   });
 }

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../domain/models/deck_schedule_status_model.dart';
 import 'deck_icon_area_widget.dart';
-import 'deck_overdue_badge_widget.dart';
 
 /// The deck's schedule at a glance: one large icon, three states (BR-161).
 ///
@@ -17,9 +15,11 @@ import 'deck_overdue_badge_widget.dart';
 /// state alongside colour — outlined calendar, filled calendar, missed
 /// calendar — so the three read apart in grayscale.
 ///
-/// Overdue adds the day badge on the well's corner: late study, counted in
-/// completed local days (BR-105), on the error-container pair — the owner's
-/// call (BR-161): missed reads red, and only missed does.
+/// Overdue used to add a `+7d` day badge on the well's corner; the badge is
+/// gone (owner mockup, 2026-08-20) — how *big* the backlog is matters more
+/// than how old, and the workload line now carries the overdue count in
+/// words. The day count survives here in the screen-reader sentence, which
+/// always spoke in days (BR-105) rather than the shorthand.
 ///
 /// **Takes the classified state, not the summary.** The status is computed
 /// once by `deckScheduleStatusOf` — through `DeckSummary.scheduleStatus` for a
@@ -69,9 +69,9 @@ class DeckStatusIconWidget extends StatelessWidget {
 
     if (status != DeckScheduleStatus.overdue) return area;
 
-    // One sentence for the screen reader, not the visual shorthand: "+7d" is
-    // for eyes. The visual pieces are excluded so nothing reads twice — the
-    // workload line still announces its own counts in words.
+    // One sentence for the screen reader: the well itself is visual-only,
+    // and the day count has no visual carrier anymore — this label is where
+    // "how long missed" lives now.
     return Semantics(
       // Its own node: inside the card's tap target the label would otherwise
       // merge into the row's combined description and become unfindable as a
@@ -81,19 +81,7 @@ class DeckStatusIconWidget extends StatelessWidget {
         dueCardCount,
         overdueDayCount,
       ),
-      child: ExcludeSemantics(
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: <Widget>[
-            area,
-            PositionedDirectional(
-              top: -AppSpacing.xs,
-              end: -AppSpacing.xs,
-              child: DeckOverdueBadgeWidget(days: overdueDayCount),
-            ),
-          ],
-        ),
-      ),
+      child: ExcludeSemantics(child: area),
     );
   }
 }

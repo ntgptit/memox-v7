@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../../core/navigation/route_names.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -70,6 +72,18 @@ class DeckSummarySectionWidget extends ConsumerWidget {
           ? DeckLevelSummaryWidget(
               snapshot: snapshot,
               onDismiss: _setSummaryVisible(ref, isVisible: false),
+              onStudyDue: snapshot.levelDueCardCount == 0
+                  ? null
+                  : () => snapshot.parent == null
+                        // The Study tab lists every root's workload; one
+                        // session cannot span roots (BR-101).
+                        ? context.goNamed(RouteNames.study)
+                        : context.goNamed(
+                            RouteNames.deckStudy,
+                            pathParameters: <String, String>{
+                              RoutePathParams.deckId: snapshot.parent!.id,
+                            },
+                          ),
             )
           // No `Align` around it: `MxTextButton` starts its own label and takes
           // no padding, so the link lands on the same vertical line as the

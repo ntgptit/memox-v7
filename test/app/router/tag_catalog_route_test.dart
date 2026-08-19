@@ -129,13 +129,17 @@ void main() {
     expect(find.byType(TagCatalogScreen), findsNothing);
   });
 
-  testWidgets('the Library app bar opens it from the root level', (
+  testWidgets('the Library overflow menu opens it from the root level', (
     tester,
   ) async {
+    // The entry moved off the bar into its one overflow menu (owner mockup,
+    // 2026-08-20).
     await pumpApp(tester, cards: cardRepo(), initialLocation: '/');
     expect(find.byType(DeckListScreen), findsOneWidget);
 
-    await tester.tap(find.byTooltip(english.tagCatalogEntryAction));
+    await tester.tap(find.byTooltip(english.libraryActionsTitle));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(english.tagCatalogEntryAction).last);
     await tester.pumpAndSettle();
 
     expect(find.byType(TagCatalogScreen), findsOneWidget);

@@ -206,7 +206,10 @@ void main() {
 
       // One deck has cards due; the other offers the figure in its place.
       expect(find.text(english.deckStudyAction), findsOneWidget);
-      expect(find.text(english.deckLearnedPercentLabel(100)), findsOneWidget);
+      expect(
+        find.text(english.deckTileLearnedPercentLabel(100)),
+        findsOneWidget,
+      );
 
       // The tap goes to a route this harness does not mount, so the assertion
       // is that the button *is* the deck's own — the id it would carry. Where
@@ -252,7 +255,7 @@ void main() {
       expect(
         find.descendant(
           of: find.byType(DeckTileWidget),
-          matching: find.textContaining('7 ${english.deckDueMetricWord}'),
+          matching: find.textContaining(english.deckTileDueChipLabel(7)),
         ),
         findsOneWidget,
         reason: 'the due count',

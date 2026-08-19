@@ -12,19 +12,20 @@ import 'package:memox/shared/widgets/mx_progress_bar.dart';
 import 'support/deck_screen_harness.dart';
 import 'support/fake_deck_repository.dart';
 
-/// The tile's state matrix: two workload numbers, one gauge, one verb
+/// The tile's state matrix: the workload chips, one gauge, one verb
 /// (BR-150, BR-142, BR-29).
 ///
-/// **Both numbers are always on the line, zero included.** An absent metric is
-/// a convention — "no chip means none due" — and a convention is exactly what
-/// a glanceable line must not require. Each state below asserts presence *and*
-/// wording, because the words are the accessible signal and colour only
-/// supports them.
+/// **Positive counts only, until nothing is pending** (owner mockup,
+/// 2026-08-20): the line leads with what needs doing — overdue, then due,
+/// then new — and a metric at zero stays quiet while any sibling is speaking.
+/// The one exception is a filled deck with nothing pending at all, which
+/// still states both zeroes: there, an absent metric would be ambiguous in
+/// exactly the way the line exists to prevent.
 void main() {
   final english = AppLocalizationsEn();
 
-  String due(int count) => '$count ${english.deckDueMetricWord}';
-  String fresh(int count) => '$count ${english.deckNewMetricWord}';
+  String due(int count) => english.deckTileDueChipLabel(count);
+  String fresh(int count) => english.deckTileNewChipLabel(count);
 
   /// Scoped to the tile: the summary panel above the list states the same
   /// metrics in the same words, and an unscoped finder counts both.
@@ -62,7 +63,7 @@ void main() {
       );
       expect(bar.value, lessThan(1));
       expect(
-        onTile(find.text(english.deckLearnedPercentLabel(37))),
+        onTile(find.text(english.deckTileLearnedPercentLabel(37))),
         findsOneWidget,
       );
     });
@@ -123,12 +124,12 @@ void main() {
       newCardCount: 14,
     );
 
-    testWidgets('states the zero, keeps Study, and claims no success', (
-      tester,
-    ) async {
+    testWidgets('leads with the new count, keeps Study, and claims no '
+        'success', (tester) async {
       await pump(tester, summary);
 
-      expect(onTile(find.text(due(0))), findsOneWidget);
+      // The due metric at zero stays quiet while new is speaking.
+      expect(onTile(find.text(due(0))), findsNothing);
       expect(onTile(find.text(fresh(14))), findsOneWidget);
       expect(find.byType(DeckStudyButtonWidget), findsOneWidget);
       // Nothing due today is not "done": no success ink anywhere on the tile.
@@ -149,13 +150,13 @@ void main() {
       learnedCardCount: 4,
     );
 
-    testWidgets('states the zero on the new side and keeps Study', (
+    testWidgets('keeps the new side quiet at zero and keeps Study', (
       tester,
     ) async {
       await pump(tester, summary);
 
       expect(onTile(find.text(due(5))), findsOneWidget);
-      expect(onTile(find.text(fresh(0))), findsOneWidget);
+      expect(onTile(find.text(fresh(0))), findsNothing);
       expect(find.byType(DeckStudyButtonWidget), findsOneWidget);
     });
   });
@@ -186,7 +187,7 @@ void main() {
       // percentage stays in the quiet variant — success is earned at 100%.
       expect(find.byIcon(Icons.check_circle), findsNothing);
       expect(
-        onTile(find.text(english.deckLearnedPercentLabel(50))),
+        onTile(find.text(english.deckTileLearnedPercentLabel(50))),
         findsOneWidget,
       );
     });
@@ -213,7 +214,7 @@ void main() {
       expect(onTile(find.text(due(0))), findsOneWidget);
       expect(onTile(find.text(fresh(0))), findsOneWidget);
       expect(
-        onTile(find.text(english.deckLearnedPercentLabel(100))),
+        onTile(find.text(english.deckTileLearnedPercentLabel(100))),
         findsOneWidget,
       );
       expect(find.byType(DeckStudyButtonWidget), findsNothing);
@@ -309,8 +310,11 @@ void main() {
     });
   });
 
-  group('the scheduler names itself only where it distinguishes', () {
-    testWidgets('the root list shows it', (tester) async {
+  group('the scheduler is off the tile entirely', () {
+    testWidgets('the root list no longer names it', (tester) async {
+      // The algorithm moved to the deck's own level (owner mockup,
+      // 2026-08-20): a column of "8 boxes" distinguished nothing and dressed
+      // every card in a term from the settings sheet.
       await pump(
         tester,
         fakeSummary(id: 'd1', name: 'Nouns', totalCardCount: 60),
@@ -318,7 +322,7 @@ void main() {
 
       expect(
         onTile(find.textContaining(english.schedulerEightBoxShortLabel)),
-        findsOneWidget,
+        findsNothing,
       );
     });
   });
