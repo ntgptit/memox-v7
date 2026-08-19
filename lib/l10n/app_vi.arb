@@ -2978,14 +2978,6 @@
   "@progressDeckMissingBackAction": {
     "description": "Returns to the library level of Progress by Deck."
   },
-  "progressPlaceholderTitle": "Tính năng Tiến độ đang được phát triển",
-  "@progressPlaceholderTitle": {
-    "description": "Heading of the Progress placeholder (AD-19)."
-  },
-  "progressPlaceholderMessage": "Các lượt học hiện tại vẫn được lưu để sử dụng khi tính năng hoàn tất.",
-  "@progressPlaceholderMessage": {
-    "description": "Body of the Progress placeholder: study history is already recorded, nothing is lost while waiting."
-  },
   "studyHomeTitle": "Học",
   "@studyHomeTitle": {
     "description": "App-bar title of the Study tab's home screen (UC-14)."
