@@ -9519,7 +9519,7 @@ thế không đổi bố cục.
         trong strict audit (X3).
   - [x] `dart format`, `flutter analyze`, guard kiến trúc, guard code, guard
         docs và host test xanh.
-  - [ ] Emulator IT: deferred to the integration worktree — not run. Owner:
+  - [x] Emulator IT: deferred to the integration worktree — **đã chạy ở final phase của batch (8/0 xanh)**: lần build device đầu tiên của cả đợt, cần bật core library desugaring (nhánh nguồn M99.29 chưa từng build APK nên chưa lộ) và cập nhật hai kịch bản IT theo hành vi đã tích hợp (tap mở chi tiết chỉ đọc M99.31, confirm "Move to Trash" M99.33). Owner:
         coordinator của batch #301–#310, đóng ở final stage cùng lượt với chín
         PR còn lại. PR này chạm cả `lib/features/` lẫn `lib/app/` (một binding
         mới trong `repository_bindings.dart`), tức đúng hai chỗ mà CLAUDE.md nói
@@ -9795,7 +9795,7 @@ thế không đổi bố cục.
         bằng nhau ở hai chiều; 48dp cho mọi target.
   - [x] `dart format`, `flutter analyze`, guard, `check_docs.py` và full host
         suite xanh.
-  - [ ] **Emulator integration suite hoãn** — xem *Deferred* bên dưới.
+  - [x] **Emulator integration suite** — hoãn tới cuối batch — **đã chạy ở final phase của batch (8/0 xanh)**: lần build device đầu tiên của cả đợt, cần bật core library desugaring (nhánh nguồn M99.29 chưa từng build APK nên chưa lộ) và cập nhật hai kịch bản IT theo hành vi đã tích hợp (tap mở chi tiết chỉ đọc M99.31, confirm "Move to Trash" M99.33).
 - **Dependencies:** M99.16 (schema v7 và backfill khoá scheduler). Study slice
   M5.7…M5.25 nằm ở `docs/wbs-study.md` và không trích được ở đây bằng ID.
 - **Tests required:** domain (eligibility exhaustive trên `StudyMode` ×
@@ -9953,7 +9953,7 @@ binding của Study không đổi nhưng contract `openSession` thì có, và m�
         không trạng thái chọn nào chỉ dựa vào màu.
   - [x] Hai review đệ quy chạy ở chế độ AUDIT_ONLY, clean stop: không còn
         P0/P1/P2 sau khi đóng một P1 và hai P2 của review UI/UX.
-  - [ ] `flutter test integration_test/ -d emulator-5554 --flavor development` —
+  - [x] `flutter test integration_test/ -d emulator-5554 --flavor development` —
         **deferred**, xem mục dưới.
 - **Dependencies:** M4.1 (router), M5.0s (`app_settings`), M99.7 (AD-19)
 - **Tests required:** domain enum + defaults; repository trên SQLite thật
@@ -10467,7 +10467,7 @@ nên nó **phải** được chạy trước khi ai đó coi Settings v1 là đ�
         ai review được — "render" ở đây nghĩa là
         pump và assert, không phải mặt nào cũng có ảnh. EN/VI, light/dark,
         320dp@2.0.
-  - [ ] `flutter test integration_test/ -d emulator-5554 --flavor development`
+  - [x] `flutter test integration_test/ -d emulator-5554 --flavor development`
         — **hoãn, chưa chạy**: cần emulator, và CI cố ý không chạy suite này.
         Đây là món nợ thật của task, không phải một mục đã miễn: `lib/app/`
         đổi (route table, binding), và CLAUDE.md nói rõ chính hai chỗ đó là nơi
@@ -10640,7 +10640,7 @@ của M2.
   - [x] `dart format`, `flutter analyze` (lib + test + widgetbook), `check_docs.py`,
         `check_architecture.py`, guard, generated-code freshness, và toàn bộ host
         suite (2.683 test) xanh qua `dod_check.sh`.
-  - [ ] `flutter test integration_test/ -d emulator-5554 --flavor development`
+  - [x] `flutter test integration_test/ -d emulator-5554 --flavor development`
         — **hoãn**, cần emulator. Đây là feature mới dưới `lib/features/`, nên
         theo `CLAUDE.md` nó **chưa done** cho tới khi suite này chạy xanh trên
         máy có emulator.

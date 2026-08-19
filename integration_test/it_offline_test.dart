@@ -85,7 +85,9 @@ void main() {
     await robot.tapText(ItText.deleteCard);
     // The confirm names where the card goes since M99.33 (BR-256).
     await robot.tapText('Move to Trash');
-    expect(find.text('No cards yet'), findsWidgets);
+    // Trashing the deck's last card flips it back to `unset` (BR-260), so
+    // the exit lands on the deck's own empty face, not a card list.
+    expect(find.text('Nothing in here yet'), findsWidgets);
   });
 
   testWidgets('IT-CONT-008 · a whole session runs with the radios off', (
