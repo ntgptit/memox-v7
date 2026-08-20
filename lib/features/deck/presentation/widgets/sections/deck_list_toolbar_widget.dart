@@ -111,7 +111,11 @@ class DeckListToolbarWidget extends StatelessWidget {
                   ? context.l10n.deckSortNameLabel
                   : context.l10n.deckSortRecentLabel,
               icon: Icons.swap_vert,
-              isSelected: isByName,
+              // **Always selected** (owner review, 2026-08-20): this pill does
+              // not toggle a filter on and off, it names the order the list is
+              // already in. Rendering it unselected while it described a live
+              // sort said the opposite.
+              isSelected: true,
               // `A-Z` is two letters to a screen reader. The expansion is what
               // gets announced; the abbreviation is what gets read.
               semanticLabel: isByName

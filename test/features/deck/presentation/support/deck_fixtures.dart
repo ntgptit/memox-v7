@@ -108,11 +108,13 @@ DeckSummary fakeSummary({
   int learnedCardCount = 0,
   int subDeckCount = 0,
   SchedulerType schedulerType = SchedulerType.eightBox,
+  DeckContentType contentType = DeckContentType.deck,
   DateTime? createdAt,
 }) => DeckSummary(
   deck: fakeRootDeck(
     id: id,
     name: name,
+    contentType: contentType,
     schedulerType: schedulerType,
     createdAt: createdAt,
   ),

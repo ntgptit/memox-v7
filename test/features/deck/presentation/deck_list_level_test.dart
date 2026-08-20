@@ -11,6 +11,7 @@ import 'package:memox/features/deck/domain/models/deck_path_segment_model.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
 import 'package:memox/features/deck/presentation/widgets/items/deck_tile_widget.dart';
+import 'package:memox/shared/widgets/mx_breadcrumb.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
@@ -20,17 +21,14 @@ import 'package:memox/shared/widgets/mx_loading_state.dart';
 import 'support/deck_screen_harness.dart';
 import 'support/fake_deck_repository.dart';
 
-/// `DeckListScreen` with a parent — the read states inside a deck (UC-06 step 4)
-/// and the not-found path (UC-03 E1).
-///
+/// `DeckListScreen` with a parent — the read states inside a deck (UC-06 step
+/// 4) and the not-found path (UC-03 E1).
 /// Same screen as `deck_list_screen_test.dart` pumps, one argument different;
-/// the two files are split by the *level* they exercise, not by widget —
-/// the claim of the unification: everything below is the level-dependent
-/// behaviour, and it is a short list.
+/// the two are split by the *level* they exercise, not by widget — everything
+/// below is the level-dependent behaviour, and it is a short list.
 ///
-/// The create-action matrix lives in `deck_level_create_test.dart`, the write
-/// flows in `deck_level_actions_test.dart`, and the breadcrumb in
-/// `deck_path_test.dart`.
+/// Create-action matrix: `deck_level_create_test.dart`. Write flows:
+/// `deck_level_actions_test.dart`. Breadcrumb: `deck_path_test.dart`.
 void main() {
   final english = AppLocalizationsEn();
 
@@ -88,8 +86,8 @@ void main() {
     testWidgets('a deck deleted elsewhere shows not-found, not an error', (
       tester,
     ) async {
-      // UC-03 E1. Nothing the user did was wrong, so this gets a way back rather
-      // than a retry button that would fail forever.
+      // UC-03 E1. Nothing the user did was wrong, so this gets a way back
+      // rather than a retry that would fail forever.
       await pumpLevel(tester, FakeDeckRepository.missingDeck());
 
       expect(find.text(english.deckDetailNotFoundTitle), findsOneWidget);
@@ -115,11 +113,9 @@ void main() {
 
     testWidgets('tapping retry actually re-reads the level', (tester) async {
       // The button existing was asserted above; that it *does* something was
-      // not. Worth its own case because the wiring is easy to get subtly
-      // wrong: this screen used to reach the container through
-      // `ProviderScope.containerOf` with no `ref` while the sibling screen
-      // used `ref.invalidate` — two idioms doing one job, which a clone
-      // copies at random.
+      // not. Worth its own case: this screen used to reach the container
+      // through `ProviderScope.containerOf` with no `ref` while the sibling
+      // screen used `ref.invalidate` — two idioms doing one job.
       final repository = FakeDeckRepository.failing(
         const DatabaseFailure(message: 'unavailable'),
       );
@@ -136,9 +132,8 @@ void main() {
     testWidgets('the level is read for the deck the route named', (
       tester,
     ) async {
-      // The family argument, end to end. A screen that dropped it would render
-      // the root list under the deck's title and nobody would notice from the
-      // pixels.
+      // The family argument, end to end: a screen that dropped it would render
+      // the root list under the deck's title.
       final repository = serving(fakeRootDeck(id: 'deck-9', name: 'Japanese'));
 
       await pumpLevel(tester, repository, deckId: 'deck-9');
@@ -157,17 +152,25 @@ void main() {
 
       await pumpLevel(tester, serving(deck, children: children));
 
-      // **In the app bar specifically.** The name is on screen twice now — the
-      // title, and the breadcrumb's own last step — so a bare `findsOneWidget`
-      // would fail for a reason that has nothing to do with the title, and a
-      // `findsNWidgets(2)` would pass if the title vanished and the crumb grew a
-      // second copy.
+      // The name is on screen twice — the title and the path's last step —
+      // and both are inside the bar since the path became its subline (owner
+      // review, 2026-08-20). Counting is not enough on its own, so the crumb
+      // is pinned separately: two would also pass if the title vanished and
+      // the crumb grew a copy.
       expect(
         find.descendant(
           of: find.byType(AppBar),
           matching: find.text('Japanese N5'),
         ),
+        findsNWidgets(2),
+      );
+      expect(
+        find.descendant(
+          of: find.byType(MxBreadcrumb),
+          matching: find.text('Japanese N5'),
+        ),
         findsOneWidget,
+        reason: 'one of the two is the path, and the other is the title',
       );
       expect(find.byType(DeckTileWidget), findsNWidgets(2));
       expect(find.text('Hiragana'), findsOneWidget);
@@ -176,10 +179,9 @@ void main() {
     testWidgets('Study appears only where something is due, and answers', (
       tester,
     ) async {
-      // **The button is real before the feature is.** There is no study session
-      // until M5, so it says so rather than swallowing the tap — the project
-      // refuses enabled-looking controls that go nowhere, and a reply is what
-      // separates this from one. The layout under review is then the real one.
+      // **The button is real before the feature is.** There is no study
+      // session until M5, so it says so rather than swallowing the tap. The
+      // layout under review is then the real one.
       await pumpLevel(
         tester,
         serving(
@@ -222,8 +224,7 @@ void main() {
     testWidgets('a child shows the same four facts a root deck does', (
       tester,
     ) async {
-      // The reason the recursive aggregate exists: a regression here means
-      // the root and deck levels have drifted apart again.
+      // A regression here means the two levels have drifted apart again.
       await pumpLevel(
         tester,
         serving(
@@ -243,8 +244,7 @@ void main() {
 
       expect(find.text('Hiragana'), findsOneWidget);
       expect(
-        // `textContaining`, because the meta line is a `Text.rich` of spans
-        // and `find.text` only matches a plain `Text`.
+        // `textContaining`: the meta line is a `Text.rich` of spans.
         find.textContaining(english.deckCardCountLabel(42)),
         findsOneWidget,
         reason: 'the card count',

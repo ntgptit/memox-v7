@@ -199,6 +199,24 @@ List<AuditSkipAllowance> deckShellAllowances({
   ];
 }
 
+/// The hero card's own surface, which its content now covers.
+///
+/// The brand-tinted context row and the full-width Study action leave no
+/// single colour at the 90% the raster cross-check needs, so the card's
+/// declared `surface` can be neither confirmed nor contradicted. The fill is
+/// pinned by the `mx_card_*` goldens; the row and the button declare colours
+/// the audit does read.
+const AuditSkipAllowance heroCardRasterAllowance = AuditSkipAllowance(
+  itemId: 'deck_screen',
+  reason: SkipReason.rasterNotFlat,
+  detailContains: 'covers only 0%',
+  rationale:
+      'The hero card declares `surface` and its own content covers it: the '
+      'brand-tinted context row and the full-width Study action. No single '
+      'colour reaches 90%, so the declaration cannot be checked from the '
+      'raster. The card fill is pinned by the mx_card_* goldens.',
+);
+
 /// The two unreadable nodes an `MxActionButton` contributes.
 ///
 /// Scoped to [itemId] so the empty state's button and the error state's Retry

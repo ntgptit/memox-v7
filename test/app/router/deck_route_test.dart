@@ -137,7 +137,10 @@ void main() {
           of: find.byType(AppBar),
           matching: find.text('Japanese N5'),
         ),
-        findsOneWidget,
+        // Twice: the bar's title and the path's last step, which is the bar's
+        // subline since the header became one block (owner review,
+        // 2026-08-20).
+        findsNWidgets(2),
       );
       expect(tester.takeException(), isNull);
     });

@@ -61,7 +61,10 @@ void main() {
     );
     // The context row: 14 new, and 180 − 12 − 14 = 154 scheduled ahead.
     expect(inSummary(find.text('14')), findsWidgets);
-    expect(inSummary(find.text(english.deckHeroNewMetricWord)), findsWidgets);
+    expect(
+      inSummary(find.text(english.deckHeroNewMetricWord.toLowerCase())),
+      findsWidgets,
+    );
     expect(inSummary(find.text('154')), findsOneWidget);
     // The hero numeral speaks above the context row's figures.
     expect(sizeOfText(tester, '12'), greaterThan(sizeOfText(tester, '14')));
@@ -92,7 +95,10 @@ void main() {
     // The panel opened by itself: new cards are work, so `auto` shows it.
     expect(find.byType(DeckLevelSummaryWidget), findsOneWidget);
     expect(inSummary(find.text('20')), findsWidgets);
-    expect(inSummary(find.text(english.deckHeroNewMetricWord)), findsWidgets);
+    expect(
+      inSummary(find.text(english.deckHeroNewMetricWord.toLowerCase())),
+      findsWidgets,
+    );
     // Nothing due, so no "cards due" headline to mislead with.
     expect(inSummary(find.text(english.deckSummaryCardsDueWord)), findsNothing);
 
@@ -131,7 +137,7 @@ void main() {
     expect(inSummary(find.text('0')), findsWidgets);
     expect(inSummary(find.text('8')), findsOneWidget);
     expect(
-      inSummary(find.text(english.deckHeroScheduledMetricWord)),
+      inSummary(find.text(english.deckHeroScheduledMetricWord.toLowerCase())),
       findsOneWidget,
     );
     expect(

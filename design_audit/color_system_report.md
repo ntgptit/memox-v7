@@ -18,15 +18,15 @@ guess.
 
 | | |
 |---|---|
-| Files scanned (`lib/`, hand-written) | 655 |
-| Colour sites found | 476 |
+| Files scanned (`lib/`, hand-written) | 656 |
+| Colour sites found | 478 |
 | Violations | 0 |
 
 **By element kind**
 
 | kind | sites |
 |---|---|
-| other | 297 |
+| other | 299 |
 | background | 18 |
 | shadow | 1 |
 | border | 13 |
@@ -37,12 +37,12 @@ guess.
 
 | kind | sites |
 |---|---|
-| shared-constant | 143 |
+| shared-constant | 144 |
 | blend-source | 4 |
 | Colors-material | 5 |
 | hardcoded-literal | 97 |
 | opacity-modified-token | 11 |
-| theme-token | 216 |
+| theme-token | 217 |
 
 **By violation code**
 

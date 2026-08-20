@@ -57,14 +57,14 @@ class DeckSummarySectionWidget extends ConsumerWidget {
     };
 
     return Padding(
-      // `md` above since the density pass: the field this gap used to clear is
-      // collapsed into the breadcrumb strip at rest, so what sits above the
-      // panel now is the strip itself — a section break against chrome, not
-      // against another floating surface. `deck_list_spacing_test.dart` still
-      // measures the opened-field case and `sm` is its floor.
+      // `sm` above (owner review, 2026-08-20): the path is inside the bar now,
+      // and the bar's own hairline is the separation between chrome and body,
+      // so `md` on top of that break measured about 40px of dead space above
+      // the panel on device. `sm` is the floor `deck_list_spacing_test.dart`
+      // holds for "visibly separate" and this sits on it.
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
-        AppSpacing.md,
+        AppSpacing.sm,
         AppSpacing.lg,
         AppSpacing.lg,
       ),

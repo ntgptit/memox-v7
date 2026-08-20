@@ -137,10 +137,13 @@ void main() {
       // 40 - 15 due - 0 new in C leaves 25 scheduled; B's 12 rows hold 5 new
       // and 7 unscheduled, so the level's resting figure is 32.
       expect(onPanel(find.text('5')), findsWidgets);
-      expect(onPanel(find.text(english.deckHeroNewMetricWord)), findsWidgets);
+      expect(
+        onPanel(find.text(english.deckHeroNewMetricWord.toLowerCase())),
+        findsWidgets,
+      );
       expect(onPanel(find.text('32')), findsOneWidget);
       expect(
-        onPanel(find.text(english.deckHeroScheduledMetricWord)),
+        onPanel(find.text(english.deckHeroScheduledMetricWord.toLowerCase())),
         findsOneWidget,
       );
     });
@@ -193,7 +196,10 @@ void main() {
     testWidgets('the eyebrow scopes the panel to today', (tester) async {
       await pumpLevel(tester, levelOf(due: 7, overdueCards: 0, overdueDays: 0));
 
-      expect(onPanel(find.text(english.deckSummaryTodayLabel)), findsOneWidget);
+      expect(
+        onPanel(find.text(english.deckSummaryTodayLabel.toUpperCase())),
+        findsOneWidget,
+      );
     });
 
     testWidgets('the screen reader hears the numeral, the backlog with its '

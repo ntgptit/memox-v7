@@ -8,6 +8,7 @@ import 'app_interaction_states.dart';
 import 'app_overlay_themes.dart';
 import 'app_colors.dart';
 import 'app_material_roles.dart';
+import 'app_navigation_bar_theme.dart';
 import 'app_radio_theme.dart';
 import 'app_radius.dart';
 import 'app_semantic_colors.dart';
@@ -238,30 +239,7 @@ ThemeData _buildTheme(
     // content. M3's default would tint it with `surfaceContainer` and give it
     // elevation, which reintroduces exactly the shifting background the app bar
     // deliberately turned off.
-    navigationBarTheme: NavigationBarThemeData(
-      backgroundColor: background,
-      // The active tab wears the brand, not a grey pill: with four quiet
-      // destinations the selected one is the only colored thing on the bar,
-      // which is what makes it findable at a glance (owner mockup,
-      // 2026-08-20). The glyph takes `onPrimaryContainer` — the pair M3
-      // guarantees on this fill; bare `primary` on it measured 2.13:1 in
-      // dark.
-      indicatorColor: scheme.primaryContainer,
-      iconTheme: WidgetStateProperty.resolveWith(
-        (Set<WidgetState> states) => IconThemeData(
-          color: states.contains(WidgetState.selected)
-              ? scheme.onPrimaryContainer
-              : scheme.onSurfaceVariant,
-        ),
-      ),
-      surfaceTintColor: Colors.transparent,
-      elevation: 0,
-      // Labels always visible, on every destination. The M3 default hides the
-      // unselected ones, which leaves unlabelled icons whose selection is
-      // readable only as a colour difference — exactly what an accessibility
-      // review rejects.
-      labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-    ),
+    navigationBarTheme: buildNavigationBarTheme(scheme, texts, background),
 
     // The safety net for a bare or third-party `Card` — no app widget renders
     // one. `MxCard` is the canonical card and paints itself, because its

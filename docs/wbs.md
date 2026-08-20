@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
+| **Updated by task** | M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
 | **Last updated** | 2026-08-20 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -10850,6 +10850,45 @@ của M2.
 - **Tests required:** summary hero (overdue/new/CTA/semantics/midnight), tile
   counts + workload roles, toolbar qua overflow menu, router trash/tag qua
   menu, visual audit counts mới, goldens.
+- **Checklist phases:** 10, 21
+
+### M99.36 · Library redesign pass 2 — 16 sai lệch đo trên device
+
+- **Status:** **done**
+- **Goal:** Đóng khoảng cách còn lại giữa bản Flutter và mockup sau M99.35,
+  theo danh sách chủ dự án đo trực tiếp trên máy.
+- **Scope:** Header một khối (breadcrumb thành subline của app bar, ghim,
+  thu khoảng trắng); hero (eyebrow brand viết hoa, viền + elevation, context
+  row trên nền brand, chữ thường, chevron xuống); deck card (ba chip có nền,
+  ô icon danh tính trung tính, Study bỏ icon + bo `md`, gauge chiếm phần dư,
+  gutter co ở compact); trạng thái active (pill selected mang brand, sort chip
+  luôn selected, nhãn nav đổi màu). Không đổi schema, không đổi luồng.
+- **Editable documents:** `docs/wbs.md`,
+  `docs/reviews/design-parity-checklist.md`, `docs/business-rules.md`
+  (amend BR-161, BR-162 — chỉ hai câu về ô icon và badge tuổi)
+- **5Why:** Mockup được đọc là "đúng ý" ở pass 1 nhưng chưa đo trên device;
+  chủ dự án đo thì thấy header rời làm hai, hero phẳng, ba chỉ số due đọc như
+  một câu nhiều màu, và không có gì trên màn nói "đang áp dụng". Nguyên nhân
+  chung: pass 1 chuyển **nội dung** theo mockup mà giữ nguyên **vỏ** — token
+  nền, bo góc, trạng thái selected — nên mỗi thành phần đúng nhưng tổng thể
+  không giống.
+- **Output:** `MxContentShell.titleSubline`, `brandInk()`, `_WorkloadChip`,
+  `deckTileGutter()`, `DeckStatusIconWidget` nhận `contentType`,
+  `app_chip_theme` selected mang brand, `navigationBarTheme.labelTextStyle`.
+- **Acceptance criteria:**
+  - [x] BR-161 và BR-162 được amend đúng hai câu bị đảo, có ngày và lý do;
+        tuổi backlog vẫn tới screen reader.
+  - [x] Mọi cặp màu mới đo qua sàn WCAG ở cả hai theme
+        (`deck_workload_role_test.dart`, visual audit 248 tests).
+  - [x] 320@`textScaler` 2.0 không overflow; sàn 48dp không bị hạ ở đâu.
+  - [x] Danh sách không bị nav cắt: `app_navigation_shell_test.dart` cuộn tới
+        hết và đo.
+  - [x] Gate đầy đủ xanh: analyze 0/0, host suite, golden, audit, guards,
+        emulator IT.
+- **Dependencies:** M99.35
+- **Tests required:** chip roles + WCAG, well danh tính theo `contentType`,
+  hero eyebrow/context row/CTA, toolbar chip selected, pill theme, nav shell
+  scroll-end, goldens.
 - **Checklist phases:** 10, 21
 
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì

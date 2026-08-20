@@ -158,10 +158,14 @@ void main() {
         screen: const DeckListScreen(),
       );
 
-      // The filled due-today calendar on the status well (BR-161/BR-162) —
-      // the assertion is that an icon exists beside the words, not a count
-      // of surfaces that speak the same language.
-      expect(find.byIcon(Icons.event), findsWidgets);
+      // **The chip is the carrier, and it says it in words** (owner review,
+      // 2026-08-20). The well used to change shape and colour with the
+      // schedule; it says what the deck holds now, and the count that used to
+      // need a glyph beside it sits on its own coloured ground instead —
+      // which a colour-blind reader reads as text and a screen reader
+      // announces from the same string.
+      expect(find.byIcon(Icons.folder_outlined), findsWidgets);
+      expect(find.byIcon(Icons.event), findsNothing);
       // **The words are the chip's own text now, not a semantic label on a
       // glyph.** The glyph used to be the only carrier, so it needed a label
       // nobody could see; the chip says "7 due now" in words a sighted user

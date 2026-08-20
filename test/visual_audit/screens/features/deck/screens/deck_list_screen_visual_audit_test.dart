@@ -108,6 +108,7 @@ void main() {
     additionalRules: const <AuditRule>[SurfaceColumnRule()],
     anchors: deckPlainAnchors,
     allowances: <AuditSkipAllowance>[
+      heroCardRasterAllowance,
       ...deckShellAllowances(
         // One action per row for three decks, plus the summary panel's
         // collapse chevron, plus the app bar's create and its one overflow
@@ -297,6 +298,7 @@ void main() {
       // Three breadcrumb steps: the deck list, then the two ancestors. The
       // strip's last step — the deck the user is in — is text rather than a
       // control, so it hosts no ink.
+      heroCardRasterAllowance,
       ...deckShellAllowances(
         // Four as before, plus the summary panel's collapse chevron.
         screenIconButtons: 6,

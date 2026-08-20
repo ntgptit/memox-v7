@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/app_stroke.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../domain/models/deck_list_snapshot_model.dart';
@@ -14,10 +16,11 @@ import '../../../domain/models/deck_list_snapshot_model.dart';
 /// "how much is waiting", and the answer is overdue + due today in one
 /// numeral — the split survives as the subline, red on the overdue half only.
 ///
-/// **New and Scheduled are context, not actions.** They keep no icons, no
-/// semantic ink and no tiles of their own: one quiet row, halved by a
-/// hairline. With them demoted, overdue red is the single accent left on the
-/// card — which is what lets it mean something.
+/// **New and Scheduled are context, not actions.** They keep no icons and no
+/// semantic ink of their own: one row on the brand tint, halved by an indigo
+/// hairline, with the words set lower-case under their figures. With them
+/// demoted, overdue red is the single *warning* colour left on the card —
+/// which is what lets it mean something.
 ///
 /// **Every number is still arithmetic over the snapshot the screen already
 /// has** (AD-13): a child's counts cover its whole subtree and siblings are
@@ -112,7 +115,10 @@ class DeckSummaryMetricsWidget extends StatelessWidget {
   }
 }
 
-/// New and Scheduled, side by side on a muted inset, split by a hairline.
+/// New and Scheduled, side by side on the brand tint, split by an indigo
+/// hairline (owner review, 2026-08-20). It was a neutral grey inset, which
+/// left the panel flat: the tint is what makes the row read as part of the
+/// hero rather than as a gap in it.
 class _QuietContextRow extends StatelessWidget {
   const _QuietContextRow({
     required this.newCount,
@@ -134,6 +140,7 @@ class _QuietContextRow extends StatelessWidget {
               Text(
                 '$count',
                 style: context.texts.titleMedium?.copyWith(
+                  color: context.colors.onPrimaryContainer,
                   fontFeatures: const <FontFeature>[
                     FontFeature.tabularFigures(),
                   ],
@@ -144,9 +151,11 @@ class _QuietContextRow extends StatelessWidget {
               // narrower than the word — the figure holds, the word clips.
               Flexible(
                 child: Text(
-                  word,
+                  // Lower-case: the word is the unit, the figure is the fact,
+                  // and a capital gave the two equal billing.
+                  word.toLowerCase(),
                   style: context.texts.bodyMedium?.copyWith(
-                    color: context.colors.onSurfaceVariant,
+                    color: context.colors.onPrimaryContainer,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -160,8 +169,8 @@ class _QuietContextRow extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: context.semanticColors.surfaceMuted,
-        borderRadius: BorderRadius.circular(AppSpacing.sm),
+        color: context.colors.primaryContainer,
+        borderRadius: BorderRadius.circular(AppRadius.sm),
       ),
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       child: Row(
@@ -173,11 +182,13 @@ class _QuietContextRow extends StatelessWidget {
           ),
           // A decoration, not `color:`: `Container(color:)` builds a
           // ColoredBox, which the visual audit cannot read a colour from —
-          // the DecoratedBox route keeps the hairline auditable.
+          // the DecoratedBox route keeps the hairline auditable. The rule is
+          // the brand ink so it belongs to the tint it divides; a neutral
+          // grey line on an indigo ground read as a seam.
           Container(
-            width: 1,
+            width: AppStroke.hairline,
             height: AppSpacing.lg,
-            decoration: BoxDecoration(color: context.colors.outlineVariant),
+            decoration: BoxDecoration(color: context.colors.primary),
           ),
           cell(
             scheduledCount,
