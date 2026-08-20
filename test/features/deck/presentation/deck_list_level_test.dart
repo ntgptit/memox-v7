@@ -23,9 +23,9 @@ import 'support/fake_deck_repository.dart';
 /// `DeckListScreen` with a parent — the read states inside a deck (UC-06 step 4)
 /// and the not-found path (UC-03 E1).
 ///
-/// Same screen as `deck_list_screen_test.dart` pumps, one argument different.
-/// The two files are split by the *level* they exercise, not by widget, and that
-/// is the whole claim of the unification: everything below is the level-dependent
+/// Same screen as `deck_list_screen_test.dart` pumps, one argument different;
+/// the two files are split by the *level* they exercise, not by widget —
+/// the claim of the unification: everything below is the level-dependent
 /// behaviour, and it is a short list.
 ///
 /// The create-action matrix lives in `deck_level_create_test.dart`, the write
@@ -115,12 +115,11 @@ void main() {
 
     testWidgets('tapping retry actually re-reads the level', (tester) async {
       // The button existing was asserted above; that it *does* something was
-      // not. Worth its own case because the wiring is easy to get subtly wrong:
-      // this screen used to reach the container through
-      // `ProviderScope.containerOf` from inside a `StatelessWidget` that had no
-      // `ref`, while the sibling list screen used `ref.invalidate`. That left two
-      // idioms doing one job, which is the kind of thing a clone copies at
-      // random.
+      // not. Worth its own case because the wiring is easy to get subtly
+      // wrong: this screen used to reach the container through
+      // `ProviderScope.containerOf` with no `ref` while the sibling screen
+      // used `ref.invalidate` — two idioms doing one job, which a clone
+      // copies at random.
       final repository = FakeDeckRepository.failing(
         const DatabaseFailure(message: 'unavailable'),
       );
@@ -223,10 +222,8 @@ void main() {
     testWidgets('a child shows the same four facts a root deck does', (
       tester,
     ) async {
-      // The reason the recursive aggregate exists. Before it, a sub-deck row was
-      // a name and nothing else — not a design choice, just what the old query
-      // returned. If this ever regresses, the two levels have drifted apart
-      // again.
+      // The reason the recursive aggregate exists: a regression here means
+      // the root and deck levels have drifted apart again.
       await pumpLevel(
         tester,
         serving(

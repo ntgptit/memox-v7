@@ -16,11 +16,9 @@ import 'support/fake_deck_repository.dart';
 /// (BR-150, BR-142, BR-29).
 ///
 /// **Positive counts only, until nothing is pending** (owner mockup,
-/// 2026-08-20): the line leads with what needs doing — overdue, then due,
-/// then new — and a metric at zero stays quiet while any sibling is speaking.
-/// The one exception is a filled deck with nothing pending at all, which
-/// still states both zeroes: there, an absent metric would be ambiguous in
-/// exactly the way the line exists to prevent.
+/// 2026-08-20): a metric at zero stays quiet while any sibling speaks; the
+/// one exception is a filled deck with nothing pending at all, which still
+/// states both zeroes — there, absence would be ambiguous.
 void main() {
   final english = AppLocalizationsEn();
 
