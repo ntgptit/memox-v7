@@ -111,7 +111,7 @@ class _DeckHeadRegion extends StatelessWidget {
       // block, and the action row below owns its own seam.
       padding: EdgeInsets.fromLTRB(
         deckTileGutter(context),
-        AppSpacing.md,
+        AppSpacing.lg,
         AppSpacing.xs,
         0,
       ),
@@ -190,7 +190,7 @@ class _DeckStateRegion extends StatelessWidget {
         gutter,
         AppSpacing.sm,
         gutter,
-        AppSpacing.md,
+        AppSpacing.lg,
       ),
       child: _DeckActionRow(summary: summary),
     );

@@ -98,7 +98,7 @@ class DeckLevelSummaryWidget extends StatelessWidget {
       // 2026-08-20). On the default border the panel did not separate from the
       // background at all — a card that carries the screen's one answer has to
       // look like a surface, not like a region of the page.
-      borderColor: context.colors.primaryContainer,
+      borderColor: context.semanticColors.borderAccent,
       elevation: AppElevation.raised,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

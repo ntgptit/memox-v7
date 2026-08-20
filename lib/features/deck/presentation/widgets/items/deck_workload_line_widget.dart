@@ -87,7 +87,7 @@ class DeckWorkloadLineWidget extends StatelessWidget {
     }
 
     return Wrap(
-      spacing: AppSpacing.xs,
+      spacing: AppSpacing.sm,
       runSpacing: AppSpacing.xs,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: parts,

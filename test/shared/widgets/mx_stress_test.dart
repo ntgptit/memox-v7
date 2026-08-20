@@ -143,8 +143,12 @@ void main() {
       //   `ScaffoldMessenger`. There is nothing to lay out at 320dp — what it
       //   owns is the duration and the single-tap guarantee, which
       //   `deck_undo_widget` and `card_undo_widget` exercise through it.
+      // * `MxBreadcrumbStep` is not a component: `mx_breadcrumb_step.dart` is
+      //   a `part` of `mx_breadcrumb.dart` holding its private step and
+      //   separator, and the specimen for both is the breadcrumb itself.
       expect(files.difference(covered), <String>{
         'MxAsyncView',
+        'MxBreadcrumbStep',
         'MxFailureLabelsWidget',
         'MxFormSheet',
         'MxUndoSnackBar',

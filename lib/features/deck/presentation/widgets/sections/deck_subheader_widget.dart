@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../../core/navigation/route_names.dart';
+import '../../../../../core/theme/app_icon_size.dart';
+import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/theme_context_extension.dart';
+import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_breadcrumb.dart';
 import '../../../domain/models/deck_list_snapshot_model.dart';
 import 'deck_path_widget.dart';
 
@@ -27,11 +34,66 @@ class DeckSubheaderWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The strip is the breadcrumb alone now: search moved up into the app
-    // bar so the header reads as one row of actions over one line of place
-    // (owner mockup, 2026-08-20). The slot itself stays at every level —
-    // a band of chrome that comes and goes is what the path widget's own
-    // doc argues against.
-    return DeckPathWidget(snapshot: snapshot);
+    // **The chevron belongs to the path, not to the bar** (owner review,
+    // 2026-08-20). The line already says where "up" is; putting the platform
+    // arrow beside the title as well gave the header two back affordances for
+    // one destination. `MxContentShell` drops its automatic leading wherever a
+    // subline is present, so this is the only one.
+    //
+    // Absent at the root, where there is nothing above to go to — and the
+    // path line keeps its height either way, so the header does not change
+    // shape on the way in.
+    if (snapshot.parent == null) return DeckPathWidget(snapshot: snapshot);
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        _DeckPathBackWidget(snapshot: snapshot),
+        const SizedBox(width: AppSpacing.xs),
+        Flexible(child: DeckPathWidget(snapshot: snapshot)),
+      ],
+    );
+  }
+}
+
+/// One level up, on the path's own line.
+///
+/// **It goes where the parent is, not where the stack came from.** The bar's
+/// platform arrow pops the navigator, which is right for a pushed route and
+/// wrong for a deep link — a deck opened from a notification has nothing to
+/// pop to. The nearest ancestor is a place, so this navigates by name to it,
+/// and to the deck list when the open deck is a root's child.
+class _DeckPathBackWidget extends StatelessWidget {
+  const _DeckPathBackWidget({required this.snapshot});
+
+  final DeckListSnapshot snapshot;
+
+  @override
+  Widget build(BuildContext context) {
+    final ancestors = snapshot.ancestors;
+
+    return Semantics(
+      button: true,
+      label: context.l10n.deckPathUpSemanticLabel,
+      child: InkWell(
+        onTap: () => ancestors.isEmpty
+            ? context.goNamed(RouteNames.decks)
+            : context.goNamed(
+                RouteNames.deckDetail,
+                pathParameters: <String, String>{
+                  RoutePathParams.deckId: ancestors.last.id,
+                },
+              ),
+        child: SizedBox(
+          height: MxBreadcrumb.compactLineHeight,
+          width: AppSpacing.lg,
+          child: Icon(
+            Icons.chevron_left,
+            size: AppIconSize.sm,
+            color: context.colors.onSurfaceVariant,
+          ),
+        ),
+      ),
+    );
   }
 }

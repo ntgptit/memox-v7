@@ -214,13 +214,13 @@ void main() {
 
       expect(lastRow.bottom, lessThanOrEqualTo(bar.top));
 
-      // **And nothing floats over it.** This used to also assert the last row
-      // cleared the create action, bought by a 112px bottom inset. The button
-      // covered whatever row happened to sit at the bottom-right at rest — on a
-      // deck card, its overflow menu — and no inset fixes that, because an inset
-      // only reserves the *end* of the scroll. Create moved to the app bar, so
-      // the guarantee is now structural rather than measured.
-      expect(find.byType(FloatingActionButton), findsNothing);
+      // **And the floating action does not cover it either** (owner review,
+      // 2026-08-20). Create floats again, so the guarantee goes back to being
+      // measured: an inset only reserves the *end* of the scroll, and the end
+      // of the scroll is exactly where a reader looks for the last deck's
+      // Study button.
+      final action = tester.getRect(find.byType(FloatingActionButton));
+      expect(lastRow.bottom, lessThanOrEqualTo(action.top));
       expect(tester.takeException(), isNull);
     });
 

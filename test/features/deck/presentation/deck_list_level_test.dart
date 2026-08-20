@@ -152,25 +152,21 @@ void main() {
 
       await pumpLevel(tester, serving(deck, children: children));
 
-      // The name is on screen twice — the title and the path's last step —
-      // and both are inside the bar since the path became its subline (owner
-      // review, 2026-08-20). Counting is not enough on its own, so the crumb
-      // is pinned separately: two would also pass if the title vanished and
-      // the crumb grew a copy.
+      // Once, in the bar: the path stops above the open deck now, so its
+      // name has exactly one place on the screen (owner review, 2026-08-20).
       expect(
         find.descendant(
           of: find.byType(AppBar),
           matching: find.text('Japanese N5'),
         ),
-        findsNWidgets(2),
+        findsOneWidget,
       );
       expect(
         find.descendant(
           of: find.byType(MxBreadcrumb),
           matching: find.text('Japanese N5'),
         ),
-        findsOneWidget,
-        reason: 'one of the two is the path, and the other is the title',
+        findsNothing,
       );
       expect(find.byType(DeckTileWidget), findsNWidgets(2));
       expect(find.text('Hiragana'), findsOneWidget);

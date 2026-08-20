@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
+| **Updated by task** | M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
 | **Last updated** | 2026-08-20 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -10889,6 +10889,42 @@ của M2.
 - **Tests required:** chip roles + WCAG, well danh tính theo `contentType`,
   hero eyebrow/context row/CTA, toolbar chip selected, pill theme, nav shell
   scroll-end, goldens.
+- **Checklist phases:** 10, 21
+
+### M99.37 · Library redesign pass 3 — FAB, header hai dòng, lưới 4px
+
+- **Status:** **done**
+- **Goal:** Đóng năm điểm còn lại của mockup và đưa mọi khoảng cách trên màn
+  Library về lưới 4 của Material 3.
+- **Scope:** Create thành FAB (đảo M4.10ag) + inset cuối danh sách tính theo
+  FAB và safe area; breadcrumb vào title của app bar, dừng trên deck đang mở,
+  chevron back nằm trên dòng path, dòng path cao cố định 20; Study bo 12 cao
+  40 rộng ≥80; viền hero dùng token `borderAccent` mới; lưới 4 cho track
+  progress, khối số phụ, padding card và chip. Không đổi schema, không đổi
+  luồng, không đổi type scale.
+- **Editable documents:** `docs/wbs.md`,
+  `docs/reviews/design-parity-checklist.md`
+- **5Why:** Pass 2 đã đúng nội dung nhưng còn ba thứ nặng thị giác: một nút
+  filled trong app bar (không thuộc ngôn ngữ app bar), một dòng path là băng
+  riêng, và một tá số lẻ ngoài lưới 4 — mỗi số đến từ một lần chỉnh quang học
+  cục bộ, và một chỉnh cục bộ thì lần sau không ai thấy.
+- **Output:** `MxBreadcrumb.lineHeight` + `compactLineHeight`,
+  `MxContentShell` title hai dòng và bỏ leading tự động khi có subline,
+  `_DeckPathBackWidget`, `floatingActionButtonTheme`, token `borderAccent`,
+  `deckPathUpSemanticLabel`, group lưới trong `deck_tile_geometry_test.dart`.
+- **Acceptance criteria:**
+  - [x] Bar chỉ còn hai icon cùng cỡ; create là FAB 56 bo 16 trên `primary`.
+  - [x] Cuộn tới hết: hàng cuối không bị FAB che — đo trong shell test.
+  - [x] Header cao như nhau ở root và trong deck; path không lặp tên deck.
+  - [x] Mọi padding/spacing/chiều cao control trên màn là bội số 4; chip 24,
+        Study ≥80, path 20 được pin bằng test.
+  - [x] Sàn 48dp chỉ bị hạ đúng một chỗ (step của path trong header), ghi rõ
+        tại `MxBreadcrumb.compactLineHeight` và trong parity checklist.
+  - [x] Gate đầy đủ xanh: analyze 0/0, host suite, golden, audit, guards,
+        emulator IT.
+- **Dependencies:** M99.36
+- **Tests required:** path (dừng trên deck đang mở, chevron), shell scroll-end
+  vs FAB, audit counts mới, lưới 4, goldens.
 - **Checklist phases:** 10, 21
 
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
