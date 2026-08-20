@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_button_themes.dart';
-import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import 'package:go_router/go_router.dart';
@@ -67,32 +66,32 @@ class DeckStudyButtonWidget extends StatelessWidget {
             padding: const WidgetStatePropertyAll<EdgeInsets>(
               EdgeInsets.symmetric(horizontal: AppSpacing.md),
             ),
+            // A card corner, not a pill (owner review, 2026-08-20): the row
+            // it sits in is built from rounded rectangles — the gauge, the
+            // chips above it, the card itself — and a stadium among them read
+            // as a borrowed component.
             shape: WidgetStatePropertyAll<OutlinedBorder>(
               RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppRadius.pill),
+                borderRadius: BorderRadius.circular(AppRadius.md),
               ),
             ),
             tapTargetSize: MaterialTapTargetSize.padded,
           ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        spacing: AppSpacing.xs,
-        children: <Widget>[
-          const Icon(Icons.play_arrow, size: AppIconSize.sm),
-          Text(
-            context.l10n.deckStudyAction,
-            // **`onPrimary` stated, not inherited.** `context.texts.labelMedium`
-            // carries the theme's body colour, and passing it whole overrode
-            // the foreground the button had already resolved — the same
-            // override class the visual audit once measured at 2.33:1 on the
-            // brand fill. A style taken from the text theme has to say its
-            // colour when it lands on a coloured surface.
-            style: context.texts.labelMedium?.copyWith(
-              color: context.colors.onPrimary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
+      // **The word alone** (owner review, 2026-08-20). The play glyph said
+      // nothing the verb did not, and it cost the row width that the gauge
+      // beside it needed at large text scales.
+      child: Text(
+        context.l10n.deckStudyAction,
+        // **`onPrimary` stated, not inherited.** `context.texts.labelMedium`
+        // carries the theme's body colour, and passing it whole overrode the
+        // foreground the button had already resolved — the same kind of
+        // override the visual audit once measured at 2.33:1 on the brand
+        // fill. A style taken from the text theme has to say its colour when
+        // it lands on a coloured surface.
+        style: context.texts.labelMedium?.copyWith(
+          color: context.colors.onPrimary,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'app_button_themes.dart';
 import 'app_icon_size.dart';
 import 'app_interaction_states.dart';
+import 'app_material_roles.dart';
 import 'app_semantic_colors.dart';
 import 'app_spacing.dart';
 import 'app_typography.dart';
@@ -39,9 +40,11 @@ import 'app_typography.dart';
 /// Selected borrows the navigation bar's indicator pair, so "this one is active"
 /// looks the same whether it is a tab or a filter; unselected is a card sitting
 /// on the page, which is the same surface-over-background step every other panel
-/// uses.
+/// uses. That pair is the **brand** container since the owner review of
+/// 2026-08-20 — it was the neutral `secondaryContainer`, which on a light page
+/// made an applied filter and an unapplied one nearly the same rectangle.
 Color _restingFill(ColorScheme scheme, {required bool isSelected}) =>
-    isSelected ? scheme.secondaryContainer : scheme.surface;
+    isSelected ? scheme.primaryContainer : scheme.surface;
 
 /// The fill for [states], resolved to a solid colour over the ground that state
 /// actually has.
@@ -90,7 +93,7 @@ Color _labelColorFor(
     return semantic.onDisabled;
   }
   if (states.contains(WidgetState.selected)) {
-    return scheme.onSecondaryContainer;
+    return brandInk(scheme);
   }
 
   return scheme.onSurfaceVariant;
@@ -157,6 +160,13 @@ ChipThemeData buildChipTheme(
     // one look alike.
     if (states.contains(WidgetState.focused)) {
       return AppInteractionStates.focusRing(semantic);
+    }
+    // **Selected is ringed in the brand** (owner review, 2026-08-20). Fill and
+    // label alone left an applied sort looking like an unapplied one on a
+    // light ground: `primaryContainer` against `surface` is a small step, and
+    // the ring is what makes it a state rather than a shade.
+    if (states.contains(WidgetState.selected)) {
+      return BorderSide(color: scheme.primary);
     }
 
     return BorderSide(color: semantic.borderSubtle);

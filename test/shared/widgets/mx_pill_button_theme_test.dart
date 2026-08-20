@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/app_material_roles.dart';
 import 'package:memox/core/theme/app_interaction_states.dart';
 import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_theme.dart';
@@ -220,9 +221,12 @@ void main() {
         );
 
         final states = color! as WidgetStateColor;
+        // Selected is the brand ink on the brand tint (owner review,
+        // 2026-08-20) — `brandInk` picks the shade that clears the
+        // contrast floor on this theme's container.
         expect(
           states.resolve(<WidgetState>{WidgetState.selected}),
-          theme.colorScheme.onSecondaryContainer,
+          brandInk(theme.colorScheme),
         );
         expect(
           states.resolve(<WidgetState>{}),

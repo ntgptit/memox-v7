@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -59,47 +60,87 @@ class DeckWorkloadLineWidget extends StatelessWidget {
     final dueLabel = context.l10n.deckTileDueChipLabel(dueTodayCount);
     final newLabel = context.l10n.deckTileNewChipLabel(summary.newCardCount);
 
-    Widget fact(String label, {Color? ink, bool isBold = false}) => Text(
-      label,
-      style: context.texts.bodySmall?.copyWith(
-        color: ink ?? quiet,
-        fontWeight: isBold ? FontWeight.w600 : null,
-      ),
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-    );
-
-    // The separator travels with the metric it introduces, so a line break
-    // can never strand a lone `·`.
-    Widget joined(Widget child) => Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Text('·', style: context.texts.bodySmall?.copyWith(color: quiet)),
-        const SizedBox(width: AppSpacing.xs),
-        child,
-      ],
-    );
-
     final parts = <Widget>[
       if (overdueCount > 0)
-        fact(overdueLabel, ink: semantic.danger, isBold: true),
-      if (hasDue) fact(dueLabel, ink: semantic.onStreakContainer, isBold: true),
-      if (hasNew) fact(newLabel, ink: semantic.info, isBold: true),
+        _WorkloadChip(
+          label: overdueLabel,
+          fill: context.colors.errorContainer,
+          ink: context.colors.onErrorContainer,
+        ),
+      if (hasDue)
+        _WorkloadChip(
+          label: dueLabel,
+          fill: semantic.streakContainer,
+          ink: semantic.onStreakContainer,
+        ),
+      if (hasNew)
+        _WorkloadChip(label: newLabel, fill: semantic.surfaceMuted, ink: quiet),
     ];
     // A filled deck with nothing pending still states both zeroes: an absent
     // metric is ambiguous in exactly the way this line exists to prevent.
+    // They wear the neutral chip — nothing here is a state.
     if (parts.isEmpty) {
-      parts.addAll(<Widget>[fact(dueLabel), fact(newLabel)]);
+      parts.addAll(<Widget>[
+        _WorkloadChip(label: dueLabel, fill: semantic.surfaceMuted, ink: quiet),
+        _WorkloadChip(label: newLabel, fill: semantic.surfaceMuted, ink: quiet),
+      ]);
     }
 
     return Wrap(
-      spacing: AppSpacing.sm,
+      spacing: AppSpacing.xs,
       runSpacing: AppSpacing.xs,
       crossAxisAlignment: WrapCrossAlignment.center,
-      children: <Widget>[
-        for (final (index, part) in parts.indexed)
-          index == 0 ? part : joined(part),
-      ],
+      children: parts,
+    );
+  }
+}
+
+/// One count on its own tinted ground.
+///
+/// **Chips, not coloured words** (owner review, 2026-08-20). The three counts
+/// were ink on the card surface separated by middle dots, which read as one
+/// multicoloured sentence — the eye had to parse the line before it could
+/// find the number that mattered. A chip gives each count a boundary, so the
+/// row scans as three facts.
+///
+/// Every pair is a container pair, so the ink is legible on its own ground by
+/// construction: `errorContainer` for the backlog, the streak pair for
+/// today's reviews, and `surfaceMuted` for new — new is **not** a warning, and
+/// the blue it used to wear was the only place in the app where a metric read
+/// as a link.
+class _WorkloadChip extends StatelessWidget {
+  const _WorkloadChip({
+    required this.label,
+    required this.fill,
+    required this.ink,
+  });
+
+  final String label;
+  final Color fill;
+  final Color ink;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: fill,
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: AppSpacing.xs,
+        ),
+        child: Text(
+          label,
+          style: context.texts.bodySmall?.copyWith(
+            color: ink,
+            fontWeight: FontWeight.w600,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
     );
   }
 }

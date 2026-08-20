@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_breakpoints.dart';
@@ -33,6 +35,7 @@ class MxContentShell extends StatefulWidget {
     this.leading,
     this.actions,
     this.subheader,
+    this.titleSubline,
     this.padding,
     this.isScrollable = false,
     this.floatingActionButton,
@@ -55,6 +58,26 @@ class MxContentShell extends StatefulWidget {
   /// field, or both.
   final Widget? subheader;
 
+  /// A second line **inside the bar**, under [title].
+  ///
+  /// **Why a separate slot from [subheader], which is also pinned.** Both stay
+  /// put when the body scrolls; what differs is whether the reader sees one
+  /// header or two things stacked. As a subheader the breadcrumb sat below the
+  /// bar with the bar's own bottom slack, the band's padding and the strip's
+  /// 48dp tap floor between it and the title — measured on device at roughly
+  /// 60px, far enough that the title and the path read as unrelated elements
+  /// (owner review, 2026-08-20). In `AppBar.bottom` the gap is the bar's
+  /// alone.
+  ///
+  /// It spans the **full** bar width rather than the title slot, so a long
+  /// path may run under the actions instead of truncating early — which is why
+  /// this is `bottom` and not a `Column` inside [title].
+  ///
+  /// The residual gap is a tap target, not padding: a breadcrumb step is a
+  /// control and keeps [AppSpacing.minimumTouchTarget], so its label is
+  /// centred in a 48 box. Everything around it is zero.
+  final Widget? titleSubline;
+
   /// Screen padding. `null` resolves to the scale for the current width:
   /// [AppSpacing.lg], or [AppSpacing.md] below [AppBreakpoints.compact].
   final EdgeInsetsGeometry? padding;
@@ -71,6 +94,14 @@ class MxContentShell extends StatefulWidget {
 
 class _MxContentShellState extends State<MxContentShell> {
   bool _hasScrolled = false;
+
+  /// Line box over font size. Material's own text styles land between 1.27 and
+  /// 1.5; the higher end is used so a two-line bar never clips.
+  static const double _lineFactor = 1.5;
+
+  /// Only reached if the theme has no such style, which the app's does.
+  static const double _fallbackTitleSize = 22;
+  static const double _fallbackSublineSize = 12;
 
   /// Two pixels rather than zero: a scroll view can report a sub-pixel offset at
   /// rest, and a hairline that flickers on an untouched screen is worse than no
@@ -112,12 +143,35 @@ class _MxContentShellState extends State<MxContentShell> {
 
   PreferredSizeWidget? _buildAppBar(BuildContext context) {
     final subheader = widget.subheader;
-    if (widget.title == null && subheader == null) return null;
+    final subline = widget.titleSubline;
+    if (widget.title == null && subheader == null && subline == null) {
+      return null;
+    }
 
     return AppBar(
       title: widget.title == null ? null : Text(widget.title!),
       leading: widget.leading,
       automaticallyImplyLeading: widget.leading == null,
+      // Only when a subline is present: the toolbar row gives up the slack it
+      // does not need so the two lines read as one block. It never goes below
+      // the touch floor — the row carries the bar's icon buttons — and it
+      // grows with the text scale, because a title clipped by a fixed bar is
+      // the failure this number exists to avoid.
+      toolbarHeight: subline == null ? null : _toolbarHeight(context),
+      bottom: subline == null
+          ? null
+          : PreferredSize(
+              preferredSize: Size.fromHeight(_sublineHeight(context)),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: _defaultPadding(context).left,
+                ),
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: subline,
+                ),
+              ),
+            ),
       actions: widget.actions,
       // Below the whole chrome block rather than between bar and subheader: the
       // subheader is chrome too, and the line is there to say where chrome ends
@@ -127,6 +181,28 @@ class _MxContentShellState extends State<MxContentShell> {
               bottom: BorderSide(color: context.semanticColors.borderSubtle),
             )
           : null,
+    );
+  }
+
+  /// The bar's own row, tight around its title and its 48dp actions.
+  double _toolbarHeight(BuildContext context) {
+    final scaler = MediaQuery.textScalerOf(context);
+    final size = context.texts.titleLarge?.fontSize ?? _fallbackTitleSize;
+
+    return math.max(
+      AppSpacing.minimumTouchTarget,
+      scaler.scale(size) * _lineFactor + AppSpacing.sm,
+    );
+  }
+
+  /// The subline band: one line of `bodySmall` inside a control's touch floor.
+  double _sublineHeight(BuildContext context) {
+    final scaler = MediaQuery.textScalerOf(context);
+    final size = context.texts.bodySmall?.fontSize ?? _fallbackSublineSize;
+
+    return math.max(
+      AppSpacing.minimumTouchTarget,
+      scaler.scale(size) * _lineFactor + AppSpacing.md,
     );
   }
 

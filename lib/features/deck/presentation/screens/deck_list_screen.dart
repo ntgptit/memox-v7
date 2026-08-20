@@ -204,17 +204,16 @@ class _DeckLevel extends ConsumerWidget {
       // The shell's own padding is dropped: the body is one scroll view and
       // owns its gutters.
       padding: EdgeInsets.zero,
-      // **The path is the shell's subheader, not the first row of the body.**
-      // It was already pinned — a `Column` above an `Expanded` does not scroll —
-      // so this changes nothing about whether it moves. What it changes is who
-      // owns it: as a subheader it sits inside the app bar's own chrome, takes
-      // the screen gutter from the shell instead of re-deriving it, and lands on
-      // the correct side of the hairline that appears once the list scrolls
-      // under. It is also where the design puts it.
+      // **The path is the bar's second line, not a band under it.** It was
+      // already pinned in the subheader slot; what that slot could not do is
+      // make it read as part of the header — the bar's bottom slack, the
+      // band's padding and the strip's own touch floor added up to about 60px
+      // of nothing between the title and the path, so the two looked like
+      // separate components (owner review, 2026-08-20).
       //
       // Above every body state, including the empty ones — "where am I" is most
       // worth answering on a level with nothing in it to recognise.
-      subheader: DeckSubheaderWidget(snapshot: snapshot),
+      titleSubline: DeckSubheaderWidget(snapshot: snapshot),
       body: _body(context, parent),
     );
   }

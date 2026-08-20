@@ -84,8 +84,10 @@ void main() {
         ),
         findsNothing,
       );
-      // Seven due with zero overdue days is the due-today state.
-      expect(onTile(find.byIcon(Icons.event)), findsOneWidget);
+      // The well says what the deck holds, in every schedule state (owner
+      // review, 2026-08-20): urgency is the chips' job now.
+      expect(onTile(find.byIcon(Icons.folder_outlined)), findsOneWidget);
+      expect(onTile(find.byIcon(Icons.event)), findsNothing);
 
       // One typography for the pair.
       final dueStyle = tester.widget<Text>(onTile(find.text(due(7)))).style;
@@ -132,9 +134,9 @@ void main() {
       expect(find.byType(DeckStudyButtonWidget), findsOneWidget);
       // Nothing due today is not "done": no success ink anywhere on the tile.
       expect(find.byIcon(Icons.check_circle), findsNothing);
-      // Nothing due: the status square rests on the outlined calendar, and
-      // the workload line carries no icons at all.
-      expect(onTile(find.byIcon(Icons.event_outlined)), findsOneWidget);
+      // The well never changes with the schedule, and the workload line
+      // carries no icons at all.
+      expect(onTile(find.byIcon(Icons.folder_outlined)), findsOneWidget);
       expect(onTile(find.byIcon(Icons.schedule)), findsNothing);
     });
   });
@@ -205,10 +207,9 @@ void main() {
       await pump(tester, summary);
 
       // No check glyph any more: the full gauge and its success figure are
-      // the completion signal, and the status square answers "when" — for a
-      // deck with nothing due, an outlined calendar at rest.
+      // the completion signal, and the well answers "what", not "when".
       expect(find.byIcon(Icons.check_circle), findsNothing);
-      expect(onTile(find.byIcon(Icons.event_outlined)), findsOneWidget);
+      expect(onTile(find.byIcon(Icons.folder_outlined)), findsOneWidget);
       expect(onTile(find.text(due(0))), findsOneWidget);
       expect(onTile(find.text(fresh(0))), findsOneWidget);
       expect(
@@ -382,19 +383,15 @@ void main() {
       expect(find.byType(DeckStudyButtonWidget), findsOneWidget);
       expect(tester.takeException(), isNull);
 
-      // The separator can never be an orphan: it shares a row with the metric
-      // it introduces, so if the group wraps, the dot travels with `14 New`
-      // and sits on the same line.
-      final dot = tester.getRect(
-        find
-            .descendant(
-              of: find.byType(DeckWorkloadLineWidget),
-              matching: find.text('·'),
-            )
-            .first,
+      // No separators left to strand: each count is a chip with its own
+      // ground, so a wrap breaks between chips (owner review, 2026-08-20).
+      expect(
+        find.descendant(
+          of: find.byType(DeckWorkloadLineWidget),
+          matching: find.text('·'),
+        ),
+        findsNothing,
       );
-      final fresh14 = tester.getRect(onTile(find.text(fresh(14))));
-      expect(dot.center.dy, closeTo(fresh14.center.dy, 1));
     });
   });
 }

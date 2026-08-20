@@ -2,76 +2,58 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../domain/models/deck_content_type_model.dart';
 import '../../../domain/models/deck_schedule_status_model.dart';
 import 'deck_icon_area_widget.dart';
 
-/// The deck's schedule at a glance: one large icon, three states (BR-161).
+/// The deck's identity at a glance: one large icon, neutral in every schedule
+/// state.
 ///
-/// **The well answers "when", not "what" or "how far".** The identity glyphs
-/// and the completion check both left this square during the status pass:
-/// what a deck is made of is on the metadata line in words, completion is the
-/// progress bar's whole job, and the one question a scanning eye actually
-/// asks the column is whether anything is waiting. Shape and fill carry the
-/// state alongside colour — outlined calendar, filled calendar, missed
-/// calendar — so the three read apart in grayscale.
+/// **The well answers "what", and the chips answer "when"** (owner review,
+/// 2026-08-20). It used to carry the schedule: an outlined calendar at rest, a
+/// filled one for today, a missed one in the error pair for a backlog. That
+/// was the only carrier of urgency when the counts were plain words; now the
+/// workload line states `8 overdue` on its own red ground, and a red square
+/// beside a red chip said the same thing twice — with a glyph that reads as
+/// *cancelled*, not as *late*. This amends BR-161's icon-pair sentence; the
+/// day count still reaches a screen reader through [overdueDayCount].
 ///
-/// Overdue used to add a `+7d` day badge on the well's corner; the badge is
-/// gone (owner mockup, 2026-08-20) — how *big* the backlog is matters more
-/// than how old, and the workload line now carries the overdue count in
-/// words. The day count survives here in the screen-reader sentence, which
-/// always spoke in days (BR-105) rather than the shorthand.
-///
-/// **Takes the classified state, not the summary.** The status is computed
-/// once by `deckScheduleStatusOf` — through `DeckSummary.scheduleStatus` for a
-/// tile, through the level fold for the summary panel — and this widget only
-/// dresses it. The two counts ride along for the screen-reader sentence,
-/// which names the cards and the days rather than the shorthand.
+/// **Still takes the classified state**, because the announcement depends on
+/// it: a deck with a backlog gets a sentence naming cards and days, and a deck
+/// without one gets none.
 class DeckStatusIconWidget extends StatelessWidget {
   const DeckStatusIconWidget({
     required this.status,
+    required this.contentType,
     required this.dueCardCount,
     required this.overdueDayCount,
     super.key,
   });
 
   final DeckScheduleStatus status;
+
+  /// Which glyph the well shows: a stack of cards for a deck that holds them,
+  /// a folder for one that holds decks. `unset` is a folder — it is what the
+  /// deck is until its first child decides (BR-63).
+  final DeckContentType contentType;
+
   final int dueCardCount;
   final int overdueDayCount;
 
   @override
   Widget build(BuildContext context) {
-    final semantic = context.semanticColors;
-
-    final icon = switch (status) {
-      DeckScheduleStatus.notDue => Icons.event_outlined,
-      DeckScheduleStatus.dueToday => Icons.event,
-      DeckScheduleStatus.overdue => Icons.event_busy,
-    };
-    final tint = switch (status) {
-      DeckScheduleStatus.notDue => context.colors.onSurfaceVariant,
-      // The streak pair, not the brand container (M99.14): the hero and the
-      // workload words already speak due-today in the amber time-pressure
-      // role, and a purple well beside a yellow "12 Due" read as two
-      // different states. One state, one colour, everywhere it appears.
-      DeckScheduleStatus.dueToday => semantic.onStreakContainer,
-      // Red on purpose (owner decision, 2026-08-11, recorded on BR-161):
-      // missed is a red-letter state, and only missed. The M3 error-container
-      // pair carries its own contrast guarantee in both themes.
-      DeckScheduleStatus.overdue => context.colors.onErrorContainer,
-    };
-    final well = switch (status) {
-      DeckScheduleStatus.notDue => semantic.surfaceMuted,
-      DeckScheduleStatus.dueToday => semantic.streakContainer,
-      DeckScheduleStatus.overdue => context.colors.errorContainer,
-    };
-
-    final area = DeckIconArea(icon: icon, tint: tint, wellColor: well);
+    final area = DeckIconArea(
+      icon: contentType == DeckContentType.card
+          ? Icons.style_outlined
+          : Icons.folder_outlined,
+      tint: context.colors.onPrimaryContainer,
+    );
 
     if (status != DeckScheduleStatus.overdue) return area;
 
-    // One sentence for the screen reader: the well itself is visual-only,
-    // and the day count has no visual carrier anymore — this label is where
-    // "how long missed" lives now.
+    // One sentence for the screen reader: the well is visual-only, and the day
+    // count has no visual carrier anymore — this label is where "how long
+    // missed" lives now.
     return Semantics(
       // Its own node: inside the card's tap target the label would otherwise
       // merge into the row's combined description and become unfindable as a

@@ -609,6 +609,37 @@ không lấy màu hay tính năng ngoài domain.
 | Summary một dòng `titleLarge` + câu, padding `md` | ✅ `deck_level_summary_widget.dart` | ❌ chưa | Kit đang là bản hai tầng cũ |
 | Tile: đầu card `md/xs` thay `lg/sm` | ✅ `deck_tile_widget.dart` | ❌ chưa | Mật độ: 3 deck đủ khi summary mở, 393×852 |
 
+## Library redesign · pass 2 (owner review, 2026-08-20)
+
+Mười sáu sai lệch chủ dự án đo trên device sau khi pass 1 lên main. Ghi riêng
+vì mỗi dòng dưới đây **đảo** một quyết định đang có hiệu lực, không phải bổ
+sung vào nó.
+
+| Quyết định | Flutter | design_system | Ghi chú |
+|---|---|---|---|
+| Breadcrumb thành **subline của app bar** (`MxContentShell.titleSubline` → `AppBar.bottom`), không còn là band `subheader` dưới bar | ✅ `mx_content_shell.dart`, `deck_list_screen.dart` | ❌ chưa | Đo trên device: title→path ~60px vì cộng slack của bar + padding band + sàn 48dp của step. Nay chỉ còn sàn tap target; toolbar co về `minimumTouchTarget` và cao theo `textScaler` |
+| Khoảng trước hero còn `sm` (từ `md`) | ✅ `deck_summary_section_widget.dart` | ❌ chưa | `sm` là sàn "visibly separate" của `deck_list_spacing_test.dart` |
+| Eyebrow `TODAY` viết hoa, `labelMedium` + `sectionLabelTracking`, mực brand | ✅ `deck_level_summary_widget.dart` | ❌ chưa | Mực lấy từ `brandInk()` — `primary` đo 2.90:1 trên surface dark, dưới sàn 4.5 của chữ 12px |
+| Hero có viền `primaryContainer` + `AppElevation.raised` | ✅ cùng file | ❌ chưa | Viền mặc định gần như vô hình nên panel không tách khỏi nền |
+| Context row đổi từ `surfaceMuted` sang `primaryContainer`, vạch chia `primary`, chữ `new`/`scheduled` viết thường | ✅ `deck_summary_metrics_widget.dart` | ❌ chưa | Chữ thường để số dẫn dắt; vạch chia thuộc về nền nó chia |
+| Chevron thu gọn chỉ **xuống** khi panel đang mở | ✅ `deck_level_summary_widget.dart` | ❌ chưa | Mũi tên chỉ chỗ nội dung sẽ đi, không phải thao tác |
+| Workload thành **ba chip** có nền riêng, bỏ dấu `·`; `new` dùng `surfaceMuted`/`onSurfaceVariant` thay `info` | ✅ `deck_workload_line_widget.dart` | ❌ chưa | Xanh dương là chỗ duy nhất trong app một metric đọc ra như hyperlink. Cặp chip đo trong `deck_workload_role_test.dart` |
+| Ô icon deck thành **danh tính** (`folder`/`style`) trên `primaryContainer`, không đổi theo trạng thái lịch — **amend BR-161** | ✅ `deck_status_icon_widget.dart` | ❌ chưa | Chip đỏ đã mang trạng thái; ô đỏ + glyph "lịch có dấu X" nói lại lần hai bằng nghĩa "đã huỷ" |
+| Study bỏ icon `play_arrow`, bo `AppRadius.md` | ✅ `deck_study_button_widget.dart` | ❌ chưa | Cũng trả lại bề ngang cho gauge ở text scale lớn |
+| Gauge chiếm hết phần dư (`Expanded`), nhãn `%` không flex, khoảng cách `xs` | ✅ `deck_tile_widget.dart` | ❌ chưa | `Flexible` loose ăn nửa chỗ trống rồi bỏ trống — đó là "khoảng hở" chủ dự án thấy |
+| Gutter của card co còn `md` dưới `AppBreakpoints.compact` (`deckTileGutter`) | ✅ cùng file | ❌ chưa | 320@2.0 thiếu 4.9px; cùng cách `applyCompactScale` và `mxScreenGutter` đã làm |
+| Pill `selected` đổi sang `primaryContainer` + viền `primary` + mực `brandInk` (toàn app) | ✅ `app_chip_theme.dart` | ❌ chưa | `secondaryContainer` trên nền sáng gần như không phân biệt được với chưa chọn |
+| Chip sort **luôn** ở trạng thái selected | ✅ `deck_list_toolbar_widget.dart` | ❌ chưa | Nó không bật/tắt gì — nó gọi tên thứ tự đang áp dụng |
+| Nav bar: nhãn tab active cũng đổi màu, không chỉ icon | ✅ `app_theme.dart` `labelTextStyle` | ❌ chưa | Trước đó nhãn rơi về `onSurface` cho cả hai trạng thái |
+
+Padding cuối danh sách: đã xác nhận bằng test — `app_navigation_shell_test.dart`
+cuộn tới hết và đo `lastRow.bottom <= navBar.top`. Test này **đang đỏ vì đúng
+lý do**: `Scaffold` dựng body trước app bar nên breadcrumb chuyển vào bar làm
+`Scrollable` cuối cùng không còn là danh sách; finder nay bám `CustomScrollView`.
+
+Số đếm deck: chỉ có **một** nguồn trên màn — nhãn section (`YOUR DECKS · N`,
+đếm sau filter). Không có chỗ nào khác in số deck, nên không có gì để đồng bộ.
+
 ## Library header + hero redesign pass (owner mockup, 2026-08-20)
 
 Sáu điểm từ mockup của chủ dự án, áp vào Flutter trước; kit HTML là mock tĩnh

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_elevation.dart';
+import '../../../../../core/theme/app_breakpoints.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -108,8 +109,8 @@ class _DeckHeadRegion extends StatelessWidget {
       // element uses. `md` on top since the density pass. **Zero at the
       // bottom, deliberately:** the head owns every line break inside the
       // block, and the action row below owns its own seam.
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
+      padding: EdgeInsets.fromLTRB(
+        deckTileGutter(context),
         AppSpacing.md,
         AppSpacing.xs,
         0,
@@ -122,6 +123,7 @@ class _DeckHeadRegion extends StatelessWidget {
         children: <Widget>[
           DeckStatusIconWidget(
             status: summary.scheduleStatus,
+            contentType: summary.deck.contentType,
             dueCardCount: summary.dueCardCount,
             overdueDayCount: summary.overdueDayCount,
           ),
@@ -178,14 +180,16 @@ class _DeckStateRegion extends StatelessWidget {
       return const SizedBox(height: AppSpacing.md);
     }
 
+    final gutter = deckTileGutter(context);
+
     return Padding(
       // `sm` on top: the seam between the metadata block and the action row is
       // a *section* boundary — information above, verbs below — so it gets one
       // step more than the line breaks inside the block.
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
+      padding: EdgeInsets.fromLTRB(
+        gutter,
         AppSpacing.sm,
-        AppSpacing.lg,
+        gutter,
         AppSpacing.md,
       ),
       child: _DeckActionRow(summary: summary),
@@ -231,27 +235,30 @@ class _DeckActionRow extends StatelessWidget {
                       value: summary.learnedFraction,
                     ),
                   ),
-                  const SizedBox(width: AppSpacing.sm),
-                  // Flexible so the worded label ("21% learned") degrades by
-                  // truncating its word at extreme text scales instead of
-                  // striping the row; the figure leads the string and the
-                  // Semantics `value` above always carries the full sentence.
-                  Flexible(
-                    child: Text(
-                      context.l10n.deckTileLearnedPercentLabel(percent),
-                      style: context.texts.labelMedium?.copyWith(
-                        // Success is earned at 100% and only there — the same
-                        // moment the gauge's own fill turns (BR-88). Anything
-                        // less is the neutral figure, whatever today's due
-                        // count happens to be.
-                        color: summary.isFullyLearned
-                            ? context.semanticColors.success
-                            : context.colors.onSurfaceVariant,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                  // `xs`, not `sm`: the figure belongs to the gauge it
+                  // measures, and the wider gap read as two elements (owner
+                  // review, 2026-08-20).
+                  const SizedBox(width: AppSpacing.xs),
+                  // **No flex on the label** (owner review, 2026-08-20). A
+                  // loose flex child takes only the width it needs and its
+                  // share of the leftover stays empty, which put a hole
+                  // between the gauge and its figure and left the bar at half
+                  // the row. Natural width here, and the gauge's `Expanded`
+                  // absorbs everything else — the mockup's `flex: 1`.
+                  Text(
+                    context.l10n.deckTileLearnedPercentLabel(percent),
+                    style: context.texts.labelMedium?.copyWith(
+                      // Success is earned at 100% and only there — the same
+                      // moment the gauge's own fill turns (BR-88). Anything
+                      // less is the neutral figure, whatever today's due
+                      // count happens to be.
+                      color: summary.isFullyLearned
+                          ? context.semanticColors.success
+                          : context.colors.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
@@ -281,6 +288,21 @@ class _DeckActionRow extends StatelessWidget {
     );
   }
 }
+
+/// The card's own gutter: 16, or 12 below [AppBreakpoints.compact].
+///
+/// **One number for every band on the card**, because the well, the text
+/// column and the gauge all line up against it — a region that scaled alone
+/// would break the axis the geometry test pins.
+///
+/// It scales for the same reason `mxScreenGutter` and `applyCompactScale` do:
+/// at 320 with `textScaler` 2.0 the gauge, the worded figure and the verb
+/// wanted 4.9px more than the card had, and one step off each side is the
+/// version that keeps all three rather than dropping one.
+double deckTileGutter(BuildContext context) =>
+    AppBreakpoints.isCompact(MediaQuery.sizeOf(context).width)
+    ? AppSpacing.md
+    : AppSpacing.lg;
 
 /// The structural facts: `570 cards · 4 sub-decks` (UC-06).
 ///

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_elevation.dart';
+import '../../../../../core/theme/app_material_roles.dart';
 import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
@@ -91,6 +94,12 @@ class DeckLevelSummaryWidget extends StatelessWidget {
       (sum, d) => sum + d.learnedCardCount,
     );
     return MxCard(
+      // **Indigo hairline, and a step further off the page** (owner review,
+      // 2026-08-20). On the default border the panel did not separate from the
+      // background at all — a card that carries the screen's one answer has to
+      // look like a surface, not like a region of the page.
+      borderColor: context.colors.primaryContainer,
+      elevation: AppElevation.raised,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
@@ -105,9 +114,14 @@ class DeckLevelSummaryWidget extends StatelessWidget {
                   // The scope, not a narration: every figure below is "as of
                   // today", and saying it once up here is what lets the
                   // metrics be bare numbers.
-                  context.l10n.deckSummaryTodayLabel,
+                  context.l10n.deckSummaryTodayLabel.toUpperCase(),
+                  // The section-label treatment the list heading already
+                  // wears, in the brand ink: an eyebrow set like body copy
+                  // read as a stray word above the numeral rather than as the
+                  // panel's scope (owner review, 2026-08-20).
                   style: context.texts.labelMedium?.copyWith(
-                    color: context.colors.onSurfaceVariant,
+                    color: brandInk(context.colors),
+                    letterSpacing: AppTypography.sectionLabelTracking,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -115,8 +129,11 @@ class DeckLevelSummaryWidget extends StatelessWidget {
               ),
               // A chevron, not an X: this collapses to a one-line link and
               // comes back — X promised removal (owner mockup, 2026-08-20).
+              // **It points down while the panel is open**: the arrow shows
+              // where the content goes, and up is what the collapsed link
+              // wears to bring it back (owner review, 2026-08-20).
               MxIconButton(
-                icon: Icons.expand_less,
+                icon: Icons.expand_more,
                 semanticLabel: context.l10n.deckSummaryHideLabel,
                 onPressed: onDismiss,
               ),
