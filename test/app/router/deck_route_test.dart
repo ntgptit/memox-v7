@@ -137,10 +137,9 @@ void main() {
           of: find.byType(AppBar),
           matching: find.text('Japanese N5'),
         ),
-        // Twice: the bar's title and the path's last step, which is the bar's
-        // subline since the header became one block (owner review,
-        // 2026-08-20).
-        findsNWidgets(2),
+        // Once: the path stops above the open deck, so the title is the
+        // only place its name appears (owner review, 2026-08-20).
+        findsOneWidget,
       );
       expect(tester.takeException(), isNull);
     });

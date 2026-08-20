@@ -18,31 +18,31 @@ guess.
 
 | | |
 |---|---|
-| Files scanned (`lib/`, hand-written) | 656 |
-| Colour sites found | 478 |
+| Files scanned (`lib/`, hand-written) | 657 |
+| Colour sites found | 484 |
 | Violations | 0 |
 
 **By element kind**
 
 | kind | sites |
 |---|---|
-| other | 299 |
+| other | 304 |
 | background | 18 |
 | shadow | 1 |
 | border | 13 |
 | text | 115 |
-| icon | 32 |
+| icon | 33 |
 
 **By source kind**
 
 | kind | sites |
 |---|---|
-| shared-constant | 144 |
+| shared-constant | 147 |
 | blend-source | 4 |
 | Colors-material | 5 |
-| hardcoded-literal | 97 |
+| hardcoded-literal | 99 |
 | opacity-modified-token | 11 |
-| theme-token | 217 |
+| theme-token | 218 |
 
 **By violation code**
 

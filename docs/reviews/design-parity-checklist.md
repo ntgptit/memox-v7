@@ -609,6 +609,23 @@ không lấy màu hay tính năng ngoài domain.
 | Summary một dòng `titleLarge` + câu, padding `md` | ✅ `deck_level_summary_widget.dart` | ❌ chưa | Kit đang là bản hai tầng cũ |
 | Tile: đầu card `md/xs` thay `lg/sm` | ✅ `deck_tile_widget.dart` | ❌ chưa | Mật độ: 3 deck đủ khi summary mở, 393×852 |
 
+## Library redesign · pass 3 (owner review, 2026-08-20)
+
+Năm điểm còn lại cộng một ràng buộc lưới. Như pass 2, mỗi dòng **đảo** một
+quyết định đang có hiệu lực.
+
+| Quyết định | Flutter | design_system | Ghi chú |
+|---|---|---|---|
+| Create rời app bar thành **FAB** 56, bo 16, nền `primary`, elevation `overlay`, `endFloat` (16 trên nav) — **đảo M4.10ag** | ✅ `deck_list_screen.dart`, `floatingActionButtonTheme` trong `app_theme.dart` | ❌ chưa | Lý do M4.10ag (nút nổi che hàng cuối) nay được trả bằng inset cuối danh sách, không bằng việc dời nút. Bar còn đúng hai icon outline cùng kích thước |
+| Inset cuối danh sách = 56 (FAB) + 16 + 16 **+ safe area**, thay `lg` | ✅ `deck_list_sliver_widget.dart` | ❌ chưa | Đo bằng `app_navigation_shell_test.dart`: cuộn tới hết thì `lastRow.bottom <= FAB.top` |
+| Breadcrumb vào **title** của app bar (`Column`, cách 8), không còn ở `AppBar.bottom`; `toolbarHeight` tính theo hai dòng | ✅ `mx_content_shell.dart` | ❌ chưa | `bottom` cho cả bề ngang nhưng vẫn là một băng riêng có slack của toolbar phía trên |
+| Path **dừng trên deck đang mở** (không lặp tên); mọi segment đều bấm được | ✅ `deck_path_widget.dart` | ❌ chưa | Tên deck đã là title một dòng ngay trên |
+| Chevron back nằm **trên dòng path**, bar bỏ leading tự động khi có subline | ✅ `deck_subheader_widget.dart`, `mx_content_shell.dart` | ❌ chưa | Đi tới **cha** theo tên route, không pop navigator — deep link không có gì để pop |
+| Dòng path cao cố định **20px** ở mọi cấp (`MxBreadcrumb.lineHeight`) | ✅ `mx_breadcrumb.dart` | ❌ chưa | **Phân kỳ có chủ đích khỏi sàn 48dp**, chỉ ở header này: 48 không nằm vừa trong 20. Ở root không có target nào bị thu nhỏ (step gốc không `onTap`). Mọi caller khác giữ mặc định 48 |
+| Study: bo 12, cao 40 (vẽ), rộng tối thiểu 80; hit area vẫn 48 | ✅ `deck_study_button_widget.dart` | ❌ chưa | Cùng hệ bo góc với CTA của hero |
+| Viền hero dùng token mới `borderAccent` = brand 38% trộn trên surface | ✅ `app_colors.dart`, `app_semantic_colors.dart` | ❌ chưa | `primaryContainer` là *fill*: cách surface ΔL* 4, đọc ra như một sắc trắng khác chứ không phải một cạnh. Trộn sẵn (không alpha) theo R7 của MX-VIS-002 để audit đọc được |
+| Lưới 4: track progress `sm` 6→4; khối số phụ hero 12/16; card deck 16 trên/dưới; chip cách nhau 8; chip cao 24 | ✅ nhiều file | ❌ chưa | `deck_tile_geometry_test.dart` pin chip 24, Study ≥80, path 20 |
+
 ## Library redesign · pass 2 (owner review, 2026-08-20)
 
 Mười sáu sai lệch chủ dự án đo trên device sau khi pass 1 lên main. Ghi riêng

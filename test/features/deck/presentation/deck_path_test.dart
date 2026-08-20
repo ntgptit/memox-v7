@@ -82,29 +82,31 @@ void main() {
 
       expect(find.byType(MxBreadcrumb), findsOneWidget);
       final MxBreadcrumb crumb = tester.widget(find.byType(MxBreadcrumb));
-      // The whole path, literally. Both ends used to be dropped as duplicate
-      // chrome — the list is what Back reaches, the deck is what the title says
-      // — and the result was a strip that answered "where am I" only in the
-      // middle of the tree.
+      // **The path reads up the tree, and stops above the open deck** (owner
+      // review, 2026-08-20). Its name is the bar's title one line above, and
+      // repeating it spent the header's scarcest width on the same word
+      // twice. The list end stays: it is where Back goes, and saying so is
+      // the point of a path.
       expect(crumb.items.map((MxBreadcrumbItem i) => i.label), <String>[
         english.deckPathRootLabel,
         'Japanese N5',
         'Kana',
-        'Hiragana',
       ]);
-      // Every step but the last goes somewhere; the last is where you already
-      // are, so it renders as text rather than as a control that does nothing.
+      // Every step is somewhere the reader can go, now that the one step that
+      // was not — the deck they are standing in — is gone.
       expect(
-        crumb.items.take(3).every((MxBreadcrumbItem i) => i.onTap != null),
+        crumb.items.every((MxBreadcrumbItem i) => i.onTap != null),
         isTrue,
       );
-      expect(crumb.items.last.onTap, isNull);
     });
 
-    testWidgets('a root deck gets one too — Root, then itself', (tester) async {
+    testWidgets('a root deck gets one too — the list, and a way back', (
+      tester,
+    ) async {
       // The case that used to render nothing, and the reason this changed: one
       // level in is where a user first looks for a breadcrumb, and finding none
       // there reads as the component being broken rather than as a decision.
+      // One step now, because the deck itself is the title.
       final english = AppLocalizationsEn();
 
       await pumpLevel(
@@ -115,8 +117,13 @@ void main() {
       final MxBreadcrumb crumb = tester.widget(find.byType(MxBreadcrumb));
       expect(crumb.items.map((MxBreadcrumbItem i) => i.label), <String>[
         english.deckPathRootLabel,
-        'Japanese N5',
       ]);
+      expect(
+        crumb.items.single.onTap,
+        isNotNull,
+        reason: 'inside a deck the list step is a way out',
+      );
+      expect(find.byIcon(Icons.chevron_left), findsOneWidget);
     });
 
     testWidgets('the deck list itself shows Root, and it does not act', (

@@ -172,7 +172,13 @@ class _QuietContextRow extends StatelessWidget {
         color: context.colors.primaryContainer,
         borderRadius: BorderRadius.circular(AppRadius.sm),
       ),
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+      // 12 down the sides of the figures, 16 across: the block is a panel
+      // inside a panel, so it takes the grid's next step in rather than the
+      // card's own inset (owner review, 2026-08-20).
+      padding: const EdgeInsets.symmetric(
+        vertical: AppSpacing.md,
+        horizontal: AppSpacing.lg,
+      ),
       child: Row(
         children: <Widget>[
           cell(

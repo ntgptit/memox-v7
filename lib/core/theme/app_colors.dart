@@ -137,9 +137,24 @@ abstract final class AppColors {
   /// Both values are hue 240 and inside the light canvas's chroma budget. The
   /// history is worth keeping: `#D7DAE3` (1.40:1) was too weak when it was the
   /// only cue, `#BEC0C3` (1.82:1) was right then and too heavy now.
+  /// The hairline a panel wears when it is the screen's *answer* rather than
+  /// one row among many — today the Library's Today card.
+  ///
+  /// **The brand at 38% over the surface, resolved here rather than at paint
+  /// time.** `primaryContainer` was tried and is a fill: against `surface` it
+  /// is a step of ΔL* 4, which reads as a slightly different white rather than
+  /// as an edge (owner review, 2026-08-20). Blending keeps the hue and buys
+  /// the contrast, and a resolved constant is what MX-VIS-002 rule R7 asks
+  /// for — a translucent border composites against whatever is behind it, and
+  /// the audit cannot read it back.
+  static const Color borderAccentLight = Color(0xFFB6B6E2);
+
   static const Color borderSubtleLight = Color(0xFFD2D2DD);
   // Lifted from 0xFF403D67 so a fill-less hairline (a divider on the dark page)
   // reads on OLED. Same hue and saturation (0.41), lightness only.
+  /// Same recipe as [borderAccentLight], over the dark surface.
+  static const Color borderAccentDark = Color(0xFF31306F);
+
   static const Color borderSubtleDark = Color(0xFF4C487A);
 
   /// A control's edge at the 3:1 WCAG 1.4.11 asks — cleared against every

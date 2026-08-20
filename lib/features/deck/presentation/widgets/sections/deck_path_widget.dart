@@ -58,6 +58,9 @@ class DeckPathWidget extends StatelessWidget {
       semanticLabel: context.l10n.deckPathSemanticLabel,
       // The top of the tree, recognisable without reading it.
       rootIcon: Icons.home_outlined,
+      // A line of the header, not a band of its own — see
+      // `MxBreadcrumb.compactLineHeight` for what that costs and why.
+      lineHeight: MxBreadcrumb.compactLineHeight,
       items: <MxBreadcrumbItem>[
         // **"All decks", not "Root".** It names the top of the tree in the
         // user's own words — "Root" was the schema's term leaking into chrome
@@ -78,9 +81,11 @@ class DeckPathWidget extends StatelessWidget {
               },
             ),
           ),
-        // No `onTap`: this is where the user already is. Absent at the root,
-        // where the first step is already that statement.
-        if (parent != null) MxBreadcrumbItem(label: parent.name),
+        // **The open deck is not a step.** Its name is the bar's title one
+        // line above, and a path that ends by repeating it spends the header's
+        // scarcest width saying the same word twice (owner review,
+        // 2026-08-20). The path now reads *up* the tree only, and every step
+        // in it is somewhere the reader can go.
       ],
     );
   }

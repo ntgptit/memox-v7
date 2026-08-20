@@ -86,6 +86,9 @@ List<AuditSkipAllowance> deckShellAllowances({
 }) {
   final iconButtons =
       screenIconButtons + (hasBackButton ? 1 : 0) + (hasSearchField ? 1 : 0);
+  // The chevron on the path line contributes nothing to either count: it is a
+  // bare `InkWell` painting into the app bar's own `Material`, with no
+  // rounded clip of its own (owner review, 2026-08-20).
   final floatingActions = hasFloatingAction ? 1 : 0;
   // Every one of these hosts an InkWell inside its own Material.
   final inkHosts =
@@ -97,6 +100,8 @@ List<AuditSkipAllowance> deckShellAllowances({
       floatingActions;
   // The InkWell's rounded clip, once per host that has one. Icon buttons draw a
   // `_ShapeBorderPainter` instead, which is counted separately below.
+  // The path chevron is not in this list: its `InkWell` has no rounded clip
+  // to paint, being a plain rectangle in a 20px line.
   final unnamedPainters =
       tappableCards + pills + breadcrumbSteps + floatingActions;
 

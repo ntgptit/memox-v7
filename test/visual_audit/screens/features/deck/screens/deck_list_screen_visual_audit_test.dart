@@ -65,16 +65,15 @@ void main() {
     anchors: deckAnchorsWithEmpty,
     allowances: <AuditSkipAllowance>[
       ...deckShellAllowances(
-        // Two: create, which came back to the app bar when the floating
-        // action was dropped, and the bar's one overflow menu — where the tag
-        // catalog and Trash live now (owner mockup, 2026-08-20; wireframe T2
-        // amendment T2a). Both stay even with no decks: an empty catalog is
-        // an answer, and knowing the recovery surface exists matters most
-        // before anything has been deleted (AD-22). The empty state's own
-        // button belongs to the `empty_state` item below, and there is no
-        // toolbar — with no decks there is nothing to sort.
-        screenIconButtons: 2,
+        // One declared: the bar's overflow, where the tag catalog and Trash
+        // live (T2a). Search is the shell's own count and create floats
+        // (owner review, 2026-08-20). Both stay with no decks: an empty
+        // catalog is an answer, and the recovery surface matters most before
+        // anything is deleted (AD-22). The empty state's button belongs to
+        // `empty_state`, and with no decks there is no toolbar to sort.
+        screenIconButtons: 1,
         screenItemId: 'deck_screen',
+        hasFloatingAction: true,
       ),
       // Two ways forward since UC-01: the starter catalog and the blank deck.
       ...mxActionButtonAllowances('empty_state', buttons: 2),
@@ -111,10 +110,11 @@ void main() {
       heroCardRasterAllowance,
       ...deckShellAllowances(
         // One action per row for three decks, plus the summary panel's
-        // collapse chevron, plus the app bar's create and its one overflow
-        // menu (owner mockup, 2026-08-20 — tag catalog and Trash live inside
-        // it now; search is the shell's own count).
-        screenIconButtons: 6,
+        // collapse chevron, plus the bar's one overflow menu (tag catalog and
+        // Trash live inside it; search is the shell's own count). Create is
+        // the floating action now (owner review, 2026-08-20).
+        screenIconButtons: 5,
+        hasFloatingAction: true,
         screenItemId: 'deck_screen',
         // Every row is a tappable card now rather than a ListTile.
         tappableCards: 3,
@@ -202,14 +202,13 @@ void main() {
     additionalRules: const <AuditRule>[SurfaceColumnRule()],
     anchors: deckAnchorsWithEmpty,
     allowances: <AuditSkipAllowance>[
-      // Two declared icon buttons — create and the action menu — plus the back
-      // button the AppBar adds on a pushed route. One breadcrumb step: this deck
-      // has no ancestors, so the strip is the deck list and then the deck
-      // itself, and only the first of those is a control.
+      // One declared icon button — the deck's action menu — plus the floating
+      // create. One breadcrumb step: no ancestors, so the path is the deck
+      // list alone and the way back is the chevron beside it.
       ...deckShellAllowances(
-        screenIconButtons: 2,
+        screenIconButtons: 1,
         screenItemId: 'deck_screen',
-        hasBackButton: true,
+        hasFloatingAction: true,
         breadcrumbSteps: 1,
       ),
       ...mxActionButtonAllowances('empty_state'),
@@ -241,9 +240,9 @@ void main() {
     anchors: deckAnchorsWithEmpty,
     allowances: <AuditSkipAllowance>[
       ...deckShellAllowances(
-        screenIconButtons: 2,
+        screenIconButtons: 1,
         screenItemId: 'deck_screen',
-        hasBackButton: true,
+        hasFloatingAction: true,
         breadcrumbSteps: 1,
       ),
       ...mxActionButtonAllowances('empty_state'),
@@ -300,10 +299,12 @@ void main() {
       // control, so it hosts no ink.
       heroCardRasterAllowance,
       ...deckShellAllowances(
-        // Four as before, plus the summary panel's collapse chevron.
-        screenIconButtons: 6,
+        // Three row menus, the deck's overflow and the panel's collapse
+        // chevron. Create floats, and the way back is the path's own chevron
+        // rather than the bar's platform arrow (owner review, 2026-08-20).
+        screenIconButtons: 5,
         screenItemId: 'deck_screen',
-        hasBackButton: true,
+        hasFloatingAction: true,
         tappableCards: 3,
         // Sort alone — the filter lives in the deck's own overflow now.
         pills: 1,
@@ -357,9 +358,8 @@ void main() {
       ...deckShellAllowances(
         screenIconButtons: 1,
         screenItemId: 'deck_screen',
-        hasBackButton: true,
-        // The deck list step. This deck has no ancestors, and its own step is
-        // text rather than a control.
+        // The deck list step, and the chevron beside it — the way back lives
+        // on the path line now (owner review, 2026-08-20).
         breadcrumbSteps: 1,
       ),
       // The "Open cards" action that hands off to the card list (M4.11).

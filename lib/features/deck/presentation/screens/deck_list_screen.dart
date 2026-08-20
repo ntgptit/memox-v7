@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import 'package:go_router/go_router.dart';
 
@@ -146,17 +147,6 @@ class _DeckLevel extends ConsumerWidget {
           // stays on the branch navigator and the bottom bar holds.
           onPressed: () => context.pushNamed(RouteNames.librarySearch),
         ),
-        // **Create is the bar's one filled action.** It stays an app-bar
-        // action rather than a floating one (M4.10ag), and disappears where
-        // the action does: a `card` deck holds no sub-decks (BR-63).
-        if (_mayCreate(parent))
-          MxIconButton(
-            icon: Icons.add,
-            isFilled: true,
-            semanticLabel: _createLabel(context, parent),
-            tooltip: _createLabel(context, parent),
-            onPressed: () => _startCreate(context, parent),
-          ),
         // The root's overflow: tag catalog (UC-18), Trash (AD-22 — the entry
         // stays root-only and unbadged; wireframe T2's "always on the bar"
         // is amended to "always in the bar's menu", recorded in the parity
@@ -204,6 +194,29 @@ class _DeckLevel extends ConsumerWidget {
       // The shell's own padding is dropped: the body is one scroll view and
       // owns its gutters.
       padding: EdgeInsets.zero,
+      // **Create floats again, reversing M4.10ag** (owner review,
+      // 2026-08-20). It was moved onto the bar because a floating button
+      // covers whatever row sits under it — on a deck card, its overflow
+      // menu. What made it a bar action then was the fill it needed to read
+      // as primary, and a filled square between two outlined glyphs
+      // outweighed the title. As a real FAB the weight is where it belongs,
+      // and the row it used to cover is answered by the list's own bottom
+      // inset rather than by moving the button.
+      //
+      // Absent where the action is: a `card` deck holds no sub-decks (BR-63).
+      floatingActionButton: _mayCreate(parent)
+          ? FloatingActionButton(
+              onPressed: () => _startCreate(context, parent),
+              tooltip: _createLabel(context, parent),
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(AppRadius.lg)),
+              ),
+              child: Icon(
+                Icons.add,
+                semanticLabel: _createLabel(context, parent),
+              ),
+            )
+          : null,
       // **The path is the bar's second line, not a band under it.** It was
       // already pinned in the subheader slot; what that slot could not do is
       // make it read as part of the header — the bar's bottom slack, the

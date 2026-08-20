@@ -9,8 +9,14 @@ import '../../../../../core/navigation/route_names.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 
-/// The pill height the design draws. The *target* is not this — see below.
-const double _kPillHeight = 32;
+/// The height the button draws, which is also its target now: 40 is on the
+/// 4px grid and clears the 32 the pill used to paint (owner review,
+/// 2026-08-20). `MaterialTapTargetSize.padded` still lifts the *hit* area to
+/// [AppSpacing.minimumTouchTarget].
+const double _kButtonHeight = 40;
+
+/// So a one-word verb is not narrower than the chips above it.
+const double _kButtonMinWidth = 80;
 
 /// Start studying what is due in one deck.
 ///
@@ -34,7 +40,7 @@ const double _kPillHeight = 32;
 /// the only other accent left, so one primary verb per card now reads as the
 /// hierarchy instead of competing with it.
 ///
-/// **32 is what it paints; 48 is what a finger gets.** `AppSpacing` calls the
+/// **40 is what it paints; 48 is what a finger gets.** `AppSpacing` calls the
 /// touch target a floor, and `MxBreadcrumb` already settled the same conflict
 /// the same way — the kit's CSS says 36 there and its usage note says 48, and 48
 /// won. `MaterialTapTargetSize.padded` keeps the pill's drawn height at 32 and
@@ -61,7 +67,7 @@ class DeckStudyButtonWidget extends StatelessWidget {
             label: context.colors.onPrimary,
           ).copyWith(
             minimumSize: const WidgetStatePropertyAll<Size>(
-              Size(0, _kPillHeight),
+              Size(_kButtonMinWidth, _kButtonHeight),
             ),
             padding: const WidgetStatePropertyAll<EdgeInsets>(
               EdgeInsets.symmetric(horizontal: AppSpacing.md),
@@ -69,10 +75,10 @@ class DeckStudyButtonWidget extends StatelessWidget {
             // A card corner, not a pill (owner review, 2026-08-20): the row
             // it sits in is built from rounded rectangles — the gauge, the
             // chips above it, the card itself — and a stadium among them read
-            // as a borrowed component.
-            shape: WidgetStatePropertyAll<OutlinedBorder>(
+            // as a borrowed component. Same corner as the hero's own CTA.
+            shape: const WidgetStatePropertyAll<OutlinedBorder>(
               RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppRadius.md),
+                borderRadius: BorderRadius.all(Radius.circular(AppRadius.md)),
               ),
             ),
             tapTargetSize: MaterialTapTargetSize.padded,

@@ -7,6 +7,7 @@ import 'app_input_theme.dart';
 import 'app_interaction_states.dart';
 import 'app_overlay_themes.dart';
 import 'app_colors.dart';
+import 'app_elevation.dart';
 import 'app_material_roles.dart';
 import 'app_navigation_bar_theme.dart';
 import 'app_radio_theme.dart';
@@ -239,6 +240,19 @@ ThemeData _buildTheme(
     // content. M3's default would tint it with `surfaceContainer` and give it
     // elevation, which reintroduces exactly the shifting background the app bar
     // deliberately turned off.
+    // **The brand pair, stated.** Material 3's default is the
+    // `primaryContainer` tonal pair, which puts the screen's one create action
+    // in the same clothes as the navigation bar's active tab. The owner's
+    // mockup draws it as the brand fill (owner review, 2026-08-20), and the
+    // pair carries its own contrast guarantee.
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      backgroundColor: scheme.primary,
+      foregroundColor: scheme.onPrimary,
+      elevation: AppElevation.overlay,
+      focusElevation: AppElevation.overlay,
+      hoverElevation: AppElevation.overlay,
+      highlightElevation: AppElevation.overlay,
+    ),
     navigationBarTheme: buildNavigationBarTheme(scheme, texts, background),
 
     // The safety net for a bare or third-party `Card` — no app widget renders

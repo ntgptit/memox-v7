@@ -13,12 +13,11 @@ import '../../core/theme/theme_context_extension.dart';
 /// *is* the content, as a study session's own progress will be. A third would
 /// be a guess, which is the same argument that keeps the icon scale at three.
 enum MxProgressBarSize {
-  /// **6, not 4.** At 4 the track read as a hairline rather than a measure, and
-  /// on the deck card — where it is the card's base, seated inside a 16 corner —
-  /// it also sat further into the curve: the horizontal inset at the top edge of
-  /// a 4px bar is 5.4px against 3.5 at 6, so the thicker bar reaches *closer* to
-  /// the corners rather than further from them.
-  sm(6),
+  /// **4 again** (owner review, 2026-08-20). It was 6 for a card whose track
+  /// was the card's own base, seated inside a 16 corner; the gauge moved
+  /// inside the surface two passes ago, so the corner argument no longer
+  /// applies, and 6 was the one control height off the 4px grid.
+  sm(4),
   md(8);
 
   const MxProgressBarSize(this.trackHeight);

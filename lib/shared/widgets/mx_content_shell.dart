@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_breakpoints.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/theme_context_extension.dart';
+import 'mx_breadcrumb.dart';
 
 /// The frame every screen is built in: app bar, gutters, an optional pinned
 /// subheader and an optional floating action.
@@ -58,24 +59,22 @@ class MxContentShell extends StatefulWidget {
   /// field, or both.
   final Widget? subheader;
 
-  /// A second line **inside the bar**, under [title].
+  /// A second line **inside the title**, under [title] itself.
   ///
-  /// **Why a separate slot from [subheader], which is also pinned.** Both stay
-  /// put when the body scrolls; what differs is whether the reader sees one
-  /// header or two things stacked. As a subheader the breadcrumb sat below the
-  /// bar with the bar's own bottom slack, the band's padding and the strip's
-  /// 48dp tap floor between it and the title — measured on device at roughly
-  /// 60px, far enough that the title and the path read as unrelated elements
-  /// (owner review, 2026-08-20). In `AppBar.bottom` the gap is the bar's
-  /// alone.
+  /// **Why not [subheader], which is also pinned.** Both stay put when the
+  /// body scrolls; what differs is whether the reader sees one header or two
+  /// things stacked. As a subheader the breadcrumb sat below the bar with the
+  /// bar's bottom slack, the band's padding and the strip's 48dp tap floor
+  /// between it and the title — measured on device at roughly 60px, far
+  /// enough that the two read as unrelated elements (owner review,
+  /// 2026-08-20).
   ///
-  /// It spans the **full** bar width rather than the title slot, so a long
-  /// path may run under the actions instead of truncating early — which is why
-  /// this is `bottom` and not a `Column` inside [title].
-  ///
-  /// The residual gap is a tap target, not padding: a breadcrumb step is a
-  /// control and keeps [AppSpacing.minimumTouchTarget], so its label is
-  /// centred in a 48 box. Everything around it is zero.
+  /// **In the title slot, not `AppBar.bottom`.** `bottom` gave the line the
+  /// full bar width but kept it a separate band with the toolbar's own slack
+  /// above it; a `Column` in the title makes the two lines one block with a
+  /// single [AppSpacing.sm] between them. The cost is width — the line ends
+  /// where the actions begin — which the caller answers by keeping the line
+  /// short and letting it ellipsize.
   final Widget? titleSubline;
 
   /// Screen padding. `null` resolves to the scale for the current width:
@@ -101,7 +100,6 @@ class _MxContentShellState extends State<MxContentShell> {
 
   /// Only reached if the theme has no such style, which the app's does.
   static const double _fallbackTitleSize = 22;
-  static const double _fallbackSublineSize = 12;
 
   /// Two pixels rather than zero: a scroll view can report a sub-pixel offset at
   /// rest, and a hairline that flickers on an untouched screen is worse than no
@@ -149,29 +147,19 @@ class _MxContentShellState extends State<MxContentShell> {
     }
 
     return AppBar(
-      title: widget.title == null ? null : Text(widget.title!),
+      title: _buildTitle(context, subline),
       leading: widget.leading,
-      automaticallyImplyLeading: widget.leading == null,
-      // Only when a subline is present: the toolbar row gives up the slack it
-      // does not need so the two lines read as one block. It never goes below
+      // **A subline owns the way back.** The path's own chevron is the up
+      // affordance where there is one, so the bar must not also draw the
+      // platform arrow beside a title that already has a line under it
+      // (owner review, 2026-08-20).
+      automaticallyImplyLeading: widget.leading == null && subline == null,
+      // Only when a subline is present: the row is sized to the block it
+      // holds rather than to Material's one-line default. It never goes below
       // the touch floor — the row carries the bar's icon buttons — and it
       // grows with the text scale, because a title clipped by a fixed bar is
       // the failure this number exists to avoid.
       toolbarHeight: subline == null ? null : _toolbarHeight(context),
-      bottom: subline == null
-          ? null
-          : PreferredSize(
-              preferredSize: Size.fromHeight(_sublineHeight(context)),
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: _defaultPadding(context).left,
-                ),
-                child: Align(
-                  alignment: AlignmentDirectional.centerStart,
-                  child: subline,
-                ),
-              ),
-            ),
       actions: widget.actions,
       // Below the whole chrome block rather than between bar and subheader: the
       // subheader is chrome too, and the line is there to say where chrome ends
@@ -184,25 +172,36 @@ class _MxContentShellState extends State<MxContentShell> {
     );
   }
 
-  /// The bar's own row, tight around its title and its 48dp actions.
-  double _toolbarHeight(BuildContext context) {
-    final scaler = MediaQuery.textScalerOf(context);
-    final size = context.texts.titleLarge?.fontSize ?? _fallbackTitleSize;
+  /// The title, alone or over its subline.
+  Widget? _buildTitle(BuildContext context, Widget? subline) {
+    final title = widget.title;
+    if (title == null) return subline;
+    if (subline == null) return Text(title);
 
-    return math.max(
-      AppSpacing.minimumTouchTarget,
-      scaler.scale(size) * _lineFactor + AppSpacing.sm,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
+        const SizedBox(height: AppSpacing.sm),
+        subline,
+      ],
     );
   }
 
-  /// The subline band: one line of `bodySmall` inside a control's touch floor.
-  double _sublineHeight(BuildContext context) {
+  /// The bar's row when it carries two lines: the title's line box, the gap,
+  /// the subline's own height, and the padding a bar puts around its content.
+  double _toolbarHeight(BuildContext context) {
     final scaler = MediaQuery.textScalerOf(context);
-    final size = context.texts.bodySmall?.fontSize ?? _fallbackSublineSize;
+    final title = context.texts.titleLarge?.fontSize ?? _fallbackTitleSize;
 
     return math.max(
       AppSpacing.minimumTouchTarget,
-      scaler.scale(size) * _lineFactor + AppSpacing.md,
+      scaler.scale(title) * _lineFactor +
+          AppSpacing.sm +
+          MxBreadcrumb.compactLineHeight +
+          AppSpacing.md,
     );
   }
 
