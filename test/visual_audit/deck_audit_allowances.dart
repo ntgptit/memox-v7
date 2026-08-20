@@ -133,7 +133,7 @@ List<AuditSkipAllowance> deckShellAllowances({
       rationale:
           'NavigationBar paints its selection indicator into a Material ink '
           'layer, so the pill has no render object of its own. Its colour is '
-          'secondaryContainer, set in navigationBarTheme, and the two selected '
+          'primaryContainer, set in navigationBarTheme, and the two selected '
           'states are pinned by the mx_navigation_bar_* goldens.',
     ),
     AuditSkipAllowance(

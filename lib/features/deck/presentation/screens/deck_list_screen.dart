@@ -17,6 +17,7 @@ import '../controllers/deck_list_controller.dart';
 import '../controllers/deck_list_view_controller.dart';
 import '../states/deck_list_view_state.dart';
 import '../widgets/overlays/deck_actions_widget.dart';
+import '../widgets/overlays/library_menu_widget.dart';
 import '../widgets/overlays/deck_confirm_widget.dart';
 import '../widgets/overlays/deck_create_child_widget.dart';
 import '../widgets/sections/deck_level_error_widget.dart';
@@ -130,56 +131,52 @@ class _DeckLevel extends ConsumerWidget {
     return MxContentShell(
       // The level names itself: the app at the root, the deck below it.
       title: parent?.name ?? context.l10n.decksTitle,
+      // **One row: search, the primary create, one overflow** (owner mockup,
+      // 2026-08-20). The bar leads with the two actions a library is used
+      // for — finding and adding — and everything rarer lives behind one
+      // kebab, so the row never grows past three targets.
       actions: <Widget>[
-        // The tag catalog (UC-18, M4.14 T2). **Only at the root level**, which
-        // is the Library: a tag belongs to no deck (BR-93), so offering it
-        // inside one would suggest a scope that does not exist — and the deck
-        // level's bar already carries create plus the deck's own overflow.
-        //
-        // Always visible, even with no decks and no tags: a catalog that is
-        // empty is an answer, and hiding the door would leave a user who
-        // wondered "which tags do I have?" with nowhere to look. By route name,
-        // so the deck feature never imports the card feature's screen (AD-13).
-        if (parent == null)
-          MxIconButton(
-            icon: Icons.sell_outlined,
-            semanticLabel: context.l10n.tagCatalogEntryAction,
-            tooltip: context.l10n.tagCatalogEntryAction,
-            onPressed: () => context.goNamed(RouteNames.tagCatalog),
-          ),
-        // **Create is an app-bar action, not a floating one.** A button hovering
-        // over the bottom-right of a scrolling list covers whatever row is
-        // there, and on a deck card that is its overflow menu — an inset only
-        // reserves the END of the scroll, never the resting frame. Nothing
-        // floats now. The cost is accepted: the primary action left the thumb's
-        // reach. See M4.10ag in `docs/wbs.md`.
-        //
-        // It disappears where the action does: a `card` deck holds no sub-decks
-        // (BR-63), and a button that appears only when it applies is honest
-        // where a permanently disabled one is not.
+        MxIconButton(
+          icon: Icons.search,
+          semanticLabel: context.l10n.librarySearchOpenLabel,
+          tooltip: context.l10n.librarySearchOpenLabel,
+          // **`push`, not `go`.** Search is a *sibling* of the deck-detail
+          // route under `/`, so `go` would rebuild the match list and throw
+          // away every level below the root (wireframe S2/W4). Pushed, it
+          // stays on the branch navigator and the bottom bar holds.
+          onPressed: () => context.pushNamed(RouteNames.librarySearch),
+        ),
+        // **Create is the bar's one filled action.** It stays an app-bar
+        // action rather than a floating one (M4.10ag), and disappears where
+        // the action does: a `card` deck holds no sub-decks (BR-63).
         if (_mayCreate(parent))
           MxIconButton(
-            // The same glyph at every level. It was `add` at the root and
-            // `create_new_folder` inside a deck, which made one action look
-            // like two — the thing created is a deck in both cases.
             icon: Icons.add,
+            isFilled: true,
             semanticLabel: _createLabel(context, parent),
             tooltip: _createLabel(context, parent),
             onPressed: () => _startCreate(context, parent),
           ),
-        // **Trash lives on the root level's bar and nowhere else** (AD-22,
-        // wireframe T1/T2). It is always here, with no badge: a user needs to
-        // know a recovery surface exists *before* they delete something, and a
-        // count would turn an ordinary place into one that looks like a task.
+        // The root's overflow: tag catalog (UC-18), Trash (AD-22 — the entry
+        // stays root-only and unbadged; wireframe T2's "always on the bar"
+        // is amended to "always in the bar's menu", recorded in the parity
+        // checklist), and the due-only view toggle that left the toolbar.
         if (parent == null)
           MxIconButton(
-            icon: Icons.delete_outline,
-            semanticLabel: context.l10n.trashEntryLabel,
-            tooltip: context.l10n.trashEntryLabel,
-            onPressed: () => context.goNamed(RouteNames.trash),
+            icon: Icons.more_vert,
+            semanticLabel: context.l10n.libraryActionsTitle,
+            tooltip: context.l10n.libraryActionsTitle,
+            onPressed: () => showLibraryMenu(
+              context,
+              isDueFilterActive: filter == DeckListFilter.due,
+              onToggleDueFilter: () => onFilterChanged(
+                filter == DeckListFilter.due
+                    ? DeckListFilter.all
+                    : DeckListFilter.due,
+              ),
+            ),
           ),
-        // Only when there is a deck to act on: the root level is not a deck,
-        // and the rows have their own menus.
+        // A deck's own menu, which also carries the level's view toggle now.
         if (parent != null)
           MxIconButton(
             icon: Icons.more_vert,
@@ -187,11 +184,16 @@ class _DeckLevel extends ConsumerWidget {
             onPressed: () => showDeckActions(
               context,
               deck: parent,
+              isDueFilterActive: filter == DeckListFilter.due,
+              onToggleDueFilter: () => onFilterChanged(
+                filter == DeckListFilter.due
+                    ? DeckListFilter.all
+                    : DeckListFilter.due,
+              ),
               // The deck being viewed is gone, so staying here would show a
               // not-found state the user did not ask for. Going **up one
               // level** — not to the root — is where the deck was, and its
-              // siblings are what the user was browsing. Landing at the root
-              // reads as though more than the one deck had gone.
+              // siblings are what the user was browsing.
               onDeleted: (batchId) {
                 leaveDeletedDeck(context, parent);
                 showDeckMovedToTrash(context, ref, batchId: batchId);
@@ -228,6 +230,12 @@ class _DeckLevel extends ConsumerWidget {
     // which is exactly the dead control this design refused to copy.
     if (snapshot.decks.isEmpty) return _emptyLevel(context, parent);
 
+    final visible = applyDeckListView(
+      snapshot.decks,
+      filter: filter,
+      sort: sort,
+    );
+
     // **One scroll view, not a pinned block above a scrolling one.** The summary
     // panel and the toolbar used to sit outside the list, so their height came
     // out of the *screen* rather than the scroll — and stopped fitting the
@@ -256,21 +264,14 @@ class _DeckLevel extends ConsumerWidget {
               isRootLevel: parent == null,
               filter: filter,
               sort: sort,
+              visibleCount: visible.length,
               onFilterChanged: onFilterChanged,
               onSortChanged: onSortChanged,
             ),
           ),
         ),
         DeckListSliverWidget(
-          // The scheduler distinguishes decks only at the root: below it every
-          // descendant inherits the root's algorithm (BR-06), and a column of
-          // identical "8 boxes" is non-information.
-          shouldShowScheduler: snapshot.isRootLevel,
-          summaries: applyDeckListView(
-            snapshot.decks,
-            filter: filter,
-            sort: sort,
-          ),
+          summaries: visible,
           onClearFilter: () => onFilterChanged(DeckListFilter.all),
         ),
       ],

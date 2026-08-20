@@ -609,6 +609,24 @@ không lấy màu hay tính năng ngoài domain.
 | Summary một dòng `titleLarge` + câu, padding `md` | ✅ `deck_level_summary_widget.dart` | ❌ chưa | Kit đang là bản hai tầng cũ |
 | Tile: đầu card `md/xs` thay `lg/sm` | ✅ `deck_tile_widget.dart` | ❌ chưa | Mật độ: 3 deck đủ khi summary mở, 393×852 |
 
+## Library header + hero redesign pass (owner mockup, 2026-08-20)
+
+Sáu điểm từ mockup của chủ dự án, áp vào Flutter trước; kit HTML là mock tĩnh
+nên các mục dưới ghi **phân kỳ cố ý** cho tới lần đụng kit kế tiếp.
+
+| Quyết định | Flutter | design_system | Ghi chú |
+|---|---|---|---|
+| Header một hàng: search + create (filled primary) + một kebab; breadcrumb là sub-line thường trực, root đọc `All decks` (bỏ từ kỹ thuật "Root"); Trash và tag catalog vào overflow `showLibraryMenu` (amend T1/T2 — xem `docs/wireframes/m99-33-trash-restore.md` T2a) | ✅ `deck_list_screen.dart`, `library_menu_widget.dart`, `deck_subheader_widget.dart`, `MxIconButton.isFilled` | ❌ chưa | Mọi target giữ floor 48dp (mock ghi 44/40 — floor a11y của repo cao hơn và thắng, phân kỳ cố ý với mock) |
+| Hero một con số: `15 cards due` gộp overdue + hôm nay; subline `8 overdue · 7 today` chỉ hiện khi overdue>0, nửa overdue mang `danger` w600; CTA `Study N due cards` (root → tab Study vì BR-101, trong deck → study của deck đó); nút đóng thành chevron thu gọn | ✅ `deck_summary_metrics_widget.dart`, `deck_level_summary_widget.dart`, `deck_summary_section_widget.dart` | ❌ chưa | Supersede lưới 2×2 bốn tập của three-set hero pass; bốn tập BR-162 vẫn đủ mặt: hero + subline + context row |
+| New/Scheduled hạ cấp thành context row: không icon, không semantic ink, một hàng trên nền `surface-muted` ngăn bằng hairline `outlineVariant`; đỏ overdue là accent duy nhất còn lại trên panel | ✅ `_QuietContextRow` trong `deck_summary_metrics_widget.dart` | ❌ chưa | Semantics giữ nguyên các câu `deckHero*SemanticLabel` |
+| Toolbar một chip sort nhãn đầy nghĩa (`Recently studied` / `By name`); filter due-only vào overflow (root: `showLibraryMenu`, trong deck: `showDeckActions`); số lượng deck dời vào nhãn section `YOUR DECKS · N` (đếm sau filter) | ✅ `deck_list_toolbar_widget.dart`, `deck_actions_widget.dart` | ❌ chưa | Hai pill giống hệt nhau từng đứng cạnh nhau — control hiếm rời hàng |
+| Tile: bỏ badge `+Nd` đè icon (xoá `deck_overdue_badge_widget.dart`) — backlog thành phần chữ dẫn đầu workload line `8 overdue · 4 due · 5 new` (overdue ink `danger` w600, due chỉ đếm hôm nay); metadata cố định `N cards · N sub-decks` (bỏ scheduler khỏi tile — thuộc cấp deck); gauge có nhãn `21% learned`; chỉ số dương mới hiện, deck đầy mà hết việc thì nêu cả hai số 0 | ✅ `deck_workload_line_widget.dart`, `deck_tile_widget.dart`, `deck_status_icon_widget.dart` | ❌ chưa | Tuổi backlog (ngày) chỉ còn trong câu semantics của ô status (`deckOverdueSemanticLabel`); supersede phần badge của schedule-status pass |
+| Nav active dùng `primaryContainer` + icon `primary` thay pill xám | ✅ `app_theme.dart` `navigationBarTheme` | ❌ chưa | |
+
+Study trở lại **filled primary** theo mock (đảo quyết định tonal 2026-08-05):
+các chip metric đã bỏ container và badge đã bỏ, nên một verb primary mỗi card
+giờ là hierarchy thay vì spray accent như lần đo trước.
+
 ## Deck tile anatomy pass (refine, 2026-08-11)
 
 Chốt anatomy ba băng và color-role cho tile + summary. Concept chỉ cho

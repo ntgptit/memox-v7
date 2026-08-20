@@ -26,6 +26,7 @@ class DeckListToolbarWidget extends StatelessWidget {
   const DeckListToolbarWidget({
     required this.filter,
     required this.sort,
+    required this.visibleCount,
     required this.onFilterChanged,
     required this.onSortChanged,
     required this.isRootLevel,
@@ -40,9 +41,12 @@ class DeckListToolbarWidget extends StatelessWidget {
   /// Which heading the list gets — the library's, or this deck's children's.
   final bool isRootLevel;
 
+  /// How many decks the list below actually shows, after the filter — the
+  /// heading names the list, so it counts what is visible, not the level.
+  final int visibleCount;
+
   @override
   Widget build(BuildContext context) {
-    final isDueOnly = filter == DeckListFilter.due;
     final isByName = sort == DeckListSort.name;
 
     // Wrap, not Row: at `textScaler` 2.0 on a 320-wide screen the two pills do
@@ -77,10 +81,11 @@ class DeckListToolbarWidget extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
           child: Text(
-            (isRootLevel
-                    ? context.l10n.decksSectionLabelRoot
-                    : context.l10n.decksSectionLabelChild)
-                .toUpperCase(),
+            // The count lives on the label naming the list, freeing the
+            // header's breadcrumb line from carrying it (owner mockup,
+            // 2026-08-20). Middle dot, not parentheses: it reads as part of
+            // the label, not an aside.
+            '${(isRootLevel ? context.l10n.decksSectionLabelRoot : context.l10n.decksSectionLabelChild).toUpperCase()} · $visibleCount',
             // **`label-md`, not `label-sm`.** The heading and the two pills read
             // as one row, and the pills carry a container while the heading is
             // bare text — so at 11 against their 12 the heading looked like a
@@ -97,19 +102,10 @@ class DeckListToolbarWidget extends StatelessWidget {
           spacing: AppSpacing.sm,
           runSpacing: AppSpacing.sm,
           children: <Widget>[
-            MxPillButton(
-              label: isDueOnly
-                  ? context.l10n.deckFilterDueLabel
-                  : context.l10n.deckFilterAllLabel,
-              icon: Icons.filter_list,
-              isSelected: isDueOnly,
-              semanticLabel: isDueOnly
-                  ? context.l10n.deckFilterDueSemanticLabel
-                  : context.l10n.deckFilterAllSemanticLabel,
-              onPressed: () => onFilterChanged(
-                isDueOnly ? DeckListFilter.all : DeckListFilter.due,
-              ),
-            ),
+            // The filter pill is gone: filter and sort wore the same
+            // clothes, so two look-alike controls collapsed into one — sort
+            // keeps the row, filter moved into the bar's overflow menu
+            // (owner mockup, 2026-08-20).
             MxPillButton(
               label: isByName
                   ? context.l10n.deckSortNameLabel

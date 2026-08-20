@@ -65,7 +65,7 @@ void main() {
       expect(onLine(find.byType(DecoratedBox)), findsNothing);
 
       final dueStyle = tester
-          .widget<Text>(onLine(find.text('7 ${english.deckDueMetricWord}')))
+          .widget<Text>(onLine(find.text(english.deckTileDueChipLabel(7))))
           .style;
       expect(dueStyle?.color, semantic.onStreakContainer);
       expect(dueStyle?.color, isNot(semantic.danger));
@@ -74,7 +74,7 @@ void main() {
       // The two worded metrics are one typography: same size, same weight —
       // the pair reads level, and only the ink differs.
       final newStyle = tester
-          .widget<Text>(onLine(find.text('14 ${english.deckNewMetricWord}')))
+          .widget<Text>(onLine(find.text(english.deckTileNewChipLabel(14))))
           .style;
       expect(newStyle?.color, semantic.info);
       expect(newStyle?.color, isNot(scheme.primary));
@@ -83,7 +83,8 @@ void main() {
       expect(dueStyle?.fontWeight, FontWeight.w600);
       expect(newStyle?.fontWeight, FontWeight.w600);
 
-      // Study: the tonal pair, not primary and not any workload colour.
+      // Study: the card's one primary verb (owner mockup, 2026-08-20) — the
+      // chips gave up their containers, so the brand fill no longer competes.
       final study = tester.widget<FilledButton>(
         find.descendant(
           of: find.byType(DeckStudyButtonWidget),
@@ -91,8 +92,7 @@ void main() {
         ),
       );
       final studyFill = study.style?.backgroundColor?.resolve(<WidgetState>{});
-      expect(studyFill, scheme.secondaryContainer);
-      expect(studyFill, isNot(scheme.primary));
+      expect(studyFill, scheme.primary);
       expect(studyFill, isNot(semantic.streakContainer));
     });
   }
@@ -227,8 +227,12 @@ void main() {
     });
   });
 
-  group('the overdue badge', () {
-    Future<void> pumpOverdue(WidgetTester tester, int days) => pumpDeckScreen(
+  group('the overdue chip on the workload line', () {
+    Future<void> pumpOverdue(
+      WidgetTester tester, {
+      required int overdueCards,
+      int days = 7,
+    }) => pumpDeckScreen(
       tester,
       repository: FakeDeckRepository.withSummaries(<DeckSummary>[
         fakeSummary(
@@ -236,6 +240,7 @@ void main() {
           name: 'Backlog',
           totalCardCount: 60,
           dueCardCount: 12,
+          overdueCardCount: overdueCards,
           overdueDayCount: days,
           learnedCardCount: 30,
         ),
@@ -243,72 +248,61 @@ void main() {
       screen: const DeckListScreen(),
     );
 
-    // Scoped to the tile: the level summary above the list now states the
-    // same overdue badge for the level (BR-161), and this group is about the
-    // tile's. The summary's own copy is asserted in
-    // `deck_summary_overdue_test.dart`.
+    // Scoped to the tile: the level summary above the list states the same
+    // split for the level, and this group is about the tile's line. The
+    // summary's own copy is asserted in `deck_summary_overdue_test.dart`.
     Finder onTile(Finder matching) =>
         find.descendant(of: find.byType(DeckTileWidget), matching: matching);
 
-    testWidgets('one day reads compact, and the reader hears the sentence', (
+    testWidgets('the backlog leads the line in the danger ink, and the due '
+        'chip counts only today', (tester) async {
+      // The `+7d` badge over the icon is gone (owner mockup, 2026-08-20):
+      // it said how *old* the backlog was but not how *big*, and "12 due"
+      // hid that eight of the twelve had already missed their day.
+      await pumpOverdue(tester, overdueCards: 8);
+
+      final context = tester.element(find.byType(DeckWorkloadLineWidget));
+      final semantic = Theme.of(context).extension<AppSemanticColors>()!;
+
+      final overdue = onTile(find.text(english.deckSummaryOverduePart(8)));
+      expect(overdue, findsOneWidget);
+      final style = tester.widget<Text>(overdue).style;
+      expect(style?.color, semantic.danger);
+      expect(style?.fontWeight, FontWeight.w600);
+
+      expect(
+        onTile(find.text(english.deckTileDueChipLabel(4))),
+        findsOneWidget,
+        reason: 'the split closes: 12 due = 8 overdue + 4 today',
+      );
+      expect(onTile(find.text(english.deckTileDueChipLabel(12))), findsNothing);
+    });
+
+    testWidgets('the day count survives in the status square sentence', (
       tester,
     ) async {
-      await pumpOverdue(tester, 1);
+      await pumpOverdue(tester, overdueCards: 8);
 
       expect(
-        onTile(find.text(english.deckOverdueBadgeLabel(1))),
+        onTile(find.bySemanticsLabel(english.deckOverdueSemanticLabel(12, 7))),
         findsOneWidget,
-      );
-      expect(
-        onTile(find.bySemanticsLabel(english.deckOverdueSemanticLabel(12, 1))),
-        findsOneWidget,
-        reason: 'a screen reader gets the sentence, not +1d',
+        reason: 'a screen reader still hears both units: cards and days',
       );
     });
 
-    testWidgets('seven days', (tester) async {
-      await pumpOverdue(tester, 7);
-
-      expect(
-        onTile(find.text(english.deckOverdueBadgeLabel(7))),
-        findsOneWidget,
-      );
-    });
-
-    testWidgets('the badge wears the same red family as the well', (
+    testWidgets('nothing overdue: the line opens with the due chip', (
       tester,
     ) async {
-      // Solid error fill, onError text — the count is part of the overdue
-      // state, not a neutral annotation floating over it.
-      await pumpOverdue(tester, 7);
-      final scheme = Theme.of(
-        tester.element(find.byType(DeckListScreen)),
-      ).colorScheme;
-
-      final label = onTile(find.text(english.deckOverdueBadgeLabel(7)));
-      final text = tester.widget<Text>(label);
-      expect(text.style?.color, scheme.onError);
-
-      final chip = tester.widget<DecoratedBox>(
-        find.ancestor(of: label, matching: find.byType(DecoratedBox)).first,
-      );
-      expect((chip.decoration as BoxDecoration).color, scheme.error);
-    });
-
-    testWidgets('a hundred days caps at 99+', (tester) async {
-      await pumpOverdue(tester, 100);
+      await pumpOverdue(tester, overdueCards: 0, days: 0);
 
       expect(
-        onTile(find.text(english.deckOverdueBadgeCapLabel)),
+        onTile(find.text(english.deckSummaryOverduePart(0))),
+        findsNothing,
+      );
+      expect(
+        onTile(find.text(english.deckTileDueChipLabel(12))),
         findsOneWidget,
       );
-      expect(find.text(english.deckOverdueBadgeLabel(100)), findsNothing);
-    });
-
-    testWidgets('due today carries no badge', (tester) async {
-      await pumpOverdue(tester, 0);
-
-      expect(find.textContaining('+'), findsNothing);
     });
   });
 

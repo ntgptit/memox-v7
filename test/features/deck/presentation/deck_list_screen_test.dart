@@ -112,15 +112,18 @@ void main() {
       expect(
         find.descendant(
           of: find.byType(DeckTileWidget),
-          matching: find.textContaining('7 ${english.deckDueMetricWord}'),
+          matching: find.textContaining(english.deckTileDueChipLabel(7)),
         ),
         findsOneWidget,
       );
+      // The scheduler is off the tile (owner mockup, 2026-08-20): the
+      // algorithm is a configuration detail that lives on the deck's own
+      // level now, not a column dressing every card.
       expect(
         find.textContaining(english.schedulerEightBoxShortLabel),
-        findsWidgets,
+        findsNothing,
       );
-      expect(find.textContaining(english.schedulerSm2Label), findsOneWidget);
+      expect(find.textContaining(english.schedulerSm2Label), findsNothing);
     });
 
     testWidgets('a deck with nothing due says so, neutrally (BR-29)', (
@@ -132,13 +135,13 @@ void main() {
         screen: const DeckListScreen(),
       );
 
-      // **Two states, not one.** One fixture has cards and none of them due --
-      // its workload line states the zeroes outright, `0 Due . 0 New`, because
-      // an absent metric is a convention a reader should never need (BR-150).
-      // The other has no cards at all and says so instead. Asserting both is
-      // what keeps them split.
+      // **Two states, not one.** One fixture has cards and none of them
+      // pending — with nothing speaking, its workload line states both
+      // zeroes outright, `0 due · 0 new`, because there an absent metric
+      // would be ambiguous (BR-150). The other has no cards at all and says
+      // so instead. Asserting both is what keeps them split.
       expect(
-        find.textContaining('0 ${english.deckDueMetricWord}'),
+        find.textContaining(english.deckTileDueChipLabel(0)),
         findsOneWidget,
       );
       expect(find.textContaining(english.deckNoCardsLabel), findsOneWidget);
@@ -168,7 +171,7 @@ void main() {
       expect(
         find.descendant(
           of: find.byType(DeckTileWidget),
-          matching: find.textContaining('7 ${english.deckDueMetricWord}'),
+          matching: find.textContaining(english.deckTileDueChipLabel(7)),
         ),
         findsOneWidget,
       );

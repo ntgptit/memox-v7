@@ -240,7 +240,20 @@ ThemeData _buildTheme(
     // deliberately turned off.
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: background,
-      indicatorColor: scheme.secondaryContainer,
+      // The active tab wears the brand, not a grey pill: with four quiet
+      // destinations the selected one is the only colored thing on the bar,
+      // which is what makes it findable at a glance (owner mockup,
+      // 2026-08-20). The glyph takes `onPrimaryContainer` — the pair M3
+      // guarantees on this fill; bare `primary` on it measured 2.13:1 in
+      // dark.
+      indicatorColor: scheme.primaryContainer,
+      iconTheme: WidgetStateProperty.resolveWith(
+        (Set<WidgetState> states) => IconThemeData(
+          color: states.contains(WidgetState.selected)
+              ? scheme.onPrimaryContainer
+              : scheme.onSurfaceVariant,
+        ),
+      ),
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       // Labels always visible, on every destination. The M3 default hides the

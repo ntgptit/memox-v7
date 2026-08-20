@@ -59,11 +59,11 @@ class DeckPathWidget extends StatelessWidget {
       // The top of the tree, recognisable without reading it.
       rootIcon: Icons.home_outlined,
       items: <MxBreadcrumbItem>[
-        // **"Root", not the screen's own title.** It names the top of the tree
-        // rather than the screen that lists it: a first step reading "Decks"
-        // while the app bar above also read "Decks" looked like a link back to
-        // where the reader already was. And on that screen it is exactly that,
-        // so it carries no `onTap` there — the same rule the last step follows.
+        // **"All decks", not "Root".** It names the top of the tree in the
+        // user's own words — "Root" was the schema's term leaking into chrome
+        // (owner mockup, 2026-08-20). On the root screen the step is where the
+        // reader already is, so it carries no `onTap` there — the same rule
+        // the last step follows.
         MxBreadcrumbItem(
           label: context.l10n.deckPathRootLabel,
           onTap: isAtRoot ? null : () => context.goNamed(RouteNames.decks),

@@ -420,7 +420,7 @@
   "@deckPathSemanticLabel": {
     "description": "Screen-reader label introducing the breadcrumb strip that shows where in the deck tree the user is."
   },
-  "deckPathRootLabel": "Root",
+  "deckPathRootLabel": "All decks",
   "@deckPathRootLabel": {
     "description": "First step of the breadcrumb: the top of the deck tree, above every root deck. Names the top of the hierarchy rather than the screen — the screen's own title is 'Decks', and a path whose first step repeated it read as a link back to where the reader already was. Not tappable while the user is on that screen."
   },
@@ -432,19 +432,11 @@
   "@deckFilterDueLabel": {
     "description": "Label of the deck-list filter pill when only decks with cards due are shown. Tapping it switches back to showing every deck."
   },
-  "deckFilterAllSemanticLabel": "Showing all decks. Activate to show only decks with cards due.",
-  "@deckFilterAllSemanticLabel": {
-    "description": "Screen-reader label for the filter pill in its all-decks state. Says both what is on screen and what activating it does, because the pill is a toggle rather than a menu."
-  },
-  "deckFilterDueSemanticLabel": "Showing only decks with cards due. Activate to show all decks.",
-  "@deckFilterDueSemanticLabel": {
-    "description": "Screen-reader label for the filter pill in its due-only state."
-  },
-  "deckSortRecentLabel": "Recent",
+  "deckSortRecentLabel": "Recently studied",
   "@deckSortRecentLabel": {
     "description": "Label of the deck-list sort pill when decks are ordered newest first."
   },
-  "deckSortNameLabel": "A-Z",
+  "deckSortNameLabel": "By name",
   "@deckSortNameLabel": {
     "description": "Label of the deck-list sort pill when decks are ordered by name. An abbreviation on purpose - the pill is narrow - with the full wording in the screen-reader label."
   },
@@ -2009,38 +2001,9 @@
   "@deckResetProgressConfirm": {
     "description": "Confirms the reset. Destructive, so it carries the danger styling."
   },
-  "deckDueMetricWord": "Due",
-  "@deckDueMetricWord": {
-    "description": "The word half of the due metric; the tile and the summary compose '<count> Due'. Due-today keeps the streakContainer time-pressure role; overdue wears the error pair per BR-161 (BR-150, BR-29)."
-  },
-  "deckNewMetricWord": "New",
-  "@deckNewMetricWord": {
-    "description": "The word half of the new metric; composed as '<count> New'. Foreground is semantic info on the neutral surface — never a filled container, never success (BR-90, BR-150)."
-  },
-  "deckHeroOverdueMetricWord": "Overdue",
-  "@deckHeroOverdueMetricWord": {
-    "description": "Word half of the hero's first metric (BR-162): due cards that came due before today began. Error semantic role when non-zero; the deck tile keeps deckDueMetricWord for the undivided total."
-  },
-  "deckHeroDueTodayMetricWord": "Due today",
-  "@deckHeroDueTodayMetricWord": {
-    "description": "Word half of the hero's second metric (BR-162): due cards whose due_at belongs to today's local day. Streak time-pressure role when non-zero."
-  },
   "deckHeroNewMetricWord": "New",
   "@deckHeroNewMetricWord": {
     "description": "Word half of the hero's third metric (BR-150): cards still on the learning chain. Info role when non-zero."
-  },
-  "deckHeroOverdueAgedMetricWord": "Overdue (+{days}d)",
-  "@deckHeroOverdueAgedMetricWord": {
-    "placeholders": {
-      "days": {
-        "type": "int"
-      }
-    },
-    "description": "Word half of the hero's overdue metric while a backlog exists (BR-162): the set name with the oldest card's age in parentheses. Text, not a chip — a chip beside one cell of the metric grid breaks the column alignment."
-  },
-  "deckHeroOverdueAgedCapMetricWord": "Overdue (99+d)",
-  "@deckHeroOverdueAgedCapMetricWord": {
-    "description": "The aged overdue word past the badge cap: the exact figure stops being information at this size, matching deckOverdueBadgeCapLabel."
   },
   "deckHeroOverdueSemanticLabel": "{count} overdue cards; oldest is {days} days overdue",
   "@deckHeroOverdueSemanticLabel": {
@@ -2084,19 +2047,6 @@
       }
     },
     "description": "Screen-reader sentence for the hero's scheduled metric (BR-162)."
-  },
-  "deckOverdueBadgeLabel": "+{days}d",
-  "@deckOverdueBadgeLabel": {
-    "placeholders": {
-      "days": {
-        "type": "int"
-      }
-    },
-    "description": "Compact overdue badge on the deck status icon (BR-161): completed local days since the subtree's oldest due card. Kept terse on purpose; the full sentence lives in deckOverdueSemanticLabel."
-  },
-  "deckOverdueBadgeCapLabel": "99+",
-  "@deckOverdueBadgeCapLabel": {
-    "description": "The badge past 99 days: an exact count of a hundred-day backlog is noise at this size."
   },
   "deckOverdueSemanticLabel": "{count} cards due; oldest card is {days} days overdue",
   "@deckOverdueSemanticLabel": {
@@ -3760,12 +3710,12 @@
   },
   "librarySearchNoResultsTitle": "No results for “{query}”",
   "@librarySearchNoResultsTitle": {
-    "description": "Heading when a settled search matched nothing. \"query\" is echoed as typed — not the folded form — so the user can see the spelling that was searched.",
     "placeholders": {
       "query": {
         "type": "String"
       }
-    }
+    },
+    "description": "Heading when a settled search matched nothing. \"query\" is echoed as typed — not the folded form — so the user can see the spelling that was searched."
   },
   "librarySearchNoResultsMessage": "Nothing in your library has that in a deck name, a card, or a tag.",
   "@librarySearchNoResultsMessage": {
@@ -3801,16 +3751,15 @@
   },
   "librarySearchDeckResultSemantic": "Deck {name}",
   "@librarySearchDeckResultSemantic": {
-    "description": "Screen-reader label of a deck result that sits at the top of the library, so it has no path above it. \"name\" comes first because the list mixes two kinds and the kind is what disambiguates them.",
     "placeholders": {
       "name": {
         "type": "String"
       }
-    }
+    },
+    "description": "Screen-reader label of a deck result that sits at the top of the library, so it has no path above it. \"name\" comes first because the list mixes two kinds and the kind is what disambiguates them."
   },
   "librarySearchDeckResultInPathSemantic": "Deck {name}, in {path}",
   "@librarySearchDeckResultInPathSemantic": {
-    "description": "Screen-reader label of a deck result with ancestors. \"path\" is announced after \"name\" because the name is what the user searched for.",
     "placeholders": {
       "name": {
         "type": "String"
@@ -3818,11 +3767,11 @@
       "path": {
         "type": "String"
       }
-    }
+    },
+    "description": "Screen-reader label of a deck result with ancestors. \"path\" is announced after \"name\" because the name is what the user searched for."
   },
   "librarySearchCardResultSemantic": "Card {front}, {back}, in {path}",
   "@librarySearchCardResultSemantic": {
-    "description": "Screen-reader label of a card result. \"back\" is carried whole although the row clamps it to one line — an ellipsis is a layout decision, not a decision to drop content from the accessibility tree. \"path\" is the deck the card lives in.",
     "placeholders": {
       "front": {
         "type": "String"
@@ -3833,16 +3782,17 @@
       "path": {
         "type": "String"
       }
-    }
+    },
+    "description": "Screen-reader label of a card result. \"back\" is carried whole although the row clamps it to one line — an ellipsis is a layout decision, not a decision to drop content from the accessibility tree. \"path\" is the deck the card lives in."
   },
   "librarySearchMatchedTagLabel": "Tag: {tag}",
   "@librarySearchMatchedTagLabel": {
-    "description": "Shown on a card result that matched through one of its tags rather than through its own text (BR-252). \"tag\" is the best-ranked matching tag; without it the row appears with no visible reason, which reads as a broken search.",
     "placeholders": {
       "tag": {
         "type": "String"
       }
-    }
+    },
+    "description": "Shown on a card result that matched through one of its tags rather than through its own text (BR-252). \"tag\" is the best-ranked matching tag; without it the row appears with no visible reason, which reads as a broken search."
   },
   "librarySearchPathSeparator": " › ",
   "@librarySearchPathSeparator": {
@@ -3850,7 +3800,6 @@
   },
   "librarySearchCardResultTaggedSemantic": "Card {front}, {back}, in {path}, matched tag {tag}",
   "@librarySearchCardResultTaggedSemantic": {
-    "description": "Screen-reader label of a card result that matched through one of its tags rather than through its own text. \"tag\" is the reason the row is in the list, and with match highlighting deliberately absent it is the only reason a screen-reader user can be given — so it belongs in the label and not only in the visible chip. \"front\", \"back\" and \"path\" carry the same meaning as in librarySearchCardResultSemantic.",
     "placeholders": {
       "front": {
         "type": "String"
@@ -3864,7 +3813,8 @@
       "tag": {
         "type": "String"
       }
-    }
+    },
+    "description": "Screen-reader label of a card result that matched through one of its tags rather than through its own text. \"tag\" is the reason the row is in the list, and with match highlighting deliberately absent it is the only reason a screen-reader user can be given — so it belongs in the label and not only in the visible chip. \"front\", \"back\" and \"path\" carry the same meaning as in librarySearchCardResultSemantic."
   },
   "studySummaryStoppedByDeletion": "The deck or card you were studying was moved to Trash.",
   "@studySummaryStoppedByDeletion": {
@@ -4078,5 +4028,67 @@
   "trashUndoFailed": "That couldn’t be undone.",
   "@trashUndoFailed": {
     "description": "Shown when Undo is refused (UC-21 E3)."
+  },
+  "deckSummaryCardsDueWord": "cards due",
+  "@deckSummaryCardsDueWord": {
+    "description": "The word after the Today hero numeral: \"15 cards due\". The numeral is composed in code."
+  },
+  "deckSummaryOverduePart": "{count} overdue",
+  "@deckSummaryOverduePart": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "One half of the hero subline (\"8 overdue · 7 today\") and the tile overdue chip. Red ink; overdue is the one semantic color left on the card (owner mockup, 2026-08-20)."
+  },
+  "deckSummaryDueTodayPart": "{count} today",
+  "@deckSummaryDueTodayPart": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "The other half of the hero subline."
+  },
+  "deckSummaryStudyDueAction": "Study {count} due cards",
+  "@deckSummaryStudyDueAction": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "The Today panel CTA. At the root it opens the Study tab (a session belongs to one root deck, BR-101, so a cross-deck session cannot be offered); inside a deck it starts that deck study."
+  },
+  "deckTileDueChipLabel": "{count} due",
+  "@deckTileDueChipLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Deck-card chip: due-today count (total due minus overdue)."
+  },
+  "deckTileNewChipLabel": "{count} new",
+  "@deckTileNewChipLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Deck-card chip: new count."
+  },
+  "deckTileLearnedPercentLabel": "{percent}% learned",
+  "@deckTileLearnedPercentLabel": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    },
+    "description": "The tile gauge label, with the word so the number is not bare (\"21% learned\")."
+  },
+  "libraryActionsTitle": "Library actions",
+  "@libraryActionsTitle": {
+    "description": "Title of the Library app-bar overflow sheet (tag catalog, Trash, due-only filter)."
   }
 }

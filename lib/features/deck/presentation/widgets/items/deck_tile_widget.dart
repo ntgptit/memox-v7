@@ -11,7 +11,6 @@ import '../../../domain/models/deck_summary_model.dart';
 import 'deck_status_icon_widget.dart';
 import 'deck_workload_line_widget.dart';
 import 'deck_study_button_widget.dart';
-import '../support/deck_labels_widget.dart';
 
 /// One deck in a deck list, at any level (UC-06 step 2).
 ///
@@ -40,7 +39,6 @@ class DeckTileWidget extends StatelessWidget {
     required this.summary,
     required this.onTap,
     required this.onActions,
-    required this.shouldShowScheduler,
     super.key,
   });
 
@@ -55,7 +53,6 @@ class DeckTileWidget extends StatelessWidget {
   /// repeating `8 boxes` on every child row is a column of non-information.
   /// The *screen* passes this from its snapshot — a tile guessing the level
   /// from its entity would be a second copy of `isRootLevel`.
-  final bool shouldShowScheduler;
 
   @override
   Widget build(BuildContext context) {
@@ -78,11 +75,7 @@ class DeckTileWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          _DeckHeadRegion(
-            summary: summary,
-            onActions: onActions,
-            shouldShowScheduler: shouldShowScheduler,
-          ),
+          _DeckHeadRegion(summary: summary, onActions: onActions),
           _DeckStateRegion(summary: summary),
         ],
       ),
@@ -102,15 +95,10 @@ class DeckTileWidget extends StatelessWidget {
 /// That is most of what took the card from 168 to about 110 — on a 393x852 screen
 /// the difference is 2.3 visible decks against 3.5.
 class _DeckHeadRegion extends StatelessWidget {
-  const _DeckHeadRegion({
-    required this.summary,
-    required this.onActions,
-    required this.shouldShowScheduler,
-  });
+  const _DeckHeadRegion({required this.summary, required this.onActions});
 
   final DeckSummary summary;
   final VoidCallback onActions;
-  final bool shouldShowScheduler;
 
   @override
   Widget build(BuildContext context) {
@@ -150,10 +138,7 @@ class _DeckHeadRegion extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: AppSpacing.xs),
-                _DeckMetaLine(
-                  summary: summary,
-                  shouldShowScheduler: shouldShowScheduler,
-                ),
+                _DeckMetaLine(summary: summary),
                 const SizedBox(height: AppSpacing.xs),
                 DeckWorkloadLineWidget(summary: summary),
               ],
@@ -247,19 +232,26 @@ class _DeckActionRow extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: AppSpacing.sm),
-                  Text(
-                    context.l10n.deckLearnedPercentLabel(percent),
-                    style: context.texts.labelMedium?.copyWith(
-                      // Success is earned at 100% and only there — the same
-                      // moment the gauge's own fill turns (BR-88). Anything
-                      // less is the neutral figure, whatever today's due
-                      // count happens to be.
-                      color: summary.isFullyLearned
-                          ? context.semanticColors.success
-                          : context.colors.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
+                  // Flexible so the worded label ("21% learned") degrades by
+                  // truncating its word at extreme text scales instead of
+                  // striping the row; the figure leads the string and the
+                  // Semantics `value` above always carries the full sentence.
+                  Flexible(
+                    child: Text(
+                      context.l10n.deckTileLearnedPercentLabel(percent),
+                      style: context.texts.labelMedium?.copyWith(
+                        // Success is earned at 100% and only there — the same
+                        // moment the gauge's own fill turns (BR-88). Anything
+                        // less is the neutral figure, whatever today's due
+                        // count happens to be.
+                        color: summary.isFullyLearned
+                            ? context.semanticColors.success
+                            : context.colors.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 1,
                   ),
                 ],
               ),
@@ -290,7 +282,7 @@ class _DeckActionRow extends StatelessWidget {
   }
 }
 
-/// The structural facts: `4 sub-decks · 570 cards · 8 boxes` (UC-06).
+/// The structural facts: `570 cards · 4 sub-decks` (UC-06).
 ///
 /// **Plain text groups, back by measurement.** The icon-per-metric pass gave
 /// every fact its own glyph and the golden showed the cost: five anchors on a
@@ -299,29 +291,24 @@ class _DeckActionRow extends StatelessWidget {
 ///
 /// A `Wrap` of atomic groups rather than one rich text: each `·` is glued to
 /// the fact it introduces, so a narrow screen breaks between facts and never
-/// strands a separator. The scheduler appears only where it distinguishes —
-/// see [DeckTileWidget.shouldShowScheduler] — and reads `summary.schedulerType`,
-/// the resolved value, because a sub-deck's own column is null by rule
-/// (BR-06).
+/// strands a separator. **Cards first, and no scheduler** (owner mockup,
+/// 2026-08-20): the card count is the fact a learner compares decks by, and
+/// the algorithm is a configuration detail that moved to the deck's own
+/// level — a column of "8 boxes" distinguished nothing and dressed every
+/// card in a term from the settings sheet.
 class _DeckMetaLine extends StatelessWidget {
-  const _DeckMetaLine({
-    required this.summary,
-    required this.shouldShowScheduler,
-  });
+  const _DeckMetaLine({required this.summary});
 
   final DeckSummary summary;
-  final bool shouldShowScheduler;
 
   @override
   Widget build(BuildContext context) {
     final facts = <String>[
+      context.l10n.deckCardCountLabel(summary.totalCardCount),
       // Only when there are any: a group that reads "0 sub-decks" spends
       // itself saying nothing happened.
       if (summary.subDeckCount > 0)
         context.l10n.deckSubDeckCountLabel(summary.subDeckCount),
-      context.l10n.deckCardCountLabel(summary.totalCardCount),
-      if (shouldShowScheduler)
-        context.schedulerShortLabel(summary.schedulerType),
     ];
     final quiet = context.texts.bodySmall?.copyWith(
       color: context.colors.onSurfaceVariant,

@@ -25,15 +25,15 @@ const double _kPillHeight = 32;
 /// to the deck the session started from rather than to whatever the Study tab
 /// last held.
 ///
-/// **Tonal, revised from filled (owner decision, 2026-08-05).** The history has
-/// three steps, each recorded in `docs/reviews/design-parity-checklist.md`:
-/// the kit argued *outlined* (a column of filled buttons stops the card being
-/// calm), the owner first chose *filled* (Study is the card's primary action
-/// and an outlined pill lost to the due chip beside it) — and the measured UI
-/// review then showed the cost: with several decks due at once, a column of
-/// `primary` fills sprays the screen's accent across every row. Tonal
-/// (`secondaryContainer`) keeps the emphasis that beat outlined while leaving
-/// `primary` to screen-level actions; the owner approved the revision.
+/// **Primary again (owner mockup, 2026-08-20), reversing the tonal revision
+/// of 2026-08-05.** The full history is in
+/// `docs/reviews/design-parity-checklist.md`: outlined (the kit) lost to
+/// filled (owner), filled lost to tonal when a column of `primary` fills
+/// sprayed the accent across every row — and the redesign restores primary
+/// *because the rest of the card got quieter with it*: the metric chips gave
+/// up their containers, the `+Nd` badge is gone, and overdue's danger ink is
+/// the only other accent left, so one primary verb per card now reads as the
+/// hierarchy instead of competing with it.
 ///
 /// **32 is what it paints; 48 is what a finger gets.** `AppSpacing` calls the
 /// touch target a floor, and `MxBreadcrumb` already settled the same conflict
@@ -52,11 +52,15 @@ class DeckStudyButtonWidget extends StatelessWidget {
         RouteNames.deckStudy,
         pathParameters: <String, String>{RoutePathParams.deckId: deckId},
       ),
-      // The tonal pair comes from the theme's builder (one slot in ThemeData
-      // belongs to the brand fill — see `buildFilledTonalStyle`); only the
-      // pill's geometry is stated here.
-      style: buildFilledTonalStyle(context.colors, context.semanticColors)
-          .copyWith(
+      // The brand pair comes from the shared builder; only the pill's
+      // geometry is stated here.
+      style:
+          buildFilledStyle(
+            context.colors,
+            context.semanticColors,
+            fill: context.colors.primary,
+            label: context.colors.onPrimary,
+          ).copyWith(
             minimumSize: const WidgetStatePropertyAll<Size>(
               Size(0, _kPillHeight),
             ),
@@ -77,14 +81,14 @@ class DeckStudyButtonWidget extends StatelessWidget {
           const Icon(Icons.play_arrow, size: AppIconSize.sm),
           Text(
             context.l10n.deckStudyAction,
-            // **`onSecondaryContainer` stated, not inherited.** `context.texts.labelMedium`
-            // carries the theme's body colour, and passing it whole overrode the
-            // foreground `FilledButton` had already resolved — dark ink on the
-            // tinted fill — the same override class the visual audit once
-            // measured at 2.33:1 on the brand fill. A style taken from the text theme has to say its colour
-            // when it lands on a coloured surface.
+            // **`onPrimary` stated, not inherited.** `context.texts.labelMedium`
+            // carries the theme's body colour, and passing it whole overrode
+            // the foreground the button had already resolved — the same
+            // override class the visual audit once measured at 2.33:1 on the
+            // brand fill. A style taken from the text theme has to say its
+            // colour when it lands on a coloured surface.
             style: context.texts.labelMedium?.copyWith(
-              color: context.colors.onSecondaryContainer,
+              color: context.colors.onPrimary,
               fontWeight: FontWeight.w600,
             ),
           ),

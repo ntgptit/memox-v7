@@ -12,10 +12,11 @@ import 'support/fake_deck_repository.dart';
 
 /// The root list's filter and sort, driven through the real screen.
 ///
-/// `deck_list_view_test.dart` covers the transform itself, which is pure. What is
-/// left to prove here is that the pills are wired to it — that tapping one changes
-/// what is on screen rather than only what is highlighted, which is the difference
-/// between a control and a decoration.
+/// `deck_list_view_test.dart` covers the transform itself, which is pure. What
+/// is left to prove here is that the controls are wired to it — the sort chip
+/// on the toolbar, and the due-only filter that lives in the bar's overflow
+/// menu now (owner mockup, 2026-08-20) — that operating one changes what is
+/// on screen rather than only what is highlighted.
 ///
 /// Split from `root_deck_list_screen_test.dart` when that file crossed the
 /// 400-line guard.
@@ -65,9 +66,11 @@ void main() {
 
       // The defaults describe the repository's own answer: everything, in its
       // own order. A default that changed the view would be a content change
-      // dressed as a redesign.
-      expect(find.text(english.deckFilterAllLabel), findsOneWidget);
+      // dressed as a redesign. Sort is the toolbar's one chip — the filter
+      // moved into the bar's overflow — and the heading counts the list.
       expect(find.text(english.deckSortRecentLabel), findsOneWidget);
+      expect(find.byType(MxPillButton), findsOneWidget);
+      expect(find.textContaining(' · 3'), findsOneWidget);
     });
 
     testWidgets('the filter really filters', (tester) async {
@@ -79,11 +82,20 @@ void main() {
       );
       expect(find.byType(DeckTileWidget), findsNWidgets(3));
 
-      await tester.tap(find.text(english.deckFilterAllLabel));
+      // The filter lives in the bar's overflow now: open it, choose the
+      // due-only view.
+      await tester.tap(find.byTooltip(english.libraryActionsTitle));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(english.deckFilterDueLabel));
       await tester.pumpAndSettle();
 
       expect(find.byType(DeckTileWidget), findsOneWidget);
       expect(find.text('Japanese N5'), findsOneWidget);
+      expect(
+        find.textContaining(' · 1'),
+        findsOneWidget,
+        reason: 'the heading counts what the filter left visible',
+      );
     });
 
     testWidgets('the sort really sorts', (tester) async {
@@ -116,12 +128,13 @@ void main() {
         screen: const DeckListScreen(),
       );
 
-      await tester.tap(find.text(english.deckFilterAllLabel));
+      await tester.tap(find.byTooltip(english.libraryActionsTitle));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(english.deckFilterDueLabel));
       await tester.pumpAndSettle();
 
       expect(find.byType(DeckTileWidget), findsNothing);
       expect(find.text(english.decksNoDueTitle), findsOneWidget);
-      expect(find.byType(MxPillButton), findsNWidgets(2));
 
       await tester.tap(find.text(english.decksShowAllAction));
       await tester.pumpAndSettle();

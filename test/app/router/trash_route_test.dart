@@ -63,13 +63,20 @@ void main() {
     expect(find.byType(MxNavigationBar), findsOneWidget);
   });
 
-  testWidgets('the root deck list carries the entry, always', (tester) async {
-    // Always, and with no badge (wireframe T2): a user has to know the recovery
-    // surface exists *before* they delete something.
+  testWidgets('the root overflow menu carries the entry, always', (
+    tester,
+  ) async {
+    // Always, and with no badge: a user has to know the recovery surface
+    // exists *before* they delete something. The entry moved from the bar
+    // itself into the bar's one overflow menu (owner mockup, 2026-08-20 —
+    // the amendment to wireframe T2 is recorded in the parity checklist).
     await pumpApp(tester);
 
     expect(find.byType(DeckListScreen), findsOneWidget);
-    expect(find.bySemanticsLabel(english.trashEntryLabel), findsOneWidget);
+    await tester.tap(find.byTooltip(english.libraryActionsTitle));
+    await tester.pumpAndSettle();
+
+    expect(find.text(english.trashEntryLabel), findsOneWidget);
   });
 
   testWidgets('tapping the entry lands on Trash, inside the branch', (
@@ -77,7 +84,9 @@ void main() {
   ) async {
     await pumpApp(tester);
 
-    await tester.tap(find.bySemanticsLabel(english.trashEntryLabel));
+    await tester.tap(find.byTooltip(english.libraryActionsTitle));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(english.trashEntryLabel));
     await tester.pumpAndSettle();
 
     expect(find.byType(TrashScreen), findsOneWidget);

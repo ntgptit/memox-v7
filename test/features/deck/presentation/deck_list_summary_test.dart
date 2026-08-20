@@ -110,17 +110,14 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(DeckLevelSummaryWidget), findsOneWidget);
-      // Metric-first since the anatomy pass: a caught-up level states its two
-      // zeroes rather than a sentence (BR-150's no-absence rule).
+      // Metric-first since the anatomy pass: a caught-up level still leads
+      // with a numeral — the hero states its zero rather than a sentence.
       expect(
         find.descendant(
           of: find.byType(DeckLevelSummaryWidget),
-          matching: find.textContaining(
-            '0 ${english.deckHeroDueTodayMetricWord}',
-            findRichText: true,
-          ),
+          matching: find.text('0'),
         ),
-        findsOneWidget,
+        findsWidgets,
       );
     });
 

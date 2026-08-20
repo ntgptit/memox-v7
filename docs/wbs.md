@@ -7,8 +7,8 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
-| **Last updated** | 2026-08-19 |
+| **Updated by task** | M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
+| **Last updated** | 2026-08-20 |
 
 Single source of truth for project progress. Update it in the same commit as the
 work it describes. A task is `done` only when it meets the Definition of Done in
@@ -10807,6 +10807,50 @@ của M2.
   contract và workflow wiring; chạy changed gate cùng full `dod_check.sh` trên
   branch thật.
 - **Checklist phases:** 19, meta
+
+### M99.35 · Redesign header + hero màn Library theo mockup chủ dự án
+
+- **Status:** **done**
+- **Goal:** Màn Library trả lời "hôm nay học gì" bằng một con số và một CTA,
+  thay vì một bảng bốn metric ngang vai và một header ba hàng.
+- **Scope:** Sáu điểm của mockup (2026-08-20): header một hàng (search +
+  create filled + một overflow; breadcrumb thành sub-line thường trực, root
+  đọc `All decks`); hero một con số `N cards due` + subline overdue/today +
+  CTA `Study N due cards` + chevron thu gọn; New/Scheduled hạ cấp thành
+  context row; một chip sort, filter vào overflow, đếm deck trên nhãn
+  section; tile bỏ badge `+Nd` và scheduler, workload ba phần
+  `overdue · due · new`, gauge `N% learned`, Study trở lại filled primary;
+  nav active `primaryContainer`/`onPrimaryContainer`.
+- **Editable documents:** `docs/wbs.md`, `docs/reviews/design-parity-checklist.md`,
+  `docs/wireframes/m99-33-trash-restore.md` (amendment T2a)
+- **5Why:** Review của chủ dự án đọc panel cũ như bảng số liệu: bốn tập
+  BR-162 ngang trọng số không nói tập nào cần hành động; badge `+7d` nói
+  backlog *cũ bao lâu* nhưng không nói *lớn cỡ nào*; hai pill filter/sort
+  mặc cùng bộ đồ nên đọc như một cặp; trash/tag chiếm bar cho hành động
+  hiếm. Quyết định: một câu trả lời một con số, đỏ overdue là accent duy
+  nhất còn lại của card, hành động hiếm vào một overflow.
+- **Output:** `library_menu_widget.dart` (overflow root),
+  `MxIconButton.isFilled`, hero mới trong `deck_summary_metrics_widget.dart`,
+  CTA trong `deck_level_summary_widget.dart`, workload ba phần, xoá
+  `deck_overdue_badge_widget.dart`, 10 khoá ARB mồ côi bị prune, 39 golden
+  tái sinh.
+- **Acceptance criteria:**
+  - [x] BR-101 giữ nguyên: CTA ở root mở tab Study, trong deck mở study của
+        deck đó — không có session xuyên root.
+  - [x] Bốn tập BR-162 vẫn đủ mặt: hero + subline + context row; semantics
+        bốn câu `deckHero*SemanticLabel` không đổi; tuổi backlog còn trong
+        `deckOverdueSemanticLabel`/`deckHeroOverdueSemanticLabel`.
+  - [x] Trash/tag catalog vẫn khám phá được từ root (một tap sâu hơn, T2a);
+        route và test router cập nhật theo.
+  - [x] Danger ink, streak ink, nav pair mới đều qua sàn WCAG trong hai theme
+        (`deck_workload_role_test.dart`, visual audit).
+  - [x] Toàn bộ gate xanh: analyze 0/0, full host suite, visual/design audit,
+        golden 258, guards, emulator IT 8/8.
+- **Dependencies:** M99.19 (deck screen), M99.30 (tag catalog), M99.33 (trash)
+- **Tests required:** summary hero (overdue/new/CTA/semantics/midnight), tile
+  counts + workload roles, toolbar qua overflow menu, router trash/tag qua
+  menu, visual audit counts mới, goldens.
+- **Checklist phases:** 10, 21
 
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 
