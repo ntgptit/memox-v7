@@ -10927,6 +10927,52 @@ của M2.
   vs FAB, audit counts mới, lưới 4, goldens.
 - **Checklist phases:** 10, 21
 
+### M99.38 · Token architecture pass — ColorScheme đúng M3, cardPrompt rời rung
+
+- **Status:** **done**
+- **Goal:** Đóng các sai lệch tầng token so với kiến trúc M3 mà audit
+  (`design_audit/m3_token_architecture_audit.md`) chỉ ra, không đổi pixel nào
+  trong light ngoài chủ đích.
+- **Scope:** `ColorScheme(...)` tường minh thay `fromSeed().copyWith()` — họ
+  `*Fixed` không khai nữa, rơi về fallback của constructor;
+  `outline = borderControl` / `outlineVariant = borderSubtle` (cặp hai bậc
+  đúng M3 — widget ngoài đọc `scheme.outline` nhận stroke 3:1);
+  `surfaceTint` dark về `primary` (mọi component vẫn
+  `surfaceTintColor: transparent`); FAB dark elevation 0 khớp `shadowsFor`
+  (dark không vẽ shadow — trước đó FAB là vật thể duy nhất có);
+  card prompt rời `headlineMedium` sang `AppTextStyles.cardPrompt`
+  (ThemeExtension mới, compact pass override extension), rung về metric M3
+  28/w400 — khớp `--text-card-prompt` của kit vốn đã nằm ngoài scale;
+  `sectionLabel` thành style hoàn chỉnh; alias ngữ nghĩa `overdue` (= danger,
+  BR-161) và `dueContainer`/`onDueContainer` (= cặp streak) + call site đổi
+  theo; các trùng-hex có chủ đích viết thành dẫn xuất (`tertiaryDark =
+  infoDark`, thang dark của container, `scrim = shadow`, `primaryAccent`);
+  chip về `AppRadius.pill` thay `StadiumBorder`; `_kListBottomInset` lên
+  `AppSpacing.fabScrollClearance`; error screen dùng `AppSpacing`.
+  Không đổi schema, không đổi giá trị màu nào — chỉ ánh xạ, dẫn xuất và tên.
+- **Output:** `app_theme.dart` với hai `ColorScheme(...)` tường minh;
+  `AppTextStyles` (`app_text_styles.dart`) đăng ký cạnh `AppSemanticColors`
+  và được compact pass override; alias `overdue`/`dueContainer`/
+  `onDueContainer` trong `AppSemanticColors`; `AppSpacing.fabScrollClearance`;
+  các dẫn xuất trong `AppColors`/`AppMaterialRoles`; artifacts
+  `design_audit/` regenerate theo code mới.
+- **Acceptance criteria:**
+  - [x] `flutter analyze` 0 lỗi 0 cảnh báo; guard xanh; `check_docs.sh` xanh.
+  - [x] Toàn bộ host test non-golden xanh (3553); các nhóm golden/demo/preview
+        fail-sẵn trên Linux trùng khớp baseline 186/186 — pixel do Windows
+        `ci-full` phán xử, goldens dark có FAB sẽ regenerate vì mất shadow
+        (chủ đích).
+  - [x] `scheme.outline` đạt 3:1 trên surface ở cả hai mode
+        (`color_scheme_roles_test` nhận `borderControl` vào palette).
+  - [x] Pin card-prompt nằm trên `AppTextStyles.cardPrompt`; `headlineMedium`
+        pin ở metric M3 28/w400; compact pass đổi cỡ prompt qua extension.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.37
+- **Tests required:** `test/core/theme/` + `test/visual_audit/` +
+  `test/design_audit/` trọn bộ; `compact_scale_test` cho cardPrompt qua
+  extension; full host suite.
+- **Checklist phases:** 7, 12
+
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 
 Ghi lại cụ thể, vì "mất một bộ lint" là câu quá mơ hồ để ai đó sau này biết

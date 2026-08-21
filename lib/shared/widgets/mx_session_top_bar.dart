@@ -241,13 +241,15 @@ class _Chip extends StatelessWidget {
         // *classification*, not the sentence a screen wrote — the same reason
         // the context line under it is uppercase and a deck name never is.
         label.toUpperCase(),
-        style: context.texts.labelMedium?.copyWith(
-          // `primaryAccent` is the brand hue *as text* — the variant held light
-          // enough to pass AA on a dark surface, which `primary` is not.
-          color: context.semanticColors.primaryAccent,
-          fontWeight: FontWeight.w600,
-          letterSpacing: AppTypography.sectionLabelTracking,
-        ),
+        style:
+            AppTypography.withWeight(
+              context.textStyles.sectionLabel,
+              FontWeight.w600,
+            ).copyWith(
+              // `primaryAccent` is the brand hue *as text* — the variant held light
+              // enough to pass AA on a dark surface, which `primary` is not.
+              color: context.semanticColors.primaryAccent,
+            ),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),

@@ -79,7 +79,7 @@ class StudyHomeWorkloadItemWidget extends StatelessWidget {
                   : Icons.event_busy_outlined,
               count: deck.overdueCount,
               word: l10n.studyHomeOverdueWord,
-              color: deck.overdueCount > 0 ? semantic.danger : quiet,
+              color: deck.overdueCount > 0 ? semantic.overdue : quiet,
               wellColor: deck.overdueCount > 0
                   ? context.colors.errorContainer
                   : semantic.surfaceMuted,
@@ -91,14 +91,12 @@ class StudyHomeWorkloadItemWidget extends StatelessWidget {
               icon: deck.dueTodayCount > 0 ? Icons.event : Icons.event_outlined,
               count: deck.dueTodayCount,
               word: l10n.studyHomeDueTodayWord,
-              color: deck.dueTodayCount > 0
-                  ? semantic.onStreakContainer
-                  : quiet,
+              color: deck.dueTodayCount > 0 ? semantic.onDueContainer : quiet,
               wellColor: deck.dueTodayCount > 0
-                  ? semantic.streakContainer
+                  ? semantic.dueContainer
                   : semantic.surfaceMuted,
               wellTint: deck.dueTodayCount > 0
-                  ? semantic.onStreakContainer
+                  ? semantic.onDueContainer
                   : quiet,
             ),
             _Metric(

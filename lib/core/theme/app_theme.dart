@@ -14,6 +14,7 @@ import 'app_radio_theme.dart';
 import 'app_radius.dart';
 import 'app_semantic_colors.dart';
 import 'app_spacing.dart';
+import 'app_text_styles.dart';
 import 'app_typography.dart';
 
 /// Material 3 themes for the app.
@@ -31,11 +32,16 @@ import 'app_typography.dart';
 /// is a decision made without a screen to check it against — which is the rule
 /// this list follows, in both directions.
 ThemeData buildLightTheme() => _buildTheme(
-  ColorScheme.fromSeed(seedColor: AppColors.seed).copyWith(
-    // Every role is declared. `fromSeed` had been generating a neutral-grey
-    // surfaceContainer ladder, a pink `tertiary` and a second red for `error` —
-    // none visible yet only because the MVP has no Dialog, BottomSheet,
-    // NavigationBar, Menu or Chip. See AppColors for the audit.
+  // The constructor, not `fromSeed(...).copyWith(...)`. Every role the app
+  // ships is a hand-tuned constant, and `fromSeed` had been generating a
+  // parallel set nobody rendered — a neutral-grey surfaceContainer ladder, a
+  // pink `tertiary`, a second red for `error` — which read as "there is a
+  // tonal palette" when there is none. What is not passed falls back to the
+  // constructor's own derivations (the `*Fixed` family lands on its base
+  // role); nothing reads those, and `app_theme_test.dart` is what notices if
+  // something starts to.
+  const ColorScheme(
+    brightness: Brightness.light,
     primary: AppColors.primaryLight,
     onPrimary: AppColors.onPrimaryLight,
     primaryContainer: AppMaterialRoles.primaryContainerLight,
@@ -63,29 +69,19 @@ ThemeData buildLightTheme() => _buildTheme(
     surfaceContainer: AppMaterialRoles.surfaceContainerLight,
     surfaceContainerHigh: AppMaterialRoles.surfaceContainerHighLight,
     surfaceContainerHighest: AppMaterialRoles.surfaceContainerHighestLight,
-    outline: AppColors.borderSubtleLight,
+    // **The M3 pair, at last as a pair.** `outline` is the stroke the spec
+    // asks to identify a component's boundary — the 3:1 of WCAG 1.4.11 — and
+    // `outlineVariant` is the decorative hairline. Both used to be
+    // `borderSubtle`, which handed any component that trusts `scheme.outline`
+    // a 1.45:1 edge. The app's own widgets read the semantic tokens directly,
+    // so this re-mapping changes what an *untended* widget degrades to, not
+    // what the app draws.
+    outline: AppColors.borderControlLight,
     outlineVariant: AppColors.borderSubtleLight,
     inverseSurface: AppMaterialRoles.inverseSurfaceLight,
     onInverseSurface: AppMaterialRoles.onInverseSurfaceLight,
     inversePrimary: AppMaterialRoles.inversePrimaryLight,
     surfaceTint: AppColors.primaryLight,
-    // The M3 `*Fixed` family: brightness-independent by definition, so both
-    // themes get the same light-container values. No Material component reads
-    // them today — which is exactly the argument that left a PINK `tertiary`
-    // undetected until an audit went looking. `fromSeed` still generates
-    // `tertiaryFixed` at hue 329.
-    primaryFixed: AppMaterialRoles.primaryContainerLight,
-    primaryFixedDim: AppMaterialRoles.primaryContainerLight,
-    onPrimaryFixed: AppMaterialRoles.onPrimaryContainerLight,
-    onPrimaryFixedVariant: AppColors.primaryLight,
-    secondaryFixed: AppMaterialRoles.secondaryContainerLight,
-    secondaryFixedDim: AppMaterialRoles.secondaryContainerLight,
-    onSecondaryFixed: AppMaterialRoles.onSecondaryContainerLight,
-    onSecondaryFixedVariant: AppMaterialRoles.secondaryLight,
-    tertiaryFixed: AppMaterialRoles.tertiaryContainerLight,
-    tertiaryFixedDim: AppMaterialRoles.tertiaryContainerLight,
-    onTertiaryFixed: AppMaterialRoles.onTertiaryContainerLight,
-    onTertiaryFixedVariant: AppMaterialRoles.tertiaryLight,
     shadow: AppColors.shadowLight,
     scrim: AppColors.scrimLight,
   ),
@@ -97,10 +93,8 @@ ThemeData buildLightTheme() => _buildTheme(
 );
 
 ThemeData buildDarkTheme() => _buildTheme(
-  ColorScheme.fromSeed(
-    seedColor: AppColors.seed,
+  const ColorScheme(
     brightness: Brightness.dark,
-  ).copyWith(
     primary: AppColors.primaryDark,
     onPrimary: AppColors.onPrimaryDark,
     primaryContainer: AppMaterialRoles.primaryContainerDark,
@@ -127,31 +121,18 @@ ThemeData buildDarkTheme() => _buildTheme(
     surfaceContainer: AppMaterialRoles.surfaceContainerDark,
     surfaceContainerHigh: AppMaterialRoles.surfaceContainerHighDark,
     surfaceContainerHighest: AppMaterialRoles.surfaceContainerHighestDark,
-    outline: AppColors.borderSubtleDark,
+    // The same pair as light — see the note there.
+    outline: AppColors.borderControlDark,
     outlineVariant: AppColors.borderSubtleDark,
     inverseSurface: AppMaterialRoles.inverseSurfaceDark,
     onInverseSurface: AppMaterialRoles.onInverseSurfaceDark,
     inversePrimary: AppMaterialRoles.inversePrimaryDark,
-    // Not the generated tone-80 lavender: Material paints this over elevated
-    // surfaces, and a near-pastel tint there undoes the navy canvas.
-    surfaceTint: AppColors.surfaceElevatedDark,
-    // The M3 `*Fixed` family: brightness-independent by definition, so both
-    // themes get the same light-container values. No Material component reads
-    // them today — which is exactly the argument that left a PINK `tertiary`
-    // undetected until an audit went looking. `fromSeed` still generates
-    // `tertiaryFixed` at hue 329.
-    primaryFixed: AppMaterialRoles.primaryContainerLight,
-    primaryFixedDim: AppMaterialRoles.primaryContainerLight,
-    onPrimaryFixed: AppMaterialRoles.onPrimaryContainerLight,
-    onPrimaryFixedVariant: AppColors.primaryLight,
-    secondaryFixed: AppMaterialRoles.secondaryContainerLight,
-    secondaryFixedDim: AppMaterialRoles.secondaryContainerLight,
-    onSecondaryFixed: AppMaterialRoles.onSecondaryContainerLight,
-    onSecondaryFixedVariant: AppMaterialRoles.secondaryLight,
-    tertiaryFixed: AppMaterialRoles.tertiaryContainerLight,
-    tertiaryFixedDim: AppMaterialRoles.tertiaryContainerLight,
-    onTertiaryFixed: AppMaterialRoles.onTertiaryContainerLight,
-    onTertiaryFixedVariant: AppMaterialRoles.tertiaryLight,
+    // `primary`, the canonical M3 mapping, and the earlier deviation to
+    // `surfaceElevatedDark` is retired: every themed component sets
+    // `surfaceTintColor: transparent`, so what this role must be is *true*
+    // for the one reader it can still have — an untended elevated widget —
+    // rather than a value chosen to soften a tint the app already suppresses.
+    surfaceTint: AppColors.primaryDark,
     shadow: AppColors.shadowDark,
     scrim: AppColors.scrimDark,
   ),
@@ -165,6 +146,13 @@ ThemeData buildDarkTheme() => _buildTheme(
   actionLabel: AppColors.onPrimaryDark,
   outlineLabel: AppColors.secondaryActionDark,
 );
+
+/// The FAB's Material elevation, per brightness — the one component that keeps
+/// a dp value instead of `elevation: 0` + `shadowsFor`, because
+/// `FloatingActionButtonThemeData` has no slot for a hand-painted shadow.
+double _fabElevation(ColorScheme scheme) => scheme.brightness == Brightness.dark
+    ? AppElevation.none
+    : AppElevation.overlay;
 
 ThemeData _buildTheme(
   ColorScheme scheme,
@@ -199,7 +187,7 @@ ThemeData _buildTheme(
     // needing a shadow to say so.
     scaffoldBackgroundColor: background,
     textTheme: texts,
-    extensions: <ThemeExtension<Object?>>[semantic],
+    extensions: <ThemeExtension<Object?>>[semantic, AppTextStyles.from(texts)],
 
     // The framework fall-through, seeded. Anything not themed below — a bare
     // `InkWell`, a third-party widget — resolves its washes from these four,
@@ -248,10 +236,14 @@ ThemeData _buildTheme(
     floatingActionButtonTheme: FloatingActionButtonThemeData(
       backgroundColor: scheme.primary,
       foregroundColor: scheme.onPrimary,
-      elevation: AppElevation.overlay,
-      focusElevation: AppElevation.overlay,
-      hoverElevation: AppElevation.overlay,
-      highlightElevation: AppElevation.overlay,
+      // Zero in dark, matching `shadowsFor`: the dark page is at the bottom of
+      // the lightness scale, so a shadow there is paint nobody can see — and
+      // until this matched, the FAB was the one object in dark carrying a
+      // Material shadow while every other surface had measurably opted out.
+      elevation: _fabElevation(scheme),
+      focusElevation: _fabElevation(scheme),
+      hoverElevation: _fabElevation(scheme),
+      highlightElevation: _fabElevation(scheme),
     ),
     navigationBarTheme: buildNavigationBarTheme(scheme, texts, background),
 

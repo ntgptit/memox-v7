@@ -19,9 +19,8 @@ abstract final class AppElevation {
   /// A card in a list. The lowest step that reads as a step at all.
   static const double card = 1;
 
-  /// A surface deliberately lifted above its neighbours — a selected card, a
-  /// dragged item. Nothing uses it yet; it exists so the next caller does not
-  /// invent a number.
+  /// A surface deliberately lifted above its neighbours — the Library's Today
+  /// card, the study answer pieces, the recall timer panel all sit here.
   static const double raised = 3;
 
   /// A sheet or dialog over the whole screen.

@@ -223,13 +223,13 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
   /// back along the trail (BR-155).
   StudyCardModel get _card => widget.viewedCard ?? widget.turn.card;
 
-  /// The type role a `self_assess` half takes, chosen by the **face** it shows.
-  ///
-  /// The front is at most 60 characters and the back up to 240 (BR-08), so the
-  /// role follows the content: a rule written as "upper" and "lower" swaps the
-  /// sizes when the direction does.
-  TextStyle? _selfAssessRole(TextTheme texts, StudyCardFace face) =>
-      face == StudyCardFace.front ? texts.headlineMedium : texts.headlineSmall;
+  /// The type role a `self_assess` half takes, chosen by the **face** it
+  /// shows: the front is at most 60 characters and the back up to 240 (BR-08),
+  /// so the role follows the content rather than the card's upper/lower half.
+  TextStyle? _selfAssessRole(BuildContext context, StudyCardFace face) =>
+      face == StudyCardFace.front
+      ? context.textStyles.cardPrompt
+      : context.texts.headlineSmall;
 
   /// The text of one face of [_card].
   ///
@@ -304,7 +304,7 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
                             texts.titleLarge!,
                             FontWeight.w500,
                           )
-                        : _selfAssessRole(texts, promptFace),
+                        : _selfAssessRole(context, promptFace),
                     // **The tight end is the one facing the rule, so it is only
                     // tight when there is a rule to face.** Before the flip
                     // `self_assess` is a single half filling the card, and the
@@ -337,7 +337,7 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
                           widget.emphasis ==
                               StudyFaceEmphasis.backSupportingFront
                           ? texts.bodyLarge
-                          : _selfAssessRole(texts, revealFace),
+                          : _selfAssessRole(context, revealFace),
                       padding: const EdgeInsets.only(
                         top: AppSpacing.sm,
                         bottom: AppSpacing.lg,

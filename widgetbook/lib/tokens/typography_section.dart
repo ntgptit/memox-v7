@@ -31,8 +31,12 @@ class _TypeRole {
 
 List<_TypeRole> _typeRoles(BuildContext context) {
   final texts = context.texts;
+  final styles = context.textStyles;
 
   return <_TypeRole>[
+    // The two named styles that live beside the scale, not on it.
+    _TypeRole('textStyles.cardPrompt', styles.cardPrompt),
+    _TypeRole('textStyles.sectionLabel', styles.sectionLabel),
     _TypeRole('displayLarge', texts.displayLarge),
     _TypeRole('displayMedium', texts.displayMedium),
     _TypeRole('displaySmall', texts.displaySmall),

@@ -73,8 +73,12 @@ abstract final class AppTypography {
   ];
 
   /// The front of a review card — the one place the app deliberately gets
-  /// large, because that text is the task.
+  /// large, because that text is the task. The three metrics live here as the
+  /// kit's `--text-card-prompt` values; the complete style is
+  /// `AppTextStyles.cardPrompt`, not a `TextTheme` rung.
   static const double cardPromptSize = 30;
+  static const double cardPromptHeight = 1.22;
+  static const double cardPromptTracking = -0.5;
 
   /// The same prompt on a screen narrower than `AppBreakpoints.compact`. 30
   /// forces a two-word prompt onto three lines at 320 wide, which pushes the
@@ -181,15 +185,15 @@ abstract final class AppTypography {
         size: 32,
         height: 40 / 32,
       ),
-      // The card prompt. Tighter leading than Material's default: a long-ish
-      // prompt otherwise wraps in a way that pushes the answer below the fold
-      // inside the phone frame.
+      // The Material 3 metric, restored: this rung carried the card prompt's
+      // 30/1.22/−0.5 until the prompt moved to `AppTextStyles.cardPrompt`,
+      // which meant any future widget reaching for `headlineMedium` *as a
+      // rung* would have inherited a component's private metrics.
       headlineMedium: _display(
         base.headlineMedium,
-        FontWeight.w600,
-        size: cardPromptSize,
-        height: 1.22,
-        tracking: -0.5,
+        FontWeight.w400,
+        size: 28,
+        height: 36 / 28,
       ),
       headlineSmall: _display(
         base.headlineSmall,

@@ -89,7 +89,7 @@ class DeckSummaryMetricsWidget extends StatelessWidget {
                     TextSpan(
                       text: context.l10n.deckSummaryOverduePart(overdueCount),
                       style: context.texts.bodyMedium?.copyWith(
-                        color: context.semanticColors.danger,
+                        color: context.semanticColors.overdue,
                         fontWeight: FontWeight.w600,
                       ),
                     ),

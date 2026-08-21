@@ -15,16 +15,16 @@
         "verdict": "in-band"
       },
       "colorScheme.outline on card (colorScheme.surface)": {
-        "ratio": 1.451959386225585,
-        "verdict": "in-band"
+        "ratio": 3.1885726840527027,
+        "verdict": "too-heavy"
       },
       "colorScheme.outline on page (scaffoldBackgroundColor)": {
-        "ratio": 1.375631420468159,
-        "verdict": "in-band"
+        "ratio": 3.020952798157612,
+        "verdict": "too-heavy"
       },
       "colorScheme.outline on muted tile (semantic.surfaceMuted)": {
-        "ratio": 1.268783049267407,
-        "verdict": "in-band"
+        "ratio": 2.7863086331910654,
+        "verdict": "too-heavy"
       },
       "colorScheme.outlineVariant on card (colorScheme.surface)": {
         "ratio": 1.451959386225585,
@@ -107,15 +107,15 @@
         "verdict": "too-heavy"
       },
       "colorScheme.outline on card (colorScheme.surface)": {
-        "ratio": 2.0421476825767875,
+        "ratio": 3.0013025727193954,
         "verdict": "too-heavy"
       },
       "colorScheme.outline on page (scaffoldBackgroundColor)": {
-        "ratio": 2.317089833543392,
+        "ratio": 3.405379414020047,
         "verdict": "too-heavy"
       },
       "colorScheme.outline on muted tile (semantic.surfaceMuted)": {
-        "ratio": 1.7269891606363466,
+        "ratio": 2.5381205556770405,
         "verdict": "too-heavy"
       },
       "colorScheme.outlineVariant on card (colorScheme.surface)": {

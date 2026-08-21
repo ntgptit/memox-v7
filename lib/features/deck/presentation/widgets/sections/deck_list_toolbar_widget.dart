@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_pill_button.dart';
@@ -92,9 +91,8 @@ class DeckListToolbarWidget extends StatelessWidget {
             // caption for controls rather than the title of the list they filter.
             // Same rung now; the pills still lead on weight of surface, which is
             // the right order for a label and a control.
-            style: context.texts.labelMedium?.copyWith(
+            style: context.textStyles.sectionLabel.copyWith(
               color: context.colors.onSurfaceVariant,
-              letterSpacing: AppTypography.sectionLabelTracking,
             ),
           ),
         ),

@@ -32,4 +32,15 @@ abstract final class AppSpacing {
   /// reachable on a desk and missed on a bus, and the miss looks like the app
   /// ignoring the tap rather than the user hitting beside it.
   static const double minimumTouchTarget = 48;
+
+  /// The bottom inset a scrollable needs on a screen with a floating action
+  /// button, so the last row can scroll clear of it: the button itself plus a
+  /// [lg] gap on each side. Derived, not chosen — like [minimumTouchTarget]
+  /// it is a clearance, not a step on [scale], and any screen that grows a
+  /// FAB reads it from here instead of re-adding the same three numbers.
+  static const double fabScrollClearance = _floatingActionSize + lg + lg;
+
+  /// Material's floating action button, which declares no public constant for
+  /// its own size.
+  static const double _floatingActionSize = 56;
 }

@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/app/app.dart';
 import 'package:memox/core/theme/app_breakpoints.dart';
 import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/core/theme/app_text_styles.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/core/theme/app_typography.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
@@ -53,13 +54,16 @@ void main() {
       final roomy = await themeAt(tester, normal);
 
       expect(
-        compact.textTheme.headlineMedium!.fontSize,
+        compact.extension<AppTextStyles>()!.cardPrompt.fontSize,
         AppTypography.compactCardPromptSize,
       );
       expect(
-        roomy.textTheme.headlineMedium!.fontSize,
+        roomy.extension<AppTextStyles>()!.cardPrompt.fontSize,
         AppTypography.cardPromptSize,
       );
+      // The rung beside it no longer moves: the compact pass re-sizes the
+      // prompt's own slot, and `headlineMedium` stays on the M3 metric.
+      expect(compact.textTheme.headlineMedium!.fontSize, 28);
     });
 
     testWidgets('list rows lose horizontal padding, not vertical', (

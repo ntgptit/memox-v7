@@ -280,12 +280,12 @@
       "carriesNoHue": false
     },
     "colorScheme.outline": {
-      "hex": "#D2D2DD",
+      "hex": "#8D8D95",
       "opaque": true,
       "hue": 240.0,
-      "saturation": 0.13924050632911414,
-      "chroma": 0.04313725490196085,
-      "lightnessStar": 84.49161091168108,
+      "saturation": 0.03636363636363636,
+      "chroma": 0.03137254901960784,
+      "lightnessStar": 58.86531644334096,
       "classifiedAs": "neutral",
       "hueDistanceFromDeclaredSeed": 0.0,
       "hueDistanceFromDarkSurfaceFamily": 3.2432432432432563,
@@ -381,7 +381,7 @@
       "hue": 163.42857142857144,
       "saturation": 0.7664233576642335,
       "chroma": 0.4117647058823529,
-      "lightnessStar": 45.02222206391582,
+      "lightnessStar": 45.02222206391583,
       "classifiedAs": "role-or-on-color"
     },
     "semantic.warning": {
@@ -846,15 +846,15 @@
       "carriesNoHue": false
     },
     "colorScheme.outline": {
-      "hex": "#4C487A",
+      "hex": "#66628D",
       "opaque": true,
-      "hue": 244.8,
-      "saturation": 0.2577319587628866,
-      "chroma": 0.19607843137254904,
-      "lightnessStar": 33.084576264594325,
+      "hue": 245.58139534883722,
+      "saturation": 0.17991631799163182,
+      "chroma": 0.16862745098039217,
+      "lightnessStar": 43.4825167325174,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 4.800000000000011,
-      "hueDistanceFromDarkSurfaceFamily": 1.556756756756755,
+      "hueDistanceFromDeclaredSeed": 5.581395348837219,
+      "hueDistanceFromDarkSurfaceFamily": 2.338152105593963,
       "carriesNoHue": false
     },
     "colorScheme.outlineVariant": {
@@ -897,12 +897,12 @@
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.surfaceTint": {
-      "hex": "#37345F",
+      "hex": "#5656C9",
       "opaque": true,
-      "hue": 244.18604651162792,
-      "saturation": 0.29251700680272114,
-      "chroma": 0.16862745098039217,
-      "lightnessStar": 23.981202569774247,
+      "hue": 240.0,
+      "saturation": 0.5156950672645739,
+      "chroma": 0.4509803921568627,
+      "lightnessStar": 42.53796262609107,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.shadow": {
