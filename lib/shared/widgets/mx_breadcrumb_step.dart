@@ -170,12 +170,20 @@ class _MxBreadcrumbSeparator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // **A slash, not a chevron** (owner review, 2026-08-21). The header's way
+    // back is a `<`, and a `>` between every step put two arrows pointing
+    // opposite ways on one line — the eye reads them as controls in
+    // disagreement rather than as punctuation.
     return ExcludeSemantics(
-      child: Icon(
-        Icons.chevron_right,
-        size: AppIconSize.sm,
-        color: context.colors.onSurfaceVariant,
+      child: Text(
+        _kSeparator,
+        style: context.texts.bodySmall?.copyWith(
+          color: context.colors.onSurfaceVariant,
+        ),
       ),
     );
   }
 }
+
+/// Between two steps. A path is read, and a path is written with slashes.
+const String _kSeparator = '/';

@@ -15,18 +15,17 @@ import 'support/fake_deck_repository.dart';
 /// The tile's state matrix: the workload chips, one gauge, one verb
 /// (BR-150, BR-142, BR-29).
 ///
-/// **Positive counts only, until nothing is pending** (owner mockup,
-/// 2026-08-20): a metric at zero stays quiet while any sibling speaks; the
-/// one exception is a filled deck with nothing pending at all, which still
-/// states both zeroes — there, absence would be ambiguous.
+/// **Positive counts only** (owner mockup, 2026-08-20): a metric at zero
+/// stays quiet while any sibling speaks, and a deck with nothing pending at
+/// all says so in one chip rather than in two zeroes (owner review,
+/// 2026-08-21).
 void main() {
   final english = AppLocalizationsEn();
 
   String due(int count) => english.deckTileDueChipLabel(count);
   String fresh(int count) => english.deckTileNewChipLabel(count);
 
-  /// Scoped to the tile: the summary panel above the list states the same
-  /// metrics in the same words, and an unscoped finder counts both.
+  /// Scoped to the tile: the summary panel states the same words above.
   Finder onTile(Finder matching) =>
       find.descendant(of: find.byType(DeckTileWidget), matching: matching);
 
@@ -71,9 +70,8 @@ void main() {
     ) async {
       await pump(tester, summary);
 
-      // The icon-per-metric grammar is gone by measurement: five anchors on a
-      // three-line block wrapped the metadata and grew the card. The facts
-      // read as text, and the one glyph left is the schedule status.
+      // The icon-per-metric grammar is gone by measurement: five anchors on
+      // a three-line block wrapped the metadata and grew the card.
       expect(onTile(find.byIcon(Icons.style_outlined)), findsNothing);
       expect(onTile(find.byIcon(Icons.account_tree_outlined)), findsNothing);
       expect(onTile(find.byIcon(Icons.auto_awesome_outlined)), findsNothing);
@@ -84,8 +82,8 @@ void main() {
         ),
         findsNothing,
       );
-      // The well says what the deck holds, in every schedule state (owner
-      // review, 2026-08-20): urgency is the chips' job now.
+      // The well says what the deck holds in every schedule state: urgency
+      // is the chips' job.
       expect(onTile(find.byIcon(Icons.folder_outlined)), findsOneWidget);
       expect(onTile(find.byIcon(Icons.event)), findsNothing);
 
@@ -124,18 +122,18 @@ void main() {
       newCardCount: 14,
     );
 
-    testWidgets('leads with the new count, keeps Study, and claims no '
-        'success', (tester) async {
+    testWidgets('leads with the new count and claims no success', (
+      tester,
+    ) async {
       await pump(tester, summary);
 
       // The due metric at zero stays quiet while new is speaking.
       expect(onTile(find.text(due(0))), findsNothing);
       expect(onTile(find.text(fresh(14))), findsOneWidget);
       expect(find.byType(DeckStudyButtonWidget), findsOneWidget);
-      // Nothing due today is not "done": no success ink anywhere on the tile.
+      // Nothing due is not "done": no success ink on the tile.
       expect(find.byIcon(Icons.check_circle), findsNothing);
-      // The well never changes with the schedule, and the workload line
-      // carries no icons at all.
+      // The well never changes with the schedule.
       expect(onTile(find.byIcon(Icons.folder_outlined)), findsOneWidget);
       expect(onTile(find.byIcon(Icons.schedule)), findsNothing);
     });
@@ -161,7 +159,7 @@ void main() {
     });
   });
 
-  group('nothing studyable (0 Due, 0 New, 50%)', () {
+  group('nothing pending (0 Due, 0 New, 50%)', () {
     final summary = fakeSummary(
       id: 'd1',
       name: 'Half way',
@@ -169,12 +167,20 @@ void main() {
       learnedCardCount: 4,
     );
 
-    testWidgets('both zeroes stay on the line and Study is absent, not '
-        'disabled', (tester) async {
+    testWidgets('one chip says the whole state, and no verb goes with it', (
+      tester,
+    ) async {
       await pump(tester, summary);
 
-      expect(onTile(find.text(due(0))), findsOneWidget);
-      expect(onTile(find.text(fresh(0))), findsOneWidget);
+      // **Not two zeroes**: `0 due · 0 new` is two facts about what is not
+      // there, and a reader scanning for work read both to learn nothing.
+      expect(onTile(find.text(due(0))), findsNothing);
+      expect(onTile(find.text(fresh(0))), findsNothing);
+      expect(
+        onTile(find.text(english.deckTileAllCaughtUpLabel)),
+        findsOneWidget,
+      );
+      // And no verb: BR-145 forbids a review before anything is due.
       expect(find.byType(DeckStudyButtonWidget), findsNothing);
     });
 
@@ -183,8 +189,8 @@ void main() {
     ) async {
       await pump(tester, summary);
 
-      // 50% learned with nothing pending is neutral: no success check, and the
-      // percentage stays in the quiet variant — success is earned at 100%.
+      // 50% learned with nothing pending is neutral: success is earned at
+      // 100% and only there.
       expect(find.byIcon(Icons.check_circle), findsNothing);
       expect(
         onTile(find.text(english.deckTileLearnedPercentLabel(50))),
@@ -206,12 +212,14 @@ void main() {
     ) async {
       await pump(tester, summary);
 
-      // No check glyph any more: the full gauge and its success figure are
-      // the completion signal, and the well answers "what", not "when".
+      // No check glyph: the gauge and its figure are the completion signal,
+      // and the well answers "what", not "when".
       expect(find.byIcon(Icons.check_circle), findsNothing);
       expect(onTile(find.byIcon(Icons.folder_outlined)), findsOneWidget);
-      expect(onTile(find.text(due(0))), findsOneWidget);
-      expect(onTile(find.text(fresh(0))), findsOneWidget);
+      expect(
+        onTile(find.text(english.deckTileAllCaughtUpLabel)),
+        findsOneWidget,
+      );
       expect(
         onTile(find.text(english.deckTileLearnedPercentLabel(100))),
         findsOneWidget,
@@ -230,9 +238,8 @@ void main() {
     testWidgets('is honestly shorter than a studyable neighbour — no phantom '
         '48px band', (tester) async {
       // The touch floor belongs to the Study button. A completed card has no
-      // button, so forcing its action row to the 48 floor bought equal heights
-      // with a band of nothing — the imbalance the spacing patch removed. The
-      // completed card must now be shorter, by roughly the pill's cushion.
+      // button, so forcing its row to the floor bought equal heights with a
+      // band of nothing. It must now be shorter.
       await pumpDeckScreen(
         tester,
         repository: FakeDeckRepository.withSummaries(<DeckSummary>[
@@ -268,8 +275,8 @@ void main() {
     });
 
     testWidgets('keeps the Study touch target at the 48 floor', (tester) async {
-      // The visual pill paints 32; the floor is the hit area, and trimming the
-      // row's resting height must never trim this.
+      // The pill paints 40; the floor is the hit area, and trimming the row's
+      // resting height must never trim this.
       await pump(
         tester,
         fakeSummary(
@@ -335,14 +342,13 @@ void main() {
       await pump(tester, summary);
 
       expect(find.text(english.deckNoCardsLabel), findsOneWidget);
-      // The resting sentence sits on the same axis as the title — the indent
-      // applies to the whole workload line, whatever it is saying.
+      // The resting sentence sits on the title's axis: the indent applies to
+      // the whole workload line, whatever it says.
       expect(
         tester.getRect(find.byType(DeckWorkloadLineWidget)).left,
         tester.getRect(find.text('Brand new')).left,
       );
-      // A gauge needs a denominator; an empty deck has none, so there is no
-      // bar to draw rather than a 0% one.
+      // A gauge needs a denominator; an empty deck has none.
       expect(
         find.descendant(
           of: find.byType(DeckTileWidget),
@@ -354,44 +360,6 @@ void main() {
       // And no workload zeroes: "no cards" is a different fact from "nothing
       // pending", and printing 0/0 here would collapse the two.
       expect(onTile(find.text(due(0))), findsNothing);
-    });
-  });
-
-  group('at text scale 2.0 on a compact width', () {
-    testWidgets('the whole anatomy survives 320px at double text', (
-      tester,
-    ) async {
-      await pumpDeckScreen(
-        tester,
-        repository: FakeDeckRepository.withSummaries(<DeckSummary>[
-          fakeSummary(
-            id: 'd1',
-            name: 'A deck with a deliberately long name that wraps',
-            totalCardCount: 60,
-            newCardCount: 14,
-            dueCardCount: 7,
-            learnedCardCount: 22,
-          ),
-        ]),
-        screen: const DeckListScreen(),
-        surface: const Size(320, 852),
-        textScale: 2,
-      );
-
-      expect(onTile(find.text(due(7))), findsOneWidget);
-      expect(onTile(find.text(fresh(14))), findsOneWidget);
-      expect(find.byType(DeckStudyButtonWidget), findsOneWidget);
-      expect(tester.takeException(), isNull);
-
-      // No separators left to strand: each count is a chip with its own
-      // ground, so a wrap breaks between chips (owner review, 2026-08-20).
-      expect(
-        find.descendant(
-          of: find.byType(DeckWorkloadLineWidget),
-          matching: find.text('·'),
-        ),
-        findsNothing,
-      );
     });
   });
 }

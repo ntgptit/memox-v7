@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -19,6 +20,7 @@ import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/features/deck/presentation/widgets/items/deck_tile_widget.dart';
+import 'package:memox/features/deck/presentation/widgets/items/deck_study_button_widget.dart';
 import 'package:memox/shared/widgets/mx_loading_state.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 import 'package:memox/features/settings/di/app_settings_repository_provider.dart';
@@ -83,9 +85,18 @@ void main() {
     await tester.pump();
   }
 
+  /// Enough rows to scroll, and every one of them with work to do — the
+  /// last card has to carry a Study button for the clearance test to have
+  /// something to press (owner review, 2026-08-21).
   List<DeckSummary> manySummaries() => <DeckSummary>[
     for (var i = 0; i < 30; i++)
-      fakeSummary(id: 'deck-$i', name: 'Deck number $i'),
+      fakeSummary(
+        id: 'deck-$i',
+        name: 'Deck number $i',
+        totalCardCount: 20,
+        dueCardCount: 4,
+        learnedCardCount: 6,
+      ),
   ];
 
   group('the bar survives every state of the deck branch', () {
@@ -221,6 +232,28 @@ void main() {
       // Study button.
       final action = tester.getRect(find.byType(FloatingActionButton));
       expect(lastRow.bottom, lessThanOrEqualTo(action.top));
+
+      // **And a press on it reaches it** (owner review, 2026-08-21).
+      // Geometry says the row clears the action; that is not the same as the
+      // row's own control being pressable, and `tester.tap` would not tell us
+      // — `warnIfMissed` prints and carries on, and the FAB's own `onPressed`
+      // firing instead would leave the test just as green. So the question is
+      // asked directly: does a hit at the button's centre arrive at the
+      // button?
+      final study = find.byType(DeckStudyButtonWidget).last;
+      final target = tester.renderObject(study);
+      final hit = HitTestResult();
+      WidgetsBinding.instance.hitTestInView(
+        hit,
+        tester.getCenter(study),
+        tester.view.viewId,
+      );
+
+      expect(
+        hit.path.any((HitTestEntry<HitTestTarget> e) => e.target == target),
+        isTrue,
+        reason: 'the floating action covers the last Study button',
+      );
       expect(tester.takeException(), isNull);
     });
 

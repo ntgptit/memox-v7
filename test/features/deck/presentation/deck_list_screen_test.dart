@@ -136,14 +136,11 @@ void main() {
       );
 
       // **Two states, not one.** One fixture has cards and none of them
-      // pending — with nothing speaking, its workload line states both
-      // zeroes outright, `0 due · 0 new`, because there an absent metric
-      // would be ambiguous (BR-150). The other has no cards at all and says
-      // so instead. Asserting both is what keeps them split.
-      expect(
-        find.textContaining(english.deckTileDueChipLabel(0)),
-        findsOneWidget,
-      );
+      // pending — it says so in one chip (owner review, 2026-08-21). The
+      // other has no cards at all and says *that* instead. Asserting both is
+      // what keeps them split: "nothing to do" and "nothing here" are
+      // different answers.
+      expect(find.text(english.deckTileAllCaughtUpLabel), findsOneWidget);
       expect(find.textContaining(english.deckNoCardsLabel), findsOneWidget);
     });
 

@@ -70,7 +70,13 @@ void main() {
       // moved into the bar's overflow — and the heading counts the list.
       expect(find.text(english.deckSortRecentLabel), findsOneWidget);
       expect(find.byType(MxPillButton), findsOneWidget);
-      expect(find.textContaining(' · 3'), findsOneWidget);
+      // The root's figures live in the header now (owner review,
+      // 2026-08-21), so the heading is the label alone.
+      expect(
+        find.text(english.decksSectionLabelRoot.toUpperCase()),
+        findsOneWidget,
+      );
+      expect(find.textContaining(' · 3'), findsNothing);
     });
 
     testWidgets('the filter really filters', (tester) async {
@@ -92,9 +98,9 @@ void main() {
       expect(find.byType(DeckTileWidget), findsOneWidget);
       expect(find.text('Japanese N5'), findsOneWidget);
       expect(
-        find.textContaining(' · 1'),
+        find.text(english.deckHeaderStatsLabel(3, 160)),
         findsOneWidget,
-        reason: 'the heading counts what the filter left visible',
+        reason: 'the header states the level, filtered or not',
       );
     });
 

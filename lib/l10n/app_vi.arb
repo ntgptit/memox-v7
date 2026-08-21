@@ -4075,5 +4075,29 @@
   "libraryActionsTitle": "Tác vụ thư viện",
   "@libraryActionsTitle": {
     "description": "Title of the Library app-bar overflow sheet (tag catalog, Trash, due-only filter)."
+  },
+  "deckHeaderStatsLabel": "{deckCount} bộ thẻ · {cardCount} thẻ",
+  "@deckHeaderStatsLabel": {
+    "placeholders": {
+      "deckCount": {
+        "type": "int"
+      },
+      "cardCount": {
+        "type": "int"
+      }
+    },
+    "description": "The Library header’s second line at the root level, where a path would only repeat the screen title. Two figures for the level itself: how many decks it holds and how many cards those decks hold in total."
+  },
+  "deckPathAncestorsTitle": "Đi tới",
+  "@deckPathAncestorsTitle": {
+    "description": "Title of the sheet a long press on the deck path opens. It lists every ancestor of the open deck, so a reader can reach any level rather than only the one above."
+  },
+  "deckPathAncestorsHint": "nhấn giữ để xem mọi cấp",
+  "@deckPathAncestorsHint": {
+    "description": "Screen-reader hint on the deck path line: tapping goes up one level, and long-pressing opens the list of every ancestor."
+  },
+  "deckTileAllCaughtUpLabel": "Đã học hết",
+  "@deckTileAllCaughtUpLabel": {
+    "description": "The deck card’s one chip when a deck with cards has nothing pending: no reviews due and no new cards. It replaces the two zero chips, which stated the absence of work twice and said nothing."
   }
 }

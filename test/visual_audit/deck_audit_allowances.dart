@@ -91,19 +91,18 @@ List<AuditSkipAllowance> deckShellAllowances({
   // rounded clip of its own (owner review, 2026-08-20).
   final floatingActions = hasFloatingAction ? 1 : 0;
   // Every one of these hosts an InkWell inside its own Material.
+  // **The path contributes nothing to either count since it became one
+  // target** (owner review, 2026-08-21). Its steps were `InkWell`s in their
+  // own `Material`, one clip and one ink layer each; the strip is now a
+  // single bare `InkWell` painting into the app bar's own `Material`, with no
+  // rounded clip of its own — the same shape the path's chevron had.
+  // [breadcrumbSteps] stays a parameter because it still says whether a state
+  // *has* a path, which the states below read as documentation.
   final inkHosts =
-      iconButtons +
-      tappableCards +
-      pills +
-      filledButtons +
-      breadcrumbSteps +
-      floatingActions;
+      iconButtons + tappableCards + pills + filledButtons + floatingActions;
   // The InkWell's rounded clip, once per host that has one. Icon buttons draw a
   // `_ShapeBorderPainter` instead, which is counted separately below.
-  // The path chevron is not in this list: its `InkWell` has no rounded clip
-  // to paint, being a plain rectangle in a 20px line.
-  final unnamedPainters =
-      tappableCards + pills + breadcrumbSteps + floatingActions;
+  final unnamedPainters = tappableCards + pills + floatingActions;
 
   return <AuditSkipAllowance>[
     // One per Navigator: the harness's own MaterialApp, GoRouter's root, and the

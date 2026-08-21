@@ -76,14 +76,23 @@ class DeckWorkloadLineWidget extends StatelessWidget {
       if (hasNew)
         _WorkloadChip(label: newLabel, fill: semantic.surfaceMuted, ink: quiet),
     ];
-    // A filled deck with nothing pending still states both zeroes: an absent
-    // metric is ambiguous in exactly the way this line exists to prevent.
-    // They wear the neutral chip — nothing here is a state.
+    // **Nothing pending says so once** (owner review, 2026-08-21). It used to
+    // print `0 due · 0 new`, on the argument that an absent metric is
+    // ambiguous — but two chips of zero are two facts about what is *not*
+    // there, and a reader scanning for work has to read both to learn
+    // nothing. One chip states the whole state instead.
+    //
+    // No verb goes with it: BR-145 forbids opening a review before anything
+    // is due, so a `Practice` button here would be an action that cannot run
+    // (owner decision, 2026-08-21).
     if (parts.isEmpty) {
-      parts.addAll(<Widget>[
-        _WorkloadChip(label: dueLabel, fill: semantic.surfaceMuted, ink: quiet),
-        _WorkloadChip(label: newLabel, fill: semantic.surfaceMuted, ink: quiet),
-      ]);
+      parts.add(
+        _WorkloadChip(
+          label: context.l10n.deckTileAllCaughtUpLabel,
+          fill: semantic.surfaceMuted,
+          ink: quiet,
+        ),
+      );
     }
 
     return Wrap(
