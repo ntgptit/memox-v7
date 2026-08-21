@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/core/theme/theme_context_extension.dart';
 
 import '../visual_audit/memox_audit.dart';
 import '../visual_audit/screen_auditor.dart';
@@ -85,7 +86,7 @@ class _ReviewScreen extends StatelessWidget {
                 children: <Widget>[
                   Text(
                     'ephemeral',
-                    style: texts.headlineMedium?.copyWith(
+                    style: context.textStyles.cardPrompt.copyWith(
                       color: scheme.onSurface,
                     ),
                   ),

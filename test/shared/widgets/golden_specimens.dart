@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:memox/core/theme/theme_context_extension.dart';
 import 'package:memox/core/theme/app_spacing.dart';
 import 'package:memox/shared/widgets/mx_confirm_dialog.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
@@ -59,7 +60,10 @@ class TypographySpecimen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Text('Ephemeral', style: texts.headlineMedium),
+          // The card prompt, not `headlineMedium`: this line exists to show
+          // the app's largest text, and that is the prompt's own style since
+          // it left the scale (`AppTextStyles.cardPrompt`).
+          Text('Ephemeral', style: context.textStyles.cardPrompt),
           const SizedBox(height: 12),
           Text('Display / Jakarta 600', style: texts.titleLarge),
           Text('Title / Inter 600', style: texts.titleMedium),
@@ -83,7 +87,7 @@ class CardPrompt extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text('ephemeral', style: texts.headlineMedium),
+        Text('ephemeral', style: context.textStyles.cardPrompt),
         const SizedBox(height: 8),
         Text('adjective · /ɪˈfem(ə)rəl/', style: texts.bodyMedium),
       ],

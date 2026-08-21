@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/app_text_styles.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/core/theme/app_typography.dart';
 
@@ -35,10 +36,12 @@ import 'package:memox/core/theme/app_typography.dart';
 void main() {
   /// Every rung [AppTypography.buildTextTheme] sets — all fifteen.
   ///
-  /// The old list held six, and `headlineMedium` was not one of them. That is
-  /// the card prompt: the single largest piece of CJK the app ever draws, and
-  /// the one rung whose fallback most needed checking.
+  /// The old list held six, and `headlineMedium` was not one of them. The
+  /// card prompt — the single largest piece of CJK the app ever draws — has
+  /// since left the scale for `AppTextStyles.cardPrompt`, so it is checked
+  /// alongside the rungs rather than as one of them.
   Map<String, TextStyle?> rungsOf(TextTheme t) => <String, TextStyle?>{
+    'cardPrompt': buildLightTheme().extension<AppTextStyles>()!.cardPrompt,
     'displayLarge': t.displayLarge,
     'displayMedium': t.displayMedium,
     'displaySmall': t.displaySmall,
@@ -81,8 +84,9 @@ void main() {
 
   for (final script in _scripts) {
     test('${script.name} renders from its face, not the missing-glyph box', () {
-      // The card prompt rung — the largest CJK the app draws.
-      final prompt = buildLightTheme().textTheme.headlineMedium!;
+      // The card prompt — the largest CJK the app draws. Its own style since
+      // it left the scale, and it carries the same fallback chain.
+      final prompt = buildLightTheme().extension<AppTextStyles>()!.cardPrompt;
 
       // The same rung with the chain removed. Plus Jakarta Sans is Latin-only,
       // so this is guaranteed to come back as `flutter_test`'s missing-glyph

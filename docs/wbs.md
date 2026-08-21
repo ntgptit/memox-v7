@@ -10958,10 +10958,23 @@ của M2.
   `design_audit/` regenerate theo code mới.
 - **Acceptance criteria:**
   - [x] `flutter analyze` 0 lỗi 0 cảnh báo; guard xanh; `check_docs.sh` xanh.
-  - [x] Toàn bộ host test non-golden xanh (3553); các nhóm golden/demo/preview
-        fail-sẵn trên Linux trùng khớp baseline 186/186 — pixel do Windows
-        `ci-full` phán xử, goldens dark có FAB sẽ regenerate vì mất shadow
-        (chủ đích).
+  - [x] Toàn bộ host test non-golden xanh; các nhóm golden fail-sẵn trên Linux
+        trùng khớp baseline 186/186.
+  - [x] **Pixel diff đo bằng A/B trên cùng Linux** (render baseline
+        `--update-goldens`, render bản mới, so hai bộ với nhau — cùng platform
+        nên mọi khác biệt đều do code): **106/186 identical**, 80 file đổi,
+        chia đúng bốn nhóm đã truy nguyên nhân:
+        (a) 4 × `deck_list_*_dark` — FAB bỏ shadow, pixel rơi đúng lên token
+        (`#1A1837 → #1A1838`);
+        (b) 4 × `settings_*` + `card_import_preview_*` — `outline` remap, chỉ
+        chạm **viền track của `Switch` off-state** (3821 px light / 3828 dark,
+        `borderSubtle → borderControl`), tức 1.45:1 → 3.19:1 đúng WCAG 1.4.11;
+        (c) `mx_session_top_bar_*` + mọi màn study có mode chip — `withWeight`
+        khiến w600 **thực sự áp dụng**; trước đó `copyWith(fontWeight:)` là
+        no-op im lặng trên variable font nên nhãn render w500 dù code nói w600;
+        (d) phần đuôi 0.02–0.08% — chip đổi `StadiumBorder` →
+        `AppRadius.pill`, cùng màu, chỉ khác antialiasing đường cong.
+        Goldens sẽ regenerate trên Windows `ci-full`.
   - [x] `scheme.outline` đạt 3:1 trên surface ở cả hai mode
         (`color_scheme_roles_test` nhận `borderControl` vào palette).
   - [x] Pin card-prompt nằm trên `AppTextStyles.cardPrompt`; `headlineMedium`
