@@ -138,10 +138,52 @@ void main() {
       expect(study.height, AppSpacing.minimumTouchTarget);
       expect(study.width, greaterThanOrEqualTo(80));
 
+      // The root header has no path — it states the level's figures — so the
+      // line itself is measured one level in, by `deck_path_test.dart`.
+      expect(MxBreadcrumb.compactLineHeight, 32);
+    });
+  });
+
+  group('at text scale 2.0 on a compact width', () {
+    testWidgets('the whole anatomy survives 320px at double text', (
+      tester,
+    ) async {
+      await pumpDeckScreen(
+        tester,
+        repository: FakeDeckRepository.withSummaries(<DeckSummary>[
+          fakeSummary(
+            id: 'd1',
+            name: 'A deck with a deliberately long name that wraps',
+            totalCardCount: 60,
+            newCardCount: 14,
+            dueCardCount: 7,
+            learnedCardCount: 22,
+          ),
+        ]),
+        screen: const DeckListScreen(),
+        surface: const Size(320, 852),
+        textScale: 2,
+      );
+
+      final english = AppLocalizationsEn();
       expect(
-        tester.getSize(find.byType(MxBreadcrumb)).height,
-        MxBreadcrumb.compactLineHeight,
-        reason: 'the path is a line of the header, not a band',
+        onTile(find.text(english.deckTileDueChipLabel(7))),
+        findsOneWidget,
+      );
+      expect(
+        onTile(find.text(english.deckTileNewChipLabel(14))),
+        findsOneWidget,
+      );
+      expect(find.byType(DeckStudyButtonWidget), findsOneWidget);
+      expect(tester.takeException(), isNull);
+
+      // No separators left to strand: each count has its own ground.
+      expect(
+        find.descendant(
+          of: find.byType(DeckWorkloadLineWidget),
+          matching: find.text('·'),
+        ),
+        findsNothing,
       );
     });
   });

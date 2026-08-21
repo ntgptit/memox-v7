@@ -92,12 +92,16 @@ void main() {
         'Japanese N5',
         'Kana',
       ]);
-      // Every step is somewhere the reader can go, now that the one step that
-      // was not — the deck they are standing in — is gone.
+      // **No step carries a tap** (owner review, 2026-08-21). The strip is
+      // one control: tapping it anywhere goes up a level, long-pressing opens
+      // every level. Four small targets in a header line was the arrangement
+      // that could not clear the touch floor.
       expect(
-        crumb.items.every((MxBreadcrumbItem i) => i.onTap != null),
+        crumb.items.every((MxBreadcrumbItem i) => i.onTap == null),
         isTrue,
       );
+      expect(crumb.onUp, isNotNull);
+      expect(crumb.onShowAll, isNotNull);
     });
 
     testWidgets('a root deck gets one too — the list, and a way back', (
@@ -119,34 +123,75 @@ void main() {
         english.deckPathRootLabel,
       ]);
       expect(
-        crumb.items.single.onTap,
+        crumb.onUp,
         isNotNull,
-        reason: 'inside a deck the list step is a way out',
+        reason: 'inside a deck the whole line is the way out',
       );
       expect(find.byIcon(Icons.chevron_left), findsOneWidget);
     });
 
-    testWidgets('the deck list itself shows Root, and it does not act', (
+    testWidgets('the deck list itself has no path — it has figures', (
       tester,
     ) async {
-      // The top of the tree is a place like any other, so it says so. It is not
-      // a link there: tapping it would navigate to the screen already on screen,
-      // which is the same reason the last step of a deeper path is text.
+      // **The root's second line states the level, not the place** (owner
+      // review, 2026-08-21). "Library" over "All decks" was one thing said
+      // twice; the line is the header's scarcest space, and at the root there
+      // is nowhere above to go.
       final english = AppLocalizationsEn();
 
       await pumpDeckScreen(
         tester,
         repository: FakeDeckRepository.withSummaries(<DeckSummary>[
-          fakeSummary(id: '1', name: 'Japanese N5'),
+          fakeSummary(id: '1', name: 'Japanese N5', totalCardCount: 40),
+          fakeSummary(id: '2', name: 'Kanji', totalCardCount: 60),
         ]),
         screen: const DeckListScreen(),
       );
 
-      final MxBreadcrumb crumb = tester.widget(find.byType(MxBreadcrumb));
-      expect(crumb.items.map((MxBreadcrumbItem i) => i.label), <String>[
-        english.deckPathRootLabel,
-      ]);
-      expect(crumb.items.single.onTap, isNull);
+      expect(find.byType(MxBreadcrumb), findsNothing);
+      expect(find.text(english.deckHeaderStatsLabel(2, 100)), findsOneWidget);
+    });
+
+    testWidgets('one tap goes up a level, and a long press offers all of '
+        'them', (tester) async {
+      final english = AppLocalizationsEn();
+
+      await pumpLevel(
+        tester,
+        serving(
+          fakeSubDeck(id: 'deck-1', name: 'Hiragana', parentId: 'branch'),
+          ancestors: fakePath(<String>['Japanese N5', 'Kana']),
+        ),
+      );
+
+      await tester.longPress(find.byType(MxBreadcrumb));
+      await tester.pumpAndSettle();
+
+      // Every ancestor, as ordinary list rows — which is where a jump of
+      // several levels belongs, and where the touch floor is free.
+      expect(find.text(english.deckPathAncestorsTitle), findsOneWidget);
+      // Twice each: once in the path that is still behind the sheet, once as
+      // a row in it.
+      expect(find.text('Japanese N5'), findsNWidgets(2));
+      expect(find.text('Kana'), findsNWidgets(2));
+      await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+    });
+
+    testWidgets('the line clears the touch floor at every level', (
+      tester,
+    ) async {
+      // The gate the old model could not pass: four steps in a 20px line were
+      // four controls under 48dp, and the guideline test only ran at the root
+      // — where the one step happened to carry no tap. It runs here now.
+      await pumpLevel(
+        tester,
+        serving(
+          fakeSubDeck(id: 'deck-1', name: 'Hiragana', parentId: 'branch'),
+          ancestors: fakePath(<String>['Japanese N5', 'Kana']),
+        ),
+      );
+
+      await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
     });
 
     testWidgets('it starts at the gutter, not centred in the strip', (
@@ -157,14 +202,14 @@ void main() {
       // search field was full width so it hid that, and only the breadcrumb —
       // which is as wide as its own steps — showed a path floating in the middle
       // of a screen whose every other element starts at the gutter.
-      await pumpDeckScreen(
+      await pumpLevel(
         tester,
-        repository: FakeDeckRepository.withSummaries(<DeckSummary>[
-          fakeSummary(id: '1', name: 'Japanese N5'),
-        ]),
-        screen: const DeckListScreen(),
+        serving(fakeRootDeck(id: 'deck-1', name: 'Japanese N5')),
       );
 
+      // **One level in, since the root's line became figures** (owner review,
+      // 2026-08-21).
+      //
       // **The first painted thing, not the strip's box.** Asserting the widget
       // origin passed while every step still carried `sm` of leading padding,
       // so the box sat on the gutter and the word sat 8px inside it — which is
@@ -174,8 +219,10 @@ void main() {
       // search field out of this strip and onto its own screen. The claim is
       // unchanged and so is what it catches: a breadcrumb whose first step
       // carries its own leading padding sits inside the box rather than on it.
+      // The chevron is the first painted thing now — it says what tapping the
+      // line does — so it is the one that has to sit on the gutter.
       expect(
-        tester.getTopLeft(find.byIcon(Icons.home_outlined)).dx,
+        tester.getTopLeft(find.byIcon(Icons.chevron_left)).dx,
         tester.getRect(find.byType(DeckSubheaderWidget)).left,
         reason: 'the path starts on the strip it sits in, not centred in it',
       );
@@ -183,15 +230,13 @@ void main() {
 
     testWidgets('the root step keeps its home glyph', (tester) async {
       // It lost it for a release: the glyph was drawn on the tappable branch
-      // only, and the deck list's `Root` step is the one step in the app that is
-      // first and non-tappable at once — so the mark that makes the top of the
-      // tree recognisable without reading was missing exactly there.
-      await pumpDeckScreen(
+      // only, and the deck list's `All decks` step is the one step in the app
+      // that is first and non-tappable at once — so the mark that makes the
+      // top of the tree recognisable without reading was missing exactly
+      // there. Measured one level in, where the path now lives.
+      await pumpLevel(
         tester,
-        repository: FakeDeckRepository.withSummaries(<DeckSummary>[
-          fakeSummary(id: '1', name: 'Japanese N5'),
-        ]),
-        screen: const DeckListScreen(),
+        serving(fakeRootDeck(id: 'deck-1', name: 'Japanese N5')),
       );
 
       expect(

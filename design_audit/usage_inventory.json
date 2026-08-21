@@ -1,14 +1,14 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 657,
-  "totalSites": 484,
+  "scannedFiles": 658,
+  "totalSites": 485,
   "byElementKind": {
-    "other": 304,
+    "other": 305,
     "background": 18,
     "shadow": 1,
     "border": 13,
-    "text": 115,
-    "icon": 33
+    "text": 117,
+    "icon": 31
   },
   "bySourceKind": {
     "shared-constant": 147,
@@ -16,7 +16,7 @@
     "Colors-material": 5,
     "hardcoded-literal": 99,
     "opacity-modified-token": 11,
-    "theme-token": 218
+    "theme-token": 219
   },
   "sites": [
     {
@@ -4135,7 +4135,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_list_toolbar_widget.dart",
-      "line": 96,
+      "line": 100,
       "widget_context": "DeckListToolbarWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4168,9 +4168,9 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_subheader_widget.dart",
-      "line": 93,
-      "widget_context": "_DeckPathBackWidget",
-      "element_kind": "icon",
+      "line": 53,
+      "widget_context": "DeckSubheaderWidget",
+      "element_kind": "text",
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",
       "token": "colorScheme.onSurfaceVariant",
@@ -5114,7 +5114,18 @@
     },
     {
       "file": "lib/shared/widgets/mx_breadcrumb.dart",
-      "line": 236,
+      "line": 169,
+      "widget_context": "_MxBreadcrumbState",
+      "element_kind": "other",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/shared/widgets/mx_breadcrumb.dart",
+      "line": 325,
       "widget_context": "_MxBreadcrumbFoldState",
       "element_kind": "icon",
       "source_kind": "theme-token",
@@ -5125,7 +5136,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_breadcrumb.dart",
-      "line": 237,
+      "line": 326,
       "widget_context": "_MxBreadcrumbFoldState",
       "element_kind": "icon",
       "source_kind": "theme-token",
@@ -5136,7 +5147,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_breadcrumb.dart",
-      "line": 252,
+      "line": 341,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -5180,9 +5191,9 @@
     },
     {
       "file": "lib/shared/widgets/mx_breadcrumb_step.dart",
-      "line": 177,
+      "line": 181,
       "widget_context": "_MxBreadcrumbSeparator",
-      "element_kind": "icon",
+      "element_kind": "text",
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",
       "token": "colorScheme.onSurfaceVariant",

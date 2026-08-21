@@ -60,7 +60,10 @@ void main() {
     ) async {
       await pump(tester, path(3));
 
-      expect(find.byIcon(Icons.chevron_right), findsNWidgets(2));
+      // A slash, not a chevron (owner review, 2026-08-21): the header's back
+      // affordance owns the only arrow on the line.
+      expect(find.text('/'), findsNWidgets(2));
+      expect(find.byIcon(Icons.chevron_right), findsNothing);
     });
 
     testWidgets('an empty path renders nothing at all', (tester) async {
@@ -68,7 +71,7 @@ void main() {
       // space, because the alternative is a blank strip above every root list.
       await pump(tester, const <MxBreadcrumbItem>[]);
 
-      expect(find.byIcon(Icons.chevron_right), findsNothing);
+      expect(find.text('/'), findsNothing);
       expect(
         tester.getSize(find.byType(MxBreadcrumb)),
         const Size(0, 0),

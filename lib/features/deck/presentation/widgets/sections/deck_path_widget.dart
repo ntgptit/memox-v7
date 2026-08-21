@@ -4,9 +4,9 @@ import 'package:go_router/go_router.dart';
 import '../../../../../core/navigation/route_names.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_breadcrumb.dart';
-import '../../../domain/entities/deck_entity.dart';
 import '../../../domain/models/deck_list_snapshot_model.dart';
 import '../../../domain/models/deck_path_segment_model.dart';
+import '../overlays/deck_ancestors_widget.dart';
 
 /// Where this level sits in the tree.
 ///
@@ -44,48 +44,59 @@ class DeckPathWidget extends StatelessWidget {
 
   final DeckListSnapshot snapshot;
 
+  /// One level up: the nearest ancestor, or the list when there is none.
+  ///
+  /// **By name, not by popping.** The bar's platform arrow pops the navigator,
+  /// which is right for a pushed route and wrong for a deep link — a deck
+  /// opened from a notification has nothing to pop to. It is also wrong for
+  /// the ancestor sheet, which jumps several levels at once.
+  void _goUp(BuildContext context) {
+    final ancestors = snapshot.ancestors;
+    if (ancestors.isEmpty) {
+      context.goNamed(RouteNames.decks);
+
+      return;
+    }
+
+    context.goNamed(
+      RouteNames.deckDetail,
+      pathParameters: <String, String>{
+        RoutePathParams.deckId: ancestors.last.id,
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final DeckEntity? parent = snapshot.parent;
-    final bool isAtRoot = parent == null;
-
     // **No padding of its own any more.** The gutter and the space below it come
     // from `MxContentShell`'s subheader slot, which takes them from the same
     // `_defaultPadding` the body uses — so the path lines up with the rows under
     // it at both widths, where a hardcoded `AppSpacing.lg` matched them only at
     // the wide one.
     return MxBreadcrumb(
-      semanticLabel: context.l10n.deckPathSemanticLabel,
+      semanticLabel: context.l10n.deckPathUpSemanticLabel,
       // The top of the tree, recognisable without reading it.
       rootIcon: Icons.home_outlined,
-      // A line of the header, not a band of its own — see
-      // `MxBreadcrumb.compactLineHeight` for what that costs and why.
+      // A line of the header, not a band of its own.
       lineHeight: MxBreadcrumb.compactLineHeight,
+      // **The strip is one target** (owner review, 2026-08-21): tap goes up a
+      // level, long press opens every level. The steps below carry no `onTap`
+      // — see `MxBreadcrumb.onUp` for why four small controls became one big
+      // one.
+      upIcon: Icons.chevron_left,
+      onUp: () => _goUp(context),
+      onShowAll: () => showDeckAncestors(context, snapshot: snapshot),
       items: <MxBreadcrumbItem>[
         // **"All decks", not "Root".** It names the top of the tree in the
         // user's own words — "Root" was the schema's term leaking into chrome
-        // (owner mockup, 2026-08-20). On the root screen the step is where the
-        // reader already is, so it carries no `onTap` there — the same rule
-        // the last step follows.
-        MxBreadcrumbItem(
-          label: context.l10n.deckPathRootLabel,
-          onTap: isAtRoot ? null : () => context.goNamed(RouteNames.decks),
-        ),
+        // (owner mockup, 2026-08-20).
+        MxBreadcrumbItem(label: context.l10n.deckPathRootLabel),
         for (final DeckPathSegment segment in snapshot.ancestors)
-          MxBreadcrumbItem(
-            label: segment.name,
-            onTap: () => context.goNamed(
-              RouteNames.deckDetail,
-              pathParameters: <String, String>{
-                RoutePathParams.deckId: segment.id,
-              },
-            ),
-          ),
+          MxBreadcrumbItem(label: segment.name),
         // **The open deck is not a step.** Its name is the bar's title one
         // line above, and a path that ends by repeating it spends the header's
         // scarcest width saying the same word twice (owner review,
-        // 2026-08-20). The path now reads *up* the tree only, and every step
-        // in it is somewhere the reader can go.
+        // 2026-08-20).
       ],
     );
   }

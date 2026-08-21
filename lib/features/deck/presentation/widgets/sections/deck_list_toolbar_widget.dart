@@ -81,11 +81,15 @@ class DeckListToolbarWidget extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
           child: Text(
-            // The count lives on the label naming the list, freeing the
-            // header's breadcrumb line from carrying it (owner mockup,
-            // 2026-08-20). Middle dot, not parentheses: it reads as part of
-            // the label, not an aside.
-            '${(isRootLevel ? context.l10n.decksSectionLabelRoot : context.l10n.decksSectionLabelChild).toUpperCase()} · $visibleCount',
+            // **One count per level, and the root's lives in the header.**
+            // The header's second line states the root's own totals now
+            // (owner review, 2026-08-21), so repeating the figure here would
+            // be the redundancy that line was freed of. Inside a deck the
+            // header shows the path instead, so the heading keeps it. Middle
+            // dot, not parentheses: it reads as part of the label.
+            isRootLevel
+                ? context.l10n.decksSectionLabelRoot.toUpperCase()
+                : '${context.l10n.decksSectionLabelChild.toUpperCase()} · $visibleCount',
             // **`label-md`, not `label-sm`.** The heading and the two pills read
             // as one row, and the pills carry a container while the heading is
             // bare text — so at 11 against their 12 the heading looked like a
