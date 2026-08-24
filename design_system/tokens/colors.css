@@ -30,7 +30,7 @@
   --mx-page-dark:#0A082D;--mx-card-dark:#1A1838;--mx-inset-dark:#28254B;--mx-raised-dark:#37345F;
   --mx-ink-dark:#EDEDF6;--mx-ink-quiet-dark:#A8A7C4;--mx-line-dark:#4C487A;
   --mx-indigo-dark:#5656C9;--mx-indigo-bright-dark:#8A8AE0;--mx-indigo-container-dark:#2B2B6E;
-  --mx-success-dark:#4FC79B;--mx-warning-dark:#E0B064;--mx-danger-dark:#F2808F;--mx-info-dark:#8DB4D8;
+  --mx-success-dark:#4FC79B;--mx-warning-dark:#E8D08E;--mx-danger-dark:#F2808F;--mx-info-dark:#8DB4D8;
 
   /* --- semantic: surface ladder --------------------------------------- */
   --color-background:var(--mx-page-light);
