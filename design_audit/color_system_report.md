@@ -19,14 +19,14 @@ guess.
 | | |
 |---|---|
 | Files scanned (`lib/`, hand-written) | 659 |
-| Colour sites found | 454 |
+| Colour sites found | 453 |
 | Violations | 0 |
 
 **By element kind**
 
 | kind | sites |
 |---|---|
-| other | 274 |
+| other | 273 |
 | background | 18 |
 | shadow | 1 |
 | border | 13 |
@@ -37,10 +37,10 @@ guess.
 
 | kind | sites |
 |---|---|
-| shared-constant | 124 |
+| shared-constant | 129 |
 | blend-source | 4 |
 | Colors-material | 5 |
-| hardcoded-literal | 91 |
+| hardcoded-literal | 85 |
 | opacity-modified-token | 11 |
 | theme-token | 219 |
 
