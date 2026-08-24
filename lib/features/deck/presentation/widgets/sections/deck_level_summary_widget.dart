@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_material_roles.dart';
 import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
@@ -119,9 +118,8 @@ class DeckLevelSummaryWidget extends StatelessWidget {
                   // wears, in the brand ink: an eyebrow set like body copy
                   // read as a stray word above the numeral rather than as the
                   // panel's scope (owner review, 2026-08-20).
-                  style: context.texts.labelMedium?.copyWith(
+                  style: context.textStyles.sectionLabel.copyWith(
                     color: brandInk(context.colors),
-                    letterSpacing: AppTypography.sectionLabelTracking,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/app_text_styles.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/core/theme/app_typography.dart';
 
@@ -81,14 +82,15 @@ void main() {
         tracking: 0,
         family: display,
       );
-      // The one deliberately large style, and the only rung whose size the app
-      // chose rather than inherited: 30/1.22/-0.5.
+      // The Material 3 metric, held since the card prompt moved to its own
+      // `AppTextStyles.cardPrompt` slot — this pin now prevents the rung from
+      // quietly carrying a component's metrics again.
       expectStep(
-        'card-prompt',
+        'headline-md',
         texts.headlineMedium,
-        size: AppTypography.cardPromptSize,
-        height: 1.22,
-        tracking: -0.5,
+        size: 28,
+        height: 36 / 28,
+        tracking: 0,
         family: display,
       );
       expectStep(
@@ -97,6 +99,22 @@ void main() {
         size: 24,
         height: 32 / 24,
         tracking: 0,
+        family: display,
+      );
+    });
+
+    test('the card prompt owns its metrics outside the scale', () {
+      // The one deliberately large style: 30/1.22/-0.5, now an
+      // `AppTextStyles` slot rather than a rung a bystander can inherit.
+      final styles = buildLightTheme().extension<AppTextStyles>();
+
+      expect(styles, isNotNull);
+      expectStep(
+        'card-prompt',
+        styles!.cardPrompt,
+        size: AppTypography.cardPromptSize,
+        height: AppTypography.cardPromptHeight,
+        tracking: AppTypography.cardPromptTracking,
         family: display,
       );
     });

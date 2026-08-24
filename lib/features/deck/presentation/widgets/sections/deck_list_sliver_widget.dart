@@ -21,12 +21,7 @@ import '../support/deck_undo_widget.dart';
 /// frame — see the screen's own note on M4.10ag. What it buys is that the last
 /// card's Study button is reachable once the list is scrolled home; the safe
 /// area is added at the call site, where the `MediaQuery` is.
-const double _kListBottomInset =
-    _kFloatingActionSize + AppSpacing.lg + AppSpacing.lg;
-
-/// Material's floating action button, which declares no public constant for
-/// its own size.
-const double _kFloatingActionSize = 56;
+const double _kListBottomInset = AppSpacing.fabScrollClearance;
 
 /// The rows of one deck level, as a sliver.
 ///

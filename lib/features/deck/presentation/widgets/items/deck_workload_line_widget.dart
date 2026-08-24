@@ -70,8 +70,8 @@ class DeckWorkloadLineWidget extends StatelessWidget {
       if (hasDue)
         _WorkloadChip(
           label: dueLabel,
-          fill: semantic.streakContainer,
-          ink: semantic.onStreakContainer,
+          fill: semantic.dueContainer,
+          ink: semantic.onDueContainer,
         ),
       if (hasNew)
         _WorkloadChip(label: newLabel, fill: semantic.surfaceMuted, ink: quiet),
@@ -113,7 +113,7 @@ class DeckWorkloadLineWidget extends StatelessWidget {
 /// row scans as three facts.
 ///
 /// Every pair is a container pair, so the ink is legible on its own ground by
-/// construction: `errorContainer` for the backlog, the streak pair for
+/// construction: `errorContainer` for the backlog, the due pair for
 /// today's reviews, and `surfaceMuted` for new — new is **not** a warning, and
 /// the blue it used to wear was the only place in the app where a metric read
 /// as a link.

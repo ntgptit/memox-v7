@@ -8,7 +8,6 @@ import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_card.dart';
@@ -265,9 +264,8 @@ class _Headline extends ConsumerWidget {
           // It stays uppercase with the section tracking, which is what keeps it
           // a heading rather than a competing statistic: it is 12 against the
           // count's 14, and it carries no number of its own.
-          style: context.texts.labelMedium?.copyWith(
+          style: context.textStyles.sectionLabel.copyWith(
             color: context.colors.onSurface,
-            letterSpacing: AppTypography.sectionLabelTracking,
           ),
         ),
         const SizedBox(height: AppSpacing.xs),

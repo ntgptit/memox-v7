@@ -343,7 +343,7 @@ class _RecallTimerSectionWidgetState extends State<RecallTimerSectionWidget>
               child: Center(
                 child: Text(
                   widget.turn.card.front,
-                  style: context.texts.headlineMedium,
+                  style: context.textStyles.cardPrompt,
                   textAlign: TextAlign.center,
                   maxLines: 4,
                   overflow: TextOverflow.ellipsis,

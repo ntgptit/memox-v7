@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'app_breakpoints.dart';
 import 'app_spacing.dart';
+import 'app_text_styles.dart';
 import 'app_typography.dart';
 
 /// The same theme, tightened for a screen narrower than
@@ -20,6 +21,7 @@ import 'app_typography.dart';
 /// thumb needs, and under the floor the icon-button theme was measured against.
 ThemeData applyCompactScale(ThemeData base) {
   final texts = base.textTheme;
+  final styles = base.extension<AppTextStyles>();
 
   return base.copyWith(
     textTheme: texts.copyWith(
@@ -27,11 +29,19 @@ ThemeData applyCompactScale(ThemeData base) {
       // Word ..." on a 320-wide screen; the name is the one thing that screen
       // is about.
       titleLarge: texts.titleLarge?.copyWith(fontSize: 20),
-      // The study card prompt, the app's one deliberately large style.
-      headlineMedium: texts.headlineMedium?.copyWith(
-        fontSize: AppTypography.compactCardPromptSize,
-      ),
     ),
+    // The study card prompt, the app's one deliberately large style — its own
+    // extension slot since it left `headlineMedium`, so the compact pass
+    // re-sizes the prompt and no longer touches the M3 rung beside it.
+    extensions: <ThemeExtension<Object?>>[
+      ...base.extensions.values.where((ext) => ext is! AppTextStyles),
+      if (styles != null)
+        styles.copyWith(
+          cardPrompt: styles.cardPrompt.copyWith(
+            fontSize: AppTypography.compactCardPromptSize,
+          ),
+        ),
+    ],
     listTileTheme: base.listTileTheme.copyWith(
       // Horizontal only. The vertical rhythm is what keeps a row tappable.
       contentPadding: const EdgeInsets.symmetric(

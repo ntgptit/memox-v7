@@ -8,6 +8,7 @@ import 'package:memox/core/theme/app_icon_size.dart';
 import 'package:memox/core/theme/app_radius.dart';
 import 'package:memox/core/theme/app_spacing.dart';
 import 'package:memox/core/theme/app_theme.dart';
+import 'package:memox/core/theme/app_text_styles.dart';
 import 'package:memox/core/theme/app_typography.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 
@@ -174,9 +175,11 @@ void main() {
       expectRung('display-md', texts.displayMedium);
       expectRung('display-sm', texts.displaySmall);
       expectRung('headline-lg', texts.headlineLarge);
+      // `--text-card-prompt` sits beside the scale in the kit, and it now
+      // does in Flutter too: `AppTextStyles.cardPrompt`, not a rung.
       expectRung(
         'card-prompt',
-        texts.headlineMedium,
+        light.extension<AppTextStyles>()?.cardPrompt,
         trackingToken: 'card-prompt',
       );
       expectRung('headline-sm', texts.headlineSmall);

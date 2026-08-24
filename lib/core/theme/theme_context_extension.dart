@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app_semantic_colors.dart';
+import 'app_text_styles.dart';
 
 /// The only accessors widgets use to reach theme values.
 ///
@@ -24,6 +25,20 @@ extension ThemeContextX on BuildContext {
 
     throw FlutterError(
       'AppSemanticColors is not registered on this Theme.\n'
+      'Build themes with buildLightTheme() / buildDarkTheme(), which register '
+      'it in ThemeData.extensions.',
+    );
+  }
+
+  /// The named styles `TextTheme` has no slot for — the card prompt and the
+  /// section label. Throws when missing, for the same reason [semanticColors]
+  /// does.
+  AppTextStyles get textStyles {
+    final styles = Theme.of(this).extension<AppTextStyles>();
+    if (styles != null) return styles;
+
+    throw FlutterError(
+      'AppTextStyles is not registered on this Theme.\n'
       'Build themes with buildLightTheme() / buildDarkTheme(), which register '
       'it in ThemeData.extensions.',
     );

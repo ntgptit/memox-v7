@@ -3,6 +3,7 @@ import 'dart:ui' show PlatformDispatcher;
 import 'package:flutter/widgets.dart';
 
 import '../core/theme/app_colors.dart';
+import '../core/theme/app_spacing.dart';
 
 import '../l10n/generated/app_localizations.dart';
 import '../l10n/generated/app_localizations_en.dart';
@@ -75,7 +76,12 @@ class ErrorScreenWidget extends StatelessWidget {
         color: palette.background,
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            // The real spacing tokens, like the colours below: `AppSpacing` is
+            // a class of compile-time constants and needs no theme to be
+            // alive. Only the two font sizes stay literal — the text theme
+            // does need a `Theme`, which is exactly what this screen cannot
+            // assume it has.
+            padding: const EdgeInsets.all(AppSpacing.xl),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
@@ -88,7 +94,7 @@ class ErrorScreenWidget extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.md),
                 Text(
                   message,
                   textAlign: TextAlign.center,

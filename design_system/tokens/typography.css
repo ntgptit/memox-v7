@@ -1,8 +1,9 @@
 /* Two families, each doing the job it is good at.
    Plus Jakarta Sans: display + titles — the app's only visual signature.
    Inter: body + UI — drawn for screens, unambiguous l/I/1 at 14px on a phone.
-   Sizes are the Material 3 scale, with the two the app deliberately overrides:
-   headline-md (the card prompt) at 30/1.22/-0.5, and body-md leading at 1.45. */
+   Sizes are the Material 3 scale, with one leading the app deliberately
+   overrides (body-md at 1.45) and one style of its own beside the scale:
+   the card prompt at 30/1.22/-0.5, which is not a headline rung. */
 :root{
   /* The CJK faces sit behind the Latin primary in both stacks and in the same
      order as AppTypography.cjkFallback — Korean, then Japanese, then Simplified

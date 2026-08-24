@@ -90,6 +90,23 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   final Color danger;
   final Color info;
 
+  /// Overdue — a review past its day (BR-161 settled that late is a *red*
+  /// signal, distinct from due-today's warm one). It **is** [danger]: the
+  /// palette spends one red, and a deck that slipped and a destructive action
+  /// sharing it is the accepted cost. The alias exists so a call site says
+  /// *overdue* and an audit can find every place the state is painted —
+  /// which `danger` alone cannot, because it also names delete buttons.
+  Color get overdue => danger;
+
+  /// The due chip's fill and label — [streakContainer] and [onStreakContainer]
+  /// under the name the call sites mean. The design reuses one warm family
+  /// for everything time-pressured; the streak display (Progress) and the due
+  /// chip (Library, Study home) both draw from it, so the stored pair keeps
+  /// the kit's `--color-streak-container` name and each meaning reads through
+  /// its own alias.
+  Color get dueContainer => streakContainer;
+  Color get onDueContainer => onStreakContainer;
+
   /// Inset tile, chip, icon container — a step above the card.
   final Color surfaceMuted;
 

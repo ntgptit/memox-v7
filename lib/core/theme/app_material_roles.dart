@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'app_colors.dart';
+
 /// The `ColorScheme` roles memox declares only because Material asks for them.
 ///
 /// **Split out of `AppColors` at M4.10ao, and along the line the class doc
@@ -67,10 +69,11 @@ abstract final class AppMaterialRoles {
 
   static const Color tertiaryLight = Color(0xFF45647F);
 
-  /// `#8DB4D8` from the design system, replacing `#A2BAD0` — and it is the same
-  /// value as `AppColors.infoDark`, which is deliberate: the tertiary role and
-  /// the `info` semantic are the one blue the palette has.
-  static const Color tertiaryDark = Color(0xFF8DB4D8);
+  /// From the design system, replacing `#A2BAD0` — and it *is*
+  /// `AppColors.infoDark`, stated as a derivation because it is deliberate:
+  /// the tertiary role and the `info` semantic are the one blue the palette
+  /// has, and a copied hex is a relationship the next edit can silently break.
+  static const Color tertiaryDark = AppColors.infoDark;
   static const Color onTertiaryLight = Color(0xFFFFFFFF);
   static const Color onTertiaryDark = Color(0xFF17232E);
   static const Color tertiaryContainerLight = Color(0xFFE1E9F0);
@@ -88,24 +91,25 @@ abstract final class AppMaterialRoles {
   static const Color surfaceContainerLowestLight = Color(0xFFFCFCFE);
 
   /// The dark half of this ladder moved with the four main tiers at M4.10aa —
-  /// `surfaceContainerHigh`, `Highest` and `Bright` are the same values as
+  /// `surfaceContainerHigh`, `Highest` and `Bright` **are**
   /// `AppColors.surfaceMuted`, [secondaryContainerDark] and
-  /// `AppColors.surfaceElevated`, and leaving them on the old slate would have
-  /// split one ladder into two hue families at exactly the rungs a Dialog and a
-  /// Menu draw from.
+  /// `AppColors.surfaceElevated`, written as derivations because leaving them
+  /// as copied hex would let the ladder split into two hue families at exactly
+  /// the rungs a Dialog and a Menu draw from — the drift the derivation now
+  /// makes impossible rather than merely checked-for.
   static const Color surfaceContainerLowestDark = Color(0xFF0A0326);
   static const Color surfaceContainerLowLight = Color(0xFFFAFAFC);
   static const Color surfaceContainerLowDark = Color(0xFF151134);
   static const Color surfaceContainerLight = Color(0xFFF1F2F6);
   static const Color surfaceContainerDark = Color(0xFF221E44);
   static const Color surfaceContainerHighLight = Color(0xFFEAECF1);
-  static const Color surfaceContainerHighDark = Color(0xFF28254B);
+  static const Color surfaceContainerHighDark = AppColors.surfaceMutedDark;
   static const Color surfaceContainerHighestLight = Color(0xFFE3E5EC);
-  static const Color surfaceContainerHighestDark = Color(0xFF332F58);
+  static const Color surfaceContainerHighestDark = secondaryContainerDark;
   static const Color surfaceDimLight = Color(0xFFDEE0E7);
   static const Color surfaceDimDark = Color(0xFF0B0327);
   static const Color surfaceBrightLight = Color(0xFFFCFCFE);
-  static const Color surfaceBrightDark = Color(0xFF37345F);
+  static const Color surfaceBrightDark = AppColors.surfaceElevatedDark;
 
   static const Color inverseSurfaceLight = Color(0xFF2A2C3E);
   static const Color inverseSurfaceDark = Color(0xFFE7E8F0);

@@ -4,6 +4,7 @@ import 'app_button_themes.dart';
 import 'app_icon_size.dart';
 import 'app_interaction_states.dart';
 import 'app_material_roles.dart';
+import 'app_radius.dart';
 import 'app_semantic_colors.dart';
 import 'app_spacing.dart';
 import 'app_typography.dart';
@@ -171,12 +172,19 @@ ChipThemeData buildChipTheme(
 
     return BorderSide(color: semantic.borderSubtle);
   }),
-  // **Stadium, kept.** `AppRadius.sm` is named "chips, badges, small indicators"
+  // **Pill, kept.** `AppRadius.sm` is named "chips, badges, small indicators"
   // and going to it was tried — the owner looked at the render and kept the
   // pill. The reason holds up beside the numbers: at 32 tall the chip is now the
   // same height as the deck row's Study button, which is also fully rounded, and
   // two controls that size alike in one list should not shape differently.
-  shape: const StadiumBorder(),
+  //
+  // `AppRadius.pill`, not `StadiumBorder`: same painted shape, but the pill
+  // radius is how every other fully-rounded control in the app says it
+  // (`MxSearchField`, `MxMetricWell`, the progress bar), and one result should
+  // not have two mechanisms.
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(AppRadius.pill),
+  ),
   labelStyle: _labelStyle(texts, scheme, semantic),
   iconTheme: IconThemeData(
     size: AppIconSize.sm,

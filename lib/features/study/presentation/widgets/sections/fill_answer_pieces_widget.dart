@@ -15,8 +15,8 @@ part of 'fill_answer_section_widget.dart';
 /// **Body type, not a headline.** A meaning is a gloss in two languages plus the
 /// note that says which to use — BR-08 allows 240 characters — so this rung is
 /// chosen for four to six readable lines rather than for impact. `recall` puts
-/// its term in `headlineMedium` because a term is one word; the same rung here
-/// pushes a real meaning off the card.
+/// its term in the card-prompt style because a term is one word; the same
+/// metric here pushes a real meaning off the card.
 ///
 /// It scrolls rather than truncating. An ellipsis on a prompt hides the half of
 /// the meaning that distinguishes two similar cards, and the card's outer height

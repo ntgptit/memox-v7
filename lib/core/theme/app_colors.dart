@@ -48,8 +48,11 @@ import 'package:flutter/material.dart';
 /// is every role that is a memox decision Material happens to have a slot for —
 /// `primary`, `surface`, `outline`, `error`, `shadow`, `scrim`.
 abstract final class AppColors {
-  /// Seed for `ColorScheme.fromSeed`. Every role it would generate is
-  /// overridden below; the seed remains only because Material requires one.
+  /// The palette's declared seed — the hue every neutral in both modes carries
+  /// a trace of. Nothing *generates* from it any more (`app_theme.dart` builds
+  /// its `ColorScheme`s explicitly, precisely so no generated role can hide
+  /// behind the declared ones); it stays because the design system names it
+  /// (`--color-seed`) and the parity test pins the two together.
   static const Color seed = primaryLight;
 
   // --- Surface ladder ------------------------------------------------------
@@ -211,8 +214,11 @@ abstract final class AppColors {
   /// the brand (a text button, a link) uses this instead: the light value is
   /// the fill colour, which passes on light surfaces; the dark value is the
   /// brighter indigo the focus ring already uses, 6.26:1 on the page.
-  static const Color primaryAccentLight = Color(0xFF4646B4);
-  static const Color primaryAccentDark = Color(0xFF8A8AE0);
+  /// Derivations, not copies: light *is* the fill colour and dark *is* the
+  /// focus ring's indigo — both facts this comment already states, now stated
+  /// where an edit cannot un-say them.
+  static const Color primaryAccentLight = primaryLight;
+  static const Color primaryAccentDark = focusRingDark;
 
   /// Label of a secondary (outlined) action — *End session*, *Cancel*.
   ///
@@ -323,6 +329,10 @@ abstract final class AppColors {
 
   /// The letterbox around the phone-sized frame on the web build.
   ///
+  /// **A non-theme constant, deliberately**: it paints outside `MaterialApp`,
+  /// where no `ColorScheme` or extension can reach, and it must not change
+  /// with the user's theme — the surround is "not the app" in both modes.
+  ///
   /// Outside the app surface entirely — Android never shows it (AD-04) — but it
   /// is still a colour, and a colour in a widget is a colour the theme cannot
   /// change. It has to read as "not the app" rather than as another panel.
@@ -349,6 +359,10 @@ abstract final class AppColors {
   /// MX-VIS-002 rule R6.
   static const Color shadowLight = Color(0xFF0B0C18);
   static const Color shadowDark = Color(0xFF04040B);
-  static const Color scrimLight = Color(0xFF0B0C18);
-  static const Color scrimDark = Color(0xFF04040B);
+
+  /// The scrim is the shadow's colour by definition here — one dark-from-seed
+  /// per mode, whether it is cast or laid over — so it derives rather than
+  /// repeats the hex.
+  static const Color scrimLight = shadowLight;
+  static const Color scrimDark = shadowDark;
 }

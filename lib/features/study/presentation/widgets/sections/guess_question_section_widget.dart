@@ -312,10 +312,9 @@ class _PromptCard extends StatelessWidget {
         Flexible(
           child: Text(
             term,
-            // `headlineMedium` is documented as *the card prompt* — 30 with
-            // −0.5 tracking, which is the handout's 32/−0.5 landing on a step
-            // this scale already has.
-            style: context.texts.headlineMedium,
+            // The card prompt style — 30 with −0.5 tracking, which is the
+            // handout's 32/−0.5 landing on the metric the prompt already owns.
+            style: context.textStyles.cardPrompt,
             textAlign: TextAlign.center,
             overflow: TextOverflow.ellipsis,
             maxLines: 3,
