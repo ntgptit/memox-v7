@@ -97,6 +97,8 @@ abstract final class AppColors {
   /// `seed @ 0.015` over white — one step lighter than [surfaceLight] and still
   /// carrying the hue. Both were `#FFFFFF` before M4.10i, which made the top two
   /// rungs of the light ladder the same rung.
+  // `AppMaterialRoles.surfaceContainerLowestLight` and `surfaceBrightLight`
+  // are this value under Material's names, derived there.
   static const Color surfaceElevatedLight = Color(0xFFFCFCFE);
   static const Color surfaceElevatedDark = Color(0xFF37345F);
 
@@ -285,8 +287,22 @@ abstract final class AppColors {
   static const Color progressTrackDark = Color(0xFF2E3247);
 
   /// The filled part, below 100%.
+  ///
+  /// **Dark *is* the bright indigo the focus ring uses**, and says so rather
+  /// than repeating the hex. The kit reaches it through
+  /// `--mx-indigo-bright-dark` and gets there honestly for the ring and by a
+  /// copied literal for the fill; this file has no primitive layer, so the
+  /// derivation runs through the token that holds the value — the same shape
+  /// [primaryAccentDark] already uses.
+  ///
+  /// **What sharing it costs, measured.** A focus ring drawn *on* a progress
+  /// fill in dark would be invisible, and no repaint fixes that: against
+  /// `#8A8AE0` no indigo clears the 3:1 of WCAG 1.4.11 and even white reaches
+  /// only 3.09. So the adjacency is forbidden rather than contrast-solved —
+  /// and nothing does it today, because every bar is inset inside its card
+  /// while the ring is the card's own edge.
   static const Color progressFillLight = Color(0xFF6E6ECE);
-  static const Color progressFillDark = Color(0xFF8A8AE0);
+  static const Color progressFillDark = focusRingDark;
 
   // --- Due chip -----------------------------------------------------------
   //

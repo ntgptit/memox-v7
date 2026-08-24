@@ -69,7 +69,8 @@ abstract final class AppMaterialRoles {
   static const Color onErrorContainerLight = Color(0xFF641421);
   static const Color onErrorContainerDark = Color(0xFFF5D3D8);
 
-  static const Color surfaceContainerLowestLight = Color(0xFFFCFCFE);
+  static const Color surfaceContainerLowestLight =
+      AppColors.surfaceElevatedLight;
 
   /// The dark half of this ladder moved with the four main tiers at M4.10aa —
   /// `surfaceContainerHigh`, `Highest` and `Bright` **are**
@@ -81,20 +82,36 @@ abstract final class AppMaterialRoles {
   static const Color surfaceContainerLowestDark = Color(0xFF0A0326);
   static const Color surfaceContainerLowLight = Color(0xFFFAFAFC);
   static const Color surfaceContainerLowDark = Color(0xFF151134);
+  // `onInverseSurfaceLight` is the same value from the other direction —
+  // written there as the derivation, so this stays the source.
   static const Color surfaceContainerLight = Color(0xFFF1F2F6);
   static const Color surfaceContainerDark = Color(0xFF221E44);
-  static const Color surfaceContainerHighLight = Color(0xFFEAECF1);
+  static const Color surfaceContainerHighLight = AppColors.surfaceMutedLight;
   static const Color surfaceContainerHighDark = AppColors.surfaceMutedDark;
   static const Color surfaceContainerHighestLight = Color(0xFFE3E5EC);
   static const Color surfaceContainerHighestDark = secondaryContainerDark;
+
+  /// **`surfaceDim` is the dimmest surface, which in this app is the page.**
+  ///
+  /// Dark says so by deriving. It used to be `0xFF0B0327` — three parts in 255
+  /// away from [AppColors.backgroundDark], near enough that nobody could see
+  /// the difference and far enough that an edit to the page would have left it
+  /// behind. A colour that exists twice under two names is a colour that will
+  /// disagree with itself eventually.
+  ///
+  /// Light is deliberately *not* derived, and that is the open question rather
+  /// than an oversight: `#DEE0E7` is **darker** than the light page, so the
+  /// ladder there runs the other way and `surfaceDim` sits below a page that
+  /// is not in the scheme at all. Straightening that is a surface-ladder
+  /// change with pixels behind it, not a rename — see the token audit.
   static const Color surfaceDimLight = Color(0xFFDEE0E7);
-  static const Color surfaceDimDark = Color(0xFF0B0327);
-  static const Color surfaceBrightLight = Color(0xFFFCFCFE);
+  static const Color surfaceDimDark = AppColors.backgroundDark;
+  static const Color surfaceBrightLight = AppColors.surfaceElevatedLight;
   static const Color surfaceBrightDark = AppColors.surfaceElevatedDark;
 
   static const Color inverseSurfaceLight = Color(0xFF2A2C3E);
   static const Color inverseSurfaceDark = Color(0xFFE7E8F0);
-  static const Color onInverseSurfaceLight = Color(0xFFF1F2F6);
+  static const Color onInverseSurfaceLight = surfaceContainerLight;
   static const Color onInverseSurfaceDark = Color(0xFF23253A);
   static const Color inversePrimaryLight = Color(0xFFA9A9E0);
   static const Color inversePrimaryDark = Color(0xFF3A3A9B);

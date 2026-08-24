@@ -138,7 +138,10 @@
   --color-error-container:#5E2831;
   --color-on-error-container:#F5D3D8;
   --color-progress-track:#2E3247;
-  --color-progress-fill:#8A8AE0;
+  /* The focus ring's own indigo, reached through the primitive rather
+     than copied: one edit, one meaning moved. A focus ring must never
+     be drawn on this fill — see AppColors.progressFillDark. */
+  --color-progress-fill:var(--mx-indigo-bright-dark);
   --color-progress-complete:var(--mx-success-dark);
   --color-streak:#E0B064;
   /* The container is no longer the warm olive #3A2E1C. A brown-olive fill is
@@ -152,7 +155,8 @@
   --color-surface-container:#221E44;
   --color-surface-container-high:#28254B;
   --color-surface-container-highest:#332F58;
-  --color-surface-dim:#0B0327;
+  /* The dimmest surface is the page. */
+  --color-surface-dim:var(--color-background);
   --color-surface-bright:#37345F;
   --color-inverse-surface:#E7E8F0;
   --color-on-inverse-surface:#23253A;

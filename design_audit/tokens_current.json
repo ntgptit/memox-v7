@@ -762,15 +762,15 @@
       "carriesNoHue": false
     },
     "colorScheme.surfaceDim": {
-      "hex": "#0B0327",
+      "hex": "#0A082D",
       "opaque": true,
-      "hue": 253.33333333333334,
-      "saturation": 0.8571428571428568,
-      "chroma": 0.1411764705882353,
-      "lightnessStar": 2.554130659129478,
+      "hue": 243.24324324324326,
+      "saturation": 0.6981132075471698,
+      "chroma": 0.1450980392156863,
+      "lightnessStar": 3.8630298153192073,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 13.333333333333343,
-      "hueDistanceFromDarkSurfaceFamily": 10.090090090090087,
+      "hueDistanceFromDeclaredSeed": 3.2432432432432563,
+      "hueDistanceFromDarkSurfaceFamily": 0.0,
       "carriesNoHue": false
     },
     "colorScheme.surfaceBright": {
