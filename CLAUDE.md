@@ -292,6 +292,33 @@ CI green.
 Run `.claude/skills/flutter-workflow/scripts/dod_check.sh` for the mechanical
 half of that list. The judgement half is still yours.
 
+### A change a person can see ends in the gallery
+
+`test/demo/` is the only picture this project has of itself — the real screens
+on a real device size, committed as PNGs. **When a change moves any of them,
+regenerate the goldens and republish the gallery in the same turn:**
+
+```bash
+flutter test --tags golden --update-goldens
+python .claude/skills/flutter-testing/scripts/build_screen_gallery.py
+```
+
+Then publish `build/screen_gallery.html` as an Artifact **at the existing
+URL** — https://claude.ai/code/artifact/e8a68227-1582-407c-88c2-ff25d66bd9d8 —
+so the owner's tab keeps showing the current app instead of a fork of it.
+Publishing without that URL makes a second gallery, and two galleries mean
+nobody knows which one is the app.
+
+**Why this is a rule and not a courtesy.** A screenshot the owner is reviewing
+against is a claim about what shipped, and a stale one is a wrong claim that
+looks right — the failure mode that cost this project four review rounds on
+one screen. The gallery reads the *committed* goldens and renders nothing
+itself, so regenerating them first is not optional: build it from stale PNGs
+and it is confidently wrong.
+
+The page carries the commit it was built from in its header, which is what
+makes a stale tab recognisable rather than merely wrong.
+
 During the inner loop, `.claude/skills/flutter-workflow/scripts/dod_check.sh
 --changed --base origin/main` MUST build the same immutable feature × layer ×
 risk verification plan used by PR CI. It runs only the selected host tests and
