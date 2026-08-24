@@ -263,18 +263,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 153,
-      "widget_context": "AppColors",
-      "element_kind": "other",
-      "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFFB6B6E2)",
-      "token": null,
-      "resolved_value_light": "#B6B6E2",
-      "resolved_value_dark": "#B6B6E2"
-    },
-    {
-      "file": "lib/core/theme/app_colors.dart",
-      "line": 155,
+      "line": 143,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -285,18 +274,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 159,
-      "widget_context": "AppColors",
-      "element_kind": "other",
-      "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF31306F)",
-      "token": null,
-      "resolved_value_light": "#31306F",
-      "resolved_value_dark": "#31306F"
-    },
-    {
-      "file": "lib/core/theme/app_colors.dart",
-      "line": 161,
+      "line": 146,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -304,6 +282,28 @@
       "token": null,
       "resolved_value_light": "#4C487A",
       "resolved_value_dark": "#4C487A"
+    },
+    {
+      "file": "lib/core/theme/app_colors.dart",
+      "line": 158,
+      "widget_context": "AppColors",
+      "element_kind": "other",
+      "source_kind": "hardcoded-literal",
+      "expression": "Color(0xFFB6B6E2)",
+      "token": null,
+      "resolved_value_light": "#B6B6E2",
+      "resolved_value_dark": "#B6B6E2"
+    },
+    {
+      "file": "lib/core/theme/app_colors.dart",
+      "line": 161,
+      "widget_context": "AppColors",
+      "element_kind": "other",
+      "source_kind": "hardcoded-literal",
+      "expression": "Color(0xFF31306F)",
+      "token": null,
+      "resolved_value_light": "#31306F",
+      "resolved_value_dark": "#31306F"
     },
     {
       "file": "lib/core/theme/app_colors.dart",
@@ -725,18 +725,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 34,
-      "widget_context": "<top-level>",
-      "element_kind": "other",
-      "source_kind": "shared-constant",
-      "expression": "AppColors.primaryDark",
-      "token": "AppColors.primaryDark",
-      "resolved_value_light": "unresolvable: no light counterpart in theme",
-      "resolved_value_dark": "#5656C9"
-    },
-    {
-      "file": "lib/core/theme/app_material_roles.dart",
-      "line": 47,
+      "line": 28,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -747,7 +736,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 48,
+      "line": 29,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -758,7 +747,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 49,
+      "line": 30,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -769,7 +758,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 53,
+      "line": 34,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -780,7 +769,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 55,
+      "line": 36,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -791,7 +780,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 62,
+      "line": 43,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -802,7 +791,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 63,
+      "line": 44,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -813,7 +802,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 64,
+      "line": 45,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -824,7 +813,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 65,
+      "line": 46,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -835,7 +824,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 66,
+      "line": 47,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -846,7 +835,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 67,
+      "line": 48,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -857,7 +846,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 68,
+      "line": 49,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -868,7 +857,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 70,
+      "line": 51,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -879,7 +868,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 76,
+      "line": 57,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -890,7 +879,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 77,
+      "line": 58,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -901,7 +890,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 78,
+      "line": 59,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -912,7 +901,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 79,
+      "line": 60,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -923,7 +912,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 80,
+      "line": 61,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -934,7 +923,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 81,
+      "line": 62,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -945,7 +934,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 82,
+      "line": 63,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -956,7 +945,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 84,
+      "line": 65,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -967,7 +956,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 85,
+      "line": 66,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -978,7 +967,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 86,
+      "line": 67,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -989,7 +978,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 87,
+      "line": 68,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1000,7 +989,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 88,
+      "line": 69,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1011,7 +1000,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 89,
+      "line": 70,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1022,7 +1011,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 91,
+      "line": 72,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1033,7 +1022,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 100,
+      "line": 81,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1044,7 +1033,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 101,
+      "line": 82,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1055,7 +1044,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 102,
+      "line": 83,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1066,7 +1055,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 103,
+      "line": 84,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1077,7 +1066,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 104,
+      "line": 85,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1088,7 +1077,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 105,
+      "line": 86,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1099,7 +1088,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 106,
+      "line": 87,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1110,7 +1099,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 107,
+      "line": 88,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1121,7 +1110,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 109,
+      "line": 90,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1132,7 +1121,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 110,
+      "line": 91,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1143,7 +1132,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 111,
+      "line": 92,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1154,7 +1143,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 112,
+      "line": 93,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1165,7 +1154,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 114,
+      "line": 95,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1176,7 +1165,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 115,
+      "line": 96,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1187,7 +1176,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 116,
+      "line": 97,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1198,7 +1187,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 117,
+      "line": 98,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1209,7 +1198,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 118,
+      "line": 99,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1220,7 +1209,7 @@
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
-      "line": 119,
+      "line": 100,
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1228,6 +1217,17 @@
       "token": null,
       "resolved_value_light": "#3A3A9B",
       "resolved_value_dark": "#3A3A9B"
+    },
+    {
+      "file": "lib/core/theme/app_material_roles.dart",
+      "line": 110,
+      "widget_context": "<top-level>",
+      "element_kind": "other",
+      "source_kind": "shared-constant",
+      "expression": "AppColors.primaryDark",
+      "token": "AppColors.primaryDark",
+      "resolved_value_light": "unresolvable: no light counterpart in theme",
+      "resolved_value_dark": "#5656C9"
     },
     {
       "file": "lib/core/theme/app_navigation_bar_theme.dart",

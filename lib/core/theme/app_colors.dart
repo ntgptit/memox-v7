@@ -140,6 +140,11 @@ abstract final class AppColors {
   /// Both values are hue 240 and inside the light canvas's chroma budget. The
   /// history is worth keeping: `#D7DAE3` (1.40:1) was too weak when it was the
   /// only cue, `#BEC0C3` (1.82:1) was right then and too heavy now.
+  static const Color borderSubtleLight = Color(0xFFD2D2DD);
+  // Lifted from 0xFF403D67 so a fill-less hairline (a divider on the dark page)
+  // reads on OLED. Same hue and saturation (0.41), lightness only.
+  static const Color borderSubtleDark = Color(0xFF4C487A);
+
   /// The hairline a panel wears when it is the screen's *answer* rather than
   /// one row among many — today the Library's Today card.
   ///
@@ -152,13 +157,8 @@ abstract final class AppColors {
   /// the audit cannot read it back.
   static const Color borderAccentLight = Color(0xFFB6B6E2);
 
-  static const Color borderSubtleLight = Color(0xFFD2D2DD);
-  // Lifted from 0xFF403D67 so a fill-less hairline (a divider on the dark page)
-  // reads on OLED. Same hue and saturation (0.41), lightness only.
   /// Same recipe as [borderAccentLight], over the dark surface.
   static const Color borderAccentDark = Color(0xFF31306F);
-
-  static const Color borderSubtleDark = Color(0xFF4C487A);
 
   /// A control's edge at the 3:1 WCAG 1.4.11 asks — cleared against every
   /// neighbour it touches. Why a control and not a card, and the measurements:

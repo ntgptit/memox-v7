@@ -24,25 +24,6 @@ import 'app_colors.dart';
 /// So are `primary`, `surface`, `outline`, `shadow` and `scrim` — each is a
 /// memox decision that Material happens to have a slot for, and each stays in
 /// `AppColors` where its reasoning is.
-/// The brand ink, in the shade this theme can actually print it — a selected
-/// pill's label, the navigation bar's active tab, the hero's eyebrow.
-///
-/// **Not simply `primary`, and not simply `onPrimaryContainer`.** The owner's
-/// mockup asks the active state and the eyebrow to read as the brand colour
-/// (owner review, 2026-08-20), and in light they can: `primary` measures
-/// 5.6:1 on `primaryContainer` and 8.0:1 on `surface`. In dark `primaryDark`
-/// is deliberately held low — see [AppColors.primaryDark] — so the same ink
-/// measures **2.13:1** on the container and **2.90:1** on the surface, and the
-/// visual audit fails both. Dark therefore takes the M3 partner, which is the
-/// same hue a few steps up and clears every floor on both grounds.
-///
-/// One function rather than a copy per call site: the pill, the tab and the
-/// eyebrow have to agree about what "brand" looks like, and they did not when
-/// each resolved its own.
-Color brandInk(ColorScheme scheme) => scheme.brightness == Brightness.light
-    ? scheme.primary
-    : scheme.onPrimaryContainer;
-
 abstract final class AppMaterialRoles {
   static const Color primaryContainerLight = Color(0xFFDCDCF2);
   static const Color primaryContainerDark = Color(0xFF2B2B6E);
@@ -118,3 +99,22 @@ abstract final class AppMaterialRoles {
   static const Color inversePrimaryLight = Color(0xFFA9A9E0);
   static const Color inversePrimaryDark = Color(0xFF3A3A9B);
 }
+
+/// The brand ink, in the shade this theme can actually print it — a selected
+/// pill's label, the navigation bar's active tab, the hero's eyebrow.
+///
+/// **Not simply `primary`, and not simply `onPrimaryContainer`.** The owner's
+/// mockup asks the active state and the eyebrow to read as the brand colour
+/// (owner review, 2026-08-20), and in light they can: `primary` measures
+/// 5.6:1 on `primaryContainer` and 8.0:1 on `surface`. In dark `primaryDark`
+/// is deliberately held low — see [AppColors.primaryDark] — so the same ink
+/// measures **2.13:1** on the container and **2.90:1** on the surface, and the
+/// visual audit fails both. Dark therefore takes the M3 partner, which is the
+/// same hue a few steps up and clears every floor on both grounds.
+///
+/// One function rather than a copy per call site: the pill, the tab and the
+/// eyebrow have to agree about what "brand" looks like, and they did not when
+/// each resolved its own.
+Color brandInk(ColorScheme scheme) => scheme.brightness == Brightness.light
+    ? scheme.primary
+    : scheme.onPrimaryContainer;

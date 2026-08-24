@@ -75,13 +75,13 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   /// label; this is the variant that passes. See `AppColors.primaryAccentDark`.
   final Color primaryAccent;
 
-  /// The unfilled part of a progress track, and the filled part below 100%.
-  /// At 100% the fill becomes [success] — see `MxProgressBar`.
   /// The due chip's fill and its label. See `AppColors.streakContainerLight`
   /// for why the label is not the design's own value.
   final Color streakContainer;
   final Color onStreakContainer;
 
+  /// The unfilled part of a progress track, and the filled part below 100%.
+  /// At 100% the fill becomes [success] — see `MxProgressBar`.
   final Color progressTrack;
   final Color progressFill;
 
