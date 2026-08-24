@@ -1,0 +1,289 @@
+# -*- coding: utf-8 -*-
+"""Build the screen gallery: one HTML page of every demo golden.
+
+**What it is for.** `test/demo/` renders the real screens on a real device
+size and commits the result; those PNGs are the only picture the project has
+of itself. Opening 110 files one at a time is not review, so this collects
+them into a page a person can scan: light and dark of the same screen behind
+one toggle, click to enlarge, arrows to walk the set.
+
+**It reads the committed goldens; it does not render.** So run
+`flutter test --tags golden` first if the code has moved — a gallery built
+from stale PNGs is worse than none, because it looks current.
+
+    python .claude/skills/flutter-testing/scripts/build_screen_gallery.py
+
+Writes `build/screen_gallery.html` (gitignored — 7MB of embedded PNGs has no
+business in git). Pass a path as the first argument to write elsewhere.
+
+Needs Pillow for the resize: `python -m pip install Pillow`.
+"""
+import base64
+import io
+import os
+import subprocess
+import sys
+
+from PIL import Image
+
+# .claude/skills/flutter-testing/scripts/ -> the repo root.
+ROOT = os.path.abspath(
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), *[os.pardir] * 4)
+)
+G = os.path.join(ROOT, 'test', 'demo', 'goldens')
+OUT = (
+    os.path.abspath(sys.argv[1])
+    if len(sys.argv) > 1
+    else os.path.join(ROOT, 'build', 'screen_gallery.html')
+)
+
+
+def _stamp():
+    """What the reader is looking at, so a stale tab is recognisable."""
+    try:
+        return subprocess.check_output(
+            ['git', 'log', '-1', '--format=%h · %s'],
+            cwd=ROOT,
+            text=True,
+            encoding='utf-8',
+        ).strip()
+    except Exception:
+        return 'unknown revision'
+
+
+SCREENS = [
+    ('Library & Deck', 'deck_list_root', 'Deck list — root', 'Hero hôm nay, chip workload, path một target'),
+    ('Library & Deck', 'deck_list_level', 'Deck list — trong deck', 'Cấp con: breadcrumb, sub-decks, chip trên tile'),
+    ('Library & Deck', 'deck_list_empty', 'Deck list — rỗng', 'Hai lối vào: starter catalog / deck mới'),
+    ('Library & Deck', 'deck_list_new_only', 'Deck chỉ có thẻ mới', 'BR-150: Study vẫn mở'),
+    ('Card', 'card_list', 'Card list', 'Toolbar lọc + pill trạng thái'),
+    ('Card', 'card_editor_edit', 'Card editor', 'Sửa nội dung, tag, cờ; danger zone'),
+    ('Card', 'card_detail', 'Card detail', 'Mặt đọc + lịch sử keyset (M99.31)'),
+    ('Card', 'card_detail_page_error', 'Card detail — lỗi trang sau', 'Band D24: giữ những gì đã đọc'),
+    ('Card', 'card_import_source', 'Import — nguồn', 'Bước 1 của wizard'),
+    ('Card', 'card_import_preview', 'Import — preview', 'Bước 2: hàng lỗi được khoanh'),
+    ('Card', 'card_import_result_complete', 'Import — kết quả', 'Bước 3: đếm đủ, không lệch'),
+    ('Card', 'card_export_sheet', 'Export sheet', 'Ba format, share qua OS'),
+    ('Card', 'card_bulk_delete_dialog', 'Bulk delete — confirm', 'Variant cautious: vào Trash 30 ngày'),
+    ('Card', 'card_move_picker', 'Move picker', 'Chỉ deck hợp lệ được chào'),
+    ('Tag', 'tag_catalog', 'Tag catalog', 'Nhãn toàn thư viện tại /tags'),
+    ('Tag', 'tag_filter_sheet', 'Tag filter', 'Lọc OR nhiều nhãn (BR-231)'),
+    ('Tag', 'tag_rename_merge', 'Tag rename/gộp', 'Đổi tên trùng = gộp, nói trước'),
+    ('Study', 'study_home', 'Study Home', 'Resume + workload thật (UC-14)'),
+    ('Study', 'study_browse', 'Browse', 'Giai đoạn đọc của learning'),
+    ('Study', 'study_match', 'Match', 'Ghép cặp'),
+    ('Study', 'study_guess', 'Guess', 'Chọn nghĩa'),
+    ('Study', 'study_recall', 'Recall', 'Đếm ngược + tự chấm'),
+    ('Study', 'study_fill', 'Fill', 'Gõ đáp án'),
+    ('Progress', 'progress_overview', 'Progress — tổng quan', 'Streak, 7 ngày, tổng đời (UC-12)'),
+    ('Progress', 'progress_deck', 'Progress — theo deck', 'Card-day, Learning/Reviewing (UC-13)'),
+    ('Settings & Reminder', 'settings', 'Settings', 'Mặc định học, theme, ngôn ngữ (UC-16)'),
+    ('Settings & Reminder', 'reminder_settings', 'Daily reminder', 'Opt-in, giờ địa phương (UC-17)'),
+    ('Search', 'library_search', 'Global search', 'Deck + thẻ + nhãn, keyset (UC-20)'),
+    ('Trash', 'trash', 'Trash', 'Soft delete, 30 ngày, restore/purge (UC-21)'),
+]
+
+
+
+def encode(path, width=560):
+    """A screen at review width, embedded — the page has to open offline."""
+    im = Image.open(path)
+    if im.width > width:
+        im = im.resize((width, round(im.height * width / im.width)),
+                       Image.LANCZOS)
+    buf = io.BytesIO()
+    im.save(buf, format='PNG', optimize=True)
+
+    return 'data:image/png;base64,' + base64.b64encode(buf.getvalue()).decode()
+
+
+cards, total, dark_count = [], 0, 0
+groups = {}
+for group, base, name, note in SCREENS:
+    light_p = os.path.join(G, base + '_light.png')
+    if not os.path.exists(light_p):
+        light_p = os.path.join(G, base + '.png')  # card_editor_edit
+    dark_p = os.path.join(G, base + '_dark.png')
+    light = encode(light_p)
+    dark = encode(dark_p) if os.path.exists(dark_p) else None
+    if dark:
+        dark_count += 1
+    total += 1
+    dark_attr = (' data-dark="%s"' % dark) if dark else ''
+    tag = '' if dark else '<span class="chip">light only</span>'
+    card = (
+        '<figure class="shot" tabindex="0" data-name="{name}"{dark}>'
+        '<div class="frame"><img loading="lazy" src="{light}" alt="{name}"></div>'
+        '<figcaption><strong>{name}</strong>{tag}<span>{note}</span></figcaption>'
+        '</figure>'
+    ).format(name=name, dark=dark_attr, light=light, tag=tag, note=note)
+    groups.setdefault(group, []).append(card)
+
+sections = []
+for group, items in groups.items():
+    sections.append(
+        '<section><h2><span class="eyebrow">{g}</span>'
+        '<span class="count">{n}</span></h2>'
+        '<div class="grid">{cards}</div></section>'.format(
+            g=group, n=len(items), cards=''.join(items)))
+
+html = """<title>MemoX — 29 màn hình</title>
+<style>
+:root{
+  --ground:#F6F6F9; --surface:#FFFFFF; --ink:#1B1B22; --muted:#5D5D6E;
+  --accent:#4F5BD5; --line:#E3E3EC; --frame:#23232B; --chip:#EEEEF6;
+}
+:root:not([data-theme="light"]){}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#131318; --surface:#1D1D25; --ink:#ECECF3; --muted:#9C9CAF;
+    --accent:#8B95F2; --line:#2A2A36; --frame:#000000; --chip:#26262F;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#131318; --surface:#1D1D25; --ink:#ECECF3; --muted:#9C9CAF;
+  --accent:#8B95F2; --line:#2A2A36; --frame:#000000; --chip:#26262F;
+}
+*{box-sizing:border-box}
+body{background:var(--ground); color:var(--ink);
+  font:16px/1.5 "Segoe UI",Roboto,system-ui,sans-serif; margin:0;
+  padding:0 0 4rem}
+header{position:sticky; top:0; z-index:5; background:var(--ground);
+  border-bottom:1px solid var(--line); padding:.45rem 1rem;
+  display:flex; align-items:center; gap:.8rem; flex-wrap:nowrap;
+  transition:transform .22s ease}
+header.hidden{transform:translateY(-100%)}
+@media (prefers-reduced-motion: reduce){
+  header{transition:none}
+}
+header h1{font-size:.95rem; font-weight:700; letter-spacing:-.01em;
+  margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+header p{margin:0; color:var(--muted); font-size:.78rem;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+@media (max-width:640px){ header p{display:none} }
+.spacer{flex:1; min-width:0}
+.toggle{display:flex; border:1px solid var(--line); border-radius:999px;
+  overflow:hidden; flex:none}
+.toggle button{border:0; background:transparent; color:var(--muted);
+  font:inherit; font-size:.8rem; padding:.25rem .75rem; cursor:pointer}
+.toggle button[aria-pressed="true"]{background:var(--accent); color:#fff}
+.toggle button:focus-visible{outline:2px solid var(--accent);
+  outline-offset:-2px}
+main{max-width:1240px; margin:0 auto; padding:0 1.4rem}
+section h2{display:flex; align-items:baseline; gap:.6rem;
+  margin:2.2rem 0 1rem}
+.eyebrow{font-size:.78rem; font-weight:700; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--accent)}
+.count{font-size:.78rem; color:var(--muted);
+  font-variant-numeric:tabular-nums}
+.grid{display:grid; gap:1.1rem;
+  grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.shot{margin:0; cursor:zoom-in; border-radius:14px}
+.shot:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
+.frame{background:var(--frame); border-radius:18px; padding:7px;
+  box-shadow:0 6px 22px rgba(20,20,40,.16)}
+.frame img{display:block; width:100%; height:auto; border-radius:12px;
+  background:#fff}
+figcaption{padding:.55rem .15rem 0; font-size:.83rem; color:var(--muted)}
+figcaption strong{display:inline; color:var(--ink); font-size:.88rem;
+  margin-right:.4rem}
+figcaption span{display:block; margin-top:.1rem}
+.chip{display:inline-block; background:var(--chip); color:var(--muted);
+  border-radius:999px; padding:.05rem .5rem; font-size:.7rem;
+  vertical-align:middle}
+dialog{border:0; border-radius:16px; padding:0; background:var(--surface);
+  color:var(--ink); max-width:min(92vw,460px);
+  box-shadow:0 24px 80px rgba(0,0,0,.45)}
+dialog::backdrop{background:rgba(10,10,16,.72)}
+dialog img{display:block; width:100%; height:auto;
+  border-radius:16px 16px 0 0}
+dialog .bar{display:flex; align-items:center; gap:.8rem;
+  padding:.7rem 1rem}
+dialog .bar strong{font-size:.95rem}
+dialog .bar span{color:var(--muted); font-size:.8rem}
+dialog .bar button{margin-left:auto; border:1px solid var(--line);
+  background:transparent; color:var(--ink); border-radius:8px;
+  font:inherit; font-size:.85rem; padding:.3rem .8rem; cursor:pointer}
+@media (prefers-reduced-motion: no-preference){
+  .shot{transition:transform .18s ease}
+  .shot:hover{transform:translateY(-3px)}
+}
+</style>
+<header id="hdr">
+  <h1>MemoX · __TOTAL__ màn</h1>
+  <div class="spacer"><p>golden suite @ __STAMP__ · 393×852</p></div>
+  <div class="toggle" role="group" aria-label="Chế độ render">
+    <button id="btnLight" aria-pressed="true">Light</button>
+    <button id="btnDark" aria-pressed="false">Dark</button>
+  </div>
+</header>
+<main>__SECTIONS__</main>
+<dialog id="box">
+  <img id="boxImg" alt="">
+  <div class="bar"><strong id="boxName"></strong>
+    <span>&larr; &rarr; chuyển màn</span>
+    <button id="boxClose">Đóng</button></div>
+</dialog>
+<script>
+(function(){
+  var dark = false;
+  var shots = Array.prototype.slice.call(document.querySelectorAll('.shot'));
+  function srcFor(shot){
+    return (dark && shot.dataset.dark) ? shot.dataset.dark
+      : shot.querySelector('img').dataset.light;
+  }
+  shots.forEach(function(s){
+    var img = s.querySelector('img');
+    img.dataset.light = img.src;
+  });
+  function apply(){
+    shots.forEach(function(s){ s.querySelector('img').src = srcFor(s); });
+    document.getElementById('btnLight').setAttribute('aria-pressed', String(!dark));
+    document.getElementById('btnDark').setAttribute('aria-pressed', String(dark));
+  }
+  document.getElementById('btnLight').onclick = function(){ dark=false; apply(); };
+  document.getElementById('btnDark').onclick = function(){ dark=true; apply(); };
+
+  var box = document.getElementById('box'), cur = -1;
+  function show(i){
+    cur = (i + shots.length) % shots.length;
+    var s = shots[cur];
+    document.getElementById('boxImg').src = srcFor(s);
+    document.getElementById('boxImg').alt = s.dataset.name;
+    document.getElementById('boxName').textContent = s.dataset.name;
+    if(!box.open) box.showModal();
+  }
+  shots.forEach(function(s, i){
+    s.addEventListener('click', function(){ show(i); });
+    s.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); show(i); }
+    });
+  });
+  document.getElementById('boxClose').onclick = function(){ box.close(); };
+  box.addEventListener('click', function(e){ if(e.target === box) box.close(); });
+  document.addEventListener('keydown', function(e){
+    if(!box.open) return;
+    if(e.key === 'ArrowRight') show(cur+1);
+    if(e.key === 'ArrowLeft') show(cur-1);
+  });
+
+  // The header gets out of the way while reviewing: hidden on scroll down,
+  // back on the first scroll up.
+  var hdr = document.getElementById('hdr'), lastY = 0;
+  window.addEventListener('scroll', function(){
+    var y = window.scrollY;
+    if(y > lastY + 6 && y > 60) hdr.classList.add('hidden');
+    else if(y < lastY - 6) hdr.classList.remove('hidden');
+    lastY = y;
+  }, {passive:true});
+})();
+</script>
+"""
+html = html.replace('__SECTIONS__', ''.join(sections))
+html = html.replace('__TOTAL__', str(total))
+html = html.replace('__STAMP__', _stamp())
+os.makedirs(os.path.dirname(OUT), exist_ok=True)
+io.open(OUT, 'w', encoding='utf-8').write(html)
+print('screens:', total, '| with dark:', dark_count,
+      '| size: %.1f MB' % (os.path.getsize(OUT) / 1048576))
+print('wrote', OUT)
