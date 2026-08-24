@@ -107,19 +107,20 @@ void main() {
     additionalRules: const <AuditRule>[SurfaceColumnRule()],
     anchors: deckPlainAnchors,
     allowances: <AuditSkipAllowance>[
-      heroCardRasterAllowance,
       ...deckShellAllowances(
         // One action per row for three decks, plus the summary panel's
         // collapse chevron, plus the bar's one overflow menu (tag catalog and
-        // Trash live inside it; search is the shell's own count). Create is
-        // the floating action now (owner review, 2026-08-20).
-        screenIconButtons: 5,
+        // Trash live inside it; search is the shell's own count), plus the
+        // list heading's sort control — which is an icon button rather than a
+        // pill since the 2026-08-25 review. Create is the floating action
+        // (owner review, 2026-08-20). No `pills:` at all now — the filter
+        // moved into the bar's overflow and sort gave up its chip, so the
+        // screen has none left.
+        screenIconButtons: 6,
         hasFloatingAction: true,
         screenItemId: 'deck_screen',
         // Every row is a tappable card now rather than a ListTile.
         tappableCards: 3,
-        // Sort alone — the filter moved into the bar's overflow menu.
-        pills: 1,
         // One deck in this fixture has cards due, so one Study action — and
         // the summary panel's own Study CTA above the list.
         filledButtons: 2,
@@ -297,17 +298,16 @@ void main() {
       // Three breadcrumb steps: the deck list, then the two ancestors. The
       // strip's last step — the deck the user is in — is text rather than a
       // control, so it hosts no ink.
-      heroCardRasterAllowance,
       ...deckShellAllowances(
-        // Three row menus, the deck's overflow and the panel's collapse
-        // chevron. Create floats, and the way back is the path's own chevron
-        // rather than the bar's platform arrow (owner review, 2026-08-20).
-        screenIconButtons: 5,
+        // Three row menus, the deck's overflow, the panel's collapse chevron
+        // and the list heading's sort control. Create floats, and the way back
+        // is the path's own chevron rather than the bar's platform arrow
+        // (owner review, 2026-08-20). No `pills:` — the filter lives in the
+        // deck's own overflow and sort is a bare glyph.
+        screenIconButtons: 6,
         screenItemId: 'deck_screen',
         hasFloatingAction: true,
         tappableCards: 3,
-        // Sort alone — the filter lives in the deck's own overflow now.
-        pills: 1,
         // Two of the three children have cards due, and the summary panel's
         // Study CTA makes a third filled action.
         filledButtons: 3,

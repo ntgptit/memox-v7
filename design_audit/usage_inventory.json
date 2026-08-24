@@ -1,14 +1,14 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 659,
-  "totalSites": 453,
+  "scannedFiles": 660,
+  "totalSites": 455,
   "byElementKind": {
     "other": 273,
     "background": 18,
     "shadow": 1,
     "border": 13,
-    "text": 117,
-    "icon": 31
+    "text": 118,
+    "icon": 32
   },
   "bySourceKind": {
     "shared-constant": 129,
@@ -16,7 +16,7 @@
     "Colors-material": 5,
     "hardcoded-literal": 85,
     "opacity-modified-token": 11,
-    "theme-token": 219
+    "theme-token": 221
   },
   "sites": [
     {
@@ -3783,7 +3783,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_list_toolbar_widget.dart",
-      "line": 99,
+      "line": 86,
       "widget_context": "DeckListToolbarWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4707,7 +4707,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_action_sheet.dart",
-      "line": 105,
+      "line": 118,
       "widget_context": "_SheetTitle",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4718,7 +4718,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_action_sheet.dart",
-      "line": 125,
+      "line": 138,
       "widget_context": "_SheetRow",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -4729,7 +4729,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_action_sheet.dart",
-      "line": 127,
+      "line": 140,
       "widget_context": "_SheetRow",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -4740,7 +4740,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_action_sheet.dart",
-      "line": 128,
+      "line": 141,
       "widget_context": "_SheetRow",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -4751,7 +4751,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_action_sheet.dart",
-      "line": 148,
+      "line": 166,
       "widget_context": "_SheetRow",
       "element_kind": "icon",
       "source_kind": "theme-token",
@@ -4759,6 +4759,17 @@
       "token": "colorScheme.onSurfaceVariant",
       "resolved_value_light": "#565C72",
       "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/shared/widgets/mx_action_sheet.dart",
+      "line": 180,
+      "widget_context": "_SheetRow",
+      "element_kind": "icon",
+      "source_kind": "theme-token",
+      "expression": "context.colors.primary",
+      "token": "colorScheme.primary",
+      "resolved_value_light": "#4646B4",
+      "resolved_value_dark": "#5656C9"
     },
     {
       "file": "lib/shared/widgets/mx_breadcrumb.dart",
@@ -4913,6 +4924,17 @@
       "token": "colorScheme.onSurfaceVariant",
       "resolved_value_light": "#565C72",
       "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/shared/widgets/mx_icon_button.dart",
+      "line": 111,
+      "widget_context": "MxIconButton",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.semanticColors.primaryAccent",
+      "token": "semantic.primaryAccent",
+      "resolved_value_light": "unresolvable: semantic.primaryAccent not in the dumped theme",
+      "resolved_value_dark": "unresolvable: semantic.primaryAccent not in the dumped theme"
     },
     {
       "file": "lib/shared/widgets/mx_navigation_bar.dart",

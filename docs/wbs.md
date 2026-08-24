@@ -11094,6 +11094,85 @@ của M2.
   `deck_list_level_test.dart`; `test/demo/` goldens; full host suite.
 - **Checklist phases:** 7, 12, 14
 
+### M99.41 · Sort control trên hàng `YOUR DECKS` — pill 41,5% xuống glyph 13,3%
+
+- **Status:** **done**
+- **Goal:** Trả lại thứ bậc cho hàng heading. Pill `↑↓ Recently studied` đo
+  **149,8px trên màn 393 = 41,5% chiều rộng hàng**, trong khi label `YOUR DECKS`
+  chỉ 88,6px — control nặng hơn chính thứ nó điều chỉnh.
+- **Scope:** Chỉ hàng heading và sort. Hero panel, deck card, bottom nav không
+  đổi.
+  Pill mất viền và nền, còn **glyph 20px** (`AppIconSize.mdCompact`) màu brand
+  ink, canh phải trên cùng đường tâm với label. Label lên weight 600 (qua
+  `AppTypography.withWeight`, **không** `copyWith(fontWeight:)` — trên variable
+  font đó là no-op im lặng, đúng cái bẫy M99.39 tìm ra) và tracking
+  `listHeadingTracking = 0.72` (= 0,06em ở 12px). `Wrap` về lại `Row`: hai pill
+  cần wrap ở 320/2.0, một control 48px thì không.
+  Bấm mở **bottom sheet** thay vì cycle tại chỗ.
+- **Quyết định của chủ dự án (2026-08-25):** sheet mang **4 thứ tự** chứ không
+  phải 2. `DeckListSort` thêm `cardsDue` (backlog lớn nhất lên đầu, dùng tổng
+  due chưa chia của BR-22) và `progress` (ít học xong nhất lên đầu, theo
+  **learnedFraction** chứ không theo learnedCardCount — deck 900 thẻ ở 90% còn
+  nhiều thẻ chưa học hơn deck 20 thẻ ở 10% nhưng vẫn là deck gần xong hơn). Cả
+  hai tính từ `DeckSummary` sẵn có, không đụng repository hay schema.
+  **Vì sao là sheet chứ không phải cycle:** pill nhảy sang thứ tự kế mỗi lần
+  bấm — chấp nhận được với 2 lựa chọn, không dùng được với 4, vì thứ tự muốn
+  chọn nằm cách 1–3 lần bấm và list sắp lại dưới ngón tay ở từng lần.
+- **Đo được, và là lý do bác một yêu cầu:** yêu cầu ban đầu là hit area 44px và
+  hàng cao 32px. **Hàng 32px và hit area 48px thật là loại trừ nhau**, và mẹo
+  tưởng cho cả hai — hộp 48 tràn khỏi slot 32 qua `OverflowBox` — đã dựng thử và
+  **không chạy**: `meetsGuideline(androidTapTargetGuideline)` **xanh** vì nó đọc
+  semantics rect (48), còn tap cách mép 4px **không được giao** (đo: 0 tap), vì
+  mọi hit-test tổ tiên bắt đầu bằng `size.contains`. Nó sẽ qua CI và trượt trên
+  máy thật. Hàng giữ 48px = `AppSpacing.minimumTouchTarget`; bỏ chrome của pill
+  đã cho đúng hiệu ứng thị giác mà 32px nhắm tới, vì mực trong hàng còn đúng
+  glyph 20px và label 12px.
+- **Output:** `deck_list_toolbar_widget.dart` (Row + glyph + label mới),
+  `deck_sort_sheet_widget.dart` (mới — `showDeckSortSheet` + `deckSortLabel`),
+  `deck_list_view_state.dart` (`cardsDue`/`progress` + comparator),
+  `mx_action_sheet.dart` (`MxActionSheetAction.isSelected` → check brand ink +
+  `ListTile.selected`, để trạng thái không chỉ nằm ở dấu tick),
+  `mx_icon_button.dart` (`isAccent` → `primaryAccent`, **không** `primary`:
+  `primary` đo 3,33:1 trên dark và trượt AA, accent 6,26:1 — cùng kết luận
+  `MxTextButton` đã chốt), `app_typography.dart` (`listHeadingTracking`),
+  ARB en/vi (`deckSortCardsDueLabel`, `deckSortProgressLabel`,
+  `deckSortSheetTitle`, `deckSortControlSemanticLabel` vào; hai
+  `deckSort*SemanticLabel` kiểu "Activate to sort by…" ra vì không còn cycle),
+  parity kit: `MxActionSheet.jsx`/`.d.ts` (`isSelected`), `mx.css`
+  (`.mx-tile__check`, `.mx-deckhead*`), `DeckLevelScreen.jsx` (4 thứ tự + sheet).
+- **Acceptance criteria:**
+  - [x] Control **48px = 13,3%** hàng, từ 149,8px = 41,5%. Glyph 20px.
+  - [x] Hit area **48px thật** — không phải 48px chỉ trên giấy semantics.
+  - [x] Không tràn ở 320 × textScaler 2.0; label ellipsize chứ không đẩy.
+  - [x] Sheet 4 hàng, **đúng một** hàng mang tick — số lượng là nửa phần
+        assertion: sheet tick hai hàng còn tệ hơn sheet không tick hàng nào, vì
+        nó trông như đã trả lời.
+  - [x] Chọn đúng thứ tự đang chạy thì không phát lại — list không rebuild về
+        đúng thứ tự nó đang có.
+  - [x] Thứ tự đang chạy vẫn tới được screen reader qua
+        `deckSortControlSemanticLabel`; glyph không nói được "recently studied".
+  - [x] `progress` sắp theo phân số: fixture 900@90% vs 20@10% khoá đúng cái bẫy
+        sắp theo learnedCardCount.
+  - [x] `flutter analyze` 0 lỗi 0 cảnh báo; guard kiến trúc, `check_docs.py`,
+        `check_prompt_contract.py` xanh; host suite **3748/3748**.
+  - [x] Visual audit: `pills` của deck_list_screen về 0, `screenIconButtons`
+        5→6. Allowance `heroCardRasterAllowance` **xoá** — bỏ pill tô nền khiến
+        `surface` của màn đủ ngưỡng 90%, nên audit tự đọc được thay vì phải
+        miễn trừ. Một miễn trừ ít đi là một thứ được kiểm thật.
+- **Mất mát đã ghi nhận:** người dùng sáng mắt mất khả năng đọc "đang sort theo
+  gì" ở trạng thái nghỉ — trước pill in ra, giờ phải mở sheet. Đó chính là cái
+  đánh đổi lấy 100px và trọng lượng thị giác.
+- **Phân kỳ kit đã ghi:** `DeckLevelScreen.jsx` giữ pill lọc `Due only` trên
+  hàng heading; bản Flutter không có vì lọc đã vào overflow của bar. Kit không
+  có overflow để chuyển vào, và một control không có đường bật lại còn tệ hơn
+  một control khác biệt.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.40
+- **Tests required:** `deck_list_toolbar_test.dart` (viết lại quanh sheet, +4
+  case), `deck_list_view_test.dart`, visual audit deck_list_screen,
+  `test/demo/` goldens.
+- **Checklist phases:** 7, 12, 14
+
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 
 Ghi lại cụ thể, vì "mất một bộ lint" là câu quá mơ hồ để ai đó sau này biết

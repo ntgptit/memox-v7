@@ -1,26 +1,34 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
-import '../../../../../shared/widgets/mx_pill_button.dart';
+import '../../../../../shared/widgets/mx_icon_button.dart';
 import '../../states/deck_list_view_state.dart';
+import '../overlays/deck_sort_sheet_widget.dart';
 
-/// The root list's view controls: which decks, and in what order.
+/// The list's heading and the one control that acts on it.
 ///
-/// **Two pills, and both do something.** The reference this screen was designed
-/// against shows a row of four — search, a filter sheet, a sort menu, a profile
-/// avatar. Three of those have no behaviour in this build, and a control that
-/// looks live and does nothing is worse than an emptier toolbar: the user pays
-/// attention to it once and learns to distrust the row. So the toolbar carries
-/// exactly the two switches that are real.
+/// **The control lost its container** (owner review, 2026-08-25). It was a pill
+/// reading `↑↓ Recently studied`, which measured 149.8px on a 393 screen —
+/// **41.5% of the row**, against a heading of 88.6px. A control that outweighs
+/// the thing it names has the hierarchy backwards: the heading says what the
+/// list is, and the sort is an adjustment to it. What is left is a 20px glyph
+/// in the brand ink, right-aligned on the heading's own centre line.
 ///
-/// Both are toggles rather than menus. With two options each, a menu costs a tap
-/// and a frame to say what a label already says — and the label doubles as the
-/// answer to "what am I looking at", which a menu hides until opened.
+/// **The order it is in moved into the sheet.** A glyph cannot say "recently
+/// studied", so the sheet ticks the live option and the control's screen-reader
+/// label speaks it. That is a real trade — a sighted user now needs one tap to
+/// answer "what is this sorted by" where the pill answered it at rest — and it
+/// is what buys back the 100px and the visual weight.
 ///
-/// Feature-local: it speaks [DeckListFilter] and [DeckListSort]. `MxPillButton`
-/// is the shared half and knows neither.
+/// **A sheet, not a cycle.** The pill advanced to the next order on each tap.
+/// That is workable at two options and unusable at four (owner decision,
+/// 2026-08-25): the order you want ends up one to three taps away, and the list
+/// re-sorts under the finger on every one of them.
+///
+/// Feature-local: it speaks [DeckListSort]. `MxIconButton` is the shared half
+/// and knows nothing about decks.
 class DeckListToolbarWidget extends StatelessWidget {
   const DeckListToolbarWidget({
     required this.filter,
@@ -46,39 +54,15 @@ class DeckListToolbarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isByName = sort == DeckListSort.name;
-
-    // Wrap, not Row: at `textScaler` 2.0 on a 320-wide screen the two pills do
-    // not fit side by side, and a Row would overflow rather than stack.
-    // **Label left, pills hard right.** The design gives the heading `flex: 1`
-    // so the two controls sit at the end of the row rather than trailing the
-    // words. A `Row` with an `Expanded` heading is that, and the heading
-    // ellipsizes rather than clipping when the row runs out — the right thing
-    // to give up first, since the pills are the controls and the heading only
-    // names what they act on.
-    // **Heading left, pills hard right — and it has to survive 320 at
-    // textScaler 2.0.** The design gives the heading `flex: 1` so the controls
-    // sit at the end of the row. A `Row` with an `Expanded` heading is exactly
-    // that, and it overflowed at the compact size: the heading ellipsizes, but
-    // the two pills together are already wider than the screen once the text
-    // doubles.
-    //
-    // A `Wrap` holding the heading and a second `Wrap` of the pills is both. On
-    // one line `spaceBetween` pushes the pills to the end; when they no longer
-    // fit, the group drops to its own line, and if the two cannot share even
-    // that, the inner `Wrap` breaks them apart as well.
-    //
-    // The heading itself: without it the two pills float above the cards with
-    // nothing saying what they filter, and "Your decks" against "Sub-decks" is
-    // the one place besides the app-bar title where the screen says which level
-    // the user is on.
-    return Wrap(
-      runSpacing: AppSpacing.sm,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      alignment: WrapAlignment.spaceBetween,
+    // **A `Row` again, where the two pills needed a `Wrap`.** The wrap existed
+    // because at `textScaler` 2.0 on a 320 screen two pills could not share a
+    // line with the heading and a `Row` overflowed. One 48px control leaves the
+    // heading 240 even at that scale, and the heading ellipsizes rather than
+    // pushing — which is the right thing to give up first, since the control is
+    // the control and the heading only names what it acts on.
+    return Row(
       children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+        Expanded(
           child: Text(
             // **One count per level, and the root's lives in the header.**
             // The header's second line states the root's own totals now
@@ -89,45 +73,49 @@ class DeckListToolbarWidget extends StatelessWidget {
             isRootLevel
                 ? context.l10n.decksSectionLabelRoot.toUpperCase()
                 : '${context.l10n.decksSectionLabelChild.toUpperCase()} · $visibleCount',
-            // **`label-md`, not `label-sm`.** The heading and the two pills read
-            // as one row, and the pills carry a container while the heading is
-            // bare text — so at 11 against their 12 the heading looked like a
-            // caption for controls rather than the title of the list they filter.
-            // Same rung now; the pills still lead on weight of surface, which is
-            // the right order for a label and a control.
-            style: context.textStyles.sectionLabel.copyWith(
-              color: context.colors.onSurfaceVariant,
-            ),
+            // **`withWeight`, not `copyWith(fontWeight:)`.** The body face is a
+            // variable font, and `copyWith` alone moves the declared weight
+            // without moving the `wght` axis — it renders at the old weight and
+            // says the new one, which is the silent no-op M99.39 found on the
+            // study screen's mode chip.
+            style:
+                AppTypography.withWeight(
+                  context.textStyles.sectionLabel,
+                  FontWeight.w600,
+                ).copyWith(
+                  color: context.colors.onSurfaceVariant,
+                  letterSpacing: AppTypography.listHeadingTracking,
+                ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
-        Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
-          children: <Widget>[
-            // The filter pill is gone: filter and sort wore the same
-            // clothes, so two look-alike controls collapsed into one — sort
-            // keeps the row, filter moved into the bar's overflow menu
-            // (owner mockup, 2026-08-20).
-            MxPillButton(
-              label: isByName
-                  ? context.l10n.deckSortNameLabel
-                  : context.l10n.deckSortRecentLabel,
-              icon: Icons.swap_vert,
-              // **Always selected** (owner review, 2026-08-20): this pill does
-              // not toggle a filter on and off, it names the order the list is
-              // already in. Rendering it unselected while it described a live
-              // sort said the opposite.
-              isSelected: true,
-              // `A-Z` is two letters to a screen reader. The expansion is what
-              // gets announced; the abbreviation is what gets read.
-              semanticLabel: isByName
-                  ? context.l10n.deckSortNameSemanticLabel
-                  : context.l10n.deckSortRecentSemanticLabel,
-              onPressed: () => onSortChanged(
-                isByName ? DeckListSort.recent : DeckListSort.name,
-              ),
-            ),
-          ],
+        // **48, and it is the row's whole height.** The design asks for a 32px
+        // row; a 32px row and a real 48px target are mutually exclusive, and
+        // the trick that appears to give both — a 48 box overflowing a 32 slot
+        // — was measured and does not work: `meetsGuideline` passes because it
+        // reads the semantics rect, while a tap 4px outside the row is never
+        // delivered, because every ancestor hit-test starts with
+        // `size.contains`. It would have shipped green and missed on a device.
+        // With the pill's container gone the row reads as the 20px glyph and
+        // the 12px heading inside it, which is the height the design was after.
+        MxIconButton(
+          icon: Icons.swap_vert,
+          // Glyph at `mdCompact` (20), target untouched at 48.
+          isCompact: true,
+          // The row's only control, so it is allowed to be the accent.
+          isAccent: true,
+          // The glyph says "sort"; only this says what it is sorted by. A
+          // sighted user reads that off the sheet's tick — a screen reader has
+          // no sheet until it opens one, so the state travels with the control.
+          semanticLabel: context.l10n.deckSortControlSemanticLabel(
+            deckSortLabel(context.l10n, sort),
+          ),
+          onPressed: () => showDeckSortSheet(
+            context,
+            current: sort,
+            onSelected: onSortChanged,
+          ),
         ),
       ],
     );

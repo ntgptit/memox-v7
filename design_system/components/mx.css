@@ -198,6 +198,23 @@
 .mx-today__disclose{width:var(--touch-target-min);height:var(--touch-target-min);flex:none;display:flex;align-items:center;justify-content:center;border:0;border-radius:50%;background:none;color:var(--color-text-secondary);cursor:pointer}
 .mx-today__disclose:hover{background:color-mix(in srgb,var(--color-text-secondary) 10%,transparent)}
 .mx-today__disclose:focus-visible{outline:none;box-shadow:0 0 0 var(--border-focus) var(--color-primary)}
+/* --- Sheet row selection ------------------------------------------------
+   The tick is the one thing in a choosing sheet saying "you are here", so it
+   is the one thing allowed to be the accent. */
+.mx-tile__check{margin-left:auto;display:flex;align-items:center;color:var(--color-primary)}
+.mx-tile--selected .mx-tile__title{font-weight:var(--weight-semibold)}
+/* --- Deck list heading row ----------------------------------------------
+   The sort control lost its pill (owner review, 2026-08-25). It measured
+   149.8px on a 393 screen — 41.5% of the row — against an 88.6px heading, so
+   the adjustment outweighed the thing it named. What is left is a 20px glyph
+   in the brand ink on a 48 target: the target is the row's height because a
+   32px row and a real 48px hit area cannot both be true, and the hit area is
+   the half a finger notices. */
+.mx-deckhead{display:flex;align-items:center;gap:var(--space-sm)}
+.mx-deckhead__label{flex:1;min-width:0;margin:0;font-size:var(--text-label-md);line-height:var(--leading-label-md);font-weight:var(--weight-semibold);letter-spacing:0.72px;text-transform:uppercase;color:var(--color-text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mx-deckhead__sort{width:var(--touch-target-min);height:var(--touch-target-min);flex:none;display:flex;align-items:center;justify-content:center;border:0;border-radius:50%;background:none;color:var(--color-primary-accent);cursor:pointer}
+.mx-deckhead__sort:hover{background:color-mix(in srgb,var(--color-primary-accent) 10%,transparent)}
+.mx-deckhead__sort:focus-visible{outline:none;box-shadow:0 0 0 var(--border-focus) var(--color-primary)}
 /* --- MxTextButton ------------------------------------------------------
    No padding, no radius, no hover surface: a text button with a background is
    an outlined button with the border turned off. The 48 target is min-height

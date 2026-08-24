@@ -434,19 +434,32 @@
   },
   "deckSortRecentLabel": "Recently studied",
   "@deckSortRecentLabel": {
-    "description": "Label of the deck-list sort pill when decks are ordered newest first."
+    "description": "Sort option: decks ordered newest first — the default. Full wording now that the options live in a sheet rather than on a narrow pill."
   },
-  "deckSortNameLabel": "By name",
+  "deckSortNameLabel": "Name",
   "@deckSortNameLabel": {
-    "description": "Label of the deck-list sort pill when decks are ordered by name. An abbreviation on purpose - the pill is narrow - with the full wording in the screen-reader label."
+    "description": "Sort option: decks ordered by name, case-insensitively."
   },
-  "deckSortRecentSemanticLabel": "Sorted by newest first. Activate to sort by name.",
-  "@deckSortRecentSemanticLabel": {
-    "description": "Screen-reader label for the sort pill in its recent state."
+  "deckSortCardsDueLabel": "Cards due",
+  "@deckSortCardsDueLabel": {
+    "description": "Sort option: the deck with the biggest due backlog first. The undivided due total (BR-22), not overdue alone."
   },
-  "deckSortNameSemanticLabel": "Sorted by name. Activate to sort by newest first.",
-  "@deckSortNameSemanticLabel": {
-    "description": "Screen-reader label for the sort pill in its by-name state."
+  "deckSortProgressLabel": "Progress",
+  "@deckSortProgressLabel": {
+    "description": "Sort option: the least-finished deck first, by learned fraction rather than by learned count."
+  },
+  "deckSortSheetTitle": "Sort decks by",
+  "@deckSortSheetTitle": {
+    "description": "Title of the bottom sheet that chooses the deck-list order. Names the axis, because each row names a value of it."
+  },
+  "deckSortControlSemanticLabel": "Sort decks. Currently {current}",
+  "@deckSortControlSemanticLabel": {
+    "description": "Screen-reader label of the sort control on the list heading row. The control paints only a glyph, so the current order — which a sighted user reads off the sheet — has to be spoken here or it is not available at all.",
+    "placeholders": {
+      "current": {
+        "type": "String"
+      }
+    }
   },
   "decksNoDueTitle": "Nothing due right now",
   "@decksNoDueTitle": {

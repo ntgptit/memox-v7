@@ -91,6 +91,17 @@ abstract final class AppTypography {
   /// it is the one place in the app where a text style is adjusted per use.
   static const double sectionLabelTracking = 1.1;
 
+  /// The deck list's heading, which is tracked tighter than the rest.
+  ///
+  /// **0.06em at `label-md`'s 12px, which is 0.72** (owner review, 2026-08-25).
+  /// The heading shares its row with the sort control and nothing else, and at
+  /// [sectionLabelTracking] the two words spread wide enough to read as the
+  /// heavier half of the pair — the opposite of the balance that row is for.
+  /// A second constant rather than a moved one: every other section label in
+  /// the app sits above a group of rows with no control beside it, and 1.1 is
+  /// still right there.
+  static const double listHeadingTracking = 0.72;
+
   /// Pairs a [FontWeight] with the matching variable-axis setting.
   static List<FontVariation> _wght(FontWeight weight) => <FontVariation>[
     FontVariation('wght', weight.value.toDouble()),

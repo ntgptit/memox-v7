@@ -8,6 +8,10 @@ export interface MxActionSheetAction {
   variant?: 'normal' | 'destructive';
   /** false greys the row and blocks the callback — the row stays visible on purpose. */
   isEnabled?: boolean;
+  /** Marks the row the app is already in, for a sheet that CHOOSES rather than
+   * acts. Draws a trailing check and sets aria-checked. Leave undefined on a
+   * sheet of plain actions — there is no current state for it to mark. */
+  isSelected?: boolean;
 }
 
 export interface MxActionSheetProps {
