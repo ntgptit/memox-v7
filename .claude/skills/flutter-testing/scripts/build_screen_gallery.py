@@ -113,8 +113,8 @@ for group, base, name, note in SCREENS:
     tag = '' if dark else '<span class="chip">light only</span>'
     card = (
         '<figure class="shot" tabindex="0" data-name="{name}"{dark}>'
-        '<div class="frame"><img loading="lazy" src="{light}" alt="{name}"></div>'
         '<figcaption><strong>{name}</strong>{tag}<span>{note}</span></figcaption>'
+        '<div class="frame"><img loading="lazy" src="{light}" alt="{name}"></div>'
         '</figure>'
     ).format(name=name, dark=dark_attr, light=light, tag=tag, note=note)
     groups.setdefault(group, []).append(card)
@@ -184,10 +184,13 @@ section h2{display:flex; align-items:baseline; gap:.6rem;
   box-shadow:0 6px 22px rgba(20,20,40,.16)}
 .frame img{display:block; width:100%; height:auto; border-radius:12px;
   background:#fff}
-figcaption{padding:.55rem .15rem 0; font-size:.83rem; color:var(--muted)}
+/* Above the screen it names: a caption under a phone-shaped image reads as
+   part of the next card down, because the gap to the image above it is the
+   frame's shadow and the gap below is only the grid's. */
+figcaption{padding:0 .15rem .5rem; font-size:.83rem; color:var(--muted)}
 figcaption strong{display:inline; color:var(--ink); font-size:.88rem;
   margin-right:.4rem}
-figcaption span{display:block; margin-top:.1rem}
+figcaption span{display:block; margin-top:.05rem}
 .chip{display:inline-block; background:var(--chip); color:var(--muted);
   border-radius:999px; padding:.05rem .5rem; font-size:.7rem;
   vertical-align:middle}
@@ -196,7 +199,7 @@ dialog{border:0; border-radius:16px; padding:0; background:var(--surface);
   box-shadow:0 24px 80px rgba(0,0,0,.45)}
 dialog::backdrop{background:rgba(10,10,16,.72)}
 dialog img{display:block; width:100%; height:auto;
-  border-radius:16px 16px 0 0}
+  border-radius:0 0 16px 16px}
 dialog .bar{display:flex; align-items:center; gap:.8rem;
   padding:.7rem 1rem}
 dialog .bar strong{font-size:.95rem}
@@ -219,10 +222,10 @@ dialog .bar button{margin-left:auto; border:1px solid var(--line);
 </header>
 <main>__SECTIONS__</main>
 <dialog id="box">
-  <img id="boxImg" alt="">
   <div class="bar"><strong id="boxName"></strong>
     <span>&larr; &rarr; chuyển màn</span>
     <button id="boxClose">Đóng</button></div>
+  <img id="boxImg" alt="">
 </dialog>
 <script>
 (function(){
