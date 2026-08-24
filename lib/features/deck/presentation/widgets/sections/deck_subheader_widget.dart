@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../../../../core/navigation/route_names.dart';
-import '../../../../../core/theme/app_icon_size.dart';
-import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_breadcrumb.dart';
 import '../../../domain/models/deck_list_snapshot_model.dart';
+import '../../../domain/models/deck_summary_model.dart';
 import 'deck_path_widget.dart';
 
-/// The path, and the way into search.
+/// The header's second line: where you are, or what is here.
 ///
 /// Both are chrome and both stay put while the list scrolls, which is what the
 /// shell's subheader slot is for.
@@ -34,66 +31,34 @@ class DeckSubheaderWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // **The chevron belongs to the path, not to the bar** (owner review,
-    // 2026-08-20). The line already says where "up" is; putting the platform
-    // arrow beside the title as well gave the header two back affordances for
-    // one destination. `MxContentShell` drops its automatic leading wherever a
-    // subline is present, so this is the only one.
-    //
-    // Absent at the root, where there is nothing above to go to — and the
-    // path line keeps its height either way, so the header does not change
-    // shape on the way in.
-    if (snapshot.parent == null) return DeckPathWidget(snapshot: snapshot);
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        _DeckPathBackWidget(snapshot: snapshot),
-        const SizedBox(width: AppSpacing.xs),
-        Flexible(child: DeckPathWidget(snapshot: snapshot)),
-      ],
-    );
-  }
-}
-
-/// One level up, on the path's own line.
-///
-/// **It goes where the parent is, not where the stack came from.** The bar's
-/// platform arrow pops the navigator, which is right for a pushed route and
-/// wrong for a deep link — a deck opened from a notification has nothing to
-/// pop to. The nearest ancestor is a place, so this navigates by name to it,
-/// and to the deck list when the open deck is a root's child.
-class _DeckPathBackWidget extends StatelessWidget {
-  const _DeckPathBackWidget({required this.snapshot});
-
-  final DeckListSnapshot snapshot;
-
-  @override
-  Widget build(BuildContext context) {
-    final ancestors = snapshot.ancestors;
-
-    return Semantics(
-      button: true,
-      label: context.l10n.deckPathUpSemanticLabel,
-      child: InkWell(
-        onTap: () => ancestors.isEmpty
-            ? context.goNamed(RouteNames.decks)
-            : context.goNamed(
-                RouteNames.deckDetail,
-                pathParameters: <String, String>{
-                  RoutePathParams.deckId: ancestors.last.id,
-                },
+    // **At the root the line states the level, not the place** (owner review,
+    // 2026-08-21). "Library" over "All decks" was one thing said twice, and
+    // the second line is the header's scarcest space. Inside a deck the path
+    // earns it back: there the title names the deck and the line names the
+    // way out.
+    if (snapshot.parent == null) {
+      return SizedBox(
+        height: MxBreadcrumb.compactLineHeight,
+        child: Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: Text(
+            context.l10n.deckHeaderStatsLabel(
+              snapshot.decks.length,
+              snapshot.decks.fold<int>(
+                0,
+                (int sum, DeckSummary deck) => sum + deck.totalCardCount,
               ),
-        child: SizedBox(
-          height: MxBreadcrumb.compactLineHeight,
-          width: AppSpacing.lg,
-          child: Icon(
-            Icons.chevron_left,
-            size: AppIconSize.sm,
-            color: context.colors.onSurfaceVariant,
+            ),
+            style: context.texts.bodySmall?.copyWith(
+              color: context.colors.onSurfaceVariant,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
-      ),
-    );
+      );
+    }
+
+    return DeckPathWidget(snapshot: snapshot);
   }
 }

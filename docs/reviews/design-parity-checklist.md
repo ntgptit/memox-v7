@@ -609,6 +609,23 @@ không lấy màu hay tính năng ngoài domain.
 | Summary một dòng `titleLarge` + câu, padding `md` | ✅ `deck_level_summary_widget.dart` | ❌ chưa | Kit đang là bản hai tầng cũ |
 | Tile: đầu card `md/xs` thay `lg/sm` | ✅ `deck_tile_widget.dart` | ❌ chưa | Mật độ: 3 deck đủ khi summary mở, 393×852 |
 
+## Library redesign · pass 4 (owner review, 2026-08-21)
+
+| Quyết định | Flutter | design_system | Ghi chú |
+|---|---|---|---|
+| **Dòng path là một target duy nhất**: chạm bất kỳ đâu = lên một cấp; nhấn giữ = sheet liệt kê mọi tổ tiên (`MxActionSheet`, hàng đạt sàn 48dp). Segment không còn là control. Dòng cao **32** | ✅ `MxBreadcrumb.onUp/onShowAll/upIcon`, `deck_ancestors_widget.dart` | ❌ chưa | **Gỡ hẳn phân kỳ 20px của pass 3.** Nâng dòng lên 24–32 mà giữ target/segment thì vẫn dưới sàn, chỉ fail ít hơn; đổi mô hình tương tác mới hết. `deck_path_test.dart` nay chạy `meetsGuideline` **ở cấp sâu** — chỗ trước đây không có gate nào canh |
+| Dấu phân cách đổi `>` → `/`; `<` chỉ dành cho back | ✅ `mx_breadcrumb_step.dart` | ❌ chưa | Hai chevron ngược chiều trên một dòng đọc như hai control cãi nhau |
+| Root: dòng dưới title đổi từ path sang **số liệu level** (`4 decks · 868 cards`), vẫn cao 32 | ✅ `deck_subheader_widget.dart` | ❌ chưa | "Library" + "All decks" là một điều nói hai lần |
+| Nhãn section ở root bỏ số đếm (`YOUR DECKS`), trong deck vẫn giữ (`SUB-DECKS · 3`) | ✅ `deck_list_toolbar_widget.dart` | ❌ chưa | Một con số một chỗ: root đếm ở header, cấp con đếm ở nhãn |
+| Deck hết việc: bỏ hai chip `0 due` / `0 new`, hiện **một** chip `All caught up`; **không** có nút hành động | ✅ `deck_workload_line_widget.dart` | ❌ chưa | Nút `Practice` bị BR-145 chặn ("MUST NOT có thao tác nào cho phép ôn sớm hơn hạn") — chủ dự án chốt bỏ nút thay vì amend luật (2026-08-21) |
+| FAB che nút card cuối: kiểm bằng **hit-test thật** tại tâm nút sau khi cuộn hết | ✅ `app_navigation_shell_test.dart` | — | `tester.tap` không đủ: `warnIfMissed` chỉ in cảnh báo, và nếu FAB nuốt cú chạm thì test vẫn xanh. Đã thử hạ inset về `lg` để xác nhận gate bắt được |
+
+Chấm lạ trên FAB: **không phải lỗi vẽ**. Truy bằng render-tree walk — đó là glyph
+`more_vert` của deck card phía sau (icon 24px tại (337,693)-(361,717), FAB bắt
+đầu ở y=700), màu đúng `onSurfaceVariant`. Không có Badge, không có clip lệch.
+Đây đúng là hiện tượng M4.10ag từng nêu khi nút nổi che hàng dưới nó; phần cuối
+danh sách đã được inset + hit-test xử lý, phần giữa là cái giá cố hữu của FAB.
+
 ## Library redesign · pass 3 (owner review, 2026-08-20)
 
 Năm điểm còn lại cộng một ràng buộc lưới. Như pass 2, mỗi dòng **đảo** một

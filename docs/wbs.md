@@ -7,8 +7,8 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
-| **Last updated** | 2026-08-20 |
+| **Updated by task** | M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
+| **Last updated** | 2026-08-21 |
 
 Single source of truth for project progress. Update it in the same commit as the
 work it describes. A task is `done` only when it meets the Definition of Done in
@@ -10927,7 +10927,40 @@ của M2.
   vs FAB, audit counts mới, lưới 4, goldens.
 - **Checklist phases:** 10, 21
 
-### M99.38 · Token architecture pass — ColorScheme đúng M3, cardPrompt rời rung
+### M99.38 · Library redesign pass 4 — path một target, caught-up, gate FAB
+
+- **Status:** **done**
+- **Goal:** Gỡ phân kỳ 48dp của pass 3 bằng cách đổi mô hình tương tác thay vì
+  nới số đo, và đóng bốn điểm còn lại của chủ dự án.
+- **Scope:** `MxBreadcrumb` thêm chế độ một-target (`onUp`/`onShowAll`/
+  `upIcon`, dòng 32) + sheet tổ tiên; dấu phân cách `/`; root đổi dòng path
+  sang số liệu level và nhãn section bỏ số đếm; deck hết việc hiện một chip
+  `All caught up` không kèm nút; gate FAB-che-nút bằng hit-test. Không đổi
+  schema, không đổi luồng học.
+- **Editable documents:** `docs/wbs.md`,
+  `docs/reviews/design-parity-checklist.md`
+- **5Why:** Pass 3 đặt bốn control vào một dòng 32px rồi phải xin miễn sàn
+  48dp — sai ở chỗ *có bốn control*, không phải ở chiều cao. Chín trên mười
+  lần người dùng chỉ cần "lùi một cấp", nên nó xứng đáng cả dòng; nhảy nhiều
+  cấp hiếm hơn thì vào long-press, nơi mỗi hàng là ListTile 48dp bình thường.
+- **Output:** `MxBreadcrumb` một-target, `showDeckAncestors`,
+  `deckHeaderStatsLabel`, `deckTileAllCaughtUpLabel`, `deckPathAncestorsTitle`,
+  test hit-test cho FAB, `meetsGuideline` ở cấp sâu.
+- **Acceptance criteria:**
+  - [x] Không còn exemption sàn chạm nào trong app; `meetsGuideline` chạy ở
+        cả root lẫn cấp sâu và xanh.
+  - [x] Sheet tổ tiên đi đúng cấp; tap dòng path lên một cấp theo tên route.
+  - [x] Root không lặp nghĩa với title; đúng một nguồn cho mỗi con số.
+  - [x] Deck hết việc: một chip, không nút — BR-145 không bị vi phạm.
+  - [x] Gate FAB được chứng minh bắt lỗi (hạ inset thì test đỏ).
+  - [x] Gate đầy đủ xanh: analyze 0/0, host suite 3740, golden 258, audit 248,
+        guards, emulator IT.
+- **Dependencies:** M99.37
+- **Tests required:** path một-target + sheet + a11y cấp sâu, caught-up chip,
+  heading/stat ở root, hit-test FAB, audit counts, goldens.
+- **Checklist phases:** 10, 21
+
+### M99.39 · Token architecture pass — ColorScheme đúng M3, cardPrompt rời rung
 
 - **Status:** **done**
 - **Goal:** Đóng các sai lệch tầng token so với kiến trúc M3 mà audit
@@ -10980,7 +11013,7 @@ của M2.
   - [x] Pin card-prompt nằm trên `AppTextStyles.cardPrompt`; `headlineMedium`
         pin ở metric M3 28/w400; compact pass đổi cỡ prompt qua extension.
 - **Editable documents:** `docs/wbs.md`
-- **Dependencies:** M99.37
+- **Dependencies:** M99.38
 - **Tests required:** `test/core/theme/` + `test/visual_audit/` +
   `test/design_audit/` trọn bộ; `compact_scale_test` cho cardPrompt qua
   extension; full host suite.

@@ -73,21 +73,23 @@ class MxBreadcrumb extends StatefulWidget {
     this.rootIcon,
     this.collapseAfter = 4,
     this.lineHeight = AppSpacing.minimumTouchTarget,
+    this.onUp,
+    this.onShowAll,
+    this.upIcon,
     super.key,
   });
 
   /// The compact line: a strip that is a *line of a header* rather than a band
-  /// of its own (owner review, 2026-08-20).
+  /// of its own.
   ///
-  /// **It is under the touch floor, deliberately and only here.** A step is a
-  /// control, and [AppSpacing.minimumTouchTarget] is what every other control
-  /// in the app gets — including this one at its default. The owner's header
-  /// spec asks for a fixed 20px path line at every level so the bar does not
-  /// change height on the way into a sub-deck, and 48 cannot fit inside 20.
-  /// The trade is recorded in `docs/reviews/design-parity-checklist.md`; the
-  /// root level, where the only step carries no `onTap`, has no target to
-  /// shrink.
-  static const double compactLineHeight = 20;
+  /// **32, and no exemption** (owner review, 2026-08-21). It was 20 with a tap
+  /// target per step, which put four controls under the 48dp floor to save
+  /// header height — and raising the line to 24 or 32 would only have failed
+  /// by less. The interaction model changed instead: at this height the strip
+  /// is **one** target spanning most of the bar, which is far more area than
+  /// the floor asks for, and it buys the action a reader wants nine times in
+  /// ten. The steps stop being controls. See [onUp].
+  static const double compactLineHeight = 32;
 
   /// Ordered from the top of the hierarchy to the current step.
   ///
@@ -105,6 +107,31 @@ class MxBreadcrumb extends StatefulWidget {
   /// The strip's height. Defaults to the touch floor; a header passes
   /// [compactLineHeight] — see the note there.
   final double lineHeight;
+
+  /// Makes the **whole strip** one target: one level up.
+  ///
+  /// **Why the model changed** (owner review, 2026-08-21). A path of four
+  /// steps used to be four controls, each as tall as the line; fitting that
+  /// into a header meant either a tall band or targets under the floor. But
+  /// the steps were never equally used — "back one level" is what a reader
+  /// reaches for almost every time, and it is the only one that has to be
+  /// cheap. So the strip is a single wide target for that, [onShowAll] on
+  /// long-press reaches any ancestor through a sheet whose rows are ordinary
+  /// 48dp list tiles, and the path goes back to being what it reads like: a
+  /// sentence saying where you are.
+  ///
+  /// When this is set, every [MxBreadcrumbItem.onTap] is ignored — a control
+  /// inside a control is a gesture arena nobody wins.
+  final VoidCallback? onUp;
+
+  /// The long-press companion to [onUp]: reach any ancestor, not just the
+  /// nearest. Null leaves the strip tap-only.
+  final VoidCallback? onShowAll;
+
+  /// Drawn before the first step when [onUp] is set, so the strip shows what
+  /// tapping it does. The back glyph is the only chevron on the line — the
+  /// separator between steps is a slash.
+  final IconData? upIcon;
 
   /// Above this many steps the middle folds into an expandable ellipsis.
   ///
@@ -130,10 +157,72 @@ class _MxBreadcrumbState extends State<MxBreadcrumb> {
     if (oldWidget.items.length != widget.items.length) _isExpanded = false;
   }
 
+  /// The header form: one control, and a path that only reads.
+  ///
+  /// A `Row` that ellipsizes rather than the scrolling strip: a view that
+  /// scrolls sideways inside a target that answers a tap is two gestures
+  /// competing for one drag.
+  Widget _buildSingleTarget(
+    BuildContext context,
+    List<MxBreadcrumbItem> items,
+  ) {
+    final quiet = context.colors.onSurfaceVariant;
+    final style = context.texts.bodySmall?.copyWith(color: quiet);
+
+    return Semantics(
+      button: true,
+      label: widget.semanticLabel,
+      child: InkWell(
+        onTap: widget.onUp,
+        onLongPress: widget.onShowAll,
+        child: SizedBox(
+          height: widget.lineHeight,
+          child: Row(
+            children: <Widget>[
+              if (widget.upIcon != null) ...<Widget>[
+                Icon(widget.upIcon, size: AppIconSize.sm, color: quiet),
+                const SizedBox(width: AppSpacing.xs),
+              ],
+              if (widget.rootIcon != null) ...<Widget>[
+                Icon(widget.rootIcon, size: AppIconSize.sm, color: quiet),
+                const SizedBox(width: AppSpacing.xs),
+              ],
+              // The last step is the one worth reading in full — it is where
+              // a tap lands — so the ones before it give up width first.
+              for (final (int index, MxBreadcrumbItem item) in items.indexed)
+                Flexible(
+                  flex: index == items.length - 1 ? 2 : 1,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      if (index > 0) ...<Widget>[
+                        const SizedBox(width: AppSpacing.xs),
+                        Text(_kSeparator, style: style),
+                        const SizedBox(width: AppSpacing.xs),
+                      ],
+                      Flexible(
+                        child: Text(
+                          item.label,
+                          style: style,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final items = widget.items;
     if (items.isEmpty) return const SizedBox.shrink();
+    if (widget.onUp != null) return _buildSingleTarget(context, items);
 
     final isFolded = !_isExpanded && items.length > widget.collapseAfter;
     final hiddenCount = items.length - 3;
