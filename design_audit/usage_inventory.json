@@ -3772,7 +3772,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_level_summary_widget.dart",
-      "line": 100,
+      "line": 111,
       "widget_context": "DeckLevelSummaryWidget",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3827,8 +3827,8 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 92,
-      "widget_context": "DeckSummaryMetricsWidget",
+      "line": 188,
+      "widget_context": "_HeroFigureLine",
       "element_kind": "other",
       "source_kind": "theme-token",
       "expression": "context.semanticColors.overdue",
@@ -3838,8 +3838,8 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 105,
-      "widget_context": "DeckSummaryMetricsWidget",
+      "line": 201,
+      "widget_context": "_HeroFigureLine",
       "element_kind": "other",
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",
@@ -3849,7 +3849,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 143,
+      "line": 240,
       "widget_context": "_QuietContextRow",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3860,7 +3860,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 158,
+      "line": 255,
       "widget_context": "_QuietContextRow",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3871,7 +3871,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 172,
+      "line": 269,
       "widget_context": "_QuietContextRow",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -3882,7 +3882,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 197,
+      "line": 294,
       "widget_context": "_QuietContextRow",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -4927,7 +4927,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_progress_bar.dart",
-      "line": 172,
+      "line": 184,
       "widget_context": "_MxProgressHeader",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4938,7 +4938,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_progress_bar.dart",
-      "line": 182,
+      "line": 194,
       "widget_context": "_MxProgressHeader",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4949,7 +4949,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_progress_bar.dart",
-      "line": 183,
+      "line": 195,
       "widget_context": "_MxProgressHeader",
       "element_kind": "text",
       "source_kind": "theme-token",

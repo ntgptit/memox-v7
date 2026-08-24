@@ -175,16 +175,29 @@
    28 — the other half of evening out the field's two sides, 24 visible above it
    against 28 below, where it used to be 36 against 16. The field slid up toward
    the chrome it belongs to; the strip and this panel did not move. */
-.mx-today{position:relative;display:flex;flex-direction:column;gap:var(--space-lg);box-sizing:border-box;background:var(--color-surface);border:var(--border-hairline) solid var(--color-border-subtle);border-radius:var(--radius-lg);padding:var(--space-lg);margin-top:var(--space-xl)}
-.mx-today__row{display:flex;align-items:flex-start;gap:var(--space-md)}
-.mx-today__figure{display:block;font-family:var(--font-display);font-size:34px;line-height:1.05;font-weight:var(--weight-bold);letter-spacing:-1px;font-variant-numeric:tabular-nums}
-.mx-today__sub{display:block;font-size:var(--text-body-sm);line-height:var(--leading-body-sm);color:var(--color-text-secondary);margin-top:var(--space-sm)}
-/* Dismiss. The panel is the most useful thing on the screen on the day you open
-   the app to study, and the thing in the way on the day you opened it to
-   reorganise your decks — so it is removable, and getting it back is one tap. */
-.mx-today__close{position:absolute;top:var(--space-sm);right:var(--space-sm);width:32px;height:32px;display:flex;align-items:center;justify-content:center;border:0;border-radius:50%;background:none;color:var(--color-text-secondary);cursor:pointer}
-.mx-today__close:hover{background:color-mix(in srgb,var(--color-text-secondary) 10%,transparent)}
-.mx-today__close:focus-visible{outline:none;box-shadow:0 0 0 var(--border-focus) var(--color-primary)}
+/* --- Today panel (deck level hero) ------------------------------------
+   Two rows and a rule. It was five stacked bands and measured 37.6% of a
+   393x852 viewport, which left one and a half deck cards above the fold on a
+   screen whose subject is the list of decks (owner review, 2026-08-25). What
+   went is ranking, not data: the `TODAY` eyebrow said nothing "cards due" does
+   not, and the resting figures moved behind the disclosure. 156px, 18.3%,
+   three whole cards.
+   No dismiss button any more. It existed because the panel was in the way of
+   the list, and one chevron cannot mean "hide me" and "show me more". */
+.mx-today{display:flex;flex-direction:column;gap:var(--space-md);box-sizing:border-box;background:var(--color-surface);border:var(--border-hairline) solid var(--color-border-subtle);border-radius:var(--radius-lg);padding:var(--space-lg);margin-top:var(--space-sm)}
+.mx-today__row{display:flex;align-items:center;gap:var(--space-md)}
+/* Baseline, not centre: the numeral and its word are two type sizes stating
+   one fact, and figures sitting on different baselines read as two. */
+.mx-today__figures{flex:1;min-width:0;display:flex;align-items:baseline;gap:var(--space-sm)}
+.mx-today__figure{font-family:var(--font-display);font-size:var(--text-headline-lg);line-height:var(--leading-headline-lg);font-weight:var(--weight-bold);letter-spacing:-1px;font-variant-numeric:tabular-nums}
+.mx-today__word{font-size:var(--text-title-md);line-height:var(--leading-title-md);color:var(--color-text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mx-today__sub{font-size:var(--text-body-md);line-height:var(--leading-body-md);color:var(--color-text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-left:var(--space-sm)}
+/* The disclosure. Down opens the resting figures, up shuts them — the arrow
+   shows where the content goes, which is the rule the old close button
+   followed for a different content. */
+.mx-today__disclose{width:var(--touch-target-min);height:var(--touch-target-min);flex:none;display:flex;align-items:center;justify-content:center;border:0;border-radius:50%;background:none;color:var(--color-text-secondary);cursor:pointer}
+.mx-today__disclose:hover{background:color-mix(in srgb,var(--color-text-secondary) 10%,transparent)}
+.mx-today__disclose:focus-visible{outline:none;box-shadow:0 0 0 var(--border-focus) var(--color-primary)}
 /* --- MxTextButton ------------------------------------------------------
    No padding, no radius, no hover surface: a text button with a background is
    an outlined button with the border turned off. The 48 target is min-height

@@ -5,30 +5,50 @@ import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_stroke.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_icon_button.dart';
 import '../../../domain/models/deck_list_snapshot_model.dart';
 
-/// The hero's metric band: one number, its breakdown, and the context row
-/// (owner mockup, 2026-08-20).
+/// The hero's figure line, and the resting figures behind its disclosure
+/// (owner mockup, 2026-08-20; compacted 2026-08-25).
 ///
 /// **One number, because one question.** The panel used to print the four
 /// disjoint sets of BR-162 at near-equal weight, and the owner's review read
 /// it the way any table reads: as homework. What the user asks the panel is
 /// "how much is waiting", and the answer is overdue + due today in one
-/// numeral — the split survives as the subline, red on the overdue half only.
+/// numeral — the split survives beside it, red on the overdue half only.
 ///
-/// **New and Scheduled are context, not actions.** They keep no icons and no
-/// semantic ink of their own: one row on the brand tint, halved by an indigo
-/// hairline, with the words set lower-case under their figures. With them
-/// demoted, overdue red is the single *warning* colour left on the card —
-/// which is what lets it mean something.
+/// **The split shares the numeral's line rather than sitting under it.** It
+/// was a subline, which cost a whole row of height to say something that fits
+/// in the space the numeral leaves empty. Both groups are `Flexible`, so a
+/// long translation at double scale ellipsizes instead of overflowing, and
+/// they share one baseline: figures of two sizes sitting on different baselines
+/// is what made the old two-line arrangement read as two facts rather than one.
+///
+/// **New and Scheduled are context, not actions — and now they are also not
+/// default.** They were the third band of a panel that stood at 38% of the
+/// viewport; they keep their tint and their indigo hairline, one disclosure
+/// away. With them behind the chevron, overdue red is the only semantic colour
+/// left on the collapsed card, which is what lets it mean something.
 ///
 /// **Every number is still arithmetic over the snapshot the screen already
 /// has** (AD-13): a child's counts cover its whole subtree and siblings are
 /// disjoint, so the level folds are the level's totals — no second read.
 class DeckSummaryMetricsWidget extends StatelessWidget {
-  const DeckSummaryMetricsWidget({required this.snapshot, super.key});
+  const DeckSummaryMetricsWidget({
+    required this.snapshot,
+    required this.isExpanded,
+    required this.onToggleExpanded,
+    super.key,
+  });
 
   final DeckListSnapshot snapshot;
+
+  /// Whether the resting figures are open.
+  final bool isExpanded;
+
+  /// Opens or shuts them. The chevron is the panel's only control now — the
+  /// dismiss button it replaced is gone (owner decision, 2026-08-25).
+  final VoidCallback onToggleExpanded;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +57,67 @@ class DeckSummaryMetricsWidget extends StatelessWidget {
     final newCount = snapshot.levelNewCardCount;
     final scheduledCount = snapshot.levelScheduledCardCount;
 
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Row(
+          // Centred, not baseline: the chevron is a 48px target with no text
+          // in it, and a `Baseline` cross-alignment asks every child for a
+          // baseline it does not have. The figures keep their own baseline
+          // inside [_HeroFigureLine].
+          children: <Widget>[
+            Expanded(
+              child: _HeroFigureLine(
+                dueCount: dueCount,
+                newCount: newCount,
+                overdueCount: overdueCount,
+                overdueDayCount: snapshot.levelOverdueDayCount,
+              ),
+            ),
+            // **A disclosure, not a dismissal.** It pointed down and hid the
+            // panel; it now points down to open the resting figures and up to
+            // shut them — the arrow shows where the content goes, which is the
+            // same rule the old chevron followed for a different content.
+            MxIconButton(
+              icon: isExpanded ? Icons.expand_less : Icons.expand_more,
+              semanticLabel: isExpanded
+                  ? context.l10n.deckSummaryCollapseLabel
+                  : context.l10n.deckSummaryExpandLabel,
+              onPressed: onToggleExpanded,
+            ),
+          ],
+        ),
+        if (isExpanded) ...<Widget>[
+          const SizedBox(height: AppSpacing.md),
+          _QuietContextRow(newCount: newCount, scheduledCount: scheduledCount),
+        ],
+      ],
+    );
+  }
+}
+
+/// `15 cards due · 8 overdue · 7 today`, on one baseline.
+///
+/// Two semantic nodes rather than one sentence: the numeral answers "how much"
+/// and the split answers "how bad", and a reader who has heard the first may
+/// not need the second. Each group excludes its own children so the figures are
+/// not read twice.
+class _HeroFigureLine extends StatelessWidget {
+  const _HeroFigureLine({
+    required this.dueCount,
+    required this.newCount,
+    required this.overdueCount,
+    required this.overdueDayCount,
+  });
+
+  final int dueCount;
+  final int newCount;
+  final int overdueCount;
+  final int overdueDayCount;
+
+  @override
+  Widget build(BuildContext context) {
     // The hero numeral: what is due; a level with nothing due but new cards
     // waiting leads with those instead (BR-150 — new-only is studyable).
     final heroCount = dueCount > 0 ? dueCount : newCount;
@@ -44,72 +125,88 @@ class DeckSummaryMetricsWidget extends StatelessWidget {
         ? context.l10n.deckSummaryCardsDueWord
         : context.l10n.deckHeroNewMetricWord;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
       children: <Widget>[
-        Semantics(
-          container: true,
-          label: dueCount > 0
-              ? context.l10n.deckHeroDueTodaySemanticLabel(dueCount)
-              : context.l10n.deckHeroNewSemanticLabel(newCount),
-          child: ExcludeSemantics(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: <Widget>[
-                Text(
-                  '$heroCount',
-                  style: context.texts.displaySmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    fontFeatures: const <FontFeature>[
-                      FontFeature.tabularFigures(),
-                    ],
+        Flexible(
+          child: Semantics(
+            container: true,
+            label: dueCount > 0
+                ? context.l10n.deckHeroDueTodaySemanticLabel(dueCount)
+                : context.l10n.deckHeroNewSemanticLabel(newCount),
+            child: ExcludeSemantics(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text(
+                    '$heroCount',
+                    // `headlineLarge`, one rung down from `displaySmall`
+                    // (owner review, 2026-08-25): 36px was set when the
+                    // numeral had a row to itself, and 32 is what fits beside
+                    // its own breakdown on a 393 screen.
+                    style: context.texts.headlineLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      fontFeatures: const <FontFeature>[
+                        FontFeature.tabularFigures(),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Text(heroWord, style: context.texts.titleMedium),
-              ],
+                  const SizedBox(width: AppSpacing.sm),
+                  Flexible(
+                    child: Text(
+                      heroWord,
+                      style: context.texts.titleMedium,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-        // The breakdown, only when there is one to state: with no overdue the
-        // subline would repeat the numeral above it in smaller type.
+        // The breakdown, only when there is one to state: with no overdue it
+        // would repeat the numeral beside it in smaller type.
         if (overdueCount > 0) ...<Widget>[
-          const SizedBox(height: AppSpacing.xs),
-          Semantics(
-            label: context.l10n.deckHeroOverdueSemanticLabel(
-              overdueCount,
-              snapshot.levelOverdueDayCount,
-            ),
-            child: ExcludeSemantics(
-              child: Text.rich(
-                TextSpan(
-                  children: <InlineSpan>[
-                    TextSpan(
-                      text: context.l10n.deckSummaryOverduePart(overdueCount),
-                      style: context.texts.bodyMedium?.copyWith(
-                        color: context.semanticColors.overdue,
-                        fontWeight: FontWeight.w600,
+          const SizedBox(width: AppSpacing.md),
+          Flexible(
+            child: Semantics(
+              label: context.l10n.deckHeroOverdueSemanticLabel(
+                overdueCount,
+                overdueDayCount,
+              ),
+              child: ExcludeSemantics(
+                child: Text.rich(
+                  TextSpan(
+                    children: <InlineSpan>[
+                      TextSpan(
+                        text: context.l10n.deckSummaryOverduePart(overdueCount),
+                        style: context.texts.bodyMedium?.copyWith(
+                          color: context.semanticColors.overdue,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                    const TextSpan(text: ' · '),
-                    TextSpan(
-                      text: context.l10n.deckSummaryDueTodayPart(
-                        dueCount - overdueCount,
+                      const TextSpan(text: ' · '),
+                      TextSpan(
+                        text: context.l10n.deckSummaryDueTodayPart(
+                          dueCount - overdueCount,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                style: context.texts.bodyMedium?.copyWith(
-                  color: context.colors.onSurfaceVariant,
+                    ],
+                  ),
+                  style: context.texts.bodyMedium?.copyWith(
+                    color: context.colors.onSurfaceVariant,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ),
           ),
         ],
-        const SizedBox(height: AppSpacing.md),
-        _QuietContextRow(newCount: newCount, scheduledCount: scheduledCount),
       ],
     );
   }

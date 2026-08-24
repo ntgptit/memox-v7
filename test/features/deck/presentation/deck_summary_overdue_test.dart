@@ -18,10 +18,11 @@ import 'package:memox/shared/widgets/mx_progress_bar.dart';
 import 'support/deck_screen_harness.dart';
 import 'support/fake_deck_repository.dart';
 
-/// The hero's metric band, inside a deck (owner mockup, 2026-08-20): one
-/// numeral answering "how much is waiting", the overdue/today breakdown as
-/// its subline, New and Scheduled demoted to the quiet context row, and the
-/// CTA that starts the study the numeral counted.
+/// The hero's metric band, inside a deck (owner mockup, 2026-08-20; compacted
+/// 2026-08-25): one numeral answering "how much is waiting", the overdue/today
+/// breakdown beside it on the same baseline, New and Scheduled demoted to the
+/// quiet context row behind the chevron, and the CTA that starts the study the
+/// numeral counted.
 ///
 /// The core fixture is the mandated scenario: A holds B and C; C carries the
 /// workload. The panel at A's level folds the child subtrees.
@@ -68,6 +69,14 @@ void main() {
     of: find.byType(DeckLevelSummaryWidget),
     matching: matching,
   );
+
+  /// Opens the resting figures. The panel starts collapsed on every level.
+  Future<void> expandSummary(WidgetTester tester) async {
+    await tester.tap(
+      find.bySemanticsLabel(english.deckSummaryExpandLabel).first,
+    );
+    await tester.pumpAndSettle();
+  }
 
   /// The hero numeral and its word are separate texts on one baseline row.
   void expectHero(int count, String word) {
@@ -133,9 +142,11 @@ void main() {
         ),
         findsOneWidget,
       );
-      // New and Scheduled keep no semantic ink and no tiles — one quiet row.
+      // New and Scheduled keep no semantic ink and no tiles — one quiet row,
+      // and it is one chevron away since the compaction.
       // 40 - 15 due - 0 new in C leaves 25 scheduled; B's 12 rows hold 5 new
       // and 7 unscheduled, so the level's resting figure is 32.
+      await expandSummary(tester);
       expect(onPanel(find.text('5')), findsWidgets);
       expect(
         onPanel(find.text(english.deckHeroNewMetricWord.toLowerCase())),
@@ -193,11 +204,21 @@ void main() {
       );
     });
 
-    testWidgets('the eyebrow scopes the panel to today', (tester) async {
+    testWidgets('no eyebrow: the figure line carries its own scope', (
+      tester,
+    ) async {
+      // `TODAY` sat above the numeral as the panel's scope and cost a whole
+      // row to say what "cards due" already says (owner review, 2026-08-25).
+      // What replaced it in that row is the disclosure, which is the one
+      // control the panel has left.
       await pumpLevel(tester, levelOf(due: 7, overdueCards: 0, overdueDays: 0));
 
       expect(
-        onPanel(find.text(english.deckSummaryTodayLabel.toUpperCase())),
+        onPanel(find.text(english.deckSummaryCardsDueWord)),
+        findsOneWidget,
+      );
+      expect(
+        find.bySemanticsLabel(english.deckSummaryExpandLabel),
         findsOneWidget,
       );
     });
@@ -222,6 +243,9 @@ void main() {
         findsOneWidget,
         reason: 'the sentence carries both units: cards and days',
       );
+      // The resting figures announce from the context row, so it is opened —
+      // a screen reader gets the chevron like anyone else.
+      await expandSummary(tester);
       expect(
         onPanel(find.bySemanticsLabel(english.deckHeroNewSemanticLabel(5))),
         findsOneWidget,
@@ -234,7 +258,9 @@ void main() {
       );
     });
 
-    testWidgets('the learned bar still closes the panel', (tester) async {
+    testWidgets('the learned bar still closes the panel, caption or not', (
+      tester,
+    ) async {
       await pumpLevel(
         tester,
         levelOf(due: 15, overdueCards: 12, overdueDays: 7, newCards: 5),

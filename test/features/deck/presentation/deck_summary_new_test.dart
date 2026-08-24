@@ -11,9 +11,22 @@ import 'support/fake_deck_repository.dart';
 
 /// The hero with new cards in play (BR-150, owner mockup 2026-08-20): one
 /// numeral leads — what is due, or the new cards when nothing is — and New
-/// and Scheduled rest in the quiet context row below it.
+/// and Scheduled rest in the quiet context row one chevron away.
+///
+/// **The context row moved behind the disclosure with the 2026-08-25
+/// compaction**, so the tests that read it open it first. That tap is not
+/// scaffolding: what it asserts is that the figures are still the same fold
+/// over the same snapshot once they are on screen.
 void main() {
   final english = AppLocalizationsEn();
+
+  /// Opens the resting figures. The panel starts collapsed on every level.
+  Future<void> expandSummary(WidgetTester tester) async {
+    await tester.tap(
+      find.bySemanticsLabel(english.deckSummaryExpandLabel).first,
+    );
+    await tester.pumpAndSettle();
+  }
 
   Finder inSummary(Finder matching) => find.descendant(
     of: find.byType(DeckLevelSummaryWidget),
@@ -60,6 +73,7 @@ void main() {
       findsNothing,
     );
     // The context row: 14 new, and 180 − 12 − 14 = 154 scheduled ahead.
+    await expandSummary(tester);
     expect(inSummary(find.text('14')), findsWidgets);
     expect(
       inSummary(find.text(english.deckHeroNewMetricWord.toLowerCase())),
@@ -95,12 +109,14 @@ void main() {
     // The panel opened by itself: new cards are work, so `auto` shows it.
     expect(find.byType(DeckLevelSummaryWidget), findsOneWidget);
     expect(inSummary(find.text('20')), findsWidgets);
+    // Nothing due, so no "cards due" headline to mislead with.
+    expect(inSummary(find.text(english.deckSummaryCardsDueWord)), findsNothing);
+
+    await expandSummary(tester);
     expect(
       inSummary(find.text(english.deckHeroNewMetricWord.toLowerCase())),
       findsWidgets,
     );
-    // Nothing due, so no "cards due" headline to mislead with.
-    expect(inSummary(find.text(english.deckSummaryCardsDueWord)), findsNothing);
 
     final bar = tester.widget<MxProgressBar>(
       inSummary(find.byType(MxProgressBar)),
@@ -108,8 +124,7 @@ void main() {
     expect(bar.value, 0);
   });
 
-  testWidgets('both sets empty: the panel waits behind its link, then rests '
-      'quiet', (tester) async {
+  testWidgets('both sets empty: the panel stays away entirely', (tester) async {
     await pumpDeckScreen(
       tester,
       repository: FakeDeckRepository.withSummaries(<DeckSummary>[
@@ -123,31 +138,14 @@ void main() {
       screen: const DeckListScreen(),
     );
 
-    // Nothing new and nothing due: `auto` keeps the panel away, and the
-    // one-line link stands in for it.
+    // Nothing new and nothing due. The panel used to wait behind a one-line
+    // link; the link went with the dismiss button it existed to undo (owner
+    // decision, 2026-08-25), so a caught-up level simply gets its list. The
+    // deck card's own bar still carries the finished progress, which is the
+    // one figure the panel would have added.
     expect(find.byType(DeckLevelSummaryWidget), findsNothing);
-    expect(find.text(english.deckSummaryShowAction), findsOneWidget);
 
-    await tester.tap(find.text(english.deckSummaryShowAction));
-    await tester.pumpAndSettle();
-
-    // Caught up: the hero states its zero, and the eight learned cards rest
-    // in the context row — a resting card asks for nothing, so nothing is
-    // shouted and no CTA is offered.
-    expect(inSummary(find.text('0')), findsWidgets);
-    expect(inSummary(find.text('8')), findsOneWidget);
-    expect(
-      inSummary(find.text(english.deckHeroScheduledMetricWord.toLowerCase())),
-      findsOneWidget,
-    );
-    expect(
-      inSummary(find.text(english.deckSummaryStudyDueAction(0))),
-      findsNothing,
-    );
-    // 100% learned: the shared bar carries the success moment on its own.
-    final bar = tester.widget<MxProgressBar>(
-      inSummary(find.byType(MxProgressBar)),
-    );
+    final bar = tester.widget<MxProgressBar>(find.byType(MxProgressBar).first);
     expect(bar.value, 1);
   });
 }

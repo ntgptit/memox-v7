@@ -28,29 +28,26 @@ enum DeckListSort {
   name,
 }
 
-/// Whether the level summary panel is on screen.
+/// How much of the level summary hero is on screen.
 ///
-/// **Three states, not a boolean, because "the user has not said" is not the same
-/// as "hide it".** The panel used to default to showing, on the argument that it
-/// is the most useful thing on the screen on the day you opened the app to study.
-/// That is true of the day there is something to study. On every other day it
-/// opened to announce that nothing was waiting and then had to be dismissed by
-/// hand — a panel asking for an action in order to say no action is needed.
+/// **Two states, because the hero now has two jobs and only one of them is the
+/// default.** The panel used to answer four questions at once and stood 320px
+/// tall on a 852px screen — 38% of the viewport for a screen whose subject is
+/// the list underneath it. Collapsed, it answers the one question the user
+/// actually opened the app with ("how much is waiting, and can I start now");
+/// the resting figures and the learned line are a disclosure away.
 ///
-/// [auto] is the answer: the panel follows the level's due count until the user
-/// says otherwise, and once they do, their choice sticks and stops following it.
-enum DeckSummaryVisibility {
-  /// Follow the level: shown where something is due, absent where nothing is.
-  auto,
+/// **It replaced a three-state visibility choice, and the dismiss button with
+/// it** (owner decision, 2026-08-25). The reason the panel was dismissible was
+/// that it was in the way of the list; at 18% of the viewport it no longer is,
+/// and a chevron cannot mean "hide me" and "show me more" at the same time.
+enum DeckSummaryDetail {
+  /// The default: one figure line and the CTA.
+  collapsed,
 
-  /// The user opened it. Stays open on a level with nothing due — asking for the
-  /// panel is asking for the progress bar inside it, which is worth seeing on a
-  /// deck that is finished.
-  shown,
-
-  /// The user dismissed it. Stays closed even where something is due; the link
-  /// that brings it back is always there.
-  hidden,
+  /// The resting figures — New and Scheduled — plus the learned line above the
+  /// progress track.
+  expanded,
 }
 
 /// Applies the current view choices to one snapshot's decks.

@@ -1,4 +1,4 @@
-const { MxContentShell, MxIconButton, MxIcon, MxCard, MxBreadcrumb, MxPillButton, MxEmptyState, MxProgressBar, MxActionButton, MxSearchField, MxTextButton } = window.MemoxDesignSystem_3a620f;
+const { MxContentShell, MxIconButton, MxIcon, MxCard, MxBreadcrumb, MxPillButton, MxEmptyState, MxProgressBar, MxActionButton, MxSearchField } = window.MemoxDesignSystem_3a620f;
 
 /**
  * The deck list — ONE screen, used at every depth of the tree. The root is not a
@@ -7,17 +7,12 @@ const { MxContentShell, MxIconButton, MxIcon, MxCard, MxBreadcrumb, MxPillButton
  * Three things make a nested library usable, and all three live here:
  *   - a breadcrumb, pinned under the app bar, that folds its middle when deep
  *   - a search that walks the WHOLE subtree, not just the level in view
- *   - a summary panel that can be dismissed when it is in the way
+ *   - a compact summary panel whose resting figures fold behind a chevron
  */
 function DeckLevelScreen({ path, onOpen, onUp, onJumpTo, onNavigate, onActions, onRowActions, onCreate, onStudy, isCompact }) {
   const [dueOnly, setDueOnly] = React.useState(false);
   const [byName, setByName] = React.useState(true);
   const [query, setQuery] = React.useState('');
-  // 'auto' follows the level's due count; 'shown' and 'hidden' are the user
-  // overriding it, and neither returns to 'auto' — both are saying "from now on".
-  // It defaulted to open, which meant every level with nothing due opened a panel
-  // whose only content was that nothing was due, and then asked to be dismissed.
-  const [summaryChoice, setSummaryChoice] = React.useState('auto');
 
   const deck = path[path.length - 1];
   const ancestors = path.slice(0, -1);
@@ -35,7 +30,11 @@ function DeckLevelScreen({ path, onOpen, onUp, onJumpTo, onNavigate, onActions, 
   rows = [...rows].sort((a, b) => (byName ? a.name.localeCompare(b.name) : b.due - a.due));
 
   const totalDue = all.reduce((n, r) => n + r.due, 0);
-  const summaryOpen = summaryChoice === 'auto' ? totalDue > 0 : summaryChoice === 'shown';
+  // The panel or nothing. The dismiss button and the link that brought a
+  // dismissed panel back are both gone (owner decision, 2026-08-25); what is
+  // left is the rule the old 'auto' default already followed — a level with
+  // work waiting gets the panel, a level without gets the list.
+  const summaryOpen = totalDue > 0;
 
   return (
     <MxContentShell
@@ -94,20 +93,14 @@ function DeckLevelScreen({ path, onOpen, onUp, onJumpTo, onNavigate, onActions, 
         ) : (
           <React.Fragment>
             {summaryOpen
-              ? <LevelSummary deck={deck} isRoot={isRoot} totalDue={totalDue} onStudy={onStudy} onDismiss={() => setSummaryChoice('hidden')} />
+              ? <LevelSummary deck={deck} isRoot={isRoot} totalDue={totalDue} onStudy={onStudy} />
               : null}
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', margin: (summaryOpen ? 'var(--space-xl)' : '0') + ' 0 var(--space-md)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', margin: (summaryOpen ? 'var(--space-md)' : '0') + ' 0 var(--space-md)' }}>
               <p className="mx-section-label" style={{ margin: 0, flex: 1 }}>{isRoot ? 'Your decks' : 'Sub-decks'}</p>
               <MxPillButton label={dueOnly ? 'Due only' : 'All'} icon="filter_list" isSelected={dueOnly} onClick={() => setDueOnly(!dueOnly)} />
               <MxPillButton label={byName ? 'A–Z' : 'Due first'} icon="swap_vert" isSelected={!byName} semanticLabel={byName ? 'Sort by name' : 'Sort by cards due'} onClick={() => setByName(!byName)} />
             </div>
-
-            {summaryOpen ? null : (
-              <div style={{ marginBottom: 'var(--space-md)' }}>
-                <MxTextButton label="Show today’s summary" trailingIcon="expand_more" onClick={() => setSummaryChoice('shown')} />
-              </div>
-            )}
 
             {/* `lg`, not `md`: the track seated on each card's base makes the
                 bottom boundary loud, so a 12px gap after it reads as part of
@@ -185,33 +178,50 @@ function highlight(text, query) {
 /**
  * At the root this is "today"; deeper down it is this deck's own progress. Both
  * answer the same question, so they are one block rather than a home screen and
- * a header. Dismissible, because on a day spent reorganising decks it is in the
- * way of the list it sits on top of.
+ * a header.
+ *
+ * **Two rows and a rule** (owner review, 2026-08-25). It was five stacked bands
+ * and measured 37.6% of a 393x852 viewport, which left one and a half deck
+ * cards above the fold. What went is ranking, not data: the `TODAY` eyebrow
+ * said nothing "cards due" does not, and the learned caption is a resting
+ * figure that sits one chevron away rather than at the top of every visit.
+ *
+ * **It is no longer dismissible, and that is the same decision.** The close
+ * button existed because the panel was in the way of the list; at 18% it is
+ * not, and one chevron cannot mean "hide me" and "show me more".
  */
-function LevelSummary({ deck, isRoot, totalDue, onStudy, onDismiss }) {
+function LevelSummary({ deck, isRoot, totalDue, onStudy }) {
+  const [isExpanded, setIsExpanded] = React.useState(false);
   const learned = deck.cards ? deck.learned / deck.cards : 0;
   return (
     <div className="mx-today">
-      <button type="button" className="mx-today__close" onClick={onDismiss} aria-label="Hide summary" title="Hide summary">
-        <MxIcon name="close" filled size="var(--icon-sm)" />
-      </button>
       <div className="mx-today__row">
-        <span style={{ flex: 1, minWidth: 0, paddingRight: 'var(--space-xl)' }}>
+        <span className="mx-today__figures">
           <span className="mx-today__figure" style={totalDue ? undefined : { color: 'var(--color-success)' }}>{totalDue ? totalDue : 'All'}</span>
-          <span className="mx-today__sub">
-            {totalDue
-              ? (isRoot ? 'cards due across your library today' : 'cards due in this deck today')
-              : 'caught up — nothing due here today'}
-          </span>
+          <span className="mx-today__word">{totalDue ? 'cards due' : 'caught up'}</span>
+          {isRoot ? (
+            <span className="mx-streak mx-today__sub">
+              <MxIcon name="local_fire_department" filled size="var(--icon-sm)" />
+              {window.MEMOX_STATS.streakDays}
+            </span>
+          ) : null}
         </span>
-        {isRoot ? (
-          <span className="mx-streak" style={{ marginTop: 28 }}>
-            <MxIcon name="local_fire_department" filled size="var(--icon-sm)" />
-            {window.MEMOX_STATS.streakDays}
-          </span>
-        ) : null}
+        <button
+          type="button"
+          className="mx-today__disclose"
+          onClick={() => setIsExpanded(!isExpanded)}
+          aria-expanded={isExpanded}
+          aria-label={isExpanded ? 'Show fewer figures' : 'Show more figures'}
+          title={isExpanded ? 'Show fewer figures' : 'Show more figures'}
+        >
+          <MxIcon name={isExpanded ? 'expand_less' : 'expand_more'} filled size="var(--icon-sm)" />
+        </button>
       </div>
-      <MxProgressBar value={learned} label={deck.learned + ' of ' + deck.cards + ' learned'} valueLabel={Math.round(learned * 100) + '%'} size="sm" />
+      {/* Collapsed it is a bare 4px rule under the figure line — a bar there
+          does not need to be told what it measures. The strings are still
+          passed: a screen reader has no chevron, so what is painted and what is
+          announced are two decisions. */}
+      <MxProgressBar value={learned} label={deck.learned + ' of ' + deck.cards + ' learned'} valueLabel={Math.round(learned * 100) + '%'} size="sm" isLabelPainted={isExpanded} />
       {totalDue ? <MxActionButton label="Start studying" icon="play_arrow" isBlock onClick={() => onStudy(deck)} /> : null}
     </div>
   );

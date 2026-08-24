@@ -11019,6 +11019,81 @@ của M2.
   extension; full host suite.
 - **Checklist phases:** 7, 12
 
+### M99.40 · Hero panel `TODAY` thu gọn — 37,6% viewport xuống 18,3%
+
+- **Status:** **done**
+- **Goal:** Trả màn Deck list lại cho danh sách deck. Chủ dự án đo trên
+  393×852: hero chiếm 320px (**37,6%** viewport), đẩy list xuống dưới nên chỉ
+  còn **1 deck card trọn vẹn + nửa card thứ hai** trên bottom nav. Đích: hero
+  ≤ 22% và tối thiểu 3 deck card thấy được ở trạng thái mặc định.
+- **Scope:** Chỉ hero panel và khoảng trắng giữa nó với list — deck card,
+  bottom nav, màu, font, radius không đổi.
+  Hero gộp từ 5 khối rời còn 2 dòng: dòng 1 là `15 cards due` +
+  `8 overdue · 7 today` **cùng một baseline** (số về `headlineLarge` 32px từ
+  `displaySmall` 36px) với chevron cuối hàng; dòng 2 là CTA `Study N due cards`
+  full-width 48px; giữa hai dòng là track 4px (`MxProgressBarSize.sm`)
+  **không caption**. Eyebrow `TODAY` bỏ hẳn — `cards due` đã mang phạm vi.
+  Context row `New | Scheduled` và dòng `353 of 868 learned / 41%` chuyển vào
+  phần mở rộng sau chevron. Khoảng cách giữa các dòng `md` (12) đồng nhất;
+  padding hero giữ `lg` (16) — vốn đã là 16, không phải đổi.
+  Chrome giữa hero và list: bỏ padding đáy của summary section (`md` → 0) và
+  hạ gap dưới toolbar `xl` (24) → `md` (12) — **đánh đổi có chủ đích**, xem
+  Acceptance.
+- **Quyết định của chủ dự án (2026-08-25):** chevron **đổi nghĩa** từ "ẩn
+  panel" sang "mở rộng chi tiết", và **nút ẩn bị bỏ hẳn** cùng link
+  `Show today's summary` đứng thay nó. Một chevron không thể vừa nói "giấu tôi"
+  vừa nói "cho tôi xem thêm", và lý do panel từng cần ẩn — nó chắn danh sách —
+  không còn ở 18%. `DeckSummaryVisibility{auto,shown,hidden}` bị thay bởi
+  `DeckSummaryDetail{collapsed,expanded}`; luật hiện diện còn đúng luật `auto`
+  vốn theo: level có việc thì có panel, không thì có list.
+  **Mất mát đã ghi nhận:** level đã học hết không còn đường xem thanh learned
+  của cả level (mỗi deck card vẫn mang bar riêng).
+- **Output:** `deck_level_summary_widget.dart` (2 dòng + track + CTA),
+  `deck_summary_metrics_widget.dart` (`_HeroFigureLine` một baseline hai node
+  semantics + `_QuietContextRow` sau disclosure),
+  `deck_summary_section_widget.dart` (luật hiện diện, padding đáy 0),
+  `deck_list_view_state.dart` + `deck_list_view_controller.dart`
+  (`DeckSummaryDetail` / `DeckSummaryDetailChoice.toggle()`),
+  `deck_list_screen.dart` (toolbar gap `md`),
+  `mx_progress_bar.dart` (`shouldPaintLabel` — **vẽ** và **đọc** là hai quyết
+  định; nhãn vẫn luôn được screen reader đọc khi thu gọn),
+  ARB en/vi (`deckSummaryExpandLabel`/`deckSummaryCollapseLabel` vào;
+  `deckSummaryTodayLabel`/`deckSummaryHideLabel`/`deckSummaryShowAction` ra),
+  parity kit: `mx.css` `.mx-today`, `DeckLevelScreen.jsx` `LevelSummary`,
+  `MxProgressBar.jsx`/`.d.ts` (`isLabelPainted`).
+- **Acceptance criteria:**
+  - [x] Hero **156px = 18,3%** của 852 (đích ≤ 22%). Đo bằng `getRect` trong
+        `deck_summary_compact_geometry_test.dart`, không phải ước lượng.
+  - [x] **2 deck card trọn vẹn + 89% card thứ ba** trên bottom nav, từ
+        1 card + 50% card hai. **Không đạt 3 card trọn vẹn**, và đó là kết
+        luận đo được chứ không phải thiếu sót: hero đã ở sàn cứng của nó
+        (16×2 padding + 48 hàng chevron + 12 + 4 track + 12 + 48 CTA = 156),
+        chrome giữa hero và list đã trả hết 24px, và 3 card × (160 + 16) =
+        512px vẫn dài hơn 772 − 306. 70px còn lại nằm trong **chiều cao deck
+        card** và **app bar** — cả hai đều ngoài phạm vi chủ dự án đã dặn.
+  - [x] Test đo bằng `pumpDeckApp` (shell thật, có bottom nav) chứ không
+        `pumpDeckScreen`. Đo không shell thì con số ra "3 card trọn vẹn" và
+        **sai trên máy thật** — đúng loại số liệu tự tin mà sai mà rule gallery
+        sinh ra để chặn.
+  - [x] Chevron mở/đóng đúng chiều, và đóng lại **trả đủ** chiều cao.
+  - [x] Nhãn learned vẫn được đọc khi không vẽ (`shouldPaintLabel: false` giữ
+        `Semantics.label`/`value`).
+  - [x] `flutter analyze` 0 lỗi 0 cảnh báo toàn repo; guard kiến trúc xanh;
+        `check_docs.py` xanh; `check_prompt_contract.py` xanh.
+  - [x] Full host suite **3744/3744**; goldens regenerate (6 PNG deck list) và
+        gallery republish tại URL cũ.
+- **Đánh đổi đã ghi:** gap dưới toolbar `xl` → `md` phá lập luận cũ ("một
+  section break bằng đúng 16 giữa hai card sẽ khiến toolbar đọc như hàng đầu
+  của list"). Lập luận đó vẫn đúng; nó bị đánh đổi lấy 12px cuối cùng theo
+  yêu cầu 3-card. Muốn trả lại chỉ cần một token.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.39
+- **Tests required:** `deck_summary_compact_geometry_test.dart` (mới),
+  `deck_list_summary_test.dart` (viết lại theo state machine mới),
+  `deck_summary_new_test.dart`, `deck_summary_overdue_test.dart`,
+  `deck_list_level_test.dart`; `test/demo/` goldens; full host suite.
+- **Checklist phases:** 7, 12, 14
+
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 
 Ghi lại cụ thể, vì "mất một bộ lint" là câu quá mơ hồ để ai đó sau này biết

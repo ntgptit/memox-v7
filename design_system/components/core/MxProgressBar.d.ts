@@ -21,6 +21,10 @@ export interface MxProgressBarProps {
   shape?: 'pill' | 'flush';
   /** streak draws in the streak colour — for a run of days rather than a proportion learned. */
   tone?: 'progress' | 'streak';
+  /** Whether `label` and `valueLabel` are DRAWN. They are always announced.
+   * `false` gives a bare track — the deck hero's collapsed state — without
+   * costing the bar its accessible name. */
+  isLabelPainted?: boolean;
 }
 
 export declare function MxProgressBar(props: MxProgressBarProps): React.JSX.Element;
