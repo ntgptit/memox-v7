@@ -240,7 +240,8 @@ abstract final class AppColors {
   // a game.
   //
   // **These eight values come from `design_system/tokens/colors.css` and the
-  // design system is authoritative for them** (project owner's decision, M4.10p).
+  // design system is authoritative for them** (project owner's decision,
+  // M4.10p). `warningDark` has since moved, on both sides at once.
   // They are louder than the values they replaced — in HSL saturation, light
   // rises 0.299…0.676 → 0.411…0.801 and dark 0.325…0.678 → 0.490…0.814.
   //
@@ -263,8 +264,22 @@ abstract final class AppColors {
   static const Color successDark = Color(0xFF4FC79B);
 
   /// Card due soon, streak at risk — informative, not alarming.
+  ///
+  /// **Dark moved off `#E0B064` (owner decision, 2026-08-24)**, the streak
+  /// family's accent — the due chip's label, `--color-streak` in the kit.
+  /// Warning was set to it on both sides, so two unrelated meanings were one
+  /// colour: an edit for "a card is due soon" repainted every due chip.
+  ///
+  /// **Derived, not chosen.** In light, warning sits 7.4° yellower than the
+  /// streak accent and 0.098 darker in L (`#9A6A11` against `#C2731B`); dark
+  /// inverts lightness, so the same relationship reads `HSL(44.2, 0.667,
+  /// 0.733)`. Saturation is untouched — the chroma ordering
+  /// `app_palette_test.dart` pins holds — and contrast rose: 11.24:1 on the
+  /// card, 12.75:1 on the page, against a 3.0 floor. **A shade apart, not a
+  /// hue:** the semantic hues map light→dark by keeping hue and raising
+  /// lightness, and that rule lands warning back on the streak amber.
   static const Color warningLight = Color(0xFF9A6A11);
-  static const Color warningDark = Color(0xFFE0B064);
+  static const Color warningDark = Color(0xFFE8D08E);
 
   /// Answer forgotten, destructive action, reset.
   static const Color dangerLight = Color(0xFFC02B3A);

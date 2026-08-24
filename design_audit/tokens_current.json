@@ -951,12 +951,12 @@
       "classifiedAs": "role-or-on-color"
     },
     "semantic.warning": {
-      "hex": "#E0B064",
+      "hex": "#E8D08E",
       "opaque": true,
-      "hue": 36.774193548387096,
-      "saturation": 0.6666666666666666,
-      "chroma": 0.48627450980392156,
-      "lightnessStar": 74.71003022035062,
+      "hue": 44.0,
+      "saturation": 0.661764705882353,
+      "chroma": 0.3529411764705882,
+      "lightnessStar": 84.08046814464086,
       "classifiedAs": "role-or-on-color"
     },
     "semantic.danger": {
