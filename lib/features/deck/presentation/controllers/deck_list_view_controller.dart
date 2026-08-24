@@ -37,34 +37,29 @@ class DeckListSortChoice extends _$DeckListSortChoice {
   void select(DeckListSort sort) => state = sort;
 }
 
-/// Whether the level summary panel is showing.
+/// How much of the level summary hero the user wants to see.
 ///
 /// The third input-state notifier beside filter and sort, and the same kind of
 /// value: something the UI owns that a view is parameterized by, reading nothing
 /// and writing nothing.
 ///
-/// **Not keyed by level, deliberately.** The reason the design gives for making
-/// the panel dismissible is a mood rather than a place — on a day spent
-/// reorganising decks it is in the way of the list it sits on top of — and a
-/// user who dismisses it at the root and finds it back two taps later has not
-/// been listened to. Filter and sort are global for the same reason.
+/// **Not keyed by level, deliberately.** Wanting the resting figures is a mood
+/// rather than a place, and a user who opens them at the root and finds them
+/// shut two taps later has not been listened to. Filter and sort are global for
+/// the same reason.
 ///
-/// Defaults to [DeckSummaryVisibility.auto] rather than to showing. The old
-/// default put the panel on screen on every level including the ones with
-/// nothing due, where it existed only to be dismissed. `auto` is still a global
-/// choice — what it follows is local, which is the point: the same preference
-/// produces a panel on the level that has work waiting and none on the level
-/// that does not.
+/// **Defaults to [DeckSummaryDetail.collapsed]** — the panel's height is the
+/// list's height, and the figures behind the disclosure are context rather than
+/// the question the screen is opened with.
 ///
-/// One mutator, so a caller says which state it wants rather than toggling —
-/// the close button and the link that brings it back both know their answer, and
-/// both are saying "from now on", which is why neither can return to `auto`.
+/// One mutator, and it toggles: unlike the visibility choice it replaced there
+/// is only one control, and what it does depends on where it already is.
 @riverpod
-class DeckSummaryVisibilityChoice extends _$DeckSummaryVisibilityChoice {
+class DeckSummaryDetailChoice extends _$DeckSummaryDetailChoice {
   @override
-  DeckSummaryVisibility build() => DeckSummaryVisibility.auto;
+  DeckSummaryDetail build() => DeckSummaryDetail.collapsed;
 
-  void setVisible({required bool isVisible}) => state = isVisible
-      ? DeckSummaryVisibility.shown
-      : DeckSummaryVisibility.hidden;
+  void toggle() => state = state == DeckSummaryDetail.expanded
+      ? DeckSummaryDetail.collapsed
+      : DeckSummaryDetail.expanded;
 }

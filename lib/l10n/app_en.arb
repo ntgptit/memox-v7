@@ -312,17 +312,13 @@
     },
     "description": "The figure at the right-hand end of a deck's progress bar. Whole percent -- a decimal on a 4px bar is precision nobody can act on."
   },
-  "deckSummaryTodayLabel": "Today",
-  "@deckSummaryTodayLabel": {
-    "description": "Eyebrow of the level summary hero: the time scope the two workload figures describe. One word on purpose — it scopes, it does not narrate."
+  "deckSummaryExpandLabel": "Show more figures",
+  "@deckSummaryExpandLabel": {
+    "description": "The disclosure control on the level summary hero, while it is collapsed. Says what appears — the New/Scheduled figures and the learned line — rather than naming the chevron."
   },
-  "deckSummaryHideLabel": "Hide summary",
-  "@deckSummaryHideLabel": {
-    "description": "The close button on the level summary panel. Says what it does, not what the glyph is."
-  },
-  "deckSummaryShowAction": "Show today's summary",
-  "@deckSummaryShowAction": {
-    "description": "Brings the panel back after it has been dismissed. Named so it is obvious what returns."
+  "deckSummaryCollapseLabel": "Show fewer figures",
+  "@deckSummaryCollapseLabel": {
+    "description": "The same disclosure control once the extra figures are open. Mirrors deckSummaryExpandLabel so a screen reader hears which way the control goes."
   },
   "decksSectionLabelRoot": "Your decks",
   "@decksSectionLabelRoot": {

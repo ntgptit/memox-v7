@@ -260,17 +260,19 @@ class _DeckLevel extends ConsumerWidget {
         SliverToBoxAdapter(child: DeckSummarySectionWidget(snapshot: snapshot)),
         SliverToBoxAdapter(
           child: Padding(
-            // `xl` below, not `lg`: this is the gap between two *sections* — the
-            // controls and the thing they control — and a section break that
-            // used the same number as the gap between two cards would make the
-            // toolbar read as the first row of the list. It is `xl` at every
-            // width again: the compact trade existed only to buy screen height,
-            // and there is no longer any to buy.
+            // `md` below (owner decision, 2026-08-25). It was `xl`, on the
+            // argument that a section break matching the 16 between two cards
+            // would make the toolbar read as the first row of the list. That
+            // argument is still true and was traded anyway: the owner asked for
+            // three whole deck cards above the fold, the hero had already given
+            // back every pixel it could, and this gap was the last one between
+            // the panel and the list. `md` at every width — the compact trade
+            // that used to live here bought screen height the same way.
             padding: const EdgeInsets.fromLTRB(
               AppSpacing.lg,
               0,
               AppSpacing.lg,
-              AppSpacing.xl,
+              AppSpacing.md,
             ),
             child: DeckListToolbarWidget(
               isRootLevel: parent == null,

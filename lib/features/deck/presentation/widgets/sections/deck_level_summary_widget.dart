@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_elevation.dart';
-import '../../../../../core/theme/app_material_roles.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../../../shared/widgets/mx_card.dart';
-import '../../../../../shared/widgets/mx_icon_button.dart';
 import '../../../../../shared/widgets/mx_progress_bar.dart';
 import '../../../domain/models/deck_list_snapshot_model.dart';
 import '../../../domain/models/deck_summary_model.dart';
-import '../../states/deck_list_view_state.dart';
 import 'deck_summary_metrics_widget.dart';
 
 /// The level's study status, as the screen's one hero (BR-150, BR-161).
@@ -20,17 +17,29 @@ import 'deck_summary_metrics_widget.dart';
 /// same question about that deck. They are the same question at different
 /// scopes, so they are one block rather than a home screen and a header.
 ///
-/// **Status-first, in scan order.** The panel reads top to bottom the way the
-/// question is actually asked: the time scope (`Today`), then the four
-/// disjoint sets of BR-162 most-urgent-first — the backlog that missed its day
-/// (Overdue), the reviews that belong to today (Due today), the cards still
-/// waiting to be learned (New), the cards resting until a later review
-/// (Scheduled) — then how far the level has come. Together the four partition
-/// every card the level holds, so the grid also reads as a whole. One focal
-/// point — the most urgent non-empty set leads with the larger numeral —
-/// because figures at equal weight is what made the old panel scan as a table
-/// row instead of an answer. The tile keeps the undivided `Due` total; the
-/// hero is where the breakdown lives.
+/// **Two lines, because the screen belongs to the list under it** (owner
+/// review, 2026-08-25). Measured before the change: 320px of a 852px viewport
+/// — 37.6% — which left one and a half deck cards on screen and put the third
+/// below the fold. The panel now reads
+///
+/// ```
+/// 15 cards due   8 overdue · 7 today            ⌄
+/// ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁ (4px, no caption)
+/// [        Study 15 due cards        ]
+/// ```
+///
+/// which measures 156px, 18.3%, and leaves three cards whole. What went is not
+/// data but *ranking*: the eyebrow (`TODAY` said nothing "cards due" does not),
+/// the New/Scheduled band and the learned caption are resting figures, and they
+/// sit one chevron away rather than at the top of the screen every time it
+/// opens.
+///
+/// **The panel is no longer dismissible, and that is the same decision.** The
+/// dismiss button existed because the panel was in the way of the list; at 18%
+/// it is not, and one chevron cannot mean both "hide me" and "show me more"
+/// (owner decision, 2026-08-25). A level with nothing studyable renders no
+/// panel at all — [hasStudyable] is now the presence rule outright, where it
+/// used to be what `auto` resolved to.
 ///
 /// **Every number here is arithmetic over the snapshot the screen already has.**
 /// A child's counts are its whole subtree, and sibling subtrees are disjoint, so
@@ -41,11 +50,12 @@ import 'deck_summary_metrics_widget.dart';
 ///
 /// **The surface is [MxCard], not a hand-rolled box.** Radius, border,
 /// elevation and interaction states all come from the one shared surface; the
-/// panel itself is not tappable — the close button is its only control.
+/// panel itself is not tappable — the chevron is its only control.
 class DeckLevelSummaryWidget extends StatelessWidget {
   const DeckLevelSummaryWidget({
     required this.snapshot,
-    required this.onDismiss,
+    required this.isExpanded,
+    required this.onToggleExpanded,
     this.onStudyDue,
     super.key,
   });
@@ -56,11 +66,12 @@ class DeckLevelSummaryWidget extends StatelessWidget {
   /// stays honest on a level with nothing due.
   final VoidCallback? onStudyDue;
 
-  /// Hides the panel. **Dismissible on purpose**: it is the most useful thing on
-  /// the screen on the day you opened the app to study, and the thing in the way
-  /// of the list on the day you opened it to reorganise your decks. Getting it
-  /// back is one tap, so nothing is lost by hiding it.
-  final VoidCallback onDismiss;
+  /// Whether the resting figures — New, Scheduled, and the learned caption —
+  /// are on screen.
+  final bool isExpanded;
+
+  /// Opens or shuts them.
+  final VoidCallback onToggleExpanded;
 
   /// Whether this level has anything to summarise.
   ///
@@ -73,11 +84,11 @@ class DeckLevelSummaryWidget extends StatelessWidget {
   /// Whether anything on this level is waiting to be studied — new **or** due
   /// (BR-150).
   ///
-  /// What [DeckSummaryVisibility.auto] follows. Exposed here rather than computed
-  /// by the caller so that the number deciding whether the panel appears and the
-  /// number the panel prints are the same fold over the same snapshot — a panel
-  /// that appeared because of one count and then displayed another would be worse
-  /// than one that never appeared.
+  /// The presence rule. Exposed here rather than computed by the caller so that
+  /// the number deciding whether the panel appears and the number the panel
+  /// prints are the same fold over the same snapshot — a panel that appeared
+  /// because of one count and then displayed another would be worse than one
+  /// that never appeared.
   ///
   /// `any` rather than summing: the question is whether the sum is non-zero, and
   /// a card count cannot be negative, so the first studyable deck answers it.
@@ -103,52 +114,25 @@ class DeckLevelSummaryWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Row(
-            // Centred against the close button's 48 floor: the eyebrow is one
-            // short label, and the button's surplus splits evenly around it
-            // instead of pooling underneath.
-            children: <Widget>[
-              Expanded(
-                child: Text(
-                  // The scope, not a narration: every figure below is "as of
-                  // today", and saying it once up here is what lets the
-                  // metrics be bare numbers.
-                  context.l10n.deckSummaryTodayLabel.toUpperCase(),
-                  // The section-label treatment the list heading already
-                  // wears, in the brand ink: an eyebrow set like body copy
-                  // read as a stray word above the numeral rather than as the
-                  // panel's scope (owner review, 2026-08-20).
-                  style: context.textStyles.sectionLabel.copyWith(
-                    color: brandInk(context.colors),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              // A chevron, not an X: this collapses to a one-line link and
-              // comes back — X promised removal (owner mockup, 2026-08-20).
-              // **It points down while the panel is open**: the arrow shows
-              // where the content goes, and up is what the collapsed link
-              // wears to bring it back (owner review, 2026-08-20).
-              MxIconButton(
-                icon: Icons.expand_more,
-                semanticLabel: context.l10n.deckSummaryHideLabel,
-                onPressed: onDismiss,
-              ),
-            ],
+          DeckSummaryMetricsWidget(
+            snapshot: snapshot,
+            isExpanded: isExpanded,
+            onToggleExpanded: onToggleExpanded,
           ),
-          const SizedBox(height: AppSpacing.xs),
-          DeckSummaryMetricsWidget(snapshot: snapshot),
           if (cardCount > 0) ...<Widget>[
-            // `lg`: the seam between "what is waiting" and "how far you are"
-            // is the panel's one section break, one step wider than the line
-            // breaks inside each band.
-            const SizedBox(height: AppSpacing.lg),
-            // The learned line and the bar come as one component, and use
-            // the same progress tokens as every tile: track, fill, and
-            // success only at 100%.
+            // `md` between every band, not `lg` between some and `xl` between
+            // others: the panel is two lines and a rule now, and a section
+            // break inside three rows is a break between nothing.
+            const SizedBox(height: AppSpacing.md),
+            // The same progress tokens as every tile: track, fill, and success
+            // only at 100%. **Collapsed it is a bare 4px rule** — the caption
+            // it used to carry is a resting figure, and a bar under a figure
+            // line does not need to be told what it measures. The strings are
+            // still passed, because a screen reader has no chevron: what is
+            // painted and what is announced are two decisions.
             MxProgressBar(
               size: MxProgressBarSize.sm,
+              shouldPaintLabel: isExpanded,
               value: learnedCount / cardCount,
               label: context.l10n.deckLearnedProgressLabel(
                 learnedCount,
@@ -166,7 +150,7 @@ class DeckLevelSummaryWidget extends StatelessWidget {
           // deck's study. The caller decides which; null means nothing is
           // due and the button would be a promise with no cards behind it.
           if (onStudyDue != null) ...<Widget>[
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.md),
             MxActionButton(
               label: context.l10n.deckSummaryStudyDueAction(
                 snapshot.levelDueCardCount,

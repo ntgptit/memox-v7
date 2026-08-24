@@ -312,17 +312,13 @@
     },
     "description": "Con số ở đầu bên phải thanh tiến độ. Phần trăm nguyên — một chữ số thập phân trên thanh 4px là độ chính xác không ai làm gì được."
   },
-  "deckSummaryTodayLabel": "Hôm nay",
-  "@deckSummaryTodayLabel": {
-    "description": "Eyebrow of the level summary hero: the time scope the two workload figures describe. One word on purpose — it scopes, it does not narrate."
+  "deckSummaryExpandLabel": "Hiện thêm số liệu",
+  "@deckSummaryExpandLabel": {
+    "description": "The disclosure control on the level summary hero, while it is collapsed. Says what appears — the New/Scheduled figures and the learned line — rather than naming the chevron."
   },
-  "deckSummaryHideLabel": "Ẩn tổng kết",
-  "@deckSummaryHideLabel": {
-    "description": "Nút đóng trên panel tổng kết. Nói việc nó làm, không nói hình cái glyph."
-  },
-  "deckSummaryShowAction": "Hiện tổng kết hôm nay",
-  "@deckSummaryShowAction": {
-    "description": "Đưa panel trở lại sau khi đã ẩn."
+  "deckSummaryCollapseLabel": "Thu gọn số liệu",
+  "@deckSummaryCollapseLabel": {
+    "description": "The same disclosure control once the extra figures are open. Mirrors deckSummaryExpandLabel so a screen reader hears which way the control goes."
   },
   "decksSectionLabelRoot": "Deck của bạn",
   "@decksSectionLabelRoot": {

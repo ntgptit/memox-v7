@@ -266,16 +266,16 @@ void main() {
       // card mentioned the same total, which is exactly the ambiguity a bare
       // substring match hides.
       //
-      // **Painted once, announced twice.** The level summary above the list
-      // still writes the figure out; the card stopped, because a header saying
-      // `21 of 42 learned` above a track of the same length is the same fact
-      // twice and it cost 24px on every row. The card's copy moved into
-      // `Semantics`, so a screen reader still hears both — which is what the
-      // second expectation checks.
+      // **Announced, not painted — anywhere on this screen now.** The card
+      // stopped writing the figure out because a header saying `21 of 42
+      // learned` above a track of the same length is the same fact twice and
+      // it cost 24px on every row; the level summary stopped when it was
+      // compacted, and prints it only behind its chevron. Both still carry the
+      // words in `Semantics`, which is what the second expectation checks.
       expect(
         find.text(english.deckLearnedProgressLabel(21, 42)),
-        findsOneWidget,
-        reason: 'painted once, by the level summary',
+        findsNothing,
+        reason: 'the learned caption is announced, never drawn at rest',
       );
       // On the card's own node, not as a separate one: `MxCard` announces the
       // whole card as one button, so everything inside it merges into that
