@@ -54,21 +54,47 @@ class DeckSummarySectionWidget extends ConsumerWidget {
         DeckSummaryDetail.expanded;
 
     return Padding(
-      // `sm` above (owner review, 2026-08-20): the path is inside the bar now,
-      // and the bar's own hairline is the separation between chrome and body,
-      // so `md` on top of that break measured about 40px of dead space above
-      // the panel on device. `sm` is the floor `deck_list_spacing_test.dart`
-      // holds for "visibly separate" and this sits on it.
+      // **Nothing above, and the bar already carries the break** (owner review,
+      // 2026-08-25, vertical-rhythm pass). It was `sm`, on top of the 8.5 the
+      // app bar keeps below the subheader — 16.5 in total, where the design
+      // asks for 16. Swapping the heading row's gaps cost 8px of the list's
+      // headroom, and this is where the owner said to find them.
       //
-      // **Nothing below** (owner review, 2026-08-25). The list heading under
-      // this owns the gap before the first card and always did; the panel's own
-      // bottom inset was a second opinion about the same seam, and the two
-      // stacked into dead space that cost most of a deck card.
+      // `deck_list_spacing_test.dart` still holds: it asks for `sm` between the
+      // header strip and this card, and the bar's own centring clears it —
+      // exactly, at 8, since `_toolbarHeight` was made to reserve what it
+      // renders. It used to clear by half a pixel, on five pixels of slack the
+      // bar had reserved for a line height it does not use. The separation
+      // rests on that arithmetic either way, so a change there breaks the
+      // guard rather than merely moving a gap. Putting `sm` back is one token
+      // if the trade sours.
+      //
+      // **`xl` below, and the reason is grouping rather than taste** (owner
+      // review, 2026-08-25, vertical-rhythm pass). It was 0, which put the list
+      // heading against the hero's own edge while leaving 24 between that
+      // heading and the first card it names. By proximity the reader groups
+      // `YOUR DECKS` with the panel above it instead of the list below — the
+      // label was closer to the thing it does not describe.
+      //
+      // **`sm`, the bottom of the walk.** This went `xl` → `lg` → `md` → `sm`
+      // across four reviews, each one saying the break under the hero was
+      // still too much air, and each step handing the pixels to the list.
+      //
+      // What holds it at `sm` rather than 0 is the label below it. Measured on
+      // ink, the cap sits 28.09 under the hero and the baseline 19.19 over the
+      // first card, so the label is nearer its own list by 8.9 — one spacing
+      // step, the least this design system asks anyone to see as a difference.
+      // At 0 it would be 20.09 against 19.19 and the label would belong to
+      // neither side, which is the "floating" an image review named.
+      //
+      // The row's 48px height is `MxTextButton`'s touch target, and it is why
+      // both figures dwarf the tokens: the `Row` centres a 16px label box in
+      // 48, so 16 of each is air no token here can see or spend.
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
-        AppSpacing.sm,
-        AppSpacing.lg,
         0,
+        AppSpacing.lg,
+        AppSpacing.sm,
       ),
       child: DeckLevelSummaryWidget(
         snapshot: snapshot,

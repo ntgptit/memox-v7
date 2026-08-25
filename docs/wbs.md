@@ -12038,6 +12038,160 @@ của M2.
   `deck_summary_new_test.dart`, `test/demo/` goldens, full host suite.
 - **Checklist phases:** 7, 12, 14
 
+### M99.52 · Thước nhịp dọc cho Deck list — và khoảng bị đảo mà nó bắt được
+
+- **Status:** **done**
+- **Goal:** Chủ dự án yêu cầu một golden kẻ vạch ngang ở mép trên/dưới của từng
+  item trên màn Deck list rồi đo khoảng giữa chúng, để **phát hiện khoảng cách
+  bất thường theo chiều dọc**. Không phải để nhìn cho đẹp — để bắt lỗi.
+- **Scope:** Một test golden mới, cộng đúng một sửa đổi mà chính nó chỉ ra.
+- **Công cụ:** `deck_list_rhythm_golden_test.dart` dựng màn root **thật** (cùng
+  fixture với `deck_screens_demo_test.dart`, để thước và gallery đo cùng một
+  app), thu hộp của từng item, rồi pump lại với một lớp thước phủ lên: hairline
+  ở mỗi mép, tên item bên trái, **khoảng cách in ngay trong khoảng nó đo**.
+  Golden nằm cạnh feature chứ không ở `test/demo/goldens`, để gallery vẫn chỉ
+  chứa màn hình.
+- **Hai lần thước tự sai trước khi đọc được:**
+  - `TextPainter` trong `CustomPainter` tự phân giải font, và trong harness
+    golden nó rơi về fallback — **mọi nhãn ra ô đen**. Chuyển nhãn sang widget
+    `Text`. Vẫn đen: `TextStyle` không khai `fontFamily` thì cũng rơi về
+    fallback. Phải khai `AppTypography.bodyFamily` tường minh.
+  - Bản đầu tính khoảng theo **mọi** item, nên in ra `11,9` cho khoảng giữa
+    FAB và card 4 — một con số đo vị trí của nút chứ không đo quyết định spacing
+    nào. FAB và bottom bar nay **được vẽ mép nhưng không tham gia chuỗi đo**.
+- **Chuỗi đo, theo yêu cầu chủ dự án (2026-08-25, vòng hai):** title →
+  subtitle → hero → hàng heading → **card đầu tiên**, rồi dừng. Khoảng giữa các
+  card đã được duyệt và chấp nhận nên in tiếp chỉ là nhiễu che mất thứ chưa
+  chốt; chúng vẫn được kẻ mép. App bar cũng chỉ còn kẻ mép: **hộp của bar cho
+  biết chrome kết thúc ở đâu, còn thứ mắt đọc là title và dòng dưới nó** — và
+  khoảng giữa *hai cái đó* mới là quyết định.
+- **Một bug nữa của chính thước:** `find.text('Library')` khớp cả nhãn tab
+  Library dưới bottom nav, nên chuỗi đầu tiên đo tới **một cái tab** rồi in ra
+  như thể đó là header. Finder nay ràng vào `AppBar`.
+- **Đo được sau khi chia nhỏ:**
+
+  | | khoảng | |
+  |---|---|---|
+  | Title → Subtitle | 16,0 | token |
+  | Subtitle → Hero | **24,5** | lệch thang 0,5 — miễn trừ có lý do |
+  | Hero → Heading row | 0,0 | hai hộp chạm nhau |
+  | Heading row → Card 1 | 24,0 | token |
+
+  `24,5` = **16,5** phần đệm còn lại dưới khối tiêu đề của bar, cộng `sm` của
+  summary section. 16,5 không phải con số ai gõ: `MxContentShell._toolbarHeight`
+  tính bar bằng `titleLarge × _lineFactor + sm + compactLineHeight + md`, và nửa
+  pixel rơi ra từ phép nhân đó. Đuổi theo nó nghĩa là sửa số học chiều cao của
+  một shell dùng chung để dịch một khoảng mà mắt đọc là `xl`. Nên nó vào
+  `_allowedOffScale` **kèm lý do**, khóa theo cặp để một ngoại lệ không lặng lẽ
+  che một khoảng khác trôi tới cùng giá trị.
+- **Cái nó bắt được:**
+
+  ```
+  Hero        →  Heading row :  0.0
+  Heading row →  Deck card 1 : 12.0   ← đảo nhịp
+  Deck card 1 →  Deck card 2 : 16.0
+  Deck card 2 →  Deck card 3 : 16.0
+  ```
+
+  Hàng heading bám vào card đầu **chặt hơn** các card bám nhau. Mọi con số đều
+  là token hợp lệ, nên phép kiểm "có nằm trên `AppSpacing.scale` không" **không
+  bắt được** — đây là lỗi **quan hệ**, không phải lỗi giá trị.
+- **Sửa vòng một, và nó chưa trúng gốc:** gap dưới toolbar `md` → `xl`, theo
+  lập luận cũ ở `deck_list_screen.dart` ("một section break không lớn hơn 16 sẽ
+  khiến heading đọc như hàng đầu của list"). Nhịp thành `8 / 0 / 24 / 16 / 16`.
+- **Chủ dự án đọc overlay và chỉ ra gốc thật (2026-08-25):** `hero → heading =
+  0` còn `heading → card 1 = 24`. Label **dính vào hero** và **tách khỏi chính
+  list nó gán nhãn**, nên theo proximity người đọc nhóm `YOUR DECKS` vào hero
+  card. **Lỗi grouping, không phải thẩm mỹ.**
+
+  Lập luận cũ trả lời sai câu hỏi: nó đúng với một heading **trôi giữa** hai
+  nhóm, mà heading này không trôi — **nó thuộc về list**.
+- **Sửa vòng hai — đảo hai khoảng:** `xl` chuyển sang padding đáy của summary
+  section, `sm` ở toolbar. Chủ dự án đọc kết quả và nói `24` phía trên heading
+  là quá nhiều, nên hạ dần qua hai vòng review: `xl` → `lg` → **`md`**. Chốt ở
+  **`hero → heading = 12`, `heading → card 1 = 8`**. Break chỉ cần **lớn hơn**
+  tie, không cần lớn — 12 so với 8 vẫn đọc label thuộc về list, và mỗi bậc hạ
+  xuống trả pixel lại cho list.
+- **Vòng ba — đo mực thay vì đo hộp.** Phê bình theo ảnh nói label `YOUR DECKS`
+  có ~61px không khí quanh nó, gấp ~7 lần chiều cao chữ, và yêu cầu bỏ padding
+  dọc trong heading row để còn 20/10. Đo lại: cap-height Inter 12px là **8,72px**,
+  trên mực **32,09** = token 12 + row-centring 16 + ascent-trên-cap 4,09; dưới
+  mực **27,19** = descent 3,19 + row-centring 16 + token 8. Tổng 59,28 — độ lớn
+  đúng, nguyên nhân sai: **không có padding dọc nào trong row**. Row cao 48 vì
+  `MxTextButton` cao 48 (`getRect` của hai cái trùng khít), và `Row` chia đôi
+  32px đó quanh label. Sàn tuyệt đối khi nút còn trong row là **20,09 / 19,19**,
+  nên chỉ tiêu `dưới ≈ 10` không đạt được bằng bất kỳ token nào.
+- **Và hai mục tiêu đánh nhau.** Gộp label vào list bằng proximity cần
+  `trên ≥ 2 × dưới`, mà `dưới ≥ 19,19`, tức `trên ≥ 38,4` — **thêm** không khí
+  chứ không siết. Chủ dự án chọn phương án trong phạm vi: token dưới `8 → 0`.
+  Tổng 59,28 → 51,28; tỉ lệ trên/dưới **1,18 → 1,67**, label thôi cách đều hai
+  bên. Chỉ tiêu 20/11 đạt chính xác nếu nút sort rời khỏi dòng heading — ghi
+  lại làm lựa chọn để ngỏ, chưa làm.
+- **Vòng bốn — `hero → heading` hạ nốt về `sm`, `heading → card 1` giữ 0.**
+  Chủ dự án thử 8/8 trước, tôi đo ra tỉ lệ 1,03 (28,09 / 27,19) tức label lại
+  cách đều hai bên, nên chốt 8/0. Mực: **28,09 trên / 19,19 dưới**, tổng 51,3 →
+  **47,3**, label nghiêng về list **8,9px**. Chuỗi hộp: 16 / 16 / 8 / 0.
+- **Ngưỡng grouping đổi từ tỉ lệ sang khoảng cách.** Nó là `1,5×` — con số tôi
+  ước, ghi một chữ số thập phân, không neo vào đâu — và quyết định này đo ra
+  1,46, trượt đúng 0,036. Một ngưỡng chặn thay đổi bằng khoảng nhỏ hơn thứ nó
+  phát biểu được sẽ bị hạ dần mỗi vòng review cho tới lúc vô nghĩa. Thay bằng
+  **`AppSpacing.sm`**: label phải gần list hơn panel ít nhất một bậc thang
+  spacing. Vẫn bắt được cả hai khiếm khuyết cũ — 0/24 lệch **23px sai chiều**,
+  và 8/8 chỉ còn 0,9.
+- **Quy tắc grouping chuyển sang chạy trên mực.** Nó đang so hai khoảng hộp, mà
+  khoảng hộp dưới heading nay là 0 trong khi mực cách card đầu 19,2 — người đọc
+  bảng sẽ thấy một khiếm khuyết không tồn tại. Thước có thêm dải `Label ink`
+  (cap → baseline, dùng cap-height 0,727 của Inter, **không** dùng ascent) và
+  assertion là tỉ lệ ≥ 1,5 thay vì phép so lớn hơn.
+- **16,5 giữa subtitle và hero: sửa được, và đã sửa.** Nó từng được miễn trừ là
+  "số học chiều cao của bar". `_toolbarHeight` = `titleLarge × 1,5` + sm + 32 +
+  md = 85, trong khi Column thật cao 68 = 28 + 8 + 32 — vì `titleLarge.height`
+  là **1,2727**, không phải 1,5. Năm pixel dư không ai chọn làm phần thừa của
+  bar thành **17**, chia đôi ra 8,5. Cho bar giữ chỗ đúng bằng thứ nó dựng
+  (`title?.height ?? _lineFactor`) và đổi `md → lg` cho padding bar: **84 =
+  28 + 8 + 32 + 16**, thừa 16, chia đôi ra 8. Toàn bộ chuỗi nay là số nguyên
+  (8 / 36 / 52 / 68 / 84) và `_allowedOffScale` rỗng — không khoảng nào còn cần
+  miễn trừ. 1,5 giữ lại làm fallback cho theme không khai báo line height.
+- **Thước lại tự sai lần thứ tư, và lần này nó gây hiểu nhầm thật.** Mỗi khoảng
+  có **hai** chip — tên dải bên trái, con số bên phải — nên con số dễ bị đọc là
+  "khoảng của dải mang tên đó". Chủ dự án đọc `24` thành khoảng **dưới** heading
+  trong khi nó là khoảng **trên**. Nay mỗi số có một **ngoặc dọc** nối đúng hai
+  mép nó đo, nên không thể gán nhầm.
+- **Bù 8px, lấy từ nơi chủ dự án chỉ:** padding trên của summary section `sm` →
+  0. `subtitle → hero` còn **16,5**, đúng mục tiêu 16. Toàn bộ 16,5 nay thuộc về
+  app bar. **`deck_list_spacing_test.dart` vẫn qua nhưng chỉ hơn sàn nửa pixel**
+  (đòi ≥ 8, còn 8,5) — nghĩa là sự tách biệt giữa header strip và hero nay tựa
+  hoàn toàn vào số học của `_toolbarHeight`; đổi ở đó sẽ làm guard đỏ chứ không
+  chỉ dịch một khoảng. Trả `sm` lại là một token nếu đánh đổi này hỏng.
+- **Luật trong thước bị đảo theo, vì luật cũ giờ sai:** không còn "khoảng dưới
+  heading phải lớn hơn khoảng giữa hai card" mà là **proximity** — thứ nằm
+  **trên** heading phải xa hơn thứ nằm **dưới** nó. Đo từ đúng chuỗi bức ảnh vẽ,
+  nên luật và thước không thể nói khác nhau.
+- **Khoảng `0.0` giữa hero và heading row được vẽ ra chứ không giấu.** Hai hộp
+  chạm nhau thật; trên máy nó đọc rộng rãi vì hàng heading cao 48 quanh một nhãn
+  12px — target của control sort đặt chiều cao đó. Chênh lệch giữa **hộp** và
+  **mực** là thứ đáng nhìn thấy, nên thước kẻ theo hộp và nói rõ điều đó.
+- **Output:** `deck_list_rhythm_golden_test.dart` + `goldens/deck_list_rhythm.png`,
+  `deck_list_screen.dart` (gap `xl`), 6 golden `deck_list_*` sinh lại.
+- **Acceptance criteria:**
+  - [x] Golden kẻ vạch ở mép trên và mép dưới của từng item, in khoảng cách.
+  - [x] Nhãn đọc được (không phải ô đen).
+  - [x] Item phủ (FAB, bottom bar) và các card sau card đầu được vẽ mép nhưng
+        không làm nhiễu số đo.
+  - [x] Ảnh nói cùng điều với test: khoảng được miễn trừ mang màu riêng, không
+        phải đỏ — một chip đỏ cạnh một lần chạy xanh dạy người đọc mất tin vào
+        một trong hai.
+  - [x] Nhãn tên nằm trong khoảng phía trên dải nó đặt tên, không đè lên nội
+        dung — bản trước làm subtitle mất ba ký tự vào chính nhãn của nó.
+  - [x] Bắt được lỗi giá trị (off-scale) **và** lỗi quan hệ (nhịp đảo).
+  - [x] Lỗi nó bắt được đã sửa; vẫn ba card trọn vẹn.
+  - [x] `dod_check.sh` xanh.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.51
+- **Tests required:** `deck_list_rhythm_golden_test.dart` (mới),
+  `deck_summary_compact_geometry_test.dart`, `test/demo/` goldens, full suite.
+- **Checklist phases:** 7, 12, 14
+
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 
 Ghi lại cụ thể, vì "mất một bộ lint" là câu quá mơ hồ để ai đó sau này biết
