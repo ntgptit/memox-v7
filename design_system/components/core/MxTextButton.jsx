@@ -18,12 +18,22 @@ import { MxIcon } from './MxIcon.jsx';
  * Colour is `--color-primary-accent`, not `--color-primary` — the accent is the
  * variant that reads as a label on the page (dark #8A8AE0, 6.26:1, where the
  * fill colour measures 3.33:1 and fails AA at label size).
+ *
+ * `isCompact` drops the label to `--text-label-md`, for a link sharing a row
+ * with a heading set at that rung — a control larger than the thing it names
+ * has the hierarchy backwards. Only the type moves; the 48 target does not.
+ *
+ * `semanticLabel` is for a link whose label is a VALUE rather than an action:
+ * the deck list's sort control paints the order it is in, and "Recent, button"
+ * tells a reader a word and not what pressing it does. The announcement
+ * CONTAINS the painted label rather than replacing it (WCAG 2.5.3).
  */
-export function MxTextButton({ label, onClick, icon, trailingIcon, isDisabled = false, isDestructive = false }) {
+export function MxTextButton({ label, onClick, icon, trailingIcon, isDisabled = false, isDestructive = false, isCompact = false, semanticLabel }) {
   return (
     <button
       type="button"
-      className={'mx-textbtn' + (isDestructive ? ' mx-textbtn--destructive' : '')}
+      className={'mx-textbtn' + (isDestructive ? ' mx-textbtn--destructive' : '') + (isCompact ? ' mx-textbtn--compact' : '')}
+      aria-label={semanticLabel}
       onClick={onClick}
       disabled={isDisabled || !onClick}
     >

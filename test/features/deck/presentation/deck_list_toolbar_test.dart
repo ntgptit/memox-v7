@@ -70,14 +70,20 @@ void main() {
       // own order. A default that changed the view would be a content change
       // dressed as a redesign.
       expect(find.byType(DeckListToolbarWidget), findsOneWidget);
-      // **The order is not painted on the row any more.** The control is a
-      // glyph, so what the list is sorted by reaches a sighted user through
-      // the sheet and a screen reader through the control's own label. Both
-      // are asserted, because losing either is losing the fact.
+      // **The order is painted on the row, in the short form.** The first
+      // compaction pass took the control down to a bare glyph and moved the
+      // order into the sheet; a glyph says "sort" and cannot say "sorted by
+      // what", which is the half a user needs (owner review, 2026-08-25).
+      // The full wording stays in the sheet, where there is room for it.
+      expect(find.text(english.deckSortRecentShortLabel), findsOneWidget);
       expect(find.text(english.deckSortRecentLabel), findsNothing);
+      // The painted word is a value, so the announcement says what pressing it
+      // does — and contains the painted word rather than replacing it.
       expect(
         find.bySemanticsLabel(
-          english.deckSortControlSemanticLabel(english.deckSortRecentLabel),
+          english.deckSortControlSemanticLabel(
+            english.deckSortRecentShortLabel,
+          ),
         ),
         findsWidgets,
       );
@@ -149,6 +155,15 @@ void main() {
           .single
           .actions;
       expect(rows.length, 4);
+      // The sheet keeps the full wording — it has the room, and `Recent`
+      // alone under "Sort decks by" says less than the row it came from.
+      expect(
+        rows.map((MxActionSheetAction row) => row.label),
+        containsAll(<String>[
+          english.deckSortRecentLabel,
+          english.deckSortCardsDueLabel,
+        ]),
+      );
       expect(
         rows
             .where((MxActionSheetAction row) => row.isSelected)

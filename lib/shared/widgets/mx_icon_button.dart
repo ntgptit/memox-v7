@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_icon_size.dart';
 import '../../core/theme/app_spacing.dart';
-import '../../core/theme/theme_context_extension.dart';
 
 /// An action with no visible label.
 ///
@@ -30,7 +29,6 @@ class MxIconButton extends StatelessWidget {
     this.tooltip,
     this.isCompact = false,
     this.isFilled = false,
-    this.isAccent = false,
     super.key,
   });
 
@@ -66,20 +64,6 @@ class MxIconButton extends StatelessWidget {
   /// only the container changes, so a bar never carries two of these.
   final bool isFilled;
 
-  /// Draws the glyph in the brand ink instead of `onSurfaceVariant`.
-  ///
-  /// **For a glyph that is the only control in its row.** The deck list's sort
-  /// control lost its pill, and a 20px `onSurfaceVariant` glyph alone beside a
-  /// heading reads as decoration rather than as something to press. Nothing
-  /// else changes — no container, no size, the same 48 target — so this is the
-  /// quiet end of the same ladder [isFilled] tops.
-  ///
-  /// **`primaryAccent`, not `primary`.** `MxTextButton` settled this: `primary`
-  /// measures 3.33:1 on dark and fails AA for anything read as text; the accent
-  /// measures 6.26:1. A control the user is meant to find should not be the one
-  /// place the app drops below the floor it holds everywhere else.
-  final bool isAccent;
-
   @override
   Widget build(BuildContext context) {
     if (isFilled) {
@@ -102,15 +86,6 @@ class MxIconButton extends StatelessWidget {
     return IconButton(
       onPressed: onPressed,
       tooltip: tooltip ?? semanticLabel,
-      // Only the foreground is stated. `iconButtonTheme` still owns the size,
-      // the shape, the 48 floor and every interaction state — a `style` that
-      // named more would replace the theme's `WidgetStateColor` with a flat
-      // colour and take the disabled state with it.
-      style: isAccent
-          ? IconButton.styleFrom(
-              foregroundColor: context.semanticColors.primaryAccent,
-            )
-          : null,
       constraints: isCompact
           ? const BoxConstraints.tightFor(
               width: AppSpacing.minimumTouchTarget,
