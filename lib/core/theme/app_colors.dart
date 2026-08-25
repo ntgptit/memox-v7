@@ -218,7 +218,8 @@ abstract final class AppColors {
   /// brighter indigo the focus ring already uses, 6.26:1 on the page.
   /// Derivations, not copies: light *is* the fill colour and dark *is* the
   /// focus ring's indigo — both facts this comment already states, now stated
-  /// where an edit cannot un-say them.
+  /// where an edit cannot un-say them. A *selected* control's ink is a
+  /// different question: `AppMaterialRoles.selectedInk`, which holds the why.
   static const Color primaryAccentLight = primaryLight;
   static const Color primaryAccentDark = focusRingDark;
 

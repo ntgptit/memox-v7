@@ -11258,18 +11258,98 @@ của M2.
         `check_architecture.sh` và `check_docs.py` xanh.
 - **Chưa trả, đã ghi:** `flutter analyze` và host suite **chưa chạy** trong
   phiên này — môi trường không có Flutter SDK. Phải chạy trước khi merge.
-- **Nợ liên quan đã ghi nhận, chưa làm:** `brandInk` và `semantic.primaryAccent`
-  vẫn là hai lời đáp khác nhau cho cùng "brand làm chữ" ở dark (`#D7D5FF` so
-  với `#8A8AE0`); `chipTheme.iconTheme` không đổi màu theo `selected` nên pill
-  đang chọn có chữ brand cạnh glyph xám; `semantic.surfaceElevated` không có
-  caller nào trong `lib/`; alpha rời rạc (`0.72`/`0.48`/`0.24`/`0.4`/`0.5`) và
-  `fontSize: 20` trong compact pass vẫn là literal ngoài `AppStateOpacity` và
-  `AppTypography`.
+- **Nợ liên quan đã ghi nhận:** ~~`brandInk` so với `semantic.primaryAccent`~~
+  và ~~`chipTheme.iconTheme` không đổi màu theo `selected`~~ **đã trả ở
+  M99.43** — và phép đo ở đó bác luôn cách sửa mà entry này đề nghị: hai token
+  không gộp được, cái sai là cái tên. **Chưa trả:**
+  `semantic.surfaceElevated` không có caller nào trong `lib/`; alpha rời rạc
+  (`0.72`/`0.48`/`0.24`/`0.4`/`0.5`) và `fontSize: 20` trong compact pass vẫn
+  là literal ngoài `AppStateOpacity` và `AppTypography`.
 - **Editable documents:** `docs/wbs.md`
 - **Dependencies:** M99.39, M99.41
 - **Tests required:** `focus_ring_contrast_test.dart` (+2 group, 8 case),
   `app_theme_identity_test.dart` (mới), `app_theme_test.dart` (+2 assertion
   trong `MemoxApp follows the system theme mode`).
+- **Checklist phases:** 7, 13
+
+### M99.43 · `selectedInk` tách khỏi `primaryAccent`; glyph của pill theo label
+
+- **Status:** **done**
+- **Goal:** Hai mục còn lại của đợt review theme. `brandInk` và
+  `semantic.primaryAccent` trông như hai cách viết của một ý ("mực brand"), và
+  ở dark cho ra hai màu cách nhau xa — `#D7D5FF` so với `#8A8AE0`. Còn
+  `chipTheme.iconTheme` khai báo một màu cho mọi state, nên pill **đang chọn**
+  in chữ mực brand cạnh glyph xám.
+- **Scope:** Đổi tên + tài liệu + test cho token thứ nhất; một dòng màu trong
+  `MxPillButton` cho token thứ hai. **Không đổi một giá trị màu nào** — mọi
+  hex giữ nguyên ở cả hai mode, nên `test/demo/` goldens và visual audit không
+  đụng tới. Hai nợ còn lại của đợt review — `semantic.surfaceElevated` không
+  caller, và alpha rời rạc ngoài `AppStateOpacity` — vẫn để ngoài phạm vi.
+- **Đo xong thì kết luận đảo lại: hai token này KHÔNG hợp nhất được.** Review
+  ban đầu đề nghị gộp. Số liệu bác điều đó, theo cả hai chiều:
+  - Gộp về `primaryAccent`: ở dark nó đo **4,06:1** trên `primaryContainer` —
+    tức trên chính nền của pill đang chọn — dưới sàn 4,5 mà chữ 12px cần. Gộp
+    kiểu này là một lỗi a11y mới.
+  - Gộp về `onPrimaryContainer`: ở light nó là `#1B1B5C`, đọc ra như chữ đen
+    chứ không như mực brand mà mockup chủ dự án yêu cầu (2026-08-20).
+  - Mỗi token lấy giá trị vừa đọc được trên **nền của chính nó** vừa còn là
+    brand. Nền khác nhau nên giá trị khác nhau. Chúng bằng nhau ở light **do
+    cấu tạo** (cả hai về `primary`), và đó chính là thứ khiến chúng trông
+    thừa.
+- **Nên cái sai thật sự là cái tên, và nó được sửa:** `brandInk` →
+  `selectedInk`. `primaryAccent` đã tự nhận là "brand hue as a LABEL", nên một
+  hàm tên `brandInk` là hai thứ cùng nhận một việc. Tên mới nói **câu hỏi** —
+  mực của một control *đang được chọn* — chứ không nói màu.
+- **Bốn số giờ là assertion, không phải comment:** `selectedInk` trên nền pill
+  đang chọn (5,57 light / 8,87 dark), trên indicator của nav bar, và trên
+  chính thanh nav — vì M3 vẽ **glyph tab trong indicator còn label thì bên
+  dưới, trên nền thanh**, tức một token phải qua sàn trên hai nền khác nhau.
+  Nền đọc từ theme đã dựng chứ không từ token, theo đúng lý do
+  `theme_probe.dart` tồn tại. Phép gộp bị bác cũng thành test: nếu bảng màu
+  đổi tới mức `primaryAccent` qua được 4,5 trên nền pill dark, test đỏ và
+  quyết định được xem lại — chứ không lặng lẽ gộp.
+- **Glyph của pill: `ChipThemeData.iconTheme` không có slot per-state.** Nó là
+  `IconThemeData` trần, không phải `WidgetStateProperty`, nên một màu phải
+  phục vụ mọi state và nó khai báo mực nghỉ. Hệ quả: pill **đang chọn** = chữ
+  mực brand + glyph xám; pill **disabled** = chữ mờ 38% + glyph nguyên độ đậm.
+  Hai nửa của một control không đồng ý với nhau về việc nó đang ở state nào.
+  Sửa bằng cách để glyph đọc `DefaultTextStyle` — đúng thứ `RawChip` phân giải
+  `labelStyle` vào — nên selected, disabled và nghỉ đều đúng miễn phí, và một
+  state tương lai cũng vậy, không sinh thêm một resolver phải giữ đồng bộ.
+  Cùng quy tắc `app_interaction_states_test.dart` đã gọi tên: "the icon rides
+  the label through every state". `chipTheme.iconTheme` ở lại làm fall-through
+  cho `Chip` trần (avatar, delete glyph), và comment nói rõ nó chỉ còn là thế.
+- **Một tuyên bố cũ đã lệch, phát hiện nhờ việc đổi tên:**
+  `design-parity-checklist.md` ghi eyebrow `TODAY` lấy mực từ `brandInk()`.
+  Không còn: `deck_subheader_widget.dart` dùng `onSurfaceVariant`. Dòng đó đã
+  sửa cho đúng, giữ lại phép đo 2,90:1 vốn là phần còn giá trị. Doc lệch code
+  tệ hơn không có doc, vì phiên sau tin nó.
+- **Output:** `app_material_roles.dart` (`brandInk` → `selectedInk`, doc mang
+  bốn phép đo và lý do không gộp được), `app_colors.dart` (trỏ chéo từ
+  `primaryAccent`), `app_chip_theme.dart` + `app_navigation_bar_theme.dart`
+  (call site), `mx_pill_button.dart` (glyph lấy màu label),
+  `design-parity-checklist.md` (đổi tên + sửa tuyên bố lệch).
+- **Acceptance criteria:**
+  - [x] `selectedInk` qua 4,5:1 trên **cả ba** nền một control đang chọn có:
+        nền pill, indicator nav, thân thanh nav — ở cả hai mode.
+  - [x] Pill và tab cùng phân giải về đúng `selectedInk`, khẳng định qua theme
+        chứ không qua hằng số.
+  - [x] Phép gộp bị bác là test, không phải comment; và mỗi mode khẳng định
+        **cách suy ra** (light = `primary`, dark = `onPrimaryContainer`) chứ
+        không phải hex, nên trỏ lại vào một màu chỉ tình cờ qua contrast sẽ đỏ.
+  - [x] Glyph của pill bằng đúng màu label ở selected / nghỉ / disabled, đọc
+        từ cây widget — không assertion nào trên `ChipThemeData` thấy được lỗi
+        này, vì lời giải nằm trong widget.
+  - [x] Không giá trị màu nào đổi; goldens và visual audit không cần dựng lại.
+  - [x] Guard `memox-v7` 0 lỗi 0 cảnh báo (`app_colors.dart` chạm trần 400
+        dòng nên trỏ chéo phải rút còn hai dòng), `check_architecture.sh` và
+        `check_docs.py` xanh.
+- **Chưa trả, đã ghi:** `flutter analyze` và host suite **chưa chạy** — môi
+  trường không có Flutter SDK. Phải chạy trước khi merge.
+- **Editable documents:** `docs/wbs.md`, `docs/reviews/design-parity-checklist.md`
+- **Dependencies:** M99.42
+- **Tests required:** `app_selected_ink_test.dart` (mới, 8 case),
+  `mx_pill_button_theme_test.dart` (+1 widget test, ba state).
 - **Checklist phases:** 7, 13
 
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
