@@ -11639,6 +11639,132 @@ của M2.
   family`) nay phủ giá trị thật thay vì phủ fallback.
 - **Checklist phases:** 7, 13
 
+### M99.48 · Switch, checkbox và time picker có theme; cờ high contrast thôi bị bỏ qua
+
+- **Status:** **done**
+- **Goal:** Ba lỗ hổng còn lại của đợt review theme. Cả ba cùng một dạng: một
+  quyết định *chưa được đưa ra* trông y hệt một quyết định *đã đưa ra*, cho tới
+  khi có người đo.
+  - `Switch`, hai `SwitchListTile` và một `CheckboxListTile` **đang render** mà
+    không có `switchTheme`/`checkboxTheme`. Chúng lấy hover/press/focus từ
+    fallback không seed của `ThemeData` — là bốn control duy nhất trong app
+    không đọc `AppInteractionStates`. Điều này vi phạm đúng quy tắc
+    `app_theme.dart` tự tuyên bố *"chỉ theme cái gì render — theo cả hai
+    chiều"*, và chiều ngược lại đang thủng.
+  - `showTimePicker` **không kế thừa `dialogTheme`**: `TimePickerDialog` dựng
+    `Dialog` từ `_TimePickerDefaultsM3` (elevation 6, bo 28, nền
+    `surfaceContainerHigh`). Nên màn hình nhắc học mở ra bề mặt **duy nhất**
+    trong app mang shadow Material và góc bo khác — trong khi `dialogTheme`
+    dành hẳn một đoạn giải thích vì sao dialog là `elevation: 0` + hairline
+    (F15, AD-14).
+  - `MaterialApp.highContrastTheme` và `highContrastDarkTheme` **để null**, nên
+    người bật "High contrast text" của Android nhận đúng từng pixel như người
+    không bật. Đây không phải mặc định trung tính — nó là yêu cầu hỏng trong im
+    lặng.
+- **Scope:** `app_toggle_themes.dart` (mới), `app_high_contrast.dart` (mới),
+  `buildTimePickerTheme` trong `app_overlay_themes.dart`, nối vào
+  `app_theme.dart`, hai slot trong `app.dart`, ba file test mới, một mục
+  Widgetbook. Không đụng `AppColors`, không thêm một mã hex nào.
+- **Thumb lúc tắt rời khỏi mặc định của Material, và đó là số đo chứ không phải
+  gu.** M3 mặc định thumb chưa chọn là `colorScheme.outline` — ở đây là
+  `borderControl` — trên track `surfaceContainerHighest`. Cặp đó đo được
+  **2,79:1 ở light và 2,54:1 ở dark**, dưới ngưỡng 3:1 mà WCAG 1.4.11 đòi cho
+  thông tin nhận diện *trạng thái* — mà trên một switch thì thumb **chính là**
+  trạng thái. `onSurfaceVariant` trên cùng track đọc 5,61:1 và 6,17:1.
+- **Track được viền ở mọi trạng thái, và viền đổi màu thay vì biến mất.** M3 bỏ
+  viền khi switch bật — đúng ở nơi `primary` là fill sáng đọc 7,27:1 trên thẻ,
+  và **sai ở đây**, vì `primaryDark` cố ý giữ thấp (xem `AppColors.primaryDark`)
+  và đo **2,90:1** trên thẻ tối. Nên biên được suy ra từ chính cặp mà track đang
+  mang, đúng cách `AppInteractionStates.focusRingOf` suy ra viền focus của nút
+  filled:
+
+  | track | viền | trên fill | trên thẻ tối |
+  |---|---|---|---|
+  | tắt (`surfaceMuted`) | `borderControl` | — | 3,00:1 |
+  | bật (`primary`) | `onPrimary` | 5,88:1 | 17,05:1 |
+
+  Ở light viền lúc bật là trắng trên thẻ gần trắng — 1,03:1, tức vô hình — và
+  đó là kết quả **đúng** chứ không phải sót: fill của light đã tự tách 7,27:1
+  nên viền không có việc gì để làm và không làm gì. Cạnh xuất hiện đúng ở chế độ
+  cần nó.
+- **High contrast: ba phép đổi, không màu mới.** Mọi giá trị là một token sẵn có
+  đứng thay cho token khác, nên đây là *trỏ lại* bảng màu chứ không phải bảng
+  màu thứ hai phải nuôi.
+
+  | token | thường | high contrast |
+  |---|---|---|
+  | `borderSubtle` | 1,45 / 2,04 | `onSurfaceVariant` — 6,41 / 7,30 |
+  | `borderControl` | 3,19 / 3,00 | `onSurfaceVariant` |
+  | `borderAccent` | 1,89 / 1,45 | `primaryAccent` — 7,27 / 5,51 |
+  | `onDisabled` | 2,37 / 3,20 | cùng mực ở 62% — 4,88 / 6,33 |
+
+  **Vì sao là `onSurfaceVariant` chứ không phải `borderControl`.**
+  `borderControl` đạt 3:1 trên thẻ và trên trang, nhưng trên **tile muted** chỉ
+  tới 2,79 / 2,54 — mà tile chìm chính là chỗ app xếp một dãy tuỳ chọn. Một
+  bảng màu high contrast vẫn còn một nền nó trượt thì chưa làm được đúng việc
+  nó sinh ra để làm.
+- **Nâng `onDisabled` là phép đổi duy nhất phải đánh đổi, và là đánh đổi mà
+  chính cái cờ đó đang yêu cầu.** Control bị vô hiệu *phải* lùi lại, 38% là thứ
+  làm nó đọc ngay ra là không dùng được. Nhưng 2,37:1 ở light nằm dưới sàn 3:1
+  cho bất kỳ đồ hoạ nào người dùng phải nhìn thấy được, và một control không ai
+  đọc nổi còn tệ hơn một control mất thêm một nhịp mới nhận ra là đang tắt. 62%
+  rơi vào 4,88:1 — đọc được, mà vẫn chưa tới một phần ba 14,81:1 của
+  `onSurface`, nên thứ bậc còn nguyên.
+- **Cái gì cố ý KHÔNG đổi:** `primary`, bốn màu semantic, thang surface,
+  `focusRing`. High contrast là thiết lập dễ đọc, không phải một thiết kế thứ
+  hai — dời màu thương hiệu hay màu success sẽ biến app thành app khác với đúng
+  những người đã bật nó lên.
+- **Một seam được rút ra để hai theme không lệch nhau.** `_light` và `_dark` giờ
+  nhận `(scheme, semantic)` và giữ bốn tham số còn lại — trang, fill hành động,
+  nhãn của nó, nhãn outlined — ở **một** chỗ. Dựng theme high contrast tại call
+  site thứ hai chính là cách một `actionFill` cũ nằm lại mà không ai thấy trong
+  diff; `app_high_contrast_test.dart` còn ghim thêm rằng chúng bằng nhau.
+- **Golden: đúng sáu file dịch chuyển, và con số đó được đo chứ không suy
+  luận.** Chạy toàn bộ golden hai lần trên **cùng** máy Linux — một lần có thay
+  đổi, một lần `git stash` phần `lib/` — rồi so 184 ảnh test giữa hai lần, nên
+  chênh lệch nền tảng Windows/Linux triệt tiêu:
+  - `reminder_settings_{light,dark}.png` — `Switch`
+  - `tag_filter_sheet_{light,dark}.png` — `CheckboxListTile`
+  - `card_import_preview_light.png`, `card_import_preview_valid_light.png` —
+    `SwitchListTile`
+
+  178 ảnh còn lại giống hệt nhau ở cả hai lần. **Đếm hẹp một lần rồi phải sửa:**
+  vòng đo đầu chỉ chạy `feature_screens_demo_test.dart` và cho ra 2 — bốn file
+  kia sinh từ test khác. Chạy hẹp trả lời một câu hỏi hẹp hơn câu được hỏi.
+  **Không regenerate ở đây**: `dart_test.yaml` ghi rõ golden sinh trên Windows,
+  và cập nhật chúng trên Linux sẽ làm job `windows-latest` của CI đỏ. Xem
+  Known technical debt.
+- **Acceptance criteria:**
+  - [x] `switchTheme`, `checkboxTheme`, `timePickerTheme` đều được khai báo và
+        đều đọc `AppInteractionStates` như mọi control khác.
+  - [x] Thumb đọc trên track ở cả hai trạng thái, cả hai chế độ (≥ 3:1); và có
+        test ghim rằng mặc định `outline` của Material *vẫn* trượt ngưỡng, để
+        lý do rời bỏ nó không mục ruỗng.
+  - [x] Track/ô tick luôn có biên tách khỏi thẻ: hoặc fill hoặc viền đạt 3:1.
+  - [x] Time picker có cùng nền, cùng elevation, cùng shape với `dialogTheme` —
+        so trực tiếp hai theme với nhau, nên đổi `dialogTheme` thì cái này theo
+        hoặc đỏ.
+  - [x] Mọi border trong high contrast đạt 3:1 trên **cả ba** nền, hai chế độ.
+  - [x] Mực disabled high contrast ≥ 3:1 mà vẫn yếu hơn `onSurface`.
+  - [x] Thương hiệu, thang surface và bốn màu semantic không đổi giữa hai theme.
+  - [x] Hai theme high contrast được memo hoá như hai theme kia.
+  - [x] `flutter analyze` sạch; `flutter test --exclude-tags golden` xanh;
+        widgetbook smoke test xanh; guard 0 vi phạm.
+- **Output:** `lib/core/theme/app_toggle_themes.dart` (mới),
+  `lib/core/theme/app_high_contrast.dart` (mới), `buildTimePickerTheme` trong
+  `app_overlay_themes.dart`, `app_theme.dart` (nối ba theme, tách `_lightScheme`
+  /`_darkScheme` thành hằng số, thêm `_light`/`_dark` và hai builder high
+  contrast), `lib/app/app.dart` (hai slot `MaterialApp`),
+  `widgetbook/lib/components/form_components.dart` +
+  `widgetbook/lib/main.dart` (mục *Switch and Checkbox*).
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.47
+- **Tests required:** `app_toggle_themes_test.dart` (mới, 9 case),
+  `app_time_picker_theme_test.dart` (mới, 6 case), `app_high_contrast_test.dart`
+  (mới, 9 case), và `color_scheme_roles_test.dart` mở rộng sang hai scheme high
+  contrast — chúng phải chịu cùng hai rule palette/hue chứ không được miễn.
+- **Checklist phases:** 7, 13
+
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 
 Ghi lại cụ thể, vì "mất một bộ lint" là câu quá mơ hồ để ai đó sau này biết
@@ -11680,6 +11806,7 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 | `study_answers` chưa có index cho khoảng thời gian | M99.28 | Progress lọc `answered_at >= ? AND answered_at < ?`; index duy nhất chạm cột này là `(card_id, answered_at)`, mà cột dẫn đầu không nằm trong predicate — nên mỗi lần emit là một full scan `study_answers`, và stream re-emit theo **mỗi lượt trả lời** khi màn hình đang mở (ở độ sâu 3 là ba scan mỗi lượt). Output có chặn, scan thì không | Thêm index `(answered_at)` — nhưng đó là **đổi schema**, tức bump version + snapshot + migration test, và M99.28 cố ý không đụng schema. Trả cùng lần bump schema tiếp theo, và theo đúng rule index của repo: đo bằng `EXPLAIN QUERY PLAN` trên dữ liệu thật trước rồi mới thêm |
 | `ancestry` CTE trong `deck.drift` không có bound | M99.28 | Cùng khiếm khuyết đã sửa ở `progress.drift`: walk mang `distance` tăng mỗi vòng nên `UNION` không dedup được, và trên cây cha vòng lặp thì statement không bao giờ trả về — nó giữ database isolate, nên mọi query khác của app chặn theo. Comment ở `deck.drift` còn khẳng định ngược lại | Áp đúng cách đã dùng ở `progress.drift`: `:maxWalk` cho `ancestry`, giữ `UNION` cho các walk không mang counter. Không gộp vào M99.28 vì nó nằm ngoài scope đã tuyên bố (không đụng Deck production code) |
 | `end_reason = scheduler_reset` phải mang cả BR-164 | M99.16 | Đổi scheduler khi chưa khoá ghi cùng giá trị với Reset, nên đọc riêng cột đó thì hai sự kiện khác nhau trông giống nhau. Không mất thông tin — `study_sessions.scheduler_generation` bằng generation của root sau một lần đổi và nhỏ hơn sau một lần reset — nhưng nó bắt người đọc phải biết mẹo đó | Tên đúng là `scheduler_changed`. `study_sessions.end_reason` có `CHECK` liệt kê giá trị nên thêm một giá trị là **đổi schema**, và nới `CHECK` là rebuild bảng nên xứng một bump riêng. Ba lần bump sau khi nợ được ghi đều đã đi việc khác: v8 (BR-203, ba cột `direction` additive), v9 (M99.28, hai cột theme/ngôn ngữ), v10 (M99.29, ba cột nhắc học); v11 (M99.33, Trash) có rebuild `study_sessions` nhưng cố ý không gánh thêm nợ này. Đích hiện tại là **v12** — lần rebuild kế tiếp của `study_sessions`, rồi đổi `deck_scheduler_repository_impl.dart` sang giá trị mới |
+| Sáu golden cũ sau M99.48 | M99.48 | `Switch`, `CheckboxListTile` và `SwitchListTile` đổi màu thumb, viền track và viền ô tick, nên `reminder_settings_{light,dark}.png`, `tag_filter_sheet_{light,dark}.png`, `card_import_preview_light.png` và `card_import_preview_valid_light.png` không còn khớp app. Golden của repo **sinh trên Windows** (`dart_test.yaml`), và job golden của CI chạy `windows-latest` — cập nhật chúng trên Linux sẽ làm chính job đó đỏ, nên phiên này cố ý không chạm vào. Đo chắc chắn là **đúng sáu file**: chạy toàn bộ golden hai lần trên cùng máy Linux, một lần có thay đổi và một lần `git stash` phần `lib/`, rồi so 184 ảnh test — chênh lệch nền tảng triệt tiêu, 178 ảnh giống hệt nhau | Trên máy Windows: `flutter test --tags golden --update-goldens`, kiểm đúng sáu file đó là toàn bộ diff, rồi `python .claude/skills/flutter-testing/scripts/build_screen_gallery.py` và publish lại gallery ở đúng URL đã ghim trong `CLAUDE.md` |
 | Nội dung starter là fixture, không phải nội dung production | T1.3 | Không phát hành được với nội dung này | Tìm nguồn nội dung có bản quyền rõ ràng trước M8 (BR-87) |
 | `sqlite3.wasm` và `drift_worker.js` là binary vendored trong `web/` | M4.2 | Không có bước build nào sinh ra chúng và không có bước build nào báo khi chúng cũ: app compile, load, rồi **không mở được database**. Nâng `drift` mà quên tải lại worker không có triệu chứng nào cho tới khi ai đó mở trình duyệt | `test/database/web_assets_test.dart` so version trong `pubspec.lock` với version đã pin, kèm `web/WEB_ASSETS.md` ghi URL tải. Đã kiểm tiêm lỗi: đổi `drift` thành 2.99.0 làm test đỏ |
 | Server phát web chưa gửi COOP/COEP | M4.2 | `crossOriginIsolated` là `false`, nên drift chọn backend lưu trữ kém hơn OPFS. Không có lỗi nào — chỉ là hiệu năng và độ bền khác đi, âm thầm | Thêm `Cross-Origin-Opener-Policy: same-origin` và `Cross-Origin-Embedder-Policy: require-corp` vào server phát web ở M7, và kiểm lại `crossOriginIsolated` trong E2E |

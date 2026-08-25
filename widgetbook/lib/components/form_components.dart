@@ -244,3 +244,75 @@ WidgetbookComponent listTileComponent() {
     ],
   );
 }
+
+/// The two binary toggles, side by side and in every state.
+///
+/// **Raw `Switch` and `Checkbox`, not an `Mx` wrapper, because that is what the
+/// app renders.** There is no shared component here to catalogue — the reminder
+/// screen and the tag filter sheet build Material's own widgets and let the
+/// theme dress them. So what this page is for is the *theme*: the resting thumb
+/// that had to leave Material's `outline` to clear 3:1, and the track outline
+/// that changes colour instead of disappearing when the switch turns on. Both
+/// are decisions a number can defend and only a screen can approve.
+WidgetbookComponent toggleComponent() {
+  return WidgetbookComponent(
+    name: 'Switch and Checkbox',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Every state',
+        builder: (BuildContext context) =>
+            const CatalogCenterPage(child: _ToggleMatrix()),
+      ),
+    ],
+  );
+}
+
+/// On and off, enabled and disabled, for both controls at once.
+///
+/// A matrix rather than knobs: the states have to be visible *together*. The
+/// question these answer — does the off switch read as off, and is the on one
+/// still bounded against the card — is a comparison, and a knob shows one at a
+/// time.
+class _ToggleMatrix extends StatelessWidget {
+  const _ToggleMatrix();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        _ToggleRow(label: 'enabled', isEnabled: true),
+        SizedBox(height: 24),
+        _ToggleRow(label: 'disabled', isEnabled: false),
+      ],
+    );
+  }
+}
+
+class _ToggleRow extends StatelessWidget {
+  const _ToggleRow({required this.label, required this.isEnabled});
+
+  final String label;
+  final bool isEnabled;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Text(label, style: Theme.of(context).textTheme.labelLarge),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            for (final value in <bool>[false, true]) ...<Widget>[
+              Switch(value: value, onChanged: isEnabled ? (_) {} : null),
+              Checkbox(value: value, onChanged: isEnabled ? (_) {} : null),
+              const SizedBox(width: 16),
+            ],
+          ],
+        ),
+      ],
+    );
+  }
+}

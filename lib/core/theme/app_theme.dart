@@ -8,6 +8,7 @@ import 'app_interaction_states.dart';
 import 'app_overlay_themes.dart';
 import 'app_colors.dart';
 import 'app_elevation.dart';
+import 'app_high_contrast.dart';
 import 'app_material_roles.dart';
 import 'app_navigation_bar_theme.dart';
 import 'app_radio_theme.dart';
@@ -15,6 +16,7 @@ import 'app_radius.dart';
 import 'app_semantic_colors.dart';
 import 'app_spacing.dart';
 import 'app_text_styles.dart';
+import 'app_toggle_themes.dart';
 import 'app_typography.dart';
 
 /// Material 3 themes for the app.
@@ -53,143 +55,168 @@ ThemeData buildLightTheme() => _lightTheme;
 
 ThemeData buildDarkTheme() => _darkTheme;
 
-final ThemeData _lightTheme = _buildTheme(
-  // The constructor, not `fromSeed(...).copyWith(...)`. Every role the app
-  // ships is a hand-tuned constant, and `fromSeed` had been generating a
-  // parallel set nobody rendered — a neutral-grey surfaceContainer ladder, a
-  // pink `tertiary`, a second red for `error` — which read as "there is a
-  // tonal palette" when there is none.
-  //
-  // **Every role the SDK offers is now passed**, the twelve `*Fixed` included.
-  // They were the last ones left to the constructor's own fallback, which
-  // resolves each to its *base* role (`_primaryFixed ?? primary`) — a
-  // fill-level tone in a container-level slot, and a different value in each
-  // brightness for a role the spec defines as brightness-independent.
-  const ColorScheme(
-    brightness: Brightness.light,
-    primary: AppColors.primaryLight,
-    onPrimary: AppColors.onPrimaryLight,
-    primaryContainer: AppMaterialRoles.primaryContainerLight,
-    onPrimaryContainer: AppMaterialRoles.onPrimaryContainerLight,
-    // The `*Fixed` family carries no brightness suffix because the role is
-    // defined as the same colour in both themes; see `AppMaterialRoles`.
-    primaryFixed: AppMaterialRoles.primaryFixed,
-    primaryFixedDim: AppMaterialRoles.primaryFixedDim,
-    onPrimaryFixed: AppMaterialRoles.onPrimaryFixed,
-    onPrimaryFixedVariant: AppMaterialRoles.onPrimaryFixedVariant,
-    secondary: AppMaterialRoles.secondaryLight,
-    onSecondary: AppMaterialRoles.onSecondaryLight,
-    secondaryContainer: AppMaterialRoles.secondaryContainerLight,
-    onSecondaryContainer: AppMaterialRoles.onSecondaryContainerLight,
-    secondaryFixed: AppMaterialRoles.secondaryFixed,
-    secondaryFixedDim: AppMaterialRoles.secondaryFixedDim,
-    onSecondaryFixed: AppMaterialRoles.onSecondaryFixed,
-    onSecondaryFixedVariant: AppMaterialRoles.onSecondaryFixedVariant,
-    tertiary: AppMaterialRoles.tertiaryLight,
-    onTertiary: AppMaterialRoles.onTertiaryLight,
-    tertiaryContainer: AppMaterialRoles.tertiaryContainerLight,
-    onTertiaryContainer: AppMaterialRoles.onTertiaryContainerLight,
-    tertiaryFixed: AppMaterialRoles.tertiaryFixed,
-    tertiaryFixedDim: AppMaterialRoles.tertiaryFixedDim,
-    onTertiaryFixed: AppMaterialRoles.onTertiaryFixed,
-    onTertiaryFixedVariant: AppMaterialRoles.onTertiaryFixedVariant,
-    // `error` is `danger`, not a second red system.
-    error: AppColors.dangerLight,
-    onError: AppMaterialRoles.onErrorLight,
-    errorContainer: AppMaterialRoles.errorContainerLight,
-    onErrorContainer: AppMaterialRoles.onErrorContainerLight,
-    surface: AppColors.surfaceLight,
-    onSurface: AppColors.textPrimaryLight,
-    onSurfaceVariant: AppColors.textSecondaryLight,
-    surfaceDim: AppMaterialRoles.surfaceDimLight,
-    surfaceBright: AppMaterialRoles.surfaceBrightLight,
-    surfaceContainerLowest: AppMaterialRoles.surfaceContainerLowestLight,
-    surfaceContainerLow: AppMaterialRoles.surfaceContainerLowLight,
-    surfaceContainer: AppMaterialRoles.surfaceContainerLight,
-    surfaceContainerHigh: AppMaterialRoles.surfaceContainerHighLight,
-    surfaceContainerHighest: AppMaterialRoles.surfaceContainerHighestLight,
-    // **The M3 pair, at last as a pair.** `outline` is the stroke the spec
-    // asks to identify a component's boundary — the 3:1 of WCAG 1.4.11 — and
-    // `outlineVariant` is the decorative hairline. Both used to be
-    // `borderSubtle`, which handed any component that trusts `scheme.outline`
-    // a 1.45:1 edge. The app's own widgets read the semantic tokens directly,
-    // so this re-mapping changes what an *untended* widget degrades to, not
-    // what the app draws.
-    outline: AppColors.borderControlLight,
-    outlineVariant: AppColors.borderSubtleLight,
-    inverseSurface: AppMaterialRoles.inverseSurfaceLight,
-    onInverseSurface: AppMaterialRoles.onInverseSurfaceLight,
-    inversePrimary: AppMaterialRoles.inversePrimaryLight,
-    surfaceTint: AppColors.primaryLight,
-    shadow: AppColors.shadowLight,
-    scrim: AppColors.scrimLight,
-  ),
-  const AppSemanticColors.light(),
+/// The two themes `MaterialApp` reaches for when the platform reports
+/// `MediaQuery.highContrast` — Android's "High contrast text" and the
+/// equivalent switch on every other platform.
+///
+/// **Both slots were null until M99.48, which is why the setting did nothing.**
+/// What changes is borders and disabled ink and nothing else; the reasoning and
+/// every measurement are in `app_high_contrast.dart`. Memoised for the reason
+/// the other two are — see this file's header.
+ThemeData buildHighContrastLightTheme() => _highContrastLightTheme;
+
+ThemeData buildHighContrastDarkTheme() => _highContrastDarkTheme;
+
+// The constructor, not `fromSeed(...).copyWith(...)`. Every role the app
+// ships is a hand-tuned constant, and `fromSeed` had been generating a
+// parallel set nobody rendered — a neutral-grey surfaceContainer ladder, a
+// pink `tertiary`, a second red for `error` — which read as "there is a
+// tonal palette" when there is none.
+//
+// **Every role the SDK offers is now passed**, the twelve `*Fixed` included.
+// They were the last ones left to the constructor's own fallback, which
+// resolves each to its *base* role (`_primaryFixed ?? primary`) — a
+// fill-level tone in a container-level slot, and a different value in each
+// brightness for a role the spec defines as brightness-independent.
+const ColorScheme _lightScheme = ColorScheme(
+  brightness: Brightness.light,
+  primary: AppColors.primaryLight,
+  onPrimary: AppColors.onPrimaryLight,
+  primaryContainer: AppMaterialRoles.primaryContainerLight,
+  onPrimaryContainer: AppMaterialRoles.onPrimaryContainerLight,
+  // The `*Fixed` family carries no brightness suffix because the role is
+  // defined as the same colour in both themes; see `AppMaterialRoles`.
+  primaryFixed: AppMaterialRoles.primaryFixed,
+  primaryFixedDim: AppMaterialRoles.primaryFixedDim,
+  onPrimaryFixed: AppMaterialRoles.onPrimaryFixed,
+  onPrimaryFixedVariant: AppMaterialRoles.onPrimaryFixedVariant,
+  secondary: AppMaterialRoles.secondaryLight,
+  onSecondary: AppMaterialRoles.onSecondaryLight,
+  secondaryContainer: AppMaterialRoles.secondaryContainerLight,
+  onSecondaryContainer: AppMaterialRoles.onSecondaryContainerLight,
+  secondaryFixed: AppMaterialRoles.secondaryFixed,
+  secondaryFixedDim: AppMaterialRoles.secondaryFixedDim,
+  onSecondaryFixed: AppMaterialRoles.onSecondaryFixed,
+  onSecondaryFixedVariant: AppMaterialRoles.onSecondaryFixedVariant,
+  tertiary: AppMaterialRoles.tertiaryLight,
+  onTertiary: AppMaterialRoles.onTertiaryLight,
+  tertiaryContainer: AppMaterialRoles.tertiaryContainerLight,
+  onTertiaryContainer: AppMaterialRoles.onTertiaryContainerLight,
+  tertiaryFixed: AppMaterialRoles.tertiaryFixed,
+  tertiaryFixedDim: AppMaterialRoles.tertiaryFixedDim,
+  onTertiaryFixed: AppMaterialRoles.onTertiaryFixed,
+  onTertiaryFixedVariant: AppMaterialRoles.onTertiaryFixedVariant,
+  // `error` is `danger`, not a second red system.
+  error: AppColors.dangerLight,
+  onError: AppMaterialRoles.onErrorLight,
+  errorContainer: AppMaterialRoles.errorContainerLight,
+  onErrorContainer: AppMaterialRoles.onErrorContainerLight,
+  surface: AppColors.surfaceLight,
+  onSurface: AppColors.textPrimaryLight,
+  onSurfaceVariant: AppColors.textSecondaryLight,
+  surfaceDim: AppMaterialRoles.surfaceDimLight,
+  surfaceBright: AppMaterialRoles.surfaceBrightLight,
+  surfaceContainerLowest: AppMaterialRoles.surfaceContainerLowestLight,
+  surfaceContainerLow: AppMaterialRoles.surfaceContainerLowLight,
+  surfaceContainer: AppMaterialRoles.surfaceContainerLight,
+  surfaceContainerHigh: AppMaterialRoles.surfaceContainerHighLight,
+  surfaceContainerHighest: AppMaterialRoles.surfaceContainerHighestLight,
+  // **The M3 pair, at last as a pair.** `outline` is the stroke the spec
+  // asks to identify a component's boundary — the 3:1 of WCAG 1.4.11 — and
+  // `outlineVariant` is the decorative hairline. Both used to be
+  // `borderSubtle`, which handed any component that trusts `scheme.outline`
+  // a 1.45:1 edge. The app's own widgets read the semantic tokens directly,
+  // so this re-mapping changes what an *untended* widget degrades to, not
+  // what the app draws.
+  outline: AppColors.borderControlLight,
+  outlineVariant: AppColors.borderSubtleLight,
+  inverseSurface: AppMaterialRoles.inverseSurfaceLight,
+  onInverseSurface: AppMaterialRoles.onInverseSurfaceLight,
+  inversePrimary: AppMaterialRoles.inversePrimaryLight,
+  surfaceTint: AppColors.primaryLight,
+  shadow: AppColors.shadowLight,
+  scrim: AppColors.scrimLight,
+);
+
+const ColorScheme _darkScheme = ColorScheme(
+  brightness: Brightness.dark,
+  primary: AppColors.primaryDark,
+  onPrimary: AppColors.onPrimaryDark,
+  primaryContainer: AppMaterialRoles.primaryContainerDark,
+  onPrimaryContainer: AppMaterialRoles.onPrimaryContainerDark,
+  // The `*Fixed` family carries no brightness suffix because the role is
+  // defined as the same colour in both themes; see `AppMaterialRoles`.
+  primaryFixed: AppMaterialRoles.primaryFixed,
+  primaryFixedDim: AppMaterialRoles.primaryFixedDim,
+  onPrimaryFixed: AppMaterialRoles.onPrimaryFixed,
+  onPrimaryFixedVariant: AppMaterialRoles.onPrimaryFixedVariant,
+  secondary: AppMaterialRoles.secondaryDark,
+  onSecondary: AppMaterialRoles.onSecondaryDark,
+  secondaryContainer: AppMaterialRoles.secondaryContainerDark,
+  onSecondaryContainer: AppMaterialRoles.onSecondaryContainerDark,
+  secondaryFixed: AppMaterialRoles.secondaryFixed,
+  secondaryFixedDim: AppMaterialRoles.secondaryFixedDim,
+  onSecondaryFixed: AppMaterialRoles.onSecondaryFixed,
+  onSecondaryFixedVariant: AppMaterialRoles.onSecondaryFixedVariant,
+  tertiary: AppMaterialRoles.tertiaryDark,
+  onTertiary: AppMaterialRoles.onTertiaryDark,
+  tertiaryContainer: AppMaterialRoles.tertiaryContainerDark,
+  onTertiaryContainer: AppMaterialRoles.onTertiaryContainerDark,
+  tertiaryFixed: AppMaterialRoles.tertiaryFixed,
+  tertiaryFixedDim: AppMaterialRoles.tertiaryFixedDim,
+  onTertiaryFixed: AppMaterialRoles.onTertiaryFixed,
+  onTertiaryFixedVariant: AppMaterialRoles.onTertiaryFixedVariant,
+  error: AppColors.dangerDark,
+  onError: AppMaterialRoles.onErrorDark,
+  errorContainer: AppMaterialRoles.errorContainerDark,
+  onErrorContainer: AppMaterialRoles.onErrorContainerDark,
+  surface: AppColors.surfaceDark,
+  onSurface: AppColors.textPrimaryDark,
+  onSurfaceVariant: AppColors.textSecondaryDark,
+  surfaceDim: AppMaterialRoles.surfaceDimDark,
+  surfaceBright: AppMaterialRoles.surfaceBrightDark,
+  surfaceContainerLowest: AppMaterialRoles.surfaceContainerLowestDark,
+  surfaceContainerLow: AppMaterialRoles.surfaceContainerLowDark,
+  surfaceContainer: AppMaterialRoles.surfaceContainerDark,
+  surfaceContainerHigh: AppMaterialRoles.surfaceContainerHighDark,
+  surfaceContainerHighest: AppMaterialRoles.surfaceContainerHighestDark,
+  // The same pair as light — see the note there.
+  outline: AppColors.borderControlDark,
+  outlineVariant: AppColors.borderSubtleDark,
+  inverseSurface: AppMaterialRoles.inverseSurfaceDark,
+  onInverseSurface: AppMaterialRoles.onInverseSurfaceDark,
+  inversePrimary: AppMaterialRoles.inversePrimaryDark,
+  // `primary`, the canonical M3 mapping, and the earlier deviation to
+  // `surfaceElevatedDark` is retired: every themed component sets
+  // `surfaceTintColor: transparent`, so what this role must be is *true*
+  // for the one reader it can still have — an untended elevated widget —
+  // rather than a value chosen to soften a tint the app already suppresses.
+  surfaceTint: AppColors.primaryDark,
+  shadow: AppColors.shadowDark,
+  scrim: AppColors.scrimDark,
+);
+
+/// The light theme, given the palette it should read.
+///
+/// **One place the four arguments below are written, and that is the point of
+/// the seam.** High contrast re-points the borders and nothing else — the page,
+/// the action fill, its label and the outlined label are the same decisions in
+/// both. Passing them at two call sites is how the high-contrast theme would
+/// quietly keep an old `actionFill` after someone changed the normal one;
+/// `app_high_contrast_test.dart` also pins that they agree.
+ThemeData _light(ColorScheme scheme, AppSemanticColors semantic) => _buildTheme(
+  scheme,
+  semantic,
   background: AppColors.backgroundLight,
   actionFill: AppColors.primaryLight,
   actionLabel: AppColors.onPrimaryLight,
   outlineLabel: AppColors.secondaryActionLight,
 );
 
-final ThemeData _darkTheme = _buildTheme(
-  const ColorScheme(
-    brightness: Brightness.dark,
-    primary: AppColors.primaryDark,
-    onPrimary: AppColors.onPrimaryDark,
-    primaryContainer: AppMaterialRoles.primaryContainerDark,
-    onPrimaryContainer: AppMaterialRoles.onPrimaryContainerDark,
-    // The `*Fixed` family carries no brightness suffix because the role is
-    // defined as the same colour in both themes; see `AppMaterialRoles`.
-    primaryFixed: AppMaterialRoles.primaryFixed,
-    primaryFixedDim: AppMaterialRoles.primaryFixedDim,
-    onPrimaryFixed: AppMaterialRoles.onPrimaryFixed,
-    onPrimaryFixedVariant: AppMaterialRoles.onPrimaryFixedVariant,
-    secondary: AppMaterialRoles.secondaryDark,
-    onSecondary: AppMaterialRoles.onSecondaryDark,
-    secondaryContainer: AppMaterialRoles.secondaryContainerDark,
-    onSecondaryContainer: AppMaterialRoles.onSecondaryContainerDark,
-    secondaryFixed: AppMaterialRoles.secondaryFixed,
-    secondaryFixedDim: AppMaterialRoles.secondaryFixedDim,
-    onSecondaryFixed: AppMaterialRoles.onSecondaryFixed,
-    onSecondaryFixedVariant: AppMaterialRoles.onSecondaryFixedVariant,
-    tertiary: AppMaterialRoles.tertiaryDark,
-    onTertiary: AppMaterialRoles.onTertiaryDark,
-    tertiaryContainer: AppMaterialRoles.tertiaryContainerDark,
-    onTertiaryContainer: AppMaterialRoles.onTertiaryContainerDark,
-    tertiaryFixed: AppMaterialRoles.tertiaryFixed,
-    tertiaryFixedDim: AppMaterialRoles.tertiaryFixedDim,
-    onTertiaryFixed: AppMaterialRoles.onTertiaryFixed,
-    onTertiaryFixedVariant: AppMaterialRoles.onTertiaryFixedVariant,
-    error: AppColors.dangerDark,
-    onError: AppMaterialRoles.onErrorDark,
-    errorContainer: AppMaterialRoles.errorContainerDark,
-    onErrorContainer: AppMaterialRoles.onErrorContainerDark,
-    surface: AppColors.surfaceDark,
-    onSurface: AppColors.textPrimaryDark,
-    onSurfaceVariant: AppColors.textSecondaryDark,
-    surfaceDim: AppMaterialRoles.surfaceDimDark,
-    surfaceBright: AppMaterialRoles.surfaceBrightDark,
-    surfaceContainerLowest: AppMaterialRoles.surfaceContainerLowestDark,
-    surfaceContainerLow: AppMaterialRoles.surfaceContainerLowDark,
-    surfaceContainer: AppMaterialRoles.surfaceContainerDark,
-    surfaceContainerHigh: AppMaterialRoles.surfaceContainerHighDark,
-    surfaceContainerHighest: AppMaterialRoles.surfaceContainerHighestDark,
-    // The same pair as light — see the note there.
-    outline: AppColors.borderControlDark,
-    outlineVariant: AppColors.borderSubtleDark,
-    inverseSurface: AppMaterialRoles.inverseSurfaceDark,
-    onInverseSurface: AppMaterialRoles.onInverseSurfaceDark,
-    inversePrimary: AppMaterialRoles.inversePrimaryDark,
-    // `primary`, the canonical M3 mapping, and the earlier deviation to
-    // `surfaceElevatedDark` is retired: every themed component sets
-    // `surfaceTintColor: transparent`, so what this role must be is *true*
-    // for the one reader it can still have — an untended elevated widget —
-    // rather than a value chosen to soften a tint the app already suppresses.
-    surfaceTint: AppColors.primaryDark,
-    shadow: AppColors.shadowDark,
-    scrim: AppColors.scrimDark,
-  ),
-  const AppSemanticColors.dark(),
+/// The dark theme. See [_light].
+ThemeData _dark(ColorScheme scheme, AppSemanticColors semantic) => _buildTheme(
+  scheme,
+  semantic,
   background: AppColors.backgroundDark,
   // Indigo in both modes, so the brand is the same object in light and dark.
   // The colour it does NOT compete with is the study verdict pair: those are
@@ -198,6 +225,23 @@ final ThemeData _darkTheme = _buildTheme(
   actionFill: AppColors.primaryDark,
   actionLabel: AppColors.onPrimaryDark,
   outlineLabel: AppColors.secondaryActionDark,
+);
+
+final ThemeData _lightTheme = _light(
+  _lightScheme,
+  const AppSemanticColors.light(),
+);
+
+final ThemeData _darkTheme = _dark(_darkScheme, const AppSemanticColors.dark());
+
+final ThemeData _highContrastLightTheme = _light(
+  highContrastScheme(_lightScheme),
+  highContrastSemantics(const AppSemanticColors.light(), _lightScheme),
+);
+
+final ThemeData _highContrastDarkTheme = _dark(
+  highContrastScheme(_darkScheme),
+  highContrastSemantics(const AppSemanticColors.dark(), _darkScheme),
 );
 
 /// The FAB's Material elevation, per brightness — the one component that keeps
@@ -378,6 +422,13 @@ ThemeData _buildTheme(
     dividerTheme: buildDividerTheme(semantic),
     scrollbarTheme: buildScrollbarTheme(scheme),
     radioTheme: buildRadioTheme(scheme, semantic),
+    switchTheme: buildSwitchTheme(scheme, semantic),
+    checkboxTheme: buildCheckboxTheme(scheme, semantic),
+
+    // The reminder screen's `showTimePicker`. Its dialog does NOT read
+    // `dialogTheme` — see `buildTimePickerTheme` — so without this entry it is
+    // the one surface in the app carrying Material's elevation and corner.
+    timePickerTheme: buildTimePickerTheme(scheme, semantic, texts),
 
     listTileTheme: ListTileThemeData(
       contentPadding: const EdgeInsets.symmetric(

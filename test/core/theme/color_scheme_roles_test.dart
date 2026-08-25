@@ -18,10 +18,18 @@ void main() {
   final schemes = <String, ColorScheme>{
     'light': buildLightTheme().colorScheme,
     'dark': buildDarkTheme().colorScheme,
+    // High contrast re-points three border tokens and nothing else, so it is
+    // held to the same two rules rather than exempted from them: a stronger
+    // edge still has to be a colour from this palette, in a hue this palette
+    // uses. It is a legibility setting, not a licence for a second system.
+    'high contrast light': buildHighContrastLightTheme().colorScheme,
+    'high contrast dark': buildHighContrastDarkTheme().colorScheme,
   };
   final palettes = <String, List<Color>>{
     'light': lightPaletteTokens,
     'dark': darkPaletteTokens,
+    'high contrast light': lightPaletteTokens,
+    'high contrast dark': darkPaletteTokens,
   };
 
   test('every role comes from the palette', () {
