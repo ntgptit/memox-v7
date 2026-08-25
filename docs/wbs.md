@@ -11173,7 +11173,76 @@ của M2.
   `test/demo/` goldens.
 - **Checklist phases:** 7, 12, 14
 
-### M99.42 · Focus-visible cho filled và text button; theme dựng một lần
+### M99.42 · Trả nhãn cho sort control — glyph trần khó hiểu
+
+- **Status:** **done**
+- **Goal:** M99.41 thu sort control xuống một glyph `↑↓` trần. Chủ dự án phản
+  hồi: **chỉ một icon thì gây khó hiểu và ảnh hưởng UX**. Đúng — và đó chính là
+  mất mát M99.41 đã tự ghi nhận: một glyph nói được *"sắp xếp"* nhưng không nói
+  được *"theo cái gì"*, mà vế sau mới là thứ người dùng cần. Đây là phương án 3
+  chủ dự án đưa ra ngay từ đầu và em đã không chọn.
+- **Scope:** Chỉ control sort. Không đụng pill (không quay lại), không đụng
+  heading, hero, deck card, bottom nav.
+  Control thành `MxTextButton`: **glyph 16px + nhãn**, phẳng, không
+  nền không viền, `primaryAccent`, `label-md` 12px/w500 — rung gần nhất với
+  13px/500 chủ dự án yêu cầu, và **cùng rung với heading** nên không cái nào
+  lấn cái nào. Nhãn dùng dạng ngắn (`Recent`, không phải `Recently studied`);
+  sheet giữ nguyên dạng đầy đủ vì nó có chỗ.
+- **Đo được:** control rộng **62,9px** (`Recent`), rộng nhất trong 8 tổ hợp
+  ngôn ngữ × thứ tự là **75,2px** (`Progress`) và **74,8px** (`Theo tên`) —
+  đều dưới ngân sách **96px** chủ dự án đặt, so với pill gốc 149,8px. Chiều cao
+  giữ 48px.
+- **Hai thay đổi shared component, và một cái là gỡ:**
+  - `MxTextButton` thêm `isCompact` (nhãn về `label-md`; `TextButton` của
+    Material lấy `label-lg` 14px, tức lớn hơn heading 12px — đúng lỗi thứ bậc
+    mà cả hai pass này sinh ra để sửa) và `semanticLabel` (nhãn vẽ ra là **một
+    giá trị**, không phải một hành động: nghe "Recent, button" là nghe một từ
+    chứ không biết bấm vào thì gì xảy ra). Câu đọc **chứa** nhãn vẽ ra chứ
+    không thay thế nó — WCAG 2.5.3, người dùng voice control đọc thứ họ thấy.
+  - `MxIconButton.isAccent` **gỡ bỏ**. Nó được thêm ở M99.41 cho đúng control
+    này và giờ không còn caller nào. Một cờ shared component không có người
+    dùng là một quyết định thiết kế giả vờ là năng lực.
+- **Output:** `deck_list_toolbar_widget.dart` (MxTextButton),
+  `deck_sort_sheet_widget.dart` (`deckSortShortLabel` — switch vét cạn, hai
+  thứ tự đã đủ ngắn thì trỏ thẳng vào chuỗi của sheet thay vì nhân bản, vì
+  translator sửa `Name` một chỗ mà quên chỗ kia đúng là thứ nhân bản chuỗi mời
+  gọi), `mx_text_button.dart`, `mx_icon_button.dart` (gỡ `isAccent`),
+  ARB en/vi (`deckSortRecentShortLabel`, `deckSortCardsDueShortLabel`),
+  parity kit: `MxTextButton.jsx`/`.d.ts` (`isCompact`, `semanticLabel`),
+  `mx.css` (`.mx-textbtn--compact`, `.mx-deckhead__sort` rút còn `flex:none`),
+  `DeckLevelScreen.jsx` (`SORT_SHORT` + MxTextButton).
+- **Acceptance criteria:**
+  - [x] Nhãn hiện ở trạng thái nghỉ: người dùng sáng mắt đọc được đang sort
+        theo gì mà không cần mở sheet.
+  - [x] Không có pill: không viền, không nền, không radius riêng.
+  - [x] Glyph **bên trái** nhãn (chủ dự án review lần ba). Bản đầu đặt bên
+        phải và đó là bản lai yếu nhất: vị trí sau nhãn là chỗ của **chevron
+        mở** (`expand_more` ở link show-summary cũ, `▾` ở menu), còn
+        `swap_vert` gọi tên trục sắp xếp chứ không mở gì — ngồi vào ghế của
+        chevron thì nó đọc như mũi tên không thuộc về ai. Dẫn trước, cặp
+        glyph-nhãn đọc thành một cụm: "sắp xếp: gần đây". Khoá bằng geometry
+        (`glyph.left < word.left`) chứ không bằng thứ tự tham số, vì caller
+        truyền `icon:` mà component đổi `Row` bên dưới thì vẫn vẽ sai.
+  - [x] ≤ **96px** cho cả 4 thứ tự × 2 ngôn ngữ, khoá bằng
+        `deck_sort_control_width_test.dart` — **đo chứ không clamp**: một
+        `maxWidth` sẽ ellipsize đúng cái từ trả lời "sort theo gì", tức là lại
+        vứt đi thứ pass này sinh ra để trả về.
+  - [x] Target 48px giữ nguyên, `meetsGuideline(androidTapTargetGuideline)`
+        xanh.
+  - [x] `dod_check.sh` **`✓ mechanical gates passed`** — lần này chạy đúng
+        lệnh CLAUDE.md dặn thay vì tự chọn từng guard rời. Host suite
+        **3757/3757**; `code-verification-guard` 70 rule xanh.
+- **Sai sót quy trình đã sửa:** ở M99.41 em chạy ba guard Python rời và bỏ qua
+  `code-verification-guard`, nên CI đỏ vì thứ tự khoá trong block metadata ARB
+  (`placeholders` phải đứng trước `description`). `dod_check.sh` vốn đã gói
+  guard đó; lệnh có sẵn trong CLAUDE.md và em đã không dùng.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.41
+- **Tests required:** `deck_sort_control_width_test.dart` (mới, 10 case),
+  `deck_list_toolbar_test.dart`, `test/demo/` goldens, full host suite.
+- **Checklist phases:** 7, 12, 14
+
+### M99.43 · Focus-visible cho filled và text button; theme dựng một lần
 
 - **Status:** **done**
 - **Goal:** Hai lỗ hổng tìm ra trong đợt review tầng theme. Nút CTA chính của
@@ -11260,7 +11329,7 @@ của M2.
   phiên này — môi trường không có Flutter SDK. Phải chạy trước khi merge.
 - **Nợ liên quan đã ghi nhận:** ~~`brandInk` so với `semantic.primaryAccent`~~
   và ~~`chipTheme.iconTheme` không đổi màu theo `selected`~~ **đã trả ở
-  M99.43** — và phép đo ở đó bác luôn cách sửa mà entry này đề nghị: hai token
+  M99.44** — và phép đo ở đó bác luôn cách sửa mà entry này đề nghị: hai token
   không gộp được, cái sai là cái tên. **Chưa trả:**
   `semantic.surfaceElevated` không có caller nào trong `lib/`; alpha rời rạc
   (`0.72`/`0.48`/`0.24`/`0.4`/`0.5`) và `fontSize: 20` trong compact pass vẫn
@@ -11272,7 +11341,7 @@ của M2.
   trong `MemoxApp follows the system theme mode`).
 - **Checklist phases:** 7, 13
 
-### M99.43 · `selectedInk` tách khỏi `primaryAccent`; glyph của pill theo label
+### M99.44 · `selectedInk` tách khỏi `primaryAccent`; glyph của pill theo label
 
 - **Status:** **done**
 - **Goal:** Hai mục còn lại của đợt review theme. `brandInk` và
@@ -11347,12 +11416,12 @@ của M2.
 - **Chưa trả, đã ghi:** `flutter analyze` và host suite **chưa chạy** — môi
   trường không có Flutter SDK. Phải chạy trước khi merge.
 - **Editable documents:** `docs/wbs.md`, `docs/reviews/design-parity-checklist.md`
-- **Dependencies:** M99.42
+- **Dependencies:** M99.43
 - **Tests required:** `app_selected_ink_test.dart` (mới, 8 case),
   `mx_pill_button_theme_test.dart` (+1 widget test, ba state).
 - **Checklist phases:** 7, 13
 
-### M99.44 · `no_large_source_file` đếm dòng logic, thôi đếm doc
+### M99.45 · `no_large_source_file` đếm dòng logic, thôi đếm doc
 
 - **Status:** **done**
 - **Goal:** Ngưỡng 400 dòng đang đếm **dòng thô** — kể cả import, comment và
@@ -11381,7 +11450,7 @@ của M2.
 - **Chứng minh bằng probe chứ không bằng suy luận:** dựng tạm hai file trong
   `lib/core/theme/` — một file 453 dòng toàn dartdoc, một file 452 dòng toàn
   `const`. File doc **qua**, file code **báo 452**. Xoá sau khi đo.
-- **Trả lại ba chỗ đã bị ép cắt ở M99.42 và M99.43:** trỏ chéo từ
+- **Trả lại ba chỗ đã bị ép cắt ở M99.43 và M99.44:** trỏ chéo từ
   `primaryAccent` sang `selectedInk` bị rút xuống hai dòng chỉ vì
   `app_colors.dart` chạm trần 400 thô (nó ở 56 logic); doc memo hoá trong
   `app_theme.dart` bị rút từ 19 xuống 10 dòng. Cả hai về lại bản đầy đủ.
@@ -11405,7 +11474,7 @@ của M2.
   - [x] Guard `memox-v7` 0 lỗi 0 cảnh báo; `check_architecture.sh` và
         `check_docs.py` xanh.
 - **Editable documents:** `docs/wbs.md`
-- **Dependencies:** M99.43
+- **Dependencies:** M99.44
 - **Tests required:** `code-verification-guard-v2/tests/test_max_lines_rule.py`
   (+2 case).
 - **Checklist phases:** 4

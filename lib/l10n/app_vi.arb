@@ -448,6 +448,14 @@
   "@deckSortProgressLabel": {
     "description": "Sort option: the least-finished deck first, by learned fraction rather than by learned count."
   },
+  "deckSortRecentShortLabel": "Gần đây",
+  "@deckSortRecentShortLabel": {
+    "description": "The sort control on the list heading row paints the order in force, and has about 96px for it. The sheet keeps the full wording; this is the same order named in the space a heading row has."
+  },
+  "deckSortCardsDueShortLabel": "Đến hạn",
+  "@deckSortCardsDueShortLabel": {
+    "description": "The same order as deckSortCardsDueLabel, named for the heading row. The word after it in the sheet is what disambiguates there; here the sort glyph does."
+  },
   "deckSortSheetTitle": "Sắp xếp deck theo",
   "@deckSortSheetTitle": {
     "description": "Title of the bottom sheet that chooses the deck-list order. Names the axis, because each row names a value of it."

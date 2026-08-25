@@ -1,13 +1,13 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
   "scannedFiles": 660,
-  "totalSites": 455,
+  "totalSites": 454,
   "byElementKind": {
     "other": 273,
     "background": 18,
     "shadow": 1,
     "border": 13,
-    "text": 118,
+    "text": 117,
     "icon": 32
   },
   "bySourceKind": {
@@ -16,7 +16,7 @@
     "Colors-material": 5,
     "hardcoded-literal": 85,
     "opacity-modified-token": 11,
-    "theme-token": 221
+    "theme-token": 220
   },
   "sites": [
     {
@@ -3783,7 +3783,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_list_toolbar_widget.dart",
-      "line": 86,
+      "line": 90,
       "widget_context": "DeckListToolbarWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4926,17 +4926,6 @@
       "resolved_value_dark": "#A8A7C4"
     },
     {
-      "file": "lib/shared/widgets/mx_icon_button.dart",
-      "line": 111,
-      "widget_context": "MxIconButton",
-      "element_kind": "text",
-      "source_kind": "theme-token",
-      "expression": "context.semanticColors.primaryAccent",
-      "token": "semantic.primaryAccent",
-      "resolved_value_light": "unresolvable: semantic.primaryAccent not in the dumped theme",
-      "resolved_value_dark": "unresolvable: semantic.primaryAccent not in the dumped theme"
-    },
-    {
       "file": "lib/shared/widgets/mx_navigation_bar.dart",
       "line": 101,
       "widget_context": "MxNavigationBar",
@@ -5004,7 +4993,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_text_button.dart",
-      "line": 90,
+      "line": 114,
       "widget_context": "_MxTextButtonState",
       "element_kind": "other",
       "source_kind": "theme-token",

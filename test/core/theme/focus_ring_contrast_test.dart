@@ -31,7 +31,7 @@ import '../../support/theme_probe.dart';
 /// filled button's ground is the accent itself, so the ring token measures
 /// 1.02:1 on it and the button draws its own label colour instead; a text
 /// button has neither a border nor an overlay by design, so it underlines. Both
-/// resolved to nothing before M99.42 — the app's primary call to action had no
+/// resolved to nothing before M99.43 — the app's primary call to action had no
 /// focus-visible state at all — which is why their absence is now asserted
 /// rather than left to the reader of a component list.
 void main() {

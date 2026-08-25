@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
-import '../../../../../shared/widgets/mx_icon_button.dart';
+import '../../../../../shared/widgets/mx_text_button.dart';
 import '../../states/deck_list_view_state.dart';
 import '../overlays/deck_sort_sheet_widget.dart';
 
@@ -13,14 +13,18 @@ import '../overlays/deck_sort_sheet_widget.dart';
 /// reading `↑↓ Recently studied`, which measured 149.8px on a 393 screen —
 /// **41.5% of the row**, against a heading of 88.6px. A control that outweighs
 /// the thing it names has the hierarchy backwards: the heading says what the
-/// list is, and the sort is an adjustment to it. What is left is a 20px glyph
-/// in the brand ink, right-aligned on the heading's own centre line.
+/// list is, and the sort is an adjustment to it. What is left is a 16px glyph
+/// and one word in the brand ink, right-aligned on the heading's own centre
+/// line — under 96px, against the pill's 149.8.
 ///
-/// **The order it is in moved into the sheet.** A glyph cannot say "recently
-/// studied", so the sheet ticks the live option and the control's screen-reader
-/// label speaks it. That is a real trade — a sighted user now needs one tap to
-/// answer "what is this sorted by" where the pill answered it at rest — and it
-/// is what buys back the 100px and the visual weight.
+/// **The label came back, the container did not** (owner review, 2026-08-25,
+/// second pass). The first pass took the pill down to a bare `swap_vert` glyph
+/// and moved the order it is in into the sheet — 48px, but a glyph says
+/// "sort" and cannot say "sorted by what", which is the half a user actually
+/// needs. The order is painted again, in the short form the row has space for,
+/// with the glyph leading it. That is `MxTextButton`, not a pill: flat, no
+/// container, brand ink, `label-md` so it sits on the heading's own rung
+/// instead of a size above it.
 ///
 /// **A sheet, not a cycle.** The pill advanced to the next order on each tap.
 /// That is workable at two options and unusable at four (owner decision,
@@ -56,10 +60,10 @@ class DeckListToolbarWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     // **A `Row` again, where the two pills needed a `Wrap`.** The wrap existed
     // because at `textScaler` 2.0 on a 320 screen two pills could not share a
-    // line with the heading and a `Row` overflowed. One 48px control leaves the
-    // heading 240 even at that scale, and the heading ellipsizes rather than
-    // pushing — which is the right thing to give up first, since the control is
-    // the control and the heading only names what it acts on.
+    // line with the heading and a `Row` overflowed. One control under 96px
+    // leaves the heading room even at that scale, and the heading ellipsizes
+    // rather than pushing — the right thing to give up first, since the control
+    // is the control and the heading only names what it acts on.
     return Row(
       children: <Widget>[
         Expanded(
@@ -90,26 +94,36 @@ class DeckListToolbarWidget extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
         ),
-        // **48, and it is the row's whole height.** The design asks for a 32px
-        // row; a 32px row and a real 48px target are mutually exclusive, and
-        // the trick that appears to give both — a 48 box overflowing a 32 slot
-        // — was measured and does not work: `meetsGuideline` passes because it
-        // reads the semantics rect, while a tap 4px outside the row is never
-        // delivered, because every ancestor hit-test starts with
+        // **48 tall, and it is the row's whole height.** The design asks for a
+        // 32px row; a 32px row and a real 48px target are mutually exclusive,
+        // and the trick that appears to give both — a 48 box overflowing a 32
+        // slot — was measured and does not work: `meetsGuideline` passes
+        // because it reads the semantics rect, while a tap 4px outside the row
+        // is never delivered, because every ancestor hit-test starts with
         // `size.contains`. It would have shipped green and missed on a device.
-        // With the pill's container gone the row reads as the 20px glyph and
-        // the 12px heading inside it, which is the height the design was after.
-        MxIconButton(
+        // With the pill's container gone the row reads as one 12px word, one
+        // 16px glyph and the heading, which is the weight the design was after.
+        MxTextButton(
+          // The order it is in, in the short form — `Recent`, not `Recently
+          // studied`, which does not fit the room a heading row has.
+          label: deckSortShortLabel(context.l10n, sort),
+          // **Leading, and the position is a claim about what the glyph is**
+          // (owner review, 2026-08-25, third pass). Trailing is where a
+          // *disclosure* chevron goes — `expand_more` on the old show-summary
+          // link, `▾` on a menu. `swap_vert` is not a disclosure, it names the
+          // axis: put it in the chevron's seat and it reads as an arrow that
+          // belongs to nothing. Leading, the pair reads as one phrase —
+          // "sort: recent" — which is what the control is.
           icon: Icons.swap_vert,
-          // Glyph at `mdCompact` (20), target untouched at 48.
+          // `label-md`, the heading's own rung. A `TextButton` takes `label-lg`
+          // from Material, and a control set larger than the thing it names is
+          // the defect this row was rebuilt to fix.
           isCompact: true,
-          // The row's only control, so it is allowed to be the accent.
-          isAccent: true,
-          // The glyph says "sort"; only this says what it is sorted by. A
-          // sighted user reads that off the sheet's tick — a screen reader has
-          // no sheet until it opens one, so the state travels with the control.
+          // The painted word is a value, not an action. A reader hearing
+          // "Recent, button" is told a word and not what pressing it does; the
+          // announcement contains the painted label rather than replacing it.
           semanticLabel: context.l10n.deckSortControlSemanticLabel(
-            deckSortLabel(context.l10n, sort),
+            deckSortShortLabel(context.l10n, sort),
           ),
           onPressed: () => showDeckSortSheet(
             context,

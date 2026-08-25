@@ -35,7 +35,9 @@ class MxTextButton extends StatefulWidget {
     this.icon,
     this.trailingIcon,
     this.isDestructive = false,
+    this.isCompact = false,
     this.accent,
+    this.semanticLabel,
     super.key,
   });
 
@@ -53,6 +55,28 @@ class MxTextButton extends StatefulWidget {
 
   /// Danger as a label: the text goes `semanticColors.danger`.
   final bool isDestructive;
+
+  /// Drops the label to `label-md`, for a link sharing a row with a heading.
+  ///
+  /// **Because the row's own heading is `label-md`.** A `TextButton` takes
+  /// `label-lg` (14) from Material, and the deck list's heading is 12 — a
+  /// control set larger than the thing it names has the hierarchy backwards,
+  /// which is the whole defect the sort control was rebuilt to fix. The same
+  /// adjustment, and the same reason, as `MxIconButton.isCompact`: only the
+  /// glyph or the type moves, never the 48 target.
+  final bool isCompact;
+
+  /// What a screen reader announces instead of the painted words.
+  ///
+  /// **For a link whose label is a value, not an action.** The sort control
+  /// paints the order it is in — `Recent` — and a reader hearing "Recent,
+  /// button" is told a word and not what pressing it does. The announcement
+  /// **contains** the painted label rather than replacing it (WCAG 2.5.3): a
+  /// voice-control user says what they can see.
+  ///
+  /// Null leaves the painted label as the accessible name, which is right
+  /// everywhere the words are already the action.
+  final String? semanticLabel;
 
   /// The link's ink, when the surface behind it is not the page.
   ///
@@ -100,12 +124,50 @@ class _MxTextButtonState extends State<MxTextButton> {
     return ButtonStyle(foregroundColor: foreground, iconColor: foreground);
   }
 
+  /// The accent style, plus the compact rung when one is asked for.
+  ///
+  /// Merged rather than replaced: `TextButton.style` merges into
+  /// `textButtonTheme`, so naming a `textStyle` here leaves the zero padding,
+  /// the 48 floor and the state-blended foreground exactly where they were.
+  ButtonStyle? _style(BuildContext context) {
+    final accent = _accentStyle(context);
+    if (!widget.isCompact) return accent;
+
+    final compact = ButtonStyle(
+      textStyle: WidgetStatePropertyAll<TextStyle?>(context.texts.labelMedium),
+    );
+
+    return accent == null ? compact : accent.merge(compact);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final button = _button(context);
+    final name = widget.semanticLabel;
+    if (name == null) return button;
+
+    // **One node, carrying everything the button's node did.** The trap is the
+    // one `MxActionButton` documents: `Semantics(label:) + ExcludeSemantics`
+    // drops the button's own node and — without `container` — does not
+    // reliably put one back, so the control announces as loose text rather
+    // than as a button. Role, enabled state and the tap action are restated.
+    return Semantics(
+      container: true,
+      button: true,
+      enabled: widget.onPressed != null,
+      focusable: widget.onPressed != null,
+      label: name,
+      onTap: widget.onPressed,
+      excludeSemantics: true,
+      child: button,
+    );
+  }
+
+  Widget _button(BuildContext context) {
     return TextButton(
       statesController: _states,
       onPressed: widget.onPressed,
-      style: _accentStyle(context),
+      style: _style(context),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         spacing: AppSpacing.xs,
