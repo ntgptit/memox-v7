@@ -94,9 +94,28 @@ class MxContentShell extends StatefulWidget {
 class _MxContentShellState extends State<MxContentShell> {
   bool _hasScrolled = false;
 
-  /// Line box over font size. Material's own text styles land between 1.27 and
-  /// 1.5; the higher end is used so a two-line bar never clips.
+  /// Line box over font size, for a theme that declares no line height.
+  ///
+  /// **A fallback now, not the number in use** (owner review, 2026-08-25). It
+  /// was applied unconditionally at Material's high end, 1.5, so a two-line bar
+  /// could never clip — and the app's `titleLarge` declares 1.2727, so the bar
+  /// reserved 33px for a line that renders 28. Five pixels of slack nobody
+  /// chose, on top of the bar's own padding, made the block's leftover **odd**:
+  /// 17, halved by centring into 8.5, which is why the distance from the
+  /// subtitle to the first thing below the bar read 16.5 and could not be
+  /// spent, moved or named. Asking the style for its own line height costs the
+  /// safety margin nothing — [_barPadding] carries it, as a token.
   static const double _lineFactor = 1.5;
+
+  /// What the bar keeps around the block it centres.
+  ///
+  /// **`lg`, and it is doing two jobs.** It is the breathing room a bar puts
+  /// around its content, and it is the slack that absorbs a subline growing
+  /// past [MxBreadcrumb.compactLineHeight] at a large text scale — the job the
+  /// 1.5 line factor used to do by accident. At `lg` the leftover is even, so
+  /// centring lands on whole pixels and every distance out of this bar is a
+  /// number somebody can point at.
+  static const double _barPadding = AppSpacing.lg;
 
   /// Only reached if the theme has no such style, which the app's does.
   static const double _fallbackTitleSize = 22;
@@ -192,16 +211,22 @@ class _MxContentShellState extends State<MxContentShell> {
 
   /// The bar's row when it carries two lines: the title's line box, the gap,
   /// the subline's own height, and the padding a bar puts around its content.
+  ///
+  /// **Each term is what that thing actually measures**, which is what makes
+  /// the total spendable: 28 + 8 + 32 + 16 = 84 against a 68px block, so the
+  /// 16 left over halves into 8 on each side rather than 8.5. See
+  /// [_lineFactor] for the five pixels this used to reserve for nothing.
   double _toolbarHeight(BuildContext context) {
     final scaler = MediaQuery.textScalerOf(context);
-    final title = context.texts.titleLarge?.fontSize ?? _fallbackTitleSize;
+    final title = context.texts.titleLarge;
 
     return math.max(
       AppSpacing.minimumTouchTarget,
-      scaler.scale(title) * _lineFactor +
+      scaler.scale(title?.fontSize ?? _fallbackTitleSize) *
+              (title?.height ?? _lineFactor) +
           AppSpacing.sm +
           MxBreadcrumb.compactLineHeight +
-          AppSpacing.md,
+          _barPadding,
     );
   }
 

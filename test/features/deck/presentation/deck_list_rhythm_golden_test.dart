@@ -111,29 +111,37 @@ void main() {
     await matchesReviewGolden('goldens/deck_list_rhythm.png');
   });
 
-  test('the heading row groups with the list it names, not with the panel '
+  test('the heading label groups with the list it names, not with the panel '
       'above it', () {
-    // **The rule this replaced was answering the wrong question.** For four
-    // passes the gap under the heading carried "a section break no larger than
-    // the 16 between two cards makes the heading read as the list's first
-    // row" — true of a heading floating *between* two groups, and this one is
-    // not floating: it belongs to the list.
+    // **Proximity is about ink, and measuring the box got this wrong twice.**
+    // For four passes the gap under the heading carried "a section break no
+    // larger than the 16 between two cards makes the heading read as the
+    // list's first row" — true of a heading floating *between* two groups, and
+    // this one is not floating: it belongs to the list. The ruler drew what
+    // that reading cost — 0 above the heading and 24 below — and the owner
+    // named it: by proximity the reader groups `YOUR DECKS` with the hero,
+    // because the label sat against the thing it does not describe.
     //
-    // The ruler drew what that reading cost — 0 above the heading and 24 below
-    // — and the owner named it: by proximity the reader groups `YOUR DECKS`
-    // with the hero card, because the label sat against the thing it does not
-    // describe and away from the cards it does. A grouping defect, not a
-    // matter of taste, and no amount of "is this a token" could see it.
+    // Then the boxes lied the other way. The row is 48 tall around a 16px
+    // label because `MxTextButton`'s touch target sets its height, so 32px of
+    // what the eye reads as air is *inside* the row and invisible to any
+    // box-to-box distance. The box gap below the heading is now 0 and the real
+    // distance from the cap to the first card is 19.2 — a reader checking the
+    // table would see a defect that is not there, and did.
     //
-    // So the rule is proximity: whatever sits above the heading must be
-    // further away than what sits below it.
+    // So the rule runs on [_inkAboveLabel] / [_inkBelowLabel], which are what
+    // a person actually sees, and it is a ratio rather than a comparison: at
+    // 1.18 the label was equidistant and grouped with neither side.
+    final ratio = _inkAboveLabel / _inkBelowLabel;
     expect(
-      _gapAboveHeading,
-      greaterThan(_gapBelowHeading),
+      ratio,
+      greaterThan(_minimumGroupingRatio),
       reason:
-          'heading row sits ${_gapAboveHeading.toStringAsFixed(1)} below the '
-          'hero and ${_gapBelowHeading.toStringAsFixed(1)} above its first '
-          'card — a label has to be nearer the thing it names',
+          'the label’s cap sits ${_inkAboveLabel.toStringAsFixed(1)} below '
+          'the hero and ${_inkBelowLabel.toStringAsFixed(1)} above its first '
+          'card — a ratio of ${ratio.toStringAsFixed(2)}, too near 1 for the '
+          'label to read as belonging to the list rather than floating '
+          'between it and the panel',
     );
   });
 
@@ -169,11 +177,29 @@ String _marker(String? from, String to, double? gap) {
 /// Filled by the ruler test, read by the assertions that follow it.
 final List<String> _offScaleGaps = <String>[];
 
-/// The distance from the hero's foot to the heading row.
-double _gapAboveHeading = 0;
+/// The distance from the hero's foot to the top of the label's capitals.
+double _inkAboveLabel = 0;
 
-/// The distance from the heading row's foot to the first deck card.
-double _gapBelowHeading = 0;
+/// The distance from the label's baseline to the first deck card.
+double _inkBelowLabel = 0;
+
+/// How much further the label may sit from the panel than from its own list.
+///
+/// Not a round 2: with the sort control in the row, everything below the
+/// baseline is `descent 3.19 + half the button's 48px target`, a floor of 19.2
+/// that no spacing token can reach. Demanding 2.0 would demand 38px above —
+/// *more* air, in a row the owner asked to tighten. 1.5 is the point at which
+/// the eye stops reading the label as equidistant, and 12/0 clears it at 1.67.
+const double _minimumGroupingRatio = 1.5;
+
+/// Inter's cap height as a fraction of the em, for `YOUR DECKS`.
+///
+/// **Pinned to the face, like [AppTypography.heroNumeralCapTrim].** Uppercase
+/// ink runs from the baseline to the cap, which is neither the font's ascent
+/// nor the line box — Inter's ascent leaves 4.09px above the caps at 12px, and
+/// counting that as ink puts every number here 4px out. If the body family
+/// changes, this changes with it.
+const double _interCapHeight = 0.727;
 
 /// One thing the screen stacks, and the box it occupies.
 typedef _Band = ({String name, Rect rect, bool isInFlow});
@@ -191,6 +217,9 @@ List<_Band> _bandsOf(WidgetTester tester) {
       ));
     }
   }
+
+  void rule(String label, Rect rect) =>
+      bands.add((name: label, rect: rect, isInFlow: false));
 
   final english = AppLocalizationsEn();
 
@@ -218,6 +247,13 @@ List<_Band> _bandsOf(WidgetTester tester) {
   );
   collect('Hero', find.byType(DeckLevelSummaryWidget));
   collect('Heading row', find.byType(DeckListToolbarWidget));
+  // **The label's ink, ruled as its own band, because the row's box hides it.**
+  // `DeckListToolbarWidget` is 48 tall around a 16px label — the sort control's
+  // touch target sets the height and the `Row` centres both children in it, so
+  // 32 of the air the eye reads is *inside* the box, where no box-to-box
+  // distance can reach it. Two lines, on the cap and on the baseline, so the
+  // picture shows where the word actually sits inside its row.
+  rule('Label ink', _labelInk(tester));
   collect('Deck card', find.byType(DeckTileWidget));
   // **Drawn but not measured against.** Both of these sit *over* the list
   // rather than in it, so a distance from the thing above them is a number
@@ -245,7 +281,43 @@ List<_Band> _bandsOf(WidgetTester tester) {
     bands[i] = (name: band.name, rect: band.rect, isInFlow: false);
   }
 
+  final ink = bands.firstWhere((b) => b.name == 'Label ink').rect;
+  final hero = bands.firstWhere((b) => b.name == 'Hero').rect;
+  final card = bands.firstWhere((b) => b.name.startsWith('Deck card')).rect;
+  _inkAboveLabel = ink.top - hero.bottom;
+  _inkBelowLabel = card.top - ink.bottom;
+
   return bands;
+}
+
+/// Where `YOUR DECKS` actually puts ink: cap to baseline, not the line box.
+///
+/// Uppercase has no descender, so the bottom of the ink *is* the baseline. The
+/// top is the baseline less the cap height — [_interCapHeight] of the em — and
+/// not the ascent, which at this size sits 4.09px above the capitals. Taking
+/// the ascent for ink is the same class of error as taking it for leading, and
+/// it puts every number here 4px out.
+Rect _labelInk(WidgetTester tester) {
+  final label = find.descendant(
+    of: find.byType(DeckListToolbarWidget),
+    matching: find.text(
+      AppLocalizationsEn().decksSectionLabelRoot.toUpperCase(),
+    ),
+  );
+  final box = tester.getRect(label);
+  final style = tester.widget<Text>(label).style!;
+  final painter = TextPainter(
+    text: TextSpan(text: 'X', style: style),
+    textDirection: TextDirection.ltr,
+  )..layout();
+  final baseline = box.top + painter.computeLineMetrics().first.ascent;
+
+  return Rect.fromLTRB(
+    box.left,
+    baseline - style.fontSize! * _interCapHeight,
+    box.right,
+    baseline,
+  );
 }
 
 /// The table the picture draws, as text, for a terminal and for a diff.
@@ -278,37 +350,47 @@ String _report(List<_Band> bands) {
         _offScaleGaps.add('$pair = ${gap.toStringAsFixed(1)}');
       }
     }
-    if (gap != null && previousName == 'Heading row') _gapBelowHeading = gap;
-    if (gap != null && band.name == 'Heading row') _gapAboveHeading = gap;
     if (band.isInFlow) {
       previousBottom = band.rect.bottom;
       previousName = band.name;
     }
   }
 
+  // **The one distance the table cannot carry.** Every row above is box to
+  // box; these two are cap to box, and they are the pair the grouping rule
+  // runs on. Printed apart rather than folded into the chain, because they are
+  // sums — a token plus half a touch target — and the token check would have
+  // to excuse them, which would blind it to the token drifting.
+  buffer
+    ..writeln()
+    ..writeln(
+      'label ink   ${_inkAboveLabel.toStringAsFixed(2)} below the hero, '
+      '${_inkBelowLabel.toStringAsFixed(2)} above card 1, '
+      'ratio ${(_inkAboveLabel / _inkBelowLabel).toStringAsFixed(2)}',
+    )
+    ..writeln(
+      '            the lower number floors at descent + half the sort '
+      'control’s 48px target',
+    );
+
   return buffer.toString();
 }
 
 /// Distances that are not steps and are allowed to stay, with the reason.
 ///
-/// **One entry, and it is a sum rather than a choice.** From the subtitle's
-/// foot to the hero measures 24.5: the app bar keeps 16.5 under its title block
-/// and the summary section adds `sm` on top of that. The 16.5 is not a number
-/// anybody typed — `MxContentShell._toolbarHeight` computes the bar from
-/// `titleLarge * _lineFactor + sm + compactLineHeight + md`, and the half pixel
-/// falls out of that multiplication. Chasing it would mean changing a shared
-/// shell's height arithmetic to move a distance the eye reads as `xl`.
+/// **Empty, and it took a fix rather than an exemption to get there.** It held
+/// one entry: 16.5 from the subtitle to the hero, excused as "the bar's line
+/// arithmetic, not a spacing decision". That was true and it was still a
+/// defect — `MxContentShell` reserved `titleLarge * 1.5` for a line that
+/// renders at 1.2727, so five pixels of slack nobody chose made the bar's
+/// leftover odd, and centring halved it into 8.5. The bar now reserves what it
+/// renders and the distance is 16.
 ///
-/// Keyed by the pair, so an entry cannot quietly cover a second gap that drifts
-/// to the same value somewhere else on the screen.
-const Map<String, String> _allowedOffScale = <String, String>{
-  'Subtitle -> Hero':
-      '16.5, and every pixel of it belongs to the bar: '
-      'MxContentShell._toolbarHeight computes its height from '
-      'titleLarge * _lineFactor + sm + compactLineHeight + md, which leaves '
-      '16.5 under the subtitle. The summary section adds nothing on top of it '
-      'any more. The half pixel is that multiplication, not a spacing choice.',
-};
+/// Kept rather than deleted, because the next sum will come from somewhere
+/// else and an entry with a reason beats a threshold that quietly widens.
+/// Keyed by the pair, so an entry cannot cover a second gap that drifts to the
+/// same value elsewhere on the screen.
+const Map<String, String> _allowedOffScale = <String, String>{};
 
 /// Whether a distance is one of the spacing steps, or an overlap.
 ///

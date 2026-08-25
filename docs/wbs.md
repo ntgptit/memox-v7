@@ -12112,6 +12112,35 @@ của M2.
   **`hero → heading = 12`, `heading → card 1 = 8`**. Break chỉ cần **lớn hơn**
   tie, không cần lớn — 12 so với 8 vẫn đọc label thuộc về list, và mỗi bậc hạ
   xuống trả pixel lại cho list.
+- **Vòng ba — đo mực thay vì đo hộp.** Phê bình theo ảnh nói label `YOUR DECKS`
+  có ~61px không khí quanh nó, gấp ~7 lần chiều cao chữ, và yêu cầu bỏ padding
+  dọc trong heading row để còn 20/10. Đo lại: cap-height Inter 12px là **8,72px**,
+  trên mực **32,09** = token 12 + row-centring 16 + ascent-trên-cap 4,09; dưới
+  mực **27,19** = descent 3,19 + row-centring 16 + token 8. Tổng 59,28 — độ lớn
+  đúng, nguyên nhân sai: **không có padding dọc nào trong row**. Row cao 48 vì
+  `MxTextButton` cao 48 (`getRect` của hai cái trùng khít), và `Row` chia đôi
+  32px đó quanh label. Sàn tuyệt đối khi nút còn trong row là **20,09 / 19,19**,
+  nên chỉ tiêu `dưới ≈ 10` không đạt được bằng bất kỳ token nào.
+- **Và hai mục tiêu đánh nhau.** Gộp label vào list bằng proximity cần
+  `trên ≥ 2 × dưới`, mà `dưới ≥ 19,19`, tức `trên ≥ 38,4` — **thêm** không khí
+  chứ không siết. Chủ dự án chọn phương án trong phạm vi: token dưới `8 → 0`.
+  Tổng 59,28 → 51,28; tỉ lệ trên/dưới **1,18 → 1,67**, label thôi cách đều hai
+  bên. Chỉ tiêu 20/11 đạt chính xác nếu nút sort rời khỏi dòng heading — ghi
+  lại làm lựa chọn để ngỏ, chưa làm.
+- **Quy tắc grouping chuyển sang chạy trên mực.** Nó đang so hai khoảng hộp, mà
+  khoảng hộp dưới heading nay là 0 trong khi mực cách card đầu 19,2 — người đọc
+  bảng sẽ thấy một khiếm khuyết không tồn tại. Thước có thêm dải `Label ink`
+  (cap → baseline, dùng cap-height 0,727 của Inter, **không** dùng ascent) và
+  assertion là tỉ lệ ≥ 1,5 thay vì phép so lớn hơn.
+- **16,5 giữa subtitle và hero: sửa được, và đã sửa.** Nó từng được miễn trừ là
+  "số học chiều cao của bar". `_toolbarHeight` = `titleLarge × 1,5` + sm + 32 +
+  md = 85, trong khi Column thật cao 68 = 28 + 8 + 32 — vì `titleLarge.height`
+  là **1,2727**, không phải 1,5. Năm pixel dư không ai chọn làm phần thừa của
+  bar thành **17**, chia đôi ra 8,5. Cho bar giữ chỗ đúng bằng thứ nó dựng
+  (`title?.height ?? _lineFactor`) và đổi `md → lg` cho padding bar: **84 =
+  28 + 8 + 32 + 16**, thừa 16, chia đôi ra 8. Toàn bộ chuỗi nay là số nguyên
+  (8 / 36 / 52 / 68 / 84) và `_allowedOffScale` rỗng — không khoảng nào còn cần
+  miễn trừ. 1,5 giữ lại làm fallback cho theme không khai báo line height.
 - **Thước lại tự sai lần thứ tư, và lần này nó gây hiểu nhầm thật.** Mỗi khoảng
   có **hai** chip — tên dải bên trái, con số bên phải — nên con số dễ bị đọc là
   "khoảng của dải mang tên đó". Chủ dự án đọc `24` thành khoảng **dưới** heading

@@ -61,10 +61,13 @@ class DeckSummarySectionWidget extends ConsumerWidget {
       // headroom, and this is where the owner said to find them.
       //
       // `deck_list_spacing_test.dart` still holds: it asks for `sm` between the
-      // header strip and this card, and the bar's own 8.5 clears it. **By half
-      // a pixel** — so the separation now rests entirely on `_toolbarHeight`'s
-      // arithmetic, and a change there breaks that guard rather than merely
-      // moving a gap. Putting `sm` back is one token if the trade sours.
+      // header strip and this card, and the bar's own centring clears it —
+      // exactly, at 8, since `_toolbarHeight` was made to reserve what it
+      // renders. It used to clear by half a pixel, on five pixels of slack the
+      // bar had reserved for a line height it does not use. The separation
+      // rests on that arithmetic either way, so a change there breaks the
+      // guard rather than merely moving a gap. Putting `sm` back is one token
+      // if the trade sours.
       //
       // **`xl` below, and the reason is grouping rather than taste** (owner
       // review, 2026-08-25, vertical-rhythm pass). It was 0, which put the list

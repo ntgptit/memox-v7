@@ -260,21 +260,31 @@ class _DeckLevel extends ConsumerWidget {
         SliverToBoxAdapter(child: DeckSummarySectionWidget(snapshot: snapshot)),
         SliverToBoxAdapter(
           child: Padding(
-            // **`sm`, and the old argument was answering the wrong question.**
-            // The rule this gap carried for four passes was "a section break no
-            // larger than the 16 between two cards makes the heading read as
-            // the list's first row". True of a heading floating between two
-            // groups — and this one is not floating: it *belongs* to the list.
-            // The ruler drew what the old reading cost: 0 above the heading and
-            // 24 below it, so the label sat against the hero and away from the
-            // cards it names, and proximity grouped it with the panel. The
-            // section above now owns the `xl` break; what is left here is the
-            // short tie between a label and its own list.
+            // **Zero, because the tie is already 19px of ink-to-card and the
+            // token was buying nothing** (owner decision, 2026-08-25). The gap
+            // this carried for four passes answered "a section break no larger
+            // than the 16 between two cards makes the heading read as the
+            // list's first row" — true of a heading floating between two
+            // groups, and this one belongs to the list. The ruler then drew the
+            // cost of that reading, and measuring the *ink* rather than the
+            // boxes showed why the token could go entirely:
+            //
+            //     above the cap  32.09 = token 12 + row-centring 16 + 4.09
+            //     below the cap  27.19 = descent 3.19 + row-centring 16 + 8
+            //
+            // Both 16s are `MxTextButton`'s 48px touch target, which sets the
+            // row's whole height and splits evenly around a 16px label box.
+            // They are not padding and there is nothing to delete. So the
+            // label's real distance to the first card never drops below
+            // `3.19 + 16 = 19.19` no matter what goes here — the `sm` was
+            // stacked on top of a gap that already read as generous, and
+            // dropping it takes the ratio above:below from 1.18, where the
+            // label is equidistant and groups with neither, to 1.67.
             padding: const EdgeInsets.fromLTRB(
               AppSpacing.lg,
               0,
               AppSpacing.lg,
-              AppSpacing.sm,
+              0,
             ),
             child: DeckListToolbarWidget(
               isRootLevel: parent == null,
