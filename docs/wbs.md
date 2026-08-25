@@ -11722,10 +11722,27 @@ của M2.
 - **Golden: mười file dịch chuyển, không phải sáu.** Con số sáu là kết quả đo
   trên Linux — chạy toàn bộ golden hai lần trên **cùng** máy, một lần có thay
   đổi, một lần `git stash` phần `lib/`, rồi so **184** ảnh giữa hai lần để
-  triệt tiêu chênh lệch nền tảng. Phương pháp đúng, **phạm vi thì không**: repo
-  có **186** golden — 110 ở `test/demo/goldens`, 72 ở
-  `test/shared/widgets/goldens`, 4 ở `test/design_preview/goldens` — và 184
-  thiếu đúng hai ảnh của thư mục thứ ba. Hai ảnh đó cũng dịch chuyển:
+  triệt tiêu chênh lệch nền tảng. Phương pháp đúng, **bước gom ảnh thì không** —
+  và lý do chính xác quan trọng, vì nó đổi cả cách sửa.
+
+  Repo có **186** golden: 110 ở `test/demo/goldens`, 72 ở
+  `test/shared/widgets/goldens`, 4 ở `test/design_preview/goldens`. Phép đo
+  **có** quét cả ba thư mục (`find test -path "*/failures/*_testImage.png"`),
+  nhưng gom kết quả bằng `cp` vào **một** thư mục tạm, tức làm phẳng theo
+  **basename**. Mà đúng hai tên bị trùng giữa các thư mục —
+  `settings_light.png` và `settings_dark.png` tồn tại ở cả `test/demo/goldens`
+  lẫn `test/design_preview/goldens`. Bản của `demo` (không đổi) ghi đè bản của
+  `design_preview` (có đổi) ở **cả hai** lượt chạy, nên cặp đó so ra giống hệt
+  nhau và biến mất khỏi kết quả. 186 → 184 chính là hai lần ghi đè đó, không
+  phải một thư mục bị bỏ quên.
+
+  Nên phép sửa không phải "quét thêm thư mục thứ ba" mà là **giữ đường dẫn khi
+  gom** — một phép đo làm phẳng không gian tên là một phép đo im lặng đánh mất
+  đúng những mục mà hai không gian con cùng đặt tên, tức những mục dễ bị lẫn
+  nhất. Kiểm chứng lại trên chính thư mục tạm còn sót: nó giữ **2** ảnh
+  `settings_*` trong khi repo có **4**.
+
+  Bốn ảnh còn thiếu so với sáu đã báo cáo:
   - `reminder_settings_{light,dark}.png` — `Switch`
   - `tag_filter_sheet_{light,dark}.png` — `CheckboxListTile`
   - `card_import_preview_light.png`, `card_import_preview_valid_light.png` —
