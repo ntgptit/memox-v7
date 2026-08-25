@@ -6,6 +6,7 @@ import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../../../shared/widgets/mx_async_view.dart';
+import '../../../../../shared/widgets/mx_button_pair.dart';
 import '../../../../../shared/widgets/mx_empty_state.dart';
 import '../../../../../shared/widgets/mx_error_state.dart';
 import '../../../../../shared/widgets/mx_form_sheet.dart';
@@ -184,39 +185,35 @@ class _Actions extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final matches = ref.watch(cardListTagDraftCountProvider(deckId)).value;
 
-    // **`OverflowBar`, not a `Row` — the same control `MxConfirmDialog` uses
-    // and for the reason it records.** A button is a non-flex child of a `Row`,
-    // so it receives an unbounded main-axis constraint and its label cannot
-    // wrap: at textScale 2.0 the two buttons measure 383dp against a 361dp
-    // column at 393dp, and 95dp over at 320dp — a `RenderFlex overflowed`, not
-    // a tight fit. `OverflowBar` stacks them instead (M4.14 G9, R).
-    return OverflowBar(
-      alignment: MainAxisAlignment.end,
-      spacing: AppSpacing.sm,
-      overflowSpacing: AppSpacing.sm,
-      overflowAlignment: OverflowBarAlignment.end,
-      children: <Widget>[
-        MxActionButton(
-          label: context.l10n.tagFilterClearAction,
-          variant: MxActionButtonVariant.secondary,
-          onPressed: draft.isActive
-              ? () => _selectDraft(ref, deckId, TagFilter.none)
-              : null,
-        ),
-        MxActionButton(
-          // The count answers the question the user actually has — "is this
-          // going to show me anything?" — before they close the sheet to find
-          // out (M4.14 T6). Until it lands the button is the bare verb rather
-          // than a flickering zero.
-          label: matches == null
-              ? context.l10n.tagFilterApplyAction
-              : context.l10n.tagFilterApplyActionCount(matches),
-          onPressed: () {
-            _applyDraft(ref, deckId, draft, catalog);
-            onClose();
-          },
-        ),
-      ],
+    // **`MxButtonPair`, which keeps what `OverflowBar` was here for and adds
+    // what it could not do.** The bar was chosen because a button is a non-flex
+    // child of a `Row`, so its label cannot wrap: at textScale 2.0 these two
+    // measure 383dp against a 361dp column at 393dp, and 95dp over at 320dp — a
+    // `RenderFlex overflowed`, not a tight fit (M4.14 G9, R). The pair stacks
+    // at exactly that point, and where the bar sized each action to its own
+    // label — `Clear` small beside `Apply · 128` — it splits the row evenly and
+    // matches their heights.
+    return MxButtonPair(
+      secondary: MxActionButton(
+        label: context.l10n.tagFilterClearAction,
+        variant: MxActionButtonVariant.secondary,
+        onPressed: draft.isActive
+            ? () => _selectDraft(ref, deckId, TagFilter.none)
+            : null,
+      ),
+      primary: MxActionButton(
+        // The count answers the question the user actually has — "is this
+        // going to show me anything?" — before they close the sheet to find
+        // out (M4.14 T6). Until it lands the button is the bare verb rather
+        // than a flickering zero.
+        label: matches == null
+            ? context.l10n.tagFilterApplyAction
+            : context.l10n.tagFilterApplyActionCount(matches),
+        onPressed: () {
+          _applyDraft(ref, deckId, draft, catalog);
+          onClose();
+        },
+      ),
     );
   }
 }

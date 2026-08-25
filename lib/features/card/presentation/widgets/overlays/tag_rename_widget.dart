@@ -7,6 +7,7 @@ import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
+import '../../../../../shared/widgets/mx_button_pair.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../../../shared/widgets/mx_form_sheet.dart';
 import '../../../../../shared/widgets/mx_text_field.dart';
@@ -139,36 +140,31 @@ class _RenameFormState extends ConsumerState<_RenameForm> {
         if (target != null) _MergeNotice(targetName: target.name),
         if (failure != null)
           _FailureBand(message: context.tagCatalogWriteFailure(failure)),
-        // `OverflowBar` for the reason the filter sheet records: a button is a
-        // non-flex child of a `Row`, so its label cannot wrap, and at textScale
-        // 2.0 `Cancel` + `Merge tags` measure 346dp — over the column at 360dp
-        // and below (M4.14 G9, R).
-        OverflowBar(
-          alignment: MainAxisAlignment.end,
-          spacing: AppSpacing.sm,
-          overflowSpacing: AppSpacing.sm,
-          overflowAlignment: OverflowBarAlignment.end,
-          children: <Widget>[
-            MxActionButton(
-              label: context.l10n.commonCancelAction,
-              variant: MxActionButtonVariant.secondary,
-              onPressed: rename.submit.isSubmitting ? null : widget.onClose,
-            ),
-            MxActionButton(
-              // The label is the last thing read before the action happens, so
-              // it says which of the two will happen (M4.14 W4 item 4).
-              // Relabelled while a failure is showing: the only way to retry
-              // was to notice the button was still enabled and press the same
-              // word again, which reads as "it did not register my tap".
-              label: failure != null
-                  ? context.l10n.retryAction
-                  : target == null
-                  ? context.l10n.tagRenameAction
-                  : context.l10n.tagMergeAction,
-              isLoading: rename.submit.isSubmitting,
-              onPressed: rename.submit.canSubmit ? _submit : null,
-            ),
-          ],
+        // `MxButtonPair` keeps the stacking `OverflowBar` was here for — a
+        // button is a non-flex child of a `Row`, so its label cannot wrap, and
+        // at textScale 2.0 `Cancel` + `Merge tags` measure 346dp, over the
+        // column at 360dp and below (M4.14 G9, R) — and draws the two at one
+        // size, which the bar's per-label sizing could not.
+        MxButtonPair(
+          secondary: MxActionButton(
+            label: context.l10n.commonCancelAction,
+            variant: MxActionButtonVariant.secondary,
+            onPressed: rename.submit.isSubmitting ? null : widget.onClose,
+          ),
+          primary: MxActionButton(
+            // The label is the last thing read before the action happens, so
+            // it says which of the two will happen (M4.14 W4 item 4).
+            // Relabelled while a failure is showing: the only way to retry
+            // was to notice the button was still enabled and press the same
+            // word again, which reads as "it did not register my tap".
+            label: failure != null
+                ? context.l10n.retryAction
+                : target == null
+                ? context.l10n.tagRenameAction
+                : context.l10n.tagMergeAction,
+            isLoading: rename.submit.isSubmitting,
+            onPressed: rename.submit.canSubmit ? _submit : null,
+          ),
         ),
       ],
     );

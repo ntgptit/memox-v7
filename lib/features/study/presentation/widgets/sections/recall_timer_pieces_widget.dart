@@ -255,6 +255,20 @@ class _RecallActionArea extends StatelessWidget {
 /// read as the way on, where a full-width bar reads as the screen floor. Shared
 /// with `fill`, which asks the same two questions in the other direction and
 /// held an identical private copy of this.
+///
+/// **When there are two, they are the same size — the row's whole job.** They
+/// used to be `Flexible` around their own labels, so `Forgotten` came out
+/// narrower than `Remembered` and `Show hint` narrower than `Check`: two verdict
+/// buttons at two widths, on the screen a learner presses more than any other,
+/// with the size difference reading as a recommendation the app never meant to
+/// make. Each half now fills its share up to [AppStudyPair.ctaMaxWidth] — the
+/// cap survives, and both halves get the same share — and
+/// [CrossAxisAlignment.stretch] under an [IntrinsicHeight] gives them one
+/// height when a label wraps at a large text scale.
+///
+/// A lone action still hugs its label: it is not next to anything, so there is
+/// nothing for it to match, and stretching it to the cap would draw a
+/// half-width bar under the cards.
 class StudyCtaRowWidget extends StatelessWidget {
   const StudyCtaRowWidget({required this.children, super.key});
 
@@ -264,21 +278,30 @@ class StudyCtaRowWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     if (children.isEmpty) return const SizedBox.shrink();
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        for (final (index, child) in children.indexed) ...<Widget>[
-          if (index > 0) const SizedBox(width: AppSpacing.md),
-          Flexible(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: AppStudyPair.ctaMaxWidth,
+    final isPair = children.length > 1;
+
+    return IntrinsicHeight(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          for (final (index, child) in children.indexed) ...<Widget>[
+            if (index > 0) const SizedBox(width: AppSpacing.md),
+            Flexible(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxWidth: AppStudyPair.ctaMaxWidth,
+                ),
+                // `Flexible` hands every child the same loose share; filling it
+                // is what turns "the same room" into "the same width".
+                child: isPair
+                    ? SizedBox(width: double.infinity, child: child)
+                    : child,
               ),
-              child: child,
             ),
-          ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }

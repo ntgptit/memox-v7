@@ -4,6 +4,7 @@ import '../../core/theme/app_icon_size.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/theme_context_extension.dart';
 import 'mx_action_button.dart';
+import 'mx_button_pair.dart';
 
 /// Shown when there is nothing to display and that is fine.
 ///
@@ -79,16 +80,29 @@ class MxEmptyState extends StatelessWidget {
             ],
             if (actionLabel != null && onAction != null) ...<Widget>[
               const SizedBox(height: AppSpacing.xl),
-              MxActionButton(label: actionLabel!, onPressed: onAction),
-            ],
-            if (secondaryActionLabel != null &&
-                onSecondaryAction != null) ...<Widget>[
-              const SizedBox(height: AppSpacing.sm),
-              MxActionButton(
-                label: secondaryActionLabel!,
-                variant: MxActionButtonVariant.secondary,
-                onPressed: onSecondaryAction,
-              ),
+              // **The pair goes through `MxButtonPair`, which is what makes
+              // the two buttons one size.** Stacked in a `Column` they used to
+              // take their own label's width — `Browse starter library` wide
+              // and `New deck` narrow, one above the other — so the second of
+              // two equally valid ways to start read as a smaller, lesser
+              // afterthought. Vertical rather than the responsive default: an
+              // empty state offers two *paths*, and side by side at half a
+              // phone's width is where labels of that length wrap.
+              if (secondaryActionLabel != null && onSecondaryAction != null)
+                MxButtonPair(
+                  axis: Axis.vertical,
+                  primary: MxActionButton(
+                    label: actionLabel!,
+                    onPressed: onAction,
+                  ),
+                  secondary: MxActionButton(
+                    label: secondaryActionLabel!,
+                    variant: MxActionButtonVariant.secondary,
+                    onPressed: onSecondaryAction,
+                  ),
+                )
+              else
+                MxActionButton(label: actionLabel!, onPressed: onAction),
             ],
           ],
         ),

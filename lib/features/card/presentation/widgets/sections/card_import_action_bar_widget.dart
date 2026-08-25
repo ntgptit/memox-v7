@@ -133,7 +133,20 @@ class CardImportActionBarWidget extends ConsumerWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Row(children: _actions(context, ref)),
+          // **`IntrinsicHeight` and a stretched cross axis, not a bare `Row`.**
+          // `Expanded` already gives the two actions the same width; without
+          // these they can still differ in height, because at a large text
+          // scale `Back` stays on one line while `Import 128 cards` wraps to
+          // two — and two buttons side by side at two heights is the same
+          // mismatch `MxButtonPair` exists to prevent. This bar keeps its own
+          // `Row`: its children are a phase-dependent list of one *or* two
+          // actions, which is not the pair the shared widget takes.
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: _actions(context, ref),
+            ),
+          ),
           if (hint != null)
             Padding(
               padding: const EdgeInsets.only(top: AppSpacing.xs),

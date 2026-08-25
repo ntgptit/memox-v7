@@ -4,6 +4,7 @@ import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
+import '../../../../../shared/widgets/mx_button_pair.dart';
 import '../../../../../shared/widgets/mx_confirm_dialog.dart';
 import '../../../../../shared/widgets/mx_text_field.dart';
 import '../../../domain/models/scheduler_type_model.dart';
@@ -139,21 +140,21 @@ class _DeckFormWidgetState extends State<DeckFormWidget> {
           ),
         ],
         const SizedBox(height: AppSpacing.xl),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: <Widget>[
-            MxActionButton(
-              label: context.l10n.commonCancelAction,
-              onPressed: state.isSubmitting ? null : _cancel,
-              variant: MxActionButtonVariant.secondary,
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            MxActionButton(
-              label: widget.submitLabel,
-              onPressed: _submit,
-              isLoading: state.isSubmitting,
-            ),
-          ],
+        // **`MxButtonPair`, not a `Row` of two self-sized buttons.** Sized to
+        // their labels, `Cancel` and `Create deck` are two different buttons
+        // for one decision; the pair splits the footer evenly, matches their
+        // heights and stacks when the line is too narrow for both.
+        MxButtonPair(
+          secondary: MxActionButton(
+            label: context.l10n.commonCancelAction,
+            onPressed: state.isSubmitting ? null : _cancel,
+            variant: MxActionButtonVariant.secondary,
+          ),
+          primary: MxActionButton(
+            label: widget.submitLabel,
+            onPressed: _submit,
+            isLoading: state.isSubmitting,
+          ),
         ),
       ],
     );
