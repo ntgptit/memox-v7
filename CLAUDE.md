@@ -414,3 +414,35 @@ way **cannot be reopened** — the only way forward is a new PR. This has cost t
 PRs already (#160, #173). Do not use `gh pr merge --delete-branch` as a shortcut:
 it also fails outright when `main` is checked out in another worktree, which is
 the normal state here.
+
+**Never force-push a branch a cloud session is working on.** A session started
+from the phone or the web clones this repository fresh and checks out the
+**commit** it was started at, not the branch name. Force-pushing rewrites that
+branch's history and orphans the old tip: the branch still exists, the SHA no
+longer resolves, and every later attempt to open that session dies at
+`The requested branch or commit was not found in the repository` — after the
+clone step has already reported success, which is what makes it read like a
+network fault instead of a ref problem.
+
+The orphaned commit survives only in whichever local clone happened to fetch it
+before the force-push, and only until `git gc` runs there. Push it back before
+touching anything else:
+
+```bash
+git push origin <sha>:refs/heads/rescue/<what-it-was>-<sha>
+git clone --bare <repo> /tmp/verify.git && git --git-dir=/tmp/verify.git cat-file -t <sha>
+```
+
+`git fetch` names the damage in passing and it is easy to read past — the `+`
+and the `...` are the whole signal:
+
+```
+ + edcd3558...df536ea3  claude/app-theme-review-vc0mha -> origin/...  (forced update)
+```
+
+**Local-only branches are invisible to a cloud session too.** It resolves
+everything against the remote, so a worktree branch that was never pushed —
+including whatever the *primary* checkout happens to be sitting on — cannot be
+a base. Keep `D:/workspace/memox-v7` on `main`, and check with
+`git worktree list` against `git ls-remote --heads origin` when a session will
+not start.
