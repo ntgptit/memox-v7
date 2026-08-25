@@ -371,10 +371,23 @@ class _RhythmRuler extends StatelessWidget {
       // A zero is drawn too: two boxes that touch is a fact worth seeing, and
       // the hero and the heading row do exactly that.
       if (gap != null && gap >= 0) {
+        final gapTop = previousBottom!;
+        // **The number spans the gap it measures.** Without the bracket a
+        // reader binds it to whichever name chip shares the gap — the owner
+        // read `24` as the distance *below* the heading row when it is the
+        // distance above it, and the picture gave them no way to tell.
+        labels.add(
+          Positioned(
+            right: 46,
+            top: gapTop,
+            height: gap == 0 ? 1 : gap,
+            child: const _GapBracket(),
+          ),
+        );
         labels.add(
           Positioned(
             right: 6,
-            top: previousBottom! + gap / 2 - 8,
+            top: gapTop + gap / 2 - 8,
             child: _chip(
               gap.toStringAsFixed(gap == gap.roundToDouble() ? 0 : 1),
               _fillFor(previousName, band.name, gap),
@@ -427,6 +440,45 @@ class _RhythmRuler extends StatelessWidget {
       ),
     ),
   );
+}
+
+/// The bracket that ties a number to the two edges it measures between.
+///
+/// A stem down the gap with a serif at each end, so the figure beside it reads
+/// as *this distance* rather than as a property of the nearest label.
+class _GapBracket extends StatelessWidget {
+  const _GapBracket();
+
+  static const Color _ink = Color(0xCCE11D48);
+
+  @override
+  Widget build(BuildContext context) => const CustomPaint(
+    size: Size(30, double.infinity),
+    painter: _GapBracketPainter(),
+  );
+}
+
+class _GapBracketPainter extends CustomPainter {
+  const _GapBracketPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final ink = Paint()
+      ..color = _GapBracket._ink
+      ..strokeWidth = 1;
+    final x = size.width / 2;
+    canvas
+      ..drawLine(Offset(x, 0), Offset(x, size.height), ink)
+      ..drawLine(Offset(x - 4, 0.5), Offset(x + 4, 0.5), ink)
+      ..drawLine(
+        Offset(x - 4, size.height - 0.5),
+        Offset(x + 4, size.height - 0.5),
+        ink,
+      );
+  }
+
+  @override
+  bool shouldRepaint(_GapBracketPainter oldDelegate) => false;
 }
 
 /// The hairlines themselves — one on each edge of every band.

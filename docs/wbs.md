@@ -12106,10 +12106,16 @@ của M2.
 
   Lập luận cũ trả lời sai câu hỏi: nó đúng với một heading **trôi giữa** hai
   nhóm, mà heading này không trôi — **nó thuộc về list**.
-- **Sửa vòng hai — đảo hai khoảng:** `hero → heading = 24` (`xl` chuyển sang
-  padding đáy của summary section), `heading → card 1 = 8` (`sm` ở toolbar).
-  Quang học từ mực của label: tới hero 42, tới card đầu 26 — label nay gần thứ
-  nó gán nhãn hơn.
+- **Sửa vòng hai — đảo hai khoảng:** `xl` chuyển sang padding đáy của summary
+  section, `sm` ở toolbar. Chủ dự án đọc kết quả và nói `24` phía trên heading
+  là quá nhiều, nên hạ một bậc: **`hero → heading = 16` (`lg`),
+  `heading → card 1 = 8` (`sm`)**. Break chỉ cần **lớn hơn**, không cần lớn —
+  16 so với 8 vẫn để label gần list nó gán nhãn gấp đôi so với panel phía trên.
+- **Thước lại tự sai lần thứ tư, và lần này nó gây hiểu nhầm thật.** Mỗi khoảng
+  có **hai** chip — tên dải bên trái, con số bên phải — nên con số dễ bị đọc là
+  "khoảng của dải mang tên đó". Chủ dự án đọc `24` thành khoảng **dưới** heading
+  trong khi nó là khoảng **trên**. Nay mỗi số có một **ngoặc dọc** nối đúng hai
+  mép nó đo, nên không thể gán nhầm.
 - **Bù 8px, lấy từ nơi chủ dự án chỉ:** padding trên của summary section `sm` →
   0. `subtitle → hero` còn **16,5**, đúng mục tiêu 16. Toàn bộ 16,5 nay thuộc về
   app bar. **`deck_list_spacing_test.dart` vẫn qua nhưng chỉ hơn sàn nửa pixel**

@@ -71,13 +71,18 @@ class DeckSummarySectionWidget extends ConsumerWidget {
       // heading against the hero's own edge while leaving 24 between that
       // heading and the first card it names. By proximity the reader groups
       // `YOUR DECKS` with the panel above it instead of the list below — the
-      // label was closer to the thing it does not describe. The two gaps are
-      // swapped: the heading now sits `xl` off the hero and `sm` off its list.
+      // label was closer to the thing it does not describe.
+      //
+      // **`lg`, not `xl`.** The swap first put the whole `xl` here and the
+      // owner read the result as too much air under the hero. One step down
+      // still separates: 16 above the heading against `sm` below it keeps the
+      // label twice as near its own list as the panel it follows, which is
+      // what the grouping needed — the break only had to be *bigger*, not big.
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
         0,
         AppSpacing.lg,
-        AppSpacing.xl,
+        AppSpacing.lg,
       ),
       child: DeckLevelSummaryWidget(
         snapshot: snapshot,
