@@ -43,7 +43,7 @@ void main() {
         applyDeckListView(
           sample(),
           filter: DeckListFilter.all,
-          sort: DeckListSort.recent,
+          sort: DeckListSort.dateAdded,
         ),
         hasLength(3),
       );
@@ -65,7 +65,7 @@ void main() {
       final visible = applyDeckListView(
         <DeckSummary>[deck('Apple', due: 0, createdAt: oldest)],
         filter: DeckListFilter.due,
-        sort: DeckListSort.recent,
+        sort: DeckListSort.dateAdded,
       );
 
       expect(visible, isEmpty);
@@ -77,7 +77,7 @@ void main() {
       final visible = applyDeckListView(
         sample(),
         filter: DeckListFilter.all,
-        sort: DeckListSort.recent,
+        sort: DeckListSort.dateAdded,
       );
 
       expect(namesOf(visible), <String>['Apple', 'cherry', 'banana']);
@@ -145,7 +145,10 @@ void main() {
       addTearDown(container.dispose);
 
       expect(container.read(deckListFilterChoiceProvider), DeckListFilter.all);
-      expect(container.read(deckListSortChoiceProvider), DeckListSort.recent);
+      expect(
+        container.read(deckListSortChoiceProvider),
+        DeckListSort.dateAdded,
+      );
     });
 
     test('changing one leaves the other alone', () {
@@ -159,7 +162,10 @@ void main() {
           .select(DeckListFilter.due);
 
       expect(container.read(deckListFilterChoiceProvider), DeckListFilter.due);
-      expect(container.read(deckListSortChoiceProvider), DeckListSort.recent);
+      expect(
+        container.read(deckListSortChoiceProvider),
+        DeckListSort.dateAdded,
+      );
     });
   });
 }

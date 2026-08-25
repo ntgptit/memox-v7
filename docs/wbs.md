@@ -11242,6 +11242,85 @@ của M2.
   `deck_list_toolbar_test.dart`, `test/demo/` goldens, full host suite.
 - **Checklist phases:** 7, 12, 14
 
+### M99.43 · Nhãn sort nói đúng việc nó làm, và numeral hero canh quang học
+
+- **Status:** **done**
+- **Goal:** Hai phát hiện từ vòng review ảnh của chủ dự án, cả hai đã đo lại
+  trên golden thật trước khi sửa.
+- **Phát hiện 1 — nhãn sort SAI, không phải "mơ hồ":**
+  comparator sắp theo `deck.createdAt` giảm dần, còn chuỗi ghi
+  `"Recently studied"` / `"Học gần đây"`. `DeckEntity` **không có** field
+  `lastStudiedAt` nào, nên app không thể sắp theo ngày học kể cả khi muốn —
+  nhãn đưa ra một lời hứa không có gì đằng sau. Lỗi có từ trước, pill cũ cũng
+  ghi vậy; việc M99.42 rút thành `"Recent"` vô tình làm nó **bớt sai** đi.
+- **Scope:** Hai sửa đổi trên màn Deck list — nhãn/enum của thứ tự sort, và
+  canh quang học numeral hero. Không đụng deck card, bottom nav, padding của
+  `MxCard`, và **không** thêm `lastStudiedAt`.
+- **Cách sửa (phát hiện 1):** Chuỗi về `"Date added"` / `"Ngày tạo"` (chủ dự án chốt phương án
+  đổi chuỗi, không thêm `lastStudiedAt`). Enum `DeckListSort.recent` →
+  **`dateAdded`**: cái tên mơ hồ chính là thứ để con bug sống sót, một người
+  đọc `recent` sẽ tự suy ra "gần đây = vừa học". Rename thuần cơ học, không
+  đổi hành vi.
+- **Bỏ luôn bộ nhãn ngắn — một vốn từ, không phải hai.** M99.42 đẻ ra
+  `deckSortShortLabel()` cùng hai key ARB vì `"Recently studied"` đo 95px+,
+  không lọt ngân sách 96px của hàng heading. Chuỗi đó nay là `"Date added"`
+  (90,8px) nên lý do biến mất. Đo cả 8 tổ hợp với chuỗi của sheet: 7 lọt, riêng
+  VI `"Thẻ đến hạn"` 96,9px — quá 0,9px, nên **chính entry ARB tiếng Việt rút
+  thành `"Đến hạn"`** thay vì giữ cả một cơ chế hai vốn từ cho một chuỗi.
+  Xoá: 2 key ARB + 1 hàm. Mọi mô tả ARB của 4 thứ tự nay ghi rõ ràng buộc 96px
+  để translator không "khôi phục" chuỗi dài.
+  **Hệ quả có thật:** hàng và sheet cùng chuỗi nên `find.text` trong test thành
+  mơ hồ — `chooseSort` phải ràng vào `MxActionSheet`. Đã ghi vào comment.
+- **Phát hiện 2 — canh quang học numeral hero.** Review nói "padding lệch",
+  **sai chẩn đoán**: `MxCard` là `EdgeInsets.all(16)`, đối xứng tuyệt đối, và
+  hộp của numeral cách mép trên đúng 16. Nhưng **số đo thì đúng**: mực chữ
+  "15" cách mép trên 32,3px, mực nút cách mép dưới 13,3px. Phân rã:
+  16 (padding) + 4 (dòng 40px canh giữa trong hàng 48 do chevron đặt)
+  + 12,3 (internal leading + ascent-trên-cap của font).
+- **Cách sửa (phát hiện 2):** Hai bước có nguyên tắc, **không** hạ padding:
+  hàng đổi sang `CrossAxisAlignment.start` (trả 4px), và numeral lấy
+  `height: 1` cho line box khít mực (trả 4px). Chữ số không có descender và
+  không mang dấu, nên đây là chuỗi duy nhất trong app bỏ được leading mà không
+  rủi ro cắt glyph.
+- **Đo được: 32,3 → 24,3px, tỉ lệ 2,43 → 1,82.** Phần dư **8,3px** là
+  ascent-trên-cap của chính font, chỉ gỡ được bằng một hằng số gắn với file
+  font — tức magic value gắn với thứ có thể thay. **Cố tình dừng ở đây**, và
+  cách duy nhất đi tiếp là dịch cả dòng lên, việc chỉ chuyển bất đối xứng
+  xuống khe giữa dòng số và progress bar. Chiều cao hero **không đổi** (156px):
+  hàng vẫn 48 do chevron, nên không có golden nào ngoài numeral bị xê dịch.
+- **Output:** ARB en/vi (4 mô tả ghi ràng buộc 96px; 2 key ngắn xoá; VI
+  `cardsDue` rút gọn), `deck_list_view_state.dart` (`dateAdded` + doc giải
+  thích vì sao đổi tên), `deck_list_view_controller.dart`,
+  `deck_sort_sheet_widget.dart` (xoá `deckSortShortLabel`),
+  `deck_list_toolbar_widget.dart`, `deck_summary_metrics_widget.dart`
+  (top-align + line box), test toolbar/width, parity kit `DeckLevelScreen.jsx`.
+- **Acceptance criteria:**
+  - [x] Nhãn khớp hành vi ở **cả** hàng heading lẫn option trong sheet — cùng
+        một chuỗi, nên không thể lệch nhau.
+  - [x] Enum không còn tên mơ hồ.
+  - [x] Ngân sách 96px vẫn giữ cho 8 tổ hợp; `"Date added"` 90,8px là chật
+        nhất — test bắt được nếu chuỗi nào phình ra.
+  - [x] Numeral: 32,3 → 24,3px, phần dư đã truy đúng nguyên nhân và ghi lại.
+  - [x] `EdgeInsets.all(16)` giữ nguyên như chủ dự án yêu cầu.
+  - [x] `dod_check.sh` **`✓ mechanical gates passed`**; host suite
+        **3757/3757**; guard 70 rule xanh.
+- **Ba mục review KHÔNG sửa, kèm lý do đo được:**
+  - Nút `Study` / icon `⋮` "dưới 44px": **sai** — đo `80×48` và `48×48`, đúng
+    sàn 48 của repo. Review đo phần **tô** (40px) rồi kết luận về **vùng chạm**.
+  - `% learned` lặp 3 lần: đếm đúng 3, nhưng là nhận định mật độ chứ không phải
+    khuyết tật đo được; mỗi card là một thực thể độc lập, không phải hàng bảng.
+  - FAB đè `⋮` card thứ ba: **có thật**, chồng `48×22px` = 46% vùng chạm, còn
+    dải 26px bấm được. **Chưa sửa, chưa có quyết định của chủ dự án** — và
+    `DeckLevelScreen.jsx` bên kit đã ghi sẵn cảnh báo này khi chọn đưa Create
+    lên app bar, nên hai kit đang mâu thuẫn ở đúng điểm đó. Cần chốt trước khi
+    đụng vào.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.42
+- **Tests required:** `deck_list_toolbar_test.dart`,
+  `deck_sort_control_width_test.dart`, `deck_list_view_test.dart`,
+  `test/demo/` goldens, full host suite.
+- **Checklist phases:** 7, 12, 14
+
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 
 Ghi lại cụ thể, vì "mất một bộ lint" là câu quá mơ hồ để ai đó sau này biết

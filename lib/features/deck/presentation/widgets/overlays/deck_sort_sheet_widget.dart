@@ -10,31 +10,22 @@ import '../../states/deck_list_view_state.dart';
 /// **A function on the enum's behalf, not a field on the enum.** A `DeckListSort`
 /// that carried its own label would carry English into a value the domain layer
 /// can hold, and the ARB lookup needs a `BuildContext` the enum has no business
-/// owning. Public because the control on the heading row announces the same word
-/// the sheet ticks — two spellings of one fact is how a screen reader and a
-/// sighted user end up disagreeing about what the list is sorted by.
+/// owning. Public because the control on the heading row paints and announces
+/// the same word the sheet ticks — two spellings of one fact is how a screen
+/// reader and a sighted user end up disagreeing about what the list is sorted
+/// by.
+///
+/// **One vocabulary, since the labels stopped lying.** There was a second, short
+/// set for the heading row, and it existed for exactly one string: *Recently
+/// studied* did not fit 96px. That string was a false claim about the sort and
+/// is now *Date added*, which does fit — so the short set went with it. The one
+/// order that still would not fit is Vietnamese `cardsDue`, and the shorter
+/// phrasing is simply what that ARB entry carries.
 String deckSortLabel(AppLocalizations l10n, DeckListSort sort) =>
     switch (sort) {
-      DeckListSort.recent => l10n.deckSortRecentLabel,
+      DeckListSort.dateAdded => l10n.deckSortRecentLabel,
       DeckListSort.name => l10n.deckSortNameLabel,
       DeckListSort.cardsDue => l10n.deckSortCardsDueLabel,
-      DeckListSort.progress => l10n.deckSortProgressLabel,
-    };
-
-/// The same order, named in the space a heading row has.
-///
-/// **A second vocabulary, and only where the first does not fit.** The control
-/// on the heading row has about 96px; `Recently studied` alone measures more
-/// than that at `label-md`. Two of the four orders are already short enough and
-/// point at the sheet's own string rather than at a duplicate — a translator
-/// changing `Name` in one place and not the other is exactly the drift a
-/// duplicated string invites. The switch is exhaustive so a fifth order cannot
-/// be added without deciding what the control calls it.
-String deckSortShortLabel(AppLocalizations l10n, DeckListSort sort) =>
-    switch (sort) {
-      DeckListSort.recent => l10n.deckSortRecentShortLabel,
-      DeckListSort.name => l10n.deckSortNameLabel,
-      DeckListSort.cardsDue => l10n.deckSortCardsDueShortLabel,
       DeckListSort.progress => l10n.deckSortProgressLabel,
     };
 
@@ -44,7 +35,7 @@ String deckSortShortLabel(AppLocalizations l10n, DeckListSort sort) =>
 /// bare text read as a paragraph, and the eye needs somewhere to land while it
 /// scans for the one it wants.
 IconData _iconFor(DeckListSort sort) => switch (sort) {
-  DeckListSort.recent => Icons.schedule,
+  DeckListSort.dateAdded => Icons.schedule,
   DeckListSort.name => Icons.sort_by_alpha,
   DeckListSort.cardsDue => Icons.event_available,
   DeckListSort.progress => Icons.donut_small,

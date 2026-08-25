@@ -17,7 +17,7 @@ enum DeckListFilter {
 
 /// The order the root list is shown in.
 ///
-/// The repository's own order is by creation, which is [DeckListSort.recent].
+/// The repository's own order is by creation, which is [DeckListSort.dateAdded].
 /// Sorting here rather than in SQL keeps it a view choice: a second screen wanting
 /// a different order does not become a second query.
 ///
@@ -28,7 +28,13 @@ enum DeckListFilter {
 /// answer the questions a learner actually has about their library.
 enum DeckListSort {
   /// Newest first — the order decks were created in, reversed.
-  recent,
+  ///
+  /// **It was called `recent`, and the name is what let the bug live.** The
+  /// label on it read *Recently studied* while the comparator sorted on
+  /// `createdAt`, and nothing in the app records when a deck was last studied
+  /// — `DeckEntity` has no such field. A vague name is what makes a reader
+  /// re-derive the wrong meaning, so this one says which date it means.
+  dateAdded,
 
   /// By name, case-insensitively.
   name,
@@ -102,7 +108,7 @@ List<DeckSummary> applyDeckListView(
 
   indexed.sort((a, b) {
     final primary = switch (sort) {
-      DeckListSort.recent => b.summary.deck.createdAt.compareTo(
+      DeckListSort.dateAdded => b.summary.deck.createdAt.compareTo(
         a.summary.deck.createdAt,
       ),
       DeckListSort.name => a.summary.deck.name.toLowerCase().compareTo(
