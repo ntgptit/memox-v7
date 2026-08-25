@@ -12194,7 +12194,12 @@ của M2.
 
 ### M99.53 · Hai nút cạnh nhau là một kích thước — `MxButtonPair`
 
-- **Status:** **done** (còn nợ golden, xem dưới)
+- **Status:** **in-progress** — code, test, Widgetbook và mục WBS này đã xong và
+  đã merge (#337, #338); còn **26 golden chưa sinh lại** và gallery màn hình
+  chưa publish lại. Ghi `done` khi một acceptance criterion bắt buộc còn bỏ
+  trống thì chính cuốn sổ này nói dối: phiên sau đọc `done` sẽ bỏ qua đúng phần
+  việc còn lại. Chuyển sang `done` sau khi chạy `flutter test --update-goldens`
+  trên **Windows** và build lại gallery.
 - **Goal:** Chủ dự án nhìn trên máy và bác bỏ màn thư viện rỗng: *«2 button đặt
   cạnh nhau, bất kể cùng row hay cùng column thì phải có bề rộng và bề cao
   giống nhau»*. `Browse starter library` rộng, `New deck` hẹp hơn hẳn ngay dưới
