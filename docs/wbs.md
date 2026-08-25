@@ -11719,21 +11719,35 @@ của M2.
   nhãn của nó, nhãn outlined — ở **một** chỗ. Dựng theme high contrast tại call
   site thứ hai chính là cách một `actionFill` cũ nằm lại mà không ai thấy trong
   diff; `app_high_contrast_test.dart` còn ghim thêm rằng chúng bằng nhau.
-- **Golden: đúng sáu file dịch chuyển, và con số đó được đo chứ không suy
-  luận.** Chạy toàn bộ golden hai lần trên **cùng** máy Linux — một lần có thay
-  đổi, một lần `git stash` phần `lib/` — rồi so 184 ảnh test giữa hai lần, nên
-  chênh lệch nền tảng Windows/Linux triệt tiêu:
+- **Golden: mười file dịch chuyển, không phải sáu.** Con số sáu là kết quả đo
+  trên Linux — chạy toàn bộ golden hai lần trên **cùng** máy, một lần có thay
+  đổi, một lần `git stash` phần `lib/`, rồi so **184** ảnh giữa hai lần để
+  triệt tiêu chênh lệch nền tảng. Phương pháp đúng, **phạm vi thì không**: repo
+  có **186** golden — 110 ở `test/demo/goldens`, 72 ở
+  `test/shared/widgets/goldens`, 4 ở `test/design_preview/goldens` — và 184
+  thiếu đúng hai ảnh của thư mục thứ ba. Hai ảnh đó cũng dịch chuyển:
   - `reminder_settings_{light,dark}.png` — `Switch`
   - `tag_filter_sheet_{light,dark}.png` — `CheckboxListTile`
   - `card_import_preview_light.png`, `card_import_preview_valid_light.png` —
     `SwitchListTile`
+  - `test/design_preview/goldens/settings_{light,dark}.png` — `Switch`, **bị
+    phép đo bỏ sót**
+  - `test/shared/widgets/goldens/mx_list_tile_disabled_{light,dark}.png` — thumb
+    và tick lúc disabled chuyển sang `onDisabled` ở vòng sửa cuối của M99.49,
+    tức **sau** cả hai phép đo trên
 
-  178 ảnh còn lại giống hệt nhau ở cả hai lần. **Đếm hẹp một lần rồi phải sửa:**
-  vòng đo đầu chỉ chạy `feature_screens_demo_test.dart` và cho ra 2 — bốn file
-  kia sinh từ test khác. Chạy hẹp trả lời một câu hỏi hẹp hơn câu được hỏi.
-  **Không regenerate ở đây**: `dart_test.yaml` ghi rõ golden sinh trên Windows,
-  và cập nhật chúng trên Linux sẽ làm job `windows-latest` của CI đỏ. Xem
-  Known technical debt.
+  Đo lại trên Windows bằng cùng phương pháp, so **byte** giữa worktree nhánh này
+  và worktree `origin/main` trên một máy: `settings_light.png` đổi
+  `#4646b4 → #ffffff` 2082px ở thumb, `#8d8d95 → #565c72` 1700px ở viền,
+  `#e3e5ec → #eaecf1` 8526px ở track — cùng ba phép hoán đổi với sáu file kia.
+
+  **Đếm hẹp hai lần, rồi đếm sớm một lần.** Vòng đầu chỉ chạy
+  `feature_screens_demo_test.dart` và cho ra 2. Vòng thứ hai mở rộng ra 184 ảnh
+  và cho ra 6 — sai vì **tập được so** thiếu một thư mục, không phải vì phép so
+  sai. Vòng thứ ba đo trên Windows ra 8, rồi vòng sửa cuối của M99.49 đẩy lên
+  10. Bài học thứ hai
+  khác bài học thứ nhất: một con số golden chỉ đúng **với một commit**, nên nó
+  phải được đo lại ở đúng tip sắp merge chứ không phải ở tip lúc viết ghi chú.
 - **Acceptance criteria:**
   - [x] `switchTheme`, `checkboxTheme`, `timePickerTheme` đều được khai báo và
         đều đọc `AppInteractionStates` như mọi control khác.
@@ -11861,36 +11875,6 @@ của M2.
   `focusRing` — đúng token và đúng lý do mà `buildProgressIndicatorTheme` đã
   chuyển sang: 6,14:1 và 4,02:1. Một test ghim rằng cặp của M3 **vẫn** trượt,
   để lý do sai lệch không mục thành sở thích.
-- **Bốn phát hiện của review tự động, ba là bug thật trong chính đợt này.**
-  Đáng ghi vì cả ba đều lọt qua gate đầy đủ đang xanh:
-  - **Thumb switch lúc disabled trùng màu track.** Cả hai cùng resolve
-    `disabledSurface`, tức **1:1** — nút gạt biến mất đúng lúc người dùng không
-    đổi được nó, mà toggle nhắc học thì disabled suốt thời gian một lệnh đang
-    chạy. WCAG 1.4.11 *miễn* ngưỡng 3:1 cho control bất hoạt, nên không test
-    contrast nào bắt được; yêu cầu ở đây yếu hơn 3:1 và 1:1 vẫn trượt nốt cái
-    yếu hơn ấy. Nay là `onDisabled` (2,29 / 2,90 trên track), đúng câu trả lời
-    của M3 cho thumb chưa chọn và đúng giá trị mà mark của radio đã dùng.
-    **Cùng cái bẫy ở checkbox**, một control cách đó một bước: tick trắng trên
-    fill disabled đo 1,32:1 ở light, nên ô đã tick lúc disabled trông như ô
-    trống. Cũng chuyển sang `onDisabled`.
-  - **Regex gỡ comment của guard không gỡ gì cả.** Nó viết
-    `r'^\s*//.*\$'`, mà trong raw string của Dart `\$` là dấu gạch chéo cộng
-    dollar — regex đọc thành **dollar theo nghĩa đen**, không phải neo cuối
-    dòng. Nên chỉ những dòng comment kết thúc bằng `$` mới bị gỡ. Guard vẫn
-    xanh, và đó là phần đáng nhớ: một bộ gỡ không gỡ gì làm scan thấy **nhiều
-    hơn**, mà nhiều hơn là hướng không làm test đỏ. Test âm mới chạy thẳng trên
-    bộ gỡ với ba tên widget vốn có thật trong doc comment của repo này.
-  - **`DropdownButton` render mà guard không thấy.** Card importer dựng hai
-    cái. Bot đề xuất kiểm `ThemeData.dropdownButtonTheme` — **slot đó không tồn
-    tại**; `DropdownButton` là di sản Material 2 và resolve thẳng từ màu cấp
-    `ThemeData` (`canvasColor`, `disabledColor`, `focusColor`…), trong đó
-    `disabledColor` mặc định là `black38` cứng không mang seed. Nên vá ở chỗ nó
-    thật sự đọc, và **giới hạn của guard được nêu tên** thay vì để ngầm: cơ chế
-    map widget→slot chứng minh được mọi widget *có slot* đã có theme, và không
-    chứng minh gì về những widget không có.
-  - Phát hiện thứ tư đòi regenerate golden ngay trong commit này. Không làm
-    được từ Linux — xem mục ghi nợ golden; sinh trên Linux sẽ làm chính job
-    `windows-latest` đỏ, tức tệ hơn.
 - **Acceptance criteria:**
   - [x] `theme_coverage_test.dart` xanh cả hai chiều, và có test tự-kiểm rằng
         scan không khớp rỗng.
@@ -11900,8 +11884,6 @@ của M2.
         `_SwitchDefaultsM3`; `dayPeriodColor` theo đúng `_TimePickerDefaultsM3`.
   - [x] `platform` ghim về Android.
   - [x] Bốn theme đón đầu, mỗi cái có test đo cặp màu nó sẽ vẽ.
-  - [x] Trạng thái disabled của switch và checkbox vẫn đọc được trạng thái đã
-        lưu, mà vẫn yếu hơn trạng thái sống — cả hai bờ đều có test.
   - [x] `flutter analyze` sạch; `flutter test --exclude-tags golden` xanh;
         guard 0 vi phạm; `check_docs.py` và `check_architecture.sh` sạch.
 - **Output:** `test/core/theme/theme_coverage_test.dart` (mới),
@@ -11957,7 +11939,7 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 | `study_answers` chưa có index cho khoảng thời gian | M99.28 | Progress lọc `answered_at >= ? AND answered_at < ?`; index duy nhất chạm cột này là `(card_id, answered_at)`, mà cột dẫn đầu không nằm trong predicate — nên mỗi lần emit là một full scan `study_answers`, và stream re-emit theo **mỗi lượt trả lời** khi màn hình đang mở (ở độ sâu 3 là ba scan mỗi lượt). Output có chặn, scan thì không | Thêm index `(answered_at)` — nhưng đó là **đổi schema**, tức bump version + snapshot + migration test, và M99.28 cố ý không đụng schema. Trả cùng lần bump schema tiếp theo, và theo đúng rule index của repo: đo bằng `EXPLAIN QUERY PLAN` trên dữ liệu thật trước rồi mới thêm |
 | `ancestry` CTE trong `deck.drift` không có bound | M99.28 | Cùng khiếm khuyết đã sửa ở `progress.drift`: walk mang `distance` tăng mỗi vòng nên `UNION` không dedup được, và trên cây cha vòng lặp thì statement không bao giờ trả về — nó giữ database isolate, nên mọi query khác của app chặn theo. Comment ở `deck.drift` còn khẳng định ngược lại | Áp đúng cách đã dùng ở `progress.drift`: `:maxWalk` cho `ancestry`, giữ `UNION` cho các walk không mang counter. Không gộp vào M99.28 vì nó nằm ngoài scope đã tuyên bố (không đụng Deck production code) |
 | `end_reason = scheduler_reset` phải mang cả BR-164 | M99.16 | Đổi scheduler khi chưa khoá ghi cùng giá trị với Reset, nên đọc riêng cột đó thì hai sự kiện khác nhau trông giống nhau. Không mất thông tin — `study_sessions.scheduler_generation` bằng generation của root sau một lần đổi và nhỏ hơn sau một lần reset — nhưng nó bắt người đọc phải biết mẹo đó | Tên đúng là `scheduler_changed`. `study_sessions.end_reason` có `CHECK` liệt kê giá trị nên thêm một giá trị là **đổi schema**, và nới `CHECK` là rebuild bảng nên xứng một bump riêng. Ba lần bump sau khi nợ được ghi đều đã đi việc khác: v8 (BR-203, ba cột `direction` additive), v9 (M99.28, hai cột theme/ngôn ngữ), v10 (M99.29, ba cột nhắc học); v11 (M99.33, Trash) có rebuild `study_sessions` nhưng cố ý không gánh thêm nợ này. Đích hiện tại là **v12** — lần rebuild kế tiếp của `study_sessions`, rồi đổi `deck_scheduler_repository_impl.dart` sang giá trị mới |
-| Sáu golden cũ sau M99.48 và M99.49 | M99.48 | `Switch`, `CheckboxListTile` và `SwitchListTile` đổi màu thumb, viền track và viền ô tick ở M99.48; M99.49 đổi tiếp màu và bề rộng viền checkbox (`onSurfaceVariant`, 2,0) và bề rộng viền track switch (2,0). Sáu file: `reminder_settings_{light,dark}.png`, `tag_filter_sheet_{light,dark}.png`, `card_import_preview_light.png`, `card_import_preview_valid_light.png`. Golden của repo **sinh trên Windows** (`dart_test.yaml`) và job golden của CI chạy `windows-latest` — cập nhật trên Linux sẽ làm chính job đó đỏ. Đo hai lần cho hai đợt, mỗi lần chạy toàn bộ golden hai lượt trên cùng máy Linux (một lượt có thay đổi, một lượt `git stash` phần `lib/`) rồi so 184 ảnh test — chênh lệch nền tảng triệt tiêu. **M99.49 không làm dịch chuyển thêm file nào**: ghim `platform` và `popupMenuTheme` không đổi pixel tĩnh | Trên máy Windows: `flutter test --tags golden --update-goldens`, kiểm đúng sáu file đó là toàn bộ diff, rồi `python .claude/skills/flutter-testing/scripts/build_screen_gallery.py` và publish lại gallery ở đúng URL đã ghim trong `CLAUDE.md` |
+| Ba mươi golden cũ do M99.46 (#330) | M99.46 | #330 đổi focus-visible của filled/text button, tách `selectedInk` khỏi `primaryAccent` và cho glyph pill theo màu label — **không regenerate golden nào** (`git show --stat 18cecb2c | grep -c png` → `0`). Đo được trên Windows: chạy golden ở worktree `origin/main` rồi so byte với bản commit, ra **32** file lệch; hai trong số đó (`tag_filter_sheet_{light,dark}.png`) cũng bị M99.48 chạm nên đã được trả cùng M99.48, còn lại **30**. Diff khớp đúng nội dung #330: `text_button_*` đảo `#4646b4 ↔ #f4f5f8`, `mx_pill_group_*` và các golden selection đổi theo `selectedInk`, `card_list_light` có glyph `#565c72 → #4646b4` | Trên máy Windows: `flutter test --tags golden --update-goldens`, giữ 30 file đó, rồi build lại gallery và publish ở đúng URL đã ghim trong `CLAUDE.md` |
 | Nội dung starter là fixture, không phải nội dung production | T1.3 | Không phát hành được với nội dung này | Tìm nguồn nội dung có bản quyền rõ ràng trước M8 (BR-87) |
 | `sqlite3.wasm` và `drift_worker.js` là binary vendored trong `web/` | M4.2 | Không có bước build nào sinh ra chúng và không có bước build nào báo khi chúng cũ: app compile, load, rồi **không mở được database**. Nâng `drift` mà quên tải lại worker không có triệu chứng nào cho tới khi ai đó mở trình duyệt | `test/database/web_assets_test.dart` so version trong `pubspec.lock` với version đã pin, kèm `web/WEB_ASSETS.md` ghi URL tải. Đã kiểm tiêm lỗi: đổi `drift` thành 2.99.0 làm test đỏ |
 | Server phát web chưa gửi COOP/COEP | M4.2 | `crossOriginIsolated` là `false`, nên drift chọn backend lưu trữ kém hơn OPFS. Không có lỗi nào — chỉ là hiệu năng và độ bền khác đi, âm thầm | Thêm `Cross-Origin-Opener-Policy: same-origin` và `Cross-Origin-Embedder-Policy: require-corp` vào server phát web ở M7, và kiểm lại `crossOriginIsolated` trong E2E |
