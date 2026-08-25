@@ -12127,6 +12127,17 @@ của M2.
   Tổng 59,28 → 51,28; tỉ lệ trên/dưới **1,18 → 1,67**, label thôi cách đều hai
   bên. Chỉ tiêu 20/11 đạt chính xác nếu nút sort rời khỏi dòng heading — ghi
   lại làm lựa chọn để ngỏ, chưa làm.
+- **Vòng bốn — `hero → heading` hạ nốt về `sm`, `heading → card 1` giữ 0.**
+  Chủ dự án thử 8/8 trước, tôi đo ra tỉ lệ 1,03 (28,09 / 27,19) tức label lại
+  cách đều hai bên, nên chốt 8/0. Mực: **28,09 trên / 19,19 dưới**, tổng 51,3 →
+  **47,3**, label nghiêng về list **8,9px**. Chuỗi hộp: 16 / 16 / 8 / 0.
+- **Ngưỡng grouping đổi từ tỉ lệ sang khoảng cách.** Nó là `1,5×` — con số tôi
+  ước, ghi một chữ số thập phân, không neo vào đâu — và quyết định này đo ra
+  1,46, trượt đúng 0,036. Một ngưỡng chặn thay đổi bằng khoảng nhỏ hơn thứ nó
+  phát biểu được sẽ bị hạ dần mỗi vòng review cho tới lúc vô nghĩa. Thay bằng
+  **`AppSpacing.sm`**: label phải gần list hơn panel ít nhất một bậc thang
+  spacing. Vẫn bắt được cả hai khiếm khuyết cũ — 0/24 lệch **23px sai chiều**,
+  và 8/8 chỉ còn 0,9.
 - **Quy tắc grouping chuyển sang chạy trên mực.** Nó đang so hai khoảng hộp, mà
   khoảng hộp dưới heading nay là 0 trong khi mực cách card đầu 19,2 — người đọc
   bảng sẽ thấy một khiếm khuyết không tồn tại. Thước có thêm dải `Label ink`

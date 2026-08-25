@@ -76,17 +76,25 @@ class DeckSummarySectionWidget extends ConsumerWidget {
       // `YOUR DECKS` with the panel above it instead of the list below — the
       // label was closer to the thing it does not describe.
       //
-      // **`md`, walked down from `xl` in two owner reviews.** The swap first
-      // put the whole `xl` here, then `lg`, and both read as too much air
-      // under the hero. `md` is where it settled: 12 above the heading against
-      // `sm` below it. The grouping this was for needs only that the break be
-      // *bigger* than the tie — 12 against 8 still reads the label as the
-      // list's, and every step down gives the list back its pixels.
+      // **`sm`, the bottom of the walk.** This went `xl` → `lg` → `md` → `sm`
+      // across four reviews, each one saying the break under the hero was
+      // still too much air, and each step handing the pixels to the list.
+      //
+      // What holds it at `sm` rather than 0 is the label below it. Measured on
+      // ink, the cap sits 28.09 under the hero and the baseline 19.19 over the
+      // first card, so the label is nearer its own list by 8.9 — one spacing
+      // step, the least this design system asks anyone to see as a difference.
+      // At 0 it would be 20.09 against 19.19 and the label would belong to
+      // neither side, which is the "floating" an image review named.
+      //
+      // The row's 48px height is `MxTextButton`'s touch target, and it is why
+      // both figures dwarf the tokens: the `Row` centres a 16px label box in
+      // 48, so 16 of each is air no token here can see or spend.
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
         0,
         AppSpacing.lg,
-        AppSpacing.md,
+        AppSpacing.sm,
       ),
       child: DeckLevelSummaryWidget(
         snapshot: snapshot,

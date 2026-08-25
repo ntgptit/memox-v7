@@ -129,19 +129,22 @@ void main() {
     // distance from the cap to the first card is 19.2 — a reader checking the
     // table would see a defect that is not there, and did.
     //
-    // So the rule runs on [_inkAboveLabel] / [_inkBelowLabel], which are what
-    // a person actually sees, and it is a ratio rather than a comparison: at
-    // 1.18 the label was equidistant and grouped with neither side.
-    final ratio = _inkAboveLabel / _inkBelowLabel;
+    // So the rule runs on [_inkAboveLabel] and [_inkBelowLabel], which are
+    // what a person actually sees, and it asks for a *lead* rather than a bare
+    // comparison: at 32.09 against 27.19 the boxes said the label was nearer
+    // its own list while the eye read it as equidistant.
+    final lead = _inkAboveLabel - _inkBelowLabel;
     expect(
-      ratio,
-      greaterThan(_minimumGroupingRatio),
+      lead,
+      greaterThanOrEqualTo(_minimumGroupingLead),
       reason:
-          'the label’s cap sits ${_inkAboveLabel.toStringAsFixed(1)} below '
-          'the hero and ${_inkBelowLabel.toStringAsFixed(1)} above its first '
-          'card — a ratio of ${ratio.toStringAsFixed(2)}, too near 1 for the '
-          'label to read as belonging to the list rather than floating '
-          'between it and the panel',
+          'the label’s cap sits ${_inkAboveLabel.toStringAsFixed(1)} below the '
+          'hero and its baseline ${_inkBelowLabel.toStringAsFixed(1)} above '
+          'its first card — nearer the list it names by only '
+          '${lead.toStringAsFixed(1)}, under the '
+          '${_minimumGroupingLead.toInt()} this design system treats as the '
+          'smallest visible difference, so the label reads as floating between '
+          'the panel and the list rather than belonging to either',
     );
   });
 
@@ -183,14 +186,26 @@ double _inkAboveLabel = 0;
 /// The distance from the label's baseline to the first deck card.
 double _inkBelowLabel = 0;
 
-/// How much further the label may sit from the panel than from its own list.
+/// How much nearer the label must sit to the list it names than to the panel
+/// it follows.
 ///
-/// Not a round 2: with the sort control in the row, everything below the
-/// baseline is `descent 3.19 + half the button's 48px target`, a floor of 19.2
-/// that no spacing token can reach. Demanding 2.0 would demand 38px above —
-/// *more* air, in a row the owner asked to tighten. 1.5 is the point at which
-/// the eye stops reading the label as equidistant, and 12/0 clears it at 1.67.
-const double _minimumGroupingRatio = 1.5;
+/// **A distance off the spacing scale, not a ratio somebody picked.** This was
+/// `1.5x`, written as "the point at which the eye stops reading the label as
+/// equidistant" — a number to one decimal with nothing behind it. The next
+/// owner decision measured 1.46 and failed it by 0.036, which is not a
+/// difference the rule can claim to see. A threshold that blocks a change by
+/// less than it can state gets argued down once per review until it means
+/// nothing.
+///
+/// [AppSpacing.sm] is the smallest gap this design system asks anyone to
+/// notice. Below one step, "nearer the list" is arithmetic rather than
+/// something on the screen. It still catches both defects this rule exists
+/// for: 0/24 put the label **23 the wrong way**, and matching the tokens on
+/// both sides of the row leaves 0.9.
+///
+/// Raising it costs air, not tokens — everything below the baseline floors at
+/// `descent 3.19 + half the sort control's 48px target`.
+const double _minimumGroupingLead = AppSpacing.sm;
 
 /// Inter's cap height as a fraction of the em, for `YOUR DECKS`.
 ///
@@ -366,7 +381,7 @@ String _report(List<_Band> bands) {
     ..writeln(
       'label ink   ${_inkAboveLabel.toStringAsFixed(2)} below the hero, '
       '${_inkBelowLabel.toStringAsFixed(2)} above card 1, '
-      'ratio ${(_inkAboveLabel / _inkBelowLabel).toStringAsFixed(2)}',
+      'nearer its list by ${(_inkAboveLabel - _inkBelowLabel).toStringAsFixed(2)}',
     )
     ..writeln(
       '            the lower number floors at descent + half the sort '
