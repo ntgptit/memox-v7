@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_breadcrumb.dart';
+import 'package:memox/shared/widgets/mx_button_pair.dart';
 import 'package:memox/shared/widgets/mx_icon_button.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
@@ -43,6 +44,62 @@ WidgetbookComponent actionButtonComponent() {
               isLoading: isLoading,
               icon: hasIcon ? Icons.add : null,
               onPressed: isEnabled ? _noop : null,
+            ),
+          );
+        },
+      ),
+    ],
+  );
+}
+
+WidgetbookComponent buttonPairComponent() {
+  return WidgetbookComponent(
+    name: 'MxButtonPair',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        // The knobs are the two things that can make a pair come out uneven:
+        // labels of different lengths, and an axis. The viewport and text-scale
+        // addons cover the third — the row-or-stack threshold — because the
+        // pair reads the screen rather than its own line.
+        name: 'Playground',
+        builder: (BuildContext context) {
+          final primaryLabel = context.knobs.string(
+            label: 'primary label',
+            initialValue: 'Browse starter library',
+          );
+          final secondaryLabel = context.knobs.string(
+            label: 'secondary label',
+            initialValue: 'New deck',
+            description: 'Deliberately shorter — the halves must still match',
+          );
+          final axis = context.knobs.object.dropdown<Axis>(
+            label: 'axis',
+            options: Axis.values,
+            labelBuilder: (Axis value) => value == Axis.horizontal
+                ? 'horizontal — a row, stacked when narrow'
+                : 'vertical — always stacked',
+          );
+          final isEnabled = context.knobs.boolean(
+            label: 'enabled',
+            initialValue: true,
+          );
+          final isSubmitting = context.knobs.boolean(
+            label: 'primary isLoading',
+          );
+
+          return CatalogCenterPage(
+            child: MxButtonPair(
+              axis: axis,
+              primary: MxActionButton(
+                label: primaryLabel,
+                isLoading: isSubmitting,
+                onPressed: isEnabled ? _noop : null,
+              ),
+              secondary: MxActionButton(
+                label: secondaryLabel,
+                variant: MxActionButtonVariant.secondary,
+                onPressed: isEnabled ? _noop : null,
+              ),
             ),
           );
         },
