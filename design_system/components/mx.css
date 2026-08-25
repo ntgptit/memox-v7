@@ -216,7 +216,9 @@
    down to a lone `swap_vert`, and a glyph says "sort" without saying "sorted by
    what" — the half a reader needs (owner review, 2026-08-25, second pass). The
    order is painted again, short enough to keep the whole control under 96px
-   against the pill's 149.8, with the glyph trailing the word. */
+   against the pill's 149.8. The glyph LEADS: trailing is where a disclosure
+   chevron goes, and `swap_vert` names the axis rather than opening something —
+   in the chevron's seat it reads as an arrow belonging to nothing. */
 .mx-deckhead__sort{flex:none}
 /* --- MxTextButton ------------------------------------------------------
    No padding, no radius, no hover surface: a text button with a background is

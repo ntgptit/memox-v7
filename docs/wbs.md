@@ -11183,7 +11183,7 @@ của M2.
   chủ dự án đưa ra ngay từ đầu và em đã không chọn.
 - **Scope:** Chỉ control sort. Không đụng pill (không quay lại), không đụng
   heading, hero, deck card, bottom nav.
-  Control thành `MxTextButton`: **nhãn + glyph 16px bên phải**, phẳng, không
+  Control thành `MxTextButton`: **glyph 16px + nhãn**, phẳng, không
   nền không viền, `primaryAccent`, `label-md` 12px/w500 — rung gần nhất với
   13px/500 chủ dự án yêu cầu, và **cùng rung với heading** nên không cái nào
   lấn cái nào. Nhãn dùng dạng ngắn (`Recent`, không phải `Recently studied`);
@@ -11215,8 +11215,14 @@ của M2.
   - [x] Nhãn hiện ở trạng thái nghỉ: người dùng sáng mắt đọc được đang sort
         theo gì mà không cần mở sheet.
   - [x] Không có pill: không viền, không nền, không radius riêng.
-  - [x] Glyph **bên phải** nhãn — chữ là sự thật, glyph là dấu hiệu bấm được.
-        Đặt bên trái thì mắt gặp mũi tên trước khi gặp câu trả lời.
+  - [x] Glyph **bên trái** nhãn (chủ dự án review lần ba). Bản đầu đặt bên
+        phải và đó là bản lai yếu nhất: vị trí sau nhãn là chỗ của **chevron
+        mở** (`expand_more` ở link show-summary cũ, `▾` ở menu), còn
+        `swap_vert` gọi tên trục sắp xếp chứ không mở gì — ngồi vào ghế của
+        chevron thì nó đọc như mũi tên không thuộc về ai. Dẫn trước, cặp
+        glyph-nhãn đọc thành một cụm: "sắp xếp: gần đây". Khoá bằng geometry
+        (`glyph.left < word.left`) chứ không bằng thứ tự tham số, vì caller
+        truyền `icon:` mà component đổi `Row` bên dưới thì vẫn vẽ sai.
   - [x] ≤ **96px** cho cả 4 thứ tự × 2 ngôn ngữ, khoá bằng
         `deck_sort_control_width_test.dart` — **đo chứ không clamp**: một
         `maxWidth` sẽ ellipsize đúng cái từ trả lời "sort theo gì", tức là lại
@@ -11232,7 +11238,7 @@ của M2.
   guard đó; lệnh có sẵn trong CLAUDE.md và em đã không dùng.
 - **Editable documents:** `docs/wbs.md`
 - **Dependencies:** M99.41
-- **Tests required:** `deck_sort_control_width_test.dart` (mới, 9 case),
+- **Tests required:** `deck_sort_control_width_test.dart` (mới, 10 case),
   `deck_list_toolbar_test.dart`, `test/demo/` goldens, full host suite.
 - **Checklist phases:** 7, 12, 14
 

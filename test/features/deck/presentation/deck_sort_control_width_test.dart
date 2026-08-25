@@ -81,6 +81,35 @@ void main() {
     }
   }
 
+  testWidgets('the sort glyph leads the word it qualifies', (tester) async {
+    // **Position is a claim about what the glyph is.** Trailing is where a
+    // *disclosure* chevron goes — `expand_more` on the old show-summary link.
+    // `swap_vert` is not a disclosure; it names the axis, and in the chevron's
+    // seat it reads as an arrow belonging to nothing (owner review,
+    // 2026-08-25). Leading, the pair reads as one phrase: "sort: recent".
+    //
+    // Asserted by geometry rather than by argument order, because a caller can
+    // pass `icon:` and still have it painted last if the component's `Row`
+    // ever changes underneath.
+    await pumpToolbar(tester, locale: 'en', sort: DeckListSort.recent);
+
+    final glyph = tester.getRect(find.byIcon(Icons.swap_vert));
+    final word = tester.getRect(
+      find
+          .descendant(
+            of: find.byType(MxTextButton),
+            matching: find.byType(Text),
+          )
+          .first,
+    );
+
+    expect(
+      glyph.left,
+      lessThan(word.left),
+      reason: 'the glyph names the axis, so it comes before the value',
+    );
+  });
+
   testWidgets('the control keeps the 48 target the row is built around', (
     tester,
   ) async {

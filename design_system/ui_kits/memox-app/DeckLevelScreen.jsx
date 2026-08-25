@@ -130,7 +130,7 @@ function DeckLevelScreen({ path, onOpen, onUp, onJumpTo, onNavigate, onActions, 
               <span className="mx-deckhead__sort">
                 <MxTextButton
                   label={SORT_SHORT[sort]}
-                  trailingIcon="swap_vert"
+                  icon="swap_vert"
                   isCompact
                   semanticLabel={'Sort decks. Currently ' + SORT_SHORT[sort]}
                   onClick={() => setSortSheetOpen(true)}

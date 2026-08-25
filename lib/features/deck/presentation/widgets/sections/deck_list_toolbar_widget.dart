@@ -13,8 +13,8 @@ import '../overlays/deck_sort_sheet_widget.dart';
 /// reading `↑↓ Recently studied`, which measured 149.8px on a 393 screen —
 /// **41.5% of the row**, against a heading of 88.6px. A control that outweighs
 /// the thing it names has the hierarchy backwards: the heading says what the
-/// list is, and the sort is an adjustment to it. What is left is one word and
-/// a 16px glyph in the brand ink, right-aligned on the heading's own centre
+/// list is, and the sort is an adjustment to it. What is left is a 16px glyph
+/// and one word in the brand ink, right-aligned on the heading's own centre
 /// line — under 96px, against the pill's 149.8.
 ///
 /// **The label came back, the container did not** (owner review, 2026-08-25,
@@ -22,7 +22,7 @@ import '../overlays/deck_sort_sheet_widget.dart';
 /// and moved the order it is in into the sheet — 48px, but a glyph says
 /// "sort" and cannot say "sorted by what", which is the half a user actually
 /// needs. The order is painted again, in the short form the row has space for,
-/// with the glyph trailing it. That is `MxTextButton`, not a pill: flat, no
+/// with the glyph leading it. That is `MxTextButton`, not a pill: flat, no
 /// container, brand ink, `label-md` so it sits on the heading's own rung
 /// instead of a size above it.
 ///
@@ -107,10 +107,14 @@ class DeckListToolbarWidget extends StatelessWidget {
           // The order it is in, in the short form — `Recent`, not `Recently
           // studied`, which does not fit the room a heading row has.
           label: deckSortShortLabel(context.l10n, sort),
-          // Trailing, because the word is the fact and the glyph is what marks
-          // it pressable. Leading, the eye met an arrow before it met an
-          // answer.
-          trailingIcon: Icons.swap_vert,
+          // **Leading, and the position is a claim about what the glyph is**
+          // (owner review, 2026-08-25, third pass). Trailing is where a
+          // *disclosure* chevron goes — `expand_more` on the old show-summary
+          // link, `▾` on a menu. `swap_vert` is not a disclosure, it names the
+          // axis: put it in the chevron's seat and it reads as an arrow that
+          // belongs to nothing. Leading, the pair reads as one phrase —
+          // "sort: recent" — which is what the control is.
+          icon: Icons.swap_vert,
           // `label-md`, the heading's own rung. A `TextButton` takes `label-lg`
           // from Material, and a control set larger than the thing it names is
           // the defect this row was rebuilt to fix.
