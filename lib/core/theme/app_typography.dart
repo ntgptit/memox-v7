@@ -91,6 +91,30 @@ abstract final class AppTypography {
   /// it is the one place in the app where a text style is adjusted per use.
   static const double sectionLabelTracking = 1.1;
 
+  /// The hero numeral's line box, as a multiple of its own size.
+  ///
+  /// **Not a leading adjustment — a cap-height trim, and the number is
+  /// derived** (owner review, 2026-08-25). `height: 1` already gives the
+  /// numeral a line box exactly its font size, so there is no leading left to
+  /// cut. What still sits above the digits is the font's own **ascent above
+  /// cap height**: measured off the rendered golden, the ink of `15` is 23.7px
+  /// tall inside a 32px box, all of the 8.3px slack sitting above it. That is
+  /// why a card padded 16 all round reads as 24 at the top and 16 at the
+  /// bottom.
+  ///
+  /// Flutter splits a `height` change evenly around the baseline, so trimming
+  /// the box by twice the slack moves the ink up by exactly the slack:
+  ///
+  ///     1 - 2 * 8.3 / 32 = 0.481
+  ///
+  /// Measured back: 16.3px above the ink against 16 below the button. **It is
+  /// pinned to Plus Jakarta Sans**, and it is the one place in the app where a
+  /// glyph is positioned by a font metric rather than by the grid —
+  /// [sectionLabelTracking] is the other kind of the same admission. A font
+  /// swap moves the six `deck_list_*` goldens, which is the signal to measure
+  /// it again rather than to regenerate and move on.
+  static const double heroNumeralCapTrim = 0.481;
+
   /// The deck list's heading, which is tracked tighter than the rest.
   ///
   /// **0.06em at `label-md`'s 12px, which is 0.72** (owner review, 2026-08-25).

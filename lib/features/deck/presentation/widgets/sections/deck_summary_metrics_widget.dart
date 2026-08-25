@@ -2,11 +2,21 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/app_stroke.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
-import '../../../../../shared/widgets/mx_icon_button.dart';
 import '../../../domain/models/deck_list_snapshot_model.dart';
+
+/// How far the figure line stops short of the card's right edge.
+///
+/// The disclosure is [AppSpacing.minimumTouchTarget] wide and sits in the
+/// card's own corner, outside the content's [AppSpacing.lg] padding — so the
+/// line has to give back the difference, or the overdue split runs under it.
+/// Derived from the two numbers it is made of rather than written as 32, so
+/// moving either one moves this with it.
+const double heroDisclosureInset =
+    AppSpacing.minimumTouchTarget - AppSpacing.lg;
 
 /// The hero's figure line, and the resting figures behind its disclosure
 /// (owner mockup, 2026-08-20; compacted 2026-08-25).
@@ -37,7 +47,6 @@ class DeckSummaryMetricsWidget extends StatelessWidget {
   const DeckSummaryMetricsWidget({
     required this.snapshot,
     required this.isExpanded,
-    required this.onToggleExpanded,
     super.key,
   });
 
@@ -45,10 +54,6 @@ class DeckSummaryMetricsWidget extends StatelessWidget {
 
   /// Whether the resting figures are open.
   final bool isExpanded;
-
-  /// Opens or shuts them. The chevron is the panel's only control now — the
-  /// dismiss button it replaced is gone (owner decision, 2026-08-25).
-  final VoidCallback onToggleExpanded;
 
   @override
   Widget build(BuildContext context) {
@@ -61,39 +66,33 @@ class DeckSummaryMetricsWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        Row(
-          // **Top-aligned, not centred** (owner review, 2026-08-25). Centring
-          // put the 40px figure line in the middle of a row the chevron's 48px
-          // target sets the height of, which pushed the numeral 4px further
-          // from the card's edge than the padding says it is. `start` gives
-          // those 4 back; the chevron fills the row either way.
-          //
-          // Not `baseline`: the chevron is a 48px target with no text in it,
-          // and a baseline cross-alignment asks every child for a baseline it
-          // does not have. The figures keep their own baseline inside
-          // [_HeroFigureLine].
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Expanded(
-              child: _HeroFigureLine(
-                dueCount: dueCount,
-                newCount: newCount,
-                overdueCount: overdueCount,
-                overdueDayCount: snapshot.levelOverdueDayCount,
-              ),
-            ),
-            // **A disclosure, not a dismissal.** It pointed down and hid the
-            // panel; it now points down to open the resting figures and up to
-            // shut them — the arrow shows where the content goes, which is the
-            // same rule the old chevron followed for a different content.
-            MxIconButton(
-              icon: isExpanded ? Icons.expand_less : Icons.expand_more,
-              semanticLabel: isExpanded
-                  ? context.l10n.deckSummaryCollapseLabel
-                  : context.l10n.deckSummaryExpandLabel,
-              onPressed: onToggleExpanded,
-            ),
-          ],
+        // **The chevron is not in this row, and that is the whole point**
+        // (owner review, 2026-08-25, fourth pass). It used to be, and its 48px
+        // touch target then set the row's height while the figure line is 32 —
+        // so 16px of nothing had to sit either above the numeral or below it,
+        // and the arithmetic made the two things the owner asked for exclusive:
+        //
+        //     above_ink + below_ink = 48 - 23.7 = 24.3   (fixed)
+        //     gap to card top       = 16 + above_ink
+        //     gap to the CTA        = below_ink + 12
+        //     => their sum is 52.3, whatever the alignment
+        //
+        // Top-aligning gave 24.3 above and 28 below; centring would give 32.3
+        // and 20. Neither is "16 above, 12 below". The row has to stop being
+        // 48 tall, so the chevron moved to the card's own corner — see
+        // [DeckLevelSummaryWidget], which owns the `Stack` it now lives in.
+        //
+        // The right inset is what keeps the overdue split from running under
+        // it: the chevron is 48 wide at the card's edge and the content's own
+        // padding is 16, so the line stops 32 earlier than the rest.
+        Padding(
+          padding: const EdgeInsets.only(right: heroDisclosureInset),
+          child: _HeroFigureLine(
+            dueCount: dueCount,
+            newCount: newCount,
+            overdueCount: overdueCount,
+            overdueDayCount: snapshot.levelOverdueDayCount,
+          ),
         ),
         if (isExpanded) ...<Widget>[
           const SizedBox(height: AppSpacing.md),
@@ -150,18 +149,20 @@ class _HeroFigureLine extends StatelessWidget {
                 children: <Widget>[
                   Text(
                     '$heroCount',
-                    // **The line box hugs the digits.** The rung's 40/32
-                    // leading is right for running text and wrong for a lone
-                    // numeral against a card edge: measured on the golden, it
-                    // put 32.3px of air above the ink where the padding below
-                    // the CTA is 16. Digits have no descenders and take no
-                    // diacritics, so this is the one string in the app that
-                    // can give its leading up without risking a clipped glyph.
+                    // **A cap-height trim, not a leading cut.** `height: 1`
+                    // already made the box exactly the font size, and the
+                    // remaining 8.3px above the digits is the font's ascent
+                    // above its cap — no `TextStyle` knob reaches it, and
+                    // `leadingDistribution: even` was measured to change
+                    // nothing because there is no leading left to distribute.
+                    // [AppTypography.heroNumeralCapTrim] carries the derivation
+                    // and the measurement.
                     //
-                    // `height`, not a hand-tuned offset: what is left above
-                    // the ink after this is the font's own ascent-above-cap,
-                    // which only a font-specific constant could remove — and
-                    // that is a magic number tied to a file we can swap.
+                    // Digits have no descenders and take no diacritics, so this
+                    // is the one string in the app whose box can under-report
+                    // its glyph without risking a clip. The 12px below this
+                    // line is what the overflow eats into, and it fits at every
+                    // scale the responsive matrix covers.
                     //
                     // `headlineLarge`, one rung down from `displaySmall`
                     // (owner review, 2026-08-25): 36px was set when the
@@ -169,7 +170,7 @@ class _HeroFigureLine extends StatelessWidget {
                     // its own breakdown on a 393 screen.
                     style: context.texts.headlineLarge?.copyWith(
                       fontWeight: FontWeight.w700,
-                      height: 1,
+                      height: AppTypography.heroNumeralCapTrim,
                       fontFeatures: const <FontFeature>[
                         FontFeature.tabularFigures(),
                       ],
