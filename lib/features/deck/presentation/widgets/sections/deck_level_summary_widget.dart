@@ -24,18 +24,17 @@ import 'deck_summary_metrics_widget.dart';
 ///
 /// ```
 /// 15 cards due   8 overdue · 7 today            ⌄
-/// ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁ (4px, no caption)
 /// [        Study 15 due cards        ]
 /// ```
 ///
-/// which measures 156px, 18.3%, and leaves three cards whole. What went is not
+/// which measures 140px, 16.4%. What went is not
 /// data but *ranking*: the eyebrow (`TODAY` said nothing "cards due" does not),
 /// the New/Scheduled band and the learned caption are resting figures, and they
 /// sit one chevron away rather than at the top of the screen every time it
 /// opens.
 ///
 /// **The panel is no longer dismissible, and that is the same decision.** The
-/// dismiss button existed because the panel was in the way of the list; at 18%
+/// dismiss button existed because the panel was in the way of the list; at 16%
 /// it is not, and one chevron cannot mean both "hide me" and "show me more"
 /// (owner decision, 2026-08-25). A level with nothing studyable renders no
 /// panel at all — [hasStudyable] is now the presence rule outright, where it
@@ -119,20 +118,28 @@ class DeckLevelSummaryWidget extends StatelessWidget {
             isExpanded: isExpanded,
             onToggleExpanded: onToggleExpanded,
           ),
-          if (cardCount > 0) ...<Widget>[
+          // **The bar belongs to the disclosure, not to the resting panel**
+          // (owner review, 2026-08-25, third pass). It shipped as a bare 4px
+          // rule on the brief's own instruction — "no label" — and the owner's
+          // read of the result is the argument against it: a 41% fill sitting
+          // between `15 cards due` and the Study button states a proportion of
+          // nothing the eye can name. A gauge with no referent is not quieter
+          // than a labelled one, it is only smaller.
+          //
+          // So it goes where its caption already was. Collapsed, the panel is
+          // the figure line and the CTA and nothing else; open, the bar arrives
+          // with `353 of 868 learned` and `41%` attached. The learned figure is
+          // now behind the chevron for a screen reader too, which is the
+          // honest consequence — it was the only reader getting it at rest.
+          if (isExpanded && cardCount > 0) ...<Widget>[
             // `md` between every band, not `lg` between some and `xl` between
             // others: the panel is two lines and a rule now, and a section
             // break inside three rows is a break between nothing.
             const SizedBox(height: AppSpacing.md),
             // The same progress tokens as every tile: track, fill, and success
-            // only at 100%. **Collapsed it is a bare 4px rule** — the caption
-            // it used to carry is a resting figure, and a bar under a figure
-            // line does not need to be told what it measures. The strings are
-            // still passed, because a screen reader has no chevron: what is
-            // painted and what is announced are two decisions.
+            // only at 100%.
             MxProgressBar(
               size: MxProgressBarSize.sm,
-              shouldPaintLabel: isExpanded,
               value: learnedCount / cardCount,
               label: context.l10n.deckLearnedProgressLabel(
                 learnedCount,

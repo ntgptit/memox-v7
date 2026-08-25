@@ -258,14 +258,21 @@ void main() {
       );
     });
 
-    testWidgets('the learned bar still closes the panel, caption or not', (
+    testWidgets('the learned bar closes the panel once it is opened', (
       tester,
     ) async {
+      // It used to sit in the resting panel as an unlabelled rule. A 41% fill
+      // between the figure line and the CTA states a proportion of nothing the
+      // eye can name, so it went where its caption already was (owner review,
+      // 2026-08-25).
       await pumpLevel(
         tester,
         levelOf(due: 15, overdueCards: 12, overdueDays: 7, newCards: 5),
       );
 
+      expect(onPanel(find.byType(MxProgressBar)), findsNothing);
+
+      await expandSummary(tester);
       expect(onPanel(find.byType(MxProgressBar)), findsOneWidget);
     });
 

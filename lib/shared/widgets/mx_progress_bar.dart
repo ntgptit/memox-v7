@@ -60,7 +60,6 @@ class MxProgressBar extends StatelessWidget {
     this.valueLabel,
     this.size = MxProgressBarSize.md,
     this.shape = MxProgressBarShape.pill,
-    this.shouldPaintLabel = true,
     super.key,
   });
 
@@ -82,16 +81,6 @@ class MxProgressBar extends StatelessWidget {
   /// on a surface — the clipping is then the caller's to do.
   final MxProgressBarShape shape;
 
-  /// Whether [label] and [valueLabel] are **drawn**. They are always announced.
-  ///
-  /// **A visibility switch, not a second way of passing null.** The deck hero's
-  /// collapsed state wants a bare 4px track with no caption above it, and a
-  /// caller that dropped the strings to get one would ship a progress bar with
-  /// no accessible name at all — a control announcing a percentage of nothing.
-  /// The same split `MxActionButton.shouldKeepLabelWhileLoading` makes: what is
-  /// painted and what is announced are two decisions.
-  final bool shouldPaintLabel;
-
   @override
   Widget build(BuildContext context) {
     final fraction = value.clamp(0.0, 1.0);
@@ -107,8 +96,7 @@ class MxProgressBar extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            if (shouldPaintLabel &&
-                (label != null || valueLabel != null)) ...<Widget>[
+            if (label != null || valueLabel != null) ...<Widget>[
               _MxProgressHeader(
                 label: label,
                 valueLabel: valueLabel,

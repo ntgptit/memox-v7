@@ -4267,7 +4267,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_level_summary_widget.dart",
-      "line": 111,
+      "line": 110,
       "widget_context": "DeckLevelSummaryWidget",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -5433,7 +5433,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_progress_bar.dart",
-      "line": 184,
+      "line": 172,
       "widget_context": "_MxProgressHeader",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -5444,7 +5444,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_progress_bar.dart",
-      "line": 194,
+      "line": 182,
       "widget_context": "_MxProgressHeader",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -5455,7 +5455,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_progress_bar.dart",
-      "line": 195,
+      "line": 183,
       "widget_context": "_MxProgressHeader",
       "element_kind": "text",
       "source_kind": "theme-token",
