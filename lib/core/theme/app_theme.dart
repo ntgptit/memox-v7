@@ -31,7 +31,29 @@ import 'app_typography.dart';
 /// scheduler picker gave them callers. A theme for a component nobody renders
 /// is a decision made without a screen to check it against — which is the rule
 /// this list follows, in both directions.
-ThemeData buildLightTheme() => _buildTheme(
+///
+/// **Built once, and the memoisation is load-bearing rather than an
+/// optimisation.** `ThemeData.==` compares every component theme, and a
+/// component theme here holds `WidgetStateProperty.resolveWith((states) {...})`
+/// — a fresh closure on every call, with no value equality. So two themes built
+/// from identical tokens are never `==`, and with
+/// `themeAnimationDuration: Duration.zero` (`app.dart`) `MaterialApp` mounts a
+/// plain `Theme`, whose `updateShouldNotify` is exactly `data != oldWidget.data`.
+///
+/// `MemoxApp` calls these from a `build()` that would therefore invalidate
+/// **every** `Theme.of(context)` dependent in the tree each time it ran — and
+/// it runs on the settings stream, so at minimum on the cold-start loading→data
+/// emission and on every theme or language change. Returning one instance makes
+/// that comparison `identical` and the notification stop.
+///
+/// One instance is safe to share: `ThemeData` and both extensions are
+/// immutable. Tests get the same object, which is what they should be asserting
+/// on anyway. `app_theme_identity_test.dart` pins both halves.
+ThemeData buildLightTheme() => _lightTheme;
+
+ThemeData buildDarkTheme() => _darkTheme;
+
+final ThemeData _lightTheme = _buildTheme(
   // The constructor, not `fromSeed(...).copyWith(...)`. Every role the app
   // ships is a hand-tuned constant, and `fromSeed` had been generating a
   // parallel set nobody rendered — a neutral-grey surfaceContainer ladder, a
@@ -92,7 +114,7 @@ ThemeData buildLightTheme() => _buildTheme(
   outlineLabel: AppColors.secondaryActionLight,
 );
 
-ThemeData buildDarkTheme() => _buildTheme(
+final ThemeData _darkTheme = _buildTheme(
   const ColorScheme(
     brightness: Brightness.dark,
     primary: AppColors.primaryDark,
@@ -285,7 +307,7 @@ ThemeData _buildTheme(
       outlineLabel: outlineLabel,
     ),
 
-    textButtonTheme: buildTextButtonTheme(scheme, semantic),
+    textButtonTheme: buildTextButtonTheme(scheme, semantic, texts),
 
     inputDecorationTheme: buildInputDecorationTheme(scheme, semantic, texts),
 

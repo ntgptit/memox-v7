@@ -15,3 +15,20 @@ Color filledButtonFill(ThemeData theme) =>
 /// The label colour an `OutlinedButton` paints at rest.
 Color outlinedButtonLabel(ThemeData theme) =>
     theme.outlinedButtonTheme.style!.foregroundColor!.resolve(<WidgetState>{})!;
+
+/// The border a `FilledButton` paints while focused, or null if it paints none.
+///
+/// Resolved from the theme rather than from `AppInteractionStates`, for the
+/// reason this file exists: the ring the button draws and the ring the tokens
+/// describe have to be the same object, and only the theme can say what is
+/// actually painted.
+///
+/// A statement body rather than an arrow: the chain plus the state set is one
+/// character over the line, and where a formatter breaks that is a coin toss
+/// worth losing a CI round to exactly once. Two short lines have no decision
+/// in them.
+BorderSide? filledButtonFocusSide(ThemeData theme) {
+  final side = theme.filledButtonTheme.style!.side!;
+
+  return side.resolve(const <WidgetState>{WidgetState.focused});
+}

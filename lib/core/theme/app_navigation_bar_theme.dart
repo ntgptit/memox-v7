@@ -22,7 +22,7 @@ NavigationBarThemeData buildNavigationBarTheme(
   iconTheme: WidgetStateProperty.resolveWith(
     (Set<WidgetState> states) => IconThemeData(
       color: states.contains(WidgetState.selected)
-          ? brandInk(scheme)
+          ? selectedInk(scheme)
           : scheme.onSurfaceVariant,
     ),
   ),
@@ -33,7 +33,7 @@ NavigationBarThemeData buildNavigationBarTheme(
   labelTextStyle: WidgetStateProperty.resolveWith(
     (Set<WidgetState> states) => texts.labelMedium!.copyWith(
       color: states.contains(WidgetState.selected)
-          ? brandInk(scheme)
+          ? selectedInk(scheme)
           : scheme.onSurfaceVariant,
       fontWeight: states.contains(WidgetState.selected)
           ? FontWeight.w600

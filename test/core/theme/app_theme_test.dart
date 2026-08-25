@@ -363,6 +363,14 @@ void main() {
       expect(app.themeMode, ThemeMode.system);
       expect(app.theme, isNotNull);
       expect(app.darkTheme, isNotNull);
+
+      // **And it hands `MaterialApp` the shared instances, not fresh ones.**
+      // `same`, not `==`: a rebuilt theme is never `==` anyway, which is the
+      // whole reason the builders memoise. `app_theme_identity_test.dart`
+      // holds that argument; this is the half of it that only a mounted
+      // `MemoxApp` can prove.
+      expect(app.theme, same(buildLightTheme()));
+      expect(app.darkTheme, same(buildDarkTheme()));
     });
   });
 }

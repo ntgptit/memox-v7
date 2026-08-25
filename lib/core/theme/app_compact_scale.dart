@@ -19,7 +19,34 @@ import 'app_typography.dart';
 /// `VisualDensity.compact` would have been the shorter route and it subtracts
 /// 8dp from every button, taking the icon button to 40x40 — under the floor a
 /// thumb needs, and under the floor the icon-button theme was measured against.
+///
+/// **Memoised per base theme, for the reason `buildLightTheme` is.** This runs
+/// inside `CompactScaleWidget.build`, under `MaterialApp` — so it re-runs
+/// whenever `MemoxApp` rebuilds, not only when the width changes. A fresh
+/// `ThemeData` is never `==` to the last one (the component themes hold
+/// closures), so on a narrow screen an uncached call would re-notify every
+/// `Theme.of` dependent below it and undo the caching one level up.
+///
+/// An [Expando] rather than a `Map`: it keys on identity, where a map would
+/// compute `ThemeData.hashCode` over every component theme on each lookup —
+/// paying most of the cost the cache exists to avoid. It also lets a base
+/// theme be collected rather than pinning every theme ever passed here, which
+/// matters in a test run that builds hundreds.
 ThemeData applyCompactScale(ThemeData base) {
+  final cached = _compactScaleCache[base];
+  if (cached != null) return cached;
+
+  final scaled = _buildCompactScale(base);
+  _compactScaleCache[base] = scaled;
+
+  return scaled;
+}
+
+final Expando<ThemeData> _compactScaleCache = Expando<ThemeData>(
+  'applyCompactScale',
+);
+
+ThemeData _buildCompactScale(ThemeData base) {
   final texts = base.textTheme;
   final styles = base.extension<AppTextStyles>();
 

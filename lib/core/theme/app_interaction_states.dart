@@ -162,7 +162,33 @@ abstract final class AppInteractionStates {
   ///
   /// Pinned per ground, in both modes, by `focus_ring_contrast_test.dart`.
   static BorderSide focusRing(AppSemanticColors semantic) =>
-      BorderSide(color: semantic.focusRing, width: AppStroke.focus);
+      focusRingOf(semantic.focusRing);
+
+  /// The same ring — same stroke, same shape — in a colour the caller supplies.
+  ///
+  /// **For the one control whose ground is not a surface.** Every ring above is
+  /// drawn on a page, a card or a pill's own fill, and `semantic.focusRing`
+  /// clears 3:1 on all three. A *filled* button's ground is the accent itself,
+  /// and the ring token is the same indigo family:
+  ///
+  /// | ground | `focusRing` on it |
+  /// |---|---|
+  /// | `primary` light | **1.02:1** |
+  /// | `primary` dark | **1.90:1** |
+  ///
+  /// 1.02 is not a weak ring, it is no ring — `#4141C0` on `#4646B4` is the
+  /// same colour to the eye. So the filled button draws its ring in its **own
+  /// label colour**, which is the one value already guaranteed to read on that
+  /// fill: `onPrimary` on `primary`, `onError` on `error`,
+  /// `onSecondaryContainer` on `secondaryContainer` — 5.76:1 at the tightest.
+  /// Deriving it from the pair the button already carries is what keeps a
+  /// future variant from needing a new measurement.
+  ///
+  /// This is the same deviation `focusRing` itself records: follow the token
+  /// where it works, and where it lands in a contrast failure, say so and
+  /// measure. `focus_ring_contrast_test.dart` pins both halves.
+  static BorderSide focusRingOf(Color color) =>
+      BorderSide(color: color, width: AppStroke.focus);
 
   /// Ordered pressed → focused → hovered, and the order is load-bearing: a
   /// control being pressed is also hovered, and reading hover first would make

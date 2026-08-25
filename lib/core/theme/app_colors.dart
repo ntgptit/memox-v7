@@ -219,6 +219,14 @@ abstract final class AppColors {
   /// Derivations, not copies: light *is* the fill colour and dark *is* the
   /// focus ring's indigo — both facts this comment already states, now stated
   /// where an edit cannot un-say them.
+  ///
+  /// **The ground is a surface or the page, and that is the whole boundary
+  /// between this and `AppMaterialRoles.selectedInk`.** A control that is
+  /// *selected* sits on the selection's own tint instead, where this token
+  /// measures 4.06:1 in dark — under the 4.5 a 12px label needs. The two agree
+  /// in light by construction, which is what keeps making them look like two
+  /// spellings of one idea; `selectedInk` holds the four measurements that say
+  /// they are not, in either direction.
   static const Color primaryAccentLight = primaryLight;
   static const Color primaryAccentDark = focusRingDark;
 

@@ -222,11 +222,11 @@ void main() {
 
         final states = color! as WidgetStateColor;
         // Selected is the brand ink on the brand tint (owner review,
-        // 2026-08-20) — `brandInk` picks the shade that clears the
+        // 2026-08-20) — `selectedInk` picks the shade that clears the
         // contrast floor on this theme's container.
         expect(
           states.resolve(<WidgetState>{WidgetState.selected}),
-          brandInk(theme.colorScheme),
+          selectedInk(theme.colorScheme),
         );
         expect(
           states.resolve(<WidgetState>{}),
@@ -262,6 +262,64 @@ void main() {
           WidgetState.selected,
           WidgetState.disabled,
         }),
+      );
+    });
+
+    testWidgets('the glyph rides the label through every state', (
+      tester,
+    ) async {
+      // `ChipThemeData.iconTheme` is a plain `IconThemeData` with no per-state
+      // slot, so it stated the resting ink for all of them: a *selected* pill
+      // printed a brand-ink word beside a grey glyph, and a *disabled* one a
+      // faded word beside a glyph at full strength. Read from the tree, like
+      // the test above, because the answer now lives in the widget and no
+      // assertion on `ChipThemeData` can reach it.
+      final WidgetStateColor labelColor =
+          buildLightTheme().chipTheme.labelStyle!.color! as WidgetStateColor;
+
+      Future<void> expectGlyphMatchesLabel(
+        String name, {
+        required bool isSelected,
+        required bool isEnabled,
+        required Set<WidgetState> states,
+      }) async {
+        await pump(
+          tester,
+          MxPillButton(
+            label: 'A-Z',
+            icon: Icons.sort,
+            isSelected: isSelected,
+            onPressed: isEnabled ? () {} : null,
+          ),
+        );
+
+        final glyph = tester.widget<Icon>(
+          find.descendant(
+            of: find.byType(RawChip),
+            matching: find.byType(Icon),
+          ),
+        );
+
+        expect(glyph.color, labelColor.resolve(states), reason: name);
+      }
+
+      await expectGlyphMatchesLabel(
+        'selected',
+        isSelected: true,
+        isEnabled: true,
+        states: const <WidgetState>{WidgetState.selected},
+      );
+      await expectGlyphMatchesLabel(
+        'resting',
+        isSelected: false,
+        isEnabled: true,
+        states: const <WidgetState>{},
+      );
+      await expectGlyphMatchesLabel(
+        'disabled',
+        isSelected: false,
+        isEnabled: false,
+        states: const <WidgetState>{WidgetState.disabled},
       );
     });
   });

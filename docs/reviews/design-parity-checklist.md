@@ -653,7 +653,7 @@ sung vào nó.
 |---|---|---|---|
 | Breadcrumb thành **subline của app bar** (`MxContentShell.titleSubline` → `AppBar.bottom`), không còn là band `subheader` dưới bar | ✅ `mx_content_shell.dart`, `deck_list_screen.dart` | ❌ chưa | Đo trên device: title→path ~60px vì cộng slack của bar + padding band + sàn 48dp của step. Nay chỉ còn sàn tap target; toolbar co về `minimumTouchTarget` và cao theo `textScaler` |
 | Khoảng trước hero còn `sm` (từ `md`) | ✅ `deck_summary_section_widget.dart` | ❌ chưa | `sm` là sàn "visibly separate" của `deck_list_spacing_test.dart` |
-| Eyebrow `TODAY` viết hoa, `labelMedium` + `sectionLabelTracking`, mực brand | ✅ `deck_level_summary_widget.dart` | ❌ chưa | Mực lấy từ `brandInk()` — `primary` đo 2.90:1 trên surface dark, dưới sàn 4.5 của chữ 12px |
+| Eyebrow `TODAY` viết hoa, `labelMedium` + `sectionLabelTracking`, mực brand | ✅ `deck_level_summary_widget.dart` | ❌ chưa | Mực nay là `onSurfaceVariant`, không còn mực brand — `deck_subheader_widget.dart` đã đổi từ khi dòng này viết. `primary` đo 2.90:1 trên surface dark, dưới sàn 4.5 của chữ 12px, nên đường quay lại mực brand phải qua một token khác |
 | Hero có viền `primaryContainer` + `AppElevation.raised` | ✅ cùng file | ❌ chưa | Viền mặc định gần như vô hình nên panel không tách khỏi nền |
 | Context row đổi từ `surfaceMuted` sang `primaryContainer`, vạch chia `primary`, chữ `new`/`scheduled` viết thường | ✅ `deck_summary_metrics_widget.dart` | ❌ chưa | Chữ thường để số dẫn dắt; vạch chia thuộc về nền nó chia |
 | Chevron thu gọn chỉ **xuống** khi panel đang mở | ✅ `deck_level_summary_widget.dart` | ❌ chưa | Mũi tên chỉ chỗ nội dung sẽ đi, không phải thao tác |
@@ -662,7 +662,7 @@ sung vào nó.
 | Study bỏ icon `play_arrow`, bo `AppRadius.md` | ✅ `deck_study_button_widget.dart` | ❌ chưa | Cũng trả lại bề ngang cho gauge ở text scale lớn |
 | Gauge chiếm hết phần dư (`Expanded`), nhãn `%` không flex, khoảng cách `xs` | ✅ `deck_tile_widget.dart` | ❌ chưa | `Flexible` loose ăn nửa chỗ trống rồi bỏ trống — đó là "khoảng hở" chủ dự án thấy |
 | Gutter của card co còn `md` dưới `AppBreakpoints.compact` (`deckTileGutter`) | ✅ cùng file | ❌ chưa | 320@2.0 thiếu 4.9px; cùng cách `applyCompactScale` và `mxScreenGutter` đã làm |
-| Pill `selected` đổi sang `primaryContainer` + viền `primary` + mực `brandInk` (toàn app) | ✅ `app_chip_theme.dart` | ❌ chưa | `secondaryContainer` trên nền sáng gần như không phân biệt được với chưa chọn |
+| Pill `selected` đổi sang `primaryContainer` + viền `primary` + mực `selectedInk` (toàn app) | ✅ `app_chip_theme.dart` | ❌ chưa | `secondaryContainer` trên nền sáng gần như không phân biệt được với chưa chọn |
 | Chip sort **luôn** ở trạng thái selected | ✅ `deck_list_toolbar_widget.dart` | ❌ chưa | Nó không bật/tắt gì — nó gọi tên thứ tự đang áp dụng |
 | Nav bar: nhãn tab active cũng đổi màu, không chỉ icon | ✅ `app_theme.dart` `labelTextStyle` | ❌ chưa | Trước đó nhãn rơi về `onSurface` cho cả hai trạng thái |
 
