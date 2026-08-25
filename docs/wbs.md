@@ -12108,9 +12108,10 @@ của M2.
   nhóm, mà heading này không trôi — **nó thuộc về list**.
 - **Sửa vòng hai — đảo hai khoảng:** `xl` chuyển sang padding đáy của summary
   section, `sm` ở toolbar. Chủ dự án đọc kết quả và nói `24` phía trên heading
-  là quá nhiều, nên hạ một bậc: **`hero → heading = 16` (`lg`),
-  `heading → card 1 = 8` (`sm`)**. Break chỉ cần **lớn hơn**, không cần lớn —
-  16 so với 8 vẫn để label gần list nó gán nhãn gấp đôi so với panel phía trên.
+  là quá nhiều, nên hạ dần qua hai vòng review: `xl` → `lg` → **`md`**. Chốt ở
+  **`hero → heading = 12`, `heading → card 1 = 8`**. Break chỉ cần **lớn hơn**
+  tie, không cần lớn — 12 so với 8 vẫn đọc label thuộc về list, và mỗi bậc hạ
+  xuống trả pixel lại cho list.
 - **Thước lại tự sai lần thứ tư, và lần này nó gây hiểu nhầm thật.** Mỗi khoảng
   có **hai** chip — tên dải bên trái, con số bên phải — nên con số dễ bị đọc là
   "khoảng của dải mang tên đó". Chủ dự án đọc `24` thành khoảng **dưới** heading
