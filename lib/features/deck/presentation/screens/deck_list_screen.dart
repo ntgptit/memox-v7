@@ -260,19 +260,20 @@ class _DeckLevel extends ConsumerWidget {
         SliverToBoxAdapter(child: DeckSummarySectionWidget(snapshot: snapshot)),
         SliverToBoxAdapter(
           child: Padding(
-            // `md` below (owner decision, 2026-08-25). It was `xl`, on the
-            // argument that a section break matching the 16 between two cards
-            // would make the toolbar read as the first row of the list. That
-            // argument is still true and was traded anyway: the owner asked for
-            // three whole deck cards above the fold, the hero had already given
-            // back every pixel it could, and this gap was the last one between
-            // the panel and the list. `md` at every width — the compact trade
-            // that used to live here bought screen height the same way.
+            // **`xl` again.** It was traded down to `md` for twelve pixels when
+            // the hero still needed them, against a stated argument: a section
+            // break no larger than the 16 between two cards makes the heading
+            // read as the list's first row rather than as its title. The hero
+            // gave 37px back since, and the rhythm ruler
+            // (`deck_list_rhythm_golden_test.dart`) drew the result — 12 above
+            // the first card against 16 between cards, the heading bound to the
+            // list more tightly than the list is to itself. The debt is paid
+            // and the argument stands.
             padding: const EdgeInsets.fromLTRB(
               AppSpacing.lg,
               0,
               AppSpacing.lg,
-              AppSpacing.md,
+              AppSpacing.xl,
             ),
             child: DeckListToolbarWidget(
               isRootLevel: parent == null,

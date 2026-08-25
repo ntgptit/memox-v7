@@ -12038,6 +12038,66 @@ của M2.
   `deck_summary_new_test.dart`, `test/demo/` goldens, full host suite.
 - **Checklist phases:** 7, 12, 14
 
+### M99.52 · Thước nhịp dọc cho Deck list — và khoảng bị đảo mà nó bắt được
+
+- **Status:** **done**
+- **Goal:** Chủ dự án yêu cầu một golden kẻ vạch ngang ở mép trên/dưới của từng
+  item trên màn Deck list rồi đo khoảng giữa chúng, để **phát hiện khoảng cách
+  bất thường theo chiều dọc**. Không phải để nhìn cho đẹp — để bắt lỗi.
+- **Scope:** Một test golden mới, cộng đúng một sửa đổi mà chính nó chỉ ra.
+- **Công cụ:** `deck_list_rhythm_golden_test.dart` dựng màn root **thật** (cùng
+  fixture với `deck_screens_demo_test.dart`, để thước và gallery đo cùng một
+  app), thu hộp của từng item, rồi pump lại với một lớp thước phủ lên: hairline
+  ở mỗi mép, tên item bên trái, **khoảng cách in ngay trong khoảng nó đo**.
+  Golden nằm cạnh feature chứ không ở `test/demo/goldens`, để gallery vẫn chỉ
+  chứa màn hình.
+- **Hai lần thước tự sai trước khi đọc được:**
+  - `TextPainter` trong `CustomPainter` tự phân giải font, và trong harness
+    golden nó rơi về fallback — **mọi nhãn ra ô đen**. Chuyển nhãn sang widget
+    `Text`. Vẫn đen: `TextStyle` không khai `fontFamily` thì cũng rơi về
+    fallback. Phải khai `AppTypography.bodyFamily` tường minh.
+  - Bản đầu tính khoảng theo **mọi** item, nên in ra `11,9` cho khoảng giữa
+    FAB và card 4 — một con số đo vị trí của nút chứ không đo quyết định spacing
+    nào. FAB và bottom bar nay **được vẽ mép nhưng không tham gia chuỗi đo**.
+- **Cái nó bắt được:**
+
+  ```
+  Hero        →  Heading row :  0.0
+  Heading row →  Deck card 1 : 12.0   ← đảo nhịp
+  Deck card 1 →  Deck card 2 : 16.0
+  Deck card 2 →  Deck card 3 : 16.0
+  ```
+
+  Hàng heading bám vào card đầu **chặt hơn** các card bám nhau. Mọi con số đều
+  là token hợp lệ, nên phép kiểm "có nằm trên `AppSpacing.scale` không" **không
+  bắt được** — đây là lỗi **quan hệ**, không phải lỗi giá trị. Chính là điều
+  comment cũ ở `deck_list_screen.dart` đã cảnh báo, và là đánh đổi M99.42 ghi
+  lại: `xl` bị hạ xuống `md` để lấy 12px khi hero còn cần. M99.50 và M99.51 đã
+  trả lại 37px, nên đánh đổi hết hạn.
+- **Sửa:** gap dưới toolbar `md` → **`xl`**. Nhịp còn `8 / 0 / 24 / 16 / 16`;
+  card 3 kết ở 763,9 so với bottom bar ở 772 nên **vẫn ba card trọn vẹn**.
+- **Luật được thêm vào thước:** ngoài phép kiểm off-scale, nay có phép kiểm
+  **quan hệ** — khoảng dưới hàng heading phải **lớn hơn** khoảng giữa hai card.
+  Đo từ đúng chuỗi mà bức ảnh vẽ, nên luật và thước không thể nói khác nhau.
+- **Khoảng `0.0` giữa hero và heading row được vẽ ra chứ không giấu.** Hai hộp
+  chạm nhau thật; trên máy nó đọc rộng rãi vì hàng heading cao 48 quanh một nhãn
+  12px — target của control sort đặt chiều cao đó. Chênh lệch giữa **hộp** và
+  **mực** là thứ đáng nhìn thấy, nên thước kẻ theo hộp và nói rõ điều đó.
+- **Output:** `deck_list_rhythm_golden_test.dart` + `goldens/deck_list_rhythm.png`,
+  `deck_list_screen.dart` (gap `xl`), 6 golden `deck_list_*` sinh lại.
+- **Acceptance criteria:**
+  - [x] Golden kẻ vạch ở mép trên và mép dưới của từng item, in khoảng cách.
+  - [x] Nhãn đọc được (không phải ô đen).
+  - [x] Item phủ (FAB, bottom bar) được vẽ mép nhưng không làm nhiễu số đo.
+  - [x] Bắt được lỗi giá trị (off-scale) **và** lỗi quan hệ (nhịp đảo).
+  - [x] Lỗi nó bắt được đã sửa; vẫn ba card trọn vẹn.
+  - [x] `dod_check.sh` xanh.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.51
+- **Tests required:** `deck_list_rhythm_golden_test.dart` (mới),
+  `deck_summary_compact_geometry_test.dart`, `test/demo/` goldens, full suite.
+- **Checklist phases:** 7, 12, 14
+
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 
 Ghi lại cụ thể, vì "mất một bộ lint" là câu quá mơ hồ để ai đó sau này biết
