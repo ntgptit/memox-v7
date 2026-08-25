@@ -12192,6 +12192,85 @@ của M2.
   `deck_summary_compact_geometry_test.dart`, `test/demo/` goldens, full suite.
 - **Checklist phases:** 7, 12, 14
 
+### M99.53 · Hai nút cạnh nhau là một kích thước — `MxButtonPair`
+
+- **Status:** **done** (còn nợ golden, xem dưới)
+- **Goal:** Chủ dự án nhìn trên máy và bác bỏ màn thư viện rỗng: *«2 button đặt
+  cạnh nhau, bất kể cùng row hay cùng column thì phải có bề rộng và bề cao
+  giống nhau»*. `Browse starter library` rộng, `New deck` hẹp hơn hẳn ngay dưới
+  nó. Hai lựa chọn vẽ ở hai kích thước thì **bố cục đã chọn hộ người dùng rồi**.
+- **Scope:** Một shared component mang luật, sáu call site chuyển sang dùng nó,
+  một test đo hình học, một playground Widgetbook. Không đụng token, không đụng
+  business rule, không mở rộng sang cột dọc từ ba nút trở lên.
+- **Output:** `lib/shared/widgets/mx_button_pair.dart` (mới),
+  `mx_empty_state.dart`, `mx_confirm_dialog.dart`, `deck_form_widget.dart`,
+  `tag_rename_widget.dart`, `card_tag_filter_sheet_widget.dart`,
+  `card_import_action_bar_widget.dart`, `card_export_action_bar_widget.dart`,
+  `recall_timer_pieces_widget.dart`; `test/shared/widgets/mx_button_pair_test.dart`
+  (mới) và `mx_stress_specimens.dart`; `widgetbook/lib/components/control_components.dart`
+  và `widgetbook/lib/main.dart`; `design_audit/usage_inventory.json` sinh lại.
+- **Đây là lỗ hổng của một *tầng*, không phải của một màn.** Theme quản màu,
+  khoảng cách, bán kính, trạng thái — chặt đến mức có gate riêng. Không có gì
+  quản **quan hệ** giữa hai điều khiển đặt cạnh nhau, nên mỗi call site tự quyết
+  và không ai sai theo cùng một kiểu. Rà `lib/` ra sáu chỗ:
+
+  | Nơi | Trước | Sau |
+  |---|---|---|
+  | `MxEmptyState` | hai nút, mỗi nút một bề rộng | xếp dọc, một kích thước |
+  | `MxConfirmDialog` | `OverflowBar` — Cancel nhỏ cạnh Delete lớn | chia đôi đều, cao bằng nhau |
+  | `deck_form_widget` | `Row` căn phải, hai nút tự co | chia đôi đều, hẹp thì xếp dọc |
+  | `tag_rename_widget`, `card_tag_filter_sheet_widget` | `OverflowBar` | chia đôi đều, giữ hành vi xếp dọc |
+  | `StudyCtaRowWidget` | `Flexible` — mỗi nút co theo nhãn | lấp đầy nửa phần, dưới trần 160dp |
+  | `card_import_action_bar_widget` | `Expanded` đều bề rộng, lệch cao khi nhãn xuống dòng | thêm `IntrinsicHeight` + stretch |
+
+  `card_export_action_bar_widget` giữ nguyên hành vi nhưng bỏ bản sao riêng của
+  logic hàng-hay-cột: nó là nơi hành vi đó được viết lần đầu, nay dùng chung.
+- **Cách ép bằng nhau, và vì sao không phải bằng một hằng số.** Bề rộng do hai
+  `Expanded` chia; chiều cao do `IntrinsicHeight` bọc ngoài — intrinsic trục
+  chính của `RenderFlex` là `totalFlex × max(childSize / flex)`, tức
+  `2 × max(h₁, h₂)` cộng khe, rồi hai `Expanded` chia đôi lại. Nút thấp hơn cao
+  lên bằng nút cao hơn **vì bất cứ lý do gì** — thường là một nhãn xuống hai
+  dòng ở `textScaler` 2.0 — thay vì bị ghim vào một con số đúng ở đúng một cỡ chữ.
+- **`MediaQuery` chứ không `LayoutBuilder`, và đó không phải chuyện phong cách.**
+  `AlertDialog` layout phần `actions` bên trong một `IntrinsicWidth`;
+  `LayoutBuilder` từ chối trả lời truy vấn intrinsic («calculating the intrinsic
+  dimensions would require running the layout callback speculatively»), nên bản
+  đầu tiên làm hộp thoại **ném lỗi ngay lúc layout**. `mx_confirm_dialog_test.dart`
+  bắt được — một test viết cho live region, không liên quan gì tới bố cục. Ngưỡng
+  xếp dọc nay đọc bề rộng màn hình trừ một gutter mỗi bên: xấp xỉ, và đúng vì một
+  cặp action luôn nằm trong thứ bám theo màn hình (cột trang, sheet, dialog).
+- **Test đo hình chữ nhật đã layout, không đọc source.** Đây là điểm của cả mục
+  này: `flutter analyze` và guard đọc chữ trong file; golden so màn hình với
+  **bản chụp hôm qua của chính nó**, nên một cạnh sai từ lần render đầu tiên
+  pass mãi mãi. Sáu ca trong `mx_button_pair_test.dart`: hàng ngang, xếp dọc,
+  dòng quá hẹp cho một hàng, `textScaler` 2.0 nơi một nhãn xuống dòng, cộng
+  `MxEmptyState` và `MxConfirmDialog` dựng đúng như hai nơi gọi thật.
+- **Còn để lại — cột dọc từ ba nút trở lên** (`study_resume_widget`,
+  `deck_scheduler_change_widget`, `deck_reset_progress_widget`,
+  `card_editor_screen`) đã bằng bề rộng nhờ `CrossAxisAlignment.stretch` và vẫn
+  có thể lệch chiều cao nếu một nhãn xuống dòng. Cần một widget **nhóm**, không
+  phải một widget cặp; chưa có màn nào chạm ngưỡng đó ở cỡ chữ đang hỗ trợ.
+- **Acceptance criteria:**
+  - [x] Hai nút cạnh nhau bằng nhau cả bề rộng lẫn chiều cao, ở cả hai trục.
+  - [x] Ngưỡng hẹp vẫn xếp dọc — không bóp hai nhãn thành hai dòng mỗi nút.
+  - [x] Không widget nào trong app còn giữ bản sao riêng của luật này.
+  - [x] Component mới có playground trong Widgetbook (knob nhãn + trục).
+  - [x] `flutter analyze` sạch; toàn bộ test không-golden xanh (3584);
+        guard 70 luật sạch; `check_docs.py` nhất quán.
+  - [ ] **26 golden sinh lại — nợ, và nợ có chủ.** Pixel comparison thuộc về
+        `ci-full` trên **Windows**; container Linux của phiên làm việc render
+        khác, nên sinh lại ở đó là ghi vào repo một sai lệch khó thấy. Danh
+        sách: `mx_confirm_dialog_*` (4), `deck_list_empty_*`, các demo sheet và
+        confirm của tag, các hàng CTA `study_fill_*` / `recall_*`. Gallery màn
+        hình **chưa** publish lại vì nó đọc golden đã commit: dựng từ ảnh cũ là
+        một tuyên bố sai trông như đúng.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.52
+- **Tests required:** `mx_button_pair_test.dart` (mới),
+  `mx_confirm_dialog_test.dart`, `mx_stress_test.dart`, `test/visual_audit/`,
+  `widgetbook/test/catalog_smoke_test.dart`, full non-golden suite.
+- **Checklist phases:** 7, 12, 14
+
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 
 Ghi lại cụ thể, vì "mất một bộ lint" là câu quá mơ hồ để ai đó sau này biết
