@@ -65,10 +65,19 @@ SwitchThemeData buildSwitchTheme(
   AppSemanticColors semantic,
 ) => SwitchThemeData(
   thumbColor: WidgetStateProperty.resolveWith((states) {
-    // The thumb is a face, not a glyph — a disabled switch still shows a
-    // pill with a knob on it — so this is the solid `disabledSurface` rather
-    // than the translucent content token the radio's mark takes.
-    if (states.contains(WidgetState.disabled)) return semantic.disabledSurface;
+    // **`onDisabled`, and it shipped as `disabledSurface` — the same value the
+    // track resolves to, which put the knob at 1:1 against the pill it sits
+    // on.** A disabled switch drawn that way is a uniform blob: the stored
+    // on/off state disappears exactly while the user cannot change it, which
+    // on the reminder toggle is the whole time a command is in flight.
+    //
+    // WCAG 1.4.11 does exempt inactive components from its 3:1 floor, so the
+    // requirement here is *visible*, not *3:1* — and 1:1 fails the weaker one.
+    // The ink at 38% reads 2.29:1 in light and 2.90:1 in dark on the disabled
+    // track: plainly muted, plainly still there. It is also M3's own answer
+    // for an unselected disabled thumb, and the value the radio's disabled
+    // mark already takes.
+    if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
     if (states.contains(WidgetState.selected)) return scheme.onPrimary;
 
     return scheme.onSurfaceVariant;
@@ -136,7 +145,14 @@ CheckboxThemeData buildCheckboxTheme(
     // on a muted tile are one control, and a fill would make it two.
     return Colors.transparent;
   }),
-  checkColor: WidgetStatePropertyAll<Color>(scheme.onPrimary),
+  checkColor: WidgetStateProperty.resolveWith((states) {
+    // The same trap as the switch's thumb, one control over: a white tick on
+    // the disabled fill measures 1.32:1 in light, so a disabled *ticked* box
+    // reads as an empty one. The disabled ink is 2.29:1 on that fill.
+    if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
+
+    return scheme.onPrimary;
+  }),
   side: WidgetStateBorderSide.resolveWith((states) {
     if (states.contains(WidgetState.focused)) {
       return AppInteractionStates.focusRing(semantic);

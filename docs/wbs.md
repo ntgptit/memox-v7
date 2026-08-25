@@ -11861,6 +11861,36 @@ của M2.
   `focusRing` — đúng token và đúng lý do mà `buildProgressIndicatorTheme` đã
   chuyển sang: 6,14:1 và 4,02:1. Một test ghim rằng cặp của M3 **vẫn** trượt,
   để lý do sai lệch không mục thành sở thích.
+- **Bốn phát hiện của review tự động, ba là bug thật trong chính đợt này.**
+  Đáng ghi vì cả ba đều lọt qua gate đầy đủ đang xanh:
+  - **Thumb switch lúc disabled trùng màu track.** Cả hai cùng resolve
+    `disabledSurface`, tức **1:1** — nút gạt biến mất đúng lúc người dùng không
+    đổi được nó, mà toggle nhắc học thì disabled suốt thời gian một lệnh đang
+    chạy. WCAG 1.4.11 *miễn* ngưỡng 3:1 cho control bất hoạt, nên không test
+    contrast nào bắt được; yêu cầu ở đây yếu hơn 3:1 và 1:1 vẫn trượt nốt cái
+    yếu hơn ấy. Nay là `onDisabled` (2,29 / 2,90 trên track), đúng câu trả lời
+    của M3 cho thumb chưa chọn và đúng giá trị mà mark của radio đã dùng.
+    **Cùng cái bẫy ở checkbox**, một control cách đó một bước: tick trắng trên
+    fill disabled đo 1,32:1 ở light, nên ô đã tick lúc disabled trông như ô
+    trống. Cũng chuyển sang `onDisabled`.
+  - **Regex gỡ comment của guard không gỡ gì cả.** Nó viết
+    `r'^\s*//.*\$'`, mà trong raw string của Dart `\$` là dấu gạch chéo cộng
+    dollar — regex đọc thành **dollar theo nghĩa đen**, không phải neo cuối
+    dòng. Nên chỉ những dòng comment kết thúc bằng `$` mới bị gỡ. Guard vẫn
+    xanh, và đó là phần đáng nhớ: một bộ gỡ không gỡ gì làm scan thấy **nhiều
+    hơn**, mà nhiều hơn là hướng không làm test đỏ. Test âm mới chạy thẳng trên
+    bộ gỡ với ba tên widget vốn có thật trong doc comment của repo này.
+  - **`DropdownButton` render mà guard không thấy.** Card importer dựng hai
+    cái. Bot đề xuất kiểm `ThemeData.dropdownButtonTheme` — **slot đó không tồn
+    tại**; `DropdownButton` là di sản Material 2 và resolve thẳng từ màu cấp
+    `ThemeData` (`canvasColor`, `disabledColor`, `focusColor`…), trong đó
+    `disabledColor` mặc định là `black38` cứng không mang seed. Nên vá ở chỗ nó
+    thật sự đọc, và **giới hạn của guard được nêu tên** thay vì để ngầm: cơ chế
+    map widget→slot chứng minh được mọi widget *có slot* đã có theme, và không
+    chứng minh gì về những widget không có.
+  - Phát hiện thứ tư đòi regenerate golden ngay trong commit này. Không làm
+    được từ Linux — xem mục ghi nợ golden; sinh trên Linux sẽ làm chính job
+    `windows-latest` đỏ, tức tệ hơn.
 - **Acceptance criteria:**
   - [x] `theme_coverage_test.dart` xanh cả hai chiều, và có test tự-kiểm rằng
         scan không khớp rỗng.
@@ -11870,6 +11900,8 @@ của M2.
         `_SwitchDefaultsM3`; `dayPeriodColor` theo đúng `_TimePickerDefaultsM3`.
   - [x] `platform` ghim về Android.
   - [x] Bốn theme đón đầu, mỗi cái có test đo cặp màu nó sẽ vẽ.
+  - [x] Trạng thái disabled của switch và checkbox vẫn đọc được trạng thái đã
+        lưu, mà vẫn yếu hơn trạng thái sống — cả hai bờ đều có test.
   - [x] `flutter analyze` sạch; `flutter test --exclude-tags golden` xanh;
         guard 0 vi phạm; `check_docs.py` và `check_architecture.sh` sạch.
 - **Output:** `test/core/theme/theme_coverage_test.dart` (mới),

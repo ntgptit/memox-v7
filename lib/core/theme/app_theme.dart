@@ -320,6 +320,24 @@ ThemeData _buildTheme(
     highlightColor: scheme.primary.withValues(alpha: AppStateOpacity.pressed),
     splashColor: scheme.primary.withValues(alpha: AppStateOpacity.pressed),
 
+    // **Two more of the same kind, for the one widget family that has no
+    // component theme at all.** `DropdownButton` is a Material 2 survivor —
+    // `ThemeData` has no slot for it, only `dropdownMenuTheme` for the
+    // unrelated `DropdownMenu` — so it resolves straight from these top-level
+    // colours, and the card importer builds two of them.
+    //
+    // `canvasColor` is the menu it opens; without it the menu takes
+    // `ThemeData`'s own default rather than this app's card surface.
+    // `disabledColor` is worse: Material's fallback is a hardcoded
+    // `black38`/`white38` with no seed in it, which is the same class of
+    // unseeded default `AppStateOpacity`'s file comment was opened for.
+    //
+    // `theme_coverage_test.dart` cannot reach this pair — its whole mechanism
+    // is a widget-to-slot map, and there is no slot — so the gap is closed
+    // here and named in that file's blind-spot list.
+    canvasColor: scheme.surface,
+    disabledColor: semantic.onDisabled,
+
     // A bare `Icon` outside every themed component. Material's fallback is a
     // hardcoded black87/white pair, not even `onSurface`; declaring the
     // secondary ink at the standard glyph size means an icon nobody styled

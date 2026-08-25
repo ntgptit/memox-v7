@@ -22,6 +22,19 @@ import 'package:memox/core/theme/app_theme.dart';
 /// * **themed ∧ not rendered ⇒ on a named list.** Otherwise the fix for the
 ///   first rule is to theme everything, which is the decision-without-a-screen
 ///   `app_theme.dart` spends a paragraph refusing.
+/// A `//` or `///` line, anchored at the end of the line.
+///
+/// **Named rather than inlined because the anchor was wrong and nothing
+/// noticed.** It shipped as `r'^\s*//.*\$'`, and in a Dart raw string `\$` is a
+/// backslash and a dollar — which the regex engine reads as a *literal dollar
+/// sign*, not as end-of-line. So the pattern matched only comment lines that
+/// happen to end in `$`, and every other comment survived into the scan. The
+/// guard still passed, which is the part worth remembering: a stripper that
+/// strips nothing makes the scan see *more*, and more is the direction that
+/// does not fail. `finds nothing in prose alone` below is what would have
+/// caught it.
+final RegExp _lineComment = RegExp(r'^\s*//.*$', multiLine: true);
+
 void main() {
   final theme = buildLightTheme();
   final bare = ThemeData();
@@ -154,7 +167,7 @@ void main() {
       .where((f) => f.path.endsWith('.dart'))
       .where((f) => !RegExp(r'\.(g|freezed|drift)\.dart$').hasMatch(f.path))
       .map((f) => f.readAsStringSync())
-      .map((s) => s.replaceAll(RegExp(r'^\s*//.*\$', multiLine: true), ''))
+      .map((s) => s.replaceAll(_lineComment, ''))
       .toList();
 
   Set<String> renderedNames() {
@@ -228,6 +241,59 @@ void main() {
           'These are now rendered, so their allowlist reason is out of '
           'date:\n  ${stale.join("\n  ")}',
     );
+  });
+
+  test('the widgets with no slot at all are covered another way', () {
+    // **The blind spot this guard cannot close with its own mechanism, named
+    // rather than left implicit.** `DropdownButton` is a Material 2 survivor
+    // with no `ThemeData` slot — `dropdownMenuTheme` belongs to the unrelated
+    // `DropdownMenu` — so a widget-to-slot map has nothing to point at, and
+    // the card importer builds two of them. It resolves from top-level colours
+    // instead, and Material's `disabledColor` fallback is a hardcoded
+    // `black38` with no seed in it.
+    //
+    // A code review found this while the guard reported full coverage, which
+    // is the honest limit of the mechanism: it proves every widget *that has a
+    // slot* is themed, and nothing about the ones that do not.
+    expect(
+      declared((t) => t.canvasColor),
+      isTrue,
+      reason: "the dropdown menu is back on Material's canvas",
+    );
+    expect(
+      declared((t) => t.disabledColor),
+      isTrue,
+      reason: 'a disabled dropdown label is back on a hardcoded black38',
+    );
+  });
+
+  test('finds nothing in prose alone', () {
+    // The negative the comment stripper exists for, run against the stripper
+    // rather than against `lib/`. Three of these appear verbatim in this
+    // repository's own doc comments — `PopupMenuButton<CardListSort>(` is in
+    // `app_planned_themes.dart` — so a scan that reads comments reports them
+    // rendered no matter what the code does.
+    const prose = '''
+/// A `NavigationRail(` in a doc comment.
+// PopupMenuButton<CardListSort>(
+    // DataTable(
+''';
+
+    final stripped = prose.replaceAll(_lineComment, '');
+
+    for (final name in <String>[
+      'NavigationRail',
+      'PopupMenuButton',
+      'DataTable',
+    ]) {
+      expect(
+        RegExp(
+          '(?<![A-Za-z0-9_])$name\\s*(<[^()]*>)?\\s*\\(',
+        ).hasMatch(stripped),
+        isFalse,
+        reason: '$name survived comment stripping — the anchor is wrong again',
+      );
+    }
   });
 
   test('the scan can actually see a widget, and can miss one', () {

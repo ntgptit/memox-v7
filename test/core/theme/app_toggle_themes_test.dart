@@ -185,6 +185,72 @@ void main() {
     });
   });
 
+  group('disabled still shows what it is', () {
+    // **The state a contrast floor does not cover.** WCAG 1.4.11 exempts
+    // inactive components, so nothing above would have caught a disabled
+    // switch whose thumb and track were the same colour — which is what
+    // shipped, at 1:1. The requirement here is weaker than 3:1 and it is still
+    // a requirement: a control the user cannot change is a control whose
+    // current value they can only read.
+    const off = <WidgetState>{WidgetState.disabled};
+    const on = <WidgetState>{WidgetState.disabled, WidgetState.selected};
+
+    test('a disabled switch still shows which side the knob is on', () {
+      for (final entry in themes.entries) {
+        final t = entry.value;
+
+        for (final states in const <Set<WidgetState>>[off, on]) {
+          final knob = Color.alphaBlend(thumb(t, states), track(t, states));
+
+          expect(
+            contrast(knob, track(t, states)),
+            greaterThan(1.5),
+            reason:
+                '${entry.key}: with states $states the thumb dissolves into '
+                'its own track',
+          );
+        }
+      }
+    });
+
+    test('a disabled ticked box still looks ticked', () {
+      for (final entry in themes.entries) {
+        final t = entry.value;
+        final fill = t.checkboxTheme.fillColor!.resolve(on)!;
+        final tick = Color.alphaBlend(
+          t.checkboxTheme.checkColor!.resolve(on)!,
+          fill,
+        );
+
+        expect(
+          contrast(tick, fill),
+          greaterThan(1.5),
+          reason: '${entry.key}: the disabled tick vanishes into its box',
+        );
+      }
+    });
+
+    test('and still reads as disabled rather than as available', () {
+      // The other bound. Fixing the first one by making disabled look enabled
+      // trades a real bug for a worse one.
+      for (final entry in themes.entries) {
+        final t = entry.value;
+
+        // Composited, not raw. `onDisabled` is translucent, and `contrast`
+        // reads RGB without alpha — so comparing the token itself would
+        // measure an opaque near-black thumb that nothing ever paints, and
+        // report the disabled switch as the louder of the two.
+        final disabledKnob = Color.alphaBlend(thumb(t, off), track(t, off));
+
+        expect(
+          contrast(disabledKnob, track(t, off)),
+          lessThan(contrast(thumb(t, const {}), track(t, const {}))),
+          reason: '${entry.key}: the disabled switch is as loud as a live one',
+        );
+      }
+    });
+  });
+
   test('both resolve the house control wash, not Material own', () {
     // The drift that opened this task: four call sites taking hover, press and
     // focus from `ThemeData`'s unseeded fallbacks while every other control in

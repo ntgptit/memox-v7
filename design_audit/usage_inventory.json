@@ -3035,7 +3035,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 481,
+      "line": 499,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -3046,7 +3046,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 498,
+      "line": 516,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -3057,7 +3057,7 @@
     },
     {
       "file": "lib/core/theme/app_toggle_themes.dart",
-      "line": 131,
+      "line": 140,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -3068,7 +3068,7 @@
     },
     {
       "file": "lib/core/theme/app_toggle_themes.dart",
-      "line": 137,
+      "line": 146,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
