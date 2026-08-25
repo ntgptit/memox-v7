@@ -31,7 +31,21 @@ import 'app_typography.dart';
 /// scheduler picker gave them callers. A theme for a component nobody renders
 /// is a decision made without a screen to check it against — which is the rule
 /// this list follows, in both directions.
-ThemeData buildLightTheme() => _buildTheme(
+///
+/// **Built once, and the memoisation is load-bearing rather than an
+/// optimisation.** `ThemeData.==` walks every component theme, and the ones
+/// here hold `WidgetStateProperty.resolveWith` closures — no value equality, so
+/// two themes off identical tokens are never `==`. `MemoxApp` calls these from
+/// `build()`, which runs on the settings stream; every such rebuild would hand
+/// `MaterialApp` an unequal theme, and `Theme.updateShouldNotify` is exactly
+/// `data != oldWidget.data`. One instance makes the comparison `identical` and
+/// the whole-tree invalidation stop. Sharing it is safe — `ThemeData` and both
+/// extensions are immutable — and `app_theme_identity_test.dart` pins it.
+ThemeData buildLightTheme() => _lightTheme;
+
+ThemeData buildDarkTheme() => _darkTheme;
+
+final ThemeData _lightTheme = _buildTheme(
   // The constructor, not `fromSeed(...).copyWith(...)`. Every role the app
   // ships is a hand-tuned constant, and `fromSeed` had been generating a
   // parallel set nobody rendered — a neutral-grey surfaceContainer ladder, a
@@ -92,7 +106,7 @@ ThemeData buildLightTheme() => _buildTheme(
   outlineLabel: AppColors.secondaryActionLight,
 );
 
-ThemeData buildDarkTheme() => _buildTheme(
+final ThemeData _darkTheme = _buildTheme(
   const ColorScheme(
     brightness: Brightness.dark,
     primary: AppColors.primaryDark,
@@ -285,7 +299,7 @@ ThemeData _buildTheme(
       outlineLabel: outlineLabel,
     ),
 
-    textButtonTheme: buildTextButtonTheme(scheme, semantic),
+    textButtonTheme: buildTextButtonTheme(scheme, semantic, texts),
 
     inputDecorationTheme: buildInputDecorationTheme(scheme, semantic, texts),
 

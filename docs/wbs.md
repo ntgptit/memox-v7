@@ -11173,6 +11173,105 @@ của M2.
   `test/demo/` goldens.
 - **Checklist phases:** 7, 12, 14
 
+### M99.42 · Focus-visible cho filled và text button; theme dựng một lần
+
+- **Status:** **done**
+- **Goal:** Hai lỗ hổng tìm ra trong đợt review tầng theme. Nút CTA chính của
+  mọi màn — `MxActionButton` variant `primary`, tức `FilledButton` — **không có
+  chỉ báo focus nào cả**, và `buildLightTheme()`/`buildDarkTheme()` chạy bên
+  trong `MemoxApp.build()` nên mỗi lần settings phát là cả cây widget rebuild.
+- **Scope:** Chỉ tầng theme. Không màn nào, không component nào đổi API —
+  `MxActionButton` và `MxTextButton` không sửa một dòng, cả hai nhận thay đổi
+  qua đúng theme slot chúng vốn resolve. Không đụng bảng màu: mọi giá trị dùng
+  ở đây đã có trong `AppColors` và trong cặp `on*` mà nút vốn mang. Ba nợ token
+  mà đợt review cùng tìm ra — `brandInk` so với `primaryAccent`, icon của chip
+  không theo `selected`, alpha rời rạc — **để ngoài phạm vi** và ghi ở cuối
+  entry: chúng là dọn dẹp nhất quán, không phải lỗi a11y hay lỗi rebuild.
+- **Vì sao filled button không có gì, đo được:** `app_interaction_states.dart`
+  tự phát biểu hợp đồng "wash nói *có thứ gì đó* đang focus, ring nói *cái
+  nào*". Filled button không nhận cái nào. `buildFilledStyle` không set `side`
+  — `focus_ring_contrast_test.dart` nói thẳng "the three components that draw
+  one" là chip, outlined, icon. Còn wash thì `controlOverlay` trả
+  `primary @ 10%` **vẽ đè lên chính fill `primary`**: `alphaBlend` cho ra đúng
+  màu xuất phát, **1.00:1**. Đây là cùng cái bẫy mà hover đã gặp và đã sửa bằng
+  blend ("6% của accent phủ lên accent là accent") — chỉ là chậm một state.
+  Trượt WCAG 2.4.7 và 1.4.11.
+- **Vì sao ring không lấy `semantic.focusRing`:** ba component kia đứng trên
+  page, card hoặc fill của pill, nơi token đo trên 3:1. Filled button đứng trên
+  chính accent, và token cùng họ indigo: **1,02:1 ở light** (`#4141C0` trên
+  `#4646B4`), **1,90:1 ở dark**. Không phải ring yếu — là không có ring. Nên
+  filled button vẽ ring bằng **chính màu label của nó**, giá trị duy nhất đã
+  được bảo đảm đọc được trên fill đó: `onPrimary` trên `primary` 7,51/5,88,
+  `onError` trên `error` 5,76/6,80, `onSecondaryContainer` trên
+  `secondaryContainer` 10,37/9,09 (light/dark). Chặt nhất 5,76:1 so với sàn
+  3,0. Suy ra từ cặp nút đã mang sẵn, nên một variant mới không cần đo lại.
+  Ring vẽ `strokeAlignInside` nên nằm gọn trong nút; trạng thái nghỉ vẫn không
+  viền — filled button là một mảng fill, không phải fill trong khung.
+- **Text button thì underline, không phải ring:** overlay đã bị tắt và padding
+  bằng 0, nên không có viền để vẽ ring — ring sẽ ôm sát chữ. `MxTextButton` đã
+  tự trả lời bằng một gạch chân dày `AppStroke.focus`; phát biểu lại ở tầng
+  theme là thứ khiến một `TextButton` **trần** cũng đánh dấu được. `textStyle`
+  của `ButtonStyle` **lấy nguyên khối chứ không merge**, nên `labelLarge` phải
+  được nêu lại đầy đủ — một style thiếu sẽ âm thầm đánh rơi size, leading và
+  tracking khi đi qua `TextButton.defaultStyleOf`; test khoá đúng chỗ đó.
+- **Vì sao theme phải memo hoá — và vì sao thêm `==` cho extension thì vô
+  ích:** `ThemeData.==` duyệt từng component theme, mà các theme ở đây giữ
+  closure `WidgetStateProperty.resolveWith` — không có value equality. Nên hai
+  theme dựng từ **cùng token vẫn không bao giờ `==`**. Với
+  `themeAnimationDuration: Duration.zero`, `MaterialApp` gắn `Theme` thường,
+  `updateShouldNotify` đúng bằng `data != oldWidget.data` → mọi widget đọc
+  `Theme.of` rebuild theo. Bổ sung `==` cho `AppSemanticColors`/`AppTextStyles`
+  **không** sửa được cái này vì closure mới là nguyên nhân; cache mới là cách
+  sửa. `applyCompactScale` cache theo cùng lý do và bằng `Expando` — key theo
+  identity, chứ `Map` sẽ tính `ThemeData.hashCode` trên từng component theme ở
+  mỗi lần tra, tức trả gần hết cái giá mà cache sinh ra để tránh.
+- **Không đụng tới ảnh:** cả hai state thay đổi đều là focus. Ở trạng thái nghỉ
+  `side` trả null và `RoundedRectangleBorder.copyWith(side: null)` giữ nguyên
+  `BorderSide.none`, còn `textStyle` trả đúng `labelLarge` mà `defaultStyleOf`
+  vẫn cấp — nên `test/demo/` goldens không đổi và không cần dựng lại.
+- **Output:** `app_interaction_states.dart` (`focusRingOf(Color)`, `focusRing`
+  giờ suy ra từ nó nên một stroke duy nhất), `app_button_themes.dart`
+  (`buildFilledStyle` thêm `side`; `buildTextButtonTheme` nhận `TextTheme` và
+  thêm `textStyle` có underline khi focus), `app_theme.dart` (`_lightTheme` /
+  `_darkTheme` lazy top-level, builder trả về chúng), `app_compact_scale.dart`
+  (cache `Expando`, thân hàm tách thành `_buildCompactScale`),
+  `theme_probe.dart` (`filledButtonFocusSide`).
+- **Acceptance criteria:**
+  - [x] `FilledButton` vẽ ring khi focus, không vẽ khi nghỉ, ở cả hai mode.
+  - [x] Màu ring của mọi fill mà `buildFilledStyle` phục vụ đều trên 3:1 —
+        `primary`, `error`, `secondaryContainer`.
+  - [x] Ghi lại **lý do lệch** thành assertion chứ không phải comment: token
+        ring đo dưới 3:1 trên fill accent, và wash focus một mình đổi dưới
+        1,1:1. Nếu bảng màu đổi tới mức chúng qua được, test đỏ và quyết định
+        được xem lại — chứ không bị lặng lẽ bỏ qua.
+  - [x] `TextButton` trần gạch chân khi focus ở đúng `AppStroke.focus`, và rung
+        `labelLarge` sống sót qua việc bị nêu lại (size, leading, tracking,
+        weight ở cả hai state).
+  - [x] `buildLightTheme()` và `buildDarkTheme()` trả cùng một instance qua các
+        lần gọi, và `MemoxApp` đưa đúng instance đó cho `MaterialApp` — khẳng
+        định bằng `same`, vì `==` không phân biệt được và đó chính là vấn đề.
+  - [x] `applyCompactScale` cache theo base, không trộn base sáng với base tối,
+        và vẫn thật sự áp compact pass — cache một câu trả lời sai còn tệ hơn
+        không cache.
+  - [x] Guard `memox-v7` 0 lỗi 0 cảnh báo (`no_large_source_file` phải chịu tách
+        file: test identity ra `app_theme_identity_test.dart`),
+        `check_architecture.sh` và `check_docs.py` xanh.
+- **Chưa trả, đã ghi:** `flutter analyze` và host suite **chưa chạy** trong
+  phiên này — môi trường không có Flutter SDK. Phải chạy trước khi merge.
+- **Nợ liên quan đã ghi nhận, chưa làm:** `brandInk` và `semantic.primaryAccent`
+  vẫn là hai lời đáp khác nhau cho cùng "brand làm chữ" ở dark (`#D7D5FF` so
+  với `#8A8AE0`); `chipTheme.iconTheme` không đổi màu theo `selected` nên pill
+  đang chọn có chữ brand cạnh glyph xám; `semantic.surfaceElevated` không có
+  caller nào trong `lib/`; alpha rời rạc (`0.72`/`0.48`/`0.24`/`0.4`/`0.5`) và
+  `fontSize: 20` trong compact pass vẫn là literal ngoài `AppStateOpacity` và
+  `AppTypography`.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.39, M99.41
+- **Tests required:** `focus_ring_contrast_test.dart` (+2 group, 8 case),
+  `app_theme_identity_test.dart` (mới), `app_theme_test.dart` (+2 assertion
+  trong `MemoxApp follows the system theme mode`).
+- **Checklist phases:** 7, 13
+
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 
 Ghi lại cụ thể, vì "mất một bộ lint" là câu quá mơ hồ để ai đó sau này biết
