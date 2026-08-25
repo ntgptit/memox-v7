@@ -454,12 +454,12 @@
   },
   "deckSortControlSemanticLabel": "Sort decks. Currently {current}",
   "@deckSortControlSemanticLabel": {
-    "description": "Screen-reader label of the sort control on the list heading row. The control paints only a glyph, so the current order — which a sighted user reads off the sheet — has to be spoken here or it is not available at all.",
     "placeholders": {
       "current": {
         "type": "String"
       }
-    }
+    },
+    "description": "Screen-reader label of the sort control on the list heading row. The control paints only a glyph, so the current order — which a sighted user reads off the sheet — has to be spoken here or it is not available at all."
   },
   "decksNoDueTitle": "Nothing due right now",
   "@decksNoDueTitle": {
