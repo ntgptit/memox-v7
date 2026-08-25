@@ -140,9 +140,29 @@ class _Content extends StatelessWidget {
       // row's Study button holds its own.
       spacing: AppSpacing.xs,
       children: <Widget>[
-        // Size from the icon scale, colour from `chipTheme.iconTheme`, which
-        // still resolves here — an `IconTheme` wraps the chip's whole label.
-        Icon(icon, size: AppIconSize.sm),
+        // Size from the icon scale, colour from **the label beside it**.
+        //
+        // `chipTheme.iconTheme` resolves here — an `IconTheme` wraps the
+        // chip's whole label — but `ChipThemeData.iconTheme` is a plain
+        // `IconThemeData` with no `WidgetStateProperty` slot, so it can only
+        // state one colour for every state. It stated the resting ink, which
+        // left a *selected* pill printing a brand-ink word next to a grey
+        // glyph, and a *disabled* one printing a faded word next to a glyph at
+        // full strength — the two halves of one control disagreeing about
+        // which state it is in.
+        //
+        // `DefaultTextStyle` is what `RawChip` resolves `labelStyle` into, so
+        // reading the colour back from it is reading the answer the theme
+        // already gave: selected, disabled and resting all arrive for free,
+        // and a future state does too without a second resolver to keep in
+        // step. The same rule `MxTextButton` and the button themes follow —
+        // `app_interaction_states_test.dart` calls it "the icon rides the
+        // label through every state".
+        Icon(
+          icon,
+          size: AppIconSize.sm,
+          color: DefaultTextStyle.of(context).style.color,
+        ),
         // **`Flexible`, and `mx_stress_test.dart` is why.** A bare `Text` in a
         // `Row` takes its full intrinsic width and refuses to give any back, so
         // at 320px with `textScaler` 2.0 the pill overflowed by 171. Material's

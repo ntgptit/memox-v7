@@ -94,7 +94,7 @@ Color _labelColorFor(
     return semantic.onDisabled;
   }
   if (states.contains(WidgetState.selected)) {
-    return brandInk(scheme);
+    return selectedInk(scheme);
   }
 
   return scheme.onSurfaceVariant;
@@ -186,6 +186,14 @@ ChipThemeData buildChipTheme(
     borderRadius: BorderRadius.circular(AppRadius.pill),
   ),
   labelStyle: _labelStyle(texts, scheme, semantic),
+  // **The fall-through only, and it cannot be more than that.**
+  // `ChipThemeData.iconTheme` is a plain `IconThemeData` with no
+  // `WidgetStateProperty` slot, so one colour has to serve every state — and
+  // the resting ink is the honest choice for a bare `Chip`'s avatar or delete
+  // glyph, which is the only thing left reading it. `MxPillButton` paints its
+  // own glyph in the resolved *label* colour instead, because a selected pill
+  // printing brand ink beside a grey glyph is one control disagreeing with
+  // itself. See the note at its `Icon`.
   iconTheme: IconThemeData(
     size: AppIconSize.sm,
     color: scheme.onSurfaceVariant,

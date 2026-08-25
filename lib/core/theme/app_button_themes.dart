@@ -4,6 +4,7 @@ import 'app_interaction_states.dart';
 import 'app_radius.dart';
 import 'app_semantic_colors.dart';
 import 'app_spacing.dart';
+import 'app_stroke.dart';
 
 /// The filled, outlined, text-link and destructive button styles, and the
 /// geometry the filled and outlined pair share.
@@ -138,6 +139,29 @@ ButtonStyle buildFilledStyle(
 
     return label;
   }),
+  // **The focus ring, and it is drawn in [label] rather than in the ring
+  // token.** Same argument as the hover blend directly above, one state later:
+  // the shared `overlayColor` washes 10% of `primary` on focus, and 10% of the
+  // accent painted on the accent is the accent — so the app's primary CTA had
+  // no focus indicator at all, in either mode. Nor would the usual ring fix
+  // it: `semantic.focusRing` is the same indigo family as the fill and
+  // measures 1.02:1 on it in light. `AppInteractionStates.focusRingOf` records
+  // the table; the short version is that the label colour is the one value
+  // already guaranteed to read on this fill, whatever the variant.
+  //
+  // Null everywhere else, so the button keeps its borderless resting shape —
+  // a filled button is a fill, not a fill inside a frame.
+  side: WidgetStateProperty.resolveWith((states) {
+    // Unreachable in practice — `ButtonStyleButton` refuses focus while
+    // disabled — but stated so the resolver reads in the same disabled-first
+    // order as every other one in this file.
+    if (states.contains(WidgetState.disabled)) return null;
+    if (states.contains(WidgetState.focused)) {
+      return AppInteractionStates.focusRingOf(label);
+    }
+
+    return null;
+  }),
 );
 
 /// A text link's label colour, resolved per state.
@@ -196,6 +220,17 @@ WidgetStateProperty<Color> textLinkForeground(
 /// at label size; `AppSemanticColors.primaryAccent` is the variant that reads
 /// as a label.
 ///
+/// **Focus is an underline, and it is declared here rather than only in
+/// `MxTextButton`.** Suppressing the overlay takes the wash away, and the zero
+/// padding leaves no border to draw a ring on — a ring would trace the glyphs
+/// themselves. `MxTextButton` had already answered that with a rule under the
+/// label at [AppStroke.focus]; stating the same thing in the theme is what
+/// makes a *bare* `TextButton` — the `SnackBarAction` this doc comment
+/// anticipates — mark itself too, instead of resolving to the one control in
+/// the app with no focus-visible state at all. The component keeps its own
+/// resolver: it also underlines on hover, and it re-reads the state-blended
+/// colour so the rule cannot disagree with the text above it.
+///
 /// This is the design system's definition of a text button, so anything that
 /// builds a `TextButton` inherits the link shape — a future `SnackBarAction`
 /// included. A caller that genuinely needs Material's padded button declares
@@ -203,6 +238,7 @@ WidgetStateProperty<Color> textLinkForeground(
 TextButtonThemeData buildTextButtonTheme(
   ColorScheme scheme,
   AppSemanticColors semantic,
+  TextTheme texts,
 ) {
   final foreground = textLinkForeground(
     scheme,
@@ -222,6 +258,23 @@ TextButtonThemeData buildTextButtonTheme(
       splashFactory: NoSplash.splashFactory,
       foregroundColor: foreground,
       iconColor: foreground,
+      // `labelLarge` restated, because `ButtonStyle.textStyle` is taken
+      // wholesale rather than merged: a partial style here would drop the
+      // rung's size, leading and tracking on its way past
+      // `TextButton.defaultStyleOf`.
+      textStyle: WidgetStateProperty.resolveWith((states) {
+        final rung = texts.labelLarge;
+        if (!states.contains(WidgetState.focused)) return rung;
+
+        return rung?.copyWith(
+          decoration: TextDecoration.underline,
+          // Explicit, for the reason `MxTextButton` records: left null the
+          // engine picks a default that does not track the state-blended
+          // foreground, and the rule visibly disagrees with its own label.
+          decorationColor: foreground.resolve(states),
+          decorationThickness: AppStroke.focus,
+        );
+      }),
     ),
   );
 }

@@ -11321,6 +11321,243 @@ của M2.
   `test/demo/` goldens, full host suite.
 - **Checklist phases:** 7, 12, 14
 
+### M99.44 · Focus-visible cho filled và text button; theme dựng một lần
+
+- **Status:** **done**
+- **Goal:** Hai lỗ hổng tìm ra trong đợt review tầng theme. Nút CTA chính của
+  mọi màn — `MxActionButton` variant `primary`, tức `FilledButton` — **không có
+  chỉ báo focus nào cả**, và `buildLightTheme()`/`buildDarkTheme()` chạy bên
+  trong `MemoxApp.build()` nên mỗi lần settings phát là cả cây widget rebuild.
+- **Scope:** Chỉ tầng theme. Không màn nào, không component nào đổi API —
+  `MxActionButton` và `MxTextButton` không sửa một dòng, cả hai nhận thay đổi
+  qua đúng theme slot chúng vốn resolve. Không đụng bảng màu: mọi giá trị dùng
+  ở đây đã có trong `AppColors` và trong cặp `on*` mà nút vốn mang. Ba nợ token
+  mà đợt review cùng tìm ra — `brandInk` so với `primaryAccent`, icon của chip
+  không theo `selected`, alpha rời rạc — **để ngoài phạm vi** và ghi ở cuối
+  entry: chúng là dọn dẹp nhất quán, không phải lỗi a11y hay lỗi rebuild.
+- **Vì sao filled button không có gì, đo được:** `app_interaction_states.dart`
+  tự phát biểu hợp đồng "wash nói *có thứ gì đó* đang focus, ring nói *cái
+  nào*". Filled button không nhận cái nào. `buildFilledStyle` không set `side`
+  — `focus_ring_contrast_test.dart` nói thẳng "the three components that draw
+  one" là chip, outlined, icon. Còn wash thì `controlOverlay` trả
+  `primary @ 10%` **vẽ đè lên chính fill `primary`**: `alphaBlend` cho ra đúng
+  màu xuất phát, **1.00:1**. Đây là cùng cái bẫy mà hover đã gặp và đã sửa bằng
+  blend ("6% của accent phủ lên accent là accent") — chỉ là chậm một state.
+  Trượt WCAG 2.4.7 và 1.4.11.
+- **Vì sao ring không lấy `semantic.focusRing`:** ba component kia đứng trên
+  page, card hoặc fill của pill, nơi token đo trên 3:1. Filled button đứng trên
+  chính accent, và token cùng họ indigo: **1,02:1 ở light** (`#4141C0` trên
+  `#4646B4`), **1,90:1 ở dark**. Không phải ring yếu — là không có ring. Nên
+  filled button vẽ ring bằng **chính màu label của nó**, giá trị duy nhất đã
+  được bảo đảm đọc được trên fill đó: `onPrimary` trên `primary` 7,51/5,88,
+  `onError` trên `error` 5,76/6,80, `onSecondaryContainer` trên
+  `secondaryContainer` 10,37/9,09 (light/dark). Chặt nhất 5,76:1 so với sàn
+  3,0. Suy ra từ cặp nút đã mang sẵn, nên một variant mới không cần đo lại.
+  Ring vẽ `strokeAlignInside` nên nằm gọn trong nút; trạng thái nghỉ vẫn không
+  viền — filled button là một mảng fill, không phải fill trong khung.
+- **Text button thì underline, không phải ring:** overlay đã bị tắt và padding
+  bằng 0, nên không có viền để vẽ ring — ring sẽ ôm sát chữ. `MxTextButton` đã
+  tự trả lời bằng một gạch chân dày `AppStroke.focus`; phát biểu lại ở tầng
+  theme là thứ khiến một `TextButton` **trần** cũng đánh dấu được. `textStyle`
+  của `ButtonStyle` **lấy nguyên khối chứ không merge**, nên `labelLarge` phải
+  được nêu lại đầy đủ — một style thiếu sẽ âm thầm đánh rơi size, leading và
+  tracking khi đi qua `TextButton.defaultStyleOf`; test khoá đúng chỗ đó.
+- **Vì sao theme phải memo hoá — và vì sao thêm `==` cho extension thì vô
+  ích:** `ThemeData.==` duyệt từng component theme, mà các theme ở đây giữ
+  closure `WidgetStateProperty.resolveWith` — không có value equality. Nên hai
+  theme dựng từ **cùng token vẫn không bao giờ `==`**. Với
+  `themeAnimationDuration: Duration.zero`, `MaterialApp` gắn `Theme` thường,
+  `updateShouldNotify` đúng bằng `data != oldWidget.data` → mọi widget đọc
+  `Theme.of` rebuild theo. Bổ sung `==` cho `AppSemanticColors`/`AppTextStyles`
+  **không** sửa được cái này vì closure mới là nguyên nhân; cache mới là cách
+  sửa. `applyCompactScale` cache theo cùng lý do và bằng `Expando` — key theo
+  identity, chứ `Map` sẽ tính `ThemeData.hashCode` trên từng component theme ở
+  mỗi lần tra, tức trả gần hết cái giá mà cache sinh ra để tránh.
+- **Không đụng tới ảnh:** cả hai state thay đổi đều là focus. Ở trạng thái nghỉ
+  `side` trả null và `RoundedRectangleBorder.copyWith(side: null)` giữ nguyên
+  `BorderSide.none`, còn `textStyle` trả đúng `labelLarge` mà `defaultStyleOf`
+  vẫn cấp — nên `test/demo/` goldens không đổi và không cần dựng lại.
+- **Output:** `app_interaction_states.dart` (`focusRingOf(Color)`, `focusRing`
+  giờ suy ra từ nó nên một stroke duy nhất), `app_button_themes.dart`
+  (`buildFilledStyle` thêm `side`; `buildTextButtonTheme` nhận `TextTheme` và
+  thêm `textStyle` có underline khi focus), `app_theme.dart` (`_lightTheme` /
+  `_darkTheme` lazy top-level, builder trả về chúng), `app_compact_scale.dart`
+  (cache `Expando`, thân hàm tách thành `_buildCompactScale`),
+  `theme_probe.dart` (`filledButtonFocusSide`).
+- **Acceptance criteria:**
+  - [x] `FilledButton` vẽ ring khi focus, không vẽ khi nghỉ, ở cả hai mode.
+  - [x] Màu ring của mọi fill mà `buildFilledStyle` phục vụ đều trên 3:1 —
+        `primary`, `error`, `secondaryContainer`.
+  - [x] Ghi lại **lý do lệch** thành assertion chứ không phải comment: token
+        ring đo dưới 3:1 trên fill accent, và wash focus một mình đổi dưới
+        1,1:1. Nếu bảng màu đổi tới mức chúng qua được, test đỏ và quyết định
+        được xem lại — chứ không bị lặng lẽ bỏ qua.
+  - [x] `TextButton` trần gạch chân khi focus ở đúng `AppStroke.focus`, và rung
+        `labelLarge` sống sót qua việc bị nêu lại (size, leading, tracking,
+        weight ở cả hai state).
+  - [x] `buildLightTheme()` và `buildDarkTheme()` trả cùng một instance qua các
+        lần gọi, và `MemoxApp` đưa đúng instance đó cho `MaterialApp` — khẳng
+        định bằng `same`, vì `==` không phân biệt được và đó chính là vấn đề.
+  - [x] `applyCompactScale` cache theo base, không trộn base sáng với base tối,
+        và vẫn thật sự áp compact pass — cache một câu trả lời sai còn tệ hơn
+        không cache.
+  - [x] Guard `memox-v7` 0 lỗi 0 cảnh báo (`no_large_source_file` phải chịu tách
+        file: test identity ra `app_theme_identity_test.dart`),
+        `check_architecture.sh` và `check_docs.py` xanh.
+- **Chưa trả, đã ghi:** `flutter analyze` và host suite **chưa chạy** trong
+  phiên này — môi trường không có Flutter SDK. Phải chạy trước khi merge.
+- **Nợ liên quan đã ghi nhận:** ~~`brandInk` so với `semantic.primaryAccent`~~
+  và ~~`chipTheme.iconTheme` không đổi màu theo `selected`~~ **đã trả ở
+  M99.45** — và phép đo ở đó bác luôn cách sửa mà entry này đề nghị: hai token
+  không gộp được, cái sai là cái tên. **Chưa trả:**
+  `semantic.surfaceElevated` không có caller nào trong `lib/`; alpha rời rạc
+  (`0.72`/`0.48`/`0.24`/`0.4`/`0.5`) và `fontSize: 20` trong compact pass vẫn
+  là literal ngoài `AppStateOpacity` và `AppTypography`.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.39, M99.41
+- **Tests required:** `focus_ring_contrast_test.dart` (+2 group, 8 case),
+  `app_theme_identity_test.dart` (mới), `app_theme_test.dart` (+2 assertion
+  trong `MemoxApp follows the system theme mode`).
+- **Checklist phases:** 7, 13
+
+### M99.45 · `selectedInk` tách khỏi `primaryAccent`; glyph của pill theo label
+
+- **Status:** **done**
+- **Goal:** Hai mục còn lại của đợt review theme. `brandInk` và
+  `semantic.primaryAccent` trông như hai cách viết của một ý ("mực brand"), và
+  ở dark cho ra hai màu cách nhau xa — `#D7D5FF` so với `#8A8AE0`. Còn
+  `chipTheme.iconTheme` khai báo một màu cho mọi state, nên pill **đang chọn**
+  in chữ mực brand cạnh glyph xám.
+- **Scope:** Đổi tên + tài liệu + test cho token thứ nhất; một dòng màu trong
+  `MxPillButton` cho token thứ hai. **Không đổi một giá trị màu nào** — mọi
+  hex giữ nguyên ở cả hai mode, nên `test/demo/` goldens và visual audit không
+  đụng tới. Hai nợ còn lại của đợt review — `semantic.surfaceElevated` không
+  caller, và alpha rời rạc ngoài `AppStateOpacity` — vẫn để ngoài phạm vi.
+- **Đo xong thì kết luận đảo lại: hai token này KHÔNG hợp nhất được.** Review
+  ban đầu đề nghị gộp. Số liệu bác điều đó, theo cả hai chiều:
+  - Gộp về `primaryAccent`: ở dark nó đo **4,06:1** trên `primaryContainer` —
+    tức trên chính nền của pill đang chọn — dưới sàn 4,5 mà chữ 12px cần. Gộp
+    kiểu này là một lỗi a11y mới.
+  - Gộp về `onPrimaryContainer`: ở light nó là `#1B1B5C`, đọc ra như chữ đen
+    chứ không như mực brand mà mockup chủ dự án yêu cầu (2026-08-20).
+  - Mỗi token lấy giá trị vừa đọc được trên **nền của chính nó** vừa còn là
+    brand. Nền khác nhau nên giá trị khác nhau. Chúng bằng nhau ở light **do
+    cấu tạo** (cả hai về `primary`), và đó chính là thứ khiến chúng trông
+    thừa.
+- **Nên cái sai thật sự là cái tên, và nó được sửa:** `brandInk` →
+  `selectedInk`. `primaryAccent` đã tự nhận là "brand hue as a LABEL", nên một
+  hàm tên `brandInk` là hai thứ cùng nhận một việc. Tên mới nói **câu hỏi** —
+  mực của một control *đang được chọn* — chứ không nói màu.
+- **Bốn số giờ là assertion, không phải comment:** `selectedInk` trên nền pill
+  đang chọn (5,57 light / 8,87 dark), trên indicator của nav bar, và trên
+  chính thanh nav — vì M3 vẽ **glyph tab trong indicator còn label thì bên
+  dưới, trên nền thanh**, tức một token phải qua sàn trên hai nền khác nhau.
+  Nền đọc từ theme đã dựng chứ không từ token, theo đúng lý do
+  `theme_probe.dart` tồn tại. Phép gộp bị bác cũng thành test: nếu bảng màu
+  đổi tới mức `primaryAccent` qua được 4,5 trên nền pill dark, test đỏ và
+  quyết định được xem lại — chứ không lặng lẽ gộp.
+- **Glyph của pill: `ChipThemeData.iconTheme` không có slot per-state.** Nó là
+  `IconThemeData` trần, không phải `WidgetStateProperty`, nên một màu phải
+  phục vụ mọi state và nó khai báo mực nghỉ. Hệ quả: pill **đang chọn** = chữ
+  mực brand + glyph xám; pill **disabled** = chữ mờ 38% + glyph nguyên độ đậm.
+  Hai nửa của một control không đồng ý với nhau về việc nó đang ở state nào.
+  Sửa bằng cách để glyph đọc `DefaultTextStyle` — đúng thứ `RawChip` phân giải
+  `labelStyle` vào — nên selected, disabled và nghỉ đều đúng miễn phí, và một
+  state tương lai cũng vậy, không sinh thêm một resolver phải giữ đồng bộ.
+  Cùng quy tắc `app_interaction_states_test.dart` đã gọi tên: "the icon rides
+  the label through every state". `chipTheme.iconTheme` ở lại làm fall-through
+  cho `Chip` trần (avatar, delete glyph), và comment nói rõ nó chỉ còn là thế.
+- **Một tuyên bố cũ đã lệch, phát hiện nhờ việc đổi tên:**
+  `design-parity-checklist.md` ghi eyebrow `TODAY` lấy mực từ `brandInk()`.
+  Không còn: `deck_subheader_widget.dart` dùng `onSurfaceVariant`. Dòng đó đã
+  sửa cho đúng, giữ lại phép đo 2,90:1 vốn là phần còn giá trị. Doc lệch code
+  tệ hơn không có doc, vì phiên sau tin nó.
+- **Output:** `app_material_roles.dart` (`brandInk` → `selectedInk`, doc mang
+  bốn phép đo và lý do không gộp được), `app_colors.dart` (trỏ chéo từ
+  `primaryAccent`), `app_chip_theme.dart` + `app_navigation_bar_theme.dart`
+  (call site), `mx_pill_button.dart` (glyph lấy màu label),
+  `design-parity-checklist.md` (đổi tên + sửa tuyên bố lệch).
+- **Acceptance criteria:**
+  - [x] `selectedInk` qua 4,5:1 trên **cả ba** nền một control đang chọn có:
+        nền pill, indicator nav, thân thanh nav — ở cả hai mode.
+  - [x] Pill và tab cùng phân giải về đúng `selectedInk`, khẳng định qua theme
+        chứ không qua hằng số.
+  - [x] Phép gộp bị bác là test, không phải comment; và mỗi mode khẳng định
+        **cách suy ra** (light = `primary`, dark = `onPrimaryContainer`) chứ
+        không phải hex, nên trỏ lại vào một màu chỉ tình cờ qua contrast sẽ đỏ.
+  - [x] Glyph của pill bằng đúng màu label ở selected / nghỉ / disabled, đọc
+        từ cây widget — không assertion nào trên `ChipThemeData` thấy được lỗi
+        này, vì lời giải nằm trong widget.
+  - [x] Không giá trị màu nào đổi; goldens và visual audit không cần dựng lại.
+  - [x] Guard `memox-v7` 0 lỗi 0 cảnh báo (`app_colors.dart` chạm trần 400
+        dòng nên trỏ chéo phải rút còn hai dòng), `check_architecture.sh` và
+        `check_docs.py` xanh.
+- **Chưa trả, đã ghi:** `flutter analyze` và host suite **chưa chạy** — môi
+  trường không có Flutter SDK. Phải chạy trước khi merge.
+- **Editable documents:** `docs/wbs.md`, `docs/reviews/design-parity-checklist.md`
+- **Dependencies:** M99.44
+- **Tests required:** `app_selected_ink_test.dart` (mới, 8 case),
+  `mx_pill_button_theme_test.dart` (+1 widget test, ba state).
+- **Checklist phases:** 7, 13
+
+### M99.46 · `no_large_source_file` đếm dòng logic, thôi đếm doc
+
+- **Status:** **done**
+- **Goal:** Ngưỡng 400 dòng đang đếm **dòng thô** — kể cả import, comment và
+  dartdoc. Trong repo này đó là đo sai thứ: `app_colors.dart` có **400 dòng thô
+  nhưng 56 dòng logic**, 86% còn lại là lý do của từng màu. Một ngân sách mà
+  một đoạn văn tiêu hết dạy người ta xoá đoạn văn, đúng ngược với việc một rule
+  maintainability tồn tại để làm.
+- **Scope:** Một dòng trong `overrides.yaml` của ruleset `memox-v7`, cộng test
+  cho engine. **Không sửa engine** — `MaxLinesMatcher` đã hỗ trợ
+  `count_mode: logical` từ trước; và **không sửa registry chung**, vì
+  `common-file-rules.yaml` còn phục vụ memox, memox-v4, memox-v5 và
+  memox-design-jsx, đổi mặc định ở đó là đổi gate của bốn project khác.
+- **Hoá ra project đã tự quyết định điều này rồi, chỉ sót một nửa.** Có **hai**
+  rule độ dài file, cùng `type: max_lines`, cùng scope `source_files`:
+  - `common.max_file_lines` — **error**, đã override thành lib-only, 500,
+    `count_mode: logical`;
+  - `common.no_large_source_file` — **warning**, 400, để nguyên đếm thô.
+  Tức là cùng một phép đo ở hai mức nghiêm trọng, nhưng **hai đơn vị khác
+  nhau**, nên cái đáng lẽ là một cái thang thì không phải thang. Nay cả hai
+  cùng đơn vị: cảnh báo ở 400, chặn ở 500.
+- **Đo trước khi đổi, trên toàn repo (1195 file):** tỉ lệ logic/thô trung vị là
+  **0,63**. Sau khi đổi, số file vượt 400 logic là **0** — mọi file vượt đều là
+  `test/drift/generated/**`, vốn đã nằm trong `exclude`. File thật lớn nhất là
+  `card_import_repository_test.dart` ở **312 logic**. Nên ngưỡng vẫn còn răng
+  (còn 88 dòng dư cho file lớn nhất) chứ không thành vô hiệu.
+- **Chứng minh bằng probe chứ không bằng suy luận:** dựng tạm hai file trong
+  `lib/core/theme/` — một file 453 dòng toàn dartdoc, một file 452 dòng toàn
+  `const`. File doc **qua**, file code **báo 452**. Xoá sau khi đo.
+- **Trả lại ba chỗ đã bị ép cắt ở M99.44 và M99.45:** trỏ chéo từ
+  `primaryAccent` sang `selectedInk` bị rút xuống hai dòng chỉ vì
+  `app_colors.dart` chạm trần 400 thô (nó ở 56 logic); doc memo hoá trong
+  `app_theme.dart` bị rút từ 19 xuống 10 dòng. Cả hai về lại bản đầy đủ.
+  `app_theme_identity_test.dart` **vẫn tách riêng** — việc tách đứng vững vì
+  nó là một câu hỏi khác (identity, không phải bảng màu), nên chỉ sửa lại phần
+  doc từng viện dẫn ngưỡng 400 làm lý do.
+- **Output:** `registries/projects/memox-v7/config/overrides.yaml`
+  (`count_mode: logical` + comment nêu cái thang và con số 400/56),
+  `tests/test_max_lines_rule.py` (+2 case), `app_colors.dart` và
+  `app_theme.dart` (doc về bản đầy đủ), `app_theme_identity_test.dart` (lý do
+  tách).
+- **Acceptance criteria:**
+  - [x] Dartdoc `///` không bị tính — case riêng trong suite của guard, vì
+        `///` bắt được nhờ tiền tố `//` chứ không nhờ một nhánh của riêng nó,
+        và đó là thứ dễ vỡ khi ai đó dọn `_is_logical_source_line`.
+  - [x] `import` / `export` / `part` không bị tính.
+  - [x] Chế độ mới **vẫn báo** file dài thật — case đối chứng, vì mục đích là
+        đếm đúng hơn chứ không phải đếm nhẹ đi.
+  - [x] `python -m pytest -q` trong `code-verification-guard-v2/`: **179/179**
+        (177 trước + 2 mới).
+  - [x] Guard `memox-v7` 0 lỗi 0 cảnh báo; `check_architecture.sh` và
+        `check_docs.py` xanh.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.45
+- **Tests required:** `code-verification-guard-v2/tests/test_max_lines_rule.py`
+  (+2 case).
+- **Checklist phases:** 4
+
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 
 Ghi lại cụ thể, vì "mất một bộ lint" là câu quá mơ hồ để ai đó sau này biết
