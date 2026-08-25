@@ -11969,6 +11969,75 @@ của M2.
   visual audit `deck_list_screen`, `test/demo/` goldens, full host suite.
 - **Checklist phases:** 7, 12, 14
 
+### M99.51 · Nhịp dọc hero — chevron rời khỏi hàng số, và cắt cap-height
+
+- **Status:** **done**
+- **Goal:** Chủ dự án yêu cầu hai điều trong hero card: (1) cắt internal leading
+  của numeral để trên/dưới cân nhau, (2) thu khoảng dòng-số → nút Study về 12px.
+  Đo trước khi sửa cho thấy **cả hai chẩn đoán đều không đúng nguyên nhân**, và
+  ở dạng đã nêu thì **loại trừ lẫn nhau**.
+- **Scope:** Chỉ hero card. Không đụng deck card, toolbar, header, bottom nav.
+- **Đo được, và vì sao hai yêu cầu xung khắc:**
+  - Khoảng 12px **đã có sẵn**: `padding trên 16 / metrics→CTA 12 / padding dưới
+    16`. Progress bar rời đi ở M99.50 không để lại vùng trống nào.
+  - 16px anh thấy thừa là **nửa dưới của hàng chevron**: target 48px của chevron
+    đặt chiều cao hàng, dòng số chỉ 32px, và M99.42 top-align nên 16px dư dồn
+    xuống dưới.
+  - Với band 48 cố định và ink cao 23,7: `trên_ink + dưới_ink = 24,3` là **hằng
+    số**, nên `gap trên + gap giữa = 16 + 24,3 + 12 = 52,3` **bất kể canh kiểu
+    gì**. Muốn `trên = 16` thì `giữa = 36,3`; muốn `giữa = 12` thì `trên = 40,3`.
+    Chỉ khi chevron thôi quyết định chiều cao hàng thì cả hai mới cùng đạt.
+  - `leadingDistribution: even` chủ dự án gợi ý: **đo ra không đổi gì**
+    (ink 114,3..138,0 trước và sau). Với `height: 1` không còn leading để phân
+    bố; 8,3px phía trên là **ascent-trên-cap của font**, nằm trong em-box.
+- **Cách sửa:**
+  1. **Chevron rời khỏi hàng số.** `MxCard(padding: EdgeInsets.zero)` + `Stack`:
+     nội dung mang padding 16 của riêng nó, chevron `Positioned(top: 0, right:
+     0)` chiếm góc card. Target 48px của nó trải qua phần padding thay vì ép
+     dòng số cao 48. Dòng số lùi phải `heroDisclosureInset = minimumTouchTarget
+     − lg = 32` để phần overdue không chui xuống dưới chevron. Đo: chevron
+     `90..138`, CTA `153,2..201,2` — **không chồng nhau**, và target nằm trọn
+     trong card.
+  2. **`AppTypography.heroNumeralCapTrim = 0.481`** — dẫn xuất chứ không dò:
+     Flutter chia thay đổi `height` đều quanh baseline, nên cắt hộp đi hai lần
+     phần dư sẽ kéo mực lên đúng một lần phần dư — `1 − 2 × 8,3/32 = 0,481`.
+     Đo ngược lại: **16,3px trên ink** so với 16px dưới nút.
+- **Kết quả đo:**
+
+  | | M99.50 | M99.51 |
+  |---|---|---|
+  | hero | 140px · 16,4% | **118,9px · 14,0%** |
+  | quang học trên / giữa / dưới | 24,3 / 28 / 16 | **16,3 / 14,9 / 16** |
+  | deck card trọn vẹn | 3 | 3 |
+
+- **Đánh đổi đã ghi:** `heroNumeralCapTrim` khiến line box của numeral (15,4px)
+  **nhỏ hơn glyph** (23,7px) — hộp nói dối về chữ nó chứa. Chấp nhận được ở
+  đúng chỗ này vì chữ số không có descender, không mang dấu, và 12px ngay dưới
+  đủ chỗ cho 8,7px tràn ở mọi cỡ chữ ma trận responsive phủ (đã kiểm 393×1.0 và
+  320×2.0, không exception). Đây là **hằng số gắn với Plus Jakarta Sans**; đổi
+  font sẽ làm sáu golden `deck_list_*` dịch, và đó là tín hiệu phải đo lại chứ
+  không phải regenerate rồi đi tiếp.
+  Cách sửa quy ước — padding trên 8 / dưới 16 — **bị chủ dự án loại trừ** trong
+  chính yêu cầu ("giữ `EdgeInsets.all(16)` nguyên"), nên không dùng.
+- **Output:** `deck_level_summary_widget.dart` (Stack + chevron ở góc, `_content`
+  tách ra), `deck_summary_metrics_widget.dart` (bỏ chevron và
+  `onToggleExpanded`, thêm `heroDisclosureInset`), `app_typography.dart`
+  (`heroNumeralCapTrim`), 6 golden `deck_list_*`.
+- **Acceptance criteria:**
+  - [x] Quang học trên (16,3) khớp dưới (16).
+  - [x] Nút gần dòng số hơn: khoảng giữa 28 → **14,9**.
+  - [x] `EdgeInsets.all(16)` giữ nguyên — padding không hạ, chỉ chuyển từ
+        `MxCard` xuống nội dung.
+  - [x] Chevron giữ target 48px thật, nằm trọn trong card, không chồng CTA.
+  - [x] Không đổi màu, cỡ chữ, radius, chiều cao nút.
+  - [x] `dod_check.sh` xanh; 6 golden regenerate; gallery publish tại URL ghim.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.50
+- **Tests required:** `deck_summary_compact_geometry_test.dart`,
+  `deck_list_summary_test.dart`, `deck_summary_overdue_test.dart`,
+  `deck_summary_new_test.dart`, `test/demo/` goldens, full host suite.
+- **Checklist phases:** 7, 12, 14
+
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 
 Ghi lại cụ thể, vì "mất một bộ lint" là câu quá mơ hồ để ai đó sau này biết
