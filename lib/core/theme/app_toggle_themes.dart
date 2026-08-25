@@ -89,23 +89,37 @@ SwitchThemeData buildSwitchTheme(
 
     return semantic.borderControl;
   }),
-  trackOutlineWidth: WidgetStateProperty.resolveWith((states) {
-    if (states.contains(WidgetState.focused)) return AppStroke.focus;
-
-    return AppStroke.hairline;
-  }),
+  // One width in every state, and it is M3's 2.0 rather than a hairline. Focus
+  // moves the colour and not the weight, the same way an input's border does —
+  // and because `AppStroke.selectionControl` equals `AppStroke.focus`, the ring
+  // needs no second value here to be the right thickness.
+  trackOutlineWidth: const WidgetStatePropertyAll<double>(
+    AppStroke.selectionControl,
+  ),
   overlayColor: AppInteractionStates.controlOverlay(scheme),
 );
 
 /// The checkbox, as the tag filter sheet's `CheckboxListTile` renders it.
 ///
-/// **The box is outlined in every state, for the switch's reason.** An empty
-/// checkbox is identified by its edge alone — the same case as an empty text
-/// field, which is why `borderControl` and not `borderSubtle`: 3.19:1 in light
-/// and 3.00:1 in dark, against a hairline that measures 1.45:1 and 2.04:1. A
-/// *ticked* box is a `primary` fill, which is 2.90:1 on a dark card, so the
-/// edge stays and becomes `onPrimary` — 5.88:1 on the fill, 17.05:1 on the
-/// card behind it.
+/// **The resting edge is `onSurfaceVariant`, and correcting that to M3's role
+/// was the finding of the role audit.** It shipped as `borderControl` on the
+/// argument that an empty checkbox is identified by its edge — the same case as
+/// an empty text field. The case is the same; the *number* is not. A text field
+/// is a full-width control whose edge is read along its whole length, so the
+/// 3:1 floor is enough; an 18dp box has a fraction of that length to be seen
+/// over, and M3 answers it with the secondary ink rather than the outline role.
+/// The app's own tokens make the gap plain: `borderControl` measures 3.19:1 in
+/// light and 3.00:1 in dark, `onSurfaceVariant` 6.41:1 and 7.30:1. Transferring
+/// the field's argument to a control an order of magnitude smaller was the
+/// mistake, and the stroke width carried the same one — see
+/// [AppStroke.selectionControl].
+///
+/// **The edge stays when the box is ticked, which is where this departs from
+/// M3** (`_CheckboxDefaultsM3.side` returns width 0 once selected). A ticked
+/// box is a `primary` fill, and `primaryDark` is held low enough that it
+/// measures 2.90:1 on a dark card. So the edge remains and becomes `onPrimary`
+/// — 5.88:1 on the fill it sits on, 17.05:1 on the card behind it — by the same
+/// derivation the switch's track uses.
 CheckboxThemeData buildCheckboxTheme(
   ColorScheme scheme,
   AppSemanticColors semantic,
@@ -128,13 +142,24 @@ CheckboxThemeData buildCheckboxTheme(
       return AppInteractionStates.focusRing(semantic);
     }
     if (states.contains(WidgetState.disabled)) {
-      return BorderSide(color: semantic.onDisabled);
+      return _boxSide(semantic.onDisabled);
     }
     if (states.contains(WidgetState.selected)) {
-      return BorderSide(color: scheme.onPrimary);
+      return _boxSide(scheme.onPrimary);
+    }
+    // M3 darkens the outline while the pointer is on it. Kept, because the
+    // overlay wash alone is 1.15:1 and the box is small enough that the edge is
+    // most of what there is to change.
+    if (states.contains(WidgetState.pressed) ||
+        states.contains(WidgetState.hovered)) {
+      return _boxSide(scheme.onSurface);
     }
 
-    return BorderSide(color: semantic.borderControl);
+    return _boxSide(scheme.onSurfaceVariant);
   }),
   overlayColor: AppInteractionStates.controlOverlay(scheme),
 );
+
+/// A checkbox's box edge, at the one weight.
+BorderSide _boxSide(Color color) =>
+    BorderSide(color: color, width: AppStroke.selectionControl);

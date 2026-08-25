@@ -11765,6 +11765,125 @@ của M2.
   contrast — chúng phải chịu cùng hai rule palette/hue chứ không được miễn.
 - **Checklist phases:** 7, 13
 
+### M99.49 · Guard phủ theme, ghim platform, audit lại role màu theo spec M3
+
+- **Status:** **done**
+- **Goal:** Bốn việc, và việc đầu là thứ đáng lẽ phải có trước ba việc kia.
+  - **Không cơ chế nào trong repo thấy được một theme *thiếu*.** `flutter
+    analyze` không diễn đạt được; 70 rule của guard nói về kiến trúc, đặt tên,
+    riêng tư, test; sáu mã V của `design_audit` đều hỏi *"màu code viết ra có
+    đúng không"*. Một quyết định **chưa đưa ra** không viết ra gì để quét. Đó là
+    lý do 12 role `*Fixed`, `switchTheme`, `checkboxTheme` và `timePickerTheme`
+    cùng sống sót.
+  - `ThemeData.platform` chưa ghim, trong khi `visualDensity` và
+    `materialTapTargetSize` ngay bên trên đã ghim vì đúng lập luận đó.
+  - Chưa có theme nào cho các component mà roadmap của chính dự án đã nêu.
+  - Chưa từng đối chiếu cách dùng role màu với spec.
+- **Scope:** `theme_coverage_test.dart` (mới), `app_planned_themes.dart` (mới),
+  `buildPopupMenuTheme` trong `app_overlay_themes.dart`, sửa `app_toggle_themes
+  .dart` và `buildTimePickerTheme` theo phát hiện audit, `AppStroke
+  .selectionControl`, một dòng `platform:` trong `_buildTheme`, hai file test.
+- **Audit role màu: nguồn là implementation tham chiếu, không phải trí nhớ.**
+  `m3.material.io` bị egress proxy chặn, nên chuẩn lấy từ hai nguồn máy đọc
+  được: các lớp `_XxxDefaultsM3` trong SDK Flutter (sinh từ chính token database
+  của M3) và `material-color-utilities` của Google. Trích ra bảng role→slot cho
+  22 component rồi đối chiếu từng cái.
+
+  **Ba phát hiện, và hai trong số đó là lỗi của chính đợt M99.48:**
+
+  | chỗ | app đã làm | M3 | xử lý |
+  |---|---|---|---|
+  | viền checkbox lúc chưa tick | `borderControl` (3,19 / 3,00) | `onSurfaceVariant` (6,41 / 7,30) | **theo M3** |
+  | bề rộng viền checkbox / track switch | 1,0 | 2,0 | **theo M3** |
+  | `dayPeriodColor` của time picker | `primaryContainer` | `tertiaryContainer` | **theo M3** |
+
+  **Vì sao viền checkbox sai.** Nó ship với lập luận "ô trống được nhận ra bằng
+  cạnh — giống hệt ô nhập trống", nên lấy `borderControl`. *Trường hợp* thì
+  giống, *con số* thì không: ô nhập là control rộng cả hàng, cạnh của nó được
+  đọc dọc suốt chiều dài, nên sàn 3:1 là đủ; ô checkbox 18dp chỉ có một phần
+  nhỏ chiều dài đó. Đem lập luận của một control lớn áp lên một control nhỏ hơn
+  một bậc độ lớn là chỗ sai. Bề rộng mắc đúng lỗi ấy lần thứ hai.
+- **Những sai lệch khác so với M3 đều đã có lý do và giữ nguyên** — nhãn nút
+  outlined là màu trung tính chứ không phải `primary` (nó đứng cạnh cặp verdict
+  học), FAB dùng `primary` chứ không `primaryContainer` (owner review
+  2026-08-20), navigation indicator dùng `primaryContainer` chứ không
+  `secondaryContainer` (cùng review), progress indicator dùng `focusRing` chứ
+  không `primary` (2,81:1), app bar và card ngồi trên thang surface riêng của
+  app. Mỗi cái đã mang sẵn số đo trong doc.
+- **Guard: quét từ đầu kia.** `theme_coverage_test.dart` đọc `lib/` tìm widget
+  Material mà app dựng, rồi hỏi `ThemeData` đã dựng xem slot tương ứng có được
+  điền chưa — so với `ThemeData()` trần, vì mọi slot đều non-null nên "đã khai
+  báo" không thể là phép kiểm null. Hai chiều:
+  - **render ⇒ phải có theme.** Dựng `SegmentedButton` là đỏ ngay trong PR đó.
+  - **có theme ∧ không render ⇒ phải nằm trong danh sách có lý do.** Nếu không,
+    cách vá chiều thứ nhất sẽ là theme hết mọi thứ — đúng cái
+    `app_theme.dart` từ chối.
+- **Guard tìm ra ngay một lỗ hổng đã ship, và hai lỗi trong chính scan của
+  tôi.** Nó bắt được **`PopupMenuButton` ở bốn call site** không có theme — grep
+  thủ công đã bỏ sót cả hai lần, vì mọi call site đều viết
+  `PopupMenuButton<CardListSort>(` và mẫu tên-rồi-mở-ngoặc không khớp lời gọi có
+  generic. Bốn menu đó đang render trên `surfaceContainer` với shadow Material
+  và góc 4px. Hai lỗi của scan:
+  - nó khớp lớp **`Card` do Drift sinh** trong `app_database.g.dart` (app có
+    bảng `cards`), nên báo `cardTheme` đã có widget dùng trong khi không;
+  - nó bỏ sót `RadioListTile<T>(` và `showModalBottomSheet<T>(`, báo hai theme
+    đang render là không render.
+
+  Cả hai nay có test riêng ghim rằng scan **thấy được** một widget app chắc chắn
+  dựng và **không thấy** một widget app chắc chắn không dựng — một guard âm thầm
+  khớp rỗng thì xanh mãi mãi.
+- **`platform: TargetPlatform.android`.** Hai dòng ngay trên nó ghim density và
+  tap target để kênh E2E web đo đúng hình học Android, rồi để `platform` đọc
+  `defaultTargetPlatform` — chính giá trị mà hai dòng kia sinh ra để thôi tin.
+  Nên mọi thứ Material phân giải theo nền tảng vẫn rẽ theo OS của trình duyệt,
+  rõ nhất là hiệu ứng chuyển trang (Android vẽ
+  `PredictiveBackPageTransitionsBuilder`, Linux/Windows vẽ `Zoom`, macOS vẽ
+  Cupertino), kéo theo scroll physics và text-selection control.
+  `pageTransitionsTheme` cố ý **không** khai báo: ghim platform là thứ làm cho
+  mặc định trở nên đúng, còn nêu tên builder nữa là tạo thêm một chỗ phải giữ
+  đồng bộ với câu trả lời Android của chính SDK.
+- **Bốn theme đón đầu, và luật kết nạp hẹp.** `app_planned_themes.dart` chỉ nhận
+  theme **nhắc lại** quyết định đã có và đã đo, không nhận theme phải *quyết
+  định* cái mới; component phải có tên trong roadmap của chính dự án; và mặc
+  định của Material phải sai theo một kiểu đã được xác lập. Nhận: `datePicker`
+  (bypass `dialogTheme` y hệt time picker — kiểm chứng bằng
+  `_DatePickerDefaultsM3.backgroundColor` = `surfaceContainerHigh`),
+  `segmentedButton`, `slider` (SM-2 parameter, `CLAUDE.md` nêu), `tabBar` (màn
+  History của card, `docs/wbs.md` nêu). Loại: `badgeTheme` (chọn giữa họ *due*
+  ấm và *overdue* đỏ là một quyết định — cần màn hình), `navigationRail` và
+  `drawer` (AD-04 cấm), `menuTheme`/`menuBarTheme` (API menu neo, app không
+  dùng).
+- **Slider: M3 sai ở bảng màu này, và đó là lần thứ ba cùng một phép sửa.** Theme
+  ship theo đúng M3 — active `primary`, inactive `secondaryContainer` — rồi test
+  đo được **6,02:1 ở light và 2,11:1 ở dark**. Không một màu nền nào trong dải
+  tối đạt 3:1 với `primaryDark` (tốt nhất là `surfaceMuted` ở 2,45), vì
+  `primaryDark` cố ý nằm giữa các surface và chữ. Nên nửa được tô chuyển sang
+  `focusRing` — đúng token và đúng lý do mà `buildProgressIndicatorTheme` đã
+  chuyển sang: 6,14:1 và 4,02:1. Một test ghim rằng cặp của M3 **vẫn** trượt,
+  để lý do sai lệch không mục thành sở thích.
+- **Acceptance criteria:**
+  - [x] `theme_coverage_test.dart` xanh cả hai chiều, và có test tự-kiểm rằng
+        scan không khớp rỗng.
+  - [x] Mọi widget Material app render đều có theme — `PopupMenuButton` là cái
+        cuối cùng, do guard tìm ra.
+  - [x] Viền và bề rộng của checkbox/switch theo đúng `_CheckboxDefaultsM3` và
+        `_SwitchDefaultsM3`; `dayPeriodColor` theo đúng `_TimePickerDefaultsM3`.
+  - [x] `platform` ghim về Android.
+  - [x] Bốn theme đón đầu, mỗi cái có test đo cặp màu nó sẽ vẽ.
+  - [x] `flutter analyze` sạch; `flutter test --exclude-tags golden` xanh;
+        guard 0 vi phạm; `check_docs.py` và `check_architecture.sh` sạch.
+- **Output:** `test/core/theme/theme_coverage_test.dart` (mới),
+  `lib/core/theme/app_planned_themes.dart` (mới), `buildPopupMenuTheme` trong
+  `app_overlay_themes.dart`, `AppStroke.selectionControl`, sửa
+  `app_toggle_themes.dart` và `buildTimePickerTheme`, `platform:` trong
+  `app_theme.dart`, `test/core/theme/app_planned_themes_test.dart` (mới).
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.48
+- **Tests required:** `theme_coverage_test.dart` (mới, 4 case),
+  `app_planned_themes_test.dart` (mới, 12 case), và
+  `app_toggle_themes_test.dart` cập nhật theo role/bề rộng mới.
+- **Checklist phases:** 7, 13
+
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 
 Ghi lại cụ thể, vì "mất một bộ lint" là câu quá mơ hồ để ai đó sau này biết
@@ -11806,7 +11925,7 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 | `study_answers` chưa có index cho khoảng thời gian | M99.28 | Progress lọc `answered_at >= ? AND answered_at < ?`; index duy nhất chạm cột này là `(card_id, answered_at)`, mà cột dẫn đầu không nằm trong predicate — nên mỗi lần emit là một full scan `study_answers`, và stream re-emit theo **mỗi lượt trả lời** khi màn hình đang mở (ở độ sâu 3 là ba scan mỗi lượt). Output có chặn, scan thì không | Thêm index `(answered_at)` — nhưng đó là **đổi schema**, tức bump version + snapshot + migration test, và M99.28 cố ý không đụng schema. Trả cùng lần bump schema tiếp theo, và theo đúng rule index của repo: đo bằng `EXPLAIN QUERY PLAN` trên dữ liệu thật trước rồi mới thêm |
 | `ancestry` CTE trong `deck.drift` không có bound | M99.28 | Cùng khiếm khuyết đã sửa ở `progress.drift`: walk mang `distance` tăng mỗi vòng nên `UNION` không dedup được, và trên cây cha vòng lặp thì statement không bao giờ trả về — nó giữ database isolate, nên mọi query khác của app chặn theo. Comment ở `deck.drift` còn khẳng định ngược lại | Áp đúng cách đã dùng ở `progress.drift`: `:maxWalk` cho `ancestry`, giữ `UNION` cho các walk không mang counter. Không gộp vào M99.28 vì nó nằm ngoài scope đã tuyên bố (không đụng Deck production code) |
 | `end_reason = scheduler_reset` phải mang cả BR-164 | M99.16 | Đổi scheduler khi chưa khoá ghi cùng giá trị với Reset, nên đọc riêng cột đó thì hai sự kiện khác nhau trông giống nhau. Không mất thông tin — `study_sessions.scheduler_generation` bằng generation của root sau một lần đổi và nhỏ hơn sau một lần reset — nhưng nó bắt người đọc phải biết mẹo đó | Tên đúng là `scheduler_changed`. `study_sessions.end_reason` có `CHECK` liệt kê giá trị nên thêm một giá trị là **đổi schema**, và nới `CHECK` là rebuild bảng nên xứng một bump riêng. Ba lần bump sau khi nợ được ghi đều đã đi việc khác: v8 (BR-203, ba cột `direction` additive), v9 (M99.28, hai cột theme/ngôn ngữ), v10 (M99.29, ba cột nhắc học); v11 (M99.33, Trash) có rebuild `study_sessions` nhưng cố ý không gánh thêm nợ này. Đích hiện tại là **v12** — lần rebuild kế tiếp của `study_sessions`, rồi đổi `deck_scheduler_repository_impl.dart` sang giá trị mới |
-| Sáu golden cũ sau M99.48 | M99.48 | `Switch`, `CheckboxListTile` và `SwitchListTile` đổi màu thumb, viền track và viền ô tick, nên `reminder_settings_{light,dark}.png`, `tag_filter_sheet_{light,dark}.png`, `card_import_preview_light.png` và `card_import_preview_valid_light.png` không còn khớp app. Golden của repo **sinh trên Windows** (`dart_test.yaml`), và job golden của CI chạy `windows-latest` — cập nhật chúng trên Linux sẽ làm chính job đó đỏ, nên phiên này cố ý không chạm vào. Đo chắc chắn là **đúng sáu file**: chạy toàn bộ golden hai lần trên cùng máy Linux, một lần có thay đổi và một lần `git stash` phần `lib/`, rồi so 184 ảnh test — chênh lệch nền tảng triệt tiêu, 178 ảnh giống hệt nhau | Trên máy Windows: `flutter test --tags golden --update-goldens`, kiểm đúng sáu file đó là toàn bộ diff, rồi `python .claude/skills/flutter-testing/scripts/build_screen_gallery.py` và publish lại gallery ở đúng URL đã ghim trong `CLAUDE.md` |
+| Sáu golden cũ sau M99.48 và M99.49 | M99.48 | `Switch`, `CheckboxListTile` và `SwitchListTile` đổi màu thumb, viền track và viền ô tick ở M99.48; M99.49 đổi tiếp màu và bề rộng viền checkbox (`onSurfaceVariant`, 2,0) và bề rộng viền track switch (2,0). Sáu file: `reminder_settings_{light,dark}.png`, `tag_filter_sheet_{light,dark}.png`, `card_import_preview_light.png`, `card_import_preview_valid_light.png`. Golden của repo **sinh trên Windows** (`dart_test.yaml`) và job golden của CI chạy `windows-latest` — cập nhật trên Linux sẽ làm chính job đó đỏ. Đo hai lần cho hai đợt, mỗi lần chạy toàn bộ golden hai lượt trên cùng máy Linux (một lượt có thay đổi, một lượt `git stash` phần `lib/`) rồi so 184 ảnh test — chênh lệch nền tảng triệt tiêu. **M99.49 không làm dịch chuyển thêm file nào**: ghim `platform` và `popupMenuTheme` không đổi pixel tĩnh | Trên máy Windows: `flutter test --tags golden --update-goldens`, kiểm đúng sáu file đó là toàn bộ diff, rồi `python .claude/skills/flutter-testing/scripts/build_screen_gallery.py` và publish lại gallery ở đúng URL đã ghim trong `CLAUDE.md` |
 | Nội dung starter là fixture, không phải nội dung production | T1.3 | Không phát hành được với nội dung này | Tìm nguồn nội dung có bản quyền rõ ràng trước M8 (BR-87) |
 | `sqlite3.wasm` và `drift_worker.js` là binary vendored trong `web/` | M4.2 | Không có bước build nào sinh ra chúng và không có bước build nào báo khi chúng cũ: app compile, load, rồi **không mở được database**. Nâng `drift` mà quên tải lại worker không có triệu chứng nào cho tới khi ai đó mở trình duyệt | `test/database/web_assets_test.dart` so version trong `pubspec.lock` với version đã pin, kèm `web/WEB_ASSETS.md` ghi URL tải. Đã kiểm tiêm lỗi: đổi `drift` thành 2.99.0 làm test đỏ |
 | Server phát web chưa gửi COOP/COEP | M4.2 | `crossOriginIsolated` là `false`, nên drift chọn backend lưu trữ kém hơn OPFS. Không có lỗi nào — chỉ là hiệu năng và độ bền khác đi, âm thầm | Thêm `Cross-Origin-Opener-Policy: same-origin` và `Cross-Origin-Embedder-Policy: require-corp` vào server phát web ở M7, và kiểm lại `crossOriginIsolated` trong E2E |

@@ -6,6 +6,7 @@ import 'app_icon_size.dart';
 import 'app_input_theme.dart';
 import 'app_interaction_states.dart';
 import 'app_overlay_themes.dart';
+import 'app_planned_themes.dart';
 import 'app_colors.dart';
 import 'app_elevation.dart';
 import 'app_high_contrast.dart';
@@ -269,6 +270,24 @@ ThemeData _buildTheme(
     // the two channels cannot drift apart.
     visualDensity: VisualDensity.standard,
     materialTapTargetSize: MaterialTapTargetSize.padded,
+    // **The same argument, finished.** The two lines above pin density and tap
+    // target so the web E2E channel measures Android's geometry — and left
+    // `platform` itself reading `defaultTargetPlatform`, which is the value
+    // both of them exist to stop trusting. Everything Material resolves per
+    // platform therefore still forked at the browser's OS: the page transition
+    // most visibly (Android draws `PredictiveBackPageTransitionsBuilder`,
+    // Linux and Windows `ZoomPageTransitionsBuilder`, macOS the Cupertino
+    // slide), and with it scroll physics and the text-selection controls.
+    //
+    // Android is the release target (AD-04) and the web build is the channel
+    // that has to agree with it, so the platform is declared rather than
+    // detected. A Playwright run now exercises the transition a phone runs.
+    //
+    // `pageTransitionsTheme` is left at its default *given* that platform:
+    // pinning the platform is what makes the default correct, and naming a
+    // builder as well would be a second place to keep in step with the SDK's
+    // own Android answer.
+    platform: TargetPlatform.android,
     // Anything that builds its own TextStyle without going through the text
     // theme still lands on the body face rather than the platform default.
     fontFamily: AppTypography.bodyFamily,
@@ -429,6 +448,17 @@ ThemeData _buildTheme(
     // `dialogTheme` — see `buildTimePickerTheme` — so without this entry it is
     // the one surface in the app carrying Material's elevation and corner.
     timePickerTheme: buildTimePickerTheme(scheme, semantic, texts),
+    popupMenuTheme: buildPopupMenuTheme(scheme, semantic, texts),
+
+    // Four components nothing renders yet. They are here rather than left to
+    // Material because each one only restates a decision this app has already
+    // made and measured — the admission test, and the ones it turned away, are
+    // in `app_planned_themes.dart`. `theme_coverage_test.dart` is what stops
+    // the list growing on a hunch.
+    datePickerTheme: buildDatePickerTheme(scheme, semantic, texts),
+    segmentedButtonTheme: buildSegmentedButtonTheme(scheme, semantic),
+    sliderTheme: buildSliderTheme(scheme, semantic, texts),
+    tabBarTheme: buildTabBarTheme(scheme, semantic, texts),
 
     listTileTheme: ListTileThemeData(
       contentPadding: const EdgeInsets.symmetric(

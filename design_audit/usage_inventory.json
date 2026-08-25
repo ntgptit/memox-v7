@@ -1,10 +1,10 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 662,
-  "totalSites": 495,
+  "scannedFiles": 663,
+  "totalSites": 499,
   "byElementKind": {
-    "other": 312,
-    "background": 20,
+    "other": 313,
+    "background": 23,
     "shadow": 1,
     "border": 13,
     "text": 117,
@@ -13,9 +13,9 @@
   "bySourceKind": {
     "shared-constant": 154,
     "blend-source": 4,
-    "Colors-material": 8,
+    "Colors-material": 11,
     "hardcoded-literal": 97,
-    "opacity-modified-token": 12,
+    "opacity-modified-token": 13,
     "theme-token": 220
   },
   "sites": [
@@ -1429,7 +1429,7 @@
     },
     {
       "file": "lib/core/theme/app_overlay_themes.dart",
-      "line": 230,
+      "line": 252,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "Colors-material",
@@ -1437,6 +1437,50 @@
       "token": "Colors.transparent",
       "resolved_value_light": "#00000000",
       "resolved_value_dark": "#00000000"
+    },
+    {
+      "file": "lib/core/theme/app_overlay_themes.dart",
+      "line": 299,
+      "widget_context": "<top-level>",
+      "element_kind": "background",
+      "source_kind": "Colors-material",
+      "expression": "Colors.transparent",
+      "token": "Colors.transparent",
+      "resolved_value_light": "#00000000",
+      "resolved_value_dark": "#00000000"
+    },
+    {
+      "file": "lib/core/theme/app_planned_themes.dart",
+      "line": 142,
+      "widget_context": "<top-level>",
+      "element_kind": "background",
+      "source_kind": "Colors-material",
+      "expression": "Colors.transparent",
+      "token": "Colors.transparent",
+      "resolved_value_light": "#00000000",
+      "resolved_value_dark": "#00000000"
+    },
+    {
+      "file": "lib/core/theme/app_planned_themes.dart",
+      "line": 146,
+      "widget_context": "<top-level>",
+      "element_kind": "background",
+      "source_kind": "Colors-material",
+      "expression": "Colors.transparent",
+      "token": "Colors.transparent",
+      "resolved_value_light": "#00000000",
+      "resolved_value_dark": "#00000000"
+    },
+    {
+      "file": "lib/core/theme/app_planned_themes.dart",
+      "line": 218,
+      "widget_context": "<top-level>",
+      "element_kind": "other",
+      "source_kind": "opacity-modified-token",
+      "expression": "semantic.focusRing.withValues(alpha: AppStateOpacity.pressed)",
+      "token": "semantic.focusRing",
+      "resolved_value_light": "#4141C0 @ alpha unresolvable",
+      "resolved_value_dark": "#8A8AE0 @ alpha unresolvable"
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
@@ -1847,7 +1891,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 83,
+      "line": 84,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1858,7 +1902,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 84,
+      "line": 85,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1869,7 +1913,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 85,
+      "line": 86,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1880,7 +1924,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 86,
+      "line": 87,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1891,7 +1935,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 89,
+      "line": 90,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1902,7 +1946,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 90,
+      "line": 91,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1913,7 +1957,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 91,
+      "line": 92,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1924,7 +1968,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 92,
+      "line": 93,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1935,7 +1979,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 93,
+      "line": 94,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1946,7 +1990,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 94,
+      "line": 95,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1957,7 +2001,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 95,
+      "line": 96,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1968,7 +2012,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 96,
+      "line": 97,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1979,7 +2023,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 97,
+      "line": 98,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1990,7 +2034,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 98,
+      "line": 99,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2001,7 +2045,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 99,
+      "line": 100,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2012,7 +2056,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 100,
+      "line": 101,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2023,7 +2067,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 101,
+      "line": 102,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2034,7 +2078,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 102,
+      "line": 103,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2045,7 +2089,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 103,
+      "line": 104,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2056,7 +2100,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 104,
+      "line": 105,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2067,7 +2111,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 105,
+      "line": 106,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2078,7 +2122,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 106,
+      "line": 107,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2089,7 +2133,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 107,
+      "line": 108,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2100,7 +2144,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 108,
+      "line": 109,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2111,7 +2155,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 110,
+      "line": 111,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2122,7 +2166,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 111,
+      "line": 112,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2133,7 +2177,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 112,
+      "line": 113,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2144,7 +2188,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 113,
+      "line": 114,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2155,7 +2199,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 114,
+      "line": 115,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2166,7 +2210,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 115,
+      "line": 116,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2177,7 +2221,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 116,
+      "line": 117,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2188,7 +2232,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 117,
+      "line": 118,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2199,7 +2243,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 118,
+      "line": 119,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2210,7 +2254,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 119,
+      "line": 120,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2221,7 +2265,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 120,
+      "line": 121,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2232,7 +2276,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 121,
+      "line": 122,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2243,7 +2287,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 122,
+      "line": 123,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2254,7 +2298,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 123,
+      "line": 124,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2265,7 +2309,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 131,
+      "line": 132,
       "widget_context": "<top-level>",
       "element_kind": "border",
       "source_kind": "shared-constant",
@@ -2276,7 +2320,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 132,
+      "line": 133,
       "widget_context": "<top-level>",
       "element_kind": "border",
       "source_kind": "shared-constant",
@@ -2287,7 +2331,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 133,
+      "line": 134,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2298,7 +2342,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 134,
+      "line": 135,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2309,7 +2353,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 135,
+      "line": 136,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2320,7 +2364,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 136,
+      "line": 137,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2331,7 +2375,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 137,
+      "line": 138,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2342,7 +2386,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 138,
+      "line": 139,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2353,7 +2397,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 143,
+      "line": 144,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2364,7 +2408,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 144,
+      "line": 145,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2375,7 +2419,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 145,
+      "line": 146,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2386,7 +2430,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 146,
+      "line": 147,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2397,7 +2441,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 149,
+      "line": 150,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2408,7 +2452,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 150,
+      "line": 151,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2419,7 +2463,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 151,
+      "line": 152,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2430,7 +2474,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 152,
+      "line": 153,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2441,7 +2485,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 153,
+      "line": 154,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2452,7 +2496,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 154,
+      "line": 155,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2463,7 +2507,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 155,
+      "line": 156,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2474,7 +2518,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 156,
+      "line": 157,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2485,7 +2529,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 157,
+      "line": 158,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2496,7 +2540,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 158,
+      "line": 159,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2507,7 +2551,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 159,
+      "line": 160,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2518,7 +2562,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 160,
+      "line": 161,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2529,7 +2573,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 161,
+      "line": 162,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2540,7 +2584,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 162,
+      "line": 163,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2551,7 +2595,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 163,
+      "line": 164,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2562,7 +2606,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 164,
+      "line": 165,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2573,7 +2617,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 165,
+      "line": 166,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2584,7 +2628,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 166,
+      "line": 167,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2595,7 +2639,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 167,
+      "line": 168,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2606,7 +2650,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 168,
+      "line": 169,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2617,7 +2661,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 169,
+      "line": 170,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2628,7 +2672,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 170,
+      "line": 171,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2639,7 +2683,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 171,
+      "line": 172,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2650,7 +2694,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 172,
+      "line": 173,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2661,7 +2705,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 173,
+      "line": 174,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2672,7 +2716,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 174,
+      "line": 175,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2683,7 +2727,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 175,
+      "line": 176,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2694,7 +2738,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 176,
+      "line": 177,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2705,7 +2749,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 177,
+      "line": 178,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2716,7 +2760,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 178,
+      "line": 179,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2727,7 +2771,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 179,
+      "line": 180,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2738,7 +2782,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 180,
+      "line": 181,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2749,7 +2793,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 181,
+      "line": 182,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2760,7 +2804,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 182,
+      "line": 183,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2771,7 +2815,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 184,
+      "line": 185,
       "widget_context": "<top-level>",
       "element_kind": "border",
       "source_kind": "shared-constant",
@@ -2782,7 +2826,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 185,
+      "line": 186,
       "widget_context": "<top-level>",
       "element_kind": "border",
       "source_kind": "shared-constant",
@@ -2793,7 +2837,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 186,
+      "line": 187,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2804,7 +2848,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 187,
+      "line": 188,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2815,7 +2859,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 188,
+      "line": 189,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2826,7 +2870,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 194,
+      "line": 195,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2837,7 +2881,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 195,
+      "line": 196,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2848,7 +2892,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 196,
+      "line": 197,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2859,7 +2903,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 210,
+      "line": 211,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2870,7 +2914,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 211,
+      "line": 212,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2881,7 +2925,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 212,
+      "line": 213,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2892,7 +2936,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 213,
+      "line": 214,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2903,7 +2947,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 220,
+      "line": 221,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2914,7 +2958,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 225,
+      "line": 226,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2925,7 +2969,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 226,
+      "line": 227,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2936,7 +2980,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 227,
+      "line": 228,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2947,7 +2991,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 297,
+      "line": 316,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -2958,7 +3002,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 300,
+      "line": 319,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -2969,7 +3013,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 301,
+      "line": 320,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -2980,7 +3024,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 302,
+      "line": 321,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -2991,7 +3035,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 451,
+      "line": 481,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -3002,7 +3046,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 468,
+      "line": 498,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -3013,7 +3057,7 @@
     },
     {
       "file": "lib/core/theme/app_toggle_themes.dart",
-      "line": 117,
+      "line": 131,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -3024,7 +3068,7 @@
     },
     {
       "file": "lib/core/theme/app_toggle_themes.dart",
-      "line": 123,
+      "line": 137,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",

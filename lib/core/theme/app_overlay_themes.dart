@@ -224,13 +224,38 @@ TimePickerThemeData buildTimePickerTheme(
     // AM/PM. Only some locales show it, which is exactly why it is themed
     // rather than left out: a component nobody sees in `en` is one an
     // `en_US` reviewer sees on the first screenshot.
+    // **`tertiaryContainer`, which is M3's role here and not the one this
+    // theme first used.** It shipped as `primaryContainer` — the app's answer
+    // for *a selected control* — and that is the right answer to the wrong
+    // question. M3 gives the hour/minute field `primaryContainer` and AM/PM
+    // `tertiaryContainer` on purpose: they are two different questions
+    // ("which unit am I editing" and "morning or afternoon") and one fill for
+    // both loses the distinction the component is drawn to make.
+    //
+    // **What adopting it buys here is less than it should be, and the number
+    // is worth recording rather than discovering later.** Against
+    // `primaryContainer` the app's `tertiaryContainer` measures **1.10:1 in
+    // light and 1.29:1 in dark** — the two containers differ in hue but barely
+    // in lightness, so the distinction reads as a tint rather than as a
+    // separation. That is a property of a hand-tuned palette whose tertiary
+    // carries 8.8 chroma against primary's 14.5, not of this mapping: the fix,
+    // if the owner wants the distinction to carry, is a tone on
+    // `tertiaryContainer`, not a different role in this file.
+    //
+    // It also gives the tertiary family its first renderer. Until now it was
+    // declared only so `fromSeed` could not invent it.
     dayPeriodColor: WidgetStateColor.resolveWith((states) {
-      if (states.contains(WidgetState.selected)) return scheme.primaryContainer;
+      if (states.contains(WidgetState.selected)) {
+        return scheme.tertiaryContainer;
+      }
 
       return Colors.transparent;
     }),
     dayPeriodTextColor: WidgetStateColor.resolveWith((states) {
-      if (states.contains(WidgetState.selected)) return selected;
+      // 9.75:1 in light, 7.24:1 in dark on the fill above.
+      if (states.contains(WidgetState.selected)) {
+        return scheme.onTertiaryContainer;
+      }
 
       return scheme.onSurfaceVariant;
     }),
@@ -250,3 +275,44 @@ TimePickerThemeData buildTimePickerTheme(
     entryModeIconColor: scheme.onSurfaceVariant,
   );
 }
+
+/// The overflow menu — `PopupMenuButton`, on four call sites: the card list's
+/// import/export menu, the bulk-action bar, a tag row and the sort control.
+///
+/// **Found by `theme_coverage_test.dart` rather than by reading the code, and
+/// that is the point of that test.** Two hand greps missed all four, because
+/// every one is written `PopupMenuButton<CardListSort>(` and a name-then-paren
+/// search does not match a generic call. Until this landed, four menus rendered
+/// on `surfaceContainer` with a Material shadow and a 4px corner while every
+/// other surface in the app sat on `surface` at `elevation: 0` with a hairline.
+///
+/// The values are `dialogTheme`'s and `bottomSheetTheme`'s — a menu is a small
+/// sheet, so it takes the same paper. `AppRadius.md` rather than M3's 4: this
+/// app's corner scale starts at 8 and a 4px menu beside a 12px button reads as
+/// a different kit.
+PopupMenuThemeData buildPopupMenuTheme(
+  ColorScheme scheme,
+  AppSemanticColors semantic,
+  TextTheme texts,
+) => PopupMenuThemeData(
+  color: scheme.surface,
+  surfaceTintColor: Colors.transparent,
+  // Zero plus a hairline, for the reason F15 and AD-14 give: one depth
+  // mechanism, and this app spends it on the surface ladder.
+  elevation: AppElevation.none,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(AppRadius.md),
+    side: BorderSide(color: semantic.borderSubtle),
+  ),
+  labelTextStyle: WidgetStateProperty.resolveWith((states) {
+    final base = texts.bodyMedium;
+    if (states.contains(WidgetState.disabled)) {
+      return base?.copyWith(color: semantic.onDisabled);
+    }
+
+    return base?.copyWith(color: scheme.onSurface);
+  }),
+  // The menu is a list of destinations, so its rows wash like rows rather than
+  // like controls — the same weight `MxListTile` resolves.
+  menuPadding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+);
