@@ -4,6 +4,7 @@ import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
 import 'package:memox/features/deck/presentation/widgets/items/deck_tile_widget.dart';
 import 'package:memox/features/deck/presentation/widgets/sections/deck_level_summary_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
+import 'package:memox/shared/widgets/mx_progress_bar.dart';
 
 import 'support/deck_screen_harness.dart';
 import 'support/fake_deck_repository.dart';
@@ -160,24 +161,41 @@ void main() {
       );
     });
 
-    testWidgets('the learned figure is announced even while it is not drawn', (
-      tester,
-    ) async {
-      // The chevron is a sighted affordance. A screen reader has none, so the
-      // collapsed bar keeps its name and its value — a progress bar announcing
-      // a bare percentage of nothing is what dropping the strings would ship.
-      await pumpDeckScreen(
-        tester,
-        repository: FakeDeckRepository.withSummaries(withDue()),
-        screen: const DeckListScreen(),
-      );
+    testWidgets(
+      'the learned figure waits behind the chevron for every reader',
+      (tester) async {
+        // **The bar left the resting panel with its caption** (owner review,
+        // 2026-08-25). It used to stay as a bare 4px rule, announced but not
+        // drawn — which put a screen reader ahead of a sighted user on one
+        // figure and left the sighted user a gauge measuring nothing nameable.
+        // Now neither gets it until the chevron opens, and both get it whole.
+        await pumpDeckScreen(
+          tester,
+          repository: FakeDeckRepository.withSummaries(withDue()),
+          screen: const DeckListScreen(),
+        );
 
-      expect(
-        onPanel(
-          find.bySemanticsLabel(english.deckLearnedProgressLabel(40, 160)),
-        ),
-        findsOneWidget,
-      );
-    });
+        expect(onPanel(find.byType(MxProgressBar)), findsNothing);
+        expect(
+          onPanel(
+            find.bySemanticsLabel(english.deckLearnedProgressLabel(40, 160)),
+          ),
+          findsNothing,
+        );
+
+        await tester.tap(
+          find.bySemanticsLabel(english.deckSummaryExpandLabel).first,
+        );
+        await tester.pumpAndSettle();
+
+        expect(onPanel(find.byType(MxProgressBar)), findsOneWidget);
+        expect(
+          onPanel(
+            find.bySemanticsLabel(english.deckLearnedProgressLabel(40, 160)),
+          ),
+          findsOneWidget,
+        );
+      },
+    );
   });
 }

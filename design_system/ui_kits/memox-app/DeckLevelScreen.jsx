@@ -264,11 +264,10 @@ function LevelSummary({ deck, isRoot, totalDue, onStudy }) {
           <MxIcon name={isExpanded ? 'expand_less' : 'expand_more'} filled size="var(--icon-sm)" />
         </button>
       </div>
-      {/* Collapsed it is a bare 4px rule under the figure line — a bar there
-          does not need to be told what it measures. The strings are still
-          passed: a screen reader has no chevron, so what is painted and what is
-          announced are two decisions. */}
-      <MxProgressBar value={learned} label={deck.learned + ' of ' + deck.cards + ' learned'} valueLabel={Math.round(learned * 100) + '%'} size="sm" isLabelPainted={isExpanded} />
+      {/* The bar belongs to the disclosure. A 41% fill with no caption states a
+          proportion of nothing the eye can name — smaller than a labelled one,
+          not quieter. Open, it arrives with the figure attached. */}
+      {isExpanded ? <MxProgressBar value={learned} label={deck.learned + ' of ' + deck.cards + ' learned'} valueLabel={Math.round(learned * 100) + '%'} size="sm" /> : null}
       {totalDue ? <MxActionButton label="Start studying" icon="play_arrow" isBlock onClick={() => onStudy(deck)} /> : null}
     </div>
   );

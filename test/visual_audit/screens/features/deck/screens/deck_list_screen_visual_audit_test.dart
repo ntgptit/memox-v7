@@ -126,6 +126,8 @@ void main() {
         filledButtons: 2,
       ),
       // One progress bar per deck that has cards; two of the three fixtures do.
+      // **The hero's own bar is not among them since 2026-08-25** — it moved
+      // behind the chevron, so the resting panel contributes no painter here.
       //
       // `LinearProgressIndicator` paints its track and its fill through
       // `_LinearProgressIndicatorPainter`, so neither colour exists on a render
@@ -143,9 +145,9 @@ void main() {
             'CustomPainter, so no render object carries either colour. Both are '
             'asserted in mx_progress_bar_test.dart and pinned by the '
             'mx_progress_bar_* goldens.',
-        // Two of the three fixtures have cards, plus the level summary's own
-        // bar above them.
-        expectedMatches: 3,
+        // Two of the three fixtures have cards. The level summary contributes
+        // none: its bar is part of the disclosure now.
+        expectedMatches: 2,
       ),
     ],
   );
@@ -313,7 +315,8 @@ void main() {
         filledButtons: 3,
         breadcrumbSteps: 3,
       ),
-      // Three cards, all with cards, plus the level summary's own bar.
+      // Three cards, all with cards. The level summary adds none — its bar
+      // moved behind the chevron on 2026-08-25.
       // The count is exact on purpose — an allowance that said "any number" would
       // stop noticing when a bar appears on a row that should not have one.
       const AuditSkipAllowance(
@@ -325,7 +328,7 @@ void main() {
             'CustomPainter, so no render object carries either colour. Both are '
             'asserted in mx_progress_bar_test.dart and pinned by the '
             'mx_progress_bar_* goldens.',
-        expectedMatches: 4,
+        expectedMatches: 3,
       ),
     ],
   );

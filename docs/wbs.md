@@ -11915,6 +11915,60 @@ của M2.
   `app_toggle_themes_test.dart` cập nhật theo role/bề rộng mới.
 - **Checklist phases:** 7, 13
 
+### M99.50 · Progress bar hero về sau chevron — và 3 deck card cuối cùng cũng đủ
+
+- **Status:** **done**
+- **Goal:** Chủ dự án đọc lại màn hình: thanh progress 4px không nhãn nằm giữa
+  `15 cards due` và nút Study là *"một thanh màu vô nghĩa"*. Đúng — và đây là
+  đảo lại chính chỉ dẫn cũ: brief hero mục 2 ghi nguyên văn **"không kèm
+  label"**, và bản đã ship làm đúng thế (nhãn ẩn khi thu gọn, hiện khi mở
+  chevron). Nhìn kết quả thật thì lập luận đổi chiều: một gauge không có tham
+  chiếu không *êm hơn* một gauge có nhãn, nó chỉ *nhỏ hơn*.
+- **Scope:** Chỉ hero panel. Thanh progress chuyển hẳn vào phần mở rộng — thu
+  gọn còn đúng dòng số và CTA; mở chevron thì thanh xuất hiện **kèm** nhãn
+  `353 of 868 learned` và `41%` như cũ. Không đụng deck card, toolbar, bottom
+  nav, padding `MxCard`.
+- **Đo được — và mục tiêu 3 card của M99.40 nay mới đạt:**
+
+  | | M99.40 | M99.44 |
+  |---|---|---|
+  | hero | 156px · 18,3% | **140px · 16,4%** |
+  | deck card trọn vẹn trên bottom nav | 2 (+89% card 3) | **3** |
+
+  M99.40 đã kết luận 3 card là **không đạt được**: hero ở sàn cứng, chrome giữa
+  hero và list đã trả hết 24px, còn thiếu ~16px nằm trong chiều cao deck card và
+  app bar — cả hai ngoài phạm vi. Kết luận đó **sai ở chỗ nhìn chưa hết**: 16px
+  còn thiếu nằm ngay trên panel, là thanh 4px cộng khe `md` 12px của nó. Mục
+  tiêu không bị chặn bởi sàn của hero mà bởi một thứ trên hero vốn không có lý
+  do ở đó.
+- **Hệ quả accessibility đã ghi:** trước đây thanh vẫn *đọc được* khi thu gọn dù
+  không *vẽ* nhãn — tức screen reader đi trước người sáng mắt đúng một con số.
+  Nay cả hai cùng phải mở chevron. Bớt một bất đối xứng, đổi lấy việc con số
+  learned không còn ở trạng thái nghỉ cho bất kỳ ai.
+- **Gỡ `MxProgressBar.shouldPaintLabel`.** Cờ đó thêm ở M99.40 cho đúng call
+  site này và giờ không còn caller — cùng lý do đã gỡ `MxIconButton.isAccent` ở
+  M99.42. Kit parity: `isLabelPainted` của `MxProgressBar.jsx`/`.d.ts` gỡ theo.
+- **Output:** `deck_level_summary_widget.dart` (`if (isExpanded && cardCount >
+  0)`), `mx_progress_bar.dart` (gỡ cờ), `deck_summary_compact_geometry_test.dart`
+  (siết từ "2 card + 80% card ba" lên **3 card trọn vẹn**),
+  `deck_list_summary_test.dart` và `deck_summary_overdue_test.dart` (thanh nay
+  sau chevron), visual audit `deck_list_screen` (`_LinearProgressIndicatorPainter`
+  3→2 và 4→3), 6 golden `deck_list_*`, parity kit.
+- **Acceptance criteria:**
+  - [x] Thu gọn: không còn thanh nào không nhãn trên hero.
+  - [x] Mở chevron: thanh + `353 of 868 learned` + `41%`.
+  - [x] Hero **140px = 16,4%**, dưới trần 22%.
+  - [x] **3 deck card trọn vẹn** trên bottom nav, đo bằng `pumpDeckApp` (shell
+        thật) chứ không `pumpDeckScreen`.
+  - [x] Cờ shared component không còn caller thì gỡ, không để lại.
+  - [x] `dod_check.sh` xanh; golden regenerate; gallery publish tại URL đã ghim.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.49
+- **Tests required:** `deck_summary_compact_geometry_test.dart`,
+  `deck_list_summary_test.dart`, `deck_summary_overdue_test.dart`,
+  visual audit `deck_list_screen`, `test/demo/` goldens, full host suite.
+- **Checklist phases:** 7, 12, 14
+
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 
 Ghi lại cụ thể, vì "mất một bộ lint" là câu quá mơ hồ để ai đó sau này biết

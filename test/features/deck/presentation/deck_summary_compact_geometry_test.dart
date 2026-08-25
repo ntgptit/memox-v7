@@ -20,16 +20,17 @@ const double heroViewportCeiling = 0.22;
 /// **The defect this locks was reported as a picture, not as a value.** The
 /// panel answered four questions at once and stood 320px tall on a 393x852
 /// device — 37.6% of the viewport — which left one deck card whole above the
-/// bottom bar and half of a second. Every number involved was a legitimate
-/// token; the bug lived in the *sum* of five stacked bands, so only geometry
-/// after layout can see it. `getRect`, therefore, and not a widget finder.
+/// bottom bar and half of a second. It is 140px and 16.4% now, and three cards
+/// are whole. Every number involved was a legitimate token; the bug lived in
+/// the *sum* of five stacked bands, so only geometry after layout can see it.
+/// `getRect`, therefore, and not a widget finder.
 ///
-/// **`pumpDeckApp`, not `pumpDeckScreen`, and that distinction is the whole
-/// point of the second test.** The screen on its own has 852px to spend; the
-/// app has 772, because the bottom navigation bar covers the rest. Measured
-/// without the shell this change looks like it reaches three whole cards, and
-/// on a device it does not — which is exactly the kind of confidently wrong
-/// figure the gallery rule exists to prevent.
+/// **`pumpDeckApp`, not `pumpDeckScreen`, and the difference is 80px.** The
+/// screen on its own has 852px to spend; the app has 772, because the bottom
+/// navigation bar covers the rest. An earlier pass measured without the shell,
+/// read three whole cards off it, and was wrong on a device by exactly that
+/// bar — the kind of confidently wrong figure the gallery rule exists to
+/// prevent. Three is true here because the fold is where the bar starts.
 void main() {
   /// The owner's reported figures: 15 due of which 8 missed their day, 46 new
   /// across 868 cards.
@@ -97,15 +98,17 @@ void main() {
     );
   });
 
-  testWidgets('two deck cards are whole above the bottom bar, and the third '
-      'is most of the way there', (tester) async {
-    // **Two and most of a third, not three, and the number is measured rather
-    // than aspired to.** The owner asked for three whole cards; the hero gave
-    // back 164px and the chrome between it and the list gave back the last 24,
-    // which still lands the third card's foot under the bottom bar. The
-    // remaining pixels are in the deck card's own height and in the app bar,
-    // and neither was in scope. This holds what was actually delivered, so a
-    // later change to any of the three cannot quietly undo it.
+  testWidgets('three deck cards are whole above the bottom bar', (
+    tester,
+  ) async {
+    // **Three, finally, and the last 16px came from somewhere nobody had
+    // looked.** The first pass reached two whole cards and 89% of a third and
+    // said so: the hero was at its floor and the chrome had given back all it
+    // had. What was still on the panel was an unlabelled 4px gauge, and moving
+    // it behind the disclosure (owner review, 2026-08-25) returned the bar plus
+    // its `md` gap — exactly the 16px the third card was short. The target was
+    // never blocked by the hero's floor; it was blocked by something on the
+    // panel that had no reason to be there.
     await pumpDeckApp(
       tester,
       repository: FakeDeckRepository.withSummaries(reportedLibrary()),
@@ -120,17 +123,8 @@ void main() {
 
     expect(
       rects.where((r) => r.bottom <= fold).length,
-      greaterThanOrEqualTo(2),
-      reason: 'two deck cards must be readable end to end without scrolling',
-    );
-
-    final third = rects[2];
-    expect(
-      (fold - third.top) / third.height,
-      greaterThan(0.8),
-      reason:
-          'the third card must read as a card that continues, not as a sliver '
-          'under the bar',
+      greaterThanOrEqualTo(3),
+      reason: 'three deck cards must be readable end to end without scrolling',
     );
   });
 
