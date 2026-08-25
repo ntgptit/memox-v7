@@ -1,7 +1,9 @@
-const { MxContentShell, MxIconButton, MxIcon, MxCard, MxBreadcrumb, MxPillButton, MxEmptyState, MxProgressBar, MxActionButton, MxSearchField, MxActionSheet } = window.MemoxDesignSystem_3a620f;
+const { MxContentShell, MxIconButton, MxIcon, MxCard, MxBreadcrumb, MxPillButton, MxEmptyState, MxProgressBar, MxActionButton, MxSearchField, MxActionSheet, MxTextButton } = window.MemoxDesignSystem_3a620f;
 
 /** The four orders, and the glyph each gets in the sheet. */
 const SORT_LABELS = { recent: 'Recently studied', name: 'Name', cardsDue: 'Cards due', progress: 'Progress' };
+/** The same orders, named in the room a heading row has — under 96px with the glyph. */
+const SORT_SHORT = { recent: 'Recent', name: 'Name', cardsDue: 'Due', progress: 'Progress' };
 const SORT_ICONS = { recent: 'schedule', name: 'sort_by_alpha', cardsDue: 'event_available', progress: 'donut_small' };
 
 /**
@@ -125,15 +127,15 @@ function DeckLevelScreen({ path, onOpen, onUp, onJumpTo, onNavigate, onActions, 
                   this kit has no overflow to move it into, and a control with
                   no way to turn it back ON is worse than one that differs. */}
               <MxPillButton label={dueOnly ? 'Due only' : 'All'} icon="filter_list" isSelected={dueOnly} onClick={() => setDueOnly(!dueOnly)} />
-              <button
-                type="button"
-                className="mx-deckhead__sort"
-                aria-label={'Sort decks. Currently ' + SORT_LABELS[sort]}
-                title={'Sort decks. Currently ' + SORT_LABELS[sort]}
-                onClick={() => setSortSheetOpen(true)}
-              >
-                <MxIcon name="swap_vert" size="var(--icon-sm)" />
-              </button>
+              <span className="mx-deckhead__sort">
+                <MxTextButton
+                  label={SORT_SHORT[sort]}
+                  trailingIcon="swap_vert"
+                  isCompact
+                  semanticLabel={'Sort decks. Currently ' + SORT_SHORT[sort]}
+                  onClick={() => setSortSheetOpen(true)}
+                />
+              </span>
             </div>
 
             {isSortSheetOpen ? (

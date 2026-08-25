@@ -212,9 +212,12 @@
    the half a finger notices. */
 .mx-deckhead{display:flex;align-items:center;gap:var(--space-sm)}
 .mx-deckhead__label{flex:1;min-width:0;margin:0;font-size:var(--text-label-md);line-height:var(--leading-label-md);font-weight:var(--weight-semibold);letter-spacing:0.72px;text-transform:uppercase;color:var(--color-text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mx-deckhead__sort{width:var(--touch-target-min);height:var(--touch-target-min);flex:none;display:flex;align-items:center;justify-content:center;border:0;border-radius:50%;background:none;color:var(--color-primary-accent);cursor:pointer}
-.mx-deckhead__sort:hover{background:color-mix(in srgb,var(--color-primary-accent) 10%,transparent)}
-.mx-deckhead__sort:focus-visible{outline:none;box-shadow:0 0 0 var(--border-focus) var(--color-primary)}
+/* The control is MxTextButton, not a bare glyph. The first pass took the pill
+   down to a lone `swap_vert`, and a glyph says "sort" without saying "sorted by
+   what" — the half a reader needs (owner review, 2026-08-25, second pass). The
+   order is painted again, short enough to keep the whole control under 96px
+   against the pill's 149.8, with the glyph trailing the word. */
+.mx-deckhead__sort{flex:none}
 /* --- MxTextButton ------------------------------------------------------
    No padding, no radius, no hover surface: a text button with a background is
    an outlined button with the border turned off. The 48 target is min-height
@@ -224,6 +227,7 @@
    Colour is the accent: --color-primary measures 3.33:1 on dark at label size
    and fails AA; the accent (#8A8AE0 dark) measures 6.26:1. */
 .mx-textbtn{display:inline-flex;align-items:center;gap:var(--space-xs);border:0;background:none;padding:0;min-height:var(--touch-target-min);font-family:var(--font-body);font-size:var(--text-label-md);letter-spacing:var(--tracking-label-md);font-weight:var(--weight-semibold);color:var(--color-primary-accent);cursor:pointer;transition:color var(--duration-fast) var(--ease-standard)}
+.mx-textbtn--compact{font-size:var(--text-label-md);letter-spacing:var(--tracking-label-md);font-weight:var(--weight-medium)}
 .mx-textbtn:hover{color:color-mix(in srgb,var(--color-primary-accent) 85%,var(--color-text-primary))}
 .mx-textbtn:hover .mx-textbtn__label{text-decoration:underline;text-decoration-color:currentColor;text-underline-offset:3px}
 .mx-textbtn:active{color:color-mix(in srgb,var(--color-primary-accent) 72%,var(--color-text-primary))}

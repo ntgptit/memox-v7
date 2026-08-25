@@ -11173,6 +11173,69 @@ của M2.
   `test/demo/` goldens.
 - **Checklist phases:** 7, 12, 14
 
+### M99.42 · Trả nhãn cho sort control — glyph trần khó hiểu
+
+- **Status:** **done**
+- **Goal:** M99.41 thu sort control xuống một glyph `↑↓` trần. Chủ dự án phản
+  hồi: **chỉ một icon thì gây khó hiểu và ảnh hưởng UX**. Đúng — và đó chính là
+  mất mát M99.41 đã tự ghi nhận: một glyph nói được *"sắp xếp"* nhưng không nói
+  được *"theo cái gì"*, mà vế sau mới là thứ người dùng cần. Đây là phương án 3
+  chủ dự án đưa ra ngay từ đầu và em đã không chọn.
+- **Scope:** Chỉ control sort. Không đụng pill (không quay lại), không đụng
+  heading, hero, deck card, bottom nav.
+  Control thành `MxTextButton`: **nhãn + glyph 16px bên phải**, phẳng, không
+  nền không viền, `primaryAccent`, `label-md` 12px/w500 — rung gần nhất với
+  13px/500 chủ dự án yêu cầu, và **cùng rung với heading** nên không cái nào
+  lấn cái nào. Nhãn dùng dạng ngắn (`Recent`, không phải `Recently studied`);
+  sheet giữ nguyên dạng đầy đủ vì nó có chỗ.
+- **Đo được:** control rộng **62,9px** (`Recent`), rộng nhất trong 8 tổ hợp
+  ngôn ngữ × thứ tự là **75,2px** (`Progress`) và **74,8px** (`Theo tên`) —
+  đều dưới ngân sách **96px** chủ dự án đặt, so với pill gốc 149,8px. Chiều cao
+  giữ 48px.
+- **Hai thay đổi shared component, và một cái là gỡ:**
+  - `MxTextButton` thêm `isCompact` (nhãn về `label-md`; `TextButton` của
+    Material lấy `label-lg` 14px, tức lớn hơn heading 12px — đúng lỗi thứ bậc
+    mà cả hai pass này sinh ra để sửa) và `semanticLabel` (nhãn vẽ ra là **một
+    giá trị**, không phải một hành động: nghe "Recent, button" là nghe một từ
+    chứ không biết bấm vào thì gì xảy ra). Câu đọc **chứa** nhãn vẽ ra chứ
+    không thay thế nó — WCAG 2.5.3, người dùng voice control đọc thứ họ thấy.
+  - `MxIconButton.isAccent` **gỡ bỏ**. Nó được thêm ở M99.41 cho đúng control
+    này và giờ không còn caller nào. Một cờ shared component không có người
+    dùng là một quyết định thiết kế giả vờ là năng lực.
+- **Output:** `deck_list_toolbar_widget.dart` (MxTextButton),
+  `deck_sort_sheet_widget.dart` (`deckSortShortLabel` — switch vét cạn, hai
+  thứ tự đã đủ ngắn thì trỏ thẳng vào chuỗi của sheet thay vì nhân bản, vì
+  translator sửa `Name` một chỗ mà quên chỗ kia đúng là thứ nhân bản chuỗi mời
+  gọi), `mx_text_button.dart`, `mx_icon_button.dart` (gỡ `isAccent`),
+  ARB en/vi (`deckSortRecentShortLabel`, `deckSortCardsDueShortLabel`),
+  parity kit: `MxTextButton.jsx`/`.d.ts` (`isCompact`, `semanticLabel`),
+  `mx.css` (`.mx-textbtn--compact`, `.mx-deckhead__sort` rút còn `flex:none`),
+  `DeckLevelScreen.jsx` (`SORT_SHORT` + MxTextButton).
+- **Acceptance criteria:**
+  - [x] Nhãn hiện ở trạng thái nghỉ: người dùng sáng mắt đọc được đang sort
+        theo gì mà không cần mở sheet.
+  - [x] Không có pill: không viền, không nền, không radius riêng.
+  - [x] Glyph **bên phải** nhãn — chữ là sự thật, glyph là dấu hiệu bấm được.
+        Đặt bên trái thì mắt gặp mũi tên trước khi gặp câu trả lời.
+  - [x] ≤ **96px** cho cả 4 thứ tự × 2 ngôn ngữ, khoá bằng
+        `deck_sort_control_width_test.dart` — **đo chứ không clamp**: một
+        `maxWidth` sẽ ellipsize đúng cái từ trả lời "sort theo gì", tức là lại
+        vứt đi thứ pass này sinh ra để trả về.
+  - [x] Target 48px giữ nguyên, `meetsGuideline(androidTapTargetGuideline)`
+        xanh.
+  - [x] `dod_check.sh` **`✓ mechanical gates passed`** — lần này chạy đúng
+        lệnh CLAUDE.md dặn thay vì tự chọn từng guard rời. Host suite
+        **3757/3757**; `code-verification-guard` 70 rule xanh.
+- **Sai sót quy trình đã sửa:** ở M99.41 em chạy ba guard Python rời và bỏ qua
+  `code-verification-guard`, nên CI đỏ vì thứ tự khoá trong block metadata ARB
+  (`placeholders` phải đứng trước `description`). `dod_check.sh` vốn đã gói
+  guard đó; lệnh có sẵn trong CLAUDE.md và em đã không dùng.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.41
+- **Tests required:** `deck_sort_control_width_test.dart` (mới, 9 case),
+  `deck_list_toolbar_test.dart`, `test/demo/` goldens, full host suite.
+- **Checklist phases:** 7, 12, 14
+
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 
 Ghi lại cụ thể, vì "mất một bộ lint" là câu quá mơ hồ để ai đó sau này biết

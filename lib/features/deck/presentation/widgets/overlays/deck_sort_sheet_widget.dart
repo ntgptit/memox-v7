@@ -21,6 +21,23 @@ String deckSortLabel(AppLocalizations l10n, DeckListSort sort) =>
       DeckListSort.progress => l10n.deckSortProgressLabel,
     };
 
+/// The same order, named in the space a heading row has.
+///
+/// **A second vocabulary, and only where the first does not fit.** The control
+/// on the heading row has about 96px; `Recently studied` alone measures more
+/// than that at `label-md`. Two of the four orders are already short enough and
+/// point at the sheet's own string rather than at a duplicate — a translator
+/// changing `Name` in one place and not the other is exactly the drift a
+/// duplicated string invites. The switch is exhaustive so a fifth order cannot
+/// be added without deciding what the control calls it.
+String deckSortShortLabel(AppLocalizations l10n, DeckListSort sort) =>
+    switch (sort) {
+      DeckListSort.recent => l10n.deckSortRecentShortLabel,
+      DeckListSort.name => l10n.deckSortNameLabel,
+      DeckListSort.cardsDue => l10n.deckSortCardsDueShortLabel,
+      DeckListSort.progress => l10n.deckSortProgressLabel,
+    };
+
 /// The glyph beside each order in the sheet.
 ///
 /// Decorative — the label is what is announced. It exists because four rows of
