@@ -78,6 +78,20 @@ class MemoxApp extends ConsumerWidget {
       supportedLocales: AppLocalizations.supportedLocales,
       theme: buildLightTheme(),
       darkTheme: buildDarkTheme(),
+      // **Read by `MaterialApp` off `MediaQuery.highContrast`, not off a
+      // setting of ours.** The platform owns this flag — Android's "High
+      // contrast text", and the equivalent elsewhere — so there is no third
+      // entry in `AppThemeMode` and nothing to store: BR-214 is about the
+      // light/dark choice the user makes *in the app*, and this is orthogonal
+      // to it. A user on `system` in the dark with high contrast on gets
+      // `highContrastDarkTheme`, which is the pairing these two slots exist to
+      // express.
+      //
+      // Leaving them null — which is what shipped until M99.48 — is not a
+      // neutral default. It means the app renders identically for someone who
+      // asked for stronger contrast, and the request fails silently.
+      highContrastTheme: buildHighContrastLightTheme(),
+      highContrastDarkTheme: buildHighContrastDarkTheme(),
       // The stored choice, resolved to Flutter's own enum here and nowhere
       // else. `AppThemeMode.system` becomes `ThemeMode.system`, which is what
       // makes the app keep following the platform rather than freezing at

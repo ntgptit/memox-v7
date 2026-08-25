@@ -26,4 +26,28 @@ abstract final class AppStroke {
   /// an outlined button and a tappable card, and the thickness of the underline
   /// a text button focuses with.
   static const double focus = 2;
+
+  /// The outline of a selection control — a checkbox's box, a switch's track.
+  ///
+  /// **A fourth value, against this file's own warning, and the exception is
+  /// narrow enough to state.** The three above are the kit's, and the drift the
+  /// warning guards against is a *per-screen* stroke. This is not one: the kit
+  /// draws no checkbox and no switch (see `app_toggle_themes.dart`), so where
+  /// it is silent the spec is the next authority, and Material 3 puts both at
+  /// **2.0** — `_CheckboxDefaultsM3.side` and `_SwitchDefaultsM3
+  /// .trackOutlineWidth`. Following [hairline] there was a transcription of a
+  /// value nobody had decided.
+  ///
+  /// **Why a selection control needs twice a card's stroke.** A hairline is
+  /// read along a card's whole edge; a checkbox's box is 18dp square, so the
+  /// same weight has a fraction of the length to be seen over. The rule is
+  /// proportional, not aesthetic — the smaller the control, the more of it has
+  /// to be edge.
+  ///
+  /// It happens to equal [focus]. That is a coincidence, not a relationship,
+  /// which is why it is a separate constant: a focus ring that got heavier
+  /// should not silently thicken every checkbox in the app. What the equality
+  /// does buy is that focus changes only the colour here, exactly as it does on
+  /// an input — see `buildInputDecorationTheme`.
+  static const double selectionControl = 2;
 }

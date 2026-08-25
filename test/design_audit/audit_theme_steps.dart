@@ -74,6 +74,25 @@ Map<String, Color> auditTokensOf(ThemeData theme) {
     'colorScheme.surfaceTint': s.surfaceTint,
     'colorScheme.shadow': s.shadow,
     'colorScheme.scrim': s.scrim,
+    // The `*Fixed` families. Added with the roles themselves (M99.47): without
+    // them the inventory records every `AppMaterialRoles.primaryFixed` site as
+    // `unresolvable: not in the dumped theme`, which reads as "the audit
+    // checked this and found nothing wrong" when what happened is that the
+    // audit could not see it. One value per role rather than a light/dark pair
+    // — they are brightness-independent, so both dumps carry the same colour
+    // and the report says so by repeating it.
+    'colorScheme.primaryFixed': s.primaryFixed,
+    'colorScheme.primaryFixedDim': s.primaryFixedDim,
+    'colorScheme.onPrimaryFixed': s.onPrimaryFixed,
+    'colorScheme.onPrimaryFixedVariant': s.onPrimaryFixedVariant,
+    'colorScheme.secondaryFixed': s.secondaryFixed,
+    'colorScheme.secondaryFixedDim': s.secondaryFixedDim,
+    'colorScheme.onSecondaryFixed': s.onSecondaryFixed,
+    'colorScheme.onSecondaryFixedVariant': s.onSecondaryFixedVariant,
+    'colorScheme.tertiaryFixed': s.tertiaryFixed,
+    'colorScheme.tertiaryFixedDim': s.tertiaryFixedDim,
+    'colorScheme.onTertiaryFixed': s.onTertiaryFixed,
+    'colorScheme.onTertiaryFixedVariant': s.onTertiaryFixedVariant,
     'theme.scaffoldBackgroundColor': theme.scaffoldBackgroundColor,
     'semantic.success': x.success,
     'semantic.warning': x.warning,
