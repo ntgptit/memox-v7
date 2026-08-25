@@ -12095,15 +12095,31 @@ của M2.
 
   Hàng heading bám vào card đầu **chặt hơn** các card bám nhau. Mọi con số đều
   là token hợp lệ, nên phép kiểm "có nằm trên `AppSpacing.scale` không" **không
-  bắt được** — đây là lỗi **quan hệ**, không phải lỗi giá trị. Chính là điều
-  comment cũ ở `deck_list_screen.dart` đã cảnh báo, và là đánh đổi M99.42 ghi
-  lại: `xl` bị hạ xuống `md` để lấy 12px khi hero còn cần. M99.50 và M99.51 đã
-  trả lại 37px, nên đánh đổi hết hạn.
-- **Sửa:** gap dưới toolbar `md` → **`xl`**. Nhịp còn `8 / 0 / 24 / 16 / 16`;
-  card 3 kết ở 763,9 so với bottom bar ở 772 nên **vẫn ba card trọn vẹn**.
-- **Luật được thêm vào thước:** ngoài phép kiểm off-scale, nay có phép kiểm
-  **quan hệ** — khoảng dưới hàng heading phải **lớn hơn** khoảng giữa hai card.
-  Đo từ đúng chuỗi mà bức ảnh vẽ, nên luật và thước không thể nói khác nhau.
+  bắt được** — đây là lỗi **quan hệ**, không phải lỗi giá trị.
+- **Sửa vòng một, và nó chưa trúng gốc:** gap dưới toolbar `md` → `xl`, theo
+  lập luận cũ ở `deck_list_screen.dart` ("một section break không lớn hơn 16 sẽ
+  khiến heading đọc như hàng đầu của list"). Nhịp thành `8 / 0 / 24 / 16 / 16`.
+- **Chủ dự án đọc overlay và chỉ ra gốc thật (2026-08-25):** `hero → heading =
+  0` còn `heading → card 1 = 24`. Label **dính vào hero** và **tách khỏi chính
+  list nó gán nhãn**, nên theo proximity người đọc nhóm `YOUR DECKS` vào hero
+  card. **Lỗi grouping, không phải thẩm mỹ.**
+
+  Lập luận cũ trả lời sai câu hỏi: nó đúng với một heading **trôi giữa** hai
+  nhóm, mà heading này không trôi — **nó thuộc về list**.
+- **Sửa vòng hai — đảo hai khoảng:** `hero → heading = 24` (`xl` chuyển sang
+  padding đáy của summary section), `heading → card 1 = 8` (`sm` ở toolbar).
+  Quang học từ mực của label: tới hero 42, tới card đầu 26 — label nay gần thứ
+  nó gán nhãn hơn.
+- **Bù 8px, lấy từ nơi chủ dự án chỉ:** padding trên của summary section `sm` →
+  0. `subtitle → hero` còn **16,5**, đúng mục tiêu 16. Toàn bộ 16,5 nay thuộc về
+  app bar. **`deck_list_spacing_test.dart` vẫn qua nhưng chỉ hơn sàn nửa pixel**
+  (đòi ≥ 8, còn 8,5) — nghĩa là sự tách biệt giữa header strip và hero nay tựa
+  hoàn toàn vào số học của `_toolbarHeight`; đổi ở đó sẽ làm guard đỏ chứ không
+  chỉ dịch một khoảng. Trả `sm` lại là một token nếu đánh đổi này hỏng.
+- **Luật trong thước bị đảo theo, vì luật cũ giờ sai:** không còn "khoảng dưới
+  heading phải lớn hơn khoảng giữa hai card" mà là **proximity** — thứ nằm
+  **trên** heading phải xa hơn thứ nằm **dưới** nó. Đo từ đúng chuỗi bức ảnh vẽ,
+  nên luật và thước không thể nói khác nhau.
 - **Khoảng `0.0` giữa hero và heading row được vẽ ra chứ không giấu.** Hai hộp
   chạm nhau thật; trên máy nó đọc rộng rãi vì hàng heading cao 48 quanh một nhãn
   12px — target của control sort đặt chiều cao đó. Chênh lệch giữa **hộp** và

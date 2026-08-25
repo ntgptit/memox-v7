@@ -111,25 +111,29 @@ void main() {
     await matchesReviewGolden('goldens/deck_list_rhythm.png');
   });
 
-  test('the heading row is not bound tighter to the list than the list is to '
-      'itself', () {
-    // **A relational rule, and the reason the off-scale check alone was not
-    // enough.** The gap under the heading row was 12 while the cards sat 16
-    // apart — every number a legitimate token, and the arrangement still wrong:
-    // a heading that hugs the first row closer than the rows hug each other
-    // reads as the list's first entry rather than as its title. `xl` was traded
-    // away for those 12px in #327 when the hero still needed them; #334 and
-    // #335 gave 37 back, so the trade is off.
+  test('the heading row groups with the list it names, not with the panel '
+      'above it', () {
+    // **The rule this replaced was answering the wrong question.** For four
+    // passes the gap under the heading carried "a section break no larger than
+    // the 16 between two cards makes the heading read as the list's first
+    // row" — true of a heading floating *between* two groups, and this one is
+    // not floating: it belongs to the list.
     //
-    // Measured from the same walk the picture draws, so the rule and the ruler
-    // cannot disagree.
+    // The ruler drew what that reading cost — 0 above the heading and 24 below
+    // — and the owner named it: by proximity the reader groups `YOUR DECKS`
+    // with the hero card, because the label sat against the thing it does not
+    // describe and away from the cards it does. A grouping defect, not a
+    // matter of taste, and no amount of "is this a token" could see it.
+    //
+    // So the rule is proximity: whatever sits above the heading must be
+    // further away than what sits below it.
     expect(
-      _headingGap,
-      greaterThan(_cardGap),
+      _gapAboveHeading,
+      greaterThan(_gapBelowHeading),
       reason:
-          'heading row sits ${_headingGap.toStringAsFixed(1)} above the first '
-          'card while cards are ${_cardGap.toStringAsFixed(1)} apart — the '
-          'heading has to read as a title, not as a row',
+          'heading row sits ${_gapAboveHeading.toStringAsFixed(1)} below the '
+          'hero and ${_gapBelowHeading.toStringAsFixed(1)} above its first '
+          'card — a label has to be nearer the thing it names',
     );
   });
 
@@ -165,11 +169,11 @@ String _marker(String? from, String to, double? gap) {
 /// Filled by the ruler test, read by the assertions that follow it.
 final List<String> _offScaleGaps = <String>[];
 
-/// The distance from the heading row's foot to the first deck card.
-double _headingGap = 0;
+/// The distance from the hero's foot to the heading row.
+double _gapAboveHeading = 0;
 
-/// The distance between two deck cards.
-double _cardGap = 0;
+/// The distance from the heading row's foot to the first deck card.
+double _gapBelowHeading = 0;
 
 /// One thing the screen stacks, and the box it occupies.
 typedef _Band = ({String name, Rect rect, bool isInFlow});
@@ -274,18 +278,12 @@ String _report(List<_Band> bands) {
         _offScaleGaps.add('$pair = ${gap.toStringAsFixed(1)}');
       }
     }
-    if (gap != null && previousName == 'Heading row') _headingGap = gap;
+    if (gap != null && previousName == 'Heading row') _gapBelowHeading = gap;
+    if (gap != null && band.name == 'Heading row') _gapAboveHeading = gap;
     if (band.isInFlow) {
       previousBottom = band.rect.bottom;
       previousName = band.name;
     }
-  }
-
-  // Read off the cards themselves rather than off the chain, which no longer
-  // walks past the first one.
-  final cards = bands.where((b) => b.name.startsWith('Deck card')).toList();
-  if (cards.length >= 2) {
-    _cardGap = cards[1].rect.top - cards[0].rect.bottom;
   }
 
   return buffer.toString();
@@ -305,10 +303,11 @@ String _report(List<_Band> bands) {
 /// to the same value somewhere else on the screen.
 const Map<String, String> _allowedOffScale = <String, String>{
   'Subtitle -> Hero':
-      '24.5 = 16.5 left under the bar’s title block by '
-      'MxContentShell._toolbarHeight, plus AppSpacing.sm from the summary '
-      'section. The residue is the bar’s line arithmetic, not a spacing '
-      'decision.',
+      '16.5, and every pixel of it belongs to the bar: '
+      'MxContentShell._toolbarHeight computes its height from '
+      'titleLarge * _lineFactor + sm + compactLineHeight + md, which leaves '
+      '16.5 under the subtitle. The summary section adds nothing on top of it '
+      'any more. The half pixel is that multiplication, not a spacing choice.',
 };
 
 /// Whether a distance is one of the spacing steps, or an overlap.

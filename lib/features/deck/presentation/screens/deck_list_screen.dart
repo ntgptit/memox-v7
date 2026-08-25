@@ -260,20 +260,21 @@ class _DeckLevel extends ConsumerWidget {
         SliverToBoxAdapter(child: DeckSummarySectionWidget(snapshot: snapshot)),
         SliverToBoxAdapter(
           child: Padding(
-            // **`xl` again.** It was traded down to `md` for twelve pixels when
-            // the hero still needed them, against a stated argument: a section
-            // break no larger than the 16 between two cards makes the heading
-            // read as the list's first row rather than as its title. The hero
-            // gave 37px back since, and the rhythm ruler
-            // (`deck_list_rhythm_golden_test.dart`) drew the result — 12 above
-            // the first card against 16 between cards, the heading bound to the
-            // list more tightly than the list is to itself. The debt is paid
-            // and the argument stands.
+            // **`sm`, and the old argument was answering the wrong question.**
+            // The rule this gap carried for four passes was "a section break no
+            // larger than the 16 between two cards makes the heading read as
+            // the list's first row". True of a heading floating between two
+            // groups — and this one is not floating: it *belongs* to the list.
+            // The ruler drew what the old reading cost: 0 above the heading and
+            // 24 below it, so the label sat against the hero and away from the
+            // cards it names, and proximity grouped it with the panel. The
+            // section above now owns the `xl` break; what is left here is the
+            // short tie between a label and its own list.
             padding: const EdgeInsets.fromLTRB(
               AppSpacing.lg,
               0,
               AppSpacing.lg,
-              AppSpacing.xl,
+              AppSpacing.sm,
             ),
             child: DeckListToolbarWidget(
               isRootLevel: parent == null,

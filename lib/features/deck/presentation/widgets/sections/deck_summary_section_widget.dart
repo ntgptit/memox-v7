@@ -54,21 +54,30 @@ class DeckSummarySectionWidget extends ConsumerWidget {
         DeckSummaryDetail.expanded;
 
     return Padding(
-      // `sm` above (owner review, 2026-08-20): the path is inside the bar now,
-      // and the bar's own hairline is the separation between chrome and body,
-      // so `md` on top of that break measured about 40px of dead space above
-      // the panel on device. `sm` is the floor `deck_list_spacing_test.dart`
-      // holds for "visibly separate" and this sits on it.
+      // **Nothing above, and the bar already carries the break** (owner review,
+      // 2026-08-25, vertical-rhythm pass). It was `sm`, on top of the 8.5 the
+      // app bar keeps below the subheader — 16.5 in total, where the design
+      // asks for 16. Swapping the heading row's gaps cost 8px of the list's
+      // headroom, and this is where the owner said to find them.
       //
-      // **Nothing below** (owner review, 2026-08-25). The list heading under
-      // this owns the gap before the first card and always did; the panel's own
-      // bottom inset was a second opinion about the same seam, and the two
-      // stacked into dead space that cost most of a deck card.
+      // `deck_list_spacing_test.dart` still holds: it asks for `sm` between the
+      // header strip and this card, and the bar's own 8.5 clears it. **By half
+      // a pixel** — so the separation now rests entirely on `_toolbarHeight`'s
+      // arithmetic, and a change there breaks that guard rather than merely
+      // moving a gap. Putting `sm` back is one token if the trade sours.
+      //
+      // **`xl` below, and the reason is grouping rather than taste** (owner
+      // review, 2026-08-25, vertical-rhythm pass). It was 0, which put the list
+      // heading against the hero's own edge while leaving 24 between that
+      // heading and the first card it names. By proximity the reader groups
+      // `YOUR DECKS` with the panel above it instead of the list below — the
+      // label was closer to the thing it does not describe. The two gaps are
+      // swapped: the heading now sits `xl` off the hero and `sm` off its list.
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
-        AppSpacing.sm,
-        AppSpacing.lg,
         0,
+        AppSpacing.lg,
+        AppSpacing.xl,
       ),
       child: DeckLevelSummaryWidget(
         snapshot: snapshot,
