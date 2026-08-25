@@ -91,7 +91,7 @@ void main() {
     // Asserted by geometry rather than by argument order, because a caller can
     // pass `icon:` and still have it painted last if the component's `Row`
     // ever changes underneath.
-    await pumpToolbar(tester, locale: 'en', sort: DeckListSort.recent);
+    await pumpToolbar(tester, locale: 'en', sort: DeckListSort.dateAdded);
 
     final glyph = tester.getRect(find.byIcon(Icons.swap_vert));
     final word = tester.getRect(
@@ -118,7 +118,7 @@ void main() {
     // the first pass already proved that a target which only *reports* 48 is
     // not one — a 48 box overflowing a 32 slot passes
     // `androidTapTargetGuideline` and never receives the tap.
-    await pumpToolbar(tester, locale: 'en', sort: DeckListSort.recent);
+    await pumpToolbar(tester, locale: 'en', sort: DeckListSort.dateAdded);
 
     expect(tester.getRect(find.byType(MxTextButton)).height, 48);
 

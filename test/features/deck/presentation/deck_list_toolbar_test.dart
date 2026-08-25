@@ -70,20 +70,17 @@ void main() {
       // own order. A default that changed the view would be a content change
       // dressed as a redesign.
       expect(find.byType(DeckListToolbarWidget), findsOneWidget);
-      // **The order is painted on the row, in the short form.** The first
-      // compaction pass took the control down to a bare glyph and moved the
-      // order into the sheet; a glyph says "sort" and cannot say "sorted by
-      // what", which is the half a user needs (owner review, 2026-08-25).
-      // The full wording stays in the sheet, where there is room for it.
-      expect(find.text(english.deckSortRecentShortLabel), findsOneWidget);
-      expect(find.text(english.deckSortRecentLabel), findsNothing);
+      // **The order is painted on the row, in the same words the sheet uses.**
+      // The first compaction pass took the control down to a bare glyph and
+      // moved the order into the sheet; a glyph says "sort" and cannot say
+      // "sorted by what", which is the half a user needs (owner review,
+      // 2026-08-25).
+      expect(find.text(english.deckSortRecentLabel), findsOneWidget);
       // The painted word is a value, so the announcement says what pressing it
       // does — and contains the painted word rather than replacing it.
       expect(
         find.bySemanticsLabel(
-          english.deckSortControlSemanticLabel(
-            english.deckSortRecentShortLabel,
-          ),
+          english.deckSortControlSemanticLabel(english.deckSortRecentLabel),
         ),
         findsWidgets,
       );
@@ -122,10 +119,20 @@ void main() {
     });
 
     /// Opens the sort sheet and picks [option].
+    ///
+    /// **Scoped to the sheet, and it has to be.** The row and the sheet name
+    /// the orders with the same string now, so a bare `find.text` matches the
+    /// control the tap just opened the sheet from as well as the row inside
+    /// it — and taps whichever the tree happens to hold first.
     Future<void> chooseSort(WidgetTester tester, String option) async {
       await tester.tap(find.byIcon(Icons.swap_vert));
       await tester.pumpAndSettle();
-      await tester.tap(find.text(option));
+      await tester.tap(
+        find.descendant(
+          of: find.byType(MxActionSheet),
+          matching: find.text(option),
+        ),
+      );
       await tester.pumpAndSettle();
     }
 
@@ -155,8 +162,8 @@ void main() {
           .single
           .actions;
       expect(rows.length, 4);
-      // The sheet keeps the full wording — it has the room, and `Recent`
-      // alone under "Sort decks by" says less than the row it came from.
+      // The sheet and the row name the orders the same way — one vocabulary,
+      // since the label that needed shortening was the one that lied.
       expect(
         rows.map((MxActionSheetAction row) => row.label),
         containsAll(<String>[

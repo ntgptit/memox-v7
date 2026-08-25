@@ -62,10 +62,17 @@ class DeckSummaryMetricsWidget extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Row(
-          // Centred, not baseline: the chevron is a 48px target with no text
-          // in it, and a `Baseline` cross-alignment asks every child for a
-          // baseline it does not have. The figures keep their own baseline
-          // inside [_HeroFigureLine].
+          // **Top-aligned, not centred** (owner review, 2026-08-25). Centring
+          // put the 40px figure line in the middle of a row the chevron's 48px
+          // target sets the height of, which pushed the numeral 4px further
+          // from the card's edge than the padding says it is. `start` gives
+          // those 4 back; the chevron fills the row either way.
+          //
+          // Not `baseline`: the chevron is a 48px target with no text in it,
+          // and a baseline cross-alignment asks every child for a baseline it
+          // does not have. The figures keep their own baseline inside
+          // [_HeroFigureLine].
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Expanded(
               child: _HeroFigureLine(
@@ -143,12 +150,26 @@ class _HeroFigureLine extends StatelessWidget {
                 children: <Widget>[
                   Text(
                     '$heroCount',
+                    // **The line box hugs the digits.** The rung's 40/32
+                    // leading is right for running text and wrong for a lone
+                    // numeral against a card edge: measured on the golden, it
+                    // put 32.3px of air above the ink where the padding below
+                    // the CTA is 16. Digits have no descenders and take no
+                    // diacritics, so this is the one string in the app that
+                    // can give its leading up without risking a clipped glyph.
+                    //
+                    // `height`, not a hand-tuned offset: what is left above
+                    // the ink after this is the font's own ascent-above-cap,
+                    // which only a font-specific constant could remove — and
+                    // that is a magic number tied to a file we can swap.
+                    //
                     // `headlineLarge`, one rung down from `displaySmall`
                     // (owner review, 2026-08-25): 36px was set when the
                     // numeral had a row to itself, and 32 is what fits beside
                     // its own breakdown on a 393 screen.
                     style: context.texts.headlineLarge?.copyWith(
                       fontWeight: FontWeight.w700,
+                      height: 1,
                       fontFeatures: const <FontFeature>[
                         FontFeature.tabularFigures(),
                       ],

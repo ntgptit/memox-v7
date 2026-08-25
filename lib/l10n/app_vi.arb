@@ -432,29 +432,21 @@
   "@deckFilterDueLabel": {
     "description": "Label of the deck-list filter pill when only decks with cards due are shown. Tapping it switches back to showing every deck."
   },
-  "deckSortRecentLabel": "Học gần đây",
+  "deckSortRecentLabel": "Ngày tạo",
   "@deckSortRecentLabel": {
-    "description": "Sort option: decks ordered newest first — the default. Full wording now that the options live in a sheet rather than on a narrow pill."
+    "description": "Sort option: decks in the order they were created, newest first. **Named for what it sorts by.** It read \"Recently studied\" and sorted on `createdAt` — a label making a claim the app cannot honour, because nothing records when a deck was last studied. The heading row shows this same string in about 96px, so a translation longer than roughly eleven characters will fail deck_sort_control_width_test.dart — pick the shorter phrasing over the fuller one."
   },
   "deckSortNameLabel": "Theo tên",
   "@deckSortNameLabel": {
-    "description": "Sort option: decks ordered by name, case-insensitively."
+    "description": "Sort option: decks ordered by name, case-insensitively. The heading row shows this same string in about 96px, so a translation longer than roughly eleven characters will fail deck_sort_control_width_test.dart — pick the shorter phrasing over the fuller one."
   },
-  "deckSortCardsDueLabel": "Thẻ đến hạn",
+  "deckSortCardsDueLabel": "Đến hạn",
   "@deckSortCardsDueLabel": {
-    "description": "Sort option: the deck with the biggest due backlog first. The undivided due total (BR-22), not overdue alone."
+    "description": "Sort option: the deck with the biggest due backlog first. The undivided due total (BR-22), not overdue alone. The heading row shows this same string in about 96px, so a translation longer than roughly eleven characters will fail deck_sort_control_width_test.dart — pick the shorter phrasing over the fuller one."
   },
   "deckSortProgressLabel": "Tiến độ",
   "@deckSortProgressLabel": {
-    "description": "Sort option: the least-finished deck first, by learned fraction rather than by learned count."
-  },
-  "deckSortRecentShortLabel": "Gần đây",
-  "@deckSortRecentShortLabel": {
-    "description": "The sort control on the list heading row paints the order in force, and has about 96px for it. The sheet keeps the full wording; this is the same order named in the space a heading row has."
-  },
-  "deckSortCardsDueShortLabel": "Đến hạn",
-  "@deckSortCardsDueShortLabel": {
-    "description": "The same order as deckSortCardsDueLabel, named for the heading row. The word after it in the sheet is what disambiguates there; here the sort glyph does."
+    "description": "Sort option: the least-finished deck first, by learned fraction rather than by learned count. The heading row shows this same string in about 96px, so a translation longer than roughly eleven characters will fail deck_sort_control_width_test.dart — pick the shorter phrasing over the fuller one."
   },
   "deckSortSheetTitle": "Sắp xếp deck theo",
   "@deckSortSheetTitle": {

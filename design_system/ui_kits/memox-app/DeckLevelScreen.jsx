@@ -1,10 +1,8 @@
 const { MxContentShell, MxIconButton, MxIcon, MxCard, MxBreadcrumb, MxPillButton, MxEmptyState, MxProgressBar, MxActionButton, MxSearchField, MxActionSheet, MxTextButton } = window.MemoxDesignSystem_3a620f;
 
 /** The four orders, and the glyph each gets in the sheet. */
-const SORT_LABELS = { recent: 'Recently studied', name: 'Name', cardsDue: 'Cards due', progress: 'Progress' };
-/** The same orders, named in the room a heading row has — under 96px with the glyph. */
-const SORT_SHORT = { recent: 'Recent', name: 'Name', cardsDue: 'Due', progress: 'Progress' };
-const SORT_ICONS = { recent: 'schedule', name: 'sort_by_alpha', cardsDue: 'event_available', progress: 'donut_small' };
+const SORT_LABELS = { dateAdded: 'Date added', name: 'Name', cardsDue: 'Cards due', progress: 'Progress' };
+const SORT_ICONS = { dateAdded: 'schedule', name: 'sort_by_alpha', cardsDue: 'event_available', progress: 'donut_small' };
 
 /**
  * The deck list — ONE screen, used at every depth of the tree. The root is not a
@@ -21,7 +19,7 @@ function DeckLevelScreen({ path, onOpen, onUp, onJumpTo, onNavigate, onActions, 
   // that advanced on each tap — workable at two options and unusable at four,
   // because the order you want ends up one to three taps away and the list
   // re-sorts under the finger on every one of them.
-  const [sort, setSort] = React.useState('recent');
+  const [sort, setSort] = React.useState('dateAdded');
   const [isSortSheetOpen, setSortSheetOpen] = React.useState(false);
   const [query, setQuery] = React.useState('');
 
@@ -129,10 +127,10 @@ function DeckLevelScreen({ path, onOpen, onUp, onJumpTo, onNavigate, onActions, 
               <MxPillButton label={dueOnly ? 'Due only' : 'All'} icon="filter_list" isSelected={dueOnly} onClick={() => setDueOnly(!dueOnly)} />
               <span className="mx-deckhead__sort">
                 <MxTextButton
-                  label={SORT_SHORT[sort]}
+                  label={SORT_LABELS[sort]}
                   icon="swap_vert"
                   isCompact
-                  semanticLabel={'Sort decks. Currently ' + SORT_SHORT[sort]}
+                  semanticLabel={'Sort decks. Currently ' + SORT_LABELS[sort]}
                   onClick={() => setSortSheetOpen(true)}
                 />
               </span>

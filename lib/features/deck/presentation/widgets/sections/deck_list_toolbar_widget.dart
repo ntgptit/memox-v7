@@ -104,9 +104,10 @@ class DeckListToolbarWidget extends StatelessWidget {
         // With the pill's container gone the row reads as one 12px word, one
         // 16px glyph and the heading, which is the weight the design was after.
         MxTextButton(
-          // The order it is in, in the short form — `Recent`, not `Recently
-          // studied`, which does not fit the room a heading row has.
-          label: deckSortShortLabel(context.l10n, sort),
+          // The order it is in, in the same words the sheet ticks. There
+          // used to be a second, shorter set for this row; it existed for the
+          // one label that did not fit, and that label was the one that lied.
+          label: deckSortLabel(context.l10n, sort),
           // **Leading, and the position is a claim about what the glyph is**
           // (owner review, 2026-08-25, third pass). Trailing is where a
           // *disclosure* chevron goes — `expand_more` on the old show-summary
@@ -123,7 +124,7 @@ class DeckListToolbarWidget extends StatelessWidget {
           // "Recent, button" is told a word and not what pressing it does; the
           // announcement contains the painted label rather than replacing it.
           semanticLabel: context.l10n.deckSortControlSemanticLabel(
-            deckSortShortLabel(context.l10n, sort),
+            deckSortLabel(context.l10n, sort),
           ),
           onPressed: () => showDeckSortSheet(
             context,
