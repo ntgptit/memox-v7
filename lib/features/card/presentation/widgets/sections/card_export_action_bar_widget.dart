@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
+import '../../../../../shared/widgets/mx_button_pair.dart';
 import '../../states/card_export_state.dart';
 
 /// The export sheet's action row (M4.13 W2 item 8, W5, E6, E7).
@@ -40,11 +40,6 @@ class CardExportActionBarWidget extends StatelessWidget {
   /// Runs the export. Null while one is in flight or when the scope can no
   /// longer produce one.
   final VoidCallback? onSubmit;
-
-  /// The narrowest either button stays readable at 1.0× type: `Export 128
-  /// cards` must not ellipsize into `Export…` on the control that says what
-  /// pressing it does.
-  static const double _minButtonWidth = 136;
 
   @override
   Widget build(BuildContext context) {
@@ -98,32 +93,12 @@ class CardExportActionBarWidget extends StatelessWidget {
       onPressed: isGenerating ? null : onSubmit,
     );
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final scale = MediaQuery.textScalerOf(context).scale(1);
-        final fitsSideBySide =
-            constraints.maxWidth >= _minButtonWidth * scale * 2 + AppSpacing.sm;
-        if (!fitsSideBySide) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              // Primary on top when stacked: the action the user came for
-              // should not be the one below the fold.
-              primary,
-              const SizedBox(height: AppSpacing.sm),
-              cancel,
-            ],
-          );
-        }
-
-        return Row(
-          children: <Widget>[
-            Expanded(child: cancel),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(child: primary),
-          ],
-        );
-      },
-    );
+    // The row-or-stack decision, the even split and the matched heights are
+    // `MxButtonPair`'s — this bar is where that behaviour was first written,
+    // and it moved to the shared widget when every other action pair in the app
+    // needed the same three properties. The threshold it defaults to is the one
+    // measured here: `Export 128 cards` must not ellipsize into `Export…` on
+    // the control that says what pressing it does.
+    return MxButtonPair(secondary: cancel, primary: primary);
   }
 }

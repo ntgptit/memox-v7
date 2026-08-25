@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_action_sheet.dart';
 import 'package:memox/shared/widgets/mx_breadcrumb.dart';
+import 'package:memox/shared/widgets/mx_button_pair.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
 import 'package:memox/shared/widgets/mx_confirm_dialog.dart';
 import 'package:memox/shared/widgets/mx_content_shell.dart';
@@ -88,6 +89,21 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
       label: kLongLabel,
       onPressed: _noop,
       isLoading: true,
+    ),
+    isInteractive: true,
+  ),
+  MxStressSpecimen(
+    // Two long labels, because the pair's promise is that they come out the
+    // same size however unequal the copy is — and the stress width is where an
+    // even split is tightest.
+    name: 'MxButtonPair',
+    build: () => const MxButtonPair(
+      primary: MxActionButton(label: kLongLabel, onPressed: _noop),
+      secondary: MxActionButton(
+        label: kLongTitle,
+        onPressed: _noop,
+        variant: MxActionButtonVariant.secondary,
+      ),
     ),
     isInteractive: true,
   ),

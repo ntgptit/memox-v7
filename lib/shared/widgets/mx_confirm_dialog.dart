@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'mx_action_button.dart';
+import 'mx_button_pair.dart';
 
 /// Whether the confirmed action destroys something.
 ///
@@ -95,28 +96,35 @@ class MxConfirmDialog extends StatelessWidget {
       // this fixes is that neither was announced. The banded failures elsewhere
       // mark themselves the same way (D24, D25).
       content: Semantics(liveRegion: true, child: Text(message)),
-      // `OverflowBar` stacks the actions vertically when they no longer fit
-      // side by side, which is what happens on a 320-wide screen at
-      // textScaler 2.0. Left in Material's hands rather than reimplemented.
+      // **One child, and it is `MxButtonPair` rather than the two buttons
+      // Material would put in an `OverflowBar`.** The bar sizes each action to
+      // its own label, so `Cancel` beside `Delete deck` is a small button next
+      // to a large one — two options drawn at two weights when the dialog's
+      // whole job is to present them as a choice. The pair splits the footer
+      // evenly and matches their heights, and keeps the reason the bar was
+      // here: it stacks when a 320-wide screen at textScaler 2.0 leaves no room
+      // for a row.
       actions: <Widget>[
-        MxActionButton(
-          label: cancelLabel,
-          onPressed: isSubmitting ? null : onCancel,
-          variant: MxActionButtonVariant.secondary,
-          // Focus starts on cancel for anything serious — destructive *or*
-          // cautious — so a stray Enter neither deletes nor hides anything. On
-          // a normal dialog neither action is autofocused: pre-selecting
-          // "confirm" makes the keyboard path skip the question the dialog
-          // exists to ask.
-          shouldAutofocus: _shouldFocusCancel,
-        ),
-        MxActionButton(
-          label: confirmLabel,
-          onPressed: isSubmitting ? null : onConfirm,
-          variant: _isDestructive
-              ? MxActionButtonVariant.destructive
-              : MxActionButtonVariant.primary,
-          isLoading: isSubmitting,
+        MxButtonPair(
+          secondary: MxActionButton(
+            label: cancelLabel,
+            onPressed: isSubmitting ? null : onCancel,
+            variant: MxActionButtonVariant.secondary,
+            // Focus starts on cancel for anything serious — destructive *or*
+            // cautious — so a stray Enter neither deletes nor hides anything.
+            // On a normal dialog neither action is autofocused: pre-selecting
+            // "confirm" makes the keyboard path skip the question the dialog
+            // exists to ask.
+            shouldAutofocus: _shouldFocusCancel,
+          ),
+          primary: MxActionButton(
+            label: confirmLabel,
+            onPressed: isSubmitting ? null : onConfirm,
+            variant: _isDestructive
+                ? MxActionButtonVariant.destructive
+                : MxActionButtonVariant.primary,
+            isLoading: isSubmitting,
+          ),
         ),
       ],
     );
