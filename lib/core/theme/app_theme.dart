@@ -33,14 +33,22 @@ import 'app_typography.dart';
 /// this list follows, in both directions.
 ///
 /// **Built once, and the memoisation is load-bearing rather than an
-/// optimisation.** `ThemeData.==` walks every component theme, and the ones
-/// here hold `WidgetStateProperty.resolveWith` closures — no value equality, so
-/// two themes off identical tokens are never `==`. `MemoxApp` calls these from
-/// `build()`, which runs on the settings stream; every such rebuild would hand
-/// `MaterialApp` an unequal theme, and `Theme.updateShouldNotify` is exactly
-/// `data != oldWidget.data`. One instance makes the comparison `identical` and
-/// the whole-tree invalidation stop. Sharing it is safe — `ThemeData` and both
-/// extensions are immutable — and `app_theme_identity_test.dart` pins it.
+/// optimisation.** `ThemeData.==` compares every component theme, and a
+/// component theme here holds `WidgetStateProperty.resolveWith((states) {...})`
+/// — a fresh closure on every call, with no value equality. So two themes built
+/// from identical tokens are never `==`, and with
+/// `themeAnimationDuration: Duration.zero` (`app.dart`) `MaterialApp` mounts a
+/// plain `Theme`, whose `updateShouldNotify` is exactly `data != oldWidget.data`.
+///
+/// `MemoxApp` calls these from a `build()` that would therefore invalidate
+/// **every** `Theme.of(context)` dependent in the tree each time it ran — and
+/// it runs on the settings stream, so at minimum on the cold-start loading→data
+/// emission and on every theme or language change. Returning one instance makes
+/// that comparison `identical` and the notification stop.
+///
+/// One instance is safe to share: `ThemeData` and both extensions are
+/// immutable. Tests get the same object, which is what they should be asserting
+/// on anyway. `app_theme_identity_test.dart` pins both halves.
 ThemeData buildLightTheme() => _lightTheme;
 
 ThemeData buildDarkTheme() => _darkTheme;

@@ -11352,6 +11352,64 @@ của M2.
   `mx_pill_button_theme_test.dart` (+1 widget test, ba state).
 - **Checklist phases:** 7, 13
 
+### M99.44 · `no_large_source_file` đếm dòng logic, thôi đếm doc
+
+- **Status:** **done**
+- **Goal:** Ngưỡng 400 dòng đang đếm **dòng thô** — kể cả import, comment và
+  dartdoc. Trong repo này đó là đo sai thứ: `app_colors.dart` có **400 dòng thô
+  nhưng 56 dòng logic**, 86% còn lại là lý do của từng màu. Một ngân sách mà
+  một đoạn văn tiêu hết dạy người ta xoá đoạn văn, đúng ngược với việc một rule
+  maintainability tồn tại để làm.
+- **Scope:** Một dòng trong `overrides.yaml` của ruleset `memox-v7`, cộng test
+  cho engine. **Không sửa engine** — `MaxLinesMatcher` đã hỗ trợ
+  `count_mode: logical` từ trước; và **không sửa registry chung**, vì
+  `common-file-rules.yaml` còn phục vụ memox, memox-v4, memox-v5 và
+  memox-design-jsx, đổi mặc định ở đó là đổi gate của bốn project khác.
+- **Hoá ra project đã tự quyết định điều này rồi, chỉ sót một nửa.** Có **hai**
+  rule độ dài file, cùng `type: max_lines`, cùng scope `source_files`:
+  - `common.max_file_lines` — **error**, đã override thành lib-only, 500,
+    `count_mode: logical`;
+  - `common.no_large_source_file` — **warning**, 400, để nguyên đếm thô.
+  Tức là cùng một phép đo ở hai mức nghiêm trọng, nhưng **hai đơn vị khác
+  nhau**, nên cái đáng lẽ là một cái thang thì không phải thang. Nay cả hai
+  cùng đơn vị: cảnh báo ở 400, chặn ở 500.
+- **Đo trước khi đổi, trên toàn repo (1195 file):** tỉ lệ logic/thô trung vị là
+  **0,63**. Sau khi đổi, số file vượt 400 logic là **0** — mọi file vượt đều là
+  `test/drift/generated/**`, vốn đã nằm trong `exclude`. File thật lớn nhất là
+  `card_import_repository_test.dart` ở **312 logic**. Nên ngưỡng vẫn còn răng
+  (còn 88 dòng dư cho file lớn nhất) chứ không thành vô hiệu.
+- **Chứng minh bằng probe chứ không bằng suy luận:** dựng tạm hai file trong
+  `lib/core/theme/` — một file 453 dòng toàn dartdoc, một file 452 dòng toàn
+  `const`. File doc **qua**, file code **báo 452**. Xoá sau khi đo.
+- **Trả lại ba chỗ đã bị ép cắt ở M99.42 và M99.43:** trỏ chéo từ
+  `primaryAccent` sang `selectedInk` bị rút xuống hai dòng chỉ vì
+  `app_colors.dart` chạm trần 400 thô (nó ở 56 logic); doc memo hoá trong
+  `app_theme.dart` bị rút từ 19 xuống 10 dòng. Cả hai về lại bản đầy đủ.
+  `app_theme_identity_test.dart` **vẫn tách riêng** — việc tách đứng vững vì
+  nó là một câu hỏi khác (identity, không phải bảng màu), nên chỉ sửa lại phần
+  doc từng viện dẫn ngưỡng 400 làm lý do.
+- **Output:** `registries/projects/memox-v7/config/overrides.yaml`
+  (`count_mode: logical` + comment nêu cái thang và con số 400/56),
+  `tests/test_max_lines_rule.py` (+2 case), `app_colors.dart` và
+  `app_theme.dart` (doc về bản đầy đủ), `app_theme_identity_test.dart` (lý do
+  tách).
+- **Acceptance criteria:**
+  - [x] Dartdoc `///` không bị tính — case riêng trong suite của guard, vì
+        `///` bắt được nhờ tiền tố `//` chứ không nhờ một nhánh của riêng nó,
+        và đó là thứ dễ vỡ khi ai đó dọn `_is_logical_source_line`.
+  - [x] `import` / `export` / `part` không bị tính.
+  - [x] Chế độ mới **vẫn báo** file dài thật — case đối chứng, vì mục đích là
+        đếm đúng hơn chứ không phải đếm nhẹ đi.
+  - [x] `python -m pytest -q` trong `code-verification-guard-v2/`: **179/179**
+        (177 trước + 2 mới).
+  - [x] Guard `memox-v7` 0 lỗi 0 cảnh báo; `check_architecture.sh` và
+        `check_docs.py` xanh.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.43
+- **Tests required:** `code-verification-guard-v2/tests/test_max_lines_rule.py`
+  (+2 case).
+- **Checklist phases:** 4
+
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 
 Ghi lại cụ thể, vì "mất một bộ lint" là câu quá mơ hồ để ai đó sau này biết

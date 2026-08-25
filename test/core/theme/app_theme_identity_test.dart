@@ -16,8 +16,9 @@ import 'package:memox/core/theme/app_theme.dart';
 ///
 /// So the builders memoise, and this file asserts the two halves of that: that
 /// one instance comes back, and that the equality it is standing in for really
-/// is unavailable. Splitting it from `app_theme_test.dart` keeps that file
-/// about what the palette *looks* like — and both under the 400-line guard.
+/// is unavailable. Split from `app_theme_test.dart` on the seam that file
+/// already had: everything there is about what the palette *looks* like, and
+/// nothing here is about colour at all.
 void main() {
   group('theme identity', () {
     test('each theme is built once', () {
