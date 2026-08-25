@@ -11742,7 +11742,7 @@ của M2.
   nhất. Kiểm chứng lại trên chính thư mục tạm còn sót: nó giữ **2** ảnh
   `settings_*` trong khi repo có **4**.
 
-  Bốn ảnh còn thiếu so với sáu đã báo cáo:
+  Mười ảnh, gộp theo control — sáu đã báo cáo, cộng bốn được tìm ra sau:
   - `reminder_settings_{light,dark}.png` — `Switch`
   - `tag_filter_sheet_{light,dark}.png` — `CheckboxListTile`
   - `card_import_preview_light.png`, `card_import_preview_valid_light.png` —
