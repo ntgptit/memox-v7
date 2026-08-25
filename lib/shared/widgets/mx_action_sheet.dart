@@ -23,6 +23,7 @@ class MxActionSheetAction {
     this.icon,
     this.variant = MxActionSheetActionVariant.normal,
     this.isEnabled = true,
+    this.isSelected = false,
   });
 
   /// Already-localized.
@@ -36,6 +37,18 @@ class MxActionSheetAction {
   /// purpose: hiding an unavailable action makes the menu change shape between
   /// visits, and the user cannot learn where anything is.
   final bool isEnabled;
+
+  /// Whether this row is the state the app is already in.
+  ///
+  /// **For a sheet that chooses rather than acts.** A list of sort orders is
+  /// still a list of actions — each one does something — but one of them is
+  /// where the user already is, and a sheet that does not say which turns
+  /// "change the order" into "guess the order". It draws a trailing check and
+  /// announces itself as selected, so the fact does not live in the tick alone.
+  ///
+  /// Off by default: an action sheet that performs things has no current state
+  /// to mark, and every existing caller is one of those.
+  final bool isSelected;
 }
 
 /// The mobile action menu.
@@ -129,6 +142,11 @@ class _SheetRow extends StatelessWidget {
 
     return ListTile(
       enabled: action.isEnabled,
+      // **The row carries the state, not just the tick.** `selected: true`
+      // alone would repaint the row and tell a screen reader nothing; the
+      // explicit flag is what makes "Recently studied, selected" the
+      // announcement rather than "Recently studied".
+      selected: action.isSelected,
       onTap: action.isEnabled ? action.onPressed : null,
       leading: action.icon == null
           ? null
@@ -153,6 +171,15 @@ class _SheetRow extends StatelessWidget {
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       ),
+      // Brand ink, and only here: the check is the one thing in the sheet
+      // saying "you are here", so it is the one thing allowed to be the accent.
+      trailing: action.isSelected
+          ? Icon(
+              Icons.check,
+              size: AppIconSize.md,
+              color: context.colors.primary,
+            )
+          : null,
     );
   }
 }

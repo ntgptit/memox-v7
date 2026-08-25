@@ -1,4 +1,8 @@
-const { MxContentShell, MxIconButton, MxIcon, MxCard, MxBreadcrumb, MxPillButton, MxEmptyState, MxProgressBar, MxActionButton, MxSearchField } = window.MemoxDesignSystem_3a620f;
+const { MxContentShell, MxIconButton, MxIcon, MxCard, MxBreadcrumb, MxPillButton, MxEmptyState, MxProgressBar, MxActionButton, MxSearchField, MxActionSheet } = window.MemoxDesignSystem_3a620f;
+
+/** The four orders, and the glyph each gets in the sheet. */
+const SORT_LABELS = { recent: 'Recently studied', name: 'Name', cardsDue: 'Cards due', progress: 'Progress' };
+const SORT_ICONS = { recent: 'schedule', name: 'sort_by_alpha', cardsDue: 'event_available', progress: 'donut_small' };
 
 /**
  * The deck list — ONE screen, used at every depth of the tree. The root is not a
@@ -11,7 +15,12 @@ const { MxContentShell, MxIconButton, MxIcon, MxCard, MxBreadcrumb, MxPillButton
  */
 function DeckLevelScreen({ path, onOpen, onUp, onJumpTo, onNavigate, onActions, onRowActions, onCreate, onStudy, isCompact }) {
   const [dueOnly, setDueOnly] = React.useState(false);
-  const [byName, setByName] = React.useState(true);
+  // One of four orders, chosen from a sheet. It was a boolean behind a pill
+  // that advanced on each tap — workable at two options and unusable at four,
+  // because the order you want ends up one to three taps away and the list
+  // re-sorts under the finger on every one of them.
+  const [sort, setSort] = React.useState('recent');
+  const [isSortSheetOpen, setSortSheetOpen] = React.useState(false);
   const [query, setQuery] = React.useState('');
 
   const deck = path[path.length - 1];
@@ -27,7 +36,14 @@ function DeckLevelScreen({ path, onOpen, onUp, onJumpTo, onNavigate, onActions, 
 
   const all = deck.children || [];
   let rows = dueOnly ? all.filter((r) => r.due > 0) : all;
-  rows = [...rows].sort((a, b) => (byName ? a.name.localeCompare(b.name) : b.due - a.due));
+  rows = [...rows].sort((a, b) => {
+    if (sort === 'name') return a.name.localeCompare(b.name);
+    if (sort === 'cardsDue') return b.due - a.due;
+    // Fraction, not count: a 900-card deck at 90% has more cards left than a
+    // 20-card deck at 10% and is nonetheless the one closer to done.
+    if (sort === 'progress') return (a.cards ? a.learned / a.cards : 0) - (b.cards ? b.learned / b.cards : 0);
+    return 0;
+  });
 
   const totalDue = all.reduce((n, r) => n + r.due, 0);
   // The panel or nothing. The dismiss button and the link that brought a
@@ -96,11 +112,42 @@ function DeckLevelScreen({ path, onOpen, onUp, onJumpTo, onNavigate, onActions, 
               ? <LevelSummary deck={deck} isRoot={isRoot} totalDue={totalDue} onStudy={onStudy} />
               : null}
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', margin: (summaryOpen ? 'var(--space-md)' : '0') + ' 0 var(--space-md)' }}>
-              <p className="mx-section-label" style={{ margin: 0, flex: 1 }}>{isRoot ? 'Your decks' : 'Sub-decks'}</p>
+            {/* The heading and its one control. The sort lost its pill: at
+                149.8px on a 393 screen it was 41.5% of the row against an
+                88.6px heading, so the adjustment outweighed the thing it
+                named (owner review, 2026-08-25). A glyph cannot say
+                "recently studied", so the order it is in lives on the
+                sheet's tick and in the control's own label. */}
+            <div className="mx-deckhead" style={{ margin: (summaryOpen ? 'var(--space-md)' : '0') + ' 0 var(--space-md)' }}>
+              <p className="mx-deckhead__label">{isRoot ? 'Your decks' : 'Sub-decks'}</p>
+              {/* The filter keeps its pill here and has none in the app, where
+                  it moved into the bar's overflow menu. A recorded divergence:
+                  this kit has no overflow to move it into, and a control with
+                  no way to turn it back ON is worse than one that differs. */}
               <MxPillButton label={dueOnly ? 'Due only' : 'All'} icon="filter_list" isSelected={dueOnly} onClick={() => setDueOnly(!dueOnly)} />
-              <MxPillButton label={byName ? 'A–Z' : 'Due first'} icon="swap_vert" isSelected={!byName} semanticLabel={byName ? 'Sort by name' : 'Sort by cards due'} onClick={() => setByName(!byName)} />
+              <button
+                type="button"
+                className="mx-deckhead__sort"
+                aria-label={'Sort decks. Currently ' + SORT_LABELS[sort]}
+                title={'Sort decks. Currently ' + SORT_LABELS[sort]}
+                onClick={() => setSortSheetOpen(true)}
+              >
+                <MxIcon name="swap_vert" size="var(--icon-sm)" />
+              </button>
             </div>
+
+            {isSortSheetOpen ? (
+              <MxActionSheet
+                title="Sort decks by"
+                onDismiss={() => setSortSheetOpen(false)}
+                actions={Object.keys(SORT_LABELS).map((key) => ({
+                  label: SORT_LABELS[key],
+                  icon: SORT_ICONS[key],
+                  isSelected: key === sort,
+                  onPress: () => { setSort(key); setSortSheetOpen(false); },
+                }))}
+              />
+            ) : null}
 
             {/* `lg`, not `md`: the track seated on each card's base makes the
                 bottom boundary loud, so a 12px gap after it reads as part of

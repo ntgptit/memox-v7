@@ -20,12 +20,34 @@ enum DeckListFilter {
 /// The repository's own order is by creation, which is [DeckListSort.recent].
 /// Sorting here rather than in SQL keeps it a view choice: a second screen wanting
 /// a different order does not become a second query.
+///
+/// **Four, since the sort control became a sheet** (owner decision, 2026-08-25).
+/// Two were all a toggle could carry — a control that cycles has to be pressed
+/// once per option, so a third would have made the order the user wanted three
+/// taps away and unpredictable in between. A sheet lists them, so the list can
+/// answer the questions a learner actually has about their library.
 enum DeckListSort {
   /// Newest first — the order decks were created in, reversed.
   recent,
 
   /// By name, case-insensitively.
   name,
+
+  /// Most cards due first — the deck with the biggest backlog leads.
+  ///
+  /// The undivided due total, the same figure the tile's chip prints (BR-22),
+  /// not overdue alone: "what should I open first" is answered by the whole of
+  /// today's work, and a deck with 30 due today outranks one with 4 that missed
+  /// their day.
+  cardsDue,
+
+  /// Least learned first — the deck with the most work left leads.
+  ///
+  /// Ascending on [DeckSummary.learnedFraction], not on the learned count: a
+  /// 600-card deck at 80% has more cards left than a 40-card deck at 10% and is
+  /// nonetheless the one closer to done. A deck with no cards has a fraction of
+  /// 0 and sorts to the front, which is honest — nothing in it is learned.
+  progress,
 }
 
 /// How much of the level summary hero is on screen.
@@ -85,6 +107,15 @@ List<DeckSummary> applyDeckListView(
       ),
       DeckListSort.name => a.summary.deck.name.toLowerCase().compareTo(
         b.summary.deck.name.toLowerCase(),
+      ),
+      // Descending: the biggest backlog leads, because the question this order
+      // answers is "where is the work".
+      DeckListSort.cardsDue => b.summary.dueCardCount.compareTo(
+        a.summary.dueCardCount,
+      ),
+      // Ascending: the least-finished deck leads, for the same reason.
+      DeckListSort.progress => a.summary.learnedFraction.compareTo(
+        b.summary.learnedFraction,
       ),
     };
     if (primary != 0) return primary;

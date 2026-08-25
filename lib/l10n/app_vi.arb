@@ -434,19 +434,32 @@
   },
   "deckSortRecentLabel": "Học gần đây",
   "@deckSortRecentLabel": {
-    "description": "Label of the deck-list sort pill when decks are ordered newest first."
+    "description": "Sort option: decks ordered newest first — the default. Full wording now that the options live in a sheet rather than on a narrow pill."
   },
   "deckSortNameLabel": "Theo tên",
   "@deckSortNameLabel": {
-    "description": "Label of the deck-list sort pill when decks are ordered by name. An abbreviation on purpose - the pill is narrow - with the full wording in the screen-reader label."
+    "description": "Sort option: decks ordered by name, case-insensitively."
   },
-  "deckSortRecentSemanticLabel": "Đang sắp xếp theo mới nhất. Kích hoạt để sắp xếp theo tên.",
-  "@deckSortRecentSemanticLabel": {
-    "description": "Screen-reader label for the sort pill in its recent state."
+  "deckSortCardsDueLabel": "Thẻ đến hạn",
+  "@deckSortCardsDueLabel": {
+    "description": "Sort option: the deck with the biggest due backlog first. The undivided due total (BR-22), not overdue alone."
   },
-  "deckSortNameSemanticLabel": "Đang sắp xếp theo tên. Kích hoạt để sắp xếp theo mới nhất.",
-  "@deckSortNameSemanticLabel": {
-    "description": "Screen-reader label for the sort pill in its by-name state."
+  "deckSortProgressLabel": "Tiến độ",
+  "@deckSortProgressLabel": {
+    "description": "Sort option: the least-finished deck first, by learned fraction rather than by learned count."
+  },
+  "deckSortSheetTitle": "Sắp xếp deck theo",
+  "@deckSortSheetTitle": {
+    "description": "Title of the bottom sheet that chooses the deck-list order. Names the axis, because each row names a value of it."
+  },
+  "deckSortControlSemanticLabel": "Sắp xếp deck. Hiện đang {current}",
+  "@deckSortControlSemanticLabel": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      }
+    },
+    "description": "Screen-reader label of the sort control on the list heading row. The control paints only a glyph, so the current order — which a sighted user reads off the sheet — has to be spoken here or it is not available at all."
   },
   "decksNoDueTitle": "Hiện chưa có gì đến hạn",
   "@decksNoDueTitle": {
