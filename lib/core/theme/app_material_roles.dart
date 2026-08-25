@@ -12,7 +12,10 @@ import 'app_colors.dart';
 /// other's business: the first set is edited when the product changes its mind,
 /// the second when a Material component finally renders.
 ///
-/// **Why every one is declared rather than generated.** `ColorScheme.fromSeed`
+/// **Why almost every one is declared rather than generated.** The twelve
+/// `*Fixed` roles at the foot of this class are the exception, and the block
+/// above them says why the objection below does not reach them.
+/// `ColorScheme.fromSeed`
 /// produces ~30 roles, and an audit found it had generated a neutral-grey
 /// `surfaceContainer` ladder, a **pink** `tertiary`, and an `error` red
 /// competing with `danger` — all in hue families this app never uses. None had
@@ -115,6 +118,87 @@ abstract final class AppMaterialRoles {
   static const Color onInverseSurfaceDark = Color(0xFF23253A);
   static const Color inversePrimaryLight = Color(0xFFA9A9E0);
   static const Color inversePrimaryDark = Color(0xFF3A3A9B);
+
+  // --- The `*Fixed` families -----------------------------------------------
+  //
+  // **One constant per role, with no `Light`/`Dark` suffix, and that is the
+  // whole point.** M3 defines a `*Fixed` role as "a substitute for the
+  // container that is the same colour for the dark and light themes"
+  // (`ColorScheme.primaryFixed`, and `color_spec_2021.ts` states it as a tone
+  // that does not read `s.isDark`). Every other token in this file comes in a
+  // pair because its two halves are different decisions; these do not, so
+  // giving them a pair would create a way to spell the invariant wrongly.
+  // `color_scheme_roles_test.dart` asserts light and dark resolve equal, but
+  // the naming is what makes that assertion hard to break.
+  //
+  // **These twelve are generated, and they are the only generated colours in
+  // the app.** Everything else here is hand-tuned, and the file header explains
+  // why: `fromSeed` once produced a pink `tertiary` and a grey surface ladder
+  // on a navy app. That objection does not transfer. A `*Fixed` role has no
+  // hand-tuned counterpart to drift from — it is defined *as* a tone of its
+  // own family's palette, and the tones are fixed by the spec at 90 / 80 / 10
+  // / 30. Choosing them by eye would be inventing a number the spec already
+  // states.
+  //
+  // **Each palette is keyed on this app's own role colour, not on the seed.**
+  // M3 derives `secondaryPalette` and `tertiaryPalette` from the seed by hue
+  // rotation, which is exactly what produced the pink `tertiary`. Keying each
+  // family on [secondaryLight] / [tertiaryLight] keeps the hues the app chose
+  // — HSL 224-244, inside the navy/indigo band `_isInFamily` allows — while
+  // taking the tones from the spec.
+  //
+  // **The cost, stated.** A generated tone carries the palette's full chroma,
+  // and A2's hand-tuned containers deliberately carry less: `primaryFixedDim`
+  // sits at chroma 0.247 where `primaryContainerLight` sits at 0.145. So these
+  // read as more saturated than the containers beside them. That is accepted
+  // rather than overlooked (owner decision, 2026-08-25) — the alternative was
+  // hand-tuning them into the A2 chroma band, which would have put the app's
+  // numbers back in front of the spec's for a role the spec fully determines.
+  //
+  // Nothing renders them today. They are declared so that the day something
+  // does, it draws a tone of this app's palette rather than `primary` — which
+  // is what an undeclared `*Fixed` resolves to (`ColorScheme.primaryFixed`
+  // reads `_primaryFixed ?? primary`), a fill-level tone in a container-level
+  // slot, and different in each brightness.
+  //
+  // Contrast, measured against what the spec's own `ContrastCurve` asks at
+  // standard contrast — `on*Fixed` >= 7:1 and `on*FixedVariant` >= 4.5:1, each
+  // on both `*Fixed` and `*FixedDim`. The tightest of the twelve pairings is
+  // `onTertiaryFixedVariant` on `tertiaryFixedDim` at 5.45:1.
+
+  /// Primary palette (keyed on [AppColors.primaryLight]) at tone 90.
+  static const Color primaryFixed = Color(0xFFE1E0FF);
+
+  /// The same palette at tone 80 — ten tones dimmer, which is the
+  /// `toneDeltaPair` the spec pins between this and [primaryFixed].
+  static const Color primaryFixedDim = Color(0xFFC0C1FF);
+
+  /// Tone 10. 13.26:1 on [primaryFixed], 10.01:1 on [primaryFixedDim].
+  static const Color onPrimaryFixed = Color(0xFF07006D);
+
+  /// Tone 30 — the lower-emphasis ink. 7.30:1 and 5.51:1 on the same pair.
+  static const Color onPrimaryFixedVariant = Color(0xFF3736A5);
+
+  /// Secondary palette (keyed on [secondaryLight]) at tone 90.
+  static const Color secondaryFixed = Color(0xFFDDE2FB);
+  static const Color secondaryFixedDim = Color(0xFFC1C6DE);
+
+  /// Tone 10. 13.34:1 on [secondaryFixed], 10.12:1 on [secondaryFixedDim].
+  static const Color onSecondaryFixed = Color(0xFF151B2C);
+
+  /// Tone 30. 7.30:1 and 5.54:1.
+  static const Color onSecondaryFixedVariant = Color(0xFF404659);
+
+  /// Tertiary palette (keyed on [tertiaryLight]) at tone 90.
+  static const Color tertiaryFixed = Color(0xFFCBE5FF);
+  static const Color tertiaryFixedDim = Color(0xFFAACAE9);
+
+  /// Tone 10. 13.17:1 on [tertiaryFixed], 10.03:1 on [tertiaryFixedDim].
+  static const Color onTertiaryFixed = Color(0xFF121D26);
+
+  /// Tone 30, and the tightest pairing of the twelve: 7.16:1 on
+  /// [tertiaryFixed] and 5.45:1 on [tertiaryFixedDim], against a 4.5 floor.
+  static const Color onTertiaryFixedVariant = Color(0xFF2A4A64);
 }
 
 /// The ink of a control that is **selected** — a selected pill's label, the

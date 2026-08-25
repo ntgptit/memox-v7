@@ -40,6 +40,49 @@ void main() {
     }
   });
 
+  test('fixed roles are identical in light and dark', () {
+    // The one property the two tests above structurally cannot see. Both ask
+    // whether a role's value is *ours*; neither compares the two schemes to
+    // each other, so twelve roles disagreed across brightness for as long as
+    // they were undeclared and every gate stayed green.
+    final light = schemes['light']!;
+    final dark = schemes['dark']!;
+
+    final fixed = <String, (Color, Color)>{
+      'primaryFixed': (light.primaryFixed, dark.primaryFixed),
+      'primaryFixedDim': (light.primaryFixedDim, dark.primaryFixedDim),
+      'onPrimaryFixed': (light.onPrimaryFixed, dark.onPrimaryFixed),
+      'onPrimaryFixedVariant': (
+        light.onPrimaryFixedVariant,
+        dark.onPrimaryFixedVariant,
+      ),
+      'secondaryFixed': (light.secondaryFixed, dark.secondaryFixed),
+      'secondaryFixedDim': (light.secondaryFixedDim, dark.secondaryFixedDim),
+      'onSecondaryFixed': (light.onSecondaryFixed, dark.onSecondaryFixed),
+      'onSecondaryFixedVariant': (
+        light.onSecondaryFixedVariant,
+        dark.onSecondaryFixedVariant,
+      ),
+      'tertiaryFixed': (light.tertiaryFixed, dark.tertiaryFixed),
+      'tertiaryFixedDim': (light.tertiaryFixedDim, dark.tertiaryFixedDim),
+      'onTertiaryFixed': (light.onTertiaryFixed, dark.onTertiaryFixed),
+      'onTertiaryFixedVariant': (
+        light.onTertiaryFixedVariant,
+        dark.onTertiaryFixedVariant,
+      ),
+    };
+
+    fixed.forEach((name, pair) {
+      expect(
+        pair.$1,
+        pair.$2,
+        reason:
+            '$name differs between light and dark — a `*Fixed` role is one '
+            'colour for both themes, so it must be one constant',
+      );
+    });
+  });
+
   test('no role strays outside an A2 hue family', () {
     // Independent of the check above rather than implied by it: membership
     // says the value came from the palette, this says the palette itself has
@@ -93,8 +136,15 @@ Map<String, Color> _roles(ColorScheme s) => <String, Color>{
   'surfaceTint': s.surfaceTint,
   'shadow': s.shadow,
   'scrim': s.scrim,
-  // Brightness-independent by definition, so both schemes carry the same
-  // light-container values.
+  // Brightness-independent by definition — and that is now true rather than
+  // assumed. Until M99.47 these twelve were the only roles left undeclared,
+  // so each resolved through `ColorScheme`'s own fallback to its *base* role
+  // (`_primaryFixed ?? primary`): a fill-level tone where the spec asks for a
+  // container-level one, and a different value in each brightness. The comment
+  // that stood here claimed the opposite, and the two assertions in this file
+  // could not catch it — `primaryLight` and `primaryDark` are both palette
+  // tokens in the right hue family, so both passed while disagreeing.
+  // `fixed roles are identical in light and dark` below is what closes that.
   'primaryFixed': s.primaryFixed,
   'primaryFixedDim': s.primaryFixedDim,
   'onPrimaryFixed': s.onPrimaryFixed,

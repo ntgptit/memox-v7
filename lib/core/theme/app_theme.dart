@@ -58,24 +58,41 @@ final ThemeData _lightTheme = _buildTheme(
   // ships is a hand-tuned constant, and `fromSeed` had been generating a
   // parallel set nobody rendered — a neutral-grey surfaceContainer ladder, a
   // pink `tertiary`, a second red for `error` — which read as "there is a
-  // tonal palette" when there is none. What is not passed falls back to the
-  // constructor's own derivations (the `*Fixed` family lands on its base
-  // role); nothing reads those, and `app_theme_test.dart` is what notices if
-  // something starts to.
+  // tonal palette" when there is none.
+  //
+  // **Every role the SDK offers is now passed**, the twelve `*Fixed` included.
+  // They were the last ones left to the constructor's own fallback, which
+  // resolves each to its *base* role (`_primaryFixed ?? primary`) — a
+  // fill-level tone in a container-level slot, and a different value in each
+  // brightness for a role the spec defines as brightness-independent.
   const ColorScheme(
     brightness: Brightness.light,
     primary: AppColors.primaryLight,
     onPrimary: AppColors.onPrimaryLight,
     primaryContainer: AppMaterialRoles.primaryContainerLight,
     onPrimaryContainer: AppMaterialRoles.onPrimaryContainerLight,
+    // The `*Fixed` family carries no brightness suffix because the role is
+    // defined as the same colour in both themes; see `AppMaterialRoles`.
+    primaryFixed: AppMaterialRoles.primaryFixed,
+    primaryFixedDim: AppMaterialRoles.primaryFixedDim,
+    onPrimaryFixed: AppMaterialRoles.onPrimaryFixed,
+    onPrimaryFixedVariant: AppMaterialRoles.onPrimaryFixedVariant,
     secondary: AppMaterialRoles.secondaryLight,
     onSecondary: AppMaterialRoles.onSecondaryLight,
     secondaryContainer: AppMaterialRoles.secondaryContainerLight,
     onSecondaryContainer: AppMaterialRoles.onSecondaryContainerLight,
+    secondaryFixed: AppMaterialRoles.secondaryFixed,
+    secondaryFixedDim: AppMaterialRoles.secondaryFixedDim,
+    onSecondaryFixed: AppMaterialRoles.onSecondaryFixed,
+    onSecondaryFixedVariant: AppMaterialRoles.onSecondaryFixedVariant,
     tertiary: AppMaterialRoles.tertiaryLight,
     onTertiary: AppMaterialRoles.onTertiaryLight,
     tertiaryContainer: AppMaterialRoles.tertiaryContainerLight,
     onTertiaryContainer: AppMaterialRoles.onTertiaryContainerLight,
+    tertiaryFixed: AppMaterialRoles.tertiaryFixed,
+    tertiaryFixedDim: AppMaterialRoles.tertiaryFixedDim,
+    onTertiaryFixed: AppMaterialRoles.onTertiaryFixed,
+    onTertiaryFixedVariant: AppMaterialRoles.onTertiaryFixedVariant,
     // `error` is `danger`, not a second red system.
     error: AppColors.dangerLight,
     onError: AppMaterialRoles.onErrorLight,
@@ -121,14 +138,28 @@ final ThemeData _darkTheme = _buildTheme(
     onPrimary: AppColors.onPrimaryDark,
     primaryContainer: AppMaterialRoles.primaryContainerDark,
     onPrimaryContainer: AppMaterialRoles.onPrimaryContainerDark,
+    // The `*Fixed` family carries no brightness suffix because the role is
+    // defined as the same colour in both themes; see `AppMaterialRoles`.
+    primaryFixed: AppMaterialRoles.primaryFixed,
+    primaryFixedDim: AppMaterialRoles.primaryFixedDim,
+    onPrimaryFixed: AppMaterialRoles.onPrimaryFixed,
+    onPrimaryFixedVariant: AppMaterialRoles.onPrimaryFixedVariant,
     secondary: AppMaterialRoles.secondaryDark,
     onSecondary: AppMaterialRoles.onSecondaryDark,
     secondaryContainer: AppMaterialRoles.secondaryContainerDark,
     onSecondaryContainer: AppMaterialRoles.onSecondaryContainerDark,
+    secondaryFixed: AppMaterialRoles.secondaryFixed,
+    secondaryFixedDim: AppMaterialRoles.secondaryFixedDim,
+    onSecondaryFixed: AppMaterialRoles.onSecondaryFixed,
+    onSecondaryFixedVariant: AppMaterialRoles.onSecondaryFixedVariant,
     tertiary: AppMaterialRoles.tertiaryDark,
     onTertiary: AppMaterialRoles.onTertiaryDark,
     tertiaryContainer: AppMaterialRoles.tertiaryContainerDark,
     onTertiaryContainer: AppMaterialRoles.onTertiaryContainerDark,
+    tertiaryFixed: AppMaterialRoles.tertiaryFixed,
+    tertiaryFixedDim: AppMaterialRoles.tertiaryFixedDim,
+    onTertiaryFixed: AppMaterialRoles.onTertiaryFixed,
+    onTertiaryFixedVariant: AppMaterialRoles.onTertiaryFixedVariant,
     error: AppColors.dangerDark,
     onError: AppMaterialRoles.onErrorDark,
     errorContainer: AppMaterialRoles.errorContainerDark,

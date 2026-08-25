@@ -363,6 +363,114 @@
       "hueDistanceFromDarkSurfaceFamily": 7.8586278586278695,
       "carriesNoHue": false
     },
+    "colorScheme.primaryFixed": {
+      "hex": "#E1E0FF",
+      "opaque": true,
+      "hue": 241.93548387096774,
+      "saturation": 1.0,
+      "chroma": 0.1215686274509804,
+      "lightnessStar": 90.10894262484236,
+      "classifiedAs": "role-or-on-color"
+    },
+    "colorScheme.primaryFixedDim": {
+      "hex": "#C0C1FF",
+      "opaque": true,
+      "hue": 239.04761904761904,
+      "saturation": 1.0,
+      "chroma": 0.24705882352941178,
+      "lightnessStar": 79.93509111664461,
+      "classifiedAs": "role-or-on-color"
+    },
+    "colorScheme.onPrimaryFixed": {
+      "hex": "#07006D",
+      "opaque": true,
+      "hue": 243.8532110091743,
+      "saturation": 0.9999999999999999,
+      "chroma": 0.42745098039215684,
+      "lightnessStar": 10.177942060258243,
+      "classifiedAs": "role-or-on-color"
+    },
+    "colorScheme.onPrimaryFixedVariant": {
+      "hex": "#3736A5",
+      "opaque": true,
+      "hue": 240.54054054054058,
+      "saturation": 0.5068493150684932,
+      "chroma": 0.43529411764705883,
+      "lightnessStar": 29.830365255360746,
+      "classifiedAs": "role-or-on-color"
+    },
+    "colorScheme.secondaryFixed": {
+      "hex": "#DDE2FB",
+      "opaque": true,
+      "hue": 230.00000000000003,
+      "saturation": 0.7894736842105262,
+      "chroma": 0.11764705882352933,
+      "lightnessStar": 90.19715087023268,
+      "classifiedAs": "role-or-on-color"
+    },
+    "colorScheme.secondaryFixedDim": {
+      "hex": "#C1C6DE",
+      "opaque": true,
+      "hue": 229.65517241379308,
+      "saturation": 0.30526315789473696,
+      "chroma": 0.11372549019607847,
+      "lightnessStar": 80.17934113726609,
+      "classifiedAs": "role-or-on-color"
+    },
+    "colorScheme.onSecondaryFixed": {
+      "hex": "#151B2C",
+      "opaque": true,
+      "hue": 224.34782608695653,
+      "saturation": 0.35384615384615387,
+      "chroma": 0.09019607843137255,
+      "lightnessStar": 9.993260108763778,
+      "classifiedAs": "role-or-on-color"
+    },
+    "colorScheme.onSecondaryFixedVariant": {
+      "hex": "#404659",
+      "opaque": true,
+      "hue": 225.6,
+      "saturation": 0.1633986928104575,
+      "chroma": 0.0980392156862745,
+      "lightnessStar": 29.890738036548463,
+      "classifiedAs": "role-or-on-color"
+    },
+    "colorScheme.tertiaryFixed": {
+      "hex": "#CBE5FF",
+      "opaque": true,
+      "hue": 210.0,
+      "saturation": 0.9999999999999994,
+      "chroma": 0.20392156862745103,
+      "lightnessStar": 89.83850544044509,
+      "classifiedAs": "role-or-on-color"
+    },
+    "colorScheme.tertiaryFixedDim": {
+      "hex": "#AACAE9",
+      "opaque": true,
+      "hue": 209.52380952380952,
+      "saturation": 0.5887850467289719,
+      "chroma": 0.24705882352941178,
+      "lightnessStar": 79.99379429618817,
+      "classifiedAs": "role-or-on-color"
+    },
+    "colorScheme.onTertiaryFixed": {
+      "hex": "#121D26",
+      "opaque": true,
+      "hue": 207.0,
+      "saturation": 0.35714285714285715,
+      "chroma": 0.0784313725490196,
+      "lightnessStar": 10.162526243438652,
+      "classifiedAs": "role-or-on-color"
+    },
+    "colorScheme.onTertiaryFixedVariant": {
+      "hex": "#2A4A64",
+      "opaque": true,
+      "hue": 206.8965517241379,
+      "saturation": 0.40845070422535207,
+      "chroma": 0.22745098039215686,
+      "lightnessStar": 30.181226820912947,
+      "classifiedAs": "role-or-on-color"
+    },
     "theme.scaffoldBackgroundColor": {
       "hex": "#F4F5F8",
       "opaque": true,
@@ -928,6 +1036,114 @@
       "hueDistanceFromDeclaredSeed": 0.0,
       "hueDistanceFromDarkSurfaceFamily": 3.2432432432432563,
       "carriesNoHue": false
+    },
+    "colorScheme.primaryFixed": {
+      "hex": "#E1E0FF",
+      "opaque": true,
+      "hue": 241.93548387096774,
+      "saturation": 1.0,
+      "chroma": 0.1215686274509804,
+      "lightnessStar": 90.10894262484236,
+      "classifiedAs": "role-or-on-color"
+    },
+    "colorScheme.primaryFixedDim": {
+      "hex": "#C0C1FF",
+      "opaque": true,
+      "hue": 239.04761904761904,
+      "saturation": 1.0,
+      "chroma": 0.24705882352941178,
+      "lightnessStar": 79.93509111664461,
+      "classifiedAs": "role-or-on-color"
+    },
+    "colorScheme.onPrimaryFixed": {
+      "hex": "#07006D",
+      "opaque": true,
+      "hue": 243.8532110091743,
+      "saturation": 0.9999999999999999,
+      "chroma": 0.42745098039215684,
+      "lightnessStar": 10.177942060258243,
+      "classifiedAs": "role-or-on-color"
+    },
+    "colorScheme.onPrimaryFixedVariant": {
+      "hex": "#3736A5",
+      "opaque": true,
+      "hue": 240.54054054054058,
+      "saturation": 0.5068493150684932,
+      "chroma": 0.43529411764705883,
+      "lightnessStar": 29.830365255360746,
+      "classifiedAs": "role-or-on-color"
+    },
+    "colorScheme.secondaryFixed": {
+      "hex": "#DDE2FB",
+      "opaque": true,
+      "hue": 230.00000000000003,
+      "saturation": 0.7894736842105262,
+      "chroma": 0.11764705882352933,
+      "lightnessStar": 90.19715087023268,
+      "classifiedAs": "role-or-on-color"
+    },
+    "colorScheme.secondaryFixedDim": {
+      "hex": "#C1C6DE",
+      "opaque": true,
+      "hue": 229.65517241379308,
+      "saturation": 0.30526315789473696,
+      "chroma": 0.11372549019607847,
+      "lightnessStar": 80.17934113726609,
+      "classifiedAs": "role-or-on-color"
+    },
+    "colorScheme.onSecondaryFixed": {
+      "hex": "#151B2C",
+      "opaque": true,
+      "hue": 224.34782608695653,
+      "saturation": 0.35384615384615387,
+      "chroma": 0.09019607843137255,
+      "lightnessStar": 9.993260108763778,
+      "classifiedAs": "role-or-on-color"
+    },
+    "colorScheme.onSecondaryFixedVariant": {
+      "hex": "#404659",
+      "opaque": true,
+      "hue": 225.6,
+      "saturation": 0.1633986928104575,
+      "chroma": 0.0980392156862745,
+      "lightnessStar": 29.890738036548463,
+      "classifiedAs": "role-or-on-color"
+    },
+    "colorScheme.tertiaryFixed": {
+      "hex": "#CBE5FF",
+      "opaque": true,
+      "hue": 210.0,
+      "saturation": 0.9999999999999994,
+      "chroma": 0.20392156862745103,
+      "lightnessStar": 89.83850544044509,
+      "classifiedAs": "role-or-on-color"
+    },
+    "colorScheme.tertiaryFixedDim": {
+      "hex": "#AACAE9",
+      "opaque": true,
+      "hue": 209.52380952380952,
+      "saturation": 0.5887850467289719,
+      "chroma": 0.24705882352941178,
+      "lightnessStar": 79.99379429618817,
+      "classifiedAs": "role-or-on-color"
+    },
+    "colorScheme.onTertiaryFixed": {
+      "hex": "#121D26",
+      "opaque": true,
+      "hue": 207.0,
+      "saturation": 0.35714285714285715,
+      "chroma": 0.0784313725490196,
+      "lightnessStar": 10.162526243438652,
+      "classifiedAs": "role-or-on-color"
+    },
+    "colorScheme.onTertiaryFixedVariant": {
+      "hex": "#2A4A64",
+      "opaque": true,
+      "hue": 206.8965517241379,
+      "saturation": 0.40845070422535207,
+      "chroma": 0.22745098039215686,
+      "lightnessStar": 30.181226820912947,
+      "classifiedAs": "role-or-on-color"
     },
     "theme.scaffoldBackgroundColor": {
       "hex": "#0A082D",

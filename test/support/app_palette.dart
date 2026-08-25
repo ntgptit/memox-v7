@@ -62,6 +62,22 @@ final List<Color> lightPaletteTokens = <Color>[
   AppColors.onDisabledLight,
   AppColors.shadowLight,
   AppColors.scrimLight,
+  // The `*Fixed` families, which are one value per role rather than a pair —
+  // brightness-independent by definition, so the same twelve constants appear
+  // in both lists. That they are literally the same identifiers in each list is
+  // the invariant, visible here without a test having to state it.
+  AppMaterialRoles.primaryFixed,
+  AppMaterialRoles.primaryFixedDim,
+  AppMaterialRoles.onPrimaryFixed,
+  AppMaterialRoles.onPrimaryFixedVariant,
+  AppMaterialRoles.secondaryFixed,
+  AppMaterialRoles.secondaryFixedDim,
+  AppMaterialRoles.onSecondaryFixed,
+  AppMaterialRoles.onSecondaryFixedVariant,
+  AppMaterialRoles.tertiaryFixed,
+  AppMaterialRoles.tertiaryFixedDim,
+  AppMaterialRoles.onTertiaryFixed,
+  AppMaterialRoles.onTertiaryFixedVariant,
 ];
 
 /// A list, not a set: several roles deliberately share a token — white is the
@@ -127,4 +143,20 @@ final List<Color> darkPaletteTokens = <Color>[
   AppMaterialRoles.tertiaryContainerLight,
   AppMaterialRoles.onTertiaryContainerLight,
   AppMaterialRoles.tertiaryLight,
+  // The `*Fixed` families, which are one value per role rather than a pair —
+  // brightness-independent by definition, so the same twelve constants appear
+  // in both lists. That they are literally the same identifiers in each list is
+  // the invariant, visible here without a test having to state it.
+  AppMaterialRoles.primaryFixed,
+  AppMaterialRoles.primaryFixedDim,
+  AppMaterialRoles.onPrimaryFixed,
+  AppMaterialRoles.onPrimaryFixedVariant,
+  AppMaterialRoles.secondaryFixed,
+  AppMaterialRoles.secondaryFixedDim,
+  AppMaterialRoles.onSecondaryFixed,
+  AppMaterialRoles.onSecondaryFixedVariant,
+  AppMaterialRoles.tertiaryFixed,
+  AppMaterialRoles.tertiaryFixedDim,
+  AppMaterialRoles.onTertiaryFixed,
+  AppMaterialRoles.onTertiaryFixedVariant,
 ];

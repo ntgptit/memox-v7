@@ -64,6 +64,23 @@ List<_ColorEntry> _schemeEntries(BuildContext context) {
     _ColorEntry('outlineVariant', colors.outlineVariant),
     _ColorEntry('inverseSurface', colors.inverseSurface),
     _ColorEntry('inversePrimary', colors.inversePrimary),
+    // The `*Fixed` families. Swatched here rather than left to the role test
+    // because they are the app's only generated colours: they carry their
+    // palette's full chroma where the hand-tuned containers beside them
+    // deliberately carry less, and a number cannot say whether that reads as
+    // one system. Two swatches from the same family sit adjacent on purpose.
+    _ColorEntry('primaryFixed', colors.primaryFixed),
+    _ColorEntry('primaryFixedDim', colors.primaryFixedDim),
+    _ColorEntry('onPrimaryFixed', colors.onPrimaryFixed),
+    _ColorEntry('onPrimaryFixedVariant', colors.onPrimaryFixedVariant),
+    _ColorEntry('secondaryFixed', colors.secondaryFixed),
+    _ColorEntry('secondaryFixedDim', colors.secondaryFixedDim),
+    _ColorEntry('onSecondaryFixed', colors.onSecondaryFixed),
+    _ColorEntry('onSecondaryFixedVariant', colors.onSecondaryFixedVariant),
+    _ColorEntry('tertiaryFixed', colors.tertiaryFixed),
+    _ColorEntry('tertiaryFixedDim', colors.tertiaryFixedDim),
+    _ColorEntry('onTertiaryFixed', colors.onTertiaryFixed),
+    _ColorEntry('onTertiaryFixedVariant', colors.onTertiaryFixedVariant),
   ];
 }
 

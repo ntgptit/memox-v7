@@ -11558,6 +11558,87 @@ của M2.
   (+2 case).
 - **Checklist phases:** 4
 
+### M99.47 · 12 role `*Fixed` thôi rơi về base role, `ColorScheme` khép kín 46/46
+
+- **Status:** **done**
+- **Goal:** `ColorScheme` khai báo 34/46 role. 12 role còn lại — cả họ `*Fixed`
+  — chưa bao giờ được truyền, nên mỗi cái rơi về fallback của chính
+  `ColorScheme`: `_primaryFixed ?? primary`. Hai hệ quả, và không cái nào lộ ra
+  dưới dạng test đỏ:
+  - **Sai tầng tông.** Spec đặt `*Fixed` ở tone 90 (cấp container); fallback trả
+    về `primary` ở tone ~36 (cấp fill). Một component đọc `primaryFixed` sẽ nhận
+    mảng indigo đặc ở chỗ đáng lẽ là nền nhạt.
+  - **Phá đúng định nghĩa "fixed".** Role này tồn tại để *giống nhau ở cả hai
+    brightness*. Fallback lấy `primary` của scheme hiện tại, nên
+    `primaryFixed` là `#4646B4` ở light và `#5656C9` ở dark.
+- **Scope:** `app_material_roles.dart` (12 hằng số mới), `app_theme.dart` (truyền
+  vào cả hai `ColorScheme`), `test/support/app_palette.dart`,
+  `color_scheme_roles_test.dart`, `widgetbook/lib/tokens/color_sections.dart`.
+  Không đụng `AppColors`, không đụng `AppSemanticColors`, không đụng CSS kit.
+- **Audit trước khi sửa, và hai phần ba yêu cầu hoá ra đã đạt.** Diff 34 role app
+  khai báo với 49 tham số của `ColorScheme` trong SDK:
+  - **role deprecated đang dùng: 0.** `background`, `onBackground`,
+    `surfaceVariant` (deprecated sau v3.18) không xuất hiện ở bất kỳ đâu trong
+    `lib/` hay `test/`.
+  - **role thừa / ngoài chuẩn: 0.** Mọi role app truyền đều nằm trong danh sách
+    của SDK.
+  - **role chuẩn còn thiếu: 12**, đúng bằng họ `*Fixed`.
+  Nên task này chỉ còn một việc: bổ sung, không gỡ gì.
+- **Giá trị lấy từ tonal palette, và đây là ngoại lệ có chủ đích duy nhất của
+  file `app_material_roles.dart`.** Header file nói "khai báo chứ không sinh",
+  vì `fromSeed` từng sinh ra `tertiary` **hồng** và thang surface xám. Lập luận
+  đó không với tới `*Fixed`: role này không có bản hand-tuned để lệch khỏi — spec
+  định nghĩa nó *bằng* tone của palette, cố định ở 90 / 80 / 10 / 30
+  (`color_spec_2021.ts`, `material-color-utilities`). Chọn bằng mắt là bịa ra con
+  số mà spec đã nói.
+- **Mỗi palette khoá trên role màu của chính app, không khoá trên seed.** M3 sinh
+  `secondaryPalette`/`tertiaryPalette` từ seed bằng phép xoay hue — đúng cái đã
+  đẻ ra `tertiary` hồng. Khoá trên `secondaryLight` / `tertiaryLight` giữ được hue
+  app đã chọn (HSL 224–244, trong dải navy/indigo mà `_isInFamily` cho phép) mà
+  vẫn lấy tone từ spec.
+- **Cái giá, nói thẳng.** Tone sinh ra mang đủ chroma của palette, còn container
+  hand-tuned của A2 cố ý mang ít hơn: `primaryFixedDim` ở chroma 0,247 trong khi
+  `primaryContainerLight` ở 0,145. Nên 12 màu này đậm hơn hẳn các container đứng
+  cạnh. **Chấp nhận, không phải bỏ sót** (quyết định của owner, 2026-08-25) — lựa
+  chọn còn lại là hand-tune chúng về dải chroma A2, tức đặt con số của app lên
+  trước con số của spec cho một role mà spec đã quy định trọn vẹn. 12 swatch được
+  thêm vào Widgetbook đúng để owner soi lại quyết định này trên màn hình.
+- **Tên hằng số không có hậu tố `Light`/`Dark`, và đó là phần bất biến.** Mọi
+  token khác trong file đi theo cặp vì hai nửa là hai quyết định khác nhau; nhóm
+  này thì không, nên cho nó một cặp là tạo ra cách viết sai. Một hằng số dùng cho
+  cả hai `ColorScheme`.
+- **Một comment sai đã che lỗi này suốt.** `color_scheme_roles_test.dart` viết
+  *"Brightness-independent by definition, so both schemes carry the same
+  light-container values"* — sai cả hai vế. Nó không bị bắt vì hai assertion của
+  file chỉ hỏi "màu này có phải của mình không" và "hue có trong dải không";
+  `primaryLight` và `primaryDark` đều đạt cả hai trong khi khác nhau. Test mới
+  `fixed roles are identical in light and dark` so trực tiếp hai scheme — điều mà
+  hai test cũ về cấu trúc không thể thấy.
+- **Acceptance criteria:**
+  - [x] `ColorScheme` truyền đủ **46/46** role không deprecated, và **0** role
+        deprecated.
+  - [x] 12 role `*Fixed` bằng nhau giữa light và dark (test mới, 12 case).
+  - [x] Mọi ràng buộc contrast của spec đạt ở standard contrast: `on*Fixed`
+        ≥ 7:1 và `on*FixedVariant` ≥ 4,5:1, mỗi cái trên cả `*Fixed` lẫn
+        `*FixedDim`. Chặt nhất: `onTertiaryFixedVariant` trên
+        `tertiaryFixedDim` ở **5,45:1**.
+  - [x] `toneDeltaPair`: `*Fixed` sáng hơn `*FixedDim` 10 tone (đo 9,8–10,2).
+  - [x] 12 giá trị lọt `_isInFamily` của `color_scheme_roles_test`.
+  - [x] `flutter analyze` sạch (0 lỗi, 0 cảnh báo); `flutter test` xanh.
+- **Output:** `app_material_roles.dart` (12 hằng số `*Fixed`, không hậu tố
+  brightness, kèm khối doc ghi tone và số đo contrast); `app_theme.dart` (truyền
+  vào cả hai `ColorScheme`, và hai doc comment cũ nói `*Fixed` "rơi về base role"
+  được sửa vì không còn đúng); `test/support/app_palette.dart` (12 token vào cả
+  hai danh sách — cùng identifier, nên tính bất biến nhìn thấy được);
+  `widgetbook/lib/tokens/color_sections.dart` (12 swatch).
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.45
+- **Tests required:** `color_scheme_roles_test.dart` — comment sai được thay, cộng
+  test mới `fixed roles are identical in light and dark` (12 case). Hai test sẵn
+  có (`every role comes from the palette`, `no role strays outside an A2 hue
+  family`) nay phủ giá trị thật thay vì phủ fallback.
+- **Checklist phases:** 7, 13
+
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 
 Ghi lại cụ thể, vì "mất một bộ lint" là câu quá mơ hồ để ai đó sau này biết

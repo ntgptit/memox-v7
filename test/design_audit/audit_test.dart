@@ -54,7 +54,11 @@ void main() {
     );
     expect(
       (tokens['light']! as Map<String, Object?>),
-      hasLength(54),
+      // 54 until M99.47, which added the twelve `*Fixed` roles to the theme
+      // and therefore to the dump. The number is pinned rather than derived
+      // for exactly the reason the message below states, so it moves only when
+      // someone decided it should.
+      hasLength(66),
       reason:
           'a role added to Material and not listed in auditTokensOf is '
           'invisible to every later step',
