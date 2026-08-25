@@ -12059,6 +12059,31 @@ của M2.
   - Bản đầu tính khoảng theo **mọi** item, nên in ra `11,9` cho khoảng giữa
     FAB và card 4 — một con số đo vị trí của nút chứ không đo quyết định spacing
     nào. FAB và bottom bar nay **được vẽ mép nhưng không tham gia chuỗi đo**.
+- **Chuỗi đo, theo yêu cầu chủ dự án (2026-08-25, vòng hai):** title →
+  subtitle → hero → hàng heading → **card đầu tiên**, rồi dừng. Khoảng giữa các
+  card đã được duyệt và chấp nhận nên in tiếp chỉ là nhiễu che mất thứ chưa
+  chốt; chúng vẫn được kẻ mép. App bar cũng chỉ còn kẻ mép: **hộp của bar cho
+  biết chrome kết thúc ở đâu, còn thứ mắt đọc là title và dòng dưới nó** — và
+  khoảng giữa *hai cái đó* mới là quyết định.
+- **Một bug nữa của chính thước:** `find.text('Library')` khớp cả nhãn tab
+  Library dưới bottom nav, nên chuỗi đầu tiên đo tới **một cái tab** rồi in ra
+  như thể đó là header. Finder nay ràng vào `AppBar`.
+- **Đo được sau khi chia nhỏ:**
+
+  | | khoảng | |
+  |---|---|---|
+  | Title → Subtitle | 16,0 | token |
+  | Subtitle → Hero | **24,5** | lệch thang 0,5 — miễn trừ có lý do |
+  | Hero → Heading row | 0,0 | hai hộp chạm nhau |
+  | Heading row → Card 1 | 24,0 | token |
+
+  `24,5` = **16,5** phần đệm còn lại dưới khối tiêu đề của bar, cộng `sm` của
+  summary section. 16,5 không phải con số ai gõ: `MxContentShell._toolbarHeight`
+  tính bar bằng `titleLarge × _lineFactor + sm + compactLineHeight + md`, và nửa
+  pixel rơi ra từ phép nhân đó. Đuổi theo nó nghĩa là sửa số học chiều cao của
+  một shell dùng chung để dịch một khoảng mà mắt đọc là `xl`. Nên nó vào
+  `_allowedOffScale` **kèm lý do**, khóa theo cặp để một ngoại lệ không lặng lẽ
+  che một khoảng khác trôi tới cùng giá trị.
 - **Cái nó bắt được:**
 
   ```
@@ -12088,7 +12113,13 @@ của M2.
 - **Acceptance criteria:**
   - [x] Golden kẻ vạch ở mép trên và mép dưới của từng item, in khoảng cách.
   - [x] Nhãn đọc được (không phải ô đen).
-  - [x] Item phủ (FAB, bottom bar) được vẽ mép nhưng không làm nhiễu số đo.
+  - [x] Item phủ (FAB, bottom bar) và các card sau card đầu được vẽ mép nhưng
+        không làm nhiễu số đo.
+  - [x] Ảnh nói cùng điều với test: khoảng được miễn trừ mang màu riêng, không
+        phải đỏ — một chip đỏ cạnh một lần chạy xanh dạy người đọc mất tin vào
+        một trong hai.
+  - [x] Nhãn tên nằm trong khoảng phía trên dải nó đặt tên, không đè lên nội
+        dung — bản trước làm subtitle mất ba ký tự vào chính nhãn của nó.
   - [x] Bắt được lỗi giá trị (off-scale) **và** lỗi quan hệ (nhịp đảo).
   - [x] Lỗi nó bắt được đã sửa; vẫn ba card trọn vẹn.
   - [x] `dod_check.sh` xanh.

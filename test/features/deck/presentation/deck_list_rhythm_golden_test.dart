@@ -1,11 +1,14 @@
 @Tags(<String>['golden', 'review'])
 library;
 
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_spacing.dart';
 import 'package:memox/core/theme/app_typography.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
+import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/features/deck/presentation/widgets/items/deck_tile_widget.dart';
 import 'package:memox/features/deck/presentation/widgets/sections/deck_level_summary_widget.dart';
 import 'package:memox/features/deck/presentation/widgets/sections/deck_list_toolbar_widget.dart';
@@ -29,6 +32,13 @@ import 'support/fake_deck_repository.dart';
 /// whether the one above or the one below moved. Both are here — the ruler is
 /// the golden, and [_offScaleGaps] fails the run outright when a gap is not a
 /// spacing token, so a drift cannot survive by nobody looking at the image.
+///
+/// **What it measures, and what it only draws.** The chain runs title →
+/// subtitle → hero → heading row → first deck card, which is the sequence the
+/// owner has open questions about. The remaining cards, the floating action and
+/// the bottom bar keep their edges so the picture stays whole, but contribute no
+/// number: card-to-card spacing was reviewed and accepted, and the other two
+/// float over the list rather than sitting in it.
 ///
 /// **Boxes, not ink.** The rules sit on layout edges, which is what a spacing
 /// token controls. Where a box holds more air than its ink — the toolbar row is
@@ -137,9 +147,19 @@ void main() {
       isEmpty,
       reason:
           'gaps off AppSpacing.scale: ${_offScaleGaps.join(', ')} — either fix '
-          'the spacing or say here why this one is not a token',
+          'the spacing or add the pair to _allowedOffScale with the reason it '
+          'is a sum rather than a choice',
     );
   });
+}
+
+/// How the table marks a gap that is not a step: excused, or not.
+String _marker(String? from, String to, double? gap) {
+  if (gap == null || _isToken(gap)) return '';
+
+  return _allowedOffScale.containsKey('$from -> $to')
+      ? '   <-- off scale, excused'
+      : '   <-- off scale';
 }
 
 /// Filled by the ruler test, read by the assertions that follow it.
@@ -168,7 +188,30 @@ List<_Band> _bandsOf(WidgetTester tester) {
     }
   }
 
-  collect('App bar', find.byType(AppBar));
+  final english = AppLocalizationsEn();
+
+  // **The bar is two bands, not one** (owner review, 2026-08-25). Its box tells
+  // you where the chrome ends; what the eye actually reads is the title and the
+  // line under it, and the distance between *those* is the decision. So the bar
+  // keeps an edge for context and stays out of the chain.
+  collect('App bar', find.byType(AppBar), isInFlow: false);
+  // **Scoped to the bar.** `find.text('Library')` also matches the bottom
+  // navigation's own label, and the first version of this chain measured a gap
+  // to it — a number about a tab, printed as if it were about the header.
+  collect(
+    'Title',
+    find.descendant(
+      of: find.byType(AppBar),
+      matching: find.text(english.decksTitle),
+    ),
+  );
+  collect(
+    'Subtitle',
+    find.descendant(
+      of: find.byType(AppBar),
+      matching: find.text(english.deckHeaderStatsLabel(4, 868)),
+    ),
+  );
   collect('Hero', find.byType(DeckLevelSummaryWidget));
   collect('Heading row', find.byType(DeckListToolbarWidget));
   collect('Deck card', find.byType(DeckTileWidget));
@@ -181,6 +224,22 @@ List<_Band> _bandsOf(WidgetTester tester) {
   collect('Bottom bar', find.byType(MxNavigationBar), isInFlow: false);
 
   bands.sort((a, b) => a.rect.top.compareTo(b.rect.top));
+
+  // **The chain stops at the first card** (owner review, 2026-08-25): the gaps
+  // between cards were looked at and accepted, so printing them again is noise
+  // over the one thing that is not yet settled. They keep their edges, and
+  // `_cardGap` still reads the first pair, because the rule about the heading
+  // needs a card gap to compare against.
+  var seenFirstCard = false;
+  for (var i = 0; i < bands.length; i++) {
+    final band = bands[i];
+    if (!band.name.startsWith('Deck card')) continue;
+    if (!seenFirstCard) {
+      seenFirstCard = true;
+      continue;
+    }
+    bands[i] = (name: band.name, rect: band.rect, isInFlow: false);
+  }
 
   return bands;
 }
@@ -207,27 +266,50 @@ String _report(List<_Band> bands) {
       '${band.rect.bottom.toStringAsFixed(1).padLeft(9)}'
       '${band.rect.height.toStringAsFixed(1).padLeft(8)}'
       '${gap == null ? '—'.padLeft(8) : gap.toStringAsFixed(1).padLeft(8)}'
-      '${gap != null && !_isToken(gap) ? '   <-- off scale' : ''}',
+      '${_marker(previousName, band.name, gap)}',
     );
     if (gap != null && !_isToken(gap)) {
-      _offScaleGaps.add(
-        '$previousName -> ${band.name} = ${gap.toStringAsFixed(1)}',
-      );
-    }
-    if (gap != null) {
-      if (previousName == 'Heading row') _headingGap = gap;
-      if (previousName != null && previousName.startsWith('Deck card')) {
-        _cardGap = gap;
+      final pair = '$previousName -> ${band.name}';
+      if (!_allowedOffScale.containsKey(pair)) {
+        _offScaleGaps.add('$pair = ${gap.toStringAsFixed(1)}');
       }
     }
+    if (gap != null && previousName == 'Heading row') _headingGap = gap;
     if (band.isInFlow) {
       previousBottom = band.rect.bottom;
       previousName = band.name;
     }
   }
 
+  // Read off the cards themselves rather than off the chain, which no longer
+  // walks past the first one.
+  final cards = bands.where((b) => b.name.startsWith('Deck card')).toList();
+  if (cards.length >= 2) {
+    _cardGap = cards[1].rect.top - cards[0].rect.bottom;
+  }
+
   return buffer.toString();
 }
+
+/// Distances that are not steps and are allowed to stay, with the reason.
+///
+/// **One entry, and it is a sum rather than a choice.** From the subtitle's
+/// foot to the hero measures 24.5: the app bar keeps 16.5 under its title block
+/// and the summary section adds `sm` on top of that. The 16.5 is not a number
+/// anybody typed — `MxContentShell._toolbarHeight` computes the bar from
+/// `titleLarge * _lineFactor + sm + compactLineHeight + md`, and the half pixel
+/// falls out of that multiplication. Chasing it would mean changing a shared
+/// shell's height arithmetic to move a distance the eye reads as `xl`.
+///
+/// Keyed by the pair, so an entry cannot quietly cover a second gap that drifts
+/// to the same value somewhere else on the screen.
+const Map<String, String> _allowedOffScale = <String, String>{
+  'Subtitle -> Hero':
+      '24.5 = 16.5 left under the bar’s title block by '
+      'MxContentShell._toolbarHeight, plus AppSpacing.sm from the summary '
+      'section. The residue is the bar’s line arithmetic, not a spacing '
+      'decision.',
+};
 
 /// Whether a distance is one of the spacing steps, or an overlap.
 ///
@@ -257,6 +339,11 @@ class _RhythmRuler extends StatelessWidget {
   static const Color _ink = Color(0xFF0F172A);
   static const Color _tokenFill = Color(0xF2FDE68A);
   static const Color _offScaleFill = Color(0xF2FCA5A5);
+
+  /// Off the scale, but carrying a reason in [_allowedOffScale]. A third colour
+  /// rather than red, because the picture has to say what the test says — a red
+  /// chip beside a passing run teaches a reader to distrust one of the two.
+  static const Color _excusedFill = Color(0xF2FDBA74);
   static const Color _nameFill = Color(0xF2E0E7FF);
 
   @override
@@ -267,13 +354,17 @@ class _RhythmRuler extends StatelessWidget {
       labels.add(
         Positioned(
           left: 4,
-          top: band.rect.top + 1,
+          // Above its own top line rather than below it: at `top + 1` the chip
+          // covered the first line of whatever it names — the subtitle lost
+          // three characters to its own label in the render before this.
+          top: math.max(0, band.rect.top - 11),
           child: _chip(band.name, _nameFill, 9),
         ),
       );
     }
 
     double? previousBottom;
+    String? previousName;
     for (final band in bands) {
       final gap = !band.isInFlow || previousBottom == null
           ? null
@@ -287,13 +378,16 @@ class _RhythmRuler extends StatelessWidget {
             top: previousBottom! + gap / 2 - 8,
             child: _chip(
               gap.toStringAsFixed(gap == gap.roundToDouble() ? 0 : 1),
-              _isToken(gap) ? _tokenFill : _offScaleFill,
+              _fillFor(previousName, band.name, gap),
               11,
             ),
           ),
         );
       }
-      if (band.isInFlow) previousBottom = band.rect.bottom;
+      if (band.isInFlow) {
+        previousBottom = band.rect.bottom;
+        previousName = band.name;
+      }
     }
 
     return Stack(
@@ -303,6 +397,14 @@ class _RhythmRuler extends StatelessWidget {
         ...labels,
       ],
     );
+  }
+
+  Color _fillFor(String? from, String to, double gap) {
+    if (_isToken(gap)) return _tokenFill;
+
+    return _allowedOffScale.containsKey('$from -> $to')
+        ? _excusedFill
+        : _offScaleFill;
   }
 
   Widget _chip(String text, Color background, double fontSize) => ColoredBox(
