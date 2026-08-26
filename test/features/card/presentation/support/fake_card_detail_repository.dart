@@ -207,5 +207,22 @@ CardHistoryPageModel fakeHistoryPage({
   );
 }
 
-/// A fixed instant. Presentation tests never read the wall clock.
-final DateTime fakeNow = DateTime.utc(2026, 8, 14, 9, 41);
+/// A fixed instant, **in the local zone on purpose**.
+///
+/// Presentation tests never read the wall clock — but a fixed *UTC* instant is
+/// not enough, because the screen does not print UTC. `cardHistoryTimestamp`
+/// renders `utc.toLocal()` (AD-06: the database stores UTC, a timeline that
+/// showed it would put a 23:00 review on the wrong day for most of the world),
+/// so a `DateTime.utc` fixture prints a different time on every machine.
+///
+/// That is not hypothetical: the three `card_detail` goldens were drawn on CI,
+/// which runs UTC, and failed on a developer machine in KST by exactly nine
+/// hours — while passing CI, so nothing ever went red where anyone was looking.
+/// Redrawing them locally would only have flipped which side was broken.
+///
+/// A local `DateTime` passes through `toLocal()` unchanged, so the rendered
+/// string is the same in every zone and the goldens mean the same thing
+/// everywhere. Nothing else about the fixture changes: the value is still
+/// fixed, and the cursor tests that compare it never look at the wall clock
+/// either.
+final DateTime fakeNow = DateTime(2026, 8, 14, 9, 41);
