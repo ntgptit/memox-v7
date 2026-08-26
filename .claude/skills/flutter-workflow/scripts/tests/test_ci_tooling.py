@@ -35,6 +35,32 @@ class VerificationPlanBuilderTest(unittest.TestCase):
             force_full=force_full,
         )
 
+    def test_a_shared_widget_change_selects_the_golden_job(self) -> None:
+        """#337's shape: six components relaid out, no picture redrawn.
+
+        It passed every check in `ci.yml` because nothing there compares a
+        committed PNG against a fresh render — the Windows golden job lives in
+        `ci-full.yml`, which is `workflow_dispatch:` only. 26 goldens went
+        stale on `main` and the screen gallery published a pre-#337 app.
+        """
+        plan = self._plan("lib/shared/widgets/mx_button_pair.dart")
+        self.assertTrue(plan.needs_goldens)
+
+    def test_a_change_to_the_pictures_themselves_selects_the_golden_job(self) -> None:
+        """A PR that only regenerates goldens is the one whose claim needs
+        checking most — and a PNG is not code, so `code_required` misses it."""
+        plan = self._plan("test/demo/goldens/deck_list_empty_light.png")
+        self.assertTrue(plan.needs_goldens)
+
+    def test_a_demo_test_change_selects_the_golden_job(self) -> None:
+        plan = self._plan("test/demo/deck_screens_demo_test.dart")
+        self.assertTrue(plan.needs_goldens)
+
+    def test_a_documents_only_change_does_not_pay_for_a_windows_runner(self) -> None:
+        """The job is conditional for a reason: Windows minutes cost double."""
+        plan = self._plan("design_audit/layout_review/SUMMARY.md")
+        self.assertFalse(plan.needs_goldens)
+
     def test_normalization_preserves_dot_prefixed_directories(self) -> None:
         self.assertEqual(
             ".github/workflows/ci.yml",
@@ -331,16 +357,34 @@ class AggregateGateTest(unittest.TestCase):
             "static_result": "success",
             "host_result": "success",
             "widgetbook_result": "success",
+            "goldens_result": "success",
             "needs_contracts": True,
             "needs_static": True,
             "needs_host_tests": True,
             "needs_widgetbook": True,
+            "needs_goldens": True,
         }
         values.update(overrides)
         return self.module.evaluate(**values)
 
     def test_full_path_passes_when_every_required_job_succeeds(self) -> None:
         self.assertEqual([], self._evaluate())
+
+    def test_a_required_golden_job_that_did_not_run_fails_the_gate(self) -> None:
+        """The gap #337 walked through: green everywhere, pixels never compared.
+
+        A skipped golden job on a change that needs one is not a neutral
+        result — it is the check that would have caught 26 stale pictures
+        never having happened.
+        """
+        problems = self._evaluate(goldens_result="skipped", needs_goldens=True)
+        self.assertEqual(1, len(problems))
+        self.assertIn("golden comparison", problems[0])
+
+    def test_golden_job_running_when_unselected_fails_the_gate(self) -> None:
+        problems = self._evaluate(goldens_result="success", needs_goldens=False)
+        self.assertEqual(1, len(problems))
+        self.assertIn("golden comparison", problems[0])
 
     def test_docs_path_requires_only_contract_job(self) -> None:
         self.assertEqual(
@@ -349,9 +393,11 @@ class AggregateGateTest(unittest.TestCase):
                 static_result="skipped",
                 host_result="skipped",
                 widgetbook_result="skipped",
+                goldens_result="skipped",
                 needs_static=False,
                 needs_host_tests=False,
                 needs_widgetbook=False,
+                needs_goldens=False,
             ),
         )
 

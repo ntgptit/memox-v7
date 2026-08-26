@@ -64,6 +64,7 @@ class VerificationPlan:
     needs_static: bool
     needs_host_tests: bool
     needs_widgetbook: bool
+    needs_goldens: bool
     full_suite: bool
 
     @property
@@ -376,6 +377,22 @@ class VerificationPlanBuilder:
         )
         docs_only = bool(changed) and not code_required
         risk = "full" if self.full_suite else "targeted" if code_required else "docs"
+        # **Pixel comparison belongs on the PR, not only in a dispatch-only
+        # workflow.** `ci-full.yml` has always had a `goldens` job on Windows,
+        # and it is `workflow_dispatch:` — so in practice nothing ever compared
+        # a committed PNG against a fresh render. #337 changed how six
+        # components lay out, committed no goldens, went green on every check,
+        # and left 26 stale pictures on `main`; the gallery published a
+        # pre-#337 app until someone ran the suite by hand.
+        #
+        # Any code change can move a pixel, so `code_required` is the trigger.
+        # A change that touches the pictures themselves counts too, because a
+        # PR that only regenerates goldens is exactly the one whose claim needs
+        # checking — and PNGs are not code, so `code_required` is false there.
+        needs_goldens = code_required or any(
+            "/goldens/" in path or path.startswith("test/demo/")
+            for path in changed
+        )
         return VerificationPlan(
             changed_paths=changed,
             affected_features=tuple(sorted(self.features)),
@@ -396,6 +413,7 @@ class VerificationPlanBuilder:
             needs_static=code_required,
             needs_host_tests=needs_host_tests,
             needs_widgetbook=self.needs_widgetbook,
+            needs_goldens=needs_goldens,
             full_suite=self.full_suite,
         )
 
@@ -591,6 +609,7 @@ def write_github_output(path: Path, plan: VerificationPlan) -> None:
         "needs_static": _bool(plan.needs_static),
         "needs_host_tests": _bool(plan.needs_host_tests),
         "needs_widgetbook": _bool(plan.needs_widgetbook),
+        "needs_goldens": _bool(plan.needs_goldens),
         "full_suite": _bool(plan.full_suite),
         "risk": plan.risk,
         "shard_count": str(plan.shard_count),

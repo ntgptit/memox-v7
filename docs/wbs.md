@@ -7917,6 +7917,30 @@ phần còn lại thì không).
 
 ---
 
+## M99.53 — Pixel comparison trở thành cổng của PR
+
+- **Lỗ hổng đã được ghi nhận từ trước mà chưa bịt.** `docs/wbs-study.md` §1549
+  đã viết: các job "chờ `ci-full.yml`, vốn chạy thủ công". Job
+  `goldens (windows)` là một trong số đó — nó tồn tại từ đầu và **chưa từng chạy
+  tự động**.
+- **Cái giá đã trả thật.** #337 đổi bố cục sáu component qua `MxButtonPair`,
+  commit 0 file PNG, xanh mọi check, và để **26 golden cũ** trên `main`; screen
+  gallery xuất bản bản app trước #337 cho tới khi có người chạy suite bằng tay
+  (PR #340). Mọi cổng khác trong `ci.yml` đọc source text hoặc widget tree —
+  không cổng nào thấy được một hình chữ nhật đã dịch chỗ.
+- **Sửa:** thêm output `needs_goldens` vào `build_verification_plan.py`, job
+  `goldens (windows)` vào `ci.yml`, và một nhánh tương ứng trong
+  `check_ci_gate.py` — gate đỏ cả khi job cần mà bị skip **lẫn** khi job chạy mà
+  không được chọn.
+- **Điều kiện chọn:** `code_required`, hoặc bất kỳ đường dẫn nào chứa
+  `/goldens/` hoặc bắt đầu bằng `test/demo/`. Vế thứ hai là cần thiết vì PNG
+  không phải code — nếu thiếu nó, đúng loại PR chỉ vẽ lại golden (như #340) sẽ
+  không được kiểm.
+- **Vẫn có điều kiện, không always-on:** runner Windows tính gấp đôi phút. PR
+  chỉ sửa tài liệu bỏ qua job này.
+- Kiểm bằng 4 test mới trong `test_ci_tooling.py`, dựng theo hình dạng thật của
+  #337, #340, một PR đổi demo test, và một PR docs-only. Tổng 44 → 50 test.
+
 ## M99 · Adhoc
 
 Task do chủ dự án giao trực tiếp, không thuộc chuỗi phụ thuộc M0…M9. Đánh số từ
