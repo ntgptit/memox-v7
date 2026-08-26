@@ -27,6 +27,8 @@ import 'package:memox/l10n/generated/app_localizations.dart';
 
 import 'golden_density.dart';
 
+import 'layout_probe.dart';
+
 /// The default review surface, in **logical** pixels: the frame the app imposes
 /// on web (AD-04).
 ///
@@ -146,5 +148,8 @@ Future<void> pumpReview(
 /// to make.
 Future<void> matchesReviewGolden(String path) async {
   await expectLater(find.byType(ReviewApp), matchesGoldenFile(path));
+  // The same frame, measured. See `layout_probe.dart` for why the numbers are
+  // taken here rather than by a suite of their own. Off unless asked for.
+  if (isLayoutProbeEnabled) probeLayout(path);
   debugDisableShadows = true;
 }
