@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/app/config/env_config.dart';
@@ -385,6 +386,105 @@ void main() {
           find.bySemanticsLabel(english.deckHeroOverdueSemanticLabel(7, 7)),
         ),
         findsNothing,
+      );
+    });
+  });
+
+  group('the hero keeps both halves whole', () {
+    /// Nothing the renderer had to cut off, among the panel's own text.
+    ///
+    /// **Clipping is the failure mode here, and it is silent.** Both halves of
+    /// the hero were `Flexible`, so a short line shrank *both* and ellipsized
+    /// both: `15 cards due  8 overdue · 7 today` drew as `15 car…  8 overdue…`.
+    /// No overflow, no exception, every token legal — and BR-162's split, the
+    /// whole reason the subline exists, gone from the screen while the
+    /// semantics still read it in full.
+    List<String> clippedOnPanel(WidgetTester tester) {
+      final clipped = <String>[];
+      void visit(Element element) {
+        final render = element.renderObject;
+        if (render is RenderParagraph &&
+            render.hasSize &&
+            !render.debugNeedsLayout &&
+            render.didExceedMaxLines) {
+          clipped.add(render.text.toPlainText().trim());
+        }
+        element.visitChildren(visit);
+      }
+
+      tester.element(find.byType(DeckLevelSummaryWidget)).visitChildren(visit);
+
+      // **`scheduled` is excluded, and only that.** The quiet context row
+      // clips its unit word at large scales on purpose — "the figure holds,
+      // the word clips" is written into `_QuietContextRow`, because half that
+      // row is narrower than the word and the count is the fact. That is a
+      // decision; the hero's was not.
+      // Lower-cased because the row draws them that way: "the word is the
+      // unit, the figure is the fact, and a capital gave the two equal
+      // billing".
+      final quietRowWords = <String>{
+        english.deckHeroScheduledMetricWord.toLowerCase(),
+        english.deckHeroNewMetricWord.toLowerCase(),
+      };
+
+      return clipped.where((text) => !quietRowWords.contains(text)).toList();
+    }
+
+    testWidgets('at 360 the subline moves down rather than being cut', (
+      tester,
+    ) async {
+      // 360dp is a common Android width and 1.0 is the default scale, so this
+      // is not a stress case — it is what a lot of people see. The line is six
+      // pixels short there, which was enough to lose the word `today`.
+      await pumpLevel(
+        tester,
+        levelOf(due: 15, overdueCards: 8, overdueDays: 7),
+        surface: const Size(360, 640),
+      );
+      await expandSummary(tester);
+
+      expect(clippedOnPanel(tester), isEmpty);
+      expectHero(15, english.deckSummaryCardsDueWord);
+    });
+
+    testWidgets('nothing is cut at 1.3 or 1.5 either', (tester) async {
+      for (final scale in <double>[1.3, 1.5]) {
+        await pumpLevel(
+          tester,
+          levelOf(due: 15, overdueCards: 8, overdueDays: 7),
+          surface: const Size(360, 640),
+          textScale: scale,
+        );
+        await expandSummary(tester);
+
+        expect(
+          clippedOnPanel(tester),
+          isEmpty,
+          reason: 'the hero clipped at textScaler $scale',
+        );
+      }
+    });
+
+    testWidgets('a line with room for both still draws them side by side', (
+      tester,
+    ) async {
+      // The fix must not cost the wide case its one-line hero: 393 at 1.0 is
+      // what the gallery captures, and it fits.
+      await pumpLevel(
+        tester,
+        levelOf(due: 15, overdueCards: 8, overdueDays: 7),
+      );
+      await expandSummary(tester);
+
+      final numeral = tester.getRect(onPanel(find.text('15')).first);
+      final subline = tester.getRect(
+        onPanel(find.textContaining(english.deckSummaryOverduePart(8))).first,
+      );
+
+      expect(
+        subline.left,
+        greaterThan(numeral.right),
+        reason: 'at 393 the split belongs beside the numeral, not under it',
       );
     });
   });
