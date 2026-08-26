@@ -198,8 +198,17 @@ final class FakeCardRepository extends FakeCardBulkRepository
   /// What the router's auto-forward reads; a test sets it to prove the redirect.
   bool holdsCards = false;
 
+  /// When set, `watchDeckContext` errors instead of emitting.
+  ///
+  /// The editor draws its breadcrumb from this read, and a failed read used to
+  /// be indistinguishable from a slow one — both rendered no path. There was no
+  /// way to stage the difference without this.
+  Object? nextDeckContextFailure;
+
   @override
   Stream<DeckContextModel> watchDeckContext(String deckId) {
+    final failure = nextDeckContextFailure;
+    if (failure != null) return Stream<DeckContextModel>.error(failure);
     final seeded = deckContextToShow;
     if (seeded == null) return const Stream<DeckContextModel>.empty();
 

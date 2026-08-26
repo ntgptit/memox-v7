@@ -16,10 +16,10 @@ import '../../../../../shared/widgets/mx_content_shell.dart';
 /// flag write immediately (BR-92, BR-93), so the implication was wrong in the
 /// one direction that costs data.
 ///
-/// **Save takes the larger share, and the ratio is a flex rather than a
-/// number.** The concept draws Cancel about half of Save's width; two flex
-/// factors reproduce that at every text scale, where a pair of pixel widths
-/// would be right at one and clipped at the rest.
+/// **Save takes the larger share, and nothing here decides by how much.**
+/// Cancel is sized to its label and Save fills what is left, which reproduces
+/// the concept's proportion at every width and translation — see the comment
+/// on the row for the two ratios that were tried and what each got wrong.
 ///
 /// **Presentation only.** It is handed labels, callbacks and two booleans; it
 /// decides nothing about whether the form is dirty. That belongs to the screen
@@ -43,11 +43,6 @@ class CardEditorActionBarWidget extends StatelessWidget {
 
   final bool isSaving;
 
-  /// Cancel's share of the row against Save's. The concept's proportion, kept
-  /// as a ratio so it survives translation and text scale.
-  static const int _cancelFlex = 2;
-  static const int _saveFlex = 3;
-
   @override
   Widget build(BuildContext context) {
     // **No `SafeArea` here.** The shell puts the footer inside the body's, so a
@@ -61,36 +56,53 @@ class CardEditorActionBarWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Row(
-            children: <Widget>[
-              Expanded(
-                flex: _cancelFlex,
-                child: MxActionButton(
+          // **`IntrinsicHeight`, because the two labels wrap differently.** At
+          // 320dp and text scale 2.0 the Vietnamese `Huỷ` stayed on one line
+          // while `Lưu thay đổi` took two — 64 against 104, two buttons at two
+          // heights presenting one choice. Stretching both to the taller is the
+          // same rule `MxButtonPair` encodes for dialogs.
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                // **Cancel is sized to its own label; Save takes the rest.**
+                // Two attempts preceded this. 3 : 2 came out 1.50 : 1 and made
+                // the pair read as near-equals, where the concept plainly
+                // treats Cancel as the small way out (it draws 127px against
+                // Save's 404). 3 : 1 got the proportion and broke the word —
+                // at 390dp `Cancel` wrapped to `Canc / el`, which is what a
+                // ratio does when it does not know how wide a label is.
+                //
+                // Letting the label decide reproduces the concept's shape at
+                // every width and translation without a number that can be
+                // wrong: Cancel is exactly as wide as the word, and Save is
+                // everything left over — which is always the larger share on a
+                // phone.
+                MxActionButton(
                   label: context.l10n.cardEditorCancelAction,
                   variant: MxActionButtonVariant.secondary,
-                  // Not disabled while saving: the way out stays open, the same
-                  // rule `MxConfirmDialog` keeps for its cancel. The exit
-                  // coordinator is what refuses to leave mid-write, and it says
-                  // so by doing nothing rather than by greying the control the
-                  // user would reach for if the save hung.
+                  // Not disabled while saving: the way out stays open, the
+                  // same rule `MxConfirmDialog` keeps for its cancel. The
+                  // exit coordinator is what refuses to leave mid-write, and
+                  // it says so by doing nothing rather than by greying the
+                  // control the user would reach for if the save hung.
                   onPressed: onCancel,
                 ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                flex: _saveFlex,
-                child: MxActionButton(
-                  label: context.l10n.cardEditorSaveChanges,
-                  icon: Icons.check,
-                  onPressed: onSave,
-                  isLoading: isSaving,
-                  // The width is decided from outside, so the label can stay
-                  // painted while the spinner runs — this is the one place on
-                  // the screen that says a save is happening.
-                  shouldKeepLabelWhileLoading: true,
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: MxActionButton(
+                    label: context.l10n.cardEditorSaveChanges,
+                    icon: Icons.check,
+                    onPressed: onSave,
+                    isLoading: isSaving,
+                    // The width is decided from outside, so the label can stay
+                    // painted while the spinner runs — this is the one place on
+                    // the screen that says a save is happening.
+                    shouldKeepLabelWhileLoading: true,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           // **A standing fact, not a status.** It says where the data lives

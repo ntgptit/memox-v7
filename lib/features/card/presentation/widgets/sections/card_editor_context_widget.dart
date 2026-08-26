@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/navigation/route_names.dart';
@@ -31,34 +32,70 @@ class CardEditorContextWidget extends StatelessWidget {
     required this.deckId,
     required this.cardId,
     required this.deckContext,
+    required this.onLeave,
     super.key,
   });
 
   final String deckId;
   final String cardId;
 
-  /// Null until the one deck-context read resolves. The rows that depend on it
-  /// are simply absent until then rather than showing a placeholder path — a
-  /// breadcrumb that says the wrong thing briefly is worse than one that
-  /// arrives a frame late.
-  final DeckContextModel? deckContext;
+  /// The one read this screen makes for its path, in every state.
+  ///
+  /// **An `AsyncValue`, not a nullable model, and that is a correction.** It
+  /// was `DeckContextModel?` — which flattened loading, error and "this deck no
+  /// longer exists" into the same `null` and silently rendered the screen with
+  /// no path at all. The two are not the same thing to a user: one is a frame
+  /// away, the other is a screen that will never say where they are.
+  final AsyncValue<DeckContextModel> deckContext;
+
+  /// Runs a navigation **through the editor's exit coordinator**.
+  ///
+  /// **Every crumb is a way out, and they were not guarded.** The screen's
+  /// whole contract is that leaving with unsaved work asks first; the back
+  /// arrow, Cancel and the system gesture all honoured it while four
+  /// `goNamed` calls in here walked straight past it and dropped the draft
+  /// without a word. The callback takes the navigation as a thunk so the guard
+  /// decides *whether* it happens, not this widget.
+  final void Function(VoidCallback navigate) onLeave;
 
   @override
   Widget build(BuildContext context) {
-    final resolved = deckContext;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        if (resolved != null) ...<Widget>[
-          _buildBreadcrumb(context, resolved),
-          const SizedBox(height: AppSpacing.md),
-        ],
+        ...deckContext.when(
+          data: (DeckContextModel deck) => <Widget>[
+            _buildBreadcrumb(context, deck),
+            const SizedBox(height: AppSpacing.md),
+          ],
+          // A frame, not a state worth drawing furniture for.
+          loading: () => const <Widget>[],
+          // **Said, not swallowed.** A deck that was deleted or a read that
+          // failed used to look exactly like a deck that had not arrived yet:
+          // the path simply was not there. The row below names what is
+          // unavailable so the missing path is a fact rather than an absence.
+          error: (Object error, StackTrace stackTrace) => <Widget>[
+            Semantics(
+              liveRegion: true,
+              child: Text(
+                context.l10n.cardEditorContextUnavailable,
+                style: context.texts.bodySmall?.copyWith(
+                  color: context.colors.error,
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+          ],
+        ),
         _buildHistoryRow(context),
-        if (resolved != null) ...<Widget>[
-          const SizedBox(height: AppSpacing.sm),
-          _buildDeckRow(context, resolved),
-        ],
+        ...deckContext.when(
+          data: (DeckContextModel deck) => <Widget>[
+            const SizedBox(height: AppSpacing.sm),
+            _buildDeckRow(context, deck),
+          ],
+          loading: () => const <Widget>[],
+          error: (Object error, StackTrace stackTrace) => const <Widget>[],
+        ),
       ],
     );
   }
@@ -77,23 +114,27 @@ class CardEditorContextWidget extends StatelessWidget {
       items: <MxBreadcrumbItem>[
         MxBreadcrumbItem(
           label: context.l10n.deckPathRootLabel,
-          onTap: () => context.goNamed(RouteNames.decks),
+          onTap: () => onLeave(() => context.goNamed(RouteNames.decks)),
         ),
         for (final DeckBreadcrumbSegment segment in deck.ancestors)
           MxBreadcrumbItem(
             label: segment.name,
-            onTap: () => context.goNamed(
-              RouteNames.deckDetail,
-              pathParameters: <String, String>{
-                RoutePathParams.deckId: segment.id,
-              },
+            onTap: () => onLeave(
+              () => context.goNamed(
+                RouteNames.deckDetail,
+                pathParameters: <String, String>{
+                  RoutePathParams.deckId: segment.id,
+                },
+              ),
             ),
           ),
         MxBreadcrumbItem(
           label: deck.deckName,
-          onTap: () => context.goNamed(
-            RouteNames.deckDetail,
-            pathParameters: <String, String>{RoutePathParams.deckId: deckId},
+          onTap: () => onLeave(
+            () => context.goNamed(
+              RouteNames.deckDetail,
+              pathParameters: <String, String>{RoutePathParams.deckId: deckId},
+            ),
           ),
         ),
         // The leaf: no tap, because this is the screen the user is on.
@@ -110,7 +151,13 @@ class CardEditorContextWidget extends StatelessWidget {
         horizontal: AppSpacing.md,
         vertical: AppSpacing.sm,
       ),
-      onTap: () => context.goNamed(
+      // **`push`, not `go`, and no discard guard.** `go` replaced the stack, so
+      // opening the history was a one-way trip: back from the detail screen
+      // landed on the deck rather than on the form the user was halfway
+      // through. Pushing leaves the editor alive underneath with its draft
+      // intact, which is also why this is the one navigation here that does not
+      // have to ask about unsaved work — nothing is being left.
+      onTap: () => context.pushNamed(
         RouteNames.cardDetail,
         pathParameters: <String, String>{
           RoutePathParams.deckId: deckId,

@@ -77,20 +77,28 @@ class CardTrashActionWidget extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
-          MxActionButton(
-            label: context.l10n.cardEditorTrashAction,
-            icon: Icons.delete_outline,
-            variant: MxActionButtonVariant.secondary,
-            onPressed: isDisabled
-                ? null
-                : () => showCardDeleteConfirm(
-                    context,
-                    cardId: cardId,
-                    onDeleted: (batchId) {
-                      _leaveMovedCard(context);
-                      showCardMovedToTrash(context, ref, batchId: batchId);
-                    },
-                  ),
+          // **Sized to its label, not stretched.** The column is `stretch`, so
+          // the button came out 326dp — full bleed across the card, which reads
+          // as the section's primary action. The concept draws it about 41% of
+          // the card, deliberately smaller than the Save it shares a screen
+          // with. `Align` opts this one child out of the column's stretch.
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: MxActionButton(
+              label: context.l10n.cardEditorTrashAction,
+              icon: Icons.delete_outline,
+              variant: MxActionButtonVariant.secondary,
+              onPressed: isDisabled
+                  ? null
+                  : () => showCardDeleteConfirm(
+                      context,
+                      cardId: cardId,
+                      onDeleted: (batchId) {
+                        _leaveMovedCard(context);
+                        showCardMovedToTrash(context, ref, batchId: batchId);
+                      },
+                    ),
+            ),
           ),
         ],
       ),

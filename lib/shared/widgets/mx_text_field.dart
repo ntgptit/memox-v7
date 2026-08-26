@@ -252,10 +252,18 @@ class MxTextField extends StatelessWidget {
     required bool isFocused,
   }) {
     if (maxLength == null) return null;
+    // **An external label owns the counter too.** The card editor draws
+    // `55 / 60` in its label row; this one appeared under the field the moment
+    // the value passed 80% of the limit, so one field showed the same number
+    // twice, in two formats, in two places. It stays *reserved* rather than
+    // removed — the slot is what keeps the field's height stable when an error
+    // arrives, which is the reason the hidden state below exists at all.
+    final isOwnedByCaller =
+        labelPlacement == MxTextFieldLabelPlacement.external;
     final isNearLimit = currentLength >= maxLength * _counterVisibleFraction;
 
     return Visibility(
-      visible: isNearLimit,
+      visible: isNearLimit && !isOwnedByCaller,
       maintainSize: true,
       maintainAnimation: true,
       maintainState: true,

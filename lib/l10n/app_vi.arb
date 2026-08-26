@@ -1462,6 +1462,10 @@
   "@cardEditorLocalOnlyNote": {
     "description": "Standing note under the editor's action bar. A fact about where data lives (AD-01), not a status — it does not change while a save runs."
   },
+  "cardEditorContextUnavailable": "Hiện chưa lấy được đường dẫn bộ thẻ của thẻ này.",
+  "@cardEditorContextUnavailable": {
+    "description": "Shown in place of the editor's breadcrumb when the deck-context read fails or the deck is gone. Names what is unavailable: an absent path used to look identical to one that had not loaded yet."
+  },
   "cardEditorContextMismatch": "Thẻ này không còn nằm trong bộ thẻ đó. Hãy quay lại và mở nó từ bộ thẻ của chính nó.",
   "@cardEditorContextMismatch": {
     "description": "Shown when the card's deck no longer matches the route's deck. Names the recovery rather than the ids."
@@ -1499,7 +1503,7 @@
   "@cardEditorDelete": {
     "description": "Button that opens the delete confirmation."
   },
-  "cardDeleteConfirmTitle": "Xóa thẻ này?",
+  "cardDeleteConfirmTitle": "Chuyển thẻ này vào Trash?",
   "@cardDeleteConfirmTitle": {
     "description": "Title of the card delete confirmation dialog (UC-04 A5)."
   },

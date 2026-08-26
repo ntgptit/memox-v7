@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:memox/core/navigation/route_names.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/features/card/di/card_repository_provider.dart';
+import 'package:memox/features/card/domain/models/deck_context_model.dart';
 import 'package:memox/features/card/presentation/screens/card_editor_screen.dart';
 import 'package:memox/l10n/generated/app_localizations.dart';
 
@@ -36,6 +37,18 @@ Future<GoRouter> pumpCardEditor(
   Size? surfaceSize,
   double textScale = 1,
 }) async {
+  // **Seeded unless the caller says otherwise, and that is a correction.**
+  // `FakeCardRepository.watchDeckContext` returns an empty stream by default,
+  // so every test that did not set this was quietly exercising an editor with
+  // no breadcrumb and no deck row — a screen production never shows. The audit
+  // found that before it found anything the screen was doing wrong.
+  repository.deckContextToShow ??= const DeckContextModel(
+    deckName: 'TOPIK II — Vocab',
+    ancestors: <DeckBreadcrumbSegment>[
+      DeckBreadcrumbSegment(id: 'korean', name: 'Korean'),
+    ],
+  );
+
   if (surfaceSize != null) {
     tester.view.physicalSize = surfaceSize;
     tester.view.devicePixelRatio = 1;

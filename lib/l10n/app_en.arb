@@ -1462,6 +1462,10 @@
   "@cardEditorLocalOnlyNote": {
     "description": "Standing note under the editor's action bar. A fact about where data lives (AD-01), not a status — it does not change while a save runs."
   },
+  "cardEditorContextUnavailable": "This card's deck path isn't available right now.",
+  "@cardEditorContextUnavailable": {
+    "description": "Shown in place of the editor's breadcrumb when the deck-context read fails or the deck is gone. Names what is unavailable: an absent path used to look identical to one that had not loaded yet."
+  },
   "cardEditorContextMismatch": "This card isn't in this deck any more. Go back and open it from its own deck.",
   "@cardEditorContextMismatch": {
     "description": "Shown when the card's deck no longer matches the route's deck. Names the recovery rather than the ids."
@@ -1499,9 +1503,9 @@
   "@cardEditorDelete": {
     "description": "Button that opens the delete confirmation in the card editor."
   },
-  "cardDeleteConfirmTitle": "Delete this card?",
+  "cardDeleteConfirmTitle": "Move this card to Trash?",
   "@cardDeleteConfirmTitle": {
-    "description": "Title of the card delete confirmation dialog (UC-04 A5)."
+    "description": "Title of the card soft-delete confirmation (UC-04 A5, BR-256). Says Trash, not Delete: the action, the button and the card that opens it all name the destination, and a title that said Delete would be the one place claiming the card is gone."
   },
   "cardDeleteConfirmMessage": "The card and its study history go to Trash. You can restore them for 30 days.",
   "@cardDeleteConfirmMessage": {

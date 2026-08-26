@@ -112,23 +112,41 @@ class CardEditorFieldWidget extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.xs),
         ],
-        Flexible(
-          child: Text(
-            label,
-            style: context.texts.labelMedium?.copyWith(color: quiet),
-            overflow: TextOverflow.ellipsis,
+        // **One flexible child, not two.** `Flexible(label)` beside a `Spacer`
+        // — which is an `Expanded` — split the free space evenly, so the label
+        // was cut at half the row while the counter floated up to 91dp short of
+        // the field's right edge. Measured at 390dp: `EXAMPLE SENTENCE` needed
+        // 132 and was given 120, with ~180 free beside it; the five counters
+        // landed at 282.9 / 353.5 / 374.0 / 284.4 / 374.0 against a surface
+        // edge of 374. Giving the label-and-marker group the whole remainder
+        // pins the counter to the edge and lets the label take what it needs.
+        Expanded(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: <Widget>[
+              Flexible(
+                child: Text(
+                  label,
+                  style: context.texts.labelMedium?.copyWith(color: quiet),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              Text(
+                isRequired
+                    ? context.l10n.cardEditorFieldRequired
+                    : context.l10n.cardEditorFieldOptional,
+                style: context.texts.labelSmall?.copyWith(
+                  color: isRequired
+                      ? context.semanticColors.primaryAccent
+                      : quiet,
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(width: AppSpacing.xs),
-        Text(
-          isRequired
-              ? context.l10n.cardEditorFieldRequired
-              : context.l10n.cardEditorFieldOptional,
-          style: context.texts.labelSmall?.copyWith(
-            color: isRequired ? context.semanticColors.primaryAccent : quiet,
-          ),
-        ),
-        const Spacer(),
         // **Always on, unlike the app-wide counter.** `MxTextField` hides its
         // own until 80% of the limit, because `0 / 240` under an empty field is
         // noise about a rule nobody is near. Here the row exists anyway and the

@@ -43,9 +43,14 @@ class CardFlagToggleWidget extends ConsumerWidget {
       icon: isFlagged ? Icons.flag : Icons.flag_outlined,
       semanticLabel: label,
       tone: isFlagged ? MxIconButtonTone.warning : MxIconButtonTone.standard,
-      // A write in flight disables the action rather than hiding it: the icon
-      // still reports the state it had, which is the state the card still has.
-      onPressed: flag.isLoading ? null : () => onToggle?.call(isFlagged),
+      // **Both conditions, because either one means inert.** `flag.isLoading`
+      // is this widget's own read; a null [onToggle] is the screen saying a
+      // flag write is already in flight. Checking only the first left a button
+      // that hit-tested as enabled and then did nothing — the affordance lying
+      // about itself, even though the controller made it harmless.
+      onPressed: flag.isLoading || onToggle == null
+          ? null
+          : () => onToggle!.call(isFlagged),
     );
   }
 }

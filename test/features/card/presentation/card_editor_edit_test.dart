@@ -328,7 +328,9 @@ void main() {
     await tester.pumpAndSettle();
 
     // The confirmation is up, and nothing is deleted until it is confirmed.
-    expect(find.text('Delete this card?'), findsOneWidget);
+    // Its title says Trash too: a dialog that said `Delete` would be the one
+    // place in this flow claiming the card is gone (BR-256).
+    expect(find.text('Move this card to Trash?'), findsOneWidget);
     expect(repository.deletes, isEmpty);
 
     // "Move to Trash", not "Delete": the confirm button says where the card

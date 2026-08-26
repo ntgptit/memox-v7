@@ -3,15 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/theme_context_extension.dart';
 import '../../../../l10n/l10n_extension.dart';
-import '../../../../shared/widgets/mx_action_button.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_empty_state.dart';
 import '../../../../shared/widgets/mx_icon_button.dart';
 import '../../domain/entities/card_entity.dart';
-import '../../domain/failures/card_validation_failure.dart';
 import '../controllers/card_editor_load_controller.dart';
 import '../controllers/card_flag_controller.dart';
 import '../controllers/card_write_controller.dart';
@@ -21,44 +17,35 @@ import '../states/card_submit_state.dart';
 import '../widgets/overlays/card_discard_confirm_widget.dart';
 import '../widgets/sections/card_create_form_widget.dart';
 import '../widgets/sections/card_editor_action_bar_widget.dart';
-import '../widgets/sections/card_editor_context_widget.dart';
-import '../widgets/sections/card_editor_details_widget.dart';
-import '../widgets/sections/card_editor_field_widget.dart';
+import '../widgets/sections/card_editor_form_widget.dart';
+import '../widgets/sections/card_editor_save_shortcut_widget.dart';
 import '../widgets/sections/card_flag_toggle_widget.dart';
-import '../widgets/sections/card_tag_section_widget.dart';
-import '../widgets/sections/card_trash_action_widget.dart';
 import '../widgets/support/card_failure_labels_widget.dart';
 
 /// The card editor — create and edit (UC-04 W4, A1).
 ///
-/// One screen, two modes, decided by [cardId]: null creates, set edits. What
-/// they share is the shell; everything else differs, and this file holds **only
-/// edit**. Create lives in `CardCreateFormWidget` with its own controllers,
-/// because the two modes used to share five `TextEditingController`s that no
-/// single instance ever used twice — the sharing bought nothing at runtime and
-/// cost a place for an edit-mode change to land in create.
+/// One screen, two modes, decided by [cardId]. This file holds **only edit**;
+/// create lives in `CardCreateFormWidget` with its own controllers, because
+/// while the two shared five `TextEditingController`s and a field builder,
+/// every decision taken for edit landed on a screen nobody had reviewed.
 ///
-/// Edit's own facts, in the order they were got wrong:
+/// It owns the shell, the controllers and the state; `CardEditorFormWidget`
+/// owns what the body contains. Four facts, in the order they were got wrong:
 ///
-/// - **`Save changes` owns five fields and nothing else.** Tags and the flag
-///   write the moment they are touched (BR-92, BR-93), so a Save that lit up
-///   for them would promise something it does not carry. It is pinned in the
-///   shell's footer rather than in the scroll, where it used to disappear
-///   exactly when the user was editing the tags below it.
-/// - **Two affordances, one command.** The app bar carries a compact `Save`
-///   shortcut; it and the footer read the same dirty state and call the same
-///   `_save()`. Only the footer shows the spinner — two spinners for one
-///   operation is two operations to the person watching.
-/// - **Dirty is a comparison, not a flag.** [CardContentDraft] holds the five
-///   values as a save would store them; typing a word and deleting it again
-///   lands back on pristine, and both Saves go dark with it.
-/// - **There is one way out.** The back arrow, the footer's Cancel and the
-///   system back gesture all reach `_handleExitRequest`, so the discard
-///   question cannot be answered differently depending on how the user tried
-///   to leave.
+/// - **Save owns five fields and nothing else.** Tags and the flag write the
+///   moment they are touched (BR-92, BR-93); a Save lit by them would promise
+///   what it does not carry. It is pinned in the footer, not in the scroll.
+/// - **Two affordances, one command.** The app bar carries a compact `Save`;
+///   it and the footer read the same dirty state and call the same `_save()`.
+///   Only the footer spins — two spinners read as two operations.
+/// - **Dirty is a comparison.** [CardContentDraft] holds the five values as a
+///   save would store them, so typing a word and deleting it lands on pristine.
+/// - **There is one way out.** The back arrow, Cancel, the system gesture *and
+///   every breadcrumb crumb* reach `_handleExitRequest`. The crumbs were the
+///   ones that did not, and they dropped drafts silently.
 ///
-/// It navigates nothing itself: each controller reports an outcome and this
-/// widget reacts — because a controller holding a `BuildContext` is the crash
+/// It navigates nothing itself: controllers report outcomes and this widget
+/// reacts — a controller holding a `BuildContext` is the crash
 /// `command_query_separation_test.dart` exists to forbid.
 class CardEditorScreen extends ConsumerStatefulWidget {
   const CardEditorScreen({required this.deckId, this.cardId, super.key});
@@ -138,13 +125,10 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
   @override
   void dispose() {
     for (final controller in _contentControllers) {
-      controller.removeListener(_recomputeDirty);
+      controller
+        ..removeListener(_recomputeDirty)
+        ..dispose();
     }
-    _front.dispose();
-    _back.dispose();
-    _example.dispose();
-    _hint.dispose();
-    _pronunciation.dispose();
     _frontFocus.dispose();
     super.dispose();
   }
@@ -207,33 +191,30 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
           ),
         ),
       ),
-      error: (error, stackTrace) => _shell(
-        context,
-        body: MxEmptyState(
-          icon: Icons.error_outline,
-          title: context.l10n.cardEditorLoadFailed,
-          actionLabel: context.l10n.cardEditorLoadRetry,
-          onAction: _pop,
-        ),
-      ),
+      error: (error, stackTrace) =>
+          _recoveryFace(context, context.l10n.cardEditorLoadFailed),
+      // **The one consistency check this screen owes.** A deep link can name a
+      // deck the card no longer belongs to; rendering the route's breadcrumb
+      // over another deck's card would be a confident lie about where the user
+      // is. Both values are already in hand, so the check costs no query — and
+      // the recovery names what to do rather than the ids.
       data: (card) => card.deckId == widget.deckId
-          // **The one consistency check this screen owes.** A deep link can
-          // name a deck the card no longer belongs to; rendering the route's
-          // breadcrumb over another deck's card would be a confident lie about
-          // where the user is. Both values are already in hand, so the check
-          // costs no query — and the recovery is named rather than the ids.
           ? _buildEditForm(context, cardId, card)
-          : _shell(
-              context,
-              body: MxEmptyState(
-                icon: Icons.error_outline,
-                title: context.l10n.cardEditorContextMismatch,
-                actionLabel: context.l10n.cardEditorLoadRetry,
-                onAction: _pop,
-              ),
-            ),
+          : _recoveryFace(context, context.l10n.cardEditorContextMismatch),
     );
   }
+
+  /// A dead end with a way back. Both of the editor's are the same shape, so
+  /// only the sentence differs.
+  Widget _recoveryFace(BuildContext context, String title) => _shell(
+    context,
+    body: MxEmptyState(
+      icon: Icons.error_outline,
+      title: title,
+      actionLabel: context.l10n.cardEditorLoadRetry,
+      onAction: _pop,
+    ),
+  );
 
   Widget _buildEditForm(BuildContext context, String cardId, CardEntity card) {
     _prefillOnce(card);
@@ -242,7 +223,7 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
     final state = ref.watch(provider);
     final flagState = ref.watch(setCardFlagProvider(cardId));
     final controller = ref.read(provider.notifier);
-    final deckContext = ref.watch(deckContextProvider(widget.deckId)).value;
+    final deckContext = ref.watch(deckContextProvider(widget.deckId));
 
     ref.listen<CardSubmitState>(provider, (previous, next) {
       if (next.shouldClose && !(previous?.shouldClose ?? false)) {
@@ -285,13 +266,7 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
           ),
           // The compact shortcut. Same command, same enabled rule, no spinner —
           // the footer owns saying that a save is running.
-          Padding(
-            padding: const EdgeInsets.only(right: AppSpacing.sm),
-            child: MxActionButton(
-              label: context.l10n.cardEditorSaveShortAction,
-              onPressed: canSave ? save : null,
-            ),
-          ),
+          CardEditorSaveShortcutWidget(onSave: canSave ? save : null),
         ],
         subheader: flagState.failure == null
             ? null
@@ -304,89 +279,24 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
           onCancel: () => unawaited(_handleExitRequest(cardId)),
           onSave: canSave ? save : null,
         ),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            CardEditorContextWidget(
-              deckId: widget.deckId,
-              cardId: cardId,
-              deckContext: deckContext,
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            CardEditorFieldWidget(
-              label: context.l10n.cardEditorFrontFieldLabel,
-              controller: _front,
-              focusNode: _frontFocus,
-              maxLength: kCardFrontMaxLength,
-              isRequired: true,
-              isEnabled: !busy,
-              maxLines: 2,
-              minLines: 1,
-              errorText: _frontError(state.frontProblem),
-              textInputAction: TextInputAction.next,
-              // The front is the prompt a learner is shown and the back is the
-              // answer, so the two are not equals. The value only: label,
-              // counter, error and border stay on the theme, so the two fields
-              // still line up on every edge.
-              textStyle: context.texts.titleLarge,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            CardEditorFieldWidget(
-              label: context.l10n.cardEditorBackFieldLabel,
-              controller: _back,
-              maxLength: kCardBackMaxLength,
-              isRequired: true,
-              isEnabled: !busy,
-              maxLines: 4,
-              minLines: 2,
-              errorText: _backError(state.backProblem),
-              // BR-10's reassurance is *about* this field, and as a floating
-              // `Text` below it belonged to neither — it read as a heading for
-              // whatever came next.
-              helperText: context.l10n.cardEditorProgressNote,
-            ),
-            if (state.failure != null) ...<Widget>[
-              const SizedBox(height: AppSpacing.lg),
-              // Live, like every other failure on this screen. It is the one
-              // furthest from the control that causes it — the button is pinned
-              // at the bottom and this paints beside the fields — so a screen
-              // reader user pressed Save and was told nothing at all.
-              Semantics(
-                liveRegion: true,
-                child: Text(
-                  context.l10n.cardEditorSaveFailed,
-                  style: context.texts.bodyMedium?.copyWith(
-                    color: context.colors.error,
-                  ),
-                ),
-              ),
-            ],
-            const SizedBox(height: AppSpacing.xl),
-            CardEditorDetailsWidget(
-              isExpanded: _detailsExpanded,
-              onToggle: () =>
-                  setState(() => _detailsExpanded = !_detailsExpanded),
-              exampleController: _example,
-              hintController: _hint,
-              pronunciationController: _pronunciation,
-              isBusy: busy,
-              exampleProblem: state.exampleProblem,
-              hintProblem: state.hintProblem,
-              pronunciationProblem: state.pronunciationProblem,
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            CardTagSectionWidget(
-              cardId: cardId,
-              onDraftChanged: _onTagDraftChanged,
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            const Divider(height: AppSpacing.xl),
-            CardTrashActionWidget(
-              deckId: widget.deckId,
-              cardId: cardId,
-              isDisabled: busy,
-            ),
-          ],
+        body: CardEditorFormWidget(
+          deckId: widget.deckId,
+          cardId: cardId,
+          deckContext: deckContext,
+          onLeave: (navigate) =>
+              unawaited(_handleExitRequest(cardId, then: navigate)),
+          state: state,
+          isBusy: busy,
+          front: _front,
+          back: _back,
+          example: _example,
+          hint: _hint,
+          pronunciation: _pronunciation,
+          frontFocus: _frontFocus,
+          isDetailsExpanded: _detailsExpanded,
+          onToggleDetails: () =>
+              setState(() => _detailsExpanded = !_detailsExpanded),
+          onTagDraftChanged: _onTagDraftChanged,
         ),
       ),
     );
@@ -416,11 +326,17 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
   /// Async, and every early return is a case that must **not** pop: a save in
   /// flight, because the write would land on a screen that is gone, and a
   /// dialog already asking this question.
-  Future<void> _handleExitRequest(String cardId) async {
+  /// [then] is what leaving *means* for the affordance that asked. The back
+  /// arrow, Cancel and the system gesture pop; a breadcrumb crumb navigates
+  /// somewhere else entirely. Passing the destination in as a thunk is what
+  /// lets one coordinator own the question for all of them — the alternative
+  /// was four `goNamed` calls that walked past the guard, which is exactly
+  /// what they were doing.
+  Future<void> _handleExitRequest(String cardId, {VoidCallback? then}) async {
     if (ref.read(cardEditProvider(cardId)).isSubmitting) return;
     if (_isDiscardOpen) return;
     if (!_hasUnsavedWork) {
-      _pop();
+      (then ?? _pop)();
 
       return;
     }
@@ -433,7 +349,7 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
     // refocusing — which is what leaves the draft, the focus and the scroll
     // exactly where the user left them.
     if (!shouldDiscard) return;
-    _pop();
+    (then ?? _pop)();
   }
 
   /// Leaves after a successful write.
@@ -483,16 +399,4 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
             : context.l10n.cardEditorBackAction,
         onPressed: onClose,
       );
-
-  String? _frontError(CardValidationProblem? problem) => switch (problem) {
-    CardValidationProblem.frontEmpty => context.l10n.cardFrontEmptyError,
-    CardValidationProblem.frontTooLong => context.l10n.cardFrontTooLongError,
-    _ => null,
-  };
-
-  String? _backError(CardValidationProblem? problem) => switch (problem) {
-    CardValidationProblem.backEmpty => context.l10n.cardBackEmptyError,
-    CardValidationProblem.backTooLong => context.l10n.cardBackTooLongError,
-    _ => null,
-  };
 }

@@ -213,17 +213,28 @@ class _CardTagSectionWidgetState extends ConsumerState<CardTagSectionWidget> {
         // A heading, and it has to say so: the app-bar title carries the flag
         // and this did not, so the only section label on the screen was
         // announced as loose text.
-        Semantics(
-          header: true,
-          child: Text(
-            context.l10n.cardEditorTagsHeading,
-            style: context.texts.labelMedium?.copyWith(color: quiet),
+        // **Flexible, because at 320dp and text scale 2.0 this row overflowed
+        // by 7.5px in Vietnamese** — `NHÃN` + `không bắt buộc` + the counter do
+        // not fit, and a `Row` of rigid children reports that as an overflow
+        // stripe in debug and clips silently in release. The heading is the
+        // part that may give way; the counter is a number and must not.
+        Flexible(
+          child: Semantics(
+            header: true,
+            child: Text(
+              context.l10n.cardEditorTagsHeading,
+              style: context.texts.labelMedium?.copyWith(color: quiet),
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ),
         const SizedBox(width: AppSpacing.xs),
-        Text(
-          context.l10n.cardEditorFieldOptional,
-          style: context.texts.labelSmall?.copyWith(color: quiet),
+        Flexible(
+          child: Text(
+            context.l10n.cardEditorFieldOptional,
+            style: context.texts.labelSmall?.copyWith(color: quiet),
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
         const Spacer(),
         // The counter appears only once a tag exists: at zero it is a limit
