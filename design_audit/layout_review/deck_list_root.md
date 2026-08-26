@@ -133,9 +133,17 @@ nhau ở cùng nửa phải của tile, và F1 làm chúng còn gần FAB nữa.
 Trên render, FAB phủ hết chữ `100% le|arned` của Phrasal verbs. Lần đo trước
 cho thấy nó đè 48 × 22px lên vùng menu ⋮, còn chừa dải 26px chạm được. Đây là
 mục §14 "Floating button không che content" — trượt thẳng.
-Hai kit đang bất đồng: `design_system/ui_kits/memox-app/DeckLevelScreen.jsx` đặt
-Create trên app bar kèm ghi chú "no inset fixes it", app Flutter dùng FAB.
-Đã đo, chưa sửa, chờ quyết định.
+**Chủ dự án cố ý để mở (2026-08-26)** — đang tìm phương án, chưa chốt.
+
+**Và kit không phải câu trả lời.** `design_system/ui_kits/memox-app/DeckLevelScreen.jsx`
+đặt Create trên app bar kèm ghi chú "no inset fixes it", nên rất dễ trích nó như
+một thiết kế đã chốt. Chủ dự án nói rõ **kit đã cũ** và không phải nơi ra quyết
+định ở đây. Mirror sang kit vẫn áp dụng *sau* khi có quyết định, không phải trước.
+
+Ba hướng đáng cân nhắc theo giá trị tự thân, không theo kit:
+- Create thành action trên app bar — bỏ hẳn lớp nổi;
+- FAB ẩn khi cuộn xuống, hiện khi cuộn lên;
+- chừa bottom inset trong list bằng chiều cao FAB, để không thẻ nào nằm dưới nó.
 
 **F2 — Ba nút primary tô đặc trong một viewport.** ⚠️ Level 2.
 Hero `Study 15 due cards` (full width) + `Study` trên card 1 + `Study` trên card

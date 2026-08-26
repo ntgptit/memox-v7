@@ -139,9 +139,12 @@ lớn nhất của điểm Typography 1,41.
 [deck_list_level](deck_list_level.md) đè lên **nút `Study` cùng màu primary** —
 người dùng không biết chạm chỗ giao thì tạo deck hay bắt đầu học.
 
-Đã đo từ trước (48 × 22px, còn 26px chạm được), chưa sửa, và hai kit đang bất
-đồng: `DeckLevelScreen.jsx` đặt Create trên app bar kèm ghi chú "no inset fixes
-it".
+Đã đo (48 × 22px chồng lên vùng ⋮, còn 26px chạm được). **Chủ dự án cố ý để mở
+(2026-08-26)** — đang tìm phương án.
+
+**Kit không phải nơi tra câu trả lời.** `DeckLevelScreen.jsx` đặt Create trên app
+bar kèm ghi chú "no inset fixes it", nhưng chủ dự án nói **kit đã cũ**. Mirror
+sang kit vẫn áp dụng sau khi chốt, không phải trước.
 
 Ở [deck_list_empty](deck_list_empty.md), FAB còn **lặp lại đúng hành động** của
 nút `New deck` ngay giữa màn.
@@ -221,7 +224,8 @@ Theo *tỉ lệ giữa hậu quả và công sức*, không theo điểm số.
 1. **C3** — kẹp số dòng ô đáp án ở Guess và Match: sửa lỗi rò rỉ đáp án (nặng
    nhất) cộng hai lỗi bố cục, và không đụng tới dữ liệu người dùng.
 2. **C1** cho dialog — sửa `MxButtonPair` nhận bề rộng thật; quy tắc đã đúng sẵn.
-3. **C5** — FAB. Cần quyết định của chủ dự án vì hai kit đang bất đồng.
+3. **C5** — FAB. **Chủ dự án đang giữ, cố ý.** Không tự sửa, và không viện dẫn
+   kit làm căn cứ.
 4. **C10** — tám lỗi độc lập, mỗi cái vài dòng.
 5. **C2** — thẻ chế độ học co theo nội dung. Ảnh hưởng bốn màn, cần thiết kế lại.
 6. **C9** — áp bài học của deck list cho card list và import preview.
