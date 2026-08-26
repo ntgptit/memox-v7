@@ -19,6 +19,7 @@ class DeckSchedulerPickerWidget extends StatelessWidget {
     required this.selected,
     required this.isEnabled,
     required this.onChanged,
+    required this.sectionLabel,
     this.errorText,
     this.shouldShowLockNotice = true,
     super.key,
@@ -28,6 +29,23 @@ class DeckSchedulerPickerWidget extends StatelessWidget {
   final bool isEnabled;
   final String? errorText;
   final ValueChanged<SchedulerType?> onChanged;
+
+  /// The heading above the radios, or null when the caller has already titled
+  /// the section itself.
+  ///
+  /// **Required and nullable, which is the point.** This widget used to print
+  /// `Study mode` unconditionally, so every caller that also titled its own
+  /// section got two headings — and four of the five did. The change sheet read
+  /// `Study mode` twice three lines apart; reset read `Study mode after the
+  /// reset` directly above `Study mode`; the starter install read `Review
+  /// schedule` above `Study mode`.
+  ///
+  /// A `showSectionLabel: false` flag would have fixed those four and left the
+  /// trap: the rule "do not title this yourself if you already have a title"
+  /// stays unwritten, and the next caller breaks it exactly as these did.
+  /// Making the parameter required moves the decision to the compiler — a new
+  /// call site cannot be added without answering the question.
+  final String? sectionLabel;
 
   /// **False inside the reset confirmation**, where the notice would be a lie:
   /// the lock is what the user is in the middle of undoing (BR-44), so telling
@@ -49,10 +67,8 @@ class DeckSchedulerPickerWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(
-          context.l10n.schedulerSectionLabel,
-          style: context.texts.labelLarge,
-        ),
+        if (sectionLabel != null)
+          Text(sectionLabel!, style: context.texts.labelLarge),
         // `RadioGroup`, not `RadioListTile.groupValue`: the per-tile group
         // parameters are deprecated as of Flutter 3.32 and this project treats
         // analyzer warnings as failures.

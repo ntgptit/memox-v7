@@ -93,6 +93,8 @@ class _SchedulerSheetState extends ConsumerState<_SchedulerSheet> {
       // Shown, disabled: which mode the deck runs is still the thing the user came
       // to find out, and an empty locked panel does not answer it.
       DeckSchedulerPickerWidget(
+        // Titled above as "Study mode is locked".
+        sectionLabel: null,
         selected: _scheduler,
         isEnabled: false,
         shouldShowLockNotice: false,
@@ -164,6 +166,9 @@ class _SchedulerSheetState extends ConsumerState<_SchedulerSheet> {
       ),
       const SizedBox(height: AppSpacing.lg),
       DeckSchedulerPickerWidget(
+        // The sheet is already titled `Study mode`; printing it again three
+        // lines down is what this parameter exists to stop.
+        sectionLabel: null,
         selected: _scheduler,
         isEnabled: !submit.isSubmitting,
         // The notice is true here and worth saying: this is the last moment the

@@ -134,6 +134,8 @@ class _StarterInstallFormState extends ConsumerState<_StarterInstallForm> {
         ),
         const SizedBox(height: AppSpacing.sm),
         DeckSchedulerPickerWidget(
+          // Titled two lines up as "Review schedule".
+          sectionLabel: null,
           selected: _scheduler,
           isEnabled: !install.isInstalling,
           // The picker's callback is nullable for its disabled branch; a null
