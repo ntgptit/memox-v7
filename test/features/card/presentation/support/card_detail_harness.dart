@@ -27,6 +27,7 @@ Future<GoRouter> pumpCardDetail(
   ThemeData? theme,
   Size? surfaceSize,
   double textScale = 1,
+  double bottomInset = 0,
 }) async {
   final router = GoRouter(
     initialLocation: '/decks/deck-1/cards/$cardId',
@@ -78,9 +79,15 @@ Future<GoRouter> pumpCardDetail(
         supportedLocales: AppLocalizations.supportedLocales,
         routerConfig: router,
         builder: (context, child) => MediaQuery(
-          data: MediaQuery.of(
-            context,
-          ).copyWith(textScaler: TextScaler.linear(textScale)),
+          // **`viewPadding` as well as `padding`**, because `SafeArea` reads
+          // `padding` while a test that wants to prove "the system bar is
+          // reported" has to set the value the framework derives it from. Zero
+          // is the default, so every existing caller is unaffected.
+          data: MediaQuery.of(context).copyWith(
+            textScaler: TextScaler.linear(textScale),
+            padding: EdgeInsets.only(bottom: bottomInset),
+            viewPadding: EdgeInsets.only(bottom: bottomInset),
+          ),
           child: child!,
         ),
       ),

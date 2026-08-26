@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_card.dart';
-import '../../../../../shared/widgets/mx_loading_state.dart';
 import '../../../../../shared/widgets/mx_text_button.dart';
 import '../../states/card_history_state.dart';
 import '../items/card_history_event_widget.dart';
@@ -28,6 +28,16 @@ import '../items/card_history_event_widget.dart';
 /// **Not scrollable itself.** It is a band of the screen's single scroll view,
 /// so the reader scrolls one surface rather than fighting a list nested inside
 /// a page (M4.15 V4).
+///
+/// **The band has no card of its own; each event has one.** The heading, the
+/// empty face, the initial spinner and all four tails sit on the page at the
+/// screen gutter, and the event cards line up with them — so the timeline reads
+/// as a run of records rather than as one long box with rows in it. A card that appeared only
+/// once there were events would make "this card has no reviews yet" look like a
+/// band that failed to render, and would move the tail's left edge the moment
+/// the first review landed. The heading stays *outside* it, on the screen's
+/// gutter, because it titles the surface rather than sitting in it — the same
+/// relationship the schedule panel's heading has to its panel (G1).
 class CardHistorySectionWidget extends StatelessWidget {
   const CardHistorySectionWidget({
     required this.state,
@@ -48,10 +58,20 @@ class CardHistorySectionWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        Text(context.l10n.cardHistoryTitle, style: context.texts.titleSmall),
+        Text(
+          context.l10n.cardHistoryTitle.toUpperCase(),
+          style: context.textStyles.sectionLabel.copyWith(
+            color: context.colors.onSurfaceVariant,
+          ),
+        ),
         const SizedBox(height: AppSpacing.md),
         if (state.isLoadingInitial)
-          MxLoadingState(semanticsLabel: context.l10n.cardHistoryLoadingLabel)
+          // **Not `MxLoadingState`** (V12). That widget centres a 36dp
+          // indicator inside `EdgeInsets.all(xl)`, so the spinner would float
+          // in the middle of the band — the only face that does not start where
+          // the events, the empty face and all four tails start, and it would
+          // jump left the moment the page landed.
+          _InlineSpinner(semanticsLabel: context.l10n.cardHistoryLoadingLabel)
         else if (state.isEmpty)
           const _EmptyHistory()
         else
@@ -136,7 +156,9 @@ class _EmptyHistory extends StatelessWidget {
         // lives inside the screen's own scroll view.
         //
         // `onSurfaceVariant`, not `primary`: the accent measures 3.29:1 as a
-        // painted glyph on the dark ground, the same number `_FlagRow` cites.
+        // painted glyph on the dark ground — the graphic bar, not the text one,
+        // and this glyph sits beside two lines of prose rather than carrying a
+        // meaning of its own.
         Icon(
           Icons.history,
           size: AppIconSize.md,
@@ -188,10 +210,15 @@ class _GenerationHeading extends StatelessWidget {
           isCurrent
               ? context.l10n.cardHistoryCurrentGenerationLabel
               : context.l10n.cardHistoryGenerationLabel(generation),
-          style: context.texts.labelSmall?.copyWith(
-            color: context.colors.onSurfaceVariant,
-            fontWeight: FontWeight.w600,
-          ),
+          // `bodySmall` at w600, not `labelSmall`: it is the only heading
+          // *inside* the timeline card, and one rung below the event lines it
+          // introduces made it read as a caption on the event above rather than
+          // as the start of a group. `withWeight`, because both faces are
+          // variable and a bare `fontWeight:` paints w400 while reporting w600.
+          style: AppTypography.withWeight(
+            context.texts.bodySmall!,
+            FontWeight.w600,
+          ).copyWith(color: context.colors.onSurfaceVariant),
         ),
       ),
     );
@@ -221,24 +248,8 @@ class _Tail extends StatelessWidget {
     if (state.isLoadingMore) {
       return Padding(
         padding: const EdgeInsets.only(top: AppSpacing.sm),
-        // **Not `MxLoadingState`, and that is the whole point of this branch.**
-        // That widget centres a 36dp indicator inside `EdgeInsets.all(xl)`, so
-        // the tail would grow from 48 to 84 and jump from the events' left edge
-        // to the middle of the screen — exactly the shift W3 face 5 forbids.
-        // This is the button's own footprint with the button's spinner in it,
-        // the shape `MxActionButton` already uses inline.
-        child: SizedBox(
-          height: AppSpacing.minimumTouchTarget,
-          child: Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: SizedBox.square(
-              dimension: AppIconSize.sm,
-              child: CircularProgressIndicator(
-                strokeWidth: _spinnerStroke,
-                semanticsLabel: context.l10n.cardHistoryLoadingMoreLabel,
-              ),
-            ),
-          ),
+        child: _InlineSpinner(
+          semanticsLabel: context.l10n.cardHistoryLoadingMoreLabel,
         ),
       );
     }
@@ -269,6 +280,42 @@ class _Tail extends StatelessWidget {
     }
 
     return const SizedBox.shrink();
+  }
+}
+
+/// A spinner in the band's own grammar: glyph-sized, on the band's left edge,
+/// in a box exactly one touch target tall.
+///
+/// **Both faces that spin use it, and that is the point.** `MxLoadingState`
+/// centres a 36dp indicator inside `EdgeInsets.all(xl)` — 84dp tall and in the
+/// middle of the surface. In the tail that grows the slot from 48 to 84 and
+/// shifts the events above, which W3 face 5 forbids; at the top of the band it
+/// puts the one face that has nothing above it 40dp in from an edge every other
+/// face starts on, and then jumps left when the page lands. Same footprint as
+/// `MxActionButton`'s in-button indicator, so the band spins the same way
+/// wherever it spins.
+class _InlineSpinner extends StatelessWidget {
+  const _InlineSpinner({required this.semanticsLabel});
+
+  /// Already-localized, and different per face: "loading the history" and
+  /// "loading more" are two different sentences to a screen reader.
+  final String semanticsLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: AppSpacing.minimumTouchTarget,
+      child: Align(
+        alignment: AlignmentDirectional.centerStart,
+        child: SizedBox.square(
+          dimension: AppIconSize.sm,
+          child: CircularProgressIndicator(
+            strokeWidth: _spinnerStroke,
+            semanticsLabel: semanticsLabel,
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -349,7 +396,7 @@ class _PageError extends StatelessWidget {
   }
 }
 
-/// The stroke of the inline load-more spinner.
+/// The stroke of the inline spinner, on either face that spins.
 ///
 /// 2, the same weight `MxActionButton` uses for its in-button indicator — a
 /// spinner sized down to a glyph keeps the default 4 only by looking like a

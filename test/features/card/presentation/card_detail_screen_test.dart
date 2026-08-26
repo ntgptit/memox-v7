@@ -95,7 +95,10 @@ void main() {
       await pumpCardDetail(tester, repository);
       await tester.pumpAndSettle();
 
-      expect(find.text('Box'), findsOneWidget);
+      // Two, and both belong: the summary badge names the position and the
+      // progress panel labels the track under it. An ambiguous finder here
+      // would be asserting about whichever one it happened to pick.
+      expect(find.text('Box'), findsNWidgets(2));
       expect(find.text('Ease'), findsNothing);
       expect(find.text('Interval'), findsNothing);
       expect(find.text('Repetitions'), findsNothing);

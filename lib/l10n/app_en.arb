@@ -4264,5 +4264,17 @@
   "deckTileAllCaughtUpLabel": "All caught up",
   "@deckTileAllCaughtUpLabel": {
     "description": "The deck card’s one chip when a deck with cards has nothing pending: no reviews due and no new cards. It replaces the two zero chips, which stated the absence of work twice and said nothing."
+  },
+  "cardDetailBoxPositionSemantics": "Box {current} of {total}",
+  "@cardDetailBoxPositionSemantics": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    },
+    "description": "Spoken form of the eight-box position track. A screen reader says this instead of the drawn form, where the stroke is punctuation and is read as silence or as slash."
   }
 }

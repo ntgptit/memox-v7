@@ -1,14 +1,14 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 679,
-  "totalSites": 511,
+  "scannedFiles": 673,
+  "totalSites": 507,
   "byElementKind": {
-    "other": 317,
+    "other": 319,
     "background": 23,
     "shadow": 1,
     "border": 14,
-    "text": 122,
-    "icon": 34
+    "text": 118,
+    "icon": 32
   },
   "bySourceKind": {
     "shared-constant": 154,
@@ -16,7 +16,7 @@
     "Colors-material": 11,
     "hardcoded-literal": 97,
     "opacity-modified-token": 13,
-    "theme-token": 232
+    "theme-token": 228
   },
   "sites": [
     {
@@ -3078,8 +3078,41 @@
       "resolved_value_dark": "#00000000"
     },
     {
+      "file": "lib/features/card/presentation/screens/card_editor_screen.dart",
+      "line": 248,
+      "widget_context": "_CardEditorScreenState",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "Theme.of(context).colorScheme.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/card/presentation/screens/card_editor_screen.dart",
+      "line": 318,
+      "widget_context": "_CardEditorScreenState",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "Theme.of(context).colorScheme.error",
+      "token": "colorScheme.error",
+      "resolved_value_light": "#C02B3A",
+      "resolved_value_dark": "#F2808F"
+    },
+    {
+      "file": "lib/features/card/presentation/screens/card_editor_screen.dart",
+      "line": 349,
+      "widget_context": "_CardEditorScreenState",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "Theme.of(context).colorScheme.error",
+      "token": "colorScheme.error",
+      "resolved_value_light": "#C02B3A",
+      "resolved_value_dark": "#F2808F"
+    },
+    {
       "file": "lib/features/card/presentation/widgets/items/card_history_event_widget.dart",
-      "line": 84,
+      "line": 128,
       "widget_context": "CardHistoryEventWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3090,18 +3123,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/items/card_history_event_widget.dart",
-      "line": 106,
-      "widget_context": "CardHistoryEventWidget",
-      "element_kind": "text",
-      "source_kind": "theme-token",
-      "expression": "context.colors.onSurfaceVariant",
-      "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#565C72",
-      "resolved_value_dark": "#A8A7C4"
-    },
-    {
-      "file": "lib/features/card/presentation/widgets/items/card_history_event_widget.dart",
-      "line": 116,
+      "line": 144,
       "widget_context": "CardHistoryEventWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3113,6 +3135,17 @@
     {
       "file": "lib/features/card/presentation/widgets/items/card_history_event_widget.dart",
       "line": 161,
+      "widget_context": "CardHistoryEventWidget",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/card/presentation/widgets/items/card_history_event_widget.dart",
+      "line": 285,
       "widget_context": "_Marker",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -3123,14 +3156,91 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/items/card_history_event_widget.dart",
-      "line": 176,
-      "widget_context": "_Marker",
-      "element_kind": "background",
+      "line": 321,
+      "widget_context": "<top-level>",
+      "element_kind": "other",
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",
       "token": "colorScheme.onSurfaceVariant",
       "resolved_value_light": "#565C72",
       "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/card/presentation/widgets/items/card_history_event_widget.dart",
+      "line": 329,
+      "widget_context": "<top-level>",
+      "element_kind": "other",
+      "source_kind": "theme-token",
+      "expression": "context.semanticColors.primaryAccent",
+      "token": "semantic.primaryAccent",
+      "resolved_value_light": "unresolvable: semantic.primaryAccent not in the dumped theme",
+      "resolved_value_dark": "unresolvable: semantic.primaryAccent not in the dumped theme"
+    },
+    {
+      "file": "lib/features/card/presentation/widgets/items/card_metric_widget.dart",
+      "line": 77,
+      "widget_context": "CardMetricWidget",
+      "element_kind": "background",
+      "source_kind": "theme-token",
+      "expression": "context.semanticColors.surfaceMuted",
+      "token": "semantic.surfaceMuted",
+      "resolved_value_light": "#EAECF1",
+      "resolved_value_dark": "#28254B"
+    },
+    {
+      "file": "lib/features/card/presentation/widgets/items/card_metric_widget.dart",
+      "line": 83,
+      "widget_context": "CardMetricWidget",
+      "element_kind": "icon",
+      "source_kind": "theme-token",
+      "expression": "context.semanticColors.primaryAccent",
+      "token": "semantic.primaryAccent",
+      "resolved_value_light": "unresolvable: semantic.primaryAccent not in the dumped theme",
+      "resolved_value_dark": "unresolvable: semantic.primaryAccent not in the dumped theme"
+    },
+    {
+      "file": "lib/features/card/presentation/widgets/items/card_metric_widget.dart",
+      "line": 107,
+      "widget_context": "<top-level>",
+      "element_kind": "other",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/card/presentation/widgets/items/card_metric_widget.dart",
+      "line": 122,
+      "widget_context": "<top-level>",
+      "element_kind": "other",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurface",
+      "token": "colorScheme.onSurface",
+      "resolved_value_light": "#16182B",
+      "resolved_value_dark": "#EDEDF6"
+    },
+    {
+      "file": "lib/features/card/presentation/widgets/items/card_metric_widget.dart",
+      "line": 124,
+      "widget_context": "<top-level>",
+      "element_kind": "other",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurface",
+      "token": "colorScheme.onSurface",
+      "resolved_value_light": "#16182B",
+      "resolved_value_dark": "#EDEDF6"
+    },
+    {
+      "file": "lib/features/card/presentation/widgets/items/card_metric_widget.dart",
+      "line": 131,
+      "widget_context": "<top-level>",
+      "element_kind": "other",
+      "source_kind": "theme-token",
+      "expression": "context.semanticColors.primaryAccent",
+      "token": "semantic.primaryAccent",
+      "resolved_value_light": "unresolvable: semantic.primaryAccent not in the dumped theme",
+      "resolved_value_dark": "unresolvable: semantic.primaryAccent not in the dumped theme"
     },
     {
       "file": "lib/features/card/presentation/widgets/items/card_tile_widget.dart",
@@ -3276,31 +3386,20 @@
       "resolved_value_dark": "#A8A7C4"
     },
     {
-      "file": "lib/features/card/presentation/widgets/sections/card_create_form_widget.dart",
-      "line": 143,
-      "widget_context": "_CardCreateFormWidgetState",
+      "file": "lib/features/card/presentation/widgets/sections/card_danger_zone_widget.dart",
+      "line": 52,
+      "widget_context": "CardDangerZoneWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
-      "expression": "context.colors.error",
+      "expression": "Theme.of(context).colorScheme.error",
       "token": "colorScheme.error",
       "resolved_value_light": "#C02B3A",
       "resolved_value_dark": "#F2808F"
     },
     {
-      "file": "lib/features/card/presentation/widgets/sections/card_detail_content_widget.dart",
-      "line": 42,
-      "widget_context": "CardDetailContentWidget",
-      "element_kind": "text",
-      "source_kind": "theme-token",
-      "expression": "context.colors.onSurface",
-      "token": "colorScheme.onSurface",
-      "resolved_value_light": "#16182B",
-      "resolved_value_dark": "#EDEDF6"
-    },
-    {
-      "file": "lib/features/card/presentation/widgets/sections/card_detail_content_widget.dart",
-      "line": 86,
-      "widget_context": "_DetailField",
+      "file": "lib/features/card/presentation/widgets/sections/card_detail_state_widget.dart",
+      "line": 53,
+      "widget_context": "CardDetailStateWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",
@@ -3310,7 +3409,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_detail_state_widget.dart",
-      "line": 137,
+      "line": 281,
       "widget_context": "_StateRow",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3320,20 +3419,9 @@
       "resolved_value_dark": "#EDEDF6"
     },
     {
-      "file": "lib/features/card/presentation/widgets/sections/card_detail_state_widget.dart",
-      "line": 162,
-      "widget_context": "_FlagRow",
-      "element_kind": "icon",
-      "source_kind": "theme-token",
-      "expression": "context.colors.onSurface",
-      "token": "colorScheme.onSurface",
-      "resolved_value_light": "#16182B",
-      "resolved_value_dark": "#EDEDF6"
-    },
-    {
-      "file": "lib/features/card/presentation/widgets/sections/card_detail_state_widget.dart",
-      "line": 188,
-      "widget_context": "_TagRow",
+      "file": "lib/features/card/presentation/widgets/sections/card_detail_summary_widget.dart",
+      "line": 81,
+      "widget_context": "CardDetailSummaryWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",
@@ -3342,9 +3430,20 @@
       "resolved_value_dark": "#A8A7C4"
     },
     {
-      "file": "lib/features/card/presentation/widgets/sections/card_detail_state_widget.dart",
-      "line": 270,
-      "widget_context": "_SideBySide",
+      "file": "lib/features/card/presentation/widgets/sections/card_detail_summary_widget.dart",
+      "line": 98,
+      "widget_context": "CardDetailSummaryWidget",
+      "element_kind": "border",
+      "source_kind": "theme-token",
+      "expression": "context.semanticColors.borderSubtle",
+      "token": "semantic.borderSubtle",
+      "resolved_value_light": "#D2D2DD",
+      "resolved_value_dark": "#4C487A"
+    },
+    {
+      "file": "lib/features/card/presentation/widgets/sections/card_detail_summary_widget.dart",
+      "line": 206,
+      "widget_context": "_SchedulerBadge",
       "element_kind": "text",
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",
@@ -3353,9 +3452,9 @@
       "resolved_value_dark": "#A8A7C4"
     },
     {
-      "file": "lib/features/card/presentation/widgets/sections/card_detail_state_widget.dart",
-      "line": 297,
-      "widget_context": "_Stacked",
+      "file": "lib/features/card/presentation/widgets/sections/card_detail_summary_widget.dart",
+      "line": 306,
+      "widget_context": "_DetailField",
       "element_kind": "text",
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",
@@ -3373,127 +3472,6 @@
       "token": "semantic.primaryAccent",
       "resolved_value_light": "unresolvable: semantic.primaryAccent not in the dumped theme",
       "resolved_value_dark": "unresolvable: semantic.primaryAccent not in the dumped theme"
-    },
-    {
-      "file": "lib/features/card/presentation/widgets/sections/card_editor_action_bar_widget.dart",
-      "line": 105,
-      "widget_context": "CardEditorActionBarWidget",
-      "element_kind": "text",
-      "source_kind": "theme-token",
-      "expression": "context.colors.onSurfaceVariant",
-      "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#565C72",
-      "resolved_value_dark": "#A8A7C4"
-    },
-    {
-      "file": "lib/features/card/presentation/widgets/sections/card_editor_context_widget.dart",
-      "line": 83,
-      "widget_context": "CardEditorContextWidget",
-      "element_kind": "text",
-      "source_kind": "theme-token",
-      "expression": "context.colors.error",
-      "token": "colorScheme.error",
-      "resolved_value_light": "#C02B3A",
-      "resolved_value_dark": "#F2808F"
-    },
-    {
-      "file": "lib/features/card/presentation/widgets/sections/card_editor_context_widget.dart",
-      "line": 147,
-      "widget_context": "CardEditorContextWidget",
-      "element_kind": "other",
-      "source_kind": "theme-token",
-      "expression": "context.colors.onSurfaceVariant",
-      "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#565C72",
-      "resolved_value_dark": "#A8A7C4"
-    },
-    {
-      "file": "lib/features/card/presentation/widgets/sections/card_editor_context_widget.dart",
-      "line": 192,
-      "widget_context": "CardEditorContextWidget",
-      "element_kind": "text",
-      "source_kind": "theme-token",
-      "expression": "context.semanticColors.primaryAccent",
-      "token": "semantic.primaryAccent",
-      "resolved_value_light": "unresolvable: semantic.primaryAccent not in the dumped theme",
-      "resolved_value_dark": "unresolvable: semantic.primaryAccent not in the dumped theme"
-    },
-    {
-      "file": "lib/features/card/presentation/widgets/sections/card_editor_context_widget.dart",
-      "line": 200,
-      "widget_context": "CardEditorContextWidget",
-      "element_kind": "icon",
-      "source_kind": "theme-token",
-      "expression": "context.semanticColors.primaryAccent",
-      "token": "semantic.primaryAccent",
-      "resolved_value_light": "unresolvable: semantic.primaryAccent not in the dumped theme",
-      "resolved_value_dark": "unresolvable: semantic.primaryAccent not in the dumped theme"
-    },
-    {
-      "file": "lib/features/card/presentation/widgets/sections/card_editor_context_widget.dart",
-      "line": 220,
-      "widget_context": "CardEditorContextWidget",
-      "element_kind": "icon",
-      "source_kind": "theme-token",
-      "expression": "context.colors.onSurfaceVariant",
-      "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#565C72",
-      "resolved_value_dark": "#A8A7C4"
-    },
-    {
-      "file": "lib/features/card/presentation/widgets/sections/card_editor_details_widget.dart",
-      "line": 55,
-      "widget_context": "CardEditorDetailsWidget",
-      "element_kind": "text",
-      "source_kind": "theme-token",
-      "expression": "context.colors.onSurfaceVariant",
-      "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#565C72",
-      "resolved_value_dark": "#A8A7C4"
-    },
-    {
-      "file": "lib/features/card/presentation/widgets/sections/card_editor_details_widget.dart",
-      "line": 108,
-      "widget_context": "CardEditorDetailsWidget",
-      "element_kind": "other",
-      "source_kind": "theme-token",
-      "expression": "context.semanticColors.primaryAccent",
-      "token": "semantic.primaryAccent",
-      "resolved_value_light": "unresolvable: semantic.primaryAccent not in the dumped theme",
-      "resolved_value_dark": "unresolvable: semantic.primaryAccent not in the dumped theme"
-    },
-    {
-      "file": "lib/features/card/presentation/widgets/sections/card_editor_field_widget.dart",
-      "line": 103,
-      "widget_context": "CardEditorFieldWidget",
-      "element_kind": "other",
-      "source_kind": "theme-token",
-      "expression": "context.colors.onSurfaceVariant",
-      "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#565C72",
-      "resolved_value_dark": "#A8A7C4"
-    },
-    {
-      "file": "lib/features/card/presentation/widgets/sections/card_editor_field_widget.dart",
-      "line": 150,
-      "widget_context": "CardEditorFieldWidget",
-      "element_kind": "text",
-      "source_kind": "theme-token",
-      "expression": "context.semanticColors.primaryAccent",
-      "token": "semantic.primaryAccent",
-      "resolved_value_light": "unresolvable: semantic.primaryAccent not in the dumped theme",
-      "resolved_value_dark": "unresolvable: semantic.primaryAccent not in the dumped theme"
-    },
-    {
-      "file": "lib/features/card/presentation/widgets/sections/card_editor_form_widget.dart",
-      "line": 120,
-      "widget_context": "CardEditorFormWidget",
-      "element_kind": "text",
-      "source_kind": "theme-token",
-      "expression": "context.colors.error",
-      "token": "colorScheme.error",
-      "resolved_value_light": "#C02B3A",
-      "resolved_value_dark": "#F2808F"
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_export_format_options_widget.dart",
@@ -3540,8 +3518,30 @@
       "resolved_value_dark": "#A8A7C4"
     },
     {
+      "file": "lib/features/card/presentation/widgets/sections/card_flag_toggle_widget.dart",
+      "line": 26,
+      "widget_context": "CardFlagToggleWidget",
+      "element_kind": "other",
+      "source_kind": "theme-token",
+      "expression": "context.semanticColors.warning",
+      "token": "semantic.warning",
+      "resolved_value_light": "#9A6A11",
+      "resolved_value_dark": "#E8D08E"
+    },
+    {
       "file": "lib/features/card/presentation/widgets/sections/card_history_section_widget.dart",
-      "line": 143,
+      "line": 64,
+      "widget_context": "CardHistorySectionWidget",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/card/presentation/widgets/sections/card_history_section_widget.dart",
+      "line": 165,
       "widget_context": "_EmptyHistory",
       "element_kind": "icon",
       "source_kind": "theme-token",
@@ -3552,7 +3552,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_history_section_widget.dart",
-      "line": 154,
+      "line": 176,
       "widget_context": "_EmptyHistory",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3563,7 +3563,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_history_section_widget.dart",
-      "line": 192,
+      "line": 221,
       "widget_context": "_GenerationHeading",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3574,7 +3574,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_history_section_widget.dart",
-      "line": 265,
+      "line": 276,
       "widget_context": "_Tail",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3970,47 +3970,25 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_tag_section_widget.dart",
-      "line": 209,
-      "widget_context": "_CardTagSectionWidgetState",
-      "element_kind": "other",
-      "source_kind": "theme-token",
-      "expression": "context.colors.onSurfaceVariant",
-      "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#565C72",
-      "resolved_value_dark": "#A8A7C4"
-    },
-    {
-      "file": "lib/features/card/presentation/widgets/sections/card_tag_section_widget.dart",
-      "line": 315,
+      "line": 60,
       "widget_context": "_CardTagSectionWidgetState",
       "element_kind": "text",
       "source_kind": "theme-token",
-      "expression": "context.colors.onSurfaceVariant",
-      "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#565C72",
-      "resolved_value_dark": "#A8A7C4"
-    },
-    {
-      "file": "lib/features/card/presentation/widgets/sections/card_trash_action_widget.dart",
-      "line": 76,
-      "widget_context": "CardTrashActionWidget",
-      "element_kind": "text",
-      "source_kind": "theme-token",
-      "expression": "context.colors.onSurfaceVariant",
-      "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#565C72",
-      "resolved_value_dark": "#A8A7C4"
-    },
-    {
-      "file": "lib/features/card/presentation/widgets/support/card_failure_labels_widget.dart",
-      "line": 63,
-      "widget_context": "CardWriteFailureTextWidget",
-      "element_kind": "text",
-      "source_kind": "theme-token",
-      "expression": "context.colors.error",
+      "expression": "Theme.of(context).colorScheme.error",
       "token": "colorScheme.error",
       "resolved_value_light": "#C02B3A",
       "resolved_value_dark": "#F2808F"
+    },
+    {
+      "file": "lib/features/card/presentation/widgets/sections/card_tag_section_widget.dart",
+      "line": 98,
+      "widget_context": "_CardTagSectionWidgetState",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "Theme.of(context).colorScheme.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
     },
     {
       "file": "lib/features/card/presentation/widgets/support/card_sort_control_widget.dart",
@@ -5279,7 +5257,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_action_button.dart",
-      "line": 177,
+      "line": 209,
       "widget_context": "MxActionButton",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -5290,7 +5268,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_action_button.dart",
-      "line": 178,
+      "line": 210,
       "widget_context": "MxActionButton",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -5466,18 +5444,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_content_shell.dart",
-      "line": 198,
-      "widget_context": "_MxContentShellState",
-      "element_kind": "border",
-      "source_kind": "theme-token",
-      "expression": "context.semanticColors.borderSubtle",
-      "token": "semantic.borderSubtle",
-      "resolved_value_light": "#D2D2DD",
-      "resolved_value_dark": "#4C487A"
-    },
-    {
-      "file": "lib/shared/widgets/mx_content_shell.dart",
-      "line": 236,
+      "line": 188,
       "widget_context": "_MxContentShellState",
       "element_kind": "border",
       "source_kind": "theme-token",
@@ -5540,17 +5507,6 @@
       "token": "colorScheme.error",
       "resolved_value_light": "#C02B3A",
       "resolved_value_dark": "#F2808F"
-    },
-    {
-      "file": "lib/shared/widgets/mx_icon_button.dart",
-      "line": 123,
-      "widget_context": "MxIconButton",
-      "element_kind": "other",
-      "source_kind": "theme-token",
-      "expression": "context.semanticColors.warning",
-      "token": "semantic.warning",
-      "resolved_value_light": "#9A6A11",
-      "resolved_value_dark": "#E8D08E"
     },
     {
       "file": "lib/shared/widgets/mx_navigation_bar.dart",
@@ -5631,7 +5587,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_text_field.dart",
-      "line": 275,
+      "line": 153,
       "widget_context": "MxTextField",
       "element_kind": "text",
       "source_kind": "theme-token",
