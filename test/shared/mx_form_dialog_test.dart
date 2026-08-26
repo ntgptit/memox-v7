@@ -217,41 +217,54 @@ void main() {
     testWidgets('the pair is laid out at the footer width, not the screen', (
       tester,
     ) async {
-      // The defect #348 fixed in `MxConfirmDialog`, which this dialog would
-      // otherwise have inherited by building the same `MxButtonPair` inside the
-      // same `AlertDialog.actions`. On a 393 screen the footer is
-      // `393 − 2×40 − 2×24 = 265`, not the 361 the pair assumes when nobody
-      // tells it; believing 361 it keeps a row that cannot hold either label
-      // and both wrap — with nothing overflowing and no gate saying a word.
+      // **Shown as a route, because that is the only way `insetPadding`
+      // applies.** The version of this test that came before rendered the
+      // dialog straight into a `Scaffold` body, where `AlertDialog` never sees
+      // its own inset — and then asserted that the number handed to the pair
+      // equalled the function that produced it. Both sides came from
+      // `MediaQuery`, so it passed without the layout being involved at all,
+      // and would have kept passing if the footer were the full screen.
+      //
+      // Measured against the real thing: `393 − 2×inset − 2×actionsInset`.
+      // The **view**, not a wrapped `MediaQuery`: `showDialog` pushes onto the
+      // Navigator inside `MaterialApp`, which builds its own `MediaQuery` from
+      // the view and never sees a wrapper placed above it.
+      tester.view.physicalSize = const Size(393, 852);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
       await tester.pumpWidget(
-        MediaQuery(
-          data: const MediaQueryData(size: Size(393, 852)),
-          child: MaterialApp(
-            theme: buildLightTheme(),
-            home: Scaffold(
-              body: MxFormDialog(
-                title: 'Add tag',
-                confirmLabel: 'Add tag to selection',
-                cancelLabel: 'Huỷ bỏ thao tác',
-                onConfirm: () {},
-                onCancel: () {},
-                child: const SizedBox.shrink(),
+        MaterialApp(
+          theme: buildLightTheme(),
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => TextButton(
+                onPressed: () => showDialog<void>(
+                  context: context,
+                  builder: (_) => MxFormDialog(
+                    title: 'Add tag',
+                    confirmLabel: 'Add tag to selection',
+                    cancelLabel: 'Huỷ bỏ thao tác',
+                    onConfirm: () {},
+                    onCancel: () {},
+                    child: const SizedBox.shrink(),
+                  ),
+                ),
+                child: const Text('open'),
               ),
             ),
           ),
         ),
       );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
 
-      // **Measured, not handed over.** The pair used to be told a number,
-      // because as a `Flex` it had no way to see one; it is a render object
-      // now and reads the constraint it is given. So the check is what it was
-      // always trying to be: the line the pair actually got is this dialog's
-      // footer — `393 − 2×inset − 2×actionsInset` — and not the screen.
       final width = tester.getSize(find.byType(MxButtonPair)).width;
 
       expect(
         width,
         393 - MxDialogMetrics.inset * 2 - MxDialogMetrics.actionsInset * 2,
+        reason: 'the pair must get the dialog footer, not the screen',
       );
       expect(width, lessThan(393));
     });
