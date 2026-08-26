@@ -25,6 +25,22 @@ enum MxActionButtonVariant {
   /// flag beside a colour lets a caller pass one without the other, and the
   /// mismatch is invisible in review.
   destructive,
+
+  /// A filled button one step quieter than [primary] — `secondaryContainer`
+  /// under `onSecondaryContainer`.
+  ///
+  /// **For an action a screen must offer without leading with.** Card Detail's
+  /// `Edit` is the case it was added for: a reading surface where the action
+  /// has to be findable and must not out-weigh the card being read (BR-246,
+  /// M4.15 V3). A `primary` fill there competes with the content; an icon alone
+  /// says nothing until it is tapped.
+  ///
+  /// **Measured, so nobody has to re-measure:** the label pair is 10.37:1 in
+  /// light and 9.09:1 in dark, well past AA. The *container* is only 1.14:1 /
+  /// 1.56:1 against the app bar it usually sits on, so what identifies this
+  /// control is its label, not its fill — which is the conformant path, and the
+  /// reason this variant always carries visible words.
+  tonal,
 }
 
 /// The app's button.
@@ -157,6 +173,22 @@ class MxActionButton extends StatelessWidget {
         style: busyStyle,
         child: child,
       ),
+      // The tonal pair the theme already builds. `buildFilledTonalStyle` rather
+      // than a second `styleFrom` call, for the reason the destructive branch
+      // gives below: `styleFrom` produces flat properties that shadow the
+      // theme's for every state at once.
+      MxActionButtonVariant.tonal => FilledButton(
+        onPressed: effectiveOnPressed,
+        autofocus: shouldAutofocus,
+        // `busyStyle` first, or the branch for it in [_busyStyle] is dead code
+        // that reads as coverage. A tonal button keeping its label while
+        // loading would otherwise fall back to `disabledSurface`/`onDisabled` —
+        // the 2.29:1 pair that method exists to avoid.
+        style:
+            busyStyle ??
+            buildFilledTonalStyle(context.colors, context.semanticColors),
+        child: child,
+      ),
       // `error` / `onError`, not a token read directly: the scheme pair is
       // already contrast-checked against each other in `app_theme_test.dart`,
       // and A2 maps `error` onto the `danger` token so the two cannot diverge.
@@ -224,9 +256,18 @@ class MxActionButton extends StatelessWidget {
       );
     }
 
-    final (Color fill, Color label) = variant == MxActionButtonVariant.primary
-        ? (colors.primary, colors.onPrimary)
-        : (colors.error, colors.onError);
+    final (Color fill, Color label) = switch (variant) {
+      MxActionButtonVariant.primary => (colors.primary, colors.onPrimary),
+      MxActionButtonVariant.tonal => (
+        colors.secondaryContainer,
+        colors.onSecondaryContainer,
+      ),
+      // `secondary` returned above; the switch is exhaustive so a variant added
+      // later fails the build here rather than silently rendering as an error
+      // button, which a two-armed conditional did.
+      MxActionButtonVariant.secondary ||
+      MxActionButtonVariant.destructive => (colors.error, colors.onError),
+    };
 
     return ButtonStyle(
       backgroundColor: WidgetStatePropertyAll<Color>(fill),

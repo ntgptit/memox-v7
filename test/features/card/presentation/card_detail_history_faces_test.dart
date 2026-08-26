@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/card/domain/models/card_history_page_model.dart';
+import 'package:memox/features/card/presentation/widgets/items/card_history_event_widget.dart';
 import 'package:memox/features/study/domain/models/study_answer_kind_model.dart';
 import 'package:memox/features/study/domain/models/study_mode.dart';
 import 'package:memox/features/study/domain/models/study_outcome_reason_model.dart';
+import 'package:memox/shared/widgets/mx_card.dart';
 
 import 'support/card_detail_harness.dart';
 import 'support/fake_card_detail_repository.dart';
@@ -38,6 +40,37 @@ void main() {
       expect(find.text('Retry'), findsNothing);
     });
 
+    testWidgets('the first page loading is a face of the band, on the band '
+        'edge (V16)', (tester) async {
+      // **The one face nothing rendered.** `card_history_controller_test.dart`
+      // asserts the *state* is `loadingInitial`; nothing drew it, and V16 put a
+      // card around it — so a centred `MxLoadingState` would have floated 40dp
+      // in from an edge every other face starts on, and jumped left when the
+      // page landed. The WBS entry for this task claimed there was behaviour
+      // coverage here; there was not, and this is it.
+      final gate = Completer<void>();
+      final repository = FakeCardDetailRepository()
+        ..seededDetail = fakeCardDetail()
+        ..historyGate = gate
+        ..pages.add(fakeHistoryPage(count: 2));
+      await pumpCardDetail(tester, repository);
+      await tester.pump();
+
+      final heading = tester.getRect(find.text('STUDY HISTORY'));
+      final spinner = tester.getRect(
+        find.byType(CircularProgressIndicator).first,
+      );
+      // The band has no card of its own in the compact layout, so its edge
+      // is the screen gutter — the same one the heading uses.
+      expect(spinner.left, heading.left);
+      expect(find.text('No reviews yet'), findsNothing);
+
+      gate.complete();
+      await tester.pumpAndSettle();
+      // And the events land where the spinner was, so nothing jumps.
+      expect(find.textContaining('Self-assess'), findsNWidgets(2));
+    });
+
     testWidgets('an event says the stored mode, kind and action and the '
         'before→after of its own scheduler', (tester) async {
       final repository = FakeCardDetailRepository()
@@ -60,7 +93,10 @@ void main() {
       await pumpCardDetail(tester, repository);
       await tester.pumpAndSettle();
 
-      expect(find.text('Recall · Scheduled · Remembered'), findsOneWidget);
+      // The verdict moved into the badge; the line under it says where the
+      // turn came from and what it was for.
+      expect(find.text('Recall · Scheduled'), findsOneWidget);
+      expect(find.text('Remembered'), findsOneWidget);
       expect(find.text('Box 2 → 3'), findsOneWidget);
       expect(find.text('Timed out'), findsOneWidget);
     });
@@ -160,6 +196,22 @@ void main() {
       expect(find.text('Retry'), findsOneWidget);
       expect(find.textContaining('Self-assess'), findsNWidgets(3));
 
+      // **G6's fourth face.** `Load more`, the loading-more spinner and
+      // `All reviews shown` are all pinned to the band's edge elsewhere; this
+      // one is an `MxCard` nested in the timeline card, so a stray `Center` or
+      // an extra inset would move only this face and leave the other three
+      // green.
+      final heading = tester.getRect(find.text('STUDY HISTORY'));
+      final band = tester.getRect(
+        find
+            .ancestor(
+              of: find.text('The next page could not be loaded.'),
+              matching: find.byType(MxCard),
+            )
+            .first,
+      );
+      expect(band.left, heading.left);
+
       await tester.ensureVisible(find.text('Retry'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Retry'));
@@ -181,7 +233,7 @@ void main() {
       // The Vietnamese labels prove the whole band went through the locale, and
       // the date beside them came from MaterialLocalizations rather than a
       // hand-built string.
-      expect(find.text('Lịch sử học'), findsOneWidget);
+      expect(find.text('LỊCH SỬ HỌC'), findsOneWidget);
       expect(find.textContaining('Tự đánh giá'), findsOneWidget);
     });
   });
@@ -198,11 +250,16 @@ void main() {
     await tester.pumpAndSettle();
     await tester.ensureVisible(find.text('Load more'));
     await tester.pumpAndSettle();
-    final before = tester.getRect(
-      find
-          .ancestor(of: find.text('Load more'), matching: find.byType(Padding))
-          .last,
-    );
+
+    // **Absolute rectangles, because the relative ones could not fail.** This
+    // used to compare `find.ancestor(…, Padding).last` for the button and for
+    // the spinner. `_collectAncestors` walks `visitAncestorElements`, which
+    // runs child → root, so `.last` is the **outermost** `Padding` — the scroll
+    // view's, shared by every face of the screen. The two rects were the same
+    // element, and the test would have passed with `MxLoadingState` back in the
+    // tail, which is the one thing it is named after.
+    final heading = tester.getRect(find.text('STUDY HISTORY'));
+    final lastEvent = tester.getRect(find.byType(CardHistoryEventWidget).last);
 
     // Held open, so the in-flight face can be measured at all — the fake
     // otherwise resolves in the same microtask and `pumpAndSettle` walks
@@ -212,18 +269,14 @@ void main() {
     await tester.tap(find.text('Load more'));
     await tester.pump();
 
-    final loading = tester.getRect(
-      find
-          .ancestor(
-            of: find.byType(CircularProgressIndicator),
-            matching: find.byType(Padding),
-          )
-          .last,
+    final spinner = tester.getRect(
+      find.byType(CircularProgressIndicator).first,
     );
-    // Same height and same left edge: the tail must not grow by 36dp and jump
-    // to the middle of the screen while a page is on its way.
-    expect(loading.height, before.height);
-    expect(loading.left, before.left);
+    // **The band's own edge, which is the screen gutter now that the timeline
+    // has no card of its own** — the same slot the button it replaced sat on.
+    expect(spinner.left, heading.left);
+    // And nothing above the tail moved: that is what G6 is actually about.
+    expect(tester.getRect(find.byType(CardHistoryEventWidget).last), lastEvent);
 
     gate.complete();
     await tester.pumpAndSettle();

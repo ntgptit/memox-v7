@@ -2,82 +2,36 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/error/failure.dart';
-import 'package:memox/features/card/domain/failures/card_not_found_failure.dart';
-import 'package:memox/features/card/di/card_detail_repository_provider.dart';
-import 'package:memox/features/card/domain/models/card_history_page_model.dart';
-import 'package:memox/features/study/domain/models/study_answer_kind_model.dart';
-import 'package:memox/features/study/domain/models/study_action_model.dart';
-import 'package:memox/features/card/domain/models/card_history_event_model.dart';
-import 'package:memox/features/card/presentation/screens/card_detail_screen.dart';
 import 'package:memox/features/card/presentation/widgets/sections/card_detail_state_widget.dart';
+import 'package:memox/features/card/domain/models/card_history_page_model.dart';
 
 import '../features/card/presentation/support/fake_card_detail_repository.dart';
+import 'card_detail_demo_fixtures.dart';
 import '../support/study_render.dart';
 
-/// DEMO renders (not assertions) of Card Detail (UC-19, wireframe M4.15):
-/// device-faithful PNGs for design review, driven through the real screen with
-/// its one repository faked. Run with:
+/// DEMO renders (not assertions) of what a card **says** — the summary hero, the
+/// scheduler badge, the progress panel and its grid — driven through the real
+/// screen with its one repository faked (UC-19, M4.15). Run with:
 ///   flutter test --update-goldens --tags golden test/demo/card_detail_demo_test.dart
 ///
-/// **This screen shipped without any**, which is why three visual changes could
-/// land in one afternoon — a rebuilt error band, a halved bottom inset, a new
-/// not-found glyph — and the whole suite stayed green. The other screens in the
-/// card feature have demo renders; this one was the exception, which is what
-/// made D27's decision uncheckable.
-///
-/// The faces chosen are the ones a reviewer cannot judge from prose: the
-/// reading surface D27 deliberately leaves un-carded, the timeline's failed
-/// page now that it wears the app's shared band, and the deleted-card face
-/// whose glyph used to say "no search results". The first version of this file
-/// named all three and rendered only the first — the two this round changed
-/// were exactly the two it left out.
+/// **Split from `card_detail_history_demo_test.dart` at the seam the guard's
+/// size ceiling exposed, and a real one:** this file is about the card, that one
+/// is about its timeline's faces. Same fixtures, same harness, so nothing about
+/// the setup diverges.
 void main() {
-  FakeCardDetailRepository loaded({bool withHistory = true}) {
-    final repository = FakeCardDetailRepository()
-      ..seededDetail = fakeCardDetail(
-        front: '사과',
-        back: 'quả táo',
-        example: '사과를 먹어요',
-        hint: 'a fruit',
-        pronunciation: 'sa-gwa',
-        tagNames: <String>['noun', 'food'],
-        isFlagged: true,
-      );
-    repository.pages.add(
-      withHistory
-          ? CardHistoryPageModel(
-              events: <CardHistoryEventModel>[
-                fakeHistoryEvent(id: 'e1'),
-                fakeHistoryEvent(id: 'e2', action: StudyAction.forgotten),
-                fakeHistoryEvent(id: 'e3', kind: StudyAnswerKind.learning),
-              ],
-              hasMore: false,
-              nextCursor: null,
-            )
-          : CardHistoryPageModel.empty,
-    );
-
-    return repository;
-  }
-
-  Widget scope(
-    FakeCardDetailRepository repository,
-    Brightness brightness, {
-    Locale? locale,
-    double textScale = 1,
-  }) => ProviderScope(
-    overrides: [cardDetailRepositoryProvider.overrideWithValue(repository)],
-    child: ReviewApp(
-      home: const CardDetailScreen(deckId: 'deck-1', cardId: 'card-1'),
-      brightness: brightness,
-      locale: locale,
-      textScale: textScale,
-    ),
-  );
-
+  /// **The fixture states a card the app could actually have produced.**
+  /// The first version did not, and three of the headline renders showed it:
+  /// the panel read `New · Never answered · Reviews 0 · Box 1` above a timeline
+  /// carrying three reviews — a combination no answer can write, since an answer
+  /// updates the schedule and the history in one go. Worse for review, the
+  /// `forgotten` row said `Box 1 → 2`: a danger word beside a *promotion*, on
+  /// the very frame someone would use to judge whether the danger/success
+  /// mapping reads. And all three rows carried the same minute, so the timeline
+  /// had no legible order.
+  ///
+  /// A reference picture that contradicts the rule it illustrates is worse than
+  /// no picture, so the counts, the dates and the box moves agree here.
   testWidgets('detail — loaded with history, light', (tester) async {
     await pumpReview(tester, scope(loaded(), Brightness.light));
 
@@ -156,38 +110,6 @@ void main() {
     await matchesReviewGolden('goldens/card_detail_320_x2_vi_scrolled.png');
   });
 
-  testWidgets('detail — a history page that failed to load, light', (
-    tester,
-  ) async {
-    // The band D24/D25's grammar was just applied to. Rendered because the
-    // whole point of that grammar is that it is checked by eye across screens,
-    // and a structural diff against the sibling widgets is not that check.
-    final repository = loaded()
-      ..nextHistoryFailure = const DatabaseFailure(message: 'demo');
-    await pumpReview(tester, scope(repository, Brightness.light));
-
-    await matchesReviewGolden('goldens/card_detail_page_error_light.png');
-  });
-
-  testWidgets('detail — the card was deleted from another screen, light', (
-    tester,
-  ) async {
-    // The face whose glyph changed this round. `search_off` said "nothing
-    // matched your search" on four other screens; a render is what makes the
-    // difference visible.
-    final repository = loaded();
-    await pumpReview(tester, scope(repository, Brightness.light));
-    repository.emitDetailError(
-      const NotFoundFailure(
-        message: 'gone',
-        reason: CardNotFoundReason.cardGone,
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    await matchesReviewGolden('goldens/card_detail_not_found_light.png');
-  });
-
   testWidgets('detail — the whole schedule grid, VI at textScaler 2.0', (
     tester,
   ) async {
@@ -213,12 +135,116 @@ void main() {
     await matchesReviewGolden('goldens/card_detail_state_grid_vi_x2.png');
   });
 
-  testWidgets('detail — a card with no history yet, light', (tester) async {
+  testWidgets('detail — the schedule grid at 320dp and 2.0, VI, dark', (
+    tester,
+  ) async {
+    // **G8 stacked has only ever been seen in light.** Dark is where the
+    // surface ladder inverts (W6, divergence four), and the stacked grid is the
+    // densest thing on the muted panel — so the one frame where that inversion
+    // matters most was the one frame nobody had.
     await pumpReview(
       tester,
-      scope(loaded(withHistory: false), Brightness.light),
+      scope(
+        loaded(),
+        Brightness.dark,
+        locale: const Locale('vi'),
+        textScale: 2,
+      ),
+      surface: const Size(320, 1400),
     );
 
-    await matchesReviewGolden('goldens/card_detail_no_history_light.png');
+    await tester.ensureVisible(find.byType(CardDetailStateWidget));
+    await tester.pumpAndSettle();
+
+    await matchesReviewGolden('goldens/card_detail_state_grid_vi_x2_dark.png');
+  });
+
+  testWidgets('detail — ten tags and a flag at 320dp and 2.0, VI', (
+    tester,
+  ) async {
+    // **The hero now holds the flag and every tag in one `Wrap`.** That is a
+    // different reflow shape from the tag row it replaced, and ten tags with
+    // doubled Vietnamese is the case that actually bends it.
+    final repository = FakeCardDetailRepository()
+      ..seededDetail = fakeCardDetail(
+        front: '사과',
+        back: 'quả táo',
+        isFlagged: true,
+        tagNames: <String>[for (var i = 1; i <= 10; i++) 'nhãn $i'],
+        currentBox: 3,
+        // The schedule has to agree with the counts: `Reviews 7` above `Not
+        // scheduled yet` is a card no answer could have written, and a
+        // reference picture that contradicts the rule it illustrates is worse
+        // than no picture.
+        learnedAt: fakeNow.subtract(const Duration(days: 12)),
+        dueAt: fakeNow.add(const Duration(days: 2)),
+        lastAnsweredAt: fakeNow,
+        answerCount: 7,
+        lapseCount: 1,
+      )
+      ..pages.add(CardHistoryPageModel.empty);
+    await pumpReview(
+      tester,
+      scope(
+        repository,
+        Brightness.light,
+        locale: const Locale('vi'),
+        textScale: 2,
+      ),
+      surface: const Size(320, 1400),
+    );
+
+    await matchesReviewGolden('goldens/card_detail_many_tags_vi_x2.png');
+  });
+
+  testWidgets('detail — loaded with history at 412dp', (tester) async {
+    // The widest phone the geometry tests run at, and the one width that had
+    // assertions but no picture.
+    await pumpReview(
+      tester,
+      scope(loaded(), Brightness.light),
+      surface: const Size(412, 915),
+    );
+
+    await matchesReviewGolden('goldens/card_detail_412_light.png');
+  });
+
+  for (final brightness in Brightness.values) {
+    testWidgets('detail — an sm2 card, unflagged and with no extras, '
+        '${brightness.name}', (tester) async {
+      // **Both modes, because one mode is how a mode goes unexamined.** The
+      // gallery pairs a screen by `<base>_light` / `<base>_dark`; a face
+      // rendered in dark alone is a face the owner reviews in dark alone — and
+      // this is the frame where the surface ladder is easiest to read, in
+      // either direction.
+      await pumpReview(tester, scope(sm2(), brightness));
+
+      await matchesReviewGolden(
+        'goldens/card_detail_sm2_${brightness.name}.png',
+      );
+    });
+  }
+
+  testWidgets('detail — a long meaning and a long example, light', (
+    tester,
+  ) async {
+    // The hero has to hold a paragraph without the divider or the optional
+    // group losing their place, and the card must still end on the gutter.
+    final repository = FakeCardDetailRepository()
+      ..seededDetail = fakeCardDetail(
+        front: '만나서 반갑습니다',
+        back:
+            'nice to meet you — a polite greeting used the first time you meet '
+            'someone, and long enough here to wrap several times inside the '
+            'card that holds it',
+        example:
+            '안녕하세요, 만나서 반갑습니다. 저는 한국어를 배우고 있어요, '
+            'and this line keeps going so the example wraps too',
+        isFlagged: true,
+      )
+      ..pages.add(CardHistoryPageModel.empty);
+    await pumpReview(tester, scope(repository, Brightness.light));
+
+    await matchesReviewGolden('goldens/card_detail_long_content_light.png');
   });
 }

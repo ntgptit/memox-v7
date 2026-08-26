@@ -4108,5 +4108,17 @@
   "deckTileAllCaughtUpLabel": "Đã học hết",
   "@deckTileAllCaughtUpLabel": {
     "description": "The deck card’s one chip when a deck with cards has nothing pending: no reviews due and no new cards. It replaces the two zero chips, which stated the absence of work twice and said nothing."
+  },
+  "cardDetailBoxPositionSemantics": "Hộp {current} trên {total}",
+  "@cardDetailBoxPositionSemantics": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    },
+    "description": "Dạng nói của thanh vị trí tám hộp. Trình đọc màn hình đọc câu này thay cho dạng vẽ trên màn, vì dấu gạch là ký hiệu và bị đọc thành khoảng lặng hoặc thành gạch chéo."
   }
 }

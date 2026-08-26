@@ -1,28 +1,33 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_icon_size.dart';
+import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_card.dart';
 import '../../../../deck/domain/models/scheduler_type_model.dart';
 import '../../../domain/entities/card_study_state_entity.dart';
 import '../../../domain/models/card_detail_model.dart';
 import '../../../domain/models/card_state_model.dart';
+import '../items/card_box_progress_widget.dart';
+import '../items/card_metric_widget.dart';
+import '../support/card_action_tone_widget.dart';
 import '../support/card_state_widget.dart';
-import '../support/card_tag_chip_widget.dart';
 
-/// The card's marks and its schedule **as it stands now** (BR-240, M4.15 W2
-/// band 2).
+/// Where the scheduler has this card right now (BR-240, M4.15 W2 band 2).
 ///
 /// **Only the fields of the scheduler this card is actually on.** An
 /// `eight_box` card has no ease factor and an `sm2` card has no box (AD-08), so
 /// the other algorithm's rows are absent rather than shown empty — a labelled
-/// blank invites the reader to look for a value that cannot exist.
+/// blank invites the reader to look for a value that cannot exist. The same rule
+/// governs the track above the grid: `eight_box` has eight steps to be on, SM-2
+/// has none, and drawing one for it would be inventing a progress metric the
+/// algorithm does not define (BR-243).
 ///
 /// **Nothing here is derived beyond the display state**, which comes from the
-/// same `cardStateOf` the list row uses. No accuracy, no streak, no percentage:
-/// BR-243 keeps every aggregate on this screen out, because a second definition
-/// of a statistic is one that will disagree with the real one.
+/// same `cardStateOf` the list row uses. No accuracy, no recall rate, no streak,
+/// no "since added": BR-243 keeps every aggregate off this screen, because a
+/// second definition of a statistic is one that will disagree with the real one.
 class CardDetailStateWidget extends StatelessWidget {
   const CardDetailStateWidget({required this.detail, super.key});
 
@@ -30,43 +35,59 @@ class CardDetailStateWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
     final state = detail.studyState;
+    final box = state.currentBox;
+    final isBoxed =
+        state.schedulerType == SchedulerType.eightBox && box != null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        Text(l10n.cardDetailStateSectionTitle, style: context.texts.titleSmall),
+        // Upper-cased with the section tracking, the same heading shape the
+        // deck list, the progress panel and the session bar already use — so a
+        // reader meets one kind of group title in this app rather than four.
+        Text(
+          context.l10n.cardDetailStateSectionTitle.toUpperCase(),
+          style: context.textStyles.sectionLabel.copyWith(
+            color: context.colors.onSurfaceVariant,
+          ),
+        ),
         const SizedBox(height: AppSpacing.md),
-        // Flag, then tags, then the display state, then the schedule — the
-        // order W2 band 2 lists, so the wireframe and the screen can be read
-        // against each other without translating between two orders.
-        if (detail.card.isFlagged) ...<Widget>[
-          _FlagRow(label: l10n.cardDetailFlaggedLabel),
-          const SizedBox(height: AppSpacing.sm),
-        ],
-        if (detail.tagNames.isNotEmpty) ...<Widget>[
-          _TagRow(names: detail.tagNames, label: l10n.cardDetailTagsLabel),
-          const SizedBox(height: AppSpacing.md),
-        ],
-        _StateRow(state: detail.state),
-        const SizedBox(height: AppSpacing.md),
-        for (final row in _scheduleRows(context, state))
-          _ScheduleRow(label: row.$1, value: row.$2),
+        SizedBox(
+          width: double.infinity,
+          child: MxCard(
+            // Flat, like every other card in this column (D20): two competing
+            // depths in one scroll view read as a rendering fault rather than as
+            // a hierarchy. The hairline and the surface step do the separating.
+            elevation: AppElevation.none,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                _StateRow(state: detail.state),
+                if (isBoxed) ...<Widget>[
+                  const SizedBox(height: AppSpacing.md),
+                  _BoxProgress(currentBox: box),
+                ],
+                const SizedBox(height: AppSpacing.lg),
+                _MetricGrid(metrics: _metrics(context, state)),
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }
 
-  /// The schedule as label/value pairs, shared plus per-scheduler.
+  /// The schedule as typed cells, shared plus per-scheduler.
   ///
-  /// A list rather than a chain of widgets so every row goes through one
-  /// alignment (M4.15 G2) and so which rows exist is one readable expression
-  /// instead of a `Column` full of conditionals.
-  List<(String, String)> _scheduleRows(
-    BuildContext context,
-    CardStudyStateEntity state,
-  ) {
+  /// **Typed, so the grid never has to read a label to decide how to draw a
+  /// value.** The first version of this screen returned `(String, String)`
+  /// pairs, and the only way to accent the box from there was to compare the
+  /// label against the localized word `Box` — correct in English, wrong in
+  /// Vietnamese, and wrong in silence.
+  List<CardMetric> _metrics(BuildContext context, CardStudyStateEntity state) {
     final l10n = context.l10n;
     // `learned_at` and `due_at` travel together (BR-149), so one placeholder
     // answers both and the pair can never say two different things about
@@ -81,33 +102,155 @@ class CardDetailStateWidget extends StatelessWidget {
 
     final unscheduled = l10n.cardDetailNotScheduledValue;
 
-    return <(String, String)>[
-      (l10n.cardDetailDueLabel, date(state.dueAt, whenNull: unscheduled)),
-      (
+    return <CardMetric>[
+      CardMetric.date(
+        l10n.cardDetailDueLabel,
+        date(state.dueAt, whenNull: unscheduled),
+        Icons.schedule_rounded,
+      ),
+      CardMetric.date(
         l10n.cardDetailLearnedLabel,
         date(state.learnedAt, whenNull: unscheduled),
+        Icons.school_outlined,
       ),
-      (
+      CardMetric.date(
         l10n.cardDetailLastAnsweredLabel,
         date(state.lastAnsweredAt, whenNull: l10n.cardDetailNeverAnsweredValue),
+        Icons.history_rounded,
       ),
-      (l10n.cardDetailReviewsLabel, '${state.answerCount}'),
-      (l10n.cardDetailLapsesLabel, '${state.lapseCount}'),
-      if (state.schedulerType == SchedulerType.eightBox &&
-          state.currentBox != null)
-        (l10n.cardDetailBoxLabel, '${state.currentBox}'),
-      if (state.schedulerType == SchedulerType.sm2) ...<(String, String)>[
+      CardMetric.numeric(
+        l10n.cardDetailReviewsLabel,
+        '${state.answerCount}',
+        Icons.autorenew_rounded,
+      ),
+      CardMetric.numeric(
+        l10n.cardDetailLapsesLabel,
+        '${state.lapseCount}',
+        Icons.replay_rounded,
+      ),
+      if (state.schedulerType == SchedulerType.sm2) ...<CardMetric>[
         if (state.easeFactor != null)
-          (l10n.cardDetailEaseLabel, state.easeFactor!.toStringAsFixed(2)),
+          CardMetric.numeric(
+            l10n.cardDetailEaseLabel,
+            state.easeFactor!.toStringAsFixed(2),
+            Icons.speed_rounded,
+          ),
         if (state.intervalDays != null)
-          (
+          CardMetric.numeric(
             l10n.cardDetailIntervalLabel,
             l10n.cardDetailDayCount(state.intervalDays!),
+            Icons.event_repeat_rounded,
           ),
         if (state.repetitions != null)
-          (l10n.cardDetailRepetitionsLabel, '${state.repetitions}'),
+          CardMetric.numeric(
+            l10n.cardDetailRepetitionsLabel,
+            '${state.repetitions}',
+            Icons.repeat_one_rounded,
+          ),
       ],
     ];
+  }
+}
+
+/// The eight-step ladder, with the position stated in words above it.
+///
+/// **One semantics node, and it says the number.** The track itself is eight
+/// coloured boxes — nothing a screen reader can make a sentence out of — so the
+/// row and the track are announced together as the position they jointly mean,
+/// and the decorative halves are excluded rather than read out one by one.
+class _BoxProgress extends StatelessWidget {
+  const _BoxProgress({required this.currentBox});
+
+  final int currentBox;
+
+  @override
+  Widget build(BuildContext context) {
+    final maxBox = context.cardMaxBox;
+    final label = context.l10n.cardDetailBoxLabel;
+    // Punctuation on screen, words in the ear: `3 / 8` is read as silence or as
+    // "slash", so the spoken form is its own ARB key — the one string this
+    // presentation-only change adds, and it adds no copy anybody sees.
+    final position = '$currentBox / $maxBox';
+
+    return Semantics(
+      container: true,
+      label: context.l10n.cardDetailBoxPositionSemantics(currentBox, maxBox),
+      child: ExcludeSemantics(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: Text(label, style: cardMetricLabelStyle(context)),
+                ),
+                Text(
+                  position,
+                  style: cardMetricValueStyle(
+                    context,
+                    CardMetricKind.schedulerProgress,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            CardBoxProgressWidget(currentBox: currentBox, maxBox: maxBox),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The schedule's cells, two across where two fit.
+///
+/// **The decision is made once for the whole grid, from real constraints.** Two
+/// cells that each measured their own width would be free to disagree the moment
+/// one of them wrapped, and a per-device breakpoint would be a number chosen
+/// against a phone rather than against the text it has to hold. The floor scales
+/// with the text scaler because that is what actually makes a cell too narrow.
+class _MetricGrid extends StatelessWidget {
+  const _MetricGrid({required this.metrics});
+
+  final List<CardMetric> metrics;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final floor = MediaQuery.textScalerOf(context).scale(_minCellWidth);
+        final columns = (constraints.maxWidth - AppSpacing.md) / 2 >= floor
+            ? 2
+            : 1;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            for (var start = 0; start < metrics.length; start += columns) ...[
+              if (start > 0) const SizedBox(height: AppSpacing.lg),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  for (var column = 0; column < columns; column++) ...<Widget>[
+                    if (column > 0) const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: start + column < metrics.length
+                          // The trailing gap of an odd row is an empty cell
+                          // rather than a shorter row, so the column edges hold
+                          // all the way down.
+                          ? CardMetricWidget(metric: metrics[start + column])
+                          : const SizedBox.shrink(),
+                    ),
+                  ],
+                ],
+              ),
+            ],
+          ],
+        );
+      },
+    );
   }
 }
 
@@ -121,6 +264,7 @@ class _StateRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Container(
           width: _stateDotSize,
@@ -142,179 +286,14 @@ class _StateRow extends StatelessWidget {
   }
 }
 
-/// The user's flag, present only when set — the detail screen shows it and
-/// never toggles it (BR-92, BR-239).
-class _FlagRow extends StatelessWidget {
-  const _FlagRow({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        Icon(
-          Icons.flag,
-          size: AppIconSize.sm,
-          // `onSurface`, not `primary`: the accent measures 3.29:1 as a glyph
-          // on the dark surface, below what a painted mark needs. The flag
-          // reads by shape; the colour only stays legible.
-          color: context.colors.onSurface,
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Text(label, style: context.texts.bodyMedium),
-      ],
-    );
-  }
-}
-
-/// The read-only chip strip (BR-93), wrapping so ten tags reflow at 320dp
-/// instead of overflowing.
-class _TagRow extends StatelessWidget {
-  const _TagRow({required this.names, required this.label});
-
-  final List<String> names;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Text(
-          label,
-          style: context.texts.labelSmall?.copyWith(
-            color: context.colors.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.xs),
-        Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.xs,
-          children: <Widget>[
-            for (final name in names) CardTagChipWidget(name: name),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-/// One label/value pair of the schedule.
-///
-/// **Two columns, and the label column is fixed**, so every value starts at the
-/// same x (M4.15 G2) instead of being pushed around by the length of the word
-/// beside it. The column scales with the text, because a constant dp would clip
-/// the longest label in either language at 2.0 — and Vietnamese runs longer
-/// than English here.
-///
-/// **Past a point the two columns stop fitting, and then it stacks.** At 320dp
-/// with a 2.0 scaler the label column alone is 232 of the 288 available, which
-/// leaves 44 for the value — less than one word of `bodySmall` at that scale.
-/// Nothing overflows and nothing throws, so the failure is silent: the value
-/// simply lays out past its column. Below the threshold the row becomes the
-/// same label-over-value shape the content band already uses, which keeps the
-/// value readable at the cost of G2's alignment — an alignment nobody can read
-/// when the text it aligns is cut off.
-class _ScheduleRow extends StatelessWidget {
-  const _ScheduleRow({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final labelWidth = MediaQuery.textScalerOf(
-            context,
-          ).scale(_labelColumnWidth);
-          final fitsBeside =
-              labelWidth + AppSpacing.md <=
-              constraints.maxWidth * _maxLabelColumnFraction;
-
-          return fitsBeside
-              ? _SideBySide(label: label, value: value, labelWidth: labelWidth)
-              : _Stacked(label: label, value: value);
-        },
-      ),
-    );
-  }
-}
-
-/// The two-column form, which is what G2 measures.
-class _SideBySide extends StatelessWidget {
-  const _SideBySide({
-    required this.label,
-    required this.value,
-    required this.labelWidth,
-  });
-
-  final String label;
-  final String value;
-  final double labelWidth;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        SizedBox(
-          width: labelWidth,
-          child: Text(
-            label,
-            style: context.texts.bodySmall?.copyWith(
-              color: context.colors.onSurfaceVariant,
-            ),
-          ),
-        ),
-        const SizedBox(width: AppSpacing.md),
-        Expanded(child: Text(value, style: context.texts.bodySmall)),
-      ],
-    );
-  }
-}
-
-/// The narrow form: label over value, both on the band's left edge.
-class _Stacked extends StatelessWidget {
-  const _Stacked({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Text(
-          label,
-          style: context.texts.bodySmall?.copyWith(
-            color: context.colors.onSurfaceVariant,
-          ),
-        ),
-        Text(value, style: context.texts.bodySmall),
-      ],
-    );
-  }
-}
-
 /// The state dot's diameter, matching the list row's — colour and position
 /// carry it, not size.
 const double _stateDotSize = 10;
 
-/// The unscaled width of the schedule's label column, sized to the longest
-/// label in either language at 1.0×.
-const double _labelColumnWidth = 116;
-
-/// How much of the row the scaled label column may take before the pair stacks.
+/// The narrowest a cell may be before the grid drops to one column.
 ///
-/// Not a design value and deliberately not a token: it is this grid's own
-/// layout rule. Past 45% the remainder stops being able to hold one word of
-/// `bodySmall` at the scale that got it there, and a value laid out past its
-/// column is worse than a taller row.
-const double _maxLabelColumnFraction = 0.45;
+/// Not a design value and deliberately not a token: it is this grid's own layout
+/// rule — a 32dp well, its `sm` gap and roughly six characters of `bodyMedium`.
+/// Below it the value wraps mid-word while the label still fits, which is the
+/// shape that reads as a rendering fault rather than as a narrow screen.
+const double _minCellWidth = 132;

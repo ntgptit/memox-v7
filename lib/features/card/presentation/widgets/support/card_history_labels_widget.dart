@@ -92,8 +92,14 @@ extension CardHistoryLabels on BuildContext {
   /// [CardHistoryEventModel.schedulerType]: a card whose deck changed scheduler
   /// still has older rows written under the previous one, and those rows must
   /// read in their own terms. Asking the data is what makes that automatic.
-  List<String> cardHistoryScheduleLines(CardHistoryEventModel event) =>
-      _scheduleLines(event, spoken: false);
+  ///
+  /// **Typed, so the widget never reads a rendered string to decide how to draw
+  /// it.** `Box 2 -> 3` is the one line that carries the accent, and the only
+  /// way to find it in a `List<String>` is to match the localized word `Box` —
+  /// right in English, wrong in Vietnamese, and wrong silently.
+  List<CardHistoryScheduleLine> cardHistoryScheduleLines(
+    CardHistoryEventModel event,
+  ) => _scheduleLines(event, spoken: false);
 
   /// The same lines, in words a screen reader can say (M4.15 W6).
   ///
@@ -102,7 +108,10 @@ extension CardHistoryLabels on BuildContext {
   /// phrasing differs, so the spoken form is a flag rather than a second
   /// function that could drift from this one the first time a field is added.
   List<String> cardHistoryScheduleLinesSemantics(CardHistoryEventModel event) =>
-      _scheduleLines(event, spoken: true);
+      _scheduleLines(
+        event,
+        spoken: true,
+      ).map((line) => line.text).toList(growable: false);
 
   /// The stage name, spoken.
   ///
@@ -114,7 +123,7 @@ extension CardHistoryLabels on BuildContext {
       ? l10n.cardHistoryModeUnknownSemantics
       : cardHistoryMode(mode);
 
-  List<String> _scheduleLines(
+  List<CardHistoryScheduleLine> _scheduleLines(
     CardHistoryEventModel event, {
     required bool spoken,
   }) {
@@ -129,26 +138,48 @@ extension CardHistoryLabels on BuildContext {
         : l10n.cardHistoryIntervalChange(from, to);
     final absent = spoken ? l10n.cardHistoryAbsentValueSemantics : _absentValue;
 
-    final lines = <String>[
+    final lines = <CardHistoryScheduleLine>[
       if (event.previousBox != null || event.nextBox != null)
-        box(_number(event.previousBox, absent), _number(event.nextBox, absent)),
+        CardHistoryScheduleLine(
+          box(
+            _number(event.previousBox, absent),
+            _number(event.nextBox, absent),
+          ),
+          CardHistoryScheduleLineKind.box,
+        ),
       if (event.previousEaseFactor != null || event.nextEaseFactor != null)
-        ease(
-          _ease(event.previousEaseFactor, absent),
-          _ease(event.nextEaseFactor, absent),
+        CardHistoryScheduleLine(
+          ease(
+            _ease(event.previousEaseFactor, absent),
+            _ease(event.nextEaseFactor, absent),
+          ),
+          CardHistoryScheduleLineKind.ease,
         ),
       if (event.previousIntervalDays != null || event.nextIntervalDays != null)
-        interval(
-          _days(event.previousIntervalDays, absent),
-          _days(event.nextIntervalDays, absent),
+        CardHistoryScheduleLine(
+          interval(
+            _days(event.previousIntervalDays, absent),
+            _days(event.nextIntervalDays, absent),
+          ),
+          CardHistoryScheduleLineKind.interval,
         ),
       if (event.nextDueAt != null)
-        l10n.cardHistoryNextDueLabel(cardHistoryDate(event.nextDueAt!)),
+        CardHistoryScheduleLine(
+          l10n.cardHistoryNextDueLabel(cardHistoryDate(event.nextDueAt!)),
+          CardHistoryScheduleLineKind.nextDue,
+        ),
     ];
     // Said, not left blank: a learning turn records history and moves no
     // schedule (BR-144), and an event with no lines under it reads as data that
     // failed to load rather than as the normal shape of that turn.
-    if (lines.isEmpty) return <String>[l10n.cardHistoryScheduleUnchanged];
+    if (lines.isEmpty) {
+      return <CardHistoryScheduleLine>[
+        CardHistoryScheduleLine(
+          l10n.cardHistoryScheduleUnchanged,
+          CardHistoryScheduleLineKind.unchanged,
+        ),
+      ];
+    }
 
     return lines;
   }
@@ -188,6 +219,33 @@ extension CardHistoryLabels on BuildContext {
   /// at; the raw double would print a long tail nobody can compare at a glance.
   String _ease(double? value, String absent) =>
       value?.toStringAsFixed(2) ?? absent;
+}
+
+/// Which schedule field one before-after line is about.
+///
+/// Presentation-only: the domain already says which columns the row filled, and
+/// this is the widget's own name for "the line I may accent".
+enum CardHistoryScheduleLineKind {
+  /// `eight_box`'s position — the one line that carries the accent (V15).
+  box,
+  ease,
+  interval,
+  nextDue,
+
+  /// The turn moved no schedule at all (BR-144).
+  unchanged,
+}
+
+/// One before-after line, with the field it is about attached.
+@immutable
+final class CardHistoryScheduleLine {
+  const CardHistoryScheduleLine(this.text, this.kind);
+
+  /// Already localized, in the drawn or the spoken form depending on which
+  /// builder produced it.
+  final String text;
+
+  final CardHistoryScheduleLineKind kind;
 }
 
 /// The stand-in for a side of a pair the row did not record.

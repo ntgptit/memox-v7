@@ -12852,6 +12852,179 @@ của M2.
   `widgetbook/test/catalog_smoke_test.dart`.
 - **Checklist phases:** 7, 13, 14
 
+### M99.60 · Card Detail — compact history layout theo concept của chủ dự án
+
+- **Status:** **done** — presentation-only. Không đổi read model, repository,
+  DAO, SQL, use case, controller, provider, route, paging hay hành vi nào.
+  **Một ARB key duy nhất được thêm**, và nó là accessibility:
+  `cardDetailBoxPositionSemantics` — dạng nói của vị trí hộp, vì `3 / 8` tới
+  trình đọc màn hình thành "3 gạch chéo 8" hoặc thành im lặng. Không copy nào
+  người dùng nhìn thấy được thêm, không nghiệp vụ nào được định nghĩa; đây đúng
+  ngoại lệ mà implementation prompt §6 cho phép.
+- **Goal:** Màn cũ là ba dải chữ phẳng, nên nội dung thẻ, lịch hiện tại và lịch
+  sử có cùng visual weight. Concept của chủ dự án quét được nhanh vì ba lý do:
+  chữ nhỏ và có thứ bậc rõ, lịch là một lưới hai cột có thanh tiến độ, và mỗi
+  lượt ôn là một card có phán quyết ở góc trái và thời điểm ở góc phải. Bản này
+  lấy đúng ba thứ đó và **không** lấy dữ liệu mà concept bịa ra.
+- **Scope:** `card_detail_screen.dart` và ba section, hai item widget mới, một
+  support mapper mới, một typed variant `tonal` cho `MxActionButton`, wireframe
+  M4.15, test geometry/vai trò/semantics, golden và gallery. **Không** mở rộng
+  sang Card List / Editor / Study.
+- **Output:** `lib/features/card/presentation/screens/card_detail_screen.dart`;
+  `.../widgets/sections/card_detail_summary_widget.dart` (đổi tên từ
+  `card_detail_content_widget.dart`), `card_detail_state_widget.dart`,
+  `card_history_section_widget.dart`;
+  `.../widgets/items/card_history_event_widget.dart`,
+  `card_box_progress_widget.dart` (mới), `card_metric_widget.dart` (mới, thay
+  lưới nhãn/giá trị private trong `card_detail_state_widget.dart`);
+  `.../widgets/support/card_action_tone_widget.dart` (mới),
+  `card_history_labels_widget.dart`;
+  `lib/shared/widgets/mx_action_button.dart` (`MxActionButtonVariant.tonal`);
+  `docs/wireframes/m4-15-card-detail.md` (V13…V19 viết lại, W2/W4 viết lại,
+  G1…G12); test `card_detail_alignment_test.dart`,
+  `card_detail_hierarchy_test.dart`, `card_detail_timeline_style_test.dart`,
+  `card_detail_history_faces_test.dart`, `card_detail_screen_test.dart`,
+  `test/support/study_render.dart`, `support/card_detail_harness.dart`;
+  `.claude/skills/flutter-testing/scripts/build_screen_gallery.py`;
+  `lib/l10n/app_en.arb`, `lib/l10n/app_vi.arb` (một key accessibility, xem
+  Status); `lib/core/theme/app_breakpoints.dart` (chỉ doc-comment: `medium` có
+  consumer production đầu tiên); `test/shared/widgets/mx_components_test.dart`;
+  `design_audit/color_system_report.md` và `design_audit/usage_inventory.json`
+  (**regenerate, không đổi tool** — bộ quét đếm site màu theo file, và các widget
+  mới làm số đó nhích lên); goldens `test/demo/`.
+- **Concept là hợp đồng về hierarchy, không phải nguồn nghiệp vụ.** Sáu thứ
+  trong ảnh **không** được dựng, và mỗi thứ có một lý do đã ghi: breadcrumb
+  (read model không có deck path, và một task UI không được mở query để bắt
+  chước ảnh); `Recall rate`, `Correct streak`, `Since added` và
+  `TIMELINE · N EVENTS` (BR-243 và V10 cấm mọi aggregate — history phân trang,
+  nên con số đang giữ trong memory không phải tổng); `All events` filter (chưa
+  có filter contract); taxonomy `CORRECT`/`RECOVERED`/`FORGOT` (event phải dùng
+  `mode`/`kind`/`action` đã lưu); thời lượng `1.4 s` (read model không lưu nó);
+  và `Box 3 / 5` — `eight_box` có **tám** hộp, số lấy từ `kMaxBox` của chính
+  scheduler chứ không phải từ ảnh.
+- **Bốn divergence là số đo, không phải ý kiến** (đủ chi tiết ở W6): badge của
+  event là pill **viền** chứ không tô nền, vì `warning` trên `surfaceMuted` chỉ
+  4.00:1 ở light còn trên `surface` cả ba tone đều đạt 4.5:1; đường nối giữ
+  `borderControl` (3.02 / 3.41) chứ không `borderSubtle` (1.38 / 2.32); glyph cờ
+  dùng `onDueContainer` (6.38 / 6.57) chứ không `warning` (4.04 ở light); và nút
+  `Edit` tonal được nhận diện bằng **nhãn**, vì `secondaryContainer` chỉ 1.14:1
+  so với app bar — đó là lý do biến thể này luôn mang chữ.
+- **`hard` là một bậc riêng, không phải success.** Sáu action trả lời một câu
+  hỏi theo ba cách: `forgotten`/`again` → danger, `hard` → warning,
+  `remembered`/`good`/`easy` → success. Gọi `hard` là success sẽ xoá đúng tín
+  hiệu duy nhất SM-2 có giữa "ổn" và "suýt mất".
+- **Ở dark, đoạn "đã qua" và đoạn "hiện tại" của track là cùng một màu.**
+  `progressFillDark` và `primaryAccentDark` đều resolve về `focusRingDark`. Nên
+  đoạn hiện tại được phân biệt bằng **chiều cao** và bằng dòng `N / 8` ngay trên
+  track, không bằng sắc. Ghi lại kèm một test giữ sự thật đó, để ngày hai token
+  tách ra thì chênh lệch chiều cao được xem lại chứ không bị kế thừa mù.
+- **Mọi card trong cột đều phẳng.** D20 nói card trong một cột cuộn để phẳng vì
+  "hai độ sâu cạnh tranh trong một cột làm danh sách đọc rối"; ở đây có ba loại
+  bề mặt trong một cột, nên cả ba đều `AppElevation.none`. Điều đó cũng gỡ bỏ
+  phân kỳ mà bản nháp trước phải ghi: `shadowsFor` trả rỗng ở dark, nên một
+  "card nổi" chỉ nổi ở một trong hai theme.
+- **`MxActionButtonVariant.tonal` là một enum member, không phải một knob màu.**
+  Nó dùng `buildFilledTonalStyle` đã có sẵn trong `app_button_themes.dart`, nên
+  không thêm `Color?`, không `ButtonStyle?` tuỳ ý và không local `Theme` patch.
+  `_busyStyle` đổi từ một điều kiện hai nhánh sang `switch` exhaustive, nên một
+  variant thêm sau này fail lúc build thay vì âm thầm render như nút destructive.
+- **Hai chi phí change này tạo ra, ghi lại thay vì để im.**
+  - `card_history_section_widget.dart` nay **404 dòng thô** và làm
+    `check_architecture.py` in một cảnh báo `! large file` **mới**. Guard
+    `common.no_large_source_file` đếm **dòng logic** và file này có 263, nên gate
+    xanh — chênh lệch là doc comment. Không tách `_Tail`/`_PageError`/
+    `_InlineSpinner` sang bucket khác vì AD-15 chỉ có bốn bucket và không cái
+    nào nghĩa là "mảnh của một band không lặp"; phát minh cái thứ năm để hạ một
+    cảnh báo dòng-thô là đổi một quy tắc lấy một con số.
+  - Mỗi event card bọc một `IntrinsicHeight` để connector chạy hết chiều cao
+    hàng. Timeline là `Column` không lazy trong một `SingleChildScrollView`, page
+    size 50, và load-more cộng dồn — nên sau bốn lần Load more mỗi frame layout
+    phải chạy thêm 200 lượt intrinsic pass. Chưa đo, và chưa có màn nào trong app
+    chạm ngưỡng đó; nếu một ngày nó thành vấn đề thì lối ra là vẽ connector bằng
+    `CustomPaint` chứ không phải bỏ card.
+- **Acceptance criteria:**
+  - [x] Summary hero và progress panel cùng một cặp mép ngoài bằng
+        `mxScreenGutter`; event card cùng mép phải và cùng mép trái với nhau;
+        đo bằng `getRect` ở 320@2.0, 390 và 412.
+  - [x] Front ở `headlineSmall` 24sp, **không** phải `cardPrompt` 30sp; Back ở
+        `bodyMedium` muted.
+  - [x] Scheduler badge không chồng Front; `eight_box` nói `N / 8`, `sm2` nói
+        `SM-2` và không có track.
+  - [x] Track có đúng `kMaxBox` đoạn, bề rộng bằng nhau, đoạn hiện tại cao hơn.
+  - [x] Lưới metric hai cột ở 390/412, một cột ở 320@2.0, giá trị vẫn trong
+        panel.
+  - [x] Đủ sáu `StudyAction` map sang ba tone; chấm và badge cùng tone; badge là
+        viền, không tô nền.
+  - [x] Event vẫn là **một** node semantics gộp, dạng nói giữ nguyên.
+  - [x] Không aggregate, không filter, không breadcrumb, không taxonomy mới.
+  - [x] Edit đạt tap target Android và không ép tiêu đề ellipsis ở 320dp VI.
+  - [x] Contrast đo bằng `test/support/color_math.dart` ở cả hai theme.
+  - [x] Strict visual audit của `CardDetailScreen` PASS ở light và dark, không
+        nới allowance nào.
+  - [x] `flutter analyze` sạch; `dart format` sạch; guard sạch; `check_docs.py`
+        sạch.
+  - [x] Goldens regenerate với `TZ=UTC`; chạy lại **không** có
+        `--update-goldens` thì xanh, nên mọi PNG đã commit khớp một render tươi.
+  - [x] Gallery build lại từ goldens hiện tại và publish đúng URL cũ trong
+        `CLAUDE.md` — bước cuối của delivery phase, sau hai recursive review.
+- **URL ghim đang bị hai nhánh chưa merge tranh nhau, và rule trong `CLAUDE.md`
+  chưa nói tới ca này.** Trước lượt publish này, artifact đang mang
+  `golden suite @ 2ef75dbc` — `claude/card-editor-ux-hardening`, một nhánh
+  **không** nằm trên `origin/main`. Nhánh này cũng vậy. Nên trong cửa sổ giữa hai
+  lần merge, URL không phải "bản app đang chạy" như rule giả định, mà là *lần
+  publish gần nhất của bất kỳ ai*: publish của mình vừa xoá các frame D28 khỏi
+  trang, và khi #362-kế-tiếp của họ merge thì publish của họ sẽ xoá các frame
+  Card Detail này — và nó đã xảy ra thật, **trong vòng vài phút**: session kia
+  publish đè ngay sau đó, đưa trang về `2ef75dbc`. Không phải lỗi của bên nào,
+  mỗi bên đều làm đúng rule.
+
+  **Lối ra không phải là nhường, cũng không phải đè lại: là ghép.** Trang do
+  `build_screen_gallery.py` sinh ra có cấu trúc ổn định — mỗi màn là một
+  `<figure data-name="...">` mang PNG dạng base64, cộng vài con số đếm ở
+  header và ở mỗi section. Nên lấy **bản đang live làm nền** và chỉ thay đúng
+  các `<figure>` mà session này động vào là đủ: 42 màn của họ giữ nguyên, 16
+  màn Card detail thay mới, `Card` 10 → 24, tổng 44 → 58. Số học tự kiểm được —
+  44 − 2 + 16 = 58 khớp đúng bản build thuần của nhánh này, nên nếu lệch là
+  ghép sai chứ không phải "chắc do khác nhánh".
+
+  Việc này lặp lại — bản ghép đầu bị đè sau ~40 phút bởi một commit thứ ba
+  (`72c3b637`, chưa push), nên thao tác được đóng gói thành
+  `.claude/skills/flutter-testing/scripts/splice_screen_gallery.py`: đọc file
+  HTML mà WebFetch lưu lại từ artifact đang live, ghép figure theo tiền tố tên,
+  tự sửa ba con số đếm và header. Nó **assert** phép trừ-cộng thay vì giả định:
+  nếu một nhánh đổi tên màn thì tổng không khớp và script dừng, thay vì lặng lẽ
+  xuất bản một trang có màn bị nhân đôi.
+
+  Đổi lại, trang sau khi ghép **không tái tạo được bằng script**, nên header
+  phải tự khai điều đó (`ghép tay · 42 màn @ … + 16 màn @ …`) thay vì mang một
+  SHA duy nhất. Một SHA duy nhất trên trang đã ghép mới là thứ nguy hiểm: nó
+  trông y hệt một bản build sạch. Ghi lại đây vì lần tới nó sẽ trông giống hệt
+  một gallery stale, mà nguyên nhân thì khác hẳn.
+- **Emulator integration suite:** **not run — presentation-only restyle.** Không
+  thêm feature, route, binding, persistence hay platform behavior nào, nên không
+  có thứ gì mà chỉ một thiết bị mới nhìn thấy. Đây **không** phải một lượt chạy
+  xanh.
+- **Editable documents:** `docs/wbs.md`, `docs/wireframes/m4-15-card-detail.md`,
+  `docs/reviews/design-parity-checklist.md`
+- **Dependencies:** M99.31
+- **Tests required:** `card_detail_alignment_test.dart`,
+  `card_detail_hierarchy_test.dart` (mới),
+  `card_detail_timeline_style_test.dart` (mới),
+  `card_detail_layout_test.dart` (mới — các quan hệ hình học thuộc về một
+  viewport/locale cụ thể, tách khi `card_detail_alignment_test.dart` vượt trần
+  400 dòng logic; finder và fixture dùng chung ở
+  `support/card_detail_geometry.dart`),
+  `card_detail_screen_test.dart`, `card_detail_history_faces_test.dart`,
+  `test/demo/card_detail_demo_test.dart` tách làm ba —
+  `card_detail_history_demo_test.dart` (mọi mặt của dòng thời gian) và
+  `card_detail_demo_fixtures.dart` (fixture dùng chung), vì file gốc vượt trần
+  400 dòng của guard sau khi có 21 render;
+  `card_detail_route_test.dart`, `mx_components_test.dart`,
+  `mx_accessibility_test.dart`, `card_detail_screen_visual_audit_test.dart`,
+  `card_detail_demo_test.dart`, `widgetbook/test/catalog_smoke_test.dart`.
+- **Checklist phases:** 6, 7, 13
+
+
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 
 Ghi lại cụ thể, vì "mất một bộ lint" là câu quá mơ hồ để ai đó sau này biết

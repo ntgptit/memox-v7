@@ -116,6 +116,7 @@ Future<void> pumpReview(
   WidgetTester tester,
   Widget root, {
   Size surface = kReviewSurface,
+  bool settle = true,
 }) async {
   tester.view.physicalSize = goldenSurfaceFor(surface);
   tester.view.devicePixelRatio = kGoldenDevicePixelRatio;
@@ -124,6 +125,21 @@ Future<void> pumpReview(
   debugDisableShadows = false;
 
   await tester.pumpWidget(root);
+  if (!settle) {
+    // **One frame, for a face that never settles.** A loading face holds a
+    // repeating animation open, so `pumpAndSettle` times out rather than
+    // returning — which is why no render in this repo had ever photographed
+    // one, and why a spinner inside a card could be laid out wrong for a whole
+    // milestone with nothing to look at.
+    //
+    // This returns at t=0, and a caller photographing a spinner should **not**
+    // capture there: at t=0 the indicator's sweep is zero length and the PNG is
+    // a dot. Pump a fixed offset first — a constant duration is every bit as
+    // deterministic as no duration, and it shows an arc.
+    await tester.pump();
+
+    return;
+  }
   await tester.pumpAndSettle();
 }
 
