@@ -242,7 +242,14 @@ class _HeroFigureLine extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.baseline,
       textBaseline: TextBaseline.alphabetic,
       children: <Widget>[
-        Flexible(child: _numeral(context, heroCount, heroWord)),
+        // **The numeral is not `Flexible`, and that is load-bearing.**
+        // `Flexible` splits the line by *flex*, not by need: two of them at
+        // flex 1 each take half, so a 133-wide breakdown beside a 100-wide
+        // numeral still ellipsized at 126 even though the fit calculation had
+        // already proved both fit together. The numeral takes its own width —
+        // `fitsOnOneLine` guarantees there is room — and the breakdown takes
+        // what is left.
+        _numeral(context, heroCount, heroWord),
         // The breakdown, only when there is one to state: with no overdue it
         // would repeat the numeral beside it in smaller type.
         if (overdueCount > 0) ...<Widget>[
