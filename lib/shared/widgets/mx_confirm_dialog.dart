@@ -95,7 +95,8 @@ class MxConfirmDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      // Stated, so `footerWidth` above describes the dialog this actually is.
+      // Stated rather than inherited, so the dialog's geometry is readable
+      // here instead of being Material's default two indirections away.
       insetPadding: const EdgeInsets.symmetric(
         horizontal: dialogInset,
         vertical: AppSpacing.xl,
