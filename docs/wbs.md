@@ -12276,6 +12276,49 @@ của M2.
   `widgetbook/test/catalog_smoke_test.dart`, full non-golden suite.
 - **Checklist phases:** 7, 12, 14
 
+### M99.54 · Checkbox đã tick bị co lại 4dp — viền trắng vẽ trên nền trắng
+
+- **Status:** **in-progress** — code và test đã xong; còn **1 golden chưa sinh
+  lại** (`test/demo/goldens/tag_filter_sheet_light.png`). Chuyển sang `done` sau
+  khi chạy `flutter test --update-goldens` trên **Windows** và publish lại
+  gallery vào đúng URL đã ghim.
+- **Goal:** Chủ dự án chụp sheet *Filter by tags* và nói: ô đã tick trông như
+  **mất viền**, lệch hẳn so với ô chưa tick cùng cột.
+- **Scope:** Một nhánh trong `buildCheckboxTheme` và một test luật. Không đụng
+  token màu, không đụng widget nào.
+- **Output:** `lib/core/theme/app_toggle_themes.dart`,
+  `test/core/theme/app_toggle_themes_test.dart`,
+  `design_audit/usage_inventory.json` sinh lại.
+- **Cái nhìn thấy là hệ quả, không phải nguyên nhân.** Viền vẫn được vẽ — nó vô
+  hình. Theme cố ý giữ viền `onPrimary` cho ô đã tick (M99.48), và `BorderSide`
+  của Flutter vẽ **bên trong** hình, nên phần nền indigo bị thụt vào đúng bề dày
+  nét ở cả bốn cạnh:
+
+  | | viền vs mặt thẻ | nền vs mặt thẻ | ô indigo nhìn thấy |
+  |---|---|---|---|
+  | light | **1,03:1** — trắng trên trắng | 7,27:1 | 14dp cạnh 18dp |
+  | dark | 17,05:1 | **2,90:1** | 18dp |
+
+  Nên ở light chiếc viền **không mua được gì** và phải trả bằng chính cái ô:
+  một cột checkbox trong đó ô đã tick nhỏ hơn và không thẳng hàng. Ở dark nó là
+  thứ duy nhất chỉ ra biên của control, vì nền chỉ đạt 2,90:1 — dưới sàn 3:1 của
+  WCAG 1.4.11. Viền nay chỉ còn ở dark.
+- **Luật được ghim, chứ không phải giá trị.** Test cũ hỏi «viền *hoặc* nền có
+  đọc được không» — một phép OR mà viền trắng vẫn qua được trong khi vẫn ăn mất
+  4dp. Test mới: **nếu ô đã tick có vẽ viền thì viền đó phải đọc được trên mặt
+  thẻ phía sau**, vì đó chính là thứ nói control kết thúc ở đâu. Chạy ngược trên
+  code cũ thì đỏ đúng ở `light`.
+- **Acceptance criteria:**
+  - [x] Ô đã tick và ô chưa tick cùng chiếm 18dp, thẳng hàng trong một cột.
+  - [x] Dark giữ viền — nền indigo ở đó không tự đủ tương phản.
+  - [x] Test bắt được đúng lỗi này khi chạy trên code cũ.
+  - [x] `flutter analyze` sạch; 3585 test không-golden xanh; guard sạch.
+  - [ ] `tag_filter_sheet_light.png` sinh lại trên Windows và gallery publish lại.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.53
+- **Tests required:** `app_toggle_themes_test.dart`, `test/demo/` goldens.
+- **Checklist phases:** 7, 12
+
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 
 Ghi lại cụ thể, vì "mất một bộ lint" là câu quá mơ hồ để ai đó sau này biết
