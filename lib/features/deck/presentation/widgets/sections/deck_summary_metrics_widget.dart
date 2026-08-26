@@ -122,6 +122,61 @@ class _HeroFigureLine extends StatelessWidget {
   final int overdueCount;
   final int overdueDayCount;
 
+  /// How wide [text] draws in [style], at the reader's text scale.
+  ///
+  /// The line has to be measured rather than laid out speculatively: both
+  /// halves are `Flexible`, so when the row is short both of them shrink and
+  /// both ellipsize — which is how `15 cards due  8 overdue · 7 today` became
+  /// `15 car…  8 overdue…` and lost half of BR-162 rather than losing the less
+  /// important half whole.
+  double _widthOf(BuildContext context, String text, TextStyle? style) =>
+      _widthOfSpan(context, TextSpan(text: text, style: style));
+
+  /// **The span that is measured is the span that is drawn.** Measuring the
+  /// breakdown as plain `bodyMedium` under-reported it: its first half is
+  /// `w600`, which is wider, so the line was judged to fit by a few pixels and
+  /// then clipped by exactly those few — 6px in English, 9 in Vietnamese.
+  double _widthOfSpan(BuildContext context, InlineSpan span) {
+    final painter = TextPainter(
+      text: span,
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+      maxLines: 1,
+    )..layout();
+
+    return painter.width;
+  }
+
+  /// The numeral's style — **one definition, used to measure and to draw.**
+  /// `tabularFigures` widens the digits, and leaving it out of the measurement
+  /// under-reported the line by the few pixels it then clipped.
+  TextStyle? _numeralStyle(BuildContext context) =>
+      context.texts.headlineLarge?.copyWith(
+        fontWeight: FontWeight.w700,
+        height: AppTypography.heroNumeralCapTrim,
+        fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
+      );
+
+  /// BR-162's split as one span: `8 overdue` in the overdue ink, then the rest.
+  TextSpan _breakdownSpan(BuildContext context) => TextSpan(
+    style: context.texts.bodyMedium?.copyWith(
+      color: context.colors.onSurfaceVariant,
+    ),
+    children: <InlineSpan>[
+      TextSpan(
+        text: context.l10n.deckSummaryOverduePart(overdueCount),
+        style: context.texts.bodyMedium?.copyWith(
+          color: context.semanticColors.overdue,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      const TextSpan(text: ' · '),
+      TextSpan(
+        text: context.l10n.deckSummaryDueTodayPart(dueCount - overdueCount),
+      ),
+    ],
+  );
+
   @override
   Widget build(BuildContext context) {
     // The hero numeral: what is due; a level with nothing due but new cards
@@ -131,107 +186,158 @@ class _HeroFigureLine extends StatelessWidget {
         ? context.l10n.deckSummaryCardsDueWord
         : context.l10n.deckHeroNewMetricWord;
 
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // **Both halves whole on two lines, or neither whole on one.** At 360
+        // the row is six pixels short in English and nine in Vietnamese — at
+        // the default text scale, on the width the gallery does not capture —
+        // so it wrapped both halves rather than moving one down.
+        final needed =
+            _widthOf(context, '$heroCount', _numeralStyle(context)) +
+            AppSpacing.sm +
+            _widthOf(context, heroWord, context.texts.titleMedium) +
+            (overdueCount == 0
+                ? 0
+                : AppSpacing.md +
+                      _widthOfSpan(context, _breakdownSpan(context)));
+        final fitsOnOneLine = needed <= constraints.maxWidth;
+
+        return _line(
+          context,
+          heroCount,
+          heroWord,
+          fitsOnOneLine: fitsOnOneLine,
+        );
+      },
+    );
+  }
+
+  Widget _line(
+    BuildContext context,
+    int heroCount,
+    String heroWord, {
+    required bool fitsOnOneLine,
+  }) {
+    // Stacked, the breakdown is its own line under the numeral, so neither is
+    // cut. The baseline alignment only means anything while they share a line.
+    if (!fitsOnOneLine) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          _numeral(context, heroCount, heroWord),
+          if (overdueCount > 0) ...<Widget>[
+            const SizedBox(height: AppSpacing.xs),
+            _breakdown(context),
+          ],
+        ],
+      );
+    }
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.baseline,
       textBaseline: TextBaseline.alphabetic,
       children: <Widget>[
-        Flexible(
-          child: Semantics(
-            container: true,
-            label: dueCount > 0
-                ? context.l10n.deckHeroDueTodaySemanticLabel(dueCount)
-                : context.l10n.deckHeroNewSemanticLabel(newCount),
-            child: ExcludeSemantics(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Text(
-                    '$heroCount',
-                    // **A cap-height trim, not a leading cut.** `height: 1`
-                    // already made the box exactly the font size, and the
-                    // remaining 8.3px above the digits is the font's ascent
-                    // above its cap — no `TextStyle` knob reaches it, and
-                    // `leadingDistribution: even` was measured to change
-                    // nothing because there is no leading left to distribute.
-                    // [AppTypography.heroNumeralCapTrim] carries the derivation
-                    // and the measurement.
-                    //
-                    // Digits have no descenders and take no diacritics, so this
-                    // is the one string in the app whose box can under-report
-                    // its glyph without risking a clip. The 12px below this
-                    // line is what the overflow eats into, and it fits at every
-                    // scale the responsive matrix covers.
-                    //
-                    // `headlineLarge`, one rung down from `displaySmall`
-                    // (owner review, 2026-08-25): 36px was set when the
-                    // numeral had a row to itself, and 32 is what fits beside
-                    // its own breakdown on a 393 screen.
-                    style: context.texts.headlineLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      height: AppTypography.heroNumeralCapTrim,
-                      fontFeatures: const <FontFeature>[
-                        FontFeature.tabularFigures(),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Flexible(
-                    child: Text(
-                      heroWord,
-                      style: context.texts.titleMedium,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
+        Flexible(child: _numeral(context, heroCount, heroWord)),
         // The breakdown, only when there is one to state: with no overdue it
         // would repeat the numeral beside it in smaller type.
         if (overdueCount > 0) ...<Widget>[
           const SizedBox(width: AppSpacing.md),
-          Flexible(
-            child: Semantics(
-              label: context.l10n.deckHeroOverdueSemanticLabel(
-                overdueCount,
-                overdueDayCount,
-              ),
-              child: ExcludeSemantics(
-                child: Text.rich(
-                  TextSpan(
-                    children: <InlineSpan>[
-                      TextSpan(
-                        text: context.l10n.deckSummaryOverduePart(overdueCount),
-                        style: context.texts.bodyMedium?.copyWith(
-                          color: context.semanticColors.overdue,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const TextSpan(text: ' · '),
-                      TextSpan(
-                        text: context.l10n.deckSummaryDueTodayPart(
-                          dueCount - overdueCount,
-                        ),
-                      ),
-                    ],
-                  ),
-                  style: context.texts.bodyMedium?.copyWith(
-                    color: context.colors.onSurfaceVariant,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ),
-          ),
+          Flexible(child: _breakdown(context)),
         ],
       ],
     );
   }
+
+  /// `15 cards due` — the figure and the unit it counts, on one baseline.
+  Widget _numeral(BuildContext context, int heroCount, String heroWord) =>
+      Semantics(
+        container: true,
+        label: dueCount > 0
+            ? context.l10n.deckHeroDueTodaySemanticLabel(dueCount)
+            : context.l10n.deckHeroNewSemanticLabel(newCount),
+        child: ExcludeSemantics(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Text(
+                '$heroCount',
+                // **A cap-height trim, not a leading cut.** `height: 1`
+                // already made the box exactly the font size, and the
+                // remaining 8.3px above the digits is the font's ascent
+                // above its cap — no `TextStyle` knob reaches it, and
+                // `leadingDistribution: even` was measured to change
+                // nothing because there is no leading left to distribute.
+                // [AppTypography.heroNumeralCapTrim] carries the derivation
+                // and the measurement.
+                //
+                // Digits have no descenders and take no diacritics, so this
+                // is the one string in the app whose box can under-report
+                // its glyph without risking a clip. The 12px below this
+                // line is what the overflow eats into, and it fits at every
+                // scale the responsive matrix covers.
+                //
+                // `headlineLarge`, one rung down from `displaySmall`
+                // (owner review, 2026-08-25): 36px was set when the
+                // numeral had a row to itself, and 32 is what fits beside
+                // its own breakdown on a 393 screen.
+                style: context.texts.headlineLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  height: AppTypography.heroNumeralCapTrim,
+                  fontFeatures: const <FontFeature>[
+                    FontFeature.tabularFigures(),
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Flexible(
+                child: Text(
+                  heroWord,
+                  style: context.texts.titleMedium,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+  /// `8 overdue · 7 today` — BR-162's split, in one sentence.
+  Widget _breakdown(BuildContext context) => Semantics(
+    label: context.l10n.deckHeroOverdueSemanticLabel(
+      overdueCount,
+      overdueDayCount,
+    ),
+    child: ExcludeSemantics(
+      child: Text.rich(
+        TextSpan(
+          children: <InlineSpan>[
+            TextSpan(
+              text: context.l10n.deckSummaryOverduePart(overdueCount),
+              style: context.texts.bodyMedium?.copyWith(
+                color: context.semanticColors.overdue,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const TextSpan(text: ' · '),
+            TextSpan(
+              text: context.l10n.deckSummaryDueTodayPart(
+                dueCount - overdueCount,
+              ),
+            ),
+          ],
+        ),
+        style: context.texts.bodyMedium?.copyWith(
+          color: context.colors.onSurfaceVariant,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    ),
+  );
 }
 
 /// New and Scheduled, side by side on the brand tint, split by an indigo
