@@ -1,5 +1,8 @@
 # Layout review — 29 màn hình
 
+**[→ SUMMARY.md](SUMMARY.md)** — bảng điểm, điểm theo tiêu chí, 10 phát hiện
+xuyên màn và thứ tự đề xuất sửa. Đọc file đó trước.
+
 Một file cho mỗi màn hình trong screen gallery, chấm theo checklist bố cục
 mobile 20 mục + ba tầng Correct / Balanced / Beautiful + bảng 8 tiêu chí.
 
@@ -35,8 +38,8 @@ Ba lỗi đầu đều **im lặng**: chúng cho ra số trông hợp lý.
 `rungs` đếm tổ hợp phân biệt của (size / weight / height / letter-spacing) thực
 sự được vẽ. Hai điều chỉnh khi so với mốc "3–5 cấp" của checklist:
 
-- **Bottom navigation góp 2–3 rung cho mọi màn có nó.** Đó là chrome dùng chung,
-  không phải typography của màn.
+- **Bottom navigation góp đúng 2 rung**, và chỉ ở 5/29 golden — xem mục dưới.
+  Đó là chrome dùng chung, không phải typography của màn.
 - **Màn có sheet/dialog vẫn vẽ màn phía sau.** `card_export_sheet`,
   `card_bulk_delete_dialog`, `card_move_picker`, `tag_filter_sheet` mang theo
   rung của card list bên dưới. Số của chúng là của **hai** màn cộng lại.
