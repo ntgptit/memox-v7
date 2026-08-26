@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/state/submit_state.dart';
-import '../../core/theme/app_spacing.dart';
+import 'mx_sheet_insets.dart';
 
 /// Shows a form in a bottom sheet with the keyboard inset applied.
 ///
@@ -40,13 +40,7 @@ Future<void> showMxFormSheet(
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    builder: (sheetContext) => Padding(
-      padding: EdgeInsets.only(
-        left: AppSpacing.lg,
-        right: AppSpacing.lg,
-        top: AppSpacing.lg,
-        bottom: AppSpacing.lg + _bottomObstruction(MediaQuery.of(sheetContext)),
-      ),
+    builder: (sheetContext) => MxSheetInsets(
       child: SingleChildScrollView(
         child: Consumer(
           builder: (consumerContext, ref, _) => builder(
@@ -59,13 +53,6 @@ Future<void> showMxFormSheet(
     ),
   );
 }
-
-/// Whatever is covering the bottom of the sheet: the keyboard, or the system
-/// bar when the keyboard is down.
-double _bottomObstruction(MediaQueryData media) =>
-    media.viewInsets.bottom > media.viewPadding.bottom
-    ? media.viewInsets.bottom
-    : media.viewPadding.bottom;
 
 /// Closes its sheet the moment the operation reports that it should close.
 ///

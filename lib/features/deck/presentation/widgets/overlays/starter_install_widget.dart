@@ -5,6 +5,9 @@ import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
+import '../../../../../shared/widgets/mx_confirm_dialog.dart';
+import '../../../../../shared/widgets/mx_dialog_tone.dart';
+import '../../../../../shared/widgets/mx_sheet_insets.dart';
 import '../../../domain/models/deck_template_model.dart';
 import '../../../domain/models/scheduler_type_model.dart';
 import '../../../domain/repositories/deck_template_repository.dart';
@@ -27,13 +30,12 @@ Future<DeckTemplateInstallOutcome?> showStarterInstallSheet(
 }) => showModalBottomSheet<DeckTemplateInstallOutcome>(
   context: context,
   isScrollControlled: true,
-  builder: (sheetContext) => Padding(
-    padding: EdgeInsets.only(
-      left: AppSpacing.lg,
-      right: AppSpacing.lg,
-      top: AppSpacing.lg,
-      bottom: AppSpacing.lg + MediaQuery.viewInsetsOf(sheetContext).bottom,
-    ),
+  // **This sheet used to clear the keyboard and nothing else.** It has no text
+  // field, so `viewInsets.bottom` was always zero and there was no `SafeArea`
+  // either — which put the scheduler picker's primary action underneath the
+  // Android navigation bar on every device that has one. `MxSheetInsets` is the
+  // one place that formula lives now.
+  builder: (sheetContext) => MxSheetInsets(
     child: SingleChildScrollView(
       child: _StarterInstallForm(
         template: template,
@@ -50,27 +52,29 @@ Future<DeckTemplateInstallOutcome?> showStarterInstallSheet(
 /// "already in your library" — because the rule is about informed intent: a
 /// user who re-taps a starter by accident must land on Cancel, not on a
 /// duplicate.
-Future<bool> showStarterAddAgainConfirm(BuildContext context) async =>
-    await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(dialogContext.l10n.starterLibraryAlreadyInstalledTitle),
-        content: Text(dialogContext.l10n.starterLibraryAlreadyInstalledMessage),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(
-              MaterialLocalizations.of(dialogContext).cancelButtonLabel,
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(dialogContext.l10n.starterLibraryAddAgainAction),
-          ),
-        ],
-      ),
-    ) ??
-    false;
+Future<bool> showStarterAddAgainConfirm(BuildContext context) {
+  final l10n = context.l10n;
+
+  return showMxConfirm(
+    context,
+    title: l10n.starterLibraryAlreadyInstalledTitle,
+    message: l10n.starterLibraryAlreadyInstalledMessage,
+    confirmLabel: l10n.starterLibraryAddAgainAction,
+    cancelLabel: l10n.commonCancelAction,
+    // **The two axes disagreeing, which is why there are two.** Nothing is
+    // destroyed and nothing is hidden, so the severity is `info` — the dialog
+    // reports a fact the tile the user just tapped could not show them. But a
+    // stray Enter still leaves a duplicate deck to find and delete, so the
+    // action axis is `cautious`: Cancel keeps the focus, without the
+    // destructive colour that would overstate what is happening.
+    //
+    // This is what the function's own doc has always promised — "a user who
+    // re-taps a starter by accident must land on Cancel" — and what the bare
+    // `AlertDialog` it used to build did not do.
+    variant: MxConfirmDialogVariant.cautious,
+    tone: MxDialogTone.info,
+  );
+}
 
 class _StarterInstallForm extends ConsumerStatefulWidget {
   const _StarterInstallForm({

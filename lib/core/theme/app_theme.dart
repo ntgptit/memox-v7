@@ -508,6 +508,19 @@ ThemeData _buildTheme(
       contentTextStyle: texts.bodyMedium?.copyWith(
         color: scheme.onSurfaceVariant,
       ),
+      // **The same 24 Material already uses, said in the app's own units.**
+      // `_DialogDefaultsM3.actionsPadding` is a literal
+      // `only(left: 24, right: 24, bottom: 24)`, so this moves nothing today —
+      // which is the point. Left unset, the footer's inset is a number the
+      // framework owns and may revise, and the app's dialogs would drift off
+      // the 4/8/12/16/24/32 scale in an SDK bump with no diff to review. The
+      // argument is `elevation: 0` and `shape`'s: state the answer rather than
+      // inherit one.
+      actionsPadding: const EdgeInsets.only(
+        left: AppSpacing.xl,
+        right: AppSpacing.xl,
+        bottom: AppSpacing.xl,
+      ),
     ),
 
     bottomSheetTheme: BottomSheetThemeData(

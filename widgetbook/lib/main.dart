@@ -184,6 +184,8 @@ class MemoxWidgetbook extends StatelessWidget {
             errorStateComponent(),
             loadingStateComponent(),
             confirmDialogComponent(),
+            formDialogComponent(),
+            alertDialogComponent(),
             actionSheetComponent(),
           ],
         ),

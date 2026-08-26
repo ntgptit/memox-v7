@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'mx_action_button.dart';
 import 'mx_button_pair.dart';
+import 'mx_dialog_tone.dart';
 
 /// Whether the confirmed action destroys something.
 ///
@@ -25,6 +26,15 @@ enum MxConfirmDialogVariant {
   /// the safe default focus, because a stray Enter should not move a deck the
   /// user was only reading about. Folding this into `normal` would have taken
   /// the focus rule with it, silently.
+  ///
+  /// **The rule generalised, after a second case turned up that the paragraph
+  /// above does not describe.** What this variant encodes is *a stray Enter
+  /// must not do this, and the destructive colour would overstate it*. Soft
+  /// delete is one instance; adding a duplicate starter deck
+  /// (`showStarterAddAgainConfirm`, BR-38) is another — nothing is hidden and
+  /// there is no window to change your mind, but there is still a deck to go
+  /// find and delete afterwards. Read "out of sight" as the case that named
+  /// the variant, not as its boundary.
   cautious,
 }
 
@@ -49,6 +59,7 @@ class MxConfirmDialog extends StatelessWidget {
     required this.onConfirm,
     required this.onCancel,
     this.variant = MxConfirmDialogVariant.normal,
+    this.tone,
     this.isSubmitting = false,
     super.key,
   });
@@ -63,6 +74,16 @@ class MxConfirmDialog extends StatelessWidget {
   final VoidCallback onCancel;
 
   final MxConfirmDialogVariant variant;
+
+  /// How serious the situation is — the severity axis, independent of [variant].
+  ///
+  /// Null renders the header exactly as it did before tones existed: no icon,
+  /// title alone. That is the default on purpose, so a dialog gains an icon
+  /// only where someone decided it earns one, rather than every dialog in the
+  /// app growing decoration in one commit.
+  ///
+  /// See [MxDialogTone] for why this is not folded into [variant].
+  final MxDialogTone? tone;
 
   /// While true both actions are inert. Confirming a delete twice sends two
   /// deletes, and the second one fails against data the first already removed —
@@ -84,7 +105,7 @@ class MxConfirmDialog extends StatelessWidget {
       // nothing a passing widget test would notice — and the user confirms a
       // delete having read half the sentence describing it.
       scrollable: true,
-      title: Text(title),
+      title: MxDialogHeader(title: title, tone: tone),
       // **A live region, because the message is where a failure lands.** Both
       // callers that can fail leave the dialog open and change only this text —
       // the tag delete appends the reason to the question, the deck delete
@@ -129,4 +150,43 @@ class MxConfirmDialog extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Asks a yes/no question and returns the answer.
+///
+/// **The one-shot half of the confirmation story**, for the callers that do not
+/// keep the dialog open while a write runs — see `MxAsyncConfirmDialog` for
+/// those. Five call sites had each written this same `showDialog` themselves,
+/// and the fifth had drifted: it built a bare `AlertDialog` with two
+/// `TextButton`s, so it had neither the destructive colour nor the focus rule,
+/// while its own doc comment said a mistaken tap "must land on Cancel".
+///
+/// **Anything other than the confirm button is a no.** The barrier, the Android
+/// back gesture and Escape all pop with null, and every caller was already
+/// writing `?? false` to say so. Returning `bool` rather than `bool?` puts that
+/// decision here once instead of trusting five call sites to keep repeating it.
+Future<bool> showMxConfirm(
+  BuildContext context, {
+  required String title,
+  required String message,
+  required String confirmLabel,
+  required String cancelLabel,
+  MxConfirmDialogVariant variant = MxConfirmDialogVariant.normal,
+  MxDialogTone? tone,
+}) async {
+  final bool? confirmed = await showDialog<bool>(
+    context: context,
+    builder: (dialogContext) => MxConfirmDialog(
+      title: title,
+      message: message,
+      confirmLabel: confirmLabel,
+      cancelLabel: cancelLabel,
+      variant: variant,
+      tone: tone,
+      onConfirm: () => Navigator.of(dialogContext).pop(true),
+      onCancel: () => Navigator.of(dialogContext).pop(false),
+    ),
+  );
+
+  return confirmed ?? false;
 }

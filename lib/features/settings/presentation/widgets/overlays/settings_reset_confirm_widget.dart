@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_async_confirm_dialog.dart';
 import '../../../../../shared/widgets/mx_confirm_dialog.dart';
+import '../../../../../shared/widgets/mx_dialog_tone.dart';
 import '../../controllers/settings_write_controller.dart';
 import '../../states/settings_submit_state.dart';
 
@@ -23,11 +25,13 @@ import '../../states/settings_submit_state.dart';
 /// reset shows in the reset group's own error band with `Try again`; a dialog
 /// that stayed open to carry the failure would hold the user inside a decision
 /// they have already made (wireframe W4).
-Future<void> showSettingsResetConfirm(BuildContext context) => showDialog<void>(
-  context: context,
-  builder: (dialogContext) =>
-      _SettingsResetDialog(onClose: () => Navigator.of(dialogContext).pop()),
-);
+Future<void> showSettingsResetConfirm(BuildContext context) =>
+    showMxAsyncConfirm(
+      context,
+      reset: (container) =>
+          container.read(settingsResetControllerProvider.notifier).reset(),
+      builder: (dialogContext, close) => _SettingsResetDialog(onClose: close),
+    );
 
 class _SettingsResetDialog extends ConsumerWidget {
   const _SettingsResetDialog({required this.onClose});
@@ -36,36 +40,36 @@ class _SettingsResetDialog extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final submit = ref.watch(settingsResetControllerProvider);
+    final SettingsSubmitState submit = ref.watch(
+      settingsResetControllerProvider,
+    );
 
-    // Watching the transition rather than acting inside `submit` is what keeps
-    // the controller free of a `BuildContext` it must never hold.
-    ref.listen<SettingsSubmitState>(settingsResetControllerProvider, (
-      previous,
-      next,
-    ) {
-      // **Close on a failure too.** The first version returned early whenever
-      // `outcome` was null, and `submitStateFromFailure` produces exactly that
-      // — a state carrying a `failure` and no outcome. So a failed reset left
-      // the dialog standing, unchanged and silent, while the error band and its
-      // retry rendered on the section *behind* the scrim. The band is where W4
-      // says the failure belongs, and it can only be read once this is gone.
-      final bool hasSettled = next.outcome != null || next.failure != null;
-      final bool hasSettledAlready =
-          previous?.outcome != null || previous?.failure != null;
-      if (!hasSettled || hasSettledAlready) return;
-      onClose();
-    });
-
-    return MxConfirmDialog(
+    return MxAsyncConfirmDialog(
+      state: submit,
       title: context.l10n.settingsResetConfirmTitle,
       message: context.l10n.settingsResetDescription,
       confirmLabel: context.l10n.settingsResetConfirmAction,
       cancelLabel: context.l10n.commonCancelAction,
       variant: MxConfirmDialogVariant.destructive,
-      isSubmitting: submit.isSubmitting,
+      // Options only — decks and learning progress are untouched, which is the
+      // sentence the message leads with. `warning`, not `error`.
+      tone: MxDialogTone.warning,
+      // **The dialog closes on a failure too, and the enum is what says so.**
+      // The first version of this closed only on success, and
+      // `submitStateFromFailure` produces exactly the state that misses — a
+      // `failure` and no `outcome` — so a failed reset left the dialog
+      // standing, unchanged and silent, over the error band and retry it was
+      // hiding. The band is where W4 puts the failure, and it can only be read
+      // once this is gone.
+      //
+      // Note this controller reports `savedAndContinue`, not `savedAndClose`:
+      // `canSubmit` has to stay true so a second reset is possible later. That
+      // is exactly why `saved` would be the wrong policy here and why there
+      // are two.
+      closeWhen: MxConfirmCloseWhen.settled,
       onConfirm: () => _confirm(ref),
       onCancel: onClose,
+      onDone: onClose,
     );
   }
 

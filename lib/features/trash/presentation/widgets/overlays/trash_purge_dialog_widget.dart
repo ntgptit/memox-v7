@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_confirm_dialog.dart';
+import '../../../../../shared/widgets/mx_dialog_tone.dart';
 
 /// The strong confirmation permanent deletion requires (BR-266, wireframe T11).
 ///
@@ -12,23 +13,19 @@ import '../../../../../shared/widgets/mx_confirm_dialog.dart';
 /// control would make Enter a way to lose data.
 ///
 /// Returns true only if the user confirmed; dismissing any other way is a no.
-Future<bool> showTrashPurgeDialog(
-  BuildContext context, {
-  required int count,
-}) async {
+Future<bool> showTrashPurgeDialog(BuildContext context, {required int count}) {
   final l10n = context.l10n;
-  final confirmed = await showDialog<bool>(
-    context: context,
-    builder: (dialogContext) => MxConfirmDialog(
-      title: l10n.trashPurgeConfirmTitle(count),
-      message: l10n.trashPurgeConfirmMessage,
-      confirmLabel: l10n.trashPurgeConfirmAction,
-      cancelLabel: l10n.trashPurgeCancelAction,
-      variant: MxConfirmDialogVariant.destructive,
-      onConfirm: () => Navigator.of(dialogContext).pop(true),
-      onCancel: () => Navigator.of(dialogContext).pop(false),
-    ),
-  );
 
-  return confirmed ?? false;
+  return showMxConfirm(
+    context,
+    title: l10n.trashPurgeConfirmTitle(count),
+    message: l10n.trashPurgeConfirmMessage,
+    confirmLabel: l10n.trashPurgeConfirmAction,
+    cancelLabel: l10n.trashPurgeCancelAction,
+    variant: MxConfirmDialogVariant.destructive,
+    // **The one `error` tone among the app's confirmations.** Every other
+    // delete lands in Trash and comes back; this is where that stops being
+    // true, and the tone is what says so before the tap rather than after.
+    tone: MxDialogTone.error,
+  );
 }

@@ -5,6 +5,7 @@ import '../../../../../core/error/failure.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_sheet_insets.dart';
 import '../../../domain/models/card_export_request_model.dart';
 import '../../../domain/models/card_export_result_model.dart';
 import '../../../domain/models/card_export_scope_model.dart';
@@ -209,58 +210,61 @@ class _CardExportSheetState extends ConsumerState<CardExportSheetWidget> {
         if (!didPop) return;
         _cancelExport(ref, widget.deckId);
       },
-      child: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.only(
-            left: AppSpacing.lg,
-            right: AppSpacing.lg,
-            bottom: AppSpacing.lg + MediaQuery.viewInsetsOf(context).bottom,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              // The body scrolls; the action row does not, so it stays in reach
-              // when the sheet is taller than the screen (W6).
-              Flexible(
-                child: SingleChildScrollView(
-                  child: _Body(
-                    scope: widget.scope,
-                    deckCardCount: widget.deckCardCount,
-                    format: _format,
-                    // The scope is gone, so the sheet has stopped being able to
-                    // act on a format (W3 state 7). The options stay readable —
-                    // they are the record of what was asked for — but a control
-                    // that can no longer change anything must not still take
-                    // taps.
-                    isFormatEnabled: phase != CardExportPhase.invalidScope,
-                    failure: failure,
-                    onFormatSelected: (next) => setState(() => _format = next),
-                  ),
+      // No top gutter: the sheet's drag handle already provides one, which is
+      // why this composes `mxSheetBottomObstruction` rather than wearing
+      // `MxSheetInsets`. The `SafeArea` that used to be here is gone with it —
+      // the obstruction already accounts for `viewPadding`, so keeping both
+      // inset the navigation bar twice.
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: AppSpacing.lg,
+          right: AppSpacing.lg,
+          bottom: AppSpacing.lg + mxSheetBottomObstruction(context),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            // The body scrolls; the action row does not, so it stays in reach
+            // when the sheet is taller than the screen (W6).
+            Flexible(
+              child: SingleChildScrollView(
+                child: _Body(
+                  scope: widget.scope,
+                  deckCardCount: widget.deckCardCount,
+                  format: _format,
+                  // The scope is gone, so the sheet has stopped being able to
+                  // act on a format (W3 state 7). The options stay readable —
+                  // they are the record of what was asked for — but a control
+                  // that can no longer change anything must not still take
+                  // taps.
+                  isFormatEnabled: phase != CardExportPhase.invalidScope,
+                  failure: failure,
+                  onFormatSelected: (next) => setState(() => _format = next),
                 ),
               ),
-              const SizedBox(height: AppSpacing.lg),
-              CardExportActionBarWidget(
-                phase: phase,
-                cardCount: count,
-                onCancel: () {
-                  _cancelExport(ref, widget.deckId);
-                  widget.onClose(null);
-                },
-                onSubmit: phase == CardExportPhase.invalidScope
-                    ? null
-                    : () => _submitExport(
-                        ref,
-                        widget.deckId,
-                        CardExportRequest(
-                          deckId: widget.deckId,
-                          scope: widget.scope,
-                          format: _format,
-                        ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            CardExportActionBarWidget(
+              phase: phase,
+              cardCount: count,
+              onCancel: () {
+                _cancelExport(ref, widget.deckId);
+                widget.onClose(null);
+              },
+              onSubmit: phase == CardExportPhase.invalidScope
+                  ? null
+                  : () => _submitExport(
+                      ref,
+                      widget.deckId,
+                      CardExportRequest(
+                        deckId: widget.deckId,
+                        scope: widget.scope,
+                        format: _format,
                       ),
-              ),
-            ],
-          ),
+                    ),
+            ),
+          ],
         ),
       ),
     );
