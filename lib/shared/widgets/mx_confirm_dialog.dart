@@ -113,8 +113,9 @@ class MxConfirmDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      // Stated, so the dialog Material draws is the dialog this file describes.
-      // actually is.
+      // Stated rather than inherited, so the dialog's geometry is readable
+      // here instead of being Material's default two indirections away — and
+      // shared, so every dialog in the set is the same dialog.
       insetPadding: MxDialogMetrics.insetPadding,
       actionsPadding: MxDialogMetrics.actionsPadding,
       // Scrollable because the alternative is silent truncation, not an error.
