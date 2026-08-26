@@ -78,11 +78,11 @@ class MxConfirmDialog extends StatelessWidget {
 
   /// How far a dialog sits in from each edge of the screen.
   ///
-  /// **Stated rather than inherited.** This is Material's own `AlertDialog`
-  /// default, and leaving it implicit is what made the footer unmeasurable:
-  /// `MxButtonPair` had no way to know the number, so it assumed one page
-  /// gutter and got 96px too much. Writing it down is what lets the footer
-  /// width be computed instead of guessed.
+  /// **Stated rather than inherited**, so the two paddings that decide the
+  /// footer's width are visible in one place rather than inherited silently
+  /// from Material. They are no longer *arithmetic* anybody depends on:
+  /// `MxButtonPair` measures the line it is handed instead of computing it, so
+  /// changing these moves the dialog without anything else needing to be told.
   ///
   /// It is off `AppSpacing.scale` on purpose — the scale stops at 32 and this
   /// is a framework constant, not a design step. Naming it keeps that visible.
@@ -91,12 +91,6 @@ class MxConfirmDialog extends StatelessWidget {
   /// The dialog's own padding around its action row — Material's default,
   /// stated here for the same reason as [dialogInset].
   static const double actionsInset = 24;
-
-  /// The line the action pair actually gets, which is neither the screen nor
-  /// the dialog: `screen − 2×inset − 2×actionsInset`. On a 393 screen that is
-  /// 265, against the 361 the pair assumed before.
-  static double footerWidth(BuildContext context) =>
-      MediaQuery.sizeOf(context).width - dialogInset * 2 - actionsInset * 2;
 
   @override
   Widget build(BuildContext context) {
@@ -140,9 +134,10 @@ class MxConfirmDialog extends StatelessWidget {
       // for a row.
       actions: <Widget>[
         MxButtonPair(
-          // The footer, not the screen — see `footerWidth`. Without this the
-          // pair stays in a row that cannot hold either label and both wrap.
-          availableWidth: footerWidth(context),
+          // No width passed: the pair is a render object now and measures the
+          // constraint it is given, which is this dialog's footer. Handing it a
+          // computed number was the workaround for a widget that could not see
+          // one.
           secondary: MxActionButton(
             label: cancelLabel,
             onPressed: isSubmitting ? null : onCancel,

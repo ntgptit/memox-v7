@@ -200,13 +200,52 @@ void main() {
       expectOneSize(tester);
     });
 
-    testWidgets('a dialog footer stacks, because it is not the screen wide', (
+    testWidgets('a dialog whose labels fit keeps the row', (tester) async {
+      // **The case this widget was rewritten for.** `Delete tag` needs 117.7
+      // and `Cancel` 95.6, so a row of two 117.7 halves needs 243.4 — inside
+      // the dialog's 265 footer with room to spare. The previous threshold
+      // compared that footer against a constant sized for `Export 128 cards`
+      // (136 each, 280 the pair) and stacked anyway, costing 56px of height on
+      // a dialog that never needed it, and drawing each button 265 wide for a
+      // 118-wide label.
+      await tester.pumpWidget(
+        host(
+          const MxConfirmDialog(
+            title: 'Delete tag?',
+            message: '"động từ" will be removed from 42 cards.',
+            confirmLabel: 'Delete tag',
+            cancelLabel: 'Cancel',
+            variant: MxConfirmDialogVariant.destructive,
+            onConfirm: _noop,
+            onCancel: _noop,
+          ),
+          width: 393,
+        ),
+      );
+
+      final sizes = buttonSizes(tester);
+      expect(
+        tester.getTopLeft(find.byType(MxActionButton).at(0)).dy,
+        tester.getTopLeft(find.byType(MxActionButton).at(1)).dy,
+        reason: 'both labels fit, so the pair must be a row, not a stack',
+      );
+      expect(
+        sizes.first.width,
+        lessThan(200),
+        reason: 'a row splits the footer; 265 wide would mean it stacked',
+      );
+      expectOneSize(tester);
+      expectNoWrappedLabel(tester);
+    });
+
+    testWidgets('a dialog whose labels do not fit stacks instead of wrapping', (
       tester,
     ) async {
-      // 393 is the review surface. The dialog's footer is
-      // `393 − 2×40 inset − 2×24 actions = 265`, below the 280 a row needs, so
-      // the pair must stack. Reading the screen instead gave 361, kept the row,
-      // and wrapped both labels to two lines — in every dialog in the app.
+      // 393 is the review surface, so the dialog's footer is
+      // `393 − 2×40 inset − 2×24 actions = 265`. `Move to Trash` needs 145.3,
+      // so a row of two needs 298.6 — 33.6 more than there is. The pair must
+      // stack; the failure it is guarding against is a row that fits neither
+      // label and breaks both across two lines.
       await tester.pumpWidget(
         host(
           const MxConfirmDialog(
@@ -222,16 +261,10 @@ void main() {
         ),
       );
 
-      final pair = tester.widget<MxButtonPair>(find.byType(MxButtonPair));
       expect(
-        pair.availableWidth,
-        MxConfirmDialog.footerWidth(tester.element(find.byType(MxButtonPair))),
-        reason: 'the dialog must hand the pair its own footer width',
-      );
-      expect(
-        find.byType(Column),
-        findsWidgets,
-        reason: 'a 265-wide footer cannot hold a row of two 136 buttons',
+        tester.getTopLeft(find.byType(MxActionButton).at(0)).dy,
+        isNot(tester.getTopLeft(find.byType(MxActionButton).at(1)).dy),
+        reason: 'a 265-wide footer cannot hold a row of two 145.3 buttons',
       );
       expectOneSize(tester);
       expectNoWrappedLabel(tester);
