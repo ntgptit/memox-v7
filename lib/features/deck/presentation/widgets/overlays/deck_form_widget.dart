@@ -123,6 +123,9 @@ class _DeckFormWidgetState extends State<DeckFormWidget> {
         if (widget.isSchedulerRequired) ...<Widget>[
           const SizedBox(height: AppSpacing.md),
           DeckSchedulerPickerWidget(
+            // The only call site with no section title of its own: the form
+            // above it is a name field, so the radios need naming here.
+            sectionLabel: context.l10n.schedulerSectionLabel,
             selected: _scheduler,
             isEnabled: !state.isSubmitting,
             errorText: state.isSchedulerMissing

@@ -110,6 +110,8 @@ class _ResetProgressSheetState extends ConsumerState<_ResetProgressSheet> {
                 style: context.texts.labelLarge,
               ),
               DeckSchedulerPickerWidget(
+                // Titled two lines up as "Study mode after the reset".
+                sectionLabel: null,
                 selected: _scheduler,
                 isEnabled: !submit.isSubmitting,
                 // The lock is what this operation undoes (BR-44); repeating the

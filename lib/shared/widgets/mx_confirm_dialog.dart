@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_spacing.dart';
 import 'mx_action_button.dart';
 import 'mx_button_pair.dart';
 import 'mx_dialog_tone.dart';
@@ -96,9 +97,42 @@ class MxConfirmDialog extends StatelessWidget {
   bool get _shouldFocusCancel =>
       _isDestructive || variant == MxConfirmDialogVariant.cautious;
 
+  /// How far a dialog sits in from each edge of the screen.
+  ///
+  /// **Stated rather than inherited.** This is Material's own `AlertDialog`
+  /// default, and leaving it implicit is what made the footer unmeasurable:
+  /// `MxButtonPair` had no way to know the number, so it assumed one page
+  /// gutter and got 96px too much. Writing it down is what lets the footer
+  /// width be computed instead of guessed.
+  ///
+  /// It is off `AppSpacing.scale` on purpose — the scale stops at 32 and this
+  /// is a framework constant, not a design step. Naming it keeps that visible.
+  static const double dialogInset = 40;
+
+  /// The dialog's own padding around its action row — Material's default,
+  /// stated here for the same reason as [dialogInset].
+  static const double actionsInset = 24;
+
+  /// The line the action pair actually gets, which is neither the screen nor
+  /// the dialog: `screen − 2×inset − 2×actionsInset`. On a 393 screen that is
+  /// 265, against the 361 the pair assumed before.
+  static double footerWidth(BuildContext context) =>
+      MediaQuery.sizeOf(context).width - dialogInset * 2 - actionsInset * 2;
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      // Stated, so `footerWidth` above describes the dialog this actually is.
+      insetPadding: const EdgeInsets.symmetric(
+        horizontal: dialogInset,
+        vertical: AppSpacing.xl,
+      ),
+      actionsPadding: const EdgeInsets.fromLTRB(
+        actionsInset,
+        0,
+        actionsInset,
+        actionsInset,
+      ),
       // Scrollable because the alternative is silent truncation, not an error.
       // At textScaler 3.0 on a 320-wide screen a translated message clips
       // mid-word inside the content box: no exception, no overflow stripe,
@@ -127,6 +161,9 @@ class MxConfirmDialog extends StatelessWidget {
       // for a row.
       actions: <Widget>[
         MxButtonPair(
+          // The footer, not the screen — see `footerWidth`. Without this the
+          // pair stays in a row that cannot hold either label and both wrap.
+          availableWidth: footerWidth(context),
           secondary: MxActionButton(
             label: cancelLabel,
             onPressed: isSubmitting ? null : onCancel,

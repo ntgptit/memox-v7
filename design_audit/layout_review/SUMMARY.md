@@ -15,13 +15,13 @@ Commit `ea80d3f7`. Phương pháp và cách đọc số: [README](README.md).
 | [study_guess](study_guess.md) | **14** | 2 | 2 | 2 | 2 | 1 | 2 | 2 | 1 | Pass |
 | [study_match](study_match.md) | **14** | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 0 | Pass |
 | [tag_filter_sheet](tag_filter_sheet.md) | **14** | 2 | 2 | 2 | 2 | 1 | 2 | 2 | 1 | Pass |
+| [deck_list_empty](deck_list_empty.md) | **14** | 2 | 2 | 2 | 2 | 1 | 2 | 1 | **2** | Pass |
 | [card_bulk_delete_dialog](card_bulk_delete_dialog.md) | 13 | 2 | 2 | 1 | 2 | 2 | 2 | 2 | 0 | Minor fix |
 | [card_detail](card_detail.md) | 13 | 2 | 2 | 2 | 2 | 1 | 1 | 2 | 1 | Minor fix |
 | [card_import_preview](card_import_preview.md) | 13 | 2 | 2 | 2 | 2 | 0 | 2 | 2 | 1 | Minor fix |
 | [card_import_result_complete](card_import_result_complete.md) | 13 | 2 | 1 | 2 | 2 | 1 | 2 | 2 | 1 | Minor fix |
 | [card_import_source](card_import_source.md) | 13 | 1 | 2 | 2 | 2 | 1 | 2 | 2 | 1 | Minor fix |
 | [card_move_picker](card_move_picker.md) | 13 | 2 | 2 | 2 | 2 | 1 | 2 | 1 | 1 | Minor fix |
-| [deck_list_empty](deck_list_empty.md) | 13 | 2 | 2 | 2 | 2 | 1 | 2 | 1 | 1 | Minor fix |
 | [settings](settings.md) | 13 | 2 | 2 | 2 | 2 | 2 | 2 | 0 | 1 | Minor fix |
 | [study_home](study_home.md) | 13 | 2 | 2 | 2 | 2 | 1 | 1 | 2 | 1 | Minor fix |
 | [study_recall](study_recall.md) | 13 | 2 | 2 | 2 | 2 | 0 | 2 | 2 | 1 | Minor fix |
@@ -29,17 +29,23 @@ Commit `ea80d3f7`. Phương pháp và cách đọc số: [README](README.md).
 | [library_search](library_search.md) | 12 | 2 | 1 | 2 | 2 | 1 | 1 | 2 | 1 | Minor fix |
 | [reminder_settings](reminder_settings.md) | 12 | 2 | 2 | 2 | 2 | 0 | 2 | 1 | 1 | Minor fix |
 | [trash](trash.md) | 12 | 2 | 2 | 2 | 2 | 1 | 2 | 1 | 0 | Minor fix |
-| [deck_list_root](deck_list_root.md) | 11 | 1 | 2 | 2 | 2 | 2 | 0 | 1 | 1 | Minor fix |
 | [progress_deck](progress_deck.md) | 11 | 1 | 0 | 2 | 2 | 2 | 1 | 2 | 1 | Minor fix |
-| [deck_list_level](deck_list_level.md) | **10** | 1 | 2 | 2 | 2 | 2 | 0 | 0 | 1 | **Major** |
+| [deck_list_root](deck_list_root.md) | **10** | 1 | 2 | 2 | 2 | 2 | 0 | 1 | **0** | **Major** |
 | [progress_overview](progress_overview.md) | **10** | 1 | 0 | 2 | 2 | 1 | 1 | 2 | 1 | **Major** |
+| [deck_list_new_only](deck_list_new_only.md) | **10** | 0 | 2 | 2 | 2 | 1 | 0 | 1 | **2** | **Major** |
+| [deck_list_level](deck_list_level.md) | **9** | 1 | 2 | 2 | 2 | 2 | 0 | 0 | **0** | **Major** |
 | [card_editor_edit](card_editor_edit.md) | **9** | 0 | 1 | 2 | 2 | 2 | 1 | 0 | 1 | **Major** |
 | [card_list](card_list.md) | **9** | 1 | 2 | 2 | 2 | 0 | 0 | 2 | 0 | **Major** |
-| [deck_list_new_only](deck_list_new_only.md) | **9** | 0 | 2 | 2 | 2 | 1 | 0 | 1 | 1 | **Major** |
 | [study_browse](study_browse.md) | **9** | 2 | 2 | 1 | 2 | 0 | 1 | 0 | 1 | **Major** |
 | [study_fill](study_fill.md) | **9** | 0 | 2 | 2 | 2 | 0 | 0 | 2 | 1 | **Major** |
 
-**6 Pass · 16 Minor fix · 7 Major layout revision · 0 Reject.**
+**7 Pass · 14 Minor fix · 8 Major layout revision · 0 Reject.**
+
+Bốn màn deck được **chấm lại cột Responsive** trên commit `cd4f3eb2` với bằng
+chứng đo được từ [ma trận responsive](deck_responsive_matrix.md) — 25 frame ở ba
+bề rộng, ba text scale, hai ngôn ngữ, hai theme. Bảy điểm còn lại của mỗi màn
+giữ nguyên như chấm trên `ea80d3f7`; 25 màn còn lại vẫn chưa có bằng chứng
+responsive.
 
 ## Điểm theo tiêu chí
 
@@ -52,7 +58,7 @@ Commit `ea80d3f7`. Phương pháp và cách đọc số: [README](README.md).
 | CTA | 1,48 | 4 | 7 | 18 |
 | Typography | 1,41 | 5 | 7 | 17 |
 | Density | 1,14 | 6 | 13 | 10 |
-| **Responsive** | **0,86** | 4 | 25 | **0** |
+| **Responsive** | **0,86** | 6 | 21 | **2** |
 
 Hai đầu của bảng này quan trọng hơn phần giữa.
 
@@ -62,9 +68,15 @@ nhận: probe đọc từng `SizedBox` và `Padding` thật; sáu giá trị n�
 `MxSessionTopBar` (xem [README](README.md)). Hệ spacing của dự án này đang hoạt
 động đúng như thiết kế.
 
-**Responsive không có màn nào đạt 2**, nhưng đó phần lớn là **thiếu bằng chứng**
-chứ không phải hỏng: gallery chụp một kích thước, một text scale, một ngôn ngữ.
-Bốn màn bị 0 vì **đã hỏng ở chính kích thước đang đo** — xem C1.
+**Responsive giờ có đúng hai màn đạt 2**, và cả hai là deck — không phải vì
+chúng tốt hơn, mà vì chúng là hai màn duy nhất từng được dựng ở 360/393/412 ×
+scale 1,0/1,3/1,5 × en/vi × light/dark. 21 màn còn ở `1` phần lớn là **thiếu
+bằng chứng** chứ không phải hỏng: gallery chụp một kích thước, một text scale,
+một ngôn ngữ.
+
+Sáu màn bị 0 vì **đã hỏng ở chính kích thước đang đo** — bốn màn ở C1, cộng
+`deck_list_root` và `deck_list_level` sau khi đo (xem C1a). Trung bình không đổi
+so với bản `ea80d3f7`: bốn thay đổi của deck triệt tiêu nhau.
 
 ## Phát hiện xuyên màn
 
@@ -83,6 +95,45 @@ Ba cái đầu là truncate; cái thứ tư có nguyên nhân đo được và s
 `MxButtonPair` tính `line = MediaQuery.width − 32 = 361` trong khi nút thật chỉ
 có **265** (dialog trừ `insetPadding` 40 và padding 24). Đưa bề rộng thật vào
 đúng công thức đó thì `265 < 280` → pair tự xếp chồng. Quy tắc đúng, đầu vào sai.
+
+**Và nó không phải lỗi của một màn.** Sau khi chụp các overlay của deck, dialog
+xoá deck vỡ y hệt — ở **cả** tiếng Anh (`Move to Trash`) lẫn tiếng Việt (`Chuyển
+vào Trash`). Mục này mô tả C1 như khiếm khuyết của `card_bulk_delete_dialog`;
+thực tế nó là khiếm khuyết của `MxButtonPair`, nên số màn bị ảnh hưởng bằng số
+dialog dùng nó. Xem [deck_overlays](deck_overlays.md) O2.
+
+### C1a — Hero của deck cắt chữ ở tiếng Việt, tại đúng 393px
+
+Bổ sung cho C1 sau khi đo, trên một trục mà C1 không có: **ngôn ngữ**.
+
+`deck_list_root` và `deck_list_level` sạch ở 393 × 1,0 tiếng Anh — nên chúng
+không nằm trong C1. Đổi sang **tiếng Việt**, cùng bề rộng, cùng scale, cùng
+fixture, thì hero cắt: `8 quá hạn · 7 hôm …` (thiếu 9px), và ở màn level thêm
+filter pill `Tất cả bộ thẻ` (thiếu 4px).
+
+Cả 29 golden đều là bản tiếng Anh, nên trục này chưa từng có mặt trong bất kỳ
+vòng chấm nào — kể cả C1. Chi tiết và ba hướng sửa:
+[ma trận responsive](deck_responsive_matrix.md) S1.
+
+### C1b — 11 overlay của deck chưa từng được chấm, và bốn lỗi trong đó
+
+Bản chấm này xét 29 **màn**, và với deck đó là cùng một màn ở bốn trạng thái. Mọi
+sheet, menu, form và dialog mà nó mở ra không có ảnh lẫn số đo — kể cả hai hành
+động phá huỷ và ô nhập tự do duy nhất của feature.
+
+17 bề mặt đã được chụp và đo. Không cái nào có tap target dưới 48, và không giá
+trị spacing nào của app nằm ngoài scale. Bốn lỗi:
+
+- câu xác nhận xoá mở đầu bằng **chữ thường** (`no cards go to Trash…`) bất cứ khi
+  nào deck không có sub-deck — tức mọi deck rỗng, ở cả hai ngôn ngữ;
+- nút dialog xoá xuống hai dòng — C1 ở trên;
+- `DeckSchedulerPickerWidget` tự mang tiêu đề section, nên sheet đổi scheduler
+  hiển thị **`Study mode` hai lần cách nhau ba dòng**, và sheet reset hiển thị
+  `Study mode after the reset` ngay trên `Study mode`;
+- starter library — màn đầu tiên một thư viện rỗng nhìn thấy — in mã locale thô:
+  `Language: en`.
+
+Chi tiết, cùng bốn mục còn lại và những gì đạt: [deck_overlays](deck_overlays.md).
 
 ### C2 — Bốn chế độ học dùng khung thẻ cố định nửa màn bất kể nội dung
 

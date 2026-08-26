@@ -132,4 +132,14 @@ void main() {
 
     expect(repository.progressResets, isEmpty);
   });
+
+  testWidgets('the mode section is titled once, by this sheet', (tester) async {
+    // This sheet titles the section `Study mode after the reset`; the picker
+    // used to add `Study mode` directly under it, so the sheet read as two
+    // headings stacked with nothing between them.
+    await pumpSheet(tester, hasLearnedCards: true);
+
+    expect(find.text('Study mode after the reset'), findsOneWidget);
+    expect(find.text('Study mode'), findsNothing);
+  });
 }

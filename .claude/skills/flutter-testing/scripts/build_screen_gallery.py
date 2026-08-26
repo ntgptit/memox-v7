@@ -56,6 +56,25 @@ SCREENS = [
     ('Library & Deck', 'deck_list_level', 'Deck list — trong deck', 'Cấp con: breadcrumb, sub-decks, chip trên tile'),
     ('Library & Deck', 'deck_list_empty', 'Deck list — rỗng', 'Hai lối vào: starter catalog / deck mới'),
     ('Library & Deck', 'deck_list_new_only', 'Deck chỉ có thẻ mới', 'BR-150: Study vẫn mở'),
+    # Deck's overlays. They are surfaces, not screens, and they had no picture
+    # at all until #346 — which is how eleven of them, including both
+    # destructive actions, went unreviewed while the same list screen was
+    # scored four times.
+    ('Deck — overlay', 'deck_actions_root', 'Deck actions — root', 'Rename, study mode, reset, delete'),
+    ('Deck — overlay', 'deck_actions_child', 'Deck actions — sub-deck', 'Chỉ sub-deck mới có Move (BR-06)'),
+    ('Deck — overlay', 'deck_library_menu', 'Library menu', 'Tag catalog, Trash, lọc due-only'),
+    ('Deck — overlay', 'deck_sort_sheet', 'Sort sheet', 'Các thứ tự một danh sách có thể nhận'),
+    ('Deck — overlay', 'deck_create_root', 'New deck', 'Tên + chọn scheduler, khoá sau review đầu'),
+    ('Deck — overlay', 'deck_create_child_kind', 'Thêm gì vào deck unset', 'BR-61/62: cả sub-deck lẫn card'),
+    ('Deck — overlay', 'deck_rename_form', 'Rename', 'Cùng form, tên đã điền sẵn'),
+    ('Deck — overlay', 'deck_move_picker', 'Move picker', 'Mục bị chặn nêu lý do (BR-69/70)'),
+    ('Deck — overlay', 'deck_ancestors', 'Breadcrumb — Go to', 'Chỉ mở bằng long press'),
+    ('Deck — overlay', 'deck_delete_confirm', 'Delete — confirm', 'Nút xuống 2 dòng: C1, MxButtonPair'),
+    ('Deck — overlay', 'deck_delete_empty', 'Delete — deck rỗng', 'Câu mở đầu bằng chữ thường (O1)'),
+    ('Deck — overlay', 'deck_delete_confirm_vi', 'Delete — tiếng Việt', 'Cùng nút vỡ ở ngôn ngữ dài hơn'),
+    ('Deck — overlay', 'deck_reset_progress', 'Reset learning progress', 'Hai heading liền nhau (O3)'),
+    ('Deck — overlay', 'deck_scheduler_change', 'Change study mode', '"Study mode" xuất hiện hai lần (O4)'),
+    ('Deck — overlay', 'deck_starter_library', 'Starter library', 'UC-01; in mã locale thô (O5)'),
     ('Card', 'card_list', 'Card list', 'Toolbar lọc + pill trạng thái'),
     ('Card', 'card_editor_edit', 'Card editor', 'Sửa nội dung, tag, cờ; danger zone'),
     ('Card', 'card_detail', 'Card detail', 'Mặt đọc + lịch sử keyset (M99.31)'),

@@ -219,4 +219,27 @@ void main() {
       expect(find.text('Reset learning progress'), findsOneWidget);
     });
   });
+
+  group('the section is titled once', () {
+    // `DeckSchedulerPickerWidget` used to print `Study mode` unconditionally,
+    // so this sheet — whose own title is `Study mode` — printed it twice, three
+    // lines apart. Nothing else could see it: no overflow, no clip, correct
+    // tokens, and the golden matched the day it was drawn wrong.
+    testWidgets('an unlocked sheet says "Study mode" once, not twice', (
+      tester,
+    ) async {
+      await pumpSheet(tester);
+
+      expect(find.text('Study mode'), findsOneWidget);
+    });
+
+    testWidgets('a locked sheet does not repeat its own heading', (
+      tester,
+    ) async {
+      await pumpSheet(tester, isLocked: true);
+
+      expect(find.text('Study mode is locked'), findsOneWidget);
+      expect(find.text('Study mode'), findsNothing);
+    });
+  });
 }

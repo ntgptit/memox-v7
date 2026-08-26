@@ -299,9 +299,16 @@ on a real device size, committed as PNGs. **When a change moves any of them,
 regenerate the goldens and republish the gallery in the same turn:**
 
 ```bash
-flutter test --tags golden --update-goldens
+TZ=UTC flutter test --tags golden --update-goldens
 python .claude/skills/flutter-testing/scripts/build_screen_gallery.py
 ```
+
+**`TZ=UTC` is not optional, and Dart honours it on Windows too.** `card_detail`
+renders review timestamps through `toLocal()`; without the pin, the goldens
+carry whatever timezone the machine that wrote them was in. Four of them were
+carrying UTC+9 and failed the moment the golden job ran on a UTC runner — by
+exactly the same pixel counts a local `TZ=UTC` run reproduces, which is how the
+cause was identified rather than guessed.
 
 Then publish `build/screen_gallery.html` as an Artifact **at the existing
 URL** — https://claude.ai/code/artifact/e8a68227-1582-407c-88c2-ff25d66bd9d8 —
@@ -325,7 +332,13 @@ risk verification plan used by PR CI. It runs only the selected host tests and
 Widgetbook surface. Layer ownership provides the starting set; reverse Dart
 imports add app, integration and cross-feature test consumers, and existing
 untracked tests are discoverable locally. Golden-only changes use runnable
-non-golden surrogates because Windows `ci-full` owns pixel comparison. Unknown
+non-golden surrogates **locally**, because the local loop excludes the golden
+tag; **pixel comparison is a PR gate now** — `ci.yml` runs `goldens (windows)`
+whenever the plan sets `needs_goldens`, which any code change or any change to
+`test/demo/` does. It used to live only in `ci-full.yml`, which is
+`workflow_dispatch:`, so nothing compared a committed PNG against a fresh
+render unless a person remembered: #337 relaid out six components, committed no
+goldens, went green, and left 26 stale pictures on `main`. Unknown
 paths and schema/shared/router/native/tooling changes promote themselves to the
 full non-golden host suite. A selected mandatory tool or guard missing from the
 environment MUST fail rather than report a skip. The default command without

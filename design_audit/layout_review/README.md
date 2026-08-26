@@ -1,4 +1,4 @@
-# Layout review — 29 màn hình
+# Layout review — 29 màn hình, cộng 17 bề mặt overlay của deck
 
 **[→ SUMMARY.md](SUMMARY.md)** — bảng điểm, điểm theo tiêu chí, 10 phát hiện
 xuyên màn và thứ tự đề xuất sửa. Đọc file đó trước.
@@ -6,7 +6,17 @@ xuyên màn và thứ tự đề xuất sửa. Đọc file đó trước.
 Một file cho mỗi màn hình trong screen gallery, chấm theo checklist bố cục
 mobile 20 mục + ba tầng Correct / Balanced / Beautiful + bảng 8 tiêu chí.
 
+[**deck_overlays.md**](deck_overlays.md) chấm 11 overlay và màn starter của deck
+— các bề mặt không nằm trong 29 màn vì chúng không có golden nào. Chúng gộp vào
+**một** file, không phải mười lăm: chúng dùng chung `MxActionSheet`,
+`MxFormSheet`, `MxConfirmDialog` và `MxButtonPair`, nên ba trong bốn lỗi tìm được
+là lỗi của component dùng chung — điều mà chấm riêng lẻ sẽ giấu đi.
+
 Chấm trên commit `ea80d3f7` (sau khi 26 golden cũ được vẽ lại — xem bên dưới).
+
+**Cột Responsive của bốn màn deck đã được chấm lại trên `cd4f3eb2`** bằng
+[ma trận responsive](deck_responsive_matrix.md) — xem "Đo ngoài một frame" bên
+dưới.
 
 ## Số đo đến từ đâu
 
@@ -32,6 +42,30 @@ Probe đo bốn thứ, và cả bốn đều đã phải sửa vì bản đầu 
 | **Typography** — loại font MaterialIcons | `Icon` vẽ qua `RenderParagraph`, nên 16 icon trên deck list bị đếm thành một rung 24px/400, đẩy màn đó vượt 2 rung so với thứ mắt đọc được là chữ. |
 
 Ba lỗi đầu đều **im lặng**: chúng cho ra số trông hợp lý.
+
+## Đo ngoài một frame gallery chụp
+
+`layout_probe.dart` đo **frame mà gallery chụp**, và đó vừa là điểm mạnh (số và
+ảnh không thể lệch nhau) vừa là trần của nó: gallery chụp một bề rộng, một text
+scale, một ngôn ngữ, một theme. Mọi mục §16 và §19 vì thế phải để `➖`.
+
+`test/design_audit/deck_stress_probe.dart` dựng **frame mới** thay vì đo lại
+frame cũ — 25 frame cho bốn màn deck, ở ba bề rộng × ba text scale × en/vi ×
+light/dark, cộng list 0/1/50 item và tên deck dài.
+
+```bash
+MEMOX_LAYOUT_PROBE=1 flutter test test/design_audit/deck_stress_probe.dart   --tags golden --update-goldens
+```
+
+Nó hỏi mỗi `RenderParagraph` hai câu — có phải cắt chữ không, và cần thêm bao
+nhiêu pixel để khỏi cắt. Cách này cần thiết vì **không một frame nào overflow**:
+những gì hỏng đều hỏng êm sau `TextOverflow.ellipsis`, nên không có sọc vàng đen
+nào để nhìn thấy, và một dấu `…` trông như một lựa chọn chứ không như sự cố.
+
+Nó cũng **không** phải `_test.dart`, nên `flutter test` không thu nó vào suite
+nào: nó ghi, không assert — cùng lý do với `layout_probe`.
+
+Kết quả: [deck_responsive_matrix.md](deck_responsive_matrix.md).
 
 ## Đọc con số typography thế nào
 

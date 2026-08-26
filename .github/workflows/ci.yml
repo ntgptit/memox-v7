@@ -40,6 +40,7 @@ jobs:
       needs_static: ${{ steps.changes.outputs.needs_static }}
       needs_host_tests: ${{ steps.changes.outputs.needs_host_tests }}
       needs_widgetbook: ${{ steps.changes.outputs.needs_widgetbook }}
+      needs_goldens: ${{ steps.changes.outputs.needs_goldens }}
       full_suite: ${{ steps.changes.outputs.full_suite }}
       risk: ${{ steps.changes.outputs.risk }}
       shard_count: ${{ steps.changes.outputs.shard_count }}
@@ -245,10 +246,77 @@ jobs:
         run: flutter test --reporter failures-only
         working-directory: widgetbook
 
+  goldens:
+    # **Pixel comparison, on the PR, on Windows.**
+    #
+    # `ci-full.yml` has had this job since the start and it is
+    # `workflow_dispatch:` — so nothing ever compared a committed PNG against a
+    # fresh render unless a person remembered to. #337 changed how six
+    # components lay out through `MxButtonPair`, committed no goldens, passed
+    # every check here, and left 26 stale pictures on `main`; the screen
+    # gallery went on publishing a pre-#337 app until the suite was run by
+    # hand. Every other gate in this file reads source text or a widget tree,
+    # and none of them can see a rectangle that moved.
+    #
+    # Windows because goldens are bound to it — `dart_test.yaml` pins the
+    # platform, and a Linux render differs in font rasterisation. The runner
+    # costs double, which is why the job is conditional rather than always-on.
+    name: goldens (windows)
+    needs: classify
+    if: needs.classify.outputs.needs_goldens == 'true'
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: .fvmrc
+          cache: true
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:'
+
+      - name: cache build_runner
+        uses: actions/cache@v4
+        with:
+          path: .dart_tool/build
+          key: build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}-${{ github.sha }}-goldens
+          restore-keys: |
+            build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}-
+
+      - name: pub get
+        run: flutter pub get
+
+      - name: generate
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      # **UTC, explicitly.** `card_detail` renders review timestamps through
+      # `toLocal()` — correct for the app, since the database stores UTC
+      # (AD-06) and a person reads local time — but it makes the picture depend
+      # on the machine's timezone. Four goldens were carrying UTC+9 until this
+      # job ran and disagreed with them by 2014, 2014, 14268 and 2264 pixels.
+      # The runner already defaults to UTC; pinning it here is what makes the
+      # regeneration command in CLAUDE.md and this job the same environment.
+      - name: golden comparison
+        env:
+          TZ: UTC
+        run: flutter test --tags golden --reporter failures-only
+
+      # The failure images are the whole point of a red golden job: without
+      # them the reviewer knows a pixel moved and not which one.
+      - name: upload failure images
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-failures
+          path: |
+            test/**/failures/**
+          if-no-files-found: ignore
+          retention-days: 7
+
   gate:
     name: CI gate
     if: always()
-    needs: [classify, contracts, static, host_tests, widgetbook]
+    needs: [classify, contracts, static, host_tests, widgetbook, goldens]
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
@@ -265,8 +333,8 @@ jobs:
             --contracts-result '${{ needs.contracts.result }}' \
             --static-result '${{ needs.static.result }}' \
             --host-result '${{ needs.host_tests.result }}' \
-            --widgetbook-result '${{ needs.widgetbook.result }}' \
+            --widgetbook-result '${{ needs.widgetbook.result }}'             --goldens-result '${{ needs.goldens.result }}' \
             --needs-contracts '${{ needs.classify.outputs.needs_contracts }}' \
             --needs-static '${{ needs.classify.outputs.needs_static }}' \
             --needs-host-tests '${{ needs.classify.outputs.needs_host_tests }}' \
-            --needs-widgetbook '${{ needs.classify.outputs.needs_widgetbook }}'
+            --needs-widgetbook '${{ needs.classify.outputs.needs_widgetbook }}'             --needs-goldens '${{ needs.classify.outputs.needs_goldens }}'

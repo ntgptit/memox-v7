@@ -7917,6 +7917,57 @@ phần còn lại thì không).
 
 ---
 
+## M99.53 — Pixel comparison trở thành cổng của PR
+
+- **Lỗ hổng đã được ghi nhận từ trước mà chưa bịt.** `docs/wbs-study.md` §1549
+  đã viết: các job "chờ `ci-full.yml`, vốn chạy thủ công". Job
+  `goldens (windows)` là một trong số đó — nó tồn tại từ đầu và **chưa từng chạy
+  tự động**.
+- **Cái giá đã trả thật.** #337 đổi bố cục sáu component qua `MxButtonPair`,
+  commit 0 file PNG, xanh mọi check, và để **26 golden cũ** trên `main`; screen
+  gallery xuất bản bản app trước #337 cho tới khi có người chạy suite bằng tay
+  (PR #340). Mọi cổng khác trong `ci.yml` đọc source text hoặc widget tree —
+  không cổng nào thấy được một hình chữ nhật đã dịch chỗ.
+- **Sửa:** thêm output `needs_goldens` vào `build_verification_plan.py`, job
+  `goldens (windows)` vào `ci.yml`, và một nhánh tương ứng trong
+  `check_ci_gate.py` — gate đỏ cả khi job cần mà bị skip **lẫn** khi job chạy mà
+  không được chọn.
+- **Điều kiện chọn:** `code_required`, hoặc bất kỳ đường dẫn nào chứa
+  `/goldens/` hoặc bắt đầu bằng `test/demo/`. Vế thứ hai là cần thiết vì PNG
+  không phải code — nếu thiếu nó, đúng loại PR chỉ vẽ lại golden (như #340) sẽ
+  không được kiểm.
+- **Vẫn có điều kiện, không always-on:** runner Windows tính gấp đôi phút. PR
+  chỉ sửa tài liệu bỏ qua job này.
+- Kiểm bằng 4 test mới trong `test_ci_tooling.py`, dựng theo hình dạng thật của
+  #337, #340, một PR đổi demo test, và một PR docs-only.
+- **Lần đẩy đầu tiên sai, và CI bắt được.** `needs_goldens` được ghi vào
+  `$GITHUB_OUTPUT` nhưng **không** được khai báo trong khối `outputs:` của job
+  `classify`, nên `needs.classify.outputs.needs_goldens` là chuỗi rỗng, job
+  Windows bị skip trên đúng loại thay đổi cần nó. Thứ duy nhất làm nó lộ ra là
+  `check_ci_gate.py` từ chối parse `''` thành boolean — nếu gate dễ dãi hơn, job
+  đã chết âm thầm, đúng thứ nó sinh ra để chặn, lùi lên một tầng.
+- **Lần chạy đầu tiên của job mới đã bắt được một khiếm khuyết có thật, ngay
+  lập tức.** 4/261 golden đỏ trên runner: `card_detail_light`, `card_detail_dark`
+  (2 014px mỗi cái), `card_detail_state_grid_vi_x2` (14 268px),
+  `tag_filter_sheet_light` (2 264px).
+  - Ảnh diff (do bước upload artifact mới của chính job này cung cấp) chỉ cho
+    thấy **một chữ số và `AM`/`PM`** — không phải rasterise, mà là **múi giờ**.
+  - `card_history_labels_widget.dart:70` gọi `utc.toLocal()`. Đó là hành vi
+    **đúng** của app: DB lưu UTC (AD-06), người dùng đọc giờ địa phương. Nhưng
+    nó khiến golden mang theo múi giờ của máy đã vẽ ra nó.
+  - Máy vẽ ra chúng ở **UTC+9**. Chạy lại tại chỗ với `TZ=UTC` tái hiện **đúng
+    từng con số pixel** — nên nguyên nhân được xác định chứ không phải đoán.
+  - Dart **có** tôn trọng `TZ` trên Windows, nên sửa được sạch: vẽ lại 4 golden
+    dưới `TZ=UTC`, ghim `TZ: UTC` vào job, và đưa `TZ=UTC` vào lệnh regenerate
+    trong CLAUDE.md. Chạy toàn bộ suite dưới UTC chỉ đổi đúng 4 file — không
+    golden nào khác phụ thuộc múi giờ.
+  - Đây là loại lỗi **im lặng theo địa lý**: bất kỳ ai ngoài UTC+9 cũng thấy 4
+    golden này đỏ mà không có manh mối nào.
+- Thêm `PlanOutputsAreWiredIntoTheWorkflowTest`: mọi cờ `needs_*` mà plan phát
+  ra phải vừa được khai báo ở `classify.outputs` vừa được truyền cho gate. Đọc
+  `ci.yml` bằng quét text chứ không dùng PyYAML, vì job chạy test này không cài
+  dependency Python nào. Đã kiểm nó **đỏ** khi gỡ dòng khai báo. Tổng 44 → 52.
+
 ## M99 · Adhoc
 
 Task do chủ dự án giao trực tiếp, không thuộc chuỗi phụ thuộc M0…M9. Đánh số từ

@@ -13,10 +13,12 @@ def evaluate(
     static_result: str,
     host_result: str,
     widgetbook_result: str,
+    goldens_result: str,
     needs_contracts: bool,
     needs_static: bool,
     needs_host_tests: bool,
     needs_widgetbook: bool,
+    needs_goldens: bool,
 ) -> list[str]:
     problems: list[str] = []
     if classify_result != "success":
@@ -27,6 +29,7 @@ def evaluate(
         ("static verification", static_result, needs_static),
         ("host-test shards", host_result, needs_host_tests),
         ("Widgetbook smoke test", widgetbook_result, needs_widgetbook),
+        ("golden comparison", goldens_result, needs_goldens),
     ):
         expected = "success" if required else "skipped"
         if result != expected:
@@ -48,6 +51,7 @@ def main() -> int:
         "static-result",
         "host-result",
         "widgetbook-result",
+        "goldens-result",
     ):
         parser.add_argument(f"--{name}", required=True)
     for name in (
@@ -55,6 +59,7 @@ def main() -> int:
         "needs-static",
         "needs-host-tests",
         "needs-widgetbook",
+        "needs-goldens",
     ):
         parser.add_argument(f"--{name}", type=_parse_bool, required=True)
     args = parser.parse_args()
@@ -65,10 +70,12 @@ def main() -> int:
         static_result=args.static_result,
         host_result=args.host_result,
         widgetbook_result=args.widgetbook_result,
+        goldens_result=args.goldens_result,
         needs_contracts=args.needs_contracts,
         needs_static=args.needs_static,
         needs_host_tests=args.needs_host_tests,
         needs_widgetbook=args.needs_widgetbook,
+        needs_goldens=args.needs_goldens,
     )
     if problems:
         for problem in problems:
