@@ -7917,6 +7917,120 @@ phần còn lại thì không).
 
 ---
 
+## M99.55 — Deck review: đo những khung gallery chưa từng chụp, rồi sửa cái đo được
+
+- **Vì sao phải đo lại chứ không đọc lại.** Code deck không đổi dòng nào giữa
+  `ea80d3f7` (bản chấm 29 màn) và `cd4f3eb2`. Chạy lại probe cũ trên frame cũ chỉ
+  in ra số cũ. Thứ chưa ai biết nằm ở **các frame chưa từng được dựng**: gallery
+  chụp một bề rộng, một text scale, một ngôn ngữ, một theme — nên §16 và §19 của
+  cả bốn báo cáo deck đều phải để `➖`.
+- **`deck_stress_probe.dart` dựng 25 frame:** 360/393/412 × scale 1,0/1,3/1,5 ×
+  en/vi × light/dark, cộng 0/1/50 deck và tên tiếng Việt dài thật. Nó hỏi mỗi
+  `RenderParagraph` hai câu — có phải cắt không, và thiếu bao nhiêu pixel.
+- **Không một frame nào overflow.** Đó là lý do bốn vòng review nhìn ảnh không
+  thấy gì: `TextOverflow.ellipsis` làm đúng việc của nó, không sọc vàng đen,
+  token nào cũng hợp lệ, và golden khớp đúng cái ngày nó bị vẽ sai. Một dấu `…`
+  trông như một lựa chọn thiết kế.
+
+### Cái đo được, và cái đã sửa
+
+| | Đọc ra | Điều kiện | PR |
+|---|---|---|---|
+| Hero mất một nửa BR-162 | `15 car…  8 overdue…` | 360 × 1,0 · en (thiếu 6px); **393 × 1,0 · vi** (thiếu 9px) | #350, #358 |
+| Breadcrumb hết định vị | `Tất cả… / Academic W…` | 360 × 1,5 · vi | #351 |
+| Câu xác nhận xoá | `no cards go…` / `1 card go…` | mọi deck rỗng, cả hai ngôn ngữ | #351 |
+| Bộ chọn scheduler in tiêu đề hai lần | `Study mode` / `Study mode` | 4 trong 5 nơi dùng | #349 |
+| 21 chuỗi thiếu dạng số nhiều | `1 decks · 0 cards` | màn đầu tiên người dùng mới thấy | #354 |
+| Starter in mã locale thô | `Language: en` | UC-01 | #356 |
+
+- **393 × 1,0 tiếng Việt là ô đáng sợ nhất**: đúng bề rộng và scale gallery
+  chụp, chỉ đổi ngôn ngữ. Cả 29 golden đều là bản tiếng Anh, nên trục ngôn ngữ
+  chưa từng xuất hiện trong bất kỳ vòng chấm nào — kể cả C1.
+
+### Một lỗi, ba lần, ba PR liên tiếp
+
+`Flexible` trong `Row` chia không gian **theo flex, không theo nhu cầu**: hai cái
+cùng flex thì mỗi cái lấy nửa dòng, kể cả khi tổng nhu cầu vừa khít.
+
+1. **breadcrumb** — comment tại chỗ nói các bậc trước "nhường chỗ trước"; code
+   chưa bao giờ làm được điều đó (#351);
+2. **hero** — #350 sửa phép đo và tuyên bố đo/vẽ dùng chung một nguồn, nhưng vẫn
+   còn hai bản sao và Row vẫn chia đôi (#357 hợp nhất, #358 sửa Row);
+3. **hero lần nữa** — gate bắt được ở fixture có numeral **một chữ số**.
+
+Điểm đáng giữ: **probe không thể thấy lần thứ ba.** Fixture của nó có 12 thẻ đến
+hạn, numeral `12` đủ rộng để vượt ngưỡng và xếp dọc. Một chữ số thì *vừa*, rồi
+cắt. Fixture quyết định lỗi có xuất hiện hay không — nên gate phải render một ma
+trận, không phải một khung được chọn sẵn.
+
+### 17 bề mặt overlay lần đầu có ảnh
+
+- Bản chấm 29 màn xét **4** bề mặt deck, và cả bốn là cùng một màn. Mọi sheet,
+  menu, form, dialog — kể cả hai hành động phá huỷ và ô nhập tự do duy nhất —
+  không có ảnh, không có số đo (#347).
+- Sạch: **0** tap target dưới 48 trên cả 17, **0** giá trị spacing của app ngoài
+  scale (ba giá trị lệch đều của framework).
+- **Hai lỗi của chính bộ đo phải sửa trước khi có ảnh đúng**, và cả hai im lặng:
+  `showDialog` đẩy route lên root navigator nằm ngoài `ProviderScope` (tách
+  `deckRouterAt` + `deckScopeAround`), và chọn ⋮ theo **chỉ số** chụp nhầm sheet
+  dưới đúng tên file — bar nằm cuối cây, không phải đầu.
+- Probe học thêm một luật: target nhỏ nằm trọn trong target lớn hơn (radio 40×40
+  trong hàng 361×80) không phải lỗi, nhưng nút xoá 40px trong card mở trang chi
+  tiết thì là. Probe **không thể** phân biệt — đó là câu hỏi về ý định — nên nó
+  tách `tapTargetsUnder48Nested` và để người đọc trả lời.
+
+### Ba finding của bản chấm là sai, đã đính chính tại chỗ
+
+- **S4** ghi "nhãn filter pill bị cắt" — thực ra là bậc đầu breadcrumb.
+  `deckPathRootLabel` và `deckFilterAllLabel` **cùng giá trị**, nên phép đo
+  đọc-chuỗi-đã-render không tách được; mà trên màn đó filter pill nằm trong menu.
+  S3 và S4 là một.
+- **O6** chê affordance của `Add to library` — nhưng cả thẻ là vùng chạm, và màu
+  `primary` đã bị loại **bằng phép đo** (2,90:1 trên thẻ tối). Rút lại.
+- **O7** mô tả sai ranh giới ngang/dọc của cặp nút; sau #348 ranh giới hoá ra là
+  *bề rộng còn lại*.
+
+Giữ dạng "rút lại kèm lý do" thay vì xoá: cách chúng sai có ích: một finding
+đúng theo sách vẫn sai khi thứ nó mô tả không phải control, hoặc khi lý do đã
+được đo mà bức ảnh không kể.
+
+### Gate, và vì sao nó đến sau cùng
+
+- `deck_text_fit_test.dart` render ma trận thật và fail trên bất kỳ paragraph nào
+  bị cắt. **Đặt sau các fix là có chủ ý**: gate đỏ ngay ngày đầu là gate bị mute.
+- Hai ngoại lệ là **test riêng, không phải skip**: chữ đơn vị hàng New/Scheduled
+  cắt có chủ ý, và tên deck dài quá hai dòng thì cắt — ca thứ hai khẳng định
+  việc cắt **có xảy ra**, để gate không qua bằng cách tuyên bố suông.
+- `plural_forms_test.dart` quét ARB theo **hình dạng** thay vì danh sách, và bắt
+  ngay một chuỗi danh sách tay của tôi bỏ sót: `reminderNotificationBodyManyDecks`
+  đã có plural cho `others` nên bị lọc nhầm, và sẽ ship `1 cards are due…`.
+
+### Golden lệch múi giờ — CI xanh, local đỏ
+
+- Ba golden `card_detail` vẽ trên CI (UTC) và sai đúng chín giờ trên máy KST.
+  `cardHistoryTimestamp` render `toLocal()` đúng theo AD-06; fixture mới là chỗ
+  sai vì cấp `DateTime.utc`.
+- **Chiều của lỗi là thứ khiến nó ẩn**: CI xanh nên không có gì đỏ ở nơi ai đó
+  đang nhìn, và local mang ba lỗi suốt nhiều tuần — đọc thành "nhiễu quen thuộc",
+  đúng cách một suite mất uy tín. Vẽ lại ở local chỉ lật ngược bên nào hỏng.
+- Fixture đổi sang instant **local**, đi qua `toLocal()` không đổi. **Golden
+  không cần vẽ lại** — chúng vẫn nói 09:41, giờ nói vậy ở mọi múi giờ (#359).
+
+- **Status:** **done** cho phần đo và phần sửa. Nhóm quyết định của chủ dự án còn
+  mở: FAB đè content (ở scale 1,5 nó đè *control* chứ không chỉ chữ), hướng cặp
+  nút cho sheet New deck, ba primary CTA trong một viewport, khung thẻ study nửa
+  màn ở bốn màn học, và affordance của long-press breadcrumb.
+- **Chưa đo:** overlay ở 360/scale 1,5/vi (15/17 mới chỉ 393 × 1,0); trạng thái
+  loading/error của mọi form; breadcrumb sâu 10 cấp (BR-55).
+- **Dependencies:** M99.54
+- **Checklist phases:** 12.2, 15.1, 15.3
+- **Tests:** `deck_text_fit_test.dart` (14), `plural_forms_test.dart` (2),
+  `mx_breadcrumb_test.dart` (+5), `deck_summary_overdue_test.dart` (+3),
+  `localization_test.dart` (+3), `app_typography_test.dart` (+2),
+  `deck_overlays_demo_test.dart` (16 golden), `deck_starter_demo_test.dart` (2)
+
+---
+
 ## M99.54 — `MxButtonPair` hỏi hai nút thay vì đoán
 
 - **Hai lần đoán, hai hướng sai.** #337 đọc `MediaQuery.width − 32` — đúng cho
