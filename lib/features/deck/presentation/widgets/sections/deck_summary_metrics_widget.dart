@@ -150,9 +150,13 @@ class _HeroFigureLine extends StatelessWidget {
   /// The numeral's style — **one definition, used to measure and to draw.**
   /// `tabularFigures` widens the digits, and leaving it out of the measurement
   /// under-reported the line by the few pixels it then clipped.
+  ///
+  /// The weight is [AppTypography.heroNumeralWeight] rather than a `w700`
+  /// written here: it is the app's fourth weight, and that note is where the
+  /// exception is argued.
   TextStyle? _numeralStyle(BuildContext context) =>
       context.texts.headlineLarge?.copyWith(
-        fontWeight: FontWeight.w700,
+        fontWeight: AppTypography.heroNumeralWeight,
         height: AppTypography.heroNumeralCapTrim,
         fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
       );
@@ -290,13 +294,7 @@ class _HeroFigureLine extends StatelessWidget {
                 // (owner review, 2026-08-25): 36px was set when the
                 // numeral had a row to itself, and 32 is what fits beside
                 // its own breakdown on a 393 screen.
-                style: context.texts.headlineLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  height: AppTypography.heroNumeralCapTrim,
-                  fontFeatures: const <FontFeature>[
-                    FontFeature.tabularFigures(),
-                  ],
-                ),
+                style: _numeralStyle(context),
               ),
               const SizedBox(width: AppSpacing.sm),
               Flexible(
@@ -320,26 +318,7 @@ class _HeroFigureLine extends StatelessWidget {
     ),
     child: ExcludeSemantics(
       child: Text.rich(
-        TextSpan(
-          children: <InlineSpan>[
-            TextSpan(
-              text: context.l10n.deckSummaryOverduePart(overdueCount),
-              style: context.texts.bodyMedium?.copyWith(
-                color: context.semanticColors.overdue,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const TextSpan(text: ' · '),
-            TextSpan(
-              text: context.l10n.deckSummaryDueTodayPart(
-                dueCount - overdueCount,
-              ),
-            ),
-          ],
-        ),
-        style: context.texts.bodyMedium?.copyWith(
-          color: context.colors.onSurfaceVariant,
-        ),
+        _breakdownSpan(context),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
