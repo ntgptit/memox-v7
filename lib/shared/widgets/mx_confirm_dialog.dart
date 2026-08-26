@@ -62,6 +62,7 @@ class MxConfirmDialog extends StatelessWidget {
     this.variant = MxConfirmDialogVariant.normal,
     this.tone,
     this.isSubmitting = false,
+    this.isConfirmBlocked = false,
     super.key,
   });
 
@@ -90,6 +91,18 @@ class MxConfirmDialog extends StatelessWidget {
   /// deletes, and the second one fails against data the first already removed —
   /// which surfaces to the user as an error for an action that worked.
   final bool isSubmitting;
+
+  /// While true the confirm button is inert **and Cancel is not**.
+  ///
+  /// **A second flag rather than more of [isSubmitting], because Cancel is not
+  /// the same question.** The deck delete cannot ask *are you sure* until it
+  /// knows what will be lost (BR-04), so confirm has to wait for the impact
+  /// read — but backing out is safe at every instant, and a user who opened
+  /// this dialog by accident should not be held in it until a database query
+  /// returns. Folding the two into one flag is what made Cancel dead during
+  /// that read; the code did it, the WBS entry claimed the opposite, and only
+  /// the review caught that they disagreed.
+  final bool isConfirmBlocked;
 
   bool get _isDestructive => variant == MxConfirmDialogVariant.destructive;
 
@@ -138,6 +151,7 @@ class MxConfirmDialog extends StatelessWidget {
           availableWidth: MxDialogMetrics.footerWidth(context),
           secondary: MxActionButton(
             label: cancelLabel,
+            // Not `isConfirmBlocked` — see its doc. The way out stays open.
             onPressed: isSubmitting ? null : onCancel,
             variant: MxActionButtonVariant.secondary,
             // Focus starts on cancel for anything serious — destructive *or*
@@ -149,7 +163,7 @@ class MxConfirmDialog extends StatelessWidget {
           ),
           primary: MxActionButton(
             label: confirmLabel,
-            onPressed: isSubmitting ? null : onConfirm,
+            onPressed: isSubmitting || isConfirmBlocked ? null : onConfirm,
             variant: _isDestructive
                 ? MxActionButtonVariant.destructive
                 : MxActionButtonVariant.primary,

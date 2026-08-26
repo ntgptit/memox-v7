@@ -217,6 +217,29 @@ void main() {
             'will be lost is still loading',
       );
     });
+
+    testWidgets('isBlocked leaves Cancel live — the way out is always safe', (
+      tester,
+    ) async {
+      await pump(tester, closeWhen: MxConfirmCloseWhen.saved, isBlocked: true);
+
+      final cancel = tester.widget<ButtonStyleButton>(
+        find.ancestor(
+          of: find.text('Cancel'),
+          matching: find.byWidgetPredicate((w) => w is ButtonStyleButton),
+        ),
+      );
+
+      expect(
+        cancel.onPressed,
+        isNotNull,
+        reason:
+            'blocked is not submitting: a user who opened this by accident '
+            'must not be held in it until a database read returns. The two '
+            'went through one flag until a review noticed that the code and '
+            'the WBS entry disagreed about it',
+      );
+    });
   });
 }
 

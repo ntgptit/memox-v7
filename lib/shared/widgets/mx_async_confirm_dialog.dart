@@ -97,12 +97,17 @@ class MxAsyncConfirmDialog<P extends Enum> extends StatefulWidget {
   final MxDialogTone? tone;
   final MxConfirmCloseWhen closeWhen;
 
-  /// Disables confirm for a reason that is not the write.
+  /// Disables **confirm only** for a reason that is not the write.
   ///
   /// One caller: the deck delete cannot ask *are you sure* until it knows what
   /// will be lost (BR-04), so it blocks while the impact read is in flight.
-  /// Folded into the same disabled state rather than given its own, because to
-  /// the user there is one answer — not yet.
+  ///
+  /// **Cancel stays live throughout**, which is the correction this parameter
+  /// carries. It first went through `isSubmitting`, which disables both — so a
+  /// user who opened the dialog by accident was held in it until a database
+  /// query returned. That was the pre-existing behaviour, faithfully copied
+  /// when the four dialogs were merged into this one, and copying it is what
+  /// gave it a single place to be wrong in and a single place to fix.
   final bool isBlocked;
 
   @override
@@ -167,7 +172,8 @@ class _MxAsyncConfirmDialogState<P extends Enum>
       cancelLabel: widget.cancelLabel,
       variant: widget.variant,
       tone: widget.tone,
-      isSubmitting: widget.state.isSubmitting || widget.isBlocked,
+      isSubmitting: widget.state.isSubmitting,
+      isConfirmBlocked: widget.isBlocked,
       onConfirm: widget.onConfirm,
       onCancel: widget.onCancel,
     );

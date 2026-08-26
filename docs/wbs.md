@@ -12512,6 +12512,18 @@ của M2.
   lại bằng `addPostFrameCallback` trong widget chứ không để lại thành thứ caller
   phải biết. **Bốn test feature đỏ đúng vì lỗi này** trước khi sửa
   (`deck_level_actions_test`, `side_effect_once_test`, `card_editor_edit_test`).
+- **`isBlocked` chặn confirm, **không** chặn Cancel — và đó là một sửa lỗi, không
+  phải một lựa chọn thiết kế.** Bản đầu gộp nó vào `isSubmitting`, vốn làm bất
+  động **cả hai** nút, nên trong lúc đọc impact (BR-04) người dùng mở nhầm hộp
+  thoại bị giữ lại cho tới khi một query database trả về. Đây là hành vi có sẵn
+  từ trước, được chép nguyên khi gộp bốn hộp thoại — và chính việc chép nó vào
+  một chỗ là thứ cho nó đúng một nơi để sai và đúng một nơi để sửa.
+
+  Đáng ghi lại cách nó bị bắt: **code và mục WBS này mâu thuẫn nhau**, acceptance
+  criterion đã viết "chỉ chặn confirm" trong khi code chặn cả hai, và test của
+  chính nó chỉ kiểm nút confirm nên không thấy. Codex review trên PR #352 chỉ ra
+  chỗ lệch. Nay `MxConfirmDialog` có `isConfirmBlocked` riêng, và có test tiêm
+  lỗi: đỏ trên code cũ, xanh trên code mới.
 - **Reset trước khi mở, cho cả bốn.** Trước đây chỉ `showTagDeleteConfirm` làm,
   và comment của nó nói thẳng ba cái kia đang đánh cược: `autoDispose` *thường*
   đã thu notifier rồi, nhưng mở hộp thoại thứ hai khi cái thứ nhất còn đang
@@ -12521,8 +12533,9 @@ của M2.
   - [x] `saved` không đóng khi có failure; `settled` có.
   - [x] `settled` đóng cả trên `savedAndContinue` — ca của settings reset.
   - [x] Rebuild trên state đã settled không pop lần hai.
-  - [x] `isSubmitting` làm cả hai nút bất động; `isBlocked` chỉ chặn confirm
-        (BR-04, deck chưa đọc xong impact).
+  - [x] `isSubmitting` làm cả hai nút bất động; `isBlocked` chỉ chặn confirm và
+        **giữ Cancel sống** (BR-04, deck chưa đọc xong impact). Kiểm bằng test
+        tiêm lỗi, vì đây đúng là chỗ code và mục này từng nói khác nhau.
   - [x] Không call site nào còn giữ bản sao của transition.
   - [x] `flutter analyze` sạch; guard sạch; suite không-golden xanh.
 - **Editable documents:** `docs/wbs.md`
