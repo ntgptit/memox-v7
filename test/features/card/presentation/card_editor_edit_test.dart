@@ -10,6 +10,8 @@ import 'package:memox/features/card/di/card_repository_provider.dart';
 import 'package:memox/features/card/presentation/screens/card_editor_screen.dart';
 import 'package:memox/l10n/generated/app_localizations.dart';
 
+import 'package:memox/features/card/presentation/widgets/sections/card_trash_action_widget.dart';
+
 import 'support/fake_card_repository.dart';
 
 /// The editor in edit mode (UC-04 A1, A5): prefill from the loaded card, save
@@ -102,6 +104,10 @@ void main() {
     await pump(tester, repository);
 
     await tester.enterText(find.byType(TextField).first, 'new front');
+    // The pump is load-bearing: `enterText` schedules a frame but does not
+    // pump one, and `Save changes` only becomes pressable on the frame that
+    // sees the form is dirty.
+    await tester.pump();
     await tester.tap(find.text('Save changes'));
     await tester.pump();
 
@@ -131,9 +137,9 @@ void main() {
 
     await pump(tester, repository);
 
-    expect(find.byIcon(Icons.outlined_flag), findsOneWidget);
+    expect(find.byIcon(Icons.flag_outlined), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.outlined_flag));
+    await tester.tap(find.byIcon(Icons.flag_outlined));
     await tester.pump();
 
     expect(repository.flagWrites.single, (id: 'card-1', isFlagged: true));
@@ -149,12 +155,17 @@ void main() {
     repository.nextFlagFailure = const DatabaseFailure(message: 'write failed');
 
     await pump(tester, repository);
-    await tester.tap(find.byIcon(Icons.outlined_flag));
+    await tester.tap(find.byIcon(Icons.flag_outlined));
     await tester.pump();
 
     expect(repository.flagWrites, isEmpty);
-    expect(find.byIcon(Icons.outlined_flag), findsOneWidget);
-    expect(find.text('Please try again.'), findsOneWidget);
+    expect(find.byIcon(Icons.flag_outlined), findsOneWidget);
+    // The message names the flag rather than saying `Please try again.`: it
+    // renders in the pinned subheader, at the opposite corner from the app-bar
+    // action that caused it, where a generic sentence reads as a page error or
+    // as the front field's.
+    expect(find.textContaining('flag'), findsWidgets);
+    expect(find.text('Please try again.'), findsNothing);
   });
 
   testWidgets('editing a card with a detail opens the details expanded', (
@@ -181,18 +192,23 @@ void main() {
 
     await pump(tester, repository);
 
-    // Collapsed by default: the toggle is present, the field is not.
-    expect(find.text('Add details'), findsOneWidget);
-    await tester.ensureVisible(find.text('Add details'));
-    await tester.tap(find.text('Add details'));
+    // Collapsed by default: the toggle is present, the field is not. The label
+    // names the three fields it reveals — `Add details` said nothing about what
+    // a tap would open.
+    const String toggle = 'Add example, hint & pronunciation';
+    expect(find.text(toggle), findsOneWidget);
+    await tester.ensureVisible(find.text(toggle));
+    await tester.tap(find.text(toggle));
     await tester.pumpAndSettle();
 
-    await tester.ensureVisible(find.widgetWithText(TextField, 'Example'));
-    await tester.enterText(
-      find.widgetWithText(TextField, 'Example'),
-      'a new example',
-    );
-    await tester.ensureVisible(find.text('Save changes'));
+    // The label is external now, so the field is found by the section heading
+    // above it rather than by a floating label inside it.
+    final Finder exampleField = find.byType(TextField).at(2);
+    await tester.ensureVisible(exampleField);
+    await tester.enterText(exampleField, 'a new example');
+    // `enterText` schedules a frame but does not pump one, and Save only
+    // becomes pressable on the frame that sees the form is dirty.
+    await tester.pump();
     await tester.tap(find.text('Save changes'));
     await tester.pump();
 
@@ -220,17 +236,20 @@ void main() {
     expect(find.text('2 / 10'), findsOneWidget);
   });
 
-  testWidgets('submitting the tag field adds the tag', (tester) async {
+  testWidgets('opening the entry and submitting adds the tag', (tester) async {
     final repository = FakeCardRepository();
     addTearDown(repository.dispose);
     repository.cardToGet = repository.card('card-1');
 
     await pump(tester, repository);
 
-    await tester.enterText(
-      find.widgetWithText(TextField, 'Add tag').first,
-      'verb',
-    );
+    // Adding starts at the chip: the entry opens in place rather than sitting
+    // under the strip as a permanent form.
+    await tester.ensureVisible(find.text('Add tag'));
+    await tester.tap(find.text('Add tag'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField).last, 'verb');
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pump();
 
@@ -246,10 +265,12 @@ void main() {
     repository.nextTagFailure = const DatabaseFailure(message: 'write failed');
 
     await pump(tester, repository);
-    await tester.enterText(
-      find.widgetWithText(TextField, 'Add tag').first,
-      'verb',
-    );
+    // Adding starts at the chip now: the entry opens in place rather than
+    // sitting under the strip as a permanent form.
+    await tester.ensureVisible(find.text('Add tag'));
+    await tester.tap(find.text('Add tag'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).last, 'verb');
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pump();
 
@@ -270,12 +291,16 @@ void main() {
     await pump(tester, repository);
     repository.emitTags(<dynamic>[repository.tag('t1', name: 'noun')].cast());
     await tester.pumpAndSettle();
-    await tester.tap(
-      find.descendant(
-        of: find.widgetWithText(Chip, 'noun'),
-        matching: find.byIcon(Icons.cancel),
-      ),
+    // The editor is a longer page than it was — context rows above the form,
+    // a Trash card below it — so the strip has to be brought into view before
+    // it can be tapped. Without this the tap silently misses.
+    final Finder chipDelete = find.descendant(
+      of: find.widgetWithText(Chip, 'noun'),
+      matching: find.byIcon(Icons.cancel),
     );
+    await tester.ensureVisible(chipDelete);
+    await tester.pumpAndSettle();
+    await tester.tap(chipDelete);
     await tester.pump();
 
     expect(repository.tagRemoves, isEmpty);
@@ -283,7 +308,7 @@ void main() {
     expect(find.text('Please try again.'), findsOneWidget);
   });
 
-  testWidgets('the danger zone confirms, then deletes the card', (
+  testWidgets('the Trash card confirms, then moves the card to Trash', (
     tester,
   ) async {
     final repository = FakeCardRepository();
@@ -292,8 +317,14 @@ void main() {
 
     await pump(tester, repository);
 
-    await tester.ensureVisible(find.text('Delete card'));
-    await tester.tap(find.text('Delete card'));
+    // Two controls now say `Move to Trash` — the editor's card and the
+    // confirmation's action — so each is found through the thing that owns it.
+    final Finder editorAction = find.descendant(
+      of: find.byType(CardTrashActionWidget),
+      matching: find.text('Move to Trash'),
+    );
+    await tester.ensureVisible(editorAction);
+    await tester.tap(editorAction);
     await tester.pumpAndSettle();
 
     // The confirmation is up, and nothing is deleted until it is confirmed.
@@ -302,7 +333,12 @@ void main() {
 
     // "Move to Trash", not "Delete": the confirm button says where the card
     // goes, because it goes somewhere it can come back from (BR-256).
-    await tester.tap(find.text('Move to Trash'));
+    await tester.tap(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.text('Move to Trash'),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(repository.deletes.single, 'card-1');

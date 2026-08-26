@@ -49,6 +49,9 @@ void main() {
     // `max` is `DeckName.maxLength`, a compile-time constant of 100. A plural
     // here would be a branch that can never be taken.
     'deckNameTooLongError': 'the count is a constant, never 1',
+    // `max` is `kMaxTagsPerCard`, a compile-time constant of 10, and the string
+    // is only rendered *at* the cap — so the one-arm is unreachable twice over.
+    'cardEditorTagCapReached': 'the count is a constant, never 1',
   };
 
   late final Map<String, dynamic> arb;

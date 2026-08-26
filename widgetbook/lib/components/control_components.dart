@@ -117,17 +117,30 @@ WidgetbookComponent iconButtonComponent() {
         builder: (BuildContext context) {
           final semanticLabel = context.knobs.string(
             label: 'semanticLabel',
-            initialValue: 'Edit',
+            initialValue: 'Flag card',
           );
           final isEnabled = context.knobs.boolean(
             label: 'enabled',
             initialValue: true,
           );
+          final tone = context.knobs.object.dropdown<MxIconButtonTone>(
+            label: 'tone',
+            options: MxIconButtonTone.values,
+            labelBuilder: (MxIconButtonTone value) => value.name,
+          );
 
           return CatalogCenterPage(
             child: MxIconButton(
-              icon: Icons.edit_outlined,
+              // The card editor's flag is the tone axis's first caller, so the
+              // catalog shows the glyph pair it changes with rather than a
+              // neutral icon: a toned button that kept the same shape would
+              // suggest colour is the whole signal, which is what it must not
+              // be.
+              icon: tone == MxIconButtonTone.warning
+                  ? Icons.flag
+                  : Icons.flag_outlined,
               semanticLabel: semanticLabel,
+              tone: tone,
               onPressed: isEnabled ? _noop : null,
             ),
           );

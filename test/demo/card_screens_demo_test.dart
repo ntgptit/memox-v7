@@ -168,20 +168,32 @@ void main() {
     await matchesReviewGolden('goldens/card_list_dark.png');
   });
 
-  testWidgets('card editor — edit mode (tags, flag, danger zone)', (
+  testWidgets('card editor — edit mode (context, tags, flag, Trash)', (
     tester,
   ) async {
     final repo = FakeCardRepository();
     addTearDown(repo.dispose);
-    repo.cardToGet = repo.card(
-      'c3',
-      front: '감사합니다',
-      back:
-          'thank you, to someone older or senior / cảm ơn, dùng với người '
-          'lớn tuổi hoặc cấp trên',
-      // Flagged, so the review render shows the app-bar flag in its active amber.
-      isFlagged: true,
+    repo.deckContextToShow = const DeckContextModel(
+      deckName: 'TOPIK II — Vocab',
+      ancestors: <DeckBreadcrumbSegment>[
+        DeckBreadcrumbSegment(id: 'korean', name: 'Korean'),
+      ],
     );
+    repo.cardToGet = repo
+        .card(
+          'c3',
+          front: '감사합니다',
+          back:
+              'thank you, to someone older or senior / cảm ơn, dùng với người '
+              'lớn tuổi hoặc cấp trên',
+          // Flagged, so the render shows the app-bar flag in its active amber.
+          isFlagged: true,
+        )
+        // The fixture's deck is `deck-1`; this render mounts the editor on
+        // `demo`. The editor now refuses to draw a breadcrumb for a card that
+        // belongs somewhere else, so the two have to agree — which is the check
+        // doing its job on the first render that disagreed with it.
+        .copyWith(deckId: 'demo');
 
     await pumpReview(
       tester,
@@ -200,6 +212,53 @@ void main() {
     await tester.pumpAndSettle();
 
     await matchesReviewGolden('goldens/card_editor_edit.png');
+  });
+
+  testWidgets('card editor — edit mode, dark, scrolled to the Trash card', (
+    tester,
+  ) async {
+    final repo = FakeCardRepository();
+    addTearDown(repo.dispose);
+    repo.deckContextToShow = const DeckContextModel(
+      deckName: 'TOPIK II — Vocab',
+      ancestors: <DeckBreadcrumbSegment>[
+        DeckBreadcrumbSegment(id: 'korean', name: 'Korean'),
+      ],
+    );
+    repo.cardToGet = repo
+        .card('c3', front: '감사합니다', back: 'thank you / cảm ơn')
+        .copyWith(
+          deckId: 'demo',
+          example: '감사합니다, 정말 도움이 되었어요.',
+          hint: '감사 = gratitude',
+          pronunciation: 'gam-sa-ham-ni-da',
+        );
+
+    await pumpReview(
+      tester,
+      _scope(
+        repo,
+        const CardEditorScreen(deckId: 'demo', cardId: 'c3'),
+        Brightness.dark,
+      ),
+    );
+    repo.emitTags(
+      <dynamic>[
+        repo.tag('t1', name: 'greeting'),
+        repo.tag('t2', name: 'polite'),
+        repo.tag('t3', name: 'TOPIK II'),
+      ].cast(),
+    );
+    await tester.pumpAndSettle();
+
+    // The concept's second panel: the optional details open because the card
+    // has them, the tag strip, and the Trash card at the end of the scroll.
+    // `ensureVisible`, not `scrollUntilVisible`: the latter wants exactly one
+    // `Scrollable` in the tree and this screen has more than one.
+    await tester.ensureVisible(find.text('Move this flashcard to Trash'));
+    await tester.pumpAndSettle();
+
+    await matchesReviewGolden('goldens/card_editor_edit_dark_scrolled.png');
   });
 
   testWidgets('card list — selection mode, two rows chosen', (tester) async {

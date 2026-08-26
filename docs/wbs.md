@@ -12852,6 +12852,96 @@ của M2.
   `widgetbook/test/catalog_smoke_test.dart`.
 - **Checklist phases:** 7, 13, 14
 
+### M99.62 · Card Editor concept parity — màn sửa thẻ dựng lại theo concept
+
+- **Status:** **in-progress**
+- **M99.60 và M99.61 bỏ trống có chủ ý.** M99.60 do PR #361 giữ (đã CLOSED,
+  không merge); M99.61 do PR #363 giữ (đang mở). Cả hai chưa vào `main`, nên lấy
+  lại số sẽ tạo hai mục cùng ID nếu chúng landed sau.
+- **Quan hệ với PR #363, nói thẳng ra:** #363 sửa **cùng một màn** từ cùng một
+  base và đã làm sẵn pinned footer, dirty snapshot và exit coordinator. Task này
+  dựng lại từ `origin/main` theo concept mới, nên hai nhánh sẽ đụng nhau nặng.
+  Quan trọng hơn: concept prompt §7 **đưa khối xoá trở lại editor**, trong khi
+  #363 mang D28 bỏ hẳn nó. Prompt mới hơn và cấm đúng hai thứ đã làm khối cũ bị
+  loại — màu đỏ destructive và heading `Danger zone` — nên đây được đọc là thiết
+  kế lại có chủ đích, không phải phục hồi nguyên trạng. Chủ dự án chốt cuối.
+- **Goal:** Màn **Edit flashcard** đạt parity với concept light/dark: chrome,
+  breadcrumb, history entry, deck context read-only, form có external label +
+  counter, optional details, tags, thẻ Trash, và action bar ghim đáy có Cancel +
+  Save. Nghiệp vụ Card/Tag/Flag/Trash **không** đổi.
+- **Scope:** Edit mode của `CardEditorScreen` và section của nó; footer slot cho
+  `MxContentShell`; tone cho `MxIconButton`; trailing action cho `MxTextField`;
+  l10n; wireframe M4.11; Widgetbook; test. **Ngoài scope:** create mode, Card
+  Detail, Card List, move/bulk, scheduler, schema, study.
+
+#### UI Contract (ghi trước khi sửa source, theo yêu cầu prompt §"UI Contract")
+
+**Section table** — thứ tự đọc phải đúng bảng này:
+
+| # | Section | Vị trí | Trách nhiệm | Nguồn dữ liệu |
+|---|---|---|---|---|
+| 1 | App bar | ghim trên | Back, title, Flag, compact Save | dirty/submit + flag controller |
+| 2 | Breadcrumb | đầu body | `Library › … › deck › Edit` | `deckContextProvider(deckId)` |
+| 3 | History entry | sau breadcrumb | mở Card Detail hiện có | route + card id |
+| 4 | Deck context | sau history | tên deck, read-only | `deckContextProvider(deckId)` |
+| 5 | Front | form 1 | Korean term, counter 60 | content draft |
+| 6 | Back | form 2 | meaning, counter 240, helper BR-10 | content draft |
+| 7 | Optional details | sau Back | Example · Hint · Pronunciation | content draft |
+| 8 | Tags | sau details | chips + add/remove tức thì, cap 10 | tag controllers |
+| 9 | Divider + Trash card | cuối body | mô tả + `Move to Trash` | soft-delete flow |
+| 10 | Action bar | ghim đáy | Cancel + Save changes + helper | dirty/submit |
+
+**Interaction ownership** — cái gì thuộc lệnh nào:
+
+| Thao tác | Ghi khi nào | Bật Save? | Chặn rời màn? |
+|---|---|---|---|
+| Front · Back · Example · Hint · Pronunciation | khi bấm Save | **có** | có |
+| Tag add/remove | ngay (BR-93) | không | không |
+| Flag toggle | ngay (BR-92) | không | không |
+| Chữ đang gõ trong tag entry | chưa ghi | **không** | **có** |
+| Mở/đóng optional details | không ghi | không | không |
+| Move to Trash | qua confirm hiện có | — | không (rời màn theo route) |
+
+**Hai affordance Save, một command.** App-bar Save và footer Save đọc cùng
+`contentDirty` + submit state và gọi cùng `_save()`. Submitting: footer giữ một
+spinner, top chỉ disabled — hai spinner cho một operation là hai operation với
+người nhìn.
+
+**Shared-widget mapping:** app bar/gutter `MxContentShell` · breadcrumb
+`MxBreadcrumb` qua `CardBreadcrumbWidget` · deck row và Trash card `MxCard` ·
+input `MxTextField` bọc trong composite `CardEditorFieldWidget` · nút
+`MxActionButton` · flag/back `MxIconButton` · confirm `MxConfirmDialog` ·
+undo `showMxUndoSnackBar`.
+
+**Geometry contract** (đo bằng `tester.getRect` trên production tree): mọi
+section 2–9 cùng left/right edge = `mxScreenGutter(context)`; Front và Back
+surface cùng width; label row và counter cùng edge với surface; optional field
+và tag Wrap **không** thụt thêm gutter; footer ngoài `SingleChildScrollView`,
+trên safe area và trên keyboard; Save rộng hơn Cancel, cả hai ≥48dp.
+
+**Approved differences** (từ prompt, **không** sửa cho giống ảnh): không mic,
+không TTS, không `78% recall`/streak/accuracy, deck row không dropdown, Flag vẫn
+hiện dù ảnh không vẽ, copy là soft-delete `Move to Trash` giữ history tới purge,
+action xoá là secondary trung tính chứ không đỏ (BR-266 dành đỏ cho purge),
+không heading `Danger zone`, không đổi typography/density toàn app.
+
+- **Output:** *(điền khi implementation xong)*
+- **Acceptance criteria:**
+  - [ ] Thứ tự đọc đúng section table ở trên.
+  - [ ] Hai affordance Save dùng một command; không double submit.
+  - [ ] Back, Cancel và system back đi cùng một exit coordinator.
+  - [ ] Tag/Flag ghi tức thì và không bật Save; tag draft chặn rời màn.
+  - [ ] Trash card là soft-delete, secondary trung tính, giữ confirm/route/Undo.
+  - [ ] Mọi section chia sẻ một content edge, đo bằng `getRect`.
+  - [ ] Footer ngoài scroll, trên keyboard và safe area.
+  - [ ] Không mic, không TTS, không recall metric, không hard-delete copy.
+- **Editable documents:** `docs/wbs.md`, `docs/wireframes/m4-11-card-management.md`
+- **Dependencies:** M99.55, M99.59
+- **Tests required:** `card_editor_edit_test.dart`,
+  `card_editor_screen_visual_audit_test.dart`, `card_screens_demo_test.dart`,
+  `widgetbook/test/catalog_smoke_test.dart`.
+- **Checklist phases:** 7, 13, 14
+
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 
 Ghi lại cụ thể, vì "mất một bộ lint" là câu quá mơ hồ để ai đó sau này biết
