@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_spacing.dart';
 import 'package:memox/core/theme/app_theme.dart';
@@ -295,6 +296,138 @@ void main() {
           reason: '$label must be at least a minimum target tall',
         );
       }
+    });
+  });
+
+  group('the header form folds instead of clipping', () {
+    /// The header variant: one target, a back chevron, a home glyph.
+    Future<void> pumpHeader(
+      WidgetTester tester,
+      List<String> labels, {
+      required double width,
+      double textScale = 1,
+    }) async {
+      tester.view.physicalSize = Size(width, 200);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: buildLightTheme(),
+          home: Scaffold(
+            // `copyWith`, never a fresh `MediaQueryData` — the same trap
+            // `mx_button_pair_test` records: constructing one zeroes `size`,
+            // and this widget measures its own line.
+            body: Builder(
+              builder: (context) => MediaQuery(
+                data: MediaQuery.of(
+                  context,
+                ).copyWith(textScaler: TextScaler.linear(textScale)),
+                child: MxBreadcrumb(
+                  lineHeight: MxBreadcrumb.compactLineHeight,
+                  upIcon: Icons.chevron_left,
+                  rootIcon: Icons.home_outlined,
+                  onUp: () {},
+                  items: <MxBreadcrumbItem>[
+                    for (final label in labels) MxBreadcrumbItem(label: label),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    /// Labels the renderer had to cut off.
+    List<String> clipped(WidgetTester tester) {
+      final paragraphs = find.byType(RichText);
+
+      return <String>[
+        for (var index = 0; index < paragraphs.evaluate().length; index++)
+          if (tester
+              .renderObject<RenderParagraph>(paragraphs.at(index))
+              .didExceedMaxLines)
+            tester
+                .renderObject<RenderParagraph>(paragraphs.at(index))
+                .text
+                .toPlainText(),
+      ];
+    }
+
+    testWidgets('the deepest step stays whole and the rest fold', (
+      tester,
+    ) async {
+      // The deck header at 360: `All decks / Academic Word List` does not fit,
+      // and both steps used to ellipsize together — `Tất cả… / Academic W…`.
+      // Only one of them is worth keeping, and it is the one nearest the user.
+      await pumpHeader(tester, <String>[
+        'All decks',
+        'Academic Word List',
+      ], width: 190);
+
+      expect(clipped(tester), isEmpty);
+      expect(find.text('Academic Word List'), findsOneWidget);
+      expect(find.text('…'), findsOneWidget);
+      expect(find.text('All decks'), findsNothing);
+    });
+
+    testWidgets('a line with room for both keeps both', (tester) async {
+      await pumpHeader(tester, <String>[
+        'All decks',
+        'Academic Word List',
+      ], width: 500);
+
+      expect(clipped(tester), isEmpty);
+      expect(find.text('All decks'), findsOneWidget);
+      expect(find.text('Academic Word List'), findsOneWidget);
+      expect(find.text('…'), findsNothing);
+    });
+
+    testWidgets('a deep path keeps as many of the nearest steps as fit', (
+      tester,
+    ) async {
+      // BR-55 allows ten levels. The fold is one marker however many it hides:
+      // the sheet behind a long press is where the whole path lives.
+      await pumpHeader(tester, <String>[
+        'All decks',
+        'A',
+        'B',
+        'C',
+        'D',
+        'Sublist 1',
+      ], width: 190);
+
+      expect(clipped(tester), isEmpty);
+      expect(find.text('Sublist 1'), findsOneWidget);
+      expect(find.text('…'), findsOneWidget);
+      expect(find.text('All decks'), findsNothing);
+    });
+
+    testWidgets('at a large text scale it folds rather than cutting', (
+      tester,
+    ) async {
+      await pumpHeader(
+        tester,
+        <String>['All decks', 'Academic Word List'],
+        width: 360,
+        textScale: 1.5,
+      );
+
+      expect(clipped(tester), isEmpty);
+      expect(find.text('Academic Word List'), findsOneWidget);
+    });
+
+    testWidgets('one step longer than the bar is the one case that clips', (
+      tester,
+    ) async {
+      // Nothing left to fold: a single name wider than the whole header has to
+      // give, and clipping one label beats overflowing the row.
+      await pumpHeader(tester, <String>[
+        'A deck name far too long for any header to hold',
+      ], width: 200);
+
+      expect(clipped(tester), hasLength(1));
     });
   });
 }
