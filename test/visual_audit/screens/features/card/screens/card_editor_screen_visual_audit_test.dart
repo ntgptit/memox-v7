@@ -65,14 +65,21 @@ void main() {
       ..._fieldsEdit,
       _inkLayersEdit,
       _shapesEdit,
+      _chipsEdit,
     ],
   );
 }
 
 Future<void> _settleFlagToggle(WidgetTester tester) => tester.pumpAndSettle();
 
-/// The editor opened on an existing card (UC-04 A1): the two fields prefilled,
-/// the BR-10 progress note, the save-changes button, and the danger zone.
+/// The editor opened on an existing card (UC-04 A1): the context rows, the two
+/// fields prefilled with their external labels, the BR-10 note as the back
+/// field's helper, the tag strip with its `+ Add tag` chip, the Trash card, and
+/// the pinned Cancel/Save footer.
+///
+/// The card carries no optional detail, so the disclosure is collapsed and the
+/// tag entry is closed — which is why edit counts two editable fields, not
+/// five.
 Widget _editorInEditMode() {
   final repository = FakeCardRepository();
   repository.cardToGet = repository.card(
@@ -119,10 +126,27 @@ const AuditSkipAllowance _inkLayersEdit = AuditSkipAllowance(
   itemId: 'shell',
   reason: SkipReason.rasterOnly,
   detailContains: '_RenderInkFeatures',
-  expectedMatches: 6,
+  expectedMatches: 10,
   rationale:
-      'The five of create plus the app-bar flag IconButton (BR-92). Overlay '
+      'The Scaffold and the AppBar, the back IconButton, the app-bar flag '
+      '(BR-92) and the compact Save; then the footer Cancel and Save; and the '
+      'three tappable cards the concept adds — history row, deck row and the '
+      'Trash card. Splash and highlight paint into these layers; the overlay '
       'colours are asserted in app_theme_test.dart.',
+);
+
+/// The chips, unreadable for the same reason as on the Trash screen: a chip
+/// renders through a private render object that neither extracts a colour nor
+/// promises to paint none. The pill's fill, ink and radius come from
+/// `app_chip_theme` and are pinned by the mx_components goldens.
+const AuditSkipAllowance _chipsEdit = AuditSkipAllowance(
+  itemId: 'shell',
+  reason: SkipReason.unknownRenderType,
+  detailContains: '_RenderChip',
+  rationale:
+      'The `+ Add tag` action chip, and any tag chips the card carries. Chip '
+      'colours come from app_chip_theme and are pinned by the mx_components '
+      'goldens.',
 );
 
 const AuditSkipAllowance _shapesCreate = AuditSkipAllowance(
@@ -140,10 +164,11 @@ const AuditSkipAllowance _shapesEdit = AuditSkipAllowance(
   itemId: 'shell',
   reason: SkipReason.customPainter,
   detailContains: '_ShapeBorderPainter',
-  expectedMatches: 4,
+  expectedMatches: 6,
   rationale:
-      'The three of create plus the app-bar flag IconButton (BR-92); the shapes '
-      'come from the icon-button theme and are pinned by the mx_components '
+      'The back IconButton, the app-bar flag (BR-92) and the compact Save; the '
+      'footer Cancel and Save; and the Trash card action. The shapes come from '
+      'the button and icon-button themes and are pinned by the mx_components '
       'goldens.',
 );
 
@@ -203,31 +228,33 @@ const List<AuditSkipAllowance> _fieldsEdit = <AuditSkipAllowance>[
     itemId: 'shell',
     reason: SkipReason.rasterOnly,
     detailContains: '_RenderDecoration',
-    expectedMatches: 3,
+    expectedMatches: 2,
     rationale:
-        'Front, back and the tag-entry field (BR-93); each border is a '
-        'CustomPainter with its colours asserted in app_theme_test.dart.',
+        'InputDecorator lays out the front and the back; its border is a '
+        'CustomPainter and its colours are asserted in app_theme_test.dart. '
+        'Two, not three: the tag entry opens from a chip and is closed here.',
   ),
   AuditSkipAllowance(
     itemId: 'shell',
     reason: SkipReason.rasterOnly,
     detailContains: 'RenderEditable paints',
-    expectedMatches: 3,
-    rationale: 'The editable region of the three fields; text is raster-only.',
+    expectedMatches: 2,
+    rationale: 'The editable region of each side; typed text is raster-only.',
   ),
   AuditSkipAllowance(
     itemId: 'shell',
     reason: SkipReason.rasterOnly,
     detailContains: '_RenderEditableCustomPaint',
-    expectedMatches: 6,
-    rationale: 'The caret and selection painters behind the three fields.',
+    expectedMatches: 4,
+    rationale: 'The caret and selection painters behind each of the two sides.',
   ),
   AuditSkipAllowance(
     itemId: 'shell',
     reason: SkipReason.customPainter,
     detailContains: 'no painter',
-    expectedMatches: 3,
+    expectedMatches: 4,
     rationale:
-        'Each of the three fields clips through a painter-less CustomPaint.',
+        'Each field clips through a CustomPaint with no painter of its own, '
+        'and each MxCard the concept adds clips the same way.',
   ),
 ];

@@ -13034,6 +13034,278 @@ của M2.
 - **Checklist phases:** 6, 7, 13
 
 
+### M99.62 · Card Editor concept parity — màn sửa thẻ dựng lại theo concept
+
+- **Status:** **done**
+- **M99.61 bỏ trống có chủ ý**, do PR #363 giữ (đang mở). M99.60 cũng từng
+  trống vì cùng lý do — PR #361 giữ nó rồi bị CLOSED, và trong lúc PR này chờ
+  merge thì #364 lấy đúng số ấy cho Card Detail và landed trước. Đó là lý do
+  không lấy lại một ID đang treo: nhánh giữ nó có thể về đích sau mình.
+- **Quan hệ với PR #363, nói thẳng ra:** #363 sửa **cùng một màn** từ cùng một
+  base và đã làm sẵn pinned footer, dirty snapshot và exit coordinator. Task này
+  dựng lại từ `origin/main` theo concept mới, nên hai nhánh sẽ đụng nhau nặng.
+  Quan trọng hơn: concept prompt §7 **đưa khối xoá trở lại editor**, trong khi
+  #363 mang D28 bỏ hẳn nó. Prompt mới hơn và cấm đúng hai thứ đã làm khối cũ bị
+  loại — màu đỏ destructive và heading `Danger zone` — nên đây được đọc là thiết
+  kế lại có chủ đích, không phải phục hồi nguyên trạng. Chủ dự án chốt cuối.
+- **Goal:** Màn **Edit flashcard** đạt parity với concept light/dark: chrome,
+  breadcrumb, history entry, deck context read-only, form có external label +
+  counter, optional details, tags, thẻ Trash, và action bar ghim đáy có Cancel +
+  Save. Nghiệp vụ Card/Tag/Flag/Trash **không** đổi.
+- **Scope:** Edit mode của `CardEditorScreen` và section của nó; footer slot cho
+  `MxContentShell`; tone cho `MxIconButton`; trailing action cho `MxTextField`;
+  l10n; wireframe M4.11; Widgetbook; test. **Ngoài scope:** create mode, Card
+  Detail, Card List, move/bulk, scheduler, schema, study.
+
+#### UI Contract (ghi trước khi sửa source, theo yêu cầu prompt §"UI Contract")
+
+**Section table** — thứ tự đọc phải đúng bảng này:
+
+| # | Section | Vị trí | Trách nhiệm | Nguồn dữ liệu |
+|---|---|---|---|---|
+| 1 | App bar | ghim trên | Back, title, Flag, compact Save | dirty/submit + flag controller |
+| 2 | Breadcrumb | đầu body | `Library › … › deck › Edit` | `deckContextProvider(deckId)` |
+| 3 | History entry | sau breadcrumb | mở Card Detail hiện có | route + card id |
+| 4 | Deck context | sau history | tên deck, read-only | `deckContextProvider(deckId)` |
+| 5 | Front | form 1 | Korean term, counter 60 | content draft |
+| 6 | Back | form 2 | meaning, counter 240, helper BR-10 | content draft |
+| 7 | Optional details | sau Back | Example · Hint · Pronunciation | content draft |
+| 8 | Tags | sau details | chips + add/remove tức thì, cap 10 | tag controllers |
+| 9 | Divider + Trash card | cuối body | mô tả + `Move to Trash` | soft-delete flow |
+| 10 | Action bar | ghim đáy | Cancel + Save changes + helper | dirty/submit |
+
+**Interaction ownership** — cái gì thuộc lệnh nào:
+
+| Thao tác | Ghi khi nào | Bật Save? | Chặn rời màn? |
+|---|---|---|---|
+| Front · Back · Example · Hint · Pronunciation | khi bấm Save | **có** | có |
+| Tag add/remove | ngay (BR-93) | không | không |
+| Flag toggle | ngay (BR-92) | không | không |
+| Chữ đang gõ trong tag entry | chưa ghi | **không** | **có** |
+| Mở/đóng optional details | không ghi | không | không |
+| Move to Trash | qua confirm hiện có | — | không (rời màn theo route) |
+
+**Hai affordance Save, một command.** App-bar Save và footer Save đọc cùng
+`contentDirty` + submit state và gọi cùng `_save()`. Submitting: footer giữ một
+spinner, top chỉ disabled — hai spinner cho một operation là hai operation với
+người nhìn.
+
+**Shared-widget mapping:** app bar/gutter `MxContentShell` · breadcrumb
+`MxBreadcrumb` **trực tiếp**, không qua `CardBreadcrumbWidget` — widget đó kết
+thúc ở deck vì crumb cuối của nó *là* màn nó thuộc về; thêm tham số để đổi leaf
+sẽ biến nó thành thứ hai màn dùng chung mà hình dạng lại là "crumb cuối là tôi"
+· deck row và Trash card `MxCard` ·
+input `MxTextField` bọc trong composite `CardEditorFieldWidget` · nút
+`MxActionButton` · flag/back `MxIconButton` · confirm `MxConfirmDialog` ·
+undo `showMxUndoSnackBar`.
+
+**Geometry contract** (đo bằng `tester.getRect` trên production tree): mọi
+section 2–9 cùng left/right edge = `mxScreenGutter(context)`; Front và Back
+surface cùng width; label row và counter cùng edge với surface; optional field
+và tag Wrap **không** thụt thêm gutter; footer ngoài `SingleChildScrollView`,
+trên safe area và trên keyboard; Save rộng hơn Cancel, cả hai ≥48dp.
+
+**Approved differences** (từ prompt, **không** sửa cho giống ảnh): không mic,
+không TTS, không `78% recall`/streak/accuracy, deck row không dropdown, Flag vẫn
+hiện dù ảnh không vẽ, copy là soft-delete `Move to Trash` giữ history tới purge,
+action xoá là secondary trung tính chứ không đỏ (BR-266 dành đỏ cho purge),
+không heading `Danger zone`, không đổi typography/density toàn app.
+
+- **Output:**
+  - `lib/features/card/presentation/screens/card_editor_screen.dart` (viết lại
+    edit mode: dirty snapshot, exit coordinator nhận thêm đích đến, `PopScope`,
+    hai Save affordance, kiểm tra deck/route);
+  - mới: `states/card_content_draft_state.dart`,
+    `widgets/overlays/card_discard_confirm_widget.dart`,
+    `widgets/sections/card_editor_form_widget.dart`,
+    `card_editor_context_widget.dart`, `card_editor_field_widget.dart`,
+    `card_editor_details_widget.dart`, `card_editor_action_bar_widget.dart`,
+    `card_editor_save_shortcut_widget.dart`, `card_create_form_widget.dart`;
+  - đổi tên: `card_danger_zone_widget.dart` → `card_trash_action_widget.dart`;
+  - sửa: `card_tag_section_widget.dart`, `card_flag_toggle_widget.dart`,
+    `widgets/support/card_failure_labels_widget.dart`;
+  - shared: `mx_content_shell.dart` (`footer` + hairline), `mx_icon_button.dart`
+    (`MxIconButtonTone`), `mx_text_field.dart` (`MxTextFieldAction`,
+    `MxTextFieldLabelPlacement`, cap 3 dòng cho helper/error);
+  - `lib/l10n/app_en.arb`, `app_vi.arb` (~31 key mới, `cardDeleteConfirmTitle`
+    đổi copy, `cardEditorDetailsToggle` đổi copy);
+  - `docs/wireframes/m4-11-card-management.md` (D14, W6b vẽ lại, bảng 9 approved
+    differences);
+  - test: `card_editor_concept_test.dart`, `card_editor_layout_test.dart`,
+    `card_editor_guards_test.dart`, `support/card_editor_harness.dart`,
+    `test/shared/widgets/mx_editor_surface_test.dart` (mới);
+    `card_editor_edit_test.dart`, `card_tag_after_error_test.dart`,
+    `card_screens_demo_test.dart` (+1 render dark scrolled),
+    `card_editor_screen_visual_audit_test.dart`, `plural_forms_test.dart`,
+    `support/fake_card_repository.dart` (`updateGate`,
+    `nextDeckContextFailure`);
+  - `widgetbook/lib/screens/card_editor_screen_use_case.dart` (mới),
+    `components/control_components.dart`, `components/form_components.dart`,
+    `main.dart`.
+
+#### Hai pass review, và những gì chúng bắt được
+
+Hai subagent `AUDIT_ONLY` chạy song song trên hai worktree tách rời ở cùng
+commit; **không pass nào tìm ra P0**, và cả hai tìm ra thứ gate không thấy.
+
+**Architecture/logic — 3 P1, 9 P2.**
+
+- **P1 · bốn affordance điều hướng đi vòng qua exit coordinator.** Cả hợp đồng
+  của màn là "rời màn có một cửa", nhưng ba crumb breadcrumb và hàng History gọi
+  thẳng `goNamed`: form đang dirty → mất draft, **không hỏi gì**. Coordinator giờ
+  nhận đích đến như một thunk, nên nó quyết định *có* điều hướng hay không thay
+  vì chỉ biết pop.
+- **P1 · deck read hỏng trông y hệt deck read chậm.** `.value` gộp loading,
+  error và "deck đã bị xoá" thành cùng một `null`, và màn im lặng bỏ cả
+  breadcrumb lẫn deck row. Giờ là `AsyncValue`, và error nói ra bằng một dòng
+  typed. **Hệ quả nặng hơn cả bug:** fake trả `Stream.empty()` mặc định, nên
+  gần như mọi test mới đang chạy trên một editor **không có breadcrumb** — một
+  màn production không bao giờ hiện. Harness giờ seed deck context mặc định.
+- **P1 · History dùng `go`, không phải `push`** — mở lịch sử là chuyến một
+  chiều, back không trả về form đang sửa. Đổi thành `push`, và đó cũng là lý do
+  lối này *không* cần guard: không có gì bị rời bỏ.
+- P2 đã xử lý: cờ vẫn hit-test như bấm được trong lúc chính nó đang ghi; ba
+  shared API mới không có một regression test nào; `card_editor_screen.dart`
+  vượt ngưỡng 400 dòng; WBS mâu thuẫn với code; Widgetbook use case được đặt
+  hàng mà chưa giao.
+- P2 **không** sửa, có lý do: save thành công vứt tag draft chưa submit —
+  implementation prompt §3 nói rõ "Save thành công bypass guard đúng một lần",
+  nên đây là spec chứ không phải lỗi; exit không bị chặn khi tag write đang bay
+  — write thuộc provider chứ không thuộc widget, nó vẫn hoàn tất, và chặn người
+  dùng vì một ghi nền là đánh đổi tệ hơn; counter đếm grapheme còn BR-08 đếm
+  UTF-16 code unit — nợ có sẵn trên `main`, create mode cũng vậy.
+
+**UI/UX — 5 P1, 13 P2.** Pass này render 24 PNG và đo bằng `getRect` + hit-test.
+
+- **P1 · label row chia đôi khoảng trống.** `Flexible(label)` cạnh một `Spacer`
+  (vốn là `Expanded`) nên cả hai cùng flex: label bị cắt ở nửa hàng trong khi
+  còn ~180dp trống, và năm counter rơi vào 282.9 / 353.5 / 374.0 / 284.4 / 374.0
+  so với mép field 374 — lệch tới **91.1dp**. Golden đang commit lúc đó chính là
+  ảnh chụp lỗi này.
+- **P1 · một field đếm chính nó hai lần.** `labelPlacement.external` tắt label
+  nhưng không tắt counter nội bộ, nên qua 80% giới hạn field hiện `55 / 60` ở
+  hàng label và `55/60` dưới ô — hai định dạng của một con số. Slot vẫn được giữ
+  (nó là thứ làm chiều cao field ổn định khi có lỗi), chỉ không vẽ gì.
+- **P1 · `RenderFlex overflowed by 7.5 pixels`** ở heading tag, đúng tại
+  320×568 @2.0 tiếng Việt. Debug in sọc, release clip im lặng.
+- **P1 · title app bar thành `Sử…`** ở 320@2.0: slot title được 76.6dp trong khi
+  `Sửa thẻ` cần ~155. Shortcut Save thu về icon khi màn hẹp **và** người dùng đã
+  phóng chữ — cả hai điều kiện lấy từ nền tảng có sẵn, không phải một ngưỡng tự
+  đặt.
+- **P1 · băng chạm nút xoá chip 33 × 48**, dưới sàn 48 mà contract C10 đòi.
+  **Không sửa:** chủ dự án đã xem cả hai bản dựng ngày 2026-08-26 và chọn bề
+  rộng chip — `minWidth: 48` tốn 28px mỗi chip, ở 10 tag là một hàng thứ ba trên
+  màn hẹp nhất. Contract và quyết định của chủ dự án đang mâu thuẫn; chỉ thị
+  trực tiếp của chủ dự án thắng, và con số được ghi ở widget, ở test và ở đây.
+- P2 đã xử lý: nút Trash full-bleed 326dp → co về bề rộng nhãn; hai nút footer
+  khác chiều cao ở scale lớn → `IntrinsicHeight`; title dialog `Delete this
+  card?` giữa một luồng soft-delete → `Move this card to Trash?`.
+- **Một fix của tôi sai và golden bắt tại chỗ.** Để đưa tỷ lệ Cancel:Save về
+  gần concept (3.18:1) tôi đặt flex 1:3 — ở 390dp `Cancel` xuống dòng thành
+  `Canc / el`. Đó là chuyện xảy ra khi một tỷ lệ không biết nhãn rộng bao nhiêu.
+  Cách đúng là để Cancel co theo nhãn và Save lấy phần còn lại: đúng hình dạng
+  concept ở mọi bề rộng và mọi bản dịch, không có con số nào để sai.
+- P2 ghi nhận, không sửa: viền control (`borderSubtle`) 1.38:1 light / 2.32:1
+  dark và nền Save disabled 1.21:1 — token app-wide có sẵn trên `main`; nút xoá
+  chip không có accessible **label** (chỉ có tooltip) vì Material `Chip` không
+  expose; keyboard che 32.7dp đáy ô Back đang focus; `MxContentShell` không có
+  max-width nội dung (chưa render ≥600dp nên chưa đo được).
+
+#### Vòng review thứ hai, và một lỗi do chính fix vòng một tạo ra
+
+Hai pass chạy lại từ đầu trên cây đã sửa. Không P0.
+
+- **P1 · `push` làm editor xếp chồng được, và một lần Save pop hai route.** Fix
+  vòng 1 đổi History từ `go` sang `push` để back trả về form — đúng, và nó mở ra
+  một chu trình: editor → Card Detail → **Edit** của Card Detail → editor thứ
+  hai. `cardEditProvider` và `cardToEditProvider` là family theo `cardId`, nên
+  hai màn chia một notifier và một snapshot: cả hai cùng thấy `shouldClose`,
+  `Navigator.pop` pop route **trên cùng** chứ không phải route của người gọi, và
+  người dùng rơi xuống một bản sao cũ của form với `Save changes` sáng nhưng
+  không ghi gì (`canSubmit` đã là false vĩnh viễn).
+  - **Đã sửa phần thuộc phạm vi:** phản ứng với `shouldClose` chỉ chạy khi route
+    của chính màn đó `isCurrent`. Một Save pop đúng một route, người dùng đáp
+    xuống Card Detail. Test tái hiện dựng router có Edit action, và **đỏ khi bỏ
+    guard**.
+  - **Còn mở, ngoài phạm vi:** bản thân chu trình. Đóng nó nghĩa là đổi Edit
+    action của Card Detail hoặc thêm redirect ở router — implementation prompt
+    nói rõ Card Detail và route không đổi trong task này. Ghi ra để chủ dự án
+    quyết, kèm đúng chỗ tái hiện.
+- **P1 (UI) · title app bar bị cắt trong tiếng Anh ở gần như mọi cấu hình.** Fix
+  vòng 1 đo bằng tiếng Việt — `Sửa thẻ` luôn vừa. `Edit flashcard` cần 145.8dp
+  ở scale 1.0 và 195.4 ở 2.0, trong khi bar cấp 94.4 ở 320, 101.3 ở 360@2.0,
+  131.3 ở 390@2.0: thiếu từ 14 đến 94 pixel, và ở 390@1.0 — chỗ duy nhất nó vừa
+  — margin đúng **0.0**. Điều kiện thu icon (`isCompact && textScale > 1`) không
+  bắn ở đúng hai vùng đó. Shortcut giờ **luôn là icon**: một quy tắc chỉ đúng ở
+  một ngôn ngữ không phải quy tắc.
+- **P1 (UI) · `Save changes` hẹp hơn `Cancel` và bị cắt chữ.** Ở 320 EN @2.0:
+  Cancel **142.6** vs Save **141.4** — secondary rộng hơn primary, nhãn primary
+  ellipsize giữa từ. Đây là mặt kia của cùng một sai lầm: một tỷ lệ quyết định
+  tại chỗ không thể biết hai nhãn đã dịch rộng bao nhiêu. Dùng `MxButtonPair` —
+  nó hỏi chính hai nút, khớp chiều cao, và xếp chồng khi một hàng thật sự không
+  chứa nổi. Bề rộng bằng nhau đánh đổi tỷ lệ 3.2:1 của concept, và M99.53 đã
+  tranh luận đúng đánh đổi đó: hai control cạnh nhau đọc như một lựa chọn, và
+  một lựa chọn vẽ ở hai cỡ là đã được layout quyết hộ người dùng.
+- **P1 (UI) · heading tag vẫn còn nguyên lỗi `Flexible` + `Spacer`** mà label
+  row đã sửa. Overflow vòng 1 đóng lại thành clipping: `Spacer` chia đều free
+  space nên giữ 87–113dp trống trong khi `không bắt buộc` bị cắt, ở 412×915
+  @1.3 tiếng Việt — một cấu hình phổ thông.
+- **P1 (UI) · hàng `Review history` là target 36dp.** Hit-test biên: vùng chạm
+  đúng bằng rect, không có padding target nào — thấp hơn sàn 48 ở cỡ chữ mặc
+  định, trên control tương tác duy nhất của khối context.
+- **P1 (UI) · ở 320@2.0 marker thắng tên field.** `CÂU VÍ DỤ` còn **18.2dp** —
+  một glyph cộng dấu ba chấm — trong khi `không bắt buộc` giữ trọn 171. Marker
+  không flex nên được cấp chỗ trước. Giờ tên field lấy ba phần tư.
+- **P2 (UI) · câu chữ retention của tôi sai.** Thẻ Trash viết "kept in Trash
+  until you empty it", còn dialog cách một tap viết "restore for 30 days".
+  **BR-264 nói auto-purge chạy ở 30 ngày bất kể người dùng có dọn Trash hay
+  không**, nên câu của tôi vừa mâu thuẫn vừa sai. Cả hai giờ nói cùng một cửa sổ.
+- **P2 · deck bị xoá vẫn không nói gì.** `deck_context_read_data_source.dart`
+  dùng `.where((row) => row != null)`, nên hàng đã biến mất không sinh value và
+  cũng không sinh error: provider ở `AsyncLoading` mãi mãi và màn vẽ trống. Fix
+  vòng 1 chỉ đóng nửa *read lỗi*. Sửa nốt phải đụng `data/` dùng chung với card
+  list (nơi `deckName` có `?? cardListTitle`), nên ghi lại thay vì sửa kèm.
+- **P2 đã sửa:** test cho fix cờ vòng 1 **không đỏ khi bỏ fix** — nó mount cả
+  màn, nơi không có gì bị disable. Giờ mount thẳng widget với `onToggle: null`;
+  đã kiểm chứng đỏ. Và dạng icon của Save shortcut hoàn toàn không được assert
+  — mọi test tìm nó bằng `widgetWithText`, thứ không thấy gì khi nó thành
+  `MxIconButton`; giờ có test cho cả hai dạng, kèm target 48 và tooltip.
+
+- **`card_editor_screen.dart` còn 402 dòng, trên ngưỡng cảnh báo 400.** Từ 506
+  xuống 402 bằng ba lần tách thật — form body, save shortcut, và gộp
+  `removeListener` với `dispose` vào một vòng. Tôi dừng ở đây thay vì cắt giải
+  thích cho tròn số: `check_architecture` xếp nó là cảnh báo (`✓ architecture
+  boundaries clean` vẫn in ra) và trên `main` đã có năm file cùng trạng thái.
+- **Acceptance criteria:**
+  - [x] Thứ tự đọc đúng section table ở trên.
+  - [x] Hai affordance Save dùng một command; tap cả hai trong một frame vẫn ghi
+        một lần (`CardEdit.canSubmit` set đồng bộ trước `await` đầu tiên).
+  - [x] Back, Cancel, system back **và mọi crumb breadcrumb** đi cùng một exit
+        coordinator.
+  - [x] History `push`, nên back trả về form với draft nguyên vẹn.
+  - [x] Deck read phân biệt được ba trạng thái; error nói ra thay vì biến mất.
+  - [x] Tag/Flag ghi tức thì và không bật Save; tag draft chặn rời màn.
+  - [x] Trash card là soft-delete, secondary trung tính, giữ confirm/route/Undo;
+        copy nói lịch sử được giữ tới lúc dọn (BR-256).
+  - [x] Mọi section chia sẻ một content edge, đo bằng `getRect`; counter thẳng
+        mép field.
+  - [x] Footer ngoài scroll, trên keyboard và safe area; Cancel co theo nhãn.
+  - [x] Không mic, không TTS, không recall metric, không hard-delete copy.
+  - [x] Ba shared API mới có regression test cho default của chúng.
+  - [x] Không overflow ở 320×568 @ 2.0 tiếng Việt.
+- **Editable documents:** `docs/wbs.md`, `docs/wireframes/m4-11-card-management.md`
+- **Dependencies:** M99.55, M99.59
+- **Tests required:** `card_editor_concept_test.dart`,
+  `card_editor_layout_test.dart`, `card_editor_guards_test.dart`,
+  `card_editor_edit_test.dart`, `card_tag_after_error_test.dart`,
+  `test/shared/widgets/mx_editor_surface_test.dart`, `plural_forms_test.dart`,
+  `card_editor_screen_visual_audit_test.dart`, `card_screens_demo_test.dart`,
+  `widgetbook/test/catalog_smoke_test.dart`.
+- **Emulator:** `not run — scoped host verification`. Không thêm platform
+  binding, plugin, persistence hay route nào; mọi hành vi mới chứng minh được
+  bằng host widget test có `GoRouter` thật. Đây **không** phải một lần pass.
+- **Checklist phases:** 7, 13, 14
+
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 
 Ghi lại cụ thể, vì "mất một bộ lint" là câu quá mơ hồ để ai đó sau này biết

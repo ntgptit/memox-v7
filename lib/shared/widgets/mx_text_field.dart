@@ -1,5 +1,61 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_spacing.dart';
+import 'mx_icon_button.dart';
+
+/// A button drawn inside a field, at its trailing edge.
+///
+/// **A typed triple rather than a `suffixIcon` widget slot.** A widget slot
+/// would let a caller put anything in a field — a second text style, a coloured
+/// glyph, a whole `Row` — and [MxTextField]'s entire reason for existing is
+/// that it refuses those. What a field's trailing action actually varies in is
+/// three things, so the type carries exactly three.
+///
+/// It exists because a tag field that only submits on the keyboard's `done` key
+/// has an action nobody can see: on a form full of visible buttons, the way to
+/// commit a tag was a key on a keyboard that is not on screen until the field
+/// is focused.
+@immutable
+class MxTextFieldAction {
+  const MxTextFieldAction({
+    required this.icon,
+    required this.semanticLabel,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+
+  /// Already-localized. Required for the same reason [MxIconButton] requires
+  /// one: an icon inside a field is otherwise announced as a blank button.
+  final String semanticLabel;
+
+  /// `null` disables the action while leaving it visible — a tag field with
+  /// nothing typed in it still has to show *where* the add button is.
+  final VoidCallback? onPressed;
+}
+
+/// Where a field's name is painted.
+///
+/// **Two placements, one accessible name.** Material floats the label onto the
+/// border, which is right for a form of short fields and wrong for one where
+/// the name carries more than the name — the card editor puts `Required` and a
+/// live `3 / 60` counter on the same row, and none of that fits in a floating
+/// label.
+///
+/// [external] only stops this widget *painting* the label. The caller still
+/// passes it, and is responsible for putting it on screen and for merging it
+/// into the field's semantics node — `MergeSemantics` around the label row and
+/// the field is what makes a screen reader announce them as one control. The
+/// label is not optional in either placement, because a field with no name is
+/// unlabelled to a screen reader whichever way it is drawn.
+enum MxTextFieldLabelPlacement {
+  /// Material's floating label. Every existing caller.
+  floating,
+
+  /// Drawn by the caller, above the field.
+  external,
+}
+
 /// The app's text input.
 ///
 /// Takes no `Color`, no `TextStyle` and no `InputDecoration`: every visual
@@ -39,6 +95,8 @@ class MxTextField extends StatelessWidget {
     this.onSubmitted,
     this.textAlign = TextAlign.start,
     this.textStyle,
+    this.trailingAction,
+    this.labelPlacement = MxTextFieldLabelPlacement.floating,
     super.key,
   });
 
@@ -97,6 +155,32 @@ class MxTextField extends StatelessWidget {
   /// The typed value's own style. Null keeps the theme's.
   final TextStyle? textStyle;
 
+  /// A button at the field's trailing edge. Null for a field that commits some
+  /// other way, or does not commit at all.
+  final MxTextFieldAction? trailingAction;
+
+  /// Whether this widget paints [label] itself. Default keeps Material's
+  /// floating label, which is every caller that existed before the card editor.
+  final MxTextFieldLabelPlacement labelPlacement;
+
+  /// How many lines [helperText] and [errorText] may occupy before they
+  /// ellipsize.
+  ///
+  /// **An app-wide change, not a per-caller option, and that is deliberate.**
+  /// Material's default is one line, and it was found by rendering: the card
+  /// editor's BR-10 sentence painted `Editing the text doesn't change this
+  /// card'…` — cut mid-word, mid-apostrophe, saying nothing. A message that
+  /// does not fit is worse than no message, because it takes the space and
+  /// withholds the meaning.
+  ///
+  /// **A parameter was the obvious shape and it is the wrong one.** It would
+  /// leave every existing field on the truncating default and hand the next
+  /// author the same defect to rediscover. There is no field in this app whose
+  /// error is better read cut in half, so there is nothing for a caller to
+  /// decide. It applies to the error as well, so the two states cannot resize
+  /// the field differently.
+  static const int _maxMessageLines = 3;
+
   @override
   Widget build(BuildContext context) {
     return TextField(
@@ -116,11 +200,41 @@ class MxTextField extends StatelessWidget {
       onChanged: onChanged,
       onSubmitted: onSubmitted,
       decoration: InputDecoration(
-        labelText: label,
+        labelText: switch (labelPlacement) {
+          MxTextFieldLabelPlacement.floating => label,
+          // Not painted, and not lost: the caller draws it and merges it.
+          MxTextFieldLabelPlacement.external => null,
+        },
         hintText: hintText,
         helperText: helperText,
+        helperMaxLines: _maxMessageLines,
         errorText: errorText,
+        errorMaxLines: _maxMessageLines,
+        suffixIcon: _buildSuffix(),
+        // **Stated, because the default is 48 wide and 48 tall only by
+        // accident.** `InputDecorator` gives a suffix the field's own height
+        // when it has one to give, and a single-line field is shorter than the
+        // touch floor at small text scales — so the button would be tappable
+        // over a box narrower than the guideline asks for while looking exactly
+        // right.
+        suffixIconConstraints: trailingAction == null
+            ? null
+            : const BoxConstraints(
+                minWidth: AppSpacing.minimumTouchTarget,
+                minHeight: AppSpacing.minimumTouchTarget,
+              ),
       ),
+    );
+  }
+
+  Widget? _buildSuffix() {
+    final action = trailingAction;
+    if (action == null) return null;
+
+    return MxIconButton(
+      icon: action.icon,
+      semanticLabel: action.semanticLabel,
+      onPressed: action.onPressed,
     );
   }
 
@@ -138,10 +252,18 @@ class MxTextField extends StatelessWidget {
     required bool isFocused,
   }) {
     if (maxLength == null) return null;
+    // **An external label owns the counter too.** The card editor draws
+    // `55 / 60` in its label row; this one appeared under the field the moment
+    // the value passed 80% of the limit, so one field showed the same number
+    // twice, in two formats, in two places. It stays *reserved* rather than
+    // removed — the slot is what keeps the field's height stable when an error
+    // arrives, which is the reason the hidden state below exists at all.
+    final isOwnedByCaller =
+        labelPlacement == MxTextFieldLabelPlacement.external;
     final isNearLimit = currentLength >= maxLength * _counterVisibleFraction;
 
     return Visibility(
-      visible: isNearLimit,
+      visible: isNearLimit && !isOwnedByCaller,
       maintainSize: true,
       maintainAnimation: true,
       maintainState: true,

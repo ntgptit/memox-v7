@@ -2,6 +2,29 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_icon_size.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../core/theme/theme_context_extension.dart';
+
+/// What an icon button's glyph *means*, on the one axis a bar action has.
+///
+/// **An enum rather than a `Color?`.** A colour parameter lets any caller paint
+/// any icon any shade, which is how an app ends up with four different oranges
+/// and no way to change them together. The card editor's flag was the first
+/// caller to need one — a raised flag is a state the user set, and it has to be
+/// visible as a state — and it reached for `IconButton(color:)` directly
+/// because this widget offered nothing.
+enum MxIconButtonTone {
+  /// The bar's own ink. Every action that is only an action.
+  standard,
+
+  /// A state worth noticing, set by the user and reversible: the card editor's
+  /// raised flag. `AppSemanticColors.warning`, the same role the tone axis on
+  /// dialogs uses for the same meaning.
+  ///
+  /// **It is never the only signal.** The glyph itself changes with the state —
+  /// outlined to filled — so the flag reads as raised without colour vision,
+  /// and the accessible name says which way the next tap goes.
+  warning,
+}
 
 /// An action with no visible label.
 ///
@@ -29,6 +52,7 @@ class MxIconButton extends StatelessWidget {
     this.tooltip,
     this.isCompact = false,
     this.isFilled = false,
+    this.tone = MxIconButtonTone.standard,
     super.key,
   });
 
@@ -64,6 +88,10 @@ class MxIconButton extends StatelessWidget {
   /// only the container changes, so a bar never carries two of these.
   final bool isFilled;
 
+  /// What the glyph means. [MxIconButtonTone.standard] keeps the theme's ink,
+  /// which is every existing caller.
+  final MxIconButtonTone tone;
+
   @override
   Widget build(BuildContext context) {
     if (isFilled) {
@@ -85,6 +113,15 @@ class MxIconButton extends StatelessWidget {
     }
     return IconButton(
       onPressed: onPressed,
+      // Null keeps `iconButtonTheme`'s foreground. `IconButton` folds a
+      // non-null `color` into a style that still resolves disabled through
+      // `disabledColor`, so a toned button greys out like every other one —
+      // the tone speaks about the *state the icon reports*, not about whether
+      // the control can be pressed.
+      color: switch (tone) {
+        MxIconButtonTone.standard => null,
+        MxIconButtonTone.warning => context.semanticColors.warning,
+      },
       tooltip: tooltip ?? semanticLabel,
       constraints: isCompact
           ? const BoxConstraints.tightFor(

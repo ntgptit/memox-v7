@@ -38,6 +38,15 @@ WidgetbookComponent textFieldComponent() {
             min: 10,
             max: 200,
           );
+          final hasTrailingAction = context.knobs.boolean(
+            label: 'trailingAction',
+          );
+          final labelPlacement = context.knobs.object
+              .dropdown<MxTextFieldLabelPlacement>(
+                label: 'labelPlacement',
+                options: MxTextFieldLabelPlacement.values,
+                labelBuilder: (MxTextFieldLabelPlacement value) => value.name,
+              );
 
           return CatalogCenterPage(
             child: _TextFieldDemo(
@@ -48,6 +57,8 @@ WidgetbookComponent textFieldComponent() {
               isEnabled: isEnabled,
               isReadOnly: isReadOnly,
               maxLength: maxLength,
+              hasTrailingAction: hasTrailingAction,
+              labelPlacement: labelPlacement,
             ),
           );
         },
@@ -68,6 +79,8 @@ class _TextFieldDemo extends StatefulWidget {
     required this.isEnabled,
     required this.isReadOnly,
     required this.maxLength,
+    required this.hasTrailingAction,
+    required this.labelPlacement,
   });
 
   final String label;
@@ -77,6 +90,8 @@ class _TextFieldDemo extends StatefulWidget {
   final bool isEnabled;
   final bool isReadOnly;
   final int? maxLength;
+  final bool hasTrailingAction;
+  final MxTextFieldLabelPlacement labelPlacement;
 
   @override
   State<_TextFieldDemo> createState() => _TextFieldDemoState();
@@ -86,7 +101,18 @@ class _TextFieldDemoState extends State<_TextFieldDemo> {
   final TextEditingController _controller = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    // So the trailing action's enabled state tracks what is typed, the way the
+    // tag entry's does.
+    _controller.addListener(_onChanged);
+  }
+
+  void _onChanged() => setState(() {});
+
+  @override
   void dispose() {
+    _controller.removeListener(_onChanged);
     _controller.dispose();
     super.dispose();
   }
@@ -102,6 +128,17 @@ class _TextFieldDemoState extends State<_TextFieldDemo> {
       isEnabled: widget.isEnabled,
       isReadOnly: widget.isReadOnly,
       maxLength: widget.maxLength,
+      labelPlacement: widget.labelPlacement,
+      trailingAction: widget.hasTrailingAction
+          ? MxTextFieldAction(
+              icon: Icons.add,
+              semanticLabel: 'Add this tag',
+              // Null on an empty field is the shape the tag entry uses: the
+              // button stays where it is and stops working, rather than
+              // appearing under the finger as the first character lands.
+              onPressed: _controller.text.trim().isEmpty ? null : () {},
+            )
+          : null,
     );
   }
 }

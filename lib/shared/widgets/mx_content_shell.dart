@@ -40,6 +40,7 @@ class MxContentShell extends StatefulWidget {
     this.padding,
     this.isScrollable = false,
     this.floatingActionButton,
+    this.footer,
     super.key,
   });
 
@@ -86,6 +87,42 @@ class MxContentShell extends StatefulWidget {
   final bool isScrollable;
 
   final Widget? floatingActionButton;
+
+  /// A band pinned to the bottom of the screen, below [body] and outside its
+  /// scroll — an action bar, and so far only that.
+  ///
+  /// **The slot exists because the alternative is putting the action in the
+  /// scroll.** The card editor's `Save changes` sat between the detail fields
+  /// and the tag strip: editing a tag scrolled the save button off screen, and
+  /// a save button you cannot see while you work is one whose scope you have to
+  /// guess at. Owning the `Scaffold` is what makes this the shell's job — a
+  /// screen cannot pin anything below a body the shell laid out.
+  ///
+  /// **The last row of the body's column — *not* `Scaffold.bottomNavigationBar`,
+  /// and the difference is not cosmetic.** `_ScaffoldLayout` subtracts the
+  /// keyboard from the **body** and positions the bottom bar at
+  /// `size.height − barHeight` regardless. Measured on a 390×844 viewport with
+  /// a 336 keyboard: the body correctly ended at 508 and the bar sat at
+  /// 738…844, entirely behind the keyboard. A pinned Save that disappears the
+  /// moment the user types is worse than one in the scroll, because the scroll
+  /// at least gives it back.
+  ///
+  /// Inside the body, `resizeToAvoidBottomInset` shrinks the whole column, so
+  /// the footer lands on the keyboard's top edge with nothing computed by hand.
+  /// It also puts the footer **inside** the body's `SafeArea`, which is why a
+  /// caller must not add one of its own — the gesture strip would be paid for
+  /// twice.
+  ///
+  /// **A hairline above it, always.** With no seam the scrolling body is
+  /// guillotined flush against the action: at 320dp and text scale 2.0 the last
+  /// line of a field's helper was cut horizontally in half and left touching
+  /// the button. It is the same line the bar draws when content has scrolled
+  /// under it, at the other end of the same page, and it also gives a resting
+  /// footer some presence — a disabled Save on a bare page reads as empty space
+  /// rather than as the action area it is.
+  ///
+  /// Null for every screen that had no footer before, which is all of them.
+  final Widget? footer;
 
   @override
   State<MxContentShell> createState() => _MxContentShellState();
@@ -134,6 +171,8 @@ class _MxContentShellState extends State<MxContentShell> {
 
   @override
   Widget build(BuildContext context) {
+    final footer = widget.footer;
+
     return Scaffold(
       appBar: _buildAppBar(context),
       floatingActionButton: widget.floatingActionButton,
@@ -152,6 +191,15 @@ class _MxContentShellState extends State<MxContentShell> {
                 child: _buildBody(context),
               ),
             ),
+            if (footer != null)
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: BorderSide(color: context.semanticColors.borderSubtle),
+                  ),
+                ),
+                child: footer,
+              ),
           ],
         ),
       ),

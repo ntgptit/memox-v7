@@ -1192,9 +1192,9 @@
   "@cardTagControlCharacterError": {
     "description": "Inline error when a pasted tag name carries a control character (BR-93). Not typeable from a keyboard; it arrives by paste."
   },
-  "cardEditorDetailsToggle": "Thêm chi tiết",
+  "cardEditorDetailsToggle": "Thêm ví dụ, gợi ý & phát âm",
   "@cardEditorDetailsToggle": {
-    "description": "Toggle that expands the optional detail fields (W4/W5, BR-95)."
+    "description": "Collapsed label of the inline disclosure holding the optional detail fields (W4/W5, BR-95)."
   },
   "cardEditorDetailsLabel": "Chi tiết",
   "@cardEditorDetailsLabel": {
@@ -1362,11 +1362,148 @@
   "@cardEditorDangerZone": {
     "description": "Heading above the delete action (UC-04 A5)."
   },
+  "cardEditorBackAction": "Quay lại",
+  "@cardEditorBackAction": {
+    "description": "App-bar back affordance in edit mode. Edit is pushed onto the card list, so it reads as a step back rather than as closing a sheet."
+  },
+  "cardEditorCancelAction": "Huỷ",
+  "@cardEditorCancelAction": {
+    "description": "Footer action that leaves the editor. Goes through the same discard guard as Back."
+  },
+  "cardEditorSaveShortAction": "Lưu",
+  "@cardEditorSaveShortAction": {
+    "description": "The app-bar save shortcut. Short because it shares a 56dp row with the title and the flag; it runs the same command as the footer's Save changes."
+  },
+  "cardEditorBreadcrumbLabel": "Sửa",
+  "@cardEditorBreadcrumbLabel": {
+    "description": "Last, untappable step of the editor breadcrumb — where the user already is (W6b)."
+  },
+  "cardEditorHistoryAction": "Lịch sử",
+  "@cardEditorHistoryAction": {
+    "description": "Opens the card's detail screen, which owns the review history (BR-243). The editor computes no metric of its own."
+  },
+  "cardEditorHistoryLabel": "Lịch sử ôn tập",
+  "@cardEditorHistoryLabel": {
+    "description": "Row label for the entry point to the card's detail screen."
+  },
+  "cardEditorFrontFieldLabel": "MẶT TRƯỚC",
+  "@cardEditorFrontFieldLabel": {
+    "description": "External label above the front field. Upper case is the concept's section grammar; no language suffix because a card carries no language metadata."
+  },
+  "cardEditorBackFieldLabel": "MẶT SAU · NGHĨA",
+  "@cardEditorBackFieldLabel": {
+    "description": "External label above the back field."
+  },
+  "cardEditorFieldRequired": "Bắt buộc",
+  "@cardEditorFieldRequired": {
+    "description": "Marks a field the card cannot be saved without (BR-07). Text, not colour alone."
+  },
+  "cardEditorFieldOptional": "không bắt buộc",
+  "@cardEditorFieldOptional": {
+    "description": "Marks a field that may be left empty (BR-95). Lower case: it trails the field name rather than heading it."
+  },
+  "cardEditorFieldCounter": "{current} / {max}",
+  "@cardEditorFieldCounter": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    },
+    "description": "Character counter shown beside an editor field label. Always visible here, unlike the app-wide near-the-limit counter, because the concept's label row reserves the space."
+  },
+  "cardEditorDetailsHeading": "CHI TIẾT KHÔNG BẮT BUỘC",
+  "@cardEditorDetailsHeading": {
+    "description": "Heading of the expanded optional-detail section (W5, BR-95)."
+  },
+  "cardEditorExampleFieldLabel": "CÂU VÍ DỤ",
+  "@cardEditorExampleFieldLabel": {
+    "description": "External label above the example field."
+  },
+  "cardEditorHintFieldLabel": "GỢI Ý",
+  "@cardEditorHintFieldLabel": {
+    "description": "External label above the hint field."
+  },
+  "cardEditorPronunciationFieldLabel": "PHÁT ÂM · PHIÊN ÂM",
+  "@cardEditorPronunciationFieldLabel": {
+    "description": "External label above the pronunciation field."
+  },
+  "cardEditorTagsHeading": "NHÃN",
+  "@cardEditorTagsHeading": {
+    "description": "Heading of the tag section in the editor, in the concept's section grammar."
+  },
+  "cardEditorTagAddChip": "Thêm nhãn",
+  "@cardEditorTagAddChip": {
+    "description": "Chip that opens the tag entry field. Sits with the chips rather than below them, so adding starts where the tags are."
+  },
+  "cardEditorTagAddAction": "Thêm nhãn này",
+  "@cardEditorTagAddAction": {
+    "description": "Accessible name and tooltip of the button inside the tag entry field. Distinct from the chip that opened it."
+  },
+  "cardEditorTagEntryDismiss": "Đóng ô thêm nhãn",
+  "@cardEditorTagEntryDismiss": {
+    "description": "Accessible name of the control that closes the tag entry without submitting. The typed text survives, so the exit guard still protects it."
+  },
+  "cardEditorTrashTitle": "Chuyển thẻ này vào Trash",
+  "@cardEditorTrashTitle": {
+    "description": "Title of the editor's soft-delete card. Product language, not a technical section label — and it names the destination, because Trash is where the card goes rather than where it ends (BR-256)."
+  },
+  "cardEditorTrashDescription": "Thẻ rời khỏi thư viện của bạn, còn lịch sử học nằm trong Trash 30 ngày để bạn khôi phục lại. Các thẻ khác trong bộ thẻ này không đổi.",
+  "@cardEditorTrashDescription": {
+    "description": "Body of the editor's soft-delete card. States what happens and what is preserved: BR-256 keeps the review history until purge, so copy claiming history is removed would be wrong."
+  },
+  "cardEditorTrashAction": "Chuyển vào Trash",
+  "@cardEditorTrashAction": {
+    "description": "Button that opens the soft-delete confirmation. Neutral secondary weight: BR-266 reserves the destructive colour for permanent purge."
+  },
+  "cardEditorLocalOnlyNote": "Thay đổi chỉ lưu trên thiết bị này.",
+  "@cardEditorLocalOnlyNote": {
+    "description": "Standing note under the editor's action bar. A fact about where data lives (AD-01), not a status — it does not change while a save runs."
+  },
+  "cardEditorContextUnavailable": "Hiện chưa lấy được đường dẫn bộ thẻ của thẻ này.",
+  "@cardEditorContextUnavailable": {
+    "description": "Shown in place of the editor's breadcrumb when the deck-context read fails or the deck is gone. Names what is unavailable: an absent path used to look identical to one that had not loaded yet."
+  },
+  "cardEditorContextMismatch": "Thẻ này không còn nằm trong bộ thẻ đó. Hãy quay lại và mở nó từ bộ thẻ của chính nó.",
+  "@cardEditorContextMismatch": {
+    "description": "Shown when the card's deck no longer matches the route's deck. Names the recovery rather than the ids."
+  },
+  "cardEditorDiscardTitle": "Bỏ thay đổi?",
+  "@cardEditorDiscardTitle": {
+    "description": "Title of the dialog shown when leaving the card editor with unsaved edits (UC-04 A1)."
+  },
+  "cardEditorDiscardMessage": "Các thay đổi chưa lưu của thẻ này sẽ mất. Thẻ nhãn và cờ thì đã được lưu.",
+  "@cardEditorDiscardMessage": {
+    "description": "Body of the discard dialog. States what is lost and what is not: tags and the flag write immediately (BR-92, BR-93) and are not part of the draft."
+  },
+  "cardEditorDiscardConfirm": "Bỏ thay đổi",
+  "@cardEditorDiscardConfirm": {
+    "description": "Destructive action of the discard dialog: leave and lose the edits."
+  },
+  "cardEditorDiscardCancel": "Tiếp tục sửa",
+  "@cardEditorDiscardCancel": {
+    "description": "Secondary action of the discard dialog: stay on the editor with the draft intact."
+  },
+  "cardEditorTagCapReached": "Đã dùng hết {max} nhãn. Xóa bớt một nhãn để thêm nhãn mới.",
+  "@cardEditorTagCapReached": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    },
+    "description": "Replaces the tag entry once the card holds the maximum number of tags (BR-94). Shown instead of a field that would only refuse what is typed into it."
+  },
+  "cardEditorFlagFailed": "Không đổi được cờ. Hãy thử lại.",
+  "@cardEditorFlagFailed": {
+    "description": "Shown when SetCardFlag fails (BR-92). Names the flag because it renders in the pinned subheader, far from the app-bar action that caused it."
+  },
   "cardEditorDelete": "Xóa thẻ",
   "@cardEditorDelete": {
     "description": "Button that opens the delete confirmation."
   },
-  "cardDeleteConfirmTitle": "Xóa thẻ này?",
+  "cardDeleteConfirmTitle": "Chuyển thẻ này vào Trash?",
   "@cardDeleteConfirmTitle": {
     "description": "Title of the card delete confirmation dialog (UC-04 A5)."
   },

@@ -69,6 +69,14 @@ final class FakeCardRepository extends FakeCardBulkRepository
   /// the in-flight state and fire a second submit while the first is pending.
   Completer<void>? createGate;
 
+  /// The same, for `updateCard`.
+  ///
+  /// Added when the editor grew an exit guard and two Save affordances:
+  /// "leaving is inert while a save is in flight" and "only the footer shows a
+  /// spinner" both need a save that stays in flight, and the missing gate is
+  /// why neither had a test.
+  Completer<void>? updateGate;
+
   void emitCards(List<CardEntity> cards) => _cards.add(cards);
 
   /// Pushes a list frame into the management-list stream (the read the list
@@ -190,8 +198,17 @@ final class FakeCardRepository extends FakeCardBulkRepository
   /// What the router's auto-forward reads; a test sets it to prove the redirect.
   bool holdsCards = false;
 
+  /// When set, `watchDeckContext` errors instead of emitting.
+  ///
+  /// The editor draws its breadcrumb from this read, and a failed read used to
+  /// be indistinguishable from a slow one — both rendered no path. There was no
+  /// way to stage the difference without this.
+  Object? nextDeckContextFailure;
+
   @override
   Stream<DeckContextModel> watchDeckContext(String deckId) {
+    final failure = nextDeckContextFailure;
+    if (failure != null) return Stream<DeckContextModel>.error(failure);
     final seeded = deckContextToShow;
     if (seeded == null) return const Stream<DeckContextModel>.empty();
 
@@ -260,6 +277,7 @@ final class FakeCardRepository extends FakeCardBulkRepository
       back: back.value,
       example: example?.value,
     ));
+    if (updateGate != null) await updateGate!.future;
     final failure = nextCreateFailure;
     if (failure != null) throw failure;
 

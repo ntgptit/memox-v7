@@ -1192,9 +1192,9 @@
   "@cardTagControlCharacterError": {
     "description": "Inline error when a pasted tag name carries a control character (BR-93). Not typeable from a keyboard; it arrives by paste."
   },
-  "cardEditorDetailsToggle": "Add details",
+  "cardEditorDetailsToggle": "Add example, hint & pronunciation",
   "@cardEditorDetailsToggle": {
-    "description": "Toggle that expands the optional detail fields in the card editor (W4/W5, BR-95)."
+    "description": "Collapsed label of the inline disclosure holding the optional detail fields (W4/W5, BR-95). Names all three fields: \"Add details\" said nothing about what a tap would reveal, and read like navigation to another screen."
   },
   "cardEditorDetailsLabel": "Details",
   "@cardEditorDetailsLabel": {
@@ -1362,13 +1362,150 @@
   "@cardEditorDangerZone": {
     "description": "Heading above the delete action in the card editor (UC-04 A5)."
   },
+  "cardEditorBackAction": "Back",
+  "@cardEditorBackAction": {
+    "description": "App-bar back affordance in edit mode. Edit is pushed onto the card list, so it reads as a step back rather than as closing a sheet."
+  },
+  "cardEditorCancelAction": "Cancel",
+  "@cardEditorCancelAction": {
+    "description": "Footer action that leaves the editor. Goes through the same discard guard as Back."
+  },
+  "cardEditorSaveShortAction": "Save",
+  "@cardEditorSaveShortAction": {
+    "description": "The app-bar save shortcut. Short because it shares a 56dp row with the title and the flag; it runs the same command as the footer's Save changes."
+  },
+  "cardEditorBreadcrumbLabel": "Edit",
+  "@cardEditorBreadcrumbLabel": {
+    "description": "Last, untappable step of the editor breadcrumb — where the user already is (W6b)."
+  },
+  "cardEditorHistoryAction": "History",
+  "@cardEditorHistoryAction": {
+    "description": "Opens the card's detail screen, which owns the review history (BR-243). The editor computes no metric of its own."
+  },
+  "cardEditorHistoryLabel": "Review history",
+  "@cardEditorHistoryLabel": {
+    "description": "Row label for the entry point to the card's detail screen."
+  },
+  "cardEditorFrontFieldLabel": "FRONT",
+  "@cardEditorFrontFieldLabel": {
+    "description": "External label above the front field. Upper case is the concept's section grammar; no language suffix because a card carries no language metadata."
+  },
+  "cardEditorBackFieldLabel": "BACK · MEANING",
+  "@cardEditorBackFieldLabel": {
+    "description": "External label above the back field."
+  },
+  "cardEditorFieldRequired": "Required",
+  "@cardEditorFieldRequired": {
+    "description": "Marks a field the card cannot be saved without (BR-07). Text, not colour alone."
+  },
+  "cardEditorFieldOptional": "optional",
+  "@cardEditorFieldOptional": {
+    "description": "Marks a field that may be left empty (BR-95). Lower case: it trails the field name rather than heading it."
+  },
+  "cardEditorFieldCounter": "{current} / {max}",
+  "@cardEditorFieldCounter": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    },
+    "description": "Character counter shown beside an editor field label. Always visible here, unlike the app-wide near-the-limit counter, because the concept's label row reserves the space."
+  },
+  "cardEditorDetailsHeading": "OPTIONAL DETAILS",
+  "@cardEditorDetailsHeading": {
+    "description": "Heading of the expanded optional-detail section (W5, BR-95)."
+  },
+  "cardEditorExampleFieldLabel": "EXAMPLE SENTENCE",
+  "@cardEditorExampleFieldLabel": {
+    "description": "External label above the example field."
+  },
+  "cardEditorHintFieldLabel": "HINT",
+  "@cardEditorHintFieldLabel": {
+    "description": "External label above the hint field."
+  },
+  "cardEditorPronunciationFieldLabel": "PRONUNCIATION · ROMANIZATION",
+  "@cardEditorPronunciationFieldLabel": {
+    "description": "External label above the pronunciation field."
+  },
+  "cardEditorTagsHeading": "TAGS",
+  "@cardEditorTagsHeading": {
+    "description": "Heading of the tag section in the editor, in the concept's section grammar."
+  },
+  "cardEditorTagAddChip": "Add tag",
+  "@cardEditorTagAddChip": {
+    "description": "Chip that opens the tag entry field. Sits with the chips rather than below them, so adding starts where the tags are."
+  },
+  "cardEditorTagAddAction": "Add this tag",
+  "@cardEditorTagAddAction": {
+    "description": "Accessible name and tooltip of the button inside the tag entry field. Distinct from the chip that opened it."
+  },
+  "cardEditorTagEntryDismiss": "Close tag entry",
+  "@cardEditorTagEntryDismiss": {
+    "description": "Accessible name of the control that closes the tag entry without submitting. The typed text survives, so the exit guard still protects it."
+  },
+  "cardEditorTrashTitle": "Move this flashcard to Trash",
+  "@cardEditorTrashTitle": {
+    "description": "Title of the editor's soft-delete card. Product language, not a technical section label — and it names the destination, because Trash is where the card goes rather than where it ends (BR-256)."
+  },
+  "cardEditorTrashDescription": "The card leaves your library and its study history stays in Trash for 30 days, so you can put it back. Other cards in this deck stay.",
+  "@cardEditorTrashDescription": {
+    "description": "Body of the editor's soft-delete card. Names the same window the confirmation does: BR-264 purges at 30 days whether or not the user ever empties Trash, so 'until you empty it' was both inconsistent with the dialog one tap away and untrue."
+  },
+  "cardEditorTrashAction": "Move to Trash",
+  "@cardEditorTrashAction": {
+    "description": "Button that opens the soft-delete confirmation. Neutral secondary weight: BR-266 reserves the destructive colour for permanent purge."
+  },
+  "cardEditorLocalOnlyNote": "Changes save to this device only.",
+  "@cardEditorLocalOnlyNote": {
+    "description": "Standing note under the editor's action bar. A fact about where data lives (AD-01), not a status — it does not change while a save runs."
+  },
+  "cardEditorContextUnavailable": "This card's deck path isn't available right now.",
+  "@cardEditorContextUnavailable": {
+    "description": "Shown in place of the editor's breadcrumb when the deck-context read fails or the deck is gone. Names what is unavailable: an absent path used to look identical to one that had not loaded yet."
+  },
+  "cardEditorContextMismatch": "This card isn't in this deck any more. Go back and open it from its own deck.",
+  "@cardEditorContextMismatch": {
+    "description": "Shown when the card's deck no longer matches the route's deck. Names the recovery rather than the ids."
+  },
+  "cardEditorDiscardTitle": "Discard changes?",
+  "@cardEditorDiscardTitle": {
+    "description": "Title of the dialog shown when leaving the card editor with unsaved edits (UC-04 A1)."
+  },
+  "cardEditorDiscardMessage": "Your unsaved changes to this card will be lost. Tags and the flag are already saved.",
+  "@cardEditorDiscardMessage": {
+    "description": "Body of the discard dialog. States what is lost and what is not: tags and the flag write immediately (BR-92, BR-93) and are not part of the draft."
+  },
+  "cardEditorDiscardConfirm": "Discard",
+  "@cardEditorDiscardConfirm": {
+    "description": "Destructive action of the discard dialog: leave and lose the edits."
+  },
+  "cardEditorDiscardCancel": "Keep editing",
+  "@cardEditorDiscardCancel": {
+    "description": "Secondary action of the discard dialog: stay on the editor with the draft intact."
+  },
+  "cardEditorTagCapReached": "All {max} tags are in use. Remove one to add another.",
+  "@cardEditorTagCapReached": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    },
+    "description": "Replaces the tag entry once the card holds the maximum number of tags (BR-94). Shown instead of a field that would only refuse what is typed into it."
+  },
+  "cardEditorFlagFailed": "The flag couldn't be changed. Try again.",
+  "@cardEditorFlagFailed": {
+    "description": "Shown when SetCardFlag fails (BR-92). Names the flag because it renders in the pinned subheader, far from the app-bar action that caused it."
+  },
   "cardEditorDelete": "Delete card",
   "@cardEditorDelete": {
     "description": "Button that opens the delete confirmation in the card editor."
   },
-  "cardDeleteConfirmTitle": "Delete this card?",
+  "cardDeleteConfirmTitle": "Move this card to Trash?",
   "@cardDeleteConfirmTitle": {
-    "description": "Title of the card delete confirmation dialog (UC-04 A5)."
+    "description": "Title of the card soft-delete confirmation (UC-04 A5, BR-256). Says Trash, not Delete: the action, the button and the card that opens it all name the destination, and a title that said Delete would be the one place claiming the card is gone."
   },
   "cardDeleteConfirmMessage": "The card and its study history go to Trash. You can restore them for 30 days.",
   "@cardDeleteConfirmMessage": {

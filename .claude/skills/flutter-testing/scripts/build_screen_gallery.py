@@ -189,6 +189,10 @@ for group, items in groups.items():
         '<div class="grid">{cards}</div></section>'.format(
             g=group, n=len(items), cards=''.join(items)))
 
+# The tab title counts the same list the header does. It used to carry a
+# literal 29 while the manifest had grown to 44 — the one number the owner
+# sees without opening the page, and the only one nothing regenerated.
+# #364 reached the same fix independently; this comment is why it was made.
 html = """<title>MemoX — __TOTAL__ màn hình</title>
 <style>
 :root{
