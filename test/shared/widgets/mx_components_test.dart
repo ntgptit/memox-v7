@@ -154,6 +154,143 @@ void main() {
           reason: '${mode.$1}: a disabled destructive button is still red',
         );
       });
+
+      testWidgets('${mode.$1} · a busy destructive keeps its colours, not the '
+          'disabled grey', (tester) async {
+        // **The merge order is the whole test.** A loading button is disabled —
+        // `isLoading` nulls `onPressed` — so the base style's disabled-first
+        // resolvers would paint `disabledSurface` under `onDisabled`, which is
+        // the grey `_busyStyle` exists to override once the label is painted.
+        // `ButtonStyle.merge` keeps the **receiver's** non-null fields
+        // (`backgroundColor ?? style.backgroundColor`), so `busy.merge(base)`
+        // is the direction that lets busy win and base answer for everything
+        // busy has no opinion on. Reversing it silently restores the grey, and
+        // nothing else in the suite would notice.
+        await tester.pumpWidget(
+          host(
+            Scaffold(
+              body: MxActionButton(
+                label: 'Deleting…',
+                variant: MxActionButtonVariant.destructive,
+                onPressed: () {},
+                isLoading: true,
+                shouldKeepLabelWhileLoading: true,
+              ),
+            ),
+            isDark: mode.$2,
+          ),
+        );
+
+        final theme = mode.$2 ? buildDarkTheme() : buildLightTheme();
+        final style = tester
+            .widget<FilledButton>(find.byType(FilledButton))
+            .style!;
+
+        // Disabled is the state this button is actually in while busy.
+        const busyStates = <WidgetState>{WidgetState.disabled};
+        expect(
+          style.backgroundColor!.resolve(busyStates),
+          theme.colorScheme.error,
+          reason: '${mode.$1}: a busy destructive still reads as destructive',
+        );
+        expect(
+          style.foregroundColor!.resolve(busyStates),
+          theme.colorScheme.onError,
+          reason: '${mode.$1}: its label is legible on that fill',
+        );
+        // Geometry still comes from the base style, which is what merging
+        // rather than replacing buys.
+        expect(style.shape, isNotNull);
+        expect(style.minimumSize, isNotNull);
+      });
+
+      testWidgets('${mode.$1} · a busy destructiveOutlined keeps its edge', (
+        tester,
+      ) async {
+        // The outlined variant carries its meaning on the border, so the same
+        // merge has to reach `side` — the base's disabled resolver would
+        // otherwise swap the red edge for `disabledSurface`.
+        await tester.pumpWidget(
+          host(
+            Scaffold(
+              body: MxActionButton(
+                label: 'Deleting…',
+                variant: MxActionButtonVariant.destructiveOutlined,
+                onPressed: () {},
+                isLoading: true,
+                shouldKeepLabelWhileLoading: true,
+              ),
+            ),
+            isDark: mode.$2,
+          ),
+        );
+
+        final theme = mode.$2 ? buildDarkTheme() : buildLightTheme();
+        final style = tester
+            .widget<OutlinedButton>(find.byType(OutlinedButton))
+            .style!;
+        const busyStates = <WidgetState>{WidgetState.disabled};
+
+        expect(
+          style.foregroundColor!.resolve(busyStates),
+          theme.colorScheme.error,
+        );
+        expect(
+          style.side!.resolve(busyStates)!.color,
+          theme.colorScheme.error,
+          reason: '${mode.$1}: the edge is what carries the meaning here',
+        );
+        // No fill was invented for a variant that has none.
+        expect(style.backgroundColor?.resolve(busyStates), isNull);
+      });
+
+      testWidgets(
+        '${mode.$1} · destructiveOutlined is an outline, not a fill',
+        (tester) async {
+          await tester.pumpWidget(
+            host(
+              Scaffold(
+                body: MxActionButton(
+                  label: 'Delete card',
+                  variant: MxActionButtonVariant.destructiveOutlined,
+                  onPressed: () {},
+                ),
+              ),
+              isDark: mode.$2,
+            ),
+          );
+
+          final theme = mode.$2 ? buildDarkTheme() : buildLightTheme();
+          final semantic = theme.extension<AppSemanticColors>()!;
+          final style = tester
+              .widget<OutlinedButton>(find.byType(OutlinedButton))
+              .style!;
+
+          expect(
+            style.foregroundColor!.resolve(const <WidgetState>{}),
+            theme.colorScheme.error,
+          );
+          expect(
+            style.side!.resolve(const <WidgetState>{})!.color,
+            theme.colorScheme.error,
+          );
+          // Every state resolves, exactly as the filled variant's test demands:
+          // a disabled delete must not stay red.
+          expect(
+            style.foregroundColor!.resolve(const <WidgetState>{
+              WidgetState.disabled,
+            }),
+            semantic.onDisabled,
+            reason: '${mode.$1}: a disabled outline is not still red',
+          );
+          expect(
+            style.side!.resolve(const <WidgetState>{
+              WidgetState.disabled,
+            })!.color,
+            semantic.disabledSurface,
+          );
+        },
+      );
     }
   });
 
