@@ -40,6 +40,7 @@ jobs:
       needs_static: ${{ steps.changes.outputs.needs_static }}
       needs_host_tests: ${{ steps.changes.outputs.needs_host_tests }}
       needs_widgetbook: ${{ steps.changes.outputs.needs_widgetbook }}
+      needs_goldens: ${{ steps.changes.outputs.needs_goldens }}
       full_suite: ${{ steps.changes.outputs.full_suite }}
       risk: ${{ steps.changes.outputs.risk }}
       shard_count: ${{ steps.changes.outputs.shard_count }}

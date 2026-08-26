@@ -582,5 +582,73 @@ class PromptContractTest(unittest.TestCase):
         self.assertTrue(any("header fields" in message for message in messages))
 
 
+class PlanOutputsAreWiredIntoTheWorkflowTest(unittest.TestCase):
+    """Every `needs_*` the plan emits must reach the jobs that read it.
+
+    **This test exists because the wire was cut and nothing noticed.** The
+    golden gate shipped with `needs_goldens` written to `$GITHUB_OUTPUT` and
+    *not* declared in the `classify` job's `outputs:` map, so
+    `needs.classify.outputs.needs_goldens` resolved to the empty string, the
+    Windows job was skipped on a change that required it, and the only reason
+    it surfaced was that `check_ci_gate.py` refused to parse `''` as a boolean.
+    Had the gate been more forgiving, the job would have been silently dead —
+    which is the exact failure it was added to prevent, one layer up.
+
+    Parsed as text rather than with PyYAML on purpose: the job that runs these
+    tests installs no Python dependencies, and a guard that cannot run is worse
+    than one that is slightly blunt.
+    """
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.module = _load("build_verification_plan")
+        cls.workflow = (REPO_ROOT / ".github/workflows/ci.yml").read_text(
+            encoding="utf-8"
+        )
+
+    def _emitted_needs_keys(self) -> set[str]:
+        plan = self.module.build_plan(
+            ("lib/features/deck/presentation/screens/deck_list_screen.dart",),
+            root=REPO_ROOT,
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "github_output"
+            output.touch()
+            self.module.write_github_output(output, plan)
+            lines = output.read_text(encoding="utf-8").splitlines()
+        return {
+            line.split("=", 1)[0]
+            for line in lines
+            if line.startswith("needs_")
+        }
+
+    def _classify_outputs_block(self) -> str:
+        start = self.workflow.index("    outputs:")
+        end = self.workflow.index("    steps:", start)
+        return self.workflow[start:end]
+
+    def test_every_needs_flag_is_declared_as_a_classify_output(self) -> None:
+        declared = self._classify_outputs_block()
+        for key in sorted(self._emitted_needs_keys()):
+            with self.subTest(key=key):
+                self.assertIn(
+                    f"{key}: ${{{{ steps.changes.outputs.{key} }}}}",
+                    declared,
+                    f"{key} is written to $GITHUB_OUTPUT but never exposed to "
+                    f"downstream jobs, so any `if:` reading it is always false",
+                )
+
+    def test_every_needs_flag_is_handed_to_the_gate(self) -> None:
+        for key in sorted(self._emitted_needs_keys()):
+            flag = "--" + key.replace("_", "-")
+            with self.subTest(key=key):
+                self.assertIn(
+                    f"{flag} '${{{{ needs.classify.outputs.{key} }}}}'",
+                    self.workflow,
+                    f"{flag} is not passed to check_ci_gate.py, so a job "
+                    f"selected by {key} is never checked for having run",
+                )
+
+
 if __name__ == "__main__":
     unittest.main()

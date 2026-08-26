@@ -7939,7 +7939,17 @@ phần còn lại thì không).
 - **Vẫn có điều kiện, không always-on:** runner Windows tính gấp đôi phút. PR
   chỉ sửa tài liệu bỏ qua job này.
 - Kiểm bằng 4 test mới trong `test_ci_tooling.py`, dựng theo hình dạng thật của
-  #337, #340, một PR đổi demo test, và một PR docs-only. Tổng 44 → 50 test.
+  #337, #340, một PR đổi demo test, và một PR docs-only.
+- **Lần đẩy đầu tiên sai, và CI bắt được.** `needs_goldens` được ghi vào
+  `$GITHUB_OUTPUT` nhưng **không** được khai báo trong khối `outputs:` của job
+  `classify`, nên `needs.classify.outputs.needs_goldens` là chuỗi rỗng, job
+  Windows bị skip trên đúng loại thay đổi cần nó. Thứ duy nhất làm nó lộ ra là
+  `check_ci_gate.py` từ chối parse `''` thành boolean — nếu gate dễ dãi hơn, job
+  đã chết âm thầm, đúng thứ nó sinh ra để chặn, lùi lên một tầng.
+- Thêm `PlanOutputsAreWiredIntoTheWorkflowTest`: mọi cờ `needs_*` mà plan phát
+  ra phải vừa được khai báo ở `classify.outputs` vừa được truyền cho gate. Đọc
+  `ci.yml` bằng quét text chứ không dùng PyYAML, vì job chạy test này không cài
+  dependency Python nào. Đã kiểm nó **đỏ** khi gỡ dòng khai báo. Tổng 44 → 52.
 
 ## M99 · Adhoc
 
