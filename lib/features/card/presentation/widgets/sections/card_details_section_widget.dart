@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -54,28 +55,54 @@ class CardDetailsSectionWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        InkWell(
-          onTap: onToggle,
-          borderRadius: BorderRadius.circular(AppSpacing.sm),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-            child: Row(
-              children: <Widget>[
-                Icon(
-                  isExpanded ? Icons.expand_less : Icons.add,
-                  size: 20,
-                  color: accent,
+        // **A disclosure, and the semantics have to say so.** Without
+        // `expanded` a screen reader announces a button whose label changes
+        // for no stated reason — the user is told `Details` after being told
+        // `Add example, hint & pronunciation` and has to infer that something
+        // opened. `toggled` would be the wrong word: this is not a setting.
+        Semantics(
+          container: true,
+          button: true,
+          expanded: isExpanded,
+          child: InkWell(
+            onTap: onToggle,
+            borderRadius: BorderRadius.circular(AppSpacing.sm),
+            child: ConstrainedBox(
+              // The whole row is the target, not the 20dp glyph inside it.
+              // `minHeight` rather than a fixed height: at `textScaler` 2.0 the
+              // VI label wraps to two lines and a fixed row would clip it.
+              constraints: const BoxConstraints(
+                minHeight: AppSpacing.minimumTouchTarget,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Text(
+                        isExpanded
+                            ? context.l10n.cardEditorDetailsLabel
+                            : context.l10n.cardEditorDetailsToggle,
+                        style: Theme.of(
+                          context,
+                        ).textTheme.labelLarge?.copyWith(color: accent),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    // **Trailing chevron-down, not a leading `+`, and not
+                    // `chevron_right`.** `+` said "add a thing", which is what
+                    // the *fields* do, not what the toggle does; `chevron_right`
+                    // is the platform's word for "another screen", and this
+                    // opens in place. The vertical pair is the one convention
+                    // that means exactly what happens here.
+                    Icon(
+                      isExpanded ? Icons.expand_less : Icons.expand_more,
+                      size: AppIconSize.md,
+                      color: accent,
+                    ),
+                  ],
                 ),
-                const SizedBox(width: AppSpacing.sm),
-                Text(
-                  isExpanded
-                      ? context.l10n.cardEditorDetailsLabel
-                      : context.l10n.cardEditorDetailsToggle,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.labelLarge?.copyWith(color: accent),
-                ),
-              ],
+              ),
             ),
           ),
         ),

@@ -10,6 +10,7 @@ import 'package:memox/features/card/di/card_repository_provider.dart';
 import 'package:memox/features/card/presentation/screens/card_editor_screen.dart';
 import 'package:memox/l10n/generated/app_localizations.dart';
 
+import 'support/card_editor_harness.dart';
 import 'support/fake_card_repository.dart';
 
 /// The editor in edit mode (UC-04 A1, A5): prefill from the loaded card, save
@@ -102,6 +103,10 @@ void main() {
     await pump(tester, repository);
 
     await tester.enterText(find.byType(TextField).first, 'new front');
+    // The pump is load-bearing: `enterText` schedules a frame but does not
+    // pump one, and `Save changes` only becomes pressable on the frame that
+    // sees the form is dirty.
+    await tester.pump();
     await tester.tap(find.text('Save changes'));
     await tester.pump();
 
@@ -131,9 +136,9 @@ void main() {
 
     await pump(tester, repository);
 
-    expect(find.byIcon(Icons.outlined_flag), findsOneWidget);
+    expect(find.byIcon(Icons.flag_outlined), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.outlined_flag));
+    await tester.tap(find.byIcon(Icons.flag_outlined));
     await tester.pump();
 
     expect(repository.flagWrites.single, (id: 'card-1', isFlagged: true));
@@ -149,11 +154,11 @@ void main() {
     repository.nextFlagFailure = const DatabaseFailure(message: 'write failed');
 
     await pump(tester, repository);
-    await tester.tap(find.byIcon(Icons.outlined_flag));
+    await tester.tap(find.byIcon(Icons.flag_outlined));
     await tester.pump();
 
     expect(repository.flagWrites, isEmpty);
-    expect(find.byIcon(Icons.outlined_flag), findsOneWidget);
+    expect(find.byIcon(Icons.flag_outlined), findsOneWidget);
     expect(find.text('Please try again.'), findsOneWidget);
   });
 
@@ -181,10 +186,12 @@ void main() {
 
     await pump(tester, repository);
 
-    // Collapsed by default: the toggle is present, the field is not.
-    expect(find.text('Add details'), findsOneWidget);
-    await tester.ensureVisible(find.text('Add details'));
-    await tester.tap(find.text('Add details'));
+    // Collapsed by default: the toggle is present, the field is not. The
+    // label names the three fields it reveals — `Add details` said nothing
+    // about what a tap would open.
+    expect(find.text(kDetailsToggleLabel), findsOneWidget);
+    await tester.ensureVisible(find.text(kDetailsToggleLabel));
+    await tester.tap(find.text(kDetailsToggleLabel));
     await tester.pumpAndSettle();
 
     await tester.ensureVisible(find.widgetWithText(TextField, 'Example'));
@@ -192,7 +199,7 @@ void main() {
       find.widgetWithText(TextField, 'Example'),
       'a new example',
     );
-    await tester.ensureVisible(find.text('Save changes'));
+    await tester.pump();
     await tester.tap(find.text('Save changes'));
     await tester.pump();
 

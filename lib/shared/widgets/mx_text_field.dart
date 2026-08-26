@@ -1,5 +1,39 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_spacing.dart';
+import 'mx_icon_button.dart';
+
+/// A button drawn inside a field, at its trailing edge.
+///
+/// **A typed triple rather than a `suffixIcon` widget slot.** A widget slot
+/// would let a caller put anything in a field — a second text style, a coloured
+/// glyph, a whole `Row` — and [MxTextField]'s entire reason for existing is
+/// that it refuses those. What a field's trailing action actually varies in is
+/// three things, so the type carries exactly three.
+///
+/// It exists because a tag field that only submits on the keyboard's `done` key
+/// has an action nobody can see: on a form full of visible buttons, the way to
+/// commit a tag was a key on a keyboard that is not on screen until the field
+/// is focused.
+@immutable
+class MxTextFieldAction {
+  const MxTextFieldAction({
+    required this.icon,
+    required this.semanticLabel,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+
+  /// Already-localized. Required for the same reason [MxIconButton] requires
+  /// one: an icon inside a field is otherwise announced as a blank button.
+  final String semanticLabel;
+
+  /// `null` disables the action while leaving it visible — a tag field with
+  /// nothing typed in it still has to show *where* the add button is.
+  final VoidCallback? onPressed;
+}
+
 /// The app's text input.
 ///
 /// Takes no `Color`, no `TextStyle` and no `InputDecoration`: every visual
@@ -39,6 +73,7 @@ class MxTextField extends StatelessWidget {
     this.onSubmitted,
     this.textAlign = TextAlign.start,
     this.textStyle,
+    this.trailingAction,
     super.key,
   });
 
@@ -53,7 +88,22 @@ class MxTextField extends StatelessWidget {
 
   /// Already-localized.
   final String? hintText;
+
+  /// Already-localized. A sentence under the field, in the slot the error text
+  /// takes over when there is one.
   final String? helperText;
+
+  /// How many lines [helperText] may occupy before it ellipsizes.
+  ///
+  /// **Three, not Material's one, and it was found by rendering it.** The card
+  /// editor's BR-10 reassurance is a full sentence; at one line it painted
+  /// `Editing the text doesn't change this card'…` — cut mid-word, mid-
+  /// apostrophe, saying nothing. A helper that does not fit is worse than no
+  /// helper: it takes the space and withholds the meaning.
+  ///
+  /// Three rather than null: `null` lets it grow without limit, and a helper
+  /// long enough to need four lines is a paragraph that belongs somewhere else.
+  static const int helperMaxLines = 3;
 
   /// Already-localized. Non-null puts the field in its error state.
   ///
@@ -97,6 +147,10 @@ class MxTextField extends StatelessWidget {
   /// The typed value's own style. Null keeps the theme's.
   final TextStyle? textStyle;
 
+  /// A button at the field's trailing edge. Null for a field that commits some
+  /// other way, or does not commit at all.
+  final MxTextFieldAction? trailingAction;
+
   @override
   Widget build(BuildContext context) {
     return TextField(
@@ -119,8 +173,37 @@ class MxTextField extends StatelessWidget {
         labelText: label,
         hintText: hintText,
         helperText: helperText,
+        helperMaxLines: helperMaxLines,
         errorText: errorText,
+        // The same allowance for the error, so a long refusal is readable and
+        // so the two states cannot resize the field differently.
+        errorMaxLines: helperMaxLines,
+        suffixIcon: _buildSuffix(),
+        // **Stated, because the default is 48 wide and 48 tall only by
+        // accident.** `InputDecorator` gives a suffix the field's own height
+        // when it has one to give, and a single-line field is shorter than the
+        // touch floor at small text scales — so the button would be tappable
+        // over a box narrower than the guideline asks for while looking exactly
+        // right. `minWidth`/`minHeight` make the floor the field's problem
+        // rather than the icon's.
+        suffixIconConstraints: trailingAction == null
+            ? null
+            : const BoxConstraints(
+                minWidth: AppSpacing.minimumTouchTarget,
+                minHeight: AppSpacing.minimumTouchTarget,
+              ),
       ),
+    );
+  }
+
+  Widget? _buildSuffix() {
+    final action = trailingAction;
+    if (action == null) return null;
+
+    return MxIconButton(
+      icon: action.icon,
+      semanticLabel: action.semanticLabel,
+      onPressed: action.onPressed,
     );
   }
 

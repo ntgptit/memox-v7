@@ -12852,6 +12852,128 @@ của M2.
   `widgetbook/test/catalog_smoke_test.dart`.
 - **Checklist phases:** 7, 13, 14
 
+### M99.61 · Card Editor UX hardening — Save ghim đáy, và ba thứ bậc bị đảo
+
+- **Status:** **done**
+- **M99.60 bỏ trống có chủ ý.** Số đó do PR #361 (Card
+  detail UI upgrade) giữ; PR đó còn mở vì chủ dự án chưa duyệt một quyết định
+  trong nó, nên số chưa vào `main`. Lấy lại số sẽ tạo hai mục cùng ID khi #361
+  merge.
+- **Goal:** Chế độ **sửa** thẻ nói đúng ba câu mà nó đang nói sai: cái gì được
+  lưu, lưu bằng nút nào, và rời màn thì mất gì. Nghiệp vụ thẻ không đổi — không
+  BR nào, không use case nào, không cột nào.
+- **Scope:** Edit mode của `CardEditorScreen` và các section của nó; footer slot
+  cho `MxContentShell`; một variant nút, một trục tone cho icon button, một
+  trailing action cho text field; l10n; wireframe M4.11 W6b; test.
+  **Ngoài scope:** create mode (W4), card detail, card list, import, study.
+- **Output:**
+  - `lib/features/card/presentation/screens/card_editor_screen.dart` (dirty
+    snapshot, exit coordinator, `PopScope`, footer);
+  - mới: `states/card_content_draft_state.dart`,
+    `widgets/overlays/card_discard_confirm_widget.dart`,
+    `widgets/sections/card_editor_action_bar_widget.dart`,
+    `widgets/sections/card_sides_fields_widget.dart`,
+    `widgets/sections/card_create_form_widget.dart`;
+  - đổi tên: `card_danger_zone_widget.dart` → `card_delete_action_widget.dart`;
+  - `card_tag_section_widget.dart`, `card_details_section_widget.dart`,
+    `card_flag_toggle_widget.dart`, `card_failure_labels_widget.dart`;
+  - shared: `mx_content_shell.dart` (`footer`), `mx_action_button.dart`
+    (`destructiveSecondary`), `mx_icon_button.dart` (`MxIconButtonTone`),
+    `mx_text_field.dart` (`MxTextFieldAction`), `app_button_themes.dart`
+    (`buildOutlinedStyle`);
+  - `lib/l10n/app_en.arb`, `app_vi.arb` (6 key mới, 1 key xoá, 1 key sửa copy);
+  - `docs/wireframes/m4-11-card-management.md` (D27, W6b vẽ lại);
+  - test: `card_editor_dirty_guard_test.dart`, `card_editor_tag_input_test.dart`
+    (mới), `support/card_editor_harness.dart` (mới),
+    `card_editor_edit_test.dart`, `card_tag_after_error_test.dart`;
+  - `widgetbook/lib/components/control_components.dart`, `form_components.dart`.
+
+- **Save nằm sai chỗ, và chỗ sai đó là một lời hứa sai.** Nút cũ sống trong thân
+  cuộn, giữa Optional details và Tags. Hai hệ quả, cả hai đều là lỗi: nó **cuộn
+  mất** khi người dùng sửa tag ở dưới, và vị trí *trên* Tags ngụ ý phạm vi —
+  "mọi thứ phía trên tôi là cái tôi lưu". Tag ghi tức thì (BR-93), cờ cũng vậy
+  (BR-92), nên ngụ ý đó sai theo đúng hướng làm mất dữ liệu: người dùng tin rằng
+  chưa bấm Save thì tag chưa vào.
+- **`MxContentShell.footer`, không phải `bottomSheet` hay `Stack`.** Shell sở
+  hữu `Scaffold`, nên đây là việc của nó — một màn không thể ghim gì bên dưới
+  cái body mà shell vừa dựng. `bottomNavigationBar` là slot đúng vì `Scaffold`
+  nâng nó lên trên bàn phím **và** trừ chiều cao của nó khỏi body, nên padding
+  đáy của body vẫn là token bình thường thay vì một inset tính tay sai ở mọi
+  text scale trừ một. Default `null`, nên mọi caller cũ giữ nguyên pixel.
+- **Dirty là so sánh, không phải cờ.** `CardContentDraft` giữ năm giá trị đã
+  `trim()` — đúng cái `parseCardForm` sẽ ghi — chụp lại lúc nạp thẻ. Gõ một chữ
+  rồi xoá đi thì Save **tắt lại**, vì đó mới là trạng thái người dùng đang ở;
+  một cờ `hasBeenEdited` không bao giờ quay về được. Khoảng trắng thừa không
+  tính, vì bản ghi sẽ y hệt.
+- **Baseline được đặt *sau* khi prefill, và đó là thứ làm prefill an toàn.** Gán
+  `.text` cho `TextEditingController` gọi listener **đồng bộ**, và prefill chạy
+  trong `build`. Baseline còn `null` thì listener return trước khi tới
+  `setState`, nên việc duy nhất không được phép xảy ra trong một build không xảy
+  ra được.
+- **Chữ đang gõ trong ô Add tag là hai câu khác nhau, nên là hai cờ.** Nó *là*
+  việc sẽ mất → tham gia exit guard. Nó *không* thuộc Save → không bật Save. Gộp
+  hai câu vào một cờ là cách nút Save hứa một việc nó không làm.
+- **`pop`, không phải `maybePop`, sau khi save xong.** `PopScope` chặn
+  `maybePop` và cử chỉ hệ thống; một pop trực tiếp là lối ra mà chính guard đã
+  duyệt. Test đi qua đúng đường này, vì đây là chỗ `canPop: false` dễ nuốt luôn
+  kết quả save nhất.
+- **Delete: cùng vai trò màu, khác container.** `destructiveSecondary` dùng
+  `OutlinedButton` với `error` cho cả nhãn lẫn viền, qua `buildOutlinedStyle`
+  chứ không phải `OutlinedButton.styleFrom` — `styleFrom` dựng
+  `WidgetStatePropertyAll` phẳng, nên nút sẽ giữ nguyên viền đỏ đậm lúc disabled
+  và mất hẳn focus ring, đúng lỗi mà variant filled từng mắc. Heading
+  `Danger zone` bị xoá cùng ARB key: nó là cái nhãn đi làm việc mà trọng lượng
+  của nút lẽ ra phải làm. Confirm, soft-delete, Undo, route fallback: **không
+  đổi**.
+- **Chip delete: 33 × 48, và `meetsGuideline` nói OK suốt thời gian đó.** Đo
+  bằng `getRect` trên production tree cộng hit-test biên. App đặt
+  `MaterialTapTargetSize.padded` nên *chip* cao 48 và
+  `_RenderChipRedirectingHitDetection` giao cả dải đó cho slot nằm dưới x — nên
+  chiều cao vốn đã đủ. Chiều ngang thì 33: hit từ 63 đến 96 trên một chip kết
+  thúc ở 96. `meetsGuideline(androidTapTargetGuideline)` xanh vì nó đọc rect
+  **semantics**, mà node của nút xoá thì merge vào node 48 của chip — đây là lý
+  do lỗi sống sót. Fix là `deleteIconBoxConstraints` với **`minWidth` thôi**:
+  một hộp 48 vuông làm `_RenderChip` assert (`sizes.content >= boxSize.height`)
+  và sẽ đẩy cả viên chip lên ~62 cao để sửa một con số chiều ngang.
+- **Blank tag không còn báo lỗi, và đó là chủ đích.** Trước đây gõ khoảng trắng
+  rồi Enter thì gọi controller, bị BR-93 từ chối, và in `Tag can't be empty` —
+  một thông báo về luật mà người dùng chưa hề định phá. Giờ nút Add disable khi
+  ô trim ra rỗng, nên lời từ chối được nói **trước** thay vì sau.
+- **Ba file tách ra vì guard 400 dòng, và một trong ba là refactor thật.** Screen
+  chạm 583 dòng. `CardEditorActionBarWidget` và `CardSidesFieldsWidget` là tách
+  cơ học. `CardCreateFormWidget` thì không: hai chế độ vốn **dùng chung** năm
+  `TextEditingController` do screen giữ. Một instance chỉ bao giờ là một chế độ,
+  nên lúc chạy chẳng có gì thực sự chung — cái chung là **rủi ro** rằng một thay
+  đổi cho chế độ này rơi vào chế độ kia, và baseline dirty là thay đổi đầu tiên
+  đủ lớn để rủi ro đó thành thật. Đây là một phép dời, không phải thiết kế lại:
+  mọi hành vi của create giữ nguyên.
+- **Integration suite: `not run — scoped host verification`.** Không thêm
+  platform binding, plugin, persistence hay route nào; mọi hành vi mới ở đây
+  chứng minh được bằng host widget test có router thật. Đây **không** phải một
+  lần pass.
+- **Acceptance criteria:**
+  - [x] Save chỉ ghi năm trường nội dung; tag/cờ vẫn ghi tức thì và không bật Save.
+  - [x] Draft tag chưa submit bật exit guard nhưng không bật Save.
+  - [x] `✕` và system Back đi cùng một coordinator; Back hai lần → một dialog.
+  - [x] Save thành công pop đúng một lần, không bị `PopScope` chặn; save lỗi giữ
+        nguyên chữ và trạng thái dirty.
+  - [x] Footer không nằm trong `SingleChildScrollView`; rect không đổi giữa
+        pristine, dirty và submitting.
+  - [x] Băng chạm của nút xoá chip đạt 48 × 48, chứng minh bằng hit-test hai góc.
+  - [x] Delete vẫn qua confirm cũ, soft-delete, Undo và route fallback.
+  - [x] `flutter analyze` 0 error 0 warning trên `lib/`, `test/`, `widgetbook/`.
+  - [x] ARB EN/VI cân bằng; không còn caller nào của `cardEditorDangerZone`.
+  - [x] Wireframe M4.11 ghi D27 và vẽ lại W6b; lịch sử D6/D10 giữ nguyên.
+  - [x] Widgetbook có knob cho variant, tone và trailing action mới.
+- **Editable documents:** `docs/wbs.md`, `docs/wireframes/m4-11-card-management.md`
+- **Dependencies:** M99.55, M99.59
+- **Tests required:** `card_editor_dirty_guard_test.dart`,
+  `card_editor_tag_input_test.dart`, `card_editor_edit_test.dart`,
+  `card_tag_after_error_test.dart`, `mx_content_shell_test.dart`,
+  `mx_action_button_test.dart`, `card_editor_screen_visual_audit_test.dart`,
+  `widgetbook/test/catalog_smoke_test.dart`.
+- **Checklist phases:** 7, 13, 14
+
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 
 Ghi lại cụ thể, vì "mất một bộ lint" là câu quá mơ hồ để ai đó sau này biết

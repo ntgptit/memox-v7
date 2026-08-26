@@ -168,7 +168,7 @@ void main() {
     await matchesReviewGolden('goldens/card_list_dark.png');
   });
 
-  testWidgets('card editor — edit mode (tags, flag, danger zone)', (
+  testWidgets('card editor — edit mode (tags, flag, pinned save)', (
     tester,
   ) async {
     final repo = FakeCardRepository();

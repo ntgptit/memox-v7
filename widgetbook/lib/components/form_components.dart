@@ -38,6 +38,9 @@ WidgetbookComponent textFieldComponent() {
             min: 10,
             max: 200,
           );
+          final hasTrailingAction = context.knobs.boolean(
+            label: 'trailingAction',
+          );
 
           return CatalogCenterPage(
             child: _TextFieldDemo(
@@ -48,6 +51,7 @@ WidgetbookComponent textFieldComponent() {
               isEnabled: isEnabled,
               isReadOnly: isReadOnly,
               maxLength: maxLength,
+              hasTrailingAction: hasTrailingAction,
             ),
           );
         },
@@ -68,6 +72,7 @@ class _TextFieldDemo extends StatefulWidget {
     required this.isEnabled,
     required this.isReadOnly,
     required this.maxLength,
+    required this.hasTrailingAction,
   });
 
   final String label;
@@ -77,6 +82,7 @@ class _TextFieldDemo extends StatefulWidget {
   final bool isEnabled;
   final bool isReadOnly;
   final int? maxLength;
+  final bool hasTrailingAction;
 
   @override
   State<_TextFieldDemo> createState() => _TextFieldDemoState();
@@ -86,7 +92,18 @@ class _TextFieldDemoState extends State<_TextFieldDemo> {
   final TextEditingController _controller = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    // So the trailing action's enabled state tracks what is typed, the way the
+    // tag strip's does.
+    _controller.addListener(_onChanged);
+  }
+
+  void _onChanged() => setState(() {});
+
+  @override
   void dispose() {
+    _controller.removeListener(_onChanged);
     _controller.dispose();
     super.dispose();
   }
@@ -102,6 +119,16 @@ class _TextFieldDemoState extends State<_TextFieldDemo> {
       isEnabled: widget.isEnabled,
       isReadOnly: widget.isReadOnly,
       maxLength: widget.maxLength,
+      trailingAction: widget.hasTrailingAction
+          ? MxTextFieldAction(
+              icon: Icons.add,
+              semanticLabel: 'Add this tag',
+              // Null on an empty field is the shape the tag strip uses: the
+              // button stays where it is and stops working, rather than
+              // appearing under the finger as the first character lands.
+              onPressed: _controller.text.trim().isEmpty ? null : () {},
+            )
+          : null,
     );
   }
 }

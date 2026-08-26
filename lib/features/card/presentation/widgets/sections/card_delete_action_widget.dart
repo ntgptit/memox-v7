@@ -3,19 +3,33 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/navigation/route_names.dart';
-import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
 import '../overlays/card_confirm_widget.dart';
 import '../support/card_undo_widget.dart';
 
-/// The editor's delete band: the one destructive action on a card (UC-04 A2).
+/// The editor's delete action: the one destructive thing a card offers
+/// (UC-04 A2).
 ///
 /// Split out of `card_editor_screen.dart` at the 400-line guard, and the seam
 /// is a real one — the screen owns the form, this owns the one action that
 /// ends the screen and decides where the user lands afterwards.
-class CardDangerZoneWidget extends ConsumerWidget {
-  const CardDangerZoneWidget({
+///
+/// **It was `CardDangerZoneWidget`, and it was a heading plus a filled red
+/// button.** Both halves said the same thing twice and neither of them was
+/// weight: `Danger zone` is the vocabulary of a settings page's last section,
+/// and a filled `error` button is the loudest control the app can draw — the
+/// same loudness as the `Save changes` this screen actually wants pressed. The
+/// heading existed to explain a hierarchy the button was contradicting. Now
+/// the button carries it alone, outlined
+/// ([MxActionButtonVariant.destructiveSecondary]), and there is nothing left
+/// for a heading to say.
+///
+/// What did **not** change: the confirmation, the soft delete, the Undo window
+/// (BR-256) and where a deleted card leaves you. A visual demotion that also
+/// quietly made deletion easier would be the worst possible trade.
+class CardDeleteActionWidget extends ConsumerWidget {
+  const CardDeleteActionWidget({
     required this.deckId,
     required this.cardId,
     required this.isDisabled,
@@ -43,31 +57,19 @@ class CardDangerZoneWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        Text(
-          context.l10n.cardEditorDangerZone,
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-            color: Theme.of(context).colorScheme.error,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        MxActionButton(
-          label: context.l10n.cardEditorDelete,
-          variant: MxActionButtonVariant.destructive,
-          onPressed: isDisabled
-              ? null
-              : () => showCardDeleteConfirm(
-                  context,
-                  cardId: cardId,
-                  onDeleted: (batchId) {
-                    _leaveDeletedCard(context);
-                    showCardMovedToTrash(context, ref, batchId: batchId);
-                  },
-                ),
-        ),
-      ],
+    return MxActionButton(
+      label: context.l10n.cardEditorDelete,
+      variant: MxActionButtonVariant.destructiveSecondary,
+      onPressed: isDisabled
+          ? null
+          : () => showCardDeleteConfirm(
+              context,
+              cardId: cardId,
+              onDeleted: (batchId) {
+                _leaveDeletedCard(context);
+                showCardMovedToTrash(context, ref, batchId: batchId);
+              },
+            ),
     );
   }
 }

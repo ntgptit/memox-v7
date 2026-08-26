@@ -1,13 +1,13 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 670,
+  "scannedFiles": 675,
   "totalSites": 500,
   "byElementKind": {
-    "other": 313,
+    "other": 314,
     "background": 23,
     "shadow": 1,
-    "border": 13,
-    "text": 118,
+    "border": 14,
+    "text": 116,
     "icon": 32
   },
   "bySourceKind": {
@@ -3078,39 +3078,6 @@
       "resolved_value_dark": "#00000000"
     },
     {
-      "file": "lib/features/card/presentation/screens/card_editor_screen.dart",
-      "line": 248,
-      "widget_context": "_CardEditorScreenState",
-      "element_kind": "text",
-      "source_kind": "theme-token",
-      "expression": "Theme.of(context).colorScheme.onSurfaceVariant",
-      "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#565C72",
-      "resolved_value_dark": "#A8A7C4"
-    },
-    {
-      "file": "lib/features/card/presentation/screens/card_editor_screen.dart",
-      "line": 318,
-      "widget_context": "_CardEditorScreenState",
-      "element_kind": "text",
-      "source_kind": "theme-token",
-      "expression": "Theme.of(context).colorScheme.error",
-      "token": "colorScheme.error",
-      "resolved_value_light": "#C02B3A",
-      "resolved_value_dark": "#F2808F"
-    },
-    {
-      "file": "lib/features/card/presentation/screens/card_editor_screen.dart",
-      "line": 349,
-      "widget_context": "_CardEditorScreenState",
-      "element_kind": "text",
-      "source_kind": "theme-token",
-      "expression": "Theme.of(context).colorScheme.error",
-      "token": "colorScheme.error",
-      "resolved_value_light": "#C02B3A",
-      "resolved_value_dark": "#F2808F"
-    },
-    {
       "file": "lib/features/card/presentation/widgets/items/card_history_event_widget.dart",
       "line": 84,
       "widget_context": "CardHistoryEventWidget",
@@ -3309,17 +3276,6 @@
       "resolved_value_dark": "#A8A7C4"
     },
     {
-      "file": "lib/features/card/presentation/widgets/sections/card_danger_zone_widget.dart",
-      "line": 52,
-      "widget_context": "CardDangerZoneWidget",
-      "element_kind": "text",
-      "source_kind": "theme-token",
-      "expression": "Theme.of(context).colorScheme.error",
-      "token": "colorScheme.error",
-      "resolved_value_light": "#C02B3A",
-      "resolved_value_dark": "#F2808F"
-    },
-    {
       "file": "lib/features/card/presentation/widgets/sections/card_detail_content_widget.dart",
       "line": 42,
       "widget_context": "CardDetailContentWidget",
@@ -3398,7 +3354,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_details_section_widget.dart",
-      "line": 52,
+      "line": 53,
       "widget_context": "CardDetailsSectionWidget",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3450,17 +3406,6 @@
       "token": "colorScheme.onSurfaceVariant",
       "resolved_value_light": "#565C72",
       "resolved_value_dark": "#A8A7C4"
-    },
-    {
-      "file": "lib/features/card/presentation/widgets/sections/card_flag_toggle_widget.dart",
-      "line": 26,
-      "widget_context": "CardFlagToggleWidget",
-      "element_kind": "other",
-      "source_kind": "theme-token",
-      "expression": "context.semanticColors.warning",
-      "token": "semantic.warning",
-      "resolved_value_light": "#9A6A11",
-      "resolved_value_dark": "#E8D08E"
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_history_section_widget.dart",
@@ -3881,6 +3826,17 @@
       "resolved_value_dark": "#EDEDF6"
     },
     {
+      "file": "lib/features/card/presentation/widgets/sections/card_sides_fields_widget.dart",
+      "line": 86,
+      "widget_context": "CardSidesFieldsWidget",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.error",
+      "token": "colorScheme.error",
+      "resolved_value_light": "#C02B3A",
+      "resolved_value_dark": "#F2808F"
+    },
+    {
       "file": "lib/features/card/presentation/widgets/sections/card_state_distribution_widget.dart",
       "line": 144,
       "widget_context": "_LegendItem",
@@ -3893,18 +3849,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_tag_section_widget.dart",
-      "line": 60,
-      "widget_context": "_CardTagSectionWidgetState",
-      "element_kind": "text",
-      "source_kind": "theme-token",
-      "expression": "Theme.of(context).colorScheme.error",
-      "token": "colorScheme.error",
-      "resolved_value_light": "#C02B3A",
-      "resolved_value_dark": "#F2808F"
-    },
-    {
-      "file": "lib/features/card/presentation/widgets/sections/card_tag_section_widget.dart",
-      "line": 98,
+      "line": 136,
       "widget_context": "_CardTagSectionWidgetState",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3912,6 +3857,28 @@
       "token": "colorScheme.onSurfaceVariant",
       "resolved_value_light": "#565C72",
       "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/card/presentation/widgets/sections/card_tag_section_widget.dart",
+      "line": 198,
+      "widget_context": "_CardTagSectionWidgetState",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "Theme.of(context).colorScheme.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/card/presentation/widgets/support/card_failure_labels_widget.dart",
+      "line": 53,
+      "widget_context": "CardWriteFailureTextWidget",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.error",
+      "token": "colorScheme.error",
+      "resolved_value_light": "#C02B3A",
+      "resolved_value_dark": "#F2808F"
     },
     {
       "file": "lib/features/card/presentation/widgets/support/card_sort_control_widget.dart",
@@ -5180,7 +5147,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_action_button.dart",
-      "line": 177,
+      "line": 196,
       "widget_context": "MxActionButton",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -5191,7 +5158,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_action_button.dart",
-      "line": 178,
+      "line": 197,
       "widget_context": "MxActionButton",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -5199,6 +5166,28 @@
       "token": "colorScheme.onError",
       "resolved_value_light": "#FFFFFF",
       "resolved_value_dark": "#2C1319"
+    },
+    {
+      "file": "lib/shared/widgets/mx_action_button.dart",
+      "line": 211,
+      "widget_context": "MxActionButton",
+      "element_kind": "other",
+      "source_kind": "theme-token",
+      "expression": "context.colors.error",
+      "token": "colorScheme.error",
+      "resolved_value_light": "#C02B3A",
+      "resolved_value_dark": "#F2808F"
+    },
+    {
+      "file": "lib/shared/widgets/mx_action_button.dart",
+      "line": 212,
+      "widget_context": "MxActionButton",
+      "element_kind": "border",
+      "source_kind": "theme-token",
+      "expression": "context.colors.error",
+      "token": "colorScheme.error",
+      "resolved_value_light": "#C02B3A",
+      "resolved_value_dark": "#F2808F"
     },
     {
       "file": "lib/shared/widgets/mx_action_sheet.dart",
@@ -5367,7 +5356,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_content_shell.dart",
-      "line": 188,
+      "line": 212,
       "widget_context": "_MxContentShellState",
       "element_kind": "border",
       "source_kind": "theme-token",
@@ -5430,6 +5419,17 @@
       "token": "colorScheme.error",
       "resolved_value_light": "#C02B3A",
       "resolved_value_dark": "#F2808F"
+    },
+    {
+      "file": "lib/shared/widgets/mx_icon_button.dart",
+      "line": 123,
+      "widget_context": "MxIconButton",
+      "element_kind": "other",
+      "source_kind": "theme-token",
+      "expression": "context.semanticColors.warning",
+      "token": "semantic.warning",
+      "resolved_value_light": "#9A6A11",
+      "resolved_value_dark": "#E8D08E"
     },
     {
       "file": "lib/shared/widgets/mx_navigation_bar.dart",
@@ -5510,7 +5510,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_text_field.dart",
-      "line": 153,
+      "line": 217,
       "widget_context": "MxTextField",
       "element_kind": "text",
       "source_kind": "theme-token",

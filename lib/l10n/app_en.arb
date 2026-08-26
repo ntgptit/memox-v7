@@ -1192,9 +1192,9 @@
   "@cardTagControlCharacterError": {
     "description": "Inline error when a pasted tag name carries a control character (BR-93). Not typeable from a keyboard; it arrives by paste."
   },
-  "cardEditorDetailsToggle": "Add details",
+  "cardEditorDetailsToggle": "Add example, hint & pronunciation",
   "@cardEditorDetailsToggle": {
-    "description": "Toggle that expands the optional detail fields in the card editor (W4/W5, BR-95)."
+    "description": "Collapsed label of the inline disclosure holding the optional detail fields (W4/W5, BR-95). Names all three fields: \"Add details\" said nothing about what a tap would reveal, and read like navigation to another screen."
   },
   "cardEditorDetailsLabel": "Details",
   "@cardEditorDetailsLabel": {
@@ -1358,9 +1358,32 @@
   "@cardConflictMoveCrossRoot": {
     "description": "Typed refusal reason for a move (BR-165). Refused even when both trees happen to use the same scheduler."
   },
-  "cardEditorDangerZone": "Danger zone",
-  "@cardEditorDangerZone": {
-    "description": "Heading above the delete action in the card editor (UC-04 A5)."
+  "cardEditorDiscardTitle": "Discard changes?",
+  "@cardEditorDiscardTitle": {
+    "description": "Title of the dialog shown when leaving the card editor with unsaved edits (UC-04 A1)."
+  },
+  "cardEditorDiscardMessage": "Your unsaved changes to this card will be lost. Tags and the flag are already saved.",
+  "@cardEditorDiscardMessage": {
+    "description": "Body of the discard dialog. States what is lost and what is not: tags and the flag write immediately (BR-92, BR-93) and are not part of the draft."
+  },
+  "cardEditorDiscardConfirm": "Discard",
+  "@cardEditorDiscardConfirm": {
+    "description": "Destructive action of the discard dialog: leave and lose the edits."
+  },
+  "cardEditorDiscardCancel": "Keep editing",
+  "@cardEditorDiscardCancel": {
+    "description": "Secondary action of the discard dialog: stay on the editor with the draft intact."
+  },
+  "cardEditorTagAddAction": "Add this tag",
+  "@cardEditorTagAddAction": {
+    "description": "Accessible name and tooltip of the button inside the tag field. Distinct from the field's own label so a screen reader does not announce the field and its button identically."
+  },
+  "cardEditorTagCapReached": "All {max} tags are in use. Remove one to add another.",
+  "@cardEditorTagCapReached": {
+    "description": "Replaces the tag input once the card holds the maximum number of tags (BR-94). Shown instead of a field that would only refuse what is typed into it.",
+    "placeholders": {
+      "max": { "type": "int" }
+    }
   },
   "cardEditorDelete": "Delete card",
   "@cardEditorDelete": {

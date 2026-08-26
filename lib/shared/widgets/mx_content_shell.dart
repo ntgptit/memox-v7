@@ -40,6 +40,7 @@ class MxContentShell extends StatefulWidget {
     this.padding,
     this.isScrollable = false,
     this.floatingActionButton,
+    this.footer,
     super.key,
   });
 
@@ -86,6 +87,28 @@ class MxContentShell extends StatefulWidget {
   final bool isScrollable;
 
   final Widget? floatingActionButton;
+
+  /// A band pinned to the bottom of the screen, below [body] and outside its
+  /// scroll — an action bar, and so far only that.
+  ///
+  /// **The slot exists because the alternative is putting the action in the
+  /// scroll.** The card editor's `Save changes` sat between the detail fields
+  /// and the tag strip: editing a tag scrolled the save button off screen, and
+  /// a save button you cannot see while you work is a save button whose scope
+  /// you have to guess at. Owning the `Scaffold` is what makes this the shell's
+  /// job — a screen cannot pin anything below a body the shell laid out.
+  ///
+  /// **`bottomNavigationBar`, not `bottomSheet` or a `Stack`.** The Scaffold
+  /// lifts it above the keyboard and reports its height to the body, so the
+  /// body's own bottom padding stays the caller's ordinary token instead of a
+  /// hand-computed inset that is wrong at every text scale but one. A
+  /// `bottomSheet` would draw over the content instead of displacing it.
+  ///
+  /// Null for every screen that had no footer before, which is all of them —
+  /// `Scaffold` with a null `bottomNavigationBar` lays out exactly as it did.
+  /// The caller owns the band's own `SafeArea` and padding, because what a
+  /// footer holds is not the shell's business.
+  final Widget? footer;
 
   @override
   State<MxContentShell> createState() => _MxContentShellState();
@@ -137,6 +160,7 @@ class _MxContentShellState extends State<MxContentShell> {
     return Scaffold(
       appBar: _buildAppBar(context),
       floatingActionButton: widget.floatingActionButton,
+      bottomNavigationBar: widget.footer,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

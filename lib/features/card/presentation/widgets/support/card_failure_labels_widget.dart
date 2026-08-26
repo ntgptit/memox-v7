@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../../../core/error/failure.dart';
+import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_failure_labels_widget.dart';
 import '../../../domain/failures/card_conflict_failure.dart';
@@ -28,5 +29,28 @@ extension CardFailureLabels on BuildContext {
       // rule in place.
       _ => l10n.writeErrorMessage,
     },
+  );
+}
+
+/// A failed card write, said once.
+///
+/// **It was written twice, identically.** The editor screen and the tag strip
+/// each carried the same `Semantics(liveRegion:) + Text(mxWriteFailure(...))`
+/// block, and a third caller would have got a third copy. Live, because the
+/// message arrives after the user has already moved on from the button that
+/// caused it — a failure nobody is looking at is a failure nobody is told
+/// about.
+class CardWriteFailureTextWidget extends StatelessWidget {
+  const CardWriteFailureTextWidget({required this.failure, super.key});
+
+  final Failure failure;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    liveRegion: true,
+    child: Text(
+      context.cardWriteFailure(failure),
+      style: context.texts.bodySmall?.copyWith(color: context.colors.error),
+    ),
   );
 }

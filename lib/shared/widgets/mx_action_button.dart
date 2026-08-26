@@ -25,6 +25,25 @@ enum MxActionButtonVariant {
   /// flag beside a colour lets a caller pass one without the other, and the
   /// mismatch is invisible in review.
   destructive,
+
+  /// Destructive, but **not** the action the screen wants taken.
+  ///
+  /// **The weight axis and the danger axis are two axes, and [destructive] had
+  /// been answering both.** A filled red button is the loudest thing a screen
+  /// can draw; that is right in a confirmation dialog, where destroying
+  /// something is the question being asked. It is wrong in a form whose primary
+  /// action is `Save changes`: the card editor drew Delete at exactly the
+  /// weight of Save, so the screen offered two equally-shouted actions and let
+  /// colour alone say which one ends the card. The heading `Danger zone` above
+  /// it was the tell — a label doing the work the button's own weight should
+  /// have done.
+  ///
+  /// So: same role pair, outline instead of fill. It stays unmistakably
+  /// destructive — the edge and the label both carry `error`, so the meaning
+  /// survives without colour vision — while ceding the page's one filled
+  /// emphasis to the primary. The touch target is unchanged; only the container
+  /// is.
+  destructiveSecondary,
 }
 
 /// The app's button.
@@ -179,6 +198,21 @@ class MxActionButton extends StatelessWidget {
         ),
         child: child,
       ),
+      // The same error pair as `destructive`, and the same argument against
+      // `styleFrom` — see `buildOutlinedStyle`. `error` for both the label and
+      // the edge: an outline whose only red is the words would put the whole
+      // signal on one thin string of text.
+      MxActionButtonVariant.destructiveSecondary => OutlinedButton(
+        onPressed: effectiveOnPressed,
+        autofocus: shouldAutofocus,
+        style: buildOutlinedStyle(
+          context.colors,
+          context.semanticColors,
+          label: context.colors.error,
+          border: context.colors.error,
+        ),
+        child: child,
+      ),
     };
   }
 
@@ -210,16 +244,27 @@ class MxActionButton extends StatelessWidget {
     final colors = context.colors;
     final semantic = context.semanticColors;
 
-    // The outlined variant paints no fill, so it restores its ink and its edge
-    // and leaves `backgroundColor` to the theme — naming a fill for it would
-    // mean naming a colour that is not a role.
-    if (variant == MxActionButtonVariant.secondary) {
+    // The outlined variants paint no fill, so they restore their ink and their
+    // edge and leave `backgroundColor` to the theme — naming a fill for them
+    // would mean naming a colour that is not a role. Each keeps its own pair:
+    // a busy delete must not come back in the secondary grey, which would say
+    // the action changed while the user waits for it.
+    final (Color? outlineLabel, Color? outlineBorder) = switch (variant) {
+      MxActionButtonVariant.secondary => (
+        semantic.secondaryAction,
+        semantic.borderSubtle,
+      ),
+      MxActionButtonVariant.destructiveSecondary => (
+        colors.error,
+        colors.error,
+      ),
+      _ => (null, null),
+    };
+    if (outlineLabel != null && outlineBorder != null) {
       return ButtonStyle(
-        foregroundColor: WidgetStatePropertyAll<Color>(
-          semantic.secondaryAction,
-        ),
+        foregroundColor: WidgetStatePropertyAll<Color>(outlineLabel),
         side: WidgetStatePropertyAll<BorderSide>(
-          BorderSide(color: semantic.borderSubtle),
+          BorderSide(color: outlineBorder),
         ),
       );
     }

@@ -46,11 +46,16 @@ void main() {
 
     final field = find.byType(TextField);
 
-    // A blank is refused with the inline error.
+    // **A blank never reaches the controller now, so there is no inline
+    // error to clear.** It used to submit, be refused by BR-93 and paint
+    // `Tag can't be empty` — a message about a rule the user had not tried to
+    // break. The section's own add button is disabled while the field trims to
+    // nothing, so the refusal is stated before the attempt instead of after it.
     await tester.enterText(field, '   ');
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pump();
-    expect(find.textContaining("Tag can't be empty"), findsOneWidget);
+    expect(repository.tagAdds, isEmpty);
+    expect(find.textContaining("Tag can't be empty"), findsNothing);
 
     // The very next valid name must still submit.
     await tester.enterText(field, 'tag1');
@@ -61,6 +66,5 @@ void main() {
       contains('tag1'),
       reason: 'the refused blank left the field unable to submit',
     );
-    expect(find.textContaining("Tag can't be empty"), findsNothing);
   });
 }

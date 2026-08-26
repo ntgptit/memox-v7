@@ -7,8 +7,8 @@
 | **Scope** | Card list, card editor, xoá card, các state của hai màn đó. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), luồng người dùng (`use-cases.md`), giá trị token (`design_system/tokens/`), màn review (M5.1) |
 | **Source of truth for** | Bố cục màn card M4.11 · quyết định UI đã chốt và còn mở của task này |
 | **Depends on** | `document-conventions.md`, `use-cases.md` (UC-04, UC-08), `business-rules.md` (BR-88…BR-94), `data-model.md` (schema v2), `wbs.md` (M4.10at, M4.11) |
-| **Updated by task** | M99.17 |
-| **Last updated** | 2026-08-12 |
+| **Updated by task** | M99.61 |
+| **Last updated** | 2026-08-26 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc đều tham chiếu bằng ID
 (BR-xx, UC-xx) theo `document-conventions.md` §5; chỗ nào wireframe và BR có vẻ
@@ -30,6 +30,7 @@ Nó cũng không phải design reference để đo pixel. Acceptance criteria c�
 | 2026-08-02 | M4.11 | — | Nhận hai ảnh tham chiếu chế độ sửa. W6b vẽ lại đầy đủ: optional details mở sẵn, tag chip, danger zone. Chốt D10–D11. Dải metadata, mic và TTS ghi vào `wbs.md` §Deferred. |
 | 2026-08-02 | M4.10at | — | Nhận màn tham chiếu thứ hai (editor). W4–W6b vẽ lại theo nó. BR-08 siết 2000 → 60/240; BR-95 thêm ba trường phụ. Chốt D6–D9; mở Q12–Q13. |
 | 2026-08-02 | M4.10at | — | Chủ dự án chốt đưa tag, cờ và panel tiến độ vào MVP, chèn M4.10at trước M4.11. Q8–Q11 đóng bằng BR-89…BR-94 và schema v2. D3 sửa: lọc vào scope, sort vẫn ngoài. Nhãn `LEARNING` → `BEGINNING`. |
+| 2026-08-26 | M99.61 | — | W6b vẽ lại theo Card Editor UX hardening: Save ghim đáy và disabled khi pristine, discard guard cho mọi lối rời màn, Delete outlined không heading, disclosure có nhãn ba trường, tag ghi tức thì với nút Add nhìn thấy được. Chốt D27. D6 và D10 giữ nguyên lịch sử, chỉ phần W6b bị supersede. Chế độ tạo (W4) **không** đổi. |
 | 2026-08-12 | M99.17 | Codex | Đồng bộ màn đã triển khai và định hướng quản lý dữ liệu: tạo thủ công là luồng nhỏ qua app-bar `+`; Back một dòng là summary, tap mở editor để xem đủ; search/filter/sort phục vụ tìm card; import/export là hướng bulk-management sau MVP. |
 
 ---
@@ -46,6 +47,7 @@ Nó cũng không phải design reference để đo pixel. Acceptance criteria c�
 | D7 | Ba trường phụ nằm trong một **disclosure đóng mặc định** | BR-95 cho cả ba là tuỳ chọn. Mở sẵn biến form hai ô thành form năm ô cho việc thường gặp nhất. | 2026-08-02 |
 | D8 | Deck hiện **read-only**, không phải picker | Đổi deck đích nghĩa là thẻ có thể sang root khác scheduler hoặc khác generation — đúng thứ BR-73/BR-74 đang chặn. Deck là ngữ cảnh màn đang mở. | 2026-08-02 |
 | D10 | Xoá thẻ có **hai lối**: chọn nhiều ở danh sách, và danger zone trong editor | Ảnh tham chiếu đặt danger zone trong editor. Giữ cả hai vì chúng phục vụ hai việc khác nhau — dọn hàng loạt, và bỏ một thẻ đang đọc. **Sửa ở M99.16:** lối danh sách không còn là action sheet một-thẻ mà là chế độ chọn nhiều (D13); action sheet đó chưa bao giờ tồn tại trong production. | 2026-08-02, sửa 2026-08-12 |
+| D27 | Ở **chế độ sửa**, `Save changes` là hành động ghim đáy duy nhất và bị **disable khi form còn pristine**; Delete là outlined destructive nằm trong thân cuộn, không có heading `Danger zone` | Ba việc khác nhau trong một quyết định, vì chúng là cùng một lỗi thứ bậc. **(a)** Save cũ nằm giữa Optional details và Tags: nó cuộn mất khi người dùng sửa tag, và vị trí *trên* Tags ngụ ý phạm vi lưu gồm cả tag — trong khi tag ghi tức thì (BR-93), tức là ngụ ý sai theo hướng mất dữ liệu. **(b)** Save luôn bấm được thì không nói gì về việc có gì để lưu; bấm nó ghi đè thẻ bằng chính nó. **(c)** Delete cũ dùng filled `error`, đúng bằng độ nhấn của Save, nên màn hình có hai hành động cùng hét to và chỉ còn màu để phân biệt cái nào kết thúc thẻ. Heading `Danger zone` chính là dấu hiệu: một cái nhãn đi làm việc mà trọng lượng của nút lẽ ra phải làm. **Supersede D6 chỉ cho W6b** — chế độ tạo vẫn theo D6 và không thuộc task này. | 2026-08-26 |
 | D13 | Long-press ở danh sách **vào chế độ chọn**, không mở action sheet | Đây là cử chỉ Android chuẩn cho selection, và nó là thứ đang thiếu để quản lý hàng loạt (BR-167). Vì cử chỉ không có affordance, app bar có thêm action **Select** nhìn thấy được. Thanh hành động ngữ cảnh là một **băng phía trên danh sách** chứ không phải app bar bị thay: ở 320px với `textScaler` 2.0, số đã chọn cộng năm hành động không nằm vừa một hàng 56pt, và `AppBar` xử lý việc đó bằng cách tràn chứ không xuống dòng. | 2026-08-12 |
 | D11 | `OPTIONAL DETAILS` **đóng khi rỗng, mở khi đã có nội dung** | Ảnh tạo cho thấy disclosure đóng, ảnh sửa cho thấy ba ô mở sẵn — không mâu thuẫn, mà là cùng một quy tắc ở hai trạng thái. Đóng một ô đang có chữ là giấu nội dung của chính người dùng. | 2026-08-02 |
 | D9 | **Không** có nút micro nhập giọng nói | Ảnh tham chiếu có. Nó cần plugin, quyền hệ điều hành và một luồng lỗi riêng; không nằm trong scope M4.11 và gần với media, vốn đã hoãn. | 2026-08-02 |
@@ -495,77 +497,80 @@ hạn ngạch phải dùng hết.
 
 ## 11. W6b · Editor — chế độ sửa
 
-Theo hai ảnh tham chiếu chủ dự án đưa (ảnh chụp, 2026-08-02).
+Vẽ lại 2026-08-26 theo D27. Bản 2026-08-02 (dựng từ hai ảnh tham chiếu) bị
+supersede **chỉ ở màn này**; W4 chế độ tạo giữ nguyên.
 
 ```
 ┌──────────────────────────────────────────────┐
-│  ←   Edit flashcard                   Save   │  ← chứ không phải ✕
+│  ✕   Edit flashcard                     ⚑    │  ✕ có discard guard; ⚑ ghi ngay
 ├──────────────────────────────────────────────┤
-│  Library › Korean › TOPIK II — Vocab › Edit  │
-│                                              │
-│  ▤ TOPIK II — Vocab           ● REQUIRED     │  read-only (D8)
 │                                              │
 │  FRONT · KOREAN   Required           3 / 60  │
 │  ┌────────────────────────────────────────┐  │
-│  │ 연구자                                 │  │
+│  │ 연구자                                 │  │  value = titleLarge
 │  └────────────────────────────────────────┘  │
 │                                              │
 │  BACK · MEANING   Required          27 / 240 │
 │  ┌────────────────────────────────────────┐  │
-│  │ Researcher / Nhà nghiên cứu            │  │
+│  │ Researcher / Nhà nghiên cứu            │  │  value = body
 │  └────────────────────────────────────────┘  │
+│  Editing the text doesn't change this        │  helperText của Back (BR-10)
+│  card's study progress.                      │
 │                                              │
-│  OPTIONAL DETAILS                            │  mở sẵn, không disclosure
+│  Add example, hint & pronunciation      ⌄    │  hàng ≥48dp, expanded semantics
 │                                              │
-│  ▭ EXAMPLE SENTENCE · optional               │
+│  TAGS                                 3 / 10 │
+│  ⟨TOPIK II ✕⟩ ⟨noun ✕⟩ ⟨people ✕⟩            │  ✕ có băng chạm 48×48
+│  ┌────────────────────────────────────┬───┐  │
+│  │ Add tag                            │ + │  │  + = trailing action
+│  └────────────────────────────────────┴───┘  │
+│                                              │
 │  ┌────────────────────────────────────────┐  │
-│  │ 그는 유명한 언어학 연구자이다.         │  │
-│  └────────────────────────────────────────┘  │
-│                                              │
-│  ✧ HINT · optional                           │
-│  ┌────────────────────────────────────────┐  │
-│  │ 연구 = research · 자 = person          │  │
-│  └────────────────────────────────────────┘  │
-│                                              │
-│  ◁) PRONUNCIATION · ROMANIZATION · optional  │
-│  ┌────────────────────────────────────────┐  │
-│  │ yeon-gu-ja                             │  │
-│  └────────────────────────────────────────┘  │
-│                                              │
-│  ⌷ TAGS · optional                    3 / 10 │
-│  ⟨TOPIK II ✕⟩ ⟨noun ✕⟩ ⟨people ✕⟩            │
-│  ┌ ─ ─ ─ ─ ─ ─ ┐                             │
-│    +  Add tag                                │
-│  └ ─ ─ ─ ─ ─ ─ ┘                             │
-│                                              │
-│  ────────────────────────────────────────    │  divider
-│                                              │
-│  ⚠ DANGER ZONE                               │  semantic.danger
-│  ┌────────────────────────────────────────┐  │
-│  │ Delete this flashcard                  │  │  title-sm
-│  │ Removes the card and its review        │  │
-│  │ history from TOPIK II — Vocab. Other   │  │
-│  │ cards in this deck stay.               │  │
-│  │  ┌──────────────────────────┐          │  │
-│  │  │  🗑  Delete flashcard     │          │  │  outlined destructive
-│  │  └──────────────────────────┘          │  │
+│  │            Delete card                 │  │  outlined destructive
 │  └────────────────────────────────────────┘  │
 │                                              │
 ├──────────────────────────────────────────────┤
-│  ┌──────────────┐  ┌──────────────────────┐  │
-│  │   Cancel     │  │  ✓  Save changes     │  │
-│  └──────────────┘  └──────────────────────┘  │
+│  ┌────────────────────────────────────────┐  │
+│  │             Save changes               │  │  ghim đáy; disabled khi pristine
+│  └────────────────────────────────────────┘  │
 └──────────────────────────────────────────────┘
 ```
 
-Khác chế độ tạo ở năm chỗ: `←` thay `✕`, title, breadcrumb kết bằng `Edit`,
-`OPTIONAL DETAILS` **mở sẵn** thay vì disclosure, và một khối danger zone.
-Không có `Save & add` — thêm liên tiếp là luồng của chế độ tạo.
+### Cái gì thuộc Save, và cái gì không
 
-**`Cancel` quay lại ở đây, và nó không thừa như ở chế độ tạo.** Ở W4 tôi bỏ
-`Cancel` vì `✕` đã làm đúng việc đó. Ở đây thanh dưới có một nút phá huỷ ở trên
-nó, nên một nút thoát rõ ràng cạnh `Save changes` là thứ giữ cho người dùng
-không phải tìm đường ra ở góc màn.
+Đây là sự thật hay bị đọc sai nhất ở màn này, nên nó được viết ra chứ không suy
+từ hình.
+
+| Thứ | Ghi khi nào | Có làm Save sáng lên không |
+|---|---|---|
+| Front, Back, Example, Hint, Pronunciation | khi bấm `Save changes` | **có** — đúng năm trường này |
+| Tag (thêm/xoá) | ngay lập tức (BR-93) | không |
+| Cờ ⚑ | ngay lập tức (BR-92) | không |
+| Chữ đang gõ trong ô Add tag | chưa ghi | **không** — nhưng có bật discard guard |
+| Mở/đóng `Add example, hint & pronunciation` | không ghi gì | không |
+
+Dòng thứ tư là dòng phải đọc kỹ: chữ chưa submit **là** việc người dùng sẽ mất,
+nên nó tham gia câu hỏi lúc rời màn; nó **không** thuộc Save, nên một nút Save
+sáng lên vì nó sẽ hứa một việc mà nút đó không làm.
+
+Dirty là so sánh với ảnh chụp lúc nạp thẻ, không phải cờ "đã từng sửa": gõ một
+chữ rồi xoá đi thì Save tắt lại, vì đó mới là trạng thái người dùng đang ở.
+Khoảng trắng thừa không tính — `parseCardForm` trim, nên bản ghi sẽ y hệt.
+
+### Rời màn có một cửa
+
+`✕` và cử chỉ Back của hệ thống đi vào **cùng một** coordinator:
+
+- pristine → rời ngay, không hỏi;
+- có nội dung dirty **hoặc** có chữ trong ô Add tag → `MxConfirmDialog`
+  `Discard changes?` / `Keep editing` · `Discard`, tone `warning`, focus rơi vào
+  `Keep editing`;
+- đang submit → không rời, không mở dialog;
+- Back hai lần liên tiếp → **một** dialog;
+- save thành công → rời đúng một lần, không hỏi discard.
+
+Thông điệp discard nói cả cái **không** mất: tag và cờ đã ghi rồi. Người đọc
+"unsaved changes will be lost" không có cách nào tự biết cái tag vừa thêm vẫn còn.
 
 ### Ba khối trong ảnh nhưng không có ở đây
 
@@ -578,25 +583,29 @@ Ghi ra để lần sau không ai tưởng là bỏ sót. Cả ba nằm ở
 | Icon mic trong ô FRONT | Nhập giọng nói — plugin, quyền OS, luồng lỗi riêng (D9) |
 | Icon loa trong ô PRONUNCIATION | Phát âm bằng TTS — cùng lý do |
 
-Hai icon còn lại **có** vẽ: `▭` `✧` `◁)` là icon nhãn của ba trường phụ, không
-phải nút bấm. Chúng chỉ trang trí nhãn, nên không kéo theo gì.
+### Bốn thứ của bản 2026-08-02 không còn đúng
+
+| Bản cũ | Bây giờ | Vì sao |
+|---|---|---|
+| `←` ở app bar | `✕` | `←` nói "quay lại", nhưng ở đây rời màn có thể mất draft. `✕` là "đóng cái này", và nó là cái có guard. Breadcrumb không vẽ ở màn này nên D-của-M4.10ar về `←` không áp dụng. |
+| `Cancel` cạnh `Save changes` ở thanh đáy | chỉ `Save changes` | Thanh đáy chỉ chứa hành động chính. Lối thoát là `✕`, và nó đã hỏi trước khi vứt. Hai nút ở đáy làm nút phá huỷ ở trên (`Delete card`) và nút thoát nằm cùng một vùng mắt. |
+| `OPTIONAL DETAILS` mở sẵn, không disclosure | disclosure có nhãn `Add example, hint & pronunciation` | D11 vẫn đúng và vẫn chạy: thẻ **đã có** detail thì mở sẵn. Cái đổi là nhãn lúc đóng — `Add details` không nói tap vào sẽ hiện ra gì. |
+| Khối `⚠ DANGER ZONE` với tiêu đề và câu mô tả | một nút outlined `Delete card` | Câu mô tả hậu quả vẫn còn — nó nằm trong dialog xác nhận ở W7, đúng chỗ người dùng đang quyết định. Heading thì không: xem D27(c). |
 
 ### Xoá thẻ có hai lối, và đó là chủ đích
 
 | Lối | Ở đâu | Dùng khi |
 |---|---|---|
 | Long-press hàng → chế độ chọn (W9) | danh sách | Dọn nhiều thẻ cùng lúc, kể cả toàn bộ tập đã lọc |
-| Danger zone | editor | Đang đọc nội dung thẻ và quyết định bỏ nó |
+| Nút `Delete card` trong editor | editor | Đang đọc nội dung thẻ và quyết định bỏ nó |
 
-Cả hai đi qua **cùng một dialog xác nhận** ở W7. Hai lối vào một hành động phá
-huỷ là thứ phải cân nhắc, và cái mua được ở đây là: người dọn hàng loạt không
-phải mở editor mười lần, còn người đang phân vân thì thấy nút xoá ở đúng chỗ họ
-đang nhìn nội dung.
+Cả hai đi qua **cùng một** dialog xác nhận ở W7, cùng soft-delete và cùng cửa sổ
+Undo (BR-256). Đổi outlined **không** đổi bất cứ điều gì trong câu đó — hạ trọng
+lượng thị giác mà đồng thời làm việc xoá dễ xảy ra hơn là đánh đổi tệ nhất có thể.
 
-Câu mô tả trong danger zone nói rõ **cái gì mất và cái gì ở lại** — history mất
-theo, các thẻ khác trong deck thì không. Đó là hậu quả người dùng không đoán
-được từ chữ "xoá". Xoá thẻ **cuối cùng** còn một hậu quả nữa: deck mất loại nội
-dung và quay về chưa định loại (BR-163).
+Câu mô tả trong dialog nói rõ **cái gì mất và cái gì ở lại** — history mất theo,
+các thẻ khác trong deck thì không. Xoá thẻ **cuối cùng** còn một hậu quả nữa:
+deck mất loại nội dung và quay về chưa định loại (BR-163).
 
 ---
 
