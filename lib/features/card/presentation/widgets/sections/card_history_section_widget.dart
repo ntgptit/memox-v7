@@ -28,6 +28,12 @@ import '../items/card_history_event_widget.dart';
 /// **Not scrollable itself.** It is a band of the screen's single scroll view,
 /// so the reader scrolls one surface rather than fighting a list nested inside
 /// a page (M4.15 V4).
+///
+/// **The timeline sits on a card; the heading does not.** The events, their
+/// connector and the tail are one object and now say so, the same way the
+/// schedule panel above does — a band of dots and dates floating on the page
+/// ground had nothing holding it together. The heading stays outside, on the
+/// page, because it names the block rather than belonging to it.
 class CardHistorySectionWidget extends StatelessWidget {
   const CardHistorySectionWidget({
     required this.state,
@@ -48,15 +54,37 @@ class CardHistorySectionWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        Text(context.l10n.cardHistoryTitle, style: context.texts.titleSmall),
-        const SizedBox(height: AppSpacing.md),
-        if (state.isLoadingInitial)
-          MxLoadingState(semanticsLabel: context.l10n.cardHistoryLoadingLabel)
-        else if (state.isEmpty)
-          const _EmptyHistory()
-        else
-          ..._groups(context),
-        _Tail(state: state, onLoadMore: onLoadMore),
+        Padding(
+          padding: const EdgeInsets.only(bottom: AppSpacing.md),
+          child: Text(
+            context.l10n.cardHistoryTitle.toUpperCase(),
+            style: context.textStyles.sectionLabel.copyWith(
+              color: context.colors.onSurfaceVariant,
+            ),
+          ),
+        ),
+        MxCard(
+          // Flat, as D20 asks of every card in a scrolling column: the hairline
+          // is what separates it from the page. Only the hero panel above takes
+          // a shadow, because it is the one surface the screen is built around
+          // and two lifted cards in one column read as a rendering fault.
+          elevation: AppElevation.none,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              if (state.isLoadingInitial)
+                MxLoadingState(
+                  semanticsLabel: context.l10n.cardHistoryLoadingLabel,
+                )
+              else if (state.isEmpty)
+                const _EmptyHistory()
+              else
+                ..._groups(context),
+              _Tail(state: state, onLoadMore: onLoadMore),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -188,9 +216,12 @@ class _GenerationHeading extends StatelessWidget {
           isCurrent
               ? context.l10n.cardHistoryCurrentGenerationLabel
               : context.l10n.cardHistoryGenerationLabel(generation),
-          style: context.texts.labelSmall?.copyWith(
+          // A sub-label under the band's own heading, not a second heading:
+          // `bodySmall` on the muted ink, where it used to be `labelSmall` at
+          // w600 — the same rung as the timestamps it sits above, and bolder
+          // than them, which made a grouping read as an event.
+          style: context.texts.bodySmall?.copyWith(
             color: context.colors.onSurfaceVariant,
-            fontWeight: FontWeight.w600,
           ),
         ),
       ),

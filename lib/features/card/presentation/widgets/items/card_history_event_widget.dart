@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_stroke.dart';
+import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../domain/models/card_history_event_model.dart';
@@ -46,6 +47,7 @@ class CardHistoryEventWidget extends StatelessWidget {
     final timestamp = context.cardHistoryTimestamp(event.answeredAt);
     final scheduleLines = context.cardHistoryScheduleLines(event);
     final marks = context.cardHistoryMarks(event);
+    final outcomeColor = context.cardHistoryActionColor(event.action);
 
     return Semantics(
       container: true,
@@ -69,7 +71,7 @@ class CardHistoryEventWidget extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              _Marker(isFirst: isFirst, isLast: isLast),
+              _Marker(isFirst: isFirst, isLast: isLast, color: outcomeColor),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Padding(
@@ -85,25 +87,21 @@ class CardHistoryEventWidget extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        // Mode, then kind, then action: where the turn came
-                        // from, what it was for, what was answered. Joined with
-                        // the same separator the timestamp uses so the two
-                        // lines read as one block.
-                        <String>[
-                          context.cardHistoryMode(event.mode),
-                          context.cardHistoryKind(event.kind),
-                          context.cardHistoryAction(event.action),
-                        ].join(_inlineSeparator),
-                        style: context.texts.bodyMedium,
-                      ),
+                      _OutcomeLine(event: event, color: outcomeColor),
                       for (final line in scheduleLines)
                         Padding(
                           padding: const EdgeInsets.only(top: AppSpacing.xs),
                           child: Text(
-                            line,
+                            line.text,
                             style: context.texts.bodySmall?.copyWith(
-                              color: context.colors.onSurfaceVariant,
+                              color: line.isProgression
+                                  // The ladder the reader is tracking, in the
+                                  // same accent the schedule panel gives the
+                                  // box above. `Next due` and `Schedule
+                                  // unchanged` stay quiet: they are the
+                                  // timetable, not a step along it.
+                                  ? context.semanticColors.primaryAccent
+                                  : context.colors.onSurfaceVariant,
                             ),
                           ),
                         ),
@@ -131,18 +129,28 @@ class CardHistoryEventWidget extends StatelessWidget {
 
 /// The dot, the connector under it, and the stub above it.
 ///
-/// The connector is what makes the band read as a timeline rather than a table;
-/// the dot is `onSurfaceVariant` so the mark reads as content.
+/// **The dot carries the outcome.** It used to be `onSurfaceVariant` on every
+/// row, which made a column of dots decoration: the band had a shape and no
+/// information in it. It is now the same colour as the action word on the line
+/// beside it — success, warning or danger — so a reader scanning the timeline
+/// sees where this card went wrong before reading a single word, and a reader
+/// who cannot use colour reads the word (D5).
 ///
-/// **The line is `borderControl`, not `borderSubtle`.** The subtle token was
-/// measured against a *card* surface; this band has no card, so on the page
-/// ground it falls to 1.38:1 in light — a line carrying the band's whole
-/// structure, drawn at a weight nobody can see. `borderControl` is the token
-/// minted for the 3:1 floor and measures 3.02:1 light / 3.41:1 dark there.
+/// **The line is `borderSubtle` again.** It was `borderControl` because this
+/// band had no card under it and the subtle token measures 1.38:1 against the
+/// light *page*; the timeline now sits on a `surface` card, which is the ground
+/// `borderSubtle` was measured against in the first place.
 class _Marker extends StatelessWidget {
-  const _Marker({required this.isLast, required this.isFirst});
+  const _Marker({
+    required this.isLast,
+    required this.isFirst,
+    required this.color,
+  });
 
   final bool isLast;
+
+  /// The outcome's colour — see the class doc.
+  final Color color;
 
   /// Whether the connector should start at this row. The line runs *between*
   /// events, so every row but the first opens with a stub above its dot —
@@ -158,7 +166,7 @@ class _Marker extends StatelessWidget {
     final inset = (firstLine - _markerSize) / 2;
     final line = Container(
       width: AppStroke.hairline,
-      color: context.semanticColors.borderControl,
+      color: context.semanticColors.borderSubtle,
     );
 
     return SizedBox(
@@ -172,12 +180,61 @@ class _Marker extends StatelessWidget {
           Container(
             width: _markerSize,
             height: _markerSize,
-            decoration: BoxDecoration(
-              color: context.colors.onSurfaceVariant,
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
           if (!isLast) Expanded(child: Center(child: line)),
+        ],
+      ),
+    );
+  }
+}
+
+/// Where the turn came from, what it was for, and what was answered — one line,
+/// three ranks.
+///
+/// **The action is the sentence and the other two are its context.** Mode and
+/// kind used to be set exactly like the answer, so `Self-assess · Scheduled ·
+/// Remembered` read as three equal facts and the only one a reader is scanning
+/// for was buried in the middle of them. The answer keeps `bodyMedium`, takes
+/// the weight and takes the outcome colour; the other two drop to `bodySmall` on
+/// the muted ink.
+///
+/// **One `Text.rich`, not three `Text`s in a `Row`.** The three parts are one
+/// sentence and must wrap as one at 320dp with a 2.0 scaler — a row of three
+/// would either overflow or break in three places of its own choosing.
+class _OutcomeLine extends StatelessWidget {
+  const _OutcomeLine({required this.event, required this.color});
+
+  final CardHistoryEventModel event;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final muted = context.texts.bodySmall?.copyWith(
+      color: context.colors.onSurfaceVariant,
+    );
+    final answer = context.texts.bodyMedium;
+
+    return Text.rich(
+      TextSpan(
+        children: <InlineSpan>[
+          TextSpan(text: context.cardHistoryMode(event.mode), style: muted),
+          TextSpan(text: _inlineSeparator, style: muted),
+          TextSpan(text: context.cardHistoryKind(event.kind), style: muted),
+          TextSpan(text: _inlineSeparator, style: muted),
+          TextSpan(
+            text: context.cardHistoryAction(event.action),
+            // **`withWeight`, not `copyWith(fontWeight:)`.** The body face is a
+            // variable font, so `copyWith` alone moves the declared weight
+            // without moving the `wght` axis — it renders at the old weight and
+            // reports the new one.
+            style: answer == null
+                ? null
+                : AppTypography.withWeight(
+                    answer,
+                    FontWeight.w600,
+                  ).copyWith(color: color),
+          ),
         ],
       ),
     );

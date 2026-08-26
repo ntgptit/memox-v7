@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/error/failure.dart';
 import '../../../../core/navigation/route_names.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/theme_context_extension.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
@@ -112,6 +113,11 @@ class CardDetailScreen extends ConsumerWidget {
             icon: Icons.edit_outlined,
             semanticLabel: context.l10n.cardDetailEditAction,
             tooltip: context.l10n.cardDetailEditAction,
+            // The screen's one action, in the brand hue. `iconButtonTheme` pins
+            // every icon button to `onSurfaceVariant`, which is right for a bar
+            // full of affordances and wrong for a bar with exactly one — Edit
+            // was the same grey as the labels under it.
+            accent: context.colors.primary,
             onPressed: () => _openEditor(context),
           ),
       ],
@@ -193,9 +199,14 @@ class _Body extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           CardDetailContentWidget(card: detail.card),
-          const SizedBox(height: AppSpacing.xxl),
+          // **`xl`, where it used to be `xxl`.** The gap is the one above a
+          // section heading now rather than the whole separation between two
+          // un-headed bands: the heading and the card under it carry the break,
+          // so the space above it only has to say a new section starts. The two
+          // panels *inside* a band sit `lg` apart, which is the step below.
+          const SizedBox(height: AppSpacing.xl),
           CardDetailStateWidget(detail: detail),
-          const SizedBox(height: AppSpacing.xxl),
+          const SizedBox(height: AppSpacing.xl),
           CardHistorySectionWidget(
             state: history,
             onLoadMore: () => _loadMoreHistory(ref, cardId),

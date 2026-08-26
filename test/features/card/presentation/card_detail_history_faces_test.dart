@@ -60,7 +60,13 @@ void main() {
       await pumpCardDetail(tester, repository);
       await tester.pumpAndSettle();
 
-      expect(find.text('Recall · Scheduled · Remembered'), findsOneWidget);
+      // `findRichText`, because the line is one `Text.rich`: the action is set
+      // in its own weight and its outcome colour, so the three facts are three
+      // spans of one sentence rather than one flat string.
+      expect(
+        find.text('Recall · Scheduled · Remembered', findRichText: true),
+        findsOneWidget,
+      );
       expect(find.text('Box 2 → 3'), findsOneWidget);
       expect(find.text('Timed out'), findsOneWidget);
     });
@@ -158,7 +164,10 @@ void main() {
 
       expect(find.text('The next page could not be loaded.'), findsOneWidget);
       expect(find.text('Retry'), findsOneWidget);
-      expect(find.textContaining('Self-assess'), findsNWidgets(3));
+      expect(
+        find.textContaining('Self-assess', findRichText: true),
+        findsNWidgets(3),
+      );
 
       await tester.ensureVisible(find.text('Retry'));
       await tester.pumpAndSettle();
@@ -166,7 +175,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Retry'), findsNothing);
-      expect(find.textContaining('Self-assess'), findsNWidgets(5));
+      expect(
+        find.textContaining('Self-assess', findRichText: true),
+        findsNWidgets(5),
+      );
     });
 
     testWidgets('timestamps are formatted for the active locale', (
@@ -181,8 +193,11 @@ void main() {
       // The Vietnamese labels prove the whole band went through the locale, and
       // the date beside them came from MaterialLocalizations rather than a
       // hand-built string.
-      expect(find.text('Lịch sử học'), findsOneWidget);
-      expect(find.textContaining('Tự đánh giá'), findsOneWidget);
+      expect(find.text('LỊCH SỬ HỌC'), findsOneWidget);
+      expect(
+        find.textContaining('Tự đánh giá', findRichText: true),
+        findsOneWidget,
+      );
     });
   });
 

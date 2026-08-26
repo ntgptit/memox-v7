@@ -29,6 +29,7 @@ class MxIconButton extends StatelessWidget {
     this.tooltip,
     this.isCompact = false,
     this.isFilled = false,
+    this.accent,
     super.key,
   });
 
@@ -64,6 +65,18 @@ class MxIconButton extends StatelessWidget {
   /// only the container changes, so a bar never carries two of these.
   final bool isFilled;
 
+  /// The glyph's colour, when the theme's is wrong for this one button.
+  ///
+  /// Null everywhere it should be: `iconButtonTheme` pins the foreground to
+  /// `onSurfaceVariant`, which is right for a bar carrying several affordances
+  /// and wrong for a bar carrying exactly one — a lone action set in the same
+  /// ink as the screen's secondary glyphs does not read as the action. Only the
+  /// foreground moves; size, shape and the 48 floor still come from the theme.
+  ///
+  /// Ignored when [isFilled] is set: that shape states its own pair, and a bar
+  /// never carries two prominent actions anyway.
+  final Color? accent;
+
   @override
   Widget build(BuildContext context) {
     if (isFilled) {
@@ -86,6 +99,12 @@ class MxIconButton extends StatelessWidget {
     return IconButton(
       onPressed: onPressed,
       tooltip: tooltip ?? semanticLabel,
+      // Only the foreground is stated, and only when a caller asks: everything
+      // a null leaves alone still resolves through `iconButtonTheme`, so this
+      // is the theme's button in another ink rather than a second button style.
+      style: accent == null
+          ? null
+          : IconButton.styleFrom(foregroundColor: accent),
       constraints: isCompact
           ? const BoxConstraints.tightFor(
               width: AppSpacing.minimumTouchTarget,

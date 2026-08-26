@@ -3,6 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_spacing.dart';
 import 'package:memox/features/card/domain/models/card_history_page_model.dart';
 import 'package:memox/features/card/presentation/widgets/items/card_history_event_widget.dart';
+import 'package:memox/features/card/presentation/widgets/sections/card_detail_content_widget.dart';
+import 'package:memox/features/card/presentation/widgets/sections/card_detail_state_widget.dart';
+import 'package:memox/features/card/presentation/widgets/sections/card_history_section_widget.dart';
 
 import 'support/card_detail_harness.dart';
 import 'support/fake_card_detail_repository.dart';
@@ -40,12 +43,20 @@ void main() {
     await pumpCardDetail(tester, loaded());
     await tester.pumpAndSettle();
 
-    final front = tester.getRect(find.text('안녕하세요'));
-    final stateHeading = tester.getRect(find.text('Current state'));
-    final historyHeading = tester.getRect(find.text('Study history'));
+    // **The bands' own edges, not the text inside them.** Two of the three now
+    // hold their content in a card, so the text sits one padding in — measuring
+    // it would compare the panel's edge on one band against the card's inner
+    // edge on the next, and read the difference as drift.
+    final content = tester.getRect(find.byType(CardDetailContentWidget));
+    final state = tester.getRect(find.byType(CardDetailStateWidget));
+    final history = tester.getRect(find.byType(CardHistorySectionWidget));
 
-    expect(stateHeading.left, front.left);
-    expect(historyHeading.left, front.left);
+    expect(state.left, content.left);
+    expect(history.left, content.left);
+
+    // And the headings sit on that same edge, outside the cards they name.
+    expect(tester.getRect(find.text('CURRENT STATE')).left, content.left);
+    expect(tester.getRect(find.text('STUDY HISTORY')).left, content.left);
   });
 
   testWidgets('G2 · every value of the schedule grid starts at the same x', (
@@ -69,7 +80,10 @@ void main() {
     await pumpCardDetail(tester, loaded());
     await tester.pumpAndSettle();
 
-    final lines = find.textContaining('Self-assess · Scheduled');
+    final lines = find.textContaining(
+      'Self-assess · Scheduled',
+      findRichText: true,
+    );
     expect(lines, findsNWidgets(3));
     final lefts = <double>{
       for (var index = 0; index < 3; index++)
@@ -119,16 +133,19 @@ void main() {
     await pumpCardDetail(tester, loaded(hasMore: true));
     await tester.pumpAndSettle();
 
-    final heading = tester.getRect(find.text('Study history'));
+    final firstEvent = tester.getRect(
+      find.byType(CardHistoryEventWidget).first,
+    );
     await tester.ensureVisible(find.text('Load more'));
     await tester.pumpAndSettle();
     final loadMore = tester.getRect(find.text('Load more'));
 
-    // The tail sits on the band's own edge, not centred and not indented into
-    // the events' text column — the marker column is the timeline's, and the
-    // tail is not an event. The loading and error faces that replace it inherit
-    // the slot, which `card_detail_history_faces_test.dart` measures.
-    expect(loadMore.left, heading.left);
+    // The tail sits on the timeline card's own content edge — the same x the
+    // events' marker column starts at — not centred and not indented into the
+    // events' *text* column, because the marker column is the timeline's and
+    // the tail is not an event. The loading and error faces that replace it
+    // inherit the slot, which `card_detail_history_faces_test.dart` measures.
+    expect(loadMore.left, firstEvent.left);
   });
 
   testWidgets('the schedule grid stacks rather than squeezing its value '
@@ -178,7 +195,12 @@ void main() {
 
     // `mxScreenGutter`, the same helper every other screen takes its gutter
     // from — a hardcoded 16 here put this screen 4dp wider than the list it is
-    // opened from, on the width where those 4dp matter most.
-    expect(tester.getRect(find.text('안녕하세요')).left, AppSpacing.md);
+    // opened from, on the width where those 4dp matter most. Measured on the
+    // hero panel's edge rather than on the word inside it: the card's own
+    // padding is what separates the two now.
+    expect(
+      tester.getRect(find.byType(CardDetailContentWidget)).left,
+      AppSpacing.md,
+    );
   });
 }

@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
+| **Updated by task** | M99.60 (Card Detail — bố cục và màu, đảo lại D27); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
 | **Last updated** | 2026-08-26 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -12851,6 +12851,105 @@ của M2.
 - **Tests required:** `mx_alert_dialog_test.dart` (mới), `mx_stress_test.dart`,
   `widgetbook/test/catalog_smoke_test.dart`.
 - **Checklist phases:** 7, 13, 14
+
+### M99.60 · Card Detail — bố cục và màu, không đổi một dòng dữ liệu nào
+
+- **Status:** **in-progress** — code và test xong, còn nợ goldens `test/demo/`
+  (phải regenerate trên Windows) và gallery. Xem *Verification*.
+- **Goal:** Màn chi tiết thẻ đang là một dải chữ phẳng: mọi thông tin cùng nền
+  trắng, cùng cỡ chữ, phân cách bằng khoảng trắng, và không có màu thương hiệu
+  nào ngoài đen với xám. Đưa hệ token của app vào và chia màn thành các khối đọc
+  được — **chỉ bố cục và màu**.
+- **Scope:** `presentation/` của feature Card cộng một tham số tuỳ chọn trên
+  `MxIconButton`. **Không** thêm/bớt/đổi tên field, nút hay dữ liệu; **không**
+  đúc màu mới; mọi spacing là bội số 4 qua `AppSpacing`.
+- **Output:** `card_detail_screen.dart`, `card_detail_content_widget.dart`,
+  `card_detail_state_widget.dart`, `card_history_section_widget.dart`,
+  `card_history_event_widget.dart`, `card_history_labels_widget.dart`,
+  `lib/shared/widgets/mx_icon_button.dart`;
+  `test/features/card/presentation/card_detail_alignment_test.dart`,
+  `card_detail_history_faces_test.dart`; `docs/reviews/design-parity-checklist.md`
+  (hàng D27).
+- **Đây là lần đảo lại D27, do chính chủ dự án yêu cầu (2026-08-26).** Hàng D27
+  được ghi ở M99.31 với câu "ghi ở đây để lần sau không ai *sửa* nó thành card vì
+  tưởng là seam". Lập luận đó đúng về ý định và sai về kết quả: không bọc gì thì
+  ba band không đọc thành *một* câu chuyện, chúng đọc thành **không có** câu
+  chuyện nào. D27 nay là **resolved**, không phải divergence.
+- **Sáu khối, và cái gì đi vào cái gì:**
+  - Nội dung thẻ thành **hero panel** — `MxCard` viền `borderAccent`, bề mặt duy
+    nhất của màn còn giữ `AppElevation.card`. Mặt trước dùng `cardPrompt` (chính
+    style mặt trước của thẻ ôn tập), nghĩa dùng `titleMedium`, ba field tuỳ chọn
+    có nhãn `sectionLabel` chữ hoa trên giá trị `bodyLarge`, ngăn với cặp
+    từ/nghĩa bằng `Divider(borderSubtle)`.
+  - **Flagged thành chip** cùng `Wrap` với badge trạng thái: nền `dueContainer`,
+    glyph ấm, nhãn `onDueContainer`. Vẫn **chỉ hiển thị**, không thành nút
+    (BR-92, BR-239).
+  - Bảng số liệu SRS thành khối `surfaceMuted` bo `AppRadius.md`, padding `lg`;
+    nhãn `bodyMedium` trên `onSurfaceVariant`, giá trị `bodyMedium` w600, số
+    dùng `FontFeature.tabularFigures`, và `Box` nhận `primaryAccent` — con số duy
+    nhất người dùng theo dõi tiến độ.
+  - Timeline có màu theo kết quả: dot và từ khoá kết quả cùng một token
+    (`success` / `warning` / `danger`), `Box 1 → 2` sang `primaryAccent`, hai giá
+    trị còn lại hạ xuống `bodySmall` trên `onSurfaceVariant`. Cả band bọc
+    `MxCard` **phẳng** viền `borderSubtle` theo D20.
+  - Section header sang `sectionLabel` chữ hoa trên `onSurfaceVariant`, `xl`
+    phía trên và `md` phía dưới, nằm **ngoài** card nó gọi tên.
+  - Icon bút chì trên AppBar sang `scheme.primary` — hành động duy nhất của màn
+    không nên cùng một xám với mọi glyph phụ.
+- **Glyph của chip Flagged là `onDueContainer`, không phải `warning` như yêu cầu
+  ban đầu — và con số là lý do.** `warning` (#9A6A11) trên `dueContainer`
+  (#FBEBD7) đo được **4,04:1**, dưới ngưỡng 4,5 mà một glyph `AppIconSize.sm`
+  cần; `card_detail_screen_visual_audit_test.dart` đỏ đúng ở con số đó. Vẫn đúng
+  họ màu ấm và vẫn không còn là glyph đen; `onDueContainer` là mực mà cặp token
+  này *được đo cùng*.
+- **Ba token chứ không sáu cho sáu `StudyAction`.** `eight_box` ghi
+  `forgotten`/`remembered`; SM-2 ghi bốn mức, và BR-132 đã coi `again` là câu trả
+  lời relearning còn ba mức kia là pass. Nên timeline nói *chuyện gì đã xảy ra*
+  chứ không đúc một màu cho mỗi nút. Màu **không bao giờ** là tín hiệu duy nhất:
+  từ khoá nằm ngay cạnh dot, cùng màu đó (D5).
+- **Đường nối timeline quay lại `borderSubtle`.** Nó là `borderControl` vì band
+  không có card dưới nó và `borderSubtle` chỉ đo 1,38:1 so với nền **trang**;
+  timeline nay nằm trên `surface`, đúng nền mà `borderSubtle` được đo.
+- **Hai test hình học phải đổi, và đó là điều đúng.** G1 trước đo mép trái của
+  *chữ*; hai trong ba band nay giữ chữ bên trong một card, nên phép đo cũ so mép
+  panel của band này với mép trong card của band kia rồi đọc chênh lệch đó thành
+  drift. G1 và G6 nay đo mép của **band**, phát biểu vẫn nguyên: ba band một mép
+  trái, tail đứng trên mép nội dung của card timeline.
+- **`Text.rich`, nên finder phải `findRichText: true`.** Dòng mode · kind ·
+  action là **một câu** ba span (chỉ span cuối mang weight và màu kết quả), nên
+  nó phải wrap thành một khối ở 320dp/2.0 — một `Row` ba `Text` sẽ tự chọn ba
+  chỗ ngắt.
+- **Acceptance criteria:**
+  - [x] Không field, nút hay dữ liệu nào được thêm, bớt hay đổi tên.
+  - [x] Không có `Color(0x…)`, `fontSize`, hay `BorderRadius.circular(<số>)` mới;
+        guard `memox-v7` sạch.
+  - [x] Mọi spacing qua `AppSpacing`.
+  - [x] `dart format` sạch; `flutter analyze` sạch.
+  - [x] Test của feature Card xanh.
+  - [ ] **Goldens của `test/demo/` và gallery — CHƯA cập nhật, và không thể cập
+        nhật từ môi trường đã chạy task này.** Xem *Verification*.
+- **Verification:** `flutter analyze` sạch (0 lỗi, 0 warning), `dart format`
+  sạch, guard `memox-v7` sạch, toàn bộ suite host không-golden xanh, và
+  `card_detail_screen_visual_audit_test.dart` xanh cả light lẫn dark — nó **bắt
+  được một lỗi thật** (xem mục glyph `warning` ở trên).
+- **Goldens còn nợ, và lý do là nền tảng chứ không phải quên.** `dart_test.yaml`
+  ghim tag `golden` vào Windows vì rasterisation chữ khác nhau giữa các HĐH;
+  task này chạy trên Linux, nên `--update-goldens` ở đây sẽ sinh ra 60 PNG mà
+  job `goldens (windows)` của `ci.yml` từ chối. Bố cục đã đổi, nên các PNG
+  `test/demo/card_detail_*.png` **đang cũ**: phải chạy
+  `TZ=UTC flutter test --tags golden --update-goldens` **trên Windows** rồi dựng
+  lại và publish gallery ở đúng URL cũ. Ghi ở đây thay vì để job đỏ nói hộ, vì
+  một PNG cũ trông giống hệt một PNG đúng.
+- **Emulator IT không chạy ở task này:** gate đó tồn tại cho *thứ mới trong
+  `lib/features/`* — một binding, một route, một startup fixture — và task này
+  không thêm cái nào; nó đổi style và bố cục bên trong các widget đã có mặt ở
+  suite 8/0 lần cuối.
+- **Editable documents:** `docs/wbs.md`, `docs/reviews/design-parity-checklist.md`
+- **Dependencies:** M99.31
+- **Tests required:** `card_detail_screen_test.dart`,
+  `card_detail_alignment_test.dart`, `card_detail_history_faces_test.dart`,
+  `card_detail_screen_visual_audit_test.dart`, `card_detail_demo_test.dart`.
+- **Checklist phases:** 6, 7, 13
 
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 

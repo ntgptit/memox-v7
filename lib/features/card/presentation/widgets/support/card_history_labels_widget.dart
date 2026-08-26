@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../study/domain/models/study_action_model.dart';
 import '../../../../study/domain/models/study_answer_kind_model.dart';
@@ -92,8 +93,34 @@ extension CardHistoryLabels on BuildContext {
   /// [CardHistoryEventModel.schedulerType]: a card whose deck changed scheduler
   /// still has older rows written under the previous one, and those rows must
   /// read in their own terms. Asking the data is what makes that automatic.
-  List<String> cardHistoryScheduleLines(CardHistoryEventModel event) =>
-      _scheduleLines(event, spoken: false);
+  List<CardHistoryScheduleLine> cardHistoryScheduleLines(
+    CardHistoryEventModel event,
+  ) => _scheduleLines(event, spoken: false);
+
+  /// The colour a stored action is drawn in (BR-132, M4.15 W4).
+  ///
+  /// **Three semantic tokens for six actions, and the grouping is the
+  /// scheduler's own.** `eight_box` records `forgotten`/`remembered`; SM-2
+  /// records four grades, and BR-132 already treats `again` as the relearning
+  /// answer and the other three as passes. So the timeline says *what happened*
+  /// — it did not stick, it stuck, it stuck but it was work — rather than
+  /// minting a colour per button. `hard` is the only one that needed a third
+  /// word, and `warning` is the token the app already spends on "due, not
+  /// late".
+  ///
+  /// Colour is never the only signal here: the word itself is on the line
+  /// beside the dot, in this same colour (D5).
+  Color cardHistoryActionColor(StudyAction action) {
+    final semantic = semanticColors;
+
+    return switch (action) {
+      StudyAction.forgotten || StudyAction.again => semantic.danger,
+      StudyAction.hard => semantic.warning,
+      StudyAction.remembered ||
+      StudyAction.good ||
+      StudyAction.easy => semantic.success,
+    };
+  }
 
   /// The same lines, in words a screen reader can say (M4.15 W6).
   ///
@@ -102,7 +129,10 @@ extension CardHistoryLabels on BuildContext {
   /// phrasing differs, so the spoken form is a flag rather than a second
   /// function that could drift from this one the first time a field is added.
   List<String> cardHistoryScheduleLinesSemantics(CardHistoryEventModel event) =>
-      _scheduleLines(event, spoken: true);
+      _scheduleLines(
+        event,
+        spoken: true,
+      ).map((line) => line.text).toList(growable: false);
 
   /// The stage name, spoken.
   ///
@@ -114,7 +144,7 @@ extension CardHistoryLabels on BuildContext {
       ? l10n.cardHistoryModeUnknownSemantics
       : cardHistoryMode(mode);
 
-  List<String> _scheduleLines(
+  List<CardHistoryScheduleLine> _scheduleLines(
     CardHistoryEventModel event, {
     required bool spoken,
   }) {
@@ -129,26 +159,44 @@ extension CardHistoryLabels on BuildContext {
         : l10n.cardHistoryIntervalChange(from, to);
     final absent = spoken ? l10n.cardHistoryAbsentValueSemantics : _absentValue;
 
-    final lines = <String>[
+    final lines = <CardHistoryScheduleLine>[
       if (event.previousBox != null || event.nextBox != null)
-        box(_number(event.previousBox, absent), _number(event.nextBox, absent)),
+        CardHistoryScheduleLine(
+          box(
+            _number(event.previousBox, absent),
+            _number(event.nextBox, absent),
+          ),
+          isProgression: true,
+        ),
       if (event.previousEaseFactor != null || event.nextEaseFactor != null)
-        ease(
-          _ease(event.previousEaseFactor, absent),
-          _ease(event.nextEaseFactor, absent),
+        CardHistoryScheduleLine(
+          ease(
+            _ease(event.previousEaseFactor, absent),
+            _ease(event.nextEaseFactor, absent),
+          ),
+          isProgression: true,
         ),
       if (event.previousIntervalDays != null || event.nextIntervalDays != null)
-        interval(
-          _days(event.previousIntervalDays, absent),
-          _days(event.nextIntervalDays, absent),
+        CardHistoryScheduleLine(
+          interval(
+            _days(event.previousIntervalDays, absent),
+            _days(event.nextIntervalDays, absent),
+          ),
+          isProgression: true,
         ),
       if (event.nextDueAt != null)
-        l10n.cardHistoryNextDueLabel(cardHistoryDate(event.nextDueAt!)),
+        CardHistoryScheduleLine(
+          l10n.cardHistoryNextDueLabel(cardHistoryDate(event.nextDueAt!)),
+        ),
     ];
     // Said, not left blank: a learning turn records history and moves no
     // schedule (BR-144), and an event with no lines under it reads as data that
     // failed to load rather than as the normal shape of that turn.
-    if (lines.isEmpty) return <String>[l10n.cardHistoryScheduleUnchanged];
+    if (lines.isEmpty) {
+      return <CardHistoryScheduleLine>[
+        CardHistoryScheduleLine(l10n.cardHistoryScheduleUnchanged),
+      ];
+    }
 
     return lines;
   }
@@ -195,3 +243,20 @@ extension CardHistoryLabels on BuildContext {
 /// A named constant, not a literal in four places, and not an ARB string: an en
 /// dash is punctuation and reads the same in every language this app ships.
 const String _absentValue = '–';
+
+/// One before→after line of an event's schedule, and whether it is the card
+/// *moving along its ladder*.
+///
+/// **A flag rather than the widget matching on the text.** Only the progression
+/// lines — `Box 2 → 3`, an ease or an interval change — are drawn in the accent;
+/// `Next due` and `Schedule unchanged` are facts about the timetable, not steps
+/// forward, and colouring them the same would spend the accent on every line and
+/// so on none. Which line is which is a BR-242 question, so it is answered where
+/// the lines are built.
+@immutable
+class CardHistoryScheduleLine {
+  const CardHistoryScheduleLine(this.text, {this.isProgression = false});
+
+  final String text;
+  final bool isProgression;
+}
