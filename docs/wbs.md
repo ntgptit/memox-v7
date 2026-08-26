@@ -12987,6 +12987,14 @@ của M2.
   44 − 2 + 16 = 58 khớp đúng bản build thuần của nhánh này, nên nếu lệch là
   ghép sai chứ không phải "chắc do khác nhánh".
 
+  Việc này lặp lại — bản ghép đầu bị đè sau ~40 phút bởi một commit thứ ba
+  (`72c3b637`, chưa push), nên thao tác được đóng gói thành
+  `.claude/skills/flutter-testing/scripts/splice_screen_gallery.py`: đọc file
+  HTML mà WebFetch lưu lại từ artifact đang live, ghép figure theo tiền tố tên,
+  tự sửa ba con số đếm và header. Nó **assert** phép trừ-cộng thay vì giả định:
+  nếu một nhánh đổi tên màn thì tổng không khớp và script dừng, thay vì lặng lẽ
+  xuất bản một trang có màn bị nhân đôi.
+
   Đổi lại, trang sau khi ghép **không tái tạo được bằng script**, nên header
   phải tự khai điều đó (`ghép tay · 42 màn @ … + 16 màn @ …`) thay vì mang một
   SHA duy nhất. Một SHA duy nhất trên trang đã ghép mới là thứ nguy hiểm: nó
