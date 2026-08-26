@@ -23,9 +23,16 @@ abstract final class AppBreakpoints {
 
   /// Tablet and the framed web surface at its widest.
   ///
-  /// Unused by production code, and deliberately kept that way: the project
-  /// ships no large-screen layout, so nothing may branch on this. It exists as
-  /// the documented upper edge of the phone range.
+  /// **Nothing branches on this, and that part has not changed.** The project
+  /// ships no large-screen layout, so no widget may ask "am I above medium?"
+  /// and lay itself out differently.
+  ///
+  /// It has one production consumer since M99.60: Card Detail caps its reading
+  /// column at this width (`card_detail_screen.dart`, M4.15 W2). That is a
+  /// *ceiling*, not a branch — below 600 it binds nothing and every phone gets
+  /// the identical layout — and it is here rather than as a number of its own
+  /// because the widest a phone gets is exactly the widest a column of card
+  /// text should be.
   static const double medium = 600;
 
   /// Whether [width] is narrow enough to need the compact scale.

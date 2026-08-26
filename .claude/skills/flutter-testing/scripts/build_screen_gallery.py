@@ -77,8 +77,26 @@ SCREENS = [
     ('Deck — overlay', 'deck_starter_library', 'Starter library', 'UC-01; in mã locale thô (O5)'),
     ('Card', 'card_list', 'Card list', 'Toolbar lọc + pill trạng thái'),
     ('Card', 'card_editor_edit', 'Card editor', 'Sửa nội dung, tag, cờ; danger zone'),
-    ('Card', 'card_detail', 'Card detail', 'Mặt đọc + lịch sử keyset (M99.31)'),
-    ('Card', 'card_detail_page_error', 'Card detail — lỗi trang sau', 'Band D24: giữ những gì đã đọc'),
+    ('Card', 'card_detail', 'Card detail', 'Ba bề mặt: hero, panel lịch, timeline (M99.60)'),
+    ('Card', 'card_detail_sm2', 'Card detail — sm2', 'Ba vắng mặt: divider, chip cờ, accent'),
+    ('Card', 'card_detail_long_content', 'Card detail — nội dung dài', 'Hero giữ được một đoạn văn'),
+    ('Card', 'card_detail_load_more', 'Card detail — Load more', 'Đuôi trên mép band + ranh generation'),
+    ('Card', 'card_detail_history_loading', 'Card detail — đang tải lịch sử', 'Mặt duy nhất chưa ai từng nhìn'),
+    ('Card', 'card_detail_no_history', 'Card detail — chưa có lịch sử', 'Timeline card giữ hình cả khi rỗng'),
+    ('Card', 'card_detail_not_found', 'Card detail — thẻ đã bị xoá', 'delete_outline, không phải search_off'),
+    ('Card', 'card_detail_page_error', 'Card detail — lỗi trang sau', 'Band D24: giữ những gì đã đọc, kèm Retry'),
+    # The compact and large-text frames. They are the widths G8 and the state
+    # `Wrap` are actually governed at, and they were reachable only by opening a
+    # PNG — so the one part of this screen that changes shape was the one part
+    # the review page never showed.
+    ('Card', 'card_detail_320_x2_vi', 'Card detail — 320dp @2.0 VI', 'Bề rộng hẹp nhất, chữ gấp đôi'),
+    ('Card', 'card_detail_320_x2_vi_scrolled', 'Card detail — 320dp @2.0, band trạng thái', 'Cuộn tới lưới lịch ở cùng khung'),
+    ('Card', 'card_detail_state_grid_vi_x2', 'Card detail — lưới lịch xếp chồng', 'G8: nhãn trên giá trị khi hẹp'),
+    ('Card', 'card_detail_many_tags_vi_x2', 'Card detail — mười nhãn', 'Cờ và tag trong cùng một Wrap'),
+    ('Card', 'card_detail_412', 'Card detail — 412dp', 'Điện thoại rộng nhất geometry test chạy'),
+    ('Card', 'card_detail_loading_more', 'Card detail — trang kế đang tới', 'G6: nút đổi thành spinner tại chỗ'),
+    ('Card', 'card_detail_loading', 'Card detail — đang tải thẻ', 'W3 mặt 1: chưa có gì để sửa'),
+    ('Card', 'card_detail_read_error', 'Card detail — không đọc được thẻ', 'W3 mặt 7: app bar bỏ Edit'),
     ('Card', 'card_import_source', 'Import — nguồn', 'Bước 1 của wizard'),
     ('Card', 'card_import_preview', 'Import — preview', 'Bước 2: hàng lỗi được khoanh'),
     ('Card', 'card_import_result_complete', 'Import — kết quả', 'Bước 3: đếm đủ, không lệch'),
@@ -146,7 +164,7 @@ for group, items in groups.items():
         '<div class="grid">{cards}</div></section>'.format(
             g=group, n=len(items), cards=''.join(items)))
 
-html = """<title>MemoX — 29 màn hình</title>
+html = """<title>MemoX — __TOTAL__ màn hình</title>
 <style>
 :root{
   --ground:#F6F6F9; --surface:#FFFFFF; --ink:#1B1B22; --muted:#5D5D6E;

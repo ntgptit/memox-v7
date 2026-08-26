@@ -6,18 +6,19 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/error/failure.dart';
 import '../../../../core/navigation/route_names.dart';
+import '../../../../core/theme/app_breakpoints.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_empty_state.dart';
+import '../../../../shared/widgets/mx_action_button.dart';
 import '../../../../shared/widgets/mx_error_state.dart';
-import '../../../../shared/widgets/mx_icon_button.dart';
 import '../../domain/failures/card_not_found_failure.dart';
 import '../../domain/models/card_detail_model.dart';
 import '../controllers/card_detail_controller.dart';
 import '../controllers/card_history_controller.dart';
-import '../widgets/sections/card_detail_content_widget.dart';
+import '../widgets/sections/card_detail_summary_widget.dart';
 import '../widgets/sections/card_detail_state_widget.dart';
 import '../widgets/sections/card_history_section_widget.dart';
 
@@ -108,11 +109,26 @@ class CardDetailScreen extends ConsumerWidget {
         // still reports `hasValue == true` — which left the action sitting on
         // the not-found face, pointing at a card that is gone.
         if (detail is AsyncData<CardDetailModel>)
-          MxIconButton(
-            icon: Icons.edit_outlined,
-            semanticLabel: context.l10n.cardDetailEditAction,
-            tooltip: context.l10n.cardDetailEditAction,
-            onPressed: () => _openEditor(context),
+          Padding(
+            // **The screen's own gutter, not `sm`.** An `IconButton` paints no
+            // fill so 8dp never showed; a tonal pill has a visible edge, and at
+            // 8dp it closed 8dp outside every surface below it — a second right
+            // margin on a screen that has one.
+            padding: EdgeInsets.only(right: mxScreenGutter(context)),
+            // **A tonal button with the word on it, not a bare glyph** (V3,
+            // BR-246). The action has to be findable on a page whose whole
+            // point is the card under it, and it must not out-weigh that card:
+            // `primary` competes with the content, an icon alone says nothing
+            // until it is tapped. `secondaryContainer` under
+            // `onSecondaryContainer` is the step between the two — and because
+            // the container is only 1.14:1 against the bar, what identifies
+            // this control is its label, which is why it always carries one.
+            child: MxActionButton(
+              label: context.l10n.cardDetailEditAction,
+              icon: Icons.edit_outlined,
+              variant: MxActionButtonVariant.tonal,
+              onPressed: () => _openEditor(context),
+            ),
           ),
       ],
       body: MxAsyncView<CardDetailModel>(
@@ -188,19 +204,33 @@ class _Body extends ConsumerWidget {
         gutter,
         AppSpacing.lg,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          CardDetailContentWidget(card: detail.card),
-          const SizedBox(height: AppSpacing.xxl),
-          CardDetailStateWidget(detail: detail),
-          const SizedBox(height: AppSpacing.xxl),
-          CardHistorySectionWidget(
-            state: history,
-            onLoadMore: () => _loadMoreHistory(ref, cardId),
+      // **A reading column, not a full-bleed one.** On a phone this binds
+      // nothing — 600 is above every width the app ships against — but a card's
+      // two faces stretched across a tablet are a line nobody can track back to
+      // the start of. `AppBreakpoints.medium` rather than a number invented
+      // here, so the cap moves with the breakpoint it belongs to.
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: AppBreakpoints.medium),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              CardDetailSummaryWidget(detail: detail),
+              // **`xl`, where the bands used to be `xxl` apart.** The gap was
+              // carrying the whole separation between three groups that looked
+              // alike; now every band is a surface, and the reader can see where
+              // one ends without being told by 32dp of nothing.
+              const SizedBox(height: AppSpacing.xl),
+              CardDetailStateWidget(detail: detail),
+              const SizedBox(height: AppSpacing.xl),
+              CardHistorySectionWidget(
+                state: history,
+                onLoadMore: () => _loadMoreHistory(ref, cardId),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
