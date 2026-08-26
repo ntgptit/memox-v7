@@ -95,17 +95,34 @@ ra ở bốn màn, không phải bốn lỗi.
 
 Nó là lý do chính khiến Density chỉ đạt 1,14.
 
-### C3 — Trường `back` được dùng nguyên xi trong chế độ học, và nó rò rỉ đáp án
+### C3 — Độ dài ô đáp án rò rỉ đáp án, và app không chuẩn hoá được nó ở dữ liệu
 
 [study_guess](study_guess.md) F1 là nghiêm trọng nhất trong toàn bộ bản review:
-bốn đáp án là 1–2 chữ, đáp án thứ năm là định nghĩa từ điển ba dòng. **Người
-không biết một chữ tiếng Hàn nào cũng loại được nó.** Bố cục đang rò rỉ đúng thứ
-bài kiểm tra tồn tại để giấu.
+bốn đáp án là 1–2 chữ, đáp án thứ năm là ba dòng. **Người không biết một chữ
+tiếng Hàn nào cũng loại được nó.** Bố cục đang rò rỉ đúng thứ bài kiểm tra tồn
+tại để giấu.
 
-Cùng gốc làm [study_match](study_match.md) lệch cột 5:1 và cắt chữ.
+**Bản đầu của mục này kết luận sai** và đã được chủ dự án phản biện (2026-08-26).
+Nó đề xuất "lấy phần trước dấu `(`". Hai chỗ sai:
 
-Một sửa duy nhất — chế độ học lấy phần trước dấu `(` thay vì cả trường `back` —
-giải quyết cả ba.
+- Phần trước ngoặc **không** phải một đáp án ngắn — nó là nghĩa ngắn gọn gồm
+  **tiếng Anh và tiếng Việt**, phần trong ngoặc là chi tiết. BR-08 cấp cho mặt
+  sau 240 ký tự đúng vì *"một nghĩa chứa nhiều hơn một từ — hai ngôn ngữ, ngăn
+  bằng dấu phẩy"*. Dạng dài **là** dạng đúng của `back`; thứ bất thường trong
+  fixture là bốn thẻ chỉ có tiếng Việt.
+- Và cắt ngoặc **không** bịt được rò rỉ: `Xin chào / Chào hỏi lịch sự` vẫn dài
+  gấp ~5 lần `quả táo`.
+
+Gốc thật: **độ dài mặt sau là thứ người dùng viết, app không chuẩn hoá được ở
+tầng dữ liệu.** Nên phải chuẩn hoá ở tầng trình bày — kẹp mọi ô về cùng một số
+dòng, để độ dài không còn mang tín hiệu bất kể dữ liệu ra sao.
+
+Một thay đổi đó giải quyết ba thứ: rò rỉ ở Guess, §7 của Guess (năm ô cùng loại
+cao 215/120/120/120/120), và lệch cột 5:1 ở [study_match](study_match.md) — nơi
+nó còn làm dấu `…` đọc thành "còn nữa" thay vì "hỏng".
+
+**Chỉ áp dụng cho Guess và Match**, hai chế độ mà người học quét để chọn. Browse,
+Recall và Fill phải hiện đủ nghĩa — ở đó đọc nghĩa mới là việc.
 
 ### C4 — Bốn feature tự chế một bậc typography 11px
 
@@ -201,8 +218,8 @@ từ ~40% xuống 14%, ba card hiện trọn. Bài đã có lời giải; hai m�
 
 Theo *tỉ lệ giữa hậu quả và công sức*, không theo điểm số.
 
-1. **C3** — một thay đổi trong chế độ học, sửa được lỗi rò rỉ đáp án (nặng nhất)
-   cộng hai lỗi bố cục.
+1. **C3** — kẹp số dòng ô đáp án ở Guess và Match: sửa lỗi rò rỉ đáp án (nặng
+   nhất) cộng hai lỗi bố cục, và không đụng tới dữ liệu người dùng.
 2. **C1** cho dialog — sửa `MxButtonPair` nhận bề rộng thật; quy tắc đã đúng sẵn.
 3. **C5** — FAB. Cần quyết định của chủ dự án vì hai kit đang bất đồng.
 4. **C10** — tám lỗi độc lập, mỗi cái vài dòng.
