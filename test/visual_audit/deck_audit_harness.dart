@@ -35,7 +35,24 @@ import 'screen_auditor.dart';
 /// The router is per-call because `GoRouter` carries navigation history and the
 /// harness builds one screen per theme; sharing one would let the light run
 /// decide where the dark run starts.
-Widget deckShellWith(FakeDeckRepository repository, {String? location}) {
+Widget deckShellWith(FakeDeckRepository repository, {String? location}) =>
+    deckScopeAround(repository, deckRouterAt(location));
+
+/// The production route table at [location], with no scope around it.
+///
+/// Separate from [deckShellWith] because **where the scope sits decides whether
+/// a dialog can find it.** `showModalBottomSheet` defaults to the nearest
+/// navigator, so a sheet opened inside this router stays under whatever scope
+/// wraps it; `showDialog` defaults to the *root* navigator, which in
+/// `ReviewApp(home: deckShellWith(...))` is above the scope — and a
+/// `ConsumerWidget` in that dialog throws `No ProviderScope found`.
+///
+/// That is a property of the test's nesting, not of the app: `main.dart` wraps
+/// `MaterialApp.router` in the scope, so both navigators are inside it. Pairing
+/// these two functions lets a caller reproduce that order —
+/// `deckScopeAround(repo, ReviewApp(home: deckRouterAt(null)))` — which is what
+/// photographing a dialog requires.
+Widget deckRouterAt(String? location) {
   // No `initialLocation` for the root level: the default is already the deck
   // branch, and stating it trips `avoid_redundant_argument_values`, a lint this
   // project promotes to error.
@@ -44,17 +61,25 @@ Widget deckShellWith(FakeDeckRepository repository, {String? location}) {
       : createAppRouter(initialLocation: location);
   addTearDown(router.dispose);
 
-  return ProviderScope(
-    overrides: [
-      envConfigProvider.overrideWithValue(EnvConfig.development),
-      deckRepositoryProvider.overrideWithValue(repository),
-      // A fixed clock, so the due counts in the loaded states are identical on
-      // every run.
-      clockProvider.overrideWithValue(() => DateTime.utc(2026, 7, 29, 12)),
-    ],
-    child: Router.withConfig(config: router),
-  );
+  return Router.withConfig(config: router);
 }
+
+/// [child] under the overrides every deck scenario needs.
+///
+/// Takes a child rather than returning the override list because Riverpod's
+/// `Override` is not a public type, so a helper cannot name it — the same
+/// constraint that shapes `repository_bindings.dart` and `ReviewApp`.
+Widget deckScopeAround(FakeDeckRepository repository, Widget child) =>
+    ProviderScope(
+      overrides: [
+        envConfigProvider.overrideWithValue(EnvConfig.development),
+        deckRepositoryProvider.overrideWithValue(repository),
+        // A fixed clock, so the due counts in the loaded states are identical
+        // on every run.
+        clockProvider.overrideWithValue(() => DateTime.utc(2026, 7, 29, 12)),
+      ],
+      child: child,
+    );
 
 /// The shell parked inside a deck rather than on the root list.
 Widget deckLevelWith(FakeDeckRepository repository) =>

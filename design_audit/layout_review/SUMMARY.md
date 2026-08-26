@@ -96,6 +96,12 @@ Ba cái đầu là truncate; cái thứ tư có nguyên nhân đo được và s
 có **265** (dialog trừ `insetPadding` 40 và padding 24). Đưa bề rộng thật vào
 đúng công thức đó thì `265 < 280` → pair tự xếp chồng. Quy tắc đúng, đầu vào sai.
 
+**Và nó không phải lỗi của một màn.** Sau khi chụp các overlay của deck, dialog
+xoá deck vỡ y hệt — ở **cả** tiếng Anh (`Move to Trash`) lẫn tiếng Việt (`Chuyển
+vào Trash`). Mục này mô tả C1 như khiếm khuyết của `card_bulk_delete_dialog`;
+thực tế nó là khiếm khuyết của `MxButtonPair`, nên số màn bị ảnh hưởng bằng số
+dialog dùng nó. Xem [deck_overlays](deck_overlays.md) O2.
+
 ### C1a — Hero của deck cắt chữ ở tiếng Việt, tại đúng 393px
 
 Bổ sung cho C1 sau khi đo, trên một trục mà C1 không có: **ngôn ngữ**.
@@ -108,6 +114,26 @@ filter pill `Tất cả bộ thẻ` (thiếu 4px).
 Cả 29 golden đều là bản tiếng Anh, nên trục này chưa từng có mặt trong bất kỳ
 vòng chấm nào — kể cả C1. Chi tiết và ba hướng sửa:
 [ma trận responsive](deck_responsive_matrix.md) S1.
+
+### C1b — 11 overlay của deck chưa từng được chấm, và bốn lỗi trong đó
+
+Bản chấm này xét 29 **màn**, và với deck đó là cùng một màn ở bốn trạng thái. Mọi
+sheet, menu, form và dialog mà nó mở ra không có ảnh lẫn số đo — kể cả hai hành
+động phá huỷ và ô nhập tự do duy nhất của feature.
+
+17 bề mặt đã được chụp và đo. Không cái nào có tap target dưới 48, và không giá
+trị spacing nào của app nằm ngoài scale. Bốn lỗi:
+
+- câu xác nhận xoá mở đầu bằng **chữ thường** (`no cards go to Trash…`) bất cứ khi
+  nào deck không có sub-deck — tức mọi deck rỗng, ở cả hai ngôn ngữ;
+- nút dialog xoá xuống hai dòng — C1 ở trên;
+- `DeckSchedulerPickerWidget` tự mang tiêu đề section, nên sheet đổi scheduler
+  hiển thị **`Study mode` hai lần cách nhau ba dòng**, và sheet reset hiển thị
+  `Study mode after the reset` ngay trên `Study mode`;
+- starter library — màn đầu tiên một thư viện rỗng nhìn thấy — in mã locale thô:
+  `Language: en`.
+
+Chi tiết, cùng bốn mục còn lại và những gì đạt: [deck_overlays](deck_overlays.md).
 
 ### C2 — Bốn chế độ học dùng khung thẻ cố định nửa màn bất kể nội dung
 
