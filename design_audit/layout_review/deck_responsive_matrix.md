@@ -146,11 +146,20 @@ trong bản cũ là một câu hỏi thật, không phải chỗ trống lịch 
 
 BR-55 cho phép deck sâu 10 cấp; phép đo này mới chỉ dùng 2.
 
-### S4 — Nhãn control bị cắt ⚠️ Level 1
+### S4 — ~~Nhãn control bị cắt~~ **ĐÍNH CHÍNH: vẫn là breadcrumb** ⚠️ Level 1
 
-Filter pill `All decks` thiếu 9px ở scale 1,5; tiếng Việt `Tất cả bộ thẻ` thiếu
-40px. Một nhãn control bị cắt nặng hơn một nhãn nội dung bị cắt: người dùng phải
-quyết định có bấm hay không dựa trên chữ đã mất.
+Bản đầu ghi mục này là "filter pill `All decks` bị cắt". Sai, và sai vì một
+trùng hợp đáng ghi lại: `deckPathRootLabel` và `deckFilterAllLabel` **có cùng
+giá trị** — `All decks` / `Tất cả bộ thẻ` — nên probe, vốn chỉ thấy chuỗi đã
+render, không thể phân biệt hai chuỗi ấy. Trên màn level thì filter pill nằm
+trong menu và không hiển thị, nên thứ bị cắt luôn là **bậc đầu của breadcrumb**.
+
+S3 và S4 là **một** vấn đề, và cả hai đã sửa cùng nhau (#351): các bậc trên gập
+thành `…` thay vì mọi bậc cùng cắt.
+
+Bài học cho probe chứ không phải cho UI: hai chuỗi khác key mà cùng giá trị thì
+một phép đo đọc-chuỗi-đã-render không tách được chúng. Muốn tách phải đo từ cây
+widget, không từ văn bản.
 
 ### S5 — FAB leo thang từ đè chữ thành đè control ⚠️ Level 1
 

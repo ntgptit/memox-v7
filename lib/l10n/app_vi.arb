@@ -399,14 +399,14 @@
   "@starterLibraryEmpty": {
     "description": "Catalog screen with an empty manifest."
   },
-  "starterLibraryLocaleLabel": "Ngôn ngữ: {locale}",
+  "starterLibraryLocaleLabel": "Ngôn ngữ: {locale, select, en{English} vi{Tiếng Việt} ko{한국어} other{{locale}}}",
   "@starterLibraryLocaleLabel": {
     "placeholders": {
       "locale": {
         "type": "String"
       }
     },
-    "description": "Locale line on a starter template row."
+    "description": "Locale line on a starter template row. The arms are endonyms and stay unchanged in every translation, for the same reason settingsLanguageEnglish does: a reader stuck in a language they cannot read has to be able to recognise their own. `other` falls back to the raw code so a template in an unlisted language still says something rather than nothing."
   },
   "deckNoCardsLabel": "Chưa có thẻ nào",
   "@deckNoCardsLabel": {

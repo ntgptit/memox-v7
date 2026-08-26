@@ -56,7 +56,7 @@ rồi im lặng sai về một trong hai phía.
 
 ## Findings
 
-### O1 — Câu xác nhận xoá mở đầu bằng chữ thường ❌
+### O1 — Câu xác nhận xoá mở đầu bằng chữ thường ✅ **đã sửa (#351)**
 
 `"Delete "Business email"?"` / `no cards go to Trash with it.`
 
@@ -73,10 +73,13 @@ cùng nó.`
 Đây không phải trường hợp hiếm: nó là **mọi deck rỗng** — chính thứ người ta hay
 xoá nhất. Deck có sub-deck thì câu mở bằng chữ số nên không lộ.
 
-Sửa ở ARB, không ở code: cho nhánh `=0` của `deckCount` một vế viết hoa, hoặc
-tách thành hai thông điệp.
+Sửa ở ARB, không ở code — và khi sửa mới lộ **lỗi thứ hai trong cùng chuỗi**:
+`=1{1 card}` ghép với ` go to Trash` cho ra `1 card go to Trash with it.`, sai
+chia động từ. Cùng nguyên nhân: vế đầu rỗng làm hỏng cả hoa/thường lẫn chủ ngữ
+của động từ. Plural lồng, với động từ nằm trong từng nhánh, sửa cả hai:
+`No cards go` · `1 card goes` · `1 sub-deck and 1 card go`.
 
-### O2 — Nút của dialog xoá xuống hai dòng, ở **cả hai** ngôn ngữ ❌
+### O2 — Nút của dialog xoá xuống hai dòng, ở **cả hai** ngôn ngữ ✅ **đã sửa (#348)**
 
 `Move to Trash` vỡ thành hai dòng ở tiếng Anh; `Chuyển vào Trash` cũng vậy ở
 tiếng Việt.
@@ -90,7 +93,7 @@ Cái bản chấm cũ chưa biết: lỗi này **không chỉ ở `card_bulk_del
 như một khiếm khuyết của một màn; nó là khiếm khuyết của một component, và số
 màn bị ảnh hưởng bằng số dialog.
 
-### O3 + O4 — Bộ chọn scheduler tự mang tiêu đề, nên mọi nơi dùng nó có hai ❌
+### O3 + O4 — Bộ chọn scheduler tự mang tiêu đề, nên mọi nơi dùng nó có hai ✅ **đã sửa (#349)**
 
 `DeckSchedulerPickerWidget` in `schedulerSectionLabel` ("Study mode") ở dòng 52
 của chính nó. Cả ba nơi dùng nó cũng đặt tiêu đề:
@@ -110,7 +113,7 @@ thì mọi nơi nhúng nó đều phải biết mà **không** đặt tiêu đ�
 bất thành văn mà hai trong ba nơi dùng đã vi phạm. Hướng sửa rẻ nhất là để
 tiêu đề thành tuỳ chọn của picker và tắt nó khi nơi dùng đã có.
 
-### O5 — Starter library in mã locale thô ⚠️
+### O5 — Starter library in mã locale thô ✅ **đã sửa (#355)**
 
 `120 cards · Language: en` và `480 cards · Language: ko`.
 
@@ -118,24 +121,46 @@ tiêu đề thành tuỳ chọn của picker và tắt nó khi nơi dùng đã c
 **đầu tiên** một người có thư viện rỗng nhìn thấy (UC-01), và nó đang nói bằng
 từ vựng của cơ sở dữ liệu.
 
-### O6 — Hành động và trạng thái trông giống nhau trên cùng một hàng ⚠️
+### O6 — ~~Hành động và trạng thái trông giống nhau~~ **RÚT LẠI** ✅
 
-`Add to library` (hành động) và `Added` (trạng thái) cùng là chữ trần, cùng rung,
-cùng vị trí bên phải thẻ; chỉ khác màu. Không viền, không nền, không icon.
+Bản đầu chấm mục này ⚠️: `Add to library` và `Added` cùng là chữ trần, cùng rung,
+chỉ khác màu — và theo `references/coherence.md` thì khác biệt chỉ bằng màu là
+kênh yếu nhất.
 
-Theo `references/coherence.md`, khác biệt chỉ bằng màu là kênh yếu nhất, và ở
-đây nó phải gánh phân biệt "bấm được" với "đã xong" — trên chính hành động chính
-của màn.
+**Sai, vì tôi đọc ảnh mà không đọc code.** `starter_library_screen.dart` ghi rõ
+hai điều mà bức ảnh không nói:
+
+- **cả thẻ là vùng chạm** (`MxCard(onTap: () => _add(context))`), nên `Add to
+  library` không phải một nút bị làm mờ affordance — nó là *nhãn nói thẻ này làm
+  gì*. Chuyển nó thành nút viền sẽ tạo một control bên trong một control, đúng
+  thứ `MxBreadcrumb.onUp` gọi là "gesture arena nobody wins";
+- **không dùng màu primary là quyết định đo được**: `primary` ở rung label đo
+  được **2,90:1** trên thẻ nền tối, dưới ngưỡng 4,5:1. Trọng lượng chữ gánh
+  affordance thay cho màu là cách duy nhất còn lại vừa đạt tương phản.
+
+Ghi lại thay vì xoá, vì cái sai ở đây có ích: một finding "khác biệt chỉ bằng
+màu" nghe đúng theo sách và vẫn sai khi thứ nó mô tả không phải là control, và
+khi màu đã bị loại vì lý do tương phản mà bức ảnh không kể.
 
 ### O7 — Hai kiểu bố cục cặp nút trong cùng một feature ⚠️
 
-| Ngang (Cancel trái, hành động phải) | Dọc (hành động trên, Cancel dưới) |
+**Đã đổi hình dạng sau #348, và vẫn còn.** Bản đầu ghi:
+
+| Ngang | Dọc |
 |---|---|
 | dialog xoá · form New deck | sheet reset · sheet đổi scheduler |
 
-Cả bốn đều là "xác nhận hay huỷ". Nếu ranh giới là dialog-ngang / sheet-dọc thì
-form New deck phá luật — nó là sheet và dùng ngang. Đáng chốt một quy tắc rồi áp
-cho cả bốn, vì hiện tại vị trí của Cancel phụ thuộc vào bề mặt nào mở ra.
+Sau khi `MxButtonPair` biết bề rộng thật của dialog, dialog xoá **tự chuyển sang
+dọc** — vì 265px không đủ cho một hàng hai nút. Bảng bây giờ là:
+
+| Ngang | Dọc |
+|---|---|
+| form New deck | dialog xoá · sheet reset · sheet đổi scheduler |
+
+Nên ranh giới không phải "dialog hay sheet" mà là **bề rộng còn lại**, và đó là
+một luật nhất quán hơn luật tôi đề xuất ban đầu. Cái còn lại cần chốt: form New
+deck là sheet rộng nên vẫn ngang — nếu chủ dự án muốn cặp nút luôn cùng một
+hướng bất kể chỗ, thì đó là quyết định, không phải lỗi.
 
 ### O8 — Đường duy nhất xem hết breadcrumb là một cử chỉ không có dấu hiệu ⚠️
 
