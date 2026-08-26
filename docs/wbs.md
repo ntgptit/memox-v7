@@ -12967,6 +12967,16 @@ của M2.
         `--update-goldens` thì xanh, nên mọi PNG đã commit khớp một render tươi.
   - [x] Gallery build lại từ goldens hiện tại và publish đúng URL cũ trong
         `CLAUDE.md` — bước cuối của delivery phase, sau hai recursive review.
+- **URL ghim đang bị hai nhánh chưa merge tranh nhau, và rule trong `CLAUDE.md`
+  chưa nói tới ca này.** Trước lượt publish này, artifact đang mang
+  `golden suite @ 2ef75dbc` — `claude/card-editor-ux-hardening`, một nhánh
+  **không** nằm trên `origin/main`. Nhánh này cũng vậy. Nên trong cửa sổ giữa hai
+  lần merge, URL không phải "bản app đang chạy" như rule giả định, mà là *lần
+  publish gần nhất của bất kỳ ai*: publish của mình vừa xoá các frame D28 khỏi
+  trang, và khi #362-kế-tiếp của họ merge thì publish của họ sẽ xoá các frame
+  Card Detail này. Không phải lỗi của bên nào — mỗi bên đều làm đúng rule. Lối ra
+  rẻ nhất là **publish sau khi merge**, không phải trước; ghi lại đây vì lần tới
+  nó sẽ trông giống hệt một gallery stale, mà nguyên nhân thì khác hẳn.
 - **Emulator integration suite:** **not run — presentation-only restyle.** Không
   thêm feature, route, binding, persistence hay platform behavior nào, nên không
   có thứ gì mà chỉ một thiết bị mới nhìn thấy. Đây **không** phải một lượt chạy
