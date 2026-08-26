@@ -146,7 +146,10 @@ for group, items in groups.items():
         '<div class="grid">{cards}</div></section>'.format(
             g=group, n=len(items), cards=''.join(items)))
 
-html = """<title>MemoX — 29 màn hình</title>
+# The tab title counts the same list the header does. It used to carry a
+# literal 29 while the manifest had grown to 44 — the one number the owner
+# sees without opening the page, and the only one nothing regenerated.
+html = """<title>MemoX — __TOTAL__ màn hình</title>
 <style>
 :root{
   --ground:#F6F6F9; --surface:#FFFFFF; --ink:#1B1B22; --muted:#5D5D6E;
