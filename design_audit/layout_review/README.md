@@ -43,6 +43,32 @@ sự được vẽ. Hai điều chỉnh khi so với mốc "3–5 cấp" của c
 
 Mỗi file nói rõ phần nào là của nội dung màn đó.
 
+## Giá trị ngoài scale — đã truy nguồn, không phải lỗi spacing
+
+Probe thấy 6 giá trị nằm ngoài `AppSpacing.scale`. Nếu chỉ báo con số thì 8 màn
+sẽ bị chấm trượt §5 oan, nên probe ghi luôn 6 tổ tiên gần nhất của mỗi cái. Kết
+quả:
+
+| Giá trị | Nguồn | Kết luận |
+|---|---|---|
+| **1,0 / 1,5** | `DecoratedBox < ConstrainedBox < Container` | **Bề rộng viền.** `Container` có `border` sinh ra một `Padding` bằng đúng bề rộng viền. Không phải spacing. |
+| **13,0** | `Listener < _GestureSemantics < RawGestureDetector < Align` | Tay cầm chọn text của Flutter. Framework, không phải app. |
+| **40,0** | `AnimatedPadding < Dialog < AlertDialog < MxConfirmDialog` | `insetPadding` mặc định của Material `AlertDialog`. Xem ghi chú dưới. |
+| **48,0** | `Stack < NotificationListener<DraggableScrollableNotification>` | Vùng của bottom sheet; 48 là giá trị touch target chứ không phải bậc spacing. |
+| **2,0 / 40,0** | `MxSessionTopBar < Column < Padding` | **Hai giá trị của app**, trong thanh trên của phiên học. |
+
+Nên §5 (spacing scale) là ✅ ở gần như mọi màn, và điều đó **đo được** chứ không
+phải giả định. Hai chỗ đáng nói:
+
+- `AlertDialog` mang inset 40 của Material vào một hệ thống mà bậc lớn nhất là
+  32. Không sai, nhưng nó là mặc định của framework nằm giữa các token của app.
+- `MxSessionTopBar` dùng 2 và 40 trực tiếp.
+
+Bản đầu của phần này cũng sai và im lặng: cap độ dài danh sách tổ tiên làm nó
+đóng băng ở 25 phần tử đầu — toàn scaffolding gần root — nên mọi giá trị lệch
+đều bị đổ cho `RootRestorationScope`. Phải đổi sang cửa sổ trượt giữ **6 tổ tiên
+gần nhất** mới ra được bảng trên.
+
 ## Golden phải đúng trước khi chấm
 
 Lúc bắt đầu, `origin/main` có **26 golden cũ**: #337 đổi cách render của sáu

@@ -117,6 +117,9 @@ void probeLayout(String goldenPath) {
   final leftEdges = <String, int>{};
   final spacers = <double, int>{};
   final insets = <double, int>{};
+  // Who wrote an off-scale number, so a report can say where to look instead
+  // of leaving a value nobody can trace.
+  final offScaleOwners = <String, Set<String>>{};
 
   Rect? rectOf(RenderObject? object) {
     if (object is! RenderBox || !object.hasSize || !object.attached) {
@@ -125,7 +128,7 @@ void probeLayout(String goldenPath) {
     return object.localToGlobal(Offset.zero) & object.size;
   }
 
-  void visit(Element element) {
+  void visit(Element element, List<String> ancestry) {
     final render = element.renderObject;
 
     // --- typography: one entry per rung actually painted --------------------
@@ -211,14 +214,27 @@ void probeLayout(String goldenPath) {
         inset.left,
         inset.right,
       ]) {
-        if (edge > 0.5) _record(insets, edge);
+        if (edge <= 0.5) continue;
+        _record(insets, edge);
+        if (_isOnScale(edge)) continue;
+        offScaleOwners
+            .putIfAbsent(edge.toStringAsFixed(1), () => <String>{})
+            .add(ancestry.reversed.join(' < '));
       }
     }
 
-    element.visitChildren(visit);
+    // **A sliding window of the nearest six.** The first version capped the
+    // list's length instead, which froze it at the first 25 entries — all of
+    // them framework scaffolding near the root — so every off-scale value was
+    // blamed on `RootRestorationScope`.
+    final grown = <String>[...ancestry, widget.runtimeType.toString()];
+    final nextAncestry = grown.length > 6
+        ? grown.sublist(grown.length - 6)
+        : grown;
+    element.visitChildren((child) => visit(child, nextAncestry));
   }
 
-  visit(root);
+  visit(root, <String>[]);
 
   final surface = rectOf(root.renderObject);
   for (final target in targets) {
@@ -262,6 +278,10 @@ void probeLayout(String goldenPath) {
     'spacersOffScale': _offScale(spacers),
     'insets': _tally(insets),
     'insetsOffScale': _offScale(insets),
+    'offScaleOwners': <String, List<String>>{
+      for (final entry in offScaleOwners.entries)
+        entry.key: entry.value.toList(),
+    },
   };
 
   final directory = Directory('build/layout_probe');
