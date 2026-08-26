@@ -117,7 +117,15 @@ class CardDetailScreen extends ConsumerWidget {
             // every icon button to `onSurfaceVariant`, which is right for a bar
             // full of affordances and wrong for a bar with exactly one — Edit
             // was the same grey as the labels under it.
-            accent: context.colors.primary,
+            //
+            // **`primaryAccent`, not `ColorScheme.primary`.** The bar sits on
+            // the *page* colour, and `primary` is a fill: `AppColors
+            // .primaryAccentDark` records it at 3.33:1 as bare ink on the dark
+            // page, under the 4.5 a painted glyph needs, against 6.26:1 for
+            // this token. Light is unaffected — `primaryAccentLight` *is* the
+            // fill colour — so the two modes are the same decision, correctly
+            // spelled.
+            accent: context.semanticColors.primaryAccent,
             onPressed: () => _openEditor(context),
           ),
       ],
