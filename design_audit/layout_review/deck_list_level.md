@@ -132,6 +132,10 @@ dùng không biết chạm vào chỗ giao thì mở form tạo deck hay bắt �
 Đây là cùng một nguyên nhân với F1 của root, nhưng hậu quả khác hạng: che chữ là
 mất thông tin, đè lên nút là **mơ hồ về hành vi**.
 
+**Chủ dự án cố ý để mở (2026-08-26)**, đang tìm phương án — xem
+[deck_list_root](deck_list_root.md) F1 cho ba hướng và cho lý do **không** lấy
+`DeckLevelScreen.jsx` làm căn cứ.
+
 **F2 — Breadcrumb cao 32px, dưới ngưỡng 48.** ⚠️ ngoại lệ có ghi lý do.
 Hit-test thật xác nhận 265×32 — không có `_InputPadding` nới ra. Nhưng
 `MxBreadcrumb.compactLineHeight` có doc giải thích: ở chiều cao này dải là **một**
