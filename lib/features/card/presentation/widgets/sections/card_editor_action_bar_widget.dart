@@ -23,7 +23,7 @@ class CardEditorActionBarWidget extends StatelessWidget {
   const CardEditorActionBarWidget({
     required this.label,
     required this.onSave,
-    required this.isLoading,
+    required this.isSaving,
     super.key,
   });
 
@@ -33,29 +33,28 @@ class CardEditorActionBarWidget extends StatelessWidget {
   /// `null` disables the button — a pristine form, or a save already running.
   final VoidCallback? onSave;
 
-  final bool isLoading;
+  /// **`isSaving`, not `isLoading`.** This bar holds one action, so a flag
+  /// named after the *operation* is the honest name — and a screen-wide
+  /// `isLoading` is exactly the shape that cannot say "refreshing while
+  /// submitting" once a second operation appears.
+  final bool isSaving;
 
   @override
   Widget build(BuildContext context) {
-    // `top: false`: the bar is at the bottom of the screen, so the only inset
-    // it can owe is the gesture strip. `Scaffold` puts it above the keyboard
-    // and takes its height out of the body, so nothing here computes an inset.
-    return SafeArea(
-      top: false,
-      child: Padding(
-        // The same gutter the content column uses, so the button's edges line
-        // up with the field edges above it rather than with the screen.
-        padding: EdgeInsets.fromLTRB(
-          mxScreenGutter(context),
-          AppSpacing.md,
-          mxScreenGutter(context),
-          AppSpacing.md,
-        ),
-        child: MxActionButton(
-          label: label,
-          onPressed: onSave,
-          isLoading: isLoading,
-        ),
+    // **No `SafeArea` here.** The shell puts the footer inside the body's, so a
+    // second one would pay for the gesture strip twice; and the keyboard is
+    // handled by the body shrinking, not by anything this widget computes.
+    return Padding(
+      // The same gutter the content column uses, so the button's edges line up
+      // with the field edges above it rather than with the screen.
+      padding: EdgeInsets.symmetric(
+        horizontal: mxScreenGutter(context),
+        vertical: AppSpacing.md,
+      ),
+      child: MxActionButton(
+        label: label,
+        onPressed: onSave,
+        isLoading: isSaving,
       ),
     );
   }

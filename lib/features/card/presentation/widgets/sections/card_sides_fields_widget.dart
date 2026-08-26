@@ -59,12 +59,13 @@ class CardSidesFieldsWidget extends StatelessWidget {
           minLines: 1,
           errorText: _frontError(context, state.frontProblem),
           textInputAction: TextInputAction.next,
-          // **The front is the card, and the form did not say so.** Both sides
-          // were drawn at the same body size, so they read as a pair of equals
-          // — while the front is the prompt a learner is shown and the back is
-          // the answer. The value only: label, counter, error and border stay
-          // on the theme, so the two fields still line up on every edge.
-          textStyle: context.texts.titleLarge,
+          // **No `textStyle`, and that is a reversal.** Edit mode drew the
+          // front's value at `titleLarge` on the argument that the front is the
+          // prompt and the back is the answer, so the two are not equals. The
+          // owner looked at it rendered and read it as heavy rather than
+          // primary (review, 2026-08-26). Both sides are back on the theme's
+          // input style, which is also what create mode always had — so the
+          // rule is now the same in both modes rather than one mode's exception.
         ),
         const SizedBox(height: AppSpacing.lg),
         MxTextField(
@@ -80,10 +81,18 @@ class CardSidesFieldsWidget extends StatelessWidget {
         ),
         if (state.failure != null) ...<Widget>[
           const SizedBox(height: AppSpacing.lg),
-          Text(
-            context.l10n.cardEditorSaveFailed,
-            style: context.texts.bodyMedium?.copyWith(
-              color: context.colors.error,
+          // **Live, like every other failure on this screen.** It was the one
+          // that was not, and it is the one furthest from the control that
+          // causes it — the button is pinned at the bottom and this paints
+          // beside the fields, so a screen-reader user pressed Save and was
+          // told nothing at all.
+          Semantics(
+            liveRegion: true,
+            child: Text(
+              context.l10n.cardEditorSaveFailed,
+              style: context.texts.bodyMedium?.copyWith(
+                color: context.colors.error,
+              ),
             ),
           ),
         ],

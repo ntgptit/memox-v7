@@ -41,15 +41,31 @@ extension CardFailureLabels on BuildContext {
 /// caused it — a failure nobody is looking at is a failure nobody is told
 /// about.
 class CardWriteFailureTextWidget extends StatelessWidget {
-  const CardWriteFailureTextWidget({required this.failure, super.key});
+  const CardWriteFailureTextWidget({
+    required this.failure,
+    this.message,
+    super.key,
+  });
 
   final Failure failure;
+
+  /// Already-localized. Replaces the mapped sentence when the generic one would
+  /// not say *which* write failed.
+  ///
+  /// **It exists for a message that lands nowhere near its control.** The card
+  /// editor's flag lives in the app bar and its failure paints in the pinned
+  /// subheader at the opposite corner, above the Front field — where
+  /// `Please try again.` reads as a page error, or as that field's. Every other
+  /// failure on that screen sits directly under the thing that failed and needs
+  /// no such help, which is why this is an override and not a parameter every
+  /// caller has to answer.
+  final String? message;
 
   @override
   Widget build(BuildContext context) => Semantics(
     liveRegion: true,
     child: Text(
-      context.cardWriteFailure(failure),
+      message ?? context.cardWriteFailure(failure),
       style: context.texts.bodySmall?.copyWith(color: context.colors.error),
     ),
   );

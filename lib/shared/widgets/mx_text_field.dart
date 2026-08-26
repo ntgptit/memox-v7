@@ -93,17 +93,31 @@ class MxTextField extends StatelessWidget {
   /// takes over when there is one.
   final String? helperText;
 
-  /// How many lines [helperText] may occupy before it ellipsizes.
+  /// How many lines [helperText] and [errorText] may occupy before they
+  /// ellipsize.
   ///
-  /// **Three, not Material's one, and it was found by rendering it.** The card
-  /// editor's BR-10 reassurance is a full sentence; at one line it painted
-  /// `Editing the text doesn't change this card'…` — cut mid-word, mid-
-  /// apostrophe, saying nothing. A helper that does not fit is worse than no
-  /// helper: it takes the space and withholds the meaning.
+  /// **An app-wide change, not a per-caller option, and that is deliberate.**
+  /// Material's default is one line, and it was found by rendering: the card
+  /// editor's BR-10 sentence painted `Editing the text doesn't change this
+  /// card'…` — cut mid-word, mid-apostrophe, saying nothing. A message that
+  /// does not fit is worse than no message, because it takes the space and
+  /// withholds the meaning.
   ///
-  /// Three rather than null: `null` lets it grow without limit, and a helper
-  /// long enough to need four lines is a paragraph that belongs somewhere else.
-  static const int helperMaxLines = 3;
+  /// **A parameter was the obvious shape and it is the wrong one.** It would
+  /// leave every existing field on the truncating default and hand the next
+  /// author the same defect to rediscover. There is no field in this app whose
+  /// error is better read cut in half, so there is nothing for a caller to
+  /// decide.
+  ///
+  /// It applies to the error as well as the helper, so the two states cannot
+  /// resize the field differently — a refusal that reflows the form is how a
+  /// user loses their place while being told what went wrong.
+  ///
+  /// Three rather than null: `null` grows without limit, and a message needing
+  /// four lines is a paragraph that belongs somewhere other than under a field.
+  /// No committed golden moved when this landed, which is the evidence that no
+  /// existing message was relying on the cut.
+  static const int _maxMessageLines = 3;
 
   /// Already-localized. Non-null puts the field in its error state.
   ///
@@ -173,11 +187,9 @@ class MxTextField extends StatelessWidget {
         labelText: label,
         hintText: hintText,
         helperText: helperText,
-        helperMaxLines: helperMaxLines,
+        helperMaxLines: _maxMessageLines,
         errorText: errorText,
-        // The same allowance for the error, so a long refusal is readable and
-        // so the two states cannot resize the field differently.
-        errorMaxLines: helperMaxLines,
+        errorMaxLines: _maxMessageLines,
         suffixIcon: _buildSuffix(),
         // **Stated, because the default is 48 wide and 48 tall only by
         // accident.** `InputDecorator` gives a suffix the field's own height

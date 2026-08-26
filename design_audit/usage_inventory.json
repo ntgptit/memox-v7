@@ -1,12 +1,12 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
   "scannedFiles": 675,
-  "totalSites": 500,
+  "totalSites": 501,
   "byElementKind": {
     "other": 314,
     "background": 23,
     "shadow": 1,
-    "border": 14,
+    "border": 15,
     "text": 116,
     "icon": 32
   },
@@ -16,7 +16,7 @@
     "Colors-material": 11,
     "hardcoded-literal": 97,
     "opacity-modified-token": 13,
-    "theme-token": 221
+    "theme-token": 222
   },
   "sites": [
     {
@@ -3827,7 +3827,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_sides_fields_widget.dart",
-      "line": 86,
+      "line": 94,
       "widget_context": "CardSidesFieldsWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3849,7 +3849,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_tag_section_widget.dart",
-      "line": 136,
+      "line": 205,
       "widget_context": "_CardTagSectionWidgetState",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3860,7 +3860,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_tag_section_widget.dart",
-      "line": 198,
+      "line": 265,
       "widget_context": "_CardTagSectionWidgetState",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3871,7 +3871,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/support/card_failure_labels_widget.dart",
-      "line": 53,
+      "line": 69,
       "widget_context": "CardWriteFailureTextWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -5356,7 +5356,18 @@
     },
     {
       "file": "lib/shared/widgets/mx_content_shell.dart",
-      "line": 212,
+      "line": 198,
+      "widget_context": "_MxContentShellState",
+      "element_kind": "border",
+      "source_kind": "theme-token",
+      "expression": "context.semanticColors.borderSubtle",
+      "token": "semantic.borderSubtle",
+      "resolved_value_light": "#D2D2DD",
+      "resolved_value_dark": "#4C487A"
+    },
+    {
+      "file": "lib/shared/widgets/mx_content_shell.dart",
+      "line": 236,
       "widget_context": "_MxContentShellState",
       "element_kind": "border",
       "source_kind": "theme-token",
@@ -5510,7 +5521,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_text_field.dart",
-      "line": 217,
+      "line": 248,
       "widget_context": "MxTextField",
       "element_kind": "text",
       "source_kind": "theme-token",

@@ -16,6 +16,16 @@
 .mx-btn--primary:active{background:color-mix(in srgb,var(--color-primary) 88%,var(--color-text-primary))}
 .mx-btn--destructive{background:var(--color-error);color:var(--color-on-error)}
 .mx-btn--destructive:active{background:color-mix(in srgb,var(--color-error) 88%,var(--color-text-primary))}
+/* **The weight axis and the danger axis are two axes.** `--destructive` is the
+   loudest thing a screen can draw, which is right in a confirm dialog and wrong
+   in a form whose primary action is Save: the card editor drew Delete at exactly
+   Save's weight and let colour alone say which one ends the card. Same role for
+   the label and the edge, so the meaning survives without colour vision.
+   Matches MxActionButtonVariant.destructiveSecondary. */
+.mx-btn--destructive-secondary{background:transparent;color:var(--color-error);border:var(--border-hairline) solid var(--color-error)}
+.mx-btn--destructive-secondary:hover{background:color-mix(in srgb,var(--color-error) 6%,transparent)}
+.mx-btn--destructive-secondary:active{background:color-mix(in srgb,var(--color-error) 12%,transparent)}
+.mx-btn--destructive-secondary:disabled{background:transparent}
 .mx-btn--secondary{background:transparent;color:var(--color-secondary-action);border:var(--border-hairline) solid var(--color-border-subtle)}
 .mx-btn--secondary:hover{background:color-mix(in srgb,var(--color-primary) 6%,transparent)}
 .mx-btn--secondary:active{background:color-mix(in srgb,var(--color-primary) 12%,transparent)}
@@ -32,6 +42,13 @@
 @keyframes mx-spin{to{transform:rotate(360deg)}}
 .mx-btn--block{width:100%}
 
+/* The trailing action sits over the input's own trailing padding, so the field
+   keeps its outline and the button keeps its full 48. Matches
+   MxTextField.trailingAction / MxTextFieldAction. */
+.mx-field{position:relative}
+.mx-field__action{position:absolute;top:0;right:var(--space-xs);display:flex;align-items:center;height:var(--touch-target-min)}
+.mx-field:has(.mx-field__action) .mx-field__input{padding-right:calc(var(--touch-target-min) + var(--space-xs))}
+
 /* --- MxIconButton ----------------------------------------------------- */
 .mx-iconbtn{display:inline-flex;align-items:center;justify-content:center;width:var(--touch-target-min);height:var(--touch-target-min);border-radius:var(--radius-md);border:0;background:transparent;color:var(--color-text-secondary);cursor:pointer;transition:background-color var(--duration-fast) var(--ease-standard)}
 /* Width only. The button spends 36 of a row and keeps its full 48 of height,
@@ -43,6 +60,12 @@
 .mx-iconbtn:active{background:color-mix(in srgb,var(--color-primary) 12%,transparent)}
 .mx-iconbtn:focus-visible{outline:none;box-shadow:inset 0 0 0 var(--border-focus) var(--color-primary)}
 .mx-iconbtn:disabled{color:var(--color-on-disabled);cursor:not-allowed;background:transparent}
+/* The tone axis, and so far it has one member. A raised flag is a state the
+   user set and it has to be visible as one — but never by colour alone, so the
+   glyph itself changes with the state and the accessible name says which way
+   the next tap goes. Matches MxIconButtonTone. */
+.mx-iconbtn--warning{color:var(--color-warning)}
+.mx-iconbtn--warning:disabled{color:var(--color-on-disabled)}
 
 /* --- MxPillButton (ChoiceChip) ---------------------------------------- */
 /* **Geometry lives on the component, not on the chip theme.** The Flutter side

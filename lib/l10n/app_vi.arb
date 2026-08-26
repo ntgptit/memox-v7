@@ -1358,6 +1358,8 @@
   "@cardConflictMoveCrossRoot": {
     "description": "Typed refusal reason for a move (BR-165). Refused even when both trees happen to use the same scheduler."
   },
+  "cardEditorFlagFailed": "Không đổi được cờ. Hãy thử lại.",
+  "@cardEditorFlagFailed": {"description": "Shown when SetCardFlag fails (BR-92)."},
   "cardEditorDiscardTitle": "Bỏ thay đổi?",
   "@cardEditorDiscardTitle": {
     "description": "Title of the dialog shown when leaving the card editor with unsaved edits (UC-04 A1)."
@@ -1380,10 +1382,12 @@
   },
   "cardEditorTagCapReached": "Đã dùng hết {max} nhãn. Xóa bớt một nhãn để thêm nhãn mới.",
   "@cardEditorTagCapReached": {
-    "description": "Replaces the tag input once the card holds the maximum number of tags (BR-94).",
     "placeholders": {
-      "max": { "type": "int" }
-    }
+      "max": {
+        "type": "int"
+      }
+    },
+    "description": "Replaces the tag input once the card holds the maximum number of tags (BR-94)."
   },
   "cardEditorDelete": "Xóa thẻ",
   "@cardEditorDelete": {

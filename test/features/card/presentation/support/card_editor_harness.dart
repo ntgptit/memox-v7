@@ -88,6 +88,57 @@ Future<GoRouter> pumpCardEditor(
   return router;
 }
 
+/// The editor in **create** mode, on the route production pushes it from.
+///
+/// Separate from [pumpCardEditor] rather than a flag on it: create has no card
+/// to load, so a harness that took a nullable id would spend half its body on
+/// which half applies.
+Future<GoRouter> pumpCardCreator(
+  WidgetTester tester,
+  FakeCardRepository repository, {
+  Locale locale = const Locale('en'),
+}) async {
+  final router = GoRouter(
+    initialLocation: '/decks/deck-1/new',
+    routes: <RouteBase>[
+      GoRoute(
+        path: '/decks/:deckId',
+        name: RouteNames.deckDetail,
+        builder: (context, state) => const Scaffold(body: Text('deck detail')),
+        routes: <RouteBase>[
+          GoRoute(
+            path: 'new',
+            builder: (context, state) =>
+                const CardEditorScreen(deckId: 'deck-1'),
+          ),
+        ],
+      ),
+    ],
+  );
+  addTearDown(router.dispose);
+
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [cardRepositoryProvider.overrideWithValue(repository)],
+      child: MaterialApp.router(
+        theme: buildLightTheme(),
+        locale: locale,
+        localizationsDelegates: const <LocalizationsDelegate<Object>>[
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        routerConfig: router,
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+
+  return router;
+}
+
 /// Fires the platform back gesture the way Android does, so the assertion is
 /// about `PopScope` and not about a button that happens to call the same code.
 Future<void> pressSystemBack(WidgetTester tester) async {

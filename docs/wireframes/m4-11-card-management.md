@@ -505,13 +505,11 @@ supersede **chỉ ở màn này**; W4 chế độ tạo giữ nguyên.
 │  ✕   Edit flashcard                     ⚑    │  ✕ có discard guard; ⚑ ghi ngay
 ├──────────────────────────────────────────────┤
 │                                              │
-│  FRONT · KOREAN   Required           3 / 60  │
-│  ┌────────────────────────────────────────┐  │
-│  │ 연구자                                 │  │  value = titleLarge
+│  ┌─ Front ────────────────────────────────┐  │
+│  │ 연구자                                 │  │  value = body
 │  └────────────────────────────────────────┘  │
 │                                              │
-│  BACK · MEANING   Required          27 / 240 │
-│  ┌────────────────────────────────────────┐  │
+│  ┌─ Back ─────────────────────────────────┐  │
 │  │ Researcher / Nhà nghiên cứu            │  │  value = body
 │  └────────────────────────────────────────┘  │
 │  Editing the text doesn't change this        │  helperText của Back (BR-10)
@@ -519,8 +517,8 @@ supersede **chỉ ở màn này**; W4 chế độ tạo giữ nguyên.
 │                                              │
 │  Add example, hint & pronunciation      ⌄    │  hàng ≥48dp, expanded semantics
 │                                              │
-│  TAGS                                 3 / 10 │
-│  ⟨TOPIK II ✕⟩ ⟨noun ✕⟩ ⟨people ✕⟩            │  ✕ có băng chạm 48×48
+│  Tags                                 3 / 10 │
+│  ⟨TOPIK II ✕⟩ ⟨noun ✕⟩ ⟨people ✕⟩            │  ✕: băng chạm 33×48 — xem dưới
 │  ┌────────────────────────────────────┬───┐  │
 │  │ Add tag                            │ + │  │  + = trailing action
 │  └────────────────────────────────────┴───┘  │
@@ -535,6 +533,33 @@ supersede **chỉ ở màn này**; W4 chế độ tạo giữ nguyên.
 │  └────────────────────────────────────────┘  │
 └──────────────────────────────────────────────┘
 ```
+
+**Hai chỗ chủ dự án đảo lại sau khi xem màn dựng thật (2026-08-26).**
+
+- **Front không đậm hơn Back.** D27 bản đầu cho value của Front `titleLarge`
+  với lập luận "Front là đề, Back là đáp, hai bên không ngang nhau". Nhìn trên
+  màn thật nó đọc ra **nặng**, không phải **chính**. Cả hai mặt trở lại input
+  style của theme — cũng là thứ chế độ tạo vẫn luôn dùng, nên luật giờ giống
+  nhau ở hai chế độ thay vì một chế độ là ngoại lệ.
+- **Chip tag không nới rộng.** `deleteIconBoxConstraints: minWidth 48` đưa băng
+  chạm của nút ✕ từ **33×48** lên **48×48** và tốn **28px bề rộng mỗi chip**
+  (80 → 108); ở 10 tag đó là ba hàng thay vì hai, trên đúng màn hẹp nhất. Chủ
+  dự án chọn bề rộng. Ghi rõ con số ở đây vì
+  `meetsGuideline(androidTapTargetGuideline)` **xanh ở cả hai trạng thái** — nó
+  đọc rect semantics, mà node nút xoá merge vào node 48 của chip; ai mở lại việc
+  này cần con số thật chứ không phải phán quyết của matcher. Chiều cao 48 thì
+  có sẵn: `_RenderChipRedirectingHitDetection` giao cả dải cao của viên chip cho
+  slot nằm dưới x.
+
+**Ba thứ bản vẽ này cố ý không có, vì production không có.** Bản 2026-08-02
+(dựng từ ảnh tham chiếu) vẽ nhãn kiểu `FRONT · KOREAN`, một dấu `Required`, và
+counter luôn hiện. Không cái nào tồn tại: nhãn là floating label của
+`MxTextField` nên chỉ là `Front`/`Back`; ràng buộc bắt buộc được nói bằng
+**lỗi khi submit** (BR-07) chứ không bằng một dấu cạnh nhãn; và counter chỉ xuất
+hiện từ 80% giới hạn (`MxTextField._counterVisibleFraction`) — `0 / 240` dưới
+một ô rỗng là tiếng ồn về một luật người dùng còn cách rất xa. Ghi ra vì bản vẽ
+này được vẽ lại *trong* cùng diff với code, nên một chi tiết chép lại từ bản cũ
+sẽ thành một sai lệch mà không ai biết là sai lệch.
 
 ### Cái gì thuộc Save, và cái gì không
 
@@ -591,6 +616,7 @@ Ghi ra để lần sau không ai tưởng là bỏ sót. Cả ba nằm ở
 | `Cancel` cạnh `Save changes` ở thanh đáy | chỉ `Save changes` | Thanh đáy chỉ chứa hành động chính. Lối thoát là `✕`, và nó đã hỏi trước khi vứt. Hai nút ở đáy làm nút phá huỷ ở trên (`Delete card`) và nút thoát nằm cùng một vùng mắt. |
 | `OPTIONAL DETAILS` mở sẵn, không disclosure | disclosure có nhãn `Add example, hint & pronunciation` | D11 vẫn đúng và vẫn chạy: thẻ **đã có** detail thì mở sẵn. Cái đổi là nhãn lúc đóng — `Add details` không nói tap vào sẽ hiện ra gì. |
 | Khối `⚠ DANGER ZONE` với tiêu đề và câu mô tả | một nút outlined `Delete card` | Câu mô tả hậu quả vẫn còn — nó nằm trong dialog xác nhận ở W7, đúng chỗ người dùng đang quyết định. Heading thì không: xem D27(c). |
+| Nhãn `FRONT · KOREAN`, dấu `Required`, counter luôn hiện | `Front` / `Back`, không dấu, counter từ 80% giới hạn | Xem đoạn ngay dưới bản vẽ. Cả ba là hành vi, không phải nét vẽ. |
 
 ### Xoá thẻ có hai lối, và đó là chủ đích
 

@@ -159,7 +159,12 @@ void main() {
 
     expect(repository.flagWrites, isEmpty);
     expect(find.byIcon(Icons.flag_outlined), findsOneWidget);
-    expect(find.text('Please try again.'), findsOneWidget);
+    // The message names the flag rather than saying `Please try again.`: it
+    // renders in the pinned subheader, at the opposite corner from the app-bar
+    // action that caused it, where a generic sentence reads as a page error or
+    // as the Front field's.
+    expect(find.textContaining('flag'), findsWidgets);
+    expect(find.text('Please try again.'), findsNothing);
   });
 
   testWidgets('editing a card with a detail opens the details expanded', (

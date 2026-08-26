@@ -12951,6 +12951,122 @@ của M2.
   platform binding, plugin, persistence hay route nào; mọi hành vi mới ở đây
   chứng minh được bằng host widget test có router thật. Đây **không** phải một
   lần pass.
+- **Hai pass review chạy song song trên hai worktree tách rời, và cả hai đều
+  tìm ra thứ mà gate không tìm ra.** Cách chia là có lý do: một pass đọc quyền
+  sở hữu mutation và vòng đời, một pass render và **đo**; chúng phải nhìn cùng
+  một cây nhưng không được sửa cùng một cây, nên mỗi pass có checkout riêng ở
+  cùng commit.
+
+  **Pass architecture/logic — 1 P0, 2 P1, 7 P2.**
+
+  - **P0 · nhánh đỏ ngay tại gate của chính nó.** `All {max} tags are in use`
+    đặt số trước danh từ đếm được, và `plural_forms_test.dart` quét ARB theo
+    đúng hình dạng đó. `kMaxTagsPerCard` là hằng 10 **và** chuỗi chỉ hiện lúc
+    đã chạm cap, nên nhánh "1 tag" không tới được từ hai hướng — vào `exempt`
+    với đúng lý do đó, cùng dạng với `deckNameTooLongError` có sẵn.
+  - **P1 · draft tag kẹt sau cap làm exit guard armed vĩnh viễn.** Chip là
+    `watch()` stream, nên một import hay một bulk add ở surface khác có thể đẩy
+    thẻ lên 10 tag trong lúc editor đang mở. Ô nhập biến mất, chữ ở lại trong
+    controller, và mọi lần Close sau đó hỏi "Bỏ thay đổi?" về một thứ không có
+    trên màn — lối ra duy nhất là bấm `Discard` cho những thay đổi người dùng
+    không nhìn thấy. Draft giờ bị **treo** khi ở cap và quay lại nguyên văn khi
+    gỡ một tag; nó là công việc chỉ khi người dùng còn làm gì được với nó.
+  - **P1 · create mode bị đổi cỡ chữ Front, trái đúng câu commit tự viết.**
+    `titleLarge` áp vô điều kiện trong `CardSidesFieldsWidget`, nên D27 — một
+    quyết định *chỉ* cho edit mode — rơi sang W4. Không golden nào và không
+    widget test nào của create tồn tại để thấy điều đó. Thành
+    `shouldEmphasizeFront`, mặc định tắt.
+  - P2 đã xử lý: `canPop` bám theo draft thay vì luôn `false` (predictive back
+    của Android bị tắt trên form pristine); `didUpdateWidget` reset baseline khi
+    `cardId` đổi (hôm nay chưa với tới được — provider là future một lần và
+    go_router key theo matched path — nhưng hỏng thì hỏng im lặng và tốn kém);
+    listener dirty chỉ đăng ký ở edit; `helperMaxLines`/`errorMaxLines` giữ
+    nguyên nhưng thành **quyết định có tên**, private, có test ghim.
+  - P2 **không** sửa, để chủ dự án quyết: save thành công làm mất draft tag chưa
+    submit. Guard bảo vệ nó trước Close và Back nhưng không trước Save. Đây là
+    mâu thuẫn giữa spec (`implementation.md` §1: "sau save thành công, cho phép
+    đúng một programmatic pop mà không hiện discard dialog") và chính doctrine
+    của guard; làm theo spec chứ không tự đảo.
+
+  **Pass UI/UX — 1 P0, 5 P1, 7 P2.** Đây là pass đã render 45 state và đo bằng
+  `getRect` cộng hit-test, không đọc code.
+
+  - **P0 · Save ghim đáy nằm hoàn toàn sau bàn phím.** Đo trên 390×844 với
+    `viewInsets.bottom = 336`: body co đúng về 508, còn thanh action ở 738…844 —
+    242dp dưới mép bàn phím, không một pixel nào nhìn thấy. Nguyên nhân trong
+    `_ScaffoldLayout.performLayout`: `minInsets.bottom` được trừ khỏi **body**,
+    còn `bottomNavigationBar` đặt ở `size.height − barHeight` bất kể. Ba doc
+    comment trong diff khẳng định ngược lại, và **required test #5 của
+    implementation prompt chưa được viết** — nên không có gì phản đối chúng.
+    Một Save ghim biến mất đúng lúc người dùng gõ thì tệ hơn Save trong scroll,
+    vì scroll ít nhất trả nó lại. Footer chuyển thành **hàng cuối của body
+    column**; `resizeToAvoidBottomInset` co cả cột, footer đáp xuống mép trên
+    bàn phím mà không tính tay gì cả. Đo lại: 468…488 với mép bàn phím 508.
+  - **P1 · không có đường biên giữa body cuộn và footer.** Ở 320dp @ 2.0, dòng
+    cuối của helper bị cắt ngang thân chữ và dính vào viên Save; và ở cuối
+    scroll `Delete card` cách Save **28** trong khi cách chính section của nó
+    32 — nghĩa là hành động phá huỷ nằm gần primary hơn nằm gần chỗ nó thuộc về,
+    đúng cái adjacency D27(c) sinh ra để bỏ. Shell vẽ hairline trên footer
+    (cùng đường nó đã vẽ dưới app bar ở đầu kia trang), và thân thêm `md` dưới
+    Delete.
+  - **P1 · hai dialog xác nhận cắt mất câu nêu hậu quả ở 320 @ 2.0 VI.** Đo:
+    message cần 205, được cho 160. Discard mất mệnh đề nói tag và cờ **không**
+    mất — đúng lý do câu đó có key riêng; delete mất câu nói Trash và cửa sổ
+    khôi phục. Nó *có* cuộn, nhưng dừng ở ranh giới dòng, không thumb, không
+    fade. **Lần sửa đầu của tôi sai và bị chính gate bắt:** bỏ
+    `scrollable: true` để tự sở hữu scroll view đổi cắt-chữ thành **overflow
+    24px** ở scale 3.0 — tệ hơn ở một chiều. Cách đúng là làm *primary scroll
+    controller* của dialog, vì `SingleChildScrollView` dọc không controller sẽ
+    tự gắn vào nó; `Scrollbar(thumbVisibility: true)` khi đó có cái để vẽ.
+  - **P1 · lỗi save là lỗi duy nhất trên màn không phải live region**, và là
+    lỗi xa nút gây ra nó nhất (nút ghim đáy, chữ nằm cạnh field). Người dùng
+    screen reader bấm Save và không được báo gì.
+  - **P1 · lỗi cờ hiện ở góc đối diện với cờ**, ngay trên nhãn `Front`, với câu
+    `Please try again.` chung chung — đọc như lỗi của trang hoặc của field đó.
+    Thêm `cardEditorFlagFailed` gọi tên thao tác.
+  - P2 đã xử lý: ô Add tag vẽ chữ `Add tag` hai lần (label và hint cùng chuỗi);
+    `Tags` thiếu `isHeader`.
+  - P2 **ghi nhận và không sửa**, có số đo: khoảng trống 163dp dưới `Delete
+    card` trên thẻ pristine ở 390 (`scrollExtentMax = 0`, không cuộn đi được) —
+    đây là hình dạng bình thường của một form ngắn có footer ghim, và lấp nó
+    nghĩa là bịa ra layout; khe chip dọc 18dp painted so với 8dp ngang, hệ quả
+    của `MaterialTapTargetSize.padded` — làm đều phần *nhìn thấy* sẽ làm lệch
+    phần *chạm được*; viền chip 1.45:1 (token `borderSubtle` có sẵn, không do
+    diff này); disclosure `primaryAccent` nặng hơn heading `Tags` — màu ở đây
+    báo "bấm được", không báo thứ hạng.
+  - **P2 · bản vẽ W6b tả ba thứ production không render.** Nhãn
+    `FRONT · KOREAN`, dấu `Required`, counter luôn hiện — chép lại từ bản
+    2026-08-02. Nguy hiểm hơn một bản vẽ cũ, vì nó được vẽ lại *trong cùng diff*
+    với code nên trông như đã được đối chiếu. Đã sửa và ghi lý do ngay dưới hình.
+
+- **Chủ dự án đảo hai quyết định sau khi xem màn dựng thật (2026-08-26), và cả
+  hai đều là những thứ chỉ nhìn ra được khi nhìn.**
+  - **Front trở lại input style của theme.** D27 bản đầu cho value của Front
+    `titleLarge`; lập luận vẫn đúng trên giấy — Front là đề, Back là đáp — nhưng
+    trên màn thật nó đọc ra *nặng* chứ không phải *chính*. Bỏ luôn tham số
+    `shouldEmphasizeFront` thay vì để nó mặc định tắt: một tham số không ai bật
+    là một quyết định giả vờ còn mở. Phụ phẩm tốt: hai chế độ giờ dùng chung một
+    luật thay vì một chế độ là ngoại lệ.
+  - **Chip tag trở lại bề rộng cũ.** `deleteIconBoxConstraints: minWidth 48`
+    đưa băng chạm của nút ✕ từ **33 × 48** lên **48 × 48** — và tốn **28px bề
+    rộng mỗi chip** (80 → 108), tức ở 10 tag là ba hàng thay vì hai, trên đúng
+    màn hẹp nhất. Chủ dự án chọn bề rộng. Con số 33 được ghi ở ba chỗ — trong
+    widget, trong test, và trong parity checklist — vì
+    `meetsGuideline(androidTapTargetGuideline)` **xanh ở cả hai trạng thái**, và
+    người mở lại việc này cần con số thật chứ không phải phán quyết của matcher.
+- **Ba warning của code-verification guard làm gate đỏ, và cả ba đều đúng.**
+  `build()` của tag section dài 103 dòng (max 100) — tách thành bốn helper;
+  `CardEditorActionBarWidget.isLoading` trúng luật cấm một cờ loading dùng chung
+  — đổi thành `isSaving`, vì thanh này có đúng một thao tác và đặt tên theo thao
+  tác là tên trung thực; và entry ARB mới đặt `description` trước
+  `placeholders`, ngược thứ tự mọi key khác trong file.
+- **Một bài học đo đạc lặp lại lần thứ hai trong task này.**
+  `meetsGuideline(androidTapTargetGuideline)` xanh trên băng chạm 33dp của nút
+  xoá chip, vì nó đọc rect **semantics** và node nút xoá merge vào node 48 của
+  chip. Cùng dạng với `_ScaffoldLayout`: một API hứa một điều, hành vi thật là
+  điều khác, và chỉ `getRect` cộng hit-test biên mới phân biệt được. Không có
+  con số nào trong mục này đến từ việc đọc code.
+
 - **Acceptance criteria:**
   - [x] Save chỉ ghi năm trường nội dung; tag/cờ vẫn ghi tức thì và không bật Save.
   - [x] Draft tag chưa submit bật exit guard nhưng không bật Save.
@@ -12959,19 +13075,29 @@ của M2.
         nguyên chữ và trạng thái dirty.
   - [x] Footer không nằm trong `SingleChildScrollView`; rect không đổi giữa
         pristine, dirty và submitting.
-  - [x] Băng chạm của nút xoá chip đạt 48 × 48, chứng minh bằng hit-test hai góc.
+  - [x] Băng chạm của nút xoá chip được **đo** (33 × 48) và con số đó được ghi
+        lại, không phải suy từ `meetsGuideline`.
   - [x] Delete vẫn qua confirm cũ, soft-delete, Undo và route fallback.
   - [x] `flutter analyze` 0 error 0 warning trên `lib/`, `test/`, `widgetbook/`.
   - [x] ARB EN/VI cân bằng; không còn caller nào của `cardEditorDangerZone`.
   - [x] Wireframe M4.11 ghi D27 và vẽ lại W6b; lịch sử D6/D10 giữ nguyên.
   - [x] Widgetbook có knob cho variant, tone và trailing action mới.
+  - [x] Save còn nhìn thấy trên bàn phím — đo với `viewInsets`, không suy luận.
+  - [x] Footer có đường biên với body; Delete cách Save xa hơn cách section của nó.
+  - [x] Toàn bộ message của hai dialog đọc được ở 320 @ 2.0 VI.
+  - [x] Mọi lỗi trên màn đều là live region và gọi tên thao tác của nó.
+  - [x] Create mode có widget test; Front giữ nguyên style của theme.
+  - [x] Draft tag kẹt sau cap không khoá được người dùng trong editor.
+  - [x] Bản vẽ W6b không tả thứ gì production không render.
 - **Editable documents:** `docs/wbs.md`, `docs/wireframes/m4-11-card-management.md`
 - **Dependencies:** M99.55, M99.59
 - **Tests required:** `card_editor_dirty_guard_test.dart`,
-  `card_editor_tag_input_test.dart`, `card_editor_edit_test.dart`,
-  `card_tag_after_error_test.dart`, `mx_content_shell_test.dart`,
-  `mx_action_button_test.dart`, `card_editor_screen_visual_audit_test.dart`,
-  `widgetbook/test/catalog_smoke_test.dart`.
+  `card_editor_tag_input_test.dart`, `card_editor_create_test.dart` (mới),
+  `card_editor_edit_test.dart`, `card_tag_after_error_test.dart`,
+  `mx_content_shell_footer_test.dart` (mới),
+  `mx_destructive_secondary_test.dart` (mới), `mx_accessibility_test.dart`,
+  `plural_forms_test.dart`, `card_editor_screen_visual_audit_test.dart`,
+  `card_screens_demo_test.dart`, `widgetbook/test/catalog_smoke_test.dart`.
 - **Checklist phases:** 7, 13, 14
 
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì

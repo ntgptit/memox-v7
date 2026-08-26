@@ -21,20 +21,36 @@ import '../widgets/sections/card_details_section_widget.dart';
 import '../widgets/sections/card_editor_action_bar_widget.dart';
 import '../widgets/sections/card_flag_toggle_widget.dart';
 import '../widgets/sections/card_sides_fields_widget.dart';
-import '../widgets/support/card_failure_labels_widget.dart';
 import '../widgets/sections/card_tag_section_widget.dart';
+import '../widgets/support/card_failure_labels_widget.dart';
 
 /// The card editor — create and edit (UC-04 W4, A1).
 ///
-/// One screen, two modes, decided by [cardId]: null creates, set edits. The two
-/// share the front/back fields and the inline validation; they differ in title,
-/// in the save paths (create offers save-and-add-another, edit does not), and in
-/// what sits below the fields (edit adds a BR-10 reassurance and a danger zone).
+/// One screen, two modes, decided by [cardId]: null creates, set edits. What
+/// they share is `CardSidesFieldsWidget` and the shell; everything else differs,
+/// and this file holds **only edit**. Create lives in `CardCreateFormWidget`
+/// with its own controllers, because the two modes used to share five
+/// `TextEditingController`s that no single instance ever used twice — the
+/// sharing bought nothing at runtime and cost a place for an edit-mode change to
+/// land in create.
 ///
-/// It navigates nothing itself: each controller reports a [SubmitOutcome] and
-/// this widget reacts — pop on `savedAndClose`, clear the form on
-/// `savedAndContinue` — because a controller holding a `BuildContext` is the
-/// crash `command_query_separation_test.dart` exists to forbid.
+/// Edit's own three facts, in the order they were got wrong:
+///
+/// - **`Save changes` owns five fields and nothing else.** Tags and the flag
+///   write the moment they are touched (BR-92, BR-93), so a Save that lit up for
+///   them would promise something it does not carry. It is pinned in the shell's
+///   footer rather than in the scroll, where it used to disappear exactly when
+///   the user was editing the tags below it.
+/// - **Dirty is a comparison, not a flag.** [CardContentDraft] holds the five
+///   values as a save would store them; typing a word and deleting it again
+///   lands back on pristine, and Save goes dark again with it.
+/// - **There is one way out.** The bar's close button and the system back
+///   gesture both reach `_handleExitRequest`, so the discard question cannot be
+///   answered differently depending on how the user tried to leave.
+///
+/// It navigates nothing itself: each controller reports an outcome and this
+/// widget reacts — because a controller holding a `BuildContext` is the crash
+/// `command_query_separation_test.dart` exists to forbid.
 class CardEditorScreen extends ConsumerStatefulWidget {
   const CardEditorScreen({required this.deckId, this.cardId, super.key});
 
@@ -98,9 +114,28 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
   @override
   void initState() {
     super.initState();
+    // Edit's alone. Create has its own controllers in `CardCreateFormWidget`
+    // and no baseline to compare against, so tracking dirtiness there would be
+    // five listeners answering a question nobody asks.
+    if (widget.cardId == null) return;
     for (final controller in _contentControllers) {
       controller.addListener(_recomputeDirty);
     }
+  }
+
+  /// **Unreachable today, and cheap enough to keep that way.** Nothing rebuilds
+  /// this screen with a different card: `cardToEditProvider` is a one-shot
+  /// future, and go_router keys the page by the matched path, which carries the
+  /// resolved id — so card-1 to card-2 is a new element. If that ever changes,
+  /// the failure is silent and expensive: the form would keep card A's text and
+  /// card A's baseline, and Save would write A's content onto B.
+  @override
+  void didUpdateWidget(CardEditorScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.cardId == widget.cardId) return;
+    _prefilled = false;
+    _baseline = null;
+    _isContentDirty = false;
   }
 
   @override
@@ -219,11 +254,14 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
 
     final busy = state.isSubmitting;
 
-    // `canPop: false` and one handler: the system back gesture and the bar's
-    // close button both arrive here, so exactly one place decides whether
-    // leaving costs the user anything.
+    // **`canPop` tracks the draft rather than sitting at `false`.** One handler
+    // still decides everything — the system back gesture and the bar's close
+    // button both arrive at `_handleExitRequest`. But a screen that claims the
+    // gesture unconditionally suppresses Android's predictive-back preview even
+    // when it is going to let the pop through anyway, so a pristine form paid an
+    // animation for a question it was never going to ask.
     return PopScope<Object?>(
-      canPop: false,
+      canPop: !_hasUnsavedWork,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
         unawaited(_handleExitRequest(cardId));
@@ -243,11 +281,14 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
         ],
         subheader: flagState.failure == null
             ? null
-            : CardWriteFailureTextWidget(failure: flagState.failure!),
+            : CardWriteFailureTextWidget(
+                failure: flagState.failure!,
+                message: context.l10n.cardEditorFlagFailed,
+              ),
         onClose: () => unawaited(_handleExitRequest(cardId)),
         footer: CardEditorActionBarWidget(
           label: context.l10n.cardEditorSaveChanges,
-          isLoading: busy,
+          isSaving: busy,
           // Disabled on a pristine form: a Save that is always pressable says
           // nothing about whether there is anything to save, and pressing it
           // writes the card back over itself.
@@ -285,6 +326,13 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
               cardId: cardId,
               isDisabled: busy,
             ),
+            // **Delete must sit closer to its own section than to Save.** The
+            // body's gutter plus the footer's padding left 28 between them,
+            // against the 32 that separates Delete from the tag strip — so at
+            // the end of the scroll two full-width buttons ended up adjacent,
+            // and the nearer one was the destructive one. That is the adjacency
+            // D27 set out to remove, re-created by pinning the primary.
+            const SizedBox(height: AppSpacing.md),
           ],
         ),
       ),

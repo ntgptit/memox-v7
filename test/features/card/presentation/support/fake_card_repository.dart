@@ -69,6 +69,13 @@ final class FakeCardRepository extends FakeCardBulkRepository
   /// the in-flight state and fire a second submit while the first is pending.
   Completer<void>? createGate;
 
+  /// The same, for `updateCard`.
+  ///
+  /// Added when the editor grew an exit guard: "Close does nothing while a save
+  /// is in flight" cannot be asserted without a way to keep a save in flight,
+  /// and the missing gate is why that requirement had no test for a while.
+  Completer<void>? updateGate;
+
   void emitCards(List<CardEntity> cards) => _cards.add(cards);
 
   /// Pushes a list frame into the management-list stream (the read the list
@@ -260,6 +267,7 @@ final class FakeCardRepository extends FakeCardBulkRepository
       back: back.value,
       example: example?.value,
     ));
+    if (updateGate != null) await updateGate!.future;
     final failure = nextCreateFailure;
     if (failure != null) throw failure;
 

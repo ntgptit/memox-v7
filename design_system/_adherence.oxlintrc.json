@@ -45,8 +45,8 @@
         "message": "<MxActionButton> doesn't accept that prop. Declared props: label, onClick, variant, isLoading, icon, isDisabled, isBlock, isCompact, autoFocus."
       },
       {
-        "selector": "JSXOpeningElement[name.name='MxActionButton'] > JSXAttribute[name.name='variant'] > Literal[value!=/^(?:primary|secondary|destructive)$/]",
-        "message": "<MxActionButton> variant must be one of 'primary' | 'secondary' | 'destructive'."
+        "selector": "JSXOpeningElement[name.name='MxActionButton'] > JSXAttribute[name.name='variant'] > Literal[value!=/^(?:primary|secondary|destructive|destructive-secondary)$/]",
+        "message": "<MxActionButton> variant must be one of 'primary' | 'secondary' | 'destructive' | 'destructive-secondary'."
       },
       {
         "selector": "JSXOpeningElement[name.name='MxActionSheetAction'] > JSXAttribute > JSXIdentifier[name!=/^(?:label|onPress|icon|variant|isEnabled|key|ref|className|style|children)$/]",
@@ -101,8 +101,8 @@
         "message": "<MxIcon> doesn't accept that prop. Declared props: name, filled, size, color, className, style."
       },
       {
-        "selector": "JSXOpeningElement[name.name='MxIconButton'] > JSXAttribute > JSXIdentifier[name!=/^(?:icon|semanticLabel|onClick|filled|tooltip|isDisabled|key|ref|className|style|children)$/]",
-        "message": "<MxIconButton> doesn't accept that prop. Declared props: icon, semanticLabel, onClick, filled, tooltip, isDisabled."
+        "selector": "JSXOpeningElement[name.name='MxIconButton'] > JSXAttribute > JSXIdentifier[name!=/^(?:icon|semanticLabel|onClick|filled|tooltip|isDisabled|tone|key|ref|className|style|children)$/]",
+        "message": "<MxIconButton> doesn't accept that prop. Declared props: icon, semanticLabel, onClick, filled, tooltip, isDisabled, tone."
       },
       {
         "selector": "JSXOpeningElement[name.name='MxListTile'] > JSXAttribute > JSXIdentifier[name!=/^(?:title|subtitle|leading|trailing|onClick|isEnabled|isSelected|key|ref|className|style|children)$/]",
@@ -141,8 +141,8 @@
         "message": "<MxSearchField> doesn't accept that prop. Declared props: value, onChange, placeholder, resultCount, autoFocus."
       },
       {
-        "selector": "JSXOpeningElement[name.name='MxTextField'] > JSXAttribute > JSXIdentifier[name!=/^(?:label|value|onChange|hintText|helperText|errorText|isEnabled|isReadOnly|maxLength|maxLines|type|onSurface|autoFocus|key|ref|className|style|children)$/]",
-        "message": "<MxTextField> doesn't accept that prop. Declared props: label, value, onChange, hintText, helperText, errorText, isEnabled, isReadOnly, maxLength, maxLines, type, onSurface, autoFocus."
+        "selector": "JSXOpeningElement[name.name='MxTextField'] > JSXAttribute > JSXIdentifier[name!=/^(?:label|value|onChange|hintText|helperText|errorText|isEnabled|isReadOnly|maxLength|maxLines|type|onSurface|autoFocus|trailingAction|key|ref|className|style|children)$/]",
+        "message": "<MxTextField> doesn't accept that prop. Declared props: label, value, onChange, hintText, helperText, errorText, isEnabled, isReadOnly, maxLength, maxLines, type, onSurface, autoFocus, trailingAction."
       }
     ]
   },

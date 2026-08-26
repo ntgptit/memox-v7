@@ -716,3 +716,29 @@ Contrast đo tại `deck_workload_role_test.dart`: info/surface 5.23:1 (light),
 7.84:1 (dark); onStreakContainer/streakContainer ≥ 4.5:1 hai theme;
 progressFill/progressTrack ≥ 3:1 hai theme.
 
+
+## Card editor UX hardening pass (M99.61, 2026-08-26)
+
+D27 in wireframe M4.11 settled three things about **edit mode**; the shared
+surface each of them needed is mirrored in the kit in this same change, so the
+two sides do not drift while the decision is fresh.
+
+| Quyết định | Flutter | design_system | Ghi chú |
+|---|---|---|---|
+| Weight và danger là **hai trục**: một variant nút destructive nhưng outlined, cho màn có primary action khác | ✅ `MxActionButtonVariant.destructiveSecondary` trong `mx_action_button.dart`, style qua `buildOutlinedStyle` | ✅ `.mx-btn--destructive-secondary` trong `mx.css`, `MxActionButton.d.ts`, `.prompt.md`, enum trong `_adherence.oxlintrc.json` | Cùng role cho nhãn **và** viền, nên nghĩa không phụ thuộc màu. Disabled trả về `disabled-surface`/`on-disabled` ở cả hai bên — đây là chỗ `styleFrom` từng làm nút giữ đỏ đậm lúc inert. |
+| Icon button có **trục tone** typed, không phải prop màu | ✅ `MxIconButtonTone.standard/warning` | ✅ `tone` prop + `.mx-iconbtn--warning` | Không bao giờ là tín hiệu duy nhất: caller đổi luôn glyph (`flag_outlined` → `flag`) và `semanticLabel` nói hướng tap kế tiếp. |
+| Text field có **một** trailing action typed, không phải slot | ✅ `MxTextFieldAction` trong `mx_text_field.dart`, render qua `suffixIcon` với floor 48 | ✅ `trailingAction` prop, `.mx-field__action` | Slot sẽ cho caller nhét style thứ hai vào field, đúng thứ component này tồn tại để từ chối. `onPressed` null = nhìn thấy nhưng inert. |
+| `MxContentShell` có **footer slot** để ghim action bar ngoài scroll | ✅ `MxContentShell.footer` → `Scaffold.bottomNavigationBar` | ❌ chưa — kit chưa có shell component tương ứng | Kit dựng từng màn bằng markup riêng, chưa có `MxContentShell`. Ghi ở đây để lần dựng shell sau không phát minh lại slot. |
+| `helperText` được phép xuống **3 dòng**; `errorText` cũng vậy | ✅ `MxTextField.helperMaxLines` | ⚠️ khác cách làm — CSS `.mx-field__help` vốn wrap tự nhiên, không cần cap | Chủ đích: web wrap theo container, Flutter phải nói số. Cả hai đều **không** cắt giữa câu, đó là điều đang được giữ khớp. |
+
+Đo được, và **kết luận đã bị đảo bởi chủ dự án**: `deleteIconBoxConstraints`
+với `minWidth: 48` đưa băng chạm của nút xoá chip từ **33 × 48** lên
+**48 × 48**, và tốn **28px bề rộng mỗi chip** (80 → 108). Ở 10 tag đó là ba hàng
+thay vì hai. Chủ dự án xem cả hai bản dựng và chọn bề rộng (2026-08-26), nên app
+ship với 33 × 48 và con số đó được ghi ở `card_tag_section_widget.dart`, trong
+test, và ở đây.
+
+`meetsGuideline(androidTapTargetGuideline)` **xanh ở cả hai trạng thái** — nó
+đọc rect semantics, mà node nút xoá merge vào node 48 của chip. Đây là cái bẫy
+sẽ lặp lại ở chip khác, nên nó được ghi lại chứ không chỉ được sửa: số thật chỉ
+ra từ `getRect` cộng hit-test biên.

@@ -1358,6 +1358,8 @@
   "@cardConflictMoveCrossRoot": {
     "description": "Typed refusal reason for a move (BR-165). Refused even when both trees happen to use the same scheduler."
   },
+  "cardEditorFlagFailed": "The flag couldn't be changed. Try again.",
+  "@cardEditorFlagFailed": {"description": "Shown when SetCardFlag fails (BR-92). Names the flag because it renders in the pinned subheader, far from the app-bar action that caused it."},
   "cardEditorDiscardTitle": "Discard changes?",
   "@cardEditorDiscardTitle": {
     "description": "Title of the dialog shown when leaving the card editor with unsaved edits (UC-04 A1)."
@@ -1380,10 +1382,12 @@
   },
   "cardEditorTagCapReached": "All {max} tags are in use. Remove one to add another.",
   "@cardEditorTagCapReached": {
-    "description": "Replaces the tag input once the card holds the maximum number of tags (BR-94). Shown instead of a field that would only refuse what is typed into it.",
     "placeholders": {
-      "max": { "type": "int" }
-    }
+      "max": {
+        "type": "int"
+      }
+    },
+    "description": "Replaces the tag input once the card holds the maximum number of tags (BR-94). Shown instead of a field that would only refuse what is typed into it."
   },
   "cardEditorDelete": "Delete card",
   "@cardEditorDelete": {

@@ -36,13 +36,9 @@ void main() {
     await pump(tester);
     final Rect withoutFooter = tester.getRect(find.text('0'));
 
-    expect(find.byType(BottomNavigationBar), findsNothing);
-    expect(
-      tester.widget<Scaffold>(find.byType(Scaffold)).bottomNavigationBar,
-      isNull,
-    );
     // The default is the whole compatibility claim: every existing caller
     // passes nothing, so nothing about their layout may depend on this slot.
+    expect(find.text('Save changes'), findsNothing);
     expect(withoutFooter.top, greaterThan(0));
   });
 
@@ -69,6 +65,48 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.getRect(find.text('Save changes')), before);
+  });
+
+  testWidgets('a footer stays above the keyboard', (tester) async {
+    // **The measurement that sent the first version back.** `Scaffold`
+    // subtracts the keyboard from the *body* and pins `bottomNavigationBar` at
+    // `size.height − barHeight` regardless — on this exact viewport the body
+    // ended at 508 and the bar sat at 738…844, entirely behind the keyboard. A
+    // pinned action that vanishes the moment the user types is the one failure
+    // this slot exists to prevent, so it is asserted rather than argued.
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    tester.view.viewInsets = const FakeViewPadding(bottom: 336);
+    addTearDown(tester.view.reset);
+
+    await pump(tester, footer: footer);
+
+    const double keyboardTop = 844 - 336;
+    final Rect bar = tester.getRect(find.text('Save changes'));
+    expect(bar.bottom, lessThanOrEqualTo(keyboardTop));
+
+    // And the body stops above the footer rather than running under it.
+    expect(
+      tester.getRect(find.byType(SingleChildScrollView)).bottom,
+      lessThanOrEqualTo(bar.top),
+    );
+  });
+
+  testWidgets('a footer is separated from the body by a hairline', (
+    tester,
+  ) async {
+    await pump(tester, footer: footer);
+
+    // Without it the scrolling body is guillotined flush against the action:
+    // at 320dp and text scale 2.0 the last line of a helper was cut in half and
+    // left touching the button.
+    final Finder seam = find.ancestor(
+      of: find.text('Save changes'),
+      matching: find.byType(DecoratedBox),
+    );
+    final BoxDecoration decoration =
+        tester.widget<DecoratedBox>(seam.last).decoration as BoxDecoration;
+    expect(decoration.border, isNotNull);
   });
 
   testWidgets('a footer takes its height out of the body, not over it', (

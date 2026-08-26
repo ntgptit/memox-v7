@@ -1,11 +1,13 @@
 import * as React from 'react';
 
 /**
- * The one button in memox: primary, secondary (outlined) or destructive.
+ * The one button in memox: primary, secondary (outlined), destructive (filled
+ * red) or destructive-secondary (outlined red).
  *
  */
 /**
- * The one button in memox: primary, secondary (outlined) or destructive.
+ * The one button in memox: primary, secondary (outlined), destructive (filled
+ * red) or destructive-secondary (outlined red).
  *
  * @startingPoint section="Core" subtitle="Primary, secondary and destructive actions" viewport="700x380"
  */
@@ -14,8 +16,8 @@ export interface MxActionButtonProps {
   label: string;
   /** Omitting it disables the button. */
   onClick?: () => void;
-  /** primary = the one action a screen wants; secondary = everything else; destructive = deletes or discards. */
-  variant?: 'primary' | 'secondary' | 'destructive';
+  /** primary = the one action a screen wants; secondary = everything else; destructive = deletes or discards and is the question being asked; destructive-secondary = deletes or discards but is NOT what the screen wants taken — the card editor's Delete beside its Save. */
+  variant?: 'primary' | 'secondary' | 'destructive' | 'destructive-secondary';
   /** Disabled, spinner shown, size unchanged. */
   isLoading?: boolean;
   /** While loading, keep the label painted with the spinner beside it. Costs the fixed width, so use it with isBlock or inside a flex row — and use it wherever the wait has a name the user must read. */

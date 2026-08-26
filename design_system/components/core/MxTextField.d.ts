@@ -20,6 +20,8 @@ export interface MxTextFieldProps {
   /** True when the field sits on a card rather than the page, so the floating label's backing matches. */
   onSurface?: boolean;
   autoFocus?: boolean;
+  /** A button at the field's trailing edge — the visible half of an action the keyboard's Enter also performs. Omit onClick to leave it visible and inert. */
+  trailingAction?: { icon: string; semanticLabel: string; onClick?: () => void };
 }
 
 export declare function MxTextField(props: MxTextFieldProps): React.JSX.Element;

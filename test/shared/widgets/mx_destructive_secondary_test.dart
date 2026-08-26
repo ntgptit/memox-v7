@@ -137,6 +137,38 @@ void main() {
     });
   });
 
+  group('messages under a field are readable, app-wide', () {
+    testWidgets('the helper and the error both get three lines', (
+      tester,
+    ) async {
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+
+      await pump(
+        tester,
+        MxTextField(
+          controller: controller,
+          label: 'a field',
+          helperText:
+              'a sentence long enough to need more than one line on a '
+              'narrow phone, which Material would otherwise cut mid-word',
+        ),
+      );
+
+      // **Not a parameter, and this is the assertion that says so.** Material's
+      // default is one line; the card editor's BR-10 sentence painted
+      // `…change this card'…` and said nothing. A per-caller option would have
+      // left every other field on the truncating default and handed the next
+      // author the same defect. There is no field here whose error reads better
+      // cut in half, so there is nothing for a caller to decide.
+      final InputDecoration decoration = tester
+          .widget<TextField>(find.byType(TextField))
+          .decoration!;
+      expect(decoration.helperMaxLines, 3);
+      expect(decoration.errorMaxLines, 3);
+    });
+  });
+
   group('MxTextFieldAction', () {
     testWidgets('renders inside the field and meets the touch floor', (
       tester,

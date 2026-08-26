@@ -112,6 +112,30 @@ class MxConfirmDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return _ScrollbarHost(builder: _buildDialog);
+  }
+
+  /// Puts a thumb on the scroll view `AlertDialog` builds for itself.
+  ///
+  /// **A `PrimaryScrollController` rather than a controller passed inward**,
+  /// because the scroll view is not ours: `AlertDialog(scrollable: true)`
+  /// creates it internally with no controller, and a vertical
+  /// `SingleChildScrollView` with no controller attaches to the primary one.
+  /// So the way to reach it is to *be* its primary controller.
+  ///
+  /// **The `Scrollbar` goes around the message, not around the dialog**, and
+  /// the first version had it around the dialog. `AlertDialog` lays itself out
+  /// through `Dialog`, which fills the screen and centres the surface inside
+  /// it — so a scrollbar wrapping it wrapped the **barrier** too, and swallowed
+  /// the tap that dismisses the dialog. `mx_confirm_dialog_test.dart` caught
+  /// that, which is the whole reason it asserts a barrier tap returns false
+  /// rather than assuming it.
+  ///
+  /// `thumbVisibility` is on deliberately, and it is not noise on short
+  /// dialogs: `ScrollbarPainter` paints nothing while `maxScrollExtent` is
+  /// zero. A thumb that appears only once you scroll cannot tell you there is
+  /// something to scroll to, which is the entire question the reader has.
+  Widget _buildDialog(BuildContext context, ScrollController controller) {
     return AlertDialog(
       // Stated rather than inherited, so the dialog's geometry is readable
       // here instead of being Material's default two indirections away — and
@@ -123,6 +147,15 @@ class MxConfirmDialog extends StatelessWidget {
       // mid-word inside the content box: no exception, no overflow stripe,
       // nothing a passing widget test would notice — and the user confirms a
       // delete having read half the sentence describing it.
+      //
+      // **And scrolling alone was not enough.** Measured on 320x568 at
+      // textScaler 2.0 in Vietnamese: the discard message needed 205 and was
+      // given 160, so the clause saying tags and the flag are *not* lost never
+      // appeared — and the delete dialog lost the sentence naming Trash and the
+      // restore window. It scrolled, but it stopped on a line boundary with no
+      // thumb, no fade and nothing else to say it had. That is the same defect
+      // one indirection down: a user who confirms after reading two thirds of
+      // the reason did not read the reason. See [_withScrollbar].
       scrollable: true,
       title: MxDialogHeader(title: title, tone: tone),
       // **A live region, because the message is where a failure lands.** Both
@@ -135,7 +168,11 @@ class MxConfirmDialog extends StatelessWidget {
       // The difference in *what* is announced is D26's business and stays; what
       // this fixes is that neither was announced. The banded failures elsewhere
       // mark themselves the same way (D24, D25).
-      content: Semantics(liveRegion: true, child: Text(message)),
+      content: Scrollbar(
+        controller: controller,
+        thumbVisibility: true,
+        child: Semantics(liveRegion: true, child: Text(message)),
+      ),
       // **One child, and it is `MxButtonPair` rather than the two buttons
       // Material would put in an `OverflowBar`.** The bar sizes each action to
       // its own label, so `Cancel` beside `Delete deck` is a small button next
@@ -174,6 +211,33 @@ class MxConfirmDialog extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Owns the [ScrollController] the dialog's internal scroll view attaches to,
+/// so a [Scrollbar] has something to draw against.
+class _ScrollbarHost extends StatefulWidget {
+  const _ScrollbarHost({required this.builder});
+
+  final Widget Function(BuildContext, ScrollController) builder;
+
+  @override
+  State<_ScrollbarHost> createState() => _ScrollbarHostState();
+}
+
+class _ScrollbarHostState extends State<_ScrollbarHost> {
+  final ScrollController _controller = ScrollController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => PrimaryScrollController(
+    controller: _controller,
+    child: widget.builder(context, _controller),
+  );
 }
 
 /// Asks a yes/no question and returns the answer.

@@ -1,4 +1,5 @@
 import React from 'react';
+import { MxIconButton } from './MxIconButton.jsx';
 
 /**
  * The app's text input. Outlined, never filled: a fill makes the field a block
@@ -7,6 +8,14 @@ import React from 'react';
  *
  * It knows nothing about the rules it enforces: maxLength is a number the caller
  * supplies and errorText a string the caller has already localized.
+ *
+ * `trailingAction` is a typed triple — `{ icon, semanticLabel, onClick }` — and
+ * not a slot. A slot would let a caller put a second text style, a coloured
+ * glyph or a whole row inside a field, which is the exact thing this component
+ * refuses. It exists because a field whose only way to commit is the keyboard's
+ * Enter has an action nobody can see. `onClick` omitted leaves it visible and
+ * inert, so the button does not appear under the finger as the first character
+ * lands.
  */
 export function MxTextField({
   label,
@@ -22,6 +31,7 @@ export function MxTextField({
   type = 'text',
   onSurface = false,
   autoFocus = false,
+  trailingAction,
 }) {
   const id = React.useId();
   const wrap = ['mx-field', errorText ? 'mx-field--error' : '', !isEnabled ? 'mx-field--disabled' : ''].filter(Boolean).join(' ');
@@ -43,6 +53,15 @@ export function MxTextField({
         ? <textarea {...shared} rows={maxLines} />
         : <input {...shared} type={type} />}
       <label className="mx-field__label" htmlFor={id}>{label}</label>
+      {trailingAction ? (
+        <span className="mx-field__action">
+          <MxIconButton
+            icon={trailingAction.icon}
+            semanticLabel={trailingAction.semanticLabel}
+            onClick={trailingAction.onClick}
+          />
+        </span>
+      ) : null}
       {(help || maxLength) ? (
         <div className="mx-field__help">
           <span>{help}</span>

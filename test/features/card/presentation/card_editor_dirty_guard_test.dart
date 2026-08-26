@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/error/failure.dart';
+import 'package:memox/features/card/domain/entities/tag_entity.dart';
+import 'package:memox/features/card/domain/failures/tag_validation_failure.dart';
 import 'package:memox/features/card/presentation/widgets/sections/card_editor_action_bar_widget.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 
@@ -138,6 +142,28 @@ void main() {
   });
 
   group('leaving the editor', () {
+    testWidgets('a pristine form lets the platform run its own back', (
+      tester,
+    ) async {
+      await pumpCardEditor(tester, seed());
+
+      // **`canPop` tracks the draft.** A screen that claims the gesture
+      // unconditionally suppresses Android's predictive-back preview even when
+      // it is going to allow the pop anyway.
+      expect(
+        tester.widget<PopScope<Object?>>(find.byType(PopScope<Object?>)).canPop,
+        isTrue,
+      );
+
+      await tester.enterText(find.byType(TextField).first, 'new front');
+      await tester.pump();
+
+      expect(
+        tester.widget<PopScope<Object?>>(find.byType(PopScope<Object?>)).canPop,
+        isFalse,
+      );
+    });
+
     testWidgets('a pristine form leaves immediately, with no question asked', (
       tester,
     ) async {
@@ -212,6 +238,87 @@ void main() {
       expect(find.text('Discard changes?'), findsOneWidget);
     });
 
+    testWidgets('a draft stranded behind the tag cap does not trap the user', (
+      tester,
+    ) async {
+      final repository = seed();
+      await pumpCardEditor(tester, repository);
+
+      await tester.enterText(tagInput(), 'half typed');
+      await tester.pump();
+
+      // The chips are a `watch()` stream, so the cap can arrive from an import
+      // or another surface while this editor is open. The input goes with it —
+      // and the text stays in a controller nobody can reach.
+      repository.emitTags(<TagEntity>[
+        for (int i = 0; i < kMaxTagsPerCard; i++)
+          repository.tag('tag-$i', name: 'tag $i'),
+      ]);
+      await tester.pumpAndSettle();
+      expect(find.byIcon(Icons.add), findsNothing);
+
+      await tester.tap(find.byIcon(Icons.close));
+      await tester.pumpAndSettle();
+
+      // Nothing visible is unsaved, so nothing is asked — and the only way out
+      // is not `Discard` on changes the user cannot see.
+      expect(find.text('Discard changes?'), findsNothing);
+      expect(find.text('deck detail'), findsOneWidget);
+    });
+
+    testWidgets('and the draft comes back when a tag is removed', (
+      tester,
+    ) async {
+      final repository = seed();
+      await pumpCardEditor(tester, repository);
+
+      await tester.enterText(tagInput(), 'half typed');
+      await tester.pump();
+      repository.emitTags(<TagEntity>[
+        for (int i = 0; i < kMaxTagsPerCard; i++)
+          repository.tag('tag-$i', name: 'tag $i'),
+      ]);
+      await tester.pumpAndSettle();
+
+      repository.emitTags(<TagEntity>[
+        for (int i = 0; i < kMaxTagsPerCard - 1; i++)
+          repository.tag('tag-$i', name: 'tag $i'),
+      ]);
+      await tester.pumpAndSettle();
+
+      // Suppressed, not discarded: the text was never taken away, so the guard
+      // arms again the moment the user can act on it.
+      expect(find.text('half typed'), findsOneWidget);
+      await tester.tap(find.byIcon(Icons.close));
+      await tester.pumpAndSettle();
+      expect(find.text('Discard changes?'), findsOneWidget);
+    });
+
+    testWidgets('close is inert while a save is in flight', (tester) async {
+      final repository = seed();
+      final gate = Completer<void>();
+      repository.updateGate = gate;
+      await pumpCardEditor(tester, repository);
+
+      await tester.enterText(find.byType(TextField).first, 'new front');
+      await tester.pump();
+      await tester.tap(saveButton());
+      await tester.pump();
+
+      await tester.tap(find.byIcon(Icons.close));
+      await tester.pump();
+
+      // Neither exit: a pop would land the write on a screen that is gone, and
+      // a discard dialog would offer to throw away work already being written.
+      expect(find.text('Discard changes?'), findsNothing);
+      expect(find.text('deck detail'), findsNothing);
+
+      gate.complete();
+      await tester.pumpAndSettle();
+      expect(repository.updates, hasLength(1));
+      expect(find.text('deck detail'), findsOneWidget);
+    });
+
     testWidgets('back twice in a row opens one dialog, not two', (
       tester,
     ) async {
@@ -258,6 +365,64 @@ void main() {
       expect(find.text('new front'), findsOneWidget);
       expect(isSaveEnabled(tester), isTrue);
       expect(find.textContaining('saved'), findsWidgets);
+    });
+  });
+
+  group('the discard dialog on the smallest screen', () {
+    testWidgets('the whole message is reachable, and says so', (tester) async {
+      tester.view.physicalSize = const Size(320, 568);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
+      await pumpCardEditor(
+        tester,
+        seed(),
+        locale: const Locale('vi'),
+        textScale: 2,
+      );
+      await tester.enterText(find.byType(TextField).first, 'x');
+      await tester.pump();
+      await tester.tap(find.byIcon(Icons.close));
+      await tester.pumpAndSettle();
+
+      // **Measured, and it was cut.** At this viewport the message needs 205
+      // and is given 160, so the clause saying tags and the flag are *not*
+      // lost fell outside the box — on a line boundary, with nothing to say
+      // the sentence continued.
+      final Finder message = find.textContaining('Thẻ nhãn và cờ');
+      expect(message, findsOneWidget);
+
+      final ScrollableState scrollable = tester.state<ScrollableState>(
+        find
+            .descendant(
+              of: find.byType(AlertDialog),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
+      expect(
+        scrollable.position.maxScrollExtent,
+        greaterThan(0),
+        reason: 'the message does not fit, so it must be scrollable',
+      );
+
+      // A thumb that is there before the user touches anything — one that
+      // appears on scroll cannot tell you there is something to scroll to.
+      expect(find.byType(Scrollbar), findsWidgets);
+
+      await tester.drag(message, const Offset(0, -120));
+      await tester.pumpAndSettle();
+
+      final Rect viewport = tester.getRect(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.byType(SingleChildScrollView),
+        ),
+      );
+      expect(
+        tester.getRect(message).bottom,
+        lessThanOrEqualTo(viewport.bottom),
+      );
     });
   });
 
