@@ -113,7 +113,7 @@ class MxConfirmDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      // Stated, so `MxDialogMetrics.footerWidth` describes the dialog this
+      // Stated, so the dialog Material draws is the dialog this file describes.
       // actually is.
       insetPadding: MxDialogMetrics.insetPadding,
       actionsPadding: MxDialogMetrics.actionsPadding,
@@ -145,10 +145,10 @@ class MxConfirmDialog extends StatelessWidget {
       // for a row.
       actions: <Widget>[
         MxButtonPair(
-          // The footer, not the screen — see `MxDialogMetrics.footerWidth`.
-          // Without this the pair stays in a row that cannot hold either label
-          // and both wrap.
-          availableWidth: MxDialogMetrics.footerWidth(context),
+          // No width passed: the pair is a render object now and measures the
+          // constraint it is given, which is this dialog's footer. Handing it a
+          // computed number was the workaround for a widget that could not see
+          // one.
           secondary: MxActionButton(
             label: cancelLabel,
             // Not `isConfirmBlocked` — see its doc. The way out stays open.

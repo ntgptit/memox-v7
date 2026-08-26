@@ -1,13 +1,13 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 670,
-  "totalSites": 502,
+  "scannedFiles": 664,
+  "totalSites": 501,
   "byElementKind": {
     "other": 315,
     "background": 23,
     "shadow": 1,
     "border": 13,
-    "text": 118,
+    "text": 117,
     "icon": 32
   },
   "bySourceKind": {
@@ -16,7 +16,7 @@
     "Colors-material": 11,
     "hardcoded-literal": 97,
     "opacity-modified-token": 13,
-    "theme-token": 223
+    "theme-token": 222
   },
   "sites": [
     {
@@ -3046,7 +3046,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 522,
+      "line": 516,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -4146,7 +4146,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/overlays/deck_form_widget.dart",
-      "line": 142,
+      "line": 141,
       "widget_context": "_DeckFormWidgetState",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4234,7 +4234,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/overlays/starter_install_widget.dart",
-      "line": 129,
+      "line": 125,
       "widget_context": "_StarterInstallFormState",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4245,7 +4245,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/overlays/starter_install_widget.dart",
-      "line": 136,
+      "line": 132,
       "widget_context": "_StarterInstallFormState",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4256,7 +4256,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/overlays/starter_install_widget.dart",
-      "line": 158,
+      "line": 154,
       "widget_context": "_StarterInstallFormState",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -5441,17 +5441,6 @@
       "token": "colorScheme.onSurfaceVariant",
       "resolved_value_light": "#565C72",
       "resolved_value_dark": "#A8A7C4"
-    },
-    {
-      "file": "lib/shared/widgets/mx_form_dialog.dart",
-      "line": 141,
-      "widget_context": "_FormError",
-      "element_kind": "text",
-      "source_kind": "theme-token",
-      "expression": "context.colors.error",
-      "token": "colorScheme.error",
-      "resolved_value_light": "#C02B3A",
-      "resolved_value_dark": "#F2808F"
     },
     {
       "file": "lib/shared/widgets/mx_navigation_bar.dart",

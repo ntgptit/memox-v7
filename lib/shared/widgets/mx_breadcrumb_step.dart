@@ -187,3 +187,12 @@ class _MxBreadcrumbSeparator extends StatelessWidget {
 
 /// Between two steps. A path is read, and a path is written with slashes.
 const String _kSeparator = '/';
+
+/// Stands in for the steps a narrow header could not fit.
+///
+/// A character rather than the `more_horiz` icon the scrolling strip folds
+/// with: this one sits in a line of text between two slashes, where an icon
+/// would be the wrong size and off the baseline. It is also not a control here
+/// — the whole header is one target — so it has nothing to announce that the
+/// strip's fold button does.
+const String _kFoldedSteps = '…';

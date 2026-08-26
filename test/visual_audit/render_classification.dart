@@ -85,6 +85,13 @@ bool renderPaintsNothing(RenderObject node) {
 /// gets *reported*, never one that gets silently trusted, which is the only
 /// direction this is allowed to fail in.
 const Set<String> _privateAndTransparent = <String>{
+  // The app's own. `MxButtonPair` lays its two buttons out itself so it can
+  // ask them how wide they want to be — `RenderFlex` cannot answer that
+  // without a `LayoutBuilder`, which `AlertDialog`'s `IntrinsicWidth` forbids.
+  // Its `paint` is `defaultPaint`, which is `context.paintChild` per child and
+  // nothing else; it has no colour, border or shape of its own. Unlike the
+  // Flutter entries below, this one is verifiable in this repository.
+  '_RenderPairLayout',
   'RenderTapRegionSurface', // widgets/tap_region.dart, not exported
   'RenderTapRegion',
   'RenderLeaderLayer', // marks a position for a follower; paints nothing

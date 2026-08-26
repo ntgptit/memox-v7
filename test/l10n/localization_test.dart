@@ -119,4 +119,49 @@ void main() {
       expect(en.unexpectedErrorMessage, isNot(vi.unexpectedErrorMessage));
     });
   });
+
+  group('the delete-impact sentence is a sentence', () {
+    // BR-04 makes this string state exactly what goes with the deck, so it is
+    // assembled from two plurals. Assembly is where it broke: the sub-deck arm
+    // contributes nothing at zero, which left the card arm starting the
+    // sentence in lower case, and left its verb agreeing with a subject that
+    // was no longer there.
+    //
+    // Neither is visible to any other gate. `arb_parity_test` checks that both
+    // languages have the key; the guard reads Dart, not ICU; and a golden of an
+    // empty deck's confirm dialog matched the day it was first drawn wrong.
+    final en = AppLocalizationsEn();
+    final vi = AppLocalizationsVi();
+
+    test('it starts with a capital when there are no sub-decks', () {
+      // The common case: deleting an empty deck. It read `no cards go to Trash
+      // with it.`
+      expect(en.deckDeleteImpactMessage(0, 0), startsWith('No cards'));
+      expect(en.deckDeleteImpactMessage(0, 1), startsWith('1 card'));
+      expect(en.deckDeleteImpactMessage(0, 5), startsWith('5 cards'));
+      expect(vi.deckDeleteImpactMessage(0, 0), startsWith('Không có thẻ nào'));
+    });
+
+    test('the verb agrees with what is actually going to Trash', () {
+      // One card alone `goes`; one card *and* a sub-deck `go`. It said `1 card
+      // go to Trash with it.`
+      expect(en.deckDeleteImpactMessage(0, 1), contains('1 card goes to'));
+      expect(en.deckDeleteImpactMessage(0, 2), contains('2 cards go to'));
+      expect(
+        en.deckDeleteImpactMessage(1, 1),
+        contains('1 sub-deck and 1 card go to'),
+      );
+    });
+
+    test('it still names both counts exactly (BR-04)', () {
+      expect(
+        en.deckDeleteImpactMessage(4, 570),
+        startsWith('4 sub-decks and 570 cards go to Trash'),
+      );
+      expect(
+        vi.deckDeleteImpactMessage(4, 570),
+        startsWith('4 bộ thẻ con và 570 thẻ vào Trash'),
+      );
+    });
+  });
 }

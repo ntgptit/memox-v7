@@ -7917,6 +7917,47 @@ phần còn lại thì không).
 
 ---
 
+## M99.54 — `MxButtonPair` hỏi hai nút thay vì đoán
+
+- **Hai lần đoán, hai hướng sai.** #337 đọc `MediaQuery.width − 32` — đúng cho
+  page column, sheet, empty state; **thừa 96px** trong dialog, nên mọi dialog vẽ
+  một hàng nó không có chỗ và cả hai nhãn xuống dòng. #348 sửa bề rộng nhưng giữ
+  lại một phỏng đoán về **nhãn**: xếp chồng khi line < `2 × 136 + gap`, với 136
+  là cỡ của `Export 128 cards` — **nhãn rộng nhất app, áp cho mọi cặp trong app**.
+- **Cái giá của lần đoán thứ hai, đo được:** `Delete tag` cần 117,7 và `Cancel`
+  95,6, nên một hàng chỉ cần **243,4** — nằm gọn trong footer 265 của dialog. Nó
+  vẫn xếp chồng, tốn thêm **56px chiều cao** và vẽ mỗi nút **265px cho nhãn
+  118px**. Trả giá đó trên chín dialog cho một ca mà chỉ một dialog có.
+- **Không cần đoán gì cả.** Hai nút tự biết chúng muốn rộng bao nhiêu, và
+  `RenderBox` hỏi được: `getMaxIntrinsicWidth` gộp sẵn nhãn, font, text scale,
+  icon và padding của chính nút — không còn hằng số nào phải giữ đồng bộ.
+- `MxButtonPair` nay là một `MultiChildRenderObjectWidget` với
+  `_RenderPairLayout`. **Render object chứ không phải `LayoutBuilder`**, và khác
+  biệt đó gánh việc: `AlertDialog` bọc actions trong `IntrinsicWidth`, mà
+  `LayoutBuilder` từ chối trả lời truy vấn intrinsic — chính lý do #337 phải
+  đoán ngay từ đầu.
+- Gỡ được cả `minButtonWidth` lẫn `availableWidth`, và `MxConfirmDialog.footerWidth`
+  cùng lời gọi của nó: constraint mà pair nhận **chính là** cái line, không cần
+  ai tính hộ nữa.
+- **Kết quả đo:**
+
+  | Dialog | Nhãn dài hơn | Footer cần | Trước | Sau |
+  |---|---:|---:|---|---|
+  | `Delete tag` / `Cancel` | 117,7 | 243,4 | xếp chồng | **một hàng** |
+  | `Xoá nhãn` / `Huỷ` | 112,4 | 232,8 | xếp chồng | **một hàng** |
+  | `Move to Trash` / `Cancel` | 145,3 | 298,6 | xếp chồng | xếp chồng ✔ |
+  | `Chuyển vào Trash` / `Huỷ` | 171,8 | 351,6 | xếp chồng | xếp chồng ✔ |
+
+- 5 golden đổi (`tag_delete_confirm`, `mx_confirm_dialog` × 4).
+  `card_bulk_delete_dialog` **không** đổi — nhãn của nó thật sự không vừa.
+- `_RenderPairLayout` được khai vào `_privateAndTransparent` của
+  `render_classification.dart`: `paint` của nó là `defaultPaint`, tức
+  `context.paintChild` mỗi con và không gì khác. Không khai thì visual audit báo
+  `1 unresolved` — cơ chế tự-khai-báo của audit hoạt động đúng như thiết kế.
+- Test dialog viết lại thành hai ca đối nhau: nhãn vừa thì **phải** là hàng,
+  nhãn không vừa thì **phải** xếp chồng; cả hai vẫn qua `expectNoWrappedLabel`
+  và `expectOneSize`.
+
 ## M99.53 — Pixel comparison trở thành cổng của PR
 
 - **Lỗ hổng đã được ghi nhận từ trước mà chưa bịt.** `docs/wbs-study.md` §1549

@@ -227,4 +227,71 @@ void main() {
       expect(b?.letterSpacing, a?.letterSpacing, reason: '$name tracking');
     }
   });
+
+  group('the weights the app spends', () {
+    /// Every weight the text theme itself declares.
+    Set<FontWeight> themeWeights() {
+      final theme = AppTypography.buildTextTheme(ThemeData.light().textTheme);
+
+      return <FontWeight>{
+        for (final style in <TextStyle?>[
+          theme.displayLarge,
+          theme.displayMedium,
+          theme.displaySmall,
+          theme.headlineLarge,
+          theme.headlineMedium,
+          theme.headlineSmall,
+          theme.titleLarge,
+          theme.titleMedium,
+          theme.titleSmall,
+          theme.bodyLarge,
+          theme.bodyMedium,
+          theme.bodySmall,
+          theme.labelLarge,
+          theme.labelMedium,
+          theme.labelSmall,
+        ])
+          if (style?.fontWeight != null) style!.fontWeight!,
+      };
+    }
+
+    test('the scale itself spends three', () {
+      // 400 body, 500 and 600 for emphasis. `w700` belongs to the two display
+      // rungs (57 and 45), which no screen in the app currently uses.
+      expect(
+        themeWeights(),
+        containsAll(<FontWeight>[
+          FontWeight.w400,
+          FontWeight.w500,
+          FontWeight.w600,
+        ]),
+      );
+    });
+
+    test('the hero numeral is the one weight a feature adds, and it is named', () {
+      // `deck_list_root.md` §6 scored the deck list ❌ for four weights and had
+      // to hedge — the code said `w700` at a call site and nothing said why, so
+      // a deliberate exception and an accident read the same from outside.
+      //
+      // This asserts the exception is still exactly one, still the heaviest
+      // thing on the screen, and still heavier than the rung it overrides. A
+      // fifth weight has to come past this test and the note beside the
+      // constant.
+      expect(AppTypography.heroNumeralWeight, FontWeight.w700);
+
+      final theme = AppTypography.buildTextTheme(ThemeData.light().textTheme);
+      expect(
+        theme.headlineLarge?.fontWeight,
+        FontWeight.w600,
+        reason:
+            'the numeral overrides this rung; if it stops being w600 the '
+            'exception may no longer be one',
+      );
+      expect(
+        AppTypography.heroNumeralWeight.value,
+        greaterThan(theme.headlineLarge!.fontWeight!.value),
+        reason: 'an exception that is not heavier buys nothing',
+      );
+    });
+  });
 }

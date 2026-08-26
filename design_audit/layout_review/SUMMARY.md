@@ -91,7 +91,10 @@ Xếp theo mức độ, không theo màn.
 | [trash](trash.md) | đường dẫn nguồn cắt thành `Phrasal v...` — thông tin cần để quyết định khôi phục |
 | [card_bulk_delete_dialog](card_bulk_delete_dialog.md) | nhãn `Move to Trash` xuống hai dòng |
 
-Ba cái đầu là truncate; cái thứ tư có nguyên nhân đo được và sửa được ngay:
+**Cái thứ tư đã sửa xong** (#348 rồi M99.54): `MxButtonPair` nay hỏi hai nút
+xem chúng muốn rộng bao nhiêu thay vì so với một hằng số, nên `Delete tag` /
+`Cancel` quay lại một hàng còn `Move to Trash` vẫn xếp chồng — đúng từng ca.
+Nguyên nhân gốc, giữ lại vì nó giải thích vì sao ba lần sửa mới xong:
 `MxButtonPair` tính `line = MediaQuery.width − 32 = 361` trong khi nút thật chỉ
 có **265** (dialog trừ `insetPadding` 40 và padding 24). Đưa bề rộng thật vào
 đúng công thức đó thì `265 < 280` → pair tự xếp chồng. Quy tắc đúng, đầu vào sai.

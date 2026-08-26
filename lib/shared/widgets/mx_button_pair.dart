@@ -1,4 +1,7 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import '../../core/theme/app_spacing.dart';
 
@@ -19,54 +22,48 @@ import '../../core/theme/app_spacing.dart';
 /// does it in both orientations. Every pair in the app therefore goes through
 /// this widget instead of through a hand-built `Row`.
 ///
-/// **How the sizes are made equal, and why not with a fixed number.** Width
-/// comes from `Expanded` — two children of equal flex split the line, or take
-/// the column's full width when stacked — so the pair fills the space its
-/// caller gives it and never invents a width of its own. Height comes from
-/// `IntrinsicHeight` wrapping a flex whose children are both `Expanded`:
-/// `RenderFlex`'s main-axis intrinsic is `totalFlex × max(childSize / flex)`,
-/// which is `2 × max(h₁, h₂)` plus the gap, and the two `Expanded` children
-/// then divide that back into two equal halves. So the shorter button grows to
-/// the taller one whatever made it taller — a label that wrapped to two lines
-/// at `textScaler` 2.0, most often — rather than the pair being held to a
-/// constant that is wrong at every scale but one.
+/// ## The row-or-stack decision asks the buttons, and used to guess
 ///
-/// **The row-or-stack decision reads `MediaQuery`, and deliberately not a
-/// `LayoutBuilder`.** Measuring the line the pair is actually given would be
-/// more precise, and it is not available: `AlertDialog` lays its actions out
-/// inside an `IntrinsicWidth`, `LayoutBuilder` refuses to answer an intrinsic
-/// query — "calculating the intrinsic dimensions would require running the
-/// layout callback speculatively" — and the dialog throws during layout. The
-/// widget under it must therefore answer intrinsics, which `Flex`,
-/// `IntrinsicHeight` and `Expanded` all do. The screen's width minus one page
-/// gutter each side is the approximation, and it holds because an action pair
-/// always sits in something that tracks the screen: a page column, a sheet, a
-/// dialog.
+/// **Two guesses preceded this, and each was wrong in its own direction.**
 ///
-/// **Except in a dialog, where the approximation is 96px wrong.** A dialog is
-/// not one page gutter in from the screen — it is `insetPadding` in from the
-/// screen *and* `actionsPadding` in from its own edge. On a 393 screen the
-/// footer is 265 wide while this widget assumed 361, which is above the
-/// stacking threshold, so it laid out a row and let both labels wrap to two
-/// lines instead. That shipped in every dialog in the app — `Move to Trash`,
-/// `Chuyển vào Trash` — and it looked like a copy problem rather than a
-/// measurement one, which is why it survived a layout review of 29 screens.
+/// The first read `MediaQuery.width − 32` — one page gutter in from the screen.
+/// True of a page column, a sheet and an empty state; 96px too generous in a
+/// dialog, which is `insetPadding` in from the screen *and* `actionsPadding` in
+/// from its own edge. Every dialog in the app laid out a row it did not have
+/// room for and let both labels wrap: `Move to Trash`, `Chuyển vào Trash`.
 ///
-/// So a caller that knows better may say so through [availableWidth]. Callers
-/// that sit directly in a page column, a sheet or an empty state leave it null
-/// and keep the screen-width approximation, which is right for them.
+/// The second fixed the width and kept a guess about the *labels*: stack when
+/// the line is under `2 × 136 + gap`, where 136 is what `Export 128 cards`
+/// needs — **the widest label in the app, applied to every pair in it.** So a
+/// dialog offering `Delete tag` and `Cancel` stacked too, and each of its two
+/// buttons came out 265 wide for a label needing 118. The vertical cost was
+/// 56px, paid on nine dialogs, for a case that only one of them has.
 ///
-/// **Width must be bounded where this is used.** Both orientations stretch, and
-/// a stretched cross axis against an unbounded constraint is an error. Every
-/// call site is inside a page column, a sheet or a dialog, which is where an
-/// action pair belongs anyway.
+/// Neither guess was needed. **The buttons know how wide they want to be, and
+/// `RenderBox` can ask them** — `getMaxIntrinsicWidth` accounts for the label,
+/// the font, the text scale, the icon and the button's own padding at once,
+/// with no constant to keep in step. That is what [_PairLayout] below does, and
+/// it is why this widget no longer takes a minimum width or an available width:
+/// the constraint it is handed *is* the line, and the children *are* the
+/// measurement.
+///
+/// **A render object rather than a `LayoutBuilder`, and that distinction is
+/// load-bearing.** `AlertDialog` lays its actions out inside an
+/// `IntrinsicWidth`; `LayoutBuilder` refuses to answer an intrinsic query —
+/// "calculating the intrinsic dimensions would require running the layout
+/// callback speculatively" — and the dialog throws during layout. A
+/// `RenderBox` answers intrinsics itself, so it can measure the line it is
+/// given without that restriction.
+///
+/// **Width must still be bounded where this is used.** Both orientations
+/// stretch, and a stretched cross axis against an unbounded constraint is an
+/// error. Every call site is inside a page column, a sheet or a dialog, which
+/// is where an action pair belongs anyway.
 class MxButtonPair extends StatelessWidget {
   const MxButtonPair({
     required this.primary,
     required this.secondary,
     this.axis = Axis.horizontal,
-    this.minButtonWidth = defaultMinButtonWidth,
-    this.availableWidth,
     super.key,
   });
 
@@ -78,61 +75,183 @@ class MxButtonPair extends StatelessWidget {
   /// under [primary] when stacked.
   final Widget secondary;
 
-  /// [Axis.horizontal] offers the row first and falls back to a stack when the
-  /// screen is too narrow for it. [Axis.vertical] always stacks — for a pair
-  /// that is a choice between two full-width paths rather than a footer.
+  /// [Axis.horizontal] offers the row whenever the two buttons fit in it and
+  /// falls back to a stack when they do not. [Axis.vertical] always stacks —
+  /// for a pair that is a choice between two full-width paths rather than a
+  /// footer.
   final Axis axis;
 
-  /// The narrowest half a label stays readable in, before type scaling.
-  ///
-  /// The fallback threshold, not a minimum applied to the buttons: below
-  /// `2 × minButtonWidth × textScale + gap` the pair stacks instead of
-  /// squeezing both labels into two lines apiece. 136 is the width
-  /// `Export 128 cards` needs at 1.0×, measured for the export sheet and the
-  /// widest real label in the app.
-  final double minButtonWidth;
+  @override
+  Widget build(BuildContext context) => _PairLayout(
+    isStacked: axis == Axis.vertical,
+    children: <Widget>[secondary, primary],
+  );
+}
 
-  static const double defaultMinButtonWidth = 136;
+/// Parent data for [_RenderPairLayout] — position only; the layout is decided
+/// from the children's own intrinsic widths.
+class _PairParentData extends ContainerBoxParentData<RenderBox> {}
 
-  /// The width the pair actually gets, when the caller knows it and the screen
-  /// does not imply it.
-  ///
-  /// Null means "one page gutter in from the screen on each side", which is
-  /// true of a page column, a sheet and an empty state. A dialog must pass its
-  /// own footer width — see the note above.
-  final double? availableWidth;
+class _PairLayout extends MultiChildRenderObjectWidget {
+  /// [children] is `[secondary, primary]` — the order a row draws them in. A
+  /// stack reverses it, because the action the user came for belongs on top.
+  const _PairLayout({required this.isStacked, required super.children});
+
+  final bool isStacked;
 
   @override
-  Widget build(BuildContext context) => IntrinsicHeight(
-    child: _shouldStack(context)
-        ? Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Expanded(child: primary),
-              const SizedBox(height: AppSpacing.sm),
-              Expanded(child: secondary),
-            ],
-          )
-        : Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Expanded(child: secondary),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(child: primary),
-            ],
-          ),
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderPairLayout(isStacked);
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    _RenderPairLayout renderObject,
+  ) {
+    renderObject.isForcedStack = isStacked;
+  }
+}
+
+/// Lays two children out at one size, side by side when they both fit.
+///
+/// The whole decision is one comparison against numbers the children supply:
+/// `2 × max(intrinsic width) + gap` against the line. Nothing here knows what a
+/// label says, what font it is in, or what the text scale is — the children
+/// already account for all three.
+class _RenderPairLayout extends RenderBox
+    with
+        ContainerRenderObjectMixin<RenderBox, _PairParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, _PairParentData> {
+  /// Positional, because a named parameter cannot be private and the field is.
+  _RenderPairLayout(this._isForcedStack);
+
+  static const double _gap = AppSpacing.sm;
+
+  bool _isForcedStack;
+
+  bool get isForcedStack => _isForcedStack;
+
+  set isForcedStack(bool value) {
+    if (_isForcedStack == value) return;
+    _isForcedStack = value;
+    markNeedsLayout();
+  }
+
+  @override
+  void setupParentData(RenderObject child) {
+    if (child.parentData is! _PairParentData) {
+      child.parentData = _PairParentData();
+    }
+  }
+
+  RenderBox get _first => firstChild!;
+
+  RenderBox get _second => childAfter(_first)!;
+
+  /// The width one half wants: the wider of the two, so both can be that.
+  double get _half => math.max(
+    _first.getMaxIntrinsicWidth(double.infinity),
+    _second.getMaxIntrinsicWidth(double.infinity),
   );
 
-  bool _shouldStack(BuildContext context) {
-    if (axis == Axis.vertical) return true;
+  bool _fitsAsRow(double line) =>
+      !_isForcedStack && line.isFinite && _half * 2 + _gap <= line;
 
-    // The scale, not the raw width: at `textScaler` 2.0 a 360dp screen has the
-    // same pixels and half the room, and the row that fits at 1.0× is the one
-    // that ellipsizes `Merge tags` at 2.0×.
-    final scale = MediaQuery.textScalerOf(context).scale(1);
-    final line =
-        availableWidth ?? MediaQuery.sizeOf(context).width - AppSpacing.lg * 2;
+  @override
+  double computeMinIntrinsicWidth(double height) => math.max(
+    _first.getMinIntrinsicWidth(height),
+    _second.getMinIntrinsicWidth(height),
+  );
 
-    return line < minButtonWidth * scale * 2 + AppSpacing.sm;
+  /// What the pair would take if nothing constrained it: the row, because the
+  /// row is what it prefers. A parent that cannot give this much hands down a
+  /// smaller constraint and [performLayout] stacks instead.
+  @override
+  double computeMaxIntrinsicWidth(double height) =>
+      _isForcedStack ? _half : _half * 2 + _gap;
+
+  @override
+  double computeMinIntrinsicHeight(double width) =>
+      _heightFor(width, min: true);
+
+  @override
+  double computeMaxIntrinsicHeight(double width) =>
+      _heightFor(width, min: false);
+
+  double _heightFor(double width, {required bool min}) {
+    final isRow = _fitsAsRow(width);
+    final childWidth = isRow ? (width - _gap) / 2 : width;
+    double of(RenderBox child) => min
+        ? child.getMinIntrinsicHeight(childWidth)
+        : child.getMaxIntrinsicHeight(childWidth);
+    final tallest = math.max(of(_first), of(_second));
+
+    return isRow ? tallest : tallest * 2 + _gap;
   }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) =>
+      _layout(constraints, isDry: true);
+
+  @override
+  void performLayout() {
+    size = _layout(constraints, isDry: false);
+  }
+
+  /// **Two passes on purpose.** The first asks each child how tall it is at the
+  /// width it will get; the second gives both the taller of the two. That is
+  /// what makes the shorter button grow to the taller one whatever made it
+  /// taller — a label that wrapped at `textScaler` 2.0, most often — instead of
+  /// the pair being held to a constant that is wrong at every scale but one.
+  Size _layout(BoxConstraints constraints, {required bool isDry}) {
+    final line = constraints.maxWidth;
+    final isRow = _fitsAsRow(line);
+    final childWidth = isRow ? (line - _gap) / 2 : line;
+    final probe = BoxConstraints(
+      minWidth: childWidth,
+      maxWidth: childWidth,
+      maxHeight: constraints.maxHeight,
+    );
+
+    final tallest = math.max(
+      _first.getMaxIntrinsicHeight(childWidth),
+      _second.getMaxIntrinsicHeight(childWidth),
+    );
+    final tight = probe.tighten(height: tallest);
+
+    if (isDry) {
+      return constraints.constrain(
+        Size(line, isRow ? tallest : tallest * 2 + _gap),
+      );
+    }
+
+    _first.layout(tight, parentUsesSize: true);
+    _second.layout(tight, parentUsesSize: true);
+
+    final firstData = _first.parentData! as _PairParentData;
+    final secondData = _second.parentData! as _PairParentData;
+
+    if (isRow) {
+      firstData.offset = Offset.zero;
+      secondData.offset = Offset(childWidth + _gap, 0);
+
+      return constraints.constrain(Size(line, tallest));
+    }
+
+    // Stacked, the order flips: `children` is `[secondary, primary]` for the
+    // row, and the action the user came for belongs above the alternative.
+    secondData.offset = Offset.zero;
+    firstData.offset = Offset(0, tallest + _gap);
+
+    return constraints.constrain(Size(line, tallest * 2 + _gap));
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    defaultPaint(context, offset);
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) =>
+      defaultHitTestChildren(result, position: position);
 }

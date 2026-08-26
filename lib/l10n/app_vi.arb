@@ -399,14 +399,14 @@
   "@starterLibraryEmpty": {
     "description": "Catalog screen with an empty manifest."
   },
-  "starterLibraryLocaleLabel": "Ngôn ngữ: {locale}",
+  "starterLibraryLocaleLabel": "Ngôn ngữ: {locale, select, en{English} vi{Tiếng Việt} ko{한국어} other{{locale}}}",
   "@starterLibraryLocaleLabel": {
     "placeholders": {
       "locale": {
         "type": "String"
       }
     },
-    "description": "Locale line on a starter template row."
+    "description": "Locale line on a starter template row. The arms are endonyms and stay unchanged in every translation, for the same reason settingsLanguageEnglish does: a reader stuck in a language they cannot read has to be able to recognise their own. `other` falls back to the raw code so a template in an unlisted language still says something rather than nothing."
   },
   "deckNoCardsLabel": "Chưa có thẻ nào",
   "@deckNoCardsLabel": {
@@ -655,7 +655,7 @@
     },
     "description": "Title of the delete confirmation. Names the deck so the user can tell which one they are about to lose (BR-04)."
   },
-  "deckDeleteImpactMessage": "{deckCount, plural, =0{} other{{deckCount} bộ thẻ con và }}{cardCount, plural, =0{không có thẻ nào} other{{cardCount} thẻ}} vào Trash cùng nó. Bạn khôi phục được trong 30 ngày.",
+  "deckDeleteImpactMessage": "{deckCount, plural, =0{{cardCount, plural, =0{Không có thẻ nào} other{{cardCount} thẻ}}} other{{deckCount} bộ thẻ con và {cardCount, plural, =0{không có thẻ nào} other{{cardCount} thẻ}}}} vào Trash cùng nó. Bạn khôi phục được trong 30 ngày.",
   "@deckDeleteImpactMessage": {
     "placeholders": {
       "deckCount": {

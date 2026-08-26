@@ -89,6 +89,15 @@ void main() {
       find.textContaining(english.starterLibraryLocaleLabel('en')),
       findsOneWidget,
     );
+    // **The language, not its code.** The row used to read `Language: en` —
+    // the schema's value shown to a reader on the first screen an empty
+    // library is offered. The names are endonyms and stay untranslated, for
+    // the reason `settingsLanguageEnglish` records.
+    expect(english.starterLibraryLocaleLabel('en'), 'Language: English');
+    expect(english.starterLibraryLocaleLabel('ko'), 'Language: 한국어');
+    expect(english.starterLibraryLocaleLabel('vi'), 'Language: Tiếng Việt');
+    // A template in a language nobody has named yet still says something.
+    expect(english.starterLibraryLocaleLabel('ja'), 'Language: ja');
     expect(
       find.text(english.starterLibrarySource('memox-fixture')),
       findsOneWidget,

@@ -20,6 +20,8 @@ import 'support/fake_card_detail_repository.dart';
 /// tests follow that split. Same fake and same harness, so nothing about the
 /// setup diverges.
 void main() {
+  _fixtureZoneGuard();
+
   group('history (BR-241…BR-244)', () {
     testWidgets('a card with no reviews shows the empty face, not an '
         'error', (tester) async {
@@ -364,3 +366,23 @@ const double _minimumTouchTarget = 48;
 /// Slack for a target whose ink box rounds a fraction below the token — the
 /// claim is "reachable", not "exactly 48".
 const double _touchTargetTolerance = 0.5;
+
+/// The history timeline renders `toLocal()`, so its fixture instant has to be
+/// local or the goldens mean a different time on every machine.
+///
+/// Kept as a test rather than a comment because the failure it prevents is
+/// invisible where it happens: the three `card_detail` goldens were drawn on CI
+/// in UTC and were nine hours wrong on a KST machine, passing CI the whole
+/// time. A `DateTime.utc` here would put that back, and nothing on CI would say
+/// so.
+void _fixtureZoneGuard() {
+  test('the history fixture is a local instant, not a UTC one', () {
+    expect(
+      fakeNow.isUtc,
+      isFalse,
+      reason:
+          'a UTC fixture renders a different local time in every zone, so '
+          'the card_detail goldens would only be right where they were drawn',
+    );
+  });
+}

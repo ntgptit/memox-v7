@@ -30,12 +30,11 @@ abstract final class MxDialogMetrics {
   /// A dialog's own padding around its action row.
   ///
   /// Material's default is also 24, so stating it moves nothing — but it puts
-  /// the number on the app's scale, where [footerWidth] can read it and an SDK
-  /// bump cannot silently change what the footer is measured against.
+  /// the number on the app's scale, so an SDK bump cannot silently change how
+  /// far a dialog sits in from its own edge.
   static const double actionsInset = AppSpacing.xl;
 
-  /// The padding a dialog passes to `AlertDialog.insetPadding` so that
-  /// [footerWidth] describes the dialog it actually is.
+  /// The padding a dialog passes to `AlertDialog.insetPadding`.
   static const EdgeInsets insetPadding = EdgeInsets.symmetric(
     horizontal: inset,
     vertical: AppSpacing.xl,
@@ -50,9 +49,10 @@ abstract final class MxDialogMetrics {
     actionsInset,
   );
 
-  /// The line the action pair actually gets, which is neither the screen nor
-  /// the dialog: `screen − 2×inset − 2×actionsInset`. On a 393 screen that is
-  /// 265, against the 361 the pair assumed before #348.
-  static double footerWidth(BuildContext context) =>
-      MediaQuery.sizeOf(context).width - inset * 2 - actionsInset * 2;
+  // `footerWidth` used to live here, and it is gone on purpose. It existed so
+  // `MxButtonPair` could be told a number it had no way to see; the pair is a
+  // render object now and reads the constraint it is handed, which *is* this
+  // footer. The two insets above stay — they are what the dialog passes to
+  // Material, and stating them keeps an SDK bump from moving the dialog
+  // silently — but nothing computes with them any more.
 }

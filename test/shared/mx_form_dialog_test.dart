@@ -214,7 +214,7 @@ void main() {
       expect(confirm.height, moreOrLessEquals(cancel.height, epsilon: 0.5));
     });
 
-    testWidgets('it hands the pair its own footer width, not the screen', (
+    testWidgets('the pair is laid out at the footer width, not the screen', (
       tester,
     ) async {
       // The defect #348 fixed in `MxConfirmDialog`, which this dialog would
@@ -242,13 +242,18 @@ void main() {
         ),
       );
 
-      final pair = tester.widget<MxButtonPair>(find.byType(MxButtonPair));
+      // **Measured, not handed over.** The pair used to be told a number,
+      // because as a `Flex` it had no way to see one; it is a render object
+      // now and reads the constraint it is given. So the check is what it was
+      // always trying to be: the line the pair actually got is this dialog's
+      // footer — `393 − 2×inset − 2×actionsInset` — and not the screen.
+      final width = tester.getSize(find.byType(MxButtonPair)).width;
 
       expect(
-        pair.availableWidth,
-        MxDialogMetrics.footerWidth(tester.element(find.byType(MxButtonPair))),
+        width,
+        393 - MxDialogMetrics.inset * 2 - MxDialogMetrics.actionsInset * 2,
       );
-      expect(pair.availableWidth, lessThan(393));
+      expect(width, lessThan(393));
     });
 
     testWidgets('isSubmitting makes both inert', (tester) async {

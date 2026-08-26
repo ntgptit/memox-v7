@@ -103,7 +103,8 @@ class MxFormDialog extends StatelessWidget {
       ),
       actions: <Widget>[
         MxButtonPair(
-          availableWidth: MxDialogMetrics.footerWidth(context),
+          // No width passed: the pair measures the constraint it is handed, which
+          // is this dialog's footer.
           secondary: MxActionButton(
             label: cancelLabel,
             onPressed: isSubmitting ? null : onCancel,

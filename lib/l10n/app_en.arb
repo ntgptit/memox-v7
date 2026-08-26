@@ -399,14 +399,14 @@
   "@starterLibraryEmpty": {
     "description": "Catalog screen with an empty manifest."
   },
-  "starterLibraryLocaleLabel": "Language: {locale}",
+  "starterLibraryLocaleLabel": "Language: {locale, select, en{English} vi{Tiếng Việt} ko{한국어} other{{locale}}}",
   "@starterLibraryLocaleLabel": {
     "placeholders": {
       "locale": {
         "type": "String"
       }
     },
-    "description": "Locale line on a starter template row."
+    "description": "Locale line on a starter template row. The arms are endonyms and stay unchanged in every translation, for the same reason settingsLanguageEnglish does: a reader stuck in a language they cannot read has to be able to recognise their own. `other` falls back to the raw code so a template in an unlisted language still says something rather than nothing."
   },
   "deckNoCardsLabel": "No cards yet",
   "@deckNoCardsLabel": {
@@ -655,7 +655,7 @@
     },
     "description": "Title of the delete confirmation. Names the deck so the user can tell which one they are about to lose (BR-04)."
   },
-  "deckDeleteImpactMessage": "{deckCount, plural, =0{} =1{1 sub-deck and } other{{deckCount} sub-decks and }}{cardCount, plural, =0{no cards} =1{1 card} other{{cardCount} cards}} go to Trash with it. You can restore them for 30 days.",
+  "deckDeleteImpactMessage": "{deckCount, plural, =0{{cardCount, plural, =0{No cards go} =1{1 card goes} other{{cardCount} cards go}}} =1{1 sub-deck and {cardCount, plural, =0{no cards} =1{1 card} other{{cardCount} cards}} go} other{{deckCount} sub-decks and {cardCount, plural, =0{no cards} =1{1 card} other{{cardCount} cards}} go}} to Trash with it. You can restore them for 30 days.",
   "@deckDeleteImpactMessage": {
     "placeholders": {
       "deckCount": {
@@ -1006,7 +1006,7 @@
   "@cardFilterNew": {
     "description": "The New filter pill with its count (D3, BR-90)."
   },
-  "cardFilterSemantics": "{label}, {count} cards",
+  "cardFilterSemantics": "{label}, {count, plural, =1{1 card} other{{count} cards}}",
   "@cardFilterSemantics": {
     "placeholders": {
       "label": {
@@ -1241,7 +1241,7 @@
     },
     "description": "Contextual bar title while a subset is selected (BR-167)."
   },
-  "cardSelectionAllLabel": "All {count} cards selected",
+  "cardSelectionAllLabel": "All {count, plural, =1{1 card} other{{count} cards}} selected",
   "@cardSelectionAllLabel": {
     "placeholders": {
       "count": {
@@ -1286,7 +1286,7 @@
   "@cardSelectedSemanticLabel": {
     "description": "Announced for a selected row beside its content: selection is never carried by colour alone."
   },
-  "cardBulkDeleteTitle": "Delete {count} cards?",
+  "cardBulkDeleteTitle": "Delete {count, plural, =1{1 card} other{{count} cards}}?",
   "@cardBulkDeleteTitle": {
     "placeholders": {
       "count": {
@@ -1312,7 +1312,7 @@
     },
     "description": "Result message after a bulk delete commits. It reports where the cards went, because they are recoverable from there (BR-256); Undo is offered for a single deletion only (BR-263)."
   },
-  "cardBulkMovedMessage": "{count} cards moved",
+  "cardBulkMovedMessage": "{count, plural, =1{1 card} other{{count} cards}} moved",
   "@cardBulkMovedMessage": {
     "placeholders": {
       "count": {
@@ -1321,7 +1321,7 @@
     },
     "description": "Result message after a bulk move commits."
   },
-  "cardBulkUpdatedMessage": "{count} cards updated",
+  "cardBulkUpdatedMessage": "{count, plural, =1{1 card} other{{count} cards}} updated",
   "@cardBulkUpdatedMessage": {
     "placeholders": {
       "count": {
@@ -1675,7 +1675,7 @@
   "@studyModeFill": {
     "description": "Mode name: type the answer (BR-134)."
   },
-  "studyModeCardCount": "{count} cards",
+  "studyModeCardCount": "{count, plural, =1{1 card} other{{count} cards}}",
   "@studyModeCardCount": {
     "placeholders": {
       "count": {
@@ -2018,7 +2018,7 @@
   "@deckHeroNewMetricWord": {
     "description": "Word half of the hero's third metric (BR-150): cards still on the learning chain. Info role when non-zero."
   },
-  "deckHeroOverdueSemanticLabel": "{count} overdue cards; oldest is {days} days overdue",
+  "deckHeroOverdueSemanticLabel": "{count, plural, =1{1 overdue card} other{{count} overdue cards}}; oldest is {days, plural, =1{1 day} other{{days} days}} overdue",
   "@deckHeroOverdueSemanticLabel": {
     "placeholders": {
       "count": {
@@ -2030,7 +2030,7 @@
     },
     "description": "Screen-reader sentence for the hero's overdue metric (BR-162). The count is cards overdue; the days are the age of the oldest backlog card — two different units, both named. Replaces the +Nd shorthand, which is excluded from semantics."
   },
-  "deckHeroDueTodaySemanticLabel": "{count} cards due today",
+  "deckHeroDueTodaySemanticLabel": "{count, plural, =1{1 card} other{{count} cards}} due today",
   "@deckHeroDueTodaySemanticLabel": {
     "placeholders": {
       "count": {
@@ -2039,7 +2039,7 @@
     },
     "description": "Screen-reader sentence for the hero's due-today metric (BR-162)."
   },
-  "deckHeroNewSemanticLabel": "{count} new cards",
+  "deckHeroNewSemanticLabel": "{count, plural, =1{1 new card} other{{count} new cards}}",
   "@deckHeroNewSemanticLabel": {
     "placeholders": {
       "count": {
@@ -2052,7 +2052,7 @@
   "@deckHeroScheduledMetricWord": {
     "description": "Word half of the hero's fourth metric (BR-162): learned cards resting until a future review. Always the neutral role — this is the set with nothing to do."
   },
-  "deckHeroScheduledSemanticLabel": "{count} cards scheduled for later",
+  "deckHeroScheduledSemanticLabel": "{count, plural, =1{1 card} other{{count} cards}} scheduled for later",
   "@deckHeroScheduledSemanticLabel": {
     "placeholders": {
       "count": {
@@ -2061,7 +2061,7 @@
     },
     "description": "Screen-reader sentence for the hero's scheduled metric (BR-162)."
   },
-  "deckOverdueSemanticLabel": "{count} cards due; oldest card is {days} days overdue",
+  "deckOverdueSemanticLabel": "{count, plural, =1{1 card} other{{count} cards}} due; oldest card is {days, plural, =1{1 day} other{{days} days}} overdue",
   "@deckOverdueSemanticLabel": {
     "placeholders": {
       "count": {
@@ -2081,7 +2081,7 @@
   "@cardImportBreadcrumbLabel": {
     "description": "The wizard's own, non-tappable breadcrumb segment."
   },
-  "cardImportDeckContextLabel": "{deckName} · {count} cards",
+  "cardImportDeckContextLabel": "{deckName} · {count, plural, =1{1 card} other{{count} cards}}",
   "@cardImportDeckContextLabel": {
     "placeholders": {
       "deckName": {
@@ -2310,7 +2310,7 @@
     },
     "description": "Confirm line naming the target deck."
   },
-  "cardImportSubmitAction": "Import {count} cards",
+  "cardImportSubmitAction": "Import {count, plural, =1{1 card} other{{count} cards}}",
   "@cardImportSubmitAction": {
     "placeholders": {
       "count": {
@@ -2418,7 +2418,7 @@
   "@cardImportRowIssueTagCharacter": {
     "description": "Row reason: a tag name carries a control character (BR-93), which the tag queries' char(31) join cannot survive."
   },
-  "cardImportMoreRowsLabel": "…and {count} more rows",
+  "cardImportMoreRowsLabel": "…and {count, plural, =1{1 more row} other{{count} more rows}}",
   "@cardImportMoreRowsLabel": {
     "placeholders": {
       "count": {
@@ -2481,7 +2481,7 @@
   "@cardImportFileParsingStatus": {
     "description": "Status line on the source summary while the decode runs (state 2)."
   },
-  "cardImportFileRowsDetected": "{count} rows detected",
+  "cardImportFileRowsDetected": "{count, plural, =1{1 row} other{{count} rows}} detected",
   "@cardImportFileRowsDetected": {
     "placeholders": {
       "count": {
@@ -2550,7 +2550,7 @@
   "@cardImportInfoTagsHint": {
     "description": "Info-panel line stating the tags separator contract (BR-169)."
   },
-  "cardImportSubmittingTitle": "Importing {count} cards…",
+  "cardImportSubmittingTitle": "Importing {count, plural, =1{1 card} other{{count} cards}}…",
   "@cardImportSubmittingTitle": {
     "placeholders": {
       "count": {
@@ -2567,7 +2567,7 @@
   "@cardImportSuccessTitle": {
     "description": "Success hero title (state 6)."
   },
-  "cardImportSuccessBody": "Added {count} cards to {deckName}. They are ready to study.",
+  "cardImportSuccessBody": "Added {count, plural, =1{1 card} other{{count} cards}} to {deckName}. They are ready to study.",
   "@cardImportSuccessBody": {
     "placeholders": {
       "count": {
@@ -2583,7 +2583,7 @@
   "@cardImportSkipsTitle": {
     "description": "Warning hero title when rows were left out (state 7)."
   },
-  "cardImportSkipsBody": "Added {count} cards. Some rows were skipped.",
+  "cardImportSkipsBody": "Added {count, plural, =1{1 card} other{{count} cards}}. Some rows were skipped.",
   "@cardImportSkipsBody": {
     "placeholders": {
       "count": {
@@ -3173,7 +3173,7 @@
     },
     "description": "Notification body when exactly one deck owes something (M6 N2, BR-222). The deck name and the count are the only data allowed here."
   },
-  "reminderNotificationBodyManyDecks": "{others, plural, =1{{count} cards are due in {deck} and 1 more deck} other{{count} cards are due in {deck} and {others} more decks}}",
+  "reminderNotificationBodyManyDecks": "{others, plural, =1{{count, plural, =1{1 card is} other{{count} cards are}} due in {deck} and 1 more deck} other{{count, plural, =1{1 card is} other{{count} cards are}} due in {deck} and {others} more decks}}",
   "@reminderNotificationBodyManyDecks": {
     "placeholders": {
       "others": {
@@ -4064,7 +4064,7 @@
     },
     "description": "The other half of the hero subline."
   },
-  "deckSummaryStudyDueAction": "Study {count} due cards",
+  "deckSummaryStudyDueAction": "Study {count, plural, =1{1 due card} other{{count} due cards}}",
   "@deckSummaryStudyDueAction": {
     "placeholders": {
       "count": {
@@ -4104,7 +4104,7 @@
   "@libraryActionsTitle": {
     "description": "Title of the Library app-bar overflow sheet (tag catalog, Trash, due-only filter)."
   },
-  "deckHeaderStatsLabel": "{deckCount} decks · {cardCount} cards",
+  "deckHeaderStatsLabel": "{deckCount, plural, =1{1 deck} other{{deckCount} decks}} · {cardCount, plural, =1{1 card} other{{cardCount} cards}}",
   "@deckHeaderStatsLabel": {
     "placeholders": {
       "deckCount": {
