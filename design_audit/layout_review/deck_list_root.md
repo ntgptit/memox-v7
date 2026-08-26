@@ -98,17 +98,20 @@ Control sort ở rung `label-md`, thấp hơn heading — đúng thứ bậc.
 **15. Scroll** ✅ Một `CustomScrollView`, không nested scroll. Bottom nav không
 che item cuối (card 4 vẫn cuộn tới được).
 
-**16. Responsive** ➖ Chỉ đo ở 393px, text scale 1.0, tiếng Anh. Chưa có bằng
-chứng cho 360 / 412 / font scale 120–150% / chuỗi tiếng Việt dài. Cần render bổ
-sung mới kết luận được.
+**16. Responsive** ❌ **Đã đo** — [ma trận responsive](deck_responsive_matrix.md).
+Hero cắt mất `7 today` ở 360px ngay tại scale 1.0 tiếng Anh (thiếu 6px, S1), và
+đơn vị `cards due` rời khỏi màn từ scale 1.3 ở **mọi** bề rộng kể cả 412 (S2).
+Ô 393 × 1.0 — đúng ô gallery chụp — là ô duy nhất sạch. Không frame nào overflow:
+hỏng ở đây là `ellipsis` im lặng, không phải sọc vàng đen.
 
 **17. Safe area** ➖ Không kiểm được từ golden.
 
 **18. Empty / loading / error** ➖ Với màn này: `deck_list_empty` là file riêng.
 Loading/error của chính root chưa có golden.
 
-**19. Content stress** ➖ Chỉ có bộ 4 deck. Chưa có 0 / 1 / 50+ item, chưa có
-tên deck 2–3 dòng.
+**19. Content stress** ✅ **Đã đo** — 0 / 1 / 50 item đều không cắt, không tràn,
+cuộn bình thường. Tên deck tiếng Việt 56 ký tự cắt ở dòng 2 đúng như thiết kế
+(S6). Dark giống hệt light.
 
 **20. Interaction** ⚠️ Thứ trông bấm được thì bấm được. Nhưng ⋮ và Study nằm gần
 nhau ở cùng nửa phải của tile, và F1 làm chúng còn gần FAB nữa.
