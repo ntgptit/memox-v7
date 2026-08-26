@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
@@ -47,6 +48,28 @@ void main() {
       },
     ),
   );
+
+  /// Every button label drew on one line.
+  ///
+  /// A wrapped label is what a too-narrow row produces, and it is exactly what
+  /// no other gate sees: the pair is still "one size", the golden still matches
+  /// itself, and nothing overflows — the words simply break.
+  void expectNoWrappedLabel(WidgetTester tester) {
+    final paragraphs = find.descendant(
+      of: find.byType(MxActionButton),
+      matching: find.byType(RichText),
+    );
+
+    for (var index = 0; index < paragraphs.evaluate().length; index++) {
+      final render = tester.renderObject<RenderParagraph>(paragraphs.at(index));
+      final text = render.text.toPlainText();
+      expect(
+        render.size.height,
+        lessThan(render.getMaxIntrinsicHeight(double.infinity) * 1.5),
+        reason: '"$text" wrapped: the footer is narrower than the pair thinks',
+      );
+    }
+  }
 
   /// The two buttons' boxes, in tree order.
   List<Size> buttonSizes(WidgetTester tester) {
@@ -176,5 +199,65 @@ void main() {
 
       expectOneSize(tester);
     });
+
+    testWidgets('a dialog footer stacks, because it is not the screen wide', (
+      tester,
+    ) async {
+      // 393 is the review surface. The dialog's footer is
+      // `393 − 2×40 inset − 2×24 actions = 265`, below the 280 a row needs, so
+      // the pair must stack. Reading the screen instead gave 361, kept the row,
+      // and wrapped both labels to two lines — in every dialog in the app.
+      await tester.pumpWidget(
+        host(
+          const MxConfirmDialog(
+            title: 'Delete "Academic Word List"?',
+            message: '4 sub-decks and 570 cards go to Trash with it.',
+            confirmLabel: 'Move to Trash',
+            cancelLabel: 'Cancel',
+            variant: MxConfirmDialogVariant.cautious,
+            onConfirm: _noop,
+            onCancel: _noop,
+          ),
+          width: 393,
+        ),
+      );
+
+      final pair = tester.widget<MxButtonPair>(find.byType(MxButtonPair));
+      expect(
+        pair.availableWidth,
+        MxConfirmDialog.footerWidth(tester.element(find.byType(MxButtonPair))),
+        reason: 'the dialog must hand the pair its own footer width',
+      );
+      expect(
+        find.byType(Column),
+        findsWidgets,
+        reason: 'a 265-wide footer cannot hold a row of two 136 buttons',
+      );
+      expectOneSize(tester);
+      expectNoWrappedLabel(tester);
+    });
+
+    testWidgets('neither dialog label wraps in Vietnamese', (tester) async {
+      // The longer of the two languages the app ships, and the one the review
+      // caught the row breaking in first.
+      await tester.pumpWidget(
+        host(
+          const MxConfirmDialog(
+            title: 'Xoá "Academic Word List"?',
+            message: '4 bộ thẻ con và 570 thẻ vào Trash cùng nó.',
+            confirmLabel: 'Chuyển vào Trash',
+            cancelLabel: 'Huỷ',
+            variant: MxConfirmDialogVariant.cautious,
+            onConfirm: _noop,
+            onCancel: _noop,
+          ),
+          width: 393,
+        ),
+      );
+
+      expectNoWrappedLabel(tester);
+    });
   });
 }
+
+void _noop() {}

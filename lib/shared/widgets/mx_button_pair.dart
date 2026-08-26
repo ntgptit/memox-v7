@@ -43,6 +43,19 @@ import '../../core/theme/app_spacing.dart';
 /// always sits in something that tracks the screen: a page column, a sheet, a
 /// dialog.
 ///
+/// **Except in a dialog, where the approximation is 96px wrong.** A dialog is
+/// not one page gutter in from the screen — it is `insetPadding` in from the
+/// screen *and* `actionsPadding` in from its own edge. On a 393 screen the
+/// footer is 265 wide while this widget assumed 361, which is above the
+/// stacking threshold, so it laid out a row and let both labels wrap to two
+/// lines instead. That shipped in every dialog in the app — `Move to Trash`,
+/// `Chuyển vào Trash` — and it looked like a copy problem rather than a
+/// measurement one, which is why it survived a layout review of 29 screens.
+///
+/// So a caller that knows better may say so through [availableWidth]. Callers
+/// that sit directly in a page column, a sheet or an empty state leave it null
+/// and keep the screen-width approximation, which is right for them.
+///
 /// **Width must be bounded where this is used.** Both orientations stretch, and
 /// a stretched cross axis against an unbounded constraint is an error. Every
 /// call site is inside a page column, a sheet or a dialog, which is where an
@@ -53,6 +66,7 @@ class MxButtonPair extends StatelessWidget {
     required this.secondary,
     this.axis = Axis.horizontal,
     this.minButtonWidth = defaultMinButtonWidth,
+    this.availableWidth,
     super.key,
   });
 
@@ -79,6 +93,14 @@ class MxButtonPair extends StatelessWidget {
   final double minButtonWidth;
 
   static const double defaultMinButtonWidth = 136;
+
+  /// The width the pair actually gets, when the caller knows it and the screen
+  /// does not imply it.
+  ///
+  /// Null means "one page gutter in from the screen on each side", which is
+  /// true of a page column, a sheet and an empty state. A dialog must pass its
+  /// own footer width — see the note above.
+  final double? availableWidth;
 
   @override
   Widget build(BuildContext context) => IntrinsicHeight(
@@ -108,7 +130,8 @@ class MxButtonPair extends StatelessWidget {
     // same pixels and half the room, and the row that fits at 1.0× is the one
     // that ellipsizes `Merge tags` at 2.0×.
     final scale = MediaQuery.textScalerOf(context).scale(1);
-    final line = MediaQuery.sizeOf(context).width - AppSpacing.lg * 2;
+    final line =
+        availableWidth ?? MediaQuery.sizeOf(context).width - AppSpacing.lg * 2;
 
     return line < minButtonWidth * scale * 2 + AppSpacing.sm;
   }
