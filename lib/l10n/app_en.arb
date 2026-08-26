@@ -1058,6 +1058,22 @@
   "@cardEditorProgressNote": {
     "description": "Reassurance under the fields in edit mode: content edits never touch the review state or history (BR-10)."
   },
+  "cardEditorDiscardTitle": "Discard changes?",
+  "@cardEditorDiscardTitle": {
+    "description": "Title of the confirmation shown when the card editor is closed with unsaved edits (UC-04 A1)."
+  },
+  "cardEditorDiscardMessage": "What you edited on this card will not be saved.",
+  "@cardEditorDiscardMessage": {
+    "description": "Body of the discard confirmation for a dirty card editor. Tags are excluded on purpose: they are already saved."
+  },
+  "cardEditorDiscardConfirmAction": "Discard",
+  "@cardEditorDiscardConfirmAction": {
+    "description": "Destructive confirm button of the card editor's discard dialog."
+  },
+  "cardEditorKeepEditingAction": "Keep editing",
+  "@cardEditorKeepEditingAction": {
+    "description": "Cancel button of the card editor's discard dialog. Says what staying does, not just \"Cancel\", because both buttons cancel something."
+  },
   "cardEditorLoadingLabel": "Loading card",
   "@cardEditorLoadingLabel": {
     "description": "Shown while the editor fetches the card to edit (UC-04 A1)."
@@ -1155,6 +1171,18 @@
   "@cardEditorTagAddHint": {
     "description": "Placeholder of the add-tag input (W5)."
   },
+  "cardEditorTagsSaveNote": "Tags save on their own — Save changes is for the text above.",
+  "@cardEditorTagsSaveNote": {
+    "description": "Note under the tag heading. A tag is written the moment it is added or removed, so it is not covered by the form's Save button; without this line the two look like one transaction (owner review, 2026-08-26)."
+  },
+  "cardEditorTagAddAction": "Add this tag",
+  "@cardEditorTagAddAction": {
+    "description": "Tooltip of the add button inside the tag field. The field's own label already says \"Add tag\"; this names the button's action on the typed value."
+  },
+  "cardEditorTagLimitReached": "This card has all 10 tags. Remove one to add another.",
+  "@cardEditorTagLimitReached": {
+    "description": "Replaces the add-tag field once the card holds the maximum tags (BR-94), so the limit is stated before the user types rather than as an error afterwards."
+  },
   "cardEditorTagCount": "{count} / {max}",
   "@cardEditorTagCount": {
     "placeholders": {
@@ -1192,9 +1220,9 @@
   "@cardTagControlCharacterError": {
     "description": "Inline error when a pasted tag name carries a control character (BR-93). Not typeable from a keyboard; it arrives by paste."
   },
-  "cardEditorDetailsToggle": "Add details",
+  "cardEditorDetailsToggle": "Add example, hint, pronunciation",
   "@cardEditorDetailsToggle": {
-    "description": "Toggle that expands the optional detail fields in the card editor (W4/W5, BR-95)."
+    "description": "Toggle that expands the optional detail fields in the card editor (W4/W5, BR-95). Names the three fields rather than saying \"details\": a plus and the word \"details\" do not tell the user what is behind them."
   },
   "cardEditorDetailsLabel": "Details",
   "@cardEditorDetailsLabel": {
@@ -1357,10 +1385,6 @@
   "cardConflictMoveCrossRoot": "A card can't move to a deck in another tree.",
   "@cardConflictMoveCrossRoot": {
     "description": "Typed refusal reason for a move (BR-165). Refused even when both trees happen to use the same scheduler."
-  },
-  "cardEditorDangerZone": "Danger zone",
-  "@cardEditorDangerZone": {
-    "description": "Heading above the delete action in the card editor (UC-04 A5)."
   },
   "cardEditorDelete": "Delete card",
   "@cardEditorDelete": {

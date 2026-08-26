@@ -1,38 +1,48 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/error/failure.dart';
-import '../../../../core/state/submit_outcome.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/theme_context_extension.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_action_button.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_empty_state.dart';
 import '../../../../shared/widgets/mx_failure_labels_widget.dart';
-import '../../../../shared/widgets/mx_text_field.dart';
 import '../../domain/entities/card_entity.dart';
-import '../../domain/failures/card_validation_failure.dart';
-import '../controllers/card_create_controller.dart';
 import '../controllers/card_editor_load_controller.dart';
 import '../controllers/card_flag_controller.dart';
 import '../controllers/card_write_controller.dart';
 import '../states/card_submit_state.dart';
+import '../widgets/overlays/card_editor_discard_widget.dart';
+import '../widgets/sections/card_create_form_widget.dart';
 import '../widgets/sections/card_danger_zone_widget.dart';
 import '../widgets/sections/card_details_section_widget.dart';
+import '../widgets/sections/card_editor_fields_widget.dart';
 import '../widgets/sections/card_flag_toggle_widget.dart';
 import '../widgets/sections/card_tag_section_widget.dart';
 
 /// The card editor — create and edit (UC-04 W4, A1).
 ///
-/// One screen, two modes, decided by [cardId]: null creates, set edits. The two
-/// share the front/back fields and the inline validation; they differ in title,
-/// in the save paths (create offers save-and-add-another, edit does not), and in
-/// what sits below the fields (edit adds a BR-10 reassurance and a danger zone).
+/// One route, two modes, decided by [cardId]: null creates, set edits. Both are
+/// framed by the same shell and share the front/back fields; everything else
+/// differs, so create's draft and its two save paths live in
+/// `CardCreateFormWidget` and this state object holds edit's alone.
 ///
-/// It navigates nothing itself: each controller reports a [SubmitOutcome] and
-/// this widget reacts — pop on `savedAndClose`, clear the form on
-/// `savedAndContinue` — because a controller holding a `BuildContext` is the
-/// crash `command_query_separation_test.dart` exists to forbid.
+/// It navigates nothing itself: the write controller reports a
+/// `SubmitOutcome` and this widget reacts, because a controller holding a
+/// `BuildContext` is the crash `command_query_separation_test.dart` exists to
+/// forbid.
+///
+/// **Edit pins its save to the bottom of the screen and create does not.** Edit
+/// is the mode the owner review was about: its form runs past a phone screen,
+/// and the button sat mid-scroll with the tag section below it — so the one
+/// control that commits the form was invisible from the place the user most
+/// often finished, and the tags underneath read as being inside a transaction
+/// they are not part of (2026-08-26). Create's form is short, ends in its two
+/// actions, and has nothing after them to be misread.
 class CardEditorScreen extends ConsumerStatefulWidget {
   const CardEditorScreen({required this.deckId, this.cardId, super.key});
 
@@ -57,109 +67,76 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
   /// on every rebuild would overwrite what the user is typing.
   bool _prefilled = false;
 
-  /// The optional-detail fields start collapsed (W4); a card that already has a
-  /// detail opens them expanded (W5).
+  /// A card that already has a detail opens the optional fields expanded (W5).
   bool _detailsExpanded = false;
+
+  /// What the card held when it was loaded, in the order [_editableControllers]
+  /// declares.
+  ///
+  /// **The baseline the dirty check compares against, and it has to be a
+  /// snapshot.** Comparing the fields against the *provider's* current card
+  /// would answer a different question after a successful save — the stream
+  /// re-emits with the new text, and every field would look clean again while
+  /// the user is still typing the next change.
+  List<String> _loadedValues = const <String>[];
 
   bool get _isEditing => widget.cardId != null;
 
+  List<TextEditingController> get _editableControllers =>
+      <TextEditingController>[_front, _back, _example, _hint, _pronunciation];
+
+  /// Whether the form holds an edit that is not on disk.
+  ///
+  /// **Tags are deliberately not part of this.** A tag is written the moment it
+  /// is added or removed (BR-93), so it is never unsaved — counting one would
+  /// put a discard dialog in front of a user who has changed nothing that can
+  /// be lost, and would light the save button for a change it does not save.
+  bool get _isDirty {
+    if (_loadedValues.isEmpty) return false;
+    final controllers = _editableControllers;
+
+    for (var i = 0; i < controllers.length; i++) {
+      if (controllers[i].text != _loadedValues[i]) return true;
+    }
+
+    return false;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // The save button's enabled state is derived from the text, so the screen
+    // has to rebuild as it changes. Edit only: create's draft is not here.
+    if (!_isEditing) return;
+    for (final controller in _editableControllers) {
+      controller.addListener(_onFormChanged);
+    }
+  }
+
+  void _onFormChanged() {
+    if (!mounted) return;
+    setState(() {});
+  }
+
   @override
   void dispose() {
-    _front.dispose();
-    _back.dispose();
-    _example.dispose();
-    _hint.dispose();
-    _pronunciation.dispose();
+    for (final controller in _editableControllers) {
+      controller
+        ..removeListener(_onFormChanged)
+        ..dispose();
+    }
     _frontFocus.dispose();
     super.dispose();
   }
-
-  Widget _detailsSection(CardSubmitState state, {required bool busy}) =>
-      CardDetailsSectionWidget(
-        isExpanded: _detailsExpanded,
-        onToggle: () => setState(() => _detailsExpanded = !_detailsExpanded),
-        exampleController: _example,
-        hintController: _hint,
-        pronunciationController: _pronunciation,
-        isBusy: busy,
-        exampleProblem: state.exampleProblem,
-        hintProblem: state.hintProblem,
-        pronunciationProblem: state.pronunciationProblem,
-      );
 
   @override
   Widget build(BuildContext context) =>
       _isEditing ? _buildEdit(context, widget.cardId!) : _buildCreate(context);
 
-  // ---- create ------------------------------------------------------------
-
-  Widget _buildCreate(BuildContext context) {
-    final provider = cardCreateProvider(widget.deckId);
-    final state = ref.watch(provider);
-    final controller = ref.read(provider.notifier);
-
-    ref.listen<CardSubmitState>(provider, (previous, next) {
-      if (next.shouldClose && !(previous?.shouldClose ?? false)) {
-        Navigator.of(context).pop();
-        return;
-      }
-      // Save-and-add-another: empty the form, return focus to the front, and
-      // clear the outcome so the next save is a fresh attempt (UC-04 A4).
-      if (next.shouldClearDraft && !(previous?.shouldClearDraft ?? false)) {
-        _front.clear();
-        _back.clear();
-        _example.clear();
-        _hint.clear();
-        _pronunciation.clear();
-        _frontFocus.requestFocus();
-        controller.reset();
-      }
-    });
-
-    final busy = state.isSubmitting;
-
-    return MxContentShell(
-      title: context.l10n.cardEditorCreateTitle,
-      leading: _closeButton(context),
-      isScrollable: true,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          ..._fields(state, busy: busy, autofocus: true),
-          const SizedBox(height: AppSpacing.md),
-          _detailsSection(state, busy: busy),
-          const SizedBox(height: AppSpacing.xl),
-          MxActionButton(
-            label: context.l10n.cardEditorSave,
-            onPressed: busy ? null : () => _submitCreate(controller),
-            isLoading: busy,
-          ),
-          const SizedBox(height: AppSpacing.md),
-          MxActionButton(
-            label: context.l10n.cardEditorSaveAndAdd,
-            variant: MxActionButtonVariant.secondary,
-            onPressed: busy
-                ? null
-                : () => _submitCreate(
-                    controller,
-                    disposition: SubmitDisposition.addAnother,
-                  ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _submitCreate(
-    CardCreate controller, {
-    SubmitDisposition disposition = SubmitDisposition.close,
-  }) => controller.submit(
-    rawFront: _front.text,
-    rawBack: _back.text,
-    rawExample: _example.text,
-    rawHint: _hint.text,
-    rawPronunciation: _pronunciation.text,
-    disposition: disposition,
+  Widget _buildCreate(BuildContext context) => _shell(
+    context,
+    title: context.l10n.cardEditorCreateTitle,
+    body: CardCreateFormWidget(deckId: widget.deckId),
   );
 
   // ---- edit --------------------------------------------------------------
@@ -192,21 +169,26 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
     );
   }
 
-  Widget _buildEditForm(BuildContext context, String cardId, CardEntity card) {
-    if (!_prefilled) {
-      _front.text = card.front;
-      _back.text = card.back;
-      _example.text = card.example ?? '';
-      _hint.text = card.hint ?? '';
-      _pronunciation.text = card.pronunciation ?? '';
-      // Open the details already if this card has any — so an existing detail is
-      // visible without hunting for the toggle (W5).
-      _detailsExpanded =
-          card.example != null ||
-          card.hint != null ||
-          card.pronunciation != null;
-      _prefilled = true;
+  void _prefill(CardEntity card) {
+    _loadedValues = <String>[
+      card.front,
+      card.back,
+      card.example ?? '',
+      card.hint ?? '',
+      card.pronunciation ?? '',
+    ];
+    for (var i = 0; i < _editableControllers.length; i++) {
+      _editableControllers[i].text = _loadedValues[i];
     }
+    // Open the details already if this card has any — so an existing detail is
+    // visible without hunting for the toggle (W5).
+    _detailsExpanded =
+        card.example != null || card.hint != null || card.pronunciation != null;
+    _prefilled = true;
+  }
+
+  Widget _buildEditForm(BuildContext context, String cardId, CardEntity card) {
+    if (!_prefilled) _prefill(card);
 
     final provider = cardEditProvider(cardId);
     final state = ref.watch(provider);
@@ -221,106 +203,110 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
 
     final busy = state.isSubmitting;
 
-    return _shell(
-      context,
-      title: context.l10n.cardEditorEditTitle,
-      actions: <Widget>[
-        CardFlagToggleWidget(
-          cardId: cardId,
-          onToggle: flagState.isSubmitting
-              ? null
-              : (isFlagged) => ref
-                    .read(setCardFlagProvider(cardId).notifier)
-                    .submit(isFlagged: !isFlagged),
-        ),
-      ],
-      subheader: flagState.failure == null
-          ? null
-          : _writeFailure(flagState.failure!),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          ..._fields(state, busy: busy, autofocus: false),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            context.l10n.cardEditorProgressNote,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          _detailsSection(state, busy: busy),
-          const SizedBox(height: AppSpacing.xl),
-          MxActionButton(
-            label: context.l10n.cardEditorSaveChanges,
-            onPressed: busy
-                ? null
-                : () => controller.submit(
-                    rawFront: _front.text,
-                    rawBack: _back.text,
-                    rawExample: _example.text,
-                    rawHint: _hint.text,
-                    rawPronunciation: _pronunciation.text,
-                  ),
-            isLoading: busy,
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          CardTagSectionWidget(cardId: cardId),
-          const SizedBox(height: AppSpacing.xxl),
-          CardDangerZoneWidget(
-            deckId: widget.deckId,
+    return PopScope<Object?>(
+      // Always blocked, then re-popped by the handler once it knows whether
+      // there is anything to lose. `canPop: !_isDirty` was the first version
+      // and is subtly wrong under Android's predictive back: the system
+      // commits to the transition on the frame the gesture starts, so the
+      // dialog would be decided a frame before the user finished typing.
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        // Fire-and-forget by design: the pop was already blocked, and the
+        // handler re-pops once the user has answered.
+        unawaited(_leaveEditor());
+      },
+      child: _shell(
+        context,
+        title: context.l10n.cardEditorEditTitle,
+        actions: <Widget>[
+          CardFlagToggleWidget(
             cardId: cardId,
-            isDisabled: busy,
+            onToggle: flagState.isSubmitting
+                ? null
+                : (isFlagged) => ref
+                      .read(setCardFlagProvider(cardId).notifier)
+                      .submit(isFlagged: !isFlagged),
           ),
         ],
+        subheader: flagState.failure == null
+            ? null
+            : _writeFailure(flagState.failure!),
+        // Pinned, so the control that commits the form is reachable from every
+        // scroll position — and disabled until there is something to commit, so
+        // an untouched card does not offer a live primary that would write
+        // nothing (owner review, 2026-08-26).
+        bottomBar: MxActionButton(
+          label: context.l10n.cardEditorSaveChanges,
+          onPressed: busy || !_isDirty ? null : () => _submitEdit(controller),
+          isLoading: busy,
+          // The bar decides this button's width, so the label can stay painted
+          // beside the spinner instead of hiding behind it.
+          shouldKeepLabelWhileLoading: true,
+        ),
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            CardEditorFieldsWidget(
+              state: state,
+              frontController: _front,
+              backController: _back,
+              frontFocus: _frontFocus,
+              isBusy: busy,
+              shouldAutofocus: false,
+              backHelperText: context.l10n.cardEditorProgressNote,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            CardDetailsSectionWidget(
+              isExpanded: _detailsExpanded,
+              onToggle: () =>
+                  setState(() => _detailsExpanded = !_detailsExpanded),
+              exampleController: _example,
+              hintController: _hint,
+              pronunciationController: _pronunciation,
+              isBusy: busy,
+              exampleProblem: state.exampleProblem,
+              hintProblem: state.hintProblem,
+              pronunciationProblem: state.pronunciationProblem,
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            CardTagSectionWidget(cardId: cardId),
+            const SizedBox(height: AppSpacing.xl),
+            CardDangerZoneWidget(
+              deckId: widget.deckId,
+              cardId: cardId,
+              isDisabled: busy,
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  // ---- shared ------------------------------------------------------------
+  void _submitEdit(CardEdit controller) => controller.submit(
+    rawFront: _front.text,
+    rawBack: _back.text,
+    rawExample: _example.text,
+    rawHint: _hint.text,
+    rawPronunciation: _pronunciation.text,
+  );
 
-  /// The two required sides plus the write-failed banner, shared by both modes.
-  List<Widget> _fields(
-    CardSubmitState state, {
-    required bool busy,
-    required bool autofocus,
-  }) {
-    return <Widget>[
-      MxTextField(
-        controller: _front,
-        focusNode: _frontFocus,
-        label: context.l10n.cardFrontLabel,
-        hintText: context.l10n.cardFrontHint,
-        isEnabled: !busy,
-        shouldAutofocus: autofocus,
-        maxLength: kCardFrontMaxLength,
-        maxLines: 2,
-        minLines: 1,
-        errorText: _frontError(state.frontProblem),
-        textInputAction: TextInputAction.next,
-      ),
-      const SizedBox(height: AppSpacing.lg),
-      MxTextField(
-        controller: _back,
-        label: context.l10n.cardBackLabel,
-        hintText: context.l10n.cardBackHint,
-        isEnabled: !busy,
-        maxLength: kCardBackMaxLength,
-        maxLines: 4,
-        minLines: 2,
-        errorText: _backError(state.backProblem),
-      ),
-      if (state.failure != null) ...<Widget>[
-        const SizedBox(height: AppSpacing.lg),
-        Text(
-          context.l10n.cardEditorSaveFailed,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).colorScheme.error,
-          ),
-        ),
-      ],
-    ];
+  /// Close, and Android's back gesture: the same exit, asking the same
+  /// question (UC-04 A1).
+  ///
+  /// Never mid-save — the write is already in flight, and leaving would strand
+  /// the outcome the listener above is waiting for.
+  Future<void> _leaveEditor() async {
+    if (ref.read(cardEditProvider(widget.cardId!)).isSubmitting) return;
+    if (_isDirty) {
+      final shouldDiscard = await showCardEditorDiscardConfirm(context);
+      if (!mounted || !shouldDiscard) return;
+    }
+    if (!mounted) return;
+    Navigator.of(context).pop();
   }
+
+  // ---- shared ------------------------------------------------------------
 
   Widget _shell(
     BuildContext context, {
@@ -328,11 +314,13 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
     required Widget body,
     List<Widget>? actions,
     Widget? subheader,
+    Widget? bottomBar,
   }) => MxContentShell(
     title: title,
     leading: _closeButton(context),
     actions: actions,
     subheader: subheader,
+    bottomBar: bottomBar,
     isScrollable: true,
     body: body,
   );
@@ -345,27 +333,17 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
         onNotFound: (_) => context.l10n.writeErrorMessage,
         onConflict: (_) => context.l10n.writeErrorMessage,
       ),
-      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-        color: Theme.of(context).colorScheme.error,
-      ),
+      style: context.texts.bodySmall?.copyWith(color: context.colors.error),
     ),
   );
 
+  /// Create leaves straight away; edit routes through the same guard the back
+  /// gesture does, so the `×` cannot be the one exit that loses work.
   Widget _closeButton(BuildContext context) => IconButton(
     icon: const Icon(Icons.close),
-    onPressed: () => Navigator.of(context).pop(),
+    onPressed: _isEditing
+        ? () => unawaited(_leaveEditor())
+        : () => Navigator.of(context).pop(),
     tooltip: context.l10n.cardEditorClose,
   );
-
-  String? _frontError(CardValidationProblem? problem) => switch (problem) {
-    CardValidationProblem.frontEmpty => context.l10n.cardFrontEmptyError,
-    CardValidationProblem.frontTooLong => context.l10n.cardFrontTooLongError,
-    _ => null,
-  };
-
-  String? _backError(CardValidationProblem? problem) => switch (problem) {
-    CardValidationProblem.backEmpty => context.l10n.cardBackEmptyError,
-    CardValidationProblem.backTooLong => context.l10n.cardBackTooLongError,
-    _ => null,
-  };
 }

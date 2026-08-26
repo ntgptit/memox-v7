@@ -12852,6 +12852,107 @@ của M2.
   `widgetbook/test/catalog_smoke_test.dart`.
 - **Checklist phases:** 7, 13, 14
 
+### M99.60 · Editor của flashcard — nút Save nằm sai chỗ, và chín thứ khác
+
+- **Status:** **done** — trừ goldens, xem "Chưa xong" bên dưới.
+- **Goal:** Đợt review của chủ dự án (2026-08-26) trên màn Edit flashcard liệt kê
+  10 khiếm khuyết. Cái nghiêm trọng nhất không phải thẩm mỹ: `Save changes` nằm
+  giữa `SingleChildScrollView`, **phía trên** section Tags — mà tag thì ghi ngay
+  lúc thêm/xóa. Nên thứ tự trên màn hình **nói sai** về phạm vi của nút: người
+  dùng sửa tag xong không thấy nút lưu nào nữa, và không có cách nào biết tag có
+  nằm trong cái được lưu hay không.
+- **Scope:** Chỉ màn editor và ba thành phần shared nó cần. **Không** đụng
+  create mode ngoài việc tách file (lý do ở dưới), không đụng repository, không
+  đụng schema.
+- **Output:** `card_editor_screen.dart`, `card_tag_section_widget.dart`,
+  `card_danger_zone_widget.dart`, `card_details_section_widget.dart`,
+  `card_flag_toggle_widget.dart`; ba file mới —
+  `card_editor_fields_widget.dart`, `card_create_form_widget.dart`,
+  `card_editor_discard_widget.dart`; `mx_content_shell.dart` (`bottomBar`),
+  `mx_text_field.dart` (`suffixAction`), `mx_action_button.dart` +
+  `app_button_themes.dart` (`destructiveOutlined`, `buildOutlinedStyle`);
+  `app_en.arb`, `app_vi.arb`.
+
+**Mười mục, và cái nào cũng đổi hành vi chứ không chỉ đổi màu:**
+
+1. **Save xuống `bottomNavigationBar`, và disabled khi form chưa dirty.**
+   `MxContentShell.bottomBar` là slot mới — shell cấp gutter và safe area, nên
+   màn thứ hai ghim action không phải suy lại padding. `bottomNavigationBar`
+   chứ không phải `Column` dưới body: đó là slot mà inset bàn phím đo theo, nên
+   thanh nổi **trên** bàn phím thay vì nằm sau nó. Dirty so với snapshot lúc
+   load, không so với card hiện tại của provider — sau một lần lưu thành công
+   stream re-emit, và so với nó thì mọi field lại "sạch" giữa lúc người dùng
+   đang gõ tiếp.
+2. **Delete thành `destructiveOutlined`.** Vẫn `error`, nhưng viền thay vì nền.
+   Một khối đỏ full-width ngay dưới một khối primary full-width là hai action
+   cùng trọng lượng chỉ khác màu. Variant mới nằm ở `MxActionButton` chứ không
+   phải style tự chế tại call site — và dùng `buildOutlinedStyle` (tách ra từ
+   `buildOutlinedButtonTheme`) chứ không `styleFrom`, vì lý do
+   `buildFilledStyle` đã ghi: property phẳng che theme ở **mọi** state, nên nút
+   sẽ vẫn đỏ lúc disabled.
+3. **Bỏ nhãn "Danger zone".** Quy ước trang settings trên web: nó rào một *nhóm*
+   thao tác không hoàn tác được. Ở đây có **một** nút. `Divider` làm đủ việc mà
+   cái heading đang làm. Key ARB xóa theo.
+4. **`PopScope` cho thay đổi chưa lưu.** Áp cho cả nút `×` lẫn back gesture —
+   một câu hỏi, một hàm. `canPop: false` **luôn**, rồi handler tự pop lại:
+   `canPop: !_isDirty` là bản đầu và sai tinh vi với predictive back, vì hệ
+   thống chốt transition ngay frame bắt đầu gesture. Tag không tính vào dirty:
+   chúng đã được lưu, nên hỏi về chúng là hỏi về thứ không mất được.
+5. **Cờ ở AppBar nói rõ hai trạng thái.** Off trước đây `color: null`, tức rơi
+   về `IconTheme` của bar — cùng mực với tiêu đề, nên control **chưa** bật lại
+   được vẽ đậm nhất. Nay `onSurfaceVariant` khi tắt, `semantic.warning` khi bật.
+   Màu vàng mà review thấy **là** token: `warningDark` = `#E8D08E`; bản light
+   của cùng token là `#9A6A11`.
+6. **Vùng chạm nút xóa trên tag chip.** Ba giá trị đặt cùng nhau vì chúng là một
+   phép tính: `_RenderChip` lấy content box là
+   `max(32 - padding.vertical + labelPadding.vertical, labelHeight + labelPadding.vertical)`
+   và **assert** hộp delete không cao hơn nó. Bỏ padding dọc của theme về 0 và
+   cho label 8 trên/dưới ⇒ `max(48, …)`, nên content box **chính là** vùng chạm
+   và hộp delete 48×48 vừa khít. Chip đã dùng `AppRadius.pill` từ M99.38 —
+   review nói `StadiumBorder` là đọc nhầm.
+7. **Ô "Add tag" có nút xác nhận.** `MxTextField.suffixAction` — một *action*,
+   không mở lại `decoration` mà widget cố tình từ chối. Ở 10/10 thì ô **biến
+   mất**, thay bằng câu nói rõ giới hạn: luật được nói trước khi gõ, không phải
+   sau khi gõ dưới dạng lỗi.
+8. **"Add details" → "Add example, hint, pronunciation", `Icons.add` →
+   `expand_more`.** Dấu cộng trong app này nghĩa là *tạo một thứ mới*, nên nó
+   gợi ý mở màn khác chứ không phải mở section tại chỗ.
+9. **Front đặt ở `titleLarge`.** Front là từ cần học, back là nghĩa; lúc ôn màn
+   study vẽ front to và một mình. Không dùng `headlineSmall` — với `maxLines: 2`
+   nó đẩy field back ra khỏi màn 320 ở text scale lớn.
+10. **Note BR-10 thành `helperText` của field Back.** Nó đang là một `Text` lửng
+    lơ giữa field Back và toggle details, không thuộc field nào.
+
+- **Tách file, vì guard 400 dòng.** Editor lên 447. Đường cắt là đường hai mode
+  vốn đã có: chúng chỉ dùng chung hai field. Nên `CardEditorFieldsWidget` giữ
+  phần dùng chung, `CardCreateFormWidget` giữ draft và hai save path của create,
+  và state object của screen từ đây chỉ thuộc về edit — không mode nào phải hỏi
+  mình là mode nào trước khi chạm controller.
+- **Create **không** ghim nút, và đó là chủ ý.** Cái review phản đối là nút nằm
+  *trên* một section tự lưu. Form create kết thúc bằng hai action, không có gì
+  phía sau để hiểu nhầm, và `Save and add another` là một lựa chọn giữa hai
+  đường đi — thanh một nút không diễn đạt được.
+- **Chưa xong — goldens.** `test/demo/*` và `mx_components_golden_test.dart` là
+  PNG render trên Windows; phiên này chạy Linux nên **toàn bộ** golden lệch, kể
+  cả trên cây sạch (đã kiểm bằng `git stash`). Nên goldens **chưa** được
+  regenerate và gallery **chưa** được publish lại. Phải chạy trên Windows:
+  `TZ=UTC flutter test --tags golden --update-goldens` rồi
+  `build_screen_gallery.py`. Ảnh hưởng ít nhất `goldens/card_editor_edit.png`.
+- **Acceptance criteria:**
+  - [x] Save ghim đáy, thấy được ở mọi vị trí cuộn, disabled tới khi form dirty.
+  - [x] Đóng màn khi dirty hỏi trước; `Keep editing` giữ nguyên chữ đã gõ.
+  - [x] Delete là outline, không còn heading phía trên.
+  - [x] Nút xóa trên chip đạt `AppSpacing.minimumTouchTarget`.
+  - [x] Ô add tag có nút; ở 10/10 ô biến mất và giới hạn được nói ra.
+  - [x] `flutter analyze` sạch, guard sạch, `check_docs.py` sạch.
+  - [x] 3686 test non-golden xanh; 68 visual audit xanh.
+  - [ ] Goldens regenerate + gallery publish lại — **cần máy Windows**.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.55
+- **Tests required:** `card_editor_edit_test.dart` (6 test mới),
+  `card_editor_screen_visual_audit_test.dart` (đếm ink/shape của edit +1).
+- **Checklist phases:** 7, 13, 14
+
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 
 Ghi lại cụ thể, vì "mất một bộ lint" là câu quá mơ hồ để ai đó sau này biết

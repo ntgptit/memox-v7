@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../../core/navigation/route_names.dart';
 import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
 import '../overlays/card_confirm_widget.dart';
@@ -14,6 +15,21 @@ import '../support/card_undo_widget.dart';
 /// Split out of `card_editor_screen.dart` at the 400-line guard, and the seam
 /// is a real one — the screen owns the form, this owns the one action that
 /// ends the screen and decides where the user lands afterwards.
+///
+/// **A rule and a quiet button, not a heading and a red block** (owner review,
+/// 2026-08-26). Two things were wrong with the first version:
+///
+/// * *"Danger zone" is a settings-page convention from the web*, where it
+///   fences off a group of irreversible operations under one heading. There is
+///   one action here, and a heading over a single button names a section that
+///   does not exist. The [Divider] does the whole job the heading was doing —
+///   saying that what follows is not part of the form above it.
+/// * *A full-width `error` fill directly under a full-width primary* made the
+///   two actions the same weight, differing only in hue, and put the loudest
+///   block on the screen under the least frequent action. The outlined variant
+///   keeps the red — it still has to read as destructive — and drops the mass.
+///   The delete is still confirmed before anything happens, so the quieter
+///   affordance costs no safety.
 class CardDangerZoneWidget extends ConsumerWidget {
   const CardDangerZoneWidget({
     required this.deckId,
@@ -46,16 +62,12 @@ class CardDangerZoneWidget extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        Text(
-          context.l10n.cardEditorDangerZone,
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-            color: Theme.of(context).colorScheme.error,
-          ),
-        ),
+        Divider(color: context.semanticColors.borderSubtle),
         const SizedBox(height: AppSpacing.md),
         MxActionButton(
           label: context.l10n.cardEditorDelete,
-          variant: MxActionButtonVariant.destructive,
+          variant: MxActionButtonVariant.destructiveOutlined,
+          icon: Icons.delete_outline,
           onPressed: isDisabled
               ? null
               : () => showCardDeleteConfirm(

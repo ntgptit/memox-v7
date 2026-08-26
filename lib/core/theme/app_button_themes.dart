@@ -279,31 +279,51 @@ TextButtonThemeData buildTextButtonTheme(
   );
 }
 
+/// An outlined button's colours, for any ink and any edge.
+///
+/// Public for the same reason [buildFilledStyle] is: `MxActionButton`'s
+/// `destructiveOutlined` variant is this button with `error` on both axes, not
+/// a second implementation. Reaching for `OutlinedButton.styleFrom` there would
+/// repeat the mistake that doc comment records — a flat `WidgetStatePropertyAll`
+/// shadows the theme's property for *every* state at once, so a red outline
+/// would stay fully red while disabled.
+ButtonStyle buildOutlinedStyle(
+  ColorScheme scheme,
+  AppSemanticColors semantic, {
+  required Color label,
+  required Color border,
+}) => buildSharedButtonStyle(scheme).copyWith(
+  foregroundColor: WidgetStateProperty.resolveWith((states) {
+    if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
+
+    return label;
+  }),
+  side: WidgetStateProperty.resolveWith((states) {
+    if (states.contains(WidgetState.disabled)) {
+      return BorderSide(color: semantic.disabledSurface);
+    }
+    // The ring, at the one stroke every focus indicator in the app uses. It
+    // replaces the hairline rather than sitting outside it, so focus costs no
+    // layout — an `OutlinedBorder`'s side is painted on the shape, not added
+    // to the box.
+    if (states.contains(WidgetState.focused)) {
+      return AppInteractionStates.focusRing(semantic);
+    }
+
+    return BorderSide(color: border);
+  }),
+);
+
 /// The secondary action: `MxActionButton`'s `secondary` variant.
 OutlinedButtonThemeData buildOutlinedButtonTheme(
   ColorScheme scheme,
   AppSemanticColors semantic, {
   required Color outlineLabel,
 }) => OutlinedButtonThemeData(
-  style: buildSharedButtonStyle(scheme).copyWith(
-    foregroundColor: WidgetStateProperty.resolveWith((states) {
-      if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
-
-      return outlineLabel;
-    }),
-    side: WidgetStateProperty.resolveWith((states) {
-      if (states.contains(WidgetState.disabled)) {
-        return BorderSide(color: semantic.disabledSurface);
-      }
-      // The ring, at the one stroke every focus indicator in the app uses. It
-      // replaces the hairline rather than sitting outside it, so focus costs no
-      // layout — an `OutlinedBorder`'s side is painted on the shape, not added
-      // to the box.
-      if (states.contains(WidgetState.focused)) {
-        return AppInteractionStates.focusRing(semantic);
-      }
-
-      return BorderSide(color: semantic.borderSubtle);
-    }),
+  style: buildOutlinedStyle(
+    scheme,
+    semantic,
+    label: outlineLabel,
+    border: semantic.borderSubtle,
   ),
 );

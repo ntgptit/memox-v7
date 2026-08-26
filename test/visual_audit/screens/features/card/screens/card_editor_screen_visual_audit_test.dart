@@ -72,7 +72,9 @@ void main() {
 Future<void> _settleFlagToggle(WidgetTester tester) => tester.pumpAndSettle();
 
 /// The editor opened on an existing card (UC-04 A1): the two fields prefilled,
-/// the BR-10 progress note, the save-changes button, and the danger zone.
+/// the BR-10 note as the back field's helper, the tag section, the delete band,
+/// and `Save changes` pinned in the shell's bottom bar rather than laid out in
+/// the body (M99.60).
 Widget _editorInEditMode() {
   final repository = FakeCardRepository();
   repository.cardToGet = repository.card(
@@ -119,10 +121,11 @@ const AuditSkipAllowance _inkLayersEdit = AuditSkipAllowance(
   itemId: 'shell',
   reason: SkipReason.rasterOnly,
   detailContains: '_RenderInkFeatures',
-  expectedMatches: 6,
+  expectedMatches: 7,
   rationale:
-      'The five of create plus the app-bar flag IconButton (BR-92). Overlay '
-      'colours are asserted in app_theme_test.dart.',
+      'The five of create plus the app-bar flag IconButton (BR-92) and the '
+      'add button inside the tag field (BR-93). Overlay colours are asserted '
+      'in app_theme_test.dart.',
 );
 
 const AuditSkipAllowance _shapesCreate = AuditSkipAllowance(
@@ -140,11 +143,11 @@ const AuditSkipAllowance _shapesEdit = AuditSkipAllowance(
   itemId: 'shell',
   reason: SkipReason.customPainter,
   detailContains: '_ShapeBorderPainter',
-  expectedMatches: 4,
+  expectedMatches: 5,
   rationale:
-      'The three of create plus the app-bar flag IconButton (BR-92); the shapes '
-      'come from the icon-button theme and are pinned by the mx_components '
-      'goldens.',
+      'The three of create plus the app-bar flag IconButton (BR-92) and the '
+      "tag field's add button (BR-93); the shapes come from the icon-button "
+      'theme and are pinned by the mx_components goldens.',
 );
 
 /// The route backdrop — constant across modes, so it carries no count. The

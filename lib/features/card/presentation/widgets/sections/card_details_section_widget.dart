@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -17,6 +18,14 @@ import '../../../domain/failures/card_validation_failure.dart';
 /// The single [MxTextField.errorText] each field carries reads the same
 /// per-field problem the sides use; the shared "at the character limit" copy
 /// serves all three, because BR-95 gives them one rule and one number.
+///
+/// **The collapsed toggle names its three fields and wears a chevron** (owner
+/// review, 2026-08-26). It used to read `Add details` behind an `Icons.add`,
+/// which says two wrong things at once: a plus is the app's glyph for *create
+/// a thing*, so it suggested a new screen rather than a section opening in
+/// place, and "details" does not tell anyone what is behind it. The
+/// expand/collapse chevrons are the disclosure convention, and the label now
+/// lists what expanding reveals.
 class CardDetailsSectionWidget extends StatelessWidget {
   const CardDetailsSectionWidget({
     required this.isExpanded,
@@ -62,8 +71,8 @@ class CardDetailsSectionWidget extends StatelessWidget {
             child: Row(
               children: <Widget>[
                 Icon(
-                  isExpanded ? Icons.expand_less : Icons.add,
-                  size: 20,
+                  isExpanded ? Icons.expand_less : Icons.expand_more,
+                  size: AppIconSize.mdCompact,
                   color: accent,
                 ),
                 const SizedBox(width: AppSpacing.sm),

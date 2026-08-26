@@ -231,7 +231,41 @@ carrying:
   protection somebody is relying on. `ref.mounted` covers what can actually
   arrive late.
 
-## 9 · Known gaps
+## 9 · The editor after the owner review (M99.60, UC-04)
+
+Ten defects, and the one that mattered was an ordering problem rather than a
+visual one. `Save changes` was laid out inside the scroll view, **above** the tag
+section — and a tag is written the moment it is added or removed. So the screen's
+order made a claim the code does not honour: everything under the button looks
+like it is inside what the button saves.
+
+Three things here transfer to a third feature:
+
+- **A form that mixes deferred and immediate writes has to say which is which.**
+  Pinning the commit to `MxContentShell.bottomBar` fixes reachability; it does
+  not, on its own, fix the lie. The tag section carries a line saying it saves on
+  its own, and the dirty check deliberately ignores tags — so the button, the
+  dialog and the copy all describe the same boundary. Moving the button and
+  stopping there would have left a screen that looks correct and still misleads.
+- **A dirty check compares against a snapshot, never against the live read.**
+  The baseline is what the card held when the editor loaded. Comparing against
+  the provider's current card looks equivalent and is not: after a successful
+  save the `watch()` re-emits with the new text, so every field would read clean
+  again while the user is typing the next change.
+- **`canPop: false` always, and let the handler re-pop.** `canPop: !_isDirty`
+  reads better and is wrong under Android's predictive back, which commits to the
+  transition on the frame the gesture starts. The import wizard had already
+  arrived at the same shape (`card_import_screen.dart`); the editor is the second
+  site, which is what makes it a pattern rather than one screen's quirk.
+
+**Not carried: create mode did not get the pinned bar.** The complaint was about
+a button sitting above a self-saving section, and create has nothing after its
+actions to be misread. It also offers two save paths — a one-button bar cannot
+express a choice. Symmetry between two modes is not a reason on its own; both
+modes now share `CardEditorFieldsWidget` and nothing else, which is the seam that
+was already there.
+
+## 10 · Known gaps
 
 - **Partially in the Widgetbook catalog.** `CardImportScreen` (M99.19),
   `TagCatalogScreen` (M99.30) and `CardDetailScreen` (M99.31) are

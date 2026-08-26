@@ -25,6 +25,19 @@ enum MxActionButtonVariant {
   /// flag beside a colour lets a caller pass one without the other, and the
   /// mismatch is invisible in review.
   destructive,
+
+  /// Destroys something, but is not what the screen is for.
+  ///
+  /// **The same red, carried by an edge instead of a fill**, so the action
+  /// still reads as destructive without competing with the screen's primary.
+  /// [destructive] is right where destroying *is* the point — a confirmation
+  /// dialog's confirm button, whose entire job is that one press. It is wrong
+  /// where the destructive action merely lives on the screen: the card editor
+  /// painted `Delete card` as a full-width red fill directly under a full-width
+  /// `Save changes`, two blocks of identical weight differing only in hue, and
+  /// a solid red block is the loudest thing on a form whose purpose is to edit
+  /// text (owner review, 2026-08-26).
+  destructiveOutlined,
 }
 
 /// The app's button.
@@ -171,16 +184,52 @@ class MxActionButton extends StatelessWidget {
       MxActionButtonVariant.destructive => FilledButton(
         onPressed: effectiveOnPressed,
         autofocus: shouldAutofocus,
-        style: buildFilledStyle(
-          context.colors,
-          context.semanticColors,
-          fill: context.colors.error,
-          label: context.colors.onError,
+        style: _over(
+          busyStyle,
+          buildFilledStyle(
+            context.colors,
+            context.semanticColors,
+            fill: context.colors.error,
+            label: context.colors.onError,
+          ),
+        ),
+        child: child,
+      ),
+      // `error` on both axes, and no fill. The label carries the meaning and
+      // the edge carries the weight, which is the whole distinction from the
+      // variant above. `buildOutlinedStyle`, not `styleFrom`, for the reason
+      // stated there: a flat property would keep this button red while
+      // disabled.
+      MxActionButtonVariant.destructiveOutlined => OutlinedButton(
+        onPressed: effectiveOnPressed,
+        autofocus: shouldAutofocus,
+        style: _over(
+          busyStyle,
+          buildOutlinedStyle(
+            context.colors,
+            context.semanticColors,
+            label: context.colors.error,
+            border: context.colors.error,
+          ),
         ),
         child: child,
       ),
     };
   }
+
+  /// [busy] laid over [base], for the two variants that name their own style.
+  ///
+  /// `primary` and `secondary` hand [_busyStyle]'s result straight to the
+  /// button and let the *theme* fill the rest; the destructive pair cannot,
+  /// because their colours are not in a theme slot. Passing `base` alone would
+  /// silently drop the busy treatment for exactly the two variants whose
+  /// resting look is loudest — a red button going grey mid-press is the one
+  /// this matters most for.
+  ///
+  /// `merge` keeps the receiver's non-null fields, so [busy] wins where it has
+  /// an opinion and [base] answers everywhere else.
+  ButtonStyle _over(ButtonStyle? busy, ButtonStyle base) =>
+      busy?.merge(base) ?? base;
 
   /// Keeps a *busy* button looking busy rather than disabled — and only when
   /// its label is on show.
@@ -210,17 +259,23 @@ class MxActionButton extends StatelessWidget {
     final colors = context.colors;
     final semantic = context.semanticColors;
 
-    // The outlined variant paints no fill, so it restores its ink and its edge
-    // and leaves `backgroundColor` to the theme — naming a fill for it would
-    // mean naming a colour that is not a role.
-    if (variant == MxActionButtonVariant.secondary) {
+    // The outlined variants paint no fill, so they restore their ink and their
+    // edge and leave `backgroundColor` to the theme — naming a fill for one of
+    // them would mean naming a colour that is not a role.
+    final (Color, Color)? outline = switch (variant) {
+      MxActionButtonVariant.secondary => (
+        semantic.secondaryAction,
+        semantic.borderSubtle,
+      ),
+      MxActionButtonVariant.destructiveOutlined => (colors.error, colors.error),
+      _ => null,
+    };
+    if (outline != null) {
+      final (Color ink, Color edge) = outline;
+
       return ButtonStyle(
-        foregroundColor: WidgetStatePropertyAll<Color>(
-          semantic.secondaryAction,
-        ),
-        side: WidgetStatePropertyAll<BorderSide>(
-          BorderSide(color: semantic.borderSubtle),
-        ),
+        foregroundColor: WidgetStatePropertyAll<Color>(ink),
+        side: WidgetStatePropertyAll<BorderSide>(BorderSide(color: edge)),
       );
     }
 

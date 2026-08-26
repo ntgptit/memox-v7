@@ -40,6 +40,7 @@ class MxContentShell extends StatefulWidget {
     this.padding,
     this.isScrollable = false,
     this.floatingActionButton,
+    this.bottomBar,
     super.key,
   });
 
@@ -86,6 +87,25 @@ class MxContentShell extends StatefulWidget {
   final bool isScrollable;
 
   final Widget? floatingActionButton;
+
+  /// An action pinned to the bottom of the screen, below the scrolling body.
+  ///
+  /// **For the commit a long form ends in.** A save button laid out inside a
+  /// scroll view is only reachable from wherever the user happens to have
+  /// scrolled to, and everything under it reads as outside what the button
+  /// saves — the card editor put `Save changes` above its tag section, and the
+  /// tags are written the instant they are typed, so the order actively lied
+  /// about what the button did (owner review, 2026-08-26).
+  ///
+  /// **`Scaffold.bottomNavigationBar`, not a `Column` under the body.** That
+  /// slot is what the soft keyboard's inset is measured against, so the bar
+  /// rides above the keyboard instead of behind it — which is the state a form
+  /// spends most of its life in.
+  ///
+  /// The shell supplies the gesture inset and the screen gutter, for the same
+  /// reason it supplies the body's: a second screen pinning an action must not
+  /// have to re-derive the padding, because the two only ever drift apart.
+  final Widget? bottomBar;
 
   @override
   State<MxContentShell> createState() => _MxContentShellState();
@@ -137,6 +157,7 @@ class _MxContentShellState extends State<MxContentShell> {
     return Scaffold(
       appBar: _buildAppBar(context),
       floatingActionButton: widget.floatingActionButton,
+      bottomNavigationBar: _buildBottomBar(context),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -154,6 +175,24 @@ class _MxContentShellState extends State<MxContentShell> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// The pinned action, in the gutter its screen already uses.
+  ///
+  /// `SafeArea(top: false)` because the bar sits at the bottom: the gesture
+  /// bar is what it has to clear, and taking the top inset here would add a
+  /// status-bar's worth of space in the middle of the screen.
+  Widget? _buildBottomBar(BuildContext context) {
+    final bar = widget.bottomBar;
+    if (bar == null) return null;
+
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: EdgeInsets.all(mxScreenGutter(context)),
+        child: bar,
       ),
     );
   }

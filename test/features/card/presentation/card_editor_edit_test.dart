@@ -7,7 +7,9 @@ import 'package:memox/core/error/failure.dart';
 import 'package:memox/core/navigation/route_names.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/features/card/di/card_repository_provider.dart';
+import 'package:memox/features/card/domain/failures/tag_validation_failure.dart';
 import 'package:memox/features/card/presentation/screens/card_editor_screen.dart';
+import 'package:memox/features/card/presentation/widgets/sections/card_tag_section_widget.dart';
 import 'package:memox/l10n/generated/app_localizations.dart';
 
 import 'support/fake_card_repository.dart';
@@ -102,11 +104,98 @@ void main() {
     await pump(tester, repository);
 
     await tester.enterText(find.byType(TextField).first, 'new front');
+    // Save is disabled until the form is dirty, and `enterText` does not build
+    // a frame — so the tap below would land on the button as it was before the
+    // edit. The pump is what makes it the button the user would be looking at.
+    await tester.pump();
     await tester.tap(find.text('Save changes'));
     await tester.pump();
 
     expect(repository.updates.single.id, 'card-1');
     expect(repository.updates.single.front, 'new front');
+  });
+
+  testWidgets('save stays disabled until an edit makes the form dirty', (
+    tester,
+  ) async {
+    final repository = FakeCardRepository();
+    addTearDown(repository.dispose);
+    repository.cardToGet = repository.card('card-1', front: 'old');
+
+    await pump(tester, repository);
+
+    FilledButton save() =>
+        tester.widget<FilledButton>(find.byType(FilledButton));
+
+    // Opened, untouched: the primary is inert, because pressing it would write
+    // the card back exactly as it is.
+    expect(save().onPressed, isNull);
+
+    await tester.enterText(find.byType(TextField).first, 'new front');
+    await tester.pump();
+    expect(save().onPressed, isNotNull);
+
+    // Typed back to what was loaded: dirty is a comparison, not a flag that
+    // latches on the first keystroke.
+    await tester.enterText(find.byType(TextField).first, 'old');
+    await tester.pump();
+    expect(save().onPressed, isNull);
+  });
+
+  testWidgets('closing a dirty editor asks before discarding, and stays on '
+      'Keep editing', (tester) async {
+    final repository = FakeCardRepository();
+    addTearDown(repository.dispose);
+    repository.cardToGet = repository.card('card-1', front: 'old');
+
+    await pump(tester, repository);
+    await tester.enterText(find.byType(TextField).first, 'new front');
+    await tester.pump();
+
+    await tester.tap(find.byIcon(Icons.close));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Discard changes?'), findsOneWidget);
+
+    await tester.tap(find.text('Keep editing'));
+    await tester.pumpAndSettle();
+
+    // Still on the form, still holding what was typed.
+    expect(find.text('Edit flashcard'), findsOneWidget);
+    expect(find.text('new front'), findsOneWidget);
+  });
+
+  testWidgets('discarding leaves the editor', (tester) async {
+    final repository = FakeCardRepository();
+    addTearDown(repository.dispose);
+    repository.cardToGet = repository.card('card-1', front: 'old');
+
+    await pump(tester, repository);
+    await tester.enterText(find.byType(TextField).first, 'new front');
+    await tester.pump();
+
+    await tester.tap(find.byIcon(Icons.close));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Discard'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Edit flashcard'), findsNothing);
+    expect(repository.updates, isEmpty);
+  });
+
+  testWidgets('closing an untouched editor leaves without asking', (
+    tester,
+  ) async {
+    final repository = FakeCardRepository();
+    addTearDown(repository.dispose);
+    repository.cardToGet = repository.card('card-1');
+
+    await pump(tester, repository);
+    await tester.tap(find.byIcon(Icons.close));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Discard changes?'), findsNothing);
+    expect(find.text('Edit flashcard'), findsNothing);
   });
 
   testWidgets('a failed prefill shows the load-failed state, not the form', (
@@ -181,10 +270,12 @@ void main() {
 
     await pump(tester, repository);
 
-    // Collapsed by default: the toggle is present, the field is not.
-    expect(find.text('Add details'), findsOneWidget);
-    await tester.ensureVisible(find.text('Add details'));
-    await tester.tap(find.text('Add details'));
+    // Collapsed by default: the toggle is present, the field is not. The label
+    // names the three fields it opens rather than saying "details" (M99.60).
+    const toggle = 'Add example, hint, pronunciation';
+    expect(find.text(toggle), findsOneWidget);
+    await tester.ensureVisible(find.text(toggle));
+    await tester.tap(find.text(toggle));
     await tester.pumpAndSettle();
 
     await tester.ensureVisible(find.widgetWithText(TextField, 'Example'));
@@ -192,7 +283,7 @@ void main() {
       find.widgetWithText(TextField, 'Example'),
       'a new example',
     );
-    await tester.ensureVisible(find.text('Save changes'));
+    await tester.pump();
     await tester.tap(find.text('Save changes'));
     await tester.pump();
 
@@ -235,6 +326,56 @@ void main() {
     await tester.pump();
 
     expect(repository.tagAdds.single, (id: 'card-1', name: 'verb'));
+  });
+
+  testWidgets('the add button submits the typed tag, and is inert until one '
+      'is typed', (tester) async {
+    final repository = FakeCardRepository();
+    addTearDown(repository.dispose);
+    repository.cardToGet = repository.card('card-1');
+
+    await pump(tester, repository);
+
+    IconButton addButton() => tester.widget<IconButton>(
+      find.descendant(
+        of: find.byType(CardTagSectionWidget),
+        matching: find.widgetWithIcon(IconButton, Icons.add),
+      ),
+    );
+
+    // Nothing typed: the button is there to be seen, not to be pressed.
+    expect(addButton().onPressed, isNull);
+
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Add tag').first,
+      'verb',
+    );
+    await tester.pump();
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pump();
+
+    expect(repository.tagAdds.single, (id: 'card-1', name: 'verb'));
+  });
+
+  testWidgets('at ten tags the field is replaced by the limit line', (
+    tester,
+  ) async {
+    final repository = FakeCardRepository();
+    addTearDown(repository.dispose);
+    repository.cardToGet = repository.card('card-1');
+
+    await pump(tester, repository);
+    repository.emitTags(
+      <dynamic>[
+        for (var i = 0; i < kMaxTagsPerCard; i++)
+          repository.tag('t$i', name: 'tag$i'),
+      ].cast(),
+    );
+    await tester.pumpAndSettle();
+
+    // The rule is stated before anything is typed, not as an error afterwards.
+    expect(find.widgetWithText(TextField, 'Add tag'), findsNothing);
+    expect(find.textContaining('all 10 tags'), findsOneWidget);
   });
 
   testWidgets('a failed tag add is visible below the tag field', (

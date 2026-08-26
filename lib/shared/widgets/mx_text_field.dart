@@ -39,6 +39,7 @@ class MxTextField extends StatelessWidget {
     this.onSubmitted,
     this.textAlign = TextAlign.start,
     this.textStyle,
+    this.suffixAction,
     super.key,
   });
 
@@ -97,6 +98,22 @@ class MxTextField extends StatelessWidget {
   /// The typed value's own style. Null keeps the theme's.
   final TextStyle? textStyle;
 
+  /// One action button inside the field's trailing edge — usually an
+  /// `IconButton`.
+  ///
+  /// **An action, not decoration, and that is why it does not reopen the
+  /// `decoration` this widget refuses.** A caller cannot use it to restyle the
+  /// input: it adds a control, and the control's own appearance comes from
+  /// `iconButtonTheme` like every other icon button in the app.
+  ///
+  /// **It exists because a field whose Enter key is its only commit has no
+  /// visible commit at all.** The editor's add-tag box was a bare input: a user
+  /// typed a tag and had nothing to press, because the submit lived on a
+  /// keyboard action nothing on screen named (owner review, 2026-08-26). The
+  /// keyboard path stays — [onSubmitted] is still the fast way — and this is
+  /// the same action made visible.
+  final Widget? suffixAction;
+
   @override
   Widget build(BuildContext context) {
     return TextField(
@@ -120,6 +137,7 @@ class MxTextField extends StatelessWidget {
         hintText: hintText,
         helperText: helperText,
         errorText: errorText,
+        suffixIcon: suffixAction,
       ),
     );
   }
