@@ -95,16 +95,20 @@ trạng thái chứ không phải filter — phân biệt được bằng màu t
 
 **15. Scroll** ✅ Không nested scroll.
 
-**16. Responsive** ➖ Breadcrumb `All decks / Academic Word List` đã dài; ở 360px
-hoặc tiếng Việt nó là thứ tràn trước tiên. Chưa có bằng chứng — cần render bổ
-sung.
+**16. Responsive** ❌ **Đã đo, và dự đoán ở trên là đúng** —
+[ma trận responsive](deck_responsive_matrix.md). Breadcrumb cắt ngay ở 360 × 1.0
+(thiếu 5px); ở 360 × 1.5 tiếng Việt nó đọc `Tất cả… / Academic W…` — **cả hai**
+bậc đều cụt, nên nó không còn trả lời được "tôi đang ở đâu" (S3). Kèm theo là
+hero (S1, S2) và nhãn filter pill `All decks` (S4). Đây là màn deck hỏng nặng
+nhất trên ma trận.
 
 **17. Safe area** ➖
 
 **18. Empty / loading / error** ➖ Sub-deck rỗng chưa có golden riêng.
 
-**19. Content stress** ➖ Chưa có tên deck 2–3 dòng, chưa có breadcrumb sâu 10
-cấp (BR-55 cho phép tới đó).
+**19. Content stress** ➖ Tên deck 2–3 dòng **đã đo** (S6, đúng hành vi).
+Breadcrumb sâu 10 cấp (BR-55) vẫn chưa — ma trận dùng 2 cấp, và S3 hỏng đã ở 2
+cấp nên 10 cấp chỉ có thể tệ hơn.
 
 **20. Interaction** ⚠️ Breadcrumb trông bấm được và bấm được. Nhưng nút Study
 của card 3 **trông** bấm được trong khi một phần của nó nằm dưới FAB.

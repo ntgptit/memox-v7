@@ -101,10 +101,14 @@ một màn đang tải.
 
 **15. Scroll** ✅ Không cần cuộn, không có nested scroll.
 
-**16. Responsive** ⚠️ `MxButtonPair` **có** nhánh xếp chồng khi màn quá hẹp cho
-hai label, và `mx_button_pair_test.dart` đo hình chữ nhật sau layout. Đó là bằng
-chứng thật cho một phần của §16 — nhiều hơn hầu hết màn khác có. Nhưng vẫn chưa
-có render ở 360/412 hay font scale lớn cho **màn này**.
+**16. Responsive** ✅ **Đã đo — sạch toàn ma trận**
+([chi tiết](deck_responsive_matrix.md)): 360/393/412 × scale 1.0/1.3/1.5, en và
+vi, light và dark. Không cắt chữ, không overflow, không target dưới 48. Cộng với
+`MxButtonPair` đã có nhánh xếp chồng được `mx_button_pair_test.dart` đo sau
+layout, đây là màn deck có bằng chứng responsive đầy đủ nhất.
+
+Sạch không phải may: màn này **không có hero**, và mọi thứ gãy trên ma trận đều
+gãy bên trong hero hoặc hàng điều hướng của nó.
 
 **17. Safe area** ➖
 

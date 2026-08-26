@@ -90,7 +90,10 @@ trung tính — đúng, thẻ mới không phải cảnh báo.
 
 **15. Scroll** ✅ Không cần cuộn.
 
-**16. Responsive** ➖
+**16. Responsive** ✅ **Đã đo — sạch toàn ma trận**
+([chi tiết](deck_responsive_matrix.md)): ba bề rộng × ba text scale, en + vi,
+light + dark. Không cắt, không tràn. Như `deck_list_empty`, màn này không dựng
+hero — đó là điều hai màn sạch có chung.
 
 **17. Safe area** ➖
 
