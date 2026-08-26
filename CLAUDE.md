@@ -299,9 +299,16 @@ on a real device size, committed as PNGs. **When a change moves any of them,
 regenerate the goldens and republish the gallery in the same turn:**
 
 ```bash
-flutter test --tags golden --update-goldens
+TZ=UTC flutter test --tags golden --update-goldens
 python .claude/skills/flutter-testing/scripts/build_screen_gallery.py
 ```
+
+**`TZ=UTC` is not optional, and Dart honours it on Windows too.** `card_detail`
+renders review timestamps through `toLocal()`; without the pin, the goldens
+carry whatever timezone the machine that wrote them was in. Four of them were
+carrying UTC+9 and failed the moment the golden job ran on a UTC runner — by
+exactly the same pixel counts a local `TZ=UTC` run reproduces, which is how the
+cause was identified rather than guessed.
 
 Then publish `build/screen_gallery.html` as an Artifact **at the existing
 URL** — https://claude.ai/code/artifact/e8a68227-1582-407c-88c2-ff25d66bd9d8 —

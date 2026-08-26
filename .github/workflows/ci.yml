@@ -289,7 +289,16 @@ jobs:
       - name: generate
         run: dart run build_runner build --delete-conflicting-outputs
 
+      # **UTC, explicitly.** `card_detail` renders review timestamps through
+      # `toLocal()` — correct for the app, since the database stores UTC
+      # (AD-06) and a person reads local time — but it makes the picture depend
+      # on the machine's timezone. Four goldens were carrying UTC+9 until this
+      # job ran and disagreed with them by 2014, 2014, 14268 and 2264 pixels.
+      # The runner already defaults to UTC; pinning it here is what makes the
+      # regeneration command in CLAUDE.md and this job the same environment.
       - name: golden comparison
+        env:
+          TZ: UTC
         run: flutter test --tags golden --reporter failures-only
 
       # The failure images are the whole point of a red golden job: without

@@ -7946,6 +7946,23 @@ phần còn lại thì không).
   Windows bị skip trên đúng loại thay đổi cần nó. Thứ duy nhất làm nó lộ ra là
   `check_ci_gate.py` từ chối parse `''` thành boolean — nếu gate dễ dãi hơn, job
   đã chết âm thầm, đúng thứ nó sinh ra để chặn, lùi lên một tầng.
+- **Lần chạy đầu tiên của job mới đã bắt được một khiếm khuyết có thật, ngay
+  lập tức.** 4/261 golden đỏ trên runner: `card_detail_light`, `card_detail_dark`
+  (2 014px mỗi cái), `card_detail_state_grid_vi_x2` (14 268px),
+  `tag_filter_sheet_light` (2 264px).
+  - Ảnh diff (do bước upload artifact mới của chính job này cung cấp) chỉ cho
+    thấy **một chữ số và `AM`/`PM`** — không phải rasterise, mà là **múi giờ**.
+  - `card_history_labels_widget.dart:70` gọi `utc.toLocal()`. Đó là hành vi
+    **đúng** của app: DB lưu UTC (AD-06), người dùng đọc giờ địa phương. Nhưng
+    nó khiến golden mang theo múi giờ của máy đã vẽ ra nó.
+  - Máy vẽ ra chúng ở **UTC+9**. Chạy lại tại chỗ với `TZ=UTC` tái hiện **đúng
+    từng con số pixel** — nên nguyên nhân được xác định chứ không phải đoán.
+  - Dart **có** tôn trọng `TZ` trên Windows, nên sửa được sạch: vẽ lại 4 golden
+    dưới `TZ=UTC`, ghim `TZ: UTC` vào job, và đưa `TZ=UTC` vào lệnh regenerate
+    trong CLAUDE.md. Chạy toàn bộ suite dưới UTC chỉ đổi đúng 4 file — không
+    golden nào khác phụ thuộc múi giờ.
+  - Đây là loại lỗi **im lặng theo địa lý**: bất kỳ ai ngoài UTC+9 cũng thấy 4
+    golden này đỏ mà không có manh mối nào.
 - Thêm `PlanOutputsAreWiredIntoTheWorkflowTest`: mọi cờ `needs_*` mà plan phát
   ra phải vừa được khai báo ở `classify.outputs` vừa được truyền cho gate. Đọc
   `ci.yml` bằng quét text chứ không dùng PyYAML, vì job chạy test này không cài
