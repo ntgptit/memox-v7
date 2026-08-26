@@ -295,32 +295,20 @@ void main() {
     expect(find.text('Please try again.'), findsOneWidget);
   });
 
-  testWidgets('the danger zone confirms, then deletes the card', (
-    tester,
-  ) async {
+  testWidgets('the editor offers no way to delete the card', (tester) async {
     final repository = FakeCardRepository();
     addTearDown(repository.dispose);
     repository.cardToGet = repository.card('card-1');
 
     await pump(tester, repository);
 
-    await tester.ensureVisible(find.text('Delete card'));
-    await tester.tap(find.text('Delete card'));
-    await tester.pumpAndSettle();
-
-    // The confirmation is up, and nothing is deleted until it is confirmed.
-    expect(find.text('Delete this card?'), findsOneWidget);
+    // **Removed on purpose** (owner review, 2026-08-26), not lost in a refactor.
+    // D10 gave a card two delete routes; the editor's was a full-width
+    // destructive action on a screen whose whole job is editing text. UC-04 A2
+    // asks for a delete with a confirmation, not for one *here* — A6's
+    // multi-select in the list still provides it.
+    expect(find.text('Delete card'), findsNothing);
+    expect(find.byIcon(Icons.delete_outline), findsNothing);
     expect(repository.deletes, isEmpty);
-
-    // "Move to Trash", not "Delete": the confirm button says where the card
-    // goes, because it goes somewhere it can come back from (BR-256).
-    await tester.tap(find.text('Move to Trash'));
-    await tester.pumpAndSettle();
-
-    expect(repository.deletes.single, 'card-1');
-    // And it leaves through the deck, not by popping to a card list that an
-    // `unset` deck no longer has (BR-163). Which screen the deck then shows —
-    // list or deck detail — is the router's redirect to decide.
-    expect(find.text('deck detail'), findsOneWidget);
   });
 }

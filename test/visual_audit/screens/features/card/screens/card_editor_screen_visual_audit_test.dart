@@ -73,7 +73,9 @@ Future<void> _settleFlagToggle(WidgetTester tester) => tester.pumpAndSettle();
 
 /// The editor opened on an existing card (UC-04 A1): the two fields prefilled,
 /// the BR-10 note as the back field's helper, the tag strip with its add
-/// action, the outlined delete, and the pinned `Save changes` footer.
+/// action, and the pinned `Save changes` footer. No delete — D28 took it out of
+/// the editor entirely, which is why edit is now only *one* ink layer and one
+/// shape painter ahead of create rather than two.
 Widget _editorInEditMode() {
   final repository = FakeCardRepository();
   repository.cardToGet = repository.card(
@@ -120,11 +122,13 @@ const AuditSkipAllowance _inkLayersEdit = AuditSkipAllowance(
   itemId: 'shell',
   reason: SkipReason.rasterOnly,
   detailContains: '_RenderInkFeatures',
-  expectedMatches: 7,
+  expectedMatches: 6,
   rationale:
-      'The five of create, plus the app-bar flag IconButton (BR-92) and the '
-      'add-tag action inside the tag field (BR-93). Overlay colours are '
-      'asserted in app_theme_test.dart.',
+      'The Scaffold, the AppBar, the close IconButton, the pinned Save, the '
+      'app-bar flag IconButton (BR-92) and the add-tag action inside the tag '
+      'field (BR-93). One fewer than create, which draws two action buttons in '
+      'its body; edit draws one, in the footer. Overlay colours are asserted '
+      'in app_theme_test.dart.',
 );
 
 const AuditSkipAllowance _shapesCreate = AuditSkipAllowance(
@@ -142,11 +146,12 @@ const AuditSkipAllowance _shapesEdit = AuditSkipAllowance(
   itemId: 'shell',
   reason: SkipReason.customPainter,
   detailContains: '_ShapeBorderPainter',
-  expectedMatches: 5,
+  expectedMatches: 4,
   rationale:
-      'The three of create, plus the app-bar flag IconButton (BR-92) and the '
-      "add-tag action inside the tag field (BR-93); the shapes come from the "
-      'icon-button theme and are pinned by the mx_components goldens.',
+      'The pinned Save, the close IconButton, the app-bar flag IconButton '
+      '(BR-92) and the add-tag action inside the tag field (BR-93); the shapes '
+      'come from the button and icon-button themes and are pinned by the '
+      'mx_components goldens.',
 );
 
 /// The route backdrop — constant across modes, so it carries no count. The

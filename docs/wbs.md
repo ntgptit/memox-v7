@@ -13054,6 +13054,31 @@ của M2.
     widget, trong test, và trong parity checklist — vì
     `meetsGuideline(androidTapTargetGuideline)` **xanh ở cả hai trạng thái**, và
     người mở lại việc này cần con số thật chứ không phải phán quyết của matcher.
+- **Chủ dự án bỏ hẳn lối xoá thẻ khỏi editor (D28, 2026-08-26).** Đây là bước
+  thứ hai, không phải bước đầu: D27(c) đã hạ nút filled `error` xuống outlined
+  và bỏ heading `Danger zone`. Nhìn màn dựng thật, câu hỏi còn lại không phải nó
+  *to* bao nhiêu mà là vì sao một hành động phá huỷ full-width lại ở trên một
+  màn có mỗi việc là sửa chữ.
+  - **UC-04 A2 là `frozen for MVP` và không bị đụng.** A2 đòi "xoá card, hỏi xác
+    nhận" — không đòi lối vào ở editor. A6 (long-press → chế độ chọn → Delete)
+    vẫn phủ đúng câu đó, nên khả năng xoá không mất đi đâu; cái mất là đường tắt
+    một-thẻ, giờ tốn bốn bước thay vì một. Đã kiểm tra trước khi xoá chứ không
+    xoá rồi mới đọc.
+  - **Đi theo là ba file presentation chết hẳn**, vì editor là caller duy nhất
+    của cả chuỗi: `card_delete_action_widget.dart`, `card_confirm_widget.dart`
+    (`showCardDeleteConfirm`) và `card_undo_widget.dart`
+    (`showCardMovedToTrash` — luồng bulk có undo riêng). Cùng **năm ARB key**:
+    `cardEditorDelete`, `cardDeleteConfirmTitle/Message/Action`,
+    `cardDeleteFailed`. ARB còn 800 key, EN/VI vẫn cân.
+  - **Dừng ở ranh giới presentation, có chủ đích.** `CardDelete`,
+    `DeleteCardForUndoUseCase` và `CardRepository.deleteCardForUndo` (số ít) giờ
+    **không còn caller production** — chúng vẫn có unit test và vẫn là seam cho
+    một lối xoá một-thẻ sau này (Card detail là ứng viên gần nhất). Xoá một
+    method khỏi repository contract để chạy theo một thay đổi UI là bán kính nổ
+    lớn hơn nhiều so với việc được yêu cầu, và guard hiện không phản đối. Ghi ra
+    ở đây theo đúng cách M99.59 ghi `MxAlertDialog` chưa có người gọi — nếu chủ
+    dự án muốn dọn nốt thì đó là một task riêng, không phải một tác dụng phụ.
+
 - **Ba warning của code-verification guard làm gate đỏ, và cả ba đều đúng.**
   `build()` của tag section dài 103 dòng (max 100) — tách thành bốn helper;
   `CardEditorActionBarWidget.isLoading` trúng luật cấm một cờ loading dùng chung
@@ -13077,7 +13102,7 @@ của M2.
         pristine, dirty và submitting.
   - [x] Băng chạm của nút xoá chip được **đo** (33 × 48) và con số đó được ghi
         lại, không phải suy từ `meetsGuideline`.
-  - [x] Delete vẫn qua confirm cũ, soft-delete, Undo và route fallback.
+  - [x] Editor không còn lối xoá; UC-04 A2 vẫn được A6 phủ; soft-delete và Undo (BR-256) không đổi ở luồng chọn nhiều.
   - [x] `flutter analyze` 0 error 0 warning trên `lib/`, `test/`, `widgetbook/`.
   - [x] ARB EN/VI cân bằng; không còn caller nào của `cardEditorDangerZone`.
   - [x] Wireframe M4.11 ghi D27 và vẽ lại W6b; lịch sử D6/D10 giữ nguyên.

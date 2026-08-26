@@ -439,7 +439,7 @@ void main() {
       );
     });
 
-    testWidgets('it stays on screen after scrolling to the delete action', (
+    testWidgets('it stays on screen after scrolling to the bottom', (
       tester,
     ) async {
       await pumpCardEditor(tester, seed(), surfaceSize: const Size(390, 700));
@@ -451,7 +451,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Delete card'), findsOneWidget);
+      // The tag strip is the last thing in the body now that the editor offers
+      // no delete; the point of the test is unchanged — working at the bottom
+      // of the form must not cost you sight of the button that saves the top.
+      expect(find.text('Tags'), findsOneWidget);
       expect(tester.getRect(saveButton()), before);
     });
 

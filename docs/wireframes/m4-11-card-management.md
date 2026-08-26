@@ -30,7 +30,7 @@ Nó cũng không phải design reference để đo pixel. Acceptance criteria c�
 | 2026-08-02 | M4.11 | — | Nhận hai ảnh tham chiếu chế độ sửa. W6b vẽ lại đầy đủ: optional details mở sẵn, tag chip, danger zone. Chốt D10–D11. Dải metadata, mic và TTS ghi vào `wbs.md` §Deferred. |
 | 2026-08-02 | M4.10at | — | Nhận màn tham chiếu thứ hai (editor). W4–W6b vẽ lại theo nó. BR-08 siết 2000 → 60/240; BR-95 thêm ba trường phụ. Chốt D6–D9; mở Q12–Q13. |
 | 2026-08-02 | M4.10at | — | Chủ dự án chốt đưa tag, cờ và panel tiến độ vào MVP, chèn M4.10at trước M4.11. Q8–Q11 đóng bằng BR-89…BR-94 và schema v2. D3 sửa: lọc vào scope, sort vẫn ngoài. Nhãn `LEARNING` → `BEGINNING`. |
-| 2026-08-26 | M99.61 | — | W6b vẽ lại theo Card Editor UX hardening: Save ghim đáy và disabled khi pristine, discard guard cho mọi lối rời màn, Delete outlined không heading, disclosure có nhãn ba trường, tag ghi tức thì với nút Add nhìn thấy được. Chốt D27. D6 và D10 giữ nguyên lịch sử, chỉ phần W6b bị supersede. Chế độ tạo (W4) **không** đổi. |
+| 2026-08-26 | M99.61 | — | Chốt **D28**: editor bỏ hẳn lối xoá thẻ; D10 supersede phần đó, UC-04 A2 (frozen) không đụng vì A6 vẫn phủ. W6b vẽ lại theo Card Editor UX hardening: Save ghim đáy và disabled khi pristine, discard guard cho mọi lối rời màn, Delete outlined không heading, disclosure có nhãn ba trường, tag ghi tức thì với nút Add nhìn thấy được. Chốt D27. D6 và D10 giữ nguyên lịch sử, chỉ phần W6b bị supersede. Chế độ tạo (W4) **không** đổi. |
 | 2026-08-12 | M99.17 | Codex | Đồng bộ màn đã triển khai và định hướng quản lý dữ liệu: tạo thủ công là luồng nhỏ qua app-bar `+`; Back một dòng là summary, tap mở editor để xem đủ; search/filter/sort phục vụ tìm card; import/export là hướng bulk-management sau MVP. |
 
 ---
@@ -46,8 +46,9 @@ Nó cũng không phải design reference để đo pixel. Acceptance criteria c�
 | D6 | Editor có **thanh hành động ghim đáy**, và `Save & add another` sống ở đó | Ảnh tham chiếu có `Cancel` + `Save card` ở đáy nhưng **không** có add-another, trong khi UC-04 A4 (frozen) đòi giữ form mở. `Cancel` bỏ đi vì `✕` ở app bar đã làm đúng việc đó; chỗ trống thành add-another. | 2026-08-02 |
 | D7 | Ba trường phụ nằm trong một **disclosure đóng mặc định** | BR-95 cho cả ba là tuỳ chọn. Mở sẵn biến form hai ô thành form năm ô cho việc thường gặp nhất. | 2026-08-02 |
 | D8 | Deck hiện **read-only**, không phải picker | Đổi deck đích nghĩa là thẻ có thể sang root khác scheduler hoặc khác generation — đúng thứ BR-73/BR-74 đang chặn. Deck là ngữ cảnh màn đang mở. | 2026-08-02 |
-| D10 | Xoá thẻ có **hai lối**: chọn nhiều ở danh sách, và danger zone trong editor | Ảnh tham chiếu đặt danger zone trong editor. Giữ cả hai vì chúng phục vụ hai việc khác nhau — dọn hàng loạt, và bỏ một thẻ đang đọc. **Sửa ở M99.16:** lối danh sách không còn là action sheet một-thẻ mà là chế độ chọn nhiều (D13); action sheet đó chưa bao giờ tồn tại trong production. | 2026-08-02, sửa 2026-08-12 |
+| D10 | Xoá thẻ có **hai lối**: chọn nhiều ở danh sách, và danger zone trong editor | Ảnh tham chiếu đặt danger zone trong editor. Giữ cả hai vì chúng phục vụ hai việc khác nhau — dọn hàng loạt, và bỏ một thẻ đang đọc. **Sửa ở M99.16:** lối danh sách không còn là action sheet một-thẻ mà là chế độ chọn nhiều (D13); action sheet đó chưa bao giờ tồn tại trong production. | 2026-08-02, sửa 2026-08-12, **supersede 2026-08-26 bởi D28** |
 | D27 | Ở **chế độ sửa**, `Save changes` là hành động ghim đáy duy nhất và bị **disable khi form còn pristine**; Delete là outlined destructive nằm trong thân cuộn, không có heading `Danger zone` | Ba việc khác nhau trong một quyết định, vì chúng là cùng một lỗi thứ bậc. **(a)** Save cũ nằm giữa Optional details và Tags: nó cuộn mất khi người dùng sửa tag, và vị trí *trên* Tags ngụ ý phạm vi lưu gồm cả tag — trong khi tag ghi tức thì (BR-93), tức là ngụ ý sai theo hướng mất dữ liệu. **(b)** Save luôn bấm được thì không nói gì về việc có gì để lưu; bấm nó ghi đè thẻ bằng chính nó. **(c)** Delete cũ dùng filled `error`, đúng bằng độ nhấn của Save, nên màn hình có hai hành động cùng hét to và chỉ còn màu để phân biệt cái nào kết thúc thẻ. Heading `Danger zone` chính là dấu hiệu: một cái nhãn đi làm việc mà trọng lượng của nút lẽ ra phải làm. **Supersede D6 chỉ cho W6b** — chế độ tạo vẫn theo D6 và không thuộc task này. | 2026-08-26 |
+| D28 | Editor **không** có lối xoá thẻ; xoá chỉ còn ở chế độ chọn của danh sách | Bỏ hẳn thay vì hạ trọng lượng thêm một lần nữa. D27(c) đã đổi nút filled đỏ thành outlined và bỏ heading `Danger zone`; nhìn màn dựng thật, câu hỏi còn lại không phải nó *to* bao nhiêu mà là vì sao một hành động phá huỷ full-width lại nằm trên màn có mỗi việc là sửa chữ. **UC-04 A2 (frozen) không bị đụng:** nó đòi "xoá card, hỏi xác nhận", không đòi lối vào ở editor — A6 (long-press → chọn → Delete) vẫn phủ đúng câu đó. Cái mất là đường tắt một-thẻ: từ editor giờ phải quay ra danh sách, long-press, chọn, xoá. Chủ dự án chấp nhận đánh đổi đó. | 2026-08-26 |
 | D13 | Long-press ở danh sách **vào chế độ chọn**, không mở action sheet | Đây là cử chỉ Android chuẩn cho selection, và nó là thứ đang thiếu để quản lý hàng loạt (BR-167). Vì cử chỉ không có affordance, app bar có thêm action **Select** nhìn thấy được. Thanh hành động ngữ cảnh là một **băng phía trên danh sách** chứ không phải app bar bị thay: ở 320px với `textScaler` 2.0, số đã chọn cộng năm hành động không nằm vừa một hàng 56pt, và `AppBar` xử lý việc đó bằng cách tràn chứ không xuống dòng. | 2026-08-12 |
 | D11 | `OPTIONAL DETAILS` **đóng khi rỗng, mở khi đã có nội dung** | Ảnh tạo cho thấy disclosure đóng, ảnh sửa cho thấy ba ô mở sẵn — không mâu thuẫn, mà là cùng một quy tắc ở hai trạng thái. Đóng một ô đang có chữ là giấu nội dung của chính người dùng. | 2026-08-02 |
 | D9 | **Không** có nút micro nhập giọng nói | Ảnh tham chiếu có. Nó cần plugin, quyền hệ điều hành và một luồng lỗi riêng; không nằm trong scope M4.11 và gần với media, vốn đã hoãn. | 2026-08-02 |
@@ -523,10 +524,6 @@ supersede **chỉ ở màn này**; W4 chế độ tạo giữ nguyên.
 │  │ Add tag                            │ + │  │  + = trailing action
 │  └────────────────────────────────────┴───┘  │
 │                                              │
-│  ┌────────────────────────────────────────┐  │
-│  │            Delete card                 │  │  outlined destructive
-│  └────────────────────────────────────────┘  │
-│                                              │
 ├──────────────────────────────────────────────┤
 │  ┌────────────────────────────────────────┐  │
 │  │             Save changes               │  │  ghim đáy; disabled khi pristine
@@ -615,23 +612,28 @@ Ghi ra để lần sau không ai tưởng là bỏ sót. Cả ba nằm ở
 | `←` ở app bar | `✕` | `←` nói "quay lại", nhưng ở đây rời màn có thể mất draft. `✕` là "đóng cái này", và nó là cái có guard. Breadcrumb không vẽ ở màn này nên D-của-M4.10ar về `←` không áp dụng. |
 | `Cancel` cạnh `Save changes` ở thanh đáy | chỉ `Save changes` | Thanh đáy chỉ chứa hành động chính. Lối thoát là `✕`, và nó đã hỏi trước khi vứt. Hai nút ở đáy làm nút phá huỷ ở trên (`Delete card`) và nút thoát nằm cùng một vùng mắt. |
 | `OPTIONAL DETAILS` mở sẵn, không disclosure | disclosure có nhãn `Add example, hint & pronunciation` | D11 vẫn đúng và vẫn chạy: thẻ **đã có** detail thì mở sẵn. Cái đổi là nhãn lúc đóng — `Add details` không nói tap vào sẽ hiện ra gì. |
-| Khối `⚠ DANGER ZONE` với tiêu đề và câu mô tả | một nút outlined `Delete card` | Câu mô tả hậu quả vẫn còn — nó nằm trong dialog xác nhận ở W7, đúng chỗ người dùng đang quyết định. Heading thì không: xem D27(c). |
+| Khối `⚠ DANGER ZONE` với tiêu đề, câu mô tả và nút xoá | **không còn gì** | D28. Đi qua hai bước: D27(c) hạ nút filled đỏ xuống outlined và bỏ heading; rồi bỏ hẳn. Hậu quả xoá vẫn được nêu — trong dialog xác nhận của luồng chọn nhiều, đúng chỗ người dùng đang quyết định. |
 | Nhãn `FRONT · KOREAN`, dấu `Required`, counter luôn hiện | `Front` / `Back`, không dấu, counter từ 80% giới hạn | Xem đoạn ngay dưới bản vẽ. Cả ba là hành vi, không phải nét vẽ. |
 
-### Xoá thẻ có hai lối, và đó là chủ đích
+### Xoá thẻ chỉ còn một lối (D28)
 
 | Lối | Ở đâu | Dùng khi |
 |---|---|---|
-| Long-press hàng → chế độ chọn (W9) | danh sách | Dọn nhiều thẻ cùng lúc, kể cả toàn bộ tập đã lọc |
-| Nút `Delete card` trong editor | editor | Đang đọc nội dung thẻ và quyết định bỏ nó |
+| Long-press hàng → chế độ chọn (W9) | danh sách | Bỏ một thẻ, hoặc dọn cả tập đã lọc |
 
-Cả hai đi qua **cùng một** dialog xác nhận ở W7, cùng soft-delete và cùng cửa sổ
-Undo (BR-256). Đổi outlined **không** đổi bất cứ điều gì trong câu đó — hạ trọng
-lượng thị giác mà đồng thời làm việc xoá dễ xảy ra hơn là đánh đổi tệ nhất có thể.
+Bản 2026-08-02 có hai lối và ghi rõ đó là chủ đích: người dọn hàng loạt không
+phải mở editor mười lần, còn người đang phân vân thì thấy nút xoá ở đúng chỗ họ
+đang nhìn nội dung. Lập luận thứ hai vẫn đúng về mặt luồng — cái nó không trả
+lời được là **vì sao một hành động phá huỷ full-width lại nằm trên một màn có
+mỗi việc là sửa chữ**, và đó là thứ chỉ nhìn ra được khi nhìn màn dựng thật.
 
-Câu mô tả trong dialog nói rõ **cái gì mất và cái gì ở lại** — history mất theo,
-các thẻ khác trong deck thì không. Xoá thẻ **cuối cùng** còn một hậu quả nữa:
-deck mất loại nội dung và quay về chưa định loại (BR-163).
+Cái mất, ghi ra để không ai tưởng là bỏ sót: xoá một thẻ đang mở giờ tốn bốn
+bước — ra danh sách, long-press, chọn, xoá — thay vì một.
+
+Soft-delete, cửa sổ Undo (BR-256) và câu mô tả hậu quả **không đổi**: chúng thuộc
+dialog xác nhận của luồng chọn nhiều. Câu đó nói rõ cái gì mất và cái gì ở lại —
+history mất theo, các thẻ khác trong deck thì không. Xoá thẻ **cuối cùng** còn
+một hậu quả nữa: deck mất loại nội dung và quay về chưa định loại (BR-163).
 
 ---
 
@@ -774,7 +776,7 @@ không thành thứ không ai nhớ.
 | BR-95 — ba trường phụ | W5, W6b |
 | BR-93 — tối đa 10 tag | W4, W5 |
 | UC-04 A1 — sửa card | W6b |
-| UC-04 A2 — xoá card | W7, W6b (danger zone) |
+| UC-04 A2 — xoá card | W7, W9 (chế độ chọn). **Không** còn ở W6b — D28. |
 | UC-04 A3 — deck rỗng | W2 |
 | UC-04 A4 — thêm liên tiếp | W4 |
 | UC-04 E1 — mặt trước/sau rỗng | W6 |

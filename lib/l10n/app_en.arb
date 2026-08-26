@@ -1389,26 +1389,6 @@
     },
     "description": "Replaces the tag input once the card holds the maximum number of tags (BR-94). Shown instead of a field that would only refuse what is typed into it."
   },
-  "cardEditorDelete": "Delete card",
-  "@cardEditorDelete": {
-    "description": "Button that opens the delete confirmation in the card editor."
-  },
-  "cardDeleteConfirmTitle": "Delete this card?",
-  "@cardDeleteConfirmTitle": {
-    "description": "Title of the card delete confirmation dialog (UC-04 A5)."
-  },
-  "cardDeleteConfirmMessage": "The card and its study history go to Trash. You can restore them for 30 days.",
-  "@cardDeleteConfirmMessage": {
-    "description": "Body of the card delete confirmation. Deleting the last active card also returns the deck to unset (BR-260)."
-  },
-  "cardDeleteConfirmAction": "Move to Trash",
-  "@cardDeleteConfirmAction": {
-    "description": "Confirm button on the card delete dialog (BR-256)."
-  },
-  "cardDeleteFailed": "This card couldn't be deleted. Try again.",
-  "@cardDeleteFailed": {
-    "description": "Shown when a card delete fails."
-  },
   "cardFrontLabel": "Front",
   "@cardFrontLabel": {
     "description": "Label of the front input in the card editor."

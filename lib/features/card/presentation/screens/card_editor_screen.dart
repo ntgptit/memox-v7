@@ -16,7 +16,6 @@ import '../states/card_content_draft_state.dart';
 import '../states/card_submit_state.dart';
 import '../widgets/overlays/card_discard_confirm_widget.dart';
 import '../widgets/sections/card_create_form_widget.dart';
-import '../widgets/sections/card_delete_action_widget.dart';
 import '../widgets/sections/card_details_section_widget.dart';
 import '../widgets/sections/card_editor_action_bar_widget.dart';
 import '../widgets/sections/card_flag_toggle_widget.dart';
@@ -47,6 +46,16 @@ import '../widgets/support/card_failure_labels_widget.dart';
 /// - **There is one way out.** The bar's close button and the system back
 ///   gesture both reach `_handleExitRequest`, so the discard question cannot be
 ///   answered differently depending on how the user tried to leave.
+///
+/// **It offers no delete, and that is a decision rather than an omission**
+/// (owner review, 2026-08-26). D10 gave a card two ways to be deleted: the
+/// list's multi-select, and a block in the editor. The block was a heading and
+/// a filled red button at exactly `Save changes`' weight; demoting it to an
+/// outline fixed the shouting and left the question of why a full-width
+/// destructive action shares a screen whose entire purpose is editing text.
+/// UC-04 A2 asks for a delete with a confirmation, not for a delete *here* —
+/// A6's multi-select still provides it — so the frozen use case is intact and
+/// the editor is a form again.
 ///
 /// It navigates nothing itself: each controller reports an outcome and this
 /// widget reacts — because a controller holding a `BuildContext` is the crash
@@ -320,19 +329,6 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
               cardId: cardId,
               onDraftChanged: _onTagDraftChanged,
             ),
-            const SizedBox(height: AppSpacing.xxl),
-            CardDeleteActionWidget(
-              deckId: widget.deckId,
-              cardId: cardId,
-              isDisabled: busy,
-            ),
-            // **Delete must sit closer to its own section than to Save.** The
-            // body's gutter plus the footer's padding left 28 between them,
-            // against the 32 that separates Delete from the tag strip — so at
-            // the end of the scroll two full-width buttons ended up adjacent,
-            // and the nearer one was the destructive one. That is the adjacency
-            // D27 set out to remove, re-created by pinning the primary.
-            const SizedBox(height: AppSpacing.md),
           ],
         ),
       ),
