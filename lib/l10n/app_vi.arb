@@ -655,7 +655,7 @@
     },
     "description": "Title of the delete confirmation. Names the deck so the user can tell which one they are about to lose (BR-04)."
   },
-  "deckDeleteImpactMessage": "{deckCount, plural, =0{} other{{deckCount} bộ thẻ con và }}{cardCount, plural, =0{không có thẻ nào} other{{cardCount} thẻ}} vào Trash cùng nó. Bạn khôi phục được trong 30 ngày.",
+  "deckDeleteImpactMessage": "{deckCount, plural, =0{{cardCount, plural, =0{Không có thẻ nào} other{{cardCount} thẻ}}} other{{deckCount} bộ thẻ con và {cardCount, plural, =0{không có thẻ nào} other{{cardCount} thẻ}}}} vào Trash cùng nó. Bạn khôi phục được trong 30 ngày.",
   "@deckDeleteImpactMessage": {
     "placeholders": {
       "deckCount": {

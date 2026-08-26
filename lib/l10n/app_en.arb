@@ -655,7 +655,7 @@
     },
     "description": "Title of the delete confirmation. Names the deck so the user can tell which one they are about to lose (BR-04)."
   },
-  "deckDeleteImpactMessage": "{deckCount, plural, =0{} =1{1 sub-deck and } other{{deckCount} sub-decks and }}{cardCount, plural, =0{no cards} =1{1 card} other{{cardCount} cards}} go to Trash with it. You can restore them for 30 days.",
+  "deckDeleteImpactMessage": "{deckCount, plural, =0{{cardCount, plural, =0{No cards go} =1{1 card goes} other{{cardCount} cards go}}} =1{1 sub-deck and {cardCount, plural, =0{no cards} =1{1 card} other{{cardCount} cards}} go} other{{deckCount} sub-decks and {cardCount, plural, =0{no cards} =1{1 card} other{{cardCount} cards}} go}} to Trash with it. You can restore them for 30 days.",
   "@deckDeleteImpactMessage": {
     "placeholders": {
       "deckCount": {

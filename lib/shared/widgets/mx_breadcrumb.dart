@@ -159,9 +159,19 @@ class _MxBreadcrumbState extends State<MxBreadcrumb> {
 
   /// The header form: one control, and a path that only reads.
   ///
-  /// A `Row` that ellipsizes rather than the scrolling strip: a view that
-  /// scrolls sideways inside a target that answers a tap is two gestures
-  /// competing for one drag.
+  /// A `Row` that folds rather than the scrolling strip: a view that scrolls
+  /// sideways inside a target that answers a tap is two gestures competing for
+  /// one drag.
+  ///
+  /// **Steps drop out whole; they do not shrink together.** The first version
+  /// gave the last step `flex: 2` and the earlier ones `flex: 1`, meaning to
+  /// make the earlier ones give up width first. `Flexible` does not work that
+  /// way - it divides the shortfall *in proportion*, so every step shrank and
+  /// every step ellipsized at once. At 360 with the text scale up the deck
+  /// header read `Tat ca... / Academic W...`: a breadcrumb where every crumb is
+  /// cut has stopped answering the one question it exists for. The deepest step
+  /// is now kept whole and the ones above it fold into a single ellipsis, which
+  /// is what a reader can still use.
   Widget _buildSingleTarget(
     BuildContext context,
     List<MxBreadcrumbItem> items,
@@ -177,29 +187,53 @@ class _MxBreadcrumbState extends State<MxBreadcrumb> {
         onLongPress: widget.onShowAll,
         child: SizedBox(
           height: widget.lineHeight,
-          child: Row(
-            children: <Widget>[
-              if (widget.upIcon != null) ...<Widget>[
-                Icon(widget.upIcon, size: AppIconSize.sm, color: quiet),
-                const SizedBox(width: AppSpacing.xs),
-              ],
-              if (widget.rootIcon != null) ...<Widget>[
-                Icon(widget.rootIcon, size: AppIconSize.sm, color: quiet),
-                const SizedBox(width: AppSpacing.xs),
-              ],
-              // The last step is the one worth reading in full — it is where
-              // a tap lands — so the ones before it give up width first.
-              for (final (int index, MxBreadcrumbItem item) in items.indexed)
-                Flexible(
-                  flex: index == items.length - 1 ? 2 : 1,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      if (index > 0) ...<Widget>[
-                        const SizedBox(width: AppSpacing.xs),
-                        Text(_kSeparator, style: style),
-                        const SizedBox(width: AppSpacing.xs),
-                      ],
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final leading =
+                  (widget.upIcon == null ? 0 : AppIconSize.sm + AppSpacing.xs) +
+                  (widget.rootIcon == null
+                      ? 0
+                      : AppIconSize.sm + AppSpacing.xs);
+              final shown = _stepsThatFit(
+                context,
+                items,
+                style,
+                constraints.maxWidth - leading,
+              );
+
+              return Row(
+                children: <Widget>[
+                  if (widget.upIcon != null) ...<Widget>[
+                    Icon(widget.upIcon, size: AppIconSize.sm, color: quiet),
+                    const SizedBox(width: AppSpacing.xs),
+                  ],
+                  if (widget.rootIcon != null) ...<Widget>[
+                    Icon(widget.rootIcon, size: AppIconSize.sm, color: quiet),
+                    const SizedBox(width: AppSpacing.xs),
+                  ],
+                  if (shown.length < items.length) ...<Widget>[
+                    Text(_kFoldedSteps, style: style),
+                    const SizedBox(width: AppSpacing.xs),
+                    Text(_kSeparator, style: style),
+                    const SizedBox(width: AppSpacing.xs),
+                  ],
+                  for (final (int index, MxBreadcrumbItem item)
+                      in shown.indexed) ...<Widget>[
+                    if (index > 0) ...<Widget>[
+                      const SizedBox(width: AppSpacing.xs),
+                      Text(_kSeparator, style: style),
+                      const SizedBox(width: AppSpacing.xs),
+                    ],
+                    // **Only the deepest step is `Flexible`, and that is not a
+                    // detail.** `Flexible` divides the line by *flex*, not by
+                    // need: two of them at flex 1 each take half, so a 121-wide
+                    // name in a 190-wide line still ellipsized at 95 even
+                    // though both steps fit together. The steps above are laid
+                    // out at their own width — `_stepsThatFit` has already
+                    // guaranteed they do fit — and the last one takes what is
+                    // left, which is the last resort for a name longer than the
+                    // whole bar.
+                    if (index == shown.length - 1)
                       Flexible(
                         child: Text(
                           item.label,
@@ -207,15 +241,64 @@ class _MxBreadcrumbState extends State<MxBreadcrumb> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
+                      )
+                    else
+                      Text(
+                        item.label,
+                        style: style,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ],
-                  ),
-                ),
-            ],
+                  ],
+                ],
+              );
+            },
           ),
         ),
       ),
     );
+  }
+
+  /// The deepest steps that fit in [available], keeping at least one.
+  ///
+  /// Walks from the current step outwards, because that is the order a reader
+  /// needs them in: which deck am I in first, what is above it second.
+  List<MxBreadcrumbItem> _stepsThatFit(
+    BuildContext context,
+    List<MxBreadcrumbItem> items,
+    TextStyle? style,
+    double available,
+  ) {
+    if (items.length < 2) return items;
+
+    double widthOf(String text) {
+      final painter = TextPainter(
+        text: TextSpan(text: text, style: style),
+        textDirection: Directionality.of(context),
+        textScaler: MediaQuery.textScalerOf(context),
+        maxLines: 1,
+      )..layout();
+
+      return painter.width;
+    }
+
+    final separator = AppSpacing.xs * 2 + widthOf(_kSeparator);
+    // What a fold costs when it happens: the marker and one separator.
+    final fold = widthOf(_kFoldedSteps) + separator;
+
+    var used = widthOf(items.last.label);
+    var kept = 1;
+    for (var index = items.length - 2; index >= 0; index--) {
+      final next = used + separator + widthOf(items[index].label);
+      // Every step but the outermost leaves something above it to fold, so the
+      // budget has to keep room for the marker that would say so.
+      final budget = index == 0 ? available : available - fold;
+      if (next > budget) break;
+      used = next;
+      kept++;
+    }
+
+    return items.sublist(items.length - kept);
   }
 
   @override

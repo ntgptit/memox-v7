@@ -287,6 +287,7 @@ void main() {
         home: deckLevelWith(levelRepo()),
         surface: const Size(360, 640),
         textScale: scale,
+        capture: true,
       );
     });
 
