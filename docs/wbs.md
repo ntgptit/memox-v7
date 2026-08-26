@@ -12974,9 +12974,24 @@ của M2.
   lần merge, URL không phải "bản app đang chạy" như rule giả định, mà là *lần
   publish gần nhất của bất kỳ ai*: publish của mình vừa xoá các frame D28 khỏi
   trang, và khi #362-kế-tiếp của họ merge thì publish của họ sẽ xoá các frame
-  Card Detail này. Không phải lỗi của bên nào — mỗi bên đều làm đúng rule. Lối ra
-  rẻ nhất là **publish sau khi merge**, không phải trước; ghi lại đây vì lần tới
-  nó sẽ trông giống hệt một gallery stale, mà nguyên nhân thì khác hẳn.
+  Card Detail này — và nó đã xảy ra thật, **trong vòng vài phút**: session kia
+  publish đè ngay sau đó, đưa trang về `2ef75dbc`. Không phải lỗi của bên nào,
+  mỗi bên đều làm đúng rule.
+
+  **Lối ra không phải là nhường, cũng không phải đè lại: là ghép.** Trang do
+  `build_screen_gallery.py` sinh ra có cấu trúc ổn định — mỗi màn là một
+  `<figure data-name="...">` mang PNG dạng base64, cộng vài con số đếm ở
+  header và ở mỗi section. Nên lấy **bản đang live làm nền** và chỉ thay đúng
+  các `<figure>` mà session này động vào là đủ: 42 màn của họ giữ nguyên, 16
+  màn Card detail thay mới, `Card` 10 → 24, tổng 44 → 58. Số học tự kiểm được —
+  44 − 2 + 16 = 58 khớp đúng bản build thuần của nhánh này, nên nếu lệch là
+  ghép sai chứ không phải "chắc do khác nhánh".
+
+  Đổi lại, trang sau khi ghép **không tái tạo được bằng script**, nên header
+  phải tự khai điều đó (`ghép tay · 42 màn @ … + 16 màn @ …`) thay vì mang một
+  SHA duy nhất. Một SHA duy nhất trên trang đã ghép mới là thứ nguy hiểm: nó
+  trông y hệt một bản build sạch. Ghi lại đây vì lần tới nó sẽ trông giống hệt
+  một gallery stale, mà nguyên nhân thì khác hẳn.
 - **Emulator integration suite:** **not run — presentation-only restyle.** Không
   thêm feature, route, binding, persistence hay platform behavior nào, nên không
   có thứ gì mà chỉ một thiết bị mới nhìn thấy. Đây **không** phải một lượt chạy
