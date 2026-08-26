@@ -136,11 +136,22 @@ Bên trái là định nghĩa từ điển đầy đủ (`Empty, hollow / Trốn
 bên phải là một từ Hàn. Người chơi phải đọc tới 7 dòng để so với 1 từ, **năm
 lần**.
 §9 nói trọng lượng thị giác không được lệch bất thường sang một phía. Ở đây nó
-lệch, và không phải vì bố cục mà vì **nội dung đưa vào ô sai cấp**: bài ghép cần
-một gloss ngắn, không cần trường `back` đầy đủ.
-Hướng: ô trái hiển thị phần trước dấu `(` — tức `Empty, hollow / Trống rỗng, hụt
-hẫng` — và bỏ hẳn phần giải thích. Vừa cân hai cột, vừa xoá F1, vừa làm bài ghép
-thực sự chơi được bằng cách quét mắt.
+lệch — nhưng **không phải vì dữ liệu sai**.
+
+**Sửa lại sau phản biện của chủ dự án (2026-08-26).** Bản đầu đề xuất "hiển thị
+phần trước dấu `(`". Sai: phần trước ngoặc là nghĩa ngắn gọn **hai ngôn ngữ**,
+phần trong ngoặc là chi tiết — và BR-08 cấp cho mặt sau 240 ký tự đúng vì *"một
+nghĩa chứa nhiều hơn một từ — hai ngôn ngữ, ngăn bằng dấu phẩy"*. Dạng dài là
+dạng đúng.
+Kể cả có cắt, `Empty, hollow / Trống rỗng, hụt hẫng` vẫn dài gấp nhiều lần
+`허전하다`, vì hai cột **vốn** chứa hai loại nội dung khác nhau: một từ khoá và một
+lời giải nghĩa. Sự lệch đó là bản chất của bài ghép, không phải lỗi dữ liệu.
+
+**Hướng đúng: kẹp số dòng.** Mọi ô — cả hai cột — về cùng một số dòng tối đa, với
+ellipsis. Bài ghép cần *nhận ra*, không cần *đọc hết*; và khi mọi ô cao bằng
+nhau thì `…` đọc thành "còn nữa" chứ không thành "hỏng" (F1).
+Cùng một thay đổi với [study_guess](study_guess.md) F1, và ở đó nó còn bịt được
+một rò rỉ đáp án.
 
 **F3 — Hai ô cùng hàng luôn bằng chiều cao, các hàng thì không.** ✅ ghi lại là
 quyết định đúng.

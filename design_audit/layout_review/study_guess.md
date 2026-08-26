@@ -137,13 +137,35 @@ Một người **không biết một chữ tiếng Hàn nào** vẫn loại đư
 nó là thứ duy nhất trông khác. Bố cục đang rò rỉ thông tin mà bài kiểm tra tồn
 tại để giấu.
 
-Nguyên nhân giống hệt [study_match](study_match.md) F2: trường `back` của thẻ đôi
-khi chứa **định nghĩa từ điển đầy đủ**, đôi khi chỉ chứa một gloss, và chế độ học
-dùng nó nguyên xi. Hai màn, một gốc.
+**Sửa lại sau phản biện của chủ dự án (2026-08-26).** Bản đầu của F1 này kết
+luận rằng nên "lấy phần trước dấu `(`". Kết luận đó sai ở cả hai đầu:
 
-Hướng: các chế độ học lấy phần trước dấu `(` — hoặc dòng đầu — thay vì cả trường
-`back`. Nó sửa đồng thời F1 ở đây, F1+F2 ở Match, và làm mọi ô đáp án về cùng
-chiều cao (§7).
+- **Phần trước ngoặc không phải "đáp án ngắn"** — nó là nghĩa ngắn gọn gồm
+  **tiếng Anh và tiếng Việt**; phần trong ngoặc mới là chi tiết. BR-08 nói thẳng
+  vì sao mặt sau được 240 ký tự: *"một nghĩa chứa nhiều hơn một từ — hai ngôn
+  ngữ, ngăn bằng dấu phẩy"*. Nên dạng `English / Tiếng Việt (chi tiết)` **là**
+  dạng đúng của `back`, không phải một sự phình ra cần cắt.
+- **Và cắt ngoặc không sửa được rò rỉ.** `Xin chào / Chào hỏi lịch sự` vẫn dài
+  gấp khoảng năm lần `quả táo`. Ô số 1 vẫn là ô duy nhất trông khác.
+
+Nhìn lại bộ 5 thẻ trong `study_modes_demo_test.dart`, thứ bất thường **không phải
+thẻ dài**: `quả táo`, `nước`, `quyển sách`, `biển` đều chỉ có tiếng Việt, tức
+thiếu hẳn nửa tiếng Anh mà BR-08 mô tả. Chính chú thích của fixture cũng nói vậy —
+*"One deliberately long meaning, in the shape a real deck uses."*
+
+Nên gốc của rò rỉ không nằm ở dữ liệu, và **không thể** nằm ở dữ liệu: người dùng
+viết mặt sau theo cách của họ, app không chuẩn hoá được độ dài đó.
+
+**Hướng đúng: chuẩn hoá ở tầng trình bày.** Kẹp mọi ô đáp án về cùng một số dòng
+(ellipsis khi tràn) để năm ô cao bằng nhau. Khi đó độ dài không còn mang tín hiệu
+nào, bất kể dữ liệu ra sao. Nó sửa đồng thời:
+
+- rò rỉ ở đây,
+- §7 của chính màn này (năm ô cùng loại, chiều cao 215/120/120/120/120),
+- và lệch cột 5:1 ở [study_match](study_match.md).
+
+**Chỉ kẹp ở Guess và Match** — hai chế độ mà người học *quét để chọn*. Browse,
+Recall và Fill phải hiện đủ nghĩa, vì ở đó đọc nghĩa mới là việc.
 
 **F2 — Thẻ hỏi cao ~730px cho một từ.** ⚠️
 Cùng dạng với [study_browse](study_browse.md) F2: khung thẻ cố định, nội dung
