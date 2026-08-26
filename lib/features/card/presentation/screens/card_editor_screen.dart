@@ -358,6 +358,20 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
   /// exit path during the pop sees a pristine form rather than asking the user
   /// to discard the changes they just saved.
   void _leaveAfterSave() {
+    // **Only the editor the user is looking at reacts.** `cardEditProvider` is
+    // a family keyed by card id, so two editors mounted for one card share a
+    // notifier and both see the same `shouldClose` transition — and
+    // `Navigator.pop` pops the *top* route, not the caller's. Measured: one
+    // Save popped two routes and left the user on a stale copy of the form
+    // underneath. `isCurrent` is what makes the reaction belong to a route
+    // rather than to a card.
+    //
+    // Two editors for one card is reachable today: this screen pushes Card
+    // Detail for the history, and Card Detail's own Edit action pushes an
+    // editor back. That cycle is a navigation question for Card Detail and the
+    // router, both outside this task's scope — recorded in `docs/wbs.md`
+    // M99.62. What this guard buys is that no save can strand anyone.
+    if (!(ModalRoute.of(context)?.isCurrent ?? true)) return;
     _baseline = _draft;
     _isContentDirty = false;
     _pop();

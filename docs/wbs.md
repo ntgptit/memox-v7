@@ -13028,6 +13028,66 @@ commit; **không pass nào tìm ra P0**, và cả hai tìm ra thứ gate không 
   expose; keyboard che 32.7dp đáy ô Back đang focus; `MxContentShell` không có
   max-width nội dung (chưa render ≥600dp nên chưa đo được).
 
+#### Vòng review thứ hai, và một lỗi do chính fix vòng một tạo ra
+
+Hai pass chạy lại từ đầu trên cây đã sửa. Không P0.
+
+- **P1 · `push` làm editor xếp chồng được, và một lần Save pop hai route.** Fix
+  vòng 1 đổi History từ `go` sang `push` để back trả về form — đúng, và nó mở ra
+  một chu trình: editor → Card Detail → **Edit** của Card Detail → editor thứ
+  hai. `cardEditProvider` và `cardToEditProvider` là family theo `cardId`, nên
+  hai màn chia một notifier và một snapshot: cả hai cùng thấy `shouldClose`,
+  `Navigator.pop` pop route **trên cùng** chứ không phải route của người gọi, và
+  người dùng rơi xuống một bản sao cũ của form với `Save changes` sáng nhưng
+  không ghi gì (`canSubmit` đã là false vĩnh viễn).
+  - **Đã sửa phần thuộc phạm vi:** phản ứng với `shouldClose` chỉ chạy khi route
+    của chính màn đó `isCurrent`. Một Save pop đúng một route, người dùng đáp
+    xuống Card Detail. Test tái hiện dựng router có Edit action, và **đỏ khi bỏ
+    guard**.
+  - **Còn mở, ngoài phạm vi:** bản thân chu trình. Đóng nó nghĩa là đổi Edit
+    action của Card Detail hoặc thêm redirect ở router — implementation prompt
+    nói rõ Card Detail và route không đổi trong task này. Ghi ra để chủ dự án
+    quyết, kèm đúng chỗ tái hiện.
+- **P1 (UI) · title app bar bị cắt trong tiếng Anh ở gần như mọi cấu hình.** Fix
+  vòng 1 đo bằng tiếng Việt — `Sửa thẻ` luôn vừa. `Edit flashcard` cần 145.8dp
+  ở scale 1.0 và 195.4 ở 2.0, trong khi bar cấp 94.4 ở 320, 101.3 ở 360@2.0,
+  131.3 ở 390@2.0: thiếu từ 14 đến 94 pixel, và ở 390@1.0 — chỗ duy nhất nó vừa
+  — margin đúng **0.0**. Điều kiện thu icon (`isCompact && textScale > 1`) không
+  bắn ở đúng hai vùng đó. Shortcut giờ **luôn là icon**: một quy tắc chỉ đúng ở
+  một ngôn ngữ không phải quy tắc.
+- **P1 (UI) · `Save changes` hẹp hơn `Cancel` và bị cắt chữ.** Ở 320 EN @2.0:
+  Cancel **142.6** vs Save **141.4** — secondary rộng hơn primary, nhãn primary
+  ellipsize giữa từ. Đây là mặt kia của cùng một sai lầm: một tỷ lệ quyết định
+  tại chỗ không thể biết hai nhãn đã dịch rộng bao nhiêu. Dùng `MxButtonPair` —
+  nó hỏi chính hai nút, khớp chiều cao, và xếp chồng khi một hàng thật sự không
+  chứa nổi. Bề rộng bằng nhau đánh đổi tỷ lệ 3.2:1 của concept, và M99.53 đã
+  tranh luận đúng đánh đổi đó: hai control cạnh nhau đọc như một lựa chọn, và
+  một lựa chọn vẽ ở hai cỡ là đã được layout quyết hộ người dùng.
+- **P1 (UI) · heading tag vẫn còn nguyên lỗi `Flexible` + `Spacer`** mà label
+  row đã sửa. Overflow vòng 1 đóng lại thành clipping: `Spacer` chia đều free
+  space nên giữ 87–113dp trống trong khi `không bắt buộc` bị cắt, ở 412×915
+  @1.3 tiếng Việt — một cấu hình phổ thông.
+- **P1 (UI) · hàng `Review history` là target 36dp.** Hit-test biên: vùng chạm
+  đúng bằng rect, không có padding target nào — thấp hơn sàn 48 ở cỡ chữ mặc
+  định, trên control tương tác duy nhất của khối context.
+- **P1 (UI) · ở 320@2.0 marker thắng tên field.** `CÂU VÍ DỤ` còn **18.2dp** —
+  một glyph cộng dấu ba chấm — trong khi `không bắt buộc` giữ trọn 171. Marker
+  không flex nên được cấp chỗ trước. Giờ tên field lấy ba phần tư.
+- **P2 (UI) · câu chữ retention của tôi sai.** Thẻ Trash viết "kept in Trash
+  until you empty it", còn dialog cách một tap viết "restore for 30 days".
+  **BR-264 nói auto-purge chạy ở 30 ngày bất kể người dùng có dọn Trash hay
+  không**, nên câu của tôi vừa mâu thuẫn vừa sai. Cả hai giờ nói cùng một cửa sổ.
+- **P2 · deck bị xoá vẫn không nói gì.** `deck_context_read_data_source.dart`
+  dùng `.where((row) => row != null)`, nên hàng đã biến mất không sinh value và
+  cũng không sinh error: provider ở `AsyncLoading` mãi mãi và màn vẽ trống. Fix
+  vòng 1 chỉ đóng nửa *read lỗi*. Sửa nốt phải đụng `data/` dùng chung với card
+  list (nơi `deckName` có `?? cardListTitle`), nên ghi lại thay vì sửa kèm.
+- **P2 đã sửa:** test cho fix cờ vòng 1 **không đỏ khi bỏ fix** — nó mount cả
+  màn, nơi không có gì bị disable. Giờ mount thẳng widget với `onToggle: null`;
+  đã kiểm chứng đỏ. Và dạng icon của Save shortcut hoàn toàn không được assert
+  — mọi test tìm nó bằng `widgetWithText`, thứ không thấy gì khi nó thành
+  `MxIconButton`; giờ có test cho cả hai dạng, kèm target 48 và tooltip.
+
 - **`card_editor_screen.dart` còn 402 dòng, trên ngưỡng cảnh báo 400.** Từ 506
   xuống 402 bằng ba lần tách thật — form body, save shortcut, và gộp
   `removeListener` với `dispose` vào một vòng. Tôi dừng ở đây thay vì cắt giải

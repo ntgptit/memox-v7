@@ -125,7 +125,14 @@ class CardEditorFieldWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: <Widget>[
+              // **The name gets three quarters, the marker one.** With the
+              // marker laid out at its full width first, `CÂU VÍ DỤ` came out
+              // **18.2dp** at 320 and text scale 2.0 — one glyph and an
+              // ellipsis — while `không bắt buộc` kept all 171. That inverts
+              // what the row is for: the name identifies the field, the marker
+              // qualifies it.
               Flexible(
+                flex: 3,
                 child: Text(
                   label,
                   style: context.texts.labelMedium?.copyWith(color: quiet),
@@ -133,14 +140,17 @@ class CardEditorFieldWidget extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.xs),
-              Text(
-                isRequired
-                    ? context.l10n.cardEditorFieldRequired
-                    : context.l10n.cardEditorFieldOptional,
-                style: context.texts.labelSmall?.copyWith(
-                  color: isRequired
-                      ? context.semanticColors.primaryAccent
-                      : quiet,
+              Flexible(
+                child: Text(
+                  isRequired
+                      ? context.l10n.cardEditorFieldRequired
+                      : context.l10n.cardEditorFieldOptional,
+                  style: context.texts.labelSmall?.copyWith(
+                    color: isRequired
+                        ? context.semanticColors.primaryAccent
+                        : quiet,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],

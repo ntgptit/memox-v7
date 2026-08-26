@@ -1,13 +1,13 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 677,
-  "totalSites": 510,
+  "scannedFiles": 679,
+  "totalSites": 511,
   "byElementKind": {
     "other": 317,
     "background": 23,
     "shadow": 1,
     "border": 14,
-    "text": 121,
+    "text": 122,
     "icon": 34
   },
   "bySourceKind": {
@@ -16,7 +16,7 @@
     "Colors-material": 11,
     "hardcoded-literal": 97,
     "opacity-modified-token": 13,
-    "theme-token": 231
+    "theme-token": 232
   },
   "sites": [
     {
@@ -3078,17 +3078,6 @@
       "resolved_value_dark": "#00000000"
     },
     {
-      "file": "lib/features/card/presentation/screens/card_editor_screen.dart",
-      "line": 359,
-      "widget_context": "_CardEditorScreenState",
-      "element_kind": "text",
-      "source_kind": "theme-token",
-      "expression": "context.colors.error",
-      "token": "colorScheme.error",
-      "resolved_value_light": "#C02B3A",
-      "resolved_value_dark": "#F2808F"
-    },
-    {
       "file": "lib/features/card/presentation/widgets/items/card_history_event_widget.dart",
       "line": 84,
       "widget_context": "CardHistoryEventWidget",
@@ -3387,7 +3376,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_editor_action_bar_widget.dart",
-      "line": 104,
+      "line": 105,
       "widget_context": "CardEditorActionBarWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3398,7 +3387,18 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_editor_context_widget.dart",
-      "line": 106,
+      "line": 83,
+      "widget_context": "CardEditorContextWidget",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.error",
+      "token": "colorScheme.error",
+      "resolved_value_light": "#C02B3A",
+      "resolved_value_dark": "#F2808F"
+    },
+    {
+      "file": "lib/features/card/presentation/widgets/sections/card_editor_context_widget.dart",
+      "line": 147,
       "widget_context": "CardEditorContextWidget",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3409,7 +3409,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_editor_context_widget.dart",
-      "line": 139,
+      "line": 192,
       "widget_context": "CardEditorContextWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3420,7 +3420,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_editor_context_widget.dart",
-      "line": 147,
+      "line": 200,
       "widget_context": "CardEditorContextWidget",
       "element_kind": "icon",
       "source_kind": "theme-token",
@@ -3431,7 +3431,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_editor_context_widget.dart",
-      "line": 167,
+      "line": 220,
       "widget_context": "CardEditorContextWidget",
       "element_kind": "icon",
       "source_kind": "theme-token",
@@ -3475,7 +3475,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_editor_field_widget.dart",
-      "line": 128,
+      "line": 150,
       "widget_context": "CardEditorFieldWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3483,6 +3483,17 @@
       "token": "semantic.primaryAccent",
       "resolved_value_light": "unresolvable: semantic.primaryAccent not in the dumped theme",
       "resolved_value_dark": "unresolvable: semantic.primaryAccent not in the dumped theme"
+    },
+    {
+      "file": "lib/features/card/presentation/widgets/sections/card_editor_form_widget.dart",
+      "line": 120,
+      "widget_context": "CardEditorFormWidget",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.error",
+      "token": "colorScheme.error",
+      "resolved_value_light": "#C02B3A",
+      "resolved_value_dark": "#F2808F"
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_export_format_options_widget.dart",
@@ -3970,7 +3981,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_tag_section_widget.dart",
-      "line": 295,
+      "line": 315,
       "widget_context": "_CardTagSectionWidgetState",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -5620,7 +5631,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_text_field.dart",
-      "line": 267,
+      "line": 275,
       "widget_context": "MxTextField",
       "element_kind": "text",
       "source_kind": "theme-token",

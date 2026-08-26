@@ -97,7 +97,9 @@ void main() {
       expect(find.text('Move this flashcard to Trash'), findsOneWidget);
       // BR-256 keeps the card, its state and its history until purge. Copy
       // claiming otherwise would be wrong, not just alarming.
-      expect(find.textContaining('kept in Trash'), findsOneWidget);
+      // BR-264 purges at 30 days whether or not the user empties Trash, so the
+      // card names the same window the confirmation does.
+      expect(find.textContaining('for 30 days'), findsOneWidget);
       expect(find.text('Danger zone'), findsNothing);
     });
 
@@ -185,7 +187,7 @@ void main() {
       }
     });
 
-    testWidgets('the footer is outside the scroll and Save is the wider', (
+    testWidgets('the footer is outside the scroll and both actions match', (
       tester,
     ) async {
       await pumpCardEditor(tester, seed());
@@ -205,12 +207,16 @@ void main() {
           matching: find.widgetWithText(MxActionButton, 'Cancel'),
         ),
       );
-      expect(save.width, greaterThan(cancel.width));
+      // **One size, which is not the concept's proportion.** Two attempts at
+      // that proportion each broke a label: a 3 : 1 flex wrapped `Cancel` at
+      // 390dp, and sizing Cancel to its own label let it grow past Save at 320
+      // and text scale 2.0 — 142.6 against 141.4, with `Save changes`
+      // ellipsized mid-word. `MxButtonPair` asks the buttons instead, and the
+      // repo already argued in M99.53 that a pair drawn at two sizes has made
+      // the choice for the user.
+      expect(save.width, cancel.width);
+      expect(save.height, cancel.height);
       expect(save.height, greaterThanOrEqualTo(AppSpacing.minimumTouchTarget));
-      expect(
-        cancel.height,
-        greaterThanOrEqualTo(AppSpacing.minimumTouchTarget),
-      );
     });
 
     testWidgets('the footer stays above the keyboard', (tester) async {

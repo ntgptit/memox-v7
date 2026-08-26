@@ -20,10 +20,19 @@ void main() {
     matching: find.widgetWithText(MxActionButton, 'Save changes'),
   );
 
-  Finder shortcutSave() => find.widgetWithText(MxActionButton, 'Save');
+  /// The app bar's shortcut. An icon in every configuration — the labelled
+  /// pill fit the bar in exactly one, and cost the title its name everywhere
+  /// else.
+  Finder shortcutSave() => find.ancestor(
+    of: find.byIcon(Icons.check),
+    matching: find.byType(IconButton),
+  );
 
   bool isEnabled(WidgetTester tester, Finder finder) =>
       tester.widget<MxActionButton>(finder).onPressed != null;
+
+  bool isShortcutEnabled(WidgetTester tester) =>
+      tester.widget<IconButton>(shortcutSave()).onPressed != null;
 
   FakeCardRepository seed() {
     final repository = FakeCardRepository();
@@ -42,7 +51,7 @@ void main() {
       await pumpCardEditor(tester, seed());
 
       expect(isEnabled(tester, footerSave()), isFalse);
-      expect(isEnabled(tester, shortcutSave()), isFalse);
+      expect(isShortcutEnabled(tester), isFalse);
     });
 
     testWidgets('both wake on the same keystroke', (tester) async {
@@ -52,7 +61,7 @@ void main() {
       await tester.pump();
 
       expect(isEnabled(tester, footerSave()), isTrue);
-      expect(isEnabled(tester, shortcutSave()), isTrue);
+      expect(isShortcutEnabled(tester), isTrue);
     });
 
     testWidgets('the shortcut writes once, through the same path', (
@@ -83,7 +92,7 @@ void main() {
       await tester.pump();
 
       expect(isEnabled(tester, footerSave()), isFalse);
-      expect(isEnabled(tester, shortcutSave()), isFalse);
+      expect(isShortcutEnabled(tester), isFalse);
     });
 
     testWidgets('trailing whitespace alone is not a change', (tester) async {
@@ -116,7 +125,7 @@ void main() {
         ),
         findsOneWidget,
       );
-      expect(isEnabled(tester, shortcutSave()), isFalse);
+      expect(isShortcutEnabled(tester), isFalse);
 
       gate.complete();
       await tester.pumpAndSettle();

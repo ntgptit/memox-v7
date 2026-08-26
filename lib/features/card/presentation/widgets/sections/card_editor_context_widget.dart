@@ -147,9 +147,15 @@ class CardEditorContextWidget extends StatelessWidget {
     final quiet = context.colors.onSurfaceVariant;
 
     return MxCard(
+      // **Vertical padding sized so the row is a target, not so it looks
+      // roomy.** At `sm` the card measured 358 x **36** and hit-tested to
+      // exactly that — no padded tap area, 12dp under the floor, on the only
+      // tappable thing in the context block. `md` brings it to 48 at the
+      // default text size and it grows from there. The deck row keeps `sm`
+      // because it takes no tap at all.
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
+        vertical: AppSpacing.md,
       ),
       // **`push`, not `go`, and no discard guard.** `go` replaced the stack, so
       // opening the history was a one-way trip: back from the detail screen

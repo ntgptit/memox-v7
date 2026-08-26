@@ -1450,7 +1450,7 @@
   "@cardEditorTrashTitle": {
     "description": "Title of the editor's soft-delete card. Product language, not a technical section label — and it names the destination, because Trash is where the card goes rather than where it ends (BR-256)."
   },
-  "cardEditorTrashDescription": "Thẻ rời khỏi thư viện của bạn, còn lịch sử học được giữ trong Trash cho tới khi bạn dọn sạch. Các thẻ khác trong bộ thẻ này không đổi.",
+  "cardEditorTrashDescription": "Thẻ rời khỏi thư viện của bạn, còn lịch sử học nằm trong Trash 30 ngày để bạn khôi phục lại. Các thẻ khác trong bộ thẻ này không đổi.",
   "@cardEditorTrashDescription": {
     "description": "Body of the editor's soft-delete card. States what happens and what is preserved: BR-256 keeps the review history until purge, so copy claiming history is removed would be wrong."
   },

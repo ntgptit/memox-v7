@@ -1,6 +1,9 @@
 import 'package:flutter/foundation.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/navigation/route_names.dart';
+import 'package:memox/features/card/presentation/screens/card_editor_screen.dart';
 import 'package:memox/features/card/presentation/widgets/sections/card_editor_context_widget.dart';
 import 'package:memox/features/card/presentation/widgets/sections/card_trash_action_widget.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
@@ -95,6 +98,72 @@ void main() {
     });
   });
 
+  testWidgets('a save in a stacked editor pops its own route, not two', (
+    tester,
+  ) async {
+    // **Two editors for one card are reachable**: this screen pushes Card
+    // Detail for the history, and Card Detail's own Edit action pushes an
+    // editor back. `cardEditProvider` is a family keyed by card id, so both
+    // see the same `shouldClose` transition — and `Navigator.pop` pops the top
+    // route, not the caller's. Measured before the guard: one Save popped two
+    // routes and stranded the user on a stale copy of the form.
+    final repository = seed();
+    final router = GoRouter(
+      initialLocation: '/decks/deck-1/editor',
+      routes: <RouteBase>[
+        GoRoute(
+          path: '/decks/:deckId',
+          name: RouteNames.deckDetail,
+          builder: (context, state) =>
+              const Scaffold(body: Text('deck detail')),
+          routes: <RouteBase>[
+            GoRoute(
+              path: 'editor',
+              name: 'editor',
+              builder: (context, state) =>
+                  const CardEditorScreen(deckId: 'deck-1', cardId: 'card-1'),
+            ),
+            GoRoute(
+              path: 'cards/:cardId',
+              name: RouteNames.cardDetail,
+              // Stands in for Card Detail's app-bar Edit action.
+              builder: (context, state) => Scaffold(
+                body: Center(
+                  child: ElevatedButton(
+                    onPressed: () => context.pushNamed(
+                      'editor',
+                      pathParameters: <String, String>{'deckId': 'deck-1'},
+                    ),
+                    child: const Text('detail edit'),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+    await pumpCardEditorWithRouter(tester, repository, router);
+
+    await tester.tap(find.text('History'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('detail edit'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField).first, 'saved in editor two');
+    await tester.pump();
+    await tester.tap(find.widgetWithText(MxActionButton, 'Save changes'));
+    await tester.pumpAndSettle();
+
+    expect(repository.updates, hasLength(1));
+    expect(
+      find.text('detail edit'),
+      findsOneWidget,
+      reason: 'a save in the top editor should land on the screen below it',
+    );
+  });
+
   group('the deck read says which of its three states it is in', () {
     testWidgets('a failed read names what is unavailable', (tester) async {
       final repository = seed();
@@ -121,21 +190,133 @@ void main() {
     });
   });
 
-  testWidgets('a flag the screen disabled looks disabled', (tester) async {
-    final repository = seed();
-    repository.nextFlagFailure = null;
-    await pumpCardEditor(tester, repository);
+  group('a flag the screen disabled looks disabled', () {
+    testWidgets('a null onToggle renders an inert button', (tester) async {
+      // **Mounted directly, because this is the half the screen only reaches
+      // mid-write.** The widget read its own `isLoading` and ignored the
+      // screen's null `onToggle`, so while a flag write was in flight the
+      // button still hit-tested as enabled and then did nothing — the
+      // affordance lying about itself. Asserting it through the screen needs a
+      // write held open; asserting it here needs one line, and it is the line
+      // that goes red without the fix.
+      final repository = seed();
+      await pumpFlagToggle(tester, repository, onToggle: null);
 
-    // The widget read its own `isLoading` and ignored the screen's null
-    // `onToggle`, so mid-write the button hit-tested as enabled and did
-    // nothing — the affordance lying about itself.
-    final IconButton flag = tester.widget<IconButton>(
-      find.ancestor(
-        of: find.byIcon(Icons.flag_outlined),
+      expect(
+        tester.widget<IconButton>(find.byType(IconButton)).onPressed,
+        isNull,
+      );
+    });
+
+    testWidgets('a live onToggle renders a pressable one', (tester) async {
+      final repository = seed();
+      await pumpFlagToggle(tester, repository, onToggle: (_) {});
+
+      expect(
+        tester.widget<IconButton>(find.byType(IconButton)).onPressed,
+        isNotNull,
+      );
+    });
+  });
+
+  testWidgets('the Save shortcut is an icon at every size, and says so', (
+    tester,
+  ) async {
+    // The labelled pill fit the bar in exactly one configuration — 390 @1.0 in
+    // English, with a margin of 0.0dp. Everywhere else the title was short by
+    // 14 to 94 pixels and rendered `Edit flashc…` or `Sử…`.
+    for (final Size size in const <Size>[Size(320, 900), Size(390, 900)]) {
+      await pumpCardEditor(tester, seed(), surfaceSize: size);
+
+      final Finder shortcut = find.ancestor(
+        of: find.byIcon(Icons.check),
         matching: find.byType(IconButton),
-      ),
+      );
+      expect(shortcut, findsOneWidget);
+      expect(tester.getRect(shortcut).shortestSide, greaterThanOrEqualTo(48));
+      expect(find.byTooltip('Save'), findsOneWidget);
+      expect(find.text('Edit flashcard'), findsOneWidget);
+    }
+  });
+
+  group('the deck read says which of its three states it is in', () {
+    testWidgets('a failed read names what is unavailable', (tester) async {
+      final repository = seed();
+      repository.nextDeckContextFailure = StateError('deck is gone');
+      await pumpCardEditor(tester, repository);
+
+      // It used to be `.value`, which flattened loading, error and "deleted"
+      // into one `null` and simply drew no path at all — indistinguishable
+      // from a frame that had not arrived.
+      expect(find.textContaining("isn't available"), findsOneWidget);
+      expect(find.text('All decks'), findsNothing);
+      // And the form is still usable: a missing path is not a dead screen.
+      expect(find.byType(TextField), findsWidgets);
+    });
+
+    testWidgets('a resolved read draws the path and the deck', (tester) async {
+      await pumpCardEditor(tester, seed());
+
+      expect(find.byType(CardEditorContextWidget), findsOneWidget);
+      // `Korean` folds into the ellipsis at `collapseAfter: 3` — the root and
+      // the leaf are the two crumbs always on screen.
+      expect(find.text('All decks'), findsOneWidget);
+      expect(find.text('Edit'), findsOneWidget);
+    });
+  });
+
+  group('a flag the screen disabled looks disabled', () {
+    testWidgets('a null onToggle renders an inert button', (tester) async {
+      // **Mounted directly, because this is the half the screen only reaches
+      // mid-write.** The widget read its own `isLoading` and ignored the
+      // screen's null `onToggle`, so while a flag write was in flight the
+      // button still hit-tested as enabled and then did nothing — the
+      // affordance lying about itself. Asserting it through the screen needs a
+      // write held open; asserting it here needs one line, and it is the line
+      // that goes red without the fix.
+      final repository = seed();
+      await pumpFlagToggle(tester, repository, onToggle: null);
+
+      expect(
+        tester.widget<IconButton>(find.byType(IconButton)).onPressed,
+        isNull,
+      );
+    });
+
+    testWidgets('a live onToggle renders a pressable one', (tester) async {
+      final repository = seed();
+      await pumpFlagToggle(tester, repository, onToggle: (_) {});
+
+      expect(
+        tester.widget<IconButton>(find.byType(IconButton)).onPressed,
+        isNotNull,
+      );
+    });
+  });
+
+  testWidgets('the Save shortcut becomes an icon when the bar runs out', (
+    tester,
+  ) async {
+    await pumpCardEditor(
+      tester,
+      seed(),
+      locale: const Locale('vi'),
+      textScale: 2,
+      surfaceSize: const Size(320, 568),
     );
-    expect(flag.onPressed, isNotNull);
+
+    // The bar gave the title 76.6dp for a word needing ~155 and rendered
+    // `Sử…`. The shortcut is the half that may shrink; the footer's Save keeps
+    // its full label in every case.
+    expect(find.text('Sửa thẻ'), findsOneWidget);
+    final Finder shortcut = find.ancestor(
+      of: find.byIcon(Icons.check),
+      matching: find.byType(IconButton),
+    );
+    expect(shortcut, findsOneWidget);
+    expect(tester.getRect(shortcut).shortestSide, greaterThanOrEqualTo(48));
+    // And it still says what it is.
+    expect(find.byTooltip('Lưu'), findsOneWidget);
   });
 
   group('the label row', () {

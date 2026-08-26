@@ -8,6 +8,7 @@ import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/features/card/di/card_repository_provider.dart';
 import 'package:memox/features/card/domain/models/deck_context_model.dart';
 import 'package:memox/features/card/presentation/screens/card_editor_screen.dart';
+import 'package:memox/features/card/presentation/widgets/sections/card_flag_toggle_widget.dart';
 import 'package:memox/l10n/generated/app_localizations.dart';
 
 import 'fake_card_repository.dart';
@@ -108,6 +109,41 @@ Future<GoRouter> pumpCardEditor(
   return router;
 }
 
+/// The same app, with a router the test supplies.
+///
+/// Exists for the one case the standard harness cannot stage: a second editor
+/// pushed on top of the first, which needs a detail route that can push back.
+Future<void> pumpCardEditorWithRouter(
+  WidgetTester tester,
+  FakeCardRepository repository,
+  GoRouter router,
+) async {
+  repository.deckContextToShow ??= const DeckContextModel(
+    deckName: 'TOPIK II — Vocab',
+    ancestors: <DeckBreadcrumbSegment>[
+      DeckBreadcrumbSegment(id: 'korean', name: 'Korean'),
+    ],
+  );
+
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [cardRepositoryProvider.overrideWithValue(repository)],
+      child: MaterialApp.router(
+        theme: buildLightTheme(),
+        localizationsDelegates: const <LocalizationsDelegate<Object>>[
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        routerConfig: router,
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
 /// Fires the platform back gesture the way Android does, so the assertion is
 /// about `PopScope` and not about a button that happens to call the same code.
 Future<void> pressSystemBack(WidgetTester tester) async {
@@ -139,4 +175,36 @@ Future<Finder> openTagEntry(WidgetTester tester) async {
   await tester.pumpAndSettle();
 
   return find.byType(TextField).last;
+}
+
+/// `CardFlagToggleWidget` on its own, so the inert half can be staged.
+///
+/// The screen only passes a null `onToggle` while a flag write is in flight,
+/// which needs a write held open to reach. The widget's contract — a null
+/// callback renders a disabled button — is one line to assert directly, and it
+/// is the assertion that goes red without the fix.
+Future<void> pumpFlagToggle(
+  WidgetTester tester,
+  FakeCardRepository repository, {
+  required ValueChanged<bool>? onToggle,
+}) async {
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [cardRepositoryProvider.overrideWithValue(repository)],
+      child: MaterialApp(
+        theme: buildLightTheme(),
+        localizationsDelegates: const <LocalizationsDelegate<Object>>[
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: CardFlagToggleWidget(cardId: 'card-1', onToggle: onToggle),
+        ),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
 }

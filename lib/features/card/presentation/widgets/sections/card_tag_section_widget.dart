@@ -213,30 +213,39 @@ class _CardTagSectionWidgetState extends ConsumerState<CardTagSectionWidget> {
         // A heading, and it has to say so: the app-bar title carries the flag
         // and this did not, so the only section label on the screen was
         // announced as loose text.
-        // **Flexible, because at 320dp and text scale 2.0 this row overflowed
-        // by 7.5px in Vietnamese** — `NHÃN` + `không bắt buộc` + the counter do
-        // not fit, and a `Row` of rigid children reports that as an overflow
-        // stripe in debug and clips silently in release. The heading is the
-        // part that may give way; the counter is a number and must not.
-        Flexible(
-          child: Semantics(
-            header: true,
-            child: Text(
-              context.l10n.cardEditorTagsHeading,
-              style: context.texts.labelMedium?.copyWith(color: quiet),
-              overflow: TextOverflow.ellipsis,
-            ),
+        // **One flexible group, not two flexible children beside a `Spacer`.**
+        // Making the two texts `Flexible` closed the 7.5px overflow at 320dp
+        // and text scale 2.0 in Vietnamese, and turned it into clipping: the
+        // `Spacer` is an `Expanded`, so it split the free space with them and
+        // held 87–113dp empty while `không bắt buộc` was cut. Giving the group
+        // the whole remainder pins the counter to the right edge and lets the
+        // words take what they need — the same correction the field label row
+        // needed, for the same reason.
+        Expanded(
+          child: Row(
+            children: <Widget>[
+              Flexible(
+                child: Semantics(
+                  header: true,
+                  child: Text(
+                    context.l10n.cardEditorTagsHeading,
+                    style: context.texts.labelMedium?.copyWith(color: quiet),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              Flexible(
+                child: Text(
+                  context.l10n.cardEditorFieldOptional,
+                  style: context.texts.labelSmall?.copyWith(color: quiet),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(width: AppSpacing.xs),
-        Flexible(
-          child: Text(
-            context.l10n.cardEditorFieldOptional,
-            style: context.texts.labelSmall?.copyWith(color: quiet),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        const Spacer(),
         // The counter appears only once a tag exists: at zero it is a limit
         // nobody is near, and showing 0 / 10 is noise (W5). At the cap it is
         // the number the message below refers to, so it stays.
