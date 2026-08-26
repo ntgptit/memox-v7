@@ -7,7 +7,7 @@ Card · `lib/features/card/presentation/screens/` · golden
 
 | | |
 |---|---|
-| Typography rungs | **11** — 3 là bottom nav, **8** của nội dung |
+| Typography rungs | **11 — không có bottom nav trong golden này**, cả 11 là nội dung |
 | Rung nội dung | 22/600 · 16/600 · 14/400 · 14/600 · 12/600 · 12/400 · **11/600/ls.6** · **11/500/ls1.1** |
 | Font weight | 400, 500, 600 |
 | Spacer | 4×7, 8×5, 12×7 — **toàn bộ trên scale** |
@@ -49,7 +49,7 @@ tiến độ + dòng `Showing 7 of 142` ≈ **62% viewport**.
 |---|---|
 | Whitespace | ⚠️ |
 | Optical alignment | ⚠️ dot trạng thái căn theo dòng đầu, lệch quang học nhẹ so với chữ Hàn cao hơn |
-| Typography tinh tế | ❌ 8 rung nội dung, có **hai** cỡ dưới 12 |
+| Typography tinh tế | ❌ 11 rung nội dung, có **hai** cỡ dưới 12 |
 | Icon/text proportion | ✅ icon 16 trong chip 34 |
 | Surface/color hierarchy | ⚠️ **năm** màu ngữ nghĩa cùng lúc trong legend (New/Beginning/Reviewing/Mastered + primary) |
 | Mắt đi đúng flow | ❌ mắt phải vượt 62% màn mới tới nội dung màn này mang tên |
@@ -71,7 +71,7 @@ padding màn.
 **5. Spacing & rhythm** ✅ Mọi giá trị của app đều trên scale; 20 inset 1px là bề
 rộng viền, đã truy nguồn.
 
-**6. Typography** ❌ 8 rung nội dung, vượt xa mốc 3–5. Hai rung **dưới 12px**
+**6. Typography** ❌ **11 rung nội dung**, vượt xa mốc 3–5. Hai rung **dưới 12px**
 (`11/600/ls.6` cho `NEW`/`MASTERED`, `11/500/ls1.1` cho pill `now`).
 
 **7. Component sizing** ⚠️ Chip lọc cao 34, control sort cao 24, pill `now` cao
@@ -122,7 +122,7 @@ sàn. Chip bị cắt trông **hỏng** chứ không trông như cuộn được
 | Alignment | 2 | trục 54 dùng 30 lần |
 | Spacing | 2 | 0 giá trị app ngoài scale |
 | Density | 0 | 2 card hiện trên 142 |
-| Typography | 0 | 8 rung, hai cỡ dưới 12px |
+| Typography | 0 | 11 rung nội dung, hai cỡ dưới 12px |
 | CTA | 2 | đúng một primary |
 | Responsive | 0 | **đã tràn ở kích thước đang đo** |
 | **Tổng** | **9 / 16** | **Major layout revision** |

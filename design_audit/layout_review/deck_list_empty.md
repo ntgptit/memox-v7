@@ -13,7 +13,7 @@ lại ảnh nào.
 
 | | |
 |---|---|
-| Typography rungs | **7** — 3 là bottom nav, **4** của nội dung |
+| Typography rungs | **7** — **2 của bottom nav**, **5 của nội dung** |
 | Rung nội dung | 22/600 (title) · 16/600 (nút) · 14/600 (heading rỗng) · 14/400 (mô tả) |
 | Font weight | 400, 500, 600 — **không có 700** |
 | Spacer | 8×3, 16×1, 24×1 — **toàn bộ trên scale** |
@@ -54,7 +54,7 @@ dung, cao bằng nhau qua `IntrinsicHeight`.
 |---|---|
 | Whitespace | ⚠️ nhiều, nhưng phân bố lệch: dồn hết lên trên |
 | Optical alignment | ✅ |
-| Typography tinh tế | ✅ 4 rung, 3 weight — **màn sạch nhất nhóm này** |
+| Typography tinh tế | ✅ 5 rung nội dung, 3 weight — **màn sạch nhất nhóm này** |
 | Icon/text proportion | ✅ icon 40px trên title 22 |
 | Surface/color hierarchy | ⚠️ hai khối primary (nút chính + FAB) cho một màn không có nội dung |
 | Mắt đi đúng flow | ⚠️ mắt xuống tới hai nút rồi bị FAB kéo ngược sang phải |
@@ -75,8 +75,8 @@ trống bao quanh. Không dùng divider.
 
 **5. Spacing & rhythm** ✅ Không giá trị nào ngoài scale.
 
-**6. Typography** ✅ **4 rung nội dung, 3 weight.** Đạt mốc 3–5 của checklist —
-màn duy nhất trong nhóm Deck đạt.
+**6. Typography** ✅ **5 rung nội dung, 3 weight.** Vừa chạm mốc 3–5 của
+checklist — màn duy nhất trong nhóm Deck đạt.
 
 **7. Component sizing** ✅ Hai nút cùng chiều cao qua `IntrinsicHeight`.
 
@@ -126,7 +126,7 @@ trường hợp còn lại.
 | Alignment | 2 | hai nút cùng trục cùng bề rộng |
 | Spacing | 2 | 0 ngoài scale |
 | Density | 1 | khoảng trống dồn lên trên |
-| Typography | 2 | 4 rung, 3 weight |
+| Typography | 2 | 5 rung nội dung, 3 weight |
 | CTA | 1 | FAB lặp lại nút `New deck` |
 | Responsive | 1 | có `mx_button_pair_test` nhưng chưa có render đa kích thước |
 | **Tổng** | **13 / 16** | **Minor fix** |
@@ -150,6 +150,7 @@ xuống dưới tâm.
 quang học. Kéo khối lên khoảng 42–45% sẽ cân hơn mà không đổi gì khác.
 
 **F3 — Màn sạch nhất về typography trong nhóm.** ✅ ghi lại làm mốc.
-4 rung, 3 weight, không có 700. Ba màn deck còn lại đều 7 rung / 4 weight. Khác
+5 rung nội dung, 3 weight, không có 700. Ba màn deck còn lại 8–10 rung / 4
+weight. Khác
 biệt không phải do màn này đơn giản hơn — mà do nó **không có hero numeral**,
 thứ một mình kéo theo cả rung 32 lẫn weight 700.

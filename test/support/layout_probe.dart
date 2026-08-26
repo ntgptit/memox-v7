@@ -128,7 +128,7 @@ void probeLayout(String goldenPath) {
     return object.localToGlobal(Offset.zero) & object.size;
   }
 
-  void visit(Element element, List<String> ancestry) {
+  void visit(Element element, List<String> ancestry, {required bool inChrome}) {
     final render = element.renderObject;
 
     // --- typography: one entry per rung actually painted --------------------
@@ -145,7 +145,8 @@ void probeLayout(String goldenPath) {
         final key =
             '$size/${style.fontWeight?.value ?? 400}/'
             '${style.height?.toStringAsFixed(3) ?? '-'}/'
-            '${style.letterSpacing?.toStringAsFixed(2) ?? '0'}';
+            '${style.letterSpacing?.toStringAsFixed(2) ?? '0'}'
+            '${inChrome ? '/nav' : ''}';
         final row = texts.putIfAbsent(
           key,
           () => <String, Object?>{
@@ -154,6 +155,7 @@ void probeLayout(String goldenPath) {
             'weight': style.fontWeight?.value ?? 400,
             'height': style.height,
             'tracking': style.letterSpacing,
+            'inNavigationBar': inChrome,
             'count': 0,
           },
         );
@@ -231,10 +233,18 @@ void probeLayout(String goldenPath) {
     final nextAncestry = grown.length > 6
         ? grown.sublist(grown.length - 6)
         : grown;
-    element.visitChildren((child) => visit(child, nextAncestry));
+    // **The shared tab bar is chrome, not this screen's typography.** Without
+    // this the deck list reads as ten rungs when three of them belong to a bar
+    // every tab shows — and the screens whose golden omits the bar would be
+    // compared against that inflated number.
+    final nowInChrome =
+        inChrome || element.widget.runtimeType.toString() == 'MxNavigationBar';
+    element.visitChildren(
+      (child) => visit(child, nextAncestry, inChrome: nowInChrome),
+    );
   }
 
-  visit(root, <String>[]);
+  visit(root, <String>[], inChrome: false);
 
   final surface = rectOf(root.renderObject);
   for (final target in targets) {
@@ -265,6 +275,10 @@ void probeLayout(String goldenPath) {
     'screen': name,
     'surface': <double>[surface?.width ?? 0, surface?.height ?? 0],
     'typographyRungs': texts.length,
+    'typographyRungsInContent': texts.values
+        .where((t) => t['inNavigationBar'] == false)
+        .length,
+    'hasNavigationBar': texts.values.any((t) => t['inNavigationBar'] == true),
     'typography': texts.values.toList()
       ..sort((a, b) => (b['size']! as double).compareTo(a['size']! as double)),
     'weights': texts.values.map((t) => t['weight']! as int).toSet().toList()

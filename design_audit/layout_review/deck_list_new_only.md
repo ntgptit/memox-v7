@@ -9,7 +9,7 @@ Trạng thái BR-150: không có thẻ nào đến hạn, chỉ có thẻ mới,
 
 | | |
 |---|---|
-| Typography rungs | **8** — 3 là bottom nav, **5** của nội dung |
+| Typography rungs | **10** — **2 của bottom nav**, **8 của nội dung** |
 | Rung nội dung | 32/700 (numeral) · 22/600 (title) · 16/600 · 12/600/ls.72 (heading) · 12/400 |
 | Font weight | 400, 500, 600, **700** |
 | Spacer | 4×2, 8×1 — **toàn bộ trên scale** |
@@ -48,7 +48,7 @@ Trạng thái BR-150: không có thẻ nào đến hạn, chỉ có thẻ mới,
 |---|---|
 | Whitespace | ⚠️ |
 | Optical alignment | ✅ numeral `20` cắt leading như root |
-| Typography tinh tế | ⚠️ 5 rung nhưng **weight 700 tồn tại cho một numeral không dẫn tới hành động nào** |
+| Typography tinh tế | ❌ 8 rung nội dung cho **một** deck, và weight 700 tồn tại cho một numeral không dẫn tới hành động nào |
 | Icon/text proportion | ✅ |
 | Surface/color hierarchy | ✅ chỉ 2 chỗ dùng primary (Study, FAB) — sạch hơn root |
 | Mắt đi đúng flow | ❌ mắt vào numeral `20` trước, rồi phải đi ngược xuống card mới tìm được việc để làm |
@@ -66,8 +66,8 @@ Trạng thái BR-150: không có thẻ nào đến hạn, chỉ có thẻ mới,
 
 **5. Spacing & rhythm** ✅ Không giá trị nào ngoài scale.
 
-**6. Typography** ⚠️ 5 rung nội dung — trong mốc 3–5. Nhưng 4 weight, và 700
-dành cho numeral mô tả ở F2.
+**6. Typography** ❌ **8 rung nội dung** — trên mốc 3–5, dù màn chỉ có một deck.
+4 weight, và 700 dành cho numeral mô tả ở F2.
 
 **7. Component sizing** ✅
 
@@ -112,10 +112,10 @@ hai thứ mà bộ 4 deck của màn root che mất. Ghi lại như bằng chứ
 | Alignment | 2 | ba trục sạch |
 | Spacing | 2 | 0 ngoài scale |
 | Density | 1 | một card, hơn nửa màn trống |
-| Typography | 1 | 4 weight, 700 phục vụ F2 |
+| Typography | 0 | 8 rung nội dung, 4 weight, 700 phục vụ F2 |
 | CTA | 1 | CTA duy nhất không ở vị trí dẫn dắt |
 | Responsive | 1 | không có bằng chứng |
-| **Tổng** | **10 / 16** | **Major layout revision** |
+| **Tổng** | **9 / 16** | **Major layout revision** |
 
 ## Findings
 

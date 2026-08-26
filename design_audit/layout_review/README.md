@@ -80,6 +80,30 @@ màn nào — chấm ảnh cũ là chấm một bản fork của app.
 CI không gác golden: rollup của PR không có job Windows nào, nên chuyện này lọt
 mà không ai thấy.
 
+## Chỉ 5/29 golden có bottom navigation
+
+Probe đánh dấu từng rung typography là nằm trong hay ngoài `MxNavigationBar`.
+Kết quả không mong đợi: **chỉ 5 golden có thanh tab** — bốn màn deck và
+`progress_deck`.
+
+`study_home`, `progress_overview` và `settings` **là tab của thanh đó** trong app
+thật, nhưng ảnh của chúng không có nó. Bốn màn deck được dựng qua router thật
+(`deckShellWith`), các màn còn lại dựng thẳng từ widget của màn.
+
+Hai hệ quả cho bản review này:
+
+- Mọi kết luận về **mật độ** và **safe area** trên ba màn đó thiếu 80px chrome
+  mà thiết bị thật sẽ vẽ. Chúng được đánh ⚠️ hoặc ➖ chứ không ✅.
+- `progress_overview` và `progress_deck` — **hai golden của cùng một feature** —
+  dựng bằng hai cách khác nhau, nên không so sánh trực tiếp được với nhau.
+
+Đây là khiếm khuyết của gallery, không phải của UI, nhưng nó đúng loại "ảnh nói
+sai về thứ đã ship" mà CLAUDE.md cảnh báo — và nó im lặng: ảnh trông hoàn chỉnh.
+
+Chú thích này cũng sửa một sai sót của chính tôi: năm file đầu tiên ghi "3 rung
+là bottom nav" theo phỏng đoán. Đo ra là **2**, và `card_list` thì không có thanh
+nav nào cả. Các file đó đã được sửa.
+
 ## Ký hiệu
 
 | | |

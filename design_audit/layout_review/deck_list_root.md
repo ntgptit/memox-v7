@@ -7,7 +7,7 @@ Library & Deck · `lib/features/deck/presentation/screens/deck_list_screen.dart`
 
 | | |
 |---|---|
-| Typography rungs | **10** — 3 trong đó là bottom nav, còn **7** của nội dung |
+| Typography rungs | **12** — **2 của bottom nav**, **10 của nội dung** |
 | Rung | 32/700 · 22/600 · 16/600 · 14/400 · 14/600 · 12/600/ls.72 · 12/400 |
 | Font weight | 400, 500, 600, **700** |
 | Spacer | 4×8, 8×1, 12×2, 16×3 — **toàn bộ trên scale** |
@@ -47,7 +47,7 @@ Library & Deck · `lib/features/deck/presentation/screens/deck_list_screen.dart`
 |---|---|
 | Whitespace | ✅ |
 | Optical alignment | ✅ numeral `15` đã cắt internal leading (`heroNumeralCapTrim`) |
-| Typography tinh tế | ⚠️ **bốn** font weight; 700 chỉ phục vụ đúng numeral hero |
+| Typography tinh tế | ❌ 10 rung nội dung và **bốn** font weight; 700 chỉ phục vụ đúng numeral hero |
 | Icon/text proportion | ✅ glyph 16px dẫn label 12px ở control sort |
 | Surface/color hierarchy | ⚠️ primary dùng ở 5 chỗ — xem F3 |
 | Mắt đi đúng flow | ⚠️ bị F2 làm gãy ở nửa dưới |
@@ -71,7 +71,7 @@ cùng loại cùng padding (`insets` chỉ có giá trị trên scale). Không c
 **5. Spacing & rhythm** ✅ **Không một giá trị nào ngoài `AppSpacing.scale`**,
 trên cả 8 loại spacer và 6 loại inset. Padding ngang màn = 16 nhất quán.
 
-**6. Typography** ⚠️ 7 rung nội dung — trên mốc 3–5 của checklist. Bốn weight
+**6. Typography** ❌ **10 rung nội dung** — gấp đôi mốc 3–5. Bốn weight
 (400/500/600/700), trong đó 700 tồn tại cho **một** numeral. Xem F5.
 
 **7. Component sizing** ✅ Deck tile cao 160 đều nhau. Không có kích thước tuỳ ý.
@@ -122,10 +122,10 @@ nhau ở cùng nửa phải của tile, và F1 làm chúng còn gần FAB nữa.
 | Alignment | 2 | ba trục sạch, không lệch vô chủ đích |
 | Spacing | 2 | 0 giá trị ngoài scale |
 | Density | 2 | 14% hero, ba card trọn |
-| Typography | 1 | 7 rung, 4 weight |
+| Typography | 0 | 10 rung nội dung, 4 weight |
 | CTA | 1 | primary bị pha loãng, FAB che content |
 | Responsive | 1 | không có bằng chứng ngoài 393/scale 1.0 |
-| **Tổng** | **12 / 16** | **Minor fix** |
+| **Tổng** | **11 / 16** | **Minor fix** |
 
 ## Findings
 

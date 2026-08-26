@@ -10,7 +10,7 @@ dòng thống kê, heading là `SUB-DECKS · 3`, và scheduler giải qua root.
 
 | | |
 |---|---|
-| Typography rungs | **10** — 3 là bottom nav, **7** của nội dung |
+| Typography rungs | **12** — **2 của bottom nav**, **10 của nội dung** |
 | Font weight | 400, 500, 600, **700** |
 | Spacer | 4×6, 8×1, 12×1, 16×2 — **toàn bộ trên scale** |
 | Inset | 4×17, 8×38, 12×6, 16×27, 24×6, 32×1 — **toàn bộ trên scale** |
@@ -69,7 +69,7 @@ Breadcrumb dính vào title (cùng khối app bar), đúng — nó mô tả titl
 
 **5. Spacing & rhythm** ✅ Không giá trị nào ngoài scale.
 
-**6. Typography** ⚠️ 7 rung nội dung, 4 weight. Xem F3.
+**6. Typography** ❌ **10 rung nội dung**, 4 weight. Xem F3.
 
 **7. Component sizing** ⚠️ Deck tile ở đây cao **không** đều nhau — Nouns 160
 (có chip + nút Study), Verbs thấp hơn (không có nút), Adjectives lại 160. Đây là
@@ -118,10 +118,10 @@ của card 3 **trông** bấm được trong khi một phần của nó nằm d�
 | Alignment | 2 | ba trục sạch |
 | Spacing | 2 | 0 ngoài scale |
 | Density | 2 | ba sub-deck trọn |
-| Typography | 1 | 7 rung, 4 weight |
+| Typography | 0 | 10 rung nội dung, 4 weight |
 | CTA | 0 | **FAB đè lên một CTA khác cùng màu** |
 | Responsive | 1 | breadcrumb là rủi ro chưa đo |
-| **Tổng** | **11 / 16** | **Minor fix** — nhưng F1 là Level 1, phải sửa |
+| **Tổng** | **10 / 16** | **Major layout revision** — và F1 là Level 1 |
 
 ## Findings
 
