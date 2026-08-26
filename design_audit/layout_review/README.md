@@ -1,10 +1,16 @@
-# Layout review — 29 màn hình
+# Layout review — 29 màn hình, cộng 17 bề mặt overlay của deck
 
 **[→ SUMMARY.md](SUMMARY.md)** — bảng điểm, điểm theo tiêu chí, 10 phát hiện
 xuyên màn và thứ tự đề xuất sửa. Đọc file đó trước.
 
 Một file cho mỗi màn hình trong screen gallery, chấm theo checklist bố cục
 mobile 20 mục + ba tầng Correct / Balanced / Beautiful + bảng 8 tiêu chí.
+
+[**deck_overlays.md**](deck_overlays.md) chấm 11 overlay và màn starter của deck
+— các bề mặt không nằm trong 29 màn vì chúng không có golden nào. Chúng gộp vào
+**một** file, không phải mười lăm: chúng dùng chung `MxActionSheet`,
+`MxFormSheet`, `MxConfirmDialog` và `MxButtonPair`, nên ba trong bốn lỗi tìm được
+là lỗi của component dùng chung — điều mà chấm riêng lẻ sẽ giấu đi.
 
 Chấm trên commit `ea80d3f7` (sau khi 26 golden cũ được vẽ lại — xem bên dưới).
 

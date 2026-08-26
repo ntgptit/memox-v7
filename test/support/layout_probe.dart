@@ -263,12 +263,54 @@ void probeLayout(String goldenPath) {
   }
 
   final reachable = targets.where((t) => t['occluded'] == false).toList();
-  final small = reachable
+
+  // **A small target sitting inside a big one is a different claim.** A radio
+  // is 40x40 by design and sits in a 361x80 row that answers the same tap, so
+  // every finger that lands on it hits something — reporting it as a defect
+  // read three deck sheets as broken when a tap anywhere in the row selects.
+  // The opposite case is real, though: a delete button inside a card that
+  // opens a detail page does a *different* thing, and 40px there is a genuine
+  // miss. The probe cannot tell those apart — whether the two do the same
+  // thing is a question about intent — so it separates them and lets the
+  // reviewer answer, rather than guessing and being silently wrong either way.
+  bool enclosedByReachable(Map<String, Object?> target) {
+    final rect = Rect.fromLTWH(
+      target['x']! as double,
+      target['y']! as double,
+      target['w']! as double,
+      target['h']! as double,
+    );
+    return reachable.any((other) {
+      if (identical(other, target)) return false;
+      if ((other['effectiveW']! as double) < 47.5 ||
+          (other['effectiveH']! as double) < 47.5) {
+        return false;
+      }
+      final host = Rect.fromLTWH(
+        other['x']! as double,
+        other['y']! as double,
+        other['w']! as double,
+        other['h']! as double,
+      );
+      return host.contains(rect.topLeft) && host.contains(rect.bottomRight);
+    });
+  }
+
+  final undersized = reachable
       .where(
         (t) =>
             (t['effectiveW']! as double) < 47.5 ||
             (t['effectiveH']! as double) < 47.5,
       )
+      .toList();
+  for (final target in undersized) {
+    target['insideLargerTarget'] = enclosedByReachable(target);
+  }
+  final small = undersized
+      .where((t) => t['insideLargerTarget'] == false)
+      .toList();
+  final nested = undersized
+      .where((t) => t['insideLargerTarget'] == true)
       .toList();
 
   final report = <String, Object?>{
@@ -287,6 +329,10 @@ void probeLayout(String goldenPath) {
     'tapTargetsOccluded': targets.length - reachable.length,
     'tapTargets': reachable,
     'tapTargetsUnder48': small,
+    // Under 48 but wholly inside a target that is not — see the note above.
+    // Not a verdict: whether the row does the same thing as the control still
+    // needs a person.
+    'tapTargetsUnder48Nested': nested,
     'textLeftEdges': leftEdges,
     'spacers': _tally(spacers),
     'spacersOffScale': _offScale(spacers),
