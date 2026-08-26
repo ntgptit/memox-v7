@@ -12854,8 +12854,8 @@ của M2.
 
 ### M99.60 · Card Detail — bố cục và màu, không đổi một dòng dữ liệu nào
 
-- **Status:** **in-progress** — code và test xong, còn nợ goldens `test/demo/`
-  (phải regenerate trên Windows) và gallery. Xem *Verification*.
+- **Status:** **done** — goldens `test/demo/` đã regenerate trên Windows dưới
+  `TZ=UTC` và gallery đã publish lại ở URL cũ. Xem *Verification*.
 - **Goal:** Màn chi tiết thẻ đang là một dải chữ phẳng: mọi thông tin cùng nền
   trắng, cùng cỡ chữ, phân cách bằng khoảng trắng, và không có màu thương hiệu
   nào ngoài đen với xám. Đưa hệ token của app vào và chia màn thành các khối đọc
@@ -12926,20 +12926,25 @@ của M2.
   - [x] Mọi spacing qua `AppSpacing`.
   - [x] `dart format` sạch; `flutter analyze` sạch.
   - [x] Test của feature Card xanh.
-  - [ ] **Goldens của `test/demo/` và gallery — CHƯA cập nhật, và không thể cập
-        nhật từ môi trường đã chạy task này.** Xem *Verification*.
-- **Verification:** `flutter analyze` sạch (0 lỗi, 0 warning), `dart format`
-  sạch, guard `memox-v7` sạch, toàn bộ suite host không-golden xanh, và
-  `card_detail_screen_visual_audit_test.dart` xanh cả light lẫn dark — nó **bắt
-  được một lỗi thật** (xem mục glyph `warning` ở trên).
-- **Goldens còn nợ, và lý do là nền tảng chứ không phải quên.** `dart_test.yaml`
-  ghim tag `golden` vào Windows vì rasterisation chữ khác nhau giữa các HĐH;
-  task này chạy trên Linux, nên `--update-goldens` ở đây sẽ sinh ra 60 PNG mà
-  job `goldens (windows)` của `ci.yml` từ chối. Bố cục đã đổi, nên các PNG
-  `test/demo/card_detail_*.png` **đang cũ**: phải chạy
-  `TZ=UTC flutter test --tags golden --update-goldens` **trên Windows** rồi dựng
-  lại và publish gallery ở đúng URL cũ. Ghi ở đây thay vì để job đỏ nói hộ, vì
-  một PNG cũ trông giống hệt một PNG đúng.
+  - [x] Goldens của `test/demo/` và gallery đã cập nhật — **7 PNG**, tất cả là
+        `card_detail_*`, không một screen nào khác dịch.
+- **Verification:** trên Windows, `TZ=UTC flutter test` → **3 959/3 959 xanh**
+  (3 680 non-golden + 279 golden). `flutter analyze` sạch (0 lỗi, 0 warning),
+  `dart format` sạch, `check_architecture.sh` sạch, guard `memox-v7` sạch,
+  `check_docs.py` nhất quán. `card_detail_screen_visual_audit_test.dart` xanh cả
+  light lẫn dark — nó **bắt được một lỗi thật** (xem mục glyph `warning` ở trên).
+  Regenerate golden dịch đúng **7 PNG**, tất cả `card_detail_*`; không có PNG
+  nào ngoài phạm vi PR đổi theo, tức môi trường khớp với runner.
+- **Goldens ghim Windows, và lý do là nền tảng chứ không phải tuỳ tiện.**
+  `dart_test.yaml` ghim tag `golden` vào Windows vì rasterisation chữ khác nhau
+  giữa các HĐH. Task này chạy trên Linux, nên nó **cố ý không** chạy
+  `--update-goldens` ở đó — làm vậy sẽ sinh ra một bộ PNG mà job
+  `goldens (windows)` của `ci.yml` từ chối, và một PNG sai trông giống hệt một
+  PNG đúng. Việc đó được để lại cho một lượt trên Windows, và đã làm ở đó.
+- **`TZ=UTC` không phải tuỳ chọn khi regenerate.** `card_history_labels_widget`
+  gọi `utc.toLocal()` — đúng cho app, vì DB lưu UTC (AD-06) và người dùng đọc
+  giờ địa phương — nên không ghim thì PNG mang theo múi giờ của máy đã vẽ. Bốn
+  golden từng mang UTC+9 và đỏ ngay lần đầu job golden chạy thật (M99.53).
 - **Emulator IT không chạy ở task này:** gate đó tồn tại cho *thứ mới trong
   `lib/features/`* — một binding, một route, một startup fixture — và task này
   không thêm cái nào; nó đổi style và bố cục bên trong các widget đã có mặt ở

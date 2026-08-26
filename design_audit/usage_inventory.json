@@ -3387,7 +3387,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_detail_state_widget.dart",
-      "line": 205,
+      "line": 203,
       "widget_context": "_SectionHeader",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3398,7 +3398,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_detail_state_widget.dart",
-      "line": 222,
+      "line": 220,
       "widget_context": "_StateChip",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3409,7 +3409,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_detail_state_widget.dart",
-      "line": 232,
+      "line": 230,
       "widget_context": "_StateChip",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3420,7 +3420,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_detail_state_widget.dart",
-      "line": 337,
+      "line": 335,
       "widget_context": "_TagRow",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3431,7 +3431,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_detail_state_widget.dart",
-      "line": 370,
+      "line": 368,
       "widget_context": "_SchedulePanel",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -3442,7 +3442,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_detail_state_widget.dart",
-      "line": 476,
+      "line": 474,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3453,7 +3453,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_detail_state_widget.dart",
-      "line": 490,
+      "line": 488,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3464,7 +3464,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_detail_state_widget.dart",
-      "line": 491,
+      "line": 489,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "theme-token",
