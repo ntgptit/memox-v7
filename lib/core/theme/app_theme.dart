@@ -508,6 +508,12 @@ ThemeData _buildTheme(
       contentTextStyle: texts.bodyMedium?.copyWith(
         color: scheme.onSurfaceVariant,
       ),
+      // **`actionsPadding` deliberately stays unset here** — it moved to
+      // `MxDialogMetrics` while this was in flight (#348). The footer's width
+      // has to be *computed* from that inset, so the dialog states it on the
+      // widget; a theme entry saying the same 24 would be a second answer that
+      // all three dialogs override, and the one that could silently drift out
+      // of step with the arithmetic that reads it.
     ),
 
     bottomSheetTheme: BottomSheetThemeData(

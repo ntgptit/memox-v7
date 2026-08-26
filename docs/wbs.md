@@ -7,8 +7,8 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
-| **Last updated** | 2026-08-21 |
+| **Updated by task** | M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
+| **Last updated** | 2026-08-26 |
 
 Single source of truth for project progress. Update it in the same commit as the
 work it describes. A task is `done` only when it meets the Definition of Done in
@@ -12524,6 +12524,333 @@ của M2.
 - **Dependencies:** M99.53
 - **Tests required:** `app_toggle_themes_test.dart`, `test/demo/` goldens.
 - **Checklist phases:** 7, 12
+
+### M99.55 · Hai trục cho hộp thoại — `MxDialogTone` và `showMxConfirm`
+
+- **Status:** **in-progress** — code, test, Widgetbook và mục WBS đã xong; còn
+  golden của các dialog mang tone **chưa sinh lại** và gallery chưa publish lại.
+  Ghi `done` khi acceptance criterion cuối còn trống thì cuốn sổ này nói dối.
+- **Goal:** Chủ dự án hỏi bộ shared widget cho *các loại* confirmation, và nói
+  rõ thường có ba mức — error, warning, info. App có `MxConfirmDialogVariant`
+  (`normal`/`cautious`/`destructive`) nhưng đó là trục **hành động này phá gì**,
+  không phải trục **đây là chuyện nghiêm trọng cỡ nào**. `AppSemanticColors` đã
+  có sẵn `danger`, `warning`, `info`, `success` từ M99.4 và **không hộp thoại
+  nào đọc chúng**.
+- **Scope:** Một enum tone mới, một entry point `showMxConfirm`, hai slot
+  `dialogTheme` còn trống được cân nhắc, năm call site chuyển sang dùng chung.
+  Không đụng business rule, không đổi `MxConfirmDialogVariant` của call site nào
+  ngoài một chỗ đã tự mâu thuẫn với doc của chính nó.
+- **Output:** `lib/shared/widgets/mx_dialog_tone.dart` (mới — `MxDialogTone`,
+  `MxDialogToneX`, `MxDialogHeader`), `mx_confirm_dialog.dart`,
+  `lib/core/theme/app_theme.dart`; `card_bulk_overlays_widget.dart`,
+  `card_import_overlays_widget.dart`, `trash_purge_dialog_widget.dart`,
+  `deck_form_widget.dart`, `starter_install_widget.dart`;
+  `test/shared/mx_dialog_tone_test.dart` (mới), `mx_confirm_dialog_test.dart`,
+  `mx_stress_specimens.dart`, `mx_stress_test.dart`;
+  `widgetbook/lib/components/overlay_components.dart`.
+- **Hai trục, và vì sao không gộp thành một enum.** Gộp ra 12 tổ hợp mà phần
+  lớn vô nghĩa (`info` + `destructive`?), và nó lặp lại đúng cái sai mà
+  `MxConfirmDialogVariant.cautious` sinh ra để sửa: một giá trị mang hai quyết
+  định thì không diễn đạt được trường hợp hai quyết định **không** trùng nhau.
+  Trường hợp đó có thật và nay có trong code: `showStarterAddAgainConfirm` là
+  `cautious` trên trục hành động (Enter lỡ tay để lại một deck phải đi xoá)
+  nhưng `info` trên trục nghiêm trọng (không có gì bị phá).
+
+  | Call site | variant | tone | Vì sao |
+  |---|---|---|---|
+  | `showTrashPurgeDialog` | destructive | **error** | Đây là chỗ duy nhất Trash hết tác dụng |
+  | `showTagDeleteConfirm` | destructive | **error** | Tag không có Trash |
+  | xoá card / deck / bulk | cautious | warning | 30 ngày phục hồi được (BR-256) |
+  | huỷ nháp deck / import | destructive | warning | Mất nháp, không mất dữ liệu |
+  | `showStarterAddAgainConfirm` | cautious | **info** | Không phá gì, chỉ báo một sự việc |
+
+- **Icon nằm cạnh tiêu đề, không nằm trong slot `icon:` của `AlertDialog`.** Slot
+  đó là idiom Material 3 và là bản đầu tiên, nhưng framework kèm một tác dụng
+  phụ **vô điều kiện**: có icon là title đổi sang `TextAlign.center`
+  (`dialog.dart:843`). Mọi hộp thoại trong app căn trái, nên một hộp thoại mang
+  tone sẽ thành **bố cục header thứ hai** — và tone là thuộc tính của *thông
+  điệp*, không phải lý do căn giữa lại màn hình. Nó còn tốn một hàng chiều dọc mà
+  màn 360dp ở `textScaler` 2.0 không có. `mx_dialog_tone_test.dart` giữ điều này
+  bằng cách so `textAlign` của bản có tone với bản không.
+- **Bốn tone là bốn hình, không phải một hình bốn màu.** Màu không tự mang nổi
+  nghĩa — khoảng 1/12 nam giới không tách được amber với đỏ — nên test có một ca
+  riêng khẳng định bốn glyph phải khác nhau. Icon **không** có semantic label:
+  tiêu đề đã nói bằng chữ, đọc thêm "cảnh báo" là đọc một sự việc hai lần.
+- **`showStarterAddAgainConfirm` là một bug, không phải một lần refactor.** Nó
+  dựng `AlertDialog` trần với hai `TextButton`: không variant, không màu, và
+  **không có focus rơi vào Cancel** — trong khi doc của chính hàm đó viết "a user
+  who re-taps a starter by accident must land on Cancel". Luật có, code không thi
+  hành, và không gate nào thấy được vì không gì đọc doc comment.
+- **`dialogTheme`: đã có, và đây là bốn slot còn trống đã cân nhắc.** Câu hỏi của
+  chủ dự án — *có phải phát triển theme cho dialog không* — trả lời bằng cách đọc
+  `DialogThemeData` của SDK rồi đối chiếu:
+
+  | Slot | Trạng thái | Quyết định |
+  |---|---|---|
+  | `actionsPadding` | trống → Material trả `only(24,24,24)` cứng | **Đã thêm rồi lại gỡ.** #348 merge vào `main` khi việc này đang dở và đưa `insetPadding` + `actionsPadding` thành thuộc tính của **widget**, vì `footerWidth` phải tính ra từ chúng. Một entry trong theme nói lại cùng con số 24 sẽ là câu trả lời thứ hai mà cả ba dialog đều override — và là bản có thể âm thầm lệch khỏi phép tính đang đọc nó. Con số nay sống ở `MxDialogMetrics` |
+  | `iconColor` | trống → Material trả `colorScheme.secondary` | **Không thêm.** Header dựng icon trực tiếp nên slot này không ai đọc — theme cho thứ không ai render là quyết định không có màn hình để kiểm |
+  | `constraints` | trống → `minWidth: 280`, không có `maxWidth` | **Không thêm.** Web đóng khung 393dp (`kMobileFrameSize`) và AD-04 không ship layout màn lớn, nên `maxWidth: 560` sẽ không bao giờ chạm |
+  | `insetPadding` | trống → `symmetric(40, 24)` | **Không đổi.** Đo trước rồi mới sửa: stress 320dp và test 360dp ở `textScaler` 2.0 đều không tràn, nên đổi chỉ để "đúng scale" là dịch mọi golden dialog đổi lấy không gì |
+
+- **Acceptance criteria:**
+  - [x] `MxDialogTone` đọc `AppSemanticColors`, không có literal màu nào.
+  - [x] Bốn tone là bốn glyph khác nhau; light và dark đều đúng token.
+  - [x] Hộp thoại **không** có tone dựng y hệt trước khi có tone — không golden
+        nào dịch vì một tính năng chưa ai bật.
+  - [x] Tiêu đề vẫn căn trái khi có icon.
+  - [x] `showMxConfirm` trả `false` cho barrier, back và Cancel; `true` chỉ cho
+        nút confirm.
+  - [x] `showStarterAddAgainConfirm` thi hành đúng lời doc của nó.
+  - [x] `flutter analyze` sạch; guard 70 luật sạch; Widgetbook có knob `tone`.
+  - [ ] Golden của các dialog mang tone sinh lại **trên Windows** và gallery
+        publish lại — pixel comparison thuộc `ci-full`, container Linux render
+        khác nên sinh ở đó là ghi vào repo một sai lệch khó thấy (M99.53).
+- **Hoà giải với #348, vốn merge vào `main` giữa chừng.** #348 sửa đúng một lỗi
+  của cùng khu vực: `MxButtonPair` đoán bề rộng footer bằng bề rộng màn hình trừ
+  một gutter, sai 96px với một dialog, nên hàng hai nút giữ nguyên và **cả hai
+  nhãn xuống dòng**. Nó giải quyết bằng cách cho `MxConfirmDialog` khai báo
+  `insetPadding`/`actionsPadding` rồi tự tính `footerWidth`.
+
+  Merge sạch về text nhưng **xung đột về quyền sở hữu**: nay có hai chỗ nói con
+  số 24. Đã hoà giải bằng cách nâng ba hằng số lên `MxDialogMetrics`
+  (`lib/shared/widgets/mx_dialog_metrics.dart`) — đúng nước đi #348 đã làm thấp
+  hơn một tầng, khi nó nói khiếm khuyết thuộc về `MxButtonPair` chứ không thuộc
+  dialog tình cờ để lộ ra. Và **`MxFormDialog` mang đúng khiếm khuyết đó**: nó
+  dựng cùng `MxButtonPair` trong cùng `AlertDialog.actions` và chưa từng được
+  truyền `availableWidth`. Nay có, kèm test đo lại (`mx_form_dialog_test.dart`).
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.53, M99.54
+- **Tests required:** `mx_dialog_tone_test.dart` (mới),
+  `mx_confirm_dialog_test.dart`, `mx_button_pair_test.dart`,
+  `mx_stress_test.dart`, `widgetbook/test/catalog_smoke_test.dart`,
+  full non-golden suite.
+- **Checklist phases:** 7, 12, 13, 14
+
+### M99.56 · `MxAsyncConfirmDialog` — bốn bản sao của một transition, một bản sai
+
+- **Status:** **done**
+- **Goal:** Bốn hộp thoại confirm chạy write tại chỗ — xoá card, xoá tag, xoá
+  deck, reset settings — mỗi cái tự viết một `ref.listen` dò *đúng lúc state
+  vượt qua ngưỡng đóng*. Bốn bản sao của một câu hỏi, và một trong bốn đã sai
+  ngay khi merge.
+- **Scope:** Một widget chia sẻ mang transition và chính sách đóng, một entry
+  point reset controller trước khi mở, bốn call site chuyển sang. Không đổi
+  hành vi nào của người dùng ngoài việc ba hộp thoại nay cũng được reset.
+- **Output:** `lib/shared/widgets/mx_async_confirm_dialog.dart` (mới —
+  `MxAsyncConfirmDialog`, `MxConfirmCloseWhen`, `showMxAsyncConfirm`);
+  `card_confirm_widget.dart`, `tag_delete_confirm_widget.dart`,
+  `deck_confirm_widget.dart`, `settings_reset_confirm_widget.dart`;
+  `test/shared/mx_async_confirm_dialog_test.dart` (mới), `mx_stress_test.dart`.
+- **Bản sai là settings reset, và comment của chính nó ghi lại.** Bản đầu chỉ
+  đóng khi thành công; `submitStateFromFailure` sinh ra đúng cái state lọt lưới
+  — có `failure`, không có `outcome` — nên một lần reset hỏng để hộp thoại đứng
+  im, câm, **che mất** error band và nút `Try again` của chính nó (W4). Đó là lý
+  do chính sách đóng nay là enum hai giá trị chứ không phải một điều kiện mỗi
+  call site tự viết:
+
+  | `MxConfirmCloseWhen` | Đóng khi | Ai dùng |
+  |---|---|---|
+  | `saved` | `outcome == savedAndClose` | ba lệnh xoá — lỗi đọc **trong** hộp thoại, câu hỏi vẫn còn đó |
+  | `settled` | `outcome != null \|\| failure != null` | settings reset — lỗi thuộc về band phía sau, chỉ đọc được khi scrim biến mất |
+
+- **`savedAndContinue` cho một hộp thoại có đóng, và đó không phải nhầm.**
+  `SettingsResetController` báo `savedAndContinue` chứ không phải `savedAndClose`
+  để `canSubmit` còn `true` cho lần reset sau. Nghĩa là `shouldClose` của nó
+  **luôn** false — chính xác lý do `saved` là chính sách sai ở đây và vì sao phải
+  có hai.
+- **Pop phải rời khỏi frame, và đây là điều duy nhất không chép được từ bản cũ.**
+  `didUpdateWidget` chạy *trong* build; `onDone` pop route và hai caller còn
+  navigate tiếp. Xé cây đang dựng ném ra `'_dependents.isEmpty': is not true` từ
+  `InheritedElement` — một assertion không nhắc tên widget nào lẫn cú pop nào.
+  Bốn bản viết tay không bao giờ gặp vì `ref.listen` đã được Riverpod gọi ngoài
+  build; bỏ transition ra khỏi provider là bỏ luôn bảo đảm đó, nên nó được dựng
+  lại bằng `addPostFrameCallback` trong widget chứ không để lại thành thứ caller
+  phải biết. **Bốn test feature đỏ đúng vì lỗi này** trước khi sửa
+  (`deck_level_actions_test`, `side_effect_once_test`, `card_editor_edit_test`).
+- **`isBlocked` chặn confirm, **không** chặn Cancel — và đó là một sửa lỗi, không
+  phải một lựa chọn thiết kế.** Bản đầu gộp nó vào `isSubmitting`, vốn làm bất
+  động **cả hai** nút, nên trong lúc đọc impact (BR-04) người dùng mở nhầm hộp
+  thoại bị giữ lại cho tới khi một query database trả về. Đây là hành vi có sẵn
+  từ trước, được chép nguyên khi gộp bốn hộp thoại — và chính việc chép nó vào
+  một chỗ là thứ cho nó đúng một nơi để sai và đúng một nơi để sửa.
+
+  Đáng ghi lại cách nó bị bắt: **code và mục WBS này mâu thuẫn nhau**, acceptance
+  criterion đã viết "chỉ chặn confirm" trong khi code chặn cả hai, và test của
+  chính nó chỉ kiểm nút confirm nên không thấy. Codex review trên PR #352 chỉ ra
+  chỗ lệch. Nay `MxConfirmDialog` có `isConfirmBlocked` riêng, và có test tiêm
+  lỗi: đỏ trên code cũ, xanh trên code mới.
+- **Reset trước khi mở, cho cả bốn.** Trước đây chỉ `showTagDeleteConfirm` làm,
+  và comment của nó nói thẳng ba cái kia đang đánh cược: `autoDispose` *thường*
+  đã thu notifier rồi, nhưng mở hộp thoại thứ hai khi cái thứ nhất còn đang
+  unmount là dùng chung notifier — và thứ người dùng đọc là lỗi của lần trước,
+  trình bày như câu trả lời cho câu hỏi lần này.
+- **Acceptance criteria:**
+  - [x] `saved` không đóng khi có failure; `settled` có.
+  - [x] `settled` đóng cả trên `savedAndContinue` — ca của settings reset.
+  - [x] Rebuild trên state đã settled không pop lần hai.
+  - [x] `isSubmitting` làm cả hai nút bất động; `isBlocked` chỉ chặn confirm và
+        **giữ Cancel sống** (BR-04, deck chưa đọc xong impact). Kiểm bằng test
+        tiêm lỗi, vì đây đúng là chỗ code và mục này từng nói khác nhau.
+  - [x] Không call site nào còn giữ bản sao của transition.
+  - [x] `flutter analyze` sạch; guard sạch; suite không-golden xanh.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.55
+- **Tests required:** `mx_async_confirm_dialog_test.dart` (mới),
+  `deck_level_actions_test.dart`, `side_effect_once_test.dart`,
+  `card_editor_edit_test.dart`, `settings_reset_test.dart`, full non-golden suite.
+- **Checklist phases:** 9, 14, 15
+
+### M99.57 · `MxFormDialog` — hộp thoại có form, và một nút bấm không làm gì
+
+- **Status:** **done**
+- **Goal:** Chủ dự án nói đúng: dialog chứa form mới chỉ có một shared widget
+  chung chung. `showMxFormSheet` lo form dạng sheet; giữa nó và `MxConfirmDialog`
+  còn đúng một `AlertDialog` dựng tay — prompt thêm tag hàng loạt — không dùng
+  `MxButtonPair`, không có trạng thái submit, và không có chỗ nào để nói rằng
+  thứ vừa gõ bị từ chối.
+- **Scope:** Một widget form-trong-dialog, một entry point cho ca một trường,
+  một call site chuyển sang. Không chuyển form nào đang là sheet thành dialog.
+- **Output:** `lib/shared/widgets/mx_form_dialog.dart` (mới — `MxFormDialog`,
+  `MxPromptParse`, `showMxPromptDialog`), `mx_dialog_metrics.dart` (mới, tách ra
+  từ `MxConfirmDialog` khi hoà giải với #348 — xem M99.55);
+  `card_bulk_overlays_widget.dart`;
+  `test/shared/mx_form_dialog_test.dart` (mới), `mx_stress_specimens.dart`;
+  `widgetbook/lib/components/overlay_components.dart`, `widgetbook/lib/main.dart`.
+- **Bug được sửa cùng lúc: nút bấm không làm gì và không nói gì.** Prompt cũ viết
+  `if (name == null) return;` ngay trong `onPressed` của nút confirm. `TagName`
+  từ chối ba kiểu — rỗng, quá dài, có ký tự điều khiển — và **cả ba** cho ra cùng
+  một kết quả: một cú bấm không đổi gì trên màn hình, không thông điệp, không log,
+  không phân biệt được với một cú chạm trượt. Bản mapping sang câu chữ
+  (`tagProblemLabel`) đã có sẵn từ M4.14; thứ thiếu là một chỗ để đặt câu trả lời
+  của nó.
+- **`parse` trả về *giá trị hoặc lý do*, chứ không phải một validator riêng.**
+  Hai callback tách rời là hai thứ có quyền bất đồng — validator pass còn parser
+  trả null thì lại ra đúng cái nút không làm gì. Một record `({T? value, String?
+  error})` khiến trạng thái đó không viết ra được. Lý do đã localized: domain nói
+  *luật nào* hỏng, màn hình chọn câu ARB — đúng phân công của repo, và nhờ đó một
+  trường có bốn cách sai vẫn nói đúng cách đang sai.
+- **Dialog hay sheet, và luật là số trường.** Một trường một quyết định là một
+  câu hỏi; kéo cả đáy màn hình lên để hỏi một dòng là phí. Từ hai trường trở lên,
+  hoặc bất cứ thứ gì cần cuộn, là `showMxFormSheet` — cái đó đã mang inset bàn
+  phím và khoảng hở system bar, và `MxFormDialog` cố ý không thử làm lại.
+- **Acceptance criteria:**
+  - [x] Confirm với input bị từ chối: hiện lý do **và** giữ hộp thoại.
+  - [x] Lý do là live region — hộp thoại không đổi tiêu đề, không dời focus, nên
+        không có nó thì screen reader không được báo gì.
+  - [x] Luật khác cho câu khác — không rơi về một chữ "invalid" chung.
+  - [x] Lý do biến mất ngay ở phím gõ sửa nó, không đợi lần submit sau.
+  - [x] `errorMessage: null` không thêm gì vào content — không hộp rỗng nào đẩy
+        form khi lỗi tới.
+  - [x] Hai nút bằng nhau cả rộng lẫn cao (`MxButtonPair`), cùng bất động khi
+        `isSubmitting`.
+  - [x] Pair nhận đúng bề rộng **footer**, không phải bề rộng màn hình — khiếm
+        khuyết #348 vừa sửa cho `MxConfirmDialog`, mà dialog này sẽ thừa kế
+        nguyên vẹn nếu không truyền.
+  - [x] `flutter analyze` sạch; guard sạch; Widgetbook có playground.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.55
+- **Tests required:** `mx_form_dialog_test.dart` (mới), `mx_stress_test.dart`,
+  `widgetbook/test/catalog_smoke_test.dart`, full non-golden suite.
+- **Checklist phases:** 7, 12, 13, 14
+
+### M99.58 · `MxSheetInsets` — ba cách viết một công thức, một cách sai
+
+- **Status:** **in-progress** — code và test xong; golden của starter install
+  sheet **chưa sinh lại** vì bố cục của nó đổi thật (nội dung nhích lên khỏi
+  navigation bar).
+- **Goal:** Rà hết `showModalBottomSheet` trong `lib/`: sáu sheet, và phần "chừa
+  chỗ cho thứ đang che đáy màn hình" được viết bằng ba cách khác nhau.
+- **Scope:** Tách công thức ra một chỗ, sửa sheet viết sai, chuyển sheet viết
+  đúng-nhưng-khác sang dùng chung. **Không** đụng bốn sheet chỉ dùng `SafeArea` —
+  xem dưới.
+- **Output:** `lib/shared/widgets/mx_sheet_insets.dart` (mới —
+  `mxSheetBottomObstruction`, `MxSheetInsets`); `mx_form_sheet.dart`,
+  `starter_install_widget.dart`, `card_export_sheet_widget.dart`;
+  `test/shared/widgets/mx_sheet_insets_test.dart` (mới), `mx_stress_test.dart`.
+- **Sheet viết sai là `starter_install_widget`, và nó vô hình.** Nó chừa
+  `viewInsets.bottom` — tức bàn phím — trên một sheet **không có ô nhập nào**, nên
+  số đó luôn bằng 0, và cũng không có `SafeArea`. Nút chính của picker scheduler
+  nằm dưới navigation bar trên mọi máy có nav bar. Không test nào đỏ, và lý do
+  đáng ghi: **một widget test không set `viewPadding` tái tạo đúng cấu hình mà
+  bug tàng hình.** Nên mọi ca trong test mới đều set `viewPadding`, `viewInsets`,
+  hoặc cả hai, rồi đo xem nội dung thật sự nằm đâu.
+- **Bốn sheet còn lại giữ nguyên, và đó là kết luận chứ không phải bỏ sót.**
+  `deck_scheduler_change`, `deck_reset_progress`, `trash_restore_target` và
+  sheet chọn deck đích của bulk đều chỉ có `SafeArea`. Không cái nào có ô nhập,
+  nên `viewInsets` luôn 0 và `SafeArea` **đã** là câu trả lời đúng cho system
+  bar. Bọc chúng vào `MxSheetInsets` sẽ đổi padding của bốn màn để sửa một
+  khiếm khuyết không tồn tại — đúng loại churn mà kế hoạch ban đầu ("chuyển 6
+  sheet") sẽ tạo ra nếu không đo trước.
+- **`card_export_sheet` chuyển sang, và bỏ `SafeArea` khi chuyển.** Nó có
+  `SafeArea` **cộng** `viewInsets` — đúng kết quả, bằng một đường khác. Giữ cả
+  hai sau khi đổi sang `mxSheetBottomObstruction` sẽ trừ system bar hai lần.
+  Nó dùng hàm chứ không dùng widget vì nó không có gutter trên: drag handle đã
+  làm việc đó, và một tham số bật/tắt cạnh nào được đệm là một bố cục thứ hai,
+  mà luật design system nói bố cục thứ hai là widget thứ hai chứ không phải một
+  boolean.
+- **Acceptance criteria:**
+  - [x] Gesture bar 24dp và nav bar 48dp đều không ăn mất nội dung.
+  - [x] Bàn phím lên thì chừa bàn phím.
+  - [x] Hai thứ **không** cộng dồn — bàn phím đã che system bar rồi.
+  - [x] Không có gì che thì chỉ còn đúng một gutter.
+  - [x] `mxSheetBottomObstruction` và `MxSheetInsets` không thể bất đồng.
+  - [x] `flutter analyze` sạch; guard sạch; suite không-golden xanh.
+  - [ ] Golden của starter install sheet sinh lại **trên Windows** và gallery
+        publish lại.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.55
+- **Tests required:** `mx_sheet_insets_test.dart` (mới), `mx_form_sheet_test.dart`,
+  `mx_stress_test.dart`, full non-golden suite.
+- **Checklist phases:** 7, 12, 14
+
+### M99.59 · `MxAlertDialog` — hình dạng thứ ba, và nó chưa có người gọi
+
+- **Status:** **done** — có chủ ý là chưa có call site nào trong `lib/features/`.
+- **Goal:** Hoàn tất bộ taxonomy chủ dự án yêu cầu. `MxConfirmDialog` hỏi một câu,
+  `MxFormDialog` nhận input; cả hai **có thể** mang tone nhưng không cái nào *nói
+  về* tone của nó. Hình dạng còn thiếu là cái chỉ báo một sự việc — một nút, và
+  toàn bộ nội dung là một câu trần thuật mà mức nghiêm trọng là thứ người đọc cần
+  biết trước tiên.
+- **Scope:** Widget, entry point, test, playground Widgetbook. **Không** đổi
+  đường báo lỗi nào đang chạy.
+- **Output:** `lib/shared/widgets/mx_alert_dialog.dart` (mới — `MxAlertDialog`,
+  `showMxAlert`); `test/shared/mx_alert_dialog_test.dart` (mới),
+  `mx_stress_specimens.dart`; `widgetbook/lib/components/overlay_components.dart`,
+  `widgetbook/lib/main.dart`.
+- **Chưa có người gọi, và điều đó được ghi chứ không giấu.** App này báo lỗi bằng
+  ba đường khác, mỗi đường có lý do: error band cố định kèm `Try again` khi lỗi
+  thuộc về một section (W4); `SnackBar` khi kết quả là nhất thời và không nên
+  chặn người dùng; và thân của chính hộp thoại confirm khi lỗi là câu trả lời cho
+  câu hộp thoại vừa hỏi (D26). Hai ứng viên đã xét và loại: kết quả bulk — đang
+  là `SnackBar` vì chặn người dùng *sau* một hành động đã xong đúng là kiểu ngắt
+  quãng mà Material lẫn NN/g đều cảnh báo — và lỗi export, vốn đã có band kèm
+  `Try again` mà hộp thoại sẽ che mất.
+- **Vì sao vẫn ship.** Kế hoạch nêu rủi ro "widget không có người dùng" (AD-17)
+  và chủ dự án trả lời "phát triển toàn bộ". Đó là quyết định của chủ dự án, nên
+  hình dạng này tồn tại, có test, có trong catalog — và **không file nào trong
+  `lib/features/` import nó**, để caller thật đầu tiên là thứ quyết định câu chữ,
+  nhãn nút và có cần tone hay không.
+- **`tone` là bắt buộc ở đây, khác hai hộp thoại kia.** Ở đó tone là gợi ý thêm
+  cho một câu hỏi mà chữ đã hỏi rồi; ở đây tone **chính là** phân loại của thông
+  điệp, và một caller chưa quyết được mình đang báo thành công hay thất bại thì
+  chưa viết xong thông điệp.
+- **Focus rơi vào nút duy nhất, và không mâu thuẫn với BR-266.** Luật giữ focus
+  khỏi nút confirm (`destructive`, `cautious`) là luật chọn *cái ít phá hơn*
+  trong hai; có một nút thì đó chính là nó — đúng như WAI-ARIA APG mô tả cho
+  `alertdialog`. Message **không** phải live region: `AlertDialog` đã đặt
+  `namesRoute` và đánh dấu content là semantics container nên nó được đọc lúc mở;
+  đánh dấu live nữa là đọc hai lần.
+- **Acceptance criteria:**
+  - [x] Nút duy nhất nhận focus; Enter đóng được.
+  - [x] Message được đọc đúng một lần.
+  - [x] Tone tới được glyph và màu lấy từ `AppSemanticColors`.
+  - [x] Không file nào trong `lib/features/` import nó.
+  - [x] `flutter analyze` sạch; guard sạch; có playground Widgetbook.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.55
+- **Tests required:** `mx_alert_dialog_test.dart` (mới), `mx_stress_test.dart`,
+  `widgetbook/test/catalog_smoke_test.dart`.
+- **Checklist phases:** 7, 13, 14
 
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 

@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_action_sheet.dart';
+import 'package:memox/shared/widgets/mx_alert_dialog.dart';
 import 'package:memox/shared/widgets/mx_breadcrumb.dart';
 import 'package:memox/shared/widgets/mx_button_pair.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
 import 'package:memox/shared/widgets/mx_confirm_dialog.dart';
 import 'package:memox/shared/widgets/mx_content_shell.dart';
+import 'package:memox/shared/widgets/mx_dialog_tone.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
+import 'package:memox/shared/widgets/mx_form_dialog.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/shared/widgets/mx_icon_button.dart';
 import 'package:memox/shared/widgets/mx_list_tile.dart';
@@ -256,6 +259,55 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
       confirmLabel: kLongLabel,
       cancelLabel: 'Huỷ bỏ thao tác',
       variant: MxConfirmDialogVariant.destructive,
+      onConfirm: _noop,
+      onCancel: _noop,
+    ),
+    isInteractive: true,
+  ),
+  // One action, so the footer is a single full-width button rather than a
+  // pair — the case where a long label has nothing beside it to balance
+  // against.
+  MxStressSpecimen(
+    name: 'MxAlertDialog',
+    build: () => const MxAlertDialog(
+      title: kLongTitle,
+      message: kLongMessage,
+      dismissLabel: kLongLabel,
+      tone: MxDialogTone.error,
+      onDismiss: _noop,
+    ),
+    isInteractive: true,
+  ),
+  // A form dialog carries a field *and* a failure line under it, so the case
+  // that breaks it is the one where both are long at once.
+  MxStressSpecimen(
+    name: 'MxFormDialog',
+    build: () => MxFormDialog(
+      title: kLongTitle,
+      confirmLabel: kLongLabel,
+      cancelLabel: 'Huỷ bỏ thao tác',
+      errorMessage: kLongMessage,
+      onConfirm: _noop,
+      onCancel: _noop,
+      child: MxTextField(
+        controller: TextEditingController(text: kLongLabel),
+        label: 'Tên thẻ đánh dấu',
+      ),
+    ),
+    isInteractive: true,
+  ),
+  // The toned header is a second layout, not a second colour: the icon takes
+  // room out of the headline's row, so this is where a long Vietnamese title
+  // meets a 320dp screen with 24dp of glyph already spent.
+  MxStressSpecimen(
+    name: 'MxConfirmDialog (toned)',
+    build: () => const MxConfirmDialog(
+      title: kLongTitle,
+      message: kLongMessage,
+      confirmLabel: kLongLabel,
+      cancelLabel: 'Huỷ bỏ thao tác',
+      variant: MxConfirmDialogVariant.destructive,
+      tone: MxDialogTone.error,
       onConfirm: _noop,
       onCancel: _noop,
     ),

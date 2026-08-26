@@ -5,7 +5,9 @@ import '../../../../../core/navigation/route_names.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_async_confirm_dialog.dart';
 import '../../../../../shared/widgets/mx_confirm_dialog.dart';
+import '../../../../../shared/widgets/mx_dialog_tone.dart';
 import '../../../domain/models/deck_deletion_impact_model.dart';
 import '../../../domain/entities/deck_entity.dart';
 import '../../controllers/deck_deletion_impact_controller.dart';
@@ -29,13 +31,12 @@ Future<void> showDeckDeleteConfirm(
   BuildContext context, {
   required DeckEntity deck,
   required ValueChanged<String?> onDeleted,
-}) => showDialog<void>(
-  context: context,
-  builder: (dialogContext) => _DeleteDeckDialog(
-    deck: deck,
-    onDeleted: onDeleted,
-    onClose: () => Navigator.of(dialogContext).pop(),
-  ),
+}) => showMxAsyncConfirm(
+  context,
+  reset: (container) =>
+      container.read(deleteDeckControllerProvider(deck.id).notifier).reset(),
+  builder: (dialogContext, close) =>
+      _DeleteDeckDialog(deck: deck, onDeleted: onDeleted, onClose: close),
 );
 
 /// Reads the deletion impact, then asks (BR-04).
@@ -68,17 +69,9 @@ class _DeleteDeckDialogState extends ConsumerState<_DeleteDeckDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final provider = deleteDeckControllerProvider(widget.deck.id);
-    final submit = ref.watch(provider);
-
-    ref.listen<DeckSubmitState>(provider, (previous, next) {
-      if (!next.shouldClose || (previous?.shouldClose ?? false)) return;
-      widget.onClose();
-      // The batch id was captured by `onConfirm` below, one frame before this
-      // fires. Reading it here rather than threading it through the state keeps
-      // it as short-lived as it actually is.
-      widget.onDeleted(_batchId);
-    });
+    final DeckSubmitState submit = ref.watch(
+      deleteDeckControllerProvider(widget.deck.id),
+    );
 
     return FutureBuilder<DeckDeletionImpact>(
       future: _impact,
@@ -94,7 +87,8 @@ class _DeleteDeckDialogState extends ConsumerState<_DeleteDeckDialog> {
                 impact.cardCount,
               );
 
-        return MxConfirmDialog(
+        return MxAsyncConfirmDialog(
+          state: submit,
           title: context.l10n.deckDeleteConfirmTitle(widget.deck.name),
           message: submit.failure != null
               ? context.deckWriteFailure(submit.failure!)
@@ -106,14 +100,36 @@ class _DeleteDeckDialogState extends ConsumerState<_DeleteDeckDialog> {
           // the destructive colour back to the one dialog that means it
           // (BR-256, BR-266).
           variant: MxConfirmDialogVariant.cautious,
-          isSubmitting: submit.isSubmitting || impact == null,
-          onConfirm: () async {
-            _batchId = await ref.read(provider.notifier).submit();
-          },
+          // Recoverable from Trash, so `warning` — the `error` tone belongs to
+          // the purge that ends the thirty days, and to the tag delete, which
+          // has no Trash at all.
+          tone: MxDialogTone.warning,
+          // Never ask *are you sure* before the numbers are in (BR-04): until
+          // the impact read lands the dialog cannot say what will be lost, and
+          // BR-04 makes that statement the point of the dialog.
+          isBlocked: impact == null,
+          onConfirm: () => _submit(ref),
           onCancel: widget.onClose,
+          onDone: _finish,
         );
       },
     );
+  }
+
+  /// The notifier, read from the button press rather than during a build —
+  /// see `card_confirm_widget.dart` for why this is a named method.
+  Future<void> _submit(WidgetRef ref) async {
+    _batchId = await ref
+        .read(deleteDeckControllerProvider(widget.deck.id).notifier)
+        .submit();
+  }
+
+  /// The batch id was captured by [_submit] one frame before this runs. Reading
+  /// it here rather than threading it through the state keeps it as short-lived
+  /// as it actually is.
+  void _finish() {
+    widget.onClose();
+    widget.onDeleted(_batchId);
   }
 }
 

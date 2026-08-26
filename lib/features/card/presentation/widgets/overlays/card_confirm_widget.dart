@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_async_confirm_dialog.dart';
 import '../../../../../shared/widgets/mx_confirm_dialog.dart';
+import '../../../../../shared/widgets/mx_dialog_tone.dart';
 import '../../controllers/card_write_controller.dart';
 import '../../states/card_submit_state.dart';
 
@@ -24,13 +26,12 @@ Future<void> showCardDeleteConfirm(
   BuildContext context, {
   required String cardId,
   required ValueChanged<String?> onDeleted,
-}) => showDialog<void>(
-  context: context,
-  builder: (dialogContext) => _DeleteCardDialog(
-    cardId: cardId,
-    onDeleted: onDeleted,
-    onClose: () => Navigator.of(dialogContext).pop(),
-  ),
+}) => showMxAsyncConfirm(
+  context,
+  reset: (container) =>
+      container.read(cardDeleteProvider(cardId).notifier).reset(),
+  builder: (dialogContext, close) =>
+      _DeleteCardDialog(cardId: cardId, onDeleted: onDeleted, onClose: close),
 );
 
 class _DeleteCardDialog extends StatefulWidget {
@@ -54,20 +55,17 @@ class _DeleteCardDialogState extends State<_DeleteCardDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final provider = cardDeleteProvider(widget.cardId);
-
     return Consumer(
       builder: (context, ref, child) {
-        final submit = ref.watch(provider);
+        final CardSubmitState submit = ref.watch(
+          cardDeleteProvider(widget.cardId),
+        );
 
-        ref.listen<CardSubmitState>(provider, (previous, next) {
-          if (!next.shouldClose || (previous?.shouldClose ?? false)) return;
-          widget.onClose();
-          // Captured by `onConfirm` below, one frame before this fires.
-          widget.onDeleted(_batchId);
-        });
-
-        return MxConfirmDialog(
+        // The type argument is inferred from `state` — the feature's problem
+        // enum lives in its domain, and a presentation file naming it would be
+        // an import for a word the compiler already knows.
+        return MxAsyncConfirmDialog(
+          state: submit,
           title: context.l10n.cardDeleteConfirmTitle,
           message: submit.failure != null
               ? context.l10n.cardDeleteFailed
@@ -75,15 +73,33 @@ class _DeleteCardDialogState extends State<_DeleteCardDialog> {
           confirmLabel: context.l10n.cardDeleteConfirmAction,
           cancelLabel: context.l10n.commonCancelAction,
           // Soft delete (BR-256): cautious, not destructive — see the
-          // deck dialog for the whole argument.
+          // deck dialog for the whole argument. `warning` rather than `error`
+          // on the severity axis for the same reason: it is recoverable.
           variant: MxConfirmDialogVariant.cautious,
-          isSubmitting: submit.isSubmitting,
-          onConfirm: () async {
-            _batchId = await ref.read(provider.notifier).submit();
-          },
+          tone: MxDialogTone.warning,
+          onConfirm: () => _submit(ref),
           onCancel: widget.onClose,
+          onDone: _finish,
         );
       },
     );
+  }
+
+  /// The notifier, read from a button press rather than during a build.
+  ///
+  /// A named method for the reason `settings_reset_confirm_widget.dart` gives:
+  /// the guard rule `no_ref_read_in_build` cannot tell a read that happens
+  /// *during* a build from one declared there and fired later, and naming it
+  /// makes the difference visible to a reader too.
+  Future<void> _submit(WidgetRef ref) async {
+    _batchId = await ref
+        .read(cardDeleteProvider(widget.cardId).notifier)
+        .submit();
+  }
+
+  /// The batch id was captured by [_submit] one frame before this runs.
+  void _finish() {
+    widget.onClose();
+    widget.onDeleted(_batchId);
   }
 }

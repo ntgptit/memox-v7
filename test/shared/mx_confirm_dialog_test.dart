@@ -16,6 +16,8 @@ import 'package:memox/shared/widgets/mx_confirm_dialog.dart';
 /// the title is not. That is the part the shared widget owes; what each caller
 /// *says* is its own business and is recorded in D26.
 void main() {
+  group('showMxConfirm', _entryPointTests);
+
   Future<void> pumpDialog(WidgetTester tester, String message) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -81,5 +83,99 @@ void main() {
     );
     expect(tester.getSemantics(bodyText()), isSemantics(isLiveRegion: true));
     handle.dispose();
+  });
+}
+
+/// `showMxConfirm`'s one promise: **only the confirm button is a yes.**
+///
+/// Five call sites each wrote this `showDialog` themselves and each ended with
+/// `?? false`, which is the promise spelled out five times — and the fifth had
+/// already drifted into a bare `AlertDialog` with neither the destructive
+/// colour nor the focus rule. Asserting it here is what lets the call sites
+/// stop repeating it.
+void _entryPointTests() {
+  Future<bool?> run(
+    WidgetTester tester, {
+    required Future<void> Function(WidgetTester) dismiss,
+  }) async {
+    bool? answer;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildLightTheme(),
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => TextButton(
+              onPressed: () async {
+                answer = await showMxConfirm(
+                  context,
+                  title: 'Empty the Trash?',
+                  message: 'Everything in it goes for good.',
+                  confirmLabel: 'Delete for good',
+                  cancelLabel: 'Cancel',
+                  variant: MxConfirmDialogVariant.destructive,
+                );
+              },
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    await dismiss(tester);
+    await tester.pumpAndSettle();
+
+    return answer;
+  }
+
+  testWidgets('the confirm button is the only yes', (tester) async {
+    final answer = await run(
+      tester,
+      dismiss: (t) => t.tap(find.text('Delete for good')),
+    );
+
+    expect(answer, isTrue);
+  });
+
+  testWidgets('cancel is a no', (tester) async {
+    final answer = await run(
+      tester,
+      dismiss: (t) => t.tap(find.text('Cancel')),
+    );
+
+    expect(answer, isFalse);
+  });
+
+  testWidgets(
+    'tapping the barrier is a no, not a null the caller must handle',
+    (tester) async {
+      final answer = await run(
+        tester,
+        dismiss: (t) => t.tapAt(const Offset(10, 10)),
+      );
+
+      expect(
+        answer,
+        isFalse,
+        reason:
+            'the return type is bool, not bool? — a caller cannot forget the '
+            '`?? false` that five of them used to write by hand',
+      );
+    },
+  );
+
+  testWidgets('the Android back gesture is a no', (tester) async {
+    final answer = await run(
+      tester,
+      dismiss: (t) async {
+        final NavigatorState navigator = t.state(find.byType(Navigator));
+        await navigator.maybePop();
+      },
+    );
+
+    expect(answer, isFalse);
   });
 }

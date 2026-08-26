@@ -6,6 +6,7 @@ import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../../../shared/widgets/mx_button_pair.dart';
 import '../../../../../shared/widgets/mx_confirm_dialog.dart';
+import '../../../../../shared/widgets/mx_dialog_tone.dart';
 import '../../../../../shared/widgets/mx_text_field.dart';
 import '../../../domain/models/scheduler_type_model.dart';
 import '../items/deck_scheduler_picker_widget.dart';
@@ -177,21 +178,19 @@ class _DeckFormWidgetState extends State<DeckFormWidget> {
       return;
     }
 
-    final shouldDiscard = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => MxConfirmDialog(
-        title: dialogContext.l10n.deckFormDiscardTitle,
-        message: dialogContext.l10n.deckFormDiscardMessage,
-        confirmLabel: dialogContext.l10n.deckFormDiscardConfirmAction,
-        cancelLabel: dialogContext.l10n.commonCancelAction,
-        variant: MxConfirmDialogVariant.destructive,
-        onConfirm: () => Navigator.of(dialogContext).pop(true),
-        onCancel: () => Navigator.of(dialogContext).pop(false),
-      ),
+    final bool shouldDiscard = await showMxConfirm(
+      context,
+      title: context.l10n.deckFormDiscardTitle,
+      message: context.l10n.deckFormDiscardMessage,
+      confirmLabel: context.l10n.deckFormDiscardConfirmAction,
+      cancelLabel: context.l10n.commonCancelAction,
+      variant: MxConfirmDialogVariant.destructive,
+      // The draft is lost, the deck is not: warning.
+      tone: MxDialogTone.warning,
     );
 
     if (!mounted) return;
-    if (shouldDiscard ?? false) widget.onCancel();
+    if (shouldDiscard) widget.onCancel();
   }
 }
 

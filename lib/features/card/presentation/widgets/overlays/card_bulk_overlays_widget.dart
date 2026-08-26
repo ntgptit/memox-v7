@@ -6,15 +6,17 @@ import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_confirm_dialog.dart';
+import '../../../../../shared/widgets/mx_dialog_tone.dart';
 import '../../../../../shared/widgets/mx_empty_state.dart';
+import '../../../../../shared/widgets/mx_form_dialog.dart';
 import '../../../domain/models/card_move_target_model.dart';
 import '../../../domain/models/tag_name_model.dart';
-import '../../../../../shared/widgets/mx_text_field.dart';
 import '../../controllers/card_bulk_controller.dart';
 import '../../controllers/card_move_target_controller.dart';
 import '../../controllers/card_selection_controller.dart';
 import '../../states/card_submit_state.dart';
 import '../support/card_failure_labels_widget.dart';
+import '../support/tag_labels_widget.dart';
 
 /// The bulk-delete confirmation (UC-04 A6).
 ///
@@ -28,23 +30,22 @@ import '../support/card_failure_labels_widget.dart';
 Future<bool> showCardBulkDeleteConfirm(
   BuildContext context, {
   required int count,
-}) async {
-  final confirmed = await showDialog<bool>(
-    context: context,
-    builder: (dialogContext) => MxConfirmDialog(
-      // `cautious`, like the single-item deletes this PR relabelled:
-      // the batch is recoverable, but Cancel keeps the default focus.
-      variant: MxConfirmDialogVariant.cautious,
-      title: dialogContext.l10n.cardBulkDeleteTitle(count),
-      message: dialogContext.l10n.cardBulkDeleteMessage,
-      confirmLabel: dialogContext.l10n.cardBulkDeleteConfirmAction,
-      cancelLabel: dialogContext.l10n.commonCancelAction,
-      onConfirm: () => Navigator.of(dialogContext).pop(true),
-      onCancel: () => Navigator.of(dialogContext).pop(false),
-    ),
-  );
+}) {
+  final l10n = context.l10n;
 
-  return confirmed ?? false;
+  return showMxConfirm(
+    context,
+    // `cautious`, like the single-item deletes this PR relabelled:
+    // the batch is recoverable, but Cancel keeps the default focus.
+    variant: MxConfirmDialogVariant.cautious,
+    // Recoverable for thirty days, so it warns rather than alarms — the error
+    // tone stays with the purge that ends that window (BR-256, BR-266).
+    tone: MxDialogTone.warning,
+    title: l10n.cardBulkDeleteTitle(count),
+    message: l10n.cardBulkDeleteMessage,
+    confirmLabel: l10n.cardBulkDeleteConfirmAction,
+    cancelLabel: l10n.commonCancelAction,
+  );
 }
 
 /// The move-target picker (UC-04 A5, BR-165).
@@ -154,35 +155,31 @@ class _TargetList extends StatelessWidget {
 /// refuses; the parse is the validation, exactly as the editor's tag field
 /// does it.
 Future<TagName?> showCardBulkTagPrompt(BuildContext context) {
-  final controller = TextEditingController();
+  final l10n = context.l10n;
 
-  return showDialog<TagName>(
-    context: context,
-    builder: (dialogContext) => AlertDialog(
-      title: Text(dialogContext.l10n.cardSelectionAddTagAction),
-      content: MxTextField(
-        controller: controller,
-        label: dialogContext.l10n.cardEditorTagAddHint,
-        hintText: dialogContext.l10n.cardEditorTagAddHint,
-        maxLength: TagName.maxLength,
-      ),
-      actions: <Widget>[
-        TextButton(
-          onPressed: () => Navigator.of(dialogContext).pop(),
-          child: Text(dialogContext.l10n.commonCancelAction),
-        ),
-        TextButton(
-          onPressed: () {
-            final parsed = TagName.parse(controller.text);
-            final name = parsed.name;
-            if (name == null) return;
-            Navigator.of(dialogContext).pop(name);
-          },
-          child: Text(dialogContext.l10n.cardSelectionAddTagAction),
-        ),
-      ],
-    ),
-  ).whenComplete(controller.dispose);
+  return showMxPromptDialog<TagName>(
+    context,
+    title: l10n.cardSelectionAddTagAction,
+    fieldLabel: l10n.cardEditorTagAddHint,
+    hintText: l10n.cardEditorTagAddHint,
+    maxLength: TagName.maxLength,
+    confirmLabel: l10n.cardSelectionAddTagAction,
+    cancelLabel: l10n.commonCancelAction,
+    // **The refusal now says which rule refused it.** This used to be
+    // `if (name == null) return;` inside the confirm button: an empty name, a
+    // name over the limit and a name with a control character all produced the
+    // same nothing — a button press with no dialog change and no message. The
+    // mapping already existed in `tagProblemLabel`; what was missing was
+    // anywhere to put its answer.
+    parse: (raw) {
+      final parsed = TagName.parse(raw);
+
+      return (
+        value: parsed.name,
+        error: context.tagProblemLabel(parsed.problem),
+      );
+    },
+  );
 }
 
 /// Runs one bulk command over the selection and reports what happened
