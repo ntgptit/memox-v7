@@ -123,12 +123,28 @@ SwitchThemeData buildSwitchTheme(
 /// mistake, and the stroke width carried the same one — see
 /// [AppStroke.selectionControl].
 ///
-/// **The edge stays when the box is ticked, which is where this departs from
-/// M3** (`_CheckboxDefaultsM3.side` returns width 0 once selected). A ticked
-/// box is a `primary` fill, and `primaryDark` is held low enough that it
-/// measures 2.90:1 on a dark card. So the edge remains and becomes `onPrimary`
-/// — 5.88:1 on the fill it sits on, 17.05:1 on the card behind it — by the same
-/// derivation the switch's track uses.
+/// **The edge stays when the box is ticked in dark, and only there** — which is
+/// where this departs from M3 (`_CheckboxDefaultsM3.side` returns width 0 once
+/// selected). A ticked box is a `primary` fill, and `primaryDark` is held low
+/// enough that it measures 2.90:1 on a dark card, under WCAG 1.4.11's floor. So
+/// in dark the edge remains and becomes `onPrimary` — 5.88:1 on the fill it sits
+/// on, 17.05:1 on the card behind it — by the same derivation the switch's track
+/// uses.
+///
+/// **In light the same ring was invisible, and what it cost was the box.** White
+/// on the sheet measures **1.03:1**, so nothing was gained; and a `BorderSide`
+/// is painted *inside* the shape, so the fill was inset by the stroke on all
+/// four sides — a ticked box drew 14dp of indigo where the empty boxes above and
+/// below it drew an 18dp edge. In a column of checkboxes that is not a subtle
+/// difference: the ticked ones read smaller and sit off the line the others
+/// share, which is exactly how the owner found it (2026-08-26). The light fill
+/// needs no help — 7.27:1 on the sheet — so it keeps the whole box.
+///
+/// The rule underneath, and what `app_toggle_themes_test.dart` now pins: an edge
+/// on a ticked box has to read against **the card behind the control**, because
+/// that edge is what says where the control ends. One that reads only against
+/// its own fill is a ring nobody can see, subtracting from the only shape they
+/// can.
 CheckboxThemeData buildCheckboxTheme(
   ColorScheme scheme,
   AppSemanticColors semantic,
@@ -161,7 +177,11 @@ CheckboxThemeData buildCheckboxTheme(
       return _boxSide(semantic.onDisabled);
     }
     if (states.contains(WidgetState.selected)) {
-      return _boxSide(scheme.onPrimary);
+      // See the doc comment: the ring is the dark fill's boundary, and in light
+      // it is a white line on a white sheet that shrinks the box by 4dp.
+      return scheme.brightness == Brightness.dark
+          ? _boxSide(scheme.onPrimary)
+          : BorderSide.none;
     }
     // M3 darkens the outline while the pointer is on it. Kept, because the
     // overlay wash alone is 1.15:1 and the box is small enough that the edge is

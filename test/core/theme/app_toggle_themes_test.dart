@@ -171,6 +171,30 @@ void main() {
       }
     });
 
+    test('an edge on a ticked box is one you can see on the card', () {
+      // **The rule the previous test could not state.** The one above accepts
+      // an edge *or* a fill that reads, and a `BorderSide` is painted inside
+      // the shape — so a ring that reads only against its own fill passes it
+      // while subtracting its width from every side of the box. Light shipped
+      // exactly that: `onPrimary` white measured 1.03:1 on the sheet, and the
+      // ticked box drew 14dp of indigo beside 18dp empty ones.
+      //
+      // So: draw no edge, or draw one the card behind the control can show.
+      for (final entry in themes.entries) {
+        final t = entry.value;
+        final side = box(t, const {WidgetState.selected});
+        if (side.style == BorderStyle.none || side.width == 0) continue;
+
+        expect(
+          contrast(side.color, t.colorScheme.surface),
+          greaterThanOrEqualTo(graphic),
+          reason:
+              '${entry.key}: the ticked box paints an edge that does not read '
+              'on the card, so it shrinks the box instead of bounding it',
+        );
+      }
+    });
+
     test('focus draws the ring', () {
       for (final entry in themes.entries) {
         final t = entry.value;
