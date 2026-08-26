@@ -7,6 +7,15 @@ of itself. Opening 110 files one at a time is not review, so this collects
 them into a page a person can scan: light and dark of the same screen behind
 one toggle, click to enlarge, arrows to walk the set.
 
+**One surface only: 393 × 852 dp.** Every row is the same phone, so a
+difference between two cards is a difference in the app rather than in the
+frame it was shot at. A 320dp or 412dp render is worth having — it is where
+layout breaks — but it belongs in the test that measures it, not here: side by
+side with the others it reads as a screen that got narrower, and the header's
+one `393×852` stamp becomes a lie for part of the page. `_check_surface`
+enforces this, so a row whose golden was shot elsewhere fails the build instead
+of quietly widening the set.
+
 **It reads the committed goldens; it does not render.** So run
 `flutter test --tags golden` first if the code has moved — a gallery built
 from stale PNGs is worse than none, because it looks current.
@@ -89,11 +98,6 @@ SCREENS = [
     # `Wrap` are actually governed at, and they were reachable only by opening a
     # PNG — so the one part of this screen that changes shape was the one part
     # the review page never showed.
-    ('Card', 'card_detail_320_x2_vi', 'Card detail — 320dp @2.0 VI', 'Bề rộng hẹp nhất, chữ gấp đôi'),
-    ('Card', 'card_detail_320_x2_vi_scrolled', 'Card detail — 320dp @2.0, band trạng thái', 'Cuộn tới lưới lịch ở cùng khung'),
-    ('Card', 'card_detail_state_grid_vi_x2', 'Card detail — lưới lịch xếp chồng', 'G8: nhãn trên giá trị khi hẹp'),
-    ('Card', 'card_detail_many_tags_vi_x2', 'Card detail — mười nhãn', 'Cờ và tag trong cùng một Wrap'),
-    ('Card', 'card_detail_412', 'Card detail — 412dp', 'Điện thoại rộng nhất geometry test chạy'),
     ('Card', 'card_detail_loading_more', 'Card detail — trang kế đang tới', 'G6: nút đổi thành spinner tại chỗ'),
     ('Card', 'card_detail_loading', 'Card detail — đang tải thẻ', 'W3 mặt 1: chưa có gì để sửa'),
     ('Card', 'card_detail_read_error', 'Card detail — không đọc được thẻ', 'W3 mặt 7: app bar bỏ Edit'),
@@ -122,9 +126,30 @@ SCREENS = [
 
 
 
+# The one surface the gallery shows, in device pixels. `test/demo/` renders at
+# DPR 3, so 393 × 852 dp lands here; see the module docstring for why the set is
+# not allowed to mix.
+SURFACE = (1179, 2556)
+DPR = 3
+
+
+def _check_surface(path, im):
+    if (im.width, im.height) == SURFACE:
+        return
+    raise SystemExit(
+        '{}: {}×{} px = {}×{} dp, but the gallery shows one surface only '
+        '({}×{} dp). Either render this screen at the gallery surface, or drop '
+        'its row from SCREENS and leave the golden to the test that needs that '
+        'width.'.format(
+            os.path.basename(path), im.width, im.height,
+            round(im.width / DPR), round(im.height / DPR),
+            SURFACE[0] // DPR, SURFACE[1] // DPR))
+
+
 def encode(path, width=560):
     """A screen at review width, embedded — the page has to open offline."""
     im = Image.open(path)
+    _check_surface(path, im)
     if im.width > width:
         im = im.resize((width, round(im.height * width / im.width)),
                        Image.LANCZOS)
@@ -251,7 +276,7 @@ dialog .bar button{margin-left:auto; border:1px solid var(--line);
 </style>
 <header id="hdr">
   <h1>MemoX · __TOTAL__ màn</h1>
-  <div class="spacer"><p>golden suite @ __STAMP__ · 393×852</p></div>
+  <div class="spacer"><p>golden suite @ __STAMP__ · __SURFACE__</p></div>
   <div class="toggle" role="group" aria-label="Chế độ render">
     <button id="btnLight" aria-pressed="true">Light</button>
     <button id="btnDark" aria-pressed="false">Dark</button>
@@ -322,6 +347,9 @@ dialog .bar button{margin-left:auto; border:1px solid var(--line);
 html = html.replace('__SECTIONS__', ''.join(sections))
 html = html.replace('__TOTAL__', str(total))
 html = html.replace('__STAMP__', _stamp())
+html = html.replace(
+    '__SURFACE__', '%d×%d' % (SURFACE[0] // DPR, SURFACE[1] // DPR)
+)
 os.makedirs(os.path.dirname(OUT), exist_ok=True)
 io.open(OUT, 'w', encoding='utf-8').write(html)
 print('screens:', total, '| with dark:', dark_count,

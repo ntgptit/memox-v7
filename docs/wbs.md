@@ -12967,6 +12967,15 @@ của M2.
         `--update-goldens` thì xanh, nên mọi PNG đã commit khớp một render tươi.
   - [x] Gallery build lại từ goldens hiện tại và publish đúng URL cũ trong
         `CLAUDE.md` — bước cuối của delivery phase, sau hai recursive review.
+- **Năm hàng gallery của milestone này đã bị gỡ lại, sau khi merge.** M99.60 thêm
+  `card_detail_320_x2_vi`, `_320_x2_vi_scrolled`, `_state_grid_vi_x2`,
+  `_many_tags_vi_x2` và `_412` vào `SCREENS` — 320×568 dp và 412×915 dp, trên
+  một trang mà header khẳng định `393×852`. Cạnh các thẻ khác chúng đọc thành
+  "màn này hẹp đi", tức thước đo bị đổi giữa chừng mà không ai được báo. Golden
+  vẫn giữ nguyên: 320 và 412 chính là chỗ layout gãy, nên chúng thuộc về test đo
+  chúng, không thuộc về trang review. Luật một-khung nay nằm trong `CLAUDE.md`
+  và được `build_screen_gallery.py` kiểm cơ học (thoát khác 0, nêu tên file kèm
+  kích thước dp), vì bản prose không ngăn được chính lần vi phạm đầu tiên.
 - **URL ghim đang bị hai nhánh chưa merge tranh nhau, và rule trong `CLAUDE.md`
   chưa nói tới ca này.** Trước lượt publish này, artifact đang mang
   `golden suite @ 2ef75dbc` — `claude/card-editor-ux-hardening`, một nhánh

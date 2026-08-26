@@ -326,6 +326,20 @@ and it is confidently wrong.
 The page carries the commit it was built from in its header, which is what
 makes a stale tab recognisable rather than merely wrong.
 
+**The gallery shows one surface and one only: 393 × 852 dp.** Every card is the
+same phone, so a difference the owner sees between two of them is a difference
+in the app rather than in the frame it was shot at. Renders at 320dp, at 412dp
+or at a doubled text scale are worth having — that is where layout breaks — but
+they belong to the test that measures them, not to this page: sitting beside
+the others they read as a screen that got narrower, and the header's single
+`393×852` stamp turns into a lie for part of the page. So a golden at another
+width keeps its test and does **not** get a row in `SCREENS`.
+
+This one is enforced, not just written down: `build_screen_gallery.py` checks
+every PNG it embeds and exits non-zero naming the file and its dp size, because
+the rule was broken the same day it was needed — M99.60 added five rows at
+320dp and 412dp to a page whose header claimed 393×852, and nothing objected.
+
 During the inner loop, `.claude/skills/flutter-workflow/scripts/dod_check.sh
 --changed --base origin/main` MUST build the same immutable feature × layer ×
 risk verification plan used by PR CI. It runs only the selected host tests and
