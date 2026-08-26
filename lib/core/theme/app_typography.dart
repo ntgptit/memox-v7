@@ -115,6 +115,29 @@ abstract final class AppTypography {
   /// it again rather than to regenerate and move on.
   static const double heroNumeralCapTrim = 0.481;
 
+  /// The weight of the deck hero's numeral — **the app's fourth weight, and a
+  /// deliberate exception.**
+  ///
+  /// `headlineLarge` is `w600`, and the theme spends `w700` only on the two
+  /// display rungs (57 and 45), neither of which appears on the deck list. So
+  /// this is a feature overriding a type role, which is normally how a design
+  /// system stops being one.
+  ///
+  /// It is kept because the numeral is the screen's only level-one emphasis:
+  /// the deck list answers "what do I study today", and that answer is one
+  /// figure. Dropping to `w600` puts it at the same weight as the deck names
+  /// below it, and the eye then has to find the largest thing rather than the
+  /// heaviest.
+  ///
+  /// **Named rather than inlined because the review could not tell the
+  /// difference.** `deck_list_root.md` §6 scored the screen ❌ for four weights
+  /// and had to write "this *may* be needed" — the code said `w700` at a call
+  /// site and nothing said why, so an intentional exception and an accident
+  /// look identical from the outside. One name and this paragraph is the whole
+  /// cost of telling them apart. If a fifth weight ever appears, it should have
+  /// to justify itself here too.
+  static const FontWeight heroNumeralWeight = FontWeight.w700;
+
   /// The deck list's heading, which is tracked tighter than the rest.
   ///
   /// **0.06em at `label-md`'s 12px, which is 0.72** (owner review, 2026-08-25).
