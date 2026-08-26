@@ -172,7 +172,7 @@ void _entryPointTests() {
       tester,
       dismiss: (t) async {
         final NavigatorState navigator = t.state(find.byType(Navigator));
-        navigator.maybePop();
+        await navigator.maybePop();
       },
     );
 

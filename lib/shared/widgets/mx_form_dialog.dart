@@ -4,6 +4,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/theme/theme_context_extension.dart';
 import 'mx_action_button.dart';
 import 'mx_button_pair.dart';
+import 'mx_dialog_metrics.dart';
 import 'mx_dialog_tone.dart';
 import 'mx_text_field.dart';
 
@@ -78,6 +79,13 @@ class MxFormDialog extends StatelessWidget {
     final errorMessage = this.errorMessage;
 
     return AlertDialog(
+      // **The same two insets `MxConfirmDialog` states, and for the same
+      // reason** (#348): a dialog's footer is not one page gutter in from the
+      // screen, and a button pair left to assume that lays out a row 96px wider
+      // than the line it actually has. Both labels then wrap, nothing
+      // overflows, and no gate says a word.
+      insetPadding: MxDialogMetrics.insetPadding,
+      actionsPadding: MxDialogMetrics.actionsPadding,
       // Scrollable for the reason the confirm dialog is: at textScaler 3.0 on a
       // narrow screen the alternative is silent truncation, not an error.
       scrollable: true,
@@ -95,6 +103,7 @@ class MxFormDialog extends StatelessWidget {
       ),
       actions: <Widget>[
         MxButtonPair(
+          availableWidth: MxDialogMetrics.footerWidth(context),
           secondary: MxActionButton(
             label: cancelLabel,
             onPressed: isSubmitting ? null : onCancel,

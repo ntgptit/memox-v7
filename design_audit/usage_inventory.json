@@ -1,9 +1,9 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 669,
-  "totalSites": 500,
+  "scannedFiles": 670,
+  "totalSites": 502,
   "byElementKind": {
-    "other": 313,
+    "other": 315,
     "background": 23,
     "shadow": 1,
     "border": 13,
@@ -16,7 +16,7 @@
     "Colors-material": 11,
     "hardcoded-literal": 97,
     "opacity-modified-token": 13,
-    "theme-token": 221
+    "theme-token": 223
   },
   "sites": [
     {
@@ -3046,7 +3046,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 529,
+      "line": 522,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -4003,7 +4003,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/items/deck_scheduler_picker_widget.dart",
-      "line": 84,
+      "line": 100,
       "widget_context": "DeckSchedulerPickerWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4014,7 +4014,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/items/deck_scheduler_picker_widget.dart",
-      "line": 92,
+      "line": 108,
       "widget_context": "DeckSchedulerPickerWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4146,7 +4146,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/overlays/deck_form_widget.dart",
-      "line": 139,
+      "line": 142,
       "widget_context": "_DeckFormWidgetState",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4190,7 +4190,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/overlays/deck_reset_progress_widget.dart",
-      "line": 126,
+      "line": 128,
       "widget_context": "_ResetProgressSheetState",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4201,7 +4201,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/overlays/deck_scheduler_change_widget.dart",
-      "line": 162,
+      "line": 164,
       "widget_context": "_SchedulerSheetState",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4212,7 +4212,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/overlays/deck_scheduler_change_widget.dart",
-      "line": 178,
+      "line": 183,
       "widget_context": "_SchedulerSheetState",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4256,7 +4256,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/overlays/starter_install_widget.dart",
-      "line": 156,
+      "line": 158,
       "widget_context": "_StarterInstallFormState",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4322,18 +4322,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 210,
-      "widget_context": "_HeroFigureLine",
-      "element_kind": "other",
-      "source_kind": "theme-token",
-      "expression": "context.semanticColors.overdue",
-      "token": "semantic.overdue",
-      "resolved_value_light": "unresolvable: semantic.overdue not in the dumped theme",
-      "resolved_value_dark": "unresolvable: semantic.overdue not in the dumped theme"
-    },
-    {
-      "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 223,
+      "line": 163,
       "widget_context": "_HeroFigureLine",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -4344,7 +4333,40 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 262,
+      "line": 169,
+      "widget_context": "_HeroFigureLine",
+      "element_kind": "other",
+      "source_kind": "theme-token",
+      "expression": "context.semanticColors.overdue",
+      "token": "semantic.overdue",
+      "resolved_value_light": "unresolvable: semantic.overdue not in the dumped theme",
+      "resolved_value_dark": "unresolvable: semantic.overdue not in the dumped theme"
+    },
+    {
+      "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
+      "line": 321,
+      "widget_context": "_HeroFigureLine",
+      "element_kind": "other",
+      "source_kind": "theme-token",
+      "expression": "context.semanticColors.overdue",
+      "token": "semantic.overdue",
+      "resolved_value_light": "unresolvable: semantic.overdue not in the dumped theme",
+      "resolved_value_dark": "unresolvable: semantic.overdue not in the dumped theme"
+    },
+    {
+      "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
+      "line": 334,
+      "widget_context": "_HeroFigureLine",
+      "element_kind": "other",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
+      "line": 368,
       "widget_context": "_QuietContextRow",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4355,7 +4377,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 277,
+      "line": 383,
       "widget_context": "_QuietContextRow",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4366,7 +4388,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 291,
+      "line": 397,
       "widget_context": "_QuietContextRow",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -4377,7 +4399,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 316,
+      "line": 422,
       "widget_context": "_QuietContextRow",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -5422,7 +5444,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_form_dialog.dart",
-      "line": 132,
+      "line": 141,
       "widget_context": "_FormError",
       "element_kind": "text",
       "source_kind": "theme-token",

@@ -90,7 +90,7 @@ void main() {
   testWidgets('the tone reaches the glyph and the palette owns the colour', (
     tester,
   ) async {
-    await pumpAlert(tester, tone: MxDialogTone.error);
+    await pumpAlert(tester);
 
     final icon = tester.widget<Icon>(
       find.descendant(

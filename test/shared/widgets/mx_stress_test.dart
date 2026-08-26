@@ -159,10 +159,14 @@ void main() {
       //   `mx_sheet_insets_test.dart` measures that against a real
       //   `viewPadding` — which is the only configuration the bug it fixes is
       //   visible in.
+      // * `MxDialogMetrics` is two constants and one arithmetic expression —
+      //   there is nothing to lay out. What reads them is asserted where it
+      //   matters, in `mx_button_pair_test.dart` and `mx_form_dialog_test.dart`.
       expect(files.difference(covered), <String>{
         'MxAsyncConfirmDialog',
         'MxAsyncView',
         'MxBreadcrumbStep',
+        'MxDialogMetrics',
         'MxDialogTone',
         'MxFailureLabelsWidget',
         'MxFormSheet',

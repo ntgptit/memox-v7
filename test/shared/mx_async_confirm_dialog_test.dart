@@ -144,6 +144,25 @@ void main() {
       );
     });
 
+    testWidgets('a field problem is not an outcome and closes nothing', (
+      tester,
+    ) async {
+      final closes = await pump(tester, closeWhen: MxConfirmCloseWhen.settled);
+
+      _HarnessState.of(
+        tester,
+      ).push(const _State(problems: <_Problem>{_Problem.nameEmpty}));
+      await tester.pump();
+
+      expect(
+        closes.count,
+        0,
+        reason:
+            'even `settled` means the write stopped — a rejected field is the '
+            'form still waiting, and closing on it would throw the input away',
+      );
+    });
+
     testWidgets('an idle rebuild closes nothing', (tester) async {
       final closes = await pump(tester, closeWhen: MxConfirmCloseWhen.settled);
 

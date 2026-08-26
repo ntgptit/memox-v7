@@ -12432,7 +12432,7 @@ của M2.
 
   | Slot | Trạng thái | Quyết định |
   |---|---|---|
-  | `actionsPadding` | trống → Material trả `only(24,24,24)` cứng | **Đã thêm**, bằng `AppSpacing.xl` — cùng giá trị nên không dịch pixel nào, nhưng câu trả lời thành của app thay vì của framework, đúng lý lẽ của `elevation: 0` và `shape` |
+  | `actionsPadding` | trống → Material trả `only(24,24,24)` cứng | **Đã thêm rồi lại gỡ.** #348 merge vào `main` khi việc này đang dở và đưa `insetPadding` + `actionsPadding` thành thuộc tính của **widget**, vì `footerWidth` phải tính ra từ chúng. Một entry trong theme nói lại cùng con số 24 sẽ là câu trả lời thứ hai mà cả ba dialog đều override — và là bản có thể âm thầm lệch khỏi phép tính đang đọc nó. Con số nay sống ở `MxDialogMetrics` |
   | `iconColor` | trống → Material trả `colorScheme.secondary` | **Không thêm.** Header dựng icon trực tiếp nên slot này không ai đọc — theme cho thứ không ai render là quyết định không có màn hình để kiểm |
   | `constraints` | trống → `minWidth: 280`, không có `maxWidth` | **Không thêm.** Web đóng khung 393dp (`kMobileFrameSize`) và AD-04 không ship layout màn lớn, nên `maxWidth: 560` sẽ không bao giờ chạm |
   | `insetPadding` | trống → `symmetric(40, 24)` | **Không đổi.** Đo trước rồi mới sửa: stress 320dp và test 360dp ở `textScaler` 2.0 đều không tràn, nên đổi chỉ để "đúng scale" là dịch mọi golden dialog đổi lấy không gì |
@@ -12450,11 +12450,25 @@ của M2.
   - [ ] Golden của các dialog mang tone sinh lại **trên Windows** và gallery
         publish lại — pixel comparison thuộc `ci-full`, container Linux render
         khác nên sinh ở đó là ghi vào repo một sai lệch khó thấy (M99.53).
+- **Hoà giải với #348, vốn merge vào `main` giữa chừng.** #348 sửa đúng một lỗi
+  của cùng khu vực: `MxButtonPair` đoán bề rộng footer bằng bề rộng màn hình trừ
+  một gutter, sai 96px với một dialog, nên hàng hai nút giữ nguyên và **cả hai
+  nhãn xuống dòng**. Nó giải quyết bằng cách cho `MxConfirmDialog` khai báo
+  `insetPadding`/`actionsPadding` rồi tự tính `footerWidth`.
+
+  Merge sạch về text nhưng **xung đột về quyền sở hữu**: nay có hai chỗ nói con
+  số 24. Đã hoà giải bằng cách nâng ba hằng số lên `MxDialogMetrics`
+  (`lib/shared/widgets/mx_dialog_metrics.dart`) — đúng nước đi #348 đã làm thấp
+  hơn một tầng, khi nó nói khiếm khuyết thuộc về `MxButtonPair` chứ không thuộc
+  dialog tình cờ để lộ ra. Và **`MxFormDialog` mang đúng khiếm khuyết đó**: nó
+  dựng cùng `MxButtonPair` trong cùng `AlertDialog.actions` và chưa từng được
+  truyền `availableWidth`. Nay có, kèm test đo lại (`mx_form_dialog_test.dart`).
 - **Editable documents:** `docs/wbs.md`
 - **Dependencies:** M99.53, M99.54
 - **Tests required:** `mx_dialog_tone_test.dart` (mới),
-  `mx_confirm_dialog_test.dart`, `mx_stress_test.dart`,
-  `widgetbook/test/catalog_smoke_test.dart`, full non-golden suite.
+  `mx_confirm_dialog_test.dart`, `mx_button_pair_test.dart`,
+  `mx_stress_test.dart`, `widgetbook/test/catalog_smoke_test.dart`,
+  full non-golden suite.
 - **Checklist phases:** 7, 12, 13, 14
 
 ### M99.56 · `MxAsyncConfirmDialog` — bốn bản sao của một transition, một bản sai
@@ -12529,7 +12543,9 @@ của M2.
 - **Scope:** Một widget form-trong-dialog, một entry point cho ca một trường,
   một call site chuyển sang. Không chuyển form nào đang là sheet thành dialog.
 - **Output:** `lib/shared/widgets/mx_form_dialog.dart` (mới — `MxFormDialog`,
-  `MxPromptParse`, `showMxPromptDialog`); `card_bulk_overlays_widget.dart`;
+  `MxPromptParse`, `showMxPromptDialog`), `mx_dialog_metrics.dart` (mới, tách ra
+  từ `MxConfirmDialog` khi hoà giải với #348 — xem M99.55);
+  `card_bulk_overlays_widget.dart`;
   `test/shared/mx_form_dialog_test.dart` (mới), `mx_stress_specimens.dart`;
   `widgetbook/lib/components/overlay_components.dart`, `widgetbook/lib/main.dart`.
 - **Bug được sửa cùng lúc: nút bấm không làm gì và không nói gì.** Prompt cũ viết
@@ -12559,6 +12575,9 @@ của M2.
         form khi lỗi tới.
   - [x] Hai nút bằng nhau cả rộng lẫn cao (`MxButtonPair`), cùng bất động khi
         `isSubmitting`.
+  - [x] Pair nhận đúng bề rộng **footer**, không phải bề rộng màn hình — khiếm
+        khuyết #348 vừa sửa cho `MxConfirmDialog`, mà dialog này sẽ thừa kế
+        nguyên vẹn nếu không truyền.
   - [x] `flutter analyze` sạch; guard sạch; Widgetbook có playground.
 - **Editable documents:** `docs/wbs.md`
 - **Dependencies:** M99.55

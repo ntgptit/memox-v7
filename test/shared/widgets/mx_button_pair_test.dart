@@ -5,6 +5,7 @@ import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_button_pair.dart';
 import 'package:memox/shared/widgets/mx_confirm_dialog.dart';
+import 'package:memox/shared/widgets/mx_dialog_metrics.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 
 /// The rule: two buttons offered together are drawn at one size, in either
@@ -225,7 +226,7 @@ void main() {
       final pair = tester.widget<MxButtonPair>(find.byType(MxButtonPair));
       expect(
         pair.availableWidth,
-        MxConfirmDialog.footerWidth(tester.element(find.byType(MxButtonPair))),
+        MxDialogMetrics.footerWidth(tester.element(find.byType(MxButtonPair))),
         reason: 'the dialog must hand the pair its own footer width',
       );
       expect(

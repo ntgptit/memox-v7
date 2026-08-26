@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
+import 'package:memox/shared/widgets/mx_button_pair.dart';
+import 'package:memox/shared/widgets/mx_dialog_metrics.dart';
 import 'package:memox/shared/widgets/mx_form_dialog.dart';
 
 /// The form-in-a-dialog contract, and one bug it exists to make unwriteable.
@@ -210,6 +212,43 @@ void main() {
 
       expect(confirm.width, moreOrLessEquals(cancel.width, epsilon: 0.5));
       expect(confirm.height, moreOrLessEquals(cancel.height, epsilon: 0.5));
+    });
+
+    testWidgets('it hands the pair its own footer width, not the screen', (
+      tester,
+    ) async {
+      // The defect #348 fixed in `MxConfirmDialog`, which this dialog would
+      // otherwise have inherited by building the same `MxButtonPair` inside the
+      // same `AlertDialog.actions`. On a 393 screen the footer is
+      // `393 − 2×40 − 2×24 = 265`, not the 361 the pair assumes when nobody
+      // tells it; believing 361 it keeps a row that cannot hold either label
+      // and both wrap — with nothing overflowing and no gate saying a word.
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(size: Size(393, 852)),
+          child: MaterialApp(
+            theme: buildLightTheme(),
+            home: Scaffold(
+              body: MxFormDialog(
+                title: 'Add tag',
+                confirmLabel: 'Add tag to selection',
+                cancelLabel: 'Huỷ bỏ thao tác',
+                onConfirm: () {},
+                onCancel: () {},
+                child: const SizedBox.shrink(),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final pair = tester.widget<MxButtonPair>(find.byType(MxButtonPair));
+
+      expect(
+        pair.availableWidth,
+        MxDialogMetrics.footerWidth(tester.element(find.byType(MxButtonPair))),
+      );
+      expect(pair.availableWidth, lessThan(393));
     });
 
     testWidgets('isSubmitting makes both inert', (tester) async {
