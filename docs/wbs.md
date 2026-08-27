@@ -13862,6 +13862,54 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Editable documents:** `docs/wbs.md`
 - **Dependencies:** M99.66
 
+### M99.69 · Đóng danh sách widget hoãn — 5 wrapper, 12 site, còn lại 2 mục hoãn vì không đáng dựng
+
+- **Status:** **done** — bước 3, chốt §XI: mọi họ widget còn site raw đều có
+  wrapper hoặc lý do hoãn ghi thành văn.
+- **Goal:** feature không còn tự lắp menu, switch/checkbox/radio row hay
+  dropdown; các quyết định vô hình (semantics, Material cho ripple, một
+  spelling cho menu row) có đúng một chủ.
+- **Scope:** 5 widget mới — `MxMenuButton` (+`MxMenuAction`; 4 site
+  `PopupMenuButton` từng có 3 kiểu vẽ row: hai `_MenuRow` tự chế trùng nhau,
+  một Row+ink destructive, một Text trần — nay một spelling, destructive đổi
+  cả glyph lẫn chữ sang error, tooltip bắt buộc), `MxSwitchRow` (3 site; **sở
+  hữu cả hai spelling đã ghi**: tile mặc định và biến thể announced của
+  reminder — quyết định owner-review M6 R7 thành tham số `announcedValue`
+  thay vì bị migration xoá), `MxCheckboxRow` (1), `MxRadioRows<T>` (2 — ôm
+  transparent Material mà settings từng tự viết kèm chú thích, và per-tile
+  lock với guarded callback), `MxDropdown<T>` (2 legacy — chuẩn hoá
+  HideUnderline + isExpanded + ellipsis một dòng). Hai `_MenuRow` private bị
+  xoá. Đổi tên `value` → `isOn`/`isChecked` vì chính guard
+  boolean-reads-as-predicate bắt ngay khi wrapper vừa viết xong.
+- **Hoãn còn lại, và lý do là "không đáng" chứ không phải "chưa kịp":**
+  `TextField` của study fill mode (card-as-field bespoke, một người dùng —
+  wrapper chỉ chuyển code, không chốt thêm quyết định nào) và 2 chip cùng một
+  file đã được `ChipTheme` phủ đủ. Ghi ở §XI của skill.
+- **Tests required:** `mx_menu_button_test` (callback đúng action, tooltip,
+  custom anchor, disabled không mở), `mx_switch_row_test` (announced: switch
+  mang label+value bằng lời, label không phải tap target; tile: cả hàng
+  toggle; null khoá cả hai), `mx_radio_rows_test` (Material transparency
+  trong DecoratedBox, pick, lock), 6 stress specimen mới (radio specimen phải
+  thu gọn: cao vượt màn là việc của scrollable, không phải của group),
+  widgetbook (MxMenuButton + Selection rows 4 use case).
+- **Checklist phases:** Phase 7 (components) · Phase 21 (guard).
+- **Guard:** vẫn **76 rule** — `no_raw_widget` thêm hai pattern
+  (`Switch|SwitchListTile|CheckboxListTile|RadioListTile|RadioGroup` và
+  `PopupMenuButton|PopupMenuItem|DropdownButton|DropdownButtonHideUnderline`,
+  đều `[<(]`). Probe 5 vi phạm đỏ rồi về 0.
+- **Emulator integration suite:** **not run — theme/presentation only.** Đây
+  không phải một lượt chạy xanh.
+- **Output:** như Scope; goldens 295 xanh **không đổi pixel** (migrate giữ
+  nguyên cấu trúc vẽ; Material mới của scheduler picker không nằm trong màn
+  nào audit đếm ink); host suite 4169 xanh (một test export sheet đổi
+  `PopupMenuItem<void>` → `<int>` và claim tooltip đổi sang `byTooltip`).
+- **Acceptance criteria:**
+  - [x] `lib/features/` có 0 site cho cả 9 pattern họ này (đếm bằng `[<(]`).
+  - [x] Probe hai chiều: 5 đỏ, gỡ về 0; guard xanh 76 rule.
+  - [x] `flutter analyze` 0; full host suite 4169 xanh; goldens `TZ=UTC` xanh.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.67
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |

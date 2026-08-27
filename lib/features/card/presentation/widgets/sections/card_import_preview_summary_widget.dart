@@ -5,6 +5,7 @@ import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_switch_row.dart';
 import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../domain/models/card_import_preview_model.dart';
@@ -102,13 +103,9 @@ class CardImportPreviewSummaryWidget extends ConsumerWidget {
               ),
           ],
         ),
-        SwitchListTile(
-          value: shouldIncludeDuplicates,
-          contentPadding: EdgeInsets.zero,
-          title: Text(
-            l10n.cardImportIncludeDuplicatesLabel,
-            style: context.texts.bodyMedium,
-          ),
+        MxSwitchRow(
+          label: l10n.cardImportIncludeDuplicatesLabel,
+          isOn: shouldIncludeDuplicates,
           onChanged: (value) =>
               _updateDuplicateChoice(ref, deckId, value: value),
         ),

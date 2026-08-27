@@ -6,6 +6,8 @@ import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_dropdown.dart';
+import '../../../../../shared/widgets/mx_switch_row.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../../../shared/widgets/mx_error_state.dart';
 import '../../../../../shared/widgets/mx_loading_state.dart';
@@ -214,13 +216,9 @@ class _LoadedPreview extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
         ],
-        SwitchListTile(
-          value: hasHeader,
-          contentPadding: EdgeInsets.zero,
-          title: Text(
-            context.l10n.cardImportHeaderToggleLabel,
-            style: context.texts.bodyMedium,
-          ),
+        MxSwitchRow(
+          label: context.l10n.cardImportHeaderToggleLabel,
+          isOn: hasHeader,
           onChanged: (value) => _updateHeaderChoice(ref, deckId, value: value),
         ),
         const SizedBox(height: AppSpacing.sm),
@@ -288,24 +286,17 @@ class _SheetSelector extends StatelessWidget {
         ),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: selected,
-              isExpanded: true,
-              onChanged: onSelect,
-              items: <DropdownMenuItem<String>>[
-                for (final sheet in document.sheets)
-                  if (!sheet.isEmpty)
-                    DropdownMenuItem<String>(
-                      value: sheet.name,
-                      child: Text(
-                        sheet.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-              ],
-            ),
+          child: MxDropdown<String>(
+            value: selected,
+            onChanged: onSelect,
+            options: <MxDropdownOption<String>>[
+              for (final sheet in document.sheets)
+                if (!sheet.isEmpty)
+                  MxDropdownOption<String>(
+                    value: sheet.name,
+                    label: sheet.name,
+                  ),
+            ],
           ),
         ),
       ],

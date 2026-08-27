@@ -4,6 +4,10 @@ import 'package:memox/core/theme/app_spacing.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
 import 'package:memox/shared/widgets/mx_metric_well.dart';
 import 'package:memox/shared/widgets/mx_list_tile.dart';
+import 'package:memox/shared/widgets/mx_checkbox_row.dart';
+import 'package:memox/shared/widgets/mx_dropdown.dart';
+import 'package:memox/shared/widgets/mx_radio_rows.dart';
+import 'package:memox/shared/widgets/mx_switch_row.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
 import 'package:widgetbook/widgetbook.dart';
 
@@ -291,6 +295,79 @@ WidgetbookComponent listTileComponent() {
 /// that had to leave Material's `outline` to clear 3:1, and the track outline
 /// that changes colour instead of disappearing when the switch turns on. Both
 /// are decisions a number can defend and only a screen can approve.
+WidgetbookComponent selectionRowsComponent() {
+  return WidgetbookComponent(
+    name: 'Selection rows',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'MxSwitchRow',
+        builder: (BuildContext context) {
+          final isOn = context.knobs.boolean(label: 'on', initialValue: true);
+          final isAnnounced = context.knobs.boolean(label: 'announced variant');
+
+          return CatalogCenterPage(
+            child: MxSwitchRow(
+              label: 'Enable reminders',
+              isOn: isOn,
+              announcedValue: isAnnounced ? (isOn ? 'On' : 'Off') : null,
+              onChanged: _noopBool,
+            ),
+          );
+        },
+      ),
+      WidgetbookUseCase(
+        name: 'MxCheckboxRow',
+        builder: (BuildContext context) => CatalogCenterPage(
+          child: MxCheckboxRow(
+            label: 'grammar',
+            subtitle: '12 cards',
+            isChecked: context.knobs.boolean(
+              label: 'checked',
+              initialValue: true,
+            ),
+            onToggle: _noop,
+          ),
+        ),
+      ),
+      WidgetbookUseCase(
+        name: 'MxRadioRows',
+        builder: (BuildContext context) => CatalogCenterPage(
+          child: MxRadioRows<int>(
+            values: const <int>[0, 1, 2],
+            selected: 1,
+            isEnabled: context.knobs.boolean(
+              label: 'enabled',
+              initialValue: true,
+            ),
+            onChanged: _noopIndex,
+            labelOf: (int value) => 'Choice ${String.fromCharCode(65 + value)}',
+          ),
+        ),
+      ),
+      WidgetbookUseCase(
+        name: 'MxDropdown',
+        builder: (BuildContext context) => const CatalogCenterPage(
+          child: MxDropdown<int>(
+            value: 0,
+            onChanged: _noopNullableIndex,
+            options: <MxDropdownOption<int>>[
+              MxDropdownOption<int>(value: 0, label: 'Front'),
+              MxDropdownOption<int>(value: 1, label: 'Back'),
+              MxDropdownOption<int>(value: 2, label: 'Ignore this column'),
+            ],
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
+void _noopBool(bool value) {}
+
+void _noopIndex(int value) {}
+
+void _noopNullableIndex(int? value) {}
+
 WidgetbookComponent toggleComponent() {
   return WidgetbookComponent(
     name: 'Switch and Checkbox',

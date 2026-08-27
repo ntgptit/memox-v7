@@ -1,6 +1,6 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 687,
+  "scannedFiles": 692,
   "totalSites": 353,
   "byElementKind": {
     "other": 295,
@@ -3211,7 +3211,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_preview_summary_widget.dart",
-      "line": 130,
+      "line": 127,
       "widget_context": "CardImportPreviewSummaryWidget",
       "element_kind": "border",
       "source_kind": "theme-token",

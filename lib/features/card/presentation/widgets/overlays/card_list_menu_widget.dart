@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/navigation/route_names.dart';
-import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
-import '../../../../../shared/widgets/mx_icon.dart';
+import '../../../../../shared/widgets/mx_menu_button.dart';
 import 'card_export_sheet_widget.dart';
 
 /// The card list's overflow menu: import, export and the tag catalog.
@@ -36,34 +34,29 @@ class CardListMenuWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PopupMenuButton<void>(
-      icon: const Icon(Icons.more_vert),
+    return MxMenuButton(
       tooltip: context.l10n.cardSelectionMoreLabel,
-      itemBuilder: (menuContext) => <PopupMenuEntry<void>>[
+      actions: <MxMenuAction>[
         // Import lives in the overflow, not as a third icon (M4.12 W6): the bar
         // already carries Select and Add at 320px, and bulk input is an
         // occasional action.
-        PopupMenuItem<void>(
-          onTap: onImport,
-          child: _MenuRow(
-            icon: Icons.upload_file_outlined,
-            label: menuContext.l10n.cardImportEntryAction,
-          ),
+        MxMenuAction(
+          icon: Icons.upload_file_outlined,
+          label: context.l10n.cardImportEntryAction,
+          onSelected: onImport,
         ),
         // Export is offered only when there is something to export (M4.13 W1):
         // an empty deck has no export path at all, not a greyed one — and a
         // `deck`-type or root deck never reaches this screen, because neither
         // holds cards directly.
         if (deckTotal > 0)
-          PopupMenuItem<void>(
-            onTap: () => exportDeckCards(
+          MxMenuAction(
+            icon: Icons.ios_share,
+            label: context.l10n.cardExportEntryAction,
+            onSelected: () => exportDeckCards(
               context,
               deckId: deckId,
               deckCardCount: deckTotal,
-            ),
-            child: _MenuRow(
-              icon: Icons.ios_share,
-              label: menuContext.l10n.cardExportEntryAction,
             ),
           ),
         // The catalog is library-level, so its main door is on the deck list
@@ -78,35 +71,11 @@ class CardListMenuWidget extends StatelessWidget {
         // the user at the root instead of the card list they came from (M4.14
         // T1), and the card list's autoDispose state — the applied tag filter,
         // the selection, the grown window — is destroyed on the way.
-        PopupMenuItem<void>(
-          onTap: () => context.pushNamed(RouteNames.tagCatalog),
-          child: _MenuRow(
-            icon: Icons.sell_outlined,
-            label: menuContext.l10n.tagCatalogEntryAction,
-          ),
+        MxMenuAction(
+          icon: Icons.sell_outlined,
+          label: context.l10n.tagCatalogEntryAction,
+          onSelected: () => context.pushNamed(RouteNames.tagCatalog),
         ),
-      ],
-    );
-  }
-}
-
-/// One overflow-menu row: a muted glyph and the action's words.
-///
-/// Extracted when Export joined Import — two hand-built `Row`s were already one
-/// copy apart, and the third would have been the one that drifted.
-class _MenuRow extends StatelessWidget {
-  const _MenuRow({required this.icon, required this.label});
-
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        MxIcon(icon),
-        const SizedBox(width: AppSpacing.md),
-        Text(label, style: context.texts.bodyMedium),
       ],
     );
   }

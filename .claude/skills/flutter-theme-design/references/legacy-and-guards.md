@@ -29,11 +29,16 @@ và `no_raw_style_escape` (M99.64). Mỗi mục thêm phải kèm lượt chạy
 rồi về 0 — và đếm site phải dùng `[<(]` chứ không chỉ `\(`, vì
 `RadioListTile<T>(` và `showModalBottomSheet<void>(` lọt lưới `\(` trần.
 
-**Nhóm hoãn có lý do, tính đến M99.67** — mỗi mục là "có site đang dùng mà
-chưa có wrapper", đúng thứ tự admission (wrapper trước, guard sau):
-`Switch`/`SwitchListTile` (3), `RadioListTile` (2),
-`CheckboxListTile` (1), `TextField` (1 — ô điền của study fill mode),
-chips (2), `PopupMenuButton` (4), `DropdownButton` (2 legacy).
+**Nhóm hoãn có lý do, tính đến M99.69** — còn đúng hai mục, và cả hai hoãn
+vì wrapper *không đáng dựng* chứ không phải chưa kịp: `TextField` (1 — ô điền
+của study fill mode là card-as-field bespoke có chủ đích, một người dùng,
+wrapper chỉ chuyển code chứ không chốt thêm quyết định nào); chips (2 — cùng
+một file, `ChipTheme` đã phủ đủ, không có bất đồng vô hình giữa các site).
+M99.69 đóng phần còn lại: `MxSwitchRow` (3 — sở hữu luôn biến thể announced
+của reminder, quyết định owner-review M6 R7 thành API thay vì bị xoá),
+`MxCheckboxRow` (1), `MxRadioRows` (2 — ôm transparent Material mà settings
+từng phải tự viết), `MxMenuButton` (4 — một spelling cho menu row thay cho ba
+kiểu tự chế), `MxDropdown` (2 legacy `DropdownButton`).
 `SnackBar` và `InkWell` đã ra khỏi nhóm ở M99.67: `showMxMessage`/`showMxMessageOn`
 (liveRegion + clearSnackBars, quyết định lấy từ chính tuyên bố trong repo) và
 `MxPressable` (Material transparency + InkWell + sàn 48, shape từ AppRadius).
@@ -55,11 +60,11 @@ hợp lệ của repo — hàm `showX` trong bucket `overlays/` gọi nó trực
 - [x] `Card`
 - [x] `ListTile`
 - [x] `Checkbox`
-- [ ] `CheckboxListTile`
+- [x] `CheckboxListTile`
 - [x] `Radio`
-- [ ] `RadioListTile`
-- [ ] `Switch`
-- [ ] `SwitchListTile`
+- [x] `RadioListTile`
+- [x] `Switch`
+- [x] `SwitchListTile`
 - [ ] `ChoiceChip`
 - [ ] `FilterChip`
 - [ ] `ActionChip`
@@ -76,9 +81,9 @@ hợp lệ của repo — hàm `showX` trong bucket `overlays/` gọi nó trực
 - [x] `AlertDialog`
 - [x] Direct `showDialog`
 - [ ] Direct `showModalBottomSheet`
-- [ ] `PopupMenuButton`
+- [x] `PopupMenuButton`
 - [x] `DropdownMenu`
-- [ ] `DropdownButton`
+- [x] `DropdownButton`
 - [x] `SnackBar`
 - [x] `MaterialBanner`
 - [x] `SearchBar`

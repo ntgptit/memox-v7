@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../shared/widgets/mx_switch_row.dart';
 import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../support/reminder_labels_widget.dart';
 
@@ -39,31 +39,14 @@ class ReminderToggleRowWidget extends StatelessWidget {
         horizontal: AppSpacing.lg,
         vertical: AppSpacing.xs,
       ),
-      child: Row(
-        children: <Widget>[
-          // Excluded, and the label moves onto the switch below: the visible
-          // text and the control are two nodes, so a reader focusing the
-          // control would otherwise hear "Off, switch" with no idea what is
-          // off (M6 A3, WCAG 4.1.2). Without the exclusion the same words are
-          // announced twice.
-          Expanded(
-            child: ExcludeSemantics(
-              child: Text(
-                context.l10n.reminderToggleLabel,
-                style: context.texts.bodyLarge,
-              ),
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Semantics(
-            label: context.l10n.reminderToggleLabel,
-            value: context.reminderToggleValue(isEnabled: isEnabled),
-            child: Switch(
-              value: isEnabled,
-              onChanged: isChangeable ? onChanged : null,
-            ),
-          ),
-        ],
+      // The announced variant (M6 A3, WCAG 4.1.2): the switch alone carries
+      // the label and the value in words, and the label is the tap target for
+      // nothing — MxSwitchRow owns the pattern and its reasoning now.
+      child: MxSwitchRow(
+        label: context.l10n.reminderToggleLabel,
+        announcedValue: context.reminderToggleValue(isEnabled: isEnabled),
+        isOn: isEnabled,
+        onChanged: isChangeable ? onChanged : null,
       ),
     );
   }
