@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../../../shared/widgets/mx_card.dart';
@@ -97,18 +95,16 @@ class DeckLevelSummaryWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MxCard(
-      // **Indigo hairline, and a step further off the page** (owner review,
-      // 2026-08-20). On the default border the panel did not separate from the
-      // background at all — a card that carries the screen's one answer has to
-      // look like a surface, not like a region of the page.
-      borderColor: context.semanticColors.borderAccent,
-      elevation: AppElevation.raised,
+    // The accent recipe: indigo hairline, and a step further off the page
+    // (owner review, 2026-08-20). On the default border the panel did not
+    // separate from the background at all — a card that carries the screen's
+    // one answer has to look like a surface, not like a region of the page.
+    return MxCard.accent(
       // **The card's own padding is zero and the content carries it**, so the
       // disclosure can take the corner. Its 48px target then spans the padding
       // plus the figure line rather than forcing that line to be 48 tall — see
       // `DeckSummaryMetricsWidget` for the arithmetic that made this necessary.
-      padding: EdgeInsets.zero,
+      padding: MxCardPadding.none,
       child: Stack(
         children: <Widget>[
           Padding(

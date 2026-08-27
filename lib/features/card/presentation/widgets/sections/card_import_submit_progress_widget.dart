@@ -22,7 +22,7 @@ class CardImportSubmitProgressWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MxCard(
+    return MxCard.raised(
       child: Column(
         children: <Widget>[
           const SizedBox(height: AppSpacing.md),

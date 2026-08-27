@@ -6,152 +6,380 @@ import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/theme_context_extension.dart';
 
-/// The app's one raised surface: a bordered panel that carries elevation.
+/// How much room a card puts between its edge and its content.
 ///
-/// **It was flat, and that was never a rule.** Two doc comments said the surface
-/// ladder worked without a shadow, and two milestones read that as a ban — no AD,
-/// no BR, no test behind it, while `docs/checklist.md` asked for an Elevation
-/// token nobody built. The project owner has since said the app needs real
-/// elevation to separate elements, so it has one.
+/// An enum, not an `EdgeInsets`, for the reason `MxActionButton` takes no
+/// `Size`: an open parameter is a per-call-site decision, and the inventory
+/// that closed this API found nine spellings of what were three intents.
+enum MxCardPadding {
+  /// The child owns the whole content area — a card whose content reaches the
+  /// edge (a progress track seated on the base, a tile that draws its own
+  /// regions), or one whose inner rhythm is not uniform and is therefore the
+  /// caller's layout, stated with layout primitives inside [MxCard.child].
+  none,
+
+  /// A dense panel — option cards, info panels, feedback bands.
+  compact,
+
+  /// The default reading card.
+  standard,
+}
+
+/// What a selected card paints beyond its `secondary` edge.
 ///
-/// **The shadow appears in light and not in dark, by measurement.** The dark page
-/// sits at the bottom of the lightness scale, so a shadow there moves it by
-/// ΔL\* 0.26 where the surface step already moves it 7.70 — see [shadowsFor].
-/// Dark keeps its ladder and its border; light gains a shadow and gives some
-/// border back.
+/// [MxCard.isSelected] owns the edge and the announcement everywhere (M99.70);
+/// this decides only whether the *fill* joins in. Not a bool, because the two
+/// values are two meanings, not on/off.
+enum MxCardSelectionTreatment {
+  /// The edge alone. Right for a single-choice picker, where one option is
+  /// picked at a time and the border is enough to find it.
+  edge,
+
+  /// Edge plus a `secondaryContainer` fill — for a multi-select list, where a
+  /// scanning eye has to catch several picked rows a border alone would let
+  /// slide.
+  tint,
+}
+
+/// The state a recessed card wears on its edge.
 ///
-/// [onTap] makes the whole surface one target rather than requiring a nested
-/// button. That is a generic capability, not a feature one: any card that stands
-/// for a thing the user can open wants it, and building the ink by hand at each
-/// call site is how two call sites end up with different splash radii.
+/// Closed and owned by [MxCard.recessed], because that recipe is the one whose
+/// edge carries state: the study answer surface shows where typing goes and
+/// how the turn was graded. Each member has a production caller; a tone
+/// without one is added with its caller, not before (AD-14).
+enum MxCardRecessedEdge {
+  /// The resting hairline.
+  none,
+
+  /// The surface hosts a focused text input, so the card wears the focus-ring
+  /// colour at hairline weight — the field's focus made visible at the edge
+  /// the user is looking at.
+  focus,
+
+  /// The graded turn was right.
+  success,
+
+  /// The graded turn was wrong.
+  danger,
+}
+
+/// Which meaning a feedback card carries.
 ///
-/// **A tappable card may still hold its own controls.** The ink covers the whole
-/// card and a nested button wins the gesture arena over it, so a card with a
-/// trailing menu does not have to make a *region* of itself the target — which is
-/// the arrangement that leaves the rest of the card looking tappable and inert.
-/// The web kit had to be taught the same thing the hard way: a `<button>` cannot
-/// contain a control, so `MxCard` there lays its target under the content rather
-/// than becoming one.
-///
-/// **The ink layer sits inside the decoration, not around it.** An `InkWell`
-/// paints its splash and its hover highlight *before* it paints its child, so a
-/// card that wrapped the whole `DecoratedBox` in one drew every state underneath
-/// an opaque surface colour — a tappable card with no visible feedback at all.
-/// The `Material` is transparent and hosts only the ink; the ripple is clipped to
-/// the same [radius] the border uses, and the card looks identical when
-/// [onTap] is null.
-///
-/// **Every interaction state is declared, and until this task none of them was.**
-/// A bare `InkWell` takes `ThemeData.hoverColor`, `focusColor` and `splashColor`
-/// — hardcoded black-and-white washes with no seed in them and no difference
-/// between light and dark. `AppInteractionStates.cardOverlay` replaces all three
-/// with the kit's `.mx-card__action` values, and keyboard focus additionally
-/// thickens the card's own border to [AppStroke.focus] in the accent. That is the
-/// same inset ring `.mx-card__action:focus-visible` draws, and it costs no
-/// layout: a `DecoratedBox` never insets its child for a border, so the card is
-/// the same size focused as it is at rest.
-class MxCard extends StatefulWidget {
-  const MxCard({
-    required this.child,
-    this.padding = const EdgeInsets.all(AppSpacing.lg),
-    this.elevation = AppElevation.card,
-    this.radius = AppRadius.lg,
-    this.color,
-    this.borderColor,
-    this.isSelected,
-    this.onTap,
-    this.onLongPress,
-    super.key,
+/// Only [danger] exists because only failure bands exist in production.
+/// AD-14 derives a role's container when a real caller lands, not before —
+/// success/warning/info containers have no token yet, so a tone here without
+/// a caller would be a colour waiting for a meaning.
+enum MxCardFeedbackTone {
+  /// A failure the user must read: an error band with an icon and a message.
+  /// The icon and the copy stay product content — the recipe owns only the
+  /// surface, so colour is never the sole cue.
+  danger,
+}
+
+/// The surface a recipe fills with, named as a role.
+enum _MxCardFill { surface, recessed, muted, tonal, feedback }
+
+/// The edge a recipe rests at, named as a role.
+enum _MxCardRestingEdge { subtle, control, accent }
+
+/// One recipe, one spec. Private and immutable: a feature picks a named
+/// constructor and everything below — fill, edge, radius, elevation — is this
+/// object's answer, not the call site's.
+class _MxCardSpec {
+  const _MxCardSpec({
+    required this.elevation,
+    required this.radius,
+    this.fill = _MxCardFill.surface,
+    this.edge = _MxCardRestingEdge.subtle,
   });
 
-  /// The flat bordered panel: a card *inside* another surface.
+  final double elevation;
+  final double radius;
+  final _MxCardFill fill;
+  final _MxCardRestingEdge edge;
+}
+
+/// The app's card: a bordered surface whose whole visual grammar lives here.
+///
+/// **Every constructor is a meaning, and the API holds no visual primitive.**
+/// A caller chooses what the card *is* — flat, raised, focal, recessed,
+/// feedback, muted, tonal, accent, tile, option — plus content and behaviour;
+/// fill, border, radius, elevation, shadow and internal padding are each
+/// recipe's private spec. This closed the escape hatches the M99.70 pass left
+/// open (`color:`, `borderColor:`, `radius:`, `elevation:`, `EdgeInsets`),
+/// which is the same argument `MxActionButton` opens with: the moment a caller
+/// can pass a colour, the design system stops being enforceable.
+///
+/// **The shadow appears in light and not in dark, by measurement** (AD-14).
+/// The dark page sits at the bottom of the lightness scale, so a shadow there
+/// moves it by ΔL\* 0.26 where the surface step already moves it 7.70 — see
+/// [shadowsFor]. Dark keeps its ladder and its border; light gains a shadow.
+///
+/// [onTap] makes the whole surface one target rather than requiring a nested
+/// button. **A tappable card may still hold its own controls**: the ink covers
+/// the whole card and a nested button wins the gesture arena over it, so a
+/// card with a trailing menu does not have to make a *region* of itself the
+/// target.
+///
+/// **The ink layer sits inside the decoration, not around it.** An `InkWell`
+/// paints its splash and its hover highlight *before* it paints its child, so
+/// a card that wrapped the whole `DecoratedBox` in one drew every state
+/// underneath an opaque surface colour. The `Material` is transparent and
+/// hosts only the ink; the ripple is clipped to the same radius the border
+/// uses.
+///
+/// **Every interaction state is declared.** `AppInteractionStates.cardOverlay`
+/// carries hover, press and the focus wash; keyboard focus additionally
+/// thickens the card's own border to the focus ring — painted on the border
+/// box, so the card is the same size focused as it is at rest. The ring is
+/// drawn only in `FocusHighlightMode.traditional`: focus that arrives without
+/// a keyboard (a programmatic move on a touch screen) must not leave a
+/// keyboard affordance behind, which is the rule `MxActionButton.shouldAutofocus`
+/// already follows (M99.75).
+class MxCard extends StatefulWidget {
+  /// The flat bordered panel: a card *inside* another surface, or a row in a
+  /// flat list column.
   ///
-  /// Named, because it is not the exception — seventeen call sites were
-  /// spelling `elevation: AppElevation.none` by hand, most with the same
-  /// sentence of justification. The rule they were each restating lives here
-  /// once: a shadow stacked on a shadow reads as a rendering fault rather
-  /// than depth, so a card nested in a sheet, a dialog or another card sits
-  /// flat and lets its hairline carry the edge.
+  /// Named at M99.70, because it is not the exception — seventeen call sites
+  /// were spelling `elevation: AppElevation.none` by hand. The rule they were
+  /// each restating lives here once: a shadow stacked on a shadow reads as a
+  /// rendering fault rather than depth, so a card nested in a sheet, a dialog
+  /// or another card sits flat and lets its hairline carry the edge.
   const MxCard.flat({
     required this.child,
-    this.padding = const EdgeInsets.all(AppSpacing.lg),
-    this.radius = AppRadius.lg,
-    this.color,
-    this.borderColor,
+    this.padding = MxCardPadding.standard,
+    this.isSelected,
+    MxCardSelectionTreatment selectionTreatment = MxCardSelectionTreatment.edge,
+    this.onTap,
+    this.onLongPress,
+    super.key,
+  }) : _spec = const _MxCardSpec(
+         elevation: AppElevation.none,
+         radius: AppRadius.lg,
+       ),
+       // Not an initializing formal: the field is private so a caller cannot
+       // read the spec back, while the parameter has to be public to be named.
+       // ignore: prefer_initializing_formals
+       _selectionTreatment = selectionTreatment,
+       _recessedEdge = MxCardRecessedEdge.none,
+       _tone = null;
+
+  /// The raised surface: a card that separates itself from the page it sits
+  /// on. What the unnamed constructor used to be, named — a default that is a
+  /// meaning deserves the same spelling every other meaning gets.
+  const MxCard.raised({
+    required this.child,
+    this.padding = MxCardPadding.standard,
     this.isSelected,
     this.onTap,
     this.onLongPress,
     super.key,
-  }) : elevation = AppElevation.none;
+  }) : _spec = const _MxCardSpec(
+         elevation: AppElevation.card,
+         radius: AppRadius.lg,
+       ),
+       _selectionTreatment = MxCardSelectionTreatment.edge,
+       _recessedEdge = MxCardRecessedEdge.none,
+       _tone = null;
+
+  /// The focal surface a whole screen is built around: a study prompt.
+  ///
+  /// [AppRadius.xl] because a card filling the screen reads tighter at the
+  /// same corner as a list row does, and [AppElevation.raised] because the
+  /// prompt is deliberately lifted above its neighbours. Informational only —
+  /// the study screens' controls are their own widgets, so the recipe grows a
+  /// tap the day a focal caller has one.
+  const MxCard.focal({
+    required this.child,
+    this.padding = MxCardPadding.standard,
+    super.key,
+  }) : _spec = const _MxCardSpec(
+         elevation: AppElevation.raised,
+         radius: AppRadius.xl,
+       ),
+       isSelected = null,
+       _selectionTreatment = MxCardSelectionTreatment.edge,
+       _recessedEdge = MxCardRecessedEdge.none,
+       _tone = null,
+       onTap = null,
+       onLongPress = null;
+
+  /// The surface one step *down* from its surroundings: the study answer area,
+  /// where content is awaited, hidden or typed. `surfaceContainerLow` under
+  /// the focal card's corner, flat — the pair only reads as a pair because
+  /// this one steps back.
+  ///
+  /// [edge] is the one card edge that carries state, and it is closed: see
+  /// [MxCardRecessedEdge].
+  const MxCard.recessed({
+    required this.child,
+    this.padding = MxCardPadding.standard,
+    MxCardRecessedEdge edge = MxCardRecessedEdge.none,
+    super.key,
+  }) : _spec = const _MxCardSpec(
+         elevation: AppElevation.none,
+         radius: AppRadius.xl,
+         fill: _MxCardFill.recessed,
+       ),
+       isSelected = null,
+       _selectionTreatment = MxCardSelectionTreatment.edge,
+       _recessedEdge = edge,
+       _tone = null,
+       onTap = null,
+       onLongPress = null;
+
+  /// A feedback band the user must read — six error bands used to build this
+  /// exact card by hand (`errorContainer`, flat, compact padding), each inside
+  /// its own `Semantics(liveRegion:)`. The recipe owns the surface; the icon,
+  /// the copy and the live region stay with the caller, so the meaning is
+  /// never carried by colour alone.
+  const MxCard.feedback({
+    required this.child,
+    required MxCardFeedbackTone tone,
+    super.key,
+  }) : _spec = const _MxCardSpec(
+         elevation: AppElevation.none,
+         radius: AppRadius.lg,
+         fill: _MxCardFill.feedback,
+       ),
+       padding = MxCardPadding.compact,
+       isSelected = null,
+       _selectionTreatment = MxCardSelectionTreatment.edge,
+       _recessedEdge = MxCardRecessedEdge.none,
+       onTap = null,
+       onLongPress = null,
+       // Same shape as `selectionTreatment` above: private field, public name.
+       // ignore: prefer_initializing_formals
+       _tone = tone;
+
+  /// A quiet informational panel — helper copy beside the content it explains,
+  /// on `surfaceContainerHigh` so it reads as an aside rather than a card of
+  /// content. The import wizard's info panels are the callers.
+  const MxCard.muted({required this.child, super.key})
+    : _spec = const _MxCardSpec(
+        elevation: AppElevation.card,
+        radius: AppRadius.lg,
+        fill: _MxCardFill.muted,
+      ),
+      padding = MxCardPadding.compact,
+      isSelected = null,
+      _selectionTreatment = MxCardSelectionTreatment.edge,
+      _recessedEdge = MxCardRecessedEdge.none,
+      _tone = null,
+      onTap = null,
+      onLongPress = null;
+
+  /// An emphasized callout on `secondaryContainer` — the same one-step-quieter
+  /// emphasis `MxActionButton`'s tonal variant carries, on a surface: a panel
+  /// the screen wants noticed without out-weighing the page's own action.
+  /// Study Home's resume callout is the caller.
+  const MxCard.tonal({
+    required this.child,
+    this.padding = MxCardPadding.standard,
+    super.key,
+  }) : _spec = const _MxCardSpec(
+         elevation: AppElevation.none,
+         radius: AppRadius.lg,
+         fill: _MxCardFill.tonal,
+       ),
+       isSelected = null,
+       _selectionTreatment = MxCardSelectionTreatment.edge,
+       _recessedEdge = MxCardRecessedEdge.none,
+       _tone = null,
+       onTap = null,
+       onLongPress = null;
+
+  /// The accent-edged hero panel: raised, with `borderAccent` carrying the
+  /// emphasis a fill would overdo. The deck level summary is the caller.
+  const MxCard.accent({
+    required this.child,
+    this.padding = MxCardPadding.standard,
+    super.key,
+  }) : _spec = const _MxCardSpec(
+         elevation: AppElevation.raised,
+         radius: AppRadius.lg,
+         edge: _MxCardRestingEdge.accent,
+       ),
+       isSelected = null,
+       _selectionTreatment = MxCardSelectionTreatment.edge,
+       _recessedEdge = MxCardRecessedEdge.none,
+       _tone = null,
+       onTap = null,
+       onLongPress = null;
+
+  /// A small flat card at the control corner ([AppRadius.md]) for a dense item
+  /// row — the card-detail history event is the caller. A list-row card at the
+  /// card corner reads as a shrunken panel; at the control corner it reads as
+  /// an item.
+  const MxCard.tile({required this.child, super.key})
+    : _spec = const _MxCardSpec(
+        elevation: AppElevation.none,
+        radius: AppRadius.md,
+      ),
+      padding = MxCardPadding.compact,
+      isSelected = null,
+      _selectionTreatment = MxCardSelectionTreatment.edge,
+      _recessedEdge = MxCardRecessedEdge.none,
+      _tone = null,
+      onTap = null,
+      onLongPress = null;
+
+  /// A selectable option in a chooser, resting at `borderControl` — because an
+  /// option *is* a control, and a control's edge says so before it is picked
+  /// (owner review, M99.70: the export sheet keeps the control edge where the
+  /// import step keeps the hairline, and both reasons are written down).
+  const MxCard.option({
+    required this.child,
+    // Non-nullable on purpose: an option *is* a control with a selection
+    // state, so the tri-state's `null` ("not selectable at all") is not a
+    // meaning this recipe can carry — a caller writing `isSelected: null`
+    // would get an option that never announces.
+    required bool isSelected,
+    this.onTap,
+    super.key,
+  }) : // Not an initializing formal: `this.isSelected` would reopen the
+       // nullable tri-state this constructor exists to narrow.
+       // ignore: prefer_initializing_formals
+       isSelected = isSelected,
+       _spec = const _MxCardSpec(
+         elevation: AppElevation.none,
+         radius: AppRadius.lg,
+         edge: _MxCardRestingEdge.control,
+       ),
+       padding = MxCardPadding.compact,
+       _selectionTreatment = MxCardSelectionTreatment.edge,
+       _recessedEdge = MxCardRecessedEdge.none,
+       _tone = null,
+       onLongPress = null;
 
   final Widget child;
-  final EdgeInsetsGeometry padding;
 
-  /// The corner, for the one card that wants a different one.
-  ///
-  /// [AppRadius.xl] is the study card: a surface filling the screen reads
-  /// tighter at the same corner as a list row does. Every other caller leaves
-  /// this alone, and the four places the radius is used below — border, clip,
-  /// ink and focus ring — all read it, so they cannot disagree.
-  final double radius;
-
-  /// How far this card sits above the page. [AppElevation.none] returns it to a
-  /// flat bordered panel, which is what a card *inside* another surface wants —
-  /// a shadow stacked on a shadow reads as a rendering fault rather than depth.
-  final double elevation;
-
-  /// The card's surface, when it must not be `surface`.
-  ///
-  /// Null is the answer almost everywhere. It exists for a screen holding two
-  /// cards that mean different things — a prompt and the space for an answer —
-  /// where the pair only reads as a pair if one of them steps down.
-  final Color? color;
-
-  /// The card's hairline, when the edge is carrying a state.
-  ///
-  /// Null is `borderSubtle`, which is every card that is only a card. It exists
-  /// for a surface whose *whole* meaning has changed — `fill`'s answer card once
-  /// the turn is graded, where the verdict belongs to the card the learner typed
-  /// into rather than to a panel drawn inside it. A semantic role from
-  /// `AppSemanticColors`, the same way [color] takes a role from `ColorScheme`:
-  /// a caller passing an arbitrary colour would be inventing a second card
-  /// style, which is the thing this widget exists to prevent.
-  ///
-  /// Keyboard focus still wins — a focused tappable card draws its focus ring
-  /// over this, because "you are here" outranks "this is how it went".
-  final Color? borderColor;
+  /// See [MxCardPadding]. Recipes whose density is part of their meaning
+  /// (feedback, muted, tile, option) fix it instead of exposing it.
+  final MxCardPadding padding;
 
   /// Makes the whole card a target. Null leaves it a plain surface.
   ///
-  /// No accompanying `semanticLabel`. The `InkWell` below already announces the
-  /// card as a button and its children supply the name — a card whose content is
-  /// readable text does not need a second one, and an override would *hide* that
-  /// content from a screen reader rather than adding to it. If a caller ever has
-  /// a card whose contents genuinely do not name it, that is the point to add it,
-  /// with the caller in hand to check the announcement against.
+  /// No accompanying `semanticLabel`. The card annotates itself as a button —
+  /// `Semantics(button:)` over the ink, because an `InkWell` contributes a tap
+  /// action and focusability but not the flag — and its children supply the
+  /// name: a card whose content is readable text does not need a second one,
+  /// and an override would *hide* that content from a screen reader rather
+  /// than adding to it.
   final VoidCallback? onTap;
 
   /// Long-press on the whole surface — the Android gesture for entering a
-  /// selection mode. Optional and independent of [onTap]: a card may be
-  /// tappable without being selectable, and the ink layer already exists.
+  /// selection mode. Independent of [onTap]: a long-press-only card still
+  /// builds the ink layer, which is the branch the first version of this
+  /// dropped — the callback existed and could never fire.
   final VoidCallback? onLongPress;
 
   /// Whether this card is the picked one, and the card owns what that means:
   /// the border switches to `secondary` and the node announces `selected`.
   ///
-  /// **`secondary`, and it is measured, not preferred.** Three sites used to
-  /// spell selection themselves, and the one that wrote `primary` was the one
-  /// that could not be seen: dark `primary` measures **2.90:1** on `surface`
-  /// — under WCAG 1.4.11's 3:1 — and 1.42:1 against the hairlines beside it,
-  /// a border that stopped saying anything while looking as though it did.
-  /// `secondary` measures 8.77:1 in dark and 7.33:1 in light, and it is the
-  /// token the card tile's check mark, the import step's glyph and the trash
-  /// row's box already mean "picked" by.
-  ///
-  /// What stays with the caller: any selected *fill* (the card tile tints
-  /// `secondaryContainer` so a scanning eye catches rows a border alone would
-  /// let slide) and the resting border ([borderColor] still applies whenever
-  /// this is not true).
+  /// **`secondary`, and it is measured, not preferred.** Dark `primary` on
+  /// `surface` measures **2.90:1** — under WCAG 1.4.11's 3:1 — while
+  /// `secondary` measures 8.77:1 in dark and 7.33:1 in light (M99.70).
   ///
   /// **Tri-state, because "not selected" is only sometimes a fact.** `null`
   /// is a card that is not selectable at all and says nothing. `false` is a
@@ -161,80 +389,185 @@ class MxCard extends StatefulWidget {
   /// the app turns into a poll.
   final bool? isSelected;
 
+  final _MxCardSpec _spec;
+  final MxCardSelectionTreatment _selectionTreatment;
+  final MxCardRecessedEdge _recessedEdge;
+  final MxCardFeedbackTone? _tone;
+
   @override
   State<MxCard> createState() => _MxCardState();
 }
 
 class _MxCardState extends State<MxCard> {
-  /// Only ever true on a tappable card: an `InkWell` is the one thing here that
-  /// can take focus, and it is built only when [MxCard.onTap] is non-null.
+  /// Only ever true on an interactive card: an `InkWell` is the one thing here
+  /// that can take focus, and it is built only when the card has a callback.
   bool _isFocused = false;
+
+  bool get _isInteractive => widget.onTap != null || widget.onLongPress != null;
+
+  @override
+  void initState() {
+    super.initState();
+    // The ring is keyboard-only, and the mode can change while a card is
+    // focused (plugging in a keyboard, the first key press). Listening is what
+    // keeps the ring honest in both directions rather than only at the next
+    // focus change. Interactive cards only: a list of fifty plain panels must
+    // not pay fifty listeners for an event none of them can ever act on.
+    if (_isInteractive) {
+      FocusManager.instance.addHighlightModeListener(_onHighlightModeChanged);
+    }
+  }
+
+  @override
+  void didUpdateWidget(MxCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final wasInteractive =
+        oldWidget.onTap != null || oldWidget.onLongPress != null;
+    if (wasInteractive == _isInteractive) return;
+
+    if (_isInteractive) {
+      FocusManager.instance.addHighlightModeListener(_onHighlightModeChanged);
+      return;
+    }
+    FocusManager.instance.removeHighlightModeListener(_onHighlightModeChanged);
+    // The InkWell is unmounted before it can report the blur, so the fact is
+    // reset here — a panel must not keep the ring the control left behind.
+    _isFocused = false;
+  }
+
+  @override
+  void dispose() {
+    // Registered iff currently interactive — didUpdateWidget maintains the
+    // invariant on every transition.
+    if (_isInteractive) {
+      FocusManager.instance.removeHighlightModeListener(
+        _onHighlightModeChanged,
+      );
+    }
+    super.dispose();
+  }
+
+  void _onHighlightModeChanged(FocusHighlightMode mode) {
+    if (!_isFocused) return;
+    setState(() {});
+  }
 
   void _onFocusChanged(bool isFocused) {
     if (isFocused == _isFocused) return;
     setState(() => _isFocused = isFocused);
   }
 
+  /// Keyboard focus only, on an interactive card only. Focus that arrived
+  /// from a pointer or from a programmatic move on a touch screen draws no
+  /// ring — the same gate `MxActionButton._takesFocus` applies, for the same
+  /// reason: a keyboard affordance without a keyboard makes one control read
+  /// as a different component (M99.75). The `_isInteractive` leg is
+  /// belt-and-braces over the `didUpdateWidget` reset: a plain panel can
+  /// never wear a ring even if the focus fact went stale.
+  bool get _isFocusVisible =>
+      _isInteractive &&
+      _isFocused &&
+      FocusManager.instance.highlightMode == FocusHighlightMode.traditional;
+
+  Color _fillColor(ColorScheme scheme) {
+    if ((widget.isSelected ?? false) &&
+        widget._selectionTreatment == MxCardSelectionTreatment.tint) {
+      return scheme.secondaryContainer;
+    }
+
+    return switch (widget._spec.fill) {
+      _MxCardFill.surface => scheme.surface,
+      _MxCardFill.recessed => scheme.surfaceContainerLow,
+      _MxCardFill.muted => scheme.surfaceContainerHigh,
+      _MxCardFill.tonal => scheme.secondaryContainer,
+      // Exhaustive over the tone so a second tone fails the build here
+      // rather than silently rendering as danger.
+      _MxCardFill.feedback => switch (widget._tone!) {
+        MxCardFeedbackTone.danger => scheme.errorContainer,
+      },
+    };
+  }
+
+  Color _restingEdgeColor(BuildContext context) {
+    final scheme = context.colors;
+    final semantic = context.semanticColors;
+    // Precedence below the focus ring: selected > the recipe's stateful edge >
+    // the recipe's resting edge. "This is the picked one" outranks a state the
+    // recipe painted, which outranks decoration.
+    if (widget.isSelected ?? false) return scheme.secondary;
+
+    switch (widget._recessedEdge) {
+      case MxCardRecessedEdge.focus:
+        return semantic.focusRing;
+      case MxCardRecessedEdge.success:
+        return semantic.success;
+      case MxCardRecessedEdge.danger:
+        return semantic.danger;
+      case MxCardRecessedEdge.none:
+        break;
+    }
+
+    return switch (widget._spec.edge) {
+      _MxCardRestingEdge.subtle => semantic.borderSubtle,
+      _MxCardRestingEdge.control => semantic.borderControl,
+      _MxCardRestingEdge.accent => semantic.borderAccent,
+    };
+  }
+
+  EdgeInsetsGeometry get _paddingInsets => switch (widget.padding) {
+    MxCardPadding.none => EdgeInsets.zero,
+    MxCardPadding.compact => const EdgeInsets.all(AppSpacing.md),
+    MxCardPadding.standard => const EdgeInsets.all(AppSpacing.lg),
+  };
+
   @override
   Widget build(BuildContext context) {
     final scheme = context.colors;
-    // The focus ring replaces the hairline rather than sitting outside it. Both
-    // are painted on the border box, so the swap moves nothing beside the card
-    // and nothing inside it.
-    // Precedence: focus > selected > the caller's border > the hairline.
-    // "You are here" outranks "this is the picked one", which outranks a
-    // state the caller painted, which outranks decoration.
-    final border = _isFocused
+    final radius = widget._spec.radius;
+    // The focus ring replaces the hairline rather than sitting outside it.
+    // Both are painted on the border box, so the swap moves nothing beside
+    // the card and nothing inside it.
+    final border = _isFocusVisible
         ? Border.fromBorderSide(
             AppInteractionStates.focusRing(context.semanticColors),
           )
-        : Border.all(
-            color: widget.isSelected ?? false
-                ? scheme.secondary
-                : widget.borderColor ?? context.semanticColors.borderSubtle,
-          );
+        : Border.all(color: _restingEdgeColor(context));
     final decoration = BoxDecoration(
-      // **A role, not a colour.** `surface` is the card; a caller passes another
-      // *scheme* role when the card is one step down from the surface around it
-      // — a study screen's answer area against its prompt, which is how the
-      // reader knows one is waiting to be filled and the other is not.
-      color: widget.color ?? scheme.surface,
-      borderRadius: BorderRadius.circular(widget.radius),
+      color: _fillColor(scheme),
+      borderRadius: BorderRadius.circular(radius),
       border: border,
-      boxShadow: shadowsFor(widget.elevation, scheme),
+      boxShadow: shadowsFor(widget._spec.elevation, scheme),
     );
-    // **The card clips what it holds.** Anything a caller seats on an edge — the
-    // deck card puts a progress track on its base — is otherwise cut by its own
-    // box rather than by the card's corner: a `ClipRRect` around a 4px-tall bar
-    // clamps a 16px radius down to 4, so the bar keeps its full width where the
-    // card's surface has already curved inward, and the colour runs past the
-    // corner. Clipping here is the only place that knows the real geometry.
-    // `antiAlias`, not `hardEdge`: a 16px curve stepped by whole pixels is
-    // visible against a hairline border.
+    // **The card clips what it holds.** Anything a caller seats on an edge —
+    // the deck card puts a progress track on its base — is otherwise cut by
+    // its own box rather than by the card's corner: a `ClipRRect` around a
+    // 4px-tall bar clamps a 16px radius down to 4. Clipping here is the only
+    // place that knows the real geometry. `antiAlias`, not `hardEdge`: a
+    // curve stepped by whole pixels is visible against a hairline border.
     final content = ClipRRect(
-      borderRadius: BorderRadius.circular(widget.radius),
-      child: Padding(padding: widget.padding, child: widget.child),
+      borderRadius: BorderRadius.circular(radius),
+      child: Padding(padding: _paddingInsets, child: widget.child),
     );
 
     final tap = widget.onTap;
-    if (tap == null) {
+    final longPress = widget.onLongPress;
+    if (tap == null && longPress == null) {
       final box = DecoratedBox(decoration: decoration, child: content);
       if (widget.isSelected == null) return box;
 
       return Semantics(selected: widget.isSelected, child: box);
     }
 
-    // `button: true` and nothing else. An `InkWell` contributes a tap action and
-    // focusability but **not** the button flag — a screen reader would read the
-    // card's text and never say it can be activated. Annotating rather than
-    // labelling is the whole point: adding a `label` here would replace the
-    // children's text instead of naming the control, which is the mistake the
-    // first version of this made.
+    // `button: true` only when there is a tap — a long-press-only card offers
+    // an action, not an activation. An `InkWell` contributes the tap action
+    // and focusability but **not** the button flag; annotating rather than
+    // labelling is the point, because a `label` here would replace the
+    // children's text instead of naming the control.
     return DecoratedBox(
       decoration: decoration,
       child: Semantics(
-        button: true,
-        // Passed through as the tri-state it is; see [isSelected].
+        button: tap != null,
+        // Passed through as the tri-state it is; see [MxCard.isSelected].
         selected: widget.isSelected,
         child: Material(
           // Transparency rather than a colour: the `DecoratedBox` around it
@@ -243,14 +576,23 @@ class _MxCardState extends State<MxCard> {
           type: MaterialType.transparency,
           child: InkWell(
             onTap: tap,
-            onLongPress: widget.onLongPress,
+            onLongPress: longPress,
             onFocusChange: _onFocusChanged,
             // One property for hover, press and focus, so the three cannot be
             // set from three different places. It also clips to the card's own
             // corner, because `borderRadius` below governs the whole ink layer.
             overlayColor: AppInteractionStates.cardOverlay(scheme),
-            borderRadius: BorderRadius.circular(widget.radius),
-            child: content,
+            borderRadius: BorderRadius.circular(radius),
+            // A pressable thing is a target: 48 is the floor every control in
+            // this app keeps, and it must be structural rather than an
+            // accident of the padding.
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minWidth: AppSpacing.minimumTouchTarget,
+                minHeight: AppSpacing.minimumTouchTarget,
+              ),
+              child: content,
+            ),
           ),
         ),
       ),

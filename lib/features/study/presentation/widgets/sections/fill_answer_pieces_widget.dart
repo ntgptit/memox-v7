@@ -39,9 +39,7 @@ class _PromptCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final shown = hint;
 
-    return MxCard(
-      elevation: AppElevation.raised,
-      radius: AppRadius.xl,
+    return MxCard.focal(
       child: Center(
         child: SingleChildScrollView(
           child: Column(
@@ -106,19 +104,15 @@ class _AnswerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final semantic = context.semanticColors;
     final graded = verdict;
-    final surface = context.colors.surfaceContainerLow;
 
     // **The verdict is worn by the card, not by a panel drawn inside it.** A
     // block with its own outline under the answer is the same nesting the field
     // was just taken out of, and it re-states a surface that is already saying
     // one thing.
     if (graded != null) {
-      return MxCard.flat(
-        radius: AppRadius.xl,
-        color: surface,
-        borderColor: graded ? semantic.success : semantic.danger,
+      return MxCard.recessed(
+        edge: graded ? MxCardRecessedEdge.success : MxCardRecessedEdge.danger,
         child: _Verdict(term: term, isCorrect: graded),
       );
     }
@@ -130,13 +124,13 @@ class _AnswerCard extends StatelessWidget {
         // editable is part of the target rather than a hole in it.
         behavior: HitTestBehavior.opaque,
         onTap: focusNode.requestFocus,
-        child: MxCard.flat(
-          radius: AppRadius.xl,
-          color: surface,
+        child: MxCard.recessed(
           // The card carries focus the way a field would, because it is the
           // field. Without it the only sign the keyboard belongs to this surface
           // is a caret two lines tall in the middle of it.
-          borderColor: focusNode.hasFocus ? semantic.focusRing : null,
+          edge: focusNode.hasFocus
+              ? MxCardRecessedEdge.focus
+              : MxCardRecessedEdge.none,
           child: _FillInput(
             controller: controller,
             focusNode: focusNode,

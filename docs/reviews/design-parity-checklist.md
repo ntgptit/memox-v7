@@ -716,3 +716,30 @@ Contrast đo tại `deck_workload_role_test.dart`: info/surface 5.23:1 (light),
 7.84:1 (dark); onStreakContainer/streakContainer ≥ 4.5:1 hai theme;
 progressFill/progressTrack ≥ 3:1 hai theme.
 
+
+## MxCard recipe closure pass (M99.83, 2026-08-28)
+
+C4 (`MxCard`) đổi contract: public API không còn `color`/`borderColor`/
+`radius`/`elevation`/`padding: EdgeInsets` — mười named recipe (`flat`,
+`raised`, `focal`, `recessed`, `feedback`, `muted`, `tonal`, `accent`, `tile`,
+`option`) map 1-1 vào private spec, AD-23 là chủ quyết định. 48/48 production
+call-site migrate; C1 (`MxActionButton`) không đổi implementation — audit
+M99.83 xác nhận baseline M99.74/M99.75 bằng 20 case state matrix trên 4 theme.
+
+**Hai delta pixel, phân loại theo taxonomy của review:**
+
+1. *Intended canonicalization* — `study_browse_light.png`: mặt
+   browse/self-assess của study (`study_card_face_section_widget.dart`)
+   elevation `card` → `raised` khi vào recipe `focal` — ba focal prompt còn
+   lại (recall, guess, fill) đã `raised` sẵn, nên đây là cùng loại drift
+   M99.70 gom về `flat`, không phải một quyết định mới. Đo trên golden: chỉ
+   shadow light mode, max delta 8/255 (dark không vẽ shadow, AD-14).
+2. *Required accessibility fix* — `card_editor_edit.png`: hàng Review history
+   của editor cao 44dp → 48dp khi card tương tác nhận sàn 48 structural.
+   Comment cũ tại site khai "compact brings it to 48 at the default text
+   size" nhưng render thật là 44 — target dưới sàn trên thứ duy nhất bấm được
+   của khối context. Nội dung vẫn giữa card; mọi thứ dưới dịch xuống 4dp.
+
+Mọi call-site còn lại pixel-identical: padding bất đối xứng chuyển thành
+`Padding` trong child của chính card đó, và hai golden trên là hai file PNG
+duy nhất đổi trong 295.

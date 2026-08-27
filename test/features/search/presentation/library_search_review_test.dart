@@ -111,6 +111,17 @@ void main() {
     // documentation measures the 10% wash at ~1.15:1, so the ring is the part
     // that carries the requirement — and a hand-drawn `Material` + `InkWell`
     // has none. This row is an `MxCard` now, which does.
+    // A keyboard has to exist for the claim to be checkable: widget tests
+    // start in touch mode, and the ring is now keyboard-only — the same gate
+    // `MxActionButton.shouldAutofocus` follows (M99.75, and MxCard since
+    // M99.83). Without this the test would assert an affordance the platform
+    // it simulates deliberately does not draw.
+    FocusManager.instance.highlightStrategy =
+        FocusHighlightStrategy.alwaysTraditional;
+    addTearDown(
+      () => FocusManager.instance.highlightStrategy =
+          FocusHighlightStrategy.automatic,
+    );
     await pumpSearchScreen(
       tester,
       repository: FakeLibrarySearchRepository.serving(

@@ -155,7 +155,7 @@ class _ParsingPanel extends ConsumerWidget {
     final l10n = context.l10n;
     final kind = ref.watch(cardImportSourceChoiceProvider(deckId));
 
-    return MxCard(
+    return MxCard.raised(
       child: Column(
         children: <Widget>[
           const SizedBox(height: AppSpacing.md),

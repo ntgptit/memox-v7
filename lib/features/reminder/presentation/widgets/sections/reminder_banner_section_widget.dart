@@ -43,17 +43,8 @@ class ReminderBannerSectionWidget extends StatelessWidget {
       // one block rather than two — the sibling band does the same.
       container: true,
       liveRegion: true,
-      child: MxCard.flat(
-        color: context.colors.errorContainer,
-        // `md`, not `MxCard`'s default `lg`: the two in-flow error bands are
-        // one tap apart and were four decisions apart — retry side, padding,
-        // message style, and the gap before the button. Settled on the
-        // Settings band's answers (owner decision, 2026-08-15) because that
-        // band already carries its own review and goldens, so unifying moves
-        // the newer screen rather than the settled one.
-        padding: const EdgeInsets.all(AppSpacing.md),
-        // A shadow stacked on a shadow is a rendering fault rather than
-        // depth: this banner sits inside a scrolling body of flat cards (D20).
+      child: MxCard.feedback(
+        tone: MxCardFeedbackTone.danger,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[

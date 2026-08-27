@@ -81,9 +81,7 @@ class CardImportResultWidget extends StatelessWidget {
           ),
           if (helperCopy != null) ...<Widget>[
             const SizedBox(height: AppSpacing.md),
-            MxCard(
-              color: context.colors.surfaceContainerHigh,
-              padding: const EdgeInsets.all(AppSpacing.md),
+            MxCard.muted(
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -150,7 +148,7 @@ class _HeroCard extends StatelessWidget {
       ),
     };
 
-    return MxCard(
+    return MxCard.raised(
       child: Column(
         children: <Widget>[
           const SizedBox(height: AppSpacing.md),
@@ -196,41 +194,44 @@ class _SummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    return MxCard(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.xs,
-      ),
-      child: Column(
-        children: <Widget>[
-          _SummaryRow(
-            icon: Icons.check,
-            iconColor: AppInk.secondary,
-            label: l10n.cardImportAddedRowLabel,
-            count: result.imported,
-          ),
-          if (invalidCount > 0)
+    return MxCard.raised(
+      padding: MxCardPadding.none,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.xs,
+        ),
+        child: Column(
+          children: <Widget>[
             _SummaryRow(
-              icon: Icons.error_outline,
-              iconColor: AppInk.error,
-              label: l10n.cardImportInvalidSkippedRowLabel,
-              count: invalidCount,
+              icon: Icons.check,
+              iconColor: AppInk.secondary,
+              label: l10n.cardImportAddedRowLabel,
+              count: result.imported,
             ),
-          if (result.duplicatesSkipped > 0)
-            _SummaryRow(
-              icon: Icons.copy_outlined,
-              iconColor: AppInk.tertiary,
-              label: l10n.cardImportDuplicatesSkippedRowLabel,
-              count: result.duplicatesSkipped,
-            ),
-          if (blankCount > 0)
-            _SummaryRow(
-              icon: Icons.remove,
-              iconColor: AppInk.quiet,
-              label: l10n.cardImportBlankIgnoredRowLabel,
-              count: blankCount,
-            ),
-        ],
+            if (invalidCount > 0)
+              _SummaryRow(
+                icon: Icons.error_outline,
+                iconColor: AppInk.error,
+                label: l10n.cardImportInvalidSkippedRowLabel,
+                count: invalidCount,
+              ),
+            if (result.duplicatesSkipped > 0)
+              _SummaryRow(
+                icon: Icons.copy_outlined,
+                iconColor: AppInk.tertiary,
+                label: l10n.cardImportDuplicatesSkippedRowLabel,
+                count: result.duplicatesSkipped,
+              ),
+            if (blankCount > 0)
+              _SummaryRow(
+                icon: Icons.remove,
+                iconColor: AppInk.quiet,
+                label: l10n.cardImportBlankIgnoredRowLabel,
+                count: blankCount,
+              ),
+          ],
+        ),
       ),
     );
   }

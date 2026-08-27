@@ -399,7 +399,7 @@ void main() {
   group('small screen and large text', () {
     /// Every component, in the two conditions that actually break layouts.
     final cases = <String, Widget>{
-      'MxCard': const MxCard(
+      'MxCard': const MxCard.raised(
         child: Text('A prompt long enough to wrap on a narrow phone screen'),
       ),
       'MxContentShell': const MxContentShell(

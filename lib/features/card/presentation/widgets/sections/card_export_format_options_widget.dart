@@ -195,7 +195,7 @@ class _FormatOption extends StatelessWidget {
         // layer; MergeSemantics folds them into this same single stop. What
         // the card cannot know is that these options exclude each other.
         inMutuallyExclusiveGroup: true,
-        child: MxCard.flat(
+        child: MxCard.option(
           onTap: onTap,
           // **No `color`, unlike the card tile, and the badge is the reason.**
           // `card_tile_widget.dart` says "this one is picked" with
@@ -226,15 +226,10 @@ class _FormatOption extends StatelessWidget {
           // `card_tile_widget.dart` already use for "selected", so the sheet no
           // longer holds a second opinion about which accent means picked.
           // Selected comes from [MxCard.isSelected] (the same measured
-          // `secondary` this site moved to first); the resting border stays
-          // `borderControl`, because these options are controls, not panels.
+          // `secondary` this site moved to first); the resting `borderControl`
+          // edge is the option recipe's own, because these options are
+          // controls, not panels.
           isSelected: isSelected,
-          borderColor: context.semanticColors.borderControl,
-          // Flat, because this card sits *inside* the sheet's own surface.
-          // `MxCard`'s doc calls a shadow stacked on a shadow a rendering fault,
-          // and every card the app nests in another surface — the card tile, the
-          // deck tile, the progress panel, `fill`'s answer area — passes this.
-          padding: const EdgeInsets.all(AppSpacing.md),
           // No width of its own: the band above decides whether this is a
           // third of a row or the whole column, and a minWidth here is
           // precisely what makes a row of cards size to its text instead of

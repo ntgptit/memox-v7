@@ -84,37 +84,39 @@ class _SettingsChoiceSectionWidgetState<T extends Enum>
     return SettingsSectionWidget(
       label: widget.sectionLabel,
       child: MxCard.flat(
-        // Flat, like every other card in a scrolling column (D20). This
-        // screen was the last one still taking `AppElevation.card`, and
-        // its own error band already passes `none` for the same reason.
-        // Vertical only: each row's touch target and ink span the full card
-        // width, and every row carries the horizontal gutter itself so its
-        // content still lines up with the other cards (W5).
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            SettingsChoiceRowsWidget<T>(
-              values: widget.values,
-              selected: widget.selected,
-              labelOf: widget.labelOf,
-              onChanged: _onChanged,
-              isSubmitting: widget.isSubmitting,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.lg,
-              ),
-            ),
-            if (band != null) ...<Widget>[
-              const SizedBox(height: AppSpacing.sm),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-                child: SettingsErrorBandWidget(
-                  failure: band,
-                  onRetry: widget.isSubmitting ? null : _retry,
+        // Vertical breath only: each row's touch target and ink span the full
+        // card width, and every row carries the horizontal gutter itself so
+        // its content still lines up with the other cards (W5).
+        padding: MxCardPadding.none,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              SettingsChoiceRowsWidget<T>(
+                values: widget.values,
+                selected: widget.selected,
+                labelOf: widget.labelOf,
+                onChanged: _onChanged,
+                isSubmitting: widget.isSubmitting,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg,
                 ),
               ),
+              if (band != null) ...<Widget>[
+                const SizedBox(height: AppSpacing.sm),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                  ),
+                  child: SettingsErrorBandWidget(
+                    failure: band,
+                    onRetry: widget.isSubmitting ? null : _retry,
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

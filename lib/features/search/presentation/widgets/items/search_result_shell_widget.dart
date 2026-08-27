@@ -49,29 +49,33 @@ class SearchResultShellWidget extends StatelessWidget {
       label: semanticLabel,
       child: MxCard.flat(
         // Flat: this card sits inside a list on the page's own surface, and a
-        // shadow per row would make the list read as a stack of sheets.
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.lg,
-          vertical: AppSpacing.md,
-        ),
+        // shadow per row would make the list read as a stack of sheets. The
+        // row's content area is its own — tighter ends than sides.
+        padding: MxCardPadding.none,
         onTap: onOpen,
-        child: ConstrainedBox(
-          // The row is taller than this at every scale that has been measured;
-          // the floor is here so a future single-line variant cannot fall under
-          // the target a finger needs.
-          constraints: const BoxConstraints(
-            minHeight: AppSpacing.minimumTouchTarget,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
           ),
-          child: ExcludeSemantics(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                MxIcon(icon, size: MxIconSize.sm),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(child: child),
-                const SizedBox(width: AppSpacing.sm),
-                const MxIcon(Icons.north_east, size: MxIconSize.sm),
-              ],
+          child: ConstrainedBox(
+            // The row is taller than this at every scale that has been measured;
+            // the floor is here so a future single-line variant cannot fall under
+            // the target a finger needs.
+            constraints: const BoxConstraints(
+              minHeight: AppSpacing.minimumTouchTarget,
+            ),
+            child: ExcludeSemantics(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  MxIcon(icon, size: MxIconSize.sm),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(child: child),
+                  const SizedBox(width: AppSpacing.sm),
+                  const MxIcon(Icons.north_east, size: MxIconSize.sm),
+                ],
+              ),
             ),
           ),
         ),

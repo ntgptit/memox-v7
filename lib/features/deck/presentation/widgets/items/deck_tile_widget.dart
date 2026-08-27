@@ -69,7 +69,7 @@ class DeckTileWidget extends StatelessWidget {
     // and were not. `MxCard` takes the tap; the overflow menu is a nested button
     // and wins the gesture arena over it, so it stays its own action.
     return MxCard.flat(
-      padding: EdgeInsets.zero,
+      padding: MxCardPadding.none,
       onTap: onTap,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

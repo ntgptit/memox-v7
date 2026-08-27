@@ -79,10 +79,9 @@ class ReminderSettingsSectionWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         MxCard.flat(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-          // Flat, like every card in a scrolling body (D20): the hairline
-          // carries the edge, and a shadow here would be the only one on a
-          // screen the user reaches from three flat ones.
+          // The rows own the horizontal gutter so their ink spans the card's
+          // full width; only the vertical breath is this section's.
+          padding: MxCardPadding.none,
           // `Material` inside the card, and it is not decoration: `MxCard`
           // paints its surface with a `DecoratedBox`, and `ListTile` paints its
           // background and ink onto the nearest `Material` ancestor — which
@@ -91,19 +90,22 @@ class ReminderSettingsSectionWidget extends StatelessWidget {
           // still what shows.
           child: Material(
             type: MaterialType.transparency,
-            child: Column(
-              children: <Widget>[
-                ReminderToggleRowWidget(
-                  isEnabled: settings.isEnabled,
-                  isChangeable: canToggle,
-                  onChanged: onEnabledChanged,
-                ),
-                ReminderTimeRowWidget(
-                  time: settings.time,
-                  isChangeable: canPickTime,
-                  onTap: () => onTimePressed(settings.time),
-                ),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+              child: Column(
+                children: <Widget>[
+                  ReminderToggleRowWidget(
+                    isEnabled: settings.isEnabled,
+                    isChangeable: canToggle,
+                    onChanged: onEnabledChanged,
+                  ),
+                  ReminderTimeRowWidget(
+                    time: settings.time,
+                    isChangeable: canPickTime,
+                    onTap: () => onTimePressed(settings.time),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

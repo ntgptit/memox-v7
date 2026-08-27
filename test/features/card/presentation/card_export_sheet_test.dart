@@ -203,27 +203,31 @@ void main() {
       // mx_card_test; what can regress *here* is whether this widget still
       // hands the state to the card instead of spelling a colour again.
       expect(csv.isSelected, isTrue);
-      // No fill, and that is a decision rather than an omission: a
-      // `secondaryContainer` card swallows the `secondaryContainer` pill the
-      // `Recommended` badge is made of, on the one option that has one.
-      expect(csv.color, isNull);
 
       // The resting option is the same case `borderControl` was written for:
-      // its fill *is* the sheet's, so the edge is the whole component.
-      final tsv = tester.widget<MxCard>(
+      // its fill *is* the sheet's, so the edge is the whole component. The
+      // option recipe owns that edge now, so the claim reads the rendered
+      // border — the observable outcome — rather than a parameter the closed
+      // API no longer has.
+      final tsvFinder = find
+          .ancestor(
+            of: find.text(CardTransferFormat.tsv.fileExtension.toUpperCase()),
+            matching: find.byType(MxCard),
+          )
+          .first;
+      final tsv = tester.widget<MxCard>(tsvFinder);
+      expect(tsv.isSelected, isFalse);
+      final tsvBox = tester.widget<DecoratedBox>(
         find
-            .ancestor(
-              of: find.text(CardTransferFormat.tsv.fileExtension.toUpperCase()),
-              matching: find.byType(MxCard),
-            )
+            .descendant(of: tsvFinder, matching: find.byType(DecoratedBox))
             .first,
       );
-      expect(tsv.isSelected, isFalse);
+      final tsvBorder =
+          ((tsvBox.decoration as BoxDecoration).border! as Border).top;
       expect(
-        tsv.borderColor,
+        tsvBorder.color,
         buildDarkTheme().extension<AppSemanticColors>()!.borderControl,
       );
-      expect(tsv.color, isNull);
     });
 
     testWidgets('the icon-only entry controls carry labels', (tester) async {

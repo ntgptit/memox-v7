@@ -174,7 +174,7 @@ class _SourceOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MxCard(
+    return MxCard.raised(
       onTap: onTap,
       // Border, announcement and — the part this site got wrong — the token
       // all come from [MxCard.isSelected]: this card spelled `primary`, the
@@ -182,7 +182,7 @@ class _SourceOption extends StatelessWidget {
       // measured and moved off of. No background tint: the glyph and the
       // border carry the state.
       isSelected: isSelected,
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: MxCardPadding.compact,
       // No width constraint of its own: the band above decides whether this
       // card is half a row or a full one, and a minWidth here is what made
       // the pair size to their text instead of to the column.
@@ -281,7 +281,7 @@ class _UploadPanel extends ConsumerWidget {
       );
     }
 
-    return MxCard(
+    return MxCard.raised(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
@@ -338,11 +338,7 @@ class _InfoPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    return MxCard(
-      color: colors.surfaceContainerHigh,
-      padding: const EdgeInsets.all(AppSpacing.md),
+    return MxCard.muted(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[

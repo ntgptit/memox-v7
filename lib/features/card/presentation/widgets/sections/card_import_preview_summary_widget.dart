@@ -112,37 +112,40 @@ class CardImportPreviewSummaryWidget extends ConsumerWidget {
         // The rows live on one grouped surface (concept states 3-4): a list
         // the eye reads as a single table, not loose lines on the page. The
         // hairline dividers keep the row rhythm without alternating tints.
-        MxCard(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.xs,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              for (var index = 0; index < shown.length; index++) ...<Widget>[
-                if (index > 0)
-                  Divider(
-                    height: AppSpacing.xs,
-                    color: context.colors.outlineVariant,
-                  ),
-                CardImportRowPreviewWidget(row: shown[index]),
-              ],
-              if (hiddenCount > 0)
-                Padding(
-                  padding: const EdgeInsets.only(
-                    top: AppSpacing.xs,
-                    bottom: AppSpacing.xs,
-                  ),
-                  child: Text(
-                    l10n.cardImportMoreRowsLabel(hiddenCount),
-                    style: context.texts.bodySmall!.inked(
-                      context,
-                      AppInk.quiet,
+        MxCard.raised(
+          padding: MxCardPadding.none,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.xs,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                for (var index = 0; index < shown.length; index++) ...<Widget>[
+                  if (index > 0)
+                    Divider(
+                      height: AppSpacing.xs,
+                      color: context.colors.outlineVariant,
+                    ),
+                  CardImportRowPreviewWidget(row: shown[index]),
+                ],
+                if (hiddenCount > 0)
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      top: AppSpacing.xs,
+                      bottom: AppSpacing.xs,
+                    ),
+                    child: Text(
+                      l10n.cardImportMoreRowsLabel(hiddenCount),
+                      style: context.texts.bodySmall!.inked(
+                        context,
+                        AppInk.quiet,
+                      ),
                     ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ],

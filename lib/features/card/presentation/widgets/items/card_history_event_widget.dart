@@ -90,12 +90,7 @@ class CardHistoryEventWidget extends StatelessWidget {
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                  child: MxCard.flat(
-                    // Flat, like every other surface in this column (D20). A
-                    // shadow on each of eight event cards is a stack of shadows,
-                    // which reads as a rendering fault rather than as depth.
-                    radius: AppRadius.md,
-                    padding: const EdgeInsets.all(AppSpacing.md),
+                  child: MxCard.tile(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,

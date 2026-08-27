@@ -71,11 +71,12 @@ class CardTileWidget extends StatelessWidget {
         onTap: onTap,
         onLongPress: onLongPress,
         // The border and the announcement come from [MxCard.isSelected]; the
-        // tint stays here, because a scanning eye catches rows a border alone
-        // lets slide. The height does not move between the two states — the
-        // check replaces the state dot in the same column rather than being
-        // inserted beside it — so a list does not reflow as the user selects.
-        color: isSelected ? context.colors.secondaryContainer : null,
+        // tinted treatment adds the fill, because a scanning eye catches rows
+        // a border alone lets slide. The height does not move between the two
+        // states — the check replaces the state dot in the same column rather
+        // than being inserted beside it — so a list does not reflow as the
+        // user selects.
+        selectionTreatment: MxCardSelectionTreatment.tint,
         isSelected: isSelectionMode ? isSelected : null,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
