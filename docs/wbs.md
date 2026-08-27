@@ -14055,6 +14055,47 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Editable documents:** `docs/wbs.md`
 - **Dependencies:** M99.69
 
+### M99.74 · Nút chính và phụ đồng nhất — audit toàn app, một ca lệch, một rule bịt vùng mù
+
+- **Status:** **done** — trả lời câu hỏi "button chính/phụ có nơi nào phát
+  triển kiểu riêng không?" bằng đo đạc, không bằng cảm giác.
+- **Goal:** mọi control hành xử như nút chính/phụ vẽ qua đúng một bộ state
+  resolver; chỗ nào từng lệch thì hết đường lệch lại.
+- **Scope:** xoá `MxIconButton.isFilled` (mồ côi + style phẳng); rule guard
+  mới `no_flat_style_from` scope `widget_ui_files`; skill §XIV cập nhật.
+- **Kết quả audit — đồng nhất ở mọi nơi đo được:** `FilledButton`/
+  `OutlinedButton` chỉ tồn tại trong `MxActionButton` với resolver dùng
+  chung; mọi Cancel/Close là `MxActionButton.secondary` (một spelling);
+  pill chỉ làm filter/range, không giả làm nút hành động; FAB restate đủ
+  state wash theo pair-rule; SegmentedButton (planned) dùng resolver chuẩn;
+  IconButton trần duy nhất (search clear) đi qua slot theme trong suốt.
+- **Một ca lệch, và nó nằm đúng vùng guard mù:** `MxIconButton.isFilled` —
+  `IconButton.styleFrom(backgroundColor: primary)` phẳng, tức disabled vẫn
+  giữ nguyên fill như đang armed, press/hover không sẫm, không focus ring —
+  đúng bug class mà doc của `buildFilledStyle` ghi lại và sửa cho nút
+  destructive. Mồ côi từ #328 (0 caller, 0 test, 0 widgetbook, 0 golden):
+  **xoá**, kèm ghi chú tại chỗ chỉ đường xây lại đúng cách nếu cần.
+- **Cơ khí hoá để không tái phát:** rule mới
+  `memox_v7.design_system.no_flat_style_from`, scope `widget_ui_files`
+  (features **và** `lib/shared/widgets` — vùng mù cũ). `styleFrom` hợp lệ
+  duy nhất là trong `app_theme.dart`, nơi nó *là* theme đang được định
+  nghĩa (`lib/core` ngoài scope). Probe hai chiều: đỏ đúng rule trong
+  `lib/shared`, gỡ về 0. Guard **76 → 77** (đọc từ `Running rules:`).
+- **Tests required:** không test mới — variant bị xoá không có test nào
+  (chính là một nửa bằng chứng nó chết); suite hiện có + probe là bằng
+  chứng. Host suite 4175 xanh; goldens 295 xanh, 0 file đổi.
+- **Checklist phases:** Phase 7 (components) · Phase 21 (guard).
+- **Emulator integration suite:** **not run — theme/presentation only.** Đây
+  không phải một lượt chạy xanh.
+- **Output:** như trên; skill `flutter-theme-design` §XIV ghi rule mới và
+  vùng mù nó bịt.
+- **Acceptance criteria:**
+  - [x] 0 `styleFrom(` trong `widget_ui_files`; probe đỏ rồi về 0.
+  - [x] `flutter analyze` 0; full suite 4175 xanh; goldens không đổi.
+  - [x] Guard 77 rules, đọc từ runner.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.70
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |
