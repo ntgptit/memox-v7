@@ -205,14 +205,45 @@ def _check_wbs_tasks() -> None:
     task_ids = _wbs_task_ids()
 
     # duplicate task ids
+    #
+    # **Both ledgers, and say where.** This rule has been here since the docs
+    # check was written and it works — an id chosen while an entry is drafted is
+    # only claimed when it merges, so two branches in flight pick the same one,
+    # and it caught that on the sixth occurrence in one session.
+    #
+    # It missed the fifth, which reached `main` as a duplicate M99.70, and the
+    # reason was not the rule: #377's CI ran before #378 landed, so no run ever
+    # saw both entries. A second, near-identical rule was added in response —
+    # this is that rule folded back in, because two checks answering one
+    # question is the thing this repository refuses everywhere else.
+    #
+    # What the duplicate carried and this now has: `docs/wbs-study.md` is
+    # scanned too, since a dependency may name a task in either ledger; and the
+    # failure prints both headings, because "M99.70 appears more than once" sends
+    # you looking while "here are the two lines" does not.
     before = _problems
-    seen: set[str] = set()
-    for t in task_ids:
-        if t in seen:
-            _fail("duplicate WBS task ID", f"{t} appears more than once in {WBS_FILE}")
-        seen.add(t)
+    seen: dict[str, list[str]] = {}
+    for path in (WBS_FILE, STUDY_WBS_FILE):
+        try:
+            lines = _lines(path)
+        except OSError:
+            continue
+        for line in lines:
+            match = _TASK_HEAD_RE.match(line)
+            if match:
+                seen.setdefault(match.group(1), []).append(
+                    f"{path}: {line.rstrip()[:72]}"
+                )
+
+    for task, where in sorted(seen.items()):
+        if len(where) > 1:
+            _fail(
+                "duplicate WBS task ID",
+                f"{task} is defined {len(where)} times:\n      "
+                + "\n      ".join(where),
+            )
     if _problems == before:
-        _ok(f"no duplicate WBS task IDs ({len(task_ids)} tasks)")
+        _ok(f"no duplicate WBS task IDs ({len(seen)} tasks)")
 
     # dependencies resolve
     #
@@ -250,47 +281,6 @@ def _check_wbs_tasks() -> None:
         _ok(f"every WBS dependency resolves to a defined task ({len(edges)} edges)")
 
     _check_m_task_template()
-    _check_m_task_ids_unique()
-
-
-def _check_m_task_ids_unique() -> None:
-    """Two entries with the same id, and nothing noticed.
-
-    **This rule exists because the failure kept happening and the guard had no
-    opinion about it.** Numbers get chosen while an entry is written and claimed
-    only when it merges, so two branches in flight pick the same one and the
-    second to land silently duplicates the first. It happened five times in a
-    single session and reached `main` at least once (M99.70, from #377 and #378),
-    where a duplicate breaks the one thing an id is for: `depends on M99.70` now
-    names two different pieces of work.
-
-    The heading regex keeps any letter suffix, so `M99.19a` is its own id rather
-    than a second `M99.19` — the suffixed variants are deliberate.
-    """
-    seen: dict[str, list[str]] = {}
-    for path in (WBS_FILE, STUDY_WBS_FILE):
-        try:
-            lines = _lines(path)
-        except OSError:
-            continue
-        for line in lines:
-            match = _M_HEAD_RE.match(line)
-            if match:
-                seen.setdefault(match.group(1), []).append(
-                    f"{path}: {line.rstrip()[:72]}"
-                )
-
-    duplicates = {task: where for task, where in seen.items() if len(where) > 1}
-    if not duplicates:
-        _ok(f"every WBS task id is used once ({len(seen)} ids)")
-        return
-
-    for task, where in sorted(duplicates.items()):
-        _fail(
-            "two WBS entries share one task id",
-            f"{task} is defined {len(where)} times:\n      "
-            + "\n      ".join(where),
-        )
 
 
 _M_HEAD_RE = re.compile(r"^### (M[0-9]+(?:\.[0-9]+)?[a-z]?) ")
