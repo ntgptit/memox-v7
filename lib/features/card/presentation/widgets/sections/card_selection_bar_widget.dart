@@ -5,7 +5,7 @@ import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
-import '../../../../../shared/widgets/mx_icon.dart';
+import '../../../../../shared/widgets/mx_menu_button.dart';
 import '../../../../../shared/widgets/mx_icon_button.dart';
 import '../../controllers/card_selection_controller.dart';
 
@@ -186,31 +186,16 @@ class _ActionMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PopupMenuButton<CardBulkAction>(
-      enabled: isEnabled,
-      icon: const Icon(Icons.more_vert),
+    return MxMenuButton(
+      isEnabled: isEnabled,
       tooltip: context.l10n.cardSelectionMoreLabel,
-      onSelected: (action) => action.onPressed(),
-      itemBuilder: (menuContext) => <PopupMenuEntry<CardBulkAction>>[
+      actions: <MxMenuAction>[
         for (final action in actions)
-          PopupMenuItem<CardBulkAction>(
-            value: action,
-            child: Row(
-              children: <Widget>[
-                MxIcon(
-                  action.icon,
-                  ink: action.isDestructive ? AppInk.error : AppInk.quiet,
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Text(
-                  action.label,
-                  style: menuContext.texts.bodyMedium!.inked(
-                    menuContext,
-                    action.isDestructive ? AppInk.error : AppInk.stated,
-                  ),
-                ),
-              ],
-            ),
+          MxMenuAction(
+            icon: action.icon,
+            label: action.label,
+            isDestructive: action.isDestructive,
+            onSelected: action.onPressed,
           ),
       ],
     );

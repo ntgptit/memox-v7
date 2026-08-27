@@ -6,6 +6,7 @@ import 'package:memox/shared/widgets/mx_icon.dart';
 import 'package:memox/shared/widgets/mx_breadcrumb.dart';
 import 'package:memox/shared/widgets/mx_button_pair.dart';
 import 'package:memox/shared/widgets/mx_icon_button.dart';
+import 'package:memox/shared/widgets/mx_menu_button.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 import 'package:memox/shared/widgets/mx_pressable.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
@@ -116,6 +117,49 @@ WidgetbookComponent fabComponent() {
               icon: Icons.add,
               label: label,
               onPressed: isEnabled ? _noop : null,
+            ),
+          );
+        },
+      ),
+    ],
+  );
+}
+
+WidgetbookComponent menuButtonComponent() {
+  return WidgetbookComponent(
+    name: 'MxMenuButton',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Playground',
+        builder: (BuildContext context) {
+          final isEnabled = context.knobs.boolean(
+            label: 'enabled',
+            initialValue: true,
+          );
+          final hasDestructive = context.knobs.boolean(
+            label: 'with destructive action',
+            initialValue: true,
+          );
+
+          return CatalogCenterPage(
+            child: MxMenuButton(
+              tooltip: 'More options',
+              isEnabled: isEnabled,
+              actions: <MxMenuAction>[
+                const MxMenuAction(
+                  icon: Icons.edit_outlined,
+                  label: 'Rename',
+                  onSelected: _noop,
+                ),
+                const MxMenuAction(label: 'Words only', onSelected: _noop),
+                if (hasDestructive)
+                  const MxMenuAction(
+                    icon: Icons.delete_outline,
+                    label: 'Delete tag',
+                    isDestructive: true,
+                    onSelected: _noop,
+                  ),
+              ],
             ),
           );
         },

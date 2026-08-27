@@ -44,7 +44,7 @@ void main() {
       // below carries the same words as its secondary action.
       expect(
         find.descendant(
-          of: find.byType(PopupMenuItem<void>),
+          of: find.byType(PopupMenuItem<int>),
           matching: find.text(english.cardImportEntryAction),
         ),
         findsOneWidget,
@@ -226,12 +226,8 @@ void main() {
     testWidgets('the icon-only entry controls carry labels', (tester) async {
       await h.pump(tester);
 
-      expect(
-        tester
-            .widget<PopupMenuButton<void>>(find.byType(PopupMenuButton<void>))
-            .tooltip,
-        english.cardSelectionMoreLabel,
-      );
+      // The menu is an MxMenuButton now; the named-anchor claim is the same.
+      expect(find.byTooltip(english.cardSelectionMoreLabel), findsOneWidget);
     });
   });
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../shared/widgets/mx_dropdown.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -51,22 +52,20 @@ class CardImportMappingRowWidget extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<CardTransferField?>(
-                value: field,
-                isExpanded: true,
-                onChanged: onAssign,
-                items: <DropdownMenuItem<CardTransferField?>>[
-                  DropdownMenuItem<CardTransferField?>(
-                    child: Text(context.l10n.cardImportIgnoreColumnLabel),
+            child: MxDropdown<CardTransferField?>(
+              value: field,
+              onChanged: onAssign,
+              options: <MxDropdownOption<CardTransferField?>>[
+                MxDropdownOption<CardTransferField?>(
+                  value: null,
+                  label: context.l10n.cardImportIgnoreColumnLabel,
+                ),
+                for (final destination in CardTransferField.values)
+                  MxDropdownOption<CardTransferField?>(
+                    value: destination,
+                    label: context.cardImportFieldLabel(destination),
                   ),
-                  for (final destination in CardTransferField.values)
-                    DropdownMenuItem<CardTransferField?>(
-                      value: destination,
-                      child: Text(context.cardImportFieldLabel(destination)),
-                    ),
-                ],
-              ),
+              ],
             ),
           ),
         ],

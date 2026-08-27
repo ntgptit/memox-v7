@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../shared/widgets/mx_radio_rows.dart';
 import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
@@ -54,10 +55,8 @@ class DeckSchedulerPickerWidget extends StatelessWidget {
   /// they are leaving rather than the one they are entering.
   final bool shouldShowLockNotice;
 
-  /// `unknown` is deliberately absent: it exists for reading a value a newer
-  /// build wrote and is not a choice anyone may make (BR-11).
-  static void _ignoreChange(SchedulerType? _) {}
-
+  /// `unknown` is deliberately absent from [_choices]: it exists for reading
+  /// a value a newer build wrote and is not a choice anyone may make (BR-11).
   static const List<SchedulerType> _choices = <SchedulerType>[
     SchedulerType.eightBox,
     SchedulerType.sm2,
@@ -70,29 +69,13 @@ class DeckSchedulerPickerWidget extends StatelessWidget {
       children: <Widget>[
         if (sectionLabel != null)
           Text(sectionLabel!, style: context.texts.labelLarge),
-        // `RadioGroup`, not `RadioListTile.groupValue`: the per-tile group
-        // parameters are deprecated as of Flutter 3.32 and this project treats
-        // analyzer warnings as failures.
-        // `RadioGroup.onChanged` is required and non-nullable, so the disabled
-        // state lives on each tile instead. Both are set: `enabled` greys the
-        // row and takes it out of the focus order, and the guarded callback
-        // means a tap that somehow lands mid-submit changes nothing.
-        RadioGroup<SchedulerType>(
-          groupValue: selected,
-          onChanged: isEnabled ? onChanged : _ignoreChange,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              for (final choice in _choices)
-                RadioListTile<SchedulerType>(
-                  value: choice,
-                  enabled: isEnabled,
-                  title: Text(context.schedulerLabel(choice)),
-                  subtitle: Text(context.schedulerDescription(choice)),
-                  contentPadding: EdgeInsets.zero,
-                ),
-            ],
-          ),
+        MxRadioRows<SchedulerType>(
+          values: _choices,
+          selected: selected,
+          isEnabled: isEnabled,
+          onChanged: onChanged,
+          labelOf: context.schedulerLabel,
+          subtitleOf: context.schedulerDescription,
         ),
         if (shouldShowLockNotice)
           Text(
