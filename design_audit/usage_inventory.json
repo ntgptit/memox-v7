@@ -1,22 +1,22 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
   "scannedFiles": 682,
-  "totalSites": 519,
+  "totalSites": 512,
   "byElementKind": {
-    "other": 324,
+    "other": 319,
     "background": 23,
     "shadow": 1,
     "border": 15,
-    "text": 122,
+    "text": 120,
     "icon": 34
   },
   "bySourceKind": {
-    "shared-constant": 154,
+    "shared-constant": 148,
     "blend-source": 4,
     "Colors-material": 12,
     "hardcoded-literal": 97,
-    "opacity-modified-token": 13,
-    "theme-token": 239
+    "opacity-modified-token": 16,
+    "theme-token": 235
   },
   "sites": [
     {
@@ -109,7 +109,7 @@
     },
     {
       "file": "lib/core/theme/app_button_themes.dart",
-      "line": 257,
+      "line": 264,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "Colors-material",
@@ -1385,7 +1385,7 @@
     },
     {
       "file": "lib/core/theme/app_navigation_bar_theme.dart",
-      "line": 43,
+      "line": 51,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -2914,7 +2914,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 211,
+      "line": 210,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2925,40 +2925,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 212,
-      "widget_context": "<top-level>",
-      "element_kind": "other",
-      "source_kind": "shared-constant",
-      "expression": "AppColors.primaryLight",
-      "token": "AppColors.primaryLight",
-      "resolved_value_light": "#4646B4",
-      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
-    },
-    {
-      "file": "lib/core/theme/app_theme.dart",
-      "line": 213,
-      "widget_context": "<top-level>",
-      "element_kind": "other",
-      "source_kind": "shared-constant",
-      "expression": "AppColors.onPrimaryLight",
-      "token": "AppColors.onPrimaryLight",
-      "resolved_value_light": "#FFFFFF",
-      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
-    },
-    {
-      "file": "lib/core/theme/app_theme.dart",
-      "line": 214,
-      "widget_context": "<top-level>",
-      "element_kind": "other",
-      "source_kind": "shared-constant",
-      "expression": "AppColors.secondaryActionLight",
-      "token": "AppColors.secondaryActionLight",
-      "resolved_value_light": "#454B5E",
-      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
-    },
-    {
-      "file": "lib/core/theme/app_theme.dart",
-      "line": 221,
+      "line": 220,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2969,40 +2936,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 226,
-      "widget_context": "<top-level>",
-      "element_kind": "other",
-      "source_kind": "shared-constant",
-      "expression": "AppColors.primaryDark",
-      "token": "AppColors.primaryDark",
-      "resolved_value_light": "unresolvable: no light counterpart in theme",
-      "resolved_value_dark": "#5656C9"
-    },
-    {
-      "file": "lib/core/theme/app_theme.dart",
-      "line": 227,
-      "widget_context": "<top-level>",
-      "element_kind": "other",
-      "source_kind": "shared-constant",
-      "expression": "AppColors.onPrimaryDark",
-      "token": "AppColors.onPrimaryDark",
-      "resolved_value_light": "unresolvable: no light counterpart in theme",
-      "resolved_value_dark": "#FFFFFF"
-    },
-    {
-      "file": "lib/core/theme/app_theme.dart",
-      "line": 228,
-      "widget_context": "<top-level>",
-      "element_kind": "other",
-      "source_kind": "shared-constant",
-      "expression": "AppColors.secondaryActionDark",
-      "token": "AppColors.secondaryActionDark",
-      "resolved_value_light": "unresolvable: no light counterpart in theme",
-      "resolved_value_dark": "#C3C6D2"
-    },
-    {
-      "file": "lib/core/theme/app_theme.dart",
-      "line": 316,
+      "line": 317,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -3013,22 +2947,11 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 319,
-      "widget_context": "<top-level>",
-      "element_kind": "other",
-      "source_kind": "opacity-modified-token",
-      "expression": "scheme.primary.withValues(alpha: AppStateOpacity.focus)",
-      "token": "colorScheme.primary",
-      "resolved_value_light": "#4646B4 @ alpha unresolvable",
-      "resolved_value_dark": "#5656C9 @ alpha unresolvable"
-    },
-    {
-      "file": "lib/core/theme/app_theme.dart",
       "line": 320,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
-      "expression": "scheme.primary.withValues(alpha: AppStateOpacity.pressed)",
+      "expression": "scheme.primary.withValues(alpha: AppStateOpacity.focus)",
       "token": "colorScheme.primary",
       "resolved_value_light": "#4646B4 @ alpha unresolvable",
       "resolved_value_dark": "#5656C9 @ alpha unresolvable"
@@ -3046,7 +2969,51 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 511,
+      "line": 322,
+      "widget_context": "<top-level>",
+      "element_kind": "other",
+      "source_kind": "opacity-modified-token",
+      "expression": "scheme.primary.withValues(alpha: AppStateOpacity.pressed)",
+      "token": "colorScheme.primary",
+      "resolved_value_light": "#4646B4 @ alpha unresolvable",
+      "resolved_value_dark": "#5656C9 @ alpha unresolvable"
+    },
+    {
+      "file": "lib/core/theme/app_theme.dart",
+      "line": 382,
+      "widget_context": "<top-level>",
+      "element_kind": "other",
+      "source_kind": "opacity-modified-token",
+      "expression": "scheme.onPrimary.withValues(alpha: AppStateOpacity.hoverControl)",
+      "token": "colorScheme.onPrimary",
+      "resolved_value_light": "#FFFFFF @ alpha unresolvable",
+      "resolved_value_dark": "#FFFFFF @ alpha unresolvable"
+    },
+    {
+      "file": "lib/core/theme/app_theme.dart",
+      "line": 385,
+      "widget_context": "<top-level>",
+      "element_kind": "other",
+      "source_kind": "opacity-modified-token",
+      "expression": "scheme.onPrimary.withValues(alpha: AppStateOpacity.focus)",
+      "token": "colorScheme.onPrimary",
+      "resolved_value_light": "#FFFFFF @ alpha unresolvable",
+      "resolved_value_dark": "#FFFFFF @ alpha unresolvable"
+    },
+    {
+      "file": "lib/core/theme/app_theme.dart",
+      "line": 386,
+      "widget_context": "<top-level>",
+      "element_kind": "other",
+      "source_kind": "opacity-modified-token",
+      "expression": "scheme.onPrimary.withValues(alpha: AppStateOpacity.pressed)",
+      "token": "colorScheme.onPrimary",
+      "resolved_value_light": "#FFFFFF @ alpha unresolvable",
+      "resolved_value_dark": "#FFFFFF @ alpha unresolvable"
+    },
+    {
+      "file": "lib/core/theme/app_theme.dart",
+      "line": 515,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -3057,7 +3024,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 534,
+      "line": 538,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -3926,18 +3893,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 147,
-      "widget_context": "_StudyAction",
-      "element_kind": "text",
-      "source_kind": "theme-token",
-      "expression": "context.colors.onPrimary",
-      "token": "colorScheme.onPrimary",
-      "resolved_value_light": "#FFFFFF",
-      "resolved_value_dark": "#FFFFFF"
-    },
-    {
-      "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 195,
+      "line": 184,
       "widget_context": "_ProgressRing",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3948,7 +3904,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 196,
+      "line": 185,
       "widget_context": "_ProgressRing",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -3959,7 +3915,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 242,
+      "line": 231,
       "widget_context": "_Headline",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3970,7 +3926,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 268,
+      "line": 257,
       "widget_context": "_Headline",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4220,39 +4176,6 @@
       "token": "colorScheme.onPrimaryContainer",
       "resolved_value_light": "#1B1B5C",
       "resolved_value_dark": "#D7D5FF"
-    },
-    {
-      "file": "lib/features/deck/presentation/widgets/items/deck_study_button_widget.dart",
-      "line": 66,
-      "widget_context": "DeckStudyButtonWidget",
-      "element_kind": "other",
-      "source_kind": "theme-token",
-      "expression": "context.colors.primary",
-      "token": "colorScheme.primary",
-      "resolved_value_light": "#4646B4",
-      "resolved_value_dark": "#5656C9"
-    },
-    {
-      "file": "lib/features/deck/presentation/widgets/items/deck_study_button_widget.dart",
-      "line": 67,
-      "widget_context": "DeckStudyButtonWidget",
-      "element_kind": "other",
-      "source_kind": "theme-token",
-      "expression": "context.colors.onPrimary",
-      "token": "colorScheme.onPrimary",
-      "resolved_value_light": "#FFFFFF",
-      "resolved_value_dark": "#FFFFFF"
-    },
-    {
-      "file": "lib/features/deck/presentation/widgets/items/deck_study_button_widget.dart",
-      "line": 98,
-      "widget_context": "DeckStudyButtonWidget",
-      "element_kind": "text",
-      "source_kind": "theme-token",
-      "expression": "context.colors.onPrimary",
-      "token": "colorScheme.onPrimary",
-      "resolved_value_light": "#FFFFFF",
-      "resolved_value_dark": "#FFFFFF"
     },
     {
       "file": "lib/features/deck/presentation/widgets/items/deck_tile_widget.dart",
@@ -5367,7 +5290,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_action_button.dart",
-      "line": 209,
+      "line": 241,
       "widget_context": "MxActionButton",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -5378,7 +5301,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_action_button.dart",
-      "line": 210,
+      "line": 242,
       "widget_context": "MxActionButton",
       "element_kind": "other",
       "source_kind": "theme-token",

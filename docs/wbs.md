@@ -13492,6 +13492,15 @@ menu với thứ **phía sau** nó, và không thứ gì vẽ nó ra cho một n
   kiểm đỏ bằng cách gỡ từng fix**), `app_planned_themes_test.dart`,
   `card_overflow_menu_demo_test.dart` (mới, 2 golden),
   41 golden khác đổi vì `MxActionButton` secondary có mặt gần như mọi màn.
+- **Hợp đồng vừa landed nói đúng hai trong ba việc, gần như từng chữ.** #368
+  (`flutter-theme-design`) vào `main` trong lúc PR này đang chạy. §16
+  `OutlinedButtonThemeData` yêu cầu *"Resting border dùng interactive-control
+  border token"* và *"Không dùng decorative hairline nếu border là dấu hiệu
+  chính nhận diện control"*; §30 `ListTileThemeData` yêu cầu *"Selected ink"* và
+  *"Selected contrast **được đo**"*. Hai kết luận đi tới độc lập từ hai hướng
+  khác nhau, nên đây là chỗ đáng ghi chứ không phải trùng hợp. §37
+  `PopupMenuThemeData` để elevation/shadow là hạng mục phải quyết chứ không
+  ghim giá trị, nên không mâu thuẫn.
 - **Emulator:** `not run — scoped host verification`. Không có binding, plugin,
   route hay persistence nào bị đụng; đây là ba giá trị trong `ThemeData`.
 - **Checklist phases:** 7, 13
