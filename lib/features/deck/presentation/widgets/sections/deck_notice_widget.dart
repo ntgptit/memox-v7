@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
@@ -34,9 +35,7 @@ class DeckNoticeWidget extends StatelessWidget {
           Expanded(
             child: Text(
               message,
-              style: context.texts.bodySmall?.copyWith(
-                color: context.colors.onSurfaceVariant,
-              ),
+              style: context.texts.bodySmall!.inked(context, AppInk.quiet),
             ),
           ),
         ],

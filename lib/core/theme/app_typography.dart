@@ -91,6 +91,10 @@ abstract final class AppTypography {
   /// it is the one place in the app where a text style is adjusted per use.
   static const double sectionLabelTracking = 1.1;
 
+  /// The card tile's state chip: tighter than a section label because the word
+  /// sits inside a pill, not over a list.
+  static const double stateChipTracking = 0.6;
+
   /// The hero numeral's line box, as a multiple of its own size.
   ///
   /// **Not a leading adjustment — a cap-height trim, and the number is

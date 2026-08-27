@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/error/failure.dart';
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -300,7 +301,6 @@ class _Body extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colors = context.colors;
     final band = failure;
 
     return Column(
@@ -322,9 +322,7 @@ class _Body extends StatelessWidget {
         const SizedBox(height: AppSpacing.xl),
         Text(
           l10n.cardExportFormatHeading,
-          style: context.texts.labelLarge?.copyWith(
-            color: colors.onSurfaceVariant,
-          ),
+          style: context.texts.labelLarge!.inked(context, AppInk.quiet),
         ),
         const SizedBox(height: AppSpacing.sm),
         CardExportFormatOptionsWidget(

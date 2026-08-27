@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_card.dart';
@@ -172,9 +172,7 @@ class _EmptyHistory extends StatelessWidget {
         const SizedBox(height: AppSpacing.xs),
         Text(
           context.l10n.cardHistoryEmptyMessage,
-          style: context.texts.bodySmall?.copyWith(
-            color: context.colors.onSurfaceVariant,
-          ),
+          style: context.texts.bodySmall!.inked(context, AppInk.quiet),
         ),
       ],
     );
@@ -215,10 +213,11 @@ class _GenerationHeading extends StatelessWidget {
           // introduces made it read as a caption on the event above rather than
           // as the start of a group. `withWeight`, because both faces are
           // variable and a bare `fontWeight:` paints w400 while reporting w600.
-          style: AppTypography.withWeight(
-            context.texts.bodySmall!,
-            FontWeight.w600,
-          ).copyWith(color: context.colors.onSurfaceVariant),
+          style: context.texts.bodySmall!.inked(
+            context,
+            AppInk.quiet,
+            isEmphasized: true,
+          ),
         ),
       ),
     );
@@ -272,9 +271,7 @@ class _Tail extends StatelessWidget {
         // generation, so the two numbers disagreed on the same screen.
         child: Text(
           context.l10n.cardHistoryAllShownLabel,
-          style: context.texts.bodySmall?.copyWith(
-            color: context.colors.onSurfaceVariant,
-          ),
+          style: context.texts.bodySmall!.inked(context, AppInk.quiet),
         ),
       );
     }
@@ -365,15 +362,17 @@ class _PageError extends StatelessWidget {
                   children: <Widget>[
                     Text(
                       context.l10n.cardHistoryPageErrorTitle,
-                      style: context.texts.titleSmall?.copyWith(
-                        color: colors.onErrorContainer,
+                      style: context.texts.titleSmall!.inked(
+                        context,
+                        AppInk.onErrorContainer,
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xs),
                     Text(
                       context.l10n.cardHistoryPageErrorMessage,
-                      style: context.texts.bodySmall?.copyWith(
-                        color: colors.onErrorContainer,
+                      style: context.texts.bodySmall!.inked(
+                        context,
+                        AppInk.onErrorContainer,
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xs),

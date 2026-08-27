@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -67,9 +68,7 @@ class CardResultTileWidget extends StatelessWidget {
           if (path.isNotEmpty)
             Text(
               path,
-              style: context.texts.labelSmall?.copyWith(
-                color: context.colors.onSurfaceVariant,
-              ),
+              style: context.texts.labelSmall!.inked(context, AppInk.quiet),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -81,9 +80,7 @@ class CardResultTileWidget extends StatelessWidget {
           ),
           Text(
             hit.back,
-            style: context.texts.bodyMedium?.copyWith(
-              color: context.colors.onSurfaceVariant,
-            ),
+            style: context.texts.bodyMedium!.inked(context, AppInk.quiet),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -92,9 +89,7 @@ class CardResultTileWidget extends StatelessWidget {
               padding: const EdgeInsets.only(top: AppSpacing.xs),
               child: Text(
                 context.l10n.librarySearchMatchedTagLabel(tag),
-                style: context.texts.labelSmall?.copyWith(
-                  color: context.colors.onSurfaceVariant,
-                ),
+                style: context.texts.labelSmall!.inked(context, AppInk.quiet),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),

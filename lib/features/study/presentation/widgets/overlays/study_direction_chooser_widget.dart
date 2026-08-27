@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/error/failure.dart';
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -122,9 +123,7 @@ class _StudyDirectionChooserState extends State<StudyDirectionChooserWidget> {
             const SizedBox(height: AppSpacing.xs),
             Text(
               l10n.studyDirectionBody,
-              style: context.texts.bodyMedium?.copyWith(
-                color: context.colors.onSurfaceVariant,
-              ),
+              style: context.texts.bodyMedium!.inked(context, AppInk.quiet),
             ),
             const SizedBox(height: AppSpacing.md),
             for (final option in kStudyDirectionOptions) _tile(context, option),
@@ -138,9 +137,7 @@ class _StudyDirectionChooserState extends State<StudyDirectionChooserWidget> {
                 liveRegion: true,
                 child: Text(
                   _messageFor(context, failure),
-                  style: context.texts.bodyMedium?.copyWith(
-                    color: context.colors.error,
-                  ),
+                  style: context.texts.bodyMedium!.inked(context, AppInk.error),
                 ),
               ),
             ],

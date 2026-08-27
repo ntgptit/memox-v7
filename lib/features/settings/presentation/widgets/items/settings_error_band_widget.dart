@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/error/failure.dart';
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_spacing.dart';
@@ -71,15 +72,17 @@ class SettingsErrorBandWidget extends StatelessWidget {
                 children: <Widget>[
                   Text(
                     context.l10n.settingsSaveErrorTitle,
-                    style: context.texts.titleSmall?.copyWith(
-                      color: colors.onErrorContainer,
+                    style: context.texts.titleSmall!.inked(
+                      context,
+                      AppInk.onErrorContainer,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     context.settingsWriteFailure(failure),
-                    style: context.texts.bodySmall?.copyWith(
-                      color: colors.onErrorContainer,
+                    style: context.texts.bodySmall!.inked(
+                      context,
+                      AppInk.onErrorContainer,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xs),

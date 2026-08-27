@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -79,7 +80,7 @@ class StudyHomeWorkloadItemWidget extends StatelessWidget {
                   : Icons.event_busy_outlined,
               count: deck.overdueCount,
               word: l10n.studyHomeOverdueWord,
-              color: deck.overdueCount > 0 ? semantic.overdue : quiet,
+              color: deck.overdueCount > 0 ? AppInk.overdue : AppInk.quiet,
               wellColor: deck.overdueCount > 0
                   ? context.colors.errorContainer
                   : semantic.surfaceMuted,
@@ -91,7 +92,9 @@ class StudyHomeWorkloadItemWidget extends StatelessWidget {
               icon: deck.dueTodayCount > 0 ? Icons.event : Icons.event_outlined,
               count: deck.dueTodayCount,
               word: l10n.studyHomeDueTodayWord,
-              color: deck.dueTodayCount > 0 ? semantic.onDueContainer : quiet,
+              color: deck.dueTodayCount > 0
+                  ? AppInk.onDueContainer
+                  : AppInk.quiet,
               wellColor: deck.dueTodayCount > 0
                   ? semantic.dueContainer
                   : semantic.surfaceMuted,
@@ -105,7 +108,7 @@ class StudyHomeWorkloadItemWidget extends StatelessWidget {
                   : Icons.auto_awesome_outlined,
               count: deck.newCount,
               word: l10n.studyHomeNewWord,
-              color: deck.newCount > 0 ? semantic.info : quiet,
+              color: deck.newCount > 0 ? AppInk.info : AppInk.quiet,
               wellColor: semantic.surfaceMuted,
               wellTint: deck.newCount > 0 ? semantic.info : quiet,
             ),
@@ -142,7 +145,7 @@ class _Metric extends StatelessWidget {
 
   /// The metric's tint. It reaches the well and the word; the numeral stays
   /// neutral — see the build below.
-  final Color color;
+  final AppInk color;
 
   /// Whether this count is non-zero. Drives weight and the filled glyph as well
   /// as ink, so the emphasis survives greyscale.
@@ -169,16 +172,18 @@ class _Metric extends StatelessWidget {
               // kinds of number rather than three counts of the same kind.
               TextSpan(
                 text: '$count ',
-                style: context.texts.bodySmall?.copyWith(
-                  color: context.colors.onSurface,
-                  fontWeight: _isActive ? FontWeight.w600 : null,
+                style: context.texts.bodySmall!.inked(
+                  context,
+                  AppInk.stated,
+                  isEmphasized: true,
                 ),
               ),
               TextSpan(
                 text: word,
-                style: context.texts.bodySmall?.copyWith(
-                  color: color,
-                  fontWeight: _isActive ? FontWeight.w600 : null,
+                style: context.texts.bodySmall!.inked(
+                  context,
+                  color,
+                  isEmphasized: _isActive,
                 ),
               ),
             ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -101,9 +102,7 @@ class CardEditorActionBarWidget extends StatelessWidget {
           Text(
             context.l10n.cardEditorLocalOnlyNote,
             textAlign: TextAlign.center,
-            style: context.texts.bodySmall?.copyWith(
-              color: context.colors.onSurfaceVariant,
-            ),
+            style: context.texts.bodySmall!.inked(context, AppInk.quiet),
           ),
         ],
       ),

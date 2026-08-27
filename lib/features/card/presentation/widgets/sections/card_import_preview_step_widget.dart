@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/error/failure.dart';
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -64,9 +65,7 @@ class CardImportPreviewStepWidget extends ConsumerWidget {
             children: <Widget>[
               Text(
                 context.l10n.cardImportPreviewHeading,
-                style: context.texts.labelLarge?.copyWith(
-                  color: context.colors.onSurfaceVariant,
-                ),
+                style: context.texts.labelLarge!.inked(context, AppInk.quiet),
               ),
               const SizedBox(height: AppSpacing.sm),
               _ParsingPanel(deckId: deckId),
@@ -173,9 +172,7 @@ class _ParsingPanel extends ConsumerWidget {
           const SizedBox(height: AppSpacing.xs),
           Text(
             l10n.cardImportParsingReassurance,
-            style: context.texts.bodySmall?.copyWith(
-              color: context.colors.onSurfaceVariant,
-            ),
+            style: context.texts.bodySmall!.inked(context, AppInk.quiet),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.md),
@@ -229,9 +226,7 @@ class _LoadedPreview extends ConsumerWidget {
         const SizedBox(height: AppSpacing.sm),
         Text(
           context.l10n.cardImportMappingHeading,
-          style: context.texts.labelLarge?.copyWith(
-            color: context.colors.onSurfaceVariant,
-          ),
+          style: context.texts.labelLarge!.inked(context, AppInk.quiet),
         ),
         const SizedBox(height: AppSpacing.sm),
         for (var column = 0; column < (sheet?.columnCount ?? 0); column++)
@@ -246,9 +241,7 @@ class _LoadedPreview extends ConsumerWidget {
         if (!mapping.isComplete)
           Text(
             context.l10n.cardImportMappingRequiredNote,
-            style: context.texts.bodySmall?.copyWith(
-              color: context.colors.error,
-            ),
+            style: context.texts.bodySmall!.inked(context, AppInk.error),
           ),
         const SizedBox(height: AppSpacing.md),
         preview.when(

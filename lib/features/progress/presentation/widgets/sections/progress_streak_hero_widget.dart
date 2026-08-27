@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_breakpoints.dart';
 import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_spacing.dart';
@@ -33,7 +34,6 @@ class ProgressStreakHeroWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final texts = context.texts;
-    final colors = context.colors;
 
     return Semantics(
       container: true,
@@ -55,9 +55,7 @@ class ProgressStreakHeroWidget extends StatelessWidget {
             children: <Widget>[
               Text(
                 context.l10n.progressStreakSectionLabel,
-                style: texts.labelLarge?.copyWith(
-                  color: colors.onSurfaceVariant,
-                ),
+                style: texts.labelLarge!.inked(context, AppInk.quiet),
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
@@ -96,14 +94,12 @@ class ProgressStreakHeroWidget extends StatelessWidget {
                         context,
                       ).clamp(maxScaleFactor: 1.75)
                     : MediaQuery.textScalerOf(context),
-                style: texts.displayLarge?.copyWith(color: colors.onSurface),
+                style: texts.displayLarge!.inked(context, AppInk.stated),
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
                 context.progressStreakSupportLine(overview),
-                style: texts.bodyMedium?.copyWith(
-                  color: colors.onSurfaceVariant,
-                ),
+                style: texts.bodyMedium!.inked(context, AppInk.quiet),
               ),
             ],
           ),

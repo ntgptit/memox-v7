@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_spacing.dart';
@@ -93,8 +94,9 @@ class ProgressDeckRowWidget extends StatelessWidget {
                       children: <Widget>[
                         Text(
                           activity.name,
-                          style: context.texts.titleMedium?.copyWith(
-                            color: context.colors.onSurface,
+                          style: context.texts.titleMedium!.inked(
+                            context,
+                            AppInk.stated,
                           ),
                         ),
                         if (path.isNotEmpty) ...<Widget>[
@@ -104,8 +106,9 @@ class ProgressDeckRowWidget extends StatelessWidget {
                           // apart, which is the only reason it is here.
                           Text(
                             path,
-                            style: context.texts.bodySmall?.copyWith(
-                              color: context.colors.onSurfaceVariant,
+                            style: context.texts.bodySmall!.inked(
+                              context,
+                              AppInk.quiet,
                             ),
                           ),
                         ],

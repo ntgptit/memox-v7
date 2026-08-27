@@ -108,6 +108,10 @@ Trong `lib/features/**`, fail CI nếu xuất hiện visual escapes như:
       (cả `lib/shared` và `lib/core/theme`), vì cả ba lần bug này sống đều
       không nằm trong features-only
 - [x] Raw interactive Material widgets — `no_raw_button` + `no_raw_widget`
+- [x] `texts.*.copyWith` và `withWeight(...).copyWith` — `no_text_restyle`
+      (M99.66): feature chọn rung + `AppInk`, không pha style
+- [x] `Icon(color:)` mở — `no_raw_icon_color` (M99.66); `.resolve(` là cách
+      viết hợp lệ duy nhất cho size ngoài bậc
 
 Allowlist chỉ dành cho:
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -92,9 +93,7 @@ class _TagFilterForm extends ConsumerWidget {
         // and nothing else on the screen says so (BR-231, M4.14 W6 item 2).
         Text(
           context.l10n.tagFilterSubtitle,
-          style: context.texts.bodySmall?.copyWith(
-            color: context.colors.onSurfaceVariant,
-          ),
+          style: context.texts.bodySmall!.inked(context, AppInk.quiet),
         ),
         MxAsyncView<List<TagCatalogEntry>>(
           value: tags,

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
@@ -55,25 +55,20 @@ class StudyHomeResumeSectionWidget extends StatelessWidget {
             l10n.studyHomeResumeTitle,
             // Through the wght axis — a bare `fontWeight:` paints the rung's
             // old weight.
-            style:
-                AppTypography.withWeight(
-                  context.texts.labelMedium!,
-                  FontWeight.w600,
-                ).copyWith(
-                  // Stated, not inherited. A text style taken from the theme
-                  // carries the body ink, which lands unreadably on a tinted
-                  // surface — the override class the visual audit has measured
-                  // at 2.33:1 before.
-                  color: context.colors.onSecondaryContainer,
-                ),
+            style: context.texts.labelMedium!.inked(
+              context,
+              AppInk.onSecondaryContainer,
+              isEmphasized: true,
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
             resume.deckName,
-            style: context.texts.titleMedium?.copyWith(
-              color: context.colors.onSecondaryContainer,
+            style: context.texts.titleMedium!.inked(
+              context,
+              AppInk.onSecondaryContainer,
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -84,8 +79,9 @@ class StudyHomeResumeSectionWidget extends StatelessWidget {
               context.studySessionKind(resume.kind),
               context.studyMode(resume.currentMode),
             ),
-            style: context.texts.bodySmall?.copyWith(
-              color: context.colors.onSecondaryContainer,
+            style: context.texts.bodySmall!.inked(
+              context,
+              AppInk.onSecondaryContainer,
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,

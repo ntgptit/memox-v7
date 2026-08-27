@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_spacing.dart';
@@ -203,9 +204,7 @@ class _MergeNotice extends StatelessWidget {
           Expanded(
             child: Text(
               context.l10n.tagMergeNotice(targetName),
-              style: context.texts.bodySmall?.copyWith(
-                color: context.colors.onSurfaceVariant,
-              ),
+              style: context.texts.bodySmall!.inked(context, AppInk.quiet),
             ),
           ),
         ],
@@ -261,15 +260,17 @@ class _FailureBand extends StatelessWidget {
                 children: <Widget>[
                   Text(
                     context.l10n.tagWriteErrorTitle,
-                    style: context.texts.titleSmall?.copyWith(
-                      color: colors.onErrorContainer,
+                    style: context.texts.titleSmall!.inked(
+                      context,
+                      AppInk.onErrorContainer,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     message,
-                    style: context.texts.bodySmall?.copyWith(
-                      color: colors.onErrorContainer,
+                    style: context.texts.bodySmall!.inked(
+                      context,
+                      AppInk.onErrorContainer,
                     ),
                   ),
                 ],

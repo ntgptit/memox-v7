@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
@@ -26,7 +27,6 @@ class ProgressTodayWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final texts = context.texts;
-    final colors = context.colors;
 
     // Flat, like every other card in a scrolling column (M99.26): two
     // competing depths in one column is what makes a list read as busy,
@@ -39,12 +39,12 @@ class ProgressTodayWidget extends StatelessWidget {
         children: <Widget>[
           Text(
             context.l10n.progressTodaySectionLabel,
-            style: texts.labelLarge?.copyWith(color: colors.onSurfaceVariant),
+            style: texts.labelLarge!.inked(context, AppInk.quiet),
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
             context.l10n.progressTodayCardsLabel(today.totalCards),
-            style: texts.headlineSmall?.copyWith(color: colors.onSurface),
+            style: texts.headlineSmall!.inked(context, AppInk.stated),
           ),
           const SizedBox(height: AppSpacing.sm),
           _ProgressTodayBreakdownRow(
@@ -59,7 +59,7 @@ class ProgressTodayWidget extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
           Text(
             context.l10n.progressTodayPartitionNote,
-            style: texts.bodySmall?.copyWith(color: colors.onSurfaceVariant),
+            style: texts.bodySmall!.inked(context, AppInk.quiet),
           ),
         ],
       ),
@@ -80,7 +80,6 @@ class _ProgressTodayBreakdownRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final texts = context.texts;
-    final colors = context.colors;
 
     return MergeSemantics(
       child: Row(
@@ -91,13 +90,13 @@ class _ProgressTodayBreakdownRow extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: texts.bodyMedium?.copyWith(color: colors.onSurface),
+              style: texts.bodyMedium!.inked(context, AppInk.stated),
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
           Text(
             '$count',
-            style: texts.titleMedium?.copyWith(color: colors.onSurface),
+            style: texts.titleMedium!.inked(context, AppInk.stated),
           ),
         ],
       ),

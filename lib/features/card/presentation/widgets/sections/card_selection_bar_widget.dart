@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_icon_button.dart';
 import '../../controllers/card_selection_controller.dart';
 
@@ -149,8 +151,9 @@ class CardSelectionBarWidget extends ConsumerWidget {
                   // thing on this bar the user must be able to read, and at
                   // double scale the long form does not fit one line at 320.
                   maxLines: 2,
-                  style: context.texts.titleSmall?.copyWith(
-                    color: context.colors.onSecondaryContainer,
+                  style: context.texts.titleSmall!.inked(
+                    context,
+                    AppInk.onSecondaryContainer,
                   ),
                 ),
               ),
@@ -194,19 +197,16 @@ class _ActionMenu extends StatelessWidget {
             value: action,
             child: Row(
               children: <Widget>[
-                Icon(
+                MxIcon(
                   action.icon,
-                  color: action.isDestructive
-                      ? menuContext.colors.error
-                      : menuContext.colors.onSurfaceVariant,
+                  ink: action.isDestructive ? AppInk.error : AppInk.quiet,
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Text(
                   action.label,
-                  style: menuContext.texts.bodyMedium?.copyWith(
-                    color: action.isDestructive
-                        ? menuContext.colors.error
-                        : menuContext.colors.onSurface,
+                  style: menuContext.texts.bodyMedium!.inked(
+                    menuContext,
+                    action.isDestructive ? AppInk.error : AppInk.stated,
                   ),
                 ),
               ],

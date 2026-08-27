@@ -154,9 +154,7 @@ class _RecallActionArea extends StatelessWidget {
           Text(
             message,
             textAlign: TextAlign.center,
-            style: context.texts.bodyMedium?.copyWith(
-              color: context.semanticColors.danger,
-            ),
+            style: context.texts.bodyMedium!.inked(context, AppInk.danger),
           ),
           const SizedBox(height: AppSpacing.md),
         ],

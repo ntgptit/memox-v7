@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_icon_size.dart';
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_text_field.dart';
 
 /// One editor field: a label row above, the input below.
@@ -100,16 +101,14 @@ class CardEditorFieldWidget extends StatelessWidget {
   }
 
   Widget _buildLabelRow(BuildContext context) {
-    final quiet = context.colors.onSurfaceVariant;
-
     return Row(
       crossAxisAlignment: CrossAxisAlignment.baseline,
       textBaseline: TextBaseline.alphabetic,
       children: <Widget>[
         if (icon != null) ...<Widget>[
-          ExcludeSemantics(
-            child: Icon(icon, size: AppIconSize.sm, color: quiet),
-          ),
+          // MxIcon excludes itself from semantics when unlabeled, which is
+          // what the ExcludeSemantics wrapper used to say by hand.
+          MxIcon(icon!, size: MxIconSize.sm),
           const SizedBox(width: AppSpacing.xs),
         ],
         // **One flexible child, not two.** `Flexible(label)` beside a `Spacer`
@@ -135,7 +134,10 @@ class CardEditorFieldWidget extends StatelessWidget {
                 flex: 3,
                 child: Text(
                   label,
-                  style: context.texts.labelMedium?.copyWith(color: quiet),
+                  style: context.texts.labelMedium!.inked(
+                    context,
+                    AppInk.quiet,
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -145,10 +147,9 @@ class CardEditorFieldWidget extends StatelessWidget {
                   isRequired
                       ? context.l10n.cardEditorFieldRequired
                       : context.l10n.cardEditorFieldOptional,
-                  style: context.texts.labelSmall?.copyWith(
-                    color: isRequired
-                        ? context.semanticColors.primaryAccent
-                        : quiet,
+                  style: context.texts.labelSmall!.inked(
+                    context,
+                    isRequired ? AppInk.accent : AppInk.quiet,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -173,7 +174,7 @@ class CardEditorFieldWidget extends StatelessWidget {
               value.text.characters.length,
               maxLength,
             ),
-            style: context.texts.labelSmall?.copyWith(color: quiet),
+            style: context.texts.labelSmall!.inked(context, AppInk.quiet),
           ),
         ),
       ],

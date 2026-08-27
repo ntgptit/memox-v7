@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_typography.dart';
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_text_button.dart';
@@ -77,19 +77,7 @@ class DeckListToolbarWidget extends StatelessWidget {
             isRootLevel
                 ? context.l10n.decksSectionLabelRoot.toUpperCase()
                 : '${context.l10n.decksSectionLabelChild.toUpperCase()} · $visibleCount',
-            // **`withWeight`, not `copyWith(fontWeight:)`.** The body face is a
-            // variable font, and `copyWith` alone moves the declared weight
-            // without moving the `wght` axis — it renders at the old weight and
-            // says the new one, which is the silent no-op M99.39 found on the
-            // study screen's mode chip.
-            style:
-                AppTypography.withWeight(
-                  context.textStyles.sectionLabel,
-                  FontWeight.w600,
-                ).copyWith(
-                  color: context.colors.onSurfaceVariant,
-                  letterSpacing: AppTypography.listHeadingTracking,
-                ),
+            style: context.textStyles.listHeading.inked(context, AppInk.quiet),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

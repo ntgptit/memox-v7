@@ -5,6 +5,7 @@ import '../../../../../core/navigation/route_names.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import 'card_export_sheet_widget.dart';
 
 /// The card list's overflow menu: import, export and the tag catalog.
@@ -103,7 +104,7 @@ class _MenuRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: <Widget>[
-        Icon(icon, color: context.colors.onSurfaceVariant),
+        MxIcon(icon),
         const SizedBox(width: AppSpacing.md),
         Text(label, style: context.texts.bodyMedium),
       ],

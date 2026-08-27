@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
@@ -34,9 +35,7 @@ class CardTagChipWidget extends StatelessWidget {
       ),
       child: Text(
         name,
-        style: context.texts.labelSmall?.copyWith(
-          color: context.colors.onSurfaceVariant,
-        ),
+        style: context.texts.labelSmall!.inked(context, AppInk.quiet),
       ),
     );
   }

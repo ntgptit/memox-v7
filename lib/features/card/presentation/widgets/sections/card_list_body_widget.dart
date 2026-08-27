@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -79,9 +80,11 @@ class CardListBodyWidget extends ConsumerWidget {
                 Expanded(
                   child: Text(
                     context.l10n.cardListShowing(items.length, total),
-                    style: context.texts.labelSmall?.copyWith(
-                      color: context.colors.onSurfaceVariant,
-                      letterSpacing: 1.1,
+                    // The 1.1 was `sectionLabelTracking` spelled as a bare
+                    // number; the role names it.
+                    style: context.textStyles.sectionLabelSmall.inked(
+                      context,
+                      AppInk.quiet,
                     ),
                   ),
                 ),
@@ -146,9 +149,7 @@ class _Tail extends ConsumerWidget {
         child: Center(
           child: Text(
             context.l10n.cardListAllShown(total),
-            style: context.texts.bodySmall?.copyWith(
-              color: context.colors.onSurfaceVariant,
-            ),
+            style: context.texts.bodySmall!.inked(context, AppInk.quiet),
           ),
         ),
       );

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/navigation/route_names.dart';
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -72,9 +73,7 @@ class CardTrashActionWidget extends ConsumerWidget {
           const SizedBox(height: AppSpacing.sm),
           Text(
             context.l10n.cardEditorTrashDescription,
-            style: context.texts.bodySmall?.copyWith(
-              color: context.colors.onSurfaceVariant,
-            ),
+            style: context.texts.bodySmall!.inked(context, AppInk.quiet),
           ),
           const SizedBox(height: AppSpacing.lg),
           // **Sized to its label, not stretched.** The column is `stretch`, so

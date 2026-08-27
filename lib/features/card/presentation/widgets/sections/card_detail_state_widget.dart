@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
@@ -277,9 +278,7 @@ class _StateRow extends StatelessWidget {
         const SizedBox(width: AppSpacing.sm),
         Text(
           context.cardStateLabel(state),
-          style: context.texts.bodyMedium?.copyWith(
-            color: context.colors.onSurface,
-          ),
+          style: context.texts.bodyMedium!.inked(context, AppInk.stated),
         ),
       ],
     );

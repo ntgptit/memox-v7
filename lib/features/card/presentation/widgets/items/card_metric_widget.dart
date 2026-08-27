@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
@@ -104,7 +105,7 @@ class CardMetricWidget extends StatelessWidget {
 
 /// The label half — quiet, and a rung below the value it introduces.
 TextStyle cardMetricLabelStyle(BuildContext context) =>
-    context.texts.bodySmall!.copyWith(color: context.colors.onSurfaceVariant);
+    context.texts.bodySmall!.inked(context, AppInk.quiet);
 
 /// The value half, by kind.
 ///

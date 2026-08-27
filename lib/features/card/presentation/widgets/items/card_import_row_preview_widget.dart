@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -27,17 +28,15 @@ class CardImportRowPreviewWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    final (IconData statusIcon, Color statusColor) = switch (row.status) {
-      CardImportRowStatus.ready => (Icons.check, colors.secondary),
-      CardImportRowStatus.invalid => (Icons.close, colors.error),
+    final (IconData statusIcon, AppInk statusInk) = switch (row.status) {
+      CardImportRowStatus.ready => (Icons.check, AppInk.secondary),
+      CardImportRowStatus.invalid => (Icons.close, AppInk.error),
       CardImportRowStatus.duplicateExisting ||
       CardImportRowStatus.duplicateInFile => (
         Icons.copy_outlined,
-        colors.tertiary,
+        AppInk.tertiary,
       ),
-      CardImportRowStatus.blank => (Icons.remove, colors.onSurfaceVariant),
+      CardImportRowStatus.blank => (Icons.remove, AppInk.quiet),
     };
 
     // The reason line: a typed refusal for invalid rows, the duplicate's
@@ -51,7 +50,7 @@ class CardImportRowPreviewWidget extends StatelessWidget {
       _ => null,
     };
     final isInvalid = row.status == CardImportRowStatus.invalid;
-    final reasonColor = isInvalid ? colors.error : colors.tertiary;
+    final reasonInk = isInvalid ? AppInk.error : AppInk.tertiary;
     final reasonIcon = isInvalid ? Icons.error_outline : Icons.copy_outlined;
 
     final frontText = _CellText(value: row.front, isSecondary: false);
@@ -66,9 +65,7 @@ class CardImportRowPreviewWidget extends StatelessWidget {
             width: AppSpacing.xl,
             child: Text(
               '${row.sourceRowNumber}',
-              style: context.texts.labelMedium?.copyWith(
-                color: colors.onSurfaceVariant,
-              ),
+              style: context.texts.labelMedium!.inked(context, AppInk.quiet),
             ),
           ),
           Expanded(
@@ -104,14 +101,15 @@ class CardImportRowPreviewWidget extends StatelessWidget {
                         Icon(
                           reasonIcon,
                           size: AppSpacing.md,
-                          color: reasonColor,
+                          color: reasonInk.resolve(context),
                         ),
                         const SizedBox(width: AppSpacing.xs),
                         Expanded(
                           child: Text(
                             reason,
-                            style: context.texts.bodySmall?.copyWith(
-                              color: reasonColor,
+                            style: context.texts.bodySmall!.inked(
+                              context,
+                              reasonInk,
                             ),
                           ),
                         ),
@@ -125,7 +123,11 @@ class CardImportRowPreviewWidget extends StatelessWidget {
           // The glyph is decoration over the words above; a screen reader
           // hears the status through the reason line and the summary chips.
           ExcludeSemantics(
-            child: Icon(statusIcon, size: AppSpacing.lg, color: statusColor),
+            child: Icon(
+              statusIcon,
+              size: AppSpacing.lg,
+              color: statusInk.resolve(context),
+            ),
           ),
         ],
       ),
@@ -145,14 +147,12 @@ class _CellText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     if (value.isEmpty) {
       return Text(
         context.l10n.cardImportEmptyCellLabel,
-        style: context.texts.bodyMedium?.copyWith(
-          fontStyle: FontStyle.italic,
-          color: colors.onSurfaceVariant,
-        ),
+        style: context.texts.bodyMedium!
+            .inked(context, AppInk.quiet)
+            .copyWith(fontStyle: FontStyle.italic),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       );
@@ -163,7 +163,7 @@ class _CellText extends StatelessWidget {
       // The term carries the row (concept states 3-4): the front reads at
       // title weight, the meaning at body weight on the quieter colour.
       style: isSecondary
-          ? context.texts.bodyMedium?.copyWith(color: colors.onSurfaceVariant)
+          ? context.texts.bodyMedium!.inked(context, AppInk.quiet)
           : context.texts.titleSmall,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_card.dart';
@@ -188,9 +188,7 @@ class _CardFace extends StatelessWidget {
           // hierarchy under the front while staying readable when scanning
           // long diacritic-heavy Vietnamese lists.
           card.back,
-          style: context.texts.bodyMedium?.copyWith(
-            color: context.colors.onSurface,
-          ),
+          style: context.texts.bodyMedium!.inked(context, AppInk.stated),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -212,16 +210,10 @@ class _CardFace extends StatelessWidget {
               // neutral. Colour is still never alone: the dot and the word carry
               // the same fact.
               context.cardStateLabel(item.state).toUpperCase(),
-              // Through the wght axis — a bare `fontWeight:` paints the
-              // rung's old weight.
-              style:
-                  AppTypography.withWeight(
-                    context.texts.labelSmall!,
-                    FontWeight.w600,
-                  ).copyWith(
-                    color: context.cardStateColor(item.state),
-                    letterSpacing: 0.6,
-                  ),
+              style: context.textStyles.stateChipLabel.inked(
+                context,
+                context.cardStateInk(item.state),
+              ),
             ),
             for (final tag in item.tagNames) CardTagChipWidget(name: tag),
           ],
@@ -304,9 +296,7 @@ class _DueBadge extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: context.texts.labelSmall?.copyWith(
-            color: context.colors.onSurfaceVariant,
-          ),
+          style: context.texts.labelSmall!.inked(context, AppInk.quiet),
         ),
       ),
     );

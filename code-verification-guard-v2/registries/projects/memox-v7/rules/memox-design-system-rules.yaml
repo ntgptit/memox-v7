@@ -132,3 +132,47 @@ rules:
       - memox-v7
       - design-system
       - typography
+
+  # A feature picks a rung and an AppInk; it does not mix styles. The first
+  # pattern is the direct spelling; the second closes the laundering route the
+  # M99.65 migration itself used to write — withWeight(...).copyWith(color:)
+  # smuggles an open colour past a rule that only watches texts.*.copyWith.
+  - id: memox_v7.design_system.no_text_restyle
+    type: regex
+    severity: error
+    enabled: true
+    message: >-
+      No per-site text styling in feature code. Pick a rung and apply a closed
+      ink: `texts.bodySmall!.inked(context, AppInk.quiet, isEmphasized:,
+      isTabular:)`, or a named role on `context.textStyles`. A combination
+      neither can express is a missing role — add it to AppTextStyles/AppInk in
+      lib/core/theme, do not assemble it here.
+    scopes:
+      - presentation_files
+    patterns:
+      - '^(?!\s*(?://|\*)).*\btexts\.[a-zA-Z]+[!?]?\s*\.copyWith\s*\('
+      - '^(?!\s*(?://|\*)).*withWeight\s*\([^)]*\)\s*\.copyWith\s*\('
+    tags:
+      - memox-v7
+      - design-system
+      - typography
+
+  # `.resolve(` is the one legal colour spelling on a raw Icon — it proves the
+  # value came out of AppInk's closed set. Everything else is an open colour on
+  # a glyph, which MxIcon exists to own.
+  - id: memox_v7.design_system.no_raw_icon_color
+    type: regex
+    severity: error
+    enabled: true
+    message: >-
+      No open `Icon(color:)` in feature code. Use `MxIcon(icon, ink: AppInk.x,
+      size: MxIconSize.y)`; when the size genuinely has no MxIconSize step,
+      keep `Icon` and spell the colour as `<AppInk>.resolve(context)` so it
+      still comes from the closed set.
+    scopes:
+      - presentation_files
+    patterns:
+      - '^(?!\s*(?://|\*)).*\bIcon\s*\([^)]*\bcolor\s*:\s*(?![A-Za-z_][\w.]*\.resolve\()'
+    tags:
+      - memox-v7
+      - design-system

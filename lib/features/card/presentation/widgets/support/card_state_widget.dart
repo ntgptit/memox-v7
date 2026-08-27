@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../domain/models/card_state_model.dart';
@@ -18,6 +19,15 @@ import '../../../domain/models/card_state_model.dart';
 /// primary accent → success — so nothing new has to be minted in either kit and
 /// the two stay in sync by having nothing to diverge on.
 extension CardStatePresentation on BuildContext {
+  /// The state's ink, for the closed text/icon API; [cardStateColor] stays for
+  /// the dot fill beside it, and the two switches must agree family-for-family.
+  AppInk cardStateInk(CardState state) => switch (state) {
+    CardState.isNew => AppInk.info,
+    CardState.beginning => AppInk.warning,
+    CardState.reviewing => AppInk.accent,
+    CardState.mastered => AppInk.success,
+  };
+
   Color cardStateColor(CardState state) {
     final semantic = semanticColors;
 
