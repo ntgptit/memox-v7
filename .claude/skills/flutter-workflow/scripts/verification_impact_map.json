@@ -92,6 +92,20 @@
     "pubspec.lock",
     "pubspec.yaml"
   ],
+  "inert_prefixes": [
+    ".vscode/",
+    ".idea/",
+    ".github/ISSUE_TEMPLATE/"
+  ],
+  "inert_files": [
+    ".editorconfig",
+    ".gitattributes",
+    ".gitignore",
+    ".github/CODEOWNERS",
+    ".github/FUNDING.yml",
+    ".github/PULL_REQUEST_TEMPLATE.md",
+    "LICENSE"
+  ],
   "shard_weight_thresholds": {
     "one": 240,
     "two": 800
