@@ -5,6 +5,7 @@ import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_button_pair.dart';
 import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../domain/entities/deck_entity.dart';
@@ -128,21 +129,24 @@ class _ResetProgressSheetState extends ConsumerState<_ResetProgressSheet> {
                 ),
               ],
               const SizedBox(height: AppSpacing.xl),
-              MxActionButton(
-                label: l10n.deckResetProgressConfirm,
-                variant: MxActionButtonVariant.destructive,
-                isLoading: submit.isSubmitting,
-                onPressed: submit.isSubmitting
-                    ? null
-                    : () => ref
-                          .read(provider.notifier)
-                          .submit(schedulerType: _scheduler),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              MxActionButton(
-                label: l10n.commonCancelAction,
-                variant: MxActionButtonVariant.secondary,
-                onPressed: submit.isSubmitting ? null : widget.onClose,
+              // The row the shortened labels were for: Reset beside Cancel,
+              // stacking only if a locale outgrows the line.
+              MxButtonPair(
+                primary: MxActionButton(
+                  label: l10n.deckResetProgressConfirm,
+                  variant: MxActionButtonVariant.destructive,
+                  isLoading: submit.isSubmitting,
+                  onPressed: submit.isSubmitting
+                      ? null
+                      : () => ref
+                            .read(provider.notifier)
+                            .submit(schedulerType: _scheduler),
+                ),
+                secondary: MxActionButton(
+                  label: l10n.commonCancelAction,
+                  variant: MxActionButtonVariant.secondary,
+                  onPressed: submit.isSubmitting ? null : widget.onClose,
+                ),
               ),
             ],
           ),

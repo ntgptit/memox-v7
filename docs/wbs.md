@@ -14311,6 +14311,36 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Editable documents:** `docs/wbs.md`
 - **Dependencies:** M99.76
 
+### M99.80 · Cặp confirm xếp ngang — MxButtonPair thay cho Column tay
+
+- **Status:** **done** — bước hai của yêu cầu owner: nhãn ngắn rồi thì xếp
+  ngang cho đỡ tốn chiều cao.
+- **Goal:** mọi cặp hành động thật sự là *một lựa chọn hai vế* đi qua
+  `MxButtonPair` — một hàng khi vừa, stack khi không, do pair **đo** chứ
+  không do sheet đoán.
+- **Scope:** 4 cặp Column-tay → `MxButtonPair`: locked panel + unlocked
+  confirm của sheet Study mode, sheet Reset progress, và Save/Save-&-add của
+  form tạo card. **Không** đổi: `study_resume` (ba lựa chọn, không phải
+  pair), `study_entry` (hai slot có thể là Text), empty-state Library (đã
+  dùng pair từ trước — nó stack vì "Browse starter library" không vừa cạnh
+  "New deck" ở 393dp, đó là phép đo chứ không phải bug).
+- **Bằng chứng golden nói thật cả hai chiều:** 2 golden sheet đổi sang một
+  hàng; golden form tạo card **không đổi** — pair đo "Save & add another"
+  không vừa cạnh "Save" nên giữ stack, đúng contract "chỉ ngang khi thật sự
+  vừa".
+- **Tests required:** không test mới — contract một-cỡ-hai-nút đã pin trong
+  `mx_button_pair_test`; suite hiện có + 2 golden là bằng chứng.
+- **Checklist phases:** Phase 7 (components).
+- **Emulator integration suite:** **not run — presentation only.** Đây không
+  phải một lượt chạy xanh.
+- **Output:** như Scope; gallery publish lại URL ghim sau merge.
+- **Acceptance criteria:**
+  - [x] Census `MxActionButton + SizedBox + MxActionButton` chỉ còn các ca
+        có lý do (ba-lựa-chọn, slot Text).
+  - [x] `flutter analyze` 0; full suite 4177 xanh; goldens `TZ=UTC` xanh.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.77
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |
