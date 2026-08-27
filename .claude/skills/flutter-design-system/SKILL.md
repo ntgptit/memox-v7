@@ -50,6 +50,14 @@ keyboard and switch-access users, and it is the state most often left unstyled.
 
 ## Components
 
+**The per-component contract lives in `flutter-theme-design`, not here.** This
+skill says *that* a component gets tokens, both themes and every state; that
+skill says *which* checklist a specific ThemeData slot and its `Mx*` wrapper
+must clear before the component counts as supported — including the admission
+rule for Material widgets the system does not support yet, and the banned-raw-
+widget list the guard enforces. Load it whenever the work is one component
+deep. One fact, one place: this file deliberately does not restate its lists.
+
 Build the base set once, in `shared/widgets/`: app scaffold, app bar, primary
 button, secondary button, icon button, text field, search field, card, list
 item, empty state, error state, loading state, confirmation dialog, bottom
