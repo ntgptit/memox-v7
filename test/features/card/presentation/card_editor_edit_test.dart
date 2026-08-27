@@ -333,12 +333,14 @@ void main() {
     expect(find.text('Move this card to Trash?'), findsOneWidget);
     expect(repository.deletes, isEmpty);
 
-    // "Move to Trash", not "Delete": the confirm button says where the card
-    // goes, because it goes somewhere it can come back from (BR-256).
+    // "Move", not "Delete": BR-256's "moved, not destroyed" is carried by
+    // the title just asserted above, and the button dropped the destination
+    // word so it stays one line at 393dp (owner, 2026-08-28). The bare verb
+    // still must not read as destruction — which "Move" cannot.
     await tester.tap(
       find.descendant(
         of: find.byType(AlertDialog),
-        matching: find.text('Move to Trash'),
+        matching: find.text('Move'),
       ),
     );
     await tester.pumpAndSettle();
