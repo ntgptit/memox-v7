@@ -14266,7 +14266,7 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Editable documents:** `docs/wbs.md`
 - **Dependencies:** M99.76
 
-### M99.78 · Cặp confirm xếp ngang — MxButtonPair thay cho Column tay
+### M99.79 · Cặp confirm xếp ngang — MxButtonPair thay cho Column tay
 
 - **Status:** **done** — bước hai của yêu cầu owner: nhãn ngắn rồi thì xếp
   ngang cho đỡ tốn chiều cao.
