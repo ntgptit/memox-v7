@@ -1,9 +1,9 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
   "scannedFiles": 682,
-  "totalSites": 518,
+  "totalSites": 519,
   "byElementKind": {
-    "other": 323,
+    "other": 324,
     "background": 23,
     "shadow": 1,
     "border": 15,
@@ -13,7 +13,7 @@
   "bySourceKind": {
     "shared-constant": 154,
     "blend-source": 4,
-    "Colors-material": 11,
+    "Colors-material": 12,
     "hardcoded-literal": 97,
     "opacity-modified-token": 13,
     "theme-token": 239
@@ -659,7 +659,18 @@
     },
     {
       "file": "lib/core/theme/app_elevation.dart",
-      "line": 62,
+      "line": 64,
+      "widget_context": "<top-level>",
+      "element_kind": "other",
+      "source_kind": "Colors-material",
+      "expression": "Colors.transparent",
+      "token": "Colors.transparent",
+      "resolved_value_light": "#00000000",
+      "resolved_value_dark": "#00000000"
+    },
+    {
+      "file": "lib/core/theme/app_elevation.dart",
+      "line": 76,
       "widget_context": "<top-level>",
       "element_kind": "shadow",
       "source_kind": "opacity-modified-token",
@@ -1440,7 +1451,7 @@
     },
     {
       "file": "lib/core/theme/app_overlay_themes.dart",
-      "line": 299,
+      "line": 314,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -3035,7 +3046,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 499,
+      "line": 511,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -3046,7 +3057,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 522,
+      "line": 534,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",

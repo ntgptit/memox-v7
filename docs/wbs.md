@@ -13306,6 +13306,109 @@ Hai pass chạy lại từ đầu trên cây đã sửa. Không P0.
   bằng host widget test có `GoRouter` thật. Đây **không** phải một lần pass.
 - **Checklist phases:** 7, 13, 14
 
+### M99.63 · Ba component đọc sai nền mình vẽ lên
+
+- **Status:** **done** — chỉ `ThemeData`, không đổi widget, layout, copy hay
+  hành vi nào. Ba component, ba dòng.
+- **Xuất phát từ một review của chủ dự án**, chấm theme 8.5/10 và nói thẳng ba
+  chỗ chưa chốt được. Tôi đọc token thật rồi tự tính lại từng con số trước khi
+  sửa: **cả sáu con số trong review đều đúng chính xác** — 2.45, 4.66, 1.45,
+  2.04, 3.19, 3.00. Ghi lại điều đó vì lần đo đầu của tôi ra sai hoàn toàn
+  (1.20 thay vì 2.45) do đọc nhầm byte alpha của `0xFF……` thành kênh đỏ; con số
+  của review là thứ phát hiện script của tôi hỏng, không phải ngược lại.
+
+- **Goal:** Ba component vẽ token của mình lên đúng cái nền mà chúng thật sự
+  vẽ lên, và mỗi ngưỡng được ghim bằng một phép đo trên cặp đôi đó chứ không
+  trên nền mà test palette giả định.
+- **Scope:** `listTileTheme.selectedColor`, `outlinedButtonTheme` side ở trạng
+  thái nghỉ, `popupMenuTheme` color + elevation + shadowColor. Cộng một helper
+  `materialShadowColor` trong `app_elevation.dart` cho component Material đầu
+  tiên mang độ nổi thật. **Ngoài scope:** `dialogTheme` (F15 đang mở, và F15 nói
+  rõ vì sao chưa lấy), chip unselected (cố ý giữ `borderSubtle`), radius, và mọi
+  color role khác.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `app_theme.dart`, `app_button_themes.dart`,
+  `app_overlay_themes.dart`, `app_elevation.dart`;
+  `component_depth_and_state_test.dart` và `card_overflow_menu_demo_test.dart`
+  (mới); 43 golden.
+- **Acceptance criteria:**
+  - [x] Nhãn selected đạt ≥ 4.5:1 **trên tile của chính nó**, cả hai mode.
+  - [x] Light không đổi một pixel nào ở hàng selected — ghim bằng test riêng,
+        vì một fix cho dark rất dễ kéo theo light mà không ai để ý.
+  - [x] Viền nghỉ của OutlinedButton ≥ 3:1 trên cả `surface` lẫn trang, cả hai
+        mode, và **là** token mà scheme gọi là `outline`.
+  - [x] Menu nổi ≥ 7.7 L\* khỏi mặt nó mở đè lên, cả hai mode — đo cả giấy lẫn
+        bóng, không chỉ một trong hai.
+  - [x] Dark không vẽ bóng nhưng **vẫn mang bậc**; light có bóng.
+  - [x] Popup có ảnh ở cả hai mode, vì trước đó nó không có cái nào.
+  - [x] Cả ba assertion đã được kiểm **đỏ** bằng cách gỡ từng fix.
+- **Dependencies:** AD-14 §4 (chiều sâu là mục tiêu đo được).
+
+**Cả ba là cùng một loại lỗi, và đó mới là điều đáng nhớ.** Mỗi token liên quan
+đều hợp lệ: suy từ seed, nằm đúng bậc thang, và **đạt ngưỡng trên cái nền mà
+test palette đặt nó lên**. Cái sai là nền đó không phải nền component thật sự vẽ
+lên. Một bộ kiểm màu theo role không thể thấy loại lỗi này, vì nó kiểm token chứ
+không kiểm cặp đôi.
+
+- **ListTile selected · `scheme.primary` → `semantic.primaryAccent`.** Nhãn
+  selected rơi trên `selectedTileColor` (`surfaceMuted`), không phải trên trang.
+  Dark: **2.45:1** — dưới cả 3:1 mà WCAG 1.4.11 đòi cho một state, lẫn 4.5:1 cho
+  chữ. `primaryAccent` chính là biến thể derive cho đúng nền đó: **4.66:1**.
+  Light không đổi một pixel nào vì ở đó `primaryAccent` **là** `primary` (6.36:1)
+  — có test riêng ghim điều này, để lần sau ai sửa dark không lỡ tay đổi light.
+  Không dùng `primaryContainer` + `selectedInk` như NavigationBar và chip dù nó
+  cũng đạt: một hàng list là target rộng, và mảng fill bão hoà kéo ngang cả danh
+  sách thì đọc ra thành nút bấm.
+- **OutlinedButton · `borderSubtle` → `borderControl`.** Đây **không** phải lệch
+  chuẩn Material mà là mâu thuẫn nội bộ: scheme của chính app đã map
+  `outline = borderControl`, `outlineVariant = borderSubtle`, và component duy
+  nhất đọc nhầm token là nút này. Viền nghỉ đo được **1.45:1** light và
+  **2.04:1** dark; `borderControl` cho **3.19 / 3.00** trên `surface` và
+  **3.02 / 3.41** trên trang. Chip cố ý giữ `borderSubtle`: một hàng tám pill
+  cùng ở 3:1 cạnh tranh với chính nội dung nó lọc, và chip còn có fill và nhãn
+  chứ không chỉ có cạnh.
+- **PopupMenu · `surface` @ elevation 0 → `surfaceElevated` @ `raised`.** Menu
+  mở **đè lên** một card mà lại cùng giấy với card đó: độ nổi đo được **0.00 L\***
+  ở cả hai mode — không phải bậc mờ, mà đúng một mặt phẳng — với hairline 1.46:1
+  là thứ duy nhất nói rằng có lớp thứ hai. Dialog thoát được vì có scrim 48–72%
+  phía sau; **menu không có scrim**.
+
+**Bậc `raised` là giải ra, không phải chọn.** AD-14 §4 đặt mục tiêu đo được: một
+card nổi khỏi trang nó nằm trên **7.75 L\*** ở light, 7.70 ở dark. Một menu phải
+vượt ít nhất chừng đó so với card. Dark lấy **13.73 L\*** từ riêng tấm giấy và
+không vẽ gì. Light có thang bị nén sát trắng — `surfaceElevated` trên `surface`
+chỉ đáng **0.32 L\*** — nên bóng gánh phần còn lại: `card` (α 0.07) mới tới 6.13
+và trượt, `raised` (α 0.09) tới **7.81**, `overlay` vọt lên 12.03 và dù sao cũng
+được định nghĩa là bậc cho sheet phủ cả màn hình, thứ mà menu không phải.
+
+**Comment cũ ở đó trích AD-14 để biện minh cho elevation 0, và AD-14 nói ngược
+lại.** AD này tồn tại chính vì hai doc comment đã bị đọc thành lệnh cấm elevation
+— comment của popup đã thành cái thứ ba. `design-parity-checklist.md` F15 ghi
+đúng lỗi trích dẫn ấy, nhưng cho `dialogTheme`, và hoãn nó lại vì "moves every
+dialog golden and those want a render review first". Dialog **vẫn đang mở** ở
+F15; PR này không đụng vào.
+
+**Popup không có ảnh nào, và đó là lý do lỗi sống được ở đó.** Bốn call site
+`PopupMenuButton` tồn tại — menu tràn của card list, sort control, thanh chọn,
+hàng tag catalog — và không golden nào mở bất kỳ cái nào. Mọi assertion về nó đều
+xanh: giấy là một bậc thật, nhãn vượt ngưỡng, bo góc khớp thang. Không thứ gì so
+menu với thứ **phía sau** nó, và không thứ gì vẽ nó ra cho một người nhìn.
+`card_overflow_menu_demo_test.dart` bù chỗ đó, hai mode, vì độ nổi ở hai mode
+được dựng bằng hai cách khác nhau.
+
+- **Một test cũ phải viết lại, và nó từng ghim đúng lập luận sai.**
+  `app_planned_themes_test.dart` khẳng định menu dùng chung giấy với dialog và
+  sheet. Giờ nó khẳng định điều ngược lại, kèm lý do. Test ngay dưới nó đo nhãn
+  menu trên `colorScheme.surface` — vẫn xanh trong khi đo một nền menu không còn
+  vẽ lên: **đúng loại lỗi này PR sửa, nằm ngay trong test dựng để bắt nó.**
+- **Tests required:** `component_depth_and_state_test.dart` (mới, 6 assertion, **cả ba đã
+  kiểm đỏ bằng cách gỡ từng fix**), `app_planned_themes_test.dart`,
+  `card_overflow_menu_demo_test.dart` (mới, 2 golden),
+  41 golden khác đổi vì `MxActionButton` secondary có mặt gần như mọi màn.
+- **Emulator:** `not run — scoped host verification`. Không có binding, plugin,
+  route hay persistence nào bị đụng; đây là ba giá trị trong `ThemeData`.
+- **Checklist phases:** 7, 13
+
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 
 Ghi lại cụ thể, vì "mất một bộ lint" là câu quá mơ hồ để ai đó sau này biết

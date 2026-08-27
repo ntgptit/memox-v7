@@ -303,7 +303,19 @@ OutlinedButtonThemeData buildOutlinedButtonTheme(
         return AppInteractionStates.focusRing(semantic);
       }
 
-      return BorderSide(color: semantic.borderSubtle);
+      // **`borderControl`, which is what this app's own `outline` role maps
+      // to.** `borderSubtle` is `outlineVariant` — the decorative edge, for
+      // dividers and the hairline around a card — and it left the resting
+      // button at **1.45:1** in light and **2.04:1** in dark, below the 3:1
+      // WCAG 1.4.11 asks of a control boundary. `borderControl` measures
+      // **3.19** and **3.00** on `surface`, **3.02** and **3.41** on the page.
+      //
+      // The mismatch was internal, not a deviation from Material: the scheme
+      // already says `outline = borderControl`, and the only component reading
+      // the other token was this one. Chips keep `borderSubtle` deliberately —
+      // a filter row of eight pills at 3:1 competes with the content it
+      // filters, and a chip carries a fill and a label as well as an edge.
+      return BorderSide(color: semantic.borderControl);
     }),
   ),
 );
