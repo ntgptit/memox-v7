@@ -70,7 +70,7 @@ void main() {
       // yet" on a deck that chose at creation (BR-11).
       final repository = await pumpSheet(tester, scheduler: SchedulerType.sm2);
 
-      await tester.tap(find.text('Change study mode').last);
+      await tester.tap(find.text('Change').last);
       await tester.pumpAndSettle();
 
       expect(repository.schedulerChanges, hasLength(1));
@@ -88,7 +88,7 @@ void main() {
 
       await tester.tap(find.text('SM-2'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Change study mode').last);
+      await tester.tap(find.text('Change').last);
       await tester.pumpAndSettle();
 
       expect(
@@ -103,7 +103,7 @@ void main() {
       // deck where there is nothing to reset.
       final repository = await pumpSheet(tester);
 
-      await tester.tap(find.text('Change study mode').last);
+      await tester.tap(find.text('Change').last);
       await tester.pumpAndSettle();
 
       expect(repository.progressResets, isEmpty);
@@ -145,12 +145,12 @@ void main() {
         reason: DeckConflictReason.schedulerLocked,
       );
 
-      await tester.tap(find.text('Change study mode').last);
+      await tester.tap(find.text('Change').last);
       await tester.pumpAndSettle();
 
       expect(find.textContaining('already studied this deck'), findsOneWidget);
       expect(find.text('Reset learning progress'), findsOneWidget);
-      expect(find.text('Change study mode'), findsNothing);
+      expect(find.text('Change'), findsNothing);
     });
 
     testWidgets('another refusal keeps the confirm, so a retry is possible', (
@@ -162,11 +162,11 @@ void main() {
       final repository = await pumpSheet(tester);
       repository.writeFailure = const DatabaseFailure(message: 'disk');
 
-      await tester.tap(find.text('Change study mode').last);
+      await tester.tap(find.text('Change').last);
       await tester.pumpAndSettle();
 
       expect(find.text('Reset learning progress'), findsNothing);
-      expect(find.text('Change study mode'), findsOneWidget);
+      expect(find.text('Change'), findsOneWidget);
     });
 
     testWidgets('cancelling writes nothing', (tester) async {
@@ -193,7 +193,7 @@ void main() {
         find.textContaining('Resetting learning progress'),
         findsOneWidget,
       );
-      expect(find.text('Change study mode'), findsNothing);
+      expect(find.text('Change'), findsNothing);
     });
 
     testWidgets('shows which mode is locked in, disabled', (tester) async {

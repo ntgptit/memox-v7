@@ -2103,9 +2103,9 @@
   "@deckSchedulerChangeSessionNotice": {
     "description": "Shown in the study-mode change sheet. The open session's queue was dealt for the old algorithm, so it is invalidated inside the same transaction rather than left to fail later (BR-83)."
   },
-  "deckSchedulerChangeConfirm": "Change study mode",
+  "deckSchedulerChangeConfirm": "Change",
   "@deckSchedulerChangeConfirm": {
-    "description": "Confirms an unlocked study-mode change (UC-03). A primary action, not a destructive one."
+    "description": "Confirms an unlocked study-mode change (UC-03). A primary action, not a destructive one. Bare verb: the sheet title already says Study mode, so the button stops repeating it and stays one line (owner rule, 2026-08-28 - same as the trash confirms)."
   },
   "deckSchedulerLockedTitle": "Study mode is locked",
   "@deckSchedulerLockedTitle": {
@@ -3410,7 +3410,11 @@
   },
   "tagDeleteAction": "Delete tag",
   "@tagDeleteAction": {
-    "description": "Catalog row menu item and the destructive confirm action. Carries the noun on purpose: a bare Delete reads as deleting cards (M4.14 T8, BR-235)."
+    "description": "Catalog row menu item. Carries the noun on purpose: a menu has no title to lean on, and a bare Delete reads as deleting cards (M4.14 T8, BR-235). The dialog confirm is tagDeleteConfirmAction."
+  },
+  "tagDeleteConfirmAction": "Delete",
+  "@tagDeleteConfirmAction": {
+    "description": "Confirm button of the delete-tag dialog. Bare verb: the title Delete tag? carries the noun (owner rule, 2026-08-28); the menu entry tagDeleteAction keeps it."
   },
   "tagRenameTitle": "Rename tag",
   "@tagRenameTitle": {
@@ -4116,7 +4120,7 @@
   },
   "trashPurgeConfirmAction": "Delete permanently",
   "@trashPurgeConfirmAction": {
-    "description": "Destructive confirm button. The dialog opens with focus on Cancel (wireframe T11)."
+    "description": "Destructive confirm button. The dialog opens with focus on Cancel (wireframe T11). Deliberately NOT shortened to a bare verb even though the title repeats it: purge is the one irreversible action in the app, and restating the full consequence on the button the finger lands on is the safety pattern - the bare-verb rule (2026-08-28) covers recoverable moves, not hard deletes."
   },
   "trashPurgeCancelAction": "Cancel",
   "@trashPurgeCancelAction": {

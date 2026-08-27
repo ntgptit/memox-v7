@@ -2103,7 +2103,7 @@
   "@deckSchedulerChangeSessionNotice": {
     "description": "Shown in the study-mode change sheet. The open session's queue was dealt for the old algorithm, so it is invalidated inside the same transaction rather than left to fail later (BR-83)."
   },
-  "deckSchedulerChangeConfirm": "Đổi chế độ ôn tập",
+  "deckSchedulerChangeConfirm": "Đổi",
   "@deckSchedulerChangeConfirm": {
     "description": "Confirms an unlocked study-mode change (UC-03). A primary action, not a destructive one."
   },
@@ -3390,6 +3390,10 @@
     "description": "Catalog row menu item, and the rename sheet's primary action when the new name is free (BR-233)."
   },
   "tagDeleteAction": "Xoá nhãn",
+  "tagDeleteConfirmAction": "Xoá",
+  "@tagDeleteConfirmAction": {
+    "description": "Confirm button of the delete-tag dialog. Bare verb: the title Delete tag? carries the noun (owner rule, 2026-08-28); the menu entry tagDeleteAction keeps it."
+  },
   "@tagDeleteAction": {
     "description": "Catalog row menu item and the destructive confirm action. Carries the noun on purpose: a bare Delete reads as deleting cards (M4.14 T8, BR-235)."
   },

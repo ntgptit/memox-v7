@@ -68,7 +68,7 @@ class _DeleteTagDialog extends StatelessWidget {
           message: failure == null
               ? question
               : '$question\n\n${context.tagCatalogWriteFailure(failure)}',
-          confirmLabel: context.l10n.tagDeleteAction,
+          confirmLabel: context.l10n.tagDeleteConfirmAction,
           cancelLabel: context.l10n.commonCancelAction,
           variant: MxConfirmDialogVariant.destructive,
           // A tag is gone for good — it has no Trash — so the severity axis
