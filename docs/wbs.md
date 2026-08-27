@@ -14363,6 +14363,39 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Editable documents:** `docs/wbs.md`
 - **Dependencies:** M99.80
 
+### M99.82 · Stack không còn full-bleed — và cái ép dọc hết hạn được gỡ
+
+- **Status:** **done** — hai việc từ một yêu cầu owner: "không lên được một
+  hàng thì đừng kéo nút hết chiều rộng".
+- **Goal:** pair khi buộc phải stack thì content-width (theo nút rộng hơn,
+  giữ lời hứa cùng-cỡ) và canh giữa; hai phiến nút phủ kín màn đọc như bức
+  tường, không phải một lựa chọn.
+- **Scope:** `_RenderPairLayout` — nhánh stack đổi childWidth từ cả dòng
+  sang `min(line, _half)` và canh giữa bằng inset; row giữ nguyên.
+  `Axis.vertical` giờ cũng content-width (không caller nào dùng nó, và câu
+  doc "two full-width paths" viết cho thời nhãn dài đã được thay).
+- **Và một phát hiện sửa sai báo cáo cũ:** M99.81 báo empty Library "đã lên
+  hàng" là **sai** — `MxEmptyState` đang **ép `Axis.vertical`** với lý do
+  của thời "Browse starter library" (nhãn dài, wrap ở nửa màn). Nhãn đã ngắn
+  từ M99.81 nhưng lệnh ép còn nguyên, nên golden trước chỉ là nhãn-ngắn-hơn
+  trong hai phiến full-bleed. Gỡ ép; pair tự đo và **giờ mới thật sự** ra
+  `New deck | Starter library` một hàng. Bài học: kết luận từ tên file
+  golden mà không mở ảnh — ảnh mới là bằng chứng, diff chỉ là tín hiệu.
+- **Tests required:** `mx_button_pair_test` thêm claim content-width + canh
+  giữa cho stack; `card_export_alignment_test` đổi claim W5: band nội dung
+  vẫn phủ cột, còn *nút* pin theo contract mới (cùng cỡ, giữa cột, không
+  rộng hơn cột). 3 golden đổi: `deck_list_empty_{light,dark}` (hàng thật),
+  `card_export_compact_2x_light` (stack canh giữa).
+- **Checklist phases:** Phase 7 (components).
+- **Emulator integration suite:** **not run — presentation only.** Đây không
+  phải một lượt chạy xanh.
+- **Output:** như Scope; gallery publish lại URL ghim sau merge.
+- **Acceptance criteria:**
+  - [x] Không còn stack full-bleed nào từ pair; empty Library một hàng thật.
+  - [x] `flutter analyze` 0; full suite 4179 xanh; goldens `TZ=UTC` xanh.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.81
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |

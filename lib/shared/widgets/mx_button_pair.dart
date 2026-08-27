@@ -76,9 +76,12 @@ class MxButtonPair extends StatelessWidget {
   final Widget secondary;
 
   /// [Axis.horizontal] offers the row whenever the two buttons fit in it and
-  /// falls back to a stack when they do not. [Axis.vertical] always stacks —
-  /// for a pair that is a choice between two full-width paths rather than a
-  /// footer.
+  /// falls back to a stack when they do not. [Axis.vertical] always stacks.
+  ///
+  /// **A stack is content-width and centred, not full-bleed** (owner call,
+  /// 2026-08-28): two screen-wide slabs read as a wall, not a choice. Both
+  /// buttons still share one size — the wider one's — so the pair's promise
+  /// holds in either orientation.
   final Axis axis;
 
   @override
@@ -214,7 +217,7 @@ class _RenderPairLayout extends RenderBox
 
   double _heightFor(double width, {required bool min}) {
     final isRow = _fitsAsRow(width);
-    final childWidth = isRow ? (width - _gap) / 2 : width;
+    final childWidth = isRow ? (width - _gap) / 2 : math.min(width, _half);
     double of(RenderBox child) => min
         ? child.getMinIntrinsicHeight(childWidth)
         : child.getMaxIntrinsicHeight(childWidth);
@@ -240,7 +243,14 @@ class _RenderPairLayout extends RenderBox
   Size _layout(BoxConstraints constraints, {required bool isDry}) {
     final line = constraints.maxWidth;
     final isRow = _fitsAsRow(line);
-    final childWidth = isRow ? (line - _gap) / 2 : line;
+    // Stacked buttons take the wider button's own width, not the line: two
+    // screen-wide slabs read as a wall, not a choice (owner, 2026-08-28).
+    // `min` keeps a long label from overflowing a narrow parent - it wraps
+    // inside the line instead.
+    final childWidth = isRow
+        ? (line - _gap) / 2
+        : (line.isFinite ? math.min(line, _half) : _half);
+    final paired = line.isFinite ? line : childWidth;
     final probe = BoxConstraints(
       minWidth: childWidth,
       maxWidth: childWidth,
@@ -255,7 +265,7 @@ class _RenderPairLayout extends RenderBox
 
     if (isDry) {
       return constraints.constrain(
-        Size(line, isRow ? tallest : tallest * 2 + _gap),
+        Size(paired, isRow ? tallest : tallest * 2 + _gap),
       );
     }
 
@@ -269,15 +279,18 @@ class _RenderPairLayout extends RenderBox
       firstData.offset = Offset.zero;
       secondData.offset = Offset(childWidth + _gap, 0);
 
-      return constraints.constrain(Size(line, tallest));
+      return constraints.constrain(Size(paired, tallest));
     }
 
     // Stacked, the order flips: `children` is `[secondary, primary]` for the
     // row, and the action the user came for belongs above the alternative.
-    secondData.offset = Offset.zero;
-    firstData.offset = Offset(0, tallest + _gap);
+    // Centred on the line the pair still occupies, so the choice sits where
+    // the eye already is instead of hugging one edge.
+    final inset = (paired - childWidth) / 2;
+    secondData.offset = Offset(inset, 0);
+    firstData.offset = Offset(inset, tallest + _gap);
 
-    return constraints.constrain(Size(line, tallest * 2 + _gap));
+    return constraints.constrain(Size(paired, tallest * 2 + _gap));
   }
 
   @override
