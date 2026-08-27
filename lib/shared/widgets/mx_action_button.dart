@@ -141,7 +141,30 @@ class MxActionButton extends StatelessWidget {
   ///
   /// Exists for `MxConfirmDialog`: on a destructive dialog focus starts on
   /// cancel so a stray Enter cannot delete anything.
+  ///
+  /// **Honoured only where a keyboard exists** — see [_takesFocus].
   final bool shouldAutofocus;
+
+  /// [shouldAutofocus], minus the platforms that have nothing to press Enter
+  /// with.
+  ///
+  /// **A focused outlined button wears the focus ring instead of its border**,
+  /// because that is what a focus indicator is for. On a touch device nobody
+  /// asked for one: the delete dialog's Cancel came out with an indigo ring
+  /// while the same `MxActionButton.secondary` two screens away had the grey
+  /// control edge, and the two read as different components rather than as one
+  /// button in two states. Measured on `deck_delete_confirm_light.png`: 10551
+  /// pixels of `focusRing` where every other secondary draws `borderControl`.
+  ///
+  /// The reason for the autofocus survives intact, because it was always about
+  /// a key: a stray Enter needs a keyboard, and `FocusHighlightMode.touch`
+  /// means there is not one. Flutter starts this mode from the platform and
+  /// moves it on the first interaction of the other kind, so a phone with a
+  /// keyboard attached still gets the focus — and the ring — as soon as the
+  /// keyboard is used.
+  bool _takesFocus() =>
+      shouldAutofocus &&
+      FocusManager.instance.highlightMode != FocusHighlightMode.touch;
 
   @override
   Widget build(BuildContext context) {
@@ -191,13 +214,13 @@ class MxActionButton extends StatelessWidget {
     return switch (variant) {
       MxActionButtonVariant.primary => FilledButton(
         onPressed: effectiveOnPressed,
-        autofocus: shouldAutofocus,
+        autofocus: _takesFocus(),
         style: styled,
         child: child,
       ),
       MxActionButtonVariant.secondary => OutlinedButton(
         onPressed: effectiveOnPressed,
-        autofocus: shouldAutofocus,
+        autofocus: _takesFocus(),
         style: styled,
         child: child,
       ),
@@ -207,7 +230,7 @@ class MxActionButton extends StatelessWidget {
       // theme's for every state at once.
       MxActionButtonVariant.tonal => FilledButton(
         onPressed: effectiveOnPressed,
-        autofocus: shouldAutofocus,
+        autofocus: _takesFocus(),
         // `busyStyle` first, or the branch for it in [_busyStyle] is dead code
         // that reads as coverage. A tonal button keeping its label while
         // loading would otherwise fall back to `disabledSurface`/`onDisabled` —
@@ -232,7 +255,7 @@ class MxActionButton extends StatelessWidget {
       // resolves through, with the error pair substituted for the accent.
       MxActionButtonVariant.destructive => FilledButton(
         onPressed: effectiveOnPressed,
-        autofocus: shouldAutofocus,
+        autofocus: _takesFocus(),
         style: _sized(
           context,
           buildFilledStyle(
@@ -313,8 +336,13 @@ class MxActionButton extends StatelessWidget {
         foregroundColor: WidgetStatePropertyAll<Color>(
           semantic.secondaryAction,
         ),
+        // `borderControl`, the same edge the resting button draws. It said
+        // `borderSubtle` — the decorative hairline — which was right until the
+        // theme moved the resting edge to the interactive-control token and
+        // left this copy behind, so a secondary button changed colour for the
+        // duration of a save.
         side: WidgetStatePropertyAll<BorderSide>(
-          BorderSide(color: semantic.borderSubtle),
+          BorderSide(color: semantic.borderControl),
         ),
       );
     }

@@ -154,8 +154,42 @@ class _RenderPairLayout extends RenderBox
     _second.getMaxIntrinsicWidth(double.infinity),
   );
 
-  bool _fitsAsRow(double line) =>
-      !_isForcedStack && line.isFinite && _half * 2 + _gap <= line;
+  /// **A row unless the caller asked for a column.** It used to also stack when
+  /// the two labels could not be drawn in full at half the line each, which is
+  /// why a delete dialog offering `Move to Trash` and `Cancel` came out as two
+  /// stacked buttons: `Move to Trash` wants more than half of a 393dp footer,
+  /// so the pair gave up the row.
+  ///
+  /// The project owner's call, and the arithmetic agrees: stacking costs two
+  /// button heights plus a gap to avoid a label wrapping inside one. The labels
+  /// already ellipsize at two lines, so the row's worst case is one taller
+  /// button — still shorter than two, and it keeps the two options where a
+  /// choice belongs, beside each other.
+  ///
+  /// `axis: Axis.vertical` still stacks. That is a caller stating a layout, not
+  /// the pair deciding one.
+  ///
+  /// ## The one case that still stacks, and what it looked like without it
+  ///
+  /// The test is the **longest word**, not the whole label: a row survives as
+  /// long as each button can still show one, because a label that wraps is
+  /// readable and a label cut mid-word is not. `getMinIntrinsicWidth` is
+  /// exactly that measurement for text.
+  ///
+  /// Dropping the fallback entirely was tried first and rendered: at 320dp and
+  /// `textScaler` 2.0 the delete dialog came out as **`Ca`** beside
+  /// **`Mov…`** — a destructive confirmation where neither button says what it
+  /// does. That is worse than the two rows this change exists to remove.
+  bool _fitsAsRow(double line) {
+    if (_isForcedStack || !line.isFinite) return false;
+
+    final widestWord = math.max(
+      _first.getMinIntrinsicWidth(double.infinity),
+      _second.getMinIntrinsicWidth(double.infinity),
+    );
+
+    return widestWord <= (line - _gap) / 2;
+  }
 
   @override
   double computeMinIntrinsicWidth(double height) => math.max(
