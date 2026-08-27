@@ -135,18 +135,43 @@ void main() {
       expectOneSize(tester);
     });
 
-    testWidgets('a line too narrow for a row stacks instead of squeezing', (
+    testWidgets('it stacks only when a longest word will not fit', (
       tester,
     ) async {
-      await tester.pumpWidget(host(pair, width: 220));
+      // **The threshold moved, on the project owner's call.** It used to be the
+      // whole label: a row was abandoned the moment either button could not
+      // draw its label in full at half the line. That is why a delete dialog on
+      // a 393dp screen came out as two stacked buttons — `Move to Trash` wants
+      // more than half a 265dp footer — and two stacked buttons cost two
+      // heights plus a gap to avoid a wrap inside one.
+      //
+      // The test is the longest *word* now, because a wrapped label is readable
+      // and a label cut mid-word is not. 120dp cannot hold `library` beside
+      // `deck` at half each, so this stacks.
+      await tester.pumpWidget(host(pair, width: 120));
 
       final sizes = buttonSizes(tester);
       expect(
         sizes.first.width,
-        moreOrLessEquals(220, epsilon: 0.5),
-        reason:
-            'below the threshold the pair stacks, so each half is the '
-            'full width rather than half of a line neither label fits',
+        moreOrLessEquals(120, epsilon: 0.5),
+        reason: 'stacked, so each half takes the whole line',
+      );
+      expectOneSize(tester);
+    });
+
+    testWidgets('a line that fits both longest words stays a row', (
+      tester,
+    ) async {
+      // The width the old rule stacked at, and the reason this change exists.
+      await tester.pumpWidget(host(pair, width: 220));
+
+      expect(
+        tester.getTopLeft(find.byType(MxActionButton).at(0)).dy,
+        moreOrLessEquals(
+          tester.getTopLeft(find.byType(MxActionButton).at(1)).dy,
+          epsilon: 0.5,
+        ),
+        reason: 'both buttons sit on one line even though a label must wrap',
       );
       expectOneSize(tester);
     });
@@ -238,14 +263,18 @@ void main() {
       expectNoWrappedLabel(tester);
     });
 
-    testWidgets('a dialog whose labels do not fit stacks instead of wrapping', (
+    testWidgets('a dialog whose labels do not fit wraps rather than stacks', (
       tester,
     ) async {
+      // **This test asserted the opposite, and the assertion was the design.**
       // 393 is the review surface, so the dialog's footer is
-      // `393 − 2×40 inset − 2×24 actions = 265`. `Move to Trash` needs 145.3,
-      // so a row of two needs 298.6 — 33.6 more than there is. The pair must
-      // stack; the failure it is guarding against is a row that fits neither
-      // label and breaks both across two lines.
+      // `393 − 2×40 inset − 2×24 actions = 265`; `Move to Trash` needs 145.3,
+      // so a row of two full labels needs 298.6 and the pair used to stack.
+      //
+      // The project owner looked at the result and rejected it: two rows of
+      // buttons cost more room than one row with a wrapped label, and a choice
+      // reads as a choice when the two options are side by side. A row it is,
+      // and `Move to Trash` takes two lines inside its own button.
       await tester.pumpWidget(
         host(
           const MxConfirmDialog(
@@ -263,16 +292,19 @@ void main() {
 
       expect(
         tester.getTopLeft(find.byType(MxActionButton).at(0)).dy,
-        isNot(tester.getTopLeft(find.byType(MxActionButton).at(1)).dy),
-        reason: 'a 265-wide footer cannot hold a row of two 145.3 buttons',
+        moreOrLessEquals(
+          tester.getTopLeft(find.byType(MxActionButton).at(1)).dy,
+          epsilon: 0.5,
+        ),
+        reason: 'one row: the two options belong beside each other',
       );
       expectOneSize(tester);
-      expectNoWrappedLabel(tester);
     });
 
-    testWidgets('neither dialog label wraps in Vietnamese', (tester) async {
-      // The longer of the two languages the app ships, and the one the review
-      // caught the row breaking in first.
+    testWidgets('the Vietnamese dialog is a row too', (tester) async {
+      // The longer of the two languages the app ships. It used to assert that
+      // neither label wrapped, which was the old rule's whole point; wrapping
+      // is the accepted cost of the row now, so what is checked is the row.
       await tester.pumpWidget(
         host(
           const MxConfirmDialog(
@@ -288,7 +320,14 @@ void main() {
         ),
       );
 
-      expectNoWrappedLabel(tester);
+      expect(
+        tester.getTopLeft(find.byType(MxActionButton).at(0)).dy,
+        moreOrLessEquals(
+          tester.getTopLeft(find.byType(MxActionButton).at(1)).dy,
+          epsilon: 0.5,
+        ),
+      );
+      expectOneSize(tester);
     });
   });
 }

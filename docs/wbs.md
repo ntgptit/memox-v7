@@ -13832,6 +13832,61 @@ M-task trùng số — đúng chỗ hỏng thì không ai canh.
 Luật giữ nguyên hậu tố chữ trong id, nên `M99.19a` là id riêng chứ không phải
 `M99.19` thứ hai; những biến thể ấy là có chủ ý.
 
+### M99.75 · Một hàng nút, và một secondary trông giống nhau ở mọi màn
+
+- **Status:** **done** — hai widget dùng chung, không đổi nghiệp vụ.
+- **Goal:** Cặp nút nằm một hàng ở mọi cỡ đọc được, và `MxActionButton.secondary`
+  vẽ cùng một viền ở mọi màn.
+- **Scope:** `mx_button_pair.dart` (ngưỡng xuống hàng), `mx_action_button.dart`
+  (autofocus theo chế độ tương tác, và viền lúc loading). **Ngoài scope:** thứ
+  tự hai nút, và `axis: Axis.vertical` khi caller tự chọn.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** hai widget, bốn file test, 6 golden.
+- **Acceptance criteria:**
+  - [x] Dialog xoá ở 393 là **một hàng**; `Move to Trash` xuống dòng trong nút
+        của nó thay vì đẩy Cancel xuống hàng dưới.
+  - [x] Ở 320 cỡ chữ 2.0 vẫn xếp chồng, và **đọc được nguyên chữ**.
+  - [x] Cancel trong dialog vẽ `borderControl` như mọi secondary khác.
+  - [x] Trên nền có bàn phím, autofocus và focus ring vẫn còn nguyên.
+  - [x] Secondary lúc loading không đổi màu viền.
+- **Dependencies:** M99.63 (viền control), M99.53 (`MxButtonPair`).
+- **Tests required:** `mx_button_pair_test.dart`, `mx_alert_dialog_test.dart`,
+  `mx_surface_components_test.dart`, 6 golden dialog.
+- **Emulator:** `not run — scoped host verification`.
+- **Checklist phases:** 7, 13
+
+**Chủ dự án nêu hai lỗi từ ảnh gallery, và cả hai đều đúng.**
+
+**Viền secondary lệch.** "New deck" viền xám, "Cancel" trong dialog viền tím —
+cùng một `MxActionButton.secondary`. Không phải drift token: dialog destructive
+đặt `shouldAutofocus` lên Cancel, và theme vẽ **focus ring** thay cho viền khi
+focused. Đo trên `deck_delete_confirm_light.png`: **10551 pixel `#4141C0`** đúng
+màu `focusRing`. Trên điện thoại không có gì để bấm Enter, nên đó là một
+affordance bàn phím vẽ ra vô cớ, và nó làm một nút trông như một component khác.
+Lý do của autofocus **luôn luôn là về một phím**, nên nó chỉ còn hiệu lực ngoài
+`FocusHighlightMode.touch`. Bàn phím cắm vào điện thoại vẫn có focus ngay khi
+được dùng, vì Flutter chuyển chế độ ở tương tác đầu tiên.
+
+**Hai hàng nút tốn diện tích.** `MxButtonPair` xuống hàng khi **nhãn đầy đủ**
+không vừa nửa hàng, nên `Move to Trash` đẩy cả cặp xuống hai hàng ngay trên màn
+393. Đổi ngưỡng thành **từ dài nhất**: một hàng còn sống chừng nào mỗi nút còn vẽ
+được trọn một từ, vì nhãn xuống dòng thì đọc được còn nhãn cắt giữa từ thì không.
+
+**Bỏ hẳn fallback đã thử trước, và đã render.** Ở 320 cỡ chữ 2.0 dialog xoá ra
+**`Ca`** cạnh **`Mov…`** — một hộp xác nhận huỷ mà không nút nào nói nó làm gì.
+Tệ hơn hai hàng mà thay đổi này sinh ra để bỏ. Nên ngoại lệ được giữ, có luật rõ
+và có lý do đo được, chứ không phải một con số chọn tay.
+
+**Ba test ghim hợp đồng cũ, kèm cả lý lẽ của nó** ("guard chống một hàng làm gãy
+cả hai nhãn"). Chúng khẳng định ngược lại bây giờ, và ghi rõ vì sao đổi. Hai test
+focus của alert dialog thì **phải khai báo có bàn phím**: widget test khởi động ở
+chế độ touch, nên nếu để nguyên chúng sẽ kiểm một tính chất mà nền tảng chúng
+đang mô phỏng không có. Thêm một test cho chiều ngược lại: chạm thì không focus.
+
+**Và một chỗ lệch cùng loại tìm thấy khi làm:** style lúc loading của secondary
+vẫn giữ `borderSubtle` sau khi viền nghỉ chuyển sang `borderControl` ở M99.63 —
+nút đổi màu viền trong lúc đang lưu.
+
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 
 Ghi lại cụ thể, vì "mất một bộ lint" là câu quá mơ hồ để ai đó sau này biết

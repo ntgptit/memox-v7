@@ -97,6 +97,19 @@ void main() {
 
     testWidgets('destructive does not take initial focus', (tester) async {
       // A stray Enter on a delete dialog must not delete anything.
+      //
+      // **Only where an Enter is possible.** `MxActionButton` drops the
+      // autofocus under `FocusHighlightMode.touch`, because a focused outlined
+      // button wears the focus ring instead of its border and a phone has no
+      // reason to be shown one. A widget test starts in touch mode, so the
+      // keyboard has to be declared for the property to exist at all.
+      FocusManager.instance.highlightStrategy =
+          FocusHighlightStrategy.alwaysTraditional;
+      addTearDown(() {
+        FocusManager.instance.highlightStrategy =
+            FocusHighlightStrategy.automatic;
+      });
+
       await pump(tester, build(variant: MxConfirmDialogVariant.destructive));
 
       final confirm = tester.widget<FilledButton>(
