@@ -53,3 +53,82 @@ rules:
     tags:
       - memox-v7
       - design-system
+
+  # Every pattern below is line-anchored with the comment exemption the
+  # duration rule established: prose that *names* a banned widget must not trip
+  # the rule that bans it — the first dry run here flagged a doc comment that
+  # said "used to be a raw IconButton(color:)" while explaining why it no
+  # longer is.
+  - id: memox_v7.design_system.no_raw_widget
+    type: regex
+    severity: error
+    enabled: true
+    message: >-
+      No raw Material component widgets in feature code. Use the Mx shared
+      primitive (MxCard, MxListTile, MxIconButton, MxFab, MxRadio, dialogs via
+      the shared show helpers, ...) so the component's visual grammar has one
+      owner. A widget with no Mx wrapper yet goes through the admission rule in
+      the flutter-theme-design skill first — wrapper, tests, then guard —
+      never raw-first.
+    scopes:
+      - presentation_files
+    patterns:
+      - '^(?!\s*(?://|\*)).*\b(?:Card|ListTile|IconButton|FloatingActionButton|InkResponse|ExpansionTile|Badge)\s*\('
+      - '^(?!\s*(?://|\*)).*\b(?:Checkbox|Radio|TextFormField|Slider|RangeSlider|SegmentedButton|ToggleButtons)\s*[<(]'
+      - '^(?!\s*(?://|\*)).*\b(?:NavigationBar|NavigationDrawer|NavigationRail|BottomNavigationBar|BottomAppBar|TabBar)\s*\('
+      - '^(?!\s*(?://|\*)).*\b(?:Dialog|AlertDialog|SimpleDialog|MaterialBanner|SearchBar|SearchAnchor|DropdownMenu)\s*[<(]'
+      - '^(?!\s*(?://|\*)).*\bshowDialog\s*[<(]'
+    tags:
+      - memox-v7
+      - design-system
+
+  - id: memox_v7.design_system.no_raw_style_escape
+    type: regex
+    severity: error
+    enabled: true
+    message: >-
+      No hand-built styles in feature code. `ButtonStyle`, `styleFrom`,
+      `BorderSide`, `BoxShadow`, `ShapeDecoration`, `RoundedRectangleBorder`,
+      `WidgetStateProperty` and literal icon sizes are the design system's
+      vocabulary — a feature that needs one is describing a variant the shared
+      widget should own. Extend the Mx widget or the theme in lib/shared /
+      lib/core/theme, then select it semantically here.
+    scopes:
+      - presentation_files
+    patterns:
+      - '^(?!\s*(?://|\*)).*\b(?:ButtonStyle|BorderSide|BoxShadow|ShapeDecoration|RoundedRectangleBorder)\s*\('
+      - '^(?!\s*(?://|\*)).*\.styleFrom\s*\('
+      - '^(?!\s*(?://|\*)).*\b(?:WidgetStateProperty|MaterialStateProperty)\b'
+      - '^(?!\s*(?://|\*)).*\bIcon\s*\([^)]*\bsize\s*:\s*\d'
+    tags:
+      - memox-v7
+      - design-system
+
+  # Both app faces are variable fonts with a `wght` axis, and renderers read
+  # the axis over `TextStyle.fontWeight` once it is present — so a bare
+  # `copyWith(fontWeight:)` reports the new weight to every test and paints the
+  # rung's old one on the device. Found live three separate times (the
+  # NavigationBar's selected label, both migrated buttons' inline labels, and
+  # then eleven more sites in one sweep); `AppTypography.withWeight` moves the
+  # axis with the weight and is the only legal spelling.
+  #
+  # The pattern requires the `FontWeight.` literal on purpose:
+  # `withWeight`'s own implementation writes `fontWeight: weight`, so the one
+  # file allowed to touch the field never matches.
+  - id: memox_v7.design_system.no_bare_font_weight
+    type: regex
+    severity: error
+    enabled: true
+    message: >-
+      Never set `fontWeight:` directly — on a variable font it reports one
+      weight and paints another. Re-weight through
+      `AppTypography.withWeight(style, FontWeight.wXXX)`, which moves the
+      `wght` axis with it.
+    scopes:
+      - ui_and_theme_surfaces
+    patterns:
+      - '^(?!\s*(?://|\*)).*\bfontWeight\s*:\s*FontWeight\.'
+    tags:
+      - memox-v7
+      - design-system
+      - typography

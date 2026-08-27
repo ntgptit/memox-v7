@@ -4,6 +4,7 @@ import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_card.dart';
+import '../../../../../shared/widgets/mx_icon_button.dart';
 
 /// The chosen source, one compact card (M4.12 states 1–2): a file icon, the
 /// name (or "Pasted text" — the content itself is private and never echoed,
@@ -80,9 +81,9 @@ class CardImportSourceSummaryWidget extends StatelessWidget {
           ),
           if (onRemove != null) ...<Widget>[
             const SizedBox(width: AppSpacing.xs),
-            IconButton(
-              icon: const Icon(Icons.close),
-              tooltip: context.l10n.cardImportRemoveFileLabel,
+            MxIconButton(
+              icon: Icons.close,
+              semanticLabel: context.l10n.cardImportRemoveFileLabel,
               onPressed: onRemove,
             ),
           ],

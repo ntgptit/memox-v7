@@ -7,6 +7,7 @@ import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
+import 'package:memox/shared/widgets/mx_fab.dart';
 import 'package:memox/shared/widgets/mx_loading_state.dart';
 import 'package:memox/shared/widgets/mx_content_shell.dart';
 
@@ -251,6 +252,42 @@ void main() {
         );
       });
     }
+  });
+
+  group('MxFab', () {
+    testWidgets('label reaches tooltip and semantics; theme owns the look', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        host(
+          Scaffold(
+            floatingActionButton: MxFab(
+              icon: Icons.add,
+              label: 'New deck',
+              onPressed: () {},
+            ),
+            body: const SizedBox.shrink(),
+          ),
+        ),
+      );
+
+      // One string, two jobs: the long-press tooltip and the accessible name
+      // of a control that paints no text of its own.
+      final fab = tester.widget<FloatingActionButton>(
+        find.byType(FloatingActionButton),
+      );
+      expect(fab.tooltip, 'New deck');
+      expect(find.bySemanticsLabel('New deck'), findsOneWidget);
+
+      // The wrapper passes no colour and no shape, so what renders is the
+      // theme's brand pair — the whole reason the raw widget is banned.
+      expect(fab.backgroundColor, isNull);
+      expect(fab.shape, isNull);
+
+      final size = tester.getSize(find.byType(FloatingActionButton));
+      expect(size.height, greaterThanOrEqualTo(48));
+      expect(size.width, greaterThanOrEqualTo(48));
+    });
   });
 
   group('MxLoadingState', () {

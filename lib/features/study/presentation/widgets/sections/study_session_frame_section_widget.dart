@@ -246,12 +246,15 @@ class _Figure extends StatelessWidget {
     maxLines: 1,
     softWrap: false,
     overflow: TextOverflow.ellipsis,
-    style: context.texts.labelMedium?.copyWith(
-      color: context.colors.onSurface,
-      fontWeight: FontWeight.w600,
-      // Tabular figures so a counter ticking 9 -> 10 does not shift the row.
-      fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
-    ),
+    // Through the wght axis — a bare `fontWeight:` paints the rung's old
+    // weight.
+    style: AppTypography.withWeight(context.texts.labelMedium!, FontWeight.w600)
+        .copyWith(
+          color: context.colors.onSurface,
+          // Tabular figures so a counter ticking 9 -> 10 does not shift the
+          // row.
+          fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
+        ),
   );
 }
 

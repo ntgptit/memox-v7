@@ -184,16 +184,21 @@ class _MxSearchFieldState extends State<MxSearchField> {
             if (count != null) ...<Widget>[
               Text(
                 '$count',
-                style: context.texts.labelSmall?.copyWith(
-                  color: colors.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: AppTypography.sectionLabelTracking,
-                  // Tabular figures so a count ticking 9 -> 10 does not shift
-                  // the button beside it.
-                  fontFeatures: const <FontFeature>[
-                    FontFeature.tabularFigures(),
-                  ],
-                ),
+                // Through the wght axis — a bare `fontWeight:` paints the
+                // rung's old weight.
+                style:
+                    AppTypography.withWeight(
+                      context.texts.labelSmall!,
+                      FontWeight.w600,
+                    ).copyWith(
+                      color: colors.onSurfaceVariant,
+                      letterSpacing: AppTypography.sectionLabelTracking,
+                      // Tabular figures so a count ticking 9 -> 10 does not shift
+                      // the button beside it.
+                      fontFeatures: const <FontFeature>[
+                        FontFeature.tabularFigures(),
+                      ],
+                    ),
               ),
               const SizedBox(width: AppSpacing.xs),
             ],

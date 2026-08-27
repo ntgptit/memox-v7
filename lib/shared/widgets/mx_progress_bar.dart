@@ -4,6 +4,7 @@ import '../../core/theme/app_durations.dart';
 import '../../core/theme/app_motion_policy.dart';
 import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_typography.dart';
 import '../../core/theme/theme_context_extension.dart';
 
 /// How tall the track is.
@@ -177,15 +178,19 @@ class _MxProgressHeader extends StatelessWidget {
           const SizedBox(width: AppSpacing.sm),
           Text(
             valueLabel!,
-            style: texts.labelMedium?.copyWith(
-              color: isComplete
-                  ? context.semanticColors.success
-                  : context.colors.onSurface,
-              fontWeight: FontWeight.w600,
-              // Tabular figures so a bar that ticks 61% -> 62% does not shift
-              // the label sideways under it.
-              fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
-            ),
+            // Through the wght axis — a bare `fontWeight:` paints the rung's
+            // old weight.
+            style: AppTypography.withWeight(texts.labelMedium!, FontWeight.w600)
+                .copyWith(
+                  color: isComplete
+                      ? context.semanticColors.success
+                      : context.colors.onSurface,
+                  // Tabular figures so a bar that ticks 61% -> 62% does not
+                  // shift the label sideways under it.
+                  fontFeatures: const <FontFeature>[
+                    FontFeature.tabularFigures(),
+                  ],
+                ),
           ),
         ],
       ],

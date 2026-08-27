@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_breakpoints.dart';
 import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_card.dart';
@@ -247,16 +248,21 @@ class _DeckActionRow extends StatelessWidget {
                   // absorbs everything else — the mockup's `flex: 1`.
                   Text(
                     context.l10n.deckTileLearnedPercentLabel(percent),
-                    style: context.texts.labelMedium?.copyWith(
-                      // Success is earned at 100% and only there — the same
-                      // moment the gauge's own fill turns (BR-88). Anything
-                      // less is the neutral figure, whatever today's due
-                      // count happens to be.
-                      color: summary.isFullyLearned
-                          ? context.semanticColors.success
-                          : context.colors.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    // Through the wght axis — a bare `fontWeight:` paints
+                    // the rung's old weight.
+                    style:
+                        AppTypography.withWeight(
+                          context.texts.labelMedium!,
+                          FontWeight.w600,
+                        ).copyWith(
+                          // Success is earned at 100% and only there — the
+                          // same moment the gauge's own fill turns (BR-88).
+                          // Anything less is the neutral figure, whatever
+                          // today's due count happens to be.
+                          color: summary.isFullyLearned
+                              ? context.semanticColors.success
+                              : context.colors.onSurfaceVariant,
+                        ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),

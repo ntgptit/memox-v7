@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/theme_context_extension.dart';
+import '../../../../../core/theme/app_typography.dart';
 import '../../../domain/models/search_result_model.dart';
 import '../support/search_labels_widget.dart';
 
@@ -34,10 +35,12 @@ class SearchGroupHeaderWidget extends StatelessWidget {
         // *uppercase*, which is what every other section label in the app is;
         // this one renders as authored, so the extra 1.1px would be loosening
         // lowercase text the type scale has already spaced.
-        style: context.texts.labelSmall?.copyWith(
-          color: context.colors.onSurfaceVariant,
-          fontWeight: FontWeight.w600,
-        ),
+        // Through the wght axis — a bare `fontWeight:` paints the rung's
+        // old weight.
+        style: AppTypography.withWeight(
+          context.texts.labelSmall!,
+          FontWeight.w600,
+        ).copyWith(color: context.colors.onSurfaceVariant),
       ),
     );
   }
