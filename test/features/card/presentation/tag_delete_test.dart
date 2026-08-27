@@ -97,9 +97,11 @@ void main() {
       row: 'noun',
     );
 
-    // The destructive action carries the noun, so the button cannot be read as
-    // "delete these cards" (M4.14 T8).
-    expect(find.text('Delete tag'), findsWidgets);
+    // The noun lives on the dialog title now (owner rule, 2026-08-28): the
+    // button is a bare verb, and it is the title that keeps the surface from
+    // reading as "delete these cards" (M4.14 T8).
+    expect(find.text('Delete tag?'), findsOneWidget);
+    expect(find.widgetWithText(MxActionButton, 'Delete'), findsOneWidget);
     expect(find.textContaining('delete your cards'), findsNothing);
     expect(find.textContaining('cards will be deleted'), findsNothing);
   });
@@ -108,7 +110,7 @@ void main() {
     final catalog = FakeTagCatalogRepository.seeded(tags);
     await openDelete(tester, catalog, row: 'noun');
 
-    await tester.tap(find.widgetWithText(MxActionButton, 'Delete tag').last);
+    await tester.tap(find.widgetWithText(MxActionButton, 'Delete'));
     await tester.pumpAndSettle();
 
     expect(catalog.deleteCalls, <String>['t1']);
@@ -136,7 +138,7 @@ void main() {
       );
     await openDelete(tester, catalog, row: 'noun');
 
-    await tester.tap(find.widgetWithText(MxActionButton, 'Delete tag').last);
+    await tester.tap(find.widgetWithText(MxActionButton, 'Delete'));
     await tester.pumpAndSettle();
 
     expect(find.text('Delete tag?'), findsOneWidget);
@@ -162,7 +164,7 @@ void main() {
       );
     await openDelete(tester, catalog, row: 'noun');
 
-    await tester.tap(find.widgetWithText(MxActionButton, 'Delete tag').last);
+    await tester.tap(find.widgetWithText(MxActionButton, 'Delete'));
     await tester.pumpAndSettle();
 
     // `.at(1)`, the content `Text` the failure was appended to — not the

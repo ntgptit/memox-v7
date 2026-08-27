@@ -14181,6 +14181,39 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Editable documents:** `docs/wbs.md`
 - **Dependencies:** M99.74
 
+### M99.77 · Động từ trần lan ra các confirm còn lại — và một ngoại lệ thành văn
+
+- **Status:** **done** — "triển khai cho cả ở vị trí khác": quét toàn bộ cặp
+  title–action trong ARB, sửa nốt hai chỗ còn lặp, và ghi thành văn chỗ cố ý
+  không sửa.
+- **Goal:** mọi nút confirm trong dialog/sheet có title mang danh từ thì giữ
+  động từ trần, một dòng; nút vào-cửa (menu, bar) giữ danh từ (T8/BR-235).
+- **Scope:** `deckSchedulerChangeConfirm` "Change study mode" → "Change"/"Đổi"
+  (title "Study mode" đã nêu — đúng sheet trong ảnh owner gửi);
+  `tagDeleteAction` đang gánh cả menu lẫn dialog → tách key mới
+  `tagDeleteConfirmAction` "Delete"/"Xoá" cho dialog, menu giữ "Delete tag".
+  Quét xác nhận phần còn lại đã đúng chuẩn từ trước: Reset, Discard, Rename,
+  settingsResetConfirm... đều trần sẵn.
+- **Ngoại lệ có chủ đích, ghi vào description:** `trashPurgeConfirmAction`
+  "Delete permanently" giữ nguyên dù lặp title — purge là hành động không
+  khôi phục được duy nhất của app, nút nhắc lại đầy đủ hậu quả là safety
+  pattern; luật động-từ-trần (2026-08-28) phủ các move khôi phục được, không
+  phủ hard-delete.
+- **Tests required:** `tag_delete_test` chuyển claim T8 sang title (danh từ
+  sống ở title, nút trần — title là thứ giữ mặt dialog khỏi đọc thành "xoá
+  card"); `deck_scheduler_change_widget_test` đổi 8 tham chiếu nhãn; parity
+  test bắt thiếu description VI của key mới — đã bổ sung. 2 golden đổi
+  (`deck_scheduler_change_light`, `tag_delete_confirm_light`).
+- **Checklist phases:** Phase 20 (l10n/copy).
+- **Emulator integration suite:** **not run — copy + goldens only.** Đây
+  không phải một lượt chạy xanh.
+- **Output:** như Scope; gallery publish lại URL ghim sau merge.
+- **Acceptance criteria:**
+  - [x] Không còn confirm nào lặp danh từ của title, trừ ngoại lệ purge có văn bản.
+  - [x] `flutter analyze` 0; full suite 4177 xanh; goldens `TZ=UTC` xanh.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.76
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |
