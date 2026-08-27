@@ -13616,7 +13616,7 @@ field, vừa là `WidgetStateProperty` cho `resolveAs` của SDK.
 `deck_library_menu` và `deck_sort_sheet`, hai cái tên nghe như popup nhưng là
 sheet.
 
-### M99.66 · Job golden trả tiền compile cho 403 file nó không chạy
+### M99.68 · Job golden trả tiền compile cho 403 file nó không chạy
 
 - **Status:** **done** — chỉ `ci.yml` và `.gitignore`, không đụng code hay test.
 - **Goal:** Job golden trên PR chỉ biên dịch những file nó thật sự chạy, và có
@@ -13634,7 +13634,10 @@ sheet.
   - [x] Tag không khớp gì thì job đỏ — đã đo, `flutter test` exit 79.
   - [x] Số test thực chạy dưới sàn thì job đỏ, qua script đã có sẵn.
   - [x] `golden-report.jsonl` không lọt vào working tree của ai.
-- **Dependencies:** không.
+- **Dependencies:** không. **Mục này từng mang số M99.66 và phải đổi hai bậc:**
+  #373 lấy M99.66 và #374 lấy M99.67, cả hai landed trong lúc PR này chờ. Đây là
+  lần thứ ba trong cùng một phiên — M99.62 và M99.65 đã ghi cùng bài học, và ba
+  lần thì không còn là xui: **đừng đặt số cho tới lúc sắp merge.**
 - **Tests required:** `test_ci_tooling.py` (52, xanh), và chạy tay chính hai
   step ấy trích thẳng từ yaml.
 - **Emulator:** `not run — scoped host verification`.
