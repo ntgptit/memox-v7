@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/error/failure.dart';
 import '../../../../../core/theme/app_ink.dart';
-import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../shared/widgets/mx_icon.dart';
@@ -44,12 +43,11 @@ class CardExportErrorBandWidget extends StatelessWidget {
   }
 
   Widget _band(BuildContext context, ColorScheme colors) {
-    return MxCard(
+    return MxCard.flat(
       color: colors.errorContainer,
       // Flat: the band sits inside the sheet's surface, and `MxCard`'s doc
       // calls a shadow stacked on a shadow a rendering fault rather than depth.
       // The error fill is already doing the separating here.
-      elevation: AppElevation.none,
       padding: const EdgeInsets.all(AppSpacing.md),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_ink.dart';
-import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_stroke.dart';
@@ -46,12 +45,11 @@ class CardDetailSummaryWidget extends StatelessWidget {
 
     return SizedBox(
       width: double.infinity,
-      child: MxCard(
+      child: MxCard.flat(
         // Flat, like the progress panel and every event card below it (D20).
         // The hero leads by being first, by its type and by its size, not by
         // floating above the two surfaces that describe it — which is also what
         // keeps the ladder honest in dark, where `shadowsFor` paints nothing.
-        elevation: AppElevation.none,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,

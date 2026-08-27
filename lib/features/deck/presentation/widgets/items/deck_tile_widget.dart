@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_ink.dart';
-import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_breakpoints.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
@@ -69,8 +68,7 @@ class DeckTileWidget extends StatelessWidget {
     // bands under it -- the progress bar, the due chip -- then looked tappable
     // and were not. `MxCard` takes the tap; the overflow menu is a nested button
     // and wins the gesture arena over it, so it stays its own action.
-    return MxCard(
-      elevation: AppElevation.none,
+    return MxCard.flat(
       padding: EdgeInsets.zero,
       onTap: onTap,
       child: Column(

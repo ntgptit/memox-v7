@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_card.dart';
@@ -48,10 +47,9 @@ class SearchResultShellWidget extends StatelessWidget {
     return Semantics(
       button: true,
       label: semanticLabel,
-      child: MxCard(
+      child: MxCard.flat(
         // Flat: this card sits inside a list on the page's own surface, and a
         // shadow per row would make the list read as a stack of sheets.
-        elevation: AppElevation.none,
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
           vertical: AppSpacing.md,

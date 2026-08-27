@@ -174,53 +174,49 @@ class _SourceOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    return Semantics(
-      selected: isSelected,
-      button: true,
-      child: MxCard(
-        onTap: onTap,
-        // Selection is the border, the check glyph and the semantics — no
-        // background tint: a blended fill is not a palette token, and the
-        // audit's palette closure is the design system's whole point.
-        borderColor: isSelected ? colors.primary : null,
-        padding: const EdgeInsets.all(AppSpacing.md),
-        // No width constraint of its own: the band above decides whether this
-        // card is half a row or a full one, and a minWidth here is what made
-        // the pair size to their text instead of to the column.
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                MxIcon(
-                  icon,
-                  // Secondary, not primary: the same selected-mark token the
-                  // card tile's check uses — dark primary fails contrast as a
-                  // glyph on dark surfaces.
-                  ink: isSelected ? AppInk.secondary : AppInk.quiet,
+    return MxCard(
+      onTap: onTap,
+      // Border, announcement and — the part this site got wrong — the token
+      // all come from [MxCard.isSelected]: this card spelled `primary`, the
+      // 2.90:1-in-dark border its sibling `card_export_format_options`
+      // measured and moved off of. No background tint: the glyph and the
+      // border carry the state.
+      isSelected: isSelected,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      // No width constraint of its own: the band above decides whether this
+      // card is half a row or a full one, and a minWidth here is what made
+      // the pair size to their text instead of to the column.
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              MxIcon(
+                icon,
+                // Secondary, not primary: the same selected-mark token the
+                // card tile's check uses — dark primary fails contrast as a
+                // glyph on dark surfaces.
+                ink: isSelected ? AppInk.secondary : AppInk.quiet,
+              ),
+              if (isSelected) ...<Widget>[
+                const SizedBox(width: AppSpacing.xs),
+                const MxIcon(
+                  Icons.check_circle,
+                  ink: AppInk.secondary,
+                  size: MxIconSize.sm,
                 ),
-                if (isSelected) ...<Widget>[
-                  const SizedBox(width: AppSpacing.xs),
-                  const MxIcon(
-                    Icons.check_circle,
-                    ink: AppInk.secondary,
-                    size: MxIconSize.sm,
-                  ),
-                ],
               ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(title, style: context.texts.titleSmall),
-            Text(
-              subtitle,
-              style: context.texts.bodySmall!.inked(context, AppInk.quiet),
-            ),
-          ],
-        ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(title, style: context.texts.titleSmall),
+          Text(
+            subtitle,
+            style: context.texts.bodySmall!.inked(context, AppInk.quiet),
+          ),
+        ],
       ),
     );
   }

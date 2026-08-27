@@ -25,8 +25,7 @@ class _AnswerArea extends StatelessWidget {
   Widget build(BuildContext context) {
     final revealed = answer;
 
-    return MxCard(
-      elevation: AppElevation.none,
+    return MxCard.flat(
       radius: AppRadius.xl,
       color: context.colors.surfaceContainerLow,
       child: Center(

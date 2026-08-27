@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_ink.dart';
-import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
@@ -339,9 +338,8 @@ class _PageError extends StatelessWidget {
       child: Semantics(
         container: true,
         liveRegion: true,
-        child: MxCard(
+        child: MxCard.flat(
           color: colors.errorContainer,
-          elevation: AppElevation.none,
           padding: const EdgeInsets.all(AppSpacing.md),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,

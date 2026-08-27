@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_ink.dart';
-import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
@@ -67,18 +66,17 @@ class CardTileWidget extends StatelessWidget {
     // and a colour-blind reader sees the check, so colour is never the only
     // signal (UC-04 A6).
     return Semantics(
-      selected: isSelectionMode ? isSelected : null,
       label: isSelected ? context.l10n.cardSelectedSemanticLabel : null,
-      child: MxCard(
-        elevation: AppElevation.none,
+      child: MxCard.flat(
         onTap: onTap,
         onLongPress: onLongPress,
-        // A tinted surface *and* a border, both from tokens. The height does
-        // not move between the two states — the check replaces the state dot
-        // in the same column rather than being inserted beside it — so a list
-        // does not reflow as the user selects.
+        // The border and the announcement come from [MxCard.isSelected]; the
+        // tint stays here, because a scanning eye catches rows a border alone
+        // lets slide. The height does not move between the two states — the
+        // check replaces the state dot in the same column rather than being
+        // inserted beside it — so a list does not reflow as the user selects.
         color: isSelected ? context.colors.secondaryContainer : null,
-        borderColor: isSelected ? context.colors.secondary : null,
+        isSelected: isSelectionMode ? isSelected : null,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[

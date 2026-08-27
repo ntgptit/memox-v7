@@ -13853,6 +13853,52 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Editable documents:** `docs/wbs.md`
 - **Dependencies:** M99.67
 
+### M99.70 · Chăm chút MxCard — flat có tên, selected có chủ
+
+- **Status:** **done** — lượt "chăm chút button và card". Đo trước khi sửa:
+  **button khỏe, không sửa gì** (theme khai đủ 4 state; geometry 48h/24px =
+  0.5 đúng baseline; hai action bar lệch khỏi `MxButtonPair` đều có văn bản
+  lý do; phân bố 61 site: 35 primary / 24 secondary / 1 tonal / 1 compact —
+  các biến thể hẹp đều đang được dùng đúng chỗ chúng được thêm cho).
+  **Card là nơi default thua đa số**: 29/48 site phải tự khai
+  `elevation: AppElevation.none`, và "card chọn được" bị đánh vần 3 kiểu.
+- **Goal:** đa số không phải override; selected có đúng một token và một
+  cách announce.
+- **Scope:** `MxCard.flat` (constructor đặt tên cho panel phẳng — lý do
+  "shadow chồng shadow" ghi một lần thay vì 17 comment; migrate 29 site,
+  zero pixel) và `isSelected` **tri-state** trên `MxCard`: `true` → border
+  `secondary` + announce selected; `false` → announce chưa-chọn (radio/poll
+  cần nói cả phần vắng); `null` → card thường, không biến list đọc thành
+  poll. Tint selected và resting border vẫn thuộc caller — hai site có lý do
+  văn bản khác nhau (tile tint để mắt quét; export giữ `borderControl` vì
+  option là control). Migrate 3 site selected; **sửa bug**:
+  `card_import_source_step` còn dùng `primary` (2.90:1 dark, dưới WCAG
+  1.4.11) dù site anh em `card_export_format_options` đã đo và bỏ chính giá
+  trị đó — 4 golden import-source đổi pixel đúng chỗ này.
+- **Đo được nhưng không sửa, ghi để khỏi đo lại:** BoxDecoration trong
+  features 26 site — 3 PANEL đều hợp lệ (badge pill của history, skin
+  guess/match); icon trong button 16dp cạnh label 14 (tỉ lệ 1.14, dưới dải
+  1.25–1.4 của baseline) — giữ, vì đã owner-review và baseline là số để đối
+  chiếu chứ không phải luật (skill nguyên tắc 3).
+- **Tests required:** `mx_card_test` nhóm selection (token `secondary` cả
+  hai theme; tri-state semantics qua `Tristate`; non-tappable vẫn announce;
+  borderColor còn hiệu lực khi chưa chọn) + nhóm flat (không shadow);
+  `card_export_sheet_test` chuyển claim từ so màu sang `isSelected` — token
+  giờ pin ở widget, site chỉ còn pin việc *đưa state cho card*.
+- **Checklist phases:** Phase 7 (components).
+- **Guard:** không đổi (76) — không có widget mới bị cấm; API card là mở
+  rộng, guard hiện có đã phủ.
+- **Emulator integration suite:** **not run — theme/presentation only.** Đây
+  không phải một lượt chạy xanh.
+- **Output:** như Scope; widgetbook MxCard thêm knob flat + isSelected;
+  goldens 295 xanh với đúng 4 file import-source đổi; host suite 4175 xanh.
+- **Acceptance criteria:**
+  - [x] 0 site còn `elevation: AppElevation.none` tự khai.
+  - [x] 0 site tự đánh vần border selected; `primary`-selected chết hẳn.
+  - [x] `flutter analyze` 0; full suite 4175 xanh; goldens `TZ=UTC` xanh.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.69
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |

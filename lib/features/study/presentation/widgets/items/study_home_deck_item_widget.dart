@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_ink.dart';
-import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -49,8 +48,7 @@ class StudyHomeDeckItemWidget extends StatelessWidget {
 
     // Flat with a hairline, like the deck card: two competing depths in one
     // scrolling column is what makes a list read as busy.
-    return MxCard(
-      elevation: AppElevation.none,
+    return MxCard.flat(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
