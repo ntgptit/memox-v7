@@ -38,8 +38,6 @@ void main() {
         filledButtonTheme: buildFilledButtonTheme(
           scheme,
           base.extension<AppSemanticColors>()!,
-          actionFill: scheme.primary,
-          actionLabel: scheme.onPrimary,
         ),
       );
 

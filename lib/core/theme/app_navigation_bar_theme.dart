@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app_material_roles.dart';
+import 'app_typography.dart';
 
 /// The bottom bar's whole appearance.
 ///
@@ -30,16 +31,23 @@ NavigationBarThemeData buildNavigationBarTheme(
   // `onSurface` for both states, so the active tab was a brand pill under
   // a navy word — the indicator said "here" and the label did not (owner
   // review, 2026-08-20).
-  labelTextStyle: WidgetStateProperty.resolveWith(
-    (Set<WidgetState> states) => texts.labelMedium!.copyWith(
-      color: states.contains(WidgetState.selected)
-          ? selectedInk(scheme)
-          : scheme.onSurfaceVariant,
-      fontWeight: states.contains(WidgetState.selected)
-          ? FontWeight.w600
-          : null,
-    ),
-  ),
+  //
+  // **The selected weight goes through [AppTypography.withWeight].** Both
+  // faces are variable fonts, and the renderer reads the `wght` axis over
+  // `fontWeight` once the axis is present — `labelMedium` arrives carrying
+  // wght 500, so a bare `copyWith(fontWeight: w600)` reported 600 to every
+  // test that asked and painted 500 on the device. The exact bug the helper
+  // exists for, found on this slot by the 2026-08 theme-composition review.
+  labelTextStyle: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+    final bool isSelected = states.contains(WidgetState.selected);
+    final TextStyle rung = isSelected
+        ? AppTypography.withWeight(texts.labelMedium!, FontWeight.w600)
+        : texts.labelMedium!;
+
+    return rung.copyWith(
+      color: isSelected ? selectedInk(scheme) : scheme.onSurfaceVariant,
+    );
+  }),
   surfaceTintColor: Colors.transparent,
   elevation: 0,
   // Labels always visible, on every destination. The M3 default hides the

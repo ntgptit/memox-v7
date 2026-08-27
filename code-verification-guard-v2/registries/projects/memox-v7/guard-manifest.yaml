@@ -22,6 +22,7 @@ rules:
   - rules/memox-state-management-rules.yaml
   - rules/memox-error-handling-rules.yaml
   - rules/memox-design-token-rules.yaml
+  - rules/memox-design-system-rules.yaml
   - rules/memox-i18n-rules.yaml
   - rules/memox-data-model-rules.yaml
   - rules/memox-privacy-rules.yaml
