@@ -232,11 +232,12 @@ void main() {
       lessThan(tester.getRect(cancelFinder).top),
       reason: 'the action the user came for is not the one below the fold',
     );
+    // Content bands fill the column (W5); the *buttons* no longer must.
+    // Stacked buttons are content-width and centred since the owner's call of
+    // 2026-08-28 — two screen-wide slabs read as a wall, not a choice — so
+    // what is pinned for them is the pair contract: one size, centred on the
+    // column, never wider than it.
     for (final entry in <String, Finder>{
-      'primary': primaryFinder,
-      'cancel': cancelFinder,
-      // The format band is held to the same column at this size, which nothing
-      // measured before: the old test only checked that it did not overflow.
       'csv option': optionCard(CardTransferFormat.csv),
       'content lines': find.byType(CardExportContentLinesWidget),
     }.entries) {
@@ -248,6 +249,19 @@ void main() {
         reason: '${entry.key} must fill the column once stacked',
       );
     }
+    final primaryRect = tester.getRect(primaryFinder);
+    final cancelRect = tester.getRect(cancelFinder);
+    expect(
+      cancelRect.width,
+      moreOrLessEquals(primaryRect.width, epsilon: epsilon),
+      reason: 'stacked or not, the pair is one size',
+    );
+    expect(
+      primaryRect.center.dx,
+      moreOrLessEquals(column.center.dx, epsilon: epsilon),
+      reason: 'a stacked pair sits centred on the column',
+    );
+    expect(primaryRect.width, lessThanOrEqualTo(column.width + epsilon));
     expect(tester.takeException(), isNull);
   });
 

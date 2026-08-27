@@ -135,6 +135,34 @@ void main() {
       expectOneSize(tester);
     });
 
+    testWidgets('stacked, the pair is content-width and centred - '
+        'not two full-bleed slabs', (tester) async {
+      // Owner call, 2026-08-28: when the row cannot happen, the buttons take
+      // the wider one's own width and sit centred on the line, because two
+      // screen-wide slabs read as a wall rather than a choice.
+      await tester.pumpWidget(
+        host(
+          const MxButtonPair(
+            axis: Axis.vertical,
+            primary: MxActionButton(
+              label: 'Browse starter library',
+              onPressed: null,
+            ),
+            secondary: MxActionButton(
+              label: 'New deck',
+              onPressed: null,
+              variant: MxActionButtonVariant.secondary,
+            ),
+          ),
+        ),
+      );
+
+      final pairBox = tester.getRect(find.byType(MxButtonPair));
+      final top = tester.getRect(find.byType(MxActionButton).at(0));
+      expect(top.width, lessThan(pairBox.width - 40));
+      expect(top.center.dx, moreOrLessEquals(pairBox.center.dx, epsilon: 0.5));
+    });
+
     testWidgets('it stacks only when a longest word will not fit', (
       tester,
     ) async {
