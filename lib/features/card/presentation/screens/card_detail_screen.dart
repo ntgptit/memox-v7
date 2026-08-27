@@ -12,7 +12,7 @@ import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_empty_state.dart';
-import '../../../../shared/widgets/mx_action_button.dart';
+import '../../../../shared/widgets/mx_icon_button.dart';
 import '../../../../shared/widgets/mx_error_state.dart';
 import '../../domain/failures/card_not_found_failure.dart';
 import '../../domain/models/card_detail_model.dart';
@@ -109,26 +109,38 @@ class CardDetailScreen extends ConsumerWidget {
         // still reports `hasValue == true` — which left the action sitting on
         // the not-found face, pointing at a card that is gone.
         if (detail is AsyncData<CardDetailModel>)
-          Padding(
-            // **The screen's own gutter, not `sm`.** An `IconButton` paints no
-            // fill so 8dp never showed; a tonal pill has a visible edge, and at
-            // 8dp it closed 8dp outside every surface below it — a second right
-            // margin on a screen that has one.
-            padding: EdgeInsets.only(right: mxScreenGutter(context)),
-            // **A tonal button with the word on it, not a bare glyph** (V3,
-            // BR-246). The action has to be findable on a page whose whole
-            // point is the card under it, and it must not out-weigh that card:
-            // `primary` competes with the content, an icon alone says nothing
-            // until it is tapped. `secondaryContainer` under
-            // `onSecondaryContainer` is the step between the two — and because
-            // the container is only 1.14:1 against the bar, what identifies
-            // this control is its label, which is why it always carries one.
-            child: MxActionButton(
-              label: context.l10n.cardDetailEditAction,
-              icon: Icons.edit_outlined,
-              variant: MxActionButtonVariant.tonal,
-              onPressed: () => _openEditor(context),
-            ),
+          // **An icon on the app bar, which is what V3 asked for on day one.**
+          // V19 moved it to a tonal button carrying the word, and its
+          // measurement is the reason: `secondaryContainer` is only **1.14:1**
+          // against the bar in light and 1.56:1 in dark, so a tonal pill with
+          // no label is identified by nothing — the fill it is made of is
+          // almost not there. That argues against *a tonal fill without a
+          // word*, and it was read as an argument against a bare glyph.
+          //
+          // An icon button has no fill to be invisible. Its ink is the app
+          // bar's own `foregroundColor` — `onSurface`, not the
+          // `onSurfaceVariant` the icon-button theme would give it, because an
+          // `AppBar` puts its foreground into the `IconTheme` its actions
+          // inherit. Measured on the bar's background: **16.06:1** in light and
+          // **16.62:1** in dark. Fourteen times the tonal container it
+          // replaces, and five times WCAG 1.4.11's floor for a control. What
+          // identifies it is the glyph, and the glyph is as legible as the
+          // title beside it.
+          //
+          // BR-246 is satisfied either way and is worth quoting rather than
+          // paraphrasing: edit must be *a separate, explicit action* that is
+          // *not the default tap* and **must not out-weigh the content being
+          // read**. It never required a word; the last clause prefers the
+          // lighter control, and the card is what the page is for.
+          //
+          // No `Padding` wrapper: the card list's app bar puts its icon actions
+          // in bare, and the gutter this used to carry existed only because a
+          // tonal pill has a visible edge that an `IconButton` does not.
+          MxIconButton(
+            icon: Icons.edit_outlined,
+            semanticLabel: context.l10n.cardDetailEditAction,
+            tooltip: context.l10n.cardDetailEditAction,
+            onPressed: () => _openEditor(context),
           ),
       ],
       body: MxAsyncView<CardDetailModel>(

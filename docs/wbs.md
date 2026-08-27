@@ -13887,6 +13887,56 @@ chế độ touch, nên nếu để nguyên chúng sẽ kiểm một tính chấ
 vẫn giữ `borderSubtle` sau khi viền nghỉ chuyển sang `borderControl` ở M99.63 —
 nút đổi màu viền trong lúc đang lưu.
 
+### M99.77 · Edit trên Card Detail quay lại thành một icon
+
+- **Status:** **done** — một action trên app bar, không đổi điều hướng.
+- **Goal:** Nút Edit không nặng hơn thứ nó đứng cạnh, và vẫn tìm được.
+- **Scope:** action Edit của `card_detail_screen.dart`. **Ngoài scope:** đích
+  điều hướng, và mọi action khác trên màn.
+- **Editable documents:** `docs/wbs.md`, `docs/wireframes/m4-15-card-detail.md`.
+- **Output:** `card_detail_screen.dart`, `card_detail_hierarchy_test.dart`,
+  18 golden, một dòng V20 trong wireframe.
+- **Acceptance criteria:**
+  - [x] Edit là `MxIconButton` trần trên app bar, không nhãn hiển thị.
+  - [x] Nhãn **chuyển vào semantics**, không biến mất — có test riêng.
+  - [x] Target chạm vẫn ≥ 48×48 cả hai chiều.
+  - [x] V19 được đánh dấu thay thế, không bị xoá; V20 ghi lý do và phép đo.
+- **Dependencies:** không.
+- **Tests required:** `card_detail_hierarchy_test.dart`, 18 golden card_detail.
+- **Emulator:** `not run — scoped host verification`.
+- **Checklist phases:** 7, 13
+
+**Chủ dự án hỏi hai điều: nút trông thô, và nó có phải chỉ để điều hướng không.**
+Câu sau: đúng — `_openEditor` làm đúng một việc, `pushNamed` sang route editor,
+không đổi state nào.
+
+**Câu trước dẫn tới một chỗ đọc sai tài liệu, và chỗ đọc sai là của code.**
+Comment tại đó viết "a tonal button with the word on it, **not a bare glyph**
+(V3, BR-246)". Hai nguồn ấy không nói thế:
+
+- **V3 nói ngược lại** — *"`Edit` là **icon action trên app bar**"* — tức đúng
+  thứ đang được đề nghị quay về.
+- **BR-246** đòi Sửa là *"một action riêng, tường minh"* và **"MUST NOT nổi bật
+  hơn phần nội dung đang đọc"**. Nó không đòi có chữ, và vế thứ hai nghiêng về
+  control nhẹ hơn.
+
+**V19 mới là thứ đổi hướng, và phép đo của nó vẫn đúng** — chính nó chỉ ra lối
+ra. `secondaryContainer` chỉ **1.14:1** (light) / **1.56:1** (dark) so với app
+bar, nên một pill tonal **không nhãn** thì không có gì nhận diện. Đó là lập luận
+chống *nền tonal thiếu chữ*, không phải chống glyph. Icon button không có nền để
+mà mờ.
+
+**Và tôi đã ghi sai con số một lần, sửa lại ở đây vì nó là loại sai đáng ghi.**
+Tôi tính mực là `onSurfaceVariant` (6.08 / 8.28) theo `iconButtonTheme`. Test đỏ
+mới lộ ra: `AppBar` đẩy `foregroundColor` của nó vào `IconTheme` mà các action
+đọc, nên mực thật là **`onSurface`**, đo được **16.06:1** / **16.62:1** — gấp
+mười bốn lần cái nền nó thay. Con số đúng nằm trong code, trong test và trong
+V20.
+
+Nhãn không biến mất mà **chuyển vào semantics**, và có test riêng cho điều đó:
+bỏ chữ khỏi màn hình mà bỏ luôn khỏi screen reader thì action thành không với
+tới được — tệ hơn cái nó vừa sửa.
+
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 
 Ghi lại cụ thể, vì "mất một bộ lint" là câu quá mơ hồ để ai đó sau này biết
