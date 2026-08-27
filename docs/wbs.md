@@ -13887,7 +13887,7 @@ chế độ touch, nên nếu để nguyên chúng sẽ kiểm một tính chấ
 vẫn giữ `borderSubtle` sau khi viền nghỉ chuyển sang `borderControl` ở M99.63 —
 nút đổi màu viền trong lúc đang lưu.
 
-### M99.77 · Edit trên Card Detail quay lại thành một icon
+### M99.78 · Edit trên Card Detail quay lại thành một icon
 
 - **Status:** **done** — một action trên app bar, không đổi điều hướng.
 - **Goal:** Nút Edit không nặng hơn thứ nó đứng cạnh, và vẫn tìm được.
@@ -13901,7 +13901,9 @@ nút đổi màu viền trong lúc đang lưu.
   - [x] Nhãn **chuyển vào semantics**, không biến mất — có test riêng.
   - [x] Target chạm vẫn ≥ 48×48 cả hai chiều.
   - [x] V19 được đánh dấu thay thế, không bị xoá; V20 ghi lý do và phép đo.
-- **Dependencies:** không.
+- **Dependencies:** không. **Số đổi một lần: M99.77 bị PR khác lấy mất trong
+  lúc PR này chờ CI.** Lần này guard bắt được trước khi merge — đó là việc nó
+  sinh ra để làm, và là lần đầu trong phiên nó chặn được thay vì để lọt.
 - **Tests required:** `card_detail_hierarchy_test.dart`, 18 golden card_detail.
 - **Emulator:** `not run — scoped host verification`.
 - **Checklist phases:** 7, 13
