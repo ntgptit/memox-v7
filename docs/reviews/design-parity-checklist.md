@@ -717,14 +717,14 @@ Contrast đo tại `deck_workload_role_test.dart`: info/surface 5.23:1 (light),
 progressFill/progressTrack ≥ 3:1 hai theme.
 
 
-## MxCard recipe closure pass (M99.80, 2026-08-27)
+## MxCard recipe closure pass (M99.83, 2026-08-28)
 
 C4 (`MxCard`) đổi contract: public API không còn `color`/`borderColor`/
 `radius`/`elevation`/`padding: EdgeInsets` — mười named recipe (`flat`,
 `raised`, `focal`, `recessed`, `feedback`, `muted`, `tonal`, `accent`, `tile`,
 `option`) map 1-1 vào private spec, AD-23 là chủ quyết định. 48/48 production
 call-site migrate; C1 (`MxActionButton`) không đổi implementation — audit
-M99.80 xác nhận baseline M99.74/M99.75 bằng 20 case state matrix trên 4 theme.
+M99.83 xác nhận baseline M99.74/M99.75 bằng 20 case state matrix trên 4 theme.
 
 **Hai delta pixel, phân loại theo taxonomy của review:**
 

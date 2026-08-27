@@ -81,16 +81,16 @@ class MxEmptyState extends StatelessWidget {
             if (actionLabel != null && onAction != null) ...<Widget>[
               const SizedBox(height: AppSpacing.xl),
               // **The pair goes through `MxButtonPair`, which is what makes
-              // the two buttons one size.** Stacked in a `Column` they used to
-              // take their own label's width — `Browse starter library` wide
-              // and `New deck` narrow, one above the other — so the second of
-              // two equally valid ways to start read as a smaller, lesser
-              // afterthought. Vertical rather than the responsive default: an
-              // empty state offers two *paths*, and side by side at half a
-              // phone's width is where labels of that length wrap.
+              // the two buttons one size.** The forced `Axis.vertical` that
+              // used to sit here was a decision about labels that no longer
+              // exist — it was added when the CTA read `Browse starter
+              // library`, which genuinely wrapped at half a phone. The label
+              // is `Starter library` now (M99.81), and keeping the override
+              // kept the stack for a reason nobody could see. The responsive
+              // default measures the real labels: these row, and a locale
+              // that outgrows the line stacks content-width and centred.
               if (secondaryActionLabel != null && onSecondaryAction != null)
                 MxButtonPair(
-                  axis: Axis.vertical,
                   primary: MxActionButton(
                     label: actionLabel!,
                     onPressed: onAction,

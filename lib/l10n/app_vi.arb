@@ -337,7 +337,7 @@
     },
     "description": "Mở đầu dòng meta của một deck khi nó có deck con. Chỉ đếm con trực tiếp — đúng thứ sẽ thấy khi mở."
   },
-  "deckStarterLibraryAction": "Xem thư viện mẫu",
+  "deckStarterLibraryAction": "Thư viện mẫu",
   "@deckStarterLibraryAction": {
     "description": "Empty-root CTA that opens the starter template catalog (UC-01)."
   },

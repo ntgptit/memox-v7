@@ -16,7 +16,7 @@
 
 ### Shared widget: `MxCard`
 
-Recipe theo meaning (AD-23, M99.80): `flat` · `raised` · `focal` · `recessed`
+Recipe theo meaning (AD-23, M99.83): `flat` · `raised` · `focal` · `recessed`
 · `feedback` · `muted` · `tonal` · `accent` · `tile` · `option` — mỗi recipe
 là một named constructor map 1-1 vào private spec. Không đặt tên theo
 feature (`study`, `deck`).

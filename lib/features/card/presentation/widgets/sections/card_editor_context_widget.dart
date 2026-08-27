@@ -147,7 +147,7 @@ class CardEditorContextWidget extends StatelessWidget {
       // **Compact, and the 48dp floor is the card's own now.** At `sm` the
       // card measured 358 x **36**; compact was believed to bring it to 48
       // and actually painted 44 — the golden moved 4dp when the interactive
-      // card grew its structural floor (M99.80), which is the measurement
+      // card grew its structural floor (M99.83), which is the measurement
       // that showed the old comment wrong. The deck row keeps its tighter
       // vertical inset because it takes no tap at all.
       padding: MxCardPadding.compact,

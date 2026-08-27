@@ -14311,7 +14311,92 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Editable documents:** `docs/wbs.md`
 - **Dependencies:** M99.76
 
-### M99.80 · Đóng API MxCard thành recipe — và ma trận state đầy đủ cho MxActionButton
+### M99.80 · Cặp confirm xếp ngang — MxButtonPair thay cho Column tay
+
+- **Status:** **done** — bước hai của yêu cầu owner: nhãn ngắn rồi thì xếp
+  ngang cho đỡ tốn chiều cao.
+- **Goal:** mọi cặp hành động thật sự là *một lựa chọn hai vế* đi qua
+  `MxButtonPair` — một hàng khi vừa, stack khi không, do pair **đo** chứ
+  không do sheet đoán.
+- **Scope:** 4 cặp Column-tay → `MxButtonPair`: locked panel + unlocked
+  confirm của sheet Study mode, sheet Reset progress, và Save/Save-&-add của
+  form tạo card. **Không** đổi: `study_resume` (ba lựa chọn, không phải
+  pair), `study_entry` (hai slot có thể là Text), empty-state Library (đã
+  dùng pair từ trước — nó stack vì "Browse starter library" không vừa cạnh
+  "New deck" ở 393dp, đó là phép đo chứ không phải bug).
+- **Bằng chứng golden nói thật cả hai chiều:** 2 golden sheet đổi sang một
+  hàng; golden form tạo card **không đổi** — pair đo "Save & add another"
+  không vừa cạnh "Save" nên giữ stack, đúng contract "chỉ ngang khi thật sự
+  vừa".
+- **Tests required:** không test mới — contract một-cỡ-hai-nút đã pin trong
+  `mx_button_pair_test`; suite hiện có + 2 golden là bằng chứng.
+- **Checklist phases:** Phase 7 (components).
+- **Emulator integration suite:** **not run — presentation only.** Đây không
+  phải một lượt chạy xanh.
+- **Output:** như Scope; gallery publish lại URL ghim sau merge.
+- **Acceptance criteria:**
+  - [x] Census `MxActionButton + SizedBox + MxActionButton` chỉ còn các ca
+        có lý do (ba-lựa-chọn, slot Text).
+  - [x] `flutter analyze` 0; full suite 4177 xanh; goldens `TZ=UTC` xanh.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.77
+
+### M99.81 · "Starter library" — nhãn cuối cùng nhường chỗ cho hàng ngang
+
+- **Status:** **done** — vòng chốt của chuỗi nhãn-ngắn → xếp-ngang, theo
+  duyệt của owner cho đúng nhãn đã được nêu tên ở M99.80.
+- **Goal:** cặp CTA của Library rỗng đứng một hàng ở 393dp.
+- **Scope:** `deckStarterLibraryAction` "Browse starter library"/"Xem thư
+  viện mẫu" → "Starter library"/"Thư viện mẫu". Nút vào-cửa nên **danh từ ở
+  lại** — và nhãn mới trùng đúng `starterLibraryTitle`, màn nó mở ra, nên
+  nút giờ gọi tên đích thay vì mô tả thao tác. Không đổi code layout nào:
+  `MxButtonPair` của MxEmptyState tự đo lại và tự lên hàng.
+- **Tests required:** không test mới — 2 golden `deck_list_empty_{light,dark}`
+  là bằng chứng (pair chuyển row không cần sửa dòng code nào ngoài ARB).
+- **Checklist phases:** Phase 20 (l10n/copy).
+- **Emulator integration suite:** **not run — copy only.** Đây không phải
+  một lượt chạy xanh.
+- **Output:** như Scope; gallery publish lại URL ghim sau merge.
+- **Acceptance criteria:**
+  - [x] Empty Library: hai CTA một hàng, cả light lẫn dark.
+  - [x] `flutter analyze` 0; full suite 4178 xanh; goldens `TZ=UTC` xanh.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.80
+
+### M99.82 · Stack không còn full-bleed — và cái ép dọc hết hạn được gỡ
+
+- **Status:** **done** — hai việc từ một yêu cầu owner: "không lên được một
+  hàng thì đừng kéo nút hết chiều rộng".
+- **Goal:** pair khi buộc phải stack thì content-width (theo nút rộng hơn,
+  giữ lời hứa cùng-cỡ) và canh giữa; hai phiến nút phủ kín màn đọc như bức
+  tường, không phải một lựa chọn.
+- **Scope:** `_RenderPairLayout` — nhánh stack đổi childWidth từ cả dòng
+  sang `min(line, _half)` và canh giữa bằng inset; row giữ nguyên.
+  `Axis.vertical` giờ cũng content-width (không caller nào dùng nó, và câu
+  doc "two full-width paths" viết cho thời nhãn dài đã được thay).
+- **Và một phát hiện sửa sai báo cáo cũ:** M99.81 báo empty Library "đã lên
+  hàng" là **sai** — `MxEmptyState` đang **ép `Axis.vertical`** với lý do
+  của thời "Browse starter library" (nhãn dài, wrap ở nửa màn). Nhãn đã ngắn
+  từ M99.81 nhưng lệnh ép còn nguyên, nên golden trước chỉ là nhãn-ngắn-hơn
+  trong hai phiến full-bleed. Gỡ ép; pair tự đo và **giờ mới thật sự** ra
+  `New deck | Starter library` một hàng. Bài học: kết luận từ tên file
+  golden mà không mở ảnh — ảnh mới là bằng chứng, diff chỉ là tín hiệu.
+- **Tests required:** `mx_button_pair_test` thêm claim content-width + canh
+  giữa cho stack; `card_export_alignment_test` đổi claim W5: band nội dung
+  vẫn phủ cột, còn *nút* pin theo contract mới (cùng cỡ, giữa cột, không
+  rộng hơn cột). 3 golden đổi: `deck_list_empty_{light,dark}` (hàng thật),
+  `card_export_compact_2x_light` (stack canh giữa).
+- **Checklist phases:** Phase 7 (components).
+- **Emulator integration suite:** **not run — presentation only.** Đây không
+  phải một lượt chạy xanh.
+- **Output:** như Scope; gallery publish lại URL ghim sau merge.
+- **Acceptance criteria:**
+  - [x] Không còn stack full-bleed nào từ pair; empty Library một hàng thật.
+  - [x] `flutter analyze` 0; full suite 4179 xanh; goldens `TZ=UTC` xanh.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.81
+
+### M99.83 · Đóng API MxCard thành recipe — và ma trận state đầy đủ cho MxActionButton
 
 - **Status:** **done** — foundation hardening theo prompt set
   `mx-card-action-button-foundation`; không đổi nghiệp vụ, callback,
@@ -14359,7 +14444,7 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
   duy nhất: tap-to-focus của fill mode (field behavior), fault-injection 5
   case.
 - **Tests required:** `mx_card_test.dart` (+5 test defect/tương tác),
-  `mx_card_recipes_test.dart` mới (74 case: 10 recipe × 4 theme + padding map
+  `mx_card_recipes_test.dart` mới (50 case: 10 recipe × 4 theme + padding map
   + selection treatment), `mx_action_button_state_matrix_test.dart` mới (20
   case: 4 variant × 6 state × 4 theme, loading contract, RTL),
   `card_export_sheet_test`/`fill_answer_surface_test` chuyển claim từ tham số
@@ -14380,7 +14465,6 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Editable documents:** `docs/wbs.md`, `docs/architecture.md`,
   `docs/reviews/design-parity-checklist.md`
 - **Dependencies:** M99.70, M99.74, M99.75
-
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |

@@ -6,6 +6,7 @@ import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_button_pair.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../../../shared/widgets/mx_text_field.dart';
 import '../../../domain/failures/card_validation_failure.dart';
@@ -156,18 +157,22 @@ class _CardCreateFormWidgetState extends ConsumerState<CardCreateFormWidget> {
           pronunciationProblem: state.pronunciationProblem,
         ),
         const SizedBox(height: AppSpacing.xl),
-        MxActionButton(
-          label: context.l10n.cardEditorSave,
-          onPressed: busy ? null : _submit,
-          isLoading: busy,
-        ),
-        const SizedBox(height: AppSpacing.md),
-        MxActionButton(
-          label: context.l10n.cardEditorSaveAndAdd,
-          variant: MxActionButtonVariant.secondary,
-          onPressed: busy
-              ? null
-              : () => _submit(disposition: SubmitDisposition.addAnother),
+        // Same-size pair, one row when the labels fit: the two dispositions
+        // are one choice, and stacked full-width buttons spent a row of the
+        // form for it (owner ask, 2026-08-28).
+        MxButtonPair(
+          primary: MxActionButton(
+            label: context.l10n.cardEditorSave,
+            onPressed: busy ? null : _submit,
+            isLoading: busy,
+          ),
+          secondary: MxActionButton(
+            label: context.l10n.cardEditorSaveAndAdd,
+            variant: MxActionButtonVariant.secondary,
+            onPressed: busy
+                ? null
+                : () => _submit(disposition: SubmitDisposition.addAnother),
+          ),
         ),
       ],
     );

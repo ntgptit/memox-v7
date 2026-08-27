@@ -7,7 +7,7 @@
 | **Scope** | Quyết định ràng buộc nhiều tài liệu hoặc nhiều layer. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), hình dạng dữ liệu (`data-model.md`) |
 | **Source of truth for** | AD-xx · đánh đổi kiến trúc · phương án đã bị loại · lý do pin toolchain |
 | **Depends on** | `document-conventions.md`, `product.md` |
-| **Updated by task** | M99.80 (AD-23 · shared surface/action API là tập đóng); M99.33 (AD-22 · mô hình tombstone/batch của Trash, retention 30 ngày, purge an toàn); M99.24 (AD-19 · rule placeholder gắn với tình trạng branch; Progress đã tốt nghiệp) · M99.28 (AD-19 · Settings rời trạng thái placeholder — không còn branch nào là placeholder) · M99.29 (AD-21 · nhắc học chạy trong background worker) |
+| **Updated by task** | M99.83 (AD-23 · shared surface/action API là tập đóng); M99.33 (AD-22 · mô hình tombstone/batch của Trash, retention 30 ngày, purge an toàn); M99.24 (AD-19 · rule placeholder gắn với tình trạng branch; Progress đã tốt nghiệp) · M99.28 (AD-19 · Settings rời trạng thái placeholder — không còn branch nào là placeholder) · M99.29 (AD-21 · nhắc học chạy trong background worker) |
 | **Last updated** | 2026-08-27 |
 
 Format theo `document-conventions.md` §6.1. AD xếp theo số; ID vĩnh viễn (§7).
@@ -1599,7 +1599,7 @@ sau hai lần chạm ở một branch không liên quan.
 | | |
 |---|---|
 | **Status** | accepted |
-| **Affected documents** | `docs/reviews/design-parity-checklist.md` · `wbs.md` (M99.70, M99.74, M99.75, M99.80) · `.claude/skills/flutter-theme-design/references/surfaces-containers.md` |
+| **Affected documents** | `docs/reviews/design-parity-checklist.md` · `wbs.md` (M99.70, M99.74, M99.75, M99.83) · `.claude/skills/flutter-theme-design/references/surfaces-containers.md` |
 | **Decision** | Public API của foundation component (`MxCard`, `MxActionButton`, và mọi shared surface/action sau này) chỉ nhận **content, behavior và semantic enum**; fill, border, radius, elevation, shadow và internal padding thuộc về recipe của component, không thuộc call site. |
 
 ### Vì sao có quyết định này

@@ -114,7 +114,7 @@ void main() {
     // A keyboard has to exist for the claim to be checkable: widget tests
     // start in touch mode, and the ring is now keyboard-only — the same gate
     // `MxActionButton.shouldAutofocus` follows (M99.75, and MxCard since
-    // M99.80). Without this the test would assert an affordance the platform
+    // M99.83). Without this the test would assert an affordance the platform
     // it simulates deliberately does not draw.
     FocusManager.instance.highlightStrategy =
         FocusHighlightStrategy.alwaysTraditional;

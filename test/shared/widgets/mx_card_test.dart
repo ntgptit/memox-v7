@@ -13,7 +13,7 @@ import '../../support/ink_probe.dart';
 ///
 /// Split twice at the guard's 400-line mark: first out of
 /// `mx_surface_components_test.dart` (M4.12), then the interaction-state group
-/// moved to `mx_card_interaction_test.dart` when the closed-API pass (M99.80)
+/// moved to `mx_card_interaction_test.dart` when the closed-API pass (M99.83)
 /// added the long-press and focus-mode claims.
 void main() {
   Future<void> pump(
