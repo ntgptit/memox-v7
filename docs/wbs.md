@@ -14341,6 +14341,28 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Editable documents:** `docs/wbs.md`
 - **Dependencies:** M99.77
 
+### M99.81 · "Starter library" — nhãn cuối cùng nhường chỗ cho hàng ngang
+
+- **Status:** **done** — vòng chốt của chuỗi nhãn-ngắn → xếp-ngang, theo
+  duyệt của owner cho đúng nhãn đã được nêu tên ở M99.80.
+- **Goal:** cặp CTA của Library rỗng đứng một hàng ở 393dp.
+- **Scope:** `deckStarterLibraryAction` "Browse starter library"/"Xem thư
+  viện mẫu" → "Starter library"/"Thư viện mẫu". Nút vào-cửa nên **danh từ ở
+  lại** — và nhãn mới trùng đúng `starterLibraryTitle`, màn nó mở ra, nên
+  nút giờ gọi tên đích thay vì mô tả thao tác. Không đổi code layout nào:
+  `MxButtonPair` của MxEmptyState tự đo lại và tự lên hàng.
+- **Tests required:** không test mới — 2 golden `deck_list_empty_{light,dark}`
+  là bằng chứng (pair chuyển row không cần sửa dòng code nào ngoài ARB).
+- **Checklist phases:** Phase 20 (l10n/copy).
+- **Emulator integration suite:** **not run — copy only.** Đây không phải
+  một lượt chạy xanh.
+- **Output:** như Scope; gallery publish lại URL ghim sau merge.
+- **Acceptance criteria:**
+  - [x] Empty Library: hai CTA một hàng, cả light lẫn dark.
+  - [x] `flutter analyze` 0; full suite 4178 xanh; goldens `TZ=UTC` xanh.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.80
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |

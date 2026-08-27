@@ -337,9 +337,9 @@
     },
     "description": "Leads a deck row's meta line when the deck has children. Direct children only -- it counts what opening the row will show."
   },
-  "deckStarterLibraryAction": "Browse starter library",
+  "deckStarterLibraryAction": "Starter library",
   "@deckStarterLibraryAction": {
-    "description": "Empty-root CTA that opens the starter template catalog (UC-01)."
+    "description": "Empty-root CTA that opens the starter template catalog (UC-01). Shortened from Browse starter library so the pair rows beside New deck at 393dp (owner, 2026-08-28); the noun stays - it is a standalone entry button, and it matches starterLibraryTitle, the screen it opens."
   },
   "starterLibraryTitle": "Starter library",
   "@starterLibraryTitle": {
