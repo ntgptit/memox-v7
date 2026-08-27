@@ -58,10 +58,31 @@ class MxCard extends StatefulWidget {
     this.radius = AppRadius.lg,
     this.color,
     this.borderColor,
+    this.isSelected,
     this.onTap,
     this.onLongPress,
     super.key,
   });
+
+  /// The flat bordered panel: a card *inside* another surface.
+  ///
+  /// Named, because it is not the exception — seventeen call sites were
+  /// spelling `elevation: AppElevation.none` by hand, most with the same
+  /// sentence of justification. The rule they were each restating lives here
+  /// once: a shadow stacked on a shadow reads as a rendering fault rather
+  /// than depth, so a card nested in a sheet, a dialog or another card sits
+  /// flat and lets its hairline carry the edge.
+  const MxCard.flat({
+    required this.child,
+    this.padding = const EdgeInsets.all(AppSpacing.lg),
+    this.radius = AppRadius.lg,
+    this.color,
+    this.borderColor,
+    this.isSelected,
+    this.onTap,
+    this.onLongPress,
+    super.key,
+  }) : elevation = AppElevation.none;
 
   final Widget child;
   final EdgeInsetsGeometry padding;
@@ -115,6 +136,31 @@ class MxCard extends StatefulWidget {
   /// tappable without being selectable, and the ink layer already exists.
   final VoidCallback? onLongPress;
 
+  /// Whether this card is the picked one, and the card owns what that means:
+  /// the border switches to `secondary` and the node announces `selected`.
+  ///
+  /// **`secondary`, and it is measured, not preferred.** Three sites used to
+  /// spell selection themselves, and the one that wrote `primary` was the one
+  /// that could not be seen: dark `primary` measures **2.90:1** on `surface`
+  /// — under WCAG 1.4.11's 3:1 — and 1.42:1 against the hairlines beside it,
+  /// a border that stopped saying anything while looking as though it did.
+  /// `secondary` measures 8.77:1 in dark and 7.33:1 in light, and it is the
+  /// token the card tile's check mark, the import step's glyph and the trash
+  /// row's box already mean "picked" by.
+  ///
+  /// What stays with the caller: any selected *fill* (the card tile tints
+  /// `secondaryContainer` so a scanning eye catches rows a border alone would
+  /// let slide) and the resting border ([borderColor] still applies whenever
+  /// this is not true).
+  ///
+  /// **Tri-state, because "not selected" is only sometimes a fact.** `null`
+  /// is a card that is not selectable at all and says nothing. `false` is a
+  /// selectable card currently unpicked, and it is announced: in a selection
+  /// mode or a single-choice picker the *absence* is half the information a
+  /// reader needs. A plain reading card must stay `null`, or every panel in
+  /// the app turns into a poll.
+  final bool? isSelected;
+
   @override
   State<MxCard> createState() => _MxCardState();
 }
@@ -135,12 +181,17 @@ class _MxCardState extends State<MxCard> {
     // The focus ring replaces the hairline rather than sitting outside it. Both
     // are painted on the border box, so the swap moves nothing beside the card
     // and nothing inside it.
+    // Precedence: focus > selected > the caller's border > the hairline.
+    // "You are here" outranks "this is the picked one", which outranks a
+    // state the caller painted, which outranks decoration.
     final border = _isFocused
         ? Border.fromBorderSide(
             AppInteractionStates.focusRing(context.semanticColors),
           )
         : Border.all(
-            color: widget.borderColor ?? context.semanticColors.borderSubtle,
+            color: widget.isSelected ?? false
+                ? scheme.secondary
+                : widget.borderColor ?? context.semanticColors.borderSubtle,
           );
     final decoration = BoxDecoration(
       // **A role, not a colour.** `surface` is the card; a caller passes another
@@ -167,7 +218,10 @@ class _MxCardState extends State<MxCard> {
 
     final tap = widget.onTap;
     if (tap == null) {
-      return DecoratedBox(decoration: decoration, child: content);
+      final box = DecoratedBox(decoration: decoration, child: content);
+      if (widget.isSelected == null) return box;
+
+      return Semantics(selected: widget.isSelected, child: box);
     }
 
     // `button: true` and nothing else. An `InkWell` contributes a tap action and
@@ -180,6 +234,8 @@ class _MxCardState extends State<MxCard> {
       decoration: decoration,
       child: Semantics(
         button: true,
+        // Passed through as the tri-state it is; see [isSelected].
+        selected: widget.isSelected,
         child: Material(
           // Transparency rather than a colour: the `DecoratedBox` around it
           // already paints the surface, and a second opaque layer would double

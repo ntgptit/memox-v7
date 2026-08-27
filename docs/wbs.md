@@ -13676,7 +13676,67 @@ xanh, và lại mười hai phút mà không ai biết. Sàn đếm bảo vệ *
 
 Ước tính: step 412s còn ~75s, job từ ~12,5 phút còn **~7 phút**.
 
-### M99.71 · Chạy gate lần thứ hai trên cùng một cây không còn tốn gì
+### M99.71 · Ba loại thay đổi chạy cả suite chỉ vì không ai phân loại chúng
+
+- **Status:** **done** — chỉ tooling verification, không đụng code app.
+- **Goal:** Một thay đổi chỉ chạy thứ nó có thể làm hỏng.
+- **Scope:** `build_verification_plan.py` (hai nhánh phân loại mới, một nhãn
+  risk), `verification_impact_map.json` (hai danh sách inert), test, và một mệnh
+  đề trong `CLAUDE.md`. **Ngoài scope:** fallback đường dẫn lạ (giữ nguyên),
+  `.github/workflows/` (giữ full-scope, có chủ ý), và 191s cài toolchain.
+- **Editable documents:** `docs/wbs.md`, `CLAUDE.md`.
+- **Output:** ba file tooling + `CLAUDE.md`.
+- **Acceptance criteria:**
+  - [x] PNG-only chọn **đúng job golden**, không analyze, không shard, không
+        Widgetbook.
+  - [x] Rác kho (`.gitignore`, editor config, issue template) không chạy gì.
+  - [x] PNG **đi kèm** một widget đổi thì vẫn verify widget đó.
+  - [x] `.github/workflows/` vẫn full — đây là chỗ chạy hết **là mục đích**.
+  - [x] Đường dẫn lạ vẫn full; fallback không bị đụng.
+  - [x] Cả hai thu hẹp đã kiểm **đỏ** khi gỡ ra (1 và 4 test).
+- **Dependencies:** M99.68. **Đổi số lần thứ tư trong cùng một phiên** — #376
+  lấy M99.69. M99.62, M99.65 và M99.68 đã ghi cùng bài học ba lần và tôi vẫn
+  đặt số lúc viết; bài học chỉ có giá trị khi được làm theo, nên: **số lấy ở
+  bước cuối, ngay trước khi merge.**
+- **Tests required:** `test_ci_tooling.py` — 52 → **57**.
+- **Emulator:** `not run — scoped host verification`.
+- **Checklist phases:** 14
+
+**Câu hỏi của chủ dự án: "không sửa Dart thì chạy `flutter analyze` làm gì?"**
+Đo trên lịch sử thật: **5 trong 40 commit gần nhất** chạy full suite với **không
+một dòng `.dart` nào đổi**. Hai trong số đó là PR chỉ regenerate golden — 26 và
+31 file PNG — mỗi cái kéo theo năm shard host, `flutter analyze` và Widgetbook.
+PR gần nhất (#375) đổi ba file `ci.yml` + `.gitignore` + `wbs.md` và tiêu
+**1847 giây** runner.
+
+**Cả ba triệu chứng là một nguyên nhân, và nguyên nhân đó không phải "luật vô
+lý".** Không có luật nào nói PNG cần cả suite. `require_test_path` bật
+`has_code_changes` ngay dòng đầu, rồi không tìm thấy quy tắc nào cho `.png` và
+rơi vào `require_full("unrecognised test support path")`. `.gitignore` và
+`.vscode/` rơi vào cùng fallback ấy ở tầng trên. Issue template thì dính prefix
+`.github/` trong `full_scope`. **Fallback là đúng** — một đường dẫn chưa ai phân
+loại có thể là bất cứ thứ gì, chạy hết là mặc định an toàn. Cái thiếu là phân
+loại, nên bản sửa **thêm luật chứ không nới fallback**; test
+`an_unclassified_path_still_widens_to_everything` ghim điều đó.
+
+**Máy móc đã sẵn sàng từ trước.** `needs_goldens` vốn đã bắn theo `/goldens/`
+độc lập với `code_required`. Nên một PNG chỉ cần trả về mà **không** khai là code
+change: nó tự chọn đúng job golden và không job nào khác.
+
+**`.github/workflows/` cố ý giữ full, và đó không phải sót.** Đổi thứ quyết định
+việc verification nào chạy là một tuyên bố rằng pipeline mới hoạt động, và chỉ
+một lần chạy đầy đủ mới kiểm được tuyên bố đó — #375 là ví dụ: nó sửa step golden
+và chính lần chạy đầy đủ ấy xác nhận. Chỉ hàng xóm trơ của thư mục đó được tách
+ra.
+
+**Nhãn `pixels` thay vì `docs`** cho thay đổi chỉ có ảnh: cả hai đều không cần
+verification Dart, nhưng gọi một golden vừa regenerate là "docs" trong đúng cái
+trường mà người ta liếc qua là một lời nói dối nhỏ đặt đúng chỗ dễ được tin.
+
+**Tiết kiệm đo được:** một PR regenerate golden đi từ 1847s runner xuống còn
+đúng một job golden (~425s), tức bỏ 5 shard host + analyze + Widgetbook.
+
+### M99.72 · Chạy gate lần thứ hai trên cùng một cây không còn tốn gì
 
 - **Status:** **done** — chỉ tooling, không đụng code app.
 - **Goal:** Việc chạy lặp trở thành vô hại thay vì phải nhớ đừng lặp.
@@ -13736,6 +13796,41 @@ shell không giết `flutter test` con: bộ test treo bảy phút với cả ga
 sau. Script giờ trả lời được **quyết định** mà không khởi động gì
 (`STAMP_DECISION_ONLY`), và vân tay cũng do script tự khai báo thay vì test chép
 lại — một định nghĩa thứ hai chỉ khớp cho tới khi một bên đổi.
+
+### M99.73 · Hai mục WBS trùng số, và guard không có ý kiến gì
+
+- **Status:** **done** — một luật trong `check_docs.py`, và sửa cái trùng đã lọt.
+- **Goal:** Trùng số không thể vào `main` lặng lẽ được nữa.
+- **Scope:** `check_docs.py`, và đổi số mục M99.70 thứ hai. **Ngoài scope:**
+  cách chọn số (vẫn là việc của người viết).
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `check_docs.py`, `docs/wbs.md`.
+- **Acceptance criteria:**
+  - [x] Hai mục cùng id thì `check_docs.py` đỏ và **nêu tên cả hai**.
+  - [x] `M99.19a` **không** bị coi là trùng với `M99.19` — hậu tố chữ là biến
+        thể có chủ ý.
+  - [x] Luật đã chạy lên `docs/wbs.md` của `main` và **bắt đúng** M99.70.
+  - [x] Cây này sạch: 201 id, không id nào dùng hai lần.
+- **Dependencies:** không.
+- **Tests required:** `check_docs.py` chạy trên bản `main` (đỏ) và bản đã sửa
+  (xanh).
+- **Emulator:** `not run — scoped host verification`.
+- **Checklist phases:** 14
+
+**Số được chọn lúc viết mục, nhưng chỉ thuộc về ai lúc merge.** Hai nhánh cùng
+bay thì cùng chọn một số, và nhánh về sau lặng lẽ trùng lên nhánh về trước.
+Trong đúng một phiên làm việc chuyện này xảy ra **năm lần**, và lần thứ năm thì
+lọt vào `main` thật: #378 lấy M99.70 rồi #377 cũng lấy M99.70. Một id trùng phá
+đúng thứ duy nhất id dùng để làm — `depends on M99.70` giờ chỉ vào hai việc khác
+nhau.
+
+**Tôi đã ghi bài học này ba lần trong `docs/wbs.md` rồi vi phạm bốn lần.** Nên
+lần này nó không được viết thêm lần nữa mà thành một luật: `check_docs.py` đã có
+"không bảng nào liệt kê trùng id" nhưng **không có ý kiến gì** về hai heading
+M-task trùng số — đúng chỗ hỏng thì không ai canh.
+
+Luật giữ nguyên hậu tố chữ trong id, nên `M99.19a` là id riêng chứ không phải
+`M99.19` thứ hai; những biến thể ấy là có chủ ý.
 
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 
@@ -13913,6 +14008,52 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
   - [x] `flutter analyze` 0; full host suite 4169 xanh; goldens `TZ=UTC` xanh.
 - **Editable documents:** `docs/wbs.md`
 - **Dependencies:** M99.67
+
+### M99.70 · Chăm chút MxCard — flat có tên, selected có chủ
+
+- **Status:** **done** — lượt "chăm chút button và card". Đo trước khi sửa:
+  **button khỏe, không sửa gì** (theme khai đủ 4 state; geometry 48h/24px =
+  0.5 đúng baseline; hai action bar lệch khỏi `MxButtonPair` đều có văn bản
+  lý do; phân bố 61 site: 35 primary / 24 secondary / 1 tonal / 1 compact —
+  các biến thể hẹp đều đang được dùng đúng chỗ chúng được thêm cho).
+  **Card là nơi default thua đa số**: 29/48 site phải tự khai
+  `elevation: AppElevation.none`, và "card chọn được" bị đánh vần 3 kiểu.
+- **Goal:** đa số không phải override; selected có đúng một token và một
+  cách announce.
+- **Scope:** `MxCard.flat` (constructor đặt tên cho panel phẳng — lý do
+  "shadow chồng shadow" ghi một lần thay vì 17 comment; migrate 29 site,
+  zero pixel) và `isSelected` **tri-state** trên `MxCard`: `true` → border
+  `secondary` + announce selected; `false` → announce chưa-chọn (radio/poll
+  cần nói cả phần vắng); `null` → card thường, không biến list đọc thành
+  poll. Tint selected và resting border vẫn thuộc caller — hai site có lý do
+  văn bản khác nhau (tile tint để mắt quét; export giữ `borderControl` vì
+  option là control). Migrate 3 site selected; **sửa bug**:
+  `card_import_source_step` còn dùng `primary` (2.90:1 dark, dưới WCAG
+  1.4.11) dù site anh em `card_export_format_options` đã đo và bỏ chính giá
+  trị đó — 4 golden import-source đổi pixel đúng chỗ này.
+- **Đo được nhưng không sửa, ghi để khỏi đo lại:** BoxDecoration trong
+  features 26 site — 3 PANEL đều hợp lệ (badge pill của history, skin
+  guess/match); icon trong button 16dp cạnh label 14 (tỉ lệ 1.14, dưới dải
+  1.25–1.4 của baseline) — giữ, vì đã owner-review và baseline là số để đối
+  chiếu chứ không phải luật (skill nguyên tắc 3).
+- **Tests required:** `mx_card_test` nhóm selection (token `secondary` cả
+  hai theme; tri-state semantics qua `Tristate`; non-tappable vẫn announce;
+  borderColor còn hiệu lực khi chưa chọn) + nhóm flat (không shadow);
+  `card_export_sheet_test` chuyển claim từ so màu sang `isSelected` — token
+  giờ pin ở widget, site chỉ còn pin việc *đưa state cho card*.
+- **Checklist phases:** Phase 7 (components).
+- **Guard:** không đổi (76) — không có widget mới bị cấm; API card là mở
+  rộng, guard hiện có đã phủ.
+- **Emulator integration suite:** **not run — theme/presentation only.** Đây
+  không phải một lượt chạy xanh.
+- **Output:** như Scope; widgetbook MxCard thêm knob flat + isSelected;
+  goldens 295 xanh với đúng 4 file import-source đổi; host suite 4175 xanh.
+- **Acceptance criteria:**
+  - [x] 0 site còn `elevation: AppElevation.none` tự khai.
+  - [x] 0 site tự đánh vần border selected; `primary`-selected chết hẳn.
+  - [x] `flutter analyze` 0; full suite 4175 xanh; goldens `TZ=UTC` xanh.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.69
 
 ## Known technical debt
 

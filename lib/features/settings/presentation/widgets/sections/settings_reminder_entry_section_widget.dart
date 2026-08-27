@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_card.dart';
@@ -24,10 +23,9 @@ class SettingsReminderEntrySectionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MxCard(
+    return MxCard.flat(
       // Flat, like every other card in a scrolling body (D20). A raised card
       // here would be the only shadow on the screen.
-      elevation: AppElevation.none,
       padding: EdgeInsets.zero,
       // `Material` inside the card, and it is not decoration: `MxCard` paints
       // its surface with a `DecoratedBox`, and `ListTile` paints its background

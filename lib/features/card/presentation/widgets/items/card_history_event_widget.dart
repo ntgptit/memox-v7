@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_ink.dart';
-import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_stroke.dart';
@@ -91,11 +90,10 @@ class CardHistoryEventWidget extends StatelessWidget {
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                  child: MxCard(
+                  child: MxCard.flat(
                     // Flat, like every other surface in this column (D20). A
                     // shadow on each of eight event cards is a stack of shadows,
                     // which reads as a rendering fault rather than as depth.
-                    elevation: AppElevation.none,
                     radius: AppRadius.md,
                     padding: const EdgeInsets.all(AppSpacing.md),
                     child: Column(

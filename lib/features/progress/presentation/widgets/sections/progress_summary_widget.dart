@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_ink.dart';
-import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -39,8 +38,7 @@ class ProgressSummaryWidget extends StatelessWidget {
     // competing depths in one column is what makes a list read as busy,
     // which is the reason the deck tile and the Study Home row already
     // gave. Progress was the only surface still taking the default.
-    return MxCard(
-      elevation: AppElevation.none,
+    return MxCard.flat(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,

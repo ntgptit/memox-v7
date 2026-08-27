@@ -96,6 +96,12 @@ class ImpactMap:
     database_query_features: dict[str, tuple[str, ...]]
     full_scope_prefixes: tuple[str, ...]
     full_scope_files: frozenset[str]
+    # Paths that provably cannot change what Dart compiles, what tests run, or
+    # what CI does. The bar is deliberately that high: everything else keeps
+    # falling through to the full suite, which is the right default for a path
+    # nobody has classified.
+    inert_prefixes: tuple[str, ...]
+    inert_files: frozenset[str]
     one_shard_max_weight: int
     two_shard_max_weight: int
 
@@ -116,6 +122,8 @@ class ImpactMap:
             },
             full_scope_prefixes=tuple(raw["full_scope_prefixes"]),
             full_scope_files=frozenset(raw["full_scope_files"]),
+            inert_prefixes=tuple(raw.get("inert_prefixes", ())),
+            inert_files=frozenset(raw.get("inert_files", ())),
             one_shard_max_weight=int(thresholds["one"]),
             two_shard_max_weight=int(thresholds["two"]),
         )
@@ -139,6 +147,7 @@ class VerificationPlanBuilder:
         self.has_code_changes = False
         self.requires_host_coverage = False
         self.needs_widgetbook = False
+        self.has_golden_image_changes = False
         self.full_suite = False
 
     def add_reason(self, reason: str) -> None:
@@ -242,6 +251,21 @@ class VerificationPlanBuilder:
             self.add_reason("agent workflow documentation changed")
             return
 
+        # **Before the full-scope check, because `.github/` is a prefix there
+        # and an issue template is not a pipeline.** Measured: a one-file
+        # markdown template under `.github/` selected the entire Dart suite and
+        # the Windows golden job — 1847s of runner time to verify a paragraph.
+        #
+        # These are not "low risk" paths, they are paths that cannot reach the
+        # build at all: git plumbing, editor settings, repository furniture.
+        # Anything that could change what Dart compiles, what tests run, or
+        # what CI does stays out of this list and keeps its full run.
+        if path in self.impact_map.inert_files or any(
+            path.startswith(prefix) for prefix in self.impact_map.inert_prefixes
+        ):
+            self.add_reason("repository furniture changed; no build input touched")
+            return
+
         if path in self.impact_map.full_scope_files or any(
             path.startswith(prefix) for prefix in self.impact_map.full_scope_prefixes
         ):
@@ -252,6 +276,24 @@ class VerificationPlanBuilder:
             self.has_code_changes = True
             self.needs_widgetbook = True
             self.add_reason("Widgetbook catalog changed")
+            return
+
+        # **A picture is not code, and it was only ever reaching the full
+        # suite by accident.** `require_test_path` sets `has_code_changes`
+        # first thing and then finds no rule for a `.png`, so every golden
+        # image fell through to `require_full("unrecognised test support
+        # path")`. Measured on real history: two of the last forty commits were
+        # golden-regeneration PRs — 26 and 31 PNGs — and each one ran five host
+        # shards, `flutter analyze` and the Widgetbook smoke test. A PNG cannot
+        # fail any of them.
+        #
+        # What checks a regenerated picture is the golden job comparing it
+        # against a fresh render, and `needs_goldens` already fires on
+        # `/goldens/` independently of `code_required` — so returning here
+        # without claiming a code change selects exactly that job and no other.
+        if "/goldens/" in path and not path.endswith(".dart"):
+            self.has_golden_image_changes = True
+            self.add_reason("committed golden image changed")
             return
 
         if path.startswith("test/"):
@@ -376,7 +418,19 @@ class VerificationPlanBuilder:
             path.startswith(PROMPT_PREFIX) for path in changed
         )
         docs_only = bool(changed) and not code_required
-        risk = "full" if self.full_suite else "targeted" if code_required else "docs"
+        # `pixels` rather than `docs` for a picture-only change: both require no
+        # Dart verification, but calling a regenerated golden "docs" in the one
+        # field a human reads at a glance is a small untruth in exactly the
+        # place it would be believed.
+        risk = (
+            "full"
+            if self.full_suite
+            else "targeted"
+            if code_required
+            else "pixels"
+            if self.has_golden_image_changes
+            else "docs"
+        )
         # **Pixel comparison belongs on the PR, not only in a dispatch-only
         # workflow.** `ci-full.yml` has always had a `goldens` job on Windows,
         # and it is `workflow_dispatch:` — so in practice nothing ever compared

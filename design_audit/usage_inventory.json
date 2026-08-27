@@ -1,9 +1,9 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
   "scannedFiles": 692,
-  "totalSites": 353,
+  "totalSites": 352,
   "byElementKind": {
-    "other": 295,
+    "other": 294,
     "background": 23,
     "shadow": 1,
     "border": 15,
@@ -16,7 +16,7 @@
     "Colors-material": 12,
     "hardcoded-literal": 97,
     "opacity-modified-token": 16,
-    "theme-token": 76
+    "theme-token": 75
   },
   "sites": [
     {
@@ -3057,7 +3057,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/items/card_history_event_widget.dart",
-      "line": 258,
+      "line": 256,
       "widget_context": "_Marker",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -3112,7 +3112,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/items/card_tile_widget.dart",
-      "line": 80,
+      "line": 78,
       "widget_context": "CardTileWidget",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3123,18 +3123,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/items/card_tile_widget.dart",
-      "line": 81,
-      "widget_context": "CardTileWidget",
-      "element_kind": "other",
-      "source_kind": "theme-token",
-      "expression": "context.colors.secondary",
-      "token": "colorScheme.secondary",
-      "resolved_value_light": "#4E5468",
-      "resolved_value_dark": "#B8B7D0"
-    },
-    {
-      "file": "lib/features/card/presentation/widgets/items/card_tile_widget.dart",
-      "line": 295,
+      "line": 293,
       "widget_context": "_DueBadge",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -3145,7 +3134,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_detail_state_widget.dart",
-      "line": 54,
+      "line": 53,
       "widget_context": "CardDetailStateWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3156,7 +3145,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_detail_summary_widget.dart",
-      "line": 97,
+      "line": 95,
       "widget_context": "CardDetailSummaryWidget",
       "element_kind": "border",
       "source_kind": "theme-token",
@@ -3178,7 +3167,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_export_format_options_widget.dart",
-      "line": 327,
+      "line": 326,
       "widget_context": "_RecommendedBadge",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -3189,7 +3178,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_history_section_widget.dart",
-      "line": 65,
+      "line": 64,
       "widget_context": "CardHistorySectionWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3255,7 +3244,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 185,
+      "line": 183,
       "widget_context": "_ProgressRing",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3266,7 +3255,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 186,
+      "line": 184,
       "widget_context": "_ProgressRing",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -3277,7 +3266,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 257,
+      "line": 255,
       "widget_context": "_Headline",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3387,7 +3376,7 @@
     },
     {
       "file": "lib/features/reminder/presentation/widgets/sections/reminder_banner_section_widget.dart",
-      "line": 48,
+      "line": 47,
       "widget_context": "ReminderBannerSectionWidget",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3398,7 +3387,7 @@
     },
     {
       "file": "lib/features/reminder/presentation/widgets/sections/reminder_banner_section_widget.dart",
-      "line": 106,
+      "line": 104,
       "widget_context": "ReminderBannerSectionWidget",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3409,7 +3398,7 @@
     },
     {
       "file": "lib/features/settings/presentation/widgets/items/settings_error_band_widget.dart",
-      "line": 99,
+      "line": 97,
       "widget_context": "SettingsErrorBandWidget",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3475,7 +3464,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/fill_answer_pieces_widget.dart",
-      "line": 214,
+      "line": 212,
       "widget_context": "_FillInput",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3486,7 +3475,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/recall_timer_pieces_widget.dart",
-      "line": 31,
+      "line": 30,
       "widget_context": "_AnswerArea",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3497,7 +3486,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/recall_timer_pieces_widget.dart",
-      "line": 85,
+      "line": 84,
       "widget_context": "_HiddenBar",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -3519,7 +3508,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_home_resume_section_widget.dart",
-      "line": 49,
+      "line": 47,
       "widget_context": "StudyHomeResumeSectionWidget",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3717,7 +3706,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_card.dart",
-      "line": 143,
+      "line": 194,
       "widget_context": "_MxCardState",
       "element_kind": "border",
       "source_kind": "theme-token",

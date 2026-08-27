@@ -354,7 +354,12 @@ whenever the plan sets `needs_goldens`, which any code change or any change to
 render unless a person remembered: #337 relaid out six components, committed no
 goldens, went green, and left 26 stale pictures on `main`. Unknown
 paths and schema/shared/router/native/tooling changes promote themselves to the
-full non-golden host suite. A selected mandatory tool or guard missing from the
+full non-golden host suite. Two things deliberately do **not**: repository
+furniture that cannot reach the build (`.gitignore`, editor settings, an issue
+template) verifies nothing, and a change to committed **pictures alone** selects
+the golden job and only that — no analyze, no host shards, no Widgetbook,
+because a PNG can fail none of them. Both used to reach the full suite by
+falling through the unclassified-path rule rather than by anyone deciding it. A selected mandatory tool or guard missing from the
 environment MUST fail rather than report a skip. The default command without
 `--changed` remains the final full local gate; targeted success is not release
 evidence.

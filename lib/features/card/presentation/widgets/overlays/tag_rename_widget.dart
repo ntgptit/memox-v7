@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/theme/app_ink.dart';
-import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -236,9 +235,8 @@ class _FailureBand extends StatelessWidget {
     return Semantics(
       container: true,
       liveRegion: true,
-      child: MxCard(
+      child: MxCard.flat(
         color: colors.errorContainer,
-        elevation: AppElevation.none,
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,

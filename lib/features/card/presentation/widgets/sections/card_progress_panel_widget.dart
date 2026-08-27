@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../../core/navigation/route_names.dart';
 
 import '../../../../../core/theme/app_ink.dart';
-import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -38,8 +37,7 @@ class CardProgressPanelWidget extends ConsumerWidget {
     // shadow inside a scrolling list). The tinted ground was tried and reverted:
     // a block of colour at the top of the list outweighed the cards under it,
     // which are what the screen is actually about.
-    return MxCard(
-      elevation: AppElevation.none,
+    return MxCard.flat(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[

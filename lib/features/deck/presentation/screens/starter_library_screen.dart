@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_ink.dart';
-import '../../../../core/theme/app_elevation.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/theme_context_extension.dart';
 import '../../../../l10n/l10n_extension.dart';
@@ -110,8 +109,7 @@ class _TemplateTile extends ConsumerWidget {
     final template = row.template;
     final quiet = context.texts.bodySmall!.inked(context, AppInk.quiet);
 
-    return MxCard(
-      elevation: AppElevation.none,
+    return MxCard.flat(
       onTap: () => _add(context),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

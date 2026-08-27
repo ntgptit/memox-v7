@@ -1,3 +1,5 @@
+import 'dart:ui' show Tristate;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -224,6 +226,103 @@ void main() {
 
       expect(find.bySemanticsLabel('Academic Word List'), findsOneWidget);
       handle.dispose();
+    });
+  });
+
+  group('MxCard selection', () {
+    for (final isDark in <bool>[false, true]) {
+      testWidgets('selected wears secondary, in ${isDark ? 'dark' : 'light'}', (
+        tester,
+      ) async {
+        // The token is the contract: `primary` was tried at a call site and
+        // measured 2.90:1 in dark — the widget owns the answer now so no
+        // sheet can hold a second opinion.
+        await pump(
+          tester,
+          MxCard(isSelected: true, onTap: () {}, child: const Text(long)),
+          isDark: isDark,
+        );
+
+        final scheme =
+            (isDark ? buildDarkTheme() : buildLightTheme()).colorScheme;
+        expect(borderOf(tester).color, scheme.secondary);
+      });
+    }
+
+    testWidgets('the caller\'s border still shows when not selected', (
+      tester,
+    ) async {
+      final semantic = buildLightTheme().extension<AppSemanticColors>()!;
+      await pump(
+        tester,
+        MxCard(
+          isSelected: false,
+          borderColor: semantic.borderControl,
+          onTap: () {},
+          child: const Text(long),
+        ),
+      );
+
+      expect(borderOf(tester).color, semantic.borderControl);
+    });
+
+    testWidgets('tri-state semantics: null says nothing, false and true '
+        'are both announced', (tester) async {
+      final handle = tester.ensureSemantics();
+      await pump(
+        tester,
+        Column(
+          children: <Widget>[
+            MxCard(onTap: () {}, child: const Text('plain')),
+            MxCard(isSelected: false, onTap: () {}, child: const Text('off')),
+            MxCard(isSelected: true, onTap: () {}, child: const Text('on')),
+          ],
+        ),
+      );
+
+      final plain = tester.getSemantics(find.text('plain'));
+      expect(plain.flagsCollection.isSelected, Tristate.none);
+      final off = tester.getSemantics(find.text('off'));
+      expect(off.flagsCollection.isSelected, Tristate.isFalse);
+      final on = tester.getSemantics(find.text('on'));
+      expect(on.flagsCollection.isSelected, Tristate.isTrue);
+      handle.dispose();
+    });
+
+    testWidgets('a non-tappable selected card is still announced', (
+      tester,
+    ) async {
+      final handle = tester.ensureSemantics();
+      await pump(
+        tester,
+        const MxCard.flat(isSelected: true, child: Text('picked')),
+      );
+
+      final node = tester.getSemantics(find.text('picked'));
+      expect(node.flagsCollection.isSelected, Tristate.isTrue);
+      handle.dispose();
+    });
+  });
+
+  group('MxCard.flat', () {
+    testWidgets('is the no-shadow card', (tester) async {
+      // Seventeen call sites spelled `elevation: AppElevation.none`; the
+      // constructor is that sentence said once. Same surface, same border,
+      // no shadow list.
+      await pump(tester, const MxCard.flat(child: Text(long)));
+
+      final decorated = tester.widget<DecoratedBox>(
+        find
+            .descendant(
+              of: find.byType(MxCard),
+              matching: find.byType(DecoratedBox),
+            )
+            .first,
+      );
+      expect(
+        (decorated.decoration as BoxDecoration).boxShadow,
+        anyOf(isNull, isEmpty),
+      );
     });
   });
 

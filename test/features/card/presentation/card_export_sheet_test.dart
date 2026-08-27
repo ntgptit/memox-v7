@@ -191,7 +191,6 @@ void main() {
       await h.pump(tester, brightness: Brightness.dark);
       await h.openWholeDeckExport(tester);
 
-      final scheme = buildDarkTheme().colorScheme;
       final csv = tester.widget<MxCard>(
         find
             .ancestor(
@@ -200,7 +199,10 @@ void main() {
             )
             .first,
       );
-      expect(csv.borderColor, scheme.secondary);
+      // The token itself now lives in [MxCard.isSelected] and is pinned by
+      // mx_card_test; what can regress *here* is whether this widget still
+      // hands the state to the card instead of spelling a colour again.
+      expect(csv.isSelected, isTrue);
       // No fill, and that is a decision rather than an omission: a
       // `secondaryContainer` card swallows the `secondaryContainer` pill the
       // `Recommended` badge is made of, on the one option that has one.
@@ -216,6 +218,7 @@ void main() {
             )
             .first,
       );
+      expect(tsv.isSelected, isFalse);
       expect(
         tsv.borderColor,
         buildDarkTheme().extension<AppSemanticColors>()!.borderControl,

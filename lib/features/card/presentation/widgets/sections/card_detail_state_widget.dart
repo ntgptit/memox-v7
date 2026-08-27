@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_ink.dart';
-import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -57,11 +56,10 @@ class CardDetailStateWidget extends StatelessWidget {
         const SizedBox(height: AppSpacing.md),
         SizedBox(
           width: double.infinity,
-          child: MxCard(
+          child: MxCard.flat(
             // Flat, like every other card in this column (D20): two competing
             // depths in one scroll view read as a rendering fault rather than as
             // a hierarchy. The hairline and the surface step do the separating.
-            elevation: AppElevation.none,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
