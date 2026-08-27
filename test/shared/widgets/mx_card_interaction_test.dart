@@ -204,6 +204,32 @@ void main() {
       expect(longPresses, 1);
     });
 
+    testWidgets('a long-press-only card does not announce as a button', (
+      tester,
+    ) async {
+      // Deliberate: `button: true` promises an activation, and this surface
+      // has none — a screen reader told "button" would tap and get nothing.
+      // The long-press action still reaches assistive tech through the
+      // InkWell's own node.
+      final handle = tester.ensureSemantics();
+      await pump(
+        tester,
+        MxCard.flat(onLongPress: () {}, child: const Text(long)),
+      );
+
+      // `matchesSemantics` is exact: leaving `isButton` unstated asserts the
+      // flag is absent, which is the claim.
+      expect(
+        tester.getSemantics(find.byType(InkWell)),
+        matchesSemantics(
+          isFocusable: true,
+          hasFocusAction: true,
+          hasLongPressAction: true,
+        ),
+      );
+      handle.dispose();
+    });
+
     testWidgets('tap and long-press coexist on one surface', (tester) async {
       var taps = 0;
       var longPresses = 0;

@@ -166,6 +166,10 @@ void main() {
         final decoration = decorationOf(tester);
         expect(decoration.color, scheme.surfaceContainerHigh);
         expect(radiusOf(decoration), AppRadius.lg);
+        // Card-level depth, kept from the bare `MxCard` the info panels used
+        // to build — pinned so the one recipe without a depth claim cannot
+        // drift elevation with no test going red.
+        expect(hasShadow(decoration), !isDark);
       });
 
       testWidgets('$themeName · tonal: secondaryContainer callout, flat', (

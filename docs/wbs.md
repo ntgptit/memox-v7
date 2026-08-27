@@ -14445,10 +14445,26 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
   case.
 - **Tests required:** `mx_card_test.dart` (+5 test defect/tương tác),
   `mx_card_recipes_test.dart` mới (50 case: 10 recipe × 4 theme + padding map
-  + selection treatment), `mx_action_button_state_matrix_test.dart` mới (20
-  case: 4 variant × 6 state × 4 theme, loading contract, RTL),
+  + selection treatment), `mx_action_button_state_matrix_test.dart` mới (36
+  case: 4 variant × 2 size × state set × 4 theme, loading contract, RTL),
   `card_export_sheet_test`/`fill_answer_surface_test` chuyển claim từ tham số
   sang rendered border.
+- **Hai recursive review độc lập (architecture/logic + UI/UX), audit song
+  song, fix áp tuần tự — 0 blocker, 0 major về code.** Các finding đã
+  auto-fix: exemption `requestFocus` của guard GestureDetector từng match
+  toàn args (gameable bằng handler vừa `open()` vừa `requestFocus()`) → giờ
+  chỉ exempt khi chính biểu thức `onTap` là focus plumbing, kèm
+  fault-injection hai chiều; API-closure scanner vá ba lỗ (old-style
+  function-typed formal, public getter/method, static field — mỗi lỗ một
+  probe); focus ring hết đường kẹt lại khi card mất tính tương tác giữa
+  chừng (didUpdateWidget reset + nhánh non-interactive không bao giờ hỏi
+  ring); highlight-mode listener chỉ đăng ký trên card tương tác;
+  `MxCard.option` nhận `bool` không-null (tri-state `null` trái nghĩa
+  recipe); muted pin shadow theo mode; long-press-only pin semantics
+  không-phải-button; doc `onTap` sửa câu sai về InkWell. Finding process lớn
+  nhất: base tụt sau `origin/main` 3 commit (M99.80–82 của chuỗi
+  MxButtonPair) — đã merge, đổi số task này từ M99.80 thành M99.83, và chạy
+  lại toàn bộ gate trên base mới.
 - **Checklist phases:** Phase 7 (components) · Phase 21 (guard).
 - **Emulator integration suite:** **not run — shared presentation/design-system
   refactor, không thêm device-only flow.** Đây không phải một lượt chạy xanh.

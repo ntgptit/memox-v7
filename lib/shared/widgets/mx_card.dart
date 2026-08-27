@@ -330,10 +330,18 @@ class MxCard extends StatefulWidget {
   /// import step keeps the hairline, and both reasons are written down).
   const MxCard.option({
     required this.child,
-    required this.isSelected,
+    // Non-nullable on purpose: an option *is* a control with a selection
+    // state, so the tri-state's `null` ("not selectable at all") is not a
+    // meaning this recipe can carry — a caller writing `isSelected: null`
+    // would get an option that never announces.
+    required bool isSelected,
     this.onTap,
     super.key,
-  }) : _spec = const _MxCardSpec(
+  }) : // Not an initializing formal: `this.isSelected` would reopen the
+       // nullable tri-state this constructor exists to narrow.
+       // ignore: prefer_initializing_formals
+       isSelected = isSelected,
+       _spec = const _MxCardSpec(
          elevation: AppElevation.none,
          radius: AppRadius.lg,
          edge: _MxCardRestingEdge.control,
@@ -352,10 +360,12 @@ class MxCard extends StatefulWidget {
 
   /// Makes the whole card a target. Null leaves it a plain surface.
   ///
-  /// No accompanying `semanticLabel`. The `InkWell` below already announces
-  /// the card as a button and its children supply the name — a card whose
-  /// content is readable text does not need a second one, and an override
-  /// would *hide* that content from a screen reader rather than adding to it.
+  /// No accompanying `semanticLabel`. The card annotates itself as a button —
+  /// `Semantics(button:)` over the ink, because an `InkWell` contributes a tap
+  /// action and focusability but not the flag — and its children supply the
+  /// name: a card whose content is readable text does not need a second one,
+  /// and an override would *hide* that content from a screen reader rather
+  /// than adding to it.
   final VoidCallback? onTap;
 
   /// Long-press on the whole surface — the Android gesture for entering a
@@ -393,19 +403,47 @@ class _MxCardState extends State<MxCard> {
   /// that can take focus, and it is built only when the card has a callback.
   bool _isFocused = false;
 
+  bool get _isInteractive => widget.onTap != null || widget.onLongPress != null;
+
   @override
   void initState() {
     super.initState();
     // The ring is keyboard-only, and the mode can change while a card is
     // focused (plugging in a keyboard, the first key press). Listening is what
     // keeps the ring honest in both directions rather than only at the next
-    // focus change.
-    FocusManager.instance.addHighlightModeListener(_onHighlightModeChanged);
+    // focus change. Interactive cards only: a list of fifty plain panels must
+    // not pay fifty listeners for an event none of them can ever act on.
+    if (_isInteractive) {
+      FocusManager.instance.addHighlightModeListener(_onHighlightModeChanged);
+    }
+  }
+
+  @override
+  void didUpdateWidget(MxCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final wasInteractive =
+        oldWidget.onTap != null || oldWidget.onLongPress != null;
+    if (wasInteractive == _isInteractive) return;
+
+    if (_isInteractive) {
+      FocusManager.instance.addHighlightModeListener(_onHighlightModeChanged);
+      return;
+    }
+    FocusManager.instance.removeHighlightModeListener(_onHighlightModeChanged);
+    // The InkWell is unmounted before it can report the blur, so the fact is
+    // reset here — a panel must not keep the ring the control left behind.
+    _isFocused = false;
   }
 
   @override
   void dispose() {
-    FocusManager.instance.removeHighlightModeListener(_onHighlightModeChanged);
+    // Registered iff currently interactive — didUpdateWidget maintains the
+    // invariant on every transition.
+    if (_isInteractive) {
+      FocusManager.instance.removeHighlightModeListener(
+        _onHighlightModeChanged,
+      );
+    }
     super.dispose();
   }
 
@@ -419,12 +457,15 @@ class _MxCardState extends State<MxCard> {
     setState(() => _isFocused = isFocused);
   }
 
-  /// Keyboard focus only. Focus that arrived from a pointer or from a
-  /// programmatic move on a touch screen draws no ring — the same gate
-  /// `MxActionButton._takesFocus` applies, for the same reason: a keyboard
-  /// affordance without a keyboard makes one control read as a different
-  /// component (M99.75).
+  /// Keyboard focus only, on an interactive card only. Focus that arrived
+  /// from a pointer or from a programmatic move on a touch screen draws no
+  /// ring — the same gate `MxActionButton._takesFocus` applies, for the same
+  /// reason: a keyboard affordance without a keyboard makes one control read
+  /// as a different component (M99.75). The `_isInteractive` leg is
+  /// belt-and-braces over the `didUpdateWidget` reset: a plain panel can
+  /// never wear a ring even if the focus fact went stale.
   bool get _isFocusVisible =>
+      _isInteractive &&
       _isFocused &&
       FocusManager.instance.highlightMode == FocusHighlightMode.traditional;
 

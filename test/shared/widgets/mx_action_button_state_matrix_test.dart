@@ -96,130 +96,143 @@ void main() {
 
     group(themeName, () {
       for (final variantEntry in filledVariants.entries) {
-        final variantName = variantEntry.key;
-        final variant = variantEntry.value;
+        for (final size in MxActionButtonSize.values) {
+          final variantName = '${variantEntry.key} · ${size.name}';
+          final variant = variantEntry.value;
 
-        testWidgets('$variantName · every state answers, and none is rest', (
-          tester,
-        ) async {
-          await pump(tester, theme, variant);
+          testWidgets('$variantName · every state answers, and none is rest', (
+            tester,
+          ) async {
+            await pump(tester, theme, variant, size: size);
 
-          Color? fill(Set<WidgetState> states) =>
-              resolved(tester, (s) => s.backgroundColor, states);
-          Color? ink(Set<WidgetState> states) =>
-              resolved(tester, (s) => s.foregroundColor, states);
+            Color? fill(Set<WidgetState> states) =>
+                resolved(tester, (s) => s.backgroundColor, states);
+            Color? ink(Set<WidgetState> states) =>
+                resolved(tester, (s) => s.foregroundColor, states);
 
-          final restFill = fill(rest);
-          final restInk = ink(rest);
-          expect(restFill, isNotNull, reason: '$variantName has no fill');
-          expect(restInk, isNotNull, reason: '$variantName has no ink');
+            final restFill = fill(rest);
+            final restInk = ink(rest);
+            expect(restFill, isNotNull, reason: '$variantName has no fill');
+            expect(restInk, isNotNull, reason: '$variantName has no ink');
+            expect(
+              contrast(restInk!, restFill!),
+              greaterThanOrEqualTo(4.5),
+              reason: '$themeName $variantName: label under AA on its own fill',
+            );
+
+            // Hover and press move the fill — a blend, because an accent
+            // overlay on an accent fill is the accent again and reads as no
+            // state at all (AppStateOpacity.filledHoverBlend).
+            expect(
+              fill(hovered),
+              isNot(restFill),
+              reason: '$themeName $variantName: hover is invisible',
+            );
+            expect(
+              fill(pressed),
+              isNot(restFill),
+              reason: '$themeName $variantName: press is invisible',
+            );
+
+            // Disabled must not look armed.
+            expect(
+              fill(disabled),
+              isNot(restFill),
+              reason: '$themeName $variantName: disabled still wears its fill',
+            );
+
+            // The focus indicator is drawn over the *resting fill*, so that is
+            // the ground it must clear 3:1 on (WCAG 1.4.11) — the trap AD-14
+            // records is measuring it on a ground the control never sits on.
+            final focusSide = resolved(tester, (s) => s.side, focused);
+            expect(
+              focusSide,
+              isNotNull,
+              reason: '$themeName $variantName: no focus indicator',
+            );
+            expect(
+              contrast(focusSide!.color, restFill),
+              greaterThanOrEqualTo(3.0),
+              reason: '$themeName $variantName: focus ring invisible on fill',
+            );
+          });
+        }
+      }
+
+      // Both sizes here too: compact swaps geometry, and geometry properties
+      // are single-state — a compact button that lost its state resolvers
+      // would fail this, not the drawn-40 test in mx_components_test.
+      for (final size in MxActionButtonSize.values) {
+        testWidgets('secondary · ${size.name} · edge is borderControl at rest '
+            'and while loading, focus ring when focused', (tester) async {
+          final semantic = theme.extension<AppSemanticColors>()!;
+
+          await pump(
+            tester,
+            theme,
+            MxActionButtonVariant.secondary,
+            size: size,
+          );
+
+          final restSide = resolved(tester, (s) => s.side, rest);
+          expect(restSide, isNotNull);
           expect(
-            contrast(restInk!, restFill!),
+            restSide!.color,
+            semantic.borderControl,
+            reason:
+                '$themeName: the resting secondary edge moved off '
+                'borderControl (M99.63)',
+          );
+
+          final restInk = resolved(tester, (s) => s.foregroundColor, rest);
+          expect(restInk, isNotNull);
+          expect(
+            contrast(restInk!, theme.colorScheme.surface),
             greaterThanOrEqualTo(4.5),
-            reason: '$themeName $variantName: label under AA on its own fill',
+            reason: '$themeName: secondary label under AA on surface',
           );
 
-          // Hover and press move the fill — a blend, because an accent
-          // overlay on an accent fill is the accent again and reads as no
-          // state at all (AppStateOpacity.filledHoverBlend).
-          expect(
-            fill(hovered),
-            isNot(restFill),
-            reason: '$themeName $variantName: hover is invisible',
-          );
-          expect(
-            fill(pressed),
-            isNot(restFill),
-            reason: '$themeName $variantName: press is invisible',
-          );
-
-          // Disabled must not look armed.
-          expect(
-            fill(disabled),
-            isNot(restFill),
-            reason: '$themeName $variantName: disabled still wears its fill',
-          );
-
-          // The focus indicator is drawn over the *resting fill*, so that is
-          // the ground it must clear 3:1 on (WCAG 1.4.11) — the trap AD-14
-          // records is measuring it on a ground the control never sits on.
           final focusSide = resolved(tester, (s) => s.side, focused);
+          expect(focusSide, isNotNull);
           expect(
-            focusSide,
+            contrast(focusSide!.color, theme.colorScheme.surface),
+            greaterThanOrEqualTo(3.0),
+            reason: '$themeName: secondary focus ring invisible on surface',
+          );
+
+          // Hover and press wash the outlined surface — the overlay must
+          // answer, because the fill has nothing to move.
+          expect(
+            resolved(tester, (s) => s.overlayColor, hovered),
             isNotNull,
-            reason: '$themeName $variantName: no focus indicator',
+            reason: '$themeName: secondary hover is silent',
           );
           expect(
-            contrast(focusSide!.color, restFill),
-            greaterThanOrEqualTo(3.0),
-            reason: '$themeName $variantName: focus ring invisible on fill',
+            resolved(tester, (s) => s.overlayColor, pressed),
+            isNotNull,
+            reason: '$themeName: secondary press is silent',
+          );
+
+          // A saving secondary keeps its edge: the loading style used to carry
+          // `borderSubtle` after the resting edge moved, so the button changed
+          // colour for the duration of a save (M99.75).
+          await pump(
+            tester,
+            theme,
+            MxActionButtonVariant.secondary,
+            size: size,
+            isLoading: true,
+            shouldKeepLabelWhileLoading: true,
+          );
+          final loadingSide = resolved(tester, (s) => s.side, disabled);
+          expect(loadingSide, isNotNull);
+          expect(
+            loadingSide!.color,
+            semantic.borderControl,
+            reason: '$themeName: the loading secondary edge drifted (M99.75)',
           );
         });
       }
-
-      testWidgets('secondary · edge is borderControl at rest and while '
-          'loading, focus ring when focused', (tester) async {
-        final semantic = theme.extension<AppSemanticColors>()!;
-
-        await pump(tester, theme, MxActionButtonVariant.secondary);
-
-        final restSide = resolved(tester, (s) => s.side, rest);
-        expect(restSide, isNotNull);
-        expect(
-          restSide!.color,
-          semantic.borderControl,
-          reason:
-              '$themeName: the resting secondary edge moved off '
-              'borderControl (M99.63)',
-        );
-
-        final restInk = resolved(tester, (s) => s.foregroundColor, rest);
-        expect(restInk, isNotNull);
-        expect(
-          contrast(restInk!, theme.colorScheme.surface),
-          greaterThanOrEqualTo(4.5),
-          reason: '$themeName: secondary label under AA on surface',
-        );
-
-        final focusSide = resolved(tester, (s) => s.side, focused);
-        expect(focusSide, isNotNull);
-        expect(
-          contrast(focusSide!.color, theme.colorScheme.surface),
-          greaterThanOrEqualTo(3.0),
-          reason: '$themeName: secondary focus ring invisible on surface',
-        );
-
-        // Hover and press wash the outlined surface — the overlay must
-        // answer, because the fill has nothing to move.
-        expect(
-          resolved(tester, (s) => s.overlayColor, hovered),
-          isNotNull,
-          reason: '$themeName: secondary hover is silent',
-        );
-        expect(
-          resolved(tester, (s) => s.overlayColor, pressed),
-          isNotNull,
-          reason: '$themeName: secondary press is silent',
-        );
-
-        // A saving secondary keeps its edge: the loading style used to carry
-        // `borderSubtle` after the resting edge moved, so the button changed
-        // colour for the duration of a save (M99.75).
-        await pump(
-          tester,
-          theme,
-          MxActionButtonVariant.secondary,
-          isLoading: true,
-          shouldKeepLabelWhileLoading: true,
-        );
-        final loadingSide = resolved(tester, (s) => s.side, disabled);
-        expect(loadingSide, isNotNull);
-        expect(
-          loadingSide!.color,
-          semantic.borderControl,
-          reason: '$themeName: the loading secondary edge drifted (M99.75)',
-        );
-      });
     });
   }
 

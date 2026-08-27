@@ -39,6 +39,8 @@ const Set<String> kAllowedTypeNames = <String>{
   'bool',
   'Key',
   'IconData',
+  // A return type, not a payload — nothing rides in or out through `void`.
+  'void',
 };
 
 /// One public declaration that stepped outside the allowlist.
@@ -86,13 +88,46 @@ List<ApiFinding> scanUnit(CompilationUnit unit, String label) {
     findings.add(ApiFinding(location, name));
   }
 
+  void checkFormal(FormalParameter parameter, String location) {
+    final formal = parameter is DefaultFormalParameter
+        ? parameter.parameter
+        : parameter;
+    // `this.x` and `super.x` take their type from the field they initialise,
+    // which the field pass judges.
+    if (formal is SimpleFormalParameter) {
+      checkType(formal.type, location);
+      return;
+    }
+    // An old-style function-typed formal — `void onPick(Color c)` — is a
+    // forward-only callback: the visual primitive rides in through the
+    // callback's own parameters, so each of those is judged too. The first
+    // scanner skipped this shape silently, which was exactly the
+    // "forward-only callback" hole the charter names.
+    if (formal is FunctionTypedFormalParameter) {
+      checkType(formal.returnType, location);
+      for (final inner in formal.parameters.parameters) {
+        final normal = inner is DefaultFormalParameter
+            ? inner.parameter
+            : inner;
+        if (normal is SimpleFormalParameter) {
+          checkType(normal.type, '$location callback param');
+        }
+      }
+    }
+  }
+
+  bool isOverride(ClassMember member) =>
+      member.metadata.any((Annotation a) => a.name.name == 'override');
+
   for (final declaration in unit.declarations) {
     if (declaration is! ClassDeclaration) continue;
     final className = declaration.namePart.typeName.lexeme;
     if (className.startsWith('_')) continue;
 
     for (final member in declaration.body.members) {
-      if (member is FieldDeclaration && !member.isStatic) {
+      // Static included: a public `static const Color` on the widget is the
+      // same escape a field is — a value a call site can reach for.
+      if (member is FieldDeclaration) {
         for (final field in member.fields.variables) {
           if (field.name.lexeme.startsWith('_')) continue;
           checkType(
@@ -104,16 +139,26 @@ List<ApiFinding> scanUnit(CompilationUnit unit, String label) {
       if (member is ConstructorDeclaration) {
         final constructorName = member.name?.lexeme ?? '(unnamed)';
         for (final parameter in member.parameters.parameters) {
-          final formal = parameter is DefaultFormalParameter
-              ? parameter.parameter
-              : parameter;
-          // `this.x` and `super.x` take their type from the field they
-          // initialise, which the field pass above already judged.
-          if (formal is! SimpleFormalParameter) continue;
-          checkType(
-            formal.type,
-            '$label · $className.$constructorName(${formal.name?.lexeme})',
+          checkFormal(
+            parameter,
+            '$label · $className.$constructorName(${parameter.name?.lexeme})',
           );
+        }
+      }
+      // Public getters/methods leak too: `Color get fill` hands the primitive
+      // out the other way. Framework overrides (`createState`, `build`) keep
+      // their inherited signatures and cannot widen the API, so they are
+      // skipped rather than allowlisting `State`/`Widget` machinery.
+      if (member is MethodDeclaration &&
+          !member.name.lexeme.startsWith('_') &&
+          !isOverride(member)) {
+        final location = '$label · $className.${member.name.lexeme}';
+        if (!member.isSetter) checkType(member.returnType, location);
+        final parameters = member.parameters;
+        if (parameters != null) {
+          for (final parameter in parameters.parameters) {
+            checkFormal(parameter, location);
+          }
         }
       }
     }
@@ -239,6 +284,44 @@ class _MxProbeSpec {
 }
 ''', 'probe');
       expect(findings, isEmpty);
+    });
+
+    test('a function-typed formal forwarding a primitive is a finding', () {
+      final findings = scanSource('''
+class MxProbe extends StatelessWidget {
+  const MxProbe();
+
+  static Widget probe(void onStyle(Color c)) => const SizedBox();
+}
+''', 'probe');
+      expect(findings, hasLength(1));
+      expect(findings.single.typeName, 'Color');
+    });
+
+    test('a public getter handing out a primitive is a finding', () {
+      final findings = scanSource('''
+class MxProbe extends StatelessWidget {
+  const MxProbe();
+  Color get fill => Colors.red;
+
+  @override
+  Widget build(BuildContext context) => const SizedBox();
+}
+''', 'probe');
+      // `build` is an override and stays out of it; the getter does not.
+      expect(findings, hasLength(1));
+      expect(findings.single.typeName, 'Color');
+    });
+
+    test('a public static field carrying a primitive is a finding', () {
+      final findings = scanSource('''
+class MxProbe extends StatelessWidget {
+  const MxProbe();
+  static const Color fallback = Colors.red;
+}
+''', 'probe');
+      expect(findings, hasLength(1));
+      expect(findings.single.typeName, 'Color');
     });
 
     test('a file-local enum is admitted as the component-s own vocabulary', () {

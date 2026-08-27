@@ -47,6 +47,42 @@ String? balancedArgs(String source, int openParen) {
   return null;
 }
 
+/// The value expression of the top-level `name:` argument inside [args], or
+/// null when the argument is absent. Balanced across every bracket kind, so a
+/// closure body with commas does not truncate the expression.
+String? namedArgumentExpression(String args, String name) {
+  final match = RegExp('\\b$name\\s*:').firstMatch(args);
+  if (match == null) return null;
+
+  var depth = 0;
+  for (var i = match.end; i < args.length; i++) {
+    final char = args[i];
+    if ('([{'.contains(char)) depth += 1;
+    if (')]}'.contains(char)) {
+      if (depth == 0) return args.substring(match.end, i).trim();
+      depth -= 1;
+    }
+    if (char == ',' && depth == 0) return args.substring(match.end, i).trim();
+  }
+
+  return args.substring(match.end).trim();
+}
+
+/// Whether [expression] is focus plumbing and nothing else: a `requestFocus`
+/// tear-off, or a no-argument closure whose whole body is one
+/// `requestFocus()` call. `args.contains('requestFocus')` was the first
+/// version and was gameable — a handler doing
+/// `controller.open(); focusNode.requestFocus();` walked straight through the
+/// exemption while being exactly the rebuilt activation this test bans.
+bool isFocusPlumbing(String expression) {
+  final flat = expression.replaceAll(RegExp(r'\s+'), ' ');
+
+  return RegExp(r'^[\w.]+\.requestFocus$').hasMatch(flat) ||
+      RegExp(
+        r'^\(\) (=> [\w.]+\.requestFocus\(\)|\{ [\w.]+\.requestFocus\(\); \})$',
+      ).hasMatch(flat);
+}
+
 /// Offender lines in [source]: every `GestureDetector(` whose arguments carry
 /// a tap activation and a card-family child, minus the focus-plumbing
 /// exemption.
@@ -58,9 +94,10 @@ List<int> activationWrapperLines(String source) {
     final openParen = cleaned.indexOf('(', match.start);
     final args = balancedArgs(cleaned, openParen);
     if (args == null) continue;
-    if (!RegExp(r'\bonTap\s*:').hasMatch(args)) continue;
+    final onTap = namedArgumentExpression(args, 'onTap');
+    if (onTap == null) continue;
     if (!RegExp(r'\bMxCard\b').hasMatch(args)) continue;
-    if (args.contains('requestFocus')) continue;
+    if (isFocusPlumbing(onTap)) continue;
 
     offenders.add(cleaned.substring(0, match.start).split('\n').length);
   }
@@ -129,6 +166,33 @@ Widget build(BuildContext context) => GestureDetector(
 Widget build(BuildContext context) => GestureDetector(
   behavior: HitTestBehavior.opaque,
   onTap: focusNode.requestFocus,
+  child: MxCard.recessed(child: field),
+);
+''';
+      expect(activationWrapperLines(source), isEmpty);
+    });
+
+    test('a handler that also does real work is a finding despite the '
+        'requestFocus inside it', () {
+      // The hole the first exemption had: `contains('requestFocus')` matched
+      // anywhere in the args, so a rebuilt activation only had to mention
+      // focus to walk through.
+      const source = '''
+Widget build(BuildContext context) => GestureDetector(
+  onTap: () {
+    controller.open();
+    focusNode.requestFocus();
+  },
+  child: MxCard.flat(child: Text('x')),
+);
+''';
+      expect(activationWrapperLines(source), hasLength(1));
+    });
+
+    test('a closure that only requests focus still passes', () {
+      const source = '''
+Widget build(BuildContext context) => GestureDetector(
+  onTap: () => focusNode.requestFocus(),
   child: MxCard.recessed(child: field),
 );
 ''';
