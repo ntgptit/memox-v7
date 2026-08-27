@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_radio_rows.dart';
 
 /// A closed choice, as radio rows (wireframe S9, W6).
 ///
@@ -55,18 +56,6 @@ class SettingsChoiceRowsWidget<T extends Enum> extends StatelessWidget {
   /// ink span the card while its content stays on the screen's one column (W5).
   final EdgeInsetsGeometry contentPadding;
 
-  /// `RadioGroup.onChanged` is required and non-nullable, so the locked state
-  /// lives on each tile instead. Both are set for the reason
-  /// `DeckSchedulerPickerWidget` gives: `enabled` greys the row and takes it out
-  /// of the focus order, and the guarded callback means a tap that somehow
-  /// lands mid-write changes nothing.
-  void _ignoreChange(T? _) {}
-
-  void _onChanged(T? value) {
-    if (value == null) return;
-    onChanged(value);
-  }
-
   @override
   Widget build(BuildContext context) => Semantics(
     // The lock is announced, not only painted: a group that merely greys out
@@ -74,30 +63,16 @@ class SettingsChoiceRowsWidget<T extends Enum> extends StatelessWidget {
     enabled: !isSubmitting,
     label: isSubmitting ? context.l10n.settingsSavingLabel : null,
     container: isSubmitting,
-    child: RadioGroup<T>(
-      groupValue: selected,
-      onChanged: isSubmitting ? _ignoreChange : _onChanged,
-      // **A transparent `Material`, and the framework asserts about its
-      // absence.** `ListTile` paints its splash and its selected fill onto the
-      // nearest `Material` ancestor, and `MxCard` only hosts one when the whole
-      // card is tappable — which none of these are. Without this the nearest
-      // Material is the Scaffold, *behind* the card's opaque decoration, so
-      // every ripple is drawn and then covered.
-      child: Material(
-        type: MaterialType.transparency,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            for (final value in values)
-              RadioListTile<T>(
-                value: value,
-                enabled: !isSubmitting,
-                title: Text(labelOf(value)),
-                contentPadding: contentPadding,
-              ),
-          ],
-        ),
-      ),
+    // MxRadioRows carries the transparent Material a ListTile's splash
+    // needs inside a decorated card, and the per-tile lock — the two fixes
+    // this widget used to hand-write.
+    child: MxRadioRows<T>(
+      values: values,
+      selected: selected,
+      isEnabled: !isSubmitting,
+      onChanged: onChanged,
+      labelOf: labelOf,
+      contentPadding: contentPadding,
     ),
   );
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../shared/widgets/mx_menu_button.dart';
 import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
@@ -34,15 +35,14 @@ class CardSortControlWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final active = ref.watch(cardListSortSelectionProvider(deckId));
 
-    return PopupMenuButton<CardListSort>(
-      initialValue: active,
+    return MxMenuButton(
       tooltip: context.l10n.cardSortLabel,
-      onSelected: (sort) => _selectSort(ref, deckId, sort),
-      itemBuilder: (context) => <PopupMenuEntry<CardListSort>>[
+      actions: <MxMenuAction>[
         for (final sort in CardListSort.values)
-          PopupMenuItem<CardListSort>(
-            value: sort,
-            child: Text(_label(context, sort)),
+          MxMenuAction(
+            label: _label(context, sort),
+            isSelected: sort == active,
+            onSelected: () => _selectSort(ref, deckId, sort),
           ),
       ],
       child: Semantics(

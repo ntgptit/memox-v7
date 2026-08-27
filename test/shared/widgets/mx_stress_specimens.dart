@@ -5,6 +5,8 @@ import 'package:memox/shared/widgets/mx_alert_dialog.dart';
 import 'package:memox/shared/widgets/mx_breadcrumb.dart';
 import 'package:memox/shared/widgets/mx_button_pair.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
+
+import 'mx_stress_selection_specimens.dart';
 import 'package:memox/shared/widgets/mx_confirm_dialog.dart';
 import 'package:memox/shared/widgets/mx_content_shell.dart';
 import 'package:memox/shared/widgets/mx_dialog_tone.dart';
@@ -80,6 +82,7 @@ class MxStressSpecimen {
 /// Every shared component. Adding one here is how it enters the stress suite —
 /// `mx_stress_test.dart` asserts this list covers `lib/shared/widgets/`.
 List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
+  ...selectionStressSpecimens(),
   MxStressSpecimen(
     name: 'MxActionButton',
     build: () => const MxActionButton(

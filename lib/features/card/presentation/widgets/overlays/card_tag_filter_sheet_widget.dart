@@ -5,6 +5,7 @@ import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_checkbox_row.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../../../shared/widgets/mx_async_view.dart';
 import '../../../../../shared/widgets/mx_button_pair.dart';
@@ -152,14 +153,11 @@ class _TagChoices extends ConsumerWidget {
         itemBuilder: (itemContext, index) {
           final entry = catalog[index];
 
-          return CheckboxListTile(
-            value: draft.contains(entry.id),
-            onChanged: (_) =>
-                _selectDraft(ref, deckId, draft.toggled(entry.id)),
-            title: Text(entry.name),
-            subtitle: Text(itemContext.l10n.tagCardCount(entry.cardCount)),
-            controlAffinity: ListTileControlAffinity.leading,
-            contentPadding: EdgeInsets.zero,
+          return MxCheckboxRow(
+            isChecked: draft.contains(entry.id),
+            onToggle: () => _selectDraft(ref, deckId, draft.toggled(entry.id)),
+            label: entry.name,
+            subtitle: itemContext.l10n.tagCardCount(entry.cardCount),
           );
         },
       ),

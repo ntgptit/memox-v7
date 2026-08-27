@@ -80,6 +80,8 @@ rules:
       - '^(?!\s*(?://|\*)).*\bshowDialog\s*[<(]'
       - '^(?!\s*(?://|\*)).*\b(?:SnackBar|SnackBarAction|InkWell)\s*\('
       - '^(?!\s*(?://|\*)).*\.showSnackBar\s*\('
+      - '^(?!\s*(?://|\*)).*\b(?:Switch|SwitchListTile|CheckboxListTile|RadioListTile|RadioGroup)\s*[<(]'
+      - '^(?!\s*(?://|\*)).*\b(?:PopupMenuButton|PopupMenuItem|DropdownButton|DropdownButtonHideUnderline)\s*[<(]'
     tags:
       - memox-v7
       - design-system
