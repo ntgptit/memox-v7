@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_theme.dart';
@@ -110,6 +111,51 @@ void main() {
 
       expect(size.height, greaterThanOrEqualTo(48));
       expect(size.width, greaterThanOrEqualTo(48));
+    });
+
+    testWidgets('compact draws 40 and still hits 48', (tester) async {
+      // The size axis exists so the deck tile's chip-row verb could stop
+      // hand-building a `FilledButton` — the geometry is only safe to share if
+      // lowering the body cannot lower the target with it.
+      await tester.pumpWidget(
+        host(
+          Scaffold(
+            body: Center(
+              child: MxActionButton(
+                label: 'Study',
+                size: MxActionButtonSize.compact,
+                onPressed: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // What it paints: the Material inside the button. The outer box is the
+      // wrong thing to measure — `padded` wraps it back up to the target, so
+      // asserting 40 there fails against the very mechanism under test.
+      final drawn = tester.getSize(
+        find.descendant(
+          of: find.byType(FilledButton),
+          matching: find.byType(Material),
+        ),
+      );
+      expect(drawn.height, 40);
+
+      // What a finger gets: the padded outer box restores the floor.
+      expect(
+        tester.getSize(find.byType(FilledButton)).height,
+        greaterThanOrEqualTo(48),
+      );
+
+      // The label steps down with the box — and through the variable-font
+      // axis, because a `fontWeight` alone reports 600 and paints 500.
+      final text = tester.renderObject<RenderParagraph>(find.text('Study'));
+      expect(text.text.style?.fontSize, 12);
+      expect(
+        text.text.style?.fontVariations,
+        contains(const FontVariation('wght', 600)),
+      );
     });
 
     for (final mode in <(String, bool)>[('light', false), ('dark', true)]) {

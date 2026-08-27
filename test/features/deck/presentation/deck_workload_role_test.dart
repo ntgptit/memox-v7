@@ -103,13 +103,21 @@ void main() {
 
       // Study: the card's one primary verb (owner mockup, 2026-08-20) — the
       // chips gave up their containers, so the brand fill no longer competes.
-      final study = tester.widget<FilledButton>(
-        find.descendant(
-          of: find.byType(DeckStudyButtonWidget),
-          matching: find.byType(FilledButton),
-        ),
+      //
+      // Resolved widget-then-theme, the order Material itself uses: since the
+      // M99.61 migration to `MxActionButton` the widget carries geometry only,
+      // and the fill is the theme's — which is the ownership this test wants,
+      // stated where it used to read a per-widget style.
+      final studyButton = find.descendant(
+        of: find.byType(DeckStudyButtonWidget),
+        matching: find.byType(FilledButton),
       );
-      final studyFill = study.style?.backgroundColor?.resolve(<WidgetState>{});
+      final study = tester.widget<FilledButton>(studyButton);
+      final studyFill =
+          study.style?.backgroundColor?.resolve(<WidgetState>{}) ??
+          Theme.of(
+            tester.element(studyButton),
+          ).filledButtonTheme.style?.backgroundColor?.resolve(<WidgetState>{});
       expect(studyFill, scheme.primary);
       expect(studyFill, isNot(semantic.streakContainer));
     });

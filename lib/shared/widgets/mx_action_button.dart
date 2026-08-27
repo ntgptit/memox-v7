@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_button_themes.dart';
 import '../../core/theme/app_icon_size.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_typography.dart';
 import '../../core/theme/theme_context_extension.dart';
 
 /// How much weight a button carries on its screen.
@@ -43,16 +44,39 @@ enum MxActionButtonVariant {
   tonal,
 }
 
+/// How much room a button takes.
+///
+/// An enum for the same reason [MxActionButtonVariant] is: the moment a caller
+/// can pass a `Size` or an `EdgeInsets`, every screen is free to invent a
+/// geometry, and the guard's ban on raw Material buttons only moved the
+/// improvisation one file over.
+enum MxActionButtonSize {
+  /// The shared geometry every button gets from the theme: 48 drawn, which is
+  /// also the touch target.
+  standard,
+
+  /// Drawn at 40, hit at 48 — `MaterialTapTargetSize.padded` keeps the floor.
+  ///
+  /// For a button living inside a row of chips and gauges rather than in an
+  /// action bar. The deck tile's Study verb is the case it encodes (owner
+  /// review, 2026-08-20: 40 is on the 4px grid and clears the 32 the pill used
+  /// to paint), and its label steps down with the box: `label-md` re-weighted
+  /// to 600 through [AppTypography.withWeight], because a 48-button's
+  /// `label-lg` on a 40 body reads as text escaping its control.
+  compact,
+}
+
 /// The app's button.
 ///
-/// Takes no `Color` and no `TextStyle`. Appearance comes from [variant] and the
-/// theme; that is the whole point of having this widget instead of using
-/// `FilledButton` directly.
+/// Takes no `Color` and no `TextStyle`. Appearance comes from [variant], size
+/// from [size], and everything else from the theme; that is the whole point of
+/// having this widget instead of using `FilledButton` directly.
 class MxActionButton extends StatelessWidget {
   const MxActionButton({
     required this.label,
     required this.onPressed,
     this.variant = MxActionButtonVariant.primary,
+    this.size = MxActionButtonSize.standard,
     this.isLoading = false,
     this.shouldKeepLabelWhileLoading = false,
     this.icon,
@@ -86,6 +110,8 @@ class MxActionButton extends StatelessWidget {
   final VoidCallback? onPressed;
 
   final MxActionButtonVariant variant;
+
+  final MxActionButtonSize size;
 
   /// While true the button is disabled and shows a spinner — but keeps its
   /// size. A button that shrinks to spinner width moves everything beside it,
@@ -160,17 +186,19 @@ class MxActionButton extends StatelessWidget {
     Widget child,
     ButtonStyle? busyStyle,
   ) {
+    final ButtonStyle? styled = _sized(context, busyStyle);
+
     return switch (variant) {
       MxActionButtonVariant.primary => FilledButton(
         onPressed: effectiveOnPressed,
         autofocus: shouldAutofocus,
-        style: busyStyle,
+        style: styled,
         child: child,
       ),
       MxActionButtonVariant.secondary => OutlinedButton(
         onPressed: effectiveOnPressed,
         autofocus: shouldAutofocus,
-        style: busyStyle,
+        style: styled,
         child: child,
       ),
       // The tonal pair the theme already builds. `buildFilledTonalStyle` rather
@@ -184,9 +212,11 @@ class MxActionButton extends StatelessWidget {
         // that reads as coverage. A tonal button keeping its label while
         // loading would otherwise fall back to `disabledSurface`/`onDisabled` —
         // the 2.29:1 pair that method exists to avoid.
-        style:
-            busyStyle ??
-            buildFilledTonalStyle(context.colors, context.semanticColors),
+        style: _sized(
+          context,
+          busyStyle ??
+              buildFilledTonalStyle(context.colors, context.semanticColors),
+        ),
         child: child,
       ),
       // `error` / `onError`, not a token read directly: the scheme pair is
@@ -203,15 +233,48 @@ class MxActionButton extends StatelessWidget {
       MxActionButtonVariant.destructive => FilledButton(
         onPressed: effectiveOnPressed,
         autofocus: shouldAutofocus,
-        style: buildFilledStyle(
-          context.colors,
-          context.semanticColors,
-          fill: context.colors.error,
-          label: context.colors.onError,
+        style: _sized(
+          context,
+          buildFilledStyle(
+            context.colors,
+            context.semanticColors,
+            fill: context.colors.error,
+            label: context.colors.onError,
+          ),
         ),
         child: child,
       ),
     };
+  }
+
+  /// [base] with [size]'s geometry laid over it.
+  ///
+  /// `geometry.merge(base)`, not the other way round: `merge` keeps the
+  /// receiver's non-null properties, and the variant styles above are built
+  /// from `buildSharedButtonStyle`, which already states the standard 48
+  /// `minimumSize` — merged the other way, `compact` would silently stay 48.
+  /// Colour and every state resolver still come from [base] (or, when both are
+  /// null, from the theme): the four geometry properties are single-state, so
+  /// flat values shadow nothing that resolves.
+  ButtonStyle? _sized(BuildContext context, ButtonStyle? base) {
+    if (size == MxActionButtonSize.standard) return base;
+
+    final ButtonStyle geometry = ButtonStyle(
+      minimumSize: const WidgetStatePropertyAll<Size>(
+        Size(_kCompactMinWidth, _kCompactHeight),
+      ),
+      padding: const WidgetStatePropertyAll<EdgeInsets>(
+        EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      ),
+      // 40 is what it paints; 48 is what a finger gets. `AppSpacing` calls the
+      // touch target a floor, and `padded` is how a smaller body keeps it.
+      tapTargetSize: MaterialTapTargetSize.padded,
+      textStyle: WidgetStatePropertyAll<TextStyle>(
+        AppTypography.withWeight(context.texts.labelMedium!, FontWeight.w600),
+      ),
+    );
+
+    return base == null ? geometry : geometry.merge(base);
   }
 
   /// Keeps a *busy* button looking busy rather than disabled — and only when
@@ -375,3 +438,11 @@ class _ForegroundSpinner extends StatelessWidget {
     ),
   );
 }
+
+/// The compact body: 40 on the 4px grid (owner review, 2026-08-20), with
+/// `MaterialTapTargetSize.padded` restoring the 48 target around it.
+const double _kCompactHeight = 40;
+
+/// Same floor as `buildSharedButtonStyle` — compact lowers the body, not how
+/// narrow a button may get.
+const double _kCompactMinWidth = 64;

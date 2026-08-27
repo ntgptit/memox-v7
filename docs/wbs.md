@@ -13034,6 +13034,93 @@ của M2.
 - **Checklist phases:** 6, 7, 13
 
 
+### M99.61 · Theme composition — state ownership theo cặp resting, và biên giới nút thô
+
+- **Status:** **done** — từ một review composition bên ngoài (2026-08), đối
+  chiếu từng khẳng định với code và SDK trước khi sửa; hai mục của review bị
+  bác (planned themes, TextButton-là-link) vì repo đã quyết có lý do, và phần
+  đúng còn lại là danh sách dưới đây.
+- **Goal:** mọi component đã đổi resting pair sở hữu trọn bộ state của nó, và
+  biên giới "feature không dựng nút Material thô" chuyển từ prose sang guard.
+- **Scope:** theme composition (`lib/core/theme/`), `MxActionButton` + hai call
+  site migrate, ruleset guard v7, test pin các quyết định. **Không** đổi read
+  model, use case, controller, route hay hành vi nào; không đổi token value nào.
+- **Tests required:** `component_theme_typography_test.dart` (NavBar hai state),
+  `app_theme_test.dart` (FAB washes + độ sâu SnackBar/FAB),
+  `mx_components_test.dart` (compact vẽ 40/chạm 48, axis 600), guard chạy hai
+  lượt quanh migrate (2 hit → 0) làm bằng chứng rule sống.
+- **Checklist phases:** Phase 6 (theme/tokens) · Phase 7 (shared components) ·
+  Phase 21 (guard/CI).
+- **Nguyên tắc rút ra, áp cho mọi component về sau:** đổi resting fill/foreground
+  của một Material component khỏi cặp canonical thì **mọi state default nó sở
+  hữu là của mình phải khai lại** — M3 hardcode default theo cặp *cũ*
+  (`onPrimaryContainer` cho FAB), không suy từ override.
+- **Sáu việc đã làm:**
+  - **P1 · NavigationBar**: label selected đi qua `AppTypography.withWeight` —
+    bản cũ `copyWith(fontWeight: w600)` báo 600 cho test và vẽ 500 trên máy, vì
+    trục `wght` của variable font vẫn ở 500. `component_theme_typography_test`
+    nay phủ cả hai state của bar; lỗ test là lý do bug sống sót.
+  - **P1 · FAB**: `hoverColor`/`focusColor`/`splashColor` từ `onPrimary` theo
+    `AppStateOpacity` — SDK `_FABDefaultsM3` hardcode wash `onPrimaryContainer`
+    8/10/10%, tức mực của hệ khác đè lên fill đã đổi sang `primary/onPrimary`.
+    `app_theme_test` pin cả ba wash đúng foreground.
+  - **P2 · guard**: rule mới `memox_v7.design_system.no_raw_button` (bốn nút,
+    scope `presentation_files`) — rule cũ cùng tên nằm ở ruleset `memox`
+    layer-first, load lại sẽ xanh mà không match gì. Rule bắn đúng 2 lần vào
+    hai `FilledButton` chủ đích trước khi migrate, rồi về 0: bằng chứng nó
+    hoạt động. Chủ dự án chọn migrate thay vì allowlist.
+  - **Migrate kèm theo**: `MxActionButton` thêm trục `size`
+    (`standard`/`compact`) — compact vẽ 40, chạm 48 qua `padded`, label
+    `label-md` re-weight 600 qua `withWeight`. `deck_study_button_widget` và
+    `card_progress_panel_widget` bỏ `FilledButton` thô; nút panel đổi hai nét
+    về phía hệ thống (góc `md` thay pill một-chỗ, label lên rung `label-lg`),
+    và cả hai nút **vẽ đúng 600 lần đầu** — style inline cũ cùng mang đúng
+    class bug `fontWeight`-không-`wght`.
+  - **P2 · `_buildTheme`**: bỏ `actionFill`/`actionLabel`/`outlineLabel` —
+    builder đọc thẳng `scheme.primary`/`onPrimary`/`semantic.secondaryAction`.
+    Điểm lệch tiềm tàng nằm sẵn ở high-contrast: scheme bị biến đổi còn hằng
+    relay thì không, hôm nay bằng nhau chỉ vì `highContrastScheme` cố ý không
+    đụng `primary`. `background` giữ lại vì scheme thật sự không có role cho nó.
+  - **P2 · SnackBar**: `elevation` khai theo brightness như FAB
+    (`_overlayElevation`) — im lặng rơi về 6.0 của SDK kể cả ở dark, nơi mọi
+    surface đã đo và tắt bóng; đây là overlay cuối cùng để Material tự quyết
+    độ sâu. Kèm `useMaterial3: true` explicit: các fallback ở trên sửa *default
+    của M3* cụ thể, nên flag là dependency chứ không phải preference.
+- **Hai mục của review bị bác, ghi lại để khỏi review lại:** planned themes giữ
+  wiring (admission test ba điều kiện + `theme_coverage_test` hai chiều; gỡ ra
+  tạo đúng khoảng trống "Material âm thầm quyết" mà review phản đối ở SnackBar);
+  TextButton-là-link đã là quyết định tuyên bố trên builder — phần thiếu chỉ là
+  enforcement, và rule guard mới đã đóng nó.
+- **Goldens:** 40 file sinh lại (`TZ=UTC`) — mọi màn có bottom bar (selected
+  label nay vẽ 600 thật), `deck_list_*`/`card_list_*` (hai nút migrate), dialog
+  nổi trên các màn đó. Card Detail và Study session không đổi: không có navbar.
+- **Output:** `lib/core/theme/app_theme.dart`, `app_button_themes.dart`,
+  `app_navigation_bar_theme.dart`; `lib/shared/widgets/mx_action_button.dart`;
+  hai widget migrate;
+  `code-verification-guard-v2/registries/projects/memox-v7/`
+  (`rules/memox-design-system-rules.yaml` mới + manifest);
+  `test/core/theme/app_theme_test.dart`, `component_theme_typography_test.dart`,
+  `app_theme_identity_test.dart`, `test/shared/widgets/mx_components_test.dart`,
+  `test/design_audit/audit_theme_steps.dart` (comment);
+  `widgetbook/lib/components/control_components.dart` (knob `size`); goldens
+  `test/demo/`.
+- **Acceptance criteria:**
+  - [x] NavBar selected label mang `FontVariation('wght', 600)`, test phủ cả
+        hai state.
+  - [x] Ba wash state của FAB cùng màu `foregroundColor`, pin trong test.
+  - [x] Guard 72 rule xanh; rule mới đã chứng minh bắn 2 → 0 quanh migrate.
+  - [x] `lib/features/` không còn nút Material thô nào.
+  - [x] Compact: vẽ 40 (đo Material bên trong), chạm ≥48 (đo hộp ngoài).
+  - [x] SnackBar và FAB cùng một chính sách độ sâu, pin bằng một assertion.
+  - [x] `flutter analyze` sạch; `dart format` sạch; `check_docs.py` xanh;
+        full host suite xanh.
+  - [x] Goldens regenerate với `TZ=UTC`; gallery publish lại đúng URL ghim.
+- **Emulator integration suite:** **not run — theme/presentation only.** Không
+  feature, route, binding, persistence hay platform behavior mới. Đây không
+  phải một lượt chạy xanh.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.60
+
 ### M99.62 · Card Editor concept parity — màn sửa thẻ dựng lại theo concept
 
 - **Status:** **done**

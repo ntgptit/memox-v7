@@ -103,11 +103,12 @@ Map<String, Color> auditTokensOf(ThemeData theme) {
     'semantic.borderSubtle': x.borderSubtle,
     'semantic.focusRing': x.focusRing,
     'semantic.secondaryAction': x.secondaryAction,
-    // Resolved component colours, not tokens. `background`, `actionFill`,
-    // `actionLabel` and `outlineLabel` are arguments to the private theme
-    // builder rather than fields on the extension, so the only place their
-    // final value exists is here — in the widget themes they were passed to.
-    // Auditing the arguments instead would audit intent, not what paints.
+    // Resolved component colours, not tokens. `background` is an argument to
+    // the private theme builder rather than a field on the extension (the
+    // button pairs used to be too, until the builders learned to read the
+    // scheme), so the only place the final values exist is here — in the
+    // widget themes they landed in. Auditing the arguments instead would
+    // audit intent, not what paints.
     'inputDecorationTheme.enabledBorder':
         theme.inputDecorationTheme.enabledBorder!.borderSide.color,
     'inputDecorationTheme.focusedBorder':

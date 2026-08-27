@@ -1,21 +1,13 @@
 import 'package:flutter/material.dart';
-
-import '../../../../../core/theme/app_button_themes.dart';
-import '../../../../../core/theme/app_radius.dart';
-import '../../../../../core/theme/app_spacing.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/navigation/route_names.dart';
-import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_action_button.dart';
 
-/// The height the button draws, which is also its target now: 40 is on the
-/// 4px grid and clears the 32 the pill used to paint (owner review,
-/// 2026-08-20). `MaterialTapTargetSize.padded` still lifts the *hit* area to
-/// [AppSpacing.minimumTouchTarget].
-const double _kButtonHeight = 40;
-
-/// So a one-word verb is not narrower than the chips above it.
+/// So a one-word verb is not narrower than the chips above it. Deck-local, so
+/// it constrains from outside rather than living in the shared button: the
+/// minimum a verb needs is decided by what it sits next to.
 const double _kButtonMinWidth = 80;
 
 /// Start studying what is due in one deck.
@@ -40,11 +32,17 @@ const double _kButtonMinWidth = 80;
 /// the only other accent left, so one primary verb per card now reads as the
 /// hierarchy instead of competing with it.
 ///
-/// **40 is what it paints; 48 is what a finger gets.** `AppSpacing` calls the
-/// touch target a floor, and `MxBreadcrumb` already settled the same conflict
-/// the same way — the kit's CSS says 36 there and its usage note says 48, and 48
-/// won. `MaterialTapTargetSize.padded` keeps the pill's drawn height at 32 and
-/// gives the hit area the floor.
+/// **An `MxActionButton` since the raw-button guard landed (2026-08-27), and
+/// the geometry moved with it.** This widget used to build the `FilledButton`
+/// itself — brand pair from `buildFilledStyle`, 40-high `md`-cornered pill
+/// geometry stated inline — which made it one of the two feature files
+/// `memox_v7.design_system.no_raw_button` fired on the day the rule was
+/// written. `MxActionButtonSize.compact` now owns that geometry (40 drawn, 48
+/// hit, `label-md` at 600), so the next screen that needs a chip-row button
+/// gets this one instead of copying a style block. One real change rode along:
+/// the old inline label set `fontWeight: w600` without moving the variable
+/// font's `wght` axis, so it *painted* 500 — compact goes through
+/// `AppTypography.withWeight` and paints the 600 this file always claimed.
 class DeckStudyButtonWidget extends StatelessWidget {
   const DeckStudyButtonWidget({required this.deckId, super.key});
 
@@ -52,51 +50,17 @@ class DeckStudyButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FilledButton(
-      onPressed: () => context.goNamed(
-        RouteNames.deckStudy,
-        pathParameters: <String, String>{RoutePathParams.deckId: deckId},
-      ),
-      // The brand pair comes from the shared builder; only the pill's
-      // geometry is stated here.
-      style:
-          buildFilledStyle(
-            context.colors,
-            context.semanticColors,
-            fill: context.colors.primary,
-            label: context.colors.onPrimary,
-          ).copyWith(
-            minimumSize: const WidgetStatePropertyAll<Size>(
-              Size(_kButtonMinWidth, _kButtonHeight),
-            ),
-            padding: const WidgetStatePropertyAll<EdgeInsets>(
-              EdgeInsets.symmetric(horizontal: AppSpacing.md),
-            ),
-            // A card corner, not a pill (owner review, 2026-08-20): the row
-            // it sits in is built from rounded rectangles — the gauge, the
-            // chips above it, the card itself — and a stadium among them read
-            // as a borrowed component. Same corner as the hero's own CTA.
-            shape: const WidgetStatePropertyAll<OutlinedBorder>(
-              RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(AppRadius.md)),
-              ),
-            ),
-            tapTargetSize: MaterialTapTargetSize.padded,
-          ),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minWidth: _kButtonMinWidth),
       // **The word alone** (owner review, 2026-08-20). The play glyph said
       // nothing the verb did not, and it cost the row width that the gauge
       // beside it needed at large text scales.
-      child: Text(
-        context.l10n.deckStudyAction,
-        // **`onPrimary` stated, not inherited.** `context.texts.labelMedium`
-        // carries the theme's body colour, and passing it whole overrode the
-        // foreground the button had already resolved — the same kind of
-        // override the visual audit once measured at 2.33:1 on the brand
-        // fill. A style taken from the text theme has to say its colour when
-        // it lands on a coloured surface.
-        style: context.texts.labelMedium?.copyWith(
-          color: context.colors.onPrimary,
-          fontWeight: FontWeight.w600,
+      child: MxActionButton(
+        label: context.l10n.deckStudyAction,
+        size: MxActionButtonSize.compact,
+        onPressed: () => context.goNamed(
+          RouteNames.deckStudy,
+          pathParameters: <String, String>{RoutePathParams.deckId: deckId},
         ),
       ),
     );

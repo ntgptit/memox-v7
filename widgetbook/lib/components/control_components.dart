@@ -30,6 +30,11 @@ WidgetbookComponent actionButtonComponent() {
             options: MxActionButtonVariant.values,
             labelBuilder: (MxActionButtonVariant value) => value.name,
           );
+          final size = context.knobs.object.dropdown<MxActionButtonSize>(
+            label: 'size',
+            options: MxActionButtonSize.values,
+            labelBuilder: (MxActionButtonSize value) => value.name,
+          );
           final isEnabled = context.knobs.boolean(
             label: 'enabled',
             initialValue: true,
@@ -41,6 +46,7 @@ WidgetbookComponent actionButtonComponent() {
             child: MxActionButton(
               label: label,
               variant: variant,
+              size: size,
               isLoading: isLoading,
               icon: hasIcon ? Icons.add : null,
               onPressed: isEnabled ? _noop : null,

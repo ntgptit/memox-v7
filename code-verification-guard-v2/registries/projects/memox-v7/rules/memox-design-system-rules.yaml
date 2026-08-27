@@ -1,0 +1,55 @@
+# MemoX V7 guard rules — domain: design_system
+#
+# The design system's component boundary: a feature composes shared primitives
+# (`Mx*`), it does not rebuild them from raw Material widgets. The prose half of
+# this contract has lived on the primitives themselves all along —
+# `mx_action_button.dart` opens with "that is the whole point of having this
+# widget instead of using `FilledButton` directly" — but prose on a shared
+# widget is read by the person editing the shared widget, not by the person
+# writing a new dialog in a feature. The 2026-08 theme-composition review found
+# exactly that gap: the invariant was declared and nothing enforced it.
+#
+# History note: the old `memox` ruleset had this rule
+# (`memox.design_system.no_raw_button`), and it was not carried into v7 when
+# the ruleset was rebuilt for the feature-first tree — the nine rebuilt files
+# simply did not include the design-system one. Loading the old file instead of
+# writing this one would be worse than the gap: its scopes name the layer-first
+# paths (`lib/presentation/features/**`), so it would pass green while matching
+# nothing.
+#
+# Scope note: `presentation_files` (features/*/presentation only), NOT
+# `ui_surfaces` — `lib/shared/` is where the primitives legitimately build the
+# raw widgets these rules ban. Linting it would flag the definition as the
+# crime, the same argument `memox-design-token-rules.yaml` makes for
+# `lib/core/theme/`.
+version: 1
+metadata:
+  id: memox-v7-design-system
+  name: MemoX V7 Design System Rules
+  description: >-
+    Features compose shared Mx primitives; raw Material control widgets stay in
+    lib/shared where the primitives are defined.
+  owner: memox-v7
+rules:
+  - id: memox_v7.design_system.no_raw_button
+    type: regex
+    severity: error
+    enabled: true
+    message: >-
+      No raw Material buttons in feature code. Use `MxActionButton` (variants:
+      primary / secondary / destructive / tonal; sizes: standard / compact) or
+      the other shared button primitives, so every action in the app resolves
+      through one style pipeline. A shape the shared widget cannot express is a
+      gap in the widget — extend it in lib/shared, do not route around it here.
+    scopes:
+      - presentation_files
+    # `\b` is what keeps `MxTextButton` legal without a lookbehind: `x` and `T`
+    # are both word characters, so there is no boundary inside the name.
+    patterns:
+      - '\bElevatedButton(?:\.[A-Za-z_][A-Za-z0-9_]*)?\s*\('
+      - '\bFilledButton(?:\.[A-Za-z_][A-Za-z0-9_]*)?\s*\('
+      - '\bOutlinedButton(?:\.[A-Za-z_][A-Za-z0-9_]*)?\s*\('
+      - '\bTextButton(?:\.[A-Za-z_][A-Za-z0-9_]*)?\s*\('
+    tags:
+      - memox-v7
+      - design-system
