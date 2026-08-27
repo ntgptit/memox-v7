@@ -8,6 +8,7 @@ import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_button_pair.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../domain/entities/deck_entity.dart';
 import '../../../domain/failures/deck_conflict_failure.dart';
@@ -102,12 +103,16 @@ class _SchedulerSheetState extends ConsumerState<_SchedulerSheet> {
         onChanged: (_) {},
       ),
       const SizedBox(height: AppSpacing.xl),
-      _resetAction(context),
-      const SizedBox(height: AppSpacing.sm),
-      MxActionButton(
-        label: l10n.commonCancelAction,
-        variant: MxActionButtonVariant.secondary,
-        onPressed: widget.onClose,
+      // One row when the labels fit, a stack when they do not - the pair
+      // measures the buttons instead of this sheet guessing (owner ask,
+      // 2026-08-28: stacked pairs were spending a row of sheet height each).
+      MxButtonPair(
+        primary: _resetAction(context),
+        secondary: MxActionButton(
+          label: l10n.commonCancelAction,
+          variant: MxActionButtonVariant.secondary,
+          onPressed: widget.onClose,
+        ),
       ),
     ];
   }
@@ -185,23 +190,23 @@ class _SchedulerSheetState extends ConsumerState<_SchedulerSheet> {
       // UC-03 E4: the deck locked between drawing this sheet and confirming it.
       // Retrying can only fail the same way, so the primary action becomes the
       // one that still works rather than a button that is now a trap.
-      if (_isLockedRefusal(submit.failure))
-        _resetAction(context)
-      else
-        MxActionButton(
-          label: l10n.deckSchedulerChangeConfirm,
-          isLoading: submit.isSubmitting,
-          onPressed: submit.isSubmitting
-              ? null
-              : () => ref
-                    .read(provider.notifier)
-                    .submit(schedulerType: _scheduler),
+      MxButtonPair(
+        primary: _isLockedRefusal(submit.failure)
+            ? _resetAction(context)
+            : MxActionButton(
+                label: l10n.deckSchedulerChangeConfirm,
+                isLoading: submit.isSubmitting,
+                onPressed: submit.isSubmitting
+                    ? null
+                    : () => ref
+                          .read(provider.notifier)
+                          .submit(schedulerType: _scheduler),
+              ),
+        secondary: MxActionButton(
+          label: l10n.commonCancelAction,
+          variant: MxActionButtonVariant.secondary,
+          onPressed: submit.isSubmitting ? null : widget.onClose,
         ),
-      const SizedBox(height: AppSpacing.sm),
-      MxActionButton(
-        label: l10n.commonCancelAction,
-        variant: MxActionButtonVariant.secondary,
-        onPressed: submit.isSubmitting ? null : widget.onClose,
       ),
     ];
   }
