@@ -1,6 +1,6 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 682,
+  "scannedFiles": 683,
   "totalSites": 512,
   "byElementKind": {
     "other": 319,
@@ -2980,7 +2980,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 382,
+      "line": 389,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -2991,7 +2991,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 385,
+      "line": 392,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -3002,7 +3002,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 386,
+      "line": 393,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -3013,7 +3013,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 515,
+      "line": 522,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -3024,7 +3024,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 538,
+      "line": 545,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -3189,7 +3189,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/items/card_tile_widget.dart",
-      "line": 78,
+      "line": 79,
       "widget_context": "CardTileWidget",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3200,20 +3200,9 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/items/card_tile_widget.dart",
-      "line": 79,
+      "line": 80,
       "widget_context": "CardTileWidget",
       "element_kind": "other",
-      "source_kind": "theme-token",
-      "expression": "context.colors.secondary",
-      "token": "colorScheme.secondary",
-      "resolved_value_light": "#4E5468",
-      "resolved_value_dark": "#B8B7D0"
-    },
-    {
-      "file": "lib/features/card/presentation/widgets/items/card_tile_widget.dart",
-      "line": 118,
-      "widget_context": "_SelectionMark",
-      "element_kind": "icon",
       "source_kind": "theme-token",
       "expression": "context.colors.secondary",
       "token": "colorScheme.secondary",
@@ -3226,6 +3215,17 @@
       "widget_context": "_SelectionMark",
       "element_kind": "icon",
       "source_kind": "theme-token",
+      "expression": "context.colors.secondary",
+      "token": "colorScheme.secondary",
+      "resolved_value_light": "#4E5468",
+      "resolved_value_dark": "#B8B7D0"
+    },
+    {
+      "file": "lib/features/card/presentation/widgets/items/card_tile_widget.dart",
+      "line": 120,
+      "widget_context": "_SelectionMark",
+      "element_kind": "icon",
+      "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",
       "token": "colorScheme.onSurfaceVariant",
       "resolved_value_light": "#565C72",
@@ -3233,7 +3233,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/items/card_tile_widget.dart",
-      "line": 191,
+      "line": 192,
       "widget_context": "_CardFace",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3244,7 +3244,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/items/card_tile_widget.dart",
-      "line": 257,
+      "line": 263,
       "widget_context": "_TrailingBadges",
       "element_kind": "icon",
       "source_kind": "theme-token",
@@ -3255,7 +3255,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/items/card_tile_widget.dart",
-      "line": 296,
+      "line": 302,
       "widget_context": "_DueBadge",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -3266,7 +3266,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/items/card_tile_widget.dart",
-      "line": 302,
+      "line": 308,
       "widget_context": "_DueBadge",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4102,7 +4102,7 @@
     },
     {
       "file": "lib/features/deck/presentation/screens/starter_library_screen.dart",
-      "line": 111,
+      "line": 112,
       "widget_context": "_TemplateTile",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -4113,7 +4113,7 @@
     },
     {
       "file": "lib/features/deck/presentation/screens/starter_library_screen.dart",
-      "line": 161,
+      "line": 168,
       "widget_context": "_TemplateTile",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4124,7 +4124,7 @@
     },
     {
       "file": "lib/features/deck/presentation/screens/starter_library_screen.dart",
-      "line": 162,
+      "line": 169,
       "widget_context": "_TemplateTile",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4179,7 +4179,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/items/deck_tile_widget.dart",
-      "line": 256,
+      "line": 263,
       "widget_context": "_DeckActionRow",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4190,7 +4190,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/items/deck_tile_widget.dart",
-      "line": 257,
+      "line": 264,
       "widget_context": "_DeckActionRow",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4201,7 +4201,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/items/deck_tile_widget.dart",
-      "line": 336,
+      "line": 342,
       "widget_context": "_DeckMetaLine",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -4212,7 +4212,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/items/deck_workload_line_widget.dart",
-      "line": 40,
+      "line": 41,
       "widget_context": "DeckWorkloadLineWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4223,7 +4223,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/items/deck_workload_line_widget.dart",
-      "line": 48,
+      "line": 49,
       "widget_context": "DeckWorkloadLineWidget",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -4234,7 +4234,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/items/deck_workload_line_widget.dart",
-      "line": 67,
+      "line": 68,
       "widget_context": "DeckWorkloadLineWidget",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -4245,7 +4245,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/items/deck_workload_line_widget.dart",
-      "line": 68,
+      "line": 69,
       "widget_context": "DeckWorkloadLineWidget",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -4443,7 +4443,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 173,
+      "line": 177,
       "widget_context": "_HeroFigureLine",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -4454,7 +4454,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 354,
+      "line": 356,
       "widget_context": "_QuietContextRow",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4465,7 +4465,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 369,
+      "line": 371,
       "widget_context": "_QuietContextRow",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4476,7 +4476,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 383,
+      "line": 385,
       "widget_context": "_QuietContextRow",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -4487,7 +4487,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 408,
+      "line": 410,
       "widget_context": "_QuietContextRow",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -4784,7 +4784,7 @@
     },
     {
       "file": "lib/features/search/presentation/widgets/sections/search_group_header_widget.dart",
-      "line": 38,
+      "line": 43,
       "widget_context": "SearchGroupHeaderWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -5092,7 +5092,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_home_resume_section_widget.dart",
-      "line": 48,
+      "line": 49,
       "widget_context": "StudyHomeResumeSectionWidget",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -5103,7 +5103,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_home_resume_section_widget.dart",
-      "line": 59,
+      "line": 67,
       "widget_context": "StudyHomeResumeSectionWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -5114,7 +5114,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_home_resume_section_widget.dart",
-      "line": 69,
+      "line": 76,
       "widget_context": "StudyHomeResumeSectionWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -5125,7 +5125,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_home_resume_section_widget.dart",
-      "line": 81,
+      "line": 88,
       "widget_context": "StudyHomeResumeSectionWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -5158,7 +5158,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart",
-      "line": 250,
+      "line": 253,
       "widget_context": "_Figure",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -5169,7 +5169,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart",
-      "line": 279,
+      "line": 282,
       "widget_context": "_HintLine",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -5180,7 +5180,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart",
-      "line": 293,
+      "line": 296,
       "widget_context": "_HintLine",
       "element_kind": "icon",
       "source_kind": "theme-token",
@@ -5378,7 +5378,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_breadcrumb.dart",
-      "line": 179,
+      "line": 180,
       "widget_context": "_MxBreadcrumbState",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -5389,7 +5389,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_breadcrumb.dart",
-      "line": 408,
+      "line": 409,
       "widget_context": "_MxBreadcrumbFoldState",
       "element_kind": "icon",
       "source_kind": "theme-token",
@@ -5400,7 +5400,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_breadcrumb.dart",
-      "line": 409,
+      "line": 410,
       "widget_context": "_MxBreadcrumbFoldState",
       "element_kind": "icon",
       "source_kind": "theme-token",
@@ -5411,7 +5411,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_breadcrumb.dart",
-      "line": 424,
+      "line": 425,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -5455,7 +5455,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_breadcrumb_step.dart",
-      "line": 181,
+      "line": 188,
       "widget_context": "_MxBreadcrumbSeparator",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -5576,7 +5576,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_progress_bar.dart",
-      "line": 172,
+      "line": 173,
       "widget_context": "_MxProgressHeader",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -5587,7 +5587,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_progress_bar.dart",
-      "line": 182,
+      "line": 186,
       "widget_context": "_MxProgressHeader",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -5598,7 +5598,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_progress_bar.dart",
-      "line": 183,
+      "line": 187,
       "widget_context": "_MxProgressHeader",
       "element_kind": "text",
       "source_kind": "theme-token",
