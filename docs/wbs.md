@@ -13639,6 +13639,54 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 | Notifier có public mutable property | `memox.state_management.notifier_no_public_mutable_field` |
 | Provider thiếu khai báo dependency | **chưa có** — cần phân tích graph, không diễn đạt được bằng regex; vẫn thuộc code review |
 
+### M99.66 · AppInk + vai chữ — mực và chữ của feature thành tập đóng
+
+- **Status:** **done** — bước 1 của lộ trình "component chỉ call, chỉnh layout":
+  167 site pha style tại chỗ (89 file) về **0**, thay bằng một API đóng.
+- **Goal:** feature chọn *rung + vai/mực*, không bao giờ chọn `Color` hay pha
+  `TextStyle`; icon đứng độc lập cũng vậy.
+- **Scope:** `lib/core/theme/app_ink.dart` (mới — enum `AppInk` 17 mực +
+  `inked(context, ink, {isEmphasized, isTabular})`), `AppTextStyles` thêm bốn
+  vai (`sectionLabelSmall`, `listHeading`, `stateChipLabel`, `heroNumeral`),
+  `MxIcon` (mới, tone = `AppInk`, size enum, tự exclude semantics khi không
+  nhãn), migrate 89 file presentation + 3 shared, hai rule guard. **Không**
+  đổi hành vi; pixel chỉ đổi ở các site vốn khai đậm mà vẽ nhạt.
+- **Tests required:** `app_ink_test.dart` — mọi mực trên đúng nền của nó ở cả
+  hai theme (mực trang ≥4.5 trên surface *và* page; mực container đo trên
+  container; `warning` ghi nhận trung thực 4.33 trên trang light — đúng con số
+  card_tile đã ghi — nên pin 4.5-trên-surface + 3.0-trên-trang thay vì hứa
+  quá); `inked` pin trục `wght` và "metrics thuộc về rung"; probe hai chiều
+  cho hai rule.
+- **Checklist phases:** Phase 6 (theme) · Phase 7 (components) · Phase 21
+  (guard).
+- **Hai rule guard mới — 74 → 76, đọc từ dòng `Running rules:` của runner đúng như M99.64 dặn:** `no_text_restyle`
+  (cấm `texts.*.copyWith` **và** đường vòng `withWeight(...).copyWith` mà
+  chính migration M99.64 từng viết ra; `withWeight` thuần vẫn hợp lệ) và
+  `no_raw_icon_color` (`Icon(color:)` mở; ngoại lệ duy nhất là
+  `<AppInk>.resolve(context)` cho size không có bậc). Probe làm đúng hai rule
+  đỏ rồi về 0.
+- **Phân cụm là thứ thiết kế API, không phải gu:** 81/167 site là "rung này,
+  mực phụ" → `AppInk.quiet`; 27 site họ danger/error; phần đuôi là mực đổi
+  theo state → các switch đổi kiểu trả về từ `Color` sang `AppInk`
+  (`cardStateInk`, `cardActionToneInk`, skin của match tile, stepper import).
+  Bốn tổ hợp có cấu trúc thành vai đặt tên thay vì knob mới.
+- **Bug thứ 12 của class weight-không-axis rơi ra từ migration:**
+  `heroNumeral` từng lắp tại chỗ bằng `fontWeight: heroNumeralWeight` trần —
+  khai weight thứ tư của app và vẽ weight mặc định. Vai mới sửa nó; 23 golden
+  đổi gồm các màn hero-số và những site cluster mang `w600` trần cùng loại.
+- **Emulator integration suite:** **not run — theme/presentation only.** Đây
+  không phải một lượt chạy xanh.
+- **Output:** như Scope; `widgetbook` (MxIcon + knob); stress specimen MxIcon;
+  skill `flutter-theme-design` cập nhật hiện trạng §2/§3/§XIV; goldens.
+- **Acceptance criteria:**
+  - [x] `lib/features/` có **0** `texts.*.copyWith`, 0 `withWeight().copyWith`,
+        0 `Icon(color:)` ngoài dạng `.resolve(`.
+  - [x] Guard xanh trên cây; probe làm đúng 2 rule mới đỏ.
+  - [x] `app_ink_test` xanh cả hai theme; full host suite 4126 xanh.
+  - [x] Goldens regenerate (`TZ=UTC`); gallery publish lại đúng URL ghim.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.64
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_spacing.dart';
@@ -76,15 +77,17 @@ class ReminderBannerSectionWidget extends StatelessWidget {
                 children: <Widget>[
                   Text(
                     banner.title,
-                    style: context.texts.titleSmall?.copyWith(
-                      color: context.colors.onErrorContainer,
+                    style: context.texts.titleSmall!.inked(
+                      context,
+                      AppInk.onErrorContainer,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     banner.message,
-                    style: context.texts.bodySmall?.copyWith(
-                      color: context.colors.onErrorContainer,
+                    style: context.texts.bodySmall!.inked(
+                      context,
+                      AppInk.onErrorContainer,
                     ),
                   ),
                   if (banner.isRetryable) ...<Widget>[

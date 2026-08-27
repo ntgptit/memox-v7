@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
@@ -43,7 +44,7 @@ class CardExportContentLinesWidget extends StatelessWidget {
           // The six canonical fields, named in AD-20's order. The file's own
           // headers stay English whatever this sentence says (BR-179).
           l10n.cardExportIncludesLine,
-          style: texts.bodySmall?.copyWith(color: colors.onSurfaceVariant),
+          style: texts.bodySmall!.inked(context, AppInk.quiet),
         ),
         const SizedBox(height: AppSpacing.sm),
         Row(

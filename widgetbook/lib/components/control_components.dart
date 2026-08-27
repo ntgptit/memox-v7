@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_fab.dart';
+import 'package:memox/core/theme/app_ink.dart';
+import 'package:memox/shared/widgets/mx_icon.dart';
 import 'package:memox/shared/widgets/mx_breadcrumb.dart';
 import 'package:memox/shared/widgets/mx_button_pair.dart';
 import 'package:memox/shared/widgets/mx_icon_button.dart';
@@ -51,6 +53,39 @@ WidgetbookComponent actionButtonComponent() {
               isLoading: isLoading,
               icon: hasIcon ? Icons.add : null,
               onPressed: isEnabled ? _noop : null,
+            ),
+          );
+        },
+      ),
+    ],
+  );
+}
+
+WidgetbookComponent iconComponent() {
+  return WidgetbookComponent(
+    name: 'MxIcon',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Playground',
+        builder: (BuildContext context) {
+          final ink = context.knobs.object.dropdown<AppInk>(
+            label: 'ink',
+            options: AppInk.values,
+            labelBuilder: (AppInk value) => value.name,
+          );
+          final size = context.knobs.object.dropdown<MxIconSize>(
+            label: 'size',
+            options: MxIconSize.values,
+            labelBuilder: (MxIconSize value) => value.name,
+          );
+          final hasLabel = context.knobs.boolean(label: 'semantic label');
+
+          return CatalogCenterPage(
+            child: MxIcon(
+              Icons.flag_outlined,
+              ink: ink,
+              size: size,
+              semanticLabel: hasLabel ? 'Flagged' : null,
             ),
           );
         },

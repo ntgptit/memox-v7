@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
-import '../../../../../core/theme/app_typography.dart';
 import '../../../domain/models/search_result_model.dart';
 import '../support/search_labels_widget.dart';
 
@@ -37,10 +37,11 @@ class SearchGroupHeaderWidget extends StatelessWidget {
         // lowercase text the type scale has already spaced.
         // Through the wght axis — a bare `fontWeight:` paints the rung's
         // old weight.
-        style: AppTypography.withWeight(
-          context.texts.labelSmall!,
-          FontWeight.w600,
-        ).copyWith(color: context.colors.onSurfaceVariant),
+        style: context.texts.labelSmall!.inked(
+          context,
+          AppInk.quiet,
+          isEmphasized: true,
+        ),
       ),
     );
   }

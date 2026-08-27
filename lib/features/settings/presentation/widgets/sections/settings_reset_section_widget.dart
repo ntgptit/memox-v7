@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/error/failure.dart';
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -57,9 +58,7 @@ class SettingsResetSectionWidget extends StatelessWidget {
         const SizedBox(height: AppSpacing.xs),
         Text(
           l10n.settingsResetDescription,
-          style: context.texts.bodySmall?.copyWith(
-            color: context.colors.onSurfaceVariant,
-          ),
+          style: context.texts.bodySmall!.inked(context, AppInk.quiet),
         ),
         if (band != null) ...<Widget>[
           const SizedBox(height: AppSpacing.md),

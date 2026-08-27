@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_radius.dart';
@@ -77,9 +78,7 @@ class CardDetailSummaryWidget extends StatelessWidget {
             const SizedBox(height: AppSpacing.xs),
             Text(
               card.back,
-              style: context.texts.bodyMedium?.copyWith(
-                color: context.colors.onSurfaceVariant,
-              ),
+              style: context.texts.bodyMedium!.inked(context, AppInk.quiet),
             ),
             if (marks.isNotEmpty) ...<Widget>[
               const SizedBox(height: AppSpacing.md),
@@ -202,9 +201,7 @@ class _SchedulerBadge extends StatelessWidget {
                 isBoxed
                     ? context.l10n.cardDetailBoxLabel
                     : context.cardSchedulerIdentity(state.schedulerType),
-                style: context.texts.labelSmall?.copyWith(
-                  color: context.colors.onSurfaceVariant,
-                ),
+                style: context.texts.labelSmall!.inked(context, AppInk.quiet),
               ),
               if (isBoxed) ...<Widget>[
                 const SizedBox(width: AppSpacing.xs),
@@ -214,11 +211,10 @@ class _SchedulerBadge extends StatelessWidget {
                   // language. The spoken form is a key, on the `Semantics`
                   // above.
                   '$box / ${context.cardMaxBox}',
-                  style: context.texts.labelSmall?.copyWith(
-                    color: semantic.primaryAccent,
-                    fontFeatures: const <FontFeature>[
-                      FontFeature.tabularFigures(),
-                    ],
+                  style: context.texts.labelSmall!.inked(
+                    context,
+                    AppInk.accent,
+                    isTabular: true,
                   ),
                 ),
               ],
@@ -271,8 +267,9 @@ class _FlagChip extends StatelessWidget {
           Flexible(
             child: Text(
               label,
-              style: context.texts.labelSmall?.copyWith(
-                color: semantic.onDueContainer,
+              style: context.texts.labelSmall!.inked(
+                context,
+                AppInk.onDueContainer,
               ),
             ),
           ),
@@ -302,9 +299,7 @@ class _DetailField extends StatelessWidget {
       children: <Widget>[
         Text(
           label,
-          style: context.texts.labelSmall?.copyWith(
-            color: context.colors.onSurfaceVariant,
-          ),
+          style: context.texts.labelSmall!.inked(context, AppInk.quiet),
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(value, style: context.texts.bodyMedium),

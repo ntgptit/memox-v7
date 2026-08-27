@@ -17,7 +17,14 @@ import 'app_typography.dart';
 /// beside the scale, not as one of its steps.
 @immutable
 final class AppTextStyles extends ThemeExtension<AppTextStyles> {
-  const AppTextStyles({required this.cardPrompt, required this.sectionLabel});
+  const AppTextStyles({
+    required this.cardPrompt,
+    required this.sectionLabel,
+    required this.sectionLabelSmall,
+    required this.stateChipLabel,
+    required this.listHeading,
+    required this.heroNumeral,
+  });
 
   /// Both styles, derived from the built [texts] so they inherit whatever the
   /// scale inherits (the `inherit` flag, a debug label's lineage) and restate
@@ -36,6 +43,28 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
       sectionLabel: (texts.labelMedium ?? const TextStyle()).copyWith(
         letterSpacing: AppTypography.sectionLabelTracking,
       ),
+      sectionLabelSmall: (texts.labelSmall ?? const TextStyle()).copyWith(
+        letterSpacing: AppTypography.sectionLabelTracking,
+      ),
+      stateChipLabel: AppTypography.withWeight(
+        (texts.labelSmall ?? const TextStyle()).copyWith(
+          letterSpacing: AppTypography.stateChipTracking,
+        ),
+        FontWeight.w600,
+      ),
+      listHeading: AppTypography.withWeight(
+        (texts.labelMedium ?? const TextStyle()).copyWith(
+          letterSpacing: AppTypography.listHeadingTracking,
+        ),
+        FontWeight.w600,
+      ),
+      heroNumeral: AppTypography.withWeight(
+        (texts.headlineLarge ?? const TextStyle()).copyWith(
+          height: AppTypography.heroNumeralCapTrim,
+          fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
+        ),
+        AppTypography.heroNumeralWeight,
+      ),
     );
   }
 
@@ -51,12 +80,43 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
   /// list it titles.
   final TextStyle sectionLabel;
 
+  /// [sectionLabel] one rung down — the overline above a study face or under a
+  /// toolbar, where `label-md` would out-weigh the content it introduces. Found
+  /// as four hand-assembled copies (one spelling the tracking token as a bare
+  /// `1.1`) when M99.65 clustered the app's text restyles.
+  final TextStyle sectionLabelSmall;
+
+  /// The uppercase state word inside a card tile's chip — `label-sm` opened
+  /// by its own tracking and set at the emphatic 600.
+  final TextStyle stateChipLabel;
+
+  /// The toolbar heading over a list — [sectionLabel]'s tracking swapped for
+  /// `listHeadingTracking` and the weight raised to the emphatic 600.
+  final TextStyle listHeading;
+
+  /// The one huge number a summary leads with: `headline-lg` at the app's
+  /// fourth weight, cap-trimmed and tabular. **Moving it here fixed the
+  /// twelfth instance of the weight-without-axis bug** — the style used to be
+  /// assembled per-site with a bare `fontWeight: heroNumeralWeight`, which
+  /// declared the fourth weight and painted the rung's default.
+  final TextStyle heroNumeral;
+
   @override
-  AppTextStyles copyWith({TextStyle? cardPrompt, TextStyle? sectionLabel}) =>
-      AppTextStyles(
-        cardPrompt: cardPrompt ?? this.cardPrompt,
-        sectionLabel: sectionLabel ?? this.sectionLabel,
-      );
+  AppTextStyles copyWith({
+    TextStyle? cardPrompt,
+    TextStyle? sectionLabel,
+    TextStyle? sectionLabelSmall,
+    TextStyle? stateChipLabel,
+    TextStyle? listHeading,
+    TextStyle? heroNumeral,
+  }) => AppTextStyles(
+    cardPrompt: cardPrompt ?? this.cardPrompt,
+    sectionLabel: sectionLabel ?? this.sectionLabel,
+    sectionLabelSmall: sectionLabelSmall ?? this.sectionLabelSmall,
+    stateChipLabel: stateChipLabel ?? this.stateChipLabel,
+    listHeading: listHeading ?? this.listHeading,
+    heroNumeral: heroNumeral ?? this.heroNumeral,
+  );
 
   @override
   AppTextStyles lerp(ThemeExtension<AppTextStyles>? other, double t) {
@@ -65,6 +125,14 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     return AppTextStyles(
       cardPrompt: TextStyle.lerp(cardPrompt, other.cardPrompt, t)!,
       sectionLabel: TextStyle.lerp(sectionLabel, other.sectionLabel, t)!,
+      sectionLabelSmall: TextStyle.lerp(
+        sectionLabelSmall,
+        other.sectionLabelSmall,
+        t,
+      )!,
+      stateChipLabel: TextStyle.lerp(stateChipLabel, other.stateChipLabel, t)!,
+      listHeading: TextStyle.lerp(listHeading, other.listHeading, t)!,
+      heroNumeral: TextStyle.lerp(heroNumeral, other.heroNumeral, t)!,
     );
   }
 }

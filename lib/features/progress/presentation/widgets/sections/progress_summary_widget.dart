@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
@@ -51,9 +52,7 @@ class ProgressSummaryWidget extends StatelessWidget {
             // today, so nothing moves — which is exactly why it was worth
             // fixing now: the day one of the two roles is retuned, two adjacent
             // headings on one screen would change apart.
-            style: context.texts.labelLarge?.copyWith(
-              color: context.colors.onSurfaceVariant,
-            ),
+            style: context.texts.labelLarge!.inked(context, AppInk.quiet),
           ),
           const SizedBox(height: AppSpacing.md),
           ProgressMetricGridWidget(
@@ -69,9 +68,7 @@ class ProgressSummaryWidget extends StatelessWidget {
           // scale 2.0 — see `ProgressMetricGridWidget.minimumCellWidth`.
           Text(
             context.l10n.progressCardDayUnitNote,
-            style: context.texts.bodySmall?.copyWith(
-              color: context.colors.onSurfaceVariant,
-            ),
+            style: context.texts.bodySmall!.inked(context, AppInk.quiet),
           ),
           if (!snapshot.hasActivityIn(range)) ...<Widget>[
             const SizedBox(height: AppSpacing.md),
@@ -103,16 +100,12 @@ class _NoActivityNote extends StatelessWidget {
       children: <Widget>[
         Text(
           context.l10n.progressNoActivityTitle,
-          style: context.texts.bodyMedium?.copyWith(
-            color: context.colors.onSurface,
-          ),
+          style: context.texts.bodyMedium!.inked(context, AppInk.stated),
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
           context.l10n.progressNoActivityMessage,
-          style: context.texts.bodySmall?.copyWith(
-            color: context.colors.onSurfaceVariant,
-          ),
+          style: context.texts.bodySmall!.inked(context, AppInk.quiet),
         ),
       ],
     );

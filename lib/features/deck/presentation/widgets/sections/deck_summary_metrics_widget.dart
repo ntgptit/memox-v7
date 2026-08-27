@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/app_stroke.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -151,30 +151,26 @@ class _HeroFigureLine extends StatelessWidget {
   /// `tabularFigures` widens the digits, and leaving it out of the measurement
   /// under-reported the line by the few pixels it then clipped.
   ///
-  /// The weight is [AppTypography.heroNumeralWeight] rather than a `w700`
-  /// written here: it is the app's fourth weight, and that note is where the
-  /// exception is argued.
+  /// Now the `heroNumeral` role: assembled per-site, its bare
+  /// `fontWeight: heroNumeralWeight` was the twelfth instance of the
+  /// weight-without-axis bug — the fourth weight was declared and never
+  /// painted.
   TextStyle? _numeralStyle(BuildContext context) =>
-      context.texts.headlineLarge?.copyWith(
-        fontWeight: AppTypography.heroNumeralWeight,
-        height: AppTypography.heroNumeralCapTrim,
-        fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
-      );
+      context.textStyles.heroNumeral;
 
   /// BR-162's split as one span: `8 overdue` in the overdue ink, then the rest.
   TextSpan _breakdownSpan(BuildContext context) => TextSpan(
-    style: context.texts.bodyMedium?.copyWith(
-      color: context.colors.onSurfaceVariant,
-    ),
+    style: context.texts.bodyMedium!.inked(context, AppInk.quiet),
     children: <InlineSpan>[
       TextSpan(
         text: context.l10n.deckSummaryOverduePart(overdueCount),
         // Through the wght axis — a bare `fontWeight:` paints the rung's
         // old weight.
-        style: AppTypography.withWeight(
-          context.texts.bodyMedium!,
-          FontWeight.w600,
-        ).copyWith(color: context.semanticColors.overdue),
+        style: context.texts.bodyMedium!.inked(
+          context,
+          AppInk.overdue,
+          isEmphasized: true,
+        ),
       ),
       const TextSpan(text: ' · '),
       TextSpan(
@@ -352,11 +348,10 @@ class _QuietContextRow extends StatelessWidget {
             children: <Widget>[
               Text(
                 '$count',
-                style: context.texts.titleMedium?.copyWith(
-                  color: context.colors.onPrimaryContainer,
-                  fontFeatures: const <FontFeature>[
-                    FontFeature.tabularFigures(),
-                  ],
+                style: context.texts.titleMedium!.inked(
+                  context,
+                  AppInk.onPrimaryContainer,
+                  isTabular: true,
                 ),
               ),
               const SizedBox(width: AppSpacing.xs),
@@ -367,8 +362,9 @@ class _QuietContextRow extends StatelessWidget {
                   // Lower-case: the word is the unit, the figure is the fact,
                   // and a capital gave the two equal billing.
                   word.toLowerCase(),
-                  style: context.texts.bodyMedium?.copyWith(
-                    color: context.colors.onPrimaryContainer,
+                  style: context.texts.bodyMedium!.inked(
+                    context,
+                    AppInk.onPrimaryContainer,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

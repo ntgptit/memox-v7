@@ -171,6 +171,7 @@ class MemoxWidgetbook extends StatelessWidget {
           children: <WidgetbookNode>[
             actionButtonComponent(),
             fabComponent(),
+            iconComponent(),
             buttonPairComponent(),
             breadcrumbComponent(),
             iconButtonComponent(),

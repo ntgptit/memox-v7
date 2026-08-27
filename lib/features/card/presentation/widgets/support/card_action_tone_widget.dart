@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
+
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../deck/domain/models/scheduler_type_model.dart';
 import '../../../../study/domain/models/study_action_model.dart';
@@ -59,6 +61,15 @@ extension CardActionTonePresentation on BuildContext {
     CardActionTone.success => semanticColors.success,
     CardActionTone.warning => semanticColors.warning,
     CardActionTone.danger => semanticColors.danger,
+  };
+
+  /// The tone as an [AppInk] — the text and glyph legs of the badge take it,
+  /// and the border resolves the same ink so the three stay one colour by
+  /// construction.
+  AppInk cardActionToneInk(CardActionTone tone) => switch (tone) {
+    CardActionTone.success => AppInk.success,
+    CardActionTone.warning => AppInk.warning,
+    CardActionTone.danger => AppInk.danger,
   };
 
   /// The glyph beside the word, so the verdict survives being read without

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_elevation.dart';
-import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_stroke.dart';
-import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../domain/models/card_history_event_model.dart';
 import '../support/card_action_tone_widget.dart';
@@ -124,44 +124,16 @@ class CardHistoryEventWidget extends StatelessWidget {
                               ),
                               Text(
                                 timestamp,
-                                style: context.texts.labelSmall?.copyWith(
-                                  color: context.colors.onSurfaceVariant,
+                                style: context.texts.labelSmall!.inked(
+                                  context,
+                                  AppInk.quiet,
                                 ),
                               ),
                             ],
                           ),
                         ),
                         const SizedBox(height: AppSpacing.sm),
-                        Text(
-                          // Where the turn came from and what it was for. The
-                          // verdict itself is the badge above, so this line no
-                          // longer repeats it.
-                          <String>[
-                            context.cardHistoryMode(event.mode),
-                            context.cardHistoryKind(event.kind),
-                          ].join(_inlineSeparator),
-                          style: context.texts.bodySmall?.copyWith(
-                            color: context.colors.onSurfaceVariant,
-                          ),
-                        ),
-                        for (final line in scheduleLines)
-                          Padding(
-                            padding: const EdgeInsets.only(top: AppSpacing.xs),
-                            child: Text(
-                              line.text,
-                              style: _scheduleLineStyle(context, line.kind),
-                            ),
-                          ),
-                        if (marks.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(top: AppSpacing.xs),
-                            child: Text(
-                              marks.join(_inlineSeparator),
-                              style: context.texts.labelSmall?.copyWith(
-                                color: context.colors.onSurfaceVariant,
-                              ),
-                            ),
-                          ),
+                        ..._facts(context, event, scheduleLines, marks),
                       ],
                     ),
                   ),
@@ -215,10 +187,10 @@ class _ActionBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Icon(
+          MxIcon(
             context.cardActionToneIcon(tone),
-            size: AppIconSize.sm,
-            color: ink,
+            ink: context.cardActionToneInk(tone),
+            size: MxIconSize.sm,
           ),
           const SizedBox(width: AppSpacing.xs),
           // `Flexible`, because a `Row` hands an unbounded main axis to a
@@ -227,10 +199,11 @@ class _ActionBadge extends StatelessWidget {
           Flexible(
             child: Text(
               label,
-              style: AppTypography.withWeight(
-                context.texts.labelSmall!,
-                FontWeight.w600,
-              ).copyWith(color: ink),
+              style: context.texts.labelSmall!.inked(
+                context,
+                context.cardActionToneInk(tone),
+                isEmphasized: true,
+              ),
             ),
           ),
         ],
@@ -312,21 +285,51 @@ class _Marker extends StatelessWidget {
 /// timeline for. SM-2's three lines stay quiet: ease, interval and repetitions
 /// only mean something together, and picking one to accent would be inventing a
 /// progress metric SM-2 does not define (BR-243).
+/// The prose half of the card: the mode-and-kind line, the schedule lines,
+/// and the marks — split out of `build` when the inked migration nudged it
+/// past the guard's build-length ceiling.
+List<Widget> _facts(
+  BuildContext context,
+  CardHistoryEventModel event,
+  List<CardHistoryScheduleLine> scheduleLines,
+  List<String> marks,
+) => <Widget>[
+  Text(
+    // Where the turn came from and what it was for. The verdict itself is
+    // the badge above, so this line no longer repeats it.
+    <String>[
+      context.cardHistoryMode(event.mode),
+      context.cardHistoryKind(event.kind),
+    ].join(_inlineSeparator),
+    style: context.texts.bodySmall!.inked(context, AppInk.quiet),
+  ),
+  for (final line in scheduleLines)
+    Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.xs),
+      child: Text(line.text, style: _scheduleLineStyle(context, line.kind)),
+    ),
+  if (marks.isNotEmpty)
+    Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.xs),
+      child: Text(
+        marks.join(_inlineSeparator),
+        style: context.texts.labelSmall!.inked(context, AppInk.quiet),
+      ),
+    ),
+];
+
 TextStyle _scheduleLineStyle(
   BuildContext context,
   CardHistoryScheduleLineKind kind,
 ) {
   final base = context.texts.bodySmall!;
   if (kind != CardHistoryScheduleLineKind.box) {
-    return base.copyWith(color: context.colors.onSurfaceVariant);
+    return base.inked(context, AppInk.quiet);
   }
 
   // 7.27:1 light and 5.51:1 dark on the event card — the accent as text, which
   // `ColorScheme.primary` is not on a dark surface.
-  return AppTypography.withWeight(
-    base,
-    FontWeight.w600,
-  ).copyWith(color: context.semanticColors.primaryAccent);
+  return base.inked(context, AppInk.accent, isEmphasized: true);
 }
 
 /// The separator between inline facts on one line.

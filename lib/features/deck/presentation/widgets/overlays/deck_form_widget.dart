@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -138,9 +139,7 @@ class _DeckFormWidgetState extends State<DeckFormWidget> {
           const SizedBox(height: AppSpacing.md),
           Text(
             context.deckWriteFailure(state.failure!),
-            style: context.texts.bodySmall?.copyWith(
-              color: context.semanticColors.danger,
-            ),
+            style: context.texts.bodySmall!.inked(context, AppInk.danger),
           ),
         ],
         const SizedBox(height: AppSpacing.xl),

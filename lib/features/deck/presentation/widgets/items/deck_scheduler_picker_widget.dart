@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -96,17 +97,13 @@ class DeckSchedulerPickerWidget extends StatelessWidget {
         if (shouldShowLockNotice)
           Text(
             context.l10n.schedulerLockNotice,
-            style: context.texts.bodySmall?.copyWith(
-              color: context.colors.onSurfaceVariant,
-            ),
+            style: context.texts.bodySmall!.inked(context, AppInk.quiet),
           ),
         if (errorText != null) ...<Widget>[
           const SizedBox(height: AppSpacing.xs),
           Text(
             errorText!,
-            style: context.texts.bodySmall?.copyWith(
-              color: context.semanticColors.danger,
-            ),
+            style: context.texts.bodySmall!.inked(context, AppInk.danger),
           ),
         ],
       ],

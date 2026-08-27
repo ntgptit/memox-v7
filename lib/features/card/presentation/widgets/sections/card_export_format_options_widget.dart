@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_radius.dart';
@@ -266,9 +267,7 @@ class _FormatOption extends StatelessWidget {
                 overflow: subtitleMaxLines == null
                     ? null
                     : TextOverflow.ellipsis,
-                style: context.texts.bodySmall?.copyWith(
-                  color: colors.onSurfaceVariant,
-                ),
+                style: context.texts.bodySmall!.inked(context, AppInk.quiet),
               ),
             ],
           ),
@@ -337,8 +336,9 @@ class _RecommendedBadge extends StatelessWidget {
         ),
         child: Text(
           context.l10n.cardExportRecommendedBadge,
-          style: context.texts.labelSmall?.copyWith(
-            color: context.colors.onSecondaryContainer,
+          style: context.texts.labelSmall!.inked(
+            context,
+            AppInk.onSecondaryContainer,
           ),
         ),
       ),

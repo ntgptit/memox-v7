@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_durations.dart';
 import '../../../../../core/theme/app_motion_policy.dart';
 import '../../../../../core/theme/app_radius.dart';
@@ -104,7 +105,7 @@ class MatchTileWidget extends StatelessWidget {
                     FontWeight.w500,
                   )
                 : context.texts.bodySmall)
-            ?.copyWith(color: skin.foreground);
+            ?.copyWith(color: skin.foreground.resolve(context));
     final radius = BorderRadius.circular(AppRadius.md);
     // **Only the transition is reduced, never the beat a state is held for.**
     // The hold is feedback; the crossfade is decoration, and `AppMotionPolicy`
@@ -155,7 +156,7 @@ class MatchTileWidget extends StatelessWidget {
                   opacity: _isCleared ? 0 : 1,
                   duration: motion,
                   curve: AppDurations.standard,
-                  child: _content(skin, style),
+                  child: _content(context, skin, style),
                 ),
               ),
             ),
@@ -168,12 +169,22 @@ class MatchTileWidget extends StatelessWidget {
   bool get _isTappable =>
       state == MatchTileState.idle || state == MatchTileState.selected;
 
-  Widget _content(_TileSkin skin, TextStyle? style) => Row(
+  Widget _content(
+    BuildContext context,
+    _TileSkin skin,
+    TextStyle? style,
+  ) => Row(
     mainAxisSize: MainAxisSize.min,
     mainAxisAlignment: MainAxisAlignment.center,
     children: <Widget>[
       if (skin.mark case final mark?) ...<Widget>[
-        Icon(mark, size: style?.fontSize, color: skin.foreground),
+        // The mark tracks the label's own size, which no MxIconSize step
+        // names; the closed-set spelling is the skin's ink resolving.
+        Icon(
+          mark,
+          size: style?.fontSize,
+          color: skin.foreground.resolve(context),
+        ),
         const SizedBox(width: AppSpacing.xs),
       ],
       Flexible(
@@ -225,21 +236,21 @@ class _TileSkin {
     // the edge and the ink take, and that the edge steps up from a hairline to
     // an input's weight. Written once, because three near-identical constructor
     // calls are three places for the fill to drift apart.
-    _TileSkin marked(Color colour, IconData? mark) => _TileSkin(
+    _TileSkin marked(AppInk ink, IconData? mark) => _TileSkin(
       background: ground,
-      outline: colour,
+      outline: ink.resolve(context),
       // `input`, not `focus`: 2px is the ring that says *keyboard focus is
       // here*, and a board where half the tiles wore it would leave the focus
       // indicator nothing of its own to say.
       outlineWidth: AppStroke.input,
-      foreground: colour,
+      foreground: ink,
       mark: mark,
     );
 
     return switch (state) {
-      MatchTileState.selected => marked(semantic.primaryAccent, null),
-      MatchTileState.wrong => marked(semantic.danger, Icons.close),
-      MatchTileState.paired => marked(semantic.success, Icons.check),
+      MatchTileState.selected => marked(AppInk.accent, null),
+      MatchTileState.wrong => marked(AppInk.danger, Icons.close),
+      MatchTileState.paired => marked(AppInk.success, Icons.check),
       // A cleared slot sits on the *page*, not on the tile surface: the hole is
       // what says the pair is gone, and a tile-coloured hole is just a tile
       // with no words on it. The outline is faint rather than absent — with
@@ -258,7 +269,7 @@ class _TileSkin {
           page,
         ),
         outlineWidth: AppStroke.hairline,
-        foreground: scheme.onSurface,
+        foreground: AppInk.stated,
         mark: null,
       ),
       MatchTileState.idle => _TileSkin(
@@ -267,7 +278,7 @@ class _TileSkin {
         // — the outline is the whole grid (WCAG 1.4.11).
         outline: semantic.borderControl,
         outlineWidth: AppStroke.hairline,
-        foreground: scheme.onSurface,
+        foreground: AppInk.stated,
         mark: null,
       ),
     };
@@ -284,7 +295,7 @@ class _TileSkin {
   /// enough that nothing beside the tile moves.
   final double outlineWidth;
 
-  final Color foreground;
+  final AppInk foreground;
   final IconData? mark;
 }
 

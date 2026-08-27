@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_content_shell.dart';
@@ -186,10 +186,7 @@ class _ContextLine extends StatelessWidget {
       // rather than of whichever fragment a translator happened to shout, and
       // leaves the ARB holding words rather than styling.
       (extra == null ? base : '$base · $extra').toUpperCase(),
-      style: context.texts.labelSmall?.copyWith(
-        color: context.colors.onSurfaceVariant,
-        letterSpacing: AppTypography.sectionLabelTracking,
-      ),
+      style: context.textStyles.sectionLabelSmall.inked(context, AppInk.quiet),
       textAlign: TextAlign.center,
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
@@ -246,15 +243,13 @@ class _Figure extends StatelessWidget {
     maxLines: 1,
     softWrap: false,
     overflow: TextOverflow.ellipsis,
-    // Through the wght axis — a bare `fontWeight:` paints the rung's old
-    // weight.
-    style: AppTypography.withWeight(context.texts.labelMedium!, FontWeight.w600)
-        .copyWith(
-          color: context.colors.onSurface,
-          // Tabular figures so a counter ticking 9 -> 10 does not shift the
-          // row.
-          fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
-        ),
+    // Tabular so a counter ticking 9 -> 10 does not shift the row.
+    style: context.texts.labelMedium!.inked(
+      context,
+      AppInk.stated,
+      isEmphasized: true,
+      isTabular: true,
+    ),
   );
 }
 
@@ -278,9 +273,7 @@ class _HintLine extends StatelessWidget {
     final hint = hintOverride ?? context.studyModeHint(mode);
     if (hint == null) return const SizedBox.shrink();
 
-    final style = context.texts.bodySmall?.copyWith(
-      color: context.colors.onSurfaceVariant,
-    );
+    final style = context.texts.bodySmall!.inked(context, AppInk.quiet);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,

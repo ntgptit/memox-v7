@@ -12,6 +12,7 @@ import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_form_dialog.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/shared/widgets/mx_fab.dart';
+import 'package:memox/shared/widgets/mx_icon.dart';
 import 'package:memox/shared/widgets/mx_icon_button.dart';
 import 'package:memox/shared/widgets/mx_list_tile.dart';
 import 'package:memox/shared/widgets/mx_loading_state.dart';
@@ -118,6 +119,12 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
     build: () =>
         const MxFab(icon: Icons.add, label: kLongLabel, onPressed: _noop),
     isInteractive: true,
+  ),
+  MxStressSpecimen(
+    // Non-interactive glyph: the stress is that the long accessible name
+    // reaches semantics, not layout.
+    name: 'MxIcon',
+    build: () => const MxIcon(Icons.flag_outlined, semanticLabel: kLongLabel),
   ),
   MxStressSpecimen(
     name: 'MxIconButton',

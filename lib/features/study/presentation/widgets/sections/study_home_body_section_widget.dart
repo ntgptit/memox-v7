@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_content_shell.dart';
@@ -124,9 +124,7 @@ class _StudyHomeList extends StatelessWidget {
           resume == null
               ? l10n.studyHomeSupportingCopyNoResume
               : l10n.studyHomeSupportingCopy,
-          style: context.texts.bodyMedium?.copyWith(
-            color: context.colors.onSurfaceVariant,
-          ),
+          style: context.texts.bodyMedium!.inked(context, AppInk.quiet),
         ),
         if (resume != null) ...<Widget>[
           const SizedBox(height: AppSpacing.lg),
@@ -156,19 +154,14 @@ class _StudyHomeList extends StatelessWidget {
             // heading in the app while saying the same kind of thing. The deck
             // list's toolbar is the treatment this now matches.
             l10n.studyHomeNextTitle.toUpperCase(),
-            style: context.texts.labelMedium?.copyWith(
-              color: context.colors.onSurfaceVariant,
-              letterSpacing: AppTypography.sectionLabelTracking,
-            ),
+            style: context.textStyles.sectionLabel.inked(context, AppInk.quiet),
           ),
         ),
         if (!hasWork) ...<Widget>[
           const SizedBox(height: AppSpacing.xs),
           Text(
             l10n.studyHomeNothingDueMessage,
-            style: context.texts.bodySmall?.copyWith(
-              color: context.colors.onSurfaceVariant,
-            ),
+            style: context.texts.bodySmall!.inked(context, AppInk.quiet),
           ),
         ],
         // **The gap leads each row rather than trailing it**, so the list ends

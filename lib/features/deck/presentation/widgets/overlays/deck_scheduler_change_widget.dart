@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/error/failure.dart';
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -160,9 +161,7 @@ class _SchedulerSheetState extends ConsumerState<_SchedulerSheet> {
       const SizedBox(height: AppSpacing.sm),
       Text(
         l10n.deckSchedulerChangeSessionNotice,
-        style: context.texts.bodySmall?.copyWith(
-          color: context.colors.onSurfaceVariant,
-        ),
+        style: context.texts.bodySmall!.inked(context, AppInk.quiet),
       ),
       const SizedBox(height: AppSpacing.lg),
       DeckSchedulerPickerWidget(
@@ -179,9 +178,7 @@ class _SchedulerSheetState extends ConsumerState<_SchedulerSheet> {
         const SizedBox(height: AppSpacing.md),
         Text(
           context.deckWriteFailure(submit.failure!),
-          style: context.texts.bodySmall?.copyWith(
-            color: context.semanticColors.danger,
-          ),
+          style: context.texts.bodySmall!.inked(context, AppInk.danger),
         ),
       ],
       const SizedBox(height: AppSpacing.xl),

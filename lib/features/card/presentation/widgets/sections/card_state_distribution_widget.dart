@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -140,9 +141,7 @@ class _LegendItem extends StatelessWidget {
           ),
           // labelMedium on onSurface: four short counts a reader scans need to
           // clear ordinary body text, and the muted variant sat under it.
-          style: context.texts.labelMedium?.copyWith(
-            color: context.colors.onSurface,
-          ),
+          style: context.texts.labelMedium!.inked(context, AppInk.stated),
         ),
       ],
     );

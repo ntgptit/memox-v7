@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_durations.dart';
-import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_motion_policy.dart';
 import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_stroke.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 
 /// What one option looks like once the question has been answered.
 ///
@@ -66,15 +67,15 @@ class GuessOptionItemWidget extends StatelessWidget {
     final semantic = context.semanticColors;
     final ground = scheme.surfaceContainerLowest;
 
-    final accent = switch (state) {
-      GuessOptionState.correct => semantic.success,
-      GuessOptionState.chosenWrong => semantic.danger,
+    final AppInk? accent = switch (state) {
+      GuessOptionState.correct => AppInk.success,
+      GuessOptionState.chosenWrong => AppInk.danger,
       GuessOptionState.open || GuessOptionState.dimmed => null,
     };
     // The surface never moves. Every state sits on the row's own fill, and the
     // one that reads differently is the one that says so at its edge.
     final outline =
-        accent ??
+        accent?.resolve(context) ??
         // The row's fill sits 1.06:1 from the page, so the border is doing all
         // the separating — and a row is a control (WCAG 1.4.11), not a card.
         semantic.borderControl;
@@ -132,14 +133,15 @@ class GuessOptionItemWidget extends StatelessWidget {
                         // those are a wall. `bodyMedium` also carries the 1.45
                         // line height, which is what makes the third line of a
                         // wrapped meaning readable rather than crowded.
-                        style: context.texts.bodyMedium?.copyWith(
-                          color: accent ?? scheme.onSurface,
+                        style: context.texts.bodyMedium!.inked(
+                          context,
+                          accent ?? AppInk.stated,
                         ),
                       ),
                     ),
                     if (verdict != null) ...<Widget>[
                       const SizedBox(width: AppSpacing.sm),
-                      Icon(verdict, size: AppIconSize.sm, color: accent),
+                      MxIcon(verdict, size: MxIconSize.sm, ink: accent!),
                     ],
                   ],
                 ),
