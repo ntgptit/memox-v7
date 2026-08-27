@@ -667,9 +667,9 @@
     },
     "description": "Body of the delete confirmation, stating exactly how many sub-decks and cards go with the deck (BR-04) and that the deletion is recoverable (BR-256)."
   },
-  "deckDeleteConfirmAction": "Move to Trash",
+  "deckDeleteConfirmAction": "Move",
   "@deckDeleteConfirmAction": {
-    "description": "Confirm button of the delete-deck dialog. Names where the deck goes rather than implying it is destroyed (BR-256)."
+    "description": "Confirm button of the delete-deck dialog. Bare verb on purpose: the dialog title names Trash, so BR-256's 'moved, not destroyed' is carried by the surface while the button stays one line at 393dp (owner, 2026-08-28). The editor's standalone trash action keeps the destination word - it has no title to lean on."
   },
   "deckMoveAction": "Move",
   "@deckMoveAction": {
@@ -1299,9 +1299,9 @@
   "@cardBulkDeleteMessage": {
     "description": "Body of the bulk delete confirmation: what happens to the history, and for how long it can be undone (BR-256, BR-259)."
   },
-  "cardBulkDeleteConfirmAction": "Move to Trash",
+  "cardBulkDeleteConfirmAction": "Move",
   "@cardBulkDeleteConfirmAction": {
-    "description": "Confirm button of the bulk delete dialog (BR-256)."
+    "description": "Confirm button of the bulk delete dialog. Bare verb: the title names Trash (BR-256 via the surface, owner 2026-08-28)."
   },
   "cardBulkDeletedMessage": "{count, plural, =1{1 card moved to Trash} other{{count} cards moved to Trash}}",
   "@cardBulkDeletedMessage": {
@@ -1511,9 +1511,9 @@
   "@cardDeleteConfirmMessage": {
     "description": "Body of the card delete confirmation. Deleting the last active card also returns the deck to unset (BR-260)."
   },
-  "cardDeleteConfirmAction": "Move to Trash",
+  "cardDeleteConfirmAction": "Move",
   "@cardDeleteConfirmAction": {
-    "description": "Confirm button on the card delete dialog (BR-256)."
+    "description": "Confirm button on the card delete dialog. Bare verb: the title names Trash (BR-256 via the surface, owner 2026-08-28)."
   },
   "cardDeleteFailed": "This card couldn't be deleted. Try again.",
   "@cardDeleteFailed": {
