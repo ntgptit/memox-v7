@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_elevation.dart';
-import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../../../shared/widgets/mx_text_button.dart';
 import '../../../domain/failures/reminder_failure.dart';
@@ -64,10 +64,10 @@ class ReminderBannerSectionWidget extends StatelessWidget {
             // (`settings_error_band_widget.dart`) does the same. Two error
             // bands one tap apart that look different are two answers to
             // "what does a problem look like here".
-            Icon(
+            const MxIcon(
               Icons.error_outline,
-              size: AppIconSize.mdCompact,
-              color: context.colors.onErrorContainer,
+              ink: AppInk.onErrorContainer,
+              size: MxIconSize.mdCompact,
             ),
             const SizedBox(width: AppSpacing.sm),
             Expanded(

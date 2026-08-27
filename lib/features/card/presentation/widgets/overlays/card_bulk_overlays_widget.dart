@@ -5,6 +5,7 @@ import '../../../../../core/error/failure.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_messenger.dart';
 import '../../../../../shared/widgets/mx_confirm_dialog.dart';
 import '../../../../../shared/widgets/mx_list_tile.dart';
 import '../../../../../shared/widgets/mx_dialog_tone.dart';
@@ -217,13 +218,9 @@ Future<void> runBulk(
   final failure = result.failure;
   if (failure == null) ref.read(cardSelectionProvider(deckId).notifier).clear();
 
-  final messenger = ScaffoldMessenger.of(context)..hideCurrentSnackBar();
-  messenger.showSnackBar(
-    SnackBar(
-      content: Text(
-        failure == null ? success(count) : context.cardWriteFailure(failure),
-      ),
-    ),
+  showMxMessage(
+    context,
+    failure == null ? success(count) : context.cardWriteFailure(failure),
   );
 }
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../core/theme/app_ink.dart';
-import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -33,7 +33,6 @@ class CardExportContentLinesWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colors = context.colors;
     final texts = context.texts;
 
     return Column(
@@ -50,11 +49,7 @@ class CardExportContentLinesWidget extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Icon(
-              Icons.info_outline,
-              size: AppIconSize.sm,
-              color: colors.onSurfaceVariant,
-            ),
+            const MxIcon(Icons.info_outline, size: MxIconSize.sm),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(

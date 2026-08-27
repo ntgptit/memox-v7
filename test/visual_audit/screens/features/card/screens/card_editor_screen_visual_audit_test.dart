@@ -115,24 +115,27 @@ const AuditSkipAllowance _inkLayersCreate = AuditSkipAllowance(
   itemId: 'shell',
   reason: SkipReason.rasterOnly,
   detailContains: '_RenderInkFeatures',
-  expectedMatches: 5,
+  expectedMatches: 6,
   rationale:
       'The Material ink layers of the Scaffold, the AppBar, the close '
-      'IconButton and the two action buttons. Splash and highlight paint into '
-      'these layers; the overlay colours are asserted in app_theme_test.dart.',
+      'IconButton, the two action buttons, and the details toggle — an '
+      'MxPressable, which carries its own transparent Material so its ripple '
+      'works inside any container. Splash and highlight paint into these '
+      'layers; the overlay colours are asserted in app_theme_test.dart.',
 );
 
 const AuditSkipAllowance _inkLayersEdit = AuditSkipAllowance(
   itemId: 'shell',
   reason: SkipReason.rasterOnly,
   detailContains: '_RenderInkFeatures',
-  expectedMatches: 10,
+  expectedMatches: 11,
   rationale:
       'The Scaffold and the AppBar, the back IconButton, the app-bar flag '
       '(BR-92) and the compact Save; then the footer Cancel and Save; and the '
       'three tappable cards the concept adds — history row, deck row and the '
-      'Trash card. Splash and highlight paint into these layers; the overlay '
-      'colours are asserted in app_theme_test.dart.',
+      'Trash card — plus the details toggle, an MxPressable carrying its own '
+      'transparent Material. Splash and highlight paint into these layers; '
+      'the overlay colours are asserted in app_theme_test.dart.',
 );
 
 /// The chips, unreadable for the same reason as on the Trash screen: a chip
@@ -217,9 +220,10 @@ const List<AuditSkipAllowance> _fieldsCreate = <AuditSkipAllowance>[
     itemId: 'shell',
     reason: SkipReason.customPainter,
     detailContains: 'no painter',
-    expectedMatches: 2,
+    expectedMatches: 3,
     rationale:
-        'Each field clips through a CustomPaint with no painter of its own.',
+        'Each field clips through a CustomPaint with no painter of its own, '
+        'and the ripple of the details-toggle MxPressable clips the same way.',
   ),
 ];
 
@@ -252,9 +256,10 @@ const List<AuditSkipAllowance> _fieldsEdit = <AuditSkipAllowance>[
     itemId: 'shell',
     reason: SkipReason.customPainter,
     detailContains: 'no painter',
-    expectedMatches: 4,
+    expectedMatches: 5,
     rationale:
         'Each field clips through a CustomPaint with no painter of its own, '
-        'and each MxCard the concept adds clips the same way.',
+        'and each MxCard the concept adds — and the details-toggle '
+        'MxPressable ripple — clips the same way.',
   ),
 ];

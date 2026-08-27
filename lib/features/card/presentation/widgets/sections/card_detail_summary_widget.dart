@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_elevation.dart';
-import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_stroke.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../../deck/domain/models/scheduler_type_model.dart';
 import '../../../domain/models/card_detail_model.dart';
@@ -184,10 +184,10 @@ class _SchedulerBadge extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Icon(
+              const MxIcon(
                 Icons.bolt_rounded,
-                size: AppIconSize.sm,
-                color: semantic.primaryAccent,
+                ink: AppInk.accent,
+                size: MxIconSize.sm,
               ),
               const SizedBox(width: AppSpacing.xs),
               // **No `Flexible` here, and that is deliberate.** This badge is a
@@ -255,10 +255,10 @@ class _FlagChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Icon(
+          const MxIcon(
             Icons.flag,
-            size: AppIconSize.sm,
-            color: semantic.onDueContainer,
+            ink: AppInk.onDueContainer,
+            size: MxIconSize.sm,
           ),
           const SizedBox(width: AppSpacing.xs),
           // `Flexible`, because a `Row` hands an unbounded main axis to a

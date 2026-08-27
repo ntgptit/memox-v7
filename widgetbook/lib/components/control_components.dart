@@ -7,6 +7,7 @@ import 'package:memox/shared/widgets/mx_breadcrumb.dart';
 import 'package:memox/shared/widgets/mx_button_pair.dart';
 import 'package:memox/shared/widgets/mx_icon_button.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
+import 'package:memox/shared/widgets/mx_pressable.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
 import 'package:memox/shared/widgets/mx_text_button.dart';
 import 'package:widgetbook/widgetbook.dart';
@@ -115,6 +116,39 @@ WidgetbookComponent fabComponent() {
               icon: Icons.add,
               label: label,
               onPressed: isEnabled ? _noop : null,
+            ),
+          );
+        },
+      ),
+    ],
+  );
+}
+
+WidgetbookComponent pressableComponent() {
+  return WidgetbookComponent(
+    name: 'MxPressable',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Playground',
+        builder: (BuildContext context) {
+          final shape = context.knobs.object.dropdown<MxPressableShape>(
+            label: 'shape',
+            options: MxPressableShape.values,
+            labelBuilder: (MxPressableShape value) => value.name,
+          );
+          final isEnabled = context.knobs.boolean(
+            label: 'enabled',
+            initialValue: true,
+          );
+
+          return CatalogCenterPage(
+            child: MxPressable(
+              onTap: isEnabled ? _noop : null,
+              shape: shape,
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: Text('Pressable surface'),
+              ),
             ),
           );
         },

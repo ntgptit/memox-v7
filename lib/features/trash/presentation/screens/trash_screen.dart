@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/app_ink.dart';
+import '../../../../core/theme/theme_context_extension.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/time/clock_provider.dart';
 import '../../../../l10n/l10n_extension.dart';
+import '../../../../shared/widgets/mx_messenger.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_empty_state.dart';
@@ -129,17 +132,8 @@ void _setFilter(WidgetRef ref, TrashFilter filter) =>
 void _toggleSelection(WidgetRef ref, TrashBatchEntity batch) =>
     ref.read(trashSelectionControllerProvider.notifier).toggle(batch);
 
-void _report(BuildContext context, String message) {
-  ScaffoldMessenger.of(context)
-    ..clearSnackBars()
-    ..showSnackBar(
-      SnackBar(
-        // Announced, not only drawn — the same liveRegion every other
-        // dynamically-appearing message in the app carries.
-        content: Semantics(liveRegion: true, child: Text(message)),
-      ),
-    );
-}
+void _report(BuildContext context, String message) =>
+    showMxMessage(context, message);
 
 class _TrashBody extends ConsumerWidget {
   const _TrashBody({
@@ -342,8 +336,6 @@ class _RetentionNotice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Padding(
       padding: EdgeInsets.fromLTRB(
         mxScreenGutter(context),
@@ -353,9 +345,7 @@ class _RetentionNotice extends StatelessWidget {
       ),
       child: Text(
         context.l10n.trashRetentionNotice,
-        style: theme.textTheme.bodySmall?.copyWith(
-          color: theme.colorScheme.onSurfaceVariant,
-        ),
+        style: context.texts.bodySmall!.inked(context, AppInk.quiet),
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/app_ink.dart';
 import 'package:memox/core/theme/app_colors.dart';
 import 'package:memox/core/theme/app_material_roles.dart';
 import 'package:memox/core/theme/app_semantic_colors.dart';
@@ -153,9 +154,6 @@ void main() {
       return tester.widget<DeckIconArea>(find.byType(DeckIconArea));
     }
 
-    ColorScheme schemeOf(WidgetTester tester) =>
-        Theme.of(tester.element(find.byType(DeckIconArea))).colorScheme;
-
     /// Every schedule state, one well. The chips carry urgency now, so a
     /// second carrier here would say it twice — in a glyph that reads
     /// *cancelled* rather than *late* (owner review, 2026-08-20).
@@ -174,13 +172,14 @@ void main() {
           learned: 30,
           overdueDays: days,
         );
-        final scheme = schemeOf(tester);
         final semantic = Theme.of(
           tester.element(find.byType(DeckIconArea)),
         ).extension<AppSemanticColors>()!;
 
         expect(icon.icon, Icons.folder_outlined);
-        expect(icon.tint, scheme.onPrimaryContainer);
+        // The tint is an AppInk now (M99.67): the widget names the role and
+        // MxIcon resolves it, so the role — not a resolved Color — is the claim.
+        expect(icon.tint, AppInk.onPrimaryContainer);
         // `wellColor` null means the brand container — no state override.
         expect(icon.wellColor, isNull);
         expect(icon.icon, isNot(Icons.event_busy));

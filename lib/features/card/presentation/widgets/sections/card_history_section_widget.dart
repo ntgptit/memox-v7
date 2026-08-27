@@ -6,6 +6,7 @@ import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../../../shared/widgets/mx_text_button.dart';
 import '../../states/card_history_state.dart';
@@ -159,11 +160,7 @@ class _EmptyHistory extends StatelessWidget {
         // painted glyph on the dark ground — the graphic bar, not the text one,
         // and this glyph sits beside two lines of prose rather than carrying a
         // meaning of its own.
-        Icon(
-          Icons.history,
-          size: AppIconSize.md,
-          color: context.colors.onSurfaceVariant,
-        ),
+        const MxIcon(Icons.history),
         const SizedBox(height: AppSpacing.sm),
         Text(
           context.l10n.cardHistoryEmptyTitle,
@@ -349,10 +346,10 @@ class _PageError extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Icon(
+              const MxIcon(
                 Icons.error_outline,
-                size: AppIconSize.mdCompact,
-                color: colors.onErrorContainer,
+                ink: AppInk.onErrorContainer,
+                size: MxIconSize.mdCompact,
               ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(

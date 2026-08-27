@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_icon_size.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
@@ -42,7 +43,7 @@ class DeckIconArea extends StatelessWidget {
   });
 
   final IconData icon;
-  final Color tint;
+  final AppInk tint;
   final String? semanticLabel;
 
   /// Null keeps the brand container. Pass one only to say the row is in a state
@@ -59,12 +60,7 @@ class DeckIconArea extends StatelessWidget {
       child: SizedBox.square(
         dimension: dimension,
         child: Center(
-          child: Icon(
-            icon,
-            size: AppIconSize.md,
-            color: tint,
-            semanticLabel: semanticLabel,
-          ),
+          child: MxIcon(icon, ink: tint, semanticLabel: semanticLabel),
         ),
       ),
     );

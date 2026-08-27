@@ -590,6 +590,9 @@ ThemeData _buildTheme(
         color: scheme.onInverseSurface,
       ),
       behavior: SnackBarBehavior.floating,
+      // The SDK's own default, restated so the action's colour is a decision
+      // on record rather than a silence that resolves to one.
+      actionTextColor: scheme.inversePrimary,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.md),
       ),

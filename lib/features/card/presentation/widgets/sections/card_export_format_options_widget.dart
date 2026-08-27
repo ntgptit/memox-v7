@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_elevation.dart';
-import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../domain/models/card_transfer_format_model.dart';
 
@@ -289,19 +289,17 @@ class _TitleWithGlyph extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        Icon(
+        MxIcon(
           isSelected
               ? Icons.radio_button_checked
               : Icons.radio_button_unchecked,
-          size: AppIconSize.mdCompact,
+          size: MxIconSize.mdCompact,
           // The same selected-mark token the card tile's check uses: dark
           // primary fails contrast as a glyph on dark surfaces.
-          color: isSelected ? colors.secondary : colors.onSurfaceVariant,
+          ink: isSelected ? AppInk.secondary : AppInk.quiet,
         ),
         const SizedBox(width: AppSpacing.sm),
         Flexible(

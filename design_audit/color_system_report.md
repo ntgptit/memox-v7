@@ -18,20 +18,20 @@ guess.
 
 | | |
 |---|---|
-| Files scanned (`lib/`, hand-written) | 683 |
-| Colour sites found | 512 |
+| Files scanned (`lib/`, hand-written) | 687 |
+| Colour sites found | 353 |
 | Violations | 0 |
 
 **By element kind**
 
 | kind | sites |
 |---|---|
-| other | 319 |
+| other | 295 |
 | background | 23 |
 | shadow | 1 |
 | border | 15 |
-| text | 120 |
-| icon | 34 |
+| text | 13 |
+| icon | 6 |
 
 **By source kind**
 
@@ -42,7 +42,7 @@ guess.
 | Colors-material | 12 |
 | hardcoded-literal | 97 |
 | opacity-modified-token | 16 |
-| theme-token | 235 |
+| theme-token | 76 |
 
 **By violation code**
 

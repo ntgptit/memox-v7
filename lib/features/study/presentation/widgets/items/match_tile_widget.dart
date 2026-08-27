@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../shared/widgets/mx_pressable.dart';
 import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_durations.dart';
 import '../../../../../core/theme/app_motion_policy.dart';
@@ -132,32 +133,27 @@ class MatchTileWidget extends StatelessWidget {
           borderRadius: radius,
           border: Border.all(color: skin.outline, width: skin.outlineWidth),
         ),
-        child: Material(
-          // The container paints the surface; this exists for the ripple.
-          type: MaterialType.transparency,
-          child: InkWell(
-            // A cleared tile is finished, not merely busy: BR-116 has already
-            // recorded it and a second tap could only record it twice. A tile
-            // still showing its result is not a target either — that answer is
-            // in flight.
-            onTap: _isTappable ? onTap : null,
-            borderRadius: radius,
-            child: Padding(
-              // Even on all four sides, and `sm` because six lines of meaning
-              // need the width as much as the height. `md` at the sides cost
-              // eight logical pixels of every line — which is a word per line
-              // on a 175-wide tile, and the six-line budget was bought to hold
-              // words.
-              padding: const EdgeInsets.all(AppSpacing.sm),
-              child: Center(
-                child: AnimatedOpacity(
-                  // The content leaving *is* the pair disappearing. The slot
-                  // does not move, so nothing anyone was reaching for shifts.
-                  opacity: _isCleared ? 0 : 1,
-                  duration: motion,
-                  curve: AppDurations.standard,
-                  child: _content(context, skin, style),
-                ),
+        // A cleared tile is finished, not merely busy: BR-116 has already
+        // recorded it and a second tap could only record it twice. A tile
+        // still showing its result is not a target either — that answer is
+        // in flight.
+        child: MxPressable(
+          onTap: _isTappable ? onTap : null,
+          child: Padding(
+            // Even on all four sides, and `sm` because six lines of meaning
+            // need the width as much as the height. `md` at the sides cost
+            // eight logical pixels of every line — which is a word per line
+            // on a 175-wide tile, and the six-line budget was bought to hold
+            // words.
+            padding: const EdgeInsets.all(AppSpacing.sm),
+            child: Center(
+              child: AnimatedOpacity(
+                // The content leaving *is* the pair disappearing. The slot
+                // does not move, so nothing anyone was reaching for shifts.
+                opacity: _isCleared ? 0 : 1,
+                duration: motion,
+                curve: AppDurations.standard,
+                child: _content(context, skin, style),
               ),
             ),
           ),

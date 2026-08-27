@@ -8,6 +8,7 @@ import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_stroke.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_pressable.dart';
 import '../../../../../shared/widgets/mx_icon.dart';
 
 /// What one option looks like once the question has been answered.
@@ -113,38 +114,35 @@ class GuessOptionItemWidget extends StatelessWidget {
             borderRadius: radius,
             border: Border.all(color: outline, width: outlineWidth),
           ),
-          child: Material(
-            // The container paints the surface; this exists for the ripple.
-            type: MaterialType.transparency,
-            child: InkWell(
-              onTap: onTap,
-              borderRadius: radius,
-              child: Padding(
-                padding: AppGuessOption.rowPadding,
-                child: Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: Text(
-                        text,
-                        // **14 and regular, not 16 and semibold.** A meaning is
-                        // a sentence, not a heading: real content here runs to
-                        // "Deep sleep / Giấc ngủ sâu (Danh từ, trạng thái ngủ
-                        // ngon không bị gián đoạn…)" and at 16/w600 five of
-                        // those are a wall. `bodyMedium` also carries the 1.45
-                        // line height, which is what makes the third line of a
-                        // wrapped meaning readable rather than crowded.
-                        style: context.texts.bodyMedium!.inked(
-                          context,
-                          accent ?? AppInk.stated,
-                        ),
+          // MxPressable is the Material+InkWell pair in one piece; the
+          // container above still paints the surface.
+          child: MxPressable(
+            onTap: onTap,
+            child: Padding(
+              padding: AppGuessOption.rowPadding,
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Text(
+                      text,
+                      // **14 and regular, not 16 and semibold.** A meaning is
+                      // a sentence, not a heading: real content here runs to
+                      // "Deep sleep / Giấc ngủ sâu (Danh từ, trạng thái ngủ
+                      // ngon không bị gián đoạn…)" and at 16/w600 five of
+                      // those are a wall. `bodyMedium` also carries the 1.45
+                      // line height, which is what makes the third line of a
+                      // wrapped meaning readable rather than crowded.
+                      style: context.texts.bodyMedium!.inked(
+                        context,
+                        accent ?? AppInk.stated,
                       ),
                     ),
-                    if (verdict != null) ...<Widget>[
-                      const SizedBox(width: AppSpacing.sm),
-                      MxIcon(verdict, size: MxIconSize.sm, ink: accent!),
-                    ],
+                  ),
+                  if (verdict != null) ...<Widget>[
+                    const SizedBox(width: AppSpacing.sm),
+                    MxIcon(verdict, size: MxIconSize.sm, ink: accent!),
                   ],
-                ),
+                ],
               ),
             ),
           ),

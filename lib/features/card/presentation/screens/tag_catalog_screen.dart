@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../l10n/l10n_extension.dart';
+import '../../../../shared/widgets/mx_messenger.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_empty_state.dart';
@@ -164,9 +165,7 @@ class _CatalogList extends StatelessWidget {
   ) {
     if (outcome != TagRenameOutcome.merged) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(context.l10n.tagMergedConfirmation(entry.name))),
-    );
+    showMxMessage(context, context.l10n.tagMergedConfirmation(entry.name));
   }
 }
 
