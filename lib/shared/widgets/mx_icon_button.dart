@@ -51,7 +51,6 @@ class MxIconButton extends StatelessWidget {
     required this.onPressed,
     this.tooltip,
     this.isCompact = false,
-    this.isFilled = false,
     this.tone = MxIconButtonTone.standard,
     super.key,
   });
@@ -83,34 +82,19 @@ class MxIconButton extends StatelessWidget {
   /// `MxSessionTopBar`.
   final bool isCompact;
 
-  /// The primary-filled shape, for the one action a bar leads with — the
-  /// Library's create (owner mockup, 2026-08-20). Same size, same target;
-  /// only the container changes, so a bar never carries two of these.
-  final bool isFilled;
-
   /// What the glyph means. [MxIconButtonTone.standard] keeps the theme's ink,
   /// which is every existing caller.
   final MxIconButtonTone tone;
 
+  // A filled variant existed here once (`isFilled`, for a Library mockup) and
+  // was removed twice over: its one caller went in #328, and its style was
+  // `IconButton.styleFrom(backgroundColor:)` — the flat-property spelling
+  // whose disabled state stays fully armed and whose press never darkens,
+  // the exact divergence `buildFilledStyle` exists to prevent. If a bar ever
+  // leads with a filled icon action again, build its colours from the shared
+  // resolvers, not from `styleFrom`.
   @override
   Widget build(BuildContext context) {
-    if (isFilled) {
-      final scheme = Theme.of(context).colorScheme;
-
-      return IconButton.filled(
-        onPressed: onPressed,
-        tooltip: tooltip ?? semanticLabel,
-        // The pair is stated because `iconButtonTheme` pins every icon
-        // button's foreground to `onSurfaceVariant` — correct on the bar's
-        // transparent buttons, 2.33:1 on the brand fill. Only the colours are
-        // stated; size, shape and the 48 floor still come from the theme.
-        style: IconButton.styleFrom(
-          backgroundColor: scheme.primary,
-          foregroundColor: scheme.onPrimary,
-        ),
-        icon: Icon(icon, size: AppIconSize.md, semanticLabel: semanticLabel),
-      );
-    }
     return IconButton(
       onPressed: onPressed,
       // Null keeps `iconButtonTheme`'s foreground. `IconButton` folds a

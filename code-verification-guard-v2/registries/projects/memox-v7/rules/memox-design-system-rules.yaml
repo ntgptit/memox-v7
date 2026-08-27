@@ -119,6 +119,27 @@ rules:
   # The pattern requires the `FontWeight.` literal on purpose:
   # `withWeight`'s own implementation writes `fontWeight: weight`, so the one
   # file allowed to touch the field never matches.
+  - id: memox_v7.design_system.no_flat_style_from
+    type: regex
+    severity: error
+    enabled: true
+    message: >-
+      No `styleFrom(` in widgets — feature or shared. `styleFrom` builds flat
+      WidgetStatePropertyAll values that shadow the theme's resolvers for
+      every state at once: the destructive button that never darkened, and the
+      filled icon button whose disabled state stayed fully armed, were both
+      this call. State pairs come from app_button_themes' builders
+      (buildFilledStyle, textLinkForeground) or a ButtonStyle with explicit
+      resolveWith. The one legitimate styleFrom lives in app_theme.dart, where
+      it IS the theme being defined.
+    scopes:
+      - widget_ui_files
+    patterns:
+      - '^(?!\s*(?://|\*)).*\.styleFrom\s*\('
+    tags:
+      - memox-v7
+      - design-system
+
   - id: memox_v7.design_system.no_bare_font_weight
     type: regex
     severity: error

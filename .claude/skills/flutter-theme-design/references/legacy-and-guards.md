@@ -112,7 +112,10 @@ Trong `lib/features/**`, fail CI nếu xuất hiện visual escapes như:
 - [x] `BorderSide(` — `no_raw_style_escape` (M99.64)
 - [x] `BoxShadow(` — `no_raw_style_escape`
 - [x] `ButtonStyle(` — `no_raw_style_escape`
-- [x] `.styleFrom(` — `no_raw_style_escape`
+- [x] `.styleFrom(` — `no_raw_style_escape` (features); từ M99.74 thêm
+      `no_flat_style_from` scope `widget_ui_files` phủ cả `lib/shared/widgets`
+      — chỗ `MxIconButton.isFilled` từng lệch khỏi contract filled mà guard
+      cũ không thấy vì chỉ quét features
 - [x] `ShapeDecoration(` — `no_raw_style_escape`
 - [x] `RoundedRectangleBorder(` — `no_raw_style_escape`
 - [x] `Icon(size:` số trần — `no_raw_style_escape`
