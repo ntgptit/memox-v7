@@ -5,11 +5,10 @@ import 'package:go_router/go_router.dart';
 import '../../../../../core/navigation/route_names.dart';
 
 import '../../../../../core/theme/app_elevation.dart';
-import '../../../../../core/theme/app_icon_size.dart';
-import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../domain/models/card_state_distribution_model.dart';
 import '../../controllers/card_list_filter_controller.dart';
@@ -112,43 +111,33 @@ class _StudyAction extends ConsumerWidget {
       // legend rows sit to each other. A section break should not measure the
       // same as the gap inside a section.
       padding: const EdgeInsets.only(top: AppSpacing.xl),
-      child: FilledButton(
-        // The learner's way in for a deck whose cards are all new: the deck
-        // tile's own Study button appears only when something is *due*
-        // (BR-150), so without this a freshly filled deck had no path to a
-        // session at all.
-        onPressed: () => context.goNamed(
-          RouteNames.deckStudy,
-          pathParameters: <String, String>{RoutePathParams.deckId: deckId},
-        ),
-        style: ButtonStyle(
-          minimumSize: const WidgetStatePropertyAll<Size>(
-            Size.fromHeight(AppSpacing.minimumTouchTarget),
+      // Full-width from the wrapper, not from a `Size.fromHeight` in a style:
+      // how wide a button is belongs to the layout that places it.
+      child: SizedBox(
+        width: double.infinity,
+        // **An `MxActionButton` since the raw-button guard landed
+        // (2026-08-27).** The `FilledButton` this replaces was the second of
+        // the two feature files `memox_v7.design_system.no_raw_button` fired
+        // on, and what it hand-built the shared widget already owns — down to
+        // the ink: its inline label said `w600` without moving the variable
+        // font's `wght` axis, so it painted 500. Two visual deltas ride along,
+        // both toward the system: the corner is the house `md` instead of a
+        // one-off pill (the deck button's owner review settled that a stadium
+        // among rounded rectangles reads as borrowed), and the label is the
+        // theme's `label-lg` button rung instead of a hand-shrunk `label-md`.
+        child: MxActionButton(
+          // The learner's way in for a deck whose cards are all new: the deck
+          // tile's own Study button appears only when something is *due*
+          // (BR-150), so without this a freshly filled deck had no path to a
+          // session at all.
+          label: hasReturningCards
+              ? context.l10n.cardProgressStudyAction(queued)
+              : context.l10n.cardProgressLearnAction(queued),
+          icon: Icons.play_arrow,
+          onPressed: () => context.goNamed(
+            RouteNames.deckStudy,
+            pathParameters: <String, String>{RoutePathParams.deckId: deckId},
           ),
-          shape: WidgetStatePropertyAll<OutlinedBorder>(
-            RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppRadius.pill),
-            ),
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          spacing: AppSpacing.xs,
-          children: <Widget>[
-            const Icon(Icons.play_arrow, size: AppIconSize.sm),
-            Text(
-              hasReturningCards
-                  ? context.l10n.cardProgressStudyAction(queued)
-                  : context.l10n.cardProgressLearnAction(queued),
-              // `onPrimary` stated, not inherited: a style taken from the text
-              // theme carries the body colour and would land dark ink on the
-              // brand fill — the 2.33:1 the deck button already paid for once.
-              style: context.texts.labelMedium?.copyWith(
-                color: context.colors.onPrimary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
         ),
       ),
     );

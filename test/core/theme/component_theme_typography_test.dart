@@ -127,6 +127,29 @@ void main() {
         );
       });
 
+      test('the navigation label is label-md, and selection re-weights it', () {
+        // The bar resolves per state, so both faces have to be asked for.
+        // Unselected is the rung untouched; selected is the rung at 600 — and
+        // the axis assertion inside the helper is the whole point, because
+        // this slot shipped a `copyWith(fontWeight:)` that reported 600 and
+        // painted 500 (theme-composition review, 2026-08).
+        final WidgetStateProperty<TextStyle?>? label =
+            theme.navigationBarTheme.labelTextStyle;
+        expect(label, isNotNull, reason: 'the bar declares no label style');
+
+        expectSameRung(
+          'navigationBarTheme.labelTextStyle (unselected)',
+          label!.resolve(const <WidgetState>{}),
+          texts.labelMedium,
+        );
+        expectRungReweighted(
+          'navigationBarTheme.labelTextStyle (selected)',
+          label.resolve(const <WidgetState>{WidgetState.selected}),
+          texts.labelMedium,
+          FontWeight.w600,
+        );
+      });
+
       test('an input hint is body-md, leading included', () {
         expectSameRung(
           'inputDecorationTheme.hintStyle',

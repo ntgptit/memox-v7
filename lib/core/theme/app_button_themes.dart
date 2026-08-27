@@ -57,17 +57,24 @@ ButtonStyle buildSharedButtonStyle(ColorScheme scheme) => ButtonStyle(
 );
 
 /// The primary action: `MxActionButton`'s `primary` variant.
+///
+/// Reads `scheme.primary` / `scheme.onPrimary` itself — it used to take the
+/// pair as `actionFill` / `actionLabel` parameters that every caller filled
+/// from `AppColors`, which gave one meaning two sources that merely happened
+/// to agree. The high-contrast themes were where they were set to part:
+/// `highContrastScheme` transforms the scheme while the relayed constants
+/// would have stayed the normal-contrast values, so the day that transform
+/// touches `primary`, buttons built from parameters would have quietly kept
+/// the old brand (theme-composition review, 2026-08).
 FilledButtonThemeData buildFilledButtonTheme(
   ColorScheme scheme,
-  AppSemanticColors semantic, {
-  required Color actionFill,
-  required Color actionLabel,
-}) => FilledButtonThemeData(
+  AppSemanticColors semantic,
+) => FilledButtonThemeData(
   style: buildFilledStyle(
     scheme,
     semantic,
-    fill: actionFill,
-    label: actionLabel,
+    fill: scheme.primary,
+    label: scheme.onPrimary,
   ),
 );
 
@@ -280,16 +287,19 @@ TextButtonThemeData buildTextButtonTheme(
 }
 
 /// The secondary action: `MxActionButton`'s `secondary` variant.
+///
+/// Reads `semantic.secondaryAction` itself, for the reason
+/// [buildFilledButtonTheme] gives: the relayed `outlineLabel` parameter was
+/// the same value with a second source.
 OutlinedButtonThemeData buildOutlinedButtonTheme(
   ColorScheme scheme,
-  AppSemanticColors semantic, {
-  required Color outlineLabel,
-}) => OutlinedButtonThemeData(
+  AppSemanticColors semantic,
+) => OutlinedButtonThemeData(
   style: buildSharedButtonStyle(scheme).copyWith(
     foregroundColor: WidgetStateProperty.resolveWith((states) {
       if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
 
-      return outlineLabel;
+      return semantic.secondaryAction;
     }),
     side: WidgetStateProperty.resolveWith((states) {
       if (states.contains(WidgetState.disabled)) {

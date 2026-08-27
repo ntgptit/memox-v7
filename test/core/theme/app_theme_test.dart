@@ -286,6 +286,59 @@ void main() {
     });
   });
 
+  group('state ownership follows the resting pair', () {
+    // The rule the 2026-08 theme-composition review distilled: change a
+    // component's resting fill/foreground away from Material's canonical pair,
+    // and every state default that component owns is yours to restate — M3's
+    // are hardcoded to the *old* pair (`onPrimaryContainer` for the FAB), not
+    // derived from the override.
+    for (final entry in themes.entries) {
+      test('${entry.key}: the FAB state washes are its own foreground', () {
+        final ColorScheme scheme = entry.value.colorScheme;
+        final FloatingActionButtonThemeData fab =
+            entry.value.floatingActionButtonTheme;
+
+        expect(fab.backgroundColor, scheme.primary);
+        expect(fab.foregroundColor, scheme.onPrimary);
+        for (final (String state, Color? wash) in <(String, Color?)>[
+          ('hover', fab.hoverColor),
+          ('focus', fab.focusColor),
+          ('splash', fab.splashColor),
+        ]) {
+          expect(
+            wash,
+            isNotNull,
+            reason:
+                '$state left null falls to M3\'s onPrimaryContainer wash — '
+                'another pair\'s ink over this pair\'s fill',
+          );
+          expect(
+            wash!.withValues(alpha: 1),
+            scheme.onPrimary.withValues(alpha: 1),
+            reason: '$state washes in a colour that is not the foreground',
+          );
+        }
+      });
+
+      test(
+        '${entry.key}: the snackbar states its depth like every overlay',
+        () {
+          // Silence here resolved to the SDK's 6.0 — in dark too, where the app
+          // has measurably opted out of shadows.
+          expect(
+            entry.value.snackBarTheme.elevation,
+            entry.key == 'dark' ? AppElevation.none : AppElevation.overlay,
+          );
+          expect(
+            entry.value.floatingActionButtonTheme.elevation,
+            entry.value.snackBarTheme.elevation,
+            reason: 'two overlays, two depth policies — there is one',
+          );
+        },
+      );
+    }
+  });
+
   group('theme wiring', () {
     testWidgets('the same widget builds in light and dark without throwing', (
       tester,

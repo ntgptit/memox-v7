@@ -199,34 +199,25 @@ const ColorScheme _darkScheme = ColorScheme(
 
 /// The light theme, given the palette it should read.
 ///
-/// **One place the four arguments below are written, and that is the point of
-/// the seam.** High contrast re-points the borders and nothing else — the page,
-/// the action fill, its label and the outlined label are the same decisions in
-/// both. Passing them at two call sites is how the high-contrast theme would
-/// quietly keep an old `actionFill` after someone changed the normal one;
-/// `app_high_contrast_test.dart` also pins that they agree.
-ThemeData _light(ColorScheme scheme, AppSemanticColors semantic) => _buildTheme(
-  scheme,
-  semantic,
-  background: AppColors.backgroundLight,
-  actionFill: AppColors.primaryLight,
-  actionLabel: AppColors.onPrimaryLight,
-  outlineLabel: AppColors.secondaryActionLight,
-);
+/// This used to also relay `actionFill` / `actionLabel` / `outlineLabel`
+/// constants alongside the scheme that already carries those meanings — one
+/// meaning, two sources, and the high-contrast themes were exactly where the
+/// two would have parted (they transform the scheme; the relayed constants
+/// would have stayed put). The builders read the scheme now; only the page
+/// ground remains an argument, because the scheme genuinely has no role for
+/// it.
+ThemeData _light(ColorScheme scheme, AppSemanticColors semantic) =>
+    _buildTheme(scheme, semantic, background: AppColors.backgroundLight);
 
 /// The dark theme. See [_light].
-ThemeData _dark(ColorScheme scheme, AppSemanticColors semantic) => _buildTheme(
-  scheme,
-  semantic,
-  background: AppColors.backgroundDark,
-  // Indigo in both modes, so the brand is the same object in light and dark.
-  // The colour it does NOT compete with is the study verdict pair: those are
-  // the only two saturated fills on a study screen, and `secondaryAction` is
-  // kept neutral precisely so nothing else in the row has a hue.
-  actionFill: AppColors.primaryDark,
-  actionLabel: AppColors.onPrimaryDark,
-  outlineLabel: AppColors.secondaryActionDark,
-);
+///
+/// The brand stays indigo in both modes — `scheme.primary` carries it — so the
+/// button pair is the same object in light and dark. The colour it does NOT
+/// compete with is the study verdict pair: those are the only two saturated
+/// fills on a study screen, and `secondaryAction` is kept neutral precisely so
+/// nothing else in the row has a hue.
+ThemeData _dark(ColorScheme scheme, AppSemanticColors semantic) =>
+    _buildTheme(scheme, semantic, background: AppColors.backgroundDark);
 
 final ThemeData _lightTheme = _light(
   _lightScheme,
@@ -245,22 +236,32 @@ final ThemeData _highContrastDarkTheme = _dark(
   highContrastSemantics(const AppSemanticColors.dark(), _darkScheme),
 );
 
-/// The FAB's Material elevation, per brightness — the one component that keeps
-/// a dp value instead of `elevation: 0` + `shadowsFor`, because
-/// `FloatingActionButtonThemeData` has no slot for a hand-painted shadow.
-double _fabElevation(ColorScheme scheme) => scheme.brightness == Brightness.dark
+/// Material elevation for the overlays that keep a dp value instead of
+/// `elevation: 0` + `shadowsFor` — the FAB and the SnackBar, whose theme slots
+/// have nowhere to put a hand-painted shadow.
+///
+/// Zero in dark, matching `shadowsFor`: the dark page is at the bottom of the
+/// lightness scale, so a shadow there is paint nobody can see.
+double _overlayElevation(ColorScheme scheme) =>
+    scheme.brightness == Brightness.dark
     ? AppElevation.none
     : AppElevation.overlay;
 
+/// `background` stays a parameter where the button pairs did not: the page
+/// ground is deliberately not `scheme.surface` (surface is the card sitting on
+/// it), so there genuinely is no second source for it inside the scheme.
 ThemeData _buildTheme(
   ColorScheme scheme,
   AppSemanticColors semantic, {
   required Color background,
-  required Color actionFill,
-  required Color actionLabel,
-  required Color outlineLabel,
 }) {
   final base = ThemeData(
+    // The SDK's current default, restated because it is a dependency and not a
+    // preference: the FAB state washes, the button overlays and the planned
+    // themes all correct *M3's* defaults specifically, and an SDK that ever
+    // flipped this flag would swap the baseline under every one of those
+    // corrections without a line here changing.
+    useMaterial3: true,
     colorScheme: scheme,
     // Pinned, not platform-adaptive. Android is the release target, but the
     // web build is the E2E channel (AD-04) — and Flutter's platform defaults
@@ -370,14 +371,26 @@ ThemeData _buildTheme(
     floatingActionButtonTheme: FloatingActionButtonThemeData(
       backgroundColor: scheme.primary,
       foregroundColor: scheme.onPrimary,
-      // Zero in dark, matching `shadowsFor`: the dark page is at the bottom of
-      // the lightness scale, so a shadow there is paint nobody can see — and
-      // until this matched, the FAB was the one object in dark carrying a
-      // Material shadow while every other surface had measurably opted out.
-      elevation: _fabElevation(scheme),
-      focusElevation: _fabElevation(scheme),
-      hoverElevation: _fabElevation(scheme),
-      highlightElevation: _fabElevation(scheme),
+      // **The state washes move with the pair, or they describe the old one.**
+      // M3's defaults are not derived from the effective foreground — the SDK
+      // hardcodes `onPrimaryContainer` at 8/10/10% — so overriding the resting
+      // pair above and leaving these null meant hover, focus and press painted
+      // another system's ink over this system's fill (theme-composition
+      // review, 2026-08). The rule Chip and the buttons already follow: change
+      // a component's resting pair, and every state default it owns is yours
+      // to restate.
+      hoverColor: scheme.onPrimary.withValues(
+        alpha: AppStateOpacity.hoverControl,
+      ),
+      focusColor: scheme.onPrimary.withValues(alpha: AppStateOpacity.focus),
+      splashColor: scheme.onPrimary.withValues(alpha: AppStateOpacity.pressed),
+      // Until the elevation matched `shadowsFor`, the FAB was the one object
+      // in dark carrying a Material shadow while every other surface had
+      // measurably opted out.
+      elevation: _overlayElevation(scheme),
+      focusElevation: _overlayElevation(scheme),
+      hoverElevation: _overlayElevation(scheme),
+      highlightElevation: _overlayElevation(scheme),
     ),
     navigationBarTheme: buildNavigationBarTheme(scheme, texts, background),
 
@@ -406,18 +419,9 @@ ThemeData _buildTheme(
     // sideways on every change.
     chipTheme: buildChipTheme(scheme, semantic, texts),
 
-    filledButtonTheme: buildFilledButtonTheme(
-      scheme,
-      semantic,
-      actionFill: actionFill,
-      actionLabel: actionLabel,
-    ),
+    filledButtonTheme: buildFilledButtonTheme(scheme, semantic),
 
-    outlinedButtonTheme: buildOutlinedButtonTheme(
-      scheme,
-      semantic,
-      outlineLabel: outlineLabel,
-    ),
+    outlinedButtonTheme: buildOutlinedButtonTheme(scheme, semantic),
 
     textButtonTheme: buildTextButtonTheme(scheme, semantic, texts),
 
@@ -549,6 +553,12 @@ ThemeData _buildTheme(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.md),
       ),
+      // The last overlay that let Material decide its depth: Dialog,
+      // BottomSheet, PopupMenu and the FAB all state theirs, and this slot's
+      // silence resolved to the SDK's 6.0 — in dark too, where every other
+      // surface has measurably opted out of shadows. Same brightness split as
+      // the FAB, for the same reason (theme-composition review, 2026-08).
+      elevation: _overlayElevation(scheme),
     ),
   );
 }
