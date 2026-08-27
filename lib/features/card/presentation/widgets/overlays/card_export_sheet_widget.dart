@@ -6,6 +6,7 @@ import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_messenger.dart';
 import '../../../../../shared/widgets/mx_sheet_insets.dart';
 import '../../../domain/models/card_export_request_model.dart';
 import '../../../domain/models/card_export_result_model.dart';
@@ -137,11 +138,7 @@ Future<void> _runExport(
   );
   if (result != CardExportResult.shared || !context.mounted) return;
 
-  ScaffoldMessenger.of(context)
-    ..hideCurrentSnackBar()
-    ..showSnackBar(
-      SnackBar(content: Text(context.l10n.cardExportSharedMessage)),
-    );
+  showMxMessage(context, context.l10n.cardExportSharedMessage);
 }
 
 /// The sheet itself: title, read-only scope, three formats, what the file

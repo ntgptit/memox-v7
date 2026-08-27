@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/theme_context_extension.dart';
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../domain/models/deck_content_type_model.dart';
 import '../../../domain/models/deck_schedule_status_model.dart';
@@ -46,7 +46,7 @@ class DeckStatusIconWidget extends StatelessWidget {
       icon: contentType == DeckContentType.card
           ? Icons.style_outlined
           : Icons.folder_outlined,
-      tint: context.colors.onPrimaryContainer,
+      tint: AppInk.onPrimaryContainer,
     );
 
     if (status != DeckScheduleStatus.overdue) return area;

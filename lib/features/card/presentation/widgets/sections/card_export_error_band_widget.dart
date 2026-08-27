@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import '../../../../../core/error/failure.dart';
 import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_elevation.dart';
-import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../support/card_export_labels_widget.dart';
 
@@ -54,10 +54,10 @@ class CardExportErrorBandWidget extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Icon(
+          const MxIcon(
             Icons.error_outline,
-            size: AppIconSize.mdCompact,
-            color: colors.onErrorContainer,
+            ink: AppInk.onErrorContainer,
+            size: MxIconSize.mdCompact,
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(

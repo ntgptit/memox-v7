@@ -78,6 +78,8 @@ rules:
       - '^(?!\s*(?://|\*)).*\b(?:NavigationBar|NavigationDrawer|NavigationRail|BottomNavigationBar|BottomAppBar|TabBar)\s*\('
       - '^(?!\s*(?://|\*)).*\b(?:Dialog|AlertDialog|SimpleDialog|MaterialBanner|SearchBar|SearchAnchor|DropdownMenu)\s*[<(]'
       - '^(?!\s*(?://|\*)).*\bshowDialog\s*[<(]'
+      - '^(?!\s*(?://|\*)).*\b(?:SnackBar|SnackBarAction|InkWell)\s*\('
+      - '^(?!\s*(?://|\*)).*\.showSnackBar\s*\('
     tags:
       - memox-v7
       - design-system
@@ -152,6 +154,7 @@ rules:
     patterns:
       - '^(?!\s*(?://|\*)).*\btexts\.[a-zA-Z]+[!?]?\s*\.copyWith\s*\('
       - '^(?!\s*(?://|\*)).*withWeight\s*\([^)]*\)\s*\.copyWith\s*\('
+      - '^(?!\s*(?://|\*)).*\btextTheme\.[a-zA-Z]+[!?]?\s*\.copyWith\s*\('
     tags:
       - memox-v7
       - design-system

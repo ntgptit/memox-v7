@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../l10n/l10n_extension.dart';
+import '../../../../shared/widgets/mx_messenger.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_empty_state.dart';
 import '../../../../shared/widgets/mx_error_state.dart';
@@ -121,17 +122,12 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
       if (next.error == null || next.turn == null) return;
       if (previous?.error == next.error) return;
 
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          SnackBar(
-            content: Text(context.l10n.studyLeaveFailed),
-            action: SnackBarAction(
-              label: context.l10n.retryAction,
-              onPressed: () => unawaited(_controller.leave()),
-            ),
-          ),
-        );
+      showMxMessage(
+        context,
+        context.l10n.studyLeaveFailed,
+        actionLabel: context.l10n.retryAction,
+        onAction: () => unawaited(_controller.leave()),
+      );
     });
 
     final state = ref.watch(studySessionControllerProvider(widget.deckId));

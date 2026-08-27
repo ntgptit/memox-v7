@@ -13687,6 +13687,64 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Editable documents:** `docs/wbs.md`
 - **Dependencies:** M99.64
 
+### M99.67 · MxMessenger + MxPressable — thông điệp và bề mặt bấm thành tập đóng
+
+- **Status:** **done** — bước 2 của lộ trình "component chỉ call, chỉnh layout":
+  7 site tự lắp `SnackBar` và 5 site `InkWell` trần về **0**.
+- **Goal:** một cách duy nhất để nói điều gì đó thoáng qua, và một cách duy
+  nhất để một bề mặt tự vẽ nhận ripple — kèm sàn chạm 48 không còn là việc
+  của từng call site.
+- **Scope:** `mx_messenger.dart` (mới — `showMxMessage` + `showMxMessageOn`
+  cho messenger bắt trước `await`; liveRegion + `clearSnackBars` cho *mọi*
+  thông điệp, quyết định lấy từ chính tuyên bố sẵn trong repo ở
+  `mx_undo_snack_bar` và trash; **không** chế tone family vì design chưa định
+  nghĩa), `mx_pressable.dart` (mới — Material transparency + InkWell + sàn
+  `minimumTouchTarget`, shape từ tập đóng `AppRadius` none/sm/md; **không**
+  vẽ gì, semantics thuộc caller), migrate 12 site, theme khai tường minh
+  `actionTextColor: inversePrimary`. Đổi hành vi có chủ đích: hai site từng
+  chỉ `hideCurrentSnackBar` nay clear cả hàng đợi; bốn site từng không
+  announce nay announce; toggle details 36dp nhận sàn 48 (nở vào vùng trống
+  cuối form nên golden không đổi pixel — audit đếm được +1 lớp Material).
+- **Hai lối thoát regex theo dòng, phát hiện khi đếm site:** 40 site `Icon(`
+  xuống dòng trước `color:` và 7 site `textTheme.X.copyWith` — guard theo
+  dòng của M99.66 báo sạch trong khi cây còn 47 chỗ hở. Migrate hết; vá
+  `textTheme` bằng pattern mới trong `no_text_restyle`, vá multiline `Icon`
+  bằng `test/app/icon_ink_boundary_test.dart` (quét ngoặc cân bằng, tiền lệ
+  `architecture_boundary_test`): **rule cần thấy cấu trúc thì thành test
+  Dart, không nhồi vào regex.** Probe hai chiều cho cả guard lẫn test — và
+  chính lượt revert probe xoá mất hai migration; pattern mới bắt lại đúng
+  một trong hai, boundary test không kêu vì site đó là `textTheme` chứ không
+  phải `Icon` — hai lớp lưới bắt đúng phần việc của mình.
+- **Trong lượt:** trash checkbox `primary` → `AppInk.secondary` (thẳng hàng
+  quyết định selected-mark đã ghi ở card tile); radio direction-chooser
+  unselected `null` → `quiet`; `deck_icon_area` đổi param `tint` sang
+  `AppInk`.
+- **Tests required:** `mx_messenger_test` (liveRegion qua `ensureSemantics`,
+  clear-thay-vì-xếp-hàng, action label+handler, messenger sống lâu hơn
+  context, assert cặp label/handler); `mx_pressable_test` (sàn 48 với child
+  12dp, Material transparency trong DecoratedBox, mapping shape, tap/long
+  press, null onTap); stress specimen MxPressable; hai audit
+  (card_editor, trash) cập nhật số lớp ink/clip **kèm lý do đếm được**.
+- **Checklist phases:** Phase 7 (components) · Phase 21 (guard).
+- **Guard:** vẫn **76 rule** (đọc từ `Running rules:`) — mở rộng pattern
+  `no_raw_widget` (`SnackBar(`, `SnackBarAction(`, `InkWell(`,
+  `.showSnackBar(`) và `no_text_restyle`, không thêm rule mới.
+  `ScaffoldMessenger.of` **không** cấm: bắt messenger trước `await` là đầu
+  vào thiết kế của `showMxMessageOn`.
+- **Emulator integration suite:** **not run — theme/presentation only.** Đây
+  không phải một lượt chạy xanh.
+- **Output:** như Scope; widgetbook (MxPressable + knob shape/enabled); skill
+  `flutter-theme-design` §XI đánh dấu SnackBar + InkWell, ghi bài học
+  boundary-test; goldens regenerate không đổi pixel.
+- **Acceptance criteria:**
+  - [x] `lib/features/` có 0 `SnackBar(`, 0 `InkWell(`, 0 `.showSnackBar(`
+        ngoài `showMxMessageOn`, 0 `textTheme.X.copyWith`, 0 multiline
+        `Icon(color:)`.
+  - [x] Probe hai chiều: guard đỏ 4 pattern + boundary test đỏ, gỡ về 0.
+  - [x] `flutter analyze` 0; guard xanh; goldens `TZ=UTC` 295 xanh.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.66
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |

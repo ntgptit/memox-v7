@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../core/theme/app_ink.dart';
-import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
@@ -78,11 +78,7 @@ class CardMetricWidget extends StatelessWidget {
             color: context.semanticColors.surfaceMuted,
             borderRadius: BorderRadius.circular(AppRadius.sm),
           ),
-          child: Icon(
-            metric.icon,
-            size: AppIconSize.sm,
-            color: context.semanticColors.primaryAccent,
-          ),
+          child: MxIcon(metric.icon, ink: AppInk.accent, size: MxIconSize.sm),
         ),
         const SizedBox(width: AppSpacing.sm),
         Expanded(

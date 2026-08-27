@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/error/failure.dart';
 import '../../../../../l10n/generated/app_localizations.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_messenger.dart';
 import '../../../../../shared/widgets/mx_undo_snack_bar.dart';
 import '../../../../trash/domain/failures/trash_conflict_failure.dart';
 import '../../providers/card_undo_provider.dart';
@@ -48,9 +49,8 @@ void showCardMovedToTrash(
     // The messenger is captured before the await rather than looked up after
     // it: by the time Undo is refused, this context may belong to a screen the
     // user has already left.
-    onUndoFailed: (error) => messenger
-      ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(_undoFailureText(l10n, error)))),
+    onUndoFailed: (error) =>
+        showMxMessageOn(messenger, _undoFailureText(l10n, error)),
   );
 }
 

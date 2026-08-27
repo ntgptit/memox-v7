@@ -19,6 +19,7 @@ import 'package:memox/shared/widgets/mx_loading_state.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
 import 'package:memox/shared/widgets/mx_metric_well.dart';
+import 'package:memox/shared/widgets/mx_pressable.dart';
 import 'package:memox/shared/widgets/mx_progress_bar.dart';
 import 'package:memox/shared/widgets/mx_search_field.dart';
 import 'package:memox/shared/widgets/mx_session_top_bar.dart';
@@ -125,6 +126,19 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
     // reaches semantics, not layout.
     name: 'MxIcon',
     build: () => const MxIcon(Icons.flag_outlined, semanticLabel: kLongLabel),
+  ),
+  MxStressSpecimen(
+    // The pressable owns no copy — the stress is that its 48 floor holds while
+    // the child it wraps wraps.
+    name: 'MxPressable',
+    build: () => const MxPressable(
+      onTap: _noop,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 8),
+        child: Text(kLongLabel),
+      ),
+    ),
+    isInteractive: true,
   ),
   MxStressSpecimen(
     name: 'MxIconButton',

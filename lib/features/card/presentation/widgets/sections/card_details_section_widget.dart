@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
+import '../../../../../shared/widgets/mx_pressable.dart';
 import '../../../../../shared/widgets/mx_text_field.dart';
 import '../../../domain/failures/card_validation_failure.dart';
 
@@ -46,34 +49,37 @@ class CardDetailsSectionWidget extends StatelessWidget {
     String? errorText(CardValidationProblem? problem) =>
         problem == null ? null : context.l10n.cardDetailTooLongError;
 
-    // `primaryAccent`, not `colorScheme.primary`: the brand fill measures 3.29:1
-    // as text/glyph on the dark surface, below 4.5:1. The accent is the variant
+    // `AppInk.accent`, not `primary`: the brand fill measures 3.29:1 as
+    // text/glyph on the dark surface, below 4.5:1. The accent is the variant
     // that clears it — the same reason the text buttons use it.
-    final accent = context.semanticColors.primaryAccent;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        InkWell(
+        // MxPressable floors this row at the 48 target it never had: it drew
+        // ~36 tall while its twin in `card_editor_details_widget.dart` carried
+        // the floor by hand — the exact drift the shared widget exists to end.
+        MxPressable(
           onTap: onToggle,
-          borderRadius: BorderRadius.circular(AppSpacing.sm),
+          shape: MxPressableShape.sm,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
             child: Row(
               children: <Widget>[
-                Icon(
+                MxIcon(
                   isExpanded ? Icons.expand_less : Icons.add,
-                  size: 20,
-                  color: accent,
+                  // 20 — the compact step, previously spelled as a bare number.
+                  size: MxIconSize.mdCompact,
+                  ink: AppInk.accent,
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Text(
                   isExpanded
                       ? context.l10n.cardEditorDetailsLabel
                       : context.l10n.cardEditorDetailsToggle,
-                  style: Theme.of(
+                  style: context.texts.labelLarge!.inked(
                     context,
-                  ).textTheme.labelLarge?.copyWith(color: accent),
+                    AppInk.accent,
+                  ),
                 ),
               ],
             ),

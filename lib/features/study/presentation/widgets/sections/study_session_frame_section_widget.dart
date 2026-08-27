@@ -2,10 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_ink.dart';
-import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../../shared/widgets/mx_session_top_bar.dart';
 import '../../../domain/models/study_mode.dart';
@@ -278,15 +278,12 @@ class _HintLine extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        Icon(
+        MxIcon(
           context.studyModeHintIcon(mode),
           // **The icon step, not the line's font size.** Tying it to the text
-          // put a 12px glyph beside 12px copy, and a mark that small reads as a
-          // speck rather than as the thing that classifies the sentence.
-          // [AppIconSize.sm] is the step named for exactly this — inline with
-          // body text — and it is what the handout asks for.
-          size: AppIconSize.sm,
-          color: context.colors.onSurfaceVariant,
+          // put a 12px glyph beside 12px copy, and a mark that small reads as
+          // a speck rather than as the thing that classifies the sentence.
+          size: MxIconSize.sm,
         ),
         const SizedBox(width: AppSpacing.sm),
         // `Flexible`, not `Expanded`: the row is centred, so a child that took

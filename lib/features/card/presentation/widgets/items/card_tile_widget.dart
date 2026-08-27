@@ -6,6 +6,7 @@ import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../domain/models/card_due_badge_model.dart';
 import '../../../domain/models/card_list_item_model.dart';
@@ -113,11 +114,9 @@ class _SelectionMark extends StatelessWidget {
       width: _stateDotSize,
       height: _stateDotSize,
       child: FittedBox(
-        child: Icon(
+        child: MxIcon(
           isSelected ? Icons.check_circle : Icons.circle_outlined,
-          color: isSelected
-              ? context.colors.secondary
-              : context.colors.onSurfaceVariant,
+          ink: isSelected ? AppInk.secondary : AppInk.quiet,
         ),
       ),
     );
@@ -248,11 +247,13 @@ class _TrailingBadges extends StatelessWidget {
       if (item.card.isFlagged)
         Icon(
           Icons.flag,
+          // 18 has no MxIconSize step, so the closed-set spelling is the
+          // ink's own resolve. `stated`, not `accent`: the accent measures
+          // 3.29:1 as a glyph on the dark surface — below the 4.5:1 an icon
+          // needs as painted text. The flag reads by shape; the colour only
+          // stays legible.
           size: _flagIconSize,
-          // `onSurface`, not `primary`: the accent measures 3.29:1 as a glyph
-          // on the dark surface — below the 4.5:1 an icon needs as painted
-          // text. The flag reads by shape; the colour only stays legible.
-          color: context.colors.onSurface,
+          color: AppInk.stated.resolve(context),
           semanticLabel: context.l10n.cardTileFlaggedSemantics,
         ),
       if (dueLabel != null) _DueBadge(label: dueLabel),

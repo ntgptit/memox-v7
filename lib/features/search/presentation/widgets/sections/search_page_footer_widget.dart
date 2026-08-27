@@ -6,6 +6,7 @@ import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../../../shared/widgets/mx_text_button.dart';
 import '../../states/library_search_state.dart';
@@ -107,10 +108,10 @@ class SearchPageFooterWidget extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Icon(
+              const MxIcon(
                 Icons.error_outline,
-                size: AppIconSize.mdCompact,
-                color: colors.onErrorContainer,
+                ink: AppInk.onErrorContainer,
+                size: MxIconSize.mdCompact,
               ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(

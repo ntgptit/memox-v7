@@ -29,12 +29,20 @@ và `no_raw_style_escape` (M99.64). Mỗi mục thêm phải kèm lượt chạy
 rồi về 0 — và đếm site phải dùng `[<(]` chứ không chỉ `\(`, vì
 `RadioListTile<T>(` và `showModalBottomSheet<void>(` lọt lưới `\(` trần.
 
-**Nhóm hoãn có lý do, tính đến M99.64** — mỗi mục là "có site đang dùng mà
+**Nhóm hoãn có lý do, tính đến M99.67** — mỗi mục là "có site đang dùng mà
 chưa có wrapper", đúng thứ tự admission (wrapper trước, guard sau):
-`SnackBar` (7 site; cần `MxMessenger` kèm quyết định liveRegion),
-`InkWell` (5), `Switch`/`SwitchListTile` (3), `RadioListTile` (2),
+`Switch`/`SwitchListTile` (3), `RadioListTile` (2),
 `CheckboxListTile` (1), `TextField` (1 — ô điền của study fill mode),
 chips (2), `PopupMenuButton` (4), `DropdownButton` (2 legacy).
+`SnackBar` và `InkWell` đã ra khỏi nhóm ở M99.67: `showMxMessage`/`showMxMessageOn`
+(liveRegion + clearSnackBars, quyết định lấy từ chính tuyên bố trong repo) và
+`MxPressable` (Material transparency + InkWell + sàn 48, shape từ AppRadius).
+Cùng lượt đó phát hiện **hai lối thoát khỏi regex theo dòng**: 40 site
+`Icon(` xuống dòng trước `color:` và 7 site `textTheme.X.copyWith` — cái sau
+vá bằng pattern mới trong `no_text_restyle`, cái trước vá bằng
+`test/app/icon_ink_boundary_test.dart` (quét ngoặc cân bằng, tiền lệ
+`architecture_boundary_test`): rule cần thấy *cấu trúc* thì thành test Dart,
+không cố nhồi vào regex.
 `showModalBottomSheet` **không** vào danh sách cấm: 16 site là chính pattern
 hợp lệ của repo — hàm `showX` trong bucket `overlays/` gọi nó trực tiếp.
 
@@ -71,7 +79,7 @@ hợp lệ của repo — hàm `showX` trong bucket `overlays/` gọi nó trực
 - [ ] `PopupMenuButton`
 - [x] `DropdownMenu`
 - [ ] `DropdownButton`
-- [ ] `SnackBar`
+- [x] `SnackBar`
 - [x] `MaterialBanner`
 - [x] `SearchBar`
 - [x] `SearchAnchor`
@@ -80,7 +88,7 @@ hợp lệ của repo — hàm `showX` trong bucket `overlays/` gọi nó trực
 - [x] `TabBar`
 - [x] `ExpansionTile`
 - [x] `Badge`
-- [ ] Direct interactive `InkWell`
+- [x] Direct interactive `InkWell`
 - [x] Direct interactive `InkResponse`
 
 Cho phép raw layout primitives: `Row`, `Column`, `Stack`, `Wrap`, `Flex`,

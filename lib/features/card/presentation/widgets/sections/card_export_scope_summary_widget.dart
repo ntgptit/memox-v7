@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_icon_size.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../domain/models/card_export_scope_model.dart';
@@ -30,14 +30,10 @@ class CardExportScopeSummaryWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: <Widget>[
-        Icon(
-          switch (scope) {
-            CardExportWholeDeckScope() => Icons.style_outlined,
-            CardExportSelectionScope() => Icons.checklist,
-          },
-          size: AppIconSize.mdCompact,
-          color: context.colors.onSurfaceVariant,
-        ),
+        MxIcon(switch (scope) {
+          CardExportWholeDeckScope() => Icons.style_outlined,
+          CardExportSelectionScope() => Icons.checklist,
+        }, size: MxIconSize.mdCompact),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: Text(
