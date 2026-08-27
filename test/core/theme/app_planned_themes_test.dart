@@ -198,12 +198,28 @@ void main() {
   });
 
   group('overflow menu', () {
-    test('is the same paper as a dialog and a sheet', () {
+    // **This used to assert the opposite, and the assertion was the argument.**
+    // It pinned the menu to the dialog's paper at `elevation: 0` on the
+    // reasoning that a menu is a small sheet. What a dialog and a sheet both
+    // have and a menu does not is a scrim: they can afford `surface` because
+    // 48–72% of black separates them from the page. A menu opening over a card
+    // on the same paper lifted off it by 0.00 L*.
+    //
+    // The measurement lives in `component_depth_and_state_test.dart`; what is
+    // asserted here is the distinction itself, so that restoring the old value
+    // fails against the reason rather than against a number.
+    test('is not the dialog paper, because a menu has no scrim', () {
       for (final entry in themes.entries) {
         final menu = entry.value.popupMenuTheme;
 
-        expect(menu.color, entry.value.dialogTheme.backgroundColor);
-        expect(menu.elevation, AppElevation.none);
+        expect(
+          menu.color,
+          isNot(entry.value.dialogTheme.backgroundColor),
+          reason:
+              '${entry.key}: a menu and a dialog are only alike until you ask '
+              'what separates each from what is underneath it',
+        );
+        expect(menu.elevation, greaterThan(AppElevation.none));
         expect(menu.surfaceTintColor, Colors.transparent);
       }
     });
@@ -212,7 +228,11 @@ void main() {
       for (final entry in themes.entries) {
         final t = entry.value;
         final style = t.popupMenuTheme.labelTextStyle!;
-        final ground = t.colorScheme.surface;
+        // The menu's own paper, not `colorScheme.surface`. They were the same
+        // colour until the menu moved up a rung, and this line kept passing
+        // while measuring a ground the menu no longer paints on — the same
+        // mistake, in a test, that it exists to catch in the theme.
+        final ground = t.popupMenuTheme.color!;
 
         final enabled = style.resolve(const <WidgetState>{})!.color!;
         final disabled = Color.alphaBlend(

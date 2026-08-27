@@ -49,6 +49,20 @@ abstract final class AppElevation {
 /// matched on *border contrast* — light's border is now the lighter of the two —
 /// but on how far a card is lifted off the page in total. That is what
 /// `app_theme_test.dart` pins, and it is what a reader perceives.
+/// The shadow colour a **Material component** paints at a non-zero elevation.
+///
+/// [shadowsFor] is for surfaces this app draws itself; a `PopupMenuThemeData` or
+/// a `Card` takes an `elevation` and paints its own shadow, so the only place to
+/// answer "which mode paints one" is the colour. Transparent in dark, for the
+/// measurement in [shadowsFor]'s comment and not for a second reason.
+///
+/// **The level still travels in both modes.** AD-14 keeps the scale and the
+/// paint apart precisely so dark can opt out of shadows without opting out of
+/// depth — a component that dropped to `elevation: 0` in dark would be saying
+/// it is flush with what is behind it, which is not what dark means.
+Color materialShadowColor(ColorScheme scheme) =>
+    scheme.brightness == Brightness.dark ? Colors.transparent : scheme.shadow;
+
 List<BoxShadow> shadowsFor(double level, ColorScheme scheme) {
   if (level <= AppElevation.none) return const <BoxShadow>[];
   if (scheme.brightness == Brightness.dark) return const <BoxShadow>[];

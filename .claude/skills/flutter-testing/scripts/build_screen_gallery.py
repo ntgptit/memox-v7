@@ -85,6 +85,10 @@ SCREENS = [
     ('Deck — overlay', 'deck_scheduler_change', 'Change study mode', '"Study mode" xuất hiện hai lần (O4)'),
     ('Deck — overlay', 'deck_starter_library', 'Starter library', 'UC-01; in mã locale thô (O5)'),
     ('Card', 'card_list', 'Card list', 'Toolbar lọc + pill trạng thái'),
+    # M99.63: bốn PopupMenuButton tồn tại và không cái nào từng có ảnh —
+    # menu vẽ cùng giấy với card nó mở đè lên, nổi 0.00 L*, và mọi assertion
+    # về nó vẫn xanh. Hai mode vì độ nổi được dựng khác nhau ở mỗi mode.
+    ('Card', 'card_overflow_menu', 'Overflow menu', 'Import / Export / Manage tags, mở đè lên list'),
     ('Card', 'card_editor_edit', 'Card editor', 'Sửa nội dung, tag, cờ; danger zone'),
     ('Card', 'card_detail', 'Card detail', 'Ba bề mặt: hero, panel lịch, timeline (M99.60)'),
     ('Card', 'card_detail_sm2', 'Card detail — sm2', 'Ba vắng mặt: divider, chip cờ, accent'),
