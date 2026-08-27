@@ -113,13 +113,20 @@ class _MxBreadcrumbStepState extends State<_MxBreadcrumbStep> {
     final ink = _isHovered
         ? context.colors.onSurface
         : context.colors.onSurfaceVariant;
-    final style = context.texts.labelMedium?.copyWith(
-      color: ink,
-      fontWeight: FontWeight.w600,
-      decoration: _isHovered || _isFocused ? TextDecoration.underline : null,
-      decorationColor: ink,
-      decorationThickness: _isFocused ? _kFocusUnderlineThickness : null,
-    );
+    // Through the wght axis — a bare `fontWeight:` paints the rung's old
+    // weight.
+    final style =
+        AppTypography.withWeight(
+          context.texts.labelMedium!,
+          FontWeight.w600,
+        ).copyWith(
+          color: ink,
+          decoration: _isHovered || _isFocused
+              ? TextDecoration.underline
+              : null,
+          decorationColor: ink,
+          decorationThickness: _isFocused ? _kFocusUnderlineThickness : null,
+        );
 
     return Semantics(
       button: true,

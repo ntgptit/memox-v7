@@ -22,22 +22,33 @@ Policy:
 
 ## XI. Raw widgets không nên có visual freedom ở feature layer
 
-Guard trực tiếp trong `lib/features/**`. **Trạng thái hiện tại:**
-`memox_v7.design_system.no_raw_button` phủ bốn nút đầu; các mục còn lại là
-đích mở rộng của guard, mỗi mục thêm phải kèm lượt chạy chứng minh rule bắn
-đúng site hiện có (hoặc 0) trước khi ship — như bốn nút đã làm ở M99.61.
+Guard trực tiếp trong `lib/features/**`. **Trạng thái hiện tại:** ba rule
+phủ phần đánh dấu `[x]` — `no_raw_button` (bốn nút, M99.61), `no_raw_widget`
+và `no_raw_style_escape` (M99.64). Mỗi mục thêm phải kèm lượt chạy chứng minh
+**hai chiều**: rule bắn đúng site hiện có (hoặc một probe file cố ý vi phạm)
+rồi về 0 — và đếm site phải dùng `[<(]` chứ không chỉ `\(`, vì
+`RadioListTile<T>(` và `showModalBottomSheet<void>(` lọt lưới `\(` trần.
+
+**Nhóm hoãn có lý do, tính đến M99.64** — mỗi mục là "có site đang dùng mà
+chưa có wrapper", đúng thứ tự admission (wrapper trước, guard sau):
+`SnackBar` (7 site; cần `MxMessenger` kèm quyết định liveRegion),
+`InkWell` (5), `Switch`/`SwitchListTile` (3), `RadioListTile` (2),
+`CheckboxListTile` (1), `TextField` (1 — ô điền của study fill mode),
+chips (2), `PopupMenuButton` (4), `DropdownButton` (2 legacy).
+`showModalBottomSheet` **không** vào danh sách cấm: 16 site là chính pattern
+hợp lệ của repo — hàm `showX` trong bucket `overlays/` gọi nó trực tiếp.
 
 - [x] `FilledButton`
 - [x] `OutlinedButton`
 - [x] `TextButton`
 - [x] `ElevatedButton`
-- [ ] `IconButton`
-- [ ] `FloatingActionButton`
-- [ ] `Card`
-- [ ] `ListTile`
-- [ ] `Checkbox`
+- [x] `IconButton`
+- [x] `FloatingActionButton`
+- [x] `Card`
+- [x] `ListTile`
+- [x] `Checkbox`
 - [ ] `CheckboxListTile`
-- [ ] `Radio`
+- [x] `Radio`
 - [ ] `RadioListTile`
 - [ ] `Switch`
 - [ ] `SwitchListTile`
@@ -45,32 +56,32 @@ Guard trực tiếp trong `lib/features/**`. **Trạng thái hiện tại:**
 - [ ] `FilterChip`
 - [ ] `ActionChip`
 - [ ] `InputChip`
-- [ ] `SegmentedButton`
+- [x] `SegmentedButton`
 - [ ] `TextField`
-- [ ] `TextFormField`
-- [ ] `NavigationBar`
-- [ ] `NavigationDrawer`
-- [ ] `NavigationRail`
-- [ ] `BottomNavigationBar`
-- [ ] `BottomAppBar`
-- [ ] `Dialog`
-- [ ] `AlertDialog`
-- [ ] Direct `showDialog` nếu wrapper API đã tồn tại
+- [x] `TextFormField`
+- [x] `NavigationBar`
+- [x] `NavigationDrawer`
+- [x] `NavigationRail`
+- [x] `BottomNavigationBar`
+- [x] `BottomAppBar`
+- [x] `Dialog`
+- [x] `AlertDialog`
+- [x] Direct `showDialog`
 - [ ] Direct `showModalBottomSheet`
 - [ ] `PopupMenuButton`
-- [ ] `DropdownMenu`
+- [x] `DropdownMenu`
 - [ ] `DropdownButton`
 - [ ] `SnackBar`
-- [ ] `MaterialBanner`
-- [ ] `SearchBar`
-- [ ] `SearchAnchor`
-- [ ] `Slider`
-- [ ] `RangeSlider`
-- [ ] `TabBar`
-- [ ] `ExpansionTile`
-- [ ] `Badge`
+- [x] `MaterialBanner`
+- [x] `SearchBar`
+- [x] `SearchAnchor`
+- [x] `Slider`
+- [x] `RangeSlider`
+- [x] `TabBar`
+- [x] `ExpansionTile`
+- [x] `Badge`
 - [ ] Direct interactive `InkWell`
-- [ ] Direct interactive `InkResponse`
+- [x] Direct interactive `InkResponse`
 
 Cho phép raw layout primitives: `Row`, `Column`, `Stack`, `Wrap`, `Flex`,
 `Expanded`, `Flexible`, `Align`, `Center`, `Positioned`, `Padding`, `SizedBox`,
@@ -81,18 +92,22 @@ visual language.
 
 Trong `lib/features/**`, fail CI nếu xuất hiện visual escapes như:
 
-- [ ] `Color(`
-- [ ] `Colors.`
-- [ ] `TextStyle(`
-- [ ] `BorderRadius.circular(`
-- [ ] `BorderSide(`
-- [ ] `BoxShadow(`
-- [ ] `ButtonStyle(`
-- [ ] `.styleFrom(`
-- [ ] `ShapeDecoration(`
-- [ ] `RoundedRectangleBorder(`
-- [ ] Arbitrary `Icon(size:)`
-- [ ] Raw interactive Material widgets nằm trong banned list
+- [x] `Color(` — `no_raw_color` (design-token)
+- [x] `Colors.` — `no_raw_color`
+- [x] `TextStyle(` — `no_raw_text_style`
+- [x] `BorderRadius.circular(` số trần — `no_raw_border_radius`
+- [x] `BorderSide(` — `no_raw_style_escape` (M99.64)
+- [x] `BoxShadow(` — `no_raw_style_escape`
+- [x] `ButtonStyle(` — `no_raw_style_escape`
+- [x] `.styleFrom(` — `no_raw_style_escape`
+- [x] `ShapeDecoration(` — `no_raw_style_escape`
+- [x] `RoundedRectangleBorder(` — `no_raw_style_escape`
+- [x] `Icon(size:` số trần — `no_raw_style_escape`
+- [x] `WidgetStateProperty`/`MaterialStateProperty` — `no_raw_style_escape`
+- [x] `fontWeight: FontWeight.` — `no_bare_font_weight`, scope rộng hơn
+      (cả `lib/shared` và `lib/core/theme`), vì cả ba lần bug này sống đều
+      không nằm trong features-only
+- [x] Raw interactive Material widgets — `no_raw_button` + `no_raw_widget`
 
 Allowlist chỉ dành cho:
 

@@ -13504,8 +13504,60 @@ menu với thứ **phía sau** nó, và không thứ gì vẽ nó ra cho một n
 - **Emulator:** `not run — scoped host verification`. Không có binding, plugin,
   route hay persistence nào bị đụng; đây là ba giá trị trong `ThemeData`.
 - **Checklist phases:** 7, 13
+### M99.64 · Guard hoá design-language checklist — ba rule mới, và mười một bug đi kèm
 
-### M99.64 · Drag handle của BottomSheet là một button, không phải trang trí
+- **Status:** **done** — phần cơ khí hoá được của skill `flutter-theme-design`
+  (§XI, §XIV), chuyển từ checklist sang ruleset `memox-v7`. Guard 75 rule.
+- **Goal:** feature layer không dựng được widget/style mà design system đã sở
+  hữu, và lỗi weight-không-axis không thể quay lại lần thứ tư.
+- **Scope:** ruleset guard (ba rule mới), 11 site `fontWeight:` sửa qua
+  `withWeight`, `MxFab` mới + shape FAB dời vào theme, 3 site migrate
+  (FAB / `IconButton` / `ListTile`), skill cập nhật hiện trạng. **Không** đổi
+  hành vi nào ngoài weight vẽ đúng.
+- **Tests required:** probe file cố ý vi phạm làm cả 3 rule bắn rồi về 0
+  (bằng chứng hai chiều); `MxFab` smoke (tooltip + semantics từ một chuỗi,
+  không màu/shape trên widget); shape FAB pin trong `app_theme_test`.
+- **Checklist phases:** Phase 7 (components) · Phase 21 (guard/CI).
+- **Ba rule mới, mỗi cái đã chứng minh hai chiều bằng probe:**
+  - `no_raw_widget` — 29 widget cấm trong `presentation_files`, chỉ những cái
+    **0-hit sau khi đếm bằng `[<(]`** (lưới `\(` trần bỏ sót
+    `RadioListTile<T>(` — probe đầu bắt được đúng lỗi đếm đó).
+  - `no_raw_style_escape` — `ButtonStyle`/`styleFrom`/`BorderSide`/`BoxShadow`/
+    `ShapeDecoration`/`RoundedRectangleBorder`/`WidgetStateProperty`/`Icon`
+    size trần.
+  - `no_bare_font_weight` — `fontWeight: FontWeight.` trên
+    `ui_and_theme_surfaces`; pattern cố ý đòi literal `FontWeight.` nên
+    `withWeight` (viết `fontWeight: weight`) không bao giờ match. Mọi pattern
+    mang miễn trừ dòng comment — dry run đầu flag một doc comment đang giải
+    thích vì sao chỗ đó *không còn* là IconButton thô.
+- **Mười một bug thật rơi ra từ việc đếm:** 8 site features + 3 site shared
+  (`mx_breadcrumb_step`, `mx_progress_bar`, `mx_search_field`) cùng class với
+  NavigationBar ở M99.61 — `copyWith(fontWeight: w600)` trần trên rung
+  variable-font, báo 600 vẽ 500. Tất cả chuyển qua `withWeight`; đây là lần
+  thứ ba class bug này bị bắt bằng tay, và là lý do rule thứ ba tồn tại.
+- **Nhóm hoãn có lý do, ghi trong skill §XI:** `SnackBar` (7, cần `MxMessenger`
+  kèm quyết định liveRegion), `InkWell` (5), `Switch`/`SwitchListTile` (3),
+  `RadioListTile` (2), `CheckboxListTile` (1), `TextField` (1), chips (2),
+  `PopupMenuButton` (4), `DropdownButton` (2). `showModalBottomSheet` không
+  cấm: 16 site là pattern `showX` hợp lệ của bucket `overlays/`.
+- **Output:** `code-verification-guard-v2/.../memox-design-system-rules.yaml`;
+  `lib/shared/widgets/mx_fab.dart` (mới); `lib/core/theme/app_theme.dart`
+  (shape FAB); 11 file sửa weight; 3 file migrate;
+  `.claude/skills/flutter-theme-design/references/legacy-and-guards.md`;
+  `widgetbook` (MxFab); test như trên; goldens `test/demo/`.
+- **Acceptance criteria:**
+  - [x] Guard 75 rule xanh trên cây hiện tại; probe làm đúng 3 rule mới đỏ.
+  - [x] `lib/` không còn `fontWeight: FontWeight.` nào ngoài miễn trừ cấu trúc.
+  - [x] FAB của deck list giữ nguyên hình (shape theo theme, cùng giá trị).
+  - [x] `flutter analyze` sạch; full host suite xanh; goldens regenerate
+        (`TZ=UTC`); gallery publish lại đúng URL ghim.
+- **Emulator integration suite:** **not run — guard/presentation only.** Không
+  feature, route, binding, persistence hay platform behavior mới. Đây không
+  phải một lượt chạy xanh.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.61
+
+### M99.65 · Drag handle của BottomSheet là một button, không phải trang trí
 
 - **Status:** **done** — một slot `ThemeData`, không đổi widget hay hành vi.
 - **Goal:** Handle đạt ngưỡng của thứ nó thật sự là, và hai state mà SDK có
@@ -13519,7 +13571,10 @@ menu với thứ **phía sau** nó, và không thứ gì vẽ nó ra cho một n
   - [x] `dragged` đổi màu thật, và đổi theo hướng **đậm lên**.
   - [x] `hovered` đọc giống `dragged`.
   - [x] Cả hai assertion đã kiểm **đỏ** bằng cách gỡ fix.
-- **Dependencies:** M99.63 (cùng loại lỗi, cùng token).
+- **Dependencies:** M99.63 (cùng loại lỗi, cùng token). **Mục này từng mang số
+  M99.64 và phải đổi:** #370 lấy đúng số ấy và landed trước trong lúc PR này
+  chờ CI. Cùng cái bẫy M99.62 đã ghi — một ID chưa vào `main` thì chưa phải
+  của mình.
 - **Tests required:** `component_depth_and_state_test.dart`, 26 golden sheet.
 - **Emulator:** `not run — scoped host verification`.
 - **Checklist phases:** 7, 13

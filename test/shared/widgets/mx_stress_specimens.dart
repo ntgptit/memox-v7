@@ -11,6 +11,7 @@ import 'package:memox/shared/widgets/mx_dialog_tone.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_form_dialog.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
+import 'package:memox/shared/widgets/mx_fab.dart';
 import 'package:memox/shared/widgets/mx_icon_button.dart';
 import 'package:memox/shared/widgets/mx_list_tile.dart';
 import 'package:memox/shared/widgets/mx_loading_state.dart';
@@ -108,6 +109,14 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
         variant: MxActionButtonVariant.secondary,
       ),
     ),
+    isInteractive: true,
+  ),
+  MxStressSpecimen(
+    // The FAB paints no text of its own, so the long-label stress runs through
+    // its tooltip/semantic name rather than its layout.
+    name: 'MxFab',
+    build: () =>
+        const MxFab(icon: Icons.add, label: kLongLabel, onPressed: _noop),
     isInteractive: true,
   ),
   MxStressSpecimen(

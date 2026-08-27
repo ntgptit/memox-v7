@@ -371,6 +371,13 @@ ThemeData _buildTheme(
     floatingActionButtonTheme: FloatingActionButtonThemeData(
       backgroundColor: scheme.primary,
       foregroundColor: scheme.onPrimary,
+      // The house corner, stated here rather than at the one call site it
+      // used to live on (deck list): a FAB shape is component grammar, and
+      // M3's default is the 16dp large-component squircle this app does not
+      // use anywhere else.
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+      ),
       // **The state washes move with the pair, or they describe the old one.**
       // M3's defaults are not derived from the effective foreground — the SDK
       // hardcodes `onPrimaryContainer` at 8/10/10% — so overriding the resting

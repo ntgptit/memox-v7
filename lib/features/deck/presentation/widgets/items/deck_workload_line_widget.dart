@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../domain/models/deck_summary_model.dart';
@@ -142,10 +143,12 @@ class _WorkloadChip extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: context.texts.bodySmall?.copyWith(
-            color: ink,
-            fontWeight: FontWeight.w600,
-          ),
+          // Through the wght axis — a bare `fontWeight:` paints the rung's
+          // old weight.
+          style: AppTypography.withWeight(
+            context.texts.bodySmall!,
+            FontWeight.w600,
+          ).copyWith(color: ink),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),

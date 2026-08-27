@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_elevation.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/theme_context_extension.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
@@ -156,12 +157,17 @@ class _TemplateTile extends ConsumerWidget {
             row.isInstalled
                 ? context.l10n.starterLibraryInstalledLabel
                 : context.l10n.starterLibraryInstallAction,
-            style: context.texts.labelMedium?.copyWith(
-              color: row.isInstalled
-                  ? context.semanticColors.success
-                  : context.colors.onSurfaceVariant,
-              fontWeight: FontWeight.w600,
-            ),
+            // Through the wght axis — a bare `fontWeight:` paints the rung's
+            // old weight.
+            style:
+                AppTypography.withWeight(
+                  context.texts.labelMedium!,
+                  FontWeight.w600,
+                ).copyWith(
+                  color: row.isInstalled
+                      ? context.semanticColors.success
+                      : context.colors.onSurfaceVariant,
+                ),
           ),
         ],
       ),
