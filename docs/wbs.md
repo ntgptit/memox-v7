@@ -13108,7 +13108,10 @@ của M2.
   - [x] NavBar selected label mang `FontVariation('wght', 600)`, test phủ cả
         hai state.
   - [x] Ba wash state của FAB cùng màu `foregroundColor`, pin trong test.
-  - [x] Guard 72 rule xanh; rule mới đã chứng minh bắn 2 → 0 quanh migrate.
+  - [x] Guard 71 rule xanh (70 + `no_raw_button`; bản đầu của dòng này viết
+        72 — đếm theo trí nhớ thay vì theo dòng `Running rules:` của runner,
+        đúng lỗi mà bài học analyze-repo-wide đã cảnh báo); rule mới đã chứng
+        minh bắn 2 → 0 quanh migrate.
   - [x] `lib/features/` không còn nút Material thô nào.
   - [x] Compact: vẽ 40 (đo Material bên trong), chạm ≥48 (đo hộp ngoài).
   - [x] SnackBar và FAB cùng một chính sách độ sâu, pin bằng một assertion.
@@ -13507,7 +13510,8 @@ menu với thứ **phía sau** nó, và không thứ gì vẽ nó ra cho một n
 ### M99.64 · Guard hoá design-language checklist — ba rule mới, và mười một bug đi kèm
 
 - **Status:** **done** — phần cơ khí hoá được của skill `flutter-theme-design`
-  (§XI, §XIV), chuyển từ checklist sang ruleset `memox-v7`. Guard 75 rule.
+  (§XI, §XIV), chuyển từ checklist sang ruleset `memox-v7`. Guard 74 rule
+  (71 + 3; bản đầu viết 75 vì kế thừa con số 72 đã sai ở M99.61).
 - **Goal:** feature layer không dựng được widget/style mà design system đã sở
   hữu, và lỗi weight-không-axis không thể quay lại lần thứ tư.
 - **Scope:** ruleset guard (ba rule mới), 11 site `fontWeight:` sửa qua
@@ -13546,7 +13550,7 @@ menu với thứ **phía sau** nó, và không thứ gì vẽ nó ra cho một n
   `.claude/skills/flutter-theme-design/references/legacy-and-guards.md`;
   `widgetbook` (MxFab); test như trên; goldens `test/demo/`.
 - **Acceptance criteria:**
-  - [x] Guard 75 rule xanh trên cây hiện tại; probe làm đúng 3 rule mới đỏ.
+  - [x] Guard 74 rule xanh trên cây hiện tại; probe làm đúng 3 rule mới đỏ.
   - [x] `lib/` không còn `fontWeight: FontWeight.` nào ngoài miễn trừ cấu trúc.
   - [x] FAB của deck list giữ nguyên hình (shape theo theme, cùng giá trị).
   - [x] `flutter analyze` sạch; full host suite xanh; goldens regenerate
@@ -13691,6 +13695,112 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 | `ref` sau `await` không kiểm `ref.mounted` | `memox.state_management.state_write_after_await_requires_mounted` |
 | Notifier có public mutable property | `memox.state_management.notifier_no_public_mutable_field` |
 | Provider thiếu khai báo dependency | **chưa có** — cần phân tích graph, không diễn đạt được bằng regex; vẫn thuộc code review |
+
+### M99.66 · AppInk + vai chữ — mực và chữ của feature thành tập đóng
+
+- **Status:** **done** — bước 1 của lộ trình "component chỉ call, chỉnh layout":
+  167 site pha style tại chỗ (89 file) về **0**, thay bằng một API đóng.
+- **Goal:** feature chọn *rung + vai/mực*, không bao giờ chọn `Color` hay pha
+  `TextStyle`; icon đứng độc lập cũng vậy.
+- **Scope:** `lib/core/theme/app_ink.dart` (mới — enum `AppInk` 17 mực +
+  `inked(context, ink, {isEmphasized, isTabular})`), `AppTextStyles` thêm bốn
+  vai (`sectionLabelSmall`, `listHeading`, `stateChipLabel`, `heroNumeral`),
+  `MxIcon` (mới, tone = `AppInk`, size enum, tự exclude semantics khi không
+  nhãn), migrate 89 file presentation + 3 shared, hai rule guard. **Không**
+  đổi hành vi; pixel chỉ đổi ở các site vốn khai đậm mà vẽ nhạt.
+- **Tests required:** `app_ink_test.dart` — mọi mực trên đúng nền của nó ở cả
+  hai theme (mực trang ≥4.5 trên surface *và* page; mực container đo trên
+  container; `warning` ghi nhận trung thực 4.33 trên trang light — đúng con số
+  card_tile đã ghi — nên pin 4.5-trên-surface + 3.0-trên-trang thay vì hứa
+  quá); `inked` pin trục `wght` và "metrics thuộc về rung"; probe hai chiều
+  cho hai rule.
+- **Checklist phases:** Phase 6 (theme) · Phase 7 (components) · Phase 21
+  (guard).
+- **Hai rule guard mới — 74 → 76, đọc từ dòng `Running rules:` của runner đúng như M99.64 dặn:** `no_text_restyle`
+  (cấm `texts.*.copyWith` **và** đường vòng `withWeight(...).copyWith` mà
+  chính migration M99.64 từng viết ra; `withWeight` thuần vẫn hợp lệ) và
+  `no_raw_icon_color` (`Icon(color:)` mở; ngoại lệ duy nhất là
+  `<AppInk>.resolve(context)` cho size không có bậc). Probe làm đúng hai rule
+  đỏ rồi về 0.
+- **Phân cụm là thứ thiết kế API, không phải gu:** 81/167 site là "rung này,
+  mực phụ" → `AppInk.quiet`; 27 site họ danger/error; phần đuôi là mực đổi
+  theo state → các switch đổi kiểu trả về từ `Color` sang `AppInk`
+  (`cardStateInk`, `cardActionToneInk`, skin của match tile, stepper import).
+  Bốn tổ hợp có cấu trúc thành vai đặt tên thay vì knob mới.
+- **Bug thứ 12 của class weight-không-axis rơi ra từ migration:**
+  `heroNumeral` từng lắp tại chỗ bằng `fontWeight: heroNumeralWeight` trần —
+  khai weight thứ tư của app và vẽ weight mặc định. Vai mới sửa nó; 23 golden
+  đổi gồm các màn hero-số và những site cluster mang `w600` trần cùng loại.
+- **Emulator integration suite:** **not run — theme/presentation only.** Đây
+  không phải một lượt chạy xanh.
+- **Output:** như Scope; `widgetbook` (MxIcon + knob); stress specimen MxIcon;
+  skill `flutter-theme-design` cập nhật hiện trạng §2/§3/§XIV; goldens.
+- **Acceptance criteria:**
+  - [x] `lib/features/` có **0** `texts.*.copyWith`, 0 `withWeight().copyWith`,
+        0 `Icon(color:)` ngoài dạng `.resolve(`.
+  - [x] Guard xanh trên cây; probe làm đúng 2 rule mới đỏ.
+  - [x] `app_ink_test` xanh cả hai theme; full host suite 4126 xanh.
+  - [x] Goldens regenerate (`TZ=UTC`); gallery publish lại đúng URL ghim.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.64
+
+### M99.67 · MxMessenger + MxPressable — thông điệp và bề mặt bấm thành tập đóng
+
+- **Status:** **done** — bước 2 của lộ trình "component chỉ call, chỉnh layout":
+  7 site tự lắp `SnackBar` và 5 site `InkWell` trần về **0**.
+- **Goal:** một cách duy nhất để nói điều gì đó thoáng qua, và một cách duy
+  nhất để một bề mặt tự vẽ nhận ripple — kèm sàn chạm 48 không còn là việc
+  của từng call site.
+- **Scope:** `mx_messenger.dart` (mới — `showMxMessage` + `showMxMessageOn`
+  cho messenger bắt trước `await`; liveRegion + `clearSnackBars` cho *mọi*
+  thông điệp, quyết định lấy từ chính tuyên bố sẵn trong repo ở
+  `mx_undo_snack_bar` và trash; **không** chế tone family vì design chưa định
+  nghĩa), `mx_pressable.dart` (mới — Material transparency + InkWell + sàn
+  `minimumTouchTarget`, shape từ tập đóng `AppRadius` none/sm/md; **không**
+  vẽ gì, semantics thuộc caller), migrate 12 site, theme khai tường minh
+  `actionTextColor: inversePrimary`. Đổi hành vi có chủ đích: hai site từng
+  chỉ `hideCurrentSnackBar` nay clear cả hàng đợi; bốn site từng không
+  announce nay announce; toggle details 36dp nhận sàn 48 (nở vào vùng trống
+  cuối form nên golden không đổi pixel — audit đếm được +1 lớp Material).
+- **Hai lối thoát regex theo dòng, phát hiện khi đếm site:** 40 site `Icon(`
+  xuống dòng trước `color:` và 7 site `textTheme.X.copyWith` — guard theo
+  dòng của M99.66 báo sạch trong khi cây còn 47 chỗ hở. Migrate hết; vá
+  `textTheme` bằng pattern mới trong `no_text_restyle`, vá multiline `Icon`
+  bằng `test/app/icon_ink_boundary_test.dart` (quét ngoặc cân bằng, tiền lệ
+  `architecture_boundary_test`): **rule cần thấy cấu trúc thì thành test
+  Dart, không nhồi vào regex.** Probe hai chiều cho cả guard lẫn test — và
+  chính lượt revert probe xoá mất hai migration; pattern mới bắt lại đúng
+  một trong hai, boundary test không kêu vì site đó là `textTheme` chứ không
+  phải `Icon` — hai lớp lưới bắt đúng phần việc của mình.
+- **Trong lượt:** trash checkbox `primary` → `AppInk.secondary` (thẳng hàng
+  quyết định selected-mark đã ghi ở card tile); radio direction-chooser
+  unselected `null` → `quiet`; `deck_icon_area` đổi param `tint` sang
+  `AppInk`.
+- **Tests required:** `mx_messenger_test` (liveRegion qua `ensureSemantics`,
+  clear-thay-vì-xếp-hàng, action label+handler, messenger sống lâu hơn
+  context, assert cặp label/handler); `mx_pressable_test` (sàn 48 với child
+  12dp, Material transparency trong DecoratedBox, mapping shape, tap/long
+  press, null onTap); stress specimen MxPressable; hai audit
+  (card_editor, trash) cập nhật số lớp ink/clip **kèm lý do đếm được**.
+- **Checklist phases:** Phase 7 (components) · Phase 21 (guard).
+- **Guard:** vẫn **76 rule** (đọc từ `Running rules:`) — mở rộng pattern
+  `no_raw_widget` (`SnackBar(`, `SnackBarAction(`, `InkWell(`,
+  `.showSnackBar(`) và `no_text_restyle`, không thêm rule mới.
+  `ScaffoldMessenger.of` **không** cấm: bắt messenger trước `await` là đầu
+  vào thiết kế của `showMxMessageOn`.
+- **Emulator integration suite:** **not run — theme/presentation only.** Đây
+  không phải một lượt chạy xanh.
+- **Output:** như Scope; widgetbook (MxPressable + knob shape/enabled); skill
+  `flutter-theme-design` §XI đánh dấu SnackBar + InkWell, ghi bài học
+  boundary-test; goldens regenerate không đổi pixel.
+- **Acceptance criteria:**
+  - [x] `lib/features/` có 0 `SnackBar(`, 0 `InkWell(`, 0 `.showSnackBar(`
+        ngoài `showMxMessageOn`, 0 `textTheme.X.copyWith`, 0 multiline
+        `Icon(color:)`.
+  - [x] Probe hai chiều: guard đỏ 4 pattern + boundary test đỏ, gỡ về 0.
+  - [x] `flutter analyze` 0; guard xanh; goldens `TZ=UTC` 295 xanh.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.66
 
 ## Known technical debt
 

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_icon_size.dart';
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_pressable.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../domain/failures/card_validation_failure.dart';
 import 'card_editor_field_widget.dart';
 
@@ -51,9 +53,7 @@ class CardEditorDetailsWidget extends StatelessWidget {
       children: <Widget>[
         Text(
           context.l10n.cardEditorDetailsHeading,
-          style: context.texts.labelMedium?.copyWith(
-            color: context.colors.onSurfaceVariant,
-          ),
+          style: context.texts.labelMedium!.inked(context, AppInk.quiet),
         ),
         const SizedBox(height: AppSpacing.md),
         CardEditorFieldWidget(
@@ -105,40 +105,35 @@ class CardEditorDetailsWidget extends StatelessWidget {
   /// screen reader announces a button whose label changes for no stated
   /// reason. `toggled` would be the wrong word: this is not a setting.
   Widget _buildDisclosure(BuildContext context) {
-    final accent = context.semanticColors.primaryAccent;
-
     return Semantics(
       container: true,
       button: true,
       expanded: isExpanded,
-      child: InkWell(
+      // The whole row is the target, not the glyph inside it — MxPressable
+      // floors it at 48 and keeps the wrap room textScaler 2.0 needs.
+      child: MxPressable(
         onTap: onToggle,
-        borderRadius: BorderRadius.circular(AppSpacing.sm),
-        child: ConstrainedBox(
-          // The whole row is the target, not the glyph inside it. `minHeight`
-          // rather than a fixed height: at `textScaler` 2.0 the VI label wraps
-          // to two lines and a fixed row would clip it.
-          constraints: const BoxConstraints(
-            minHeight: AppSpacing.minimumTouchTarget,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-            child: Row(
-              children: <Widget>[
-                Expanded(
-                  child: Text(
-                    context.l10n.cardEditorDetailsToggle,
-                    style: context.texts.labelLarge?.copyWith(color: accent),
+        shape: MxPressableShape.sm,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+          child: Row(
+            children: <Widget>[
+              Expanded(
+                child: Text(
+                  context.l10n.cardEditorDetailsToggle,
+                  style: context.texts.labelLarge!.inked(
+                    context,
+                    AppInk.accent,
                   ),
                 ),
-                const SizedBox(width: AppSpacing.sm),
-                // **Chevron-down, not a leading `+`, and not `chevron_right`.**
-                // `+` said "add a thing", which is what the *fields* do, not
-                // what the toggle does; `chevron_right` is the platform's word
-                // for "another screen", and this opens in place.
-                Icon(Icons.expand_more, size: AppIconSize.md, color: accent),
-              ],
-            ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              // **Chevron-down, not a leading `+`, and not `chevron_right`.**
+              // `+` said "add a thing", which is what the *fields* do, not
+              // what the toggle does; `chevron_right` is the platform's word
+              // for "another screen", and this opens in place.
+              const MxIcon(Icons.expand_more, ink: AppInk.accent),
+            ],
           ),
         ),
       ),

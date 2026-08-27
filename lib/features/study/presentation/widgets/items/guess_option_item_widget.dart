@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_durations.dart';
-import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_motion_policy.dart';
 import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_stroke.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_pressable.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 
 /// What one option looks like once the question has been answered.
 ///
@@ -66,15 +68,15 @@ class GuessOptionItemWidget extends StatelessWidget {
     final semantic = context.semanticColors;
     final ground = scheme.surfaceContainerLowest;
 
-    final accent = switch (state) {
-      GuessOptionState.correct => semantic.success,
-      GuessOptionState.chosenWrong => semantic.danger,
+    final AppInk? accent = switch (state) {
+      GuessOptionState.correct => AppInk.success,
+      GuessOptionState.chosenWrong => AppInk.danger,
       GuessOptionState.open || GuessOptionState.dimmed => null,
     };
     // The surface never moves. Every state sits on the row's own fill, and the
     // one that reads differently is the one that says so at its edge.
     final outline =
-        accent ??
+        accent?.resolve(context) ??
         // The row's fill sits 1.06:1 from the page, so the border is doing all
         // the separating — and a row is a control (WCAG 1.4.11), not a card.
         semantic.borderControl;
@@ -112,37 +114,35 @@ class GuessOptionItemWidget extends StatelessWidget {
             borderRadius: radius,
             border: Border.all(color: outline, width: outlineWidth),
           ),
-          child: Material(
-            // The container paints the surface; this exists for the ripple.
-            type: MaterialType.transparency,
-            child: InkWell(
-              onTap: onTap,
-              borderRadius: radius,
-              child: Padding(
-                padding: AppGuessOption.rowPadding,
-                child: Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: Text(
-                        text,
-                        // **14 and regular, not 16 and semibold.** A meaning is
-                        // a sentence, not a heading: real content here runs to
-                        // "Deep sleep / Giấc ngủ sâu (Danh từ, trạng thái ngủ
-                        // ngon không bị gián đoạn…)" and at 16/w600 five of
-                        // those are a wall. `bodyMedium` also carries the 1.45
-                        // line height, which is what makes the third line of a
-                        // wrapped meaning readable rather than crowded.
-                        style: context.texts.bodyMedium?.copyWith(
-                          color: accent ?? scheme.onSurface,
-                        ),
+          // MxPressable is the Material+InkWell pair in one piece; the
+          // container above still paints the surface.
+          child: MxPressable(
+            onTap: onTap,
+            child: Padding(
+              padding: AppGuessOption.rowPadding,
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Text(
+                      text,
+                      // **14 and regular, not 16 and semibold.** A meaning is
+                      // a sentence, not a heading: real content here runs to
+                      // "Deep sleep / Giấc ngủ sâu (Danh từ, trạng thái ngủ
+                      // ngon không bị gián đoạn…)" and at 16/w600 five of
+                      // those are a wall. `bodyMedium` also carries the 1.45
+                      // line height, which is what makes the third line of a
+                      // wrapped meaning readable rather than crowded.
+                      style: context.texts.bodyMedium!.inked(
+                        context,
+                        accent ?? AppInk.stated,
                       ),
                     ),
-                    if (verdict != null) ...<Widget>[
-                      const SizedBox(width: AppSpacing.sm),
-                      Icon(verdict, size: AppIconSize.sm, color: accent),
-                    ],
+                  ),
+                  if (verdict != null) ...<Widget>[
+                    const SizedBox(width: AppSpacing.sm),
+                    MxIcon(verdict, size: MxIconSize.sm, ink: accent!),
                   ],
-                ),
+                ],
               ),
             ),
           ),

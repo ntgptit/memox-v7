@@ -1,11 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_icon_size.dart';
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../../shared/widgets/mx_session_top_bar.dart';
 import '../../../domain/models/study_mode.dart';
@@ -186,10 +186,7 @@ class _ContextLine extends StatelessWidget {
       // rather than of whichever fragment a translator happened to shout, and
       // leaves the ARB holding words rather than styling.
       (extra == null ? base : '$base · $extra').toUpperCase(),
-      style: context.texts.labelSmall?.copyWith(
-        color: context.colors.onSurfaceVariant,
-        letterSpacing: AppTypography.sectionLabelTracking,
-      ),
+      style: context.textStyles.sectionLabelSmall.inked(context, AppInk.quiet),
       textAlign: TextAlign.center,
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
@@ -246,15 +243,13 @@ class _Figure extends StatelessWidget {
     maxLines: 1,
     softWrap: false,
     overflow: TextOverflow.ellipsis,
-    // Through the wght axis — a bare `fontWeight:` paints the rung's old
-    // weight.
-    style: AppTypography.withWeight(context.texts.labelMedium!, FontWeight.w600)
-        .copyWith(
-          color: context.colors.onSurface,
-          // Tabular figures so a counter ticking 9 -> 10 does not shift the
-          // row.
-          fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
-        ),
+    // Tabular so a counter ticking 9 -> 10 does not shift the row.
+    style: context.texts.labelMedium!.inked(
+      context,
+      AppInk.stated,
+      isEmphasized: true,
+      isTabular: true,
+    ),
   );
 }
 
@@ -278,22 +273,17 @@ class _HintLine extends StatelessWidget {
     final hint = hintOverride ?? context.studyModeHint(mode);
     if (hint == null) return const SizedBox.shrink();
 
-    final style = context.texts.bodySmall?.copyWith(
-      color: context.colors.onSurfaceVariant,
-    );
+    final style = context.texts.bodySmall!.inked(context, AppInk.quiet);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        Icon(
+        MxIcon(
           context.studyModeHintIcon(mode),
           // **The icon step, not the line's font size.** Tying it to the text
-          // put a 12px glyph beside 12px copy, and a mark that small reads as a
-          // speck rather than as the thing that classifies the sentence.
-          // [AppIconSize.sm] is the step named for exactly this — inline with
-          // body text — and it is what the handout asks for.
-          size: AppIconSize.sm,
-          color: context.colors.onSurfaceVariant,
+          // put a 12px glyph beside 12px copy, and a mark that small reads as
+          // a speck rather than as the thing that classifies the sentence.
+          size: MxIconSize.sm,
         ),
         const SizedBox(width: AppSpacing.sm),
         // `Flexible`, not `Expanded`: the row is centred, so a child that took

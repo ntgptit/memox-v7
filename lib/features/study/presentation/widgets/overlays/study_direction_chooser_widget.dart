@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/error/failure.dart';
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../../../shared/widgets/mx_list_tile.dart';
 import '../../../domain/failures/study_refusal_failure.dart';
@@ -122,9 +124,7 @@ class _StudyDirectionChooserState extends State<StudyDirectionChooserWidget> {
             const SizedBox(height: AppSpacing.xs),
             Text(
               l10n.studyDirectionBody,
-              style: context.texts.bodyMedium?.copyWith(
-                color: context.colors.onSurfaceVariant,
-              ),
+              style: context.texts.bodyMedium!.inked(context, AppInk.quiet),
             ),
             const SizedBox(height: AppSpacing.md),
             for (final option in kStudyDirectionOptions) _tile(context, option),
@@ -138,9 +138,7 @@ class _StudyDirectionChooserState extends State<StudyDirectionChooserWidget> {
                 liveRegion: true,
                 child: Text(
                   _messageFor(context, failure),
-                  style: context.texts.bodyMedium?.copyWith(
-                    color: context.colors.error,
-                  ),
+                  style: context.texts.bodyMedium!.inked(context, AppInk.error),
                 ),
               ),
             ],
@@ -199,7 +197,7 @@ class _StudyDirectionChooserState extends State<StudyDirectionChooserWidget> {
       title: context.studyDirection(option),
       subtitle: context.studyDirectionDescription(option),
       // The glyph carries the state; the tint only reinforces it.
-      leading: Icon(
+      leading: MxIcon(
         isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
         // `primaryAccent`, not `primary`. The glyph is the selection *signal*
         // here — the tile tint is only reinforcement — and `primary` on the
@@ -208,7 +206,9 @@ class _StudyDirectionChooserState extends State<StudyDirectionChooserWidget> {
         // decision is already recorded three times: `app_radio_theme.dart`
         // (2.90:1), `match_tile_widget.dart`, `card_details_section_widget.dart`
         // (3.29:1) — this is the fourth call site to reach it.
-        color: isSelected ? context.semanticColors.primaryAccent : null,
+        // Unselected inherits nothing here any more: `quiet` is the ink the
+        // tile's leading slot resolved to before.
+        ink: isSelected ? AppInk.accent : AppInk.quiet,
       ),
       isSelected: isSelected,
       // Locked while a start is in flight, so the choice cannot change under a

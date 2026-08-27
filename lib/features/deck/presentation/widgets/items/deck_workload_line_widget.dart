@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../domain/models/deck_summary_model.dart';
@@ -37,16 +37,13 @@ class DeckWorkloadLineWidget extends StatelessWidget {
     if (summary.totalCardCount == 0) {
       return Text(
         context.l10n.deckNoCardsLabel,
-        style: context.texts.bodySmall?.copyWith(
-          color: context.colors.onSurfaceVariant,
-        ),
+        style: context.texts.bodySmall!.inked(context, AppInk.quiet),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       );
     }
 
     final semantic = context.semanticColors;
-    final quiet = context.colors.onSurfaceVariant;
     final overdueCount = summary.overdueCardCount;
     final dueTodayCount = summary.dueCardCount - overdueCount;
     final hasDue = dueTodayCount > 0;
@@ -66,16 +63,20 @@ class DeckWorkloadLineWidget extends StatelessWidget {
         _WorkloadChip(
           label: overdueLabel,
           fill: context.colors.errorContainer,
-          ink: context.colors.onErrorContainer,
+          ink: AppInk.onErrorContainer,
         ),
       if (hasDue)
         _WorkloadChip(
           label: dueLabel,
           fill: semantic.dueContainer,
-          ink: semantic.onDueContainer,
+          ink: AppInk.onDueContainer,
         ),
       if (hasNew)
-        _WorkloadChip(label: newLabel, fill: semantic.surfaceMuted, ink: quiet),
+        _WorkloadChip(
+          label: newLabel,
+          fill: semantic.surfaceMuted,
+          ink: AppInk.quiet,
+        ),
     ];
     // **Nothing pending says so once** (owner review, 2026-08-21). It used to
     // print `0 due · 0 new`, on the argument that an absent metric is
@@ -91,7 +92,7 @@ class DeckWorkloadLineWidget extends StatelessWidget {
         _WorkloadChip(
           label: context.l10n.deckTileAllCaughtUpLabel,
           fill: semantic.surfaceMuted,
-          ink: quiet,
+          ink: AppInk.quiet,
         ),
       );
     }
@@ -127,7 +128,7 @@ class _WorkloadChip extends StatelessWidget {
 
   final String label;
   final Color fill;
-  final Color ink;
+  final AppInk ink;
 
   @override
   Widget build(BuildContext context) {
@@ -143,12 +144,11 @@ class _WorkloadChip extends StatelessWidget {
         ),
         child: Text(
           label,
-          // Through the wght axis — a bare `fontWeight:` paints the rung's
-          // old weight.
-          style: AppTypography.withWeight(
-            context.texts.bodySmall!,
-            FontWeight.w600,
-          ).copyWith(color: ink),
+          style: context.texts.bodySmall!.inked(
+            context,
+            ink,
+            isEmphasized: true,
+          ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -125,16 +126,12 @@ class _StarterInstallFormState extends ConsumerState<_StarterInstallForm> {
         const SizedBox(height: AppSpacing.xs),
         Text(
           context.l10n.starterLibraryCardCount(widget.template.cardCount),
-          style: context.texts.bodySmall?.copyWith(
-            color: context.colors.onSurfaceVariant,
-          ),
+          style: context.texts.bodySmall!.inked(context, AppInk.quiet),
         ),
         const SizedBox(height: AppSpacing.lg),
         Text(
           context.l10n.starterLibrarySchedulerPrompt,
-          style: context.texts.labelMedium?.copyWith(
-            color: context.colors.onSurfaceVariant,
-          ),
+          style: context.texts.labelMedium!.inked(context, AppInk.quiet),
         ),
         const SizedBox(height: AppSpacing.sm),
         DeckSchedulerPickerWidget(
@@ -154,9 +151,7 @@ class _StarterInstallFormState extends ConsumerState<_StarterInstallForm> {
           const SizedBox(height: AppSpacing.md),
           Text(
             context.l10n.starterLibraryInstallFailed,
-            style: context.texts.bodySmall?.copyWith(
-              color: context.semanticColors.danger,
-            ),
+            style: context.texts.bodySmall!.inked(context, AppInk.danger),
           ),
         ],
         const SizedBox(height: AppSpacing.lg),

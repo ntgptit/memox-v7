@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/error/failure.dart';
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_elevation.dart';
-import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../../../shared/widgets/mx_text_button.dart';
 import '../support/settings_labels_widget.dart';
@@ -58,10 +59,10 @@ class SettingsErrorBandWidget extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Icon(
+            const MxIcon(
               Icons.error_outline,
-              size: AppIconSize.mdCompact,
-              color: colors.onErrorContainer,
+              ink: AppInk.onErrorContainer,
+              size: MxIconSize.mdCompact,
             ),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
@@ -71,15 +72,17 @@ class SettingsErrorBandWidget extends StatelessWidget {
                 children: <Widget>[
                   Text(
                     context.l10n.settingsSaveErrorTitle,
-                    style: context.texts.titleSmall?.copyWith(
-                      color: colors.onErrorContainer,
+                    style: context.texts.titleSmall!.inked(
+                      context,
+                      AppInk.onErrorContainer,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     context.settingsWriteFailure(failure),
-                    style: context.texts.bodySmall?.copyWith(
-                      color: colors.onErrorContainer,
+                    style: context.texts.bodySmall!.inked(
+                      context,
+                      AppInk.onErrorContainer,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xs),

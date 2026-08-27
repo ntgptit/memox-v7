@@ -56,9 +56,7 @@ class _PromptCard extends StatelessWidget {
                 const SizedBox(height: AppSpacing.md),
                 Text(
                   shown,
-                  style: context.texts.bodyMedium?.copyWith(
-                    color: context.colors.onSurfaceVariant,
-                  ),
+                  style: context.texts.bodyMedium!.inked(context, AppInk.quiet),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -108,8 +106,8 @@ class _AnswerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final graded = verdict;
     final semantic = context.semanticColors;
+    final graded = verdict;
     final surface = context.colors.surfaceContainerLow;
 
     // **The verdict is worn by the card, not by a panel drawn inside it.** A
@@ -294,8 +292,7 @@ class _Verdict extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final semantic = context.semanticColors;
-    final accent = isCorrect ? semantic.success : semantic.danger;
+    final accent = isCorrect ? AppInk.success : AppInk.danger;
 
     return Center(
       child: SingleChildScrollView(
@@ -305,16 +302,16 @@ class _Verdict extends StatelessWidget {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Icon(
+                MxIcon(
                   isCorrect ? Icons.check_circle_outline : Icons.error_outline,
-                  size: AppIconSize.sm,
-                  color: accent,
+                  size: MxIconSize.sm,
+                  ink: accent,
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Flexible(
                   child: Text(
                     isCorrect ? l10n.studyFillCorrect : l10n.studyFillIncorrect,
-                    style: context.texts.labelLarge?.copyWith(color: accent),
+                    style: context.texts.labelLarge!.inked(context, accent),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -327,9 +324,7 @@ class _Verdict extends StatelessWidget {
             if (!isCorrect) ...<Widget>[
               Text(
                 l10n.studyFillAnswerLabel,
-                style: context.texts.labelMedium?.copyWith(
-                  color: context.colors.onSurfaceVariant,
-                ),
+                style: context.texts.labelMedium!.inked(context, AppInk.quiet),
               ),
               const SizedBox(height: AppSpacing.xs),
             ],

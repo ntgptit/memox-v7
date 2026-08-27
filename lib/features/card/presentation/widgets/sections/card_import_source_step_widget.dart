@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../../../shared/widgets/mx_text_field.dart';
@@ -57,9 +59,7 @@ class CardImportSourceStepWidget extends ConsumerWidget {
       children: <Widget>[
         Text(
           context.l10n.cardImportChooseSourceHeading,
-          style: context.texts.labelLarge?.copyWith(
-            color: context.colors.onSurfaceVariant,
-          ),
+          style: context.texts.labelLarge!.inked(context, AppInk.quiet),
         ),
         const SizedBox(height: AppSpacing.sm),
         _SourceOptions(deckId: deckId, kind: kind),
@@ -196,21 +196,19 @@ class _SourceOption extends StatelessWidget {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Icon(
+                MxIcon(
                   icon,
                   // Secondary, not primary: the same selected-mark token the
                   // card tile's check uses — dark primary fails contrast as a
                   // glyph on dark surfaces.
-                  color: isSelected
-                      ? colors.secondary
-                      : colors.onSurfaceVariant,
+                  ink: isSelected ? AppInk.secondary : AppInk.quiet,
                 ),
                 if (isSelected) ...<Widget>[
                   const SizedBox(width: AppSpacing.xs),
-                  Icon(
+                  const MxIcon(
                     Icons.check_circle,
-                    size: AppSpacing.lg,
-                    color: colors.secondary,
+                    ink: AppInk.secondary,
+                    size: MxIconSize.sm,
                   ),
                 ],
               ],
@@ -219,9 +217,7 @@ class _SourceOption extends StatelessWidget {
             Text(title, style: context.texts.titleSmall),
             Text(
               subtitle,
-              style: context.texts.bodySmall?.copyWith(
-                color: colors.onSurfaceVariant,
-              ),
+              style: context.texts.bodySmall!.inked(context, AppInk.quiet),
             ),
           ],
         ),
@@ -267,17 +263,18 @@ class _UploadPanel extends ConsumerWidget {
             const SizedBox(height: AppSpacing.sm),
             Row(
               children: <Widget>[
-                Icon(
+                const MxIcon(
                   Icons.error_outline,
-                  size: AppSpacing.lg,
-                  color: context.colors.error,
+                  ink: AppInk.error,
+                  size: MxIconSize.sm,
                 ),
                 const SizedBox(width: AppSpacing.xs),
                 Expanded(
                   child: Text(
                     context.cardImportFailureLabel(failure),
-                    style: context.texts.bodySmall?.copyWith(
-                      color: context.colors.error,
+                    style: context.texts.bodySmall!.inked(
+                      context,
+                      AppInk.error,
                     ),
                   ),
                 ),
@@ -295,7 +292,7 @@ class _UploadPanel extends ConsumerWidget {
           Icon(
             Icons.note_add_outlined,
             size: AppSpacing.xxl,
-            color: context.colors.onSurfaceVariant,
+            color: AppInk.quiet.resolve(context),
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
@@ -307,17 +304,18 @@ class _UploadPanel extends ConsumerWidget {
             const SizedBox(height: AppSpacing.sm),
             Row(
               children: <Widget>[
-                Icon(
+                const MxIcon(
                   Icons.error_outline,
-                  size: AppSpacing.lg,
-                  color: context.colors.error,
+                  ink: AppInk.error,
+                  size: MxIconSize.sm,
                 ),
                 const SizedBox(width: AppSpacing.xs),
                 Expanded(
                   child: Text(
                     context.cardImportFailureLabel(failure),
-                    style: context.texts.bodySmall?.copyWith(
-                      color: context.colors.error,
+                    style: context.texts.bodySmall!.inked(
+                      context,
+                      AppInk.error,
                     ),
                   ),
                 ),
@@ -354,11 +352,7 @@ class _InfoPanel extends StatelessWidget {
         children: <Widget>[
           Row(
             children: <Widget>[
-              Icon(
-                Icons.info_outline,
-                size: AppSpacing.lg,
-                color: colors.onSurfaceVariant,
-              ),
+              const MxIcon(Icons.info_outline, size: MxIconSize.sm),
               const SizedBox(width: AppSpacing.xs),
               Expanded(
                 child: Text(
@@ -373,15 +367,11 @@ class _InfoPanel extends StatelessWidget {
           const SizedBox(height: AppSpacing.xs),
           Text(
             context.l10n.cardImportInfoBusinessHint,
-            style: context.texts.bodySmall?.copyWith(
-              color: colors.onSurfaceVariant,
-            ),
+            style: context.texts.bodySmall!.inked(context, AppInk.quiet),
           ),
           Text(
             context.l10n.cardImportInfoTagsHint,
-            style: context.texts.bodySmall?.copyWith(
-              color: colors.onSurfaceVariant,
-            ),
+            style: context.texts.bodySmall!.inked(context, AppInk.quiet),
           ),
         ],
       ),

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../domain/models/card_due_badge_model.dart';
 import '../../../domain/models/card_list_item_model.dart';
@@ -113,11 +114,9 @@ class _SelectionMark extends StatelessWidget {
       width: _stateDotSize,
       height: _stateDotSize,
       child: FittedBox(
-        child: Icon(
+        child: MxIcon(
           isSelected ? Icons.check_circle : Icons.circle_outlined,
-          color: isSelected
-              ? context.colors.secondary
-              : context.colors.onSurfaceVariant,
+          ink: isSelected ? AppInk.secondary : AppInk.quiet,
         ),
       ),
     );
@@ -188,9 +187,7 @@ class _CardFace extends StatelessWidget {
           // hierarchy under the front while staying readable when scanning
           // long diacritic-heavy Vietnamese lists.
           card.back,
-          style: context.texts.bodyMedium?.copyWith(
-            color: context.colors.onSurface,
-          ),
+          style: context.texts.bodyMedium!.inked(context, AppInk.stated),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -212,16 +209,10 @@ class _CardFace extends StatelessWidget {
               // neutral. Colour is still never alone: the dot and the word carry
               // the same fact.
               context.cardStateLabel(item.state).toUpperCase(),
-              // Through the wght axis — a bare `fontWeight:` paints the
-              // rung's old weight.
-              style:
-                  AppTypography.withWeight(
-                    context.texts.labelSmall!,
-                    FontWeight.w600,
-                  ).copyWith(
-                    color: context.cardStateColor(item.state),
-                    letterSpacing: 0.6,
-                  ),
+              style: context.textStyles.stateChipLabel.inked(
+                context,
+                context.cardStateInk(item.state),
+              ),
             ),
             for (final tag in item.tagNames) CardTagChipWidget(name: tag),
           ],
@@ -256,11 +247,13 @@ class _TrailingBadges extends StatelessWidget {
       if (item.card.isFlagged)
         Icon(
           Icons.flag,
+          // 18 has no MxIconSize step, so the closed-set spelling is the
+          // ink's own resolve. `stated`, not `accent`: the accent measures
+          // 3.29:1 as a glyph on the dark surface — below the 4.5:1 an icon
+          // needs as painted text. The flag reads by shape; the colour only
+          // stays legible.
           size: _flagIconSize,
-          // `onSurface`, not `primary`: the accent measures 3.29:1 as a glyph
-          // on the dark surface — below the 4.5:1 an icon needs as painted
-          // text. The flag reads by shape; the colour only stays legible.
-          color: context.colors.onSurface,
+          color: AppInk.stated.resolve(context),
           semanticLabel: context.l10n.cardTileFlaggedSemantics,
         ),
       if (dueLabel != null) _DueBadge(label: dueLabel),
@@ -304,9 +297,7 @@ class _DueBadge extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: context.texts.labelSmall?.copyWith(
-            color: context.colors.onSurfaceVariant,
-          ),
+          style: context.texts.labelSmall!.inked(context, AppInk.quiet),
         ),
       ),
     );

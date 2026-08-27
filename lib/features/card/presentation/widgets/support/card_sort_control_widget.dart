@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../core/theme/app_icon_size.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -56,15 +57,9 @@ class CardSortControlWidget extends ConsumerWidget {
             children: <Widget>[
               Text(
                 _label(context, active),
-                style: context.texts.labelSmall?.copyWith(
-                  color: context.colors.onSurfaceVariant,
-                ),
+                style: context.texts.labelSmall!.inked(context, AppInk.quiet),
               ),
-              Icon(
-                Icons.expand_more,
-                size: AppIconSize.sm,
-                color: context.colors.onSurfaceVariant,
-              ),
+              const MxIcon(Icons.expand_more, size: MxIconSize.sm),
             ],
           ),
         ),

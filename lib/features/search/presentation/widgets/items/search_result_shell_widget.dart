@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_elevation.dart';
-import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/theme/theme_context_extension.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 
 /// The frame every result row shares: the surface, the leading glyph, the
@@ -69,19 +68,11 @@ class SearchResultShellWidget extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Icon(
-                  icon,
-                  size: AppIconSize.sm,
-                  color: context.colors.onSurfaceVariant,
-                ),
+                MxIcon(icon, size: MxIconSize.sm),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(child: child),
                 const SizedBox(width: AppSpacing.sm),
-                Icon(
-                  Icons.north_east,
-                  size: AppIconSize.sm,
-                  color: context.colors.onSurfaceVariant,
-                ),
+                const MxIcon(Icons.north_east, size: MxIconSize.sm),
               ],
             ),
           ),

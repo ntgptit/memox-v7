@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
@@ -37,7 +38,6 @@ class ProgressWeekWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final texts = context.texts;
-    final colors = context.colors;
 
     // The busiest day sets the scale, so the chart shows the shape of the week
     // rather than the shape of some fixed ceiling nobody reaches. Zero is a real
@@ -59,7 +59,7 @@ class ProgressWeekWidget extends StatelessWidget {
         children: <Widget>[
           Text(
             context.l10n.progressWeekSectionLabel,
-            style: texts.labelLarge?.copyWith(color: colors.onSurfaceVariant),
+            style: texts.labelLarge!.inked(context, AppInk.quiet),
           ),
           const SizedBox(height: AppSpacing.sm),
           Table(
@@ -99,7 +99,6 @@ class ProgressWeekWidget extends StatelessWidget {
     required bool isLast,
   }) {
     final texts = context.texts;
-    final colors = context.colors;
     final String label = context.progressDayLabel(day, isToday: isToday);
     // The gap belongs *between* rows, so the last one does not carry it — that
     // is what keeps the card's bottom padding equal to its top (G5) instead of
@@ -117,8 +116,9 @@ class ProgressWeekWidget extends StatelessWidget {
             child: ExcludeSemantics(
               child: Text(
                 label,
-                style: texts.bodyMedium?.copyWith(
-                  color: isToday ? colors.onSurface : colors.onSurfaceVariant,
+                style: texts.bodyMedium!.inked(
+                  context,
+                  isToday ? AppInk.stated : AppInk.quiet,
                 ),
               ),
             ),
@@ -136,7 +136,7 @@ class ProgressWeekWidget extends StatelessWidget {
             child: Text(
               '${day.totalCards}',
               textAlign: TextAlign.end,
-              style: texts.bodyMedium?.copyWith(color: colors.onSurface),
+              style: texts.bodyMedium!.inked(context, AppInk.stated),
             ),
           ),
         ),

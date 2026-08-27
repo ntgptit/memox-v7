@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_elevation.dart';
-import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../../../shared/widgets/mx_button_pair.dart';
 import '../../../../../shared/widgets/mx_card.dart';
@@ -195,17 +196,11 @@ class _MergeNotice extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: AppSpacing.sm,
         children: <Widget>[
-          Icon(
-            Icons.merge,
-            size: AppIconSize.sm,
-            color: context.colors.onSurfaceVariant,
-          ),
+          const MxIcon(Icons.merge, size: MxIconSize.sm),
           Expanded(
             child: Text(
               context.l10n.tagMergeNotice(targetName),
-              style: context.texts.bodySmall?.copyWith(
-                color: context.colors.onSurfaceVariant,
-              ),
+              style: context.texts.bodySmall!.inked(context, AppInk.quiet),
             ),
           ),
         ],
@@ -248,10 +243,10 @@ class _FailureBand extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Icon(
+            const MxIcon(
               Icons.error_outline,
-              size: AppIconSize.mdCompact,
-              color: colors.onErrorContainer,
+              ink: AppInk.onErrorContainer,
+              size: MxIconSize.mdCompact,
             ),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
@@ -261,15 +256,17 @@ class _FailureBand extends StatelessWidget {
                 children: <Widget>[
                   Text(
                     context.l10n.tagWriteErrorTitle,
-                    style: context.texts.titleSmall?.copyWith(
-                      color: colors.onErrorContainer,
+                    style: context.texts.titleSmall!.inked(
+                      context,
+                      AppInk.onErrorContainer,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     message,
-                    style: context.texts.bodySmall?.copyWith(
-                      color: colors.onErrorContainer,
+                    style: context.texts.bodySmall!.inked(
+                      context,
+                      AppInk.onErrorContainer,
                     ),
                   ),
                 ],

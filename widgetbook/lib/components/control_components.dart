@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_fab.dart';
+import 'package:memox/core/theme/app_ink.dart';
+import 'package:memox/shared/widgets/mx_icon.dart';
 import 'package:memox/shared/widgets/mx_breadcrumb.dart';
 import 'package:memox/shared/widgets/mx_button_pair.dart';
 import 'package:memox/shared/widgets/mx_icon_button.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
+import 'package:memox/shared/widgets/mx_pressable.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
 import 'package:memox/shared/widgets/mx_text_button.dart';
 import 'package:widgetbook/widgetbook.dart';
@@ -59,6 +62,39 @@ WidgetbookComponent actionButtonComponent() {
   );
 }
 
+WidgetbookComponent iconComponent() {
+  return WidgetbookComponent(
+    name: 'MxIcon',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Playground',
+        builder: (BuildContext context) {
+          final ink = context.knobs.object.dropdown<AppInk>(
+            label: 'ink',
+            options: AppInk.values,
+            labelBuilder: (AppInk value) => value.name,
+          );
+          final size = context.knobs.object.dropdown<MxIconSize>(
+            label: 'size',
+            options: MxIconSize.values,
+            labelBuilder: (MxIconSize value) => value.name,
+          );
+          final hasLabel = context.knobs.boolean(label: 'semantic label');
+
+          return CatalogCenterPage(
+            child: MxIcon(
+              Icons.flag_outlined,
+              ink: ink,
+              size: size,
+              semanticLabel: hasLabel ? 'Flagged' : null,
+            ),
+          );
+        },
+      ),
+    ],
+  );
+}
+
 WidgetbookComponent fabComponent() {
   return WidgetbookComponent(
     name: 'MxFab',
@@ -80,6 +116,39 @@ WidgetbookComponent fabComponent() {
               icon: Icons.add,
               label: label,
               onPressed: isEnabled ? _noop : null,
+            ),
+          );
+        },
+      ),
+    ],
+  );
+}
+
+WidgetbookComponent pressableComponent() {
+  return WidgetbookComponent(
+    name: 'MxPressable',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Playground',
+        builder: (BuildContext context) {
+          final shape = context.knobs.object.dropdown<MxPressableShape>(
+            label: 'shape',
+            options: MxPressableShape.values,
+            labelBuilder: (MxPressableShape value) => value.name,
+          );
+          final isEnabled = context.knobs.boolean(
+            label: 'enabled',
+            initialValue: true,
+          );
+
+          return CatalogCenterPage(
+            child: MxPressable(
+              onTap: isEnabled ? _noop : null,
+              shape: shape,
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: Text('Pressable surface'),
+              ),
             ),
           );
         },

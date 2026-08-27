@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_breadcrumb.dart';
 import '../../controllers/card_list_filter_controller.dart';
 import '../../controllers/deck_context_controller.dart';
@@ -68,11 +69,7 @@ class CardImportContextWidget extends ConsumerWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Icon(
-                  Icons.style_outlined,
-                  size: AppSpacing.lg,
-                  color: context.colors.onSurfaceVariant,
-                ),
+                const MxIcon(Icons.style_outlined, size: MxIconSize.sm),
                 const SizedBox(width: AppSpacing.xs),
                 Flexible(
                   child: Text(

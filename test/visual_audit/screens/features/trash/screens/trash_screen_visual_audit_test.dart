@@ -50,14 +50,16 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.rasterOnly,
         detailContains: '_RenderInkFeatures',
-        // Counted, not guessed: the Scaffold, the AppBar, and one per InkWell
-        // host the loaded state actually mounts.
-        expectedMatches: 10,
+        // Counted, not guessed: the Scaffold, the AppBar, one per InkWell
+        // host the loaded state actually mounts — and one extra per row,
+        // because a row is now an MxPressable and brings its own transparent
+        // Material instead of borrowing the shell one.
+        expectedMatches: 12,
         rationale:
             'Material ink layers: the Scaffold and the AppBar from '
             'MxContentShell, one per MxIconButton, one per MxPillButton, and '
-            'one per row — a row is an InkWell so a long press can start a '
-            'selection. A Material paints background, splash and highlight into '
+            'two per row — an MxPressable is a transparent Material plus an '
+            'InkWell so a long press can start a selection. A Material paints background, splash and highlight into '
             'a layer no render object reports; the icon button states are '
             'pinned by the mx_icon_button_* goldens and the pill surfaces by '
             'app_theme_test.dart.',
@@ -92,11 +94,11 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.customPainter,
         detailContains: 'CustomPaint (no painter)',
-        // One per MxPillButton.
-        expectedMatches: 3,
+        // One per MxPillButton, plus one per row MxPressable.
+        expectedMatches: 5,
         rationale:
             "The rounded clip an InkWell paints for its ripple, one per "
-            'MxPillButton. It has no painter to interrogate because the shape '
+            'MxPillButton and one per trash row. It has no painter to interrogate because the shape '
             'is the ripple boundary rather than a drawn stroke — the visible '
             'border is the DecoratedBox behind it, which the audit does read.',
       ),

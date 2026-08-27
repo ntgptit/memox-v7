@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -166,7 +167,7 @@ class _Metric extends StatelessWidget {
   final int count;
   final String word;
   final IconData icon;
-  final Color tint;
+  final AppInk tint;
   final Color wellColor;
   final ProgressMetricScale scale;
 
@@ -180,7 +181,11 @@ class _Metric extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.baseline,
       textBaseline: TextBaseline.alphabetic,
       children: <Widget>[
-        MxMetricWell(icon: icon, tint: tint, wellColor: wellColor),
+        MxMetricWell(
+          icon: icon,
+          tint: tint.resolve(context),
+          wellColor: wellColor,
+        ),
         const SizedBox(width: AppSpacing.xs),
         // Flexible so the text owns the rest of its fixed-width grid cell: a
         // long word at double scale wraps onto a second line inside the cell
@@ -192,9 +197,10 @@ class _Metric extends StatelessWidget {
                 TextSpan(text: '$count ', style: _numeralStyle(context, scale)),
                 TextSpan(
                   text: word,
-                  style: context.texts.labelMedium?.copyWith(
-                    color: tint,
-                    fontWeight: count == 0 ? null : FontWeight.w600,
+                  style: context.texts.labelMedium!.inked(
+                    context,
+                    tint,
+                    isEmphasized: count != 0,
                   ),
                 ),
               ],
@@ -217,7 +223,7 @@ class _ActiveCardsMetric extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final semantic = context.semanticColors;
-    final tint = count == 0 ? context.colors.onSurfaceVariant : semantic.info;
+    final tint = count == 0 ? AppInk.quiet : AppInk.info;
 
     return Semantics(
       container: true,
@@ -258,9 +264,7 @@ class _ActiveDaysMetric extends StatelessWidget {
           count: count,
           word: context.l10n.progressActiveDaysMetricWord,
           icon: Icons.calendar_month_outlined,
-          tint: hasDays
-              ? semantic.onStreakContainer
-              : context.colors.onSurfaceVariant,
+          tint: hasDays ? AppInk.onDueContainer : AppInk.quiet,
           wellColor: hasDays ? semantic.streakContainer : semantic.surfaceMuted,
           scale: scale,
         ),
@@ -280,7 +284,7 @@ class _LearningMetric extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final semantic = context.semanticColors;
-    final tint = count == 0 ? context.colors.onSurfaceVariant : semantic.info;
+    final tint = count == 0 ? AppInk.quiet : AppInk.info;
 
     return Semantics(
       container: true,
@@ -322,7 +326,7 @@ class _ReviewingMetric extends StatelessWidget {
           count: count,
           word: context.l10n.progressReviewingMetricWord,
           icon: Icons.event_repeat_outlined,
-          tint: context.colors.onSurfaceVariant,
+          tint: AppInk.quiet,
           wellColor: context.semanticColors.surfaceMuted,
           scale: scale,
         ),

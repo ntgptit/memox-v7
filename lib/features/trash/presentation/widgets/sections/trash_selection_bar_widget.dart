@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/theme_context_extension.dart';
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
@@ -54,16 +56,11 @@ class TrashSelectionBarWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Text(
-                switch (selectedType) {
-                  TrashItemType.card => l10n.trashSelectionCardsOnly,
-                  TrashItemType.deck => l10n.trashSelectionDecksOnly,
-                  null => l10n.trashSelectionCount(selectedCount),
-                },
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
+              Text(switch (selectedType) {
+                TrashItemType.card => l10n.trashSelectionCardsOnly,
+                TrashItemType.deck => l10n.trashSelectionDecksOnly,
+                null => l10n.trashSelectionCount(selectedCount),
+              }, style: context.texts.bodySmall!.inked(context, AppInk.quiet)),
               const SizedBox(height: AppSpacing.sm),
               // **`Wrap`, not `Row`, and that is a correctness fix rather than
               // a nicety.** As a `Row` the destructive text button was the

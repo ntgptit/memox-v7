@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -38,9 +39,7 @@ class CardImportSubmitProgressWidget extends StatelessWidget {
           const SizedBox(height: AppSpacing.xs),
           Text(
             context.l10n.cardImportSubmittingBody,
-            style: context.texts.bodyMedium?.copyWith(
-              color: context.colors.onSurfaceVariant,
-            ),
+            style: context.texts.bodyMedium!.inked(context, AppInk.quiet),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.md),

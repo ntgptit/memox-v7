@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../../../shared/widgets/mx_text_button.dart';
 import '../../states/card_history_state.dart';
@@ -159,11 +160,7 @@ class _EmptyHistory extends StatelessWidget {
         // painted glyph on the dark ground — the graphic bar, not the text one,
         // and this glyph sits beside two lines of prose rather than carrying a
         // meaning of its own.
-        Icon(
-          Icons.history,
-          size: AppIconSize.md,
-          color: context.colors.onSurfaceVariant,
-        ),
+        const MxIcon(Icons.history),
         const SizedBox(height: AppSpacing.sm),
         Text(
           context.l10n.cardHistoryEmptyTitle,
@@ -172,9 +169,7 @@ class _EmptyHistory extends StatelessWidget {
         const SizedBox(height: AppSpacing.xs),
         Text(
           context.l10n.cardHistoryEmptyMessage,
-          style: context.texts.bodySmall?.copyWith(
-            color: context.colors.onSurfaceVariant,
-          ),
+          style: context.texts.bodySmall!.inked(context, AppInk.quiet),
         ),
       ],
     );
@@ -215,10 +210,11 @@ class _GenerationHeading extends StatelessWidget {
           // introduces made it read as a caption on the event above rather than
           // as the start of a group. `withWeight`, because both faces are
           // variable and a bare `fontWeight:` paints w400 while reporting w600.
-          style: AppTypography.withWeight(
-            context.texts.bodySmall!,
-            FontWeight.w600,
-          ).copyWith(color: context.colors.onSurfaceVariant),
+          style: context.texts.bodySmall!.inked(
+            context,
+            AppInk.quiet,
+            isEmphasized: true,
+          ),
         ),
       ),
     );
@@ -272,9 +268,7 @@ class _Tail extends StatelessWidget {
         // generation, so the two numbers disagreed on the same screen.
         child: Text(
           context.l10n.cardHistoryAllShownLabel,
-          style: context.texts.bodySmall?.copyWith(
-            color: context.colors.onSurfaceVariant,
-          ),
+          style: context.texts.bodySmall!.inked(context, AppInk.quiet),
         ),
       );
     }
@@ -352,10 +346,10 @@ class _PageError extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Icon(
+              const MxIcon(
                 Icons.error_outline,
-                size: AppIconSize.mdCompact,
-                color: colors.onErrorContainer,
+                ink: AppInk.onErrorContainer,
+                size: MxIconSize.mdCompact,
               ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
@@ -365,15 +359,17 @@ class _PageError extends StatelessWidget {
                   children: <Widget>[
                     Text(
                       context.l10n.cardHistoryPageErrorTitle,
-                      style: context.texts.titleSmall?.copyWith(
-                        color: colors.onErrorContainer,
+                      style: context.texts.titleSmall!.inked(
+                        context,
+                        AppInk.onErrorContainer,
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xs),
                     Text(
                       context.l10n.cardHistoryPageErrorMessage,
-                      style: context.texts.bodySmall?.copyWith(
-                        color: colors.onErrorContainer,
+                      style: context.texts.bodySmall!.inked(
+                        context,
+                        AppInk.onErrorContainer,
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xs),

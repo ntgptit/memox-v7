@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/app_ink.dart';
 import '../../../../core/theme/app_elevation.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/theme_context_extension.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
@@ -108,9 +108,7 @@ class _TemplateTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final template = row.template;
-    final quiet = context.texts.bodySmall?.copyWith(
-      color: context.colors.onSurfaceVariant,
-    );
+    final quiet = context.texts.bodySmall!.inked(context, AppInk.quiet);
 
     return MxCard(
       elevation: AppElevation.none,
@@ -157,17 +155,11 @@ class _TemplateTile extends ConsumerWidget {
             row.isInstalled
                 ? context.l10n.starterLibraryInstalledLabel
                 : context.l10n.starterLibraryInstallAction,
-            // Through the wght axis — a bare `fontWeight:` paints the rung's
-            // old weight.
-            style:
-                AppTypography.withWeight(
-                  context.texts.labelMedium!,
-                  FontWeight.w600,
-                ).copyWith(
-                  color: row.isInstalled
-                      ? context.semanticColors.success
-                      : context.colors.onSurfaceVariant,
-                ),
+            style: context.texts.labelMedium!.inked(
+              context,
+              row.isInstalled ? AppInk.success : AppInk.quiet,
+              isEmphasized: true,
+            ),
           ),
         ],
       ),

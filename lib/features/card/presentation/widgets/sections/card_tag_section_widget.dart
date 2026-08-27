@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -206,8 +207,6 @@ class _CardTagSectionWidgetState extends ConsumerState<CardTagSectionWidget> {
   }
 
   Widget _buildHeading(BuildContext context, int count) {
-    final quiet = context.colors.onSurfaceVariant;
-
     return Row(
       children: <Widget>[
         // A heading, and it has to say so: the app-bar title carries the flag
@@ -229,7 +228,10 @@ class _CardTagSectionWidgetState extends ConsumerState<CardTagSectionWidget> {
                   header: true,
                   child: Text(
                     context.l10n.cardEditorTagsHeading,
-                    style: context.texts.labelMedium?.copyWith(color: quiet),
+                    style: context.texts.labelMedium!.inked(
+                      context,
+                      AppInk.quiet,
+                    ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -238,7 +240,7 @@ class _CardTagSectionWidgetState extends ConsumerState<CardTagSectionWidget> {
               Flexible(
                 child: Text(
                   context.l10n.cardEditorFieldOptional,
-                  style: context.texts.labelSmall?.copyWith(color: quiet),
+                  style: context.texts.labelSmall!.inked(context, AppInk.quiet),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -252,7 +254,7 @@ class _CardTagSectionWidgetState extends ConsumerState<CardTagSectionWidget> {
         if (count > 0)
           Text(
             context.l10n.cardEditorTagCount(count, kMaxTagsPerCard),
-            style: context.texts.labelSmall?.copyWith(color: quiet),
+            style: context.texts.labelSmall!.inked(context, AppInk.quiet),
           ),
       ],
     );
@@ -311,9 +313,7 @@ class _CardTagSectionWidgetState extends ConsumerState<CardTagSectionWidget> {
   Widget _buildCapMessage(BuildContext context) {
     return Text(
       context.l10n.cardEditorTagCapReached(kMaxTagsPerCard),
-      style: context.texts.bodySmall?.copyWith(
-        color: context.colors.onSurfaceVariant,
-      ),
+      style: context.texts.bodySmall!.inked(context, AppInk.quiet),
     );
   }
 

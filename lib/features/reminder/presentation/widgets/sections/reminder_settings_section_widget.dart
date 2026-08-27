@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
@@ -115,16 +116,12 @@ class ReminderSettingsSectionWidget extends StatelessWidget {
         const SizedBox(height: AppSpacing.lg),
         Text(
           context.l10n.reminderDueOnlyNote,
-          style: context.texts.bodyMedium?.copyWith(
-            color: context.colors.onSurfaceVariant,
-          ),
+          style: context.texts.bodyMedium!.inked(context, AppInk.quiet),
         ),
         const SizedBox(height: AppSpacing.sm),
         Text(
           context.l10n.reminderPrivacyNote,
-          style: context.texts.bodyMedium?.copyWith(
-            color: context.colors.onSurfaceVariant,
-          ),
+          style: context.texts.bodyMedium!.inked(context, AppInk.quiet),
         ),
       ],
     );

@@ -42,9 +42,9 @@ class _CardHalf extends StatelessWidget {
       children: <Widget>[
         Text(
           label.toUpperCase(),
-          style: context.texts.labelSmall?.copyWith(
-            color: context.colors.onSurfaceVariant,
-            letterSpacing: AppTypography.sectionLabelTracking,
+          style: context.textStyles.sectionLabelSmall.inked(
+            context,
+            AppInk.quiet,
           ),
         ),
         Expanded(

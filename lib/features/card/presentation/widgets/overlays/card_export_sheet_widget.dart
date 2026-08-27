@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/error/failure.dart';
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_messenger.dart';
 import '../../../../../shared/widgets/mx_sheet_insets.dart';
 import '../../../domain/models/card_export_request_model.dart';
 import '../../../domain/models/card_export_result_model.dart';
@@ -136,11 +138,7 @@ Future<void> _runExport(
   );
   if (result != CardExportResult.shared || !context.mounted) return;
 
-  ScaffoldMessenger.of(context)
-    ..hideCurrentSnackBar()
-    ..showSnackBar(
-      SnackBar(content: Text(context.l10n.cardExportSharedMessage)),
-    );
+  showMxMessage(context, context.l10n.cardExportSharedMessage);
 }
 
 /// The sheet itself: title, read-only scope, three formats, what the file
@@ -300,7 +298,6 @@ class _Body extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colors = context.colors;
     final band = failure;
 
     return Column(
@@ -322,9 +319,7 @@ class _Body extends StatelessWidget {
         const SizedBox(height: AppSpacing.xl),
         Text(
           l10n.cardExportFormatHeading,
-          style: context.texts.labelLarge?.copyWith(
-            color: colors.onSurfaceVariant,
-          ),
+          style: context.texts.labelLarge!.inked(context, AppInk.quiet),
         ),
         const SizedBox(height: AppSpacing.sm),
         CardExportFormatOptionsWidget(

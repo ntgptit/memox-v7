@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../states/card_import_state.dart';
 
 /// One stepper node's progress state — three visuals, not two. A completed
@@ -114,9 +116,7 @@ class CardImportStepperWidget extends StatelessWidget {
               // The node's own semantics already announce it.
               child: Text(
                 labels[current.index],
-                style: context.texts.labelLarge?.copyWith(
-                  color: context.colors.onSurface,
-                ),
+                style: context.texts.labelLarge!.inked(context, AppInk.stated),
               ),
             ),
           ],
@@ -167,7 +167,7 @@ class _StepNode extends StatelessWidget {
     // survives any palette and colour is never the only signal (W7).
     final isReached = state != _NodeState.future;
     final background = isReached ? colors.primary : colors.surfaceContainerHigh;
-    final foreground = isReached ? colors.onPrimary : colors.onSurfaceVariant;
+    final foreground = isReached ? AppInk.onPrimary : AppInk.quiet;
     final stateLabel = switch (state) {
       _NodeState.completed => context.l10n.cardImportStepStateCompleted,
       _NodeState.current => context.l10n.cardImportStepStateCurrent,
@@ -200,11 +200,12 @@ class _StepNode extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: state == _NodeState.completed
-                ? Icon(Icons.check, size: AppSpacing.lg, color: foreground)
+                ? MxIcon(Icons.check, ink: foreground, size: MxIconSize.sm)
                 : Text(
                     '${index + 1}',
-                    style: context.texts.labelMedium?.copyWith(
-                      color: foreground,
+                    style: context.texts.labelMedium!.inked(
+                      context,
+                      foreground,
                     ),
                   ),
           ),
@@ -213,10 +214,8 @@ class _StepNode extends StatelessWidget {
             Text(
               label,
               style: state == _NodeState.current
-                  ? context.texts.labelLarge?.copyWith(color: colors.onSurface)
-                  : context.texts.labelMedium?.copyWith(
-                      color: colors.onSurfaceVariant,
-                    ),
+                  ? context.texts.labelLarge!.inked(context, AppInk.stated)
+                  : context.texts.labelMedium!.inked(context, AppInk.quiet),
             ),
           ],
         ],

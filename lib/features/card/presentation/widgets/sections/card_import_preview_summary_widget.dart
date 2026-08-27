@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../domain/models/card_import_preview_model.dart';
 import '../../controllers/card_import_draft_controller.dart';
@@ -62,16 +64,12 @@ class CardImportPreviewSummaryWidget extends ConsumerWidget {
             Expanded(
               child: Text(
                 l10n.cardImportPreviewHeading,
-                style: context.texts.labelLarge?.copyWith(
-                  color: context.colors.onSurfaceVariant,
-                ),
+                style: context.texts.labelLarge!.inked(context, AppInk.quiet),
               ),
             ),
             Text(
               l10n.cardImportPreviewReadyOfTotal(importable, preview.totalRows),
-              style: context.texts.bodySmall?.copyWith(
-                color: context.colors.onSurfaceVariant,
-              ),
+              style: context.texts.bodySmall!.inked(context, AppInk.quiet),
             ),
           ],
         ),
@@ -141,8 +139,9 @@ class CardImportPreviewSummaryWidget extends ConsumerWidget {
                   ),
                   child: Text(
                     l10n.cardImportMoreRowsLabel(hiddenCount),
-                    style: context.texts.bodySmall?.copyWith(
-                      color: context.colors.onSurfaceVariant,
+                    style: context.texts.bodySmall!.inked(
+                      context,
+                      AppInk.quiet,
                     ),
                   ),
                 ),
@@ -170,28 +169,28 @@ class _StatusChip extends StatelessWidget {
     final (
       IconData icon,
       Color background,
-      Color foreground,
+      AppInk foreground,
     ) = switch (status) {
       CardImportRowStatus.ready => (
         Icons.check,
         colors.secondaryContainer,
-        colors.onSecondaryContainer,
+        AppInk.onSecondaryContainer,
       ),
       CardImportRowStatus.invalid => (
         Icons.error_outline,
         colors.errorContainer,
-        colors.onErrorContainer,
+        AppInk.onErrorContainer,
       ),
       CardImportRowStatus.duplicateExisting ||
       CardImportRowStatus.duplicateInFile => (
         Icons.copy_outlined,
         colors.tertiaryContainer,
-        colors.onTertiaryContainer,
+        AppInk.onTertiaryContainer,
       ),
       CardImportRowStatus.blank => (
         Icons.remove,
         colors.surfaceContainerHigh,
-        colors.onSurfaceVariant,
+        AppInk.quiet,
       ),
     };
     final label = switch (status) {
@@ -214,11 +213,11 @@ class _StatusChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Icon(icon, size: AppSpacing.lg, color: foreground),
+            MxIcon(icon, ink: foreground, size: MxIconSize.sm),
             const SizedBox(width: AppSpacing.xs),
             Text(
               context.l10n.cardImportStatusCountChip(label, count),
-              style: context.texts.labelMedium?.copyWith(color: foreground),
+              style: context.texts.labelMedium!.inked(context, foreground),
             ),
           ],
         ),

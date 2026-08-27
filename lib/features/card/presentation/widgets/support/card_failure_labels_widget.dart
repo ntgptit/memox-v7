@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../../../core/error/failure.dart';
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_failure_labels_widget.dart';
@@ -60,7 +61,7 @@ class CardWriteFailureTextWidget extends StatelessWidget {
     liveRegion: true,
     child: Text(
       message ?? context.cardWriteFailure(failure),
-      style: context.texts.bodySmall?.copyWith(color: context.colors.error),
+      style: context.texts.bodySmall!.inked(context, AppInk.error),
     ),
   );
 }

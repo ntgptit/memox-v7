@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../domain/models/search_result_model.dart';
@@ -40,9 +41,7 @@ class DeckResultTileWidget extends StatelessWidget {
           if (path.isNotEmpty)
             Text(
               path,
-              style: context.texts.labelSmall?.copyWith(
-                color: context.colors.onSurfaceVariant,
-              ),
+              style: context.texts.labelSmall!.inked(context, AppInk.quiet),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),

@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/theme_context_extension.dart';
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_pressable.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../../shared/widgets/mx_icon_button.dart';
 import '../../../domain/entities/trash_batch_entity.dart';
@@ -53,7 +57,6 @@ class TrashRowWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final l10n = context.l10n;
     final isDimmed = isSelecting && !canSelect;
 
@@ -71,9 +74,11 @@ class TrashRowWidget extends StatelessWidget {
       ].join(', '),
       child: Opacity(
         opacity: isDimmed ? 0.38 : 1,
-        child: InkWell(
+        // Full-bleed row: the ripple runs edge to edge, so the shape is none.
+        child: MxPressable(
           onTap: isSelecting && canSelect ? onToggleSelection : null,
           onLongPress: canSelect ? onToggleSelection : null,
+          shape: MxPressableShape.none,
           child: Padding(
             // The screen gutter, not a fixed token: G1 requires the chips, the
             // notice and every row to share one left edge, and the shell's
@@ -88,21 +93,23 @@ class TrashRowWidget extends StatelessWidget {
                 if (isSelecting)
                   Padding(
                     padding: const EdgeInsets.only(right: AppSpacing.sm),
-                    child: Icon(
+                    // `secondary`, aligning with the selected-mark decision
+                    // recorded on the card tile and the import source step:
+                    // dark `primary` measures 3.29:1 as a glyph.
+                    child: MxIcon(
                       isSelected
                           ? Icons.check_box_outlined
                           : Icons.check_box_outline_blank,
-                      color: theme.colorScheme.primary,
+                      ink: AppInk.secondary,
                     ),
                   )
                 else
                   Padding(
                     padding: const EdgeInsets.only(right: AppSpacing.sm),
-                    child: Icon(
+                    child: MxIcon(
                       batch.itemType == TrashItemType.deck
                           ? Icons.folder_outlined
                           : Icons.style_outlined,
-                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                 // The two leading icons above stay outside this exclusion
@@ -182,26 +189,20 @@ class _Body extends StatelessWidget {
           children: <Widget>[
             Text(
               l10n.trashDeletedDaysAgo(now.difference(batch.deletedAt).inDays),
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
+              style: context.texts.bodySmall!.inked(context, AppInk.quiet),
             ),
             // **The one number allowed to carry urgency** (T4). Everything else
             // on the row is neutral, so the countdown is what the eye finds.
             Text(
               l10n.trashDaysLeft(batch.daysLeftAt(now)),
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.tertiary,
-              ),
+              style: context.texts.bodySmall!.inked(context, AppInk.tertiary),
             ),
           ],
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
           '${l10n.trashOriginLabel}  ${context.trashOriginPath(batch)}',
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
+          style: context.texts.bodySmall!.inked(context, AppInk.quiet),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -209,9 +210,7 @@ class _Body extends StatelessWidget {
           const SizedBox(height: AppSpacing.xs),
           Text(
             context.trashBatchContents(batch),
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
+            style: context.texts.bodySmall!.inked(context, AppInk.quiet),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

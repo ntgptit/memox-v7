@@ -3,10 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/navigation/route_names.dart';
-import '../../../../../core/theme/app_icon_size.dart';
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_breadcrumb.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../domain/models/deck_context_model.dart';
@@ -79,9 +80,7 @@ class CardEditorContextWidget extends StatelessWidget {
               liveRegion: true,
               child: Text(
                 context.l10n.cardEditorContextUnavailable,
-                style: context.texts.bodySmall?.copyWith(
-                  color: context.colors.error,
-                ),
+                style: context.texts.bodySmall!.inked(context, AppInk.error),
               ),
             ),
             const SizedBox(height: AppSpacing.md),
@@ -144,8 +143,6 @@ class CardEditorContextWidget extends StatelessWidget {
   }
 
   Widget _buildHistoryRow(BuildContext context) {
-    final quiet = context.colors.onSurfaceVariant;
-
     return MxCard(
       // **Vertical padding sized so the row is a target, not so it looks
       // roomy.** At `sm` the card measured 358 x **36** and hit-tested to
@@ -172,13 +169,8 @@ class CardEditorContextWidget extends StatelessWidget {
       ),
       child: Row(
         children: <Widget>[
-          ExcludeSemantics(
-            child: Icon(
-              Icons.history_outlined,
-              size: AppIconSize.sm,
-              color: quiet,
-            ),
-          ),
+          // MxIcon excludes itself from semantics when unlabeled.
+          const MxIcon(Icons.history_outlined, size: MxIconSize.sm),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
@@ -188,16 +180,14 @@ class CardEditorContextWidget extends StatelessWidget {
           ),
           Text(
             context.l10n.cardEditorHistoryAction,
-            style: context.texts.labelLarge?.copyWith(
-              color: context.semanticColors.primaryAccent,
-            ),
+            style: context.texts.labelLarge!.inked(context, AppInk.accent),
           ),
           const SizedBox(width: AppSpacing.xs),
-          ExcludeSemantics(
-            child: Icon(
+          const ExcludeSemantics(
+            child: MxIcon(
               Icons.chevron_right,
-              size: AppIconSize.sm,
-              color: context.semanticColors.primaryAccent,
+              ink: AppInk.accent,
+              size: MxIconSize.sm,
             ),
           ),
         ],
@@ -213,12 +203,8 @@ class CardEditorContextWidget extends StatelessWidget {
       ),
       child: Row(
         children: <Widget>[
-          ExcludeSemantics(
-            child: Icon(
-              Icons.layers_outlined,
-              size: AppIconSize.sm,
-              color: context.colors.onSurfaceVariant,
-            ),
+          const ExcludeSemantics(
+            child: MxIcon(Icons.layers_outlined, size: MxIconSize.sm),
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(

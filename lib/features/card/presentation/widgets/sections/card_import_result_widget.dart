@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/error/failure.dart';
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../domain/models/card_import_result_model.dart';
 import '../../states/card_import_state.dart';
@@ -43,7 +45,6 @@ class CardImportResultWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colors = context.colors;
 
     final commit = result;
     // The hint follows the cause (state 7): invalid rows are the user's to
@@ -67,9 +68,7 @@ class CardImportResultWidget extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           Text(
             context.cardImportFailureLabel(failure!),
-            style: context.texts.bodySmall?.copyWith(
-              color: colors.onSurfaceVariant,
-            ),
+            style: context.texts.bodySmall!.inked(context, AppInk.quiet),
             textAlign: TextAlign.center,
           ),
         ],
@@ -83,16 +82,12 @@ class CardImportResultWidget extends StatelessWidget {
           if (helperCopy != null) ...<Widget>[
             const SizedBox(height: AppSpacing.md),
             MxCard(
-              color: colors.surfaceContainerHigh,
+              color: context.colors.surfaceContainerHigh,
               padding: const EdgeInsets.all(AppSpacing.md),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Icon(
-                    Icons.info_outline,
-                    size: AppSpacing.lg,
-                    color: colors.onSurfaceVariant,
-                  ),
+                  const MxIcon(Icons.info_outline, size: MxIconSize.sm),
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Text(helperCopy, style: context.texts.bodySmall),
@@ -123,34 +118,33 @@ class _HeroCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colors = context.colors;
     final (
       IconData heroIcon,
-      Color heroColor,
+      AppInk heroColor,
       String title,
       String body,
     ) = switch (phase) {
       CardImportPhase.completed => (
         Icons.check_circle_outline,
-        colors.secondary,
+        AppInk.secondary,
         l10n.cardImportSuccessTitle,
         l10n.cardImportSuccessBody(result!.imported, deckName),
       ),
       CardImportPhase.completedWithSkips => (
         Icons.warning_amber_outlined,
-        colors.tertiary,
+        AppInk.tertiary,
         l10n.cardImportSkipsTitle,
         l10n.cardImportSkipsBody(result!.imported),
       ),
       CardImportPhase.noCardsAdded => (
         Icons.info_outline,
-        colors.tertiary,
+        AppInk.tertiary,
         l10n.cardImportZeroTitle,
         l10n.cardImportZeroBody,
       ),
       _ => (
         Icons.error_outline,
-        colors.error,
+        AppInk.error,
         l10n.cardImportFailureTitle,
         l10n.cardImportFailureBody,
       ),
@@ -160,7 +154,13 @@ class _HeroCard extends StatelessWidget {
       child: Column(
         children: <Widget>[
           const SizedBox(height: AppSpacing.md),
-          Icon(heroIcon, size: AppSpacing.xxl, color: heroColor),
+          // 32 has no MxIconSize step; the closed-set spelling here is the
+          // ink's own resolve.
+          Icon(
+            heroIcon,
+            size: AppSpacing.xxl,
+            color: heroColor.resolve(context),
+          ),
           const SizedBox(height: AppSpacing.md),
           Text(
             title,
@@ -170,9 +170,7 @@ class _HeroCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.xs),
           Text(
             body,
-            style: context.texts.bodyMedium?.copyWith(
-              color: colors.onSurfaceVariant,
-            ),
+            style: context.texts.bodyMedium!.inked(context, AppInk.quiet),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.md),
@@ -197,7 +195,6 @@ class _SummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colors = context.colors;
 
     return MxCard(
       padding: const EdgeInsets.symmetric(
@@ -208,28 +205,28 @@ class _SummaryCard extends StatelessWidget {
         children: <Widget>[
           _SummaryRow(
             icon: Icons.check,
-            iconColor: colors.secondary,
+            iconColor: AppInk.secondary,
             label: l10n.cardImportAddedRowLabel,
             count: result.imported,
           ),
           if (invalidCount > 0)
             _SummaryRow(
               icon: Icons.error_outline,
-              iconColor: colors.error,
+              iconColor: AppInk.error,
               label: l10n.cardImportInvalidSkippedRowLabel,
               count: invalidCount,
             ),
           if (result.duplicatesSkipped > 0)
             _SummaryRow(
               icon: Icons.copy_outlined,
-              iconColor: colors.tertiary,
+              iconColor: AppInk.tertiary,
               label: l10n.cardImportDuplicatesSkippedRowLabel,
               count: result.duplicatesSkipped,
             ),
           if (blankCount > 0)
             _SummaryRow(
               icon: Icons.remove,
-              iconColor: colors.onSurfaceVariant,
+              iconColor: AppInk.quiet,
               label: l10n.cardImportBlankIgnoredRowLabel,
               count: blankCount,
             ),
@@ -248,7 +245,7 @@ class _SummaryRow extends StatelessWidget {
   });
 
   final IconData icon;
-  final Color iconColor;
+  final AppInk iconColor;
   final String label;
   final int count;
 
@@ -263,12 +260,12 @@ class _SummaryRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       child: Row(
         children: <Widget>[
-          Icon(icon, size: AppSpacing.lg, color: iconColor),
+          MxIcon(icon, ink: iconColor, size: MxIconSize.sm),
           const SizedBox(width: AppSpacing.md),
           Expanded(child: Text(label, style: context.texts.bodyMedium)),
           Text(
             countLabel,
-            style: context.texts.titleSmall?.copyWith(color: iconColor),
+            style: context.texts.titleSmall!.inked(context, iconColor),
           ),
         ],
       ),

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../../core/navigation/route_names.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
@@ -228,7 +229,6 @@ class _Headline extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final quiet = context.colors.onSurfaceVariant;
     // The two counts the pills already read, said once more where the summary is
     // — "how far along" above, "what is waiting" below it. Null until each lands.
     final due = ref.watch(cardDueCountProvider(deckId)).value;
@@ -280,7 +280,7 @@ class _Headline extends ConsumerWidget {
             // What was actually small is the type: 11px carrying two counts.
             // 12 is the same rung as the heading above and the legend below, so
             // the panel now sets everything except its one headline at label-md.
-            style: context.texts.labelMedium?.copyWith(color: quiet),
+            style: context.texts.labelMedium!.inked(context, AppInk.quiet),
           ),
         ],
       ],

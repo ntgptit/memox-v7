@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../domain/entities/deck_entity.dart';
 import '../../../domain/models/scheduler_type_model.dart';
@@ -88,7 +90,7 @@ class _ResetProgressSheetState extends ConsumerState<_ResetProgressSheet> {
                 title: l10n.deckResetProgressKeptTitle,
                 body: l10n.deckResetProgressKeptBody,
                 icon: Icons.check_circle_outline,
-                tone: context.semanticColors.success,
+                tone: AppInk.success,
               ),
               const SizedBox(height: AppSpacing.md),
               // UC-07 A2: still allowed, and said plainly. A deck nobody has
@@ -100,9 +102,7 @@ class _ResetProgressSheetState extends ConsumerState<_ResetProgressSheet> {
                     ? l10n.deckResetProgressLostBody
                     : l10n.deckResetProgressNothingToLose,
                 icon: Icons.remove_circle_outline,
-                tone: widget.hasLearnedCards
-                    ? context.semanticColors.danger
-                    : context.colors.onSurfaceVariant,
+                tone: widget.hasLearnedCards ? AppInk.danger : AppInk.quiet,
               ),
               const SizedBox(height: AppSpacing.lg),
               Text(
@@ -124,9 +124,7 @@ class _ResetProgressSheetState extends ConsumerState<_ResetProgressSheet> {
                 const SizedBox(height: AppSpacing.md),
                 Text(
                   context.deckWriteFailure(submit.failure!),
-                  style: context.texts.bodySmall?.copyWith(
-                    color: context.semanticColors.danger,
-                  ),
+                  style: context.texts.bodySmall!.inked(context, AppInk.danger),
                 ),
               ],
               const SizedBox(height: AppSpacing.xl),
@@ -167,19 +165,21 @@ class _Section extends StatelessWidget {
   final String title;
   final String body;
   final IconData icon;
-  final Color tone;
+  final AppInk tone;
 
   @override
   Widget build(BuildContext context) => Row(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: <Widget>[
-      Icon(icon, color: tone, size: context.texts.titleMedium?.fontSize),
+      // `sm` is 16 — the same dimension `titleMedium`'s font size used to
+      // supply, named instead of derived.
+      MxIcon(icon, ink: tone, size: MxIconSize.sm),
       const SizedBox(width: AppSpacing.md),
       Expanded(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(title, style: context.texts.labelLarge?.copyWith(color: tone)),
+            Text(title, style: context.texts.labelLarge!.inked(context, tone)),
             const SizedBox(height: AppSpacing.xs),
             Text(body, style: context.texts.bodyMedium),
           ],

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../../../shared/widgets/mx_icon_button.dart';
 
@@ -52,10 +54,7 @@ class CardImportSourceSummaryWidget extends StatelessWidget {
               color: colors.surfaceContainerHigh,
               borderRadius: BorderRadius.circular(AppSpacing.sm),
             ),
-            child: Icon(
-              Icons.description_outlined,
-              color: colors.onSurfaceVariant,
-            ),
+            child: const MxIcon(Icons.description_outlined),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -71,8 +70,9 @@ class CardImportSourceSummaryWidget extends StatelessWidget {
                 if (subtitle != null)
                   Text(
                     subtitle!,
-                    style: context.texts.bodySmall?.copyWith(
-                      color: colors.onSurfaceVariant,
+                    style: context.texts.bodySmall!.inked(
+                      context,
+                      AppInk.quiet,
                     ),
                     maxLines: 2,
                   ),

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_icon_size.dart';
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../domain/models/deck_activity_model.dart';
 import '../../../domain/models/progress_range_model.dart';
@@ -93,8 +94,9 @@ class ProgressDeckRowWidget extends StatelessWidget {
                       children: <Widget>[
                         Text(
                           activity.name,
-                          style: context.texts.titleMedium?.copyWith(
-                            color: context.colors.onSurface,
+                          style: context.texts.titleMedium!.inked(
+                            context,
+                            AppInk.stated,
                           ),
                         ),
                         if (path.isNotEmpty) ...<Widget>[
@@ -104,8 +106,9 @@ class ProgressDeckRowWidget extends StatelessWidget {
                           // apart, which is the only reason it is here.
                           Text(
                             path,
-                            style: context.texts.bodySmall?.copyWith(
-                              color: context.colors.onSurfaceVariant,
+                            style: context.texts.bodySmall!.inked(
+                              context,
+                              AppInk.quiet,
                             ),
                           ),
                         ],
@@ -118,13 +121,7 @@ class ProgressDeckRowWidget extends StatelessWidget {
               // Decorative: the card's own tap action is what a screen reader
               // announces, and a chevron with a label would be read as a second
               // control that does not exist.
-              ExcludeSemantics(
-                child: Icon(
-                  Icons.chevron_right,
-                  size: AppIconSize.md,
-                  color: context.colors.onSurfaceVariant,
-                ),
-              ),
+              const ExcludeSemantics(child: MxIcon(Icons.chevron_right)),
             ],
           ),
           const SizedBox(height: AppSpacing.md),

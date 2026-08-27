@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -116,9 +117,7 @@ class CardEditorFormWidget extends StatelessWidget {
             liveRegion: true,
             child: Text(
               context.l10n.cardEditorSaveFailed,
-              style: context.texts.bodyMedium?.copyWith(
-                color: context.colors.error,
-              ),
+              style: context.texts.bodyMedium!.inked(context, AppInk.error),
             ),
           ),
         ],

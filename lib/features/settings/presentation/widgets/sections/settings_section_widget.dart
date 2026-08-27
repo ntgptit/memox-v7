@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
-import '../../../../../core/theme/app_typography.dart';
 
 /// One labelled group of the settings screen: a heading, then a card.
 ///
@@ -54,10 +54,7 @@ class SettingsSectionWidget extends StatelessWidget {
           excludeSemantics: true,
           child: Text(
             label.toUpperCase(),
-            style: context.texts.labelMedium?.copyWith(
-              color: context.colors.onSurfaceVariant,
-              letterSpacing: AppTypography.sectionLabelTracking,
-            ),
+            style: context.textStyles.sectionLabel.inked(context, AppInk.quiet),
           ),
         ),
       ),

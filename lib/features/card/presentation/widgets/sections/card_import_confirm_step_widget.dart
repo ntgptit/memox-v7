@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../domain/models/card_import_preview_model.dart';
 import '../../controllers/card_import_commit_controller.dart';
@@ -46,8 +48,6 @@ class CardImportConfirmStepWidget extends ConsumerWidget {
       return CardImportSubmitProgressWidget(count: willWrite);
     }
 
-    final colors = context.colors;
-
     // The same summary-row language the result faces speak (states 6-7):
     // one grouped card, an icon-led row per fact, the count on the trailing
     // edge — so Confirm, Result and Preview read as one family, not three
@@ -75,13 +75,13 @@ class CardImportConfirmStepWidget extends ConsumerWidget {
               ),
               _ConfirmRow(
                 icon: Icons.check,
-                color: colors.secondary,
+                color: AppInk.secondary,
                 label: l10n.cardImportConfirmImportRowLabel,
                 count: willWrite,
               ),
               _ConfirmRow(
                 icon: Icons.copy_outlined,
-                color: colors.tertiary,
+                color: AppInk.tertiary,
                 label: shouldIncludeDuplicates
                     ? l10n.cardImportConfirmDuplicatesIncludedRowLabel
                     : l10n.cardImportDuplicatesSkippedRowLabel,
@@ -89,13 +89,13 @@ class CardImportConfirmStepWidget extends ConsumerWidget {
               ),
               _ConfirmRow(
                 icon: Icons.error_outline,
-                color: colors.error,
+                color: AppInk.error,
                 label: l10n.cardImportInvalidSkippedRowLabel,
                 count: preview.invalidCount,
               ),
               _ConfirmRow(
                 icon: Icons.remove,
-                color: colors.onSurfaceVariant,
+                color: AppInk.quiet,
                 label: l10n.cardImportBlankIgnoredRowLabel,
                 count: preview.blankCount,
               ),
@@ -121,7 +121,7 @@ class _ConfirmRow extends StatelessWidget {
   });
 
   final IconData icon;
-  final Color color;
+  final AppInk color;
   final String label;
   final int count;
 
@@ -133,12 +133,13 @@ class _ConfirmRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       child: Row(
         children: <Widget>[
-          Icon(icon, size: AppSpacing.lg, color: color),
+          // `sm` is the same 16 `AppSpacing.lg` used to spell here.
+          MxIcon(icon, ink: color, size: MxIconSize.sm),
           const SizedBox(width: AppSpacing.md),
           Expanded(child: Text(label, style: context.texts.bodyMedium)),
           Text(
             countLabel,
-            style: context.texts.titleSmall?.copyWith(color: color),
+            style: context.texts.titleSmall!.inked(context, color),
           ),
         ],
       ),
