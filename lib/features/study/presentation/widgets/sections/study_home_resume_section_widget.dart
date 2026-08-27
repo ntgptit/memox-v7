@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_ink.dart';
-import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -41,8 +40,7 @@ class StudyHomeResumeSectionWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    return MxCard(
-      elevation: AppElevation.none,
+    return MxCard.flat(
       // The one surface on this screen that steps away from `surface`: it is a
       // different kind of offer from the rows under it, and the pair only reads
       // as a pair if one of them is distinguishable at a glance.

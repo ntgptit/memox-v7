@@ -115,8 +115,7 @@ class _AnswerCard extends StatelessWidget {
     // was just taken out of, and it re-states a surface that is already saying
     // one thing.
     if (graded != null) {
-      return MxCard(
-        elevation: AppElevation.none,
+      return MxCard.flat(
         radius: AppRadius.xl,
         color: surface,
         borderColor: graded ? semantic.success : semantic.danger,
@@ -131,8 +130,7 @@ class _AnswerCard extends StatelessWidget {
         // editable is part of the target rather than a hole in it.
         behavior: HitTestBehavior.opaque,
         onTap: focusNode.requestFocus,
-        child: MxCard(
-          elevation: AppElevation.none,
+        child: MxCard.flat(
           radius: AppRadius.xl,
           color: surface,
           // The card carries focus the way a field would, because it is the

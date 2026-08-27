@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/error/failure.dart';
 import '../../../../../core/theme/app_ink.dart';
-import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -49,12 +48,11 @@ class SettingsErrorBandWidget extends StatelessWidget {
     return Semantics(
       container: true,
       liveRegion: true,
-      child: MxCard(
+      child: MxCard.flat(
         color: colors.errorContainer,
         // Flat: the band sits inside a card that already carries the app's one
         // elevation, and a shadow stacked on a shadow is a rendering fault
         // rather than depth (`MxCard`).
-        elevation: AppElevation.none,
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,

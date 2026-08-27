@@ -162,6 +162,11 @@ WidgetbookComponent cardComponent() {
             maxLines: 3,
           );
           final isTappable = context.knobs.boolean(label: 'tappable');
+          final isFlat = context.knobs.boolean(label: 'flat (no shadow)');
+          final selection = context.knobs.object.dropdown<String>(
+            label: 'isSelected',
+            options: <String>['null (not selectable)', 'false', 'true'],
+          );
           // A **role**, never a free colour — the same contract `color` has.
           // `fill`'s answer card wears its verdict on this edge rather than in a
           // panel drawn inside it.
@@ -170,17 +175,33 @@ WidgetbookComponent cardComponent() {
             options: <String>['default', 'success', 'danger', 'focusRing'],
           );
 
+          final isSelected = switch (selection) {
+            'true' => true,
+            'false' => false,
+            _ => null,
+          };
+          final borderColor = switch (edge) {
+            'success' => context.semanticColors.success,
+            'danger' => context.semanticColors.danger,
+            'focusRing' => context.semanticColors.focusRing,
+            _ => null,
+          };
+          final child = Text(content, style: context.texts.bodyMedium);
+
           return CatalogCenterPage(
-            child: MxCard(
-              onTap: isTappable ? _noop : null,
-              borderColor: switch (edge) {
-                'success' => context.semanticColors.success,
-                'danger' => context.semanticColors.danger,
-                'focusRing' => context.semanticColors.focusRing,
-                _ => null,
-              },
-              child: Text(content, style: context.texts.bodyMedium),
-            ),
+            child: isFlat
+                ? MxCard.flat(
+                    onTap: isTappable ? _noop : null,
+                    isSelected: isSelected,
+                    borderColor: borderColor,
+                    child: child,
+                  )
+                : MxCard(
+                    onTap: isTappable ? _noop : null,
+                    isSelected: isSelected,
+                    borderColor: borderColor,
+                    child: child,
+                  ),
           );
         },
       ),

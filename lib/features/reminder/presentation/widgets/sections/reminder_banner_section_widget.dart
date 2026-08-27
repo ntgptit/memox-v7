@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_ink.dart';
-import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -44,7 +43,7 @@ class ReminderBannerSectionWidget extends StatelessWidget {
       // one block rather than two — the sibling band does the same.
       container: true,
       liveRegion: true,
-      child: MxCard(
+      child: MxCard.flat(
         color: context.colors.errorContainer,
         // `md`, not `MxCard`'s default `lg`: the two in-flow error bands are
         // one tap apart and were four decisions apart — retry side, padding,
@@ -55,7 +54,6 @@ class ReminderBannerSectionWidget extends StatelessWidget {
         padding: const EdgeInsets.all(AppSpacing.md),
         // A shadow stacked on a shadow is a rendering fault rather than
         // depth: this banner sits inside a scrolling body of flat cards (D20).
-        elevation: AppElevation.none,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
