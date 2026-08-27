@@ -667,7 +667,7 @@
     },
     "description": "Body of the delete confirmation, stating exactly how many sub-decks and cards go with the deck (BR-04) and that the deletion is recoverable (BR-256)."
   },
-  "deckDeleteConfirmAction": "Chuyển vào Trash",
+  "deckDeleteConfirmAction": "Chuyển",
   "@deckDeleteConfirmAction": {
     "description": "Confirm button of the delete-deck dialog. Names where the deck goes rather than implying it is destroyed (BR-256)."
   },
@@ -1299,7 +1299,7 @@
   "@cardBulkDeleteMessage": {
     "description": "Body of the bulk delete confirmation: what happens to the history, and for how long it can be undone (BR-256, BR-259)."
   },
-  "cardBulkDeleteConfirmAction": "Chuyển vào Trash",
+  "cardBulkDeleteConfirmAction": "Chuyển",
   "@cardBulkDeleteConfirmAction": {
     "description": "Confirm button of the bulk delete dialog (BR-256)."
   },
@@ -1511,7 +1511,7 @@
   "@cardDeleteConfirmMessage": {
     "description": "Body of the card delete confirmation. Deleting the last active card also returns the deck to unset (BR-260)."
   },
-  "cardDeleteConfirmAction": "Chuyển vào Trash",
+  "cardDeleteConfirmAction": "Chuyển",
   "@cardDeleteConfirmAction": {
     "description": "Confirm button on the card delete dialog (BR-256)."
   },

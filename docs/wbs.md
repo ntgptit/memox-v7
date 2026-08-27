@@ -14151,6 +14151,36 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Editable documents:** `docs/wbs.md`
 - **Dependencies:** M99.70
 
+### M99.76 · Nút xác nhận Trash gọn một dòng — "Move", danh từ ở lại title
+
+- **Status:** **done** — copy change theo yêu cầu owner (2026-08-28), kèm
+  một quyết định phạm vi hỏi-đáp rõ ràng.
+- **Goal:** nút confirm của ba dialog Trash không xuống dòng ở 393dp.
+- **Scope:** 3 key ARB (`deckDeleteConfirmAction`,
+  `cardBulkDeleteConfirmAction`, `cardDeleteConfirmAction`) đổi
+  "Move to Trash"/"Chuyển vào Trash" → "Move"/"Chuyển" ở cả hai locale;
+  description ghi lý do. **`cardEditorTrashAction` giữ nguyên có chủ đích**
+  (owner chọn phương án đề xuất): nút đó đứng một mình trên editor, không
+  có title đỡ nghĩa, và "Move"/"Chuyển" trần đã là hành động
+  di-chuyển-sang-deck-khác trên cùng các màn (`deckMoveAction`,
+  `cardSelectionMoveAction`) — nguyên tắc T8/BR-235.
+- **BR-256 vẫn được thoả qua bề mặt:** rule yêu cầu *UI* nói "chuyển vào
+  Trash, không phải huỷ" — title của cả ba dialog vẫn nêu Trash; nút chỉ
+  thôi lặp lại danh từ. Test editor đổi claim tương ứng và ghi lại lập
+  luận.
+- **Tests required:** không test mới — 5 golden dialog regenerate
+  (`card_bulk_delete_dialog_light`, `deck_delete_confirm_{light,dark,vi}`,
+  `deck_delete_empty_light`); `card_editor_edit_test` cập nhật claim.
+- **Checklist phases:** Phase 20 (l10n/copy).
+- **Emulator integration suite:** **not run — copy + goldens only.** Đây
+  không phải một lượt chạy xanh.
+- **Output:** như Scope; gallery publish lại URL ghim sau merge (golden đổi).
+- **Acceptance criteria:**
+  - [x] Cả ba dialog một dòng ở cả EN lẫn VI; editor giữ danh từ đích.
+  - [x] `flutter analyze` 0; full suite 4177 xanh; goldens `TZ=UTC` xanh.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** M99.74
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |
