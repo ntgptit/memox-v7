@@ -250,6 +250,47 @@ def _check_wbs_tasks() -> None:
         _ok(f"every WBS dependency resolves to a defined task ({len(edges)} edges)")
 
     _check_m_task_template()
+    _check_m_task_ids_unique()
+
+
+def _check_m_task_ids_unique() -> None:
+    """Two entries with the same id, and nothing noticed.
+
+    **This rule exists because the failure kept happening and the guard had no
+    opinion about it.** Numbers get chosen while an entry is written and claimed
+    only when it merges, so two branches in flight pick the same one and the
+    second to land silently duplicates the first. It happened five times in a
+    single session and reached `main` at least once (M99.70, from #377 and #378),
+    where a duplicate breaks the one thing an id is for: `depends on M99.70` now
+    names two different pieces of work.
+
+    The heading regex keeps any letter suffix, so `M99.19a` is its own id rather
+    than a second `M99.19` — the suffixed variants are deliberate.
+    """
+    seen: dict[str, list[str]] = {}
+    for path in (WBS_FILE, STUDY_WBS_FILE):
+        try:
+            lines = _lines(path)
+        except OSError:
+            continue
+        for line in lines:
+            match = _M_HEAD_RE.match(line)
+            if match:
+                seen.setdefault(match.group(1), []).append(
+                    f"{path}: {line.rstrip()[:72]}"
+                )
+
+    duplicates = {task: where for task, where in seen.items() if len(where) > 1}
+    if not duplicates:
+        _ok(f"every WBS task id is used once ({len(seen)} ids)")
+        return
+
+    for task, where in sorted(duplicates.items()):
+        _fail(
+            "two WBS entries share one task id",
+            f"{task} is defined {len(where)} times:\n      "
+            + "\n      ".join(where),
+        )
 
 
 _M_HEAD_RE = re.compile(r"^### (M[0-9]+(?:\.[0-9]+)?[a-z]?) ")
