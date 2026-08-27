@@ -13676,7 +13676,7 @@ xanh, và lại mười hai phút mà không ai biết. Sàn đếm bảo vệ *
 
 Ước tính: step 412s còn ~75s, job từ ~12,5 phút còn **~7 phút**.
 
-### M99.69 · Ba loại thay đổi chạy cả suite chỉ vì không ai phân loại chúng
+### M99.70 · Ba loại thay đổi chạy cả suite chỉ vì không ai phân loại chúng
 
 - **Status:** **done** — chỉ tooling verification, không đụng code app.
 - **Goal:** Một thay đổi chỉ chạy thứ nó có thể làm hỏng.
@@ -13694,7 +13694,10 @@ xanh, và lại mười hai phút mà không ai biết. Sàn đếm bảo vệ *
   - [x] `.github/workflows/` vẫn full — đây là chỗ chạy hết **là mục đích**.
   - [x] Đường dẫn lạ vẫn full; fallback không bị đụng.
   - [x] Cả hai thu hẹp đã kiểm **đỏ** khi gỡ ra (1 và 4 test).
-- **Dependencies:** M99.68.
+- **Dependencies:** M99.68. **Đổi số lần thứ tư trong cùng một phiên** — #376
+  lấy M99.69. M99.62, M99.65 và M99.68 đã ghi cùng bài học ba lần và tôi vẫn
+  đặt số lúc viết; bài học chỉ có giá trị khi được làm theo, nên: **số lấy ở
+  bước cuối, ngay trước khi merge.**
 - **Tests required:** `test_ci_tooling.py` — 52 → **57**.
 - **Emulator:** `not run — scoped host verification`.
 - **Checklist phases:** 14
