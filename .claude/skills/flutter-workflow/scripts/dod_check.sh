@@ -4,7 +4,7 @@
 # guards, the code-verification guard, and tests.
 #
 # Usage: .claude/skills/flutter-workflow/scripts/dod_check.sh
-#        [--changed [--base <git-ref>]] [--fast] [--fix]
+#        [--changed [--base <git-ref>]] [--fast] [--fix] [--force]
 #   --changed  build the same feature × layer × risk plan as PR CI from the
 #              diff against --base (default: origin/main), then run only the
 #              selected host tests and Widgetbook surface. Unknown/high-risk
@@ -15,6 +15,24 @@
 #           NOT run test/core, test/shared, or another feature's tests — run the
 #           full gate (no --fast) before you commit, and always before a merge.
 #   --fix   apply `dart format` instead of only reporting drift
+#   --force ignore the pass stamp and run even if this exact tree already passed
+#
+# **The pass stamp, and why it exists.** Running this twice on an unchanged tree
+# is not caution, it is the same answer bought twice — and it happens on every
+# change, because "before commit", "before push" and "before the PR" feel like
+# three moments and are one state. A successful run now records a fingerprint of
+# the tree it verified; a later run with the same fingerprint prints what it
+# already knows and exits in ~0.4s instead of 50-150s.
+#
+# A `full` pass satisfies `--changed` and `--fast`, because it is a superset of
+# both. The reverse never holds.
+#
+# The fingerprint covers HEAD, every tracked modification, and every untracked
+# file git would not ignore — so `.fvmrc` and `pubspec.lock` are inside it. What
+# it cannot see is the Flutter SDK being swapped underneath a `.fvmrc` that did
+# not change. That is a deliberate hole: closing it costs `flutter --version` on
+# every invocation, which is most of what the stamp saves, and swapping an SDK
+# is rare and deliberate. `--force` is the way out.
 #
 # ---------------------------------------------------------------------------
 # Where the time goes, measured rather than assumed (2026-08-02, this machine):
@@ -46,11 +64,13 @@ set -uo pipefail
 
 FIX=0
 FAST=0
+FORCE=0
 CHANGED=0
 BASE_REF="origin/main"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --fix) FIX=1 ;;
+    --force) FORCE=1 ;;
     --fast) FAST=1 ;;
     --changed) CHANGED=1 ;;
     --base)
@@ -84,6 +104,66 @@ step() { hr; printf '▶ %s\n' "$1"; }
 if [[ ! -f pubspec.yaml ]]; then
   echo "No pubspec.yaml at $REPO_ROOT — the Flutter project has not been created yet."
   echo "That is expected before Phase 2.3. Nothing to check."
+  exit 0
+fi
+
+STAMP_FILE="$REPO_ROOT/.dart_tool/dod_check_stamp"
+if [[ $CHANGED -eq 1 ]]; then
+  MODE="changed:$BASE_REF"
+elif [[ $FAST -eq 1 ]]; then
+  MODE="fast"
+else
+  MODE="full"
+fi
+
+# HEAD, every tracked modification, and every untracked file git would not
+# ignore. Measured at ~0.4s against a gate that costs 50-150s.
+tree_fingerprint() {
+  {
+    git rev-parse HEAD 2>/dev/null || echo "no-head"
+    git diff HEAD --binary 2>/dev/null
+    git ls-files --others --exclude-standard -z 2>/dev/null       | xargs -0 -r sha256sum 2>/dev/null
+  } | sha256sum | cut -d" " -f1
+}
+
+FINGERPRINT="$(tree_fingerprint)"
+
+# Reported rather than re-derived. The stamp's test needs this value, and a
+# second implementation of it in the test would agree with this one only until
+# one of them changed.
+if [[ ${PRINT_FINGERPRINT:-0} -eq 1 ]]; then
+  printf '%s
+' "$FINGERPRINT"
+  exit 0
+fi
+
+# **Answer the question without doing the work.** The stamp's own tests need to
+# know which way it decides, and a test that learns that by letting the gate
+# start has already lost: killing the shell leaves `flutter test` running as an
+# orphan. This prints the decision and stops.
+REUSE=0
+if [[ $FORCE -eq 0 && -f "$STAMP_FILE" ]]; then
+  while IFS=$'	' read -r stamped_mode stamped_print stamped_at; do
+    [[ "$stamped_print" == "$FINGERPRINT" ]] || continue
+    # A full pass answers for the narrower modes as well; never the reverse.
+    if [[ "$stamped_mode" == "$MODE" || "$stamped_mode" == "full" ]]; then
+      REUSE=1
+      STAMPED_MODE="$stamped_mode"
+      STAMPED_AT="$stamped_at"
+      break
+    fi
+  done < "$STAMP_FILE"
+fi
+
+if [[ ${STAMP_DECISION_ONLY:-0} -eq 1 ]]; then
+  [[ $REUSE -eq 1 ]] && echo "reuse" || echo "run"
+  exit 0
+fi
+
+if [[ $REUSE -eq 1 ]]; then
+  echo "✓ already passed — nothing has changed since $STAMPED_AT"
+  echo "  mode on record: $STAMPED_MODE   asked for: $MODE"
+  echo "  Re-run anyway with --force."
   exit 0
 fi
 
@@ -262,13 +342,24 @@ if [[ $NEEDS_HOST_TESTS -eq 1 ]] && command -v flutter >/dev/null 2>&1; then
     else
       printf -v QUOTED_TEST_TARGETS " %q" "${CHANGED_TEST_TARGETS[@]}"
       plan test "flutter test (--changed: ${#CHANGED_TEST_TARGETS[@]} compressed targets, no goldens)" \
-        "flutter test --exclude-tags golden${QUOTED_TEST_TARGETS}"
+        "TZ=UTC flutter test --exclude-tags golden${QUOTED_TEST_TARGETS}"
     fi
   elif [[ $FAST -eq 1 ]]; then
     plan test "flutter test (--fast: Deck + app subset, no goldens)" \
-      "flutter test --exclude-tags golden test/app test/features/deck"
+      "TZ=UTC flutter test --exclude-tags golden test/app test/features/deck"
   else
-    plan test "flutter test (full suite)" "flutter test"
+    # **`TZ=UTC`, and the full suite includes goldens.** `dart_test.yaml`
+    # excludes no tag by default, so a bare `flutter test` compares pixels
+    # too — which is why running `flutter test --tags golden` after this
+    # command is the same 295 tests a second time.
+    #
+    # Unpinned, those pixels were being compared in whatever zone the machine
+    # sits in, against PNGs that CLAUDE.md requires be generated under UTC.
+    # This machine is UTC+9 and passes today; that is luck, not agreement.
+    # AD-14's own record is four goldens failing by 2014 to 14268 pixels for
+    # exactly this reason. A gate that only agrees with the runner by accident
+    # is not a gate.
+    plan test "flutter test (full suite, goldens included, TZ=UTC)"       "TZ=UTC flutter test"
   fi
 fi
 
@@ -328,6 +419,21 @@ if [[ $CHANGED -eq 1 ]]; then
 fi
 
 if [[ ${#FAILED[@]} -eq 0 ]]; then
+  # Only on a clean pass, and only for the mode that actually ran. A skipped
+  # gate is recorded in SKIPPED and does not fail the run, so re-read the
+  # summary above before trusting a stamp written by a run that skipped
+  # something you needed.
+  if [[ ${#SKIPPED[@]} -eq 0 ]]; then
+    mkdir -p "$(dirname "$STAMP_FILE")"
+    {
+      # awk rather than grep -P: BSD grep has no -P, and the mode string
+      # contains a `:` and a `/`, which a regex would have to escape.
+      [[ -f "$STAMP_FILE" ]] && awk -F'	' -v m="$MODE" '$1 != m' "$STAMP_FILE"
+      printf '%s	%s	%s
+' "$MODE" "$FINGERPRINT" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    } > "$STAMP_FILE.tmp" && mv "$STAMP_FILE.tmp" "$STAMP_FILE"
+  fi
+
   echo "✓ mechanical gates passed"
   echo
   echo "Still needs a human: acceptance criteria, scope match, design fidelity,"

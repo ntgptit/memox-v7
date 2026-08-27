@@ -13676,6 +13676,67 @@ xanh, và lại mười hai phút mà không ai biết. Sàn đếm bảo vệ *
 
 Ước tính: step 412s còn ~75s, job từ ~12,5 phút còn **~7 phút**.
 
+### M99.71 · Chạy gate lần thứ hai trên cùng một cây không còn tốn gì
+
+- **Status:** **done** — chỉ tooling, không đụng code app.
+- **Goal:** Việc chạy lặp trở thành vô hại thay vì phải nhớ đừng lặp.
+- **Scope:** `dod_check.sh` (con dấu, `--force`, `TZ=UTC`), test tooling.
+  **Ngoài scope:** nội dung các gate, và CI.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `dod_check.sh`, `test_ci_tooling.py`.
+- **Acceptance criteria:**
+  - [x] Chạy lần hai trên cây không đổi: **~1s** thay vì 50–150s.
+  - [x] Dấu `full` trả lời thay cho `--changed` và `--fast`; chiều ngược lại
+        **không bao giờ**.
+  - [x] Sửa bất kỳ file nào là dấu mất hiệu lực.
+  - [x] `--force` bỏ qua dấu.
+  - [x] Cả hai tính chất đã kiểm **đỏ** khi gỡ cơ chế (3 test và 1 test).
+- **Dependencies:** không.
+- **Tests required:** `test_ci_tooling.py` — 52 → **56**.
+- **Emulator:** `not run — scoped host verification`.
+- **Checklist phases:** 14
+
+**Chủ dự án nói thẳng: chạy gate lặp đi lặp lại quá mệt.** Đúng, và lỗi là của
+tôi: sau khi code xong chạy một lần, trước commit chạy lại, trước PR chạy lại,
+rồi CI chạy lần nữa. Ba mốc ấy **không phải ba trạng thái** — nếu không sửa gì
+thì đó là một câu hỏi hỏi ba lần.
+
+**Vì sao không giải bằng kỷ luật.** Bài học đánh số WBS trong chính phiên này
+được viết ra **ba lần** và bị vi phạm **bốn lần**. Một quy tắc chỉ nằm trong văn
+xuôi thì không giữ được; nó phải nằm trong công cụ.
+
+**Con dấu.** Chạy xanh xong thì ghi vân tay của cây vừa được kiểm; lần gọi sau
+cùng vân tay thì in ra điều đã biết và thoát. Vân tay tốn **364ms**, một lần gate
+tốn 50–150s. Dấu ghi theo **từng chế độ**: `full` là tập cha nên trả lời thay cho
+`--changed` và `--fast` — đúng thói quen hay lặp nhất — còn `--fast` thì không
+bao giờ trả lời thay cho gate đầy đủ, vì nó chỉ chạy tập con Deck + app.
+
+**Lỗ hổng, nói trước chứ không giấu:** vân tay gồm HEAD, mọi sửa đổi đã track và
+mọi file chưa track mà git không ignore — nên `.fvmrc` và `pubspec.lock` nằm
+trong đó. Thứ nó **không** thấy là SDK Flutter bị đổi bên dưới một `.fvmrc`
+không đổi. Bịt lỗ ấy tốn `flutter --version` mỗi lần gọi, tức ăn gần hết cái lợi;
+đổi SDK là việc hiếm và có chủ ý, nên đây là đánh đổi có ý thức và `--force` là
+lối ra.
+
+**Hai thứ tìm ra khi làm, và cái thứ hai là lỗi thật.**
+
+- **Gate đầy đủ vốn đã chạy golden.** `dart_test.yaml` không loại tag nào theo
+  mặc định, nên `flutter test` trần so pixel luôn. Mỗi lần tôi chạy thêm
+  `flutter test --tags golden` sau `dod_check.sh` là chạy lại 295 test lần thứ
+  hai — hàng phút, nhiều lần, chỉ vì tôi không biết.
+- **Nhưng nó chạy golden mà không ghim `TZ=UTC`.** Máy này là **KST+0900** và
+  `TZ` không set. Hôm nay qua được là **may, không phải đồng thuận**: AD-14 ghi
+  bốn golden từng lệch 2014–14268 pixel đúng vì lý do ấy, và CLAUDE.md bắt buộc
+  regenerate dưới UTC. Một gate chỉ tình cờ đồng ý với runner thì không phải
+  gate. Đã ghim cả ba chế độ.
+
+**Và một lỗi trong chính test của cơ chế này, đáng ghi vì nó suýt lọt.** Bản đầu
+kiểm nhánh phủ định bằng cách **để gate chạy thật** rồi giết theo timeout. Giết
+shell không giết `flutter test` con: bộ test treo bảy phút với cả gate chạy phía
+sau. Script giờ trả lời được **quyết định** mà không khởi động gì
+(`STAMP_DECISION_ONLY`), và vân tay cũng do script tự khai báo thay vì test chép
+lại — một định nghĩa thứ hai chỉ khớp cho tới khi một bên đổi.
+
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 
 Ghi lại cụ thể, vì "mất một bộ lint" là câu quá mơ hồ để ai đó sau này biết

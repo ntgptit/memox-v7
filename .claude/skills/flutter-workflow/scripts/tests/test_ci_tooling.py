@@ -3,6 +3,8 @@ from __future__ import annotations
 import dataclasses
 import importlib.util
 import json
+import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -21,6 +23,127 @@ def _load(name: str):
     sys.modules[name] = module
     spec.loader.exec_module(module)
     return module
+
+
+def _find_bash() -> str | None:
+    """Git Bash, not WSL's — see DodCheckStampTest._bash."""
+    shell = os.environ.get("SHELL", "")
+    if shell.endswith(("bash", "bash.exe")) and Path(shell).exists():
+        return shell
+    git = shutil.which("git")
+    if git:
+        candidate = Path(git).parents[1] / "bin" / "bash.exe"
+        if candidate.exists():
+            return str(candidate)
+    found = shutil.which("bash")
+    return found if found and "System32" not in found else None
+
+
+_BASH = _find_bash()
+
+
+class DodCheckStampTest(unittest.TestCase):
+    """The pass stamp: run twice on an unchanged tree, pay once.
+
+    Running the gate again before commit, again before push and again before the
+    PR is one tree state asked three times. The stamp exists so the repetition
+    costs ~0.4s instead of 50-150s — and so it works without anyone having to
+    remember, which is the part that failed every time it was written down.
+    """
+
+    SCRIPT = REPO_ROOT / ".claude/skills/flutter-workflow/scripts/dod_check.sh"
+    STAMP = REPO_ROOT / ".dart_tool/dod_check_stamp"
+
+    @staticmethod
+    def _bash() -> str | None:
+        """Git Bash, not WSL's.
+
+        On Windows `shutil.which("bash")` finds `System32/bash.exe`, the WSL
+        launcher, which cannot see the repository's drive path and fails with
+        `execvpe(/bin/bash)`. The shell this project's scripts are written for
+        ships beside git.
+        """
+        shell = os.environ.get("SHELL", "")
+        if shell.endswith(("bash", "bash.exe")) and Path(shell).exists():
+            return shell
+        git = shutil.which("git")
+        if git:
+            candidate = Path(git).parents[1] / "bin" / "bash.exe"
+            if candidate.exists():
+                return str(candidate)
+        found = shutil.which("bash")
+        if found and "System32" not in found:
+            return found
+        return None
+
+    def setUp(self) -> None:
+        self._saved = self.STAMP.read_bytes() if self.STAMP.exists() else None
+        self.STAMP.parent.mkdir(parents=True, exist_ok=True)
+
+    def tearDown(self) -> None:
+        if self._saved is None:
+            self.STAMP.unlink(missing_ok=True)
+        else:
+            self.STAMP.write_bytes(self._saved)
+
+    def _fingerprint(self) -> str:
+        """Asked of the script, not recomputed here — a second definition would
+        match the first only until one of them changed."""
+        out = subprocess.run(
+            [self._bash(), str(self.SCRIPT)],
+            cwd=REPO_ROOT, capture_output=True, text=True,
+            env={**os.environ, "PRINT_FINGERPRINT": "1"},
+        )
+        self.assertEqual(0, out.returncode, out.stderr)
+        return out.stdout.strip()
+
+    def _decide(self, *args: str) -> str:
+        """Ask which way the stamp decides — never let the gate start.
+
+        An earlier version of this test ran the script for real and killed it on
+        a timeout. Killing the shell orphans `flutter test`, so the suite hung
+        for seven minutes with the whole gate running behind it. The script
+        answers the question directly now.
+        """
+        out = subprocess.run(
+            [_BASH, str(self.SCRIPT), *args], cwd=REPO_ROOT,
+            capture_output=True, text=True, timeout=60,
+            env={**os.environ, "STAMP_DECISION_ONLY": "1"},
+        )
+        self.assertEqual(0, out.returncode, out.stderr)
+        return out.stdout.strip()
+
+    def _write_stamp(self, mode: str) -> None:
+        self.STAMP.write_text(
+            f"{mode}\t{self._fingerprint()}\t2026-01-01T00:00:00Z\n",
+            encoding="utf-8",
+        )
+
+    @unittest.skipUnless(_BASH, "needs Git Bash")
+    def test_an_unchanged_tree_is_not_verified_twice(self) -> None:
+        self._write_stamp("full")
+        self.assertEqual("reuse", self._decide())
+
+    @unittest.skipUnless(_BASH, "needs Git Bash")
+    def test_a_full_pass_answers_for_the_narrower_modes(self) -> None:
+        """`full` is a superset of both, and this is the case that saves the
+        most: the habit is to run the whole gate and then run a narrower one."""
+        self._write_stamp("full")
+        for args in (("--fast",), ("--changed",)):
+            with self.subTest(args=args):
+                self.assertEqual("reuse", self._decide(*args))
+
+    @unittest.skipUnless(_BASH, "needs Git Bash")
+    def test_a_narrow_pass_never_answers_for_the_full_gate(self) -> None:
+        """The safety property. `--fast` runs the Deck + app subset; letting it
+        stamp the full gate would turn a shortcut into a false clean bill."""
+        self._write_stamp("fast")
+        self.assertEqual("run", self._decide())
+
+    @unittest.skipUnless(_BASH, "needs Git Bash")
+    def test_force_ignores_a_valid_stamp(self) -> None:
+        self._write_stamp("full")
+        self.assertEqual("run", self._decide("--force"))
 
 
 class VerificationPlanBuilderTest(unittest.TestCase):
