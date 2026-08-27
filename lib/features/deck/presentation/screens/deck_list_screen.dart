@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/navigation/route_names.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
+import '../../../../shared/widgets/mx_fab.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_empty_state.dart';
 import '../../../../shared/widgets/mx_icon_button.dart';
@@ -205,16 +205,10 @@ class _DeckLevel extends ConsumerWidget {
       //
       // Absent where the action is: a `card` deck holds no sub-decks (BR-63).
       floatingActionButton: _mayCreate(parent)
-          ? FloatingActionButton(
+          ? MxFab(
+              icon: Icons.add,
+              label: _createLabel(context, parent),
               onPressed: () => _startCreate(context, parent),
-              tooltip: _createLabel(context, parent),
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(AppRadius.lg)),
-              ),
-              child: Icon(
-                Icons.add,
-                semanticLabel: _createLabel(context, parent),
-              ),
             )
           : null,
       // **The path is the bar's second line, not a band under it.** It was

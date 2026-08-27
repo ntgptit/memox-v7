@@ -5,6 +5,7 @@ import 'package:memox/app/app.dart';
 import 'package:memox/features/deck/di/deck_repository_provider.dart';
 import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_elevation.dart';
+import 'package:memox/core/theme/app_radius.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/core/theme/theme_context_extension.dart';
 import 'package:memox/features/settings/di/app_settings_repository_provider.dart';
@@ -300,6 +301,14 @@ void main() {
 
         expect(fab.backgroundColor, scheme.primary);
         expect(fab.foregroundColor, scheme.onPrimary);
+        // The house corner, owned here since the deck list stopped stating it
+        // per-site — M3's default is the 16dp squircle nothing else uses.
+        expect(
+          fab.shape,
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+          ),
+        );
         for (final (String state, Color? wash) in <(String, Color?)>[
           ('hover', fab.hoverColor),
           ('focus', fab.focusColor),

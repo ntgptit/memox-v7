@@ -6,6 +6,7 @@ import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_confirm_dialog.dart';
+import '../../../../../shared/widgets/mx_list_tile.dart';
 import '../../../../../shared/widgets/mx_dialog_tone.dart';
 import '../../../../../shared/widgets/mx_empty_state.dart';
 import '../../../../../shared/widgets/mx_form_dialog.dart';
@@ -131,12 +132,12 @@ class _TargetList extends StatelessWidget {
       itemBuilder: (context, index) {
         final target = targets[index];
 
-        return ListTile(
+        // The parent's name is what tells two same-named decks apart; a deck
+        // whose parent vanished mid-read simply shows no second line.
+        return MxListTile(
           leading: const Icon(Icons.folder_outlined),
-          title: Text(target.name),
-          // The parent's name is what tells two same-named decks apart; a deck
-          // whose parent vanished mid-read simply shows no second line.
-          subtitle: target.parentName == null ? null : Text(target.parentName!),
+          title: target.name,
+          subtitle: target.parentName,
           onTap: () => Navigator.of(context).pop(target.deckId),
         );
       },

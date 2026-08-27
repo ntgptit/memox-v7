@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
@@ -52,13 +53,19 @@ class StudyHomeResumeSectionWidget extends StatelessWidget {
         children: <Widget>[
           Text(
             l10n.studyHomeResumeTitle,
-            style: context.texts.labelMedium?.copyWith(
-              // Stated, not inherited. A text style taken from the theme carries
-              // the body ink, which lands unreadably on a tinted surface — the
-              // override class the visual audit has measured at 2.33:1 before.
-              color: context.colors.onSecondaryContainer,
-              fontWeight: FontWeight.w600,
-            ),
+            // Through the wght axis — a bare `fontWeight:` paints the rung's
+            // old weight.
+            style:
+                AppTypography.withWeight(
+                  context.texts.labelMedium!,
+                  FontWeight.w600,
+                ).copyWith(
+                  // Stated, not inherited. A text style taken from the theme
+                  // carries the body ink, which lands unreadably on a tinted
+                  // surface — the override class the visual audit has measured
+                  // at 2.33:1 before.
+                  color: context.colors.onSecondaryContainer,
+                ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

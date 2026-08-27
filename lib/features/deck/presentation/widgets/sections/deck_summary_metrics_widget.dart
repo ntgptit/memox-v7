@@ -169,10 +169,12 @@ class _HeroFigureLine extends StatelessWidget {
     children: <InlineSpan>[
       TextSpan(
         text: context.l10n.deckSummaryOverduePart(overdueCount),
-        style: context.texts.bodyMedium?.copyWith(
-          color: context.semanticColors.overdue,
-          fontWeight: FontWeight.w600,
-        ),
+        // Through the wght axis — a bare `fontWeight:` paints the rung's
+        // old weight.
+        style: AppTypography.withWeight(
+          context.texts.bodyMedium!,
+          FontWeight.w600,
+        ).copyWith(color: context.semanticColors.overdue),
       ),
       const TextSpan(text: ' · '),
       TextSpan(

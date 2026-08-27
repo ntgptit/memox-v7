@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
+import 'package:memox/shared/widgets/mx_fab.dart';
 import 'package:memox/shared/widgets/mx_breadcrumb.dart';
 import 'package:memox/shared/widgets/mx_button_pair.dart';
 import 'package:memox/shared/widgets/mx_icon_button.dart';
@@ -49,6 +50,35 @@ WidgetbookComponent actionButtonComponent() {
               size: size,
               isLoading: isLoading,
               icon: hasIcon ? Icons.add : null,
+              onPressed: isEnabled ? _noop : null,
+            ),
+          );
+        },
+      ),
+    ],
+  );
+}
+
+WidgetbookComponent fabComponent() {
+  return WidgetbookComponent(
+    name: 'MxFab',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Playground',
+        builder: (BuildContext context) {
+          final label = context.knobs.string(
+            label: 'label',
+            initialValue: 'New deck',
+          );
+          final isEnabled = context.knobs.boolean(
+            label: 'enabled',
+            initialValue: true,
+          );
+
+          return CatalogCenterPage(
+            child: MxFab(
+              icon: Icons.add,
+              label: label,
               onPressed: isEnabled ? _noop : null,
             ),
           );
