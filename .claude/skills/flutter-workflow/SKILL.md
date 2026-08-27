@@ -31,6 +31,7 @@ later decision depends on it being true.
 | Creating the Flutter project, dependencies, flavors, bootstrap, error model | `flutter-project-setup` | 2, 3, 6 |
 | Folder structure, layer boundaries, lint config, naming, code conventions | `flutter-architecture` | 4, 5 |
 | Design tokens, theming, shared components, responsive, localization, a11y | `flutter-design-system` | 7, 12, 13 |
+| A component theme in `lib/core/theme/`, an `Mx*` widget's API, admitting a new Material widget, theme ↔ widget parity | `flutter-theme-design` | 7 (component level) |
 | Routes, guards, deep links, nested shells, back behaviour | `flutter-navigation` | 8 |
 | Providers, controllers, UI state modelling, side effects | `flutter-state-riverpod` | 9 |
 | Dio, API contracts, repository shape, DTO/entity split, cache, sync, secure storage | `flutter-data-layer` | 10, 11 |
