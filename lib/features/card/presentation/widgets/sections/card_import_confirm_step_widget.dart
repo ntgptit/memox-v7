@@ -58,48 +58,51 @@ class CardImportConfirmStepWidget extends ConsumerWidget {
       children: <Widget>[
         Text(l10n.cardImportConfirmHeading, style: context.texts.titleMedium),
         const SizedBox(height: AppSpacing.sm),
-        MxCard(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.sm,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-                child: Text(
-                  l10n.cardImportConfirmTargetLabel(deckName),
-                  style: context.texts.titleSmall,
+        MxCard.raised(
+          padding: MxCardPadding.none,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+                  child: Text(
+                    l10n.cardImportConfirmTargetLabel(deckName),
+                    style: context.texts.titleSmall,
+                  ),
                 ),
-              ),
-              _ConfirmRow(
-                icon: Icons.check,
-                color: AppInk.secondary,
-                label: l10n.cardImportConfirmImportRowLabel,
-                count: willWrite,
-              ),
-              _ConfirmRow(
-                icon: Icons.copy_outlined,
-                color: AppInk.tertiary,
-                label: shouldIncludeDuplicates
-                    ? l10n.cardImportConfirmDuplicatesIncludedRowLabel
-                    : l10n.cardImportDuplicatesSkippedRowLabel,
-                count: preview.duplicateCount,
-              ),
-              _ConfirmRow(
-                icon: Icons.error_outline,
-                color: AppInk.error,
-                label: l10n.cardImportInvalidSkippedRowLabel,
-                count: preview.invalidCount,
-              ),
-              _ConfirmRow(
-                icon: Icons.remove,
-                color: AppInk.quiet,
-                label: l10n.cardImportBlankIgnoredRowLabel,
-                count: preview.blankCount,
-              ),
-            ],
+                _ConfirmRow(
+                  icon: Icons.check,
+                  color: AppInk.secondary,
+                  label: l10n.cardImportConfirmImportRowLabel,
+                  count: willWrite,
+                ),
+                _ConfirmRow(
+                  icon: Icons.copy_outlined,
+                  color: AppInk.tertiary,
+                  label: shouldIncludeDuplicates
+                      ? l10n.cardImportConfirmDuplicatesIncludedRowLabel
+                      : l10n.cardImportDuplicatesSkippedRowLabel,
+                  count: preview.duplicateCount,
+                ),
+                _ConfirmRow(
+                  icon: Icons.error_outline,
+                  color: AppInk.error,
+                  label: l10n.cardImportInvalidSkippedRowLabel,
+                  count: preview.invalidCount,
+                ),
+                _ConfirmRow(
+                  icon: Icons.remove,
+                  color: AppInk.quiet,
+                  label: l10n.cardImportBlankIgnoredRowLabel,
+                  count: preview.blankCount,
+                ),
+              ],
+            ),
           ),
         ),
       ],

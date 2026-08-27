@@ -8,7 +8,6 @@ import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
-import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_radius.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../domain/models/study_answer_commit_model.dart';
@@ -338,9 +337,7 @@ class _RecallTimerSectionWidgetState extends State<RecallTimerSectionWidget>
             constraints: const BoxConstraints(
               minHeight: AppStudyPair.cardMinHeight,
             ),
-            child: MxCard(
-              elevation: AppElevation.raised,
-              radius: AppRadius.xl,
+            child: MxCard.focal(
               child: Center(
                 child: Text(
                   widget.turn.card.front,

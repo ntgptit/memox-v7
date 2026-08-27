@@ -26,7 +26,7 @@ class SettingsReminderEntrySectionWidget extends StatelessWidget {
     return MxCard.flat(
       // Flat, like every other card in a scrolling body (D20). A raised card
       // here would be the only shadow on the screen.
-      padding: EdgeInsets.zero,
+      padding: MxCardPadding.none,
       // `Material` inside the card, and it is not decoration: `MxCard` paints
       // its surface with a `DecoratedBox`, and `ListTile` paints its background
       // and ink onto the nearest `Material` ancestor — which without this is the

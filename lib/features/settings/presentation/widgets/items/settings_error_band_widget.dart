@@ -43,17 +43,11 @@ class SettingsErrorBandWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-
     return Semantics(
       container: true,
       liveRegion: true,
-      child: MxCard.flat(
-        color: colors.errorContainer,
-        // Flat: the band sits inside a card that already carries the app's one
-        // elevation, and a shadow stacked on a shadow is a rendering fault
-        // rather than depth (`MxCard`).
-        padding: const EdgeInsets.all(AppSpacing.md),
+      child: MxCard.feedback(
+        tone: MxCardFeedbackTone.danger,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[

@@ -14311,6 +14311,76 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Editable documents:** `docs/wbs.md`
 - **Dependencies:** M99.76
 
+### M99.80 · Đóng API MxCard thành recipe — và ma trận state đầy đủ cho MxActionButton
+
+- **Status:** **done** — foundation hardening theo prompt set
+  `mx-card-action-button-foundation`; không đổi nghiệp vụ, callback,
+  navigation hay copy nào.
+- **Goal:** public API của `MxCard` không còn visual primitive nào; mọi
+  production call-site đi qua recipe có tên; `MxActionButton` giữ nguyên
+  behavior và có bằng chứng state matrix đầy đủ 4 theme.
+- **Scope:** `mx_card.dart` viết lại quanh 10 named recipe (`flat` · `raised`
+  — constructor unnamed cũ được đặt tên · `focal` · `recessed` · `feedback` ·
+  `muted` · `tonal` · `accent` · `tile` · `option`) + 4 enum đóng
+  (`MxCardPadding`, `MxCardSelectionTreatment`, `MxCardRecessedEdge`,
+  `MxCardFeedbackTone`); migrate **48/48** production call-site (inventory
+  chạy máy, 0 unknown); 2 guard test mới; state-matrix test cho button; AD-23;
+  Widgetbook playground theo recipe. **Ngoài scope:** implementation của
+  `MxActionButton` (audit không tái hiện defect nào — đúng baseline
+  M99.74/M99.75, 20/20 test matrix xanh trên code hiện có, không sửa dòng nào).
+- **Ba defect thật của MxCard, sửa kèm test:**
+  - `onLongPress != null && onTap == null` rơi vào nhánh inert — callback tồn
+    tại và không bao giờ chạy;
+  - focus ring vẽ ở mọi `FocusHighlightMode` — cùng bug class autofocus
+    M99.75, giờ gate theo `traditional` và nghe mode đổi;
+  - sàn 48×48 của card tương tác phụ thuộc padding tình cờ — giờ là
+    `ConstrainedBox` structural.
+- **Inventory → recipe (số caller):** feedback·danger 6 (sáu error band tự
+  dựng cùng một card), focal 4, recessed 3 (mặt answer study, edge enum
+  focus/success/danger), muted 2, selection-tint 1 (card tile), option 1
+  (export format — `borderControl` vì option là control, M99.70), tonal 1
+  (resume callout), accent 1 (deck summary hero), tile 1 (history event,
+  radius md). 9 site padding bất đối xứng chuyển `none` + `Padding` trong
+  child, pixel không đổi.
+- **Hai visual delta, cả hai đo trên golden trước khi nhận, ghi ở design
+  parity:** (1) `study_browse_light` — mặt browse/self-assess
+  (`study_card_face_section_widget.dart`) elevation `card` → `raised` theo
+  recipe `focal`; 3/4 focal prompt đã raised sẵn, cùng loại drift M99.70 gom
+  về `flat`; chỉ shadow light mode, max delta 8/255. (2) `card_editor_edit` —
+  hàng Review history cao 44dp → 48dp khi sàn 48 thành structural: comment cũ
+  tại site khai "compact brings it to 48" nhưng render thật là 44 — đúng bug
+  class "target phụ thuộc padding tình cờ" mà sàn structural sinh ra để chặn;
+  nội dung vẫn giữa card, mọi thứ dưới nó dịch xuống 4dp.
+- **Guard mới (structural test, không regex):**
+  `shared_api_closure_test.dart` — allowlist AST trên public API của
+  foundation files, typedef alias không lọt, 0 target = fail, fault-injection
+  6 case hai chiều; `card_activation_wrapper_test.dart` — cấm
+  `GestureDetector(onTap:)` bọc card family trong features, ngoại lệ thành văn
+  duy nhất: tap-to-focus của fill mode (field behavior), fault-injection 5
+  case.
+- **Tests required:** `mx_card_test.dart` (+5 test defect/tương tác),
+  `mx_card_recipes_test.dart` mới (74 case: 10 recipe × 4 theme + padding map
+  + selection treatment), `mx_action_button_state_matrix_test.dart` mới (20
+  case: 4 variant × 6 state × 4 theme, loading contract, RTL),
+  `card_export_sheet_test`/`fill_answer_surface_test` chuyển claim từ tham số
+  sang rendered border.
+- **Checklist phases:** Phase 7 (components) · Phase 21 (guard).
+- **Emulator integration suite:** **not run — shared presentation/design-system
+  refactor, không thêm device-only flow.** Đây không phải một lượt chạy xanh.
+- **Output:** như Scope; `docs/architecture.md` AD-23;
+  `docs/reviews/design-parity-checklist.md` pass mới; skill
+  `flutter-theme-design/references/surfaces-containers.md` §29 cập nhật theo
+  contract cuối.
+- **Acceptance criteria:**
+  - [x] Public API `MxCard`/`MxActionButton` không expose
+        Color/TextStyle/ButtonStyle/Border/Shadow/Decoration/EdgeInsets/double
+        — guard chứng minh hai chiều.
+  - [x] 0 call-site còn unnamed `MxCard(`; 48/48 phân loại, 0 unknown.
+  - [x] `flutter analyze` 0; host suite xanh; goldens `TZ=UTC` xanh.
+- **Editable documents:** `docs/wbs.md`, `docs/architecture.md`,
+  `docs/reviews/design-parity-checklist.md`
+- **Dependencies:** M99.70, M99.74, M99.75
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |

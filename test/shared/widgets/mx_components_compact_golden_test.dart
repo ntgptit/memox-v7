@@ -34,7 +34,7 @@ void main() {
     'compact_card_prompt': const Scaffold(
       body: Padding(
         padding: EdgeInsets.all(AppSpacing.md),
-        child: Center(child: MxCard(child: CardPrompt())),
+        child: Center(child: MxCard.raised(child: CardPrompt())),
       ),
     ),
   }.entries) {

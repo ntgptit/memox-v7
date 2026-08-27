@@ -338,9 +338,8 @@ class _PageError extends StatelessWidget {
       child: Semantics(
         container: true,
         liveRegion: true,
-        child: MxCard.flat(
-          color: colors.errorContainer,
-          padding: const EdgeInsets.all(AppSpacing.md),
+        child: MxCard.feedback(
+          tone: MxCardFeedbackTone.danger,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[

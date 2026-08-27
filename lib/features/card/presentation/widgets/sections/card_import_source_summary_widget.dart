@@ -41,9 +41,9 @@ class CardImportSourceSummaryWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    final card = MxCard(
+    final card = MxCard.raised(
       onTap: onReplace,
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: MxCardPadding.compact,
       child: Row(
         children: <Widget>[
           Container(

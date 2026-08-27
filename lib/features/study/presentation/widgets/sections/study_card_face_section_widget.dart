@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_ink.dart';
-import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_stroke.dart';
 import '../../../../../core/theme/app_typography.dart';
@@ -270,83 +269,83 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
         // sides of one thing"; two paragraphs in a column read as two facts
         // about it.
         Expanded(
-          child: MxCard(
+          child: MxCard.focal(
             // **The card pads its sides; each half pads its own ends.** One
             // uniform inset put as much air either side of the rule as at the
             // card's outer edge, and the halves then read as two cards stacked
             // rather than the two faces of one (§3). The rule itself runs the
             // full width between the side insets, which is what makes it a
             // fold rather than a separator dropped between two blocks.
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-            // The focal surface of the app gets the focal corner. Every other
-            // card keeps `AppRadius.lg`; this one fills the screen, and the
-            // same corner reads tighter at that size.
-            radius: AppRadius.xl,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                Expanded(
-                  child: _CardHalf(
-                    label: _labelOf(context, promptFace),
-                    text: _textOf(promptFace),
-                    // The focal face — the term (BR-08) — at the title role and
-                    // one step down in weight so it leads without shouting.
-                    //
-                    // **`self_assess` sizes by which face this is, not by which
-                    // half.** The prompt half used to be `headlineMedium`
-                    // unconditionally, which was right while the prompt was
-                    // always the front (≤60 characters, BR-08). Reversing the
-                    // direction put a 240-character meaning there at 30dp — the
-                    // very thing the supporting half below says a heading role
-                    // is not for — and dropped the short Korean term to 24dp.
-                    style:
-                        widget.emphasis == StudyFaceEmphasis.backSupportingFront
-                        ? AppTypography.withWeight(
-                            texts.titleLarge!,
-                            FontWeight.w500,
-                          )
-                        : _selfAssessRole(context, promptFace),
-                    // **The tight end is the one facing the rule, so it is only
-                    // tight when there is a rule to face.** Before the flip
-                    // `self_assess` is a single half filling the card, and the
-                    // short inset then had nothing under it — the term sat off
-                    // centre in its own card for no reason the user could see.
-                    padding: _showsBack
-                        ? const EdgeInsets.only(
-                            top: AppSpacing.lg,
-                            bottom: AppSpacing.sm,
-                          )
-                        : const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-                  ),
-                ),
-                if (_showsBack) ...<Widget>[
-                  Divider(
-                    // The rule and nothing else: the space around it belongs to
-                    // the halves, so a change of padding moves one thing.
-                    height: AppStroke.hairline,
-                    color: context.semanticColors.borderSubtle,
-                  ),
+            padding: MxCardPadding.none,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
                   Expanded(
                     child: _CardHalf(
-                      label: _labelOf(context, revealFace),
-                      text: _textOf(revealFace),
-                      // The supporting face. Under the graded modes it is
-                      // always the meaning — 240 characters (BR-08), a body
-                      // role's job. Under `self_assess` it is whichever face
-                      // the prompt is not, so `_selfAssessRole` decides.
+                      label: _labelOf(context, promptFace),
+                      text: _textOf(promptFace),
+                      // The focal face — the term (BR-08) — at the title role and
+                      // one step down in weight so it leads without shouting.
+                      //
+                      // **`self_assess` sizes by which face this is, not by which
+                      // half.** The prompt half used to be `headlineMedium`
+                      // unconditionally, which was right while the prompt was
+                      // always the front (≤60 characters, BR-08). Reversing the
+                      // direction put a 240-character meaning there at 30dp — the
+                      // very thing the supporting half below says a heading role
+                      // is not for — and dropped the short Korean term to 24dp.
                       style:
                           widget.emphasis ==
                               StudyFaceEmphasis.backSupportingFront
-                          ? texts.bodyLarge
-                          : _selfAssessRole(context, revealFace),
-                      padding: const EdgeInsets.only(
-                        top: AppSpacing.sm,
-                        bottom: AppSpacing.lg,
-                      ),
+                          ? AppTypography.withWeight(
+                              texts.titleLarge!,
+                              FontWeight.w500,
+                            )
+                          : _selfAssessRole(context, promptFace),
+                      // **The tight end is the one facing the rule, so it is only
+                      // tight when there is a rule to face.** Before the flip
+                      // `self_assess` is a single half filling the card, and the
+                      // short inset then had nothing under it — the term sat off
+                      // centre in its own card for no reason the user could see.
+                      padding: _showsBack
+                          ? const EdgeInsets.only(
+                              top: AppSpacing.lg,
+                              bottom: AppSpacing.sm,
+                            )
+                          : const EdgeInsets.symmetric(vertical: AppSpacing.lg),
                     ),
                   ),
+                  if (_showsBack) ...<Widget>[
+                    Divider(
+                      // The rule and nothing else: the space around it belongs to
+                      // the halves, so a change of padding moves one thing.
+                      height: AppStroke.hairline,
+                      color: context.semanticColors.borderSubtle,
+                    ),
+                    Expanded(
+                      child: _CardHalf(
+                        label: _labelOf(context, revealFace),
+                        text: _textOf(revealFace),
+                        // The supporting face. Under the graded modes it is
+                        // always the meaning — 240 characters (BR-08), a body
+                        // role's job. Under `self_assess` it is whichever face
+                        // the prompt is not, so `_selfAssessRole` decides.
+                        style:
+                            widget.emphasis ==
+                                StudyFaceEmphasis.backSupportingFront
+                            ? texts.bodyLarge
+                            : _selfAssessRole(context, revealFace),
+                        padding: const EdgeInsets.only(
+                          top: AppSpacing.sm,
+                          bottom: AppSpacing.lg,
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),

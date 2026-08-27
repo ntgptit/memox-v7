@@ -60,7 +60,7 @@ void main() {
     'card_prompt': const Scaffold(
       body: Padding(
         padding: EdgeInsets.all(16),
-        child: Center(child: MxCard(child: CardPrompt())),
+        child: Center(child: MxCard.raised(child: CardPrompt())),
       ),
     ),
     // The input states the palette change was actually about: focus moves the
@@ -82,7 +82,7 @@ void main() {
     'card_surface': const Scaffold(
       body: Padding(
         padding: EdgeInsets.all(16),
-        child: MxCard(child: Text('Ephemeral')),
+        child: MxCard.raised(child: Text('Ephemeral')),
       ),
     ),
     'scaffold': const MxContentShell(title: 'MemoX', body: Text('Body')),

@@ -16,13 +16,23 @@
 
 ### Shared widget: `MxCard`
 
-Variants theo meaning: standard, raised, accent, focal/study.
+Recipe theo meaning (AD-23, M99.80): `flat` · `raised` · `focal` · `recessed`
+· `feedback` · `muted` · `tonal` · `accent` · `tile` · `option` — mỗi recipe
+là một named constructor map 1-1 vào private spec. Không đặt tên theo
+feature (`study`, `deck`).
 
-- [ ] Own padding nếu card component contract yêu cầu.
-- [ ] Interactive card có hover/press/focus riêng.
-- [ ] Non-interactive card không giả button state.
-- [ ] Không expose `color/radius/shadow/elevation`.
-- [ ] `onTap` chỉ được phép nếu interactive card contract được thiết kế đầy đủ.
+- [x] Internal padding là enum đóng `MxCardPadding { none, compact, standard }`;
+      `none` = child tự sở hữu content area.
+- [x] Interactive card có hover/press/focus riêng; focus ring chỉ vẽ ở
+      `FocusHighlightMode.traditional` (cùng gate với autofocus của button).
+- [x] Non-interactive card không giả button state; `onLongPress` không cần
+      `onTap` vẫn phải reach được.
+- [x] Không expose `color/radius/shadow/elevation/EdgeInsets` — enforced bằng
+      `test/app/shared_api_closure_test.dart` (allowlist AST) và
+      `test/app/card_activation_wrapper_test.dart`.
+- [x] Selection: tri-state `isSelected` thuộc card (M99.70); selected fill là
+      `MxCardSelectionTreatment { edge, tint }`, không phải `Color`.
+- [x] Interactive card giữ sàn 48×48 structural, không nhờ padding.
 
 ## 30. `ListTileThemeData`
 

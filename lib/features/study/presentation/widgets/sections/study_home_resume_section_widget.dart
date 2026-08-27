@@ -40,11 +40,10 @@ class StudyHomeResumeSectionWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    return MxCard.flat(
+    return MxCard.tonal(
       // The one surface on this screen that steps away from `surface`: it is a
       // different kind of offer from the rows under it, and the pair only reads
       // as a pair if one of them is distinguishable at a glance.
-      color: context.colors.secondaryContainer,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,

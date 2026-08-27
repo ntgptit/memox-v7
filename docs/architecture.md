@@ -7,8 +7,8 @@
 | **Scope** | Quyết định ràng buộc nhiều tài liệu hoặc nhiều layer. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), hình dạng dữ liệu (`data-model.md`) |
 | **Source of truth for** | AD-xx · đánh đổi kiến trúc · phương án đã bị loại · lý do pin toolchain |
 | **Depends on** | `document-conventions.md`, `product.md` |
-| **Updated by task** | M99.33 (AD-22 · mô hình tombstone/batch của Trash, retention 30 ngày, purge an toàn); M99.24 (AD-19 · rule placeholder gắn với tình trạng branch; Progress đã tốt nghiệp) · M99.28 (AD-19 · Settings rời trạng thái placeholder — không còn branch nào là placeholder) · M99.29 (AD-21 · nhắc học chạy trong background worker) |
-| **Last updated** | 2026-08-19 |
+| **Updated by task** | M99.80 (AD-23 · shared surface/action API là tập đóng); M99.33 (AD-22 · mô hình tombstone/batch của Trash, retention 30 ngày, purge an toàn); M99.24 (AD-19 · rule placeholder gắn với tình trạng branch; Progress đã tốt nghiệp) · M99.28 (AD-19 · Settings rời trạng thái placeholder — không còn branch nào là placeholder) · M99.29 (AD-21 · nhắc học chạy trong background worker) |
+| **Last updated** | 2026-08-27 |
 
 Format theo `document-conventions.md` §6.1. AD xếp theo số; ID vĩnh viễn (§7).
 
@@ -1593,3 +1593,76 @@ xoá deck chứa nó tuần sau); parent trả lời *nó ở đâu*, không tr�
 ai*. *Trash trong Settings* — Settings là placeholder (AD-19) và Trash chứa nội
 dung Library; đặt ở đó thì entry point của một tính năng khôi phục dữ liệu nằm
 sau hai lần chạm ở một branch không liên quan.
+
+## AD-23 · API của shared surface/action component là tập đóng: recipe có tên, không visual primitive
+
+| | |
+|---|---|
+| **Status** | accepted |
+| **Affected documents** | `docs/reviews/design-parity-checklist.md` · `wbs.md` (M99.70, M99.74, M99.75, M99.80) · `.claude/skills/flutter-theme-design/references/surfaces-containers.md` |
+| **Decision** | Public API của foundation component (`MxCard`, `MxActionButton`, và mọi shared surface/action sau này) chỉ nhận **content, behavior và semantic enum**; fill, border, radius, elevation, shadow và internal padding thuộc về recipe của component, không thuộc call site. |
+
+### Vì sao có quyết định này
+
+M99.70 đặt `flat` và tri-state `isSelected` vào `MxCard`, nhưng để lại các
+escape hatch cũ: `color:`, `borderColor:`, `radius:`, `elevation:` và
+`padding: EdgeInsets`. Inventory trước đợt đóng API đếm 48 production call-site
+với **chín cách viết padding** cho ba ý định, sáu error band tự dựng cùng một
+card (`errorContainer` + flat + `md`) sáu lần, và một mặt học tự khai
+`AppRadius.xl` ở bốn chỗ với ba mức elevation. Mỗi tham số mở là một quyết định
+bị đẩy về từng call site — đúng bug class mà `MxActionButton` đã đóng từ đầu
+bằng enum.
+
+### Quyết định
+
+1. **Feature chọn meaning và external layout.** Một call site nói *card này là
+   gì* (recipe) và *nó nằm đâu* (layout quanh nó). Nó MUST NOT chọn màu,
+   radius, elevation, shadow, border hay internal padding.
+2. **Recipe là constructor có tên, map 1-1 vào một private spec bất biến.**
+   `MxCard`: `flat` · `raised` (constructor unnamed cũ, được đặt tên) ·
+   `focal` · `recessed` · `feedback` · `muted` · `tonal` · `accent` · `tile` ·
+   `option`. Một meaning chỉ có một caller vẫn được nhận recipe **khi** phương
+   án còn lại là một tham số primitive mở — đó chính là thứ AD này xoá.
+   Ngược lại, một meaning chưa có caller thật thì không derive trước (cùng
+   nguyên tắc container role của AD-14).
+3. **Internal padding là enum đóng** — `MxCardPadding { none, compact,
+   standard }` map vào token. `none` dành cho child tự sở hữu content area;
+   các bố cục bất đối xứng là layout của feature, viết bằng `Padding` trong
+   `child`.
+4. **Tri-state `isSelected` giữ nguyên chủ (M99.70).** Selected *fill* là
+   closed treatment (`MxCardSelectionTreatment { edge, tint }`), không phải
+   `Color`. Edge trạng thái của recessed card là enum đóng
+   (`MxCardRecessedEdge`), feedback tone là enum đóng (`MxCardFeedbackTone`,
+   hiện chỉ `danger` vì chỉ failure band có caller thật).
+5. **Foundation component không expose Flutter visual primitive types.**
+   Enforced bằng `test/app/shared_api_closure_test.dart` — allowlist trên AST,
+   không blocklist: một `typedef` alias không lọt được vì tên lạ là finding.
+   `test/app/card_activation_wrapper_test.dart` chặn feature dựng lại
+   activation của card bằng `GestureDetector` (ngoại lệ duy nhất, thành văn:
+   tap-to-focus của fill mode — đó là field behavior, không phải button).
+6. **Product composition không chui vào foundation.** Không `MxCard.study()`,
+   không `MxChoiceCard`, không wrapper chỉ forward một tone. `StudyCard`-kiểu
+   pattern là composition trong feature, dựng trên recipe chung.
+7. **ThemeData và Mx wrapper là hai tầng của một design language** — wrapper
+   chỉ siết hợp đồng, không mở hệ style thứ hai (skill §XIII).
+
+### Đánh đổi đã nhận
+
+- **Một meaning một caller vẫn thành recipe** (`tonal`, `accent`, `tile`,
+  `option`): API rộng hơn mức tối thiểu, đổi lấy việc không còn tham số mở
+  nào. Recipe chết thì xoá dễ; tham số mở sống thì lan.
+- **Bố cục padding bất đối xứng chuyển vào child**: chín call-site thêm một
+  `Padding`, đổi lấy `EdgeInsets` biến mất khỏi API. Pixel không đổi.
+- **Canonical hoá một chỗ lệch**: mặt browse/self-assess của study
+  (`study_card_face_section_widget.dart`) mang elevation `card` trong khi ba
+  focal prompt còn lại mang `raised`; recipe `focal` thống nhất về `raised` —
+  cùng loại drift mà M99.70 gom về `flat`. Delta ghi ở design parity.
+
+### Phương án đã bị loại
+
+- **Taxonomy cố định `variant × tone`** — hai trục public tự do sinh tổ hợp vô
+  nghĩa (`raised × danger`?); tone chỉ được nhận bởi đúng recipe cần nó.
+- **`MxChoiceCard`/`MxFeedbackCard`** — abstraction thứ hai cho policy mà
+  `MxCard.isSelected`/`feedback` đã sở hữu (M99.70 là owner).
+- **Guard regex trên source** — alias/generic/prefix lọt; scan AST theo
+  allowlist thì không.

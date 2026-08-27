@@ -157,52 +157,103 @@ WidgetbookComponent cardComponent() {
           final content = context.knobs.string(
             label: 'content',
             initialValue:
-                'The app’s one raised surface: bordered, unshadowed, '
-                'radius lg.',
+                'A closed surface: the recipe owns fill, edge, corner, '
+                'depth and padding.',
             maxLines: 3,
           );
           final isTappable = context.knobs.boolean(label: 'tappable');
-          final isFlat = context.knobs.boolean(label: 'flat (no shadow)');
+          final padding = context.knobs.object.dropdown<MxCardPadding>(
+            label: 'padding',
+            options: MxCardPadding.values,
+            initialOption: MxCardPadding.standard,
+          );
           final selection = context.knobs.object.dropdown<String>(
             label: 'isSelected',
             options: <String>['null (not selectable)', 'false', 'true'],
           );
-          // A **role**, never a free colour — the same contract `color` has.
-          // `fill`'s answer card wears its verdict on this edge rather than in a
-          // panel drawn inside it.
-          final edge = context.knobs.object.dropdown<String>(
-            label: 'borderColor',
-            options: <String>['default', 'success', 'danger', 'focusRing'],
-          );
+          final treatment = context.knobs.object
+              .dropdown<MxCardSelectionTreatment>(
+                label: 'selectionTreatment (flat)',
+                options: MxCardSelectionTreatment.values,
+              );
 
           final isSelected = switch (selection) {
             'true' => true,
             'false' => false,
             _ => null,
           };
-          final borderColor = switch (edge) {
-            'success' => context.semanticColors.success,
-            'danger' => context.semanticColors.danger,
-            'focusRing' => context.semanticColors.focusRing,
-            _ => null,
-          };
+          final onTap = isTappable ? _noop : null;
           final child = Text(content, style: context.texts.bodyMedium);
 
-          return CatalogCenterPage(
-            child: isFlat
-                ? MxCard.flat(
-                    onTap: isTappable ? _noop : null,
-                    isSelected: isSelected,
-                    borderColor: borderColor,
-                    child: child,
-                  )
-                : MxCard(
-                    onTap: isTappable ? _noop : null,
-                    isSelected: isSelected,
-                    borderColor: borderColor,
-                    child: child,
-                  ),
+          // Every public recipe, selectable by name — the legal API and
+          // nothing beside it, so the owner can inspect each meaning without
+          // opening a feature.
+          final recipe = context.knobs.object.dropdown<String>(
+            label: 'recipe',
+            options: <String>[
+              'flat',
+              'raised',
+              'focal',
+              'recessed',
+              'recessed · focus',
+              'recessed · success',
+              'recessed · danger',
+              'feedback · danger',
+              'muted',
+              'tonal',
+              'accent',
+              'tile',
+              'option',
+            ],
           );
+
+          final card = switch (recipe) {
+            'raised' => MxCard.raised(
+              padding: padding,
+              isSelected: isSelected,
+              onTap: onTap,
+              child: child,
+            ),
+            'focal' => MxCard.focal(padding: padding, child: child),
+            'recessed' => MxCard.recessed(padding: padding, child: child),
+            'recessed · focus' => MxCard.recessed(
+              padding: padding,
+              edge: MxCardRecessedEdge.focus,
+              child: child,
+            ),
+            'recessed · success' => MxCard.recessed(
+              padding: padding,
+              edge: MxCardRecessedEdge.success,
+              child: child,
+            ),
+            'recessed · danger' => MxCard.recessed(
+              padding: padding,
+              edge: MxCardRecessedEdge.danger,
+              child: child,
+            ),
+            'feedback · danger' => MxCard.feedback(
+              tone: MxCardFeedbackTone.danger,
+              child: child,
+            ),
+            'muted' => MxCard.muted(child: child),
+            'tonal' => MxCard.tonal(padding: padding, child: child),
+            'accent' => MxCard.accent(padding: padding, child: child),
+            'tile' => MxCard.tile(child: child),
+            'option' => MxCard.option(
+              isSelected: isSelected ?? false,
+              onTap: onTap,
+              child: child,
+            ),
+            _ => MxCard.flat(
+              padding: padding,
+              isSelected: isSelected,
+              selectionTreatment: treatment,
+              onTap: onTap,
+              child: child,
+            ),
+          };
+
+          return CatalogCenterPage(child: card);
         },
       ),
     ],

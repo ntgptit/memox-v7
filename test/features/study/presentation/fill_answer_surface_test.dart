@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_spacing.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
@@ -209,7 +210,27 @@ void main() {
         hasLength(cards),
         reason: 'a graded turn must not add a surface',
       );
-      expect(tester.widget<MxCard>(fillAnswerCard()).borderColor, isNotNull);
+      // The closed API spells the verdict as a recessed edge, so the claim is
+      // that grading moved the card off its resting edge — the recipe's token
+      // mapping itself is pinned in mx_card_test.
+      final answerBox = tester.widget<DecoratedBox>(
+        find
+            .descendant(
+              of: fillAnswerCard(),
+              matching: find.byType(DecoratedBox),
+            )
+            .first,
+      );
+      final answerBorder =
+          ((answerBox.decoration as BoxDecoration).border! as Border).top;
+      final semantic = Theme.of(
+        tester.element(fillAnswerCard()),
+      ).extension<AppSemanticColors>()!;
+      expect(
+        answerBorder.color,
+        anyOf(semantic.success, semantic.danger),
+        reason: 'the graded card wears its verdict on its own edge',
+      );
     });
   });
 }

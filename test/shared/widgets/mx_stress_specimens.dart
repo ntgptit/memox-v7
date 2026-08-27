@@ -200,11 +200,11 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
   ),
   MxStressSpecimen(
     name: 'MxCard',
-    build: () => const MxCard(child: Text(kLongMessage)),
+    build: () => const MxCard.raised(child: Text(kLongMessage)),
   ),
   MxStressSpecimen(
     name: 'MxCard (tappable)',
-    build: () => const MxCard(onTap: _noop, child: Text(kLongMessage)),
+    build: () => const MxCard.raised(onTap: _noop, child: Text(kLongMessage)),
     isInteractive: true,
   ),
   MxStressSpecimen(

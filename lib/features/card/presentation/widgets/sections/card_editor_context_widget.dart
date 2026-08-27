@@ -143,17 +143,14 @@ class CardEditorContextWidget extends StatelessWidget {
   }
 
   Widget _buildHistoryRow(BuildContext context) {
-    return MxCard(
-      // **Vertical padding sized so the row is a target, not so it looks
-      // roomy.** At `sm` the card measured 358 x **36** and hit-tested to
-      // exactly that — no padded tap area, 12dp under the floor, on the only
-      // tappable thing in the context block. `md` brings it to 48 at the
-      // default text size and it grows from there. The deck row keeps `sm`
-      // because it takes no tap at all.
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.md,
-      ),
+    return MxCard.raised(
+      // **Compact, and the 48dp floor is the card's own now.** At `sm` the
+      // card measured 358 x **36**; compact was believed to bring it to 48
+      // and actually painted 44 — the golden moved 4dp when the interactive
+      // card grew its structural floor (M99.80), which is the measurement
+      // that showed the old comment wrong. The deck row keeps its tighter
+      // vertical inset because it takes no tap at all.
+      padding: MxCardPadding.compact,
       // **`push`, not `go`, and no discard guard.** `go` replaced the stack, so
       // opening the history was a one-way trip: back from the detail screen
       // landed on the deck rather than on the form the user was halfway
@@ -196,25 +193,28 @@ class CardEditorContextWidget extends StatelessWidget {
   }
 
   Widget _buildDeckRow(BuildContext context, DeckContextModel deck) {
-    return MxCard(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
-      ),
-      child: Row(
-        children: <Widget>[
-          const ExcludeSemantics(
-            child: MxIcon(Icons.layers_outlined, size: MxIconSize.sm),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(
-              deck.deckName,
-              style: context.texts.bodyMedium,
-              overflow: TextOverflow.ellipsis,
+    return MxCard.raised(
+      padding: MxCardPadding.none,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
+        child: Row(
+          children: <Widget>[
+            const ExcludeSemantics(
+              child: MxIcon(Icons.layers_outlined, size: MxIconSize.sm),
             ),
-          ),
-        ],
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Text(
+                deck.deckName,
+                style: context.texts.bodyMedium,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

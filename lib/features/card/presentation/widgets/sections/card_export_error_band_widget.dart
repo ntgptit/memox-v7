@@ -43,12 +43,8 @@ class CardExportErrorBandWidget extends StatelessWidget {
   }
 
   Widget _band(BuildContext context, ColorScheme colors) {
-    return MxCard.flat(
-      color: colors.errorContainer,
-      // Flat: the band sits inside the sheet's surface, and `MxCard`'s doc
-      // calls a shadow stacked on a shadow a rendering fault rather than depth.
-      // The error fill is already doing the separating here.
-      padding: const EdgeInsets.all(AppSpacing.md),
+    return MxCard.feedback(
+      tone: MxCardFeedbackTone.danger,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[

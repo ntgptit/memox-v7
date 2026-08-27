@@ -3,8 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_ink.dart';
-import '../../../../../core/theme/app_elevation.dart';
-import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -288,39 +286,40 @@ class _PromptCard extends StatelessWidget {
   final String term;
 
   @override
-  Widget build(BuildContext context) => MxCard(
-    // `raised` and a 20 corner: this is the focal surface of the screen, and it
-    // is read against five rows that carry neither.
-    elevation: AppElevation.raised,
-    radius: AppRadius.xl,
-    padding: const EdgeInsets.symmetric(
-      horizontal: AppSpacing.lg,
-      vertical: AppSpacing.xl,
-    ),
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Text(
-          context.l10n.studyGuessOverline.toUpperCase(),
-          style: context.textStyles.sectionLabelSmall.inked(
-            context,
-            AppInk.quiet,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: AppSpacing.md),
-        Flexible(
-          child: Text(
-            term,
-            // The card prompt style — 30 with −0.5 tracking, which is the
-            // handout's 32/−0.5 landing on the metric the prompt already owns.
-            style: context.textStyles.cardPrompt,
+  Widget build(BuildContext context) => MxCard.focal(
+    // The focal recipe carries the depth and the corner; the prompt's own
+    // rhythm — tighter sides than ends — is this card's content area.
+    padding: MxCardPadding.none,
+    child: Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.xl,
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text(
+            context.l10n.studyGuessOverline.toUpperCase(),
+            style: context.textStyles.sectionLabelSmall.inked(
+              context,
+              AppInk.quiet,
+            ),
             textAlign: TextAlign.center,
-            overflow: TextOverflow.ellipsis,
-            maxLines: 3,
           ),
-        ),
-      ],
+          const SizedBox(height: AppSpacing.md),
+          Flexible(
+            child: Text(
+              term,
+              // The card prompt style — 30 with −0.5 tracking, which is the
+              // handout's 32/−0.5 landing on the metric the prompt already owns.
+              style: context.textStyles.cardPrompt,
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 3,
+            ),
+          ),
+        ],
+      ),
     ),
   );
 }
