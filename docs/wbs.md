@@ -13612,6 +13612,63 @@ field, vừa là `WidgetStateProperty` cho `resolveAs` của SDK.
 `deck_library_menu` và `deck_sort_sheet`, hai cái tên nghe như popup nhưng là
 sheet.
 
+### M99.66 · Job golden trả tiền compile cho 403 file nó không chạy
+
+- **Status:** **done** — chỉ `ci.yml` và `.gitignore`, không đụng code hay test.
+- **Goal:** Job golden trên PR chỉ biên dịch những file nó thật sự chạy, và có
+  cùng tripwire mà workflow không bao giờ chạy đã có sẵn.
+- **Scope:** step `golden comparison` trong `.github/workflows/ci.yml`, cộng một
+  step `golden count floor` lấy nguyên từ `ci-full.yml`. **Ngoài scope:** thời
+  gian cài toolchain (191s, là chi phí của runner Windows), `ci-full.yml`,
+  và mọi job khác.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `.github/workflows/ci.yml`, `.gitignore`.
+- **Acceptance criteria:**
+  - [x] Chạy đúng **295** test như trước, không hơn không kém.
+  - [x] Danh sách file **suy ra lúc chạy**, không viết cứng.
+  - [x] Danh sách rỗng thì job đỏ — đã chạy thử, exit 1.
+  - [x] Tag không khớp gì thì job đỏ — đã đo, `flutter test` exit 79.
+  - [x] Số test thực chạy dưới sàn thì job đỏ, qua script đã có sẵn.
+  - [x] `golden-report.jsonl` không lọt vào working tree của ai.
+- **Dependencies:** không.
+- **Tests required:** `test_ci_tooling.py` (52, xanh), và chạy tay chính hai
+  step ấy trích thẳng từ yaml.
+- **Emulator:** `not run — scoped host verification`.
+- **Checklist phases:** 14
+
+**Chỗ tốn thời gian không phải so pixel.** Đo từng step của một lần chạy thật:
+`golden comparison` **412s** trên tổng **747s**; cài + dọn `flutter-action`
+191s; `build_runner` 72s; `pub get` 58s.
+
+Bên trong 412s: `--tags` lọc **sau khi mỗi suite đã được load**, nên một lần
+chạy theo tag biên dịch cả cây rồi vứt đi phần không khớp. Đếm từ JSON reporter:
+**442 file** được compile, tốn 1.142.956 ms (**91%** tổng khối lượng), để chạm
+tới **39 file** chứa test golden thật, tốn 116.965 ms (9%). **403 file được
+biên dịch thuần tuý để bị loại.** Hai con số đó là tổng công việc chứ không phải
+wall clock — bằng chứng wall-clock là phép đo A/B: truyền thẳng đường dẫn chạy
+**đúng 295 test như nhau** trong **43s thay vì 159s**.
+
+**Repo đã biết cách làm đúng, ở ngay trong cùng file.** `host tests` shard một
+mảng file tường minh; `goldens` là job duy nhất còn lọc tag trên cả `test/`.
+Đây là chỗ sót, không phải giới hạn công cụ.
+
+**Danh sách phải suy ra, không được viết cứng** — thêm một test golden ở thư mục
+mới là một danh sách chép tay lặng lẽ ngừng so sánh nó, đúng kiểu hỏng job này
+sinh ra để chặn (#337 để 26 ảnh cũ trên `main` mà mọi check vẫn xanh).
+
+**Và cái tripwire tốt hơn thì đã có sẵn, chỉ nằm nhầm chỗ.**
+`count_golden_tests.py` đếm số test **thực chạy** và fail dưới sàn, loại đúng
+các entry `hidden` "loading <suite>" — tức 91% khối lượng nói trên. Nó chỉ được
+`ci-full.yml` gọi, mà file đó là `workflow_dispatch:` nên trên thực tế không bao
+giờ chạy; còn job gác mọi PR thì không có tripwire nào. Giờ nó có, cùng sàn 70,
+vì hai con số khác nhau là hai tuyên bố khác nhau về "bao nhiêu là đủ".
+
+**Hai guard, chia việc rõ ràng:** check rỗng bảo vệ **tốc độ** — mảng rỗng
+expand thành không có gì, nên lệnh sẽ âm thầm quay về quét cả cây, vẫn đúng, vẫn
+xanh, và lại mười hai phút mà không ai biết. Sàn đếm bảo vệ **độ phủ**.
+
+Ước tính: step 412s còn ~75s, job từ ~12,5 phút còn **~7 phút**.
+
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 
 Ghi lại cụ thể, vì "mất một bộ lint" là câu quá mơ hồ để ai đó sau này biết

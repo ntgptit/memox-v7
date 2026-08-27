@@ -296,10 +296,55 @@ jobs:
       # job ran and disagreed with them by 2014, 2014, 14268 and 2264 pixels.
       # The runner already defaults to UTC; pinning it here is what makes the
       # regeneration command in CLAUDE.md and this job the same environment.
+      # **The file list is derived here, not written down, and that is the
+      # whole design.** `--tags` filters *after* each suite is loaded, so a
+      # bare tag run compiles every file under `test/` and throws most of it
+      # away: measured at 442 files compiled to reach the 39 that hold a golden
+      # test, 403 of them purely to be discarded. Passing the paths runs the
+      # identical 295 tests in 43s instead of 159s locally. The sharded
+      # `host tests` job above has always passed an explicit list; this was the
+      # only place still filtering over the whole tree.
+      #
+      # **A hand-written list would rot invisibly.** Add a golden test in a new
+      # directory and a fixed list silently stops comparing it — which is
+      # exactly the failure this job exists to catch (#337 left 26 stale
+      # pictures on `main` with every check green). Derived, a new file
+      # anywhere is picked up with no edit here.
+      #
+      # The empty check guards the **speed**, not the coverage: an empty array
+      # expands to nothing, so the command would quietly fall back to the
+      # whole-tree run — still correct, still green, and twelve minutes again
+      # with nobody told. Coverage is guarded below instead, by counting what
+      # actually ran.
       - name: golden comparison
+        shell: bash
         env:
           TZ: UTC
-        run: flutter test --tags golden --reporter failures-only
+        run: |
+          set -o pipefail
+          mapfile -t golden_files < <(
+            grep -rlE "@Tags\(.*golden" test --include='*_test.dart' | sort
+          )
+          if [ "${#golden_files[@]}" -eq 0 ]; then
+            echo "::error::no golden-tagged test file matched — the derived list is empty, which would silently fall back to compiling the whole tree" >&2
+            exit 1
+          fi
+          echo "comparing ${#golden_files[@]} golden test files"
+          flutter test --tags golden --reporter json "${golden_files[@]}"             | tee golden-report.jsonl
+
+      # **The count floor `ci-full.yml` has always had, on the workflow that
+      # actually runs.** `count_golden_tests.py` counts test-completion events
+      # and fails below a floor, ignoring the `hidden` "loading <suite>"
+      # entries the reporter emits per file. It existed only in
+      # `ci-full.yml` — which is `workflow_dispatch:`, so in practice never —
+      # while this job, the one gating every PR, had no tripwire at all for a
+      # tag regression or a discovery regression that leaves zero tests run.
+      #
+      # Same floor as there, deliberately: two different numbers would be two
+      # different claims about what "enough" means.
+      - name: golden count floor
+        shell: bash
+        run: python .claude/skills/flutter-workflow/scripts/count_golden_tests.py golden-report.jsonl 70
 
       # The failure images are the whole point of a red golden job: without
       # them the reviewer knows a pixel moved and not which one.

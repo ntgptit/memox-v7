@@ -183,3 +183,10 @@ scratch/
 __pycache__/
 *.py[cod]
 .playwright-mcp/
+
+# The golden job's JSON report, read by `count_golden_tests.py`. It has been
+# produced by `ci-full.yml` all along and was never ignored, which did not
+# matter while that workflow was `workflow_dispatch:` and nobody ran it. The
+# PR gate writes it now, so anyone reproducing the CI command locally gets one
+# in their working tree.
+golden-report.jsonl
