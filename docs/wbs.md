@@ -13557,6 +13557,61 @@ menu với thứ **phía sau** nó, và không thứ gì vẽ nó ra cho một n
 - **Editable documents:** `docs/wbs.md`
 - **Dependencies:** M99.61
 
+### M99.65 · Drag handle của BottomSheet là một button, không phải trang trí
+
+- **Status:** **done** — một slot `ThemeData`, không đổi widget hay hành vi.
+- **Goal:** Handle đạt ngưỡng của thứ nó thật sự là, và hai state mà SDK có
+  gắn thôi bị nuốt.
+- **Scope:** `bottomSheetTheme.dragHandleColor`. **Ngoài scope:** kích thước
+  handle (32×4 của M3 giữ nguyên), `showDragHandle`, và mọi slot sheet khác.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `app_theme.dart`; `component_depth_and_state_test.dart`; 26 golden.
+- **Acceptance criteria:**
+  - [x] Handle ≥ 3:1 trên chính mặt sheet nó nằm, cả hai mode.
+  - [x] `dragged` đổi màu thật, và đổi theo hướng **đậm lên**.
+  - [x] `hovered` đọc giống `dragged`.
+  - [x] Cả hai assertion đã kiểm **đỏ** bằng cách gỡ fix.
+- **Dependencies:** M99.63 (cùng loại lỗi, cùng token). **Mục này từng mang số
+  M99.64 và phải đổi:** #370 lấy đúng số ấy và landed trước trong lúc PR này
+  chờ CI. Cùng cái bẫy M99.62 đã ghi — một ID chưa vào `main` thì chưa phải
+  của mình.
+- **Tests required:** `component_depth_and_state_test.dart`, 26 golden sheet.
+- **Emulator:** `not run — scoped host verification`.
+- **Checklist phases:** 7, 13
+
+**Review của chủ dự án gọi đây là "minor" và để ngỏ với điều kiện "nếu handle
+chỉ decorative thì không sao". Nó không decorative, và SDK nói thẳng:**
+`_DragHandle` bọc chính nó trong `Semantics(button: true, onTap: …)` với nhãn
+dismiss, rồi độn lên `kMinInteractiveDimension`. Nó là một nút đóng sheet có
+target 48×48. Vậy WCAG 1.4.11 áp dụng, và `borderSubtle` đo được **1.45:1**
+light, **2.04:1** dark — trên thứ duy nhất nói rằng sheet này kéo được.
+
+**Chọn màu bằng cách nhìn, không bằng con số.** Ba ứng viên được render và
+phóng to, cả hai mode. Mặc định của Material cho slot này là `onSurfaceVariant`
+— ở đây là **6.45 / 7.29**, vượt sàn gấp đôi và vẽ ra một thanh nặng tới mức
+kéo mắt **trước** cả tiêu đề sheet. Việc đầu tiên của một sheet là nói nó là
+cái gì. `borderControl` cho **3.19 / 3.00**, đọc rõ mà không tranh chấp, và là
+token app này vốn dùng cho "ranh giới control tương tác" — cùng một câu chuyện
+với OutlinedButton ở M99.63: trang trí → control.
+
+**Hai state đang bị nuốt, và một trong hai có thật trên điện thoại.**
+`dragHandleColor` được SDK resolve qua `WidgetStateProperty`, nhưng một `Color`
+thuần thì bỏ qua mọi state. SDK chỉ từng gắn đúng hai: `hovered` từ
+`MouseRegion` của nó, và **`dragged`** trong suốt lúc sheet đang bị kéo. Không
+có focus và không có pressed — handle có semantics nhưng không có `Focus` nên
+không nằm trong traversal. Hover không tồn tại trên điện thoại; **cú kéo thì
+có**, và tới giờ nó trông y hệt lúc không kéo. Cả hai state mượn
+`onSurfaceVariant` — đúng giá trị Material định dùng ở trạng thái nghỉ — nên
+handle đậm lên dưới ngón tay rồi trở lại, không token mới và không alpha lúc
+paint (AD-14 §1 muốn ground đã biết thì pre-compose, không blend khi vẽ).
+
+`WidgetStateColor` là thứ vào vừa slot này: nó vừa là `Color` cho kiểu của
+field, vừa là `WidgetStateProperty` cho `resolveAs` của SDK.
+
+**26 golden dịch — tức mọi sheet trong app đều có handle này**, gồm cả
+`deck_library_menu` và `deck_sort_sheet`, hai cái tên nghe như popup nhưng là
+sheet.
+
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 
 Ghi lại cụ thể, vì "mất một bộ lint" là câu quá mơ hồ để ai đó sau này biết

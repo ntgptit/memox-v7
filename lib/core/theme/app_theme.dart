@@ -545,7 +545,40 @@ ThemeData _buildTheme(
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       showDragHandle: true,
-      dragHandleColor: semantic.borderSubtle,
+      // **The handle is a button, not a decoration, and the SDK is explicit
+      // about it:** `_DragHandle` wraps itself in `Semantics(button: true,
+      // onTap: …)` with the dismiss label and pads itself to
+      // `kMinInteractiveDimension`. So WCAG 1.4.11's 3:1 applies to it, and
+      // `borderSubtle` — the decorative hairline, `outlineVariant` — measured
+      // **1.45:1** in light and **2.04:1** in dark. It is the only thing on the
+      // sheet that says the sheet can be dragged or dismissed.
+      //
+      // **`borderControl` rather than `onSurfaceVariant`, and that was decided
+      // by looking.** Material's default for this slot is `onSurfaceVariant`,
+      // which here measures 6.45 and 7.29 — it clears the floor twice over and
+      // renders as a bar heavy enough to take the eye *before* the sheet's own
+      // heading. A sheet's first job is to say what it is. `borderControl`
+      // reads as an affordance at 3.19 and 3.00 without competing, and it is
+      // the token this app already means by "interactive control".
+      dragHandleColor: WidgetStateColor.resolveWith((states) {
+        // **Two states, because two is all the SDK ever sets here** — it adds
+        // `hovered` from its own `MouseRegion` and `dragged` while the sheet is
+        // actually moving. No focus and no pressed: the handle has semantics
+        // but no `Focus`, so it is not in the traversal.
+        //
+        // `dragged` is the one that matters on the release platform. Hover does
+        // not exist on a phone; the grab does, and until now it looked exactly
+        // like the rest. Both states borrow `onSurfaceVariant` — the value
+        // Material would have used at rest — so the handle firms up under the
+        // finger and settles back, with no new token and no paint-time alpha
+        // (AD-14 §1 wants a known ground pre-composed, not blended at paint).
+        if (states.contains(WidgetState.dragged) ||
+            states.contains(WidgetState.hovered)) {
+          return scheme.onSurfaceVariant;
+        }
+
+        return semantic.borderControl;
+      }),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
       ),

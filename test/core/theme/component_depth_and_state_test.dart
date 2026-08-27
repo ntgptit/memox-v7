@@ -105,6 +105,60 @@ void main() {
     });
   });
 
+  group('BottomSheet drag handle', () {
+    // `_DragHandle` is `Semantics(button: true, onTap: …)` padded to
+    // `kMinInteractiveDimension`, so it is a control and 1.4.11's 3:1 applies.
+    // `borderSubtle` gave 1.45 and 2.04 on the sheet it sits on.
+    test('reads as a control on the sheet it sits on', () {
+      for (final entry in themes.entries) {
+        final theme = entry.value;
+        final handle = WidgetStateProperty.resolveAs<Color?>(
+          theme.bottomSheetTheme.dragHandleColor,
+          const <WidgetState>{},
+        )!;
+
+        expect(
+          contrast(handle, theme.bottomSheetTheme.backgroundColor!),
+          greaterThanOrEqualTo(3),
+          reason:
+              '${entry.key}: the handle is the only thing saying this sheet '
+              'can be dragged or dismissed',
+        );
+      }
+    });
+
+    test('the grab is visible, and it is the state a phone can reach', () {
+      for (final entry in themes.entries) {
+        final Color? slot = entry.value.bottomSheetTheme.dragHandleColor;
+        Color at(Set<WidgetState> states) =>
+            WidgetStateProperty.resolveAs<Color?>(slot, states)!;
+
+        final resting = at(const <WidgetState>{});
+        final dragged = at(const <WidgetState>{WidgetState.dragged});
+
+        expect(
+          dragged,
+          isNot(resting),
+          reason:
+              '${entry.key}: a plain `Color` in this slot swallows both states '
+              'the SDK sets. Hover does not exist on a phone; the drag does.',
+        );
+        expect(
+          at(const <WidgetState>{WidgetState.hovered}),
+          dragged,
+          reason: '${entry.key}: the two active states read the same',
+        );
+        expect(
+          contrast(dragged, entry.value.bottomSheetTheme.backgroundColor!),
+          greaterThan(
+            contrast(resting, entry.value.bottomSheetTheme.backgroundColor!),
+          ),
+          reason: '${entry.key}: the handle must firm up, not soften',
+        );
+      }
+    });
+  });
+
   group('PopupMenu depth', () {
     // AD-14: depth is a measurable target, and the target this app already
     // holds is a card lifting off its page — 7.75 L* in light, 7.70 in dark. A
