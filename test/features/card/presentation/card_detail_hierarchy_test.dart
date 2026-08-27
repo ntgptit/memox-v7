@@ -386,7 +386,7 @@ void main() {
 
   group('the Edit action', () {
     for (final brightness in Brightness.values) {
-      testWidgets('is a tonal button with a visible word in '
+      testWidgets('is a bare icon whose glyph carries it in '
           '${brightness.name}', (tester) async {
         await pumpCardDetail(
           tester,
@@ -397,37 +397,61 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        final scheme = Theme.of(
-          tester.element(find.byIcon(Icons.edit_outlined)),
-        ).colorScheme;
+        final context = tester.element(find.byIcon(Icons.edit_outlined));
+        final scheme = Theme.of(context).colorScheme;
         final icon = tester.widget<Icon>(find.byIcon(Icons.edit_outlined));
-        final resolved =
-            icon.color ??
-            IconTheme.of(
-              tester.element(find.byIcon(Icons.edit_outlined)),
-            ).color;
+        final resolved = icon.color ?? IconTheme.of(context).color;
 
-        // **The label is what identifies it.** `secondaryContainer` is only
-        // 1.14:1 / 1.56:1 against the bar, so a wordless version of this button
-        // would be a control nothing distinguishes from the background.
-        expect(find.text('Edit card'), findsOneWidget);
-        expect(resolved, scheme.onSecondaryContainer);
+        // **This asserted the opposite, and the reason it gave is the reason
+        // it changed.** It said the label is what identifies the button,
+        // because `secondaryContainer` is only 1.14:1 against the bar — true,
+        // and an argument against a *tonal fill with no word*, not against a
+        // glyph. An icon button has no fill to be invisible: this ink is the
+        // app bar's `foregroundColor`, which an `AppBar` pushes into the
+        // `IconTheme` its actions read — so `onSurface`, not the
+        // `onSurfaceVariant` the icon-button theme would have given it. It
+        // measures 16.06:1 in light and 16.62:1 in dark on the bar's own
+        // background.
+        //
+        // BR-246 wants edit to be a separate, explicit action that does not
+        // out-weigh the content being read. It never asked for a word, and the
+        // lighter control is the one that clause prefers.
+        expect(find.text('Edit card'), findsNothing);
+        expect(resolved, scheme.onSurface);
       });
     }
+
+    testWidgets('it still names itself to a screen reader', (tester) async {
+      // Dropping the word drops it from the screen, not from the semantics —
+      // otherwise the action becomes unreachable for anyone who cannot see the
+      // glyph, which is a worse outcome than the one this change fixed.
+      final handle = tester.ensureSemantics();
+      await pumpCardDetail(tester, loaded());
+      await tester.pumpAndSettle();
+
+      expect(
+        find.bySemanticsLabel('Edit card'),
+        findsOneWidget,
+        reason: 'the label moved to the semantics, it did not disappear',
+      );
+      handle.dispose();
+    });
 
     testWidgets('clears the Android tap target', (tester) async {
       await pumpCardDetail(tester, loaded());
       await tester.pumpAndSettle();
 
+      // The glyph is 24dp; what has to clear 48 is the target around it.
       final size = tester.getSize(
         find
             .ancestor(
-              of: find.text('Edit card'),
+              of: find.byIcon(Icons.edit_outlined),
               matching: find.byType(InkWell),
             )
             .first,
       );
       expect(size.height, greaterThanOrEqualTo(47.5));
+      expect(size.width, greaterThanOrEqualTo(47.5));
     });
   });
 }
