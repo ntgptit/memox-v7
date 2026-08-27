@@ -13108,7 +13108,10 @@ của M2.
   - [x] NavBar selected label mang `FontVariation('wght', 600)`, test phủ cả
         hai state.
   - [x] Ba wash state của FAB cùng màu `foregroundColor`, pin trong test.
-  - [x] Guard 72 rule xanh; rule mới đã chứng minh bắn 2 → 0 quanh migrate.
+  - [x] Guard 71 rule xanh (70 + `no_raw_button`; bản đầu của dòng này viết
+        72 — đếm theo trí nhớ thay vì theo dòng `Running rules:` của runner,
+        đúng lỗi mà bài học analyze-repo-wide đã cảnh báo); rule mới đã chứng
+        minh bắn 2 → 0 quanh migrate.
   - [x] `lib/features/` không còn nút Material thô nào.
   - [x] Compact: vẽ 40 (đo Material bên trong), chạm ≥48 (đo hộp ngoài).
   - [x] SnackBar và FAB cùng một chính sách độ sâu, pin bằng một assertion.
@@ -13507,7 +13510,8 @@ menu với thứ **phía sau** nó, và không thứ gì vẽ nó ra cho một n
 ### M99.64 · Guard hoá design-language checklist — ba rule mới, và mười một bug đi kèm
 
 - **Status:** **done** — phần cơ khí hoá được của skill `flutter-theme-design`
-  (§XI, §XIV), chuyển từ checklist sang ruleset `memox-v7`. Guard 75 rule.
+  (§XI, §XIV), chuyển từ checklist sang ruleset `memox-v7`. Guard 74 rule
+  (71 + 3; bản đầu viết 75 vì kế thừa con số 72 đã sai ở M99.61).
 - **Goal:** feature layer không dựng được widget/style mà design system đã sở
   hữu, và lỗi weight-không-axis không thể quay lại lần thứ tư.
 - **Scope:** ruleset guard (ba rule mới), 11 site `fontWeight:` sửa qua
@@ -13546,7 +13550,7 @@ menu với thứ **phía sau** nó, và không thứ gì vẽ nó ra cho một n
   `.claude/skills/flutter-theme-design/references/legacy-and-guards.md`;
   `widgetbook` (MxFab); test như trên; goldens `test/demo/`.
 - **Acceptance criteria:**
-  - [x] Guard 75 rule xanh trên cây hiện tại; probe làm đúng 3 rule mới đỏ.
+  - [x] Guard 74 rule xanh trên cây hiện tại; probe làm đúng 3 rule mới đỏ.
   - [x] `lib/` không còn `fontWeight: FontWeight.` nào ngoài miễn trừ cấu trúc.
   - [x] FAB của deck list giữ nguyên hình (shape theo theme, cùng giá trị).
   - [x] `flutter analyze` sạch; full host suite xanh; goldens regenerate
