@@ -13797,7 +13797,7 @@ sau. Script giờ trả lời được **quyết định** mà không khởi đ�
 (`STAMP_DECISION_ONLY`), và vân tay cũng do script tự khai báo thay vì test chép
 lại — một định nghĩa thứ hai chỉ khớp cho tới khi một bên đổi.
 
-### M99.73 · Hai mục WBS trùng số, và guard không có ý kiến gì
+### M99.73 · Hai mục WBS trùng số — và một luật thừa viết ra vì tưởng chưa có
 
 - **Status:** **done** — một luật trong `check_docs.py`, và sửa cái trùng đã lọt.
 - **Goal:** Trùng số không thể vào `main` lặng lẽ được nữa.
@@ -13825,9 +13825,15 @@ lọt vào `main` thật: #378 lấy M99.70 rồi #377 cũng lấy M99.70. Một
 nhau.
 
 **Tôi đã ghi bài học này ba lần trong `docs/wbs.md` rồi vi phạm bốn lần.** Nên
-lần này nó không được viết thêm lần nữa mà thành một luật: `check_docs.py` đã có
-"không bảng nào liệt kê trùng id" nhưng **không có ý kiến gì** về hai heading
-M-task trùng số — đúng chỗ hỏng thì không ai canh.
+lần này nó không được viết thêm lần nữa mà thành một luật.
+
+> **Sai, và sửa tại chỗ thay vì xoá.** Mục này từng viết rằng `check_docs.py`
+> "không có ý kiến gì" về hai heading M-task trùng số. Nó có: luật
+> `duplicate WBS task ID` đã nằm trong `_check_wbs_tasks` từ khi bộ kiểm được
+> viết, và regex của nó khớp đúng hai heading M99.70 — tức **nó sẽ bắt được**.
+> Lý do nó không nổ ở #377 không phải luật mà là thứ tự: CI của #377 chạy trước
+> khi #378 landed, nên chưa lần chạy nào nhìn thấy cả hai. Luật tôi thêm vì thế
+> là một bản trùng lặp, và đã được gộp lại làm một ở M99.79.
 
 Luật giữ nguyên hậu tố chữ trong id, nên `M99.19a` là id riêng chứ không phải
 `M99.19` thứ hai; những biến thể ấy là có chủ ý.
@@ -13938,6 +13944,45 @@ V20.
 Nhãn không biến mất mà **chuyển vào semantics**, và có test riêng cho điều đó:
 bỏ chữ khỏi màn hình mà bỏ luôn khỏi screen reader thì action thành không với
 tới được — tệ hơn cái nó vừa sửa.
+
+### M99.79 · Gộp lại: một câu hỏi, một luật
+
+- **Status:** **done** — chỉ `check_docs.py` và một đính chính trong ledger.
+- **Goal:** Chỉ còn một luật trả lời câu "hai mục có trùng id không".
+- **Scope:** `_check_wbs_tasks` trong `check_docs.py`; xoá luật thêm ở M99.73;
+  sửa lại phần chép sai của M99.73. **Ngoài scope:** cách chọn số.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `check_docs.py`, `docs/wbs.md`.
+- **Acceptance criteria:**
+  - [x] Chỉ còn **một** luật báo trùng id.
+  - [x] Nó quét cả `docs/wbs-study.md`, không chỉ `docs/wbs.md`.
+  - [x] Nó in ra **cả hai dòng** heading, không chỉ id.
+  - [x] Đã chạy đỏ với một trùng cố ý, và xanh sau khi gỡ.
+  - [x] Câu sai ở M99.73 được sửa **tại chỗ**, không xoá.
+- **Dependencies:** M99.73.
+- **Tests required:** `test_ci_tooling.py` (61, xanh); check_docs chạy đỏ/xanh
+  với một trùng cố ý.
+- **Emulator:** `not run — scoped host verification`.
+- **Checklist phases:** 14
+
+**M99.73 viết rằng guard không có ý kiến gì về hai heading trùng số. Không
+đúng.** Luật `duplicate WBS task ID` đã nằm trong `_check_wbs_tasks` từ khi bộ
+kiểm docs được viết, và `_TASK_HEAD_RE` của nó khớp đúng hai heading M99.70 —
+tức nó **sẽ** bắt được. Nó không nổ ở #377 vì CI của #377 chạy **trước** khi
+#378 landed: chưa lần chạy nào nhìn thấy cả hai mục cùng lúc. Đó là lỗ hổng của
+thứ tự merge, không phải của luật.
+
+**Nên thứ tôi thêm ở M99.73 là một bản trùng lặp**, và để hai luật cùng trả lời
+một câu hỏi là đúng thứ repo này cấm ở mọi chỗ khác — một sự thật nằm ở hai nơi
+thì nơi không ai sửa là nơi có người tin.
+
+Hai thứ bản trùng lặp ấy làm tốt hơn đã chuyển vào luật gốc chứ không bị bỏ đi:
+nó quét cả `docs/wbs-study.md` (một dependency có thể trỏ sang ledger kia), và
+nó in **cả hai dòng heading** — "M99.70 appears more than once" bắt người đọc đi
+tìm, còn "đây là hai dòng" thì không.
+
+**Và luật gốc vừa chứng minh nó hoạt động**: ở lần trùng thứ sáu trong phiên
+này, nó chặn được **trước khi merge** thay vì để lọt lên `main` như lần thứ năm.
 
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 
