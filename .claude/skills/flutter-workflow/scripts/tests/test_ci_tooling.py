@@ -56,6 +56,78 @@ class VerificationPlanBuilderTest(unittest.TestCase):
         plan = self._plan("test/demo/deck_screens_demo_test.dart")
         self.assertTrue(plan.needs_goldens)
 
+    def test_regenerating_pictures_runs_the_golden_job_and_nothing_else(self) -> None:
+        """The shape of a golden-regeneration PR, which is the common one.
+
+        Measured before this was classified: two of the last forty commits on
+        `main` were exactly this — 26 and 31 PNGs, no Dart — and each ran five
+        host shards, `flutter analyze` and the Widgetbook smoke test. A PNG can
+        fail none of them. It was not a decision: `require_test_path` claims a
+        code change first thing, then finds no rule for `.png` and falls
+        through to `require_full("unrecognised test support path")`.
+        """
+        plan = self._plan(
+            "test/demo/goldens/deck_list_empty_light.png",
+            "test/demo/goldens/card_list_dark.png",
+        )
+        self.assertTrue(plan.needs_goldens)
+        # The assertions that would have caught it: everything the pictures
+        # cannot affect.
+        self.assertFalse(plan.full_suite)
+        self.assertFalse(plan.needs_static)
+        self.assertFalse(plan.needs_host_tests)
+        self.assertFalse(plan.needs_widgetbook)
+        self.assertEqual(0, plan.shard_count)
+        self.assertEqual("pixels", plan.risk)
+
+    def test_a_picture_beside_its_widget_still_verifies_the_widget(self) -> None:
+        """The narrowing must not survive contact with a real code change."""
+        plan = self._plan(
+            "test/demo/goldens/card_list_light.png",
+            "lib/features/card/presentation/widgets/items/card_tile_widget.dart",
+        )
+        self.assertTrue(plan.needs_static)
+        self.assertTrue(plan.needs_host_tests)
+        self.assertTrue(plan.needs_goldens)
+
+    def test_repository_furniture_verifies_nothing(self) -> None:
+        """`.gitignore` and an issue template were selecting the whole suite.
+
+        Both reached `require_full` — the first as an unclassified path, the
+        second because `.github/` is a full-scope prefix and a markdown
+        template is not a pipeline. One paragraph cost 1847s of runner time.
+        """
+        for path in (
+            ".gitignore",
+            ".editorconfig",
+            ".vscode/settings.json",
+            ".github/ISSUE_TEMPLATE/bug.md",
+        ):
+            with self.subTest(path=path):
+                plan = self._plan(path)
+                self.assertFalse(plan.full_suite)
+                self.assertFalse(plan.needs_static)
+                self.assertFalse(plan.needs_goldens)
+                self.assertFalse(plan.needs_host_tests)
+
+    def test_the_workflow_itself_still_runs_everything(self) -> None:
+        """Not an oversight left in place — the one case where running the
+        whole suite *is* the point. Changing what verification runs is a claim
+        that the new pipeline works, and only a full run tests that claim.
+        `.github/workflows/` stays full-scope; only its inert neighbours moved.
+        """
+        plan = self._plan(".github/workflows/ci.yml")
+        self.assertTrue(plan.full_suite)
+
+    def test_an_unclassified_path_still_widens_to_everything(self) -> None:
+        """The fallback is the safe default and this change does not touch it.
+
+        What was wrong was never the fallback — it was the paths reaching it
+        that should have been classified.
+        """
+        plan = self._plan("tools/some_new_thing.py")
+        self.assertTrue(plan.full_suite)
+
     def test_a_documents_only_change_does_not_pay_for_a_windows_runner(self) -> None:
         """The job is conditional for a reason: Windows minutes cost double."""
         plan = self._plan("design_audit/layout_review/SUMMARY.md")

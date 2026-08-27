@@ -13676,6 +13676,66 @@ xanh, và lại mười hai phút mà không ai biết. Sàn đếm bảo vệ *
 
 Ước tính: step 412s còn ~75s, job từ ~12,5 phút còn **~7 phút**.
 
+### M99.70 · Ba loại thay đổi chạy cả suite chỉ vì không ai phân loại chúng
+
+- **Status:** **done** — chỉ tooling verification, không đụng code app.
+- **Goal:** Một thay đổi chỉ chạy thứ nó có thể làm hỏng.
+- **Scope:** `build_verification_plan.py` (hai nhánh phân loại mới, một nhãn
+  risk), `verification_impact_map.json` (hai danh sách inert), test, và một mệnh
+  đề trong `CLAUDE.md`. **Ngoài scope:** fallback đường dẫn lạ (giữ nguyên),
+  `.github/workflows/` (giữ full-scope, có chủ ý), và 191s cài toolchain.
+- **Editable documents:** `docs/wbs.md`, `CLAUDE.md`.
+- **Output:** ba file tooling + `CLAUDE.md`.
+- **Acceptance criteria:**
+  - [x] PNG-only chọn **đúng job golden**, không analyze, không shard, không
+        Widgetbook.
+  - [x] Rác kho (`.gitignore`, editor config, issue template) không chạy gì.
+  - [x] PNG **đi kèm** một widget đổi thì vẫn verify widget đó.
+  - [x] `.github/workflows/` vẫn full — đây là chỗ chạy hết **là mục đích**.
+  - [x] Đường dẫn lạ vẫn full; fallback không bị đụng.
+  - [x] Cả hai thu hẹp đã kiểm **đỏ** khi gỡ ra (1 và 4 test).
+- **Dependencies:** M99.68. **Đổi số lần thứ tư trong cùng một phiên** — #376
+  lấy M99.69. M99.62, M99.65 và M99.68 đã ghi cùng bài học ba lần và tôi vẫn
+  đặt số lúc viết; bài học chỉ có giá trị khi được làm theo, nên: **số lấy ở
+  bước cuối, ngay trước khi merge.**
+- **Tests required:** `test_ci_tooling.py` — 52 → **57**.
+- **Emulator:** `not run — scoped host verification`.
+- **Checklist phases:** 14
+
+**Câu hỏi của chủ dự án: "không sửa Dart thì chạy `flutter analyze` làm gì?"**
+Đo trên lịch sử thật: **5 trong 40 commit gần nhất** chạy full suite với **không
+một dòng `.dart` nào đổi**. Hai trong số đó là PR chỉ regenerate golden — 26 và
+31 file PNG — mỗi cái kéo theo năm shard host, `flutter analyze` và Widgetbook.
+PR gần nhất (#375) đổi ba file `ci.yml` + `.gitignore` + `wbs.md` và tiêu
+**1847 giây** runner.
+
+**Cả ba triệu chứng là một nguyên nhân, và nguyên nhân đó không phải "luật vô
+lý".** Không có luật nào nói PNG cần cả suite. `require_test_path` bật
+`has_code_changes` ngay dòng đầu, rồi không tìm thấy quy tắc nào cho `.png` và
+rơi vào `require_full("unrecognised test support path")`. `.gitignore` và
+`.vscode/` rơi vào cùng fallback ấy ở tầng trên. Issue template thì dính prefix
+`.github/` trong `full_scope`. **Fallback là đúng** — một đường dẫn chưa ai phân
+loại có thể là bất cứ thứ gì, chạy hết là mặc định an toàn. Cái thiếu là phân
+loại, nên bản sửa **thêm luật chứ không nới fallback**; test
+`an_unclassified_path_still_widens_to_everything` ghim điều đó.
+
+**Máy móc đã sẵn sàng từ trước.** `needs_goldens` vốn đã bắn theo `/goldens/`
+độc lập với `code_required`. Nên một PNG chỉ cần trả về mà **không** khai là code
+change: nó tự chọn đúng job golden và không job nào khác.
+
+**`.github/workflows/` cố ý giữ full, và đó không phải sót.** Đổi thứ quyết định
+việc verification nào chạy là một tuyên bố rằng pipeline mới hoạt động, và chỉ
+một lần chạy đầy đủ mới kiểm được tuyên bố đó — #375 là ví dụ: nó sửa step golden
+và chính lần chạy đầy đủ ấy xác nhận. Chỉ hàng xóm trơ của thư mục đó được tách
+ra.
+
+**Nhãn `pixels` thay vì `docs`** cho thay đổi chỉ có ảnh: cả hai đều không cần
+verification Dart, nhưng gọi một golden vừa regenerate là "docs" trong đúng cái
+trường mà người ta liếc qua là một lời nói dối nhỏ đặt đúng chỗ dễ được tin.
+
+**Tiết kiệm đo được:** một PR regenerate golden đi từ 1847s runner xuống còn
+đúng một job golden (~425s), tức bỏ 5 shard host + analyze + Widgetbook.
+
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 
 Ghi lại cụ thể, vì "mất một bộ lint" là câu quá mơ hồ để ai đó sau này biết
