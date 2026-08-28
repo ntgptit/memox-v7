@@ -14481,6 +14481,60 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Editable documents:** `docs/wbs.md`, `docs/architecture.md`,
   `docs/reviews/design-parity-checklist.md`
 - **Dependencies:** M99.70, M99.74, M99.75
+### M99.84 · Tag Catalog theo ngôn ngữ thị giác Card Detail — restyle presentation-only
+
+- **Status:** **done** — theo prompt set `docs/prompt/tag-catalog-visual-hierarchy/`
+  (handoff SHA-verified); implementation → hai recursive review độc lập
+  (Arch/Logic + UI/UX, audit-only, chạy song song) → coordinator fix → verify
+  pass → delivery.
+- **Goal:** catalog thôi là các dòng chữ trôi trên nền trang; một working
+  surface có hierarchy scan được, đúng surface ladder / density / typography
+  của Card Detail, không đổi một nghiệp vụ tag nào.
+- **Scope:** `tag_catalog_screen.dart` — populated đặt trong **một**
+  `MxCard.flat(padding: none)` (recipe API M99.83) trong cột đọc
+  `Center + ConstrainedBox(medium)` đúng công thức Card Detail; search
+  subheader và mọi state face (`_FaceColumn`) cùng mép với surface; hairline
+  `Divider` indent đúng cột chữ; top rhythm `xl`. `tag_catalog_row_widget.dart`
+  — rời `MxListTile` sang layout compact: well trung tính 32dp
+  (`TagCatalogRowWidget.wellSize`, `semanticColors.surfaceMuted`,
+  `sell_outlined` quiet, decorative), tên `titleSmall` 2 dòng, count
+  `bodySmall` quiet **tabular** dưới tên, `MxMenuButton` giữ nguyên hành vi.
+  Wireframe M4.14 append mục V-revision (không sửa quyết định cũ).
+- **Fix từ review, mỗi cái có test:** [Arch] test semantics hàng — name rồi
+  count, mỗi chuỗi một node; [U2] `wellSize` một-fact-một-chỗ + assertion
+  getRect nối `name.left` với separator indent; [U3] spelling `surfaceMuted`
+  theo grammar metric well; [U4] top `sm→xl` (nhịp 28dp dưới subheader như
+  card list); [U5] **fix hành vi W3 face 5 có sẵn**: Riverpod giữ value cũ
+  qua error nên error-đến-sau-data vẫn hiện search — subheader thêm
+  `!catalog.hasError`, kèm test; Retry không flicker vì previous-error giữ
+  qua `AsyncLoading`.
+- **Đổi scroller có chủ đích:** `ListView.builder` → `SingleChildScrollView`
+  + `Column` để surface liên tục (một card, không card-per-row). Chi phí:
+  mọi hàng build mỗi rebuild — chấp nhận ở cỡ catalog hàng chục tag; **nếu
+  catalog lên hàng trăm, câu trả lời là pagination như history, không phải
+  xẻ card** (ghi tại chỗ trong code; Arch review đồng thuận).
+- **Quyết định lệch prompt, có lý do:** gutter ngang giữ `lg` cố định vì G1
+  đo SỐNG với card list (dưới 360 search theo shell `md` — trade có sẵn,
+  card list y hệt); menu dùng `MxMenuButton` vì prompt viết trước khi
+  wrapper ra đời (M99.69).
+- **Tests required:** nhóm mới `visual revision 2026-08-28` trong
+  `tag_catalog_alignment_test.dart` — 8 claim (edges search/faces/error,
+  separator + inset đo bằng getRect, well đồng nhất, semantics hàng, W3
+  face 5, 320@2.0 không tràn); D21 chuyển claim sang scroller mới; toàn bộ
+  G1–G5 + 36 test hành vi rename/merge/delete/filter pass **không sửa**.
+- **Checklist phases:** Phase 7 (components) · Phase 12/13 (design system).
+- **Emulator integration suite:** **not run — presentation-only restyle.**
+  Đây không phải một lượt chạy xanh.
+- **Output:** như Scope; goldens tag_catalog regenerate `TZ=UTC`; gallery
+  publish lại URL ghim; PR non-draft chờ lệnh merge của owner.
+- **Acceptance criteria:**
+  - [x] Hai review độc lập: Arch APPROVE 0 finding; UI/UX 5 P2 đóng đủ,
+        verify pass CLEAN STOP.
+  - [x] `flutter analyze` 0; presentation+router 367 xanh; changed gate xanh.
+  - [x] Diff không chạm domain/data/route/ARB/controller.
+- **Editable documents:** `docs/wbs.md`, `docs/wireframes/m4-14-tag-management.md`
+- **Dependencies:** M99.83
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |
