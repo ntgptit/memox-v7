@@ -350,7 +350,7 @@ void main() {
   });
 
   group('G9 — the two empty faces render clean in Vietnamese', () {
-    // Reviewed as a coverage gap (M99.91 UI/UX pass): neither empty face had
+    // Reviewed as a coverage gap (M99.93 UI/UX pass): neither empty face had
     // a Vietnamese render anywhere. Stream-based, not `loadedRepository()` —
     // reaching an empty face means changing the query after the frame is up,
     // and `.loaded()`'s stream is a single fixed value the widget subscribes

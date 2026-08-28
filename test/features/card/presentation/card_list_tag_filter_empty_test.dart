@@ -111,7 +111,7 @@ void main() {
   testWidgets('the Clear action stays reachable at 320dp with textScale 2.0', (
     tester,
   ) async {
-    // Reviewed as a coverage gap (M99.91 UI/UX pass): the face itself was
+    // Reviewed as a coverage gap (M99.93 UI/UX pass): the face itself was
     // only ever pumped at 390dp. `MxButtonPair` stacks its two actions at
     // this width×scale rather than sitting side by side (M4.14 G9) — this
     // pins that the stacked Clear is still a full-width, on-screen target,

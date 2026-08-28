@@ -85,7 +85,7 @@ SCREENS = [
     ('Deck — overlay', 'deck_scheduler_change', 'Change study mode', '"Study mode" xuất hiện hai lần (O4)'),
     ('Deck — overlay', 'deck_starter_library', 'Starter library', 'UC-01; in mã locale thô (O5)'),
     ('Card', 'card_list', 'Card list', 'Toolbar lọc + pill trạng thái'),
-    ('Card', 'card_list_search_empty', 'Card list — search rỗng', 'Term giữ nguyên, pill vẫn tới được (M99.91)'),
+    ('Card', 'card_list_search_empty', 'Card list — search rỗng', 'Term giữ nguyên, pill vẫn tới được (M99.93)'),
     ('Card', 'card_list_filter_empty', 'Card list — pill rỗng', 'D3: pill khác All vẫn đó, không action'),
     # M99.63: bốn PopupMenuButton tồn tại và không cái nào từng có ảnh —
     # menu vẽ cùng giấy với card nó mở đè lên, nổi 0.00 L*, và mọi assertion

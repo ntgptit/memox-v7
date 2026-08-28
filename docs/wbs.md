@@ -14743,7 +14743,7 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Editable documents:** `docs/wbs.md`, `docs/wireframes/m99-settings.md`
 - **Dependencies:** M99.28, BR-211, BR-216
 
-### M99.91 · Card List theo visual language của Card Detail — geometry đo được, hai mặt rỗng đóng
+### M99.93 · Card List theo visual language của Card Detail — geometry đo được, hai mặt rỗng đóng
 
 - **Status:** **done** — implementation, hai review pass audit-only song song
   (architecture/logic, UI/UX) và coordinator fix P2 đều xong.
