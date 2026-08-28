@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/l10n/generated/app_localizations_vi.dart';
+import 'package:memox/shared/widgets/mx_action_button.dart';
 
 import '../domain/support/fake_app_settings_repository.dart';
 import 'support/settings_widget_harness.dart';
@@ -84,6 +85,38 @@ void main() {
       );
 
       expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('keyboard open', () {
+    testWidgets('the card-limit field stays reachable and Save is still '
+        'in reach with the keyboard covering the bottom of the screen', (
+      tester,
+    ) async {
+      // A number field on a scrolling screen is exactly where an unhandled
+      // keyboard inset clips the one control it opened for — the field itself
+      // stays on screen because it is what has focus, but a fixed-height
+      // layout can still push Save behind the keyboard.
+      await pumpSettings(
+        tester,
+        FakeAppSettingsRepository(),
+        keyboardInset: 300,
+      );
+
+      expect(tester.takeException(), isNull);
+
+      await tester.ensureVisible(find.byType(TextField).first);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(TextField), findsWidgets);
+
+      await tester.ensureVisible(find.byType(MxActionButton));
+      await tester.pumpAndSettle();
+
+      final saveRect = tester.getRect(find.byType(MxActionButton));
+      final viewport = tester.getRect(find.byType(MaterialApp));
+      expect(saveRect.bottom, lessThanOrEqualTo(viewport.bottom));
+      expect(saveRect.top, greaterThanOrEqualTo(viewport.top));
     });
   });
 }

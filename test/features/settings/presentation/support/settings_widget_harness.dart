@@ -28,6 +28,10 @@ Future<void> pumpSettings(
   Size surface = const Size(390, 780),
   double textScale = 1,
   bool shouldSettle = true,
+
+  /// How much of the bottom of the screen a soft keyboard is covering. The
+  /// default is none; a test about the keyboard passes the real height.
+  double keyboardInset = 0,
 }) async {
   await tester.binding.setSurfaceSize(surface);
   addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -48,9 +52,10 @@ Future<void> pumpSettings(
         ],
         supportedLocales: AppLocalizations.supportedLocales,
         builder: (context, child) => MediaQuery(
-          data: MediaQuery.of(
-            context,
-          ).copyWith(textScaler: TextScaler.linear(textScale)),
+          data: MediaQuery.of(context).copyWith(
+            textScaler: TextScaler.linear(textScale),
+            viewInsets: EdgeInsets.only(bottom: keyboardInset),
+          ),
           child: child ?? const SizedBox.shrink(),
         ),
         home: const SettingsScreen(),
