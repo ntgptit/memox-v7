@@ -14611,6 +14611,70 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
   không đổi UI/device behavior.
 - **Checklist phases:** 11, 15
 
+### M99.87 · Settings theo visual language của Card Detail — Save chỉ sáng khi có việc để lưu
+
+- **Status:** **done** — presentation-only restyle theo prompt set
+  `settings-visual-hierarchy`; không đổi one-row snapshot, group-scoped
+  writes, immediate theme/language, reset scope hay Reminder route entry.
+- **Goal:** Settings đạt chuẩn Card Detail (flat card, compact type, radio
+  glyph thay màu) và Save không còn hứa một hành động nó sẽ từ chối.
+- **Scope:** màn hình đã ở phần lớn ngôn ngữ này từ M99.28 (flat card, radio
+  row thay pill W6, section label compact D18, error band trong đúng nhóm
+  S8) — audit tái xác nhận bằng đọc code, không sửa gì ở các phần đó. Khoảng
+  trống thật duy nhất: nút `Save` của Study defaults luôn bấm được kể cả khi
+  draft pristine hoặc trần thẻ sai, và message lỗi chỉ lộ sau một round-trip
+  qua use case. Sửa: `SettingsStudyDefaultsSectionWidget` tự tính
+  dirty/valid từ draft, dùng lại đúng `StudyCardLimit.parse` (BR-211, không
+  nhân bản bound); Save disabled khi pristine, invalid hoặc submitting; nút
+  `Retry` của dải lỗi khoá theo cùng điều kiện valid (không theo dirty — gửi
+  lại đúng giá trị vừa lỗi vẫn hợp lệ). Message lỗi dưới trường chỉ hiện khi
+  trường mất focus — khoá Save thì sống theo từng keystroke, message thì
+  không, để tránh field (và mọi thứ dưới nó) đổi cao 20dp ở mỗi keystroke
+  vượt ngưỡng thay vì một lần mỗi submit như cũ. **Ngoài scope:** mọi
+  controller, use case, domain, `StudyOptionsSectionWidget` (song sinh ở
+  deck) — không đổi vì task này không có lý do nào khác để chạm nó.
+- **Recursive review (logic + UI/UX, song song, audit-only):** cả hai xác
+  nhận baseline M99.28 đúng và không tìm business drift. Áp dụng: (1) gate
+  `Retry` theo `_draftProblem`, không chỉ `isSubmitting`; (2) message lỗi dưới
+  trường chuyển từ "sống mỗi keystroke" sang "hiện khi blur", loại bỏ layout
+  jump 20dp lặp lại khi gõ; (3) test keyboard-open giờ khẳng định thật vị trí
+  `MxActionButton` trong viewport, không chỉ tìm `TextField`; (4) test cũ về
+  giá trị ngoài khoảng viết lại — không còn giả vờ tap một Save đã disabled,
+  mà blur field để chứng minh message hiện đúng lúc; (5) thêm test Save trở
+  lại pristine ngay sau một lần save thành công, không cần một tap thứ hai.
+- **Tests required:** nhóm `Save enablement (S2, S3)` trong
+  `settings_screen_states_test.dart` — 8 case sau fix (pristine, dirty qua
+  trần thẻ, dirty qua order, về pristine không qua save, invalid dù dirty,
+  hồi phục sau sửa, pristine ngay sau save thành công) cộng test validation
+  viết lại theo blur; `settings_screen_responsive_test.dart` thêm case
+  keyboard-open khẳng định rect của `MxActionButton` nằm trong viewport
+  (thiếu trong ma trận responsive trước đó); harness thêm `keyboardInset`
+  theo tiền lệ `search_screen_harness.dart`.
+- **Checklist phases:** Phase 13 (responsive/a11y) · Phase 14 (feature).
+- **Emulator integration suite:** **not run — presentation-only restyle.**
+  Đây không phải một lượt chạy xanh.
+- **Output:** như Scope; wireframe M99 Settings append S10; goldens settings
+  regenerate nếu Save đổi hình dạng disabled; gallery publish lại URL ghim.
+  **Bản live tại thời điểm publish đã là 56 màn của một nhánh Card Import
+  (M99.86 theo số của nhánh đó, chưa merge) — không phải stale, là một
+  session khác đang chiếm cùng URL.** Theo [[splice-gallery-not-overwrite]]:
+  không đè cả trang, chỉ thay đúng `<figure data-name="Settings">` bằng bản
+  build của nhánh này, giữ nguyên 55 figure còn lại và mọi con số đếm (56
+  tổng, count từng section không đổi vì không thêm/bớt figure) — nếu lần sau
+  gallery trông "thiếu" thứ nhánh này không đổi, đó là bằng chứng ghép đúng,
+  không phải ghép thiếu.
+- **Acceptance criteria:**
+  - [x] Không business/navigation/data drift — diff chỉ chạm
+        `features/settings/presentation/` + tests + docs.
+  - [x] Save đúng ba điều kiện disabled; validation dùng lại `StudyCardLimit`,
+        không bản sao bound thứ hai.
+  - [x] `flutter analyze` 0 (repo-wide); `dod_check.sh --changed` và bản đầy
+        đủ (không `--changed`) đều xanh; goldens `TZ=UTC` regenerate — diff
+        chỉ hai file `settings_light.png`/`settings_dark.png`, đúng bằng vùng
+        Save đổi hình dạng disabled, không pixel nào khác đổi.
+- **Editable documents:** `docs/wbs.md`, `docs/wireframes/m99-settings.md`
+- **Dependencies:** M99.28, BR-211, BR-216
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |

@@ -7,8 +7,8 @@
 | **Scope** | Màn `/settings`: anatomy, ba nhóm tuỳ chọn, hành động reset, mọi trạng thái, hợp đồng geometry, responsive/a11y. Ngoài phạm vi: luật nghiệp vụ (BR-210…BR-217), luồng (UC-16), branch contract (AD-19), và surface tuỳ chọn của deck — nó thuộc `StudyOptionsScreen` và chỉ được nhắc ở S6 |
 | **Source of truth for** | Anatomy màn Settings · copy các nhóm Settings · hợp đồng geometry của màn Settings · responsive/a11y contract của màn Settings |
 | **Depends on** | `../use-cases.md` (UC-16), `../business-rules.md` (BR-210…BR-217), `../architecture.md` (AD-15, AD-19), `m4-13-card-export.md` |
-| **Updated by task** | M99.28 (phase 8 — recursive UI/UX review) |
-| **Last updated** | 2026-08-14 |
+| **Updated by task** | M99.87 (Card Detail visual language — Save enablement, S10) · M99.28 (phase 8 — recursive UI/UX review) |
+| **Last updated** | 2026-08-28 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham chiếu bằng ID theo
 `document-conventions.md` §5; chỗ nào wireframe và BR có vẻ mâu thuẫn thì BR
@@ -205,3 +205,31 @@ nút), không đo cái hộp vô hình chứa chúng. Golden chỉ là regressio
 - Hành động reset MUST NOT dùng chữ khiến nó bị nhầm với Reset learning progress
   (BR-217), và phụ đề của nó là câu nói rõ điều đó — nên phụ đề MUST hiện ở
   trạng thái nghỉ, không chỉ trong hộp xác nhận.
+
+## Bản sửa hình ảnh — Card Detail visual language (M99.87)
+
+Restyle trình bày. Anatomy W1, copy W2, ma trận trạng thái W3 và hành vi hành
+động không đổi. Màn hình đã ở phần lớn ngôn ngữ thị giác này từ M99.28 (flat
+card, radio row thay pill, section label compact, error band trong nhóm) —
+một khoảng trống thật còn lại, và nó được đóng ở đây:
+
+| # | Quyết định | Lý do | Assertion |
+|---|---|---|---|
+| S10 | Nút `Save` của Study defaults **disabled khi draft pristine hoặc invalid**, ngoài lúc đang submit | Trước đây nút luôn bấm được — kể cả khi chưa đổi gì hoặc trần thẻ đang sai — và validation chỉ lộ ra sau một round-trip qua use case. Một nút sáng trên draft chưa đổi đọc như "có việc chưa lưu" khi không có; một nút bấm được trên số sai hứa một hành động nó sẽ từ chối ngay. Cả hai điều kiện dùng lại đúng `StudyCardLimit.parse` mà use case chạy — không có bản sao thứ hai của luật bound (BR-211) | `Save enablement (S2, S3)` trong `settings_screen_states_test.dart` — 6 case: pristine, dirty qua trần thẻ, dirty qua order, về pristine không qua save, invalid dù dirty, hồi phục sau khi sửa |
+
+Dirty được so theo **giá trị**, không theo chuỗi: `"020"` cạnh một trần thẻ đã
+lưu `20` là cùng một số, và coi nó là dirty sẽ sáng đèn cho một lần lưu không
+đổi gì.
+
+Việc khoá Save là live — mỗi keystroke. Message lỗi dưới trường thì **không**:
+nó chỉ hiện khi trường mất focus. Bản thân trạng thái disabled của Save đã báo
+"có gì đó sai" ngay khi draft rời khỏi ngưỡng hợp lệ; hiện message theo đúng
+lịch đó nghĩa là trường (và mọi thứ bên dưới nó) đổi cao 20dp ở mỗi keystroke
+vượt ngưỡng, thay vì một lần mỗi lượt submit như hành vi cũ. Đợi tới blur giữ
+việc dời hình đó còn đúng một lần — thời điểm blur vốn đã là một chuyển cảnh —
+và draft đang gõ dở vẫn tự giải thích ngay khi rời khỏi trường.
+
+`errorText` của trường vẫn đọc `widget.cardLimitProblem` như một fallback nếu
+có: giữ đường đó để một lần gọi controller trực tiếp ngoài nút Save của widget
+này (nếu từng có) vẫn hiển thị đúng, dù việc khoá Save khiến đường đó không
+còn với tới được qua UI production.

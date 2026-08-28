@@ -63,7 +63,20 @@ class _SettingsStudyDefaultsSectionWidgetState
   late final TextEditingController _cardLimit = TextEditingController(
     text: '${widget.initialCardLimit}',
   );
+  final FocusNode _cardLimitFocus = FocusNode();
   late NewCardOrder _order = widget.initialNewCardOrder;
+
+  @override
+  void initState() {
+    super.initState();
+    // Save's enablement is derived from the draft on every keystroke, not
+    // only from the radio row's own `setState` — a plain `TextEditingController`
+    // does not rebuild its widget by itself.
+    _cardLimit.addListener(_onDraftChanged);
+    // The error *text* is not shown on the same schedule as Save's own
+    // enablement — see `_fieldErrorText` below.
+    _cardLimitFocus.addListener(_onDraftChanged);
+  }
 
   @override
   void didUpdateWidget(SettingsStudyDefaultsSectionWidget oldWidget) {
@@ -83,14 +96,65 @@ class _SettingsStudyDefaultsSectionWidgetState
 
   @override
   void dispose() {
+    _cardLimit.removeListener(_onDraftChanged);
     _cardLimit.dispose();
+    _cardLimitFocus.removeListener(_onDraftChanged);
+    _cardLimitFocus.dispose();
     super.dispose();
   }
+
+  void _onDraftChanged() => setState(() {});
 
   /// The one submit path, so `Save` and `Try again` cannot diverge — a retry
   /// that sent anything other than the current draft would save a value the
   /// user is no longer looking at.
   void _submit() => widget.onSave(_cardLimit.text, _order);
+
+  /// The draft's own bound check, live and reused rather than re-derived.
+  ///
+  /// **The same parser the use case runs, not a second opinion.** BR-211
+  /// requires exactly one copy of the card-limit bounds; calling
+  /// `StudyCardLimit.parse` here is what lets Save disable itself *before* a
+  /// round trip instead of guessing at the rule from outside it.
+  StudyCardLimitProblem? get _draftProblem =>
+      StudyCardLimit.parse(_cardLimit.text).problem;
+
+  /// The message shown **under the field**, as opposed to [_draftProblem]
+  /// which gates Save.
+  ///
+  /// **Only while the field is not focused.** Save's own disabled paint
+  /// already signals "something is wrong" the instant a keystroke makes the
+  /// draft invalid — showing the message on the same schedule would grow the
+  /// field by the error line's height on every keystroke that crosses the
+  /// valid/invalid boundary, not once per submit like the old round-trip
+  /// behaviour. Deferring the text to blur keeps that reflow to the one
+  /// transition a blur already is, and a mid-typing draft still explains
+  /// itself the moment focus leaves.
+  String? get _fieldErrorText => _cardLimitFocus.hasFocus
+      ? null
+      : context.cardLimitError(_draftProblem ?? widget.cardLimitProblem);
+
+  /// Whether the draft differs from what is actually persisted.
+  ///
+  /// Compared by value, not by string: `"020"` next to a stored `20` is the
+  /// same session ceiling, and flagging it dirty would light Save for a
+  /// change that saves nothing new. An unparsable draft counts as dirty
+  /// unconditionally — [_canSubmit] below gates on validity separately, so
+  /// this only has to decide "is there something to compare".
+  bool get _isDirty {
+    final parsed = StudyCardLimit.parse(_cardLimit.text).limit;
+    final limitChanged =
+        parsed == null || parsed.value != widget.initialCardLimit;
+
+    return limitChanged || _order != widget.initialNewCardOrder;
+  }
+
+  /// **Disabled when pristine, invalid or submitting.** A bright Save over an
+  /// unchanged draft reads as "something is waiting to be saved" when nothing
+  /// is; an enabled Save over an unparsable number is a control promising an
+  /// action it would immediately refuse.
+  bool get _canSubmit =>
+      !widget.isSubmitting && _isDirty && _draftProblem == null;
 
   @override
   Widget build(BuildContext context) {
@@ -115,10 +179,11 @@ class _SettingsStudyDefaultsSectionWidgetState
             // group has no decoration to carry one.
             MxTextField(
               controller: _cardLimit,
+              focusNode: _cardLimitFocus,
               label: l10n.studyOptionsCardLimitLabel,
               isEnabled: !widget.isSubmitting,
               keyboardType: TextInputType.number,
-              errorText: context.cardLimitError(widget.cardLimitProblem),
+              errorText: _fieldErrorText,
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(l10n.studyOptionsOrderLabel, style: context.texts.titleSmall),
@@ -150,14 +215,19 @@ class _SettingsStudyDefaultsSectionWidgetState
               const SizedBox(height: AppSpacing.lg),
               SettingsErrorBandWidget(
                 failure: band,
-                onRetry: widget.isSubmitting ? null : _submit,
+                // Retry sends the same draft Save would — so it is gated by
+                // the same validity check, just not by dirtiness: resending
+                // an unchanged value after a failed save is legitimate.
+                onRetry: (widget.isSubmitting || _draftProblem != null)
+                    ? null
+                    : _submit,
               ),
             ],
             const SizedBox(height: AppSpacing.lg),
             MxActionButton(
               label: l10n.studyOptionsSave,
               isLoading: widget.isSubmitting,
-              onPressed: _submit,
+              onPressed: _canSubmit ? _submit : null,
             ),
           ],
         ),
