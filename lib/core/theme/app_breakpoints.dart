@@ -27,9 +27,11 @@ abstract final class AppBreakpoints {
   /// ships no large-screen layout, so no widget may ask "am I above medium?"
   /// and lay itself out differently.
   ///
-  /// It has one production consumer since M99.60: Card Detail caps its reading
-  /// column at this width (`card_detail_screen.dart`, M4.15 W2). That is a
-  /// *ceiling*, not a branch — below 600 it binds nothing and every phone gets
+  /// Its production consumers are all *ceilings*, never branches: Card Detail
+  /// caps its reading column here (`card_detail_screen.dart`, M4.15 W2, since
+  /// M99.60), and Study Home (`study_home_body_section_widget.dart`, M99.85)
+  /// and Tag Catalog (`tag_catalog_screen.dart`, M99.84) cap their working
+  /// columns the same way. Below 600 it binds nothing and every phone gets
   /// the identical layout — and it is here rather than as a number of its own
   /// because the widest a phone gets is exactly the widest a column of card
   /// text should be.

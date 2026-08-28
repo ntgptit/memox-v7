@@ -1,10 +1,10 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
   "scannedFiles": 692,
-  "totalSites": 343,
+  "totalSites": 344,
   "byElementKind": {
     "other": 286,
-    "background": 23,
+    "background": 24,
     "shadow": 1,
     "border": 14,
     "text": 13,
@@ -16,7 +16,7 @@
     "Colors-material": 12,
     "hardcoded-literal": 97,
     "opacity-modified-token": 16,
-    "theme-token": 66
+    "theme-token": 67
   },
   "sites": [
     {
@@ -3114,6 +3114,17 @@
       "file": "lib/features/card/presentation/widgets/items/card_tile_widget.dart",
       "line": 294,
       "widget_context": "_DueBadge",
+      "element_kind": "background",
+      "source_kind": "theme-token",
+      "expression": "context.semanticColors.surfaceMuted",
+      "token": "semantic.surfaceMuted",
+      "resolved_value_light": "#EAECF1",
+      "resolved_value_dark": "#28254B"
+    },
+    {
+      "file": "lib/features/card/presentation/widgets/items/tag_catalog_row_widget.dart",
+      "line": 152,
+      "widget_context": "_TagWell",
       "element_kind": "background",
       "source_kind": "theme-token",
       "expression": "context.semanticColors.surfaceMuted",

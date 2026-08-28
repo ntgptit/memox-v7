@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.84 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
+| **Updated by task** | M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
 | **Last updated** | 2026-08-28 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -14481,8 +14481,110 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Editable documents:** `docs/wbs.md`, `docs/architecture.md`,
   `docs/reviews/design-parity-checklist.md`
 - **Dependencies:** M99.70, M99.74, M99.75
+### M99.84 · Tag Catalog theo ngôn ngữ thị giác Card Detail — restyle presentation-only
 
-### M99.84 · Chặn vòng lặp vô hạn trong Deck ancestry query
+- **Status:** **done** — theo prompt set `docs/prompt/tag-catalog-visual-hierarchy/`
+  (handoff SHA-verified); implementation → hai recursive review độc lập
+  (Arch/Logic + UI/UX, audit-only, chạy song song) → coordinator fix → verify
+  pass → delivery.
+- **Goal:** catalog thôi là các dòng chữ trôi trên nền trang; một working
+  surface có hierarchy scan được, đúng surface ladder / density / typography
+  của Card Detail, không đổi một nghiệp vụ tag nào.
+- **Scope:** `tag_catalog_screen.dart` — populated đặt trong **một**
+  `MxCard.flat(padding: none)` (recipe API M99.83) trong cột đọc
+  `Center + ConstrainedBox(medium)` đúng công thức Card Detail; search
+  subheader và mọi state face (`_FaceColumn`) cùng mép với surface; hairline
+  `Divider` indent đúng cột chữ; top rhythm `xl`. `tag_catalog_row_widget.dart`
+  — rời `MxListTile` sang layout compact: well trung tính 32dp
+  (`TagCatalogRowWidget.wellSize`, `semanticColors.surfaceMuted`,
+  `sell_outlined` quiet, decorative), tên `titleSmall` 2 dòng, count
+  `bodySmall` quiet **tabular** dưới tên, `MxMenuButton` giữ nguyên hành vi.
+  Wireframe M4.14 append mục V-revision (không sửa quyết định cũ).
+- **Fix từ review, mỗi cái có test:** [Arch] test semantics hàng — name rồi
+  count, mỗi chuỗi một node; [U2] `wellSize` một-fact-một-chỗ + assertion
+  getRect nối `name.left` với separator indent; [U3] spelling `surfaceMuted`
+  theo grammar metric well; [U4] top `sm→xl` (nhịp 28dp dưới subheader như
+  card list); [U5] **fix hành vi W3 face 5 có sẵn**: Riverpod giữ value cũ
+  qua error nên error-đến-sau-data vẫn hiện search — subheader thêm
+  `!catalog.hasError`, kèm test; Retry không flicker vì previous-error giữ
+  qua `AsyncLoading`.
+- **Đổi scroller có chủ đích:** `ListView.builder` → `SingleChildScrollView`
+  + `Column` để surface liên tục (một card, không card-per-row). Chi phí:
+  mọi hàng build mỗi rebuild — chấp nhận ở cỡ catalog hàng chục tag; **nếu
+  catalog lên hàng trăm, câu trả lời là pagination như history, không phải
+  xẻ card** (ghi tại chỗ trong code; Arch review đồng thuận).
+- **Quyết định lệch prompt, có lý do:** gutter ngang giữ `lg` cố định vì G1
+  đo SỐNG với card list (dưới 360 search theo shell `md` — trade có sẵn,
+  card list y hệt); menu dùng `MxMenuButton` vì prompt viết trước khi
+  wrapper ra đời (M99.69).
+- **Tests required:** nhóm mới `visual revision 2026-08-28` trong
+  `tag_catalog_alignment_test.dart` — 8 claim (edges search/faces/error,
+  separator + inset đo bằng getRect, well đồng nhất, semantics hàng, W3
+  face 5, 320@2.0 không tràn); D21 chuyển claim sang scroller mới; toàn bộ
+  G1–G5 + 36 test hành vi rename/merge/delete/filter pass **không sửa**.
+- **Checklist phases:** Phase 7 (components) · Phase 12/13 (design system).
+- **Emulator integration suite:** **not run — presentation-only restyle.**
+  Đây không phải một lượt chạy xanh.
+- **Output:** như Scope; goldens tag_catalog regenerate `TZ=UTC`; gallery
+  publish lại URL ghim; PR non-draft chờ lệnh merge của owner.
+- **Acceptance criteria:**
+  - [x] Hai review độc lập: Arch APPROVE 0 finding; UI/UX 5 P2 đóng đủ,
+        verify pass CLEAN STOP.
+  - [x] `flutter analyze` 0; presentation+router 367 xanh; changed gate xanh.
+  - [x] Diff không chạm domain/data/route/ARB/controller.
+- **Editable documents:** `docs/wbs.md`, `docs/wireframes/m4-14-tag-management.md`
+- **Dependencies:** M99.83
+
+### M99.85 · Study Home theo visual language của Card Detail — băng workload/verb và trần cột
+
+- **Status:** **done** — presentation-only restyle theo prompt set
+  `study-home-visual-hierarchy`; không đổi resume validity, workload
+  aggregation/order, session creation, routes, repository, clock seam hay
+  database.
+- **Goal:** Study Home compact và phân tầng như Card Detail mà vẫn đúng
+  anatomy/copy/state của M5 và BR-200…BR-202.
+- **Scope:** bốn thay đổi hình ảnh, ghi ở wireframe S14…S17: (1) cột nội dung
+  căn giữa trần `AppBreakpoints.medium` — cùng ceiling-không-phải-branch của
+  Card Detail, dưới 600 không trói gì; (2) workload và verb **chung một băng**
+  khi đủ rộng, stack như cũ khi hẹp/chữ to — ngưỡng
+  `AppStudyHomeDeckCard.inlineActionMinWidth` scale theo `textScaler` nên 2.0
+  stack ở mọi phone; (3) verb hàng dùng `MxActionButtonSize.compact` (40 vẽ,
+  48 chạm — trade của deck tile cho cùng vai); (4) Resume primary full-width
+  khi card hẹp hơn tier compact, intrinsic ở 393/412. **Ngoài scope:** ba
+  metric/zero visibility, thứ tự BR-201, double-tap guard, mọi controller/
+  provider — không dòng nào ngoài `presentation/` đổi.
+- **Semantics đi kèm, vì cột căn giữa làm mất ranh giới ListView-child:** câu
+  một-hàng nay phủ trọn card (identity + counts ở cả hai thể layout); Resume
+  card và heading STUDY NEXT tự khai `container: true`. R5/R6/R9 giữ nguyên
+  claim và test.
+- **Tests required:** `study_home_card_geometry_test` (+5: băng inline 393,
+  stack 320@2.0, compact verb 40/48, resume full-width 320 **và** intrinsic
+  393; G6 đo đáy theo băng), `study_home_geometry_test` (+1: trần 800dp căn
+  giữa), toàn bộ suite study hiện có xanh không đổi claim nào khác.
+- **Hai recursive review độc lập (logic + UI/UX), audit song song, fix áp
+  tuần tự — một P0 thật và cả hai cùng bắt bằng số học:** `LayoutBuilder` của
+  Resume nằm trong padding card nên đo *content width* (hẹp hơn 32dp), làm
+  nhánh intrinsic của S17 không bao giờ chạy trên phone — 393 trao 329 < 360
+  → full-width khắp nơi, suite vẫn xanh vì nửa roomy chưa có assertion. Fix:
+  nâng `LayoutBuilder` ra ngoài `MxCard.tonal` (cột cha stretch nên maxWidth
+  chính là bề rộng card), thêm assertion intrinsic ở 393, sửa comment sai
+  trong test cramped. Nit đã sửa kèm: doc `inlineActionMinWidth` trộn hai hệ
+  đo (296 là card, content là 264); doc `AppBreakpoints.medium` ghi đủ hai
+  consumer; wireframe ghi biên 390/393 của S17 và chú thích W1 vẽ thể
+  stacked. Không finding nào về BR-201/semantics/scope — diff sạch 7 file.
+- **Checklist phases:** Phase 13 (responsive/a11y) · Phase 14 (feature).
+- **Emulator integration suite:** **not run — presentation-only restyle.** Đây
+  không phải một lượt chạy xanh.
+- **Output:** như Scope; wireframe M5 append S14…S17 + G15/G16; goldens
+  study_home regenerate; gallery publish lại URL ghim.
+- **Acceptance criteria:**
+  - [x] Không business/navigation/data drift — diff chỉ chạm
+        `features/study/presentation/` + tests + docs.
+  - [x] Geometry + responsive + semantics pass trên production tree.
+  - [x] `flutter analyze` 0; changed gate xanh; goldens `TZ=UTC` xanh.
+- **Editable documents:** `docs/wbs.md`, `docs/wireframes/m5-study-home.md`
+- **Dependencies:** M99.83, M5.26, M99.26
+### M99.86 · Chặn vòng lặp vô hạn trong Deck ancestry query
 
 - **Status:** **done**
 - **Goal:** `childDeckLevel` MUST kết thúc cả khi parent chain bị cyclic, để
@@ -14525,7 +14627,7 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 | ~~`dart format .` trong `dod_check.sh` crash trên worktree~~ | M2.2b | Bước `format` đỏ ở **mọi** lần chạy local nhiều tuần liền: `.` đi vào `.claude/worktrees/`, nơi Gradle xoá thư mục ngay giữa lúc formatter đang liệt kê → `PathNotFoundException`. Vì là lỗi môi trường chứ không phải lỗi format, mỗi lần lại được *báo cáo và đi vòng* thay vì sửa — và một gate đỏ mà ai cũng biết là đỏ thì không còn là gate | **Đã trả.** `dart_roots()` lấy tập thư mục từ `git ls-files '*.dart'` cắt tới segment đầu. Đúng câu hỏi cần hỏi — *cây làm việc **này** track những file Dart nào* — nên build output không tracked không lọt vào, worktree bị `.git/info/exclude` loại sẵn, và một thư mục top-level mới tự động được nhận. **Lỗi thứ hai nghiêm trọng hơn cái crash:** `.` đưa cho formatter source của **nhánh khác**, nên một worktree có format cũ làm gate đỏ vì code không nằm trong cây làm việc |
 | ~~`study_session_controller.dart` vượt trần 400 dòng của guard~~ | M5.24 | 423/400. Warning cũng làm đỏ gate. Class giữ toàn bộ command của phiên học | **Đã trả ở M5.25.** Không tách được bằng cơ chế ngôn ngữ — Dart không có partial class, base class Riverpod sinh ra là private, và extension trong `part` cũng không dùng được `state` (`invalid_use_of_protected_member`, đã thử và revert). Nên tách bằng **trách nhiệm**: offset nhìn lại của `browse` là view state, không phải command của phiên, và nay là `StudyBrowseTrailController`. Controller còn 387 dòng |
 | `study_answers` chưa có index cho khoảng thời gian | M99.28 | Progress lọc `answered_at >= ? AND answered_at < ?`; index duy nhất chạm cột này là `(card_id, answered_at)`, mà cột dẫn đầu không nằm trong predicate — nên mỗi lần emit là một full scan `study_answers`, và stream re-emit theo **mỗi lượt trả lời** khi màn hình đang mở (ở độ sâu 3 là ba scan mỗi lượt). Output có chặn, scan thì không | Thêm index `(answered_at)` — nhưng đó là **đổi schema**, tức bump version + snapshot + migration test, và M99.28 cố ý không đụng schema. Trả cùng lần bump schema tiếp theo, và theo đúng rule index của repo: đo bằng `EXPLAIN QUERY PLAN` trên dữ liệu thật trước rồi mới thêm |
-| ~~`ancestry` CTE trong `deck.drift` không có bound~~ | M99.28 | Cùng khiếm khuyết đã sửa ở `progress.drift`: walk mang `distance` tăng mỗi vòng nên `UNION` không dedup được, và trên cây cha vòng lặp thì statement không bao giờ trả về — nó giữ database isolate, nên mọi query khác của app chặn theo. Comment ở `deck.drift` còn khẳng định ngược lại | **Đã trả ở M99.84.** `ancestry` nhận `:maxWalk = DeckEntity.maxTreeDepth + 1`; `branch` giữ `UNION` không bound vì row của nó hữu hạn. Test SQLite thật dựng cycle, buộc read kết thúc và chứng minh query kế tiếp trên cùng database isolate vẫn chạy. |
+| ~~`ancestry` CTE trong `deck.drift` không có bound~~ | M99.28 | Cùng khiếm khuyết đã sửa ở `progress.drift`: walk mang `distance` tăng mỗi vòng nên `UNION` không dedup được, và trên cây cha vòng lặp thì statement không bao giờ trả về — nó giữ database isolate, nên mọi query khác của app chặn theo. Comment ở `deck.drift` còn khẳng định ngược lại | **Đã trả ở M99.86.** `ancestry` nhận `:maxWalk = DeckEntity.maxTreeDepth + 1`; `branch` giữ `UNION` không bound vì row của nó hữu hạn. Test SQLite thật dựng cycle, buộc read kết thúc và chứng minh query kế tiếp trên cùng database isolate vẫn chạy. |
 | `end_reason = scheduler_reset` phải mang cả BR-164 | M99.16 | Đổi scheduler khi chưa khoá ghi cùng giá trị với Reset, nên đọc riêng cột đó thì hai sự kiện khác nhau trông giống nhau. Không mất thông tin — `study_sessions.scheduler_generation` bằng generation của root sau một lần đổi và nhỏ hơn sau một lần reset — nhưng nó bắt người đọc phải biết mẹo đó | Tên đúng là `scheduler_changed`. `study_sessions.end_reason` có `CHECK` liệt kê giá trị nên thêm một giá trị là **đổi schema**, và nới `CHECK` là rebuild bảng nên xứng một bump riêng. Ba lần bump sau khi nợ được ghi đều đã đi việc khác: v8 (BR-203, ba cột `direction` additive), v9 (M99.28, hai cột theme/ngôn ngữ), v10 (M99.29, ba cột nhắc học); v11 (M99.33, Trash) có rebuild `study_sessions` nhưng cố ý không gánh thêm nợ này. Đích hiện tại là **v12** — lần rebuild kế tiếp của `study_sessions`, rồi đổi `deck_scheduler_repository_impl.dart` sang giá trị mới |
 | Nội dung starter là fixture, không phải nội dung production | T1.3 | Không phát hành được với nội dung này | Tìm nguồn nội dung có bản quyền rõ ràng trước M8 (BR-87) |
 | `sqlite3.wasm` và `drift_worker.js` là binary vendored trong `web/` | M4.2 | Không có bước build nào sinh ra chúng và không có bước build nào báo khi chúng cũ: app compile, load, rồi **không mở được database**. Nâng `drift` mà quên tải lại worker không có triệu chứng nào cho tới khi ai đó mở trình duyệt | `test/database/web_assets_test.dart` so version trong `pubspec.lock` với version đã pin, kèm `web/WEB_ASSETS.md` ghi URL tải. Đã kiểm tiêm lỗi: đổi `drift` thành 2.99.0 làm test đỏ |

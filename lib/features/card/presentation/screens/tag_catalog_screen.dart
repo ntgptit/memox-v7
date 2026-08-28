@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/app_breakpoints.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_stroke.dart';
 import '../../../../l10n/l10n_extension.dart';
+import '../../../../shared/widgets/mx_card.dart';
 import '../../../../shared/widgets/mx_messenger.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
@@ -52,19 +55,26 @@ class TagCatalogScreen extends ConsumerWidget {
       padding: EdgeInsets.zero,
       // The search field waits until the catalog has something to search:
       // offering to filter an empty list is chrome asking a question with one
-      // answer. It is not shown on the error face either — there is nothing to
-      // narrow (M4.14 W3).
-      subheader: (catalog.value?.isNotEmpty ?? false) || query.isNotEmpty
+      // answer. It is not shown on the error face either — there is nothing
+      // to narrow (M4.14 W3 face 5). `hasError` is checked on its own because
+      // Riverpod keeps the previous value through an error: an error arriving
+      // *after* data used to leave the field floating over the error face,
+      // which is the one face W3 says has no search.
+      subheader:
+          !catalog.hasError &&
+              ((catalog.value?.isNotEmpty ?? false) || query.isNotEmpty)
           ? _SearchStrip(query: query)
           : null,
       body: MxAsyncView<List<TagCatalogEntry>>(
         value: catalog,
         loadingLabel: context.l10n.tagCatalogLoadingLabel,
-        error: (_, _) => MxErrorState(
-          title: context.l10n.unexpectedErrorTitle,
-          message: context.l10n.tagCatalogError,
-          retryLabel: context.l10n.retryAction,
-          onRetry: () => ref.invalidate(tagCatalogProvider),
+        error: (_, _) => _FaceColumn(
+          child: MxErrorState(
+            title: context.l10n.unexpectedErrorTitle,
+            message: context.l10n.tagCatalogError,
+            retryLabel: context.l10n.retryAction,
+            onRetry: () => ref.invalidate(tagCatalogProvider),
+          ),
         ),
         data: (tags) =>
             tags.isEmpty ? _empty(context, query) : _CatalogList(tags: tags),
@@ -76,9 +86,33 @@ class TagCatalogScreen extends ConsumerWidget {
   /// otherwise it means the search matched nothing (M4.14 W3 faces 3 and 4).
   Widget _empty(BuildContext context, String query) {
     final term = query.trim();
-    if (term.isNotEmpty) return _NoSearchMatch(query: term);
+    if (term.isNotEmpty) return _FaceColumn(child: _NoSearchMatch(query: term));
 
-    return const _Empty();
+    return const _FaceColumn(child: _Empty());
+  }
+}
+
+/// The column every state face stands in: the catalog's own gutter and the
+/// same reading-column cap, so populated, empty, search-empty and error all
+/// share left and right edges (M4.14 G1, visual revision 2026-08-28). The
+/// faces carry their own internal insets; this owns only the page geometry,
+/// which is why it exists once instead of each face re-deriving it.
+class _FaceColumn extends StatelessWidget {
+  const _FaceColumn({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: AppBreakpoints.medium),
+          child: child,
+        ),
+      ),
+    );
   }
 }
 
@@ -88,11 +122,20 @@ class _SearchStrip extends ConsumerWidget {
   final String query;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => MxSearchField(
-    value: query,
-    onChanged: (value) => _updateSearch(ref, value),
-    hintText: context.l10n.tagSearchHint,
-    clearSemanticLabel: context.l10n.tagSearchClearLabel,
+  Widget build(BuildContext context, WidgetRef ref) => Center(
+    // The same reading-column cap the catalog surface stands under. On a
+    // phone this binds nothing; at the framed web width it is what keeps the
+    // search and the surface it filters sharing edges (M4.14 G2) instead of
+    // the field running wide over a capped list.
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: AppBreakpoints.medium),
+      child: MxSearchField(
+        value: query,
+        onChanged: (value) => _updateSearch(ref, value),
+        hintText: context.l10n.tagSearchHint,
+        clearSemanticLabel: context.l10n.tagSearchClearLabel,
+      ),
+    ),
   );
 }
 
@@ -103,35 +146,76 @@ class _CatalogList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // **The list's own context, never `itemBuilder`'s.** A merge removes the
-    // source row from the catalog, so the element the row was built in is
+    // **This build's context, never a per-row one.** A merge removes the
+    // source row from the catalog, so the element a row was built in is
     // deactivated moments later — and `ScaffoldMessenger.of` on a deactivated
-    // context asserts. The list outlives every row it renders.
-    return ListView.builder(
-      // **`lg` at the foot, not `sm`** (D21). Progress, Study Home and the deck
-      // level all end a scrolling list a full gutter above the navigation bar,
-      // for the reason that pass recorded: a shorter inset reads as the list
-      // being cut off rather than ended. This was 8dp, which is the one place
-      // in the app a user crossing from any of those three would see the
-      // difference.
+    // context asserts. The column's parent outlives every row it renders.
+    //
+    // **One `MxCard.flat` holding every row — a working surface, not a card
+    // per tag** (visual revision of M4.14, 2026-08-28). The rows used to sit
+    // as bare lines on the page ground; Card Detail's grammar puts grouped
+    // data on one flat panel and lets hairlines carry the row rhythm. A
+    // `Column` rather than a builder: the surface must be continuous, and a
+    // catalog is tens of rows, the same order Card Detail's summary renders
+    // in one pass. If catalogs ever reach the hundreds, pagination is the
+    // answer (as history's is), not splitting the card.
+    return SingleChildScrollView(
+      // **`lg` at the foot, not `sm`** (D21). Progress, Study Home and the
+      // deck level all end a scrolling list a full gutter above the
+      // navigation bar. Horizontal stays `lg` — fixed, not `mxScreenGutter` —
+      // because G1 measures this edge against the card list's, and that list
+      // stands at `lg` on every width it ships.
+      // `xl` on top, the rhythm both references keep: the card list's body
+      // stands `xl` under its subheader and Card Detail opens at `xl`. This
+      // was `sm` when the rows were bare lines — invisible then, a visibly
+      // short 12dp once the surface grew a hairline edge.
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
-        AppSpacing.sm,
+        AppSpacing.xl,
         AppSpacing.lg,
         AppSpacing.lg,
       ),
-      itemCount: tags.length,
-      itemBuilder: (_, index) {
-        final entry = tags[index];
-
-        return TagCatalogRowWidget(
-          entry: entry,
-          onRename: () => _rename(context, entry),
-          onDelete: () => _delete(context, entry),
-        );
-      },
+      child: Center(
+        // The same reading-column cap Card Detail set (M4.15 W2): above
+        // `AppBreakpoints.medium` a full-bleed list is a line nobody can
+        // track back; below it, this binds nothing.
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: AppBreakpoints.medium),
+          child: MxCard.flat(
+            padding: MxCardPadding.none,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                for (var index = 0; index < tags.length; index++) ...<Widget>[
+                  if (index > 0)
+                    // Inset to the text column, so the line reads as a row
+                    // separator rather than the card being sliced through —
+                    // the same move Card Detail's summary hairlines make.
+                    const Divider(
+                      height: AppStroke.hairline,
+                      thickness: AppStroke.hairline,
+                      indent: _rowTextInset,
+                      endIndent: AppSpacing.md,
+                    ),
+                  TagCatalogRowWidget(
+                    entry: tags[index],
+                    onRename: () => _rename(context, tags[index]),
+                    onDelete: () => _delete(context, tags[index]),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
+
+  /// Where a row's text begins inside the card: the row's own leading inset,
+  /// the 32dp well, and the gap after it. Stated once so the separator and
+  /// the row cannot disagree about where the text column starts.
+  static const double _rowTextInset =
+      AppSpacing.md + TagCatalogRowWidget.wellSize + AppSpacing.md;
 
   /// Opened from a post-frame callback by `PopupMenuItem.onTap`, which fires
   /// after the menu route pops — so the sheet is pushed onto the screen rather
