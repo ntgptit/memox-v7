@@ -136,59 +136,62 @@ void main() {
       }
     }
 
-    /// The clamp of X6 fires **only** where the column is too narrow.
+    /// **X6's clamp is gone, not just untriggered** (visual revision
+    /// 2026-08-28). The headline moved from `displayLarge` (57px) to
+    /// `headlineMedium` (28px) — Why 1 of the implementation prompt — and the
+    /// unbreakable unit word that forced the clamp at 320dp shrinks with it:
+    /// where `displayLarge` needed 264–274.9dp for "days"/"ngày" alone against
+    /// a 264dp compact column, `headlineMedium` needs roughly half that. There
+    /// is no viewport left where the user's chosen scale has to be capped, so
+    /// this loop asserts the opposite of what it used to: the scaler is
+    /// **never** touched, at every cell X6 used to clamp one of.
     ///
-    /// The first version was unconditional, so it also took 12.5% off the size
-    /// the user chose at 360, 390 and 412 — viewports where the Vietnamese unit
-    /// word has 21 to 73dp to spare and there is nothing to avoid. Reducing type
-    /// where it fits is the thing W6 forbids, so the scope needs an assertion of
-    /// its own; the no-mid-word-break loop above cannot see it, because a
-    /// too-small headline breaks no words either.
-    for (final ({double width, bool isClamped}) cell
-        in const <({double width, bool isClamped})>[
-          (width: 320, isClamped: true),
-          (width: 360, isClamped: false),
-          (width: 390, isClamped: false),
-          (width: 412, isClamped: false),
-        ]) {
+    /// The headline also sits in a narrower box than before — `MxMetricWell`
+    /// and its gap now share the row with it — which is exactly why this stays
+    /// a measured assertion rather than an arithmetic one: a narrower box is
+    /// the one thing that could have brought the clamp back.
+    for (final double width in const <double>[320, 360, 390, 412]) {
       for (final Locale locale in const <Locale>[Locale('en'), Locale('vi')]) {
         testWidgets('the headline keeps the user text scale at '
-            '${cell.width.toInt()}dp · ${locale.languageCode}', (tester) async {
+            '${width.toInt()}dp · ${locale.languageCode}', (tester) async {
           await pumpProgressScreen(
             tester,
             repository: seeded(),
-            surface: Size(cell.width, 900),
+            surface: Size(width, 900),
             textScale: 2,
             locale: locale,
           );
 
-          // The headline is the second of the hero's three paragraphs: section
-          // label, headline, supporting line.
+          // Found through the hero's own `Expanded`, not by a paragraph
+          // index: `MxMetricWell` draws its glyph through an `Icon`, which is
+          // itself backed by a `RichText` (font-based glyph rendering) - so
+          // the hero's three *words* (label, headline, support) no longer
+          // line up with three consecutive `RichText`s the way a fixed index
+          // assumes. Scoped to `ProgressStreakHeroWidget` first: `Expanded`
+          // is not unique to the hero, and Today's breakdown rows use it too.
           final headline =
-              find
-                      .descendant(
+              tester.renderObject(
+                    find.descendant(
+                      of: find.descendant(
                         of: find.byType(ProgressStreakHeroWidget),
-                        matching: find.byType(RichText),
-                      )
-                      .evaluate()
-                      .elementAt(1)
-                      .renderObject!
+                        matching: find.byType(Expanded),
+                      ),
+                      matching: find.byType(RichText),
+                    ),
+                  )
                   as RenderParagraph;
 
           expect(
-            headline.textScaler.scale(57),
-            cell.isClamped ? 57 * 1.75 : 57 * 2.0,
-            reason: cell.isClamped
-                ? 'the compact tier caps at 1.75'
-                : 'nothing to avoid here, so the setting is honoured',
+            headline.textScaler.scale(28),
+            28 * 2.0,
+            reason:
+                'no rung left that needs clamping, so the setting the '
+                'user chose is honoured everywhere',
           );
 
-          // And the property the scaler exists to protect, at the same cells.
-          // Asserting the scaler alone measures the *mechanism*: it says the
-          // clamp is off at 360, not that the headline survives being unclamped
-          // there. `360 · vi` is now the tightest cell on the screen — 21.1dp of
-          // slack against 274.9dp of unbreakable word — so it is precisely the
-          // one that must be measured rather than reasoned about.
+          // And the property a clamp would have protected, at the same
+          // cells: proof the headline survives at full scale rather than an
+          // assumption that it does.
           expect(
             headline.getMinIntrinsicWidth(double.infinity),
             lessThanOrEqualTo(headline.size.width),

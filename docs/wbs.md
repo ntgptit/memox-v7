@@ -14743,7 +14743,7 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Editable documents:** `docs/wbs.md`, `docs/wireframes/m99-settings.md`
 - **Dependencies:** M99.28, BR-211, BR-216
 
-### M99.89 · Card List theo visual language của Card Detail — geometry đo được, hai mặt rỗng đóng
+### M99.91 · Card List theo visual language của Card Detail — geometry đo được, hai mặt rỗng đóng
 
 - **Status:** **done** — implementation, hai review pass audit-only song song
   (architecture/logic, UI/UX) và coordinator fix P2 đều xong.
@@ -14809,6 +14809,129 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Editable documents:** `docs/wbs.md`
 - **Dependencies:** UC-04, BR-89…BR-94, BR-150/151, BR-163, BR-165/166/167,
   BR-231, BR-246, M4.11, M99.19a, M99.30
+
+### M99.89 · Progress Overview theo ngôn ngữ thị giác Card Detail — streak hero thu về compact
+
+- **Status:** **done** — theo prompt set `docs/prompt/progress-overview-visual-hierarchy/`
+  (handoff SHA-verified); implementation → hai recursive review độc lập
+  (Arch/Logic + UI/UX, audit-only, chạy song song) → coordinator fix → verify
+  pass → delivery.
+- **Goal:** streak hero thôi chiếm phần lớn first viewport và lấn Today
+  (implementation prompt, Why 1); Today và Daily activity giữ nguyên vì đã
+  đúng contract từ trước.
+- **Scope:** chỉ `progress_streak_hero_widget.dart`. Headline
+  `texts.displayLarge!` (57px) → `AppTypography.withWeight(texts.headlineMedium!,
+  w700)` (28px). Thêm `MxMetricWell` (icon `local_fire_department_outlined`)
+  trước headline, tint/wellColor theo đúng "streak vocabulary" đã có sẵn
+  trong app — `streakContainer` + `AppInk.onDueContainer` khi có streak,
+  `surfaceMuted` + `AppInk.quiet` khi streak = 0 — cùng cặp token
+  `_ActiveDaysMetric` (`progress_metric_widget.dart`) đã dùng cho "time
+  kept", không phải token mới. Bỏ text-scaler clamp 1.75 compact-only cũ
+  (X6): **đo thực nghiệm** bằng test xác nhận không còn viewport nào cần
+  clamp ở rung 28px, không phải giả định theo tỉ lệ font. Today, Daily
+  activity, `ProgressScreen`, controller/provider/repository/route — không
+  đổi. Wireframe M99.23 append mục V-revision (không sửa quyết định W2/W5
+  cũ).
+- **Fix từ review, hội tụ vào cùng một khoảng trống:** [Arch P1 + UI/UX P2]
+  không test nào đọc `MxMetricWell.wellColor`/`.tint` theo trạng thái streak
+  dù chính doc comment của widget khẳng định hành vi đó — thêm 2 test vào
+  `progress_screen_test.dart` (streak=0 → `surfaceMuted`/quiet; streak=3 →
+  `streakContainer`/`onDueContainer`), không tautological vì hai cặp token
+  đo động qua `context.semanticColors`/`AppInk.resolve(context)`, không
+  hardcode hex. [Arch P2] comment trỏ nhầm file test không tồn tại
+  (`progress_streak_hero_test.dart`) → sửa đúng tên
+  (`progress_screen_geometry_extremes_test.dart`).
+- **Cái bẫy tự sửa trong lượt implementation, trước khi review chạy:** test
+  `progress_screen_geometry_extremes_test.dart` cũ tìm headline bằng
+  `RichText.evaluate().elementAt(1)` (giả định label→headline→support là ba
+  `RichText` liên tiếp). `MxMetricWell` vẽ glyph qua `Icon`, và `Icon` tự nó
+  là một `RichText` (font-based glyph) — chèn thêm một phần tử, dịch index,
+  khiến test đọc nhầm sang paragraph của chính glyph (không bị scale theo
+  text setting) và báo sai "clamp vẫn còn". Sửa bằng cách tìm headline qua
+  cấu trúc (`Expanded` riêng của nó trong `Row`, scope trong
+  `ProgressStreakHeroWidget` vì `Expanded` không riêng gì hero) thay vì
+  index cứng — bền hơn trước biến đổi cấu trúc tiếp theo.
+- **Tests required:** `progress_screen_geometry_extremes_test.dart` viết lại
+  khối "clamp of X6" thành khối đo ngược lại — scaler **không bao giờ** bị
+  chặn, ở cả bốn viewport, kèm assertion `getMinIntrinsicWidth ≤ size.width`
+  làm bằng chứng chứ không phải giả định; `progress_screen_geometry_test.dart`
+  (G1–G12) và toàn bộ 265 test khu vực progress + 14 visual-audit paint-layer
+  pass **không sửa** — kể cả G7 hero (label→headline→support sm/xs, đo bằng
+  `find.text`, không bị ảnh hưởng bởi Row/Icon mới vì nó tìm theo nội dung).
+- **Checklist phases:** Phase 7 (components) · Phase 12/13 (design system).
+- **Emulator integration suite:** **not run — presentation-only restyle.**
+  Đây không phải một lượt chạy xanh.
+- **Output:** như Scope; 4 golden progress regenerate `TZ=UTC`, soi ảnh cả
+  light/dark (first viewport giờ thấy đủ Streak + Today); gallery publish
+  lại URL ghim; PR non-draft chờ lệnh merge của owner.
+- **Acceptance criteria:**
+  - [x] Hai review độc lập: Arch 1 P1 + 1 P2, UI/UX 1 P2 (hội tụ cùng khoảng
+        trống) — cả hai đóng đủ, verify pass CLEAN STOP.
+  - [x] `flutter analyze` 0; 265 test khu vực progress xanh; changed gate xanh.
+  - [x] Diff chỉ chạm presentation của streak hero; domain/data/route/Today/
+        Daily-activity không đổi một dòng.
+- **Editable documents:** `docs/wbs.md`, `docs/wireframes/m99-23-progress-overview.md`
+- **Dependencies:** M99.87
+### M99.90 · Daily Reminder theo visual language của Card Detail — presentation only
+
+- **Status:** **done** — presentation-only restyle theo prompt set
+  `daily-reminder-visual-hierarchy`; không đổi off/20:00 mặc định,
+  permission-only-after-tap, due-only workload, notification privacy/copy,
+  platform adapters, bootstrap hay deep link (BR-218…BR-229, UC-17).
+- **Goal:** Màn Reminder Settings đọc bằng đúng grammar Card Detail —
+  hairline chia hai hàng quyết định, một quiet info panel thay hai đoạn văn
+  trôi tự do — mà không đổi một dòng nghiệp vụ nào.
+- **Scope:** `reminder_settings_section_widget.dart` (một file lib duy nhất);
+  `reminder_settings_layout_test.dart`; hai golden
+  `reminder_settings_{light,dark}.png`; D-row R10/R11 + G8 trong M6.
+  **Ngoài scope:** screen/controller/toggle-row/time-row/banner — banner giữ
+  nguyên theo R9 (quyết định chủ dự án 2026-08-15, đã có review và golden
+  riêng), không bị đọc nhầm thành "saturated danger card cần sửa" dù prompt
+  liệt kê đúng câu đó như một tiêu chí review chung.
+- **Đổi cụ thể:** một hairline `Divider` (`AppStroke.hairline` +
+  `semanticColors.borderSubtle`, cùng token Card Detail đang dùng) giữa hàng
+  toggle và hàng giờ trong cùng schedule card (R10 — hai hàng vẫn một quyết
+  định, chỉ tách bằng nét chứ không bằng khoảng trắng mơ hồ). Hai đoạn
+  supporting copy (due-only + privacy) gộp vào một `MxCard.muted` với icon
+  `info_outline`, text `bodySmall` — đúng recipe `_InfoPanel` Card Import đã
+  dùng, không phát minh pattern mới (R11).
+- **Recursive review (architecture/logic + UI/UX, song song, audit-only):**
+  UI/UX xác nhận sạch tuyệt đối — không P0/P1/P2, đo geometry ba surface
+  (schedule/banner/info) chung mép ở mọi state có/không banner, divider
+  không đổi chiều cao card qua S2→S3→S4, info panel wrap đúng ở 320dp@2x/VI,
+  Retry touch target đúng 48dp sàn. Architecture/logic tìm đúng một P1 — file
+  test mới viết sai định dạng `dart format` chuẩn (trailing comma ép xuống
+  dòng khác mọi `testWidgets` khác trong cùng file) — đã sửa bằng
+  `dart format`, verify lại `check_format.sh` xanh và 15/15 test layout vẫn
+  pass. Không tìm business/architecture drift nào: domain/data/platform/
+  router/controller byte-identical với `origin/main`.
+- **Tests bổ sung theo yêu cầu prompt** (không có trước): G3 (tâm dọc
+  toggle/label; mép trái label/value hàng giờ), G8 (info panel chung mép với
+  card/banner), viết lại G1 thành phép đo ba-surface thay vì hai — `.last`
+  cũ giờ trỏ nhầm vào info panel nên hai chỗ dùng nó đổi sang tra theo
+  `ReminderBannerSectionWidget`.
+- **Acceptance criteria:**
+  - [x] BR-218…BR-229, UC-17, S1…S11, N1…N6 giữ nguyên — 114 test reminder
+        cũ xanh không nới lỏng.
+  - [x] G1, G3, G4, G5, G7, G8 đo bằng `getRect`/`didExceedMaxLines`, không
+        bằng mắt.
+  - [x] Hai audit độc lập: UI/UX 0 finding; architecture/logic 1 P1 (mechanical
+        format, không phải logic) — đã áp và verify.
+  - [x] `flutter analyze` 0; `dod_check.sh` (đầy đủ, không `--changed`) xanh;
+        golden `TZ=UTC` regenerate — diff đúng hai file
+        `reminder_settings_{light,dark}.png`.
+- **Output:** như Scope; wireframe M6 append D-row R10/R11 + G8;
+  `reminder_settings_layout_test.dart` +4 test (G3×2, G1/G8 viết lại); goldens
+  `reminder_settings_{light,dark}.png` regenerate.
+- **Tests required:** `reminder_settings_layout_test.dart` (G1/G3/G4/G5/G7/G8),
+  `reminder_settings_screen_test.dart` (S1…S11 hành vi), `reminder_settings_a11y_test.dart`
+  (A3/A4), `reminder_settings_screen_visual_audit_test.dart` (strict palette
+  audit, on state).
+- **Checklist phases:** Phase 13 (responsive/a11y) · Phase 14 (feature).
+- **Editable documents:** `docs/wbs.md`, `docs/wireframes/m6-daily-reminders.md`.
+- **Dependencies:** M99.70 (MxCard.muted recipe), Card Import's `_InfoPanel`
+  (pattern nguồn), M99.29 (M6 wireframe gốc), R9 (banner grammar, không đổi).
+- **Emulator:** `not run — presentation-only`.
 
 ## Known technical debt
 

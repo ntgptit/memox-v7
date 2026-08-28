@@ -7,8 +7,8 @@
 | **Scope** | Màn nhắc học trong nhánh Settings: entry point, anatomy, mọi trạng thái, dialog chọn giờ, hợp đồng geometry, responsive/a11y, và hình dạng notification. Ngoài phạm vi: luật nghiệp vụ (BR-218…BR-229), luồng (UC-17), quyết định kiến trúc (AD-21), màn Settings đầy đủ (chưa có) |
 | **Source of truth for** | Anatomy màn nhắc học · copy các trạng thái nhắc học · hợp đồng geometry của màn nhắc học · responsive/a11y contract của màn nhắc học |
 | **Depends on** | `../use-cases.md` (UC-17), `../business-rules.md` (BR-218…BR-229), `../architecture.md` (AD-21) |
-| **Updated by task** | M99.29 (phase 6 — recursive UI/UX review, vòng 2; vòng 5 — R9 và bản vẽ W5 theo quyết định thống nhất hai dải lỗi) |
-| **Last updated** | 2026-08-15 |
+| **Updated by task** | M99.29 (phase 6 — recursive UI/UX review, vòng 2; vòng 5 — R9 và bản vẽ W5 theo quyết định thống nhất hai dải lỗi); Daily Reminder visual hierarchy (R10, R11 — card đọc bằng grammar Card Detail, presentation-only) |
+| **Last updated** | 2026-08-28 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham chiếu bằng ID theo
 `document-conventions.md` §5; chỗ nào wireframe và BR có vẻ mâu thuẫn thì BR
@@ -27,6 +27,8 @@ Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham c
 | R7 | Toggle **không** dùng màu làm tín hiệu duy nhất: giá trị được nói bằng chữ ở hàng giờ và bằng `Semantics` value của chính toggle | Một switch xanh/xám là tín hiệu chỉ-màu. Hàng giờ hiện `8:00 PM` khi bật và bị vô hiệu khi tắt, nên trạng thái đọc được cả khi không phân biệt được màu | 2026-08-13 |
 | R8 | Notification là **một** dòng tiêu đề + một dòng thân, không có action button, không có big-text expand | Mọi hành động khả dĩ là "mở app học" — đúng cái chạm vào notification đã làm (BR-225). Một nút "Study now" trùng lặp với thân notification và mời gọi một luồng auto-start mà BR-225 cấm | 2026-08-13 |
 | R9 | Dải lỗi in-flow nói **cùng một ngữ pháp** với dải của Settings: icon `error_outline`, padding `md`, message `bodySmall`, khoảng `xs` trước nút, và nhãn `Retry` **căn trái** | Bản vẽ W5 ở trên trước đây vẽ nút bên phải, và nó là bản duy nhất trong repo quy định vị trí — dải của Settings không có wireframe nào đứng sau. Hai dải cách nhau một cú chạm mà đổi bên là hai câu trả lời cho một câu hỏi. Chọn theo dải đã có review và golden riêng, nên lần thống nhất này dời màn mới chứ không dời màn đã ổn định (quyết định chủ dự án) | 2026-08-15 |
+| R10 | Giữa hàng toggle (W3) và hàng giờ (W4) có một **hairline divider** cùng token với Card Detail (`AppStroke.hairline`, `semanticColors.borderSubtle`) | R2 đã nói hai hàng là một quyết định; ngăn cách chúng bằng khoảng trắng thuần không phân biệt được với ranh giới giữa hai card khác nhau khi mắt lướt nhanh. Một hairline giữ chúng cùng surface mà vẫn tách được hai câu hỏi ("có nhắc không" / "lúc mấy giờ") — không đổi chiều cao card, không đổi G5 | 2026-08-28 |
+| R11 | Hai câu supporting copy (W6) nằm trong **một** `MxCard.muted` — icon `info_outline` + hai dòng — thay vì hai đoạn `Text` nổi tự do | Hai câu nói về cùng một tính năng (R4) nhưng trôi tự do đọc như hai ghi chú rời, không như một lời giải thích. Card Detail và Card Import đã dùng đúng recipe này cho "info panel"; W6 chuyển sang cùng ngữ pháp không đổi thứ tự, không đổi copy, không đổi điều kiện hiển thị (luôn hiện) | 2026-08-28 |
 
 ## W-cấu trúc
 
@@ -82,7 +84,7 @@ Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham c
 | W3 | Hàng toggle | Nhãn bên trái, `Switch` bên phải. Khoá khi `enabling` và khi nền tảng không hỗ trợ |
 | W4 | Hàng giờ | Nhãn trên, **giờ ở dòng dưới** — không phải trailing. Cạnh nhãn, giờ chiếm 157dp trong ~264dp bề rộng hàng ở 320dp scale 2.0, để lại 90dp cho một nhãn có intrinsic 422dp; `MxListTile` trần hai dòng rồi ellipsis, nên nhãn bị **cắt**, đúng thứ A2 cấm. Chạm mở dialog (R6). Vô hiệu khi toggle tắt (R3) |
 | W5 | Banner lỗi | Tồn tại ở S6…S10, và ở S7 nó được suy ra từ **capability** chứ không từ một lệnh đã chạy — trên nền tảng không hỗ trợ thì không lệnh nào chạy được, nên chờ một lệnh hỏng sẽ khiến S7 không bao giờ tới được. Mang đúng một CTA khôi phục, và CTA đó **chạy lại đúng lệnh đã hỏng** — không phải một lệnh cố định |
-| W6 | Supporting copy | Hai câu, luôn hiển thị, không đổi theo trạng thái |
+| W6 | Supporting copy | Hai câu, luôn hiển thị, không đổi theo trạng thái. Từ R11: hai câu nằm trong một `MxCard.muted`, không đổi copy/thứ tự/điều kiện |
 
 ## S-trạng thái
 
@@ -115,6 +117,7 @@ Không có state `empty`: màn này luôn có nội dung, kể cả khi thư vi�
 | G5 | Chuyển S2 → S3 → S4 **không đổi chiều cao của card**; đây là điều R3 mua |
 | G6 | Đáy nội dung cách bottom navigation ≥ khoảng gutter của shell; không có phần tử nào bị bottom nav che ở 320×568 |
 | G7 | W5 xuất hiện đẩy W6 xuống, **không** phủ lên nó và không làm card đổi kích thước |
+| G8 | Panel W6 (R11) chung mép trái/phải với card và với banner khi banner hiện — cùng một surface column, sai lệch 0 (mở rộng G1) |
 
 ## A-responsive và a11y
 

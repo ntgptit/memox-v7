@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/app_stroke.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_card.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../domain/models/reminder_overview_model.dart';
 import '../../../domain/models/reminder_time_model.dart';
 import '../../../domain/failures/reminder_failure.dart';
@@ -99,6 +100,21 @@ class ReminderSettingsSectionWidget extends StatelessWidget {
                     isChangeable: canToggle,
                     onChanged: onEnabledChanged,
                   ),
+                  // The subtle divider Card Detail uses between an optional
+                  // group and its content (M6 R2 restated in visual terms):
+                  // the toggle and the time are one decision, so the seam
+                  // between them reads as a hairline, not as two cards
+                  // pretending to be one.
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg,
+                    ),
+                    child: Divider(
+                      height: AppStroke.hairline,
+                      thickness: AppStroke.hairline,
+                      color: context.semanticColors.borderSubtle,
+                    ),
+                  ),
                   ReminderTimeRowWidget(
                     time: settings.time,
                     isChangeable: canPickTime,
@@ -114,14 +130,38 @@ class ReminderSettingsSectionWidget extends StatelessWidget {
           ReminderBannerSectionWidget(rejection: banner, onRetry: onRetry),
         ],
         const SizedBox(height: AppSpacing.lg),
-        Text(
-          context.l10n.reminderDueOnlyNote,
-          style: context.texts.bodyMedium!.inked(context, AppInk.quiet),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Text(
-          context.l10n.reminderPrivacyNote,
-          style: context.texts.bodyMedium!.inked(context, AppInk.quiet),
+        // **One quiet info panel, not two floating paragraphs** (M6 W6
+        // restated in visual terms). Card Detail's own supporting-copy
+        // grammar is `MxCard.muted` with a leading glyph; two sentences that
+        // read as a contract belong inside one surface, and this panel keeps
+        // the same edges as the schedule card and the banner above it
+        // because it sits in the same stretch column, not because anything
+        // measures it against them.
+        MxCard.muted(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              const MxIcon(Icons.info_outline, size: MxIconSize.sm),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text(
+                      context.l10n.reminderDueOnlyNote,
+                      style: context.texts.bodySmall,
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      context.l10n.reminderPrivacyNote,
+                      style: context.texts.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
