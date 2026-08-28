@@ -10,11 +10,12 @@ import '../support/fake_reminder_platform.dart';
 import '../support/reminder_screen_harness.dart';
 import 'package:flutter/rendering.dart';
 import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/features/reminder/presentation/widgets/items/reminder_toggle_row_widget.dart';
 import 'package:memox/features/reminder/presentation/widgets/sections/reminder_banner_section_widget.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
 
-/// The M6 geometry contract (G1, G4, G5, G7), measured with `getRect` and
-/// `didExceedMaxLines` rather than asserted by eye.
+/// The M6 geometry contract (G1, G3, G4, G5, G7, G8), measured with `getRect`
+/// and `didExceedMaxLines` rather than asserted by eye.
 ///
 /// The behavioural half is `reminder_settings_screen_test.dart`; how the screen
 /// is announced is `reminder_settings_a11y_test.dart`.
@@ -26,21 +27,31 @@ void main() {
   setUp(() => harness = ReminderScreenHarness());
 
   group('layout', () {
-    testWidgets('card and banner share both edges (M6 G1)', (tester) async {
+    testWidgets('card, banner and info panel share every edge (M6 G1, G8)', (
+      tester,
+    ) async {
       harness.platform.permission = ReminderPermission.denied;
       await harness.pump(tester);
       await tester.tap(find.byType(Switch));
       await tester.pumpAndSettle();
 
+      // Schedule card, banner, quiet info panel — three surfaces once R11
+      // folded the two floating paragraphs into one `MxCard.muted`.
       final cards = tester.widgetList<MxCard>(find.byType(MxCard)).toList();
-      expect(cards, hasLength(2));
+      expect(cards, hasLength(3));
+
       final settingsCard = tester.getRect(find.byType(MxCard).first);
-      final banner = tester.getRect(find.byType(MxCard).last);
+      final banner = tester.getRect(find.byType(ReminderBannerSectionWidget));
+      final infoPanel = tester.getRect(find.byType(MxCard).last);
 
       expect(banner.left, settingsCard.left);
       expect(banner.right, settingsCard.right);
-      // The banner sits below the card and does not overlap it (M6 G7).
+      expect(infoPanel.left, settingsCard.left);
+      expect(infoPanel.right, settingsCard.right);
+      // The banner sits below the card and does not overlap it (M6 G7),
+      // and pushes the info panel down rather than sitting under it (G8).
       expect(banner.top, greaterThan(settingsCard.bottom));
+      expect(infoPanel.top, greaterThanOrEqualTo(banner.bottom));
     });
 
     /// The card's height across a write, measured rather than reasoned about.
@@ -89,7 +100,13 @@ void main() {
       // failure instead, so the one transition a user takes every time was the
       // one it never measured.
       await expectStableHeight(tester, shouldFailSchedule: false);
-      expect(find.byType(MxCard), findsOneWidget, reason: 'S4 shows no banner');
+      // Schedule card + the always-present info panel (R11); S4 shows no
+      // banner, so no third surface.
+      expect(
+        find.byType(MxCard),
+        findsNWidgets(2),
+        reason: 'S4 shows no banner',
+      );
     });
 
     testWidgets('the card keeps its height from S2 through S3 to S8 (M6 G5)', (
@@ -98,7 +115,36 @@ void main() {
       // The failure path: the banner appears *below* the card, and G7 says it
       // pushes what follows down rather than resizing what precedes it.
       await expectStableHeight(tester, shouldFailSchedule: true);
-      expect(find.byType(MxCard), findsNWidgets(2), reason: 'S8 adds a banner');
+      expect(find.byType(MxCard), findsNWidgets(3), reason: 'S8 adds a banner');
+    });
+
+    testWidgets('the toggle and its label share a vertical center (M6 G3)', (
+      tester,
+    ) async {
+      await harness.pump(tester);
+
+      // Scoped to the row: the screen's own title is the same words (M6 R2),
+      // so an unscoped text finder matches both.
+      final label = tester.getRect(
+        find.descendant(
+          of: find.byType(ReminderToggleRowWidget),
+          matching: find.text(english.reminderToggleLabel),
+        ),
+      );
+      final toggle = tester.getRect(find.byType(Switch));
+
+      expect(label.center.dy, closeTo(toggle.center.dy, 0.5));
+    });
+
+    testWidgets('the time row label and value share a left edge (M6 G3)', (
+      tester,
+    ) async {
+      await harness.pump(tester);
+
+      final label = tester.getRect(find.text(english.reminderTimeLabel));
+      final value = tester.getRect(find.text('8:00 PM'));
+
+      expect(value.left, closeTo(label.left, 0.5));
     });
 
     testWidgets('both rows clear the 48dp touch target (M6 G4)', (
@@ -161,7 +207,8 @@ void main() {
         await tester.tap(find.byType(Switch));
         await tester.pumpAndSettle();
 
-        expect(find.byType(MxCard), findsNWidgets(2));
+        // Schedule card + banner + the always-present info panel (R11).
+        expect(find.byType(MxCard), findsNWidgets(3));
         expect(tester.takeException(), isNull);
       }
     });
@@ -205,7 +252,13 @@ void main() {
       // Left, not right. Measured against the card rather than the screen: the
       // band is inset, so a button "on the left of the screen" would pass on a
       // band that had drifted right inside it.
-      final Rect banner = tester.getRect(find.byType(MxCard).last);
+      //
+      // Anchored on the section widget rather than `find.byType(MxCard).last`
+      // — with the info panel (R11) always present, `.last` now finds that
+      // panel instead of the banner.
+      final Rect banner = tester.getRect(
+        find.byType(ReminderBannerSectionWidget),
+      );
       final Rect retry = tester.getRect(
         find.descendant(
           of: find.byType(ReminderBannerSectionWidget),
@@ -270,7 +323,7 @@ void main() {
 
         expect(
           find.byType(MxCard),
-          findsNWidgets(2),
+          findsNWidgets(3),
           reason: 'banner in $locale',
         );
         final truncated = tester
@@ -337,7 +390,7 @@ void main() {
       await tester.tap(find.byType(Switch));
       await tester.pumpAndSettle();
 
-      expect(find.byType(MxCard), findsNWidgets(2));
+      expect(find.byType(MxCard), findsNWidgets(3));
       expect(tester.takeException(), isNull);
 
       // The same `didExceedMaxLines` sweep the light-theme case uses, and for

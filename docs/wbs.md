@@ -14805,6 +14805,67 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
         Daily-activity không đổi một dòng.
 - **Editable documents:** `docs/wbs.md`, `docs/wireframes/m99-23-progress-overview.md`
 - **Dependencies:** M99.87
+### M99.90 · Daily Reminder theo visual language của Card Detail — presentation only
+
+- **Status:** **done** — presentation-only restyle theo prompt set
+  `daily-reminder-visual-hierarchy`; không đổi off/20:00 mặc định,
+  permission-only-after-tap, due-only workload, notification privacy/copy,
+  platform adapters, bootstrap hay deep link (BR-218…BR-229, UC-17).
+- **Goal:** Màn Reminder Settings đọc bằng đúng grammar Card Detail —
+  hairline chia hai hàng quyết định, một quiet info panel thay hai đoạn văn
+  trôi tự do — mà không đổi một dòng nghiệp vụ nào.
+- **Scope:** `reminder_settings_section_widget.dart` (một file lib duy nhất);
+  `reminder_settings_layout_test.dart`; hai golden
+  `reminder_settings_{light,dark}.png`; D-row R10/R11 + G8 trong M6.
+  **Ngoài scope:** screen/controller/toggle-row/time-row/banner — banner giữ
+  nguyên theo R9 (quyết định chủ dự án 2026-08-15, đã có review và golden
+  riêng), không bị đọc nhầm thành "saturated danger card cần sửa" dù prompt
+  liệt kê đúng câu đó như một tiêu chí review chung.
+- **Đổi cụ thể:** một hairline `Divider` (`AppStroke.hairline` +
+  `semanticColors.borderSubtle`, cùng token Card Detail đang dùng) giữa hàng
+  toggle và hàng giờ trong cùng schedule card (R10 — hai hàng vẫn một quyết
+  định, chỉ tách bằng nét chứ không bằng khoảng trắng mơ hồ). Hai đoạn
+  supporting copy (due-only + privacy) gộp vào một `MxCard.muted` với icon
+  `info_outline`, text `bodySmall` — đúng recipe `_InfoPanel` Card Import đã
+  dùng, không phát minh pattern mới (R11).
+- **Recursive review (architecture/logic + UI/UX, song song, audit-only):**
+  UI/UX xác nhận sạch tuyệt đối — không P0/P1/P2, đo geometry ba surface
+  (schedule/banner/info) chung mép ở mọi state có/không banner, divider
+  không đổi chiều cao card qua S2→S3→S4, info panel wrap đúng ở 320dp@2x/VI,
+  Retry touch target đúng 48dp sàn. Architecture/logic tìm đúng một P1 — file
+  test mới viết sai định dạng `dart format` chuẩn (trailing comma ép xuống
+  dòng khác mọi `testWidgets` khác trong cùng file) — đã sửa bằng
+  `dart format`, verify lại `check_format.sh` xanh và 15/15 test layout vẫn
+  pass. Không tìm business/architecture drift nào: domain/data/platform/
+  router/controller byte-identical với `origin/main`.
+- **Tests bổ sung theo yêu cầu prompt** (không có trước): G3 (tâm dọc
+  toggle/label; mép trái label/value hàng giờ), G8 (info panel chung mép với
+  card/banner), viết lại G1 thành phép đo ba-surface thay vì hai — `.last`
+  cũ giờ trỏ nhầm vào info panel nên hai chỗ dùng nó đổi sang tra theo
+  `ReminderBannerSectionWidget`.
+- **Acceptance criteria:**
+  - [x] BR-218…BR-229, UC-17, S1…S11, N1…N6 giữ nguyên — 114 test reminder
+        cũ xanh không nới lỏng.
+  - [x] G1, G3, G4, G5, G7, G8 đo bằng `getRect`/`didExceedMaxLines`, không
+        bằng mắt.
+  - [x] Hai audit độc lập: UI/UX 0 finding; architecture/logic 1 P1 (mechanical
+        format, không phải logic) — đã áp và verify.
+  - [x] `flutter analyze` 0; `dod_check.sh` (đầy đủ, không `--changed`) xanh;
+        golden `TZ=UTC` regenerate — diff đúng hai file
+        `reminder_settings_{light,dark}.png`.
+- **Output:** như Scope; wireframe M6 append D-row R10/R11 + G8;
+  `reminder_settings_layout_test.dart` +4 test (G3×2, G1/G8 viết lại); goldens
+  `reminder_settings_{light,dark}.png` regenerate.
+- **Tests required:** `reminder_settings_layout_test.dart` (G1/G3/G4/G5/G7/G8),
+  `reminder_settings_screen_test.dart` (S1…S11 hành vi), `reminder_settings_a11y_test.dart`
+  (A3/A4), `reminder_settings_screen_visual_audit_test.dart` (strict palette
+  audit, on state).
+- **Checklist phases:** Phase 13 (responsive/a11y) · Phase 14 (feature).
+- **Editable documents:** `docs/wbs.md`, `docs/wireframes/m6-daily-reminders.md`.
+- **Dependencies:** M99.70 (MxCard.muted recipe), Card Import's `_InfoPanel`
+  (pattern nguồn), M99.29 (M6 wireframe gốc), R9 (banner grammar, không đổi).
+- **Emulator:** `not run — presentation-only`.
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |
