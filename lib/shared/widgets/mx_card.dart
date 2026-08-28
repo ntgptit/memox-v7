@@ -255,6 +255,13 @@ class MxCard extends StatefulWidget {
   /// A quiet informational panel — helper copy beside the content it explains,
   /// on `surfaceContainerHigh` so it reads as an aside rather than a card of
   /// content. The import wizard's info panels are the callers.
+  ///
+  /// **`elevation: card`, where [tonal] below takes `none` — deliberately,
+  /// not an oversight.** `surfaceContainerHigh` is one shallow step off
+  /// `surface`; without the shadow's lift in light it reads as a faint
+  /// re-tint rather than a separate panel. [tonal]'s `secondaryContainer` is
+  /// a hue change, not a tone step, and a hue change is loud enough on its
+  /// own — stacking a shadow under it would double-state the same fact.
   const MxCard.muted({required this.child, super.key})
     : _spec = const _MxCardSpec(
         elevation: AppElevation.card,
@@ -469,14 +476,41 @@ class _MxCardState extends State<MxCard> {
       _isFocused &&
       FocusManager.instance.highlightMode == FocusHighlightMode.traditional;
 
+  /// **Dark has no shadow to carry elevation (see [shadowsFor]), so a
+  /// surface-fill card at `card`/`raised` needs a second cue or it prints
+  /// identically to a flat one.** `raised`, `focal` and `accent` all default
+  /// to `_MxCardFill.surface`, which used to resolve to `scheme.surface` at
+  /// every elevation — the same fill, the same border, the same radius as
+  /// `.flat` picks for two of the three, so in dark `.raised` and `.flat`
+  /// were the same rendered box.
+  ///
+  /// **`surfaceContainer`, not a new colour.** It is already one rung of the
+  /// ladder `.recessed` and `.muted` read from, sitting lighter than
+  /// `surface` in dark by construction — `#221E44` against `#1A1838`
+  /// (`app_material_roles.dart`) — which is the direction Material's own
+  /// dark-elevation convention lifts a surface: nearer the light, not
+  /// farther. `surfaceContainerLow` was not a candidate: `.recessed` already
+  /// spends it on the opposite meaning, one step *down*, and a colour
+  /// carrying "sunken" on one recipe and "raised" on another would be the
+  /// kind of ambiguity this file argues against everywhere else.
+  ///
+  /// **Light keeps `scheme.surface` unconditionally.** The shadow already
+  /// separates elevation there — see [shadowsFor]'s own alpha derivation —
+  /// so stepping the fill too would be a second mechanism answering a
+  /// question already settled, and every light golden stays untouched.
   Color _fillColor(ColorScheme scheme) {
     if ((widget.isSelected ?? false) &&
         widget._selectionTreatment == MxCardSelectionTreatment.tint) {
       return scheme.secondaryContainer;
     }
 
+    final isElevatedInDark =
+        scheme.brightness == Brightness.dark &&
+        widget._spec.elevation > AppElevation.none;
+
     return switch (widget._spec.fill) {
-      _MxCardFill.surface => scheme.surface,
+      _MxCardFill.surface =>
+        isElevatedInDark ? scheme.surfaceContainer : scheme.surface,
       _MxCardFill.recessed => scheme.surfaceContainerLow,
       _MxCardFill.muted => scheme.surfaceContainerHigh,
       _MxCardFill.tonal => scheme.secondaryContainer,
