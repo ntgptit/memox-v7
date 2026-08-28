@@ -129,7 +129,7 @@ quét literal thấy được.
 | Baseline hàng metric | `CrossAxisAlignment.baseline` | Ở text scale lớn hai ô cao khác nhau; căn top làm chữ số nhấp nhô |
 | Tap target hàng | ≥ `AppSpacing.minimumTouchTarget` (48) | Sàn chạm |
 | Đường dẫn dài | wrap, **không** ellipsis | Cắt giữa đường dẫn là mất đúng thứ nó tồn tại để nói |
-| Khoảng thở đáy | `AppSpacing.xxl` dưới hàng cuối | **Không phải** clearance cho bottom bar: `Scaffold` đã trừ chiều cao thanh bar khỏi `MediaQuery` của body, nên không hàng nào nấp được sau nó và một test khẳng định điều đó thì không bao giờ đỏ. Cái đáng pin là chính khoảng inset — danh sách kết thúc sát thanh bar đọc như bị cắt ngang |
+| Khoảng thở đáy | `AppSpacing.lg` dưới hàng cuối | **Không phải** clearance cho bottom bar: `Scaffold` đã trừ chiều cao thanh bar khỏi `MediaQuery` của body, nên không hàng nào nấp được sau nó và một test khẳng định điều đó thì không bao giờ đỏ. Cái đáng pin là chính khoảng inset — danh sách kết thúc sát thanh bar đọc như bị cắt ngang. Từng là `xxl`; M4.10ag đo lại cùng câu hỏi cho deck list và hạ xuống `lg` — Progress dùng lại đúng số đó thay vì có một số riêng cho cùng một câu trả lời |
 
 ## 3. Ma trận trạng thái
 
