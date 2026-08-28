@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/theme/app_ink.dart';
+import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -55,17 +56,19 @@ class CardImportPreviewSummaryWidget extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        // The numbered heading with the readiness verdict beside it
-        // (state 3): what the classification concluded, before the rows
-        // prove it.
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textBaseline: TextBaseline.alphabetic,
+        // The section heading with the readiness verdict beside it (state 3):
+        // what the classification concluded, before the rows prove it. The
+        // same outside-the-panel label grammar Card Detail's bands use; the
+        // baseline row wraps intentionally when a narrow screen cannot hold
+        // both — the count drops under the label rather than ellipsizing.
+        Wrap(
+          crossAxisAlignment: WrapCrossAlignment.end,
+          spacing: AppSpacing.sm,
           children: <Widget>[
-            Expanded(
-              child: Text(
-                l10n.cardImportPreviewHeading,
-                style: context.texts.labelLarge!.inked(context, AppInk.quiet),
+            Text(
+              l10n.cardImportPreviewHeading.toUpperCase(),
+              style: context.textStyles.sectionLabel.copyWith(
+                color: context.colors.onSurfaceVariant,
               ),
             ),
             Text(
@@ -74,78 +77,78 @@ class CardImportPreviewSummaryWidget extends ConsumerWidget {
             ),
           ],
         ),
-        const SizedBox(height: AppSpacing.sm),
-        // One chip per status that actually occurred (state 4): a glyph, the
-        // word and the count together, never colour alone (W7). Ready always
-        // renders — "Ready · 0" is the honest headline of an all-broken file.
-        Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.xs,
-          children: <Widget>[
-            _StatusChip(
-              status: CardImportRowStatus.ready,
-              count: preview.readyCount,
-            ),
-            if (preview.invalidCount > 0)
-              _StatusChip(
-                status: CardImportRowStatus.invalid,
-                count: preview.invalidCount,
-              ),
-            if (preview.duplicateCount > 0)
-              _StatusChip(
-                status: CardImportRowStatus.duplicateExisting,
-                count: preview.duplicateCount,
-              ),
-            if (preview.blankCount > 0)
-              _StatusChip(
-                status: CardImportRowStatus.blank,
-                count: preview.blankCount,
-              ),
-          ],
-        ),
-        MxSwitchRow(
-          label: l10n.cardImportIncludeDuplicatesLabel,
-          isOn: shouldIncludeDuplicates,
-          onChanged: (value) =>
-              _updateDuplicateChoice(ref, deckId, value: value),
-        ),
-        // The rows live on one grouped surface (concept states 3-4): a list
-        // the eye reads as a single table, not loose lines on the page. The
-        // hairline dividers keep the row rhythm without alternating tints.
-        MxCard.raised(
-          padding: MxCardPadding.none,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: AppSpacing.xs,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                for (var index = 0; index < shown.length; index++) ...<Widget>[
-                  if (index > 0)
-                    Divider(
-                      height: AppSpacing.xs,
-                      color: context.colors.outlineVariant,
+        const SizedBox(height: AppSpacing.md),
+        // **The verdict, the policy and the rows are one panel** (concept
+        // states 3-4): the chips say what the classification found, the
+        // toggle is the one decision that changes the plan, and the rows are
+        // the evidence — three faces of one group, so they share one surface
+        // instead of floating between sections.
+        MxCard.flat(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              // One chip per status that actually occurred (state 4): a
+              // glyph, the word and the count together, never colour alone
+              // (W7). Ready always renders — "Ready · 0" is the honest
+              // headline of an all-broken file.
+              Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.xs,
+                children: <Widget>[
+                  _StatusChip(
+                    status: CardImportRowStatus.ready,
+                    count: preview.readyCount,
+                  ),
+                  if (preview.invalidCount > 0)
+                    _StatusChip(
+                      status: CardImportRowStatus.invalid,
+                      count: preview.invalidCount,
                     ),
-                  CardImportRowPreviewWidget(row: shown[index]),
+                  if (preview.duplicateCount > 0)
+                    _StatusChip(
+                      status: CardImportRowStatus.duplicateExisting,
+                      count: preview.duplicateCount,
+                    ),
+                  if (preview.blankCount > 0)
+                    _StatusChip(
+                      status: CardImportRowStatus.blank,
+                      count: preview.blankCount,
+                    ),
                 ],
-                if (hiddenCount > 0)
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      top: AppSpacing.xs,
-                      bottom: AppSpacing.xs,
-                    ),
-                    child: Text(
-                      l10n.cardImportMoreRowsLabel(hiddenCount),
-                      style: context.texts.bodySmall!.inked(
-                        context,
-                        AppInk.quiet,
-                      ),
+              ),
+              MxSwitchRow(
+                label: l10n.cardImportIncludeDuplicatesLabel,
+                isOn: shouldIncludeDuplicates,
+                onChanged: (value) =>
+                    _updateDuplicateChoice(ref, deckId, value: value),
+              ),
+              Divider(
+                height: AppSpacing.xs,
+                color: context.colors.outlineVariant,
+              ),
+              for (var index = 0; index < shown.length; index++) ...<Widget>[
+                if (index > 0)
+                  Divider(
+                    height: AppSpacing.xs,
+                    color: context.colors.outlineVariant,
+                  ),
+                CardImportRowPreviewWidget(row: shown[index]),
+              ],
+              if (hiddenCount > 0)
+                Padding(
+                  padding: const EdgeInsets.only(
+                    top: AppSpacing.xs,
+                    bottom: AppSpacing.xs,
+                  ),
+                  child: Text(
+                    l10n.cardImportMoreRowsLabel(hiddenCount),
+                    style: context.texts.bodySmall!.inked(
+                      context,
+                      AppInk.quiet,
                     ),
                   ),
-              ],
-            ),
+                ),
+            ],
           ),
         ),
       ],
@@ -203,7 +206,7 @@ class _StatusChip extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: background,
-        borderRadius: BorderRadius.circular(AppSpacing.md),
+        borderRadius: BorderRadius.circular(AppRadius.md),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(

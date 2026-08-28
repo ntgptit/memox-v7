@@ -13984,6 +13984,74 @@ tìm, còn "đây là hai dòng" thì không.
 **Và luật gốc vừa chứng minh nó hoạt động**: ở lần trùng thứ sáu trong phiên
 này, nó chặn được **trước khi merge** thay vì để lọt lên `main` như lần thứ năm.
 
+### M99.86 · Card Import lấy visual hierarchy của Card Detail — presentation only
+
+- **Status:** **done** — presentation, tests, goldens, Widgetbook và docs; không
+  đổi parser, transaction, provider ownership, route hay bất kỳ BR nào.
+- **Goal:** Wizard import đọc bằng đúng grammar Card Detail đã được duyệt —
+  shell dùng chung, section hierarchy, flat panels, metric wells — mà vẫn là
+  wizard thao tác, không phải trang đọc.
+- **Scope:** `card_import_screen.dart` + 10 section/item widget + action bar;
+  `mx_switch_row.dart` (một fix tổng quát); test + 14 golden; M4.12 I8–I11.
+  **Ngoài scope:** parser/commit/domain/data; copy meaning; ba câu hỏi
+  owner-decision ghi ở PR.
+- **Editable documents:** `docs/wbs.md`, `docs/wireframes/m4-12-card-import.md`.
+- **Output:** 13 file lib, 5 file test, 14 golden (12 cập nhật + 2 mới),
+  4 dòng I-decision trong M4.12.
+- **Acceptance criteria:**
+  - [x] Toàn bộ hành vi 8 phase M4.12 giữ nguyên — 39 behavior test cũ xanh
+        không nới lỏng, chỉ đổi finder theo chữ hoa render.
+  - [x] Shell/header/body/footer chỉ còn **một** owner cho gutter, SafeArea,
+        scroll và keyboard inset (`MxContentShell`); bar bỏ `viewInsets` tự cộng.
+  - [x] Context là subheader **ghim** — không trượt theo preview dài; outcome
+        vẫn ẩn toàn bộ context.
+  - [x] Mapping và Preview là hai semantic panel chia đúng mép cột — geometry
+        test viết lại theo hợp đồng panel, không nới lỏng.
+  - [x] Parsing và Submitting có golden riêng, spinner pin bằng duration.
+  - [x] VI 320dp @2.0 đi hết flow với count **ba chữ số** (128) — footer
+        nguyên vẹn, có test.
+  - [x] Hai audit độc lập (architecture/logic, UI/UX): **không P0/P1**; mọi
+        finding loại-fix đã áp, loại owner-decision ghi ở PR.
+- **Dependencies:** M99.70 (MxCard recipes + hairline decision), M99.83
+  (recipes đóng), M99.53 (MxButtonPair), M99.62 (shell footer contract).
+- **Tests required:** `card_import_wizard_test.dart` (+VI-128),
+  `card_import_alignment_test.dart` (hợp đồng panel),
+  `card_import_states_test.dart`, `card_import_commit_flow_test.dart`,
+  `card_import_upload_test.dart`, `card_import_demo_test.dart` (14 golden),
+  `mx_switch_row_test.dart`.
+- **Emulator:** `not run — presentation-only`.
+- **Checklist phases:** 7, 13
+
+**Ba lỗi thật lộ ra trong lúc làm, và cách chúng bị bắt đáng ghi hơn bản thân
+chúng:**
+
+- **`SwitchListTile` trong `MxCard` không-tappable bị framework chặn** — card
+  không-tappable là `DecoratedBox` trần (có chủ đích), tile không có `Material`
+  để vẽ ink. Sửa ở owner đúng: `MxSwitchRow` tự mang `Material` trong suốt —
+  không màu, không elevation, caller cũ render y hệt (4/4 test pass; nhánh
+  `announcedValue` của reminder không đi qua đoạn sửa).
+- **Body bọc `Center` bị shell ép `minHeight` đẩy cả wizard xuống giữa màn** —
+  golden đầu tiên lộ ~95dp trống trên heading. Không gate text nào thấy; con
+  mắt thấy ngay. Đổi `Align(topCenter)`.
+- **Hai vị từ cùng trả lời "document load chưa"** (type-check ở guard, `when`
+  mặc định skip-on-refresh ở render) — hôm nay không ai refresh provider đó nên
+  không tái hiện được, nhưng ngày có người refresh thì source line render đôi.
+  Thống nhất bằng `skipLoadingOnRefresh: false`, hành vi hiện tại không đổi
+  (audit architecture, finding 3).
+
+**Grammar kế thừa, không sao chép:** section label UPPERCASE ngoài panel,
+`sectionLabelSmall` cho nhãn trong panel (MATCH COLUMNS), `MxCard.flat` cho mọi
+surface trong một cột cuộn (D20), `MxMetricWell` + tabular figures cho fact
+rows của Confirm/Result, icon well tròn cho hero outcome. Source option giữ
+hairline — đó là owner decision M99.70 ghi ngay trong doc của `MxCard.option`,
+và comment cũ tại chỗ suýt bị đọc ngược.
+
+**Coverage gaps ghi nhận, không giấu** (từ UI/UX audit): dark mới phủ 2/10+
+state (thiếu nhất: preview-mixed dark, nơi chips dùng container tones); chưa có
+golden 320/412 hay textScale 2.0 (chỉ render-test); KO locale chưa có UI
+evidence; keyboard-open paste chưa có ảnh. Đó là nợ chung của cả demo suite,
+không riêng màn này — mở rộng là một quyết định về ngân sách golden của owner.
+
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 
 Ghi lại cụ thể, vì "mất một bộ lint" là câu quá mơ hồ để ai đó sau này biết

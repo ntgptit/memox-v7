@@ -5,8 +5,9 @@ import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
-import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_card.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
+import '../../../../../shared/widgets/mx_metric_well.dart';
 import '../../../domain/models/card_import_result_model.dart';
 import '../../states/card_import_state.dart';
 import '../support/card_import_labels_widget.dart';
@@ -148,16 +149,29 @@ class _HeroCard extends StatelessWidget {
       ),
     };
 
-    return MxCard.raised(
+    // Flat like the whole outcome column (D20). The tone lives in the icon
+    // and its well, never as a wash over the panel: a full-surface tint is
+    // the "Match feedback" failure this family already renounced — colour
+    // as the only signal, at block scale.
+    return MxCard.flat(
       child: Column(
         children: <Widget>[
           const SizedBox(height: AppSpacing.md),
-          // 32 has no MxIconSize step; the closed-set spelling here is the
-          // ink's own resolve.
-          Icon(
-            heroIcon,
-            size: AppSpacing.xxl,
-            color: heroColor.resolve(context),
+          Container(
+            width: AppSpacing.xxl + AppSpacing.md,
+            height: AppSpacing.xxl + AppSpacing.md,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: context.semanticColors.surfaceMuted,
+              shape: BoxShape.circle,
+            ),
+            // 32 has no MxIconSize step; the closed-set spelling here is
+            // the ink's own resolve.
+            child: Icon(
+              heroIcon,
+              size: AppSpacing.xxl,
+              color: heroColor.resolve(context),
+            ),
           ),
           const SizedBox(height: AppSpacing.md),
           Text(
@@ -194,44 +208,38 @@ class _SummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    return MxCard.raised(
-      padding: MxCardPadding.none,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.xs,
-        ),
-        child: Column(
-          children: <Widget>[
+    return MxCard.flat(
+      padding: MxCardPadding.compact,
+      child: Column(
+        children: <Widget>[
+          _SummaryRow(
+            icon: Icons.check,
+            iconColor: AppInk.secondary,
+            label: l10n.cardImportAddedRowLabel,
+            count: result.imported,
+          ),
+          if (invalidCount > 0)
             _SummaryRow(
-              icon: Icons.check,
-              iconColor: AppInk.secondary,
-              label: l10n.cardImportAddedRowLabel,
-              count: result.imported,
+              icon: Icons.error_outline,
+              iconColor: AppInk.error,
+              label: l10n.cardImportInvalidSkippedRowLabel,
+              count: invalidCount,
             ),
-            if (invalidCount > 0)
-              _SummaryRow(
-                icon: Icons.error_outline,
-                iconColor: AppInk.error,
-                label: l10n.cardImportInvalidSkippedRowLabel,
-                count: invalidCount,
-              ),
-            if (result.duplicatesSkipped > 0)
-              _SummaryRow(
-                icon: Icons.copy_outlined,
-                iconColor: AppInk.tertiary,
-                label: l10n.cardImportDuplicatesSkippedRowLabel,
-                count: result.duplicatesSkipped,
-              ),
-            if (blankCount > 0)
-              _SummaryRow(
-                icon: Icons.remove,
-                iconColor: AppInk.quiet,
-                label: l10n.cardImportBlankIgnoredRowLabel,
-                count: blankCount,
-              ),
-          ],
-        ),
+          if (result.duplicatesSkipped > 0)
+            _SummaryRow(
+              icon: Icons.copy_outlined,
+              iconColor: AppInk.tertiary,
+              label: l10n.cardImportDuplicatesSkippedRowLabel,
+              count: result.duplicatesSkipped,
+            ),
+          if (blankCount > 0)
+            _SummaryRow(
+              icon: Icons.remove,
+              iconColor: AppInk.quiet,
+              label: l10n.cardImportBlankIgnoredRowLabel,
+              count: blankCount,
+            ),
+        ],
       ),
     );
   }
@@ -261,12 +269,25 @@ class _SummaryRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       child: Row(
         children: <Widget>[
-          MxIcon(icon, ink: iconColor, size: MxIconSize.sm),
+          // The shared well, for the same reason Confirm's rows carry it:
+          // one anchored left edge down the column, one grammar across the
+          // screens that count things.
+          MxMetricWell(
+            icon: icon,
+            tint: iconColor.resolve(context),
+            wellColor: context.semanticColors.surfaceMuted,
+          ),
           const SizedBox(width: AppSpacing.md),
           Expanded(child: Text(label, style: context.texts.bodyMedium)),
           Text(
             countLabel,
-            style: context.texts.titleSmall!.inked(context, iconColor),
+            style: context.texts.titleSmall!
+                .inked(context, iconColor)
+                .copyWith(
+                  fontFeatures: const <FontFeature>[
+                    FontFeature.tabularFigures(),
+                  ],
+                ),
           ),
         ],
       ),

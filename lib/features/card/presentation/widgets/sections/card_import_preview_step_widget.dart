@@ -55,10 +55,23 @@ class CardImportPreviewStepWidget extends ConsumerWidget {
       children: <Widget>[
         // The chosen source stays as one compact line of context (state 2) —
         // never the whole chooser again, and never the pasted content
-        // itself, which is private (BR-173).
-        _SourceContext(deckId: deckId, document: document),
-        const SizedBox(height: AppSpacing.lg),
+        // itself, which is private (BR-173). While the decode runs (or
+        // fails) it is its own card; once rows exist it becomes the first
+        // row *inside* the mapping panel, because that panel is the group it
+        // introduces.
+        if (document is! AsyncData<CardTransferDocument>) ...<Widget>[
+          _SourceContext(deckId: deckId, document: document),
+          const SizedBox(height: AppSpacing.xl),
+        ],
         document.when(
+          // **No refresh short-circuit, so this and the guard above answer
+          // with one voice.** The card-or-embedded choice at the top asks
+          // 'is AsyncData' while 'when' would, by default, keep rendering
+          // stale data through a refresh — two predicates for one question,
+          // and the day someone refreshes this provider they disagree and
+          // the source line renders twice (review finding, 2026-08-28).
+          // Nobody refreshes it today, so this changes nothing visible.
+          skipLoadingOnRefresh: false,
           // The step's heading stays on screen while the decode runs
           // (concept state 2): the loading panel is Preview's content, not a
           // replacement for knowing which step this is.
@@ -66,10 +79,12 @@ class CardImportPreviewStepWidget extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               Text(
-                context.l10n.cardImportPreviewHeading,
-                style: context.texts.labelLarge!.inked(context, AppInk.quiet),
+                context.l10n.cardImportPreviewHeading.toUpperCase(),
+                style: context.textStyles.sectionLabel.copyWith(
+                  color: context.colors.onSurfaceVariant,
+                ),
               ),
-              const SizedBox(height: AppSpacing.sm),
+              const SizedBox(height: AppSpacing.md),
               _ParsingPanel(deckId: deckId),
             ],
           ),
@@ -120,24 +135,37 @@ class _SourceContext extends ConsumerWidget {
         ? l10n.cardImportFileRowsDetected(dataRowCount)
         : null;
 
+    // Row-only once the document has loaded: the mapping panel is the
+    // surface then, and a card nested in it would stack two hairlines
+    // around one line of context.
+    final isEmbedded = document is AsyncData<CardTransferDocument>;
+
     if (kind == CardImportSourceKind.upload && file != null) {
       final meta = l10n.cardImportFileMetaLabel(
         file.format.name.toUpperCase(),
         context.cardImportFileSizeLabel(file.bytes.length),
       );
+      final subtitle = status == null
+          ? meta
+          : l10n.cardImportSourceStatusLine(meta, status);
 
-      return CardImportSourceSummaryWidget(
-        title: file.name,
-        subtitle: status == null
-            ? meta
-            : l10n.cardImportSourceStatusLine(meta, status),
-      );
+      return isEmbedded
+          ? CardImportSourceSummaryWidget.embedded(
+              title: file.name,
+              subtitle: subtitle,
+            )
+          : CardImportSourceSummaryWidget(title: file.name, subtitle: subtitle);
     }
 
-    return CardImportSourceSummaryWidget(
-      title: l10n.cardImportPastedSourceLabel,
-      subtitle: status,
-    );
+    return isEmbedded
+        ? CardImportSourceSummaryWidget.embedded(
+            title: l10n.cardImportPastedSourceLabel,
+            subtitle: status,
+          )
+        : CardImportSourceSummaryWidget(
+            title: l10n.cardImportPastedSourceLabel,
+            subtitle: status,
+          );
   }
 }
 
@@ -155,7 +183,9 @@ class _ParsingPanel extends ConsumerWidget {
     final l10n = context.l10n;
     final kind = ref.watch(cardImportSourceChoiceProvider(deckId));
 
-    return MxCard.raised(
+    // Flat like the loaded panel that replaces it at this exact rect — the
+    // swap must not also be an elevation change (D20).
+    return MxCard.flat(
       child: Column(
         children: <Widget>[
           const SizedBox(height: AppSpacing.md),
@@ -208,40 +238,62 @@ class _LoadedPreview extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        if (document.hasSheetChoice) ...<Widget>[
-          _SheetSelector(
-            document: document,
-            selected: sheet?.name,
-            onSelect: (name) => _selectSheet(ref, deckId, name),
+        // **The mapping decisions are one panel, not controls on the page**
+        // (concept states 3-4): the source being read, which sheet, whether
+        // row one is a header, and where each column lands. One flat surface
+        // holds the whole answer to "what am I importing, and how".
+        MxCard.flat(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              _SourceContext(deckId: deckId, document: AsyncData(document)),
+              Divider(
+                height: AppSpacing.lg,
+                color: context.colors.outlineVariant,
+              ),
+              if (document.hasSheetChoice) ...<Widget>[
+                _SheetSelector(
+                  document: document,
+                  selected: sheet?.name,
+                  onSelect: (name) => _selectSheet(ref, deckId, name),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+              ],
+              MxSwitchRow(
+                label: context.l10n.cardImportHeaderToggleLabel,
+                isOn: hasHeader,
+                onChanged: (value) =>
+                    _updateHeaderChoice(ref, deckId, value: value),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              // The panel's inner group label — a rung below the section
+              // labels outside, same tracked-uppercase voice.
+              Text(
+                context.l10n.cardImportMappingHeading.toUpperCase(),
+                style: context.textStyles.sectionLabelSmall.copyWith(
+                  color: context.colors.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              for (var column = 0; column < (sheet?.columnCount ?? 0); column++)
+                CardImportMappingRowWidget(
+                  column: column,
+                  headerText: hasHeader && column < headerCells.length
+                      ? headerCells[column]
+                      : '',
+                  field: mapping.fieldOf(column),
+                  onAssign: (field) =>
+                      _assignColumn(ref, deckId, column, field),
+                ),
+              if (!mapping.isComplete)
+                Text(
+                  context.l10n.cardImportMappingRequiredNote,
+                  style: context.texts.bodySmall!.inked(context, AppInk.error),
+                ),
+            ],
           ),
-          const SizedBox(height: AppSpacing.sm),
-        ],
-        MxSwitchRow(
-          label: context.l10n.cardImportHeaderToggleLabel,
-          isOn: hasHeader,
-          onChanged: (value) => _updateHeaderChoice(ref, deckId, value: value),
         ),
-        const SizedBox(height: AppSpacing.sm),
-        Text(
-          context.l10n.cardImportMappingHeading,
-          style: context.texts.labelLarge!.inked(context, AppInk.quiet),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        for (var column = 0; column < (sheet?.columnCount ?? 0); column++)
-          CardImportMappingRowWidget(
-            column: column,
-            headerText: hasHeader && column < headerCells.length
-                ? headerCells[column]
-                : '',
-            field: mapping.fieldOf(column),
-            onAssign: (field) => _assignColumn(ref, deckId, column, field),
-          ),
-        if (!mapping.isComplete)
-          Text(
-            context.l10n.cardImportMappingRequiredNote,
-            style: context.texts.bodySmall!.inked(context, AppInk.error),
-          ),
-        const SizedBox(height: AppSpacing.md),
+        const SizedBox(height: AppSpacing.xl),
         preview.when(
           loading: () => MxLoadingState(
             semanticsLabel: context.l10n.cardImportParsingLabel,

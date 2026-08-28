@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_ink.dart';
+import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -24,7 +25,22 @@ class CardImportSourceSummaryWidget extends StatelessWidget {
     this.onReplace,
     this.onRemove,
     super.key,
-  });
+  }) : isEmbedded = false;
+
+  /// The same row without its own card, for a parent that *is* the surface —
+  /// the Preview step's mapping panel opens with this. A card inside a card
+  /// would stack two hairlines around one fact; context-only, so no actions.
+  const CardImportSourceSummaryWidget.embedded({
+    required this.title,
+    required this.subtitle,
+    super.key,
+  }) : isEmbedded = true,
+       onReplace = null,
+       onRemove = null;
+
+  /// True when a parent panel owns the surface and this widget is only the
+  /// row: icon well, name, status.
+  final bool isEmbedded;
 
   /// The filename, or the localized stand-in for pasted rows.
   final String title;
@@ -41,54 +57,57 @@ class CardImportSourceSummaryWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    final card = MxCard.raised(
+    final row = Row(
+      children: <Widget>[
+        Container(
+          width: AppSpacing.xxl,
+          height: AppSpacing.xxl,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: colors.surfaceContainerHigh,
+            borderRadius: BorderRadius.circular(AppRadius.sm),
+          ),
+          child: const MxIcon(Icons.description_outlined),
+        ),
+        const SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                title,
+                style: context.texts.titleSmall,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              if (subtitle != null)
+                Text(
+                  subtitle!,
+                  style: context.texts.bodySmall!.inked(context, AppInk.quiet),
+                  maxLines: 2,
+                ),
+            ],
+          ),
+        ),
+        if (onRemove != null) ...<Widget>[
+          const SizedBox(width: AppSpacing.xs),
+          MxIconButton(
+            icon: Icons.close,
+            semanticLabel: context.l10n.cardImportRemoveFileLabel,
+            onPressed: onRemove,
+          ),
+        ],
+      ],
+    );
+
+    if (isEmbedded) return row;
+
+    // Flat, like every surface in this wizard's column now (D20) — this was
+    // one of the raised cards whose shadow competed with the work panel's.
+    final card = MxCard.flat(
       onTap: onReplace,
       padding: MxCardPadding.compact,
-      child: Row(
-        children: <Widget>[
-          Container(
-            width: AppSpacing.xxl,
-            height: AppSpacing.xxl,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: colors.surfaceContainerHigh,
-              borderRadius: BorderRadius.circular(AppSpacing.sm),
-            ),
-            child: const MxIcon(Icons.description_outlined),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  title,
-                  style: context.texts.titleSmall,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                if (subtitle != null)
-                  Text(
-                    subtitle!,
-                    style: context.texts.bodySmall!.inked(
-                      context,
-                      AppInk.quiet,
-                    ),
-                    maxLines: 2,
-                  ),
-              ],
-            ),
-          ),
-          if (onRemove != null) ...<Widget>[
-            const SizedBox(width: AppSpacing.xs),
-            MxIconButton(
-              icon: Icons.close,
-              semanticLabel: context.l10n.cardImportRemoveFileLabel,
-              onPressed: onRemove,
-            ),
-          ],
-        ],
-      ),
+      child: row,
     );
 
     if (onReplace == null) return card;
