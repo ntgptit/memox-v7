@@ -14743,7 +14743,69 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Editable documents:** `docs/wbs.md`, `docs/wireframes/m99-settings.md`
 - **Dependencies:** M99.28, BR-211, BR-216
 
-### M99.89 · Daily Reminder theo visual language của Card Detail — presentation only
+### M99.89 · Progress Overview theo ngôn ngữ thị giác Card Detail — streak hero thu về compact
+
+- **Status:** **done** — theo prompt set `docs/prompt/progress-overview-visual-hierarchy/`
+  (handoff SHA-verified); implementation → hai recursive review độc lập
+  (Arch/Logic + UI/UX, audit-only, chạy song song) → coordinator fix → verify
+  pass → delivery.
+- **Goal:** streak hero thôi chiếm phần lớn first viewport và lấn Today
+  (implementation prompt, Why 1); Today và Daily activity giữ nguyên vì đã
+  đúng contract từ trước.
+- **Scope:** chỉ `progress_streak_hero_widget.dart`. Headline
+  `texts.displayLarge!` (57px) → `AppTypography.withWeight(texts.headlineMedium!,
+  w700)` (28px). Thêm `MxMetricWell` (icon `local_fire_department_outlined`)
+  trước headline, tint/wellColor theo đúng "streak vocabulary" đã có sẵn
+  trong app — `streakContainer` + `AppInk.onDueContainer` khi có streak,
+  `surfaceMuted` + `AppInk.quiet` khi streak = 0 — cùng cặp token
+  `_ActiveDaysMetric` (`progress_metric_widget.dart`) đã dùng cho "time
+  kept", không phải token mới. Bỏ text-scaler clamp 1.75 compact-only cũ
+  (X6): **đo thực nghiệm** bằng test xác nhận không còn viewport nào cần
+  clamp ở rung 28px, không phải giả định theo tỉ lệ font. Today, Daily
+  activity, `ProgressScreen`, controller/provider/repository/route — không
+  đổi. Wireframe M99.23 append mục V-revision (không sửa quyết định W2/W5
+  cũ).
+- **Fix từ review, hội tụ vào cùng một khoảng trống:** [Arch P1 + UI/UX P2]
+  không test nào đọc `MxMetricWell.wellColor`/`.tint` theo trạng thái streak
+  dù chính doc comment của widget khẳng định hành vi đó — thêm 2 test vào
+  `progress_screen_test.dart` (streak=0 → `surfaceMuted`/quiet; streak=3 →
+  `streakContainer`/`onDueContainer`), không tautological vì hai cặp token
+  đo động qua `context.semanticColors`/`AppInk.resolve(context)`, không
+  hardcode hex. [Arch P2] comment trỏ nhầm file test không tồn tại
+  (`progress_streak_hero_test.dart`) → sửa đúng tên
+  (`progress_screen_geometry_extremes_test.dart`).
+- **Cái bẫy tự sửa trong lượt implementation, trước khi review chạy:** test
+  `progress_screen_geometry_extremes_test.dart` cũ tìm headline bằng
+  `RichText.evaluate().elementAt(1)` (giả định label→headline→support là ba
+  `RichText` liên tiếp). `MxMetricWell` vẽ glyph qua `Icon`, và `Icon` tự nó
+  là một `RichText` (font-based glyph) — chèn thêm một phần tử, dịch index,
+  khiến test đọc nhầm sang paragraph của chính glyph (không bị scale theo
+  text setting) và báo sai "clamp vẫn còn". Sửa bằng cách tìm headline qua
+  cấu trúc (`Expanded` riêng của nó trong `Row`, scope trong
+  `ProgressStreakHeroWidget` vì `Expanded` không riêng gì hero) thay vì
+  index cứng — bền hơn trước biến đổi cấu trúc tiếp theo.
+- **Tests required:** `progress_screen_geometry_extremes_test.dart` viết lại
+  khối "clamp of X6" thành khối đo ngược lại — scaler **không bao giờ** bị
+  chặn, ở cả bốn viewport, kèm assertion `getMinIntrinsicWidth ≤ size.width`
+  làm bằng chứng chứ không phải giả định; `progress_screen_geometry_test.dart`
+  (G1–G12) và toàn bộ 265 test khu vực progress + 14 visual-audit paint-layer
+  pass **không sửa** — kể cả G7 hero (label→headline→support sm/xs, đo bằng
+  `find.text`, không bị ảnh hưởng bởi Row/Icon mới vì nó tìm theo nội dung).
+- **Checklist phases:** Phase 7 (components) · Phase 12/13 (design system).
+- **Emulator integration suite:** **not run — presentation-only restyle.**
+  Đây không phải một lượt chạy xanh.
+- **Output:** như Scope; 4 golden progress regenerate `TZ=UTC`, soi ảnh cả
+  light/dark (first viewport giờ thấy đủ Streak + Today); gallery publish
+  lại URL ghim; PR non-draft chờ lệnh merge của owner.
+- **Acceptance criteria:**
+  - [x] Hai review độc lập: Arch 1 P1 + 1 P2, UI/UX 1 P2 (hội tụ cùng khoảng
+        trống) — cả hai đóng đủ, verify pass CLEAN STOP.
+  - [x] `flutter analyze` 0; 265 test khu vực progress xanh; changed gate xanh.
+  - [x] Diff chỉ chạm presentation của streak hero; domain/data/route/Today/
+        Daily-activity không đổi một dòng.
+- **Editable documents:** `docs/wbs.md`, `docs/wireframes/m99-23-progress-overview.md`
+- **Dependencies:** M99.87
+### M99.90 · Daily Reminder theo visual language của Card Detail — presentation only
 
 - **Status:** **done** — presentation-only restyle theo prompt set
   `daily-reminder-visual-hierarchy`; không đổi off/20:00 mặc định,

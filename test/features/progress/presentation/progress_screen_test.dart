@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/app/router/route_paths.dart';
+import 'package:memox/core/theme/app_ink.dart';
+import 'package:memox/core/theme/theme_context_extension.dart';
 import 'package:memox/features/progress/domain/models/deck_activity_model.dart';
 import 'package:memox/features/progress/domain/models/deck_activity_snapshot_model.dart';
 import 'package:memox/features/progress/presentation/widgets/sections/progress_streak_hero_widget.dart';
@@ -8,6 +10,7 @@ import 'package:memox/features/progress/presentation/widgets/sections/progress_w
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_loading_state.dart';
+import 'package:memox/shared/widgets/mx_metric_well.dart';
 
 import 'support/fake_progress_repository.dart';
 import 'support/progress_screen_harness.dart';
@@ -186,7 +189,44 @@ void main() {
 
       expect(find.text(english.progressStreakZeroLine), findsOneWidget);
       expect(find.text(english.progressStreakHeldLine), findsNothing);
+
+      // The well's own claim (progress_streak_hero_widget.dart doc comment):
+      // zero is neutral, not a dimmed copy of the active accent. Nothing
+      // else in the suite reads MxMetricWell's colours, so a flipped or
+      // hard-coded ternary here would pass every other test in the app.
+      final zeroWell = tester.widget<MxMetricWell>(
+        find.descendant(
+          of: find.byType(ProgressStreakHeroWidget),
+          matching: find.byType(MxMetricWell),
+        ),
+      );
+      final context = tester.element(find.byType(ProgressStreakHeroWidget));
+      expect(zeroWell.wellColor, context.semanticColors.surfaceMuted);
+      expect(zeroWell.tint, AppInk.quiet.resolve(context));
     });
+
+    testWidgets(
+      'an active streak wears the streak vocabulary, not the zero pair',
+      (tester) async {
+        await pumpProgressScreen(
+          tester,
+          repository: seeded(
+            totals: const <int>[4, 1, 0, 0, 0, 0, 0],
+            streak: 3,
+          ),
+        );
+
+        final activeWell = tester.widget<MxMetricWell>(
+          find.descendant(
+            of: find.byType(ProgressStreakHeroWidget),
+            matching: find.byType(MxMetricWell),
+          ),
+        );
+        final context = tester.element(find.byType(ProgressStreakHeroWidget));
+        expect(activeWell.wellColor, context.semanticColors.streakContainer);
+        expect(activeWell.tint, AppInk.onDueContainer.resolve(context));
+      },
+    );
   });
 
   group('lifetime empty (S-d)', () {

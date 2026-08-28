@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_ink.dart';
-import '../../../../../core/theme/app_breakpoints.dart';
 import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_card.dart';
+import '../../../../../shared/widgets/mx_metric_well.dart';
 import '../../../domain/models/progress_overview_model.dart';
 import '../support/progress_labels_widget.dart';
 
-/// The hero: how many days in a row, and what today looks like (W2).
+/// The hero: how many days in a row, and what today looks like (W2, visual
+/// revision 2026-08-28).
 ///
 /// **One semantics node for the whole panel.** Read as separate nodes, a screen
 /// reader announces "7", "days", "3 cards today" — three fragments in which the
@@ -33,6 +35,8 @@ class ProgressStreakHeroWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final texts = context.texts;
+    final semantic = context.semanticColors;
+    final hasStreak = overview.currentStreakDays > 0;
 
     return Semantics(
       container: true,
@@ -56,43 +60,57 @@ class ProgressStreakHeroWidget extends StatelessWidget {
                 style: texts.labelLarge!.inked(context, AppInk.quiet),
               ),
               const SizedBox(height: AppSpacing.sm),
-              Text(
-                context.l10n.progressStreakDaysLabel(
-                  overview.currentStreakDays,
-                ),
-                // **The one place in this app that caps the text scaler, and it
-                // is not to buy back a line** (X6).
-                //
-                // `displayLarge` is 57px, so at a 2.0 scale the *unit word on
-                // its own* measures 268.1dp in English and 274.9dp in Vietnamese
-                // against a content column of `320 − 2×12 − 2×16 = 264dp`.
-                // Wrapping cannot help: there is no break opportunity inside
-                // "days", so the engine breaks mid-word and renders `5` / `day`
-                // / `s`. That is not one line too many, it is a word cut in
-                // half — W6.1 forbids clipping and this is worse, because it
-                // looks deliberate.
-                //
-                // **Only where the column is too narrow**, which is the
-                // compact tier. The constraint is the content width, not the
-                // type role: at 360dp the column is 296dp and the Vietnamese
-                // unit word needs 274.9dp, so from there up there is nothing to
-                // avoid and taking 12.5% off the size the user chose would be a
-                // loss with no gain. The first version of this clamp was
-                // unconditional and did exactly that at 360, 390 and 412.
-                //
-                // 1.75 rather than the arithmetic limit. Linearly the headline
-                // would still fit at `264 / 274.9 × 2.0 ≈ 1.92`, so 1.75 is a
-                // deliberate margin, not the measured edge: the numbers above
-                // are one font and one string each, and a plural form or a
-                // font-fallback in another future locale eats a few dp without
-                // warning.
-                textScaler:
-                    AppBreakpoints.isCompact(MediaQuery.sizeOf(context).width)
-                    ? MediaQuery.textScalerOf(
-                        context,
-                      ).clamp(maxScaleFactor: 1.75)
-                    : MediaQuery.textScalerOf(context),
-                style: texts.displayLarge!.inked(context, AppInk.stated),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  // A well, not a bare figure — the same grammar every metric
+                  // in the app anchors on (`MxMetricWell`), so the streak reads
+                  // as a measured fact rather than as the poster the display
+                  // rung used to make it. The tint pair is the app's existing
+                  // streak vocabulary — `streakContainer`/`onDueContainer` when
+                  // there is one to show, `surfaceMuted`/quiet when there is
+                  // not — the same pair `_ActiveDaysMetric` already wears for
+                  // "time kept" (`progress_metric_widget.dart`), so a zero
+                  // streak reads as *neutral*, not as a smaller version of the
+                  // same accent that marks an active one.
+                  Padding(
+                    padding: const EdgeInsets.only(top: AppSpacing.xs),
+                    child: MxMetricWell(
+                      icon: Icons.local_fire_department_outlined,
+                      tint: (hasStreak ? AppInk.onDueContainer : AppInk.quiet)
+                          .resolve(context),
+                      wellColor: hasStreak
+                          ? semantic.streakContainer
+                          : semantic.surfaceMuted,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Text(
+                      context.l10n.progressStreakDaysLabel(
+                        overview.currentStreakDays,
+                      ),
+                      // `headlineMedium`, not `displayLarge`: the hero led the
+                      // first viewport at a size nothing else on the screen
+                      // could balance against (implementation prompt, Why 1).
+                      // No text-scaler clamp is needed at this rung — measured
+                      // below, not assumed: at scale 2.0 "days" alone is 130dp
+                      // in English and 133dp in Vietnamese (28px vs the old
+                      // 57px rung, same font), well inside the 264dp compact
+                      // content column the old clamp was written for
+                      // (`progress_screen_geometry_extremes_test.dart` pins
+                      // the absence of clipping instead of a size cap).
+                      // Explicit, not left to `Text`'s own default — the
+                      // property the extremes test reads off the render
+                      // object is only populated once something states it.
+                      textScaler: MediaQuery.textScalerOf(context),
+                      style: AppTypography.withWeight(
+                        texts.headlineMedium!,
+                        FontWeight.w700,
+                      ).inked(context, AppInk.stated),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(

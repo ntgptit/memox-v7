@@ -216,3 +216,26 @@ sau một vòng event loop, đúng hình dạng của `watch()` thật; bỏ opt
 Không có **pull-to-refresh**, nên không có state cho cử chỉ đó (P9). `Retry`
 thì có: nó là thao tác duy nhất của người dùng mở lại một lần đọc, và từ M99.23
 nó **được hiển thị** — xem `S-e′`.
+
+## V-visual revision 2026-08-28 — Card Detail visual language
+
+Bản sửa trình bày thuần tuý; mọi quyết định D/W/G/S phía trên giữ nguyên hiệu
+lực, kể cả khi mục dưới đây nói khác về hình thức. Chỉ S1 (streak hero) đổi;
+S2 (Today) và S3 (Daily activity) không đổi.
+
+- Headline của S1 đổi từ `displayLarge` (57px) sang `headlineMedium` (28px,
+  w700) — Why 1 của implementation prompt: display-size cũ chiếm phần lớn
+  first viewport và lấn Today. Đo thực nghiệm xác nhận không còn viewport nào
+  cần text-scaler clamp ở rung này (X6 cũ, clamp 1.75 ở compact tier, đã gỡ
+  bỏ cùng comment giải thích).
+- Thêm một well trung tính trước headline (`MxMetricWell`, icon
+  `local_fire_department_outlined`), dùng đúng "streak vocabulary" đã có sẵn
+  trong app: `streakContainer` + `AppInk.onDueContainer` khi có streak,
+  `surfaceMuted` + `AppInk.quiet` khi streak = 0 — cùng cặp token
+  `_ActiveDaysMetric` (`progress_metric_widget.dart`) đã dùng cho "time
+  kept". Không gradient, không celebration, không flame giả tưởng.
+- Đo bằng test: `progress_screen_geometry_extremes_test.dart` (headline +
+  text-scaler ở 320/360/390/412dp, EN/VI) và
+  `progress_screen_test.dart` (nhóm "today zero with the streak held (S-c)":
+  wellColor/tint đúng theo streak = 0 vs streak > 0).
+
