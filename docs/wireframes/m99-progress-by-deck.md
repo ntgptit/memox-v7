@@ -129,7 +129,7 @@ quét literal thấy được.
 | Baseline hàng metric | `CrossAxisAlignment.baseline` | Ở text scale lớn hai ô cao khác nhau; căn top làm chữ số nhấp nhô |
 | Tap target hàng | ≥ `AppSpacing.minimumTouchTarget` (48) | Sàn chạm |
 | Đường dẫn dài | wrap, **không** ellipsis | Cắt giữa đường dẫn là mất đúng thứ nó tồn tại để nói |
-| Khoảng thở đáy | `AppSpacing.xxl` dưới hàng cuối | **Không phải** clearance cho bottom bar: `Scaffold` đã trừ chiều cao thanh bar khỏi `MediaQuery` của body, nên không hàng nào nấp được sau nó và một test khẳng định điều đó thì không bao giờ đỏ. Cái đáng pin là chính khoảng inset — danh sách kết thúc sát thanh bar đọc như bị cắt ngang |
+| Khoảng thở đáy | `AppSpacing.lg` dưới hàng cuối | **Không phải** clearance cho bottom bar: `Scaffold` đã trừ chiều cao thanh bar khỏi `MediaQuery` của body, nên không hàng nào nấp được sau nó và một test khẳng định điều đó thì không bao giờ đỏ. Cái đáng pin là chính khoảng inset — danh sách kết thúc sát thanh bar đọc như bị cắt ngang. Từng là `xxl`; M4.10ag đo lại cùng câu hỏi cho deck list và hạ xuống `lg` — Progress dùng lại đúng số đó thay vì có một số riêng cho cùng một câu trả lời |
 
 ## 3. Ma trận trạng thái
 
@@ -192,3 +192,44 @@ Những chỗ màn hình này cố ý khác deck list, và vì sao:
 Biểu đồ theo ngày, heatmap, so sánh hai khoảng, accuracy và streak — tất cả
 thuộc BR-182 và cần định nghĩa riêng trước khi có hình. Một khung biểu đồ dựng
 sẵn "để sau này điền" là cách chốt bố cục cho dữ liệu chưa ai định nghĩa.
+
+## V-visual revision 2026-08-28 — Card Detail visual language, xác nhận độc lập
+
+`docs/prompt/progress-by-deck-visual-hierarchy/` yêu cầu đưa màn này vào đúng
+ngôn ngữ thị giác Card Detail. Khác Tag Catalog, Study Home và Progress
+Overview — ba restyle cùng đợt, mỗi cái đổi thật một mảng UI — màn này đã đi
+gần hết quãng đường trước khi prompt set tồn tại: M99.24 dựng màn, và đặc biệt
+M99.26 ("Một ngữ pháp cho Library, Study và Progress") đã thống nhất
+`MxCard.flat`, `MxMetricWell` dùng chung và lưới metric 2×2 baseline-aligned
+thật trên cả ba tab — chính là những gì §1–§4 phía trên mô tả, viết trước khi
+lượt review này chạy. Việc của lượt này không phải dựng lại mà là **xác nhận
+độc lập bằng cách audit lại toàn màn**, không giả định "đọc code thấy đúng là
+xong".
+
+**Khoảng trống thật duy nhất tìm được: numeral thiếu tabular figures.** Card
+Detail's `card_metric_widget.dart` (`CardMetricKind.numeric`/
+`schedulerProgress`) đã mang `FontFeature.tabularFigures()` từ trước — một
+lưới là một cột số so hàng, và chữ số proportional làm `1` hẹp hơn `4` ở hàng
+dưới, hai cột lệch cạnh trái dù grid đã baseline-align đúng. `_numeralStyle`
+dùng chung của `progress_metric_widget.dart` (nuôi cả panel scale lẫn row
+scale) thiếu đúng dòng đó. Thêm một `fontFeatures` vào `.copyWith(...)` đóng
+khoảng trống ở cả hai rung cùng lúc, vì cùng một hàm. Golden
+`progress_deck_light/dark` regenerate `TZ=UTC` ra byte-identical — Inter vốn
+đã tabular cho chữ số, nên đây là fix về ý nghĩa của style declaration, không
+phải một thay đổi hình ảnh.
+
+**Hai phát hiện phụ từ hai review độc lập, không thuộc diff của lượt này:**
+
+- Bảng §2 phía trên (khoảng thở đáy) đã được sửa tại chỗ trong lượt này — từ
+  `xxl` (giá trị cũ, không còn đúng) sang `lg` (giá trị code đã ship từ
+  M4.10ag) — thay vì lặp lại ở đây, vì đó là sửa một sự thật sai chứ không
+  phải một quyết định thị giác mới.
+- Một bug domain/SQL thật (`childDeckActivity` trong `progress.drift` không
+  lọc deck con đã vào Trash khỏi hàng hiển thị, dù số liệu đã lọc đúng — BR-185,
+  BR-257) được review Architecture/Logic tìm thấy nhưng **không sửa ở đây**:
+  `implementation.md` của chính prompt set này cấm đổi domain/data/SQL trong
+  một restyle presentation-only. Đã spawn một task riêng (`task_bb091e47`).
+
+**Không đổi:** mọi quyết định W1–W? ở §1–§5 phía trên — pinned range strip,
+lưới 2×2, không breadcrumb, đơn vị thẻ-ngày, ma trận trạng thái §3. Lượt này
+xác nhận chúng đúng, không viết lại chúng.

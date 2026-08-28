@@ -1,13 +1,13 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
   "scannedFiles": 692,
-  "totalSites": 357,
+  "totalSites": 358,
   "byElementKind": {
     "other": 288,
     "background": 26,
     "shadow": 1,
     "border": 18,
-    "text": 18,
+    "text": 19,
     "icon": 6
   },
   "bySourceKind": {
@@ -16,7 +16,7 @@
     "Colors-material": 12,
     "hardcoded-literal": 97,
     "opacity-modified-token": 16,
-    "theme-token": 80
+    "theme-token": 81
   },
   "sites": [
     {
@@ -3133,6 +3133,17 @@
       "resolved_value_dark": "#28254B"
     },
     {
+      "file": "lib/features/card/presentation/widgets/overlays/card_export_sheet_widget.dart",
+      "line": 326,
+      "widget_context": "_Body",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
       "file": "lib/features/card/presentation/widgets/sections/card_detail_state_widget.dart",
       "line": 53,
       "widget_context": "CardDetailStateWidget",
@@ -3453,7 +3464,7 @@
     },
     {
       "file": "lib/features/progress/presentation/widgets/items/progress_metric_widget.dart",
-      "line": 141,
+      "line": 148,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3464,7 +3475,7 @@
     },
     {
       "file": "lib/features/progress/presentation/widgets/items/progress_metric_widget.dart",
-      "line": 330,
+      "line": 339,
       "widget_context": "_ReviewingMetric",
       "element_kind": "other",
       "source_kind": "theme-token",

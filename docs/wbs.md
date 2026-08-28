@@ -14880,6 +14880,7 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
         Daily-activity không đổi một dòng.
 - **Editable documents:** `docs/wbs.md`, `docs/wireframes/m99-23-progress-overview.md`
 - **Dependencies:** M99.87
+
 ### M99.90 · Daily Reminder theo visual language của Card Detail — presentation only
 
 - **Status:** **done** — presentation-only restyle theo prompt set
@@ -14940,6 +14941,152 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Dependencies:** M99.70 (MxCard.muted recipe), Card Import's `_InfoPanel`
   (pattern nguồn), M99.29 (M6 wireframe gốc), R9 (banner grammar, không đổi).
 - **Emulator:** `not run — presentation-only`.
+
+### M99.91 · Progress by Deck theo ngôn ngữ thị giác Card Detail — grid đã có sẵn, còn thiếu tabular
+
+- **Status:** **done** — theo prompt set
+  `docs/prompt/progress-by-deck-visual-hierarchy/` (handoff SHA-verified);
+  implementation → hai recursive review độc lập (Arch/Logic + UI/UX,
+  audit-only, chạy song song) → coordinator fix → verify pass → delivery.
+- **Goal:** đưa Progress by Deck (`/progress` cấp thư viện và
+  `/progress/:deckId`) vào đúng ngôn ngữ thị giác Card Detail. Khác hai
+  restyle trước (Tag Catalog M99.84, Study Home M99.85, Progress Overview
+  M99.89 — mỗi cái đều đổi thật một mảng UI), màn này đã đi phần lớn quãng
+  đường từ M99.24 (dựng màn) và đặc biệt M99.26 ("Một ngữ pháp cho Library,
+  Study và Progress" — chính milestone thống nhất `MxCard.flat`,
+  `MxMetricWell` dùng chung và lưới metric 2×2 baseline-aligned thật trên cả
+  ba tab) trước khi prompt set này tồn tại. Việc của lượt này là xác nhận
+  **độc lập** bằng cách audit lại toàn màn theo đúng contract, không phải
+  giả định "đã xong" từ đọc code.
+- **Scope:** khoảng trống thật duy nhất tìm được — `_numeralStyle` dùng
+  chung của `progress_metric_widget.dart` (nuôi cả `ProgressSummaryWidget`
+  panel scale lẫn `ProgressDeckRowWidget` row scale) thiếu
+  `FontFeature.tabularFigures()` — đúng feature Card Detail's
+  `card_metric_widget.dart` (`CardMetricKind.numeric`/`schedulerProgress`)
+  đã mang từ trước, vì lý do giống hệt: một lưới là một cột số so hàng, chữ
+  số proportional thì `1` hẹp hơn `4` ở hàng dưới, hai cột lệch cạnh trái dù
+  đã baseline-align đúng. Thêm một dòng vào `.copyWith(...)`, cả hai rung
+  (panel `titleMedium`, row `titleSmall`) đều nhận cùng lúc vì cùng một hàm.
+  **Không đổi pixel nào** — golden `progress_deck_light/dark` regenerate
+  `TZ=UTC` ra byte-identical với bản trước (Inter vốn đã tabular cho chữ
+  số), nên đây là một fix về ý nghĩa/đúng-đắn của style declaration, không
+  phải một fix hình ảnh.
+- **Ngoài scope, xác nhận đã đúng chứ không sửa:** header/identity nhẹ ở
+  cấp deck (AppBar tên deck, không giant metric, không breadcrumb thứ hai —
+  path sống trên hàng); dải chọn khoảng ghim từ bên trong vùng cuộn, nền
+  `scaffoldBackgroundColor` không phải `surface`; lưới metric gập một cột
+  dưới `minimumCellWidth` nhân theo `textScaler`; baseline alignment; toàn
+  card tappable; path wrap không ellipsis; số 0 trung tính; navigation
+  `pushNamed` giữ stack. Tất cả đã đúng contract từ trước lượt này.
+- **Fix từ review — cả hai điểm đều là doc/test drift có sẵn, không phải từ
+  diff của lượt này:**
+  - [Arch P2, UI/UX P2 — cùng phát hiện độc lập] `docs/wireframes/m99-progress-by-deck.md`
+    §2 vẫn ghi khoảng thở đáy dưới hàng cuối là `AppSpacing.xxl`, trong khi
+    `progress_deck_list_widget.dart` đã chuyển sang `AppSpacing.lg` từ
+    M4.10ag (đo lại đúng câu hỏi đó cho deck list, Study Home dùng chung số).
+    Bảng của wireframe còn tự nhận "pinned bằng test" — sai, không test nào
+    khẳng định con số đó. Sửa: cập nhật dòng bảng sang `lg` kèm trích dẫn
+    M4.10ag, thêm assertion `SliverPadding.padding.bottom` vào
+    `progress_deck_geometry_test.dart`. Không đổi hành vi hay pixel — code
+    vốn đã đúng, chỉ doc và test coverage di chuyển.
+  - [Arch P0, out of scope — flagged, không fix ở đây] `childDeckActivity`
+    trong `progress.drift` thiếu `child.delete_batch_id IS NULL` trên
+    join tạo hàng (CTE `branch` nuôi số liệu đã lọc đúng, chỉ hàng hiển thị
+    thì không) — một deck con bị chuyển vào Trash vẫn hiện trong drill-down
+    của deck cha, số về 0 nhưng hàng không biến mất (BR-185, BR-257). Đây
+    là bug domain/SQL thật, nhưng `implementation.md` của chính prompt set
+    này cấm tường minh việc đổi domain/data/SQL trong một restyle
+    presentation-only — nên spawn một task riêng
+    (`task_bb091e47`) thay vì sửa lẫn vào diff này.
+  - [UI/UX P2, giữ nguyên không sửa] mỗi ô metric là một semantics node
+    riêng thay vì gộp thành một câu — đã xác nhận là quyết định có chủ ý từ
+    trước (ARB `@description` + doc comment ở cả hai widget), không phải
+    lỗi của lượt này.
+- **Tests required:** test tabular mới trong `progress_deck_row_test.dart`
+  (group "the numeral is tabular", đọc `TextSpan.style.fontFeatures` của
+  đúng numeral span qua `find.byType(Text)` — không phải `RichText`, vì
+  glyph của `MxMetricWell` cũng vẽ qua `RichText` và khớp nhầm); test bottom
+  clearance mới trong `progress_deck_geometry_test.dart`; toàn bộ 267 test
+  khu vực progress xanh, không sửa test cũ nào.
+- **Checklist phases:** Phase 7 (components) · Phase 12/13 (design system).
+- **Emulator integration suite:** **not run — presentation-only restyle.**
+  Đây không phải một lượt chạy xanh.
+- **Output:** như Scope; goldens `progress_deck_light/dark` regenerate
+  `TZ=UTC`, soi ảnh xác nhận byte-identical (không golden nào cần commit lại
+  vì không pixel nào đổi); gallery publish lại URL ghim; PR non-draft chờ
+  lệnh merge của owner.
+- **Acceptance criteria:**
+  - [x] Hai review độc lập: Arch 1 P0 (flagged riêng) + 1 P2, UI/UX 1 P2
+        (P2 hội tụ cùng phát hiện) — cả hai đóng đủ hoặc flag đúng chỗ,
+        verify pass CLEAN STOP.
+  - [x] `flutter analyze` 0; 267 test khu vực progress xanh; changed gate
+        xanh.
+  - [x] Diff chỉ chạm `_numeralStyle` + hai file doc/test drift; domain/
+        data/SQL/route/navigation/query — không đổi một dòng nào trong lượt
+        này (bug SQL tìm thấy được route sang task riêng, không sửa tại
+        đây).
+- **Editable documents:** `docs/wbs.md`, `docs/wireframes/m99-progress-by-deck.md`
+- **Dependencies:** M99.24, M99.26
+
+### M99.92 · Card Export lấy visual hierarchy của Card Detail — presentation only
+
+- **Status:** **done** — presentation-only restyle theo prompt set
+  `card-export-visual-hierarchy`; không đổi controller, use case, repository,
+  encoder/destination, route hay bất kỳ BR nào — AD-20, BR-174…181, UC-11
+  nguyên vẹn.
+- **Goal:** Sheet export đọc bằng đúng grammar Card Detail — mỗi band là một
+  `MxCard.flat` độc lập, nhãn nhóm dùng `sectionLabel` uppercase — mà vẫn là
+  modal bottom sheet đúng sáu trạng thái của M4.13 W3, không phải một route.
+- **Scope:** `card_export_scope_summary_widget.dart` (bọc Row trong
+  `MxCard.flat`, padding compact), `card_export_content_lines_widget.dart`
+  (bọc Column, ban đầu chọn `MxCard.muted`, audit UI/UX sửa thành
+  `MxCard.flat`), `card_export_sheet_widget.dart` (chỉ đổi style của heading
+  "Format" sang `sectionLabel` uppercase — không đổi callback, state hay
+  request). **Ngoài scope, xác nhận bằng diff và giữ nguyên:** toàn bộ
+  `card_export_controller.dart`, `card_export_state.dart`, use case,
+  repository, DAO, encoder, model; `card_export_format_options_widget.dart`
+  (đã native theo Card Detail từ M99.70) và `card_export_action_bar_widget.dart`
+  (đã dùng `MxButtonPair` từ trước) — không có lý do để chạm.
+- **Recursive review (logic + UI/UX, song song, audit-only):** architecture/
+  logic audit APPROVE ngay lượt đầu, không finding — xác nhận scope/dữ liệu/
+  privacy/persistence không đổi bằng cách chạy lại 94 test data/domain/
+  repository cũ (đều xanh) và source-scan `card_transfer_boundary_test.dart`.
+  UI/UX audit tìm đúng một P1: `MxCard.muted` mang `elevation: AppElevation
+  .card` (khác `none`), nên content-lines band vẽ `boxShadow` thật ở light
+  theme trong khi scope-summary band liền kề (`MxCard.flat`) thì không — đo
+  bằng lấy mẫu pixel trên golden, không chỉ nhìn. Đúng anti-pattern "hai độ
+  sâu cạnh tranh" mà doc của `MxCard.flat` tự cảnh báo và ba lần audit khác
+  (D20, D23, D27) đã trả giá để sửa — lần này bắt trước khi merge. Coordinator
+  sửa bằng `MxCard.flat(padding: compact)`, regenerate lại 9 golden, lượt sau
+  sạch (không P0/P1/P2 còn lại). Ghi nhận, không sửa vì ngoài scope:
+  `card_import_result_widget.dart` và `card_import_source_step_widget.dart`
+  cũng dùng `MxCard.muted` cạnh `MxCard.flat` trong cùng cột cuộn và chưa
+  từng qua audit D20 — nợ của Card Import, không phải của task này.
+- **Acceptance criteria:**
+  - [x] Toàn bộ hành vi UC-11 và sáu trạng thái W3 giữ nguyên — 45 test
+        presentation (alignment/sheet/states/failure-faces) xanh, chỉ đổi
+        finder theo chữ hoa heading, không nới lỏng assertion nào.
+  - [x] W5 (một cột nội dung, cạnh trái/phải chung mọi band) vẫn đúng — scope
+        summary và content lines giờ là card full-width, đo bằng
+        `find.byType` (rìa của band, không phải `Text` bên trong nó).
+  - [x] E7/E7a (panel action không đổi cao/vị trí giữa initial↔generating)
+        giữ nguyên, xác nhận bằng test rect trước/trong khi generating.
+  - [x] `flutter analyze` 0 (repo-wide); goldens `TZ=UTC` regenerate — đúng 9
+        file `card_export_*.png` đổi, không golden nào khác trong repo đổi.
+  - [x] AD-20, BR-174…181, pipeline export không đổi — xác nhận bằng diff
+        (`git diff main -- lib/features/card`) chỉ 3 file presentation, và
+        94 test data/domain/repository cũ chạy lại xanh nguyên vẹn.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** 3 file lib, 2 file test (`card_export_alignment_test.dart`,
+  `card_export_states_test.dart`), 9 golden regenerate.
+- **Tests required:** `card_export_alignment_test.dart`,
+  `card_export_sheet_test.dart`, `card_export_states_test.dart`,
+  `card_export_failure_faces_test.dart`, `card_export_demo_test.dart`
+  (9 golden), `card_transfer_boundary_test.dart` (re-run, không sửa).
+- **Emulator integration suite:** **not run — presentation-only restyle.**
+- **Checklist phases:** 7, 13.
+- **Dependencies:** M99.70 (MxCard recipes + D20 flat-in-column), M99.87
+  (Card Import, cùng pattern), M99.84 (Tag Catalog), M99.85 (Study Home).
 
 ## Known technical debt
 

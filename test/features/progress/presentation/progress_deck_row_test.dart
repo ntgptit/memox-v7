@@ -158,6 +158,36 @@ void main() {
     });
   });
 
+  group('the numeral is tabular', () {
+    testWidgets('both the panel and a row give their numeral tabular figures', (
+      tester,
+    ) async {
+      await pumpProgressScreen(
+        tester,
+        repository: mixedLevel(),
+        screen: const ProgressDeckScreen(),
+      );
+
+      // Panel scale: the summary's own total (BR-183).
+      expect(
+        _numeralFeaturesOf(
+          tester,
+          find.bySemanticsLabel(english.progressActiveCardsSemanticLabel(45)),
+        ),
+        const <FontFeature>[FontFeature.tabularFigures()],
+      );
+      // Row scale: the busy deck's own count, a different rung of the same
+      // shared style function.
+      expect(
+        _numeralFeaturesOf(
+          tester,
+          find.bySemanticsLabel(english.progressActiveCardsSemanticLabel(42)),
+        ),
+        const <FontFeature>[FontFeature.tabularFigures()],
+      );
+    });
+  });
+
   group('locales, themes and viewports', () {
     testWidgets('renders in Vietnamese', (tester) async {
       await pumpProgressScreen(
@@ -249,4 +279,24 @@ void main() {
       expect(find.byType(ProgressDeckRowWidget), findsOneWidget);
     });
   });
+}
+
+/// The `FontFeature`s of a metric's numeral span.
+///
+/// A metric renders as one `Text.rich`: the outer `TextSpan` carries no style
+/// of its own, and its first child is the numeral — the word beside it is the
+/// second. Reading the render tree rather than `find.text` is what lets this
+/// assert the numeral's style in isolation from the word's.
+///
+/// **`find.byType(Text)`, not `RichText`.** The well's own glyph paints
+/// through a `RichText` too (`MxMetricWell` wraps an `Icon`), so matching that
+/// type inside the metric's `Semantics` node finds two and `tester.widget`
+/// throws. `Text` is unambiguous: the well has none of its own.
+List<FontFeature>? _numeralFeaturesOf(WidgetTester tester, Finder metric) {
+  final text = tester.widget<Text>(
+    find.descendant(of: metric, matching: find.byType(Text)),
+  );
+  final root = text.textSpan! as TextSpan;
+  final numeral = root.children!.first as TextSpan;
+  return numeral.style?.fontFeatures;
 }
