@@ -217,6 +217,47 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(find.text(vi.cardImportSuccessTitle), findsOneWidget);
     });
+
+    testWidgets('a three-digit count survives the narrowest footer', (
+      tester,
+    ) async {
+      // The single-row walk above proves the road; this proves the label at
+      // its widest. "Nhap 128 the" at 320dp and 2.0x is the case the
+      // pair's one-row-or-stack rule exists for, and until now the only
+      // evidence anywhere used a one-digit count (review coverage gap,
+      // 2026-08-28).
+      final vi = AppLocalizationsVi();
+      final rows = StringBuffer('front,back\n');
+      for (var i = 0; i < 128; i++) {
+        rows.write('tu$i,nghia$i\n');
+      }
+      await h.pump(
+        tester,
+        surface: compact,
+        textScale: 2,
+        locale: const Locale('vi'),
+      );
+
+      await tester.tap(find.text(vi.cardImportPasteOptionTitle));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), rows.toString());
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(vi.cardImportPreviewAction));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      await tester.ensureVisible(find.text(vi.cardImportContinueAction));
+      await tester.tap(find.text(vi.cardImportContinueAction));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      // The label is whole — not ellipsized mid-word — and tappable.
+      expect(find.text(vi.cardImportSubmitAction(128)), findsOneWidget);
+      await tester.tap(find.text(vi.cardImportSubmitAction(128)));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.text(vi.cardImportSuccessTitle), findsOneWidget);
+    });
   });
 
   group('preview step', () {

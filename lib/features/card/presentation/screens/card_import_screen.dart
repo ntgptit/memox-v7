@@ -5,8 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/navigation/route_names.dart';
-import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_breakpoints.dart';
 import '../../../../l10n/l10n_extension.dart';
+import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_icon_button.dart';
 import '../controllers/card_import_commit_controller.dart';
 import '../controllers/card_import_draft_controller.dart';
@@ -202,87 +203,81 @@ class _CardImportScreenState extends ConsumerState<CardImportScreen> {
         // handler re-pops once it has decided.
         unawaited(_handleSystemBack());
       },
-      child: Scaffold(
-        appBar: _appBar(phase, isSubmitting: submit.isSubmitting),
-        body: SafeArea(
-          child: Column(
-            children: <Widget>[
-              // The breadcrumb, context chip and stepper leave with the
-              // wizard: on an outcome the hero is the focal point (state 6).
-              if (!phase.isOutcome) _wizardHeader(step, completed),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.lg,
-                    AppSpacing.sm,
-                    AppSpacing.lg,
-                    AppSpacing.xl,
-                  ),
-                  child: phase.isOutcome
-                      ? _outcomeBody(deckId, phase)
-                      : switch (step) {
-                          CardImportStep.source => CardImportSourceStepWidget(
-                            deckId: deckId,
-                            pasteController: _pasteController,
-                          ),
-                          CardImportStep.preview => CardImportPreviewStepWidget(
-                            deckId: deckId,
-                          ),
-                          CardImportStep.confirm => _confirmBody(deckId),
-                        },
-                ),
-              ),
-              CardImportActionBarWidget(
-                deckId: deckId,
-                phase: phase,
-                submit: submit,
-                pasteController: _pasteController,
-                onReset: _resetDraft,
-                onViewCards: _viewCards,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  PreferredSizeWidget _appBar(
-    CardImportPhase phase, {
-    required bool isSubmitting,
-  }) {
-    return AppBar(
-      leading: MxIconButton(
-        icon: Icons.close,
-        // The action's name, not the screen's: a screen reader lands on
-        // "Cancel", the same word the tooltip shows.
-        semanticLabel: context.l10n.commonCancelAction,
-        tooltip: context.l10n.commonCancelAction,
-        // Locked while the one commit runs (F): it cannot honestly be
-        // cancelled, so the exit does not pretend otherwise.
-        onPressed: isSubmitting ? null : _cancel,
-      ),
-      // An outcome retitles the bar (state 6): the wizard's name is for
-      // work in progress, the result's for what it did.
-      title: Text(
-        phase.isOutcome
+      // **`MxContentShell`, where this used to be a raw `Scaffold`.** The
+      // wizard was the last card screen still deciding its own gutters, its
+      // own keyboard inset and its own footer seam — three answers the shell
+      // owns once. The behaviours the old scaffold carried travel intact:
+      //
+      // - Close keeps its name, its tooltip and the submit lock (F);
+      // - the wizard context is the shell's *pinned* subheader, so it stops
+      //   scrolling with the body — "which step am I on" was scrolling out of
+      //   reach on exactly the long previews that make the question worth
+      //   asking — and it still leaves entirely on an outcome (state 6);
+      // - the footer is the shell's footer slot: the last row of the body's
+      //   column, above the keyboard because the body shrinks, with the seam
+      //   drawn by the shell. The bar's hand-added `viewInsets.bottom` went
+      //   with the rest of its self-owned geometry.
+      child: MxContentShell(
+        // An outcome retitles the bar (state 6): the wizard's name is for
+        // work in progress, the result's for what it did.
+        title: phase.isOutcome
             ? context.l10n.cardImportResultsTitle
             : context.l10n.cardImportTitle,
-      ),
-    );
-  }
-
-  Widget _wizardHeader(CardImportStep step, Set<CardImportStep> completed) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.sm,
-        AppSpacing.lg,
-        AppSpacing.sm,
-      ),
-      child: CardImportContextWidget(
-        deckId: widget.deckId,
-        stepper: CardImportStepperWidget(current: step, completed: completed),
+        leading: MxIconButton(
+          icon: Icons.close,
+          // The action's name, not the screen's: a screen reader lands on
+          // "Cancel", the same word the tooltip shows.
+          semanticLabel: context.l10n.commonCancelAction,
+          tooltip: context.l10n.commonCancelAction,
+          // Locked while the one commit runs (F): it cannot honestly be
+          // cancelled, so the exit does not pretend otherwise.
+          onPressed: submit.isSubmitting ? null : _cancel,
+        ),
+        // The breadcrumb, stepper and context chip leave with the wizard: on
+        // an outcome the hero is the focal point (state 6).
+        subheader: phase.isOutcome
+            ? null
+            : CardImportContextWidget(
+                deckId: deckId,
+                stepper: CardImportStepperWidget(
+                  current: step,
+                  completed: completed,
+                ),
+              ),
+        isScrollable: true,
+        // **A reading column, like Card Detail's** (M4.15 V4): unconstrained
+        // on a phone, capped at the shared breakpoint on anything wider, so a
+        // mapping row never stretches into a line the eye cannot track back.
+        // The shell's own padding is the gutter; nothing below re-adds one.
+        // Top-anchored: the shell's scrollable body carries a min-height so
+        // short content can still push a footer seam to the bottom, and a
+        // plain Center would float the wizard into the middle of that space.
+        body: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: AppBreakpoints.medium),
+            child: phase.isOutcome
+                ? _outcomeBody(deckId, phase)
+                : switch (step) {
+                    CardImportStep.source => CardImportSourceStepWidget(
+                      deckId: deckId,
+                      pasteController: _pasteController,
+                    ),
+                    CardImportStep.preview => CardImportPreviewStepWidget(
+                      deckId: deckId,
+                    ),
+                    CardImportStep.confirm => _confirmBody(deckId),
+                  },
+          ),
+        ),
+        footer: CardImportActionBarWidget(
+          deckId: deckId,
+          phase: phase,
+          submit: submit,
+          pasteController: _pasteController,
+          onReset: _resetDraft,
+          onViewCards: _viewCards,
+        ),
       ),
     );
   }

@@ -35,7 +35,10 @@ void main() {
 
       // The panel: what is being read, and the no-writes reassurance — under
       // the step's own heading, which never leaves while the decode runs.
-      expect(find.text(english.cardImportPreviewHeading), findsOneWidget);
+      expect(
+        find.text(english.cardImportPreviewHeading.toUpperCase()),
+        findsOneWidget,
+      );
       expect(find.text(english.cardImportParsingPasteTitle), findsOneWidget);
       expect(find.text(english.cardImportParsingReassurance), findsOneWidget);
       // The source is one compact context line, not the chooser repeated —
@@ -264,7 +267,10 @@ void main() {
 
       // The preview is intact — classified rows, mapping, headline — and no
       // second decode ran: the draft never lived in the commit controller.
-      expect(find.text(english.cardImportMappingHeading), findsOneWidget);
+      expect(
+        find.text(english.cardImportMappingHeading.toUpperCase()),
+        findsOneWidget,
+      );
       expect(
         find.text(english.cardImportPreviewReadyOfTotal(2, 2)),
         findsOneWidget,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_ink.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -98,11 +99,12 @@ class CardImportRowPreviewWidget extends StatelessWidget {
                     padding: const EdgeInsets.only(top: AppSpacing.xs),
                     child: Row(
                       children: <Widget>[
-                        Icon(
-                          reasonIcon,
-                          size: AppSpacing.md,
-                          color: reasonInk.resolve(context),
-                        ),
+                        // `MxIcon` at the scale's own small step: 12dp was
+                        // below every legal icon size, spelled through a
+                        // *spacing* token, and a fixed-size raw `Icon` besides
+                        // — at 2.0x text it shrank relative to the words it
+                        // annotates (review finding 1, 2026-08-28).
+                        MxIcon(reasonIcon, ink: reasonInk, size: MxIconSize.sm),
                         const SizedBox(width: AppSpacing.xs),
                         Expanded(
                           child: Text(
@@ -123,11 +125,7 @@ class CardImportRowPreviewWidget extends StatelessWidget {
           // The glyph is decoration over the words above; a screen reader
           // hears the status through the reason line and the summary chips.
           ExcludeSemantics(
-            child: Icon(
-              statusIcon,
-              size: AppSpacing.lg,
-              color: statusInk.resolve(context),
-            ),
+            child: MxIcon(statusIcon, ink: statusInk, size: MxIconSize.sm),
           ),
         ],
       ),
