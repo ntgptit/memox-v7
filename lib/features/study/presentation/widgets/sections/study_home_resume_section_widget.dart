@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_breakpoints.dart';
 import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
@@ -38,65 +39,139 @@ class StudyHomeResumeSectionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // **Measured outside the card, because S17 is a rule about the card.**
+    // The first version put the `LayoutBuilder` inside the card's padding, so
+    // it saw the content width — 32dp narrower — and the full-width branch ran
+    // on every phone: 393 handed it 329, which is under the 360 tier the rule
+    // names. The parent column stretches, so out here `maxWidth` *is* the
+    // card's width (361 at 393dp, 296 at 320dp), and the two branches land
+    // where the wireframe says they do. Both reviews caught this from the
+    // arithmetic; the golden had quietly stamped the wrong branch.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isCramped = AppBreakpoints.isCompact(constraints.maxWidth);
+
+        return _ResumeCard(
+          resume: resume,
+          onResume: onResume,
+          isCramped: isCramped,
+        );
+      },
+    );
+  }
+}
+
+class _ResumeCard extends StatelessWidget {
+  const _ResumeCard({
+    required this.resume,
+    required this.onResume,
+    required this.isCramped,
+  });
+
+  final StudyHomeResumeModel resume;
+  final VoidCallback onResume;
+
+  /// Whether the card is narrower than the compact tier — the width the
+  /// stretched primary is for.
+  final bool isCramped;
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
 
     return MxCard.tonal(
       // The one surface on this screen that steps away from `surface`: it is a
       // different kind of offer from the rows under it, and the pair only reads
       // as a pair if one of them is distinguishable at a glance.
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Text(
-            l10n.studyHomeResumeTitle,
-            // Through the wght axis — a bare `fontWeight:` paints the rung's
-            // old weight.
-            style: context.texts.labelMedium!.inked(
-              context,
-              AppInk.onSecondaryContainer,
-              isEmphasized: true,
+      //
+      // **Its own semantics boundary, stated rather than inherited.** The body
+      // used to get one from being a `ListView` child; inside the centred
+      // working column that accident is gone, and without `container: true`
+      // the card's three lines merge into whatever text stands above it.
+      child: Semantics(
+        container: true,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Text(
+              l10n.studyHomeResumeTitle,
+              // Through the wght axis — a bare `fontWeight:` paints the rung's
+              // old weight.
+              style: context.texts.labelMedium!.inked(
+                context,
+                AppInk.onSecondaryContainer,
+                isEmphasized: true,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            resume.deckName,
-            style: context.texts.titleMedium!.inked(
-              context,
-              AppInk.onSecondaryContainer,
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              resume.deckName,
+              style: context.texts.titleMedium!.inked(
+                context,
+                AppInk.onSecondaryContainer,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            l10n.studyHomeResumeSubtitle(
-              context.studySessionKind(resume.kind),
-              context.studyMode(resume.currentMode),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              l10n.studyHomeResumeSubtitle(
+                context.studySessionKind(resume.kind),
+                context.studyMode(resume.currentMode),
+              ),
+              style: context.texts.bodySmall!.inked(
+                context,
+                AppInk.onSecondaryContainer,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
-            style: context.texts.bodySmall!.inked(
-              context,
-              AppInk.onSecondaryContainer,
+            const SizedBox(height: AppSpacing.md),
+            _ResumeAction(
+              resume: resume,
+              onResume: onResume,
+              isCramped: isCramped,
             ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Align(
-            alignment: AlignmentDirectional.centerStart,
-            // Named after the deck for the reason the row buttons are: a screen
-            // reader hearing "Resume" alone cannot tell which session it means.
-            child: MxActionButton(
-              label: l10n.studyHomeResumeAction,
-              semanticLabel: l10n.studyHomeResumeSemanticLabel(resume.deckName),
-              icon: Icons.play_arrow,
-              onPressed: onResume,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
+  }
+}
+
+/// The one primary on the screen, sized by the card it sits in.
+///
+/// **Full-width on a cramped card, intrinsic on a roomy one** (S17). Below the
+/// compact tier the stretched primary is the easier target and the calmer
+/// line; at 393/412 an intrinsic button keeps the focal card from reading as a
+/// wall of fill.
+class _ResumeAction extends StatelessWidget {
+  const _ResumeAction({
+    required this.resume,
+    required this.onResume,
+    required this.isCramped,
+  });
+
+  final StudyHomeResumeModel resume;
+  final VoidCallback onResume;
+  final bool isCramped;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    // Named after the deck for the reason the row buttons are: a screen
+    // reader hearing "Resume" alone cannot tell which session it means.
+    final action = MxActionButton(
+      label: l10n.studyHomeResumeAction,
+      semanticLabel: l10n.studyHomeResumeSemanticLabel(resume.deckName),
+      icon: Icons.play_arrow,
+      onPressed: onResume,
+    );
+    if (isCramped) return action;
+
+    return Align(alignment: AlignmentDirectional.centerStart, child: action);
   }
 }

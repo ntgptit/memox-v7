@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_spacing.dart';
@@ -45,10 +47,18 @@ void main() {
       final card = tester.getRect(inRow(find.byType(MxCard)).first);
       final name = tester.getRect(inRow(find.text('Everyday Korean')).first);
       final action = tester.getRect(inRow(find.byType(MxActionButton)).first);
+      final workload = tester.getRect(
+        inRow(find.byType(StudyHomeWorkloadItemWidget)).first,
+      );
 
       expect(name.left - card.left, AppSpacing.lg);
       expect(name.top - card.top, AppSpacing.lg);
-      expect(card.bottom - action.bottom, AppSpacing.lg);
+      // The bottom is the workload/action band's — whichever of the two runs
+      // lower. In the inline arrangement the counts may take two lines beside
+      // a shorter verb, and measuring the verb alone would count the band's
+      // internal centring as card padding (the first run read 18 for 16).
+      final bandBottom = math.max(workload.bottom, action.bottom);
+      expect(card.bottom - bandBottom, AppSpacing.lg);
       // The fourth side, which the first version of this test called "every
       // side" without measuring. `CrossAxisAlignment.stretch` makes the name's
       // right edge the content edge, so this is exact rather than incidental.
@@ -106,19 +116,121 @@ void main() {
       expect(workload.top - scheduler.bottom, AppSpacing.sm);
     });
 
-    testWidgets('the verb sits a section step below the counts', (
+    testWidgets('at 393dp the verb shares the workload band and trails it', (
       tester,
     ) async {
+      // The compact arrangement (G15): the counts lead, the verb trails on the
+      // same band, one step of air between them — the extra band every row
+      // used to spend on its button is what made a short list fill the screen.
       await harness.pump(tester);
 
+      final card = tester.getRect(inRow(find.byType(MxCard)).first);
       final workload = tester.getRect(
         inRow(find.byType(StudyHomeWorkloadItemWidget)).first,
       );
       final action = tester.getRect(inRow(find.byType(MxActionButton)).first);
 
-      // Information above, verb below: one step more than the line breaks
-      // inside the block, and one step less than a break between two cards.
-      expect(action.top - workload.bottom, AppSpacing.md);
+      // Same band: the verb's box overlaps the counts' vertical extent rather
+      // than starting below it.
+      expect(action.top, lessThan(workload.bottom));
+      expect(action.bottom, greaterThan(workload.top));
+      // Trailing: the verb ends at the content edge, and the counts get
+      // everything to its left minus one step.
+      expect(card.right - action.right, AppSpacing.lg);
+      expect(action.left - workload.right, greaterThanOrEqualTo(AppSpacing.md));
+    });
+
+    testWidgets(
+      'cramped, the verb steps back below the counts — one section step',
+      (tester) async {
+        // The stacked arrangement (G8): at 320dp with doubled type the scaled
+        // threshold stacks, because three counts squeezed against a button is
+        // a squeeze and not a layout.
+        await harness.pump(tester, surface: const Size(320, 568), textScale: 2);
+
+        final workload = tester.getRect(
+          inRow(find.byType(StudyHomeWorkloadItemWidget)).first,
+        );
+        final action = tester.getRect(inRow(find.byType(MxActionButton)).first);
+
+        expect(action.top - workload.bottom, AppSpacing.md);
+      },
+    );
+
+    testWidgets('the compact verb draws 40 and still hits 48', (tester) async {
+      // The deck tile's Study verb made this trade first (M99.74's audit):
+      // a 40 body on the 4px grid inside a dense row, with
+      // `MaterialTapTargetSize.padded` keeping the touch floor. The task-card
+      // arrangement borrows it for the same reason — the verb is furniture in
+      // a row, not a screen action.
+      await harness.pump(tester);
+
+      final drawn = tester.getSize(
+        find
+            .descendant(
+              of: inRow(find.byType(MxActionButton)),
+              matching: find.byType(Material),
+            )
+            .first,
+      );
+      expect(drawn.height, 40);
+      expect(
+        tester.getSize(inRow(find.byType(MxActionButton)).first).height,
+        greaterThanOrEqualTo(AppSpacing.minimumTouchTarget),
+      );
+    });
+
+    testWidgets('a cramped resume card stretches its primary to full width', (
+      tester,
+    ) async {
+      // Below the compact tier the stretched primary is the easier target
+      // (S17). The roomy half has its own assertion below — it did not at
+      // first, and the padding test could not stand in for it: its bottom
+      // measurement holds for a stretched button too, which is exactly how
+      // the full-width branch ran on every phone with the suite green.
+      await harness.pump(tester, surface: const Size(320, 568));
+
+      final resume = find.byType(StudyHomeResumeSectionWidget);
+      final card = tester.getRect(
+        find.descendant(of: resume, matching: find.byType(MxCard)).first,
+      );
+      final action = tester.getRect(
+        find
+            .descendant(of: resume, matching: find.byType(MxActionButton))
+            .first,
+      );
+
+      expect(action.left - card.left, AppSpacing.lg);
+      expect(card.right - action.right, AppSpacing.lg);
+    });
+
+    testWidgets('a roomy resume card keeps its primary intrinsic', (
+      tester,
+    ) async {
+      // The other half of S17, at the default 393: the card is 361 wide —
+      // above the compact tier — so the button hugs its label instead of
+      // running wall to wall. This is the assertion whose absence let the
+      // width comparison land in the wrong coordinate system unnoticed: the
+      // LayoutBuilder read the card's *content* width, 32dp narrower, and
+      // stretched on every phone.
+      await harness.pump(tester);
+
+      final resume = find.byType(StudyHomeResumeSectionWidget);
+      final card = tester.getRect(
+        find.descendant(of: resume, matching: find.byType(MxCard)).first,
+      );
+      final action = tester.getRect(
+        find
+            .descendant(of: resume, matching: find.byType(MxActionButton))
+            .first,
+      );
+
+      expect(action.left - card.left, AppSpacing.lg);
+      expect(
+        card.right - action.right,
+        greaterThan(AppSpacing.lg),
+        reason: 'a stretched primary at 393 is the wrong S17 branch',
+      );
     });
 
     testWidgets(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_breakpoints.dart';
 import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
@@ -96,11 +97,6 @@ class _StudyHomeList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final decks = home.studiableDecks;
-    final resume = home.resume;
-    final hasWork = decks.any((deck) => deck.hasWorkload);
-
     return ListView(
       // The gutter is applied here rather than by the shell so the scroll runs
       // edge to edge — content passes under the app-bar hairline instead of
@@ -114,6 +110,51 @@ class _StudyHomeList extends StatelessWidget {
         mxScreenGutter(context),
         AppSpacing.lg,
       ),
+      children: <Widget>[
+        // **A working column, not a full-bleed one.** On a phone this binds
+        // nothing — 600 is above every width the app ships against — but a
+        // row of task cards stretched across a tablet is a line nobody can
+        // track back to the start of. The same ceiling Card Detail caps its
+        // reading column at, and a ceiling rather than a branch: below it the
+        // layout is identical everywhere (AppBreakpoints.medium's own rule).
+        Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: AppBreakpoints.medium),
+            child: _StudyHomeColumn(
+              home: home,
+              onResume: onResume,
+              onStudy: onStudy,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// The column the ceiling wraps: supporting copy, the resume offer, the
+/// heading, then the ranked decks.
+class _StudyHomeColumn extends StatelessWidget {
+  const _StudyHomeColumn({
+    required this.home,
+    required this.onResume,
+    required this.onStudy,
+  });
+
+  final StudyHomeModel home;
+  final VoidCallback onResume;
+  final ValueChanged<StudyHomeDeckModel> onStudy;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final decks = home.studiableDecks;
+    final resume = home.resume;
+    final hasWork = decks.any((deck) => deck.hasWorkload);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Text(
           // **Two lines, chosen by whether there is anything to carry on
@@ -140,6 +181,10 @@ class _StudyHomeList extends StatelessWidget {
         // and cannot jump by heading at all.
         Semantics(
           header: true,
+          // Its own boundary: the heading used to inherit one from being a
+          // `ListView` child, and merged into the resume card's text without
+          // it now that the column is one child.
+          container: true,
           // **The name is the sentence, not the shouting.** The uppercase is a
           // typographic treatment; some TTS engines spell an all-caps run out
           // letter by letter, so the label states the heading as written and
