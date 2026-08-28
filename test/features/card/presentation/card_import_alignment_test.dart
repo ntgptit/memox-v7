@@ -68,7 +68,7 @@ void main() {
   /// exactly how the original defect hid.
   void expectSourceCardsFillColumn(WidgetTester tester) {
     final column = tester.getRect(
-      find.text(english.cardImportChooseSourceHeading),
+      find.text(english.cardImportChooseSourceHeading.toUpperCase()),
     );
     final upload = tester.getRect(
       cardHolding(find.text(english.cardImportUploadOptionTitle)),
@@ -115,7 +115,7 @@ void main() {
     expectSourceCardsFillColumn(tester);
     expectSharedEdges(tester, <String, Finder>{
       'choose-a-source heading': find.text(
-        english.cardImportChooseSourceHeading,
+        english.cardImportChooseSourceHeading.toUpperCase(),
       ),
       'file summary card': cardHolding(find.text('words.csv')),
       'info panel': cardHolding(find.text(english.cardImportInfoTitle)),
@@ -130,7 +130,7 @@ void main() {
     expectSourceCardsFillColumn(tester);
     expectSharedEdges(tester, <String, Finder>{
       'choose-a-source heading': find.text(
-        english.cardImportChooseSourceHeading,
+        english.cardImportChooseSourceHeading.toUpperCase(),
       ),
       'chooser panel': cardHolding(find.text(english.cardImportChoosePrompt)),
       'info panel': cardHolding(find.text(english.cardImportInfoTitle)),
@@ -147,7 +147,7 @@ void main() {
     expectSourceCardsFillColumn(tester);
     expectSharedEdges(tester, <String, Finder>{
       'choose-a-source heading': find.text(
-        english.cardImportChooseSourceHeading,
+        english.cardImportChooseSourceHeading.toUpperCase(),
       ),
       'paste box': find.byType(TextField),
       'info panel': cardHolding(find.text(english.cardImportInfoTitle)),
@@ -161,7 +161,7 @@ void main() {
 
     // Stacked, so both cards span the whole column rather than half of it.
     final column = tester.getRect(
-      find.text(english.cardImportChooseSourceHeading),
+      find.text(english.cardImportChooseSourceHeading.toUpperCase()),
     );
     for (final entry in <String, String>{
       'upload': english.cardImportUploadOptionTitle,
@@ -178,18 +178,37 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Preview: source context, mapping heading and the row list '
-      'share the column', (tester) async {
+  testWidgets('Preview: the mapping panel and the preview panel share the '
+      'column, and the mapping heading sits inside its panel', (tester) async {
+    // **The contract this asserts changed with the panel migration.** The
+    // source line, the mapping heading and the row list used to be three
+    // loose elements sharing the page column; they are two grouped panels
+    // now — mapping (source line, sheet/header, column rows) and preview
+    // (chips, policy, rows) — so what must share the column is the panels,
+    // and what must *not* is their contents, which sit one panel-padding in.
     await h.pump(tester, surface: phoneSurface);
     await h.pasteAndPreview(tester, 'front,back\n사과,apple\n배,pear\n');
 
+    final mappingPanel = cardHolding(
+      find.text(english.cardImportPastedSourceLabel),
+    );
+    final previewPanel = cardHolding(find.text('사과'));
     expectSharedEdges(tester, <String, Finder>{
-      'source context card': cardHolding(
-        find.text(english.cardImportPastedSourceLabel),
-      ),
-      'mapping heading': find.text(english.cardImportMappingHeading),
-      'row list card': cardHolding(find.text('사과')),
+      'mapping panel': mappingPanel,
+      'preview panel': previewPanel,
     });
+
+    final panel = tester.getRect(mappingPanel);
+    final heading = tester.getRect(
+      find.text(english.cardImportMappingHeading.toUpperCase()),
+    );
+    expect(
+      heading.left,
+      greaterThan(panel.left),
+      reason: 'the group label belongs to the panel, inset by its padding',
+    );
+    expect(heading.right, lessThan(panel.right));
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Confirm: heading and the plan summary share the column', (
@@ -201,7 +220,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expectSharedEdges(tester, <String, Finder>{
-      'confirm heading': find.text(english.cardImportConfirmHeading),
+      'confirm heading': find.text(
+        english.cardImportConfirmHeading.toUpperCase(),
+      ),
       'plan summary card': cardHolding(
         find.text(english.cardImportConfirmImportRowLabel),
       ),

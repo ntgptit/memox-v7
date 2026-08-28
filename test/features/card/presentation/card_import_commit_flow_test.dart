@@ -27,7 +27,10 @@ void main() {
       await h.pump(tester);
       await toConfirm(tester);
 
-      expect(find.text(english.cardImportConfirmHeading), findsOneWidget);
+      expect(
+        find.text(english.cardImportConfirmHeading.toUpperCase()),
+        findsOneWidget,
+      );
       expect(
         find.text(english.cardImportConfirmTargetLabel('TOPIK I')),
         findsOneWidget,
@@ -143,7 +146,10 @@ void main() {
       await widgetsAppState.didPopRoute();
       await tester.pump();
       expect(find.text(english.cardImportSubmittingTitle(2)), findsOneWidget);
-      expect(find.text(english.cardImportMappingHeading), findsNothing);
+      expect(
+        find.text(english.cardImportMappingHeading.toUpperCase()),
+        findsNothing,
+      );
 
       // A second press cannot start a second batch: the primary is in its
       // loading state, and canSubmit is latched until the commit resolves.

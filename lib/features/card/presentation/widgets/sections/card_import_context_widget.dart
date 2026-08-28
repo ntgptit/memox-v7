@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -59,7 +60,7 @@ class CardImportContextWidget extends ConsumerWidget {
         DecoratedBox(
           decoration: BoxDecoration(
             color: context.colors.surfaceContainerHigh,
-            borderRadius: BorderRadius.circular(AppSpacing.md),
+            borderRadius: BorderRadius.circular(AppRadius.md),
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(

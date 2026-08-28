@@ -43,11 +43,21 @@ class MxSwitchRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (announcedValue == null) {
-      return SwitchListTile(
-        value: isOn,
-        onChanged: onChanged,
-        contentPadding: EdgeInsets.zero,
-        title: Text(label, style: context.texts.bodyMedium),
+      // **Its own transparent `Material`, so the row can sit on any surface.**
+      // A `SwitchListTile` paints its ink on the nearest `Material` ancestor;
+      // inside a non-tappable `MxCard` — a bare `DecoratedBox`, by design —
+      // the nearest one is the Scaffold's, behind the card's opaque fill, and
+      // the framework rightly flags the splash as invisible. Transparency
+      // adds a paint layer for the ink and no colour of its own, so callers
+      // that sit on the bare page render exactly as before.
+      return Material(
+        type: MaterialType.transparency,
+        child: SwitchListTile(
+          value: isOn,
+          onChanged: onChanged,
+          contentPadding: EdgeInsets.zero,
+          title: Text(label, style: context.texts.bodyMedium),
+        ),
       );
     }
 
