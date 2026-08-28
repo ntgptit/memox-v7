@@ -134,11 +134,20 @@ class ProgressMetricGridWidget extends StatelessWidget {
 /// The row rung dropping to `titleSmall` fixes a second thing: it used to be
 /// `titleMedium`, the same rung and weight as the deck name beside it, so five
 /// blocks of type competed and the row's own name did not win.
+///
+/// **Tabular, the same feature Card Detail's own numeric metrics carry**
+/// (`card_metric_widget.dart`'s `CardMetricKind.numeric`): a grid is a column
+/// of counts read against each other, and proportional figures let a `1` sit
+/// narrower than a `4` on the row below it, so the second column's numeral
+/// does not share the first column's left edge it otherwise would.
 TextStyle? _numeralStyle(BuildContext context, ProgressMetricScale scale) =>
     (scale == ProgressMetricScale.panel
             ? context.texts.titleMedium
             : context.texts.titleSmall)
-        ?.copyWith(color: context.colors.onSurface);
+        ?.copyWith(
+          color: context.colors.onSurface,
+          fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
+        );
 
 /// One metric: anchor, numeral, word — one shape for all four.
 ///
