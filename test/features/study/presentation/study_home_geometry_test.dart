@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/app_breakpoints.dart';
 import 'package:memox/core/theme/app_spacing.dart';
 import 'package:memox/features/study/domain/models/study_home_deck_model.dart';
 import 'package:memox/features/study/presentation/widgets/items/study_home_deck_item_widget.dart';
@@ -72,6 +73,25 @@ void main() {
       // takes it from there rather than re-deriving the rule — a second copy is
       // how the two drift apart below 360, where nobody looks.
       expect(row.left - screen.left, AppSpacing.md);
+    });
+
+    testWidgets('past the ceiling the column stops growing and centres', (
+      tester,
+    ) async {
+      // The working column caps at `AppBreakpoints.medium`, the same ceiling
+      // Card Detail's reading column takes (G16). A ceiling, not a branch: on
+      // every phone width it binds nothing, which the 393/412 tests prove by
+      // never noticing it.
+      await harness.pump(tester, surface: const Size(800, 900));
+
+      final screen = tester.getRect(find.byType(MaterialApp));
+      final row = tester.getRect(find.byType(StudyHomeDeckItemWidget).first);
+      final resume = tester.getRect(find.byType(StudyHomeResumeSectionWidget));
+
+      expect(row.width, AppBreakpoints.medium);
+      expect(resume.width, AppBreakpoints.medium);
+      // Centred: equal dead margin either side, well past the gutter.
+      expect(row.left - screen.left, closeTo(screen.right - row.right, 0.5));
     });
   });
 

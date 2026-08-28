@@ -14481,6 +14481,56 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Editable documents:** `docs/wbs.md`, `docs/architecture.md`,
   `docs/reviews/design-parity-checklist.md`
 - **Dependencies:** M99.70, M99.74, M99.75
+### M99.84 · Study Home theo visual language của Card Detail — băng workload/verb và trần cột
+
+- **Status:** **done** — presentation-only restyle theo prompt set
+  `study-home-visual-hierarchy`; không đổi resume validity, workload
+  aggregation/order, session creation, routes, repository, clock seam hay
+  database.
+- **Goal:** Study Home compact và phân tầng như Card Detail mà vẫn đúng
+  anatomy/copy/state của M5 và BR-200…BR-202.
+- **Scope:** bốn thay đổi hình ảnh, ghi ở wireframe S14…S17: (1) cột nội dung
+  căn giữa trần `AppBreakpoints.medium` — cùng ceiling-không-phải-branch của
+  Card Detail, dưới 600 không trói gì; (2) workload và verb **chung một băng**
+  khi đủ rộng, stack như cũ khi hẹp/chữ to — ngưỡng
+  `AppStudyHomeDeckCard.inlineActionMinWidth` scale theo `textScaler` nên 2.0
+  stack ở mọi phone; (3) verb hàng dùng `MxActionButtonSize.compact` (40 vẽ,
+  48 chạm — trade của deck tile cho cùng vai); (4) Resume primary full-width
+  khi card hẹp hơn tier compact, intrinsic ở 393/412. **Ngoài scope:** ba
+  metric/zero visibility, thứ tự BR-201, double-tap guard, mọi controller/
+  provider — không dòng nào ngoài `presentation/` đổi.
+- **Semantics đi kèm, vì cột căn giữa làm mất ranh giới ListView-child:** câu
+  một-hàng nay phủ trọn card (identity + counts ở cả hai thể layout); Resume
+  card và heading STUDY NEXT tự khai `container: true`. R5/R6/R9 giữ nguyên
+  claim và test.
+- **Tests required:** `study_home_card_geometry_test` (+5: băng inline 393,
+  stack 320@2.0, compact verb 40/48, resume full-width 320 **và** intrinsic
+  393; G6 đo đáy theo băng), `study_home_geometry_test` (+1: trần 800dp căn
+  giữa), toàn bộ suite study hiện có xanh không đổi claim nào khác.
+- **Hai recursive review độc lập (logic + UI/UX), audit song song, fix áp
+  tuần tự — một P0 thật và cả hai cùng bắt bằng số học:** `LayoutBuilder` của
+  Resume nằm trong padding card nên đo *content width* (hẹp hơn 32dp), làm
+  nhánh intrinsic của S17 không bao giờ chạy trên phone — 393 trao 329 < 360
+  → full-width khắp nơi, suite vẫn xanh vì nửa roomy chưa có assertion. Fix:
+  nâng `LayoutBuilder` ra ngoài `MxCard.tonal` (cột cha stretch nên maxWidth
+  chính là bề rộng card), thêm assertion intrinsic ở 393, sửa comment sai
+  trong test cramped. Nit đã sửa kèm: doc `inlineActionMinWidth` trộn hai hệ
+  đo (296 là card, content là 264); doc `AppBreakpoints.medium` ghi đủ hai
+  consumer; wireframe ghi biên 390/393 của S17 và chú thích W1 vẽ thể
+  stacked. Không finding nào về BR-201/semantics/scope — diff sạch 7 file.
+- **Checklist phases:** Phase 13 (responsive/a11y) · Phase 14 (feature).
+- **Emulator integration suite:** **not run — presentation-only restyle.** Đây
+  không phải một lượt chạy xanh.
+- **Output:** như Scope; wireframe M5 append S14…S17 + G15/G16; goldens
+  study_home regenerate; gallery publish lại URL ghim.
+- **Acceptance criteria:**
+  - [x] Không business/navigation/data drift — diff chỉ chạm
+        `features/study/presentation/` + tests + docs.
+  - [x] Geometry + responsive + semantics pass trên production tree.
+  - [x] `flutter analyze` 0; changed gate xanh; goldens `TZ=UTC` xanh.
+- **Editable documents:** `docs/wbs.md`, `docs/wireframes/m5-study-home.md`
+- **Dependencies:** M99.83, M5.26, M99.26
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |

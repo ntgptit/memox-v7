@@ -7,8 +7,8 @@
 | **Scope** | Màn hình `/study`: anatomy, Resume card, danh sách root deck, mọi trạng thái, hợp đồng geometry, responsive/a11y. Ngoài phạm vi: luật nghiệp vụ (BR-200…BR-202), luồng (UC-14), study entry của một deck (UC-05), phiên học (`m5-study-modes.md`) |
 | **Source of truth for** | Anatomy Study Home · copy các trạng thái của Study Home · hợp đồng geometry của Study Home · responsive/a11y contract của Study Home |
 | **Depends on** | `../use-cases.md` (UC-14), `../business-rules.md` (BR-200…BR-202, BR-161, BR-162), `../architecture.md` (AD-13, AD-15, AD-16), `m5-study-modes.md` |
-| **Updated by task** | M5.26 (Study Home v1) · M99.26 (một ngữ pháp cho Library / Study / Progress — W1, G9, G12) |
-| **Last updated** | 2026-08-15 |
+| **Updated by task** | M99.84 (Card Detail visual language — S14…S17, G15/G16, phạm vi G8, cách đo G6) · M5.26 (Study Home v1) · M99.26 (một ngữ pháp cho Library / Study / Progress — W1, G9, G12) |
+| **Last updated** | 2026-08-28 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham chiếu bằng ID theo
 `document-conventions.md` §5; chỗ nào wireframe và BR có vẻ mâu thuẫn thì BR
@@ -74,6 +74,11 @@ Bottom navigation (thuộc shell, không thuộc màn hình này)
 
 Resume card vắng mặt hoàn toàn khi không có phiên hợp lệ — không phải một thẻ
 rỗng, không phải một nút bị vô hiệu hoá (BR-200).
+
+*(M99.84)* Sơ đồ trên vẽ deck row ở **thể stacked** — `[▶ Study]` một băng
+riêng dưới counts. Ở bề rộng đủ (G15, thể mặc định của 393/412) verb gộp vào
+cùng băng với counts; anatomy — thứ tự *deck nào → có gì chờ → làm gì được* —
+không đổi.
 
 Ba chỉ số **không** có dấu `·` ngăn giữa. Icon đã nhóm từng chỉ số rồi, và
 `deck_workload_line_widget.dart` phải bọc dấu `·` vào một `Row` chính vì `Wrap`
@@ -167,3 +172,23 @@ không ai chọn.
   `features/deck/presentation/` là thứ một feature khác không được import.
   Tách phần dùng chung xuống `core/` là việc riêng, không làm kèm ở đây vì nó
   sẽ viết lại một controller mà thay đổi này không có lý do nào khác để chạm.
+
+## Bản sửa hình ảnh — Card Detail visual language (M99.84)
+
+Restyle trình bày, không đổi anatomy W1, copy, trạng thái W3 hay hành vi
+action nào. Bốn thay đổi hình ảnh, mỗi cái một phép đo:
+
+| # | Quyết định | Lý do | Assertion |
+|---|---|---|---|
+| S14 | Cột nội dung căn giữa, trần `AppBreakpoints.medium` (**G16**) | Cùng trần mà Card Detail đặt cho reading column: trần, không phải branch — dưới 600 không trói gì, mọi phone giữ nguyên layout | `past the ceiling the column stops growing and centres` |
+| S15 | Workload và verb **chung một băng** khi đủ rộng; stack như cũ khi hẹp/chữ to (**G15**, thay thế phạm vi của G8) | Mỗi hàng từng tốn nguyên một băng cho một nút — đó là thứ làm danh sách ngắn chiếm nhiều viewport. Ngưỡng scale theo `textScaler` nên chữ 2.0 stack thay vì ép ba chỉ số sát nút; G8 (verb `md` dưới counts) nay là hợp đồng của **thể stack** | `at 393dp the verb shares the workload band and trails it` · `cramped, the verb steps back below the counts — one section step` |
+| S16 | Verb của hàng dùng `MxActionButtonSize.compact` (40 vẽ, 48 chạm) | Cùng trade mà deck tile đã làm cho cùng vai: verb là đồ đạc trong một hàng, không phải action cấp màn; G11 giữ nguyên qua `padded` | `the compact verb draws 40 and still hits 48` |
+| S17 | Resume primary full-width khi **card** hẹp hơn `AppBreakpoints.compact`; intrinsic ở 393/412 | Dưới tier compact nút trải hết là target dễ hơn và đường nét tĩnh hơn; đo theo bề rộng card chứ không theo viewport để khỏi suy lại gutter. **Cả hai nhánh đều có phép đo** — bản đầu chỉ pin nhánh cramped, và phép so sánh rơi nhầm hệ toạ độ (content width, hẹp hơn 32dp) khiến full-width chạy trên mọi phone mà suite vẫn xanh; hai review độc lập cùng bắt bằng số học. **Biên đã biết:** viewport 390 → card 358 → full-width, 393 → card 361 → intrinsic — hai phone cùng hạng lệch 3dp cho hai thể; đây là hệ quả trung thực của "đo theo card", không phải regression khi soi ảnh | `a cramped resume card stretches its primary to full width` · `a roomy resume card keeps its primary intrinsic` |
+
+G6 sửa cách đo cạnh dưới: đáy card đo tới **băng workload/action** (max của hai
+bottom), vì ở thể inline counts có thể hai dòng cạnh một verb thấp hơn — đo
+riêng verb sẽ đếm phần canh giữa nội bộ của băng như padding (`the card pads
+its content by one step on every side`). Semantics: câu-một-hàng nay phủ trọn
+card (identity + counts ở bất kỳ thể nào), Resume card và heading tự khai
+`container: true` vì cột căn giữa làm mất ranh giới ListView-child từng cấp
+ranh giới đó miễn phí (R5/R6/R9 giữ nguyên claim).
