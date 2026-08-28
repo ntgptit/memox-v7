@@ -14796,7 +14796,15 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
   `card_list_tag_filter_empty_test.dart` (mới); `card_state_distribution_widget.dart`,
   `card_list_screen_test.dart`, `card_screens_demo_test.dart` (sửa); 4 golden
   mới (`card_list_search_empty_light/dark.png`, `card_list_filter_empty_light/dark.png`);
-  2 hàng gallery mới; gallery publish lại URL ghim.
+  2 hàng gallery mới; gallery publish lại URL ghim. **Bản live tại thời điểm
+  publish là 56 màn, đóng dấu commit của lượt Settings (M99.88) — không phải
+  stale, là trạng thái publish gần nhất trên URL ghim.** Theo
+  [[splice-gallery-not-overwrite]]: không đè cả trang, chỉ thay figure
+  `Card list` bằng bản mới + chèn hai figure mới (`Card list — search rỗng`,
+  `Card list — pill rỗng`) ngay sau nó, tăng count section Card 22→24 và
+  tổng 56→58, giữ nguyên mọi figure khác — kể cả Progress Overview/Daily
+  Reminder dù goldens của chúng đã đổi trong worktree này (out of scope, để
+  session của chúng tự publish).
 - **Acceptance criteria:**
   - [x] Không business/navigation/data drift — diff chỉ chạm
         `features/card/presentation/` (đúng một widget ngoài `card_list/`:
