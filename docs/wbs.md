@@ -13984,7 +13984,7 @@ tìm, còn "đây là hai dòng" thì không.
 **Và luật gốc vừa chứng minh nó hoạt động**: ở lần trùng thứ sáu trong phiên
 này, nó chặn được **trước khi merge** thay vì để lọt lên `main` như lần thứ năm.
 
-### M99.86 · Card Import lấy visual hierarchy của Card Detail — presentation only
+### M99.87 · Card Import lấy visual hierarchy của Card Detail — presentation only
 
 - **Status:** **done** — presentation, tests, goldens, Widgetbook và docs; không
   đổi parser, transaction, provider ownership, route hay bất kỳ BR nào.
