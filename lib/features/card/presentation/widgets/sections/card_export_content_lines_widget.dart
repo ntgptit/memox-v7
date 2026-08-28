@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../shared/widgets/mx_card.dart';
 import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
@@ -27,6 +28,16 @@ import '../../../../../l10n/l10n_extension.dart';
 /// on re-import. The glyph is the shape this feature already uses for the job —
 /// `card_import_source_step_widget.dart` and `card_import_result_widget.dart`
 /// both mark an informational aside the same way.
+///
+/// **`MxCard.flat`, not `.muted`.** The pair no longer sits loose on the
+/// sheet's own background, which is what made it read as a stray paragraph
+/// rather than a deliberate disclosure — but `.muted` carries `AppElevation
+/// .card`, and this band sits in the same scroll column as the scope
+/// summary's flat card two bands above it. A shadow on one card and none on
+/// its neighbour is the exact "two competing depths" fault `MxCard.flat`'s
+/// own doc warns about, painted only in light mode — the fix three other
+/// screens already paid for once each (D20). Flat, like every other card in
+/// this column.
 class CardExportContentLinesWidget extends StatelessWidget {
   const CardExportContentLinesWidget({super.key});
 
@@ -35,33 +46,36 @@ class CardExportContentLinesWidget extends StatelessWidget {
     final l10n = context.l10n;
     final texts = context.texts;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        Text(
-          // The six canonical fields, named in AD-20's order. The file's own
-          // headers stay English whatever this sentence says (BR-179).
-          l10n.cardExportIncludesLine,
-          style: texts.bodySmall!.inked(context, AppInk.quiet),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            const MxIcon(Icons.info_outline, size: MxIconSize.sm),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: Text(
-                l10n.cardExportExcludesLine,
-                // Full ink, unlike the line above it: this is the half a reader
-                // is least expecting and most needs (E4).
-                style: texts.bodySmall,
+    return MxCard.flat(
+      padding: MxCardPadding.compact,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Text(
+            // The six canonical fields, named in AD-20's order. The file's own
+            // headers stay English whatever this sentence says (BR-179).
+            l10n.cardExportIncludesLine,
+            style: texts.bodySmall!.inked(context, AppInk.quiet),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              const MxIcon(Icons.info_outline, size: MxIconSize.sm),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  l10n.cardExportExcludesLine,
+                  // Full ink, unlike the line above it: this is the half a
+                  // reader is least expecting and most needs (E4).
+                  style: texts.bodySmall,
+                ),
               ),
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
