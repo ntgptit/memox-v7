@@ -7,7 +7,7 @@
 | **Scope** | Màn hình `/study`: anatomy, Resume card, danh sách root deck, mọi trạng thái, hợp đồng geometry, responsive/a11y. Ngoài phạm vi: luật nghiệp vụ (BR-200…BR-202), luồng (UC-14), study entry của một deck (UC-05), phiên học (`m5-study-modes.md`) |
 | **Source of truth for** | Anatomy Study Home · copy các trạng thái của Study Home · hợp đồng geometry của Study Home · responsive/a11y contract của Study Home |
 | **Depends on** | `../use-cases.md` (UC-14), `../business-rules.md` (BR-200…BR-202, BR-161, BR-162), `../architecture.md` (AD-13, AD-15, AD-16), `m5-study-modes.md` |
-| **Updated by task** | M99.84 (Card Detail visual language — S14…S17, G15/G16, phạm vi G8, cách đo G6) · M5.26 (Study Home v1) · M99.26 (một ngữ pháp cho Library / Study / Progress — W1, G9, G12) |
+| **Updated by task** | M99.85 (Card Detail visual language — S14…S17, G15/G16, phạm vi G8, cách đo G6) · M5.26 (Study Home v1) · M99.26 (một ngữ pháp cho Library / Study / Progress — W1, G9, G12) |
 | **Last updated** | 2026-08-28 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham chiếu bằng ID theo
@@ -75,7 +75,7 @@ Bottom navigation (thuộc shell, không thuộc màn hình này)
 Resume card vắng mặt hoàn toàn khi không có phiên hợp lệ — không phải một thẻ
 rỗng, không phải một nút bị vô hiệu hoá (BR-200).
 
-*(M99.84)* Sơ đồ trên vẽ deck row ở **thể stacked** — `[▶ Study]` một băng
+*(M99.85)* Sơ đồ trên vẽ deck row ở **thể stacked** — `[▶ Study]` một băng
 riêng dưới counts. Ở bề rộng đủ (G15, thể mặc định của 393/412) verb gộp vào
 cùng băng với counts; anatomy — thứ tự *deck nào → có gì chờ → làm gì được* —
 không đổi.
@@ -173,7 +173,7 @@ không ai chọn.
   Tách phần dùng chung xuống `core/` là việc riêng, không làm kèm ở đây vì nó
   sẽ viết lại một controller mà thay đổi này không có lý do nào khác để chạm.
 
-## Bản sửa hình ảnh — Card Detail visual language (M99.84)
+## Bản sửa hình ảnh — Card Detail visual language (M99.85)
 
 Restyle trình bày, không đổi anatomy W1, copy, trạng thái W3 hay hành vi
 action nào. Bốn thay đổi hình ảnh, mỗi cái một phép đo:

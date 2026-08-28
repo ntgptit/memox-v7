@@ -30,7 +30,7 @@ abstract final class AppBreakpoints {
   /// Two production consumers, both ceilings: Card Detail caps its reading
   /// column at this width (`card_detail_screen.dart`, M4.15 W2, since M99.60)
   /// and Study Home caps its working column the same way
-  /// (`study_home_body_section_widget.dart`, M99.84 S14/G16). A *ceiling*, not
+  /// (`study_home_body_section_widget.dart`, M99.85 S14/G16). A *ceiling*, not
   /// a branch — below 600 it binds nothing and every phone gets the identical
   /// layout — and it is here rather than as a number of its own because the
   /// widest a phone gets is exactly the widest a column of card text should

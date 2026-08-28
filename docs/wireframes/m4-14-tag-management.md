@@ -164,3 +164,28 @@ Từ trên xuống:
 - Đóng overlay rename/xoá MUST trả focus về **đúng hàng** đã mở nó.
 - Số thẻ dùng ICU plural ở cả EN và VI; không nối chuỗi bằng tay.
 - Không màu nào được đặt cứng; mọi màu và khoảng cách lấy từ token.
+
+## V-visual revision 2026-08-28 — Card Detail visual language
+
+Bản sửa **trình bày thuần tuý**; mọi quyết định D/W/G/R phía trên giữ nguyên
+hiệu lực, kể cả khi mục dưới đây nói khác về hình thức.
+
+- Catalog populated đặt trong **một** `MxCard.flat` liên tục (không card-per-row,
+  không shadow), trong cột đọc `Center + ConstrainedBox(AppBreakpoints.medium)`
+  — cùng công thức Card Detail M4.15 W2.
+- Hàng: well trung tính 32dp (`semanticColors.surfaceMuted`, `AppRadius.sm`,
+  `sell_outlined` sm quiet, decorative) · tên `titleSmall` tối đa 2 dòng ·
+  count `bodySmall` quiet **tabular** dưới tên (G3 giữ nguyên) · menu
+  `MxMenuButton` 48dp (G4 giữ nguyên). Mọi hàng cùng glyph/tone — well không
+  mang nghĩa phân loại (T9 giữ nguyên).
+- Ngăn hàng bằng hairline `Divider` indent đúng cột chữ (md + 32 + md), endIndent
+  md; separator không cắt xuyên card.
+- Search subheader và mọi state face đứng trong cùng cột: face bọc bởi gutter
+  `lg` + cap `medium`, không gutter thứ hai; search bọc cap `medium` (G2 mở
+  rộng cho bề rộng > medium).
+- Gutter ngang của surface giữ `AppSpacing.lg` cố định để G1 tiếp tục đúng với
+  card list; dưới 360dp search theo gutter shell (`md`) như chính card list —
+  trade có sẵn của shell, không thuộc bản sửa này.
+- Đo bằng test: nhóm `visual revision 2026-08-28` trong
+  `tag_catalog_alignment_test.dart`.
+
