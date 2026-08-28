@@ -14679,7 +14679,7 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
   không đổi UI/device behavior.
 - **Checklist phases:** 11, 15
 
-### M99.87 · Progress Overview theo ngôn ngữ thị giác Card Detail — streak hero thu về compact
+### M99.88 · Progress Overview theo ngôn ngữ thị giác Card Detail — streak hero thu về compact
 
 - **Status:** **done** — theo prompt set `docs/prompt/progress-overview-visual-hierarchy/`
   (handoff SHA-verified); implementation → hai recursive review độc lập
@@ -14740,7 +14740,7 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
   - [x] Diff chỉ chạm presentation của streak hero; domain/data/route/Today/
         Daily-activity không đổi một dòng.
 - **Editable documents:** `docs/wbs.md`, `docs/wireframes/m99-23-progress-overview.md`
-- **Dependencies:** M99.86
+- **Dependencies:** M99.87
 
 ## Known technical debt
 
