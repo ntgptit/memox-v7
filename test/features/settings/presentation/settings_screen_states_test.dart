@@ -8,6 +8,7 @@ import 'package:memox/features/settings/domain/models/app_settings_model.dart';
 import 'package:memox/features/settings/domain/models/app_theme_mode_model.dart';
 import 'package:memox/features/settings/presentation/widgets/items/settings_error_band_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
+import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/shared/widgets/mx_loading_state.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
@@ -42,6 +43,10 @@ void main() {
     await tester.tap(choiceRow(label));
     await tester.pumpAndSettle();
   }
+
+  bool isSaveEnabled(WidgetTester tester) =>
+      tester.widget<MxActionButton>(find.byType(MxActionButton)).onPressed !=
+      null;
 
   group('loaded', () {
     testWidgets('shows all three groups at their persisted values', (
@@ -195,19 +200,124 @@ void main() {
     });
   });
 
-  group('validation and persistence failure', () {
-    testWidgets('an out-of-range limit shows its message under the field and '
-        'writes nothing', (tester) async {
+  group('Save enablement (S2, S3)', () {
+    testWidgets('is disabled while the draft is pristine', (tester) async {
+      await pumpSettings(tester, FakeAppSettingsRepository());
+
+      expect(isSaveEnabled(tester), isFalse);
+    });
+
+    testWidgets('enables once the card limit is edited', (tester) async {
+      await pumpSettings(tester, FakeAppSettingsRepository());
+
+      await tester.enterText(find.byType(MxTextField), '35');
+      await tester.pump();
+
+      expect(isSaveEnabled(tester), isTrue);
+    });
+
+    testWidgets('enables when only the order changes', (tester) async {
+      await pumpSettings(tester, FakeAppSettingsRepository());
+
+      await tester.tap(find.text(english.studyOptionsOrderRandom));
+      await tester.pump();
+
+      expect(isSaveEnabled(tester), isTrue);
+    });
+
+    testWidgets('goes pristine again once the draft matches persisted values, '
+        'without a save', (tester) async {
+      await pumpSettings(tester, FakeAppSettingsRepository());
+
+      await tester.enterText(find.byType(MxTextField), '35');
+      await tester.pump();
+      expect(isSaveEnabled(tester), isTrue);
+
+      await tester.enterText(find.byType(MxTextField), '20');
+      await tester.pump();
+
+      expect(isSaveEnabled(tester), isFalse);
+    });
+
+    testWidgets('stays disabled while the draft is out of range, even '
+        'though it is dirty', (tester) async {
+      await pumpSettings(tester, FakeAppSettingsRepository());
+
+      await tester.enterText(find.byType(MxTextField), '9999');
+      await tester.pump();
+
+      // Save's own disabled paint is live from the first keystroke; the
+      // message under the field is not — see `_fieldErrorText`. It only
+      // shows once the field is no longer being typed into.
+      expect(isSaveEnabled(tester), isFalse);
+      expect(find.textContaining('Between'), findsNothing);
+
+      FocusScope.of(tester.element(find.byType(MxTextField))).unfocus();
+      await tester.pump();
+
+      expect(find.textContaining('Between'), findsOneWidget);
+    });
+
+    testWidgets('re-enables once an out-of-range draft is corrected', (
+      tester,
+    ) async {
+      await pumpSettings(tester, FakeAppSettingsRepository());
+
+      await tester.enterText(find.byType(MxTextField), '9999');
+      await tester.pump();
+      expect(isSaveEnabled(tester), isFalse);
+
+      await tester.enterText(find.byType(MxTextField), '35');
+      await tester.pump();
+
+      expect(find.textContaining('Between'), findsNothing);
+      expect(isSaveEnabled(tester), isTrue);
+    });
+
+    testWidgets('goes pristine again immediately after a successful save, '
+        'without a second tap', (tester) async {
+      // The re-seed on a successful write (`didUpdateWidget`) and the
+      // dirty check both read the same persisted value in the same rebuild
+      // — there is no frame where Save is briefly re-enabled by its own
+      // success.
       final repository = FakeAppSettingsRepository();
       await pumpSettings(tester, repository);
 
-      await tester.enterText(find.byType(MxTextField), '9999');
+      await tester.enterText(find.byType(MxTextField), '35');
+      await tester.pump();
+      expect(isSaveEnabled(tester), isTrue);
+
       await tester.tap(find.text(english.studyOptionsSave));
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('Between'), findsOneWidget);
-      expect(repository.writes, isEmpty);
+      expect(repository.current.cardLimit, 35);
+      expect(isSaveEnabled(tester), isFalse);
     });
+  });
+
+  group('validation and persistence failure', () {
+    testWidgets(
+      'an out-of-range limit disables Save and shows its message under the '
+      'field once the field is blurred, and nothing is written',
+      (tester) async {
+        // Save is disabled the instant the draft goes out of range (S10), so
+        // there is nothing left to prove by tapping it — the assertion that
+        // matters is that the disabled button is unreachable and the message
+        // still explains why, once the field is no longer being typed into.
+        final repository = FakeAppSettingsRepository();
+        await pumpSettings(tester, repository);
+
+        await tester.enterText(find.byType(MxTextField), '9999');
+        await tester.pump();
+        expect(isSaveEnabled(tester), isFalse);
+
+        FocusScope.of(tester.element(find.byType(MxTextField))).unfocus();
+        await tester.pump();
+
+        expect(find.textContaining('Between'), findsOneWidget);
+        expect(repository.writes, isEmpty);
+      },
+    );
 
     testWidgets('a failing theme save shows a band in that group and leaves '
         'the persisted value marked', (tester) async {
