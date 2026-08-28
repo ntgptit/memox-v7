@@ -7,8 +7,8 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
-| **Last updated** | 2026-08-26 |
+| **Updated by task** | M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
+| **Last updated** | 2026-08-28 |
 
 Single source of truth for project progress. Update it in the same commit as the
 work it describes. A task is `done` only when it meets the Definition of Done in
@@ -14584,6 +14584,33 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
   - [x] `flutter analyze` 0; changed gate xanh; goldens `TZ=UTC` xanh.
 - **Editable documents:** `docs/wbs.md`, `docs/wireframes/m5-study-home.md`
 - **Dependencies:** M99.83, M5.26, M99.26
+### M99.86 · Chặn vòng lặp vô hạn trong Deck ancestry query
+
+- **Status:** **done**
+- **Goal:** `childDeckLevel` MUST kết thúc cả khi parent chain bị cyclic, để
+  một read lỗi không giữ database isolate và chặn toàn bộ SQLite của app.
+- **Scope:** Bound riêng `ancestry(deck_id, distance)` bằng `:maxWalk`; truyền
+  `DeckEntity.maxTreeDepth + 1`; sửa comment SQL; pin cây hợp lệ sâu tối đa,
+  cycle termination, isolate còn dùng được, aggregate và thứ tự bằng SQLite
+  thật.
+- **Out of scope:** Schema/migration, thay đổi nghiệp vụ Deck, UI, emulator,
+  gallery và task Deck Write & Move UX Hardening.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `deck.drift`, `deck_dao.dart`, `deck_ancestry_read_test.dart` và
+  technical-debt ledger cập nhật.
+- **Acceptance criteria:**
+  - [x] Bound là parameter lấy từ single owner của BR-55, không hardcode số.
+  - [x] Breadcrumb của cây sâu tối đa vẫn đủ và đúng thứ tự.
+  - [x] Parent cycle trả về trong thời hạn test; query kế tiếp trên cùng
+        database isolate vẫn thành công.
+  - [x] Aggregate và thứ tự child/breadcrumb hiện có không regression.
+  - [x] Changed gate và test database/Deck liên quan xanh.
+- **Dependencies:** M99.28
+- **Tests required:** SQLite thật trong `deck_ancestry_read_test.dart`, cộng
+  changed verification plan cho Deck/database; không cần emulator hay golden vì
+  không đổi UI/device behavior.
+- **Checklist phases:** 11, 15
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |
@@ -14600,7 +14627,7 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 | ~~`dart format .` trong `dod_check.sh` crash trên worktree~~ | M2.2b | Bước `format` đỏ ở **mọi** lần chạy local nhiều tuần liền: `.` đi vào `.claude/worktrees/`, nơi Gradle xoá thư mục ngay giữa lúc formatter đang liệt kê → `PathNotFoundException`. Vì là lỗi môi trường chứ không phải lỗi format, mỗi lần lại được *báo cáo và đi vòng* thay vì sửa — và một gate đỏ mà ai cũng biết là đỏ thì không còn là gate | **Đã trả.** `dart_roots()` lấy tập thư mục từ `git ls-files '*.dart'` cắt tới segment đầu. Đúng câu hỏi cần hỏi — *cây làm việc **này** track những file Dart nào* — nên build output không tracked không lọt vào, worktree bị `.git/info/exclude` loại sẵn, và một thư mục top-level mới tự động được nhận. **Lỗi thứ hai nghiêm trọng hơn cái crash:** `.` đưa cho formatter source của **nhánh khác**, nên một worktree có format cũ làm gate đỏ vì code không nằm trong cây làm việc |
 | ~~`study_session_controller.dart` vượt trần 400 dòng của guard~~ | M5.24 | 423/400. Warning cũng làm đỏ gate. Class giữ toàn bộ command của phiên học | **Đã trả ở M5.25.** Không tách được bằng cơ chế ngôn ngữ — Dart không có partial class, base class Riverpod sinh ra là private, và extension trong `part` cũng không dùng được `state` (`invalid_use_of_protected_member`, đã thử và revert). Nên tách bằng **trách nhiệm**: offset nhìn lại của `browse` là view state, không phải command của phiên, và nay là `StudyBrowseTrailController`. Controller còn 387 dòng |
 | `study_answers` chưa có index cho khoảng thời gian | M99.28 | Progress lọc `answered_at >= ? AND answered_at < ?`; index duy nhất chạm cột này là `(card_id, answered_at)`, mà cột dẫn đầu không nằm trong predicate — nên mỗi lần emit là một full scan `study_answers`, và stream re-emit theo **mỗi lượt trả lời** khi màn hình đang mở (ở độ sâu 3 là ba scan mỗi lượt). Output có chặn, scan thì không | Thêm index `(answered_at)` — nhưng đó là **đổi schema**, tức bump version + snapshot + migration test, và M99.28 cố ý không đụng schema. Trả cùng lần bump schema tiếp theo, và theo đúng rule index của repo: đo bằng `EXPLAIN QUERY PLAN` trên dữ liệu thật trước rồi mới thêm |
-| `ancestry` CTE trong `deck.drift` không có bound | M99.28 | Cùng khiếm khuyết đã sửa ở `progress.drift`: walk mang `distance` tăng mỗi vòng nên `UNION` không dedup được, và trên cây cha vòng lặp thì statement không bao giờ trả về — nó giữ database isolate, nên mọi query khác của app chặn theo. Comment ở `deck.drift` còn khẳng định ngược lại | Áp đúng cách đã dùng ở `progress.drift`: `:maxWalk` cho `ancestry`, giữ `UNION` cho các walk không mang counter. Không gộp vào M99.28 vì nó nằm ngoài scope đã tuyên bố (không đụng Deck production code) |
+| ~~`ancestry` CTE trong `deck.drift` không có bound~~ | M99.28 | Cùng khiếm khuyết đã sửa ở `progress.drift`: walk mang `distance` tăng mỗi vòng nên `UNION` không dedup được, và trên cây cha vòng lặp thì statement không bao giờ trả về — nó giữ database isolate, nên mọi query khác của app chặn theo. Comment ở `deck.drift` còn khẳng định ngược lại | **Đã trả ở M99.86.** `ancestry` nhận `:maxWalk = DeckEntity.maxTreeDepth + 1`; `branch` giữ `UNION` không bound vì row của nó hữu hạn. Test SQLite thật dựng cycle, buộc read kết thúc và chứng minh query kế tiếp trên cùng database isolate vẫn chạy. |
 | `end_reason = scheduler_reset` phải mang cả BR-164 | M99.16 | Đổi scheduler khi chưa khoá ghi cùng giá trị với Reset, nên đọc riêng cột đó thì hai sự kiện khác nhau trông giống nhau. Không mất thông tin — `study_sessions.scheduler_generation` bằng generation của root sau một lần đổi và nhỏ hơn sau một lần reset — nhưng nó bắt người đọc phải biết mẹo đó | Tên đúng là `scheduler_changed`. `study_sessions.end_reason` có `CHECK` liệt kê giá trị nên thêm một giá trị là **đổi schema**, và nới `CHECK` là rebuild bảng nên xứng một bump riêng. Ba lần bump sau khi nợ được ghi đều đã đi việc khác: v8 (BR-203, ba cột `direction` additive), v9 (M99.28, hai cột theme/ngôn ngữ), v10 (M99.29, ba cột nhắc học); v11 (M99.33, Trash) có rebuild `study_sessions` nhưng cố ý không gánh thêm nợ này. Đích hiện tại là **v12** — lần rebuild kế tiếp của `study_sessions`, rồi đổi `deck_scheduler_repository_impl.dart` sang giá trị mới |
 | Nội dung starter là fixture, không phải nội dung production | T1.3 | Không phát hành được với nội dung này | Tìm nguồn nội dung có bản quyền rõ ràng trước M8 (BR-87) |
 | `sqlite3.wasm` và `drift_worker.js` là binary vendored trong `web/` | M4.2 | Không có bước build nào sinh ra chúng và không có bước build nào báo khi chúng cũ: app compile, load, rồi **không mở được database**. Nâng `drift` mà quên tải lại worker không có triệu chứng nào cho tới khi ai đó mở trình duyệt | `test/database/web_assets_test.dart` so version trong `pubspec.lock` với version đã pin, kèm `web/WEB_ASSETS.md` ghi URL tải. Đã kiểm tiêm lỗi: đổi `drift` thành 2.99.0 làm test đỏ |
