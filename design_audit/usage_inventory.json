@@ -1,12 +1,12 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
   "scannedFiles": 692,
-  "totalSites": 356,
+  "totalSites": 357,
   "byElementKind": {
     "other": 288,
     "background": 26,
     "shadow": 1,
-    "border": 17,
+    "border": 18,
     "text": 18,
     "icon": 6
   },
@@ -16,7 +16,7 @@
     "Colors-material": 12,
     "hardcoded-literal": 97,
     "opacity-modified-token": 16,
-    "theme-token": 79
+    "theme-token": 80
   },
   "sites": [
     {
@@ -3483,6 +3483,17 @@
       "token": "colorScheme.onErrorContainer",
       "resolved_value_light": "#641421",
       "resolved_value_dark": "#F5D3D8"
+    },
+    {
+      "file": "lib/features/reminder/presentation/widgets/sections/reminder_settings_section_widget.dart",
+      "line": 115,
+      "widget_context": "ReminderSettingsSectionWidget",
+      "element_kind": "border",
+      "source_kind": "theme-token",
+      "expression": "context.semanticColors.borderSubtle",
+      "token": "semantic.borderSubtle",
+      "resolved_value_light": "#D2D2DD",
+      "resolved_value_dark": "#4C487A"
     },
     {
       "file": "lib/features/settings/presentation/widgets/items/settings_error_band_widget.dart",
