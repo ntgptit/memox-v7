@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/error/failure.dart';
-import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -317,9 +316,15 @@ class _Body extends StatelessWidget {
           deckCardCount: deckCardCount,
         ),
         const SizedBox(height: AppSpacing.xl),
+        // The section-label grammar every Card Detail band opens with:
+        // tracked uppercase `sectionLabel` on `onSurfaceVariant`, not sentence
+        // case — the format band is a group of three options, not a row of
+        // content, and this is the name of the group.
         Text(
-          l10n.cardExportFormatHeading,
-          style: context.texts.labelLarge!.inked(context, AppInk.quiet),
+          l10n.cardExportFormatHeading.toUpperCase(),
+          style: context.textStyles.sectionLabel.copyWith(
+            color: context.colors.onSurfaceVariant,
+          ),
         ),
         const SizedBox(height: AppSpacing.sm),
         CardExportFormatOptionsWidget(

@@ -1,13 +1,13 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
   "scannedFiles": 692,
-  "totalSites": 356,
+  "totalSites": 357,
   "byElementKind": {
     "other": 288,
     "background": 26,
     "shadow": 1,
     "border": 17,
-    "text": 18,
+    "text": 19,
     "icon": 6
   },
   "bySourceKind": {
@@ -16,7 +16,7 @@
     "Colors-material": 12,
     "hardcoded-literal": 97,
     "opacity-modified-token": 16,
-    "theme-token": 79
+    "theme-token": 80
   },
   "sites": [
     {
@@ -3131,6 +3131,17 @@
       "token": "semantic.surfaceMuted",
       "resolved_value_light": "#EAECF1",
       "resolved_value_dark": "#28254B"
+    },
+    {
+      "file": "lib/features/card/presentation/widgets/overlays/card_export_sheet_widget.dart",
+      "line": 326,
+      "widget_context": "_Body",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_detail_state_widget.dart",

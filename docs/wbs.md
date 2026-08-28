@@ -14743,6 +14743,66 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Editable documents:** `docs/wbs.md`, `docs/wireframes/m99-settings.md`
 - **Dependencies:** M99.28, BR-211, BR-216
 
+### M99.90 · Card Export lấy visual hierarchy của Card Detail — presentation only
+
+- **Status:** **done** — presentation-only restyle theo prompt set
+  `card-export-visual-hierarchy`; không đổi controller, use case, repository,
+  encoder/destination, route hay bất kỳ BR nào — AD-20, BR-174…181, UC-11
+  nguyên vẹn.
+- **Goal:** Sheet export đọc bằng đúng grammar Card Detail — mỗi band là một
+  `MxCard.flat` độc lập, nhãn nhóm dùng `sectionLabel` uppercase — mà vẫn là
+  modal bottom sheet đúng sáu trạng thái của M4.13 W3, không phải một route.
+- **Scope:** `card_export_scope_summary_widget.dart` (bọc Row trong
+  `MxCard.flat`, padding compact), `card_export_content_lines_widget.dart`
+  (bọc Column, ban đầu chọn `MxCard.muted`, audit UI/UX sửa thành
+  `MxCard.flat`), `card_export_sheet_widget.dart` (chỉ đổi style của heading
+  "Format" sang `sectionLabel` uppercase — không đổi callback, state hay
+  request). **Ngoài scope, xác nhận bằng diff và giữ nguyên:** toàn bộ
+  `card_export_controller.dart`, `card_export_state.dart`, use case,
+  repository, DAO, encoder, model; `card_export_format_options_widget.dart`
+  (đã native theo Card Detail từ M99.70) và `card_export_action_bar_widget.dart`
+  (đã dùng `MxButtonPair` từ trước) — không có lý do để chạm.
+- **Recursive review (logic + UI/UX, song song, audit-only):** architecture/
+  logic audit APPROVE ngay lượt đầu, không finding — xác nhận scope/dữ liệu/
+  privacy/persistence không đổi bằng cách chạy lại 94 test data/domain/
+  repository cũ (đều xanh) và source-scan `card_transfer_boundary_test.dart`.
+  UI/UX audit tìm đúng một P1: `MxCard.muted` mang `elevation: AppElevation
+  .card` (khác `none`), nên content-lines band vẽ `boxShadow` thật ở light
+  theme trong khi scope-summary band liền kề (`MxCard.flat`) thì không — đo
+  bằng lấy mẫu pixel trên golden, không chỉ nhìn. Đúng anti-pattern "hai độ
+  sâu cạnh tranh" mà doc của `MxCard.flat` tự cảnh báo và ba lần audit khác
+  (D20, D23, D27) đã trả giá để sửa — lần này bắt trước khi merge. Coordinator
+  sửa bằng `MxCard.flat(padding: compact)`, regenerate lại 9 golden, lượt sau
+  sạch (không P0/P1/P2 còn lại). Ghi nhận, không sửa vì ngoài scope:
+  `card_import_result_widget.dart` và `card_import_source_step_widget.dart`
+  cũng dùng `MxCard.muted` cạnh `MxCard.flat` trong cùng cột cuộn và chưa
+  từng qua audit D20 — nợ của Card Import, không phải của task này.
+- **Acceptance criteria:**
+  - [x] Toàn bộ hành vi UC-11 và sáu trạng thái W3 giữ nguyên — 45 test
+        presentation (alignment/sheet/states/failure-faces) xanh, chỉ đổi
+        finder theo chữ hoa heading, không nới lỏng assertion nào.
+  - [x] W5 (một cột nội dung, cạnh trái/phải chung mọi band) vẫn đúng — scope
+        summary và content lines giờ là card full-width, đo bằng
+        `find.byType` (rìa của band, không phải `Text` bên trong nó).
+  - [x] E7/E7a (panel action không đổi cao/vị trí giữa initial↔generating)
+        giữ nguyên, xác nhận bằng test rect trước/trong khi generating.
+  - [x] `flutter analyze` 0 (repo-wide); goldens `TZ=UTC` regenerate — đúng 9
+        file `card_export_*.png` đổi, không golden nào khác trong repo đổi.
+  - [x] AD-20, BR-174…181, pipeline export không đổi — xác nhận bằng diff
+        (`git diff main -- lib/features/card`) chỉ 3 file presentation, và
+        94 test data/domain/repository cũ chạy lại xanh nguyên vẹn.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** 3 file lib, 2 file test (`card_export_alignment_test.dart`,
+  `card_export_states_test.dart`), 9 golden regenerate.
+- **Tests required:** `card_export_alignment_test.dart`,
+  `card_export_sheet_test.dart`, `card_export_states_test.dart`,
+  `card_export_failure_faces_test.dart`, `card_export_demo_test.dart`
+  (9 golden), `card_transfer_boundary_test.dart` (re-run, không sửa).
+- **Emulator integration suite:** **not run — presentation-only restyle.**
+- **Checklist phases:** 7, 13.
+- **Dependencies:** M99.70 (MxCard recipes + D20 flat-in-column), M99.87
+  (Card Import, cùng pattern), M99.84 (Tag Catalog), M99.85 (Study Home).
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |

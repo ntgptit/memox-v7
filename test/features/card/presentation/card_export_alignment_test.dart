@@ -81,7 +81,7 @@ void main() {
   Map<String, Finder> bandsOf({required bool hasError}) => <String, Finder>{
     'title': find.text(english.cardExportEntryAction),
     'scope summary': find.byType(CardExportScopeSummaryWidget),
-    'format heading': find.text(english.cardExportFormatHeading),
+    'format heading': find.text(english.cardExportFormatHeading.toUpperCase()),
     'format options': find.byType(CardExportFormatOptionsWidget),
     'content lines': find.byType(CardExportContentLinesWidget),
     if (hasError) 'error band': find.byType(CardExportErrorBandWidget),
@@ -117,7 +117,9 @@ void main() {
     await h.pump(tester);
     await h.openWholeDeckExport(tester);
 
-    final column = tester.getRect(find.text(english.cardExportFormatHeading));
+    final column = tester.getRect(
+      find.text(english.cardExportFormatHeading.toUpperCase()),
+    );
     for (final format in CardTransferFormat.values) {
       final rect = tester.getRect(optionCard(format));
       expect(
@@ -140,7 +142,9 @@ void main() {
     await h.pump(tester, surface: wideSurface);
     await h.openWholeDeckExport(tester);
 
-    final column = tester.getRect(find.text(english.cardExportFormatHeading));
+    final column = tester.getRect(
+      find.text(english.cardExportFormatHeading.toUpperCase()),
+    );
     final rects = <CardTransferFormat, Rect>{
       for (final format in CardTransferFormat.values)
         format: tester.getRect(optionCard(format)),

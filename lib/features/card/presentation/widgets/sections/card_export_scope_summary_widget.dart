@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../shared/widgets/mx_card.dart';
 import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
@@ -14,6 +15,10 @@ import '../support/card_export_labels_widget.dart';
 /// is nobody's intent and a silent way to discard the selection they just
 /// built. It stays in the semantics tree all the same: a screen-reader user
 /// needs to hear what the export covers before pressing the primary.
+///
+/// **Its own flat card**, not a row loose on the sheet's background — the same
+/// grammar Card Detail's bands read by (D20): a fact the user is here to
+/// verify sits on a surface, not directly on the page.
 class CardExportScopeSummaryWidget extends StatelessWidget {
   const CardExportScopeSummaryWidget({
     required this.scope,
@@ -28,25 +33,28 @@ class CardExportScopeSummaryWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        MxIcon(switch (scope) {
-          CardExportWholeDeckScope() => Icons.style_outlined,
-          CardExportSelectionScope() => Icons.checklist,
-        }, size: MxIconSize.mdCompact),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: Text(
-            context.cardExportScopeLabel(scope, deckCardCount),
-            // Two lines rather than an ellipsis: the count is the one thing on
-            // this line the user is here to verify, and at double scale the
-            // sentence does not fit one line at 320dp.
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: context.texts.bodyMedium,
+    return MxCard.flat(
+      padding: MxCardPadding.compact,
+      child: Row(
+        children: <Widget>[
+          MxIcon(switch (scope) {
+            CardExportWholeDeckScope() => Icons.style_outlined,
+            CardExportSelectionScope() => Icons.checklist,
+          }, size: MxIconSize.mdCompact),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              context.cardExportScopeLabel(scope, deckCardCount),
+              // Two lines rather than an ellipsis: the count is the one thing
+              // on this line the user is here to verify, and at double scale
+              // the sentence does not fit one line at 320dp.
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: context.texts.bodyMedium,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

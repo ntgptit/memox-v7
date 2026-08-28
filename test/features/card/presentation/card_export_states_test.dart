@@ -247,7 +247,10 @@ void main() {
       await tester.tap(primary(english.cardExportSubmitAction(3)));
       await tester.pumpAndSettle();
 
-      expect(find.text(english.cardExportFormatHeading), findsNothing);
+      expect(
+        find.text(english.cardExportFormatHeading.toUpperCase()),
+        findsNothing,
+      );
       expect(find.text(english.cardExportSharedMessage), findsOneWidget);
     });
 
@@ -284,7 +287,10 @@ void main() {
       await tester.tap(find.text(english.commonCancelAction));
       await tester.pumpAndSettle();
 
-      expect(find.text(english.cardExportFormatHeading), findsNothing);
+      expect(
+        find.text(english.cardExportFormatHeading.toUpperCase()),
+        findsNothing,
+      );
       expect(h.exports.readCalls, 0);
       expect(find.text(english.cardExportSharedMessage), findsNothing);
     });
@@ -312,7 +318,10 @@ void main() {
       await h.pump(tester, brightness: Brightness.dark);
       await h.openWholeDeckExport(tester);
 
-      expect(find.text(english.cardExportFormatHeading), findsOneWidget);
+      expect(
+        find.text(english.cardExportFormatHeading.toUpperCase()),
+        findsOneWidget,
+      );
       expect(tester.takeException(), isNull);
     });
   });
