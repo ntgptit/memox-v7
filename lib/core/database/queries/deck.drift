@@ -216,9 +216,14 @@ ORDER BY created_at ASC, id ASC;
 -- whole level: it maps every descendant to which direct child of :parentId it
 -- belongs under, and the two aggregates then group on that.
 --
--- UNION, not UNION ALL, for the same reason as every other walk in this file: a
--- cyclic tree from corrupt data terminates with the complete reachable set
--- instead of hanging. BR-55 caps real depth at 10, so the walk is short.
+-- UNION, not UNION ALL, makes `branch` cycle-safe because its
+-- `(branch_id, deck_id)` rows come from a finite set. That does NOT make
+-- `ancestry` cycle-safe: its `distance` grows on every lap, so every row stays
+-- distinct and UNION cannot deduplicate it. `ancestry` therefore also carries
+-- a caller-supplied `:maxWalk` bound derived from `DeckEntity.maxTreeDepth`.
+-- A truncated breadcrumb from corrupt data is preferable to a statement that
+-- never returns and holds the database isolate; every valid chain still fits
+-- inside the BR-55 limit.
 --
 -- **The scheduler comes from the root** (BR-06): a sub-deck's own columns are
 -- NULL by rule, and the review it is part of uses the root's. Reading it here
@@ -258,10 +263,11 @@ ORDER BY created_at ASC, id ASC;
 -- SQLite does not promise the order an aggregate consumes its input, so the chain
 -- is sorted in Dart, where the guarantee is real.
 --
--- The walk stops at the root because `parent_deck_id IS NOT NULL` guards the
--- recursive step, and UNION rather than UNION ALL terminates on corrupt cyclic
--- data. The current deck is deliberately NOT in the chain — it is `parent.**`
--- above, and putting it in both places would let one read disagree with itself.
+-- A valid walk stops at the root because `parent_deck_id IS NOT NULL` guards the
+-- recursive step. A corrupt cyclic walk stops at `:maxWalk`; UNION alone cannot
+-- stop it because `distance` makes each lap distinct. The current deck is
+-- deliberately NOT in the chain — it is `parent.**` above, and putting it in
+-- both places would let one read disagree with itself.
 childDeckLevel:
 WITH RECURSIVE
 branch (branch_id, deck_id) AS (
@@ -280,7 +286,7 @@ ancestry (deck_id, distance) AS (
     SELECT d.parent_deck_id, a.distance + 1
     FROM decks d
     INNER JOIN ancestry a ON d.id = a.deck_id
-    WHERE d.parent_deck_id IS NOT NULL
+    WHERE d.parent_deck_id IS NOT NULL AND a.distance < :maxWalk
 )
 SELECT
     parent.**,
