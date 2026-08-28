@@ -14679,7 +14679,7 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
   không đổi UI/device behavior.
 - **Checklist phases:** 11, 15
 
-### M99.87 · Settings theo visual language của Card Detail — Save chỉ sáng khi có việc để lưu
+### M99.88 · Settings theo visual language của Card Detail — Save chỉ sáng khi có việc để lưu
 
 - **Status:** **done** — presentation-only restyle theo prompt set
   `settings-visual-hierarchy`; không đổi one-row snapshot, group-scoped

@@ -7,7 +7,7 @@
 | **Scope** | Màn `/settings`: anatomy, ba nhóm tuỳ chọn, hành động reset, mọi trạng thái, hợp đồng geometry, responsive/a11y. Ngoài phạm vi: luật nghiệp vụ (BR-210…BR-217), luồng (UC-16), branch contract (AD-19), và surface tuỳ chọn của deck — nó thuộc `StudyOptionsScreen` và chỉ được nhắc ở S6 |
 | **Source of truth for** | Anatomy màn Settings · copy các nhóm Settings · hợp đồng geometry của màn Settings · responsive/a11y contract của màn Settings |
 | **Depends on** | `../use-cases.md` (UC-16), `../business-rules.md` (BR-210…BR-217), `../architecture.md` (AD-15, AD-19), `m4-13-card-export.md` |
-| **Updated by task** | M99.87 (Card Detail visual language — Save enablement, S10) · M99.28 (phase 8 — recursive UI/UX review) |
+| **Updated by task** | M99.88 (Card Detail visual language — Save enablement, S10) · M99.28 (phase 8 — recursive UI/UX review) |
 | **Last updated** | 2026-08-28 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham chiếu bằng ID theo
@@ -206,7 +206,7 @@ nút), không đo cái hộp vô hình chứa chúng. Golden chỉ là regressio
   (BR-217), và phụ đề của nó là câu nói rõ điều đó — nên phụ đề MUST hiện ở
   trạng thái nghỉ, không chỉ trong hộp xác nhận.
 
-## Bản sửa hình ảnh — Card Detail visual language (M99.87)
+## Bản sửa hình ảnh — Card Detail visual language (M99.88)
 
 Restyle trình bày. Anatomy W1, copy W2, ma trận trạng thái W3 và hành vi hành
 động không đổi. Màn hình đã ở phần lớn ngôn ngữ thị giác này từ M99.28 (flat
