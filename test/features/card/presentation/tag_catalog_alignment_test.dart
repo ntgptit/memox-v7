@@ -6,6 +6,9 @@ import 'package:memox/features/card/presentation/screens/tag_catalog_screen.dart
 import 'package:memox/features/card/presentation/widgets/items/tag_catalog_row_widget.dart';
 import 'package:memox/features/card/presentation/widgets/sections/card_filter_bar_widget.dart';
 import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/shared/widgets/mx_card.dart';
+import 'package:memox/shared/widgets/mx_empty_state.dart';
+import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
 import 'package:memox/shared/widgets/mx_search_field.dart';
 
@@ -54,6 +57,7 @@ void main() {
     WidgetTester tester, {
     Size size = phone,
     double textScale = 1,
+    FakeTagCatalogRepository? repository,
   }) async {
     sizeTo(tester, size);
     await pumpTagSurface(
@@ -69,7 +73,7 @@ void main() {
           child: const TagCatalogScreen(),
         ),
       ),
-      catalog: FakeTagCatalogRepository.seeded(tags),
+      catalog: repository ?? FakeTagCatalogRepository.seeded(tags),
     );
     await tester.pumpAndSettle();
   }
@@ -334,12 +338,198 @@ void main() {
     // gap here would be the empty viewport rather than the inset. Progress can
     // measure the gap because it seeds fifty decks; this asserts the same
     // number one level closer to the source.
-    final padding = tester.widget<ListView>(find.byType(ListView)).padding;
+    // A `SingleChildScrollView` since the visual revision put the catalog on
+    // one grouped surface - the claim is the same inset on the same scroller,
+    // one widget over.
+    final padding = tester
+        .widget<SingleChildScrollView>(find.byType(SingleChildScrollView))
+        .padding;
 
     expect(
       (padding! as EdgeInsets).bottom,
       AppSpacing.lg,
       reason: 'D21: every scrolling list ends a full gutter above the foot',
     );
+  });
+
+  group('visual revision 2026-08-28 - one grouped surface', () {
+    // Where a row's text begins inside the card: leading inset, 32dp well,
+    // gap. Restated here from the screen so the two cannot drift silently -
+    // if the screen changes its inset, this file says where and by how much.
+    const rowTextInset =
+        AppSpacing.md + TagCatalogRowWidget.wellSize + AppSpacing.md;
+
+    testWidgets('the search field and the catalog surface share edges', (
+      tester,
+    ) async {
+      // Phone and wide only: below `AppBreakpoints.compact` the shell's own
+      // subheader gutter steps to `md` while the catalog holds the card
+      // list's fixed `lg` (G1) - a pre-existing shell trade the card list
+      // makes identically, not a fact this revision changed.
+      for (final size in <Size>[phone, wide]) {
+        await pumpCatalog(tester, size: size);
+        final search = tester.getRect(find.byType(MxSearchField));
+        final surface = tester.getRect(find.byType(MxCard));
+
+        expect(
+          search.left,
+          moreOrLessEquals(surface.left, epsilon: epsilon),
+          reason: 'the field must start where the list it filters starts',
+        );
+        expect(
+          search.right,
+          moreOrLessEquals(surface.right, epsilon: epsilon),
+          reason: 'and end where it ends',
+        );
+      }
+    });
+
+    testWidgets('every state face stands on the catalog surface edges', (
+      tester,
+    ) async {
+      await pumpCatalog(tester);
+      final surface = tester.getRect(find.byType(MxCard));
+
+      // Search-empty: type a term that matches nothing. The face replaces the
+      // card at the card's own edges.
+      await tester.enterText(find.byType(TextField), 'zzz-no-match');
+      await tester.pumpAndSettle();
+      final searchEmpty = tester.getRect(find.byType(MxEmptyState));
+      expect(
+        searchEmpty.left,
+        moreOrLessEquals(surface.left, epsilon: epsilon),
+      );
+      expect(
+        searchEmpty.right,
+        moreOrLessEquals(surface.right, epsilon: epsilon),
+      );
+    });
+
+    testWidgets('the error face stands on the same edges', (tester) async {
+      final repo = FakeTagCatalogRepository.seeded(tags);
+      await pumpCatalog(tester, repository: repo);
+      final surface = tester.getRect(find.byType(MxCard));
+
+      repo.emitError(StateError('read failed'));
+      await tester.pumpAndSettle();
+      final face = tester.getRect(find.byType(MxErrorState));
+      expect(face.left, moreOrLessEquals(surface.left, epsilon: epsilon));
+      expect(face.right, moreOrLessEquals(surface.right, epsilon: epsilon));
+    });
+
+    testWidgets('separators live inside the text column, one per boundary', (
+      tester,
+    ) async {
+      await pumpCatalog(tester);
+      final surface = tester.getRect(find.byType(MxCard));
+      final dividers = find.byType(Divider);
+
+      expect(
+        dividers,
+        findsNWidgets(tags.length - 1),
+        reason: 'a separator marks a boundary, so rows minus one',
+      );
+      for (var i = 0; i < tags.length - 1; i++) {
+        // The widget spans the card; the *painted* line is inset by the
+        // divider's own indent properties, which `getRect` cannot see - so
+        // the box is measured and the inset is read off the widget, the same
+        // split the D21 claim makes for a scroller's padding.
+        final rect = tester.getRect(dividers.at(i));
+        expect(rect.left, moreOrLessEquals(surface.left, epsilon: epsilon));
+        expect(rect.right, moreOrLessEquals(surface.right, epsilon: epsilon));
+
+        final divider = tester.widget<Divider>(dividers.at(i));
+        expect(
+          divider.indent,
+          rowTextInset,
+          reason:
+              'the line starts where the text column starts, not at the '
+              'card edge - a full-bleed line slices the card',
+        );
+        expect(divider.endIndent, AppSpacing.md);
+      }
+
+      // And the inset is not just a number two files agree on: the name's
+      // laid-out left edge sits exactly there, so a well that grew would
+      // drag this assertion red instead of letting the line drift off the
+      // text column.
+      final name = tester.getRect(find.text('food'));
+      expect(
+        name.left,
+        moreOrLessEquals(surface.left + rowTextInset, epsilon: epsilon),
+        reason: 'the separator indent and the text column are one fact',
+      );
+    });
+
+    testWidgets('an error arriving after data takes the search with it '
+        '(W3 face 5)', (tester) async {
+      final repo = FakeTagCatalogRepository.seeded(tags);
+      await pumpCatalog(tester, repository: repo);
+      expect(find.byType(MxSearchField), findsOneWidget);
+
+      repo.emitError(StateError('read failed'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byType(MxSearchField),
+        findsNothing,
+        reason:
+            'the error face has nothing to narrow - Riverpod keeping the '
+            'previous value must not keep the chrome',
+      );
+    });
+
+    testWidgets('every row wears the same neutral well', (tester) async {
+      await pumpCatalog(tester);
+
+      expect(
+        find.byIcon(Icons.sell_outlined),
+        findsNWidgets(tags.length),
+        reason:
+            'one glyph per row, all identical - a well that varied would '
+            'invent a hierarchy BR-230 does not have',
+      );
+    });
+
+    testWidgets('a row reads as name then count, each spoken once', (
+      tester,
+    ) async {
+      // The row left `MxListTile` (whose ListTile grouped title+subtitle into
+      // one semantics node) for two sibling `Text`s. The claim that survives
+      // the move: traversal order is name first, count second, and neither
+      // string appears on more than one node - "count khong bi doc lap".
+      final handle = tester.ensureSemantics();
+      await pumpCatalog(tester);
+
+      final name = tester.getSemantics(find.text('food'));
+      final count = tester.getSemantics(find.text('1 card'));
+      expect(name.label, 'food');
+      expect(count.label, '1 card');
+      // Once each: one node per string across the whole tree.
+      expect(find.bySemanticsLabel('food'), findsOneWidget);
+      expect(find.bySemanticsLabel('1 card'), findsOneWidget);
+      // Order: the name's node comes before its count in traversal, which is
+      // vertical order here - the count sits under the name (G3).
+      expect(
+        tester.getRect(find.text('food')).top,
+        lessThan(tester.getRect(find.text('1 card')).top),
+      );
+      handle.dispose();
+    });
+
+    testWidgets('320dp at 2.0x: rows wrap inside the surface, nothing '
+        'overflows', (tester) async {
+      await pumpCatalog(tester, size: narrow, textScale: 2);
+
+      final surface = tester.getRect(find.byType(MxCard));
+      for (var i = 0; i < tags.length; i++) {
+        final row = tester.getRect(find.byType(TagCatalogRowWidget).at(i));
+        expect(row.left, greaterThanOrEqualTo(surface.left - epsilon));
+        expect(row.right, lessThanOrEqualTo(surface.right + epsilon));
+      }
+      // An overflow throws through the test binding; reaching here with no
+      // exception is the G9 claim at this size.
+      expect(tester.takeException(), isNull);
+    });
   });
 }
