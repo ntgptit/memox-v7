@@ -1,7 +1,8 @@
 @Tags(<String>['golden', 'review'])
 library;
 
-import 'package:flutter/material.dart' show Brightness, Icons, Widget;
+import 'package:flutter/material.dart'
+    show Brightness, Icons, TextField, Widget;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/card/di/card_repository_provider.dart';
@@ -15,6 +16,7 @@ import 'package:memox/features/card/presentation/screens/card_editor_screen.dart
 import 'package:memox/features/card/presentation/screens/card_list_screen.dart';
 import 'package:memox/features/card/presentation/widgets/items/card_tile_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
+import 'package:memox/shared/widgets/mx_pill_button.dart';
 
 import '../features/card/presentation/support/fake_card_repository.dart';
 import '../support/study_render.dart';
@@ -368,6 +370,117 @@ void main() {
     await _openBulkAction(tester, AppLocalizationsEn().cardSelectionMoveAction);
 
     await matchesReviewGolden('goldens/card_move_picker_empty_light.png');
+  });
+
+  group('card list — the two empty faces neither a golden nor a test had '
+      '(M99.89)', () {
+    // Stream-based, not `.loaded()`: those two faces are reached by *changing*
+    // the query after the frame is up, and `.loaded()`'s stream is a single
+    // fixed value the widget subscribes to once — a later `emitItems` call
+    // lands on a controller nothing is listening to any more.
+    FakeCardRepository streamRepo() => FakeCardRepository()
+      ..deckContextToShow = _demoContext
+      ..distributionToShow = _demoDistribution
+      ..filterCounts[CardListFilter.due] = 23
+      ..filterCounts[CardListFilter.isNew] = 0
+      ..filterCounts[CardListFilter.flagged] = 2;
+
+    Future<void> settleToLoaded(
+      WidgetTester tester,
+      FakeCardRepository repo,
+    ) async {
+      repo.emitItems(_demoRows());
+      repo.emitCount(142);
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('a search that matches nothing', (tester) async {
+      final repo = streamRepo();
+      addTearDown(repo.dispose);
+
+      await pumpReview(
+        tester,
+        _scope(repo, const CardListScreen(deckId: 'demo'), Brightness.light),
+        // The stream repo starts empty, so the first frame is the loading
+        // spinner — a repeating animation `pumpAndSettle` never returns from.
+        settle: false,
+      );
+      await settleToLoaded(tester, repo);
+
+      await tester.enterText(find.byType(TextField), '없는단어');
+      await tester.pump();
+      repo.emitItems(<CardListItemModel>[]);
+      await tester.pumpAndSettle();
+
+      await matchesReviewGolden('goldens/card_list_search_empty_light.png');
+    });
+
+    testWidgets('a search that matches nothing, dark', (tester) async {
+      final repo = streamRepo();
+      addTearDown(repo.dispose);
+
+      await pumpReview(
+        tester,
+        _scope(repo, const CardListScreen(deckId: 'demo'), Brightness.dark),
+        // The stream repo starts empty, so the first frame is the loading
+        // spinner — a repeating animation `pumpAndSettle` never returns from.
+        settle: false,
+      );
+      await settleToLoaded(tester, repo);
+
+      await tester.enterText(find.byType(TextField), '없는단어');
+      await tester.pump();
+      repo.emitItems(<CardListItemModel>[]);
+      await tester.pumpAndSettle();
+
+      await matchesReviewGolden('goldens/card_list_search_empty_dark.png');
+    });
+
+    testWidgets('a state pill that matches nothing', (tester) async {
+      final repo = streamRepo();
+      addTearDown(repo.dispose);
+
+      await pumpReview(
+        tester,
+        _scope(repo, const CardListScreen(deckId: 'demo'), Brightness.light),
+        // The stream repo starts empty, so the first frame is the loading
+        // spinner — a repeating animation `pumpAndSettle` never returns from.
+        settle: false,
+      );
+      await settleToLoaded(tester, repo);
+
+      await tester.tap(
+        find.widgetWithText(MxPillButton, AppLocalizationsEn().cardFilterNew),
+      );
+      await tester.pump();
+      repo.emitItems(<CardListItemModel>[]);
+      await tester.pumpAndSettle();
+
+      await matchesReviewGolden('goldens/card_list_filter_empty_light.png');
+    });
+
+    testWidgets('a state pill that matches nothing, dark', (tester) async {
+      final repo = streamRepo();
+      addTearDown(repo.dispose);
+
+      await pumpReview(
+        tester,
+        _scope(repo, const CardListScreen(deckId: 'demo'), Brightness.dark),
+        // The stream repo starts empty, so the first frame is the loading
+        // spinner — a repeating animation `pumpAndSettle` never returns from.
+        settle: false,
+      );
+      await settleToLoaded(tester, repo);
+
+      await tester.tap(
+        find.widgetWithText(MxPillButton, AppLocalizationsEn().cardFilterNew),
+      );
+      await tester.pump();
+      repo.emitItems(<CardListItemModel>[]);
+      await tester.pumpAndSettle();
+
+      await matchesReviewGolden('goldens/card_list_filter_empty_dark.png');
+    });
   });
 }
 

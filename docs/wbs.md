@@ -14745,9 +14745,8 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 
 ### M99.89 · Card List theo visual language của Card Detail — geometry đo được, hai mặt rỗng đóng
 
-- **Status:** **in progress** — implementation xong, chờ hai review pass
-  audit-only (architecture/logic, UI/UX) chạy song song rồi coordinator
-  fix trước gate cuối.
+- **Status:** **done** — implementation, hai review pass audit-only song song
+  (architecture/logic, UI/UX) và coordinator fix P2 đều xong.
 - **Goal:** Card List đạt chuẩn Card Detail và có test đo được hình học của
   chính nó, không chỉ hành vi.
 - **Scope:** audit đọc code xác nhận màn hình đã ở gần hết ngôn ngữ này —
@@ -14774,27 +14773,39 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
   scope:** query/filter semantics, pagination, selection/bulk logic,
   move/delete/tag/flag/export, độ dài nội dung canonical — không đổi vì
   không có lý do nào khác để chạm chúng (UC-04, BR-165/166/167/246).
-- **Tests required:** `card_list_alignment_test.dart` mới (8 nhóm G1-G8);
-  `card_list_screen_test.dart` thêm 2 case (search-empty, state-pill
+- **Recursive review (architecture/logic, UI/UX, song song, audit-only):**
+  cả hai không tìm P0/P1 — không business/logic drift, không widget mới sai
+  ngôn ngữ, mọi "khác biệt" đều là divergence đã duyệt từ trước (pill filter
+  bar D3, selection bar edge-to-edge D13, Back preview một dòng D12). Ba mục
+  P2 (đều là gap coverage, không phải lỗi hiển thị — cả hai reviewer tự tay
+  render và xác nhận cả ba mặt đã đúng trước khi đề xuất): (1) hai mặt rỗng
+  chưa có bản dark/VI nào — thêm 2 golden pair mới (`card_list_search_empty`,
+  `card_list_filter_empty`, light+dark) và 2 test VI-locale không-overflow
+  trong `card_list_alignment_test.dart` (G9); (2) mặt tag-filtered-empty
+  chưa test ở 320dp×2.0 — thêm test xác nhận nút `Clear tag filter` vẫn full-
+  width, 48dp, trong khung hình; (3) cùng mặt đó chưa test dark — thêm test
+  không-exception + text đúng. Cả ba đã đóng, không finding nào còn treo.
+- **Tests required:** `card_list_alignment_test.dart` mới (8 nhóm G1-G8 +
+  G9 VI); `card_list_screen_test.dart` thêm 2 case (search-empty, state-pill
   filtered-empty); `card_list_tag_filter_empty_test.dart` mới (tag-filtered-
-  empty và đường Clear ra khỏi nó, UC-18 A7).
+  empty, đường Clear UC-18 A7, cộng 320×2.0 và dark); 4 golden mới trong
+  `card_screens_demo_test.dart` (search-empty, filter-empty, light+dark).
 - **Checklist phases:** Phase 13 (responsive/a11y) · Phase 14 (feature).
 - **Emulator integration suite:** **not run — presentation-only restyle.**
 - **Output:** `card_list_alignment_test.dart`,
-  `card_list_tag_filter_empty_test.dart` (mới);
-  `card_state_distribution_widget.dart`, `card_list_screen_test.dart` (sửa);
-  gallery publish lại URL ghim nếu goldens đổi (dự kiến không đổi — bug fix
-  chỉ chạm nhánh overflow chưa từng render trong goldens hiện có).
+  `card_list_tag_filter_empty_test.dart` (mới); `card_state_distribution_widget.dart`,
+  `card_list_screen_test.dart`, `card_screens_demo_test.dart` (sửa); 4 golden
+  mới (`card_list_search_empty_light/dark.png`, `card_list_filter_empty_light/dark.png`);
+  2 hàng gallery mới; gallery publish lại URL ghim.
 - **Acceptance criteria:**
-  - [ ] Không business/navigation/data drift — diff chỉ chạm
+  - [x] Không business/navigation/data drift — diff chỉ chạm
         `features/card/presentation/` (đúng một widget ngoài `card_list/`:
         `card_state_distribution_widget.dart`, dùng chung với progress
         panel) + tests + docs.
-  - [ ] Hai review pass (architecture/logic, UI/UX) chạy xong, audit-only,
-        song song; coordinator áp fix architecture trước UI.
-  - [ ] `flutter analyze` 0 (repo-wide); `dod_check.sh --changed` và bản đầy
-        đủ đều xanh; goldens `TZ=UTC` — không đổi hoặc diff đúng bằng vùng
-        được duyệt.
+  - [x] Hai review pass (architecture/logic, UI/UX) chạy xong, audit-only,
+        song song; verdict cả hai: an toàn để đi tiếp; 3 mục P2 đã đóng.
+  - [x] `flutter analyze` 0 (repo-wide); `dod_check.sh --changed` xanh;
+        goldens `TZ=UTC` — 4 file cũ không đổi, 4 file mới cho hai mặt rỗng.
 - **Editable documents:** `docs/wbs.md`
 - **Dependencies:** UC-04, BR-89…BR-94, BR-150/151, BR-163, BR-165/166/167,
   BR-231, BR-246, M4.11, M99.19a, M99.30

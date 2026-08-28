@@ -13,6 +13,7 @@ import 'package:memox/features/card/presentation/widgets/sections/card_progress_
 import 'package:memox/features/card/presentation/widgets/sections/card_selection_bar_widget.dart';
 import 'package:memox/l10n/generated/app_localizations.dart';
 import 'package:memox/shared/widgets/mx_icon_button.dart';
+import 'package:memox/shared/widgets/mx_pill_button.dart';
 import 'package:memox/shared/widgets/mx_search_field.dart';
 import 'package:memox/core/theme/app_theme.dart';
 
@@ -346,5 +347,58 @@ void main() {
     expect(row.left, moreOrLessEquals(field.left, epsilon: epsilon));
     expect(row.right, moreOrLessEquals(field.right, epsilon: epsilon));
     expect(tester.takeException(), isNull);
+  });
+
+  group('G9 — the two empty faces render clean in Vietnamese', () {
+    // Reviewed as a coverage gap (M99.89 UI/UX pass): neither empty face had
+    // a Vietnamese render anywhere. Stream-based, not `loadedRepository()` —
+    // reaching an empty face means changing the query after the frame is up,
+    // and `.loaded()`'s stream is a single fixed value the widget subscribes
+    // to once.
+    FakeCardRepository loadedThenEmptyRepository() {
+      final repository = FakeCardRepository();
+      repository.distributionToShow = const CardStateDistributionModel(
+        total: 1,
+        isNew: 1,
+        beginning: 0,
+        reviewing: 0,
+        mastered: 0,
+      );
+
+      return repository;
+    }
+
+    testWidgets('a search matching nothing', (tester) async {
+      final repository = loadedThenEmptyRepository();
+      addTearDown(repository.dispose);
+      await pumpList(tester, repository, locale: const Locale('vi'));
+      repository.emitItems(<dynamic>[repository.listItem('c1')].cast());
+      repository.emitCount(1);
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), 'không có');
+      await tester.pump();
+      repository.emitItems(<dynamic>[].cast());
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('a state pill matching nothing', (tester) async {
+      final repository = loadedThenEmptyRepository()
+        ..filterCounts[CardListFilter.isNew] = 0;
+      addTearDown(repository.dispose);
+      await pumpList(tester, repository, locale: const Locale('vi'));
+      repository.emitItems(<dynamic>[repository.listItem('c1')].cast());
+      repository.emitCount(1);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.widgetWithText(MxPillButton, 'Mới'));
+      await tester.pump();
+      repository.emitItems(<dynamic>[].cast());
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+    });
   });
 }
