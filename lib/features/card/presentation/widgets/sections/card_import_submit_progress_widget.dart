@@ -22,7 +22,9 @@ class CardImportSubmitProgressWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MxCard.raised(
+    // Flat: it replaces the confirm panel at the same rect, and the swap
+    // must not also be an elevation change (D20).
+    return MxCard.flat(
       child: Column(
         children: <Widget>[
           const SizedBox(height: AppSpacing.md),

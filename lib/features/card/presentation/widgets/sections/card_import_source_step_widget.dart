@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/theme/app_ink.dart';
+import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -57,13 +58,20 @@ class CardImportSourceStepWidget extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
+        // The section-label grammar every Card Detail band opens with: the
+        // tracked uppercase `sectionLabel` on quiet ink. `labelLarge` at
+        // sentence case read as a row of content, not as the name of a group
+        // — which mattered here more than anywhere, because everything under
+        // it *is* one group: the choice, its work surface, its guidance.
         Text(
-          context.l10n.cardImportChooseSourceHeading,
-          style: context.texts.labelLarge!.inked(context, AppInk.quiet),
+          context.l10n.cardImportChooseSourceHeading.toUpperCase(),
+          style: context.textStyles.sectionLabel.copyWith(
+            color: context.colors.onSurfaceVariant,
+          ),
         ),
-        const SizedBox(height: AppSpacing.sm),
+        const SizedBox(height: AppSpacing.md),
         _SourceOptions(deckId: deckId, kind: kind),
-        const SizedBox(height: AppSpacing.lg),
+        const SizedBox(height: AppSpacing.md),
         if (kind == CardImportSourceKind.upload)
           _UploadPanel(deckId: deckId, pick: pick)
         else
@@ -75,7 +83,10 @@ class CardImportSourceStepWidget extends ConsumerWidget {
             maxLines: 8,
             keyboardType: TextInputType.multiline,
           ),
-        const SizedBox(height: AppSpacing.lg),
+        // `xl` between sections, `md` inside one (Card Detail's rhythm): the
+        // options and the work surface are one decision, the info panel is
+        // its quiet aside.
+        const SizedBox(height: AppSpacing.xl),
         const _InfoPanel(),
       ],
     );
@@ -174,7 +185,15 @@ class _SourceOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MxCard.raised(
+    // **Flat, not raised — the one shadow this column carried.** Card
+    // Detail's rule (D20) is that two competing depths in one scroll view
+    // read as a rendering fault, and these two cards were the only elevated
+    // surfaces on the step. Flat is also this pair's *recorded* treatment:
+    // `MxCard.option`'s own doc notes the owner decision (M99.70) that "the
+    // import step keeps the hairline" where the export sheet keeps the
+    // control edge — so the recipe here is `flat` + `isSelected`, not
+    // `option`.
+    return MxCard.flat(
       onTap: onTap,
       // Border, announcement and — the part this site got wrong — the token
       // all come from [MxCard.isSelected]: this card spelled `primary`, the
@@ -281,14 +300,26 @@ class _UploadPanel extends ConsumerWidget {
       );
     }
 
-    return MxCard.raised(
+    // Flat like the rest of the column (D20), and the glyph sits in the
+    // same quiet well the summary row and Card Detail's metrics use — a
+    // 32px glyph floating free was the empty-state-hero shape this step is
+    // told not to be: the panel is a work surface awaiting one action, not
+    // a destination.
+    return MxCard.flat(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Icon(
-            Icons.note_add_outlined,
-            size: AppSpacing.xxl,
-            color: AppInk.quiet.resolve(context),
+          Align(
+            child: Container(
+              width: AppSpacing.xxl,
+              height: AppSpacing.xxl,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: context.colors.surfaceContainerHigh,
+                borderRadius: BorderRadius.circular(AppRadius.sm),
+              ),
+              child: const MxIcon(Icons.note_add_outlined),
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(

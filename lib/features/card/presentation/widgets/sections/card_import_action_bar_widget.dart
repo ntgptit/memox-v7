@@ -6,6 +6,8 @@ import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
+import '../../../../../shared/widgets/mx_button_pair.dart';
+import '../../../../../shared/widgets/mx_content_shell.dart';
 import '../../../domain/models/card_import_preview_model.dart';
 import '../../../domain/repositories/card_import_repository.dart';
 import '../../controllers/card_import_commit_controller.dart';
@@ -84,11 +86,17 @@ bool _hasChosenSource(WidgetRef ref, String deckId, String pastedText) {
 }
 
 /// The sticky action bar (wireframe I3): one primary action per presentation
-/// phase, above the keyboard, never over the content — the body scrolls with
-/// its own bottom padding. The CTAs follow [CardImportPhase], not just the
-/// step: Parsing disables the primary under its own label, Submitting locks
-/// both actions without a second spinner, and each outcome face gets its own
-/// pair (states 2, 5, 6–8).
+/// phase, in the shell's footer slot. The CTAs follow [CardImportPhase], not
+/// just the step: Parsing disables the primary under its own label, Submitting
+/// locks both actions without a second spinner, and each outcome face gets its
+/// own pair (states 2, 5, 6–8).
+///
+/// **No `SafeArea` and no `viewInsets` arithmetic here** — that was this bar's
+/// job when the screen was a raw `Scaffold`, and it is the shell's now: the
+/// footer is the last row of the body's column, so the body shrinking for the
+/// keyboard is what keeps the bar above it, and the shell's `SafeArea` already
+/// covers the gesture strip. A second inset would be paid twice, which is the
+/// exact bug the card editor's migration wrote down first.
 class CardImportActionBarWidget extends ConsumerWidget {
   const CardImportActionBarWidget({
     required this.deckId,
@@ -125,29 +133,23 @@ class CardImportActionBarWidget extends ConsumerWidget {
     };
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.sm,
-        AppSpacing.lg,
-        AppSpacing.sm + MediaQuery.viewInsetsOf(context).bottom,
+      padding: EdgeInsets.symmetric(
+        horizontal: mxScreenGutter(context),
+        vertical: AppSpacing.sm,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          // **`IntrinsicHeight` and a stretched cross axis, not a bare `Row`.**
-          // `Expanded` already gives the two actions the same width; without
-          // these they can still differ in height, because at a large text
-          // scale `Back` stays on one line while `Import 128 cards` wraps to
-          // two — and two buttons side by side at two heights is the same
-          // mismatch `MxButtonPair` exists to prevent. This bar keeps its own
-          // `Row`: its children are a phase-dependent list of one *or* two
-          // actions, which is not the pair the shared widget takes.
-          IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: _actions(context, ref),
-            ),
-          ),
+          // **`MxButtonPair` where there are two actions, a full-width button
+          // where there is one.** The bar used to keep its own
+          // `IntrinsicHeight` + `Row`, which solved the equal-height half of
+          // the pair problem and silently skipped the rest — the one-row-or-
+          // stack boundary the shared widget measures against the longest
+          // word. `Import 128 cards` beside `Back` at 320dp/2.0× is exactly
+          // the case that rule exists for, and this bar was answering it with
+          // an ellipsis.
+          _actions(context, ref),
           if (hint != null)
             Padding(
               padding: const EdgeInsets.only(top: AppSpacing.xs),
@@ -162,44 +164,35 @@ class CardImportActionBarWidget extends ConsumerWidget {
     );
   }
 
-  List<Widget> _actions(BuildContext context, WidgetRef ref) {
+  Widget _actions(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     switch (phase) {
       case CardImportPhase.source:
         final hasSource = _hasChosenSource(ref, deckId, pasteController.text);
 
-        return <Widget>[
-          Expanded(
-            child: MxActionButton(
-              label: l10n.cardImportPreviewAction,
-              onPressed: hasSource
-                  ? () => _startPreview(ref, deckId, pasteController.text)
-                  : null,
-            ),
-          ),
-        ];
+        return MxActionButton(
+          label: l10n.cardImportPreviewAction,
+          onPressed: hasSource
+              ? () => _startPreview(ref, deckId, pasteController.text)
+              : null,
+        );
 
       case CardImportPhase.parsing:
         // The decode is running: the primary says so under its own label and
         // stays put — no layout jump when rows arrive (state 2). Back keeps
         // working; it only changes the step, never the data.
-        return <Widget>[
-          Expanded(
-            child: MxActionButton(
-              label: l10n.cardImportBackAction,
-              variant: MxActionButtonVariant.secondary,
-              onPressed: () =>
-                  goToCardImportStep(ref, deckId, CardImportStep.source),
-            ),
+        return MxButtonPair(
+          secondary: MxActionButton(
+            label: l10n.cardImportBackAction,
+            variant: MxActionButtonVariant.secondary,
+            onPressed: () =>
+                goToCardImportStep(ref, deckId, CardImportStep.source),
           ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: MxActionButton(
-              label: l10n.cardImportParsingAction,
-              onPressed: null,
-            ),
+          primary: MxActionButton(
+            label: l10n.cardImportParsingAction,
+            onPressed: null,
           ),
-        ];
+        );
 
       case CardImportPhase.preview:
         final preview = ref.watch(cardImportPreviewProvider(deckId)).value;
@@ -215,26 +208,20 @@ class CardImportActionBarWidget extends ConsumerWidget {
         final canContinue =
             preview != null && mapping.isComplete && importable > 0;
 
-        return <Widget>[
-          Expanded(
-            child: MxActionButton(
-              label: l10n.cardImportBackAction,
-              variant: MxActionButtonVariant.secondary,
-              onPressed: () =>
-                  goToCardImportStep(ref, deckId, CardImportStep.source),
-            ),
+        return MxButtonPair(
+          secondary: MxActionButton(
+            label: l10n.cardImportBackAction,
+            variant: MxActionButtonVariant.secondary,
+            onPressed: () =>
+                goToCardImportStep(ref, deckId, CardImportStep.source),
           ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: MxActionButton(
-              label: l10n.cardImportContinueAction,
-              onPressed: canContinue
-                  ? () =>
-                        goToCardImportStep(ref, deckId, CardImportStep.confirm)
-                  : null,
-            ),
+          primary: MxActionButton(
+            label: l10n.cardImportContinueAction,
+            onPressed: canContinue
+                ? () => goToCardImportStep(ref, deckId, CardImportStep.confirm)
+                : null,
           ),
-        ];
+        );
 
       case CardImportPhase.confirm:
       case CardImportPhase.submitting:
@@ -250,57 +237,46 @@ class CardImportActionBarWidget extends ConsumerWidget {
         final isSubmitting = phase == CardImportPhase.submitting;
         final canImport = preview != null && count > 0 && submit.canSubmit;
 
-        return <Widget>[
-          Expanded(
-            child: MxActionButton(
-              label: l10n.cardImportBackAction,
-              variant: MxActionButtonVariant.secondary,
-              onPressed: isSubmitting
-                  ? null
-                  : () =>
-                        goToCardImportStep(ref, deckId, CardImportStep.preview),
-            ),
+        return MxButtonPair(
+          secondary: MxActionButton(
+            label: l10n.cardImportBackAction,
+            variant: MxActionButtonVariant.secondary,
+            onPressed: isSubmitting
+                ? null
+                : () => goToCardImportStep(ref, deckId, CardImportStep.preview),
           ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            // While submitting the label changes and the button locks — no
-            // spinner here: the submit panel already carries the single
-            // loading indicator this state is allowed (state 5).
-            child: MxActionButton(
-              label: isSubmitting
-                  ? l10n.cardImportSubmittingLabel
-                  : l10n.cardImportSubmitAction(count),
-              onPressed: !isSubmitting && canImport
-                  ? () => _submitImport(
-                      ref,
-                      deckId,
-                      preview,
-                      shouldIncludeDuplicates: shouldIncludeDuplicates,
-                    )
-                  : null,
-            ),
+          // While submitting the label changes and the button locks — no
+          // spinner here: the submit panel already carries the single
+          // loading indicator this state is allowed (state 5).
+          primary: MxActionButton(
+            label: isSubmitting
+                ? l10n.cardImportSubmittingLabel
+                : l10n.cardImportSubmitAction(count),
+            onPressed: !isSubmitting && canImport
+                ? () => _submitImport(
+                    ref,
+                    deckId,
+                    preview,
+                    shouldIncludeDuplicates: shouldIncludeDuplicates,
+                  )
+                : null,
           ),
-        ];
+        );
 
       case CardImportPhase.completed:
       case CardImportPhase.completedWithSkips:
       case CardImportPhase.noCardsAdded:
-        return <Widget>[
-          Expanded(
-            child: MxActionButton(
-              label: l10n.cardImportAnotherAction,
-              variant: MxActionButtonVariant.secondary,
-              onPressed: onReset,
-            ),
+        return MxButtonPair(
+          secondary: MxActionButton(
+            label: l10n.cardImportAnotherAction,
+            variant: MxActionButtonVariant.secondary,
+            onPressed: onReset,
           ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: MxActionButton(
-              label: l10n.cardImportViewCardsAction,
-              onPressed: onViewCards,
-            ),
+          primary: MxActionButton(
+            label: l10n.cardImportViewCardsAction,
+            onPressed: onViewCards,
           ),
-        ];
+        );
 
       case CardImportPhase.commitFailure:
         final preview = ref.watch(cardImportPreviewProvider(deckId)).value;
@@ -308,29 +284,24 @@ class CardImportActionBarWidget extends ConsumerWidget {
           cardImportDuplicateChoiceProvider(deckId),
         );
 
-        return <Widget>[
-          Expanded(
-            child: MxActionButton(
-              label: l10n.cardImportBackToPreviewAction,
-              variant: MxActionButtonVariant.secondary,
-              onPressed: () => _backToPreview(ref, deckId),
-            ),
+        return MxButtonPair(
+          secondary: MxActionButton(
+            label: l10n.cardImportBackToPreviewAction,
+            variant: MxActionButtonVariant.secondary,
+            onPressed: () => _backToPreview(ref, deckId),
           ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: MxActionButton(
-              label: l10n.cardImportTryAgainAction,
-              onPressed: preview != null && submit.canSubmit
-                  ? () => _submitImport(
-                      ref,
-                      deckId,
-                      preview,
-                      shouldIncludeDuplicates: shouldIncludeDuplicates,
-                    )
-                  : null,
-            ),
+          primary: MxActionButton(
+            label: l10n.cardImportTryAgainAction,
+            onPressed: preview != null && submit.canSubmit
+                ? () => _submitImport(
+                    ref,
+                    deckId,
+                    preview,
+                    shouldIncludeDuplicates: shouldIncludeDuplicates,
+                  )
+                : null,
           ),
-        ];
+        );
     }
   }
 }

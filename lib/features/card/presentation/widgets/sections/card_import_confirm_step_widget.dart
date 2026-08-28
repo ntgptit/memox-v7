@@ -5,8 +5,8 @@ import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
-import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_card.dart';
+import '../../../../../shared/widgets/mx_metric_well.dart';
 import '../../../domain/models/card_import_preview_model.dart';
 import '../../controllers/card_import_commit_controller.dart';
 import 'card_import_submit_progress_widget.dart';
@@ -56,53 +56,59 @@ class CardImportConfirmStepWidget extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        Text(l10n.cardImportConfirmHeading, style: context.texts.titleMedium),
-        const SizedBox(height: AppSpacing.sm),
-        MxCard.raised(
-          padding: MxCardPadding.none,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: AppSpacing.sm,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-                  child: Text(
-                    l10n.cardImportConfirmTargetLabel(deckName),
-                    style: context.texts.titleSmall,
-                  ),
-                ),
-                _ConfirmRow(
-                  icon: Icons.check,
-                  color: AppInk.secondary,
-                  label: l10n.cardImportConfirmImportRowLabel,
-                  count: willWrite,
-                ),
-                _ConfirmRow(
-                  icon: Icons.copy_outlined,
-                  color: AppInk.tertiary,
-                  label: shouldIncludeDuplicates
-                      ? l10n.cardImportConfirmDuplicatesIncludedRowLabel
-                      : l10n.cardImportDuplicatesSkippedRowLabel,
-                  count: preview.duplicateCount,
-                ),
-                _ConfirmRow(
-                  icon: Icons.error_outline,
-                  color: AppInk.error,
-                  label: l10n.cardImportInvalidSkippedRowLabel,
-                  count: preview.invalidCount,
-                ),
-                _ConfirmRow(
-                  icon: Icons.remove,
-                  color: AppInk.quiet,
-                  label: l10n.cardImportBlankIgnoredRowLabel,
-                  count: preview.blankCount,
-                ),
-              ],
-            ),
+        // The heading joins the section-label grammar the other steps speak
+        // now; the panel below carries the plan itself.
+        Text(
+          l10n.cardImportConfirmHeading.toUpperCase(),
+          style: context.textStyles.sectionLabel.copyWith(
+            color: context.colors.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        // **The Card Detail current-state hierarchy, not its metrics**: one
+        // flat full-width panel, the subject on top, a subtle divider, then
+        // the facts as well-anchored rows with their counts on the trailing
+        // edge — the plan the user is agreeing to, read the same way that
+        // screen's schedule is.
+        MxCard.flat(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Text(
+                l10n.cardImportConfirmTargetLabel(deckName),
+                style: context.texts.titleSmall,
+              ),
+              Divider(
+                height: AppSpacing.lg,
+                color: context.colors.outlineVariant,
+              ),
+              _ConfirmRow(
+                icon: Icons.check,
+                color: AppInk.secondary,
+                label: l10n.cardImportConfirmImportRowLabel,
+                count: willWrite,
+              ),
+              _ConfirmRow(
+                icon: Icons.copy_outlined,
+                color: AppInk.tertiary,
+                label: shouldIncludeDuplicates
+                    ? l10n.cardImportConfirmDuplicatesIncludedRowLabel
+                    : l10n.cardImportDuplicatesSkippedRowLabel,
+                count: preview.duplicateCount,
+              ),
+              _ConfirmRow(
+                icon: Icons.error_outline,
+                color: AppInk.error,
+                label: l10n.cardImportInvalidSkippedRowLabel,
+                count: preview.invalidCount,
+              ),
+              _ConfirmRow(
+                icon: Icons.remove,
+                color: AppInk.quiet,
+                label: l10n.cardImportBlankIgnoredRowLabel,
+                count: preview.blankCount,
+              ),
+            ],
           ),
         ),
       ],
@@ -136,13 +142,29 @@ class _ConfirmRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       child: Row(
         children: <Widget>[
-          // `sm` is the same 16 `AppSpacing.lg` used to spell here.
-          MxIcon(icon, ink: color, size: MxIconSize.sm),
+          // The shared metric well: the same anchored square Card Detail's
+          // schedule and the Progress grid read by, so a fact here and a
+          // fact there are entries of one grammar. The bare glyph this row
+          // used to draw left the counts' left edge to whichever icon was
+          // widest.
+          MxMetricWell(
+            icon: icon,
+            tint: color.resolve(context),
+            wellColor: context.semanticColors.surfaceMuted,
+          ),
           const SizedBox(width: AppSpacing.md),
           Expanded(child: Text(label, style: context.texts.bodyMedium)),
           Text(
             countLabel,
-            style: context.texts.titleSmall!.inked(context, color),
+            // Tabular, because the column of counts is compared downward —
+            // `7` and `12` must put their units in the same place.
+            style: context.texts.titleSmall!
+                .inked(context, color)
+                .copyWith(
+                  fontFeatures: const <FontFeature>[
+                    FontFeature.tabularFigures(),
+                  ],
+                ),
           ),
         ],
       ),

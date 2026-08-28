@@ -1,6 +1,7 @@
 @Tags(<String>['golden', 'review'])
 library;
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -157,6 +158,46 @@ void main() {
     await pasteAndPreview(tester);
 
     await matchesReviewGolden('goldens/card_import_preview_light.png');
+  });
+
+  testWidgets('preview — parsing in flight (state 2)', (tester) async {
+    // **The one phase golden the wizard never had.** The gate holds the
+    // decode open so the panel is on screen; the spinner is an animation, so
+    // the frame is pinned by pumping a fixed duration from mount rather than
+    // settling — the same clock every run of this test starts at zero.
+    transfer.parseGate = Completer<void>();
+    await pumpReview(tester, scope(Brightness.light));
+    await tester.tap(find.text(english.cardImportPasteOptionTitle));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), _validRows);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(english.cardImportPreviewAction));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+
+    await matchesReviewGolden('goldens/card_import_parsing_light.png');
+
+    transfer.parseGate!.complete();
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('import — submitting in flight (state 5)', (tester) async {
+    // Same shape as the parsing render: the commit gate holds the atomic
+    // batch open, the confirm panel has been replaced by the submit panel at
+    // the same rect, and the footer reads Importing… with no second spinner.
+    importer.commitGate = Completer<void>();
+    await pumpReview(tester, scope(Brightness.light));
+    await pasteAndPreview(tester, rows: _validRows);
+    await tester.tap(find.text(english.cardImportContinueAction));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(english.cardImportSubmitAction(4)));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+
+    await matchesReviewGolden('goldens/card_import_submitting_light.png');
+
+    importer.commitGate!.complete();
+    await tester.pumpAndSettle();
   });
 
   testWidgets('preview — parse error with typed recovery copy', (tester) async {
