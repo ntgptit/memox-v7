@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/deck/domain/entities/deck_entity.dart';
 import 'package:memox/features/deck/domain/models/deck_list_snapshot_model.dart';
@@ -33,7 +34,7 @@ void main() {
     deckId,
   )).ancestors.map((DeckPathSegment segment) => segment.name).toList();
 
-  /// A chain of [depth] decks, root first. BR-55 allows ten.
+  /// A chain of [depth] decks, root first. BR-55 owns the maximum.
   Future<List<DeckEntity>> seedChain(int depth) async {
     final decks = <DeckEntity>[
       await harness.deckRepository.createRootDeck(
@@ -85,9 +86,9 @@ void main() {
     test('at the deepest level BR-55 allows, the chain is complete', () async {
       // Ten levels, so nine ancestors, root first. A walk that stopped one short
       // would look correct at every shallower depth.
-      final chain = await seedChain(10);
+      final chain = await seedChain(DeckEntity.maxTreeDepth);
 
-      expect(await pathNamesUnder(chain[9].id), <String>[
+      expect(await pathNamesUnder(chain.last.id), <String>[
         'L1',
         'L2',
         'L3',
@@ -98,6 +99,37 @@ void main() {
         'L8',
         'L9',
       ]);
+    });
+
+    test('a cyclic parent chain terminates and leaves SQLite usable', () async {
+      // Only corrupt data can make this shape (invariant Q8 catches it), but the
+      // read still must terminate: an unbounded ancestry CTE holds the database
+      // isolate and blocks every later statement in the app.
+      final chain = await seedChain(3);
+      await harness.db.customUpdate(
+        'UPDATE decks SET parent_deck_id = ? WHERE id = ?',
+        variables: <Variable<Object>>[
+          Variable<String>(chain[2].id),
+          Variable<String>(chain[1].id),
+        ],
+        updates: <TableInfo<Table, Object?>>{harness.db.decks},
+      );
+
+      final level = await levelUnder(
+        chain[2].id,
+      ).timeout(const Duration(seconds: 5));
+
+      expect(level.parent?.id, chain[2].id);
+      expect(
+        level.ancestors,
+        hasLength(lessThanOrEqualTo(DeckEntity.maxTreeDepth + 1)),
+      );
+
+      final nextQuery = await harness.db
+          .customSelect('SELECT COUNT(*) AS deck_count FROM decks')
+          .getSingle()
+          .timeout(const Duration(seconds: 5));
+      expect(nextQuery.read<int>('deck_count'), chain.length);
     });
 
     test('each segment carries the id the breadcrumb navigates to', () async {

@@ -1,4 +1,5 @@
 import '../../../../core/database/app_database.dart';
+import '../../domain/entities/deck_entity.dart';
 import '../../domain/models/scheduler_type_model.dart';
 import '../mappers/study_state_reset_mapper.dart';
 
@@ -17,6 +18,10 @@ import '../mappers/study_state_reset_mapper.dart';
 /// maps them to domain entities and never lets one across (AD-01).
 final class DeckDao {
   DeckDao(this._db);
+
+  /// One step beyond the deepest valid tree makes the read bound derive from
+  /// BR-55 while leaving room to terminate corrupt ancestry safely.
+  static const int _ancestryWalkLimit = DeckEntity.maxTreeDepth + 1;
 
   final AppDatabase _db;
 
@@ -62,7 +67,9 @@ final class DeckDao {
     required String parentDeckId,
     required DateTime now,
     required DateTime startOfToday,
-  }) => _db.childDeckLevel(parentDeckId, now, startOfToday).watch();
+  }) => _db
+      .childDeckLevel(parentDeckId, _ancestryWalkLimit, now, startOfToday)
+      .watch();
 
   Future<Deck?> deckById(String deckId) =>
       _db.deckById(deckId).getSingleOrNull();
