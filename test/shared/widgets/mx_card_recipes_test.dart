@@ -77,27 +77,44 @@ void main() {
         expect(hasShadow(decoration), isFalse);
       });
 
-      testWidgets('$themeName · raised: surface, lg, shadow in light only', (
-        tester,
-      ) async {
-        await pump(tester, const MxCard.raised(child: Text('x')), theme: theme);
+      testWidgets(
+        '$themeName · raised: surface, lg, shadow in light, surfaceContainer in dark',
+        (tester) async {
+          await pump(
+            tester,
+            const MxCard.raised(child: Text('x')),
+            theme: theme,
+          );
 
-        final decoration = decorationOf(tester);
-        expect(decoration.color, scheme.surface);
-        expect(borderColorOf(decoration), semantic.borderSubtle);
-        expect(radiusOf(decoration), AppRadius.lg);
-        // AD-14: dark builds its depth from the surface step and draws no
-        // shadow; light carries the difference as paint.
-        expect(hasShadow(decoration), !isDark);
-      });
+          final decoration = decorationOf(tester);
+          // AD-14: dark builds its depth from the surface step and draws no
+          // shadow; light carries the difference as paint. `raised` is the
+          // one step above `none`, so dark has to carry it in the fill —
+          // `surfaceContainer`, one rung lighter than `surface` — or the
+          // recipe prints identically to `.flat`.
+          expect(
+            decoration.color,
+            isDark ? scheme.surfaceContainer : scheme.surface,
+          );
+          expect(borderColorOf(decoration), semantic.borderSubtle);
+          expect(radiusOf(decoration), AppRadius.lg);
+          expect(hasShadow(decoration), !isDark);
+        },
+      );
 
-      testWidgets('$themeName · focal: xl corner, lifted in light', (
+      testWidgets('$themeName · focal: xl corner, lifted in every theme', (
         tester,
       ) async {
         await pump(tester, const MxCard.focal(child: Text('x')), theme: theme);
 
         final decoration = decorationOf(tester);
-        expect(decoration.color, scheme.surface);
+        // Same fill step as `raised` in dark, for the same reason: `focal`
+        // sits at `AppElevation.raised`, so the two must not collapse onto
+        // `.flat`'s fill once the shadow drops out.
+        expect(
+          decoration.color,
+          isDark ? scheme.surfaceContainer : scheme.surface,
+        );
         expect(radiusOf(decoration), AppRadius.xl);
         expect(hasShadow(decoration), !isDark);
       });
@@ -182,13 +199,19 @@ void main() {
         expect(hasShadow(decoration), isFalse);
       });
 
-      testWidgets('$themeName · accent: borderAccent, lifted in light', (
+      testWidgets('$themeName · accent: borderAccent, lifted in every theme', (
         tester,
       ) async {
         await pump(tester, const MxCard.accent(child: Text('x')), theme: theme);
 
         final decoration = decorationOf(tester);
-        expect(decoration.color, scheme.surface);
+        // Same fill step as `raised`/`focal` in dark — `accent` also sits at
+        // `AppElevation.raised`, so its border colour is not the only cue
+        // that survives the shadow dropping out.
+        expect(
+          decoration.color,
+          isDark ? scheme.surfaceContainer : scheme.surface,
+        );
         expect(borderColorOf(decoration), semantic.borderAccent);
         expect(hasShadow(decoration), !isDark);
       });
