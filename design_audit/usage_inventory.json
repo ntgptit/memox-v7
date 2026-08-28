@@ -3464,7 +3464,7 @@
     },
     {
       "file": "lib/features/progress/presentation/widgets/items/progress_metric_widget.dart",
-      "line": 141,
+      "line": 148,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3475,7 +3475,7 @@
     },
     {
       "file": "lib/features/progress/presentation/widgets/items/progress_metric_widget.dart",
-      "line": 330,
+      "line": 339,
       "widget_context": "_ReviewingMetric",
       "element_kind": "other",
       "source_kind": "theme-token",

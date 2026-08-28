@@ -154,6 +154,28 @@ void main() {
 
       expect(second.top - first.bottom, AppSpacing.md);
     });
+
+    testWidgets('the inset below the last row is lg, not a bottom-bar '
+        'clearance', (tester) async {
+      // `getRect` cannot pin this one: `Scaffold` already subtracts the
+      // navigation bar's height from the body's `MediaQuery`, so no row can
+      // hide behind it and a rect-based "is the last row visible" assertion
+      // would never go red regardless of what this inset is. What the
+      // wireframe (§2) actually pins is the inset value itself, which lives
+      // on `SliverPadding.padding.bottom` — the one `SliverPadding` in this
+      // screen's tree.
+      await pumpProgressScreen(
+        tester,
+        repository: level(),
+        screen: const ProgressDeckScreen(),
+      );
+
+      final sliverPadding = tester.widget<SliverPadding>(
+        find.byType(SliverPadding),
+      );
+
+      expect((sliverPadding.padding as EdgeInsets).bottom, AppSpacing.lg);
+    });
   });
 
   group('a number is never truncated into a different number', () {
