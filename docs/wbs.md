@@ -14743,6 +14743,81 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Editable documents:** `docs/wbs.md`, `docs/wireframes/m99-settings.md`
 - **Dependencies:** M99.28, BR-211, BR-216
 
+### M99.93 · Card List theo visual language của Card Detail — geometry đo được, hai mặt rỗng đóng
+
+- **Status:** **done** — implementation, hai review pass audit-only song song
+  (architecture/logic, UI/UX) và coordinator fix P2 đều xong.
+- **Goal:** Card List đạt chuẩn Card Detail và có test đo được hình học của
+  chính nó, không chỉ hành vi.
+- **Scope:** audit đọc code xác nhận màn hình đã ở gần hết ngôn ngữ này —
+  `MxCard.flat` cho mỗi row và progress panel, `MxPillButton` cho bốn pill
+  trạng thái (D3 yêu cầu pill, không phải radio — khác với Settings),
+  `MxActionButton`/`MxMenuButton`/`MxIconButton`/`MxTextButton` khắp nơi,
+  không widget Material thô, không giá trị màu/khoảng cách hardcode. Khoảng
+  trống thật: (1) không có file geometry/alignment riêng cho Card List —
+  `card_list_alignment_test.dart` mới, đo shared gutter (search field ↔
+  progress panel ↔ row) tại 393/412 (320 tách riêng theo đúng tiền lệ
+  `tag_catalog_alignment_test.dart` vì subheader đổi gutter dưới breakpoint
+  compact), baseline của trailing badge với front, row giữ nguyên chiều cao
+  khi vào selection mode, selection bar cố ý edge-to-edge (khác gutter list —
+  ghi lại như một quyết định giữ, không phải lỗi), bottom clearance
+  `AppSpacing.xxl`, touch target 48dp, và 320dp×2.0 không overflow cả ở
+  loaded lẫn selecting; (2) hai mặt rỗng đã có code (`_NoSearchMatch`,
+  `_NoMatch`) nhưng chưa từng có test nào — search-empty và filtered-empty
+  (theo pill lẫn theo tag) giờ có trong `card_list_screen_test.dart` và
+  `card_list_tag_filter_empty_test.dart`; (3) một bug thật geometry test tìm
+  ra: `_LegendItem` trong `card_state_distribution_widget.dart` không có
+  `Flexible` quanh `Text`, nên ở 320dp×2.0 một nhãn dài ("Beginning 12")
+  RenderFlex overflow — sửa bằng `Flexible` + `maxLines: 1` + ellipsis, không
+  đổi layout ở mọi state hiện có (goldens xác nhận 0 pixel khác). **Ngoài
+  scope:** query/filter semantics, pagination, selection/bulk logic,
+  move/delete/tag/flag/export, độ dài nội dung canonical — không đổi vì
+  không có lý do nào khác để chạm chúng (UC-04, BR-165/166/167/246).
+- **Recursive review (architecture/logic, UI/UX, song song, audit-only):**
+  cả hai không tìm P0/P1 — không business/logic drift, không widget mới sai
+  ngôn ngữ, mọi "khác biệt" đều là divergence đã duyệt từ trước (pill filter
+  bar D3, selection bar edge-to-edge D13, Back preview một dòng D12). Ba mục
+  P2 (đều là gap coverage, không phải lỗi hiển thị — cả hai reviewer tự tay
+  render và xác nhận cả ba mặt đã đúng trước khi đề xuất): (1) hai mặt rỗng
+  chưa có bản dark/VI nào — thêm 2 golden pair mới (`card_list_search_empty`,
+  `card_list_filter_empty`, light+dark) và 2 test VI-locale không-overflow
+  trong `card_list_alignment_test.dart` (G9); (2) mặt tag-filtered-empty
+  chưa test ở 320dp×2.0 — thêm test xác nhận nút `Clear tag filter` vẫn full-
+  width, 48dp, trong khung hình; (3) cùng mặt đó chưa test dark — thêm test
+  không-exception + text đúng. Cả ba đã đóng, không finding nào còn treo.
+- **Tests required:** `card_list_alignment_test.dart` mới (8 nhóm G1-G8 +
+  G9 VI); `card_list_screen_test.dart` thêm 2 case (search-empty, state-pill
+  filtered-empty); `card_list_tag_filter_empty_test.dart` mới (tag-filtered-
+  empty, đường Clear UC-18 A7, cộng 320×2.0 và dark); 4 golden mới trong
+  `card_screens_demo_test.dart` (search-empty, filter-empty, light+dark).
+- **Checklist phases:** Phase 13 (responsive/a11y) · Phase 14 (feature).
+- **Emulator integration suite:** **not run — presentation-only restyle.**
+- **Output:** `card_list_alignment_test.dart`,
+  `card_list_tag_filter_empty_test.dart` (mới); `card_state_distribution_widget.dart`,
+  `card_list_screen_test.dart`, `card_screens_demo_test.dart` (sửa); 4 golden
+  mới (`card_list_search_empty_light/dark.png`, `card_list_filter_empty_light/dark.png`);
+  2 hàng gallery mới; gallery publish lại URL ghim. **Bản live tại thời điểm
+  publish là 56 màn, đóng dấu commit của lượt Settings (M99.88) — không phải
+  stale, là trạng thái publish gần nhất trên URL ghim.** Theo
+  [[splice-gallery-not-overwrite]]: không đè cả trang, chỉ thay figure
+  `Card list` bằng bản mới + chèn hai figure mới (`Card list — search rỗng`,
+  `Card list — pill rỗng`) ngay sau nó, tăng count section Card 22→24 và
+  tổng 56→58, giữ nguyên mọi figure khác — kể cả Progress Overview/Daily
+  Reminder dù goldens của chúng đã đổi trong worktree này (out of scope, để
+  session của chúng tự publish).
+- **Acceptance criteria:**
+  - [x] Không business/navigation/data drift — diff chỉ chạm
+        `features/card/presentation/` (đúng một widget ngoài `card_list/`:
+        `card_state_distribution_widget.dart`, dùng chung với progress
+        panel) + tests + docs.
+  - [x] Hai review pass (architecture/logic, UI/UX) chạy xong, audit-only,
+        song song; verdict cả hai: an toàn để đi tiếp; 3 mục P2 đã đóng.
+  - [x] `flutter analyze` 0 (repo-wide); `dod_check.sh --changed` xanh;
+        goldens `TZ=UTC` — 4 file cũ không đổi, 4 file mới cho hai mặt rỗng.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** UC-04, BR-89…BR-94, BR-150/151, BR-163, BR-165/166/167,
+  BR-231, BR-246, M4.11, M99.19a, M99.30
+
 ### M99.89 · Progress Overview theo ngôn ngữ thị giác Card Detail — streak hero thu về compact
 
 - **Status:** **done** — theo prompt set `docs/prompt/progress-overview-visual-hierarchy/`

@@ -123,7 +123,6 @@ class _LegendItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Container(
           width: _legendDotSize,
@@ -134,14 +133,22 @@ class _LegendItem extends StatelessWidget {
           ),
         ),
         const SizedBox(width: AppSpacing.xs),
-        Text(
-          context.l10n.cardProgressLegendItem(
-            context.cardStateLabel(state),
-            count,
+        // Flexible, not a bare `Text`: the parent's `Expanded` half-column
+        // gives this row a tight, bounded width, and at 320dp/textScale 2.0
+        // "Beginning 12" no longer fits it — the label must yield before the
+        // row does (RenderFlex overflow, 320@2.0).
+        Flexible(
+          child: Text(
+            context.l10n.cardProgressLegendItem(
+              context.cardStateLabel(state),
+              count,
+            ),
+            // labelMedium on onSurface: four short counts a reader scans need
+            // to clear ordinary body text, and the muted variant sat under it.
+            style: context.texts.labelMedium!.inked(context, AppInk.stated),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          // labelMedium on onSurface: four short counts a reader scans need to
-          // clear ordinary body text, and the muted variant sat under it.
-          style: context.texts.labelMedium!.inked(context, AppInk.stated),
         ),
       ],
     );

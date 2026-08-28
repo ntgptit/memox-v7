@@ -86,6 +86,63 @@ void main() {
   });
 
   testWidgets(
+    'a search that matches nothing names the term, with no filter action',
+    (tester) async {
+      final repository = FakeCardRepository();
+      addTearDown(repository.dispose);
+      await pump(tester, repository);
+
+      repository.emitItems(<dynamic>[repository.listItem('c1')].cast());
+      repository.emitCount(1);
+      await tester.pump();
+
+      await tester.enterText(find.byType(TextField), 'zzz-no-match');
+      // The search re-subscribes the list; the fake's stream stays open, so
+      // the new frame has to be pushed by hand rather than awaited.
+      repository.emitItems(<dynamic>[].cast());
+      repository.emitCount(0);
+      await tester.pump();
+
+      expect(find.text('No cards match “zzz-no-match”'), findsOneWidget);
+      expect(
+        find.text('Try a different word, or clear the search.'),
+        findsOneWidget,
+      );
+      // Unlike the tag-filtered face, a search dead end has nowhere to route
+      // a click to — the search field itself is the way out.
+      expect(find.text('Add card'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'a state pill that matches nothing says so, with no filter action (D3)',
+    (tester) async {
+      final repository = FakeCardRepository();
+      addTearDown(repository.dispose);
+      repository.filterCounts[CardListFilter.isNew] = 0;
+      await pump(tester, repository);
+
+      repository.emitItems(<dynamic>[repository.listItem('c1')].cast());
+      repository.emitCount(1);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.widgetWithText(MxPillButton, 'New'));
+      // Switching filter re-subscribes the list — that resubscribe needs its
+      // own pump before the stream has a live listener again, or an event
+      // pushed straight after the tap is broadcast to no one.
+      await tester.pump();
+      repository.emitItems(<dynamic>[].cast());
+      await tester.pump();
+
+      expect(find.text('No cards match'), findsOneWidget);
+      expect(find.text('Try another filter, or add a card.'), findsOneWidget);
+      // A state pill always has `All` beside it, so this face carries no
+      // action of its own — only the tag-filtered face does (UC-18 A7).
+      expect(find.text('Clear tag filter'), findsNothing);
+    },
+  );
+
+  testWidgets(
     'a flagged card shows the flag indicator, an unflagged one does not',
     (tester) async {
       final repository = FakeCardRepository();
