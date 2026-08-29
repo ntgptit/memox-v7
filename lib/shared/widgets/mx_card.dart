@@ -273,15 +273,20 @@ class MxCard extends StatefulWidget {
   /// on `surfaceContainerHigh` so it reads as an aside rather than a card of
   /// content. The import wizard's info panels are the callers.
   ///
-  /// **`elevation: card`, where [tonal] below takes `none` — deliberately,
-  /// not an oversight.** `surfaceContainerHigh` is one shallow step off
-  /// `surface`; without the shadow's lift in light it reads as a faint
-  /// re-tint rather than a separate panel. [tonal]'s `secondaryContainer` is
-  /// a hue change, not a tone step, and a hue change is loud enough on its
-  /// own — stacking a shadow under it would double-state the same fact.
+  /// **`elevation: none`, and it used to be `card`** (M99.95). The argument
+  /// for the shadow was that `surfaceContainerHigh` is one shallow step off
+  /// `surface` and would read as a faint re-tint without a lift. But the fill
+  /// is **3.16 L\* below the page**, not above it, so the card said "lifted"
+  /// with its shadow and "sunken" with its tone at the same time. Visible on
+  /// `card_import_source_light`: the note band cast a shadow while the content
+  /// panel above it — the thing it annotates — cast none, which is emphasis
+  /// upside down, and is the same "two competing depths" fault M99.92's own
+  /// audit caught one recipe over.
+  ///
+  /// An aside does not need lifting. The tone step alone is what says aside.
   const MxCard.muted({required this.child, super.key})
     : _spec = const _MxCardSpec(
-        elevation: AppElevation.card,
+        elevation: AppElevation.none,
         radius: AppRadius.lg,
         fill: _MxCardFill.muted,
       ),

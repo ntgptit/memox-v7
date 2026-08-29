@@ -201,10 +201,13 @@ void main() {
         final decoration = decorationOf(tester);
         expect(decoration.color, scheme.surfaceContainerHigh);
         expect(radiusOf(decoration), AppRadius.lg);
-        // Card-level depth, kept from the bare `MxCard` the info panels used
-        // to build — pinned so the one recipe without a depth claim cannot
-        // drift elevation with no test going red.
-        expect(hasShadow(decoration), !isDark);
+        // **Flat, and it carried card-level depth until M99.95.** The fill sits
+        // 3.16 L* *below* the page, so a shadow under it had the card claiming
+        // "lifted" and "sunken" at once — visible on `card_import_source_light`
+        // where the note band cast a shadow the content panel it annotates did
+        // not. Pinned in the new direction so the one recipe whose tone already
+        // states its depth cannot quietly grow a second claim.
+        expect(hasShadow(decoration), isFalse);
       });
 
       testWidgets('$themeName · tonal: secondaryContainer callout, flat', (
