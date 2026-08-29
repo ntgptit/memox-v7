@@ -136,6 +136,38 @@ abstract final class AppBorderColors {
   /// edge a card can wear.
   static const Color borderAccentDark = Color(0xFF6560B8);
 
+  /// The resting edge of a selectable **card** — `MxCard.option`.
+  ///
+  /// **Split off `borderControl` at M100.2, and the split is the point.** The
+  /// owner's review asked why a card that must draw a border draws it in a
+  /// colour unrelated to the brand. The answer for the *input* border is a
+  /// recorded rule — `app_palette_test.dart`'s "the light canvas carries no
+  /// lavender tint" names `input` explicitly and caps the tint at 0.06 — and
+  /// that rule is right: an empty text field is canvas, and putting the accent
+  /// on every one of them is the density problem M99.98 just took off Library.
+  ///
+  /// But that rule names the *input*, not every consumer of one token. An
+  /// option card is a card, sitting on a page, next to other cards whose edges
+  /// M99.99 already moved into the brand family. It was borrowing canvas
+  /// furniture, and the borrowing is what made it look wrong.
+  ///
+  /// `#8887CE` measures **3.18:1** on a card and **3.01** on the page — above
+  /// the 3:1 WCAG 1.4.11 asks of a control boundary, where `borderControl`
+  /// managed 3.19 and 3.02 — at chroma **0.105**, roughly nine times the grey
+  /// it replaces. It is deliberately **1.34 quieter than
+  /// [borderSelectedLight]**, so a picked option still wins its own row.
+  ///
+  /// **Two things it does not touch, and both are deliberate.** The input
+  /// border keeps `borderControl` and its canvas rule. So does
+  /// `guess_option_item_widget`, which writes down that its row "is a control
+  /// (WCAG 1.4.11), not a card" — the same distinction from the other side.
+  static const Color borderOptionLight = Color(0xFF8887CE);
+
+  /// See [borderOptionLight]. Measured on the fill `.option` actually has in
+  /// dark (`surface`, since the recipe is flat): **3.22:1**, chroma 0.120, and
+  /// 1.37 quieter than [borderSelectedDark].
+  static const Color borderOptionDark = Color(0xFF5D65B2);
+
   /// A control's edge at the 3:1 WCAG 1.4.11 asks — cleared against every
   /// neighbour it touches. Why a control and not a card, and the measurements:
   /// `AppSemanticColors.borderControl`.

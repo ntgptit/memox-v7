@@ -48,6 +48,10 @@ void main() {
       AppSurfaceColors.surfaceMutedLight,
       AppSurfaceColors.surfaceMutedDark,
     ),
+    '--color-border-option': (
+      AppBorderColors.borderOptionLight,
+      AppBorderColors.borderOptionDark,
+    ),
     '--color-border-divider': (
       AppBorderColors.borderDividerLight,
       AppBorderColors.borderDividerDark,

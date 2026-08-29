@@ -80,7 +80,12 @@ enum MxCardFeedbackTone {
 enum _MxCardFill { surface, recessed, muted, tonal, feedback }
 
 /// The edge a recipe rests at, named as a role.
-enum _MxCardRestingEdge { subtle, control, accent }
+/// The edge a recipe rests at, named as a role.
+///
+/// `option` was `control` until M100.2, and the rename came with the token: an
+/// option card had been borrowing the *input* border, which a recorded rule
+/// keeps untinted because a text field is canvas. A card is not canvas.
+enum _MxCardRestingEdge { subtle, option, accent }
 
 /// One recipe, one spec. Private and immutable: a feature picks a named
 /// constructor and everything below — fill, edge, radius, elevation — is this
@@ -382,7 +387,7 @@ class MxCard extends StatefulWidget {
        _spec = const _MxCardSpec(
          elevation: AppElevation.none,
          radius: AppRadius.lg,
-         edge: _MxCardRestingEdge.control,
+         edge: _MxCardRestingEdge.option,
        ),
        padding = MxCardPadding.compact,
        _selectionTreatment = MxCardSelectionTreatment.edge,
@@ -599,7 +604,7 @@ class _MxCardState extends State<MxCard> {
 
     return switch (widget._spec.edge) {
       _MxCardRestingEdge.subtle => null,
-      _MxCardRestingEdge.control => semantic.borderControl,
+      _MxCardRestingEdge.option => semantic.borderOption,
       _MxCardRestingEdge.accent => semantic.borderAccent,
     };
   }

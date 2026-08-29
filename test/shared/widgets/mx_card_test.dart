@@ -263,7 +263,7 @@ void main() {
     testWidgets('an option rests at the control edge until it is selected', (
       tester,
     ) async {
-      // The resting `borderControl` used to be a caller-passed colour; the
+      // The resting `borderOption` used to be a caller-passed colour; the
       // option recipe owns it now, so an unpicked option still reads as a
       // control and a picked one still wins with `borderSelected`.
       final semantic = buildLightTheme().extension<AppSemanticColors>()!;
@@ -272,7 +272,7 @@ void main() {
         MxCard.option(isSelected: false, onTap: () {}, child: const Text(long)),
       );
 
-      expect(borderOf(tester).color, semantic.borderControl);
+      expect(borderOf(tester).color, semantic.borderOption);
 
       await pump(
         tester,

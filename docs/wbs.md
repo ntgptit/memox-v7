@@ -15524,6 +15524,63 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
   Cả ba đã vượt từ trước đợt này; tách chúng là việc riêng, không phải nợ của
   đợt này.
 
+### M100.2 · Cạnh của option card về họ màu thương hiệu
+
+- **Status:** **done**
+- **Goal:** Chủ dự án hỏi vì sao *"khi bắt buộc sử dụng border cho card thì màu
+  sử dụng lại không phải màu liên quan đến màu primary"*. Đúng, và chỗ sai là
+  `MxCard.option`: nó mượn `borderControl` — token của **viền ô nhập** — cho
+  cạnh một **card**.
+- **Vì sao trước đây trả lời sai là "không sửa được":** tôi đọc rule
+  `app_palette_test.dart` → *"the light canvas carries no lavender tint"* quá
+  rộng. Rule đó liệt kê đích danh bốn mặt: `page`, `tile`, `border`, và
+  **`input`** = `inputDecorationTheme.enabledBorder`. Nó nói về **canvas**, và
+  một ô nhập rỗng đúng là canvas — rải accent lên mọi ô nhập chính là vấn đề
+  mật độ mà M99.98 vừa gỡ khỏi Library. Nhưng nó **không** nói "mọi nơi dùng
+  `borderControl`". Một card nằm trên page thì không phải canvas, và cạnh của
+  các card hàng xóm đã về họ thương hiệu từ M99.99.
+- **Scope:**
+  - `AppBorderColors.borderOptionLight = #8887CE` / `borderOptionDark = #5D65B2`,
+    `AppSemanticColors.borderOption`.
+  - `_MxCardRestingEdge.control` → `.option`, trỏ sang token mới. Đổi tên là
+    một nửa nội dung: enum đang đặt tên theo *token nó mượn* chứ không theo
+    *vai trò nó phục vụ*, và đó là cái làm chỗ mượn nhìn như cố ý.
+  - Token đăng ký ở `app_palette.dart`, `css_token_parity_test.dart`, và kit CSS.
+- **Phép đo:**
+
+  | | trên card | trên page | cách `borderSelected` | chroma |
+  |---|---|---|---|---|
+  | light `#8887CE` | **3.18:1** | **3.01:1** | 1.34 | 0.105 |
+  | ~~light `borderControl`~~ | 3.19:1 | 3.02:1 | — | 0.012 |
+  | dark `#5D65B2` | **3.22:1** | cao hơn | 1.37 | 0.120 |
+
+  Giữ nguyên ngưỡng 3:1 của WCAG 1.4.11 cho ranh giới một control, chroma gấp
+  ~9 lần màu xám nó thay, và **cố ý êm hơn cạnh đã chọn** để trạng thái được
+  chọn vẫn thắng trong chính hàng của nó.
+- **Hai chỗ cố ý không đụng, và lý do nằm ngay trong code:**
+  - viền ô nhập giữ `borderControl` cùng rule canvas ở trên;
+  - `guess_option_item_widget.dart` tự ghi *"a row is a control (WCAG 1.4.11),
+    not a card"* — cùng một phân biệt, nhìn từ phía kia. Nó là hàng, không phải
+    card, nên nó giữ token control.
+- **Acceptance criteria:**
+  - [x] `MxCard.option` nghỉ ở `borderOption`, và test khẳng định nó **không
+        phải** `borderControl` nữa — nếu ai đó gộp lại thì test đỏ.
+  - [x] `palette.closure`, parity kit↔app, và bộ `visual_audit/` xanh với token
+        mới.
+  - [x] 8 golden đổi, **toàn bộ là Card Export** — đúng bề mặt duy nhất dùng
+        `.option`. Không màn nào khác đổi một pixel.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** 3 file `lib/` sửa, 3 file test cập nhật hợp đồng, 1 file kit CSS,
+  2 file test đăng ký token, 8 golden.
+- **Tests required:** `test/shared/widgets/mx_card*`, `test/core/theme/`,
+  `test/design_audit/`, `test/visual_audit/`,
+  `test/features/card/presentation/card_export_sheet_test.dart`, `test/demo/`.
+- **Emulator integration suite:** **not run** — thuần trình bày, không chạm
+  `lib/features/` logic nào.
+- **Checklist phases:** 7.
+- **Dependencies:** M99.99 (cạnh đã chọn về họ thương hiệu), M100.1 (nhà của
+  `AppBorderColors`).
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |
