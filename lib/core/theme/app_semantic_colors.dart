@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
+import 'app_surface_colors.dart';
+import 'app_border_colors.dart';
 
 /// The meanings `ColorScheme` has no slot for.
 ///
@@ -44,16 +46,16 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       warning = AppColors.warningLight,
       danger = AppColors.dangerLight,
       info = AppColors.infoLight,
-      borderDivider = AppColors.borderDividerLight,
-      borderSelected = AppColors.borderSelectedLight,
-      surfaceEmphasis = AppColors.surfaceEmphasisLight,
-      surfaceSelected = AppColors.surfaceSelectedLight,
-      surfaceMuted = AppColors.surfaceMutedLight,
-      surfaceElevated = AppColors.surfaceElevatedLight,
-      borderAccent = AppColors.borderAccentLight,
-      borderSubtle = AppColors.borderSubtleLight,
-      borderControl = AppColors.borderControlLight,
-      focusRing = AppColors.focusRingLight,
+      borderDivider = AppBorderColors.borderDividerLight,
+      borderSelected = AppBorderColors.borderSelectedLight,
+      surfaceEmphasis = AppSurfaceColors.surfaceEmphasisLight,
+      surfaceSelected = AppSurfaceColors.surfaceSelectedLight,
+      surfaceMuted = AppSurfaceColors.surfaceMutedLight,
+      surfaceElevated = AppSurfaceColors.surfaceElevatedLight,
+      borderAccent = AppBorderColors.borderAccentLight,
+      borderSubtle = AppBorderColors.borderSubtleLight,
+      borderControl = AppBorderColors.borderControlLight,
+      focusRing = AppBorderColors.focusRingLight,
       secondaryAction = AppColors.secondaryActionLight,
       disabledSurface = AppColors.disabledSurfaceLight,
       onDisabled = AppColors.onDisabledLight;
@@ -68,16 +70,16 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       warning = AppColors.warningDark,
       danger = AppColors.dangerDark,
       info = AppColors.infoDark,
-      borderDivider = AppColors.borderDividerDark,
-      borderSelected = AppColors.borderSelectedDark,
-      surfaceEmphasis = AppColors.surfaceEmphasisDark,
-      surfaceSelected = AppColors.surfaceSelectedDark,
-      surfaceMuted = AppColors.surfaceMutedDark,
-      surfaceElevated = AppColors.surfaceElevatedDark,
-      borderAccent = AppColors.borderAccentDark,
-      borderSubtle = AppColors.borderSubtleDark,
-      borderControl = AppColors.borderControlDark,
-      focusRing = AppColors.focusRingDark,
+      borderDivider = AppBorderColors.borderDividerDark,
+      borderSelected = AppBorderColors.borderSelectedDark,
+      surfaceEmphasis = AppSurfaceColors.surfaceEmphasisDark,
+      surfaceSelected = AppSurfaceColors.surfaceSelectedDark,
+      surfaceMuted = AppSurfaceColors.surfaceMutedDark,
+      surfaceElevated = AppSurfaceColors.surfaceElevatedDark,
+      borderAccent = AppBorderColors.borderAccentDark,
+      borderSubtle = AppBorderColors.borderSubtleDark,
+      borderControl = AppBorderColors.borderControlDark,
+      focusRing = AppBorderColors.focusRingDark,
       secondaryAction = AppColors.secondaryActionDark,
       disabledSurface = AppColors.disabledSurfaceDark,
       onDisabled = AppColors.onDisabledDark;
@@ -120,18 +122,18 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   Color get onDueContainer => onStreakContainer;
 
   /// Inset tile, chip, icon container — a step above the card.
-  /// See [AppColors.borderDividerLight] — the hairline between rows of one
+  /// See [AppBorderColors.borderDividerLight] — the hairline between rows of one
   /// list, drawn only inside a card.
   final Color borderDivider;
 
-  /// See [AppColors.borderSelectedLight] — the edge a picked card wears.
+  /// See [AppBorderColors.borderSelectedLight] — the edge a picked card wears.
   final Color borderSelected;
 
-  /// See [AppColors.surfaceEmphasisLight] — the callout surface `MxCard.tonal`
+  /// See [AppSurfaceColors.surfaceEmphasisLight] — the callout surface `MxCard.tonal`
   /// fills with.
   final Color surfaceEmphasis;
 
-  /// See [AppColors.surfaceSelectedLight] — the fill a picked card wears under
+  /// See [AppSurfaceColors.surfaceSelectedLight] — the fill a picked card wears under
   /// `MxCardSelectionTreatment.tint`.
   final Color surfaceSelected;
 
@@ -142,7 +144,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   /// which leaves every saturated hue free to carry meaning.
   final Color surfaceElevated;
 
-  /// The accent hairline — see [AppColors.borderAccentLight].
+  /// The accent hairline — see [AppBorderColors.borderAccentLight].
   final Color borderAccent;
 
   final Color borderSubtle;

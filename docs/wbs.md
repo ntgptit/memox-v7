@@ -15480,6 +15480,50 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Dependencies:** M99.94 (bỏ cạnh ngoài — divider chỉ có nghĩa sau khi card
   thôi tự đóng khung).
 
+### M100.1 · Trả lại nợ `app_colors.dart` — tách theo vai trò
+
+- **Status:** **done** — **thuần di chuyển, không đổi một giá trị nào và không
+  đổi một pixel nào.** Xác nhận bằng `flutter test --tags golden` **không**
+  `--update-goldens`: 303 pass, **0 PNG thay đổi**.
+- **Goal:** `app_colors.dart` lên **513 dòng** so với trần 400 của guard. Đây là
+  nợ đã ghi trong bảng và từng được trả ở M99.5 bằng cách tách
+  `AppMaterialRoles`; bốn PR M99.94–M100.0 làm nó tái phát khi thêm bốn token
+  cùng phép đo giải thích từng cái.
+- **Scope:**
+  - `AppSurfaceColors` (`app_surface_colors.dart`) — mọi mặt phẳng app vẽ, kèm
+    cả đoạn chú thích về thang bốn bậc vốn thuộc về chúng.
+  - `AppBorderColors` (`app_border_colors.dart`) — mọi đường app vẽ quanh hoặc
+    trong một component. Bản thân họ này là một thang có thứ tự, và thứ tự đó
+    là cái đáng giữ cùng một chỗ: cạnh nghỉ của card êm hơn cạnh của control,
+    cạnh control êm hơn cạnh đã chọn, focus ring to hơn tất cả ở cả hai mode.
+  - **Sửa luôn một chỗ đặt nhầm tôi gây ra:** `borderDivider` và
+    `borderSelected` thêm ở M99.99/M100.0 nằm trong section *Surface*; giờ về
+    đúng họ viền.
+  - 11 file cập nhật tham chiếu, thuần đổi tên lớp.
+- **Bài học lặp lại nguyên vẹn:** allowlist R2 của `color_source_rules_test.dart`
+  — *"colour literals live only where colours are declared"* — phải được dạy tên
+  file mới, nếu không mọi literal vừa dời chỗ đọc ra là vi phạm mới. Ghi chú nợ
+  của M99.5 đã cảnh báo đúng điều này ("scanner của audit cũng phải biết tên lớp
+  mới") và lần này vẫn vấp.
+- **Acceptance criteria:**
+  - [x] `app_colors.dart` **513 → 309 dòng**; guard thôi cảnh báo cho file này.
+  - [x] Không đổi giá trị: golden pass mà không cần update, 0 PNG đổi.
+  - [x] Allowlist R2 biết hai file mới.
+  - [x] Bảng nợ ghi lại đúng sự thật — mục này **tái phát rồi trả lại**, không
+        phải "đã trả từ M99.5".
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** 2 file `lib/core/theme/` mới, 11 file cập nhật tham chiếu, 1 file
+  test allowlist.
+- **Tests required:** toàn bộ `test/visual_audit/`, `test/design_audit/`,
+  `test/core/theme/`, `test/demo/` (golden, để chứng minh không đổi pixel).
+- **Emulator integration suite:** **not run** — thuần di chuyển.
+- **Checklist phases:** 7.
+- **Dependencies:** M99.5 (tiền lệ tách `AppMaterialRoles`), M100.0.
+- **Ba file còn vượt trần và cố ý không đụng:** `app_theme.dart` (609),
+  `card_editor_screen.dart` (416), `card_import_source_step_widget.dart` (403).
+  Cả ba đã vượt từ trước đợt này; tách chúng là việc riêng, không phải nợ của
+  đợt này.
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |
@@ -15491,7 +15535,7 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 | Pin Flutter ở `.fvmrc` **khai báo** chứ không **cưỡng chế** | M2.2 | Chạy `flutter` trực tiếp trên máy có version khác vẫn build được và không cảnh báo. Đây đúng là lỗi đã xảy ra: M2.1 chạy 3.44.8, phiên sau khởi động trên 3.44.6, không có gì phát hiện ra | **Đã trả một nửa ở M4.10b:** cả hai job CI dùng `flutter-version-file: .fvmrc`, nên `.fvmrc` là nguồn duy nhất và CI không thể lệch. **Chưa trả:** máy lập trình viên vẫn chạy version nào cũng được — cần một check so `flutter --version` với `.fvmrc` trong `dod_check.sh` |
 | ~~7 file skill vẫn bảo chạy `dart run custom_lint`~~ | M2.2 | Skill vẫn hướng dẫn cài và chạy một package không cài được; phiên sau sẽ tin skill và loay hoay | **Đã trả ở M2.2b.** Cả 7 file đã trỏ sang guard. `docs/checklist.md` **cố ý giữ nguyên**: nó `frozen for MVP`, và mục "Ngoài phạm vi: mọi quyết định riêng của memox" nói rõ nó mô tả quy trình 22 phase chung — `custom_lint` ở đó là khuyến nghị Flutter phổ thông, còn quyết định riêng của memox sống ở file này (§5 canonical location) |
 | `dependencies.md` vẫn liệt kê `sqlite3_flutter_libs` | M2.2 | Package đó nay là tombstone (`0.6.0+eol`, không có native code). Skill nói sai còn tệ hơn không có skill — phiên sau sẽ cài lại nó | Sửa `.claude/skills/flutter-project-setup/references/dependencies.md`: thay bằng ghi chú rằng `sqlite3` 3.x cấp native lib qua native assets. Ngoài `Editable documents` của M2.2 nên chưa sửa ở đây |
-| ~~`app_colors.dart` vượt trần 400 dòng của guard~~ | M99.4 | Guard báo `no_large_source_file` (406/400). Cảnh báo chứ không lỗi nên CI vẫn xanh, nhưng **file đang ở đúng trần**: token tiếp theo bất kỳ cũng sẽ vượt, và `borderControl` chỉ tình cờ là cái đầu tiên | **Đã trả ở M99.5.** Khối `// --- Material roles` tách ra `lib/core/theme/app_material_roles.dart` (`AppMaterialRoles`), `app_colors.dart` còn 339 dòng. `part` vẫn không dùng được — Dart không có partial class. Chạm nhiều hơn 4 file đã dự đoán: hai allowlist (`color_source_rules_test.dart`, `audit_scan_steps.dart`) và **scanner của audit** cũng phải biết tên lớp mới, xem M99.6 |
+| ~~`app_colors.dart` vượt trần 400 dòng của guard~~ | M99.4, **tái phát M99.94–M100.0** | Guard báo `no_large_source_file` (406/400). Cảnh báo chứ không lỗi nên CI vẫn xanh, nhưng **file đang ở đúng trần**: token tiếp theo bất kỳ cũng sẽ vượt, và `borderControl` chỉ tình cờ là cái đầu tiên | **Đã trả ở M99.5.** Khối `// --- Material roles` tách ra `lib/core/theme/app_material_roles.dart` (`AppMaterialRoles`), `app_colors.dart` còn 339 dòng. `part` vẫn không dùng được — Dart không có partial class. Chạm nhiều hơn 4 file đã dự đoán: hai allowlist (`color_source_rules_test.dart`, `audit_scan_steps.dart`) và **scanner của audit** cũng phải biết tên lớp mới, xem M99.6 **Tái phát và đã trả lại ở M100.1.** Bốn token mới (`surfaceEmphasis`, `surfaceSelected`, `borderSelected`, `borderDivider`) cùng phép đo giải thích từng cái đưa file từ 407 lên 513. Tách theo vai trò, đúng cách M99.5 đã làm: `AppSurfaceColors` và `AppBorderColors`, file gốc còn **309**. Bài học lặp lại nguyên vẹn — allowlist R2 của `color_source_rules_test.dart` lại phải học tên file mới, y như ghi chú M99.5 đã cảnh báo. |
 | ~~`study_session_controller.dart` vượt trần 400 dòng của guard~~ | M5.23 | 408/400, và **warning cũng làm đỏ gate**. Class giữ toàn bộ command của phiên học, cộng summary và failure policy | **Đã trả trong cùng PR.** Tách `_loadSummary` + `StudySessionState.summary` thành `studySessionSummaryProvider` — một **query**, không phải command, nên nó chưa bao giờ thuộc về controller. Controller còn 380 dòng. Lợi ích thật chứ không chỉ số dòng: read cũ có ba call site (hết stage, leave, failure path) nên summary chỉ đúng bằng người cuối cùng nhớ đủ cả ba, và field thì sống lâu hơn phiên — quên một call site là hiện số của phiên trước dưới tiêu đề phiên mới |
 | ~~`dart format .` trong `dod_check.sh` crash trên worktree~~ | M2.2b | Bước `format` đỏ ở **mọi** lần chạy local nhiều tuần liền: `.` đi vào `.claude/worktrees/`, nơi Gradle xoá thư mục ngay giữa lúc formatter đang liệt kê → `PathNotFoundException`. Vì là lỗi môi trường chứ không phải lỗi format, mỗi lần lại được *báo cáo và đi vòng* thay vì sửa — và một gate đỏ mà ai cũng biết là đỏ thì không còn là gate | **Đã trả.** `dart_roots()` lấy tập thư mục từ `git ls-files '*.dart'` cắt tới segment đầu. Đúng câu hỏi cần hỏi — *cây làm việc **này** track những file Dart nào* — nên build output không tracked không lọt vào, worktree bị `.git/info/exclude` loại sẵn, và một thư mục top-level mới tự động được nhận. **Lỗi thứ hai nghiêm trọng hơn cái crash:** `.` đưa cho formatter source của **nhánh khác**, nên một worktree có format cũ làm gate đỏ vì code không nằm trong cây làm việc |
 | ~~`study_session_controller.dart` vượt trần 400 dòng của guard~~ | M5.24 | 423/400. Warning cũng làm đỏ gate. Class giữ toàn bộ command của phiên học | **Đã trả ở M5.25.** Không tách được bằng cơ chế ngôn ngữ — Dart không có partial class, base class Riverpod sinh ra là private, và extension trong `part` cũng không dùng được `state` (`invalid_use_of_protected_member`, đã thử và revert). Nên tách bằng **trách nhiệm**: offset nhìn lại của `browse` là view state, không phải command của phiên, và nay là `StudyBrowseTrailController`. Controller còn 387 dòng |

@@ -226,7 +226,7 @@ void main() {
         // **Light only.** The reference concept is light-only, and in dark
         // `#332F58` already carries a real violet and reads as a callout, so
         // `surfaceEmphasisDark` deliberately keeps the value it had — see
-        // `AppColors.surfaceEmphasisDark`. Asserting the divergence where it
+        // `AppSurfaceColors.surfaceEmphasisDark`. Asserting the divergence where it
         // exists, rather than forcing dark to move without a reference to
         // measure it against.
         if (!isDark) {

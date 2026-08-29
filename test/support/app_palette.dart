@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:memox/core/theme/app_colors.dart';
 import 'package:memox/core/theme/app_material_roles.dart';
+import 'package:memox/core/theme/app_surface_colors.dart';
+import 'package:memox/core/theme/app_border_colors.dart';
 
 /// The approved A2 Quizlet Navy Indigo palette, as flat lists.
 ///
@@ -14,20 +16,20 @@ import 'package:memox/core/theme/app_material_roles.dart';
 /// card, the raised surface and three `on*` labels at once — and a set literal
 /// calls that a duplicate.
 final List<Color> lightPaletteTokens = <Color>[
-  AppColors.backgroundLight,
-  AppColors.surfaceLight,
-  AppColors.borderDividerLight,
-  AppColors.borderSelectedLight,
-  AppColors.surfaceEmphasisLight,
-  AppColors.surfaceSelectedLight,
-  AppColors.surfaceMutedLight,
-  AppColors.surfaceElevatedLight,
+  AppSurfaceColors.backgroundLight,
+  AppSurfaceColors.surfaceLight,
+  AppBorderColors.borderDividerLight,
+  AppBorderColors.borderSelectedLight,
+  AppSurfaceColors.surfaceEmphasisLight,
+  AppSurfaceColors.surfaceSelectedLight,
+  AppSurfaceColors.surfaceMutedLight,
+  AppSurfaceColors.surfaceElevatedLight,
   AppColors.textPrimaryLight,
   AppColors.textSecondaryLight,
-  AppColors.borderAccentLight,
-  AppColors.borderSubtleLight,
-  AppColors.borderControlLight,
-  AppColors.focusRingLight,
+  AppBorderColors.borderAccentLight,
+  AppBorderColors.borderSubtleLight,
+  AppBorderColors.borderControlLight,
+  AppBorderColors.focusRingLight,
   AppColors.primaryLight,
   AppColors.onPrimaryLight,
   AppColors.secondaryActionLight,
@@ -88,20 +90,20 @@ final List<Color> lightPaletteTokens = <Color>[
 /// card, the raised surface and three `on*` labels at once — and a set literal
 /// calls that a duplicate.
 final List<Color> darkPaletteTokens = <Color>[
-  AppColors.backgroundDark,
-  AppColors.surfaceDark,
-  AppColors.borderDividerDark,
-  AppColors.borderSelectedDark,
-  AppColors.surfaceEmphasisDark,
-  AppColors.surfaceSelectedDark,
-  AppColors.surfaceMutedDark,
-  AppColors.surfaceElevatedDark,
+  AppSurfaceColors.backgroundDark,
+  AppSurfaceColors.surfaceDark,
+  AppBorderColors.borderDividerDark,
+  AppBorderColors.borderSelectedDark,
+  AppSurfaceColors.surfaceEmphasisDark,
+  AppSurfaceColors.surfaceSelectedDark,
+  AppSurfaceColors.surfaceMutedDark,
+  AppSurfaceColors.surfaceElevatedDark,
   AppColors.textPrimaryDark,
   AppColors.textSecondaryDark,
-  AppColors.borderAccentDark,
-  AppColors.borderSubtleDark,
-  AppColors.borderControlDark,
-  AppColors.focusRingDark,
+  AppBorderColors.borderAccentDark,
+  AppBorderColors.borderSubtleDark,
+  AppBorderColors.borderControlDark,
+  AppBorderColors.focusRingDark,
   AppColors.primaryDark,
   AppColors.onPrimaryDark,
   AppColors.secondaryActionDark,

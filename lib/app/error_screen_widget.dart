@@ -7,6 +7,7 @@ import '../core/theme/app_spacing.dart';
 
 import '../l10n/generated/app_localizations.dart';
 import '../l10n/generated/app_localizations_en.dart';
+import '../core/theme/app_surface_colors.dart';
 
 /// Which failure the screen is reporting.
 enum AppErrorKind {
@@ -136,13 +137,13 @@ class _FallbackPalette {
 /// theme override — hence [_FallbackPalette] and the platform-brightness lookup
 /// rather than a single value.
 const _FallbackPalette _lightFallback = _FallbackPalette(
-  background: AppColors.backgroundLight,
+  background: AppSurfaceColors.backgroundLight,
   title: AppColors.textPrimaryLight,
   message: AppColors.textSecondaryLight,
 );
 
 const _FallbackPalette _darkFallback = _FallbackPalette(
-  background: AppColors.backgroundDark,
+  background: AppSurfaceColors.backgroundDark,
   title: AppColors.textPrimaryDark,
   message: AppColors.textSecondaryDark,
 );

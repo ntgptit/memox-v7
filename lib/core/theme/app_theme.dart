@@ -19,6 +19,8 @@ import 'app_spacing.dart';
 import 'app_text_styles.dart';
 import 'app_toggle_themes.dart';
 import 'app_typography.dart';
+import 'app_surface_colors.dart';
+import 'app_border_colors.dart';
 
 /// Material 3 themes for the app.
 ///
@@ -112,7 +114,7 @@ const ColorScheme _lightScheme = ColorScheme(
   onError: AppMaterialRoles.onErrorLight,
   errorContainer: AppMaterialRoles.errorContainerLight,
   onErrorContainer: AppMaterialRoles.onErrorContainerLight,
-  surface: AppColors.surfaceLight,
+  surface: AppSurfaceColors.surfaceLight,
   onSurface: AppColors.textPrimaryLight,
   onSurfaceVariant: AppColors.textSecondaryLight,
   surfaceDim: AppMaterialRoles.surfaceDimLight,
@@ -129,8 +131,8 @@ const ColorScheme _lightScheme = ColorScheme(
   // a 1.45:1 edge. The app's own widgets read the semantic tokens directly,
   // so this re-mapping changes what an *untended* widget degrades to, not
   // what the app draws.
-  outline: AppColors.borderControlLight,
-  outlineVariant: AppColors.borderSubtleLight,
+  outline: AppBorderColors.borderControlLight,
+  outlineVariant: AppBorderColors.borderSubtleLight,
   inverseSurface: AppMaterialRoles.inverseSurfaceLight,
   onInverseSurface: AppMaterialRoles.onInverseSurfaceLight,
   inversePrimary: AppMaterialRoles.inversePrimaryLight,
@@ -171,7 +173,7 @@ const ColorScheme _darkScheme = ColorScheme(
   onError: AppMaterialRoles.onErrorDark,
   errorContainer: AppMaterialRoles.errorContainerDark,
   onErrorContainer: AppMaterialRoles.onErrorContainerDark,
-  surface: AppColors.surfaceDark,
+  surface: AppSurfaceColors.surfaceDark,
   onSurface: AppColors.textPrimaryDark,
   onSurfaceVariant: AppColors.textSecondaryDark,
   surfaceDim: AppMaterialRoles.surfaceDimDark,
@@ -182,8 +184,8 @@ const ColorScheme _darkScheme = ColorScheme(
   surfaceContainerHigh: AppMaterialRoles.surfaceContainerHighDark,
   surfaceContainerHighest: AppMaterialRoles.surfaceContainerHighestDark,
   // The same pair as light — see the note there.
-  outline: AppColors.borderControlDark,
-  outlineVariant: AppColors.borderSubtleDark,
+  outline: AppBorderColors.borderControlDark,
+  outlineVariant: AppBorderColors.borderSubtleDark,
   inverseSurface: AppMaterialRoles.inverseSurfaceDark,
   onInverseSurface: AppMaterialRoles.onInverseSurfaceDark,
   inversePrimary: AppMaterialRoles.inversePrimaryDark,
@@ -207,7 +209,7 @@ const ColorScheme _darkScheme = ColorScheme(
 /// ground remains an argument, because the scheme genuinely has no role for
 /// it.
 ThemeData _light(ColorScheme scheme, AppSemanticColors semantic) =>
-    _buildTheme(scheme, semantic, background: AppColors.backgroundLight);
+    _buildTheme(scheme, semantic, background: AppSurfaceColors.backgroundLight);
 
 /// The dark theme. See [_light].
 ///
@@ -217,7 +219,7 @@ ThemeData _light(ColorScheme scheme, AppSemanticColors semantic) =>
 /// fills on a study screen, and `secondaryAction` is kept neutral precisely so
 /// nothing else in the row has a hue.
 ThemeData _dark(ColorScheme scheme, AppSemanticColors semantic) =>
-    _buildTheme(scheme, semantic, background: AppColors.backgroundDark);
+    _buildTheme(scheme, semantic, background: AppSurfaceColors.backgroundDark);
 
 final ThemeData _lightTheme = _light(
   _lightScheme,
