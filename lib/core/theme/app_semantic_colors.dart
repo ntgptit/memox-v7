@@ -19,6 +19,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     required this.warning,
     required this.danger,
     required this.info,
+    required this.borderDivider,
     required this.borderSelected,
     required this.surfaceEmphasis,
     required this.surfaceSelected,
@@ -43,6 +44,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       warning = AppColors.warningLight,
       danger = AppColors.dangerLight,
       info = AppColors.infoLight,
+      borderDivider = AppColors.borderDividerLight,
       borderSelected = AppColors.borderSelectedLight,
       surfaceEmphasis = AppColors.surfaceEmphasisLight,
       surfaceSelected = AppColors.surfaceSelectedLight,
@@ -66,6 +68,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       warning = AppColors.warningDark,
       danger = AppColors.dangerDark,
       info = AppColors.infoDark,
+      borderDivider = AppColors.borderDividerDark,
       borderSelected = AppColors.borderSelectedDark,
       surfaceEmphasis = AppColors.surfaceEmphasisDark,
       surfaceSelected = AppColors.surfaceSelectedDark,
@@ -117,6 +120,10 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   Color get onDueContainer => onStreakContainer;
 
   /// Inset tile, chip, icon container — a step above the card.
+  /// See [AppColors.borderDividerLight] — the hairline between rows of one
+  /// list, drawn only inside a card.
+  final Color borderDivider;
+
   /// See [AppColors.borderSelectedLight] — the edge a picked card wears.
   final Color borderSelected;
 
@@ -182,6 +189,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     Color? warning,
     Color? danger,
     Color? info,
+    Color? borderDivider,
     Color? borderSelected,
     Color? surfaceEmphasis,
     Color? surfaceSelected,
@@ -205,6 +213,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       warning: warning ?? this.warning,
       danger: danger ?? this.danger,
       info: info ?? this.info,
+      borderDivider: borderDivider ?? this.borderDivider,
       borderSelected: borderSelected ?? this.borderSelected,
       surfaceEmphasis: surfaceEmphasis ?? this.surfaceEmphasis,
       surfaceSelected: surfaceSelected ?? this.surfaceSelected,
@@ -244,6 +253,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       warning: Color.lerp(warning, other.warning, t)!,
       danger: Color.lerp(danger, other.danger, t)!,
       info: Color.lerp(info, other.info, t)!,
+      borderDivider: Color.lerp(borderDivider, other.borderDivider, t)!,
       borderSelected: Color.lerp(borderSelected, other.borderSelected, t)!,
       surfaceEmphasis: Color.lerp(surfaceEmphasis, other.surfaceEmphasis, t)!,
       surfaceSelected: Color.lerp(surfaceSelected, other.surfaceSelected, t)!,

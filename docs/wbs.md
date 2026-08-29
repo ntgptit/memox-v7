@@ -15417,6 +15417,69 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Dependencies:** M99.98 (đưa fill sang brand — chính nó tạo ra sự lệch này).
 - **Checklist phases:** 7, 13.
 
+### M100.0 · Divider trong card — và ba mục checklist tự hoà tan
+
+- **Status:** **done** — presentation only. Không đổi controller, use case,
+  repository, route hay bất kỳ BR/UC/AD nào.
+- **Goal:** Card thôi vẽ cạnh ngoài từ M99.94 vì một màn đầy khung đọc ra là
+  khung chứ không phải mặt phẳng. Đây là ca ngược lại: **các dòng thuộc cùng
+  một danh sách cần tách khỏi nhau**, và concept chia đúng những dòng đó —
+  `RESULT BREAKDOWN`, `MASTERY BY DECK` — chứ không bao giờ chia cái card
+  quanh chúng.
+- **Scope:**
+  - `borderDivider` mới: **`#E9ECF5`** (giá trị của concept, đo **1.14:1** trên
+    fill card của app này so với 1.18:1 trên nền trắng thuần nó được vẽ cho) /
+    **`#2E2A54`** cho dark — **suy ra bằng cách khớp tỉ lệ**, không phải đoán:
+    concept là light-only, nên giá trị dark giải cho cùng độ tương phản trên
+    fill mà một card có divider thật sự mang ở dark (`surfaceContainer`
+    `#221E44`, vì các card này là `.raised`) → **1.178:1** so với 1.181 ở light.
+    Thấp hơn hẳn 1.45:1 mà `borderSubtle` từng vẽ quanh mọi card: một divider
+    cạnh tranh với nội dung thì chỉ là cái khung quay lại, lùi vào một cấp.
+  - `MxRadioRowsShape` — **enum, không phải bool**, vì đây là một *nghĩa* và
+    hai caller khác nhau ở nghĩa đó. `list`: các dòng **là** nội dung của card,
+    nên divider tràn mép nói ra điều đó. `block`: nhóm chỉ là một phần của một
+    card còn chứa thứ khác.
+  - Appearance và Language dùng `list`. **Study defaults cố ý giữ `block`** —
+    dòng radio của nó nằm giữa một ô nhập, một ghi chú và nút Save, nên một
+    đường tràn mép ở đó **cắt ngang một nhóm** chứ không **chia một danh sách**.
+    Owner review chốt sau khi xem cả hai bản dựng.
+  - **Golden mới `settings_save_failed`** (light + dark), thêm vào gallery.
+- **Ba mục checklist rút lại sau khi kiểm trên golden — ghi lại vì chúng là
+  của tôi đọc sai, không phải việc bị bỏ dở:**
+  - *"Gộp mỗi nhóm Settings vào một card"* — **đã đúng từ trước**. Ba nhóm vốn
+    là ba card; phần thiếu duy nhất là divider, tức chính mục này.
+  - *"Gộp Today + Week + Summary của Progress vào một card"* — **bỏ**. Concept
+    tách card theo *mối quan tâm* và chỉ gộp *các dòng lặp của một danh sách*:
+    Stats của nó có hai thẻ số, một thẻ biểu đồ, rồi mới tới `MASTERY BY DECK`
+    gộp bốn dòng. Progress đang đúng pattern đó.
+  - *"Card-in-card ở Settings"* — **nửa đầu đã hết**. Than phiền gốc là
+    "hairline trong hairline"; M99.94 lấy đi cả hai cạnh, nên nó là một dải có
+    sắc trong một card trắng — đúng hình dạng của một lỗi inline. **Nửa sau là
+    mục golden ở trên**, và đó mới là phần thật: không ảnh nào chụp trạng thái
+    đó, nên lần sau nó hỏng cũng không ai biết.
+- **Bán kính card giữ `lg = 16`.** Ba phương án 16/20/24 đã dựng thật và đưa
+  owner chọn; owner giữ 16. Ghi lại để phiên sau không mở lại: `xl = 20` vẫn
+  dành riêng cho card study.
+- **Acceptance criteria:**
+  - [x] Divider chỉ vẽ **giữa** các dòng — không trên dòng đầu, không dưới dòng
+        cuối, nơi nó sẽ đọc ra là cạnh của card quay lại.
+  - [x] Study defaults không có divider; Appearance/Language có.
+  - [x] Giá trị dark khớp tỉ lệ light trên fill thật (1.178 so với 1.181).
+  - [x] Token có trong `lightPaletteTokens`/`darkPaletteTokens`, trong bảng ánh
+        xạ `css_token_parity_test.dart`, và đã mirror sang kit.
+  - [x] Trạng thái lưu-thất-bại của Settings có golden ở cả hai mode.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** 5 file `lib/`, `design_system/tokens/colors.css`, 3 file test,
+  `build_screen_gallery.py`, golden PNG.
+- **Tests required:** `test/demo/feature_screens_demo_test.dart`,
+  `settings_screen_geometry_test.dart`, `settings_screen_states_test.dart`,
+  `css_token_parity_test.dart`, `app_semantic_colors_test.dart`,
+  `test/visual_audit/`.
+- **Emulator integration suite:** **not run** — presentation only.
+- **Checklist phases:** 7, 13.
+- **Dependencies:** M99.94 (bỏ cạnh ngoài — divider chỉ có nghĩa sau khi card
+  thôi tự đóng khung).
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |

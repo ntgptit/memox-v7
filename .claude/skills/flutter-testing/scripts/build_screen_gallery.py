@@ -127,6 +127,8 @@ SCREENS = [
     ('Progress', 'progress_overview', 'Progress — tổng quan', 'Streak, 7 ngày, tổng đời (UC-12)'),
     ('Progress', 'progress_deck', 'Progress — theo deck', 'Card-day, Learning/Reviewing (UC-13)'),
     ('Settings & Reminder', 'settings', 'Settings', 'Mặc định học, theme, ngôn ngữ (UC-16)'),
+    ('Settings & Reminder', 'settings_save_failed', 'Settings — lưu thất bại',
+     'Band lỗi nằm trong card của chính nhóm đó (BR-216)'),
     ('Settings & Reminder', 'reminder_settings', 'Daily reminder', 'Opt-in, giờ địa phương (UC-17)'),
     ('Search', 'library_search', 'Global search', 'Deck + thẻ + nhãn, keyset (UC-20)'),
     ('Trash', 'trash', 'Trash', 'Soft delete, 30 ngày, restore/purge (UC-21)'),
