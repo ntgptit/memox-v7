@@ -15782,6 +15782,63 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Checklist phases:** 7.
 - **Dependencies:** M100.4.
 
+### M100.6 · Catalogue có guard độ phủ, giống stress suite vốn đã có
+
+- **Status:** **done** — không đụng một dòng nào trong `lib/`, nên **không golden
+  nào có thể đổi**.
+- **Goal:** Mục cuối của đợt review shared widget. Nó bắt đầu là hai việc và
+  **một trong hai hoá ra không có thật**; phần này ghi lại cả hai.
+- **PHẦN BỊ RÚT LẠI — "5 widget để chữ tràn không chặn".** Sai gần như toàn bộ,
+  vì hai lý do độc lập:
+  - Ba chỗ tôi báo (`mx_menu_button`, `mx_switch_row`, `mx_dialog_tone`) **đã có
+    `Expanded`** hoặc nằm trong `ListTile` tự ràng buộc. Quét của tôi nhìn 12
+    dòng *phía trên* `Text(` và thấy một `Row(` của cấu trúc khác, còn
+    `Expanded(child: label)` thì nằm *phía dưới*.
+  - Quan trọng hơn: **repo đã có guard tràn chữ và nó đầy đủ.**
+    `mx_stress_test.dart` dựng mọi shared component ở **320×640, text scale
+    2.0×, copy tiếng Việt dài** ở cả light lẫn dark. Và nó có sẵn một test
+    *"no file in lib/shared/widgets is missing from it"* với **danh sách loại
+    trừ mười mục, mỗi mục một lý do viết ra**. Năm widget tôi kêu "thiếu
+    specimen" đều nằm trong danh sách đó — `MxAsyncView` *"renders whichever of
+    three builders the AsyncValue selects"*, `MxSheetInsets` *"is padding: a
+    specimen would measure whatever child it was handed"*. Tôi quét mà không
+    đọc danh sách loại trừ.
+  - **Không sửa gì cho mục này.** Ba lần trong đợt review một regex khớp *hình
+    dạng* rồi tôi đọc ra khiếm khuyết mà không kiểm *sự thật*.
+- **PHẦN CÓ THẬT — Widgetbook không có guard nào cả.** Đối lập hẳn với stress:
+  `widgetbook/test/catalog_smoke_test.dart` chỉ kiểm shell dựng được, và nó xanh
+  y hệt khi một component vắng mặt. Đo ra **8 shared component không có entry**,
+  dẫn đầu là `MxContentShell` — 23 file, 31 lần dùng, cái khung sở hữu title,
+  bar và padding của mọi màn hình.
+  - Một catalogue có đủ mọi nút mà không có khung trang trả lời được "nút trông
+    thế nào" nhưng không trả lời được "vì sao hai màn này lề khác nhau" — mà đó
+    đúng là câu hỏi cái khung sinh ra để chốt. Và `MxContentShell` chính là
+    widget nhận `EdgeInsetsGeometry? padding` từ ngoài với hai call site truyền
+    hai thứ trái ngược.
+  - **DoD đã yêu cầu điều này từ trước** — *"every new screen and new shared
+    component registered in the Widgetbook catalog"*. Nó là một câu trong tài
+    liệu chứ không phải một check, và một câu là thứ mà tám component đi lọt.
+- **Scope:** 5 entry mới trong `widgetbook/lib/components/structure_components.dart`
+  (`MxContentShell`, `MxAsyncView`, `MxProgressBar`, `MxSearchField`,
+  `MxSheetInsets`), và `test/app/widgetbook_coverage_test.dart` giữ nó đóng.
+  Ba component còn lại vào danh sách loại trừ **kèm lý do**, đúng khuôn stress
+  list; cộng một test bắt loại trừ không được ôi.
+- **Kiểm bằng tiêm lỗi:** đổi `name: 'MxContentShell'` thành
+  `'MxContentShellXX'` → test đỏ và **gọi đúng tên component**; khôi phục →
+  xanh.
+- **Acceptance criteria:**
+  - [x] 8 component thiếu entry → 0 thiếu, 3 loại trừ có lý do.
+  - [x] Guard đỏ khi thiếu entry (kiểm bằng tiêm lỗi).
+  - [x] Không đụng `lib/`, nên 0 golden đổi theo cấu trúc chứ không theo may rủi.
+  - [x] `flutter analyze` sạch ở cả root lẫn `widgetbook/`.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** 1 file widgetbook mới (5 component), `main.dart` đăng ký, 1 test mới.
+- **Tests required:** `test/app/widgetbook_coverage_test.dart`,
+  `widgetbook/test/catalog_smoke_test.dart`.
+- **Emulator integration suite:** **not run** — không chạm code chạy trên thiết bị.
+- **Checklist phases:** 7.
+- **Dependencies:** M100.5.
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |
