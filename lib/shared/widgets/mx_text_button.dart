@@ -5,6 +5,7 @@ import '../../core/theme/app_icon_size.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_stroke.dart';
 import '../../core/theme/theme_context_extension.dart';
+import '../../core/theme/app_ink.dart';
 
 /// A low-emphasis action drawn as a bare label.
 ///
@@ -89,7 +90,14 @@ class MxTextButton extends StatefulWidget {
   /// merges; this goes through it, exactly as [isDestructive] does.
   ///
   /// Null keeps `primaryAccent`, which is right on the page.
-  final Color? accent;
+  ///
+  /// **An `AppInk`, not a `Color`** (M100.5). Four features were each passing
+  /// `context.colors.onErrorContainer` here by hand — the same value, four
+  /// times, because the parameter was a hole rather than a vocabulary. The ink
+  /// they all wanted now belongs to `MxFeedbackBand`, which is the widget that
+  /// knows what ground its link sits on; this parameter stays for the next
+  /// caller with a real reason, but it can only name a token.
+  final AppInk? accent;
 
   @override
   State<MxTextButton> createState() => _MxTextButtonState();
@@ -110,15 +118,13 @@ class _MxTextButtonState extends State<MxTextButton> {
   /// pair. Null when neither is asked for, so `textButtonTheme` applies
   /// untouched.
   ButtonStyle? _accentStyle(BuildContext context) {
-    final Color? accent = widget.isDestructive
-        ? context.semanticColors.danger
-        : widget.accent;
+    final AppInk? accent = widget.isDestructive ? AppInk.danger : widget.accent;
     if (accent == null) return null;
 
     final foreground = textLinkForeground(
       context.colors,
       context.semanticColors,
-      accent: accent,
+      accent: accent.resolve(context),
     );
 
     return ButtonStyle(foregroundColor: foreground, iconColor: foreground);

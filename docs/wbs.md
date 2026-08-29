@@ -15717,6 +15717,71 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Checklist phases:** 7.
 - **Dependencies:** M100.3.
 
+### M100.5 · Bỏ hai cái lỗ trong API của kit
+
+- **Status:** **done** — **0 pixel đổi.** Chứng minh bằng
+  `flutter test --tags golden` **không** `--update-goldens`: 303 pass, **0 PNG**.
+- **Goal:** Hai widget shared bắt caller tự mang giá trị trình bày vào, và cả
+  hai đều dẫn tới cùng một hậu quả đo được: cùng một giá trị bị chép tay ở nhiều
+  chỗ.
+- **`MxFeedbackBand.action` là `Widget?`, và bốn feature dựng ra đúng một control
+  giống hệt nhau** — `MxTextButton(label: retryAction, onPressed: onRetry,
+  accent: context.colors.onErrorContainer)`. Màu đó là **mực của chính dải
+  băng**: icon và cả hai dòng chữ phía trên đều đã tô `AppInk.onErrorContainer`.
+  Action là phần tử duy nhất không được nhận nó, vì **một cái lỗ thì không kế
+  thừa được**.
+  - Nay là cặp `actionLabel` + `onAction`, kèm đúng assert
+    `(label == null) == (callback == null)` mà `MxEmptyState` và `MxErrorState`
+    đã dùng — band là widget duy nhất chưa theo ngữ pháp đó.
+  - **Doc cũ đã tranh luận thẳng thắn cho lựa chọn `Widget?` và nó sai về mặt số
+    liệu**, nên bản mới trích lại nguyên văn: *"both bands that carry an action
+    style their button against `onErrorContainer`, and a band that built the
+    control itself would have to grow a parameter for every property a caller
+    might need next."* Hai dải thành bốn, cả bốn dựng control giống hệt, và
+    **không dải nào từng cần một thuộc tính mà band không cấp được**. Cái giá nó
+    tránh vẫn là giả định; phần trùng lặp nó chấp nhận thì không.
+  - `MxTextButton.accent` đổi `Color?` → `AppInk?`. Vẫn còn tham số, nhưng nay
+    chỉ **gọi tên** được, và người dùng duy nhất là band.
+  - **Không phải chuyện tương phản.** `danger` đạt 4.50:1 (light) / 4.53 (dark)
+    trên nền band — *Thử lại* đơn giản không phải hành động nguy hiểm.
+- **`MxMetricWell` là widget shared duy nhất có `required Color`** — hai cái.
+  4/5 call site truyền cùng `surfaceMuted`, tức mặc định thật sống ở bốn chỗ; và
+  cả 5 đều đã viết `tint` dưới dạng `<AppInk>.resolve(context)`, tức chính vốn
+  từ đó viết dài ra. Nay `tint` là `AppInk`, `wellColor` mặc định `surfaceMuted`
+  và vẫn override được cho deck hero.
+- **Guard của M100.4 tự bắt được hệ quả của chính đợt này:** test
+  *"no kit exemption outlives the reason for it"* đỏ vì `mx_metric_well` thôi
+  truyền `Color` cho `Icon` thô — đúng thiết kế, và mục allowlist đã bị xoá.
+- **Một mục checklist bị RÚT LẠI vì tiền đề sai.** Báo cáo review viết *"391
+  dòng shared không ai gọi"* (`mx_form_dialog.dart` 290 + `mx_alert_dialog.dart`
+  101). Kiểm lại:
+  - `mx_form_dialog.dart` **sống hoàn toàn**. `showMxPromptDialog` có call site
+    thật ở `card_bulk_overlays_widget.dart:159`, và nó gọi `_PromptDialog` →
+    `MxFormDialog` → `_FormError`. Quét cũ trượt vì regex đòi `(` ngay sau tên
+    hàm, còn code viết `showMxPromptDialog<TagName>(` — **một tham số generic
+    xen vào giữa**. Đây là lần thứ hai trong đợt này một regex đẻ ra kết luận
+    sai; cả hai lần đều do khớp *hình dạng* thay vì kiểm *sự thật*.
+  - `mx_alert_dialog.dart` đúng là 0 consumer, nhưng **không phải rác**: nó là
+    dialog một-hành-động, và doc của nó giải thích cẩn thận vì sao nó **không**
+    phải live region trong khi `MxConfirmDialog` thì phải. Xoá một primitive có
+    chủ đích để đạt một con số dòng là đổi chác sai. Ghi vào bảng nợ thay vì
+    xoá.
+- **Scope:** `mx_feedback_band`, `mx_text_button`, `mx_metric_well`; 4 call site
+  band, 5 call site well; widgetbook, stress specimen, 2 assertion Progress.
+- **Acceptance criteria:**
+  - [x] `MxTextButton.accent` còn **1** call site (chính band), từ 4.
+  - [x] Không widget shared nào còn `required Color`.
+  - [x] **0 PNG đổi** — golden pass mà không cần update.
+  - [x] 4 056 test host xanh, `flutter analyze` sạch.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** 3 file kit, 9 file feature/widgetbook/test cập nhật, 1 exemption
+  guard xoá.
+- **Tests required:** `test/shared/widgets/`, `test/app/icon_ink_boundary_test.dart`,
+  `test/features/progress/`, `test/demo/` (golden, để chứng minh không đổi pixel).
+- **Emulator integration suite:** **not run** — thuần trình bày và chữ ký API.
+- **Checklist phases:** 7.
+- **Dependencies:** M100.4.
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |
@@ -15735,6 +15800,7 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 | `study_answers` chưa có index cho khoảng thời gian | M99.28 | Progress lọc `answered_at >= ? AND answered_at < ?`; index duy nhất chạm cột này là `(card_id, answered_at)`, mà cột dẫn đầu không nằm trong predicate — nên mỗi lần emit là một full scan `study_answers`, và stream re-emit theo **mỗi lượt trả lời** khi màn hình đang mở (ở độ sâu 3 là ba scan mỗi lượt). Output có chặn, scan thì không | Thêm index `(answered_at)` — nhưng đó là **đổi schema**, tức bump version + snapshot + migration test, và M99.28 cố ý không đụng schema. Trả cùng lần bump schema tiếp theo, và theo đúng rule index của repo: đo bằng `EXPLAIN QUERY PLAN` trên dữ liệu thật trước rồi mới thêm |
 | ~~`ancestry` CTE trong `deck.drift` không có bound~~ | M99.28 | Cùng khiếm khuyết đã sửa ở `progress.drift`: walk mang `distance` tăng mỗi vòng nên `UNION` không dedup được, và trên cây cha vòng lặp thì statement không bao giờ trả về — nó giữ database isolate, nên mọi query khác của app chặn theo. Comment ở `deck.drift` còn khẳng định ngược lại | **Đã trả ở M99.86.** `ancestry` nhận `:maxWalk = DeckEntity.maxTreeDepth + 1`; `branch` giữ `UNION` không bound vì row của nó hữu hạn. Test SQLite thật dựng cycle, buộc read kết thúc và chứng minh query kế tiếp trên cùng database isolate vẫn chạy. |
 | `end_reason = scheduler_reset` phải mang cả BR-164 | M99.16 | Đổi scheduler khi chưa khoá ghi cùng giá trị với Reset, nên đọc riêng cột đó thì hai sự kiện khác nhau trông giống nhau. Không mất thông tin — `study_sessions.scheduler_generation` bằng generation của root sau một lần đổi và nhỏ hơn sau một lần reset — nhưng nó bắt người đọc phải biết mẹo đó | Tên đúng là `scheduler_changed`. `study_sessions.end_reason` có `CHECK` liệt kê giá trị nên thêm một giá trị là **đổi schema**, và nới `CHECK` là rebuild bảng nên xứng một bump riêng. Ba lần bump sau khi nợ được ghi đều đã đi việc khác: v8 (BR-203, ba cột `direction` additive), v9 (M99.28, hai cột theme/ngôn ngữ), v10 (M99.29, ba cột nhắc học); v11 (M99.33, Trash) có rebuild `study_sessions` nhưng cố ý không gánh thêm nợ này. Đích hiện tại là **v12** — lần rebuild kế tiếp của `study_sessions`, rồi đổi `deck_scheduler_repository_impl.dart` sang giá trị mới |
+| `MxAlertDialog` không có consumer nào trong app | trước M100.5, **đo ở M100.5** | 101 dòng shared có entry Widgetbook, có test, có stress specimen — nên nhìn đâu cũng tưởng sống. Một kit có hai cách làm một việc thì lần sau người ta chọn nhầm nửa thời gian | **Cố ý chưa trả.** Nó không phải bản sao của `MxConfirmDialog`: một hành động thay vì hai, và doc ghi rõ vì sao nó **không** phải live region trong khi confirm thì phải. Xoá một primitive có chủ đích để đạt con số dòng là đổi chác sai. Quyết định khi có màn đầu tiên cần alert một-nút — dùng nó, hoặc lúc đó mới xoá |
 | Nội dung starter là fixture, không phải nội dung production | T1.3 | Không phát hành được với nội dung này | Tìm nguồn nội dung có bản quyền rõ ràng trước M8 (BR-87) |
 | `sqlite3.wasm` và `drift_worker.js` là binary vendored trong `web/` | M4.2 | Không có bước build nào sinh ra chúng và không có bước build nào báo khi chúng cũ: app compile, load, rồi **không mở được database**. Nâng `drift` mà quên tải lại worker không có triệu chứng nào cho tới khi ai đó mở trình duyệt | `test/database/web_assets_test.dart` so version trong `pubspec.lock` với version đã pin, kèm `web/WEB_ASSETS.md` ghi URL tải. Đã kiểm tiêm lỗi: đổi `drift` thành 2.99.0 làm test đỏ |
 | Server phát web chưa gửi COOP/COEP | M4.2 | `crossOriginIsolated` là `false`, nên drift chọn backend lưu trữ kém hơn OPFS. Không có lỗi nào — chỉ là hiệu năng và độ bền khác đi, âm thầm | Thêm `Cross-Origin-Opener-Policy: same-origin` và `Cross-Origin-Embedder-Policy: require-corp` vào server phát web ở M7, và kiểm lại `crossOriginIsolated` trong E2E |

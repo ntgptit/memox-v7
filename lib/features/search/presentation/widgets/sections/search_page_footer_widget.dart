@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_text_button.dart';
 import '../../states/library_search_state.dart';
@@ -96,11 +95,8 @@ class SearchPageFooterWidget extends StatelessWidget {
       child: MxFeedbackBand(
         title: context.l10n.librarySearchLoadMoreErrorTitle,
         message: context.l10n.librarySearchLoadMoreErrorMessage,
-        action: MxTextButton(
-          label: context.l10n.retryAction,
-          onPressed: onRetry,
-          accent: context.colors.onErrorContainer,
-        ),
+        actionLabel: context.l10n.retryAction,
+        onAction: onRetry,
       ),
     );
   }

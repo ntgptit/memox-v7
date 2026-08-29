@@ -75,10 +75,6 @@ void main() {
         'already resolved its WidgetStateColor for this row. There is no '
         'AppInk member for "whatever the chip decided", and naming one would '
         'drop the selected and disabled states the theme resolves.',
-    'mx_metric_well.dart':
-        'takes a Color parameter from its caller — the only shared widget with '
-        'a required Color. That is its own defect and belongs to the API '
-        'cleanup. Delete this entry when the parameter goes.',
   };
 
   Iterable<File> dartFilesUnder(String root) => Directory(root)

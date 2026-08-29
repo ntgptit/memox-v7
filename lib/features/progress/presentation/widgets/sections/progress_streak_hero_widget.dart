@@ -77,8 +77,7 @@ class ProgressStreakHeroWidget extends StatelessWidget {
                     padding: const EdgeInsets.only(top: AppSpacing.xs),
                     child: MxMetricWell(
                       icon: Icons.local_fire_department_outlined,
-                      tint: (hasStreak ? AppInk.onDueContainer : AppInk.quiet)
-                          .resolve(context),
+                      tint: hasStreak ? AppInk.onDueContainer : AppInk.quiet,
                       wellColor: hasStreak
                           ? semantic.streakContainer
                           : semantic.surfaceMuted,

@@ -147,11 +147,7 @@ class _ConfirmRow extends StatelessWidget {
           // fact there are entries of one grammar. The bare glyph this row
           // used to draw left the counts' left edge to whichever icon was
           // widest.
-          MxMetricWell(
-            icon: icon,
-            tint: color.resolve(context),
-            wellColor: context.semanticColors.surfaceMuted,
-          ),
+          MxMetricWell(icon: icon, tint: color),
           const SizedBox(width: AppSpacing.md),
           Expanded(child: Text(label, style: context.texts.bodyMedium)),
           Text(

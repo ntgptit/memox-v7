@@ -1,10 +1,10 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
   "scannedFiles": 695,
-  "totalSites": 332,
+  "totalSites": 324,
   "byElementKind": {
-    "other": 271,
-    "background": 26,
+    "other": 262,
+    "background": 27,
     "shadow": 1,
     "border": 15,
     "text": 19
@@ -15,7 +15,7 @@
     "blend-source": 4,
     "Colors-material": 12,
     "opacity-modified-token": 16,
-    "theme-token": 75
+    "theme-token": 67
   },
   "sites": [
     {
@@ -2967,17 +2967,6 @@
       "resolved_value_dark": "#A8A7C4"
     },
     {
-      "file": "lib/features/card/presentation/widgets/sections/card_history_section_widget.dart",
-      "line": 342,
-      "widget_context": "_PageError",
-      "element_kind": "other",
-      "source_kind": "theme-token",
-      "expression": "context.colors.onErrorContainer",
-      "token": "colorScheme.onErrorContainer",
-      "resolved_value_light": "#641421",
-      "resolved_value_dark": "#F5D3D8"
-    },
-    {
       "file": "lib/features/card/presentation/widgets/sections/card_import_confirm_step_widget.dart",
       "line": 64,
       "widget_context": "CardImportConfirmStepWidget",
@@ -2998,17 +2987,6 @@
       "token": "colorScheme.outlineVariant",
       "resolved_value_light": "#D2D2DD",
       "resolved_value_dark": "#4C487A"
-    },
-    {
-      "file": "lib/features/card/presentation/widgets/sections/card_import_confirm_step_widget.dart",
-      "line": 153,
-      "widget_context": "_ConfirmRow",
-      "element_kind": "other",
-      "source_kind": "theme-token",
-      "expression": "context.semanticColors.surfaceMuted",
-      "token": "semantic.surfaceMuted",
-      "resolved_value_light": "#EAECF1",
-      "resolved_value_dark": "#28254B"
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_context_widget.dart",
@@ -3092,17 +3070,6 @@
       "line": 165,
       "widget_context": "_HeroCard",
       "element_kind": "background",
-      "source_kind": "theme-token",
-      "expression": "context.semanticColors.surfaceMuted",
-      "token": "semantic.surfaceMuted",
-      "resolved_value_light": "#EAECF1",
-      "resolved_value_dark": "#28254B"
-    },
-    {
-      "file": "lib/features/card/presentation/widgets/sections/card_import_result_widget.dart",
-      "line": 278,
-      "widget_context": "_SummaryRow",
-      "element_kind": "other",
       "source_kind": "theme-token",
       "expression": "context.semanticColors.surfaceMuted",
       "token": "semantic.surfaceMuted",
@@ -3265,7 +3232,7 @@
     },
     {
       "file": "lib/features/progress/presentation/widgets/items/progress_metric_widget.dart",
-      "line": 339,
+      "line": 335,
       "widget_context": "_ReviewingMetric",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3273,17 +3240,6 @@
       "token": "semantic.surfaceMuted",
       "resolved_value_light": "#EAECF1",
       "resolved_value_dark": "#28254B"
-    },
-    {
-      "file": "lib/features/reminder/presentation/widgets/sections/reminder_banner_section_widget.dart",
-      "line": 45,
-      "widget_context": "ReminderBannerSectionWidget",
-      "element_kind": "other",
-      "source_kind": "theme-token",
-      "expression": "context.colors.onErrorContainer",
-      "token": "colorScheme.onErrorContainer",
-      "resolved_value_light": "#641421",
-      "resolved_value_dark": "#F5D3D8"
     },
     {
       "file": "lib/features/reminder/presentation/widgets/sections/reminder_settings_section_widget.dart",
@@ -3295,28 +3251,6 @@
       "token": "semantic.borderSubtle",
       "resolved_value_light": "#D2D2DD",
       "resolved_value_dark": "#4C487A"
-    },
-    {
-      "file": "lib/features/search/presentation/widgets/sections/search_page_footer_widget.dart",
-      "line": 102,
-      "widget_context": "SearchPageFooterWidget",
-      "element_kind": "other",
-      "source_kind": "theme-token",
-      "expression": "context.colors.onErrorContainer",
-      "token": "colorScheme.onErrorContainer",
-      "resolved_value_light": "#641421",
-      "resolved_value_dark": "#F5D3D8"
-    },
-    {
-      "file": "lib/features/settings/presentation/widgets/items/settings_error_band_widget.dart",
-      "line": 49,
-      "widget_context": "SettingsErrorBandWidget",
-      "element_kind": "other",
-      "source_kind": "theme-token",
-      "expression": "context.colors.onErrorContainer",
-      "token": "colorScheme.onErrorContainer",
-      "resolved_value_light": "#641421",
-      "resolved_value_dark": "#F5D3D8"
     },
     {
       "file": "lib/features/study/presentation/widgets/items/match_tile_widget.dart",
@@ -3331,18 +3265,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/items/study_home_workload_item_widget.dart",
-      "line": 47,
-      "widget_context": "StudyHomeWorkloadItemWidget",
-      "element_kind": "other",
-      "source_kind": "theme-token",
-      "expression": "context.colors.onSurfaceVariant",
-      "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#565C72",
-      "resolved_value_dark": "#A8A7C4"
-    },
-    {
-      "file": "lib/features/study/presentation/widgets/items/study_home_workload_item_widget.dart",
-      "line": 85,
+      "line": 84,
       "widget_context": "StudyHomeWorkloadItemWidget",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3350,17 +3273,6 @@
       "token": "colorScheme.errorContainer",
       "resolved_value_light": "#F8DDE1",
       "resolved_value_dark": "#5E2831"
-    },
-    {
-      "file": "lib/features/study/presentation/widgets/items/study_home_workload_item_widget.dart",
-      "line": 88,
-      "widget_context": "StudyHomeWorkloadItemWidget",
-      "element_kind": "other",
-      "source_kind": "theme-token",
-      "expression": "context.colors.onErrorContainer",
-      "token": "colorScheme.onErrorContainer",
-      "resolved_value_light": "#641421",
-      "resolved_value_dark": "#F5D3D8"
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/fill_answer_pieces_widget.dart",
@@ -3572,6 +3484,17 @@
       "resolved_value_dark": "#E8D08E"
     },
     {
+      "file": "lib/shared/widgets/mx_metric_well.dart",
+      "line": 49,
+      "widget_context": "MxMetricWell",
+      "element_kind": "background",
+      "source_kind": "theme-token",
+      "expression": "context.semanticColors.surfaceMuted",
+      "token": "semantic.surfaceMuted",
+      "resolved_value_light": "#EAECF1",
+      "resolved_value_dark": "#28254B"
+    },
+    {
       "file": "lib/shared/widgets/mx_navigation_bar.dart",
       "line": 101,
       "widget_context": "MxNavigationBar",
@@ -3647,17 +3570,6 @@
       "token": "semantic.primaryAccent",
       "resolved_value_light": "unresolvable: semantic.primaryAccent not in the dumped theme",
       "resolved_value_dark": "unresolvable: semantic.primaryAccent not in the dumped theme"
-    },
-    {
-      "file": "lib/shared/widgets/mx_text_button.dart",
-      "line": 114,
-      "widget_context": "_MxTextButtonState",
-      "element_kind": "other",
-      "source_kind": "theme-token",
-      "expression": "context.semanticColors.danger",
-      "token": "semantic.danger",
-      "resolved_value_light": "#C02B3A",
-      "resolved_value_dark": "#F2808F"
     },
     {
       "file": "lib/shared/widgets/mx_text_field.dart",
