@@ -109,17 +109,35 @@ void main() {
       // M99.61 migration to `MxActionButton` the widget carries geometry only,
       // and the fill is the theme's — which is the ownership this test wants,
       // stated where it used to read a per-widget style.
+      // **Study is outlined, and it stopped being filled at M99.98.** The
+      // argument for a brand fill — "the card's one primary verb, and the chips
+      // gave up their containers so it no longer competes" — was made about one
+      // card. A screen shows three or four at once, and the Library's first
+      // viewport then carried the accent nine times, at which point the colour
+      // reads as repetition rather than emphasis; it also left the screen's own
+      // `MxCard.accent` hero out-shouted by three solid fills below it. Study
+      // Home already drew this same verb outlined.
       final studyButton = find.descendant(
         of: find.byType(DeckStudyButtonWidget),
-        matching: find.byType(FilledButton),
+        matching: find.byType(OutlinedButton),
       );
-      final study = tester.widget<FilledButton>(studyButton);
+      expect(
+        find.descendant(
+          of: find.byType(DeckStudyButtonWidget),
+          matching: find.byType(FilledButton),
+        ),
+        findsNothing,
+        reason: 'the row verb must not carry a brand fill',
+      );
+      final study = tester.widget<OutlinedButton>(studyButton);
       final studyFill =
           study.style?.backgroundColor?.resolve(<WidgetState>{}) ??
-          Theme.of(
-            tester.element(studyButton),
-          ).filledButtonTheme.style?.backgroundColor?.resolve(<WidgetState>{});
-      expect(studyFill, scheme.primary);
+          Theme.of(tester.element(studyButton))
+              .outlinedButtonTheme
+              .style
+              ?.backgroundColor
+              ?.resolve(<WidgetState>{});
+      expect(studyFill, isNot(scheme.primary));
       expect(studyFill, isNot(semantic.streakContainer));
     });
   }

@@ -57,6 +57,17 @@ class DeckStudyButtonWidget extends StatelessWidget {
       // beside it needed at large text scales.
       child: MxActionButton(
         label: context.l10n.deckStudyAction,
+        // **`secondary`, and the argument for `primary` was a per-card one**
+        // (M99.98). "One primary verb per card reads as the hierarchy" is true
+        // of a card; a screen shows three or four at once, and the Library's
+        // first viewport then carried the accent nine times — the page CTA,
+        // three filled row verbs, two progress fills, three deck icon wells —
+        // at which point the colour says repetition, not emphasis. It also
+        // cost the screen's one `MxCard.accent` its job: a hairline in the
+        // brand family cannot out-rank three solid fills below it. Study Home
+        // already drew this same verb outlined, so the two screens now agree
+        // rather than disagreeing.
+        variant: MxActionButtonVariant.secondary,
         size: MxActionButtonSize.compact,
         onPressed: () => context.goNamed(
           RouteNames.deckStudy,

@@ -210,13 +210,28 @@ void main() {
         expect(hasShadow(decoration), isFalse);
       });
 
-      testWidgets('$themeName · tonal: secondaryContainer callout, flat', (
+      testWidgets('$themeName · tonal: the emphasis surface, flat', (
         tester,
       ) async {
         await pump(tester, const MxCard.tonal(child: Text('x')), theme: theme);
 
         final decoration = decorationOf(tester);
-        expect(decoration.color, scheme.secondaryContainer);
+        // **`surfaceEmphasis`, and it used to be `secondaryContainer`**
+        // (M99.98). That token is chroma 0.0084 in light — effectively neutral
+        // — and sat 5.24 L* below the page, so Study Home's resume callout, the
+        // screen's primary action, was the greyest thing on it. The new value
+        // is 1.11 below the page with 3.6x its chroma: marked by hue, not by
+        // weight.
+        expect(decoration.color, semantic.surfaceEmphasis);
+        // **Light only.** The reference concept is light-only, and in dark
+        // `#332F58` already carries a real violet and reads as a callout, so
+        // `surfaceEmphasisDark` deliberately keeps the value it had — see
+        // `AppColors.surfaceEmphasisDark`. Asserting the divergence where it
+        // exists, rather than forcing dark to move without a reference to
+        // measure it against.
+        if (!isDark) {
+          expect(decoration.color, isNot(scheme.secondaryContainer));
+        }
         expect(hasShadow(decoration), isFalse);
       });
 
@@ -353,7 +368,13 @@ void main() {
         ),
         theme: theme,
       );
-      expect(decorationOf(tester).color, theme.colorScheme.secondaryContainer);
+      // Selecting something must not dim it: the tint is the brand-tinted
+      // `surfaceSelected`, *lighter* than the grey it replaced, so a picked row
+      // no longer renders darker than the unpicked ones beside it (M99.98).
+      expect(
+        decorationOf(tester).color,
+        theme.extension<AppSemanticColors>()!.surfaceSelected,
+      );
 
       await pump(
         tester,

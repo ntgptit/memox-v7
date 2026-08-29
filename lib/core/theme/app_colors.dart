@@ -89,6 +89,45 @@ abstract final class AppColors {
   static const Color surfaceDark = Color(0xFF1A1838);
 
   /// Inset tile, chip, icon container.
+  /// The callout surface: a panel the screen wants noticed, at the quietest
+  /// weight that still reads as *noticed*.
+  ///
+  /// **A whisper of brand, not a step of grey** (M99.98). `MxCard.tonal` shipped
+  /// on `secondaryContainer`, which is `#E4E6EC` — chroma 0.0084, effectively
+  /// neutral, and **5.24 L\* below the page**. A callout that sits back and
+  /// carries no hue is indistinguishable from a disabled block, and Study Home's
+  /// resume card — the screen's primary action — was the greyest thing on it.
+  ///
+  /// The proportions come from the owner's reference concept, measured: its
+  /// callout sits **0.89 L\* below its page** with **1.6× the page's chroma**.
+  /// `#F1F1FC` is 1.11 below this page with **3.6×** its chroma, so what marks
+  /// it is hue rather than weight. Body ink measures 15.61:1 on it.
+  static const Color surfaceEmphasisLight = Color(0xFFF1F1FC);
+
+  /// **Dark keeps the value it has today.** The reference concept is light-only
+  /// ("LIGHT · TOKYO PURE"), and the complaint that started this was light: in
+  /// dark `#332F58` carries a real violet and already reads as a callout. A dark
+  /// value invented without a reference to measure against would be the guess
+  /// this whole pass exists to avoid.
+  static const Color surfaceEmphasisDark = Color(0xFF332F58);
+
+  /// The fill a *picked* card wears when its list uses the tint treatment.
+  ///
+  /// **Selecting something must not dim it** (M99.98). This shipped on
+  /// `secondaryContainer` too, so a selected row rendered **darker and duller**
+  /// than the unpicked white ones beside it, while the selected filter chip
+  /// directly above wore the brand container — two answers to one question,
+  /// on one screen. `#EAEBFD` is the reference concept's own pill value:
+  /// lighter than the grey it replaces (93.45 against 91.30) and carrying
+  /// nearly three times its chroma.
+  ///
+  /// The *edge* stays `secondary`: its 2.90:1 measurement is about a line on
+  /// `surface`, which the fill never had a stake in.
+  static const Color surfaceSelectedLight = Color(0xFFEAEBFD);
+
+  /// Unchanged in dark, for the reason [surfaceEmphasisDark] is.
+  static const Color surfaceSelectedDark = Color(0xFF332F58);
+
   static const Color surfaceMutedLight = Color(0xFFEAECF1);
   static const Color surfaceMutedDark = Color(0xFF28254B);
 
@@ -160,7 +199,19 @@ abstract final class AppColors {
   static const Color borderAccentLight = Color(0xFFB6B6E2);
 
   /// Same recipe as [borderAccentLight], over the dark surface.
-  static const Color borderAccentDark = Color(0xFF31306F);
+  /// **Solved against the one rule that matters here, and it is not the same
+  /// recipe as [borderAccentLight]** (M99.98). It shipped as `#31306F`, which
+  /// measures **1.33:1** on `MxCard.accent`'s own fill while the plain hairline
+  /// every other card used to wear measured **2.04:1** — the one recipe whose
+  /// job is emphasis had the faintest edge on the screen. Worse, the ranking
+  /// flipped between modes: in light the accent edge is 1.89:1 against the
+  /// hairline's 1.45, so the same recipe read "emphasised" in one mode and
+  /// "receded" in the other.
+  ///
+  /// `#6560B8` measures **2.93:1** on that fill — above the old hairline in both
+  /// modes, and still short of the focus ring, which has to stay the loudest
+  /// edge a card can wear.
+  static const Color borderAccentDark = Color(0xFF6560B8);
 
   /// A control's edge at the 3:1 WCAG 1.4.11 asks — cleared against every
   /// neighbour it touches. Why a control and not a card, and the measurements:
