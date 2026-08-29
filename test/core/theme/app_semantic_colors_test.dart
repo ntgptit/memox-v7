@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_colors.dart';
 import 'package:memox/core/theme/app_interaction_states.dart';
 import 'package:memox/core/theme/app_semantic_colors.dart';
+import 'package:memox/core/theme/app_surface_colors.dart';
 
 /// Behaviour of the `ThemeExtension` itself — `copyWith` and `lerp`.
 ///
@@ -102,7 +103,7 @@ void main() {
           AppColors.textPrimaryLight.withValues(
             alpha: AppStateOpacity.disabledSurfaceBlend,
           ),
-          AppColors.surfaceLight,
+          AppSurfaceColors.surfaceLight,
         ).toARGB32(),
       );
       expect(
@@ -111,7 +112,7 @@ void main() {
           AppColors.textPrimaryDark.withValues(
             alpha: AppStateOpacity.disabledSurfaceBlend,
           ),
-          AppColors.surfaceDark,
+          AppSurfaceColors.surfaceDark,
         ).toARGB32(),
       );
     });

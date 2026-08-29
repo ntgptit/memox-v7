@@ -16,6 +16,7 @@ import 'package:memox/l10n/generated/app_localizations_en.dart';
 import '../../../support/color_math.dart';
 import 'support/deck_screen_harness.dart';
 import 'support/fake_deck_repository.dart';
+import 'package:memox/core/theme/app_surface_colors.dart';
 
 /// Which semantic role each part of the workload row actually wears — asserted
 /// per theme, by role and not by hex, because a repainted palette must not
@@ -335,18 +336,24 @@ void main() {
     // metrics actually sit on. If a palette edit ever fails one of these, the
     // fix is a token change or a role change — never a hex in the widget.
     final pairs = <String, (Color, Color)>{
-      'info on light surface': (AppColors.infoLight, AppColors.surfaceLight),
-      'info on dark surface': (AppColors.infoDark, AppColors.surfaceDark),
+      'info on light surface': (
+        AppColors.infoLight,
+        AppSurfaceColors.surfaceLight,
+      ),
+      'info on dark surface': (
+        AppColors.infoDark,
+        AppSurfaceColors.surfaceDark,
+      ),
       // The whole due metric — clock and words — sits directly on the
       // surface in the streak ink. Measured 7.22:1 light / 8.58:1 dark when
       // the well was dropped; this holds the pair to the body-text floor.
       'due ink on light surface': (
         AppColors.onStreakContainerLight,
-        AppColors.surfaceLight,
+        AppSurfaceColors.surfaceLight,
       ),
       'due ink on dark surface': (
         AppColors.onStreakContainerDark,
-        AppColors.surfaceDark,
+        AppSurfaceColors.surfaceDark,
       ),
       // **The three workload chips**, each on its own ground (owner review,
       // 2026-08-20). Container pairs carry their own guarantee, but the floor
@@ -363,11 +370,11 @@ void main() {
       ),
       'new chip, light': (
         AppColors.textSecondaryLight,
-        AppColors.surfaceMutedLight,
+        AppSurfaceColors.surfaceMutedLight,
       ),
       'new chip, dark': (
         AppColors.textSecondaryDark,
-        AppColors.surfaceMutedDark,
+        AppSurfaceColors.surfaceMutedDark,
       ),
       // **Study Home's overdue count, which is `danger` as *ink* rather than
       // as a fill** — a pairing the app did not have before M5.26 and which
@@ -375,11 +382,11 @@ void main() {
       // card surface, so the same 4.5 floor as the rest of this table.
       'danger ink on light surface': (
         AppColors.dangerLight,
-        AppColors.surfaceLight,
+        AppSurfaceColors.surfaceLight,
       ),
       'danger ink on dark surface': (
         AppColors.dangerDark,
-        AppColors.surfaceDark,
+        AppSurfaceColors.surfaceDark,
       ),
     };
 

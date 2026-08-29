@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'app_border_colors.dart';
 
 /// Colour tokens — **A2 Quizlet Navy Indigo**, applied in M3.5b.
 ///
@@ -55,140 +56,6 @@ abstract final class AppColors {
   /// (`--color-seed`) and the parity test pins the two together.
   static const Color seed = primaryLight;
 
-  // --- Surface ladder ------------------------------------------------------
-  //
-  // Four tiers. Dark climbs L* 3.9 -> 10.2 -> 16.9 -> 24.0 so a card reads as a
-  // card and an inset tile as an inset on the strength of the ladder alone.
-  // Light inverts it — the card is white and the rest sit below — which is the
-  // same ordering of PROMINENCE, built the only way white allows.
-  //
-  // **That the ladder can carry the hierarchy is not the same as a rule against
-  // shadows**, and this comment was read as one for two milestones. The project
-  // owner has since said the app needs real elevation to separate elements; see
-  // `shadowLight`/`shadowDark` and MX-VIS-002 rule R6. Nothing here forbids a
-  // shadow — it only explains why the ladder was built to work without one.
-
-  /// Page background. The one component allowed a strong navy saturation.
-  static const Color backgroundLight = Color(0xFFF4F5F8);
-  static const Color backgroundDark = Color(0xFF0A082D);
-
-  /// Card and sheet — the flashcard surface.
-  ///
-  /// **Not pure white, since M4.10i.** `#FFFFFF` carries no hue at all, so the
-  /// one surface the whole app is built on had no relation to the seed while
-  /// every other neutral did — the audit's largest finding, and the reason light
-  /// mode read as a different palette from dark. `#FBFBFE` is `seed @ 0.02` over
-  /// white: hue 240, chroma 0.012, nowhere near the light canvas's tint budget.
-  ///
-  /// It costs lightness. A tinted card is a *darker* card, so the surface step
-  /// drops from 3.46 L\* to 2.15 — which was the argument for leaving it alone
-  /// while the step was the only depth cue light had. It is not any more: the
-  /// shadow's alpha was re-solved to 0.07 and the total lift is 8.04 L\* against
-  /// dark's 6.58.
-  static const Color surfaceLight = Color(0xFFFBFBFE);
-  static const Color surfaceDark = Color(0xFF1A1838);
-
-  /// Inset tile, chip, icon container.
-  /// The callout surface: a panel the screen wants noticed, at the quietest
-  /// weight that still reads as *noticed*.
-  ///
-  /// **A whisper of brand, not a step of grey** (M99.98). `MxCard.tonal` shipped
-  /// on `secondaryContainer`, which is `#E4E6EC` — chroma 0.0084, effectively
-  /// neutral, and **5.24 L\* below the page**. A callout that sits back and
-  /// carries no hue is indistinguishable from a disabled block, and Study Home's
-  /// resume card — the screen's primary action — was the greyest thing on it.
-  ///
-  /// The proportions come from the owner's reference concept, measured: its
-  /// callout sits **0.89 L\* below its page** with **1.6× the page's chroma**.
-  /// `#F1F1FC` is 1.11 below this page with **3.6×** its chroma, so what marks
-  /// it is hue rather than weight. Body ink measures 15.61:1 on it.
-  /// The edge a *picked* card wears.
-  ///
-  /// **Brand family, and the measurement that ruled it out no longer
-  /// applies** (M99.99). This was `ColorScheme.secondary` — `#4E5468`, chroma
-  /// **0.0337**, roughly a fifth of what the brand colours carry (focus ring
-  /// 0.1928, primary 0.1699). A slate line around a brand-tinted fill is the
-  /// card saying two different things about the same state, which is what
-  /// M99.98 left behind when it moved the fill and not the edge.
-  ///
-  /// `secondary` was chosen for a real reason, written down: dark `primary` on
-  /// `surface` measures 2.90:1, under WCAG 1.4.11's 3:1. **That measurement is
-  /// against `surface`**, and since M99.98 a selected card's edge does not sit
-  /// on `surface` — it sits on [surfaceSelectedLight]. On that ground `#6E6ECE`
-  /// measures **3.72:1**, and the dark pair **3.21:1** on `#332F58`.
-  ///
-  /// **Why not `primary` or `focusRing` themselves.** Today the ring is told
-  /// apart from the selected edge by *hue* alone: `#4E5468` and `#4141C0` are
-  /// **1.02:1** apart in luminance. Give the edge the brand hue and that
-  /// distinction is gone, so these two are picked to differ from the ring by
-  /// weight instead — lighter than it in light, dimmer in dark. The ring stays
-  /// the loudest edge a card can wear, in both modes.
-  /// The hairline *inside* a card, between the rows of one list.
-  ///
-  /// **Only inside** (M100.0). Cards stopped drawing an outer edge at M99.94
-  /// because a screen of framed boxes reads as frames rather than surfaces;
-  /// this is the opposite case — rows that belong to one list need to be told
-  /// apart *from each other*, and the reference concept divides exactly those:
-  /// its `RESULT BREAKDOWN` and `MASTERY BY DECK` rows, never the card around
-  /// them.
-  ///
-  /// `#E9ECF5` is the concept's own value, measuring **1.14:1** on this app's
-  /// card fill against 1.18:1 on the pure white it was drawn for. Far below
-  /// the 1.45:1 `borderSubtle` used to draw around every card — a divider that
-  /// competed with content would just be the frame again, one level in.
-  static const Color borderDividerLight = Color(0xFFE9ECF5);
-
-  /// **Derived by matching the light ratio, not guessed.** The concept is
-  /// light-only, so the dark value is solved for the same contrast on the fill
-  /// a divided card actually has in dark (`surfaceContainer` `#221E44`, since
-  /// these cards are `.raised`): `#2E2A54` measures **1.178:1** there against
-  /// the concept's 1.181 in light.
-  static const Color borderDividerDark = Color(0xFF2E2A54);
-
-  static const Color borderSelectedLight = Color(0xFF6E6ECE);
-
-  /// See [borderSelectedLight]. Dimmer than `focusRingDark` on purpose.
-  static const Color borderSelectedDark = Color(0xFF7C79C8);
-
-  static const Color surfaceEmphasisLight = Color(0xFFF1F1FC);
-
-  /// **Dark keeps the value it has today.** The reference concept is light-only
-  /// ("LIGHT · TOKYO PURE"), and the complaint that started this was light: in
-  /// dark `#332F58` carries a real violet and already reads as a callout. A dark
-  /// value invented without a reference to measure against would be the guess
-  /// this whole pass exists to avoid.
-  static const Color surfaceEmphasisDark = Color(0xFF332F58);
-
-  /// The fill a *picked* card wears when its list uses the tint treatment.
-  ///
-  /// **Selecting something must not dim it** (M99.98). This shipped on
-  /// `secondaryContainer` too, so a selected row rendered **darker and duller**
-  /// than the unpicked white ones beside it, while the selected filter chip
-  /// directly above wore the brand container — two answers to one question,
-  /// on one screen. `#EAEBFD` is the reference concept's own pill value:
-  /// lighter than the grey it replaces (93.45 against 91.30) and carrying
-  /// nearly three times its chroma.
-  ///
-  /// The *edge* stays `secondary`: its 2.90:1 measurement is about a line on
-  /// `surface`, which the fill never had a stake in.
-  static const Color surfaceSelectedLight = Color(0xFFEAEBFD);
-
-  /// Unchanged in dark, for the reason [surfaceEmphasisDark] is.
-  static const Color surfaceSelectedDark = Color(0xFF332F58);
-
-  static const Color surfaceMutedLight = Color(0xFFEAECF1);
-  static const Color surfaceMutedDark = Color(0xFF28254B);
-
-  /// Top of the ladder: a raised or selected surface.
-  ///
-  /// `seed @ 0.015` over white — one step lighter than [surfaceLight] and still
-  /// carrying the hue. Both were `#FFFFFF` before M4.10i, which made the top two
-  /// rungs of the light ladder the same rung.
-  // `AppMaterialRoles.surfaceContainerLowestLight` and `surfaceBrightLight`
-  // are this value under Material's names, derived there.
-  static const Color surfaceElevatedLight = Color(0xFFFCFCFE);
-  static const Color surfaceElevatedDark = Color(0xFF37345F);
-
   // --- Text and lines ------------------------------------------------------
   //
   // Neither end is pure. `#EDEDF6` rather than white, `#16182B` rather than
@@ -200,77 +67,6 @@ abstract final class AppColors {
   static const Color textPrimaryDark = Color(0xFFEDEDF6);
   static const Color textSecondaryLight = Color(0xFF565C72);
   static const Color textSecondaryDark = Color(0xFFA8A7C4);
-
-  /// Hairline between rows, around cards, and an input at rest.
-  ///
-  /// **The two modes are no longer matched on this number, and that is the
-  /// point.** Until M4.10h both stood at 1.82:1 against the card, because the
-  /// border was the only depth cue either had. Light now has a shadow
-  /// (`AppElevation`), so its border can stand down to 1.50:1; dark has no
-  /// shadow — measured, not chosen: at the bottom of the lightness scale a
-  /// shadow moves the page by ΔL* 0.26 — so its border keeps carrying the edge,
-  /// at 1.69:1 since the ladder moved onto the page's hue (1.82:1 before).
-  ///
-  /// **That drop is a consequence, not a decision.** Both the border and the
-  /// card it is drawn on gained chroma at their new hue, and a border reads
-  /// against its card: 1.69 is what holding the border's L* step at the new
-  /// saturation produces. It stays well above the 1.40 that was measured as too
-  /// weak, and what the tests actually pin — the total lift of a card off its
-  /// page — is unaffected, because the border was deliberately taken out of that
-  /// measurement at M4.10h.
-  ///
-  /// Matching the borders was the right rule when the border was everything, and
-  /// it is the wrong rule now: it would force light to draw a frame it no longer
-  /// needs. What `app_theme_test.dart` pins instead is the **step a card's edge
-  /// produces** — ΔL* 8.04 in light against 6.58 in dark — which is the thing a
-  /// reader actually perceives, and which stays symmetric while the mechanisms
-  /// differ.
-  ///
-  /// Both values are hue 240 and inside the light canvas's chroma budget. The
-  /// history is worth keeping: `#D7DAE3` (1.40:1) was too weak when it was the
-  /// only cue, `#BEC0C3` (1.82:1) was right then and too heavy now.
-  static const Color borderSubtleLight = Color(0xFFD2D2DD);
-  // Lifted from 0xFF403D67 so a fill-less hairline (a divider on the dark page)
-  // reads on OLED. Same hue and saturation (0.41), lightness only.
-  static const Color borderSubtleDark = Color(0xFF4C487A);
-
-  /// The hairline a panel wears when it is the screen's *answer* rather than
-  /// one row among many — today the Library's Today card.
-  ///
-  /// **The brand at 38% over the surface, resolved here rather than at paint
-  /// time.** `primaryContainer` was tried and is a fill: against `surface` it
-  /// is a step of ΔL* 4, which reads as a slightly different white rather than
-  /// as an edge (owner review, 2026-08-20). Blending keeps the hue and buys
-  /// the contrast, and a resolved constant is what MX-VIS-002 rule R7 asks
-  /// for — a translucent border composites against whatever is behind it, and
-  /// the audit cannot read it back.
-  static const Color borderAccentLight = Color(0xFFB6B6E2);
-
-  /// Same recipe as [borderAccentLight], over the dark surface.
-  /// **Solved against the one rule that matters here, and it is not the same
-  /// recipe as [borderAccentLight]** (M99.98). It shipped as `#31306F`, which
-  /// measures **1.33:1** on `MxCard.accent`'s own fill while the plain hairline
-  /// every other card used to wear measured **2.04:1** — the one recipe whose
-  /// job is emphasis had the faintest edge on the screen. Worse, the ranking
-  /// flipped between modes: in light the accent edge is 1.89:1 against the
-  /// hairline's 1.45, so the same recipe read "emphasised" in one mode and
-  /// "receded" in the other.
-  ///
-  /// `#6560B8` measures **2.93:1** on that fill — above the old hairline in both
-  /// modes, and still short of the focus ring, which has to stay the loudest
-  /// edge a card can wear.
-  static const Color borderAccentDark = Color(0xFF6560B8);
-
-  /// A control's edge at the 3:1 WCAG 1.4.11 asks — cleared against every
-  /// neighbour it touches. Why a control and not a card, and the measurements:
-  /// `AppSemanticColors.borderControl`.
-  static const Color borderControlLight = Color(0xFF8D8D95);
-  static const Color borderControlDark = Color(0xFF66628D);
-
-  /// Input border while focused. Focus shifts *hue*, never stroke width —
-  /// Material's default doubles the stroke, which reads as the field shouting.
-  static const Color focusRingLight = Color(0xFF4141C0);
-  static const Color focusRingDark = Color(0xFF8A8AE0);
 
   /// The fill and the border of a disabled control — a solid, per MX-VIS-002
   /// rule R7. Material's idiom is the ink at 12% alpha, which composites
@@ -327,7 +123,7 @@ abstract final class AppColors {
   /// spellings of one idea; `selectedInk` holds the four measurements that say
   /// they are not, in either direction.
   static const Color primaryAccentLight = primaryLight;
-  static const Color primaryAccentDark = focusRingDark;
+  static const Color primaryAccentDark = AppBorderColors.focusRingDark;
 
   /// Label of a secondary (outlined) action — *End session*, *Cancel*.
   ///
@@ -431,7 +227,7 @@ abstract final class AppColors {
   /// and nothing does it today, because every bar is inset inside its card
   /// while the ring is the card's own edge.
   static const Color progressFillLight = Color(0xFF6E6ECE);
-  static const Color progressFillDark = focusRingDark;
+  static const Color progressFillDark = AppBorderColors.focusRingDark;
 
   // --- Due chip -----------------------------------------------------------
   //

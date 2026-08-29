@@ -9,6 +9,8 @@ import 'package:memox/core/theme/app_overlay_themes.dart';
 import 'package:memox/core/theme/app_radius.dart';
 import 'package:memox/core/theme/app_spacing.dart';
 import 'package:memox/core/theme/app_stroke.dart';
+import 'package:memox/core/theme/app_surface_colors.dart';
+import 'package:memox/core/theme/app_border_colors.dart';
 
 void main() {
   group('AppSpacing', () {
@@ -64,8 +66,14 @@ void main() {
       expect(AppColors.warningLight, isNot(AppColors.warningDark));
       expect(AppColors.dangerLight, isNot(AppColors.dangerDark));
       expect(AppColors.infoLight, isNot(AppColors.infoDark));
-      expect(AppColors.surfaceMutedLight, isNot(AppColors.surfaceMutedDark));
-      expect(AppColors.borderSubtleLight, isNot(AppColors.borderSubtleDark));
+      expect(
+        AppSurfaceColors.surfaceMutedLight,
+        isNot(AppSurfaceColors.surfaceMutedDark),
+      );
+      expect(
+        AppBorderColors.borderSubtleLight,
+        isNot(AppBorderColors.borderSubtleDark),
+      );
     });
   });
 

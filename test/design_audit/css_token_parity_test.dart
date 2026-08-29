@@ -5,6 +5,8 @@ import 'package:memox/core/theme/app_material_roles.dart';
 import 'package:memox/core/theme/app_interaction_states.dart';
 
 import 'css_tokens.dart';
+import 'package:memox/core/theme/app_surface_colors.dart';
+import 'package:memox/core/theme/app_border_colors.dart';
 
 /// **`design_system/tokens/*.css` is authoritative for token values; this is the
 /// test that makes that sentence enforceable.**
@@ -34,31 +36,37 @@ void main() {
   /// from the file's own declarations.
   final colorParity = <String, (Color, Color)>{
     // --- surface ladder ---
-    '--color-background': (AppColors.backgroundLight, AppColors.backgroundDark),
-    '--color-surface': (AppColors.surfaceLight, AppColors.surfaceDark),
+    '--color-background': (
+      AppSurfaceColors.backgroundLight,
+      AppSurfaceColors.backgroundDark,
+    ),
+    '--color-surface': (
+      AppSurfaceColors.surfaceLight,
+      AppSurfaceColors.surfaceDark,
+    ),
     '--color-surface-muted': (
-      AppColors.surfaceMutedLight,
-      AppColors.surfaceMutedDark,
+      AppSurfaceColors.surfaceMutedLight,
+      AppSurfaceColors.surfaceMutedDark,
     ),
     '--color-border-divider': (
-      AppColors.borderDividerLight,
-      AppColors.borderDividerDark,
+      AppBorderColors.borderDividerLight,
+      AppBorderColors.borderDividerDark,
     ),
     '--color-border-selected': (
-      AppColors.borderSelectedLight,
-      AppColors.borderSelectedDark,
+      AppBorderColors.borderSelectedLight,
+      AppBorderColors.borderSelectedDark,
     ),
     '--color-surface-emphasis': (
-      AppColors.surfaceEmphasisLight,
-      AppColors.surfaceEmphasisDark,
+      AppSurfaceColors.surfaceEmphasisLight,
+      AppSurfaceColors.surfaceEmphasisDark,
     ),
     '--color-surface-selected': (
-      AppColors.surfaceSelectedLight,
-      AppColors.surfaceSelectedDark,
+      AppSurfaceColors.surfaceSelectedLight,
+      AppSurfaceColors.surfaceSelectedDark,
     ),
     '--color-surface-elevated': (
-      AppColors.surfaceElevatedLight,
-      AppColors.surfaceElevatedDark,
+      AppSurfaceColors.surfaceElevatedLight,
+      AppSurfaceColors.surfaceElevatedDark,
     ),
     // --- text and lines ---
     '--color-text-primary': (
@@ -70,10 +78,13 @@ void main() {
       AppColors.textSecondaryDark,
     ),
     '--color-border-subtle': (
-      AppColors.borderSubtleLight,
-      AppColors.borderSubtleDark,
+      AppBorderColors.borderSubtleLight,
+      AppBorderColors.borderSubtleDark,
     ),
-    '--color-focus-ring': (AppColors.focusRingLight, AppColors.focusRingDark),
+    '--color-focus-ring': (
+      AppBorderColors.focusRingLight,
+      AppBorderColors.focusRingDark,
+    ),
     // --- brand and actions ---
     '--color-seed': (AppColors.seed, AppColors.seed),
     '--color-primary': (AppColors.primaryLight, AppColors.primaryDark),

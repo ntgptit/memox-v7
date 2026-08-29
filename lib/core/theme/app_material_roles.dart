@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
+import 'app_surface_colors.dart';
 
 /// The `ColorScheme` roles memox declares only because Material asks for them.
 ///
@@ -73,7 +74,7 @@ abstract final class AppMaterialRoles {
   static const Color onErrorContainerDark = Color(0xFFF5D3D8);
 
   static const Color surfaceContainerLowestLight =
-      AppColors.surfaceElevatedLight;
+      AppSurfaceColors.surfaceElevatedLight;
 
   /// The dark half of this ladder moved with the four main tiers at M4.10aa —
   /// `surfaceContainerHigh`, `Highest` and `Bright` **are**
@@ -89,15 +90,17 @@ abstract final class AppMaterialRoles {
   // written there as the derivation, so this stays the source.
   static const Color surfaceContainerLight = Color(0xFFF1F2F6);
   static const Color surfaceContainerDark = Color(0xFF221E44);
-  static const Color surfaceContainerHighLight = AppColors.surfaceMutedLight;
-  static const Color surfaceContainerHighDark = AppColors.surfaceMutedDark;
+  static const Color surfaceContainerHighLight =
+      AppSurfaceColors.surfaceMutedLight;
+  static const Color surfaceContainerHighDark =
+      AppSurfaceColors.surfaceMutedDark;
   static const Color surfaceContainerHighestLight = Color(0xFFE3E5EC);
   static const Color surfaceContainerHighestDark = secondaryContainerDark;
 
   /// **`surfaceDim` is the dimmest surface, which in this app is the page.**
   ///
   /// Dark says so by deriving. It used to be `0xFF0B0327` — three parts in 255
-  /// away from [AppColors.backgroundDark], near enough that nobody could see
+  /// away from [AppSurfaceColors.backgroundDark], near enough that nobody could see
   /// the difference and far enough that an edit to the page would have left it
   /// behind. A colour that exists twice under two names is a colour that will
   /// disagree with itself eventually.
@@ -108,9 +111,9 @@ abstract final class AppMaterialRoles {
   /// is not in the scheme at all. Straightening that is a surface-ladder
   /// change with pixels behind it, not a rename — see the token audit.
   static const Color surfaceDimLight = Color(0xFFDEE0E7);
-  static const Color surfaceDimDark = AppColors.backgroundDark;
-  static const Color surfaceBrightLight = AppColors.surfaceElevatedLight;
-  static const Color surfaceBrightDark = AppColors.surfaceElevatedDark;
+  static const Color surfaceDimDark = AppSurfaceColors.backgroundDark;
+  static const Color surfaceBrightLight = AppSurfaceColors.surfaceElevatedLight;
+  static const Color surfaceBrightDark = AppSurfaceColors.surfaceElevatedDark;
 
   static const Color inverseSurfaceLight = Color(0xFF2A2C3E);
   static const Color inverseSurfaceDark = Color(0xFFE7E8F0);
