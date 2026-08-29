@@ -35,16 +35,28 @@
 # is rare and deliberate. `--force` is the way out.
 #
 # ---------------------------------------------------------------------------
-# Where the time goes, measured rather than assumed (2026-08-02, this machine):
+# Where the time goes, measured rather than assumed (2026-08-29, this machine,
+# warm — the numbers in brackets are the first run in a fresh worktree, where
+# touching thousands of files for the first time costs an order of magnitude
+# more and every gate pays it at once):
 #
-#   flutter test    43s        dart format          3s
-#   flutter analyze 10s        guard (python)       2s
-#                              3 doc/arch guards    2s
+#   flutter test    43s          dart format          3s
+#   flutter analyze 10s          check_docs.py        2s   [28s]
+#   guard (python)  11s          CI tooling tests     8s
+#                                architecture guard   2s
 #
 # **This file is not the bottleneck and rewriting it in another language does
 # not help.** It has no per-file loop and no fork storm — the thing that made
 # `check_architecture.sh` take two minutes before it became Python. It starts
 # seven subprocesses and prints a summary; the cost is inside those seven.
+#
+# The CI tooling gate was **43s** until 2026-08-29 and the table above did not
+# mention it at all, so nothing pointed at the second-largest cost in the run.
+# It was not the tests being slow: 32 of them called `build_plan` against this
+# repository, and each call re-read every tracked Dart file to weigh the tests
+# and build the import graph. That scan is memoized per root now — see
+# `build_verification_plan.py`. Keep this table honest when a gate moves; a
+# stale one is how a gate grows into the bottleneck without anyone noticing.
 #
 # Two things in here *were* worth fixing, and both are scheduling rather than
 # language:
