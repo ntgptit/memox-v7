@@ -204,7 +204,7 @@ void main() {
       // hands the state to the card instead of spelling a colour again.
       expect(csv.isSelected, isTrue);
 
-      // The resting option is the same case `borderControl` was written for:
+      // The resting option is the same case `borderOption` was written for:
       // its fill *is* the sheet's, so the edge is the whole component. The
       // option recipe owns that edge now, so the claim reads the rendered
       // border — the observable outcome — rather than a parameter the closed
@@ -226,7 +226,7 @@ void main() {
           ((tsvBox.decoration as BoxDecoration).border! as Border).top;
       expect(
         tsvBorder.color,
-        buildDarkTheme().extension<AppSemanticColors>()!.borderControl,
+        buildDarkTheme().extension<AppSemanticColors>()!.borderOption,
       );
     });
 

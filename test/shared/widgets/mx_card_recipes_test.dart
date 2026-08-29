@@ -274,7 +274,9 @@ void main() {
         expect(hasShadow(decoration), !isDark);
       });
 
-      testWidgets('$themeName · option: control edge, flat', (tester) async {
+      testWidgets('$themeName · option: its own brand edge, flat', (
+        tester,
+      ) async {
         await pump(
           tester,
           const MxCard.option(isSelected: false, child: Text('x')),
@@ -283,7 +285,14 @@ void main() {
 
         final decoration = decorationOf(tester);
         expect(decoration.color, scheme.surface);
-        expect(borderColorOf(decoration), semantic.borderControl);
+        // **`borderOption`, not `borderControl`** (M100.2). An option card had
+        // been borrowing the *input* border, which `app_palette_test.dart`
+        // keeps untinted by a recorded rule — "the light canvas carries no
+        // lavender tint" names `input` explicitly. That rule is about a text
+        // field, which is canvas; a card sitting on a page is not, and its
+        // neighbours' edges moved into the brand family at M99.99.
+        expect(borderColorOf(decoration), semantic.borderOption);
+        expect(borderColorOf(decoration), isNot(semantic.borderControl));
         expect(hasShadow(decoration), isFalse);
       });
     }

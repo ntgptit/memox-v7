@@ -18,6 +18,7 @@ import 'package:memox/core/theme/app_border_colors.dart';
 final List<Color> lightPaletteTokens = <Color>[
   AppSurfaceColors.backgroundLight,
   AppSurfaceColors.surfaceLight,
+  AppBorderColors.borderOptionLight,
   AppBorderColors.borderDividerLight,
   AppBorderColors.borderSelectedLight,
   AppSurfaceColors.surfaceEmphasisLight,
@@ -92,6 +93,7 @@ final List<Color> lightPaletteTokens = <Color>[
 final List<Color> darkPaletteTokens = <Color>[
   AppSurfaceColors.backgroundDark,
   AppSurfaceColors.surfaceDark,
+  AppBorderColors.borderOptionDark,
   AppBorderColors.borderDividerDark,
   AppBorderColors.borderSelectedDark,
   AppSurfaceColors.surfaceEmphasisDark,
