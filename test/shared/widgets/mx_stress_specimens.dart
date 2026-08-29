@@ -22,6 +22,7 @@ import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
 import 'package:memox/shared/widgets/mx_metric_well.dart';
 import 'package:memox/shared/widgets/mx_pressable.dart';
+import 'package:memox/shared/widgets/mx_feedback_band.dart';
 import 'package:memox/shared/widgets/mx_progress_bar.dart';
 import 'package:memox/shared/widgets/mx_search_field.dart';
 import 'package:memox/shared/widgets/mx_session_top_bar.dart';
@@ -206,6 +207,20 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
     name: 'MxCard (tappable)',
     build: () => const MxCard.raised(onTap: _noop, child: Text(kLongMessage)),
     isInteractive: true,
+  ),
+  MxStressSpecimen(
+    // Title and message both long, and the action present: the band's whole job
+    // is to stay readable while the copy grows, and the retry sits under the
+    // message rather than beside it precisely so it can.
+    name: 'MxFeedbackBand',
+    build: () => const MxFeedbackBand(
+      title: kLongTitle,
+      message: kLongMessage,
+      action: MxTextButton(label: kLongLabel, onPressed: _noop),
+    ),
+    // Title, message and a retry stacked at 2.0x on a 320 screen is taller than
+    // the centred slot, the same reason `MxEmptyState` takes this.
+    needsBoundedHeight: true,
   ),
   MxStressSpecimen(
     // A pill's label is short by design, so the stress here is the *selected*

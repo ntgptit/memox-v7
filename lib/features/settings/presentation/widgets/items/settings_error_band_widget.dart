@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/error/failure.dart';
-import '../../../../../core/theme/app_ink.dart';
-import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
-import '../../../../../shared/widgets/mx_icon.dart';
-import '../../../../../shared/widgets/mx_card.dart';
 import '../../../../../shared/widgets/mx_text_button.dart';
 import '../support/settings_labels_widget.dart';
+import '../../../../../shared/widgets/mx_feedback_band.dart';
 
 /// The in-section error band (wireframe W3 state 6, S8).
 ///
@@ -43,59 +40,13 @@ class SettingsErrorBandWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      container: true,
-      liveRegion: true,
-      child: MxCard.feedback(
-        tone: MxCardFeedbackTone.danger,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            const MxIcon(
-              Icons.error_outline,
-              ink: AppInk.onErrorContainer,
-              size: MxIconSize.mdCompact,
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Text(
-                    context.l10n.settingsSaveErrorTitle,
-                    style: context.texts.titleSmall!.inked(
-                      context,
-                      AppInk.onErrorContainer,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    context.settingsWriteFailure(failure),
-                    style: context.texts.bodySmall!.inked(
-                      context,
-                      AppInk.onErrorContainer,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    // **`onErrorContainer`, because this button sits on
-                    // `errorContainer`.** The default `primaryAccent` is right
-                    // on a page and measures 3.72:1 here in dark — under the
-                    // 4.5 its 14px w600 label needs. The band's own text
-                    // already uses this ink and reaches 8.33:1.
-                    child: MxTextButton(
-                      label: context.l10n.retryAction,
-                      onPressed: onRetry,
-                      accent: context.colors.onErrorContainer,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+    return MxFeedbackBand(
+      title: context.l10n.settingsSaveErrorTitle,
+      message: context.settingsWriteFailure(failure),
+      action: MxTextButton(
+        label: context.l10n.retryAction,
+        onPressed: onRetry,
+        accent: context.colors.onErrorContainer,
       ),
     );
   }

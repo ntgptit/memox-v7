@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/error/failure.dart';
-import '../../../../../core/theme/app_ink.dart';
-import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/theme/theme_context_extension.dart';
-import '../../../../../shared/widgets/mx_icon.dart';
-import '../../../../../shared/widgets/mx_card.dart';
 import '../support/card_export_labels_widget.dart';
+import '../../../../../shared/widgets/mx_feedback_band.dart';
 
 /// The in-sheet error band (M4.13 W3 states 5–7, E8).
 ///
@@ -33,52 +29,9 @@ class CardExportErrorBandWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    return Semantics(
-      container: true,
-      liveRegion: true,
-      child: _band(context, colors),
-    );
-  }
-
-  Widget _band(BuildContext context, ColorScheme colors) {
-    return MxCard.feedback(
-      tone: MxCardFeedbackTone.danger,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          const MxIcon(
-            Icons.error_outline,
-            ink: AppInk.onErrorContainer,
-            size: MxIconSize.mdCompact,
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Text(
-                  context.cardExportFailureTitle(failure),
-                  style: context.texts.titleSmall!.inked(
-                    context,
-                    AppInk.onErrorContainer,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  context.cardExportFailureLabel(failure),
-                  style: context.texts.bodySmall!.inked(
-                    context,
-                    AppInk.onErrorContainer,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+    return MxFeedbackBand(
+      title: context.cardExportFailureTitle(failure),
+      message: context.cardExportFailureLabel(failure),
     );
   }
 }

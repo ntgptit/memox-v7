@@ -8,7 +8,6 @@ import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../../../shared/widgets/mx_button_pair.dart';
-import '../../../../../shared/widgets/mx_card.dart';
 import '../../../../../shared/widgets/mx_form_sheet.dart';
 import '../../../../../shared/widgets/mx_text_field.dart';
 import '../../../domain/failures/tag_catalog_failure.dart';
@@ -18,6 +17,7 @@ import '../../controllers/tag_catalog_controller.dart';
 import '../../controllers/tag_write_controller.dart';
 import '../../states/tag_catalog_state.dart';
 import '../support/tag_labels_widget.dart';
+import '../../../../../shared/widgets/mx_feedback_band.dart';
 
 /// Opens the rename form for one tag (UC-18, wireframe M4.14 W4).
 ///
@@ -230,46 +230,9 @@ class _FailureBand extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      container: true,
-      liveRegion: true,
-      child: MxCard.feedback(
-        tone: MxCardFeedbackTone.danger,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            const MxIcon(
-              Icons.error_outline,
-              ink: AppInk.onErrorContainer,
-              size: MxIconSize.mdCompact,
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Text(
-                    context.l10n.tagWriteErrorTitle,
-                    style: context.texts.titleSmall!.inked(
-                      context,
-                      AppInk.onErrorContainer,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    message,
-                    style: context.texts.bodySmall!.inked(
-                      context,
-                      AppInk.onErrorContainer,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+    return MxFeedbackBand(
+      title: context.l10n.tagWriteErrorTitle,
+      message: message,
     );
   }
 }
