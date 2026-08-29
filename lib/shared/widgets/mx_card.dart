@@ -580,12 +580,11 @@ class _MxCardState extends State<MxCard> {
   /// *tinted to the fill* — `#CDE4DA` on `#EDF6F3` — which this app has no
   /// token for. Adding one is a palette decision, not this change.
   Color? _restingEdgeColor(BuildContext context) {
-    final scheme = context.colors;
     final semantic = context.semanticColors;
     // Precedence below the focus ring: selected > the recipe's stateful edge >
     // the recipe's resting edge. "This is the picked one" outranks a state the
     // recipe painted, which outranks decoration.
-    if (widget.isSelected ?? false) return scheme.secondary;
+    if (widget.isSelected ?? false) return semantic.borderSelected;
 
     switch (widget._recessedEdge) {
       case MxCardRecessedEdge.focus:

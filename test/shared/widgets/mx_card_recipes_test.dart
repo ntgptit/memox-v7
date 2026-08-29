@@ -352,7 +352,15 @@ void main() {
 
       final decoration = decorationOf(tester);
       expect(decoration.color, theme.colorScheme.surface);
-      expect(borderColorOf(decoration), theme.colorScheme.secondary);
+      // **`borderSelected`, not `secondary`** (M99.99). The slate edge carried
+      // chroma 0.0337 — a fifth of the brand family — around a fill M99.98 had
+      // just made brand-tinted, so the card said two different things about one
+      // state. The measurement that once ruled brand out was taken against
+      // `surface`; this edge sits on `surfaceSelected`, where it clears 3:1.
+      expect(
+        borderColorOf(decoration),
+        theme.extension<AppSemanticColors>()!.borderSelected,
+      );
     });
 
     testWidgets('the tint treatment adds the fill when — and only when — '

@@ -15380,6 +15380,43 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Dependencies:** M99.94 (bỏ hairline — sau đó `.accent` là recipe duy nhất
   còn cạnh, nên việc cạnh đó mờ hơn hairline cũ mới thành vấn đề nhìn thấy).
 
+### M99.99 · Cạnh của trạng thái chọn về họ thương hiệu
+
+- **Status:** **done** — presentation only. Không đổi controller, use case,
+  repository, route hay bất kỳ BR/UC/AD nào.
+- **Goal:** M99.98 đưa **fill** của trạng thái chọn sang sắc thương hiệu nhưng
+  để nguyên **cạnh** là slate, nên một card đã chọn nói hai điều khác nhau về
+  cùng một trạng thái. Chủ dự án phát hiện bằng mắt; đo lại thì đúng.
+- **Scope:**
+  - `borderSelected` mới: **`#6E6ECE`** / **`#7C79C8`**. Cạnh cũ là
+    `ColorScheme.secondary` `#4E5468`, chroma **0.0337** — khoảng **một phần
+    năm** những gì họ brand mang (focus ring 0.1928, primary 0.1699).
+  - **Phép đo từng loại `secondary` ra không còn ràng.** Lý do ghi trong doc
+    của `MxCard` là *"dark `primary` trên `surface` đo 2.90:1, dưới 3:1"* —
+    nhưng đó là **trên `surface`**, và từ M99.98 cạnh chọn không nằm trên
+    `surface` nữa, nó nằm trên `surfaceSelected`. Trên nền đúng, `#6E6ECE` đo
+    **3.72:1** và cặp dark **3.21:1**.
+  - **Vì sao không dùng thẳng `primary` hay `focusRing`.** Hôm nay focus ring
+    phân biệt với cạnh chọn **chỉ bằng sắc**: `#4E5468` và `#4141C0` cách nhau
+    **1.02:1** về độ sáng. Cho cạnh chọn mang chàm là mất phân biệt đó, nên hai
+    giá trị này chọn để khác ring bằng **độ** — nhạt hơn ring ở light, mờ hơn ở
+    dark. Ring vẫn là cạnh to tiếng nhất card có thể đeo, ở cả hai mode.
+- **Acceptance criteria:**
+  - [x] Cạnh chọn mang chroma họ brand (0.118–0.144), không còn 0.0337.
+  - [x] Đạt 3:1 trên fill của chính trạng thái chọn ở cả hai mode.
+  - [x] Thứ bậc với focus ring giữ nguyên — ring vẫn tách được bằng độ sáng.
+  - [x] Token mới có trong `lightPaletteTokens`/`darkPaletteTokens` và trong
+        bảng ánh xạ `css_token_parity_test.dart`; kit đã mirror.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** 3 file `lib/` (`app_colors.dart`, `app_semantic_colors.dart`,
+  `mx_card.dart`), `design_system/tokens/colors.css`, 4 file test, golden PNG.
+- **Tests required:** `mx_card_test.dart`, `mx_card_recipes_test.dart`,
+  `css_token_parity_test.dart`, `app_semantic_colors_test.dart`,
+  `test/visual_audit/`, `test/demo/` (golden).
+- **Emulator integration suite:** **not run** — presentation only.
+- **Dependencies:** M99.98 (đưa fill sang brand — chính nó tạo ra sự lệch này).
+- **Checklist phases:** 7, 13.
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |
