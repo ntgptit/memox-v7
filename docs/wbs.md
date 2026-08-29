@@ -15164,6 +15164,44 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
   "flat trong cột cuộn" của nó dựa trên tiền đề hairline gánh việc tách, và
   tiền đề đó không còn), #401 (elevation trong dark theme).
 
+### M99.95 · Mặt phẳng lùi thì lùi cho đúng — track và `.muted`
+
+- **Status:** **done** — presentation only. Không đổi controller, use case,
+  repository, route hay bất kỳ BR/UC/AD nào.
+- **Goal:** Hai chỗ mà một mặt đáng lẽ phải lùi ra sau đang nói sai: track của
+  progress đậm đến mức đọc như một thanh thứ hai, và `.muted` vừa đổ bóng vừa
+  có fill thấp hơn nền.
+- **Scope:**
+  - **`progressTrackLight` `#DFE0E9` → `#E9EDF8`.** Track cũ ở L\* 89.34, thấp
+    hơn card nó nằm trên bốn bậc — đủ đậm để tự đọc thành một thanh, nên gauge
+    rỗng trông như gauge đầy vẽ bằng xám. Giá trị của concept nhạt hơn với
+    card (**1.13:1** so với 1.27) nhưng **mạnh hơn với fill** (**3.75:1** so
+    với 3.34) — và fill mới là thứ mang con số. Track là cái rãnh, không phải
+    datum thứ hai. Mirror sang `design_system/tokens/colors.css`.
+  - **`MxCard.muted`: `elevation: card` → `none`.** Fill của nó
+    (`surfaceContainerHigh`) nằm **3.16 L\* dưới nền**, nên cái bóng làm card
+    nói "nổi" và tone nói "chìm" cùng lúc. Nhìn thấy trên
+    `card_import_source_light`: band chú thích có bóng trong khi panel nội dung
+    ngay trên nó — thứ mà nó chú thích — thì không. Đúng lỗi "hai độ sâu cạnh
+    tranh" mà audit của M99.92 đã bắt ở một recipe khác.
+- **Acceptance criteria:**
+  - [x] Không recipe nào còn vừa mang tone lùi vừa mang bóng — pin bằng
+        `hasShadow(decoration) == isFalse` cho `.muted` trong
+        `mx_card_recipes_test.dart`, đổi chiều assertion cũ chứ không xoá nó.
+  - [x] Tương phản track↔fill tăng, không giảm: 3.34 → 3.75:1.
+  - [x] Dark không đổi — `progressTrackDark` và bóng ở dark (không có) giữ
+        nguyên.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** 2 file `lib/` (`app_colors.dart`, `mx_card.dart`),
+  `design_system/tokens/colors.css`, 1 file test
+  (`mx_card_recipes_test.dart`), và golden PNG.
+- **Tests required:** `mx_card_recipes_test.dart`, `test/design_audit/`
+  (css parity — token mirror), `test/demo/` (golden), `test/visual_audit/`.
+- **Emulator integration suite:** **not run** — presentation only.
+- **Checklist phases:** 7, 13.
+- **Dependencies:** M99.94 (bỏ hairline — sau đó `.muted` là recipe duy nhất
+  còn mang bóng mà tone lại lùi).
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |

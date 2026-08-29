@@ -306,7 +306,14 @@ abstract final class AppColors {
   // second name for one colour is a second thing to keep in step.
 
   /// The unfilled part of a progress track.
-  static const Color progressTrackLight = Color(0xFFDFE0E9);
+  /// **Lighter since M99.95, and the trade is measured.** `#DFE0E9` sat at
+  /// L\* 89.34, four steps below the card it lies on — dark enough to read as a
+  /// *bar* in its own right, so an empty gauge looked like a filled one drawn
+  /// in grey. The reference concept puts its track at `#E9EDF8`: fainter
+  /// against the card (1.13:1 against 1.27) and **stronger against the fill**
+  /// (3.75:1 against 3.34), which is the pair that carries the number. A track
+  /// is a groove, not a second datum.
+  static const Color progressTrackLight = Color(0xFFE9EDF8);
   static const Color progressTrackDark = Color(0xFF2E3247);
 
   /// The filled part, below 100%.

@@ -77,7 +77,7 @@
   /* --- semantic: progress and reward ----------------------------------- */
   /* Its own family, not the accent. A bar drawn in --color-primary sits beside a
      button drawn in --color-primary and the eye cannot tell which one it can press. */
-  --color-progress-track:#DFE0E9;
+  --color-progress-track:#E9EDF8;
   --color-progress-fill:#6E6ECE;
   --color-progress-complete:var(--mx-success-light);
   --color-streak:#C2731B;
