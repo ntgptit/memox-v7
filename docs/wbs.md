@@ -15201,6 +15201,69 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Checklist phases:** 7, 13.
 - **Dependencies:** M99.94 (bỏ hairline — sau đó `.muted` là recipe duy nhất
   còn mang bóng mà tone lại lùi).
+### M99.97 · Gate CI tooling từ 43s xuống 8s — bản đồ quét repo được memo hoá
+
+- **Status:** **done** — chỉ chạm tooling. Không đổi một dòng `lib/` nào, không
+  đổi BR/UC/AD, không đổi kế hoạch verification mà gate chọn.
+- **Goal:** Mỗi vòng `dod_check.sh` trả **43 giây** cho `ci_tooling`, và đó là
+  chi phí lớn thứ hai trong gate sau `flutter test`. Bảng "where the time goes"
+  ở đầu `dod_check.sh` — đo 2026-08-02 — **không nhắc tới nó**, nên không gì
+  chỉ vào chỗ tốn nhất. Vòng lặp sửa-một-dòng-doc trả trọn giá này mỗi lần, vì
+  stamp chỉ ghi khi pass sạch còn mọi lần sửa đều đổi fingerprint.
+- **Scope:**
+  - **Nguyên nhân đo được, không phải test chậm.** `VerificationPlanBuilderTest`
+    chiếm **37.5s/43s**: 32 test gọi `build_plan(root=REPO_ROOT)`, và mỗi lần
+    `seal()` đọc lại **toàn bộ ~2.150 file Dart** hai lượt — một để cân trọng số
+    test (`discover_tests`), một để dựng reverse import graph
+    (`discover_test_consumers`). ~1.2s mỗi lần gọi, nhân 32.
+  - `build_verification_plan.py`: memo hoá ba tầng quét theo **root đã resolve** —
+    `_WORKTREE_SCAN_CACHE`, `_RUNNABLE_TEST_CACHE`, `_REVERSE_IMPORT_CACHE`, cộng
+    `clear_worktree_caches()` cho caller nào cố ý đổi cây. Graph tách thành
+    `_reverse_import_graph()` để chỗ đắt nhất có đúng một chủ.
+  - **Khoá theo root chứ không toàn cục, và đó là nửa quan trọng.** Test dựng
+    repo tạm phải nhận cây của chính nó; một memo thô hơn sẽ trả cho fixture
+    danh sách file của memox và mọi plan dựng trên fixture âm thầm mô tả nhầm
+    repo. Bản đầu chỉ pin "gọi hai lần bằng nhau" — assertion đó **xanh cả khi
+    cache hỏng**, nên test thật là fixture nhận đúng một file của nó.
+  - **Chỉ có hiệu lực trong một tiến trình.** CLI dựng một plan rồi thoát, nên
+    không caller nào quan sát được cây đổi dưới chân nó; lợi ích rơi trọn vào
+    bộ test — đúng chỗ đang trả giá.
+  - `dod_check.sh`: viết lại bảng thời gian theo số đo 2026-08-29, thêm cột
+    lần-chạy-lạnh (`check_docs.py` 2s ấm / **28s** lạnh trong worktree mới) và
+    ghi lại vì sao gate này từng là 43s.
+- **Đã cân nhắc và bỏ, ghi lại để phiên sau không làm lại:** gate `ci_tooling`
+  theo diff (chỉ chạy khi đụng `.claude/skills/flutter-workflow/scripts/` hoặc
+  `.github/workflows/`). Đo xong thì **số liệu bác bỏ chính đề xuất**: bộ test
+  còn 8s nên không còn là nút cổ chai, và `ImpactMapCoverageTest` **thật sự phủ
+  cây Dart** — feature mới thiếu node trong dependency graph, layer lạ dưới
+  `lib/features/`, `.drift` query chưa khai chủ đều đỏ ở đó. Bỏ nó trên một
+  thay đổi Dart là tạo đúng loại lỗ "skip đọc như pass" mà repo này đã ghi là
+  khiếm khuyết ở phần `python3` của chính `dod_check.sh`.
+- **Acceptance criteria:**
+  - [x] `python -m unittest discover` trên `scripts/tests`: **43.0s → 7.5s**,
+        63/63 xanh (61 cũ + 2 test hợp đồng cache).
+  - [x] `VerificationPlanBuilderTest` 37.46s → 1.64s; không class nào chậm đi.
+  - [x] Test hợp đồng cache **được kiểm bằng tiêm lỗi**: đổi khoá thành một
+        bucket toàn cục làm nó đỏ đúng chỗ (fixture nhận file list của memox),
+        rồi hoàn nguyên và xanh lại.
+  - [x] Kế hoạch verification không đổi: cùng diff cho ra cùng `risk`,
+        `test_files`, `shard_count` trước và sau.
+  - [x] Không đổi `lib/`, không đổi golden, không đổi `ci.yml`.
+- **Test/verification:** bộ test tooling 63/63; `dod_check.sh --changed` xanh
+  trên chính diff này (tooling là `full_scope_prefix` nên nó tự thăng lên full
+  suite — đúng ý đồ: thay đổi bộ chọn test thì phải chạy mọi test).
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `.claude/skills/flutter-workflow/scripts/build_verification_plan.py`,
+  `.claude/skills/flutter-workflow/scripts/dod_check.sh`,
+  `.claude/skills/flutter-workflow/scripts/tests/test_ci_tooling.py`,
+  `docs/wbs.md`.
+- **Tests required:** `.claude/skills/flutter-workflow/scripts/tests/test_ci_tooling.py`
+  (toàn bộ, vì chính nó là thứ đổi).
+- **Emulator integration suite:** **not run** — không thêm gì dưới
+  `lib/features/`; thay đổi nằm hoàn toàn trong tooling của gate.
+- **Checklist phases:** 21 (guard/verification).
+- **Dependencies:** M4.10b (CI + verification plan), M99.60 (sealed changed-scope
+  plan mà bộ test này bảo vệ).
 
 ### M99.96 · `MxFeedbackBand` — sáu bản chép tay còn một
 

@@ -429,6 +429,39 @@ class VerificationPlanBuilderTest(unittest.TestCase):
             self.assertIn("test/new_test.dart", plan.test_files)
             self.assertIn("test/new_test.dart", plan.local_test_targets)
 
+    def test_the_worktree_scan_is_memoized_per_root_not_globally(self) -> None:
+        """The cache that made this suite 43s → 8s must not answer for a
+        different tree.
+
+        A memo keyed by anything coarser than the resolved root would hand a
+        temporary repository the main repository's file list, and every plan
+        built against a fixture would silently describe memox instead. The
+        second half is the one that matters: the first assertion passes under a
+        global cache too.
+        """
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            subprocess.run(["git", "init", "-q", str(root)], check=True)
+            (root / "pubspec.yaml").write_text("name: memox\n", encoding="utf-8")
+            solitary = root / "test" / "only_test.dart"
+            solitary.parent.mkdir(parents=True)
+            solitary.write_text("void main() { test('only', () {}); }\n", encoding="utf-8")
+
+            repo_first = self.module.discover_tests(REPO_ROOT)
+            fixture = self.module.discover_tests(root)
+            repo_second = self.module.discover_tests(REPO_ROOT)
+
+            self.assertEqual(repo_first, repo_second)
+            self.assertEqual({"test/only_test.dart": 1}, fixture)
+            self.assertGreater(len(repo_first), 1)
+
+    def test_a_memoized_scan_is_not_shared_mutable_state(self) -> None:
+        """`seal` builds sets from what it receives; a shared object would let
+        one plan corrupt the next one built in the same process."""
+        first = self.module.discover_tests(REPO_ROOT)
+        first.clear()
+        self.assertGreater(len(self.module.discover_tests(REPO_ROOT)), 1)
+
     def test_deleted_test_support_selects_its_layer(self) -> None:
         plan = self._plan("test/features/card/data/support/deleted_fixture.dart")
         self.assertTrue(plan.test_files)
