@@ -15265,6 +15265,57 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Dependencies:** M4.10b (CI + verification plan), M99.60 (sealed changed-scope
   plan mà bộ test này bảo vệ).
 
+### M99.96 · `MxFeedbackBand` — sáu bản chép tay còn một
+
+- **Status:** **done** — refactor presentation, **không đổi một pixel nào**.
+  Không đổi controller, use case, repository, route hay bất kỳ BR/UC/AD nào.
+- **Goal:** `MxCard.feedback` cố ý để phần thân cho caller — icon và chữ phải
+  là nội dung sản phẩm để màu không bao giờ là cue duy nhất — nhưng "thân là
+  của bạn" bị đọc thành "tự dựng lấy", và sáu file cùng viết tay đúng một
+  `Semantics(liveRegion) → Row(icon, Column(title, message))`. Hôm nay chúng
+  giống nhau vì chép lẫn nhau; không có gì bắt chúng tiếp tục giống nhau, và
+  error state thứ bảy sẽ là bản chép thứ bảy.
+- **Scope:**
+  - `lib/shared/widgets/mx_feedback_band.dart` mới: sở hữu **bố cục và lời
+    thông báo**. Chữ, và action nếu có, vẫn thuộc caller — đúng phần mà
+    `MxCard.feedback` có lý khi để mở.
+  - **`liveRegion` chuyển vào trong widget, không nằm ở call site.** Thông báo
+    một thất bại là thuộc tính của việc *là* một failure band; một caller quên
+    `liveRegion` ship ra một band mà người dùng screen-reader không bao giờ
+    nghe — khiếm khuyết vô hình trong golden và trong widget test chỉ tìm chữ.
+  - Sáu caller chuyển sang: `tag_rename_widget`, `card_export_error_band_widget`,
+    `card_history_section_widget`, `reminder_banner_section_widget`,
+    `search_page_footer_widget`, `settings_error_band_widget`.
+  - `action` nhận **một widget** chứ không phải label + callback: cả hai band
+    có action đều style nút theo `onErrorContainer`, và một band tự dựng control
+    sẽ phải mọc thêm tham số cho mọi thuộc tính caller cần tiếp theo.
+  - **Dọn kèm:** `card_export_error_band_widget` còn helper `_band(BuildContext,
+    ColorScheme colors)` chết — `colors` chỉ xuất hiện ở signature. Cả helper
+    biến mất theo lần chuyển này. Hai biến `colors` thừa khác ở
+    `card_history_section_widget` và `search_page_footer_widget` cũng vậy.
+  - Đăng ký Widgetbook (`feedbackBandComponent`) và thêm stress specimen —
+    `mx_stress_test.dart` có rule "specimen list phủ mọi shared component" và
+    nó đỏ ngay khi thiếu.
+- **Acceptance criteria:**
+  - [x] Không còn file nào ngoài `mx_feedback_band.dart` dựng `MxCard.feedback`
+        — grep còn đúng hai chỗ: định nghĩa recipe và widget mới.
+  - [x] Không đổi pixel: golden của mọi trạng thái lỗi giữ nguyên.
+  - [x] `liveRegion` và `container` vẫn ở đúng chỗ với cả sáu — hành vi
+        semantics không đổi, xác nhận bằng test presentation cũ.
+  - [x] Component mới có mặt trong Widgetbook và trong stress specimen ở 320dp
+        × 2.0 text scale (cần `needsBoundedHeight`, như `MxEmptyState`).
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** 1 file `lib/shared/widgets/` mới, 6 caller, 2 file
+  `widgetbook/lib/`, 1 file test (`mx_stress_specimens.dart`).
+- **Tests required:** `mx_stress_test.dart`, `settings_screen_states_test.dart`,
+  `card_export_failure_faces_test.dart`, `tag_rename_test.dart`,
+  `card_detail_history_faces_test.dart`, `library_search_*`,
+  `reminder_*`, và Widgetbook smoke test.
+- **Emulator integration suite:** **not run** — refactor presentation, không
+  thêm gì dưới `lib/features/`.
+- **Checklist phases:** 7, 13.
+- **Dependencies:** M99.70 (recipe `.feedback`).
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |
