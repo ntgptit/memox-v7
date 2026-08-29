@@ -7,6 +7,7 @@ import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 import '../../core/theme/theme_context_extension.dart';
+import 'mx_icon.dart';
 
 /// The search bar that sits under an app bar.
 ///
@@ -133,11 +134,7 @@ class _MxSearchFieldState extends State<MxSearchField> {
         // content by its own rules, and a glyph centred in a 48-tall box does
         // not land where a line of text centred in one does.
         children: <Widget>[
-          Icon(
-            Icons.search,
-            size: AppIconSize.sm,
-            color: colors.onSurfaceVariant,
-          ),
+          const MxIcon(Icons.search, size: MxIconSize.sm),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             // The 48 lives on the box, not on the decorator. Asking

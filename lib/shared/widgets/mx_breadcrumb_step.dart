@@ -59,9 +59,9 @@ class _MxBreadcrumbStepState extends State<_MxBreadcrumbStep> {
   /// **Drawn on both branches.** It was on the tappable one only for a release,
   /// which took the home icon off the deck list — the single non-tappable `Root`
   /// step — and left a bare word where the design's own recognisable mark goes.
-  Widget? _icon(Color tint) => widget.icon == null
+  Widget? _icon(AppInk tint) => widget.icon == null
       ? null
-      : Icon(widget.icon, size: AppIconSize.sm, color: tint);
+      : MxIcon(widget.icon!, ink: tint, size: MxIconSize.sm);
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +91,7 @@ class _MxBreadcrumbStepState extends State<_MxBreadcrumbStep> {
           mainAxisSize: MainAxisSize.min,
           spacing: AppSpacing.xs,
           children: <Widget>[
-            ?_icon(quiet),
+            ?_icon(AppInk.quiet),
             Text(
               widget.item.label,
               style: context.texts.labelMedium?.copyWith(color: quiet),
@@ -156,7 +156,7 @@ class _MxBreadcrumbStepState extends State<_MxBreadcrumbStep> {
                     // The glyph is deliberately outside the underline: a
                     // decoration that reached it would draw a rule under the
                     // home icon as well as the word.
-                    ?_icon(ink),
+                    ?_icon(_isHovered ? AppInk.stated : AppInk.quiet),
                     Text(widget.item.label, style: style, maxLines: 1),
                   ],
                 ),

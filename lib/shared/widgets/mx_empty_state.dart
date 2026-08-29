@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_icon_size.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/theme_context_extension.dart';
 import 'mx_action_button.dart';
 import 'mx_button_pair.dart';
+import '../../core/theme/app_ink.dart';
+import 'mx_icon.dart';
 
 /// Shown when there is nothing to display and that is fine.
 ///
@@ -66,11 +67,7 @@ class MxEmptyState extends StatelessWidget {
             // so a CTA never outshines it — which `app_colors.dart` says makes
             // it 3.29:1 as a mark on the dark page. The two agree in light by
             // construction, so this only ever looked right there.
-            Icon(
-              icon,
-              size: AppIconSize.lg,
-              color: context.semanticColors.primaryAccent,
-            ),
+            MxIcon(icon, ink: AppInk.accent, size: MxIconSize.lg),
             const SizedBox(height: AppSpacing.lg),
             Text(
               title,

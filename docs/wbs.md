@@ -15655,6 +15655,68 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Checklist phases:** 7.
 - **Dependencies:** M100.2 (tiền lệ tách token theo nền), M100.1.
 
+### M100.4 · Kit vào trong tầm của chính luật nó đặt ra
+
+- **Status:** **done** — **thuần đổi cách gọi tên, 0 pixel đổi.** Chứng minh
+  bằng `flutter test --tags golden` **không** `--update-goldens`: 303 pass,
+  **0 PNG thay đổi**.
+- **Goal:** Đợt review 41 shared widget đo được `AppInk` — bảng mực đóng của app
+  — dùng ở **82 file** dưới `lib/features/` nhưng chỉ **3 widget** trong chính
+  kit định nghĩa ra nó. 13 widget kit vẽ `Icon` thô.
+- **Nguyên nhân, và nó không phải "kit cẩu thả":**
+  `test/app/icon_ink_boundary_test.dart` **đã tồn tại từ trước** và ép đúng luật
+  này. Phạm vi quét của nó là `lib/features/**/presentation/`. **`lib/shared/`
+  nằm ngoài.** Features ở mức 82 vì test giữ chúng ở đó; kit ở mức 3 vì không có
+  gì giữ. Đó chính là cái cửa mà `colors.primary` đi qua để thành ink của
+  `MxEmptyState` ở 3.29:1 — thứ M100.3 vừa phải đo và sửa.
+- **Sửa đúng chỗ là nới phạm vi test cũ, không viết test mới.** Tôi đã viết một
+  file guard riêng rồi **xoá đi** khi tìm ra test cũ: hai bản sao của một luật là
+  đúng cái lỗi đợt review này đang tố cáo.
+- **Scope:** 10 chỗ đổi, 9 chỗ cố ý giữ.
+  - Đổi sang `MxIcon(ink:)`: `mx_action_sheet` (2), `mx_breadcrumb` (3),
+    `mx_breadcrumb_step` (1), `mx_dialog_tone` (1), `mx_empty_state` (1),
+    `mx_error_state` (1), `mx_search_field` (1). Kit dùng `MxIcon`: **3 → 10**
+    widget.
+  - `MxDialogToneX.accent(context)` là một switch trả `Color` mà **mọi nhánh đều
+    đã là một thành viên `AppInk`** — nay là `AppInk get ink`, còn `accent()`
+    uỷ quyền cho nó. Bớt một bản sao của một map đã có.
+  - `_SheetRow` chọn ink bằng `AppInk` rồi mới resolve, thay vì chọn ba `Color`
+    bằng tay.
+- **Chín chỗ giữ `Icon` thô, và đây mới là nửa quan trọng:**
+  - **Bảy chỗ không truyền `color:` gì cả** — glyph nằm trong một nút và nhận
+    `IconTheme` mà `ButtonStyle` của nút resolve theo từng state. Đặt tên một
+    ink ở đó là **đóng băng một màu**, và icon sẽ vẫn sáng khi nút đã disabled.
+    Test cũ vốn đã miễn trừ "không màu", nên nới phạm vi không đụng chúng.
+  - `mx_pill_button` đọc `DefaultTextStyle.of(context).style.color` — chính là
+    `WidgetStateColor` của chip theme **đã resolve cho hàng này**. Không có
+    thành viên `AppInk` nào tên "màu mà chip vừa quyết".
+  - `mx_metric_well` nhận `Color` từ caller — khiếm khuyết riêng của nó, thuộc
+    về đợt dọn API.
+  - Hai chỗ sau vào allowlist **kèm lý do**, và có test bắt allowlist không được
+    ôi: nếu một mục thôi vi phạm thì phải xoá mục đó, không để lại giấy phép
+    cho thứ được sửa vào file đó lần sau.
+- **Một mục trong báo cáo review là SAI và tôi rút lại:** tôi báo *"2 nhãn nhóm
+  dựng thủ công"* ở `mx_action_sheet:117` và `mx_progress_bar:172`. Kiểm ra cả
+  hai đều **không phải nhãn nhóm**: cái đầu là **tiêu đề sheet** (sentence case,
+  còn `sectionLabel` là labelMedium + tracking dùng cho nhãn viết hoa), cái sau
+  là **caption dưới thanh tiến độ**. Regex của tôi khớp *hình dạng*
+  `labelish.copyWith(color: onSurfaceVariant)` rồi tôi đọc ra khiếm khuyết mà
+  không kiểm vai trò — đúng lỗi tôi vừa tố cáo ở chỗ khác. Không đổi gì hai chỗ
+  đó.
+- **Acceptance criteria:**
+  - [x] `icon_ink_boundary_test.dart` quét cả `lib/shared/widgets/`.
+  - [x] Kit dùng `MxIcon`: 3 → 10 widget; `Icon` thô có `color:`: 8 → 2, cả 2
+        có lý do ghi trong allowlist.
+  - [x] **0 PNG đổi** — golden pass mà không cần update.
+  - [x] 4 056 test host xanh, `flutter analyze` sạch.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** 8 file `lib/shared/widgets/` sửa, 1 file test nới phạm vi.
+- **Tests required:** `test/app/icon_ink_boundary_test.dart`,
+  `test/shared/widgets/`, `test/demo/` (golden, để chứng minh không đổi pixel).
+- **Emulator integration suite:** **not run** — thuần đổi cách gọi tên.
+- **Checklist phases:** 7.
+- **Dependencies:** M100.3.
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_icon_size.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/theme_context_extension.dart';
 import 'mx_action_button.dart';
+import '../../core/theme/app_ink.dart';
+import 'mx_icon.dart';
 
 /// Shown when something failed and the user may be able to retry.
 ///
@@ -67,10 +68,10 @@ class MxErrorState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Icon(
+            const MxIcon(
               Icons.error_outline,
-              size: AppIconSize.lg,
-              color: context.semanticColors.danger,
+              ink: AppInk.danger,
+              size: MxIconSize.lg,
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(

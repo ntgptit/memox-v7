@@ -1,14 +1,13 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
   "scannedFiles": 695,
-  "totalSites": 341,
+  "totalSites": 332,
   "byElementKind": {
-    "other": 274,
+    "other": 271,
     "background": 26,
     "shadow": 1,
     "border": 15,
-    "text": 19,
-    "icon": 6
+    "text": 19
   },
   "bySourceKind": {
     "shared-constant": 118,
@@ -16,7 +15,7 @@
     "blend-source": 4,
     "Colors-material": 12,
     "opacity-modified-token": 16,
-    "theme-token": 84
+    "theme-token": 75
   },
   "sites": [
     {
@@ -3431,7 +3430,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_action_sheet.dart",
-      "line": 118,
+      "line": 119,
       "widget_context": "_SheetTitle",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3441,87 +3440,10 @@
       "resolved_value_dark": "#A8A7C4"
     },
     {
-      "file": "lib/shared/widgets/mx_action_sheet.dart",
-      "line": 138,
-      "widget_context": "_SheetRow",
-      "element_kind": "other",
-      "source_kind": "theme-token",
-      "expression": "context.semanticColors.onDisabled",
-      "token": "semantic.onDisabled",
-      "resolved_value_light": "unresolvable: semantic.onDisabled not in the dumped theme",
-      "resolved_value_dark": "unresolvable: semantic.onDisabled not in the dumped theme"
-    },
-    {
-      "file": "lib/shared/widgets/mx_action_sheet.dart",
-      "line": 140,
-      "widget_context": "_SheetRow",
-      "element_kind": "other",
-      "source_kind": "theme-token",
-      "expression": "context.semanticColors.danger",
-      "token": "semantic.danger",
-      "resolved_value_light": "#C02B3A",
-      "resolved_value_dark": "#F2808F"
-    },
-    {
-      "file": "lib/shared/widgets/mx_action_sheet.dart",
-      "line": 141,
-      "widget_context": "_SheetRow",
-      "element_kind": "other",
-      "source_kind": "theme-token",
-      "expression": "context.colors.onSurface",
-      "token": "colorScheme.onSurface",
-      "resolved_value_light": "#16182B",
-      "resolved_value_dark": "#EDEDF6"
-    },
-    {
-      "file": "lib/shared/widgets/mx_action_sheet.dart",
-      "line": 166,
-      "widget_context": "_SheetRow",
-      "element_kind": "icon",
-      "source_kind": "theme-token",
-      "expression": "context.colors.onSurfaceVariant",
-      "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#565C72",
-      "resolved_value_dark": "#A8A7C4"
-    },
-    {
-      "file": "lib/shared/widgets/mx_action_sheet.dart",
-      "line": 185,
-      "widget_context": "_SheetRow",
-      "element_kind": "icon",
-      "source_kind": "theme-token",
-      "expression": "context.semanticColors.primaryAccent",
-      "token": "semantic.primaryAccent",
-      "resolved_value_light": "unresolvable: semantic.primaryAccent not in the dumped theme",
-      "resolved_value_dark": "unresolvable: semantic.primaryAccent not in the dumped theme"
-    },
-    {
       "file": "lib/shared/widgets/mx_breadcrumb.dart",
-      "line": 180,
+      "line": 182,
       "widget_context": "_MxBreadcrumbState",
       "element_kind": "other",
-      "source_kind": "theme-token",
-      "expression": "context.colors.onSurfaceVariant",
-      "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#565C72",
-      "resolved_value_dark": "#A8A7C4"
-    },
-    {
-      "file": "lib/shared/widgets/mx_breadcrumb.dart",
-      "line": 409,
-      "widget_context": "_MxBreadcrumbFoldState",
-      "element_kind": "icon",
-      "source_kind": "theme-token",
-      "expression": "context.colors.onSurface",
-      "token": "colorScheme.onSurface",
-      "resolved_value_light": "#16182B",
-      "resolved_value_dark": "#EDEDF6"
-    },
-    {
-      "file": "lib/shared/widgets/mx_breadcrumb.dart",
-      "line": 410,
-      "widget_context": "_MxBreadcrumbFoldState",
-      "element_kind": "icon",
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",
       "token": "colorScheme.onSurfaceVariant",
@@ -3607,18 +3529,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_empty_state.dart",
-      "line": 72,
-      "widget_context": "MxEmptyState",
-      "element_kind": "icon",
-      "source_kind": "theme-token",
-      "expression": "context.semanticColors.primaryAccent",
-      "token": "semantic.primaryAccent",
-      "resolved_value_light": "unresolvable: semantic.primaryAccent not in the dumped theme",
-      "resolved_value_dark": "unresolvable: semantic.primaryAccent not in the dumped theme"
-    },
-    {
-      "file": "lib/shared/widgets/mx_empty_state.dart",
-      "line": 86,
+      "line": 83,
       "widget_context": "MxEmptyState",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3629,18 +3540,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_error_state.dart",
-      "line": 73,
-      "widget_context": "MxErrorState",
-      "element_kind": "icon",
-      "source_kind": "theme-token",
-      "expression": "context.semanticColors.danger",
-      "token": "semantic.danger",
-      "resolved_value_light": "#C02B3A",
-      "resolved_value_dark": "#F2808F"
-    },
-    {
-      "file": "lib/shared/widgets/mx_error_state.dart",
-      "line": 86,
+      "line": 87,
       "widget_context": "MxErrorState",
       "element_kind": "text",
       "source_kind": "theme-token",

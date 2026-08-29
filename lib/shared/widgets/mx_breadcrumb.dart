@@ -4,6 +4,8 @@ import '../../core/theme/app_icon_size.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 import '../../core/theme/theme_context_extension.dart';
+import '../../core/theme/app_ink.dart';
+import 'mx_icon.dart';
 
 part 'mx_breadcrumb_step.dart';
 
@@ -205,11 +207,11 @@ class _MxBreadcrumbState extends State<MxBreadcrumb> {
               return Row(
                 children: <Widget>[
                   if (widget.upIcon != null) ...<Widget>[
-                    Icon(widget.upIcon, size: AppIconSize.sm, color: quiet),
+                    MxIcon(widget.upIcon!, size: MxIconSize.sm),
                     const SizedBox(width: AppSpacing.xs),
                   ],
                   if (widget.rootIcon != null) ...<Widget>[
-                    Icon(widget.rootIcon, size: AppIconSize.sm, color: quiet),
+                    MxIcon(widget.rootIcon!, size: MxIconSize.sm),
                     const SizedBox(width: AppSpacing.xs),
                   ],
                   if (shown.length < items.length) ...<Widget>[
@@ -402,12 +404,10 @@ class _MxBreadcrumbFoldState extends State<_MxBreadcrumbFold> {
               minWidth: AppSpacing.minimumTouchTarget,
             ),
             child: Center(
-              child: Icon(
+              child: MxIcon(
                 Icons.more_horiz,
-                size: AppIconSize.sm,
-                color: _isHovered
-                    ? context.colors.onSurface
-                    : context.colors.onSurfaceVariant,
+                ink: _isHovered ? AppInk.stated : AppInk.quiet,
+                size: MxIconSize.sm,
               ),
             ),
           ),

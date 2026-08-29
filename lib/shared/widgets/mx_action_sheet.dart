@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_icon_size.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/theme_context_extension.dart';
+import '../../core/theme/app_ink.dart';
+import 'mx_icon.dart';
 
 /// Whether an action in a sheet destroys something.
 enum MxActionSheetActionVariant {
@@ -134,11 +135,16 @@ class _SheetRow extends StatelessWidget {
 
     // Disabled wins over destructive: a greyed row that is still red reads as
     // available and dangerous, which is the worst of both.
-    final color = !action.isEnabled
-        ? context.semanticColors.onDisabled
+    // **The row names its ink rather than picking a colour** (M100.4). All
+    // three values were already `AppInk` members under the names the rest of
+    // the app uses them by; going through the enum is what stops the next
+    // colour here from being chosen instead of named.
+    final AppInk ink = !action.isEnabled
+        ? AppInk.disabled
         : isDestructive
-        ? context.semanticColors.danger
-        : context.colors.onSurface;
+        ? AppInk.danger
+        : AppInk.stated;
+    final Color color = ink.resolve(context);
 
     return ListTile(
       enabled: action.isEnabled,
@@ -158,12 +164,9 @@ class _SheetRow extends StatelessWidget {
           //
           // Destructive keeps the full colour: there the glyph is part of the
           // warning, and quieting it would leave red text beside a neutral bin.
-          : Icon(
-              action.icon,
-              size: AppIconSize.md,
-              color: isDestructive || !action.isEnabled
-                  ? color
-                  : context.colors.onSurfaceVariant,
+          : MxIcon(
+              action.icon!,
+              ink: isDestructive || !action.isEnabled ? ink : AppInk.quiet,
             ),
       title: Text(
         action.label,
@@ -179,11 +182,7 @@ class _SheetRow extends StatelessWidget {
       // This mark is the one thing in the sheet saying "you are here", so it
       // was the one thing that had to be legible and was not.
       trailing: action.isSelected
-          ? Icon(
-              Icons.check,
-              size: AppIconSize.md,
-              color: context.semanticColors.primaryAccent,
-            )
+          ? const MxIcon(Icons.check, ink: AppInk.accent)
           : null,
     );
   }
