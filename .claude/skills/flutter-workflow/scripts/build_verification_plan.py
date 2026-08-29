@@ -524,8 +524,41 @@ def compress_test_targets(
     return tuple(sorted(targets))
 
 
+# **The worktree scan is memoized per process, and that is a scheduling fix
+# rather than a correctness one.** Sealing a plan reads every tracked Dart file
+# twice — once to weigh the runnable tests, once to build the reverse import
+# graph — which is ~2,150 files on this repo and about 1.2s. One `build_plan`
+# per process pays that once and nobody notices; `test_ci_tooling.py` calls it
+# 32 times against an unchanging tree and paid it 32 times, which measured
+# **37.5s of the suite's 43s** (2026-08-29). The gate that suite belongs to runs
+# on every local iteration, so that was most of the wait between "fix a doc
+# line" and "learn whether the guard agrees".
+#
+# **Keyed by resolved root, and only valid within one process.** The CLI builds
+# one plan and exits, so nothing here can observe a tree that changed underneath
+# it; the test that builds its own temporary git repo gets its own key rather
+# than the repo's answer. A caller that edits files and re-plans in the same
+# process would read the first scan — no such caller exists, and one would be
+# asking for a plan against a tree that no longer exists anyway.
+#
+# There is deliberately no `clear()` here. Nothing needs one — a process that
+# wanted a second answer would be a process that changed the tree between two
+# plans, and the plan is a statement about one tree. Adding the escape hatch
+# before a caller exists is the habit this repository names in AD-14 and
+# refuses everywhere else.
+_WORKTREE_SCAN_CACHE: dict[str, frozenset[str]] = {}
+_RUNNABLE_TEST_CACHE: dict[str, dict[str, int]] = {}
+_REVERSE_IMPORT_CACHE: dict[str, dict[str, set[str]]] = {}
+
+
 def discover_worktree_dart_files(root: Path) -> set[str]:
     """Return tracked plus existing untracked Dart files used by local gates."""
+    key = str(root.resolve())
+    cached = _WORKTREE_SCAN_CACHE.get(key)
+    if cached is not None:
+        # A copy, because callers own what they receive — `seal` builds sets from
+        # this and a shared mutable would make one plan able to corrupt the next.
+        return set(cached)
     paths: set[str] = set()
     for arguments in (
         ["ls-files", "-z", "--", "lib", "test"],
@@ -541,7 +574,9 @@ def discover_worktree_dart_files(root: Path) -> set[str]:
             for raw in completed.stdout.split(b"\0")
             if raw and raw.decode("utf-8").endswith(".dart")
         )
-    return {path for path in paths if (root / path).is_file()}
+    present = {path for path in paths if (root / path).is_file()}
+    _WORKTREE_SCAN_CACHE[key] = frozenset(present)
+    return present
 
 
 def is_golden_only_test(path: Path) -> bool:
@@ -560,6 +595,10 @@ def is_golden_only_test(path: Path) -> bool:
 
 
 def discover_tests(root: Path) -> dict[str, int]:
+    key = str(root.resolve())
+    cached = _RUNNABLE_TEST_CACHE.get(key)
+    if cached is not None:
+        return dict(cached)
     paths = sorted(
         path
         for path in discover_worktree_dart_files(root)
@@ -568,10 +607,12 @@ def discover_tests(root: Path) -> dict[str, int]:
         and not is_golden_only_test(root / path)
     )
     declaration = re.compile(r"\b(?:testWidgets|testGoldens|test)\s*\(")
-    return {
+    weights = {
         path: max(1, len(declaration.findall((root / path).read_text(encoding="utf-8"))))
         for path in paths
     }
+    _RUNNABLE_TEST_CACHE[key] = dict(weights)
+    return weights
 
 
 def _package_name(root: Path) -> str:
@@ -591,6 +632,32 @@ def _resolve_dart_uri(importer: str, uri: str, package_name: str) -> str | None:
     return normalize_path(posixpath.normpath(posixpath.join(posixpath.dirname(importer), uri)))
 
 
+def _reverse_import_graph(root: Path) -> dict[str, set[str]]:
+    """Map each Dart file to the files that import, export or part it.
+
+    Memoized per root: this is the single most expensive read in the plan, and
+    it depends on nothing but the tree. Private, and never handed out — callers
+    below read it and do not mutate it, so no defensive copy is made of what is
+    the largest structure here.
+    """
+    key = str(root.resolve())
+    cached = _REVERSE_IMPORT_CACHE.get(key)
+    if cached is not None:
+        return cached
+
+    package_name = _package_name(root)
+    directive = re.compile(r"\b(?:import|export|part)\s+['\"]([^'\"]+)['\"]")
+    reverse: dict[str, set[str]] = {}
+    for importer in discover_worktree_dart_files(root):
+        text = (root / importer).read_text(encoding="utf-8")
+        for uri in directive.findall(text):
+            dependency = _resolve_dart_uri(importer, uri, package_name)
+            if dependency:
+                reverse.setdefault(dependency, set()).add(importer)
+    _REVERSE_IMPORT_CACHE[key] = reverse
+    return reverse
+
+
 def discover_test_consumers(
     root: Path,
     changed_dart_paths: set[str],
@@ -605,16 +672,7 @@ def discover_test_consumers(
     """
     if not changed_dart_paths:
         return set()
-    dart_files = discover_worktree_dart_files(root)
-    package_name = _package_name(root)
-    directive = re.compile(r"\b(?:import|export|part)\s+['\"]([^'\"]+)['\"]")
-    reverse: dict[str, set[str]] = {}
-    for importer in dart_files:
-        text = (root / importer).read_text(encoding="utf-8")
-        for uri in directive.findall(text):
-            dependency = _resolve_dart_uri(importer, uri, package_name)
-            if dependency:
-                reverse.setdefault(dependency, set()).add(importer)
+    reverse = _reverse_import_graph(root)
 
     pending = list(changed_dart_paths)
     visited = set(changed_dart_paths)
