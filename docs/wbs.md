@@ -15581,6 +15581,80 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Dependencies:** M99.99 (cạnh đã chọn về họ thương hiệu), M100.1 (nhà của
   `AppBorderColors`).
 
+### M100.3 · Viền control và dấu thương hiệu: đo trên nền chúng thật sự ngồi
+
+- **Status:** **done**
+- **Goal:** Review toàn bộ 41 shared widget tìm ra hai lỗi WCAG 1.4.11, và cả
+  hai cùng một nguyên nhân: **một giá trị được kiểm trên một nền rồi đem dùng
+  trên nền khác.**
+- **Vì sao review token trước đây không thấy:**
+  - `borderControl` được đo trên **page** và **surface** — hai nền mà một buổi
+    rà token tự nhiên nghĩ tới. `app_button_themes.dart` và `AppBorderColors`
+    đều chép đúng hai con số đó như thể đó là tập đủ.
+  - Nhưng nút outlined và ô nhập sống phần lớn đời trên nền thứ ba:
+    `surfaceContainer` — fill của mọi card chứa hàng.
+- **Bằng chứng là điều tra pixel, không phải suy luận.** Quét 51 golden dark,
+  với mỗi pixel màu viền hỏi *nó đang chạm màu gì*:
+
+  | nền | px kề | `#66628D` cũ | `#6E6A98` mới |
+  |---|---|---|---|
+  | page `#0A082D` | 40 342 | 3.41 | 3.85 |
+  | `surface` `#1A1838` | 8 012 | 3.00 | 3.39 |
+  | **`surfaceContainer` `#221E44`** | **5 858** | **2.76** | **3.12** |
+  | `surfaceMuted`, `primaryContainer` | 0 | — | — |
+
+  Năm màn có viền kề card mà **0 px** kề nền nó qua được: `study_home_dark`
+  (nút Study), `settings_dark` + `settings_save_failed_dark` (viền ô nhập),
+  `deck_list_root_dark` + `deck_list_level_dark`.
+- **Card thì được miễn, control thì không** — và repo đã viết sẵn phân biệt đó
+  ở phía kia: `app_high_contrast_test.dart` ghi *"a card is identified by its
+  content and its edge is decoration, which is the exemption WCAG grants"*.
+  Hai component đọc token này là một cái nút và một ô nhập; cạnh của chúng
+  **là** ranh giới component, đúng thứ 1.4.11 sinh ra để bảo vệ.
+- **Light nâng dù đang 0 px.** `#8D8D95` → `#8A8A92` (2.94 → 3.06 trên
+  `surfaceContainer`), chroma giữ nguyên 0.031 — dưới xa mức 0.06 mà rule
+  light-canvas chặn viền ô nhập, và đó chính là ràng buộc khiến **tối đi** là
+  hướng duy nhất còn lại. Census light ra 0 px vì **card light là `surface`
+  còn card dark là `surfaceContainer`** — bất đối xứng đó giải thích vì sao một
+  mode ship lỗi còn mode kia chỉ mang nợ. Trả luôn: một rule đúng ở một mode và
+  được miễn ở mode kia thì thôi làm rule, nó thành ghi chú.
+- **Nửa thứ hai — dấu thương hiệu tô bằng token fill.** `colors.primary` là
+  màu **nền nút**. `app_colors.dart` tự viết: *"…it measures 3.33:1 as bare text
+  on the dark page and fails AA at label size. Text that carries the brand uses
+  this [`primaryAccent`] instead."*
+  - `MxEmptyState` icon — `#5656C9`, 3.29:1 trên trang dark. 21 file dùng.
+  - `MxActionSheet` dấu tick "đang ở đây" — sheet nền sáng hơn nên **2.90:1**,
+    dưới 3:1. Comment ngay trên nó gọi đây là thứ duy nhất nói *you are here*.
+  - Hai token **bằng nhau ở light theo định nghĩa**, nên chỗ sai này vô hình
+    suốt — và đó là lý do assertion có sức nặng là assertion dark.
+- **Scope:**
+  - `borderControlDark` `#66628D` → `#6E6A98`; `borderControlLight`
+    `#8D8D95` → `#8A8A92`, kèm bảng census.
+  - Sửa hai lời khẳng định sai trong doc: `AppBorderColors` viết *"cleared
+    against every neighbour it touches"*, `app_button_themes.dart` liệt kê hai
+    nền như thể là tập đủ. Một khẳng định sai trong doc tệ hơn không có doc.
+  - `mx_empty_state.dart` và `mx_action_sheet.dart` → `primaryAccent`.
+  - `test/core/theme/control_border_grounds_test.dart` — mới.
+- **Test mới khoá cái gì:** ba nền × hai mode, cộng một test ghim *tiền đề* —
+  nếu `surfaceContainer` sập vào `surface` hay vào page thì file này đang đo một
+  nền hai lần, và nó phải đỏ chứ không phải lặng lẽ xanh. Cộng hai test cho cặp
+  `primary` / `primaryAccent`.
+- **Acceptance criteria:**
+  - [x] `borderControl` đạt ≥3:1 trên page, `surface` **và** `surfaceContainer`
+        ở cả hai mode.
+  - [x] Thang viền giữ thứ tự: `borderSubtle` 2.32 → `borderControl` 3.85 →
+        `borderSelected` 5.00 → `focusRing` 6.26 (dark, trên page).
+  - [x] Hai nền 0 px cố ý để nguyên — chỉnh token theo cặp không ai vẽ là cách
+        một bảng màu trôi sáng dần.
+  - [x] 4 054 test host xanh; 124 golden cập nhật.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** 4 file `lib/` sửa, 1 file test mới, 124 golden.
+- **Tests required:** `test/core/theme/`, `test/visual_audit/`,
+  `test/shared/widgets/`, `test/demo/` (golden).
+- **Emulator integration suite:** **not run** — thuần trình bày.
+- **Checklist phases:** 7.
+- **Dependencies:** M100.2 (tiền lệ tách token theo nền), M100.1.
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |

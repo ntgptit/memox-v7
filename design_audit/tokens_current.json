@@ -280,12 +280,12 @@
       "carriesNoHue": false
     },
     "colorScheme.outline": {
-      "hex": "#8D8D95",
+      "hex": "#8A8A92",
       "opaque": true,
       "hue": 240.0,
-      "saturation": 0.03636363636363636,
+      "saturation": 0.035398230088495575,
       "chroma": 0.03137254901960784,
-      "lightnessStar": 58.86531644334096,
+      "lightnessStar": 57.708649801713776,
       "classifiedAs": "neutral",
       "hueDistanceFromDeclaredSeed": 0.0,
       "hueDistanceFromDarkSurfaceFamily": 3.2432432432432563,
@@ -574,12 +574,12 @@
       "classifiedAs": "role-or-on-color"
     },
     "inputDecorationTheme.enabledBorder": {
-      "hex": "#8D8D95",
+      "hex": "#8A8A92",
       "opaque": true,
       "hue": 240.0,
-      "saturation": 0.03636363636363636,
+      "saturation": 0.035398230088495575,
       "chroma": 0.03137254901960784,
-      "lightnessStar": 58.86531644334096,
+      "lightnessStar": 57.708649801713776,
       "classifiedAs": "neutral",
       "hueDistanceFromDeclaredSeed": 0.0,
       "hueDistanceFromDarkSurfaceFamily": 3.2432432432432563,
@@ -595,12 +595,12 @@
       "classifiedAs": "role-or-on-color"
     },
     "inputDecorationTheme.disabledBorder": {
-      "hex": "#C4C4CA",
+      "hex": "#C3C3C8",
       "opaque": true,
       "hue": 240.0,
-      "saturation": 0.04888888888888922,
-      "chroma": 0.021568627450980538,
-      "lightnessStar": 79.3033398536664,
+      "saturation": 0.04761904761904768,
+      "chroma": 0.021568627450980427,
+      "lightnessStar": 78.75948837928962,
       "classifiedAs": "neutral",
       "hueDistanceFromDeclaredSeed": 0.0,
       "hueDistanceFromDarkSurfaceFamily": 3.2432432432432563,
@@ -954,15 +954,15 @@
       "carriesNoHue": false
     },
     "colorScheme.outline": {
-      "hex": "#66628D",
+      "hex": "#6E6A98",
       "opaque": true,
-      "hue": 245.58139534883722,
-      "saturation": 0.17991631799163182,
-      "chroma": 0.16862745098039217,
-      "lightnessStar": 43.4825167325174,
+      "hue": 245.21739130434784,
+      "saturation": 0.1825396825396825,
+      "chroma": 0.18039215686274507,
+      "lightnessStar": 46.82992368967564,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 5.581395348837219,
-      "hueDistanceFromDarkSurfaceFamily": 2.338152105593963,
+      "hueDistanceFromDeclaredSeed": 5.217391304347842,
+      "hueDistanceFromDarkSurfaceFamily": 1.9741480611045858,
       "carriesNoHue": false
     },
     "colorScheme.outlineVariant": {
@@ -1248,15 +1248,15 @@
       "classifiedAs": "role-or-on-color"
     },
     "inputDecorationTheme.enabledBorder": {
-      "hex": "#66628D",
+      "hex": "#6E6A98",
       "opaque": true,
-      "hue": 245.58139534883722,
-      "saturation": 0.17991631799163182,
-      "chroma": 0.16862745098039217,
-      "lightnessStar": 43.4825167325174,
+      "hue": 245.21739130434784,
+      "saturation": 0.1825396825396825,
+      "chroma": 0.18039215686274507,
+      "lightnessStar": 46.82992368967564,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 5.581395348837219,
-      "hueDistanceFromDarkSurfaceFamily": 2.338152105593963,
+      "hueDistanceFromDeclaredSeed": 5.217391304347842,
+      "hueDistanceFromDarkSurfaceFamily": 1.9741480611045858,
       "carriesNoHue": false
     },
     "inputDecorationTheme.focusedBorder": {
@@ -1269,15 +1269,15 @@
       "classifiedAs": "role-or-on-color"
     },
     "inputDecorationTheme.disabledBorder": {
-      "hex": "#403D63",
+      "hex": "#444168",
       "opaque": true,
-      "hue": 244.8,
-      "saturation": 0.23510971786833856,
-      "chroma": 0.14705882352941177,
-      "lightnessStar": 27.62435587461477,
+      "hue": 244.61538461538458,
+      "saturation": 0.23076923076923078,
+      "chroma": 0.15294117647058825,
+      "lightnessStar": 29.435192748759974,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 4.800000000000011,
-      "hueDistanceFromDarkSurfaceFamily": 1.556756756756755,
+      "hueDistanceFromDeclaredSeed": 4.615384615384585,
+      "hueDistanceFromDarkSurfaceFamily": 1.3721413721413285,
       "carriesNoHue": false
     },
     "cardTheme.color": {

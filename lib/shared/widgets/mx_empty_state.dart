@@ -61,7 +61,16 @@ class MxEmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Icon(icon, size: AppIconSize.lg, color: context.colors.primary),
+            // **`primaryAccent`, not `primary`** (M100.3). `primary` is the
+            // *fill* of a filled button and is held below the card's headline
+            // so a CTA never outshines it — which `app_colors.dart` says makes
+            // it 3.29:1 as a mark on the dark page. The two agree in light by
+            // construction, so this only ever looked right there.
+            Icon(
+              icon,
+              size: AppIconSize.lg,
+              color: context.semanticColors.primaryAccent,
+            ),
             const SizedBox(height: AppSpacing.lg),
             Text(
               title,

@@ -168,12 +168,60 @@ abstract final class AppBorderColors {
   /// 1.37 quieter than [borderSelectedDark].
   static const Color borderOptionDark = Color(0xFF5D65B2);
 
-  /// A control's edge at the 3:1 WCAG 1.4.11 asks — cleared against every
-  /// neighbour it touches. Why a control and not a card, and the measurements:
-  /// `AppSemanticColors.borderControl`.
-  static const Color borderControlLight = Color(0xFF8D8D95);
+  /// A control's edge at the 3:1 WCAG 1.4.11 asks. Why a control and not a
+  /// card, and the measurements: `AppSemanticColors.borderControl`.
+  ///
+  /// **"Cleared against every neighbour it touches" is what this comment used
+  /// to say, and it was not true.** It had been measured on two grounds — the
+  /// page and `surface` — because those are the two a token review naturally
+  /// reaches for. The outlined button and the empty text field spend most of
+  /// their life on a third: `surfaceContainer`, the fill of every card that
+  /// holds a row.
+  ///
+  /// Both modes were raised at M100.3, for the same reason and by very
+  /// different amounts. Light was at **2.94** on `surfaceContainer` and is now
+  /// **3.06**: two steps darker, chroma untouched at 0.031 — far under the 0.06
+  /// the light-canvas rule caps an input border at, which is the constraint
+  /// that makes darkening the only direction available here.
+  ///
+  /// **Light draws 0 px on that ground today** — the census found the light
+  /// card is `surface`, not `surfaceContainer`, so this is debt rather than a
+  /// live defect. It is paid anyway: a rule that holds in one mode and is
+  /// waived in the other stops being a rule and becomes a note, and the next
+  /// screen to put an outlined button on a light `surfaceContainer` would
+  /// inherit the failure with nothing objecting.
+  static const Color borderControlLight = Color(0xFF8A8A92);
 
-  static const Color borderControlDark = Color(0xFF66628D);
+  /// Raised from `#66628D` at M100.3, and the census is the reason.
+  ///
+  /// Every one of the 51 dark goldens was scanned for pixels of this colour and
+  /// asked which colour each one *touches*. Four grounds, and the third is the
+  /// one two years of review never measured:
+  ///
+  /// | ground | px adjacent | old `#66628D` | now `#6E6A98` |
+  /// |---|---|---|---|
+  /// | page `#0A082D` | 40 342 | 3.41 | 3.85 |
+  /// | `surface` `#1A1838` | 8 012 | 3.00 | 3.39 |
+  /// | **`surfaceContainer` `#221E44`** | **5 858** | **2.76** | **3.12** |
+  /// | `surfaceMuted`, `primaryContainer` | 0 | — | — |
+  ///
+  /// The same census in light returns 0 px on `surfaceContainer`, because a
+  /// light card is `surface` and a dark one is `surfaceContainer` — an
+  /// asymmetry in the palette that is exactly why one mode shipped the defect
+  /// and the other only carried it as debt.
+  ///
+  /// **A card's edge would have been exempt; a control's is not.**
+  /// `app_high_contrast_test.dart` writes the distinction down — "a card is
+  /// identified by its content and its edge is decoration, which is the
+  /// exemption WCAG grants". The two components reading this token are an
+  /// outlined button and a text field, and a control's boundary is the
+  /// information 1.4.11 exists to protect.
+  ///
+  /// The rise is 0.44 of a ratio point on the page and keeps the ladder in
+  /// order: `borderSubtle` 2.32 → this 3.85 → `borderSelected` 5.00 →
+  /// `focusRing` 6.26. The two grounds at 0 px are left failing on purpose —
+  /// sizing a token to a pairing nothing draws is how a palette drifts bright.
+  static const Color borderControlDark = Color(0xFF6E6A98);
 
   /// Input border while focused. Focus shifts *hue*, never stroke width —
   /// Material's default doubles the stroke, which reads as the field shouting.
