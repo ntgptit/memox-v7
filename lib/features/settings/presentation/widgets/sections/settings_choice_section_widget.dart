@@ -5,6 +5,7 @@ import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../items/settings_choice_rows_widget.dart';
 import '../items/settings_error_band_widget.dart';
+import '../../../../../shared/widgets/mx_radio_rows.dart';
 import 'settings_section_widget.dart';
 
 /// A settings group that is one closed choice — Appearance and Language
@@ -94,6 +95,13 @@ class _SettingsChoiceSectionWidgetState<T extends Enum>
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               SettingsChoiceRowsWidget<T>(
+                // **A list, so its rows divide** (M100.0). These rows are the
+                // whole content of their card — nothing else is in there — so
+                // the divider is what says they belong to one list. Study
+                // defaults deliberately stays a `block`: its rows sit between
+                // a field, a note and a Save button, where a line across them
+                // cuts a group instead of dividing a list.
+                shape: MxRadioRowsShape.list,
                 values: widget.values,
                 selected: widget.selected,
                 labelOf: widget.labelOf,

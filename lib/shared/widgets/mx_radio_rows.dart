@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/theme_context_extension.dart';
+
 /// A pick-one group drawn as radio rows.
 ///
 /// **Exists so no feature builds a `RadioListTile` again.** Two sites did
@@ -20,6 +22,26 @@ import 'package:flutter/material.dart';
 /// What stays with the caller: the choice type, its localized words, and any
 /// announcement around the group (the settings lock announces itself with
 /// its own `Semantics` — that is a screen's sentence, not the group's).
+/// Whether the group is a *list* — rows that need telling apart from each
+/// other — or a *block* of choices inside a larger group.
+///
+/// **An enum, because the answer is a meaning and the two callers differ on
+/// it** (M100.0). Appearance and Language are the whole content of their card:
+/// nothing else is in there, so the rows are the list and a divider between
+/// them is what says so. Study defaults' rows sit between a text field, a note
+/// and a Save button — a line across them there cuts a group in half rather
+/// than dividing a list, which is what the owner's review settled after seeing
+/// both rendered.
+enum MxRadioRowsShape {
+  /// Rows with nothing between them. Right when the group is one part of a
+  /// card that holds other things too.
+  block,
+
+  /// Rows divided by `borderDivider`, edge to edge. Right when the rows *are*
+  /// the card's content.
+  list,
+}
+
 class MxRadioRows<T> extends StatelessWidget {
   const MxRadioRows({
     required this.values,
@@ -29,6 +51,7 @@ class MxRadioRows<T> extends StatelessWidget {
     this.subtitleOf,
     this.isEnabled = true,
     this.contentPadding = EdgeInsets.zero,
+    this.shape = MxRadioRowsShape.block,
     super.key,
   });
 
@@ -53,6 +76,11 @@ class MxRadioRows<T> extends StatelessWidget {
   /// card that pads vertically only.
   final EdgeInsetsGeometry contentPadding;
 
+  /// See [MxRadioRowsShape]. Defaults to [MxRadioRowsShape.block] — a divider
+  /// is something a caller asks for, because only the caller knows whether its
+  /// rows are the card or a part of it.
+  final MxRadioRowsShape shape;
+
   void _ignoreChange(T? _) {}
 
   void _onChanged(T? value) {
@@ -72,7 +100,15 @@ class MxRadioRows<T> extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            for (final value in values)
+            for (final (index, value) in values.indexed) ...<Widget>[
+              // Between rows only — never above the first or below the last,
+              // where it would read as the card's own edge coming back.
+              if (index > 0 && shape == MxRadioRowsShape.list)
+                Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: context.semanticColors.borderDivider,
+                ),
               RadioListTile<T>(
                 value: value,
                 enabled: isEnabled,
@@ -80,6 +116,7 @@ class MxRadioRows<T> extends StatelessWidget {
                 subtitle: subtitleOf == null ? null : Text(subtitleOf!(value)),
                 contentPadding: contentPadding,
               ),
+            ],
           ],
         ),
       ),

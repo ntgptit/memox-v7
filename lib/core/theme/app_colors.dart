@@ -123,6 +123,28 @@ abstract final class AppColors {
   /// distinction is gone, so these two are picked to differ from the ring by
   /// weight instead — lighter than it in light, dimmer in dark. The ring stays
   /// the loudest edge a card can wear, in both modes.
+  /// The hairline *inside* a card, between the rows of one list.
+  ///
+  /// **Only inside** (M100.0). Cards stopped drawing an outer edge at M99.94
+  /// because a screen of framed boxes reads as frames rather than surfaces;
+  /// this is the opposite case — rows that belong to one list need to be told
+  /// apart *from each other*, and the reference concept divides exactly those:
+  /// its `RESULT BREAKDOWN` and `MASTERY BY DECK` rows, never the card around
+  /// them.
+  ///
+  /// `#E9ECF5` is the concept's own value, measuring **1.14:1** on this app's
+  /// card fill against 1.18:1 on the pure white it was drawn for. Far below
+  /// the 1.45:1 `borderSubtle` used to draw around every card — a divider that
+  /// competed with content would just be the frame again, one level in.
+  static const Color borderDividerLight = Color(0xFFE9ECF5);
+
+  /// **Derived by matching the light ratio, not guessed.** The concept is
+  /// light-only, so the dark value is solved for the same contrast on the fill
+  /// a divided card actually has in dark (`surfaceContainer` `#221E44`, since
+  /// these cards are `.raised`): `#2E2A54` measures **1.178:1** there against
+  /// the concept's 1.181 in light.
+  static const Color borderDividerDark = Color(0xFF2E2A54);
+
   static const Color borderSelectedLight = Color(0xFF6E6ECE);
 
   /// See [borderSelectedLight]. Dimmer than `focusRingDark` on purpose.

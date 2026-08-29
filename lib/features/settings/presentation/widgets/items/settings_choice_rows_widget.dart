@@ -33,6 +33,7 @@ class SettingsChoiceRowsWidget<T extends Enum> extends StatelessWidget {
     required this.onChanged,
     required this.isSubmitting,
     this.contentPadding = EdgeInsets.zero,
+    this.shape = MxRadioRowsShape.block,
     super.key,
   });
 
@@ -56,6 +57,9 @@ class SettingsChoiceRowsWidget<T extends Enum> extends StatelessWidget {
   /// ink span the card while its content stays on the screen's one column (W5).
   final EdgeInsetsGeometry contentPadding;
 
+  /// See [MxRadioRowsShape].
+  final MxRadioRowsShape shape;
+
   @override
   Widget build(BuildContext context) => Semantics(
     // The lock is announced, not only painted: a group that merely greys out
@@ -73,6 +77,7 @@ class SettingsChoiceRowsWidget<T extends Enum> extends StatelessWidget {
       onChanged: onChanged,
       labelOf: labelOf,
       contentPadding: contentPadding,
+      shape: shape,
     ),
   );
 }

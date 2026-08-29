@@ -16,6 +16,7 @@ import 'package:memox/core/theme/app_material_roles.dart';
 final List<Color> lightPaletteTokens = <Color>[
   AppColors.backgroundLight,
   AppColors.surfaceLight,
+  AppColors.borderDividerLight,
   AppColors.borderSelectedLight,
   AppColors.surfaceEmphasisLight,
   AppColors.surfaceSelectedLight,
@@ -89,6 +90,7 @@ final List<Color> lightPaletteTokens = <Color>[
 final List<Color> darkPaletteTokens = <Color>[
   AppColors.backgroundDark,
   AppColors.surfaceDark,
+  AppColors.borderDividerDark,
   AppColors.borderSelectedDark,
   AppColors.surfaceEmphasisDark,
   AppColors.surfaceSelectedDark,

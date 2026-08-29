@@ -22,6 +22,7 @@ import 'package:memox/features/settings/presentation/screens/settings_screen.dar
 import 'package:memox/features/study/presentation/screens/study_home_screen.dart';
 import 'package:memox/features/trash/presentation/screens/trash_screen.dart';
 import 'package:memox/core/time/clock_provider.dart';
+import 'package:memox/l10n/generated/app_localizations_en.dart';
 
 import '../features/progress/presentation/support/fake_progress_repository.dart';
 import '../features/reminder/support/fake_reminder_platform.dart';
@@ -123,6 +124,30 @@ void main() {
         ),
       );
       await matchesReviewGolden('goldens/settings_$mode.png');
+    });
+
+    testWidgets('settings — a save that failed, $mode', (tester) async {
+      // **The one Settings state no picture covered** (M100.0). The band is
+      // built by `SettingsErrorBandWidget` inside the group's own card, and
+      // that nesting was reported as "hairline inside hairline" during the
+      // M99.9x review — a complaint M99.94 dissolved by taking both edges
+      // away. Nothing rendered it either way: the widget tests assert the band
+      // exists, and a widget test cannot see that it sits inside a frame.
+      await pumpReview(
+        tester,
+        ReviewApp(
+          home: settingsScreenWith(
+            FailingAppSettingsRepository(),
+            const SettingsScreen(),
+          ),
+          brightness: brightness,
+        ),
+      );
+
+      await tester.tap(find.text(AppLocalizationsEn().settingsThemeDark));
+      await tester.pumpAndSettle();
+
+      await matchesReviewGolden('goldens/settings_save_failed_$mode.png');
     });
 
     testWidgets('reminder settings — enabled, $mode', (tester) async {
