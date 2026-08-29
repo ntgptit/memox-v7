@@ -109,7 +109,7 @@ class _TemplateTile extends ConsumerWidget {
     final template = row.template;
     final quiet = context.texts.bodySmall!.inked(context, AppInk.quiet);
 
-    return MxCard.flat(
+    return MxCard.raised(
       onTap: () => _add(context),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

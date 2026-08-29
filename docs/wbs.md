@@ -15088,6 +15088,82 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Dependencies:** M99.70 (MxCard recipes + D20 flat-in-column), M99.87
   (Card Import, cùng pattern), M99.84 (Tag Catalog), M99.85 (Study Home).
 
+### M99.94 · MxCard bỏ hairline — card là mặt phẳng, chứ không phải cái khung
+
+- **Status:** **done** — presentation only. Không đổi controller, use case,
+  repository, route, hay bất kỳ BR/UC/AD nào. **Không đổi một giá trị bảng màu
+  nào** (xem "Đã thử và hoàn nguyên").
+- **Goal:** Mọi `MxCard` đều vẽ một hairline `borderSubtle` — đo được **1.45:1
+  trên chính fill của nó ở light** — nên một màn hình đầy card đọc ra là chồng
+  khung chứ không phải chồng mặt phẳng. Concept chủ dự án cung cấp
+  (`LIGHT · TOKYO PURE`) **không vẽ viền nào** trên card trung tính: quét dọc
+  qua mép card ở đó đi từ nền sang fill trong đúng một pixel.
+- **Scope:**
+  - `mx_card.dart`: `_restingEdgeColor` trả `Color?`, `subtle` → `null`. Hộp
+    viền **vẫn được giữ**, vẽ bằng **chính fill của card**, vì
+    `BoxDecoration.border` thụt nội dung vào theo độ dày của nó — bỏ hẳn thì
+    nội dung nhảy 1px đúng lúc focus ring xuất hiện, tức phá
+    `mx_card_interaction_test.dart` ("focus costs nothing"). Giữ viền thật:
+    focus ring, card đã chọn, `.recessed` khi mang state, `.option`, `.accent`.
+  - **Trả lại bóng cho card nằm trên trang.** Bỏ hairline xong thì `.flat` chỉ
+    còn 2.15 L\* fill và không gì khác; đo trên concept, card ở đó có **2.02 L\*
+    fill + 2.46 L\* bóng = 4.48** biên độ qua mép. 18 call site card-trên-trang
+    chuyển `.flat` → `.raised`, và `.tile` (1 caller, timeline Study History)
+    lên `AppElevation.card`. Sau đó memox đo **2.15 + 3.49 = 5.64**.
+  - `.raised` nhận thêm `selectionTreatment` (card tile cần tint khi chọn).
+  - **Vẽ bằng fill chứ không bằng literal alpha 0 — và guard là thứ chốt việc
+    đó.** Bản đầu dùng zero-alpha; `memox.design_token.no_raw_color` từ chối,
+    đúng lý: guard không phân biệt được "không màu" với "một màu chưa ai khai
+    báo". Nó còn buộc phải nới `paint_extractors.dart` để `palette.closure`
+    thôi báo `#00000000` trên mọi màn hình. Viền vẽ bằng fill vô hình vì cùng
+    lý do, đọc ngược ra là token thật, **không cần ngoại lệ audit nào**, và giữ
+    card đúng kích thước — zero-alpha trả pixel đó lại cho nền.
+  - `.flat` thu hẹp về đúng nghĩa gốc: card nằm **trong** một mặt khác — panel
+    của import wizard, block của export sheet.
+- **Đã thử và hoàn nguyên, ghi lại để phiên sau không thử lại:** concept dùng
+  card `#FFFFFF` trên nền `#F8F9FE` (bước 2.02 L\* nhưng **bước chroma 0.0067**,
+  vì card là mặt duy nhất không có sắc). memox là 2.15 L\* và **0.0002 chroma** —
+  nền và card cùng một lavender ở hai độ sáng. Đổi theo concept làm
+  `color_system_rules_test.dart` R9 đỏ: *"every neutral carries a trace of the
+  seed"*, và comment của chính rule đó ghi light `surface` **đã từng** là
+  `#FFFFFF` và bị cố ý bỏ ở M4.10i vì "trang có sắc mà vật nằm trên trang thì
+  không". Hoàn nguyên `surfaceLight`, `backgroundLight`, `disabledSurfaceLight`
+  và mirror kit về nguyên trạng — bóng mới đã cho 5.64 L\*, hơn concept 4.48,
+  nên bước chroma không cần thiết. **Nếu sau này vẫn muốn đúng chữ concept thì
+  đó là sửa R9, và là quyết định của chủ dự án.**
+- **Acceptance criteria:**
+  - [x] Không card trung tính nào còn vẽ hairline; `.option`, `.accent`, trạng
+        thái chọn/focus/graded giữ nguyên cạnh — pin trong
+        `mx_card_recipes_test.dart` bằng `hasVisibleBorder` (alpha > 0) thay vì
+        so màu.
+  - [x] Hình học không đổi khi focus: viền trong suốt giữ hộp, 4 test
+        `mx_card_interaction_test.dart` xanh.
+  - [x] Mọi card nằm trên trang có biên độ qua mép ≥ concept — đo trên golden:
+        deck row 5.64 L\*, Study History tile 3.90 L\*, concept 4.48.
+  - [x] Dark không hỏng: nó không vẽ bóng nên `.tile`/`.raised` chuyển sang
+        `surfaceContainer`, đúng cơ chế đã có từ #401.
+  - [x] Không đổi giá trị bảng màu nào — `git diff` trên `app_colors.dart` và
+        `design_system/tokens/colors.css` rỗng.
+- **Test/verification:** `flutter analyze` 0 issue repo-wide (kể cả
+  `widgetbook/`); **4038 test non-golden xanh**; **301 golden xanh** khi verify
+  lại không `--update-goldens`; **130/150 golden dựng lại** với `TZ=UTC`.
+  Hợp đồng phải viết lại vì hình học đổi có chủ đích: `mx_card_recipes_test.dart`
+  (flat/raised/recessed/tile). Gallery đã publish lại ở URL ghim.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** 19 file `lib/` (`mx_card.dart` + 18 call site đổi recipe), 1 file
+  test (`mx_card_recipes_test.dart`), `docs/wbs.md`, và golden PNG.
+- **Tests required:** `mx_card_recipes_test.dart`,
+  `mx_card_interaction_test.dart`, `mx_card_test.dart`, toàn bộ
+  `test/visual_audit/`, `test/demo/` (golden), `app_palette_test.dart` và
+  `color_system_rules_test.dart` (R9 — gate đã chặn hướng đi sai và được ghi ở
+  "Đã thử và hoàn nguyên").
+- **Emulator integration suite:** **not run** — presentation-only restyle,
+  không thêm gì dưới `lib/features/` ngoài đổi recipe tại call site.
+- **Checklist phases:** 7, 13.
+- **Dependencies:** M99.70 (MxCard recipes + D20 flat-in-column — quy tắc
+  "flat trong cột cuộn" của nó dựa trên tiền đề hairline gánh việc tách, và
+  tiền đề đó không còn), #401 (elevation trong dark theme).
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |

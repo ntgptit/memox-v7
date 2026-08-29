@@ -45,7 +45,7 @@ class CardDetailSummaryWidget extends StatelessWidget {
 
     return SizedBox(
       width: double.infinity,
-      child: MxCard.flat(
+      child: MxCard.raised(
         // Flat, like the progress panel and every event card below it (D20).
         // The hero leads by being first, by its type and by its size, not by
         // floating above the two surfaces that describe it — which is also what

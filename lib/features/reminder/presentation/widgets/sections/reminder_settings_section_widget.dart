@@ -79,7 +79,7 @@ class ReminderSettingsSectionWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        MxCard.flat(
+        MxCard.raised(
           // The rows own the horizontal gutter so their ink spans the card's
           // full width; only the vertical breath is this section's.
           padding: MxCardPadding.none,

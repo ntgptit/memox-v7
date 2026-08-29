@@ -67,7 +67,7 @@ class CardTileWidget extends StatelessWidget {
     // signal (UC-04 A6).
     return Semantics(
       label: isSelected ? context.l10n.cardSelectedSemanticLabel : null,
-      child: MxCard.flat(
+      child: MxCard.raised(
         onTap: onTap,
         onLongPress: onLongPress,
         // The border and the announcement come from [MxCard.isSelected]; the

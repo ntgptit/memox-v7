@@ -47,7 +47,7 @@ class SearchResultShellWidget extends StatelessWidget {
     return Semantics(
       button: true,
       label: semanticLabel,
-      child: MxCard.flat(
+      child: MxCard.raised(
         // Flat: this card sits inside a list on the page's own surface, and a
         // shadow per row would make the list read as a stack of sheets. The
         // row's content area is its own — tighter ends than sides.

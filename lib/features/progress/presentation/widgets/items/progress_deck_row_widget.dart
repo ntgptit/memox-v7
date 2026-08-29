@@ -48,7 +48,7 @@ class ProgressDeckRowWidget extends StatelessWidget {
     // competing depths in one column is what makes a list read as busy,
     // which is the reason the deck tile and the Study Home row already
     // gave. Progress was the only surface still taking the default.
-    return MxCard.flat(
+    return MxCard.raised(
       onTap: onOpen,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

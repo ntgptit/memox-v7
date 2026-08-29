@@ -144,7 +144,20 @@ class MxCard extends StatefulWidget {
   /// were spelling `elevation: AppElevation.none` by hand. The rule they were
   /// each restating lives here once: a shadow stacked on a shadow reads as a
   /// rendering fault rather than depth, so a card nested in a sheet, a dialog
-  /// or another card sits flat and lets its hairline carry the edge.
+  /// or another card sits flat.
+  ///
+  /// **"…and lets its hairline carry the edge" is no longer true, and that
+  /// narrowed this recipe sharply** (M99.94). With the hairline gone, a flat
+  /// card on a page has one cue left — 2.02 L\* of fill against the page —
+  /// where the reference concept gives every page-level card **4.48**: the same
+  /// 2.02 above it *plus* a shadow that darkens the page beneath it by 2.46.
+  /// Measured on a device, half the cue is not half as clear; it is a list of
+  /// panels a reader has to hunt for.
+  ///
+  /// So `.flat` is now for what its own sentence always said and what M99.26
+  /// over-applied: a card **inside another surface** — the import wizard's
+  /// step panels, the export sheet's blocks. A card on a scrolling page takes
+  /// `.raised`.
   const MxCard.flat({
     required this.child,
     this.padding = MxCardPadding.standard,
@@ -171,6 +184,7 @@ class MxCard extends StatefulWidget {
     required this.child,
     this.padding = MxCardPadding.standard,
     this.isSelected,
+    MxCardSelectionTreatment selectionTreatment = MxCardSelectionTreatment.edge,
     this.onTap,
     this.onLongPress,
     super.key,
@@ -178,7 +192,10 @@ class MxCard extends StatefulWidget {
          elevation: AppElevation.card,
          radius: AppRadius.lg,
        ),
-       _selectionTreatment = MxCardSelectionTreatment.edge,
+       // Not an initializing formal: the field is private so a caller cannot
+       // read the spec back, while the parameter has to be public to be named.
+       // ignore: prefer_initializing_formals
+       _selectionTreatment = selectionTreatment,
        _recessedEdge = MxCardRecessedEdge.none,
        _tone = null;
 
@@ -314,13 +331,22 @@ class MxCard extends StatefulWidget {
        onTap = null,
        onLongPress = null;
 
-  /// A small flat card at the control corner ([AppRadius.md]) for a dense item
-  /// row — the card-detail history event is the caller. A list-row card at the
-  /// card corner reads as a shrunken panel; at the control corner it reads as
-  /// an item.
+  /// A small card at the control corner ([AppRadius.md]) for a dense item row —
+  /// the card-detail history event is the caller. A list-row card at the card
+  /// corner reads as a shrunken panel; at the control corner it reads as an
+  /// item.
+  ///
+  /// **It lifts, and it used to be flat** (M99.94). The word in its old first
+  /// line was "flat", and while every card carried a hairline that cost it
+  /// nothing — the line drew the boundary and the tile was simply the small
+  /// one. With the hairline gone this recipe had *neither* cue: 2.15 L\* of
+  /// fill against the page and nothing else, on the one screen where the cards
+  /// are smallest and most numerous. The study-history timeline was the
+  /// complaint that found it, after the same fix had already been made for
+  /// every `.flat` caller sitting on a page.
   const MxCard.tile({required this.child, super.key})
     : _spec = const _MxCardSpec(
-        elevation: AppElevation.none,
+        elevation: AppElevation.card,
         radius: AppRadius.md,
       ),
       padding = MxCardPadding.compact,
@@ -522,7 +548,32 @@ class _MxCardState extends State<MxCard> {
     };
   }
 
-  Color _restingEdgeColor(BuildContext context) {
+  /// The edge a card wears at rest, or **null for no edge at all**.
+  ///
+  /// **`subtle` now means "no line", and that is the whole of M99.94.** Every
+  /// card in this app drew a `borderSubtle` hairline — 1.45:1 on its own fill
+  /// in light — so a screen of cards read as a stack of frames rather than a
+  /// stack of surfaces. The reference concept the owner supplied draws **no
+  /// border on a neutral card**: a vertical scan across a card edge there goes
+  /// page → fill in a single pixel, and the card is separated by being pure
+  /// white on a page that carries a lavender tint, plus a soft shadow beneath.
+  ///
+  /// Its fill step is **2.02 L\*** against this app's **2.15** — so the line
+  /// was never buying separation the fill did not already have. It was buying
+  /// a frame.
+  ///
+  /// **What still draws one**, because in each case the line is the meaning
+  /// rather than the container: the focus ring, a selected card, `.recessed`
+  /// while it carries a graded or focused state, `.option` (an option *is* a
+  /// control, and a control's edge says so before it is picked) and `.accent`
+  /// (the edge is the entire recipe).
+  ///
+  /// `.feedback` loses its line here too, and that is a smaller decision than
+  /// it looks: its hairline was the same neutral grey, on a fill that already
+  /// announces itself by hue. The concept gives its feedback panels an edge
+  /// *tinted to the fill* — `#CDE4DA` on `#EDF6F3` — which this app has no
+  /// token for. Adding one is a palette decision, not this change.
+  Color? _restingEdgeColor(BuildContext context) {
     final scheme = context.colors;
     final semantic = context.semanticColors;
     // Precedence below the focus ring: selected > the recipe's stateful edge >
@@ -542,7 +593,7 @@ class _MxCardState extends State<MxCard> {
     }
 
     return switch (widget._spec.edge) {
-      _MxCardRestingEdge.subtle => semantic.borderSubtle,
+      _MxCardRestingEdge.subtle => null,
       _MxCardRestingEdge.control => semantic.borderControl,
       _MxCardRestingEdge.accent => semantic.borderAccent,
     };
@@ -558,16 +609,35 @@ class _MxCardState extends State<MxCard> {
   Widget build(BuildContext context) {
     final scheme = context.colors;
     final radius = widget._spec.radius;
-    // The focus ring replaces the hairline rather than sitting outside it.
-    // Both are painted on the border box, so the swap moves nothing beside
-    // the card and nothing inside it.
+    // The focus ring replaces the resting edge rather than sitting outside it.
+    // Both are painted on the border box, so the swap moves nothing beside the
+    // card and nothing inside it — which is also why a card that draws *no*
+    // resting edge does not jump when it takes focus: the ring is painted on a
+    // box the layout already reserved.
+    // **A card with no resting edge still reserves the border box**, and it
+    // draws that box in its own fill rather than dropping it.
+    // `BoxDecoration.border` insets the child by its width, so a `null` border
+    // makes the content one pixel wider at rest and one pixel narrower the
+    // moment the focus ring appears — the card would breathe under the
+    // keyboard, which is exactly what `mx_card_interaction_test.dart` pins as
+    // "focus costs nothing".
+    //
+    // **The fill, not a fully transparent literal.** Zero alpha reserves the
+    // same box, but it is a raw colour — `memox.design_token.no_raw_color`
+    // rejects it, and rightly: the guard cannot tell "no colour" from "a
+    // colour nobody declared". An edge painted in the card's own fill is
+    // invisible for the same reason and reads back as the token it is, so the
+    // paint audit needs no exception either. It also keeps the card its full
+    // size, where zero alpha gave that pixel back to the page.
+    final fill = _fillColor(scheme);
+    final restingEdge = _restingEdgeColor(context);
     final border = _isFocusVisible
         ? Border.fromBorderSide(
             AppInteractionStates.focusRing(context.semanticColors),
           )
-        : Border.all(color: _restingEdgeColor(context));
+        : Border.all(color: restingEdge ?? fill);
     final decoration = BoxDecoration(
-      color: _fillColor(scheme),
+      color: fill,
       borderRadius: BorderRadius.circular(radius),
       border: border,
       boxShadow: shadowsFor(widget._spec.elevation, scheme),
