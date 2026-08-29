@@ -102,6 +102,32 @@ abstract final class AppColors {
   /// callout sits **0.89 L\* below its page** with **1.6× the page's chroma**.
   /// `#F1F1FC` is 1.11 below this page with **3.6×** its chroma, so what marks
   /// it is hue rather than weight. Body ink measures 15.61:1 on it.
+  /// The edge a *picked* card wears.
+  ///
+  /// **Brand family, and the measurement that ruled it out no longer
+  /// applies** (M99.99). This was `ColorScheme.secondary` — `#4E5468`, chroma
+  /// **0.0337**, roughly a fifth of what the brand colours carry (focus ring
+  /// 0.1928, primary 0.1699). A slate line around a brand-tinted fill is the
+  /// card saying two different things about the same state, which is what
+  /// M99.98 left behind when it moved the fill and not the edge.
+  ///
+  /// `secondary` was chosen for a real reason, written down: dark `primary` on
+  /// `surface` measures 2.90:1, under WCAG 1.4.11's 3:1. **That measurement is
+  /// against `surface`**, and since M99.98 a selected card's edge does not sit
+  /// on `surface` — it sits on [surfaceSelectedLight]. On that ground `#6E6ECE`
+  /// measures **3.72:1**, and the dark pair **3.21:1** on `#332F58`.
+  ///
+  /// **Why not `primary` or `focusRing` themselves.** Today the ring is told
+  /// apart from the selected edge by *hue* alone: `#4E5468` and `#4141C0` are
+  /// **1.02:1** apart in luminance. Give the edge the brand hue and that
+  /// distinction is gone, so these two are picked to differ from the ring by
+  /// weight instead — lighter than it in light, dimmer in dark. The ring stays
+  /// the loudest edge a card can wear, in both modes.
+  static const Color borderSelectedLight = Color(0xFF6E6ECE);
+
+  /// See [borderSelectedLight]. Dimmer than `focusRingDark` on purpose.
+  static const Color borderSelectedDark = Color(0xFF7C79C8);
+
   static const Color surfaceEmphasisLight = Color(0xFFF1F1FC);
 
   /// **Dark keeps the value it has today.** The reference concept is light-only

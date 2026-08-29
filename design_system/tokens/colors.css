@@ -11,7 +11,7 @@
    Light is the default scope; dark re-points the same semantic names. */
 :root{
   /* --- base literals: light ------------------------------------------- */
-  --mx-page-light:#F4F5F8;--mx-card-light:#FBFBFE;--mx-inset-light:#EAECF1;--mx-emphasis-light:#F1F1FC;--mx-selected-light:#EAEBFD;--mx-raised-light:#FCFCFE;
+  --mx-page-light:#F4F5F8;--mx-card-light:#FBFBFE;--mx-inset-light:#EAECF1;--mx-emphasis-light:#F1F1FC;--mx-border-selected-light:#6E6ECE;--mx-selected-light:#EAEBFD;--mx-raised-light:#FCFCFE;
   --mx-ink-light:#16182B;--mx-ink-quiet-light:#565C72;--mx-line-light:#D2D2DD;
   --mx-indigo-light:#4646B4;--mx-indigo-deep-light:#4141C0;--mx-indigo-container-light:#DCDCF2;
   --mx-success-light:#10795C;--mx-warning-light:#9A6A11;--mx-danger-light:#C02B3A;--mx-info-light:#3F6E97;
@@ -36,6 +36,7 @@
   --color-background:var(--mx-page-light);
   --color-surface:var(--mx-card-light);
   --color-surface-muted:var(--mx-inset-light);
+  --color-border-selected:var(--mx-border-selected-light);
   --color-surface-emphasis:var(--mx-emphasis-light);
   --color-surface-selected:var(--mx-selected-light);
   --color-surface-elevated:var(--mx-raised-light);
@@ -108,6 +109,7 @@
   --color-background:var(--mx-page-dark);
   --color-surface:var(--mx-card-dark);
   --color-surface-muted:var(--mx-inset-dark);
+  --color-border-selected:#7C79C8;
   --color-surface-emphasis:#332F58;
   --color-surface-selected:#332F58;
   --color-surface-elevated:var(--mx-raised-dark);

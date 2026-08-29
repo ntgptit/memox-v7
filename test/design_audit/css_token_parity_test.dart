@@ -40,6 +40,10 @@ void main() {
       AppColors.surfaceMutedLight,
       AppColors.surfaceMutedDark,
     ),
+    '--color-border-selected': (
+      AppColors.borderSelectedLight,
+      AppColors.borderSelectedDark,
+    ),
     '--color-surface-emphasis': (
       AppColors.surfaceEmphasisLight,
       AppColors.surfaceEmphasisDark,

@@ -252,9 +252,11 @@ void main() {
           isDark: isDark,
         );
 
-        final scheme =
-            (isDark ? buildDarkTheme() : buildLightTheme()).colorScheme;
-        expect(borderOf(tester).color, scheme.secondary);
+        final semantic = (isDark ? buildDarkTheme() : buildLightTheme())
+            .extension<AppSemanticColors>()!;
+        // **`borderSelected`, not `secondary`** (M99.99). The slate edge sat at
+        // chroma 0.0337 around a fill M99.98 had just made brand-tinted.
+        expect(borderOf(tester).color, semantic.borderSelected);
       });
     }
 
@@ -263,7 +265,7 @@ void main() {
     ) async {
       // The resting `borderControl` used to be a caller-passed colour; the
       // option recipe owns it now, so an unpicked option still reads as a
-      // control and a picked one still wins with `secondary`.
+      // control and a picked one still wins with `borderSelected`.
       final semantic = buildLightTheme().extension<AppSemanticColors>()!;
       await pump(
         tester,
@@ -276,7 +278,7 @@ void main() {
         tester,
         MxCard.option(isSelected: true, onTap: () {}, child: const Text(long)),
       );
-      expect(borderOf(tester).color, buildLightTheme().colorScheme.secondary);
+      expect(borderOf(tester).color, semantic.borderSelected);
     });
 
     testWidgets('tri-state semantics: null says nothing, false and true '
