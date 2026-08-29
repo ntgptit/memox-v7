@@ -3,7 +3,6 @@ import 'package:memox/core/theme/app_spacing.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/shared/widgets/mx_feedback_band.dart';
-import 'package:memox/shared/widgets/mx_text_button.dart';
 import 'package:memox/shared/widgets/mx_loading_state.dart';
 import 'package:memox/shared/widgets/mx_session_top_bar.dart';
 import 'package:widgetbook/widgetbook.dart';
@@ -71,13 +70,8 @@ WidgetbookComponent feedbackBandComponent() {
               MxFeedbackBand(
                 title: title,
                 message: message,
-                action: hasAction
-                    ? MxTextButton(
-                        label: 'Try again',
-                        onPressed: _noop,
-                        accent: Theme.of(context).colorScheme.onErrorContainer,
-                      )
-                    : null,
+                actionLabel: hasAction ? 'Try again' : null,
+                onAction: hasAction ? _noop : null,
               ),
             ],
           );

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/error/failure.dart';
-import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
-import '../../../../../shared/widgets/mx_text_button.dart';
 import '../support/settings_labels_widget.dart';
 import '../../../../../shared/widgets/mx_feedback_band.dart';
 
@@ -43,11 +41,8 @@ class SettingsErrorBandWidget extends StatelessWidget {
     return MxFeedbackBand(
       title: context.l10n.settingsSaveErrorTitle,
       message: context.settingsWriteFailure(failure),
-      action: MxTextButton(
-        label: context.l10n.retryAction,
-        onPressed: onRetry,
-        accent: context.colors.onErrorContainer,
-      ),
+      actionLabel: context.l10n.retryAction,
+      onAction: onRetry,
     );
   }
 }

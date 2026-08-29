@@ -336,11 +336,8 @@ class _PageError extends StatelessWidget {
       child: MxFeedbackBand(
         title: context.l10n.cardHistoryPageErrorTitle,
         message: context.l10n.cardHistoryPageErrorMessage,
-        action: MxTextButton(
-          label: context.l10n.retryAction,
-          onPressed: onRetry,
-          accent: context.colors.onErrorContainer,
-        ),
+        actionLabel: context.l10n.retryAction,
+        onAction: onRetry,
       ),
     );
   }

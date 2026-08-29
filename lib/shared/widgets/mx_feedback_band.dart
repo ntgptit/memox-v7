@@ -5,6 +5,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/theme/theme_context_extension.dart';
 import 'mx_card.dart';
 import 'mx_icon.dart';
+import 'mx_text_button.dart';
 
 /// A failure the user has to read, in flow: an icon, a title, a message, and
 /// optionally one action.
@@ -29,9 +30,17 @@ class MxFeedbackBand extends StatelessWidget {
   const MxFeedbackBand({
     required this.title,
     required this.message,
-    this.action,
+    this.actionLabel,
+    this.onAction,
     super.key,
-  });
+  }) : assert(
+         (actionLabel == null) == (onAction == null),
+         'A band has an action or it does not. With only a label the link '
+         'renders and does nothing; with only a callback it never renders at '
+         'all — and either way the build below drops it silently, so the band '
+         'looks deliberately action-free and no test fails. This is the pair '
+         'rule MxEmptyState and MxErrorState already assert.',
+       );
 
   /// Already-localized. What went wrong, in a few words.
   final String title;
@@ -39,13 +48,32 @@ class MxFeedbackBand extends StatelessWidget {
   /// Already-localized. What it means, or what to do about it.
   final String message;
 
-  /// One control under the message — a retry, usually.
+  /// Already-localized, and in every case so far *Try again*.
   ///
-  /// A widget rather than a label and a callback: both bands that carry an
-  /// action style their button against `onErrorContainer`, and a band that
-  /// built the control itself would have to grow a parameter for every
-  /// property a caller might need next.
-  final Widget? action;
+  /// **This was `final Widget? action` until M100.5, and the doc it replaces
+  /// argued the case honestly — it just turned out to be wrong on the facts.**
+  /// It read: *"A widget rather than a label and a callback: both bands that
+  /// carry an action style their button against `onErrorContainer`, and a band
+  /// that built the control itself would have to grow a parameter for every
+  /// property a caller might need next."*
+  ///
+  /// Two bands became four, all four built the identical control down to
+  /// `accent: context.colors.onErrorContainer`, and **not one of them ever
+  /// needed a property the band could not have supplied.** The cost the doc
+  /// was avoiding stayed hypothetical; the duplication it accepted did not.
+  ///
+  /// And the colour they were all carrying is the band's own: the icon and
+  /// both lines of text already paint `AppInk.onErrorContainer`. The action
+  /// was the one element not given it, because a hole cannot inherit.
+  ///
+  /// `isDestructive` was never the answer either. `danger` measures 4.50:1 on
+  /// this ground in light and 4.53 in dark, so it was not a contrast problem —
+  /// *Try again* simply is not a destructive action, and painting it
+  /// danger-red says something untrue about what pressing it does.
+  final String? actionLabel;
+
+  /// Null means no action; see [actionLabel] for the pair rule.
+  final VoidCallback? onAction;
 
   @override
   Widget build(BuildContext context) {
@@ -87,11 +115,18 @@ class MxFeedbackBand extends StatelessWidget {
                       AppInk.onErrorContainer,
                     ),
                   ),
-                  if (action case final control?) ...<Widget>[
+                  if (actionLabel case final label?) ...<Widget>[
                     const SizedBox(height: AppSpacing.xs),
                     Align(
                       alignment: AlignmentDirectional.centerStart,
-                      child: control,
+                      // The band's ink, resolved here rather than asked of the
+                      // caller — this widget is the only one that knows which
+                      // ground the link is standing on.
+                      child: MxTextButton(
+                        label: label,
+                        onPressed: onAction,
+                        accent: AppInk.onErrorContainer,
+                      ),
                     ),
                   ],
                 ],

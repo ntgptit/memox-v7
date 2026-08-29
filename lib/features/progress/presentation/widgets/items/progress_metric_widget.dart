@@ -190,11 +190,7 @@ class _Metric extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.baseline,
       textBaseline: TextBaseline.alphabetic,
       children: <Widget>[
-        MxMetricWell(
-          icon: icon,
-          tint: tint.resolve(context),
-          wellColor: wellColor,
-        ),
+        MxMetricWell(icon: icon, tint: tint, wellColor: wellColor),
         const SizedBox(width: AppSpacing.xs),
         // Flexible so the text owns the rest of its fixed-width grid cell: a
         // long word at double scale wraps onto a second line inside the cell

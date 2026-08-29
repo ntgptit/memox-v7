@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_icon_size.dart';
 import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_ink.dart';
+import '../../core/theme/theme_context_extension.dart';
+import 'mx_icon.dart';
 
 /// The small icon well a metric anchors on: same size, same radius, same
 /// padding, so metrics on different screens read as entries of one grammar and
@@ -13,35 +15,43 @@ import '../../core/theme/app_spacing.dart';
 /// and a third screen was about to do without it, which is the version of the
 /// same problem that shows up as three tabs looking like three apps (M99.26).
 ///
-/// [wellColor] is a parameter rather than a fixed tint: the deck hero moves it
-/// with the deck's state, and Progress holds it neutral. What must not vary is
-/// the shape.
+/// **Both colours were `required Color` until M100.5, which made this the only
+/// shared widget that asked a caller to pick one.** Four of the five call sites
+/// passed the same `surfaceMuted`, so the real default lived in four places;
+/// and every one of the five already wrote [tint] as `<AppInk>.resolve(context)`
+/// — the vocabulary, spelled out longhand at each site.
+///
+/// So [tint] is an `AppInk` and [wellColor] defaults to `surfaceMuted`. It stays
+/// overridable, because the deck hero genuinely moves it with the deck's state;
+/// what changes is that a caller wanting the ordinary well no longer has to say
+/// so. What must not vary is still the shape.
 class MxMetricWell extends StatelessWidget {
   const MxMetricWell({
     required this.icon,
     required this.tint,
-    required this.wellColor,
+    this.wellColor,
     super.key,
   });
 
   final IconData icon;
 
-  /// The glyph's ink.
-  final Color tint;
+  /// The glyph's ink, named rather than picked.
+  final AppInk tint;
 
-  /// The well behind it.
-  final Color wellColor;
+  /// The well behind it. Null takes `surfaceMuted` — what four of the five call
+  /// sites were spelling out by hand.
+  final Color? wellColor;
 
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: wellColor,
+        color: wellColor ?? context.semanticColors.surfaceMuted,
         borderRadius: BorderRadius.circular(AppRadius.pill),
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xs),
-        child: Icon(icon, size: AppIconSize.sm, color: tint),
+        child: MxIcon(icon, ink: tint, size: MxIconSize.sm),
       ),
     );
   }

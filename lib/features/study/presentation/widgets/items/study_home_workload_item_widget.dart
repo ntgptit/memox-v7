@@ -44,7 +44,6 @@ class StudyHomeWorkloadItemWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final semantic = context.semanticColors;
-    final quiet = context.colors.onSurfaceVariant;
 
     return Semantics(
       // `container: true`, or the label has no node of its own to sit on and is
@@ -85,8 +84,8 @@ class StudyHomeWorkloadItemWidget extends StatelessWidget {
                   ? context.colors.errorContainer
                   : semantic.surfaceMuted,
               wellTint: deck.overdueCount > 0
-                  ? context.colors.onErrorContainer
-                  : quiet,
+                  ? AppInk.onErrorContainer
+                  : AppInk.quiet,
             ),
             _Metric(
               icon: deck.dueTodayCount > 0 ? Icons.event : Icons.event_outlined,
@@ -99,8 +98,8 @@ class StudyHomeWorkloadItemWidget extends StatelessWidget {
                   ? semantic.dueContainer
                   : semantic.surfaceMuted,
               wellTint: deck.dueTodayCount > 0
-                  ? semantic.onDueContainer
-                  : quiet,
+                  ? AppInk.onDueContainer
+                  : AppInk.quiet,
             ),
             _Metric(
               icon: deck.newCount > 0
@@ -110,7 +109,7 @@ class StudyHomeWorkloadItemWidget extends StatelessWidget {
               word: l10n.studyHomeNewWord,
               color: deck.newCount > 0 ? AppInk.info : AppInk.quiet,
               wellColor: semantic.surfaceMuted,
-              wellTint: deck.newCount > 0 ? semantic.info : quiet,
+              wellTint: deck.newCount > 0 ? AppInk.info : AppInk.quiet,
             ),
           ],
         ),
@@ -141,7 +140,7 @@ class _Metric extends StatelessWidget {
   /// The well behind the glyph and the glyph's own ink — the same pair the deck
   /// summary passes, so the two screens' anchors resolve to the same tokens.
   final Color wellColor;
-  final Color wellTint;
+  final AppInk wellTint;
 
   /// The metric's tint. It reaches the well and the word; the numeral stays
   /// neutral — see the build below.

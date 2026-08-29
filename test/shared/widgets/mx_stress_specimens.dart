@@ -28,6 +28,7 @@ import 'package:memox/shared/widgets/mx_search_field.dart';
 import 'package:memox/shared/widgets/mx_session_top_bar.dart';
 import 'package:memox/shared/widgets/mx_text_button.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
+import 'package:memox/core/theme/app_ink.dart';
 
 /// The specimen set for the stress suite: every shared component, built with
 /// copy long enough to break a layout.
@@ -195,8 +196,7 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
     name: 'MxMetricWell',
     build: () => const MxMetricWell(
       icon: Icons.event_busy,
-      tint: Colors.white,
-      wellColor: Colors.black26,
+      tint: AppInk.onErrorContainer,
     ),
   ),
   MxStressSpecimen(
@@ -216,7 +216,8 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
     build: () => const MxFeedbackBand(
       title: kLongTitle,
       message: kLongMessage,
-      action: MxTextButton(label: kLongLabel, onPressed: _noop),
+      actionLabel: kLongLabel,
+      onAction: _noop,
     ),
     // Title, message and a retry stacked at 2.0x on a 320 screen is taller than
     // the centred slot, the same reason `MxEmptyState` takes this.

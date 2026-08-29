@@ -12,6 +12,7 @@ import 'package:memox/shared/widgets/mx_text_field.dart';
 import 'package:widgetbook/widgetbook.dart';
 
 import '../support/catalog_page.dart';
+import 'package:memox/core/theme/app_ink.dart';
 
 void _noop() {}
 
@@ -283,9 +284,7 @@ WidgetbookComponent metricWellComponent() {
               children: <Widget>[
                 MxMetricWell(
                   icon: isActive ? Icons.event_busy : Icons.event_busy_outlined,
-                  tint: isActive
-                      ? context.colors.onErrorContainer
-                      : context.colors.onSurfaceVariant,
+                  tint: isActive ? AppInk.onErrorContainer : AppInk.quiet,
                   wellColor: isActive
                       ? context.colors.errorContainer
                       : context.semanticColors.surfaceMuted,

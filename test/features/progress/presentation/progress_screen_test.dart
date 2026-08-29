@@ -202,7 +202,9 @@ void main() {
       );
       final context = tester.element(find.byType(ProgressStreakHeroWidget));
       expect(zeroWell.wellColor, context.semanticColors.surfaceMuted);
-      expect(zeroWell.tint, AppInk.quiet.resolve(context));
+      // `tint` is an `AppInk` since M100.5, so the assertion names the token
+      // rather than a colour it happened to resolve to.
+      expect(zeroWell.tint, AppInk.quiet);
     });
 
     testWidgets(
@@ -224,7 +226,7 @@ void main() {
         );
         final context = tester.element(find.byType(ProgressStreakHeroWidget));
         expect(activeWell.wellColor, context.semanticColors.streakContainer);
-        expect(activeWell.tint, AppInk.onDueContainer.resolve(context));
+        expect(activeWell.tint, AppInk.onDueContainer);
       },
     );
   });

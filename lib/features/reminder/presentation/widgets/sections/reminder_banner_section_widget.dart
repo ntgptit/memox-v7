@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
-import '../../../../../shared/widgets/mx_text_button.dart';
 import '../../../domain/failures/reminder_failure.dart';
 import '../support/reminder_labels_widget.dart';
 import '../../../../../shared/widgets/mx_feedback_band.dart';
@@ -38,13 +36,8 @@ class ReminderBannerSectionWidget extends StatelessWidget {
     return MxFeedbackBand(
       title: banner.title,
       message: banner.message,
-      action: banner.isRetryable
-          ? MxTextButton(
-              label: context.l10n.retryAction,
-              onPressed: onRetry,
-              accent: context.colors.onErrorContainer,
-            )
-          : null,
+      actionLabel: banner.isRetryable ? context.l10n.retryAction : null,
+      onAction: banner.isRetryable ? onRetry : null,
     );
   }
 }
