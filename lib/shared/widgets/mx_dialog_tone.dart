@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_icon_size.dart';
 import '../../core/theme/app_spacing.dart';
-import '../../core/theme/theme_context_extension.dart';
+import '../../core/theme/app_ink.dart';
+import 'mx_icon.dart';
 
 /// How serious the situation an overlay is speaking about is.
 ///
@@ -48,17 +48,21 @@ enum MxDialogTone {
 /// for picking the right one — which is the bug `AppSemanticColors` exists to
 /// prevent.
 extension MxDialogToneX on MxDialogTone {
-  /// The accent, straight from the semantic palette. Never a new value.
-  Color accent(BuildContext context) {
-    final semantic = context.semanticColors;
+  /// The tone as a name in the app's ink vocabulary.
+  ///
+  /// **The switch used to return `Color` and resolve the palette itself**
+  /// (M100.4). Every arm of it was already an `AppInk` member, so the method
+  /// was a second spelling of a map that already exists — and a second
+  /// spelling is where two things drift apart.
+  AppInk get ink => switch (this) {
+    MxDialogTone.info => AppInk.info,
+    MxDialogTone.success => AppInk.success,
+    MxDialogTone.warning => AppInk.warning,
+    MxDialogTone.error => AppInk.danger,
+  };
 
-    return switch (this) {
-      MxDialogTone.info => semantic.info,
-      MxDialogTone.success => semantic.success,
-      MxDialogTone.warning => semantic.warning,
-      MxDialogTone.error => semantic.danger,
-    };
-  }
+  /// The accent, straight from the semantic palette. Never a new value.
+  Color accent(BuildContext context) => ink.resolve(context);
 
   /// **Outlined, and four distinct silhouettes.** Colour alone cannot carry the
   /// tone — roughly one in twelve men cannot separate the warning amber from
@@ -107,7 +111,7 @@ class MxDialogHeader extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Icon(tone.icon, size: AppIconSize.md, color: tone.accent(context)),
+        MxIcon(tone.icon, ink: tone.ink),
         const SizedBox(width: AppSpacing.md),
         // Expanded, because a headline that wraps must wrap inside the row
         // rather than push the icon off the dialog.
