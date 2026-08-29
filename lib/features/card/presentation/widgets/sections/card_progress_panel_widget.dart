@@ -37,7 +37,7 @@ class CardProgressPanelWidget extends ConsumerWidget {
     // shadow inside a scrolling list). The tinted ground was tried and reverted:
     // a block of colour at the top of the list outweighed the cards under it,
     // which are what the screen is actually about.
-    return MxCard.flat(
+    return MxCard.raised(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[

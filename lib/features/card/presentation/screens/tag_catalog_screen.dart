@@ -181,7 +181,7 @@ class _CatalogList extends StatelessWidget {
         // track back; below it, this binds nothing.
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: AppBreakpoints.medium),
-          child: MxCard.flat(
+          child: MxCard.raised(
             padding: MxCardPadding.none,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,

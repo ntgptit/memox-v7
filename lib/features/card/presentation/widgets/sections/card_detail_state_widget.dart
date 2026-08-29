@@ -56,7 +56,7 @@ class CardDetailStateWidget extends StatelessWidget {
         const SizedBox(height: AppSpacing.md),
         SizedBox(
           width: double.infinity,
-          child: MxCard.flat(
+          child: MxCard.raised(
             // Flat, like every other card in this column (D20): two competing
             // depths in one scroll view read as a rendering fault rather than as
             // a hierarchy. The hairline and the surface step do the separating.

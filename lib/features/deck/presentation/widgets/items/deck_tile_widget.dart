@@ -68,7 +68,7 @@ class DeckTileWidget extends StatelessWidget {
     // bands under it -- the progress bar, the due chip -- then looked tappable
     // and were not. `MxCard` takes the tap; the overflow menu is a nested button
     // and wins the gesture arena over it, so it stays its own action.
-    return MxCard.flat(
+    return MxCard.raised(
       padding: MxCardPadding.none,
       onTap: onTap,
       child: Column(

@@ -54,6 +54,17 @@ void main() {
   Color borderColorOf(BoxDecoration decoration) =>
       (decoration.border! as Border).top.color;
 
+  /// Whether the card paints an edge a reader can see.
+  ///
+  /// **A card with no resting edge still carries a `Border`**, drawn in its own
+  /// fill, because `BoxDecoration.border` insets the child by its width —
+  /// dropping it would move the content one pixel the moment the focus ring
+  /// appears. So "no edge" is a border the same colour as the surface behind
+  /// it — not a null border, and not a zero-alpha literal, which the raw-colour
+  /// guard refuses.
+  bool hasVisibleBorder(BoxDecoration decoration) =>
+      borderColorOf(decoration) != decoration.color;
+
   bool hasShadow(BoxDecoration decoration) =>
       decoration.boxShadow != null && decoration.boxShadow!.isNotEmpty;
 
@@ -65,14 +76,19 @@ void main() {
       final semantic = theme.extension<AppSemanticColors>()!;
       final isDark = scheme.brightness == Brightness.dark;
 
-      testWidgets('$themeName · flat: surface, hairline, lg, no shadow', (
+      testWidgets('$themeName · flat: surface, no edge, lg, no shadow', (
         tester,
       ) async {
         await pump(tester, const MxCard.flat(child: Text('x')), theme: theme);
 
         final decoration = decorationOf(tester);
         expect(decoration.color, scheme.surface);
-        expect(borderColorOf(decoration), semantic.borderSubtle);
+        // **No edge, and that is M99.94.** Every card used to wear a
+        // `borderSubtle` hairline — 1.45:1 on its own fill in light — so a
+        // screen of cards read as a stack of frames. The reference concept
+        // draws none: its cards are pure white on a tinted page, and the
+        // boundary is a colour edge rather than a drawn line.
+        expect(hasVisibleBorder(decoration), isFalse);
         expect(radiusOf(decoration), AppRadius.lg);
         expect(hasShadow(decoration), isFalse);
       });
@@ -96,7 +112,7 @@ void main() {
             decoration.color,
             isDark ? scheme.surfaceContainer : scheme.surface,
           );
-          expect(borderColorOf(decoration), semantic.borderSubtle);
+          expect(hasVisibleBorder(decoration), isFalse);
           expect(radiusOf(decoration), AppRadius.lg);
           expect(hasShadow(decoration), !isDark);
         },
@@ -130,7 +146,9 @@ void main() {
 
         final decoration = decorationOf(tester);
         expect(decoration.color, scheme.surfaceContainerLow);
-        expect(borderColorOf(decoration), semantic.borderSubtle);
+        // At rest it draws no edge either; the edge is what its *states* use,
+        // asserted by the case below.
+        expect(hasVisibleBorder(decoration), isFalse);
         expect(radiusOf(decoration), AppRadius.xl);
         expect(hasShadow(decoration), isFalse);
       });
@@ -216,13 +234,26 @@ void main() {
         expect(hasShadow(decoration), !isDark);
       });
 
-      testWidgets('$themeName · tile: control corner, flat', (tester) async {
+      testWidgets('$themeName · tile: control corner, lifted like any '
+          'page card', (tester) async {
         await pump(tester, const MxCard.tile(child: Text('x')), theme: theme);
 
         final decoration = decorationOf(tester);
-        expect(decoration.color, scheme.surface);
+        // Dark carries the level in the fill, as it does for `.raised`: with a
+        // non-zero elevation and no shadow to paint, `surfaceContainer` is the
+        // only thing left that can say a tile sits above its page.
+        expect(
+          decoration.color,
+          isDark ? scheme.surfaceContainer : scheme.surface,
+        );
         expect(radiusOf(decoration), AppRadius.md);
-        expect(hasShadow(decoration), isFalse);
+        // **It was `flat`, and that stopped being survivable when the hairline
+        // went** (M99.94). A tile is a card on a page — the study-history
+        // timeline is the caller — so with no line *and* no shadow it had
+        // 2.15 L* of fill and nothing else. It now carries the same level-1
+        // lift every other page card takes; only the corner still separates it
+        // from `.raised`, which is what the recipe was ever about.
+        expect(hasShadow(decoration), !isDark);
       });
 
       testWidgets('$themeName · option: control edge, flat', (tester) async {

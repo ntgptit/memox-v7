@@ -64,7 +64,7 @@ class StudyHomeDeckItemWidget extends StatelessWidget {
     // today, 12 new" with nothing saying whose they were. The sentence node
     // spans the whole card — identity *and* counts, wherever the adaptive
     // layout puts them — and the button keeps its own role and name inside it.
-    return MxCard.flat(
+    return MxCard.raised(
       child: Semantics(
         container: true,
         label: scheduler == null

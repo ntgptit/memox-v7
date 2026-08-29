@@ -83,7 +83,7 @@ class _SettingsChoiceSectionWidgetState<T extends Enum>
 
     return SettingsSectionWidget(
       label: widget.sectionLabel,
-      child: MxCard.flat(
+      child: MxCard.raised(
         // Vertical breath only: each row's touch target and ink span the full
         // card width, and every row carries the horizontal gutter itself so
         // its content still lines up with the other cards (W5).

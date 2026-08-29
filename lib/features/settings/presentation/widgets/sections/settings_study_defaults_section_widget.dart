@@ -163,7 +163,7 @@ class _SettingsStudyDefaultsSectionWidgetState
 
     return SettingsSectionWidget(
       label: l10n.settingsStudyDefaultsSection,
-      child: MxCard.flat(
+      child: MxCard.raised(
         // Flat, like every other card in a scrolling column (D20). This
         // screen was the last one still taking `AppElevation.card`, and
         // its own error band already passes `none` for the same reason.

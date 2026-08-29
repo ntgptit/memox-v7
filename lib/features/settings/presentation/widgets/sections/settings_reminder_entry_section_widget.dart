@@ -23,7 +23,7 @@ class SettingsReminderEntrySectionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MxCard.flat(
+    return MxCard.raised(
       // Flat, like every other card in a scrolling body (D20). A raised card
       // here would be the only shadow on the screen.
       padding: MxCardPadding.none,
