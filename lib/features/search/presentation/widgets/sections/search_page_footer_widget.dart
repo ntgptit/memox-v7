@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
-import '../../../../../shared/widgets/mx_icon.dart';
-import '../../../../../shared/widgets/mx_card.dart';
 import '../../../../../shared/widgets/mx_text_button.dart';
 import '../../states/library_search_state.dart';
+import '../../../../../shared/widgets/mx_feedback_band.dart';
 
 /// What sits under the last result: the way to load more, the fact that more is
 /// loading, or the fact that loading more failed.
@@ -93,58 +91,15 @@ class SearchPageFooterWidget extends StatelessWidget {
   /// announced, not only drawn: the list simply stops otherwise, and a reader
   /// has no way to tell "that is everything" from "the next page failed".
   Widget _failed(BuildContext context) {
-    final colors = context.colors;
-
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.sm),
-      child: Semantics(
-        container: true,
-        liveRegion: true,
-        child: MxCard.feedback(
-          tone: MxCardFeedbackTone.danger,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              const MxIcon(
-                Icons.error_outline,
-                ink: AppInk.onErrorContainer,
-                size: MxIconSize.mdCompact,
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Text(
-                      context.l10n.librarySearchLoadMoreErrorTitle,
-                      style: context.texts.titleSmall!.inked(
-                        context,
-                        AppInk.onErrorContainer,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      context.l10n.librarySearchLoadMoreErrorMessage,
-                      style: context.texts.bodySmall!.inked(
-                        context,
-                        AppInk.onErrorContainer,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Align(
-                      alignment: AlignmentDirectional.centerStart,
-                      child: MxTextButton(
-                        label: context.l10n.retryAction,
-                        onPressed: onRetry,
-                        accent: colors.onErrorContainer,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+      child: MxFeedbackBand(
+        title: context.l10n.librarySearchLoadMoreErrorTitle,
+        message: context.l10n.librarySearchLoadMoreErrorMessage,
+        action: MxTextButton(
+          label: context.l10n.retryAction,
+          onPressed: onRetry,
+          accent: context.colors.onErrorContainer,
         ),
       ),
     );

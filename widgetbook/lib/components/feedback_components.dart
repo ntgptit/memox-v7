@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:memox/core/theme/app_spacing.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
+import 'package:memox/shared/widgets/mx_feedback_band.dart';
+import 'package:memox/shared/widgets/mx_text_button.dart';
 import 'package:memox/shared/widgets/mx_loading_state.dart';
 import 'package:memox/shared/widgets/mx_session_top_bar.dart';
 import 'package:widgetbook/widgetbook.dart';
@@ -37,6 +39,47 @@ WidgetbookComponent emptyStateComponent() {
               actionLabel: actionLabel,
               onAction: actionLabel == null ? null : _noop,
             ),
+          );
+        },
+      ),
+    ],
+  );
+}
+
+WidgetbookComponent feedbackBandComponent() {
+  return WidgetbookComponent(
+    name: 'MxFeedbackBand',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Playground',
+        builder: (context) {
+          final title = context.knobs.string(
+            label: 'title',
+            initialValue: 'Could not save',
+          );
+          final message = context.knobs.string(
+            label: 'message',
+            initialValue: 'Something went wrong. Your changes are still here.',
+          );
+          final hasAction = context.knobs.boolean(
+            label: 'action',
+            initialValue: true,
+          );
+
+          return CatalogListPage(
+            children: <Widget>[
+              MxFeedbackBand(
+                title: title,
+                message: message,
+                action: hasAction
+                    ? MxTextButton(
+                        label: 'Try again',
+                        onPressed: _noop,
+                        accent: Theme.of(context).colorScheme.onErrorContainer,
+                      )
+                    : null,
+              ),
+            ],
           );
         },
       ),

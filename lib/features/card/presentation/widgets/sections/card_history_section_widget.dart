@@ -6,10 +6,10 @@ import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_icon.dart';
-import '../../../../../shared/widgets/mx_card.dart';
 import '../../../../../shared/widgets/mx_text_button.dart';
 import '../../states/card_history_state.dart';
 import '../items/card_history_event_widget.dart';
+import '../../../../../shared/widgets/mx_feedback_band.dart';
 
 /// The review timeline (BR-241…BR-244, M4.15 W2 band 3).
 ///
@@ -331,58 +331,15 @@ class _PageError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.sm),
-      child: Semantics(
-        container: true,
-        liveRegion: true,
-        child: MxCard.feedback(
-          tone: MxCardFeedbackTone.danger,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              const MxIcon(
-                Icons.error_outline,
-                ink: AppInk.onErrorContainer,
-                size: MxIconSize.mdCompact,
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Text(
-                      context.l10n.cardHistoryPageErrorTitle,
-                      style: context.texts.titleSmall!.inked(
-                        context,
-                        AppInk.onErrorContainer,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      context.l10n.cardHistoryPageErrorMessage,
-                      style: context.texts.bodySmall!.inked(
-                        context,
-                        AppInk.onErrorContainer,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Align(
-                      alignment: AlignmentDirectional.centerStart,
-                      child: MxTextButton(
-                        label: context.l10n.retryAction,
-                        onPressed: onRetry,
-                        accent: colors.onErrorContainer,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+      child: MxFeedbackBand(
+        title: context.l10n.cardHistoryPageErrorTitle,
+        message: context.l10n.cardHistoryPageErrorMessage,
+        action: MxTextButton(
+          label: context.l10n.retryAction,
+          onPressed: onRetry,
+          accent: context.colors.onErrorContainer,
         ),
       ),
     );
