@@ -15201,7 +15201,7 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Checklist phases:** 7, 13.
 - **Dependencies:** M99.94 (bỏ hairline — sau đó `.muted` là recipe duy nhất
   còn mang bóng mà tone lại lùi).
-### M99.96 · Gate CI tooling từ 43s xuống 8s — bản đồ quét repo được memo hoá
+### M99.97 · Gate CI tooling từ 43s xuống 8s — bản đồ quét repo được memo hoá
 
 - **Status:** **done** — chỉ chạm tooling. Không đổi một dòng `lib/` nào, không
   đổi BR/UC/AD, không đổi kế hoạch verification mà gate chọn.
