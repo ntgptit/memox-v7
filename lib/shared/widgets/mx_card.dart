@@ -529,10 +529,11 @@ class _MxCardState extends State<MxCard> {
   /// separates elevation there — see [shadowsFor]'s own alpha derivation —
   /// so stepping the fill too would be a second mechanism answering a
   /// question already settled, and every light golden stays untouched.
-  Color _fillColor(ColorScheme scheme) {
+  Color _fillColor(BuildContext context, ColorScheme scheme) {
+    final semantic = context.semanticColors;
     if ((widget.isSelected ?? false) &&
         widget._selectionTreatment == MxCardSelectionTreatment.tint) {
-      return scheme.secondaryContainer;
+      return semantic.surfaceSelected;
     }
 
     final isElevatedInDark =
@@ -544,7 +545,7 @@ class _MxCardState extends State<MxCard> {
         isElevatedInDark ? scheme.surfaceContainer : scheme.surface,
       _MxCardFill.recessed => scheme.surfaceContainerLow,
       _MxCardFill.muted => scheme.surfaceContainerHigh,
-      _MxCardFill.tonal => scheme.secondaryContainer,
+      _MxCardFill.tonal => semantic.surfaceEmphasis,
       // Exhaustive over the tone so a second tone fails the build here
       // rather than silently rendering as danger.
       _MxCardFill.feedback => switch (widget._tone!) {
@@ -634,7 +635,7 @@ class _MxCardState extends State<MxCard> {
     // invisible for the same reason and reads back as the token it is, so the
     // paint audit needs no exception either. It also keeps the card its full
     // size, where zero alpha gave that pixel back to the page.
-    final fill = _fillColor(scheme);
+    final fill = _fillColor(context, scheme);
     final restingEdge = _restingEdgeColor(context);
     final border = _isFocusVisible
         ? Border.fromBorderSide(

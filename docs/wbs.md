@@ -15253,6 +15253,70 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Checklist phases:** 7, 13.
 - **Dependencies:** M99.70 (recipe `.feedback`).
 
+### M99.97 · Nhấn mạnh phải nổi hơn hàng xóm của nó
+
+- **Status:** **done** — presentation only. Không đổi controller, use case,
+  repository, route hay bất kỳ BR/UC/AD nào.
+- **Goal:** Bốn chỗ mà tín hiệu nhấn mạnh đang **yếu hơn** thứ bình thường
+  quanh nó — tức nói ngược điều nó định nói.
+- **Scope:**
+  - **`MxCard.tonal` → `surfaceEmphasis` `#F1F1FC`** (token mới). Nó chạy trên
+    `secondaryContainer` `#E4E6EC`: chroma **0.0084**, gần như trung tính, và
+    **5.24 L\* dưới nền**. Một callout vừa lùi ra sau vừa không mang sắc thì
+    không phân biệt được với khối bị disable — thẻ resume của Study Home, tức
+    *hành động chính của màn*, là mảng xám nhất trên đó. Tỉ lệ lấy từ concept
+    chủ dự án cung cấp, đo được: callout ở đó thấp hơn nền **0.89 L\*** với
+    **1.6×** chroma của nền. `#F1F1FC` thấp hơn nền này 1.11 với **3.6×**
+    chroma — đánh dấu bằng *sắc*, không bằng *độ*.
+  - **Selection tint → `surfaceSelected` `#EAEBFD`** (token mới, chính giá trị
+    pill của concept). Cũng chạy trên `secondaryContainer`, nên hàng đã chọn
+    render **tối và xỉn hơn** hàng trắng chưa chọn bên cạnh, trong khi chip lọc
+    đã chọn ngay phía trên đeo brand container — **hai câu trả lời cho một câu
+    hỏi, trên cùng một màn**. Giá trị mới *sáng hơn* xám nó thay (93.45 so với
+    91.30). **Viền giữ `secondary`:** phép đo 2.90:1 của nó là về một *đường kẻ*
+    trên `surface`, fill chưa bao giờ có phần trong đó.
+  - **`borderAccentDark` `#31306F` → `#6560B8`.** Đo **1.33:1** trên chính fill
+    của `MxCard.accent` trong khi hairline mọi card khác từng đeo đo **2.04:1**
+    — recipe duy nhất có nhiệm vụ nhấn mạnh lại có cạnh mờ nhất màn hình. Tệ
+    hơn: thứ hạng **lật giữa hai mode** (light 1.89 so với 1.45). Giá trị mới
+    đo **2.93:1**, trên hairline cũ ở cả hai mode và vẫn dưới focus ring.
+  - **Nút "Study" hàng deck → `secondary` (outlined).** Lý lẽ cũ cho `primary`
+    là lý lẽ *của một card*; một màn hình bày ba bốn card cùng lúc, và viewport
+    đầu của Library khi đó mang accent **chín lần**. Nó cũng làm card
+    `MxCard.accent` của chính màn đó mất việc: một hairline họ brand không thể
+    trên cơ ba mảng tô đặc bên dưới. Study Home vốn đã vẽ động từ này outlined.
+- **`surfaceEmphasisDark` / `surfaceSelectedDark` giữ nguyên giá trị hôm nay**
+  (`#332F58`). Concept là light-only ("LIGHT · TOKYO PURE") và than phiền khởi
+  nguồn cũng ở light; trong dark `#332F58` mang violet thật và đã đọc ra là
+  callout. Một giá trị dark bịa ra khi không có gì để đo chính là kiểu phỏng
+  đoán mà cả đợt này tồn tại để tránh. Hợp đồng recipe vì thế chỉ ràng
+  `isNot(secondaryContainer)` **ở light**.
+- **Acceptance criteria:**
+  - [x] `.tonal` và selection tint mang sắc thương hiệu, không còn xám —
+        pin bằng `semantic.surfaceEmphasis` / `surfaceSelected` trong
+        `mx_card_recipes_test.dart`.
+  - [x] Card đã chọn **sáng hơn** trước, không tối đi: 93.45 so với 91.30.
+  - [x] Viền accent dark trên hairline: 2.93:1 so với 2.04:1.
+  - [x] Hàng deck không còn `FilledButton` — `deck_workload_role_test.dart`
+        assert `findsNothing` cho fill brand, không chỉ đổi finder.
+  - [x] Hai token mới có mặt trong `lightPaletteTokens`/`darkPaletteTokens`
+        (rule `palette.closure` của visual audit) và trong bảng ánh xạ của
+        `css_token_parity_test.dart` — cả hai gate đều đã chặn khi thiếu.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** 4 file `lib/` (`app_colors.dart`, `app_semantic_colors.dart`,
+  `mx_card.dart`, `deck_study_button_widget.dart`),
+  `design_system/tokens/colors.css`, 4 file test (`app_palette.dart`,
+  `mx_card_recipes_test.dart`, `deck_workload_role_test.dart`,
+  `css_token_parity_test.dart`), và golden PNG.
+- **Tests required:** `mx_card_recipes_test.dart`,
+  `deck_workload_role_test.dart`, `css_token_parity_test.dart`,
+  `app_semantic_colors_test.dart`, toàn bộ `test/visual_audit/`,
+  `test/demo/` (golden).
+- **Emulator integration suite:** **not run** — presentation only.
+- **Checklist phases:** 7, 13.
+- **Dependencies:** M99.94 (bỏ hairline — sau đó `.accent` là recipe duy nhất
+  còn cạnh, nên việc cạnh đó mờ hơn hairline cũ mới thành vấn đề nhìn thấy).
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |

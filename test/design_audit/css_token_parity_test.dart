@@ -40,6 +40,14 @@ void main() {
       AppColors.surfaceMutedLight,
       AppColors.surfaceMutedDark,
     ),
+    '--color-surface-emphasis': (
+      AppColors.surfaceEmphasisLight,
+      AppColors.surfaceEmphasisDark,
+    ),
+    '--color-surface-selected': (
+      AppColors.surfaceSelectedLight,
+      AppColors.surfaceSelectedDark,
+    ),
     '--color-surface-elevated': (
       AppColors.surfaceElevatedLight,
       AppColors.surfaceElevatedDark,
