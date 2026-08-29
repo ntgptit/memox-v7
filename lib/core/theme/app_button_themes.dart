@@ -320,6 +320,13 @@ OutlinedButtonThemeData buildOutlinedButtonTheme(
       // WCAG 1.4.11 asks of a control boundary. `borderControl` measures
       // **3.19** and **3.00** on `surface`, **3.02** and **3.41** on the page.
       //
+      // **And on the card, which is where this button actually sits.** Those
+      // two grounds were the whole measurement until M100.3, when a pixel
+      // census over the dark goldens found 5 858 px of this edge touching
+      // `surfaceContainer` — the fill of the deck row and the settings card —
+      // where the dark value scored **2.76**. It is `#6E6A98` now and scores
+      // 3.12 there; `AppBorderColors.borderControlDark` holds the table.
+      //
       // The mismatch was internal, not a deviation from Material: the scheme
       // already says `outline = borderControl`, and the only component reading
       // the other token was this one. Chips keep `borderSubtle` deliberately —

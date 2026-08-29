@@ -173,11 +173,16 @@ class _SheetRow extends StatelessWidget {
       ),
       // Brand ink, and only here: the check is the one thing in the sheet
       // saying "you are here", so it is the one thing allowed to be the accent.
+      // **`primaryAccent`, not `primary`** (M100.3). A sheet sits on `surface`,
+      // which is lighter than the page, and the fill token measured **2.90:1**
+      // there — under the 3:1 WCAG 1.4.11 asks of a graphic that carries state.
+      // This mark is the one thing in the sheet saying "you are here", so it
+      // was the one thing that had to be legible and was not.
       trailing: action.isSelected
           ? Icon(
               Icons.check,
               size: AppIconSize.md,
-              color: context.colors.primary,
+              color: context.semanticColors.primaryAccent,
             )
           : null,
     );

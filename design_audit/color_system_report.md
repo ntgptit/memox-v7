@@ -69,10 +69,10 @@ guess.
 | V3 | 🟡 | `lib/core/theme/app_border_colors.dart:137` | Color(0xFF6560B8) | `#6560B8` | `#6560B8` | no token within ΔE-ish range — needs a new one |
 | V3 | 🟡 | `lib/core/theme/app_border_colors.dart:164` | Color(0xFF8887CE) | `#8887CE` | `#8887CE` | no token within ΔE-ish range — needs a new one |
 | V3 | 🟡 | `lib/core/theme/app_border_colors.dart:169` | Color(0xFF5D65B2) | `#5D65B2` | `#5D65B2` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:174` | Color(0xFF8D8D95) | `#8D8D95` | `#8D8D95` | colorScheme.outline |
-| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:176` | Color(0xFF66628D) | `#66628D` | `#66628D` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:180` | Color(0xFF4141C0) | `#4141C0` | `#4141C0` | semantic.focusRing |
-| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:182` | Color(0xFF8A8AE0) | `#8A8AE0` | `#8A8AE0` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:193` | Color(0xFF8A8A92) | `#8A8A92` | `#8A8A92` | colorScheme.outline |
+| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:224` | Color(0xFF6E6A98) | `#6E6A98` | `#6E6A98` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:228` | Color(0xFF4141C0) | `#4141C0` | `#4141C0` | semantic.focusRing |
+| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:230` | Color(0xFF8A8AE0) | `#8A8AE0` | `#8A8AE0` | no token within ΔE-ish range — needs a new one |
 | V3 | 🟡 | `lib/core/theme/app_surface_colors.dart:28` | Color(0xFFF4F5F8) | `#F4F5F8` | `#F4F5F8` | no token within ΔE-ish range — needs a new one |
 | V3 | 🟡 | `lib/core/theme/app_surface_colors.dart:30` | Color(0xFF0A082D) | `#0A082D` | `#0A082D` | no token within ΔE-ish range — needs a new one |
 | V3 | 🟡 | `lib/core/theme/app_surface_colors.dart:45` | Color(0xFFFBFBFE) | `#FBFBFE` | `#FBFBFE` | colorScheme.surface |
@@ -106,9 +106,9 @@ guess.
 
 - **V3** `Color(0xFF5D65B2)` — A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #5D65B2.
 
-- **V3** `Color(0xFF8D8D95)` — A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #8D8D95.
+- **V3** `Color(0xFF8A8A92)` — A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #8A8A92.
 
-- **V3** `Color(0xFF66628D)` — A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #66628D.
+- **V3** `Color(0xFF6E6A98)` — A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #6E6A98.
 
 - **V3** `Color(0xFF4141C0)` — A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #4141C0.
 
@@ -152,18 +152,18 @@ an edge.
 | light | semantic.borderSubtle on card (colorScheme.surface) | 1.45 | in-band |
 | light | semantic.borderSubtle on page (scaffoldBackgroundColor) | 1.38 | in-band |
 | light | semantic.borderSubtle on muted tile (semantic.surfaceMuted) | 1.27 | in-band |
-| light | colorScheme.outline on card (colorScheme.surface) | 3.19 | too-heavy |
-| light | colorScheme.outline on page (scaffoldBackgroundColor) | 3.02 | too-heavy |
-| light | colorScheme.outline on muted tile (semantic.surfaceMuted) | 2.79 | too-heavy |
+| light | colorScheme.outline on card (colorScheme.surface) | 3.32 | too-heavy |
+| light | colorScheme.outline on page (scaffoldBackgroundColor) | 3.14 | too-heavy |
+| light | colorScheme.outline on muted tile (semantic.surfaceMuted) | 2.90 | too-heavy |
 | light | colorScheme.outlineVariant on card (colorScheme.surface) | 1.45 | in-band |
 | light | colorScheme.outlineVariant on page (scaffoldBackgroundColor) | 1.38 | in-band |
 | light | colorScheme.outlineVariant on muted tile (semantic.surfaceMuted) | 1.27 | in-band |
 | dark | semantic.borderSubtle on card (colorScheme.surface) | 2.04 | too-heavy |
 | dark | semantic.borderSubtle on page (scaffoldBackgroundColor) | 2.32 | too-heavy |
 | dark | semantic.borderSubtle on muted tile (semantic.surfaceMuted) | 1.73 | too-heavy |
-| dark | colorScheme.outline on card (colorScheme.surface) | 3.00 | too-heavy |
-| dark | colorScheme.outline on page (scaffoldBackgroundColor) | 3.41 | too-heavy |
-| dark | colorScheme.outline on muted tile (semantic.surfaceMuted) | 2.54 | too-heavy |
+| dark | colorScheme.outline on card (colorScheme.surface) | 3.39 | too-heavy |
+| dark | colorScheme.outline on page (scaffoldBackgroundColor) | 3.85 | too-heavy |
+| dark | colorScheme.outline on muted tile (semantic.surfaceMuted) | 2.87 | too-heavy |
 | dark | colorScheme.outlineVariant on card (colorScheme.surface) | 2.04 | too-heavy |
 | dark | colorScheme.outlineVariant on page (scaffoldBackgroundColor) | 2.32 | too-heavy |
 | dark | colorScheme.outlineVariant on muted tile (semantic.surfaceMuted) | 1.73 | too-heavy |

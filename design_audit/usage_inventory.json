@@ -186,29 +186,29 @@
     },
     {
       "file": "lib/core/theme/app_border_colors.dart",
-      "line": 174,
+      "line": 193,
       "widget_context": "AppBorderColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF8D8D95)",
+      "expression": "Color(0xFF8A8A92)",
       "token": null,
-      "resolved_value_light": "#8D8D95",
-      "resolved_value_dark": "#8D8D95"
+      "resolved_value_light": "#8A8A92",
+      "resolved_value_dark": "#8A8A92"
     },
     {
       "file": "lib/core/theme/app_border_colors.dart",
-      "line": 176,
+      "line": 224,
       "widget_context": "AppBorderColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF66628D)",
+      "expression": "Color(0xFF6E6A98)",
       "token": null,
-      "resolved_value_light": "#66628D",
-      "resolved_value_dark": "#66628D"
+      "resolved_value_light": "#6E6A98",
+      "resolved_value_dark": "#6E6A98"
     },
     {
       "file": "lib/core/theme/app_border_colors.dart",
-      "line": 180,
+      "line": 228,
       "widget_context": "AppBorderColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -219,7 +219,7 @@
     },
     {
       "file": "lib/core/theme/app_border_colors.dart",
-      "line": 182,
+      "line": 230,
       "widget_context": "AppBorderColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -3486,14 +3486,14 @@
     },
     {
       "file": "lib/shared/widgets/mx_action_sheet.dart",
-      "line": 180,
+      "line": 185,
       "widget_context": "_SheetRow",
       "element_kind": "icon",
       "source_kind": "theme-token",
-      "expression": "context.colors.primary",
-      "token": "colorScheme.primary",
-      "resolved_value_light": "#4646B4",
-      "resolved_value_dark": "#5656C9"
+      "expression": "context.semanticColors.primaryAccent",
+      "token": "semantic.primaryAccent",
+      "resolved_value_light": "unresolvable: semantic.primaryAccent not in the dumped theme",
+      "resolved_value_dark": "unresolvable: semantic.primaryAccent not in the dumped theme"
     },
     {
       "file": "lib/shared/widgets/mx_breadcrumb.dart",
@@ -3607,18 +3607,18 @@
     },
     {
       "file": "lib/shared/widgets/mx_empty_state.dart",
-      "line": 64,
+      "line": 72,
       "widget_context": "MxEmptyState",
       "element_kind": "icon",
       "source_kind": "theme-token",
-      "expression": "context.colors.primary",
-      "token": "colorScheme.primary",
-      "resolved_value_light": "#4646B4",
-      "resolved_value_dark": "#5656C9"
+      "expression": "context.semanticColors.primaryAccent",
+      "token": "semantic.primaryAccent",
+      "resolved_value_light": "unresolvable: semantic.primaryAccent not in the dumped theme",
+      "resolved_value_dark": "unresolvable: semantic.primaryAccent not in the dumped theme"
     },
     {
       "file": "lib/shared/widgets/mx_empty_state.dart",
-      "line": 77,
+      "line": 86,
       "widget_context": "MxEmptyState",
       "element_kind": "text",
       "source_kind": "theme-token",
