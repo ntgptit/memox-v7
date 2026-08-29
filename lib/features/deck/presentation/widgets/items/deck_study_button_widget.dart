@@ -58,7 +58,7 @@ class DeckStudyButtonWidget extends StatelessWidget {
       child: MxActionButton(
         label: context.l10n.deckStudyAction,
         // **`secondary`, and the argument for `primary` was a per-card one**
-        // (M99.97). "One primary verb per card reads as the hierarchy" is true
+        // (M99.98). "One primary verb per card reads as the hierarchy" is true
         // of a card; a screen shows three or four at once, and the Library's
         // first viewport then carried the accent nine times — the page CTA,
         // three filled row verbs, two progress fills, three deck icon wells —

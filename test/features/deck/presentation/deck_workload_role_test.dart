@@ -109,7 +109,7 @@ void main() {
       // M99.61 migration to `MxActionButton` the widget carries geometry only,
       // and the fill is the theme's — which is the ownership this test wants,
       // stated where it used to read a per-widget style.
-      // **Study is outlined, and it stopped being filled at M99.97.** The
+      // **Study is outlined, and it stopped being filled at M99.98.** The
       // argument for a brand fill — "the card's one primary verb, and the chips
       // gave up their containers so it no longer competes" — was made about one
       // card. A screen shows three or four at once, and the Library's first

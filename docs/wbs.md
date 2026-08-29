@@ -15316,7 +15316,7 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Checklist phases:** 7, 13.
 - **Dependencies:** M99.70 (recipe `.feedback`).
 
-### M99.97 · Nhấn mạnh phải nổi hơn hàng xóm của nó
+### M99.98 · Nhấn mạnh phải nổi hơn hàng xóm của nó
 
 - **Status:** **done** — presentation only. Không đổi controller, use case,
   repository, route hay bất kỳ BR/UC/AD nào.

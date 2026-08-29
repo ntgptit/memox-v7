@@ -217,7 +217,7 @@ void main() {
 
         final decoration = decorationOf(tester);
         // **`surfaceEmphasis`, and it used to be `secondaryContainer`**
-        // (M99.97). That token is chroma 0.0084 in light — effectively neutral
+        // (M99.98). That token is chroma 0.0084 in light — effectively neutral
         // — and sat 5.24 L* below the page, so Study Home's resume callout, the
         // screen's primary action, was the greyest thing on it. The new value
         // is 1.11 below the page with 3.6x its chroma: marked by hue, not by
@@ -370,7 +370,7 @@ void main() {
       );
       // Selecting something must not dim it: the tint is the brand-tinted
       // `surfaceSelected`, *lighter* than the grey it replaced, so a picked row
-      // no longer renders darker than the unpicked ones beside it (M99.97).
+      // no longer renders darker than the unpicked ones beside it (M99.98).
       expect(
         decorationOf(tester).color,
         theme.extension<AppSemanticColors>()!.surfaceSelected,

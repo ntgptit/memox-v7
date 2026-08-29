@@ -92,7 +92,7 @@ abstract final class AppColors {
   /// The callout surface: a panel the screen wants noticed, at the quietest
   /// weight that still reads as *noticed*.
   ///
-  /// **A whisper of brand, not a step of grey** (M99.97). `MxCard.tonal` shipped
+  /// **A whisper of brand, not a step of grey** (M99.98). `MxCard.tonal` shipped
   /// on `secondaryContainer`, which is `#E4E6EC` — chroma 0.0084, effectively
   /// neutral, and **5.24 L\* below the page**. A callout that sits back and
   /// carries no hue is indistinguishable from a disabled block, and Study Home's
@@ -113,7 +113,7 @@ abstract final class AppColors {
 
   /// The fill a *picked* card wears when its list uses the tint treatment.
   ///
-  /// **Selecting something must not dim it** (M99.97). This shipped on
+  /// **Selecting something must not dim it** (M99.98). This shipped on
   /// `secondaryContainer` too, so a selected row rendered **darker and duller**
   /// than the unpicked white ones beside it, while the selected filter chip
   /// directly above wore the brand container — two answers to one question,
@@ -200,7 +200,7 @@ abstract final class AppColors {
 
   /// Same recipe as [borderAccentLight], over the dark surface.
   /// **Solved against the one rule that matters here, and it is not the same
-  /// recipe as [borderAccentLight]** (M99.97). It shipped as `#31306F`, which
+  /// recipe as [borderAccentLight]** (M99.98). It shipped as `#31306F`, which
   /// measures **1.33:1** on `MxCard.accent`'s own fill while the plain hairline
   /// every other card used to wear measured **2.04:1** — the one recipe whose
   /// job is emphasis had the faintest edge on the screen. Worse, the ranking
