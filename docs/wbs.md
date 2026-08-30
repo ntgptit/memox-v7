@@ -15913,6 +15913,68 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
   như quét sai bằng regex. ΔL\* là một con số đúng trả lời một câu hỏi tôi
   không định hỏi.
 
+### M100.8 · Luật bề rộng hero vào shared — và chỉ luật đó
+
+- **Goal:** Chủ dự án hỏi có nên đưa hero card vào shared widget không. Đo bốn
+  hero rồi trả lời: **không dựng `MxHeroCard` kiểu bao trọn**, nhưng có **một
+  luật** đáng đưa vào shared, và đưa nó vào theo cách khiến cái bẫy của nó
+  **không còn với tới được**.
+- **Status:** **done** — refactor thuần, **0 pixel đổi**. Chứng minh bằng
+  `flutter test --tags golden` **không** `--update-goldens`: 303 pass, 0 PNG.
+- **Vì sao không dựng hero card bao trọn.** So cây widget của bốn hero, phần
+  chung là *một card và một `Column`* — tức `MxCard(child: Column(...))`, không
+  có gì để chia sẻ:
+
+  | hero | cấu trúc |
+  |---|---|
+  | Library | `Stack` phủ nút disclosure lên dòng số, rồi progress bar, rồi CTA |
+  | Study | eyebrow → tên deck → dòng chế độ → CTA |
+  | Progress | `MxMetricWell` cạnh một numeral, **không có hành động** |
+  | Card detail | tag `Wrap` → `Divider` → danh sách trường, **không có hành động** |
+
+  Một widget gói cả bốn sẽ là một đống slot tuỳ chọn — đúng hình dạng mà M100.5
+  vừa gỡ khỏi `MxFeedbackBand`.
+- **Thứ thật sự chung, và nó là thứ đã từng hỏng:** *primary của hero chỉ giãn
+  dưới tier compact*. Nửa nguy hiểm không phải `Align` mà là **chỗ đặt
+  `LayoutBuilder`**: đặt trong padding của card thì nó thấy 329dp ở máy 393dp,
+  dưới tier 360, nên nhánh giãn chạy trên mọi máy và luật im lặng không làm gì.
+  Study đã ship đúng lỗi đó một lần — *"the golden had quietly stamped the wrong
+  branch"* — và **M100.7 do tôi làm đã tạo bản sao thứ hai của cùng cái bẫy**.
+- **Scope:** `lib/shared/widgets/mx_hero_card.dart`:
+  - `MxHeroCard` — nhận một builder và trả `isCramped`. Nó **nằm ngoài card
+    theo cấu trúc**, vì card chính là thứ builder trả về. Caller không thể đặt
+    phép đo sai chỗ mà không xoá widget này trước.
+  - `MxHeroPrimary` — nửa `Align`, cộng `icon`/`semanticLabel` mà Study cần.
+  - Hai call site bỏ `LayoutBuilder` riêng, `_ResumeAction` và `_StudyDueAction`
+    biến mất.
+- **Hai guard của chính đợt này bắt được widget mới ngay khi nó ra đời:**
+  `widgetbook_coverage_test` (M100.6) đòi entry, `mx_stress_test` đòi specimen.
+  Cả hai đã thêm; specimen chạy `MxHeroCard` ở 320px × 2.0× ở cả hai theme.
+- **Và một lỗ trong guard của tôi lộ ra, đã vá luôn.**
+  `widgetbook_coverage_test` dùng `firstMatch` — ngầm giả định **một component
+  một file**. Giả định đó đúng cho tới khi `mx_hero_card.dart` có hai class:
+  test vẫn xanh trong khi `MxHeroPrimary` chưa có entry. Đổi sang `allMatches`
+  làm lộ thêm `MxSubheaderBand`, vốn nấp sau `MxContentShell` từ đầu — nay vào
+  danh sách loại trừ kèm lý do. **Kiểm bằng tiêm lỗi:** đổi tên entry của
+  `MxHeroPrimary` → test đỏ và gọi đúng tên nó; bản `firstMatch` cũ sẽ im lặng.
+- **Acceptance criteria:**
+  - [x] Luật bề rộng hero tồn tại đúng **một** chỗ.
+  - [x] **0 PNG đổi** — golden pass mà không cần update.
+  - [x] `hero_action_width_test` (M100.7) vẫn xanh không sửa một dòng — hành vi
+        không đổi.
+  - [x] Guard Widgetbook thấy **mọi** widget class trong một file, không chỉ
+        class đầu.
+  - [x] 4 066 test host xanh, `flutter analyze` sạch ở cả root lẫn `widgetbook/`.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** 1 widget shared mới, 2 file feature rút gọn, 2 entry Widgetbook,
+  1 stress specimen, 1 guard mở rộng.
+- **Tests required:** `test/app/hero_action_width_test.dart`,
+  `test/app/widgetbook_coverage_test.dart`, `test/shared/widgets/mx_stress_test.dart`,
+  `test/demo/` (golden, để chứng minh không đổi pixel).
+- **Emulator integration suite:** **not run** — thuần bố cục.
+- **Checklist phases:** 7.
+- **Dependencies:** M100.7.
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |

@@ -10,6 +10,7 @@ import 'package:memox/shared/widgets/mx_sheet_insets.dart';
 import 'package:widgetbook/widgetbook.dart';
 
 import '../support/catalog_page.dart';
+import 'package:memox/shared/widgets/mx_hero_card.dart';
 
 /// The components that decide how a *page* reads, rather than how a control does.
 ///
@@ -206,6 +207,92 @@ WidgetbookComponent searchFieldComponent() {
                 onChanged: _noopString,
                 hintText: 'Search decks and cards',
                 resultCount: hasCount ? count : null,
+              ),
+            ],
+          );
+        },
+      ),
+    ],
+  );
+}
+
+/// The hero panel's width rule, and the primary that reads it.
+///
+/// Two entries because the pair only means anything together: drag the frame
+/// narrower than 360 and the primary should snap from hugging its label to
+/// filling the card. That transition is the whole component.
+WidgetbookComponent heroCardComponent() {
+  return WidgetbookComponent(
+    name: 'MxHeroCard',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Playground',
+        builder: (BuildContext context) {
+          final label = context.knobs.string(
+            label: 'primary label',
+            initialValue: 'Study 15 due cards',
+          );
+
+          return CatalogListPage(
+            children: <Widget>[
+              MxHeroCard(
+                builder: (BuildContext context, bool isCramped) =>
+                    MxCard.accent(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Text(
+                            isCramped
+                                ? 'cramped — the primary fills the card'
+                                : 'roomy — the primary hugs its label',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 16),
+                          MxHeroPrimary(
+                            label: label,
+                            onPressed: _noop,
+                            isCramped: isCramped,
+                          ),
+                        ],
+                      ),
+                    ),
+              ),
+            ],
+          );
+        },
+      ),
+    ],
+  );
+}
+
+/// The primary on its own, with the branch as a knob rather than as a width —
+/// so both states are visible without resizing anything.
+WidgetbookComponent heroPrimaryComponent() {
+  return WidgetbookComponent(
+    name: 'MxHeroPrimary',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Playground',
+        builder: (BuildContext context) {
+          final isCramped = context.knobs.boolean(label: 'isCramped');
+          final hasIcon = context.knobs.boolean(
+            label: 'icon',
+            initialValue: true,
+          );
+
+          return CatalogListPage(
+            children: <Widget>[
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  MxHeroPrimary(
+                    label: 'Resume',
+                    icon: hasIcon ? Icons.play_arrow : null,
+                    onPressed: _noop,
+                    isCramped: isCramped,
+                  ),
+                ],
               ),
             ],
           );

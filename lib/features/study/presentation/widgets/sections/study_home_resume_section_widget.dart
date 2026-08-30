@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_breakpoints.dart';
 import '../../../../../core/theme/app_ink.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
-import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../domain/models/study_home_resume_model.dart';
 import '../support/study_labels_widget.dart';
+import '../../../../../shared/widgets/mx_hero_card.dart';
 
 /// The session already open, offered back — and nothing else (BR-200, BR-103).
 ///
@@ -39,24 +38,16 @@ class StudyHomeResumeSectionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // **Measured outside the card, because S17 is a rule about the card.**
-    // The first version put the `LayoutBuilder` inside the card's padding, so
-    // it saw the content width — 32dp narrower — and the full-width branch ran
-    // on every phone: 393 handed it 329, which is under the 360 tier the rule
-    // names. The parent column stretches, so out here `maxWidth` *is* the
-    // card's width (361 at 393dp, 296 at 320dp), and the two branches land
-    // where the wireframe says they do. Both reviews caught this from the
-    // arithmetic; the golden had quietly stamped the wrong branch.
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isCramped = AppBreakpoints.isCompact(constraints.maxWidth);
-
-        return _ResumeCard(
-          resume: resume,
-          onResume: onResume,
-          isCramped: isCramped,
-        );
-      },
+    // **S17 is a rule about the card, and `MxHeroCard` is where that gets
+    // measured.** This widget is where the trap was found: the first version
+    // put the `LayoutBuilder` inside the card's padding, saw the content width
+    // — 393 handing it 329, under the 360 tier — and ran the full-width branch
+    // on every phone. Both reviews caught it from the arithmetic; the golden
+    // had quietly stamped the wrong branch. The shared widget carries that
+    // history so the third caller cannot repeat it.
+    return MxHeroCard(
+      builder: (BuildContext context, bool isCramped) =>
+          _ResumeCard(resume: resume, onResume: onResume, isCramped: isCramped),
     );
   }
 }
@@ -162,16 +153,15 @@ class _ResumeAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    // Named after the deck for the reason the row buttons are: a screen
-    // reader hearing "Resume" alone cannot tell which session it means.
-    final action = MxActionButton(
+
+    return MxHeroPrimary(
       label: l10n.studyHomeResumeAction,
+      // Named after the deck for the reason the row buttons are: a screen
+      // reader hearing "Resume" alone cannot tell which session it means.
       semanticLabel: l10n.studyHomeResumeSemanticLabel(resume.deckName),
       icon: Icons.play_arrow,
       onPressed: onResume,
+      isCramped: isCramped,
     );
-    if (isCramped) return action;
-
-    return Align(alignment: AlignmentDirectional.centerStart, child: action);
   }
 }

@@ -38,6 +38,11 @@ void main() {
         'a showModalBottomSheet host that returns its child untouched. What it '
         'owns is the keyboard inset and the close-on-transition rule — '
         'behaviour, not a picture.',
+    'MxSubheaderBand':
+        'the band MxContentShell lays a subheader into, and its whole job is '
+        'the gutter arithmetic it inherits from the shell. Shown alone it is a '
+        'Padding with a number in it; the entry that means anything is '
+        "MxContentShell's, which draws the band in the frame it belongs to.",
     'MxDialogHeader':
         'the shared headline row inside MxConfirmDialog and MxFormDialog, both '
         'of which are catalogued. An entry would be the same row twice.',
@@ -69,20 +74,26 @@ void main() {
       final name = file.uri.pathSegments.last;
       if (!name.endsWith('.dart') || notComponents.contains(name)) continue;
 
-      final match = RegExp(
+      // **Every widget class in the file, not the first one.** The original
+      // used `firstMatch`, which quietly assumed one component per file — a
+      // fair assumption until `mx_hero_card.dart` shipped two at M100.8, and
+      // this check passed while `MxHeroPrimary` had no entry. `MxSubheaderBand`
+      // had been hidden behind `MxContentShell` the whole time.
+      final matches = RegExp(
         r'^class (Mx[A-Za-z0-9]+)(?:<[^>]*>)? extends (?:Stateless|Stateful|Consumer)',
         multiLine: true,
-      ).firstMatch(file.readAsStringSync());
-      if (match == null) continue;
+      ).allMatches(file.readAsStringSync());
 
-      final component = match.group(1)!;
-      if (excluded.containsKey(component)) continue;
-      // The catalogue names its entries; a bare mention in an import or a doc
-      // comment is not an entry, which is the distinction that makes this
-      // check worth having.
-      if (catalogue.contains("name: '$component'")) continue;
+      for (final match in matches) {
+        final component = match.group(1)!;
+        if (excluded.containsKey(component)) continue;
+        // The catalogue names its entries; a bare mention in an import or a doc
+        // comment is not an entry, which is the distinction that makes this
+        // check worth having.
+        if (catalogue.contains("name: '$component'")) continue;
 
-      missing.add(component);
+        missing.add(component);
+      }
     }
 
     expect(
