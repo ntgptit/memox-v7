@@ -29,6 +29,7 @@ import 'package:memox/shared/widgets/mx_session_top_bar.dart';
 import 'package:memox/shared/widgets/mx_text_button.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
 import 'package:memox/core/theme/app_ink.dart';
+import 'package:memox/shared/widgets/mx_hero_card.dart';
 
 /// The specimen set for the stress suite: every shared component, built with
 /// copy long enough to break a layout.
@@ -198,6 +199,29 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
       icon: Icons.event_busy,
       tint: AppInk.onErrorContainer,
     ),
+  ),
+  MxStressSpecimen(
+    // The pair under one specimen: the panel measures, the primary reads. At
+    // 320 the card is 288dp, under the tier, so the long label runs the full
+    // width instead of stranding itself at one end.
+    name: 'MxHeroCard',
+    build: () => MxHeroCard(
+      builder: (BuildContext context, bool isCramped) => MxCard.accent(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            const Text(kLongTitle),
+            MxHeroPrimary(
+              label: kLongLabel,
+              onPressed: _noop,
+              isCramped: isCramped,
+            ),
+          ],
+        ),
+      ),
+    ),
+    isInteractive: true,
   ),
   MxStressSpecimen(
     name: 'MxCard',

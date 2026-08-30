@@ -201,6 +201,8 @@ class MemoxWidgetbook extends StatelessWidget {
             progressBarComponent(),
             searchFieldComponent(),
             sheetInsetsComponent(),
+            heroCardComponent(),
+            heroPrimaryComponent(),
           ],
         ),
       ],
