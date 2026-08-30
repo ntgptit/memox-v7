@@ -9,6 +9,7 @@ import '../../../../../shared/widgets/mx_progress_bar.dart';
 import '../../../domain/models/deck_list_snapshot_model.dart';
 import '../../../domain/models/deck_summary_model.dart';
 import 'deck_summary_metrics_widget.dart';
+import '../../../../../core/theme/app_breakpoints.dart';
 
 /// The level's study status, as the screen's one hero (BR-150, BR-161).
 ///
@@ -95,6 +96,22 @@ class DeckLevelSummaryWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // **Measured outside the card, because the rule is about the card.**
+    // Study Home's resume callout learned this the hard way and wrote it down:
+    // a `LayoutBuilder` inside the card's padding sees the *content* width —
+    // 32dp narrower — so 393dp hands it 329, under the 360 tier, and the
+    // stretched branch runs on every phone. Out here `maxWidth` is the card's
+    // own width: 361 at 393dp, 296 at 320dp.
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) => _panel(
+        context,
+        isCramped: AppBreakpoints.isCompact(constraints.maxWidth),
+      ),
+    );
+  }
+
+  /// The card itself, once the width question above has been answered.
+  Widget _panel(BuildContext context, {required bool isCramped}) {
     // The accent recipe: indigo hairline, and a step further off the page
     // (owner review, 2026-08-20). On the default border the panel did not
     // separate from the background at all — a card that carries the screen's
@@ -109,7 +126,7 @@ class DeckLevelSummaryWidget extends StatelessWidget {
         children: <Widget>[
           Padding(
             padding: const EdgeInsets.all(AppSpacing.lg),
-            child: _content(context),
+            child: _content(context, isCramped: isCramped),
           ),
           // **A disclosure, not a dismissal.** It points down to open the
           // resting figures and up to shut them — the arrow shows where the
@@ -136,7 +153,7 @@ class DeckLevelSummaryWidget extends StatelessWidget {
     );
   }
 
-  Widget _content(BuildContext context) {
+  Widget _content(BuildContext context, {required bool isCramped}) {
     final decks = snapshot.decks;
     final cardCount = decks.fold<int>(0, (sum, d) => sum + d.totalCardCount);
     final learnedCount = decks.fold<int>(
@@ -189,14 +206,55 @@ class DeckLevelSummaryWidget extends StatelessWidget {
         // due and the button would be a promise with no cards behind it.
         if (onStudyDue != null) ...<Widget>[
           const SizedBox(height: AppSpacing.md),
-          MxActionButton(
+          // **The same width rule Study Home's resume callout carries**
+          // (M100.7). Both buttons say *start studying*, and at 393dp this one
+          // measured 329dp against that one's 127 — 2.6x apart for one meaning,
+          // and both starting at the same x, so side by side they read as one
+          // element that got cut short rather than as two decisions.
+          //
+          // Study Home's rule is the one with a reason written down — stretch
+          // only below the compact tier, where a hugging primary would look
+          // stranded — so this is the one that moved. The column stretches, so
+          // the `Align` is what un-stretches it above that tier.
+          _StudyDueAction(
             label: context.l10n.deckSummaryStudyDueAction(
               snapshot.levelDueCardCount,
             ),
-            onPressed: onStudyDue,
+            onPressed: onStudyDue!,
+            isCramped: isCramped,
           ),
         ],
       ],
     );
+  }
+}
+
+/// The panel's one action, stretched only where a hugging primary would look
+/// stranded.
+///
+/// A widget rather than four lines inline, because the branch has to be
+/// findable: this is the second copy of a rule whose first copy already shipped
+/// the wrong branch once, and `deck_hero_action_width_test.dart` pins both.
+class _StudyDueAction extends StatelessWidget {
+  const _StudyDueAction({
+    required this.label,
+    required this.onPressed,
+    required this.isCramped,
+  });
+
+  final String label;
+  final VoidCallback onPressed;
+
+  /// Whether the card is narrower than the compact tier — the width the
+  /// stretched primary is for. Named after Study Home's field so a reader
+  /// comparing the two finds the same word.
+  final bool isCramped;
+
+  @override
+  Widget build(BuildContext context) {
+    final action = MxActionButton(label: label, onPressed: onPressed);
+    if (isCramped) return action;
+
+    return Align(alignment: AlignmentDirectional.centerStart, child: action);
   }
 }
