@@ -15839,6 +15839,80 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Checklist phases:** 7.
 - **Dependencies:** M100.5.
 
+### M100.7 · Hai hero primary thống nhất bề rộng — và ba mục checklist bị bác bỏ
+
+- **Status:** **done**
+- **Goal:** Thống nhất bề rộng nút chính giữa hai hero cùng nói *bắt đầu học*,
+  và ghi lại ba mục checklist bị chính phép đo lại bác bỏ.
+- **Bối cảnh:** Đợt review 4 hero card đẻ ra 5 mục. Khi bắt tay làm, **ba mục
+  bị chính phép đo lại bác bỏ**, và cả ba sai vì cùng một lý do: tôi chọn
+  **ΔL\*** — chỉ đo độ sáng — cho một thiết kế **cố ý nhấn mạnh bằng sắc độ**.
+- **RÚT LẠI mục 01 &mdash; "thang nhấn mạnh đảo ngược giữa hai theme".**
+  Đo lại bằng **ΔE** (tính cả sắc):
+
+  | hero | ΔL\* light | **ΔE light** | ΔE dark |
+  |---|---|---|---|
+  | Study `.tonal` | 1.11 | **4.28** | 18.02 |
+  | ba hero còn lại | 2.15 | 2.18 | 10.13 |
+
+  Hero Study tách khỏi nền **mạnh nhất ở cả hai theme**, không phải yếu nhất.
+  Không có đảo ngược nào. Chroma fill của nó là 5.65 so với 1.54 — gấp 3.7 lần,
+  đúng bằng con số `mx_card_recipes_test` đã ghi sẵn ("3.6x its chroma").
+- **RÚT LẠI mục 02 &mdash; "`.tonal` phẳng là thiếu nhấn mạnh".** M99.98 đã
+  quyết định điều này và viết ra: *"marked by hue, not by weight"*. Trước đó nó
+  dùng `secondaryContainer` gần như xám và nằm **thấp hơn** nền trang 5.24 L\*
+  — callout chính của màn là thứ xám nhất trên đó. Giá trị hiện tại là một lựa
+  chọn đã đo, không phải một thiếu sót.
+- **RÚT LẠI mục 03 &mdash; "nối `surfaceElevated` để dark có ba bậc".** Đây là
+  mục nguy hiểm nhất: nếu làm, card `.accent`/`.focal` ở dark thành `#37345F`,
+  và trên nền đó
+  - `borderControl` rơi **3.12 → 2.30:1**, tức **phá đúng ngưỡng M100.3 vừa
+    dựng**;
+  - `primaryAccent` rơi **5.08 → 3.73:1**, dưới AA cho chữ.
+
+  Và `control_border_grounds_test` của tôi **sẽ không bắt được** vì nó chỉ kiểm
+  page/surface/surfaceContainer. Ngoài ra nhìn ảnh dark thì viền accent làm
+  đúng việc của nó: hero Library rõ ràng nổi hơn Progress. Vừa không cần vừa
+  có hại.
+- **ĐÃ LÀM &mdash; mục 05, và nó là mục duy nhất không phụ thuộc phép đo nào.**
+  Hai nút cùng nói *bắt đầu học*, đo từ golden 393dp: Library **329dp** giãn
+  hết card, Study **126.7dp** ôm nhãn. Cả hai bắt đầu ở cùng x=32dp nên đặt
+  cạnh nhau đọc ra như một phần tử bị cắt ngắn.
+  - Luật của Study là luật **có ghi lý do** — giãn chỉ dưới tier compact — nên
+    Library học theo, không phải ngược lại. **Chủ dự án chọn hướng này.**
+  - `LayoutBuilder` đặt **ngoài** card, đúng như comment của Study cảnh báo:
+    đặt trong padding thì nó thấy 329dp (bề rộng nội dung), dưới tier 360, nên
+    nhánh giãn chạy trên mọi máy và luật im lặng không làm gì. Study đã ship
+    đúng lỗi đó một lần — *"the golden had quietly stamped the wrong branch"*.
+- **Test mới `test/app/hero_action_width_test.dart`** ghim **cả hai** hero ở
+  **hai** bề rộng, cộng một test ghim *khoảng cách tới ngưỡng*: card ở 393dp
+  rộng 361 còn tier là 360 — **hụt 1dp là đổi nhánh**, và hai group kia khẳng
+  định nhánh chứ không khẳng định khoảng cách.
+  - **Kiểm bằng tiêm lỗi:** bỏ nhánh `isCramped` → test đỏ và in ra đúng
+    **329.0**, con số đo được từ golden.
+- **Cái giá, nói thẳng:** hero Library chỉ có hai hàng — dòng số và nút — nên
+  nút ôm nhãn để trống nửa hàng dưới. Hero Study có ba dòng chữ phía trên nên
+  hình đó hợp hơn ở đó. Đây là đánh đổi chủ dự án đã chọn khi biết trước "nút
+  chính ở màn Library nhỏ đi đáng kể"; ghi lại ở đây để đảo lại rẻ nếu nhìn
+  thật thấy không ổn.
+- **Scope:** `deck_level_summary_widget.dart` (LayoutBuilder ngoài card,
+  `_StudyDueAction`), 1 test mới, 19 golden.
+- **Acceptance criteria:**
+  - [x] Hai hero primary theo cùng một luật bề rộng.
+  - [x] Test đỏ khi luật bị bỏ (tiêm lỗi), và đỏ khi `LayoutBuilder` bị đặt sai
+        chỗ (cùng một assertion bắt cả hai).
+  - [x] 4 063 test host xanh, `flutter analyze` sạch.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** 1 file feature sửa, 1 test mới, 19 golden.
+- **Tests required:** `test/app/hero_action_width_test.dart`,
+  `test/features/deck/presentation/`, `test/demo/` (golden).
+- **Emulator integration suite:** **not run** — thuần bố cục.
+- **Checklist phases:** 7.
+- **Dependencies:** M100.6.
+- **Bài học lặp lại lần thứ tư trong đợt này:** chọn sai phép đo cũng sai y hệt
+  như quét sai bằng regex. ΔL\* là một con số đúng trả lời một câu hỏi tôi
+  không định hỏi.
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |
