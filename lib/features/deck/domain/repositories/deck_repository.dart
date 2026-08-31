@@ -2,6 +2,7 @@ import '../models/deck_deletion_impact_model.dart';
 import '../entities/deck_entity.dart';
 import '../models/deck_name_model.dart';
 import '../models/deck_list_snapshot_model.dart';
+import '../models/deck_reorder_placement_model.dart';
 import '../models/scheduler_type_model.dart';
 
 /// Contract for deck-tree management (UC-02, UC-03, UC-08, UC-09). Card CRUD
@@ -183,5 +184,14 @@ abstract interface class DeckRepository {
   Future<void> moveDeck({
     required String deckId,
     required String targetParentDeckId,
+  });
+
+  /// Changes [deckId]'s order relative to [targetSiblingDeckId]. Both rows are
+  /// re-read inside the transaction and must still share exactly one parent;
+  /// this operation never changes a tree pointer or any study data.
+  Future<void> reorderDeck({
+    required String deckId,
+    required String targetSiblingDeckId,
+    required DeckReorderPlacement placement,
   });
 }

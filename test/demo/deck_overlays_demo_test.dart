@@ -187,7 +187,7 @@ void main() {
     await matchesReviewGolden('goldens/deck_library_menu_light.png');
   });
 
-  testWidgets('sort sheet — the six orders a list can take', (tester) async {
+  testWidgets('sort sheet — the five orders a list can take', (tester) async {
     await pumpReview(tester, rootShell(Brightness.light));
     await tester.tap(find.byIcon(Icons.swap_vert));
     await tester.pumpAndSettle();

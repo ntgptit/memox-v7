@@ -54,6 +54,12 @@ Future<void> showDeckActions(
   /// deliberate: it acts on the list the menu was opened over.
   bool? isDueFilterActive,
   VoidCallback? onToggleDueFilter,
+
+  /// Reorder is only offered while the level is showing its persisted Manual
+  /// order, so these targets are actual neighbouring siblings rather than a
+  /// neighbour manufactured by a view-only sort.
+  VoidCallback? onMoveEarlier,
+  VoidCallback? onMoveLater,
 }) async {
   final action = await showModalBottomSheet<_DeckAction>(
     context: context,
@@ -82,6 +88,20 @@ Future<void> showDeckActions(
             label: sheetContext.l10n.deckMoveAction,
             icon: Icons.drive_file_move_outlined,
             onPressed: () => Navigator.of(sheetContext).pop(_DeckAction.move),
+          ),
+        if (onMoveEarlier != null)
+          MxActionSheetAction(
+            label: sheetContext.l10n.deckMoveEarlierAction,
+            icon: Icons.keyboard_arrow_up,
+            onPressed: () =>
+                Navigator.of(sheetContext).pop(_DeckAction.moveEarlier),
+          ),
+        if (onMoveLater != null)
+          MxActionSheetAction(
+            label: sheetContext.l10n.deckMoveLaterAction,
+            icon: Icons.keyboard_arrow_down,
+            onPressed: () =>
+                Navigator.of(sheetContext).pop(_DeckAction.moveLater),
           ),
         // A root deck only, and offered whether or not the mode is locked:
         // UC-03 A1 keeps the section visible on a studied deck so the lock can
@@ -123,6 +143,10 @@ Future<void> showDeckActions(
       await showDeckRenameForm(context, deck: deck);
     case _DeckAction.move:
       await showDeckMoveSheet(context, deckId: deck.id);
+    case _DeckAction.moveEarlier:
+      onMoveEarlier?.call();
+    case _DeckAction.moveLater:
+      onMoveLater?.call();
     case _DeckAction.scheduler:
       await showDeckSchedulerSheet(context, deck: deck);
     case _DeckAction.resetProgress:
@@ -145,6 +169,8 @@ enum _DeckAction {
   toggleDueFilter,
   rename,
   move,
+  moveEarlier,
+  moveLater,
   scheduler,
   resetProgress,
   delete,

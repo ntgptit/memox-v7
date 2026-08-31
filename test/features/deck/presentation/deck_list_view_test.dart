@@ -73,6 +73,19 @@ void main() {
   });
 
   group('sort', () {
+    test('manual retains the persisted repository order', () {
+      expect(
+        namesOf(
+          applyDeckListView(
+            sample(),
+            filter: DeckListFilter.all,
+            sort: DeckListSort.manual,
+          ),
+        ),
+        <String>['banana', 'Apple', 'cherry'],
+      );
+    });
+
     test('recent is newest first', () {
       final visible = applyDeckListView(
         sample(),
@@ -145,10 +158,7 @@ void main() {
       addTearDown(container.dispose);
 
       expect(container.read(deckListFilterChoiceProvider), DeckListFilter.all);
-      expect(
-        container.read(deckListSortChoiceProvider),
-        DeckListSort.dateAdded,
-      );
+      expect(container.read(deckListSortChoiceProvider), DeckListSort.manual);
     });
 
     test('changing one leaves the other alone', () {
@@ -162,10 +172,7 @@ void main() {
           .select(DeckListFilter.due);
 
       expect(container.read(deckListFilterChoiceProvider), DeckListFilter.due);
-      expect(
-        container.read(deckListSortChoiceProvider),
-        DeckListSort.dateAdded,
-      );
+      expect(container.read(deckListSortChoiceProvider), DeckListSort.manual);
     });
   });
 }

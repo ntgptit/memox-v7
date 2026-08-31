@@ -436,9 +436,21 @@
   "@deckSortRecentLabel": {
     "description": "Sort option: decks in the order they were created, newest first. **Named for what it sorts by.** It read \"Recently studied\" and sorted on `createdAt` — a label making a claim the app cannot honour, because nothing records when a deck was last studied. The heading row shows this same string in about 96px, so a translation longer than roughly eleven characters will fail deck_sort_control_width_test.dart — pick the shorter phrasing over the fuller one."
   },
+  "deckSortManualLabel": "Manual",
+  "@deckSortManualLabel": {
+    "description": "The persisted order a learner set by moving sibling decks."
+  },
   "deckSortNameLabel": "Name",
   "@deckSortNameLabel": {
     "description": "Sort option: decks ordered by name, case-insensitively. The heading row shows this same string in about 96px, so a translation longer than roughly eleven characters will fail deck_sort_control_width_test.dart — pick the shorter phrasing over the fuller one."
+  },
+  "deckMoveEarlierAction": "Move up",
+  "@deckMoveEarlierAction": {
+    "description": "Moves this deck before its previous sibling in Manual order."
+  },
+  "deckMoveLaterAction": "Move down",
+  "@deckMoveLaterAction": {
+    "description": "Moves this deck after its next sibling in Manual order."
   },
   "deckSortCardsDueLabel": "Cards due",
   "@deckSortCardsDueLabel": {

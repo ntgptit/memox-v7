@@ -17,16 +17,21 @@ enum DeckListFilter {
 
 /// The order the root list is shown in.
 ///
-/// The repository's own order is by creation, which is [DeckListSort.dateAdded].
+/// The repository's own order is persisted sibling order, which is
+/// [DeckListSort.manual].
 /// Sorting here rather than in SQL keeps it a view choice: a second screen wanting
 /// a different order does not become a second query.
 ///
-/// **Four, since the sort control became a sheet** (owner decision, 2026-08-25).
+/// **Five, since Manual order joined the sort sheet.**
 /// Two were all a toggle could carry — a control that cycles has to be pressed
 /// once per option, so a third would have made the order the user wanted three
 /// taps away and unpredictable in between. A sheet lists them, so the list can
 /// answer the questions a learner actually has about their library.
 enum DeckListSort {
+  /// The persisted sibling order. This is the default so a reorder is visible
+  /// immediately and remains visible after reopening the screen.
+  manual,
+
   /// Newest first — the order decks were created in, reversed.
   ///
   /// **It was called `recent`, and the name is what let the bug live.** The
@@ -108,6 +113,7 @@ List<DeckSummary> applyDeckListView(
 
   indexed.sort((a, b) {
     final primary = switch (sort) {
+      DeckListSort.manual => 0,
       DeckListSort.dateAdded => b.summary.deck.createdAt.compareTo(
         a.summary.deck.createdAt,
       ),

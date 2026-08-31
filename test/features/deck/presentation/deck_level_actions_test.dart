@@ -8,8 +8,10 @@ import 'package:memox/features/deck/domain/models/deck_deletion_impact_model.dar
 import 'package:memox/features/deck/domain/entities/deck_entity.dart';
 import 'package:memox/features/deck/domain/models/deck_list_snapshot_model.dart';
 import 'package:memox/features/deck/domain/models/deck_path_segment_model.dart';
+import 'package:memox/features/deck/domain/models/deck_reorder_placement_model.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
+import 'package:memox/features/deck/presentation/widgets/items/deck_tile_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 
 import 'support/deck_screen_harness.dart';
@@ -87,6 +89,49 @@ void main() {
       // The scheduler lives on the root, so this is where its entry belongs
       // (BR-05, UC-03).
       expect(find.text(english.deckSchedulerChangeAction), findsOneWidget);
+    });
+
+    testWidgets('a Manual-order sibling can move before its previous sibling', (
+      tester,
+    ) async {
+      final root = fakeRootDeck(id: 'root', name: 'Root');
+      final first = fakeChildSummary(
+        id: 'first',
+        name: 'First',
+        parentId: root.id,
+      );
+      final second = fakeChildSummary(
+        id: 'second',
+        name: 'Second',
+        parentId: root.id,
+      );
+      final repository = serving(root, children: <DeckSummary>[first, second]);
+      await pumpDetail(tester, repository, deckId: root.id);
+
+      await tester.tap(
+        find.descendant(
+          of: find.byType(DeckTileWidget).last,
+          matching: find.bySemanticsLabel(
+            RegExp(english.deckActionsSemanticLabel),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(english.deckMoveEarlierAction), findsOneWidget);
+      expect(find.text(english.deckMoveLaterAction), findsNothing);
+
+      await tester.tap(find.text(english.deckMoveEarlierAction));
+      await tester.pumpAndSettle();
+      expect(
+        repository.reorders,
+        <({String deckId, String target, DeckReorderPlacement placement})>[
+          (
+            deckId: second.deck.id,
+            target: first.deck.id,
+            placement: DeckReorderPlacement.before,
+          ),
+        ],
+      );
     });
 
     testWidgets('a sub-deck offers no study mode at all (BR-06)', (

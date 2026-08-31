@@ -253,12 +253,12 @@ void main() {
     });
   });
 
-  test('a v11 database opened again runs no migration', () async {
-    // Cheap, and it catches an `if (from < 11)` written as `if (from <= 11)`.
+  test('a fresh v12 database opens without an upgrade', () async {
+    // Cheap, and it catches an `if (from < 12)` written as `if (from <= 12)`.
     final db = AppDatabase(NativeDatabase.memory());
     addTearDown(db.close);
 
-    expect(db.schemaVersion, 11);
+    expect(db.schemaVersion, 12);
     expect(await rows(db, 'SELECT id FROM delete_batches'), isEmpty);
   });
 }

@@ -7,8 +7,8 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
-| **Last updated** | 2026-08-28 |
+| **Updated by task** | M100.10 (Deck sibling ordering: persisted manual position, atomic reorder, UI + tests); M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
+| **Last updated** | 2026-08-31 |
 
 Single source of truth for project progress. Update it in the same commit as the
 work it describes. A task is `done` only when it meets the Definition of Done in
@@ -16077,6 +16077,47 @@ vốn cũng cần thiết bị.
   lại vì sao gate đó chưa chạy được.
 - **Checklist phases:** 0.
 - **Dependencies:** M100.8.
+
+### M100.10 · Reorder Deck sibling order
+
+- **Status:** done
+- **Goal:** Người dùng đổi thứ tự root deck hoặc sub-deck cùng parent mà không
+  biến thao tác đó thành MoveDeck hay làm thay đổi cây, scheduler hoặc study
+  data.
+- **Scope:** `sibling_position` + migration v12; `ReorderDeckUseCase`; DAO /
+  repository transaction; Manual sort mặc định; Move up/down từ action sheet;
+  SQLite migration/repository/stream tests và widget wiring test.
+- **Out of scope:** thay `parent_deck_id`/`root_deck_id`, scheduler/generation,
+  card hoặc study state; drag-and-drop.
+- **Decision:** Không tái sử dụng `created_at` vì đó là lịch sử immutable, không
+  phải ý định sắp xếp. Không dùng raw index qua domain/UI: request `before` hoặc
+  `after` sibling, repository mới tính dense position trong transaction.
+- **5Why:** (1) Vì sao list không reorder được? Query chỉ sort lịch sử. (2) Vì
+  sao không sửa `created_at`? Nó phải giữ thời điểm tạo. (3) Vì sao cần cột?
+  Thứ tự người dùng là fact không suy ra được. (4) Vì sao không đưa index raw
+  lên UI? Một write xen giữa làm index đổi nghĩa. (5) Vì sao transaction? Một
+  failure giữa các sibling sẽ tạo thứ tự partial.
+- **Editable documents:** `docs/business-rules.md`, `docs/data-model.md`,
+  `docs/use-cases.md`, `docs/wbs.md` (chủ dự án đã cho phép sửa frozen docs).
+- **Output:** schema v12 + migration lưu `sibling_position`; transaction
+  repository và `ReorderDeckUseCase`; controls Manual order; test SQLite,
+  widget và integration xác nhận thứ tự mới phát emission.
+- **Acceptance criteria:**
+  - [x] Root và sub-deck chỉ reorder trong nhóm sibling; không thay parent/root
+        pointer, subtree, scheduler, card hay study state.
+  - [x] Operation relative `before`/`after` có thứ tự dense, deterministic và
+        rollback toàn bộ khi database failure hoặc row stale.
+  - [x] Default Manual order phản ánh order persisted và action sheet chỉ hiện
+        Move up/down khi sibling tương ứng tồn tại.
+  - [x] Migration v11→v12, database/repository/use-case/widget tests và emulator
+        integration suite đều xanh.
+- **Dependencies:** M100.8.
+- **Tests required:** migration v11→v12; SQLite first→last, last→first,
+  middle→middle, root/nested, one/no-op, stale source/target, rollback,
+  reactive list; use case và action-sheet wiring.
+- **Emulator integration suite:** required by `CLAUDE.md` vì `features/**`
+  thay đổi; chạy trước khi task được đánh dấu done.
+- **Checklist phases:** 4, 5, 6, 7, 11, 13, 14, 15, 19, 21.
 
 ## Known technical debt
 

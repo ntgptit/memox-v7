@@ -7,6 +7,7 @@ part 'app_database.g.dart';
 part 'app_database_migrations.dart';
 part 'app_database_migrations_v5.dart';
 part 'app_database_migrations_v11.dart';
+part 'app_database_migrations_v12.dart';
 
 /// The app's database.
 ///
@@ -44,7 +45,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.open() : super(openAppDatabaseConnection());
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -236,6 +237,13 @@ class AppDatabase extends _$AppDatabase {
       // from a v10 database, not a v7 one.
       if (from < 11) {
         await _upgradeToV11();
+      }
+
+      // v11 -> v12: a user-controlled sibling order for Deck. Existing rows
+      // retain their creation order, then future writes maintain dense positions
+      // within one parent group atomically.
+      if (from < 12) {
+        await _upgradeToV12();
       }
     },
 

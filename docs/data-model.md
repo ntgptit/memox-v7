@@ -7,11 +7,11 @@
 | **Scope** | Bảng, cột, index, quan hệ, query bất biến. Ngoài phạm vi: SQL runtime (`lib/core/database/`, chưa tồn tại) |
 | **Source of truth for** | Schema · cột và kiểu · index · query bất biến · thứ tự migration |
 | **Depends on** | `document-conventions.md`, `architecture.md`, `business-rules.md` |
-| **Updated by task** | M99.33 — Trash: bảng `delete_batches`, cột `delete_batch_id` trên `decks`/`cards`, `end_reason = content_deleted`, bất biến 33…37, và bất biến 1…5/15/29 đo trên hàng đang active · M99.28 — `app_settings.theme_mode` và `app_settings.language` (BR-214, BR-215), migration v9, và bảng thứ tự migration bổ sung v6/v7 vốn bị bỏ sót · M99.29 — ba cột nhắc học trên `app_settings`, migration v10 (nhánh nguồn chia làm hai bước v8 và v9; cả hai số đó đã thuộc feature khác) |
-| **Last updated** | 2026-08-13 |
+| **Updated by task** | M100.10 — `decks.sibling_position`, index sibling và migration v12 giữ thứ tự cũ; M99.33 — Trash: bảng `delete_batches`, cột `delete_batch_id` trên `decks`/`cards`, `end_reason = content_deleted`, bất biến 33…37, và bất biến 1…5/15/29 đo trên hàng đang active · M99.28 — `app_settings.theme_mode` và `app_settings.language` (BR-214, BR-215), migration v9, và bảng thứ tự migration bổ sung v6/v7 vốn bị bỏ sót · M99.29 — ba cột nhắc học trên `app_settings`, migration v10 (nhánh nguồn chia làm hai bước v8 và v9; cả hai số đó đã thuộc feature khác) |
+| **Last updated** | 2026-08-31 |
 
 Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm ở
-`lib/core/database/tables/`, hiện ở **schema v10**.
+`lib/core/database/tables/`, hiện ở **schema v12**.
 
 **`review` vẫn còn nghĩa thứ hai trong repo, và nó không đổi.** Ở `docs/reviews/`,
 "vòng review UI/UX", "code review" — đó là *rà soát*, không phải *ôn tập*. Đợt đổi
@@ -103,6 +103,7 @@ deck_templates (asset JSON ở MVP)
 | `id` | TEXT PK | UUID sinh phía client (AD-03) |
 | `name` | TEXT NOT NULL | BR-01 |
 | `parent_deck_id` | TEXT NULL | NULL = root deck. → `decks(id)` ON DELETE CASCADE |
+| `sibling_position` | INTEGER NOT NULL | Thứ tự người dùng đặt trong đúng nhóm `parent_deck_id`; `id` là tie-break deterministic (BR-268) |
 | `root_deck_id` | TEXT NOT NULL | root có `root_deck_id = id`; descendant mang id của root (BR-56) |
 | `content_type` | TEXT NOT NULL | `'unset'` \| `'card'` \| `'deck'` (BR-60…BR-66, BR-163) |
 | `owner_id` | TEXT NULL | NULL = local profile (AD-03) |
@@ -177,18 +178,23 @@ Deck con để NULL và tra qua `root_deck_id` (BR-06). Đây là cách khiến 
 không chọn scheduler riêng" bất khả thi về cấu trúc, thay vì chỉ là quy ước.
 
 Index — composite, và thứ tự cột theo đúng thứ tự query lọc rồi sắp:
-- `idx_decks_parent_created` trên `(parent_deck_id, created_at, id)` — dựng cây
+- `idx_decks_parent_position` trên `(parent_deck_id, sibling_position, id)` — dựng cây
   (`rootDecks`, `childDecks`)
-- `idx_decks_root_created` trên `(root_deck_id, created_at, id)` — mọi query gộp
+- `idx_decks_root_position` trên `(root_deck_id, sibling_position, id)` — mọi query gộp
   theo cây (`decksInTree`, `allDecks`, hai subquery của `rootDeckSummaries`)
 
 Mọi query đọc deck đều lọc theo một trong hai cột dẫn đầu rồi `ORDER BY
-created_at, id`. Với index chỉ một cột, cả ba đều kết thúc bằng `USE TEMP B-TREE
+sibling_position, id`. Với index chỉ một cột, cả ba đều kết thúc bằng `USE TEMP B-TREE
 FOR ORDER BY` — SQLite đọc hết row khớp rồi sắp, trước khi áp bất kỳ `LIMIT` nào.
 Đo bằng `EXPLAIN QUERY PLAN`: thêm cột sắp vào index thì temp B-tree biến mất, và
 subquery `total` của `rootDeckSummaries` trở thành **covering** (không chạm bảng).
 Index composite thay thế bản một cột chứ không cộng thêm: cùng cột dẫn đầu thì nó
 trả lời được mọi lookup cũ, giữ cả hai chỉ khiến mỗi insert bảo trì hai B-tree.
+
+Migration v12 thêm `sibling_position` với default 0 rồi backfill theo thứ tự
+lịch sử `(created_at, id)` trong từng `parent_deck_id` (kể cả NULL của root).
+Vì vậy upgrade không tự đổi thứ tự thư viện; chỉ một Reorder sau đó mới đổi vị
+trí người dùng nhìn thấy.
 
 ## `cards`
 

@@ -292,6 +292,8 @@ class _DeckLevel extends ConsumerWidget {
         ),
         DeckListSliverWidget(
           summaries: visible,
+          manualSummaries: snapshot.decks,
+          isManualSort: sort == DeckListSort.manual,
           onClearFilter: () => onFilterChanged(DeckListFilter.all),
         ),
       ],

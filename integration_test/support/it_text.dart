@@ -33,9 +33,10 @@ abstract final class ItText {
   /// `lib/` — the same rename that left four deck goldens a version behind.
   static const String studyTab = 'Study';
   static const String cardEditorClose = 'Close';
+  static const String cardEditorBack = 'Back';
   static const String detailsToggle = 'Add details';
   static const String detailsLabel = 'Details';
-  static const String deleteCard = 'Delete card';
+  static const String deleteCard = 'Move to Trash';
   static const String flagCard = 'Flag card';
   static const String unflagCard = 'Remove flag';
   static const String addTagHint = 'Add tag';

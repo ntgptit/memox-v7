@@ -66,6 +66,7 @@ void main() {
         'id',
         'name',
         'parent_deck_id',
+        'sibling_position',
         'root_deck_id',
         'content_type',
         'owner_id',
@@ -297,8 +298,8 @@ void main() {
       'idx_cards_deck_created',
       'idx_cards_delete_batch',
       'idx_decks_delete_batch',
-      'idx_decks_parent_created',
-      'idx_decks_root_created',
+      'idx_decks_parent_position',
+      'idx_decks_root_position',
       'idx_delete_batches_deleted',
       'idx_study_answers_card',
       'idx_study_answers_session',
@@ -328,13 +329,13 @@ void main() {
           'ORDER BY created_at ASC, id ASC',
       'rootDecks':
           'SELECT * FROM decks WHERE parent_deck_id IS NULL '
-          'ORDER BY created_at ASC, id ASC',
+          'ORDER BY sibling_position ASC, id ASC',
       'childDecks':
           "SELECT * FROM decks WHERE parent_deck_id = 'p' "
-          'ORDER BY created_at ASC, id ASC',
+          'ORDER BY sibling_position ASC, id ASC',
       'decksInTree':
           "SELECT * FROM decks WHERE root_deck_id = 'r' "
-          'ORDER BY created_at ASC, id ASC',
+          'ORDER BY sibling_position ASC, id ASC',
     };
 
     for (final MapEntry<String, String> read in reads.entries) {

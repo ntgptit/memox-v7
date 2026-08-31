@@ -34,7 +34,7 @@ import '../tables/cards.drift';
 rootDecks:
 SELECT * FROM decks
 WHERE parent_deck_id IS NULL AND delete_batch_id IS NULL
-ORDER BY created_at ASC, id ASC;
+ORDER BY sibling_position ASC, id ASC;
 
 -- Root decks with their aggregate progress — the whole of UC-06 step 1 in ONE
 -- statement (M4.10).
@@ -169,7 +169,7 @@ LEFT JOIN (
     GROUP BY parent_deck_id
 ) sub ON sub.parentId = d.id
 WHERE d.parent_deck_id IS NULL AND d.delete_batch_id IS NULL
-ORDER BY d.created_at ASC, d.id ASC;
+ORDER BY d.sibling_position ASC, d.id ASC;
 
 -- Every deck in the database, ordered so a tree can be rebuilt from it.
 --
@@ -185,7 +185,7 @@ ORDER BY d.created_at ASC, d.id ASC;
 allDecks:
 SELECT * FROM decks
 WHERE delete_batch_id IS NULL
-ORDER BY root_deck_id ASC, created_at ASC, id ASC;
+ORDER BY root_deck_id ASC, sibling_position ASC, id ASC;
 
 -- **The active deck, or no row at all.** Every write path in the Deck and Card
 -- features reads through this, and each turns a missing row into
@@ -199,7 +199,7 @@ SELECT * FROM decks WHERE id = :deckId AND delete_batch_id IS NULL;
 decksInTree:
 SELECT * FROM decks
 WHERE root_deck_id = :rootDeckId AND delete_batch_id IS NULL
-ORDER BY created_at ASC, id ASC;
+ORDER BY sibling_position ASC, id ASC;
 
 -- One deck and its direct children, each child carrying the aggregate of its
 -- WHOLE subtree — the same three facts `rootDeckSummaries` gives a root.
@@ -372,7 +372,22 @@ LEFT JOIN (
     GROUP BY parent_deck_id
 ) sub ON sub.parentId = child.id
 WHERE parent.id = :parentId AND parent.delete_batch_id IS NULL
-ORDER BY child.created_at ASC, child.id ASC;
+ORDER BY child.sibling_position ASC, child.id ASC;
+
+-- The next append position in one sibling group. `IS` intentionally handles
+-- the NULL parent of root decks as one group too.
+nextSiblingPosition:
+SELECT COALESCE(MAX(sibling_position), -1) + 1 AS nextPosition
+FROM decks
+WHERE parent_deck_id IS :parentDeckId AND delete_batch_id IS NULL;
+
+-- Read in the same deterministic order ReorderDeck mutates. This is a write
+-- helper rather than a UI list: the repository calls it inside its transaction
+-- after re-reading both referenced active rows.
+siblingDecks:
+SELECT * FROM decks
+WHERE parent_deck_id IS :parentDeckId AND delete_batch_id IS NULL
+ORDER BY sibling_position ASC, id ASC;
 
 -- Where a card may move to (BR-165).
 --

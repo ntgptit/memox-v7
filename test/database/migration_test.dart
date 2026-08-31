@@ -14,11 +14,11 @@ import '../drift/generated/schema.dart';
 /// below starts from `drift_schemas/drift_schema_v1.json`, which could not have
 /// been regenerated once the `.drift` files moved on.
 void main() {
-  test('the schema version is 11', () {
+  test('the schema version is 12', () {
     final db = AppDatabase(NativeDatabase.memory());
     addTearDown(db.close);
 
-    expect(db.schemaVersion, 11);
+    expect(db.schemaVersion, 12);
   });
 
   test('onCreate builds the whole of v9 from an empty database', () async {
@@ -70,8 +70,21 @@ void main() {
     }
   });
 
-  test('v1 through v11 are the versions that exist', () {
-    expect(GeneratedHelper.versions, <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+  test('v1 through v12 are the versions that exist', () {
+    expect(GeneratedHelper.versions, <int>[
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+    ]);
   });
 
   group('what v2 added, seen from a v1 database', () {

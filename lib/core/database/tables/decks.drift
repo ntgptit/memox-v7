@@ -19,6 +19,11 @@ CREATE TABLE decks (
     -- NULL marks a root deck.
     parent_deck_id TEXT NULL REFERENCES decks (id) ON DELETE CASCADE,
 
+    -- The user's order among decks with the same parent. It is deliberately
+    -- separate from created_at: creation time is immutable history, while this
+    -- value changes only when a user reorders siblings.
+    sibling_position INTEGER NOT NULL DEFAULT 0,
+
     -- Every deck carries the id of its root; a root carries its own (BR-56).
     --
     -- Walking `parent_deck_id` upwards needs recursion and cannot be written as
@@ -85,16 +90,16 @@ CREATE TABLE decks (
 );
 
 -- Both composite, and both in the order the queries actually use. Every deck
--- read filters on one of these two columns and sorts by `created_at, id`:
+-- read filters on one of these two columns and sorts by `sibling_position, id`:
 -- `rootDecks` (parent IS NULL), `childDecks` (parent = ?), `decksInTree`
 -- (root = ?). With only the leading column indexed, all three ended in
 -- `USE TEMP B-TREE FOR ORDER BY`.
 --
 -- Each replaces its single-column predecessor rather than joining it — see the
 -- note in `cards.drift` for why keeping both would be a cost with no benefit.
-CREATE INDEX idx_decks_parent_created ON decks (parent_deck_id, created_at, id);
+CREATE INDEX idx_decks_parent_position ON decks (parent_deck_id, sibling_position, id);
 
-CREATE INDEX idx_decks_root_created ON decks (root_deck_id, created_at, id);
+CREATE INDEX idx_decks_root_position ON decks (root_deck_id, sibling_position, id);
 
 -- Restore and purge both select "every row of this batch", and that is the only
 -- read this index serves; the active path never looks a batch up by id.

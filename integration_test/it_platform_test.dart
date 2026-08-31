@@ -83,10 +83,10 @@ void main() {
     // Since M99.31 a tap opens the read-only detail; the editor is one
     // explicit action away (UC-19).
     await robot.tapBySemantics('Edit card');
-    // By semantics, not by text: the editor's flag and close are icons carrying
+    // By semantics, not by text: the editor's flag and back are icons carrying
     // their label as a tooltip, so there is no text on screen to tap.
     await robot.tapBySemantics(ItText.flagCard);
-    await robot.tapBySemantics(ItText.cardEditorClose);
+    await robot.tapBySemantics(ItText.cardEditorBack);
 
     // Step 3, as far as one process can go: the tree is discarded and the
     // executor is closed. See the file comment — this is not an OS kill.
