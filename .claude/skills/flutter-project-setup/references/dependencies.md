@@ -22,7 +22,7 @@ does.
 | `go_router` | 14+ | Declarative routing, deep links, redirect guards. |
 | `dio` | 5.x | HTTP with interceptors, cancellation and typed errors. **Deferred — see above.** |
 | `drift` | 2.x | Typed SQLite with migrations and reactive queries. |
-| `sqlite3_flutter_libs` | — | Ships the SQLite binary. Required by Drift on mobile. |
+| ~~`sqlite3_flutter_libs`~~ | — | **Do not add it.** The only version compatible with current Drift is `0.6.0+eol` — a tombstone with no native code in it. `sqlite3` 3.x supplies the native library through native assets instead, so Drift on mobile needs no separate package. Removed from this project at M2.2; the row is struck rather than deleted because a session that has seen the old advice will look for it here. |
 | `path_provider` | — | Locates the database directory. |
 | `path` | — | Joins that path portably. |
 | `freezed_annotation` | — | Immutable data classes, unions, `copyWith`. |
@@ -82,12 +82,12 @@ generated file committed stale (Phase 19.1).
   Do **not** put `analyzer: plugins: - custom_lint` in `analysis_options.yaml`:
   a plugin declared but not installed is silently ignored, so the rules look
   configured and never run.
-- **Drift needs `sqlite3_flutter_libs`** on mobile or it fails at runtime, not
-  build time — an easy one to miss until a device test.
-- **`flutter_secure_storage` on Android** needs `minSdkVersion` 23+ for the
-  EncryptedSharedPreferences backend.
-- **`intl` version conflicts** with `flutter_localizations` regularly. Let pub
-  resolve it rather than pinning `intl` by hand.
+- **Drift does NOT need `sqlite3_flutter_libs`** any more, and adding it is the
+  mistake this line used to cause. That package is now `0.6.0+eol` — a tombstone
+  that ships no native code — and `sqlite3` 3.x supplies the native library
+  through native assets. On mobile Drift works with `sqlite3` alone. If a
+  runtime failure to open the database sends you looking for a missing native
+  lib, check the `sqlite3` version rather than reaching for the dead package.
 
 ## Auditing what is already there
 
