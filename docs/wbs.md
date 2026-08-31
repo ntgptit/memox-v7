@@ -16144,17 +16144,85 @@ vốn cũng cần thiết bị.
 - **Checklist phases:** 12.
 - **Dependencies:** M100.9.
 
+### M100.11 · Ba nợ tooling, và cái cũ nhất trong sổ
+
+- **Goal:** Trả ba dòng nợ hạ tầng làm được ngay mà không cần thiết bị — trong
+  đó một dòng ghi từ **T0.1**, cũ nhất bảng.
+- **Status:** **done** — không chạm `lib/`, 0 golden đổi.
+- **Scope:** `.claude/skills/` (2 script, 1 tài liệu), `docs/wbs.md`.
+
+#### T0.1 · `check_architecture.sh` chưa có test tự động
+
+Một guard không ai kiểm là một guard có thể **thôi tìm thấy gì** mà vẫn in dấu
+tick — tệ hơn không có guard, vì cái tick được tin.
+
+`test_architecture_checker.py` dựng một dự án tạm rồi trồng đúng một vi phạm mỗi
+lần:
+
+| fixture | kỳ vọng |
+|---|---|
+| dự án sạch | exit 0 — nếu không, mọi thất bại dưới đây thành không quy được về đâu |
+| `domain/` import Flutter | exit 1 **và** gọi tên file |
+| thiếu suffix `_entity` | **cảnh báo**, exit 0 |
+| có `pubspec.yaml` mà không có `lib/` | exit 1 — ghim lại mitigation M4.10b |
+
+- **Chỗ tôi sai và đã sửa:** bản đầu khẳng định thiếu suffix là **lỗi**. Đọc code
+  thì `_check_suffixes` và `_check_file_sizes` gọi `_warn`, chỉ `_check_imports`
+  và zero-scope gọi `_fail`. Nay ghim **cả hai chiều**: nếu rule được nâng lên
+  thành lỗi thì test đỏ và việc nâng phải là cố ý; nếu nó thôi in ra thì cũng đỏ.
+- **Đặt ở `scripts/tests/` chứ không `test/tools/`** như ghi chú T0.1 dự tính:
+  đó là thư mục `unittest discover` của gate `ci_tooling` đã quét, nên test chạy
+  ở cả `dod_check.sh` lẫn CI mà không phải nối dây gì thêm.
+
+#### M2.2 · `.fvmrc` khai báo chứ không cưỡng chế
+
+Lỗi này **đã xảy ra thật**: M2.1 chạy 3.44.8, phiên sau khởi động trên 3.44.6,
+không có gì phát hiện. CI đã đóng một nửa bằng `flutter-version-file`; nửa còn
+lại là máy lập trình viên, và đó chính là chỗ đã trôi.
+
+`check_flutter_version.sh` so `flutter --version` với `.fvmrc`.
+**Planned như một gate chứ không chạy trước pass stamp** — header của
+`dod_check.sh` giải thích rõ vì sao: trả `flutter --version` ở **mọi** lần gọi
+sẽ ngốn gần hết thứ mà stamp tiết kiệm được. Nên nó chạy khi gate thật sự chạy,
+song song với các gate khác, và gần như miễn phí về wall-clock. Lỗ mà stamp để
+lại vẫn nguyên và vẫn được ghi ở đó; cái đóng lại là trường hợp gate có chạy.
+
+Kiểm bằng tiêm lỗi: đổi `.fvmrc` thành `9.9.9` → đỏ, kèm chỉ dẫn sửa bằng
+`fvm use` chứ **không** sửa `.fvmrc` (vì CI đọc cùng file đó).
+
+#### M2.2 · `dependencies.md` vẫn liệt kê `sqlite3_flutter_libs`
+
+Skill nói sai còn tệ hơn không có skill — phiên sau sẽ đọc và cài lại một
+tombstone. Dòng bảng nay **gạch kèm lý do** thay vì xoá, vì phiên nào đã đọc lời
+khuyên cũ sẽ quay lại tìm đúng chỗ đó; và đoạn văn "Drift needs …" đảo thành
+"Drift does **NOT** need …" kèm chỉ dẫn: lỗi mở database thì đi kiểm version
+`sqlite3`, đừng với lấy package chết.
+
+- **Acceptance criteria:**
+  - [x] Guard architecture có fixture tiêm lỗi, 5 test, chạy trong `ci_tooling`.
+  - [x] Fixture sạch pass — mọi thất bại còn lại quy được về đúng cái đã trồng.
+  - [x] Sai lệch SDK làm gate đỏ; kiểm bằng tiêm lỗi.
+  - [x] Pass stamp vẫn short-circuit như cũ — gate mới không nằm trước nó.
+  - [x] `dependencies.md` không còn khuyên cài package EOL.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** `test_architecture_checker.py`, `check_flutter_version.sh`,
+  `dod_check.sh` (+1 gate), `dependencies.md`, 3 dòng nợ gạch.
+- **Tests required:** `unittest discover` trong `scripts/tests/`; `dod_check.sh`.
+- **Emulator integration suite:** **not run** — không chạm code chạy trên thiết bị.
+- **Checklist phases:** 0.
+- **Dependencies:** M100.10.
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |
 |---|---|---|---|
-| `check_architecture.sh` chưa có test tự động | T0.1 | Regression trong checker âm thầm ngừng enforce boundary | Fixture trong `test/tools/` khi `test/` tồn tại (M6). **Giảm nhẹ ở M4.10b:** script tự in số file nó quét và coi 0 là lỗi, nên trường hợp tệ nhất — checker ngừng thấy gì mà vẫn pass — không còn im lặng. Vẫn cần fixture cho các trường hợp còn lại |
+| ~~`check_architecture.sh` chưa có test tự động~~ | T0.1 | Regression trong checker âm thầm ngừng enforce boundary | **Đã trả ở M100.11.** `test_architecture_checker.py` trong bộ CI tooling — bốn fixture tiêm lỗi: dự án sạch pass, `domain/` import Flutter thì đỏ và gọi tên file, thiếu suffix thì **cảnh báo** (ghim cả hai chiều, vì `_check_suffixes` gọi `_warn` chứ không `_fail`), và pubspec-không-lib thì đỏ. Đặt ở `scripts/tests/` chứ không `test/tools/` vì đó là nơi `unittest discover` của gate `ci_tooling` đã quét. Ghi chú gốc: **Giảm nhẹ ở M4.10b:** script tự in số file nó quét và coi 0 là lỗi, nên trường hợp tệ nhất — checker ngừng thấy gì mà vẫn pass — không còn im lặng. Vẫn cần fixture cho các trường hợp còn lại |
 | ~~Không có CI~~ | T0.1 | Sáu gate tồn tại và chỉ chạy khi có người nhớ; một PR có thể merge với format lệch, guard đỏ hoặc test hỏng mà không ai thấy | **Đã trả ở M4.10b.** `.github/workflows/ci.yml` chạy trên `pull_request` và `push` vào `main`: format, analyze, generated-code, architecture, guard, docs, 844 test, golden, và build web |
 | ~~`analysis_options.yaml` chưa được áp dụng~~ | T0.1 | Bộ lint đã viết nhưng chưa được enforce; nhiều khả năng có tên rule sai hoặc đã deprecated | **Đã trả ở M2.3.** Dự đoán đúng: `immutable_classes` không tồn tại, `use_if_null_to_convert_nulls_to_bools` đã deprecated. Nghiêm trọng hơn cả hai: 11 rule chỉ nằm ở `errors:` nên **chưa bao giờ chạy** — đã chuyển hết sang `linter: rules:` và kiểm chứng bằng tiêm lỗi |
 | ~~14 query bất biến chưa chạy trên database thật~~ | T1.3 | Bất biến mới được verify trên fixture Python, chưa chạm schema Drift nào | **Đã trả một phần ở M4.4.** Cả 14 chạy trên database SQLite thật do schema production tạo — 30 test, mỗi bất biến hai chiều, cộng một test chứng minh một khiếm khuyết chỉ kích hoạt đúng những bất biến thật sự phủ nó. `check_docs.sh --db` cũng chạy đủ 14 (trước đó chép tay **10/14** và vẫn báo thành công). **Chưa trả:** vẫn là database tạm trong test, chưa phải dữ liệu người dùng thật — cái đó cần M8 |
-| Pin Flutter ở `.fvmrc` **khai báo** chứ không **cưỡng chế** | M2.2 | Chạy `flutter` trực tiếp trên máy có version khác vẫn build được và không cảnh báo. Đây đúng là lỗi đã xảy ra: M2.1 chạy 3.44.8, phiên sau khởi động trên 3.44.6, không có gì phát hiện ra | **Đã trả một nửa ở M4.10b:** cả hai job CI dùng `flutter-version-file: .fvmrc`, nên `.fvmrc` là nguồn duy nhất và CI không thể lệch. **Chưa trả:** máy lập trình viên vẫn chạy version nào cũng được — cần một check so `flutter --version` với `.fvmrc` trong `dod_check.sh` |
+| ~~Pin Flutter ở `.fvmrc` **khai báo** chứ không **cưỡng chế**~~ | M2.2 | Chạy `flutter` trực tiếp trên máy có version khác vẫn build được và không cảnh báo. Đây đúng là lỗi đã xảy ra: M2.1 chạy 3.44.8, phiên sau khởi động trên 3.44.6, không có gì phát hiện ra | **Đã trả một nửa ở M4.10b:** cả hai job CI dùng `flutter-version-file: .fvmrc`, nên `.fvmrc` là nguồn duy nhất và CI không thể lệch. **Chưa trả:** máy lập trình viên vẫn chạy version nào cũng được — **Đã trả ở M100.11:** `check_flutter_version.sh`, planned như một gate nên chỉ chạy khi gate thật sự chạy — pass stamp vẫn short-circuit trong ~0.4s, đúng như header của `dod_check.sh` giải thích. Kiểm bằng tiêm lỗi |
 | ~~7 file skill vẫn bảo chạy `dart run custom_lint`~~ | M2.2 | Skill vẫn hướng dẫn cài và chạy một package không cài được; phiên sau sẽ tin skill và loay hoay | **Đã trả ở M2.2b.** Cả 7 file đã trỏ sang guard. `docs/checklist.md` **cố ý giữ nguyên**: nó `frozen for MVP`, và mục "Ngoài phạm vi: mọi quyết định riêng của memox" nói rõ nó mô tả quy trình 22 phase chung — `custom_lint` ở đó là khuyến nghị Flutter phổ thông, còn quyết định riêng của memox sống ở file này (§5 canonical location) |
-| `dependencies.md` vẫn liệt kê `sqlite3_flutter_libs` | M2.2 | Package đó nay là tombstone (`0.6.0+eol`, không có native code). Skill nói sai còn tệ hơn không có skill — phiên sau sẽ cài lại nó | Sửa `.claude/skills/flutter-project-setup/references/dependencies.md`: thay bằng ghi chú rằng `sqlite3` 3.x cấp native lib qua native assets. Ngoài `Editable documents` của M2.2 nên chưa sửa ở đây |
+| ~~`dependencies.md` vẫn liệt kê `sqlite3_flutter_libs`~~ | M2.2 | Package đó nay là tombstone (`0.6.0+eol`, không có native code). Skill nói sai còn tệ hơn không có skill — phiên sau sẽ cài lại nó | **Đã trả ở M100.11.** Sửa `.claude/skills/flutter-project-setup/references/dependencies.md`: thay bằng ghi chú rằng `sqlite3` 3.x cấp native lib qua native assets. Ngoài `Editable documents` của M2.2 nên chưa sửa ở đây |
 | ~~`app_colors.dart` vượt trần 400 dòng của guard~~ | M99.4, **tái phát M99.94–M100.0** | Guard báo `no_large_source_file` (406/400). Cảnh báo chứ không lỗi nên CI vẫn xanh, nhưng **file đang ở đúng trần**: token tiếp theo bất kỳ cũng sẽ vượt, và `borderControl` chỉ tình cờ là cái đầu tiên | **Đã trả ở M99.5.** Khối `// --- Material roles` tách ra `lib/core/theme/app_material_roles.dart` (`AppMaterialRoles`), `app_colors.dart` còn 339 dòng. `part` vẫn không dùng được — Dart không có partial class. Chạm nhiều hơn 4 file đã dự đoán: hai allowlist (`color_source_rules_test.dart`, `audit_scan_steps.dart`) và **scanner của audit** cũng phải biết tên lớp mới, xem M99.6 **Tái phát và đã trả lại ở M100.1.** Bốn token mới (`surfaceEmphasis`, `surfaceSelected`, `borderSelected`, `borderDivider`) cùng phép đo giải thích từng cái đưa file từ 407 lên 513. Tách theo vai trò, đúng cách M99.5 đã làm: `AppSurfaceColors` và `AppBorderColors`, file gốc còn **309**. Bài học lặp lại nguyên vẹn — allowlist R2 của `color_source_rules_test.dart` lại phải học tên file mới, y như ghi chú M99.5 đã cảnh báo. |
 | ~~`study_session_controller.dart` vượt trần 400 dòng của guard~~ | M5.23 | 408/400, và **warning cũng làm đỏ gate**. Class giữ toàn bộ command của phiên học, cộng summary và failure policy | **Đã trả trong cùng PR.** Tách `_loadSummary` + `StudySessionState.summary` thành `studySessionSummaryProvider` — một **query**, không phải command, nên nó chưa bao giờ thuộc về controller. Controller còn 380 dòng. Lợi ích thật chứ không chỉ số dòng: read cũ có ba call site (hết stage, leave, failure path) nên summary chỉ đúng bằng người cuối cùng nhớ đủ cả ba, và field thì sống lâu hơn phiên — quên một call site là hiện số của phiên trước dưới tiêu đề phiên mới |
 | ~~`dart format .` trong `dod_check.sh` crash trên worktree~~ | M2.2b | Bước `format` đỏ ở **mọi** lần chạy local nhiều tuần liền: `.` đi vào `.claude/worktrees/`, nơi Gradle xoá thư mục ngay giữa lúc formatter đang liệt kê → `PathNotFoundException`. Vì là lỗi môi trường chứ không phải lỗi format, mỗi lần lại được *báo cáo và đi vòng* thay vì sửa — và một gate đỏ mà ai cũng biết là đỏ thì không còn là gate | **Đã trả.** `dart_roots()` lấy tập thư mục từ `git ls-files '*.dart'` cắt tới segment đầu. Đúng câu hỏi cần hỏi — *cây làm việc **này** track những file Dart nào* — nên build output không tracked không lọt vào, worktree bị `.git/info/exclude` loại sẵn, và một thư mục top-level mới tự động được nhận. **Lỗi thứ hai nghiêm trọng hơn cái crash:** `.` đưa cho formatter source của **nhánh khác**, nên một worktree có format cũ làm gate đỏ vì code không nằm trong cây làm việc |
