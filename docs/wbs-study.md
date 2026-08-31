@@ -907,12 +907,12 @@ phán quyết trước khi người dùng trả lời.
 
 | Nợ | Vì sao còn | Đóng ở |
 |---|---|---|
-| Controller đọc thẳng repository ở 4 chỗ | không phép kiểm nào bắt được; guard kiểm import, không kiểm lời gọi | M5.8 |
+| ~~Controller đọc thẳng repository ở 4 chỗ~~ | không phép kiểm nào bắt được; guard kiểm import, không kiểm lời gọi | M5.8 — xác minh lại ở M100.9: cả bốn controller nay dựng use case (`WatchStudyEntryUseCase(ref.watch(studyRepositoryProvider))`), đúng chiều AD-12 |
 | ~~`study_config` chưa được parse~~ | `study_config_mapper.dart` parse và ghi; hỏng thì về mặc định | xong ở M5.11 |
 | ~~BR-120 chưa có test~~ | chủ dự án chốt `eight_box` chỉ có đúng/sai nên `almost` không dựng; nửa "chỉ nhận action canonical" nay bị chặn trong transaction và có test | xong ở M5.13 |
 | ~~BR-83 chưa có caller~~ | UC-07 dựng ở M5.21; Deck gọi `invalidateSessionsForRoot` trong chính transaction của reset | xong ở M5.14 |
 | ~~`remaining_ms` chưa được nối vào UI resume~~ | `RecallTimerSectionWidget` nhận `initialRemaining` từ queue item; test BR-133 ở `recall_fill_widget_test.dart` | xong ở M5.9 |
-| Widget mode chưa ai dựng trong `lib/` | chưa có màn ghép | M5.7 |
+| ~~Widget mode chưa ai dựng trong `lib/`~~ | chưa có màn ghép | M5.7 — xác minh lại ở M100.9: `FillAnswerSectionWidget` (2 file), `MatchBoardSectionWidget` (3), `RecallTimerSectionWidget` (2), `GuessQuestionSectionWidget` (2) |
 | Hẹn giờ due-boundary có hai bản | `kMaxDueBoundaryDelay` và vòng arm/cancel nằm trong `deck_list_controller.dart`, mà `features/deck/presentation/` là thứ feature khác không được import; Study Home vì vậy có bản riêng | chưa xếp — tách xuống `core/time/` khi có caller thứ ba |
 | Study Home giữ subscription khi một phiên đang che nó | Mỗi lượt chấm thẻ ghi `card_study_states`, nên Home nhận một signal và trả **1 `BEGIN` + 2 `SELECT`** (đo trong `study_home_test.dart`, ca `one signal costs one transaction and two statements`). Đã cân nhắc và **chấp nhận**: chi phí thật nằm ở ba lượt quét `cards` chứ không ở transaction, nên dispose chỉ dời nó sang lúc quay lại — mà dispose lại mở đúng cửa sổ cold-start vừa vá ở lượt review này, và `_resume` đang dựa vào việc stream sống suốt để không phải refresh thủ công | đo lại khi một thư viện vượt ~5k thẻ |
 | ~~Ảnh wireframe chưa có trong repo~~ | chủ dự án đã thả vào `wireframes/assets/m5-study-modes/` | xong |
@@ -922,7 +922,7 @@ phán quyết trước khi người dùng trả lời.
 | ~~`pause()` không có caller — nửa **ghi** của BR-133~~ | `RecallTimerSectionWidget.onSuspended` bắn khi app rời foreground với lượt còn mở; màn hình gọi `pause()`. Round-trip có test trên SQLite thật | xong |
 | ~~Màn Study chưa có mặt trong Widgetbook~~ | `StudyCatalogRepository` là fake riêng của catalog; ba màn Study đã đăng ký | xong ở M5.16 |
 | ~~Kịch bản IT đỏ~~ | Bảy nguyên nhân, tất cả đã vá; suite trở lại **66/66** | xong |
-| 13 golden `fill` được rasterise trên Linux | phiên làm việc này không có Windows; repo chốt golden là pixel Windows (`dart_test.yaml`, job `goldens (windows)` của `ci-full`). Ảnh đúng về bố cục, sai về antialias — cùng lệch ~0,37% mà mọi golden Study đang có khi chạy trên Linux | chạy `flutter test --tags golden --update-goldens` trên Windows trước khi merge |
+| ~~13 golden `fill` được rasterise trên Linux~~ | phiên làm việc này không có Windows; repo chốt golden là pixel Windows (`dart_test.yaml`, job `goldens (windows)` của `ci-full`). Ảnh đúng về bố cục, sai về antialias — cùng lệch ~0,37% mà mọi golden Study đang có khi chạy trên Linux | **Đã trả, ghi vào sổ ở M100.9.** Sinh lại trên Windows ở `fae2b1e6` / `e6562752`; ở `963449c5` toàn bộ 303 golden pass **không** cần `--update-goldens` |
 | `fill` vẫn chỉ nhận thẻ có `example` (BR-114, BR-154) | đề bài nay là `back`, nên `example` không còn là dữ liệu mà stage cần — nhưng gỡ điều kiện là đổi **tập thẻ** của một stage, đụng `fillableCount`, BR-140 và màn chọn mode. Giữ nguyên có chủ đích để không mở rộng phạm vi | cần một quyết định sản phẩm riêng |
 
 ### Nửa **ghi** của BR-133, đóng sau M5.16
