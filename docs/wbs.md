@@ -10940,16 +10940,17 @@ của M2.
         đúng số lượng.
   - [x] Bất biến trả về 0 dòng trên database thật; migration v6/v7/v10→v11 xanh;
         host gate xanh.
-  - [ ] Hợp đồng geometry G1…G8 và responsive R1…R6 có assertion `getRect` /
-        `meetsGuideline` riêng — **chưa có**, xem Known gap.
-- **Dependencies:** M99.15 (BR-163), M99.16 (v7), M4.9a, M4.11
-- **Tests required:** SQLite thật cho bảng quyết định soft-delete/restore/purge
-  gồm depth 10, batch trộn, biên 30 ngày và rollback; migration v10 → v11 với dữ
-  liệu cũ mặc định active; invariant 33…37 hai chiều; controller/widget/router
-  cho mọi state của UC-21; cross-feature chứng minh Progress/Search/Study/Export
-  không rò Trash. **Emulator IT hoãn** — không chạy trong task này.
-- **Known gap (không đóng ở task này):** ba mục, tất cả đến từ UI/UX audit và
-  được ghi lại thay vì sửa vội.
+  - [x] Hợp đồng geometry G1…G8 và responsive R1…R6 có assertion — đóng ở
+        M100.10 bằng `trash_geometry_test.dart`: **G1** (chip, dòng giải thích và
+        glyph dẫn đầu của hàng cùng ở gutter 16), **G2** (ghim vi phạm 16dp, xem
+        dưới), **G3** (ba dòng chữ cùng mép 48, icon loại ở ngoài), **G7** (đọc
+        theo trục thật của `MxButtonPair`), **R1** (320dp × 2.0 không tràn, và
+        `N days left` không phải dòng bị cắt), **R4** (mọi icon-only control có
+        `semanticLabel`). Bảy contract còn lại được ghi ở cuối file test kèm lý
+        do không đo được — một contract chưa đo mà không ai ghi là chưa đo thì
+        nhìn giống hệt một contract đã đạt.
+  - [ ] **Gate `integration_test/` của `CLAUDE.md` — chưa chạy.** Gate local
+        trên máy có emulator; máy hiện tại chỉ có Chrome và Edge.
   - **Không có test geometry/semantics nào cho Trash.** Wireframe chốt G1…G8 và
     R1…R6, và hiện không có `getRect`, không golden, không `meetsGuideline`,
     không test 320dp@2.0 hay VI/dark cho màn này. Hai lỗi tràn thật (thanh chọn
@@ -10972,6 +10973,14 @@ của M2.
   **chưa** có là một cặp mắt độc lập trên đúng những chỗ prompt gọi là rủi ro
   cao: chuỗi lifecycle trông-như-đồng-thời, và độ sâu 10 với batch trộn ngoài
   các case đã viết. Nên chạy lại review đó trước khi coi phase 6 là xong.
+- **Dependencies:** M99.15 (BR-163), M99.16 (v7), M4.9a, M4.11
+- **Tests required:** SQLite thật cho bảng quyết định soft-delete/restore/purge
+  gồm depth 10, batch trộn, biên 30 ngày và rollback; migration v10 → v11 với dữ
+  liệu cũ mặc định active; invariant 33…37 hai chiều; controller/widget/router
+  cho mọi state của UC-21; cross-feature chứng minh Progress/Search/Study/Export
+  không rò Trash. **Emulator IT hoãn** — nay là một tiêu chí riêng ở phần
+  Acceptance, xem M100.9.
+  Bổ sung ở M100.10: `trash_geometry_test.dart` cho G1/G2/G3/G7/R1/R4.
 - **Checklist phases:** 10, 11, 14, 15
 
 ### M99.34 · Verification plan theo feature × layer × risk
@@ -16077,6 +16086,63 @@ vốn cũng cần thiết bị.
   lại vì sao gate đó chưa chạy được.
 - **Checklist phases:** 0.
 - **Dependencies:** M100.8.
+
+### M100.10 · Trash có phép đo — và phép đo tìm ra một lỗi thật ngay hôm đầu
+
+- **Goal:** Đóng mục còn lại **không phải gate thiết bị** của M99.33: hợp đồng
+  geometry `G1…G8` và responsive `R1…R6` chưa có assertion nào. Đợt đối soát
+  M100.9 xác nhận bằng code: `test/features/trash/presentation/` có **0** lần
+  dùng `getRect`.
+- **Status:** **done** — 7 test mới, toàn bộ 4 073 test host xanh.
+- **Scope:** `test/features/trash/presentation/trash_geometry_test.dart`.
+- **Đo được và đã ghim — 6 contract:**
+
+  | | nội dung | đo ra |
+  |---|---|---|
+  | G1 | chip, dòng giải thích và hàng cùng một mép trái | cả ba ở **16.0** (gutter) — đạt |
+  | G3 | ba dòng chữ cùng mép, icon loại ở ngoài | ba dòng ở **48.0**, glyph ở **16.0** — đạt |
+  | G7 | Cancel ở start, huỷ vĩnh viễn ở end | đạt, xem "ba lần suýt báo sai" |
+  | R1 | 320dp × 2.0 không tràn; `N days left` không bị cắt | đạt |
+  | R4 | mọi icon-only control có `semanticLabel` | đạt |
+  | **G2** | **mép phải overflow hàng = mép phải overflow app bar** | **VI PHẠM 16dp** |
+
+- **G2 là lỗi thật, và test này tìm ra nó ngay lần chạy đầu.** Glyph kebab của
+  hàng kết thúc ở **R=365**, của app bar ở **R=381** — hai lề phải trên cùng một
+  màn, đúng thứ contract sinh ra để chặn.
+  - **Không sửa ở đây, và lý do là phạm vi chứ không phải độ khó.** Lề của app
+    bar là `actionsPadding` của Material, dùng chung bởi **mọi** màn — dời nó là
+    quyết định cấp kit. Bóp hàng lại thì hàng thành bất đối xứng, 16 trái so với
+    12 phải, mà G1 đang ghim mép trái đó.
+  - Nên test **ghim chính vi phạm** thay vì ghim contract, đúng thành ngữ
+    `app_high_contrast_test.dart` đã dùng (*"the normal theme is the one that
+    could not, and still cannot"*). Ai sửa xong thì test đỏ, và cách sửa là lật
+    nó thành đẳng thức G2 yêu cầu.
+- **Bảy contract không đo được, ghi ngay cuối file test kèm lý do:** G4 (baseline
+  — widget test đọc rect chứ không đọc baseline), G5 và G8 (cần `viewPadding`
+  thật và app shell), G6 (M99.33 đã ghi state 8 chưa dựng), R2/R5 (đã có ở
+  `trash_screen_test.dart`), R3 (thuộc về role, đã đo ở `app_palette_test` và
+  `control_border_grounds_test`), R6 (`MxUndoSnackBar` không có layout riêng).
+- **Ba lần suýt báo sai, cả ba do đo nhầm đối tượng — ghi lại vì nó là bài học
+  của cả đợt:**
+  1. G1 "vi phạm" vì tôi đo **text** thay vì đo thứ hàng **vẽ ra đầu tiên**. Hàng
+     là full-bleed từ x=0; cái mắt thấy là glyph ở 16.
+  2. G3 "vi phạm" vì tôi lấy `28 days left` làm dòng thứ ba. Nó nằm **cùng dòng**
+     với `Deleted 2 days ago`, không phải dòng riêng.
+  3. G7 "vi phạm" vì tôi áp hợp đồng **hàng ngang** lên một cặp nút **xếp dọc**.
+     `mx_button_pair.dart` ghi rõ thứ tự đó là cố ý — *"Right in a row, **top**
+     when stacked"*. Test nay đọc trục thật trước rồi mới khẳng định.
+- **Acceptance criteria:**
+  - [x] 6 contract có assertion chạy được; 7 contract còn lại có lý do ghi tại chỗ.
+  - [x] Vi phạm G2 được ghi ở dạng chạy được, không phải ở dạng ghi chú.
+  - [x] Không assertion nào khẳng định một contract mà layout không ở trong đó.
+  - [x] 4 073 test host xanh, `flutter analyze` sạch.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** 1 file test mới (7 test), M99.33 cập nhật.
+- **Tests required:** `test/features/trash/presentation/`.
+- **Emulator integration suite:** **not run** — M99.33 vẫn còn gate thiết bị, nay
+  là một ô riêng.
+- **Checklist phases:** 12.
+- **Dependencies:** M100.9.
 
 ## Known technical debt
 
