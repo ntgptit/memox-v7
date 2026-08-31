@@ -11,6 +11,7 @@ import '../../domain/entities/deck_entity.dart';
 import '../../domain/failures/deck_conflict_failure.dart';
 import '../../domain/failures/deck_move_failure.dart';
 import '../../domain/models/deck_name_model.dart';
+import '../../domain/models/deck_reorder_placement_model.dart';
 import '../../domain/repositories/deck_repository.dart';
 import '../../domain/models/deck_list_snapshot_model.dart';
 import '../../domain/models/scheduler_type_model.dart';
@@ -22,6 +23,7 @@ import '../datasources/deck_dao.dart';
 
 part 'delete_deck_repository_impl.dart';
 part 'move_deck_repository_impl.dart';
+part 'reorder_deck_repository_impl.dart';
 part 'deck_scheduler_repository_impl.dart';
 
 /// A fresh root deck starts at scheduler version 1, generation 1 (BR-40).
@@ -42,7 +44,11 @@ const int _initialSchedulerGeneration = 1;
 /// the part file as a private mixin, purely to keep each source file
 /// readable; it is one class and one library.
 final class DeckRepositoryImpl
-    with _DeleteDeckOperation, _MoveDeckOperation, _SchedulerWriteOperations
+    with
+        _DeleteDeckOperation,
+        _MoveDeckOperation,
+        _ReorderDeckOperation,
+        _SchedulerWriteOperations
     implements DeckRepository {
   DeckRepositoryImpl(
     this._dao, {
@@ -165,6 +171,7 @@ final class DeckRepositoryImpl
     // "please choose a scheduler" on screen in response to a programming error.
     final id = _idGenerator();
     final now = _clock();
+    final siblingPosition = await _dao.nextSiblingPosition(null);
     await _dao.insertDeck(
       DecksCompanion.insert(
         id: id,
@@ -174,6 +181,7 @@ final class DeckRepositoryImpl
         schedulerType: Value<String?>(schedulerType.dbValue),
         schedulerVersion: const Value<int?>(_initialSchedulerVersion),
         schedulerGeneration: const Value<int?>(_initialSchedulerGeneration),
+        siblingPosition: Value<int>(siblingPosition),
         createdAt: now,
         updatedAt: now,
       ),
@@ -207,6 +215,7 @@ final class DeckRepositoryImpl
       }
 
       final now = _clock();
+      final siblingPosition = await _dao.nextSiblingPosition(parent.id);
       if (parentType == DeckContentType.unset) {
         // First child locks the parent to 'deck' — same atomic step (BR-62).
         await _dao.updateDeckById(
@@ -225,6 +234,7 @@ final class DeckRepositoryImpl
           name: name.value,
           parentDeckId: Value<String?>(parent.id),
           rootDeckId: parent.rootDeckId,
+          siblingPosition: Value<int>(siblingPosition),
           contentType: DeckContentType.unset.dbValue,
           createdAt: now,
           updatedAt: now,

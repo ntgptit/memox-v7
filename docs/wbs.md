@@ -16381,6 +16381,47 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Checklist phases:** 12.
 - **Dependencies:** M100.13.
 
+### M100.15 · Reorder Deck sibling order
+
+- **Status:** done
+- **Goal:** Người dùng đổi thứ tự root deck hoặc sub-deck cùng parent mà không
+  biến thao tác đó thành MoveDeck hay làm thay đổi cây, scheduler hoặc study
+  data.
+- **Scope:** `sibling_position` + migration v13; `ReorderDeckUseCase`; DAO /
+  repository transaction; Manual sort mặc định; Move up/down từ action sheet;
+  SQLite migration/repository/stream tests và widget wiring test.
+- **Out of scope:** thay `parent_deck_id`/`root_deck_id`, scheduler/generation,
+  card hoặc study state; drag-and-drop.
+- **Decision:** Không tái sử dụng `created_at` vì đó là lịch sử immutable, không
+  phải ý định sắp xếp. Không dùng raw index qua domain/UI: request `before` hoặc
+  `after` sibling, repository mới tính dense position trong transaction.
+- **5Why:** (1) Vì sao list không reorder được? Query chỉ sort lịch sử. (2) Vì
+  sao không sửa `created_at`? Nó phải giữ thời điểm tạo. (3) Vì sao cần cột?
+  Thứ tự người dùng là fact không suy ra được. (4) Vì sao không đưa index raw
+  lên UI? Một write xen giữa làm index đổi nghĩa. (5) Vì sao transaction? Một
+  failure giữa các sibling sẽ tạo thứ tự partial.
+- **Editable documents:** `docs/business-rules.md`, `docs/data-model.md`,
+  `docs/use-cases.md`, `docs/wbs.md` (chủ dự án đã cho phép sửa frozen docs).
+- **Output:** schema v13 + migration lưu `sibling_position`; transaction
+  repository và `ReorderDeckUseCase`; controls Manual order; test SQLite,
+  widget và integration xác nhận thứ tự mới phát emission.
+- **Acceptance criteria:**
+  - [x] Root và sub-deck chỉ reorder trong nhóm sibling; không thay parent/root
+        pointer, subtree, scheduler, card hay study state.
+  - [x] Operation relative `before`/`after` có thứ tự dense, deterministic và
+        rollback toàn bộ khi database failure hoặc row stale.
+  - [x] Default Manual order phản ánh order persisted và action sheet chỉ hiện
+        Move up/down khi sibling tương ứng tồn tại.
+  - [x] Migration v12→v13, database/repository/use-case/widget tests, goldens
+        và emulator integration suite đều xanh trên base mới.
+- **Dependencies:** M100.13, M100.14.
+- **Tests required:** migration v12→v13; SQLite first→last, last→first,
+  middle→middle, root/nested, one/no-op, stale source/target, rollback,
+  reactive list; use case và action-sheet wiring.
+- **Emulator integration suite:** required by `CLAUDE.md` vì `features/**`
+  thay đổi; chạy trước khi task được đánh dấu done.
+- **Checklist phases:** 4, 5, 6, 7, 11, 13, 14, 15, 19, 21.
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |

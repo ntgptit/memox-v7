@@ -75,12 +75,12 @@ void main() {
       // moved the order into the sheet; a glyph says "sort" and cannot say
       // "sorted by what", which is the half a user needs (owner review,
       // 2026-08-25).
-      expect(find.text(english.deckSortRecentLabel), findsOneWidget);
+      expect(find.text(english.deckSortManualLabel), findsOneWidget);
       // The painted word is a value, so the announcement says what pressing it
       // does — and contains the painted word rather than replacing it.
       expect(
         find.bySemanticsLabel(
-          english.deckSortControlSemanticLabel(english.deckSortRecentLabel),
+          english.deckSortControlSemanticLabel(english.deckSortManualLabel),
         ),
         findsWidgets,
       );
@@ -154,19 +154,20 @@ void main() {
       await tester.tap(find.byIcon(Icons.swap_vert));
       await tester.pumpAndSettle();
 
-      // Four options, and exactly one carries the tick. The count is half the
+      // Five options, and exactly one carries the tick. The count is half the
       // assertion: a sheet that ticked two would be worse than one that ticked
       // none, because it would look answered.
       final rows = tester
           .widgetList<MxActionSheet>(find.byType(MxActionSheet))
           .single
           .actions;
-      expect(rows.length, 4);
+      expect(rows.length, 5);
       // The sheet and the row name the orders the same way — one vocabulary,
       // since the label that needed shortening was the one that lied.
       expect(
         rows.map((MxActionSheetAction row) => row.label),
         containsAll(<String>[
+          english.deckSortManualLabel,
           english.deckSortRecentLabel,
           english.deckSortCardsDueLabel,
         ]),
@@ -175,7 +176,7 @@ void main() {
         rows
             .where((MxActionSheetAction row) => row.isSelected)
             .map((MxActionSheetAction row) => row.label),
-        <String>[english.deckSortRecentLabel],
+        <String>[english.deckSortManualLabel],
       );
     });
 

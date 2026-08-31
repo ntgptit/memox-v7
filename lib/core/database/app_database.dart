@@ -8,6 +8,7 @@ part 'app_database_migrations.dart';
 part 'app_database_migrations_v5.dart';
 part 'app_database_migrations_v11.dart';
 part 'app_database_migrations_v12.dart';
+part 'app_database_migrations_v13.dart';
 
 /// The app's database.
 ///
@@ -45,7 +46,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.open() : super(openAppDatabaseConnection());
 
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 13;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -247,6 +248,13 @@ class AppDatabase extends _$AppDatabase {
       // column whose values need a footnote is a column that gets misread.
       if (from < 12) {
         await _upgradeToV12();
+      }
+
+      // v12 → v13 (Deck reorder): creation time is historical fact, while a
+      // learner's sibling order is separate state. Backfill the latter from
+      // the former once, then let ReorderDeckUseCase own future writes.
+      if (from < 13) {
+        await _upgradeToV13();
       }
     },
 

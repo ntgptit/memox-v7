@@ -8,6 +8,8 @@ import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_empty_state.dart';
 import '../../../domain/models/deck_summary_model.dart';
+import '../../../domain/models/deck_reorder_placement_model.dart';
+import '../../controllers/deck_write_controller.dart';
 import '../items/deck_tile_widget.dart';
 import '../overlays/deck_actions_widget.dart';
 import '../support/deck_undo_widget.dart';
@@ -37,11 +39,15 @@ const double _kListBottomInset = AppSpacing.fabScrollClearance;
 class DeckListSliverWidget extends ConsumerWidget {
   const DeckListSliverWidget({
     required this.summaries,
+    required this.manualSummaries,
+    required this.isManualSort,
     required this.onClearFilter,
     super.key,
   });
 
   final List<DeckSummary> summaries;
+  final List<DeckSummary> manualSummaries;
+  final bool isManualSort;
   final VoidCallback onClearFilter;
 
   @override
@@ -80,6 +86,16 @@ class DeckListSliverWidget extends ConsumerWidget {
             const SizedBox(height: AppSpacing.lg),
         itemBuilder: (context, index) {
           final summary = summaries[index];
+          final manualIndex = manualSummaries.indexWhere(
+            (DeckSummary candidate) => candidate.deck.id == summary.deck.id,
+          );
+          final earlier = manualIndex > 0
+              ? manualSummaries[manualIndex - 1]
+              : null;
+          final later =
+              manualIndex >= 0 && manualIndex < manualSummaries.length - 1
+              ? manualSummaries[manualIndex + 1]
+              : null;
 
           return DeckTileWidget(
             summary: summary,
@@ -109,6 +125,30 @@ class DeckListSliverWidget extends ConsumerWidget {
               // is say where the deck went and offer it back (BR-256, BR-263).
               onDeleted: (batchId) =>
                   showDeckMovedToTrash(context, ref, batchId: batchId),
+              onMoveEarlier: isManualSort && earlier != null
+                  ? () => ref
+                        .read(
+                          reorderDeckControllerProvider(
+                            summary.deck.id,
+                          ).notifier,
+                        )
+                        .submit(
+                          targetSiblingDeckId: earlier.deck.id,
+                          placement: DeckReorderPlacement.before,
+                        )
+                  : null,
+              onMoveLater: isManualSort && later != null
+                  ? () => ref
+                        .read(
+                          reorderDeckControllerProvider(
+                            summary.deck.id,
+                          ).notifier,
+                        )
+                        .submit(
+                          targetSiblingDeckId: later.deck.id,
+                          placement: DeckReorderPlacement.after,
+                        )
+                  : null,
             ),
           );
         },

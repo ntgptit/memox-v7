@@ -105,6 +105,12 @@ final class DeckDao {
   Future<int> subtreeCardCount(String deckId) =>
       _db.subtreeCardCount(deckId).getSingle();
 
+  Future<int> nextSiblingPosition(String? parentDeckId) =>
+      _db.nextSiblingPosition(parentDeckId).getSingle();
+
+  Future<List<Deck>> siblingDecks(String? parentDeckId) =>
+      _db.siblingDecks(parentDeckId).get();
+
   // ---- writes ------------------------------------------------------------
 
   Future<void> insertDeck(DecksCompanion deck) =>

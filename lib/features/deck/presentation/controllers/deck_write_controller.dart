@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/error/failure.dart';
 import '../../../../core/state/submit_outcome.dart';
 import '../../domain/models/scheduler_type_model.dart';
+import '../../domain/models/deck_reorder_placement_model.dart';
 import '../providers/deck_use_case_provider.dart';
 import '../states/deck_submit_state.dart';
 
@@ -260,6 +261,36 @@ class MoveDeckController extends _$MoveDeckController {
       await ref.read(moveDeckUseCaseProvider)(
         deckId: deckId,
         targetParentDeckId: targetParentDeckId,
+      );
+      if (!ref.mounted) return;
+      state = const DeckSubmitState(outcome: SubmitOutcome.savedAndClose);
+    } on Failure catch (failure) {
+      if (!ref.mounted) return;
+      state = DeckSubmitState(failure: failure);
+    }
+  }
+
+  void reset() => state = const DeckSubmitState();
+}
+
+/// Reorders one deck relative to a sibling without changing its tree location.
+@riverpod
+class ReorderDeckController extends _$ReorderDeckController {
+  @override
+  DeckSubmitState build(String deckId) => const DeckSubmitState();
+
+  Future<void> submit({
+    required String targetSiblingDeckId,
+    required DeckReorderPlacement placement,
+  }) async {
+    if (!state.canSubmit) return;
+
+    state = const DeckSubmitState(isSubmitting: true);
+    try {
+      await ref.read(reorderDeckUseCaseProvider)(
+        deckId: deckId,
+        targetSiblingDeckId: targetSiblingDeckId,
+        placement: placement,
       );
       if (!ref.mounted) return;
       state = const DeckSubmitState(outcome: SubmitOutcome.savedAndClose);

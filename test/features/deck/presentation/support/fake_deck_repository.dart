@@ -7,6 +7,7 @@ import 'package:memox/features/deck/domain/models/deck_list_snapshot_model.dart'
 import 'package:memox/features/deck/domain/models/deck_name_model.dart';
 import 'package:memox/features/deck/domain/models/deck_path_segment_model.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
+import 'package:memox/features/deck/domain/models/deck_reorder_placement_model.dart';
 import 'package:memox/features/deck/domain/repositories/deck_repository.dart';
 
 import 'deck_fixtures.dart';
@@ -169,6 +170,9 @@ class FakeDeckRepository implements DeckRepository {
   final List<String> resets = <String>[];
   final List<({String deckId, String target})> moves =
       <({String deckId, String target})>[];
+  final List<({String deckId, String target, DeckReorderPlacement placement})>
+  reorders =
+      <({String deckId, String target, DeckReorderPlacement placement})>[];
 
   @override
   Stream<DeckListSnapshot> watchDeckList({
@@ -301,6 +305,21 @@ class FakeDeckRepository implements DeckRepository {
     required String targetParentDeckId,
   }) async {
     moves.add((deckId: deckId, target: targetParentDeckId));
+    final failure = writeFailure;
+    if (failure != null) throw failure;
+  }
+
+  @override
+  Future<void> reorderDeck({
+    required String deckId,
+    required String targetSiblingDeckId,
+    required DeckReorderPlacement placement,
+  }) async {
+    reorders.add((
+      deckId: deckId,
+      target: targetSiblingDeckId,
+      placement: placement,
+    ));
     final failure = writeFailure;
     if (failure != null) throw failure;
   }

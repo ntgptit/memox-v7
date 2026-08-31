@@ -7,8 +7,8 @@
 | **Scope** | Must-have của MVP. Ngoài phạm vi: should/nice-to-have, và mọi thứ ở mục "Điều đã cố ý không đặc tả" |
 | **Source of truth for** | UC-xx · main/alternative/error flow · UI state matrix của từng màn |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md` |
-| **Updated by task** | M99.33 — UC-21: Trash và khôi phục item đã xoá; M99.32 — UC-20: tìm kiếm toàn thư viện (deck, hai mặt card, tag); M99.24 — UC-13: xem tiến độ theo deck (cấp thư viện → cấp deck, hai khoảng); trước đó M99.23 — UC-12: xem tiến độ học (streak, hôm nay, bảy ngày) · M99.29 — UC-17: bật nhắc học hằng ngày (opt-in → quyền → lịch → notification → Study Home) · M99.30 — UC-18: quản lý tag (catalog, rename/gộp, xoá) và lọc thẻ theo nhiều tag · M99.31 — UC-19: xem chi tiết một card và lịch sử học của nó |
-| **Last updated** | 2026-08-19 |
+| **Updated by task** | M100.10 — UC-22: sắp xếp root/sub-deck cùng cấp; M99.33 — UC-21: Trash và khôi phục item đã xoá; M99.32 — UC-20: tìm kiếm toàn thư viện (deck, hai mặt card, tag); M99.24 — UC-13: xem tiến độ theo deck (cấp thư viện → cấp deck, hai khoảng); trước đó M99.23 — UC-12: xem tiến độ học (streak, hôm nay, bảy ngày) · M99.29 — UC-17: bật nhắc học hằng ngày (opt-in → quyền → lịch → notification → Study Home) · M99.30 — UC-18: quản lý tag (catalog, rename/gộp, xoá) và lọc thẻ theo nhiều tag · M99.31 — UC-19: xem chi tiết một card và lịch sử học của nó |
+| **Last updated** | 2026-08-31 |
 
 Chỉ đặc tả must-have. Should-have và nice-to-have viết khi tới lượt — đặc tả
 trước những thứ có thể bị cắt là lãng phí.
@@ -17,7 +17,7 @@ Luồng viết bằng ngôn ngữ người dùng, không nói theo màn hình ha
 hình sẽ đổi; luồng thì không.
 
 **ID use case là định danh vĩnh viễn**, cùng chính sách với BR (xem
-`business-rules.md`). UC mới append; không đánh số lại. Hiện tại: UC-01…UC-19.
+`business-rules.md`). UC mới append; không đánh số lại. Hiện tại: UC-01…UC-22.
 
 **Các UC nối vào nhau thế nào thì xem [`master-flow.md`](master-flow.md).** Tài
 liệu này đặc tả từng UC riêng lẻ và cố ý không vẽ đồ thị giữa chúng — mỗi UC mô
@@ -1530,6 +1530,46 @@ BR-163, BR-165, BR-167 qua đường dùng lại eligibility của move.
 không hợp lệ) · validation conflict · expired-live-removal · error + Retry ·
 undo snackbar. Không có state `refreshing` riêng — danh sách là một `watch()`
 stream, nên auto-purge biểu hiện thành hàng biến mất chứ không thành spinner.
+
+## UC-22 · Sắp xếp lại Deck cùng cấp
+
+| | |
+|---|---|
+| **Status** | active |
+
+**Actor:** Người dùng
+**Trigger:** Chọn Move up hoặc Move down trên một deck khi Library đang ở
+Manual order.
+**Preconditions:** Source và target là deck active cùng một level; danh sách
+đang ở Manual order để thứ tự nhìn thấy chính là thứ tự persisted.
+
+**Main flow:**
+1. Hệ thống lấy sibling liền trước hoặc sau từ thứ tự Manual đã lưu và gửi
+   operation `before`/`after`, không gửi một database index thô.
+2. Repository mở một transaction, đọc lại source và target active, xác nhận
+   chúng còn cùng `parent_deck_id`, rồi cập nhật thứ tự nhóm sibling.
+3. Watch của level phát emission mới; danh sách đổi vị trí tại chỗ. Mọi parent,
+   root pointer, scheduler, card, study state và subtree giữ nguyên.
+
+**Alternative flows:** Deck đầu không hiện Move up; deck cuối không hiện Move
+down; level chỉ có một deck không hiện thao tác reorder. Khi đang dùng sort theo
+tên, ngày, due hoặc tiến độ, thao tác bị ẩn để neighbour không bị suy ra từ một
+view-only order.
+
+**Error flows:** Source hoặc target đã stale, hoặc không còn sibling → transaction
+từ chối và không ghi gì. Lỗi database ở bất kỳ update nào → toàn transaction
+rollback, thứ tự cũ giữ nguyên.
+
+**Business rules:** BR-268, BR-55…BR-58.
+
+**Postconditions:** Chỉ `sibling_position` (và timestamp audit của các sibling
+được đánh số lại) đổi trong một transaction; sibling xuất hiện theo thứ tự mới
+qua stream và toàn bộ tree pointer, subtree cùng study data giữ nguyên.
+
+**UI states:** Ở Manual order, action sheet hiện Move up khi có sibling trước
+và Move down khi có sibling sau. Ở đầu/cuối hoặc level một phần tử, action
+tương ứng bị ẩn. Ở mọi view-only sort khác, cả hai thao tác bị ẩn; lỗi giữ
+nguyên danh sách hiện có.
 
 ## Điều đã cố ý không đặc tả
 

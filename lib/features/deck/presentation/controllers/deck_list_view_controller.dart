@@ -25,14 +25,14 @@ class DeckListFilterChoice extends _$DeckListFilterChoice {
 
 /// The order the root list is shown in.
 ///
-/// Defaults to [DeckListSort.dateAdded], which is the order the repository already
+/// Defaults to [DeckListSort.manual], which is the order the repository already
 /// returns — so the first frame after this was introduced looks exactly like the
 /// last frame before it, and the toolbar starts by describing what is on screen
 /// rather than changing it.
 @riverpod
 class DeckListSortChoice extends _$DeckListSortChoice {
   @override
-  DeckListSort build() => DeckListSort.dateAdded;
+  DeckListSort build() => DeckListSort.manual;
 
   void select(DeckListSort sort) => state = sort;
 }

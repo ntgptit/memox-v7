@@ -23,6 +23,7 @@ import '../../states/deck_list_view_state.dart';
 /// phrasing is simply what that ARB entry carries.
 String deckSortLabel(AppLocalizations l10n, DeckListSort sort) =>
     switch (sort) {
+      DeckListSort.manual => l10n.deckSortManualLabel,
       DeckListSort.dateAdded => l10n.deckSortRecentLabel,
       DeckListSort.name => l10n.deckSortNameLabel,
       DeckListSort.cardsDue => l10n.deckSortCardsDueLabel,
@@ -35,6 +36,7 @@ String deckSortLabel(AppLocalizations l10n, DeckListSort sort) =>
 /// bare text read as a paragraph, and the eye needs somewhere to land while it
 /// scans for the one it wants.
 IconData _iconFor(DeckListSort sort) => switch (sort) {
+  DeckListSort.manual => Icons.reorder,
   DeckListSort.dateAdded => Icons.schedule,
   DeckListSort.name => Icons.sort_by_alpha,
   DeckListSort.cardsDue => Icons.event_available,

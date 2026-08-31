@@ -7,11 +7,11 @@
 | **Scope** | Bảng, cột, index, quan hệ, query bất biến. Ngoài phạm vi: SQL runtime (`lib/core/database/`, chưa tồn tại) |
 | **Source of truth for** | Schema · cột và kiểu · index · query bất biến · thứ tự migration |
 | **Depends on** | `document-conventions.md`, `architecture.md`, `business-rules.md` |
-| **Updated by task** | M100.13 — `end_reason = scheduler_changed` và schema v12: tách BR-164 khỏi `scheduler_reset`; ma trận `status` × `end_reason` có thêm một hàng · M99.33 — Trash: bảng `delete_batches`, cột `delete_batch_id` trên `decks`/`cards`, `end_reason = content_deleted`, bất biến 33…37, và bất biến 1…5/15/29 đo trên hàng đang active · M99.28 — `app_settings.theme_mode` và `app_settings.language` (BR-214, BR-215), migration v9, và bảng thứ tự migration bổ sung v6/v7 vốn bị bỏ sót · M99.29 — ba cột nhắc học trên `app_settings`, migration v10 (nhánh nguồn chia làm hai bước v8 và v9; cả hai số đó đã thuộc feature khác) |
-| **Last updated** | 2026-08-13 |
+| **Updated by task** | M100.15 — `decks.sibling_position`, index theo sibling order và schema v13; M100.13 — `end_reason = scheduler_changed` và schema v12: tách BR-164 khỏi `scheduler_reset`; ma trận `status` × `end_reason` có thêm một hàng · M99.33 — Trash: bảng `delete_batches`, cột `delete_batch_id` trên `decks`/`cards`, `end_reason = content_deleted`, bất biến 33…37, và bất biến 1…5/15/29 đo trên hàng đang active · M99.28 — `app_settings.theme_mode` và `app_settings.language` (BR-214, BR-215), migration v9, và bảng thứ tự migration bổ sung v6/v7 vốn bị bỏ sót · M99.29 — ba cột nhắc học hằng ngày, migration v10 |
+| **Last updated** | 2026-08-31 |
 
 Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm ở
-`lib/core/database/tables/`, hiện ở **schema v10**.
+`lib/core/database/tables/`, hiện ở **schema v13**.
 
 **`review` vẫn còn nghĩa thứ hai trong repo, và nó không đổi.** Ở `docs/reviews/`,
 "vòng review UI/UX", "code review" — đó là *rà soát*, không phải *ôn tập*. Đợt đổi
@@ -115,6 +115,7 @@ deck_templates (asset JSON ở MVP)
 | `source_template_id` | TEXT NULL | NULL = deck tự tạo (BR-34) |
 | `source_template_version` | INTEGER NULL | version tại thời điểm sao chép |
 | `delete_batch_id` | TEXT NULL | NULL = deck đang active. Khác NULL = tombstone thuộc batch đó (BR-256, BR-258). → `delete_batches(id)` ON DELETE CASCADE |
+| `sibling_position` | INTEGER NOT NULL | Thứ tự manual trong nhóm cùng `parent_deck_id`; tie-break bằng `id` (BR-268) |
 | `created_at` | DATETIME NOT NULL | UTC |
 | `updated_at` | DATETIME NOT NULL | UTC |
 
@@ -177,13 +178,13 @@ Deck con để NULL và tra qua `root_deck_id` (BR-06). Đây là cách khiến 
 không chọn scheduler riêng" bất khả thi về cấu trúc, thay vì chỉ là quy ước.
 
 Index — composite, và thứ tự cột theo đúng thứ tự query lọc rồi sắp:
-- `idx_decks_parent_created` trên `(parent_deck_id, created_at, id)` — dựng cây
+- `idx_decks_parent_position` trên `(parent_deck_id, sibling_position, id)` — dựng cây
   (`rootDecks`, `childDecks`)
-- `idx_decks_root_created` trên `(root_deck_id, created_at, id)` — mọi query gộp
+- `idx_decks_root_position` trên `(root_deck_id, sibling_position, id)` — mọi query gộp
   theo cây (`decksInTree`, `allDecks`, hai subquery của `rootDeckSummaries`)
 
 Mọi query đọc deck đều lọc theo một trong hai cột dẫn đầu rồi `ORDER BY
-created_at, id`. Với index chỉ một cột, cả ba đều kết thúc bằng `USE TEMP B-TREE
+sibling_position, id`. Với index chỉ một cột, cả ba đều kết thúc bằng `USE TEMP B-TREE
 FOR ORDER BY` — SQLite đọc hết row khớp rồi sắp, trước khi áp bất kỳ `LIMIT` nào.
 Đo bằng `EXPLAIN QUERY PLAN`: thêm cột sắp vào index thì temp B-tree biến mất, và
 subquery `total` của `rootDeckSummaries` trở thành **covering** (không chạm bảng).
@@ -979,6 +980,8 @@ và cờ — xem `docs/wireframes/m4-11-card-management.md`.
 | 9 | Cột `app_settings.theme_mode`, `app_settings.language` — hai `ALTER TABLE ADD COLUMN` có `DEFAULT 'system'`, không đụng dòng nào (M99.28) |
 | 10 | Ba cột `app_settings.reminder_enabled`, `reminder_minute_of_day`, `reminder_last_delivered_at` — ba `ALTER TABLE … ADD COLUMN`, không đụng dòng nào. Nhánh nguồn chia làm hai bước v8 và v9; cả hai số đó đã thuộc feature khác trên nhánh tích hợp, và trạng thái trung gian mà chúng mô tả — đã cấu hình nhắc, chưa từng ghi lần gửi — chưa từng tồn tại ở đây (BR-218, BR-219, BR-221, M99.29) |
 | 11 | Trash: bảng `delete_batches`; cột `decks.delete_batch_id`, `cards.delete_batch_id` + ba index; nới `CHECK` của `study_sessions.end_reason` để nhận `content_deleted` (M99.33, BR-256…BR-267) |
+| 12 | Rebuild `study_sessions` để `end_reason` nhận `scheduler_changed`, không viết lại hàng lịch sử cũ (M100.13, BR-164) |
+| 13 | Cột `decks.sibling_position`, backfill thứ tự `(created_at, id)` theo từng nhóm sibling; thay index deck bằng `(parent/root_deck_id, sibling_position, id)` (M100.15, BR-268) |
 | _sau_ | Bảng `card_media` |
 | _sau_ | Cột sync (`is_pending_sync`, `version`) khi có backend (AD-03) |
 | _sau_ | `deck_templates` thành bảng runtime nếu tải template từ server |

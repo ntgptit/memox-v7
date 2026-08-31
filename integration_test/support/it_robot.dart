@@ -10,6 +10,7 @@ import 'package:memox/features/study/presentation/widgets/sections/match_board_s
 import 'package:memox/features/study/presentation/widgets/sections/recall_timer_section_widget.dart';
 import 'package:memox/features/study/presentation/widgets/sections/study_card_face_section_widget.dart';
 import 'package:memox/features/study/presentation/widgets/support/study_swipe_deck_widget.dart';
+import 'package:memox/shared/widgets/mx_confirm_dialog.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
 
 import 'it_harness.dart';
@@ -64,6 +65,24 @@ final class ItRobot {
       reason: 'no "$label" on screen; visible text was $visibleText',
     );
     await _tapVisible(finder.first);
+  }
+
+  /// Taps [label] in the currently open async confirmation dialog.
+  ///
+  /// The card editor's secondary action and its confirmation deliberately share
+  /// the label “Move to Trash”. Scoping the confirm avoids tapping the editor
+  /// action hidden behind the modal.
+  Future<void> tapConfirmText(String label) async {
+    final finder = find.descendant(
+      of: find.byType(MxConfirmDialog),
+      matching: find.text(label),
+    );
+    expect(
+      finder,
+      findsOneWidget,
+      reason: 'no "$label" in the confirmation; visible text was $visibleText',
+    );
+    await _tapVisible(finder);
   }
 
   /// Taps [target] after making sure the tap can actually reach it.

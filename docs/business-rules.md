@@ -7,8 +7,8 @@
 | **Scope** | Luật nghiệp vụ, validation rule, state machine, edge case của phạm vi MVP. Ngoài phạm vi: quyết định kiến trúc (`architecture.md`), hình dạng dữ liệu (`data-model.md`), luồng người dùng (`use-cases.md`) |
 | **Source of truth for** | BR-xx · validation rule · entity state machine · edge case |
 | **Depends on** | `document-conventions.md`, `product.md`, `architecture.md` |
-| **Updated by task** | M99.33 — BR-256…BR-267: Trash và restore (soft-delete một transaction, loại khỏi bề mặt active, tombstone batch, restore hỏi target, undo một batch, retention 30×24h, purge cứng theo batch, chọn nhiều tách theo loại, riêng tư trong Trash); M99.32 — BR-247…BR-255: tìm kiếm toàn thư viện (phạm vi trường, chuẩn hoá dùng chung, debounce/zero-I/O, xếp hạng, nhóm, gộp trùng, keyset, chỉ-đọc và ranh giới điều hướng, cấm index không đo); M99.28 — BR-210…BR-217: Settings v1 (mặc định học toàn cục, theme, ngôn ngữ); M99.27 — BR-203…BR-209: chiều hỏi của self-assess; M5.26 — BR-200…BR-202: Study Home (đọc thư viện thật, workload toàn subtree, ba trạng thái đã tải); M99.24 — BR-182…BR-189: tiến độ theo deck (phạm vi metric, card-day, hai khoảng, quy-về-vị-trí-hiện-tại, phân hoạch Learning/Reviewing, thứ tự, chỉ-đọc, cập nhật trực tiếp); trước đó M99.23 — BR-190…BR-199: Progress overview v1 (hai khối đã đổi chỗ khi #301 và #302 gộp — số ở bảng dưới là số đúng) · M99.29 — BR-218…BR-229: nhắc học hằng ngày (opt-in, giờ địa phương, due-only, một tóm tắt, riêng tư, thứ tự cấp bách, inexact + idempotent scheduling, permission, capability) · M99.30 — BR-230…BR-238: quản lý tag và lọc theo nhiều tag · M99.31 — BR-239…BR-246: mặt đọc của một thẻ và lịch sử học |
-| **Last updated** | 2026-08-19 |
+| **Updated by task** | M100.10 — BR-268: thứ tự manual, sibling-only, atomic và không đụng dữ liệu cây/học; M99.33 — BR-256…BR-267: Trash và restore (soft-delete một transaction, loại khỏi bề mặt active, tombstone batch, restore hỏi target, undo một batch, retention 30×24h, purge cứng theo batch, chọn nhiều tách theo loại, riêng tư trong Trash); M99.32 — BR-247…BR-255: tìm kiếm toàn thư viện (phạm vi trường, chuẩn hoá dùng chung, debounce/zero-I/O, xếp hạng, nhóm, gộp trùng, keyset, chỉ-đọc và ranh giới điều hướng, cấm index không đo); M99.28 — BR-210…BR-217: Settings v1 (mặc định học toàn cục, theme, ngôn ngữ); M99.27 — BR-203…BR-209: chiều hỏi của self-assess; M5.26 — BR-200…BR-202: Study Home (đọc thư viện thật, workload toàn subtree, ba trạng thái đã tải); M99.24 — BR-182…BR-189: tiến độ theo deck (phạm vi metric, card-day, hai khoảng, quy-về-vị-trí-hiện-tại, phân hoạch Learning/Reviewing, thứ tự, chỉ-đọc, cập nhật trực tiếp); trước đó M99.23 — BR-190…BR-199: Progress overview v1 (hai khối đã đổi chỗ khi #301 và #302 gộp — số ở bảng dưới là số đúng) · M99.29 — BR-218…BR-229: nhắc học hằng ngày (opt-in, giờ địa phương, due-only, một tóm tắt, riêng tư, thứ tự cấp bách, inexact + idempotent scheduling, permission, capability) · M99.30 — BR-230…BR-238: quản lý tag và lọc theo nhiều tag · M99.31 — BR-239…BR-246: mặt đọc của một thẻ và lịch sử học |
+| **Last updated** | 2026-08-31 |
 
 Format tuân theo `document-conventions.md` §6.2. Từ khoá MUST / SHOULD / MAY
 theo §3. Prose **không** chứa từ khoá là giải thích, không phải rule (§9).
@@ -27,7 +27,7 @@ khi ai đó đọc và làm theo.
 
 Rule bị thay thế MUST đánh `superseded by BR-yy` ở cột Status và giữ nguyên ID.
 
-Trạng thái hiện tại: **BR-01…BR-267**, không trùng, không thiếu.
+Trạng thái hiện tại: **BR-01…BR-268**, không trùng, không thiếu.
 
 ---
 
@@ -136,6 +136,7 @@ Giá trị khởi tạo của study state theo scheduler:
 | BR-14 | active | Đổi scheduler khi chưa khoá MUST khởi tạo lại study state của toàn bộ card trong cây theo scheduler mới, trong một transaction. | repository | UC-03 |
 | BR-73 | active | MUST NOT tự động chuyển đổi study state giữa hai scheduler. | domain | AD-06, UC-09 |
 | BR-74 | active | Di chuyển subtree sang root có scheduler hoặc generation không tương thích MUST bị chặn, hoặc MUST yêu cầu người dùng reset tường minh. | domain | AD-06, UC-09 |
+| BR-268 | active | Thứ tự thủ công của deck MUST chỉ được xác định trong một nhóm sibling có cùng `parent_deck_id`, bằng `(sibling_position, id)` để luôn deterministic. Reorder MUST đọc lại source và target active trong cùng transaction, và MUST từ chối nếu chúng không còn là sibling. Reorder MUST chỉ đổi `sibling_position` (và `updated_at` của các sibling đổi vị trí); MUST NOT đổi `parent_deck_id`, `root_deck_id`, scheduler/generation, card, study state hay descendant. Transaction thất bại MUST rollback toàn bộ thứ tự. | repository + database | UC-22, AD-10 |
 
 BR-14 dễ bị bỏ sót vì "chưa có lượt học nên không có gì để mất". Nhưng study state
 đã tồn tại từ lúc tạo card (BR-09), và state của 8-box không dùng được cho SM-2.

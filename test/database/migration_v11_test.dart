@@ -255,12 +255,12 @@ void main() {
 
   test('a fresh database runs no migration', () async {
     // Cheap, and it catches an `if (from < N)` written as `if (from <= N)`.
-    // The number moved to 12 at M100.13; what this asserts is unchanged — a
+    // The number moved to 13 at M100.15; what this asserts is unchanged — a
     // database created at the current version takes no upgrade step.
     final db = AppDatabase(NativeDatabase.memory());
     addTearDown(db.close);
 
-    expect(db.schemaVersion, 12);
+    expect(db.schemaVersion, 13);
     expect(await rows(db, 'SELECT id FROM delete_batches'), isEmpty);
   });
 }

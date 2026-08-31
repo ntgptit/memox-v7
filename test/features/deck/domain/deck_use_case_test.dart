@@ -6,6 +6,8 @@ import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 import 'package:memox/features/deck/domain/usecases/create_root_deck_use_case.dart';
 import 'package:memox/features/deck/domain/usecases/create_sub_deck_use_case.dart';
 import 'package:memox/features/deck/domain/usecases/rename_deck_use_case.dart';
+import 'package:memox/features/deck/domain/usecases/reorder_deck_use_case.dart';
+import 'package:memox/features/deck/domain/models/deck_reorder_placement_model.dart';
 
 import '../presentation/support/fake_deck_repository.dart';
 
@@ -164,6 +166,27 @@ void main() {
         <Enum>{DeckValidationProblem.nameTooLong},
       );
       expect(repository.renames, isEmpty);
+    });
+  });
+
+  group('ReorderDeckUseCase', () {
+    test('forwards a stable sibling-relative operation', () async {
+      await ReorderDeckUseCase(repository)(
+        deckId: 'source',
+        targetSiblingDeckId: 'target',
+        placement: DeckReorderPlacement.after,
+      );
+
+      expect(
+        repository.reorders,
+        <({String deckId, String target, DeckReorderPlacement placement})>[
+          (
+            deckId: 'source',
+            target: 'target',
+            placement: DeckReorderPlacement.after,
+          ),
+        ],
+      );
     });
   });
 }

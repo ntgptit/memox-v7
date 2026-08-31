@@ -10,6 +10,7 @@ import 'package:memox/features/deck/domain/models/deck_deletion_impact_model.dar
 import 'package:memox/features/deck/domain/models/deck_list_snapshot_model.dart';
 import 'package:memox/features/deck/domain/models/deck_name_model.dart';
 import 'package:memox/features/deck/domain/models/deck_path_segment_model.dart';
+import 'package:memox/features/deck/domain/models/deck_reorder_placement_model.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 import 'package:memox/features/deck/domain/repositories/deck_repository.dart';
@@ -496,6 +497,13 @@ class _CatalogDeckRepository implements DeckRepository {
   Future<void> moveDeck({
     required String deckId,
     required String targetParentDeckId,
+  }) async {}
+
+  @override
+  Future<void> reorderDeck({
+    required String deckId,
+    required String targetSiblingDeckId,
+    required DeckReorderPlacement placement,
   }) async {}
 
   // --- Reads the list screen never issues. ---
