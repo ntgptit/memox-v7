@@ -119,7 +119,8 @@ const Map<String, String> invariantQueries = <String, String>{
       "OR (status = 'completed' AND end_reason IS NULL) "
       "OR (status = 'abandoned' AND end_reason = 'user_exit') "
       "OR (status = 'invalidated' AND end_reason IN "
-      "('scheduler_reset','stale_generation','content_deleted')) "
+      "('scheduler_reset','scheduler_changed','stale_generation',"
+      "'content_deleted')) "
       "OR (status = 'failed' AND end_reason = 'persistence_error'))",
 
   'Q13': // Session ended but has no ended_at
