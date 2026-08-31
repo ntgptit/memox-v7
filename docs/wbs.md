@@ -10161,6 +10161,11 @@ binding của Study không đổi nhưng contract `openSession` thì có, và m�
         P0/P1/P2 sau khi đóng một P1 và hai P2 của review UI/UX.
   - [x] `flutter test integration_test/ -d emulator-5554 --flavor development` —
         **deferred**, xem mục dưới.
+  - [ ] **Gate `integration_test/` của `CLAUDE.md` — chưa chạy.** Ghi thành tiêu
+        chí ở M100.9: trước đó nó chỉ nằm trong dòng Status, nên mục này đọc ra
+        là "in-progress mà mọi ô đều đã tick" — hình dạng của một cuốn sổ sai
+        chứ không phải của một việc còn dở. Gate này là gate **local trên máy
+        có emulator**; CI cố ý không chạy nó.
 - **Dependencies:** M4.1 (router), M5.0s (`app_settings`), M99.7 (AD-19)
 - **Tests required:** domain enum + defaults; repository trên SQLite thật
   (singleton row, stream re-emit, bốn write độc lập, reset, clock injected, lỗi
@@ -10534,6 +10539,11 @@ nên nó **phải** được chạy trước khi ai đó coi Settings v1 là đ�
         gồm cả hai overlay ở 320@2.0; EN/VI, light/dark, 320@2.0 · 390 · 412.
   - [x] `dart format`, `flutter analyze`, guard, `check_docs.py` và
         `flutter test` xanh.
+  - [ ] **Gate `integration_test/` của `CLAUDE.md` — chưa chạy.** Ghi thành tiêu
+        chí ở M100.9: trước đó nó chỉ nằm trong dòng Status, nên mục này đọc ra
+        là "in-progress mà mọi ô đều đã tick" — hình dạng của một cuốn sổ sai
+        chứ không phải của một việc còn dở. Gate này là gate **local trên máy
+        có emulator**; CI cố ý không chạy nó.
 - **Dependencies:** M4.10at, M4.11, M99.19, M99.21
 - **Tests required:** domain — OR/AND composition, tập rỗng là identity,
   normalization dùng chung, kết quả gộp. SQLite thật — count catalog, phân
@@ -10679,6 +10689,11 @@ nên nó **phải** được chạy trước khi ai đó coi Settings v1 là đ�
         đổi (route table, binding), và CLAUDE.md nói rõ chính hai chỗ đó là nơi
         hai trong ba lần suite gãy im lặng bắt nguồn. Baseline phải đối chiếu
         là 8 passing / 0 failing.
+  - [ ] **Gate `integration_test/` của `CLAUDE.md` — chưa chạy.** Ghi thành tiêu
+        chí ở M100.9: trước đó nó chỉ nằm trong dòng Status, nên mục này đọc ra
+        là "in-progress mà mọi ô đều đã tick" — hình dạng của một cuốn sổ sai
+        chứ không phải của một việc còn dở. Gate này là gate **local trên máy
+        có emulator**; CI cố ý không chạy nó.
 - **Dependencies:** M99.18 (chế độ chọn nhiều quyết định nghĩa của một lần
   chạm), M5 (`study_answers` đã có `kind`/`mode`/`action`/generation)
 - **Tests required:** SQLite thật cho thứ tự và tie-break, trang 50, không
@@ -12400,9 +12415,8 @@ của M2.
 
 ### M99.53 · Hai nút cạnh nhau là một kích thước — `MxButtonPair`
 
-- **Status:** **in-progress** — code, test, Widgetbook và mục WBS này đã xong và
-  đã merge (#337, #338); còn **26 golden chưa sinh lại** và gallery màn hình
-  chưa publish lại. Ghi `done` khi một acceptance criterion bắt buộc còn bỏ
+- **Status:** **done** — đóng ở M100.9. Code, test, Widgetbook và mục WBS đã
+  merge ở #337/#338; 26 golden đã sinh lại và gallery đã publish lại. Ghi `done` khi một acceptance criterion bắt buộc còn bỏ
   trống thì chính cuốn sổ này nói dối: phiên sau đọc `done` sẽ bỏ qua đúng phần
   việc còn lại. Chuyển sang `done` sau khi chạy `flutter test --update-goldens`
   trên **Windows** và build lại gallery.
@@ -12468,7 +12482,9 @@ của M2.
   - [x] Component mới có playground trong Widgetbook (knob nhãn + trục).
   - [x] `flutter analyze` sạch; toàn bộ test không-golden xanh (3584);
         guard 70 luật sạch; `check_docs.py` nhất quán.
-  - [ ] **26 golden sinh lại — nợ, và nợ có chủ.** Pixel comparison thuộc về
+  - [x] **26 golden sinh lại.** Đóng ở M100.9 bằng bằng chứng mạnh hơn tiêu chí này yêu cầu: `44602584` sinh lại đúng 26 ảnh, cả 26 đã được sinh lại **thêm lần nữa** sau đó trên Windows (20 ở `fae2b1e6`, 3 ở `e6562752`, 3 ở `1128dff0`), và ở `963449c5` toàn bộ 303 golden pass **không** cần `--update-goldens` — tức mọi PNG đã commit khớp một lần render mới trên Windows. Gallery đã publish lại ở `b585c234`. Job `goldens (windows)` cũng so pixel ở mọi PR.
+
+        Nội dung nợ lúc ghi, giữ nguyên: **nợ có chủ.** Pixel comparison thuộc về
         `ci-full` trên **Windows**; container Linux của phiên làm việc render
         khác, nên sinh lại ở đó là ghi vào repo một sai lệch khó thấy. Danh
         sách: `mx_confirm_dialog_*` (4), `deck_list_empty_*`, các demo sheet và
@@ -12484,8 +12500,8 @@ của M2.
 
 ### M99.54 · Checkbox đã tick bị co lại 4dp — viền trắng vẽ trên nền trắng
 
-- **Status:** **in-progress** — code và test đã xong; còn **1 golden chưa sinh
-  lại** (`test/demo/goldens/tag_filter_sheet_light.png`). Chuyển sang `done` sau
+- **Status:** **done** — đóng ở M100.9. Code và test đã xong;
+  `tag_filter_sheet_light.png` sinh lại trên Windows lần gần nhất ở `fae2b1e6`. Chuyển sang `done` sau
   khi chạy `flutter test --update-goldens` trên **Windows** và publish lại
   gallery vào đúng URL đã ghim.
 - **Goal:** Chủ dự án chụp sheet *Filter by tags* và nói: ô đã tick trông như
@@ -12519,7 +12535,8 @@ của M2.
   - [x] Dark giữ viền — nền indigo ở đó không tự đủ tương phản.
   - [x] Test bắt được đúng lỗi này khi chạy trên code cũ.
   - [x] `flutter analyze` sạch; 3585 test không-golden xanh; guard sạch.
-  - [ ] `tag_filter_sheet_light.png` sinh lại trên Windows và gallery publish lại.
+  - [x] `tag_filter_sheet_light.png` sinh lại trên Windows và gallery publish
+        lại. Đóng ở M100.9 bằng bằng chứng mạnh hơn tiêu chí này yêu cầu: `44602584` sinh lại đúng 26 ảnh, cả 26 đã được sinh lại **thêm lần nữa** sau đó trên Windows (20 ở `fae2b1e6`, 3 ở `e6562752`, 3 ở `1128dff0`), và ở `963449c5` toàn bộ 303 golden pass **không** cần `--update-goldens` — tức mọi PNG đã commit khớp một lần render mới trên Windows. Gallery đã publish lại ở `b585c234`. Job `goldens (windows)` cũng so pixel ở mọi PR.
 - **Editable documents:** `docs/wbs.md`
 - **Dependencies:** M99.53
 - **Tests required:** `app_toggle_themes_test.dart`, `test/demo/` goldens.
@@ -12527,8 +12544,8 @@ của M2.
 
 ### M99.55 · Hai trục cho hộp thoại — `MxDialogTone` và `showMxConfirm`
 
-- **Status:** **in-progress** — code, test, Widgetbook và mục WBS đã xong; còn
-  golden của các dialog mang tone **chưa sinh lại** và gallery chưa publish lại.
+- **Status:** **done** — đóng ở M100.9. Golden của các dialog mang tone sinh
+  lại trên Windows lần gần nhất ở `b585c234`; gallery đã publish lại.
   Ghi `done` khi acceptance criterion cuối còn trống thì cuốn sổ này nói dối.
 - **Goal:** Chủ dự án hỏi bộ shared widget cho *các loại* confirmation, và nói
   rõ thường có ba mức — error, warning, info. App có `MxConfirmDialogVariant`
@@ -12602,9 +12619,8 @@ của M2.
         nút confirm.
   - [x] `showStarterAddAgainConfirm` thi hành đúng lời doc của nó.
   - [x] `flutter analyze` sạch; guard 70 luật sạch; Widgetbook có knob `tone`.
-  - [ ] Golden của các dialog mang tone sinh lại **trên Windows** và gallery
-        publish lại — pixel comparison thuộc `ci-full`, container Linux render
-        khác nên sinh ở đó là ghi vào repo một sai lệch khó thấy (M99.53).
+  - [x] Golden của các dialog mang tone sinh lại **trên Windows** và gallery
+        publish lại. Đóng ở M100.9 bằng bằng chứng mạnh hơn tiêu chí này yêu cầu: `44602584` sinh lại đúng 26 ảnh, cả 26 đã được sinh lại **thêm lần nữa** sau đó trên Windows (20 ở `fae2b1e6`, 3 ở `e6562752`, 3 ở `1128dff0`), và ở `963449c5` toàn bộ 303 golden pass **không** cần `--update-goldens` — tức mọi PNG đã commit khớp một lần render mới trên Windows. Gallery đã publish lại ở `b585c234`. Job `goldens (windows)` cũng so pixel ở mọi PR.
 - **Hoà giải với #348, vốn merge vào `main` giữa chừng.** #348 sửa đúng một lỗi
   của cùng khu vực: `MxButtonPair` đoán bề rộng footer bằng bề rộng màn hình trừ
   một gutter, sai 96px với một dialog, nên hàng hai nút giữ nguyên và **cả hai
@@ -12755,9 +12771,8 @@ của M2.
 
 ### M99.58 · `MxSheetInsets` — ba cách viết một công thức, một cách sai
 
-- **Status:** **in-progress** — code và test xong; golden của starter install
-  sheet **chưa sinh lại** vì bố cục của nó đổi thật (nội dung nhích lên khỏi
-  navigation bar).
+- **Status:** **done** — đóng ở M100.9. Golden của starter install sheet sinh
+  lại trên Windows lần gần nhất ở `1128dff0`.
 - **Goal:** Rà hết `showModalBottomSheet` trong `lib/`: sáu sheet, và phần "chừa
   chỗ cho thứ đang che đáy màn hình" được viết bằng ba cách khác nhau.
 - **Scope:** Tách công thức ra một chỗ, sửa sheet viết sai, chuyển sheet viết
@@ -12795,8 +12810,8 @@ của M2.
   - [x] Không có gì che thì chỉ còn đúng một gutter.
   - [x] `mxSheetBottomObstruction` và `MxSheetInsets` không thể bất đồng.
   - [x] `flutter analyze` sạch; guard sạch; suite không-golden xanh.
-  - [ ] Golden của starter install sheet sinh lại **trên Windows** và gallery
-        publish lại.
+  - [x] Golden của starter install sheet sinh lại **trên Windows** và gallery
+        publish lại. Đóng ở M100.9 bằng bằng chứng mạnh hơn tiêu chí này yêu cầu: `44602584` sinh lại đúng 26 ảnh, cả 26 đã được sinh lại **thêm lần nữa** sau đó trên Windows (20 ở `fae2b1e6`, 3 ở `e6562752`, 3 ở `1128dff0`), và ở `963449c5` toàn bộ 303 golden pass **không** cần `--update-goldens` — tức mọi PNG đã commit khớp một lần render mới trên Windows. Gallery đã publish lại ở `b585c234`. Job `goldens (windows)` cũng so pixel ở mọi PR.
 - **Editable documents:** `docs/wbs.md`
 - **Dependencies:** M99.55
 - **Tests required:** `mx_sheet_insets_test.dart` (mới), `mx_form_sheet_test.dart`,
@@ -15975,6 +15990,94 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 - **Checklist phases:** 7.
 - **Dependencies:** M100.7.
 
+### M100.9 · Đối soát sổ WBS — đóng cái đã trả, và nói rõ cái chưa
+
+- **Status:** **done** — **docs-only**, không chạm một dòng code nào.
+- **Goal:** Backlog có 11 task mở, và một phần trong đó là *sổ lạc hậu* chứ
+  không phải *việc còn dở*. Tách hai loại đó ra, bằng bằng chứng chứ không bằng
+  suy đoán, để lần chọn việc tiếp theo dựa trên một cuốn sổ đáng tin.
+- **Scope:** `docs/wbs.md`, `docs/wbs-study.md`.
+- **Nguyên tắc áp dụng:** một mục chỉ được đóng khi có bằng chứng **kiểm được
+  lại**, không phải khi có một commit trông có vẻ đúng. Inventory đầu vào ghi
+  *"nhiều khả năng đã được trả ở commit 44602584"* — đó là giả thuyết, và một
+  giả thuyết chép vào ledger thì thành sự thật giả.
+
+#### Đã đóng — 4 task golden
+
+`M99.53`, `M99.54`, `M99.55`, `M99.58`. Tiêu chí còn trống của cả bốn cùng một
+hình dạng: *golden sinh lại **trên Windows** và gallery publish lại*.
+
+Bằng chứng, và nó mạnh hơn thứ tiêu chí yêu cầu:
+
+| bước | kiểm được gì |
+|---|---|
+| `44602584` | có thật, tiêu đề *"regenerate the 26 goldens #337 moved and did not redraw"*, **26 file** |
+| sau đó | cả 26 ảnh được sinh lại **thêm lần nữa** trên Windows — 20 ở `fae2b1e6`, 3 ở `e6562752`, 3 ở `1128dff0` |
+| `963449c5` | **303 golden pass không cần `--update-goldens`, 0 PNG đổi** — tức mọi ảnh đã commit khớp một lần render mới trên Windows |
+| gallery | publish lại ở `b585c234` |
+| CI | job `goldens (windows)` so pixel ở **mọi** PR, không phải chỉ `ci-full` như lúc ghi nợ |
+
+Bước thứ ba là bước đáng giá: nó không hỏi "có ai từng sinh lại không" mà hỏi
+"ảnh đang nằm trong repo có đúng không", và trả lời được cho **toàn bộ** 303
+ảnh cùng lúc.
+
+#### Đã đóng — 4 dòng nợ
+
+- `docs/wbs.md`: `sqlite3.wasm` / `drift_worker.js` vendored — `test/database/web_assets_test.dart`
+  và `web/WEB_ASSETS.md` **có thật**, test ghim version (`3.5.0`, `2.34.0`).
+  Cột "trả" đã mô tả đúng việc này từ trước; chỉ thiếu gạch tiêu đề.
+- `docs/wbs-study.md`: *Controller đọc thẳng repository ở 4 chỗ* — cả bốn nay
+  dựng use case (`WatchStudyEntryUseCase(ref.watch(studyRepositoryProvider))`),
+  đúng chiều AD-12.
+- `docs/wbs-study.md`: *Widget mode chưa ai dựng trong `lib/`* — cả bốn widget
+  mode đều có caller (2–3 file mỗi cái).
+- `docs/wbs-study.md`: *13 golden `fill` rasterise trên Linux* — sinh lại trên
+  Windows, và `963449c5` xác nhận 0 diff.
+
+#### Sửa hình dạng sổ — 3 task
+
+`M99.28`, `M99.30`, `M99.31` đang là **"in-progress mà mọi ô đều đã tick"**, vì
+gate `integration_test/` chỉ nằm trong dòng Status chứ không phải một tiêu chí.
+Đó là hình dạng của một cuốn sổ sai, không phải của một việc còn dở — nay gate
+là một ô chưa tick, giống `M99.26` và `M99.29` vốn đã ghi đúng.
+
+#### KHÔNG đóng, và lý do kiểm được
+
+- **7 task chờ gate thiết bị** (`M5.26`, `M99.26`, `M99.28`, `M99.29`, `M99.30`,
+  `M99.31`, `M99.33`). Máy này **không có emulator hay thiết bị Android** —
+  `flutter devices` chỉ liệt kê Chrome và Edge. Đây là gate local có chủ đích:
+  `CLAUDE.md` ghi rõ CI không chạy `integration_test/` vì một emulator trên
+  GitHub runner tốn 30–45 phút và là thứ dễ flaky nhất trong pipeline.
+- **`M99.33` còn một mục *không phải* gate thiết bị**, và inventory đầu vào gộp
+  nhầm nó vào đó: hợp đồng geometry `G1…G8` / responsive `R1…R6` cần assertion
+  `getRect`. Đo lại: `test/features/trash/presentation/` có **0** lần dùng
+  `getRect`, và chỉ `R5` xuất hiện. Việc thật, chưa làm.
+- **`M99.29` còn smoke notification thật** — WorkManager, notification plugin,
+  background Drift isolate, Doze, deep link. Không có thiết bị thì không kiểm
+  được, và một cái tick không kiểm được thì tệ hơn một ô trống.
+
+#### Ghi nhận nợ kiểm toán, chưa trả ở đây
+
+Bốn task ghi `done` mà tiêu chí còn trống: `M4.10at` (5/8), `M4.11` (**0/22**),
+`M5.4` (19/25), `M99.21` (1/14). **Cố ý không tick ở đợt này.** Tick một ô là
+khẳng định đã kiểm; tick 60 ô dựa trên việc task đã ghi `done` là biến một nợ
+kiểm toán thành một lời khẳng định sai. Mỗi task cần một đợt riêng đọc từng tiêu
+chí — đáng chú ý nhất là benchmark UI Android ở 50/500/3 000 thẻ của `M4.11`,
+vốn cũng cần thiết bị.
+
+- **Acceptance criteria:**
+  - [x] Mọi mục đóng ở đây có bằng chứng kiểm lại được, ghi ngay tại mục.
+  - [x] Mọi mục **không** đóng được có lý do kiểm được, không phải "chưa làm".
+  - [x] Không task nào còn ở trạng thái "in-progress mà mọi ô đã tick".
+  - [x] Không tick ô nào chỉ vì task đã ghi `done`.
+- **Editable documents:** `docs/wbs.md`, `docs/wbs-study.md`.
+- **Output:** 4 task đóng, 4 dòng nợ gạch, 3 gate thành tiêu chí rõ.
+- **Tests required:** `check_docs.py` (docs-only; không có code thay đổi).
+- **Emulator integration suite:** **not run** — docs-only, và chính đợt này ghi
+  lại vì sao gate đó chưa chạy được.
+- **Checklist phases:** 0.
+- **Dependencies:** M100.8.
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |
@@ -15995,7 +16098,7 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 | `end_reason = scheduler_reset` phải mang cả BR-164 | M99.16 | Đổi scheduler khi chưa khoá ghi cùng giá trị với Reset, nên đọc riêng cột đó thì hai sự kiện khác nhau trông giống nhau. Không mất thông tin — `study_sessions.scheduler_generation` bằng generation của root sau một lần đổi và nhỏ hơn sau một lần reset — nhưng nó bắt người đọc phải biết mẹo đó | Tên đúng là `scheduler_changed`. `study_sessions.end_reason` có `CHECK` liệt kê giá trị nên thêm một giá trị là **đổi schema**, và nới `CHECK` là rebuild bảng nên xứng một bump riêng. Ba lần bump sau khi nợ được ghi đều đã đi việc khác: v8 (BR-203, ba cột `direction` additive), v9 (M99.28, hai cột theme/ngôn ngữ), v10 (M99.29, ba cột nhắc học); v11 (M99.33, Trash) có rebuild `study_sessions` nhưng cố ý không gánh thêm nợ này. Đích hiện tại là **v12** — lần rebuild kế tiếp của `study_sessions`, rồi đổi `deck_scheduler_repository_impl.dart` sang giá trị mới |
 | `MxAlertDialog` không có consumer nào trong app | trước M100.5, **đo ở M100.5** | 101 dòng shared có entry Widgetbook, có test, có stress specimen — nên nhìn đâu cũng tưởng sống. Một kit có hai cách làm một việc thì lần sau người ta chọn nhầm nửa thời gian | **Cố ý chưa trả.** Nó không phải bản sao của `MxConfirmDialog`: một hành động thay vì hai, và doc ghi rõ vì sao nó **không** phải live region trong khi confirm thì phải. Xoá một primitive có chủ đích để đạt con số dòng là đổi chác sai. Quyết định khi có màn đầu tiên cần alert một-nút — dùng nó, hoặc lúc đó mới xoá |
 | Nội dung starter là fixture, không phải nội dung production | T1.3 | Không phát hành được với nội dung này | Tìm nguồn nội dung có bản quyền rõ ràng trước M8 (BR-87) |
-| `sqlite3.wasm` và `drift_worker.js` là binary vendored trong `web/` | M4.2 | Không có bước build nào sinh ra chúng và không có bước build nào báo khi chúng cũ: app compile, load, rồi **không mở được database**. Nâng `drift` mà quên tải lại worker không có triệu chứng nào cho tới khi ai đó mở trình duyệt | `test/database/web_assets_test.dart` so version trong `pubspec.lock` với version đã pin, kèm `web/WEB_ASSETS.md` ghi URL tải. Đã kiểm tiêm lỗi: đổi `drift` thành 2.99.0 làm test đỏ |
+| ~~`sqlite3.wasm` và `drift_worker.js` là binary vendored trong `web/`~~ | M4.2 | Không có bước build nào sinh ra chúng và không có bước build nào báo khi chúng cũ: app compile, load, rồi **không mở được database**. Nâng `drift` mà quên tải lại worker không có triệu chứng nào cho tới khi ai đó mở trình duyệt | **Đã trả ở M4.2, ghi vào sổ ở M100.9.** `test/database/web_assets_test.dart` so version trong `pubspec.lock` với version đã pin, kèm `web/WEB_ASSETS.md` ghi URL tải. Đã kiểm tiêm lỗi: đổi `drift` thành 2.99.0 làm test đỏ |
 | Server phát web chưa gửi COOP/COEP | M4.2 | `crossOriginIsolated` là `false`, nên drift chọn backend lưu trữ kém hơn OPFS. Không có lỗi nào — chỉ là hiệu năng và độ bền khác đi, âm thầm | Thêm `Cross-Origin-Opener-Policy: same-origin` và `Cross-Origin-Embedder-Policy: require-corp` vào server phát web ở M7, và kiểm lại `crossOriginIsolated` trong E2E |
 | ~~Bản build web MUST dùng `--no-web-resources-cdn`~~ | M2.1a | Mặc định Flutter tải CanvasKit từ `gstatic.com` lúc **runtime** dù đã bundle sẵn cục bộ. Trong môi trường chặn CDN, app im lặng không render — không có lỗi build nào cảnh báo | **Đã trả ở M4.10b.** Job `web-build` trong `.github/workflows/ci.yml` dùng cờ này. **Chưa trả:** hướng dẫn chạy web thủ công vẫn chưa nhắc nó |
 | ~~`check_docs.sh` chỉ đếm task ID dạng `T*`, bỏ sót `M*`~~ | T1.4 | Báo "no duplicate WBS task IDs (8 tasks)" trong khi có 33 — **pass gây hiểu nhầm**, 25 task M2–M5 không được bảo vệ khỏi trùng ID | **Đã trả ở M2.1b.** Regex sửa thành `[TM][0-9]+(\.[0-9]+)?[a-z]?` (giờ báo 35 task), thêm check dependency resolve và check `M*` đủ field + acceptance criteria không rỗng. Cả ba verify bằng test tiêm lỗi, 4/4 case đạt |
