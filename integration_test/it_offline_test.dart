@@ -81,10 +81,11 @@ void main() {
     // Step 5: deleting works with no network.
     await robot.tapText('abandon');
     await robot.tapBySemantics('Edit card');
-    await robot.scrollToText(ItText.deleteCard);
-    await robot.tapText(ItText.deleteCard);
-    // The confirm names where the card goes since M99.33 (BR-256).
-    await robot.tapConfirmText('Move');
+    await robot.scrollToText(ItText.trashCard);
+    await robot.tapText(ItText.trashCard);
+    // The confirm names where the card goes since M99.33 (BR-256) — and it is
+    // its own word, `Move`, not a second copy of the action's label.
+    await robot.tapText(ItText.trashCardConfirm);
     // Trashing the deck's last card flips it back to `unset` (BR-260), so
     // the exit lands on the deck's own empty face, not a card list.
     expect(find.text('Nothing in here yet'), findsWidgets);

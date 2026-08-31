@@ -107,6 +107,15 @@ class Decks extends Table with TableInfo {
     requiredDuringInsert: false,
     $customConstraints: 'NULL REFERENCES decks(id)ON DELETE CASCADE',
   );
+  late final GeneratedColumn<int> siblingPosition = GeneratedColumn<int>(
+    'sibling_position',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: 'NOT NULL DEFAULT 0',
+    defaultValue: const CustomExpression('0'),
+  );
   late final GeneratedColumn<String> rootDeckId = GeneratedColumn<String>(
     'root_deck_id',
     aliasedName,
@@ -226,6 +235,7 @@ class Decks extends Table with TableInfo {
     id,
     name,
     parentDeckId,
+    siblingPosition,
     rootDeckId,
     contentType,
     ownerId,
@@ -1310,8 +1320,8 @@ class StudyQueueItems extends Table with TableInfo {
   bool get dontWriteConstraints => true;
 }
 
-class DatabaseAtV12 extends GeneratedDatabase {
-  DatabaseAtV12(QueryExecutor e) : super(e);
+class DatabaseAtV13 extends GeneratedDatabase {
+  DatabaseAtV13(QueryExecutor e) : super(e);
   late final DeleteBatches deleteBatches = DeleteBatches(this);
   late final Decks decks = Decks(this);
   late final Cards cards = Cards(this);
@@ -1354,13 +1364,13 @@ class DatabaseAtV12 extends GeneratedDatabase {
     'idx_card_study_states_due',
     'CREATE INDEX idx_card_study_states_due ON card_study_states (due_at)',
   );
-  late final Index idxDecksParentCreated = Index(
-    'idx_decks_parent_created',
-    'CREATE INDEX idx_decks_parent_created ON decks (parent_deck_id, created_at, id)',
+  late final Index idxDecksParentPosition = Index(
+    'idx_decks_parent_position',
+    'CREATE INDEX idx_decks_parent_position ON decks (parent_deck_id, sibling_position, id)',
   );
-  late final Index idxDecksRootCreated = Index(
-    'idx_decks_root_created',
-    'CREATE INDEX idx_decks_root_created ON decks (root_deck_id, created_at, id)',
+  late final Index idxDecksRootPosition = Index(
+    'idx_decks_root_position',
+    'CREATE INDEX idx_decks_root_position ON decks (root_deck_id, sibling_position, id)',
   );
   late final Index idxDecksDeleteBatch = Index(
     'idx_decks_delete_batch',
@@ -1393,8 +1403,8 @@ class DatabaseAtV12 extends GeneratedDatabase {
     idxCardsDeckCreated,
     idxCardsDeleteBatch,
     idxCardStudyStatesDue,
-    idxDecksParentCreated,
-    idxDecksRootCreated,
+    idxDecksParentPosition,
+    idxDecksRootPosition,
     idxDecksDeleteBatch,
     idxDeleteBatchesDeleted,
   ];
@@ -1472,5 +1482,5 @@ class DatabaseAtV12 extends GeneratedDatabase {
     ),
   ]);
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 13;
 }

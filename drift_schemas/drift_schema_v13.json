@@ -116,6 +116,16 @@
             "dsl_features": []
           },
           {
+            "name": "sibling_position",
+            "getter_name": "siblingPosition",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL DEFAULT 0",
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
             "name": "root_deck_id",
             "getter_name": "rootDeckId",
             "moor_type": "string",
@@ -1443,7 +1453,7 @@
       "data": {
         "on": 9,
         "name": "idx_study_queue_serving",
-        "sql": "CREATE INDEX idx_study_queue_serving\n    ON study_queue_items (session_id, mode, round, status, available_at, position);",
+        "sql": "CREATE INDEX idx_study_queue_serving\r\n    ON study_queue_items (session_id, mode, round, status, available_at, position);",
         "unique": false,
         "columns": []
       }
@@ -1526,8 +1536,8 @@
       "type": "index",
       "data": {
         "on": 1,
-        "name": "idx_decks_parent_created",
-        "sql": "CREATE INDEX idx_decks_parent_created ON decks (parent_deck_id, created_at, id);",
+        "name": "idx_decks_parent_position",
+        "sql": "CREATE INDEX idx_decks_parent_position ON decks (parent_deck_id, sibling_position, id);",
         "unique": false,
         "columns": []
       }
@@ -1540,8 +1550,8 @@
       "type": "index",
       "data": {
         "on": 1,
-        "name": "idx_decks_root_created",
-        "sql": "CREATE INDEX idx_decks_root_created ON decks (root_deck_id, created_at, id);",
+        "name": "idx_decks_root_position",
+        "sql": "CREATE INDEX idx_decks_root_position ON decks (root_deck_id, sibling_position, id);",
         "unique": false,
         "columns": []
       }
@@ -1590,7 +1600,7 @@
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE TABLE IF NOT EXISTS \"decks\" (\"id\" TEXT NOT NULL PRIMARY KEY, \"name\" TEXT NOT NULL, \"parent_deck_id\" TEXT NULL REFERENCES decks(id)ON DELETE CASCADE, \"root_deck_id\" TEXT NOT NULL, \"content_type\" TEXT NOT NULL CHECK (content_type IN ('unset', 'card', 'deck')), \"owner_id\" TEXT NULL, \"scheduler_type\" TEXT NULL CHECK (scheduler_type IS NULL OR scheduler_type IN ('eight_box', 'sm2')), \"scheduler_version\" INTEGER NULL, \"scheduler_config\" TEXT NULL, \"scheduler_generation\" INTEGER NULL, \"first_answered_at\" INTEGER NULL, \"study_config\" TEXT NULL, \"source_template_id\" TEXT NULL, \"source_template_version\" INTEGER NULL, \"delete_batch_id\" TEXT NULL REFERENCES delete_batches(id)ON DELETE CASCADE, \"created_at\" INTEGER NOT NULL, \"updated_at\" INTEGER NOT NULL);"
+          "sql": "CREATE TABLE IF NOT EXISTS \"decks\" (\"id\" TEXT NOT NULL PRIMARY KEY, \"name\" TEXT NOT NULL, \"parent_deck_id\" TEXT NULL REFERENCES decks(id)ON DELETE CASCADE, \"sibling_position\" INTEGER NOT NULL DEFAULT 0, \"root_deck_id\" TEXT NOT NULL, \"content_type\" TEXT NOT NULL CHECK (content_type IN ('unset', 'card', 'deck')), \"owner_id\" TEXT NULL, \"scheduler_type\" TEXT NULL CHECK (scheduler_type IS NULL OR scheduler_type IN ('eight_box', 'sm2')), \"scheduler_version\" INTEGER NULL, \"scheduler_config\" TEXT NULL, \"scheduler_generation\" INTEGER NULL, \"first_answered_at\" INTEGER NULL, \"study_config\" TEXT NULL, \"source_template_id\" TEXT NULL, \"source_template_version\" INTEGER NULL, \"delete_batch_id\" TEXT NULL REFERENCES delete_batches(id)ON DELETE CASCADE, \"created_at\" INTEGER NOT NULL, \"updated_at\" INTEGER NOT NULL);"
         }
       ]
     },
@@ -1739,20 +1749,20 @@
       ]
     },
     {
-      "name": "idx_decks_parent_created",
+      "name": "idx_decks_parent_position",
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE INDEX idx_decks_parent_created ON decks (parent_deck_id, created_at, id)"
+          "sql": "CREATE INDEX idx_decks_parent_position ON decks (parent_deck_id, sibling_position, id)"
         }
       ]
     },
     {
-      "name": "idx_decks_root_created",
+      "name": "idx_decks_root_position",
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE INDEX idx_decks_root_created ON decks (root_deck_id, created_at, id)"
+          "sql": "CREATE INDEX idx_decks_root_position ON decks (root_deck_id, sibling_position, id)"
         }
       ]
     },

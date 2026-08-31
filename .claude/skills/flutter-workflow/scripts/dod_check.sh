@@ -310,6 +310,18 @@ else
   FAILED+=("document gate unavailable: $DOCS_PY")
 fi
 
+# **The SDK on PATH is the SDK `.fvmrc` names.** Planned rather than run before
+# the stamp check, for the reason the stamp's own header gives: paying
+# `flutter --version` on every invocation costs most of what the stamp saves.
+# Here it runs only when the gate is actually running, and in parallel with the
+# rest, so it is free in wall-clock terms. See `check_flutter_version.sh`.
+FVM_SH="$REPO_ROOT/.claude/skills/flutter-workflow/scripts/check_flutter_version.sh"
+if [[ -f "$FVM_SH" ]]; then
+  plan flutter_version "Flutter SDK matches .fvmrc" "bash '$FVM_SH'"
+else
+  FAILED+=("flutter version check missing at $FVM_SH")
+fi
+
 CI_TOOLING_TESTS="$REPO_ROOT/.claude/skills/flutter-workflow/scripts/tests"
 if [[ -n "$PY" && -d "$CI_TOOLING_TESTS" ]]; then
   plan ci_tooling "CI tooling unit tests" \
