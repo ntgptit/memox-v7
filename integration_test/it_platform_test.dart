@@ -86,7 +86,9 @@ void main() {
     // By semantics, not by text: the editor's flag and close are icons carrying
     // their label as a tooltip, so there is no text on screen to tap.
     await robot.tapBySemantics(ItText.flagCard);
-    await robot.tapBySemantics(ItText.cardEditorClose);
+    // `Back`, not `Close`: this opened an existing card, and the editor draws
+    // the `←` for that. See `ItText.cardEditorClose`.
+    await robot.tapBySemantics(ItText.cardEditorBack);
 
     // Step 3, as far as one process can go: the tree is discarded and the
     // executor is closed. See the file comment — this is not an OS kill.

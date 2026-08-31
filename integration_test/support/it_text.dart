@@ -32,10 +32,32 @@ abstract final class ItText {
   /// The second tab. It read `Review` until #186 renamed Review to Study in
   /// `lib/` — the same rename that left four deck goldens a version behind.
   static const String studyTab = 'Study';
+
+  /// The editor's leave control, and it is **not** always the same widget.
+  ///
+  /// `card_editor_screen._closeButton` draws an `×` labelled *Close* when
+  /// creating and a `←` labelled *Back* when editing an existing card — a
+  /// deliberate distinction from #365: create is a form you abandon, edit is a
+  /// screen you came back from. The device suite only ever edits, so it needs
+  /// the second one; it was still reaching for the first, which is why
+  /// IT-PLAT-002 was failing when the emulator was next plugged in.
   static const String cardEditorClose = 'Close';
+  static const String cardEditorBack = 'Back';
   static const String detailsToggle = 'Add details';
   static const String detailsLabel = 'Details';
-  static const String deleteCard = 'Delete card';
+
+  /// **`Move to Trash`, not `Delete card`.** M99.33 replaced the hard delete
+  /// with soft-delete, and the editor's action took the destination's name.
+  /// The old string is kept next to it because a reader who remembers the old
+  /// flow will look for it here, and because its absence is the whole reason
+  /// IT-NAV-007 was red.
+  static const String trashCard = 'Move to Trash';
+
+  /// The confirm inside the dialog the action above opens
+  /// (`cardDeleteConfirmAction`). Separate from [trashCard]: the button that
+  /// opens the question and the button that answers it are different controls
+  /// with different words, and tapping the first twice is not the flow.
+  static const String trashCardConfirm = 'Move';
   static const String flagCard = 'Flag card';
   static const String unflagCard = 'Remove flag';
   static const String addTagHint = 'Add tag';

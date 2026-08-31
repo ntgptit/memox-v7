@@ -9905,7 +9905,7 @@ thế không đổi bố cục.
 - **Checklist phases:** 14, 15
 ### M99.26 · Một ngữ pháp cho Library, Study và Progress
 
-- **Status:** **in-progress** — code và docs xong, chờ emulator IT và CI (gate cuối của đợt tích hợp #301–#310).
+- **Status:** **done** — gate thiết bị đóng ở M100.14. Code, docs và CI xong. (gate cuối của đợt tích hợp #301–#310).
 - **Goal:** Ba tab đọc như ba màn của cùng một app. Sau khi Progress và Study
   Home tốt nghiệp trong cùng một đợt, mỗi tab tự trả lời bốn câu hỏi giao diện
   theo cách riêng của nó, và người dùng chuyển tab là người duy nhất nhìn thấy
@@ -9949,8 +9949,10 @@ thế không đổi bố cục.
         chi phí hairline 1.38:1 được đo và ghi lại chứ không đoán.
   - [x] Host gate xanh: format, analyze, architecture, guard, docs, toàn bộ
         host suite.
-  - [ ] **Gate `integration_test/` của `CLAUDE.md` — chưa chạy**, cùng lý do
-        và cùng lượt chạy với M99.28 và M99.29.
+  - [x] **Gate `integration_test/` — CHẠY XANH ở M100.14.** 8/8 trên
+        `emulator-5554` (Android 16, API 36), chạy **từng file một**:
+        `it_platform_test` 6/6 và `it_offline_test` 2/2. Chạy gộp một lệnh thì
+        flaky — xem M100.14.
 - **Checklist phases:** 6, 10
 
 ### M99.27 · Reverse Self-assess v1 — chiều hỏi cho phiên self-assess
@@ -10055,7 +10057,7 @@ binding của Study không đổi nhưng contract `openSession` thì có, và m�
 ở đường vào phiên.
 ### M99.28 · Settings v1 — global study defaults, theme và ngôn ngữ
 
-- **Status:** **in-progress** — phase 1–9 xong (gồm cả hai review đệ quy), chờ emulator IT và CI.
+- **Status:** **done** — gate thiết bị đóng ở M100.14. Phase 1–9 xong (gồm cả hai review đệ quy), CI xanh; gate thiết bị đã chạy.
 - **Goal:** Thay `SettingsPlaceholderScreen` bằng feature slice thật: mặc định
   học toàn app, theme, ngôn ngữ và reset, tất cả trên một dòng `app_settings`
   có kiểu, watchable và local-first.
@@ -10161,11 +10163,10 @@ binding của Study không đổi nhưng contract `openSession` thì có, và m�
         P0/P1/P2 sau khi đóng một P1 và hai P2 của review UI/UX.
   - [x] `flutter test integration_test/ -d emulator-5554 --flavor development` —
         **deferred**, xem mục dưới.
-  - [ ] **Gate `integration_test/` của `CLAUDE.md` — chưa chạy.** Ghi thành tiêu
-        chí ở M100.9: trước đó nó chỉ nằm trong dòng Status, nên mục này đọc ra
-        là "in-progress mà mọi ô đều đã tick" — hình dạng của một cuốn sổ sai
-        chứ không phải của một việc còn dở. Gate này là gate **local trên máy
-        có emulator**; CI cố ý không chạy nó.
+  - [x] **Gate `integration_test/` — CHẠY XANH ở M100.14.** 8/8 trên
+        `emulator-5554` (Android 16, API 36), chạy **từng file một**:
+        `it_platform_test` 6/6 và `it_offline_test` 2/2. Chạy gộp một lệnh thì
+        flaky — xem M100.14.
 - **Dependencies:** M4.1 (router), M5.0s (`app_settings`), M99.7 (AD-19)
 - **Tests required:** domain enum + defaults; repository trên SQLite thật
   (singleton row, stream re-emit, bốn write độc lập, reset, clock injected, lỗi
@@ -10221,7 +10222,7 @@ nên nó **phải** được chạy trước khi ai đó coi Settings v1 là đ�
 
 ### M99.29 · Daily Reminders v1
 
-- **Status:** **in-progress** — phase 1–9 xong (gồm cả các vòng review đệ quy), chờ emulator IT và CI.
+- **Status:** **in-progress** — gate `integration_test/` đóng ở M100.14 (8/8); **còn smoke notification thật**, suite không phủ WorkManager/notification/Doze. phase 1–9 xong (gồm cả các vòng review đệ quy), CI xanh; gate thiết bị đã chạy.
 - **Goal:** Một lời nhắc học hằng ngày, tuỳ chọn và mặc định tắt, dựng từ
   workload đến hạn thật tại thời điểm hiện tại — không phải từ một payload nạp sẵn
   hôm trước.
@@ -10284,16 +10285,10 @@ nên nó **phải** được chạy trước khi ai đó coi Settings v1 là đ�
         settings **đã** tắt.
   - [x] Host gate xanh: format, analyze, architecture, guard, docs, toàn bộ host
         suite.
-  - [ ] **Gate `integration_test/` của `CLAUDE.md` — chưa chạy.** Đây là gate
-        *khác* với smoke notification bên dưới, và nó áp cho branch này vì hai
-        lý do: có thêm thứ dưới `lib/features/`, **và** `lib/app/bootstrap.dart`
-        (bọc `ReminderReconcilerWidget` quanh toàn bộ cây),
-        `lib/app/di/repository_bindings.dart` và router đều bị sửa — đúng ba
-        loại thay đổi mà `CLAUDE.md` nói host suite không nhìn thấy được, và
-        đúng loại đã làm hỏng suite trong bảy mươi PR. Cần
-        `flutter test integration_test/ -d emulator-5554 --flavor development`
-        với baseline 8/8 trước khi merge; môi trường thực thi của task này không
-        có emulator, và chỉ thị của task là hoãn phần thiết bị.
+  - [x] **Gate `integration_test/` — CHẠY XANH ở M100.14.** 8/8 trên
+        `emulator-5554` (Android 16, API 36), chạy **từng file một**:
+        `it_platform_test` 6/6 và `it_offline_test` 2/2. Chạy gộp một lệnh thì
+        flaky — xem M100.14.
   - [ ] **Smoke notification trên emulator/thiết bị — chưa chạy, hoãn có chủ
         đích.** Host test dùng fake platform adapter và không gửi notification
         thật; hai plugin native (`workmanager`, `flutter_local_notifications`),
@@ -10376,7 +10371,7 @@ nên nó **phải** được chạy trước khi ai đó coi Settings v1 là đ�
 
 ### M99.30 · Tag Management v1 — catalog, lọc nhiều tag, rename/gộp, xoá
 
-- **Status:** **in-progress** — chờ emulator IT và CI (gate cuối của đợt tích hợp #301–#310); phase 1 (docs) xong: BR-230…BR-238, UC-18, wireframe
+- **Status:** **done** — gate thiết bị đóng ở M100.14. Phase 1 (docs) xong: BR-230…BR-238, UC-18, wireframe
   M4.14, `master-flow.md` §6, `check_docs.py` xanh. `data-model.md` **không**
   đổi và đó là kết luận chứ không phải bỏ sót: catalog không thêm bảng, cột hay
   index nào — nó đọc `idx_card_tags_tag` đang có. Phase 2 (domain) xong:
@@ -10539,11 +10534,10 @@ nên nó **phải** được chạy trước khi ai đó coi Settings v1 là đ�
         gồm cả hai overlay ở 320@2.0; EN/VI, light/dark, 320@2.0 · 390 · 412.
   - [x] `dart format`, `flutter analyze`, guard, `check_docs.py` và
         `flutter test` xanh.
-  - [ ] **Gate `integration_test/` của `CLAUDE.md` — chưa chạy.** Ghi thành tiêu
-        chí ở M100.9: trước đó nó chỉ nằm trong dòng Status, nên mục này đọc ra
-        là "in-progress mà mọi ô đều đã tick" — hình dạng của một cuốn sổ sai
-        chứ không phải của một việc còn dở. Gate này là gate **local trên máy
-        có emulator**; CI cố ý không chạy nó.
+  - [x] **Gate `integration_test/` — CHẠY XANH ở M100.14.** 8/8 trên
+        `emulator-5554` (Android 16, API 36), chạy **từng file một**:
+        `it_platform_test` 6/6 và `it_offline_test` 2/2. Chạy gộp một lệnh thì
+        flaky — xem M100.14.
 - **Dependencies:** M4.10at, M4.11, M99.19, M99.21
 - **Tests required:** domain — OR/AND composition, tập rỗng là identity,
   normalization dùng chung, kết quả gộp. SQLite thật — count catalog, phân
@@ -10557,7 +10551,7 @@ nên nó **phải** được chạy trước khi ai đó coi Settings v1 là đ�
 
 ### M99.31 · Card Detail và lịch sử học v1 — mặt đọc của một thẻ
 
-- **Status:** in-progress — phase 1 (docs) xong: BR-239…BR-246, UC-19, wireframe
+- **Status:** done — gate thiết bị đóng ở M100.14. Phase 1 (docs) xong: BR-239…BR-246, UC-19, wireframe
   M4.15, `master-flow.md` nhánh `J` + bảng §6, `check_docs.py` xanh. Phase 2–4
   (domain → data → presentation) xong. Phase 5 (recursive architecture/logic
   review, `AUDIT_ONLY` + coordinator) xong — tám finding đóng: (P1) `Edit` gated
@@ -10689,11 +10683,10 @@ nên nó **phải** được chạy trước khi ai đó coi Settings v1 là đ�
         đổi (route table, binding), và CLAUDE.md nói rõ chính hai chỗ đó là nơi
         hai trong ba lần suite gãy im lặng bắt nguồn. Baseline phải đối chiếu
         là 8 passing / 0 failing.
-  - [ ] **Gate `integration_test/` của `CLAUDE.md` — chưa chạy.** Ghi thành tiêu
-        chí ở M100.9: trước đó nó chỉ nằm trong dòng Status, nên mục này đọc ra
-        là "in-progress mà mọi ô đều đã tick" — hình dạng của một cuốn sổ sai
-        chứ không phải của một việc còn dở. Gate này là gate **local trên máy
-        có emulator**; CI cố ý không chạy nó.
+  - [x] **Gate `integration_test/` — CHẠY XANH ở M100.14.** 8/8 trên
+        `emulator-5554` (Android 16, API 36), chạy **từng file một**:
+        `it_platform_test` 6/6 và `it_offline_test` 2/2. Chạy gộp một lệnh thì
+        flaky — xem M100.14.
 - **Dependencies:** M99.18 (chế độ chọn nhiều quyết định nghĩa của một lần
   chạm), M5 (`study_answers` đã có `kind`/`mode`/`action`/generation)
 - **Tests required:** SQLite thật cho thứ tự và tie-break, trang 50, không
@@ -10876,7 +10869,7 @@ của M2.
 
 ### M99.33 · Trash và restore v1 — soft-delete thay cho delete cứng
 
-- **Status:** **in review** — phase 1 (docs) xong: BR-256…BR-267, UC-21, AD-22,
+- **Status:** **done** — gate thiết bị đóng ở M100.14. Phase 1 (docs) xong: BR-256…BR-267, UC-21, AD-22,
   `delete_batches` + hai cột tombstone + bất biến 33…37 + viết lại bất biến
   1…5/15/29, wireframe M99.33, 5Why. Phase 2 (schema) xong: v11 với
   `drift_schema_v11.json`, `_upgradeToV11` (bảng + hai cột + ba index + rebuild
@@ -10949,8 +10942,10 @@ của M2.
         `semanticLabel`). Bảy contract còn lại được ghi ở cuối file test kèm lý
         do không đo được — một contract chưa đo mà không ai ghi là chưa đo thì
         nhìn giống hệt một contract đã đạt.
-  - [ ] **Gate `integration_test/` của `CLAUDE.md` — chưa chạy.** Gate local
-        trên máy có emulator; máy hiện tại chỉ có Chrome và Edge.
+  - [x] **Gate `integration_test/` — CHẠY XANH ở M100.14.** 8/8 trên
+        `emulator-5554` (Android 16, API 36), chạy **từng file một**:
+        `it_platform_test` 6/6 và `it_offline_test` 2/2. Chạy gộp một lệnh thì
+        flaky — xem M100.14.
   - **Không có test geometry/semantics nào cho Trash.** Wireframe chốt G1…G8 và
     R1…R6, và hiện không có `getRect`, không golden, không `meetsGuideline`,
     không test 320dp@2.0 hay VI/dark cho màn này. Hai lỗi tràn thật (thanh chọn
@@ -16315,6 +16310,77 @@ khuyên cũ sẽ quay lại tìm đúng chỗ đó; và đoạn văn "Drift need
 - **Checklist phases:** 8.
 - **Dependencies:** M100.12.
 
+### M100.14 · Cắm emulator, chạy gate — và nó bắt được hai chỗ đã mục
+
+- **Scope:** `integration_test/support/it_text.dart`, `it_platform_test.dart`,
+  `it_offline_test.dart`; sáu mục WBS; một dòng nợ mới.
+- **Goal:** Chạy gate `integration_test/` mà sáu task đã chờ, và ghi lại đúng
+  những gì nó tìm thấy.
+- **Status:** **done** — **8/8** trên `emulator-5554` (Android 16, API 36).
+- **Tôi đã sai ở M100.9 và sửa ở đây.** Mục đó viết *"máy này không có emulator
+  hay thiết bị Android — `flutter devices` chỉ liệt kê Chrome và Edge"*. Câu đó
+  đúng về **device đang chạy** và sai về **thiết bị có thể chạy**:
+  `flutter emulators` liệt kê **hai** AVD, một cái tên thẳng là **`memox_it`** —
+  dựng riêng cho suite này. Sáu task đã bị ghi là "không đóng được" bằng một
+  phép kiểm trả lời sai câu hỏi.
+
+#### Hai lỗi tất định, cả hai là label drift
+
+Gate làm đúng việc `CLAUDE.md` mô tả: *"một rule hoặc một sợi dây đổi, và thứ mô
+phỏng nó không đi theo"*.
+
+| test | tìm | thực tế | đổi ở |
+|---|---|---|---|
+| IT-PLAT-002 | `Close` trên editor | editor vẽ `←` **`Back`** khi sửa thẻ có sẵn; `×` **`Close`** chỉ khi tạo mới | #365 |
+| IT-NAV-007 | `Delete card` | **`Move to Trash`** — soft-delete thay xoá cứng | M99.33 |
+
+IT-NAV-007 còn sai lớp thứ hai ngay sau đó: nó gõ `Move to Trash` **lần nữa**
+cho nút xác nhận, mà nút đó là **`Move`** (`cardDeleteConfirmAction`). Lỗi thứ
+nhất che lỗi thứ hai — test chết ở bước trước nên bước sau chưa bao giờ chạy.
+
+`ItText` nay giữ **cả hai** chuỗi cũ và mới kèm lý do, vì người đọc nhớ luồng cũ
+sẽ tìm đúng chỗ đó.
+
+#### Suite xanh 8/8 khi chạy **từng file**, và flaky khi chạy gộp
+
+Đo bốn lượt:
+
+| lượt | lệnh | kết quả |
+|---|---|---|
+| 1 | `integration_test/` | 6/8 — hai lỗi label ở trên |
+| 2 | `integration_test/` (sau khi sửa) | 7/8 — IT-CONT-008 |
+| 3 | `integration_test/` (không đổi gì) | 5/8 — **tập lỗi khác**: IT-CONT-008, IT-PLAT-003, IT-PLAT-006 |
+| 4 | từng file một | **6/6 + 2/2 = 8/8** |
+
+Tập lỗi **đổi giữa các lượt mà code không đổi**, và mỗi file chạy riêng đều
+xanh hết. Nên phần còn lại **không phải lỗi sản phẩm** mà là hai file dùng chung
+một emulator và một bản cài trong cùng một lệnh. Lượt 4 lặp lại được và là cách
+chạy nên dùng:
+
+```bash
+flutter test integration_test/it_platform_test.dart -d emulator-5554 --flavor development
+flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor development
+```
+
+- **Không sửa phần flaky ở đây.** Nó cần tìm ra state nào rò giữa hai file —
+  một việc riêng, và một việc mà đoán mò sẽ làm hỏng thêm. Ghi vào bảng nợ.
+- **Sáu task:** năm đóng (`M99.26`, `M99.28`, `M99.30`, `M99.31`, `M99.33`).
+  `M99.29` **vẫn mở**: gate đã chạy, nhưng suite **không phủ** WorkManager,
+  notification plugin, background Drift isolate hay Doze — nên ô smoke
+  notification vẫn là một ô trống thật, không phải một ô quên tick.
+- **Acceptance criteria:**
+  - [x] Gate chạy thật trên emulator, không phải suy đoán.
+  - [x] Mọi lỗi tất định được chẩn đoán tới nguyên nhân và sửa.
+  - [x] Phần không tất định được **đo** (bốn lượt) chứ không gọi là "flaky" rồi bỏ.
+  - [x] Chỉ tick ô nào gate thật sự chứng minh; `M99.29` giữ ô còn lại.
+  - [x] Sửa lại khẳng định sai của chính M100.9.
+- **Editable documents:** `docs/wbs.md`.
+- **Output:** 3 file `integration_test/` sửa, 6 task cập nhật, 1 dòng nợ mới.
+- **Tests required:** `integration_test/` trên emulator.
+- **Emulator integration suite:** **8/8, chạy từng file** — xem bảng trên.
+- **Checklist phases:** 12.
+- **Dependencies:** M100.13.
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |
@@ -16334,6 +16400,7 @@ khuyên cũ sẽ quay lại tìm đúng chỗ đó; và đoạn văn "Drift need
 | ~~`ancestry` CTE trong `deck.drift` không có bound~~ | M99.28 | Cùng khiếm khuyết đã sửa ở `progress.drift`: walk mang `distance` tăng mỗi vòng nên `UNION` không dedup được, và trên cây cha vòng lặp thì statement không bao giờ trả về — nó giữ database isolate, nên mọi query khác của app chặn theo. Comment ở `deck.drift` còn khẳng định ngược lại | **Đã trả ở M99.86.** `ancestry` nhận `:maxWalk = DeckEntity.maxTreeDepth + 1`; `branch` giữ `UNION` không bound vì row của nó hữu hạn. Test SQLite thật dựng cycle, buộc read kết thúc và chứng minh query kế tiếp trên cùng database isolate vẫn chạy. |
 | ~~`end_reason = scheduler_reset` phải mang cả BR-164~~ | M99.16 | Đổi scheduler khi chưa khoá ghi cùng giá trị với Reset, nên đọc riêng cột đó thì hai sự kiện khác nhau trông giống nhau. Không mất thông tin — `study_sessions.scheduler_generation` bằng generation của root sau một lần đổi và nhỏ hơn sau một lần reset — nhưng nó bắt người đọc phải biết mẹo đó | Tên đúng là `scheduler_changed`. `study_sessions.end_reason` có `CHECK` liệt kê giá trị nên thêm một giá trị là **đổi schema**, và nới `CHECK` là rebuild bảng nên xứng một bump riêng. Ba lần bump sau khi nợ được ghi đều đã đi việc khác: v8 (BR-203, ba cột `direction` additive), v9 (M99.28, hai cột theme/ngôn ngữ), v10 (M99.29, ba cột nhắc học); v11 (M99.33, Trash) có rebuild `study_sessions` nhưng cố ý không gánh thêm nợ này. **Đã trả ở M100.13.** Đích đúng là v12 và nó được làm riêng thay vì chờ ghép: không còn lần rebuild `study_sessions` nào đang chờ để ghép vào. Ghi chú gốc: Đích hiện tại là **v12** — lần rebuild kế tiếp của `study_sessions`, rồi đổi `deck_scheduler_repository_impl.dart` sang giá trị mới |
 | `MxAlertDialog` không có consumer nào trong app | trước M100.5, **đo ở M100.5** | 101 dòng shared có entry Widgetbook, có test, có stress specimen — nên nhìn đâu cũng tưởng sống. Một kit có hai cách làm một việc thì lần sau người ta chọn nhầm nửa thời gian | **Cố ý chưa trả.** Nó không phải bản sao của `MxConfirmDialog`: một hành động thay vì hai, và doc ghi rõ vì sao nó **không** phải live region trong khi confirm thì phải. Xoá một primitive có chủ đích để đạt con số dòng là đổi chác sai. Quyết định khi có màn đầu tiên cần alert một-nút — dùng nó, hoặc lúc đó mới xoá |
+| Suite  flaky khi chạy gộp một lệnh | M100.14 | Bốn lượt đo: gộp cho 5/8, 6/8, 7/8 với **tập lỗi đổi giữa các lượt mà code không đổi**; từng file thì 6/6 + 2/2 = 8/8. Hai file dùng chung một emulator và một bản cài, nên state hoặc thời gian rò giữa chúng. Hệ quả: gate chỉ tin được khi chạy từng file, và một người chạy gộp sẽ thấy đỏ mà không hiểu vì sao | Tìm state rò giữa hai file — nghi trước hết là app install và database còn sót giữa hai suite. Đoán mò sẽ làm hỏng thêm, nên cần một lượt đo riêng |
 | Nội dung starter là fixture, không phải nội dung production | T1.3 | Không phát hành được với nội dung này | Tìm nguồn nội dung có bản quyền rõ ràng trước M8 (BR-87) |
 | ~~`sqlite3.wasm` và `drift_worker.js` là binary vendored trong `web/`~~ | M4.2 | Không có bước build nào sinh ra chúng và không có bước build nào báo khi chúng cũ: app compile, load, rồi **không mở được database**. Nâng `drift` mà quên tải lại worker không có triệu chứng nào cho tới khi ai đó mở trình duyệt | **Đã trả ở M4.2, ghi vào sổ ở M100.9.** `test/database/web_assets_test.dart` so version trong `pubspec.lock` với version đã pin, kèm `web/WEB_ASSETS.md` ghi URL tải. Đã kiểm tiêm lỗi: đổi `drift` thành 2.99.0 làm test đỏ |
 | Server phát web chưa gửi COOP/COEP | M4.2 | `crossOriginIsolated` là `false`, nên drift chọn backend lưu trữ kém hơn OPFS. Không có lỗi nào — chỉ là hiệu năng và độ bền khác đi, âm thầm | Thêm `Cross-Origin-Opener-Policy: same-origin` và `Cross-Origin-Embedder-Policy: require-corp` vào server phát web ở M7, và kiểm lại `crossOriginIsolated` trong E2E |
