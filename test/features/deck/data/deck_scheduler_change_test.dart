@@ -299,7 +299,13 @@ void main() {
         "SELECT * FROM study_sessions WHERE id = '$sessionId'",
       );
       expect(session['status'], 'invalidated');
-      expect(session['end_reason'], 'scheduler_reset');
+      // **`scheduler_changed`, not `scheduler_reset`** (M100.13). BR-12's
+      // unlocked change and Reset used to write the same label, so this column
+      // could not be read on its own: a reset bumps `scheduler_generation` and
+      // this does not, and only that comparison told them apart. BR-164 never
+      // named a value — it requires `invalidated` and forbids `user_exit` —
+      // so the old value satisfied the rule and still misreported the event.
+      expect(session['end_reason'], 'scheduler_changed');
       expect(session['ended_at'], isNotNull);
     });
 

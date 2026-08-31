@@ -36,8 +36,9 @@ CREATE TABLE study_sessions (
     end_reason TEXT NULL CHECK (
         end_reason IS NULL
         OR end_reason IN (
-            'user_exit', 'scheduler_reset', 'stale_generation',
-            'persistence_error', 'interrupted', 'content_deleted'
+            'user_exit', 'scheduler_reset', 'scheduler_changed',
+            'stale_generation', 'persistence_error', 'interrupted',
+            'content_deleted'
         )
     ),
 

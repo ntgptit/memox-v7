@@ -16253,6 +16253,68 @@ khuyên cũ sẽ quay lại tìm đúng chỗ đó; và đoạn văn "Drift need
 - **Checklist phases:** 8.
 - **Dependencies:** M100.11.
 
+### M100.13 · Schema v12 — `end_reason` thôi mang hai sự kiện
+
+- **Goal:** Trả dòng nợ M99.16. `end_reason = scheduler_reset` đang mang **hai**
+  sự kiện khác nhau: Reset learning progress (BR-83), và đổi scheduler khi chưa
+  khoá (BR-12, BR-164) — vốn **không phải** reset.
+- **Status:** **done** — schema v11 → **v12**, 4 077 test host xanh, **0 golden
+  đổi**.
+- **Chủ dự án uỷ quyền sửa hai tài liệu `frozen for MVP`** trước khi làm; không
+  có uỷ quyền đó thì mục này dừng, vì `data-model.md` liệt kê đích danh tập giá
+  trị và ma trận `status` × `end_reason`.
+- **Vì sao đáng một lần rebuild bảng.** Không mất thông tin — sau một lần đổi,
+  `study_sessions.scheduler_generation` **bằng** generation của root; sau một
+  lần reset thì **nhỏ hơn**. Nhưng đọc riêng cột `end_reason` cho ra câu trả lời
+  sai, và người đọc phải biết mẹo đó mới đọc đúng. Một giá trị cần chú thích là
+  một giá trị sẽ bị đọc nhầm.
+- **Scope:**
+  - `study.drift`: `CHECK` nhận thêm `'scheduler_changed'`; `schemaVersion` 12.
+  - `app_database_migrations_v12.dart`: rebuild `study_sessions` (SQLite không
+    ALTER được `CHECK`), theo đúng khuôn v8 và v11.
+  - `drift_schema_v12.json` + `test/drift/generated/` sinh lại.
+  - `StudySessionEndReason.schedulerChanged`; ma trận `isValidWith` mở cho nó;
+    bất biến Q12 mở tương ứng.
+  - `deck_scheduler_repository_impl.changeUnlockedScheduler` ghi giá trị mới.
+  - `data-model.md`: hàng enum + **một hàng mới** trong ma trận.
+- **Hàng cũ không được viết lại, và đó là quyết định chứ không phải lười.**
+  Migration **không thể** biết một hàng `scheduler_reset` cũ ghi sự kiện nào:
+  phép so sánh phân biệt chúng cần generation của root **tại thời điểm đó**, mà
+  cái đó không được lưu. Đoán là dán nhãn lên một quá khứ không đỡ được nhãn đó.
+  Nên hàng cũ giữ nguyên; chỉ phiên đóng từ v12 trở đi mang giá trị mới.
+- **`business-rules.md` cố ý KHÔNG sửa.** BR-164 không nêu tên giá trị nào — nó
+  bắt `invalidated` và cấm `user_exit`, nên **code cũ vẫn đúng luật** và vẫn báo
+  sai sự kiện. Đó chính là hình dạng của nợ này: một rule đúng, một cột đọc sai.
+  Sửa một doc frozen khi nó không mâu thuẫn với code là mở rộng phạm vi.
+- **Một câu copy mới, vì dùng lại câu cũ là chính phép gộp vừa gỡ.** Màn summary
+  map `schedulerReset || staleGeneration` → *"tiến trình học của deck bị đặt
+  lại"*. Với `schedulerChanged` câu đó **sai**: không có gì bị đặt lại, deck giữ
+  nguyên tiến trình, chỉ hàng đợi được chia lại. Nên có
+  `studySummaryStoppedBySchedulerChange` ở cả `en` và `vi`.
+- **Migration test khẳng định bốn điều, và hai trong đó là hai rủi ro riêng
+  biệt của create-copy-drop:** mọi phiên **sống sót** qua bản sao (một bước drop
+  mà không copy vẫn để lại đúng hình dạng bảng), giá trị mới **được nhận**, hàng
+  cũ **không bị viết lại**, và `CHECK` **vẫn còn là `CHECK`** — một rebuild đánh
+  rơi ràng buộc sẽ qua ba khẳng định đầu và nhận mọi thứ.
+- **Bốn test ghim `schemaVersion == 11` đỏ đúng như thiết kế** và đã cập nhật;
+  test `deck_scheduler_change` nay khẳng định `scheduler_changed`, tức khẳng
+  định chính điều milestone này làm.
+- **Acceptance criteria:**
+  - [x] `migrateAndValidate` từ v11 khớp snapshot v12.
+  - [x] Hàng cũ giữ nguyên giá trị; hàng mới nhận giá trị mới; `CHECK` còn hiệu lực.
+  - [x] `data-model.md` khớp schema; `check_docs.py` xanh.
+  - [x] Câu giải thích cho người dùng nói đúng sự kiện, không mượn câu reset.
+  - [x] 4 077 test host xanh, `flutter analyze` sạch, **0 golden đổi**.
+- **Editable documents:** `docs/wbs.md`, `docs/data-model.md` (được uỷ quyền).
+- **Output:** schema v12 + migration + snapshot, 5 file `lib/` sửa, 2 ARB,
+  1 test migration mới, 6 test cập nhật, 1 dòng nợ gạch.
+- **Tests required:** `test/database/`, `test/features/deck/data/`,
+  `test/features/study/domain/`, toàn bộ suite host.
+- **Emulator integration suite:** **not run** — không có emulator trên máy này;
+  đây là thay đổi schema nên **nên chạy trước khi phát hành** (M8).
+- **Checklist phases:** 8.
+- **Dependencies:** M100.12.
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |
@@ -16270,7 +16332,7 @@ khuyên cũ sẽ quay lại tìm đúng chỗ đó; và đoạn văn "Drift need
 | ~~`study_session_controller.dart` vượt trần 400 dòng của guard~~ | M5.24 | 423/400. Warning cũng làm đỏ gate. Class giữ toàn bộ command của phiên học | **Đã trả ở M5.25.** Không tách được bằng cơ chế ngôn ngữ — Dart không có partial class, base class Riverpod sinh ra là private, và extension trong `part` cũng không dùng được `state` (`invalid_use_of_protected_member`, đã thử và revert). Nên tách bằng **trách nhiệm**: offset nhìn lại của `browse` là view state, không phải command của phiên, và nay là `StudyBrowseTrailController`. Controller còn 387 dòng |
 | ~~`study_answers` chưa có index cho khoảng thời gian~~ | M99.28 | Progress lọc `answered_at >= ? AND answered_at < ?`; index duy nhất chạm cột này là `(card_id, answered_at)`, mà cột dẫn đầu không nằm trong predicate — nên mỗi lần emit là một full scan `study_answers`, và stream re-emit theo **mỗi lượt trả lời** khi màn hình đang mở (ở độ sâu 3 là ba scan mỗi lượt). Output có chặn, scan thì không | **Đóng ở M100.12 bằng phép đo, và phép đo bác bỏ tiền đề.** `EXPLAIN QUERY PLAN` trên database thật: window **không** full-scan. Nó là một **join** và `cards` lái — SQLite tìm card sống qua `idx_cards_delete_batch` rồi vào `study_answers` với `card_id` **đã bind sẵn**, tức đúng cột dẫn đầu mà dòng nợ tưởng là thiếu, do join cấp chứ không do predicate. `idx_study_answers_card` phục vụ cả hàng như **COVERING INDEX**. Thêm `(answered_at)` đổi plan **bằng không**, nên **không thêm** — một index không ai đọc vẫn bắt mọi lượt ghi answer trả phí. `progress_query_plan_test.dart` ghim cả plan lẫn sự vắng mặt của index. Ghi chú gốc: Thêm index `(answered_at)` — nhưng đó là **đổi schema**, tức bump version + snapshot + migration test, và M99.28 cố ý không đụng schema. Trả cùng lần bump schema tiếp theo, và theo đúng rule index của repo: đo bằng `EXPLAIN QUERY PLAN` trên dữ liệu thật trước rồi mới thêm |
 | ~~`ancestry` CTE trong `deck.drift` không có bound~~ | M99.28 | Cùng khiếm khuyết đã sửa ở `progress.drift`: walk mang `distance` tăng mỗi vòng nên `UNION` không dedup được, và trên cây cha vòng lặp thì statement không bao giờ trả về — nó giữ database isolate, nên mọi query khác của app chặn theo. Comment ở `deck.drift` còn khẳng định ngược lại | **Đã trả ở M99.86.** `ancestry` nhận `:maxWalk = DeckEntity.maxTreeDepth + 1`; `branch` giữ `UNION` không bound vì row của nó hữu hạn. Test SQLite thật dựng cycle, buộc read kết thúc và chứng minh query kế tiếp trên cùng database isolate vẫn chạy. |
-| `end_reason = scheduler_reset` phải mang cả BR-164 | M99.16 | Đổi scheduler khi chưa khoá ghi cùng giá trị với Reset, nên đọc riêng cột đó thì hai sự kiện khác nhau trông giống nhau. Không mất thông tin — `study_sessions.scheduler_generation` bằng generation của root sau một lần đổi và nhỏ hơn sau một lần reset — nhưng nó bắt người đọc phải biết mẹo đó | Tên đúng là `scheduler_changed`. `study_sessions.end_reason` có `CHECK` liệt kê giá trị nên thêm một giá trị là **đổi schema**, và nới `CHECK` là rebuild bảng nên xứng một bump riêng. Ba lần bump sau khi nợ được ghi đều đã đi việc khác: v8 (BR-203, ba cột `direction` additive), v9 (M99.28, hai cột theme/ngôn ngữ), v10 (M99.29, ba cột nhắc học); v11 (M99.33, Trash) có rebuild `study_sessions` nhưng cố ý không gánh thêm nợ này. Đích hiện tại là **v12** — lần rebuild kế tiếp của `study_sessions`, rồi đổi `deck_scheduler_repository_impl.dart` sang giá trị mới |
+| ~~`end_reason = scheduler_reset` phải mang cả BR-164~~ | M99.16 | Đổi scheduler khi chưa khoá ghi cùng giá trị với Reset, nên đọc riêng cột đó thì hai sự kiện khác nhau trông giống nhau. Không mất thông tin — `study_sessions.scheduler_generation` bằng generation của root sau một lần đổi và nhỏ hơn sau một lần reset — nhưng nó bắt người đọc phải biết mẹo đó | Tên đúng là `scheduler_changed`. `study_sessions.end_reason` có `CHECK` liệt kê giá trị nên thêm một giá trị là **đổi schema**, và nới `CHECK` là rebuild bảng nên xứng một bump riêng. Ba lần bump sau khi nợ được ghi đều đã đi việc khác: v8 (BR-203, ba cột `direction` additive), v9 (M99.28, hai cột theme/ngôn ngữ), v10 (M99.29, ba cột nhắc học); v11 (M99.33, Trash) có rebuild `study_sessions` nhưng cố ý không gánh thêm nợ này. **Đã trả ở M100.13.** Đích đúng là v12 và nó được làm riêng thay vì chờ ghép: không còn lần rebuild `study_sessions` nào đang chờ để ghép vào. Ghi chú gốc: Đích hiện tại là **v12** — lần rebuild kế tiếp của `study_sessions`, rồi đổi `deck_scheduler_repository_impl.dart` sang giá trị mới |
 | `MxAlertDialog` không có consumer nào trong app | trước M100.5, **đo ở M100.5** | 101 dòng shared có entry Widgetbook, có test, có stress specimen — nên nhìn đâu cũng tưởng sống. Một kit có hai cách làm một việc thì lần sau người ta chọn nhầm nửa thời gian | **Cố ý chưa trả.** Nó không phải bản sao của `MxConfirmDialog`: một hành động thay vì hai, và doc ghi rõ vì sao nó **không** phải live region trong khi confirm thì phải. Xoá một primitive có chủ đích để đạt con số dòng là đổi chác sai. Quyết định khi có màn đầu tiên cần alert một-nút — dùng nó, hoặc lúc đó mới xoá |
 | Nội dung starter là fixture, không phải nội dung production | T1.3 | Không phát hành được với nội dung này | Tìm nguồn nội dung có bản quyền rõ ràng trước M8 (BR-87) |
 | ~~`sqlite3.wasm` và `drift_worker.js` là binary vendored trong `web/`~~ | M4.2 | Không có bước build nào sinh ra chúng và không có bước build nào báo khi chúng cũ: app compile, load, rồi **không mở được database**. Nâng `drift` mà quên tải lại worker không có triệu chứng nào cho tới khi ai đó mở trình duyệt | **Đã trả ở M4.2, ghi vào sổ ở M100.9.** `test/database/web_assets_test.dart` so version trong `pubspec.lock` với version đã pin, kèm `web/WEB_ASSETS.md` ghi URL tải. Đã kiểm tiêm lỗi: đổi `drift` thành 2.99.0 làm test đỏ |

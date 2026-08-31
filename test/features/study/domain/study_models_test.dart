@@ -116,6 +116,10 @@ void main() {
       // own value rather than `scheduler_reset`, because nothing about the
       // scheduler changed and only one of the two is undone by pressing Undo.
       (StudySessionStatus.invalidated, StudySessionEndReason.contentDeleted),
+      // BR-12's unlocked scheduler change (M100.13). `invalidated` for the same
+      // reason a reset is — the queue is dealt for an algorithm the deck no
+      // longer runs — but its own reason, because the generation does not move.
+      (StudySessionStatus.invalidated, StudySessionEndReason.schedulerChanged),
       (StudySessionStatus.failed, StudySessionEndReason.persistenceError),
     ];
 

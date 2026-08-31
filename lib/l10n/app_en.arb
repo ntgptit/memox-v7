@@ -1605,6 +1605,10 @@
   "@studySummaryStoppedByError": {
     "description": "Explains a session ended by a failed write (BR-85, BR-86)."
   },
+  "studySummaryStoppedBySchedulerChange": "The deck's study mode was changed while this session was open.",
+  "@studySummaryStoppedBySchedulerChange": {
+    "description": "Explains a session invalidated by an unlocked scheduler change (BR-12, BR-164). Separate from the reset sentence because nothing was reset — the deck kept its progress and only the algorithm changed."
+  },
   "studySummaryStoppedByReset": "The deck's learning progress was reset while this session was open.",
   "@studySummaryStoppedByReset": {
     "description": "Explains a session invalidated by a reset (BR-83, BR-84)."

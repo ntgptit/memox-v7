@@ -91,6 +91,14 @@ class StudySummarySectionWidget extends StatelessWidget {
     StudySessionEndReason.schedulerReset ||
     StudySessionEndReason.staleGeneration =>
       context.l10n.studySummaryStoppedByReset,
+    // **Its own sentence, not the reset one** (M100.13). BR-12 lets an
+    // untouched deck swap algorithm without resetting anything — the progress
+    // stays, only the queue is re-dealt — so "your progress was reset" would
+    // send the user looking for a reset nobody ran. Reusing the reset string
+    // here would be the same merge this milestone just took out of the
+    // database, moved up into the UI.
+    StudySessionEndReason.schedulerChanged =>
+      context.l10n.studySummaryStoppedBySchedulerChange,
     // The material went to Trash under the session (BR-259). Its own sentence
     // rather than the reset one: nothing about the scheduler changed, and
     // "your deck was reset" would send the user looking for a reset nobody ran.

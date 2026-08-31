@@ -7,6 +7,7 @@ part 'app_database.g.dart';
 part 'app_database_migrations.dart';
 part 'app_database_migrations_v5.dart';
 part 'app_database_migrations_v11.dart';
+part 'app_database_migrations_v12.dart';
 
 /// The app's database.
 ///
@@ -44,7 +45,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.open() : super(openAppDatabaseConnection());
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -236,6 +237,16 @@ class AppDatabase extends _$AppDatabase {
       // from a v10 database, not a v7 one.
       if (from < 11) {
         await _upgradeToV11();
+      }
+
+      // **v12 rebuilds `study_sessions` for one label, and that is the whole
+      // step.** `end_reason = scheduler_reset` was carrying two events —
+      // Reset learning progress, and BR-12's unlocked scheduler change, which
+      // is not a reset because the generation does not move. Nothing was lost
+      // by the overload, since `scheduler_generation` tells them apart, but a
+      // column whose values need a footnote is a column that gets misread.
+      if (from < 12) {
+        await _upgradeToV12();
       }
     },
 

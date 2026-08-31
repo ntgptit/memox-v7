@@ -164,10 +164,17 @@ mixin _SchedulerWriteOperations implements DeckRepository {
       // check would wave every one of its answers straight through into a tree
       // that has just been re-seeded. Closing them here is the only place it can
       // happen atomically.
+      //
+      // **`scheduler_changed`, not `scheduler_reset`** (M100.13). Both close a
+      // session because the ground moved, and they used to write the same
+      // label — but a reset bumps the generation and this does not, so reading
+      // the column alone said "reset" about something that was not one. The
+      // generation comparison could still tell them apart; needing that trick
+      // to read one column is what made the value worth splitting.
       await _study.invalidateSessionsForRoot(
         rootDeckId: rootDeckId,
         endedAt: _clock(),
-        reason: StudySessionEndReason.schedulerReset,
+        reason: StudySessionEndReason.schedulerChanged,
       );
     }),
   );

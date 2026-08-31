@@ -28,6 +28,7 @@ enum StudySessionStatus {
           reason == StudySessionEndReason.interrupted,
     invalidated =>
       reason == StudySessionEndReason.schedulerReset ||
+          reason == StudySessionEndReason.schedulerChanged ||
           reason == StudySessionEndReason.staleGeneration ||
           reason == StudySessionEndReason.contentDeleted,
     failed => reason == StudySessionEndReason.persistenceError,
@@ -58,7 +59,25 @@ enum StudySessionEndReason {
   interrupted('interrupted'),
 
   /// The deck was reset while the session was open (BR-83).
+  ///
+  /// **Reset only, since M100.13.** It used to carry BR-164's unlocked
+  /// scheduler change as well, which is a different event: a reset bumps
+  /// `scheduler_generation` and a change leaves it alone. Nothing was lost —
+  /// comparing the session's generation against the root's separates them —
+  /// but the column could not be read on its own, and a value that needs a
+  /// footnote is a value that gets misread.
   schedulerReset('scheduler_reset'),
+
+  /// The deck's scheduler was swapped while still unlocked, with a session open
+  /// (BR-12, BR-164).
+  ///
+  /// **Not a reset, and that is the whole distinction.** BR-12 lets an untouched
+  /// root change algorithm directly, and `scheduler_generation` deliberately
+  /// stays where it is — so BR-84's stale check would wave the open session's
+  /// answers into a tree that has just been re-dealt. BR-164 closes it in the
+  /// same transaction, and forbids `user_exit` for it because the user did not
+  /// leave.
+  schedulerChanged('scheduler_changed'),
 
   /// A session from an older generation tried to write (BR-84).
   staleGeneration('stale_generation'),
