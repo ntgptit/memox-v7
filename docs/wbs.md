@@ -16427,28 +16427,40 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Status:** done
 - **Goal:** Chuẩn hoá `ColorScheme` của cả hai theme về đúng bộ 45 semantic
   color role hiện hành của Material 3 (26 standard + 19 add-on) theo danh sách
-  chủ dự án giao: role thiếu thì bổ sung, role thừa thì gỡ, không thêm gì ngoài
-  đó.
+  chủ dự án giao: role thiếu thì bổ sung, role thừa thì gỡ — và gỡ là **gỡ
+  hẳn khỏi repo**, không giữ lại dưới dạng test đọc chúng để khoá.
 - **Scope:** `app_theme.dart` (hai `ColorScheme` và khối comment mô tả tập
-  role); `color_scheme_roles_test.dart` (bộ đếm 45 và hai bất biến mới);
-  `widgetbook/lib/tokens/color_sections.dart` (catalog đủ 45 swatch, nhóm theo
-  đúng cấu trúc danh sách).
+  role); `color_scheme_roles_test.dart` (inventory 45 + bộ đếm);
+  `app_palette_test.dart`, `test/design_audit/` (inventory và resolver không
+  còn dump `surfaceTint`, pin dump 66 → 65); guard (scope `theme_files` + hai
+  rule); `widgetbook/lib/tokens/color_sections.dart` (catalog đủ 45 swatch,
+  nhóm theo đúng cấu trúc danh sách); `design_audit/` regenerate.
 - **Out of scope:** giá trị của bất kỳ token nào — không một mã hex đổi;
-  `AppMaterialRoles`, `AppSemanticColors`, CSS kit, theme component. Đây là
-  chuẩn hoá **tập role**, không phải một pass màu.
+  `AppMaterialRoles`, `AppSemanticColors`, CSS kit, theme component. Các
+  `surfaceTintColor: transparent` trên component theme **giữ nguyên**: đó là
+  công tắc tắt cơ chế tint, không phải role — bỏ nó là bật lại tint overlay
+  của Material lên mọi surface đã hand-tune.
 - **Đối soát trước khi sửa, đo trên `ColorScheme` của SDK 3.44.8 (49 tham số
   màu = 45 role + `surfaceTint` + 3 deprecated):**
   - **Thiếu: 0.** 45/45 role đã được truyền tường minh ở cả light lẫn dark —
     M99.39 đóng 34, M99.47 thêm 12 `*Fixed`.
-  - **Deprecated: 0.** `background`, `onBackground`, `surfaceVariant` không
-    được truyền và không có chỗ nào trong `lib/`, `widgetbook/`, `e2e/`,
-    `test/` đọc.
+  - **Deprecated: 0 truyền, 0 đọc** ở `lib/`, `widgetbook/`, `e2e/`, `test/`.
   - **Thừa: 1 — `surfaceTint`.** Không phải role trong bộ 45 mà là cơ chế của
     Flutter; hai theme đang truyền tường minh đúng bằng `primary` của mỗi
-    brightness, tức đúng mặc định của SDK (`_surfaceTint ?? primary`). Gỡ hai
-    dòng đó không đổi một pixel, và đóng luôn cái khe mà một quyết định thứ
-    hai có thể lệch khỏi `primary` mà không ai thấy. Con số "46/46" của M99.47
+    brightness, tức đúng mặc định của SDK (`_surfaceTint ?? primary`), và ba
+    chỗ trong `test/` còn liệt kê nó như một role (inventory audit, resolver,
+    test chói dark). Gỡ tất cả không đổi một pixel. Con số "46/46" của M99.47
     vì thế đọc lại là **45 role + 1 cơ chế**.
+- **Bản đầu của task giữ hai test pin (`surfaceTint == primary`, ba getter
+  deprecated trả về fallback) — chủ dự án bác: xoá là xoá luôn, không đọc lại
+  chúng ở đâu cả.** Thay bằng guard, đúng chỗ của một điều cấm: rule
+  `memox_v7.design_system.color_scheme_45_roles_only` (scope `theme_files`,
+  chặn bốn tên đó làm tham số của `ColorScheme(` hoặc `copyWith(`) và
+  `memox_v7.design_system.no_retired_color_role_read` (toàn `lib/`, chặn đọc
+  `.surfaceTint`, `.onBackground`, `.surfaceVariant`; `background` không vào
+  rule đọc vì feature có field cùng tên của riêng nó, và `surfaceTintColor`
+  vẫn hợp lệ nhờ `\b`). Cả hai đã tiêm lỗi: guard đỏ và gọi đúng tên rule,
+  gỡ lỗi thì xanh.
 - **Catalog:** Widgetbook đang swatch 32/45 role, trộn standard với add-on và
   thiếu 13 (`onSecondary`, `onTertiary`, `onError`, ba `on*Container`,
   `surfaceDim`, `surfaceBright`, `surfaceContainerLowest`/`Highest`,
@@ -16458,19 +16470,22 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Editable documents:** `docs/wbs.md`
 - **Output:** như Scope.
 - **Acceptance criteria:**
-  - [x] Hai `ColorScheme` truyền đúng 45 role, không role deprecated, không
-        `surfaceTint`; `color_scheme_roles_test.dart` khoá số 45.
-  - [x] `surfaceTint` resolve bằng `primary` và ba getter deprecated trả về
-        fallback của SDK ở cả bốn scheme (light, dark, hai high-contrast).
-  - [x] Không mã hex nào đổi: diff chỉ chạm comment, tham số truyền và test.
+  - [x] Hai `ColorScheme` truyền đúng 45 role; `color_scheme_roles_test.dart`
+        khoá số 45 bằng inventory.
+  - [x] Không còn một tham chiếu nào tới `surfaceTint`, `background`,
+        `onBackground`, `surfaceVariant` như role trong `lib/`, `test/`,
+        `widgetbook/`, `e2e/` — kể cả trong test và inventory audit.
+  - [x] Guard có hai rule mới, tiêm lỗi đỏ đúng tên, gỡ lỗi xanh; bộ test của
+        guard xanh.
+  - [x] Không mã hex nào đổi: diff chỉ chạm comment, tham số truyền, test,
+        guard và catalog.
   - [x] Catalog Widgetbook hiện đủ 45 swatch; smoke test xanh.
   - [x] `flutter analyze` 0/0; `test/core/theme`, `test/design_audit`,
         `test/app` xanh; guard, `check_architecture.sh`, `check_docs.sh` sạch.
 - **Dependencies:** M99.47
 - **Tests required:** `color_scheme_roles_test.dart` — `declares exactly the
-  45 Material 3 roles` (đếm inventory), `surfaceTint is the SDK default,
-  primary` (4 scheme), `the three deprecated roles carry no value of their
-  own` (4 scheme × 3 role); `widgetbook/test/catalog_smoke_test.dart`.
+  45 Material 3 roles`; `audit_test.dart` pin dump 65; hai rule guard tiêm
+  lỗi; `widgetbook/test/catalog_smoke_test.dart`.
 - **Checklist phases:** 7.
 
 ## Known technical debt

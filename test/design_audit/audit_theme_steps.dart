@@ -71,7 +71,6 @@ Map<String, Color> auditTokensOf(ThemeData theme) {
     'colorScheme.inverseSurface': s.inverseSurface,
     'colorScheme.onInverseSurface': s.onInverseSurface,
     'colorScheme.inversePrimary': s.inversePrimary,
-    'colorScheme.surfaceTint': s.surfaceTint,
     'colorScheme.shadow': s.shadow,
     'colorScheme.scrim': s.scrim,
     // The `*Fixed` families. Added with the roles themselves (M99.47): without

@@ -202,3 +202,58 @@ rules:
     tags:
       - memox-v7
       - design-system
+
+  # `ColorScheme` takes the 45 Material 3 roles and nothing else (M100.17).
+  # The constructor also accepts three deprecated roles — `background`,
+  # `onBackground`, `surfaceVariant` — and `surfaceTint`, a tint mechanism the
+  # SDK defaults to `primary` and every themed component switches off with
+  # `surfaceTintColor: transparent`. Passing any of them either restates a
+  # value the SDK already resolves or, worse, opens a slot where a second
+  # decision can drift away from the role it shadows. Two patterns: the
+  # two-space anchor is the argument line of a top-level `const ColorScheme(`
+  # (or a top-level `copyWith(`) as `dart format` lays it out; the inline one
+  # catches a single-line call. `background` is only in the anchored pattern
+  # because the theme's own private builder takes a `background:` argument
+  # mid-line, and that one is the page ground, not a scheme role.
+  - id: memox_v7.design_system.color_scheme_45_roles_only
+    type: regex
+    severity: error
+    enabled: true
+    message: >-
+      `ColorScheme` is built from the 45 Material 3 roles only. `background`,
+      `onBackground` and `surfaceVariant` are deprecated, and `surfaceTint` is
+      a mechanism the SDK already resolves to `primary` — do not pass any of
+      them; the SDK fallback is the value, and a slot nobody reads is a slot
+      that drifts. See the scheme header in `app_theme.dart` (M100.17).
+    scopes:
+      - theme_files
+    patterns:
+      - '^\s{2}(?:surfaceTint|background|onBackground|surfaceVariant)\s*:'
+      - '\b(?:ColorScheme|copyWith)\([^)]*\b(?:surfaceTint|onBackground|surfaceVariant)\s*:'
+    tags:
+      - memox-v7
+      - design-system
+
+  # The read side of the rule above, for the whole of `lib/`: a widget that
+  # reads `scheme.surfaceVariant` renders the SDK fallback (`surface`) and
+  # calls it a role, and one that reads `scheme.surfaceTint` reads a value the
+  # app switches off everywhere. `background` is deliberately absent — feature
+  # code owns unrelated fields of that name — and `surfaceTintColor` stays
+  # legal because `\b` after `surfaceTint` rejects it.
+  - id: memox_v7.design_system.no_retired_color_role_read
+    type: regex
+    severity: error
+    enabled: true
+    message: >-
+      Do not read `surfaceTint`, `onBackground` or `surfaceVariant` from a
+      `ColorScheme`: the first is a tint mechanism the app disables on every
+      component, the other two are deprecated and resolve to the SDK's
+      fallback. Read the role you mean — `primary`, `onSurface`,
+      `surfaceContainerHighest` (M100.17).
+    scopes:
+      - dart_lib
+    patterns:
+      - '\.\s*(?:surfaceTint|onBackground|surfaceVariant)\b'
+    tags:
+      - memox-v7
+      - design-system

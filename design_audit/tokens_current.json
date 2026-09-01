@@ -330,15 +330,6 @@
       "lightnessStar": 71.00362159237613,
       "classifiedAs": "role-or-on-color"
     },
-    "colorScheme.surfaceTint": {
-      "hex": "#4646B4",
-      "opaque": true,
-      "hue": 240.0,
-      "saturation": 0.44,
-      "chroma": 0.43137254901960786,
-      "lightnessStar": 35.941317621018726,
-      "classifiedAs": "role-or-on-color"
-    },
     "colorScheme.shadow": {
       "hex": "#0B0C18",
       "opaque": true,
@@ -1002,15 +993,6 @@
       "saturation": 0.45539906103286387,
       "chroma": 0.3803921568627451,
       "lightnessStar": 30.13803257270041,
-      "classifiedAs": "role-or-on-color"
-    },
-    "colorScheme.surfaceTint": {
-      "hex": "#5656C9",
-      "opaque": true,
-      "hue": 240.0,
-      "saturation": 0.5156950672645739,
-      "chroma": 0.4509803921568627,
-      "lightnessStar": 42.53796262609107,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.shadow": {

@@ -87,14 +87,13 @@ ThemeData buildHighContrastDarkTheme() => _highContrastDarkTheme;
 // — a fill-level tone in a container-level slot, and a different value in
 // each brightness for a role the spec defines as brightness-independent.
 //
-// Two things the SDK accepts are deliberately absent. The deprecated
-// `background`, `onBackground` and `surfaceVariant`, which nothing in the
-// app reads. And `surfaceTint`, which is a Flutter mechanism rather than a
-// role: the SDK resolves it to `primary` in both brightnesses, every themed
-// component sets `surfaceTintColor: transparent` on top of that, and
-// `color_scheme_roles_test.dart` pins the default — so passing it would only
-// restate a value, and leave a slot in which a second decision could later
-// drift from `primary` unnoticed (M100.17).
+// The constructor accepts four more names than that — three deprecated
+// roles and one tint mechanism — and none is passed, read, dumped or
+// swatched anywhere in this repository. The guard keeps it that way:
+// `memox_v7.design_system.color_scheme_45_roles_only` bans them as
+// constructor or `copyWith` arguments here, and
+// `memox_v7.design_system.no_retired_color_role_read` bans reading them
+// anywhere under `lib/` (M100.17).
 const ColorScheme _lightScheme = ColorScheme(
   brightness: Brightness.light,
   primary: AppColors.primaryLight,

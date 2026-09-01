@@ -5,8 +5,7 @@ import 'package:memox/core/theme/app_theme.dart';
 import '../../support/app_palette.dart';
 import '../../support/color_math.dart';
 
-/// 26 standard roles and 19 add-ons — the set Material 3 currently defines,
-/// with the three deprecated roles and `surfaceTint` outside it.
+/// 26 standard roles and 19 add-ons — the set Material 3 currently defines.
 const int _materialColorRoleCount = 45;
 
 /// Guards the one failure mode that hides until a new screen is built: a
@@ -97,53 +96,11 @@ void main() {
 
   test('declares exactly the 45 Material 3 roles', () {
     // The inventory below is written by hand, so this is the one line that
-    // notices when a role is added to it or dropped from it. 46 was the count
-    // for a while — the 45 plus `surfaceTint`, which is not a role (M100.17).
+    // notices when a name is added to it or dropped from it. Anything the
+    // constructor accepts beyond the 45 is kept out of the scheme by the
+    // guard (`memox_v7.design_system.color_scheme_45_roles_only`), not by a
+    // test that would have to read it to check it (M100.17).
     expect(_roles(schemes['light']!).length, _materialColorRoleCount);
-  });
-
-  test('surfaceTint is the SDK default, primary', () {
-    // Not passed to the constructor on purpose: it is a mechanism, not a
-    // role, and every themed component suppresses it with
-    // `surfaceTintColor: transparent` anyway. What it resolves to is
-    // therefore the SDK's own `_surfaceTint ?? primary`, pinned here so a
-    // Flutter that changes that default is noticed on this line rather than
-    // on an untended elevated widget.
-    for (final entry in schemes.entries) {
-      expect(
-        entry.value.surfaceTint,
-        entry.value.primary,
-        reason: '${entry.key}: surfaceTint is no longer the SDK default',
-      );
-    }
-  });
-
-  test('the three deprecated roles carry no value of their own', () {
-    // `background`, `onBackground` and `surfaceVariant` are not among the 45
-    // and nothing in the app reads them. The constructor still accepts them,
-    // so the only way to prove nobody passed one is to read the getter and
-    // see the SDK's fallback come back — which is the one thing a deprecated
-    // getter is still good for, hence the ignores.
-    for (final entry in schemes.entries) {
-      final scheme = entry.value;
-      final fallbacks = <String, (Color, Color)>{
-        // ignore: deprecated_member_use
-        'background': (scheme.background, scheme.surface),
-        // ignore: deprecated_member_use
-        'onBackground': (scheme.onBackground, scheme.onSurface),
-        // ignore: deprecated_member_use
-        'surfaceVariant': (scheme.surfaceVariant, scheme.surface),
-      };
-
-      fallbacks.forEach((name, pair) {
-        expect(
-          pair.$1,
-          pair.$2,
-          reason:
-              '${entry.key}: deprecated `$name` was passed a value of its own',
-        );
-      });
-    }
   });
 
   test('no role strays outside an A2 hue family', () {
@@ -165,10 +122,6 @@ void main() {
 
 /// The 45 Material 3 colour roles, every one of which A2 declares. Each must
 /// be a palette token, not a generated one.
-///
-/// `surfaceTint` is deliberately not here: it is a Flutter mechanism rather
-/// than a role, the scheme does not pass it, and `surfaceTint is the SDK
-/// default` above is what pins the value it resolves to.
 Map<String, Color> _roles(ColorScheme s) => <String, Color>{
   'primary': s.primary,
   'onPrimary': s.onPrimary,

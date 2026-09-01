@@ -252,6 +252,16 @@ scopes:
       - '**/*.freezed.dart'
 
   # Riverpod-owned files: controllers, notifiers and generated-provider sources.
+  # The theme alone — where `ColorScheme` is constructed and the one place a
+  # retired role could be handed a value. Product UI never builds a scheme, so
+  # a rule about the scheme's argument list has nothing to say outside here.
+  theme_files:
+    include:
+      - lib/core/theme/**/*.dart
+    exclude:
+      - '**/*.g.dart'
+      - '**/*.freezed.dart'
+
   provider_files:
     include:
       - lib/**/controller/**/*.dart
