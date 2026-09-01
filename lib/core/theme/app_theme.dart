@@ -76,11 +76,25 @@ ThemeData buildHighContrastDarkTheme() => _highContrastDarkTheme;
 // pink `tertiary`, a second red for `error` — which read as "there is a
 // tonal palette" when there is none.
 //
-// **Every role the SDK offers is now passed**, the twelve `*Fixed` included.
-// They were the last ones left to the constructor's own fallback, which
-// resolves each to its *base* role (`_primaryFixed ?? primary`) — a
-// fill-level tone in a container-level slot, and a different value in each
-// brightness for a role the spec defines as brightness-independent.
+// **Exactly the 45 Material 3 colour roles are passed — no fewer, and
+// nothing that is not one.** 26 standard roles (the `primary`, `secondary`,
+// `tertiary` and `error` quartets; `surface`, `onSurface`,
+// `onSurfaceVariant`; `outline` and `outlineVariant`; the `inverse*` trio;
+// `shadow` and `scrim`) and 19 add-ons (`surfaceDim`, `surfaceBright`, the
+// five `surfaceContainer*` rungs, and the twelve `*Fixed`). The `*Fixed`
+// twelve arrived last (M99.47): until then each fell through the
+// constructor's own fallback to its *base* role (`_primaryFixed ?? primary`)
+// — a fill-level tone in a container-level slot, and a different value in
+// each brightness for a role the spec defines as brightness-independent.
+//
+// Two things the SDK accepts are deliberately absent. The deprecated
+// `background`, `onBackground` and `surfaceVariant`, which nothing in the
+// app reads. And `surfaceTint`, which is a Flutter mechanism rather than a
+// role: the SDK resolves it to `primary` in both brightnesses, every themed
+// component sets `surfaceTintColor: transparent` on top of that, and
+// `color_scheme_roles_test.dart` pins the default — so passing it would only
+// restate a value, and leave a slot in which a second decision could later
+// drift from `primary` unnoticed (M100.17).
 const ColorScheme _lightScheme = ColorScheme(
   brightness: Brightness.light,
   primary: AppColors.primaryLight,
@@ -136,7 +150,6 @@ const ColorScheme _lightScheme = ColorScheme(
   inverseSurface: AppMaterialRoles.inverseSurfaceLight,
   onInverseSurface: AppMaterialRoles.onInverseSurfaceLight,
   inversePrimary: AppMaterialRoles.inversePrimaryLight,
-  surfaceTint: AppColors.primaryLight,
   shadow: AppColors.shadowLight,
   scrim: AppColors.scrimLight,
 );
@@ -189,12 +202,6 @@ const ColorScheme _darkScheme = ColorScheme(
   inverseSurface: AppMaterialRoles.inverseSurfaceDark,
   onInverseSurface: AppMaterialRoles.onInverseSurfaceDark,
   inversePrimary: AppMaterialRoles.inversePrimaryDark,
-  // `primary`, the canonical M3 mapping, and the earlier deviation to
-  // `surfaceElevatedDark` is retired: every themed component sets
-  // `surfaceTintColor: transparent`, so what this role must be is *true*
-  // for the one reader it can still have — an untended elevated widget —
-  // rather than a value chosen to soften a tint the app already suppresses.
-  surfaceTint: AppColors.primaryDark,
   shadow: AppColors.shadowDark,
   scrim: AppColors.scrimDark,
 );

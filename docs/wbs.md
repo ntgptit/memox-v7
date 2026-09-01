@@ -7,8 +7,8 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
-| **Last updated** | 2026-08-28 |
+| **Updated by task** | M100.17 (`ColorScheme` đúng 45 role M3 — gỡ `surfaceTint` khai tường minh, catalog đủ 45 swatch); M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
+| **Last updated** | 2026-09-01 |
 
 Single source of truth for project progress. Update it in the same commit as the
 work it describes. A task is `done` only when it meets the Definition of Done in
@@ -16421,6 +16421,57 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Emulator integration suite:** required by `CLAUDE.md` vì `features/**`
   thay đổi; chạy trước khi task được đánh dấu done.
 - **Checklist phases:** 4, 5, 6, 7, 11, 13, 14, 15, 19, 21.
+
+### M100.17 · `ColorScheme` đúng 45 role Material 3 — không thiếu, không thừa
+
+- **Status:** done
+- **Goal:** Chuẩn hoá `ColorScheme` của cả hai theme về đúng bộ 45 semantic
+  color role hiện hành của Material 3 (26 standard + 19 add-on) theo danh sách
+  chủ dự án giao: role thiếu thì bổ sung, role thừa thì gỡ, không thêm gì ngoài
+  đó.
+- **Scope:** `app_theme.dart` (hai `ColorScheme` và khối comment mô tả tập
+  role); `color_scheme_roles_test.dart` (bộ đếm 45 và hai bất biến mới);
+  `widgetbook/lib/tokens/color_sections.dart` (catalog đủ 45 swatch, nhóm theo
+  đúng cấu trúc danh sách).
+- **Out of scope:** giá trị của bất kỳ token nào — không một mã hex đổi;
+  `AppMaterialRoles`, `AppSemanticColors`, CSS kit, theme component. Đây là
+  chuẩn hoá **tập role**, không phải một pass màu.
+- **Đối soát trước khi sửa, đo trên `ColorScheme` của SDK 3.44.8 (49 tham số
+  màu = 45 role + `surfaceTint` + 3 deprecated):**
+  - **Thiếu: 0.** 45/45 role đã được truyền tường minh ở cả light lẫn dark —
+    M99.39 đóng 34, M99.47 thêm 12 `*Fixed`.
+  - **Deprecated: 0.** `background`, `onBackground`, `surfaceVariant` không
+    được truyền và không có chỗ nào trong `lib/`, `widgetbook/`, `e2e/`,
+    `test/` đọc.
+  - **Thừa: 1 — `surfaceTint`.** Không phải role trong bộ 45 mà là cơ chế của
+    Flutter; hai theme đang truyền tường minh đúng bằng `primary` của mỗi
+    brightness, tức đúng mặc định của SDK (`_surfaceTint ?? primary`). Gỡ hai
+    dòng đó không đổi một pixel, và đóng luôn cái khe mà một quyết định thứ
+    hai có thể lệch khỏi `primary` mà không ai thấy. Con số "46/46" của M99.47
+    vì thế đọc lại là **45 role + 1 cơ chế**.
+- **Catalog:** Widgetbook đang swatch 32/45 role, trộn standard với add-on và
+  thiếu 13 (`onSecondary`, `onTertiary`, `onError`, ba `on*Container`,
+  `surfaceDim`, `surfaceBright`, `surfaceContainerLowest`/`Highest`,
+  `onInverseSurface`, `shadow`, `scrim`). Nay đủ 45, hai section theo đúng cấu
+  trúc danh sách và thứ tự trong section theo đúng danh sách — bảng tra, không
+  phải bộ sưu tập.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** như Scope.
+- **Acceptance criteria:**
+  - [x] Hai `ColorScheme` truyền đúng 45 role, không role deprecated, không
+        `surfaceTint`; `color_scheme_roles_test.dart` khoá số 45.
+  - [x] `surfaceTint` resolve bằng `primary` và ba getter deprecated trả về
+        fallback của SDK ở cả bốn scheme (light, dark, hai high-contrast).
+  - [x] Không mã hex nào đổi: diff chỉ chạm comment, tham số truyền và test.
+  - [x] Catalog Widgetbook hiện đủ 45 swatch; smoke test xanh.
+  - [x] `flutter analyze` 0/0; `test/core/theme`, `test/design_audit`,
+        `test/app` xanh; guard, `check_architecture.sh`, `check_docs.sh` sạch.
+- **Dependencies:** M99.47
+- **Tests required:** `color_scheme_roles_test.dart` — `declares exactly the
+  45 Material 3 roles` (đếm inventory), `surfaceTint is the SDK default,
+  primary` (4 scheme), `the three deprecated roles carry no value of their
+  own` (4 scheme × 3 role); `widgetbook/test/catalog_smoke_test.dart`.
+- **Checklist phases:** 7.
 
 ## Known technical debt
 
