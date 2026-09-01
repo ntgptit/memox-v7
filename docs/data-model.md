@@ -7,11 +7,11 @@
 | **Scope** | Bảng, cột, index, quan hệ, query bất biến. Ngoài phạm vi: SQL runtime (`lib/core/database/`, chưa tồn tại) |
 | **Source of truth for** | Schema · cột và kiểu · index · query bất biến · thứ tự migration |
 | **Depends on** | `document-conventions.md`, `architecture.md`, `business-rules.md` |
-| **Updated by task** | M100.15 — `decks.sibling_position`, index theo sibling order và schema v13; M100.13 — `end_reason = scheduler_changed` và schema v12: tách BR-164 khỏi `scheduler_reset`; ma trận `status` × `end_reason` có thêm một hàng · M99.33 — Trash: bảng `delete_batches`, cột `delete_batch_id` trên `decks`/`cards`, `end_reason = content_deleted`, bất biến 33…37, và bất biến 1…5/15/29 đo trên hàng đang active · M99.28 — `app_settings.theme_mode` và `app_settings.language` (BR-214, BR-215), migration v9, và bảng thứ tự migration bổ sung v6/v7 vốn bị bỏ sót · M99.29 — ba cột nhắc học hằng ngày, migration v10 |
-| **Last updated** | 2026-08-31 |
+| **Updated by task** | M100.16 — `end_reason = subtree_promoted`, schema v14 và ma trận session cho Promote Sub-deck; M100.15 — `decks.sibling_position`, index theo sibling order và schema v13 |
+| **Last updated** | 2026-09-01 |
 
 Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm ở
-`lib/core/database/tables/`, hiện ở **schema v13**.
+`lib/core/database/tables/`, hiện ở **schema v14**.
 
 **`review` vẫn còn nghĩa thứ hai trong repo, và nó không đổi.** Ở `docs/reviews/`,
 "vòng review UI/UX", "code review" — đó là *rà soát*, không phải *ôn tập*. Đợt đổi
@@ -366,7 +366,7 @@ bảng đầu tiên cần nhìn khi bàn về kích thước DB.
 | `session_kind` | TEXT NOT NULL | `learning` \| `reviewing` (BR-142) |
 | `current_mode` | TEXT NOT NULL | stage đang chạy: `browse` \| `self_assess` \| `match` \| `guess` \| `recall` \| `fill` (BR-108, BR-98). Phiên `reviewing` chỉ có một giá trị suốt phiên |
 | `status` | TEXT NOT NULL | `in_progress` \| `completed` \| `abandoned` \| `invalidated` \| `failed` (BR-79) |
-| `end_reason` | TEXT NULL | `user_exit` \| `scheduler_reset` \| `scheduler_changed` \| `stale_generation` \| `persistence_error` \| `interrupted` \| `content_deleted` (BR-80, BR-259, BR-164). NULL khi `in_progress` hoặc `completed` |
+| `end_reason` | TEXT NULL | `user_exit` \| `scheduler_reset` \| `scheduler_changed` \| `stale_generation` \| `persistence_error` \| `interrupted` \| `content_deleted` \| `subtree_promoted` (BR-80, BR-259, BR-164, BR-269). NULL khi `in_progress` hoặc `completed` |
 | `cursor` | INTEGER NOT NULL DEFAULT 0 | số lượt đã phục vụ trong phiên; nền của BR-26 |
 | `card_limit` | INTEGER NOT NULL | số thẻ tối đa của phiên, chốt lúc mở (BR-24, BR-139). Mặc định 20 |
 | `direction` | TEXT NULL | `korean_to_meaning` \| `meaning_to_korean` \| `mixed` (BR-203, BR-205). Chốt lúc mở và khoá suốt phiên (BR-207). NULL ở mọi phiên ngoài BR-203 |
@@ -385,6 +385,7 @@ Ma trận `status` × `end_reason` hợp lệ:
 | `invalidated` | `scheduler_changed` | đổi scheduler khi chưa khoá, phiên đang mở (BR-12, BR-164). **Không phải reset:** generation giữ nguyên, tiến trình học không bị xoá — chỉ hàng đợi được chia lại. Tách khỏi `scheduler_reset` ở v12 (M100.13) vì đọc riêng cột này không phân biệt được hai sự kiện, dù `scheduler_generation` vẫn phân biệt được |
 | `invalidated` | `stale_generation` | phiên generation cũ cố ghi lượt học (BR-84) |
 | `invalidated` | `content_deleted` | deck hoặc card mà phiên đang chạy trên đó bị chuyển vào Trash (BR-259) |
+| `invalidated` | `subtree_promoted` | subtree chứa deck hoặc queue card của phiên được tách thành root mới và reset state (BR-269) |
 | `failed` | `persistence_error` | lỗi không thể tiếp tục (BR-85) |
 
 Mọi tổ hợp khác là dữ liệu sai.

@@ -687,6 +687,8 @@
   "@deckMoveAction": {
     "description": "Action that opens the move picker for a deck (UC-09)."
   },
+  "deckPromoteAction": "Đưa thành deck gốc",
+  "@deckPromoteAction": {"description": "Action that starts the confirmed sub-deck promotion flow."},
   "deckMoveTitle": "Di chuyển tới",
   "@deckMoveTitle": {
     "description": "Title of the move picker, listing candidate parent decks."
@@ -785,6 +787,15 @@
   "deckConflictUnknownContentType": "Bộ thẻ này được tạo bởi một phiên bản ứng dụng mới hơn.",
   "deckConflictDepthUnknowable": "Bộ thẻ này nằm sâu hơn mức ứng dụng hỗ trợ.",
   "deckConflictHeightUnknowable": "Bộ thẻ này chứa nhiều cấp lồng hơn mức ứng dụng hỗ trợ.",
+  "@deckConflictHeightUnknowable": {
+    "description": "Lý do một thao tác ghi bộ thẻ bị từ chối (UC-09, BR-55, BR-58, BR-165)."
+  },
+  "deckConflictPromotionNeedsSubDeck": "Chỉ deck con mới có thể trở thành deck gốc.",
+  "@deckConflictPromotionNeedsSubDeck": {"description": "Refusal when promotion is requested for a root deck."},
+  "deckConflictPromotionHasCards": "Hãy di chuyển các thẻ trực tiếp trước. Deck gốc chỉ chứa deck con.",
+  "@deckConflictPromotionHasCards": {"description": "Refusal when a branch with direct cards is promoted."},
+  "deckConflictPromotionSchedulerUnknown": "Phiên bản ứng dụng này không biết chế độ học đó.",
+  "@deckConflictPromotionSchedulerUnknown": {"description": "Refusal for an unsupported scheduler selected for promotion."},
   "@deckMoveRejectRootDeck": {
     "description": "Lý do một thao tác ghi bộ thẻ bị từ chối (UC-09, BR-55, BR-58, BR-165)."
   },
@@ -803,9 +814,6 @@
     "description": "Lý do một thao tác ghi bộ thẻ bị từ chối (UC-09, BR-55, BR-58, BR-165)."
   },
   "@deckConflictDepthUnknowable": {
-    "description": "Lý do một thao tác ghi bộ thẻ bị từ chối (UC-09, BR-55, BR-58, BR-165)."
-  },
-  "@deckConflictHeightUnknowable": {
     "description": "Lý do một thao tác ghi bộ thẻ bị từ chối (UC-09, BR-55, BR-58, BR-165)."
   },
   "cardListTitle": "Thẻ ghi nhớ",
@@ -2167,6 +2175,18 @@
   "@deckResetProgressConfirm": {
     "description": "Confirms the reset. Destructive, so it carries the danger styling."
   },
+  "deckPromoteTitle": "Đưa thành deck gốc?",
+  "@deckPromoteTitle": {"description": "Promotion confirmation sheet title."},
+  "deckPromoteBody": "Deck con này và các deck con bên trong sẽ thành một deck độc lập. Tiến độ học hiện tại và mọi phiên học đang mở sẽ được đặt lại.",
+  "@deckPromoteBody": {"description": "Promotion confirmation's destructive effect."},
+  "deckPromoteHistoryNotice": "Thẻ và các lượt trả lời trước đây được giữ. Lịch sử chỉ để tham khảo và không dùng cho chu kỳ học mới.",
+  "@deckPromoteHistoryNotice": {"description": "Promotion confirmation's retained-data notice."},
+  "deckPromoteSchedulerLabel": "Chế độ học cho deck mới",
+  "@deckPromoteSchedulerLabel": {"description": "Label for the mandatory scheduler selection in promotion."},
+  "deckPromoteConfirm": "Đưa thành deck gốc",
+  "@deckPromoteConfirm": {"description": "Destructive confirmation action for promotion."},
+  "studySummaryStoppedByPromotion": "Nhánh này đã trở thành deck gốc mới nên phiên học này đã kết thúc.",
+  "@studySummaryStoppedByPromotion": {"description": "Summary explanation for a session invalidated by promotion."},
   "deckHeroNewMetricWord": "Mới",
   "@deckHeroNewMetricWord": {
     "description": "Word half of the hero's third metric (BR-150): cards still on the learning chain. Info role when non-zero."

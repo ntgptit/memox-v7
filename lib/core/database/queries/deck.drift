@@ -496,6 +496,22 @@ SELECT COUNT(*) AS cardCount
 FROM cards c
 WHERE c.deck_id IN (SELECT id FROM subtree) AND c.delete_batch_id IS NULL;
 
+-- Card ids in a whole subtree. Promotion needs ids, rather than merely a
+-- count, to close a root-wide session whose queue already contains one of the
+-- cards being re-rooted (BR-269).
+subtreeCardIds:
+WITH RECURSIVE subtree (id) AS (
+    SELECT id FROM decks WHERE id = :deckId AND delete_batch_id IS NULL
+    UNION
+    SELECT d.id
+    FROM decks d
+    INNER JOIN subtree s ON d.parent_deck_id = s.id
+    WHERE d.delete_batch_id IS NULL
+)
+SELECT c.id
+FROM cards c
+WHERE c.deck_id IN (SELECT id FROM subtree) AND c.delete_batch_id IS NULL;
+
 -- Rewrites the root pointer for a whole subtree in one statement (BR-71).
 -- Runs inside the move transaction; a failure anywhere rolls the lot back.
 --

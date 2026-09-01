@@ -30,7 +30,8 @@ enum StudySessionStatus {
       reason == StudySessionEndReason.schedulerReset ||
           reason == StudySessionEndReason.schedulerChanged ||
           reason == StudySessionEndReason.staleGeneration ||
-          reason == StudySessionEndReason.contentDeleted,
+          reason == StudySessionEndReason.contentDeleted ||
+          reason == StudySessionEndReason.subtreePromoted,
     failed => reason == StudySessionEndReason.persistenceError,
   };
 
@@ -92,7 +93,11 @@ enum StudySessionEndReason {
   /// scheduler being rewritten and the other is the material disappearing. A
   /// history that merges them cannot be un-merged later, and only one of them
   /// is undone by pressing Undo.
-  contentDeleted('content_deleted');
+  contentDeleted('content_deleted'),
+
+  /// A branch was promoted to an independent root. Its state was deliberately
+  /// reset, but its former root was not (BR-269).
+  subtreePromoted('subtree_promoted');
 
   const StudySessionEndReason(this.dbValue);
 

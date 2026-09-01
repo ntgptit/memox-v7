@@ -21,6 +21,32 @@ mixin _StudyTrashInvalidationOperation implements StudyRepository {
     // savepoint that can commit while the deletion around it rolls back — the
     // one outcome the rule forbids: a session closed for a deletion that never
     // happened.
+    return _invalidateSessionsTouching(
+      deckIds: deckIds,
+      cardIds: cardIds,
+      endedAt: endedAt,
+      reason: StudySessionEndReason.contentDeleted,
+    );
+  }
+
+  @override
+  Future<int> invalidateSessionsForPromotedSubtree({
+    required List<String> deckIds,
+    required List<String> cardIds,
+    required DateTime endedAt,
+  }) => _invalidateSessionsTouching(
+    deckIds: deckIds,
+    cardIds: cardIds,
+    endedAt: endedAt,
+    reason: StudySessionEndReason.subtreePromoted,
+  );
+
+  Future<int> _invalidateSessionsTouching({
+    required List<String> deckIds,
+    required List<String> cardIds,
+    required DateTime endedAt,
+    required StudySessionEndReason reason,
+  }) async {
     final ids = await _dao.openSessionIdsTouching(
       deckIds: deckIds,
       cardIds: cardIds,
@@ -31,13 +57,9 @@ mixin _StudyTrashInvalidationOperation implements StudyRepository {
         id,
         StudySessionsCompanion(
           status: Value<String>(StudySessionStatus.invalidated.dbValue),
-          // Stored, never inferred (BR-259, AD-11). `scheduler_reset` would be
-          // the nearest existing value and it would be a lie: nothing about the
-          // scheduler changed, the material went to Trash — and only one of
-          // those two is undone by pressing Undo.
-          endReason: Value<String?>(
-            StudySessionEndReason.contentDeleted.dbValue,
-          ),
+          // Stored, never inferred (BR-259, BR-269, AD-11). The two callers
+          // name distinct events; neither is a whole-root scheduler reset.
+          endReason: Value<String?>(reason.dbValue),
           endedAt: Value<DateTime?>(endedAt),
         ),
       );

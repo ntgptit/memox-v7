@@ -301,6 +301,13 @@ class StudyCatalogRepository implements StudyRepository {
     required DateTime endedAt,
   }) async => 0;
 
+  @override
+  Future<int> invalidateSessionsForPromotedSubtree({
+    required List<String> deckIds,
+    required List<String> cardIds,
+    required DateTime endedAt,
+  }) async => 0;
+
   // --- Writes: no-ops, so a control can be pressed without a database. ---
 
   @override

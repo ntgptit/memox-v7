@@ -500,6 +500,12 @@ class _CatalogDeckRepository implements DeckRepository {
   }) async {}
 
   @override
+  Future<void> promoteSubDeckToRoot({
+    required String deckId,
+    required SchedulerType schedulerType,
+  }) async {}
+
+  @override
   Future<void> reorderDeck({
     required String deckId,
     required String targetSiblingDeckId,

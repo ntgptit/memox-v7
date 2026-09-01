@@ -104,6 +104,8 @@ class StudySummarySectionWidget extends StatelessWidget {
     // "your deck was reset" would send the user looking for a reset nobody ran.
     StudySessionEndReason.contentDeleted =>
       context.l10n.studySummaryStoppedByDeletion,
+    StudySessionEndReason.subtreePromoted =>
+      context.l10n.studySummaryStoppedByPromotion,
     StudySessionEndReason.interrupted || null => null,
   };
 }

@@ -8,6 +8,7 @@ import '../../domain/usecases/get_deck_deletion_impact_use_case.dart';
 import '../../domain/usecases/move_deck_use_case.dart';
 import '../../domain/usecases/rename_deck_use_case.dart';
 import '../../domain/usecases/reorder_deck_use_case.dart';
+import '../../domain/usecases/promote_sub_deck_to_root_use_case.dart';
 import '../../domain/usecases/change_unlocked_scheduler_use_case.dart';
 import '../../domain/usecases/reset_learning_progress_use_case.dart';
 import '../../domain/usecases/watch_deck_move_targets_use_case.dart';
@@ -77,6 +78,10 @@ MoveDeckUseCase moveDeckUseCase(Ref ref) =>
 @riverpod
 ReorderDeckUseCase reorderDeckUseCase(Ref ref) =>
     ReorderDeckUseCase(ref.watch(deckRepositoryProvider));
+
+@riverpod
+PromoteSubDeckToRootUseCase promoteSubDeckToRootUseCase(Ref ref) =>
+    PromoteSubDeckToRootUseCase(ref.watch(deckRepositoryProvider));
 
 @riverpod
 WatchDeckListUseCase watchDeckListUseCase(Ref ref) =>

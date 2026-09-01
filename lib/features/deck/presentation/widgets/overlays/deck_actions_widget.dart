@@ -10,6 +10,7 @@ import '../../../domain/entities/deck_entity.dart';
 import 'deck_confirm_widget.dart';
 import 'deck_reset_progress_widget.dart';
 import 'deck_scheduler_change_widget.dart';
+import 'deck_promote_sub_deck_widget.dart';
 import 'deck_form_widget.dart';
 import '../../controllers/deck_write_controller.dart';
 import 'move_deck_sheet_widget.dart';
@@ -89,6 +90,13 @@ Future<void> showDeckActions(
             icon: Icons.drive_file_move_outlined,
             onPressed: () => Navigator.of(sheetContext).pop(_DeckAction.move),
           ),
+        if (!deck.isRoot)
+          MxActionSheetAction(
+            label: sheetContext.l10n.deckPromoteAction,
+            icon: Icons.vertical_align_top,
+            onPressed: () =>
+                Navigator.of(sheetContext).pop(_DeckAction.promote),
+          ),
         if (onMoveEarlier != null)
           MxActionSheetAction(
             label: sheetContext.l10n.deckMoveEarlierAction,
@@ -143,6 +151,8 @@ Future<void> showDeckActions(
       await showDeckRenameForm(context, deck: deck);
     case _DeckAction.move:
       await showDeckMoveSheet(context, deckId: deck.id);
+    case _DeckAction.promote:
+      await showDeckPromoteSubDeckConfirm(context, deck: deck);
     case _DeckAction.moveEarlier:
       onMoveEarlier?.call();
     case _DeckAction.moveLater:
@@ -169,6 +179,7 @@ enum _DeckAction {
   toggleDueFilter,
   rename,
   move,
+  promote,
   moveEarlier,
   moveLater,
   scheduler,

@@ -7,8 +7,8 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
-| **Last updated** | 2026-08-28 |
+| **Updated by task** | M100.16 (Promote Sub-deck to Root — scheduler tường minh, state/session reset, history giữ); M99.86 (bound cho Deck ancestry CTE, trả debt M99.28) |
+| **Last updated** | 2026-09-01 |
 
 Single source of truth for project progress. Update it in the same commit as the
 work it describes. A task is `done` only when it meets the Definition of Done in
@@ -10741,7 +10741,7 @@ của M2.
 |---|---|---|---|
 | `custom_lint` + `riverpod_lint` | descoped khỏi MVP | Không có phiên bản `custom_lint` nào tương thích `analyzer >=10`, trong khi `json_serializable`, `freezed` và `drift_dev` đều đòi mức đó. Cài được chỉ bằng cách hạ toàn bộ stack generator một thế hệ, kể cả `uuid` về `^3.0.6` — đi ngược AD-03. Chủ dự án quyết định không cần; nếu cần sẽ làm guard bên ngoài | Khi `custom_lint` hỗ trợ `analyzer >=10`, **hoặc** khi một guard ngoài được viết. Xem mục bên dưới về việc mất gì |
 | Flutter toolchain verification | **đã xong** | Từng hoãn vì `flutter` chưa có trong môi trường cloud | Đã kiểm chứng ở M2.1 trên máy local: `flutter doctor -v` → `No issues found!` |
-| Đưa deck con lên thành root deck | descoped khỏi MVP | Cần quyết định scheduler mới; là tính năng riêng chứ không phải phép di chuyển | Sau MVP (UC-09 A2) |
+| Đưa deck con lên thành root deck | done (M100.16) | UC-23/BR-269: scheduler tường minh, state/session reset có xác nhận, history giữ | Đã triển khai |
 | Tách `use-cases.md` theo đối tượng (deck / card / study) | hoãn | Chủ dự án quyết định ở M99.1: dự án chưa đủ lớn để một file 560 dòng thành vấn đề, và refactor bây giờ là chi phí không đổi lấy gì. `master-flow.md` đã lấy đi phần việc gấp nhất — trả lời "xong bước này thì đi đâu" — nên phần còn lại chỉ là kích thước file | Khi `use-cases.md` đủ lớn để tìm một UC trong đó thành việc mất thời gian. **Task đó MUST bao gồm việc sửa `check_docs.py` trước:** nó chỉ quét `docs/*.md` cấp một, nên đưa UC xuống thư mục con sẽ làm guard ngừng kiểm chín UC — không header, không "đủ chín mục", không "ID resolve" — mà vẫn báo xanh. Giữ ở cấp một (`use-cases-deck.md`) tránh được điều đó nhưng đánh đổi bằng tên file dài |
 | Media | descoped khỏi MVP | Kéo theo lưu trữ file và đồng bộ file | Sau MVP; quy tắc reset và lưu trữ đã đặt sẵn (BR-41, AD-08) |
 | ~~Tag~~ | **đã vào MVP** | Màn card cần hiển thị và lọc theo tag; bảng `tags` + `card_tags` không kéo theo lưu trữ file như media | Đã làm ở M4.10at (BR-93, BR-94) |
@@ -16420,6 +16420,46 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
   reactive list; use case và action-sheet wiring.
 - **Emulator integration suite:** required by `CLAUDE.md` vì `features/**`
   thay đổi; chạy trước khi task được đánh dấu done.
+- **Checklist phases:** 4, 5, 6, 7, 11, 13, 14, 15, 19, 21.
+
+### M100.16 · Promote Sub-deck to Root
+
+- **Status:** done
+- **Goal:** Cho phép một sub-deck cùng toàn bộ subtree trở thành root deck độc
+  lập mà không âm thầm coi đó là `MoveDeck(parent: null)`.
+- **Decision:** Người dùng chọn scheduler cho root mới. Root mới bắt đầu
+  generation 1; `first_answered_at` và `study_config` rỗng; card và
+  `study_answers` giữ nguyên nhưng study state được seed lại. Session đang mở
+  chạm deck/card của subtree bị invalidated với `subtree_promoted`.
+- **Scope:** schema v14/migration `study_sessions`; transaction promotion;
+  `PromoteSubDeckToRootUseCase`; confirmation UI; SQLite và migration tests;
+  action-sheet golden; Widgetbook fake contract.
+- **Out of scope:** MoveDeck semantics, thay đổi card content/history, scheduler
+  generation cũ, hay giữ active session không còn tương thích.
+- **5Why:** (1) Vì sao không dùng MoveDeck? Root mới phải sở hữu scheduler.
+  (2) Vì sao không giữ state? State thuộc generation/scheduler của root cũ.
+  (3) Vì sao giữ history? Answer là dữ kiện đã xảy ra, không phải state hiện
+  tại. (4) Vì sao invalidated session? Queue đã được tạo cho root cũ. (5) Vì sao
+  transaction? Parent/root pointer, scheduler, state và session phải cùng đúng
+  hoặc cùng rollback.
+- **Editable documents:** `docs/business-rules.md`, `docs/data-model.md`,
+  `docs/use-cases.md`, `docs/wbs.md`.
+- **Output:** schema v14 + migration; repository transaction;
+  `PromoteSubDeckToRootUseCase`; confirmation UI; SQLite/migration tests,
+  action-sheet golden và Widgetbook support.
+- **Acceptance criteria:**
+  - [x] Chỉ sub-deck không có direct card được promote; subtree và answer
+        history được giữ, `root_deck_id` đồng bộ toàn subtree.
+  - [x] Scheduler được chọn tường minh; state/session reset đúng lý do và mọi
+        mutation rollback nguyên tử khi database lỗi.
+  - [x] Migration v13→v14, SQLite history/session invariants, use case,
+        action sheet, Widgetbook và golden đều xanh.
+  - [x] Changed mechanical gate xanh; device suite chạy từng file trên
+        `emulator-5554`: platform 6/6 (IT-PLAT-006 xanh khi tái chạy riêng) và
+        offline 2/2.
+- **Dependencies:** M100.14, M100.15.
+- **Tests required:** migration v13→v14; scheduler/history/state/session cases
+  trên SQLite thật; stale/conflict/rollback; host gate; goldens UTC; device suite.
 - **Checklist phases:** 4, 5, 6, 7, 11, 13, 14, 15, 19, 21.
 
 ## Known technical debt
