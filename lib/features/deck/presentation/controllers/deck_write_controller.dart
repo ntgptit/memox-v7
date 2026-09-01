@@ -273,6 +273,32 @@ class MoveDeckController extends _$MoveDeckController {
   void reset() => state = const DeckSubmitState();
 }
 
+/// Promotes a branch to an independently scheduled root (UC-23).
+@riverpod
+class PromoteSubDeckToRootController extends _$PromoteSubDeckToRootController {
+  @override
+  DeckSubmitState build(String deckId) => const DeckSubmitState();
+
+  Future<void> submit({required SchedulerType schedulerType}) async {
+    if (!state.canSubmit) return;
+
+    state = const DeckSubmitState(isSubmitting: true);
+    try {
+      await ref.read(promoteSubDeckToRootUseCaseProvider)(
+        deckId: deckId,
+        schedulerType: schedulerType,
+      );
+      if (!ref.mounted) return;
+      state = const DeckSubmitState(outcome: SubmitOutcome.savedAndClose);
+    } on Failure catch (failure) {
+      if (!ref.mounted) return;
+      state = DeckSubmitState(failure: failure);
+    }
+  }
+
+  void reset() => state = const DeckSubmitState();
+}
+
 /// Reorders one deck relative to a sibling without changing its tree location.
 @riverpod
 class ReorderDeckController extends _$ReorderDeckController {

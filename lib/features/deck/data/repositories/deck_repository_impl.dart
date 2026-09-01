@@ -23,6 +23,7 @@ import '../datasources/deck_dao.dart';
 
 part 'delete_deck_repository_impl.dart';
 part 'move_deck_repository_impl.dart';
+part 'promote_sub_deck_repository_impl.dart';
 part 'reorder_deck_repository_impl.dart';
 part 'deck_scheduler_repository_impl.dart';
 
@@ -47,6 +48,7 @@ final class DeckRepositoryImpl
     with
         _DeleteDeckOperation,
         _MoveDeckOperation,
+        _PromoteSubDeckOperation,
         _ReorderDeckOperation,
         _SchedulerWriteOperations
     implements DeckRepository {

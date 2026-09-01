@@ -56,4 +56,16 @@ enum DeckConflictReason {
   /// The subtree is taller than the walk bound allows. Same reasoning as
   /// [deckDepthUnknowable], from the other end of the tree.
   subtreeHeightUnknowable,
+
+  /// Promotion is only meaningful for a branch. A root already owns its
+  /// scheduler and cannot be promoted again (BR-269).
+  promotionNeedsSubDeck,
+
+  /// A new root may never directly hold cards (BR-58), so a branch with direct
+  /// cards must be reorganised before it can be promoted (BR-269).
+  promotionDeckHasCards,
+
+  /// Promotion creates a root and a root must choose a scheduler that this
+  /// build can persist (BR-11, BR-269).
+  promotionSchedulerUnknown,
 }

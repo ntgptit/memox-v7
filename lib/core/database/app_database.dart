@@ -9,6 +9,7 @@ part 'app_database_migrations_v5.dart';
 part 'app_database_migrations_v11.dart';
 part 'app_database_migrations_v12.dart';
 part 'app_database_migrations_v13.dart';
+part 'app_database_migrations_v14.dart';
 
 /// The app's database.
 ///
@@ -46,7 +47,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.open() : super(openAppDatabaseConnection());
 
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 14;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -255,6 +256,14 @@ class AppDatabase extends _$AppDatabase {
       // the former once, then let ReorderDeckUseCase own future writes.
       if (from < 13) {
         await _upgradeToV13();
+      }
+
+      // v13 → v14 records a promotion-specific session ending. Promotion
+      // resets only one newly independent subtree, so `scheduler_reset` would
+      // falsely say the old root was reset too. SQLite requires a rebuild to
+      // widen this CHECK.
+      if (from < 14) {
+        await _upgradeToV14();
       }
     },
 

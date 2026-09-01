@@ -112,6 +112,12 @@ extension DeckLabels on BuildContext {
     DeckConflictReason.deckDepthUnknowable => l10n.deckConflictDepthUnknowable,
     DeckConflictReason.subtreeHeightUnknowable =>
       l10n.deckConflictHeightUnknowable,
+    DeckConflictReason.promotionNeedsSubDeck =>
+      l10n.deckConflictPromotionNeedsSubDeck,
+    DeckConflictReason.promotionDeckHasCards =>
+      l10n.deckConflictPromotionHasCards,
+    DeckConflictReason.promotionSchedulerUnknown =>
+      l10n.deckConflictPromotionSchedulerUnknown,
   };
 
   /// A failure, as copy the user can act on.

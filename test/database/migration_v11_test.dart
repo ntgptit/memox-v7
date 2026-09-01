@@ -260,7 +260,7 @@ void main() {
     final db = AppDatabase(NativeDatabase.memory());
     addTearDown(db.close);
 
-    expect(db.schemaVersion, 13);
+    expect(db.schemaVersion, 14);
     expect(await rows(db, 'SELECT id FROM delete_batches'), isEmpty);
   });
 }

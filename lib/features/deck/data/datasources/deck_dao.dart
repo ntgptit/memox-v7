@@ -105,6 +105,11 @@ final class DeckDao {
   Future<int> subtreeCardCount(String deckId) =>
       _db.subtreeCardCount(deckId).getSingle();
 
+  /// The active cards in a subtree, for invalidating session queues before a
+  /// promotion re-roots them (BR-269).
+  Future<List<String>> subtreeCardIds(String deckId) =>
+      _db.subtreeCardIds(deckId).get();
+
   Future<int> nextSiblingPosition(String? parentDeckId) =>
       _db.nextSiblingPosition(parentDeckId).getSingle();
 

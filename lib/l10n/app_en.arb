@@ -687,6 +687,8 @@
   "@deckMoveAction": {
     "description": "Action that opens the move picker for a deck (UC-09)."
   },
+  "deckPromoteAction": "Make top-level deck",
+  "@deckPromoteAction": {"description": "Action that starts the confirmed sub-deck promotion flow."},
   "deckMoveTitle": "Move to",
   "@deckMoveTitle": {
     "description": "Title of the move picker, listing candidate parent decks."
@@ -808,6 +810,12 @@
   "@deckConflictHeightUnknowable": {
     "description": "Why a deck write was refused (UC-09, BR-55, BR-58, BR-165)."
   },
+  "deckConflictPromotionNeedsSubDeck": "Only a sub-deck can become a top-level deck.",
+  "@deckConflictPromotionNeedsSubDeck": {"description": "Refusal when promotion is requested for a root deck."},
+  "deckConflictPromotionHasCards": "Move this deck's direct cards first. A top-level deck can only hold sub-decks.",
+  "@deckConflictPromotionHasCards": {"description": "Refusal when a branch with direct cards is promoted."},
+  "deckConflictPromotionSchedulerUnknown": "That study mode isn't known to this version of the app.",
+  "@deckConflictPromotionSchedulerUnknown": {"description": "Refusal for an unsupported scheduler selected for promotion."},
   "cardListTitle": "Flashcards",
   "@cardListTitle": {
     "description": "App-bar title of the card list, shown for a card-type deck (UC-04)."
@@ -2167,6 +2175,18 @@
   "@deckResetProgressConfirm": {
     "description": "Confirms the reset. Destructive, so it carries the danger styling."
   },
+  "deckPromoteTitle": "Make this a top-level deck?",
+  "@deckPromoteTitle": {"description": "Promotion confirmation sheet title."},
+  "deckPromoteBody": "This sub-deck and its sub-decks become an independent deck. Their current learning progress and any open study session will reset.",
+  "@deckPromoteBody": {"description": "Promotion confirmation's destructive effect."},
+  "deckPromoteHistoryNotice": "Cards and past answers are kept. Past answers remain as history and are not used for the new learning cycle.",
+  "@deckPromoteHistoryNotice": {"description": "Promotion confirmation's retained-data notice."},
+  "deckPromoteSchedulerLabel": "Study mode for the new deck",
+  "@deckPromoteSchedulerLabel": {"description": "Label for the mandatory scheduler selection in promotion."},
+  "deckPromoteConfirm": "Make top-level deck",
+  "@deckPromoteConfirm": {"description": "Destructive confirmation action for promotion."},
+  "studySummaryStoppedByPromotion": "This branch became a new top-level deck, so this study session ended.",
+  "@studySummaryStoppedByPromotion": {"description": "Summary explanation for a session invalidated by promotion."},
   "deckHeroNewMetricWord": "New",
   "@deckHeroNewMetricWord": {
     "description": "Word half of the hero's third metric (BR-150): cards still on the learning chain. Info role when non-zero."

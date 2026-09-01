@@ -316,6 +316,15 @@ abstract interface class StudyRepository {
     required DateTime endedAt,
   });
 
+  /// Closes sessions whose selected deck or queue intersects a subtree being
+  /// promoted to a new root (BR-269). Its state is reset onto a new scheduler,
+  /// so none of those queues may continue.
+  Future<int> invalidateSessionsForPromotedSubtree({
+    required List<String> deckIds,
+    required List<String> cardIds,
+    required DateTime endedAt,
+  });
+
   /// Closes a session with a [status] and [reason] the matrix allows.
   ///
   /// Turns already written stay written, in every ending (BR-86): changing the

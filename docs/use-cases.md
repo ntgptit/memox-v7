@@ -7,8 +7,8 @@
 | **Scope** | Must-have của MVP. Ngoài phạm vi: should/nice-to-have, và mọi thứ ở mục "Điều đã cố ý không đặc tả" |
 | **Source of truth for** | UC-xx · main/alternative/error flow · UI state matrix của từng màn |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md` |
-| **Updated by task** | M100.10 — UC-22: sắp xếp root/sub-deck cùng cấp; M99.33 — UC-21: Trash và khôi phục item đã xoá; M99.32 — UC-20: tìm kiếm toàn thư viện (deck, hai mặt card, tag); M99.24 — UC-13: xem tiến độ theo deck (cấp thư viện → cấp deck, hai khoảng); trước đó M99.23 — UC-12: xem tiến độ học (streak, hôm nay, bảy ngày) · M99.29 — UC-17: bật nhắc học hằng ngày (opt-in → quyền → lịch → notification → Study Home) · M99.30 — UC-18: quản lý tag (catalog, rename/gộp, xoá) và lọc thẻ theo nhiều tag · M99.31 — UC-19: xem chi tiết một card và lịch sử học của nó |
-| **Last updated** | 2026-08-31 |
+| **Updated by task** | M100.16 — UC-23: promote sub-deck thành root có scheduler tường minh và xác nhận destructive; M100.10 — UC-22: sắp xếp root/sub-deck cùng cấp |
+| **Last updated** | 2026-09-01 |
 
 Chỉ đặc tả must-have. Should-have và nice-to-have viết khi tới lượt — đặc tả
 trước những thứ có thể bị cắt là lãng phí.
@@ -17,7 +17,7 @@ Luồng viết bằng ngôn ngữ người dùng, không nói theo màn hình ha
 hình sẽ đổi; luồng thì không.
 
 **ID use case là định danh vĩnh viễn**, cùng chính sách với BR (xem
-`business-rules.md`). UC mới append; không đánh số lại. Hiện tại: UC-01…UC-22.
+`business-rules.md`). UC mới append; không đánh số lại. Hiện tại: UC-01…UC-23.
 
 **Các UC nối vào nhau thế nào thì xem [`master-flow.md`](master-flow.md).** Tài
 liệu này đặc tả từng UC riêng lẻ và cố ý không vẽ đồ thị giữa chúng — mỗi UC mô
@@ -619,8 +619,8 @@ Create có ba hành vi khác nhau tuỳ trạng thái deck.
 **Alternative flows:**
 - **A1 — Di chuyển trong cùng một cây (cùng root):** `root_deck_id` không đổi,
   nhưng vẫn phải chạy trong transaction cùng với việc đổi `parent_deck_id`.
-- **A2 — Di chuyển lên thành root deck:** ngoài phạm vi MVP — deck nguồn sẽ cần
-  scheduler riêng, tức là một quyết định mới, không phải một phép di chuyển.
+- **A2 — Đưa lên thành root deck:** không thuộc UC-09; đây là UC-23 vì source
+  phải nhận scheduler và generation riêng, không phải một phép move.
 
 **Error flows:**
 - **E1 — Đích là chính nó hoặc descendant:** chặn, lỗi rõ ràng "Không thể di
@@ -1571,11 +1571,48 @@ và Move down khi có sibling sau. Ở đầu/cuối hoặc level một phần t
 tương ứng bị ẩn. Ở mọi view-only sort khác, cả hai thao tác bị ẩn; lỗi giữ
 nguyên danh sách hiện có.
 
+## UC-23 · Đưa sub-deck thành root deck
+
+| | |
+|---|---|
+| **Status** | active |
+
+**Actor:** Người dùng
+**Trigger:** Chọn “Đưa thành deck gốc” trên một sub-deck.
+**Preconditions:** Deck nguồn còn tồn tại, là sub-deck và không chứa card trực tiếp.
+
+**Main flow:**
+1. Hệ thống mở xác nhận, nêu state học và session của subtree sẽ reset, còn card
+   và mọi `study_answers` được giữ.
+2. Người dùng chọn một scheduler hợp lệ cho root mới rồi xác nhận.
+3. Trong một transaction, hệ thống tách source khỏi parent, đặt source thành root
+   `deck` với generation 1 và `first_answered_at = NULL`, cập nhật
+   `root_deck_id` của toàn subtree, seed lại state theo scheduler đã chọn và
+   invalidates session chạm source hoặc queue card của subtree với
+   `end_reason = subtree_promoted`.
+4. Danh sách root và level cũ tự cập nhật từ watch stream.
+
+**Error flows:** Root nguồn, scheduler không hợp lệ, source có direct card hoặc
+source stale đều bị từ chối trước khi ghi. Lỗi database ở bất kỳ bước nào rollback
+parent/root pointer, scheduler, state và session cùng nhau.
+
+**Alternative flows:**
+- **A1 — Người dùng hủy xác nhận:** không có thay đổi nào được ghi.
+- **A2 — Subtree không có card hoặc state học:** thao tác vẫn cần xác nhận vì
+  scheduler ownership và root identity thay đổi; không có answer history nào bị xóa.
+
+**Postconditions:** Subtree vẫn nguyên cấu trúc; root mới tự sở hữu scheduler;
+card content và answer history không mất; state cũ không đi sang generation mới.
+
+**Business rules:** BR-11, BR-40…BR-45, BR-47, BR-56, BR-58, BR-163, BR-269.
+**UI states:** loaded · confirmation · submitting · error.
+
+---
+
 ## Điều đã cố ý không đặc tả
 
 | Thứ | Vì sao |
 |---|---|
-| Đưa deck con lên thành root deck | Cần quyết định scheduler mới; là tính năng riêng, không phải phép di chuyển (UC-09 A2) |
 | ~~Tìm kiếm card (S1)~~ | **Đã vào MVP ở M99.32** — UC-20 và BR-247…BR-255 phủ tên deck, hai mặt card và tên tag. Ngoài phạm vi v1: fuzzy/semantic search, bỏ dấu, và tìm trong `example`/`hint`/`pronunciation` |
 | ~~Thống kê / streak (S2)~~ | **Đã đặc tả ở M99.23, M99.24 và M5.26** — UC-12 với BR-190…BR-199 chốt đơn vị đếm, partition, streak và phạm vi v1; UC-13 với BR-182…BR-189 chốt tiến độ theo deck; UC-14 với BR-200…BR-202 chốt tab Study đọc thư viện thật |
 | Đảo chiều card (S3) | Should-have — **một nửa đã đóng ở M99.27**: UC-15 và BR-203…BR-209 cho phép hỏi ngược trong một phiên `self_assess` của deck `sm2` mà **không** ghi lại thẻ, nên phần còn mở là đảo chiều ở các mode khác |

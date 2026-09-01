@@ -186,6 +186,18 @@ abstract interface class DeckRepository {
     required String targetParentDeckId,
   });
 
+  /// Promotes one sub-deck and its subtree into an independent root (UC-23).
+  ///
+  /// This is deliberately distinct from [moveDeck]: a new root must receive a
+  /// scheduler chosen by the user, starts generation 1 with an unlocked
+  /// scheduler, and resets only its subtree's active study state. Content and
+  /// append-only answers remain; sessions that touch the subtree are
+  /// invalidated atomically (BR-269).
+  Future<void> promoteSubDeckToRoot({
+    required String deckId,
+    required SchedulerType schedulerType,
+  });
+
   /// Changes [deckId]'s order relative to [targetSiblingDeckId]. Both rows are
   /// re-read inside the transaction and must still share exactly one parent;
   /// this operation never changes a tree pointer or any study data.

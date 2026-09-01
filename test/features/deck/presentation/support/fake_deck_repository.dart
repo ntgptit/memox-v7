@@ -309,6 +309,19 @@ class FakeDeckRepository implements DeckRepository {
     if (failure != null) throw failure;
   }
 
+  final List<({String deckId, SchedulerType schedulerType})> promotions =
+      <({String deckId, SchedulerType schedulerType})>[];
+
+  @override
+  Future<void> promoteSubDeckToRoot({
+    required String deckId,
+    required SchedulerType schedulerType,
+  }) async {
+    promotions.add((deckId: deckId, schedulerType: schedulerType));
+    final failure = writeFailure;
+    if (failure != null) throw failure;
+  }
+
   @override
   Future<void> reorderDeck({
     required String deckId,

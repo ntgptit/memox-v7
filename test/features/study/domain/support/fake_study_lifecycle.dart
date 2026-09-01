@@ -64,4 +64,11 @@ mixin _FakeStudyLifecycleStubs implements StudyRepository {
 
     return 0;
   }
+
+  @override
+  Future<int> invalidateSessionsForPromotedSubtree({
+    required List<String> deckIds,
+    required List<String> cardIds,
+    required DateTime endedAt,
+  }) async => 0;
 }

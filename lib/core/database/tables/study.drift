@@ -32,13 +32,15 @@ CREATE TABLE study_sessions (
     -- `content_deleted` is the same argument again (BR-259): a session ended
     -- because its material went to Trash is not a session ended by a reset, and
     -- a label that is derived later can be derived wrongly. Adding it is what
-    -- made v8 a table rebuild — SQLite cannot alter a CHECK.
+    -- made v8 a table rebuild — SQLite cannot alter a CHECK. `subtree_promoted`
+    -- is separate again: promotion resets and re-roots only the extracted
+    -- branch (BR-269), not its former root's whole scheduler generation.
     end_reason TEXT NULL CHECK (
         end_reason IS NULL
         OR end_reason IN (
             'user_exit', 'scheduler_reset', 'scheduler_changed',
             'stale_generation', 'persistence_error', 'interrupted',
-            'content_deleted'
+            'content_deleted', 'subtree_promoted'
         )
     ),
 

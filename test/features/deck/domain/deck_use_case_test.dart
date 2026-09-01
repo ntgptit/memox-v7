@@ -7,6 +7,7 @@ import 'package:memox/features/deck/domain/usecases/create_root_deck_use_case.da
 import 'package:memox/features/deck/domain/usecases/create_sub_deck_use_case.dart';
 import 'package:memox/features/deck/domain/usecases/rename_deck_use_case.dart';
 import 'package:memox/features/deck/domain/usecases/reorder_deck_use_case.dart';
+import 'package:memox/features/deck/domain/usecases/promote_sub_deck_to_root_use_case.dart';
 import 'package:memox/features/deck/domain/models/deck_reorder_placement_model.dart';
 
 import '../presentation/support/fake_deck_repository.dart';
@@ -185,6 +186,22 @@ void main() {
             target: 'target',
             placement: DeckReorderPlacement.after,
           ),
+        ],
+      );
+    });
+  });
+
+  group('PromoteSubDeckToRootUseCase', () {
+    test('forwards the explicitly selected scheduler', () async {
+      await PromoteSubDeckToRootUseCase(repository)(
+        deckId: 'branch',
+        schedulerType: SchedulerType.sm2,
+      );
+
+      expect(
+        repository.promotions,
+        <({String deckId, SchedulerType schedulerType})>[
+          (deckId: 'branch', schedulerType: SchedulerType.sm2),
         ],
       );
     });
