@@ -41,11 +41,11 @@ abstract final class AppBorderColors {
   /// Both values are hue 240 and inside the light canvas's chroma budget. The
   /// history is worth keeping: `#D7DAE3` (1.40:1) was too weak when it was the
   /// only cue, `#BEC0C3` (1.82:1) was right then and too heavy now.
-  static const Color borderSubtleLight = Color(0xFFC5CBE3);
+  static const Color borderSubtleLight = Color(0xFFC7C5D2);
 
   // Lifted from 0xFF403D67 so a fill-less hairline (a divider on the dark page)
   // reads on OLED. Same hue and saturation (0.41), lightness only.
-  static const Color borderSubtleDark = Color(0xFF2A3267);
+  static const Color borderSubtleDark = Color(0xFF474550);
 
   /// Inset tile, chip, icon container.
   /// The callout surface: a panel the screen wants noticed, at the quietest
@@ -216,7 +216,7 @@ abstract final class AppBorderColors {
   /// `surfaceContainerHighest`, and it is the top rung — pushing it down
   /// compresses it into `surfaceContainerHigh` and breaks the ladder to fix a
   /// control.
-  static const Color borderControlLight = Color(0xFF757EA6);
+  static const Color borderControlLight = Color(0xFF777681);
 
   /// Raised from `#66628D` at M100.3, and the census is the reason.
   ///
@@ -262,5 +262,5 @@ abstract final class AppBorderColors {
   /// It stays well under `onSurfaceVariant` (L\* 52.56 against 69.43), so the
   /// edge is still quieter than the secondary label it sits beside — the
   /// ordering the M100.3 census established, kept while the number moved.
-  static const Color borderControlDark = Color(0xFF7E8CC0);
+  static const Color borderControlDark = Color(0xFF918F9B);
 }

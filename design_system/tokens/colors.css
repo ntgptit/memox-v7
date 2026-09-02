@@ -33,46 +33,46 @@
   --mx-success-dark:#4FC79B;--mx-warning-dark:#E8D08E;--mx-danger-dark:#F2808F;--mx-info-dark:#8DB4D8;
 
   /* --- semantic: surface ladder --------------------------------------- */
-  --color-background:#F7F9FE;
-  --color-surface:#F7F9FE;
-  --color-surface-muted:#E2E7F3;
+  --color-background:#FAF9FE;
+  --color-surface:#FAF9FE;
+  --color-surface-muted:#E8E7ED;
   --color-border-option:#8887CE;
   --color-border-divider:#E9ECF5;
   --color-border-selected:#6E6ECE;
-  --color-surface-emphasis:#F1F4FB;
-  --color-surface-selected:#E3E7FA;
+  --color-surface-emphasis:#F4F3F9;
+  --color-surface-selected:#E4DFFE;
   --color-surface-elevated:#FFFFFF;
 
   /* --- semantic: text and lines --------------------------------------- */
-  --color-text-primary:#0F1638;
-  --color-text-secondary:#4A5278;
-  --color-border-subtle:#C5CBE3;
-  --color-focus-ring:#3E53F4;
+  --color-text-primary:#1C1B1F;
+  --color-text-secondary:#474550;
+  --color-border-subtle:#C7C5D2;
+  --color-focus-ring:#4E53B6;
 
   /* --- semantic: brand and actions ------------------------------------ */
-  --color-seed:#3E53F4;
-  --color-primary:#3E53F4;
+  --color-seed:#4E53B6;
+  --color-primary:#4E53B6;
   --color-on-primary:#FFFFFF;
   /* The accent as TEXT or an ICON, which is a different problem from the accent
      as a fill: on dark, the colour that carries white text is too dark to read
      as a label on the page. */
-  --color-primary-accent:#3E53F4;
-  --color-primary-container:#E0E5FE;
-  --color-on-primary-container:#1A2580;
-  --color-secondary:#5161D1;
+  --color-primary-accent:#4E53B6;
+  --color-primary-container:#E4DFFF;
+  --color-on-primary-container:#2F3C9B;
+  --color-secondary:#5F5B75;
   --color-on-secondary:#FFFFFF;
-  --color-secondary-container:#E3E7FA;
-  --color-on-secondary-container:#242C63;
-  --color-tertiary:#6E4BF3;
+  --color-secondary-container:#E4DFFE;
+  --color-on-secondary-container:#47445D;
+  --color-tertiary:#854E61;
   --color-on-tertiary:#FFFFFF;
-  --color-tertiary-container:#EBE4FE;
-  --color-on-tertiary-container:#2C1A6E;
+  --color-tertiary-container:#FFD9E4;
+  --color-on-tertiary-container:#6B3649;
   --color-secondary-action:#454B5E;
 
   /* --- semantic: meaning ---------------------------------------------- */
   --color-success:#10795C;
   --color-warning:#906310;
-  --color-danger:#CF2343;
+  --color-danger:#BE013A;
   --color-info:#3F6E97;
   /* Status containers. The four semantics had a fill and no container, so a
      status chip had to borrow an accent role — `secondary` for "ready",
@@ -87,10 +87,10 @@
   --color-on-warning-container:#402A00;
   --color-info-container:#E0E7EF;
   --color-on-info-container:#073053;
-  --color-error:#CF2343;
+  --color-error:#BE013A;
   --color-on-error:#FFFFFF;
-  --color-error-container:#FCE0E5;
-  --color-on-error-container:#8E0F28;
+  --color-error-container:#FEDADA;
+  --color-on-error-container:#93002A;
 
   /* --- semantic: progress and reward ----------------------------------- */
   /* Its own family, not the accent. A bar drawn in --color-primary sits beside a
@@ -103,58 +103,58 @@
 
   /* --- semantic: Material surface container ladder --------------------- */
   --color-surface-container-lowest:#FFFFFF;
-  --color-surface-container-low:#F1F4FB;
-  --color-surface-container:#E9EDF7;
-  --color-surface-container-high:#E2E7F3;
-  --color-surface-container-highest:#DAE0EF;
-  --color-surface-dim:#DAE0EF;
-  --color-surface-bright:#F7F9FE;
-  --color-inverse-surface:#0A0E27;
-  --color-on-inverse-surface:#E4E8FA;
-  --color-inverse-primary:#8B9AFF;
+  --color-surface-container-low:#F4F3F9;
+  --color-surface-container:#EEEDF3;
+  --color-surface-container-high:#E8E7ED;
+  --color-surface-container-highest:#E3E2E7;
+  --color-surface-dim:#DAD9DF;
+  --color-surface-bright:#FAF9FE;
+  --color-inverse-surface:#313034;
+  --color-on-inverse-surface:#F1F0F6;
+  --color-inverse-primary:#C7BFFF;
 
   /* --- semantic: shadow, scrim, chrome --------------------------------- */
-  --color-shadow:#0A0E27;
-  --color-scrim:#0A0E27;
+  --color-shadow:#000000;
+  --color-scrim:#000000;
   --color-web-letterbox:#6E7288;
   --color-disabled-surface:#DBDEE6;
-  --color-on-disabled:rgb(15 22 56 / 0.38);
+  --color-on-disabled:#DFDEE3;
 }
 [data-theme="dark"]{
-  --color-background:#0A0E27;
-  --color-surface:#0A0E27;
-  --color-surface-muted:#2C356E;
+  --color-background:#141317;
+  --color-surface:#141317;
+  --color-surface-muted:#2A292E;
   --color-border-option:#5D65B2;
   --color-border-divider:#2E2A54;
   --color-border-selected:#7C79C8;
-  --color-surface-emphasis:#1B2249;
-  --color-surface-selected:#333C6B;
-  --color-surface-elevated:#353D7E;
-  --color-text-primary:#E4E8FA;
-  --color-text-secondary:#A4ACD0;
-  --color-border-subtle:#2A3267;
-  --color-focus-ring:#8D9CFF;
-  --color-primary:#8D9CFF;
-  --color-on-primary:#11173A;
-  --color-primary-accent:#8D9CFF;
-  --color-primary-container:#2D346A;
-  --color-on-primary-container:#D9DFFF;
+  --color-surface-emphasis:#1C1B1F;
+  --color-surface-selected:#47445D;
+  --color-surface-elevated:#39393D;
+  --color-text-primary:#E3E2E7;
+  --color-text-secondary:#C7C5D2;
+  --color-border-subtle:#474550;
+  --color-focus-ring:#C7BFFF;
+  --color-primary:#C7BFFF;
+  --color-on-primary:#002781;
+  --color-primary-accent:#C7BFFF;
+  --color-primary-container:#2F3C9B;
+  --color-on-primary-container:#E4DFFF;
   /* Moved with its container. A role has to read as one hue: leaving the fill
      on the old slate while the container joined the page family put 18 degrees
      between them, which is visible the moment the two are drawn side by side.
      Same L* (75.2), hue now 3.5 degrees off the container. */
-  --color-secondary:#9DA8E8;
-  --color-on-secondary:#171E45;
-  --color-secondary-container:#333C6B;
-  --color-on-secondary-container:#DCE1FA;
-  --color-tertiary:#B5A0FF;
-  --color-on-tertiary:#0A0E27;
-  --color-tertiary-container:#3A2E6B;
-  --color-on-tertiary-container:#E3D9FF;
+  --color-secondary:#C7C3E1;
+  --color-on-secondary:#302E45;
+  --color-secondary-container:#47445D;
+  --color-on-secondary-container:#E4DFFE;
+  --color-tertiary:#F5B5CA;
+  --color-on-tertiary:#511F33;
+  --color-tertiary-container:#6B3649;
+  --color-on-tertiary-container:#FFD9E4;
   --color-secondary-action:#C3C6D2;
   --color-success:#4FC79B;
   --color-warning:#E8D08E;
-  --color-danger:#FF8FA3;
+  --color-danger:#FEB3B4;
   --color-info:#8DB4D8;
   /* See the light block. Dark is placed at the L* band the existing dark
      containers occupy (24.0) at each role's own hue, rather than tinted — the
@@ -165,15 +165,15 @@
   --color-on-warning-container:#E4DBC1;
   --color-info-container:#213B54;
   --color-on-info-container:#CBDEEF;
-  --color-error:#FF8FA3;
-  --color-on-error:#3A0713;
-  --color-error-container:#5C1B2A;
-  --color-on-error-container:#FFD9DF;
+  --color-error:#FEB3B4;
+  --color-on-error:#6A001A;
+  --color-error-container:#93002A;
+  --color-on-error-container:#FEDADA;
   --color-progress-track:#2E3247;
   /* The focus ring's own indigo, reached through the primitive rather
      than copied: one edit, one meaning moved. A focus ring must never
      be drawn on this fill — see AppColors.progressFillDark. */
-  --color-progress-fill:#8D9CFF;
+  --color-progress-fill:#C7BFFF;
   --color-progress-complete:#4FC79B;
   --color-streak:#E0B064;
   /* The container is no longer the warm olive #3A2E1C. A brown-olive fill is
@@ -182,19 +182,19 @@
      warm accent. The label keeps its warm --color-streak; only the ground
      joins the surface family, at the same L*. */
   --color-streak-container:#342C4B;
-  --color-surface-container-lowest:#131A3A;
-  --color-surface-container-low:#1B2249;
-  --color-surface-container:#232B5A;
-  --color-surface-container-high:#2C356E;
-  --color-surface-container-highest:#353D7E;
+  --color-surface-container-lowest:#0E0D13;
+  --color-surface-container-low:#1C1B1F;
+  --color-surface-container:#201F23;
+  --color-surface-container-high:#2A292E;
+  --color-surface-container-highest:#353439;
   /* The dimmest surface is the page. */
   --color-surface-dim:#0A0E27;
-  --color-surface-bright:#2C356E;
-  --color-inverse-surface:#F7F9FE;
-  --color-on-inverse-surface:#0F1638;
-  --color-inverse-primary:#4459F4;
-  --color-shadow:#04061A;
-  --color-scrim:#04061A;
+  --color-surface-bright:#39393D;
+  --color-inverse-surface:#E3E2E7;
+  --color-on-inverse-surface:#313034;
+  --color-inverse-primary:#4E53B6;
+  --color-shadow:#000000;
+  --color-scrim:#000000;
   --color-disabled-surface:#242840;
-  --color-on-disabled:rgb(228 232 250 / 0.38);
+  --color-on-disabled:#2D2C30;
 }

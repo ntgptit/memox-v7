@@ -79,10 +79,10 @@
       "widget_context": "AppBorderColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFFC5CBE3)",
+      "expression": "Color(0xFFC7C5D2)",
       "token": null,
-      "resolved_value_light": "#C5CBE3",
-      "resolved_value_dark": "#C5CBE3"
+      "resolved_value_light": "#C7C5D2",
+      "resolved_value_dark": "#C7C5D2"
     },
     {
       "file": "lib/core/theme/app_border_colors.dart",
@@ -90,10 +90,10 @@
       "widget_context": "AppBorderColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF2A3267)",
+      "expression": "Color(0xFF474550)",
       "token": null,
-      "resolved_value_light": "#2A3267",
-      "resolved_value_dark": "#2A3267"
+      "resolved_value_light": "#474550",
+      "resolved_value_dark": "#474550"
     },
     {
       "file": "lib/core/theme/app_border_colors.dart",
@@ -189,10 +189,10 @@
       "widget_context": "AppBorderColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF757EA6)",
+      "expression": "Color(0xFF777681)",
       "token": null,
-      "resolved_value_light": "#757EA6",
-      "resolved_value_dark": "#757EA6"
+      "resolved_value_light": "#777681",
+      "resolved_value_dark": "#777681"
     },
     {
       "file": "lib/core/theme/app_border_colors.dart",
@@ -200,10 +200,10 @@
       "widget_context": "AppBorderColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF7E8CC0)",
+      "expression": "Color(0xFF918F9B)",
       "token": null,
-      "resolved_value_light": "#7E8CC0",
-      "resolved_value_dark": "#7E8CC0"
+      "resolved_value_light": "#918F9B",
+      "resolved_value_dark": "#918F9B"
     },
     {
       "file": "lib/core/theme/app_button_themes.dart",
@@ -213,8 +213,8 @@
       "source_kind": "blend-source",
       "expression": "scheme.onSurface.withValues(alpha: AppStateOpacity.disabledSurfaceBlend)",
       "token": "colorScheme.onSurface",
-      "resolved_value_light": "#0F1638",
-      "resolved_value_dark": "#E4E8FA"
+      "resolved_value_light": "#1C1B1F",
+      "resolved_value_dark": "#E3E2E7"
     },
     {
       "file": "lib/core/theme/app_button_themes.dart",
@@ -255,10 +255,10 @@
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF0F1638)",
+      "expression": "Color(0xFF1C1B1F)",
       "token": null,
-      "resolved_value_light": "#0F1638",
-      "resolved_value_dark": "#0F1638"
+      "resolved_value_light": "#1C1B1F",
+      "resolved_value_dark": "#1C1B1F"
     },
     {
       "file": "lib/core/theme/app_colors.dart",
@@ -266,10 +266,10 @@
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFFE4E8FA)",
+      "expression": "Color(0xFFE3E2E7)",
       "token": null,
-      "resolved_value_light": "#E4E8FA",
-      "resolved_value_dark": "#E4E8FA"
+      "resolved_value_light": "#E3E2E7",
+      "resolved_value_dark": "#E3E2E7"
     },
     {
       "file": "lib/core/theme/app_colors.dart",
@@ -277,10 +277,10 @@
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF4A5278)",
+      "expression": "Color(0xFF474550)",
       "token": null,
-      "resolved_value_light": "#4A5278",
-      "resolved_value_dark": "#4A5278"
+      "resolved_value_light": "#474550",
+      "resolved_value_dark": "#474550"
     },
     {
       "file": "lib/core/theme/app_colors.dart",
@@ -288,10 +288,10 @@
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFFA4ACD0)",
+      "expression": "Color(0xFFC7C5D2)",
       "token": null,
-      "resolved_value_light": "#A4ACD0",
-      "resolved_value_dark": "#A4ACD0"
+      "resolved_value_light": "#C7C5D2",
+      "resolved_value_dark": "#C7C5D2"
     },
     {
       "file": "lib/core/theme/app_colors.dart",
@@ -343,10 +343,10 @@
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF3E53F4)",
+      "expression": "Color(0xFF4E53B6)",
       "token": null,
-      "resolved_value_light": "#3E53F4",
-      "resolved_value_dark": "#3E53F4"
+      "resolved_value_light": "#4E53B6",
+      "resolved_value_dark": "#4E53B6"
     },
     {
       "file": "lib/core/theme/app_colors.dart",
@@ -354,10 +354,10 @@
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF8D9CFF)",
+      "expression": "Color(0xFFC7BFFF)",
       "token": null,
-      "resolved_value_light": "#8D9CFF",
-      "resolved_value_dark": "#8D9CFF"
+      "resolved_value_light": "#C7BFFF",
+      "resolved_value_dark": "#C7BFFF"
     },
     {
       "file": "lib/core/theme/app_colors.dart",
@@ -376,10 +376,10 @@
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF11173A)",
+      "expression": "Color(0xFF002781)",
       "token": null,
-      "resolved_value_light": "#11173A",
-      "resolved_value_dark": "#11173A"
+      "resolved_value_light": "#002781",
+      "resolved_value_dark": "#002781"
     },
     {
       "file": "lib/core/theme/app_colors.dart",
@@ -431,10 +431,10 @@
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFFCF2343)",
+      "expression": "Color(0xFFBE013A)",
       "token": null,
-      "resolved_value_light": "#CF2343",
-      "resolved_value_dark": "#CF2343"
+      "resolved_value_light": "#BE013A",
+      "resolved_value_dark": "#BE013A"
     },
     {
       "file": "lib/core/theme/app_colors.dart",
@@ -442,10 +442,10 @@
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFFFF8FA3)",
+      "expression": "Color(0xFFFEB3B4)",
       "token": null,
-      "resolved_value_light": "#FF8FA3",
-      "resolved_value_dark": "#FF8FA3"
+      "resolved_value_light": "#FEB3B4",
+      "resolved_value_dark": "#FEB3B4"
     },
     {
       "file": "lib/core/theme/app_colors.dart",
@@ -695,10 +695,10 @@
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF0A0E27)",
+      "expression": "Color(0xFF000000)",
       "token": null,
-      "resolved_value_light": "#0A0E27",
-      "resolved_value_dark": "#0A0E27"
+      "resolved_value_light": "#000000",
+      "resolved_value_dark": "#000000"
     },
     {
       "file": "lib/core/theme/app_colors.dart",
@@ -706,10 +706,10 @@
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF04061A)",
+      "expression": "Color(0xFF000000)",
       "token": null,
-      "resolved_value_light": "#04061A",
-      "resolved_value_dark": "#04061A"
+      "resolved_value_light": "#000000",
+      "resolved_value_dark": "#000000"
     },
     {
       "file": "lib/core/theme/app_elevation.dart",
@@ -730,8 +730,8 @@
       "source_kind": "opacity-modified-token",
       "expression": "scheme.shadow.withValues(alpha: 0.06 + 0.01 * level)",
       "token": "colorScheme.shadow",
-      "resolved_value_light": "#0A0E27 @ alpha 0.06",
-      "resolved_value_dark": "#04061A @ alpha 0.06"
+      "resolved_value_light": "#000000 @ alpha 0.06",
+      "resolved_value_dark": "#000000 @ alpha 0.06"
     },
     {
       "file": "lib/core/theme/app_high_contrast.dart",
@@ -741,8 +741,8 @@
       "source_kind": "opacity-modified-token",
       "expression": "scheme.onSurface.withValues(alpha: highContrastDisabledAlpha)",
       "token": "colorScheme.onSurface",
-      "resolved_value_light": "#0F1638 @ alpha unresolvable",
-      "resolved_value_dark": "#E4E8FA @ alpha unresolvable"
+      "resolved_value_light": "#1C1B1F @ alpha unresolvable",
+      "resolved_value_dark": "#E3E2E7 @ alpha unresolvable"
     },
     {
       "file": "lib/core/theme/app_input_theme.dart",
@@ -752,8 +752,8 @@
       "source_kind": "blend-source",
       "expression": "scheme.outline.withValues(alpha: 0.5)",
       "token": "colorScheme.outline",
-      "resolved_value_light": "#757EA6",
-      "resolved_value_dark": "#7E8CC0"
+      "resolved_value_light": "#777681",
+      "resolved_value_dark": "#918F9B"
     },
     {
       "file": "lib/core/theme/app_interaction_states.dart",
@@ -763,8 +763,8 @@
       "source_kind": "opacity-modified-token",
       "expression": "scheme.primary.withValues(alpha: pressedAlpha)",
       "token": "colorScheme.primary",
-      "resolved_value_light": "#3E53F4 @ alpha unresolvable",
-      "resolved_value_dark": "#8D9CFF @ alpha unresolvable"
+      "resolved_value_light": "#4E53B6 @ alpha unresolvable",
+      "resolved_value_dark": "#C7BFFF @ alpha unresolvable"
     },
     {
       "file": "lib/core/theme/app_interaction_states.dart",
@@ -774,8 +774,8 @@
       "source_kind": "opacity-modified-token",
       "expression": "scheme.primary.withValues(alpha: AppStateOpacity.focus)",
       "token": "colorScheme.primary",
-      "resolved_value_light": "#3E53F4 @ alpha unresolvable",
-      "resolved_value_dark": "#8D9CFF @ alpha unresolvable"
+      "resolved_value_light": "#4E53B6 @ alpha unresolvable",
+      "resolved_value_dark": "#C7BFFF @ alpha unresolvable"
     },
     {
       "file": "lib/core/theme/app_interaction_states.dart",
@@ -794,10 +794,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFFE0E5FE)",
+      "expression": "Color(0xFFE4DFFF)",
       "token": null,
-      "resolved_value_light": "#E0E5FE",
-      "resolved_value_dark": "#E0E5FE"
+      "resolved_value_light": "#E4DFFF",
+      "resolved_value_dark": "#E4DFFF"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -805,10 +805,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF2D346A)",
+      "expression": "Color(0xFF2F3C9B)",
       "token": null,
-      "resolved_value_light": "#2D346A",
-      "resolved_value_dark": "#2D346A"
+      "resolved_value_light": "#2F3C9B",
+      "resolved_value_dark": "#2F3C9B"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -816,10 +816,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF1A2580)",
+      "expression": "Color(0xFF2F3C9B)",
       "token": null,
-      "resolved_value_light": "#1A2580",
-      "resolved_value_dark": "#1A2580"
+      "resolved_value_light": "#2F3C9B",
+      "resolved_value_dark": "#2F3C9B"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -827,10 +827,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFFD9DFFF)",
+      "expression": "Color(0xFFE4DFFF)",
       "token": null,
-      "resolved_value_light": "#D9DFFF",
-      "resolved_value_dark": "#D9DFFF"
+      "resolved_value_light": "#E4DFFF",
+      "resolved_value_dark": "#E4DFFF"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -838,10 +838,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF5161D1)",
+      "expression": "Color(0xFF5F5B75)",
       "token": null,
-      "resolved_value_light": "#5161D1",
-      "resolved_value_dark": "#5161D1"
+      "resolved_value_light": "#5F5B75",
+      "resolved_value_dark": "#5F5B75"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -849,10 +849,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF9DA8E8)",
+      "expression": "Color(0xFFC7C3E1)",
       "token": null,
-      "resolved_value_light": "#9DA8E8",
-      "resolved_value_dark": "#9DA8E8"
+      "resolved_value_light": "#C7C3E1",
+      "resolved_value_dark": "#C7C3E1"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -871,10 +871,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF171E45)",
+      "expression": "Color(0xFF302E45)",
       "token": null,
-      "resolved_value_light": "#171E45",
-      "resolved_value_dark": "#171E45"
+      "resolved_value_light": "#302E45",
+      "resolved_value_dark": "#302E45"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -882,10 +882,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFFE3E7FA)",
+      "expression": "Color(0xFFE4DFFE)",
       "token": null,
-      "resolved_value_light": "#E3E7FA",
-      "resolved_value_dark": "#E3E7FA"
+      "resolved_value_light": "#E4DFFE",
+      "resolved_value_dark": "#E4DFFE"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -893,10 +893,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF333C6B)",
+      "expression": "Color(0xFF47445D)",
       "token": null,
-      "resolved_value_light": "#333C6B",
-      "resolved_value_dark": "#333C6B"
+      "resolved_value_light": "#47445D",
+      "resolved_value_dark": "#47445D"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -904,10 +904,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF242C63)",
+      "expression": "Color(0xFF47445D)",
       "token": null,
-      "resolved_value_light": "#242C63",
-      "resolved_value_dark": "#242C63"
+      "resolved_value_light": "#47445D",
+      "resolved_value_dark": "#47445D"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -915,10 +915,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFFDCE1FA)",
+      "expression": "Color(0xFFE4DFFE)",
       "token": null,
-      "resolved_value_light": "#DCE1FA",
-      "resolved_value_dark": "#DCE1FA"
+      "resolved_value_light": "#E4DFFE",
+      "resolved_value_dark": "#E4DFFE"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -926,10 +926,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF6E4BF3)",
+      "expression": "Color(0xFF854E61)",
       "token": null,
-      "resolved_value_light": "#6E4BF3",
-      "resolved_value_dark": "#6E4BF3"
+      "resolved_value_light": "#854E61",
+      "resolved_value_dark": "#854E61"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -937,10 +937,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFFB5A0FF)",
+      "expression": "Color(0xFFF5B5CA)",
       "token": null,
-      "resolved_value_light": "#B5A0FF",
-      "resolved_value_dark": "#B5A0FF"
+      "resolved_value_light": "#F5B5CA",
+      "resolved_value_dark": "#F5B5CA"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -959,10 +959,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF0A0E27)",
+      "expression": "Color(0xFF511F33)",
       "token": null,
-      "resolved_value_light": "#0A0E27",
-      "resolved_value_dark": "#0A0E27"
+      "resolved_value_light": "#511F33",
+      "resolved_value_dark": "#511F33"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -970,10 +970,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFFEBE4FE)",
+      "expression": "Color(0xFFFFD9E4)",
       "token": null,
-      "resolved_value_light": "#EBE4FE",
-      "resolved_value_dark": "#EBE4FE"
+      "resolved_value_light": "#FFD9E4",
+      "resolved_value_dark": "#FFD9E4"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -981,10 +981,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF3A2E6B)",
+      "expression": "Color(0xFF6B3649)",
       "token": null,
-      "resolved_value_light": "#3A2E6B",
-      "resolved_value_dark": "#3A2E6B"
+      "resolved_value_light": "#6B3649",
+      "resolved_value_dark": "#6B3649"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -992,10 +992,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF2C1A6E)",
+      "expression": "Color(0xFF6B3649)",
       "token": null,
-      "resolved_value_light": "#2C1A6E",
-      "resolved_value_dark": "#2C1A6E"
+      "resolved_value_light": "#6B3649",
+      "resolved_value_dark": "#6B3649"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -1003,10 +1003,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFFE3D9FF)",
+      "expression": "Color(0xFFFFD9E4)",
       "token": null,
-      "resolved_value_light": "#E3D9FF",
-      "resolved_value_dark": "#E3D9FF"
+      "resolved_value_light": "#FFD9E4",
+      "resolved_value_dark": "#FFD9E4"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -1025,10 +1025,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF3A0713)",
+      "expression": "Color(0xFF6A001A)",
       "token": null,
-      "resolved_value_light": "#3A0713",
-      "resolved_value_dark": "#3A0713"
+      "resolved_value_light": "#6A001A",
+      "resolved_value_dark": "#6A001A"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -1036,10 +1036,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFFFCE0E5)",
+      "expression": "Color(0xFFFEDADA)",
       "token": null,
-      "resolved_value_light": "#FCE0E5",
-      "resolved_value_dark": "#FCE0E5"
+      "resolved_value_light": "#FEDADA",
+      "resolved_value_dark": "#FEDADA"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -1047,10 +1047,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF5C1B2A)",
+      "expression": "Color(0xFF93002A)",
       "token": null,
-      "resolved_value_light": "#5C1B2A",
-      "resolved_value_dark": "#5C1B2A"
+      "resolved_value_light": "#93002A",
+      "resolved_value_dark": "#93002A"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -1058,10 +1058,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF8E0F28)",
+      "expression": "Color(0xFF93002A)",
       "token": null,
-      "resolved_value_light": "#8E0F28",
-      "resolved_value_dark": "#8E0F28"
+      "resolved_value_light": "#93002A",
+      "resolved_value_dark": "#93002A"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -1069,10 +1069,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFFFFD9DF)",
+      "expression": "Color(0xFFFEDADA)",
       "token": null,
-      "resolved_value_light": "#FFD9DF",
-      "resolved_value_dark": "#FFD9DF"
+      "resolved_value_light": "#FEDADA",
+      "resolved_value_dark": "#FEDADA"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -1080,10 +1080,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF131A3A)",
+      "expression": "Color(0xFF0E0D13)",
       "token": null,
-      "resolved_value_light": "#131A3A",
-      "resolved_value_dark": "#131A3A"
+      "resolved_value_light": "#0E0D13",
+      "resolved_value_dark": "#0E0D13"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -1091,10 +1091,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFFF1F4FB)",
+      "expression": "Color(0xFFF4F3F9)",
       "token": null,
-      "resolved_value_light": "#F1F4FB",
-      "resolved_value_dark": "#F1F4FB"
+      "resolved_value_light": "#F4F3F9",
+      "resolved_value_dark": "#F4F3F9"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -1102,10 +1102,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF1B2249)",
+      "expression": "Color(0xFF1C1B1F)",
       "token": null,
-      "resolved_value_light": "#1B2249",
-      "resolved_value_dark": "#1B2249"
+      "resolved_value_light": "#1C1B1F",
+      "resolved_value_dark": "#1C1B1F"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -1113,10 +1113,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFFE9EDF7)",
+      "expression": "Color(0xFFEEEDF3)",
       "token": null,
-      "resolved_value_light": "#E9EDF7",
-      "resolved_value_dark": "#E9EDF7"
+      "resolved_value_light": "#EEEDF3",
+      "resolved_value_dark": "#EEEDF3"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -1124,10 +1124,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF232B5A)",
+      "expression": "Color(0xFF201F23)",
       "token": null,
-      "resolved_value_light": "#232B5A",
-      "resolved_value_dark": "#232B5A"
+      "resolved_value_light": "#201F23",
+      "resolved_value_dark": "#201F23"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -1135,10 +1135,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFFDAE0EF)",
+      "expression": "Color(0xFFE3E2E7)",
       "token": null,
-      "resolved_value_light": "#DAE0EF",
-      "resolved_value_dark": "#DAE0EF"
+      "resolved_value_light": "#E3E2E7",
+      "resolved_value_dark": "#E3E2E7"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -1146,10 +1146,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF353D7E)",
+      "expression": "Color(0xFF353439)",
       "token": null,
-      "resolved_value_light": "#353D7E",
-      "resolved_value_dark": "#353D7E"
+      "resolved_value_light": "#353439",
+      "resolved_value_dark": "#353439"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -1157,10 +1157,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFFDAE0EF)",
+      "expression": "Color(0xFFDAD9DF)",
       "token": null,
-      "resolved_value_light": "#DAE0EF",
-      "resolved_value_dark": "#DAE0EF"
+      "resolved_value_light": "#DAD9DF",
+      "resolved_value_dark": "#DAD9DF"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -1179,10 +1179,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFFF7F9FE)",
+      "expression": "Color(0xFFFAF9FE)",
       "token": null,
-      "resolved_value_light": "#F7F9FE",
-      "resolved_value_dark": "#F7F9FE"
+      "resolved_value_light": "#FAF9FE",
+      "resolved_value_dark": "#FAF9FE"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -1190,10 +1190,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF2C356E)",
+      "expression": "Color(0xFF39393D)",
       "token": null,
-      "resolved_value_light": "#2C356E",
-      "resolved_value_dark": "#2C356E"
+      "resolved_value_light": "#39393D",
+      "resolved_value_dark": "#39393D"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -1201,10 +1201,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF0A0E27)",
+      "expression": "Color(0xFF313034)",
       "token": null,
-      "resolved_value_light": "#0A0E27",
-      "resolved_value_dark": "#0A0E27"
+      "resolved_value_light": "#313034",
+      "resolved_value_dark": "#313034"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -1212,10 +1212,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFFF7F9FE)",
+      "expression": "Color(0xFFE3E2E7)",
       "token": null,
-      "resolved_value_light": "#F7F9FE",
-      "resolved_value_dark": "#F7F9FE"
+      "resolved_value_light": "#E3E2E7",
+      "resolved_value_dark": "#E3E2E7"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -1223,10 +1223,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFFE4E8FA)",
+      "expression": "Color(0xFFF1F0F6)",
       "token": null,
-      "resolved_value_light": "#E4E8FA",
-      "resolved_value_dark": "#E4E8FA"
+      "resolved_value_light": "#F1F0F6",
+      "resolved_value_dark": "#F1F0F6"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -1234,10 +1234,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF0F1638)",
+      "expression": "Color(0xFF313034)",
       "token": null,
-      "resolved_value_light": "#0F1638",
-      "resolved_value_dark": "#0F1638"
+      "resolved_value_light": "#313034",
+      "resolved_value_dark": "#313034"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -1245,10 +1245,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF8B9AFF)",
+      "expression": "Color(0xFFC7BFFF)",
       "token": null,
-      "resolved_value_light": "#8B9AFF",
-      "resolved_value_dark": "#8B9AFF"
+      "resolved_value_light": "#C7BFFF",
+      "resolved_value_dark": "#C7BFFF"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -1256,10 +1256,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF4459F4)",
+      "expression": "Color(0xFF4E53B6)",
       "token": null,
-      "resolved_value_light": "#4459F4",
-      "resolved_value_dark": "#4459F4"
+      "resolved_value_light": "#4E53B6",
+      "resolved_value_dark": "#4E53B6"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -1269,7 +1269,7 @@
       "source_kind": "shared-constant",
       "expression": "AppColors.primaryLight",
       "token": "AppColors.primaryLight",
-      "resolved_value_light": "#3E53F4",
+      "resolved_value_light": "#4E53B6",
       "resolved_value_dark": "unresolvable: no dark counterpart in theme"
     },
     {
@@ -1278,10 +1278,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFFE0E5FE)",
+      "expression": "Color(0xFFE4DFFF)",
       "token": null,
-      "resolved_value_light": "#E0E5FE",
-      "resolved_value_dark": "#E0E5FE"
+      "resolved_value_light": "#E4DFFF",
+      "resolved_value_dark": "#E4DFFF"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -1289,10 +1289,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF8B9AFF)",
+      "expression": "Color(0xFFC7BFFF)",
       "token": null,
-      "resolved_value_light": "#8B9AFF",
-      "resolved_value_dark": "#8B9AFF"
+      "resolved_value_light": "#C7BFFF",
+      "resolved_value_dark": "#C7BFFF"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -1300,10 +1300,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF11173A)",
+      "expression": "Color(0xFF001554)",
       "token": null,
-      "resolved_value_light": "#11173A",
-      "resolved_value_dark": "#11173A"
+      "resolved_value_light": "#001554",
+      "resolved_value_dark": "#001554"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -1311,10 +1311,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF1A2580)",
+      "expression": "Color(0xFF2F3C9B)",
       "token": null,
-      "resolved_value_light": "#1A2580",
-      "resolved_value_dark": "#1A2580"
+      "resolved_value_light": "#2F3C9B",
+      "resolved_value_dark": "#2F3C9B"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -1322,10 +1322,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFFE3E7FA)",
+      "expression": "Color(0xFFE4DFFE)",
       "token": null,
-      "resolved_value_light": "#E3E7FA",
-      "resolved_value_dark": "#E3E7FA"
+      "resolved_value_light": "#E4DFFE",
+      "resolved_value_dark": "#E4DFFE"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -1333,10 +1333,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF9DA8E8)",
+      "expression": "Color(0xFFC7C3E1)",
       "token": null,
-      "resolved_value_light": "#9DA8E8",
-      "resolved_value_dark": "#9DA8E8"
+      "resolved_value_light": "#C7C3E1",
+      "resolved_value_dark": "#C7C3E1"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -1344,10 +1344,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF171E45)",
+      "expression": "Color(0xFF1A192F)",
       "token": null,
-      "resolved_value_light": "#171E45",
-      "resolved_value_dark": "#171E45"
+      "resolved_value_light": "#1A192F",
+      "resolved_value_dark": "#1A192F"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -1355,10 +1355,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF242C63)",
+      "expression": "Color(0xFF47445D)",
       "token": null,
-      "resolved_value_light": "#242C63",
-      "resolved_value_dark": "#242C63"
+      "resolved_value_light": "#47445D",
+      "resolved_value_dark": "#47445D"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -1366,10 +1366,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFFEBE4FE)",
+      "expression": "Color(0xFFFFD9E4)",
       "token": null,
-      "resolved_value_light": "#EBE4FE",
-      "resolved_value_dark": "#EBE4FE"
+      "resolved_value_light": "#FFD9E4",
+      "resolved_value_dark": "#FFD9E4"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -1377,10 +1377,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFFB5A0FF)",
+      "expression": "Color(0xFFF5B5CA)",
       "token": null,
-      "resolved_value_light": "#B5A0FF",
-      "resolved_value_dark": "#B5A0FF"
+      "resolved_value_light": "#F5B5CA",
+      "resolved_value_dark": "#F5B5CA"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -1388,10 +1388,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF0A0E27)",
+      "expression": "Color(0xFF39081E)",
       "token": null,
-      "resolved_value_light": "#0A0E27",
-      "resolved_value_dark": "#0A0E27"
+      "resolved_value_light": "#39081E",
+      "resolved_value_dark": "#39081E"
     },
     {
       "file": "lib/core/theme/app_material_roles.dart",
@@ -1399,10 +1399,10 @@
       "widget_context": "AppMaterialRoles",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF2C1A6E)",
+      "expression": "Color(0xFF6B3649)",
       "token": null,
-      "resolved_value_light": "#2C1A6E",
-      "resolved_value_dark": "#2C1A6E"
+      "resolved_value_light": "#6B3649",
+      "resolved_value_dark": "#6B3649"
     },
     {
       "file": "lib/core/theme/app_navigation_bar_theme.dart",
@@ -1423,8 +1423,8 @@
       "source_kind": "opacity-modified-token",
       "expression": "scheme.scrim.withValues(alpha: scheme.brightness == Brightness.dark ? 0.72 : 0.48)",
       "token": "colorScheme.scrim",
-      "resolved_value_light": "#0A0E27 @ alpha unresolvable",
-      "resolved_value_dark": "#04061A @ alpha unresolvable"
+      "resolved_value_light": "#000000 @ alpha unresolvable",
+      "resolved_value_dark": "#000000 @ alpha unresolvable"
     },
     {
       "file": "lib/core/theme/app_overlay_themes.dart",
@@ -1445,8 +1445,8 @@
       "source_kind": "opacity-modified-token",
       "expression": "scheme.primary.withValues(alpha: 0.24)",
       "token": "colorScheme.primary",
-      "resolved_value_light": "#3E53F4 @ alpha 0.24",
-      "resolved_value_dark": "#8D9CFF @ alpha 0.24"
+      "resolved_value_light": "#4E53B6 @ alpha 0.24",
+      "resolved_value_dark": "#C7BFFF @ alpha 0.24"
     },
     {
       "file": "lib/core/theme/app_overlay_themes.dart",
@@ -1456,8 +1456,8 @@
       "source_kind": "opacity-modified-token",
       "expression": "scheme.onSurfaceVariant.withValues(alpha: 0.4)",
       "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#4A5278 @ alpha 0.4",
-      "resolved_value_dark": "#A4ACD0 @ alpha 0.4"
+      "resolved_value_light": "#474550 @ alpha 0.4",
+      "resolved_value_dark": "#C7C5D2 @ alpha 0.4"
     },
     {
       "file": "lib/core/theme/app_overlay_themes.dart",
@@ -1511,8 +1511,8 @@
       "source_kind": "opacity-modified-token",
       "expression": "scheme.primary.withValues(alpha: AppStateOpacity.pressed)",
       "token": "colorScheme.primary",
-      "resolved_value_light": "#3E53F4 @ alpha unresolvable",
-      "resolved_value_dark": "#8D9CFF @ alpha unresolvable"
+      "resolved_value_light": "#4E53B6 @ alpha unresolvable",
+      "resolved_value_dark": "#C7BFFF @ alpha unresolvable"
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
@@ -1588,7 +1588,7 @@
       "source_kind": "shared-constant",
       "expression": "AppColors.dangerLight",
       "token": "AppColors.dangerLight",
-      "resolved_value_light": "#CF2343",
+      "resolved_value_light": "#BE013A",
       "resolved_value_dark": "unresolvable: no dark counterpart in theme"
     },
     {
@@ -1787,7 +1787,7 @@
       "expression": "AppColors.dangerDark",
       "token": "AppColors.dangerDark",
       "resolved_value_light": "unresolvable: no light counterpart in theme",
-      "resolved_value_dark": "#FF8FA3"
+      "resolved_value_dark": "#FEB3B4"
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
@@ -1916,10 +1916,10 @@
       "widget_context": "AppSurfaceColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFFF7F9FE)",
+      "expression": "Color(0xFFFAF9FE)",
       "token": null,
-      "resolved_value_light": "#F7F9FE",
-      "resolved_value_dark": "#F7F9FE"
+      "resolved_value_light": "#FAF9FE",
+      "resolved_value_dark": "#FAF9FE"
     },
     {
       "file": "lib/core/theme/app_surface_colors.dart",
@@ -1927,10 +1927,10 @@
       "widget_context": "AppSurfaceColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF0A0E27)",
+      "expression": "Color(0xFF141317)",
       "token": null,
-      "resolved_value_light": "#0A0E27",
-      "resolved_value_dark": "#0A0E27"
+      "resolved_value_light": "#141317",
+      "resolved_value_dark": "#141317"
     },
     {
       "file": "lib/core/theme/app_surface_colors.dart",
@@ -1938,10 +1938,10 @@
       "widget_context": "AppSurfaceColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFFF7F9FE)",
+      "expression": "Color(0xFFFAF9FE)",
       "token": null,
-      "resolved_value_light": "#F7F9FE",
-      "resolved_value_dark": "#F7F9FE"
+      "resolved_value_light": "#FAF9FE",
+      "resolved_value_dark": "#FAF9FE"
     },
     {
       "file": "lib/core/theme/app_surface_colors.dart",
@@ -1949,10 +1949,10 @@
       "widget_context": "AppSurfaceColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF0A0E27)",
+      "expression": "Color(0xFF141317)",
       "token": null,
-      "resolved_value_light": "#0A0E27",
-      "resolved_value_dark": "#0A0E27"
+      "resolved_value_light": "#141317",
+      "resolved_value_dark": "#141317"
     },
     {
       "file": "lib/core/theme/app_surface_colors.dart",
@@ -1960,10 +1960,10 @@
       "widget_context": "AppSurfaceColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFFF1F4FB)",
+      "expression": "Color(0xFFF4F3F9)",
       "token": null,
-      "resolved_value_light": "#F1F4FB",
-      "resolved_value_dark": "#F1F4FB"
+      "resolved_value_light": "#F4F3F9",
+      "resolved_value_dark": "#F4F3F9"
     },
     {
       "file": "lib/core/theme/app_surface_colors.dart",
@@ -1971,10 +1971,10 @@
       "widget_context": "AppSurfaceColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF1B2249)",
+      "expression": "Color(0xFF1C1B1F)",
       "token": null,
-      "resolved_value_light": "#1B2249",
-      "resolved_value_dark": "#1B2249"
+      "resolved_value_light": "#1C1B1F",
+      "resolved_value_dark": "#1C1B1F"
     },
     {
       "file": "lib/core/theme/app_surface_colors.dart",
@@ -1982,10 +1982,10 @@
       "widget_context": "AppSurfaceColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFFE3E7FA)",
+      "expression": "Color(0xFFE4DFFE)",
       "token": null,
-      "resolved_value_light": "#E3E7FA",
-      "resolved_value_dark": "#E3E7FA"
+      "resolved_value_light": "#E4DFFE",
+      "resolved_value_dark": "#E4DFFE"
     },
     {
       "file": "lib/core/theme/app_surface_colors.dart",
@@ -1993,10 +1993,10 @@
       "widget_context": "AppSurfaceColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF333C6B)",
+      "expression": "Color(0xFF47445D)",
       "token": null,
-      "resolved_value_light": "#333C6B",
-      "resolved_value_dark": "#333C6B"
+      "resolved_value_light": "#47445D",
+      "resolved_value_dark": "#47445D"
     },
     {
       "file": "lib/core/theme/app_surface_colors.dart",
@@ -2004,10 +2004,10 @@
       "widget_context": "AppSurfaceColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFFE2E7F3)",
+      "expression": "Color(0xFFE8E7ED)",
       "token": null,
-      "resolved_value_light": "#E2E7F3",
-      "resolved_value_dark": "#E2E7F3"
+      "resolved_value_light": "#E8E7ED",
+      "resolved_value_dark": "#E8E7ED"
     },
     {
       "file": "lib/core/theme/app_surface_colors.dart",
@@ -2015,10 +2015,10 @@
       "widget_context": "AppSurfaceColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF2C356E)",
+      "expression": "Color(0xFF2A292E)",
       "token": null,
-      "resolved_value_light": "#2C356E",
-      "resolved_value_dark": "#2C356E"
+      "resolved_value_light": "#2A292E",
+      "resolved_value_dark": "#2A292E"
     },
     {
       "file": "lib/core/theme/app_surface_colors.dart",
@@ -2037,10 +2037,10 @@
       "widget_context": "AppSurfaceColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF353D7E)",
+      "expression": "Color(0xFF39393D)",
       "token": null,
-      "resolved_value_light": "#353D7E",
-      "resolved_value_dark": "#353D7E"
+      "resolved_value_light": "#39393D",
+      "resolved_value_dark": "#39393D"
     },
     {
       "file": "lib/core/theme/app_theme.dart",
@@ -2050,7 +2050,7 @@
       "source_kind": "shared-constant",
       "expression": "AppColors.primaryLight",
       "token": "AppColors.primaryLight",
-      "resolved_value_light": "#3E53F4",
+      "resolved_value_light": "#4E53B6",
       "resolved_value_dark": "unresolvable: no dark counterpart in theme"
     },
     {
@@ -2314,7 +2314,7 @@
       "source_kind": "shared-constant",
       "expression": "AppColors.dangerLight",
       "token": "AppColors.dangerLight",
-      "resolved_value_light": "#CF2343",
+      "resolved_value_light": "#BE013A",
       "resolved_value_dark": "unresolvable: no dark counterpart in theme"
     },
     {
@@ -2490,7 +2490,7 @@
       "source_kind": "shared-constant",
       "expression": "AppColors.shadowLight",
       "token": "AppColors.shadowLight",
-      "resolved_value_light": "#0A0E27",
+      "resolved_value_light": "#000000",
       "resolved_value_dark": "unresolvable: no dark counterpart in theme"
     },
     {
@@ -2501,7 +2501,7 @@
       "source_kind": "shared-constant",
       "expression": "AppColors.scrimLight",
       "token": "AppColors.scrimLight",
-      "resolved_value_light": "#0A0E27",
+      "resolved_value_light": "#000000",
       "resolved_value_dark": "unresolvable: no dark counterpart in theme"
     },
     {
@@ -2513,7 +2513,7 @@
       "expression": "AppColors.primaryDark",
       "token": "AppColors.primaryDark",
       "resolved_value_light": "unresolvable: no light counterpart in theme",
-      "resolved_value_dark": "#8D9CFF"
+      "resolved_value_dark": "#C7BFFF"
     },
     {
       "file": "lib/core/theme/app_theme.dart",
@@ -2524,7 +2524,7 @@
       "expression": "AppColors.onPrimaryDark",
       "token": "AppColors.onPrimaryDark",
       "resolved_value_light": "unresolvable: no light counterpart in theme",
-      "resolved_value_dark": "#11173A"
+      "resolved_value_dark": "#002781"
     },
     {
       "file": "lib/core/theme/app_theme.dart",
@@ -2777,7 +2777,7 @@
       "expression": "AppColors.dangerDark",
       "token": "AppColors.dangerDark",
       "resolved_value_light": "unresolvable: no light counterpart in theme",
-      "resolved_value_dark": "#FF8FA3"
+      "resolved_value_dark": "#FEB3B4"
     },
     {
       "file": "lib/core/theme/app_theme.dart",
@@ -2953,7 +2953,7 @@
       "expression": "AppColors.shadowDark",
       "token": "AppColors.shadowDark",
       "resolved_value_light": "unresolvable: no light counterpart in theme",
-      "resolved_value_dark": "#04061A"
+      "resolved_value_dark": "#000000"
     },
     {
       "file": "lib/core/theme/app_theme.dart",
@@ -2964,7 +2964,7 @@
       "expression": "AppColors.scrimDark",
       "token": "AppColors.scrimDark",
       "resolved_value_light": "unresolvable: no light counterpart in theme",
-      "resolved_value_dark": "#04061A"
+      "resolved_value_dark": "#000000"
     },
     {
       "file": "lib/core/theme/app_theme.dart",
@@ -2974,8 +2974,8 @@
       "source_kind": "opacity-modified-token",
       "expression": "scheme.onSurfaceVariant.withValues(alpha: AppStateOpacity.hoverRow)",
       "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#4A5278 @ alpha unresolvable",
-      "resolved_value_dark": "#A4ACD0 @ alpha unresolvable"
+      "resolved_value_light": "#474550 @ alpha unresolvable",
+      "resolved_value_dark": "#C7C5D2 @ alpha unresolvable"
     },
     {
       "file": "lib/core/theme/app_theme.dart",
@@ -2985,8 +2985,8 @@
       "source_kind": "opacity-modified-token",
       "expression": "scheme.primary.withValues(alpha: AppStateOpacity.focus)",
       "token": "colorScheme.primary",
-      "resolved_value_light": "#3E53F4 @ alpha unresolvable",
-      "resolved_value_dark": "#8D9CFF @ alpha unresolvable"
+      "resolved_value_light": "#4E53B6 @ alpha unresolvable",
+      "resolved_value_dark": "#C7BFFF @ alpha unresolvable"
     },
     {
       "file": "lib/core/theme/app_theme.dart",
@@ -2996,8 +2996,8 @@
       "source_kind": "opacity-modified-token",
       "expression": "scheme.primary.withValues(alpha: AppStateOpacity.pressed)",
       "token": "colorScheme.primary",
-      "resolved_value_light": "#3E53F4 @ alpha unresolvable",
-      "resolved_value_dark": "#8D9CFF @ alpha unresolvable"
+      "resolved_value_light": "#4E53B6 @ alpha unresolvable",
+      "resolved_value_dark": "#C7BFFF @ alpha unresolvable"
     },
     {
       "file": "lib/core/theme/app_theme.dart",
@@ -3007,8 +3007,8 @@
       "source_kind": "opacity-modified-token",
       "expression": "scheme.primary.withValues(alpha: AppStateOpacity.pressed)",
       "token": "colorScheme.primary",
-      "resolved_value_light": "#3E53F4 @ alpha unresolvable",
-      "resolved_value_dark": "#8D9CFF @ alpha unresolvable"
+      "resolved_value_light": "#4E53B6 @ alpha unresolvable",
+      "resolved_value_dark": "#C7BFFF @ alpha unresolvable"
     },
     {
       "file": "lib/core/theme/app_theme.dart",
@@ -3019,7 +3019,7 @@
       "expression": "scheme.onPrimary.withValues(alpha: AppStateOpacity.hoverControl)",
       "token": "colorScheme.onPrimary",
       "resolved_value_light": "#FFFFFF @ alpha unresolvable",
-      "resolved_value_dark": "#11173A @ alpha unresolvable"
+      "resolved_value_dark": "#002781 @ alpha unresolvable"
     },
     {
       "file": "lib/core/theme/app_theme.dart",
@@ -3030,7 +3030,7 @@
       "expression": "scheme.onPrimary.withValues(alpha: AppStateOpacity.focus)",
       "token": "colorScheme.onPrimary",
       "resolved_value_light": "#FFFFFF @ alpha unresolvable",
-      "resolved_value_dark": "#11173A @ alpha unresolvable"
+      "resolved_value_dark": "#002781 @ alpha unresolvable"
     },
     {
       "file": "lib/core/theme/app_theme.dart",
@@ -3041,11 +3041,11 @@
       "expression": "scheme.onPrimary.withValues(alpha: AppStateOpacity.pressed)",
       "token": "colorScheme.onPrimary",
       "resolved_value_light": "#FFFFFF @ alpha unresolvable",
-      "resolved_value_dark": "#11173A @ alpha unresolvable"
+      "resolved_value_dark": "#002781 @ alpha unresolvable"
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 545,
+      "line": 548,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -3056,7 +3056,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 568,
+      "line": 571,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -3067,14 +3067,14 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 613,
+      "line": 616,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "blend-source",
       "expression": "scheme.onSurface.withValues(alpha: AppStateOpacity.pressed)",
       "token": "colorScheme.onSurface",
-      "resolved_value_light": "#0F1638",
-      "resolved_value_dark": "#E4E8FA"
+      "resolved_value_light": "#1C1B1F",
+      "resolved_value_dark": "#E3E2E7"
     },
     {
       "file": "lib/core/theme/app_toggle_themes.dart",
@@ -3117,8 +3117,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.primary",
       "token": "colorScheme.primary",
-      "resolved_value_light": "#3E53F4",
-      "resolved_value_dark": "#8D9CFF"
+      "resolved_value_light": "#4E53B6",
+      "resolved_value_dark": "#C7BFFF"
     },
     {
       "file": "lib/features/card/presentation/widgets/items/card_history_event_widget.dart",
@@ -3139,8 +3139,8 @@
       "source_kind": "theme-token",
       "expression": "context.semanticColors.surfaceMuted",
       "token": "semantic.surfaceMuted",
-      "resolved_value_light": "#E2E7F3",
-      "resolved_value_dark": "#2C356E"
+      "resolved_value_light": "#E8E7ED",
+      "resolved_value_dark": "#2A292E"
     },
     {
       "file": "lib/features/card/presentation/widgets/items/card_metric_widget.dart",
@@ -3150,8 +3150,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.onSurface",
       "token": "colorScheme.onSurface",
-      "resolved_value_light": "#0F1638",
-      "resolved_value_dark": "#E4E8FA"
+      "resolved_value_light": "#1C1B1F",
+      "resolved_value_dark": "#E3E2E7"
     },
     {
       "file": "lib/features/card/presentation/widgets/items/card_metric_widget.dart",
@@ -3161,8 +3161,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.onSurface",
       "token": "colorScheme.onSurface",
-      "resolved_value_light": "#0F1638",
-      "resolved_value_dark": "#E4E8FA"
+      "resolved_value_light": "#1C1B1F",
+      "resolved_value_dark": "#E3E2E7"
     },
     {
       "file": "lib/features/card/presentation/widgets/items/card_metric_widget.dart",
@@ -3172,8 +3172,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.primary",
       "token": "colorScheme.primary",
-      "resolved_value_light": "#3E53F4",
-      "resolved_value_dark": "#8D9CFF"
+      "resolved_value_light": "#4E53B6",
+      "resolved_value_dark": "#C7BFFF"
     },
     {
       "file": "lib/features/card/presentation/widgets/items/card_tile_widget.dart",
@@ -3183,8 +3183,8 @@
       "source_kind": "theme-token",
       "expression": "context.semanticColors.surfaceMuted",
       "token": "semantic.surfaceMuted",
-      "resolved_value_light": "#E2E7F3",
-      "resolved_value_dark": "#2C356E"
+      "resolved_value_light": "#E8E7ED",
+      "resolved_value_dark": "#2A292E"
     },
     {
       "file": "lib/features/card/presentation/widgets/items/tag_catalog_row_widget.dart",
@@ -3194,8 +3194,8 @@
       "source_kind": "theme-token",
       "expression": "context.semanticColors.surfaceMuted",
       "token": "semantic.surfaceMuted",
-      "resolved_value_light": "#E2E7F3",
-      "resolved_value_dark": "#2C356E"
+      "resolved_value_light": "#E8E7ED",
+      "resolved_value_dark": "#2A292E"
     },
     {
       "file": "lib/features/card/presentation/widgets/overlays/card_export_sheet_widget.dart",
@@ -3205,8 +3205,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",
       "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#4A5278",
-      "resolved_value_dark": "#A4ACD0"
+      "resolved_value_light": "#474550",
+      "resolved_value_dark": "#C7C5D2"
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_detail_state_widget.dart",
@@ -3216,8 +3216,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",
       "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#4A5278",
-      "resolved_value_dark": "#A4ACD0"
+      "resolved_value_light": "#474550",
+      "resolved_value_dark": "#C7C5D2"
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_detail_summary_widget.dart",
@@ -3227,8 +3227,8 @@
       "source_kind": "theme-token",
       "expression": "context.semanticColors.borderSubtle",
       "token": "semantic.borderSubtle",
-      "resolved_value_light": "#C5CBE3",
-      "resolved_value_dark": "#2A3267"
+      "resolved_value_light": "#C7C5D2",
+      "resolved_value_dark": "#474550"
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_export_format_options_widget.dart",
@@ -3238,8 +3238,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.secondaryContainer",
       "token": "colorScheme.secondaryContainer",
-      "resolved_value_light": "#E3E7FA",
-      "resolved_value_dark": "#333C6B"
+      "resolved_value_light": "#E4DFFE",
+      "resolved_value_dark": "#47445D"
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_history_section_widget.dart",
@@ -3249,8 +3249,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",
       "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#4A5278",
-      "resolved_value_dark": "#A4ACD0"
+      "resolved_value_light": "#474550",
+      "resolved_value_dark": "#C7C5D2"
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_confirm_step_widget.dart",
@@ -3260,8 +3260,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",
       "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#4A5278",
-      "resolved_value_dark": "#A4ACD0"
+      "resolved_value_light": "#474550",
+      "resolved_value_dark": "#C7C5D2"
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_confirm_step_widget.dart",
@@ -3271,8 +3271,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.outlineVariant",
       "token": "colorScheme.outlineVariant",
-      "resolved_value_light": "#C5CBE3",
-      "resolved_value_dark": "#2A3267"
+      "resolved_value_light": "#C7C5D2",
+      "resolved_value_dark": "#474550"
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_context_widget.dart",
@@ -3293,8 +3293,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",
       "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#4A5278",
-      "resolved_value_dark": "#A4ACD0"
+      "resolved_value_light": "#474550",
+      "resolved_value_dark": "#C7C5D2"
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_preview_step_widget.dart",
@@ -3304,8 +3304,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.outlineVariant",
       "token": "colorScheme.outlineVariant",
-      "resolved_value_light": "#C5CBE3",
-      "resolved_value_dark": "#2A3267"
+      "resolved_value_light": "#C7C5D2",
+      "resolved_value_dark": "#474550"
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_preview_step_widget.dart",
@@ -3315,8 +3315,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",
       "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#4A5278",
-      "resolved_value_dark": "#A4ACD0"
+      "resolved_value_light": "#474550",
+      "resolved_value_dark": "#C7C5D2"
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_preview_summary_widget.dart",
@@ -3326,8 +3326,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",
       "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#4A5278",
-      "resolved_value_dark": "#A4ACD0"
+      "resolved_value_light": "#474550",
+      "resolved_value_dark": "#C7C5D2"
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_preview_summary_widget.dart",
@@ -3337,8 +3337,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.outlineVariant",
       "token": "colorScheme.outlineVariant",
-      "resolved_value_light": "#C5CBE3",
-      "resolved_value_dark": "#2A3267"
+      "resolved_value_light": "#C7C5D2",
+      "resolved_value_dark": "#474550"
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_preview_summary_widget.dart",
@@ -3348,8 +3348,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.outlineVariant",
       "token": "colorScheme.outlineVariant",
-      "resolved_value_light": "#C5CBE3",
-      "resolved_value_dark": "#2A3267"
+      "resolved_value_light": "#C7C5D2",
+      "resolved_value_dark": "#474550"
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_result_widget.dart",
@@ -3359,8 +3359,8 @@
       "source_kind": "theme-token",
       "expression": "context.semanticColors.surfaceMuted",
       "token": "semantic.surfaceMuted",
-      "resolved_value_light": "#E2E7F3",
-      "resolved_value_dark": "#2C356E"
+      "resolved_value_light": "#E8E7ED",
+      "resolved_value_dark": "#2A292E"
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_source_step_widget.dart",
@@ -3370,8 +3370,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",
       "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#4A5278",
-      "resolved_value_dark": "#A4ACD0"
+      "resolved_value_light": "#474550",
+      "resolved_value_dark": "#C7C5D2"
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_source_step_widget.dart",
@@ -3392,8 +3392,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.primary",
       "token": "colorScheme.primary",
-      "resolved_value_light": "#3E53F4",
-      "resolved_value_dark": "#8D9CFF"
+      "resolved_value_light": "#4E53B6",
+      "resolved_value_dark": "#C7BFFF"
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_stepper_widget.dart",
@@ -3403,8 +3403,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.outlineVariant",
       "token": "colorScheme.outlineVariant",
-      "resolved_value_light": "#C5CBE3",
-      "resolved_value_dark": "#2A3267"
+      "resolved_value_light": "#C7C5D2",
+      "resolved_value_dark": "#474550"
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
@@ -3436,8 +3436,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.onSurface",
       "token": "colorScheme.onSurface",
-      "resolved_value_light": "#0F1638",
-      "resolved_value_dark": "#E4E8FA"
+      "resolved_value_light": "#1C1B1F",
+      "resolved_value_dark": "#E3E2E7"
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_selection_bar_widget.dart",
@@ -3447,8 +3447,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.secondaryContainer",
       "token": "colorScheme.secondaryContainer",
-      "resolved_value_light": "#E3E7FA",
-      "resolved_value_dark": "#333C6B"
+      "resolved_value_light": "#E4DFFE",
+      "resolved_value_dark": "#47445D"
     },
     {
       "file": "lib/features/card/presentation/widgets/support/card_tag_chip_widget.dart",
@@ -3458,8 +3458,8 @@
       "source_kind": "theme-token",
       "expression": "context.semanticColors.surfaceMuted",
       "token": "semantic.surfaceMuted",
-      "resolved_value_light": "#E2E7F3",
-      "resolved_value_dark": "#2C356E"
+      "resolved_value_light": "#E8E7ED",
+      "resolved_value_dark": "#2A292E"
     },
     {
       "file": "lib/features/deck/presentation/widgets/items/deck_icon_area_widget.dart",
@@ -3469,8 +3469,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.primaryContainer",
       "token": "colorScheme.primaryContainer",
-      "resolved_value_light": "#E0E5FE",
-      "resolved_value_dark": "#2D346A"
+      "resolved_value_light": "#E4DFFF",
+      "resolved_value_dark": "#2F3C9B"
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
@@ -3480,8 +3480,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.primaryContainer",
       "token": "colorScheme.primaryContainer",
-      "resolved_value_light": "#E0E5FE",
-      "resolved_value_dark": "#2D346A"
+      "resolved_value_light": "#E4DFFF",
+      "resolved_value_dark": "#2F3C9B"
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
@@ -3491,8 +3491,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.primary",
       "token": "colorScheme.primary",
-      "resolved_value_light": "#3E53F4",
-      "resolved_value_dark": "#8D9CFF"
+      "resolved_value_light": "#4E53B6",
+      "resolved_value_dark": "#C7BFFF"
     },
     {
       "file": "lib/features/progress/presentation/widgets/items/progress_metric_widget.dart",
@@ -3502,8 +3502,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.onSurface",
       "token": "colorScheme.onSurface",
-      "resolved_value_light": "#0F1638",
-      "resolved_value_dark": "#E4E8FA"
+      "resolved_value_light": "#1C1B1F",
+      "resolved_value_dark": "#E3E2E7"
     },
     {
       "file": "lib/features/progress/presentation/widgets/items/progress_metric_widget.dart",
@@ -3513,8 +3513,8 @@
       "source_kind": "theme-token",
       "expression": "context.semanticColors.surfaceMuted",
       "token": "semantic.surfaceMuted",
-      "resolved_value_light": "#E2E7F3",
-      "resolved_value_dark": "#2C356E"
+      "resolved_value_light": "#E8E7ED",
+      "resolved_value_dark": "#2A292E"
     },
     {
       "file": "lib/features/reminder/presentation/widgets/sections/reminder_settings_section_widget.dart",
@@ -3524,8 +3524,8 @@
       "source_kind": "theme-token",
       "expression": "context.semanticColors.borderSubtle",
       "token": "semantic.borderSubtle",
-      "resolved_value_light": "#C5CBE3",
-      "resolved_value_dark": "#2A3267"
+      "resolved_value_light": "#C7C5D2",
+      "resolved_value_dark": "#474550"
     },
     {
       "file": "lib/features/study/presentation/widgets/items/match_tile_widget.dart",
@@ -3546,8 +3546,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.primary",
       "token": "colorScheme.primary",
-      "resolved_value_light": "#3E53F4",
-      "resolved_value_dark": "#8D9CFF"
+      "resolved_value_light": "#4E53B6",
+      "resolved_value_dark": "#C7BFFF"
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/recall_timer_pieces_widget.dart",
@@ -3568,8 +3568,8 @@
       "source_kind": "theme-token",
       "expression": "context.semanticColors.borderSubtle",
       "token": "semantic.borderSubtle",
-      "resolved_value_light": "#C5CBE3",
-      "resolved_value_dark": "#2A3267"
+      "resolved_value_light": "#C7C5D2",
+      "resolved_value_dark": "#474550"
     },
     {
       "file": "lib/features/trash/presentation/widgets/sections/trash_selection_bar_widget.dart",
@@ -3590,8 +3590,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.error",
       "token": "colorScheme.error",
-      "resolved_value_light": "#CF2343",
-      "resolved_value_dark": "#FF8FA3"
+      "resolved_value_light": "#BE013A",
+      "resolved_value_dark": "#FEB3B4"
     },
     {
       "file": "lib/shared/widgets/mx_action_button.dart",
@@ -3602,7 +3602,7 @@
       "expression": "context.colors.onError",
       "token": "colorScheme.onError",
       "resolved_value_light": "#FFFFFF",
-      "resolved_value_dark": "#3A0713"
+      "resolved_value_dark": "#6A001A"
     },
     {
       "file": "lib/shared/widgets/mx_action_sheet.dart",
@@ -3612,8 +3612,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",
       "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#4A5278",
-      "resolved_value_dark": "#A4ACD0"
+      "resolved_value_light": "#474550",
+      "resolved_value_dark": "#C7C5D2"
     },
     {
       "file": "lib/shared/widgets/mx_breadcrumb.dart",
@@ -3623,8 +3623,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",
       "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#4A5278",
-      "resolved_value_dark": "#A4ACD0"
+      "resolved_value_light": "#474550",
+      "resolved_value_dark": "#C7C5D2"
     },
     {
       "file": "lib/shared/widgets/mx_breadcrumb.dart",
@@ -3634,8 +3634,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.primary",
       "token": "colorScheme.primary",
-      "resolved_value_light": "#3E53F4",
-      "resolved_value_dark": "#8D9CFF"
+      "resolved_value_light": "#4E53B6",
+      "resolved_value_dark": "#C7BFFF"
     },
     {
       "file": "lib/shared/widgets/mx_breadcrumb_step.dart",
@@ -3645,8 +3645,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",
       "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#4A5278",
-      "resolved_value_dark": "#A4ACD0"
+      "resolved_value_light": "#474550",
+      "resolved_value_dark": "#C7C5D2"
     },
     {
       "file": "lib/shared/widgets/mx_breadcrumb_step.dart",
@@ -3656,8 +3656,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.onSurface",
       "token": "colorScheme.onSurface",
-      "resolved_value_light": "#0F1638",
-      "resolved_value_dark": "#E4E8FA"
+      "resolved_value_light": "#1C1B1F",
+      "resolved_value_dark": "#E3E2E7"
     },
     {
       "file": "lib/shared/widgets/mx_breadcrumb_step.dart",
@@ -3667,8 +3667,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",
       "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#4A5278",
-      "resolved_value_dark": "#A4ACD0"
+      "resolved_value_light": "#474550",
+      "resolved_value_dark": "#C7C5D2"
     },
     {
       "file": "lib/shared/widgets/mx_breadcrumb_step.dart",
@@ -3678,8 +3678,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",
       "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#4A5278",
-      "resolved_value_dark": "#A4ACD0"
+      "resolved_value_light": "#474550",
+      "resolved_value_dark": "#C7C5D2"
     },
     {
       "file": "lib/shared/widgets/mx_content_shell.dart",
@@ -3689,8 +3689,8 @@
       "source_kind": "theme-token",
       "expression": "context.semanticColors.borderSubtle",
       "token": "semantic.borderSubtle",
-      "resolved_value_light": "#C5CBE3",
-      "resolved_value_dark": "#2A3267"
+      "resolved_value_light": "#C7C5D2",
+      "resolved_value_dark": "#474550"
     },
     {
       "file": "lib/shared/widgets/mx_content_shell.dart",
@@ -3700,8 +3700,8 @@
       "source_kind": "theme-token",
       "expression": "context.semanticColors.borderSubtle",
       "token": "semantic.borderSubtle",
-      "resolved_value_light": "#C5CBE3",
-      "resolved_value_dark": "#2A3267"
+      "resolved_value_light": "#C7C5D2",
+      "resolved_value_dark": "#474550"
     },
     {
       "file": "lib/shared/widgets/mx_empty_state.dart",
@@ -3711,8 +3711,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",
       "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#4A5278",
-      "resolved_value_dark": "#A4ACD0"
+      "resolved_value_light": "#474550",
+      "resolved_value_dark": "#C7C5D2"
     },
     {
       "file": "lib/shared/widgets/mx_error_state.dart",
@@ -3722,8 +3722,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",
       "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#4A5278",
-      "resolved_value_dark": "#A4ACD0"
+      "resolved_value_light": "#474550",
+      "resolved_value_dark": "#C7C5D2"
     },
     {
       "file": "lib/shared/widgets/mx_form_dialog.dart",
@@ -3733,8 +3733,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.error",
       "token": "colorScheme.error",
-      "resolved_value_light": "#CF2343",
-      "resolved_value_dark": "#FF8FA3"
+      "resolved_value_light": "#BE013A",
+      "resolved_value_dark": "#FEB3B4"
     },
     {
       "file": "lib/shared/widgets/mx_icon_button.dart",
@@ -3755,8 +3755,8 @@
       "source_kind": "theme-token",
       "expression": "context.semanticColors.surfaceMuted",
       "token": "semantic.surfaceMuted",
-      "resolved_value_light": "#E2E7F3",
-      "resolved_value_dark": "#2C356E"
+      "resolved_value_light": "#E8E7ED",
+      "resolved_value_dark": "#2A292E"
     },
     {
       "file": "lib/shared/widgets/mx_navigation_bar.dart",
@@ -3766,8 +3766,8 @@
       "source_kind": "theme-token",
       "expression": "context.semanticColors.borderSubtle",
       "token": "semantic.borderSubtle",
-      "resolved_value_light": "#C5CBE3",
-      "resolved_value_dark": "#2A3267"
+      "resolved_value_light": "#C7C5D2",
+      "resolved_value_dark": "#474550"
     },
     {
       "file": "lib/shared/widgets/mx_progress_bar.dart",
@@ -3777,8 +3777,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",
       "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#4A5278",
-      "resolved_value_dark": "#A4ACD0"
+      "resolved_value_light": "#474550",
+      "resolved_value_dark": "#C7C5D2"
     },
     {
       "file": "lib/shared/widgets/mx_progress_bar.dart",
@@ -3799,8 +3799,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.onSurface",
       "token": "colorScheme.onSurface",
-      "resolved_value_light": "#0F1638",
-      "resolved_value_dark": "#E4E8FA"
+      "resolved_value_light": "#1C1B1F",
+      "resolved_value_dark": "#E3E2E7"
     },
     {
       "file": "lib/shared/widgets/mx_radio_rows.dart",
@@ -3821,8 +3821,8 @@
       "source_kind": "theme-token",
       "expression": "context.semanticColors.surfaceMuted",
       "token": "semantic.surfaceMuted",
-      "resolved_value_light": "#E2E7F3",
-      "resolved_value_dark": "#2C356E"
+      "resolved_value_light": "#E8E7ED",
+      "resolved_value_dark": "#2A292E"
     },
     {
       "file": "lib/shared/widgets/mx_session_top_bar.dart",
@@ -3832,8 +3832,8 @@
       "source_kind": "theme-token",
       "expression": "context.colors.primary",
       "token": "colorScheme.primary",
-      "resolved_value_light": "#3E53F4",
-      "resolved_value_dark": "#8D9CFF"
+      "resolved_value_light": "#4E53B6",
+      "resolved_value_dark": "#C7BFFF"
     },
     {
       "file": "lib/shared/widgets/mx_text_field.dart",
@@ -3843,8 +3843,8 @@
       "source_kind": "theme-token",
       "expression": "Theme.of(context).colorScheme.onSurfaceVariant",
       "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#4A5278",
-      "resolved_value_dark": "#A4ACD0"
+      "resolved_value_light": "#474550",
+      "resolved_value_dark": "#C7C5D2"
     }
   ]
 }

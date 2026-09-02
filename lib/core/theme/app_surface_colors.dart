@@ -25,9 +25,9 @@ abstract final class AppSurfaceColors {
   /// shadow — it only explains why the ladder was built to work without one.
 
   /// Page background. The one component allowed a strong navy saturation.
-  static const Color backgroundLight = Color(0xFFF7F9FE);
+  static const Color backgroundLight = Color(0xFFFAF9FE);
 
-  static const Color backgroundDark = Color(0xFF0A0E27);
+  static const Color backgroundDark = Color(0xFF141317);
 
   /// Card and sheet — the flashcard surface.
   ///
@@ -42,18 +42,18 @@ abstract final class AppSurfaceColors {
   /// while the step was the only depth cue light had. It is not any more: the
   /// shadow's alpha was re-solved to 0.07 and the total lift is 8.04 L\* against
   /// dark's 6.58.
-  static const Color surfaceLight = Color(0xFFF7F9FE);
+  static const Color surfaceLight = Color(0xFFFAF9FE);
 
-  static const Color surfaceDark = Color(0xFF0A0E27);
+  static const Color surfaceDark = Color(0xFF141317);
 
-  static const Color surfaceEmphasisLight = Color(0xFFF1F4FB);
+  static const Color surfaceEmphasisLight = Color(0xFFF4F3F9);
 
   /// **Dark keeps the value it has today.** The reference concept is light-only
   /// ("LIGHT · TOKYO PURE"), and the complaint that started this was light: in
   /// dark `#332F58` carries a real violet and already reads as a callout. A dark
   /// value invented without a reference to measure against would be the guess
   /// this whole pass exists to avoid.
-  static const Color surfaceEmphasisDark = Color(0xFF1B2249);
+  static const Color surfaceEmphasisDark = Color(0xFF1C1B1F);
 
   /// The fill a *picked* card wears when its list uses the tint treatment.
   ///
@@ -67,14 +67,14 @@ abstract final class AppSurfaceColors {
   ///
   /// The *edge* stays `secondary`: its 2.90:1 measurement is about a line on
   /// `surface`, which the fill never had a stake in.
-  static const Color surfaceSelectedLight = Color(0xFFE3E7FA);
+  static const Color surfaceSelectedLight = Color(0xFFE4DFFE);
 
   /// Unchanged in dark, for the reason [surfaceEmphasisDark] is.
-  static const Color surfaceSelectedDark = Color(0xFF333C6B);
+  static const Color surfaceSelectedDark = Color(0xFF47445D);
 
-  static const Color surfaceMutedLight = Color(0xFFE2E7F3);
+  static const Color surfaceMutedLight = Color(0xFFE8E7ED);
 
-  static const Color surfaceMutedDark = Color(0xFF2C356E);
+  static const Color surfaceMutedDark = Color(0xFF2A292E);
 
   /// Top of the ladder: a raised or selected surface.
   ///
@@ -85,5 +85,5 @@ abstract final class AppSurfaceColors {
   // are this value under Material's names, derived there.
   static const Color surfaceElevatedLight = Color(0xFFFFFFFF);
 
-  static const Color surfaceElevatedDark = Color(0xFF353D7E);
+  static const Color surfaceElevatedDark = Color(0xFF39393D);
 }

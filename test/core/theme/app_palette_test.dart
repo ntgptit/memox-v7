@@ -47,7 +47,7 @@ void main() {
           // separate `background` below `surface`, so the card could be
           // `surface` itself. Reading `surface` here now measures the page
           // against itself.
-          ('card', dark.colorScheme.surfaceContainerLowest),
+          ('card', dark.colorScheme.surfaceContainerLow),
           ('tile', darkSemantic.surfaceMuted),
           ('raised', darkSemantic.surfaceElevated),
         ],
@@ -56,7 +56,7 @@ void main() {
         'light': <(String, Color)>[
           ('tile', lightSemantic.surfaceMuted),
           ('page', light.scaffoldBackgroundColor),
-          ('card', light.colorScheme.surfaceContainerLowest),
+          ('card', light.colorScheme.surfaceContainerLow),
         ],
       };
 
@@ -89,7 +89,7 @@ void main() {
       // the defect the test guards is still guarded: a card and a page told
       // apart only by a border would read 0.
       expect(
-        lightnessStar(dark.colorScheme.surfaceContainerLowest) -
+        lightnessStar(dark.colorScheme.surfaceContainerLow) -
             lightnessStar(dark.scaffoldBackgroundColor),
         greaterThanOrEqualTo(5.5),
       );
@@ -130,7 +130,7 @@ void main() {
       double previous = pageSaturation;
 
       for (final surface in <(String, Color)>[
-        ('card', dark.colorScheme.surfaceContainerLowest),
+        ('card', dark.colorScheme.surfaceContainerLow),
         ('tile', darkSemantic.surfaceMuted),
         ('raised', darkSemantic.surfaceElevated),
         // **Surfaces only, and the border is deliberately not one.** A field of

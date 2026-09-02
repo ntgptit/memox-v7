@@ -426,10 +426,13 @@ ThemeData _buildTheme(
       // `surface`, a card would be the same colour as the page it sits on:
       // 0.0 L\* apart, in both modes.
       //
-      // `surfaceContainerLowest` is the least-raised rung, which is what a flat
-      // card is. It lifts 2.1 L\* in light — where the shadow carries the rest,
-      // per AD-14 — and 5.7 L\* in dark, where nothing else can.
-      color: scheme.surfaceContainerLowest,
+      // `surfaceContainerLow`, which is `_CardDefaultsM3.color`. Not `Lowest`:
+      // in a full M3 ramp `Lowest` is the *darkest* container, so in dark it
+      // sits below the page and a card drawn on it would sink rather than lift.
+      // `Low` is the first rung above `surface` in dark and the first below it
+      // in light — M3's own asymmetry, where light leans on the shadow and dark
+      // on the ladder.
+      color: scheme.surfaceContainerLow,
       elevation: 0,
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(

@@ -6,23 +6,23 @@
       "primary": {
         "members": {
           "fill": {
-            "hex": "#3E53F4",
-            "hue": 233.07692307692307
+            "hex": "#4E53B6",
+            "hue": 237.1153846153846
           },
           "onFill": {
             "hex": "#FFFFFF",
             "hue": null
           },
           "container": {
-            "hex": "#E0E5FE",
-            "hue": 229.99999999999997
+            "hex": "#E4DFFF",
+            "hue": 249.375
           },
           "onContainer": {
-            "hex": "#1A2580",
-            "hue": 233.52941176470588
+            "hex": "#2F3C9B",
+            "hue": 232.77777777777777
           }
         },
-        "hueSpreadExcludingOnColors": 3.0769230769230944,
+        "hueSpreadExcludingOnColors": 12.259615384615387,
         "hasContainerPair": true,
         "hasBorderToken": false,
         "hasFocusToken": true
@@ -30,27 +30,27 @@
       "error/danger": {
         "members": {
           "fill": {
-            "hex": "#CF2343",
-            "hue": 348.83720930232556
+            "hex": "#BE013A",
+            "hue": 341.9047619047619
           },
           "onFill": {
             "hex": "#FFFFFF",
             "hue": null
           },
           "container": {
-            "hex": "#FCE0E5",
-            "hue": 349.2857142857143
+            "hex": "#FEDADA",
+            "hue": 0.0
           },
           "onContainer": {
-            "hex": "#8E0F28",
-            "hue": 348.18897637795277
+            "hex": "#93002A",
+            "hue": 342.8571428571429
           },
           "semanticDanger": {
-            "hex": "#CF2343",
-            "hue": 348.83720930232556
+            "hex": "#BE013A",
+            "hue": 341.9047619047619
           }
         },
-        "hueSpreadExcludingOnColors": 0.448504983388716,
+        "hueSpreadExcludingOnColors": 18.095238095238074,
         "hasContainerPair": true,
         "hasBorderToken": false,
         "hasFocusToken": false
@@ -96,23 +96,23 @@
       "primary": {
         "members": {
           "fill": {
-            "hex": "#8D9CFF",
-            "hue": 232.10526315789474
+            "hex": "#C7BFFF",
+            "hue": 247.5
           },
           "onFill": {
-            "hex": "#11173A",
-            "hue": 231.21951219512195
+            "hex": "#002781",
+            "hue": 221.86046511627907
           },
           "container": {
-            "hex": "#2D346A",
-            "hue": 233.11475409836066
+            "hex": "#2F3C9B",
+            "hue": 232.77777777777777
           },
           "onContainer": {
-            "hex": "#D9DFFF",
-            "hue": 230.52631578947367
+            "hex": "#E4DFFF",
+            "hue": 249.375
           }
         },
-        "hueSpreadExcludingOnColors": 1.0094909404659234,
+        "hueSpreadExcludingOnColors": 14.722222222222229,
         "hasContainerPair": true,
         "hasBorderToken": false,
         "hasFocusToken": true
@@ -120,27 +120,27 @@
       "error/danger": {
         "members": {
           "fill": {
-            "hex": "#FF8FA3",
-            "hue": 349.2857142857143
+            "hex": "#FEB3B4",
+            "hue": 359.2
           },
           "onFill": {
-            "hex": "#3A0713",
-            "hue": 345.88235294117646
+            "hex": "#6A001A",
+            "hue": 345.2830188679245
           },
           "container": {
-            "hex": "#5C1B2A",
-            "hue": 346.15384615384613
+            "hex": "#93002A",
+            "hue": 342.8571428571429
           },
           "onContainer": {
-            "hex": "#FFD9DF",
-            "hue": 350.5263157894737
+            "hex": "#FEDADA",
+            "hue": 0.0
           },
           "semanticDanger": {
-            "hex": "#FF8FA3",
-            "hue": 349.2857142857143
+            "hex": "#FEB3B4",
+            "hue": 359.2
           }
         },
-        "hueSpreadExcludingOnColors": 3.1318681318681456,
+        "hueSpreadExcludingOnColors": 16.3428571428571,
         "hasContainerPair": true,
         "hasBorderToken": false,
         "hasFocusToken": false

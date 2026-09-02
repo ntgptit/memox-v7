@@ -209,7 +209,7 @@ void main() {
       double liftOf(ThemeData theme) {
         final page = theme.scaffoldBackgroundColor;
         final surfaceStep =
-            (lightnessStar(theme.colorScheme.surfaceContainerLowest) -
+            (lightnessStar(theme.colorScheme.surfaceContainerLow) -
                     lightnessStar(page))
                 .abs();
 

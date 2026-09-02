@@ -62,10 +62,10 @@ abstract final class AppColors {
   // the surface hue makes text sit *in* the interface rather than on top of it.
   // Which is why both dark values moved with the ladder — a trace of the *old*
   // surface hue is a trace of a hue no surface carries any more.
-  static const Color textPrimaryLight = Color(0xFF0F1638);
-  static const Color textPrimaryDark = Color(0xFFE4E8FA);
-  static const Color textSecondaryLight = Color(0xFF4A5278);
-  static const Color textSecondaryDark = Color(0xFFA4ACD0);
+  static const Color textPrimaryLight = Color(0xFF1C1B1F);
+  static const Color textPrimaryDark = Color(0xFFE3E2E7);
+  static const Color textSecondaryLight = Color(0xFF474550);
+  static const Color textSecondaryDark = Color(0xFFC7C5D2);
 
   /// The fill and the border of a disabled control — a solid, per MX-VIS-002
   /// rule R7. Material's idiom is the ink at 12% alpha, which composites
@@ -113,15 +113,15 @@ abstract final class AppColors {
   /// What changed is the mechanism — a tone ceiling rather than a luminance
   /// cap, because a luminance cap is a fill-tone rule and this is no longer a
   /// fill-tone palette.
-  static const Color primaryLight = Color(0xFF3E53F4);
+  static const Color primaryLight = Color(0xFF4E53B6);
 
   /// Tone 80 at hue 240, chroma 0.154 — the band `secondaryDark` and
   /// `tertiaryDark` already sit in, both of which were M3-shaped all along.
-  static const Color primaryDark = Color(0xFF8D9CFF);
+  static const Color primaryDark = Color(0xFFC7BFFF);
   static const Color onPrimaryLight = Color(0xFFFFFFFF);
 
   /// Tone 20 at the same hue. 7.72:1 under [primaryDark].
-  static const Color onPrimaryDark = Color(0xFF11173A);
+  static const Color onPrimaryDark = Color(0xFF002781);
 
   // --- Semantic ------------------------------------------------------------
   //
@@ -172,8 +172,8 @@ abstract final class AppColors {
   static const Color warningDark = Color(0xFFE8D08E);
 
   /// Answer forgotten, destructive action, reset.
-  static const Color dangerLight = Color(0xFFCF2343);
-  static const Color dangerDark = Color(0xFFFF8FA3);
+  static const Color dangerLight = Color(0xFFBE013A);
+  static const Color dangerDark = Color(0xFFFEB3B4);
 
   // --- Status containers ---------------------------------------------------
   //
@@ -327,8 +327,8 @@ abstract final class AppColors {
   /// `#04040B` is `seed @ 0.06` over black, which keeps hue 240 at a luminance
   /// low enough to read as a shadow rather than as a navy smear. Pinned by
   /// MX-VIS-002 rule R6.
-  static const Color shadowLight = Color(0xFF0A0E27);
-  static const Color shadowDark = Color(0xFF04061A);
+  static const Color shadowLight = Color(0xFF000000);
+  static const Color shadowDark = Color(0xFF000000);
 
   /// The scrim is the shadow's colour by definition here — one dark-from-seed
   /// per mode, whether it is cast or laid over — so it derives rather than
