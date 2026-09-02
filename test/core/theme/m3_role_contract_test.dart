@@ -19,10 +19,10 @@ import 'package:memox/core/theme/app_theme.dart';
 /// is `expect(slot, scheme.someRole)`, which compares the *resolved colour* —
 /// `scheme.someRole` evaluates to a `Color` like any other. That is a real
 /// check and it is not an identity guard, because two roles can carry one
-/// value: in this palette `surfaceContainerHighest` and `secondaryContainer`
-/// are the same `#332F58` in dark, so a switch re-pointed from one to the other
-/// passes every assertion here. Demonstrated, not assumed — the fault injection
-/// is recorded in the M100.23 WBS entry.
+/// value: until M100.25 `surfaceContainerHighest` and `secondaryContainer`
+/// were the same `#332F58` in dark, so a switch re-pointed from one to the
+/// other passed every assertion here. Demonstrated, not assumed — the fault
+/// injection is recorded in the M100.23 WBS entry.
 ///
 /// The identity half lives in `m3_role_binding_guard_test.dart`, which parses
 /// the theme sources and asks which role the code *names*. The two are meant to

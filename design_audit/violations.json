@@ -1,6 +1,6 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "seedUsedForHueChecks": "#4646B4",
+  "seedUsedForHueChecks": "#4454CC",
   "totalViolations": 24,
   "byCode": {
     "V1": 0,

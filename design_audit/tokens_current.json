@@ -3,8 +3,8 @@
   "note": "Values are what the built ThemeData holds, not what AppColors declares. ColorScheme.fromSeed fills roles this app then overrides.",
   "seedHypotheses": {
     "declaredSeed_colorSchemePrimaryLight": {
-      "hex": "#4646B4",
-      "hue": 240.0,
+      "hex": "#4454CC",
+      "hue": 232.94117647058823,
       "note": "AppColors.seed is AppColors.primaryLight"
     },
     "darkSurfaceFamily_scaffoldBackgroundDark": {
@@ -12,16 +12,16 @@
       "hue": 243.24324324324326,
       "note": "The audit brief names #0B1220 for this family. The app ships #0A082D. Reported as found, not as briefed."
     },
-    "hueDeltaBetweenHypotheses": 3.2432432432432563
+    "hueDeltaBetweenHypotheses": 10.302066772655024
   },
   "light": {
     "colorScheme.primary": {
-      "hex": "#4646B4",
+      "hex": "#4454CC",
       "opaque": true,
-      "hue": 240.0,
-      "saturation": 0.44,
-      "chroma": 0.43137254901960786,
-      "lightnessStar": 35.941317621018726,
+      "hue": 232.94117647058823,
+      "saturation": 0.5714285714285715,
+      "chroma": 0.5333333333333334,
+      "lightnessStar": 41.1034119356745,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.onPrimary": {
@@ -34,30 +34,30 @@
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.primaryContainer": {
-      "hex": "#DCDCF2",
+      "hex": "#DADDF2",
       "opaque": true,
-      "hue": 240.0,
-      "saturation": 0.45833333333333287,
-      "chroma": 0.08627450980392148,
-      "lightnessStar": 88.35837993267742,
+      "hue": 232.49999999999994,
+      "saturation": 0.47999999999999954,
+      "chroma": 0.09411764705882353,
+      "lightnessStar": 88.46160782933038,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.onPrimaryContainer": {
-      "hex": "#1B1B5C",
+      "hex": "#141D5D",
       "opaque": true,
-      "hue": 240.0,
-      "saturation": 0.5462184873949579,
-      "chroma": 0.2549019607843137,
-      "lightnessStar": 14.341849158213826,
+      "hue": 232.60273972602738,
+      "saturation": 0.6460176991150443,
+      "chroma": 0.28627450980392155,
+      "lightnessStar": 14.500288753719836,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.secondary": {
-      "hex": "#4E5468",
+      "hex": "#585E7F",
       "opaque": true,
-      "hue": 226.1538461538462,
-      "saturation": 0.14285714285714282,
-      "chroma": 0.10196078431372546,
-      "lightnessStar": 35.906828976926064,
+      "hue": 230.76923076923075,
+      "saturation": 0.1813953488372093,
+      "chroma": 0.15294117647058825,
+      "lightnessStar": 40.59337202221171,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.onSecondary": {
@@ -70,21 +70,21 @@
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.secondaryContainer": {
-      "hex": "#D9DDEB",
+      "hex": "#DADDEB",
       "opaque": true,
-      "hue": 226.6666666666666,
-      "saturation": 0.3103448275862067,
-      "chroma": 0.07058823529411762,
-      "lightnessStar": 88.19086486571028,
+      "hue": 229.4117647058823,
+      "saturation": 0.29824561403508754,
+      "chroma": 0.06666666666666665,
+      "lightnessStar": 88.26448489747672,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.onSecondaryContainer": {
-      "hex": "#2C3141",
+      "hex": "#2E3141",
       "opaque": true,
-      "hue": 225.71428571428572,
-      "saturation": 0.19266055045871555,
-      "chroma": 0.08235294117647057,
-      "lightnessStar": 20.49382029970183,
+      "hue": 230.52631578947367,
+      "saturation": 0.17117117117117114,
+      "chroma": 0.07450980392156861,
+      "lightnessStar": 20.67021306738591,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.tertiary": {
@@ -167,7 +167,7 @@
       "chroma": 0.01176470588235301,
       "lightnessStar": 98.69362392643127,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 0.0,
+      "hueDistanceFromDeclaredSeed": 7.058823529411768,
       "hueDistanceFromDarkSurfaceFamily": 3.2432432432432563,
       "carriesNoHue": false
     },
@@ -179,7 +179,7 @@
       "chroma": 0.0823529411764706,
       "lightnessStar": 8.976931175570705,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 5.714285714285722,
+      "hueDistanceFromDeclaredSeed": 1.3445378151260456,
       "hueDistanceFromDarkSurfaceFamily": 8.957528957528979,
       "carriesNoHue": false
     },
@@ -191,7 +191,7 @@
       "chroma": 0.10980392156862745,
       "lightnessStar": 39.322647622450155,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 12.857142857142833,
+      "hueDistanceFromDeclaredSeed": 5.798319327731065,
       "hueDistanceFromDarkSurfaceFamily": 16.10038610038609,
       "carriesNoHue": false
     },
@@ -203,7 +203,7 @@
       "chroma": 0.03529411764705881,
       "lightnessStar": 89.21019594660218,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 13.333333333333286,
+      "hueDistanceFromDeclaredSeed": 6.274509803921518,
       "hueDistanceFromDarkSurfaceFamily": 16.576576576576542,
       "carriesNoHue": false
     },
@@ -215,7 +215,7 @@
       "chroma": 0.007843137254901933,
       "lightnessStar": 99.01415638446775,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 0.0,
+      "hueDistanceFromDeclaredSeed": 7.058823529411768,
       "hueDistanceFromDarkSurfaceFamily": 3.2432432432432563,
       "carriesNoHue": false
     },
@@ -227,7 +227,7 @@
       "chroma": 0.007843137254901933,
       "lightnessStar": 99.01415638446775,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 0.0,
+      "hueDistanceFromDeclaredSeed": 7.058823529411768,
       "hueDistanceFromDarkSurfaceFamily": 3.2432432432432563,
       "carriesNoHue": false
     },
@@ -239,7 +239,7 @@
       "chroma": 0.007843137254902044,
       "lightnessStar": 98.32226482382697,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 0.0,
+      "hueDistanceFromDeclaredSeed": 7.058823529411768,
       "hueDistanceFromDarkSurfaceFamily": 3.2432432432432563,
       "carriesNoHue": false
     },
@@ -251,7 +251,7 @@
       "chroma": 0.019607843137254943,
       "lightnessStar": 95.52140342220525,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 11.999999999999943,
+      "hueDistanceFromDeclaredSeed": 4.941176470588175,
       "hueDistanceFromDarkSurfaceFamily": 15.2432432432432,
       "carriesNoHue": false
     },
@@ -263,7 +263,7 @@
       "chroma": 0.027450980392156876,
       "lightnessStar": 93.37844324314104,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 17.14285714285731,
+      "hueDistanceFromDeclaredSeed": 10.084033613445541,
       "hueDistanceFromDarkSurfaceFamily": 20.386100386100566,
       "carriesNoHue": false
     },
@@ -275,7 +275,7 @@
       "chroma": 0.03529411764705892,
       "lightnessStar": 90.97378335260696,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 13.333333333333456,
+      "hueDistanceFromDeclaredSeed": 6.2745098039216884,
       "hueDistanceFromDarkSurfaceFamily": 16.576576576576713,
       "carriesNoHue": false
     },
@@ -287,7 +287,7 @@
       "chroma": 0.0313725490196079,
       "lightnessStar": 52.64240952586836,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 0.0,
+      "hueDistanceFromDeclaredSeed": 7.058823529411768,
       "hueDistanceFromDarkSurfaceFamily": 3.2432432432432563,
       "carriesNoHue": false
     },
@@ -299,7 +299,7 @@
       "chroma": 0.04313725490196085,
       "lightnessStar": 84.49161091168108,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 0.0,
+      "hueDistanceFromDeclaredSeed": 7.058823529411768,
       "hueDistanceFromDarkSurfaceFamily": 3.2432432432432563,
       "carriesNoHue": false
     },
@@ -322,12 +322,12 @@
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.inversePrimary": {
-      "hex": "#A9A9E0",
+      "hex": "#A4ABE0",
       "opaque": true,
-      "hue": 240.0,
-      "saturation": 0.47008547008546997,
-      "chroma": 0.21568627450980393,
-      "lightnessStar": 71.00362159237613,
+      "hue": 233.00000000000003,
+      "saturation": 0.4918032786885244,
+      "chroma": 0.23529411764705876,
+      "lightnessStar": 71.14593324722708,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.shadow": {
@@ -338,7 +338,7 @@
       "chroma": 0.050980392156862744,
       "lightnessStar": 3.6135528107911763,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 4.615384615384613,
+      "hueDistanceFromDeclaredSeed": 2.443438914027155,
       "hueDistanceFromDarkSurfaceFamily": 7.8586278586278695,
       "carriesNoHue": false
     },
@@ -350,80 +350,80 @@
       "chroma": 0.050980392156862744,
       "lightnessStar": 3.6135528107911763,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 4.615384615384613,
+      "hueDistanceFromDeclaredSeed": 2.443438914027155,
       "hueDistanceFromDarkSurfaceFamily": 7.8586278586278695,
       "carriesNoHue": false
     },
     "colorScheme.primaryFixed": {
-      "hex": "#E1E0FF",
+      "hex": "#DFE0FF",
       "opaque": true,
-      "hue": 241.93548387096774,
+      "hue": 238.125,
       "saturation": 1.0,
-      "chroma": 0.1215686274509804,
-      "lightnessStar": 90.10894262484236,
+      "chroma": 0.12549019607843137,
+      "lightnessStar": 89.9610560853713,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.primaryFixedDim": {
-      "hex": "#C0C1FF",
+      "hex": "#BCC2FF",
       "opaque": true,
-      "hue": 239.04761904761904,
+      "hue": 234.6268656716418,
       "saturation": 1.0,
-      "chroma": 0.24705882352941178,
-      "lightnessStar": 79.93509111664461,
+      "chroma": 0.26274509803921564,
+      "lightnessStar": 79.89467780225057,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.onPrimaryFixed": {
-      "hex": "#07006D",
+      "hex": "#000B62",
       "opaque": true,
-      "hue": 243.8532110091743,
-      "saturation": 0.9999999999999999,
-      "chroma": 0.42745098039215684,
-      "lightnessStar": 10.177942060258243,
+      "hue": 233.265306122449,
+      "saturation": 1.0000000000000002,
+      "chroma": 0.3843137254901961,
+      "lightnessStar": 9.96274255951219,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.onPrimaryFixedVariant": {
-      "hex": "#3736A5",
+      "hex": "#2636B1",
       "opaque": true,
-      "hue": 240.54054054054058,
-      "saturation": 0.5068493150684932,
-      "chroma": 0.43529411764705883,
-      "lightnessStar": 29.830365255360746,
+      "hue": 233.0935251798561,
+      "saturation": 0.6465116279069767,
+      "chroma": 0.5450980392156862,
+      "lightnessStar": 29.972497604294063,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.secondaryFixed": {
-      "hex": "#DDE2FB",
+      "hex": "#DDE1FF",
       "opaque": true,
-      "hue": 230.00000000000003,
-      "saturation": 0.7894736842105262,
-      "chroma": 0.11764705882352933,
-      "lightnessStar": 90.19715087023268,
+      "hue": 232.94117647058826,
+      "saturation": 1.0,
+      "chroma": 0.1333333333333333,
+      "lightnessStar": 90.06443109975798,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.secondaryFixedDim": {
-      "hex": "#C1C6DE",
+      "hex": "#BFC4EA",
       "opaque": true,
-      "hue": 229.65517241379308,
-      "saturation": 0.30526315789473696,
-      "chroma": 0.11372549019607847,
-      "lightnessStar": 80.17934113726609,
+      "hue": 233.02325581395348,
+      "saturation": 0.5058823529411761,
+      "chroma": 0.1686274509803921,
+      "lightnessStar": 79.89569358379141,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.onSecondaryFixed": {
-      "hex": "#151B2C",
+      "hex": "#131937",
       "opaque": true,
-      "hue": 224.34782608695653,
-      "saturation": 0.35384615384615387,
-      "chroma": 0.09019607843137255,
-      "lightnessStar": 9.993260108763778,
+      "hue": 230.0,
+      "saturation": 0.48648648648648635,
+      "chroma": 0.1411764705882353,
+      "lightnessStar": 9.872566321441173,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.onSecondaryFixedVariant": {
-      "hex": "#404659",
+      "hex": "#3F4565",
       "opaque": true,
-      "hue": 225.6,
-      "saturation": 0.1633986928104575,
-      "chroma": 0.0980392156862745,
-      "lightnessStar": 29.890738036548463,
+      "hue": 230.52631578947367,
+      "saturation": 0.23170731707317072,
+      "chroma": 0.14901960784313723,
+      "lightnessStar": 30.040990283510844,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.tertiaryFixed": {
@@ -470,7 +470,7 @@
       "chroma": 0.015686274509803866,
       "lightnessStar": 96.53969074739886,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 15.0,
+      "hueDistanceFromDeclaredSeed": 7.941176470588232,
       "hueDistanceFromDarkSurfaceFamily": 18.243243243243256,
       "carriesNoHue": false
     },
@@ -518,7 +518,7 @@
       "chroma": 0.027450980392156876,
       "lightnessStar": 93.37844324314104,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 17.14285714285731,
+      "hueDistanceFromDeclaredSeed": 10.084033613445541,
       "hueDistanceFromDarkSurfaceFamily": 20.386100386100566,
       "carriesNoHue": false
     },
@@ -530,7 +530,7 @@
       "chroma": 0.007843137254901933,
       "lightnessStar": 99.01415638446775,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 0.0,
+      "hueDistanceFromDeclaredSeed": 7.058823529411768,
       "hueDistanceFromDarkSurfaceFamily": 3.2432432432432563,
       "carriesNoHue": false
     },
@@ -542,7 +542,7 @@
       "chroma": 0.04313725490196085,
       "lightnessStar": 84.49161091168108,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 0.0,
+      "hueDistanceFromDeclaredSeed": 7.058823529411768,
       "hueDistanceFromDarkSurfaceFamily": 3.2432432432432563,
       "carriesNoHue": false
     },
@@ -626,17 +626,17 @@
       "chroma": 0.0313725490196079,
       "lightnessStar": 52.64240952586836,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 0.0,
+      "hueDistanceFromDeclaredSeed": 7.058823529411768,
       "hueDistanceFromDarkSurfaceFamily": 3.2432432432432563,
       "carriesNoHue": false
     },
     "inputDecorationTheme.focusedBorder": {
-      "hex": "#4646B4",
+      "hex": "#4454CC",
       "opaque": true,
-      "hue": 240.0,
-      "saturation": 0.44,
-      "chroma": 0.43137254901960786,
-      "lightnessStar": 35.941317621018726,
+      "hue": 232.94117647058823,
+      "saturation": 0.5714285714285715,
+      "chroma": 0.5333333333333334,
+      "lightnessStar": 41.1034119356745,
       "classifiedAs": "role-or-on-color"
     },
     "inputDecorationTheme.disabledBorder": {
@@ -647,7 +647,7 @@
       "chroma": 0.021568627450980427,
       "lightnessStar": 76.39368359576117,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 0.0,
+      "hueDistanceFromDeclaredSeed": 7.058823529411768,
       "hueDistanceFromDarkSurfaceFamily": 3.2432432432432563,
       "carriesNoHue": false
     },
@@ -659,7 +659,7 @@
       "chroma": 0.01176470588235301,
       "lightnessStar": 98.69362392643127,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 0.0,
+      "hueDistanceFromDeclaredSeed": 7.058823529411768,
       "hueDistanceFromDarkSurfaceFamily": 3.2432432432432563,
       "carriesNoHue": false
     },
@@ -671,7 +671,7 @@
       "chroma": 0.04313725490196085,
       "lightnessStar": 84.49161091168108,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 0.0,
+      "hueDistanceFromDeclaredSeed": 7.058823529411768,
       "hueDistanceFromDarkSurfaceFamily": 3.2432432432432563,
       "carriesNoHue": false
     },
@@ -683,17 +683,17 @@
       "chroma": 0.019607843137254943,
       "lightnessStar": 95.52140342220525,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 11.999999999999943,
+      "hueDistanceFromDeclaredSeed": 4.941176470588175,
       "hueDistanceFromDarkSurfaceFamily": 15.2432432432432,
       "carriesNoHue": false
     },
     "navigationBarTheme.indicatorColor": {
-      "hex": "#D9DDEB",
+      "hex": "#DADDEB",
       "opaque": true,
-      "hue": 226.6666666666666,
-      "saturation": 0.3103448275862067,
-      "chroma": 0.07058823529411762,
-      "lightnessStar": 88.19086486571028,
+      "hue": 229.4117647058823,
+      "saturation": 0.29824561403508754,
+      "chroma": 0.06666666666666665,
+      "lightnessStar": 88.26448489747672,
       "classifiedAs": "role-or-on-color"
     },
     "dialogTheme.backgroundColor": {
@@ -704,7 +704,7 @@
       "chroma": 0.027450980392156876,
       "lightnessStar": 93.37844324314104,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 17.14285714285731,
+      "hueDistanceFromDeclaredSeed": 10.084033613445541,
       "hueDistanceFromDarkSurfaceFamily": 20.386100386100566,
       "carriesNoHue": false
     },
@@ -716,7 +716,7 @@
       "chroma": 0.007843137254902044,
       "lightnessStar": 98.32226482382697,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 0.0,
+      "hueDistanceFromDeclaredSeed": 7.058823529411768,
       "hueDistanceFromDarkSurfaceFamily": 3.2432432432432563,
       "carriesNoHue": false
     },
@@ -728,82 +728,82 @@
       "chroma": 0.015686274509803866,
       "lightnessStar": 96.53969074739886,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 15.0,
+      "hueDistanceFromDeclaredSeed": 7.941176470588232,
       "hueDistanceFromDarkSurfaceFamily": 18.243243243243256,
       "carriesNoHue": false
     }
   },
   "dark": {
     "colorScheme.primary": {
-      "hex": "#C3C3EB",
+      "hex": "#BCC2FF",
       "opaque": true,
-      "hue": 240.0,
-      "saturation": 0.49999999999999967,
-      "chroma": 0.1568627450980392,
-      "lightnessStar": 79.9713023311683,
+      "hue": 234.6268656716418,
+      "saturation": 1.0,
+      "chroma": 0.26274509803921564,
+      "lightnessStar": 79.89467780225057,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.onPrimary": {
-      "hex": "#262670",
+      "hex": "#202771",
       "opaque": true,
-      "hue": 240.0,
-      "saturation": 0.4933333333333333,
-      "chroma": 0.2901960784313725,
-      "lightnessStar": 19.915877721072164,
+      "hue": 234.8148148148148,
+      "saturation": 0.5586206896551724,
+      "chroma": 0.3176470588235294,
+      "lightnessStar": 19.844023038430635,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.primaryContainer": {
-      "hex": "#2B2B6E",
+      "hex": "#252C6F",
       "opaque": true,
-      "hue": 240.0,
-      "saturation": 0.4379084967320261,
-      "chroma": 0.2627450980392157,
-      "lightnessStar": 21.45801835661775,
+      "hue": 234.32432432432432,
+      "saturation": 0.4999999999999999,
+      "chroma": 0.2901960784313725,
+      "lightnessStar": 21.365984447522976,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.onPrimaryContainer": {
-      "hex": "#D7D5FF",
+      "hex": "#D2D6FF",
       "opaque": true,
-      "hue": 242.85714285714283,
-      "saturation": 1.0000000000000007,
-      "chroma": 0.16470588235294115,
-      "lightnessStar": 86.63044935542257,
+      "hue": 234.66666666666666,
+      "saturation": 1.0,
+      "chroma": 0.17647058823529416,
+      "lightnessStar": 86.51136341364592,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.secondary": {
-      "hex": "#B8B7D0",
+      "hex": "#9EA4C1",
       "opaque": true,
-      "hue": 242.4,
-      "saturation": 0.2100840336134453,
-      "chroma": 0.0980392156862745,
-      "lightnessStar": 75.20892234857195,
+      "hue": 229.7142857142857,
+      "saturation": 0.22012578616352194,
+      "chroma": 0.13725490196078427,
+      "lightnessStar": 67.77689373195626,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.onSecondary": {
-      "hex": "#1E2033",
+      "hex": "#1C2033",
       "opaque": true,
-      "hue": 234.28571428571428,
-      "saturation": 0.2592592592592593,
-      "chroma": 0.0823529411764706,
-      "lightnessStar": 12.910384027718479,
+      "hue": 229.56521739130434,
+      "saturation": 0.29113924050632917,
+      "chroma": 0.09019607843137256,
+      "lightnessStar": 12.727816424320352,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.secondaryContainer": {
-      "hex": "#332F58",
+      "hex": "#2A3259",
       "opaque": true,
-      "hue": 245.85365853658539,
-      "saturation": 0.30370370370370364,
-      "chroma": 0.16078431372549018,
-      "lightnessStar": 21.731477494983153,
+      "hue": 229.78723404255317,
+      "saturation": 0.35877862595419846,
+      "chroma": 0.18431372549019606,
+      "lightnessStar": 21.925256093909816,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.onSecondaryContainer": {
-      "hex": "#D9DCE7",
+      "hex": "#DADCE7",
       "opaque": true,
-      "hue": 227.14285714285708,
-      "saturation": 0.2258064516129033,
-      "chroma": 0.05490196078431375,
-      "lightnessStar": 87.82767318459281,
+      "hue": 230.76923076923066,
+      "saturation": 0.21311475409836078,
+      "chroma": 0.050980392156862786,
+      "lightnessStar": 87.90180861532976,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.tertiary": {
@@ -886,7 +886,7 @@
       "chroma": 0.12549019607843137,
       "lightnessStar": 10.246897318492142,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 3.75,
+      "hueDistanceFromDeclaredSeed": 10.808823529411768,
       "hueDistanceFromDarkSurfaceFamily": 0.5067567567567437,
       "carriesNoHue": false
     },
@@ -898,7 +898,7 @@
       "chroma": 0.03529411764705881,
       "lightnessStar": 93.98072539379939,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 0.0,
+      "hueDistanceFromDeclaredSeed": 7.058823529411768,
       "hueDistanceFromDarkSurfaceFamily": 3.2432432432432563,
       "carriesNoHue": false
     },
@@ -910,7 +910,7 @@
       "chroma": 0.11372549019607847,
       "lightnessStar": 69.4323255718261,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 2.0689655172413666,
+      "hueDistanceFromDeclaredSeed": 9.127789046653135,
       "hueDistanceFromDarkSurfaceFamily": 1.1742777260018897,
       "carriesNoHue": false
     },
@@ -922,7 +922,7 @@
       "chroma": 0.1450980392156863,
       "lightnessStar": 3.8630298153192073,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 3.2432432432432563,
+      "hueDistanceFromDeclaredSeed": 10.302066772655024,
       "hueDistanceFromDarkSurfaceFamily": 0.0,
       "carriesNoHue": false
     },
@@ -934,7 +934,7 @@
       "chroma": 0.16862745098039217,
       "lightnessStar": 23.981202569774247,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 4.1860465116279215,
+      "hueDistanceFromDeclaredSeed": 11.24487004103969,
       "hueDistanceFromDarkSurfaceFamily": 0.9428032683846652,
       "carriesNoHue": false
     },
@@ -946,7 +946,7 @@
       "chroma": 0.13725490196078433,
       "lightnessStar": 2.4352537342854355,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 12.0,
+      "hueDistanceFromDeclaredSeed": 19.058823529411768,
       "hueDistanceFromDarkSurfaceFamily": 8.756756756756744,
       "carriesNoHue": false
     },
@@ -958,7 +958,7 @@
       "chroma": 0.13725490196078433,
       "lightnessStar": 7.301016512612773,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 6.857142857142833,
+      "hueDistanceFromDeclaredSeed": 13.9159663865546,
       "hueDistanceFromDarkSurfaceFamily": 3.6138996138995765,
       "carriesNoHue": false
     },
@@ -970,7 +970,7 @@
       "chroma": 0.14901960784313725,
       "lightnessStar": 13.744662280965144,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 6.3157894736842195,
+      "hueDistanceFromDeclaredSeed": 13.374613003095988,
       "hueDistanceFromDarkSurfaceFamily": 3.072546230440963,
       "carriesNoHue": false
     },
@@ -982,7 +982,7 @@
       "chroma": 0.14901960784313725,
       "lightnessStar": 16.903783706924095,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 4.736842105263122,
+      "hueDistanceFromDeclaredSeed": 11.79566563467489,
       "hueDistanceFromDarkSurfaceFamily": 1.4935988620198657,
       "carriesNoHue": false
     },
@@ -994,7 +994,7 @@
       "chroma": 0.16078431372549018,
       "lightnessStar": 21.731477494983153,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 5.853658536585385,
+      "hueDistanceFromDeclaredSeed": 12.912482065997153,
       "hueDistanceFromDarkSurfaceFamily": 2.610415293342129,
       "carriesNoHue": false
     },
@@ -1006,7 +1006,7 @@
       "chroma": 0.16078431372549018,
       "lightnessStar": 52.556936689519944,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 5.853658536585385,
+      "hueDistanceFromDeclaredSeed": 12.912482065997153,
       "hueDistanceFromDarkSurfaceFamily": 2.610415293342129,
       "carriesNoHue": false
     },
@@ -1018,7 +1018,7 @@
       "chroma": 0.19607843137254904,
       "lightnessStar": 33.084576264594325,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 4.800000000000011,
+      "hueDistanceFromDeclaredSeed": 11.85882352941178,
       "hueDistanceFromDarkSurfaceFamily": 1.556756756756755,
       "carriesNoHue": false
     },
@@ -1041,12 +1041,12 @@
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.inversePrimary": {
-      "hex": "#3A3A9B",
+      "hex": "#333C9C",
       "opaque": true,
-      "hue": 240.0,
-      "saturation": 0.45539906103286387,
-      "chroma": 0.3803921568627451,
-      "lightnessStar": 30.13803257270041,
+      "hue": 234.85714285714286,
+      "saturation": 0.5072463768115942,
+      "chroma": 0.411764705882353,
+      "lightnessStar": 30.24438856465249,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.shadow": {
@@ -1057,7 +1057,7 @@
       "chroma": 0.027450980392156862,
       "lightnessStar": 1.2357769295875185,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 0.0,
+      "hueDistanceFromDeclaredSeed": 7.058823529411768,
       "hueDistanceFromDarkSurfaceFamily": 3.2432432432432563,
       "carriesNoHue": false
     },
@@ -1069,80 +1069,80 @@
       "chroma": 0.027450980392156862,
       "lightnessStar": 1.2357769295875185,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 0.0,
+      "hueDistanceFromDeclaredSeed": 7.058823529411768,
       "hueDistanceFromDarkSurfaceFamily": 3.2432432432432563,
       "carriesNoHue": false
     },
     "colorScheme.primaryFixed": {
-      "hex": "#E1E0FF",
+      "hex": "#DFE0FF",
       "opaque": true,
-      "hue": 241.93548387096774,
+      "hue": 238.125,
       "saturation": 1.0,
-      "chroma": 0.1215686274509804,
-      "lightnessStar": 90.10894262484236,
+      "chroma": 0.12549019607843137,
+      "lightnessStar": 89.9610560853713,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.primaryFixedDim": {
-      "hex": "#C0C1FF",
+      "hex": "#BCC2FF",
       "opaque": true,
-      "hue": 239.04761904761904,
+      "hue": 234.6268656716418,
       "saturation": 1.0,
-      "chroma": 0.24705882352941178,
-      "lightnessStar": 79.93509111664461,
+      "chroma": 0.26274509803921564,
+      "lightnessStar": 79.89467780225057,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.onPrimaryFixed": {
-      "hex": "#07006D",
+      "hex": "#000B62",
       "opaque": true,
-      "hue": 243.8532110091743,
-      "saturation": 0.9999999999999999,
-      "chroma": 0.42745098039215684,
-      "lightnessStar": 10.177942060258243,
+      "hue": 233.265306122449,
+      "saturation": 1.0000000000000002,
+      "chroma": 0.3843137254901961,
+      "lightnessStar": 9.96274255951219,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.onPrimaryFixedVariant": {
-      "hex": "#3736A5",
+      "hex": "#2636B1",
       "opaque": true,
-      "hue": 240.54054054054058,
-      "saturation": 0.5068493150684932,
-      "chroma": 0.43529411764705883,
-      "lightnessStar": 29.830365255360746,
+      "hue": 233.0935251798561,
+      "saturation": 0.6465116279069767,
+      "chroma": 0.5450980392156862,
+      "lightnessStar": 29.972497604294063,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.secondaryFixed": {
-      "hex": "#DDE2FB",
+      "hex": "#DDE1FF",
       "opaque": true,
-      "hue": 230.00000000000003,
-      "saturation": 0.7894736842105262,
-      "chroma": 0.11764705882352933,
-      "lightnessStar": 90.19715087023268,
+      "hue": 232.94117647058826,
+      "saturation": 1.0,
+      "chroma": 0.1333333333333333,
+      "lightnessStar": 90.06443109975798,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.secondaryFixedDim": {
-      "hex": "#C1C6DE",
+      "hex": "#BFC4EA",
       "opaque": true,
-      "hue": 229.65517241379308,
-      "saturation": 0.30526315789473696,
-      "chroma": 0.11372549019607847,
-      "lightnessStar": 80.17934113726609,
+      "hue": 233.02325581395348,
+      "saturation": 0.5058823529411761,
+      "chroma": 0.1686274509803921,
+      "lightnessStar": 79.89569358379141,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.onSecondaryFixed": {
-      "hex": "#151B2C",
+      "hex": "#131937",
       "opaque": true,
-      "hue": 224.34782608695653,
-      "saturation": 0.35384615384615387,
-      "chroma": 0.09019607843137255,
-      "lightnessStar": 9.993260108763778,
+      "hue": 230.0,
+      "saturation": 0.48648648648648635,
+      "chroma": 0.1411764705882353,
+      "lightnessStar": 9.872566321441173,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.onSecondaryFixedVariant": {
-      "hex": "#404659",
+      "hex": "#3F4565",
       "opaque": true,
-      "hue": 225.6,
-      "saturation": 0.1633986928104575,
-      "chroma": 0.0980392156862745,
-      "lightnessStar": 29.890738036548463,
+      "hue": 230.52631578947367,
+      "saturation": 0.23170731707317072,
+      "chroma": 0.14901960784313723,
+      "lightnessStar": 30.040990283510844,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.tertiaryFixed": {
@@ -1189,7 +1189,7 @@
       "chroma": 0.1450980392156863,
       "lightnessStar": 3.8630298153192073,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 3.2432432432432563,
+      "hueDistanceFromDeclaredSeed": 10.302066772655024,
       "hueDistanceFromDarkSurfaceFamily": 0.0,
       "carriesNoHue": false
     },
@@ -1237,7 +1237,7 @@
       "chroma": 0.14901960784313725,
       "lightnessStar": 16.903783706924095,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 4.736842105263122,
+      "hueDistanceFromDeclaredSeed": 11.79566563467489,
       "hueDistanceFromDarkSurfaceFamily": 1.4935988620198657,
       "carriesNoHue": false
     },
@@ -1249,7 +1249,7 @@
       "chroma": 0.16862745098039217,
       "lightnessStar": 23.981202569774247,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 4.1860465116279215,
+      "hueDistanceFromDeclaredSeed": 11.24487004103969,
       "hueDistanceFromDarkSurfaceFamily": 0.9428032683846652,
       "carriesNoHue": false
     },
@@ -1261,7 +1261,7 @@
       "chroma": 0.19607843137254904,
       "lightnessStar": 33.084576264594325,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 4.800000000000011,
+      "hueDistanceFromDeclaredSeed": 11.85882352941178,
       "hueDistanceFromDarkSurfaceFamily": 1.556756756756755,
       "carriesNoHue": false
     },
@@ -1345,17 +1345,17 @@
       "chroma": 0.16078431372549018,
       "lightnessStar": 52.556936689519944,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 5.853658536585385,
+      "hueDistanceFromDeclaredSeed": 12.912482065997153,
       "hueDistanceFromDarkSurfaceFamily": 2.610415293342129,
       "carriesNoHue": false
     },
     "inputDecorationTheme.focusedBorder": {
-      "hex": "#C3C3EB",
+      "hex": "#BCC2FF",
       "opaque": true,
-      "hue": 240.0,
-      "saturation": 0.49999999999999967,
-      "chroma": 0.1568627450980392,
-      "lightnessStar": 79.9713023311683,
+      "hue": 234.6268656716418,
+      "saturation": 1.0,
+      "chroma": 0.26274509803921564,
+      "lightnessStar": 79.89467780225057,
       "classifiedAs": "role-or-on-color"
     },
     "inputDecorationTheme.disabledBorder": {
@@ -1366,7 +1366,7 @@
       "chroma": 0.14313725490196078,
       "lightnessStar": 32.524280638497686,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 4.931506849315099,
+      "hueDistanceFromDeclaredSeed": 11.990330378726867,
       "hueDistanceFromDarkSurfaceFamily": 1.6882636060718426,
       "carriesNoHue": false
     },
@@ -1378,7 +1378,7 @@
       "chroma": 0.12549019607843137,
       "lightnessStar": 10.246897318492142,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 3.75,
+      "hueDistanceFromDeclaredSeed": 10.808823529411768,
       "hueDistanceFromDarkSurfaceFamily": 0.5067567567567437,
       "carriesNoHue": false
     },
@@ -1390,7 +1390,7 @@
       "chroma": 0.19607843137254904,
       "lightnessStar": 33.084576264594325,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 4.800000000000011,
+      "hueDistanceFromDeclaredSeed": 11.85882352941178,
       "hueDistanceFromDarkSurfaceFamily": 1.556756756756755,
       "carriesNoHue": false
     },
@@ -1402,17 +1402,17 @@
       "chroma": 0.14901960784313725,
       "lightnessStar": 13.744662280965144,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 6.3157894736842195,
+      "hueDistanceFromDeclaredSeed": 13.374613003095988,
       "hueDistanceFromDarkSurfaceFamily": 3.072546230440963,
       "carriesNoHue": false
     },
     "navigationBarTheme.indicatorColor": {
-      "hex": "#332F58",
+      "hex": "#2A3259",
       "opaque": true,
-      "hue": 245.85365853658539,
-      "saturation": 0.30370370370370364,
-      "chroma": 0.16078431372549018,
-      "lightnessStar": 21.731477494983153,
+      "hue": 229.78723404255317,
+      "saturation": 0.35877862595419846,
+      "chroma": 0.18431372549019606,
+      "lightnessStar": 21.925256093909816,
       "classifiedAs": "role-or-on-color"
     },
     "dialogTheme.backgroundColor": {
@@ -1423,7 +1423,7 @@
       "chroma": 0.14901960784313725,
       "lightnessStar": 16.903783706924095,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 4.736842105263122,
+      "hueDistanceFromDeclaredSeed": 11.79566563467489,
       "hueDistanceFromDarkSurfaceFamily": 1.4935988620198657,
       "carriesNoHue": false
     },
@@ -1435,7 +1435,7 @@
       "chroma": 0.13725490196078433,
       "lightnessStar": 7.301016512612773,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 6.857142857142833,
+      "hueDistanceFromDeclaredSeed": 13.9159663865546,
       "hueDistanceFromDarkSurfaceFamily": 3.6138996138995765,
       "carriesNoHue": false
     },
@@ -1447,7 +1447,7 @@
       "chroma": 0.1450980392156863,
       "lightnessStar": 3.8630298153192073,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 3.2432432432432563,
+      "hueDistanceFromDeclaredSeed": 10.302066772655024,
       "hueDistanceFromDarkSurfaceFamily": 0.0,
       "carriesNoHue": false
     }

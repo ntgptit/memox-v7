@@ -1,7 +1,13 @@
-/* memox colour system — the app's own palette, unchanged.
+/* memox colour system — the app's own palette.
    Every value here is lifted from lib/core/theme/app_colors.dart. The redesign
    changed layout and hierarchy, not hue: this file is the app's existing colour
    language, and anything built on it should still look like memox.
+
+   M100.25: the two accent families take their hue from the owner's
+   tokyo-react-admin-dashboard palette (primary #5569FF, secondary #6E759F,
+   dark secondary #9EA4C1). Fills sit at the first tone of each family whose
+   ratios clear; containers and on-colours keep their tone and chroma and move
+   hue only. Surfaces, tertiary and the four semantics are unchanged.
 
    The one addition is a progress family, because the redesign puts a bar on
    every deck and a bar drawn in --color-primary sits beside a button drawn in
@@ -13,7 +19,7 @@
   /* --- base literals: light ------------------------------------------- */
   --mx-page-light:#F4F5F8;--mx-card-light:#FBFBFE;--mx-inset-light:#EAECF1;--mx-emphasis-light:#F1F1FC;--mx-border-selected-light:#6E6ECE;--mx-border-divider-light:#E9ECF5;--mx-border-option-light:#8887CE;--mx-selected-light:#EAEBFD;--mx-raised-light:#FCFCFE;
   --mx-ink-light:#16182B;--mx-ink-quiet-light:#565C72;--mx-line-light:#D2D2DD;
-  --mx-indigo-light:#4646B4;--mx-indigo-deep-light:#4141C0;--mx-indigo-container-light:#DCDCF2;
+  --mx-indigo-light:#4454CC;--mx-indigo-deep-light:#4141C0;--mx-indigo-container-light:#DADDF2;
   --mx-success-light:#10795C;--mx-warning-light:#9A6A11;--mx-danger-light:#C02B3A;--mx-info-light:#3F6E97;
   /* --- base literals: dark -------------------------------------------- */
   /* The dark surface ladder now sits in the page's colour family. It did not
@@ -29,7 +35,7 @@
      sRGB; measured, the ladder lands at 3.9 -> 10.2 -> 16.9 -> 24.0. */
   --mx-page-dark:#0A082D;--mx-card-dark:#1A1838;--mx-inset-dark:#28254B;--mx-raised-dark:#37345F;
   --mx-ink-dark:#EDEDF6;--mx-ink-quiet-dark:#A8A7C4;--mx-line-dark:#4C487A;
-  --mx-indigo-dark:#C3C3EB;--mx-indigo-bright-dark:#8A8AE0;--mx-indigo-container-dark:#2B2B6E;
+  --mx-indigo-dark:#BCC2FF;--mx-indigo-bright-dark:#8A8AE0;--mx-indigo-container-dark:#252C6F;
   --mx-success-dark:#4FC79B;--mx-warning-dark:#E8D08E;--mx-danger-dark:#F2808F;--mx-info-dark:#8DB4D8;
 
   /* --- semantic: surface ladder --------------------------------------- */
@@ -50,7 +56,7 @@
   --color-focus-ring:var(--mx-indigo-light);
 
   /* --- semantic: brand and actions ------------------------------------ */
-  --color-seed:#4646B4;
+  --color-seed:#4454CC;
   --color-primary:var(--mx-indigo-light);
   --color-on-primary:#FFFFFF;
   /* The accent as TEXT or an ICON, which is a different problem from the accent
@@ -58,11 +64,11 @@
      as a label on the page. */
   --color-primary-accent:var(--mx-indigo-light);
   --color-primary-container:var(--mx-indigo-container-light);
-  --color-on-primary-container:#1B1B5C;
-  --color-secondary:#4E5468;
+  --color-on-primary-container:#141D5D;
+  --color-secondary:#585E7F;
   --color-on-secondary:#FFFFFF;
-  --color-secondary-container:#D9DDEB;
-  --color-on-secondary-container:#2C3141;
+  --color-secondary-container:#DADDEB;
+  --color-on-secondary-container:#2E3141;
   --color-tertiary:#45647F;
   --color-on-tertiary:#FFFFFF;
   --color-tertiary-container:#E1E9F0;
@@ -111,7 +117,7 @@
   --color-surface-bright:#FCFCFE;
   --color-inverse-surface:#2A2C3E;
   --color-on-inverse-surface:#F1F2F6;
-  --color-inverse-primary:#A9A9E0;
+  --color-inverse-primary:#A4ABE0;
 
   /* --- semantic: shadow, scrim, chrome --------------------------------- */
   --color-shadow:#0B0C18;
@@ -135,18 +141,17 @@
   --color-border-subtle:var(--mx-line-dark);
   --color-focus-ring:var(--mx-indigo-dark);
   --color-primary:var(--mx-indigo-dark);
-  --color-on-primary:#262670;
+  --color-on-primary:#202771;
   --color-primary-accent:var(--mx-indigo-dark);
   --color-primary-container:var(--mx-indigo-container-dark);
-  --color-on-primary-container:#D7D5FF;
-  /* Moved with its container. A role has to read as one hue: leaving the fill
-     on the old slate while the container joined the page family put 18 degrees
-     between them, which is visible the moment the two are drawn side by side.
-     Same L* (75.2), hue now 3.5 degrees off the container. */
-  --color-secondary:#B8B7D0;
-  --color-on-secondary:#1E2033;
-  --color-secondary-container:#332F58;
-  --color-on-secondary-container:#D9DCE7;
+  --color-on-primary-container:#D2D6FF;
+  /* Tokyo's dark-theme secondary, as is. Its container leaves the surface
+     family with it: a role has to read as one hue, and Tokyo's secondary sits
+     at hue 230 where the dark surfaces sit at 246. Same tone as before. */
+  --color-secondary:#9EA4C1;
+  --color-on-secondary:#1C2033;
+  --color-secondary-container:#2A3259;
+  --color-on-secondary-container:#DADCE7;
   --color-tertiary:#8DB4D8;
   --color-on-tertiary:#17232E;
   --color-tertiary-container:#33465A;
@@ -192,7 +197,7 @@
   --color-surface-bright:#37345F;
   --color-inverse-surface:#E7E8F0;
   --color-on-inverse-surface:#23253A;
-  --color-inverse-primary:#3A3A9B;
+  --color-inverse-primary:#333C9C;
   --color-shadow:#04040B;
   --color-scrim:#04040B;
   --color-disabled-surface:#312E4E;

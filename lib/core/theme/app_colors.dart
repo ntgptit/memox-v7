@@ -89,7 +89,14 @@ abstract final class AppColors {
 
   // --- Brand and actions ---------------------------------------------------
 
-  /// The single accent, on hue 240 in both brightnesses.
+  /// The single accent — Tokyo's indigo, at HSL hue 233 in both brightnesses.
+  ///
+  /// **`#4454CC` is Tokyo's `primary.dark`, not its `primary.main`** (M100.25,
+  /// from the owner's tokyo-react-admin-dashboard palette). Its `main` is
+  /// `#5569FF`, and white on that measures 4.33:1 — under AA for a button
+  /// label, which `app_theme_test.dart` holds at 4.5. `darken(main, 0.2)` is
+  /// the first value of Tokyo's own family that clears it, at 6.20:1, and it
+  /// lands at tone 41 — where M3 puts a light scheme's `primary` anyway.
   ///
   /// **Dark inverts the tone, which is what Material 3 asks for and what this
   /// palette spent two years working around.** M3 puts a dark scheme's
@@ -109,19 +116,29 @@ abstract final class AppColors {
   ///
   /// The rule the old comment protected still holds and is still asserted: the
   /// CTA must never be the brightest thing on screen. `primary` against the
-  /// page is 11.36:1 where `onSurface` is 15.84:1, so the headline still wins.
+  /// dark page is 11.33:1 where `onSurface` is 16.62:1, so the headline still
+  /// wins.
   /// What changed is the mechanism — a tone ceiling rather than a luminance
   /// cap, because a luminance cap is a fill-tone rule and this is no longer a
   /// fill-tone palette.
-  static const Color primaryLight = Color(0xFF4646B4);
+  static const Color primaryLight = Color(0xFF4454CC);
 
-  /// Tone 80 at hue 240, chroma 0.154 — the band `secondaryDark` and
-  /// `tertiaryDark` already sit in, both of which were M3-shaped all along.
-  static const Color primaryDark = Color(0xFFC3C3EB);
+  /// Tone 80 of the palette keyed on [primaryLight] — one hex with
+  /// `AppMaterialRoles.primaryFixedDim`, which is the same tone of the same
+  /// palette. 11.33:1 on the page, 9.99:1 on the card, 7.24:1 as a ring on
+  /// `secondaryContainer`.
+  ///
+  /// **Tokyo's own dark accent, `#8C7CF0`, was measured and turned down.** It
+  /// is 15.4 degrees off the light brand hue where `app_palette_test.dart`
+  /// allows 12, and it sits at tone 58 — the tone-20 ink M3 pairs with it
+  /// reads 3.89:1, so it fails as a button fill for the reason the hue-240
+  /// fill did before M100.18. The light theme's hue at M3's tone gives one
+  /// brand in both modes.
+  static const Color primaryDark = Color(0xFFBCC2FF);
   static const Color onPrimaryLight = Color(0xFFFFFFFF);
 
-  /// Tone 20 at the same hue. 7.72:1 under [primaryDark].
-  static const Color onPrimaryDark = Color(0xFF262670);
+  /// Tone 20 at the same hue. 7.73:1 under [primaryDark].
+  static const Color onPrimaryDark = Color(0xFF202771);
 
   // --- Semantic ------------------------------------------------------------
   //

@@ -247,12 +247,12 @@ be kept in step by editing one value.
 
 | mode | role | hue spread | has container pair |
 |---|---|---|---|
-| light | primary | 0.0° | true |
+| light | primary | 0.4° | true |
 | light | error/danger | 2.8° | true |
 | light | success | 0.0° | false |
 | light | warning | 0.0° | false |
 | light | info | 0.0° | false |
-| dark | primary | 0.0° | true |
+| dark | primary | 0.3° | true |
 | dark | error/danger | 2.1° | true |
 | dark | success | 0.0° | false |
 | dark | warning | 0.0° | false |

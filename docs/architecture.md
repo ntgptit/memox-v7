@@ -838,7 +838,8 @@ một Elevation token chưa ai làm. Chủ dự án cuối cùng phải nói th�
 
 ### Quyết định
 
-**1 · Seed là nguồn của mọi trung tính.** `AppColors.seed` (hue 240). Mọi
+**1 · Seed là nguồn của mọi trung tính.** `AppColors.seed` (HSL hue 233 từ
+M100.25; 240 trước đó). Mọi
 neutral — surface, page, border, muted text, shadow, scrim — phải mang một trace
 của nó. Công thức chuẩn tắc là
 `Color.alphaBlend(seed.withValues(alpha: a), base)`, **precompute thành hằng số**,
@@ -980,6 +981,24 @@ trả lời cho disabled, hover, focus và press. Câu trả lời của nó cho
 nguyên vẹn `secondaryContainer`, tức một pill không bấm được trông y hệt pill
 bấm được (M4.10ao). Slot state-aware (`color`, `WidgetStateBorderSide`,
 `WidgetStateColor` trong `labelStyle`) là nơi quyền sở hữu thật sự nằm.
+
+**Hue của hai họ accent đổi sang palette Tokyo ở M100.25, và luật trên là
+thứ quyết định *cách* đổi.** Chủ dự án chỉ định tham chiếu
+`ntgptit/tokyo-react-admin-dashboard`: `primary` `#5569FF`, `secondary`
+`#6E759F`, dark `secondary` `#9EA4C1`. Không lấy nguyên hex vào slot fill khi
+tỉ lệ không đạt — trắng trên `#5569FF` đo 4,33:1, trên `#6E759F` 4,46:1 — mà
+lấy giá trị đầu tiên **của chính họ Tokyo** vượt sàn: `primary.dark`
+(`#4454CC`, 6,20:1) và `secondary.dark` (`#585E7F`, 6,32:1), đều là tone ~41.
+Dark `primary` là tone 80 của palette đó (`#BCC2FF`); dark accent riêng của Tokyo
+(`#8C7CF0`) bị loại vì lệch 15,4° so với hue light và ink tone-20 trên nó chỉ
+đạt 3,89:1. Mọi container, `on*` và `inverse*` của hai họ **giữ tone và chroma,
+chỉ đổi hue** — nên bậc so với `surfaceContainer` và mọi tỉ lệ nằm trong 0,1 L\*
+so với trước. Hệ quả cấu trúc duy nhất: `secondaryContainer` dark rời họ surface
+(hue 230 so với 246), nên `surfaceContainerHighest` dark dẫn xuất từ
+`surfaceEmphasis` thay vì từ nó — bậc thang không dịch một pixel. `tertiary`,
+`error`, bốn semantic và thang surface không đổi: Tokyo không có tertiary, màu
+trạng thái của nó vượt ngân sách chroma, và thang surface là quyết định về chiều
+sâu (mục 4) chứ không phải về thương hiệu.
 
 ### Nguồn của giá trị token đã đổi (M4.10p)
 
