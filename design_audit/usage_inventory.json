@@ -1,21 +1,21 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
   "scannedFiles": 701,
-  "totalSites": 321,
+  "totalSites": 318,
   "byElementKind": {
-    "other": 259,
-    "background": 27,
+    "other": 255,
+    "background": 28,
     "shadow": 1,
     "border": 15,
     "text": 19
   },
   "bySourceKind": {
-    "shared-constant": 117,
+    "shared-constant": 113,
     "hardcoded-literal": 105,
     "blend-source": 4,
     "Colors-material": 12,
     "opacity-modified-token": 16,
-    "theme-token": 67
+    "theme-token": 68
   },
   "sites": [
     {
@@ -75,7 +75,7 @@
     },
     {
       "file": "lib/core/theme/app_border_colors.dart",
-      "line": 46,
+      "line": 44,
       "widget_context": "AppBorderColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -86,7 +86,7 @@
     },
     {
       "file": "lib/core/theme/app_border_colors.dart",
-      "line": 50,
+      "line": 48,
       "widget_context": "AppBorderColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -97,7 +97,7 @@
     },
     {
       "file": "lib/core/theme/app_border_colors.dart",
-      "line": 100,
+      "line": 98,
       "widget_context": "AppBorderColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -108,7 +108,7 @@
     },
     {
       "file": "lib/core/theme/app_border_colors.dart",
-      "line": 107,
+      "line": 105,
       "widget_context": "AppBorderColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -119,7 +119,7 @@
     },
     {
       "file": "lib/core/theme/app_border_colors.dart",
-      "line": 109,
+      "line": 107,
       "widget_context": "AppBorderColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -130,7 +130,7 @@
     },
     {
       "file": "lib/core/theme/app_border_colors.dart",
-      "line": 112,
+      "line": 110,
       "widget_context": "AppBorderColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -141,7 +141,7 @@
     },
     {
       "file": "lib/core/theme/app_border_colors.dart",
-      "line": 124,
+      "line": 122,
       "widget_context": "AppBorderColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -152,7 +152,7 @@
     },
     {
       "file": "lib/core/theme/app_border_colors.dart",
-      "line": 139,
+      "line": 137,
       "widget_context": "AppBorderColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -163,7 +163,7 @@
     },
     {
       "file": "lib/core/theme/app_border_colors.dart",
-      "line": 166,
+      "line": 164,
       "widget_context": "AppBorderColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -174,7 +174,7 @@
     },
     {
       "file": "lib/core/theme/app_border_colors.dart",
-      "line": 171,
+      "line": 169,
       "widget_context": "AppBorderColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -185,7 +185,7 @@
     },
     {
       "file": "lib/core/theme/app_border_colors.dart",
-      "line": 195,
+      "line": 193,
       "widget_context": "AppBorderColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -196,7 +196,7 @@
     },
     {
       "file": "lib/core/theme/app_border_colors.dart",
-      "line": 226,
+      "line": 224,
       "widget_context": "AppBorderColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -204,28 +204,6 @@
       "token": null,
       "resolved_value_light": "#6E6A98",
       "resolved_value_dark": "#6E6A98"
-    },
-    {
-      "file": "lib/core/theme/app_border_colors.dart",
-      "line": 243,
-      "widget_context": "AppBorderColors",
-      "element_kind": "other",
-      "source_kind": "shared-constant",
-      "expression": "AppColors.primaryLight",
-      "token": "AppColors.primaryLight",
-      "resolved_value_light": "#4646B4",
-      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
-    },
-    {
-      "file": "lib/core/theme/app_border_colors.dart",
-      "line": 245,
-      "widget_context": "AppBorderColors",
-      "element_kind": "other",
-      "source_kind": "shared-constant",
-      "expression": "AppColors.primaryDark",
-      "token": "AppColors.primaryDark",
-      "resolved_value_light": "unresolvable: no light counterpart in theme",
-      "resolved_value_dark": "#C3C3EB"
     },
     {
       "file": "lib/core/theme/app_button_themes.dart",
@@ -251,7 +229,7 @@
     },
     {
       "file": "lib/core/theme/app_chip_theme.dart",
-      "line": 79,
+      "line": 78,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "blend-source",
@@ -394,7 +372,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 149,
+      "line": 134,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -405,7 +383,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 150,
+      "line": 135,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -416,7 +394,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 179,
+      "line": 164,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -427,7 +405,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 180,
+      "line": 165,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -438,7 +416,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 197,
+      "line": 182,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -449,7 +427,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 198,
+      "line": 183,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -460,7 +438,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 201,
+      "line": 186,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -471,7 +449,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 202,
+      "line": 187,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -482,7 +460,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 224,
+      "line": 209,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -493,7 +471,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 225,
+      "line": 210,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -504,7 +482,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 242,
+      "line": 227,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -515,7 +493,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 270,
+      "line": 255,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -526,7 +504,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 271,
+      "line": 256,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -537,7 +515,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 272,
+      "line": 257,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -548,7 +526,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 277,
+      "line": 262,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -559,7 +537,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 281,
+      "line": 266,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -570,7 +548,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 282,
+      "line": 267,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -581,7 +559,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 300,
+      "line": 285,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -592,7 +570,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 314,
+      "line": 299,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -603,7 +581,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 315,
+      "line": 300,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -658,7 +636,7 @@
     },
     {
       "file": "lib/core/theme/app_interaction_states.dart",
-      "line": 203,
+      "line": 186,
       "widget_context": "AppInteractionStates",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -669,7 +647,7 @@
     },
     {
       "file": "lib/core/theme/app_interaction_states.dart",
-      "line": 206,
+      "line": 189,
       "widget_context": "AppInteractionStates",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -680,7 +658,7 @@
     },
     {
       "file": "lib/core/theme/app_interaction_states.dart",
-      "line": 209,
+      "line": 192,
       "widget_context": "AppInteractionStates",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -1252,7 +1230,7 @@
     },
     {
       "file": "lib/core/theme/app_navigation_bar_theme.dart",
-      "line": 51,
+      "line": 50,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -1263,7 +1241,7 @@
     },
     {
       "file": "lib/core/theme/app_overlay_themes.dart",
-      "line": 38,
+      "line": 37,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -1274,7 +1252,7 @@
     },
     {
       "file": "lib/core/theme/app_overlay_themes.dart",
-      "line": 63,
+      "line": 62,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "Colors-material",
@@ -1285,7 +1263,7 @@
     },
     {
       "file": "lib/core/theme/app_overlay_themes.dart",
-      "line": 115,
+      "line": 114,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -1296,7 +1274,7 @@
     },
     {
       "file": "lib/core/theme/app_overlay_themes.dart",
-      "line": 140,
+      "line": 142,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -1307,7 +1285,7 @@
     },
     {
       "file": "lib/core/theme/app_overlay_themes.dart",
-      "line": 252,
+      "line": 254,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "Colors-material",
@@ -1318,7 +1296,7 @@
     },
     {
       "file": "lib/core/theme/app_overlay_themes.dart",
-      "line": 314,
+      "line": 316,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -1329,7 +1307,7 @@
     },
     {
       "file": "lib/core/theme/app_planned_themes.dart",
-      "line": 142,
+      "line": 141,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -1340,7 +1318,7 @@
     },
     {
       "file": "lib/core/theme/app_planned_themes.dart",
-      "line": 146,
+      "line": 145,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -1351,29 +1329,18 @@
     },
     {
       "file": "lib/core/theme/app_planned_themes.dart",
-      "line": 218,
+      "line": 219,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
-      "expression": "semantic.focusRing.withValues(alpha: AppStateOpacity.pressed)",
-      "token": "semantic.focusRing",
+      "expression": "scheme.primary.withValues(alpha: AppStateOpacity.pressed)",
+      "token": "colorScheme.primary",
       "resolved_value_light": "#4646B4 @ alpha unresolvable",
       "resolved_value_dark": "#C3C3EB @ alpha unresolvable"
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 41,
-      "widget_context": "AppSemanticColors",
-      "element_kind": "other",
-      "source_kind": "shared-constant",
-      "expression": "AppColors.primaryAccentLight",
-      "token": "AppColors.primaryAccentLight",
-      "resolved_value_light": "unresolvable: no light counterpart in theme",
-      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
-    },
-    {
-      "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 42,
+      "line": 39,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1384,7 +1351,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 43,
+      "line": 40,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1395,7 +1362,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 44,
+      "line": 41,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1406,7 +1373,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 45,
+      "line": 42,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1417,7 +1384,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 46,
+      "line": 43,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1428,7 +1395,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 47,
+      "line": 44,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1439,7 +1406,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 48,
+      "line": 45,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1450,7 +1417,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 49,
+      "line": 46,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1461,7 +1428,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 61,
+      "line": 57,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1472,7 +1439,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 62,
+      "line": 58,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1483,7 +1450,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 63,
+      "line": 59,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1494,18 +1461,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 66,
-      "widget_context": "AppSemanticColors",
-      "element_kind": "other",
-      "source_kind": "shared-constant",
-      "expression": "AppColors.primaryAccentDark",
-      "token": "AppColors.primaryAccentDark",
-      "resolved_value_light": "unresolvable: no light counterpart in theme",
-      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
-    },
-    {
-      "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 67,
+      "line": 62,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1516,7 +1472,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 68,
+      "line": 63,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1527,7 +1483,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 69,
+      "line": 64,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1538,7 +1494,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 70,
+      "line": 65,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1549,7 +1505,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 71,
+      "line": 66,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1560,7 +1516,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 72,
+      "line": 67,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1571,7 +1527,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 73,
+      "line": 68,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1582,7 +1538,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 74,
+      "line": 69,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1593,7 +1549,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 86,
+      "line": 80,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1604,7 +1560,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 87,
+      "line": 81,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1615,7 +1571,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 88,
+      "line": 82,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2759,7 +2715,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 531,
+      "line": 530,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -2770,7 +2726,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 554,
+      "line": 553,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -2781,7 +2737,7 @@
     },
     {
       "file": "lib/core/theme/app_toggle_themes.dart",
-      "line": 156,
+      "line": 157,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -2792,7 +2748,7 @@
     },
     {
       "file": "lib/core/theme/app_toggle_themes.dart",
-      "line": 162,
+      "line": 163,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -2800,6 +2756,17 @@
       "token": "Colors.transparent",
       "resolved_value_light": "#00000000",
       "resolved_value_dark": "#00000000"
+    },
+    {
+      "file": "lib/features/card/presentation/widgets/items/card_box_progress_widget.dart",
+      "line": 52,
+      "widget_context": "CardBoxProgressWidget",
+      "element_kind": "background",
+      "source_kind": "theme-token",
+      "expression": "context.colors.primary",
+      "token": "colorScheme.primary",
+      "resolved_value_light": "#4646B4",
+      "resolved_value_dark": "#C3C3EB"
     },
     {
       "file": "lib/features/card/presentation/widgets/items/card_history_event_widget.dart",
@@ -2851,10 +2818,10 @@
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "theme-token",
-      "expression": "context.semanticColors.primaryAccent",
-      "token": "semantic.primaryAccent",
-      "resolved_value_light": "unresolvable: semantic.primaryAccent not in the dumped theme",
-      "resolved_value_dark": "unresolvable: semantic.primaryAccent not in the dumped theme"
+      "expression": "context.colors.primary",
+      "token": "colorScheme.primary",
+      "resolved_value_light": "#4646B4",
+      "resolved_value_dark": "#C3C3EB"
     },
     {
       "file": "lib/features/card/presentation/widgets/items/card_tile_widget.dart",
@@ -3221,7 +3188,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/items/match_tile_widget.dart",
-      "line": 262,
+      "line": 261,
       "widget_context": "_TileSkin",
       "element_kind": "border",
       "source_kind": "blend-source",
@@ -3533,10 +3500,10 @@
       "widget_context": "_Chip",
       "element_kind": "text",
       "source_kind": "theme-token",
-      "expression": "context.semanticColors.primaryAccent",
-      "token": "semantic.primaryAccent",
-      "resolved_value_light": "unresolvable: semantic.primaryAccent not in the dumped theme",
-      "resolved_value_dark": "unresolvable: semantic.primaryAccent not in the dumped theme"
+      "expression": "context.colors.primary",
+      "token": "colorScheme.primary",
+      "resolved_value_light": "#4646B4",
+      "resolved_value_dark": "#C3C3EB"
     },
     {
       "file": "lib/shared/widgets/mx_text_field.dart",

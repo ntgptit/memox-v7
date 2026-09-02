@@ -67,7 +67,7 @@ DatePickerThemeData buildDatePickerTheme(
   final selected = scheme.onPrimaryContainer;
 
   return DatePickerThemeData(
-    backgroundColor: scheme.surface,
+    backgroundColor: scheme.surfaceContainerHigh,
     elevation: AppElevation.none,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(AppRadius.lg),

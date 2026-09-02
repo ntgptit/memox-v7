@@ -60,7 +60,7 @@ ProgressIndicatorThemeData buildProgressIndicatorTheme(
   // faint track behind a circular indicator in newer versions; on a card
   // that reads as a second ring nobody asked for.
   circularTrackColor: Colors.transparent,
-  linearTrackColor: scheme.surfaceContainerHighest,
+  linearTrackColor: scheme.secondaryContainer,
 );
 
 /// How long a pointer rests before a tooltip appears.
@@ -122,12 +122,15 @@ TextSelectionThemeData buildTextSelectionTheme(
 /// one list look like two.
 /// `space` equals `thickness`, so a divider occupies exactly the line it draws
 /// and adds no padding of its own — Material's default reserves 16.
-DividerThemeData buildDividerTheme(AppSemanticColors semantic) =>
-    DividerThemeData(
-      color: semantic.borderSubtle,
-      thickness: AppStroke.hairline,
-      space: AppStroke.hairline,
-    );
+DividerThemeData buildDividerTheme(ColorScheme scheme) => DividerThemeData(
+  // `outlineVariant` is M3's name for the decorative hairline, and it *is*
+  // `borderSubtle` — the scheme maps the two onto one value. Reading it
+  // through the role rather than the extension is what makes that true by
+  // construction instead of by coincidence (M100.20).
+  color: scheme.outlineVariant,
+  thickness: AppStroke.hairline,
+  space: AppStroke.hairline,
+);
 
 /// The scroll thumb.
 ///
@@ -173,7 +176,7 @@ TimePickerThemeData buildTimePickerTheme(
   final selected = scheme.onPrimaryContainer;
 
   return TimePickerThemeData(
-    backgroundColor: scheme.surface,
+    backgroundColor: scheme.surfaceContainerHigh,
     // Zero, and a hairline instead — the same trade `dialogTheme` makes, for
     // the same reason: AD-14 admits one depth mechanism and this app spends it
     // on the surface ladder.
@@ -193,7 +196,7 @@ TimePickerThemeData buildTimePickerTheme(
     // property form here does not compile, which is the good outcome; writing
     // a flat colour compiles and silently drops the selected state, which is
     // the one to watch for.
-    dialBackgroundColor: semantic.surfaceMuted,
+    dialBackgroundColor: scheme.surfaceContainerHighest,
     dialHandColor: scheme.primary,
     dialTextColor: WidgetStateColor.resolveWith((states) {
       // The number the hand is on sits ON the hand, so it takes the fill's
@@ -309,7 +312,7 @@ PopupMenuThemeData buildPopupMenuTheme(
   // the opposite** — depth is a measurable target and each mode builds it from
   // what it has — and it was written because two doc comments had already been
   // read as a ban on elevation. This one had become the third.
-  color: semantic.surfaceElevated,
+  color: scheme.surfaceContainer,
   surfaceTintColor: Colors.transparent,
   // **Solved against AD-14's own floor: a card lifts off its page by 7.75 L\*,
   // so a menu must clear at least that off the card.** Dark gets 13.73 L\* from

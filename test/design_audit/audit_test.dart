@@ -56,10 +56,11 @@ void main() {
       (tokens['light']! as Map<String, Object?>),
       // 54 until M99.47, which added the twelve `*Fixed` roles to the theme
       // and therefore to the dump; 66 until M100.17, which retired the one
-      // entry that was never a role from the scheme and so from the dump. The
-      // number is pinned rather than derived for exactly the reason the
-      // message below states, so it moves only when someone decided it should.
-      hasLength(65),
+      // entry that was never a role; 65 until M100.19, which retired the ring
+      // token once `primary` could carry the role itself. The number is pinned
+      // rather than derived for exactly the reason the message below states,
+      // so it moves only when someone decided it should.
+      hasLength(64),
       reason:
           'a role added to Material and not listed in auditTokensOf is '
           'invisible to every later step',

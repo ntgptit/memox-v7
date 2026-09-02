@@ -476,7 +476,7 @@ ThemeData _buildTheme(
     progressIndicatorTheme: buildProgressIndicatorTheme(scheme, semantic),
     tooltipTheme: buildTooltipTheme(scheme, texts),
     textSelectionTheme: buildTextSelectionTheme(scheme, semantic),
-    dividerTheme: buildDividerTheme(semantic),
+    dividerTheme: buildDividerTheme(scheme),
     scrollbarTheme: buildScrollbarTheme(scheme),
     radioTheme: buildRadioTheme(scheme, semantic),
     switchTheme: buildSwitchTheme(scheme, semantic),
@@ -526,7 +526,7 @@ ThemeData _buildTheme(
 
     dialogTheme: DialogThemeData(
       barrierColor: modalBarrierColor(scheme),
-      backgroundColor: scheme.surface,
+      backgroundColor: scheme.surfaceContainerHigh,
       surfaceTintColor: Colors.transparent,
       // Zero, for the same reason as the FAB above: a second depth mechanism
       // AD-14 does not admit. See F15.
@@ -549,7 +549,7 @@ ThemeData _buildTheme(
 
     bottomSheetTheme: BottomSheetThemeData(
       modalBarrierColor: modalBarrierColor(scheme),
-      backgroundColor: scheme.surface,
+      backgroundColor: scheme.surfaceContainerLow,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       showDragHandle: true,

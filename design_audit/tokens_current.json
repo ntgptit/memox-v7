@@ -546,15 +546,6 @@
       "hueDistanceFromDarkSurfaceFamily": 3.2432432432432563,
       "carriesNoHue": false
     },
-    "semantic.focusRing": {
-      "hex": "#4646B4",
-      "opaque": true,
-      "hue": 240.0,
-      "saturation": 0.44,
-      "chroma": 0.43137254901960786,
-      "lightnessStar": 35.941317621018726,
-      "classifiedAs": "role-or-on-color"
-    },
     "semantic.secondaryAction": {
       "hex": "#454B5E",
       "opaque": true,
@@ -643,24 +634,24 @@
       "classifiedAs": "role-or-on-color"
     },
     "dialogTheme.backgroundColor": {
-      "hex": "#FBFBFE",
+      "hex": "#EAECF1",
       "opaque": true,
-      "hue": 240.0,
-      "saturation": 0.6000000000000056,
-      "chroma": 0.01176470588235301,
-      "lightnessStar": 98.69362392643127,
+      "hue": 222.8571428571427,
+      "saturation": 0.20000000000000015,
+      "chroma": 0.027450980392156876,
+      "lightnessStar": 93.37844324314104,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 0.0,
-      "hueDistanceFromDarkSurfaceFamily": 3.2432432432432563,
+      "hueDistanceFromDeclaredSeed": 17.14285714285731,
+      "hueDistanceFromDarkSurfaceFamily": 20.386100386100566,
       "carriesNoHue": false
     },
     "bottomSheetTheme.backgroundColor": {
-      "hex": "#FBFBFE",
+      "hex": "#FAFAFC",
       "opaque": true,
       "hue": 240.0,
-      "saturation": 0.6000000000000056,
-      "chroma": 0.01176470588235301,
-      "lightnessStar": 98.69362392643127,
+      "saturation": 0.25000000000000355,
+      "chroma": 0.007843137254902044,
+      "lightnessStar": 98.32226482382697,
       "classifiedAs": "neutral",
       "hueDistanceFromDeclaredSeed": 0.0,
       "hueDistanceFromDarkSurfaceFamily": 3.2432432432432563,
@@ -1211,15 +1202,6 @@
       "hueDistanceFromDarkSurfaceFamily": 1.556756756756755,
       "carriesNoHue": false
     },
-    "semantic.focusRing": {
-      "hex": "#C3C3EB",
-      "opaque": true,
-      "hue": 240.0,
-      "saturation": 0.49999999999999967,
-      "chroma": 0.1568627450980392,
-      "lightnessStar": 79.9713023311683,
-      "classifiedAs": "role-or-on-color"
-    },
     "semantic.secondaryAction": {
       "hex": "#C3C6D2",
       "opaque": true,
@@ -1308,27 +1290,27 @@
       "classifiedAs": "role-or-on-color"
     },
     "dialogTheme.backgroundColor": {
-      "hex": "#1A1838",
+      "hex": "#28254B",
       "opaque": true,
-      "hue": 243.75,
-      "saturation": 0.4,
-      "chroma": 0.12549019607843137,
-      "lightnessStar": 10.246897318492142,
+      "hue": 244.73684210526312,
+      "saturation": 0.3392857142857143,
+      "chroma": 0.14901960784313725,
+      "lightnessStar": 16.903783706924095,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 3.75,
-      "hueDistanceFromDarkSurfaceFamily": 0.5067567567567437,
+      "hueDistanceFromDeclaredSeed": 4.736842105263122,
+      "hueDistanceFromDarkSurfaceFamily": 1.4935988620198657,
       "carriesNoHue": false
     },
     "bottomSheetTheme.backgroundColor": {
-      "hex": "#1A1838",
+      "hex": "#151134",
       "opaque": true,
-      "hue": 243.75,
-      "saturation": 0.4,
-      "chroma": 0.12549019607843137,
-      "lightnessStar": 10.246897318492142,
+      "hue": 246.85714285714283,
+      "saturation": 0.5072463768115943,
+      "chroma": 0.13725490196078433,
+      "lightnessStar": 7.301016512612773,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 3.75,
-      "hueDistanceFromDarkSurfaceFamily": 0.5067567567567437,
+      "hueDistanceFromDeclaredSeed": 6.857142857142833,
+      "hueDistanceFromDarkSurfaceFamily": 3.6138996138995765,
       "carriesNoHue": false
     },
     "appBarTheme.backgroundColor": {

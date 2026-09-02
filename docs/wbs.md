@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.19 (gỡ ba token thay thế khỏi 112 call-site, golden chứng minh không đổi pixel); M100.18 (dark `primary` đảo tone theo M3; ba token thay thế thành dẫn xuất); M100.17 (`ColorScheme` đúng 45 role M3 — gỡ `surfaceTint` khai tường minh, catalog đủ 45 swatch); M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
+| **Updated by task** | M100.20 (bảy binding component về role M3; sàn độ nổi của menu bỏ theo quyết định chủ dự án); M100.19 (gỡ ba token thay thế khỏi 112 call-site, golden chứng minh không đổi pixel); M100.18 (dark `primary` đảo tone theo M3; ba token thay thế thành dẫn xuất); M100.17 (`ColorScheme` đúng 45 role M3 — gỡ `surfaceTint` khai tường minh, catalog đủ 45 swatch); M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
 | **Last updated** | 2026-09-01 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -16608,10 +16608,79 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
   suite; `css_token_parity_test`.
 - **Checklist phases:** 7.
 
+### M100.20 · Bảy binding component về đúng role M3 của chúng
+
+- **Status:** done
+- **Goal:** Áp phần còn lại của nguyên tắc: mỗi component vẽ bằng role Material
+  quy định cho nó, không bằng một token app tự chế. Đây là nhóm surface mà chủ
+  dự án chọn "áp default M3 cho cả năm".
+- **Scope:** `app_theme.dart` (Dialog, BottomSheet), `app_overlay_themes.dart`
+  (TimePicker container + dial, PopupMenu, progress track, Divider),
+  `app_planned_themes.dart` (DatePicker); test độ nổi của menu; goldens.
+- **Out of scope:** nền NavigationBar (M3 nói `surfaceContainer`, app cố ý vẽ
+  màu page để chrome đọc như một khung — quyết định M99.35, giữ và ghi thành
+  divergence); gỡ token `surfaceElevated` nay đã chết (xem dưới).
+- **Đo trước, trên default M3 của SDK 3.44.8:**
+
+  | component | M3 | trước | sau |
+  |---|---|---|---|
+  | Dialog | `surfaceContainerHigh` | `surface` | ✔ |
+  | BottomSheet | `surfaceContainerLow` | `surface` | ✔ |
+  | TimePicker | `surfaceContainerHigh` | `surface` | ✔ |
+  | TimePicker dial | `surfaceContainerHighest` | `semantic.surfaceMuted` | ✔ |
+  | DatePicker | `surfaceContainerHigh` | `surface` | ✔ |
+  | PopupMenu | `surfaceContainer` | `semantic.surfaceElevated` | ✔ |
+  | Progress track | `secondaryContainer` | `surfaceContainerHighest` | ✔ |
+  | Divider | `outlineVariant` | `semantic.borderSubtle` | ✔ (cùng giá trị) |
+
+- **Không có hồi quy tương phản:** mọi cặp chữ trên nền mới đo từ 5,61:1 tới
+  16,41:1, sàn 4,5; fill progress trên track mới 6,02:1 / 7,30:1, sàn 3.
+- **Một sàn nội bộ bị bỏ, và đó là quyết định của chủ dự án.** `PopupMenu` trên
+  `surfaceContainer` nổi khỏi card **3,50 L\*** ở dark, dưới sàn 7,70 mà test
+  `component_depth_and_state_test.dart` đang giữ. Đo cho thấy sàn ấy không thoả
+  được bằng cách nào hợp lý: shadow dark trên card chỉ đáng 0,71 L\* ở alpha
+  thật, và nâng `surfaceContainer` lên 17,95 L\* thì nó vượt `surfaceContainerHigh`
+  (16,90) — tức phải giãn lại **cả thang** dark. Chủ dự án chọn nhận bước thang
+  của M3. Lý do sàn 7,70 không áp được: nó là lift của **card trên page**, còn
+  đây là **menu trên card** — một suy diễn của repo, không phải của M3.
+  Khiếm khuyết mà test được viết ra để bắt vẫn còn nguyên và không phải "bước
+  nhỏ": nó là menu vẽ `surface` trên `surface` ở elevation 0, tức **0,00 L\***.
+  Test nay khẳng định menu ở **một rung khác**, đúng thứ M3 bảo đảm.
+- **Một lỗi im lặng do đổi chữ ký ở M100.19, chỉ test bắt được.**
+  `AppInteractionStates.focusRing(t.extension()!)` — `extension()` là generic và
+  suy kiểu **từ tham số**. Đổi tham số sang `ColorScheme` biến nó thành
+  `t.extension<ColorScheme>()`, hợp kiểu và trả **null**. Analyzer sạch, hai test
+  toggle đỏ. Ghi lại vì nó là hình mẫu: đổi kiểu tham số của một hàm mà call-site
+  dùng generic suy kiểu thì analyzer không bảo vệ được.
+- **Một sót của M100.19 phát hiện ở đây:** pin kích thước dump của audit vẫn là
+  65 sau khi dòng `focusRing` bị gỡ khỏi inventory (đúng phải là 64). Nó lọt vì
+  full suite của M100.19 không khởi động được và chỉ golden được chạy. Đã sửa;
+  bài học là "gate nào không chạy thì coi như đỏ", không phải "xanh vì không đỏ".
+- **`surfaceElevated` nay không còn consumer nào trong `lib`** — đúng mục 7 của
+  bản audit chủ dự án giao. Chưa gỡ ở đây: 21 dòng ở 7 file test cộng token
+  `--color-surface-elevated` của kit, và nó thuộc đợt hợp nhất hai thang surface
+  chứ không phải đợt bind component. Ghi vào nợ để đợt sau nhặt.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** bảy slot theme đọc role M3 (bảng trên); `buildDividerTheme` nhận
+  `ColorScheme` thay vì `AppSemanticColors`; `component_depth_and_state_test.dart`
+  phát biểu lại độ nổi của menu theo M3; pin dump audit 65 → 64; goldens của
+  các overlay vẽ lại; `design_audit/` regenerate (321 → 318 colour site).
+- **Acceptance criteria:**
+  - [x] Bảy slot đọc role M3; không slot nào còn đọc token app tự chế.
+  - [x] Không cặp chữ nào tụt dưới sàn ở cả hai theme.
+  - [x] Test độ nổi của menu phát biểu lại theo M3, không bị xoá.
+  - [x] analyze 0/0, theme + visual audit 404, design audit 88, full host suite,
+        goldens vẽ lại và review, gallery publish lại.
+- **Dependencies:** M100.19
+- **Tests required:** `component_depth_and_state_test.dart`, `app_toggle_themes_test.dart`,
+  `app_overlay_themes_test.dart`, visual audit, goldens.
+- **Checklist phases:** 7.
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |
 |---|---|---|---|
+| `AppSemanticColors.surfaceElevated` không còn consumer | M100.20 | Nó tồn tại để làm nền cho PopupMenu, và menu nay đọc `surfaceContainer` theo M3. Một token chết trong kit là thứ người sau sẽ với tay lấy, và nó là rung thứ sáu của một thang song song mà M3 chỉ có năm | Gỡ trong đợt hợp nhất hai thang surface: 21 dòng ở 7 file test, cộng `--color-surface-elevated` của kit cần map hoặc giải thích. Hằng số `AppSurfaceColors.surfaceElevated*` **vẫn dùng** làm dẫn xuất cho `surfaceContainerLowest` và `surfaceBright` nên chỉ field của extension mới chết |
 | ~~`check_architecture.sh` chưa có test tự động~~ | T0.1 | Regression trong checker âm thầm ngừng enforce boundary | **Đã trả ở M100.11.** `test_architecture_checker.py` trong bộ CI tooling — bốn fixture tiêm lỗi: dự án sạch pass, `domain/` import Flutter thì đỏ và gọi tên file, thiếu suffix thì **cảnh báo** (ghim cả hai chiều, vì `_check_suffixes` gọi `_warn` chứ không `_fail`), và pubspec-không-lib thì đỏ. Đặt ở `scripts/tests/` chứ không `test/tools/` vì đó là nơi `unittest discover` của gate `ci_tooling` đã quét. Ghi chú gốc: **Giảm nhẹ ở M4.10b:** script tự in số file nó quét và coi 0 là lỗi, nên trường hợp tệ nhất — checker ngừng thấy gì mà vẫn pass — không còn im lặng. Vẫn cần fixture cho các trường hợp còn lại |
 | ~~Không có CI~~ | T0.1 | Sáu gate tồn tại và chỉ chạy khi có người nhớ; một PR có thể merge với format lệch, guard đỏ hoặc test hỏng mà không ai thấy | **Đã trả ở M4.10b.** `.github/workflows/ci.yml` chạy trên `pull_request` và `push` vào `main`: format, analyze, generated-code, architecture, guard, docs, 844 test, golden, và build web |
 | ~~`analysis_options.yaml` chưa được áp dụng~~ | T0.1 | Bộ lint đã viết nhưng chưa được enforce; nhiều khả năng có tên rule sai hoặc đã deprecated | **Đã trả ở M2.3.** Dự đoán đúng: `immutable_classes` không tồn tại, `use_if_null_to_convert_nulls_to_bools` đã deprecated. Nghiêm trọng hơn cả hai: 11 rule chỉ nằm ở `errors:` nên **chưa bao giờ chạy** — đã chuyển hết sang `linter: rules:` và kiểm chứng bằng tiêm lỗi |
