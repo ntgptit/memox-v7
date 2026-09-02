@@ -290,15 +290,13 @@ const List<_Binding> _bindings = <_Binding>[
     slot: 'foregroundColor',
     file: _buttons,
     scope: 'buildOutlinedButtonTheme',
-    requires: <String>[],
-    refuses: <String>['primary', 'secondary', 'onSurfaceVariant'],
+    requires: <String>['primary'],
+    refuses: <String>['secondary', 'onSurfaceVariant'],
     because:
-        '_OutlinedButtonDefaultsM3.foregroundColor is primary, and this slot '
-        'departs from it on purpose (M100.27): `primary` is Tokyo\'s #5569FF '
-        'verbatim by owner decision and reads 3.96:1 as a label on the light '
-        'page, so the label is `semantic.primaryInk` — Tokyo\'s primary.dark '
-        'in light, the fill itself in dark. Reading `primary` here again would '
-        'put a sub-AA label back.',
+        '_OutlinedButtonDefaultsM3.foregroundColor is primary. The retired '
+        '`secondaryAction` token was a second name for it, and M100.27\'s '
+        '`primaryInk` was another — a role that fails a ratio is answered by '
+        'retuning the palette (M100.28), never by a substitute token.',
   ),
   _Binding(
     component: 'OutlinedButton',

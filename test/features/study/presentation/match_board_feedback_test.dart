@@ -147,7 +147,7 @@ void main() {
       // And the tap was a real selection, not just a dismissal.
       final ink = Theme.of(
         tester.element(find.text('front-b')),
-      ).extension<AppSemanticColors>()!.primaryInk;
+      ).colorScheme.primary;
       expect(tester.widget<Text>(find.text('front-b')).style?.color, ink);
       expect(_edge(tester, 'front-b').color, ink);
 

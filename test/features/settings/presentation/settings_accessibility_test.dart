@@ -80,10 +80,8 @@ void main() {
         // Kept in the other direction rather than deleted, for the reason the
         // original was written: a palette that drifts back under the floor
         // must fail here rather than quietly re-introduce a fallback ink.
-        // `primaryInk` since M100.27: the fill role is Tokyo's verbatim and
-        // reads 3.39 / 3.43 on the band; the Retry label is the brand as ink.
         expect(
-          contrast(semantic.primaryInk, scheme.errorContainer),
+          contrast(scheme.primary, scheme.errorContainer),
           greaterThanOrEqualTo(kAaBodyText),
           reason:
               'the brand ink fell back under AA on the error band, so the '

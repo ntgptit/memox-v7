@@ -257,12 +257,9 @@ SliderThemeData buildSliderTheme(
 /// measures 11.36:1 there.
 TabBarThemeData buildTabBarTheme(
   ColorScheme scheme,
-  AppSemanticColors semantic,
   TextTheme texts,
 ) => TabBarThemeData(
-  // The brand as ink (M100.27): `primary` is Tokyo's fill verbatim and reads
-  // 3.96:1 as a label on the light page; the indicator below stays on it.
-  labelColor: semantic.primaryInk,
+  labelColor: scheme.primary,
   unselectedLabelColor: scheme.onSurfaceVariant,
   labelStyle: texts.titleSmall,
   unselectedLabelStyle: texts.titleSmall,

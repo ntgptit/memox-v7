@@ -3,7 +3,7 @@
   "note": "Values are what the built ThemeData holds, not what AppColors declares. ColorScheme.fromSeed fills roles this app then overrides.",
   "seedHypotheses": {
     "declaredSeed_colorSchemePrimaryLight": {
-      "hex": "#5569FF",
+      "hex": "#4454CC",
       "hue": 232.94117647058823,
       "note": "AppColors.seed is AppColors.primaryLight"
     },
@@ -16,12 +16,12 @@
   },
   "light": {
     "colorScheme.primary": {
-      "hex": "#5569FF",
+      "hex": "#4454CC",
       "opaque": true,
       "hue": 232.94117647058823,
-      "saturation": 1.0,
-      "chroma": 0.6666666666666667,
-      "lightnessStar": 50.98357564878535,
+      "saturation": 0.5714285714285715,
+      "chroma": 0.5333333333333334,
+      "lightnessStar": 41.1034119356745,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.onPrimary": {
@@ -382,12 +382,12 @@
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.onPrimaryFixedVariant": {
-      "hex": "#122CCB",
+      "hex": "#2636B1",
       "opaque": true,
-      "hue": 231.56756756756758,
-      "saturation": 0.8371040723981901,
-      "chroma": 0.7254901960784313,
-      "lightnessStar": 30.01438921048154,
+      "hue": 233.0935251798561,
+      "saturation": 0.6465116279069767,
+      "chroma": 0.5450980392156862,
+      "lightnessStar": 29.972497604294063,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.secondaryFixed": {
@@ -631,12 +631,12 @@
       "carriesNoHue": false
     },
     "inputDecorationTheme.focusedBorder": {
-      "hex": "#5569FF",
+      "hex": "#4454CC",
       "opaque": true,
       "hue": 232.94117647058823,
-      "saturation": 1.0,
-      "chroma": 0.6666666666666667,
-      "lightnessStar": 50.98357564878535,
+      "saturation": 0.5714285714285715,
+      "chroma": 0.5333333333333334,
+      "lightnessStar": 41.1034119356745,
       "classifiedAs": "role-or-on-color"
     },
     "inputDecorationTheme.disabledBorder": {
@@ -735,39 +735,39 @@
   },
   "dark": {
     "colorScheme.primary": {
-      "hex": "#8C7CF0",
+      "hex": "#BCC2FF",
       "opaque": true,
-      "hue": 248.27586206896552,
-      "saturation": 0.7945205479452055,
-      "chroma": 0.4549019607843137,
-      "lightnessStar": 58.30378186316727,
+      "hue": 234.6268656716418,
+      "saturation": 1.0,
+      "chroma": 0.26274509803921564,
+      "lightnessStar": 79.89467780225057,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.onPrimary": {
-      "hex": "#111633",
+      "hex": "#202771",
       "opaque": true,
-      "hue": 231.1764705882353,
-      "saturation": 0.5000000000000002,
-      "chroma": 0.13333333333333336,
-      "lightnessStar": 8.411672110324723,
+      "hue": 234.8148148148148,
+      "saturation": 0.5586206896551724,
+      "chroma": 0.3176470588235294,
+      "lightnessStar": 19.844023038430635,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.primaryContainer": {
-      "hex": "#32296D",
+      "hex": "#252C6F",
       "opaque": true,
-      "hue": 247.94117647058826,
-      "saturation": 0.4533333333333332,
-      "chroma": 0.2666666666666666,
-      "lightnessStar": 21.461646532096957,
+      "hue": 234.32432432432432,
+      "saturation": 0.4999999999999999,
+      "chroma": 0.2901960784313725,
+      "lightnessStar": 21.365984447522976,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.onPrimaryContainer": {
-      "hex": "#DAD4FE",
+      "hex": "#D2D6FF",
       "opaque": true,
-      "hue": 248.57142857142856,
-      "saturation": 0.9545454545454553,
-      "chroma": 0.16470588235294115,
-      "lightnessStar": 86.57735860034676,
+      "hue": 234.66666666666666,
+      "saturation": 1.0,
+      "chroma": 0.17647058823529416,
+      "lightnessStar": 86.51136341364592,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.secondary": {
@@ -1041,12 +1041,12 @@
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.inversePrimary": {
-      "hex": "#453799",
+      "hex": "#333C9C",
       "opaque": true,
-      "hue": 248.57142857142856,
-      "saturation": 0.47115384615384615,
-      "chroma": 0.38431372549019605,
-      "lightnessStar": 30.15094104898011,
+      "hue": 234.85714285714286,
+      "saturation": 0.5072463768115942,
+      "chroma": 0.411764705882353,
+      "lightnessStar": 30.24438856465249,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.shadow": {
@@ -1101,12 +1101,12 @@
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.onPrimaryFixedVariant": {
-      "hex": "#122CCB",
+      "hex": "#2636B1",
       "opaque": true,
-      "hue": 231.56756756756758,
-      "saturation": 0.8371040723981901,
-      "chroma": 0.7254901960784313,
-      "lightnessStar": 30.01438921048154,
+      "hue": 233.0935251798561,
+      "saturation": 0.6465116279069767,
+      "chroma": 0.5450980392156862,
+      "lightnessStar": 29.972497604294063,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.secondaryFixed": {
@@ -1350,12 +1350,12 @@
       "carriesNoHue": false
     },
     "inputDecorationTheme.focusedBorder": {
-      "hex": "#8C7CF0",
+      "hex": "#BCC2FF",
       "opaque": true,
-      "hue": 248.27586206896552,
-      "saturation": 0.7945205479452055,
-      "chroma": 0.4549019607843137,
-      "lightnessStar": 58.30378186316727,
+      "hue": 234.6268656716418,
+      "saturation": 1.0,
+      "chroma": 0.26274509803921564,
+      "lightnessStar": 79.89467780225057,
       "classifiedAs": "role-or-on-color"
     },
     "inputDecorationTheme.disabledBorder": {

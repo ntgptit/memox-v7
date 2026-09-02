@@ -136,10 +136,9 @@ void main() {
     await tester.pumpAndSettle();
 
     final theme = Theme.of(tester.element(find.text('Box 2 → 3')));
-    // The brand as ink (`primaryInk`, M100.27), not the fill role.
     expect(
       tester.widget<Text>(find.text('Box 2 → 3')).style!.color,
-      theme.extension<AppSemanticColors>()!.primaryInk,
+      theme.colorScheme.primary,
     );
     expect(
       tester.widget<Text>(find.textContaining('Due')).style!.color,
@@ -215,10 +214,8 @@ void main() {
         ]) {
           expect(contrast(ink, scheme.surface), greaterThanOrEqualTo(4.5));
         }
-        // The box line is the brand as ink since M100.27; `primary` itself
-        // is Tokyo's fill and reads 4.33 here.
         expect(
-          contrast(semantic.primaryInk, scheme.surface),
+          contrast(scheme.primary, scheme.surface),
           greaterThanOrEqualTo(4.5),
         );
       });
@@ -229,17 +226,9 @@ void main() {
           contrast(semantic.borderControl, theme.scaffoldBackgroundColor),
           greaterThanOrEqualTo(3),
         );
-        // The scheduler badge's ink on the muted panel is text, so 4.5; the
-        // current box step is a fill, so 3:1 (WCAG 1.4.11). Until M100.27 both
-        // were `primary`; the fill is Tokyo's verbatim now and reads 3.62 on
-        // the light panel, which is a fill's bar and not a label's.
-        expect(
-          contrast(semantic.primaryInk, semantic.surfaceMuted),
-          greaterThanOrEqualTo(4.5),
-        );
         expect(
           contrast(scheme.primary, semantic.surfaceMuted),
-          greaterThanOrEqualTo(3),
+          greaterThanOrEqualTo(4.5),
         );
         expect(
           contrast(semantic.onDueContainer, semantic.dueContainer),

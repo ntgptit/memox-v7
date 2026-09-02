@@ -25,7 +25,9 @@ import 'package:flutter/material.dart';
 /// hold survived without a rule moving. Measurements quoted below that predate
 /// M100.26 describe the A2 palette and are kept as the record of *why* a token
 /// exists; the current numbers are the tests' output.
-/// **M100.27: the page and the card are Tokyo's verbatim, by owner decision.**
+/// **The page and the card are Tokyo's verbatim (M100.27, kept by M100.28)** —
+/// they may be, because no canonical role or ratio depends on their exact hex
+/// the way `primary`'s consumers depend on `primary`; AD-14 ranks that order.
 /// Light card and raised surface are pure `#FFFFFF` — Tokyo's paper — which
 /// MX-VIS-002 R9 now exempts for exactly these four roles, since a tint the
 /// owner has ruled out cannot be a rule. The dark card is `#111633`, 4.3 L\*

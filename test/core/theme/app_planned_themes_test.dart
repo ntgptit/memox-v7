@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_elevation.dart';
-import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_theme.dart';
 
 import '../../support/color_math.dart';
@@ -50,15 +49,12 @@ void main() {
         final t = entry.value.datePickerTheme;
         const on = <WidgetState>{WidgetState.selected};
 
-        // The same pair as the filled button's label — white on Tokyo's
-        // `#5569FF` — and the same owner-decided 4.3 floor in light (M100.27,
-        // see `app_theme_test.dart`).
         expect(
           contrast(
             resolve(t.dayForegroundColor, on),
             resolve(t.dayBackgroundColor, on),
           ),
-          greaterThanOrEqualTo(entry.key == 'light' ? 4.3 : text),
+          greaterThanOrEqualTo(text),
           reason: '${entry.key}: the selected day is unreadable',
         );
       }
@@ -173,18 +169,13 @@ void main() {
   group('tab bar', () {
     test('the selected label reads on the page it sits on', () {
       // A tab's label sits on the page, not on a container fill, which is why
-      // `_TabBarDefaultsM3` inks it `primary` rather than an `on*` role. Since
-      // M100.27 the app's brand-as-ink is `primaryInk` — `primary` is Tokyo's
-      // fill verbatim and reads 3.96:1 as text on the light page. The identity
-      // is pinned in `m3_role_contract_test.dart`; this asks whether it is
-      // readable where it actually lands.
+      // `_TabBarDefaultsM3` inks it `primary` rather than an `on*` role. The
+      // role identity is pinned in `m3_role_contract_test.dart`; this asks
+      // whether it is readable where it actually lands.
       for (final entry in themes.entries) {
         final t = entry.value;
 
-        expect(
-          t.tabBarTheme.labelColor,
-          t.extension<AppSemanticColors>()!.primaryInk,
-        );
+        expect(t.tabBarTheme.labelColor, t.colorScheme.primary);
         expect(
           contrast(t.tabBarTheme.labelColor!, t.colorScheme.surface),
           greaterThanOrEqualTo(text),

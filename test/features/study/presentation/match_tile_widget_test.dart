@@ -202,12 +202,12 @@ void main() {
       );
     });
 
-    testWidgets('selected is the brand ink on the edge and the label', (
+    testWidgets('selected is primary on the edge and the label', (
       tester,
     ) async {
-      // `primaryInk`, not `primary`: this is a label on a surface, and since
-      // M100.27 `primary` is Tokyo's fill verbatim — 3.96:1 as bare text on
-      // the light page — so the brand as ink is its own token again.
+      // `primary` — the canonical accent, as a label on a surface. It reads
+      // there because the palette was retuned to make it (M100.28), not
+      // because a second token stands in for it.
       await pumpTile(
         tester,
         text: term,
@@ -217,7 +217,7 @@ void main() {
 
       final accent = Theme.of(
         tester.element(find.text(term)),
-      ).extension<AppSemanticColors>()!.primaryInk;
+      ).colorScheme.primary;
       expect(skinOf(tester).border!.top.color, accent);
       expect(skinOf(tester).border!.top.width, AppStroke.input);
       expect(textOf(tester, term).style?.color, accent);

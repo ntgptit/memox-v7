@@ -40,10 +40,6 @@ void main() {
       expect(mid.danger, Color.lerp(light.danger, dark.danger, 0.5));
       expect(mid.info, Color.lerp(light.info, dark.info, 0.5));
       expect(
-        mid.primaryInk,
-        Color.lerp(light.primaryInk, dark.primaryInk, 0.5),
-      );
-      expect(
         mid.surfaceMuted,
         Color.lerp(light.surfaceMuted, dark.surfaceMuted, 0.5),
       );

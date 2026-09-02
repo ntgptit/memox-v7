@@ -125,7 +125,7 @@ TextStyle cardMetricValueStyle(BuildContext context, CardMetricKind kind) {
       // 6.36:1 light and 4.66:1 dark on `surfaceMuted`, 7.27 / 5.51 on
       // `surface` — the accent as text, not `ColorScheme.primary`, which is a
       // fill colour and fails AA as a bare label on the dark panel.
-      color: context.semanticColors.primaryInk,
+      color: context.colors.primary,
       fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
     ),
   };

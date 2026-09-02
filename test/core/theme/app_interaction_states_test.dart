@@ -146,8 +146,7 @@ void main() {
         final foreground = entry.value.textButtonTheme.style!.foregroundColor!;
         final rest = foreground.resolve(resting);
 
-        // The brand as ink (M100.27), not the fill role.
-        expect(rest, semantic.primaryInk, reason: entry.key);
+        expect(rest, entry.value.colorScheme.primary, reason: entry.key);
         expect(
           foreground.resolve(hovered),
           isNot(rest),

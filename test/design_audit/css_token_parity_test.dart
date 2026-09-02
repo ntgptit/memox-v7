@@ -90,10 +90,7 @@ void main() {
     '--color-seed': (AppColors.seed, AppColors.seed),
     '--color-primary': (AppColors.primaryLight, AppColors.primaryDark),
     '--color-on-primary': (AppColors.onPrimaryLight, AppColors.onPrimaryDark),
-    '--color-primary-accent': (
-      AppColors.primaryInkLight,
-      AppColors.primaryInkDark,
-    ),
+    '--color-primary-accent': (AppColors.primaryLight, AppColors.primaryDark),
     '--color-primary-container': (
       AppMaterialRoles.primaryContainerLight,
       AppMaterialRoles.primaryContainerDark,

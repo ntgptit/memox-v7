@@ -248,7 +248,7 @@ class _Chip extends StatelessWidget {
             ).copyWith(
               // The brand hue as text. `primary` is that since M100.18 —
               // the dark tone inverted, so the role itself passes AA here.
-              color: context.semanticColors.primaryInk,
+              color: context.colors.primary,
             ),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,

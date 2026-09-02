@@ -114,16 +114,9 @@ void main() {
             final restInk = ink(rest);
             expect(restFill, isNotNull, reason: '$variantName has no fill');
             expect(restInk, isNotNull, reason: '$variantName has no ink');
-            // The light primary fill is Tokyo's `#5569FF` verbatim (owner
-            // decision, M100.27) and white on it is 4.33:1 — held at 4.3, the
-            // same recorded floor as `app_theme_test.dart`. Every other pair
-            // keeps the full bar.
-            final isAcceptedPrimary =
-                variantEntry.key == 'primary' &&
-                theme.brightness == Brightness.light;
             expect(
               contrast(restInk!, restFill!),
-              greaterThanOrEqualTo(isAcceptedPrimary ? 4.3 : 4.5),
+              greaterThanOrEqualTo(4.5),
               reason: '$themeName $variantName: label under AA on its own fill',
             );
 

@@ -67,21 +67,17 @@ void main() {
       // white text 1.71:1 on the tone-80 lavender, which passes no standard.
       // Read from the theme, not from a token — the gap that once shipped a
       // 3.09:1 label was a test that checked a token the button did not use.
-      // **Light holds 4.3, not 4.5, and that is an owner decision recorded
-      // rather than a floor that slipped (M100.27).** The fill is Tokyo's
-      // `#5569FF` verbatim and white on it measures 4.33:1; the only inks that
-      // clear 4.5 on it are near-black, which Tokyo's own buttons do not wear.
-      // Dark is held at the full bar because its ink *did* move: `#111633` on
-      // `#8C7CF0` reads 5.27 where white read 3.36.
-      const filledLabelFloor = <String, double>{'light': 4.3, 'dark': 4.5};
-
+      // **4.5 in both modes, and the floor does not move for a hex.** M100.27
+      // held light at 4.3 to keep Tokyo's `#5569FF` verbatim; M100.28 reversed
+      // that as the invariant now says: when a canonical role fails a ratio
+      // the palette is retuned (`#4454CC`, 6.20:1), never the floor.
       for (final entry in themes.entries) {
         expect(
           contrast(
             entry.value.colorScheme.onPrimary,
             filledButtonFill(entry.value),
           ),
-          greaterThanOrEqualTo(filledLabelFloor[entry.key]!),
+          greaterThanOrEqualTo(4.5),
           reason: '${entry.key}: onPrimary on the action fill',
         );
         expect(

@@ -153,10 +153,7 @@ void main() {
 
   group('primary', () {
     test('light and dark primary are the same brand colour', () {
-      // 16, not 12, since M100.27: both hexes are Tokyo's verbatim (`#5569FF`
-      // light, `#8C7CF0` dark — owner decision) and Tokyo's two themes sit
-      // 15.3 degrees apart. The bound still catches a violet drifting to blue.
-      const sameFamily = 16.0;
+      const sameFamily = 12.0;
 
       expect(
         (hue(light.colorScheme.primary)! - hue(dark.colorScheme.primary)!)
@@ -224,14 +221,11 @@ void main() {
         'light': light,
         'dark': dark,
       }.entries) {
-        // `primaryInk`, not `primary`, since M100.27: the fill role is Tokyo's
-        // `#5569FF` verbatim and reads 3.96:1 as a label on the light page, so
-        // the brand-as-ink slots take Tokyo's `primary.dark` there. In dark the
-        // two are one value, which the second expectation states.
         expect(
           outlinedButtonLabel(entry.value),
-          entry.value.extension<AppSemanticColors>()!.primaryInk,
-          reason: '${entry.key}: the outlined label is the brand as ink',
+          entry.value.colorScheme.primary,
+          reason:
+              '${entry.key}: _OutlinedButtonDefaultsM3 names `primary` here',
         );
       }
     });
