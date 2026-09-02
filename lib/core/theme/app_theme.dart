@@ -87,13 +87,14 @@ ThemeData buildHighContrastDarkTheme() => _highContrastDarkTheme;
 // — a fill-level tone in a container-level slot, and a different value in
 // each brightness for a role the spec defines as brightness-independent.
 //
-// The constructor accepts four more names than that — three deprecated
+// The constructor accepts a few more names than that — three deprecated
 // roles and one tint mechanism — and none is passed, read, dumped or
-// swatched anywhere in this repository. The guard keeps it that way:
-// `memox_v7.design_system.color_scheme_45_roles_only` bans them as
-// constructor or `copyWith` arguments here, and
-// `memox_v7.design_system.no_retired_color_role_read` bans reading them
-// anywhere under `lib/` (M100.17).
+// swatched anywhere in this repository. The guard locks the names to the
+// list above by allowlist rather than by naming what is out:
+// `memox_v7.design_system.color_scheme_arguments_are_m3_roles` for what a
+// `ColorScheme(` or a scheme's `copyWith(` may be handed, and
+// `memox_v7.design_system.color_scheme_reads_are_m3_roles` for what may be
+// read off one anywhere under `lib/` (M100.17).
 const ColorScheme _lightScheme = ColorScheme(
   brightness: Brightness.light,
   primary: AppColors.primaryLight,

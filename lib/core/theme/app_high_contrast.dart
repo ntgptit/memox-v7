@@ -76,13 +76,18 @@ AppSemanticColors highContrastSemantics(
   onDisabled: scheme.onSurface.withValues(alpha: highContrastDisabledAlpha),
 );
 
-/// [base] with the two Material border roles pointed at the same stronger edge.
+/// [scheme] with the two Material border roles pointed at the same stronger
+/// edge.
 ///
 /// `outline` and `outlineVariant` are what an *untended* widget reads — the app's
 /// own components go through `AppSemanticColors` — so they have to move with it
 /// or a third-party control keeps drawing the normal-contrast hairline on a
 /// screen where everything around it got stronger.
-ColorScheme highContrastScheme(ColorScheme base) => base.copyWith(
-  outline: base.onSurfaceVariant,
-  outlineVariant: base.onSurfaceVariant,
+///
+/// The parameter is `scheme` rather than `base` on purpose: the guard's
+/// role-name allowlist recognises a scheme by the three names the codebase
+/// gives it, and this is the one place a scheme is re-pointed rather than read.
+ColorScheme highContrastScheme(ColorScheme scheme) => scheme.copyWith(
+  outline: scheme.onSurfaceVariant,
+  outlineVariant: scheme.onSurfaceVariant,
 );

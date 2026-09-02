@@ -98,7 +98,7 @@ void main() {
     // The inventory below is written by hand, so this is the one line that
     // notices when a name is added to it or dropped from it. Anything the
     // constructor accepts beyond the 45 is kept out of the scheme by the
-    // guard (`memox_v7.design_system.color_scheme_45_roles_only`), not by a
+    // guard's allowlist rule `color_scheme_arguments_are_m3_roles`, not by a
     // test that would have to read it to check it (M100.17).
     expect(_roles(schemes['light']!).length, _materialColorRoleCount);
   });

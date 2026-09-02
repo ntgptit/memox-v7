@@ -16453,14 +16453,30 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
     vì thế đọc lại là **45 role + 1 cơ chế**.
 - **Bản đầu của task giữ hai test pin (`surfaceTint == primary`, ba getter
   deprecated trả về fallback) — chủ dự án bác: xoá là xoá luôn, không đọc lại
-  chúng ở đâu cả.** Thay bằng guard, đúng chỗ của một điều cấm: rule
-  `memox_v7.design_system.color_scheme_45_roles_only` (scope `theme_files`,
-  chặn bốn tên đó làm tham số của `ColorScheme(` hoặc `copyWith(`) và
-  `memox_v7.design_system.no_retired_color_role_read` (toàn `lib/`, chặn đọc
-  `.surfaceTint`, `.onBackground`, `.surfaceVariant`; `background` không vào
-  rule đọc vì feature có field cùng tên của riêng nó, và `surfaceTintColor`
-  vẫn hợp lệ nhờ `\b`). Cả hai đã tiêm lỗi: guard đỏ và gọi đúng tên rule,
-  gỡ lỗi thì xanh.
+  chúng ở đâu cả.** Bản thứ hai thay bằng hai rule guard **blocklist** bốn tên
+  đó — chủ dự án bác lần nữa: guard phải khoá tên role theo chuẩn M3, tức
+  **allowlist 45 tên**, không cần và không được nhắc tên nào ngoài chuẩn. Bản
+  cuối:
+  - `memox_v7.design_system.color_scheme_arguments_are_m3_roles` (regex
+    **file mode**, scope `dart_lib`): tham số của `ColorScheme(`, bốn
+    constructor theo brightness, và `copyWith(` trên ba định danh mà codebase
+    đặt cho scheme (`scheme`, `colors`, `colorScheme`) chỉ được là một trong
+    45 tên hoặc `brightness`. Đi bộ ngoặc cân bằng hai tầng; ngoặc lẻ trong
+    comment làm vùng kiểm **ngắn lại** chứ không tràn sang code sau; tham số
+    đọc ở đầu dòng nên comment văn xuôi có dấu hai chấm không dính; có pattern
+    riêng cho call viết trên một dòng. `fromSeed` không nằm trong rule vì nó
+    không phải danh sách role.
+  - `memox_v7.design_system.color_scheme_reads_are_m3_roles` (line mode,
+    scope `dart_lib`): member đọc trên ba định danh đó phải là 45 tên,
+    `brightness` hoặc `copyWith`; dòng comment miễn vì văn xuôi nhắc
+    `colors.css`; chấp nhận `?.`.
+  - `highContrastScheme` đổi tên tham số `base` → `scheme` để rơi vào đúng ba
+    định danh rule nhận diện — chỗ duy nhất scheme được re-point thay vì đọc.
+  - Đo trên cây hiện tại: 0 finding; `state.copyWith(error: …)` của study
+    controller không dính vì receiver không phải scheme. Tiêm lỗi bốn ca
+    (tham số constructor nhiều dòng, `copyWith` nhiều dòng trong high
+    contrast, `copyWith` một dòng trong feature, đọc `scheme.<tên lạ>` trong
+    feature): guard đỏ đúng tên rule; gỡ thì xanh.
 - **Catalog:** Widgetbook đang swatch 32/45 role, trộn standard với add-on và
   thiếu 13 (`onSecondary`, `onTertiary`, `onError`, ba `on*Container`,
   `surfaceDim`, `surfaceBright`, `surfaceContainerLowest`/`Highest`,
@@ -16475,8 +16491,9 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
   - [x] Không còn một tham chiếu nào tới `surfaceTint`, `background`,
         `onBackground`, `surfaceVariant` như role trong `lib/`, `test/`,
         `widgetbook/`, `e2e/` — kể cả trong test và inventory audit.
-  - [x] Guard có hai rule mới, tiêm lỗi đỏ đúng tên, gỡ lỗi xanh; bộ test của
-        guard xanh.
+  - [x] Guard khoá tên role bằng **allowlist 45 tên M3** ở cả chiều truyền và
+        chiều đọc, không nhắc tên nào ngoài chuẩn; tiêm lỗi bốn ca đỏ đúng
+        tên rule, gỡ lỗi xanh; bộ test của guard xanh.
   - [x] Không mã hex nào đổi: diff chỉ chạm comment, tham số truyền, test,
         guard và catalog.
   - [x] Catalog Widgetbook hiện đủ 45 swatch; smoke test xanh.
