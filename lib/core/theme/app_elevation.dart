@@ -74,9 +74,17 @@ List<BoxShadow> shadowsFor(double level, ColorScheme scheme) {
   // `shadows.card`: `0px 0px 2px #6A7199`, a one-pixel halo that reads 4.07:1
   // against the page and 3.74:1 against the card. Same colour at every level:
   // a halo is an edge, and an edge does not get deeper.
+  //
+  // **`spreadRadius: 1` is what makes those two ratios true on screen.** A
+  // blur alone rasterises the source colour into partially covered pixels, so
+  // the exposed ring would measure below the source (review on #427). The
+  // one-pixel spread paints a solid ring at the full colour before the 2 px
+  // blur falls off outside it — the cue the ratios describe is the ring, and
+  // `app_elevation_test.dart` pins the spread so the ring cannot quietly
+  // become a wash again.
   if (scheme.brightness == Brightness.dark) {
     return const <BoxShadow>[
-      BoxShadow(color: AppColors.cardRimDark, blurRadius: 2),
+      BoxShadow(color: AppColors.cardRimDark, blurRadius: 2, spreadRadius: 1),
     ];
   }
 

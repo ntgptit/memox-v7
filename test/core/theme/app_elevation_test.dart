@@ -59,6 +59,16 @@ void main() {
         expect(card.color, AppColors.cardRimDark);
         expect(card.color.a, 1.0, reason: 'a rim is an edge, not a wash');
         expect(card.offset, Offset.zero);
+        // The solid ring is what the 3:1 ratios are measured on. Blur alone
+        // would leave every exposed pixel partially covered and the source
+        // colour's contrast a claim about paint nobody sees.
+        expect(
+          card.spreadRadius,
+          greaterThanOrEqualTo(1.0),
+          reason:
+              'without a spread the rim is only a blur, and a blurred edge '
+              'never reaches the colour its contrast was measured at',
+        );
         expect(overlay.color, card.color);
         expect(overlay.blurRadius, card.blurRadius);
       },

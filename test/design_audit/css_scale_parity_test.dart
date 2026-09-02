@@ -287,7 +287,7 @@ void main() {
       // `0 0 2px #6A7199`, a one-pixel halo rather than a shade — at every
       // level, and the kit says the same thing in the same words. The two
       // agreeing is what makes it a shared decision rather than a coincidence.
-      const rim = '0 0 2px #6A7199';
+      const rim = '0 0 2px 1px #6A7199';
       for (final token in <String>[
         '--shadow-card',
         '--shadow-raised',
@@ -309,6 +309,7 @@ void main() {
         final shadow = shadowsFor(level, dark.colorScheme).single;
         expect(shadow.color, AppColors.cardRimDark, reason: 'level $level');
         expect(shadow.blurRadius, 2, reason: 'level $level');
+        expect(shadow.spreadRadius, 1, reason: 'level $level');
         expect(shadow.offset, Offset.zero, reason: 'level $level');
       }
     });

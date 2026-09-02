@@ -16980,6 +16980,13 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
   `m3_role_binding_guard_test`, `m3_combined_state_test`) ghim slot → `primary`;
   palette quality (`app_palette_test`, `app_theme_test`, `app_ink_test`, audit)
   đo hex. Không tầng nào được sửa để tầng kia pass.
+- **Review PR #427 (Codex):** rim dark vẽ bằng `blurRadius: 2` một mình thì pixel lộ
+  ra chỉ phủ một phần, nên tỉ lệ 4,07 / 3,74 đo trên màu nguồn không phải thứ mắt
+  thấy. Sửa: thêm `spreadRadius: 1` để vòng 1 px được tô đặc đúng màu trước khi
+  blur tắt dần; `app_elevation_test` ghim spread ≥ 1, kit `elevation.css` ghi
+  `0 0 2px 1px #6A7199`. Hai thread còn lại (today-foreground của date picker,
+  đăng ký `primaryInk` với audit resolver) hết hiệu lực khi `primary` retune về
+  `#4454CC` (5,15:1 trên `surfaceContainerHigh`) và `primaryInk` bị gỡ.
 - **Editable documents:** `docs/wbs.md`, `docs/architecture.md` (AD-14).
 - **Output:** như Scope.
 - **Acceptance criteria:**

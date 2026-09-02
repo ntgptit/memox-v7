@@ -4,7 +4,9 @@
    bottom of the scale — so a shade there moves it by under one L*, and with
    the card fixed at Tokyo's #111633 the surface step is 4.3 L*. Tokyo's own
    card shadow, 0 0 2px #6A7199, is a one-pixel halo that reads 4.07:1 against
-   the page and 3.74:1 against the card; it is the same at every level, because
+   the page and 3.74:1 against the card. The app adds a 1px spread so the ring
+   is painted solid at that colour before the blur falls off — a blur alone
+   leaves every exposed pixel partially covered. Same at every level, because
    an edge does not get deeper. */
 :root{
   --elevation-none:0;--elevation-card:1;--elevation-raised:3;--elevation-overlay:8;
@@ -17,5 +19,5 @@
   --border-focus:2px;     /* focus ring on icon buttons and outlined buttons */
 }
 [data-theme="dark"]{
-  --shadow-card:0 0 2px #6A7199;--shadow-raised:0 0 2px #6A7199;--shadow-overlay:0 0 2px #6A7199;
+  --shadow-card:0 0 2px 1px #6A7199;--shadow-raised:0 0 2px 1px #6A7199;--shadow-overlay:0 0 2px 1px #6A7199;
 }

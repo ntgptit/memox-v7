@@ -226,7 +226,9 @@ void main() {
       // 1 px rim `shadowsFor` paints. A rim is an edge, measured as contrast
       // against what it separates (WCAG 1.4.11's 3:1), not as a shift of the
       // page's lightness, which is why the two modes are no longer held to one
-      // number and are instead each held to their own pair.
+      // number and are instead each held to their own pair. The colour measured
+      // here is painted solid by the rim's 1 px spread (`app_elevation_test`
+      // pins it), so the ratio is the ring's, not a blurred approximation.
       final lightLift = liftOf(themes['light']!);
       expect(
         lightLift,
