@@ -267,65 +267,71 @@ void main() {
     });
   });
 
-  group('semantic chroma budget', () {
-    test('info stays the quietest, and nothing is fully saturated', () {
-      // Not equal on purpose. Four hues all at full saturation is how a study
-      // tool starts looking like a game.
+  group('semantic hues', () {
+    test('the four semantics are four hues, each unmistakably a colour', () {
+      // **This replaced the chroma budget at M100.26, and the replacement is
+      // the redesign rather than a loosening.** Until then this group held
+      // `info` as the quietest of the four and capped saturation at 0.85,
+      // because A2 was a restrained palette and four hues all shouting is how
+      // a study tool starts looking like a game. The owner's decision to move
+      // the theme to tokyo-react-admin-dashboard retires that premise: Tokyo's
+      // status colours (`#57CA22`, `#FFA319`, `#FF1943`, `#33C2FF`) are
+      // deliberately vivid, and all four sit at saturation 1.0 in HSL, so a
+      // budget rule would fail on arrival and a ceiling raised to 1.0 would
+      // catch nothing.
       //
-      // **This replaced a rule that the palette outgrew at M4.10p.** Until then
-      // it also asserted `danger` was the loudest, and with the old values it
-      // was — light 0.676 against warning's 0.612. Adopting the design system's
-      // semantic colours inverted that: light is now warning 0.801, success
-      // 0.766, danger 0.634.
-      //
-      // The interesting part is where the disagreement lives. The design
-      // system's own readme says "danger carries the most saturation, info the
-      // least", so its prose and its hex values contradict each other; this repo
-      // is not the party that disagrees. Values are what the project owner made
-      // authoritative, so the values won, and the half of the rule they did not
-      // break is kept rather than the whole rule being deleted:
-      //
-      //   - `info` is still the quietest in both modes, and the design agrees.
-      //   - Nothing approaches full saturation. The ceiling is 0.85 rather than
-      //     the old 0.70 because dark `danger` now measures 0.814 — high enough
-      //     that the old number would only be re-raised on the next palette
-      //     change, and low enough to still catch a raw `#FF0000`.
-      //   - The four are still spread, so "deliberately unequal" keeps a test.
-      const ceiling = 0.85;
-      const minimumSpread = 1.5;
+      // What restraint is left is expressed where it is measurable: the light
+      // fills sit at tone ~45 so they clear 3:1 on the card and the page
+      // (`app_theme_test.dart`), the warning ink clears 4.5 (`app_ink_test
+      // .dart`), and this test keeps the structural half — four *different*
+      // hues, none of them a grey.
+      const minimumHueGap = 40.0;
+      const minimumSaturation = 0.5;
 
       for (final entry in <String, AppSemanticColors>{
         'light': lightSemantic,
         'dark': darkSemantic,
       }.entries) {
         final semantic = entry.value;
-        final budget = <String, double>{
-          'danger': saturation(semantic.danger),
-          'success': saturation(semantic.success),
-          'warning': saturation(semantic.warning),
-          'info': saturation(semantic.info),
+        final hues = <String, Color>{
+          'danger': semantic.danger,
+          'success': semantic.success,
+          'warning': semantic.warning,
+          'info': semantic.info,
         };
-        final values = budget.values.toList();
 
-        final loudest = values.reduce((a, b) => a > b ? a : b);
-        final quietest = values.reduce((a, b) => a < b ? a : b);
+        for (final colour in hues.entries) {
+          expect(
+            hue(colour.value),
+            isNotNull,
+            reason: '${entry.key}: ${colour.key} is a grey',
+          );
+          expect(
+            saturation(colour.value),
+            greaterThanOrEqualTo(minimumSaturation),
+            reason:
+                '${entry.key}: ${colour.key} is too muted to read as a '
+                'status colour',
+          );
+        }
 
-        expect(
-          budget['info'],
-          quietest,
-          reason: '${entry.key}: info is not the quietest',
-        );
-        expect(
-          loudest,
-          lessThanOrEqualTo(ceiling),
-          reason: '${entry.key}: a semantic colour is over budget',
-        );
-        expect(
-          loudest / quietest,
-          greaterThanOrEqualTo(minimumSpread),
-          reason:
-              '${entry.key}: the four semantics are too close to be a budget',
-        );
+        final names = hues.keys.toList();
+        for (var i = 0; i < names.length; i++) {
+          for (var j = i + 1; j < names.length; j++) {
+            final a = hue(hues[names[i]]!)!;
+            final b = hue(hues[names[j]]!)!;
+            final raw = (a - b).abs();
+            final gap = raw > 180 ? 360 - raw : raw;
+
+            expect(
+              gap,
+              greaterThanOrEqualTo(minimumHueGap),
+              reason:
+                  '${entry.key}: ${names[i]} and ${names[j]} are '
+                  '${gap.round()} degrees apart — two statuses in one hue',
+            );
+          }
+        }
       }
     });
   });

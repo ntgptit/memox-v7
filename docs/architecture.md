@@ -1000,6 +1000,29 @@ so với trước. Hệ quả cấu trúc duy nhất: `secondaryContainer` dark 
 trạng thái của nó vượt ngân sách chroma, và thang surface là quyết định về chiều
 sâu (mục 4) chứ không phải về thương hiệu.
 
+**M100.26 mở rộng quyết định đó ra toàn bộ hệ màu — theme là Tokyo, không chỉ
+hai họ accent.** Chủ dự án xác nhận đây là redesign toàn diện. Mỗi token nay là
+một trong ba thứ: (1) **literal Tokyo** — trang `#F2F5F9` / `#070C27`, ink
+`#223354` / `#CBCCD2`, bốn màu trạng thái `#57CA22` `#FFA319` `#FF1943`
+`#33C2FF` ở dark, viền `#272C48`, `primary.main` làm cạnh chọn; (2) **primitive
+Tokyo làm phẳng** theo đúng idiom `alpha.black` / `primary.lighter` của nó —
+text phụ = ink @ 70 % trên paper, inset = ink @ 10 %, fill chọn = `lighten(primary,
+.85)`; (3) **giá trị cũ đổi hue** sang key Tokyo, giữ tone và chroma — toàn bộ
+thang dark (L\* 4,1 → 10,4 → 17,0 → 24,0 ở hue ~231 thay cho ~245), thang
+`surfaceContainer`, container và `on*` của mọi họ, `tertiary` theo hue của
+`info`. Bốn fill trạng thái ở light lấy hue và chroma Tokyo ở đúng tone cũ (~45),
+vì literal Tokyo trên trang sáng đo 2–2,4:1.
+
+Năm quyết định của AD này vẫn nguyên và **không luật đo nào phải nới**: seed vẫn
+là gốc trung tính (nay hue 233), R3/R4/R9, sàn thang, trần bão hoà surface dark
+(card 0,35 so với trần 0,42), tổng độ nổi card đều pass với giá trị mới. Hai thứ
+đổi ở tầng luật: `borderControl` light hạ chroma về 0,047 để canvas sáng giữ trần
+0,06 (Tokyo `text.secondary` mang 0,137); và **ngân sách chroma semantic bị thay**
+— Tokyo cố ý để bốn màu trạng thái ở saturation 1,0, nên "info yên nhất, trần
+0,85" đỏ ngay khi áp và trần nâng lên 1,0 thì không bắt được gì. Phần cấu trúc
+giữ lại thành luật mới: bốn hue cách nhau ≥ 40°, không cái nào là grey; phần
+tương phản đã có sàn riêng ở `app_theme_test.dart` và `app_ink_test.dart`.
+
 ### Nguồn của giá trị token đã đổi (M4.10p)
 
 Khi AD này được viết, `lib/core/theme/` là nơi duy nhất định nghĩa một token.

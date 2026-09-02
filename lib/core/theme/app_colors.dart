@@ -1,6 +1,17 @@
 import 'package:flutter/material.dart';
 
-/// Colour tokens — **A2 Quizlet Navy Indigo**, applied in M3.5b.
+/// Colour tokens — **Tokyo**, applied in M100.25–26 over the A2 Quizlet Navy
+/// Indigo structure laid down at M3.5b.
+///
+/// **The palette is Tokyo's since M100.26.** The owner asked for the theme to
+/// match `ntgptit/tokyo-react-admin-dashboard`, and every value in this file is
+/// now one of three things: a Tokyo literal, a Tokyo primitive flattened over a
+/// Tokyo surface (its `alpha.black`/`primary.lighter` idiom, precomputed as
+/// AD-14 requires), or the value this file already had re-hued onto a Tokyo
+/// key with its tone and chroma kept — so every L\* step and ratio the tests
+/// hold survived without a rule moving. Measurements quoted below that predate
+/// M100.26 describe the A2 palette and are kept as the record of *why* a token
+/// exists; the current numbers are the tests' output.
 ///
 /// Every name says what the colour *means*, never what it looks like. `danger`
 /// survives a redesign that turns it amber; `red` becomes a lie the moment
@@ -62,10 +73,10 @@ abstract final class AppColors {
   // the surface hue makes text sit *in* the interface rather than on top of it.
   // Which is why both dark values moved with the ladder — a trace of the *old*
   // surface hue is a trace of a hue no surface carries any more.
-  static const Color textPrimaryLight = Color(0xFF16182B);
-  static const Color textPrimaryDark = Color(0xFFEDEDF6);
-  static const Color textSecondaryLight = Color(0xFF565C72);
-  static const Color textSecondaryDark = Color(0xFFA8A7C4);
+  static const Color textPrimaryLight = Color(0xFF223354);
+  static const Color textPrimaryDark = Color(0xFFCBCCD2);
+  static const Color textSecondaryLight = Color(0xFF596680);
+  static const Color textSecondaryDark = Color(0xFF9597A1);
 
   /// The fill and the border of a disabled control — a solid, per MX-VIS-002
   /// rule R7. Material's idiom is the ink at 12% alpha, which composites
@@ -77,15 +88,15 @@ abstract final class AppColors {
   /// The kit's `--color-disabled-surface` reads `#E3E3E6` / `#312E4E`, ~3/255
   /// away: a stale transcription of this file rather than a decision of its
   /// own. Recorded in `docs/wbs.md` under M4.10an.
-  static const Color disabledSurfaceLight = Color(0xFFE0E0E5);
-  static const Color disabledSurfaceDark = Color(0xFF33324F);
+  static const Color disabledSurfaceLight = Color(0xFFE1E3EA);
+  static const Color disabledSurfaceDark = Color(0xFF2D3043);
 
   /// A disabled label or glyph — the kit's `--color-on-disabled`, which is the
   /// ink at 38%. Translucent where the fill above is solid, and for a reason: a
   /// disabled fill has one ground, a disabled label has three — the page, a
   /// card, and the disabled fill itself.
-  static const Color onDisabledLight = Color(0x6116182B);
-  static const Color onDisabledDark = Color(0x61EDEDF6);
+  static const Color onDisabledLight = Color(0x61223354);
+  static const Color onDisabledDark = Color(0x61CBCCD2);
 
   // --- Brand and actions ---------------------------------------------------
 
@@ -167,8 +178,8 @@ abstract final class AppColors {
   //   records the whole measurement.
 
   /// Answer remembered, session completed, saved.
-  static const Color successLight = Color(0xFF10795C);
-  static const Color successDark = Color(0xFF4FC79B);
+  static const Color successLight = Color(0xFF2A7800);
+  static const Color successDark = Color(0xFF57CA22);
 
   /// Card due soon, streak at risk — informative, not alarming.
   ///
@@ -185,12 +196,12 @@ abstract final class AppColors {
   /// card, 12.75:1 on the page, against a 3.0 floor. **A shade apart, not a
   /// hue:** the semantic hues map light→dark by keeping hue and raising
   /// lightness, and that rule lands warning back on the streak amber.
-  static const Color warningLight = Color(0xFF9A6A11);
-  static const Color warningDark = Color(0xFFE8D08E);
+  static const Color warningLight = Color(0xFFA46500);
+  static const Color warningDark = Color(0xFFFFA319);
 
   /// Answer forgotten, destructive action, reset.
-  static const Color dangerLight = Color(0xFFC02B3A);
-  static const Color dangerDark = Color(0xFFF2808F);
+  static const Color dangerLight = Color(0xFFCD0031);
+  static const Color dangerDark = Color(0xFFFF768F);
 
   // --- Status containers ---------------------------------------------------
   //
@@ -219,20 +230,20 @@ abstract final class AppColors {
   // `AppMaterialRoles.errorContainer*` already holds this family's container;
   // `AppSemanticColors.dangerContainer` derives from it rather than declaring
   // a second red, exactly as the class header refuses a second red fill.
-  static const Color successContainerLight = Color(0xFFDAE9E7);
-  static const Color successContainerDark = Color(0xFF0E412F);
-  static const Color onSuccessContainerLight = Color(0xFF003627);
-  static const Color onSuccessContainerDark = Color(0xFFBFE3D6);
+  static const Color successContainerLight = Color(0xFFDFE9DA);
+  static const Color successContainerDark = Color(0xFF273F1C);
+  static const Color onSuccessContainerLight = Color(0xFF1E3414);
+  static const Color onSuccessContainerDark = Color(0xFFCBE2C0);
 
   static const Color warningContainerLight = Color(0xFFEDE6DC);
-  static const Color warningContainerDark = Color(0xFF453812);
-  static const Color onWarningContainerLight = Color(0xFF402A00);
-  static const Color onWarningContainerDark = Color(0xFFE4DBC1);
+  static const Color warningContainerDark = Color(0xFF4C3513);
+  static const Color onWarningContainerLight = Color(0xFF432902);
+  static const Color onWarningContainerDark = Color(0xFFEAD9C0);
 
-  static const Color infoContainerLight = Color(0xFFE0E7EF);
-  static const Color infoContainerDark = Color(0xFF213B54);
-  static const Color onInfoContainerLight = Color(0xFF073053);
-  static const Color onInfoContainerDark = Color(0xFFCBDEEF);
+  static const Color infoContainerLight = Color(0xFFDEE8EC);
+  static const Color infoContainerDark = Color(0xFF153D4E);
+  static const Color onInfoContainerLight = Color(0xFF003247);
+  static const Color onInfoContainerDark = Color(0xFFC7E0EB);
 
   // --- Progress -----------------------------------------------------------
   //
@@ -254,7 +265,7 @@ abstract final class AppColors {
   /// against the card (1.13:1 against 1.27) and **stronger against the fill**
   /// (3.75:1 against 3.34), which is the pair that carries the number. A track
   /// is a groove, not a second datum.
-  static const Color progressTrackLight = Color(0xFFE9EDF8);
+  static const Color progressTrackLight = Color(0xFFEBEDFF);
   static const Color progressTrackDark = Color(0xFF2E3247);
 
   /// The filled part, below 100%.
@@ -272,7 +283,7 @@ abstract final class AppColors {
   /// and a bar drawn in it reads as a control rather than as progress. That
   /// asymmetry is the tone system working, not a drift — dark's tone 80 is a
   /// label-weight indigo, light's tone 40 is a fill-weight one.
-  static const Color progressFillLight = Color(0xFF6E6ECE);
+  static const Color progressFillLight = Color(0xFF5569FF);
   static const Color progressFillDark = primaryDark;
 
   // --- Due chip -----------------------------------------------------------
@@ -311,8 +322,8 @@ abstract final class AppColors {
 
   /// Status that genuinely carries information: streak, counters, "3 of 20".
   /// Not a decorative accent — plain metadata uses `textSecondary`.
-  static const Color infoLight = Color(0xFF3F6E97);
-  static const Color infoDark = Color(0xFF8DB4D8);
+  static const Color infoLight = Color(0xFF00729A);
+  static const Color infoDark = Color(0xFF33C2FF);
 
   /// The letterbox around the phone-sized frame on the web build.
   ///
@@ -330,7 +341,7 @@ abstract final class AppColors {
   /// frame, so the surround is *lighter* than every app surface in dark mode
   /// instead of darker than every one in light. Either reads as "not the app";
   /// this one is the design's.
-  static const Color webLetterbox = Color(0xFF6E7288);
+  static const Color webLetterbox = Color(0xFF6E759F);
 
   /// The colour a drop shadow and a modal scrim are drawn from.
   ///
@@ -344,8 +355,8 @@ abstract final class AppColors {
   /// `#04040B` is `seed @ 0.06` over black, which keeps hue 240 at a luminance
   /// low enough to read as a shadow rather than as a navy smear. Pinned by
   /// MX-VIS-002 rule R6.
-  static const Color shadowLight = Color(0xFF0B0C18);
-  static const Color shadowDark = Color(0xFF04040B);
+  static const Color shadowLight = Color(0xFF0A0C18);
+  static const Color shadowDark = Color(0xFF03040B);
 
   /// The scrim is the shadow's colour by definition here — one dark-from-seed
   /// per mode, whether it is cast or laid over — so it derives rather than

@@ -29,6 +29,13 @@ import 'app_surface_colors.dart';
 /// memox decision that Material happens to have a slot for, and each stays in
 /// `AppColors` where its reasoning is.
 ///
+/// **M100.26 finished what M100.25 started: the whole scheme is Tokyo's.** The
+/// `tertiary` family follows Tokyo's `info` hue (its dark fill *is*
+/// `AppColors.infoDark`, Tokyo's `#33C2FF`), the `error` family follows Tokyo's
+/// `#FF1943`, and the surface-container ladder, `inverse*` pair and the
+/// tertiary `*Fixed` roles are re-derived from the Tokyo surfaces and ink by
+/// the same rule as before — tone and chroma kept, hue moved.
+///
 /// **The two accent families took Tokyo's hues at M100.25.** `primary` and
 /// `secondary` come from the owner's tokyo-react-admin-dashboard palette —
 /// `#5569FF` / `#6E759F` in its light theme, `#9EA4C1` for dark `secondary` —
@@ -116,7 +123,7 @@ abstract final class AppMaterialRoles {
   static const Color onSecondaryContainerLight = Color(0xFF2E3141);
   static const Color onSecondaryContainerDark = Color(0xFFDADCE7);
 
-  static const Color tertiaryLight = Color(0xFF45647F);
+  static const Color tertiaryLight = Color(0xFF3C6678);
 
   /// From the design system, replacing `#A2BAD0` — and it *is*
   /// `AppColors.infoDark`, stated as a derivation because it is deliberate:
@@ -124,18 +131,18 @@ abstract final class AppMaterialRoles {
   /// has, and a copied hex is a relationship the next edit can silently break.
   static const Color tertiaryDark = AppColors.infoDark;
   static const Color onTertiaryLight = Color(0xFFFFFFFF);
-  static const Color onTertiaryDark = Color(0xFF17232E);
-  static const Color tertiaryContainerLight = Color(0xFFE1E9F0);
-  static const Color tertiaryContainerDark = Color(0xFF33465A);
-  static const Color onTertiaryContainerLight = Color(0xFF22394B);
-  static const Color onTertiaryContainerDark = Color(0xFFD5E0EA);
+  static const Color onTertiaryDark = Color(0xFF13242B);
+  static const Color tertiaryContainerLight = Color(0xFFE0EAEE);
+  static const Color tertiaryContainerDark = Color(0xFF2B4854);
+  static const Color onTertiaryContainerLight = Color(0xFF1C3A47);
+  static const Color onTertiaryContainerDark = Color(0xFFD3E1E7);
 
   static const Color onErrorLight = Color(0xFFFFFFFF);
-  static const Color onErrorDark = Color(0xFF2C1319);
-  static const Color errorContainerLight = Color(0xFFF8DDE1);
-  static const Color errorContainerDark = Color(0xFF5E2831);
-  static const Color onErrorContainerLight = Color(0xFF641421);
-  static const Color onErrorContainerDark = Color(0xFFF5D3D8);
+  static const Color onErrorDark = Color(0xFF2C1318);
+  static const Color errorContainerLight = Color(0xFFF8DDE2);
+  static const Color errorContainerDark = Color(0xFF5E2832);
+  static const Color onErrorContainerLight = Color(0xFF641423);
+  static const Color onErrorContainerDark = Color(0xFFF4D3D9);
 
   static const Color surfaceContainerLowestLight =
       AppSurfaceColors.surfaceElevatedLight;
@@ -149,18 +156,18 @@ abstract final class AppMaterialRoles {
   /// now makes impossible rather than merely checked-for. `Highest` derived
   /// from [secondaryContainerDark] until M100.25, when that role left the
   /// surface family for Tokyo's hue; the rung itself did not move.
-  static const Color surfaceContainerLowestDark = Color(0xFF0A0326);
-  static const Color surfaceContainerLowLight = Color(0xFFFAFAFC);
-  static const Color surfaceContainerLowDark = Color(0xFF151134);
+  static const Color surfaceContainerLowestDark = Color(0xFF010624);
+  static const Color surfaceContainerLowLight = Color(0xFFF9FAFB);
+  static const Color surfaceContainerLowDark = Color(0xFF0D1335);
   // `onInverseSurfaceLight` is the same value from the other direction —
   // written there as the derivation, so this stays the source.
-  static const Color surfaceContainerLight = Color(0xFFF1F2F6);
-  static const Color surfaceContainerDark = Color(0xFF221E44);
+  static const Color surfaceContainerLight = Color(0xFFF0F2F6);
+  static const Color surfaceContainerDark = Color(0xFF1A2045);
   static const Color surfaceContainerHighLight =
       AppSurfaceColors.surfaceMutedLight;
   static const Color surfaceContainerHighDark =
       AppSurfaceColors.surfaceMutedDark;
-  static const Color surfaceContainerHighestLight = Color(0xFFE3E5EC);
+  static const Color surfaceContainerHighestLight = Color(0xFFE2E5EB);
   static const Color surfaceContainerHighestDark =
       AppSurfaceColors.surfaceEmphasisDark;
 
@@ -177,15 +184,15 @@ abstract final class AppMaterialRoles {
   /// ladder there runs the other way and `surfaceDim` sits below a page that
   /// is not in the scheme at all. Straightening that is a surface-ladder
   /// change with pixels behind it, not a rename — see the token audit.
-  static const Color surfaceDimLight = Color(0xFFDEE0E7);
+  static const Color surfaceDimLight = Color(0xFFDDE0E6);
   static const Color surfaceDimDark = AppSurfaceColors.backgroundDark;
   static const Color surfaceBrightLight = AppSurfaceColors.surfaceElevatedLight;
   static const Color surfaceBrightDark = AppSurfaceColors.surfaceElevatedDark;
 
-  static const Color inverseSurfaceLight = Color(0xFF2A2C3E);
-  static const Color inverseSurfaceDark = Color(0xFFE7E8F0);
+  static const Color inverseSurfaceLight = Color(0xFF252D3D);
+  static const Color inverseSurfaceDark = Color(0xFFE6E9EF);
   static const Color onInverseSurfaceLight = surfaceContainerLight;
-  static const Color onInverseSurfaceDark = Color(0xFF23253A);
+  static const Color onInverseSurfaceDark = Color(0xFF1D273A);
 
   /// The snackbar's action ink. 6.20:1 on [inverseSurfaceLight] and 7.59:1 on
   /// [inverseSurfaceDark], which is body-text AA in both.
@@ -268,13 +275,13 @@ abstract final class AppMaterialRoles {
   static const Color onSecondaryFixedVariant = Color(0xFF3F4565);
 
   /// Tertiary palette (keyed on [tertiaryLight]) at tone 90.
-  static const Color tertiaryFixed = Color(0xFFCBE5FF);
-  static const Color tertiaryFixedDim = Color(0xFFAACAE9);
+  static const Color tertiaryFixed = Color(0xFFBEE9FE);
+  static const Color tertiaryFixedDim = Color(0xFFA2CDE1);
 
   /// Tone 10. 13.17:1 on [tertiaryFixed], 10.03:1 on [tertiaryFixedDim].
-  static const Color onTertiaryFixed = Color(0xFF121D26);
+  static const Color onTertiaryFixed = Color(0xFF001F2A);
 
   /// Tone 30, and the tightest pairing of the twelve: 7.16:1 on
   /// [tertiaryFixed] and 5.45:1 on [tertiaryFixedDim], against a 4.5 floor.
-  static const Color onTertiaryFixedVariant = Color(0xFF2A4A64);
+  static const Color onTertiaryFixedVariant = Color(0xFF204C5D);
 }
