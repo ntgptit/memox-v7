@@ -16687,7 +16687,8 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Scope:** `AppColors` (12 hằng số container), `AppSemanticColors` (6 field +
   cặp `dangerContainer` dẫn xuất), `AppInk` (4 ink mới),
   `design_system/tokens/colors.css`, chip trạng thái Import, hai call-site
-  overdue, `css_token_parity_test`, goldens.
+  overdue, `css_token_parity_test`, goldens, và hai registry của audit
+  (`app_palette.dart`, `auditTokensOf` + `TokenResolver`).
 - **Out of scope:** giá trị của bốn fill semantic; `warningContainer` chưa có
   caller nào — dựng cùng lô vì bốn semantic là một họ và để lại một lỗ là cách
   lỗ đó được lấp bằng role accent lần sau.
@@ -16709,11 +16710,28 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **`danger` không có giá trị mới, và đó là điểm của việc `error` là `danger`.**
   `dangerContainer`/`onDangerContainer` dẫn xuất từ `AppMaterialRoles.errorContainer*`.
   Không pixel nào đổi ở overdue; cái đổi là call-site thôi tự nhận là lỗi.
+- **Thêm token mà không đăng ký thì audit không thấy nó — bắt được ở review.**
+  Lô đầu sửa `AppColors`, `AppSemanticColors`, kit CSS và call-site, nhưng bỏ
+  quên hai chỗ hỏi "màu này có phải của mình không": `lightPaletteTokens` /
+  `darkPaletteTokens` (`PaletteClosureRule` và `color_scheme_roles_test` dùng
+  chung), và bảng 8 field mà `auditTokensOf` với `TokenResolver` cùng giữ.
+  `TokenResolver` khớp `AppColors.xxxLight` bằng cách cắt hậu tố rồi tìm key
+  kết thúc bằng `.xxx`, nên field thiếu trong bảng làm hằng số **unresolvable**
+  — đúng như `usage_inventory.json` đã commit ghi cho cả 12. Ghim dump 64 → 72.
+  Ghi lại vì đây là điều ghim dump nói sẵn: *"a role added to Material and not
+  listed in `auditTokensOf` is invisible to every later step"* — và bước 2–6 của
+  audit không assert gì cứng, nên lỗ này **không làm test đỏ**, nó chỉ làm báo
+  cáo im lặng sai. Ba field cũ (`borderControl`, `progressTrack`,
+  `borderDivider`) thiếu sẵn từ trước nhánh này, để nguyên, không mở rộng PR.
+  Claim thứ nhất của review — `PaletteClosureRule` sẽ báo blocking ở chip
+  preview — **không đúng**: visual audit của Import chỉ dựng bước Source, đúng
+  như doc comment của chính test nói, nên chip preview chưa bao giờ được audit.
 - **Editable documents:** `docs/wbs.md`
 - **Output:** 12 hằng số trong `AppColors`; 6 field + 2 field dẫn xuất trong
   `AppSemanticColors`; 4 thành viên `AppInk`; 6 token trong kit CSS; chip Import
   đọc `successContainer`/`infoContainer`; hai site overdue đọc `dangerContainer`;
-  map parity mở rộng; goldens của Import vẽ lại.
+  map parity mở rộng; goldens của Import vẽ lại; 12 hằng số mới resolve được
+  trong `usage_inventory.json` thay vì unresolvable.
 - **Acceptance criteria:**
   - [x] Không call-site nào còn dùng role accent (`secondary`/`tertiary`) để
         mang trạng thái nghiệp vụ.
@@ -16722,6 +16740,8 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
   - [x] Kit mang giá trị trước, Dart theo sau (AD-14); parity xanh.
   - [x] `invalid` giữ `errorContainer` — một hàng parse hỏng **là** lỗi, đúng
         chỗ duy nhất trên màn đó role ấy có nghĩa.
+  - [x] Mọi field mới của extension có mặt trong cả hai registry của audit; 12
+        hằng số resolve đúng brightness của chúng.
   - [x] analyze 0/0, theme + design audit 319, visual audit + card/deck/study
         2204, full host suite, goldens vẽ lại, gallery publish lại.
 - **Dependencies:** M100.20
