@@ -96,12 +96,12 @@
       "primary": {
         "members": {
           "fill": {
-            "hex": "#5656C9",
+            "hex": "#C3C3EB",
             "hue": 240.0
           },
           "onFill": {
-            "hex": "#FFFFFF",
-            "hue": null
+            "hex": "#262670",
+            "hue": 240.0
           },
           "container": {
             "hex": "#2B2B6E",

@@ -77,22 +77,22 @@ void main() {
         }
       });
 
-      test('is the reason the ring is not `primary`', () {
-        // Kept as an assertion rather than a comment: it is the whole
-        // justification for the token choice in `AppInteractionStates.focusRing`, and if the palette ever
-        // moves `primary` up to where it would pass, this test says so instead
-        // of quietly leaving a helper nobody can explain.
+      test('`primary` now clears the floor the ring was invented to clear', () {
+        // **The tripwire fired, and this is the other side of it.** This used
+        // to assert that `primary` *failed* 3:1 on `secondaryContainer` in
+        // dark — the whole justification for a separate ring token — with the
+        // note that if the palette ever moved up to where it passed, the
+        // deviation had to be reconsidered rather than silently bypassed.
         //
-        // Light passes on `primary` too, so only dark is asserted to fail.
-        if (mode != 'dark') return;
-
+        // M100.18 moved it: the dark accent inverted to tone 80. So the ring
+        // token is now a derivation of `primary` and is removed in M100.19,
+        // and what is asserted is the condition that makes that removal safe.
         expect(
           contrast(scheme.primary, scheme.secondaryContainer),
-          lessThan(graphicFloor),
+          greaterThanOrEqualTo(graphicFloor),
           reason:
-              'primary now clears 3:1 on secondaryContainer in dark. If that '
-              'is deliberate, AppInteractionStates.focusRing can be reconsidered — but it must '
-              'be reconsidered, not silently bypassed.',
+              '$mode: primary fell back under 3:1 on secondaryContainer, so a '
+              'ring drawn in it is invisible on a selected control',
         );
       });
 

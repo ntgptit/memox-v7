@@ -888,15 +888,46 @@ Một màu tồn tại như mặc định framework thì **vô hình với mọi
 trọn một cuộc audit màu (M4.10m). Component nào app dùng thì app khai báo theme
 cho nó.
 
-**Một token đúng vẫn có thể sai ở vai trò khác.** `primary` là fill của nút, và
-`primaryDark` được giữ ở luminance thấp để một filled button không thành thứ sáng
-nhất trên trang navy. Dùng chính nó làm **focus ring** thì đo được 2.90:1 trên
-`surface` và 2.11:1 trên `secondaryContainer` — dưới ngưỡng 3:1 mà WCAG 1.4.11
-đòi ở một chỉ báo đồ hoạ (M4.10ap). `focusRing` là token cho vai trò đó, và đây
-là cùng một lập luận đã đưa progress indicator rời khỏi `primary` ở M4.10m.
-**Đo trên nền thật, không trên một nền danh nghĩa:** `primaryDark` đạt 3.29:1
-trên `background`, nên một phép kiểm chỉ dùng nền trang sẽ pass và bỏ sót cả hai
-nền mà control được focus thực sự nằm lên.
+**Một token đúng vẫn có thể sai ở vai trò khác — nhưng lời giải là sửa token,
+không phải đổi role của component (M100.18).** Đoạn này trước đây kết luận ngược
+lại, và kết luận đó đã đẻ ra năm token thay thế.
+
+Sự việc: `primaryDark` từng được giữ ở luminance thấp để một filled button không
+thành thứ sáng nhất trên trang navy. Dùng chính nó làm **focus ring** thì đo được
+2.90:1 trên `surface` và 2.11:1 trên `secondaryContainer` — dưới ngưỡng 3:1 mà
+WCAG 1.4.11 đòi ở một chỉ báo đồ hoạ (M4.10ap). Phản ứng lúc đó là cấp cho vai
+trò ấy một token riêng (`focusRing`), và cùng lập luận đã đưa progress indicator
+rời khỏi `primary` ở M4.10m, tab và list tile rời sang `primaryAccent`, còn nhãn
+của control được chọn thì đổi role theo brightness (`selectedInk`).
+
+**Nguyên nhân gốc không phải role, mà là palette.** M3 đặt `primary` của một dark
+scheme ở tone 80 — một tone **sáng** — với `onPrimary` ở tone 20; palette này để
+`primary` ở tone-fill 42.5 mang chữ trắng. Một tone không thể vừa đủ sáng để đọc
+được như nhãn trên nền tối, vừa đủ tối để chữ trắng nằm lên: đo được điểm giao là
+cứng — giá trị hue-240 đầu tiên đạt 4.5:1 như chữ làm trắng trên nó tụt còn
+3.73:1. Nên mọi binding M3 giao cho `primary` đều trượt, và mỗi lần trượt lại đẻ
+thêm một token.
+
+**Quyết định:** component gắn với role M3 quy định cho nó; tỉ lệ không đạt thì
+**đổi giá trị của role**, một chỗ, rồi đo lại toàn hệ. Đảo tone `primary` ở dark
+(`#5656C9` → `#C3C3EB`, `onPrimary` `#FFFFFF` → `#262670`) làm mọi binding đạt
+cùng lúc: 10.02:1 làm chữ trên card, 7.37:1 làm ring trên `primaryContainer`,
+7.31:1 trên `secondaryContainer`, nhãn nút 7.72:1. Ba token thay thế
+(`primaryAccent`, `focusRing`, `selectedInk`) mất lý do tồn tại và bị gỡ.
+
+**Ràng buộc cũ vẫn còn, chỉ đổi công cụ đo.** CTA không bao giờ được là thứ sáng
+nhất màn hình: `primary` trên page đo 11.36:1 trong khi `onSurface` đo 15.84:1.
+Trước đây điều đó được cưỡng chế bằng trần luminance 0.20 — một công cụ của
+palette tone-fill; nay nó được phát biểu trực tiếp thành quan hệ giữa hai tỉ lệ.
+
+**Đo trên nền thật, không trên một nền danh nghĩa** vẫn nguyên giá trị:
+`primaryDark` cũ đạt 3.29:1 trên `background`, nên một phép kiểm chỉ dùng nền
+trang sẽ pass và bỏ sót cả hai nền mà control được focus thực sự nằm lên.
+
+**Ba họ accent còn lại đã đúng M3 từ trước** — `secondary`, `tertiary` và `error`
+ở dark đều đã đảo tone (fill sáng, on-fill tối), lệch tone mục tiêu 4,8–13,3 L\*
+và không ràng buộc nào của chúng hỏng. Chúng **không** bị snap về đúng T80/T20:
+trigger để đổi một hex là một tỉ lệ hỏng, và chúng không có.
 
 **Và khai báo component là chưa đủ — phải khai báo đủ *state*.** `ChipThemeData`
 có `backgroundColor` và `selectedColor` nên nhìn qua tưởng đã xong; Material vẫn

@@ -177,11 +177,16 @@ CheckboxThemeData buildCheckboxTheme(
       return _boxSide(semantic.onDisabled);
     }
     if (states.contains(WidgetState.selected)) {
-      // See the doc comment: the ring is the dark fill's boundary, and in light
-      // it is a white line on a white sheet that shrinks the box by 4dp.
-      return scheme.brightness == Brightness.dark
-          ? _boxSide(scheme.onPrimary)
-          : BorderSide.none;
+      // **No edge, which is M3's own answer** (`_CheckboxDefaultsM3.side`
+      // returns a zero-width transparent side when selected): the fill *is*
+      // the box, so an edge can only subtract its width from every side.
+      //
+      // This used to draw `onPrimary` in dark and nothing in light — a third
+      // brightness switch, and it existed because the old dark `primary` was a
+      // fill tone sitting close to the card, so the box needed a ring to be
+      // findable. Since dark inverted to tone 80 (M100.18) the fill reads on
+      // its own: 10.02:1 on the dark card, 7.27:1 on the light one.
+      return BorderSide.none;
     }
     // M3 darkens the outline while the pointer is on it. Kept, because the
     // overlay wash alone is 1.15:1 and the box is small enough that the edge is

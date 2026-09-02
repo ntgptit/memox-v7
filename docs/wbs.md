@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.17 (`ColorScheme` đúng 45 role M3 — gỡ `surfaceTint` khai tường minh, catalog đủ 45 swatch); M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
+| **Updated by task** | M100.18 (dark `primary` đảo tone theo M3; ba token thay thế thành dẫn xuất); M100.17 (`ColorScheme` đúng 45 role M3 — gỡ `surfaceTint` khai tường minh, catalog đủ 45 swatch); M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
 | **Last updated** | 2026-09-01 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -16504,6 +16504,66 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
   45 Material 3 roles`; `audit_test.dart` pin dump 65; hai rule guard tiêm
   lỗi; `widgetbook/test/catalog_smoke_test.dart`.
 - **Checklist phases:** 7.
+
+### M100.18 · Dark `primary` đảo tone theo M3 — và năm token thay thế mất lý do
+
+- **Status:** done
+- **Goal:** Chốt nguyên tắc chủ dự án nêu: component gắn với role M3 quy định cho
+  nó; tỉ lệ không đạt thì **đổi hex của role**, không đổi role trên component.
+  Áp nguyên tắc đó vào nguyên nhân gốc, thay vì sửa từng chỗ triệu chứng.
+- **Scope:** `app_colors.dart` (`primaryDark`, `onPrimaryDark`, `primaryAccent*`,
+  `progressFillDark`), `app_border_colors.dart` (`focusRing*`),
+  `app_material_roles.dart` (`selectedInk`), `app_toggle_themes.dart` (viền
+  checkbox đã tick), `design_system/tokens/colors.css`, `docs/architecture.md`
+  (AD-14), năm file test mã hoá giả định cũ, goldens.
+- **Out of scope:** gỡ ba token thay thế khỏi 112 call-site — đó là M100.19, cố ý
+  tách để thay đổi thị giác được review riêng khỏi một loạt đổi tên cơ học.
+  Cũng ngoài phạm vi: `secondary`/`tertiary`/`error` (xem dưới), và bộ role
+  surface của overlay (M100.20).
+- **Đo trước khi sửa.** Kiểm kê được **12 chỗ tráo role để đạt tỉ lệ**, và tất cả
+  quy về một nguyên nhân: M3 đặt `primary` của dark scheme ở tone 80 (tone
+  **sáng**) với `onPrimary` tone 20; palette này để `primary` ở tone-fill L\* 42.5
+  mang chữ trắng. Hệ quả đo được: 2.90:1 trên card, hụt sàn 3:1 của WCAG 1.4.11
+  đúng **0.10**, và không đâu gần 4.5:1 mà nhãn tab cần. Điểm giao là cứng — giá
+  trị hue-240 đầu tiên đạt 4.5:1 như chữ làm trắng trên nó tụt còn 3.73:1, tức
+  `onPrimary` hỏng. Một tone không phục vụ được cả hai vai.
+- **Ba họ accent còn lại đã đúng M3 từ trước, nên không đụng.** `secondary`,
+  `tertiary`, `error` ở dark đều đã đảo tone, lệch tone mục tiêu 4,8–13,3 L\* và
+  **không ràng buộc nào của chúng hỏng**. Chủ dự án chọn "đảo cả bốn"; phép đo cho
+  thấy ba trong bốn đã đảo rồi, và trigger để đổi một hex là một tỉ lệ hỏng — nên
+  snap chúng về đúng T80/T20 chỉ đổi pixel mà không sửa lỗi nào. Ghi lại để chủ dự
+  án bác nếu muốn chặt hơn.
+- **Output:** `primaryDark` `#5656C9` → `#C3C3EB` (tone 80, hue 240, chroma
+  0,154 — đúng dải `secondaryDark`/`tertiaryDark` đang ngồi); `onPrimaryDark`
+  `#FFFFFF` → `#262670` (tone 20). `primaryAccent`, `focusRing`, `progressFillDark`
+  thành dẫn xuất của `primary`; `selectedInk()` trả `onPrimaryContainer` ở cả hai
+  mode. Viền checkbox đã tick về `BorderSide.none` theo `_CheckboxDefaultsM3`.
+  Kit CSS mang giá trị mới (AD-14: kit là chuẩn cho giá trị).
+- **Năm test mã hoá giả định cũ đã lật tiền đề, không bị xoá.** Chúng được viết
+  đúng như bẫy báo động — "nếu palette dịch tới mức primary đạt, test này sẽ nói
+  ra thay vì để lại một helper không ai giải thích được" — và chúng đã nổ đúng
+  lúc: `focus_ring_contrast_test` (ring không phải primary), `app_palette_test`
+  (trần luminance 0.20 — công cụ của palette tone-fill), `app_planned_themes_test`
+  (cặp M3 của slider "vẫn hỏng"), `app_selected_ink_test` (đổi role theo
+  brightness), `control_border_grounds_test` (`primaryAccent` vượt `primary`).
+  Mỗi cái nay khẳng định chiều ngược lại, nên palette trôi ngược sẽ làm đỏ.
+- **Một hồi quy thật, tìm bằng test.** Viền checkbox đã tick vẽ `onPrimary` **chỉ
+  ở dark** — lần tráo theo brightness thứ ba — và nó tồn tại vì fill cũ quá gần
+  card. Với `onPrimary` đảo thành tone tối, viền tụt còn 1,29:1. Sửa theo M3: bỏ
+  viền, vì fill tự bao lấy hộp (10,02:1 dark, 7,27:1 light).
+- **Editable documents:** `docs/wbs.md`, `docs/architecture.md` (AD-14)
+- **Acceptance criteria:**
+  - [x] Mọi binding M3 mà `primary` tham gia đều đạt sàn ở cả hai theme.
+  - [x] Ràng buộc "CTA không sáng nhất màn hình" vẫn giữ, phát biểu lại thành
+        quan hệ hai tỉ lệ thay vì trần luminance.
+  - [x] Kit CSS và Dart khớp nhau; `css_token_parity` và `css_derived_parity` xanh.
+  - [x] Năm test lật tiền đề, không test nào bị xoá để lấy màu xanh.
+  - [x] analyze 0/0, theme 225, visual audit 179, design audit 88, full host suite,
+        goldens vẽ lại và review, gallery publish lại đúng URL ghim.
+- **Dependencies:** M100.17
+- **Tests required:** năm file trên; `app_toggle_themes_test` (viền checkbox);
+  goldens dark.
+- **Checklist phases:** 7, 13.
 
 ## Known technical debt
 

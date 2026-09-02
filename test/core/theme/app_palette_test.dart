@@ -155,13 +155,20 @@ void main() {
     });
 
     test('no dark role is bright enough to read as a light source', () {
-      // Wider than `primary` alone: the previous palette passed this check and
-      // still glared, because the top of the surface ladder is what an
-      // elevated widget actually paints, and nothing was looking at it.
+      // **Surfaces only, and `primary` left on purpose (M100.18).** A
+      // luminance cap is a fill-tone instrument: it asks "is this dark enough
+      // to sit under white", which is the right question for a tone-40 fill
+      // and the wrong one for the tone-80 role M3 puts in a dark scheme. The
+      // rule this test was protecting — the CTA must never out-shout the card
+      // — is a *relationship*, and `the action never out-shouts the card
+      // content` below asserts it directly.
+      //
+      // The surfaces stay: the previous palette passed on `primary` alone and
+      // still glared, because the top of the ladder is what an elevated widget
+      // actually paints and nothing was looking at it.
       final scheme = dark.colorScheme;
 
       for (final role in <(String, Color)>[
-        ('primary', scheme.primary),
         ('surfaceContainerHighest', scheme.surfaceContainerHighest),
         ('surfaceBright', scheme.surfaceBright),
       ]) {

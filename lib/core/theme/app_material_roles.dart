@@ -207,36 +207,20 @@ abstract final class AppMaterialRoles {
 /// The ink of a control that is **selected** — a selected pill's label, the
 /// navigation bar's active tab.
 ///
-/// **Not simply `primary`, and not simply `onPrimaryContainer`.** The owner's
-/// mockup asks the active state to read as the brand colour (owner review,
-/// 2026-08-20), and in light it can: `primary` measures 5.57:1 on
-/// `primaryContainer` and 6.89:1 on `background`. In dark `primaryDark` is
-/// deliberately held low — see [AppColors.primaryDark] — so the same ink
-/// measures **2.13:1** on the container, and the visual audit fails it. Dark
-/// therefore takes the M3 partner, which is the same hue a few steps up and
-/// clears every floor on both grounds: 8.87:1 and 13.68:1.
+/// **`onPrimaryContainer`, in both modes, which is the pair M3 names for a
+/// label on a container fill.** This used to switch role by brightness —
+/// `primary` in light, `onPrimaryContainer` in dark — because the old dark
+/// `primary` measured 2.13:1 on the container and the visual audit failed it.
+/// Switching the *role* to satisfy a ratio is the bug class M100.18 exists to
+/// close: a component binds to the role M3 gives it, and a failing ratio is
+/// answered by moving the palette, not by moving the component.
 ///
-/// **Named for the question, not for the colour, because
-/// `AppSemanticColors.primaryAccent` answers a different one and the two used
-/// to collide.** That token is *the brand hue as a label on a surface* — a
-/// link, an accent glyph on a card or a page. This one is *the ink of a
-/// selected control*, whose ground is the selection's own tint. They agree in
-/// light by construction (both resolve to `primary`) and part company in dark,
-/// which is what made them look like two spellings of one idea.
+/// Light loses nothing by joining: it was drawing `primary` at 5.57:1 on
+/// `primaryContainer` where `onPrimaryContainer` draws at 11.46:1, so the
+/// label gets more legible and keeps the brand hue — `#1B1B5C` is the same
+/// family several tones down, which is exactly what an `on*Container` role is.
 ///
-/// **They are not, and merging them was measured rather than argued.**
-/// `primaryAccent` in dark is the focus ring's brighter indigo, chosen to stay
-/// recognisably *brand* on a page — and on a selected pill's
-/// `primaryContainer` fill it measures **4.06:1**, under the 4.5 a 12px label
-/// needs. Merging the other way is no better: `onPrimaryContainer` in light is
-/// `#1B1B5C`, which reads as black text rather than as the brand. Each token
-/// takes the value that is both legible on *its* ground and still the brand;
-/// the grounds differ, so the values do. `app_selected_ink_test.dart` pins all
-/// four numbers so a future merge has to fail a test rather than a review.
-///
-/// One function rather than a copy per call site: the pill and the tab have to
-/// agree about what "selected" looks like, and they did not when each resolved
-/// its own.
-Color selectedInk(ColorScheme scheme) => scheme.brightness == Brightness.light
-    ? scheme.primary
-    : scheme.onPrimaryContainer;
+/// Kept as a function for one release rather than inlined at each call site:
+/// the pill, the tab and the time picker have to agree about what "selected"
+/// looks like, and the rename is a separate, pixel-free diff.
+Color selectedInk(ColorScheme scheme) => scheme.onPrimaryContainer;

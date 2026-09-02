@@ -29,7 +29,7 @@
      sRGB; measured, the ladder lands at 3.9 -> 10.2 -> 16.9 -> 24.0. */
   --mx-page-dark:#0A082D;--mx-card-dark:#1A1838;--mx-inset-dark:#28254B;--mx-raised-dark:#37345F;
   --mx-ink-dark:#EDEDF6;--mx-ink-quiet-dark:#A8A7C4;--mx-line-dark:#4C487A;
-  --mx-indigo-dark:#5656C9;--mx-indigo-bright-dark:#8A8AE0;--mx-indigo-container-dark:#2B2B6E;
+  --mx-indigo-dark:#C3C3EB;--mx-indigo-bright-dark:#8A8AE0;--mx-indigo-container-dark:#2B2B6E;
   --mx-success-dark:#4FC79B;--mx-warning-dark:#E8D08E;--mx-danger-dark:#F2808F;--mx-info-dark:#8DB4D8;
 
   /* --- semantic: surface ladder --------------------------------------- */
@@ -47,7 +47,7 @@
   --color-text-primary:var(--mx-ink-light);
   --color-text-secondary:var(--mx-ink-quiet-light);
   --color-border-subtle:var(--mx-line-light);
-  --color-focus-ring:var(--mx-indigo-deep-light);
+  --color-focus-ring:var(--mx-indigo-light);
 
   /* --- semantic: brand and actions ------------------------------------ */
   --color-seed:#4646B4;
@@ -120,10 +120,10 @@
   --color-text-primary:var(--mx-ink-dark);
   --color-text-secondary:var(--mx-ink-quiet-dark);
   --color-border-subtle:var(--mx-line-dark);
-  --color-focus-ring:var(--mx-indigo-bright-dark);
+  --color-focus-ring:var(--mx-indigo-dark);
   --color-primary:var(--mx-indigo-dark);
-  --color-on-primary:#FFFFFF;
-  --color-primary-accent:var(--mx-indigo-bright-dark);
+  --color-on-primary:#262670;
+  --color-primary-accent:var(--mx-indigo-dark);
   --color-primary-container:var(--mx-indigo-container-dark);
   --color-on-primary-container:#D7D5FF;
   /* Moved with its container. A role has to read as one hue: leaving the fill
@@ -151,7 +151,7 @@
   /* The focus ring's own indigo, reached through the primitive rather
      than copied: one edit, one meaning moved. A focus ring must never
      be drawn on this fill — see AppColors.progressFillDark. */
-  --color-progress-fill:var(--mx-indigo-bright-dark);
+  --color-progress-fill:var(--mx-indigo-dark);
   --color-progress-complete:var(--mx-success-dark);
   --color-streak:#E0B064;
   /* The container is no longer the warm olive #3A2E1C. A brown-olive fill is

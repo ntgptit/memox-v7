@@ -95,55 +95,54 @@ void main() {
     AppSemanticColors semanticOf(ThemeData theme) =>
         theme.extension<AppSemanticColors>()!;
 
-    test('they agree in light and part company in dark', () {
-      // Stated so the *shape* of the relationship is pinned, not just its
-      // values: a reader who finds them equal in light should find the reason
-      // here rather than conclude one of them is redundant.
-      expect(
-        selectedInk(light.colorScheme),
-        semanticOf(light).primaryAccent,
-        reason: 'light: both resolve to the brand fill, by construction',
-      );
-      expect(
-        selectedInk(dark.colorScheme),
-        isNot(semanticOf(dark).primaryAccent),
-        reason: 'dark: the grounds differ, so the inks do',
-      );
+    test('the selected ink is `onPrimaryContainer`, in both modes', () {
+      // **The M3 pair, and now the only reason the two tokens differ.** This
+      // group used to pin a brightness switch: `primary` in light, the M3
+      // partner in dark, because dark `primary` landed at 2.13:1 on the pill.
+      // M100.18 inverted the dark accent, so the switch had no ratio left to
+      // justify it and the ink became one role — the one Material names for a
+      // label printed on a container fill.
+      for (final entry in <String, ThemeData>{
+        'light': light,
+        'dark': dark,
+      }.entries) {
+        expect(
+          selectedInk(entry.value.colorScheme),
+          entry.value.colorScheme.onPrimaryContainer,
+          reason:
+              '${entry.key}: the selected ink drifted off the M3 pair for a '
+              'label on a container',
+        );
+      }
     });
 
-    test('merging onto the accent would fail the pill in dark', () {
-      // The measurement that refuses the merge. `primaryAccent` in dark is the
-      // focus ring's brighter indigo, held there to stay recognisably *brand*
-      // on a page — and on the selected pill's own fill it lands under the bar
-      // a 12px label needs. If the palette ever moves so that this passes, the
-      // two tokens can be reconsidered — but reconsidered, not merged on the
-      // assumption that equal-in-light means equal.
-      final fill = dark.chipTheme.color!.resolve(const <WidgetState>{
-        WidgetState.selected,
-      })!;
+    test('the accent would now pass too, so the choice is semantic', () {
+      // **The honest statement of what changed.** Merging the selected ink
+      // onto the brand accent used to be refused by a measurement — it landed
+      // under 4.5:1 on the pill in dark. It no longer does, in either mode. So
+      // the separation survives on the rule rather than on the number: a label
+      // on `primaryContainer` takes `onPrimaryContainer`, and a brand mark on
+      // a surface takes `primary`. Same grammar, different grounds.
+      //
+      // Asserted rather than written down, because a number that stopped
+      // forcing a decision is exactly the kind that gets quietly re-cited.
+      for (final entry in <String, ThemeData>{
+        'light': light,
+        'dark': dark,
+      }.entries) {
+        final fill = entry.value.chipTheme.color!.resolve(const <WidgetState>{
+          WidgetState.selected,
+        })!;
 
-      expect(
-        contrast(semanticOf(dark).primaryAccent, fill),
-        lessThan(textFloor),
-        reason:
-            'the accent now clears 4.5:1 on the selected pill in dark, so '
-            'selectedInk may no longer need to exist',
-      );
-    });
-
-    test('each mode states its derivation rather than a hex', () {
-      // The other direction of the merge fails a different test than
-      // contrast: `onPrimaryContainer` in light is a near-black navy that
-      // reads as body text, not as the brand the owner's mockup asks for
-      // (2026-08-20). That judgement is not a number, so what is asserted
-      // instead is the derivation — light takes the brand fill, dark takes the
-      // M3 partner of the ground it prints on. Repointing either at a colour
-      // that merely passes contrast now has to fail here first.
-      expect(selectedInk(light.colorScheme), light.colorScheme.primary);
-      expect(
-        selectedInk(dark.colorScheme),
-        dark.colorScheme.onPrimaryContainer,
-      );
+        expect(
+          contrast(semanticOf(entry.value).primaryAccent, fill),
+          greaterThanOrEqualTo(textFloor),
+          reason:
+              '${entry.key}: the accent no longer clears 4.5:1 on the selected '
+              'pill, so the separation is forced again and this test should '
+              'say which measurement forces it',
+        );
+      }
     });
   });
 }

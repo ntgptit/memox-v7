@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'app_colors.dart';
+
 /// Every line the app draws around or inside a component.
 ///
 /// **Split out of `AppColors` at M100.1**, alongside [AppSurfaceColors], for the
@@ -225,7 +227,20 @@ abstract final class AppBorderColors {
 
   /// Input border while focused. Focus shifts *hue*, never stroke width —
   /// Material's default doubles the stroke, which reads as the field shouting.
-  static const Color focusRingLight = Color(0xFF4141C0);
+  ///
+  /// **Now `primary` in both modes, and therefore on its way out (M100.18).**
+  /// A focus ring is a graphical indicator, so WCAG 1.4.11 asks 3:1 against
+  /// every ground a focused control sits on. This token existed because the
+  /// old dark `primary` was a fill tone that reached only 2.90:1 on the card
+  /// and 2.11:1 on `secondaryContainer`. Since dark inverted to tone 80,
+  /// `primary` measures 10.02:1 on the card, 7.37:1 on `primaryContainer` and
+  /// 7.31:1 on `secondaryContainer`; light was never the problem at 7.27 /
+  /// 5.57 / 6.02.
+  ///
+  /// Kept as a derivation for one release so the palette change and the 51
+  /// call-site renames stay two reviewable diffs. Light shifts by three units
+  /// (`#4141C0` → the fill colour) and that is the whole visual delta here.
+  static const Color focusRingLight = AppColors.primaryLight;
 
-  static const Color focusRingDark = Color(0xFF8A8AE0);
+  static const Color focusRingDark = AppColors.primaryDark;
 }
