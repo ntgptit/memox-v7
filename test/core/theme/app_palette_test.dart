@@ -6,11 +6,12 @@ import 'package:memox/core/theme/app_theme.dart';
 import '../../support/color_math.dart';
 import '../../support/theme_probe.dart';
 
-/// The structural rules of **A2 Quizlet Navy Indigo**.
+/// The structural rules of the palette — Tokyo's since M100.26, on the
+/// structure A2 Quizlet Navy Indigo laid down.
 ///
 /// Readability lives in `app_theme_test.dart`; this file asserts the things a
-/// contrast check cannot see — that the ladder climbs, that only the page is
-/// allowed to be strongly navy, that the semantic hues stay inside their budget.
+/// contrast check cannot see — that the ladder climbs, that the dark surfaces
+/// stay below the page's saturation, that the four semantics are four hues.
 /// Every value is read from `ThemeData`, never from `AppColors`, so the subject
 /// is what a screen will paint rather than what the palette intended.
 void main() {
@@ -75,10 +76,14 @@ void main() {
       // The specific failure of the baseline: a navy card on a navy page, told
       // apart only by its border. The flashcard is the one thing a review
       // screen exists to show, so it has to read as an object without one.
+      // 4, not 6, since M100.27 — and not alone. The card is Tokyo's `#111633`
+      // on Tokyo's `#070C27` by owner decision, which is 4.3 L*; the rest of
+      // the separation is the rim `shadowsFor` paints in dark, measured in
+      // `app_theme_test.dart` at 3:1 against both the page and the card.
       expect(
         lightnessStar(dark.colorScheme.surface) -
             lightnessStar(dark.scaffoldBackgroundColor),
-        greaterThanOrEqualTo(6.0),
+        greaterThanOrEqualTo(4.0),
       );
     });
 
@@ -104,7 +109,11 @@ void main() {
       // The page is the one component allowed a saturated navy. Once card,
       // tile and input carry the same saturation there is no hierarchy left to
       // spend — everything is equally coloured, so nothing is emphasised.
-      const share = 0.6;
+      // 0.75 since M100.27. Tokyo's dark is navy on navy: the card `#111633`
+      // carries 72% of the page's saturation, and both hexes are the owner's.
+      // The tile, the raised surface and the border still sit well under 0.6;
+      // the ceiling now says only that nothing above the card climbs back up.
+      const share = 0.75;
       final pageSaturation = saturation(dark.scaffoldBackgroundColor);
       final ceiling = pageSaturation * share;
 
@@ -267,65 +276,71 @@ void main() {
     });
   });
 
-  group('semantic chroma budget', () {
-    test('info stays the quietest, and nothing is fully saturated', () {
-      // Not equal on purpose. Four hues all at full saturation is how a study
-      // tool starts looking like a game.
+  group('semantic hues', () {
+    test('the four semantics are four hues, each unmistakably a colour', () {
+      // **This replaced the chroma budget at M100.26, and the replacement is
+      // the redesign rather than a loosening.** Until then this group held
+      // `info` as the quietest of the four and capped saturation at 0.85,
+      // because A2 was a restrained palette and four hues all shouting is how
+      // a study tool starts looking like a game. The owner's decision to move
+      // the theme to tokyo-react-admin-dashboard retires that premise: Tokyo's
+      // status colours (`#57CA22`, `#FFA319`, `#FF1943`, `#33C2FF`) are
+      // deliberately vivid, and all four sit at saturation 1.0 in HSL, so a
+      // budget rule would fail on arrival and a ceiling raised to 1.0 would
+      // catch nothing.
       //
-      // **This replaced a rule that the palette outgrew at M4.10p.** Until then
-      // it also asserted `danger` was the loudest, and with the old values it
-      // was — light 0.676 against warning's 0.612. Adopting the design system's
-      // semantic colours inverted that: light is now warning 0.801, success
-      // 0.766, danger 0.634.
-      //
-      // The interesting part is where the disagreement lives. The design
-      // system's own readme says "danger carries the most saturation, info the
-      // least", so its prose and its hex values contradict each other; this repo
-      // is not the party that disagrees. Values are what the project owner made
-      // authoritative, so the values won, and the half of the rule they did not
-      // break is kept rather than the whole rule being deleted:
-      //
-      //   - `info` is still the quietest in both modes, and the design agrees.
-      //   - Nothing approaches full saturation. The ceiling is 0.85 rather than
-      //     the old 0.70 because dark `danger` now measures 0.814 — high enough
-      //     that the old number would only be re-raised on the next palette
-      //     change, and low enough to still catch a raw `#FF0000`.
-      //   - The four are still spread, so "deliberately unequal" keeps a test.
-      const ceiling = 0.85;
-      const minimumSpread = 1.5;
+      // What restraint is left is expressed where it is measurable: the light
+      // fills sit at tone ~45 so they clear 3:1 on the card and the page
+      // (`app_theme_test.dart`), the warning ink clears 4.5 (`app_ink_test
+      // .dart`), and this test keeps the structural half — four *different*
+      // hues, none of them a grey.
+      const minimumHueGap = 40.0;
+      const minimumSaturation = 0.5;
 
       for (final entry in <String, AppSemanticColors>{
         'light': lightSemantic,
         'dark': darkSemantic,
       }.entries) {
         final semantic = entry.value;
-        final budget = <String, double>{
-          'danger': saturation(semantic.danger),
-          'success': saturation(semantic.success),
-          'warning': saturation(semantic.warning),
-          'info': saturation(semantic.info),
+        final hues = <String, Color>{
+          'danger': semantic.danger,
+          'success': semantic.success,
+          'warning': semantic.warning,
+          'info': semantic.info,
         };
-        final values = budget.values.toList();
 
-        final loudest = values.reduce((a, b) => a > b ? a : b);
-        final quietest = values.reduce((a, b) => a < b ? a : b);
+        for (final colour in hues.entries) {
+          expect(
+            hue(colour.value),
+            isNotNull,
+            reason: '${entry.key}: ${colour.key} is a grey',
+          );
+          expect(
+            saturation(colour.value),
+            greaterThanOrEqualTo(minimumSaturation),
+            reason:
+                '${entry.key}: ${colour.key} is too muted to read as a '
+                'status colour',
+          );
+        }
 
-        expect(
-          budget['info'],
-          quietest,
-          reason: '${entry.key}: info is not the quietest',
-        );
-        expect(
-          loudest,
-          lessThanOrEqualTo(ceiling),
-          reason: '${entry.key}: a semantic colour is over budget',
-        );
-        expect(
-          loudest / quietest,
-          greaterThanOrEqualTo(minimumSpread),
-          reason:
-              '${entry.key}: the four semantics are too close to be a budget',
-        );
+        final names = hues.keys.toList();
+        for (var i = 0; i < names.length; i++) {
+          for (var j = i + 1; j < names.length; j++) {
+            final a = hue(hues[names[i]]!)!;
+            final b = hue(hues[names[j]]!)!;
+            final raw = (a - b).abs();
+            final gap = raw > 180 ? 360 - raw : raw;
+
+            expect(
+              gap,
+              greaterThanOrEqualTo(minimumHueGap),
+              reason:
+                  '${entry.key}: ${names[i]} and ${names[j]} are '
+                  '${gap.round()} degrees apart — two statuses in one hue',
+            );
+          }
+        }
       }
     });
   });

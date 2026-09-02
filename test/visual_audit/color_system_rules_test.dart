@@ -163,6 +163,22 @@ void main() {
         'borderSubtle': semantic.borderSubtle,
       };
 
+      // **The light paper is exempt since M100.27, by owner decision.** The
+      // card is Tokyo's `#FFFFFF` verbatim, and the three roles that are the
+      // card under Material's names follow it. A rule cannot ask for a tint
+      // the owner has ruled out; what R9 still guards is every *other* light
+      // neutral and the whole of dark.
+      if (mode.key == 'light') {
+        for (final paper in <String>[
+          'surface',
+          'surfaceBright',
+          'surfaceContainerLowest',
+          'surfaceElevated',
+        ]) {
+          neutrals.remove(paper);
+        }
+      }
+
       for (final neutral in neutrals.entries) {
         expect(
           hueOf(neutral.value),

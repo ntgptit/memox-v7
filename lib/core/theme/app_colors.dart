@@ -1,44 +1,43 @@
 import 'package:flutter/material.dart';
 
-/// Colour tokens — **A2 Quizlet Navy Indigo**, applied in M3.5b.
+/// Colour tokens — **Tokyo's palette under the M3 binding contract**
+/// (M100.25–28), on the token structure A2 Quizlet Navy Indigo laid down at
+/// M3.5b.
+///
+/// **The invariant every value here obeys (AD-14, M100.28).** A Material
+/// component binds to the canonical M3 role its `_XxxDefaultsM3` names; when a
+/// role fails a contrast or hierarchy ratio, the *palette* moves — never a
+/// substitute token, never a lowered floor. Tokyo
+/// (`ntgptit/tokyo-react-admin-dashboard`) is the visual reference, ranked
+/// below that contract and below a coherent family: the page, the card, the
+/// ink and the dark statuses are Tokyo's exact hex because nothing depends on
+/// them; `primary` is Tokyo's family retuned to the tone every consumer clears.
+///
+/// **How a value here was chosen.** One of three ways, each named at the token:
+/// a Tokyo literal; a Tokyo primitive flattened the way its own theme does
+/// (`alpha.black` over paper, `primary.lighter`, precomputed as AD-14 asks);
+/// or the previous value re-hued onto a Tokyo key with its tone and chroma
+/// kept, so the L\* steps and ratios the tests hold were preserved by
+/// construction. Measurements quoted at older tokens describe the state when
+/// that token was decided and are kept as the record of *why* it exists; the
+/// current numbers are the tests' output.
 ///
 /// Every name says what the colour *means*, never what it looks like. `danger`
 /// survives a redesign that turns it amber; `red` becomes a lie the moment
 /// someone changes it, and nobody renames a constant used in forty files.
 ///
-/// **The page is the only place saturated navy is allowed.** [backgroundDark]
-/// sits at 70% saturation, which is what gives dark mode its identity. Every
-/// surface above it drops to 26–40% while climbing in lightness, so the navy
-/// reads as the room the content sits in rather than as a tint applied to the
-/// content itself. A palette where card, tile and input are all as navy as the
-/// page has no hierarchy left to spend — everything is equally coloured, so
-/// nothing is emphasised.
-///
-/// That band was 20–30% until M4.10aa. Joining the page's colour family is
-/// exactly what raised it, and it is the one number the change spends: the card
-/// now sits at 40% against a ceiling of 42% (`app_palette_test.dart` allows a
-/// surface 60% of the page's saturation). There is no room left above the card,
-/// so a future surface that wants more saturation has to take lightness instead.
+/// **The dark page is the most saturated surface, and the ladder climbs above
+/// it in lightness.** Tokyo's dark is navy on navy — the card carries 72% of
+/// the page's saturation — so hierarchy in dark is lightness plus the card's
+/// rim (`AppElevation`), not a saturation drop; `app_palette_test.dart` holds
+/// every surface above the card under 0.75 of the page and the ladder's steps
+/// in L\*.
 ///
 /// **Why the ladder is measured in L\*, not in contrast ratio.** A deep navy
 /// page is at luminance 0.004, and down there WCAG's `+0.05` constant compresses
 /// every real step into "1.1-something": the card is 3× the page's luminance and
 /// still scores 1.17:1. L\* is the perceptual scale and stays honest at the
-/// bottom, so `test/core/theme/app_theme_test.dart` asserts the ladder in L\*.
-/// The three dark steps are ~6.3, 6.7 and 7.1 L\*.
-///
-/// **The dark ladder joined the page's colour family at M4.10aa.** It failed to
-/// be in it in two ways at once: `#1B1D32` was hue 235 against the page's 243 —
-/// a green-leaning slate under a violet — and it carried barely half the page's
-/// chroma (0.040 against 0.072). A duller, greener surface stacked on a
-/// saturated violet page reads as grey paper laid on the app rather than as
-/// part of the same room, and neither difference is large enough to be named
-/// when you look at either colour alone. Every surface now sits at OKLCH hue
-/// ~285, chroma 0.06–0.074.
-///
-/// Reaching that inside sRGB cost the rungs ~2 L\* apiece. Every ladder
-/// assertion still holds; the tightest is the card's 6.3 L\* off the page,
-/// against a 6.0 floor.
+/// bottom, so `test/core/theme/app_palette_test.dart` asserts the ladder in L\*.
 ///
 /// **What is not here.** The `ColorScheme` roles this app declares only because
 /// `fromSeed` would otherwise invent them — the container ladder, the `tertiary`
@@ -62,10 +61,10 @@ abstract final class AppColors {
   // the surface hue makes text sit *in* the interface rather than on top of it.
   // Which is why both dark values moved with the ladder — a trace of the *old*
   // surface hue is a trace of a hue no surface carries any more.
-  static const Color textPrimaryLight = Color(0xFF16182B);
-  static const Color textPrimaryDark = Color(0xFFEDEDF6);
-  static const Color textSecondaryLight = Color(0xFF565C72);
-  static const Color textSecondaryDark = Color(0xFFA8A7C4);
+  static const Color textPrimaryLight = Color(0xFF223354);
+  static const Color textPrimaryDark = Color(0xFFCBCCD2);
+  static const Color textSecondaryLight = Color(0xFF596680);
+  static const Color textSecondaryDark = Color(0xFF9395A2);
 
   /// The fill and the border of a disabled control — a solid, per MX-VIS-002
   /// rule R7. Material's idiom is the ink at 12% alpha, which composites
@@ -77,51 +76,65 @@ abstract final class AppColors {
   /// The kit's `--color-disabled-surface` reads `#E3E3E6` / `#312E4E`, ~3/255
   /// away: a stale transcription of this file rather than a decision of its
   /// own. Recorded in `docs/wbs.md` under M4.10an.
-  static const Color disabledSurfaceLight = Color(0xFFE0E0E5);
-  static const Color disabledSurfaceDark = Color(0xFF33324F);
+  static const Color disabledSurfaceLight = Color(0xFFE4E7EA);
+  static const Color disabledSurfaceDark = Color(0xFF272C46);
 
   /// A disabled label or glyph — the kit's `--color-on-disabled`, which is the
   /// ink at 38%. Translucent where the fill above is solid, and for a reason: a
   /// disabled fill has one ground, a disabled label has three — the page, a
   /// card, and the disabled fill itself.
-  static const Color onDisabledLight = Color(0x6116182B);
-  static const Color onDisabledDark = Color(0x61EDEDF6);
+  static const Color onDisabledLight = Color(0x61223354);
+  static const Color onDisabledDark = Color(0x61CBCCD2);
 
   // --- Brand and actions ---------------------------------------------------
 
-  /// The single accent, on hue 240 in both brightnesses.
+  /// The single accent — Tokyo's indigo family, at HSL hue 233 in both
+  /// brightnesses, **retuned to the canonical M3 contract rather than copied**
+  /// (M100.28, owner's invariant).
   ///
-  /// **Dark inverts the tone, which is what Material 3 asks for and what this
-  /// palette spent two years working around.** M3 puts a dark scheme's
-  /// `primary` at tone 80 — a *light* tone — with `onPrimary` at tone 20;
-  /// light keeps the fill at tone 40 with white on it. The old dark value was
-  /// a mid fill-tone (L\* 42.5) carrying white, and that single deviation is
-  /// what made `primary` unusable in every binding M3 gives it: at 2.90:1 on
-  /// the card it missed WCAG 1.4.11's 3:1 for a progress indicator, a slider,
-  /// a caret or a focus ring, and it was nowhere near the 4.5:1 a tab label
-  /// needs. Five component themes reached for a substitute token instead, and
-  /// the substitute was the bug — M100.18.
+  /// **The invariant this value obeys.** A Material component binds to the M3
+  /// role its `_XxxDefaultsM3` names, that binding is locked, and when the role
+  /// fails a ratio the *palette* moves — never a substitute token, never a
+  /// lowered floor. `primary` is the role with the most consumers: the filled
+  /// button's fill under white, the text button's label, the outlined label,
+  /// the tab label, the focus ring, the caret, the radio, the switch and the
+  /// progress indicator. One hex has to serve all of them.
   ///
-  /// A single tone cannot be both: bright enough to read as a label on a dark
-  /// page *and* dark enough for white to sit on it. Measured, the crossover is
-  /// hard — the first hue-240 value clearing 4.5:1 as text drops white on it to
-  /// 3.73:1. Inverting resolves it rather than trading one failure for another.
-  ///
-  /// The rule the old comment protected still holds and is still asserted: the
-  /// CTA must never be the brightest thing on screen. `primary` against the
-  /// page is 11.36:1 where `onSurface` is 15.84:1, so the headline still wins.
-  /// What changed is the mechanism — a tone ceiling rather than a luminance
-  /// cap, because a luminance cap is a fill-tone rule and this is no longer a
-  /// fill-tone palette.
-  static const Color primaryLight = Color(0xFF4646B4);
+  /// **Why `#4454CC` and not Tokyo's `primary.main` `#5569FF`.** Measured,
+  /// `#5569FF` fails three canonical consumers at once: white on it is 4.33:1
+  /// (the filled label), and as a label it reads 4.33 on the card and 3.96 on
+  /// the page (text button, outlined button, tab). `#4454CC` is the next value
+  /// in Tokyo's own family — its `primary.dark`, `darken(main, 0.2)` — and it
+  /// clears every consumer: 6.20 under white, 6.20 / 5.67 as text on card and
+  /// page, 5.19 on the inset tile, 4.58 on `secondaryContainer` as a ring,
+  /// 5.34 on the progress track, 4.85 on the error band. Tone 41, where M3
+  /// puts a light `primary`.
+  static const Color primaryLight = Color(0xFF4454CC);
 
-  /// Tone 80 at hue 240, chroma 0.154 — the band `secondaryDark` and
-  /// `tertiaryDark` already sit in, both of which were M3-shaped all along.
-  static const Color primaryDark = Color(0xFFC3C3EB);
+  /// Tone 80 of the palette keyed on [primaryLight] — the M3 dark `primary`,
+  /// and one hex with `AppMaterialRoles.primaryFixedDim` by construction.
+  ///
+  /// **Why not Tokyo's dark `primary` `#8C7CF0`.** At tone 58 it fails the
+  /// same contract: white on it is 3.36:1 and as a label on the selected tile
+  /// it reads 4.29. Tone 80 of *its* family (`#C8BFFF`) passes every ratio but
+  /// sits 15.5° off the light brand, past the 12° `app_palette_test.dart`
+  /// holds for one brand across modes; tone 80 of the light family passes the
+  /// same ratios — 7.73 under [onPrimaryDark], 11.27 on the page, 10.37 on the
+  /// card, 8.43 on the tile, 7.24 on `secondaryContainer`, 7.39 on the track,
+  /// 6.74 on the error band — at 1.7°. Coherent family outranks exact hex.
+  static const Color primaryDark = Color(0xFFBCC2FF);
   static const Color onPrimaryLight = Color(0xFFFFFFFF);
 
-  /// Tone 20 at the same hue. 7.72:1 under [primaryDark].
-  static const Color onPrimaryDark = Color(0xFF262670);
+  /// Tone 20 at the brand hue. 7.73:1 under [primaryDark].
+  static const Color onPrimaryDark = Color(0xFF202771);
+
+  /// The 1 px halo a dark card wears instead of a shadow — Tokyo's
+  /// `shadows.card` (`0px 0px 2px #6A7199`) in NebulaFighter. The card is
+  /// Tokyo's `#111633` on the `#070C27` page — a 4.3 L\* step — and a dark
+  /// shade moves that page by under one L\*, so depth in dark comes from an
+  /// edge: this reads 4.07:1 against the page and 3.74:1 against the card.
+  /// See `shadowsFor` and AD-14 §4.
+  static const Color cardRimDark = Color(0xFF6A7199);
 
   // --- Semantic ------------------------------------------------------------
   //
@@ -150,8 +163,8 @@ abstract final class AppColors {
   //   records the whole measurement.
 
   /// Answer remembered, session completed, saved.
-  static const Color successLight = Color(0xFF10795C);
-  static const Color successDark = Color(0xFF4FC79B);
+  static const Color successLight = Color(0xFF2A7800);
+  static const Color successDark = Color(0xFF57CA22);
 
   /// Card due soon, streak at risk — informative, not alarming.
   ///
@@ -168,12 +181,12 @@ abstract final class AppColors {
   /// card, 12.75:1 on the page, against a 3.0 floor. **A shade apart, not a
   /// hue:** the semantic hues map light→dark by keeping hue and raising
   /// lightness, and that rule lands warning back on the streak amber.
-  static const Color warningLight = Color(0xFF9A6A11);
-  static const Color warningDark = Color(0xFFE8D08E);
+  static const Color warningLight = Color(0xFFA46500);
+  static const Color warningDark = Color(0xFFFFA319);
 
   /// Answer forgotten, destructive action, reset.
-  static const Color dangerLight = Color(0xFFC02B3A);
-  static const Color dangerDark = Color(0xFFF2808F);
+  static const Color dangerLight = Color(0xFFCD0031);
+  static const Color dangerDark = Color(0xFFFF768F);
 
   // --- Status containers ---------------------------------------------------
   //
@@ -202,20 +215,20 @@ abstract final class AppColors {
   // `AppMaterialRoles.errorContainer*` already holds this family's container;
   // `AppSemanticColors.dangerContainer` derives from it rather than declaring
   // a second red, exactly as the class header refuses a second red fill.
-  static const Color successContainerLight = Color(0xFFDAE9E7);
-  static const Color successContainerDark = Color(0xFF0E412F);
-  static const Color onSuccessContainerLight = Color(0xFF003627);
-  static const Color onSuccessContainerDark = Color(0xFFBFE3D6);
+  static const Color successContainerLight = Color(0xFFDFE9DA);
+  static const Color successContainerDark = Color(0xFF273F1C);
+  static const Color onSuccessContainerLight = Color(0xFF1E3414);
+  static const Color onSuccessContainerDark = Color(0xFFCBE2C0);
 
   static const Color warningContainerLight = Color(0xFFEDE6DC);
-  static const Color warningContainerDark = Color(0xFF453812);
-  static const Color onWarningContainerLight = Color(0xFF402A00);
-  static const Color onWarningContainerDark = Color(0xFFE4DBC1);
+  static const Color warningContainerDark = Color(0xFF4C3513);
+  static const Color onWarningContainerLight = Color(0xFF432902);
+  static const Color onWarningContainerDark = Color(0xFFEAD9C0);
 
-  static const Color infoContainerLight = Color(0xFFE0E7EF);
-  static const Color infoContainerDark = Color(0xFF213B54);
-  static const Color onInfoContainerLight = Color(0xFF073053);
-  static const Color onInfoContainerDark = Color(0xFFCBDEEF);
+  static const Color infoContainerLight = Color(0xFFDEE8EC);
+  static const Color infoContainerDark = Color(0xFF153D4E);
+  static const Color onInfoContainerLight = Color(0xFF003247);
+  static const Color onInfoContainerDark = Color(0xFFC7E0EB);
 
   // --- Progress -----------------------------------------------------------
   //
@@ -237,7 +250,7 @@ abstract final class AppColors {
   /// against the card (1.13:1 against 1.27) and **stronger against the fill**
   /// (3.75:1 against 3.34), which is the pair that carries the number. A track
   /// is a groove, not a second datum.
-  static const Color progressTrackLight = Color(0xFFE9EDF8);
+  static const Color progressTrackLight = Color(0xFFEBEDFF);
   static const Color progressTrackDark = Color(0xFF2E3247);
 
   /// The filled part, below 100%.
@@ -255,7 +268,11 @@ abstract final class AppColors {
   /// and a bar drawn in it reads as a control rather than as progress. That
   /// asymmetry is the tone system working, not a drift — dark's tone 80 is a
   /// label-weight indigo, light's tone 40 is a fill-weight one.
-  static const Color progressFillLight = Color(0xFF6E6ECE);
+  // A tint of the brand, never the brand itself: a bar in the button's own hex
+  // beside the button is the failure this token exists to prevent
+  // (`mx_progress_bar_test.dart`). `#6E6ECE` re-hued onto Tokyo's indigo with
+  // its tone and chroma kept; 3.76:1 on its track.
+  static const Color progressFillLight = Color(0xFF6471CF);
   static const Color progressFillDark = primaryDark;
 
   // --- Due chip -----------------------------------------------------------
@@ -294,8 +311,8 @@ abstract final class AppColors {
 
   /// Status that genuinely carries information: streak, counters, "3 of 20".
   /// Not a decorative accent — plain metadata uses `textSecondary`.
-  static const Color infoLight = Color(0xFF3F6E97);
-  static const Color infoDark = Color(0xFF8DB4D8);
+  static const Color infoLight = Color(0xFF00729A);
+  static const Color infoDark = Color(0xFF33C2FF);
 
   /// The letterbox around the phone-sized frame on the web build.
   ///
@@ -313,7 +330,7 @@ abstract final class AppColors {
   /// frame, so the surround is *lighter* than every app surface in dark mode
   /// instead of darker than every one in light. Either reads as "not the app";
   /// this one is the design's.
-  static const Color webLetterbox = Color(0xFF6E7288);
+  static const Color webLetterbox = Color(0xFF6E759F);
 
   /// The colour a drop shadow and a modal scrim are drawn from.
   ///
@@ -327,8 +344,8 @@ abstract final class AppColors {
   /// `#04040B` is `seed @ 0.06` over black, which keeps hue 240 at a luminance
   /// low enough to read as a shadow rather than as a navy smear. Pinned by
   /// MX-VIS-002 rule R6.
-  static const Color shadowLight = Color(0xFF0B0C18);
-  static const Color shadowDark = Color(0xFF04040B);
+  static const Color shadowLight = Color(0xFF0A0C18);
+  static const Color shadowDark = Color(0xFF03040B);
 
   /// The scrim is the shadow's colour by definition here — one dark-from-seed
   /// per mode, whether it is cast or laid over — so it derives rather than

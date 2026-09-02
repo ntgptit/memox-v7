@@ -838,7 +838,8 @@ một Elevation token chưa ai làm. Chủ dự án cuối cùng phải nói th�
 
 ### Quyết định
 
-**1 · Seed là nguồn của mọi trung tính.** `AppColors.seed` (hue 240). Mọi
+**1 · Seed là nguồn của mọi trung tính.** `AppColors.seed` (HSL hue 233 từ
+M100.25; 240 trước đó). Mọi
 neutral — surface, page, border, muted text, shadow, scrim — phải mang một trace
 của nó. Công thức chuẩn tắc là
 `Color.alphaBlend(seed.withValues(alpha: a), base)`, **precompute thành hằng số**,
@@ -980,6 +981,83 @@ trả lời cho disabled, hover, focus và press. Câu trả lời của nó cho
 nguyên vẹn `secondaryContainer`, tức một pill không bấm được trông y hệt pill
 bấm được (M4.10ao). Slot state-aware (`color`, `WidgetStateBorderSide`,
 `WidgetStateColor` trong `labelStyle`) là nơi quyền sở hữu thật sự nằm.
+
+**Hue của hai họ accent đổi sang palette Tokyo ở M100.25, và luật trên là
+thứ quyết định *cách* đổi.** Chủ dự án chỉ định tham chiếu
+`ntgptit/tokyo-react-admin-dashboard`: `primary` `#5569FF`, `secondary`
+`#6E759F`, dark `secondary` `#9EA4C1`. Không lấy nguyên hex vào slot fill khi
+tỉ lệ không đạt — trắng trên `#5569FF` đo 4,33:1, trên `#6E759F` 4,46:1 — mà
+lấy giá trị đầu tiên **của chính họ Tokyo** vượt sàn: `primary.dark`
+(`#4454CC`, 6,20:1) và `secondary.dark` (`#585E7F`, 6,32:1), đều là tone ~41.
+Dark `primary` là tone 80 của palette đó (`#BCC2FF`); dark accent riêng của Tokyo
+(`#8C7CF0`) bị loại vì lệch 15,4° so với hue light và ink tone-20 trên nó chỉ
+đạt 3,89:1. Mọi container, `on*` và `inverse*` của hai họ **giữ tone và chroma,
+chỉ đổi hue** — nên bậc so với `surfaceContainer` và mọi tỉ lệ nằm trong 0,1 L\*
+so với trước. Hệ quả cấu trúc duy nhất: `secondaryContainer` dark rời họ surface
+(hue 230 so với 246), nên `surfaceContainerHighest` dark dẫn xuất từ
+`surfaceEmphasis` thay vì từ nó — bậc thang không dịch một pixel. `tertiary`,
+`error`, bốn semantic và thang surface không đổi: Tokyo không có tertiary, màu
+trạng thái của nó vượt ngân sách chroma, và thang surface là quyết định về chiều
+sâu (mục 4) chứ không phải về thương hiệu.
+
+**M100.26 mở rộng quyết định đó ra toàn bộ hệ màu — theme là Tokyo, không chỉ
+hai họ accent.** Chủ dự án xác nhận đây là redesign toàn diện. Mỗi token nay là
+một trong ba thứ: (1) **literal Tokyo** — trang `#F2F5F9` / `#070C27`, ink
+`#223354` / `#CBCCD2`, bốn màu trạng thái `#57CA22` `#FFA319` `#FF1943`
+`#33C2FF` ở dark, viền `#272C48`, `primary.main` làm cạnh chọn; (2) **primitive
+Tokyo làm phẳng** theo đúng idiom `alpha.black` / `primary.lighter` của nó —
+text phụ = ink @ 70 % trên paper, inset = ink @ 10 %, fill chọn = `lighten(primary,
+.85)`; (3) **giá trị cũ đổi hue** sang key Tokyo, giữ tone và chroma — toàn bộ
+thang dark (L\* 4,1 → 10,4 → 17,0 → 24,0 ở hue ~231 thay cho ~245), thang
+`surfaceContainer`, container và `on*` của mọi họ, `tertiary` theo hue của
+`info`. Bốn fill trạng thái ở light lấy hue và chroma Tokyo ở đúng tone cũ (~45),
+vì literal Tokyo trên trang sáng đo 2–2,4:1.
+
+Năm quyết định của AD này vẫn nguyên và **không luật đo nào phải nới**: seed vẫn
+là gốc trung tính (nay hue 233), R3/R4/R9, sàn thang, trần bão hoà surface dark
+(card 0,35 so với trần 0,42), tổng độ nổi card đều pass với giá trị mới. Hai thứ
+đổi ở tầng luật: `borderControl` light hạ chroma về 0,047 để canvas sáng giữ trần
+0,06 (Tokyo `text.secondary` mang 0,137); và **ngân sách chroma semantic bị thay**
+— Tokyo cố ý để bốn màu trạng thái ở saturation 1,0, nên "info yên nhất, trần
+0,85" đỏ ngay khi áp và trần nâng lên 1,0 thì không bắt được gì. Phần cấu trúc
+giữ lại thành luật mới: bốn hue cách nhau ≥ 40°, không cái nào là grey; phần
+tương phản đã có sàn riêng ở `app_theme_test.dart` và `app_ink_test.dart`.
+
+**Bất biến từ M100.28 — binding canonical bị khoá; palette retune để đáp ứng
+binding.** M100.27 thử làm ngược lại: khoá ba hex Tokyo (`primary`, trang, card)
+rồi dời chỗ điều chỉnh sang on-colour, một token `primaryInk` cho chữ thương hiệu,
+và hạ sàn nhãn nút light xuống 4,3. Chủ dự án bác toàn bộ hướng đó và đặt luật:
+
+1. Material component dùng đúng canonical M3 role mà `_XxxDefaultsM3` của SDK
+   ghim. `m3_role_binding_guard_test.dart` khoá bằng AST: TextButton foreground,
+   OutlinedButton foreground, TabBar label → `primary`; không có "deliberate
+   departure".
+2. Canonical role không đạt contrast/hierarchy → sửa **hex/tone của role** ở
+   palette layer. Không tạo token thay thế để component né role (đây là lần thứ
+   hai `primaryAccent`/`primaryInk` bị gỡ — M100.18 và M100.28 — và lý do là một).
+3. Không hạ ngưỡng accessibility để giữ một hex. Normal text ≥ 4,5:1, graphic và
+   viền control ≥ 3:1. Không có "owner exception".
+4. Tokyo là visual reference. Thứ tự ưu tiên: canonical mapping → accessibility →
+   họ màu nhất quán → hex Tokyo nguyên bản. Trang và card có thể giữ nguyên hex
+   vì chúng không phá hợp đồng nào; `primary` là role nhiều consumer nhất nên
+   không được khoá.
+
+Áp vào `primary`: `#5569FF` đo 4,33 dưới trắng và 3,96 làm chữ trên trang — hỏng
+ba consumer canonical cùng lúc — nên **không hợp lệ** cho hợp đồng M3 primary;
+giá trị kế tiếp trong chính họ Tokyo, `primary.dark` `#4454CC`, đạt mọi consumer
+(6,20 / 5,67 / 5,19 tile / 4,58 ring trên `secondaryContainer`). Dark: `#8C7CF0`
+(tone 58) đo 3,36 dưới trắng và 4,29 làm chữ trên tile → tone 80 của họ light
+(`#BCC2FF`, 1,7° lệch) thay cho tone 80 của họ Tokyo-dark (`#C8BFFF`, lệch 15,5°
+quá trần 12° của "một thương hiệu hai mode"). Cả họ (`onPrimary`, container,
+`inversePrimary`, `*Fixed`) sinh lại từ hai key đó. Test tách hai tầng: **role
+identity** (slot → role) không bao giờ đổi vì contrast; **palette quality** (role
+→ hex → tỉ lệ) là nơi số được đo.
+
+Những gì M100.27 đổi và vẫn đứng, vì có lý do tri giác độc lập chứ không phải để
+hex pass: card dark `#111633` với rim Tokyo `0 0 2px #6A7199` làm cue chiều sâu
+thứ hai (bậc ≥ 4 L\* **và** rim ≥ 3:1, đo tách theo mode); R9 miễn cho bốn role
+là paper trắng của Tokyo; trần bão hoà surface dark 0,75. Những gì bị revert:
+sàn 4,3, khoảng hue 16° (về 12°), `primaryInk`, `onPrimary` dark `#111633`.
 
 ### Nguồn của giá trị token đã đổi (M4.10p)
 

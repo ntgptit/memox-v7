@@ -115,8 +115,8 @@ void main() {
         contrast(scheme.onSurface, scheme.surface),
         greaterThanOrEqualTo(_kAaBodyText),
       );
-      // The mode pill: `primaryAccent` on `surfaceMuted`, and §7.8's whole
-      // argument is that this pair is the one the project already owns.
+      // The mode pill: `primary` on `surfaceMuted`, and §7.8's whole argument
+      // is that this pair is the one the project already owns.
       expect(
         contrast(scheme.primary, semantic.surfaceMuted),
         greaterThanOrEqualTo(_kAaBodyText),

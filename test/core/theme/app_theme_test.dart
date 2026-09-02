@@ -67,6 +67,10 @@ void main() {
       // white text 1.71:1 on the tone-80 lavender, which passes no standard.
       // Read from the theme, not from a token — the gap that once shipped a
       // 3.09:1 label was a test that checked a token the button did not use.
+      // **4.5 in both modes, and the floor does not move for a hex.** M100.27
+      // held light at 4.3 to keep Tokyo's `#5569FF` verbatim; M100.28 reversed
+      // that as the invariant now says: when a canonical role fails a ratio
+      // the palette is retuned (`#4454CC`, 6.20:1), never the floor.
       for (final entry in themes.entries) {
         expect(
           contrast(
@@ -106,10 +110,12 @@ void main() {
 
     test('the text link is readable at rest on page AND on card', () {
       // The link's label is bare text with no fill behind it, so it must clear
-      // the body-text bar rather than the 3:1 UI bar. This is the reason the
-      // accent token exists: `primary` measures 3.33:1 as bare text on the
-      // dark page. Read from the theme slot, not from the token, so the test
-      // holds whichever colour the slot is ever rewired to.
+      // the body-text bar rather than the 3:1 UI bar. The slot is `primary`
+      // (`_TextButtonDefaultsM3`, pinned by the AST guard), so this is the
+      // measurement that forces the palette when it fails — twice a substitute
+      // token stood here instead, and twice it was removed (M100.18, M100.28).
+      // Read from the theme slot, not from a token, so the test holds
+      // whichever colour the slot resolves to.
       for (final entry in themes.entries) {
         final label = entry.value.textButtonTheme.style!.foregroundColor!
             .resolve(const <WidgetState>{})!;
@@ -214,30 +220,52 @@ void main() {
         return surfaceStep + shadowStep;
       }
 
-      final steps = <String, double>{
-        for (final entry in themes.entries) entry.key: liftOf(entry.value),
-      };
+      // **Two cues per mode, and since M100.27 they are not the same two.**
+      // Light lifts a card with the surface step plus a shade; dark's page
+      // sits at the bottom of the lightness scale where a shade moves nothing,
+      // and with the card fixed at Tokyo's `#111633` (owner decision) its
+      // surface step is 4.3 L* — so dark's second cue is Tokyo's own: the
+      // 1 px rim `shadowsFor` paints. A rim is an edge, measured as contrast
+      // against what it separates (WCAG 1.4.11's 3:1), not as a shift of the
+      // page's lightness, which is why the two modes are no longer held to one
+      // number and are instead each held to their own pair. The colour measured
+      // here is painted solid by the rim's 1 px spread (`app_elevation_test`
+      // pins it), so the ratio is the ring's, not a blurred approximation.
+      final lightLift = liftOf(themes['light']!);
+      expect(
+        lightLift,
+        greaterThanOrEqualTo(6.0),
+        reason:
+            'light: a card edge moves the page by only '
+            '${lightLift.toStringAsFixed(2)} L*. Below this a card does not '
+            'read as sitting on anything.',
+      );
 
-      for (final entry in steps.entries) {
+      final dark = themes['dark']!;
+      final darkPage = dark.scaffoldBackgroundColor;
+      final darkStep =
+          lightnessStar(dark.colorScheme.surface) - lightnessStar(darkPage);
+      expect(
+        darkStep,
+        greaterThanOrEqualTo(4.0),
+        reason:
+            'dark: the card sits only ${darkStep.toStringAsFixed(2)} L* above '
+            'the page; even with a rim it needs a visible step of its own',
+      );
+      final rim = shadowsFor(AppElevation.card, dark.colorScheme).single.color;
+      for (final ground in <String, Color>{
+        'page': darkPage,
+        'card': dark.colorScheme.surface,
+      }.entries) {
         expect(
-          entry.value,
-          greaterThanOrEqualTo(6.0),
+          contrast(rim, ground.value),
+          greaterThanOrEqualTo(3.0),
           reason:
-              '${entry.key}: a card edge moves the page by only '
-              '${entry.value.toStringAsFixed(2)} L*. Below this a card does not '
-              'read as sitting on anything. Measured: $steps',
+              'dark: the card rim reads '
+              '${contrast(rim, ground.value).toStringAsFixed(2)}:1 against '
+              'the ${ground.key} — under the 3:1 an edge needs to separate',
         );
       }
-
-      expect(
-        (steps['light']! - steps['dark']!).abs(),
-        lessThan(2.0),
-        reason:
-            'the two modes must lift a card off the page by the same amount, '
-            'however each builds it. Light was 1.40 against a border-matched '
-            "dark's 1.82 before M4.10e, and 8.04 against 7.70 after elevation "
-            'landed. Measured: $steps',
-      );
     });
   });
 

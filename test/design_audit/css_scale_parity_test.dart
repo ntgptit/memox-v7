@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/app_colors.dart';
 import 'package:memox/core/theme/app_breakpoints.dart';
 import 'package:memox/core/theme/app_compact_scale.dart';
 import 'package:memox/core/theme/app_durations.dart';
@@ -280,10 +281,13 @@ void main() {
       }
     });
 
-    test('dark drops every shadow, as the kit does', () {
-      // `[data-theme="dark"]` re-points all three to `none`. The Dart side says
-      // the same thing by returning an empty list, and the two agreeing is what
-      // makes "no shadow in dark" a shared decision rather than a coincidence.
+    test('dark paints Tokyo\'s rim at every level, as the kit does', () {
+      // Until M100.27 `[data-theme="dark"]` re-pointed all three to `none` and
+      // Dart returned an empty list. Dark now paints Tokyo's `shadows.card` —
+      // `0 0 2px #6A7199`, a one-pixel halo rather than a shade — at every
+      // level, and the kit says the same thing in the same words. The two
+      // agreeing is what makes it a shared decision rather than a coincidence.
+      const rim = '0 0 2px 1px #6A7199';
       for (final token in <String>[
         '--shadow-card',
         '--shadow-raised',
@@ -295,17 +299,18 @@ void main() {
             token,
             scope: '[data-theme="dark"]',
           ),
-          'none',
-          reason: '$token still paints in dark',
+          rim,
+          reason: '$token in dark is not Tokyo\'s rim',
         );
       }
 
-      for (final level in AppElevation.scale) {
-        expect(
-          shadowsFor(level, dark.colorScheme),
-          isEmpty,
-          reason: 'level $level paints a shadow in dark',
-        );
+      expect(shadowsFor(AppElevation.none, dark.colorScheme), isEmpty);
+      for (final level in AppElevation.scale.skip(1)) {
+        final shadow = shadowsFor(level, dark.colorScheme).single;
+        expect(shadow.color, AppColors.cardRimDark, reason: 'level $level');
+        expect(shadow.blurRadius, 2, reason: 'level $level');
+        expect(shadow.spreadRadius, 1, reason: 'level $level');
+        expect(shadow.offset, Offset.zero, reason: 'level $level');
       }
     });
 

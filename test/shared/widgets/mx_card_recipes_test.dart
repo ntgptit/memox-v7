@@ -114,7 +114,9 @@ void main() {
           );
           expect(hasVisibleBorder(decoration), isFalse);
           expect(radiusOf(decoration), AppRadius.lg);
-          expect(hasShadow(decoration), !isDark);
+          // Since M100.27 dark paints Tokyo's rim, so every lifted recipe
+          // carries a BoxShadow in both modes.
+          expect(hasShadow(decoration), isTrue);
         },
       );
 
@@ -132,7 +134,7 @@ void main() {
           isDark ? scheme.surfaceContainer : scheme.surface,
         );
         expect(radiusOf(decoration), AppRadius.xl);
-        expect(hasShadow(decoration), !isDark);
+        expect(hasShadow(decoration), isTrue);
       });
 
       testWidgets('$themeName · recessed: one step down, xl, flat', (
@@ -249,7 +251,7 @@ void main() {
           isDark ? scheme.surfaceContainer : scheme.surface,
         );
         expect(borderColorOf(decoration), semantic.borderAccent);
-        expect(hasShadow(decoration), !isDark);
+        expect(hasShadow(decoration), isTrue);
       });
 
       testWidgets('$themeName · tile: control corner, lifted like any '
@@ -271,7 +273,7 @@ void main() {
         // 2.15 L* of fill and nothing else. It now carries the same level-1
         // lift every other page card takes; only the corner still separates it
         // from `.raised`, which is what the recipe was ever about.
-        expect(hasShadow(decoration), !isDark);
+        expect(hasShadow(decoration), isTrue);
       });
 
       testWidgets('$themeName · option: its own brand edge, flat', (

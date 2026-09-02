@@ -175,9 +175,8 @@ void main() {
       final accent = theme.colorScheme.primary;
       final label = tester.widget<Text>(find.text('front-a'));
 
-      // `primaryAccent`, not `primary`: this is a label on a surface now, and
-      // `primary` is deliberately held below the card's headline — 3.33:1 as
-      // bare text on the dark page.
+      // `primary`, the canonical accent, as a label on a surface — readable
+      // because the palette is tuned for it (M100.28), not via a second token.
       expect(label.style?.color, accent);
 
       // The surface is painted by the tile's own `AnimatedContainer`, not by

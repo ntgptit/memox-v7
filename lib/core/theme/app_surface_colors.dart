@@ -10,7 +10,30 @@ import 'package:flutter/material.dart';
 /// wrong was keeping six roles in one file, not writing down why a colour is
 /// what it is.
 ///
-/// Nothing here changed value. This file is a move.
+/// Nothing changed value in that move. M100.26 then moved every value: the
+/// page is Tokyo's (`#F2F5F9` / `#070C27`), the light card is Tokyo's paper
+/// with the trace of brand R9 asks for, the light inset and selected fills are
+/// Tokyo's `alpha.black[10]` and `primary.lighter`, and the dark ladder keeps
+/// its tones at Tokyo's navy hue (HSL ~231) instead of A2's violet (~245).
+///
+/// **The palette is Tokyo's since M100.26.** The owner asked for the theme to
+/// match `ntgptit/tokyo-react-admin-dashboard`, and every value in this file is
+/// now one of three things: a Tokyo literal, a Tokyo primitive flattened over a
+/// Tokyo surface (its `alpha.black`/`primary.lighter` idiom, precomputed as
+/// AD-14 requires), or the value this file already had re-hued onto a Tokyo
+/// key with its tone and chroma kept — so every L\* step and ratio the tests
+/// hold survived without a rule moving. Measurements quoted below that predate
+/// M100.26 describe the A2 palette and are kept as the record of *why* a token
+/// exists; the current numbers are the tests' output.
+/// **The page and the card are Tokyo's verbatim (M100.27, kept by M100.28)** —
+/// they may be, because no canonical role or ratio depends on their exact hex
+/// the way `primary`'s consumers depend on `primary`; AD-14 ranks that order.
+/// Light card and raised surface are pure `#FFFFFF` — Tokyo's paper — which
+/// MX-VIS-002 R9 now exempts for exactly these four roles, since a tint the
+/// owner has ruled out cannot be a rule. The dark card is `#111633`, 4.3 L\*
+/// above the page rather than the 6 the ladder used to ask; the missing depth
+/// is Tokyo's own cue, the rim in `shadowsFor`, and `app_palette_test.dart`
+/// holds the pair at 4 L\* plus a 3:1 rim rather than at 6 alone.
 abstract final class AppSurfaceColors {
   ///
   /// Four tiers. Dark climbs L* 3.9 -> 10.2 -> 16.9 -> 24.0 so a card reads as a
@@ -25,9 +48,9 @@ abstract final class AppSurfaceColors {
   /// shadow — it only explains why the ladder was built to work without one.
 
   /// Page background. The one component allowed a strong navy saturation.
-  static const Color backgroundLight = Color(0xFFF4F5F8);
+  static const Color backgroundLight = Color(0xFFF2F5F9);
 
-  static const Color backgroundDark = Color(0xFF0A082D);
+  static const Color backgroundDark = Color(0xFF070C27);
 
   /// Card and sheet — the flashcard surface.
   ///
@@ -42,18 +65,18 @@ abstract final class AppSurfaceColors {
   /// while the step was the only depth cue light had. It is not any more: the
   /// shadow's alpha was re-solved to 0.07 and the total lift is 8.04 L\* against
   /// dark's 6.58.
-  static const Color surfaceLight = Color(0xFFFBFBFE);
+  static const Color surfaceLight = Color(0xFFFFFFFF);
 
-  static const Color surfaceDark = Color(0xFF1A1838);
+  static const Color surfaceDark = Color(0xFF111633);
 
-  static const Color surfaceEmphasisLight = Color(0xFFF1F1FC);
+  static const Color surfaceEmphasisLight = Color(0xFFF5F6FF);
 
   /// **Dark keeps the value it has today.** The reference concept is light-only
   /// ("LIGHT · TOKYO PURE"), and the complaint that started this was light: in
   /// dark `#332F58` carries a real violet and already reads as a callout. A dark
   /// value invented without a reference to measure against would be the guess
   /// this whole pass exists to avoid.
-  static const Color surfaceEmphasisDark = Color(0xFF332F58);
+  static const Color surfaceEmphasisDark = Color(0xFF2A3159);
 
   /// The fill a *picked* card wears when its list uses the tint treatment.
   ///
@@ -67,14 +90,14 @@ abstract final class AppSurfaceColors {
   ///
   /// The *edge* stays `secondary`: its 2.90:1 measurement is about a line on
   /// `surface`, which the fill never had a stake in.
-  static const Color surfaceSelectedLight = Color(0xFFEAEBFD);
+  static const Color surfaceSelectedLight = Color(0xFFE6E9FF);
 
   /// Unchanged in dark, for the reason [surfaceEmphasisDark] is.
-  static const Color surfaceSelectedDark = Color(0xFF332F58);
+  static const Color surfaceSelectedDark = Color(0xFF2A3159);
 
-  static const Color surfaceMutedLight = Color(0xFFEAECF1);
+  static const Color surfaceMutedLight = Color(0xFFE9EBEE);
 
-  static const Color surfaceMutedDark = Color(0xFF28254B);
+  static const Color surfaceMutedDark = Color(0xFF21274C);
 
   /// Top of the ladder: a raised or selected surface.
   ///
@@ -83,7 +106,7 @@ abstract final class AppSurfaceColors {
   /// rungs of the light ladder the same rung.
   // `AppMaterialRoles.surfaceContainerLowestLight` and `surfaceBrightLight`
   // are this value under Material's names, derived there.
-  static const Color surfaceElevatedLight = Color(0xFFFCFCFE);
+  static const Color surfaceElevatedLight = Color(0xFFFFFFFF);
 
-  static const Color surfaceElevatedDark = Color(0xFF37345F);
+  static const Color surfaceElevatedDark = Color(0xFF2F3660);
 }

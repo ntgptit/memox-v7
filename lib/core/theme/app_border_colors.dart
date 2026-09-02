@@ -11,7 +11,23 @@ import 'package:flutter/material.dart';
 /// one's, and the focus ring is louder than all of them in both modes. Each
 /// value carries the measurement that puts it in that order.
 ///
-/// Nothing here changed value. This file is a move.
+/// Nothing changed value in that move. M100.26 then moved every value onto
+/// Tokyo's: the resting edge is Tokyo's `alpha.black[12]` divider (light) and
+/// its `#272C48` divider (dark); the picked edge is Tokyo's `primary.main`
+/// light and its dark-theme `primary` dark; the accent and option edges are
+/// tints of Tokyo's primary; the control edge is a low-chroma grey at Tokyo's
+/// ink hue, because `app_palette_test.dart` holds the light canvas — input
+/// border included — under chroma 0.06.
+///
+/// **The palette is Tokyo's since M100.26.** The owner asked for the theme to
+/// match `ntgptit/tokyo-react-admin-dashboard`, and every value in this file is
+/// now one of three things: a Tokyo literal, a Tokyo primitive flattened over a
+/// Tokyo surface (its `alpha.black`/`primary.lighter` idiom, precomputed as
+/// AD-14 requires), or the value this file already had re-hued onto a Tokyo
+/// key with its tone and chroma kept — so every L\* step and ratio the tests
+/// hold survived without a rule moving. Measurements quoted below that predate
+/// M100.26 describe the A2 palette and are kept as the record of *why* a token
+/// exists; the current numbers are the tests' output.
 abstract final class AppBorderColors {
   /// Hairline between rows, around cards, and an input at rest.
   ///
@@ -41,11 +57,11 @@ abstract final class AppBorderColors {
   /// Both values are hue 240 and inside the light canvas's chroma budget. The
   /// history is worth keeping: `#D7DAE3` (1.40:1) was too weak when it was the
   /// only cue, `#BEC0C3` (1.82:1) was right then and too heavy now.
-  static const Color borderSubtleLight = Color(0xFFD2D2DD);
+  static const Color borderSubtleLight = Color(0xFFE4E7EA);
 
   // Lifted from 0xFF403D67 so a fill-less hairline (a divider on the dark page)
   // reads on OLED. Same hue and saturation (0.41), lightness only.
-  static const Color borderSubtleDark = Color(0xFF4C487A);
+  static const Color borderSubtleDark = Color(0xFF272C48);
 
   /// Inset tile, chip, icon container.
   /// The callout surface: a panel the screen wants noticed, at the quietest
@@ -95,20 +111,20 @@ abstract final class AppBorderColors {
   /// card fill against 1.18:1 on the pure white it was drawn for. Far below
   /// the 1.45:1 `borderSubtle` used to draw around every card — a divider that
   /// competed with content would just be the frame again, one level in.
-  static const Color borderDividerLight = Color(0xFFE9ECF5);
+  static const Color borderDividerLight = Color(0xFFF2F5F9);
 
   /// **Derived by matching the light ratio, not guessed.** The concept is
   /// light-only, so the dark value is solved for the same contrast on the fill
   /// a divided card actually has in dark (`surfaceContainer` `#221E44`, since
   /// these cards are `.raised`): `#2E2A54` measures **1.178:1** there against
   /// the concept's 1.181 in light.
-  static const Color borderDividerDark = Color(0xFF2E2A54);
+  static const Color borderDividerDark = Color(0xFF252C55);
 
-  static const Color borderSelectedLight = Color(0xFF6E6ECE);
+  static const Color borderSelectedLight = Color(0xFF5569FF);
 
   /// See [borderSelectedLight]. Dimmer than the focus indicator on purpose —
   /// that ring is `scheme.primary` at [AppStroke.focus].
-  static const Color borderSelectedDark = Color(0xFF7C79C8);
+  static const Color borderSelectedDark = Color(0xFF8C7CF0);
 
   /// The hairline a panel wears when it is the screen's *answer* rather than
   /// one row among many — today the Library's Today card.
@@ -120,7 +136,7 @@ abstract final class AppBorderColors {
   /// the contrast, and a resolved constant is what MX-VIS-002 rule R7 asks
   /// for — a translucent border composites against whatever is behind it, and
   /// the audit cannot read it back.
-  static const Color borderAccentLight = Color(0xFFB6B6E2);
+  static const Color borderAccentLight = Color(0xFFAAB4FF);
 
   /// Same recipe as [borderAccentLight], over the dark surface.
   /// **Solved against the one rule that matters here, and it is not the same
@@ -135,7 +151,7 @@ abstract final class AppBorderColors {
   /// `#6560B8` measures **2.93:1** on that fill — above the old hairline in both
   /// modes, and still short of the focus ring, which has to stay the loudest
   /// edge a card can wear.
-  static const Color borderAccentDark = Color(0xFF6560B8);
+  static const Color borderAccentDark = Color(0xFF7063C0);
 
   /// The resting edge of a selectable **card** — `MxCard.option`.
   ///
@@ -162,12 +178,12 @@ abstract final class AppBorderColors {
   /// border keeps `borderControl` and its canvas rule. So does
   /// `guess_option_item_widget`, which writes down that its row "is a control
   /// (WCAG 1.4.11), not a card" — the same distinction from the other side.
-  static const Color borderOptionLight = Color(0xFF8887CE);
+  static const Color borderOptionLight = Color(0xFF8896FF);
 
   /// See [borderOptionLight]. Measured on the fill `.option` actually has in
   /// dark (`surface`, since the recipe is flat): **3.22:1**, chroma 0.120, and
   /// 1.37 quieter than [borderSelectedDark].
-  static const Color borderOptionDark = Color(0xFF5D65B2);
+  static const Color borderOptionDark = Color(0xFF5B65B2);
 
   /// A control's edge at the 3:1 WCAG 1.4.11 asks. Why a control and not a
   /// card, and the measurements: `AppSemanticColors.borderControl`.
@@ -216,7 +232,7 @@ abstract final class AppBorderColors {
   /// `surfaceContainerHighest`, and it is the top rung — pushing it down
   /// compresses it into `surfaceContainerHigh` and breaks the ladder to fix a
   /// control.
-  static const Color borderControlLight = Color(0xFF7D7D85);
+  static const Color borderControlLight = Color(0xFF6F727B);
 
   /// Raised from `#66628D` at M100.3, and the census is the reason.
   ///
@@ -262,5 +278,5 @@ abstract final class AppBorderColors {
   /// It stays well under `onSurfaceVariant` (L\* 52.56 against 69.43), so the
   /// edge is still quieter than the secondary label it sits beside — the
   /// ordering the M100.3 census established, kept while the number moved.
-  static const Color borderControlDark = Color(0xFF7D79A2);
+  static const Color borderControlDark = Color(0xFF747BA3);
 }

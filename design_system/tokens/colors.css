@@ -1,7 +1,17 @@
-/* memox colour system — the app's own palette, unchanged.
+/* memox colour system — the app's own palette.
    Every value here is lifted from lib/core/theme/app_colors.dart. The redesign
    changed layout and hierarchy, not hue: this file is the app's existing colour
    language, and anything built on it should still look like memox.
+
+   M100.25–26: the palette is the owner's tokyo-react-admin-dashboard, adapted
+   where WCAG asks. Accents (primary #5569FF, secondary #6E759F, dark #9EA4C1)
+   sit at the first tone of each Tokyo family whose ratios clear. Surfaces are
+   Tokyo's page (#F2F5F9 / #070C27), paper and dark ladder re-hued onto
+   Tokyo's navy; text is Tokyo's ink (#223354 / #CBCCD2) and its 70% alpha
+   secondary; borders are Tokyo's alpha-black divider and its primary tints;
+   the four statuses are Tokyo's (#57CA22 #FFA319 #FF1943 #33C2FF) as-is in
+   dark and at each fill's previous tone in light; tertiary follows info's
+   hue. Containers and on-colours keep their tone and chroma and move hue only.
 
    The one addition is a progress family, because the redesign puts a bar on
    every deck and a bar drawn in --color-primary sits beside a button drawn in
@@ -11,26 +21,20 @@
    Light is the default scope; dark re-points the same semantic names. */
 :root{
   /* --- base literals: light ------------------------------------------- */
-  --mx-page-light:#F4F5F8;--mx-card-light:#FBFBFE;--mx-inset-light:#EAECF1;--mx-emphasis-light:#F1F1FC;--mx-border-selected-light:#6E6ECE;--mx-border-divider-light:#E9ECF5;--mx-border-option-light:#8887CE;--mx-selected-light:#EAEBFD;--mx-raised-light:#FCFCFE;
-  --mx-ink-light:#16182B;--mx-ink-quiet-light:#565C72;--mx-line-light:#D2D2DD;
-  --mx-indigo-light:#4646B4;--mx-indigo-deep-light:#4141C0;--mx-indigo-container-light:#DCDCF2;
-  --mx-success-light:#10795C;--mx-warning-light:#9A6A11;--mx-danger-light:#C02B3A;--mx-info-light:#3F6E97;
+  --mx-page-light:#F2F5F9;--mx-card-light:#FFFFFF;--mx-inset-light:#E9EBEE;--mx-emphasis-light:#F5F6FF;--mx-border-selected-light:#5569FF;--mx-border-divider-light:#F2F5F9;--mx-border-option-light:#8896FF;--mx-selected-light:#E6E9FF;--mx-raised-light:#FFFFFF;
+  --mx-ink-light:#223354;--mx-ink-quiet-light:#596680;--mx-line-light:#E4E7EA;
+  --mx-indigo-light:#4454CC;--mx-indigo-deep-light:#4141C0;--mx-indigo-container-light:#DADDF2;
+  --mx-success-light:#2A7800;--mx-warning-light:#A46500;--mx-danger-light:#CD0031;--mx-info-light:#00729A;
   /* --- base literals: dark -------------------------------------------- */
-  /* The dark surface ladder now sits in the page's colour family. It did not
-     before, and it failed in two ways at once: the card #1B1D32 was hue 235 to
-     the page's 243 — a green-leaning slate against a violet — and it carried
-     little more than half the page's chroma (0.040 against 0.072 in OKLCH).
-     A duller, greener surface stacked on a saturated violet page reads as grey
-     paper laid on the app rather than as part of the same room. Every surface
-     is now OKLCH hue ~285 at chroma 0.06-0.074.
-
-     The rungs are the ones that were already there — L* 3.9 -> 11.6 -> 19.0 ->
-     26.3 — give or take the ~2 L* apiece it costs to reach the new hue inside
-     sRGB; measured, the ladder lands at 3.9 -> 10.2 -> 16.9 -> 24.0. */
-  --mx-page-dark:#0A082D;--mx-card-dark:#1A1838;--mx-inset-dark:#28254B;--mx-raised-dark:#37345F;
-  --mx-ink-dark:#EDEDF6;--mx-ink-quiet-dark:#A8A7C4;--mx-line-dark:#4C487A;
-  --mx-indigo-dark:#C3C3EB;--mx-indigo-bright-dark:#8A8AE0;--mx-indigo-container-dark:#2B2B6E;
-  --mx-success-dark:#4FC79B;--mx-warning-dark:#E8D08E;--mx-danger-dark:#F2808F;--mx-info-dark:#8DB4D8;
+  /* The dark surface ladder sits in the page's colour family, and since
+     M100.26 that family is Tokyo's navy: the page is Tokyo's #070C27 and every
+     rung above it keeps the tone and chroma it had (L* 4.1 -> 10.4 -> 17.0 ->
+     24.0) at the page's HSL hue ~231, so the steps app_palette_test.dart holds
+     are unchanged while the room reads as Tokyo's rather than A2's violet. */
+  --mx-page-dark:#070C27;--mx-card-dark:#111633;--mx-inset-dark:#21274C;--mx-raised-dark:#2F3660;
+  --mx-ink-dark:#CBCCD2;--mx-ink-quiet-dark:#9395A2;--mx-line-dark:#272C48;
+  --mx-indigo-dark:#BCC2FF;--mx-indigo-bright-dark:#8A8AE0;--mx-indigo-container-dark:#252C6F;
+  --mx-success-dark:#57CA22;--mx-warning-dark:#FFA319;--mx-danger-dark:#FF768F;--mx-info-dark:#33C2FF;
 
   /* --- semantic: surface ladder --------------------------------------- */
   --color-background:var(--mx-page-light);
@@ -50,23 +54,23 @@
   --color-focus-ring:var(--mx-indigo-light);
 
   /* --- semantic: brand and actions ------------------------------------ */
-  --color-seed:#4646B4;
+  --color-seed:#4454CC;
   --color-primary:var(--mx-indigo-light);
   --color-on-primary:#FFFFFF;
-  /* The accent as TEXT or an ICON, which is a different problem from the accent
-     as a fill: on dark, the colour that carries white text is too dark to read
-     as a label on the page. */
+  /* The accent as TEXT or an ICON is the same role as the accent as a fill:
+     M3 binds both to primary, and M100.28 retuned primary so one hex serves
+     both (Tokyo's primary.dark #4454CC in light, tone 80 of it in dark). */
   --color-primary-accent:var(--mx-indigo-light);
   --color-primary-container:var(--mx-indigo-container-light);
-  --color-on-primary-container:#1B1B5C;
-  --color-secondary:#4E5468;
+  --color-on-primary-container:#141D5D;
+  --color-secondary:#585E7F;
   --color-on-secondary:#FFFFFF;
-  --color-secondary-container:#D9DDEB;
-  --color-on-secondary-container:#2C3141;
-  --color-tertiary:#45647F;
+  --color-secondary-container:#DADDEB;
+  --color-on-secondary-container:#2E3141;
+  --color-tertiary:#3C6678;
   --color-on-tertiary:#FFFFFF;
-  --color-tertiary-container:#E1E9F0;
-  --color-on-tertiary-container:#22394B;
+  --color-tertiary-container:#E0EAEE;
+  --color-on-tertiary-container:#1C3A47;
   --color-secondary-action:#454B5E;
 
   /* --- semantic: meaning ---------------------------------------------- */
@@ -81,76 +85,75 @@
      containers carry (0.142 of the fill over `surface`), with the ink at the
      tone the existing `on*Container` pairs occupy. `danger` needs none: it is
      `error`, so `--color-error-container` already holds it. */
-  --color-success-container:#DAE9E7;
-  --color-on-success-container:#003627;
+  --color-success-container:#DFE9DA;
+  --color-on-success-container:#1E3414;
   --color-warning-container:#EDE6DC;
-  --color-on-warning-container:#402A00;
-  --color-info-container:#E0E7EF;
-  --color-on-info-container:#073053;
+  --color-on-warning-container:#432902;
+  --color-info-container:#DEE8EC;
+  --color-on-info-container:#003247;
   --color-error:var(--mx-danger-light);
   --color-on-error:#FFFFFF;
-  --color-error-container:#F8DDE1;
-  --color-on-error-container:#641421;
+  --color-error-container:#F8DDE2;
+  --color-on-error-container:#641423;
 
   /* --- semantic: progress and reward ----------------------------------- */
   /* Its own family, not the accent. A bar drawn in --color-primary sits beside a
      button drawn in --color-primary and the eye cannot tell which one it can press. */
-  --color-progress-track:#E9EDF8;
-  --color-progress-fill:#6E6ECE;
+  --color-progress-track:#EBEDFF;
+  --color-progress-fill:#6471CF;
   --color-progress-complete:var(--mx-success-light);
   --color-streak:#C2731B;
   --color-streak-container:#FBEBD7;
 
   /* --- semantic: Material surface container ladder --------------------- */
-  --color-surface-container-lowest:#FCFCFE;
-  --color-surface-container-low:#FAFAFC;
-  --color-surface-container:#F1F2F6;
-  --color-surface-container-high:#EAECF1;
-  --color-surface-container-highest:#E3E5EC;
-  --color-surface-dim:#DEE0E7;
-  --color-surface-bright:#FCFCFE;
-  --color-inverse-surface:#2A2C3E;
-  --color-on-inverse-surface:#F1F2F6;
-  --color-inverse-primary:#A9A9E0;
+  --color-surface-container-lowest:#FFFFFF;
+  --color-surface-container-low:#F9FAFB;
+  --color-surface-container:#F0F2F6;
+  --color-surface-container-high:#E9EBEE;
+  --color-surface-container-highest:#E2E5EB;
+  --color-surface-dim:#DDE0E6;
+  --color-surface-bright:#FFFFFF;
+  --color-inverse-surface:#252D3D;
+  --color-on-inverse-surface:#F0F2F6;
+  --color-inverse-primary:#A4ABE0;
 
   /* --- semantic: shadow, scrim, chrome --------------------------------- */
-  --color-shadow:#0B0C18;
-  --color-scrim:#0B0C18;
-  --color-web-letterbox:#6E7288;
-  --color-disabled-surface:#E3E3E6;
-  --color-on-disabled:rgb(22 24 43 / 0.38);
+  --color-shadow:#0A0C18;
+  --color-scrim:#0A0C18;
+  --color-web-letterbox:#6E759F;
+  --color-disabled-surface:#E4E7EA;
+  --color-on-disabled:rgb(34 51 84 / 0.38);
 }
 [data-theme="dark"]{
   --color-background:var(--mx-page-dark);
   --color-surface:var(--mx-card-dark);
   --color-surface-muted:var(--mx-inset-dark);
-  --color-border-option:#5D65B2;
-  --color-border-divider:#2E2A54;
-  --color-border-selected:#7C79C8;
-  --color-surface-emphasis:#332F58;
-  --color-surface-selected:#332F58;
+  --color-border-option:#5B65B2;
+  --color-border-divider:#252C55;
+  --color-border-selected:#8C7CF0;
+  --color-surface-emphasis:#2A3159;
+  --color-surface-selected:#2A3159;
   --color-surface-elevated:var(--mx-raised-dark);
   --color-text-primary:var(--mx-ink-dark);
   --color-text-secondary:var(--mx-ink-quiet-dark);
   --color-border-subtle:var(--mx-line-dark);
   --color-focus-ring:var(--mx-indigo-dark);
   --color-primary:var(--mx-indigo-dark);
-  --color-on-primary:#262670;
+  --color-on-primary:#202771;
   --color-primary-accent:var(--mx-indigo-dark);
   --color-primary-container:var(--mx-indigo-container-dark);
-  --color-on-primary-container:#D7D5FF;
-  /* Moved with its container. A role has to read as one hue: leaving the fill
-     on the old slate while the container joined the page family put 18 degrees
-     between them, which is visible the moment the two are drawn side by side.
-     Same L* (75.2), hue now 3.5 degrees off the container. */
-  --color-secondary:#B8B7D0;
-  --color-on-secondary:#1E2033;
-  --color-secondary-container:#332F58;
-  --color-on-secondary-container:#D9DCE7;
-  --color-tertiary:#8DB4D8;
-  --color-on-tertiary:#17232E;
-  --color-tertiary-container:#33465A;
-  --color-on-tertiary-container:#D5E0EA;
+  --color-on-primary-container:#D2D6FF;
+  /* Tokyo's dark-theme secondary, as is. Its container leaves the surface
+     family with it: a role has to read as one hue, and Tokyo's secondary sits
+     at hue 230 where the dark surfaces sit at 246. Same tone as before. */
+  --color-secondary:#9EA4C1;
+  --color-on-secondary:#1C2033;
+  --color-secondary-container:#2A3259;
+  --color-on-secondary-container:#DADCE7;
+  --color-tertiary:#33C2FF;
+  --color-on-tertiary:#13242B;
+  --color-tertiary-container:#2B4854;
+  --color-on-tertiary-container:#D3E1E7;
   --color-secondary-action:#C3C6D2;
   --color-success:var(--mx-success-dark);
   --color-warning:var(--mx-warning-dark);
@@ -159,16 +162,16 @@
   /* See the light block. Dark is placed at the L* band the existing dark
      containers occupy (24.0) at each role's own hue, rather than tinted — the
      dark containers were never a blend of their fill. */
-  --color-success-container:#0E412F;
-  --color-on-success-container:#BFE3D6;
-  --color-warning-container:#453812;
-  --color-on-warning-container:#E4DBC1;
-  --color-info-container:#213B54;
-  --color-on-info-container:#CBDEEF;
+  --color-success-container:#273F1C;
+  --color-on-success-container:#CBE2C0;
+  --color-warning-container:#4C3513;
+  --color-on-warning-container:#EAD9C0;
+  --color-info-container:#153D4E;
+  --color-on-info-container:#C7E0EB;
   --color-error:var(--mx-danger-dark);
-  --color-on-error:#2C1319;
-  --color-error-container:#5E2831;
-  --color-on-error-container:#F5D3D8;
+  --color-on-error:#2C1318;
+  --color-error-container:#5E2832;
+  --color-on-error-container:#F4D3D9;
   --color-progress-track:#2E3247;
   /* The focus ring's own indigo, reached through the primitive rather
      than copied: one edit, one meaning moved. A focus ring must never
@@ -182,19 +185,19 @@
      warm accent. The label keeps its warm --color-streak; only the ground
      joins the surface family, at the same L*. */
   --color-streak-container:#342C4B;
-  --color-surface-container-lowest:#0A0326;
-  --color-surface-container-low:#151134;
-  --color-surface-container:#221E44;
-  --color-surface-container-high:#28254B;
-  --color-surface-container-highest:#332F58;
+  --color-surface-container-lowest:#010624;
+  --color-surface-container-low:#0D1335;
+  --color-surface-container:#1A2045;
+  --color-surface-container-high:#21274C;
+  --color-surface-container-highest:#2A3159;
   /* The dimmest surface is the page. */
   --color-surface-dim:var(--color-background);
-  --color-surface-bright:#37345F;
-  --color-inverse-surface:#E7E8F0;
-  --color-on-inverse-surface:#23253A;
-  --color-inverse-primary:#3A3A9B;
-  --color-shadow:#04040B;
-  --color-scrim:#04040B;
-  --color-disabled-surface:#312E4E;
-  --color-on-disabled:rgb(237 238 245 / 0.38);
+  --color-surface-bright:#2F3660;
+  --color-inverse-surface:#E6E9EF;
+  --color-on-inverse-surface:#1D273A;
+  --color-inverse-primary:#333C9C;
+  --color-shadow:#03040B;
+  --color-scrim:#03040B;
+  --color-disabled-surface:#272C46;
+  --color-on-disabled:rgb(203 204 210 / 0.38);
 }

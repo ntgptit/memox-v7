@@ -4,7 +4,7 @@ import 'package:memox/core/theme/app_material_roles.dart';
 import 'package:memox/core/theme/app_surface_colors.dart';
 import 'package:memox/core/theme/app_border_colors.dart';
 
-/// The approved A2 Quizlet Navy Indigo palette, as flat lists.
+/// The approved palette — Tokyo's since M100.26 — as flat lists.
 ///
 /// One list per brightness, shared by every check that needs to ask "is this
 /// colour ours". Two consumers today — the `ColorScheme` role test and the
@@ -154,6 +154,7 @@ final List<Color> darkPaletteTokens = <Color>[
   AppColors.disabledSurfaceDark,
   AppColors.onDisabledDark,
   AppColors.shadowDark,
+  AppColors.cardRimDark,
   AppColors.scrimDark,
   // The `*Fixed` family is the same in both schemes, so the dark scheme
   // legitimately carries these light tokens.

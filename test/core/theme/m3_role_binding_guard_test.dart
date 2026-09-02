@@ -29,7 +29,25 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   for (final _Binding binding in _bindings) {
     test('${binding.component} · ${binding.slot}', () {
-      final Set<String> roles = _rolesIn(binding);
+      final _SchemeRoles reads = _readsIn(binding);
+      final Set<String> roles = reads.roles;
+
+      // **A slot that names an app token instead of a scheme role is the
+      // substitute this file exists to refuse (M100.28).** `primaryInk` passed
+      // every runtime pin while it stood in for `primary`, because the two
+      // resolved to one value; only the source said which one the slot read.
+      final Set<String> substitutes = reads.semanticReads.difference(
+        _allowedSemanticReads,
+      );
+      expect(
+        substitutes,
+        isEmpty,
+        reason:
+            '${binding.component}.${binding.slot} reads '
+            '`semantic.${substitutes.join('`, `semantic.')}` — an app token '
+            'standing in for a canonical role. If the role fails a ratio, '
+            'retune the palette; never route the slot around it.',
+      );
 
       for (final String required in binding.requires) {
         expect(
@@ -80,7 +98,15 @@ class _Binding {
   final String because;
 }
 
-Set<String> _rolesIn(_Binding binding) {
+/// The `semantic.<token>` reads a role slot may carry: the disabled pair, which
+/// every role slot needs and which M3 itself spells as `onSurface @ 12% / 38%`
+/// before AD-14 R7 flattens it into a token. Anything else is a substitute.
+const Set<String> _allowedSemanticReads = <String>{
+  'onDisabled',
+  'disabledSurface',
+};
+
+_SchemeRoles _readsIn(_Binding binding) {
   final File file = File(binding.file);
   expect(file.existsSync(), isTrue, reason: 'missing ${binding.file}');
 
@@ -108,7 +134,7 @@ Set<String> _rolesIn(_Binding binding) {
   final _SchemeRoles visitor = _SchemeRoles();
   target!.accept(visitor);
 
-  return visitor.roles;
+  return visitor;
 }
 
 AstNode? _functionNamed(CompilationUnit unit, String name) {
@@ -128,25 +154,32 @@ AstNode? _namedArgument(AstNode declaration, String label) {
   return visitor.found;
 }
 
-/// Every `scheme.<role>` the subtree reads.
+/// Every `scheme.<role>` the subtree reads — and every `semantic.<token>`, so
+/// a slot that swapped a role for an app token is caught by name.
 ///
 /// Both spellings are collected because the analyser models `a.b` as a
 /// `PrefixedIdentifier` and `a.b.c` as a `PropertyAccess`, and a resolver that
 /// grows a `?.` or a cast moves between them without changing what it means.
 class _SchemeRoles extends RecursiveAstVisitor<void> {
   final Set<String> roles = <String>{};
+  final Set<String> semanticReads = <String>{};
+
+  void _record(String prefix, String member) {
+    if (prefix == 'scheme') roles.add(member);
+    if (prefix == 'semantic') semanticReads.add(member);
+  }
 
   @override
   void visitPrefixedIdentifier(PrefixedIdentifier node) {
-    if (node.prefix.name == 'scheme') roles.add(node.identifier.name);
+    _record(node.prefix.name, node.identifier.name);
     super.visitPrefixedIdentifier(node);
   }
 
   @override
   void visitPropertyAccess(PropertyAccess node) {
     final Expression? target = node.target;
-    if (target is SimpleIdentifier && target.name == 'scheme') {
-      roles.add(node.propertyName.name);
+    if (target is SimpleIdentifier) {
+      _record(target.name, node.propertyName.name);
     }
     super.visitPropertyAccess(node);
   }
@@ -285,6 +318,47 @@ const List<_Binding> _bindings = <_Binding>[
         '_SegmentedButtonDefaultsM3.side has no focus branch. The keyboard '
         'cue is the overlay.',
   ),
+  // **TextButton and TabBar are the two `primaryInk` reached first (M100.27),
+  // and neither had a row here.** The runtime contract compares resolved
+  // colours, so a token equal to `primary` passed it; only the source shows
+  // which name the slot reads. `accent` is the argument the text-link resolver
+  // takes its resting, hovered and pressed colour from, so it is the slot.
+  _Binding(
+    component: 'TextButton',
+    slot: 'accent',
+    file: _buttons,
+    scope: 'buildTextButtonTheme',
+    requires: <String>['primary'],
+    refuses: <String>['secondary', 'tertiary', 'onSurfaceVariant'],
+    because:
+        '_TextButtonDefaultsM3.foregroundColor is primary. A text link is bare '
+        'text on a surface; if the role fails 4.5:1 there, the palette moves.',
+  ),
+  _Binding(
+    component: 'TabBar',
+    slot: 'labelColor',
+    file: _planned,
+    scope: 'buildTabBarTheme',
+    requires: <String>['primary'],
+    refuses: <String>[
+      'secondary',
+      'tertiary',
+      'onSurfaceVariant',
+      'onSecondaryContainer',
+    ],
+    because:
+        '_TabBarDefaultsM3.labelColor is primary: the selected label sits on '
+        'the page, not on a container, so it is the accent as ink.',
+  ),
+  _Binding(
+    component: 'TabBar',
+    slot: 'indicatorColor',
+    file: _planned,
+    scope: 'buildTabBarTheme',
+    requires: <String>['primary'],
+    refuses: <String>['secondary', 'tertiary', 'secondaryContainer'],
+    because: '_TabBarDefaultsM3.indicatorColor is primary.',
+  ),
   _Binding(
     component: 'OutlinedButton',
     slot: 'foregroundColor',
@@ -294,7 +368,9 @@ const List<_Binding> _bindings = <_Binding>[
     refuses: <String>['secondary', 'onSurfaceVariant'],
     because:
         '_OutlinedButtonDefaultsM3.foregroundColor is primary. The retired '
-        '`secondaryAction` token was a second name for it.',
+        '`secondaryAction` token was a second name for it, and M100.27\'s '
+        '`primaryInk` was another — a role that fails a ratio is answered by '
+        'retuning the palette (M100.28), never by a substitute token.',
   ),
   _Binding(
     component: 'OutlinedButton',
