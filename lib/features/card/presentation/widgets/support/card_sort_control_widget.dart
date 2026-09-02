@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../shared/widgets/mx_menu_button.dart';
 import '../../../../../shared/widgets/mx_icon.dart';
-import '../../../../../core/theme/app_ink.dart';
-import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/theme/theme_context_extension.dart';
+import '../../../../../core/theme/extensions/app_ink.dart';
+import '../../../../../core/theme/foundations/app_spacing.dart';
+import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../domain/models/card_list_sort_model.dart';
 import '../../controllers/card_list_filter_controller.dart';

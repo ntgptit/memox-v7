@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_interaction_states.dart';
-import 'package:memox/core/theme/app_spacing.dart';
-import 'package:memox/core/theme/app_stroke.dart';
+import 'package:memox/core/theme/foundations/app_sizing.dart';
+import 'package:memox/core/theme/states/app_interaction_states.dart';
+import 'package:memox/core/theme/foundations/app_stroke.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
 
@@ -300,8 +300,8 @@ void main() {
       );
 
       final card = tester.getSize(find.byType(MxCard));
-      expect(card.width, greaterThanOrEqualTo(AppSpacing.minimumTouchTarget));
-      expect(card.height, greaterThanOrEqualTo(AppSpacing.minimumTouchTarget));
+      expect(card.width, greaterThanOrEqualTo(AppSizing.touchTarget));
+      expect(card.height, greaterThanOrEqualTo(AppSizing.touchTarget));
     });
   });
 }

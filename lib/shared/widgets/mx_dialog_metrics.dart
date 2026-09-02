@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_spacing.dart';
+import '../../core/theme/foundations/app_spacing.dart';
 
 /// The two insets that decide how wide a dialog's footer really is.
 ///

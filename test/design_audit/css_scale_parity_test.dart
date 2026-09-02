@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_colors.dart';
-import 'package:memox/core/theme/app_breakpoints.dart';
-import 'package:memox/core/theme/app_compact_scale.dart';
-import 'package:memox/core/theme/app_durations.dart';
-import 'package:memox/core/theme/app_elevation.dart';
-import 'package:memox/core/theme/app_icon_size.dart';
-import 'package:memox/core/theme/app_radius.dart';
-import 'package:memox/core/theme/app_spacing.dart';
-import 'package:memox/core/theme/app_interaction_states.dart';
+import 'package:memox/core/theme/foundations/app_colors.dart';
+import 'package:memox/core/theme/foundations/app_breakpoints.dart';
+import 'package:memox/core/theme/foundations/app_sizing.dart';
+import 'package:memox/core/theme/schemes/app_compact_scale.dart';
+import 'package:memox/core/theme/foundations/app_durations.dart';
+import 'package:memox/core/theme/foundations/app_elevation.dart';
+import 'package:memox/core/theme/foundations/app_icon_size.dart';
+import 'package:memox/core/theme/foundations/app_radius.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
+import 'package:memox/core/theme/states/app_interaction_states.dart';
 import 'package:memox/core/theme/app_theme.dart';
-import 'package:memox/core/theme/app_text_styles.dart';
-import 'package:memox/core/theme/app_typography.dart';
+import 'package:memox/core/theme/typography/app_text_styles.dart';
+import 'package:memox/core/theme/typography/app_typography.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 
 import 'css_tokens.dart';
@@ -40,7 +41,7 @@ void main() {
       expect(CssTokens.number('spacing.css', '--space-xxl'), AppSpacing.xxl);
       expect(
         CssTokens.number('spacing.css', '--touch-target-min'),
-        AppSpacing.minimumTouchTarget,
+        AppSizing.touchTarget,
       );
     });
 

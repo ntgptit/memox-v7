@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_icon_size.dart';
-import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/foundations/app_icon_size.dart';
+import '../../../../../core/theme/foundations/app_sizing.dart';
+import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_text_button.dart';
 import '../../states/library_search_state.dart';
@@ -48,7 +49,7 @@ class SearchPageFooterWidget extends StatelessWidget {
           // spinner says nothing at all to a screen reader.
           liveRegion: true,
           child: SizedBox(
-            height: AppSpacing.minimumTouchTarget,
+            height: AppSizing.touchTarget,
             child: Center(
               child: SizedBox.square(
                 dimension: AppIconSize.sm,

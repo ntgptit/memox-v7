@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.28 (bất biến canonical binding: gỡ `primaryInk`, khôi phục `primary` cho TextButton/OutlinedButton/TabBar, sàn 4,5 và 12° trở lại, `primary` retune `#4454CC` / `#BCC2FF`); M100.27 (`primary`, nền trang, nền card lấy nguyên hex Tokyo theo chỉ định chủ dự án; `primaryInk` cho thương hiệu làm chữ; dark vẽ rim Tokyo thay shade; R9 miễn paper trắng, sàn 4,3 cho nhãn nút light); M100.26 (toàn bộ hệ màu về palette Tokyo — surface, ink, viền, bốn semantic, tertiary, thang container; ngân sách chroma semantic thay bằng luật bốn hue; golden vẽ lại); M100.25 (hai họ accent M3 lấy hue từ palette Tokyo; fill là giá trị Tokyo đầu tiên vượt sàn, container/on giữ tone và chroma; `surfaceContainerHighest` dark tách khỏi `secondaryContainer`); M100.24 (golden về một nền tảng: job CI chuyển sang Linux, thêm bước font, bỏ tolerance); M100.23 (tổ hợp state thôi phá canonical role; guard AST khoá slot→role; luật nền tảng golden); M100.22 (năm component về role M3 canonical; hai hex palette gánh phần contrast; gỡ khái niệm selected ink chung); M100.21 (container cho bốn semantic; chip trạng thái thôi mượn role accent); M100.20 (bảy binding component về role M3; sàn độ nổi của menu bỏ theo quyết định chủ dự án); M100.19 (gỡ ba token thay thế khỏi 112 call-site, golden chứng minh không đổi pixel); M100.18 (dark `primary` đảo tone theo M3; ba token thay thế thành dẫn xuất); M100.17 (`ColorScheme` đúng 45 role M3 — gỡ `surfaceTint` khai tường minh, catalog đủ 45 swatch); M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
+| **Updated by task** | M100.29 (`lib/core/theme/` chia sáu tầng: token tách khỏi component builder, `ColorScheme` có nguồn riêng `schemes/app_color_scheme.dart`, `AppSizing` nhận ba giá trị đã có, guard chiều import đã kiểm ngược, tài liệu `docs/design-system/theme-architecture.md`); M100.28 (bất biến canonical binding: gỡ `primaryInk`, khôi phục `primary` cho TextButton/OutlinedButton/TabBar, sàn 4,5 và 12° trở lại, `primary` retune `#4454CC` / `#BCC2FF`); M100.27 (`primary`, nền trang, nền card lấy nguyên hex Tokyo theo chỉ định chủ dự án; `primaryInk` cho thương hiệu làm chữ; dark vẽ rim Tokyo thay shade; R9 miễn paper trắng, sàn 4,3 cho nhãn nút light); M100.26 (toàn bộ hệ màu về palette Tokyo — surface, ink, viền, bốn semantic, tertiary, thang container; ngân sách chroma semantic thay bằng luật bốn hue; golden vẽ lại); M100.25 (hai họ accent M3 lấy hue từ palette Tokyo; fill là giá trị Tokyo đầu tiên vượt sàn, container/on giữ tone và chroma; `surfaceContainerHighest` dark tách khỏi `secondaryContainer`); M100.24 (golden về một nền tảng: job CI chuyển sang Linux, thêm bước font, bỏ tolerance); M100.23 (tổ hợp state thôi phá canonical role; guard AST khoá slot→role; luật nền tảng golden); M100.22 (năm component về role M3 canonical; hai hex palette gánh phần contrast; gỡ khái niệm selected ink chung); M100.21 (container cho bốn semantic; chip trạng thái thôi mượn role accent); M100.20 (bảy binding component về role M3; sàn độ nổi của menu bỏ theo quyết định chủ dự án); M100.19 (gỡ ba token thay thế khỏi 112 call-site, golden chứng minh không đổi pixel); M100.18 (dark `primary` đảo tone theo M3; ba token thay thế thành dẫn xuất); M100.17 (`ColorScheme` đúng 45 role M3 — gỡ `surfaceTint` khai tường minh, catalog đủ 45 swatch); M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
 | **Last updated** | 2026-09-02 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -16944,6 +16944,120 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Dependencies:** M100.23
 - **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
 - **Checklist phases:** 14, 21.
+
+### M100.29 · `lib/core/theme/` có tầng — token tách khỏi builder, scheme có nguồn riêng
+
+- **Status:** done
+- **Goal:** Theme là **29 file phẳng trong một thư mục**. Một thư mục phẳng không
+  có chiều: không gì chặn một file token import một component builder, không gì
+  nói một feature được đọc `AppMaterialRoles` hay không, và câu "file này là token
+  hay builder?" chỉ trả lời được bằng cách mở file ra. Chủ dự án chỉ định tổ chức
+  lại theo cách Tokyo tách trách nhiệm (palette / typography / shadows /
+  components), **dịch sang Flutter-native chứ không chép cấu trúc React/MUI**.
+  Đây là foundation refactor **trước** đợt redesign shared widget: không đổi
+  pixel, không redesign Card/Button/Input/Chip.
+- **Scope:** 29 file dưới `lib/core/theme/` chuyển vào sáu tầng — `foundations/`
+  (13 token file + `app_sizing.dart` mới), `typography/` (2), `states/` (1),
+  `components/` (8 + 6 tách khỏi `app_theme.dart`), `schemes/` (3, gồm
+  `app_color_scheme.dart` mới), `extensions/` (2), `app_theme.dart` ở gốc.
+  277 file rewrite import (`lib/`, `test/`, `widgetbook/`). 25 file test dưới
+  `test/core/theme/` chuyển vào cùng sáu tầng + `contracts/`. Guard mới
+  `test/core/theme/contracts/theme_layering_test.dart`. Tài liệu mới
+  `docs/design-system/theme-architecture.md`; `check_docs.py` quét thêm
+  `docs/design-system/`; `docs/README.md`.
+- **Hai file tách ra, và lý do từng cái:**
+  | File mới | Tách khỏi | Vì sao |
+  |---|---|---|
+  | `schemes/app_color_scheme.dart` | `app_theme.dart` (135 / 635 dòng) | Composition root vừa là nguồn của scheme: "`secondaryContainer` là màu gì?" và "app theme những component nào?" là việc của cùng một file, trong khi chúng đổi vì hai lý do khác nhau — palette dịch (M100.25–28 đổi mọi giá trị, không chạm phần dưới) so với một component có caller đầu tiên |
+  | `foundations/app_sizing.dart` | `AppSpacing` + một literal `64` | `AppSpacing` khai "every gap, pad and inset" rồi phải tự bác `minimumTouchTarget` là "a floor, not a step". Một class phải biện minh rằng một member không thuộc về nó là một member đặt sai chỗ |
+- **`AppSizing` không phát minh giá trị nào.** `touchTarget` 48 và
+  `floatingAction` 56 là hai hằng đã có trên `AppSpacing` (cái sau là private);
+  `buttonMinWidth` 64 là literal trần trong `buildSharedButtonStyle`. Không thêm
+  `controlSm/Md/Lg` như brief gợi ý: không màn hình nào render chúng, và ba token
+  không có caller là ba quyết định không có gì để đối chiếu — cùng luật
+  `app_planned_themes.dart` đang theo cho component theme.
+- **`app_theme.dart` 635 → 285 dòng, và phần còn lại là composition thật.** Tám
+  slot còn dựng inline được tách ra `components/`: `app_app_bar_theme.dart`,
+  `app_card_theme.dart`, `app_floating_action_button_theme.dart`,
+  `app_icon_button_theme.dart`, `app_list_tile_theme.dart` và
+  `app_modal_themes.dart` (dialog + bottom sheet + snack bar — một họ theo
+  *hành vi*: đều có barrier hoặc float, đều phải trả lời "mode này có vẽ shadow
+  không", hai trong ba dùng chung `modalBarrierColor`). `_overlayElevation` về
+  `foundations/app_elevation.dart` thành `overlayElevationFor` — cùng quyết
+  định "mode nào vẽ shadow" mà `materialShadowColor` đã ở đó.
+  Còn lại trong `app_theme.dart`: `ThemeData` base, bốn wash fall-through,
+  `canvasColor`/`disabledColor`, `iconTheme`, và danh sách slot → builder.
+- **Một comment sai bị gỡ, không phải di dời.** Năm dòng trên
+  `floatingActionButtonTheme` mô tả *bottom bar* — "sits on the page colour",
+  "M3's default would tint it with `surfaceContainer`". M100.22 đã đảo quyết
+  định đó: bar **lấy** `surfaceContainer`, và `buildNavigationBarTheme` giữ
+  phép đo. Comment là bản sao cũ của một quyết định đã bị lật, nên gỡ chứ không
+  chuyển sang file khác.
+- **Chiều phụ thuộc, và nó được kiểm ngược:** `foundations` → `typography`/
+  `states` → `components`/`schemes` → `app_theme.dart`; `extensions/` là **read
+  side**, nằm cạnh chứ không nằm dưới, chỉ đọc `foundations` + `typography`.
+  Bốn rule trong `theme_layering_test.dart` đều được chèn vi phạm để xem có đỏ
+  không trước khi giữ lại — một guard không khớp gì thì xanh vĩnh viễn.
+- **`app_ink.dart` sang `extensions/`, không sang `typography/` như brief.**
+  Nó nhận `BuildContext` và đọc một theme đã dựng xong; để ở `typography/` thì
+  `typography/` phải import `extensions/theme_context_extension.dart` và tạo chu
+  trình ở mức thư mục. Cùng lý do `theme_context_extension.dart` ở đó: cả hai là
+  extension trên một `ThemeData` đã có, không phải thứ dựng ra nó.
+- **Không có barrel `theme.dart`.** Một barrel gom 31 file biến mọi internal
+  token thành public API và làm rule "feature không đọc `app_material_roles`"
+  không kiểm được nữa — mọi import trở thành cùng một dòng.
+- **Ranh giới public/internal đã đúng từ trước, task này chỉ khoá lại:** không
+  file nào dưới `lib/features/` import bốn file palette, `components/`,
+  `schemes/` hay `states/`. `lib/shared/widgets/` đọc `components/` và `states/`
+  (nửa widget của hợp đồng — `MxActionButton` gọi `buildFilledTonalStyle`);
+  `lib/app/` không bị chặn vì nó là composition root và vẽ hai bề mặt ngoài
+  `MaterialApp`.
+- **Không đổi pixel, và đây là bằng chứng chứ không phải khẳng định.** Hai phép
+  đo, vì golden trên Windows không nói được gì (nền tảng viết là Linux —
+  `dart_test.yaml`):
+  1. **`ThemeData` dump.** Cả **bốn** theme (light, dark, hai bản high contrast)
+     — mọi slot, cộng mọi `WidgetStateProperty` resolve qua 8 tập state — dump
+     từ một worktree ở `origin/main` và từ HEAD rồi diff: **1 649 dòng,
+     identical** sau khi bỏ id chẩn đoán (`ColorScheme#c0247`) mà Flutter sinh
+     mới mỗi lần chạy.
+  2. **Golden trên cùng một máy Windows.** `origin/main` cho `+74 -229`;
+     HEAD cho đúng cùng số. 229 golden đỏ ở đây là khoảng cách rasterisation
+     Windows↔Linux, có sẵn trước khi task này bắt đầu — CI Linux mới là chỗ so.
+  Ngoài `lib/core/theme/`, diff chỉ còn import và một đổi tên hằng sang hằng
+  cùng giá trị (48), cộng vài dòng `dart format` gộp lại vì tên mới ngắn hơn.
+  Không giá trị token nào đổi, không binding nào đổi, không ngưỡng nào đổi;
+  45 role M3 của M100.17 và hợp đồng binding M100.26–28 nguyên vẹn.
+  `design_audit/*.json|md` regenerate: đường dẫn file mới, số file quét 702 → 710.
+- **Editable documents:** `docs/wbs.md`, `docs/README.md`,
+  `docs/design-system/theme-architecture.md` (mới).
+- **Output:** như Scope.
+- **Acceptance criteria:**
+  - [x] `lib/core/theme/` có đúng sáu tầng + `app_theme.dart`; mỗi tầng chỉ import
+        tầng dưới nó (`theme_layering_test.dart`, 4 rule, đã kiểm ngược).
+  - [x] `app_theme.dart` 635 → 285 dòng, không còn dựng `ColorScheme` và không
+        còn dựng một component theme nào — rule thứ năm của guard cấm mọi
+        `XxxThemeData(` trong file đó, trừ `IconThemeData` (fall-through cấp
+        `ThemeData`, không phải component theme).
+  - [x] `ColorScheme` vẫn nhận đúng 45 role M3, không thêm shadow role
+        (`color_scheme_roles_test`, `m3_role_contract_test` xanh không sửa).
+  - [x] `AppSemanticColors` vẫn chỉ chứa app/domain semantics — không thêm, không
+        bớt field nào.
+  - [x] Không file nào dưới `lib/features/` import theme internal; không file nào
+        dưới `lib/core/theme/` import `features/`, `app/`, `shared/`.
+  - [x] `test/core/theme/` mirror sáu tầng + `contracts/`; 312 test xanh.
+  - [x] `dart format` sạch, `flutter analyze` 0 issue (app + widgetbook),
+        guard 79/79 rule 0 finding, `check_generated.py` xanh, `check_docs.py`
+        xanh (29 tài liệu), architecture guard xanh, host suite non-golden
+        4 265/4 265.
+  - [x] Golden không đổi — `ThemeData` dump identical với `origin/main`, và bộ
+        golden trên cùng máy Windows cho cùng `74/303` pass ở cả hai nhánh; nên
+        không regenerate PNG và không republish gallery.
+- **Dependencies:** M100.28
+- **Tests required:** `test/core/theme/contracts/theme_layering_test.dart` (mới,
+  5 rule, mỗi rule đã kiểm ngược);
+  toàn bộ test hiện có chạy lại không sửa nội dung assert — chỉ đường dẫn import
+  và path literal.
+- **Checklist phases:** 4, 7.
 
 ### M100.28 · Binding canonical khoá, palette retune — gỡ `primaryInk`
 

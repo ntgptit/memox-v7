@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:memox/core/theme/theme_context_extension.dart';
-import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/core/theme/extensions/theme_context_extension.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/shared/widgets/mx_confirm_dialog.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
 import 'package:memox/shared/widgets/mx_progress_bar.dart';

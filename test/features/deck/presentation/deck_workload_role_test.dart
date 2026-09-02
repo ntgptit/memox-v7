@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_ink.dart';
-import 'package:memox/core/theme/app_colors.dart';
-import 'package:memox/core/theme/app_material_roles.dart';
-import 'package:memox/core/theme/app_semantic_colors.dart';
+import 'package:memox/core/theme/extensions/app_ink.dart';
+import 'package:memox/core/theme/foundations/app_colors.dart';
+import 'package:memox/core/theme/foundations/app_material_roles.dart';
+import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/features/deck/domain/models/deck_content_type_model.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
@@ -16,7 +16,7 @@ import 'package:memox/l10n/generated/app_localizations_en.dart';
 import '../../../support/color_math.dart';
 import 'support/deck_screen_harness.dart';
 import 'support/fake_deck_repository.dart';
-import 'package:memox/core/theme/app_surface_colors.dart';
+import 'package:memox/core/theme/foundations/app_surface_colors.dart';
 
 /// Which semantic role each part of the workload row actually wears — asserted
 /// per theme, by role and not by hex, because a repainted palette must not

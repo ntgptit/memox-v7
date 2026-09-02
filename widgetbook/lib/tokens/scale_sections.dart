@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
-import 'package:memox/core/theme/app_breakpoints.dart';
-import 'package:memox/core/theme/app_durations.dart';
-import 'package:memox/core/theme/app_icon_size.dart';
-import 'package:memox/core/theme/app_radius.dart';
-import 'package:memox/core/theme/app_spacing.dart';
-import 'package:memox/core/theme/theme_context_extension.dart';
+import 'package:memox/core/theme/foundations/app_breakpoints.dart';
+import 'package:memox/core/theme/foundations/app_durations.dart';
+import 'package:memox/core/theme/foundations/app_icon_size.dart';
+import 'package:memox/core/theme/foundations/app_radius.dart';
+import 'package:memox/core/theme/foundations/app_sizing.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
+import 'package:memox/core/theme/extensions/theme_context_extension.dart';
 import '../support/showcase_section.dart';
 
 /// The scale-token sections of the token gallery: spacing, radius, icon
@@ -191,14 +192,14 @@ class _TouchTargetDemo extends StatelessWidget {
           SizedBox(
             width: _factNameWidth,
             child: Text(
-              'minimumTouchTarget · '
-              '${AppSpacing.minimumTouchTarget.toStringAsFixed(0)}',
+              'touchTarget · '
+              '${AppSizing.touchTarget.toStringAsFixed(0)}',
               style: context.texts.bodySmall,
             ),
           ),
           const SizedBox(width: AppSpacing.md),
           SizedBox.square(
-            dimension: AppSpacing.minimumTouchTarget,
+            dimension: AppSizing.touchTarget,
             child: DecoratedBox(
               decoration: BoxDecoration(
                 border: Border.all(color: context.colors.primary),

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../shared/widgets/mx_icon.dart';
-import '../../../../../core/theme/app_ink.dart';
-import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/theme/theme_context_extension.dart';
+import '../../../../../core/theme/extensions/app_ink.dart';
+import '../../../../../core/theme/foundations/app_spacing.dart';
+import '../../../../../core/theme/extensions/theme_context_extension.dart';
 
 /// A short banner explaining why an action is not available in this build.
 ///

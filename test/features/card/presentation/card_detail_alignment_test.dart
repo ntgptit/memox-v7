@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/features/card/presentation/widgets/items/card_box_progress_widget.dart';
 import 'package:memox/features/card/presentation/widgets/items/card_history_event_widget.dart';
 import 'package:memox/shared/widgets/mx_card.dart';

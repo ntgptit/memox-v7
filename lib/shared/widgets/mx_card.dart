@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_elevation.dart';
-import '../../core/theme/app_interaction_states.dart';
-import '../../core/theme/app_radius.dart';
-import '../../core/theme/app_spacing.dart';
-import '../../core/theme/theme_context_extension.dart';
+import '../../core/theme/foundations/app_elevation.dart';
+import '../../core/theme/foundations/app_sizing.dart';
+import '../../core/theme/states/app_interaction_states.dart';
+import '../../core/theme/foundations/app_radius.dart';
+import '../../core/theme/foundations/app_spacing.dart';
+import '../../core/theme/extensions/theme_context_extension.dart';
 
 /// How much room a card puts between its edge and its content.
 ///
@@ -703,8 +704,8 @@ class _MxCardState extends State<MxCard> {
             // accident of the padding.
             child: ConstrainedBox(
               constraints: const BoxConstraints(
-                minWidth: AppSpacing.minimumTouchTarget,
-                minHeight: AppSpacing.minimumTouchTarget,
+                minWidth: AppSizing.touchTarget,
+                minHeight: AppSizing.touchTarget,
               ),
               child: content,
             ),

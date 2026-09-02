@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_spacing.dart';
+import '../../core/theme/foundations/app_spacing.dart';
 
 /// The loading state, centred in whatever space it is given.
 ///

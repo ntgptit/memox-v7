@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_radius.dart';
-import 'package:memox/core/theme/app_semantic_colors.dart';
-import 'package:memox/core/theme/app_spacing.dart';
-import 'package:memox/core/theme/app_typography.dart';
+import 'package:memox/core/theme/foundations/app_radius.dart';
+import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
+import 'package:memox/core/theme/typography/app_typography.dart';
 import 'package:memox/core/theme/app_theme.dart';
 
 import '../support/golden_density.dart';

@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/navigation/route_names.dart';
-import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../domain/models/deck_list_snapshot_model.dart';
 import '../../controllers/deck_list_view_controller.dart';
 import '../../states/deck_list_view_state.dart';

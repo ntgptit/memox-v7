@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:memox/core/theme/app_colors.dart';
-import 'package:memox/core/theme/app_material_roles.dart';
-import 'package:memox/core/theme/app_surface_colors.dart';
-import 'package:memox/core/theme/app_border_colors.dart';
+import 'package:memox/core/theme/foundations/app_colors.dart';
+import 'package:memox/core/theme/foundations/app_material_roles.dart';
+import 'package:memox/core/theme/foundations/app_surface_colors.dart';
+import 'package:memox/core/theme/foundations/app_border_colors.dart';
 
 /// The approved palette — Tokyo's since M100.26 — as flat lists.
 ///

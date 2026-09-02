@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/theme_context_extension.dart';
+import '../../core/theme/extensions/theme_context_extension.dart';
 
 /// How much width one destination may claim before the row stops growing.
 ///

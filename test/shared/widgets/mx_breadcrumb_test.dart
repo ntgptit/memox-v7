@@ -2,7 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/core/theme/foundations/app_sizing.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/shared/widgets/mx_breadcrumb.dart';
 
@@ -292,7 +292,7 @@ void main() {
       for (final String label in <String>['Level 0', 'Level 1']) {
         expect(
           tester.getSize(find.byType(InkWell).at(0)).height,
-          greaterThanOrEqualTo(AppSpacing.minimumTouchTarget),
+          greaterThanOrEqualTo(AppSizing.touchTarget),
           reason: '$label must be at least a minimum target tall',
         );
       }

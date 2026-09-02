@@ -9,7 +9,7 @@ import 'package:memox/l10n/generated/app_localizations_en.dart';
 import '../support/fake_reminder_platform.dart';
 import '../support/reminder_screen_harness.dart';
 import 'package:flutter/rendering.dart';
-import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/features/reminder/presentation/widgets/items/reminder_toggle_row_widget.dart';
 import 'package:memox/features/reminder/presentation/widgets/sections/reminder_banner_section_widget.dart';
 import 'package:memox/shared/widgets/mx_card.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_icon_size.dart';
-import '../../core/theme/app_ink.dart';
+import '../../core/theme/foundations/app_icon_size.dart';
+import '../../core/theme/extensions/app_ink.dart';
 
 /// How large an icon draws. The values are `AppIconSize`'s; the enum exists so
 /// a call site names a step instead of shipping a number.

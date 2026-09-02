@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../shared/widgets/mx_content_shell.dart';
 
 /// The overview band that sits above the library level, with its own spacing.

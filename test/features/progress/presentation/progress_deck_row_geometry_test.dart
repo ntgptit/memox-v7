@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/core/theme/foundations/app_sizing.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/features/progress/domain/models/deck_activity_model.dart';
 import 'package:memox/features/progress/domain/models/progress_path_segment_model.dart';
 import 'package:memox/features/progress/presentation/screens/progress_deck_screen.dart';
@@ -33,7 +34,7 @@ void main() {
       for (var i = 0; i < 2; i++) {
         expect(
           tester.getRect(find.byType(ProgressDeckRowWidget).at(i)).height,
-          greaterThanOrEqualTo(AppSpacing.minimumTouchTarget),
+          greaterThanOrEqualTo(AppSizing.touchTarget),
         );
       }
     });

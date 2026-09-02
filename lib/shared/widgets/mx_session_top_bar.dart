@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_icon_size.dart';
-import '../../core/theme/app_radius.dart';
-import '../../core/theme/app_spacing.dart';
-import '../../core/theme/app_typography.dart';
-import '../../core/theme/theme_context_extension.dart';
+import '../../core/theme/foundations/app_icon_size.dart';
+import '../../core/theme/foundations/app_radius.dart';
+import '../../core/theme/foundations/app_sizing.dart';
+import '../../core/theme/foundations/app_spacing.dart';
+import '../../core/theme/typography/app_typography.dart';
+import '../../core/theme/extensions/theme_context_extension.dart';
 import 'mx_content_shell.dart';
 import 'mx_icon_button.dart';
 import 'mx_progress_bar.dart';
@@ -37,16 +38,14 @@ const double _kChipMaxWidthFraction = 0.4;
 /// What the row spends before the chip, the track and the figure get to argue:
 /// the close button, and the two [AppSpacing.sm] gaps — chip→track and
 /// track→figure. There is deliberately none after the button; see the row.
-const double _kRowFixedWidth =
-    AppSpacing.minimumTouchTarget + AppSpacing.sm * 2;
+const double _kRowFixedWidth = AppSizing.touchTarget + AppSpacing.sm * 2;
 
 /// How far inside its own box the close button draws its glyph.
 ///
 /// Derived, not chosen: the button centres an [AppIconSize.mdCompact] glyph in
-/// an [AppSpacing.minimumTouchTarget] box. Writing it out is what lets the bar
+/// an [AppSizing.touchTarget] box. Writing it out is what lets the bar
 /// place the *glyph* on a line and let the box fall where it must.
-const double _kGlyphInset =
-    (AppSpacing.minimumTouchTarget - AppIconSize.mdCompact) / 2;
+const double _kGlyphInset = (AppSizing.touchTarget - AppIconSize.mdCompact) / 2;
 
 /// Where the ✕ *glyph* sits: on the screen gutter, like any leading action.
 ///
@@ -91,7 +90,7 @@ double _trailingInset(BuildContext context) =>
 ///
 /// ## It must sit in a region with no horizontal padding
 ///
-/// The close button is 48×48 — [AppSpacing.minimumTouchTarget], and it cannot go
+/// The close button is 48×48 — [AppSizing.touchTarget], and it cannot go
 /// below that without failing `androidTapTargetGuideline` — so its glyph sits
 /// [_kGlyphInset] inside where the button starts. Handed a normal gutter, the
 /// bar can only put the *button* on it, which leaves the glyph 14px further in

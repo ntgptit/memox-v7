@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:memox/core/theme/app_radius.dart';
-import 'package:memox/core/theme/theme_context_extension.dart';
+import 'package:memox/core/theme/foundations/app_radius.dart';
+import 'package:memox/core/theme/extensions/theme_context_extension.dart';
 import 'package:memox/shared/widgets/mx_action_sheet.dart';
 import 'package:memox/shared/widgets/mx_alert_dialog.dart';
 import 'package:memox/shared/widgets/mx_confirm_dialog.dart';

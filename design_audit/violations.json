@@ -14,7 +14,7 @@
     {
       "code": "V3",
       "severity": "🟡",
-      "file": "lib/core/theme/app_border_colors.dart",
+      "file": "lib/core/theme/foundations/app_border_colors.dart",
       "line": 60,
       "widget_context": "AppBorderColors",
       "element_kind": "other",
@@ -28,7 +28,7 @@
     {
       "code": "V3",
       "severity": "🟡",
-      "file": "lib/core/theme/app_border_colors.dart",
+      "file": "lib/core/theme/foundations/app_border_colors.dart",
       "line": 64,
       "widget_context": "AppBorderColors",
       "element_kind": "other",
@@ -42,7 +42,7 @@
     {
       "code": "V3",
       "severity": "🟡",
-      "file": "lib/core/theme/app_border_colors.dart",
+      "file": "lib/core/theme/foundations/app_border_colors.dart",
       "line": 114,
       "widget_context": "AppBorderColors",
       "element_kind": "other",
@@ -56,7 +56,7 @@
     {
       "code": "V3",
       "severity": "🟡",
-      "file": "lib/core/theme/app_border_colors.dart",
+      "file": "lib/core/theme/foundations/app_border_colors.dart",
       "line": 121,
       "widget_context": "AppBorderColors",
       "element_kind": "other",
@@ -70,7 +70,7 @@
     {
       "code": "V3",
       "severity": "🟡",
-      "file": "lib/core/theme/app_border_colors.dart",
+      "file": "lib/core/theme/foundations/app_border_colors.dart",
       "line": 123,
       "widget_context": "AppBorderColors",
       "element_kind": "other",
@@ -84,7 +84,7 @@
     {
       "code": "V3",
       "severity": "🟡",
-      "file": "lib/core/theme/app_border_colors.dart",
+      "file": "lib/core/theme/foundations/app_border_colors.dart",
       "line": 127,
       "widget_context": "AppBorderColors",
       "element_kind": "other",
@@ -98,7 +98,7 @@
     {
       "code": "V3",
       "severity": "🟡",
-      "file": "lib/core/theme/app_border_colors.dart",
+      "file": "lib/core/theme/foundations/app_border_colors.dart",
       "line": 139,
       "widget_context": "AppBorderColors",
       "element_kind": "other",
@@ -112,7 +112,7 @@
     {
       "code": "V3",
       "severity": "🟡",
-      "file": "lib/core/theme/app_border_colors.dart",
+      "file": "lib/core/theme/foundations/app_border_colors.dart",
       "line": 154,
       "widget_context": "AppBorderColors",
       "element_kind": "other",
@@ -126,7 +126,7 @@
     {
       "code": "V3",
       "severity": "🟡",
-      "file": "lib/core/theme/app_border_colors.dart",
+      "file": "lib/core/theme/foundations/app_border_colors.dart",
       "line": 181,
       "widget_context": "AppBorderColors",
       "element_kind": "other",
@@ -140,7 +140,7 @@
     {
       "code": "V3",
       "severity": "🟡",
-      "file": "lib/core/theme/app_border_colors.dart",
+      "file": "lib/core/theme/foundations/app_border_colors.dart",
       "line": 186,
       "widget_context": "AppBorderColors",
       "element_kind": "other",
@@ -154,7 +154,7 @@
     {
       "code": "V3",
       "severity": "🟡",
-      "file": "lib/core/theme/app_border_colors.dart",
+      "file": "lib/core/theme/foundations/app_border_colors.dart",
       "line": 235,
       "widget_context": "AppBorderColors",
       "element_kind": "other",
@@ -168,7 +168,7 @@
     {
       "code": "V3",
       "severity": "🟡",
-      "file": "lib/core/theme/app_border_colors.dart",
+      "file": "lib/core/theme/foundations/app_border_colors.dart",
       "line": 281,
       "widget_context": "AppBorderColors",
       "element_kind": "other",
@@ -182,7 +182,7 @@
     {
       "code": "V3",
       "severity": "🟡",
-      "file": "lib/core/theme/app_surface_colors.dart",
+      "file": "lib/core/theme/foundations/app_surface_colors.dart",
       "line": 51,
       "widget_context": "AppSurfaceColors",
       "element_kind": "other",
@@ -196,7 +196,7 @@
     {
       "code": "V3",
       "severity": "🟡",
-      "file": "lib/core/theme/app_surface_colors.dart",
+      "file": "lib/core/theme/foundations/app_surface_colors.dart",
       "line": 53,
       "widget_context": "AppSurfaceColors",
       "element_kind": "other",
@@ -210,7 +210,7 @@
     {
       "code": "V3",
       "severity": "🟡",
-      "file": "lib/core/theme/app_surface_colors.dart",
+      "file": "lib/core/theme/foundations/app_surface_colors.dart",
       "line": 68,
       "widget_context": "AppSurfaceColors",
       "element_kind": "other",
@@ -224,7 +224,7 @@
     {
       "code": "V3",
       "severity": "🟡",
-      "file": "lib/core/theme/app_surface_colors.dart",
+      "file": "lib/core/theme/foundations/app_surface_colors.dart",
       "line": 70,
       "widget_context": "AppSurfaceColors",
       "element_kind": "other",
@@ -238,7 +238,7 @@
     {
       "code": "V3",
       "severity": "🟡",
-      "file": "lib/core/theme/app_surface_colors.dart",
+      "file": "lib/core/theme/foundations/app_surface_colors.dart",
       "line": 72,
       "widget_context": "AppSurfaceColors",
       "element_kind": "other",
@@ -252,7 +252,7 @@
     {
       "code": "V3",
       "severity": "🟡",
-      "file": "lib/core/theme/app_surface_colors.dart",
+      "file": "lib/core/theme/foundations/app_surface_colors.dart",
       "line": 79,
       "widget_context": "AppSurfaceColors",
       "element_kind": "other",
@@ -266,7 +266,7 @@
     {
       "code": "V3",
       "severity": "🟡",
-      "file": "lib/core/theme/app_surface_colors.dart",
+      "file": "lib/core/theme/foundations/app_surface_colors.dart",
       "line": 93,
       "widget_context": "AppSurfaceColors",
       "element_kind": "other",
@@ -280,7 +280,7 @@
     {
       "code": "V3",
       "severity": "🟡",
-      "file": "lib/core/theme/app_surface_colors.dart",
+      "file": "lib/core/theme/foundations/app_surface_colors.dart",
       "line": 96,
       "widget_context": "AppSurfaceColors",
       "element_kind": "other",
@@ -294,7 +294,7 @@
     {
       "code": "V3",
       "severity": "🟡",
-      "file": "lib/core/theme/app_surface_colors.dart",
+      "file": "lib/core/theme/foundations/app_surface_colors.dart",
       "line": 98,
       "widget_context": "AppSurfaceColors",
       "element_kind": "other",
@@ -308,7 +308,7 @@
     {
       "code": "V3",
       "severity": "🟡",
-      "file": "lib/core/theme/app_surface_colors.dart",
+      "file": "lib/core/theme/foundations/app_surface_colors.dart",
       "line": 100,
       "widget_context": "AppSurfaceColors",
       "element_kind": "other",
@@ -322,7 +322,7 @@
     {
       "code": "V3",
       "severity": "🟡",
-      "file": "lib/core/theme/app_surface_colors.dart",
+      "file": "lib/core/theme/foundations/app_surface_colors.dart",
       "line": 109,
       "widget_context": "AppSurfaceColors",
       "element_kind": "other",
@@ -336,7 +336,7 @@
     {
       "code": "V3",
       "severity": "🟡",
-      "file": "lib/core/theme/app_surface_colors.dart",
+      "file": "lib/core/theme/foundations/app_surface_colors.dart",
       "line": 111,
       "widget_context": "AppSurfaceColors",
       "element_kind": "other",
@@ -350,7 +350,7 @@
     {
       "code": "V1",
       "severity": "🔴",
-      "file": "lib/core/theme/app_colors.dart",
+      "file": "lib/core/theme/foundations/app_colors.dart",
       "line": 0,
       "widget_context": "AppColors",
       "element_kind": "token",
@@ -364,7 +364,7 @@
     {
       "code": "V6",
       "severity": "🔴",
-      "file": "lib/core/theme/app_colors.dart",
+      "file": "lib/core/theme/foundations/app_colors.dart",
       "line": 0,
       "widget_context": "AppColors",
       "element_kind": "token",
@@ -378,7 +378,7 @@
     {
       "code": "V1",
       "severity": "🔴",
-      "file": "lib/core/theme/app_colors.dart",
+      "file": "lib/core/theme/foundations/app_colors.dart",
       "line": 0,
       "widget_context": "AppColors",
       "element_kind": "token",
@@ -392,7 +392,7 @@
     {
       "code": "V6",
       "severity": "🔴",
-      "file": "lib/core/theme/app_colors.dart",
+      "file": "lib/core/theme/foundations/app_colors.dart",
       "line": 0,
       "widget_context": "AppColors",
       "element_kind": "token",
@@ -406,7 +406,7 @@
     {
       "code": "V1",
       "severity": "🟢",
-      "file": "lib/core/theme/app_colors.dart",
+      "file": "lib/core/theme/foundations/app_colors.dart",
       "line": 0,
       "widget_context": "AppColors",
       "element_kind": "token",
@@ -420,7 +420,7 @@
     {
       "code": "V1",
       "severity": "🟢",
-      "file": "lib/core/theme/app_colors.dart",
+      "file": "lib/core/theme/foundations/app_colors.dart",
       "line": 0,
       "widget_context": "AppColors",
       "element_kind": "token",

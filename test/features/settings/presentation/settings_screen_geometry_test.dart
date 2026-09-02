@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/core/theme/foundations/app_sizing.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/features/settings/domain/models/app_theme_mode_model.dart';
 import 'package:memox/features/study/domain/models/new_card_order_model.dart';
 import 'package:memox/features/settings/presentation/screens/settings_screen.dart';
@@ -221,7 +222,7 @@ void main() {
 
   group('touch targets', () {
     testWidgets('every radio row clears the 48dp floor', (tester) async {
-      // `AppSpacing.minimumTouchTarget`. `RadioListTile` gets there through
+      // `AppSizing.touchTarget`. `RadioListTile` gets there through
       // `ListTileThemeData`, but W6 asks for it to be measured rather than
       // assumed — the zero-horizontal-padding shape considered first is the one
       // that would have broken it.
@@ -236,7 +237,7 @@ void main() {
       for (var i = 0; i < 8; i++) {
         expect(
           tester.getRect(rows.at(i)).height,
-          greaterThanOrEqualTo(AppSpacing.minimumTouchTarget),
+          greaterThanOrEqualTo(AppSizing.touchTarget),
         );
       }
     });

@@ -3,7 +3,7 @@ import 'dart:ui' show CheckedState;
 
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_semantic_colors.dart';
+import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/features/settings/domain/models/app_theme_mode_model.dart';
 import 'package:memox/features/settings/presentation/screens/settings_screen.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_colors.dart';
-import 'package:memox/core/theme/app_material_roles.dart';
-import 'package:memox/core/theme/app_interaction_states.dart';
+import 'package:memox/core/theme/foundations/app_colors.dart';
+import 'package:memox/core/theme/foundations/app_material_roles.dart';
+import 'package:memox/core/theme/states/app_interaction_states.dart';
 
 import 'css_tokens.dart';
-import 'package:memox/core/theme/app_surface_colors.dart';
-import 'package:memox/core/theme/app_border_colors.dart';
+import 'package:memox/core/theme/foundations/app_surface_colors.dart';
+import 'package:memox/core/theme/foundations/app_border_colors.dart';
 
 /// **`design_system/tokens/*.css` is authoritative for token values; this is the
 /// test that makes that sentence enforceable.**

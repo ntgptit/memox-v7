@@ -114,7 +114,7 @@ void main() {
     tester,
   ) async {
     // The budget is horizontal. Nothing about it is allowed to shrink the
-    // target: `AppSpacing.minimumTouchTarget` is the floor a finger needs, and
+    // target: `AppSizing.touchTarget` is the floor a finger needs, and
     // the first pass already proved that a target which only *reports* 48 is
     // not one — a 48 box overflowing a 32 slot passes
     // `androidTapTargetGuideline` and never receives the tap.

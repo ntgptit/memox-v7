@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:memox/core/theme/app_semantic_colors.dart';
+import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/progress/presentation/widgets/items/progress_week_bar_widget.dart';

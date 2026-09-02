@@ -13,20 +13,20 @@ void main() {
   /// Where colour literals are supposed to live. Everywhere else, a literal is a
   /// second source of truth for a value the theme already owns.
   const declarationFiles = <String>{
-    'lib/core/theme/app_colors.dart',
+    'lib/core/theme/foundations/app_colors.dart',
     // The `ColorScheme` roles split out of `app_colors.dart` at the 400-line
     // guard. Same job, same permission — it is the other half of one file.
-    'lib/core/theme/app_material_roles.dart',
+    'lib/core/theme/foundations/app_material_roles.dart',
     // The surface and border families, split out of `app_colors.dart` at the
     // same ceiling for the same reason (M100.1). Adding a file here is how this
     // rule stays a rule after a split: the scanner has to be told the new home,
     // or every moved literal reads as a new violation — the failure M99.5
     // recorded as debt and this pass hit again.
-    'lib/core/theme/app_surface_colors.dart',
-    'lib/core/theme/app_border_colors.dart',
+    'lib/core/theme/foundations/app_surface_colors.dart',
+    'lib/core/theme/foundations/app_border_colors.dart',
     'lib/core/theme/app_theme.dart',
-    'lib/core/theme/app_semantic_colors.dart',
-    'lib/core/theme/app_button_themes.dart',
+    'lib/core/theme/foundations/app_semantic_colors.dart',
+    'lib/core/theme/components/app_button_themes.dart',
   };
 
   /// The one literal outside those files that is allowed, with its reason.

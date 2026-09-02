@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../domain/models/deck_activity_model.dart';
 import '../../../domain/models/progress_range_model.dart';
 import '../items/progress_deck_row_widget.dart';

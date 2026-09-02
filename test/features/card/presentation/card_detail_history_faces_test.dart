@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/error/failure.dart';
+import 'package:memox/core/theme/foundations/app_sizing.dart';
 import 'package:memox/features/card/domain/models/card_history_page_model.dart';
 import 'package:memox/features/card/presentation/widgets/items/card_history_event_widget.dart';
 import 'package:memox/features/study/domain/models/study_answer_kind_model.dart';
@@ -413,8 +414,8 @@ void main() {
   });
 }
 
-/// The minimum touch target the design system states (`AppSpacing`).
-const double _minimumTouchTarget = 48;
+/// The minimum touch target the design system states (`AppSizing`).
+const double _minimumTouchTarget = AppSizing.touchTarget;
 
 /// Slack for a target whose ink box rounds a fraction below the token — the
 /// claim is "reachable", not "exactly 48".

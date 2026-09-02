@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/theme_context_extension.dart';
+import '../../core/theme/extensions/theme_context_extension.dart';
 
 /// A pick-one group drawn as radio rows.
 ///

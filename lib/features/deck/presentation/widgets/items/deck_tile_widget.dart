@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_ink.dart';
-import '../../../../../core/theme/app_breakpoints.dart';
-import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/theme/theme_context_extension.dart';
+import '../../../../../core/theme/extensions/app_ink.dart';
+import '../../../../../core/theme/foundations/app_breakpoints.dart';
+import '../../../../../core/theme/foundations/app_sizing.dart';
+import '../../../../../core/theme/foundations/app_spacing.dart';
+import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../../../shared/widgets/mx_icon_button.dart';
@@ -278,9 +279,7 @@ class _DeckActionRow extends StatelessWidget {
     if (!hasStudy) return row;
 
     return Container(
-      constraints: const BoxConstraints(
-        minHeight: AppSpacing.minimumTouchTarget,
-      ),
+      constraints: const BoxConstraints(minHeight: AppSizing.touchTarget),
       alignment: AlignmentDirectional.centerStart,
       child: row,
     );

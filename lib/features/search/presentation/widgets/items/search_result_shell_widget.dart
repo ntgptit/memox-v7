@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/foundations/app_sizing.dart';
+import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 
@@ -62,9 +63,7 @@ class SearchResultShellWidget extends StatelessWidget {
             // The row is taller than this at every scale that has been measured;
             // the floor is here so a future single-line variant cannot fall under
             // the target a finger needs.
-            constraints: const BoxConstraints(
-              minHeight: AppSpacing.minimumTouchTarget,
-            ),
+            constraints: const BoxConstraints(minHeight: AppSizing.touchTarget),
             child: ExcludeSemantics(
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,

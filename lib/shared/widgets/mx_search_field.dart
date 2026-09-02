@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_durations.dart';
-import '../../core/theme/app_icon_size.dart';
-import '../../core/theme/app_motion_policy.dart';
-import '../../core/theme/app_radius.dart';
-import '../../core/theme/app_spacing.dart';
-import '../../core/theme/app_typography.dart';
-import '../../core/theme/theme_context_extension.dart';
+import '../../core/theme/foundations/app_durations.dart';
+import '../../core/theme/foundations/app_icon_size.dart';
+import '../../core/theme/foundations/app_motion_policy.dart';
+import '../../core/theme/foundations/app_radius.dart';
+import '../../core/theme/foundations/app_sizing.dart';
+import '../../core/theme/foundations/app_spacing.dart';
+import '../../core/theme/typography/app_typography.dart';
+import '../../core/theme/extensions/theme_context_extension.dart';
 import 'mx_icon.dart';
 
 /// The search bar that sits under an app bar.
@@ -145,7 +146,7 @@ class _MxSearchFieldState extends State<MxSearchField> {
             // tiny upward nudge keeps the hint from sitting 2px lower than the
             // search icon.
             child: SizedBox(
-              height: AppSpacing.minimumTouchTarget,
+              height: AppSizing.touchTarget,
               child: TextField(
                 controller: _controller,
                 focusNode: _focusNode,

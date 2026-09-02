@@ -80,13 +80,17 @@ def _lines(path: str) -> tuple[str, ...]:
 def _docs_md() -> list[str]:
     """Contract documents checked by this repository.
 
-    Core specifications live directly under ``docs/``. IT scenarios are the
-    one intentionally nested contract: their catalog and agent execution guide
-    must receive the same header/reference checks rather than becoming an
-    unguarded island of prose.
+    Core specifications live directly under ``docs/``. Two nested trees are
+    contracts too, and are checked for the same reason: their prose binds code
+    the same way, so leaving them out makes them unguarded islands of prose.
+    ``it-scenarios/`` holds the device-suite catalog and its agent execution
+    guide; ``design-system/`` holds contracts about the design system that are
+    tied to the product rather than to a task, which is what separates it from
+    ``wireframes/`` and ``reviews/`` (M100.29).
     """
     paths = set((_REPO / "docs").glob("*.md"))
     paths.update((_REPO / "docs" / "it-scenarios").glob("*.md"))
+    paths.update((_REPO / "docs" / "design-system").glob("*.md"))
     return sorted(p.relative_to(_REPO).as_posix() for p in paths)
 
 

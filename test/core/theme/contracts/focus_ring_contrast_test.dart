@@ -1,0 +1,283 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/states/app_interaction_states.dart';
+import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
+import 'package:memox/core/theme/foundations/app_stroke.dart';
+import 'package:memox/core/theme/app_theme.dart';
+
+import '../../../support/color_math.dart';
+import '../../../support/theme_probe.dart';
+
+/// **A focus ring is a graphic, and WCAG 1.4.11 asks 3:1 of it.**
+///
+/// The project already applies that number — it is the argument in
+/// `iconButtonTheme` for drawing a ring at all, and the argument that moved the
+/// progress indicator off `primary` in M4.10m. It had never been applied to the
+/// ring's own colour.
+///
+/// Three components drew `BorderSide(color: scheme.primary, width: 2)`. In light
+/// that is fine. In dark `primary` is held at a luminance that keeps a filled
+/// button from becoming the brightest thing on a navy page, so it measures
+/// **2.90:1** on `surface` and **2.11:1** on `secondaryContainer` — a focus
+/// indicator that marks the focused control for people who can already see
+/// where they are.
+///
+/// **Measured against the grounds the ring actually sits on, not against one
+/// nominal background.** A pill's ring is drawn on `secondaryContainer` when the
+/// pill is selected, which is the darkest of the three and where `primary`
+/// failed worst; a `surface`-only assertion would have passed and missed it.
+///
+/// **Two more groups cover the controls that cannot take the shared ring.** A
+/// filled button's ground is the accent itself, so the ring token measures
+/// 1.02:1 on it and the button draws its own label colour instead; a text
+/// button has neither a border nor an overlay by design, so it underlines. Both
+/// resolved to nothing before M99.44 — the app's primary call to action had no
+/// focus-visible state at all — which is why their absence is now asserted
+/// rather than left to the reader of a component list.
+void main() {
+  /// WCAG 1.4.11 for a non-text graphic.
+  const double graphicFloor = 3;
+
+  for (final (String mode, ThemeData Function() build)
+      in <(String, ThemeData Function())>[
+        ('light', buildLightTheme),
+        ('dark', buildDarkTheme),
+      ]) {
+    group('$mode focus ring', () {
+      final ThemeData theme = build();
+      final ColorScheme scheme = theme.colorScheme;
+      final AppSemanticColors semantic = theme.extension<AppSemanticColors>()!;
+
+      /// Every ground a focused control is drawn on.
+      ///
+      /// `background` is the page an icon button or an unselected pill sits
+      /// straight on; `surface` is a card or a sheet; `secondaryContainer` is a
+      /// selected pill's own fill. A ring has to clear the floor on all three,
+      /// because which one it lands on is the screen's choice, not the theme's.
+      final grounds = <String, Color>{
+        'background': theme.scaffoldBackgroundColor,
+        'surface': scheme.surface,
+        'surfaceContainerHighest': scheme.surfaceContainerHighest,
+        'secondaryContainer': scheme.secondaryContainer,
+      };
+
+      test('clears 3:1 on every ground it can land on', () {
+        final ring = AppInteractionStates.focusIndicator(scheme).color;
+
+        for (final entry in grounds.entries) {
+          expect(
+            contrast(ring, entry.value),
+            greaterThanOrEqualTo(graphicFloor),
+            reason:
+                'the focus ring measures '
+                '${contrast(ring, entry.value).toStringAsFixed(2)}:1 on '
+                '${entry.key} in $mode — under the 3:1 WCAG 1.4.11 asks of a '
+                'focus indicator',
+          );
+        }
+      });
+
+      test('`primary` now clears the floor the ring was invented to clear', () {
+        // **The tripwire fired, and this is the other side of it.** This used
+        // to assert that `primary` *failed* 3:1 on `secondaryContainer` in
+        // dark — the whole justification for a separate ring token — with the
+        // note that if the palette ever moved up to where it passed, the
+        // deviation had to be reconsidered rather than silently bypassed.
+        //
+        // M100.18 moved it: the dark accent inverted to tone 80. So the ring
+        // token is now a derivation of `primary` and is removed in M100.19,
+        // and what is asserted is the condition that makes that removal safe.
+        expect(
+          contrast(scheme.primary, scheme.secondaryContainer),
+          greaterThanOrEqualTo(graphicFloor),
+          reason:
+              '$mode: primary fell back under 3:1 on secondaryContainer, so a '
+              'ring drawn in it is invisible on a selected control',
+        );
+      });
+
+      test('the components that own a ring all draw the same one', () {
+        // **The list shrank at M100.23, and the reason is the subject of that
+        // task.** It used to include the chip, on the argument that three
+        // surface-grounded controls should draw one ring. They should — but the
+        // chip was drawing it in `ChipThemeData.side`, the slot
+        // `_ChoiceChipDefaultsM3` fills with the chip's *identity*, so a
+        // selected chip that took focus left its Material role.
+        //
+        // The chip's ring moved to `MxFocusRing`, a layer of its own, and is
+        // asserted in `mx_pill_button_focus_test.dart` with a real Tab. What
+        // stays here are the two whose `side` Material leaves empty — there is
+        // no canonical role in those slots to displace.
+        //
+        // **The filled button is deliberately not in this list**, and its
+        // absence is checked rather than assumed — see the `filled focus ring`
+        // group below. These sit on a page or a card, where the token clears
+        // 3:1; the filled button sits on the accent, where it measures 1.02:1.
+        final expected = AppInteractionStates.focusIndicator(scheme);
+
+        final outlined = theme.outlinedButtonTheme.style!.side!.resolve(
+          <WidgetState>{WidgetState.focused},
+        );
+        final icon = theme.iconButtonTheme.style!.side!.resolve(<WidgetState>{
+          WidgetState.focused,
+        });
+
+        for (final (String component, BorderSide? side)
+            in <(String, BorderSide?)>[
+              ('outlinedButton', outlined),
+              ('iconButton', icon),
+            ]) {
+          expect(side, isNotNull, reason: '$component draws no focus ring');
+          expect(side!.color, expected.color, reason: component);
+          expect(side.width, expected.width, reason: component);
+        }
+      });
+
+      test('the ring is distinguishable from the resting border', () {
+        // A ring that clears 3:1 against the page can still be invisible as a
+        // *change* if it lands on the same colour the control already had.
+        final ring = AppInteractionStates.focusIndicator(scheme).color;
+
+        expect(
+          ring,
+          isNot(semantic.borderSubtle),
+          reason: 'focus and rest draw the same border colour in $mode',
+        );
+      });
+    });
+
+    group('$mode filled focus ring', () {
+      final ThemeData theme = build();
+      final ColorScheme scheme = theme.colorScheme;
+
+      /// Every fill `buildFilledStyle` is applied to, with the label that
+      /// travels with it — the primary CTA, `MxActionButton`'s destructive
+      /// variant, and the tonal style the deck row's Study button uses.
+      final variants = <String, (Color, Color)>{
+        'primary': (filledButtonFill(theme), scheme.onPrimary),
+        'error': (scheme.error, scheme.onError),
+        'secondaryContainer': (
+          scheme.secondaryContainer,
+          scheme.onSecondaryContainer,
+        ),
+      };
+
+      test('a filled button draws a ring at all', () {
+        // The regression this whole group exists for: the primary CTA of every
+        // screen resolved `side` to nothing, and its only other focus signal
+        // was a wash of `primary` on a `primary` fill.
+        final side = filledButtonFocusSide(theme);
+
+        expect(side, isNotNull, reason: 'filled button draws no focus ring');
+        expect(side!.width, AppStroke.focus);
+        expect(
+          side.color,
+          scheme.onPrimary,
+          reason: 'the ring is the button label, not a separate token',
+        );
+      });
+
+      test('and none at rest', () {
+        // A filled button is a fill, not a fill inside a frame. If this starts
+        // returning a side, focus has stopped being a *change*.
+        expect(
+          theme.filledButtonTheme.style!.side!.resolve(const <WidgetState>{}),
+          isNull,
+        );
+      });
+
+      test('the ring clears 3:1 on every fill it is drawn on', () {
+        // The label of a filled button is already contrast-checked against its
+        // own fill in `app_theme_test.dart`, at the 4.5 body-text bar. Stated
+        // again here at the graphic bar, because that is the property the ring
+        // depends on and it must not be able to change silently underneath it.
+        for (final entry in variants.entries) {
+          expect(
+            contrast(entry.value.$2, entry.value.$1),
+            greaterThanOrEqualTo(graphicFloor),
+            reason: '$mode: the ring on the ${entry.key} fill',
+          );
+        }
+      });
+
+      test('the shared ring token would be invisible here', () {
+        // Records the reason for the deviation, the way the `focusRing` doc
+        // comment records its own. If the palette ever moves so that this
+        // passes, `focusRingOf(label)` can be reconsidered — but it must be
+        // reconsidered, not silently bypassed.
+        expect(
+          contrast(scheme.primary, filledButtonFill(theme)),
+          lessThan(graphicFloor),
+          reason:
+              'the ring token now clears the floor on the accent fill, so the '
+              'filled button no longer needs a ring of its own',
+        );
+      });
+
+      test('the focus wash alone changes nothing, which is why', () {
+        // The other half of the reason. `controlOverlay` resolves focus to
+        // `primary` at 10%, and the fill it lands on IS `primary` — so the
+        // overlay composites to the colour it started from. Pinned so that a
+        // future "the wash is enough, drop the ring" reads this number first.
+        final fill = filledButtonFill(theme);
+        final overlay = theme.filledButtonTheme.style!.overlayColor!.resolve(
+          const <WidgetState>{WidgetState.focused},
+        )!;
+
+        expect(
+          contrast(Color.alphaBlend(overlay, fill), fill),
+          lessThan(1.1),
+          reason: '$mode: the focus wash is a visible change on its own',
+        );
+      });
+    });
+
+    group('$mode text button focus', () {
+      final ThemeData theme = build();
+      final WidgetStateProperty<TextStyle?> textStyle =
+          theme.textButtonTheme.style!.textStyle!;
+
+      test('a rule under the label, at the focus stroke', () {
+        // The link has no border to thicken and no overlay to wash — both are
+        // deliberate — so the underline is the whole indicator. `MxTextButton`
+        // already drew it; this pins that a bare `TextButton` does too.
+        final focused = textStyle.resolve(const <WidgetState>{
+          WidgetState.focused,
+        });
+
+        expect(focused?.decoration, TextDecoration.underline);
+        expect(focused?.decorationThickness, AppStroke.focus);
+      });
+
+      test('and no rule at rest', () {
+        expect(
+          textStyle.resolve(const <WidgetState>{})?.decoration,
+          isNot(TextDecoration.underline),
+        );
+      });
+
+      test('the rung survives being restated', () {
+        // `ButtonStyle.textStyle` is taken wholesale rather than merged, so a
+        // partial style here would silently drop `labelLarge`'s size, leading
+        // and tracking on the way past `TextButton.defaultStyleOf`.
+        final rung = theme.textTheme.labelLarge;
+
+        for (final states in <Set<WidgetState>>[
+          const <WidgetState>{},
+          const <WidgetState>{WidgetState.focused},
+        ]) {
+          final style = textStyle.resolve(states);
+
+          expect(style?.fontSize, rung?.fontSize, reason: '$mode $states');
+          expect(style?.height, rung?.height, reason: '$mode $states');
+          expect(
+            style?.letterSpacing,
+            rung?.letterSpacing,
+            reason: '$mode $states',
+          );
+          expect(style?.fontWeight, rung?.fontWeight, reason: '$mode $states');
+        }
+      });
+    });
+  }
+}

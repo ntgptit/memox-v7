@@ -2,12 +2,12 @@ import 'dart:ui' show PlatformDispatcher;
 
 import 'package:flutter/widgets.dart';
 
-import '../core/theme/app_colors.dart';
-import '../core/theme/app_spacing.dart';
+import '../core/theme/foundations/app_colors.dart';
+import '../core/theme/foundations/app_spacing.dart';
 
 import '../l10n/generated/app_localizations.dart';
 import '../l10n/generated/app_localizations_en.dart';
-import '../core/theme/app_surface_colors.dart';
+import '../core/theme/foundations/app_surface_colors.dart';
 
 /// Which failure the screen is reporting.
 enum AppErrorKind {

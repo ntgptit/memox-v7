@@ -1,10 +1,11 @@
+import '../../core/theme/foundations/app_sizing.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_breakpoints.dart';
-import '../../core/theme/app_spacing.dart';
-import '../../core/theme/theme_context_extension.dart';
+import '../../core/theme/foundations/app_breakpoints.dart';
+import '../../core/theme/foundations/app_spacing.dart';
+import '../../core/theme/extensions/theme_context_extension.dart';
 import 'mx_breadcrumb.dart';
 
 /// The frame every screen is built in: app bar, gutters, an optional pinned
@@ -269,7 +270,7 @@ class _MxContentShellState extends State<MxContentShell> {
     final title = context.texts.titleLarge;
 
     return math.max(
-      AppSpacing.minimumTouchTarget,
+      AppSizing.touchTarget,
       scaler.scale(title?.fontSize ?? _fallbackTitleSize) *
               (title?.height ?? _lineFactor) +
           AppSpacing.sm +

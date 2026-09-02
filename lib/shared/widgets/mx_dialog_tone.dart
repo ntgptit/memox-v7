@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_spacing.dart';
-import '../../core/theme/app_ink.dart';
+import '../../core/theme/foundations/app_spacing.dart';
+import '../../core/theme/extensions/app_ink.dart';
 import 'mx_icon.dart';
 
 /// How serious the situation an overlay is speaking about is.

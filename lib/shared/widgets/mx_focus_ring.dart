@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_interaction_states.dart';
-import '../../core/theme/theme_context_extension.dart';
+import '../../core/theme/states/app_interaction_states.dart';
+import '../../core/theme/extensions/theme_context_extension.dart';
 
 /// A keyboard-focus ring drawn **around** a child, in a layer of its own.
 ///
