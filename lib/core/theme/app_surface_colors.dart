@@ -72,10 +72,10 @@ abstract final class AppSurfaceColors {
   ///
   /// The *edge* stays `secondary`: its 2.90:1 measurement is about a line on
   /// `surface`, which the fill never had a stake in.
-  static const Color surfaceSelectedLight = Color(0xFFE4DFFE);
+  static const Color surfaceSelectedLight = Color(0xFFD4DBFF);
 
   /// Unchanged in dark, for the reason [surfaceEmphasisDark] is.
-  static const Color surfaceSelectedDark = Color(0xFF47445D);
+  static const Color surfaceSelectedDark = Color(0xFF3F446B);
 
   static const Color surfaceMutedLight = Color(0xFFE5E8F1);
 

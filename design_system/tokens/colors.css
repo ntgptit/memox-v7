@@ -36,44 +36,44 @@
   --color-background:#F7F9FF;
   --color-surface:#F7F9FF;
   --color-surface-muted:#E5E8F1;
-  --color-border-option:#8887CE;
+  --color-border-option:#798ACB;
   --color-border-divider:#E9ECF5;
-  --color-border-selected:#6E6ECE;
+  --color-border-selected:#6575B5;
   --color-surface-emphasis:#F1F3FC;
-  --color-surface-selected:#E4DFFE;
+  --color-surface-selected:#D4DBFF;
   --color-surface-elevated:#FFFFFF;
 
   /* --- semantic: text and lines --------------------------------------- */
   --color-text-primary:#1A1B21;
   --color-text-secondary:#44474D;
   --color-border-subtle:#C4C6CF;
-  --color-focus-ring:#4E53B6;
+  --color-focus-ring:#4451E6;
 
   /* --- semantic: brand and actions ------------------------------------ */
-  --color-seed:#4E53B6;
-  --color-primary:#4E53B6;
+  --color-seed:#4451E6;
+  --color-primary:#4451E6;
   --color-on-primary:#FFFFFF;
   /* The accent as TEXT or an ICON, which is a different problem from the accent
      as a fill: on dark, the colour that carries white text is too dark to read
      as a label on the page. */
-  --color-primary-accent:#4E53B6;
-  --color-primary-container:#E4DFFF;
-  --color-on-primary-container:#2F3C9B;
-  --color-secondary:#5F5B75;
+  --color-primary-accent:#4451E6;
+  --color-primary-container:#D9E2FE;
+  --color-on-primary-container:#2E2CC2;
+  --color-secondary:#5C628B;
   --color-on-secondary:#FFFFFF;
-  --color-secondary-container:#E4DFFE;
-  --color-on-secondary-container:#47445D;
-  --color-tertiary:#854E61;
+  --color-secondary-container:#D4DBFF;
+  --color-on-secondary-container:#3F446B;
+  --color-tertiary:#844981;
   --color-on-tertiary:#FFFFFF;
-  --color-tertiary-container:#FFD9E4;
-  --color-on-tertiary-container:#6B3649;
+  --color-tertiary-container:#FED6FB;
+  --color-on-tertiary-container:#6A3167;
   --color-secondary-action:#454B5E;
 
   /* --- semantic: meaning ---------------------------------------------- */
-  --color-success:#0F7357;
-  --color-warning:#875D0F;
-  --color-danger:#BE013A;
-  --color-info:#3C688F;
+  --color-success:#2C730A;
+  --color-warning:#8D590F;
+  --color-danger:#C81132;
+  --color-info:#296B8B;
   /* Status containers. The four semantics had a fill and no container, so a
      status chip had to borrow an accent role — `secondary` for "ready",
      `tertiary` for "duplicate" — which is what M3 reserves for accents rather
@@ -81,23 +81,23 @@
      containers carry (0.142 of the fill over `surface`), with the ink at the
      tone the existing `on*Container` pairs occupy. `danger` needs none: it is
      `error`, so `--color-error-container` already holds it. */
-  --color-success-container:#DAE9E7;
-  --color-on-success-container:#003627;
-  --color-warning-container:#EDE6DC;
-  --color-on-warning-container:#402A00;
-  --color-info-container:#E0E7EF;
-  --color-on-info-container:#073053;
-  --color-error:#BE013A;
+  --color-success-container:#CBEBC2;
+  --color-on-success-container:#1C5201;
+  --color-warning-container:#FEDDBA;
+  --color-on-warning-container:#663E00;
+  --color-info-container:#C1E8FE;
+  --color-on-info-container:#004C69;
+  --color-error:#C81132;
   --color-on-error:#FFFFFF;
-  --color-error-container:#FEDADA;
-  --color-on-error-container:#93002A;
+  --color-error-container:#FFDAD8;
+  --color-on-error-container:#86001D;
 
   /* --- semantic: progress and reward ----------------------------------- */
   /* Its own family, not the accent. A bar drawn in --color-primary sits beside a
      button drawn in --color-primary and the eye cannot tell which one it can press. */
-  --color-progress-track:#E9EDF8;
-  --color-progress-fill:#6E6ECE;
-  --color-progress-complete:#0F7357;
+  --color-progress-track:#E8EBF3;
+  --color-progress-fill:#6077FF;
+  --color-progress-complete:#2C730A;
   --color-streak:#C2731B;
   --color-streak-container:#FBEBD7;
 
@@ -111,7 +111,7 @@
   --color-surface-bright:#F7F9FF;
   --color-inverse-surface:#2E3037;
   --color-on-inverse-surface:#EEF1F9;
-  --color-inverse-primary:#C7BFFF;
+  --color-inverse-primary:#93A9FF;
 
   /* --- semantic: shadow, scrim, chrome --------------------------------- */
   --color-shadow:#000000;
@@ -124,57 +124,57 @@
   --color-background:#0A0E27;
   --color-surface:#0A0E27;
   --color-surface-muted:#28304F;
-  --color-border-option:#5D65B2;
-  --color-border-divider:#2E2A54;
-  --color-border-selected:#7C79C8;
+  --color-border-option:#5968A7;
+  --color-border-divider:#262E4D;
+  --color-border-selected:#6E7FBF;
   --color-surface-emphasis:#131A3A;
-  --color-surface-selected:#47445D;
+  --color-surface-selected:#3F446B;
   --color-surface-elevated:#3D4667;
   --color-text-primary:#DBE2F8;
   --color-text-secondary:#BFC6DC;
   --color-border-subtle:#414658;
-  --color-focus-ring:#C7BFFF;
-  --color-primary:#C7BFFF;
-  --color-on-primary:#002781;
-  --color-primary-accent:#C7BFFF;
-  --color-primary-container:#2F3C9B;
-  --color-on-primary-container:#E4DFFF;
+  --color-focus-ring:#93A9FF;
+  --color-primary:#93A9FF;
+  --color-on-primary:#2101A3;
+  --color-primary-accent:#93A9FF;
+  --color-primary-container:#2E2CC2;
+  --color-on-primary-container:#D9E2FE;
   /* Moved with its container. A role has to read as one hue: leaving the fill
      on the old slate while the container joined the page family put 18 degrees
      between them, which is visible the moment the two are drawn side by side.
      Same L* (75.2), hue now 3.5 degrees off the container. */
-  --color-secondary:#C7C3E1;
-  --color-on-secondary:#302E45;
-  --color-secondary-container:#47445D;
-  --color-on-secondary-container:#E4DFFE;
-  --color-tertiary:#F5B5CA;
-  --color-on-tertiary:#511F33;
-  --color-tertiary-container:#6B3649;
-  --color-on-tertiary-container:#FFD9E4;
+  --color-secondary:#A3ABD8;
+  --color-on-secondary:#292D52;
+  --color-secondary-container:#3F446B;
+  --color-on-secondary-container:#DBE1FF;
+  --color-tertiary:#F3B1EE;
+  --color-on-tertiary:#51194F;
+  --color-tertiary-container:#6A3167;
+  --color-on-tertiary-container:#FED6FB;
   --color-secondary-action:#C3C6D2;
-  --color-success:#4FC79B;
-  --color-warning:#E8D08E;
-  --color-danger:#FEB3B4;
-  --color-info:#8DB4D8;
+  --color-success:#57CA22;
+  --color-warning:#F1A953;
+  --color-danger:#F69291;
+  --color-info:#84BDDB;
   /* See the light block. Dark is placed at the L* band the existing dark
      containers occupy (24.0) at each role's own hue, rather than tinted — the
      dark containers were never a blend of their fill. */
-  --color-success-container:#0E412F;
-  --color-on-success-container:#BFE3D6;
-  --color-warning-container:#453812;
-  --color-on-warning-container:#E4DBC1;
-  --color-info-container:#213B54;
-  --color-on-info-container:#CBDEEF;
-  --color-error:#FEB3B4;
-  --color-on-error:#6A001A;
-  --color-error-container:#93002A;
-  --color-on-error-container:#FEDADA;
-  --color-progress-track:#2E3247;
+  --color-success-container:#1C5201;
+  --color-on-success-container:#CBEBC2;
+  --color-warning-container:#663E00;
+  --color-on-warning-container:#FEDDBA;
+  --color-info-container:#004C69;
+  --color-on-info-container:#C1E8FE;
+  --color-error:#F69291;
+  --color-on-error:#680114;
+  --color-error-container:#86001D;
+  --color-on-error-container:#FFDAD8;
+  --color-progress-track:#212847;
   /* The focus ring's own indigo, reached through the primitive rather
      than copied: one edit, one meaning moved. A focus ring must never
      be drawn on this fill — see AppColors.progressFillDark. */
-  --color-progress-fill:#C7BFFF;
-  --color-progress-complete:#4FC79B;
+  --color-progress-fill:#93A9FF;
+  --color-progress-complete:#57CA22;
   --color-streak:#E0B064;
   /* The container is no longer the warm olive #3A2E1C. A brown-olive fill is
      the one hue that cannot sit on a violet page without looking muddy — the
@@ -192,7 +192,7 @@
   --color-surface-bright:#3D4667;
   --color-inverse-surface:#DBE2F8;
   --color-on-inverse-surface:#272F4E;
-  --color-inverse-primary:#4E53B6;
+  --color-inverse-primary:#4451E6;
   --color-shadow:#000000;
   --color-scrim:#000000;
   --color-disabled-surface:#232740;

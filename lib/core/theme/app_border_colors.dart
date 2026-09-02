@@ -102,13 +102,13 @@ abstract final class AppBorderColors {
   /// a divided card actually has in dark (`surfaceContainer` `#221E44`, since
   /// these cards are `.raised`): `#2E2A54` measures **1.178:1** there against
   /// the concept's 1.181 in light.
-  static const Color borderDividerDark = Color(0xFF2E2A54);
+  static const Color borderDividerDark = Color(0xFF262E4D);
 
-  static const Color borderSelectedLight = Color(0xFF6E6ECE);
+  static const Color borderSelectedLight = Color(0xFF6575B5);
 
   /// See [borderSelectedLight]. Dimmer than the focus indicator on purpose —
   /// that ring is `scheme.primary` at [AppStroke.focus].
-  static const Color borderSelectedDark = Color(0xFF7C79C8);
+  static const Color borderSelectedDark = Color(0xFF6E7FBF);
 
   /// The hairline a panel wears when it is the screen's *answer* rather than
   /// one row among many — today the Library's Today card.
@@ -120,7 +120,7 @@ abstract final class AppBorderColors {
   /// the contrast, and a resolved constant is what MX-VIS-002 rule R7 asks
   /// for — a translucent border composites against whatever is behind it, and
   /// the audit cannot read it back.
-  static const Color borderAccentLight = Color(0xFFB6B6E2);
+  static const Color borderAccentLight = Color(0xFFA4B7FC);
 
   /// Same recipe as [borderAccentLight], over the dark surface.
   /// **Solved against the one rule that matters here, and it is not the same
@@ -135,7 +135,7 @@ abstract final class AppBorderColors {
   /// `#6560B8` measures **2.93:1** on that fill — above the old hairline in both
   /// modes, and still short of the focus ring, which has to stay the loudest
   /// edge a card can wear.
-  static const Color borderAccentDark = Color(0xFF6560B8);
+  static const Color borderAccentDark = Color(0xFF5867A6);
 
   /// The resting edge of a selectable **card** — `MxCard.option`.
   ///
@@ -162,12 +162,12 @@ abstract final class AppBorderColors {
   /// border keeps `borderControl` and its canvas rule. So does
   /// `guess_option_item_widget`, which writes down that its row "is a control
   /// (WCAG 1.4.11), not a card" — the same distinction from the other side.
-  static const Color borderOptionLight = Color(0xFF8887CE);
+  static const Color borderOptionLight = Color(0xFF798ACB);
 
   /// See [borderOptionLight]. Measured on the fill `.option` actually has in
   /// dark (`surface`, since the recipe is flat): **3.22:1**, chroma 0.120, and
   /// 1.37 quieter than [borderSelectedDark].
-  static const Color borderOptionDark = Color(0xFF5D65B2);
+  static const Color borderOptionDark = Color(0xFF5968A7);
 
   /// A control's edge at the 3:1 WCAG 1.4.11 asks. Why a control and not a
   /// card, and the measurements: `AppSemanticColors.borderControl`.

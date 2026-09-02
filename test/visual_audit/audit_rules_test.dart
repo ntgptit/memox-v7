@@ -104,8 +104,14 @@ void main() {
     });
 
     test('a colour that is neither is reported, but does not block', () {
+      // **Magenta, and deliberately so.** This read `#7F3B12` until M100.28
+      // put Tokyo's amber family into the palette; the fixture then sat 4/255
+      // from a blend of two real tokens and the rule correctly stopped
+      // reporting it — a fixture that had quietly become on-palette, not a
+      // rule that broke. A colour has to be far from every pairwise blend of
+      // every token to test this, and magenta is 151/255 from the nearest.
       final findings = closureOn(
-        paintOf(const Color(0xFF7F3B12), source: PaintSource.raster),
+        paintOf(const Color(0xFFFF00FF), source: PaintSource.raster),
       );
 
       expect(findings, hasLength(1));

@@ -118,15 +118,15 @@ abstract final class AppColors {
   /// What changed is the mechanism — a tone ceiling rather than a luminance
   /// cap, because a luminance cap is a fill-tone rule and this is no longer a
   /// fill-tone palette.
-  static const Color primaryLight = Color(0xFF4E53B6);
+  static const Color primaryLight = Color(0xFF4451E6);
 
   /// Tone 80 at hue 240, chroma 0.154 — the band `secondaryDark` and
   /// `tertiaryDark` already sit in, both of which were M3-shaped all along.
-  static const Color primaryDark = Color(0xFFC7BFFF);
+  static const Color primaryDark = Color(0xFF93A9FF);
   static const Color onPrimaryLight = Color(0xFFFFFFFF);
 
   /// Tone 20 at the same hue. 7.72:1 under [primaryDark].
-  static const Color onPrimaryDark = Color(0xFF002781);
+  static const Color onPrimaryDark = Color(0xFF2101A3);
 
   // --- Semantic ------------------------------------------------------------
   //
@@ -155,8 +155,8 @@ abstract final class AppColors {
   //   records the whole measurement.
 
   /// Answer remembered, session completed, saved.
-  static const Color successLight = Color(0xFF0F7357);
-  static const Color successDark = Color(0xFF4FC79B);
+  static const Color successLight = Color(0xFF2C730A);
+  static const Color successDark = Color(0xFF57CA22);
 
   /// Card due soon, streak at risk — informative, not alarming.
   ///
@@ -173,12 +173,12 @@ abstract final class AppColors {
   /// card, 12.75:1 on the page, against a 3.0 floor. **A shade apart, not a
   /// hue:** the semantic hues map light→dark by keeping hue and raising
   /// lightness, and that rule lands warning back on the streak amber.
-  static const Color warningLight = Color(0xFF875D0F);
-  static const Color warningDark = Color(0xFFE8D08E);
+  static const Color warningLight = Color(0xFF8D590F);
+  static const Color warningDark = Color(0xFFF1A953);
 
   /// Answer forgotten, destructive action, reset.
-  static const Color dangerLight = Color(0xFFBE013A);
-  static const Color dangerDark = Color(0xFFFEB3B4);
+  static const Color dangerLight = Color(0xFFC81132);
+  static const Color dangerDark = Color(0xFFF69291);
 
   // --- Status containers ---------------------------------------------------
   //
@@ -207,20 +207,20 @@ abstract final class AppColors {
   // `AppMaterialRoles.errorContainer*` already holds this family's container;
   // `AppSemanticColors.dangerContainer` derives from it rather than declaring
   // a second red, exactly as the class header refuses a second red fill.
-  static const Color successContainerLight = Color(0xFFDAE9E7);
-  static const Color successContainerDark = Color(0xFF0E412F);
-  static const Color onSuccessContainerLight = Color(0xFF003627);
-  static const Color onSuccessContainerDark = Color(0xFFBFE3D6);
+  static const Color successContainerLight = Color(0xFFCBEBC2);
+  static const Color successContainerDark = Color(0xFF1C5201);
+  static const Color onSuccessContainerLight = Color(0xFF1C5201);
+  static const Color onSuccessContainerDark = Color(0xFFCBEBC2);
 
-  static const Color warningContainerLight = Color(0xFFEDE6DC);
-  static const Color warningContainerDark = Color(0xFF453812);
-  static const Color onWarningContainerLight = Color(0xFF402A00);
-  static const Color onWarningContainerDark = Color(0xFFE4DBC1);
+  static const Color warningContainerLight = Color(0xFFFEDDBA);
+  static const Color warningContainerDark = Color(0xFF663E00);
+  static const Color onWarningContainerLight = Color(0xFF663E00);
+  static const Color onWarningContainerDark = Color(0xFFFEDDBA);
 
-  static const Color infoContainerLight = Color(0xFFE0E7EF);
-  static const Color infoContainerDark = Color(0xFF213B54);
-  static const Color onInfoContainerLight = Color(0xFF073053);
-  static const Color onInfoContainerDark = Color(0xFFCBDEEF);
+  static const Color infoContainerLight = Color(0xFFC1E8FE);
+  static const Color infoContainerDark = Color(0xFF004C69);
+  static const Color onInfoContainerLight = Color(0xFF004C69);
+  static const Color onInfoContainerDark = Color(0xFFC1E8FE);
 
   // --- Progress -----------------------------------------------------------
   //
@@ -242,8 +242,8 @@ abstract final class AppColors {
   /// against the card (1.13:1 against 1.27) and **stronger against the fill**
   /// (3.75:1 against 3.34), which is the pair that carries the number. A track
   /// is a groove, not a second datum.
-  static const Color progressTrackLight = Color(0xFFE9EDF8);
-  static const Color progressTrackDark = Color(0xFF2E3247);
+  static const Color progressTrackLight = Color(0xFFE8EBF3);
+  static const Color progressTrackDark = Color(0xFF212847);
 
   /// The filled part, below 100%.
   ///
@@ -260,7 +260,7 @@ abstract final class AppColors {
   /// and a bar drawn in it reads as a control rather than as progress. That
   /// asymmetry is the tone system working, not a drift — dark's tone 80 is a
   /// label-weight indigo, light's tone 40 is a fill-weight one.
-  static const Color progressFillLight = Color(0xFF6E6ECE);
+  static const Color progressFillLight = Color(0xFF6077FF);
   static const Color progressFillDark = primaryDark;
 
   // --- Due chip -----------------------------------------------------------
@@ -299,8 +299,8 @@ abstract final class AppColors {
 
   /// Status that genuinely carries information: streak, counters, "3 of 20".
   /// Not a decorative accent — plain metadata uses `textSecondary`.
-  static const Color infoLight = Color(0xFF3C688F);
-  static const Color infoDark = Color(0xFF8DB4D8);
+  static const Color infoLight = Color(0xFF296B8B);
+  static const Color infoDark = Color(0xFF84BDDB);
 
   /// The letterbox around the phone-sized frame on the web build.
   ///

@@ -66,13 +66,13 @@ in the empty cells, not in re-picking what exists.
 | colorScheme.outlineVariant | `lib/core/theme/app_border_colors.dart:44` — Color(0xFFC4C6CF) | `#C4C6CF` | `#C4C6CF` |
 | no token within ΔE-ish range — needs a new one | `lib/core/theme/app_border_colors.dart:48` — Color(0xFF414658) | `#414658` | `#414658` |
 | no token within ΔE-ish range — needs a new one | `lib/core/theme/app_border_colors.dart:98` — Color(0xFFE9ECF5) | `#E9ECF5` | `#E9ECF5` |
-| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_border_colors.dart:105` — Color(0xFF2E2A54) | `#2E2A54` | `#2E2A54` |
-| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_border_colors.dart:107` — Color(0xFF6E6ECE) | `#6E6ECE` | `#6E6ECE` |
-| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_border_colors.dart:111` — Color(0xFF7C79C8) | `#7C79C8` | `#7C79C8` |
-| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_border_colors.dart:123` — Color(0xFFB6B6E2) | `#B6B6E2` | `#B6B6E2` |
-| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_border_colors.dart:138` — Color(0xFF6560B8) | `#6560B8` | `#6560B8` |
-| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_border_colors.dart:165` — Color(0xFF8887CE) | `#8887CE` | `#8887CE` |
-| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_border_colors.dart:170` — Color(0xFF5D65B2) | `#5D65B2` | `#5D65B2` |
+| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_border_colors.dart:105` — Color(0xFF262E4D) | `#262E4D` | `#262E4D` |
+| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_border_colors.dart:107` — Color(0xFF6575B5) | `#6575B5` | `#6575B5` |
+| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_border_colors.dart:111` — Color(0xFF6E7FBF) | `#6E7FBF` | `#6E7FBF` |
+| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_border_colors.dart:123` — Color(0xFFA4B7FC) | `#A4B7FC` | `#A4B7FC` |
+| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_border_colors.dart:138` — Color(0xFF5867A6) | `#5867A6` | `#5867A6` |
+| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_border_colors.dart:165` — Color(0xFF798ACB) | `#798ACB` | `#798ACB` |
+| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_border_colors.dart:170` — Color(0xFF5968A7) | `#5968A7` | `#5968A7` |
 | no token within ΔE-ish range — needs a new one | `lib/core/theme/app_border_colors.dart:265` — Color(0xFF8A90A5) | `#8A90A5` | `#8A90A5` |
 | no token within ΔE-ish range — needs a new one | `lib/core/theme/app_surface_colors.dart:41` — Color(0xFF0A0E27) | `#0A0E27` | `#0A0E27` |
 | no token within ΔE-ish range — needs a new one | `lib/core/theme/app_surface_colors.dart:52` — Color(0xFF0A0E27) | `#0A0E27` | `#0A0E27` |
@@ -83,8 +83,8 @@ in the empty cells, not in re-picking what exists.
 | colorScheme.outline | `lib/core/theme/app_border_colors.dart:219` — Color(0xFF74777E) | `#74777E` | `#74777E` |
 | colorScheme.surface | `lib/core/theme/app_surface_colors.dart:39` — Color(0xFFF7F9FF) | `#F7F9FF` | `#F7F9FF` |
 | colorScheme.surface | `lib/core/theme/app_surface_colors.dart:50` — Color(0xFFF7F9FF) | `#F7F9FF` | `#F7F9FF` |
-| colorScheme.secondaryContainer | `lib/core/theme/app_surface_colors.dart:75` — Color(0xFFE4DFFE) | `#E4DFFE` | `#E4DFFE` |
-| colorScheme.onSecondaryContainer | `lib/core/theme/app_surface_colors.dart:78` — Color(0xFF47445D) | `#47445D` | `#47445D` |
+| colorScheme.secondaryContainer | `lib/core/theme/app_surface_colors.dart:75` — Color(0xFFD4DBFF) | `#D4DBFF` | `#D4DBFF` |
+| colorScheme.onSecondaryContainer | `lib/core/theme/app_surface_colors.dart:78` — Color(0xFF3F446B) | `#3F446B` | `#3F446B` |
 | semantic.surfaceMuted | `lib/core/theme/app_surface_colors.dart:80` — Color(0xFFE5E8F1) | `#E5E8F1` | `#E5E8F1` |
 | colorScheme.onPrimary | `lib/core/theme/app_surface_colors.dart:91` — Color(0xFFFFFFFF) | `#FFFFFF` | `#FFFFFF` |
 | blendOver(seed, base, small alpha) - see migration_map.md | `lib/core/theme/app_colors.dart` — colorScheme.shadow (light) | `#000000` | `#000000` |

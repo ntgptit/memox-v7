@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.27 (hai thang surface về navy Tokyo Nebula, neo bằng hai hex chủ dự án; A4 đã xoá navy mà A3 vốn có); M100.26 (bảng A4 — đủ 45 role M3 áp nguyên văn, không lệch giá trị nào; chín kết quả đo chờ chủ dự án quyết); M100.25 (bảng A3 — 26 role M3 đổi tone, chín giá trị lệch bảng để giữ sàn); M100.24 (golden về một nền tảng: job CI chuyển sang Linux, thêm bước font, bỏ tolerance); M100.23 (tổ hợp state thôi phá canonical role; guard AST khoá slot→role; luật nền tảng golden); M100.22 (năm component về role M3 canonical; hai hex palette gánh phần contrast; gỡ khái niệm selected ink chung); M100.21 (container cho bốn semantic; chip trạng thái thôi mượn role accent); M100.20 (bảy binding component về role M3; sàn độ nổi của menu bỏ theo quyết định chủ dự án); M100.19 (gỡ ba token thay thế khỏi 112 call-site, golden chứng minh không đổi pixel); M100.18 (dark `primary` đảo tone theo M3; ba token thay thế thành dẫn xuất); M100.17 (`ColorScheme` đúng 45 role M3 — gỡ `surfaceTint` khai tường minh, catalog đủ 45 swatch); M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
+| **Updated by task** | M100.28 (bộ role M3 lấy hue từ Tokyo admin dashboard; mọi accent light hội tụ L* 42.5 vì Tokyo vẽ chúng làm nền còn app vẽ làm chữ); M100.27 (hai thang surface về navy Tokyo Nebula, neo bằng hai hex chủ dự án; A4 đã xoá navy mà A3 vốn có); M100.26 (bảng A4 — đủ 45 role M3 áp nguyên văn, không lệch giá trị nào; chín kết quả đo chờ chủ dự án quyết); M100.25 (bảng A3 — 26 role M3 đổi tone, chín giá trị lệch bảng để giữ sàn); M100.24 (golden về một nền tảng: job CI chuyển sang Linux, thêm bước font, bỏ tolerance); M100.23 (tổ hợp state thôi phá canonical role; guard AST khoá slot→role; luật nền tảng golden); M100.22 (năm component về role M3 canonical; hai hex palette gánh phần contrast; gỡ khái niệm selected ink chung); M100.21 (container cho bốn semantic; chip trạng thái thôi mượn role accent); M100.20 (bảy binding component về role M3; sàn độ nổi của menu bỏ theo quyết định chủ dự án); M100.19 (gỡ ba token thay thế khỏi 112 call-site, golden chứng minh không đổi pixel); M100.18 (dark `primary` đảo tone theo M3; ba token thay thế thành dẫn xuất); M100.17 (`ColorScheme` đúng 45 role M3 — gỡ `surfaceTint` khai tường minh, catalog đủ 45 swatch); M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
 | **Last updated** | 2026-09-02 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -17163,6 +17163,86 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
   - [x] Full host suite 4142 test, 6 đỏ — đúng sáu mục mở, không phát sinh mới.
   - [ ] Sáu mục mở: chờ chủ dự án chọn sửa giá trị hay sửa luật.
 - **Dependencies:** M100.26
+- **Tests required:** `flutter test --exclude-tags golden`, `--tags golden`,
+  `test/design_audit/`, visual audit.
+- **Checklist phases:** 6, 14.
+
+### M100.28 · Bộ role M3 lấy màu từ Tokyo admin dashboard
+
+- **Status:** done (áp xong; sáu kết quả đo còn lại vẫn chờ chủ dự án quyết)
+- **Goal:** Chủ dự án chỉ sang `ntgptit/tokyo-react-admin-dashboard` làm nguồn
+  tham chiếu. Repo có đúng hai scheme, và một trong hai chính là cái nhãn trên
+  mockup: `NebulaFighterTheme.ts` (dark) và `PureLightTheme.ts` (light).
+- **Scope:** `lib/core/theme/app_material_roles.dart` (40 hằng),
+  `app_colors.dart` (29), `app_border_colors.dart` (8),
+  `app_surface_colors.dart` (2), `design_system/tokens/colors.css` (80 giá trị
+  resync), `test/visual_audit/audit_rules_test.dart` (một fixture đã thành
+  on-palette), toàn bộ golden.
+- **Out of scope:** hai thang surface — M100.27 đã đặt chúng ở hue 272.3 /
+  chroma 0.057, và Tokyo **xác nhận** con số đó chứ không đổi nó: trang dark
+  của Tokyo `#070C27` đo hue 270.9 chroma 0.0558, card `#111633` đo 273.3 /
+  0.0571. Họ `streak` cũng để nguyên — Tokyo không có nó.
+- **Phương pháp, và nó chính là nguyên tắc chủ dự án đã chốt:** lấy **hue và
+  chroma OKLCH của Tokyo nguyên vẹn**, đặt lightness ở chính L\* của Tokyo nơi
+  Tokyo có giá trị, rồi **chỉ sửa lightness** ở đúng chỗ một sàn đo được bị
+  trượt. Không role nào đổi hue để cứu contrast.
+- **Bảy họ hue lấy từ Tokyo:** primary 272.0 / secondary 276.8 / error 21.1 /
+  success 138.5 / warning 68.5 / info 232.3. `tertiary` là họ duy nhất Tokyo
+  **không có** — chọn 329.0, vừa là quy ước của M3 (primary + ~57 độ) vừa là
+  khe rộng nhất còn lại trên vòng hue (277 → 21 rộng 104 độ, giữa là 329).
+  **Không dùng cyan 232 của Tokyo cho `tertiary`**, dù đó là màu Tokyo thật:
+  `card_import_preview_summary_widget.dart` vẽ `tertiaryContainer` (duplicate)
+  cạnh `infoContainer` trên cùng một màn, và hai role trùng hex thì màn đó mất
+  một thông tin.
+- **Mọi accent light hội tụ về L\* ≈ 42.5, và đó là một phát hiện chứ không
+  phải một lựa chọn.** Tokyo đặt primary ở L\* 51, error ở 54, success 72,
+  warning 75 — và cả bốn **trượt 4.5:1 khi làm mực**: 3.53, 3.13, 2.13, 2.00.
+  Không phải Tokyo sai: Tokyo vẽ chúng thành *nền chip và badge*, app này vẽ
+  chúng thành *chữ*. Cùng một hue, hai công dụng, hai lightness. L\* 42.5 là
+  chỗ đầu tiên 4.5:1 đạt trên `surfaceContainerHigh` light.
+- **Ba trong bốn semantic dark ra đúng hex Tokyo** trước bước cuối: `success`
+  `#57CA22` và `warning` `#FFA319` nguyên văn, `info` lệch một đơn vị. Đó là
+  bằng chứng ánh xạ trung thực. Sau đó trần saturation của MX-VIS-002 hạ
+  `warning` xuống `#F1A953` và `info` xuống `#84BDDB`; `success` dark giữ
+  nguyên `#57CA22`.
+- **Trần saturation, và vì sao nó bắt được thật:** ở L\* ~42 với chroma của
+  Tokyo, một kênh chạm 0 — `warning` light `#8F5800` có B=0, saturation HSL
+  bằng **1.0** đúng nghĩa. Giảm chroma, giữ nguyên hue và L\*, tới khi ≤ 0.85.
+  `info` phải là trầm nhất trong bốn semantic với spread ≥ 1.5, nên nó hạ
+  tiếp xuống 0.544 (light) và 0.547 (dark).
+- **Trần chroma 0.065 cho rung sáng, và chỉ rung sáng.** Ở tone 90 sRGB còn
+  thừa gamut cho hue xanh lá, nên `successContainer` sinh ra ở chroma 0.2200 —
+  neon — trong khi mọi container khác rơi vào 0.039–0.066 và baseline M3 nằm ở
+  0.037–0.048. Không phải sinh sai: clipping đã kẹp giúp các hue khác mà không
+  kẹp giúp hue này. **Áp trần cho cả tone thấp đã thử và sai**: nó làm
+  `primaryContainer` dark xỉn tới mức trùng `secondaryContainer` ở ΔE 1.9.
+- **Cặp gần nhất còn lại tốt hơn cả M3 lẫn A4.** `primaryContainer` và
+  `secondaryContainer` light cách ΔE 3.8 vì Tokyo đặt primary và secondary
+  cách nhau 5 độ hue và ở tone 90 sRGB kẹp chênh lệch chroma. Cùng phép đo:
+  baseline M3 của Google là **3.4**, bảng A4 chủ dự án đưa là **0.4**. Đo
+  trước rồi mới kết luận — lần đầu đã suýt đi sửa một vấn đề không tồn tại.
+- **Hai lỗi thật do bảng mới, cả hai đã sửa:**
+  - `primary` dark `#93A9FF` trên `errorContainer` dark đo **4.15:1** — nút
+    Retry trong dải lỗi của Settings. `errorContainer` dark tối lại
+    `#920320` → `#86001D` (kèm `onErrorContainerLight`, cùng tone 30 của M3),
+    lên 4.61:1. Chọn tối container thay vì sáng `primary` vì phạm vi hẹp hơn.
+  - fixture `#7F3B12` của `audit_rules_test` — màu "không thuộc palette" — nay
+    chỉ cách một blend hai token thật **4/255**, nên rule đúng khi thôi báo.
+    Fixture đã thành on-palette, không phải rule hỏng. Đổi sang `#FF00FF`,
+    cách blend gần nhất 151/255.
+- **`borderOption` light `#8887CE` → `#798ACB`.** Nó đo 2.96:1 trên card, tức
+  **vốn đã** trượt sàn 3:1 của WCAG 1.4.11 trước task này; giữ nguyên tỉ lệ khi
+  đổi hue sẽ giữ nguyên cả lỗi, nên nâng lên 3.01.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** 7 họ hue của Tokyo trên toàn bộ role accent, semantic, container,
+  Fixed và border; kit resync 80 giá trị; golden vẽ lại; gallery publish.
+- **Acceptance criteria:**
+  - [x] Không role nào đổi hue để cứu contrast; chỉ lightness và chroma đổi.
+  - [x] Mọi sàn 4.5 (mực) và 3.0 (viền) đạt trên mọi rung của hai thang.
+  - [x] Không cặp role nào dưới ΔE của baseline M3 cho cặp tương ứng.
+  - [x] analyze 0 error 0 warning, format sạch, `test/design_audit/` 108/108.
+  - [ ] Sáu mục mở của M100.26–27: vẫn chờ chủ dự án.
+- **Dependencies:** M100.27
 - **Tests required:** `flutter test --exclude-tags golden`, `--tags golden`,
   `test/design_audit/`, visual audit.
 - **Checklist phases:** 6, 14.

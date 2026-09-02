@@ -1,6 +1,6 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "seedUsedForHueChecks": "#4E53B6",
+  "seedUsedForHueChecks": "#4451E6",
   "totalViolations": 30,
   "byCode": {
     "V1": 5,
@@ -61,10 +61,10 @@
       "widget_context": "AppBorderColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF2E2A54)",
-      "resolved_value_light": "#2E2A54",
-      "resolved_value_dark": "#2E2A54",
-      "why": "A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #2E2A54.",
+      "expression": "Color(0xFF262E4D)",
+      "resolved_value_light": "#262E4D",
+      "resolved_value_dark": "#262E4D",
+      "why": "A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #262E4D.",
       "proposed_target_token": "no token within ΔE-ish range — needs a new one"
     },
     {
@@ -75,10 +75,10 @@
       "widget_context": "AppBorderColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF6E6ECE)",
-      "resolved_value_light": "#6E6ECE",
-      "resolved_value_dark": "#6E6ECE",
-      "why": "A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #6E6ECE.",
+      "expression": "Color(0xFF6575B5)",
+      "resolved_value_light": "#6575B5",
+      "resolved_value_dark": "#6575B5",
+      "why": "A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #6575B5.",
       "proposed_target_token": "no token within ΔE-ish range — needs a new one"
     },
     {
@@ -89,10 +89,10 @@
       "widget_context": "AppBorderColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF7C79C8)",
-      "resolved_value_light": "#7C79C8",
-      "resolved_value_dark": "#7C79C8",
-      "why": "A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #7C79C8.",
+      "expression": "Color(0xFF6E7FBF)",
+      "resolved_value_light": "#6E7FBF",
+      "resolved_value_dark": "#6E7FBF",
+      "why": "A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #6E7FBF.",
       "proposed_target_token": "no token within ΔE-ish range — needs a new one"
     },
     {
@@ -103,10 +103,10 @@
       "widget_context": "AppBorderColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFFB6B6E2)",
-      "resolved_value_light": "#B6B6E2",
-      "resolved_value_dark": "#B6B6E2",
-      "why": "A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #B6B6E2.",
+      "expression": "Color(0xFFA4B7FC)",
+      "resolved_value_light": "#A4B7FC",
+      "resolved_value_dark": "#A4B7FC",
+      "why": "A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #A4B7FC.",
       "proposed_target_token": "no token within ΔE-ish range — needs a new one"
     },
     {
@@ -117,10 +117,10 @@
       "widget_context": "AppBorderColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF6560B8)",
-      "resolved_value_light": "#6560B8",
-      "resolved_value_dark": "#6560B8",
-      "why": "A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #6560B8.",
+      "expression": "Color(0xFF5867A6)",
+      "resolved_value_light": "#5867A6",
+      "resolved_value_dark": "#5867A6",
+      "why": "A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #5867A6.",
       "proposed_target_token": "no token within ΔE-ish range — needs a new one"
     },
     {
@@ -131,10 +131,10 @@
       "widget_context": "AppBorderColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF8887CE)",
-      "resolved_value_light": "#8887CE",
-      "resolved_value_dark": "#8887CE",
-      "why": "A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #8887CE.",
+      "expression": "Color(0xFF798ACB)",
+      "resolved_value_light": "#798ACB",
+      "resolved_value_dark": "#798ACB",
+      "why": "A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #798ACB.",
       "proposed_target_token": "no token within ΔE-ish range — needs a new one"
     },
     {
@@ -145,10 +145,10 @@
       "widget_context": "AppBorderColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF5D65B2)",
-      "resolved_value_light": "#5D65B2",
-      "resolved_value_dark": "#5D65B2",
-      "why": "A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #5D65B2.",
+      "expression": "Color(0xFF5968A7)",
+      "resolved_value_light": "#5968A7",
+      "resolved_value_dark": "#5968A7",
+      "why": "A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #5968A7.",
       "proposed_target_token": "no token within ΔE-ish range — needs a new one"
     },
     {
@@ -271,10 +271,10 @@
       "widget_context": "AppSurfaceColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFFE4DFFE)",
-      "resolved_value_light": "#E4DFFE",
-      "resolved_value_dark": "#E4DFFE",
-      "why": "A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #E4DFFE.",
+      "expression": "Color(0xFFD4DBFF)",
+      "resolved_value_light": "#D4DBFF",
+      "resolved_value_dark": "#D4DBFF",
+      "why": "A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #D4DBFF.",
       "proposed_target_token": "colorScheme.secondaryContainer"
     },
     {
@@ -285,10 +285,10 @@
       "widget_context": "AppSurfaceColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF47445D)",
-      "resolved_value_light": "#47445D",
-      "resolved_value_dark": "#47445D",
-      "why": "A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #47445D.",
+      "expression": "Color(0xFF3F446B)",
+      "resolved_value_light": "#3F446B",
+      "resolved_value_dark": "#3F446B",
+      "why": "A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #3F446B.",
       "proposed_target_token": "colorScheme.onSecondaryContainer"
     },
     {
