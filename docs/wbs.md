@@ -7,8 +7,8 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.21 (container cho bốn semantic; chip trạng thái thôi mượn role accent); M100.20 (bảy binding component về role M3; sàn độ nổi của menu bỏ theo quyết định chủ dự án); M100.19 (gỡ ba token thay thế khỏi 112 call-site, golden chứng minh không đổi pixel); M100.18 (dark `primary` đảo tone theo M3; ba token thay thế thành dẫn xuất); M100.17 (`ColorScheme` đúng 45 role M3 — gỡ `surfaceTint` khai tường minh, catalog đủ 45 swatch); M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
-| **Last updated** | 2026-09-01 |
+| **Updated by task** | M100.22 (năm component về role M3 canonical; hai hex palette gánh phần contrast; gỡ khái niệm selected ink chung); M100.21 (container cho bốn semantic; chip trạng thái thôi mượn role accent); M100.20 (bảy binding component về role M3; sàn độ nổi của menu bỏ theo quyết định chủ dự án); M100.19 (gỡ ba token thay thế khỏi 112 call-site, golden chứng minh không đổi pixel); M100.18 (dark `primary` đảo tone theo M3; ba token thay thế thành dẫn xuất); M100.17 (`ColorScheme` đúng 45 role M3 — gỡ `surfaceTint` khai tường minh, catalog đủ 45 swatch); M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
+| **Last updated** | 2026-09-02 |
 
 Single source of truth for project progress. Update it in the same commit as the
 work it describes. A task is `done` only when it meets the Definition of Done in
@@ -16746,6 +16746,67 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
         2204, full host suite, goldens vẽ lại, gallery publish lại.
 - **Dependencies:** M100.20
 - **Tests required:** `css_token_parity_test`; visual audit của Import; goldens.
+- **Checklist phases:** 7, 14.
+
+### M100.22 · Năm Material component về đúng role M3; hai hex gánh phần còn lại
+
+- **Status:** done
+- **Goal:** Đóng phần còn tồn đọng của nguyên tắc M100.18. Lần đó gỡ các *token*
+  thay thế nhưng không rà những component đã **đổi sang role M3 khác** để né
+  cùng một phép đo. Còn lại năm cái, và luật chủ dự án giao là tuyệt đối:
+  component gắn với role canonical trước; tỉ lệ không đạt thì sửa hex/tone của
+  role ở tầng palette, không đổi role trên component.
+- **Scope:** `app_navigation_bar_theme.dart`, `app_chip_theme.dart`,
+  `app_planned_themes.dart` (SegmentedButton + DatePicker + Slider doc),
+  `app_button_themes.dart` (OutlinedButton), `app_toggle_themes.dart` (Switch),
+  `app_overlay_themes.dart` (TimePicker `hourMinuteColor`),
+  `app_input_theme.dart`, `app_theme.dart` (drag handle, nav call site),
+  `mx_action_button.dart` (`_busyStyle`); palette
+  (`AppMaterialRoles.secondaryContainerLight`, `AppBorderColors.borderControl*`);
+  kit `--color-secondary-container`; gỡ `secondaryAction` end-to-end;
+  `m3_role_contract_test.dart` mới thay `app_selected_ink_test.dart`.
+- **Out of scope:** business semantic (`success`/`warning`/`danger`/`info`/
+  `overdue`) — giữ nguyên theo yêu cầu; `selectedTileColor` của ListTile (M3
+  không có default cho slot này); các comment còn nhắc `primaryAccent` trong
+  10 file test feature — nợ của M100.19, không mở rộng PR để dọn.
+- **Nguyên nhân gốc: hai lỗ trong palette, không phải mười một quyết định.**
+  Ba component (NavigationBar indicator, ChoiceChip, SegmentedButton) đều né
+  cùng một chỗ — `secondaryContainer` light `#E4E6EC` chỉ cách `surfaceContainer`
+  **4,22 L\***, nên selected không đọc được và mỗi cái tự mượn `primaryContainer`
+  (7,16 L\*). Switch né chỗ khác: `outline` trên `surfaceContainerHighest` đo
+  **2,79 / 2,54**, dưới 3:1 của WCAG 1.4.11, mà trên switch thì thumb *chính là*
+  trạng thái. OutlinedButton là trường hợp thứ ba: `secondaryAction` là tên thứ
+  hai cho một slot `_OutlinedButtonDefaultsM3` đã điền bằng `primary`.
+- **Sửa hai hex:** `secondaryContainerLight` `#E4E6EC` → `#D9DDEB` (L\* 91,30 →
+  88,19 — khớp mốc 88,36 của `primaryContainer` mà chủ dự án đã duyệt bằng mắt;
+  chroma 0,031 → 0,071 để đọc ra "có tint" chứ không phải xám; giữ hue 226 của
+  `secondaryLight` nên vẫn qua băng 5 độ của `color_system_rules_test` R3).
+  `borderControl` `#8A8A92` → `#7D7D85` light, `#6E6A98` → `#7D79A2` dark.
+- **Dark không đổi, và đó là phát hiện.** `secondaryContainerDark` đã cách
+  `surfaceContainer` 7,99 L\*, nhiều hơn 7,71 của `primaryContainer` — thay role
+  ở dark chưa bao giờ mua được gì. Báo cáo gốc nói "trên nền sáng"; phép đo đồng ý.
+- **Editable documents:** `docs/wbs.md`, `docs/architecture.md`,
+  `docs/reviews/design-parity-checklist.md`
+- **Output:** 11 slot về role canonical; 2 hằng số palette đổi; 1 token kit đổi
+  giá trị; `secondaryAction` gỡ khỏi `AppColors`, `AppSemanticColors`, palette
+  list, hai registry audit, catalog Widgetbook, và chuyển sang `_notBroughtOver`
+  của parity kèm lý do; `m3_role_contract_test.dart` ghim `slot → role` bằng
+  identity cho 17 component ở cả hai mode (35 test); ghim dump 72 → 71.
+- **Acceptance criteria:**
+  - [x] Không Material component nào còn đổi role để đạt contrast; mọi lệch còn
+        lại đều nằm ở slot M3 không có default.
+  - [x] Mọi cặp canonical sau restore đều đạt sàn: text 4,5 và graphic 3,0.
+  - [x] Không còn khái niệm "một selected ink chung" trong code, test hay doc.
+  - [x] Test ghim **identity** của role, không phải hex và không phải tỉ lệ — đổi
+        component sang role khác thì đỏ dù contrast vẫn pass.
+  - [x] Test từng khoá substitution đã đảo, không xoá: `app_toggle_themes_test`
+        (`outline` giờ **đạt** sàn), nhóm `secondary action` của `app_palette_test`
+        (nhãn giờ **là** `primary`).
+  - [x] analyze 0/0, format, architecture, docs, guard, full host suite, goldens
+        vẽ lại, gallery publish lại.
+- **Dependencies:** M100.21
+- **Tests required:** `m3_role_contract_test`; `app_toggle_themes_test`;
+  `app_palette_test`; `css_token_parity_test`; visual audit; goldens.
 - **Checklist phases:** 7, 14.
 
 ## Known technical debt

@@ -100,7 +100,6 @@ Map<String, Color> auditTokensOf(ThemeData theme) {
     'semantic.surfaceMuted': x.surfaceMuted,
     'semantic.surfaceElevated': x.surfaceElevated,
     'semantic.borderSubtle': x.borderSubtle,
-    'semantic.secondaryAction': x.secondaryAction,
     'semantic.successContainer': x.successContainer,
     'semantic.onSuccessContainer': x.onSuccessContainer,
     'semantic.warningContainer': x.warningContainer,

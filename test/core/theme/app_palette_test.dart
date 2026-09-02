@@ -200,36 +200,58 @@ void main() {
   });
 
   group('secondary action', () {
-    test('is neutral, and is not the brand colour', () {
-      // It sits beside the study verdicts. Anything with a hue there competes
-      // with the two colours carrying the user's actual decision.
-      const neutral = 0.20;
-
+    // **This group asserted the opposite until M100.22, and the inversion is
+    // the point rather than a relaxation.** It pinned that the outlined
+    // button's label is *not* `primary` and carries no hue, because
+    // `AppColors.secondaryAction*` existed to keep a third colour away from the
+    // study verdicts. That token was a second name for a slot
+    // `_OutlinedButtonDefaultsM3.foregroundColor` already fills, so the pin
+    // was holding a substitution in place: any agent restoring the canonical
+    // role would have been failed by the suite for doing the right thing.
+    test('is the canonical M3 role, not a substitute token', () {
       for (final entry in <String, ThemeData>{
         'light': light,
         'dark': dark,
       }.entries) {
-        final label = outlinedButtonLabel(entry.value);
-
         expect(
-          label,
-          isNot(entry.value.colorScheme.primary),
-          reason: '${entry.key}: the secondary action borrowed primary',
-        );
-        expect(
-          saturation(label),
-          lessThanOrEqualTo(neutral),
-          reason: '${entry.key}: the secondary action carries a hue',
+          outlinedButtonLabel(entry.value),
+          entry.value.colorScheme.primary,
+          reason:
+              '${entry.key}: _OutlinedButtonDefaultsM3 names `primary` here',
         );
       }
     });
 
-    test('borrows no semantic colour', () {
-      for (final entry in <String, AppSemanticColors>{
-        'light': lightSemantic,
-        'dark': darkSemantic,
+    test('reads on every ground an outlined button sits on', () {
+      // The hierarchy argument the retired token was built on is still owed an
+      // answer, and this is where it is owed: on the role, not on the button.
+      for (final entry in <String, ThemeData>{
+        'light': light,
+        'dark': dark,
       }.entries) {
-        final semantic = entry.value;
+        final theme = entry.value;
+        final label = outlinedButtonLabel(theme);
+
+        for (final ground in <String, Color>{
+          'surface': theme.colorScheme.surface,
+          'page': theme.scaffoldBackgroundColor,
+          'surfaceContainer': theme.colorScheme.surfaceContainer,
+        }.entries) {
+          expect(
+            contrast(label, ground.value),
+            greaterThanOrEqualTo(4.5),
+            reason: '${entry.key}: label on ${ground.key}',
+          );
+        }
+      }
+    });
+
+    test('borrows no semantic colour', () {
+      for (final entry in <String, ThemeData>{
+        'light': light,
+        'dark': dark,
+      }.entries) {
+        final semantic = entry.value.extension<AppSemanticColors>()!;
 
         expect(
           <Color>[
@@ -238,7 +260,7 @@ void main() {
             semantic.danger,
             semantic.info,
           ],
-          isNot(contains(semantic.secondaryAction)),
+          isNot(contains(outlinedButtonLabel(entry.value))),
           reason: entry.key,
         );
       }

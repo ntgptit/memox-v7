@@ -73,7 +73,7 @@ in the empty cells, not in re-picking what exists.
 | no token within ΔE-ish range — needs a new one | `lib/core/theme/app_border_colors.dart:137` — Color(0xFF6560B8) | `#6560B8` | `#6560B8` |
 | no token within ΔE-ish range — needs a new one | `lib/core/theme/app_border_colors.dart:164` — Color(0xFF8887CE) | `#8887CE` | `#8887CE` |
 | no token within ΔE-ish range — needs a new one | `lib/core/theme/app_border_colors.dart:169` — Color(0xFF5D65B2) | `#5D65B2` | `#5D65B2` |
-| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_border_colors.dart:224` — Color(0xFF6E6A98) | `#6E6A98` | `#6E6A98` |
+| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_border_colors.dart:264` — Color(0xFF7D79A2) | `#7D79A2` | `#7D79A2` |
 | no token within ΔE-ish range — needs a new one | `lib/core/theme/app_surface_colors.dart:28` — Color(0xFFF4F5F8) | `#F4F5F8` | `#F4F5F8` |
 | no token within ΔE-ish range — needs a new one | `lib/core/theme/app_surface_colors.dart:30` — Color(0xFF0A082D) | `#0A082D` | `#0A082D` |
 | no token within ΔE-ish range — needs a new one | `lib/core/theme/app_surface_colors.dart:47` — Color(0xFF1A1838) | `#1A1838` | `#1A1838` |
@@ -83,7 +83,7 @@ in the empty cells, not in re-picking what exists.
 | no token within ΔE-ish range — needs a new one | `lib/core/theme/app_surface_colors.dart:73` — Color(0xFF332F58) | `#332F58` | `#332F58` |
 | no token within ΔE-ish range — needs a new one | `lib/core/theme/app_surface_colors.dart:77` — Color(0xFF28254B) | `#28254B` | `#28254B` |
 | no token within ΔE-ish range — needs a new one | `lib/core/theme/app_surface_colors.dart:88` — Color(0xFF37345F) | `#37345F` | `#37345F` |
-| colorScheme.outline | `lib/core/theme/app_border_colors.dart:193` — Color(0xFF8A8A92) | `#8A8A92` | `#8A8A92` |
+| colorScheme.outline | `lib/core/theme/app_border_colors.dart:218` — Color(0xFF7D7D85) | `#7D7D85` | `#7D7D85` |
 | colorScheme.surface | `lib/core/theme/app_surface_colors.dart:45` — Color(0xFFFBFBFE) | `#FBFBFE` | `#FBFBFE` |
 | semantic.surfaceMuted | `lib/core/theme/app_surface_colors.dart:75` — Color(0xFFEAECF1) | `#EAECF1` | `#EAECF1` |
 | semantic.surfaceElevated | `lib/core/theme/app_surface_colors.dart:86` — Color(0xFFFCFCFE) | `#FCFCFE` | `#FCFCFE` |

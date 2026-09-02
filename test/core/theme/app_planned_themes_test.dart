@@ -167,9 +167,11 @@ void main() {
   });
 
   group('tab bar', () {
-    test('the selected label is the accent, not the selection ink', () {
-      // A tab's label sits on the page, not on a container fill — which is the
-      // boundary `primaryAccent` and `selectedInk` were split along.
+    test('the selected label reads on the page it sits on', () {
+      // A tab's label sits on the page, not on a container fill, which is why
+      // `_TabBarDefaultsM3` inks it `primary` rather than an `on*` role. The
+      // role identity is pinned in `m3_role_contract_test.dart`; this asks
+      // whether it is readable where it actually lands.
       for (final entry in themes.entries) {
         final t = entry.value;
 

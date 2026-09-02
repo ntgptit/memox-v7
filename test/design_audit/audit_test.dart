@@ -58,10 +58,12 @@ void main() {
       // and therefore to the dump; 66 until M100.17, which retired the one
       // entry that was never a role; 65 until M100.19, which retired the ring
       // token once `primary` could carry the role itself; 64 until M100.21,
-      // which gave the extension eight status-container fields. The number is
-      // pinned rather than derived for exactly the reason the message below
-      // states, so it moves only when someone decided it should.
-      hasLength(72),
+      // which gave the extension eight status-container fields; 72 until
+      // M100.22 retired `secondaryAction`, the last token standing in for a
+      // canonical role. The number is pinned rather than derived for exactly
+      // the reason the message below states, so it moves only when someone
+      // decided it should.
+      hasLength(71),
       reason:
           'a role added to Material and not listed in auditTokensOf is '
           'invisible to every later step',

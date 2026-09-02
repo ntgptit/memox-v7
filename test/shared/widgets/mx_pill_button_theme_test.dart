@@ -217,12 +217,14 @@ void main() {
         );
 
         final states = color! as WidgetStateColor;
-        // Selected is the brand ink on the brand tint (owner review,
-        // 2026-08-20) — `selectedInk` picks the shade that clears the
-        // contrast floor on this theme's container.
+        // `onSecondaryContainer` on `secondaryContainer` —
+        // `_ChoiceChipDefaultsM3.labelStyle`'s pair, restored at M100.22 from
+        // the brand container the 2026-08-20 review had put here. The role
+        // identity is pinned in `m3_role_contract_test.dart`; this file cares
+        // that the *state resolution* still happens in the slot Material reads.
         expect(
           states.resolve(<WidgetState>{WidgetState.selected}),
-          theme.colorScheme.onPrimaryContainer,
+          theme.colorScheme.onSecondaryContainer,
         );
         expect(
           states.resolve(<WidgetState>{}),

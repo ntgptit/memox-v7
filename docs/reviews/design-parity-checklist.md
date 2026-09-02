@@ -662,9 +662,9 @@ sung vào nó.
 | Study bỏ icon `play_arrow`, bo `AppRadius.md` | ✅ `deck_study_button_widget.dart` | ❌ chưa | Cũng trả lại bề ngang cho gauge ở text scale lớn |
 | Gauge chiếm hết phần dư (`Expanded`), nhãn `%` không flex, khoảng cách `xs` | ✅ `deck_tile_widget.dart` | ❌ chưa | `Flexible` loose ăn nửa chỗ trống rồi bỏ trống — đó là "khoảng hở" chủ dự án thấy |
 | Gutter của card co còn `md` dưới `AppBreakpoints.compact` (`deckTileGutter`) | ✅ cùng file | ❌ chưa | 320@2.0 thiếu 4.9px; cùng cách `applyCompactScale` và `mxScreenGutter` đã làm |
-| Pill `selected` đổi sang `primaryContainer` + viền `primary` + mực `selectedInk` (toàn app) | ✅ `app_chip_theme.dart` | ❌ chưa | `secondaryContainer` trên nền sáng gần như không phân biệt được với chưa chọn |
+| ~~Pill `selected` đổi sang `primaryContainer` + viền `primary` + mực `selectedInk`~~ **Đảo ở M100.22** | ✅ `app_chip_theme.dart` | ❌ chưa | Quan sát gốc đúng: `secondaryContainer` cũ (`#E4E6EC`) chỉ cách `surface` 7,39 L\* nên chọn/chưa chọn gần như một. Nhưng chỗ sửa sai — M100.22 nâng tone của chính role (`#D9DDEB`, 10,50 L\*) và trả cả ba slot (pill, indicator, segment) về `secondaryContainer`/`onSecondaryContainer` theo `_ChoiceChipDefaultsM3`. Viền `primary` khi selected bị bỏ: M3 để trong suốt, và nó chỉ chịu lực vì fill dưới nó không đủ |
 | Chip sort **luôn** ở trạng thái selected | ✅ `deck_list_toolbar_widget.dart` | ❌ chưa | Nó không bật/tắt gì — nó gọi tên thứ tự đang áp dụng |
-| Nav bar: nhãn tab active cũng đổi màu, không chỉ icon | ✅ `app_theme.dart` `labelTextStyle` | ❌ chưa | Trước đó nhãn rơi về `onSurface` cho cả hai trạng thái |
+| Nav bar: nhãn tab active cũng đổi màu, không chỉ icon | ✅ `app_navigation_bar_theme.dart` `labelTextStyle` | ❌ chưa | Vẫn đúng, nhưng theo mapping M3 từ M100.22: active `onSurface`, inactive `onSurfaceVariant` — hai role khác nhau, nên nhãn vẫn đổi. Lỗi ban đầu là **cả hai** rơi về `onSurface`; bản sửa cũ dùng `onPrimaryContainer` cho active, tức đọc nhãn như thể nó nằm trong pill indicator, mà render thì không |
 
 Padding cuối danh sách: đã xác nhận bằng test — `app_navigation_shell_test.dart`
 cuộn tới hết và đo `lastRow.bottom <= navBar.top`. Test này **đang đỏ vì đúng

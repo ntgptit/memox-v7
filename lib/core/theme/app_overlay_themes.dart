@@ -51,17 +51,15 @@ Color modalBarrierColor(ColorScheme scheme) => scheme.scrim.withValues(
 /// `focusRing` is the same hue at the intensity meant to pull attention — 5.36:1
 /// in dark, 7.41:1 in light. It is what a focus ring and a spinner have in
 /// common: both say *this, now*.
-ProgressIndicatorThemeData buildProgressIndicatorTheme(
-  ColorScheme scheme,
-  AppSemanticColors semantic,
-) => ProgressIndicatorThemeData(
-  color: scheme.primary,
-  // Explicitly transparent rather than left to default. Material draws a
-  // faint track behind a circular indicator in newer versions; on a card
-  // that reads as a second ring nobody asked for.
-  circularTrackColor: Colors.transparent,
-  linearTrackColor: scheme.secondaryContainer,
-);
+ProgressIndicatorThemeData buildProgressIndicatorTheme(ColorScheme scheme) =>
+    ProgressIndicatorThemeData(
+      color: scheme.primary,
+      // Explicitly transparent rather than left to default. Material draws a
+      // faint track behind a circular indicator in newer versions; on a card
+      // that reads as a second ring nobody asked for.
+      circularTrackColor: Colors.transparent,
+      linearTrackColor: scheme.secondaryContainer,
+    );
 
 /// How long a pointer rests before a tooltip appears.
 ///
@@ -106,14 +104,12 @@ TooltipThemeData buildTooltipTheme(ColorScheme scheme, TextTheme texts) =>
 /// Left to Material these come from `primary` at an opacity it chooses. Naming
 /// them matters most for `selectionColor`: the default is light enough that
 /// selected text on a tinted card is hard to see it is selected at all.
-TextSelectionThemeData buildTextSelectionTheme(
-  ColorScheme scheme,
-  AppSemanticColors semantic,
-) => TextSelectionThemeData(
-  cursorColor: scheme.primary,
-  selectionColor: scheme.primary.withValues(alpha: 0.24),
-  selectionHandleColor: scheme.primary,
-);
+TextSelectionThemeData buildTextSelectionTheme(ColorScheme scheme) =>
+    TextSelectionThemeData(
+      cursorColor: scheme.primary,
+      selectionColor: scheme.primary.withValues(alpha: 0.24),
+      selectionHandleColor: scheme.primary,
+    );
 
 /// Hairlines between rows.
 ///
@@ -168,11 +164,7 @@ ScrollbarThemeData buildScrollbarTheme(ColorScheme scheme) =>
 /// light and 8.87:1 in dark. This used to be a function that switched role by
 /// brightness, because `primary` on that fill measured 2.13:1 in dark
 /// (M100.19).
-TimePickerThemeData buildTimePickerTheme(
-  ColorScheme scheme,
-  AppSemanticColors semantic,
-  TextTheme texts,
-) {
+TimePickerThemeData buildTimePickerTheme(ColorScheme scheme, TextTheme texts) {
   final selected = scheme.onPrimaryContainer;
 
   return TimePickerThemeData(
@@ -183,7 +175,7 @@ TimePickerThemeData buildTimePickerTheme(
     elevation: AppElevation.none,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(AppRadius.lg),
-      side: BorderSide(color: semantic.borderSubtle),
+      side: BorderSide(color: scheme.outlineVariant),
     ),
     padding: const EdgeInsets.all(AppSpacing.xl),
     helpTextStyle: texts.labelLarge?.copyWith(color: scheme.onSurfaceVariant),
@@ -208,10 +200,14 @@ TimePickerThemeData buildTimePickerTheme(
     dialTextStyle: texts.bodyLarge,
 
     // The hour and minute fields above the dial.
+    // `primaryContainer` selected, `surfaceContainerHighest` at rest — both
+    // `_TimePickerDefaultsM3.hourMinuteColor`'s. The resting fill read
+    // `surfaceMuted`, which is `surfaceContainerHigh`: one rung low, and a rung
+    // the app happened to have a name for rather than the one M3 asks for.
     hourMinuteColor: WidgetStateColor.resolveWith((states) {
       if (states.contains(WidgetState.selected)) return scheme.primaryContainer;
 
-      return semantic.surfaceMuted;
+      return scheme.surfaceContainerHighest;
     }),
     hourMinuteTextColor: WidgetStateColor.resolveWith((states) {
       if (states.contains(WidgetState.selected)) return selected;
@@ -262,10 +258,10 @@ TimePickerThemeData buildTimePickerTheme(
       return scheme.onSurfaceVariant;
     }),
     dayPeriodTextStyle: texts.titleMedium,
-    dayPeriodBorderSide: BorderSide(color: semantic.borderControl),
+    dayPeriodBorderSide: BorderSide(color: scheme.outline),
     dayPeriodShape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(AppRadius.md),
-      side: BorderSide(color: semantic.borderControl),
+      side: BorderSide(color: scheme.outline),
     ),
 
     // **`inputDecorationTheme` is deliberately left to Material.** The picker's
@@ -325,7 +321,7 @@ PopupMenuThemeData buildPopupMenuTheme(
   shadowColor: materialShadowColor(scheme),
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(AppRadius.md),
-    side: BorderSide(color: semantic.borderSubtle),
+    side: BorderSide(color: scheme.outlineVariant),
   ),
   labelTextStyle: WidgetStateProperty.resolveWith((states) {
     final base = texts.bodyMedium;

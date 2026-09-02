@@ -190,7 +190,32 @@ abstract final class AppBorderColors {
   /// waived in the other stops being a rule and becomes a note, and the next
   /// screen to put an outlined button on a light `surfaceContainer` would
   /// inherit the failure with nothing objecting.
-  static const Color borderControlLight = Color(0xFF8A8A92);
+  /// Darkened from `#8A8A92` at M100.22 by the switch, which is the first
+  /// component to read this role against the *top* of the surface ladder.
+  ///
+  /// M3's unselected switch is `outline` on `surfaceContainerHighest`, and the
+  /// app had been avoiding that pairing — thumb re-pointed to
+  /// `onSurfaceVariant`, track to `surfaceMuted` — because `#8A8A92` scores
+  /// **2.72:1** on `#E3E5EC`, under the 3:1 WCAG 1.4.11 asks of the visual
+  /// information identifying a control's state. On a switch the thumb *is* the
+  /// state, so the exemption does not apply.
+  ///
+  /// `#7D7D85` is the same hue (240) at the same chroma (0.031), 5.07 L\*
+  /// lower, and it clears the pairing at **3.24:1**. Every other ground this
+  /// role is drawn on improves, because all of them are lighter than it:
+  ///
+  /// | ground | was | now |
+  /// |---|---|---|
+  /// | `surfaceContainerHighest` | 2.72 | 3.24 |
+  /// | `surface` | 3.32 | 3.95 |
+  /// | page | 3.14 | 3.74 |
+  /// | `surfaceContainer` | 3.06 | 3.65 |
+  ///
+  /// Darkening was the only lever available: the alternative is lowering
+  /// `surfaceContainerHighest`, and it is the top rung — pushing it down
+  /// compresses it into `surfaceContainerHigh` and breaks the ladder to fix a
+  /// control.
+  static const Color borderControlLight = Color(0xFF7D7D85);
 
   /// Raised from `#66628D` at M100.3, and the census is the reason.
   ///
@@ -221,5 +246,20 @@ abstract final class AppBorderColors {
   /// order: `borderSubtle` 2.32 → this 3.85 → `borderSelected` 5.00 →
   /// `focusRing` 6.26. The two grounds at 0 px are left failing on purpose —
   /// sizing a token to a pairing nothing draws is how a palette drifts bright.
-  static const Color borderControlDark = Color(0xFF6E6A98);
+  /// Raised again at M100.22, for the mirror of the reason light was lowered:
+  /// `#6E6A98` scored **2.47:1** on `surfaceContainerHighest`, which in dark is
+  /// `#332F58`. `#7D79A2` holds hue 245 and clears it at **3.04:1**, and every
+  /// other ground improves because all of them are darker than it:
+  ///
+  /// | ground | was | now |
+  /// |---|---|---|
+  /// | `surfaceContainerHighest` | 2.47 | 3.04 |
+  /// | `surface` | 3.39 | 4.16 |
+  /// | page | 3.85 | 4.72 |
+  /// | `surfaceContainer` | 3.12 | 3.84 |
+  ///
+  /// It stays well under `onSurfaceVariant` (L\* 52.56 against 69.43), so the
+  /// edge is still quieter than the secondary label it sits beside — the
+  /// ordering the M100.3 census established, kept while the number moved.
+  static const Color borderControlDark = Color(0xFF7D79A2);
 }

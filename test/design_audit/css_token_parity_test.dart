@@ -131,10 +131,6 @@ void main() {
       AppMaterialRoles.onTertiaryContainerLight,
       AppMaterialRoles.onTertiaryContainerDark,
     ),
-    '--color-secondary-action': (
-      AppColors.secondaryActionLight,
-      AppColors.secondaryActionDark,
-    ),
     // --- meaning ---
     '--color-success': (AppColors.successLight, AppColors.successDark),
     '--color-warning': (AppColors.warningLight, AppColors.warningDark),
@@ -364,6 +360,16 @@ void main() {
 /// fails if a name here stops being declared in the kit, which is what stops a
 /// reason outliving the thing it excused.
 const Map<String, String> _notBroughtOver = <String, String>{
+  '--color-secondary-action':
+      'The label of a secondary (outlined) action. The app carried it as '
+      '`AppColors.secondaryAction*` so that an outlined button standing beside '
+      'the study verdicts would not add a third hue to that decision — a '
+      'hierarchy argument, and a real one. It was still a second name for a '
+      'slot Material already fills: `_OutlinedButtonDefaultsM3.foregroundColor` '
+      'is `primary`, and since M100.18 inverted the dark tone that role reads '
+      '7.27:1 light and 10.01:1 dark on a card. M100.22 gave the slot back to '
+      'the role and dropped the token; if the study screen needs a quieter '
+      'action it is `primary` that moves, not the button.',
   '--color-streak':
       'The streak *label* colour, for a streak display that does not exist. '
       'Measured on its own container at 11px semibold it reads 3.12:1, under '

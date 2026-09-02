@@ -39,7 +39,6 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     required this.borderAccent,
     required this.borderSubtle,
     required this.borderControl,
-    required this.secondaryAction,
     required this.disabledSurface,
     required this.onDisabled,
   });
@@ -71,7 +70,6 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       borderAccent = AppBorderColors.borderAccentLight,
       borderSubtle = AppBorderColors.borderSubtleLight,
       borderControl = AppBorderColors.borderControlLight,
-      secondaryAction = AppColors.secondaryActionLight,
       disabledSurface = AppColors.disabledSurfaceLight,
       onDisabled = AppColors.onDisabledLight;
 
@@ -102,7 +100,6 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       borderAccent = AppBorderColors.borderAccentDark,
       borderSubtle = AppBorderColors.borderSubtleDark,
       borderControl = AppBorderColors.borderControlDark,
-      secondaryAction = AppColors.secondaryActionDark,
       disabledSurface = AppColors.disabledSurfaceDark,
       onDisabled = AppColors.onDisabledDark;
 
@@ -210,9 +207,6 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   /// The same edge stated louder, not a different one: same hue, same stroke.
   final Color borderControl;
 
-  /// Label of a secondary (outlined) action.
-  final Color secondaryAction;
-
   /// The fill and the border of a disabled control — a solid, so the same
   /// disabled button is the same colour on a page, on a card and in a dialog.
   /// See `AppColors.disabledSurfaceLight`.
@@ -250,7 +244,6 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     Color? borderAccent,
     Color? borderSubtle,
     Color? borderControl,
-    Color? secondaryAction,
     Color? disabledSurface,
     Color? onDisabled,
   }) {
@@ -281,7 +274,6 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       borderAccent: borderAccent ?? this.borderAccent,
       borderSubtle: borderSubtle ?? this.borderSubtle,
       borderControl: borderControl ?? this.borderControl,
-      secondaryAction: secondaryAction ?? this.secondaryAction,
       disabledSurface: disabledSurface ?? this.disabledSurface,
       onDisabled: onDisabled ?? this.onDisabled,
     );
@@ -348,7 +340,6 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       borderAccent: Color.lerp(borderAccent, other.borderAccent, t)!,
       borderSubtle: Color.lerp(borderSubtle, other.borderSubtle, t)!,
       borderControl: Color.lerp(borderControl, other.borderControl, t)!,
-      secondaryAction: Color.lerp(secondaryAction, other.secondaryAction, t)!,
       disabledSurface: Color.lerp(disabledSurface, other.disabledSurface, t)!,
       onDisabled: Color.lerp(onDisabled, other.onDisabled, t)!,
     );

@@ -34,33 +34,36 @@ import 'app_stroke.dart';
 /// The switch, as the reminder toggle and the importer's two `SwitchListTile`s
 /// render it.
 ///
-/// **The resting thumb is the secondary ink, and that is a measured departure
-/// from Material.** M3's default unselected thumb is `colorScheme.outline` —
-/// `borderControl` here — on a `surfaceContainerHighest` track. Against this
-/// app's muted track that pairing measures **2.79:1 in light and 2.54:1 in
-/// dark**, under the 3:1 WCAG 1.4.11 asks of the visual information that
-/// identifies a control's state; and on a switch the thumb *is* the state.
-/// `onSurfaceVariant` on the same track reads 5.61:1 and 6.17:1.
+/// **Every slot is `_SwitchDefaultsM3`'s, and M100.22 is where the last three
+/// substitutions were given back.** The off state had drifted furthest:
 ///
-/// **The track is outlined in every state, and the outline changes colour
-/// rather than disappearing.** M3 drops the outline once the switch is on,
-/// which is fine where `primary` is a light-mode fill and reads 7.27:1 against
-/// a card — and wrong here, because `primaryDark` is deliberately held below
-/// the card's headline text (see `AppColors.primaryDark`) and measures
-/// **2.90:1** on a dark card. So the boundary is drawn from the pair the track
-/// already carries, exactly as `AppInteractionStates.focusRingOf` derives a
-/// filled button's ring:
+/// | slot | was | M3, and now |
+/// |---|---|---|
+/// | off thumb | `onSurfaceVariant` | `outline` |
+/// | off track | `surfaceMuted` (= `surfaceContainerHigh`) | `surfaceContainerHighest` |
+/// | off track outline | `borderControl` | `outline` |
+/// | on track outline | `onPrimary` | transparent |
 ///
-/// | track | outline | on the fill | on a dark card |
-/// |---|---|---|---|
-/// | off (`surfaceMuted`) | `borderControl` | — | 3.00:1 |
-/// | on (`primary`) | `onPrimary` | 5.88:1 | 17.05:1 |
+/// **The reason the first three were substituted was real, and it was a palette
+/// fault.** `outline` on `surfaceContainerHighest` measured **2.79:1 in light
+/// and 2.54:1 in dark** — under the 3:1 WCAG 1.4.11 asks of the visual
+/// information identifying a control's state, and on a switch the thumb *is*
+/// the state. The theme answered by moving the component to a brighter ink and
+/// a lower track, which fixed the number and left `outline` failing for the
+/// next component to find. M100.22 moved the role instead:
+/// `AppBorderColors.borderControlLight`/`Dark` carry the derivation, and the
+/// pairing now reads **3.24:1 and 3.04:1** with every other `outline` ground
+/// improving as a side effect.
 ///
-/// In light the on-state outline is white on a near-white card — 1.03:1, which
-/// is to say invisible — and that is the correct outcome rather than a missed
-/// one: light's fill already separates itself at 7.27:1, so the outline has no
-/// work to do and does none. The edge appears exactly in the mode that needs
-/// it.
+/// **The on-state outline is gone, and that is the same correction one state
+/// over.** M3 drops the track outline once the switch is on; this theme kept it
+/// and painted `onPrimary` there, because `primaryDark` used to sit at 2.90:1
+/// against a dark card and the pill needed an edge to be findable. M100.18
+/// inverted that tone — the on track now reads **10.01:1 on the dark card and
+/// 7.27:1 on the light one** — so the fill separates itself and the edge has
+/// nothing left to do. In light it was 1.03:1 white-on-near-white the whole
+/// time, which is to say the app was carrying a brightness-conditional
+/// workaround for a condition that no longer holds in either mode.
 SwitchThemeData buildSwitchTheme(
   ColorScheme scheme,
   AppSemanticColors semantic,
@@ -81,23 +84,27 @@ SwitchThemeData buildSwitchTheme(
     if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
     if (states.contains(WidgetState.selected)) return scheme.onPrimary;
 
-    return scheme.onSurfaceVariant;
+    return scheme.outline;
   }),
   trackColor: WidgetStateProperty.resolveWith((states) {
     if (states.contains(WidgetState.disabled)) return semantic.disabledSurface;
     if (states.contains(WidgetState.selected)) return scheme.primary;
 
-    return semantic.surfaceMuted;
+    return scheme.surfaceContainerHighest;
   }),
   trackOutlineColor: WidgetStateProperty.resolveWith((states) {
     // Focus draws the ring in the track's outline slot, because
     // `SwitchThemeData` has no other. Same colour and same weight as every
-    // other focus ring in the app; only the shape it follows differs.
+    // other focus ring in the app; only the shape it follows differs. It is
+    // read before `selected` on purpose — a focused *on* switch still has to
+    // show where the keyboard is, and M3's transparent-when-selected answer
+    // would swallow the ring.
     if (states.contains(WidgetState.focused)) return scheme.primary;
     if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
-    if (states.contains(WidgetState.selected)) return scheme.onPrimary;
+    // Transparent once on, per `_SwitchDefaultsM3.trackOutlineColor`.
+    if (states.contains(WidgetState.selected)) return Colors.transparent;
 
-    return semantic.borderControl;
+    return scheme.outline;
   }),
   // One width in every state, and it is M3's 2.0 rather than a hairline. Focus
   // moves the colour and not the weight, the same way an input's border does —
@@ -124,22 +131,21 @@ SwitchThemeData buildSwitchTheme(
 /// mistake, and the stroke width carried the same one — see
 /// [AppStroke.selectionControl].
 ///
-/// **The edge stays when the box is ticked in dark, and only there** — which is
-/// where this departs from M3 (`_CheckboxDefaultsM3.side` returns width 0 once
-/// selected). A ticked box is a `primary` fill, and `primaryDark` is held low
-/// enough that it measures 2.90:1 on a dark card, under WCAG 1.4.11's floor. So
-/// in dark the edge remains and becomes `onPrimary` — 5.88:1 on the fill it sits
-/// on, 17.05:1 on the card behind it — by the same derivation the switch's track
-/// uses.
+/// **A ticked box has no edge, which is `_CheckboxDefaultsM3.side`'s answer**
+/// (a zero-width transparent side once selected). It used to keep one in dark
+/// and drop it in light — a brightness switch, and it existed because the old
+/// dark `primary` was a fill tone at 2.90:1 against the card, so the box needed
+/// a ring to be findable. M100.18 inverted that tone and M100.21 removed the
+/// ring; the fill now reads 10.02:1 on the dark card and 7.27:1 on the light
+/// one, and carries the state on its own.
 ///
-/// **In light the same ring was invisible, and what it cost was the box.** White
-/// on the sheet measures **1.03:1**, so nothing was gained; and a `BorderSide`
-/// is painted *inside* the shape, so the fill was inset by the stroke on all
-/// four sides — a ticked box drew 14dp of indigo where the empty boxes above and
-/// below it drew an 18dp edge. In a column of checkboxes that is not a subtle
-/// difference: the ticked ones read smaller and sit off the line the others
-/// share, which is exactly how the owner found it (2026-08-26). The light fill
-/// needs no help — 7.27:1 on the sheet — so it keeps the whole box.
+/// What the light half of that switch had already shown is why it was worth
+/// removing rather than mirroring: white on the sheet measures **1.03:1**, so
+/// the ring bought nothing, and a `BorderSide` is painted *inside* the shape —
+/// the fill was inset by the stroke on all four sides, so a ticked box drew
+/// 14dp of indigo where the empty boxes above and below it drew an 18dp edge.
+/// In a column of checkboxes the ticked ones read smaller and sat off the line
+/// the others share, which is exactly how the owner found it (2026-08-26).
 ///
 /// The rule underneath, and what `app_toggle_themes_test.dart` now pins: an edge
 /// on a ticked box has to read against **the card behind the control**, because

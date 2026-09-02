@@ -78,8 +78,10 @@ void main() {
         WidgetStateProperty.resolveAs<Color>(c!, states);
 
     test('the selected hour reads on its own fill', () {
-      // This is what `selectedInk` exists for: one token here would ship
-      // 2.13:1 in dark, which is the measurement recorded on that function.
+      // `_TimePickerDefaultsM3` inks the selected field with
+      // `onPrimaryContainer` on a `primaryContainer` fill — the container's own
+      // pair. This checks the pairing still reads; which roles they are is
+      // pinned in `m3_role_contract_test.dart`.
       for (final entry in themes.entries) {
         final t = entry.value.timePickerTheme;
         const on = <WidgetState>{WidgetState.selected};

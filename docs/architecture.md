@@ -929,6 +929,50 @@ trang sẽ pass và bỏ sót cả hai nền mà control được focus thực s
 và không ràng buộc nào của chúng hỏng. Chúng **không** bị snap về đúng T80/T20:
 trigger để đổi một hex là một tỉ lệ hỏng, và chúng không có.
 
+**Luật này áp lần thứ hai ở M100.22, và lần này cái sai không phải token mà là
+role của component.** M100.18 gỡ các token thay thế; nó không rà lại những
+component đã *đổi sang role M3 khác* để né cùng một phép đo. Còn lại năm cái, và
+tất cả đều dồn về hai lỗ trong palette:
+
+| Component | Slot | Đã dùng | M3 quy định |
+|---|---|---|---|
+| NavigationBar | nền / indicator / glyph / nhãn active | `background` · `primaryContainer` · `onPrimaryContainer` · `onPrimaryContainer` | `surfaceContainer` · `secondaryContainer` · `onSecondaryContainer` · `onSurface` |
+| ChoiceChip | fill / nhãn / viền selected | `primaryContainer` · `onPrimaryContainer` · `primary` | `secondaryContainer` · `onSecondaryContainer` · trong suốt |
+| SegmentedButton | fill / nhãn selected / nhãn unselected | `primaryContainer` · `onPrimaryContainer` · `onSurfaceVariant` | `secondaryContainer` · `onSecondaryContainer` · `onSurface` |
+| OutlinedButton | nhãn | `secondaryAction` | `primary` |
+| Switch | thumb / track / viền track (off) | `onSurfaceVariant` · `surfaceMuted` · `borderControl` | `outline` · `surfaceContainerHighest` · `outline` |
+
+Ba cái đầu né cùng một chỗ: `secondaryContainer` ở light (`#E4E6EC`) chỉ cách
+`surfaceContainer` **4,22 L\***, nên trạng thái selected không đọc được và mỗi
+component tự đi mượn `primaryContainer` (7,16 L\*). Cái thứ năm né chỗ khác:
+`outline` trên `surfaceContainerHighest` đo **2,79 / 2,54** — dưới 3:1 mà WCAG
+1.4.11 đòi, và trên switch thì thumb *chính là* trạng thái.
+
+**Sửa hai hex, không sửa mười một slot:** `secondaryContainerLight`
+`#E4E6EC` → `#D9DDEB` (L\* 91,30 → 88,19, chroma 0,031 → 0,071, giữ hue 226) và
+`borderControl` `#8A8A92` → `#7D7D85` light, `#6E6A98` → `#7D79A2` dark. Sau đó
+mọi cặp canonical đều đạt, và mọi nền khác của `outline` **tốt lên** như hệ quả
+(3,32 → 3,95 trên card light; 3,39 → 4,16 dark).
+
+**Dark không đổi, và đó là một phát hiện chứ không phải bỏ sót.**
+`secondaryContainerDark` đã cách `surfaceContainer` 7,99 L\* — nhiều hơn cả 7,71
+của `primaryContainer`. Việc thay role ở dark chưa bao giờ mua được gì; báo cáo
+gốc của chủ dự án nói "trên nền sáng", và phép đo đồng ý.
+
+**Cái mà M100.22 gỡ hẳn là khái niệm "một selected ink chung".**
+`app_selected_ink_test.dart` từng ghim rằng pill, glyph tab và nhãn tab cùng phân
+giải về một token. M3 không như vậy: nhãn tab active là `onSurface` vì nó nằm
+*dưới* indicator chứ không nằm trong, còn glyph nằm trong nên lấy
+`onSecondaryContainer`. Test đó không mô tả app — nó **giữ ba component ở ngoài
+default của chúng**, và sẽ đánh trượt bất kỳ ai sửa đúng. Thay bằng
+`m3_role_contract_test.dart`: ghim `slot → role` bằng **identity**, cho 17
+component, ở cả hai mode.
+
+**Vì sao identity chứ không phải hex hay tỉ lệ.** Ghim hex vẫn pass khi component
+đổi sang role khác tình cờ trùng giá trị; ghim tỉ lệ pass cho *mọi* role vượt
+sàn — đó chính là cách mười một slot trôi sang `primaryContainer` mà mọi gate vẫn
+xanh. Phân công từ M100.22: **role thuộc về component, con số thuộc về palette.**
+
 **Và khai báo component là chưa đủ — phải khai báo đủ *state*.** `ChipThemeData`
 có `backgroundColor` và `selectedColor` nên nhìn qua tưởng đã xong; Material vẫn
 trả lời cho disabled, hover, focus và press. Câu trả lời của nó cho disabled là

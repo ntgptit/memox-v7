@@ -221,10 +221,13 @@ ThemeData _light(ColorScheme scheme, AppSemanticColors semantic) =>
 /// The dark theme. See [_light].
 ///
 /// The brand stays indigo in both modes — `scheme.primary` carries it — so the
-/// button pair is the same object in light and dark. The colour it does NOT
-/// compete with is the study verdict pair: those are the only two saturated
-/// fills on a study screen, and `secondaryAction` is kept neutral precisely so
-/// nothing else in the row has a hue.
+/// button pair is the same object in light and dark. The colour it competes
+/// with is the study verdict pair, the only two saturated *fills* on a study
+/// screen. `AppColors.secondaryAction*` used to keep the outlined button out of
+/// that contest by not being the brand at all; M100.22 retired it, because a
+/// second name for `primary` is not a way to answer a hierarchy question — the
+/// outlined button is a hairline and a label against two filled verdicts, and
+/// the weight difference is what separates them.
 ThemeData _dark(ColorScheme scheme, AppSemanticColors semantic) =>
     _buildTheme(scheme, semantic, background: AppSurfaceColors.backgroundDark);
 
@@ -408,7 +411,7 @@ ThemeData _buildTheme(
       hoverElevation: _overlayElevation(scheme),
       highlightElevation: _overlayElevation(scheme),
     ),
-    navigationBarTheme: buildNavigationBarTheme(scheme, texts, background),
+    navigationBarTheme: buildNavigationBarTheme(scheme, texts),
 
     // The safety net for a bare or third-party `Card` — no app widget renders
     // one. `MxCard` is the canonical card and paints itself, because its
@@ -421,7 +424,7 @@ ThemeData _buildTheme(
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        side: BorderSide(color: semantic.borderSubtle),
+        side: BorderSide(color: scheme.outlineVariant),
       ),
     ),
 
@@ -473,9 +476,9 @@ ThemeData _buildTheme(
           ),
     ),
 
-    progressIndicatorTheme: buildProgressIndicatorTheme(scheme, semantic),
+    progressIndicatorTheme: buildProgressIndicatorTheme(scheme),
     tooltipTheme: buildTooltipTheme(scheme, texts),
-    textSelectionTheme: buildTextSelectionTheme(scheme, semantic),
+    textSelectionTheme: buildTextSelectionTheme(scheme),
     dividerTheme: buildDividerTheme(scheme),
     scrollbarTheme: buildScrollbarTheme(scheme),
     radioTheme: buildRadioTheme(scheme, semantic),
@@ -485,7 +488,7 @@ ThemeData _buildTheme(
     // The reminder screen's `showTimePicker`. Its dialog does NOT read
     // `dialogTheme` — see `buildTimePickerTheme` — so without this entry it is
     // the one surface in the app carrying Material's elevation and corner.
-    timePickerTheme: buildTimePickerTheme(scheme, semantic, texts),
+    timePickerTheme: buildTimePickerTheme(scheme, texts),
     popupMenuTheme: buildPopupMenuTheme(scheme, semantic, texts),
 
     // Four components nothing renders yet. They are here rather than left to
@@ -496,7 +499,7 @@ ThemeData _buildTheme(
     datePickerTheme: buildDatePickerTheme(scheme, semantic, texts),
     segmentedButtonTheme: buildSegmentedButtonTheme(scheme, semantic),
     sliderTheme: buildSliderTheme(scheme, semantic, texts),
-    tabBarTheme: buildTabBarTheme(scheme, semantic, texts),
+    tabBarTheme: buildTabBarTheme(scheme, texts),
 
     listTileTheme: ListTileThemeData(
       contentPadding: const EdgeInsets.symmetric(
@@ -512,11 +515,13 @@ ThemeData _buildTheme(
       // and far under the 4.5:1 its label needs, which is why a second token
       // stood here until M100.19. Tone 80 clears both grounds outright.
       //
-      // Not `primaryContainer` + `onPrimaryContainer` like NavigationBar and the
-      // chips, though that would also pass: a row is a wide target, and the
-      // saturated fill those controls use reads as a button when it is stretched
-      // across a list. The muted tile with an accented label keeps the grammar
-      // — brand tint means selected — at a weight a row can carry.
+      // Not the `secondaryContainer` pair NavigationBar and the chips take,
+      // though that would also pass: a row is a wide target, and a tinted fill
+      // stretched across a list reads as a button. The muted tile with an
+      // accented label keeps the grammar — brand tint means selected — at a
+      // weight a row can carry. `ListTile` has no M3 selected-fill default to
+      // depart from; `selectedTileColor` is null in Material and the choice is
+      // the app's to make.
       selectedColor: scheme.primary,
       selectedTileColor: semantic.surfaceMuted,
       shape: RoundedRectangleBorder(
@@ -533,7 +538,7 @@ ThemeData _buildTheme(
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        side: BorderSide(color: semantic.borderSubtle),
+        side: BorderSide(color: scheme.outlineVariant),
       ),
       titleTextStyle: texts.titleMedium?.copyWith(color: scheme.onSurface),
       contentTextStyle: texts.bodyMedium?.copyWith(
@@ -576,16 +581,22 @@ ThemeData _buildTheme(
         //
         // `dragged` is the one that matters on the release platform. Hover does
         // not exist on a phone; the grab does, and until now it looked exactly
-        // like the rest. Both states borrow `onSurfaceVariant` — the value
-        // Material would have used at rest — so the handle firms up under the
-        // finger and settles back, with no new token and no paint-time alpha
-        // (AD-14 §1 wants a known ground pre-composed, not blended at paint).
+        // like the rest.
+        //
+        // **The resting value is `onSurfaceVariant`, which is
+        // `_BottomSheetDefaultsM3.dragHandleColor`.** It read `outline` until
+        // M100.22, with `onSurfaceVariant` held back as the grabbed state —
+        // which is M3's resting answer used as an emphasis, so the handle sat
+        // one step quieter than Material draws it and the emphasis only
+        // restored the default. Resting is M3's now and the grab goes up to
+        // `onSurface`: the same ladder, one rung higher, no new token and no
+        // paint-time alpha (AD-14 §1 wants a known ground pre-composed).
         if (states.contains(WidgetState.dragged) ||
             states.contains(WidgetState.hovered)) {
-          return scheme.onSurfaceVariant;
+          return scheme.onSurface;
         }
 
-        return semantic.borderControl;
+        return scheme.onSurfaceVariant;
       }),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),

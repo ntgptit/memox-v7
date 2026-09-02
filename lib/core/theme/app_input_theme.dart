@@ -35,18 +35,15 @@ InputDecorationTheme buildInputDecorationTheme(
   // and nothing else is identified by its edge alone, which is exactly the
   // information WCAG 1.4.11 asks 3:1 of; the hairline measured 1.38:1 in light.
   // A card's edge stays subtle because a card is identified by its content.
-  border: _inputBorder(semantic.borderControl),
-  enabledBorder: _inputBorder(semantic.borderControl),
+  border: _inputBorder(scheme.outline),
+  enabledBorder: _inputBorder(scheme.outline),
   focusedBorder: _inputBorder(scheme.primary),
-  errorBorder: _inputBorder(semantic.danger),
-  focusedErrorBorder: _inputBorder(semantic.danger),
+  errorBorder: _inputBorder(scheme.error),
+  focusedErrorBorder: _inputBorder(scheme.error),
   // Solid, per MX-VIS-002 rule R7. Blended here rather than read from
   // `disabledSurface`: this is the *hairline* faded, that is the *ink*.
   disabledBorder: _inputBorder(
-    Color.alphaBlend(
-      semantic.borderControl.withValues(alpha: 0.5),
-      scheme.surface,
-    ),
+    Color.alphaBlend(scheme.outline.withValues(alpha: 0.5), scheme.surface),
   ),
   hintStyle: texts.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
 );

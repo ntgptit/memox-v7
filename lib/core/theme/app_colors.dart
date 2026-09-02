@@ -123,17 +123,6 @@ abstract final class AppColors {
   /// Tone 20 at the same hue. 7.72:1 under [primaryDark].
   static const Color onPrimaryDark = Color(0xFF262670);
 
-  /// Label of a secondary (outlined) action — *End session*, *Cancel*.
-  ///
-  /// Deliberately neutral (saturation under 20%) rather than the brand colour.
-  /// A secondary action sits next to the study verdicts, and anything with a
-  /// hue there competes with the two colours carrying the user's actual
-  /// decision. Keeping it a separate token from [primaryLight] also stops the
-  /// pairing that once shipped a label at 3.09:1 — one colour cannot be both a
-  /// fill and a label on a dark surface.
-  static const Color secondaryActionLight = Color(0xFF454B5E);
-  static const Color secondaryActionDark = Color(0xFFC3C6D2);
-
   // --- Semantic ------------------------------------------------------------
   //
   // On a chroma budget, `info` the quietest of the four. None reaches full

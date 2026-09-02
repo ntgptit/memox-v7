@@ -37,14 +37,21 @@ import 'app_typography.dart';
 
 /// The resting fill for a pill, before any pointer or disabled state.
 ///
-/// Selected borrows the navigation bar's indicator pair, so "this one is active"
-/// looks the same whether it is a tab or a filter; unselected is a card sitting
-/// on the page, which is the same surface-over-background step every other panel
-/// uses. That pair is the **brand** container since the owner review of
-/// 2026-08-20 — it was the neutral `secondaryContainer`, which on a light page
-/// made an applied filter and an unapplied one nearly the same rectangle.
+/// Selected is `secondaryContainer` — `_ChoiceChipDefaultsM3.color`'s answer,
+/// and the same pair the navigation indicator and the segmented button take, so
+/// "this one is active" looks the same whether it is a tab, a segment or a
+/// filter. Unselected is a card sitting on the page, which is the same
+/// surface-over-background step every other panel uses.
+///
+/// **It was `primaryContainer` between the owner review of 2026-08-20 and
+/// M100.22, and the review's complaint was real**: at `#E4E6EC` an applied
+/// filter and an unapplied one were nearly the same rectangle on a light page —
+/// 7.39 L\* of step against `surface`, where the brand container gave 10.34. The
+/// error was fixing that on the component. M100.22 moved the *tone* instead
+/// (`AppMaterialRoles.secondaryContainerLight`), so the role now gives 10.50 and
+/// the chip can say what it is.
 Color _restingFill(ColorScheme scheme, {required bool isSelected}) =>
-    isSelected ? scheme.primaryContainer : scheme.surface;
+    isSelected ? scheme.secondaryContainer : scheme.surface;
 
 /// The fill for [states], resolved to a solid colour over the ground that state
 /// actually has.
@@ -93,7 +100,7 @@ Color _labelColorFor(
     return semantic.onDisabled;
   }
   if (states.contains(WidgetState.selected)) {
-    return scheme.onPrimaryContainer;
+    return scheme.onSecondaryContainer;
   }
 
   return scheme.onSurfaceVariant;
@@ -161,15 +168,23 @@ ChipThemeData buildChipTheme(
     if (states.contains(WidgetState.focused)) {
       return AppInteractionStates.focusRing(scheme);
     }
-    // **Selected is ringed in the brand** (owner review, 2026-08-20). Fill and
-    // label alone left an applied sort looking like an unapplied one on a
-    // light ground: `primaryContainer` against `surface` is a small step, and
-    // the ring is what makes it a state rather than a shade.
+    // **No ring when selected, which is `_ChoiceChipDefaultsM3.side`'s answer**
+    // (`BorderSide(color: Colors.transparent)` once selected): the fill is what
+    // says "applied", and an edge in a *third* colour makes the pill a
+    // different shape from its unselected neighbours as well as a different
+    // colour.
+    //
+    // It drew `scheme.primary` from the 2026-08-20 review, and that ring was
+    // load-bearing only because the fill underneath it was not: `#E4E6EC`
+    // stepped 7.39 L\* off `surface`. With the tone corrected at M100.22 the
+    // fill steps 10.50 and carries the state alone, which is what M3 assumes.
     if (states.contains(WidgetState.selected)) {
-      return BorderSide(color: scheme.primary);
+      return const BorderSide(color: Colors.transparent);
     }
 
-    return BorderSide(color: semantic.borderSubtle);
+    // `outlineVariant`, which is what `borderSubtle` had been aliasing — the
+    // two are the same value, and M3 names this slot the decorative one.
+    return BorderSide(color: scheme.outlineVariant);
   }),
   // **Pill, kept.** `AppRadius.sm` is named "chips, badges, small indicators"
   // and going to it was tried — the owner looked at the render and kept the

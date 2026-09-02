@@ -64,14 +64,12 @@ DatePickerThemeData buildDatePickerTheme(
   AppSemanticColors semantic,
   TextTheme texts,
 ) {
-  final selected = scheme.onPrimaryContainer;
-
   return DatePickerThemeData(
     backgroundColor: scheme.surfaceContainerHigh,
     elevation: AppElevation.none,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(AppRadius.lg),
-      side: BorderSide(color: semantic.borderSubtle),
+      side: BorderSide(color: scheme.outlineVariant),
     ),
     headerForegroundColor: scheme.onSurfaceVariant,
     weekdayStyle: texts.labelMedium?.copyWith(color: scheme.onSurfaceVariant),
@@ -99,33 +97,41 @@ DatePickerThemeData buildDatePickerTheme(
 
       return scheme.primary;
     }),
-    // A range is a run of days, so it takes the selection tint the pills and
-    // the navigation indicator already use rather than a second one.
-    rangeSelectionBackgroundColor: scheme.primaryContainer,
+    // `secondaryContainer`, which is `_DatePickerDefaultsM3`'s own answer and
+    // the same tint the pills and the navigation indicator take. It read
+    // `primaryContainer` on that reasoning while those two controls were also
+    // substituted; M100.22 moved all three back together.
+    rangeSelectionBackgroundColor: scheme.secondaryContainer,
     rangePickerHeaderForegroundColor: scheme.onSurfaceVariant,
+    // A selected year is a `primary` fill under `onPrimary`, exactly as a
+    // selected day is — `_DatePickerDefaultsM3` names both, and the container
+    // pair that stood here made the year grid say "selected" in a different
+    // voice from the day grid two taps away.
     yearForegroundColor: WidgetStateProperty.resolveWith((states) {
-      if (states.contains(WidgetState.selected)) return selected;
+      if (states.contains(WidgetState.selected)) return scheme.onPrimary;
 
       return scheme.onSurfaceVariant;
     }),
     yearBackgroundColor: WidgetStateProperty.resolveWith((states) {
-      if (states.contains(WidgetState.selected)) return scheme.primaryContainer;
+      if (states.contains(WidgetState.selected)) return scheme.primary;
 
       return null;
     }),
-    dividerColor: semantic.borderSubtle,
+    dividerColor: scheme.outlineVariant,
   );
 }
 
 /// The segmented button — a range switch (week / month / year) on the deferred
 /// progress and study-history screens.
 ///
-/// **`primaryContainer` / `onPrimaryContainer`, because this app has one answer
-/// for "this segment is the active one" and it is already drawn twice.** M3 uses
-/// the `secondaryContainer` pair; the owner's review (2026-08-20) moved the
-/// app's active state to the brand container, which is what the navigation
-/// bar's indicator and `MxPillButton` both render. A third answer here would
-/// make the same question look different on three screens.
+/// **`secondaryContainer` / `onSecondaryContainer`, which is
+/// `_SegmentedButtonDefaultsM3`'s pair and now the app's.** This slot did carry
+/// the brand container, on the sound argument that the app should have one
+/// answer for "this segment is the active one" and that the navigation
+/// indicator and `MxPillButton` already drew it. The argument was right and the
+/// role was wrong: all three had been re-pointed away from M3 for the same
+/// reason, so agreeing with each other only made the deviation consistent.
+/// M100.22 moved all three back and moved the tone underneath them instead.
 ///
 /// The label is the container's own `on` role — the M3 pairing — rather than
 /// `primary`, which is a fill and not the ink for a fill.
@@ -140,17 +146,29 @@ SegmentedButtonThemeData buildSegmentedButtonTheme(
             ? semantic.disabledSurface
             : Colors.transparent;
       }
-      if (states.contains(WidgetState.selected)) return scheme.primaryContainer;
+      // `secondaryContainer`/`onSecondaryContainer` —
+      // `_SegmentedButtonDefaultsM3` names both, and M100.22 restored them
+      // from the brand container the 2026-08-20 review had put here. The
+      // review wanted the selected segment to carry brand; the tone move in
+      // `AppMaterialRoles.secondaryContainerLight` is what pays for that
+      // without the segment claiming a role that means "primary action".
+      if (states.contains(WidgetState.selected)) {
+        return scheme.secondaryContainer;
+      }
 
       return Colors.transparent;
     }),
     foregroundColor: WidgetStateProperty.resolveWith((states) {
       if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
       if (states.contains(WidgetState.selected)) {
-        return scheme.onPrimaryContainer;
+        return scheme.onSecondaryContainer;
       }
 
-      return scheme.onSurfaceVariant;
+      // `onSurface`, not `onSurfaceVariant`: an unselected *segment* is still a
+      // live target inside a control the user is reading, where an unselected
+      // nav destination is one of four peers. M3 splits them that way and this
+      // had taken the navigation answer.
+      return scheme.onSurface;
     }),
     overlayColor: AppInteractionStates.controlOverlay(scheme),
     side: WidgetStateProperty.resolveWith((states) {
@@ -158,7 +176,10 @@ SegmentedButtonThemeData buildSegmentedButtonTheme(
         return AppInteractionStates.focusRing(scheme);
       }
 
-      return BorderSide(color: semantic.borderControl);
+      // `scheme.outline`, which is the value `borderControl` was already
+      // aliasing — `_SegmentedButtonDefaultsM3.side` names the role, so the
+      // theme now says it in the same word.
+      return BorderSide(color: scheme.outline);
     }),
     shape: WidgetStatePropertyAll<OutlinedBorder>(
       RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
@@ -172,27 +193,26 @@ SegmentedButtonThemeData buildSegmentedButtonTheme(
 /// The slider — `CLAUDE.md` names SM-2 parameters as deliberately deferred, and
 /// a bounded numeric parameter is what a slider is for.
 ///
-/// **The filled half is `focusRing`, not `primary`, and that is the third time
-/// this palette has forced the same correction.** M3 fills the active track
-/// with `primary` and the rest with `secondaryContainer`, and this theme was
-/// written that way. Measured, M3's own pairing scores **6.02:1 in light and
-/// 2.11:1 in dark** — under the 3:1 a slider's value needs, because
-/// `primaryDark` is deliberately held between the surfaces and the text (see
-/// `AppColors.primaryDark`) and *no* neutral in the dark palette reaches 3:1
-/// from it: the best, `surfaceMuted`, is 2.45.
+/// **`primary` on `secondaryContainer` — M3's own pairing, in both halves.**
 ///
-/// Since M100.18 the fix is the role itself: `primary` against
-/// `secondaryContainer` reads **6.02:1 light and 7.31:1 dark**, and against the
-/// card behind it 7.27:1 and 10.02:1. The inactive half keeps M3's role; the
-/// active half now keeps it too, which is the point of moving the palette
-/// rather than the component.
+/// The active half is worth its history, because it is the case this whole
+/// palette line was argued from. It was a substitute token for a while:
+/// measured against `secondaryContainer`, `primary` scored **6.02:1 in light
+/// and 2.11:1 in dark**, under the 3:1 a slider's value needs, because
+/// `primaryDark` was a fill tone held between the surfaces and the text and
+/// *no* neutral in the dark palette reached 3:1 from it.
+///
+/// M100.18 fixed the role instead of the component: `primary` against
+/// `secondaryContainer` now reads **6.02:1 light and 7.31:1 dark**, and against
+/// the card behind it 7.27:1 and 10.02:1. Both halves keep M3's role, which is
+/// the whole point of moving the palette rather than the component.
 ///
 /// **This reverses the argument this file first shipped**, which was that a
 /// slider is pressable so it takes the accent while a progress bar does not.
 /// The premise is still right — a slider is a control — but pressability is
-/// carried by the thumb, not by the hue, and the hue has a contrast job that
-/// `primary` cannot do on a dark card. A test pins the M3 pairing as failing,
-/// so the reason cannot decay back into a preference.
+/// carried by the thumb, not by the hue. The hue had a contrast job `primary`
+/// could not do on a dark card, and the answer was to give `primary` a tone
+/// that can.
 ///
 /// The value indicator takes the inverse pair — the same surface a snack bar
 /// uses, and for the same reason: it is a momentary overlay that has to read
@@ -235,7 +255,6 @@ SliderThemeData buildSliderTheme(
 /// measures 11.36:1 there.
 TabBarThemeData buildTabBarTheme(
   ColorScheme scheme,
-  AppSemanticColors semantic,
   TextTheme texts,
 ) => TabBarThemeData(
   labelColor: scheme.primary,
@@ -246,7 +265,7 @@ TabBarThemeData buildTabBarTheme(
   indicatorSize: TabBarIndicatorSize.tab,
   // The hairline under the whole bar, which is the same line every other band
   // in the app is separated by.
-  dividerColor: semantic.borderSubtle,
+  dividerColor: scheme.outlineVariant,
   dividerHeight: AppStroke.hairline,
   overlayColor: AppInteractionStates.controlOverlay(scheme),
 );

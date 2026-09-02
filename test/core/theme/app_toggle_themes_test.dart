@@ -60,26 +60,41 @@ void main() {
       }
     });
 
-    test('Material default thumb would have failed this', () {
-      // Pins the reason for the departure rather than only its result. If a
-      // later edit puts the thumb back on `outline`, this says what breaks.
+    test('the M3 pairing is what clears the floor, not a substitute', () {
+      // **This test asserted the opposite until M100.22, and it is worth saying
+      // why rather than just flipping it.** It pinned that `outline` on the
+      // resting track measures *under* the floor — which was true, and which
+      // made the substitution (`onSurfaceVariant` on `surfaceMuted`) look
+      // load-bearing. What it actually did was hold the palette's failure in
+      // place: any agent restoring M3's own pairing would have been failed by
+      // the suite for it, and the only way to pass was to keep the component
+      // off its default.
+      //
+      // The floor is now cleared by the roles themselves — `borderControl`
+      // moved 5.07 L\* in light and 5.73 in dark — so the assertion can be what
+      // it should always have been: the canonical pairing works.
       for (final entry in themes.entries) {
         final scheme = entry.value.colorScheme;
 
         expect(
-          contrast(scheme.outline, track(entry.value, const {})),
-          lessThan(graphic),
+          contrast(scheme.outline, scheme.surfaceContainerHighest),
+          greaterThanOrEqualTo(graphic),
           reason:
-              '${entry.key}: `outline` now clears the floor on the resting '
-              'track, so the note in buildSwitchTheme is out of date',
+              '${entry.key}: M3 puts the resting thumb (`outline`) on the '
+              'resting track (`surfaceContainerHighest`). If this fails, the '
+              'fix is a tone in AppBorderColors — not a different role on the '
+              'switch.',
         );
       }
     });
 
     test('the track is bounded against the surface in both states', () {
-      // Off, the fill is a near-surface muted tile and the outline does it.
-      // On, the fill is `primary` — 7.27:1 in light but 2.90:1 in dark — so
-      // the outline changes colour rather than disappearing the way M3's does.
+      // Off, the fill is a near-surface tile and the outline does it. On, M3
+      // drops the outline entirely and the fill has to carry it alone —
+      // `primary` on the card is 7.27:1 in light and 10.01:1 in dark since
+      // M100.18, which is why the app stopped drawing an on-state edge at
+      // M100.22. Either half satisfies this; the point is that one of them
+      // must.
       for (final entry in themes.entries) {
         final t = entry.value;
         final ground = t.colorScheme.surface;

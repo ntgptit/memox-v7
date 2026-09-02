@@ -47,7 +47,38 @@ abstract final class AppMaterialRoles {
   static const Color secondaryDark = Color(0xFFB8B7D0);
   static const Color onSecondaryLight = Color(0xFFFFFFFF);
   static const Color onSecondaryDark = Color(0xFF1E2033);
-  static const Color secondaryContainerLight = Color(0xFFE4E6EC);
+
+  /// Retuned from `#E4E6EC` at M100.22, and the component that forced it is
+  /// the one that had been avoiding it.
+  ///
+  /// Three M3 slots take this role for their selected state — the navigation
+  /// indicator, the choice chip and the segmented button — and all three had
+  /// been re-pointed at `primaryContainer` instead, because at `#E4E6EC` an
+  /// applied filter and an unapplied one were nearly the same rectangle on a
+  /// light page. That was true and measured: 4.22 L\* of step against
+  /// `surfaceContainer`, where the `primaryContainer` the owner approved gave
+  /// 7.16.
+  ///
+  /// So the tone moves to where that step already was, in the *secondary*
+  /// family rather than the primary one: L\* 91.30 → 88.19 against
+  /// `primaryContainer`'s 88.36, and chroma 0.031 → 0.071 so it reads tinted
+  /// rather than grey. Hue stays 226 — [secondaryLight]'s own — so the pair
+  /// still passes `color_system_rules_test.dart` R3's five-degree band.
+  ///
+  /// | ground | was | now | `primaryContainer` gave |
+  /// |---|---|---|---|
+  /// | `surface` | 7.39 L\* | 10.50 | 10.34 |
+  /// | page | 5.24 | 8.35 | 8.18 |
+  /// | `surfaceContainer` | 4.22 | 7.33 | 7.16 |
+  ///
+  /// [onSecondaryContainerLight] reads 9.55:1 on it, down from 10.37 and still
+  /// clear of AA by more than double.
+  ///
+  /// **Dark did not move, and that is the finding rather than an omission.**
+  /// `#332F58` already gave 7.99 L\* against `surfaceContainer` where
+  /// `primaryContainer` gave 7.71 — the substitution bought dark nothing. The
+  /// owner's report said "on a light page", and the measurement agreed.
+  static const Color secondaryContainerLight = Color(0xFFD9DDEB);
   static const Color secondaryContainerDark = Color(0xFF332F58);
   static const Color onSecondaryContainerLight = Color(0xFF2C3141);
   static const Color onSecondaryContainerDark = Color(0xFFD9DCE7);
