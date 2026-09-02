@@ -310,30 +310,26 @@ carrying UTC+9 and failed the moment the golden job ran on a UTC runner — by
 exactly the same pixel counts a local `TZ=UTC` run reproduces, which is how the
 cause was identified rather than guessed.
 
-**`test/shared/widgets/goldens/` is Windows-authored, and a Linux container
-cannot re-baseline it.** Glyph *rasterisation* differs between operating
-systems: the same widget, the same fonts and the same SDK produce different
-antialiasing on Linux and on Windows, and `matchesGoldenFile` compares byte for
-byte. `mx_components_golden_test.dart` has said so in its own header since it
-was written, and CI settles which platform wins by running the golden job on
-`windows-latest`.
+**Goldens have exactly one authoring platform, and since M100.24 it is Linux.**
+Glyph *rasterisation* differs between operating systems — the same widget, the
+same fonts and the same SDK produce different antialiasing, 1–3% of pixels, and
+`matchesGoldenFile` compares byte for byte. So the platform is a choice, and
+every renderer has to make the same one: `ci.yml`'s golden job runs on
+`ubuntu-latest`, and `dart_test.yaml` records why.
 
-So the component goldens have exactly one authoring platform, and it is
-Windows. A cloud session runs on Linux; running `--update-goldens` there
-rewrites those PNGs with renders that CI will reject, and it does it *silently*
-— the local run reports 303/303 because Linux agrees with itself.
+**A Windows checkout can no longer regenerate goldens.** Running
+`--update-goldens` there writes PNGs CI will reject, and it does it *silently* —
+the local run reports 303/303 because a platform always agrees with itself. Use
+WSL, or let a cloud session regenerate and review the result through the screen
+gallery.
 
-That is not hypothetical. M100.18 regenerated them from a Linux container, the
-job went red, and the redness survived four more commits while the cause was
-looked for in the palette. Only 24 of the 78 files differed enough to fail,
-which is what made it read like a content bug rather than a platform one.
-
-**If you are on Linux:** regenerate `test/demo/` (those are platform-stable in
-practice and CI compares them green) and leave `test/shared/widgets/goldens/`
-alone — `flutter test --tags golden --update-goldens
-test/demo/` scopes it. If a component
-golden genuinely has to move, say so and hand the regeneration to a Windows
-checkout rather than committing a Linux render of it.
+That failure mode is not hypothetical, and it is why the rule is written here
+rather than assumed. M100.18 regenerated the component goldens from a Linux
+container while the job still ran on Windows; the job went red and stayed red
+for six commits while the cause was looked for in the palette. What hid it was
+the impact plan: it compares only the goldens a change could have touched, so
+the failure count moved 35 → 24 → 16 between runs and read like flakiness. It
+was not. Every golden that was compared failed, every time.
 
 Then publish `build/screen_gallery.html` as an Artifact **at the existing
 URL** — https://claude.ai/code/artifact/e8a68227-1582-407c-88c2-ff25d66bd9d8 —

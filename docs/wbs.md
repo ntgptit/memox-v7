@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.23 (tổ hợp state thôi phá canonical role; guard AST khoá slot→role; luật nền tảng golden); M100.22 (năm component về role M3 canonical; hai hex palette gánh phần contrast; gỡ khái niệm selected ink chung); M100.21 (container cho bốn semantic; chip trạng thái thôi mượn role accent); M100.20 (bảy binding component về role M3; sàn độ nổi của menu bỏ theo quyết định chủ dự án); M100.19 (gỡ ba token thay thế khỏi 112 call-site, golden chứng minh không đổi pixel); M100.18 (dark `primary` đảo tone theo M3; ba token thay thế thành dẫn xuất); M100.17 (`ColorScheme` đúng 45 role M3 — gỡ `surfaceTint` khai tường minh, catalog đủ 45 swatch); M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
+| **Updated by task** | M100.24 (golden về một nền tảng: job CI chuyển sang Linux, thêm bước font, bỏ tolerance); M100.23 (tổ hợp state thôi phá canonical role; guard AST khoá slot→role; luật nền tảng golden); M100.22 (năm component về role M3 canonical; hai hex palette gánh phần contrast; gỡ khái niệm selected ink chung); M100.21 (container cho bốn semantic; chip trạng thái thôi mượn role accent); M100.20 (bảy binding component về role M3; sàn độ nổi của menu bỏ theo quyết định chủ dự án); M100.19 (gỡ ba token thay thế khỏi 112 call-site, golden chứng minh không đổi pixel); M100.18 (dark `primary` đảo tone theo M3; ba token thay thế thành dẫn xuất); M100.17 (`ColorScheme` đúng 45 role M3 — gỡ `surfaceTint` khai tường minh, catalog đủ 45 swatch); M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
 | **Last updated** | 2026-09-02 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -16894,6 +16894,56 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Tests required:** `m3_role_binding_guard_test`; `m3_combined_state_test`;
   `m3_role_contract_test`; `app_toggle_themes_test`; golden comparison.
 - **Checklist phases:** 7, 14.
+
+### M100.24 · Golden có một nền tảng, và nền tảng đó là Linux
+
+- **Status:** done
+- **Goal:** Đóng nguồn đỏ cuối của PR #426. Rasterisation chữ khác nhau giữa hệ
+  điều hành — `dart_test.yaml` đã đo và ghi: **1–3% pixel**. Nên golden có đúng
+  **một** nền tảng viết, và mọi bên render phải là nền tảng đó. Trước M100.24 nó
+  là Windows; PNG thì được viết trên Linux từ M100.18. Hai điều đó không thể
+  cùng đúng.
+- **Scope:** `.github/workflows/ci.yml` (job `goldens`: `windows-latest` →
+  `ubuntu-latest`, tên hiển thị, thêm bước font), `.github/workflows/ci-full.yml`
+  (đồng bộ, thêm `TZ: UTC` vốn thiếu), `dart_test.yaml`, `CLAUDE.md`.
+- **Out of scope:** giá trị golden — không PNG nào được vẽ lại ở task này.
+- **Chọn Linux chứ không phải vẽ lại trên Windows, và đây là quyết định của chủ
+  dự án.** Ba lựa chọn được đặt ra: chuyển job sang Linux; chủ dự án vẽ lại trên
+  Windows; hoặc baseline riêng từng nền tảng. Lý do Linux thắng: mọi job CI khác
+  đã là `ubuntu-latest` — Windows tồn tại **chỉ** cho job này; phiên cloud (Linux)
+  là nơi golden thực sự được vẽ; và chủ dự án review qua screen gallery chứ không
+  render lại tại máy.
+- **Comparator có ngưỡng sai số bị loại, bằng số của chính dự án.** Lệch nền tảng
+  là 1–3% pixel; một regression thật — một role màu sai, một rect dịch — hoàn
+  toàn có thể nhỏ hơn 3%. Ngưỡng đủ rộng để nuốt antialiasing cũng đủ rộng để
+  nuốt bug. So sánh vẫn byte-exact.
+- **Bước font là bắt buộc và suýt bị bỏ sót.** Job Windows chưa bao giờ cần
+  `prepare_test_fonts.sh`; trên Linux, thiếu nó thì mọi glyph rơi về font hộp của
+  `flutter_test` và **toàn bộ** ~300 golden đỏ cùng lúc. Đã thêm vào cả hai
+  workflow. `ci-full.yml` cũng thiếu `TZ: UTC` — thêm luôn, vì `card_detail` vẽ
+  timestamp qua `toLocal()`.
+- **Cái giá, nói ra chứ không để phát hiện sau:** một checkout Windows không còn
+  chạy `--update-goldens` mà CI đồng ý được nữa. Dùng WSL, hoặc để phiên cloud vẽ
+  rồi review qua gallery. Đã ghi cạnh chính câu lệnh trong `CLAUDE.md`.
+- **Vì sao lỗi này sống được sáu commit.** Job golden chạy theo impact plan, nên
+  nó chỉ so những golden mà thay đổi có thể chạm tới. Số fail đi 35 → 24 → 16 và
+  đọc như flaky. Không phải: **mọi golden được so đều fail, mọi lần.** Chuẩn hoá
+  theo số test thực chạy mới thấy — 23 component golden được so cho 24 fail, 15
+  cho 16. Bài học ghi lại vì nó sẽ tái diễn với bất kỳ gate nào chọn theo impact.
+- **Editable documents:** `docs/wbs.md`, `CLAUDE.md`
+- **Output:** golden job của cả hai workflow chạy `ubuntu-latest` kèm bước font;
+  `dart_test.yaml` và `CLAUDE.md` ghi nền tảng viết là Linux cùng cái giá của nó.
+- **Acceptance criteria:**
+  - [x] Không workflow nào còn so golden trên nền tảng khác nơi PNG được viết.
+  - [x] Job golden trên Linux có bước font; thiếu nó là đỏ toàn bộ chứ không phải
+        một phần.
+  - [x] `CI gate` đọc job id `goldens`, không phải tên hiển thị — đổi tên không
+        phá cổng (đã kiểm).
+  - [x] Không PNG nào đổi; so sánh vẫn byte-exact, không thêm tolerance.
+  - [x] guard, docs, YAML của cả hai workflow parse sạch.
+- **Dependencies:** M100.23
+- **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
+- **Checklist phases:** 14, 21.
 
 ## Known technical debt
 

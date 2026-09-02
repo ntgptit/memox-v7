@@ -9,7 +9,7 @@ name: CI (full)
 #     impact-selected non-golden subset (or all tests for high-risk changes),
 #     while this job independently proves the global suite still runs
 #     monolithically and has not silently shrunk;
-#   * goldens + the golden count floor — windows-bound pixel comparisons;
+#   * goldens + the golden count floor — linux-bound pixel comparisons;
 #   * the web build (E2E channel) — a full dart2js compile;
 #   * clean-rebuild reproducibility — a second, from-nothing build_runner pass.
 #
@@ -88,8 +88,12 @@ jobs:
           fi
 
   goldens:
-    name: goldens (windows) + count floor
-    runs-on: windows-latest
+    # Linux since M100.24, for the reason `dart_test.yaml` records: a golden has
+    # one authoring platform and it is now this one. Kept in step with `ci.yml`
+    # deliberately — two workflows comparing the same PNGs on two platforms is
+    # how one of them becomes permanently red.
+    name: goldens (linux) + count floor
+    runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
@@ -118,11 +122,21 @@ jobs:
       - name: generate
         run: dart run build_runner build --delete-conflicting-outputs
 
+      # Required on Linux: the runner asks for lowercase material-font paths
+      # while the SDK artifact ships mixed case, and without the symlinks every
+      # glyph renders as `flutter_test`'s box.
+      - name: prepare material fonts
+        run: bash .claude/skills/flutter-workflow/scripts/prepare_test_fonts.sh
+
       # JSON reporter so the count floor below can read completion events; a real
-      # golden failure still fails this step via pipefail. Git Bash ships with the
-      # windows runner, so the pipe/tee/pipefail behave as elsewhere.
+      # golden failure still fails this step via pipefail.
+      # TZ pinned for the same reason `ci.yml` pins it: `card_detail` renders
+      # review timestamps through `toLocal()`, so the picture depends on the
+      # machine's zone.
       - name: golden tests
         shell: bash
+        env:
+          TZ: UTC
         run: |
           set -o pipefail
           flutter test --tags golden --reporter json | tee golden-report.jsonl
