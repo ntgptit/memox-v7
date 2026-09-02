@@ -202,3 +202,67 @@ rules:
     tags:
       - memox-v7
       - design-system
+
+  # `ColorScheme` is the 45 Material 3 colour roles — 26 standard, 19 add-on —
+  # and the guard locks the names to that list by allowlist, in both
+  # directions (M100.17). The SDK's constructor accepts a few more names
+  # (three deprecated roles and a tint mechanism it resolves for itself), and
+  # any name that is not on the list is a finding, so none of them has to be
+  # spelled here to stay out. `brightness` is the one non-role argument the
+  # constructor takes.
+  #
+  # Argument side, file mode: the callee is the unnamed constructor, one of
+  # the four brightness-named constructors, or `copyWith` on one of the three
+  # identifiers the codebase gives a scheme (`scheme`, `colors`,
+  # `colorScheme`); `fromSeed` is not a role list and is left to the scheme
+  # header's own argument. The balanced-paren walk stops at a bare `(` or
+  # `)`, so an unbalanced paren in a comment inside the call shortens what is
+  # checked rather than leaking the check into the code after it. The first
+  # pattern reads an argument at the start of its own line, which is where
+  # `dart format` puts every argument of a call this long — and where a
+  # comment never starts with an identifier and a colon; the second covers a
+  # call written on one line.
+  - id: memox_v7.design_system.color_scheme_arguments_are_m3_roles
+    type: regex
+    mode: file
+    severity: error
+    enabled: true
+    message: >-
+      A `ColorScheme` is built from the 45 Material 3 colour roles only (26
+      standard + 19 add-on), plus `brightness`. Any other argument name is
+      either a deprecated role or a mechanism the SDK already resolves — do
+      not pass it; the scheme header in `app_theme.dart` lists the set
+      (M100.17).
+    scopes:
+      - dart_lib
+    patterns:
+      - '(?:\bColorScheme(?:\.(?:light|dark|highContrastLight|highContrastDark))?|\b(?:scheme|colors|colorScheme)\??\.copyWith)\s*\((?:[^()]|\((?:[^()]|\([^()]*\))*\))*?^\s+(?!(?:brightness|surfaceContainerHighest|onSecondaryFixedVariant|surfaceContainerLowest|onTertiaryFixedVariant|onPrimaryFixedVariant|onSecondaryContainer|surfaceContainerHigh|onTertiaryContainer|surfaceContainerLow|onPrimaryContainer|secondaryContainer|tertiaryContainer|secondaryFixedDim|primaryContainer|onErrorContainer|onSurfaceVariant|onInverseSurface|surfaceContainer|onSecondaryFixed|tertiaryFixedDim|primaryFixedDim|onTertiaryFixed|errorContainer|outlineVariant|inverseSurface|inversePrimary|onPrimaryFixed|secondaryFixed|surfaceBright|tertiaryFixed|primaryFixed|onSecondary|onTertiary|surfaceDim|onPrimary|secondary|onSurface|tertiary|primary|onError|surface|outline|shadow|error|scrim)\s*:)[A-Za-z_]\w*\s*:'
+      - '(?:\bColorScheme(?:\.(?:light|dark|highContrastLight|highContrastDark))?|\b(?:scheme|colors|colorScheme)\??\.copyWith)\s*\([^()\n]*?\b(?!(?:brightness|surfaceContainerHighest|onSecondaryFixedVariant|surfaceContainerLowest|onTertiaryFixedVariant|onPrimaryFixedVariant|onSecondaryContainer|surfaceContainerHigh|onTertiaryContainer|surfaceContainerLow|onPrimaryContainer|secondaryContainer|tertiaryContainer|secondaryFixedDim|primaryContainer|onErrorContainer|onSurfaceVariant|onInverseSurface|surfaceContainer|onSecondaryFixed|tertiaryFixedDim|primaryFixedDim|onTertiaryFixed|errorContainer|outlineVariant|inverseSurface|inversePrimary|onPrimaryFixed|secondaryFixed|surfaceBright|tertiaryFixed|primaryFixed|onSecondary|onTertiary|surfaceDim|onPrimary|secondary|onSurface|tertiary|primary|onError|surface|outline|shadow|error|scrim)\s*:)[A-Za-z_]\w*\s*:'
+    tags:
+      - memox-v7
+      - design-system
+
+  # Read side, line mode: on the three identifiers the codebase gives a
+  # scheme, a member must be one of the 45 roles, `brightness`, or
+  # `copyWith`. Comment lines are exempt because prose names files such as
+  # `colors.css`. `?.` is accepted so a nullable scheme is not a way around
+  # the rule. `context.colors.<role>` and `theme.colorScheme.<role>` are the
+  # shapes this catches; a scheme held under another name is a naming
+  # finding first (`highContrastScheme` renamed its parameter to `scheme` for
+  # exactly this reason).
+  - id: memox_v7.design_system.color_scheme_reads_are_m3_roles
+    type: regex
+    severity: error
+    enabled: true
+    message: >-
+      Read a `ColorScheme` through one of its 45 Material 3 role names (or
+      `brightness` / `copyWith`). Anything else is a deprecated role, a
+      mechanism the app disables everywhere, or a typo — name the role you
+      mean, e.g. `onSurface`, `surfaceContainerHighest` (M100.17).
+    scopes:
+      - dart_lib
+    patterns:
+      - '^(?!\s*//).*?\b(?:scheme|colors|colorScheme)\??\.(?!(?:brightness|copyWith|surfaceContainerHighest|onSecondaryFixedVariant|surfaceContainerLowest|onTertiaryFixedVariant|onPrimaryFixedVariant|onSecondaryContainer|surfaceContainerHigh|onTertiaryContainer|surfaceContainerLow|onPrimaryContainer|secondaryContainer|tertiaryContainer|secondaryFixedDim|primaryContainer|onErrorContainer|onSurfaceVariant|onInverseSurface|surfaceContainer|onSecondaryFixed|tertiaryFixedDim|primaryFixedDim|onTertiaryFixed|errorContainer|outlineVariant|inverseSurface|inversePrimary|onPrimaryFixed|secondaryFixed|surfaceBright|tertiaryFixed|primaryFixed|onSecondary|onTertiary|surfaceDim|onPrimary|secondary|onSurface|tertiary|primary|onError|surface|outline|shadow|error|scrim)\b)[A-Za-z_]\w*'
+    tags:
+      - memox-v7
+      - design-system

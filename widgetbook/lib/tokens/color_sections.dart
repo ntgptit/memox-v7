@@ -5,12 +5,18 @@ import 'package:memox/core/theme/theme_context_extension.dart';
 
 import '../support/showcase_section.dart';
 
-/// The two colour sections: the `ColorScheme` roles the theme declares, and
-/// the `AppSemanticColors` extension beside them.
+/// The colour sections: the 45 `ColorScheme` roles the theme declares — the
+/// 26 standard roles, then the 19 add-ons — and the `AppSemanticColors`
+/// extension beside them.
 ///
 /// Read from the live theme, never from `AppColors`, so a swatch shows the
 /// colour a product widget would actually resolve — which is also what makes
 /// the theme addon flip every swatch.
+///
+/// Every role, in the order Material lists them, so the page reads as the
+/// lookup table it is. It used to show 32 of the 45 with standard and add-on
+/// roles interleaved, and a role absent from this page is exactly how a gap
+/// in the scheme stays invisible (M99.47, M100.17).
 class TokenColorSectionsWidget extends StatelessWidget {
   const TokenColorSectionsWidget({super.key});
 
@@ -20,8 +26,14 @@ class TokenColorSectionsWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         ShowcaseSectionWidget(
-          title: 'ColorScheme roles',
-          children: <Widget>[_ColorGrid(entries: _schemeEntries(context))],
+          title: 'ColorScheme · standard roles (26)',
+          children: <Widget>[
+            _ColorGrid(entries: _standardRoleEntries(context)),
+          ],
+        ),
+        ShowcaseSectionWidget(
+          title: 'ColorScheme · add-on roles (19)',
+          children: <Widget>[_ColorGrid(entries: _addOnRoleEntries(context))],
         ),
         ShowcaseSectionWidget(
           title: 'Semantic colors (AppSemanticColors)',
@@ -40,7 +52,9 @@ class _ColorEntry {
   final Color color;
 }
 
-List<_ColorEntry> _schemeEntries(BuildContext context) {
+/// The 26 standard roles: four accent quartets, the surface trio, the outline
+/// pair, the inverse trio, and the two utilities.
+List<_ColorEntry> _standardRoleEntries(BuildContext context) {
   final colors = context.colors;
 
   return <_ColorEntry>[
@@ -49,21 +63,43 @@ List<_ColorEntry> _schemeEntries(BuildContext context) {
     _ColorEntry('primaryContainer', colors.primaryContainer),
     _ColorEntry('onPrimaryContainer', colors.onPrimaryContainer),
     _ColorEntry('secondary', colors.secondary),
+    _ColorEntry('onSecondary', colors.onSecondary),
     _ColorEntry('secondaryContainer', colors.secondaryContainer),
+    _ColorEntry('onSecondaryContainer', colors.onSecondaryContainer),
     _ColorEntry('tertiary', colors.tertiary),
+    _ColorEntry('onTertiary', colors.onTertiary),
     _ColorEntry('tertiaryContainer', colors.tertiaryContainer),
+    _ColorEntry('onTertiaryContainer', colors.onTertiaryContainer),
     _ColorEntry('error', colors.error),
+    _ColorEntry('onError', colors.onError),
     _ColorEntry('errorContainer', colors.errorContainer),
+    _ColorEntry('onErrorContainer', colors.onErrorContainer),
     _ColorEntry('surface', colors.surface),
     _ColorEntry('onSurface', colors.onSurface),
     _ColorEntry('onSurfaceVariant', colors.onSurfaceVariant),
-    _ColorEntry('surfaceContainerLow', colors.surfaceContainerLow),
-    _ColorEntry('surfaceContainer', colors.surfaceContainer),
-    _ColorEntry('surfaceContainerHigh', colors.surfaceContainerHigh),
     _ColorEntry('outline', colors.outline),
     _ColorEntry('outlineVariant', colors.outlineVariant),
     _ColorEntry('inverseSurface', colors.inverseSurface),
+    _ColorEntry('onInverseSurface', colors.onInverseSurface),
     _ColorEntry('inversePrimary', colors.inversePrimary),
+    _ColorEntry('shadow', colors.shadow),
+    _ColorEntry('scrim', colors.scrim),
+  ];
+}
+
+/// The 19 add-on roles: the tone-based surface ladder and the three `*Fixed`
+/// families.
+List<_ColorEntry> _addOnRoleEntries(BuildContext context) {
+  final colors = context.colors;
+
+  return <_ColorEntry>[
+    _ColorEntry('surfaceDim', colors.surfaceDim),
+    _ColorEntry('surfaceBright', colors.surfaceBright),
+    _ColorEntry('surfaceContainerLowest', colors.surfaceContainerLowest),
+    _ColorEntry('surfaceContainerLow', colors.surfaceContainerLow),
+    _ColorEntry('surfaceContainer', colors.surfaceContainer),
+    _ColorEntry('surfaceContainerHigh', colors.surfaceContainerHigh),
+    _ColorEntry('surfaceContainerHighest', colors.surfaceContainerHighest),
     // The `*Fixed` families. Swatched here rather than left to the role test
     // because they are the app's only generated colours: they carry their
     // palette's full chroma where the hand-tuned containers beside them

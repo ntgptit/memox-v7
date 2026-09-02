@@ -48,7 +48,6 @@ class TokenResolver {
       'colorScheme.outlineVariant': s.outlineVariant,
       'colorScheme.inverseSurface': s.inverseSurface,
       'colorScheme.onInverseSurface': s.onInverseSurface,
-      'colorScheme.surfaceTint': s.surfaceTint,
       'colorScheme.shadow': s.shadow,
       'colorScheme.scrim': s.scrim,
       'semantic.success': x.success,

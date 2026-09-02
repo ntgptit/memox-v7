@@ -156,13 +156,12 @@ void main() {
 
     test('no dark role is bright enough to read as a light source', () {
       // Wider than `primary` alone: the previous palette passed this check and
-      // still glared, because `surfaceTint` is what Material paints over every
-      // elevated surface and nothing was looking at it.
+      // still glared, because the top of the surface ladder is what an
+      // elevated widget actually paints, and nothing was looking at it.
       final scheme = dark.colorScheme;
 
       for (final role in <(String, Color)>[
         ('primary', scheme.primary),
-        ('surfaceTint', scheme.surfaceTint),
         ('surfaceContainerHighest', scheme.surfaceContainerHighest),
         ('surfaceBright', scheme.surfaceBright),
       ]) {
