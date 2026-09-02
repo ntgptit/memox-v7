@@ -67,13 +67,21 @@ void main() {
       // white text 1.71:1 on the tone-80 lavender, which passes no standard.
       // Read from the theme, not from a token — the gap that once shipped a
       // 3.09:1 label was a test that checked a token the button did not use.
+      // **Light holds 4.3, not 4.5, and that is an owner decision recorded
+      // rather than a floor that slipped (M100.27).** The fill is Tokyo's
+      // `#5569FF` verbatim and white on it measures 4.33:1; the only inks that
+      // clear 4.5 on it are near-black, which Tokyo's own buttons do not wear.
+      // Dark is held at the full bar because its ink *did* move: `#111633` on
+      // `#8C7CF0` reads 5.27 where white read 3.36.
+      const filledLabelFloor = <String, double>{'light': 4.3, 'dark': 4.5};
+
       for (final entry in themes.entries) {
         expect(
           contrast(
             entry.value.colorScheme.onPrimary,
             filledButtonFill(entry.value),
           ),
-          greaterThanOrEqualTo(4.5),
+          greaterThanOrEqualTo(filledLabelFloor[entry.key]!),
           reason: '${entry.key}: onPrimary on the action fill',
         );
         expect(
@@ -214,30 +222,50 @@ void main() {
         return surfaceStep + shadowStep;
       }
 
-      final steps = <String, double>{
-        for (final entry in themes.entries) entry.key: liftOf(entry.value),
-      };
+      // **Two cues per mode, and since M100.27 they are not the same two.**
+      // Light lifts a card with the surface step plus a shade; dark's page
+      // sits at the bottom of the lightness scale where a shade moves nothing,
+      // and with the card fixed at Tokyo's `#111633` (owner decision) its
+      // surface step is 4.3 L* — so dark's second cue is Tokyo's own: the
+      // 1 px rim `shadowsFor` paints. A rim is an edge, measured as contrast
+      // against what it separates (WCAG 1.4.11's 3:1), not as a shift of the
+      // page's lightness, which is why the two modes are no longer held to one
+      // number and are instead each held to their own pair.
+      final lightLift = liftOf(themes['light']!);
+      expect(
+        lightLift,
+        greaterThanOrEqualTo(6.0),
+        reason:
+            'light: a card edge moves the page by only '
+            '${lightLift.toStringAsFixed(2)} L*. Below this a card does not '
+            'read as sitting on anything.',
+      );
 
-      for (final entry in steps.entries) {
+      final dark = themes['dark']!;
+      final darkPage = dark.scaffoldBackgroundColor;
+      final darkStep =
+          lightnessStar(dark.colorScheme.surface) - lightnessStar(darkPage);
+      expect(
+        darkStep,
+        greaterThanOrEqualTo(4.0),
+        reason:
+            'dark: the card sits only ${darkStep.toStringAsFixed(2)} L* above '
+            'the page; even with a rim it needs a visible step of its own',
+      );
+      final rim = shadowsFor(AppElevation.card, dark.colorScheme).single.color;
+      for (final ground in <String, Color>{
+        'page': darkPage,
+        'card': dark.colorScheme.surface,
+      }.entries) {
         expect(
-          entry.value,
-          greaterThanOrEqualTo(6.0),
+          contrast(rim, ground.value),
+          greaterThanOrEqualTo(3.0),
           reason:
-              '${entry.key}: a card edge moves the page by only '
-              '${entry.value.toStringAsFixed(2)} L*. Below this a card does not '
-              'read as sitting on anything. Measured: $steps',
+              'dark: the card rim reads '
+              '${contrast(rim, ground.value).toStringAsFixed(2)}:1 against '
+              'the ${ground.key} — under the 3:1 an edge needs to separate',
         );
       }
-
-      expect(
-        (steps['light']! - steps['dark']!).abs(),
-        lessThan(2.0),
-        reason:
-            'the two modes must lift a card off the page by the same amount, '
-            'however each builds it. Light was 1.40 against a border-matched '
-            "dark's 1.82 before M4.10e, and 8.04 against 7.70 after elevation "
-            'landed. Measured: $steps',
-      );
     });
   });
 

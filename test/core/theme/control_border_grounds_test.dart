@@ -113,8 +113,13 @@ void main() {
         for (final entry in themes.entries) {
           final theme = entry.value;
 
+          // `primaryInk` since M100.27 — the mark is the brand as ink, and the
+          // fill role is Tokyo's `#5569FF` verbatim (3.96:1 on the light page).
           expect(
-            contrast(theme.colorScheme.primary, theme.scaffoldBackgroundColor),
+            contrast(
+              theme.extension<AppSemanticColors>()!.primaryInk,
+              theme.scaffoldBackgroundColor,
+            ),
             greaterThanOrEqualTo(4.5),
             reason:
                 '${entry.key}: the brand hue no longer reads as a label on the '

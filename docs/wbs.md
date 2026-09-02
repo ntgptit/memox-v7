@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.26 (toàn bộ hệ màu về palette Tokyo — surface, ink, viền, bốn semantic, tertiary, thang container; ngân sách chroma semantic thay bằng luật bốn hue; golden vẽ lại); M100.25 (hai họ accent M3 lấy hue từ palette Tokyo; fill là giá trị Tokyo đầu tiên vượt sàn, container/on giữ tone và chroma; `surfaceContainerHighest` dark tách khỏi `secondaryContainer`); M100.24 (golden về một nền tảng: job CI chuyển sang Linux, thêm bước font, bỏ tolerance); M100.23 (tổ hợp state thôi phá canonical role; guard AST khoá slot→role; luật nền tảng golden); M100.22 (năm component về role M3 canonical; hai hex palette gánh phần contrast; gỡ khái niệm selected ink chung); M100.21 (container cho bốn semantic; chip trạng thái thôi mượn role accent); M100.20 (bảy binding component về role M3; sàn độ nổi của menu bỏ theo quyết định chủ dự án); M100.19 (gỡ ba token thay thế khỏi 112 call-site, golden chứng minh không đổi pixel); M100.18 (dark `primary` đảo tone theo M3; ba token thay thế thành dẫn xuất); M100.17 (`ColorScheme` đúng 45 role M3 — gỡ `surfaceTint` khai tường minh, catalog đủ 45 swatch); M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
+| **Updated by task** | M100.27 (`primary`, nền trang, nền card lấy nguyên hex Tokyo theo chỉ định chủ dự án; `primaryInk` cho thương hiệu làm chữ; dark vẽ rim Tokyo thay shade; R9 miễn paper trắng, sàn 4,3 cho nhãn nút light); M100.26 (toàn bộ hệ màu về palette Tokyo — surface, ink, viền, bốn semantic, tertiary, thang container; ngân sách chroma semantic thay bằng luật bốn hue; golden vẽ lại); M100.25 (hai họ accent M3 lấy hue từ palette Tokyo; fill là giá trị Tokyo đầu tiên vượt sàn, container/on giữ tone và chroma; `surfaceContainerHighest` dark tách khỏi `secondaryContainer`); M100.24 (golden về một nền tảng: job CI chuyển sang Linux, thêm bước font, bỏ tolerance); M100.23 (tổ hợp state thôi phá canonical role; guard AST khoá slot→role; luật nền tảng golden); M100.22 (năm component về role M3 canonical; hai hex palette gánh phần contrast; gỡ khái niệm selected ink chung); M100.21 (container cho bốn semantic; chip trạng thái thôi mượn role accent); M100.20 (bảy binding component về role M3; sàn độ nổi của menu bỏ theo quyết định chủ dự án); M100.19 (gỡ ba token thay thế khỏi 112 call-site, golden chứng minh không đổi pixel); M100.18 (dark `primary` đảo tone theo M3; ba token thay thế thành dẫn xuất); M100.17 (`ColorScheme` đúng 45 role M3 — gỡ `surfaceTint` khai tường minh, catalog đủ 45 swatch); M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
 | **Last updated** | 2026-09-02 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -16944,6 +16944,75 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Dependencies:** M100.23
 - **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
 - **Checklist phases:** 14, 21.
+
+### M100.27 · Ba màu chính là của Tokyo nguyên hex — mọi thứ khác nhường
+
+- **Status:** done
+- **Goal:** Chủ dự án xem gallery M100.26 và chỉ định: `primary`, nền app và nền
+  card là màu chính, **không sửa**, phải giống Tokyo; nếu phải sửa thì sửa những
+  điểm khác. M100.25–26 đã hạ `primary` light về `primary.dark` (`#4454CC`), đảo
+  dark `primary` về tone 80 (`#BCC2FF`), tint paper light (`#FBFBFE`) và nâng card
+  dark lên tone 10,4 (`#171B30`) để qua gate. Task này trả bốn giá trị đó về
+  Tokyo nguyên hex và dời phần điều chỉnh sang on-colour, binding chữ, cue chiều
+  sâu và ngưỡng luật — mỗi chỗ có số đo.
+- **Scope:** `app_colors.dart` (`primary` L/D, `onPrimaryDark`, **mới**
+  `primaryInk` L/D, **mới** `cardRimDark`, `textSecondaryDark`, `disabledSurface`
+  L/D); `app_surface_colors.dart` (`surface` L/D, `surfaceElevatedLight`);
+  `app_material_roles.dart` (họ primary dark đổi hue theo `#8C7CF0`, `*Fixed`
+  primary theo `#5569FF`); `app_semantic_colors.dart` (field `primaryInk`);
+  `app_ink.dart`, `app_button_themes.dart`, `app_planned_themes.dart`,
+  `app_theme.dart` và 4 widget (binding thương hiệu-làm-chữ → `primaryInk`);
+  `app_elevation.dart` (dark vẽ rim); kit `colors.css` + `elevation.css`; 12 file
+  test; `widgetbook` catalog; AD-14; `design_audit/`; toàn bộ golden.
+- **Bốn giá trị cố định và cái giá của từng cái, đo được:**
+  | Giá trị Tokyo | Đo | Nhường ở đâu |
+  |---|---|---|
+  | `primary` light `#5569FF` | trắng trên nó **4,33:1**; làm chữ 4,33 trên card, **3,96 trên trang** | nhãn nút giữ trắng, sàn cặp này **4,3** (quyết định chủ dự án, ghi trong test); chữ thương hiệu bind `primaryInk` = Tokyo `primary.dark` `#4454CC` (6,20 / 5,67) |
+  | `primary` dark `#8C7CF0` | trắng trên nó **3,36:1**; làm chữ 5,73 / 5,27 nhưng **4,29 trên tile chọn**; lệch **15,3°** so với light | `onPrimary` = paper Tokyo `#111633` (5,27); `primaryInk` = `lighten(main,.25)` `#A99DF4` (6,2 trên tile, 4,83 trên band lỗi); trần lệch hue 12° → 16° |
+  | card light `#FFFFFF` | không hue → R9 đỏ cho 4 role | R9 miễn đúng bốn role là paper (`surface`, `surfaceBright`, `surfaceContainerLowest`, `surfaceElevated`) |
+  | card dark `#111633` | cao **4,3 L\*** trên trang (sàn 6); sat 0,50 = 72 % trang (trần 60 %) | dark vẽ **rim Tokyo** `0 0 2px #6A7199` (4,07:1 trên trang, 3,74 trên card) ở mọi level; sàn bậc 6 → 4 **cộng** rim ≥ 3:1; trần sat 0,6 → 0,75 |
+- **`primaryInk` là token M100.18 đã gỡ, quay lại có lý do khác.** Khi đó `primary`
+  được phép dịch nên token thay thế là triệu chứng; nay `primary` bị khoá nên
+  binding là đòn bẩy duy nhất. Slot đổi: TextButton, OutlinedButton (foreground),
+  TabBar `labelColor`, ListTile `selectedColor`, `AppInk.accent`, và 4 chỗ widget
+  đọc `colors.primary` làm chữ (`MxActionButton` secondary, `MxSessionTopBar`,
+  `CardMetric` scheduler, `CardState` reviewing). Fill, focus ring, caret, radio,
+  switch, progress, stepper, indicator tab **vẫn là `primary`**.
+  `m3_role_binding_guard_test.dart` ghi OutlinedButton là slot duy nhất cố ý rời
+  `_OutlinedButtonDefaultsM3`, và `refuses` `primary` để không ai trả nhãn dưới AA
+  về.
+- **Phép đo tổng độ nổi card tách đôi** (`app_theme_test.dart`): light = bậc
+  surface + shade ≥ 6 L\* (đo 9,2); dark = bậc ≥ 4 L\* **và** rim ≥ 3:1 trên
+  trang lẫn card. Bỏ ràng buộc "hai mode lệch nhau < 2 L\*" vì hai mode nay dùng
+  hai loại cue — shade và cạnh — không cộng chung được. `css_scale_parity_test`
+  và `elevation.css` cùng nói dark vẽ rim.
+- **Dẫn xuất theo:** `textSecondaryDark` = ink @ 70 % trên `#111633` (`#9395A2`);
+  `disabledSurface` = ink @ 12 % trên paper (`#E4E7EA` / `#272C46`);
+  `primaryContainerDark` `#32296D`, `onPrimaryContainerDark` `#DAD4FE`,
+  `inversePrimaryDark` `#453799` đổi hue theo `#8C7CF0` giữ tone; `*Fixed` primary
+  từ `#5569FF` (`#DFE0FF` `#BCC2FF` `#000B62` `#122CCB`).
+- **Hai chỗ nhỏ theo sau:** `progressFillLight` là `#4454CC` (Tokyo `primary.dark`)
+  thay cho `#5569FF` của M100.26 — `mx_progress_bar_test.dart` giữ luật "bar không
+  bao giờ trùng hex của nút", và với `primary` bị khoá thì bar lấy shade kế tiếp
+  của họ (5,50:1 trên track). Audit màn hình (`TextContrastRule`) ghi đúng **một**
+  cặp được chủ dự án chấp nhận — trắng trên `#5569FF` ở sàn 4,3 — tại một chỗ
+  thay cho allowance từng màn, nên trượt dưới mức đã chấp nhận vẫn đỏ.
+- **Editable documents:** `docs/wbs.md`, `docs/architecture.md` (AD-14).
+- **Output:** như Scope.
+- **Acceptance criteria:**
+  - [x] `primary` L/D, `background` L/D, `surface` L/D đúng hex Tokyo, không lệch
+        một đơn vị; `css_token_parity_test.dart` xanh.
+  - [x] Mọi chữ mang thương hiệu ≥ 4,5:1 trên mọi ground nó ngồi (`app_ink_test`,
+        `app_palette_test` secondary action, `component_depth_and_state_test`
+        ListTile, tab bar); duy nhất cặp nhãn nút light giữ 4,3 có ghi lý do.
+  - [x] `test/core/theme`, `test/design_audit`, `color_*_rules`, `test/shared`
+        xanh; full host suite 4181/4181; guard 0 finding; analyze 0/0 app +
+        widgetbook; `check_architecture.py`, `check_docs.py`, 68 test CI tooling xanh.
+  - [x] Golden vẽ lại trên Linux `TZ=UTC`: 303/303, **202 PNG đổi**; gallery
+        republish tại URL ghim.
+- **Dependencies:** M100.26.
+- **Tests required:** các test đã sửa ở Scope; không thêm file test.
+- **Checklist phases:** 7.
 
 ### M100.26 · Toàn bộ hệ màu về palette Tokyo
 

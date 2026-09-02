@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'app_colors.dart';
+
 /// How far a surface sits above the one behind it.
 ///
 /// **The token `docs/checklist.md` has always asked for and nobody built.** Its
@@ -65,7 +67,18 @@ Color materialShadowColor(ColorScheme scheme) =>
 
 List<BoxShadow> shadowsFor(double level, ColorScheme scheme) {
   if (level <= AppElevation.none) return const <BoxShadow>[];
-  if (scheme.brightness == Brightness.dark) return const <BoxShadow>[];
+  // **Dark paints a rim, not a shade (M100.27).** The measurement above still
+  // holds — a dark shadow moves the page by under one L* — and with the card
+  // fixed at Tokyo's `#111633` on Tokyo's `#070C27` the surface step is 4.3
+  // L*, below the 6 the ladder used to carry alone. Tokyo's own answer is its
+  // `shadows.card`: `0px 0px 2px #6A7199`, a one-pixel halo that reads 4.07:1
+  // against the page and 3.74:1 against the card. Same colour at every level:
+  // a halo is an edge, and an edge does not get deeper.
+  if (scheme.brightness == Brightness.dark) {
+    return const <BoxShadow>[
+      BoxShadow(color: AppColors.cardRimDark, blurRadius: 2),
+    ];
+  }
 
   // One shadow, not Material's two. The second is an ambient wash that costs a
   // full-size blur per surface and, at level 1, moves the result by under half

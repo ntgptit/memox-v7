@@ -499,7 +499,7 @@ ThemeData _buildTheme(
     datePickerTheme: buildDatePickerTheme(scheme, semantic, texts),
     segmentedButtonTheme: buildSegmentedButtonTheme(scheme, semantic),
     sliderTheme: buildSliderTheme(scheme, semantic, texts),
-    tabBarTheme: buildTabBarTheme(scheme, texts),
+    tabBarTheme: buildTabBarTheme(scheme, semantic, texts),
 
     listTileTheme: ListTileThemeData(
       contentPadding: const EdgeInsets.symmetric(
@@ -522,7 +522,7 @@ ThemeData _buildTheme(
       // weight a row can carry. `ListTile` has no M3 selected-fill default to
       // depart from; `selectedTileColor` is null in Material and the choice is
       // the app's to make.
-      selectedColor: scheme.primary,
+      selectedColor: semantic.primaryInk,
       selectedTileColor: semantic.surfaceMuted,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.md),

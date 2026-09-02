@@ -67,26 +67,30 @@ in the empty cells, not in re-picking what exists.
 | no token within ΔE-ish range — needs a new one | `lib/core/theme/app_border_colors.dart:64` — Color(0xFF272C48) | `#272C48` | `#272C48` |
 | no token within ΔE-ish range — needs a new one | `lib/core/theme/app_border_colors.dart:114` — Color(0xFFF2F5F9) | `#F2F5F9` | `#F2F5F9` |
 | no token within ΔE-ish range — needs a new one | `lib/core/theme/app_border_colors.dart:121` — Color(0xFF252C55) | `#252C55` | `#252C55` |
-| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_border_colors.dart:123` — Color(0xFF5569FF) | `#5569FF` | `#5569FF` |
 | no token within ΔE-ish range — needs a new one | `lib/core/theme/app_border_colors.dart:127` — Color(0xFF8C7CF0) | `#8C7CF0` | `#8C7CF0` |
 | no token within ΔE-ish range — needs a new one | `lib/core/theme/app_border_colors.dart:139` — Color(0xFFAAB4FF) | `#AAB4FF` | `#AAB4FF` |
 | no token within ΔE-ish range — needs a new one | `lib/core/theme/app_border_colors.dart:154` — Color(0xFF7063C0) | `#7063C0` | `#7063C0` |
 | no token within ΔE-ish range — needs a new one | `lib/core/theme/app_border_colors.dart:181` — Color(0xFF8896FF) | `#8896FF` | `#8896FF` |
 | no token within ΔE-ish range — needs a new one | `lib/core/theme/app_border_colors.dart:186` — Color(0xFF5B65B2) | `#5B65B2` | `#5B65B2` |
 | no token within ΔE-ish range — needs a new one | `lib/core/theme/app_border_colors.dart:281` — Color(0xFF747BA3) | `#747BA3` | `#747BA3` |
-| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_surface_colors.dart:42` — Color(0xFFF2F5F9) | `#F2F5F9` | `#F2F5F9` |
-| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_surface_colors.dart:44` — Color(0xFF070C27) | `#070C27` | `#070C27` |
-| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_surface_colors.dart:61` — Color(0xFF171B30) | `#171B30` | `#171B30` |
-| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_surface_colors.dart:63` — Color(0xFFF5F6FF) | `#F5F6FF` | `#F5F6FF` |
-| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_surface_colors.dart:70` — Color(0xFF2A3159) | `#2A3159` | `#2A3159` |
-| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_surface_colors.dart:84` — Color(0xFFE6E9FF) | `#E6E9FF` | `#E6E9FF` |
-| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_surface_colors.dart:87` — Color(0xFF2A3159) | `#2A3159` | `#2A3159` |
-| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_surface_colors.dart:91` — Color(0xFF21274C) | `#21274C` | `#21274C` |
-| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_surface_colors.dart:102` — Color(0xFF2F3660) | `#2F3660` | `#2F3660` |
+| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_surface_colors.dart:49` — Color(0xFFF2F5F9) | `#F2F5F9` | `#F2F5F9` |
+| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_surface_colors.dart:51` — Color(0xFF070C27) | `#070C27` | `#070C27` |
+| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_surface_colors.dart:68` — Color(0xFF111633) | `#111633` | `#111633` |
+| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_surface_colors.dart:70` — Color(0xFFF5F6FF) | `#F5F6FF` | `#F5F6FF` |
+| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_surface_colors.dart:77` — Color(0xFF2A3159) | `#2A3159` | `#2A3159` |
+| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_surface_colors.dart:91` — Color(0xFFE6E9FF) | `#E6E9FF` | `#E6E9FF` |
+| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_surface_colors.dart:94` — Color(0xFF2A3159) | `#2A3159` | `#2A3159` |
+| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_surface_colors.dart:98` — Color(0xFF21274C) | `#21274C` | `#21274C` |
+| no token within ΔE-ish range — needs a new one | `lib/core/theme/app_surface_colors.dart:109` — Color(0xFF2F3660) | `#2F3660` | `#2F3660` |
+| colorScheme.primary | `lib/core/theme/app_border_colors.dart:123` — Color(0xFF5569FF) | `#5569FF` | `#5569FF` |
 | colorScheme.outline | `lib/core/theme/app_border_colors.dart:235` — Color(0xFF6F727B) | `#6F727B` | `#6F727B` |
-| colorScheme.surface | `lib/core/theme/app_surface_colors.dart:59` — Color(0xFFFBFBFE) | `#FBFBFE` | `#FBFBFE` |
-| semantic.surfaceMuted | `lib/core/theme/app_surface_colors.dart:89` — Color(0xFFE9EBEE) | `#E9EBEE` | `#E9EBEE` |
-| semantic.surfaceElevated | `lib/core/theme/app_surface_colors.dart:100` — Color(0xFFFCFCFE) | `#FCFCFE` | `#FCFCFE` |
+| colorScheme.onPrimary | `lib/core/theme/app_surface_colors.dart:66` — Color(0xFFFFFFFF) | `#FFFFFF` | `#FFFFFF` |
+| colorScheme.onPrimary | `lib/core/theme/app_surface_colors.dart:107` — Color(0xFFFFFFFF) | `#FFFFFF` | `#FFFFFF` |
+| semantic.surfaceMuted | `lib/core/theme/app_surface_colors.dart:96` — Color(0xFFE9EBEE) | `#E9EBEE` | `#E9EBEE` |
+| blendOver(seed, base, small alpha) - see migration_map.md | `lib/core/theme/app_colors.dart` — colorScheme.surface (light) | `#FFFFFF` | `#111633` |
+| blendOver(seed, base, small alpha) - see migration_map.md | `lib/core/theme/app_colors.dart` — semantic.surfaceElevated (light) | `#FFFFFF` | `#2F3660` |
+| derive both from the seed, or neither | `lib/core/theme/app_colors.dart` — colorScheme.surface (mechanism differs by mode) | `#FFFFFF` | `#111633` |
+| derive both from the seed, or neither | `lib/core/theme/app_colors.dart` — semantic.surfaceElevated (mechanism differs by mode) | `#FFFFFF` | `#2F3660` |
 | regenerate from the seed at the same lightness | `lib/core/theme/app_colors.dart` — colorScheme.outlineVariant (light) is 23 degrees from the seed hue | `#E4E7EA` | `#272C48` |
 | regenerate from the seed at the same lightness | `lib/core/theme/app_colors.dart` — semantic.borderSubtle (light) is 23 degrees from the seed hue | `#E4E7EA` | `#272C48` |
 

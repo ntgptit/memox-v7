@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_theme.dart';
 
 /// **What role does this component slot read?** — pinned as identity, for every
@@ -54,6 +55,7 @@ void main() {
     group('$mode · component slot resolves its canonical M3 role', () {
       final ThemeData theme = build();
       final ColorScheme scheme = theme.colorScheme;
+      final AppSemanticColors semantic = theme.extension<AppSemanticColors>()!;
 
       const Set<WidgetState> selected = <WidgetState>{WidgetState.selected};
       const Set<WidgetState> resting = <WidgetState>{};
@@ -144,7 +146,14 @@ void main() {
       test('OutlinedButton', () {
         final s = theme.outlinedButtonTheme.style!;
 
-        pin('foreground', s.foregroundColor!.resolve(resting), scheme.primary);
+        // `primaryInk` — the one deliberate departure from `_OutlinedButtonDefaultsM3`
+        // (M100.27): `primary` is Tokyo's `#5569FF` verbatim and reads 3.96:1 as
+        // a label on the light page. In dark the ink *is* the fill.
+        pin(
+          'foreground',
+          s.foregroundColor!.resolve(resting),
+          semantic.primaryInk,
+        );
         pin('side', s.side!.resolve(resting)!.color, scheme.outline);
       });
 
@@ -324,7 +333,8 @@ void main() {
       test('TabBar', () {
         final t = theme.tabBarTheme;
 
-        pin('label', t.labelColor, scheme.primary);
+        // The brand as ink, for the reason OutlinedButton gives (M100.27).
+        pin('label', t.labelColor, semantic.primaryInk);
         pin(
           'unselected label',
           t.unselectedLabelColor,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/app_colors.dart';
 import 'package:memox/core/theme/app_elevation.dart';
 import 'package:memox/core/theme/app_theme.dart';
 
@@ -46,10 +47,22 @@ void main() {
       expect(shadowsFor(AppElevation.card, light), hasLength(1));
     });
 
-    test('a dark card gets none', () {
-      expect(shadowsFor(AppElevation.card, dark), isEmpty);
-      expect(shadowsFor(AppElevation.overlay, dark), isEmpty);
-    });
+    test(
+      'a dark card gets a rim, not a shade — and the same one at every level',
+      () {
+        // Tokyo's `shadows.card` (M100.27): an opaque one-pixel halo, because
+        // the measurement below shows a dark shade buys nothing and the card is
+        // fixed at Tokyo's `#111633`, 4.3 L* above its page.
+        final card = shadowsFor(AppElevation.card, dark).single;
+        final overlay = shadowsFor(AppElevation.overlay, dark).single;
+
+        expect(card.color, AppColors.cardRimDark);
+        expect(card.color.a, 1.0, reason: 'a rim is an edge, not a wash');
+        expect(card.offset, Offset.zero);
+        expect(overlay.color, card.color);
+        expect(overlay.blurRadius, card.blurRadius);
+      },
+    );
 
     test('and that is because a dark shadow buys almost nothing', () {
       // **The measurement the decision rests on, re-derived here rather than

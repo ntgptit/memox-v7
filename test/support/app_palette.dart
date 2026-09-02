@@ -31,6 +31,7 @@ final List<Color> lightPaletteTokens = <Color>[
   AppBorderColors.borderSubtleLight,
   AppBorderColors.borderControlLight,
   AppColors.primaryLight,
+  AppColors.primaryInkLight,
   AppColors.onPrimaryLight,
   AppColors.streakContainerLight,
   AppColors.onStreakContainerLight,
@@ -113,6 +114,7 @@ final List<Color> darkPaletteTokens = <Color>[
   AppBorderColors.borderSubtleDark,
   AppBorderColors.borderControlDark,
   AppColors.primaryDark,
+  AppColors.primaryInkDark,
   AppColors.onPrimaryDark,
   AppColors.streakContainerDark,
   AppColors.onStreakContainerDark,
@@ -154,6 +156,7 @@ final List<Color> darkPaletteTokens = <Color>[
   AppColors.disabledSurfaceDark,
   AppColors.onDisabledDark,
   AppColors.shadowDark,
+  AppColors.cardRimDark,
   AppColors.scrimDark,
   // The `*Fixed` family is the same in both schemes, so the dark scheme
   // legitimately carries these light tokens.

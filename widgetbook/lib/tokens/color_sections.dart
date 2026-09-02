@@ -128,6 +128,7 @@ List<_ColorEntry> _semanticEntries(BuildContext context) {
     _ColorEntry('warning', semantic.warning),
     _ColorEntry('danger', semantic.danger),
     _ColorEntry('info', semantic.info),
+    _ColorEntry('primaryInk', semantic.primaryInk),
     _ColorEntry('surfaceMuted', semantic.surfaceMuted),
     _ColorEntry('surfaceElevated', semantic.surfaceElevated),
     _ColorEntry('borderSubtle', semantic.borderSubtle),

@@ -115,10 +115,12 @@ void main() {
         contrast(scheme.onSurface, scheme.surface),
         greaterThanOrEqualTo(_kAaBodyText),
       );
-      // The mode pill: `primaryAccent` on `surfaceMuted`, and §7.8's whole
-      // argument is that this pair is the one the project already owns.
+      // The mode pill: the brand as ink on `surfaceMuted`, and §7.8's whole
+      // argument is that this pair is the one the project already owns. Since
+      // M100.27 that ink is `primaryInk`; `primary` is Tokyo's fill verbatim
+      // and reads 3.62 / 4.29 on the muted panel.
       expect(
-        contrast(scheme.primary, semantic.surfaceMuted),
+        contrast(semantic.primaryInk, semantic.surfaceMuted),
         greaterThanOrEqualTo(_kAaBodyText),
       );
     });

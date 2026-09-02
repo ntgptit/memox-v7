@@ -172,12 +172,12 @@ void main() {
       await tester.pump(AppDurations.normal);
 
       final theme = Theme.of(tester.element(find.text('front-a')));
-      final accent = theme.colorScheme.primary;
+      final accent = theme.extension<AppSemanticColors>()!.primaryInk;
       final label = tester.widget<Text>(find.text('front-a'));
 
-      // `primaryAccent`, not `primary`: this is a label on a surface now, and
-      // `primary` is deliberately held below the card's headline — 3.33:1 as
-      // bare text on the dark page.
+      // `primaryInk`, not `primary`: this is a label on a surface, and since
+      // M100.27 `primary` is Tokyo's fill verbatim — 3.96:1 as bare text on
+      // the light page.
       expect(label.style?.color, accent);
 
       // The surface is painted by the tile's own `AnimatedContainer`, not by

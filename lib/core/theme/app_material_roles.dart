@@ -51,12 +51,12 @@ import 'app_surface_colors.dart';
 /// rather than a brand one.
 abstract final class AppMaterialRoles {
   static const Color primaryContainerLight = Color(0xFFDADDF2);
-  static const Color primaryContainerDark = Color(0xFF252C6F);
+  static const Color primaryContainerDark = Color(0xFF32296D);
   static const Color onPrimaryContainerLight = Color(0xFF141D5D);
 
   /// The design system's `#D7D5FF` moved to the Tokyo hue at the same tone and
   /// chroma. It reads 8.87:1 on the container, exactly as before.
-  static const Color onPrimaryContainerDark = Color(0xFFD2D6FF);
+  static const Color onPrimaryContainerDark = Color(0xFFDAD4FE);
 
   /// Tokyo's `secondary.dark` — `darken(#6E759F, 0.2)` — rather than its
   /// `secondary.main`: white on `#6E759F` measures 4.46:1, four hundredths
@@ -197,7 +197,7 @@ abstract final class AppMaterialRoles {
   /// The snackbar's action ink. 6.20:1 on [inverseSurfaceLight] and 7.59:1 on
   /// [inverseSurfaceDark], which is body-text AA in both.
   static const Color inversePrimaryLight = Color(0xFFA4ABE0);
-  static const Color inversePrimaryDark = Color(0xFF333C9C);
+  static const Color inversePrimaryDark = Color(0xFF453799);
 
   // --- The `*Fixed` families -----------------------------------------------
   //
@@ -252,17 +252,18 @@ abstract final class AppMaterialRoles {
   /// The same palette at tone 80 — ten tones dimmer, which is the
   /// `toneDeltaPair` the spec pins between this and [primaryFixed].
   ///
-  /// Equal to `AppColors.primaryDark` by construction: both are tone 80 of one
-  /// palette, which is also how `fromSeed` relates the two. Kept as its own
-  /// literal rather than derived, because a `*Fixed` role must never follow a
-  /// brightness-suffixed token — the block above says why.
+  /// Tone 80 of the palette keyed on Tokyo's `#5569FF`. It was one hex with
+  /// `AppColors.primaryDark` while that role sat at tone 80 (M100.25); since
+  /// M100.27 dark `primary` is Tokyo's own `#8C7CF0` at tone 58, so the two
+  /// differ again — which is fine, because a `*Fixed` role is defined by the
+  /// spec's tone and never follows a brightness-suffixed token.
   static const Color primaryFixedDim = Color(0xFFBCC2FF);
 
   /// Tone 10. 13.27:1 on [primaryFixed], 10.05:1 on [primaryFixedDim].
   static const Color onPrimaryFixed = Color(0xFF000B62);
 
-  /// Tone 30 — the lower-emphasis ink. 7.24:1 and 5.48:1 on the same pair.
-  static const Color onPrimaryFixedVariant = Color(0xFF2636B1);
+  /// Tone 30 — the lower-emphasis ink. 7.35:1 and 5.57:1 on the same pair.
+  static const Color onPrimaryFixedVariant = Color(0xFF122CCB);
 
   /// Secondary palette (keyed on [secondaryLight]) at tone 90.
   static const Color secondaryFixed = Color(0xFFDDE1FF);

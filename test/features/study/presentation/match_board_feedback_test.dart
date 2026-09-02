@@ -145,11 +145,11 @@ void main() {
       expect(find.byIcon(Icons.close), findsNothing);
 
       // And the tap was a real selection, not just a dismissal.
-      expect(
-        tester.widget<Text>(find.text('front-b')).style?.color,
-        _scheme(tester).primary,
-      );
-      expect(_edge(tester, 'front-b').color, _scheme(tester).primary);
+      final ink = Theme.of(
+        tester.element(find.text('front-b')),
+      ).extension<AppSemanticColors>()!.primaryInk;
+      expect(tester.widget<Text>(find.text('front-b')).style?.color, ink);
+      expect(_edge(tester, 'front-b').color, ink);
 
       await tester.pump(AppMatchTile.wrongHold);
     });
@@ -265,9 +265,6 @@ Future<void> _settleColour(WidgetTester tester) async {
 AppSemanticColors _semantic(WidgetTester tester) => Theme.of(
   tester.element(find.byType(MatchBoardSectionWidget)),
 ).extension<AppSemanticColors>()!;
-
-ColorScheme _scheme(WidgetTester tester) =>
-    Theme.of(tester.element(find.byType(MatchBoardSectionWidget))).colorScheme;
 
 /// What the tile showing [label] paints behind its text.
 Color? _fill(WidgetTester tester, String label) =>

@@ -6,7 +6,7 @@
       "primary": {
         "members": {
           "fill": {
-            "hex": "#4454CC",
+            "hex": "#5569FF",
             "hue": 232.94117647058823
           },
           "onFill": {
@@ -96,23 +96,23 @@
       "primary": {
         "members": {
           "fill": {
-            "hex": "#BCC2FF",
-            "hue": 234.6268656716418
+            "hex": "#8C7CF0",
+            "hue": 248.27586206896552
           },
           "onFill": {
-            "hex": "#202771",
-            "hue": 234.8148148148148
+            "hex": "#111633",
+            "hue": 231.1764705882353
           },
           "container": {
-            "hex": "#252C6F",
-            "hue": 234.32432432432432
+            "hex": "#32296D",
+            "hue": 247.94117647058826
           },
           "onContainer": {
-            "hex": "#D2D6FF",
-            "hue": 234.66666666666666
+            "hex": "#DAD4FE",
+            "hue": 248.57142857142856
           }
         },
-        "hueSpreadExcludingOnColors": 0.3025413473174865,
+        "hueSpreadExcludingOnColors": 0.33468559837726275,
         "hasContainerPair": true,
         "hasBorderToken": false,
         "hasFocusToken": true

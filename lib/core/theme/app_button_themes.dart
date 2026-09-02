@@ -250,7 +250,9 @@ TextButtonThemeData buildTextButtonTheme(
   final foreground = textLinkForeground(
     scheme,
     semantic,
-    accent: scheme.primary,
+    // `primaryInk`, not `primary`: the fill is Tokyo's `#5569FF` verbatim and
+    // reads 3.96:1 as text on the light page (M100.27).
+    accent: semantic.primaryInk,
   );
 
   return TextButtonThemeData(
@@ -310,7 +312,13 @@ OutlinedButtonThemeData buildOutlinedButtonTheme(
     foregroundColor: WidgetStateProperty.resolveWith((states) {
       if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
 
-      return scheme.primary;
+      // The brand as ink, not the fill role — `primary` is Tokyo's `#5569FF`
+      // verbatim since M100.27 and reads 3.96:1 as a label on the light page;
+      // `primaryInk` is Tokyo's `primary.dark` there and the fill itself in
+      // dark. `_OutlinedButtonDefaultsM3` names `primary`; this is the one
+      // deliberate departure, and `m3_role_binding_guard_test.dart` records
+      // it.
+      return semantic.primaryInk;
     }),
     side: WidgetStateProperty.resolveWith((states) {
       if (states.contains(WidgetState.disabled)) {

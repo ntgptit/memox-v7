@@ -25,6 +25,13 @@ import 'package:flutter/material.dart';
 /// hold survived without a rule moving. Measurements quoted below that predate
 /// M100.26 describe the A2 palette and are kept as the record of *why* a token
 /// exists; the current numbers are the tests' output.
+/// **M100.27: the page and the card are Tokyo's verbatim, by owner decision.**
+/// Light card and raised surface are pure `#FFFFFF` — Tokyo's paper — which
+/// MX-VIS-002 R9 now exempts for exactly these four roles, since a tint the
+/// owner has ruled out cannot be a rule. The dark card is `#111633`, 4.3 L\*
+/// above the page rather than the 6 the ladder used to ask; the missing depth
+/// is Tokyo's own cue, the rim in `shadowsFor`, and `app_palette_test.dart`
+/// holds the pair at 4 L\* plus a 3:1 rim rather than at 6 alone.
 abstract final class AppSurfaceColors {
   ///
   /// Four tiers. Dark climbs L* 3.9 -> 10.2 -> 16.9 -> 24.0 so a card reads as a
@@ -56,9 +63,9 @@ abstract final class AppSurfaceColors {
   /// while the step was the only depth cue light had. It is not any more: the
   /// shadow's alpha was re-solved to 0.07 and the total lift is 8.04 L\* against
   /// dark's 6.58.
-  static const Color surfaceLight = Color(0xFFFBFBFE);
+  static const Color surfaceLight = Color(0xFFFFFFFF);
 
-  static const Color surfaceDark = Color(0xFF171B30);
+  static const Color surfaceDark = Color(0xFF111633);
 
   static const Color surfaceEmphasisLight = Color(0xFFF5F6FF);
 
@@ -97,7 +104,7 @@ abstract final class AppSurfaceColors {
   /// rungs of the light ladder the same rung.
   // `AppMaterialRoles.surfaceContainerLowestLight` and `surfaceBrightLight`
   // are this value under Material's names, derived there.
-  static const Color surfaceElevatedLight = Color(0xFFFCFCFE);
+  static const Color surfaceElevatedLight = Color(0xFFFFFFFF);
 
   static const Color surfaceElevatedDark = Color(0xFF2F3660);
 }

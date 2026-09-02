@@ -1023,6 +1023,37 @@ là gốc trung tính (nay hue 233), R3/R4/R9, sàn thang, trần bão hoà surf
 giữ lại thành luật mới: bốn hue cách nhau ≥ 40°, không cái nào là grey; phần
 tương phản đã có sàn riêng ở `app_theme_test.dart` và `app_ink_test.dart`.
 
+**M100.27 đảo thứ tự ưu tiên cho ba màu, theo chỉ định của chủ dự án: `primary`,
+nền trang và nền card lấy nguyên hex Tokyo, mọi thứ khác nhường.** Ba giá trị đó
+là `#5569FF` / `#8C7CF0`, `#F2F5F9` / `#070C27`, `#FFFFFF` / `#111633`. Luật của
+AD này vẫn là "tỉ lệ hỏng thì sửa palette", nhưng khi palette bị khoá thì đòn bẩy
+còn lại là **on-colour, binding chữ và cue chiều sâu** — và mỗi chỗ nhường được
+ghi bằng số:
+
+- Trắng trên `#5569FF` đo **4,33:1**; không ink nào ngoài gần-đen vượt 4,5. Nhãn
+  nút light giữ trắng như Tokyo và test giữ cặp này ở sàn **4,3** như một quyết
+  định của chủ dự án, không phải một sàn trượt. Dark thì ink đổi được: `onPrimary`
+  là paper Tokyo `#111633` (5,27:1) thay cho trắng (3,36:1).
+- `#5569FF` làm **chữ** đo 4,33 trên card và **3,96 trên trang**, nên các slot
+  "thương hiệu làm ink" — text button, nhãn outlined, nhãn tab, hàng list được
+  chọn, `AppInk.accent` — bind sang `AppSemanticColors.primaryInk`: Tokyo
+  `primary.dark` (`#4454CC`, 6,20 / 5,67) ở light và `lighten(#8C7CF0, .25)`
+  (`#A99DF4`, 6,2 trên tile, 4,83 trên band lỗi) ở dark. Fill, ring, caret, radio, progress vẫn là
+  `primary`. Đây chính là token M100.18 gỡ — hồi đó vì palette được phép dịch;
+  nay nó quay lại vì palette bị khoá, và `m3_role_binding_guard_test.dart` ghi
+  đúng một slot cố ý rời `_OutlinedButtonDefaultsM3`.
+- Card dark `#111633` trên trang `#070C27` chỉ cao **4,3 L\***, dưới sàn 6 của
+  mục 4. Cue thứ hai của dark là của chính Tokyo: `shadows.card` = `0 0 2px
+  #6A7199`, một viền halo 1 px đo 4,07:1 trên trang và 3,74:1 trên card, vẽ ở mọi
+  level vì cạnh thì không "sâu" thêm. Phép đo tổng độ nổi tách thành hai cặp —
+  light: bậc surface + shade ≥ 6 L\*; dark: bậc ≥ 4 L\* **và** rim ≥ 3:1 — thay
+  cho một số chung, vì hai mode nay dùng hai loại cue khác nhau.
+- Paper light là trắng thuần, nên R9 miễn cho đúng bốn role là card dưới các tên
+  Material (`surface`, `surfaceBright`, `surfaceContainerLowest`,
+  `surfaceElevated`); mọi trung tính khác vẫn phải mang hue. Trần bão hoà surface
+  dark 0,6 → 0,75 (card Tokyo mang 72 % của trang); khoảng hue light–dark của
+  `primary` 12° → 16° (hai theme Tokyo cách nhau 15,3°).
+
 ### Nguồn của giá trị token đã đổi (M4.10p)
 
 Khi AD này được viết, `lib/core/theme/` là nơi duy nhất định nghĩa một token.

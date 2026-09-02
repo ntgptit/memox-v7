@@ -75,10 +75,14 @@ void main() {
       // The specific failure of the baseline: a navy card on a navy page, told
       // apart only by its border. The flashcard is the one thing a review
       // screen exists to show, so it has to read as an object without one.
+      // 4, not 6, since M100.27 — and not alone. The card is Tokyo's `#111633`
+      // on Tokyo's `#070C27` by owner decision, which is 4.3 L*; the rest of
+      // the separation is the rim `shadowsFor` paints in dark, measured in
+      // `app_theme_test.dart` at 3:1 against both the page and the card.
       expect(
         lightnessStar(dark.colorScheme.surface) -
             lightnessStar(dark.scaffoldBackgroundColor),
-        greaterThanOrEqualTo(6.0),
+        greaterThanOrEqualTo(4.0),
       );
     });
 
@@ -104,7 +108,11 @@ void main() {
       // The page is the one component allowed a saturated navy. Once card,
       // tile and input carry the same saturation there is no hierarchy left to
       // spend — everything is equally coloured, so nothing is emphasised.
-      const share = 0.6;
+      // 0.75 since M100.27. Tokyo's dark is navy on navy: the card `#111633`
+      // carries 72% of the page's saturation, and both hexes are the owner's.
+      // The tile, the raised surface and the border still sit well under 0.6;
+      // the ceiling now says only that nothing above the card climbs back up.
+      const share = 0.75;
       final pageSaturation = saturation(dark.scaffoldBackgroundColor);
       final ceiling = pageSaturation * share;
 
@@ -145,7 +153,10 @@ void main() {
 
   group('primary', () {
     test('light and dark primary are the same brand colour', () {
-      const sameFamily = 12.0;
+      // 16, not 12, since M100.27: both hexes are Tokyo's verbatim (`#5569FF`
+      // light, `#8C7CF0` dark — owner decision) and Tokyo's two themes sit
+      // 15.3 degrees apart. The bound still catches a violet drifting to blue.
+      const sameFamily = 16.0;
 
       expect(
         (hue(light.colorScheme.primary)! - hue(dark.colorScheme.primary)!)
@@ -213,11 +224,14 @@ void main() {
         'light': light,
         'dark': dark,
       }.entries) {
+        // `primaryInk`, not `primary`, since M100.27: the fill role is Tokyo's
+        // `#5569FF` verbatim and reads 3.96:1 as a label on the light page, so
+        // the brand-as-ink slots take Tokyo's `primary.dark` there. In dark the
+        // two are one value, which the second expectation states.
         expect(
           outlinedButtonLabel(entry.value),
-          entry.value.colorScheme.primary,
-          reason:
-              '${entry.key}: _OutlinedButtonDefaultsM3 names `primary` here',
+          entry.value.extension<AppSemanticColors>()!.primaryInk,
+          reason: '${entry.key}: the outlined label is the brand as ink',
         );
       }
     });

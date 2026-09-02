@@ -89,7 +89,7 @@ enum AppInk {
     return switch (this) {
       AppInk.stated => colors.onSurface,
       AppInk.quiet => colors.onSurfaceVariant,
-      AppInk.accent => colors.primary,
+      AppInk.accent => semantic.primaryInk,
       AppInk.success => semantic.success,
       AppInk.warning => semantic.warning,
       AppInk.danger => semantic.danger,

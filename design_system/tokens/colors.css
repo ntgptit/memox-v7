@@ -21,9 +21,9 @@
    Light is the default scope; dark re-points the same semantic names. */
 :root{
   /* --- base literals: light ------------------------------------------- */
-  --mx-page-light:#F2F5F9;--mx-card-light:#FBFBFE;--mx-inset-light:#E9EBEE;--mx-emphasis-light:#F5F6FF;--mx-border-selected-light:#5569FF;--mx-border-divider-light:#F2F5F9;--mx-border-option-light:#8896FF;--mx-selected-light:#E6E9FF;--mx-raised-light:#FCFCFE;
+  --mx-page-light:#F2F5F9;--mx-card-light:#FFFFFF;--mx-inset-light:#E9EBEE;--mx-emphasis-light:#F5F6FF;--mx-border-selected-light:#5569FF;--mx-border-divider-light:#F2F5F9;--mx-border-option-light:#8896FF;--mx-selected-light:#E6E9FF;--mx-raised-light:#FFFFFF;
   --mx-ink-light:#223354;--mx-ink-quiet-light:#596680;--mx-line-light:#E4E7EA;
-  --mx-indigo-light:#4454CC;--mx-indigo-deep-light:#4141C0;--mx-indigo-container-light:#DADDF2;
+  --mx-indigo-light:#5569FF;--mx-indigo-deep-light:#4141C0;--mx-indigo-container-light:#DADDF2;
   --mx-success-light:#2A7800;--mx-warning-light:#A46500;--mx-danger-light:#CD0031;--mx-info-light:#00729A;
   /* --- base literals: dark -------------------------------------------- */
   /* The dark surface ladder sits in the page's colour family, and since
@@ -31,9 +31,9 @@
      rung above it keeps the tone and chroma it had (L* 4.1 -> 10.4 -> 17.0 ->
      24.0) at the page's HSL hue ~231, so the steps app_palette_test.dart holds
      are unchanged while the room reads as Tokyo's rather than A2's violet. */
-  --mx-page-dark:#070C27;--mx-card-dark:#171B30;--mx-inset-dark:#21274C;--mx-raised-dark:#2F3660;
-  --mx-ink-dark:#CBCCD2;--mx-ink-quiet-dark:#9597A1;--mx-line-dark:#272C48;
-  --mx-indigo-dark:#BCC2FF;--mx-indigo-bright-dark:#8A8AE0;--mx-indigo-container-dark:#252C6F;
+  --mx-page-dark:#070C27;--mx-card-dark:#111633;--mx-inset-dark:#21274C;--mx-raised-dark:#2F3660;
+  --mx-ink-dark:#CBCCD2;--mx-ink-quiet-dark:#9395A2;--mx-line-dark:#272C48;
+  --mx-indigo-dark:#8C7CF0;--mx-indigo-bright-dark:#8A8AE0;--mx-indigo-container-dark:#32296D;
   --mx-success-dark:#57CA22;--mx-warning-dark:#FFA319;--mx-danger-dark:#FF768F;--mx-info-dark:#33C2FF;
 
   /* --- semantic: surface ladder --------------------------------------- */
@@ -54,13 +54,14 @@
   --color-focus-ring:var(--mx-indigo-light);
 
   /* --- semantic: brand and actions ------------------------------------ */
-  --color-seed:#4454CC;
+  --color-seed:#5569FF;
   --color-primary:var(--mx-indigo-light);
   --color-on-primary:#FFFFFF;
   /* The accent as TEXT or an ICON, which is a different problem from the accent
-     as a fill: on dark, the colour that carries white text is too dark to read
-     as a label on the page. */
-  --color-primary-accent:var(--mx-indigo-light);
+     as a fill. M100.27: the fill is Tokyo's primary.main verbatim and reads
+     3.96:1 as text on the page, so the ink is Tokyo's primary.dark in light;
+     in dark the fill (#8C7CF0) reads on both grounds and the ink is the fill. */
+  --color-primary-accent:#4454CC;
   --color-primary-container:var(--mx-indigo-container-light);
   --color-on-primary-container:#141D5D;
   --color-secondary:#585E7F;
@@ -100,19 +101,19 @@
   /* Its own family, not the accent. A bar drawn in --color-primary sits beside a
      button drawn in --color-primary and the eye cannot tell which one it can press. */
   --color-progress-track:#EBEDFF;
-  --color-progress-fill:#5569FF;
+  --color-progress-fill:#4454CC;
   --color-progress-complete:var(--mx-success-light);
   --color-streak:#C2731B;
   --color-streak-container:#FBEBD7;
 
   /* --- semantic: Material surface container ladder --------------------- */
-  --color-surface-container-lowest:#FCFCFE;
+  --color-surface-container-lowest:#FFFFFF;
   --color-surface-container-low:#F9FAFB;
   --color-surface-container:#F0F2F6;
   --color-surface-container-high:#E9EBEE;
   --color-surface-container-highest:#E2E5EB;
   --color-surface-dim:#DDE0E6;
-  --color-surface-bright:#FCFCFE;
+  --color-surface-bright:#FFFFFF;
   --color-inverse-surface:#252D3D;
   --color-on-inverse-surface:#F0F2F6;
   --color-inverse-primary:#A4ABE0;
@@ -121,7 +122,7 @@
   --color-shadow:#0A0C18;
   --color-scrim:#0A0C18;
   --color-web-letterbox:#6E759F;
-  --color-disabled-surface:#E1E3EA;
+  --color-disabled-surface:#E4E7EA;
   --color-on-disabled:rgb(34 51 84 / 0.38);
 }
 [data-theme="dark"]{
@@ -139,10 +140,11 @@
   --color-border-subtle:var(--mx-line-dark);
   --color-focus-ring:var(--mx-indigo-dark);
   --color-primary:var(--mx-indigo-dark);
-  --color-on-primary:#202771;
-  --color-primary-accent:var(--mx-indigo-dark);
+  --color-on-primary:#111633;
+  /* lighten(#8C7CF0, .25): the fill reads 4.29:1 on the selected tile as text. */
+  --color-primary-accent:#A99DF4;
   --color-primary-container:var(--mx-indigo-container-dark);
-  --color-on-primary-container:#D2D6FF;
+  --color-on-primary-container:#DAD4FE;
   /* Tokyo's dark-theme secondary, as is. Its container leaves the surface
      family with it: a role has to read as one hue, and Tokyo's secondary sits
      at hue 230 where the dark surfaces sit at 246. Same tone as before. */
@@ -195,9 +197,9 @@
   --color-surface-bright:#2F3660;
   --color-inverse-surface:#E6E9EF;
   --color-on-inverse-surface:#1D273A;
-  --color-inverse-primary:#333C9C;
+  --color-inverse-primary:#453799;
   --color-shadow:#03040B;
   --color-scrim:#03040B;
-  --color-disabled-surface:#2D3043;
+  --color-disabled-surface:#272C46;
   --color-on-disabled:rgb(203 204 210 / 0.38);
 }

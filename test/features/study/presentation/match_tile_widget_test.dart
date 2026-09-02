@@ -65,9 +65,6 @@ void main() {
     tester.element(find.byType(MatchTileWidget)),
   ).extension<AppSemanticColors>()!;
 
-  ColorScheme schemeOf(WidgetTester tester) =>
-      Theme.of(tester.element(find.byType(MatchTileWidget))).colorScheme;
-
   Color? fillFor(WidgetTester tester) => skinOf(tester).color;
 
   testWidgets('a term is the scanned voice: titleMedium, medium, two lines', (
@@ -205,12 +202,12 @@ void main() {
       );
     });
 
-    testWidgets('selected is primaryAccent on the edge and the label', (
+    testWidgets('selected is the brand ink on the edge and the label', (
       tester,
     ) async {
-      // `primaryAccent`, not `primary`: this is a label on a surface now, and
-      // `primary` is deliberately held below the card's headline so a filled
-      // CTA never outshines it — 3.33:1 as bare text on the dark page.
+      // `primaryInk`, not `primary`: this is a label on a surface, and since
+      // M100.27 `primary` is Tokyo's fill verbatim — 3.96:1 as bare text on
+      // the light page — so the brand as ink is its own token again.
       await pumpTile(
         tester,
         text: term,
@@ -218,7 +215,9 @@ void main() {
         state: MatchTileState.selected,
       );
 
-      final accent = schemeOf(tester).primary;
+      final accent = Theme.of(
+        tester.element(find.text(term)),
+      ).extension<AppSemanticColors>()!.primaryInk;
       expect(skinOf(tester).border!.top.color, accent);
       expect(skinOf(tester).border!.top.width, AppStroke.input);
       expect(textOf(tester, term).style?.color, accent);

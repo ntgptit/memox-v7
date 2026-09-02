@@ -167,9 +167,16 @@ void main() {
           AppInk.onDueContainer: semantic.dueContainer,
         };
         for (final pair in pairs.entries) {
+          // `onPrimary` on `primary` in light is held at 4.3 — the fill is
+          // Tokyo's `#5569FF` verbatim by owner decision (M100.27) and white
+          // on it measures 4.33:1; see `app_theme_test.dart`. Every other pair
+          // keeps the full bar.
+          final floor = pair.key == AppInk.onPrimary && entry.key == 'light'
+              ? 4.3
+              : 4.5;
           expect(
             contrast(resolved[pair.key]!, pair.value),
-            greaterThanOrEqualTo(4.5),
+            greaterThanOrEqualTo(floor),
             reason: '${entry.key}: AppInk.${pair.key.name} on its container',
           );
         }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:memox/core/theme/app_colors.dart';
 
 import '../support/color_math.dart';
 import 'audit_model.dart';
@@ -53,6 +54,25 @@ class TextContrastRule implements AuditRule {
   static const double _normal = 4.5;
   static const double _large = 3.0;
 
+  /// **The one pair the owner accepted under AA, recorded here rather than
+  /// allowed screen by screen (M100.27).** `primary` is Tokyo's `#5569FF`
+  /// verbatim by owner decision and white on it measures 4.33:1; no ink but
+  /// near-black clears 4.5 on it, and Tokyo's own buttons are white on it. The
+  /// floor the pair is held to is 4.3 — the same number `app_theme_test.dart`
+  /// holds — so a drift below what was accepted still fails.
+  static const List<(Color, Color, double)> _ownerAccepted =
+      <(Color, Color, double)>[
+        (AppColors.onPrimaryLight, AppColors.primaryLight, 4.3),
+      ];
+
+  static bool _isOwnerAccepted(Color ink, Color background, double ratio) {
+    for (final (fore, back, floor) in _ownerAccepted) {
+      if (ink == fore && background == back && ratio >= floor) return true;
+    }
+
+    return false;
+  }
+
   @override
   String get name => 'contrast.text';
 
@@ -79,6 +99,7 @@ class TextContrastRule implements AuditRule {
         final threshold = paint.isLargeText ? _large : _normal;
         final ratio = contrast(paint.color, background);
         if (ratio >= threshold) continue;
+        if (_isOwnerAccepted(paint.color, background, ratio)) continue;
 
         yield AuditFinding(
           rule: name,

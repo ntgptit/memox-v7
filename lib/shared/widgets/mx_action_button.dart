@@ -341,7 +341,9 @@ class MxActionButton extends StatelessWidget {
       // the canonical roles; both times a secondary button changed colour for
       // the duration of a save.
       return ButtonStyle(
-        foregroundColor: WidgetStatePropertyAll<Color>(colors.primary),
+        foregroundColor: WidgetStatePropertyAll<Color>(
+          context.semanticColors.primaryInk,
+        ),
         side: WidgetStatePropertyAll<BorderSide>(
           BorderSide(color: colors.outline),
         ),

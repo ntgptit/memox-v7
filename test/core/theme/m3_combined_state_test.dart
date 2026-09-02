@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_theme.dart';
 
 /// **Does any combination of states move a slot off its canonical role?**
@@ -45,6 +46,7 @@ void main() {
       ]) {
     final ThemeData theme = build();
     final ColorScheme scheme = theme.colorScheme;
+    final AppSemanticColors semantic = theme.extension<AppSemanticColors>()!;
 
     /// Asserts every state in [states] resolves [slot] to [role].
     void holds(
@@ -258,12 +260,15 @@ void main() {
         holds('side', side, <Set<WidgetState>>[focused], scheme.primary);
       });
 
-      test('the label is primary in both', () {
+      test('the label is the brand ink in both', () {
+        // `primaryInk`, not `primary`, since M100.27 — see the OutlinedButton
+        // row in `m3_role_contract_test.dart`. What this file adds is that no
+        // state branch swaps it for something else.
         holds('foreground', fg, <Set<WidgetState>>[
           resting,
           focused,
           hovered,
-        ], scheme.primary);
+        ], semantic.primaryInk);
       });
     });
 

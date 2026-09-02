@@ -17,6 +17,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     required this.onStreakContainer,
     required this.progressTrack,
     required this.progressFill,
+    required this.primaryInk,
     required this.success,
     required this.warning,
     required this.danger,
@@ -48,6 +49,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       onStreakContainer = AppColors.onStreakContainerLight,
       progressTrack = AppColors.progressTrackLight,
       progressFill = AppColors.progressFillLight,
+      primaryInk = AppColors.primaryInkLight,
       success = AppColors.successLight,
       warning = AppColors.warningLight,
       danger = AppColors.dangerLight,
@@ -78,6 +80,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       onStreakContainer = AppColors.onStreakContainerDark,
       progressTrack = AppColors.progressTrackDark,
       progressFill = AppColors.progressFillDark,
+      primaryInk = AppColors.primaryInkDark,
       success = AppColors.successDark,
       warning = AppColors.warningDark,
       danger = AppColors.dangerDark,
@@ -112,6 +115,13 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   /// At 100% the fill becomes [success] — see `MxProgressBar`.
   final Color progressTrack;
   final Color progressFill;
+
+  /// The brand hue as **ink** — text buttons, the outlined label, tab labels,
+  /// accent glyphs, a selected row's title. `ColorScheme.primary` is the fill
+  /// and is Tokyo's `#5569FF` verbatim (owner decision, M100.27), which reads
+  /// 3.96:1 as text on the light page; this is Tokyo's `primary.dark` in light
+  /// and the fill itself in dark. See `AppColors.primaryInkLight`.
+  final Color primaryInk;
 
   final Color success;
   final Color warning;
@@ -222,6 +232,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     Color? onStreakContainer,
     Color? progressTrack,
     Color? progressFill,
+    Color? primaryInk,
     Color? success,
     Color? warning,
     Color? danger,
@@ -252,6 +263,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       onStreakContainer: onStreakContainer ?? this.onStreakContainer,
       progressTrack: progressTrack ?? this.progressTrack,
       progressFill: progressFill ?? this.progressFill,
+      primaryInk: primaryInk ?? this.primaryInk,
       success: success ?? this.success,
       warning: warning ?? this.warning,
       danger: danger ?? this.danger,
@@ -298,6 +310,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       )!,
       progressTrack: Color.lerp(progressTrack, other.progressTrack, t)!,
       progressFill: Color.lerp(progressFill, other.progressFill, t)!,
+      primaryInk: Color.lerp(primaryInk, other.primaryInk, t)!,
       success: Color.lerp(success, other.success, t)!,
       warning: Color.lerp(warning, other.warning, t)!,
       danger: Color.lerp(danger, other.danger, t)!,

@@ -34,7 +34,7 @@ extension CardStatePresentation on BuildContext {
     return switch (state) {
       CardState.isNew => semantic.info,
       CardState.beginning => semantic.warning,
-      CardState.reviewing => colors.primary,
+      CardState.reviewing => semantic.primaryInk,
       CardState.mastered => semantic.success,
     };
   }

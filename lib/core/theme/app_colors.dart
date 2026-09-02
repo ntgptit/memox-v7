@@ -76,7 +76,7 @@ abstract final class AppColors {
   static const Color textPrimaryLight = Color(0xFF223354);
   static const Color textPrimaryDark = Color(0xFFCBCCD2);
   static const Color textSecondaryLight = Color(0xFF596680);
-  static const Color textSecondaryDark = Color(0xFF9597A1);
+  static const Color textSecondaryDark = Color(0xFF9395A2);
 
   /// The fill and the border of a disabled control — a solid, per MX-VIS-002
   /// rule R7. Material's idiom is the ink at 12% alpha, which composites
@@ -88,8 +88,8 @@ abstract final class AppColors {
   /// The kit's `--color-disabled-surface` reads `#E3E3E6` / `#312E4E`, ~3/255
   /// away: a stale transcription of this file rather than a decision of its
   /// own. Recorded in `docs/wbs.md` under M4.10an.
-  static const Color disabledSurfaceLight = Color(0xFFE1E3EA);
-  static const Color disabledSurfaceDark = Color(0xFF2D3043);
+  static const Color disabledSurfaceLight = Color(0xFFE4E7EA);
+  static const Color disabledSurfaceDark = Color(0xFF272C46);
 
   /// A disabled label or glyph — the kit's `--color-on-disabled`, which is the
   /// ink at 38%. Translucent where the fill above is solid, and for a reason: a
@@ -100,56 +100,61 @@ abstract final class AppColors {
 
   // --- Brand and actions ---------------------------------------------------
 
-  /// The single accent — Tokyo's indigo, at HSL hue 233 in both brightnesses.
+  /// The single accent — Tokyo's `primary`, **verbatim in both themes**
+  /// (owner decision, 2026-09-02, M100.27): `#5569FF` from PureLight and
+  /// `#8C7CF0` from NebulaFighter. Together with the page and the card these
+  /// three are the colours the owner named as fixed; everything else in the
+  /// palette bends around them.
   ///
-  /// **`#4454CC` is Tokyo's `primary.dark`, not its `primary.main`** (M100.25,
-  /// from the owner's tokyo-react-admin-dashboard palette). Its `main` is
-  /// `#5569FF`, and white on that measures 4.33:1 — under AA for a button
-  /// label, which `app_theme_test.dart` holds at 4.5. `darken(main, 0.2)` is
-  /// the first value of Tokyo's own family that clears it, at 6.20:1, and it
-  /// lands at tone 41 — where M3 puts a light scheme's `primary` anyway.
+  /// **What that costs, measured, and where each cost was paid.** White on
+  /// `#5569FF` is **4.33:1** — 0.17 under AA for a 14 px button label, and no
+  /// ink but near-black clears 4.5 on it. The label stays white, as Tokyo's
+  /// is, and `app_theme_test.dart` records the pair at a 4.3 floor as the
+  /// owner's call. As *text* on a surface `#5569FF` reads 4.33 on the card and
+  /// 3.96 on the page, so the brand-as-ink slots — text buttons, the outlined
+  /// label, tab labels, the selected list row, `AppInk.accent` — bind to
+  /// [primaryInkLight] instead: Tokyo's own `primary.dark`, 6.20 / 5.67. The
+  /// fill, the ring, the caret, the radio and the progress bar stay on this
+  /// role, where 3:1 is the bar and 3.20 on `secondaryContainer` is the
+  /// tightest pairing.
   ///
-  /// **Dark inverts the tone, which is what Material 3 asks for and what this
-  /// palette spent two years working around.** M3 puts a dark scheme's
-  /// `primary` at tone 80 — a *light* tone — with `onPrimary` at tone 20;
-  /// light keeps the fill at tone 40 with white on it. The old dark value was
-  /// a mid fill-tone (L\* 42.5) carrying white, and that single deviation is
-  /// what made `primary` unusable in every binding M3 gives it: at 2.90:1 on
-  /// the card it missed WCAG 1.4.11's 3:1 for a progress indicator, a slider,
-  /// a caret or a focus ring, and it was nowhere near the 4.5:1 a tab label
-  /// needs. Five component themes reached for a substitute token instead, and
-  /// the substitute was the bug — M100.18.
-  ///
-  /// A single tone cannot be both: bright enough to read as a label on a dark
-  /// page *and* dark enough for white to sit on it. Measured, the crossover is
-  /// hard — the first hue-240 value clearing 4.5:1 as text drops white on it to
-  /// 3.73:1. Inverting resolves it rather than trading one failure for another.
-  ///
-  /// The rule the old comment protected still holds and is still asserted: the
-  /// CTA must never be the brightest thing on screen. `primary` against the
-  /// dark page is 11.33:1 where `onSurface` is 16.62:1, so the headline still
-  /// wins.
-  /// What changed is the mechanism — a tone ceiling rather than a luminance
-  /// cap, because a luminance cap is a fill-tone rule and this is no longer a
-  /// fill-tone palette.
-  static const Color primaryLight = Color(0xFF4454CC);
-
-  /// Tone 80 of the palette keyed on [primaryLight] — one hex with
-  /// `AppMaterialRoles.primaryFixedDim`, which is the same tone of the same
-  /// palette. 11.33:1 on the page, 9.99:1 on the card, 7.24:1 as a ring on
-  /// `secondaryContainer`.
-  ///
-  /// **Tokyo's own dark accent, `#8C7CF0`, was measured and turned down.** It
-  /// is 15.4 degrees off the light brand hue where `app_palette_test.dart`
-  /// allows 12, and it sits at tone 58 — the tone-20 ink M3 pairs with it
-  /// reads 3.89:1, so it fails as a button fill for the reason the hue-240
-  /// fill did before M100.18. The light theme's hue at M3's tone gives one
-  /// brand in both modes.
-  static const Color primaryDark = Color(0xFFBCC2FF);
+  /// **Dark inverts the ink, not the fill.** `#8C7CF0` sits at tone 58; white
+  /// on it is 3.36:1, so [onPrimaryDark] is Tokyo's own dark paper `#111633`
+  /// (5.27:1) rather than white. As text the role reads 5.73 / 5.27 on the
+  /// page and card but 4.29 on the selected tile, so [primaryInkDark] lifts it
+  /// by a quarter (`lighten(main, .25)`, `#A99DF4`). The two themes'
+  /// hues are 15.3° apart — Tokyo's choice — and `app_palette_test.dart` holds
+  /// them within 16 rather than the 12 the hue-240 pair needed.
+  static const Color primaryLight = Color(0xFF5569FF);
+  static const Color primaryDark = Color(0xFF8C7CF0);
   static const Color onPrimaryLight = Color(0xFFFFFFFF);
 
-  /// Tone 20 at the same hue. 7.73:1 under [primaryDark].
-  static const Color onPrimaryDark = Color(0xFF202771);
+  /// Tokyo's dark paper (`themeColors.white` in NebulaFighter), 5.27:1 under
+  /// [primaryDark]. See [primaryLight] for why it is not white.
+  static const Color onPrimaryDark = Color(0xFF111633);
+
+  /// The brand hue **as ink** — a text button, an outlined label, a tab label,
+  /// an accent glyph, a selected row's title. `primary` is a fill role, and
+  /// with the fill fixed at Tokyo's `#5569FF` it cannot also be AA text on a
+  /// light surface (4.33 / 3.96); Tokyo's `primary.dark` — `darken(main, 0.2)`,
+  /// the hover shade of its own buttons — is the nearest Tokyo colour that is.
+  /// Dark mirrors the rule the other way — `lighten(main, 0.25)` of Tokyo's
+  /// `#8C7CF0` — because the fill at tone 58 reads 4.29:1 on the selected tile
+  /// a list row sits on, and the ink has to clear 4.5 on every ground a label
+  /// can land: 6.2 on the tile, 7.4 on the card, 8.1 on the page and 4.83 on
+  /// the error band, where the Settings Retry sits. M100.18
+  /// removed a token that stood exactly here, because then the palette could
+  /// move; M100.27 restores it because now it cannot.
+  static const Color primaryInkLight = Color(0xFF4454CC);
+  static const Color primaryInkDark = Color(0xFFA99DF4);
+
+  /// The 1 px halo a dark card wears instead of a shadow — Tokyo's
+  /// `shadows.card` (`0px 0px 2px #6A7199`) in NebulaFighter. With the card
+  /// fixed at `#111633` on the `#070C27` page the surface step is 4.3 L\*, and
+  /// a dark shade moves that page by under one L\*, so depth in dark comes from
+  /// an edge: this reads 4.07:1 against the page and 3.74:1 against the card.
+  /// See `shadowsFor` and AD-14 §4.
+  static const Color cardRimDark = Color(0xFF6A7199);
 
   // --- Semantic ------------------------------------------------------------
   //
@@ -283,7 +288,11 @@ abstract final class AppColors {
   /// and a bar drawn in it reads as a control rather than as progress. That
   /// asymmetry is the tone system working, not a drift — dark's tone 80 is a
   /// label-weight indigo, light's tone 40 is a fill-weight one.
-  static const Color progressFillLight = Color(0xFF5569FF);
+  // Tokyo's `primary.dark`, not its `primary.main`: a bar in the button's own
+  // hex beside the button is the failure this token exists to prevent
+  // (`mx_progress_bar_test.dart`), and with `primary` fixed at `#5569FF` the
+  // bar takes the family's next shade. 5.50:1 on its track.
+  static const Color progressFillLight = Color(0xFF4454CC);
   static const Color progressFillDark = primaryDark;
 
   // --- Due chip -----------------------------------------------------------
