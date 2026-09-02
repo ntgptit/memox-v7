@@ -96,21 +96,25 @@ void main() {
         );
       });
 
-      test('the three surface-grounded components all draw the same one', () {
-        // The structural half. Equal colours today prove nothing about
-        // tomorrow if each component computes its own, so this asserts they
-        // resolve to the value `AppInteractionStates.focusRing` returns.
+      test('the components that own a ring all draw the same one', () {
+        // **The list shrank at M100.23, and the reason is the subject of that
+        // task.** It used to include the chip, on the argument that three
+        // surface-grounded controls should draw one ring. They should — but the
+        // chip was drawing it in `ChipThemeData.side`, the slot
+        // `_ChoiceChipDefaultsM3` fills with the chip's *identity*, so a
+        // selected chip that took focus left its Material role.
+        //
+        // The chip's ring moved to `MxFocusRing`, a layer of its own, and is
+        // asserted in `mx_pill_button_focus_test.dart` with a real Tab. What
+        // stays here are the two whose `side` Material leaves empty — there is
+        // no canonical role in those slots to displace.
         //
         // **The filled button is deliberately not in this list**, and its
         // absence is checked rather than assumed — see the `filled focus ring`
-        // group below. These three sit on a page, a card or a pill's own fill,
-        // where the token clears 3:1; the filled button sits on the accent,
-        // where the same token measures 1.02:1.
+        // group below. These sit on a page or a card, where the token clears
+        // 3:1; the filled button sits on the accent, where it measures 1.02:1.
         final expected = AppInteractionStates.focusIndicator(scheme);
 
-        final chip = (theme.chipTheme.side! as WidgetStateBorderSide).resolve(
-          <WidgetState>{WidgetState.focused},
-        );
         final outlined = theme.outlinedButtonTheme.style!.side!.resolve(
           <WidgetState>{WidgetState.focused},
         );
@@ -120,21 +124,12 @@ void main() {
 
         for (final (String component, BorderSide? side)
             in <(String, BorderSide?)>[
-              ('chip', chip),
               ('outlinedButton', outlined),
               ('iconButton', icon),
             ]) {
           expect(side, isNotNull, reason: '$component draws no focus ring');
-          expect(
-            side!.color,
-            expected.color,
-            reason: '$component draws its own focus colour in $mode',
-          );
-          expect(
-            side.width,
-            expected.width,
-            reason: '$component draws its own focus width in $mode',
-          );
+          expect(side!.color, expected.color, reason: component);
+          expect(side.width, expected.width, reason: component);
         }
       });
 

@@ -117,21 +117,31 @@ void main() {
       }
     });
 
-    test('focus draws the ring in the outline slot', () {
-      // `SwitchThemeData` has no side, so the outline carries it. Same colour
-      // and same weight as every other ring in the app.
+    test('focus goes to the overlay, not to the track outline', () {
+      // **The inverse of what this pinned until M100.23.** It required the
+      // focused switch to draw the ring in `trackOutlineColor`, because
+      // `SwitchThemeData` has no `side` — true, and the wrong conclusion. That
+      // slot is the track's canonical boundary role, and filling it with a
+      // focus colour meant a switched-*on* switch that took focus drew a
+      // boundary `_SwitchDefaultsM3` says should not exist at all.
+      //
+      // Material puts the cue in `overlayColor`, and so does this theme now.
       for (final entry in themes.entries) {
         final t = entry.value;
         const focused = <WidgetState>{WidgetState.focused};
+        final ring = AppInteractionStates.focusIndicator(t.colorScheme).color;
 
         expect(
           trackEdge(t, focused),
-          AppInteractionStates.focusIndicator(t.colorScheme).color,
-          reason: '${entry.key}: the focused switch is not wearing the ring',
+          isNot(ring),
+          reason:
+              '${entry.key}: the track outline is carrying the focus ring '
+              'again — it is the switch identity slot',
         );
         expect(
-          t.switchTheme.trackOutlineWidth!.resolve(focused),
-          AppStroke.focus,
+          t.switchTheme.overlayColor!.resolve(focused),
+          isNotNull,
+          reason: '${entry.key}: a focused switch shows nothing at all',
         );
       }
     });
@@ -210,16 +220,19 @@ void main() {
       }
     });
 
-    test('focus draws the ring', () {
+    test('focus darkens the edge to onSurface, as hover does', () {
+      // `_CheckboxDefaultsM3.side` gives pressed, hovered and focused the same
+      // `onSurface` — an 18dp box has little length to be seen over, so the
+      // edge is what changes. This asserted a `primary` ring until M100.23,
+      // read *above* the `selected` branch, so a ticked box that took focus
+      // grew an edge where M3 draws none and lost the stroke's width from its
+      // fill on all four sides.
       for (final entry in themes.entries) {
         final t = entry.value;
         final side = box(t, const {WidgetState.focused});
 
-        expect(
-          side.color,
-          AppInteractionStates.focusIndicator(t.colorScheme).color,
-        );
-        expect(side.width, AppStroke.focus);
+        expect(side.color, t.colorScheme.onSurface, reason: entry.key);
+        expect(side.width, AppStroke.selectionControl, reason: entry.key);
       }
     });
   });
