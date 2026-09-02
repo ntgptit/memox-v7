@@ -3,8 +3,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../core/theme/app_breakpoints.dart';
-import '../core/theme/app_compact_scale.dart';
+import '../core/theme/foundations/app_breakpoints.dart';
+import '../core/theme/schemes/app_compact_scale.dart';
 import '../core/theme/app_theme.dart';
 import '../features/settings/domain/models/app_language_model.dart';
 import '../features/settings/domain/models/app_settings_model.dart';

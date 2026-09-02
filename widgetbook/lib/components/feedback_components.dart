@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/shared/widgets/mx_feedback_band.dart';

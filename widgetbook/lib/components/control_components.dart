@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_fab.dart';
-import 'package:memox/core/theme/app_ink.dart';
+import 'package:memox/core/theme/extensions/app_ink.dart';
 import 'package:memox/shared/widgets/mx_icon.dart';
 import 'package:memox/shared/widgets/mx_breadcrumb.dart';
 import 'package:memox/shared/widgets/mx_button_pair.dart';

@@ -2,7 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/core/theme/foundations/app_sizing.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/features/study/domain/models/study_home_deck_model.dart';
 import 'package:memox/features/study/presentation/widgets/items/study_home_deck_item_widget.dart';
 import 'package:memox/features/study/presentation/widgets/sections/study_home_resume_section_widget.dart';
@@ -10,7 +11,7 @@ import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_metric_well.dart';
 
 import 'support/study_home_harness.dart';
-import 'package:memox/core/theme/app_icon_size.dart';
+import 'package:memox/core/theme/foundations/app_icon_size.dart';
 import 'package:memox/features/study/presentation/widgets/items/study_home_workload_item_widget.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
@@ -176,7 +177,7 @@ void main() {
       expect(drawn.height, 40);
       expect(
         tester.getSize(inRow(find.byType(MxActionButton)).first).height,
-        greaterThanOrEqualTo(AppSpacing.minimumTouchTarget),
+        greaterThanOrEqualTo(AppSizing.touchTarget),
       );
     });
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/features/study/domain/models/study_home_deck_model.dart';
 import 'package:memox/features/study/presentation/widgets/items/study_home_deck_item_widget.dart';
 import 'package:memox/features/study/presentation/widgets/sections/study_home_resume_section_widget.dart';

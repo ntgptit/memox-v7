@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_radius.dart';
-import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/core/theme/foundations/app_radius.dart';
+import 'package:memox/core/theme/foundations/app_sizing.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/shared/widgets/mx_pressable.dart';
 
@@ -27,7 +27,7 @@ void main() {
     );
 
     final size = tester.getSize(find.byType(MxPressable));
-    expect(size.height, greaterThanOrEqualTo(AppSpacing.minimumTouchTarget));
+    expect(size.height, greaterThanOrEqualTo(AppSizing.touchTarget));
   });
 
   testWidgets('carries its own transparent Material, so the ripple works '

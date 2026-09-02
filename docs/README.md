@@ -42,6 +42,14 @@ còn `use-cases.md` thì không.
 | [`wireframes/`](wireframes/) | Bố cục và hành vi UI chốt **trước** khi viết code một task | `draft` → `active` khi code land |
 | [`reviews/`](reviews/) | Report và checklist của một vòng review đã chạy | Đóng băng sau khi task đóng |
 
+`design-system/` là ngoại lệ trong hai thư mục con: nó gắn với **sản phẩm**, không
+với một task, nên nó có header bảy dòng như tài liệu cấp một và `check_docs.py`
+quét nó (M100.29).
+
+| Document | Purpose | Status |
+|---|---|---|
+| [`design-system/theme-architecture.md`](design-system/theme-architecture.md) | Layering của `lib/core/theme/`, chiều import giữa các tầng, và ranh giới public/internal của theme | active |
+
 Cả hai MUST tham chiếu BR/AD/UC bằng ID và MUST NOT phát biểu lại luật — cùng
 quy tắc canonical location ở `document-conventions.md` §5. `check_docs.py` chỉ
 quét `docs/*.md` cấp một, nên header bảy dòng ở đây là kỷ luật tự giác, không

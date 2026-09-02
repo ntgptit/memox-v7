@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 
 /// A scrolling page for token galleries and other long content.
 ///

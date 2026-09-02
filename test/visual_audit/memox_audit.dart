@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_semantic_colors.dart';
+import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/l10n/generated/app_localizations.dart';
 

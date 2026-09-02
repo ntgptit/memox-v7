@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:memox/core/theme/app_spacing.dart';
-import 'package:memox/core/theme/theme_context_extension.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
+import 'package:memox/core/theme/extensions/theme_context_extension.dart';
 import '../support/showcase_section.dart';
 
 /// The typography section: every `TextTheme` role, rendered in itself, with

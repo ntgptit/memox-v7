@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 
 /// Measures the frame a demo golden is about to capture, and writes the numbers
 /// down beside the picture.

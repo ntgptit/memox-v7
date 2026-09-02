@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_interaction_states.dart';
+import 'package:memox/core/theme/states/app_interaction_states.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
 

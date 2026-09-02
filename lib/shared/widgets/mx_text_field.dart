@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_spacing.dart';
+import '../../core/theme/foundations/app_sizing.dart';
 import 'mx_icon_button.dart';
 
 /// A button drawn inside a field, at its trailing edge.
@@ -220,8 +220,8 @@ class MxTextField extends StatelessWidget {
         suffixIconConstraints: trailingAction == null
             ? null
             : const BoxConstraints(
-                minWidth: AppSpacing.minimumTouchTarget,
-                minHeight: AppSpacing.minimumTouchTarget,
+                minWidth: AppSizing.touchTarget,
+                minHeight: AppSizing.touchTarget,
               ),
       ),
     );

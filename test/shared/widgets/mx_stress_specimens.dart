@@ -28,7 +28,7 @@ import 'package:memox/shared/widgets/mx_search_field.dart';
 import 'package:memox/shared/widgets/mx_session_top_bar.dart';
 import 'package:memox/shared/widgets/mx_text_button.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
-import 'package:memox/core/theme/app_ink.dart';
+import 'package:memox/core/theme/extensions/app_ink.dart';
 import 'package:memox/shared/widgets/mx_hero_card.dart';
 
 /// The specimen set for the stress suite: every shared component, built with

@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 
-import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../items/match_tile_widget.dart';
 
 /// The board's geometry, with nothing in it about pairing.

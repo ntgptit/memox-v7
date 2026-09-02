@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_breakpoints.dart';
-import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/core/theme/foundations/app_breakpoints.dart';
+import 'package:memox/core/theme/foundations/app_sizing.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/features/study/domain/models/study_home_deck_model.dart';
 import 'package:memox/features/study/presentation/widgets/items/study_home_deck_item_widget.dart';
 import 'package:memox/features/study/presentation/widgets/sections/study_home_resume_section_widget.dart';
@@ -155,7 +156,7 @@ void main() {
         for (var i = 0; i < buttons.evaluate().length; i++) {
           expect(
             tester.getRect(buttons.at(i)).height,
-            greaterThanOrEqualTo(AppSpacing.minimumTouchTarget),
+            greaterThanOrEqualTo(AppSizing.touchTarget),
             reason: '$label #$i is under the touch floor',
           );
         }

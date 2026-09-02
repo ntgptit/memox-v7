@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_ink.dart';
-import '../../../../../core/theme/app_radius.dart';
-import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/theme/app_stroke.dart';
-import '../../../../../core/theme/theme_context_extension.dart';
+import '../../../../../core/theme/extensions/app_ink.dart';
+import '../../../../../core/theme/foundations/app_radius.dart';
+import '../../../../../core/theme/foundations/app_sizing.dart';
+import '../../../../../core/theme/foundations/app_spacing.dart';
+import '../../../../../core/theme/foundations/app_stroke.dart';
+import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../domain/models/deck_list_snapshot_model.dart';
 
 /// How far the figure line stops short of the card's right edge.
 ///
-/// The disclosure is [AppSpacing.minimumTouchTarget] wide and sits in the
+/// The disclosure is [AppSizing.touchTarget] wide and sits in the
 /// card's own corner, outside the content's [AppSpacing.lg] padding — so the
 /// line has to give back the difference, or the overdue split runs under it.
 /// Derived from the two numbers it is made of rather than written as 32, so
 /// moving either one moves this with it.
-const double heroDisclosureInset =
-    AppSpacing.minimumTouchTarget - AppSpacing.lg;
+const double heroDisclosureInset = AppSizing.touchTarget - AppSpacing.lg;
 
 /// The hero's figure line, and the resting figures behind its disclosure
 /// (owner mockup, 2026-08-20; compacted 2026-08-25).

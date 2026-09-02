@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_radius.dart';
-import '../../core/theme/app_spacing.dart';
-import '../../core/theme/app_ink.dart';
-import '../../core/theme/theme_context_extension.dart';
+import '../../core/theme/foundations/app_radius.dart';
+import '../../core/theme/foundations/app_spacing.dart';
+import '../../core/theme/extensions/app_ink.dart';
+import '../../core/theme/extensions/theme_context_extension.dart';
 import 'mx_icon.dart';
 
 /// The small icon well a metric anchors on: same size, same radius, same

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_icon_size.dart';
-import '../../core/theme/app_spacing.dart';
-import '../../core/theme/app_typography.dart';
-import '../../core/theme/theme_context_extension.dart';
-import '../../core/theme/app_ink.dart';
+import '../../core/theme/foundations/app_icon_size.dart';
+import '../../core/theme/foundations/app_sizing.dart';
+import '../../core/theme/foundations/app_spacing.dart';
+import '../../core/theme/typography/app_typography.dart';
+import '../../core/theme/extensions/theme_context_extension.dart';
+import '../../core/theme/extensions/app_ink.dart';
 import 'mx_icon.dart';
 
 part 'mx_breadcrumb_step.dart';
@@ -60,7 +61,7 @@ class MxBreadcrumbItem {
 /// A step with no [MxBreadcrumbItem.onTap] renders as quiet text rather than as a
 /// control — how a caller marks the step the user is already on.
 ///
-/// Every step is its own tap target at [AppSpacing.minimumTouchTarget]. The
+/// Every step is its own tap target at [AppSizing.touchTarget]. The
 /// design's CSS sets 36 and its usage note says 48; 48 wins, because 36 breaks
 /// the touch-target floor the same design declares.
 ///
@@ -75,7 +76,7 @@ class MxBreadcrumb extends StatefulWidget {
     this.semanticLabel,
     this.rootIcon,
     this.collapseAfter = 4,
-    this.lineHeight = AppSpacing.minimumTouchTarget,
+    this.lineHeight = AppSizing.touchTarget,
     this.onUp,
     this.onShowAll,
     this.upIcon,
@@ -400,8 +401,8 @@ class _MxBreadcrumbFoldState extends State<_MxBreadcrumbFold> {
           splashFactory: NoSplash.splashFactory,
           child: ConstrainedBox(
             constraints: const BoxConstraints(
-              minHeight: AppSpacing.minimumTouchTarget,
-              minWidth: AppSpacing.minimumTouchTarget,
+              minHeight: AppSizing.touchTarget,
+              minWidth: AppSizing.touchTarget,
             ),
             child: Center(
               child: MxIcon(

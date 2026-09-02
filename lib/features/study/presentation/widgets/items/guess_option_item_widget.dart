@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_ink.dart';
-import '../../../../../core/theme/app_durations.dart';
-import '../../../../../core/theme/app_motion_policy.dart';
-import '../../../../../core/theme/app_radius.dart';
-import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/theme/app_stroke.dart';
-import '../../../../../core/theme/theme_context_extension.dart';
+import '../../../../../core/theme/extensions/app_ink.dart';
+import '../../../../../core/theme/foundations/app_durations.dart';
+import '../../../../../core/theme/foundations/app_motion_policy.dart';
+import '../../../../../core/theme/foundations/app_radius.dart';
+import '../../../../../core/theme/foundations/app_sizing.dart';
+import '../../../../../core/theme/foundations/app_spacing.dart';
+import '../../../../../core/theme/foundations/app_stroke.dart';
+import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_pressable.dart';
 import '../../../../../shared/widgets/mx_icon.dart';
@@ -197,10 +198,10 @@ abstract final class AppGuessOption {
     return content > floor ? content : floor;
   }
 
-  /// The shortest a row may be. [AppSpacing.minimumTouchTarget] rather than the
+  /// The shortest a row may be. [AppSizing.touchTarget] rather than the
   /// handout's 50: five of these are the only controls on the screen, and the
   /// floor for a control is a number this project already has.
-  static const double rowMinHeight = AppSpacing.minimumTouchTarget;
+  static const double rowMinHeight = AppSizing.touchTarget;
 
   /// How far the three options nobody picked recede once the answer is in.
   ///

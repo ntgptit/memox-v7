@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_breakpoints.dart';
+import '../../core/theme/foundations/app_breakpoints.dart';
 import 'mx_action_button.dart';
 
 /// The width question a hero panel has to answer, asked in the one place where

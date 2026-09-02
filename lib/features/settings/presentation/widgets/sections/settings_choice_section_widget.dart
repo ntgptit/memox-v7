@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/error/failure.dart';
-import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../items/settings_choice_rows_widget.dart';
 import '../items/settings_error_band_widget.dart';

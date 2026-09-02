@@ -1,26 +1,27 @@
 import 'package:flutter/material.dart';
 
-import 'app_button_themes.dart';
-import 'app_chip_theme.dart';
-import 'app_icon_size.dart';
-import 'app_input_theme.dart';
-import 'app_interaction_states.dart';
-import 'app_overlay_themes.dart';
-import 'app_planned_themes.dart';
-import 'app_colors.dart';
-import 'app_elevation.dart';
-import 'app_high_contrast.dart';
-import 'app_material_roles.dart';
-import 'app_navigation_bar_theme.dart';
-import 'app_radio_theme.dart';
-import 'app_radius.dart';
-import 'app_semantic_colors.dart';
-import 'app_spacing.dart';
-import 'app_text_styles.dart';
-import 'app_toggle_themes.dart';
-import 'app_typography.dart';
-import 'app_surface_colors.dart';
-import 'app_border_colors.dart';
+import 'components/app_app_bar_theme.dart';
+import 'components/app_button_themes.dart';
+import 'components/app_card_theme.dart';
+import 'components/app_chip_theme.dart';
+import 'components/app_floating_action_button_theme.dart';
+import 'components/app_icon_button_theme.dart';
+import 'components/app_input_theme.dart';
+import 'components/app_list_tile_theme.dart';
+import 'components/app_modal_themes.dart';
+import 'components/app_navigation_bar_theme.dart';
+import 'components/app_overlay_themes.dart';
+import 'components/app_planned_themes.dart';
+import 'components/app_radio_theme.dart';
+import 'components/app_toggle_themes.dart';
+import 'foundations/app_icon_size.dart';
+import 'foundations/app_semantic_colors.dart';
+import 'foundations/app_surface_colors.dart';
+import 'schemes/app_color_scheme.dart';
+import 'schemes/app_high_contrast.dart';
+import 'states/app_interaction_states.dart';
+import 'typography/app_text_styles.dart';
+import 'typography/app_typography.dart';
 
 /// Material 3 themes for the app.
 ///
@@ -70,142 +71,6 @@ ThemeData buildHighContrastLightTheme() => _highContrastLightTheme;
 
 ThemeData buildHighContrastDarkTheme() => _highContrastDarkTheme;
 
-// The constructor, not `fromSeed(...).copyWith(...)`. Every role the app
-// ships is a hand-tuned constant, and `fromSeed` had been generating a
-// parallel set nobody rendered — a neutral-grey surfaceContainer ladder, a
-// pink `tertiary`, a second red for `error` — which read as "there is a
-// tonal palette" when there is none.
-//
-// **Exactly the 45 Material 3 colour roles are passed — no fewer, and
-// nothing that is not one.** 26 standard roles (the `primary`, `secondary`,
-// `tertiary` and `error` quartets; `surface`, `onSurface`,
-// `onSurfaceVariant`; `outline` and `outlineVariant`; the `inverse*` trio;
-// `shadow` and `scrim`) and 19 add-ons (`surfaceDim`, `surfaceBright`, the
-// five `surfaceContainer*` rungs, and the twelve `*Fixed`). The `*Fixed`
-// twelve arrived last (M99.47): until then each fell through the
-// constructor's own fallback to its *base* role (`_primaryFixed ?? primary`)
-// — a fill-level tone in a container-level slot, and a different value in
-// each brightness for a role the spec defines as brightness-independent.
-//
-// The constructor accepts a few more names than that — three deprecated
-// roles and one tint mechanism — and none is passed, read, dumped or
-// swatched anywhere in this repository. The guard locks the names to the
-// list above by allowlist rather than by naming what is out:
-// `memox_v7.design_system.color_scheme_arguments_are_m3_roles` for what a
-// `ColorScheme(` or a scheme's `copyWith(` may be handed, and
-// `memox_v7.design_system.color_scheme_reads_are_m3_roles` for what may be
-// read off one anywhere under `lib/` (M100.17).
-const ColorScheme _lightScheme = ColorScheme(
-  brightness: Brightness.light,
-  primary: AppColors.primaryLight,
-  onPrimary: AppColors.onPrimaryLight,
-  primaryContainer: AppMaterialRoles.primaryContainerLight,
-  onPrimaryContainer: AppMaterialRoles.onPrimaryContainerLight,
-  // The `*Fixed` family carries no brightness suffix because the role is
-  // defined as the same colour in both themes; see `AppMaterialRoles`.
-  primaryFixed: AppMaterialRoles.primaryFixed,
-  primaryFixedDim: AppMaterialRoles.primaryFixedDim,
-  onPrimaryFixed: AppMaterialRoles.onPrimaryFixed,
-  onPrimaryFixedVariant: AppMaterialRoles.onPrimaryFixedVariant,
-  secondary: AppMaterialRoles.secondaryLight,
-  onSecondary: AppMaterialRoles.onSecondaryLight,
-  secondaryContainer: AppMaterialRoles.secondaryContainerLight,
-  onSecondaryContainer: AppMaterialRoles.onSecondaryContainerLight,
-  secondaryFixed: AppMaterialRoles.secondaryFixed,
-  secondaryFixedDim: AppMaterialRoles.secondaryFixedDim,
-  onSecondaryFixed: AppMaterialRoles.onSecondaryFixed,
-  onSecondaryFixedVariant: AppMaterialRoles.onSecondaryFixedVariant,
-  tertiary: AppMaterialRoles.tertiaryLight,
-  onTertiary: AppMaterialRoles.onTertiaryLight,
-  tertiaryContainer: AppMaterialRoles.tertiaryContainerLight,
-  onTertiaryContainer: AppMaterialRoles.onTertiaryContainerLight,
-  tertiaryFixed: AppMaterialRoles.tertiaryFixed,
-  tertiaryFixedDim: AppMaterialRoles.tertiaryFixedDim,
-  onTertiaryFixed: AppMaterialRoles.onTertiaryFixed,
-  onTertiaryFixedVariant: AppMaterialRoles.onTertiaryFixedVariant,
-  // `error` is `danger`, not a second red system.
-  error: AppColors.dangerLight,
-  onError: AppMaterialRoles.onErrorLight,
-  errorContainer: AppMaterialRoles.errorContainerLight,
-  onErrorContainer: AppMaterialRoles.onErrorContainerLight,
-  surface: AppSurfaceColors.surfaceLight,
-  onSurface: AppColors.textPrimaryLight,
-  onSurfaceVariant: AppColors.textSecondaryLight,
-  surfaceDim: AppMaterialRoles.surfaceDimLight,
-  surfaceBright: AppMaterialRoles.surfaceBrightLight,
-  surfaceContainerLowest: AppMaterialRoles.surfaceContainerLowestLight,
-  surfaceContainerLow: AppMaterialRoles.surfaceContainerLowLight,
-  surfaceContainer: AppMaterialRoles.surfaceContainerLight,
-  surfaceContainerHigh: AppMaterialRoles.surfaceContainerHighLight,
-  surfaceContainerHighest: AppMaterialRoles.surfaceContainerHighestLight,
-  // **The M3 pair, at last as a pair.** `outline` is the stroke the spec
-  // asks to identify a component's boundary — the 3:1 of WCAG 1.4.11 — and
-  // `outlineVariant` is the decorative hairline. Both used to be
-  // `borderSubtle`, which handed any component that trusts `scheme.outline`
-  // a 1.45:1 edge. The app's own widgets read the semantic tokens directly,
-  // so this re-mapping changes what an *untended* widget degrades to, not
-  // what the app draws.
-  outline: AppBorderColors.borderControlLight,
-  outlineVariant: AppBorderColors.borderSubtleLight,
-  inverseSurface: AppMaterialRoles.inverseSurfaceLight,
-  onInverseSurface: AppMaterialRoles.onInverseSurfaceLight,
-  inversePrimary: AppMaterialRoles.inversePrimaryLight,
-  shadow: AppColors.shadowLight,
-  scrim: AppColors.scrimLight,
-);
-
-const ColorScheme _darkScheme = ColorScheme(
-  brightness: Brightness.dark,
-  primary: AppColors.primaryDark,
-  onPrimary: AppColors.onPrimaryDark,
-  primaryContainer: AppMaterialRoles.primaryContainerDark,
-  onPrimaryContainer: AppMaterialRoles.onPrimaryContainerDark,
-  // The `*Fixed` family carries no brightness suffix because the role is
-  // defined as the same colour in both themes; see `AppMaterialRoles`.
-  primaryFixed: AppMaterialRoles.primaryFixed,
-  primaryFixedDim: AppMaterialRoles.primaryFixedDim,
-  onPrimaryFixed: AppMaterialRoles.onPrimaryFixed,
-  onPrimaryFixedVariant: AppMaterialRoles.onPrimaryFixedVariant,
-  secondary: AppMaterialRoles.secondaryDark,
-  onSecondary: AppMaterialRoles.onSecondaryDark,
-  secondaryContainer: AppMaterialRoles.secondaryContainerDark,
-  onSecondaryContainer: AppMaterialRoles.onSecondaryContainerDark,
-  secondaryFixed: AppMaterialRoles.secondaryFixed,
-  secondaryFixedDim: AppMaterialRoles.secondaryFixedDim,
-  onSecondaryFixed: AppMaterialRoles.onSecondaryFixed,
-  onSecondaryFixedVariant: AppMaterialRoles.onSecondaryFixedVariant,
-  tertiary: AppMaterialRoles.tertiaryDark,
-  onTertiary: AppMaterialRoles.onTertiaryDark,
-  tertiaryContainer: AppMaterialRoles.tertiaryContainerDark,
-  onTertiaryContainer: AppMaterialRoles.onTertiaryContainerDark,
-  tertiaryFixed: AppMaterialRoles.tertiaryFixed,
-  tertiaryFixedDim: AppMaterialRoles.tertiaryFixedDim,
-  onTertiaryFixed: AppMaterialRoles.onTertiaryFixed,
-  onTertiaryFixedVariant: AppMaterialRoles.onTertiaryFixedVariant,
-  error: AppColors.dangerDark,
-  onError: AppMaterialRoles.onErrorDark,
-  errorContainer: AppMaterialRoles.errorContainerDark,
-  onErrorContainer: AppMaterialRoles.onErrorContainerDark,
-  surface: AppSurfaceColors.surfaceDark,
-  onSurface: AppColors.textPrimaryDark,
-  onSurfaceVariant: AppColors.textSecondaryDark,
-  surfaceDim: AppMaterialRoles.surfaceDimDark,
-  surfaceBright: AppMaterialRoles.surfaceBrightDark,
-  surfaceContainerLowest: AppMaterialRoles.surfaceContainerLowestDark,
-  surfaceContainerLow: AppMaterialRoles.surfaceContainerLowDark,
-  surfaceContainer: AppMaterialRoles.surfaceContainerDark,
-  surfaceContainerHigh: AppMaterialRoles.surfaceContainerHighDark,
-  surfaceContainerHighest: AppMaterialRoles.surfaceContainerHighestDark,
-  // The same pair as light — see the note there.
-  outline: AppBorderColors.borderControlDark,
-  outlineVariant: AppBorderColors.borderSubtleDark,
-  inverseSurface: AppMaterialRoles.inverseSurfaceDark,
-  onInverseSurface: AppMaterialRoles.onInverseSurfaceDark,
-  inversePrimary: AppMaterialRoles.inversePrimaryDark,
-  shadow: AppColors.shadowDark,
-  scrim: AppColors.scrimDark,
-);
-
 /// The light theme, given the palette it should read.
 ///
 /// This used to also relay `actionFill` / `actionLabel` / `outlineLabel`
@@ -232,32 +97,24 @@ ThemeData _dark(ColorScheme scheme, AppSemanticColors semantic) =>
     _buildTheme(scheme, semantic, background: AppSurfaceColors.backgroundDark);
 
 final ThemeData _lightTheme = _light(
-  _lightScheme,
+  lightColorScheme,
   const AppSemanticColors.light(),
 );
 
-final ThemeData _darkTheme = _dark(_darkScheme, const AppSemanticColors.dark());
+final ThemeData _darkTheme = _dark(
+  darkColorScheme,
+  const AppSemanticColors.dark(),
+);
 
 final ThemeData _highContrastLightTheme = _light(
-  highContrastScheme(_lightScheme),
-  highContrastSemantics(const AppSemanticColors.light(), _lightScheme),
+  highContrastScheme(lightColorScheme),
+  highContrastSemantics(const AppSemanticColors.light(), lightColorScheme),
 );
 
 final ThemeData _highContrastDarkTheme = _dark(
-  highContrastScheme(_darkScheme),
-  highContrastSemantics(const AppSemanticColors.dark(), _darkScheme),
+  highContrastScheme(darkColorScheme),
+  highContrastSemantics(const AppSemanticColors.dark(), darkColorScheme),
 );
-
-/// Material elevation for the overlays that keep a dp value instead of
-/// `elevation: 0` + `shadowsFor` — the FAB and the SnackBar, whose theme slots
-/// have nowhere to put a hand-painted shadow.
-///
-/// Zero in dark, matching `shadowsFor`: the dark page is at the bottom of the
-/// lightness scale, so a shadow there is paint nobody can see.
-double _overlayElevation(ColorScheme scheme) =>
-    scheme.brightness == Brightness.dark
-    ? AppElevation.none
-    : AppElevation.overlay;
 
 /// `background` stays a parameter where the button pairs did not: the page
 /// ground is deliberately not `scheme.surface` (surface is the card sitting on
@@ -360,73 +217,13 @@ ThemeData _buildTheme(
       size: AppIconSize.md,
     ),
 
-    appBarTheme: AppBarTheme(
-      backgroundColor: background,
-      foregroundColor: scheme.onSurface,
-      // No tint on scroll: during a study session the header must stay still, because
-      // a colour shift behind the card reads as the card itself changing.
-      scrolledUnderElevation: 0,
-      elevation: 0,
-      centerTitle: false,
-    ),
-
-    // The bottom bar sits on the page colour, like the app bar above it, so the
-    // chrome reads as one frame rather than three surfaces stacked on the
-    // content. M3's default would tint it with `surfaceContainer` and give it
-    // elevation, which reintroduces exactly the shifting background the app bar
-    // deliberately turned off.
-    // **The brand pair, stated.** Material 3's default is the
-    // `primaryContainer` tonal pair, which puts the screen's one create action
-    // in the same clothes as the navigation bar's active tab. The owner's
-    // mockup draws it as the brand fill (owner review, 2026-08-20), and the
-    // pair carries its own contrast guarantee.
-    floatingActionButtonTheme: FloatingActionButtonThemeData(
-      backgroundColor: scheme.primary,
-      foregroundColor: scheme.onPrimary,
-      // The house corner, stated here rather than at the one call site it
-      // used to live on (deck list): a FAB shape is component grammar, and
-      // M3's default is the 16dp large-component squircle this app does not
-      // use anywhere else.
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-      ),
-      // **The state washes move with the pair, or they describe the old one.**
-      // M3's defaults are not derived from the effective foreground — the SDK
-      // hardcodes `onPrimaryContainer` at 8/10/10% — so overriding the resting
-      // pair above and leaving these null meant hover, focus and press painted
-      // another system's ink over this system's fill (theme-composition
-      // review, 2026-08). The rule Chip and the buttons already follow: change
-      // a component's resting pair, and every state default it owns is yours
-      // to restate.
-      hoverColor: scheme.onPrimary.withValues(
-        alpha: AppStateOpacity.hoverControl,
-      ),
-      focusColor: scheme.onPrimary.withValues(alpha: AppStateOpacity.focus),
-      splashColor: scheme.onPrimary.withValues(alpha: AppStateOpacity.pressed),
-      // Until the elevation matched `shadowsFor`, the FAB was the one object
-      // in dark carrying a Material shadow while every other surface had
-      // measurably opted out.
-      elevation: _overlayElevation(scheme),
-      focusElevation: _overlayElevation(scheme),
-      hoverElevation: _overlayElevation(scheme),
-      highlightElevation: _overlayElevation(scheme),
-    ),
+    // The chrome: the two bars that frame every screen, and the one action that
+    // floats over them.
+    appBarTheme: buildAppBarTheme(scheme, background: background),
     navigationBarTheme: buildNavigationBarTheme(scheme, texts),
+    floatingActionButtonTheme: buildFloatingActionButtonTheme(scheme),
 
-    // The safety net for a bare or third-party `Card` — no app widget renders
-    // one. `MxCard` is the canonical card and paints itself, because its
-    // focus-ring border swap and `shadowsFor` depth have no `CardThemeData`
-    // slot; this keeps an untended `Card` on the same surface, radius and
-    // hairline instead of Material's elevated default.
-    cardTheme: CardThemeData(
-      color: scheme.surface,
-      elevation: 0,
-      margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        side: BorderSide(color: scheme.outlineVariant),
-      ),
-    ),
+    cardTheme: buildCardTheme(scheme),
 
     // Pills — `MxPillButton`. Selected borrows the navigation bar's indicator
     // pair, so "this one is active" looks the same whether it is a tab or a
@@ -449,32 +246,15 @@ ThemeData _buildTheme(
     // Four component themes added in M4.8, one per shared component that
     // renders through them — a theme for one nobody builds is a decision made
     // without a screen to check it against.
-    iconButtonTheme: IconButtonThemeData(
-      style:
-          IconButton.styleFrom(
-            // The 48×48 minimum lives here rather than in `MxIconButton`, so no
-            // screen can pass a smaller one — there is no parameter to pass.
-            minimumSize: const Size.square(AppSpacing.minimumTouchTarget),
-            foregroundColor: scheme.onSurfaceVariant,
-            // Named, not left to `defaultStyleOf` where no audit can see it.
-            disabledForegroundColor: semantic.onDisabled,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppRadius.md),
-            ),
-          ).copyWith(
-            // Hover, press and focus declared. Left null they came from
-            // Material, which is neither the kit nor what every other control
-            // in this app resolves.
-            overlayColor: AppInteractionStates.iconOverlay(scheme),
-            // Focus draws a ring, not just the tint: measured off the goldens
-            // that tint alone is 1.15:1 against the surface behind it in both
-            // modes, where WCAG 1.4.11 asks 3:1 of a focus indicator.
-            side: WidgetStateProperty.resolveWith((states) {
-              if (!states.contains(WidgetState.focused)) return null;
-              return AppInteractionStates.focusIndicator(scheme);
-            }),
-          ),
-    ),
+    iconButtonTheme: buildIconButtonTheme(scheme, semantic),
+    listTileTheme: buildListTileTheme(scheme, semantic),
+    dialogTheme: buildDialogTheme(scheme, texts),
+    bottomSheetTheme: buildBottomSheetTheme(scheme),
+
+    // The snack bar, from UC-05 — an overlay like the two above it, and the
+    // reason `app_modal_themes.dart` groups the three by behaviour rather than
+    // by widget class.
+    snackBarTheme: buildSnackBarTheme(scheme, texts),
 
     progressIndicatorTheme: buildProgressIndicatorTheme(scheme),
     tooltipTheme: buildTooltipTheme(scheme, texts),
@@ -500,136 +280,5 @@ ThemeData _buildTheme(
     segmentedButtonTheme: buildSegmentedButtonTheme(scheme, semantic),
     sliderTheme: buildSliderTheme(scheme, semantic, texts),
     tabBarTheme: buildTabBarTheme(scheme, texts),
-
-    listTileTheme: ListTileThemeData(
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.xs,
-      ),
-      minVerticalPadding: AppSpacing.sm,
-      iconColor: scheme.onSurfaceVariant,
-      textColor: scheme.onSurface,
-      // **`primary`, and the ground is what used to make that hard.** A
-      // selected row lands on `surfaceMuted`, not the page, and the old dark
-      // fill tone measured 2.45:1 there — under WCAG 1.4.11's 3:1 for a state
-      // and far under the 4.5:1 its label needs, which is why a second token
-      // stood here until M100.19. Tone 80 clears both grounds outright.
-      //
-      // Not the `secondaryContainer` pair NavigationBar and the chips take,
-      // though that would also pass: a row is a wide target, and a tinted fill
-      // stretched across a list reads as a button. The muted tile with an
-      // accented label keeps the grammar — brand tint means selected — at a
-      // weight a row can carry. `ListTile` has no M3 selected-fill default to
-      // depart from; `selectedTileColor` is null in Material and the choice is
-      // the app's to make.
-      selectedColor: scheme.primary,
-      selectedTileColor: semantic.surfaceMuted,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.md),
-      ),
-    ),
-
-    dialogTheme: DialogThemeData(
-      barrierColor: modalBarrierColor(scheme),
-      backgroundColor: scheme.surfaceContainerHigh,
-      surfaceTintColor: Colors.transparent,
-      // Zero, for the same reason as the FAB above: a second depth mechanism
-      // AD-14 does not admit. See F15.
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        side: BorderSide(color: scheme.outlineVariant),
-      ),
-      titleTextStyle: texts.titleMedium?.copyWith(color: scheme.onSurface),
-      contentTextStyle: texts.bodyMedium?.copyWith(
-        color: scheme.onSurfaceVariant,
-      ),
-      // **`actionsPadding` deliberately stays unset here** — it moved to
-      // `MxDialogMetrics` while this was in flight (#348). The footer's width
-      // has to be *computed* from that inset, so the dialog states it on the
-      // widget; a theme entry saying the same 24 would be a second answer that
-      // all three dialogs override, and the one that could silently drift out
-      // of step with the arithmetic that reads it.
-    ),
-
-    bottomSheetTheme: BottomSheetThemeData(
-      modalBarrierColor: modalBarrierColor(scheme),
-      backgroundColor: scheme.surfaceContainerLow,
-      surfaceTintColor: Colors.transparent,
-      elevation: 0,
-      showDragHandle: true,
-      // **The handle is a button, not a decoration, and the SDK is explicit
-      // about it:** `_DragHandle` wraps itself in `Semantics(button: true,
-      // onTap: …)` with the dismiss label and pads itself to
-      // `kMinInteractiveDimension`. So WCAG 1.4.11's 3:1 applies to it, and
-      // `borderSubtle` — the decorative hairline, `outlineVariant` — measured
-      // **1.45:1** in light and **2.04:1** in dark. It is the only thing on the
-      // sheet that says the sheet can be dragged or dismissed.
-      //
-      // **`borderControl` rather than `onSurfaceVariant`, and that was decided
-      // by looking.** Material's default for this slot is `onSurfaceVariant`,
-      // which here measures 6.45 and 7.29 — it clears the floor twice over and
-      // renders as a bar heavy enough to take the eye *before* the sheet's own
-      // heading. A sheet's first job is to say what it is. `borderControl`
-      // reads as an affordance at 3.19 and 3.00 without competing, and it is
-      // the token this app already means by "interactive control".
-      dragHandleColor: WidgetStateColor.resolveWith((states) {
-        // **Two states, because two is all the SDK ever sets here** — it adds
-        // `hovered` from its own `MouseRegion` and `dragged` while the sheet is
-        // actually moving. No focus and no pressed: the handle has semantics
-        // but no `Focus`, so it is not in the traversal.
-        //
-        // `dragged` is the one that matters on the release platform. Hover does
-        // not exist on a phone; the grab does, and until now it looked exactly
-        // like the rest.
-        //
-        // **The role is `onSurfaceVariant` in every state, and the grab is a
-        // state layer over it rather than a second role.**
-        // `_BottomSheetDefaultsM3.dragHandleColor` is that role and does not
-        // vary; the SDK still resolves this slot against states, which is the
-        // sanctioned place to put feedback — but feedback is a layer, not a
-        // different meaning.
-        //
-        // It read `outline` until M100.22 (M3's resting answer held back as an
-        // emphasis), then `onSurface` under the grab, which M100.23 caught as
-        // the same bug class as the four resolvers above: an interaction state
-        // moving a slot off its canonical role. The grab now blends `onSurface`
-        // at `AppStateOpacity.pressed` into the role itself — pre-composed
-        // against a known ground, because AD-14 §1 forbids paint-time alpha —
-        // so the handle firms up without ever claiming to be a different token.
-        if (states.contains(WidgetState.dragged) ||
-            states.contains(WidgetState.hovered)) {
-          return Color.alphaBlend(
-            scheme.onSurface.withValues(alpha: AppStateOpacity.pressed),
-            scheme.onSurfaceVariant,
-          );
-        }
-
-        return scheme.onSurfaceVariant;
-      }),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
-      ),
-    ),
-
-    snackBarTheme: SnackBarThemeData(
-      backgroundColor: scheme.inverseSurface,
-      contentTextStyle: texts.bodyMedium?.copyWith(
-        color: scheme.onInverseSurface,
-      ),
-      behavior: SnackBarBehavior.floating,
-      // The SDK's own default, restated so the action's colour is a decision
-      // on record rather than a silence that resolves to one.
-      actionTextColor: scheme.inversePrimary,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.md),
-      ),
-      // The last overlay that let Material decide its depth: Dialog,
-      // BottomSheet, PopupMenu and the FAB all state theirs, and this slot's
-      // silence resolved to the SDK's 6.0 — in dark too, where every other
-      // surface has measurably opted out of shadows. Same brightness split as
-      // the FAB, for the same reason (theme-composition review, 2026-08).
-      elevation: _overlayElevation(scheme),
-    ),
   );
 }

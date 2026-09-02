@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_spacing.dart';
-import '../../core/theme/theme_context_extension.dart';
+import '../../core/theme/foundations/app_spacing.dart';
+import '../../core/theme/extensions/theme_context_extension.dart';
 import 'mx_action_button.dart';
 import 'mx_button_pair.dart';
-import '../../core/theme/app_ink.dart';
+import '../../core/theme/extensions/app_ink.dart';
 import 'mx_icon.dart';
 
 /// Shown when there is nothing to display and that is fine.

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/features/study/domain/entities/study_queue_item_entity.dart';
 import 'package:memox/features/study/domain/models/study_action_model.dart';
 import 'package:memox/features/study/domain/models/study_direction_model.dart';

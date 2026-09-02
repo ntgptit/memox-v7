@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/features/study/domain/models/study_mode.dart';
 import 'package:memox/features/study/domain/models/study_session_kind_model.dart';
 import 'package:memox/features/study/domain/models/study_turn_model.dart';

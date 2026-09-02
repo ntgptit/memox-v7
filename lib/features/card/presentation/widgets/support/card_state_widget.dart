@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 
-import '../../../../../core/theme/app_ink.dart';
-import '../../../../../core/theme/theme_context_extension.dart';
+import '../../../../../core/theme/extensions/app_ink.dart';
+import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../domain/models/card_state_model.dart';
 

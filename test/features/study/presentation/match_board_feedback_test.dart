@@ -3,9 +3,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_durations.dart';
-import 'package:memox/core/theme/app_semantic_colors.dart';
-import 'package:memox/core/theme/app_stroke.dart';
+import 'package:memox/core/theme/foundations/app_durations.dart';
+import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
+import 'package:memox/core/theme/foundations/app_stroke.dart';
 import 'package:memox/features/study/domain/models/match_mode.dart';
 import 'package:memox/features/study/domain/models/study_turn_model.dart';
 import 'package:memox/features/study/presentation/widgets/items/match_tile_widget.dart';

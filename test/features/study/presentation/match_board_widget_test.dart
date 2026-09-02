@@ -6,9 +6,9 @@ import 'package:memox/features/study/domain/models/match_mode.dart';
 import 'package:memox/features/study/domain/models/study_turn_model.dart';
 import 'package:memox/features/study/presentation/widgets/sections/match_board_section_widget.dart';
 
-import 'package:memox/core/theme/app_durations.dart';
-import 'package:memox/core/theme/app_semantic_colors.dart';
-import 'package:memox/core/theme/app_stroke.dart';
+import 'package:memox/core/theme/foundations/app_durations.dart';
+import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
+import 'package:memox/core/theme/foundations/app_stroke.dart';
 
 import 'support/study_commit_stub.dart';
 import 'support/study_widget_harness.dart';

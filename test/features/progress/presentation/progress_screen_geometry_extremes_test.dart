@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/error/failure.dart';
-import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/features/progress/presentation/widgets/items/progress_week_bar_widget.dart';
 import 'package:memox/features/progress/presentation/widgets/sections/progress_streak_hero_widget.dart';
 import 'package:memox/features/progress/presentation/widgets/sections/progress_today_widget.dart';

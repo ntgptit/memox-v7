@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_ink.dart';
-import '../../../../../core/theme/theme_context_extension.dart';
+import '../../../../../core/theme/extensions/app_ink.dart';
+import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_text_button.dart';
 import '../../states/deck_list_view_state.dart';

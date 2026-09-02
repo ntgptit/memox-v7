@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/core/theme/foundations/app_sizing.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
@@ -135,7 +136,7 @@ void main() {
       // The painted button is 40; the hit area is the touch floor, which
       // `MaterialTapTargetSize.padded` adds around it.
       final study = tester.getSize(find.byType(DeckStudyButtonWidget));
-      expect(study.height, AppSpacing.minimumTouchTarget);
+      expect(study.height, AppSizing.touchTarget);
       expect(study.width, greaterThanOrEqualTo(80));
 
       // The root header has no path — it states the level's figures — so the

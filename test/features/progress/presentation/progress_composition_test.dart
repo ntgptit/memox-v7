@@ -9,14 +9,14 @@ import 'package:memox/features/progress/presentation/widgets/sections/progress_s
 import 'package:memox/features/progress/presentation/widgets/sections/progress_summary_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/core/error/failure.dart';
-import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/shared/widgets/mx_content_shell.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/shared/widgets/mx_loading_state.dart';
 
 import 'support/fake_progress_repository.dart';
 import 'support/progress_screen_harness.dart';
-import 'package:memox/core/theme/app_surface_colors.dart';
+import 'package:memox/core/theme/foundations/app_surface_colors.dart';
 
 /// `/progress` as **one** screen: the overview's three sections and the library
 /// level in the same scroll, fed by two independent streams (UC-12, UC-13,

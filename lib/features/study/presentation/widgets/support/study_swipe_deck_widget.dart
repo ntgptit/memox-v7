@@ -4,8 +4,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 
-import '../../../../../core/theme/app_durations.dart';
-import '../../../../../core/theme/app_motion_policy.dart';
+import '../../../../../core/theme/foundations/app_durations.dart';
+import '../../../../../core/theme/foundations/app_motion_policy.dart';
 import '../../../../../l10n/l10n_extension.dart';
 
 /// How far a drag must travel before it counts as a swipe.

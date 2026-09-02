@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_breakpoints.dart';
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/app_stroke.dart';
+import '../../../../core/theme/foundations/app_breakpoints.dart';
+import '../../../../core/theme/foundations/app_spacing.dart';
+import '../../../../core/theme/foundations/app_stroke.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_card.dart';
 import '../../../../shared/widgets/mx_messenger.dart';

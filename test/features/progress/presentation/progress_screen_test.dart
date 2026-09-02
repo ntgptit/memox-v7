@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/app/router/route_paths.dart';
-import 'package:memox/core/theme/app_ink.dart';
-import 'package:memox/core/theme/theme_context_extension.dart';
+import 'package:memox/core/theme/extensions/app_ink.dart';
+import 'package:memox/core/theme/extensions/theme_context_extension.dart';
 import 'package:memox/features/progress/domain/models/deck_activity_model.dart';
 import 'package:memox/features/progress/domain/models/deck_activity_snapshot_model.dart';
 import 'package:memox/features/progress/presentation/widgets/sections/progress_streak_hero_widget.dart';

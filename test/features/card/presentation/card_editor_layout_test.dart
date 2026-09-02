@@ -2,7 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/core/theme/foundations/app_sizing.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/features/card/domain/entities/tag_entity.dart';
 import 'package:memox/features/card/domain/models/deck_context_model.dart';
 import 'package:memox/features/card/domain/failures/tag_validation_failure.dart';
@@ -216,7 +217,7 @@ void main() {
       // the choice for the user.
       expect(save.width, cancel.width);
       expect(save.height, cancel.height);
-      expect(save.height, greaterThanOrEqualTo(AppSpacing.minimumTouchTarget));
+      expect(save.height, greaterThanOrEqualTo(AppSizing.touchTarget));
     });
 
     testWidgets('the footer stays above the keyboard', (tester) async {

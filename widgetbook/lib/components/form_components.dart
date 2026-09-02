@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:memox/core/theme/theme_context_extension.dart';
-import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/core/theme/extensions/theme_context_extension.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
 import 'package:memox/shared/widgets/mx_metric_well.dart';
 import 'package:memox/shared/widgets/mx_list_tile.dart';
@@ -12,7 +12,7 @@ import 'package:memox/shared/widgets/mx_text_field.dart';
 import 'package:widgetbook/widgetbook.dart';
 
 import '../support/catalog_page.dart';
-import 'package:memox/core/theme/app_ink.dart';
+import 'package:memox/core/theme/extensions/app_ink.dart';
 
 void _noop() {}
 

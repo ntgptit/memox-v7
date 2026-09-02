@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_stroke.dart';
+import 'package:memox/core/theme/foundations/app_stroke.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/features/search/domain/models/search_result_model.dart';
 import 'package:memox/features/search/domain/models/search_page_model.dart';

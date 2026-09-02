@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:memox/core/theme/app_semantic_colors.dart';
+import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 
 import 'audit_color_math.dart';
 import 'color_usage_scan.dart';

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/core/theme/foundations/app_sizing.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/shared/widgets/mx_icon_button.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
@@ -201,8 +201,8 @@ void main() {
 
       final size = tester.getSize(find.byType(IconButton));
 
-      expect(size.width, greaterThanOrEqualTo(AppSpacing.minimumTouchTarget));
-      expect(size.height, greaterThanOrEqualTo(AppSpacing.minimumTouchTarget));
+      expect(size.width, greaterThanOrEqualTo(AppSizing.touchTarget));
+      expect(size.height, greaterThanOrEqualTo(AppSizing.touchTarget));
     });
 
     testWidgets('enabled fires exactly once per tap', (tester) async {

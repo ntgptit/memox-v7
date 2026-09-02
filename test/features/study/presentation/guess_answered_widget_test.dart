@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_semantic_colors.dart';
-import 'package:memox/core/theme/app_stroke.dart';
+import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
+import 'package:memox/core/theme/foundations/app_stroke.dart';
 import 'package:memox/features/study/domain/entities/study_queue_item_entity.dart';
 import 'package:memox/features/study/domain/models/guess_mode.dart';
 import 'package:memox/features/study/domain/models/study_mode.dart';

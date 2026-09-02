@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_icon_size.dart';
-import '../../core/theme/app_spacing.dart';
-import '../../core/theme/theme_context_extension.dart';
+import '../../core/theme/foundations/app_icon_size.dart';
+import '../../core/theme/foundations/app_sizing.dart';
+import '../../core/theme/extensions/theme_context_extension.dart';
 
 /// What an icon button's glyph *means*, on the one axis a bar action has.
 ///
@@ -75,7 +75,7 @@ class MxIconButton extends StatelessWidget {
   /// **It does not make the button narrower, and it never did.** This used to
   /// constrain the box to 36 wide; Material's tap-target padding re-inflated it
   /// to 48 and centred the 36 inside, so the row spent 48 either way. The
-  /// constraint is gone rather than fixed — 48 is [AppSpacing.minimumTouchTarget]
+  /// constraint is gone rather than fixed — 48 is [AppSizing.touchTarget]
   /// and shrinking below it fails `androidTapTargetGuideline`, which
   /// `study_accessibility_test.dart` asserts. A row that needs its leading glyph
   /// closer to the screen edge than 14px has to be laid out edge-to-edge; see
@@ -109,8 +109,8 @@ class MxIconButton extends StatelessWidget {
       tooltip: tooltip ?? semanticLabel,
       constraints: isCompact
           ? const BoxConstraints.tightFor(
-              width: AppSpacing.minimumTouchTarget,
-              height: AppSpacing.minimumTouchTarget,
+              width: AppSizing.touchTarget,
+              height: AppSizing.touchTarget,
             )
           : null,
       padding: isCompact ? EdgeInsets.zero : null,

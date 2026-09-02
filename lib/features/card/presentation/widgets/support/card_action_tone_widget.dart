@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_ink.dart';
+import '../../../../../core/theme/extensions/app_ink.dart';
 
-import '../../../../../core/theme/theme_context_extension.dart';
+import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../deck/domain/models/scheduler_type_model.dart';
 import '../../../../study/domain/models/study_action_model.dart';
 import '../../../../study/domain/models/eight_box_scheduler.dart';

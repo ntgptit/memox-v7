@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/navigation/route_names.dart';
-import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';

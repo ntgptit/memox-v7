@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_icon_size.dart';
-import '../../core/theme/app_radius.dart';
-import '../../core/theme/app_spacing.dart';
+import '../../core/theme/foundations/app_icon_size.dart';
+import '../../core/theme/foundations/app_radius.dart';
+import '../../core/theme/foundations/app_sizing.dart';
+import '../../core/theme/foundations/app_spacing.dart';
 import 'mx_focus_ring.dart';
 
 /// A selectable pill: the app's control for switching between a small, fixed set
@@ -22,7 +23,7 @@ import 'mx_focus_ring.dart';
 /// border come from `chipTheme` in `app_theme.dart`, so a pill here and a pill in
 /// another feature cannot drift.
 ///
-/// The tap target is padded to [AppSpacing.minimumTouchTarget]. A chip's natural
+/// The tap target is padded to [AppSizing.touchTarget]. A chip's natural
 /// height is below it, and a control that is easy to see and hard to hit is worse
 /// than one that is neither.
 ///

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_durations.dart';
-import '../../core/theme/app_motion_policy.dart';
-import '../../core/theme/app_radius.dart';
-import '../../core/theme/app_spacing.dart';
-import '../../core/theme/app_typography.dart';
-import '../../core/theme/theme_context_extension.dart';
+import '../../core/theme/foundations/app_durations.dart';
+import '../../core/theme/foundations/app_motion_policy.dart';
+import '../../core/theme/foundations/app_radius.dart';
+import '../../core/theme/foundations/app_spacing.dart';
+import '../../core/theme/typography/app_typography.dart';
+import '../../core/theme/extensions/theme_context_extension.dart';
 
 /// How tall the track is.
 ///

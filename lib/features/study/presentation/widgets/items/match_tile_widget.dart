@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/foundations/app_sizing.dart';
 import '../../../../../shared/widgets/mx_pressable.dart';
-import '../../../../../core/theme/app_ink.dart';
-import '../../../../../core/theme/app_durations.dart';
-import '../../../../../core/theme/app_motion_policy.dart';
-import '../../../../../core/theme/app_radius.dart';
-import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/theme/app_stroke.dart';
-import '../../../../../core/theme/app_typography.dart';
-import '../../../../../core/theme/theme_context_extension.dart';
+import '../../../../../core/theme/extensions/app_ink.dart';
+import '../../../../../core/theme/foundations/app_durations.dart';
+import '../../../../../core/theme/foundations/app_motion_policy.dart';
+import '../../../../../core/theme/foundations/app_radius.dart';
+import '../../../../../core/theme/foundations/app_spacing.dart';
+import '../../../../../core/theme/foundations/app_stroke.dart';
+import '../../../../../core/theme/typography/app_typography.dart';
+import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 
 /// What a tile on the board can be showing (§4, §8.8).
@@ -353,7 +354,7 @@ abstract final class AppMatchTile {
   /// typography above already implies, and the two move together or the board
   /// silently starts ellipsising the sixth line it was sized to show.
   ///
-  /// It was [AppSpacing.minimumTouchTarget] while the meaning had four lines and
+  /// It was [AppSizing.touchTarget] while the meaning had four lines and
   /// the floor was only about a thumb. A tile is still a control, and 112 clears
   /// 48 with room to spare; what changed is that the tap target stopped being
   /// the binding constraint.

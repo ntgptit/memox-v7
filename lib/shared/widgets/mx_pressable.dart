@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_radius.dart';
-import '../../core/theme/app_spacing.dart';
+import '../../core/theme/foundations/app_radius.dart';
+import '../../core/theme/foundations/app_sizing.dart';
 
 /// How a pressable surface rounds its ripple. The values are `AppRadius`'s;
 /// the enum exists so a call site names a step instead of shipping a
@@ -35,7 +35,7 @@ enum MxPressableShape {
 /// - the `Material(transparency)` + `InkWell` pair comes as one piece, so a
 ///   ripple works identically inside a `DecoratedBox` and on a bare page;
 /// - the ripple's corner comes from [MxPressableShape]'s closed list;
-/// - the content is floored at [AppSpacing.minimumTouchTarget] — a pressable
+/// - the content is floored at [AppSizing.touchTarget] — a pressable
 ///   thing is a target, and 48 is the floor every control in this app keeps.
 ///
 /// **What it deliberately is not**: a surface. It paints no fill, no border,
@@ -70,9 +70,7 @@ class MxPressable extends StatelessWidget {
         onLongPress: onLongPress,
         borderRadius: shape.borderRadius,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minHeight: AppSpacing.minimumTouchTarget,
-          ),
+          constraints: const BoxConstraints(minHeight: AppSizing.touchTarget),
           child: child,
         ),
       ),

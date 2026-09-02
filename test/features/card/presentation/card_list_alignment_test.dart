@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/features/card/di/card_repository_provider.dart';
 import 'package:memox/features/card/domain/models/card_list_filter_model.dart';
 import 'package:memox/features/card/domain/models/card_state_distribution_model.dart';

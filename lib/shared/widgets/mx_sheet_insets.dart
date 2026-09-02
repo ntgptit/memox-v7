@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_spacing.dart';
+import '../../core/theme/foundations/app_spacing.dart';
 
 /// Whatever is covering the bottom of a bottom sheet: the keyboard, or the
 /// system bar when the keyboard is down.

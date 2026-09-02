@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_breakpoints.dart';
+import 'package:memox/core/theme/foundations/app_breakpoints.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/features/deck/domain/models/deck_list_snapshot_model.dart';
 import 'package:memox/features/deck/domain/models/deck_path_segment_model.dart';

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_interaction_states.dart';
-import '../../core/theme/app_radius.dart';
-import '../../core/theme/theme_context_extension.dart';
+import '../../core/theme/states/app_interaction_states.dart';
+import '../../core/theme/foundations/app_radius.dart';
+import '../../core/theme/extensions/theme_context_extension.dart';
 
 /// A row in a list.
 ///

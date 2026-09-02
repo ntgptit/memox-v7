@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../shared/widgets/mx_dropdown.dart';
-import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/theme/theme_context_extension.dart';
+import '../../../../../core/theme/foundations/app_spacing.dart';
+import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../domain/models/card_transfer_field_model.dart';
 import '../support/card_import_labels_widget.dart';
