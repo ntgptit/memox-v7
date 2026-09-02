@@ -100,8 +100,18 @@ Map<String, Color> auditTokensOf(ThemeData theme) {
     'semantic.surfaceMuted': x.surfaceMuted,
     'semantic.surfaceElevated': x.surfaceElevated,
     'semantic.borderSubtle': x.borderSubtle,
-    'semantic.focusRing': x.focusRing,
-    'semantic.secondaryAction': x.secondaryAction,
+    'semantic.successContainer': x.successContainer,
+    'semantic.onSuccessContainer': x.onSuccessContainer,
+    'semantic.warningContainer': x.warningContainer,
+    'semantic.onWarningContainer': x.onWarningContainer,
+    'semantic.infoContainer': x.infoContainer,
+    'semantic.onInfoContainer': x.onInfoContainer,
+    // Equal to `colorScheme.errorContainer` by construction, and listed anyway:
+    // the dump's job is to say what the extension carries, not what is
+    // reachable some other way. `borderControl` and `progressTrack` are missing
+    // from this table for exactly the reason that argument would justify.
+    'semantic.dangerContainer': x.dangerContainer,
+    'semantic.onDangerContainer': x.onDangerContainer,
     // Resolved component colours, not tokens. `background` is an argument to
     // the private theme builder rather than a field on the extension (the
     // button pairs used to be too, until the builders learned to read the

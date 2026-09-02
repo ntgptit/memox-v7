@@ -23,13 +23,14 @@ List<AuditRule> memoxAuditRules({required bool isDark}) {
   final semantic = isDark
       ? const AppSemanticColors.dark()
       : const AppSemanticColors.light();
+  final scheme = (isDark ? buildDarkTheme() : buildLightTheme()).colorScheme;
 
   return <AuditRule>[
     // First, because everything after it is meaningless if the screen threw.
     const NoErrorWidgetRule(),
     const TextContrastRule(),
     NonTextContrastRule(<Color>[
-      semantic.focusRing,
+      scheme.primary,
       semantic.success,
       semantic.warning,
       semantic.danger,

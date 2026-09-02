@@ -247,7 +247,7 @@ jobs:
         working-directory: widgetbook
 
   goldens:
-    # **Pixel comparison, on the PR, on Windows.**
+    # **Pixel comparison, on the PR, on Linux.**
     #
     # `ci-full.yml` has had this job since the start and it is
     # `workflow_dispatch:` — so nothing ever compared a committed PNG against a
@@ -258,13 +258,25 @@ jobs:
     # hand. Every other gate in this file reads source text or a widget tree,
     # and none of them can see a rectangle that moved.
     #
-    # Windows because goldens are bound to it — `dart_test.yaml` pins the
-    # platform, and a Linux render differs in font rasterisation. The runner
-    # costs double, which is why the job is conditional rather than always-on.
-    name: goldens (windows)
+    # **Linux since M100.24, and the platform is a choice rather than a
+    # property.** Text rasterisation differs between operating systems by 1-3%
+    # of pixels, so a golden has exactly one authoring platform and every
+    # renderer has to be that platform. It was Windows because that is where
+    # the project was developed; it is Linux now because that is where the
+    # goldens are *written* — cloud sessions do the regenerating, every other
+    # job in this file is `ubuntu-latest`, and the owner reviews through the
+    # screen gallery rather than by re-rendering locally.
+    #
+    # The cost is stated so it is not discovered: a Windows checkout can no
+    # longer run `--update-goldens` and have CI agree. Regenerate from Linux or
+    # WSL. CLAUDE.md carries the same rule next to the command.
+    #
+    # Ubuntu is also half the price of the Windows runner, which is why this
+    # job can stay conditional without the conditional doing much work.
+    name: goldens (linux)
     needs: classify
     if: needs.classify.outputs.needs_goldens == 'true'
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
@@ -288,6 +300,15 @@ jobs:
 
       - name: generate
         run: dart run build_runner build --delete-conflicting-outputs
+
+      # **Needed now that this job is on Linux, and not before.** The Linux test
+      # runner asks for lowercase material-font paths while the SDK artifact
+      # ships mixed case; without the symlinks every glyph falls back to
+      # `flutter_test`'s box font and all 300 goldens disagree at once. The host
+      # and Widgetbook jobs have always run this — the Windows golden job never
+      # had to.
+      - name: prepare material fonts
+        run: bash .claude/skills/flutter-workflow/scripts/prepare_test_fonts.sh
 
       # **UTC, explicitly.** `card_detail` renders review timestamps through
       # `toLocal()` — correct for the app, since the database stores UTC

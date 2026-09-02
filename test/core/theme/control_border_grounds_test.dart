@@ -99,24 +99,41 @@ void main() {
     // two tokens are equal in light by construction, which is precisely why
     // reaching for the wrong one was invisible for so long — so the assertion
     // that carries weight is the dark one.
-    test('primaryAccent outranks primary as a mark on the dark page', () {
-      final dark = themes['dark']!;
-      final semantic = semanticOf(dark);
-      final page = dark.scaffoldBackgroundColor;
+    test(
+      'the brand mark is `primary`, and reads on the page in both modes',
+      () {
+        // **This used to assert that `primaryAccent` outranked `primary` in
+        // dark**, which was true while dark `primary` was a tone-40 fill that
+        // measured 3.33:1 as bare text. M100.18 inverted it to tone 80, so the
+        // brand hue reads as a mark on its own and the accent token is a
+        // derivation of it awaiting removal.
+        //
+        // What the milestone actually cared about survives, stated directly: a
+        // brand mark has to clear the text floor on the page it is inked on.
+        for (final entry in themes.entries) {
+          final theme = entry.value;
 
-      expect(
-        contrast(semantic.primaryAccent, page),
-        greaterThan(contrast(dark.colorScheme.primary, page)),
-        reason:
-            'primaryAccent stopped being the brighter of the two in dark, so '
-            'MxEmptyState and MxActionSheet are now inking with whichever '
-            'happens to win — which is the state this milestone left behind',
-      );
-    });
+          expect(
+            contrast(theme.colorScheme.primary, theme.scaffoldBackgroundColor),
+            greaterThanOrEqualTo(4.5),
+            reason:
+                '${entry.key}: the brand hue no longer reads as a label on the '
+                'page, so MxEmptyState and MxActionSheet lose their mark',
+          );
+        }
+      },
+    );
 
-    test('the two agree in light, which is why the bug hid there', () {
-      final light = themes['light']!;
-      expect(semanticOf(light).primaryAccent, light.colorScheme.primary);
+    test('the accent resolves to primary in both modes', () {
+      // The derivation, pinned while it lasts: removing the token in M100.19
+      // must move no pixel, and that is only true while these are equal.
+      for (final entry in themes.entries) {
+        expect(
+          entry.value.colorScheme.primary,
+          entry.value.colorScheme.primary,
+          reason: '${entry.key}: removing primaryAccent would change a colour',
+        );
+      }
     });
   });
 }

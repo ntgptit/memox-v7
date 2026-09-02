@@ -56,6 +56,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final semantic = semanticOf(tester);
+
     for (var index = 0; index < actions.length; index++) {
       final action = actions[index];
       final expected = switch (action) {
@@ -134,11 +135,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final semantic = semanticOf(tester);
     final theme = Theme.of(tester.element(find.text('Box 2 → 3')));
     expect(
       tester.widget<Text>(find.text('Box 2 → 3')).style!.color,
-      semantic.primaryAccent,
+      theme.colorScheme.primary,
     );
     expect(
       tester.widget<Text>(find.textContaining('Due')).style!.color,
@@ -215,7 +215,7 @@ void main() {
           expect(contrast(ink, scheme.surface), greaterThanOrEqualTo(4.5));
         }
         expect(
-          contrast(semantic.primaryAccent, scheme.surface),
+          contrast(scheme.primary, scheme.surface),
           greaterThanOrEqualTo(4.5),
         );
       });
@@ -227,7 +227,7 @@ void main() {
           greaterThanOrEqualTo(3),
         );
         expect(
-          contrast(semantic.primaryAccent, semantic.surfaceMuted),
+          contrast(scheme.primary, semantic.surfaceMuted),
           greaterThanOrEqualTo(4.5),
         );
         expect(
@@ -250,7 +250,7 @@ void main() {
           greaterThanOrEqualTo(3),
         );
         expect(
-          contrast(semantic.primaryAccent, semantic.progressTrack),
+          contrast(scheme.primary, semantic.progressTrack),
           greaterThanOrEqualTo(3),
         );
       });
@@ -260,10 +260,11 @@ void main() {
         'why height carries them', () {
       final semantic = buildDarkTheme().extension<AppSemanticColors>()!;
 
-      // `progressFillDark` and `primaryAccentDark` are both `focusRingDark`.
-      // Recorded so the day they diverge, the height difference can be revisited
-      // rather than inherited.
-      expect(semantic.progressFill, semantic.primaryAccent);
+      // Both are `primary` in dark since M100.18 — `progressFill` derives
+      // from it, and the accent token that used to stand between them is gone.
+      // Recorded so the day they diverge, the height difference can be
+      // revisited rather than inherited.
+      expect(semantic.progressFill, buildDarkTheme().colorScheme.primary);
     });
   });
 }

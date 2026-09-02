@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'app_elevation.dart';
 import 'app_interaction_states.dart';
-import 'app_material_roles.dart';
 import 'app_radius.dart';
 import 'app_semantic_colors.dart';
 import 'app_spacing.dart';
@@ -65,14 +64,12 @@ DatePickerThemeData buildDatePickerTheme(
   AppSemanticColors semantic,
   TextTheme texts,
 ) {
-  final selected = selectedInk(scheme);
-
   return DatePickerThemeData(
-    backgroundColor: scheme.surface,
+    backgroundColor: scheme.surfaceContainerHigh,
     elevation: AppElevation.none,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(AppRadius.lg),
-      side: BorderSide(color: semantic.borderSubtle),
+      side: BorderSide(color: scheme.outlineVariant),
     ),
     headerForegroundColor: scheme.onSurfaceVariant,
     weekdayStyle: texts.labelMedium?.copyWith(color: scheme.onSurfaceVariant),
@@ -92,44 +89,52 @@ DatePickerThemeData buildDatePickerTheme(
     // Today is a ring, not a fill — M3's own answer, and the one that keeps a
     // filled day meaning *selected* and nothing else.
     todayBorder: BorderSide(
-      color: semantic.primaryAccent,
+      color: scheme.primary,
       width: AppStroke.selectionControl,
     ),
     todayForegroundColor: WidgetStateProperty.resolveWith((states) {
       if (states.contains(WidgetState.selected)) return scheme.onPrimary;
 
-      return semantic.primaryAccent;
+      return scheme.primary;
     }),
-    // A range is a run of days, so it takes the selection tint the pills and
-    // the navigation indicator already use rather than a second one.
-    rangeSelectionBackgroundColor: scheme.primaryContainer,
+    // `secondaryContainer`, which is `_DatePickerDefaultsM3`'s own answer and
+    // the same tint the pills and the navigation indicator take. It read
+    // `primaryContainer` on that reasoning while those two controls were also
+    // substituted; M100.22 moved all three back together.
+    rangeSelectionBackgroundColor: scheme.secondaryContainer,
     rangePickerHeaderForegroundColor: scheme.onSurfaceVariant,
+    // A selected year is a `primary` fill under `onPrimary`, exactly as a
+    // selected day is — `_DatePickerDefaultsM3` names both, and the container
+    // pair that stood here made the year grid say "selected" in a different
+    // voice from the day grid two taps away.
     yearForegroundColor: WidgetStateProperty.resolveWith((states) {
-      if (states.contains(WidgetState.selected)) return selected;
+      if (states.contains(WidgetState.selected)) return scheme.onPrimary;
 
       return scheme.onSurfaceVariant;
     }),
     yearBackgroundColor: WidgetStateProperty.resolveWith((states) {
-      if (states.contains(WidgetState.selected)) return scheme.primaryContainer;
+      if (states.contains(WidgetState.selected)) return scheme.primary;
 
       return null;
     }),
-    dividerColor: semantic.borderSubtle,
+    dividerColor: scheme.outlineVariant,
   );
 }
 
 /// The segmented button — a range switch (week / month / year) on the deferred
 /// progress and study-history screens.
 ///
-/// **`primaryContainer` and [selectedInk], because this app has one answer for
-/// "this segment is the active one" and it is already drawn twice.** M3 uses
-/// the `secondaryContainer` / `onSecondaryContainer` pair; the owner's review
-/// (2026-08-20) moved the app's active state to the brand container, which is
-/// what the navigation bar's indicator and `MxPillButton` both render. A third
-/// answer here would make the same question look different on three screens.
+/// **`secondaryContainer` / `onSecondaryContainer`, which is
+/// `_SegmentedButtonDefaultsM3`'s pair and now the app's.** This slot did carry
+/// the brand container, on the sound argument that the app should have one
+/// answer for "this segment is the active one" and that the navigation
+/// indicator and `MxPillButton` already drew it. The argument was right and the
+/// role was wrong: all three had been re-pointed away from M3 for the same
+/// reason, so agreeing with each other only made the deviation consistent.
+/// M100.22 moved all three back and moved the tone underneath them instead.
 ///
-/// [selectedInk] rather than `primary` for the same reason it exists: on a
-/// dark `primaryContainer` fill, `primary` measures 2.13:1.
+/// The label is the container's own `on` role — the M3 pairing — rather than
+/// `primary`, which is a fill and not the ink for a fill.
 SegmentedButtonThemeData buildSegmentedButtonTheme(
   ColorScheme scheme,
   AppSemanticColors semantic,
@@ -141,23 +146,42 @@ SegmentedButtonThemeData buildSegmentedButtonTheme(
             ? semantic.disabledSurface
             : Colors.transparent;
       }
-      if (states.contains(WidgetState.selected)) return scheme.primaryContainer;
+      // `secondaryContainer`/`onSecondaryContainer` —
+      // `_SegmentedButtonDefaultsM3` names both, and M100.22 restored them
+      // from the brand container the 2026-08-20 review had put here. The
+      // review wanted the selected segment to carry brand; the tone move in
+      // `AppMaterialRoles.secondaryContainerLight` is what pays for that
+      // without the segment claiming a role that means "primary action".
+      if (states.contains(WidgetState.selected)) {
+        return scheme.secondaryContainer;
+      }
 
       return Colors.transparent;
     }),
     foregroundColor: WidgetStateProperty.resolveWith((states) {
       if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
-      if (states.contains(WidgetState.selected)) return selectedInk(scheme);
-
-      return scheme.onSurfaceVariant;
-    }),
-    overlayColor: AppInteractionStates.controlOverlay(scheme),
-    side: WidgetStateProperty.resolveWith((states) {
-      if (states.contains(WidgetState.focused)) {
-        return AppInteractionStates.focusRing(semantic);
+      if (states.contains(WidgetState.selected)) {
+        return scheme.onSecondaryContainer;
       }
 
-      return BorderSide(color: semantic.borderControl);
+      // `onSurface`, not `onSurfaceVariant`: an unselected *segment* is still a
+      // live target inside a control the user is reading, where an unselected
+      // nav destination is one of four peers. M3 splits them that way and this
+      // had taken the navigation answer.
+      return scheme.onSurface;
+    }),
+    overlayColor: AppInteractionStates.controlOverlay(scheme),
+    // `_SegmentedButtonDefaultsM3.side` has two answers and neither is a focus
+    // ring: disabled, then `outline`. The focus branch that stood here returned
+    // `primary`, so tabbing onto a segment replaced the control's boundary role
+    // — removed at M100.23. The keyboard cue is `overlayColor` above, which is
+    // where M3 puts it.
+    side: WidgetStateProperty.resolveWith((states) {
+      if (states.contains(WidgetState.disabled)) {
+        return BorderSide(color: semantic.disabledSurface);
+      }
+
+      return BorderSide(color: scheme.outline);
     }),
     shape: WidgetStatePropertyAll<OutlinedBorder>(
       RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
@@ -171,27 +195,26 @@ SegmentedButtonThemeData buildSegmentedButtonTheme(
 /// The slider — `CLAUDE.md` names SM-2 parameters as deliberately deferred, and
 /// a bounded numeric parameter is what a slider is for.
 ///
-/// **The filled half is `focusRing`, not `primary`, and that is the third time
-/// this palette has forced the same correction.** M3 fills the active track
-/// with `primary` and the rest with `secondaryContainer`, and this theme was
-/// written that way. Measured, M3's own pairing scores **6.02:1 in light and
-/// 2.11:1 in dark** — under the 3:1 a slider's value needs, because
-/// `primaryDark` is deliberately held between the surfaces and the text (see
-/// `AppColors.primaryDark`) and *no* neutral in the dark palette reaches 3:1
-/// from it: the best, `surfaceMuted`, is 2.45.
+/// **`primary` on `secondaryContainer` — M3's own pairing, in both halves.**
 ///
-/// So the fix is the one `buildProgressIndicatorTheme` already made and
-/// `AppSemanticColors.primaryAccent` already records — the same hue at the
-/// intensity meant to be seen. `focusRing` against `secondaryContainer` reads
-/// **6.14:1 and 4.02:1**, and against the card behind it 7.41:1 and 5.51:1.
-/// The inactive half keeps M3's role; only the half that has to be read moves.
+/// The active half is worth its history, because it is the case this whole
+/// palette line was argued from. It was a substitute token for a while:
+/// measured against `secondaryContainer`, `primary` scored **6.02:1 in light
+/// and 2.11:1 in dark**, under the 3:1 a slider's value needs, because
+/// `primaryDark` was a fill tone held between the surfaces and the text and
+/// *no* neutral in the dark palette reached 3:1 from it.
+///
+/// M100.18 fixed the role instead of the component: `primary` against
+/// `secondaryContainer` now reads **6.02:1 light and 7.31:1 dark**, and against
+/// the card behind it 7.27:1 and 10.02:1. Both halves keep M3's role, which is
+/// the whole point of moving the palette rather than the component.
 ///
 /// **This reverses the argument this file first shipped**, which was that a
 /// slider is pressable so it takes the accent while a progress bar does not.
 /// The premise is still right — a slider is a control — but pressability is
-/// carried by the thumb, not by the hue, and the hue has a contrast job that
-/// `primary` cannot do on a dark card. A test pins the M3 pairing as failing,
-/// so the reason cannot decay back into a preference.
+/// carried by the thumb, not by the hue. The hue had a contrast job `primary`
+/// could not do on a dark card, and the answer was to give `primary` a tone
+/// that can.
 ///
 /// The value indicator takes the inverse pair — the same surface a snack bar
 /// uses, and for the same reason: it is a momentary overlay that has to read
@@ -201,12 +224,12 @@ SliderThemeData buildSliderTheme(
   AppSemanticColors semantic,
   TextTheme texts,
 ) => SliderThemeData(
-  activeTrackColor: semantic.focusRing,
+  activeTrackColor: scheme.primary,
   // `secondaryContainer` is M3's, and it is also the one neutral fill in this
   // palette that is not already a surface tier — so the inactive half cannot be
   // mistaken for the card behind it.
   inactiveTrackColor: scheme.secondaryContainer,
-  thumbColor: semantic.focusRing,
+  thumbColor: scheme.primary,
   disabledActiveTrackColor: semantic.disabledSurface,
   disabledInactiveTrackColor: semantic.disabledSurface,
   disabledThumbColor: semantic.disabledSurface,
@@ -215,7 +238,7 @@ SliderThemeData buildSliderTheme(
   // floor, which is the right floor — a tick is a mark on a track, not text.
   activeTickMarkColor: scheme.onPrimary,
   inactiveTickMarkColor: scheme.onSecondaryContainer,
-  overlayColor: semantic.focusRing.withValues(alpha: AppStateOpacity.pressed),
+  overlayColor: scheme.primary.withValues(alpha: AppStateOpacity.pressed),
   valueIndicatorColor: scheme.inverseSurface,
   valueIndicatorTextStyle: texts.labelMedium?.copyWith(
     color: scheme.onInverseSurface,
@@ -226,26 +249,25 @@ SliderThemeData buildSliderTheme(
 /// `docs/wbs.md` records as blocked on a study-answers screen rather than on a
 /// design.
 ///
-/// **`primaryAccent` for the selected label, and this is the distinction that
-/// token was split out to carry.** A tab's label sits on the page or a card, not
-/// on a selection fill — so it is the *brand hue as a label*, which is
-/// `primaryAccent` (6.26:1 on the dark page), and not [selectedInk], whose
-/// ground is a container tint. The two agree in light and part company in dark,
-/// which is exactly the case `AppMaterialRoles.selectedInk` documents.
+/// **`primary` for the selected label, which is M3's own answer and was not
+/// available until M100.18.** A tab's label sits on the page or a card, not on a
+/// selection fill, so it wants the brand hue as a label — and the old dark fill
+/// tone could not be one, at 3.33:1 on the page against the 4.5:1 text needs. A
+/// separate accent token carried it until the palette inverted; `primary` now
+/// measures 11.36:1 there.
 TabBarThemeData buildTabBarTheme(
   ColorScheme scheme,
-  AppSemanticColors semantic,
   TextTheme texts,
 ) => TabBarThemeData(
-  labelColor: semantic.primaryAccent,
+  labelColor: scheme.primary,
   unselectedLabelColor: scheme.onSurfaceVariant,
   labelStyle: texts.titleSmall,
   unselectedLabelStyle: texts.titleSmall,
-  indicatorColor: semantic.primaryAccent,
+  indicatorColor: scheme.primary,
   indicatorSize: TabBarIndicatorSize.tab,
   // The hairline under the whole bar, which is the same line every other band
   // in the app is separated by.
-  dividerColor: semantic.borderSubtle,
+  dividerColor: scheme.outlineVariant,
   dividerHeight: AppStroke.hairline,
   overlayColor: AppInteractionStates.controlOverlay(scheme),
 );

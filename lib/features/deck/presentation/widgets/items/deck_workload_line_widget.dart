@@ -62,8 +62,11 @@ class DeckWorkloadLineWidget extends StatelessWidget {
       if (overdueCount > 0)
         _WorkloadChip(
           label: overdueLabel,
-          fill: context.colors.errorContainer,
-          ink: AppInk.onErrorContainer,
+          // `dangerContainer`, which *is* `errorContainer` — one red system.
+          // The name is the fix: a review past its day is late, not a fault
+          // (M100.21).
+          fill: semantic.dangerContainer,
+          ink: AppInk.onDangerContainer,
         ),
       if (hasDue)
         _WorkloadChip(

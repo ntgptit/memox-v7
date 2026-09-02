@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'app_button_themes.dart';
 import 'app_icon_size.dart';
 import 'app_interaction_states.dart';
-import 'app_material_roles.dart';
 import 'app_radius.dart';
 import 'app_semantic_colors.dart';
 import 'app_spacing.dart';
@@ -38,14 +37,21 @@ import 'app_typography.dart';
 
 /// The resting fill for a pill, before any pointer or disabled state.
 ///
-/// Selected borrows the navigation bar's indicator pair, so "this one is active"
-/// looks the same whether it is a tab or a filter; unselected is a card sitting
-/// on the page, which is the same surface-over-background step every other panel
-/// uses. That pair is the **brand** container since the owner review of
-/// 2026-08-20 — it was the neutral `secondaryContainer`, which on a light page
-/// made an applied filter and an unapplied one nearly the same rectangle.
+/// Selected is `secondaryContainer` — `_ChoiceChipDefaultsM3.color`'s answer,
+/// and the same pair the navigation indicator and the segmented button take, so
+/// "this one is active" looks the same whether it is a tab, a segment or a
+/// filter. Unselected is a card sitting on the page, which is the same
+/// surface-over-background step every other panel uses.
+///
+/// **It was `primaryContainer` between the owner review of 2026-08-20 and
+/// M100.22, and the review's complaint was real**: at `#E4E6EC` an applied
+/// filter and an unapplied one were nearly the same rectangle on a light page —
+/// 7.39 L\* of step against `surface`, where the brand container gave 10.34. The
+/// error was fixing that on the component. M100.22 moved the *tone* instead
+/// (`AppMaterialRoles.secondaryContainerLight`), so the role now gives 10.50 and
+/// the chip can say what it is.
 Color _restingFill(ColorScheme scheme, {required bool isSelected}) =>
-    isSelected ? scheme.primaryContainer : scheme.surface;
+    isSelected ? scheme.secondaryContainer : scheme.surface;
 
 /// The fill for [states], resolved to a solid colour over the ground that state
 /// actually has.
@@ -94,7 +100,7 @@ Color _labelColorFor(
     return semantic.onDisabled;
   }
   if (states.contains(WidgetState.selected)) {
-    return selectedInk(scheme);
+    return scheme.onSecondaryContainer;
   }
 
   return scheme.onSurfaceVariant;
@@ -150,27 +156,33 @@ ChipThemeData buildChipTheme(
   // is legible by contrast alone and the tick would shift the label sideways on
   // every change.
   showCheckmark: false,
+  // **Selected is read first, and the order is the contract rather than a
+  // style.** `_ChoiceChipDefaultsM3.side` decides on `isSelected` before it
+  // looks at anything else, so a chip that is selected *and* focused is still a
+  // selected chip. This resolver used to ask about focus first and paint a
+  // `primary` ring, which meant one state combination — the one a keyboard user
+  // is in whenever they tab onto an applied filter — silently left the
+  // canonical role. That is the bug class M100.23 exists to close: an
+  // interaction state may add feedback, it may not change what a slot *means*.
+  //
+  // Focus is not lost by removing it from here. It is carried by the fill, in
+  // `_fillFor` above, which tints the resting colour by `AppStateOpacity.focus`
+  // — and a state layer is exactly where M3 puts a chip's focus cue.
   side: WidgetStateBorderSide.resolveWith((states) {
+    if (states.contains(WidgetState.selected)) {
+      // **No edge when selected, in every combination.**
+      // `_ChoiceChipDefaultsM3.side` returns a transparent side for a selected
+      // chip whether or not it is enabled: the fill is what says "applied", and
+      // an edge in a third colour makes the pill a different shape from its
+      // unselected neighbours as well as a different colour.
+      return const BorderSide(color: Colors.transparent);
+    }
     if (states.contains(WidgetState.disabled)) {
       return BorderSide(color: disabledSurfaceTint(scheme));
     }
-    // The same ring `iconButtonTheme` and the outlined button draw, from the
-    // one definition. A pill is reachable by keyboard on the web build, which is
-    // the E2E channel, and Material's own focus cue for a chip is a fill tint
-    // this theme now owns — so without a ring the focused pill and the hovered
-    // one look alike.
-    if (states.contains(WidgetState.focused)) {
-      return AppInteractionStates.focusRing(semantic);
-    }
-    // **Selected is ringed in the brand** (owner review, 2026-08-20). Fill and
-    // label alone left an applied sort looking like an unapplied one on a
-    // light ground: `primaryContainer` against `surface` is a small step, and
-    // the ring is what makes it a state rather than a shade.
-    if (states.contains(WidgetState.selected)) {
-      return BorderSide(color: scheme.primary);
-    }
-
-    return BorderSide(color: semantic.borderSubtle);
+    // `outlineVariant`, which is what `borderSubtle` had been aliasing — the
+    // two are the same value, and M3 names this slot the decorative one.
+    return BorderSide(color: scheme.outlineVariant);
   }),
   // **Pill, kept.** `AppRadius.sm` is named "chips, badges, small indicators"
   // and going to it was tried — the owner looked at the render and kept the

@@ -7,8 +7,8 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.17 (`ColorScheme` đúng 45 role M3 — gỡ `surfaceTint` khai tường minh, catalog đủ 45 swatch); M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
-| **Last updated** | 2026-09-01 |
+| **Updated by task** | M100.24 (golden về một nền tảng: job CI chuyển sang Linux, thêm bước font, bỏ tolerance); M100.23 (tổ hợp state thôi phá canonical role; guard AST khoá slot→role; luật nền tảng golden); M100.22 (năm component về role M3 canonical; hai hex palette gánh phần contrast; gỡ khái niệm selected ink chung); M100.21 (container cho bốn semantic; chip trạng thái thôi mượn role accent); M100.20 (bảy binding component về role M3; sàn độ nổi của menu bỏ theo quyết định chủ dự án); M100.19 (gỡ ba token thay thế khỏi 112 call-site, golden chứng minh không đổi pixel); M100.18 (dark `primary` đảo tone theo M3; ba token thay thế thành dẫn xuất); M100.17 (`ColorScheme` đúng 45 role M3 — gỡ `surfaceTint` khai tường minh, catalog đủ 45 swatch); M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
+| **Last updated** | 2026-09-02 |
 
 Single source of truth for project progress. Update it in the same commit as the
 work it describes. A task is `done` only when it meets the Definition of Done in
@@ -16505,10 +16505,451 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
   lỗi; `widgetbook/test/catalog_smoke_test.dart`.
 - **Checklist phases:** 7.
 
+### M100.18 · Dark `primary` đảo tone theo M3 — và năm token thay thế mất lý do
+
+- **Status:** done
+- **Goal:** Chốt nguyên tắc chủ dự án nêu: component gắn với role M3 quy định cho
+  nó; tỉ lệ không đạt thì **đổi hex của role**, không đổi role trên component.
+  Áp nguyên tắc đó vào nguyên nhân gốc, thay vì sửa từng chỗ triệu chứng.
+- **Scope:** `app_colors.dart` (`primaryDark`, `onPrimaryDark`, `primaryAccent*`,
+  `progressFillDark`), `app_border_colors.dart` (`focusRing*`),
+  `app_material_roles.dart` (`selectedInk`), `app_toggle_themes.dart` (viền
+  checkbox đã tick), `design_system/tokens/colors.css`, `docs/architecture.md`
+  (AD-14), năm file test mã hoá giả định cũ, goldens.
+- **Out of scope:** gỡ ba token thay thế khỏi 112 call-site — đó là M100.19, cố ý
+  tách để thay đổi thị giác được review riêng khỏi một loạt đổi tên cơ học.
+  Cũng ngoài phạm vi: `secondary`/`tertiary`/`error` (xem dưới), và bộ role
+  surface của overlay (M100.20).
+- **Đo trước khi sửa.** Kiểm kê được **12 chỗ tráo role để đạt tỉ lệ**, và tất cả
+  quy về một nguyên nhân: M3 đặt `primary` của dark scheme ở tone 80 (tone
+  **sáng**) với `onPrimary` tone 20; palette này để `primary` ở tone-fill L\* 42.5
+  mang chữ trắng. Hệ quả đo được: 2.90:1 trên card, hụt sàn 3:1 của WCAG 1.4.11
+  đúng **0.10**, và không đâu gần 4.5:1 mà nhãn tab cần. Điểm giao là cứng — giá
+  trị hue-240 đầu tiên đạt 4.5:1 như chữ làm trắng trên nó tụt còn 3.73:1, tức
+  `onPrimary` hỏng. Một tone không phục vụ được cả hai vai.
+- **Ba họ accent còn lại đã đúng M3 từ trước, nên không đụng.** `secondary`,
+  `tertiary`, `error` ở dark đều đã đảo tone, lệch tone mục tiêu 4,8–13,3 L\* và
+  **không ràng buộc nào của chúng hỏng**. Chủ dự án chọn "đảo cả bốn"; phép đo cho
+  thấy ba trong bốn đã đảo rồi, và trigger để đổi một hex là một tỉ lệ hỏng — nên
+  snap chúng về đúng T80/T20 chỉ đổi pixel mà không sửa lỗi nào. Ghi lại để chủ dự
+  án bác nếu muốn chặt hơn.
+- **Output:** `primaryDark` `#5656C9` → `#C3C3EB` (tone 80, hue 240, chroma
+  0,154 — đúng dải `secondaryDark`/`tertiaryDark` đang ngồi); `onPrimaryDark`
+  `#FFFFFF` → `#262670` (tone 20). `primaryAccent`, `focusRing`, `progressFillDark`
+  thành dẫn xuất của `primary`; `selectedInk()` trả `onPrimaryContainer` ở cả hai
+  mode. Viền checkbox đã tick về `BorderSide.none` theo `_CheckboxDefaultsM3`.
+  Kit CSS mang giá trị mới (AD-14: kit là chuẩn cho giá trị).
+- **Năm test mã hoá giả định cũ đã lật tiền đề, không bị xoá.** Chúng được viết
+  đúng như bẫy báo động — "nếu palette dịch tới mức primary đạt, test này sẽ nói
+  ra thay vì để lại một helper không ai giải thích được" — và chúng đã nổ đúng
+  lúc: `focus_ring_contrast_test` (ring không phải primary), `app_palette_test`
+  (trần luminance 0.20 — công cụ của palette tone-fill), `app_planned_themes_test`
+  (cặp M3 của slider "vẫn hỏng"), `app_selected_ink_test` (đổi role theo
+  brightness), `control_border_grounds_test` (`primaryAccent` vượt `primary`).
+  Mỗi cái nay khẳng định chiều ngược lại, nên palette trôi ngược sẽ làm đỏ.
+- **Một hồi quy thật, tìm bằng test.** Viền checkbox đã tick vẽ `onPrimary` **chỉ
+  ở dark** — lần tráo theo brightness thứ ba — và nó tồn tại vì fill cũ quá gần
+  card. Với `onPrimary` đảo thành tone tối, viền tụt còn 1,29:1. Sửa theo M3: bỏ
+  viền, vì fill tự bao lấy hộp (10,02:1 dark, 7,27:1 light).
+- **Editable documents:** `docs/wbs.md`, `docs/architecture.md` (AD-14)
+- **Acceptance criteria:**
+  - [x] Mọi binding M3 mà `primary` tham gia đều đạt sàn ở cả hai theme.
+  - [x] Ràng buộc "CTA không sáng nhất màn hình" vẫn giữ, phát biểu lại thành
+        quan hệ hai tỉ lệ thay vì trần luminance.
+  - [x] Kit CSS và Dart khớp nhau; `css_token_parity` và `css_derived_parity` xanh.
+  - [x] Năm test lật tiền đề, không test nào bị xoá để lấy màu xanh.
+  - [x] analyze 0/0, theme 225, visual audit 179, design audit 88, full host suite,
+        goldens vẽ lại và review, gallery publish lại đúng URL ghim.
+- **Dependencies:** M100.17
+- **Tests required:** năm file trên; `app_toggle_themes_test` (viền checkbox);
+  goldens dark.
+- **Checklist phases:** 7, 13.
+
+### M100.19 · Gỡ ba token thay thế khỏi 112 call-site — không một pixel dịch
+
+- **Status:** done
+- **Goal:** Đóng nửa còn lại của M100.18. Palette đã đảo tone nên
+  `primaryAccent`, `focusRing` và `selectedInk` chỉ còn là dẫn xuất của
+  `primary`/`onPrimaryContainer`; gỡ hẳn chúng để repo có **một** cách gọi mỗi
+  vai trò thay vì hai cách trỏ cùng một màu.
+- **Scope:** `AppSemanticColors` (bỏ hai field khỏi constructor, hai named
+  constructor, `copyWith`, `lerp`), `AppColors.primaryAccent*`,
+  `AppBorderColors.focusRing*`, `AppMaterialRoles.selectedInk`,
+  `AppInteractionStates.focusRing` (đổi tham số sang `ColorScheme`),
+  `progressFillDark`, 27 call-site trong `lib`, ~50 trong `test`, catalogue
+  Widgetbook, bản đồ token của hai bộ audit, và 25 khối doc comment mô tả
+  token không còn tồn tại.
+- **Out of scope:** mọi giá trị màu — đây là đổi tên, không phải đổi palette.
+- **Bằng chứng là golden, không phải lời hứa.** Toàn bộ 303 golden chạy ở chế
+  độ **so sánh** (không `--update-goldens`) và phải xanh: nếu một call-site nào
+  bị trỏ sai role, ảnh sẽ đổi. Đây là lý do M100.18 và M100.19 được tách đôi —
+  một PR đổi hình có review thị giác, một PR không đổi hình có bằng chứng cơ học.
+- **Hai lỗi tự gây trong lúc refactor, cả hai do thay thế mù:** regex đổi trúng
+  **khoá chuỗi** `'semantic.focusRing'` trong bảng inventory của
+  `audit_theme_steps.dart` và `token_resolver.dart` (đúng ra là xoá dòng, vì
+  token biến mất); và `replace(..., 1)` gỡ đúng khai báo `semantic` mà một
+  group khác đang đọc trong `focus_ring_contrast_test.dart` và
+  `card_detail_timeline_style_test.dart`. Cả hai lộ ra ở analyze, không lọt tới
+  test — nhưng chúng là lý do một refactor "cơ học" vẫn phải chạy đủ gate.
+- **`AppInteractionStates.focusRing` đổi chữ ký thay vì đổi thân hàm.** Nó nhận
+  `AppSemanticColors` chỉ để đọc một field; nay nhận `ColorScheme` và đọc
+  `primary`. Chữ ký là chỗ duy nhất ép mọi call-site khai đúng thứ nó cần.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** như Scope; `--color-primary-accent` và `--color-focus-ring` của
+  kit vẫn được khai (kit là snapshot của design project, không tự ý cắt), nay
+  map sang `AppColors.primary*` trong `css_token_parity_test.dart`.
+- **Acceptance criteria:**
+  - [x] Không còn tham chiếu nào tới ba token trong `lib/`, `test/`,
+        `widgetbook/`, kể cả trong doc comment.
+  - [x] 303 golden xanh ở chế độ so sánh — không một pixel dịch.
+  - [x] analyze 0/0, format sạch, full host suite, guard, architecture, docs.
+- **Dependencies:** M100.18
+- **Tests required:** golden ở chế độ so sánh (bằng chứng chính); full host
+  suite; `css_token_parity_test`.
+- **Checklist phases:** 7.
+
+### M100.20 · Bảy binding component về đúng role M3 của chúng
+
+- **Status:** done
+- **Goal:** Áp phần còn lại của nguyên tắc: mỗi component vẽ bằng role Material
+  quy định cho nó, không bằng một token app tự chế. Đây là nhóm surface mà chủ
+  dự án chọn "áp default M3 cho cả năm".
+- **Scope:** `app_theme.dart` (Dialog, BottomSheet), `app_overlay_themes.dart`
+  (TimePicker container + dial, PopupMenu, progress track, Divider),
+  `app_planned_themes.dart` (DatePicker); test độ nổi của menu; goldens.
+- **Out of scope:** nền NavigationBar (M3 nói `surfaceContainer`, app cố ý vẽ
+  màu page để chrome đọc như một khung — quyết định M99.35, giữ và ghi thành
+  divergence); gỡ token `surfaceElevated` nay đã chết (xem dưới).
+- **Đo trước, trên default M3 của SDK 3.44.8:**
+
+  | component | M3 | trước | sau |
+  |---|---|---|---|
+  | Dialog | `surfaceContainerHigh` | `surface` | ✔ |
+  | BottomSheet | `surfaceContainerLow` | `surface` | ✔ |
+  | TimePicker | `surfaceContainerHigh` | `surface` | ✔ |
+  | TimePicker dial | `surfaceContainerHighest` | `semantic.surfaceMuted` | ✔ |
+  | DatePicker | `surfaceContainerHigh` | `surface` | ✔ |
+  | PopupMenu | `surfaceContainer` | `semantic.surfaceElevated` | ✔ |
+  | Progress track | `secondaryContainer` | `surfaceContainerHighest` | ✔ |
+  | Divider | `outlineVariant` | `semantic.borderSubtle` | ✔ (cùng giá trị) |
+
+- **Không có hồi quy tương phản:** mọi cặp chữ trên nền mới đo từ 5,61:1 tới
+  16,41:1, sàn 4,5; fill progress trên track mới 6,02:1 / 7,30:1, sàn 3.
+- **Một sàn nội bộ bị bỏ, và đó là quyết định của chủ dự án.** `PopupMenu` trên
+  `surfaceContainer` nổi khỏi card **3,50 L\*** ở dark, dưới sàn 7,70 mà test
+  `component_depth_and_state_test.dart` đang giữ. Đo cho thấy sàn ấy không thoả
+  được bằng cách nào hợp lý: shadow dark trên card chỉ đáng 0,71 L\* ở alpha
+  thật, và nâng `surfaceContainer` lên 17,95 L\* thì nó vượt `surfaceContainerHigh`
+  (16,90) — tức phải giãn lại **cả thang** dark. Chủ dự án chọn nhận bước thang
+  của M3. Lý do sàn 7,70 không áp được: nó là lift của **card trên page**, còn
+  đây là **menu trên card** — một suy diễn của repo, không phải của M3.
+  Khiếm khuyết mà test được viết ra để bắt vẫn còn nguyên và không phải "bước
+  nhỏ": nó là menu vẽ `surface` trên `surface` ở elevation 0, tức **0,00 L\***.
+  Test nay khẳng định menu ở **một rung khác**, đúng thứ M3 bảo đảm.
+- **Một lỗi im lặng do đổi chữ ký ở M100.19, chỉ test bắt được.**
+  `AppInteractionStates.focusRing(t.extension()!)` — `extension()` là generic và
+  suy kiểu **từ tham số**. Đổi tham số sang `ColorScheme` biến nó thành
+  `t.extension<ColorScheme>()`, hợp kiểu và trả **null**. Analyzer sạch, hai test
+  toggle đỏ. Ghi lại vì nó là hình mẫu: đổi kiểu tham số của một hàm mà call-site
+  dùng generic suy kiểu thì analyzer không bảo vệ được.
+- **Một sót của M100.19 phát hiện ở đây:** pin kích thước dump của audit vẫn là
+  65 sau khi dòng `focusRing` bị gỡ khỏi inventory (đúng phải là 64). Nó lọt vì
+  full suite của M100.19 không khởi động được và chỉ golden được chạy. Đã sửa;
+  bài học là "gate nào không chạy thì coi như đỏ", không phải "xanh vì không đỏ".
+- **`surfaceElevated` nay không còn consumer nào trong `lib`** — đúng mục 7 của
+  bản audit chủ dự án giao. Chưa gỡ ở đây: 21 dòng ở 7 file test cộng token
+  `--color-surface-elevated` của kit, và nó thuộc đợt hợp nhất hai thang surface
+  chứ không phải đợt bind component. Ghi vào nợ để đợt sau nhặt.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** bảy slot theme đọc role M3 (bảng trên); `buildDividerTheme` nhận
+  `ColorScheme` thay vì `AppSemanticColors`; `component_depth_and_state_test.dart`
+  phát biểu lại độ nổi của menu theo M3; pin dump audit 65 → 64; goldens của
+  các overlay vẽ lại; `design_audit/` regenerate (321 → 318 colour site).
+- **Acceptance criteria:**
+  - [x] Bảy slot đọc role M3; không slot nào còn đọc token app tự chế.
+  - [x] Không cặp chữ nào tụt dưới sàn ở cả hai theme.
+  - [x] Test độ nổi của menu phát biểu lại theo M3, không bị xoá.
+  - [x] analyze 0/0, theme + visual audit 404, design audit 88, full host suite,
+        goldens vẽ lại và review, gallery publish lại.
+- **Dependencies:** M100.19
+- **Tests required:** `component_depth_and_state_test.dart`, `app_toggle_themes_test.dart`,
+  `app_overlay_themes_test.dart`, visual audit, goldens.
+- **Checklist phases:** 7.
+
+### M100.21 · Container cho bốn semantic — trạng thái nghiệp vụ thôi mượn role accent
+
+- **Status:** done
+- **Goal:** Đóng P1 của bản audit chủ dự án giao: chip trạng thái của Import
+  đang vẽ `secondaryContainer` cho "ready" và `tertiaryContainer` cho
+  "duplicate" — hai role M3 dành cho accent cân bằng giao diện, bị dùng làm chỗ
+  giữ nghĩa nghiệp vụ. Và `overdue` đang gọi `errorContainer`, tức nói "lỗi"
+  ở chỗ nó nghĩa là "trễ".
+- **Scope:** `AppColors` (12 hằng số container), `AppSemanticColors` (6 field +
+  cặp `dangerContainer` dẫn xuất), `AppInk` (4 ink mới),
+  `design_system/tokens/colors.css`, chip trạng thái Import, hai call-site
+  overdue, `css_token_parity_test`, goldens, và hai registry của audit
+  (`app_palette.dart`, `auditTokensOf` + `TokenResolver`).
+- **Out of scope:** giá trị của bốn fill semantic; `warningContainer` chưa có
+  caller nào — dựng cùng lô vì bốn semantic là một họ và để lại một lỗ là cách
+  lỗ đó được lấp bằng role accent lần sau.
+- **Nguyên nhân gốc, đo được: bốn semantic có fill mà không có container.**
+  Container pair duy nhất tồn tại thuộc về `primary`, `secondary`, `tertiary`,
+  `error`. Một chip trạng thái cần nền tô kèm nhãn, nên nó với tay lấy cái gần
+  nhất. Đây đúng là hình mẫu mà M100.18 đã đóng ở tầng role: thiếu một token
+  thì component đi mượn, và chỗ mượn là bug.
+- **Dẫn xuất, không phải chọn tay, theo đúng cách container hiện có được dựng.**
+  Bốn container light hiện có tái dựng được thành tint của chính fill trên
+  `surface` ở alpha 0,127–0,171 (trung bình 0,142, sai số tái dựng 0,6–5,4/255)
+  — nên ba cái mới lấy trung bình đó. Bốn container **dark thì không** tái dựng
+  được như vậy (sai số tới 28/255, tức hand-tuned); cái chúng chia sẻ là một
+  dải: L\* 21,5–29,0 ở chroma 0,153–0,263 — nên dark đặt ở L\* 24,0, chroma
+  0,20, trên hue của chính role. Ink lấy tone mà các cặp `on*Container` hiện có
+  đang chiếm (L\* 14–23 light, 86–89 dark), cho ra 10,80–10,98:1 và 8,35:1 —
+  nằm trong dải 9,75–11,46 và 7,24–9,09 của app, thay vì gần đen mà một phép
+  tìm "cái đầu tiên đạt 4,5" sinh ra (bản đầu của tôi cho 15,06:1).
+- **`danger` không có giá trị mới, và đó là điểm của việc `error` là `danger`.**
+  `dangerContainer`/`onDangerContainer` dẫn xuất từ `AppMaterialRoles.errorContainer*`.
+  Không pixel nào đổi ở overdue; cái đổi là call-site thôi tự nhận là lỗi.
+- **Thêm token mà không đăng ký thì audit không thấy nó — bắt được ở review.**
+  Lô đầu sửa `AppColors`, `AppSemanticColors`, kit CSS và call-site, nhưng bỏ
+  quên hai chỗ hỏi "màu này có phải của mình không": `lightPaletteTokens` /
+  `darkPaletteTokens` (`PaletteClosureRule` và `color_scheme_roles_test` dùng
+  chung), và bảng 8 field mà `auditTokensOf` với `TokenResolver` cùng giữ.
+  `TokenResolver` khớp `AppColors.xxxLight` bằng cách cắt hậu tố rồi tìm key
+  kết thúc bằng `.xxx`, nên field thiếu trong bảng làm hằng số **unresolvable**
+  — đúng như `usage_inventory.json` đã commit ghi cho cả 12. Ghim dump 64 → 72.
+  Ghi lại vì đây là điều ghim dump nói sẵn: *"a role added to Material and not
+  listed in `auditTokensOf` is invisible to every later step"* — và bước 2–6 của
+  audit không assert gì cứng, nên lỗ này **không làm test đỏ**, nó chỉ làm báo
+  cáo im lặng sai. Ba field cũ (`borderControl`, `progressTrack`,
+  `borderDivider`) thiếu sẵn từ trước nhánh này, để nguyên, không mở rộng PR.
+  Claim thứ nhất của review — `PaletteClosureRule` sẽ báo blocking ở chip
+  preview — **không đúng**: visual audit của Import chỉ dựng bước Source, đúng
+  như doc comment của chính test nói, nên chip preview chưa bao giờ được audit.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** 12 hằng số trong `AppColors`; 6 field + 2 field dẫn xuất trong
+  `AppSemanticColors`; 4 thành viên `AppInk`; 6 token trong kit CSS; chip Import
+  đọc `successContainer`/`infoContainer`; hai site overdue đọc `dangerContainer`;
+  map parity mở rộng; goldens của Import vẽ lại; 12 hằng số mới resolve được
+  trong `usage_inventory.json` thay vì unresolvable.
+- **Acceptance criteria:**
+  - [x] Không call-site nào còn dùng role accent (`secondary`/`tertiary`) để
+        mang trạng thái nghiệp vụ.
+  - [x] Mọi cặp container/ink mới đo trong dải của các cặp sẵn có, hue nằm
+        trong ba họ mà `color_scheme_roles_test` cưỡng chế.
+  - [x] Kit mang giá trị trước, Dart theo sau (AD-14); parity xanh.
+  - [x] `invalid` giữ `errorContainer` — một hàng parse hỏng **là** lỗi, đúng
+        chỗ duy nhất trên màn đó role ấy có nghĩa.
+  - [x] Mọi field mới của extension có mặt trong cả hai registry của audit; 12
+        hằng số resolve đúng brightness của chúng.
+  - [x] analyze 0/0, theme + design audit 319, visual audit + card/deck/study
+        2204, full host suite, goldens vẽ lại, gallery publish lại.
+- **Dependencies:** M100.20
+- **Tests required:** `css_token_parity_test`; visual audit của Import; goldens.
+- **Checklist phases:** 7, 14.
+
+### M100.22 · Năm Material component về đúng role M3; hai hex gánh phần còn lại
+
+- **Status:** done
+- **Goal:** Đóng phần còn tồn đọng của nguyên tắc M100.18. Lần đó gỡ các *token*
+  thay thế nhưng không rà những component đã **đổi sang role M3 khác** để né
+  cùng một phép đo. Còn lại năm cái, và luật chủ dự án giao là tuyệt đối:
+  component gắn với role canonical trước; tỉ lệ không đạt thì sửa hex/tone của
+  role ở tầng palette, không đổi role trên component.
+- **Scope:** `app_navigation_bar_theme.dart`, `app_chip_theme.dart`,
+  `app_planned_themes.dart` (SegmentedButton + DatePicker + Slider doc),
+  `app_button_themes.dart` (OutlinedButton), `app_toggle_themes.dart` (Switch),
+  `app_overlay_themes.dart` (TimePicker `hourMinuteColor`),
+  `app_input_theme.dart`, `app_theme.dart` (drag handle, nav call site),
+  `mx_action_button.dart` (`_busyStyle`); palette
+  (`AppMaterialRoles.secondaryContainerLight`, `AppBorderColors.borderControl*`);
+  kit `--color-secondary-container`; gỡ `secondaryAction` end-to-end;
+  `m3_role_contract_test.dart` mới thay `app_selected_ink_test.dart`.
+- **Out of scope:** business semantic (`success`/`warning`/`danger`/`info`/
+  `overdue`) — giữ nguyên theo yêu cầu; `selectedTileColor` của ListTile (M3
+  không có default cho slot này); các comment còn nhắc `primaryAccent` trong
+  10 file test feature — nợ của M100.19, không mở rộng PR để dọn.
+- **Nguyên nhân gốc: hai lỗ trong palette, không phải mười một quyết định.**
+  Ba component (NavigationBar indicator, ChoiceChip, SegmentedButton) đều né
+  cùng một chỗ — `secondaryContainer` light `#E4E6EC` chỉ cách `surfaceContainer`
+  **4,22 L\***, nên selected không đọc được và mỗi cái tự mượn `primaryContainer`
+  (7,16 L\*). Switch né chỗ khác: `outline` trên `surfaceContainerHighest` đo
+  **2,79 / 2,54**, dưới 3:1 của WCAG 1.4.11, mà trên switch thì thumb *chính là*
+  trạng thái. OutlinedButton là trường hợp thứ ba: `secondaryAction` là tên thứ
+  hai cho một slot `_OutlinedButtonDefaultsM3` đã điền bằng `primary`.
+- **Sửa hai hex:** `secondaryContainerLight` `#E4E6EC` → `#D9DDEB` (L\* 91,30 →
+  88,19 — khớp mốc 88,36 của `primaryContainer` mà chủ dự án đã duyệt bằng mắt;
+  chroma 0,031 → 0,071 để đọc ra "có tint" chứ không phải xám; giữ hue 226 của
+  `secondaryLight` nên vẫn qua băng 5 độ của `color_system_rules_test` R3).
+  `borderControl` `#8A8A92` → `#7D7D85` light, `#6E6A98` → `#7D79A2` dark.
+- **Dark không đổi, và đó là phát hiện.** `secondaryContainerDark` đã cách
+  `surfaceContainer` 7,99 L\*, nhiều hơn 7,71 của `primaryContainer` — thay role
+  ở dark chưa bao giờ mua được gì. Báo cáo gốc nói "trên nền sáng"; phép đo đồng ý.
+- **Editable documents:** `docs/wbs.md`, `docs/architecture.md`,
+  `docs/reviews/design-parity-checklist.md`
+- **Output:** 11 slot về role canonical; 2 hằng số palette đổi; 1 token kit đổi
+  giá trị; `secondaryAction` gỡ khỏi `AppColors`, `AppSemanticColors`, palette
+  list, hai registry audit, catalog Widgetbook, và chuyển sang `_notBroughtOver`
+  của parity kèm lý do; `m3_role_contract_test.dart` ghim `slot → role` bằng
+  identity cho 17 component ở cả hai mode (35 test); ghim dump 72 → 71.
+- **Acceptance criteria:**
+  - [x] Không Material component nào còn đổi role để đạt contrast; mọi lệch còn
+        lại đều nằm ở slot M3 không có default.
+  - [x] Mọi cặp canonical sau restore đều đạt sàn: text 4,5 và graphic 3,0.
+  - [x] Không còn khái niệm "một selected ink chung" trong code, test hay doc.
+  - [x] Test ghim **identity** của role, không phải hex và không phải tỉ lệ — đổi
+        component sang role khác thì đỏ dù contrast vẫn pass.
+  - [x] Test từng khoá substitution đã đảo, không xoá: `app_toggle_themes_test`
+        (`outline` giờ **đạt** sàn), nhóm `secondary action` của `app_palette_test`
+        (nhãn giờ **là** `primary`).
+  - [x] analyze 0/0, format, architecture, docs, guard, full host suite, goldens
+        vẽ lại, gallery publish lại.
+- **Dependencies:** M100.21
+- **Tests required:** `m3_role_contract_test`; `app_toggle_themes_test`;
+  `app_palette_test`; `css_token_parity_test`; visual audit; goldens.
+- **Checklist phases:** 7, 14.
+
+### M100.23 · Combined state thôi phá canonical role; guard chuyển từ giá trị sang binding
+
+- **Status:** done
+- **Goal:** Đóng lỗ mà M100.22 để lại. M100.22 trả năm component về role M3 và
+  ghim bằng test, nhưng test chỉ hỏi `{}` và `{selected}` — tức câu trả lời
+  **cuối** của một resolver. Mọi resolver ở đây là một chuỗi có thứ tự, nên lỗi
+  nằm ở **tổ hợp**: nhánh `focused` đặt trên nhánh `selected` làm
+  `{selected, focused}` trả về một role khác. Bốn slot đang như vậy.
+- **Scope:** `app_chip_theme.dart` (side), `app_toggle_themes.dart` (Switch
+  `trackOutlineColor`, Checkbox `side`), `app_planned_themes.dart`
+  (SegmentedButton `side`), `app_theme.dart` (drag handle),
+  `app_interaction_states.dart` (`focusRing` → `focusIndicator`);
+  `m3_role_binding_guard_test.dart` mới (AST), `m3_combined_state_test.dart`
+  mới; sửa comment lệch ở 5 file; luật nền tảng golden vào `CLAUDE.md`.
+- **Out of scope:** redesign, spacing, typography, business logic.
+- **Bốn slot rời role ở tổ hợp, và cả bốn vô hình với suite cũ:**
+
+  | Component | Slot | `{selected, focused}` trả về | M3 |
+  |---|---|---|---|
+  | ChoiceChip | `side` | ring `primary` | trong suốt |
+  | Switch | `trackOutlineColor` | `primary` | trong suốt |
+  | SegmentedButton | `side` | ring `primary` | `outline` |
+  | Checkbox | `side` | ring `primary` | width 0 |
+
+  Người dùng bàn phím tab vào một filter đang bật, một toggle đang bật, một
+  segment đang chọn hay một checkbox đã tick đều thấy control rời role của nó.
+- **Thứ tự nhánh chính là hợp đồng.** `_CheckboxDefaultsM3.side` xét `selected`
+  **trước** mọi interaction state; `_SwitchDefaultsM3.trackOutlineColor` cũng
+  vậy. Bản sửa là đặt lại thứ tự theo M3, không phải thêm điều kiện.
+- **Focus không bị xoá, nó chuyển kênh — và chip cần hẳn một layer mới.**
+  Switch và SegmentedButton dùng `overlayColor`, đúng chỗ
+  `_SwitchDefaultsM3.overlayColor` đặt. Checkbox đậm viền lên `onSurface`, cùng
+  giá trị M3 dùng cho hover/pressed. Drag handle BottomSheet đổi từ role thứ hai
+  thành **state layer pre-composed** trên chính `onSurfaceVariant` (AD-14 §1 cấm
+  alpha lúc vẽ).
+- **Chip là ngoại lệ, vì kênh còn lại của nó quá yếu.** Focus của chip nằm ở
+  *fill*, và đo được **1,15:1 sáng / 1,25:1 tối** so với fill lúc nghỉ — xa
+  ngưỡng 3:1 mà WCAG 1.4.11 đòi. Nên `MxFocusRing` ra đời: một
+  `foregroundDecoration` vẽ **quanh** child, không tham gia layout, không chạm
+  slot màu nào của Material. Vẽ ngoài chứ không inset vì `BorderSide` được vẽ
+  *bên trong* `OutlinedBorder` — đúng khuyết tật đã làm checkbox tick ra 14dp
+  trong khi hàng xóm 18dp (M100.21). Cùng lý do CSS tách `outline` khỏi `border`.
+  `mx_pill_button_focus_test.dart` kiểm bằng phím Tab thật, vì **không golden
+  nào chụp trạng thái focus**.
+- **`OutlinedButton` giữ nguyên, và đó là điểm cần nói rõ.**
+  `_OutlinedButtonDefaultsM3.side` **có** nhánh focus trả `primary` — component
+  duy nhất trong theme mà chính Material đổi role border theo focus. Nó được
+  viết thẳng thành `scheme.primary` để guard đọc được, và được assert tường minh
+  để luật mới không bị đọc thành "cấm mọi focus đổi màu".
+- **Guard cũ so *giá trị*, không so *role* — chứng minh bằng tiêm lỗi.** Đổi
+  `Switch.trackColor` từ `surfaceContainerHighest` sang `secondaryContainer`:
+  hai role này **cùng `#332F58` ở dark**, nên `m3_role_contract_test` dark
+  **pass**. `m3_role_binding_guard_test` (AST, đọc `scheme.<role>` trong cây cú
+  pháp) **đỏ**. Đó là lý do file thứ hai tồn tại chứ không phải trùng lặp.
+- **Tiêm lỗi thứ hai:** cắm lại nhánh `focused` trên `selected` của chip —
+  `m3_role_contract_test` pass **35/35**, `m3_combined_state_test` gọi tên nó ở
+  cả hai mode. Suite cũ thật sự mù với bug này.
+- **Golden: nguyên nhân đã tìm ra, và nó nằm trong chính file.**
+  `mx_components_golden_test.dart` ghi từ đầu: *"These were generated on
+  Windows; a Linux runner will produce different antialiasing."* CI chạy job
+  golden trên `windows-latest`. M100.18 vẽ lại chúng từ container Linux, nên 24
+  file đỏ — và đỏ suốt bốn commit trong khi nguyên nhân bị tìm ở palette. Luật
+  đã ghi vào `CLAUDE.md`: `test/shared/widgets/goldens/` chỉ được vẽ trên
+  Windows; phiên Linux vẽ `test/demo/` và để yên phần kia.
+- **M100.23 không dịch một pixel nào** — 303/303 golden pass ở comparison mode
+  mà không cần `--update-goldens`, vì mọi thay đổi đều ở state focus, mà golden
+  chụp trạng thái nghỉ.
+- **Editable documents:** `docs/wbs.md`, `CLAUDE.md`
+- **Output:** 5 resolver về đúng thứ tự M3; helper đổi tên
+  `focusRing`→`focusIndicator` kèm doc nói rõ chỉ dùng cho slot M3 để trống;
+  guard AST 16 binding; combined-state test 32 assertion; 5 comment lệch được
+  sửa; luật nền tảng golden.
+- **Acceptance criteria:**
+  - [x] Không tổ hợp state nào đưa component sang role khác; `{selected,
+        focused}`, `{focused}`, `{disabled, selected}` đều được assert.
+  - [x] Focus accessibility còn nguyên, nằm ở overlay/state layer/stroke.
+  - [x] Có guard nguồn khoá `slot → role expression`, đỏ cả khi hai role trùng
+        HEX — chứng minh bằng tiêm lỗi.
+  - [x] Không còn comment mô tả abstraction đã gỡ.
+  - [x] analyze 0/0, format, architecture, docs, guard, full host suite, golden
+        comparison 303/303.
+- **Dependencies:** M100.22
+- **Tests required:** `m3_role_binding_guard_test`; `m3_combined_state_test`;
+  `m3_role_contract_test`; `app_toggle_themes_test`; golden comparison.
+- **Checklist phases:** 7, 14.
+
+### M100.24 · Golden có một nền tảng, và nền tảng đó là Linux
+
+- **Status:** done
+- **Goal:** Đóng nguồn đỏ cuối của PR #426. Rasterisation chữ khác nhau giữa hệ
+  điều hành — `dart_test.yaml` đã đo và ghi: **1–3% pixel**. Nên golden có đúng
+  **một** nền tảng viết, và mọi bên render phải là nền tảng đó. Trước M100.24 nó
+  là Windows; PNG thì được viết trên Linux từ M100.18. Hai điều đó không thể
+  cùng đúng.
+- **Scope:** `.github/workflows/ci.yml` (job `goldens`: `windows-latest` →
+  `ubuntu-latest`, tên hiển thị, thêm bước font), `.github/workflows/ci-full.yml`
+  (đồng bộ, thêm `TZ: UTC` vốn thiếu), `dart_test.yaml`, `CLAUDE.md`.
+- **Out of scope:** giá trị golden — không PNG nào được vẽ lại ở task này.
+- **Chọn Linux chứ không phải vẽ lại trên Windows, và đây là quyết định của chủ
+  dự án.** Ba lựa chọn được đặt ra: chuyển job sang Linux; chủ dự án vẽ lại trên
+  Windows; hoặc baseline riêng từng nền tảng. Lý do Linux thắng: mọi job CI khác
+  đã là `ubuntu-latest` — Windows tồn tại **chỉ** cho job này; phiên cloud (Linux)
+  là nơi golden thực sự được vẽ; và chủ dự án review qua screen gallery chứ không
+  render lại tại máy.
+- **Comparator có ngưỡng sai số bị loại, bằng số của chính dự án.** Lệch nền tảng
+  là 1–3% pixel; một regression thật — một role màu sai, một rect dịch — hoàn
+  toàn có thể nhỏ hơn 3%. Ngưỡng đủ rộng để nuốt antialiasing cũng đủ rộng để
+  nuốt bug. So sánh vẫn byte-exact.
+- **Bước font là bắt buộc và suýt bị bỏ sót.** Job Windows chưa bao giờ cần
+  `prepare_test_fonts.sh`; trên Linux, thiếu nó thì mọi glyph rơi về font hộp của
+  `flutter_test` và **toàn bộ** ~300 golden đỏ cùng lúc. Đã thêm vào cả hai
+  workflow. `ci-full.yml` cũng thiếu `TZ: UTC` — thêm luôn, vì `card_detail` vẽ
+  timestamp qua `toLocal()`.
+- **Cái giá, nói ra chứ không để phát hiện sau:** một checkout Windows không còn
+  chạy `--update-goldens` mà CI đồng ý được nữa. Dùng WSL, hoặc để phiên cloud vẽ
+  rồi review qua gallery. Đã ghi cạnh chính câu lệnh trong `CLAUDE.md`.
+- **Vì sao lỗi này sống được sáu commit.** Job golden chạy theo impact plan, nên
+  nó chỉ so những golden mà thay đổi có thể chạm tới. Số fail đi 35 → 24 → 16 và
+  đọc như flaky. Không phải: **mọi golden được so đều fail, mọi lần.** Chuẩn hoá
+  theo số test thực chạy mới thấy — 23 component golden được so cho 24 fail, 15
+  cho 16. Bài học ghi lại vì nó sẽ tái diễn với bất kỳ gate nào chọn theo impact.
+- **Editable documents:** `docs/wbs.md`, `CLAUDE.md`
+- **Output:** golden job của cả hai workflow chạy `ubuntu-latest` kèm bước font;
+  `dart_test.yaml` và `CLAUDE.md` ghi nền tảng viết là Linux cùng cái giá của nó.
+- **Acceptance criteria:**
+  - [x] Không workflow nào còn so golden trên nền tảng khác nơi PNG được viết.
+  - [x] Job golden trên Linux có bước font; thiếu nó là đỏ toàn bộ chứ không phải
+        một phần.
+  - [x] `CI gate` đọc job id `goldens`, không phải tên hiển thị — đổi tên không
+        phá cổng (đã kiểm).
+  - [x] Không PNG nào đổi; so sánh vẫn byte-exact, không thêm tolerance.
+  - [x] guard, docs, YAML của cả hai workflow parse sạch.
+- **Dependencies:** M100.23
+- **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
+- **Checklist phases:** 14, 21.
+
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |
 |---|---|---|---|
+| `AppSemanticColors.surfaceElevated` không còn consumer | M100.20 | Nó tồn tại để làm nền cho PopupMenu, và menu nay đọc `surfaceContainer` theo M3. Một token chết trong kit là thứ người sau sẽ với tay lấy, và nó là rung thứ sáu của một thang song song mà M3 chỉ có năm | Gỡ trong đợt hợp nhất hai thang surface: 21 dòng ở 7 file test, cộng `--color-surface-elevated` của kit cần map hoặc giải thích. Hằng số `AppSurfaceColors.surfaceElevated*` **vẫn dùng** làm dẫn xuất cho `surfaceContainerLowest` và `surfaceBright` nên chỉ field của extension mới chết |
 | ~~`check_architecture.sh` chưa có test tự động~~ | T0.1 | Regression trong checker âm thầm ngừng enforce boundary | **Đã trả ở M100.11.** `test_architecture_checker.py` trong bộ CI tooling — bốn fixture tiêm lỗi: dự án sạch pass, `domain/` import Flutter thì đỏ và gọi tên file, thiếu suffix thì **cảnh báo** (ghim cả hai chiều, vì `_check_suffixes` gọi `_warn` chứ không `_fail`), và pubspec-không-lib thì đỏ. Đặt ở `scripts/tests/` chứ không `test/tools/` vì đó là nơi `unittest discover` của gate `ci_tooling` đã quét. Ghi chú gốc: **Giảm nhẹ ở M4.10b:** script tự in số file nó quét và coi 0 là lỗi, nên trường hợp tệ nhất — checker ngừng thấy gì mà vẫn pass — không còn im lặng. Vẫn cần fixture cho các trường hợp còn lại |
 | ~~Không có CI~~ | T0.1 | Sáu gate tồn tại và chỉ chạy khi có người nhớ; một PR có thể merge với format lệch, guard đỏ hoặc test hỏng mà không ai thấy | **Đã trả ở M4.10b.** `.github/workflows/ci.yml` chạy trên `pull_request` và `push` vào `main`: format, analyze, generated-code, architecture, guard, docs, 844 test, golden, và build web |
 | ~~`analysis_options.yaml` chưa được áp dụng~~ | T0.1 | Bộ lint đã viết nhưng chưa được enforce; nhiều khả năng có tên rule sai hoặc đã deprecated | **Đã trả ở M2.3.** Dự đoán đúng: `immutable_classes` không tồn tại, `use_if_null_to_convert_nulls_to_bools` đã deprecated. Nghiêm trọng hơn cả hai: 11 rule chỉ nằm ở `errors:` nên **chưa bao giờ chạy** — đã chuyển hết sang `linter: rules:` và kiểm chứng bằng tiêm lỗi |

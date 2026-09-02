@@ -310,6 +310,27 @@ carrying UTC+9 and failed the moment the golden job ran on a UTC runner — by
 exactly the same pixel counts a local `TZ=UTC` run reproduces, which is how the
 cause was identified rather than guessed.
 
+**Goldens have exactly one authoring platform, and since M100.24 it is Linux.**
+Glyph *rasterisation* differs between operating systems — the same widget, the
+same fonts and the same SDK produce different antialiasing, 1–3% of pixels, and
+`matchesGoldenFile` compares byte for byte. So the platform is a choice, and
+every renderer has to make the same one: `ci.yml`'s golden job runs on
+`ubuntu-latest`, and `dart_test.yaml` records why.
+
+**A Windows checkout can no longer regenerate goldens.** Running
+`--update-goldens` there writes PNGs CI will reject, and it does it *silently* —
+the local run reports 303/303 because a platform always agrees with itself. Use
+WSL, or let a cloud session regenerate and review the result through the screen
+gallery.
+
+That failure mode is not hypothetical, and it is why the rule is written here
+rather than assumed. M100.18 regenerated the component goldens from a Linux
+container while the job still ran on Windows; the job went red and stayed red
+for six commits while the cause was looked for in the palette. What hid it was
+the impact plan: it compares only the goldens a change could have touched, so
+the failure count moved 35 → 24 → 16 between runs and read like flakiness. It
+was not. Every golden that was compared failed, every time.
+
 Then publish `build/screen_gallery.html` as an Artifact **at the existing
 URL** — https://claude.ai/code/artifact/e8a68227-1582-407c-88c2-ff25d66bd9d8 —
 so the owner's tab keeps showing the current app instead of a fork of it.

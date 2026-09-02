@@ -85,18 +85,12 @@ void main() {
       AppBorderColors.borderSubtleLight,
       AppBorderColors.borderSubtleDark,
     ),
-    '--color-focus-ring': (
-      AppBorderColors.focusRingLight,
-      AppBorderColors.focusRingDark,
-    ),
+    '--color-focus-ring': (AppColors.primaryLight, AppColors.primaryDark),
     // --- brand and actions ---
     '--color-seed': (AppColors.seed, AppColors.seed),
     '--color-primary': (AppColors.primaryLight, AppColors.primaryDark),
     '--color-on-primary': (AppColors.onPrimaryLight, AppColors.onPrimaryDark),
-    '--color-primary-accent': (
-      AppColors.primaryAccentLight,
-      AppColors.primaryAccentDark,
-    ),
+    '--color-primary-accent': (AppColors.primaryLight, AppColors.primaryDark),
     '--color-primary-container': (
       AppMaterialRoles.primaryContainerLight,
       AppMaterialRoles.primaryContainerDark,
@@ -137,15 +131,38 @@ void main() {
       AppMaterialRoles.onTertiaryContainerLight,
       AppMaterialRoles.onTertiaryContainerDark,
     ),
-    '--color-secondary-action': (
-      AppColors.secondaryActionLight,
-      AppColors.secondaryActionDark,
-    ),
     // --- meaning ---
     '--color-success': (AppColors.successLight, AppColors.successDark),
     '--color-warning': (AppColors.warningLight, AppColors.warningDark),
     '--color-danger': (AppColors.dangerLight, AppColors.dangerDark),
     '--color-info': (AppColors.infoLight, AppColors.infoDark),
+    // The status containers (M100.21). `danger` has none because `error`
+    // already carries this family's container — the same reason the fill map
+    // above points two names at one literal.
+    '--color-success-container': (
+      AppColors.successContainerLight,
+      AppColors.successContainerDark,
+    ),
+    '--color-on-success-container': (
+      AppColors.onSuccessContainerLight,
+      AppColors.onSuccessContainerDark,
+    ),
+    '--color-warning-container': (
+      AppColors.warningContainerLight,
+      AppColors.warningContainerDark,
+    ),
+    '--color-on-warning-container': (
+      AppColors.onWarningContainerLight,
+      AppColors.onWarningContainerDark,
+    ),
+    '--color-info-container': (
+      AppColors.infoContainerLight,
+      AppColors.infoContainerDark,
+    ),
+    '--color-on-info-container': (
+      AppColors.onInfoContainerLight,
+      AppColors.onInfoContainerDark,
+    ),
     // `error` is `danger`, not a second red system — AD-05. The CSS says the
     // same thing by pointing both names at one literal.
     '--color-error': (AppColors.dangerLight, AppColors.dangerDark),
@@ -343,6 +360,16 @@ void main() {
 /// fails if a name here stops being declared in the kit, which is what stops a
 /// reason outliving the thing it excused.
 const Map<String, String> _notBroughtOver = <String, String>{
+  '--color-secondary-action':
+      'The label of a secondary (outlined) action. The app carried it as '
+      '`AppColors.secondaryAction*` so that an outlined button standing beside '
+      'the study verdicts would not add a third hue to that decision — a '
+      'hierarchy argument, and a real one. It was still a second name for a '
+      'slot Material already fills: `_OutlinedButtonDefaultsM3.foregroundColor` '
+      'is `primary`, and since M100.18 inverted the dark tone that role reads '
+      '7.27:1 light and 10.01:1 dark on a card. M100.22 gave the slot back to '
+      'the role and dropped the token; if the study screen needs a quieter '
+      'action it is `primary` that moves, not the button.',
   '--color-streak':
       'The streak *label* colour, for a streak display that does not exist. '
       'Measured on its own container at 11px semibold it reads 3.12:1, under '

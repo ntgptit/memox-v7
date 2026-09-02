@@ -13,11 +13,10 @@ import '../../../../study/domain/models/eight_box_scheduler.dart';
 /// The panel renders this widget or it renders nothing.
 ///
 /// **Colour is not the only signal, and in dark it cannot be.** Completed steps
-/// take `progressFill`, the current one `primaryAccent`, the rest
-/// `progressTrack`. In light those are three distinct values; in **dark**
-/// `progressFillDark` and `primaryAccentDark` are literally the same colour —
-/// both resolve to `focusRingDark` — so the current step is told apart by being
-/// taller, and the panel states `Box N / 8` in words directly above the track.
+/// take `progressFill`, the current one `primary`, the rest `progressTrack`. In
+/// light those are three distinct values; in **dark** `progressFillDark` *is*
+/// `primaryDark` — so the current step is told apart by being taller, and the
+/// panel states `Box N / 8` in words directly above the track.
 /// A reader who cannot see the difference is never relying on it.
 class CardBoxProgressWidget extends StatelessWidget {
   const CardBoxProgressWidget({
@@ -50,7 +49,7 @@ class CardBoxProgressWidget extends StatelessWidget {
               decoration: BoxDecoration(
                 color: switch (box.compareTo(currentBox)) {
                   < 0 => semantic.progressFill,
-                  0 => semantic.primaryAccent,
+                  0 => context.colors.primary,
                   _ => semantic.progressTrack,
                 },
                 borderRadius: BorderRadius.circular(AppRadius.pill),

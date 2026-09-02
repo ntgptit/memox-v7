@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_elevation.dart';
-import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_theme.dart';
 
 import '../../support/color_math.dart';
@@ -26,9 +25,6 @@ void main() {
 
   /// Anything that identifies a control or its state.
   const graphic = 3.0;
-
-  AppSemanticColors semanticOf(ThemeData t) =>
-      t.extension<AppSemanticColors>()!;
 
   Color resolve(WidgetStateProperty<Color?>? p, Set<WidgetState> s) =>
       p!.resolve(s)!;
@@ -128,29 +124,32 @@ void main() {
       for (final entry in themes.entries) {
         final t = entry.value;
 
-        expect(t.sliderTheme.activeTrackColor, semanticOf(t).focusRing);
-        expect(t.sliderTheme.thumbColor, semanticOf(t).focusRing);
+        expect(t.sliderTheme.activeTrackColor, t.colorScheme.primary);
+        expect(t.sliderTheme.thumbColor, t.colorScheme.primary);
       }
     });
 
-    test("M3's own pairing is what fails here, and still does", () {
-      // Pins the premise rather than only the fix. `primary` on
-      // `secondaryContainer` is the Material default; if the palette ever moves
-      // enough for it to pass, this file's deviation is no longer earning its
-      // keep and this test says so.
+    test("M3's own pairing now passes, which retired the deviation", () {
+      // **The premise flipped, and this test is how it was noticed.** It used
+      // to assert the opposite — that `primary` on `secondaryContainer` failed
+      // 3:1 in dark, which was the whole justification for the slider reaching
+      // for a substitute token. M100.18 inverted the dark accent to tone 80
+      // and the Material default started passing, so the deviation stopped
+      // earning its keep and the slider draws `primary` like M3 says.
+      //
+      // Kept as an assertion in the other direction for the same reason it was
+      // written in the first: a palette that drifts back below the floor must
+      // fail here rather than quietly re-introduce a substitute.
       for (final entry in themes.entries) {
         final scheme = entry.value.colorScheme;
-        final m3 = contrast(scheme.primary, scheme.secondaryContainer);
 
-        if (entry.key == 'dark') {
-          expect(
-            m3,
-            lessThan(graphic),
-            reason:
-                'dark: primary on secondaryContainer now clears 3:1, so the '
-                'slider could take M3 default after all',
-          );
-        }
+        expect(
+          contrast(scheme.primary, scheme.secondaryContainer),
+          greaterThanOrEqualTo(graphic),
+          reason:
+              '${entry.key}: primary no longer clears 3:1 on '
+              'secondaryContainer, so a slider drawn in it is unbounded',
+        );
       }
     });
 
@@ -168,13 +167,15 @@ void main() {
   });
 
   group('tab bar', () {
-    test('the selected label is the accent, not the selection ink', () {
-      // A tab's label sits on the page, not on a container fill — which is the
-      // boundary `primaryAccent` and `selectedInk` were split along.
+    test('the selected label reads on the page it sits on', () {
+      // A tab's label sits on the page, not on a container fill, which is why
+      // `_TabBarDefaultsM3` inks it `primary` rather than an `on*` role. The
+      // role identity is pinned in `m3_role_contract_test.dart`; this asks
+      // whether it is readable where it actually lands.
       for (final entry in themes.entries) {
         final t = entry.value;
 
-        expect(t.tabBarTheme.labelColor, semanticOf(t).primaryAccent);
+        expect(t.tabBarTheme.labelColor, t.colorScheme.primary);
         expect(
           contrast(t.tabBarTheme.labelColor!, t.colorScheme.surface),
           greaterThanOrEqualTo(text),

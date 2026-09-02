@@ -199,13 +199,11 @@ class _StudyDirectionChooserState extends State<StudyDirectionChooserWidget> {
       // The glyph carries the state; the tint only reinforces it.
       leading: MxIcon(
         isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-        // `primaryAccent`, not `primary`. The glyph is the selection *signal*
-        // here — the tile tint is only reinforcement — and `primary` on the
-        // selected tile measures **2.45:1** in dark, under the 3:1 WCAG 1.4.11
-        // asks of a non-text control. `primaryAccent` reaches 4.66:1. The same
-        // decision is already recorded three times: `app_radio_theme.dart`
-        // (2.90:1), `match_tile_widget.dart`, `card_details_section_widget.dart`
-        // (3.29:1) — this is the fourth call site to reach it.
+        // `primary`. The glyph is the selection *signal* here — the tile
+        // tint is only reinforcement — and the old dark fill tone measured
+        // 2.45:1 on the selected tile, under the 3:1 WCAG 1.4.11 asks of a
+        // non-text control. That shortfall put a second ink at four call sites
+        // until M100.18 inverted the tone.
         // Unselected inherits nothing here any more: `quiet` is the ink the
         // tile's leading slot resolved to before.
         ink: isSelected ? AppInk.accent : AppInk.quiet,

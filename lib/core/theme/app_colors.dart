@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'app_border_colors.dart';
 
 /// Colour tokens — **A2 Quizlet Navy Indigo**, applied in M3.5b.
 ///
@@ -92,49 +91,37 @@ abstract final class AppColors {
 
   /// The single accent, on hue 240 in both brightnesses.
   ///
-  /// It fills the primary action in *both* modes. The dark value is held at
-  /// luminance 0.13 — bright enough to read as the brand against the navy page,
-  /// far enough below the card's headline text that the CTA never becomes the
-  /// brightest thing on screen. That relationship is asserted, not assumed:
-  /// `primary` against the page must score lower than `onSurface` against the
-  /// page.
+  /// **Dark inverts the tone, which is what Material 3 asks for and what this
+  /// palette spent two years working around.** M3 puts a dark scheme's
+  /// `primary` at tone 80 — a *light* tone — with `onPrimary` at tone 20;
+  /// light keeps the fill at tone 40 with white on it. The old dark value was
+  /// a mid fill-tone (L\* 42.5) carrying white, and that single deviation is
+  /// what made `primary` unusable in every binding M3 gives it: at 2.90:1 on
+  /// the card it missed WCAG 1.4.11's 3:1 for a progress indicator, a slider,
+  /// a caret or a focus ring, and it was nowhere near the 4.5:1 a tab label
+  /// needs. Five component themes reached for a substitute token instead, and
+  /// the substitute was the bug — M100.18.
+  ///
+  /// A single tone cannot be both: bright enough to read as a label on a dark
+  /// page *and* dark enough for white to sit on it. Measured, the crossover is
+  /// hard — the first hue-240 value clearing 4.5:1 as text drops white on it to
+  /// 3.73:1. Inverting resolves it rather than trading one failure for another.
+  ///
+  /// The rule the old comment protected still holds and is still asserted: the
+  /// CTA must never be the brightest thing on screen. `primary` against the
+  /// page is 11.36:1 where `onSurface` is 15.84:1, so the headline still wins.
+  /// What changed is the mechanism — a tone ceiling rather than a luminance
+  /// cap, because a luminance cap is a fill-tone rule and this is no longer a
+  /// fill-tone palette.
   static const Color primaryLight = Color(0xFF4646B4);
-  static const Color primaryDark = Color(0xFF5656C9);
+
+  /// Tone 80 at hue 240, chroma 0.154 — the band `secondaryDark` and
+  /// `tertiaryDark` already sit in, both of which were M3-shaped all along.
+  static const Color primaryDark = Color(0xFFC3C3EB);
   static const Color onPrimaryLight = Color(0xFFFFFFFF);
-  static const Color onPrimaryDark = Color(0xFFFFFFFF);
 
-  /// The brand hue as a LABEL rather than as a fill.
-  ///
-  /// `primaryDark` is deliberately held below the card's headline text so a
-  /// filled CTA never outshines it — which also means it measures 3.33:1 as
-  /// bare text on the dark page and fails AA at label size. Text that carries
-  /// the brand (a text button, a link) uses this instead: the light value is
-  /// the fill colour, which passes on light surfaces; the dark value is the
-  /// brighter indigo the focus ring already uses, 6.26:1 on the page.
-  /// Derivations, not copies: light *is* the fill colour and dark *is* the
-  /// focus ring's indigo — both facts this comment already states, now stated
-  /// where an edit cannot un-say them.
-  ///
-  /// **The ground is a surface or the page, and that is the whole boundary
-  /// between this and `AppMaterialRoles.selectedInk`.** A control that is
-  /// *selected* sits on the selection's own tint instead, where this token
-  /// measures 4.06:1 in dark — under the 4.5 a 12px label needs. The two agree
-  /// in light by construction, which is what keeps making them look like two
-  /// spellings of one idea; `selectedInk` holds the four measurements that say
-  /// they are not, in either direction.
-  static const Color primaryAccentLight = primaryLight;
-  static const Color primaryAccentDark = AppBorderColors.focusRingDark;
-
-  /// Label of a secondary (outlined) action — *End session*, *Cancel*.
-  ///
-  /// Deliberately neutral (saturation under 20%) rather than the brand colour.
-  /// A secondary action sits next to the study verdicts, and anything with a
-  /// hue there competes with the two colours carrying the user's actual
-  /// decision. Keeping it a separate token from [primaryLight] also stops the
-  /// pairing that once shipped a label at 3.09:1 — one colour cannot be both a
-  /// fill and a label on a dark surface.
-  static const Color secondaryActionLight = Color(0xFF454B5E);
-  static const Color secondaryActionDark = Color(0xFFC3C6D2);
+  /// Tone 20 at the same hue. 7.72:1 under [primaryDark].
+  static const Color onPrimaryDark = Color(0xFF262670);
 
   // --- Semantic ------------------------------------------------------------
   //
@@ -188,6 +175,48 @@ abstract final class AppColors {
   static const Color dangerLight = Color(0xFFC02B3A);
   static const Color dangerDark = Color(0xFFF2808F);
 
+  // --- Status containers ---------------------------------------------------
+  //
+  // **The four semantics had a fill and no container, and that gap is what put
+  // domain state on accent roles** (M100.21). An import row's status chip
+  // needed a filled pill with a label on it; the only container pairs that
+  // existed belonged to `primary`, `secondary`, `tertiary` and `error`, so
+  // "ready" took `secondaryContainer` and "duplicate" took `tertiaryContainer`
+  // — roles M3 defines as accents for balancing an interface, not as a place
+  // to keep business meaning.
+  //
+  // **Derived, not chosen, by the method the existing containers already use.**
+  // The four hand-tuned light containers reconstruct as a tint of their own
+  // fill over `surface` at alpha 0.127–0.171 (mean 0.142, reconstruction error
+  // 0.6–5.4 of 255); these take that mean. The dark containers do *not*
+  // reconstruct that way — the error is up to 28/255, so they were hand-placed
+  // — and what they share is a band: L\* 21.5–29.0 at chroma 0.153–0.263. So
+  // dark is placed at L\* 24.0, chroma 0.20, on each role's own hue.
+  //
+  // The inks take the tone the existing `on*Container` pairs occupy (L\* 14–23
+  // light, 86–89 dark), which lands them at 10.80–10.98:1 and 8.35:1 — inside
+  // the app's own band of 9.75–11.46 and 7.24–9.09, rather than at the
+  // near-black a bare 4.5:1 search would have produced.
+  //
+  // **`danger` gets none, and that is the point of `error` being `danger`.**
+  // `AppMaterialRoles.errorContainer*` already holds this family's container;
+  // `AppSemanticColors.dangerContainer` derives from it rather than declaring
+  // a second red, exactly as the class header refuses a second red fill.
+  static const Color successContainerLight = Color(0xFFDAE9E7);
+  static const Color successContainerDark = Color(0xFF0E412F);
+  static const Color onSuccessContainerLight = Color(0xFF003627);
+  static const Color onSuccessContainerDark = Color(0xFFBFE3D6);
+
+  static const Color warningContainerLight = Color(0xFFEDE6DC);
+  static const Color warningContainerDark = Color(0xFF453812);
+  static const Color onWarningContainerLight = Color(0xFF402A00);
+  static const Color onWarningContainerDark = Color(0xFFE4DBC1);
+
+  static const Color infoContainerLight = Color(0xFFE0E7EF);
+  static const Color infoContainerDark = Color(0xFF213B54);
+  static const Color onInfoContainerLight = Color(0xFF073053);
+  static const Color onInfoContainerDark = Color(0xFFCBDEEF);
+
   // --- Progress -----------------------------------------------------------
   //
   // **Its own family, and not the accent.** A bar drawn in `primary` sits beside
@@ -213,21 +242,21 @@ abstract final class AppColors {
 
   /// The filled part, below 100%.
   ///
-  /// **Dark *is* the bright indigo the focus ring uses**, and says so rather
-  /// than repeating the hex. The kit reaches it through
-  /// `--mx-indigo-bright-dark` and gets there honestly for the ring and by a
-  /// copied literal for the fill; this file has no primitive layer, so the
-  /// derivation runs through the token that holds the value — the same shape
-  /// [primaryAccentDark] already uses.
+  /// **Dark *is* `primary`, which is also what M3 asks a progress indicator to
+  /// draw with.** It used to be the focus ring's brighter indigo, because the
+  /// old dark `primary` was a fill tone measuring 2.90:1 on the card and could
+  /// not carry a graphical indicator. Since dark inverted to tone 80 (M100.18)
+  /// the substitute has no reason left, and pointing the derivation at
+  /// `primaryDark` is what lets this file stop importing the border palette —
+  /// the dependency that made the two files circular the moment `focusRing`
+  /// became a derivation in the other direction.
   ///
-  /// **What sharing it costs, measured.** A focus ring drawn *on* a progress
-  /// fill in dark would be invisible, and no repaint fixes that: against
-  /// `#8A8AE0` no indigo clears the 3:1 of WCAG 1.4.11 and even white reaches
-  /// only 3.09. So the adjacency is forbidden rather than contrast-solved —
-  /// and nothing does it today, because every bar is inset inside its card
-  /// while the ring is the card's own edge.
+  /// Light keeps its own value: `primaryLight` at tone 40 is the button fill,
+  /// and a bar drawn in it reads as a control rather than as progress. That
+  /// asymmetry is the tone system working, not a drift — dark's tone 80 is a
+  /// label-weight indigo, light's tone 40 is a fill-weight one.
   static const Color progressFillLight = Color(0xFF6E6ECE);
-  static const Color progressFillDark = AppBorderColors.focusRingDark;
+  static const Color progressFillDark = primaryDark;
 
   // --- Due chip -----------------------------------------------------------
   //

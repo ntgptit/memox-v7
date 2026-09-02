@@ -29,7 +29,7 @@
      sRGB; measured, the ladder lands at 3.9 -> 10.2 -> 16.9 -> 24.0. */
   --mx-page-dark:#0A082D;--mx-card-dark:#1A1838;--mx-inset-dark:#28254B;--mx-raised-dark:#37345F;
   --mx-ink-dark:#EDEDF6;--mx-ink-quiet-dark:#A8A7C4;--mx-line-dark:#4C487A;
-  --mx-indigo-dark:#5656C9;--mx-indigo-bright-dark:#8A8AE0;--mx-indigo-container-dark:#2B2B6E;
+  --mx-indigo-dark:#C3C3EB;--mx-indigo-bright-dark:#8A8AE0;--mx-indigo-container-dark:#2B2B6E;
   --mx-success-dark:#4FC79B;--mx-warning-dark:#E8D08E;--mx-danger-dark:#F2808F;--mx-info-dark:#8DB4D8;
 
   /* --- semantic: surface ladder --------------------------------------- */
@@ -47,7 +47,7 @@
   --color-text-primary:var(--mx-ink-light);
   --color-text-secondary:var(--mx-ink-quiet-light);
   --color-border-subtle:var(--mx-line-light);
-  --color-focus-ring:var(--mx-indigo-deep-light);
+  --color-focus-ring:var(--mx-indigo-light);
 
   /* --- semantic: brand and actions ------------------------------------ */
   --color-seed:#4646B4;
@@ -61,7 +61,7 @@
   --color-on-primary-container:#1B1B5C;
   --color-secondary:#4E5468;
   --color-on-secondary:#FFFFFF;
-  --color-secondary-container:#E4E6EC;
+  --color-secondary-container:#D9DDEB;
   --color-on-secondary-container:#2C3141;
   --color-tertiary:#45647F;
   --color-on-tertiary:#FFFFFF;
@@ -74,6 +74,19 @@
   --color-warning:var(--mx-warning-light);
   --color-danger:var(--mx-danger-light);
   --color-info:var(--mx-info-light);
+  /* Status containers. The four semantics had a fill and no container, so a
+     status chip had to borrow an accent role — `secondary` for "ready",
+     `tertiary` for "duplicate" — which is what M3 reserves for accents rather
+     than for domain state. Derived at the tint strength the existing
+     containers carry (0.142 of the fill over `surface`), with the ink at the
+     tone the existing `on*Container` pairs occupy. `danger` needs none: it is
+     `error`, so `--color-error-container` already holds it. */
+  --color-success-container:#DAE9E7;
+  --color-on-success-container:#003627;
+  --color-warning-container:#EDE6DC;
+  --color-on-warning-container:#402A00;
+  --color-info-container:#E0E7EF;
+  --color-on-info-container:#073053;
   --color-error:var(--mx-danger-light);
   --color-on-error:#FFFFFF;
   --color-error-container:#F8DDE1;
@@ -120,10 +133,10 @@
   --color-text-primary:var(--mx-ink-dark);
   --color-text-secondary:var(--mx-ink-quiet-dark);
   --color-border-subtle:var(--mx-line-dark);
-  --color-focus-ring:var(--mx-indigo-bright-dark);
+  --color-focus-ring:var(--mx-indigo-dark);
   --color-primary:var(--mx-indigo-dark);
-  --color-on-primary:#FFFFFF;
-  --color-primary-accent:var(--mx-indigo-bright-dark);
+  --color-on-primary:#262670;
+  --color-primary-accent:var(--mx-indigo-dark);
   --color-primary-container:var(--mx-indigo-container-dark);
   --color-on-primary-container:#D7D5FF;
   /* Moved with its container. A role has to read as one hue: leaving the fill
@@ -143,6 +156,15 @@
   --color-warning:var(--mx-warning-dark);
   --color-danger:var(--mx-danger-dark);
   --color-info:var(--mx-info-dark);
+  /* See the light block. Dark is placed at the L* band the existing dark
+     containers occupy (24.0) at each role's own hue, rather than tinted — the
+     dark containers were never a blend of their fill. */
+  --color-success-container:#0E412F;
+  --color-on-success-container:#BFE3D6;
+  --color-warning-container:#453812;
+  --color-on-warning-container:#E4DBC1;
+  --color-info-container:#213B54;
+  --color-on-info-container:#CBDEEF;
   --color-error:var(--mx-danger-dark);
   --color-on-error:#2C1319;
   --color-error-container:#5E2831;
@@ -151,7 +173,7 @@
   /* The focus ring's own indigo, reached through the primitive rather
      than copied: one edit, one meaning moved. A focus ring must never
      be drawn on this fill — see AppColors.progressFillDark. */
-  --color-progress-fill:var(--mx-indigo-bright-dark);
+  --color-progress-fill:var(--mx-indigo-dark);
   --color-progress-complete:var(--mx-success-dark);
   --color-streak:#E0B064;
   /* The container is no longer the warm olive #3A2E1C. A brown-olive fill is

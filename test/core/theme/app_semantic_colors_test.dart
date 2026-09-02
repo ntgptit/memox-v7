@@ -17,15 +17,12 @@ void main() {
       final changed = base.copyWith(danger: const Color(0xFF123456));
 
       expect(changed.danger, const Color(0xFF123456));
-      expect(changed.primaryAccent, base.primaryAccent);
       expect(changed.success, base.success);
       expect(changed.warning, base.warning);
       expect(changed.info, base.info);
       expect(changed.surfaceMuted, base.surfaceMuted);
       expect(changed.borderSubtle, base.borderSubtle);
-      expect(changed.focusRing, base.focusRing);
       expect(changed.surfaceElevated, base.surfaceElevated);
-      expect(changed.secondaryAction, base.secondaryAction);
       expect(changed.disabledSurface, base.disabledSurface);
       expect(changed.onDisabled, base.onDisabled);
     });
@@ -38,10 +35,6 @@ void main() {
       // A field left out of lerp snaps during a theme change, and the snap is
       // visible only on the one screen that uses it. Comparing every field to
       // Color.lerp catches the omission wherever it is.
-      expect(
-        mid.primaryAccent,
-        Color.lerp(light.primaryAccent, dark.primaryAccent, 0.5),
-      );
       expect(mid.success, Color.lerp(light.success, dark.success, 0.5));
       expect(mid.warning, Color.lerp(light.warning, dark.warning, 0.5));
       expect(mid.danger, Color.lerp(light.danger, dark.danger, 0.5));
@@ -54,14 +47,9 @@ void main() {
         mid.borderSubtle,
         Color.lerp(light.borderSubtle, dark.borderSubtle, 0.5),
       );
-      expect(mid.focusRing, Color.lerp(light.focusRing, dark.focusRing, 0.5));
       expect(
         mid.surfaceElevated,
         Color.lerp(light.surfaceElevated, dark.surfaceElevated, 0.5),
-      );
-      expect(
-        mid.secondaryAction,
-        Color.lerp(light.secondaryAction, dark.secondaryAction, 0.5),
       );
       expect(
         mid.disabledSurface,

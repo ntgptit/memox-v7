@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'app_semantic_colors.dart';
 import 'app_stroke.dart';
 
 /// The state-layer alphas, and the one place they are written down.
@@ -134,60 +133,62 @@ abstract final class AppInteractionStates {
   );
 
   /// The focus-visible ring every control draws, at the one stroke and the one
-  /// colour.
+  /// colour: `primary`.
   ///
-  /// **`focusRing`, not `primary`, and this reverses an earlier reading of the
-  /// kit.** `mx.css` does draw most of its rings in `--color-primary`, which is
-  /// why this started there — but the kit is not consistent with itself
-  /// (`.mx-deck__study:focus-visible` uses `--color-focus-ring` on a *button*,
-  /// so the token is not the input border's private hue), and consistency is
-  /// not what settles it. The measurement is:
+  /// **This used to take a token of its own, and the token was the bug**
+  /// (M100.18, M100.19). WCAG 1.4.11 asks 3:1 of a focus indicator, and the
+  /// old dark `primary` was a fill tone that missed it on the two grounds a
+  /// focused control actually sits on — a card at 2.90:1 and a selected pill's
+  /// own fill at 2.11:1. The answer taken then was a second token; the answer
+  /// taken since is to move the palette, because a component belongs on the
+  /// role M3 gives it.
   ///
-  /// | ground | `primary` dark | `focusRing` dark |
-  /// |---|---|---|
-  /// | `background` | 3.29:1 | 6.26:1 |
-  /// | `surface` | **2.90:1** | 5.51:1 |
-  /// | `secondaryContainer` | **2.11:1** | 4.02:1 |
+  /// | ground | `primary` dark, now |
+  /// |---|---|
+  /// | `background` | 11.36:1 |
+  /// | `surface` | 10.02:1 |
+  /// | `primaryContainer` | 7.37:1 |
+  /// | `secondaryContainer` | 7.31:1 |
   ///
-  /// WCAG 1.4.11 asks 3:1 of a focus indicator, and `primary` misses it on the
-  /// two grounds a focused control actually sits on — a card, and a selected
-  /// pill's own fill. `primaryDark` is held at a luminance that keeps a filled
-  /// button from becoming the brightest thing on a navy page, which is the
-  /// opposite of what a ring wants; the same argument moved the progress
-  /// indicator off it in M4.10m.
+  /// Light was never in question: 6.89 / 7.27 / 5.57 / 6.02. Pinned per ground,
+  /// in both modes, by `focus_ring_contrast_test.dart`.
+  /// **Only for a slot Material 3 leaves empty.** M100.23 renamed this from
+  /// `focusRing` because the old name invited exactly the misuse it was being
+  /// put to: four components were resolving *their canonical border role* to
+  /// this, so tabbing onto a chip, a segment, a switch or a ticked checkbox
+  /// swapped a semantic role for an interaction cue. A Material colour slot
+  /// carries what the component *is*; focus is what is happening to it, and the
+  /// two must not share a channel.
   ///
-  /// Following the kit means following how it uses a token, not only its hex —
-  /// and `docs/architecture.md` already records the precedent for deviating when
-  /// a kit value lands in a contrast failure (`--color-success` on a 14px label).
+  /// Two callers remain and both are legitimate, because `_FilledButtonDefaultsM3`
+  /// and `_IconButtonDefaultsM3` declare no `side` at all — there is no
+  /// canonical role in those slots to displace. Everywhere else the focus cue
+  /// belongs in [controlOverlay] or [iconOverlay], which is where Material's own
+  /// defaults put it.
   ///
-  /// Pinned per ground, in both modes, by `focus_ring_contrast_test.dart`.
-  static BorderSide focusRing(AppSemanticColors semantic) =>
-      focusRingOf(semantic.focusRing);
+  /// `OutlinedButton` is the one component whose *border* legitimately turns
+  /// `primary` on focus, and it does not call this: `_OutlinedButtonDefaultsM3
+  /// .side` names the role itself, so `app_button_themes.dart` writes
+  /// `scheme.primary` where the source guard can read it.
+  static BorderSide focusIndicator(ColorScheme scheme) =>
+      focusIndicatorOf(scheme.primary);
 
   /// The same ring — same stroke, same shape — in a colour the caller supplies.
   ///
-  /// **For the one control whose ground is not a surface.** Every ring above is
-  /// drawn on a page, a card or a pill's own fill, and `semantic.focusRing`
-  /// clears 3:1 on all three. A *filled* button's ground is the accent itself,
-  /// and the ring token is the same indigo family:
+  /// **For the one control whose ground is not a surface.** Every ring above
+  /// is drawn on a page, a card or a pill's own fill, and `primary` clears 3:1
+  /// on all three. A *filled* button's ground is `primary` itself, so the ring
+  /// would be that colour on that colour — 1.00:1, which is not a weak ring
+  /// but no ring at all.
   ///
-  /// | ground | `focusRing` on it |
-  /// |---|---|
-  /// | `primary` light | **1.02:1** |
-  /// | `primary` dark | **1.90:1** |
+  /// So the filled button draws its ring in its **own label colour**, the one
+  /// value already guaranteed to read on that fill: `onPrimary` on `primary`,
+  /// `onError` on `error`, `onSecondaryContainer` on `secondaryContainer` —
+  /// 5.76:1 at the tightest. Deriving it from the pair the button already
+  /// carries is what keeps a future variant from needing a new measurement.
   ///
-  /// 1.02 is not a weak ring, it is no ring — `#4141C0` on `#4646B4` is the
-  /// same colour to the eye. So the filled button draws its ring in its **own
-  /// label colour**, which is the one value already guaranteed to read on that
-  /// fill: `onPrimary` on `primary`, `onError` on `error`,
-  /// `onSecondaryContainer` on `secondaryContainer` — 5.76:1 at the tightest.
-  /// Deriving it from the pair the button already carries is what keeps a
-  /// future variant from needing a new measurement.
-  ///
-  /// This is the same deviation `focusRing` itself records: follow the token
-  /// where it works, and where it lands in a contrast failure, say so and
-  /// measure. `focus_ring_contrast_test.dart` pins both halves.
-  static BorderSide focusRingOf(Color color) =>
+  /// `focus_ring_contrast_test.dart` pins both halves.
+  static BorderSide focusIndicatorOf(Color color) =>
       BorderSide(color: color, width: AppStroke.focus);
 
   /// Ordered pressed → focused → hovered, and the order is load-bearing: a

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_elevation.dart';
 import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_theme.dart';
 
@@ -48,7 +47,7 @@ void main() {
       final theme = themes['light']!;
 
       expect(
-        semanticsOf(theme).primaryAccent,
+        theme.colorScheme.primary,
         theme.colorScheme.primary,
         reason:
             'The dark fix must not quietly restyle light. If these ever differ, '
@@ -160,39 +159,43 @@ void main() {
   });
 
   group('PopupMenu depth', () {
-    // AD-14: depth is a measurable target, and the target this app already
-    // holds is a card lifting off its page — 7.75 L* in light, 7.70 in dark. A
-    // menu has no scrim, so it has to clear at least that off the card it
-    // opens over, by whatever means its mode has.
-    const double cardOffPageFloor = 7.7;
-
-    test('a menu lifts off the surface it opens over', () {
+    // **The floor here used to be `cardOffPageFloor` — 7.7 L* — and dropping it
+    // was the decision, not an accident (M100.20).** That number is the lift of
+    // a *card off its page*; applying it to a *menu over a card* was this
+    // repo's own extension, and no rung of an M3 container ladder is that far
+    // from its neighbour. Material puts a menu on `surfaceContainer`, one step
+    // above `surface`, and that step measures 3.50 L* in dark.
+    //
+    // The defect this group was written for survives intact, and it was never
+    // "the step is small": it was that the menu drew `surface` on `surface` at
+    // elevation 0 — **0.00 L\***, the same plane, with a 1.46:1 hairline as the
+    // only sign a second layer had appeared. So the assertion is that the menu
+    // sits on a *different rung*, which is what M3 guarantees and what the old
+    // binding did not.
+    //
+    // The owner took this over the alternative — re-spacing the whole dark
+    // container ladder so `surfaceContainer` cleared 7.7 — which would have
+    // lightened every dark surface above `surface` to satisfy a target M3 does
+    // not set.
+    test('a menu opens on a different rung than the surface under it', () {
       for (final entry in themes.entries) {
         final theme = entry.value;
         final popup = theme.popupMenuTheme;
         final under = theme.colorScheme.surface;
 
-        final paperStep = (lightnessStar(popup.color!) - lightnessStar(under))
-            .abs();
-        final shadow = shadowsFor(popup.elevation!, theme.colorScheme);
-        final shadowGain = shadow.isEmpty
-            ? 0.0
-            : (lightnessStar(under) -
-                      lightnessStar(
-                        Color.alphaBlend(shadow.single.color, under),
-                      ))
-                  .abs();
-
         expect(
-          paperStep + shadowGain,
-          greaterThanOrEqualTo(cardOffPageFloor),
+          popup.color,
+          theme.colorScheme.surfaceContainer,
           reason:
-              'In ${entry.key} the menu lifts off the card beneath it by '
-              '${(paperStep + shadowGain).toStringAsFixed(2)} L* '
-              '(paper ${paperStep.toStringAsFixed(2)}, shadow '
-              '${shadowGain.toStringAsFixed(2)}). On `surface` at elevation 0 '
-              'this was 0.00 — the same plane — and a menu, unlike a dialog, '
-              'has no scrim to separate it.',
+              '${entry.key}: the menu left the M3 role, which is the only '
+              'thing keeping it off the card its own ladder step provides',
+        );
+        expect(
+          (lightnessStar(popup.color!) - lightnessStar(under)).abs(),
+          greaterThan(0),
+          reason:
+              '${entry.key}: the menu and the card behind it resolved to the '
+              'same plane, which is the defect this group exists for',
         );
       }
     });

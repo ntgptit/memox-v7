@@ -154,7 +154,9 @@ class MxActionButton extends StatelessWidget {
   /// while the same `MxActionButton.secondary` two screens away had the grey
   /// control edge, and the two read as different components rather than as one
   /// button in two states. Measured on `deck_delete_confirm_light.png`: 10551
-  /// pixels of `focusRing` where every other secondary draws `borderControl`.
+  /// pixels of the focus indicator where every other secondary drew the
+  /// resting control edge. (Both were named tokens then; they are
+  /// `scheme.primary` and `scheme.outline` now.)
   ///
   /// The reason for the autofocus survives intact, because it was always about
   /// a key: a stray Enter needs a keyboard, and `FocusHighlightMode.touch`
@@ -326,23 +328,22 @@ class MxActionButton extends StatelessWidget {
     if (!isLoading || !shouldKeepLabelWhileLoading) return null;
 
     final colors = context.colors;
-    final semantic = context.semanticColors;
 
     // The outlined variant paints no fill, so it restores its ink and its edge
     // and leaves `backgroundColor` to the theme — naming a fill for it would
     // mean naming a colour that is not a role.
     if (variant == MxActionButtonVariant.secondary) {
+      // `primary` and `outline`, the same pair the resting button draws since
+      // M100.22. This copy has been wrong twice now for the same reason — it
+      // is a second spelling of the theme's answer, and it does not move when
+      // the theme does. It said `borderSubtle` while the theme drew the control
+      // edge, then `secondaryAction`/`borderControl` while the theme moved to
+      // the canonical roles; both times a secondary button changed colour for
+      // the duration of a save.
       return ButtonStyle(
-        foregroundColor: WidgetStatePropertyAll<Color>(
-          semantic.secondaryAction,
-        ),
-        // `borderControl`, the same edge the resting button draws. It said
-        // `borderSubtle` — the decorative hairline — which was right until the
-        // theme moved the resting edge to the interactive-control token and
-        // left this copy behind, so a secondary button changed colour for the
-        // duration of a save.
+        foregroundColor: WidgetStatePropertyAll<Color>(colors.primary),
         side: WidgetStatePropertyAll<BorderSide>(
-          BorderSide(color: semantic.borderControl),
+          BorderSide(color: colors.outline),
         ),
       );
     }

@@ -18,30 +18,30 @@ guess.
 
 | | |
 |---|---|
-| Files scanned (`lib/`, hand-written) | 701 |
-| Colour sites found | 322 |
-| Violations | 26 |
+| Files scanned (`lib/`, hand-written) | 702 |
+| Colour sites found | 343 |
+| Violations | 24 |
 
 **By element kind**
 
 | kind | sites |
 |---|---|
-| other | 260 |
-| background | 27 |
+| other | 279 |
+| background | 28 |
+| border | 16 |
 | shadow | 1 |
-| border | 15 |
 | text | 19 |
 
 **By source kind**
 
 | kind | sites |
 |---|---|
-| shared-constant | 116 |
-| hardcoded-literal | 107 |
-| blend-source | 4 |
-| Colors-material | 12 |
+| shared-constant | 127 |
+| hardcoded-literal | 115 |
+| blend-source | 5 |
+| Colors-material | 14 |
 | opacity-modified-token | 16 |
-| theme-token | 67 |
+| theme-token | 66 |
 
 **By violation code**
 
@@ -49,7 +49,7 @@ guess.
 |---|---|---|
 | V1 | 0 | neutral not derived from the seed |
 | V2 | 0 | role component using a colour outside its role |
-| V3 | 26 | literal duplicating an existing token |
+| V3 | 24 | literal duplicating an existing token |
 | V4 | 0 | hand-picked role variant instead of a generated one |
 | V5 | 0 | translucency applied at the paint site |
 | V6 | 0 | defined for one brightness, different mechanism in the other |
@@ -63,15 +63,13 @@ guess.
 | V3 | 🟡 | `lib/core/theme/app_border_colors.dart:98` | Color(0xFFE9ECF5) | `#E9ECF5` | `#E9ECF5` | no token within ΔE-ish range — needs a new one |
 | V3 | 🟡 | `lib/core/theme/app_border_colors.dart:105` | Color(0xFF2E2A54) | `#2E2A54` | `#2E2A54` | no token within ΔE-ish range — needs a new one |
 | V3 | 🟡 | `lib/core/theme/app_border_colors.dart:107` | Color(0xFF6E6ECE) | `#6E6ECE` | `#6E6ECE` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:110` | Color(0xFF7C79C8) | `#7C79C8` | `#7C79C8` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:122` | Color(0xFFB6B6E2) | `#B6B6E2` | `#B6B6E2` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:137` | Color(0xFF6560B8) | `#6560B8` | `#6560B8` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:164` | Color(0xFF8887CE) | `#8887CE` | `#8887CE` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:169` | Color(0xFF5D65B2) | `#5D65B2` | `#5D65B2` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:193` | Color(0xFF8A8A92) | `#8A8A92` | `#8A8A92` | colorScheme.outline |
-| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:224` | Color(0xFF6E6A98) | `#6E6A98` | `#6E6A98` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:228` | Color(0xFF4141C0) | `#4141C0` | `#4141C0` | semantic.focusRing |
-| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:230` | Color(0xFF8A8AE0) | `#8A8AE0` | `#8A8AE0` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:111` | Color(0xFF7C79C8) | `#7C79C8` | `#7C79C8` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:123` | Color(0xFFB6B6E2) | `#B6B6E2` | `#B6B6E2` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:138` | Color(0xFF6560B8) | `#6560B8` | `#6560B8` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:165` | Color(0xFF8887CE) | `#8887CE` | `#8887CE` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:170` | Color(0xFF5D65B2) | `#5D65B2` | `#5D65B2` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:219` | Color(0xFF7D7D85) | `#7D7D85` | `#7D7D85` | colorScheme.outline |
+| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:265` | Color(0xFF7D79A2) | `#7D79A2` | `#7D79A2` | no token within ΔE-ish range — needs a new one |
 | V3 | 🟡 | `lib/core/theme/app_surface_colors.dart:28` | Color(0xFFF4F5F8) | `#F4F5F8` | `#F4F5F8` | no token within ΔE-ish range — needs a new one |
 | V3 | 🟡 | `lib/core/theme/app_surface_colors.dart:30` | Color(0xFF0A082D) | `#0A082D` | `#0A082D` | no token within ΔE-ish range — needs a new one |
 | V3 | 🟡 | `lib/core/theme/app_surface_colors.dart:45` | Color(0xFFFBFBFE) | `#FBFBFE` | `#FBFBFE` | colorScheme.surface |
@@ -105,13 +103,9 @@ guess.
 
 - **V3** `Color(0xFF5D65B2)` — A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #5D65B2.
 
-- **V3** `Color(0xFF8A8A92)` — A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #8A8A92.
+- **V3** `Color(0xFF7D7D85)` — A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #7D7D85.
 
-- **V3** `Color(0xFF6E6A98)` — A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #6E6A98.
-
-- **V3** `Color(0xFF4141C0)` — A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #4141C0.
-
-- **V3** `Color(0xFF8A8AE0)` — A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #8A8AE0.
+- **V3** `Color(0xFF7D79A2)` — A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #7D79A2.
 
 - **V3** `Color(0xFFF4F5F8)` — A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #F4F5F8.
 
@@ -151,18 +145,18 @@ an edge.
 | light | semantic.borderSubtle on card (colorScheme.surface) | 1.45 | in-band |
 | light | semantic.borderSubtle on page (scaffoldBackgroundColor) | 1.38 | in-band |
 | light | semantic.borderSubtle on muted tile (semantic.surfaceMuted) | 1.27 | in-band |
-| light | colorScheme.outline on card (colorScheme.surface) | 3.32 | too-heavy |
-| light | colorScheme.outline on page (scaffoldBackgroundColor) | 3.14 | too-heavy |
-| light | colorScheme.outline on muted tile (semantic.surfaceMuted) | 2.90 | too-heavy |
+| light | colorScheme.outline on card (colorScheme.surface) | 3.95 | too-heavy |
+| light | colorScheme.outline on page (scaffoldBackgroundColor) | 3.74 | too-heavy |
+| light | colorScheme.outline on muted tile (semantic.surfaceMuted) | 3.45 | too-heavy |
 | light | colorScheme.outlineVariant on card (colorScheme.surface) | 1.45 | in-band |
 | light | colorScheme.outlineVariant on page (scaffoldBackgroundColor) | 1.38 | in-band |
 | light | colorScheme.outlineVariant on muted tile (semantic.surfaceMuted) | 1.27 | in-band |
 | dark | semantic.borderSubtle on card (colorScheme.surface) | 2.04 | too-heavy |
 | dark | semantic.borderSubtle on page (scaffoldBackgroundColor) | 2.32 | too-heavy |
 | dark | semantic.borderSubtle on muted tile (semantic.surfaceMuted) | 1.73 | too-heavy |
-| dark | colorScheme.outline on card (colorScheme.surface) | 3.39 | too-heavy |
-| dark | colorScheme.outline on page (scaffoldBackgroundColor) | 3.85 | too-heavy |
-| dark | colorScheme.outline on muted tile (semantic.surfaceMuted) | 2.87 | too-heavy |
+| dark | colorScheme.outline on card (colorScheme.surface) | 4.16 | too-heavy |
+| dark | colorScheme.outline on page (scaffoldBackgroundColor) | 4.72 | too-heavy |
+| dark | colorScheme.outline on muted tile (semantic.surfaceMuted) | 3.52 | too-heavy |
 | dark | colorScheme.outlineVariant on card (colorScheme.surface) | 2.04 | too-heavy |
 | dark | colorScheme.outlineVariant on page (scaffoldBackgroundColor) | 2.32 | too-heavy |
 | dark | colorScheme.outlineVariant on muted tile (semantic.surfaceMuted) | 1.73 | too-heavy |

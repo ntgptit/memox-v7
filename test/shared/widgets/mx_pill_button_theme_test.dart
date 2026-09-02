@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_material_roles.dart';
 import 'package:memox/core/theme/app_interaction_states.dart';
-import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
 
@@ -181,28 +179,46 @@ void main() {
       }
     });
 
-    test('focus draws a ring rather than only a tint', () {
-      // WCAG 1.4.11 asks 3:1 of a focus indicator. A fill tint alone does not
-      // reach it — the same measurement that put a ring on `MxIconButton`.
+    test('the theme side never becomes the focus ring', () {
+      // **This test asserted the opposite until M100.23, and the concern behind
+      // it was right.** It required `chipTheme.side` to resolve to the ring
+      // colour under focus, because a fill tint alone measures 1.15:1 in light
+      // and 1.25:1 in dark against the resting fill — nowhere near the 3:1 WCAG
+      // 1.4.11 asks of a focus indicator.
+      //
+      // What was wrong was the slot. `side` is where `_ChoiceChipDefaultsM3`
+      // puts the chip's *identity*, so filling it with a focus colour meant a
+      // selected, focused pill silently left its Material role — and because
+      // `focused` was read before `selected`, it did so in the one combination
+      // a keyboard user is always in.
+      //
+      // The indicator moved to `MxFocusRing`, a layer of its own; the rule the
+      // side now keeps is asserted here, across every combination.
+      const combinations = <Set<WidgetState>>[
+        <WidgetState>{},
+        <WidgetState>{WidgetState.focused},
+        <WidgetState>{WidgetState.selected},
+        <WidgetState>{WidgetState.selected, WidgetState.focused},
+      ];
+
       for (final isDark in <bool>[false, true]) {
         final theme = isDark ? buildDarkTheme() : buildLightTheme();
         final side = theme.chipTheme.side;
         expect(side, isA<WidgetStateBorderSide>());
 
-        final focused = (side! as WidgetStateBorderSide).resolve(<WidgetState>{
-          WidgetState.focused,
-        });
-        final resting = (side as WidgetStateBorderSide).resolve(
-          <WidgetState>{},
-        );
+        final ring = AppInteractionStates.focusIndicator(
+          theme.colorScheme,
+        ).color;
 
-        expect(
-          focused?.color,
-          AppInteractionStates.focusRing(
-            theme.extension<AppSemanticColors>()!,
-          ).color,
-        );
-        expect(focused?.width, greaterThan(resting?.width ?? 0));
+        for (final states in combinations) {
+          expect(
+            (side! as WidgetStateBorderSide).resolve(states)?.color,
+            isNot(ring),
+            reason:
+                '${isDark ? 'dark' : 'light'}: the chip theme is carrying the '
+                'focus ring in its identity slot under $states',
+          );
+        }
       }
     });
 
@@ -221,12 +237,14 @@ void main() {
         );
 
         final states = color! as WidgetStateColor;
-        // Selected is the brand ink on the brand tint (owner review,
-        // 2026-08-20) — `selectedInk` picks the shade that clears the
-        // contrast floor on this theme's container.
+        // `onSecondaryContainer` on `secondaryContainer` —
+        // `_ChoiceChipDefaultsM3.labelStyle`'s pair, restored at M100.22 from
+        // the brand container the 2026-08-20 review had put here. The role
+        // identity is pinned in `m3_role_contract_test.dart`; this file cares
+        // that the *state resolution* still happens in the slot Material reads.
         expect(
           states.resolve(<WidgetState>{WidgetState.selected}),
-          selectedInk(theme.colorScheme),
+          theme.colorScheme.onSecondaryContainer,
         );
         expect(
           states.resolve(<WidgetState>{}),

@@ -121,7 +121,7 @@ class _MxSearchFieldState extends State<MxSearchField> {
         // its 48, and at 320 wide with `textScaler` 2.0 the chrome has no two
         // pixels to spare.
         border: Border.all(
-          color: _hasFocus ? semantic.focusRing : semantic.surfaceMuted,
+          color: _hasFocus ? colors.primary : semantic.surfaceMuted,
           strokeAlign: BorderSide.strokeAlignOutside,
         ),
       ),

@@ -151,7 +151,7 @@ ButtonStyle buildFilledStyle(
   // the shared `overlayColor` washes 10% of `primary` on focus, and 10% of the
   // accent painted on the accent is the accent — so the app's primary CTA had
   // no focus indicator at all, in either mode. Nor would the usual ring fix
-  // it: `semantic.focusRing` is the same indigo family as the fill and
+  // it: `scheme.primary` is the same indigo family as the fill and
   // measures 1.02:1 on it in light. `AppInteractionStates.focusRingOf` records
   // the table; the short version is that the label colour is the one value
   // already guaranteed to read on this fill, whatever the variant.
@@ -164,7 +164,7 @@ ButtonStyle buildFilledStyle(
     // order as every other one in this file.
     if (states.contains(WidgetState.disabled)) return null;
     if (states.contains(WidgetState.focused)) {
-      return AppInteractionStates.focusRingOf(label);
+      return AppInteractionStates.focusIndicatorOf(label);
     }
 
     return null;
@@ -222,10 +222,10 @@ WidgetStateProperty<Color> textLinkForeground(
 /// trailing side, and `tapTargetSize: padded` gives the finger its horizontal
 /// 48 without drawing it.
 ///
-/// **Colour is the accent, not the fill.** `ColorScheme.primary` is held dark
-/// enough on dark surfaces that it measures 3.33:1 as bare text and fails AA
-/// at label size; `AppSemanticColors.primaryAccent` is the variant that reads
-/// as a label.
+/// **Colour is `primary`.** It used to be a separate accent token, because the
+/// old dark `primary` was a fill tone measuring 3.33:1 as bare text — failing
+/// AA at label size. Since M100.18 inverted it to tone 80 it reads 10.02:1 on
+/// the card, so the role carries its own label.
 ///
 /// **Focus is an underline, and it is declared here rather than only in
 /// `MxTextButton`.** Suppressing the overlay takes the wash away, and the zero
@@ -250,7 +250,7 @@ TextButtonThemeData buildTextButtonTheme(
   final foreground = textLinkForeground(
     scheme,
     semantic,
-    accent: semantic.primaryAccent,
+    accent: scheme.primary,
   );
 
   return TextButtonThemeData(
@@ -288,9 +288,20 @@ TextButtonThemeData buildTextButtonTheme(
 
 /// The secondary action: `MxActionButton`'s `secondary` variant.
 ///
-/// Reads `semantic.secondaryAction` itself, for the reason
-/// [buildFilledButtonTheme] gives: the relayed `outlineLabel` parameter was
-/// the same value with a second source.
+/// **`primary` and `outline`, which is what `_OutlinedButtonDefaultsM3` names
+/// for both slots — restored at M100.22.**
+///
+/// The label read `semantic.secondaryAction`, a slate that is not in the brand
+/// family at all (`#454B5E` light, `#C3C6D2` dark). That token dates from when
+/// dark `primary` was a fill tone measuring 3.33:1 as bare text; M100.18
+/// inverted it to tone 80 and the role now reads **7.27:1 in light and 10.01:1
+/// in dark** on a card, 6.89 and 11.35 on the page. There is nothing left for a
+/// substitute to buy, and a secondary button whose label is not the brand
+/// colour is the one control that disagrees with every link beside it.
+///
+/// The edge read `semantic.borderControl`, which *is* `scheme.outline` — the
+/// scheme has bound them since the role audit. Saying `outline` changes no
+/// pixel and removes the second name.
 OutlinedButtonThemeData buildOutlinedButtonTheme(
   ColorScheme scheme,
   AppSemanticColors semantic,
@@ -299,7 +310,7 @@ OutlinedButtonThemeData buildOutlinedButtonTheme(
     foregroundColor: WidgetStateProperty.resolveWith((states) {
       if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
 
-      return semantic.secondaryAction;
+      return scheme.primary;
     }),
     side: WidgetStateProperty.resolveWith((states) {
       if (states.contains(WidgetState.disabled)) {
@@ -309,30 +320,27 @@ OutlinedButtonThemeData buildOutlinedButtonTheme(
       // replaces the hairline rather than sitting outside it, so focus costs no
       // layout — an `OutlinedBorder`'s side is painted on the shape, not added
       // to the box.
+      // **`primary`, and this one is Material's own answer rather than the
+      // app's.** `_OutlinedButtonDefaultsM3.side` resolves focus to
+      // `_colors.primary` before it falls through to `outline` — the single
+      // component in this theme whose canonical *border role* changes with
+      // focus. So it is written as the role, not routed through
+      // `AppInteractionStates`, which exists for slots M3 leaves empty.
       if (states.contains(WidgetState.focused)) {
-        return AppInteractionStates.focusRing(semantic);
+        return BorderSide(color: scheme.primary, width: AppStroke.focus);
       }
 
-      // **`borderControl`, which is what this app's own `outline` role maps
-      // to.** `borderSubtle` is `outlineVariant` — the decorative edge, for
-      // dividers and the hairline around a card — and it left the resting
-      // button at **1.45:1** in light and **2.04:1** in dark, below the 3:1
-      // WCAG 1.4.11 asks of a control boundary. `borderControl` measures
-      // **3.19** and **3.00** on `surface`, **3.02** and **3.41** on the page.
+      // `scheme.outline`. The two names were the same value — the scheme binds
+      // `outline` to `borderControlLight`/`Dark` — and the M100.3 census that
+      // set that value stands: it is `#7D7D85` and `#7D79A2` since M100.22, and
+      // scores 3.95/4.16 on a card, 3.74/4.72 on the page and 3.65/3.84 on
+      // `surfaceContainer`, all clear of the 3:1 WCAG 1.4.11 asks of a control
+      // boundary.
       //
-      // **And on the card, which is where this button actually sits.** Those
-      // two grounds were the whole measurement until M100.3, when a pixel
-      // census over the dark goldens found 5 858 px of this edge touching
-      // `surfaceContainer` — the fill of the deck row and the settings card —
-      // where the dark value scored **2.76**. It is `#6E6A98` now and scores
-      // 3.12 there; `AppBorderColors.borderControlDark` holds the table.
-      //
-      // The mismatch was internal, not a deviation from Material: the scheme
-      // already says `outline = borderControl`, and the only component reading
-      // the other token was this one. Chips keep `borderSubtle` deliberately —
-      // a filter row of eight pills at 3:1 competes with the content it
-      // filters, and a chip carries a fill and a label as well as an edge.
-      return BorderSide(color: semantic.borderControl);
+      // Chips take `outlineVariant` instead, and that is M3's split rather than
+      // this app's: a filter row of eight pills at 3:1 competes with the content
+      // it filters, and a chip carries a fill and a label as well as an edge.
+      return BorderSide(color: scheme.outline);
     }),
   ),
 );

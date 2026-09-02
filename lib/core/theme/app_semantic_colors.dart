@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
+import 'app_material_roles.dart';
 import 'app_surface_colors.dart';
 import 'app_border_colors.dart';
 
@@ -12,7 +13,6 @@ import 'app_border_colors.dart';
 @immutable
 final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   const AppSemanticColors({
-    required this.primaryAccent,
     required this.streakContainer,
     required this.onStreakContainer,
     required this.progressTrack,
@@ -21,6 +21,14 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     required this.warning,
     required this.danger,
     required this.info,
+    required this.successContainer,
+    required this.onSuccessContainer,
+    required this.warningContainer,
+    required this.onWarningContainer,
+    required this.infoContainer,
+    required this.onInfoContainer,
+    required this.dangerContainer,
+    required this.onDangerContainer,
     required this.borderOption,
     required this.borderDivider,
     required this.borderSelected,
@@ -31,15 +39,12 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     required this.borderAccent,
     required this.borderSubtle,
     required this.borderControl,
-    required this.focusRing,
-    required this.secondaryAction,
     required this.disabledSurface,
     required this.onDisabled,
   });
 
   const AppSemanticColors.light()
-    : primaryAccent = AppColors.primaryAccentLight,
-      streakContainer = AppColors.streakContainerLight,
+    : streakContainer = AppColors.streakContainerLight,
       onStreakContainer = AppColors.onStreakContainerLight,
       progressTrack = AppColors.progressTrackLight,
       progressFill = AppColors.progressFillLight,
@@ -47,6 +52,14 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       warning = AppColors.warningLight,
       danger = AppColors.dangerLight,
       info = AppColors.infoLight,
+      successContainer = AppColors.successContainerLight,
+      onSuccessContainer = AppColors.onSuccessContainerLight,
+      warningContainer = AppColors.warningContainerLight,
+      onWarningContainer = AppColors.onWarningContainerLight,
+      infoContainer = AppColors.infoContainerLight,
+      onInfoContainer = AppColors.onInfoContainerLight,
+      dangerContainer = AppMaterialRoles.errorContainerLight,
+      onDangerContainer = AppMaterialRoles.onErrorContainerLight,
       borderOption = AppBorderColors.borderOptionLight,
       borderDivider = AppBorderColors.borderDividerLight,
       borderSelected = AppBorderColors.borderSelectedLight,
@@ -57,14 +70,11 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       borderAccent = AppBorderColors.borderAccentLight,
       borderSubtle = AppBorderColors.borderSubtleLight,
       borderControl = AppBorderColors.borderControlLight,
-      focusRing = AppBorderColors.focusRingLight,
-      secondaryAction = AppColors.secondaryActionLight,
       disabledSurface = AppColors.disabledSurfaceLight,
       onDisabled = AppColors.onDisabledLight;
 
   const AppSemanticColors.dark()
-    : primaryAccent = AppColors.primaryAccentDark,
-      streakContainer = AppColors.streakContainerDark,
+    : streakContainer = AppColors.streakContainerDark,
       onStreakContainer = AppColors.onStreakContainerDark,
       progressTrack = AppColors.progressTrackDark,
       progressFill = AppColors.progressFillDark,
@@ -72,6 +82,14 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       warning = AppColors.warningDark,
       danger = AppColors.dangerDark,
       info = AppColors.infoDark,
+      successContainer = AppColors.successContainerDark,
+      onSuccessContainer = AppColors.onSuccessContainerDark,
+      warningContainer = AppColors.warningContainerDark,
+      onWarningContainer = AppColors.onWarningContainerDark,
+      infoContainer = AppColors.infoContainerDark,
+      onInfoContainer = AppColors.onInfoContainerDark,
+      dangerContainer = AppMaterialRoles.errorContainerDark,
+      onDangerContainer = AppMaterialRoles.onErrorContainerDark,
       borderOption = AppBorderColors.borderOptionDark,
       borderDivider = AppBorderColors.borderDividerDark,
       borderSelected = AppBorderColors.borderSelectedDark,
@@ -82,15 +100,8 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       borderAccent = AppBorderColors.borderAccentDark,
       borderSubtle = AppBorderColors.borderSubtleDark,
       borderControl = AppBorderColors.borderControlDark,
-      focusRing = AppBorderColors.focusRingDark,
-      secondaryAction = AppColors.secondaryActionDark,
       disabledSurface = AppColors.disabledSurfaceDark,
       onDisabled = AppColors.onDisabledDark;
-
-  /// The brand hue as text — a text button, a link. `ColorScheme.primary` is a
-  /// fill colour, held dark enough on dark surfaces that it fails AA as a bare
-  /// label; this is the variant that passes. See `AppColors.primaryAccentDark`.
-  final Color primaryAccent;
 
   /// The due chip's fill and its label. See `AppColors.streakContainerLight`
   /// for why the label is not the design's own value.
@@ -106,6 +117,30 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   final Color warning;
   final Color danger;
   final Color info;
+
+  /// The filled pill a status carries, and its label.
+  ///
+  /// **Added at M100.21 because the absence was putting business meaning on
+  /// accent roles** — an import chip reading `secondaryContainer` for "ready"
+  /// and `tertiaryContainer` for "duplicate". `AppColors` holds the derivation
+  /// and the measurements.
+  final Color successContainer;
+  final Color onSuccessContainer;
+  final Color warningContainer;
+  final Color onWarningContainer;
+  final Color infoContainer;
+  final Color onInfoContainer;
+
+  /// The danger family's container pair, which **is** `error`'s.
+  ///
+  /// **A derivation rather than a value, for the reason `error` is `danger`:**
+  /// this app has one red system, and declaring a second container for it
+  /// would be the same mistake one level down. What the name buys is the call
+  /// site — an overdue chip means *late*, not *fault*, and it said
+  /// `errorContainer` only because that was the only red container there was
+  /// (M100.21).
+  final Color dangerContainer;
+  final Color onDangerContainer;
 
   /// Overdue — a review past its day (BR-161 settled that late is a *red*
   /// signal, distinct from due-today's warm one). It **is** [danger]: the
@@ -172,12 +207,6 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   /// The same edge stated louder, not a different one: same hue, same stroke.
   final Color borderControl;
 
-  /// Input border while focused. Focus shifts hue, never stroke width.
-  final Color focusRing;
-
-  /// Label of a secondary (outlined) action.
-  final Color secondaryAction;
-
   /// The fill and the border of a disabled control — a solid, so the same
   /// disabled button is the same colour on a page, on a card and in a dialog.
   /// See `AppColors.disabledSurfaceLight`.
@@ -189,7 +218,6 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
 
   @override
   AppSemanticColors copyWith({
-    Color? primaryAccent,
     Color? streakContainer,
     Color? onStreakContainer,
     Color? progressTrack,
@@ -198,6 +226,14 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     Color? warning,
     Color? danger,
     Color? info,
+    Color? successContainer,
+    Color? onSuccessContainer,
+    Color? warningContainer,
+    Color? onWarningContainer,
+    Color? infoContainer,
+    Color? onInfoContainer,
+    Color? dangerContainer,
+    Color? onDangerContainer,
     Color? borderOption,
     Color? borderDivider,
     Color? borderSelected,
@@ -208,13 +244,10 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     Color? borderAccent,
     Color? borderSubtle,
     Color? borderControl,
-    Color? focusRing,
-    Color? secondaryAction,
     Color? disabledSurface,
     Color? onDisabled,
   }) {
     return AppSemanticColors(
-      primaryAccent: primaryAccent ?? this.primaryAccent,
       streakContainer: streakContainer ?? this.streakContainer,
       onStreakContainer: onStreakContainer ?? this.onStreakContainer,
       progressTrack: progressTrack ?? this.progressTrack,
@@ -223,6 +256,14 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       warning: warning ?? this.warning,
       danger: danger ?? this.danger,
       info: info ?? this.info,
+      successContainer: successContainer ?? this.successContainer,
+      onSuccessContainer: onSuccessContainer ?? this.onSuccessContainer,
+      warningContainer: warningContainer ?? this.warningContainer,
+      onWarningContainer: onWarningContainer ?? this.onWarningContainer,
+      infoContainer: infoContainer ?? this.infoContainer,
+      onInfoContainer: onInfoContainer ?? this.onInfoContainer,
+      dangerContainer: dangerContainer ?? this.dangerContainer,
+      onDangerContainer: onDangerContainer ?? this.onDangerContainer,
       borderOption: borderOption ?? this.borderOption,
       borderDivider: borderDivider ?? this.borderDivider,
       borderSelected: borderSelected ?? this.borderSelected,
@@ -233,8 +274,6 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       borderAccent: borderAccent ?? this.borderAccent,
       borderSubtle: borderSubtle ?? this.borderSubtle,
       borderControl: borderControl ?? this.borderControl,
-      focusRing: focusRing ?? this.focusRing,
-      secondaryAction: secondaryAction ?? this.secondaryAction,
       disabledSurface: disabledSurface ?? this.disabledSurface,
       onDisabled: onDisabled ?? this.onDisabled,
     );
@@ -251,7 +290,6 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     if (other is! AppSemanticColors) return this;
 
     return AppSemanticColors(
-      primaryAccent: Color.lerp(primaryAccent, other.primaryAccent, t)!,
       streakContainer: Color.lerp(streakContainer, other.streakContainer, t)!,
       onStreakContainer: Color.lerp(
         onStreakContainer,
@@ -264,6 +302,34 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       warning: Color.lerp(warning, other.warning, t)!,
       danger: Color.lerp(danger, other.danger, t)!,
       info: Color.lerp(info, other.info, t)!,
+      successContainer: Color.lerp(
+        successContainer,
+        other.successContainer,
+        t,
+      )!,
+      onSuccessContainer: Color.lerp(
+        onSuccessContainer,
+        other.onSuccessContainer,
+        t,
+      )!,
+      warningContainer: Color.lerp(
+        warningContainer,
+        other.warningContainer,
+        t,
+      )!,
+      onWarningContainer: Color.lerp(
+        onWarningContainer,
+        other.onWarningContainer,
+        t,
+      )!,
+      infoContainer: Color.lerp(infoContainer, other.infoContainer, t)!,
+      onInfoContainer: Color.lerp(onInfoContainer, other.onInfoContainer, t)!,
+      dangerContainer: Color.lerp(dangerContainer, other.dangerContainer, t)!,
+      onDangerContainer: Color.lerp(
+        onDangerContainer,
+        other.onDangerContainer,
+        t,
+      )!,
       borderOption: Color.lerp(borderOption, other.borderOption, t)!,
       borderDivider: Color.lerp(borderDivider, other.borderDivider, t)!,
       borderSelected: Color.lerp(borderSelected, other.borderSelected, t)!,
@@ -274,8 +340,6 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       borderAccent: Color.lerp(borderAccent, other.borderAccent, t)!,
       borderSubtle: Color.lerp(borderSubtle, other.borderSubtle, t)!,
       borderControl: Color.lerp(borderControl, other.borderControl, t)!,
-      focusRing: Color.lerp(focusRing, other.focusRing, t)!,
-      secondaryAction: Color.lerp(secondaryAction, other.secondaryAction, t)!,
       disabledSurface: Color.lerp(disabledSurface, other.disabledSurface, t)!,
       onDisabled: Color.lerp(onDisabled, other.onDisabled, t)!,
     );

@@ -57,7 +57,7 @@ final class CardMetric {
 /// its value.
 ///
 /// **The well is decoration and the text is the content**, which is why the
-/// glyph takes `primaryAccent` on `surfaceMuted` (6.36:1 light, 4.66:1 dark) and
+/// glyph takes `primary` on `surfaceMuted` (6.36:1 light, 8.30:1 dark) and
 /// the label and value take the ordinary ink pair. Nothing here is a control, so
 /// nothing here carries a touch target — a read-only cell may be as compact as
 /// its type allows.
@@ -125,7 +125,7 @@ TextStyle cardMetricValueStyle(BuildContext context, CardMetricKind kind) {
       // 6.36:1 light and 4.66:1 dark on `surfaceMuted`, 7.27 / 5.51 on
       // `surface` — the accent as text, not `ColorScheme.primary`, which is a
       // fill colour and fails AA as a bare label on the dark panel.
-      color: context.semanticColors.primaryAccent,
+      color: context.colors.primary,
       fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
     ),
   };

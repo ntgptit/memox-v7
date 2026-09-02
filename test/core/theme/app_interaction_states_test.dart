@@ -146,7 +146,7 @@ void main() {
         final foreground = entry.value.textButtonTheme.style!.foregroundColor!;
         final rest = foreground.resolve(resting);
 
-        expect(rest, semantic.primaryAccent, reason: entry.key);
+        expect(rest, entry.value.colorScheme.primary, reason: entry.key);
         expect(
           foreground.resolve(hovered),
           isNot(rest),
@@ -240,7 +240,7 @@ void main() {
 
         expect(
           fill.resolve(selected),
-          semantic.primaryAccent,
+          entry.value.colorScheme.primary,
           reason:
               '${entry.key}: the mark is a glyph, so selected takes the '
               'accent — primary is a fill colour and misses 3:1 on the dark '

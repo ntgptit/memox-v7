@@ -62,11 +62,11 @@ class MxEmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            // **`primaryAccent`, not `primary`** (M100.3). `primary` is the
-            // *fill* of a filled button and is held below the card's headline
-            // so a CTA never outshines it — which `app_colors.dart` says makes
-            // it 3.29:1 as a mark on the dark page. The two agree in light by
-            // construction, so this only ever looked right there.
+            // `AppInk.accent` is `primary`, and since M100.18 that is the
+            // whole story: the dark accent inverted to tone 80, so the brand
+            // hue reads as a mark on the page at 11.36:1. This used to reach
+            // for a separate text-safe token because the old fill tone managed
+            // 3.29:1 there.
             MxIcon(icon, ink: AppInk.accent, size: MxIconSize.lg),
             const SizedBox(height: AppSpacing.lg),
             Text(

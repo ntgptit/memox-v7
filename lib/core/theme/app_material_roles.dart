@@ -47,7 +47,38 @@ abstract final class AppMaterialRoles {
   static const Color secondaryDark = Color(0xFFB8B7D0);
   static const Color onSecondaryLight = Color(0xFFFFFFFF);
   static const Color onSecondaryDark = Color(0xFF1E2033);
-  static const Color secondaryContainerLight = Color(0xFFE4E6EC);
+
+  /// Retuned from `#E4E6EC` at M100.22, and the component that forced it is
+  /// the one that had been avoiding it.
+  ///
+  /// Three M3 slots take this role for their selected state — the navigation
+  /// indicator, the choice chip and the segmented button — and all three had
+  /// been re-pointed at `primaryContainer` instead, because at `#E4E6EC` an
+  /// applied filter and an unapplied one were nearly the same rectangle on a
+  /// light page. That was true and measured: 4.22 L\* of step against
+  /// `surfaceContainer`, where the `primaryContainer` the owner approved gave
+  /// 7.16.
+  ///
+  /// So the tone moves to where that step already was, in the *secondary*
+  /// family rather than the primary one: L\* 91.30 → 88.19 against
+  /// `primaryContainer`'s 88.36, and chroma 0.031 → 0.071 so it reads tinted
+  /// rather than grey. Hue stays 226 — [secondaryLight]'s own — so the pair
+  /// still passes `color_system_rules_test.dart` R3's five-degree band.
+  ///
+  /// | ground | was | now | `primaryContainer` gave |
+  /// |---|---|---|---|
+  /// | `surface` | 7.39 L\* | 10.50 | 10.34 |
+  /// | page | 5.24 | 8.35 | 8.18 |
+  /// | `surfaceContainer` | 4.22 | 7.33 | 7.16 |
+  ///
+  /// [onSecondaryContainerLight] reads 9.55:1 on it, down from 10.37 and still
+  /// clear of AA by more than double.
+  ///
+  /// **Dark did not move, and that is the finding rather than an omission.**
+  /// `#332F58` already gave 7.99 L\* against `surfaceContainer` where
+  /// `primaryContainer` gave 7.71 — the substitution bought dark nothing. The
+  /// owner's report said "on a light page", and the measurement agreed.
+  static const Color secondaryContainerLight = Color(0xFFD9DDEB);
   static const Color secondaryContainerDark = Color(0xFF332F58);
   static const Color onSecondaryContainerLight = Color(0xFF2C3141);
   static const Color onSecondaryContainerDark = Color(0xFFD9DCE7);
@@ -203,40 +234,3 @@ abstract final class AppMaterialRoles {
   /// [tertiaryFixed] and 5.45:1 on [tertiaryFixedDim], against a 4.5 floor.
   static const Color onTertiaryFixedVariant = Color(0xFF2A4A64);
 }
-
-/// The ink of a control that is **selected** — a selected pill's label, the
-/// navigation bar's active tab.
-///
-/// **Not simply `primary`, and not simply `onPrimaryContainer`.** The owner's
-/// mockup asks the active state to read as the brand colour (owner review,
-/// 2026-08-20), and in light it can: `primary` measures 5.57:1 on
-/// `primaryContainer` and 6.89:1 on `background`. In dark `primaryDark` is
-/// deliberately held low — see [AppColors.primaryDark] — so the same ink
-/// measures **2.13:1** on the container, and the visual audit fails it. Dark
-/// therefore takes the M3 partner, which is the same hue a few steps up and
-/// clears every floor on both grounds: 8.87:1 and 13.68:1.
-///
-/// **Named for the question, not for the colour, because
-/// `AppSemanticColors.primaryAccent` answers a different one and the two used
-/// to collide.** That token is *the brand hue as a label on a surface* — a
-/// link, an accent glyph on a card or a page. This one is *the ink of a
-/// selected control*, whose ground is the selection's own tint. They agree in
-/// light by construction (both resolve to `primary`) and part company in dark,
-/// which is what made them look like two spellings of one idea.
-///
-/// **They are not, and merging them was measured rather than argued.**
-/// `primaryAccent` in dark is the focus ring's brighter indigo, chosen to stay
-/// recognisably *brand* on a page — and on a selected pill's
-/// `primaryContainer` fill it measures **4.06:1**, under the 4.5 a 12px label
-/// needs. Merging the other way is no better: `onPrimaryContainer` in light is
-/// `#1B1B5C`, which reads as black text rather than as the brand. Each token
-/// takes the value that is both legible on *its* ground and still the brand;
-/// the grounds differ, so the values do. `app_selected_ink_test.dart` pins all
-/// four numbers so a future merge has to fail a test rather than a review.
-///
-/// One function rather than a copy per call site: the pill and the tab have to
-/// agree about what "selected" looks like, and they did not when each resolved
-/// its own.
-Color selectedInk(ColorScheme scheme) => scheme.brightness == Brightness.light
-    ? scheme.primary
-    : scheme.onPrimaryContainer;

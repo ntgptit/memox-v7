@@ -15,8 +15,9 @@ import 'app_stroke.dart';
 /// **Focus changes the border's COLOUR, not its weight.** Material's default
 /// goes 1px -> 2px on focus, which makes the field jump and nudges anything
 /// laid out beside it; keeping the stroke at [AppStroke.input] in every state
-/// and moving the hue to `focusRing` is the difference between a field
-/// answering and a field shouting.
+/// and moving the hue to `scheme.primary` is the difference between a field
+/// answering and a field shouting. (`focusRing` was the token that stood there
+/// until M100.19 retired it; the role carries the job now.)
 InputDecorationTheme buildInputDecorationTheme(
   ColorScheme scheme,
   AppSemanticColors semantic,
@@ -35,18 +36,15 @@ InputDecorationTheme buildInputDecorationTheme(
   // and nothing else is identified by its edge alone, which is exactly the
   // information WCAG 1.4.11 asks 3:1 of; the hairline measured 1.38:1 in light.
   // A card's edge stays subtle because a card is identified by its content.
-  border: _inputBorder(semantic.borderControl),
-  enabledBorder: _inputBorder(semantic.borderControl),
-  focusedBorder: _inputBorder(semantic.focusRing),
-  errorBorder: _inputBorder(semantic.danger),
-  focusedErrorBorder: _inputBorder(semantic.danger),
+  border: _inputBorder(scheme.outline),
+  enabledBorder: _inputBorder(scheme.outline),
+  focusedBorder: _inputBorder(scheme.primary),
+  errorBorder: _inputBorder(scheme.error),
+  focusedErrorBorder: _inputBorder(scheme.error),
   // Solid, per MX-VIS-002 rule R7. Blended here rather than read from
   // `disabledSurface`: this is the *hairline* faded, that is the *ink*.
   disabledBorder: _inputBorder(
-    Color.alphaBlend(
-      semantic.borderControl.withValues(alpha: 0.5),
-      scheme.surface,
-    ),
+    Color.alphaBlend(scheme.outline.withValues(alpha: 0.5), scheme.surface),
   ),
   hintStyle: texts.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
 );

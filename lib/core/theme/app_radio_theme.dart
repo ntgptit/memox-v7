@@ -18,12 +18,11 @@ import 'app_semantic_colors.dart';
 /// overlay is the shared control wash. Recorded as a Flutter-only gap in
 /// `docs/reviews/design-parity-checklist.md`.
 ///
-/// **The selected mark is `primaryAccent`, not `primary`** — the same
-/// distinction the text link draws. A radio mark is a glyph on a bare surface,
-/// and `primary` is a fill colour: measured against the dark card it reaches
-/// 2.90:1, under the 3:1 WCAG 1.4.11 asks of a control's visual information.
-/// The accent is the brand hue held legible as ink, which is exactly what a
-/// mark is.
+/// **The selected mark is `primary`**, which is what M3 gives a radio and what
+/// the role can now carry: a mark is a glyph on a bare surface, and the old
+/// dark fill tone reached only 2.90:1 against the card — under the 3:1 WCAG
+/// 1.4.11 asks of a control's visual information. That shortfall is what put a
+/// separate ink here until M100.18 inverted the tone; it now measures 10.02:1.
 RadioThemeData buildRadioTheme(
   ColorScheme scheme,
   AppSemanticColors semantic,
@@ -33,7 +32,7 @@ RadioThemeData buildRadioTheme(
     // — the same 38% every disabled label and icon wears — not the solid
     // `disabledSurface`, which is a fill for things that have a face.
     if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
-    if (states.contains(WidgetState.selected)) return semantic.primaryAccent;
+    if (states.contains(WidgetState.selected)) return scheme.primary;
 
     return scheme.onSurfaceVariant;
   }),

@@ -80,11 +80,14 @@ class StudyHomeWorkloadItemWidget extends StatelessWidget {
               count: deck.overdueCount,
               word: l10n.studyHomeOverdueWord,
               color: deck.overdueCount > 0 ? AppInk.overdue : AppInk.quiet,
+              // See `deck_workload_line_widget.dart`: overdue is `danger`, and
+              // `dangerContainer` is `errorContainer` under the name that says
+              // late rather than faulty (M100.21).
               wellColor: deck.overdueCount > 0
-                  ? context.colors.errorContainer
+                  ? semantic.dangerContainer
                   : semantic.surfaceMuted,
               wellTint: deck.overdueCount > 0
-                  ? AppInk.onErrorContainer
+                  ? AppInk.onDangerContainer
                   : AppInk.quiet,
             ),
             _Metric(

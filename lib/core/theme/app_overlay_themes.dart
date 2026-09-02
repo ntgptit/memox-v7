@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'app_elevation.dart';
-import 'app_material_roles.dart';
 import 'app_radius.dart';
 import 'app_semantic_colors.dart';
 import 'app_spacing.dart';
@@ -41,28 +40,23 @@ Color modalBarrierColor(ColorScheme scheme) => scheme.scrim.withValues(
 
 /// Spinners — `MxLoadingState`, and a button mid-submit.
 ///
-/// **`focusRing`, not `primary`, and declaring this is what found out why.**
-/// Material's default for a progress indicator is `colorScheme.primary`, so that
-/// is what the app was already painting. Measured against the surface it spins
-/// on, dark `primary` scores **2.81:1** — under the 3.0 floor a graphic needs.
-/// The value was never chosen for this job: `primaryDark` is held at a luminance
-/// that keeps a filled button from becoming the brightest thing on a navy page,
-/// which is the opposite of what a spinner wants.
-///
-/// `focusRing` is the same hue at the intensity meant to pull attention — 5.36:1
-/// in dark, 7.41:1 in light. It is what a focus ring and a spinner have in
-/// common: both say *this, now*.
-ProgressIndicatorThemeData buildProgressIndicatorTheme(
-  ColorScheme scheme,
-  AppSemanticColors semantic,
-) => ProgressIndicatorThemeData(
-  color: semantic.focusRing,
-  // Explicitly transparent rather than left to default. Material draws a
-  // faint track behind a circular indicator in newer versions; on a card
-  // that reads as a second ring nobody asked for.
-  circularTrackColor: Colors.transparent,
-  linearTrackColor: scheme.surfaceContainerHighest,
-);
+/// **`primary`, which is Material's own answer — and the history of how it
+/// stopped being one is why this paragraph is long.** Declaring the slot found
+/// that dark `primary` scored **2.81:1** against the surface it spins on, under
+/// the 3.0 a graphic needs, because `primaryDark` was then a fill tone held down
+/// so a filled button could not become the brightest thing on a navy page. The
+/// answer taken at the time was a separate `focusRing` token; the answer taken
+/// at M100.18 was to invert the tone, and the role now reads **10.01:1** on the
+/// dark card. `focusRing` was retired with the reason for it.
+ProgressIndicatorThemeData buildProgressIndicatorTheme(ColorScheme scheme) =>
+    ProgressIndicatorThemeData(
+      color: scheme.primary,
+      // Explicitly transparent rather than left to default. Material draws a
+      // faint track behind a circular indicator in newer versions; on a card
+      // that reads as a second ring nobody asked for.
+      circularTrackColor: Colors.transparent,
+      linearTrackColor: scheme.secondaryContainer,
+    );
 
 /// How long a pointer rests before a tooltip appears.
 ///
@@ -107,14 +101,12 @@ TooltipThemeData buildTooltipTheme(ColorScheme scheme, TextTheme texts) =>
 /// Left to Material these come from `primary` at an opacity it chooses. Naming
 /// them matters most for `selectionColor`: the default is light enough that
 /// selected text on a tinted card is hard to see it is selected at all.
-TextSelectionThemeData buildTextSelectionTheme(
-  ColorScheme scheme,
-  AppSemanticColors semantic,
-) => TextSelectionThemeData(
-  cursorColor: semantic.focusRing,
-  selectionColor: scheme.primary.withValues(alpha: 0.24),
-  selectionHandleColor: semantic.focusRing,
-);
+TextSelectionThemeData buildTextSelectionTheme(ColorScheme scheme) =>
+    TextSelectionThemeData(
+      cursorColor: scheme.primary,
+      selectionColor: scheme.primary.withValues(alpha: 0.24),
+      selectionHandleColor: scheme.primary,
+    );
 
 /// Hairlines between rows.
 ///
@@ -123,12 +115,15 @@ TextSelectionThemeData buildTextSelectionTheme(
 /// one list look like two.
 /// `space` equals `thickness`, so a divider occupies exactly the line it draws
 /// and adds no padding of its own — Material's default reserves 16.
-DividerThemeData buildDividerTheme(AppSemanticColors semantic) =>
-    DividerThemeData(
-      color: semantic.borderSubtle,
-      thickness: AppStroke.hairline,
-      space: AppStroke.hairline,
-    );
+DividerThemeData buildDividerTheme(ColorScheme scheme) => DividerThemeData(
+  // `outlineVariant` is M3's name for the decorative hairline, and it *is*
+  // `borderSubtle` — the scheme maps the two onto one value. Reading it
+  // through the role rather than the extension is what makes that true by
+  // construction instead of by coincidence (M100.20).
+  color: scheme.outlineVariant,
+  thickness: AppStroke.hairline,
+  space: AppStroke.hairline,
+);
 
 /// The scroll thumb.
 ///
@@ -162,26 +157,22 @@ ScrollbarThemeData buildScrollbarTheme(ColorScheme scheme) =>
 /// gives the hour and minute a `primaryContainer` fill when selected. That is
 /// already the app's answer for a selected control — the navigation bar's
 /// indicator and the filter pills use the same pair — so it stays, and the ink
-/// on it is [selectedInk], which is the function that exists precisely because
-/// the right ink on that fill differs by brightness: 5.57:1 in light and
-/// 8.87:1 in dark, where a single token would have shipped 2.13:1 in one of
-/// them.
-TimePickerThemeData buildTimePickerTheme(
-  ColorScheme scheme,
-  AppSemanticColors semantic,
-  TextTheme texts,
-) {
-  final selected = selectedInk(scheme);
+/// on it is `onPrimaryContainer`, the container's own `on` role: 11.46:1 in
+/// light and 8.87:1 in dark. This used to be a function that switched role by
+/// brightness, because `primary` on that fill measured 2.13:1 in dark
+/// (M100.19).
+TimePickerThemeData buildTimePickerTheme(ColorScheme scheme, TextTheme texts) {
+  final selected = scheme.onPrimaryContainer;
 
   return TimePickerThemeData(
-    backgroundColor: scheme.surface,
+    backgroundColor: scheme.surfaceContainerHigh,
     // Zero, and a hairline instead — the same trade `dialogTheme` makes, for
     // the same reason: AD-14 admits one depth mechanism and this app spends it
     // on the surface ladder.
     elevation: AppElevation.none,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(AppRadius.lg),
-      side: BorderSide(color: semantic.borderSubtle),
+      side: BorderSide(color: scheme.outlineVariant),
     ),
     padding: const EdgeInsets.all(AppSpacing.xl),
     helpTextStyle: texts.labelLarge?.copyWith(color: scheme.onSurfaceVariant),
@@ -194,7 +185,7 @@ TimePickerThemeData buildTimePickerTheme(
     // property form here does not compile, which is the good outcome; writing
     // a flat colour compiles and silently drops the selected state, which is
     // the one to watch for.
-    dialBackgroundColor: semantic.surfaceMuted,
+    dialBackgroundColor: scheme.surfaceContainerHighest,
     dialHandColor: scheme.primary,
     dialTextColor: WidgetStateColor.resolveWith((states) {
       // The number the hand is on sits ON the hand, so it takes the fill's
@@ -206,10 +197,14 @@ TimePickerThemeData buildTimePickerTheme(
     dialTextStyle: texts.bodyLarge,
 
     // The hour and minute fields above the dial.
+    // `primaryContainer` selected, `surfaceContainerHighest` at rest — both
+    // `_TimePickerDefaultsM3.hourMinuteColor`'s. The resting fill read
+    // `surfaceMuted`, which is `surfaceContainerHigh`: one rung low, and a rung
+    // the app happened to have a name for rather than the one M3 asks for.
     hourMinuteColor: WidgetStateColor.resolveWith((states) {
       if (states.contains(WidgetState.selected)) return scheme.primaryContainer;
 
-      return semantic.surfaceMuted;
+      return scheme.surfaceContainerHighest;
     }),
     hourMinuteTextColor: WidgetStateColor.resolveWith((states) {
       if (states.contains(WidgetState.selected)) return selected;
@@ -260,10 +255,10 @@ TimePickerThemeData buildTimePickerTheme(
       return scheme.onSurfaceVariant;
     }),
     dayPeriodTextStyle: texts.titleMedium,
-    dayPeriodBorderSide: BorderSide(color: semantic.borderControl),
+    dayPeriodBorderSide: BorderSide(color: scheme.outline),
     dayPeriodShape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(AppRadius.md),
-      side: BorderSide(color: semantic.borderControl),
+      side: BorderSide(color: scheme.outline),
     ),
 
     // **`inputDecorationTheme` is deliberately left to Material.** The picker's
@@ -310,7 +305,7 @@ PopupMenuThemeData buildPopupMenuTheme(
   // the opposite** — depth is a measurable target and each mode builds it from
   // what it has — and it was written because two doc comments had already been
   // read as a ban on elevation. This one had become the third.
-  color: semantic.surfaceElevated,
+  color: scheme.surfaceContainer,
   surfaceTintColor: Colors.transparent,
   // **Solved against AD-14's own floor: a card lifts off its page by 7.75 L\*,
   // so a menu must clear at least that off the card.** Dark gets 13.73 L\* from
@@ -323,7 +318,7 @@ PopupMenuThemeData buildPopupMenuTheme(
   shadowColor: materialShadowColor(scheme),
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(AppRadius.md),
-    side: BorderSide(color: semantic.borderSubtle),
+    side: BorderSide(color: scheme.outlineVariant),
   ),
   labelTextStyle: WidgetStateProperty.resolveWith((states) {
     final base = texts.bodyMedium;

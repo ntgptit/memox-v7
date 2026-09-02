@@ -62,7 +62,7 @@ void main() {
       };
 
       test('clears 3:1 on every ground it can land on', () {
-        final ring = AppInteractionStates.focusRing(semantic).color;
+        final ring = AppInteractionStates.focusIndicator(scheme).color;
 
         for (final entry in grounds.entries) {
           expect(
@@ -77,40 +77,44 @@ void main() {
         }
       });
 
-      test('is the reason the ring is not `primary`', () {
-        // Kept as an assertion rather than a comment: it is the whole
-        // justification for the token choice in `AppInteractionStates.focusRing`, and if the palette ever
-        // moves `primary` up to where it would pass, this test says so instead
-        // of quietly leaving a helper nobody can explain.
+      test('`primary` now clears the floor the ring was invented to clear', () {
+        // **The tripwire fired, and this is the other side of it.** This used
+        // to assert that `primary` *failed* 3:1 on `secondaryContainer` in
+        // dark — the whole justification for a separate ring token — with the
+        // note that if the palette ever moved up to where it passed, the
+        // deviation had to be reconsidered rather than silently bypassed.
         //
-        // Light passes on `primary` too, so only dark is asserted to fail.
-        if (mode != 'dark') return;
-
+        // M100.18 moved it: the dark accent inverted to tone 80. So the ring
+        // token is now a derivation of `primary` and is removed in M100.19,
+        // and what is asserted is the condition that makes that removal safe.
         expect(
           contrast(scheme.primary, scheme.secondaryContainer),
-          lessThan(graphicFloor),
+          greaterThanOrEqualTo(graphicFloor),
           reason:
-              'primary now clears 3:1 on secondaryContainer in dark. If that '
-              'is deliberate, AppInteractionStates.focusRing can be reconsidered — but it must '
-              'be reconsidered, not silently bypassed.',
+              '$mode: primary fell back under 3:1 on secondaryContainer, so a '
+              'ring drawn in it is invisible on a selected control',
         );
       });
 
-      test('the three surface-grounded components all draw the same one', () {
-        // The structural half. Equal colours today prove nothing about
-        // tomorrow if each component computes its own, so this asserts they
-        // resolve to the value `AppInteractionStates.focusRing` returns.
+      test('the components that own a ring all draw the same one', () {
+        // **The list shrank at M100.23, and the reason is the subject of that
+        // task.** It used to include the chip, on the argument that three
+        // surface-grounded controls should draw one ring. They should — but the
+        // chip was drawing it in `ChipThemeData.side`, the slot
+        // `_ChoiceChipDefaultsM3` fills with the chip's *identity*, so a
+        // selected chip that took focus left its Material role.
+        //
+        // The chip's ring moved to `MxFocusRing`, a layer of its own, and is
+        // asserted in `mx_pill_button_focus_test.dart` with a real Tab. What
+        // stays here are the two whose `side` Material leaves empty — there is
+        // no canonical role in those slots to displace.
         //
         // **The filled button is deliberately not in this list**, and its
         // absence is checked rather than assumed — see the `filled focus ring`
-        // group below. These three sit on a page, a card or a pill's own fill,
-        // where the token clears 3:1; the filled button sits on the accent,
-        // where the same token measures 1.02:1.
-        final expected = AppInteractionStates.focusRing(semantic);
+        // group below. These sit on a page or a card, where the token clears
+        // 3:1; the filled button sits on the accent, where it measures 1.02:1.
+        final expected = AppInteractionStates.focusIndicator(scheme);
 
-        final chip = (theme.chipTheme.side! as WidgetStateBorderSide).resolve(
-          <WidgetState>{WidgetState.focused},
-        );
         final outlined = theme.outlinedButtonTheme.style!.side!.resolve(
           <WidgetState>{WidgetState.focused},
         );
@@ -120,28 +124,19 @@ void main() {
 
         for (final (String component, BorderSide? side)
             in <(String, BorderSide?)>[
-              ('chip', chip),
               ('outlinedButton', outlined),
               ('iconButton', icon),
             ]) {
           expect(side, isNotNull, reason: '$component draws no focus ring');
-          expect(
-            side!.color,
-            expected.color,
-            reason: '$component draws its own focus colour in $mode',
-          );
-          expect(
-            side.width,
-            expected.width,
-            reason: '$component draws its own focus width in $mode',
-          );
+          expect(side!.color, expected.color, reason: component);
+          expect(side.width, expected.width, reason: component);
         }
       });
 
       test('the ring is distinguishable from the resting border', () {
         // A ring that clears 3:1 against the page can still be invisible as a
         // *change* if it lands on the same colour the control already had.
-        final ring = AppInteractionStates.focusRing(semantic).color;
+        final ring = AppInteractionStates.focusIndicator(scheme).color;
 
         expect(
           ring,
@@ -154,7 +149,6 @@ void main() {
     group('$mode filled focus ring', () {
       final ThemeData theme = build();
       final ColorScheme scheme = theme.colorScheme;
-      final AppSemanticColors semantic = theme.extension<AppSemanticColors>()!;
 
       /// Every fill `buildFilledStyle` is applied to, with the label that
       /// travels with it — the primary CTA, `MxActionButton`'s destructive
@@ -212,7 +206,7 @@ void main() {
         // passes, `focusRingOf(label)` can be reconsidered — but it must be
         // reconsidered, not silently bypassed.
         expect(
-          contrast(semantic.focusRing, filledButtonFill(theme)),
+          contrast(scheme.primary, filledButtonFill(theme)),
           lessThan(graphicFloor),
           reason:
               'the ring token now clears the floor on the accent fill, so the '
