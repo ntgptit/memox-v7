@@ -4,7 +4,7 @@ import 'package:memox/core/theme/app_material_roles.dart';
 import 'package:memox/core/theme/app_surface_colors.dart';
 import 'package:memox/core/theme/app_border_colors.dart';
 
-/// The approved A2 Quizlet Navy Indigo palette, as flat lists.
+/// The approved palette — Tokyo's since M100.26 — as flat lists.
 ///
 /// One list per brightness, shared by every check that needs to ask "is this
 /// colour ours". Two consumers today — the `ColorScheme` role test and the

@@ -110,10 +110,12 @@ void main() {
 
     test('the text link is readable at rest on page AND on card', () {
       // The link's label is bare text with no fill behind it, so it must clear
-      // the body-text bar rather than the 3:1 UI bar. This is the reason the
-      // accent token exists: `primary` measures 3.33:1 as bare text on the
-      // dark page. Read from the theme slot, not from the token, so the test
-      // holds whichever colour the slot is ever rewired to.
+      // the body-text bar rather than the 3:1 UI bar. The slot is `primary`
+      // (`_TextButtonDefaultsM3`, pinned by the AST guard), so this is the
+      // measurement that forces the palette when it fails — twice a substitute
+      // token stood here instead, and twice it was removed (M100.18, M100.28).
+      // Read from the theme slot, not from a token, so the test holds
+      // whichever colour the slot resolves to.
       for (final entry in themes.entries) {
         final label = entry.value.textButtonTheme.style!.foregroundColor!
             .resolve(const <WidgetState>{})!;

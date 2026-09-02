@@ -6,11 +6,12 @@ import 'package:memox/core/theme/app_theme.dart';
 import '../../support/color_math.dart';
 import '../../support/theme_probe.dart';
 
-/// The structural rules of **A2 Quizlet Navy Indigo**.
+/// The structural rules of the palette — Tokyo's since M100.26, on the
+/// structure A2 Quizlet Navy Indigo laid down.
 ///
 /// Readability lives in `app_theme_test.dart`; this file asserts the things a
-/// contrast check cannot see — that the ladder climbs, that only the page is
-/// allowed to be strongly navy, that the semantic hues stay inside their budget.
+/// contrast check cannot see — that the ladder climbs, that the dark surfaces
+/// stay below the page's saturation, that the four semantics are four hues.
 /// Every value is read from `ThemeData`, never from `AppColors`, so the subject
 /// is what a screen will paint rather than what the palette intended.
 void main() {

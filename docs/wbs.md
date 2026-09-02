@@ -16992,7 +16992,11 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Acceptance criteria:**
   - [x] Không còn `primaryInk` trong `lib/`, `test/`, `widgetbook/`, kit CSS.
   - [x] TextButton, OutlinedButton foreground và TabBar label → `scheme.primary`;
-        guard AST `requires: ['primary']` cho OutlinedButton; không còn ngoại lệ.
+        guard AST `requires: ['primary']` cho OutlinedButton, **và cho TextButton
+        (`accent`), TabBar `labelColor` + `indicatorColor`** — hai slot `primaryInk`
+        chạm đầu tiên mà trước đó không có hàng nào; guard cũng đọc `semantic.<x>`
+        trong slot và từ chối mọi token ngoài cặp disabled, nên một token thay thế
+        đỏ ngay cả khi hex trùng. Contract runtime thêm hàng TextButton.
   - [x] Sàn normal text 4,5 ở mọi test và audit; không còn `_ownerAccepted`.
   - [x] `primary` retune: mọi consumer canonical ≥ 4,5 (text) / ≥ 3 (ring, fill).
   - [x] Full host suite 4181/4181, guard 0 finding, architecture, docs, 68 test CI

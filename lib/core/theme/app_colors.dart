@@ -1,55 +1,43 @@
 import 'package:flutter/material.dart';
 
-/// Colour tokens — **Tokyo**, applied in M100.25–26 over the A2 Quizlet Navy
-/// Indigo structure laid down at M3.5b.
+/// Colour tokens — **Tokyo's palette under the M3 binding contract**
+/// (M100.25–28), on the token structure A2 Quizlet Navy Indigo laid down at
+/// M3.5b.
 ///
-/// **The palette is Tokyo's since M100.26.** The owner asked for the theme to
-/// match `ntgptit/tokyo-react-admin-dashboard`, and every value in this file is
-/// now one of three things: a Tokyo literal, a Tokyo primitive flattened over a
-/// Tokyo surface (its `alpha.black`/`primary.lighter` idiom, precomputed as
-/// AD-14 requires), or the value this file already had re-hued onto a Tokyo
-/// key with its tone and chroma kept — so every L\* step and ratio the tests
-/// hold survived without a rule moving. Measurements quoted below that predate
-/// M100.26 describe the A2 palette and are kept as the record of *why* a token
-/// exists; the current numbers are the tests' output.
+/// **The invariant every value here obeys (AD-14, M100.28).** A Material
+/// component binds to the canonical M3 role its `_XxxDefaultsM3` names; when a
+/// role fails a contrast or hierarchy ratio, the *palette* moves — never a
+/// substitute token, never a lowered floor. Tokyo
+/// (`ntgptit/tokyo-react-admin-dashboard`) is the visual reference, ranked
+/// below that contract and below a coherent family: the page, the card, the
+/// ink and the dark statuses are Tokyo's exact hex because nothing depends on
+/// them; `primary` is Tokyo's family retuned to the tone every consumer clears.
+///
+/// **How a value here was chosen.** One of three ways, each named at the token:
+/// a Tokyo literal; a Tokyo primitive flattened the way its own theme does
+/// (`alpha.black` over paper, `primary.lighter`, precomputed as AD-14 asks);
+/// or the previous value re-hued onto a Tokyo key with its tone and chroma
+/// kept, so the L\* steps and ratios the tests hold were preserved by
+/// construction. Measurements quoted at older tokens describe the state when
+/// that token was decided and are kept as the record of *why* it exists; the
+/// current numbers are the tests' output.
 ///
 /// Every name says what the colour *means*, never what it looks like. `danger`
 /// survives a redesign that turns it amber; `red` becomes a lie the moment
 /// someone changes it, and nobody renames a constant used in forty files.
 ///
-/// **The page is the only place saturated navy is allowed.** [backgroundDark]
-/// sits at 70% saturation, which is what gives dark mode its identity. Every
-/// surface above it drops to 26–40% while climbing in lightness, so the navy
-/// reads as the room the content sits in rather than as a tint applied to the
-/// content itself. A palette where card, tile and input are all as navy as the
-/// page has no hierarchy left to spend — everything is equally coloured, so
-/// nothing is emphasised.
-///
-/// That band was 20–30% until M4.10aa. Joining the page's colour family is
-/// exactly what raised it, and it is the one number the change spends: the card
-/// now sits at 40% against a ceiling of 42% (`app_palette_test.dart` allows a
-/// surface 60% of the page's saturation). There is no room left above the card,
-/// so a future surface that wants more saturation has to take lightness instead.
+/// **The dark page is the most saturated surface, and the ladder climbs above
+/// it in lightness.** Tokyo's dark is navy on navy — the card carries 72% of
+/// the page's saturation — so hierarchy in dark is lightness plus the card's
+/// rim (`AppElevation`), not a saturation drop; `app_palette_test.dart` holds
+/// every surface above the card under 0.75 of the page and the ladder's steps
+/// in L\*.
 ///
 /// **Why the ladder is measured in L\*, not in contrast ratio.** A deep navy
 /// page is at luminance 0.004, and down there WCAG's `+0.05` constant compresses
 /// every real step into "1.1-something": the card is 3× the page's luminance and
 /// still scores 1.17:1. L\* is the perceptual scale and stays honest at the
-/// bottom, so `test/core/theme/app_theme_test.dart` asserts the ladder in L\*.
-/// The three dark steps are ~6.3, 6.7 and 7.1 L\*.
-///
-/// **The dark ladder joined the page's colour family at M4.10aa.** It failed to
-/// be in it in two ways at once: `#1B1D32` was hue 235 against the page's 243 —
-/// a green-leaning slate under a violet — and it carried barely half the page's
-/// chroma (0.040 against 0.072). A duller, greener surface stacked on a
-/// saturated violet page reads as grey paper laid on the app rather than as
-/// part of the same room, and neither difference is large enough to be named
-/// when you look at either colour alone. Every surface now sits at OKLCH hue
-/// ~285, chroma 0.06–0.074.
-///
-/// Reaching that inside sRGB cost the rungs ~2 L\* apiece. Every ladder
-/// assertion still holds; the tightest is the card's 6.3 L\* off the page,
-/// against a 6.0 floor.
+/// bottom, so `test/core/theme/app_palette_test.dart` asserts the ladder in L\*.
 ///
 /// **What is not here.** The `ColorScheme` roles this app declares only because
 /// `fromSeed` would otherwise invent them — the container ladder, the `tertiary`

@@ -321,6 +321,13 @@ void main() {
         pin('color', theme.dividerTheme.color, scheme.outlineVariant);
       });
 
+      test('TextButton', () {
+        final s = theme.textButtonTheme.style!;
+
+        pin('foreground', s.foregroundColor!.resolve(resting), scheme.primary);
+        pin('icon', s.iconColor!.resolve(resting), scheme.primary);
+      });
+
       test('TabBar', () {
         final t = theme.tabBarTheme;
 

@@ -103,7 +103,7 @@ void main() {
     expect(_roles(schemes['light']!).length, _materialColorRoleCount);
   });
 
-  test('no role strays outside an A2 hue family', () {
+  test('no role strays outside a palette hue family', () {
     // Independent of the check above rather than implied by it: membership
     // says the value came from the palette, this says the palette itself has
     // not drifted. `fromSeed` generates `tertiaryFixed` at hue 329 — pink — so
@@ -120,8 +120,8 @@ void main() {
   });
 }
 
-/// The 45 Material 3 colour roles, every one of which A2 declares. Each must
-/// be a palette token, not a generated one.
+/// The 45 Material 3 colour roles, every one of which the palette declares.
+/// Each must be a palette token, not a generated one.
 Map<String, Color> _roles(ColorScheme s) => <String, Color>{
   'primary': s.primary,
   'onPrimary': s.onPrimary,
