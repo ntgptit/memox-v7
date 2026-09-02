@@ -251,7 +251,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 76,
+      "line": 64,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -262,7 +262,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 77,
+      "line": 65,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -273,7 +273,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 78,
+      "line": 66,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -284,7 +284,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 79,
+      "line": 67,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -295,7 +295,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 91,
+      "line": 79,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -306,7 +306,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 92,
+      "line": 80,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -317,7 +317,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 98,
+      "line": 86,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -328,7 +328,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 99,
+      "line": 87,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -339,7 +339,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 124,
+      "line": 112,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -350,7 +350,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 137,
+      "line": 125,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -361,7 +361,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 138,
+      "line": 126,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -372,7 +372,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 141,
+      "line": 129,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -383,7 +383,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 149,
+      "line": 137,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -394,7 +394,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 178,
+      "line": 166,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -405,7 +405,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 179,
+      "line": 167,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -416,7 +416,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 196,
+      "line": 184,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -427,7 +427,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 197,
+      "line": 185,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -438,7 +438,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 200,
+      "line": 188,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -449,7 +449,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 201,
+      "line": 189,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -460,7 +460,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 230,
+      "line": 218,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -471,7 +471,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 231,
+      "line": 219,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -482,7 +482,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 232,
+      "line": 220,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -493,7 +493,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 233,
+      "line": 221,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -504,7 +504,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 235,
+      "line": 223,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -515,7 +515,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 236,
+      "line": 224,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -526,7 +526,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 237,
+      "line": 225,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -537,7 +537,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 238,
+      "line": 226,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -548,7 +548,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 240,
+      "line": 228,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -559,7 +559,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 241,
+      "line": 229,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -570,7 +570,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 242,
+      "line": 230,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -581,7 +581,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 243,
+      "line": 231,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -592,7 +592,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 265,
+      "line": 253,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -603,7 +603,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 266,
+      "line": 254,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -614,7 +614,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 287,
+      "line": 275,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -625,7 +625,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 315,
+      "line": 303,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -636,7 +636,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 316,
+      "line": 304,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -647,7 +647,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 317,
+      "line": 305,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -658,7 +658,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 322,
+      "line": 310,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -669,7 +669,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 326,
+      "line": 314,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -680,7 +680,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 327,
+      "line": 315,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -691,7 +691,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 345,
+      "line": 333,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -702,7 +702,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 359,
+      "line": 347,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -713,7 +713,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 360,
+      "line": 348,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
