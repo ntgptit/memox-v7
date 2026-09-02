@@ -33,20 +33,20 @@
   --mx-success-dark:#4FC79B;--mx-warning-dark:#E8D08E;--mx-danger-dark:#F2808F;--mx-info-dark:#8DB4D8;
 
   /* --- semantic: surface ladder --------------------------------------- */
-  --color-background:#FAF9FE;
-  --color-surface:#FAF9FE;
-  --color-surface-muted:#E8E7ED;
+  --color-background:#F7F9FF;
+  --color-surface:#F7F9FF;
+  --color-surface-muted:#E5E8F1;
   --color-border-option:#8887CE;
   --color-border-divider:#E9ECF5;
   --color-border-selected:#6E6ECE;
-  --color-surface-emphasis:#F4F3F9;
+  --color-surface-emphasis:#F1F3FC;
   --color-surface-selected:#E4DFFE;
   --color-surface-elevated:#FFFFFF;
 
   /* --- semantic: text and lines --------------------------------------- */
-  --color-text-primary:#1C1B1F;
-  --color-text-secondary:#474550;
-  --color-border-subtle:#C7C5D2;
+  --color-text-primary:#1A1B21;
+  --color-text-secondary:#44474D;
+  --color-border-subtle:#C4C6CF;
   --color-focus-ring:#4E53B6;
 
   /* --- semantic: brand and actions ------------------------------------ */
@@ -70,10 +70,10 @@
   --color-secondary-action:#454B5E;
 
   /* --- semantic: meaning ---------------------------------------------- */
-  --color-success:#10795C;
-  --color-warning:#906310;
+  --color-success:#0F7357;
+  --color-warning:#875D0F;
   --color-danger:#BE013A;
-  --color-info:#3F6E97;
+  --color-info:#3C688F;
   /* Status containers. The four semantics had a fill and no container, so a
      status chip had to borrow an accent role — `secondary` for "ready",
      `tertiary` for "duplicate" — which is what M3 reserves for accents rather
@@ -97,42 +97,42 @@
      button drawn in --color-primary and the eye cannot tell which one it can press. */
   --color-progress-track:#E9EDF8;
   --color-progress-fill:#6E6ECE;
-  --color-progress-complete:#10795C;
+  --color-progress-complete:#0F7357;
   --color-streak:#C2731B;
   --color-streak-container:#FBEBD7;
 
   /* --- semantic: Material surface container ladder --------------------- */
   --color-surface-container-lowest:#FFFFFF;
-  --color-surface-container-low:#F4F3F9;
-  --color-surface-container:#EEEDF3;
-  --color-surface-container-high:#E8E7ED;
-  --color-surface-container-highest:#E3E2E7;
-  --color-surface-dim:#DAD9DF;
-  --color-surface-bright:#FAF9FE;
-  --color-inverse-surface:#313034;
-  --color-on-inverse-surface:#F1F0F6;
+  --color-surface-container-low:#F1F3FC;
+  --color-surface-container:#EBEEF6;
+  --color-surface-container-high:#E5E8F1;
+  --color-surface-container-highest:#E0E2EB;
+  --color-surface-dim:#D7DAE2;
+  --color-surface-bright:#F7F9FF;
+  --color-inverse-surface:#2E3037;
+  --color-on-inverse-surface:#EEF1F9;
   --color-inverse-primary:#C7BFFF;
 
   /* --- semantic: shadow, scrim, chrome --------------------------------- */
   --color-shadow:#000000;
   --color-scrim:#000000;
   --color-web-letterbox:#6E7288;
-  --color-disabled-surface:#DFDEE3;
-  --color-on-disabled:rgb(28 27 31 / 0.38);
+  --color-disabled-surface:#DCDEE4;
+  --color-on-disabled:rgb(26 27 33 / 0.38);
 }
 [data-theme="dark"]{
-  --color-background:#141317;
-  --color-surface:#141317;
-  --color-surface-muted:#2A292E;
+  --color-background:#0A0E27;
+  --color-surface:#0A0E27;
+  --color-surface-muted:#28304F;
   --color-border-option:#5D65B2;
   --color-border-divider:#2E2A54;
   --color-border-selected:#7C79C8;
-  --color-surface-emphasis:#1C1B1F;
+  --color-surface-emphasis:#131A3A;
   --color-surface-selected:#47445D;
-  --color-surface-elevated:#39393D;
-  --color-text-primary:#E3E2E7;
-  --color-text-secondary:#C7C5D2;
-  --color-border-subtle:#474550;
+  --color-surface-elevated:#3D4667;
+  --color-text-primary:#DBE2F8;
+  --color-text-secondary:#BFC6DC;
+  --color-border-subtle:#414658;
   --color-focus-ring:#C7BFFF;
   --color-primary:#C7BFFF;
   --color-on-primary:#002781;
@@ -182,19 +182,19 @@
      warm accent. The label keeps its warm --color-streak; only the ground
      joins the surface family, at the same L*. */
   --color-streak-container:#342C4B;
-  --color-surface-container-lowest:#0E0D13;
-  --color-surface-container-low:#1C1B1F;
-  --color-surface-container:#201F23;
-  --color-surface-container-high:#2A292E;
-  --color-surface-container-highest:#353439;
+  --color-surface-container-lowest:#03041E;
+  --color-surface-container-low:#131A3A;
+  --color-surface-container:#1A203E;
+  --color-surface-container-high:#28304F;
+  --color-surface-container-highest:#374060;
   /* The dimmest surface is the page. */
   --color-surface-dim:#0A0E27;
-  --color-surface-bright:#39393D;
-  --color-inverse-surface:#E3E2E7;
-  --color-on-inverse-surface:#313034;
+  --color-surface-bright:#3D4667;
+  --color-inverse-surface:#DBE2F8;
+  --color-on-inverse-surface:#272F4E;
   --color-inverse-primary:#4E53B6;
   --color-shadow:#000000;
   --color-scrim:#000000;
-  --color-disabled-surface:#2D2C30;
-  --color-on-disabled:rgb(227 226 231 / 0.38);
+  --color-disabled-surface:#232740;
+  --color-on-disabled:rgb(219 226 248 / 0.38);
 }

@@ -58,8 +58,8 @@
       "success": {
         "members": {
           "fill": {
-            "hex": "#10795C",
-            "hue": 163.42857142857144
+            "hex": "#0F7357",
+            "hue": 163.2
           }
         },
         "hueSpreadExcludingOnColors": 0.0,
@@ -70,8 +70,8 @@
       "warning": {
         "members": {
           "fill": {
-            "hex": "#906310",
-            "hue": 38.90625
+            "hex": "#875D0F",
+            "hue": 38.99999999999999
           }
         },
         "hueSpreadExcludingOnColors": 0.0,
@@ -82,8 +82,8 @@
       "info": {
         "members": {
           "fill": {
-            "hex": "#3F6E97",
-            "hue": 207.95454545454544
+            "hex": "#3C688F",
+            "hue": 208.19277108433735
           }
         },
         "hueSpreadExcludingOnColors": 0.0,

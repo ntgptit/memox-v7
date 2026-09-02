@@ -57,15 +57,18 @@ abstract final class AppColors {
 
   // --- Text and lines ------------------------------------------------------
   //
-  // Neither end is pure. `#EDEDF6` rather than white, `#16182B` rather than
-  // black: a pure value buzzes against a tinted ground, and carrying a trace of
-  // the surface hue makes text sit *in* the interface rather than on top of it.
-  // Which is why both dark values moved with the ladder — a trace of the *old*
-  // surface hue is a trace of a hue no surface carries any more.
-  static const Color textPrimaryLight = Color(0xFF1C1B1F);
-  static const Color textPrimaryDark = Color(0xFFE3E2E7);
-  static const Color textSecondaryLight = Color(0xFF474550);
-  static const Color textSecondaryDark = Color(0xFFC7C5D2);
+  // Neither end is pure. A pure value buzzes against a tinted ground, and
+  // carrying a trace of the surface hue makes text sit *in* the interface
+  // rather than on top of it. Which is why all four moved with the ladder at
+  // M100.27 — a trace of the *old* surface hue is a trace of a hue no surface
+  // carries any more, and the navy ladders left the previous ink 25 degrees
+  // adrift. These are M3's `onSurface` and `onSurfaceVariant`: neutral tones 10
+  // and 30 in light, 90 and 80 in dark, at the ladder's hue and roughly half
+  // its chroma.
+  static const Color textPrimaryLight = Color(0xFF1A1B21);
+  static const Color textPrimaryDark = Color(0xFFDBE2F8);
+  static const Color textSecondaryLight = Color(0xFF44474D);
+  static const Color textSecondaryDark = Color(0xFFBFC6DC);
 
   /// The fill and the border of a disabled control — a solid, per MX-VIS-002
   /// rule R7. Material's idiom is the ink at 12% alpha, which composites
@@ -74,18 +77,20 @@ abstract final class AppColors {
   /// chosen. Flattened over the surface once, here, where the ground is fixed;
   /// `app_semantic_colors_test.dart` pins each back to that blend.
   ///
-  /// The kit's `--color-disabled-surface` reads `#E3E3E6` / `#312E4E`, ~3/255
-  /// away: a stale transcription of this file rather than a decision of its
-  /// own. Recorded in `docs/wbs.md` under M4.10an.
-  static const Color disabledSurfaceLight = Color(0xFFDFDEE3);
-  static const Color disabledSurfaceDark = Color(0xFF2D2C30);
+  /// The kit carries the same pair, resynced from this file whenever the ink or
+  /// the surface moves — most recently at M100.27, when both ladders went navy.
+  /// It is listed in the parity test's `_derived` map rather than compared as a
+  /// literal, because "equal to the kit" is the wrong question for a value the
+  /// app computes.
+  static const Color disabledSurfaceLight = Color(0xFFDCDEE4);
+  static const Color disabledSurfaceDark = Color(0xFF232740);
 
   /// A disabled label or glyph — the kit's `--color-on-disabled`, which is the
   /// ink at 38%. Translucent where the fill above is solid, and for a reason: a
   /// disabled fill has one ground, a disabled label has three — the page, a
   /// card, and the disabled fill itself.
-  static const Color onDisabledLight = Color(0x611C1B1F);
-  static const Color onDisabledDark = Color(0x61E3E2E7);
+  static const Color onDisabledLight = Color(0x611A1B21);
+  static const Color onDisabledDark = Color(0x61DBE2F8);
 
   // --- Brand and actions ---------------------------------------------------
 
@@ -150,7 +155,7 @@ abstract final class AppColors {
   //   records the whole measurement.
 
   /// Answer remembered, session completed, saved.
-  static const Color successLight = Color(0xFF10795C);
+  static const Color successLight = Color(0xFF0F7357);
   static const Color successDark = Color(0xFF4FC79B);
 
   /// Card due soon, streak at risk — informative, not alarming.
@@ -168,7 +173,7 @@ abstract final class AppColors {
   /// card, 12.75:1 on the page, against a 3.0 floor. **A shade apart, not a
   /// hue:** the semantic hues map light→dark by keeping hue and raising
   /// lightness, and that rule lands warning back on the streak amber.
-  static const Color warningLight = Color(0xFF906310);
+  static const Color warningLight = Color(0xFF875D0F);
   static const Color warningDark = Color(0xFFE8D08E);
 
   /// Answer forgotten, destructive action, reset.
@@ -294,7 +299,7 @@ abstract final class AppColors {
 
   /// Status that genuinely carries information: streak, counters, "3 of 20".
   /// Not a decorative accent — plain metadata uses `textSecondary`.
-  static const Color infoLight = Color(0xFF3F6E97);
+  static const Color infoLight = Color(0xFF3C688F);
   static const Color infoDark = Color(0xFF8DB4D8);
 
   /// The letterbox around the phone-sized frame on the web build.

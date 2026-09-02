@@ -114,19 +114,19 @@ abstract final class AppMaterialRoles {
   /// as copied hex would let the ladder split into two hue families at exactly
   /// the rungs a Dialog and a Menu draw from — the drift the derivation now
   /// makes impossible rather than merely checked-for.
-  static const Color surfaceContainerLowestDark = Color(0xFF0E0D13);
-  static const Color surfaceContainerLowLight = Color(0xFFF4F3F9);
-  static const Color surfaceContainerLowDark = Color(0xFF1C1B1F);
+  static const Color surfaceContainerLowestDark = Color(0xFF03041E);
+  static const Color surfaceContainerLowLight = Color(0xFFF1F3FC);
+  static const Color surfaceContainerLowDark = Color(0xFF131A3A);
   // `onInverseSurfaceLight` is the same value from the other direction —
   // written there as the derivation, so this stays the source.
-  static const Color surfaceContainerLight = Color(0xFFEEEDF3);
-  static const Color surfaceContainerDark = Color(0xFF201F23);
+  static const Color surfaceContainerLight = Color(0xFFEBEEF6);
+  static const Color surfaceContainerDark = Color(0xFF1A203E);
   static const Color surfaceContainerHighLight =
       AppSurfaceColors.surfaceMutedLight;
   static const Color surfaceContainerHighDark =
       AppSurfaceColors.surfaceMutedDark;
-  static const Color surfaceContainerHighestLight = Color(0xFFE3E2E7);
-  static const Color surfaceContainerHighestDark = Color(0xFF353439);
+  static const Color surfaceContainerHighestLight = Color(0xFFE0E2EB);
+  static const Color surfaceContainerHighestDark = Color(0xFF374060);
 
   /// **`surfaceDim` is the dimmest surface, which in this app is the page.**
   ///
@@ -136,20 +136,21 @@ abstract final class AppMaterialRoles {
   /// behind. A colour that exists twice under two names is a colour that will
   /// disagree with itself eventually.
   ///
-  /// Light is deliberately *not* derived, and that is the open question rather
-  /// than an oversight: `#DEE0E7` is **darker** than the light page, so the
-  /// ladder there runs the other way and `surfaceDim` sits below a page that
-  /// is not in the scheme at all. Straightening that is a surface-ladder
-  /// change with pixels behind it, not a rename — see the token audit.
-  static const Color surfaceDimLight = Color(0xFFDAD9DF);
-  static const Color surfaceDimDark = Color(0xFF0A0E27);
-  static const Color surfaceBrightLight = Color(0xFFFAF9FE);
-  static const Color surfaceBrightDark = Color(0xFF39393D);
+  /// Light is deliberately *not* derived, and that is no longer an open
+  /// question. In M3 a light ladder **descends** — `surface` is tone 98 and the
+  /// containers step down from it — so `surfaceDim` sitting below the page is
+  /// the shape, not a gap. Since M100.26 the page is in the scheme
+  /// (`background == surface`), which is the half of the old note that was
+  /// actually wrong.
+  static const Color surfaceDimLight = Color(0xFFD7DAE2);
+  static const Color surfaceDimDark = AppSurfaceColors.backgroundDark;
+  static const Color surfaceBrightLight = Color(0xFFF7F9FF);
+  static const Color surfaceBrightDark = Color(0xFF3D4667);
 
-  static const Color inverseSurfaceLight = Color(0xFF313034);
-  static const Color inverseSurfaceDark = Color(0xFFE3E2E7);
-  static const Color onInverseSurfaceLight = Color(0xFFF1F0F6);
-  static const Color onInverseSurfaceDark = Color(0xFF313034);
+  static const Color inverseSurfaceLight = Color(0xFF2E3037);
+  static const Color inverseSurfaceDark = AppColors.textPrimaryDark;
+  static const Color onInverseSurfaceLight = Color(0xFFEEF1F9);
+  static const Color onInverseSurfaceDark = Color(0xFF272F4E);
   static const Color inversePrimaryLight = Color(0xFFC7BFFF);
   static const Color inversePrimaryDark = Color(0xFF4E53B6);
 

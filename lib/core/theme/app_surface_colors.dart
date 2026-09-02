@@ -24,36 +24,41 @@ abstract final class AppSurfaceColors {
   /// `shadowLight`/`shadowDark` and MX-VIS-002 rule R6. Nothing here forbids a
   /// shadow — it only explains why the ladder was built to work without one.
 
-  /// Page background. The one component allowed a strong navy saturation.
-  static const Color backgroundLight = Color(0xFFFAF9FE);
-
-  static const Color backgroundDark = Color(0xFF141317);
-
-  /// Card and sheet — the flashcard surface.
+  /// The page. `background` and `surface` are the same colour on purpose —
+  /// M3 collapsed the two and this app followed at M100.26, so the pair below
+  /// is one value written twice rather than a ladder with a rung nobody names.
   ///
-  /// **Not pure white, since M4.10i.** `#FFFFFF` carries no hue at all, so the
-  /// one surface the whole app is built on had no relation to the seed while
-  /// every other neutral did — the audit's largest finding, and the reason light
-  /// mode read as a different palette from dark. `#FBFBFE` is `seed @ 0.02` over
-  /// white: hue 240, chroma 0.012, nowhere near the light canvas's tint budget.
+  /// **Dark is the project owner's Tokyo Nebula page, verbatim.** `#0A0E27`
+  /// and the card's `#131A3A` are the two anchors the whole dark ladder is
+  /// built from; everything else on it is derived at their shared OKLCH hue
+  /// (272.3 degrees) and chroma (0.057). What made this necessary is that the
+  /// A4 table's dark surfaces were M3's *neutral* palette — `#141317` is
+  /// R20 G19 B23, a warm grey at chroma 0.008 — and a grey ramp cannot produce
+  /// a navy interface no matter which rung a component reads. Seven times the
+  /// chroma is a different colour language, not a tuning difference.
+  static const Color backgroundLight = Color(0xFFF7F9FF);
+
+  static const Color backgroundDark = Color(0xFF0A0E27);
+
+  /// The page again, under the role Material actually reads.
   ///
-  /// It costs lightness. A tinted card is a *darker* card, so the surface step
-  /// drops from 3.46 L\* to 2.15 — which was the argument for leaving it alone
-  /// while the step was the only depth cue light had. It is not any more: the
-  /// shadow's alpha was re-solved to 0.07 and the total lift is 8.04 L\* against
-  /// dark's 6.58.
-  static const Color surfaceLight = Color(0xFFFAF9FE);
+  /// **This used to be the card and is not any more.** Until M100.26 the app
+  /// kept `background` below `surface` and drew cards on `surface`; M3 puts the
+  /// page on `surface` and the card on `surfaceContainerLow`
+  /// (`_CardDefaultsM3.color`). Anything still describing `surface` as "the
+  /// flashcard surface" is describing the old model.
+  static const Color surfaceLight = Color(0xFFF7F9FF);
 
-  static const Color surfaceDark = Color(0xFF141317);
+  static const Color surfaceDark = Color(0xFF0A0E27);
 
-  static const Color surfaceEmphasisLight = Color(0xFFF4F3F9);
+  static const Color surfaceEmphasisLight = Color(0xFFF1F3FC);
 
   /// **Dark keeps the value it has today.** The reference concept is light-only
   /// ("LIGHT · TOKYO PURE"), and the complaint that started this was light: in
   /// dark `#332F58` carries a real violet and already reads as a callout. A dark
   /// value invented without a reference to measure against would be the guess
   /// this whole pass exists to avoid.
-  static const Color surfaceEmphasisDark = Color(0xFF1C1B1F);
+  static const Color surfaceEmphasisDark = Color(0xFF131A3A);
 
   /// The fill a *picked* card wears when its list uses the tint treatment.
   ///
@@ -72,9 +77,9 @@ abstract final class AppSurfaceColors {
   /// Unchanged in dark, for the reason [surfaceEmphasisDark] is.
   static const Color surfaceSelectedDark = Color(0xFF47445D);
 
-  static const Color surfaceMutedLight = Color(0xFFE8E7ED);
+  static const Color surfaceMutedLight = Color(0xFFE5E8F1);
 
-  static const Color surfaceMutedDark = Color(0xFF2A292E);
+  static const Color surfaceMutedDark = Color(0xFF28304F);
 
   /// Top of the ladder: a raised or selected surface.
   ///
@@ -85,5 +90,5 @@ abstract final class AppSurfaceColors {
   // are this value under Material's names, derived there.
   static const Color surfaceElevatedLight = Color(0xFFFFFFFF);
 
-  static const Color surfaceElevatedDark = Color(0xFF39393D);
+  static const Color surfaceElevatedDark = Color(0xFF3D4667);
 }
