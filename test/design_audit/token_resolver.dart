@@ -58,6 +58,18 @@ class TokenResolver {
       'semantic.surfaceElevated': x.surfaceElevated,
       'semantic.borderSubtle': x.borderSubtle,
       'semantic.secondaryAction': x.secondaryAction,
+      'semantic.successContainer': x.successContainer,
+      'semantic.onSuccessContainer': x.onSuccessContainer,
+      'semantic.warningContainer': x.warningContainer,
+      'semantic.onWarningContainer': x.onWarningContainer,
+      'semantic.infoContainer': x.infoContainer,
+      'semantic.onInfoContainer': x.onInfoContainer,
+      // Equal to `colorScheme.errorContainer` by construction, and listed anyway:
+      // the dump's job is to say what the extension carries, not what is
+      // reachable some other way. `borderControl` and `progressTrack` are missing
+      // from this table for exactly the reason that argument would justify.
+      'semantic.dangerContainer': x.dangerContainer,
+      'semantic.onDangerContainer': x.onDangerContainer,
       'Colors.transparent': const Color(0x00000000),
       'Colors.white': const Color(0xFFFFFFFF),
       'Colors.black': const Color(0xFF000000),

@@ -1566,7 +1566,7 @@
       "source_kind": "shared-constant",
       "expression": "AppColors.successContainerLight",
       "token": "AppColors.successContainerLight",
-      "resolved_value_light": "unresolvable: no light counterpart in theme",
+      "resolved_value_light": "#DAE9E7",
       "resolved_value_dark": "unresolvable: no dark counterpart in theme"
     },
     {
@@ -1577,7 +1577,7 @@
       "source_kind": "shared-constant",
       "expression": "AppColors.onSuccessContainerLight",
       "token": "AppColors.onSuccessContainerLight",
-      "resolved_value_light": "unresolvable: no light counterpart in theme",
+      "resolved_value_light": "#003627",
       "resolved_value_dark": "unresolvable: no dark counterpart in theme"
     },
     {
@@ -1588,7 +1588,7 @@
       "source_kind": "shared-constant",
       "expression": "AppColors.warningContainerLight",
       "token": "AppColors.warningContainerLight",
-      "resolved_value_light": "unresolvable: no light counterpart in theme",
+      "resolved_value_light": "#EDE6DC",
       "resolved_value_dark": "unresolvable: no dark counterpart in theme"
     },
     {
@@ -1599,7 +1599,7 @@
       "source_kind": "shared-constant",
       "expression": "AppColors.onWarningContainerLight",
       "token": "AppColors.onWarningContainerLight",
-      "resolved_value_light": "unresolvable: no light counterpart in theme",
+      "resolved_value_light": "#402A00",
       "resolved_value_dark": "unresolvable: no dark counterpart in theme"
     },
     {
@@ -1610,7 +1610,7 @@
       "source_kind": "shared-constant",
       "expression": "AppColors.infoContainerLight",
       "token": "AppColors.infoContainerLight",
-      "resolved_value_light": "unresolvable: no light counterpart in theme",
+      "resolved_value_light": "#E0E7EF",
       "resolved_value_dark": "unresolvable: no dark counterpart in theme"
     },
     {
@@ -1621,7 +1621,7 @@
       "source_kind": "shared-constant",
       "expression": "AppColors.onInfoContainerLight",
       "token": "AppColors.onInfoContainerLight",
-      "resolved_value_light": "unresolvable: no light counterpart in theme",
+      "resolved_value_light": "#073053",
       "resolved_value_dark": "unresolvable: no dark counterpart in theme"
     },
     {
@@ -1776,7 +1776,7 @@
       "expression": "AppColors.successContainerDark",
       "token": "AppColors.successContainerDark",
       "resolved_value_light": "unresolvable: no light counterpart in theme",
-      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
+      "resolved_value_dark": "#0E412F"
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
@@ -1787,7 +1787,7 @@
       "expression": "AppColors.onSuccessContainerDark",
       "token": "AppColors.onSuccessContainerDark",
       "resolved_value_light": "unresolvable: no light counterpart in theme",
-      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
+      "resolved_value_dark": "#BFE3D6"
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
@@ -1798,7 +1798,7 @@
       "expression": "AppColors.warningContainerDark",
       "token": "AppColors.warningContainerDark",
       "resolved_value_light": "unresolvable: no light counterpart in theme",
-      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
+      "resolved_value_dark": "#453812"
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
@@ -1809,7 +1809,7 @@
       "expression": "AppColors.onWarningContainerDark",
       "token": "AppColors.onWarningContainerDark",
       "resolved_value_light": "unresolvable: no light counterpart in theme",
-      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
+      "resolved_value_dark": "#E4DBC1"
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
@@ -1820,7 +1820,7 @@
       "expression": "AppColors.infoContainerDark",
       "token": "AppColors.infoContainerDark",
       "resolved_value_light": "unresolvable: no light counterpart in theme",
-      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
+      "resolved_value_dark": "#213B54"
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
@@ -1831,7 +1831,7 @@
       "expression": "AppColors.onInfoContainerDark",
       "token": "AppColors.onInfoContainerDark",
       "resolved_value_light": "unresolvable: no light counterpart in theme",
-      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
+      "resolved_value_dark": "#CBDEEF"
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",

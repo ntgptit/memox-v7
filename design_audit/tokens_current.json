@@ -555,6 +555,78 @@
       "lightnessStar": 32.04591973134513,
       "classifiedAs": "role-or-on-color"
     },
+    "semantic.successContainer": {
+      "hex": "#DAE9E7",
+      "opaque": true,
+      "hue": 172.00000000000003,
+      "saturation": 0.2542372881355932,
+      "chroma": 0.05882352941176472,
+      "lightnessStar": 91.21291938805446,
+      "classifiedAs": "role-or-on-color"
+    },
+    "semantic.onSuccessContainer": {
+      "hex": "#003627",
+      "opaque": true,
+      "hue": 163.33333333333334,
+      "saturation": 0.9999999999999999,
+      "chroma": 0.21176470588235294,
+      "lightnessStar": 19.16064813935339,
+      "classifiedAs": "role-or-on-color"
+    },
+    "semantic.warningContainer": {
+      "hex": "#EDE6DC",
+      "opaque": true,
+      "hue": 35.294117647058805,
+      "saturation": 0.3207547169811321,
+      "chroma": 0.06666666666666665,
+      "lightnessStar": 91.57952320107515,
+      "classifiedAs": "role-or-on-color"
+    },
+    "semantic.onWarningContainer": {
+      "hex": "#402A00",
+      "opaque": true,
+      "hue": 39.375,
+      "saturation": 1.0,
+      "chroma": 0.25098039215686274,
+      "lightnessStar": 18.9961670338662,
+      "classifiedAs": "role-or-on-color"
+    },
+    "semantic.infoContainer": {
+      "hex": "#E0E7EF",
+      "opaque": true,
+      "hue": 212.0,
+      "saturation": 0.31914893617021284,
+      "chroma": 0.05882352941176472,
+      "lightnessStar": 91.33876175327501,
+      "classifiedAs": "role-or-on-color"
+    },
+    "semantic.onInfoContainer": {
+      "hex": "#073053",
+      "opaque": true,
+      "hue": 207.63157894736844,
+      "saturation": 0.8444444444444442,
+      "chroma": 0.2980392156862745,
+      "lightnessStar": 19.15556383189746,
+      "classifiedAs": "role-or-on-color"
+    },
+    "semantic.dangerContainer": {
+      "hex": "#F8DDE1",
+      "opaque": true,
+      "hue": 351.11111111111114,
+      "saturation": 0.6585365853658539,
+      "chroma": 0.10588235294117643,
+      "lightnessStar": 90.37019877206008,
+      "classifiedAs": "role-or-on-color"
+    },
+    "semantic.onDangerContainer": {
+      "hex": "#641421",
+      "opaque": true,
+      "hue": 350.25,
+      "saturation": 0.6666666666666666,
+      "chroma": 0.3137254901960784,
+      "lightnessStar": 21.280325627328708,
+      "classifiedAs": "role-or-on-color"
+    },
     "inputDecorationTheme.enabledBorder": {
       "hex": "#8A8A92",
       "opaque": true,
@@ -1209,6 +1281,78 @@
       "saturation": 0.14285714285714285,
       "chroma": 0.05882352941176472,
       "lightnessStar": 79.97861053869403,
+      "classifiedAs": "role-or-on-color"
+    },
+    "semantic.successContainer": {
+      "hex": "#0E412F",
+      "opaque": true,
+      "hue": 158.82352941176472,
+      "saturation": 0.6455696202531644,
+      "chroma": 0.19999999999999998,
+      "lightnessStar": 23.931536541879545,
+      "classifiedAs": "role-or-on-color"
+    },
+    "semantic.onSuccessContainer": {
+      "hex": "#BFE3D6",
+      "opaque": true,
+      "hue": 158.33333333333337,
+      "saturation": 0.39130434782608675,
+      "chroma": 0.14117647058823524,
+      "lightnessStar": 87.42160336108259,
+      "classifiedAs": "role-or-on-color"
+    },
+    "semantic.warningContainer": {
+      "hex": "#453812",
+      "opaque": true,
+      "hue": 44.705882352941174,
+      "saturation": 0.5862068965517241,
+      "chroma": 0.19999999999999998,
+      "lightnessStar": 24.12002080318269,
+      "classifiedAs": "role-or-on-color"
+    },
+    "semantic.onWarningContainer": {
+      "hex": "#E4DBC1",
+      "opaque": true,
+      "hue": 44.57142857142854,
+      "saturation": 0.3932584269662922,
+      "chroma": 0.13725490196078438,
+      "lightnessStar": 87.48854112800744,
+      "classifiedAs": "role-or-on-color"
+    },
+    "semantic.infoContainer": {
+      "hex": "#213B54",
+      "opaque": true,
+      "hue": 209.41176470588235,
+      "saturation": 0.43589743589743585,
+      "chroma": 0.19999999999999998,
+      "lightnessStar": 23.971188953675544,
+      "classifiedAs": "role-or-on-color"
+    },
+    "semantic.onInfoContainer": {
+      "hex": "#CBDEEF",
+      "opaque": true,
+      "hue": 208.33333333333331,
+      "saturation": 0.5294117647058827,
+      "chroma": 0.14117647058823535,
+      "lightnessStar": 87.56804895867032,
+      "classifiedAs": "role-or-on-color"
+    },
+    "semantic.dangerContainer": {
+      "hex": "#5E2831",
+      "opaque": true,
+      "hue": 350.0,
+      "saturation": 0.4029850746268657,
+      "chroma": 0.21176470588235297,
+      "lightnessStar": 24.061071041584263,
+      "classifiedAs": "role-or-on-color"
+    },
+    "semantic.onDangerContainer": {
+      "hex": "#F5D3D8",
+      "opaque": true,
+      "hue": 351.17647058823525,
+      "saturation": 0.6296296296296297,
+      "chroma": 0.13333333333333341,
+      "lightnessStar": 87.46502477251605,
       "classifiedAs": "role-or-on-color"
     },
     "inputDecorationTheme.enabledBorder": {

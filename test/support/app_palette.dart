@@ -41,6 +41,15 @@ final List<Color> lightPaletteTokens = <Color>[
   AppColors.warningLight,
   AppColors.dangerLight,
   AppColors.infoLight,
+  // The status containers (M100.21). `danger` has no pair here because it
+  // reuses `errorContainer`/`onErrorContainer`, already listed above as the
+  // Material roles they are.
+  AppColors.successContainerLight,
+  AppColors.onSuccessContainerLight,
+  AppColors.warningContainerLight,
+  AppColors.onWarningContainerLight,
+  AppColors.infoContainerLight,
+  AppColors.onInfoContainerLight,
   AppMaterialRoles.primaryContainerLight,
   AppMaterialRoles.onPrimaryContainerLight,
   AppMaterialRoles.secondaryLight,
@@ -115,6 +124,12 @@ final List<Color> darkPaletteTokens = <Color>[
   AppColors.warningDark,
   AppColors.dangerDark,
   AppColors.infoDark,
+  AppColors.successContainerDark,
+  AppColors.onSuccessContainerDark,
+  AppColors.warningContainerDark,
+  AppColors.onWarningContainerDark,
+  AppColors.infoContainerDark,
+  AppColors.onInfoContainerDark,
   AppMaterialRoles.primaryContainerDark,
   AppMaterialRoles.onPrimaryContainerDark,
   AppMaterialRoles.secondaryDark,
