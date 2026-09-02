@@ -419,7 +419,17 @@ ThemeData _buildTheme(
     // slot; this keeps an untended `Card` on the same surface, radius and
     // hairline instead of Material's elevated default.
     cardTheme: CardThemeData(
-      color: scheme.surface,
+      // **`surfaceContainerLowest`, because the page is `surface` now.** The
+      // A3 palette is built on M3's own model — `surface` *is* the page, and
+      // the container ladder is what rises off it — where the palette it
+      // replaced kept a separate `background` below `surface`. Left reading
+      // `surface`, a card would be the same colour as the page it sits on:
+      // 0.0 L\* apart, in both modes.
+      //
+      // `surfaceContainerLowest` is the least-raised rung, which is what a flat
+      // card is. It lifts 2.1 L\* in light — where the shadow carries the rest,
+      // per AD-14 — and 5.7 L\* in dark, where nothing else can.
+      color: scheme.surfaceContainerLowest,
       elevation: 0,
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(

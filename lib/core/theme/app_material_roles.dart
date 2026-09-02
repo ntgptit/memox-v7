@@ -29,24 +29,24 @@ import 'app_surface_colors.dart';
 /// memox decision that Material happens to have a slot for, and each stays in
 /// `AppColors` where its reasoning is.
 abstract final class AppMaterialRoles {
-  static const Color primaryContainerLight = Color(0xFFDCDCF2);
-  static const Color primaryContainerDark = Color(0xFF2B2B6E);
-  static const Color onPrimaryContainerLight = Color(0xFF1B1B5C);
+  static const Color primaryContainerLight = Color(0xFFE0E5FE);
+  static const Color primaryContainerDark = Color(0xFF2D346A);
+  static const Color onPrimaryContainerLight = Color(0xFF1A2580);
 
   /// `#D7D5FF` from the design system, replacing `#D8D8F0`. It reads the same on
   /// the container (8.87:1 against 8.96:1) and carries more of the seed's hue.
-  static const Color onPrimaryContainerDark = Color(0xFFD7D5FF);
+  static const Color onPrimaryContainerDark = Color(0xFFD9DFFF);
 
-  static const Color secondaryLight = Color(0xFF4E5468);
+  static const Color secondaryLight = Color(0xFF5161D1);
 
   /// Moved with [secondaryContainerDark] at M4.10aa, and forced rather than
   /// chosen: `color_system_rules_test.dart` R3 holds a role's fill and its
   /// container within 5 degrees of hue, and taking the container to the page
   /// family while the fill stayed on the old slate opened 18. Same L\* (75.2),
   /// now 3.5 degrees off its container.
-  static const Color secondaryDark = Color(0xFFB8B7D0);
+  static const Color secondaryDark = Color(0xFF9DA8E8);
   static const Color onSecondaryLight = Color(0xFFFFFFFF);
-  static const Color onSecondaryDark = Color(0xFF1E2033);
+  static const Color onSecondaryDark = Color(0xFF171E45);
 
   /// Retuned from `#E4E6EC` at M100.22, and the component that forced it is
   /// the one that had been avoiding it.
@@ -78,31 +78,31 @@ abstract final class AppMaterialRoles {
   /// `#332F58` already gave 7.99 L\* against `surfaceContainer` where
   /// `primaryContainer` gave 7.71 — the substitution bought dark nothing. The
   /// owner's report said "on a light page", and the measurement agreed.
-  static const Color secondaryContainerLight = Color(0xFFD9DDEB);
-  static const Color secondaryContainerDark = Color(0xFF332F58);
-  static const Color onSecondaryContainerLight = Color(0xFF2C3141);
-  static const Color onSecondaryContainerDark = Color(0xFFD9DCE7);
+  static const Color secondaryContainerLight = Color(0xFFE3E7FA);
+  static const Color secondaryContainerDark = Color(0xFF333C6B);
+  static const Color onSecondaryContainerLight = Color(0xFF242C63);
+  static const Color onSecondaryContainerDark = Color(0xFFDCE1FA);
 
-  static const Color tertiaryLight = Color(0xFF45647F);
+  static const Color tertiaryLight = Color(0xFF6E4BF3);
 
   /// From the design system, replacing `#A2BAD0` — and it *is*
   /// `AppColors.infoDark`, stated as a derivation because it is deliberate:
   /// the tertiary role and the `info` semantic are the one blue the palette
   /// has, and a copied hex is a relationship the next edit can silently break.
-  static const Color tertiaryDark = AppColors.infoDark;
+  static const Color tertiaryDark = Color(0xFFB5A0FF);
   static const Color onTertiaryLight = Color(0xFFFFFFFF);
-  static const Color onTertiaryDark = Color(0xFF17232E);
-  static const Color tertiaryContainerLight = Color(0xFFE1E9F0);
-  static const Color tertiaryContainerDark = Color(0xFF33465A);
-  static const Color onTertiaryContainerLight = Color(0xFF22394B);
-  static const Color onTertiaryContainerDark = Color(0xFFD5E0EA);
+  static const Color onTertiaryDark = Color(0xFF0A0E27);
+  static const Color tertiaryContainerLight = Color(0xFFEBE4FE);
+  static const Color tertiaryContainerDark = Color(0xFF3A2E6B);
+  static const Color onTertiaryContainerLight = Color(0xFF2C1A6E);
+  static const Color onTertiaryContainerDark = Color(0xFFE3D9FF);
 
   static const Color onErrorLight = Color(0xFFFFFFFF);
-  static const Color onErrorDark = Color(0xFF2C1319);
-  static const Color errorContainerLight = Color(0xFFF8DDE1);
-  static const Color errorContainerDark = Color(0xFF5E2831);
-  static const Color onErrorContainerLight = Color(0xFF641421);
-  static const Color onErrorContainerDark = Color(0xFFF5D3D8);
+  static const Color onErrorDark = Color(0xFF3A0713);
+  static const Color errorContainerLight = Color(0xFFFCE0E5);
+  static const Color errorContainerDark = Color(0xFF5C1B2A);
+  static const Color onErrorContainerLight = Color(0xFF8E0F28);
+  static const Color onErrorContainerDark = Color(0xFFFFD9DF);
 
   static const Color surfaceContainerLowestLight =
       AppSurfaceColors.surfaceElevatedLight;
@@ -114,19 +114,19 @@ abstract final class AppMaterialRoles {
   /// as copied hex would let the ladder split into two hue families at exactly
   /// the rungs a Dialog and a Menu draw from — the drift the derivation now
   /// makes impossible rather than merely checked-for.
-  static const Color surfaceContainerLowestDark = Color(0xFF0A0326);
-  static const Color surfaceContainerLowLight = Color(0xFFFAFAFC);
-  static const Color surfaceContainerLowDark = Color(0xFF151134);
+  static const Color surfaceContainerLowestDark = Color(0xFF131A3A);
+  static const Color surfaceContainerLowLight = Color(0xFFF1F4FB);
+  static const Color surfaceContainerLowDark = Color(0xFF1B2249);
   // `onInverseSurfaceLight` is the same value from the other direction —
   // written there as the derivation, so this stays the source.
-  static const Color surfaceContainerLight = Color(0xFFF1F2F6);
-  static const Color surfaceContainerDark = Color(0xFF221E44);
+  static const Color surfaceContainerLight = Color(0xFFE9EDF7);
+  static const Color surfaceContainerDark = Color(0xFF232B5A);
   static const Color surfaceContainerHighLight =
       AppSurfaceColors.surfaceMutedLight;
   static const Color surfaceContainerHighDark =
       AppSurfaceColors.surfaceMutedDark;
-  static const Color surfaceContainerHighestLight = Color(0xFFE3E5EC);
-  static const Color surfaceContainerHighestDark = secondaryContainerDark;
+  static const Color surfaceContainerHighestLight = Color(0xFFDAE0EF);
+  static const Color surfaceContainerHighestDark = Color(0xFF353D7E);
 
   /// **`surfaceDim` is the dimmest surface, which in this app is the page.**
   ///
@@ -141,17 +141,17 @@ abstract final class AppMaterialRoles {
   /// ladder there runs the other way and `surfaceDim` sits below a page that
   /// is not in the scheme at all. Straightening that is a surface-ladder
   /// change with pixels behind it, not a rename — see the token audit.
-  static const Color surfaceDimLight = Color(0xFFDEE0E7);
-  static const Color surfaceDimDark = AppSurfaceColors.backgroundDark;
-  static const Color surfaceBrightLight = AppSurfaceColors.surfaceElevatedLight;
-  static const Color surfaceBrightDark = AppSurfaceColors.surfaceElevatedDark;
+  static const Color surfaceDimLight = Color(0xFFDAE0EF);
+  static const Color surfaceDimDark = Color(0xFF0A0E27);
+  static const Color surfaceBrightLight = Color(0xFFF7F9FE);
+  static const Color surfaceBrightDark = Color(0xFF2C356E);
 
-  static const Color inverseSurfaceLight = Color(0xFF2A2C3E);
-  static const Color inverseSurfaceDark = Color(0xFFE7E8F0);
-  static const Color onInverseSurfaceLight = surfaceContainerLight;
-  static const Color onInverseSurfaceDark = Color(0xFF23253A);
-  static const Color inversePrimaryLight = Color(0xFFA9A9E0);
-  static const Color inversePrimaryDark = Color(0xFF3A3A9B);
+  static const Color inverseSurfaceLight = Color(0xFF0A0E27);
+  static const Color inverseSurfaceDark = Color(0xFFF7F9FE);
+  static const Color onInverseSurfaceLight = Color(0xFFE4E8FA);
+  static const Color onInverseSurfaceDark = Color(0xFF0F1638);
+  static const Color inversePrimaryLight = Color(0xFF8B9AFF);
+  static const Color inversePrimaryDark = Color(0xFF4459F4);
 
   // --- The `*Fixed` families -----------------------------------------------
   //
@@ -201,36 +201,36 @@ abstract final class AppMaterialRoles {
   // `onTertiaryFixedVariant` on `tertiaryFixedDim` at 5.45:1.
 
   /// Primary palette (keyed on [AppColors.primaryLight]) at tone 90.
-  static const Color primaryFixed = Color(0xFFE1E0FF);
+  static const Color primaryFixed = Color(0xFFE0E5FE);
 
   /// The same palette at tone 80 — ten tones dimmer, which is the
   /// `toneDeltaPair` the spec pins between this and [primaryFixed].
-  static const Color primaryFixedDim = Color(0xFFC0C1FF);
+  static const Color primaryFixedDim = Color(0xFF8B9AFF);
 
   /// Tone 10. 13.26:1 on [primaryFixed], 10.01:1 on [primaryFixedDim].
-  static const Color onPrimaryFixed = Color(0xFF07006D);
+  static const Color onPrimaryFixed = Color(0xFF11173A);
 
   /// Tone 30 — the lower-emphasis ink. 7.30:1 and 5.51:1 on the same pair.
-  static const Color onPrimaryFixedVariant = Color(0xFF3736A5);
+  static const Color onPrimaryFixedVariant = Color(0xFF1A2580);
 
   /// Secondary palette (keyed on [secondaryLight]) at tone 90.
-  static const Color secondaryFixed = Color(0xFFDDE2FB);
-  static const Color secondaryFixedDim = Color(0xFFC1C6DE);
+  static const Color secondaryFixed = Color(0xFFE3E7FA);
+  static const Color secondaryFixedDim = Color(0xFF9DA8E8);
 
   /// Tone 10. 13.34:1 on [secondaryFixed], 10.12:1 on [secondaryFixedDim].
-  static const Color onSecondaryFixed = Color(0xFF151B2C);
+  static const Color onSecondaryFixed = Color(0xFF171E45);
 
   /// Tone 30. 7.30:1 and 5.54:1.
-  static const Color onSecondaryFixedVariant = Color(0xFF404659);
+  static const Color onSecondaryFixedVariant = Color(0xFF242C63);
 
   /// Tertiary palette (keyed on [tertiaryLight]) at tone 90.
-  static const Color tertiaryFixed = Color(0xFFCBE5FF);
-  static const Color tertiaryFixedDim = Color(0xFFAACAE9);
+  static const Color tertiaryFixed = Color(0xFFEBE4FE);
+  static const Color tertiaryFixedDim = Color(0xFFB5A0FF);
 
   /// Tone 10. 13.17:1 on [tertiaryFixed], 10.03:1 on [tertiaryFixedDim].
-  static const Color onTertiaryFixed = Color(0xFF121D26);
+  static const Color onTertiaryFixed = Color(0xFF0A0E27);
 
   /// Tone 30, and the tightest pairing of the twelve: 7.16:1 on
   /// [tertiaryFixed] and 5.45:1 on [tertiaryFixedDim], against a 4.5 floor.
-  static const Color onTertiaryFixedVariant = Color(0xFF2A4A64);
+  static const Color onTertiaryFixedVariant = Color(0xFF2C1A6E);
 }

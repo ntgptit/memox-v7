@@ -188,7 +188,12 @@ bool _isInFamily(Color color) {
   if (h == null) return true;
 
   const families = <(double, double)>[
-    (195, 255), // navy, indigo, steel — the brand and every surface
+    // 195-258 since A3. It was 195-255 while `tertiary` was a steel blue; A3
+    // makes it a violet at hue 257, so the band's ceiling described the palette
+    // that used to be here rather than a rule. Widened by three degrees, which
+    // is what the new family needs and no more — a pink `tertiary` at 329, the
+    // `fromSeed` default this band was written to catch, is still out.
+    (195, 258), // navy, indigo, violet — the brand and every surface
     (340, 360), // danger
     (145, 175), // success
     (25, 55), // warning

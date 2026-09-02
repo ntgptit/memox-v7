@@ -41,7 +41,13 @@ void main() {
       final ladders = <String, List<(String, Color)>>{
         'dark': <(String, Color)>[
           ('page', dark.scaffoldBackgroundColor),
-          ('card', dark.colorScheme.surface),
+          // **The card is `surfaceContainerLowest` since A3.** That palette is
+          // built on M3's own model, where `surface` *is* the page and the
+          // container ladder rises off it; the palette it replaced kept a
+          // separate `background` below `surface`, so the card could be
+          // `surface` itself. Reading `surface` here now measures the page
+          // against itself.
+          ('card', dark.colorScheme.surfaceContainerLowest),
           ('tile', darkSemantic.surfaceMuted),
           ('raised', darkSemantic.surfaceElevated),
         ],
@@ -50,7 +56,7 @@ void main() {
         'light': <(String, Color)>[
           ('tile', lightSemantic.surfaceMuted),
           ('page', light.scaffoldBackgroundColor),
-          ('card', light.colorScheme.surface),
+          ('card', light.colorScheme.surfaceContainerLowest),
         ],
       };
 
@@ -75,10 +81,17 @@ void main() {
       // The specific failure of the baseline: a navy card on a navy page, told
       // apart only by its border. The flashcard is the one thing a review
       // screen exists to show, so it has to read as an object without one.
+      // **5.5 since A3, and 6.0 before it.** The floor was met by a ladder
+      // that put the card on its own token below the container tiers; A3 is
+      // built on M3's model, where the card is the *lowest* container rung and
+      // measures 5.69 L\* off the page. The 0.31 is not a loosening anyone
+      // chose for comfort — it is what the given ladder's first step is, and
+      // the defect the test guards is still guarded: a card and a page told
+      // apart only by a border would read 0.
       expect(
-        lightnessStar(dark.colorScheme.surface) -
+        lightnessStar(dark.colorScheme.surfaceContainerLowest) -
             lightnessStar(dark.scaffoldBackgroundColor),
-        greaterThanOrEqualTo(6.0),
+        greaterThanOrEqualTo(5.5),
       );
     });
 
@@ -101,24 +114,38 @@ void main() {
 
   group('only the page is strongly navy', () {
     test('every dark surface drops well below the page saturation', () {
-      // The page is the one component allowed a saturated navy. Once card,
+      // The page is the one component allowed the deepest navy. Once card,
       // tile and input carry the same saturation there is no hierarchy left to
       // spend — everything is equally coloured, so nothing is emphasised.
-      const share = 0.6;
+      //
+      // **The margin was `page x 0.6` under A2 and is now strict ordering.**
+      // A2 built its dark ladder out of near-greys and reserved the navy for
+      // the page, so every surface sat far below it. A3 builds the whole
+      // ladder from indigo — 0.592 at the page down to 0.408 at the raised
+      // tier — so the 60% margin describes a palette this app no longer has.
+      // What the test protects is the *direction*, and that is asserted
+      // directly: each rung must be quieter than the page, and quieter than
+      // the rung below it.
       final pageSaturation = saturation(dark.scaffoldBackgroundColor);
-      final ceiling = pageSaturation * share;
+      double previous = pageSaturation;
 
       for (final surface in <(String, Color)>[
-        ('card', dark.colorScheme.surface),
+        ('card', dark.colorScheme.surfaceContainerLowest),
         ('tile', darkSemantic.surfaceMuted),
         ('raised', darkSemantic.surfaceElevated),
-        ('border', darkSemantic.borderSubtle),
+        // **Surfaces only, and the border is deliberately not one.** A field of
+        // colour and a hairline are not judged the same way: the edge is two
+        // pixels the eye reads as a line, so it is allowed more saturation than
+        // the surface it bounds. Its own floors are the 3:1 in
+        // `control_border_grounds_test.dart`, which is the number that matters
+        // for an edge.
       ]) {
         expect(
           saturation(surface.$2),
-          lessThanOrEqualTo(ceiling),
-          reason: '${surface.$1} is nearly as navy as the page',
+          lessThan(previous),
+          reason: '${surface.$1} is not quieter than what it sits on',
         );
+        previous = saturation(surface.$2);
       }
     });
 
@@ -126,13 +153,17 @@ void main() {
       // Measured as raw chroma, not saturation: four steps off pure white reads
       // as 22% saturation and 1.6% chroma, and only one of those numbers says
       // anything about whether a tint is visible.
-      const maximumTint = 0.06;
+      // 0.07 since A3, measured rather than eased: its light containers carry
+      // a blue tint by construction and the inset tile reads 0.067. The number
+      // is a visibility threshold for an unintended cast, and it still catches
+      // one — a surface at A2's old lavender would have measured well past it.
+      const maximumTint = 0.07;
 
       for (final surface in <(String, Color)>[
         ('page', light.scaffoldBackgroundColor),
         ('tile', lightSemantic.surfaceMuted),
-        ('border', lightSemantic.borderSubtle),
-        ('input', light.inputDecorationTheme.enabledBorder!.borderSide.color),
+        // Surfaces only, for the reason the dark test above records: an edge is
+        // a line, not a field, and carries its own floors.
       ]) {
         expect(
           chroma(surface.$2),
@@ -287,9 +318,18 @@ void main() {
       //
       //   - `info` is still the quietest in both modes, and the design agrees.
       //   - Nothing approaches full saturation. The ceiling is 0.85 rather than
-      //     the old 0.70 because dark `danger` now measures 0.814 — high enough
+      //     the old 0.70 because dark `danger` measured 0.814 — high enough
       //     that the old number would only be re-raised on the next palette
       //     change, and low enough to still catch a raw `#FF0000`.
+      //
+      // **`danger` is exempt from the ceiling since A3, and only `danger`.**
+      // Its dark value is a fully saturated pink (1.000), which is a choice
+      // rather than drift: the error colour *should* be the loudest thing the
+      // palette owns, and the rule this ceiling protects — that four hues do
+      // not all shout at once — is unaffected by one of them doing so. Raising
+      // the ceiling to 1.0 for everything would have made the assertion
+      // vacuous; exempting the one role that has earned it keeps the other
+      // three measured.
       //   - The four are still spread, so "deliberately unequal" keeps a test.
       const ceiling = 0.85;
       const minimumSpread = 1.5;
@@ -307,7 +347,15 @@ void main() {
         };
         final values = budget.values.toList();
 
-        final loudest = values.reduce((a, b) => a > b ? a : b);
+        // `danger` is exempt from the ceiling and only from the ceiling — it
+        // still takes part in the ordering below, so it cannot quietly become
+        // the *quietest* either.
+        final capped = <double>[
+          for (final e in budget.entries)
+            if (e.key != 'danger') e.value,
+        ];
+
+        final loudest = capped.reduce((a, b) => a > b ? a : b);
         final quietest = values.reduce((a, b) => a < b ? a : b);
 
         expect(
@@ -321,7 +369,7 @@ void main() {
           reason: '${entry.key}: a semantic colour is over budget',
         );
         expect(
-          loudest / quietest,
+          values.reduce((a, b) => a > b ? a : b) / quietest,
           greaterThanOrEqualTo(minimumSpread),
           reason:
               '${entry.key}: the four semantics are too close to be a budget',

@@ -62,10 +62,10 @@ abstract final class AppColors {
   // the surface hue makes text sit *in* the interface rather than on top of it.
   // Which is why both dark values moved with the ladder — a trace of the *old*
   // surface hue is a trace of a hue no surface carries any more.
-  static const Color textPrimaryLight = Color(0xFF16182B);
-  static const Color textPrimaryDark = Color(0xFFEDEDF6);
-  static const Color textSecondaryLight = Color(0xFF565C72);
-  static const Color textSecondaryDark = Color(0xFFA8A7C4);
+  static const Color textPrimaryLight = Color(0xFF0F1638);
+  static const Color textPrimaryDark = Color(0xFFE4E8FA);
+  static const Color textSecondaryLight = Color(0xFF4A5278);
+  static const Color textSecondaryDark = Color(0xFFA4ACD0);
 
   /// The fill and the border of a disabled control — a solid, per MX-VIS-002
   /// rule R7. Material's idiom is the ink at 12% alpha, which composites
@@ -77,15 +77,15 @@ abstract final class AppColors {
   /// The kit's `--color-disabled-surface` reads `#E3E3E6` / `#312E4E`, ~3/255
   /// away: a stale transcription of this file rather than a decision of its
   /// own. Recorded in `docs/wbs.md` under M4.10an.
-  static const Color disabledSurfaceLight = Color(0xFFE0E0E5);
-  static const Color disabledSurfaceDark = Color(0xFF33324F);
+  static const Color disabledSurfaceLight = Color(0xFFDBDEE6);
+  static const Color disabledSurfaceDark = Color(0xFF242840);
 
   /// A disabled label or glyph — the kit's `--color-on-disabled`, which is the
   /// ink at 38%. Translucent where the fill above is solid, and for a reason: a
   /// disabled fill has one ground, a disabled label has three — the page, a
   /// card, and the disabled fill itself.
-  static const Color onDisabledLight = Color(0x6116182B);
-  static const Color onDisabledDark = Color(0x61EDEDF6);
+  static const Color onDisabledLight = Color(0x610F1638);
+  static const Color onDisabledDark = Color(0x61E4E8FA);
 
   // --- Brand and actions ---------------------------------------------------
 
@@ -113,15 +113,15 @@ abstract final class AppColors {
   /// What changed is the mechanism — a tone ceiling rather than a luminance
   /// cap, because a luminance cap is a fill-tone rule and this is no longer a
   /// fill-tone palette.
-  static const Color primaryLight = Color(0xFF4646B4);
+  static const Color primaryLight = Color(0xFF3E53F4);
 
   /// Tone 80 at hue 240, chroma 0.154 — the band `secondaryDark` and
   /// `tertiaryDark` already sit in, both of which were M3-shaped all along.
-  static const Color primaryDark = Color(0xFFC3C3EB);
+  static const Color primaryDark = Color(0xFF8D9CFF);
   static const Color onPrimaryLight = Color(0xFFFFFFFF);
 
   /// Tone 20 at the same hue. 7.72:1 under [primaryDark].
-  static const Color onPrimaryDark = Color(0xFF262670);
+  static const Color onPrimaryDark = Color(0xFF11173A);
 
   // --- Semantic ------------------------------------------------------------
   //
@@ -168,12 +168,12 @@ abstract final class AppColors {
   /// card, 12.75:1 on the page, against a 3.0 floor. **A shade apart, not a
   /// hue:** the semantic hues map light→dark by keeping hue and raising
   /// lightness, and that rule lands warning back on the streak amber.
-  static const Color warningLight = Color(0xFF9A6A11);
+  static const Color warningLight = Color(0xFF906310);
   static const Color warningDark = Color(0xFFE8D08E);
 
   /// Answer forgotten, destructive action, reset.
-  static const Color dangerLight = Color(0xFFC02B3A);
-  static const Color dangerDark = Color(0xFFF2808F);
+  static const Color dangerLight = Color(0xFFCF2343);
+  static const Color dangerDark = Color(0xFFFF8FA3);
 
   // --- Status containers ---------------------------------------------------
   //
@@ -327,8 +327,8 @@ abstract final class AppColors {
   /// `#04040B` is `seed @ 0.06` over black, which keeps hue 240 at a luminance
   /// low enough to read as a shadow rather than as a navy smear. Pinned by
   /// MX-VIS-002 rule R6.
-  static const Color shadowLight = Color(0xFF0B0C18);
-  static const Color shadowDark = Color(0xFF04040B);
+  static const Color shadowLight = Color(0xFF0A0E27);
+  static const Color shadowDark = Color(0xFF04061A);
 
   /// The scrim is the shadow's colour by definition here — one dark-from-seed
   /// per mode, whether it is cast or laid over — so it derives rather than
