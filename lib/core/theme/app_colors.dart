@@ -77,15 +77,15 @@ abstract final class AppColors {
   /// The kit's `--color-disabled-surface` reads `#E3E3E6` / `#312E4E`, ~3/255
   /// away: a stale transcription of this file rather than a decision of its
   /// own. Recorded in `docs/wbs.md` under M4.10an.
-  static const Color disabledSurfaceLight = Color(0xFFDBDEE6);
-  static const Color disabledSurfaceDark = Color(0xFF242840);
+  static const Color disabledSurfaceLight = Color(0xFFDFDEE3);
+  static const Color disabledSurfaceDark = Color(0xFF2D2C30);
 
   /// A disabled label or glyph — the kit's `--color-on-disabled`, which is the
   /// ink at 38%. Translucent where the fill above is solid, and for a reason: a
   /// disabled fill has one ground, a disabled label has three — the page, a
   /// card, and the disabled fill itself.
-  static const Color onDisabledLight = Color(0x610F1638);
-  static const Color onDisabledDark = Color(0x61E4E8FA);
+  static const Color onDisabledLight = Color(0x611C1B1F);
+  static const Color onDisabledDark = Color(0x61E3E2E7);
 
   // --- Brand and actions ---------------------------------------------------
 

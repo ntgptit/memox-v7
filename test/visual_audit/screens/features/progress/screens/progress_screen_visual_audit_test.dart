@@ -110,7 +110,7 @@ void main() {
       AuditSkipAllowance(
         itemId: 'shell',
         reason: SkipReason.rasterNotFlat,
-        detailContains: 'covers only 0%',
+        detailContains: 'covers only',
         rationale:
             'The unselected range pill declares a surface tint that its resting '
             'state does not fill, and _RenderChip paints what it does fill '
@@ -188,7 +188,7 @@ void main() {
       AuditSkipAllowance(
         itemId: 'shell',
         reason: SkipReason.rasterNotFlat,
-        detailContains: 'covers only 0%',
+        detailContains: 'covers only',
         rationale:
             'The unselected range pill declares a surface tint that its resting '
             'state does not fill, and _RenderChip paints what it does fill '

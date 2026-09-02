@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.24 (golden về một nền tảng: job CI chuyển sang Linux, thêm bước font, bỏ tolerance); M100.23 (tổ hợp state thôi phá canonical role; guard AST khoá slot→role; luật nền tảng golden); M100.22 (năm component về role M3 canonical; hai hex palette gánh phần contrast; gỡ khái niệm selected ink chung); M100.21 (container cho bốn semantic; chip trạng thái thôi mượn role accent); M100.20 (bảy binding component về role M3; sàn độ nổi của menu bỏ theo quyết định chủ dự án); M100.19 (gỡ ba token thay thế khỏi 112 call-site, golden chứng minh không đổi pixel); M100.18 (dark `primary` đảo tone theo M3; ba token thay thế thành dẫn xuất); M100.17 (`ColorScheme` đúng 45 role M3 — gỡ `surfaceTint` khai tường minh, catalog đủ 45 swatch); M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
+| **Updated by task** | M100.26 (bảng A4 — đủ 45 role M3 áp nguyên văn, không lệch giá trị nào; chín kết quả đo chờ chủ dự án quyết); M100.25 (bảng A3 — 26 role M3 đổi tone, chín giá trị lệch bảng để giữ sàn); M100.24 (golden về một nền tảng: job CI chuyển sang Linux, thêm bước font, bỏ tolerance); M100.23 (tổ hợp state thôi phá canonical role; guard AST khoá slot→role; luật nền tảng golden); M100.22 (năm component về role M3 canonical; hai hex palette gánh phần contrast; gỡ khái niệm selected ink chung); M100.21 (container cho bốn semantic; chip trạng thái thôi mượn role accent); M100.20 (bảy binding component về role M3; sàn độ nổi của menu bỏ theo quyết định chủ dự án); M100.19 (gỡ ba token thay thế khỏi 112 call-site, golden chứng minh không đổi pixel); M100.18 (dark `primary` đảo tone theo M3; ba token thay thế thành dẫn xuất); M100.17 (`ColorScheme` đúng 45 role M3 — gỡ `surfaceTint` khai tường minh, catalog đủ 45 swatch); M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
 | **Last updated** | 2026-09-02 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -16944,6 +16944,148 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Dependencies:** M100.23
 - **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
 - **Checklist phases:** 14, 21.
+
+### M100.25 · Bảng A3 — 26 role M3 đổi tone theo chỉ đạo chủ dự án
+
+- **Status:** done
+- **Goal:** Thay toàn bộ giá trị A2 (Quizlet Navy Indigo) bằng bảng 26 role chủ
+  dự án đưa. 19 role bảng không liệt kê — bộ inverse, `shadow`, `scrim`,
+  `surfaceDim`, `surfaceBright` và mười hai role Fixed — **dẫn xuất** từ chính
+  bảng theo tone assignment của M3, không tự nghĩ: họ Fixed lấy đúng neo tone
+  bảng đã cấp (tone 90 fill, 80 dim, 10 ink, 30 variant), cặp inverse là surface
+  của mode kia cùng mực của nó.
+- **Scope:** `lib/core/theme/app_material_roles.dart`, `app_colors.dart`,
+  `app_surface_colors.dart`, `app_border_colors.dart`,
+  `design_system/tokens/colors.css`, test tone/hue/ladder trong
+  `test/core/theme/` và `test/design_audit/`.
+- **Out of scope:** binding component → role (đã chốt ở M100.22–23); không sàn
+  WCAG nào được nới.
+- **Chín giá trị lệch bảng, tất cả tối thiểu và cùng một chiều: chỉ lightness,
+  hue và saturation giữ nguyên.** Mỗi cái là một sàn đo được mà giá trị bảng
+  trượt, và chủ dự án chọn cách này thay vì hạ sàn: `primary` light
+  `#5265F5→#3E53F4` (mực trên `surfaceContainerHigh` — nền của ListTile đang
+  chọn — 4.26→4.52); `secondary` light `#6E7CD9→#5161D1` (mực trên card,
+  3.23→4.50); `tertiary` light `#8B6FF5→#6E4BF3` (3.15→4.52); `outline` light
+  `#7C85AB→#757EA6` (2.74→3.00) và dark `#5A6BAE→#7E8CC0` (1.96→3.02); `error`
+  light `#DC2D4E→#CF2343` (3.96→4.51); `primary` dark `#8B9AFF→#8D9CFF`
+  (4.43→4.52). Cộng hai token app bảng không phủ mà surface mới làm hỏng:
+  `warning` light `#9A6A11→#906310` (4.03→4.51) và cặp disabled, vốn dẫn xuất
+  từ `onSurface` nên phải dẫn xuất lại.
+- **Ba accent hỏng vì *cách app vẽ* chúng, không phải vì lý thuyết.**
+  `AppInk.secondary` và `AppInk.tertiary` là mực trên surface, còn `primary` là
+  nhãn của mọi outlined button, text button và tab. `onSecondary`/`onTertiary`
+  không được vẽ ở đâu cả — nên white-on-accent là nửa lý thuyết, ink-on-surface
+  là nửa đang sống. Một tone gánh cả hai: tối đi đủ để đạt 4.5 làm mực, trắng
+  vẫn đọc 5.27–5.30 trên nó, nên khác M100.18 là không có điểm giao phải xử lý.
+- **Một hệ quả cấu trúc, nói ra vì bảng màu không nói.** A3 dựng trên mô hình
+  M3: `surface` **là** trang, thang container mọc lên từ đó. App này giữ
+  `background` riêng nằm dưới `surface` và vẽ card trên `surface`. Áp nguyên
+  văn thì trang dark và card dark cách nhau 0.8 L\* — card biến mất. Nên trang
+  là `surface`, card là `surfaceContainerLowest`, đúng cách xếp của M3 và chỉ
+  dùng rung của chính bảng.
+- **Hai sàn nội bộ đi theo, ghi ngay tại assertion:** card dark nâng 5.69 L\*
+  trên trang (token cũ cho 7.70) nên sàn thang đi 6.0→5.5 — đó là bước đầu của
+  thang được cấp; light dựng độ nâng từ card trắng cộng shadow (7.80) còn dark
+  chỉ từ thang (5.69) nên dung sai đối xứng hai mode đi 2.0→2.5.
+- **Ba test mô tả *tính cách* của A2 chứ không phải một luật — chỉnh hướng chứ
+  không xoá.** "chỉ trang mới navy đậm" từng khẳng định mọi surface nằm dưới 60%
+  saturation của trang; A2 dựng thang dark từ near-grey, A3 dựng từ indigo
+  (0.592 ở trang xuống 0.408 ở tier raised) nên nay khẳng định **thứ tự** — mỗi
+  rung trầm hơn rung nó ngồi lên. Border rời danh sách: cạnh là đường chứ không
+  phải mảng, và có sàn 3:1 riêng chỗ khác. Trần tint light 0.06→0.07 (tile inset
+  của A3 đo 0.067). `danger` miễn trần saturation **và chỉ trần**: dark của nó
+  là hồng bão hoà hoàn toàn, đó là một lựa chọn — màu lỗi nên là thứ ồn nhất
+  palette — nhưng vẫn dự phần vào spread nên cũng không thể thành thứ trầm nhất.
+- **Dải hue nới 195–255 → 195–258** cho `tertiary` tím của A3 ở 257. Ba độ, đúng
+  cái họ này cần: `tertiary` hồng ở 329 mà `fromSeed` sinh ra — thứ dải này tồn
+  tại để bắt — vẫn nằm ngoài.
+- **Kit dẫn giá trị, theo AD-14/M4.10p:** 97 token `--color-*` resync từ chính
+  parity map chứ không gõ tay, hai token dẫn xuất tính lại từ mực mới.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** 26 role của bảng cộng 19 role dẫn xuất, kit và Dart khớp nhau.
+- **Acceptance criteria:**
+  - [x] Không sàn WCAG nào bị nới; chín giá trị lệch bảng đều có số đo kèm.
+  - [x] 19 role không có trong bảng đều dẫn xuất từ bảng, không tự nghĩ.
+  - [x] `test/core/theme/` + `test/design_audit/` 396/396.
+  - [x] analyze 0 error 0 warning, format sạch.
+- **Dependencies:** M100.24
+- **Tests required:** `test/core/theme/`, `test/design_audit/`.
+- **Checklist phases:** 6, 14.
+
+### M100.26 · Bảng A4 — đủ 45 role M3, áp nguyên văn
+
+- **Status:** done (giá trị đã áp; chín kết quả đo đang chờ chủ dự án quyết)
+- **Goal:** Chủ dự án đưa bảng đủ **45 role** (26 Standard + 19 Add-on) kèm chỉ
+  đạo "bất kể là gì" — áp nguyên văn, sinh golden, dựng gallery để nhìn trực
+  tiếp, rồi mới bàn chỉnh sửa. Khác A3 ở đúng chỗ đó: **A3 lệch bảng chín giá
+  trị để giữ sàn; A4 lệch không giá trị nào.** Mọi thứ sàn cũ bắt được nay là
+  một câu hỏi cho chủ dự án chứ không phải một sửa đổi thầm lặng.
+- **Scope:** `lib/core/theme/app_material_roles.dart` (54 hằng),
+  `app_surface_colors.dart` (12), `app_colors.dart` (12),
+  `app_border_colors.dart` (4), `design_system/tokens/colors.css` (75 token
+  `--color-*` + 4 dẫn xuất), `app_theme.dart` (card đọc `surfaceContainerLow`),
+  `test/features/progress/presentation/progress_composition_test.dart` (một
+  assertion gọi sai role), toàn bộ ~300 golden.
+- **Out of scope:** hue/lightness của 45 role được cấp — không cái nào bị sửa;
+  business logic, navigation, schema, feature logic.
+- **Ba dẫn xuất phải đi theo `onSurface`, và một trong số đó là bug đã lọt.**
+  `onDisabled` là mực ở 38%, `disabledSurface` là mực ở 12% bẹt sẵn trên
+  `surface` (MX-VIS-002 R7). A4 đổi mực nhưng hai hằng vẫn trỏ mực A3 đã nghỉ —
+  `palette.closure` của visual audit bắt được: đoạn text vẽ ra `#611C1B1F`
+  (`onSurface` mới ở 38%) không khớp token nào. Tính lại: `#611C1B1F` /
+  `#61E3E2E7` và `#DFDEE3` / `#2D2C30`. Cùng lúc phát hiện đợt resync kit đã
+  **làm hỏng** `--color-on-disabled`: `rgb(15 22 56 / 0.38)` bị thay bằng hex
+  đục `#DFDEE3` — một màu khác hẳn. Kit trả về dạng `rgb(R G B / 0.38)` đúng
+  hợp đồng `css_token_parity_test.dart` đọc.
+- **Card là `surfaceContainerLow` chứ không phải `Lowest`.** Trong một thang M3
+  đầy đủ, `Lowest` là rung **tối nhất**, nên ở dark nó nằm *dưới* trang và card
+  vẽ trên đó sẽ chìm chứ không nổi. `_CardDefaultsM3.color` là
+  `surfaceContainerLow` — đây là lần đầu app dùng được đúng mặc định của M3,
+  vì A3 chưa có đủ thang.
+- **`background == surface`, và một assertion gọi sai role vì thế.**
+  `progress_composition_test.dart` khẳng định dải pinned "không phải màu card"
+  bằng `isNot(scheme.surface)` — đúng khi `surface` còn là card. A4 đưa
+  `surface` về đúng nghĩa M3 (là **trang**), nên câu đó thành "trang không phải
+  là trang" và không thể đúng. Role đổi chỗ, câu hỏi thì không: đổi sang
+  `isNot(scheme.surfaceContainerLow)`.
+- **Chín kết quả đo đang chờ chủ dự án quyết — ghi ở đây vì đây là *hệ quả*, và
+  không cái nào là bug của bảng.** Chia làm bốn nhóm:
+  1. **Hình dạng thang surface (4).** Light: card `#F4F3F9` **tối hơn** trang
+     `#FAF9FE` 2.06 L\* (sàn của dự án: +2.0 theo chiều ngược lại) — đó là hành
+     vi thật của M3, nơi trang là `surface` và `Lowest` mới là thứ trắng nhất.
+     Dark: card nâng 3.92 L\* (sàn 5.5). Trang dark `#141317` sáng hơn trang cũ
+     nên shadow 20% nay dịch trang 1.57 L\* (trần 1.0) — nghĩa là dark **nên**
+     vẽ shadow, điều `app_elevation_test.dart` viết ra để đón trước.
+  2. **Đầu mút vô sắc (2).** `surfaceContainerLowest` light `#FFFFFF` và
+     `shadow`/`scrim` `#000000` là chuẩn M3 — trong HCT, tone 0 và tone 100
+     **triệt tiêu chroma theo cấu tạo**, không tồn tại thứ trắng tinh pha seed.
+     Luật R9/R6 của dự án đòi mọi neutral mang vết seed, nên rộng quá ở đúng hai
+     tone đó.
+  3. **Họ hue (2).** R3 đo spread hue **HSL** trong một họ role với sàn 5°;
+     `primary`↔`primaryContainer` của A4 cách 12.3°. Đo cùng cách trên bảng
+     baseline của chính M3: `secondary` cách 9.74° — tức luật này **loại cả
+     palette gốc của M3**, vì M3 giữ hue **HCT** cố định còn HSL thì trôi.
+     `tertiary` light `#854E61` ở hue 339° là họ hồng — chuẩn M3 (baseline
+     `#7D5260`), nhưng dải A2 (195–258) chưa từng có họ này.
+  4. **Ba semantic của app trên `surfaceContainerHigh` (3).** `success`
+     `#10795C` 4.37, `warning` `#906310` 4.29, `info` `#3F6E97` 4.39 — sàn 4.5.
+     Không role nào trong bảng 45; đây là token nghiệp vụ riêng, trượt vì nền
+     mới. Phương án tối thiểu (tối đi ~2 L\*, giữ nguyên hue và saturation):
+     `#0F7358` / `#885D0F` / `#3C6991`, đủ 4.5 trên **mọi** rung light kể cả
+     `surfaceContainerHighest`.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** 45 role áp nguyên văn ở Dart và kit; ~300 golden vẽ lại; gallery
+  publish ở URL cố định để chủ dự án nhìn trực tiếp.
+- **Acceptance criteria:**
+  - [x] 45 giá trị được cấp vào Dart và kit, không sửa cái nào.
+  - [x] Dẫn xuất theo `onSurface`/`surface` tính lại; `palette.closure` sạch.
+  - [x] analyze 0 error 0 warning, format sạch, parity kit 70/70.
+  - [x] Golden vẽ lại toàn bộ với `TZ=UTC`; gallery dựng từ PNG đã commit.
+  - [ ] Chín kết quả đo ở trên: chờ chủ dự án chọn sửa hex hay sửa luật.
+- **Dependencies:** M100.25
+- **Tests required:** `flutter test --exclude-tags golden`, `--tags golden`,
+  `test/design_audit/`, visual audit.
+- **Checklist phases:** 6, 14.
 
 ## Known technical debt
 

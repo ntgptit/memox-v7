@@ -117,8 +117,8 @@
   --color-shadow:#000000;
   --color-scrim:#000000;
   --color-web-letterbox:#6E7288;
-  --color-disabled-surface:#DBDEE6;
-  --color-on-disabled:#DFDEE3;
+  --color-disabled-surface:#DFDEE3;
+  --color-on-disabled:rgb(28 27 31 / 0.38);
 }
 [data-theme="dark"]{
   --color-background:#141317;
@@ -195,6 +195,6 @@
   --color-inverse-primary:#4E53B6;
   --color-shadow:#000000;
   --color-scrim:#000000;
-  --color-disabled-surface:#242840;
-  --color-on-disabled:#2D2C30;
+  --color-disabled-surface:#2D2C30;
+  --color-on-disabled:rgb(227 226 231 / 0.38);
 }

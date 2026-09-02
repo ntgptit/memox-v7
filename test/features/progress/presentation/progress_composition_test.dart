@@ -344,13 +344,19 @@ void main() {
     // under test and would hold whatever that resolved to. The second check is
     // the one that says the strip is not painted in the card's colour, which is
     // the mistake this replaced.
+    //
+    // **The card is `surfaceContainerLow`, not `surface`.** This read
+    // `isNot(scheme.surface)` while `surface` was the card colour; under the
+    // full M3 ramp (M100.26) `surface` *is* the page, so the old form asserted
+    // that the page is not the page and could never hold. The role moved, the
+    // question did not: the strip must not be painted in the card's colour.
     expect(
       (box.decoration as BoxDecoration).color,
       AppSurfaceColors.backgroundLight,
     );
     expect(
       (box.decoration as BoxDecoration).color,
-      isNot(Theme.of(context).colorScheme.surface),
+      isNot(Theme.of(context).colorScheme.surfaceContainerLow),
       reason: 'the two differ, which is the whole point',
     );
   });

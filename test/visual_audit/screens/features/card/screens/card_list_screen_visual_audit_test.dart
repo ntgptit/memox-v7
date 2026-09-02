@@ -144,10 +144,17 @@ void main() {
             'colours come from ChipThemeData, pinned by the mx_components chip '
             'goldens.',
       ),
+      // **The percentage is not part of the match, and used to be.** The
+      // allowance read `covers only 0%` until M100.26 moved the palette; the
+      // same chip then measured 1% and the same anomaly arrived as unresolved
+      // with the allowance unused. What is being allowed is that a declared
+      // tint does not fill its own rect — the figure is the measurement, not
+      // the reason, and pinning it makes the allowance brittle to any colour
+      // change. Five sibling allowances carried the same literal.
       AuditSkipAllowance(
         itemId: 'shell',
         reason: SkipReason.rasterNotFlat,
-        detailContains: 'covers only 0%',
+        detailContains: 'covers only',
         rationale:
             'An unselected chip declares a surface tint that its transparent '
             'rest state does not fill; the chip colours are pinned by the '

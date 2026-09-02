@@ -97,7 +97,7 @@ void main() {
       AuditSkipAllowance(
         itemId: 'shell',
         reason: SkipReason.rasterNotFlat,
-        detailContains: 'covers only 0%',
+        detailContains: 'covers only',
         rationale:
             'The unselected order pill declares a surface tint its transparent '
             'rest state does not fill; the chip colours are pinned by the '

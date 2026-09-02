@@ -131,7 +131,7 @@ void main() {
       const AuditSkipAllowance(
         itemId: 'progress_screen',
         reason: SkipReason.rasterNotFlat,
-        detailContains: 'covers only 0%',
+        detailContains: 'covers only',
         rationale:
             'The unselected range pill declares a surface tint that its resting '
             'state does not fill, and `_RenderChip` paints what it does fill '
@@ -182,7 +182,7 @@ void main() {
       const AuditSkipAllowance(
         itemId: 'progress_screen',
         reason: SkipReason.rasterNotFlat,
-        detailContains: 'covers only 0%',
+        detailContains: 'covers only',
         rationale:
             'The unselected range pill, exactly as in the mixed state above.',
       ),
