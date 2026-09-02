@@ -643,7 +643,9 @@ class _MxCardState extends State<MxCard> {
     final fill = _fillColor(context, scheme);
     final restingEdge = _restingEdgeColor(context);
     final border = _isFocusVisible
-        ? Border.fromBorderSide(AppInteractionStates.focusRing(context.colors))
+        ? Border.fromBorderSide(
+            AppInteractionStates.focusIndicator(context.colors),
+          )
         : Border.all(color: restingEdge ?? fill);
     final decoration = BoxDecoration(
       color: fill,

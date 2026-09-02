@@ -62,7 +62,7 @@ void main() {
       };
 
       test('clears 3:1 on every ground it can land on', () {
-        final ring = AppInteractionStates.focusRing(scheme).color;
+        final ring = AppInteractionStates.focusIndicator(scheme).color;
 
         for (final entry in grounds.entries) {
           expect(
@@ -106,7 +106,7 @@ void main() {
         // group below. These three sit on a page, a card or a pill's own fill,
         // where the token clears 3:1; the filled button sits on the accent,
         // where the same token measures 1.02:1.
-        final expected = AppInteractionStates.focusRing(scheme);
+        final expected = AppInteractionStates.focusIndicator(scheme);
 
         final chip = (theme.chipTheme.side! as WidgetStateBorderSide).resolve(
           <WidgetState>{WidgetState.focused},
@@ -141,7 +141,7 @@ void main() {
       test('the ring is distinguishable from the resting border', () {
         // A ring that clears 3:1 against the page can still be invisible as a
         // *change* if it lands on the same colour the control already had.
-        final ring = AppInteractionStates.focusRing(scheme).color;
+        final ring = AppInteractionStates.focusIndicator(scheme).color;
 
         expect(
           ring,

@@ -92,17 +92,20 @@ SwitchThemeData buildSwitchTheme(
 
     return scheme.surfaceContainerHighest;
   }),
+  // `_SwitchDefaultsM3.trackOutlineColor`'s own order: selected, then disabled,
+  // then the role. **No focus branch, and removing the one that was here is the
+  // point of M100.23.** It read focus first and returned `primary`, on the
+  // argument that a focused *on* switch still has to show where the keyboard
+  // is — which is true, and was answered in the wrong slot. The outline is the
+  // switch's canonical boundary role; a focused-on switch was being drawn with
+  // a boundary M3 says should not exist, in a colour that means something else.
+  //
+  // The keyboard cue is `overlayColor` below — `AppInteractionStates.controlOverlay`
+  // washes `primary` at `AppStateOpacity.focus` around the thumb, which is
+  // where `_SwitchDefaultsM3.overlayColor` puts it too.
   trackOutlineColor: WidgetStateProperty.resolveWith((states) {
-    // Focus draws the ring in the track's outline slot, because
-    // `SwitchThemeData` has no other. Same colour and same weight as every
-    // other focus ring in the app; only the shape it follows differs. It is
-    // read before `selected` on purpose — a focused *on* switch still has to
-    // show where the keyboard is, and M3's transparent-when-selected answer
-    // would swallow the ring.
-    if (states.contains(WidgetState.focused)) return scheme.primary;
-    if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
-    // Transparent once on, per `_SwitchDefaultsM3.trackOutlineColor`.
     if (states.contains(WidgetState.selected)) return Colors.transparent;
+    if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
 
     return scheme.outline;
   }),
@@ -176,10 +179,12 @@ CheckboxThemeData buildCheckboxTheme(
 
     return scheme.onPrimary;
   }),
+  // Disabled, then selected, then the interaction inks — `_CheckboxDefaultsM3
+  // .side`'s order exactly. **Focus used to be read first**, so a ticked box
+  // that had keyboard focus drew a `primary` ring where M3 draws no edge at
+  // all: the one combination where this slot left its canonical answer, and
+  // invisible to a test that only ever asked about `{selected}` and `{}`.
   side: WidgetStateBorderSide.resolveWith((states) {
-    if (states.contains(WidgetState.focused)) {
-      return AppInteractionStates.focusRing(scheme);
-    }
     if (states.contains(WidgetState.disabled)) {
       return _boxSide(semantic.onDisabled);
     }
@@ -195,11 +200,14 @@ CheckboxThemeData buildCheckboxTheme(
       // its own: 10.02:1 on the dark card, 7.27:1 on the light one.
       return BorderSide.none;
     }
-    // M3 darkens the outline while the pointer is on it. Kept, because the
-    // overlay wash alone is 1.15:1 and the box is small enough that the edge is
-    // most of what there is to change.
+    // M3 darkens the outline under a pointer *and* under keyboard focus, to the
+    // same `onSurface` — see the pressed/hovered/focused trio in
+    // `_CheckboxDefaultsM3.side`. Focus joins them here rather than drawing a
+    // ring of its own: the edge is most of what an 18dp box has to change, and
+    // the overlay wash alone is 1.15:1.
     if (states.contains(WidgetState.pressed) ||
-        states.contains(WidgetState.hovered)) {
+        states.contains(WidgetState.hovered) ||
+        states.contains(WidgetState.focused)) {
       return _boxSide(scheme.onSurface);
     }
 

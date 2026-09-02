@@ -126,7 +126,7 @@ void main() {
 
         expect(
           trackEdge(t, focused),
-          AppInteractionStates.focusRing(t.colorScheme).color,
+          AppInteractionStates.focusIndicator(t.colorScheme).color,
           reason: '${entry.key}: the focused switch is not wearing the ring',
         );
         expect(
@@ -215,7 +215,10 @@ void main() {
         final t = entry.value;
         final side = box(t, const {WidgetState.focused});
 
-        expect(side.color, AppInteractionStates.focusRing(t.colorScheme).color);
+        expect(
+          side.color,
+          AppInteractionStates.focusIndicator(t.colorScheme).color,
+        );
         expect(side.width, AppStroke.focus);
       }
     });

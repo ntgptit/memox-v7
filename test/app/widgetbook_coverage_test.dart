@@ -34,6 +34,11 @@ void main() {
         'spinner it drives is MxConfirmDialog.isSubmitting, which that entry '
         'already has a knob for. What it owns is the close policy and the '
         'fire-once transition, which a catalogue page cannot show.',
+    'MxFocusRing':
+        'a foregroundDecoration and no layout — it shows nothing until a '
+        'descendant takes keyboard focus, which a catalogue page cannot '
+        'arrange. What it owns is asserted in mx_pill_button_focus_test.dart, '
+        'which reaches it with a real Tab.',
     'MxFormHost':
         'a showModalBottomSheet host that returns its child untouched. What it '
         'owns is the keyboard inset and the close-on-transition rule — '

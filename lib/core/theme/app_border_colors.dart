@@ -76,7 +76,7 @@ abstract final class AppBorderColors {
   /// on `surface` — it sits on [surfaceSelectedLight]. On that ground `#6E6ECE`
   /// measures **3.72:1**, and the dark pair **3.21:1** on `#332F58`.
   ///
-  /// **Why not `primary` or `focusRing` themselves.** Today the ring is told
+  /// **Why not `primary` itself.** Today the ring is told
   /// apart from the selected edge by *hue* alone: `#4E5468` and `#4141C0` are
   /// **1.02:1** apart in luminance. Give the edge the brand hue and that
   /// distinction is gone, so these two are picked to differ from the ring by
@@ -106,7 +106,8 @@ abstract final class AppBorderColors {
 
   static const Color borderSelectedLight = Color(0xFF6E6ECE);
 
-  /// See [borderSelectedLight]. Dimmer than `focusRingDark` on purpose.
+  /// See [borderSelectedLight]. Dimmer than the focus indicator on purpose —
+  /// that ring is `scheme.primary` at [AppStroke.focus].
   static const Color borderSelectedDark = Color(0xFF7C79C8);
 
   /// The hairline a panel wears when it is the screen's *answer* rather than

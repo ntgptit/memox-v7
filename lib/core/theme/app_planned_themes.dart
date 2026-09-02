@@ -171,14 +171,16 @@ SegmentedButtonThemeData buildSegmentedButtonTheme(
       return scheme.onSurface;
     }),
     overlayColor: AppInteractionStates.controlOverlay(scheme),
+    // `_SegmentedButtonDefaultsM3.side` has two answers and neither is a focus
+    // ring: disabled, then `outline`. The focus branch that stood here returned
+    // `primary`, so tabbing onto a segment replaced the control's boundary role
+    // — removed at M100.23. The keyboard cue is `overlayColor` above, which is
+    // where M3 puts it.
     side: WidgetStateProperty.resolveWith((states) {
-      if (states.contains(WidgetState.focused)) {
-        return AppInteractionStates.focusRing(scheme);
+      if (states.contains(WidgetState.disabled)) {
+        return BorderSide(color: semantic.disabledSurface);
       }
 
-      // `scheme.outline`, which is the value `borderControl` was already
-      // aliasing — `_SegmentedButtonDefaultsM3.side` names the role, so the
-      // theme now says it in the same word.
       return BorderSide(color: scheme.outline);
     }),
     shape: WidgetStatePropertyAll<OutlinedBorder>(

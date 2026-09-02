@@ -166,10 +166,16 @@ void main() {
       // * `MxDialogMetrics` is two constants and one arithmetic expression —
       //   there is nothing to lay out. What reads them is asserted where it
       //   matters, in `mx_button_pair_test.dart` and `mx_form_dialog_test.dart`.
+      // * `MxFocusRing` adds a `foregroundDecoration` and no layout at all —
+      //   deliberately, since a ring that changed its child's size would move
+      //   the page every time focus arrived. It has nothing to show until a
+      //   descendant is focused, which a static specimen cannot arrange;
+      //   `mx_pill_button_focus_test.dart` reaches it with a real Tab instead.
       expect(files.difference(covered), <String>{
         'MxAsyncConfirmDialog',
         'MxAsyncView',
         'MxBreadcrumbStep',
+        'MxFocusRing',
         'MxDialogMetrics',
         'MxDialogTone',
         'MxFailureLabelsWidget',

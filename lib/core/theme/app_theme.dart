@@ -471,7 +471,7 @@ ThemeData _buildTheme(
             // modes, where WCAG 1.4.11 asks 3:1 of a focus indicator.
             side: WidgetStateProperty.resolveWith((states) {
               if (!states.contains(WidgetState.focused)) return null;
-              return AppInteractionStates.focusRing(scheme);
+              return AppInteractionStates.focusIndicator(scheme);
             }),
           ),
     ),
@@ -583,17 +583,26 @@ ThemeData _buildTheme(
         // not exist on a phone; the grab does, and until now it looked exactly
         // like the rest.
         //
-        // **The resting value is `onSurfaceVariant`, which is
-        // `_BottomSheetDefaultsM3.dragHandleColor`.** It read `outline` until
-        // M100.22, with `onSurfaceVariant` held back as the grabbed state —
-        // which is M3's resting answer used as an emphasis, so the handle sat
-        // one step quieter than Material draws it and the emphasis only
-        // restored the default. Resting is M3's now and the grab goes up to
-        // `onSurface`: the same ladder, one rung higher, no new token and no
-        // paint-time alpha (AD-14 §1 wants a known ground pre-composed).
+        // **The role is `onSurfaceVariant` in every state, and the grab is a
+        // state layer over it rather than a second role.**
+        // `_BottomSheetDefaultsM3.dragHandleColor` is that role and does not
+        // vary; the SDK still resolves this slot against states, which is the
+        // sanctioned place to put feedback — but feedback is a layer, not a
+        // different meaning.
+        //
+        // It read `outline` until M100.22 (M3's resting answer held back as an
+        // emphasis), then `onSurface` under the grab, which M100.23 caught as
+        // the same bug class as the four resolvers above: an interaction state
+        // moving a slot off its canonical role. The grab now blends `onSurface`
+        // at `AppStateOpacity.pressed` into the role itself — pre-composed
+        // against a known ground, because AD-14 §1 forbids paint-time alpha —
+        // so the handle firms up without ever claiming to be a different token.
         if (states.contains(WidgetState.dragged) ||
             states.contains(WidgetState.hovered)) {
-          return scheme.onSurface;
+          return Color.alphaBlend(
+            scheme.onSurface.withValues(alpha: AppStateOpacity.pressed),
+            scheme.onSurfaceVariant,
+          );
         }
 
         return scheme.onSurfaceVariant;

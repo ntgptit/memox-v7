@@ -15,20 +15,30 @@ import 'package:memox/core/theme/app_theme.dart';
 /// them equal was a house rule holding three components off their own defaults,
 /// and the suite would have failed anyone who corrected them.
 ///
-/// **Every expectation here is `expect(slot, scheme.someRole)` — identity, not
-/// a hex and not a ratio.** That is deliberate and it is the contract:
+/// **What this file actually proves, and what it does not.** Every expectation
+/// is `expect(slot, scheme.someRole)`, which compares the *resolved colour* —
+/// `scheme.someRole` evaluates to a `Color` like any other. That is a real
+/// check and it is not an identity guard, because two roles can carry one
+/// value: in this palette `surfaceContainerHighest` and `secondaryContainer`
+/// are the same `#332F58` in dark, so a switch re-pointed from one to the other
+/// passes every assertion here. Demonstrated, not assumed — the fault injection
+/// is recorded in the M100.23 WBS entry.
 ///
-/// * a hex pin passes when a component is re-pointed at a different role that
-///   happens to carry the same value today;
-/// * a contrast pin passes for *any* role that clears the floor, which is
-///   exactly how eleven slots drifted onto `primaryContainer` while every gate
-///   stayed green.
+/// The identity half lives in `m3_role_binding_guard_test.dart`, which parses
+/// the theme sources and asks which role the code *names*. The two are meant to
+/// be read together: this one catches a value that drifted, that one catches a
+/// role that drifted.
 ///
-/// Contrast still has to hold, and it is asserted — in `app_theme_test.dart`,
-/// `app_palette_test.dart` and the visual audit, against the palette. That is
-/// the division this project now works to: **the role belongs to the component,
-/// the number belongs to the palette.** A pairing that fails is fixed by moving
-/// a tone, never by moving a component to a role that measures better.
+/// **And state combinations live in `m3_combined_state_test.dart`.** This file
+/// asks `{}` and `{selected}` only, which is the answer a resolver gives last —
+/// the failures were all in `{selected, focused}`, where a `focused` branch sat
+/// above the `selected` one.
+///
+/// Contrast is asserted elsewhere again — `app_theme_test.dart`,
+/// `app_palette_test.dart`, the visual audit — against the palette. That is the
+/// division this project works to: **the role belongs to the component, the
+/// number belongs to the palette.** A pairing that fails is fixed by moving a
+/// tone, never by moving a component to a role that measures better.
 ///
 /// The authority for every row below is the pinned SDK's `_XxxDefaultsM3`
 /// class, read at 3.44.8 — not the Material website and not a blog. There is no

@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.22 (năm component về role M3 canonical; hai hex palette gánh phần contrast; gỡ khái niệm selected ink chung); M100.21 (container cho bốn semantic; chip trạng thái thôi mượn role accent); M100.20 (bảy binding component về role M3; sàn độ nổi của menu bỏ theo quyết định chủ dự án); M100.19 (gỡ ba token thay thế khỏi 112 call-site, golden chứng minh không đổi pixel); M100.18 (dark `primary` đảo tone theo M3; ba token thay thế thành dẫn xuất); M100.17 (`ColorScheme` đúng 45 role M3 — gỡ `surfaceTint` khai tường minh, catalog đủ 45 swatch); M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
+| **Updated by task** | M100.23 (tổ hợp state thôi phá canonical role; guard AST khoá slot→role; luật nền tảng golden); M100.22 (năm component về role M3 canonical; hai hex palette gánh phần contrast; gỡ khái niệm selected ink chung); M100.21 (container cho bốn semantic; chip trạng thái thôi mượn role accent); M100.20 (bảy binding component về role M3; sàn độ nổi của menu bỏ theo quyết định chủ dự án); M100.19 (gỡ ba token thay thế khỏi 112 call-site, golden chứng minh không đổi pixel); M100.18 (dark `primary` đảo tone theo M3; ba token thay thế thành dẫn xuất); M100.17 (`ColorScheme` đúng 45 role M3 — gỡ `surfaceTint` khai tường minh, catalog đủ 45 swatch); M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
 | **Last updated** | 2026-09-02 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -16807,6 +16807,92 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Dependencies:** M100.21
 - **Tests required:** `m3_role_contract_test`; `app_toggle_themes_test`;
   `app_palette_test`; `css_token_parity_test`; visual audit; goldens.
+- **Checklist phases:** 7, 14.
+
+### M100.23 · Combined state thôi phá canonical role; guard chuyển từ giá trị sang binding
+
+- **Status:** done
+- **Goal:** Đóng lỗ mà M100.22 để lại. M100.22 trả năm component về role M3 và
+  ghim bằng test, nhưng test chỉ hỏi `{}` và `{selected}` — tức câu trả lời
+  **cuối** của một resolver. Mọi resolver ở đây là một chuỗi có thứ tự, nên lỗi
+  nằm ở **tổ hợp**: nhánh `focused` đặt trên nhánh `selected` làm
+  `{selected, focused}` trả về một role khác. Bốn slot đang như vậy.
+- **Scope:** `app_chip_theme.dart` (side), `app_toggle_themes.dart` (Switch
+  `trackOutlineColor`, Checkbox `side`), `app_planned_themes.dart`
+  (SegmentedButton `side`), `app_theme.dart` (drag handle),
+  `app_interaction_states.dart` (`focusRing` → `focusIndicator`);
+  `m3_role_binding_guard_test.dart` mới (AST), `m3_combined_state_test.dart`
+  mới; sửa comment lệch ở 5 file; luật nền tảng golden vào `CLAUDE.md`.
+- **Out of scope:** redesign, spacing, typography, business logic.
+- **Bốn slot rời role ở tổ hợp, và cả bốn vô hình với suite cũ:**
+
+  | Component | Slot | `{selected, focused}` trả về | M3 |
+  |---|---|---|---|
+  | ChoiceChip | `side` | ring `primary` | trong suốt |
+  | Switch | `trackOutlineColor` | `primary` | trong suốt |
+  | SegmentedButton | `side` | ring `primary` | `outline` |
+  | Checkbox | `side` | ring `primary` | width 0 |
+
+  Người dùng bàn phím tab vào một filter đang bật, một toggle đang bật, một
+  segment đang chọn hay một checkbox đã tick đều thấy control rời role của nó.
+- **Thứ tự nhánh chính là hợp đồng.** `_CheckboxDefaultsM3.side` xét `selected`
+  **trước** mọi interaction state; `_SwitchDefaultsM3.trackOutlineColor` cũng
+  vậy. Bản sửa là đặt lại thứ tự theo M3, không phải thêm điều kiện.
+- **Focus không bị xoá, nó chuyển kênh — và chip cần hẳn một layer mới.**
+  Switch và SegmentedButton dùng `overlayColor`, đúng chỗ
+  `_SwitchDefaultsM3.overlayColor` đặt. Checkbox đậm viền lên `onSurface`, cùng
+  giá trị M3 dùng cho hover/pressed. Drag handle BottomSheet đổi từ role thứ hai
+  thành **state layer pre-composed** trên chính `onSurfaceVariant` (AD-14 §1 cấm
+  alpha lúc vẽ).
+- **Chip là ngoại lệ, vì kênh còn lại của nó quá yếu.** Focus của chip nằm ở
+  *fill*, và đo được **1,15:1 sáng / 1,25:1 tối** so với fill lúc nghỉ — xa
+  ngưỡng 3:1 mà WCAG 1.4.11 đòi. Nên `MxFocusRing` ra đời: một
+  `foregroundDecoration` vẽ **quanh** child, không tham gia layout, không chạm
+  slot màu nào của Material. Vẽ ngoài chứ không inset vì `BorderSide` được vẽ
+  *bên trong* `OutlinedBorder` — đúng khuyết tật đã làm checkbox tick ra 14dp
+  trong khi hàng xóm 18dp (M100.21). Cùng lý do CSS tách `outline` khỏi `border`.
+  `mx_pill_button_focus_test.dart` kiểm bằng phím Tab thật, vì **không golden
+  nào chụp trạng thái focus**.
+- **`OutlinedButton` giữ nguyên, và đó là điểm cần nói rõ.**
+  `_OutlinedButtonDefaultsM3.side` **có** nhánh focus trả `primary` — component
+  duy nhất trong theme mà chính Material đổi role border theo focus. Nó được
+  viết thẳng thành `scheme.primary` để guard đọc được, và được assert tường minh
+  để luật mới không bị đọc thành "cấm mọi focus đổi màu".
+- **Guard cũ so *giá trị*, không so *role* — chứng minh bằng tiêm lỗi.** Đổi
+  `Switch.trackColor` từ `surfaceContainerHighest` sang `secondaryContainer`:
+  hai role này **cùng `#332F58` ở dark**, nên `m3_role_contract_test` dark
+  **pass**. `m3_role_binding_guard_test` (AST, đọc `scheme.<role>` trong cây cú
+  pháp) **đỏ**. Đó là lý do file thứ hai tồn tại chứ không phải trùng lặp.
+- **Tiêm lỗi thứ hai:** cắm lại nhánh `focused` trên `selected` của chip —
+  `m3_role_contract_test` pass **35/35**, `m3_combined_state_test` gọi tên nó ở
+  cả hai mode. Suite cũ thật sự mù với bug này.
+- **Golden: nguyên nhân đã tìm ra, và nó nằm trong chính file.**
+  `mx_components_golden_test.dart` ghi từ đầu: *"These were generated on
+  Windows; a Linux runner will produce different antialiasing."* CI chạy job
+  golden trên `windows-latest`. M100.18 vẽ lại chúng từ container Linux, nên 24
+  file đỏ — và đỏ suốt bốn commit trong khi nguyên nhân bị tìm ở palette. Luật
+  đã ghi vào `CLAUDE.md`: `test/shared/widgets/goldens/` chỉ được vẽ trên
+  Windows; phiên Linux vẽ `test/demo/` và để yên phần kia.
+- **M100.23 không dịch một pixel nào** — 303/303 golden pass ở comparison mode
+  mà không cần `--update-goldens`, vì mọi thay đổi đều ở state focus, mà golden
+  chụp trạng thái nghỉ.
+- **Editable documents:** `docs/wbs.md`, `CLAUDE.md`
+- **Output:** 5 resolver về đúng thứ tự M3; helper đổi tên
+  `focusRing`→`focusIndicator` kèm doc nói rõ chỉ dùng cho slot M3 để trống;
+  guard AST 16 binding; combined-state test 32 assertion; 5 comment lệch được
+  sửa; luật nền tảng golden.
+- **Acceptance criteria:**
+  - [x] Không tổ hợp state nào đưa component sang role khác; `{selected,
+        focused}`, `{focused}`, `{disabled, selected}` đều được assert.
+  - [x] Focus accessibility còn nguyên, nằm ở overlay/state layer/stroke.
+  - [x] Có guard nguồn khoá `slot → role expression`, đỏ cả khi hai role trùng
+        HEX — chứng minh bằng tiêm lỗi.
+  - [x] Không còn comment mô tả abstraction đã gỡ.
+  - [x] analyze 0/0, format, architecture, docs, guard, full host suite, golden
+        comparison 303/303.
+- **Dependencies:** M100.22
+- **Tests required:** `m3_role_binding_guard_test`; `m3_combined_state_test`;
+  `m3_role_contract_test`; `app_toggle_themes_test`; golden comparison.
 - **Checklist phases:** 7, 14.
 
 ## Known technical debt

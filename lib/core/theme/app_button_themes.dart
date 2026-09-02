@@ -164,7 +164,7 @@ ButtonStyle buildFilledStyle(
     // order as every other one in this file.
     if (states.contains(WidgetState.disabled)) return null;
     if (states.contains(WidgetState.focused)) {
-      return AppInteractionStates.focusRingOf(label);
+      return AppInteractionStates.focusIndicatorOf(label);
     }
 
     return null;
@@ -320,8 +320,14 @@ OutlinedButtonThemeData buildOutlinedButtonTheme(
       // replaces the hairline rather than sitting outside it, so focus costs no
       // layout — an `OutlinedBorder`'s side is painted on the shape, not added
       // to the box.
+      // **`primary`, and this one is Material's own answer rather than the
+      // app's.** `_OutlinedButtonDefaultsM3.side` resolves focus to
+      // `_colors.primary` before it falls through to `outline` — the single
+      // component in this theme whose canonical *border role* changes with
+      // focus. So it is written as the role, not routed through
+      // `AppInteractionStates`, which exists for slots M3 leaves empty.
       if (states.contains(WidgetState.focused)) {
-        return AppInteractionStates.focusRing(scheme);
+        return BorderSide(color: scheme.primary, width: AppStroke.focus);
       }
 
       // `scheme.outline`. The two names were the same value — the scheme binds

@@ -18,15 +18,15 @@ guess.
 
 | | |
 |---|---|
-| Files scanned (`lib/`, hand-written) | 701 |
-| Colour sites found | 342 |
+| Files scanned (`lib/`, hand-written) | 702 |
+| Colour sites found | 343 |
 | Violations | 24 |
 
 **By element kind**
 
 | kind | sites |
 |---|---|
-| other | 278 |
+| other | 279 |
 | background | 28 |
 | border | 16 |
 | shadow | 1 |
@@ -38,7 +38,7 @@ guess.
 |---|---|
 | shared-constant | 127 |
 | hardcoded-literal | 115 |
-| blend-source | 4 |
+| blend-source | 5 |
 | Colors-material | 14 |
 | opacity-modified-token | 16 |
 | theme-token | 66 |
@@ -63,13 +63,13 @@ guess.
 | V3 | 🟡 | `lib/core/theme/app_border_colors.dart:98` | Color(0xFFE9ECF5) | `#E9ECF5` | `#E9ECF5` | no token within ΔE-ish range — needs a new one |
 | V3 | 🟡 | `lib/core/theme/app_border_colors.dart:105` | Color(0xFF2E2A54) | `#2E2A54` | `#2E2A54` | no token within ΔE-ish range — needs a new one |
 | V3 | 🟡 | `lib/core/theme/app_border_colors.dart:107` | Color(0xFF6E6ECE) | `#6E6ECE` | `#6E6ECE` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:110` | Color(0xFF7C79C8) | `#7C79C8` | `#7C79C8` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:122` | Color(0xFFB6B6E2) | `#B6B6E2` | `#B6B6E2` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:137` | Color(0xFF6560B8) | `#6560B8` | `#6560B8` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:164` | Color(0xFF8887CE) | `#8887CE` | `#8887CE` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:169` | Color(0xFF5D65B2) | `#5D65B2` | `#5D65B2` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:218` | Color(0xFF7D7D85) | `#7D7D85` | `#7D7D85` | colorScheme.outline |
-| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:264` | Color(0xFF7D79A2) | `#7D79A2` | `#7D79A2` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:111` | Color(0xFF7C79C8) | `#7C79C8` | `#7C79C8` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:123` | Color(0xFFB6B6E2) | `#B6B6E2` | `#B6B6E2` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:138` | Color(0xFF6560B8) | `#6560B8` | `#6560B8` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:165` | Color(0xFF8887CE) | `#8887CE` | `#8887CE` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:170` | Color(0xFF5D65B2) | `#5D65B2` | `#5D65B2` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:219` | Color(0xFF7D7D85) | `#7D7D85` | `#7D7D85` | colorScheme.outline |
+| V3 | 🟡 | `lib/core/theme/app_border_colors.dart:265` | Color(0xFF7D79A2) | `#7D79A2` | `#7D79A2` | no token within ΔE-ish range — needs a new one |
 | V3 | 🟡 | `lib/core/theme/app_surface_colors.dart:28` | Color(0xFFF4F5F8) | `#F4F5F8` | `#F4F5F8` | no token within ΔE-ish range — needs a new one |
 | V3 | 🟡 | `lib/core/theme/app_surface_colors.dart:30` | Color(0xFF0A082D) | `#0A082D` | `#0A082D` | no token within ΔE-ish range — needs a new one |
 | V3 | 🟡 | `lib/core/theme/app_surface_colors.dart:45` | Color(0xFFFBFBFE) | `#FBFBFE` | `#FBFBFE` | colorScheme.surface |

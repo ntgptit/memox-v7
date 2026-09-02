@@ -154,7 +154,9 @@ class MxActionButton extends StatelessWidget {
   /// while the same `MxActionButton.secondary` two screens away had the grey
   /// control edge, and the two read as different components rather than as one
   /// button in two states. Measured on `deck_delete_confirm_light.png`: 10551
-  /// pixels of `focusRing` where every other secondary draws `borderControl`.
+  /// pixels of the focus indicator where every other secondary drew the
+  /// resting control edge. (Both were named tokens then; they are
+  /// `scheme.primary` and `scheme.outline` now.)
   ///
   /// The reason for the autofocus survives intact, because it was always about
   /// a key: a stray Enter needs a keyboard, and `FocusHighlightMode.touch`

@@ -179,26 +179,46 @@ void main() {
       }
     });
 
-    test('focus draws a ring rather than only a tint', () {
-      // WCAG 1.4.11 asks 3:1 of a focus indicator. A fill tint alone does not
-      // reach it — the same measurement that put a ring on `MxIconButton`.
+    test('the theme side never becomes the focus ring', () {
+      // **This test asserted the opposite until M100.23, and the concern behind
+      // it was right.** It required `chipTheme.side` to resolve to the ring
+      // colour under focus, because a fill tint alone measures 1.15:1 in light
+      // and 1.25:1 in dark against the resting fill — nowhere near the 3:1 WCAG
+      // 1.4.11 asks of a focus indicator.
+      //
+      // What was wrong was the slot. `side` is where `_ChoiceChipDefaultsM3`
+      // puts the chip's *identity*, so filling it with a focus colour meant a
+      // selected, focused pill silently left its Material role — and because
+      // `focused` was read before `selected`, it did so in the one combination
+      // a keyboard user is always in.
+      //
+      // The indicator moved to `MxFocusRing`, a layer of its own; the rule the
+      // side now keeps is asserted here, across every combination.
+      const combinations = <Set<WidgetState>>[
+        <WidgetState>{},
+        <WidgetState>{WidgetState.focused},
+        <WidgetState>{WidgetState.selected},
+        <WidgetState>{WidgetState.selected, WidgetState.focused},
+      ];
+
       for (final isDark in <bool>[false, true]) {
         final theme = isDark ? buildDarkTheme() : buildLightTheme();
         final side = theme.chipTheme.side;
         expect(side, isA<WidgetStateBorderSide>());
 
-        final focused = (side! as WidgetStateBorderSide).resolve(<WidgetState>{
-          WidgetState.focused,
-        });
-        final resting = (side as WidgetStateBorderSide).resolve(
-          <WidgetState>{},
-        );
+        final ring = AppInteractionStates.focusIndicator(
+          theme.colorScheme,
+        ).color;
 
-        expect(
-          focused?.color,
-          AppInteractionStates.focusRing(theme.colorScheme).color,
-        );
-        expect(focused?.width, greaterThan(resting?.width ?? 0));
+        for (final states in combinations) {
+          expect(
+            (side! as WidgetStateBorderSide).resolve(states)?.color,
+            isNot(ring),
+            reason:
+                '${isDark ? 'dark' : 'light'}: the chip theme is carrying the '
+                'focus ring in its identity slot under $states',
+          );
+        }
       }
     });
 

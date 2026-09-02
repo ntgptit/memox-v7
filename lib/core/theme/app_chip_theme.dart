@@ -156,32 +156,30 @@ ChipThemeData buildChipTheme(
   // is legible by contrast alone and the tick would shift the label sideways on
   // every change.
   showCheckmark: false,
+  // **Selected is read first, and the order is the contract rather than a
+  // style.** `_ChoiceChipDefaultsM3.side` decides on `isSelected` before it
+  // looks at anything else, so a chip that is selected *and* focused is still a
+  // selected chip. This resolver used to ask about focus first and paint a
+  // `primary` ring, which meant one state combination — the one a keyboard user
+  // is in whenever they tab onto an applied filter — silently left the
+  // canonical role. That is the bug class M100.23 exists to close: an
+  // interaction state may add feedback, it may not change what a slot *means*.
+  //
+  // Focus is not lost by removing it from here. It is carried by the fill, in
+  // `_fillFor` above, which tints the resting colour by `AppStateOpacity.focus`
+  // — and a state layer is exactly where M3 puts a chip's focus cue.
   side: WidgetStateBorderSide.resolveWith((states) {
+    if (states.contains(WidgetState.selected)) {
+      // **No edge when selected, in every combination.**
+      // `_ChoiceChipDefaultsM3.side` returns a transparent side for a selected
+      // chip whether or not it is enabled: the fill is what says "applied", and
+      // an edge in a third colour makes the pill a different shape from its
+      // unselected neighbours as well as a different colour.
+      return const BorderSide(color: Colors.transparent);
+    }
     if (states.contains(WidgetState.disabled)) {
       return BorderSide(color: disabledSurfaceTint(scheme));
     }
-    // The same ring `iconButtonTheme` and the outlined button draw, from the
-    // one definition. A pill is reachable by keyboard on the web build, which is
-    // the E2E channel, and Material's own focus cue for a chip is a fill tint
-    // this theme now owns — so without a ring the focused pill and the hovered
-    // one look alike.
-    if (states.contains(WidgetState.focused)) {
-      return AppInteractionStates.focusRing(scheme);
-    }
-    // **No ring when selected, which is `_ChoiceChipDefaultsM3.side`'s answer**
-    // (`BorderSide(color: Colors.transparent)` once selected): the fill is what
-    // says "applied", and an edge in a *third* colour makes the pill a
-    // different shape from its unselected neighbours as well as a different
-    // colour.
-    //
-    // It drew `scheme.primary` from the 2026-08-20 review, and that ring was
-    // load-bearing only because the fill underneath it was not: `#E4E6EC`
-    // stepped 7.39 L\* off `surface`. With the tone corrected at M100.22 the
-    // fill steps 10.50 and carries the state alone, which is what M3 assumes.
-    if (states.contains(WidgetState.selected)) {
-      return const BorderSide(color: Colors.transparent);
-    }
-
     // `outlineVariant`, which is what `borderSubtle` had been aliasing — the
     // two are the same value, and M3 names this slot the decorative one.
     return BorderSide(color: scheme.outlineVariant);

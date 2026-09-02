@@ -149,7 +149,7 @@ void main() {
         final theme = isDark ? buildDarkTheme() : buildLightTheme();
         expect(
           borderOf(tester).color,
-          AppInteractionStates.focusRing(theme.colorScheme).color,
+          AppInteractionStates.focusIndicator(theme.colorScheme).color,
         );
         expect(
           tester.getRect(find.byType(MxCard)),

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_icon_size.dart';
+import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
+import 'mx_focus_ring.dart';
 
 /// A selectable pill: the app's control for switching between a small, fixed set
 /// of views of the same content.
@@ -75,39 +77,50 @@ class MxPillButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final pressed = onPressed;
 
-    return ChoiceChip(
-      // `semanticsLabel` on the Text rather than a `Semantics` wrapper around the
-      // chip. Wrapping was tried and is wrong twice over: `excludeSemantics` drops
-      // the chip's tap action along with its label, and without it the reader
-      // announces the abbreviation *and* the expansion. Relabelling the child
-      // leaves Material's own button and selected flags exactly where they were.
-      // **The icon rides in the label, not in `avatar`.** Material reserves a
-      // fixed leading box for an avatar and centres the glyph in it, so a 16px
-      // icon came out 3 further from the edge than the 12 the theme asks for and
-      // 10 from its label rather than 8 — numbers that belong to `RawChip`'s
-      // internals, not to this design. Composed here, the gap is the gap.
-      //
-      // Nothing is lost by the move: the icon is decorative, the label is what a
-      // screen reader announces, and `semanticsLabel` still rides the `Text`.
-      label: _Content(icon: icon, label: label, semanticLabel: semanticLabel),
-      // **One rung below the chip theme, on purpose.** `chipTheme` sets
-      // `label-lg` (14), which is right for the card list's filter pills — they
-      // carry counts a reader scans. These two sit in a deck list beside the
-      // Study button on every row, and that button is `label-md` (12); two
-      // controls of the same height in one list reading at two sizes is what
-      // makes a toolbar look assembled rather than designed.
-      //
-      // Only the metrics come from the rung. The colour stays the theme's
-      // `WidgetStateColor` — copying the rung whole would replace it with a flat
-      // colour and take the disabled and selected states with it, the same trap
-      // `app_chip_theme.dart` documents for `secondaryLabelStyle`.
-      labelStyle: _labelStyle(context),
-      selected: isSelected,
-      onSelected: pressed == null ? null : (_) => pressed(),
-      // Padded rather than shrinkWrap: the pill paints at [_height] and the
-      // guideline minimum for a finger is 48, so the target is grown around a
-      // shape that stays the size the design asks for.
-      materialTapTargetSize: MaterialTapTargetSize.padded,
+    // **The focus ring is a layer around the chip, not a colour on it.**
+    // `ChipThemeData.side` carries the chip's *identity* — `outlineVariant`
+    // unselected, transparent selected, both from `_ChoiceChipDefaultsM3` — and
+    // resolving it to `primary` on focus put a selected, focused pill on a role
+    // it has no business wearing (M100.23). The wash in `_fillFor` stays and is
+    // not enough on its own: 1.15:1 in light, 1.25:1 in dark, against the 3:1
+    // WCAG 1.4.11 asks. `MxFocusRing` supplies the rest without touching a
+    // Material colour slot.
+    return MxFocusRing(
+      borderRadius: BorderRadius.circular(AppRadius.pill),
+      child: ChoiceChip(
+        // `semanticsLabel` on the Text rather than a `Semantics` wrapper around the
+        // chip. Wrapping was tried and is wrong twice over: `excludeSemantics` drops
+        // the chip's tap action along with its label, and without it the reader
+        // announces the abbreviation *and* the expansion. Relabelling the child
+        // leaves Material's own button and selected flags exactly where they were.
+        // **The icon rides in the label, not in `avatar`.** Material reserves a
+        // fixed leading box for an avatar and centres the glyph in it, so a 16px
+        // icon came out 3 further from the edge than the 12 the theme asks for and
+        // 10 from its label rather than 8 — numbers that belong to `RawChip`'s
+        // internals, not to this design. Composed here, the gap is the gap.
+        //
+        // Nothing is lost by the move: the icon is decorative, the label is what a
+        // screen reader announces, and `semanticsLabel` still rides the `Text`.
+        label: _Content(icon: icon, label: label, semanticLabel: semanticLabel),
+        // **One rung below the chip theme, on purpose.** `chipTheme` sets
+        // `label-lg` (14), which is right for the card list's filter pills — they
+        // carry counts a reader scans. These two sit in a deck list beside the
+        // Study button on every row, and that button is `label-md` (12); two
+        // controls of the same height in one list reading at two sizes is what
+        // makes a toolbar look assembled rather than designed.
+        //
+        // Only the metrics come from the rung. The colour stays the theme's
+        // `WidgetStateColor` — copying the rung whole would replace it with a flat
+        // colour and take the disabled and selected states with it, the same trap
+        // `app_chip_theme.dart` documents for `secondaryLabelStyle`.
+        labelStyle: _labelStyle(context),
+        selected: isSelected,
+        onSelected: pressed == null ? null : (_) => pressed(),
+        // Padded rather than shrinkWrap: the pill paints at [_height] and the
+        // guideline minimum for a finger is 48, so the target is grown around a
+        // shape that stays the size the design asks for.
+        materialTapTargetSize: MaterialTapTargetSize.padded,
+      ),
     );
   }
 }

@@ -15,8 +15,9 @@ import 'app_stroke.dart';
 /// **Focus changes the border's COLOUR, not its weight.** Material's default
 /// goes 1px -> 2px on focus, which makes the field jump and nudges anything
 /// laid out beside it; keeping the stroke at [AppStroke.input] in every state
-/// and moving the hue to `focusRing` is the difference between a field
-/// answering and a field shouting.
+/// and moving the hue to `scheme.primary` is the difference between a field
+/// answering and a field shouting. (`focusRing` was the token that stood there
+/// until M100.19 retired it; the role carries the job now.)
 InputDecorationTheme buildInputDecorationTheme(
   ColorScheme scheme,
   AppSemanticColors semantic,

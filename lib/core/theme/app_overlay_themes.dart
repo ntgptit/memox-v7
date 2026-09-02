@@ -40,17 +40,14 @@ Color modalBarrierColor(ColorScheme scheme) => scheme.scrim.withValues(
 
 /// Spinners — `MxLoadingState`, and a button mid-submit.
 ///
-/// **`focusRing`, not `primary`, and declaring this is what found out why.**
-/// Material's default for a progress indicator is `colorScheme.primary`, so that
-/// is what the app was already painting. Measured against the surface it spins
-/// on, dark `primary` scores **2.81:1** — under the 3.0 floor a graphic needs.
-/// The value was never chosen for this job: `primaryDark` is held at a luminance
-/// that keeps a filled button from becoming the brightest thing on a navy page,
-/// which is the opposite of what a spinner wants.
-///
-/// `focusRing` is the same hue at the intensity meant to pull attention — 5.36:1
-/// in dark, 7.41:1 in light. It is what a focus ring and a spinner have in
-/// common: both say *this, now*.
+/// **`primary`, which is Material's own answer — and the history of how it
+/// stopped being one is why this paragraph is long.** Declaring the slot found
+/// that dark `primary` scored **2.81:1** against the surface it spins on, under
+/// the 3.0 a graphic needs, because `primaryDark` was then a fill tone held down
+/// so a filled button could not become the brightest thing on a navy page. The
+/// answer taken at the time was a separate `focusRing` token; the answer taken
+/// at M100.18 was to invert the tone, and the role now reads **10.01:1** on the
+/// dark card. `focusRing` was retired with the reason for it.
 ProgressIndicatorThemeData buildProgressIndicatorTheme(ColorScheme scheme) =>
     ProgressIndicatorThemeData(
       color: scheme.primary,

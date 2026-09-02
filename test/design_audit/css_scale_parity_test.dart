@@ -7,6 +7,7 @@ import 'package:memox/core/theme/app_elevation.dart';
 import 'package:memox/core/theme/app_icon_size.dart';
 import 'package:memox/core/theme/app_radius.dart';
 import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/core/theme/app_interaction_states.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/core/theme/app_text_styles.dart';
 import 'package:memox/core/theme/app_typography.dart';
@@ -123,10 +124,13 @@ void main() {
         CssTokens.number('elevation.css', '--border-input'),
       );
 
-      final focusRing = (light.chipTheme.side! as WidgetStateBorderSide)
-          .resolve(<WidgetState>{WidgetState.focused});
+      // Read from the ring's one definition rather than off a component.
+      // This used to resolve `chipTheme.side` under focus, which worked only
+      // while the chip was carrying the ring in its identity slot — the
+      // arrangement M100.23 ended. A width read from a component measures
+      // whichever slot that component happens to use today.
       expect(
-        focusRing?.width,
+        AppInteractionStates.focusIndicator(light.colorScheme).width,
         CssTokens.number('elevation.css', '--border-focus'),
       );
 
