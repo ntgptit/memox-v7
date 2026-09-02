@@ -48,10 +48,9 @@ enum MatchTileState {
 /// exactly as well while the board stays still.
 ///
 /// **Colours come from `ColorScheme` and `AppSemanticColors`, never from this
-/// file.** Selected is `primaryAccent` rather than `primary`: it is the variant
-/// this app keeps legible *as a label on a surface*, which is what the tile now
-/// needs — `primary` is held below the card's headline so a filled CTA never
-/// outshines it, and reads 3.33:1 as bare text on the dark page. Wrong is
+/// file.** Selected is `primary`, which the tile needs *as a label on a
+/// surface*. That was not possible while the dark tone was a fill tone reading
+/// 3.33:1 as bare text on the page; since M100.18 it reads 11.36:1. Wrong is
 /// `danger`, never a second red. Paired is `success`, and only because it means
 /// exactly what `success` means: this answer was right. It is not the mode's
 /// colour and not decoration (§7.8). The handout calls that role `mastery`; this

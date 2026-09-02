@@ -79,7 +79,7 @@ void main() {
         light.colorScheme.surface,
         reason: 'a field being typed into stops being a well in the page',
       );
-      expect(decorationOf(tester).border!.top.color, semantic.focusRing);
+      expect(decorationOf(tester).border!.top.color, light.colorScheme.primary);
     });
 
     testWidgets('the border is there at rest, so focus costs no layout', (
@@ -130,7 +130,7 @@ void main() {
       expect(paintedDecorationOf(tester).color, light.colorScheme.surface);
       expect(
         paintedDecorationOf(tester).border!.top.color,
-        semantic.focusRing,
+        light.colorScheme.primary,
         reason: 'the border did not reach its focused hue',
       );
     });

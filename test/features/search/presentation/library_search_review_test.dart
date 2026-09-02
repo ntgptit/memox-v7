@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_stroke.dart';
+import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/features/search/domain/models/search_result_model.dart';
 import 'package:memox/features/search/domain/models/search_page_model.dart';
 import 'package:memox/features/search/domain/models/search_query_model.dart';
@@ -156,10 +156,7 @@ void main() {
     final BoxDecoration decoration = box.decoration as BoxDecoration;
 
     expect(decoration.border?.top.width, AppStroke.focus);
-    expect(
-      decoration.border?.top.color,
-      const AppSemanticColors.light().focusRing,
-    );
+    expect(decoration.border?.top.color, buildLightTheme().colorScheme.primary);
   });
 
   group('the field never states a count it cannot stand behind', () {

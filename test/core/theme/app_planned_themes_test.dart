@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_elevation.dart';
-import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_theme.dart';
 
 import '../../support/color_math.dart';
@@ -26,9 +25,6 @@ void main() {
 
   /// Anything that identifies a control or its state.
   const graphic = 3.0;
-
-  AppSemanticColors semanticOf(ThemeData t) =>
-      t.extension<AppSemanticColors>()!;
 
   Color resolve(WidgetStateProperty<Color?>? p, Set<WidgetState> s) =>
       p!.resolve(s)!;
@@ -128,8 +124,8 @@ void main() {
       for (final entry in themes.entries) {
         final t = entry.value;
 
-        expect(t.sliderTheme.activeTrackColor, semanticOf(t).focusRing);
-        expect(t.sliderTheme.thumbColor, semanticOf(t).focusRing);
+        expect(t.sliderTheme.activeTrackColor, t.colorScheme.primary);
+        expect(t.sliderTheme.thumbColor, t.colorScheme.primary);
       }
     });
 
@@ -177,7 +173,7 @@ void main() {
       for (final entry in themes.entries) {
         final t = entry.value;
 
-        expect(t.tabBarTheme.labelColor, semanticOf(t).primaryAccent);
+        expect(t.tabBarTheme.labelColor, t.colorScheme.primary);
         expect(
           contrast(t.tabBarTheme.labelColor!, t.colorScheme.surface),
           greaterThanOrEqualTo(text),

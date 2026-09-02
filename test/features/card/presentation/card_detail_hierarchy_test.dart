@@ -50,6 +50,10 @@ void main() {
     tester.element(find.byType(CardDetailSummaryWidget)),
   ).extension<AppSemanticColors>()!;
 
+  ColorScheme schemeOf(WidgetTester tester) => Theme.of(
+    tester.element(find.byType(CardDetailSummaryWidget)),
+  ).colorScheme;
+
   group('summary typography', () {
     testWidgets('the front is the headline rung, not the review prompt', (
       tester,
@@ -140,7 +144,7 @@ void main() {
       expect(badge, findsOneWidget);
       // The accent, and tabular figures so a two-digit box does not shift the
       // stroke beside it.
-      expect(styleOf(tester, badge).color, semanticOf(tester).primaryAccent);
+      expect(styleOf(tester, badge).color, schemeOf(tester).primary);
       expect(styleOf(tester, badge).fontFeatures, const <FontFeature>[
         FontFeature.tabularFigures(),
       ]);
@@ -184,7 +188,7 @@ void main() {
             (tester.widget<Container>(steps.at(index)).decoration!
                     as BoxDecoration)
                 .color!;
-        expect(colourAt(box - 1), semantic.primaryAccent);
+        expect(colourAt(box - 1), schemeOf(tester).primary);
         expect(
           colourAt(box == 1 ? 1 : 0),
           box == 1 ? semantic.progressTrack : semantic.progressFill,
@@ -304,7 +308,7 @@ void main() {
 
       expect(colourAt(0), semantic.progressFill);
       expect(colourAt(1), semantic.progressFill);
-      expect(colourAt(2), semantic.primaryAccent);
+      expect(colourAt(2), schemeOf(tester).primary);
       expect(colourAt(3), semantic.progressTrack);
       expect(colourAt(7), semantic.progressTrack);
 

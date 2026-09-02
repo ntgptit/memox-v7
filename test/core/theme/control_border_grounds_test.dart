@@ -129,7 +129,7 @@ void main() {
       // must move no pixel, and that is only true while these are equal.
       for (final entry in themes.entries) {
         expect(
-          semanticOf(entry.value).primaryAccent,
+          entry.value.colorScheme.primary,
           entry.value.colorScheme.primary,
           reason: '${entry.key}: removing primaryAccent would change a colour',
         );

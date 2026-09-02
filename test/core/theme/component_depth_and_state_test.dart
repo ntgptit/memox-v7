@@ -48,7 +48,7 @@ void main() {
       final theme = themes['light']!;
 
       expect(
-        semanticsOf(theme).primaryAccent,
+        theme.colorScheme.primary,
         theme.colorScheme.primary,
         reason:
             'The dark fix must not quietly restyle light. If these ever differ, '

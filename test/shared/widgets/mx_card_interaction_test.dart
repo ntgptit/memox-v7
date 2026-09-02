@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_interaction_states.dart';
-import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_spacing.dart';
 import 'package:memox/core/theme/app_stroke.dart';
 import 'package:memox/core/theme/app_theme.dart';
@@ -150,9 +149,7 @@ void main() {
         final theme = isDark ? buildDarkTheme() : buildLightTheme();
         expect(
           borderOf(tester).color,
-          AppInteractionStates.focusRing(
-            theme.extension<AppSemanticColors>()!,
-          ).color,
+          AppInteractionStates.focusRing(theme.colorScheme).color,
         );
         expect(
           tester.getRect(find.byType(MxCard)),

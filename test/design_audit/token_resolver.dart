@@ -57,7 +57,6 @@ class TokenResolver {
       'semantic.surfaceMuted': x.surfaceMuted,
       'semantic.surfaceElevated': x.surfaceElevated,
       'semantic.borderSubtle': x.borderSubtle,
-      'semantic.focusRing': x.focusRing,
       'semantic.secondaryAction': x.secondaryAction,
       'Colors.transparent': const Color(0x00000000),
       'Colors.white': const Color(0xFFFFFFFF),

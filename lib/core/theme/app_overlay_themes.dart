@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'app_elevation.dart';
-import 'app_material_roles.dart';
 import 'app_radius.dart';
 import 'app_semantic_colors.dart';
 import 'app_spacing.dart';
@@ -56,7 +55,7 @@ ProgressIndicatorThemeData buildProgressIndicatorTheme(
   ColorScheme scheme,
   AppSemanticColors semantic,
 ) => ProgressIndicatorThemeData(
-  color: semantic.focusRing,
+  color: scheme.primary,
   // Explicitly transparent rather than left to default. Material draws a
   // faint track behind a circular indicator in newer versions; on a card
   // that reads as a second ring nobody asked for.
@@ -111,9 +110,9 @@ TextSelectionThemeData buildTextSelectionTheme(
   ColorScheme scheme,
   AppSemanticColors semantic,
 ) => TextSelectionThemeData(
-  cursorColor: semantic.focusRing,
+  cursorColor: scheme.primary,
   selectionColor: scheme.primary.withValues(alpha: 0.24),
-  selectionHandleColor: semantic.focusRing,
+  selectionHandleColor: scheme.primary,
 );
 
 /// Hairlines between rows.
@@ -162,16 +161,16 @@ ScrollbarThemeData buildScrollbarTheme(ColorScheme scheme) =>
 /// gives the hour and minute a `primaryContainer` fill when selected. That is
 /// already the app's answer for a selected control — the navigation bar's
 /// indicator and the filter pills use the same pair — so it stays, and the ink
-/// on it is [selectedInk], which is the function that exists precisely because
-/// the right ink on that fill differs by brightness: 5.57:1 in light and
-/// 8.87:1 in dark, where a single token would have shipped 2.13:1 in one of
-/// them.
+/// on it is `onPrimaryContainer`, the container's own `on` role: 11.46:1 in
+/// light and 8.87:1 in dark. This used to be a function that switched role by
+/// brightness, because `primary` on that fill measured 2.13:1 in dark
+/// (M100.19).
 TimePickerThemeData buildTimePickerTheme(
   ColorScheme scheme,
   AppSemanticColors semantic,
   TextTheme texts,
 ) {
-  final selected = selectedInk(scheme);
+  final selected = scheme.onPrimaryContainer;
 
   return TimePickerThemeData(
     backgroundColor: scheme.surface,

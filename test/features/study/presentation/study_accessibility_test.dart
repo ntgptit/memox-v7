@@ -118,7 +118,7 @@ void main() {
       // The mode pill: `primaryAccent` on `surfaceMuted`, and §7.8's whole
       // argument is that this pair is the one the project already owns.
       expect(
-        contrast(semantic.primaryAccent, semantic.surfaceMuted),
+        contrast(scheme.primary, semantic.surfaceMuted),
         greaterThanOrEqualTo(_kAaBodyText),
       );
     });

@@ -65,6 +65,9 @@ void main() {
     tester.element(find.byType(MatchTileWidget)),
   ).extension<AppSemanticColors>()!;
 
+  ColorScheme schemeOf(WidgetTester tester) =>
+      Theme.of(tester.element(find.byType(MatchTileWidget))).colorScheme;
+
   Color? fillFor(WidgetTester tester) => skinOf(tester).color;
 
   testWidgets('a term is the scanned voice: titleMedium, medium, two lines', (
@@ -184,7 +187,7 @@ void main() {
         expect(fillFor(tester), isNot(scheme.error));
         expect(fillFor(tester), isNot(semantic.success));
         expect(fillFor(tester), isNot(semantic.danger));
-        expect(fillFor(tester), isNot(semantic.primaryAccent));
+        expect(fillFor(tester), isNot(scheme.primary));
       });
     }
 
@@ -215,7 +218,7 @@ void main() {
         state: MatchTileState.selected,
       );
 
-      final accent = semanticOf(tester).primaryAccent;
+      final accent = schemeOf(tester).primary;
       expect(skinOf(tester).border!.top.color, accent);
       expect(skinOf(tester).border!.top.width, AppStroke.input);
       expect(textOf(tester, term).style?.color, accent);

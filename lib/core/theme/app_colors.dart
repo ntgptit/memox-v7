@@ -123,21 +123,6 @@ abstract final class AppColors {
   /// Tone 20 at the same hue. 7.72:1 under [primaryDark].
   static const Color onPrimaryDark = Color(0xFF262670);
 
-  /// The brand hue as a LABEL rather than as a fill.
-  ///
-  /// **Now `primary` in both modes, and therefore on its way out (M100.18).**
-  /// It existed because `primaryDark` was a fill tone that measured 3.33:1 as
-  /// bare text and failed AA at label size, so a brand-coloured label had to
-  /// reach for a brighter indigo. Since dark inverted to tone 80, `primary`
-  /// itself measures 10.02:1 on the card and 11.36:1 on the page — the very
-  /// thing this token was introduced to supply.
-  ///
-  /// Kept as a derivation for exactly one release so the palette change and
-  /// the 46 call-site renames are two reviewable diffs rather than one. It
-  /// resolves to the same colour either way, so removing it moves no pixel.
-  static const Color primaryAccentLight = primaryLight;
-  static const Color primaryAccentDark = primaryDark;
-
   /// Label of a secondary (outlined) action — *End session*, *Cancel*.
   ///
   /// Deliberately neutral (saturation under 20%) rather than the brand colour.

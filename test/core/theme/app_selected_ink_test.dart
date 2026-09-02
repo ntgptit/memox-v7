@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_material_roles.dart';
-import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_theme.dart';
 
 import '../../support/color_math.dart';
@@ -47,7 +45,7 @@ void main() {
       };
 
       test('clears 4.5:1 on every ground a selected control has', () {
-        final ink = selectedInk(scheme);
+        final ink = scheme.onPrimaryContainer;
 
         for (final entry in grounds.entries) {
           expect(
@@ -64,7 +62,7 @@ void main() {
       test('the pill and the tab resolve the same ink', () {
         // Equal colours today prove nothing about tomorrow if each component
         // computes its own — the state this function was written to end.
-        final expected = selectedInk(scheme);
+        final expected = scheme.onPrimaryContainer;
         const selected = <WidgetState>{WidgetState.selected};
 
         expect(
@@ -92,9 +90,6 @@ void main() {
     final ThemeData light = buildLightTheme();
     final ThemeData dark = buildDarkTheme();
 
-    AppSemanticColors semanticOf(ThemeData theme) =>
-        theme.extension<AppSemanticColors>()!;
-
     test('the selected ink is `onPrimaryContainer`, in both modes', () {
       // **The M3 pair, and now the only reason the two tokens differ.** This
       // group used to pin a brightness switch: `primary` in light, the M3
@@ -107,7 +102,7 @@ void main() {
         'dark': dark,
       }.entries) {
         expect(
-          selectedInk(entry.value.colorScheme),
+          entry.value.colorScheme.onPrimaryContainer,
           entry.value.colorScheme.onPrimaryContainer,
           reason:
               '${entry.key}: the selected ink drifted off the M3 pair for a '
@@ -116,13 +111,14 @@ void main() {
       }
     });
 
-    test('the accent would now pass too, so the choice is semantic', () {
-      // **The honest statement of what changed.** Merging the selected ink
-      // onto the brand accent used to be refused by a measurement — it landed
-      // under 4.5:1 on the pill in dark. It no longer does, in either mode. So
-      // the separation survives on the rule rather than on the number: a label
-      // on `primaryContainer` takes `onPrimaryContainer`, and a brand mark on
-      // a surface takes `primary`. Same grammar, different grounds.
+    test('`primary` would now pass too, so the choice is semantic', () {
+      // **The honest statement of what changed.** Inking a selected control
+      // with the brand fill used to be refused by a measurement — `primary`
+      // landed under 4.5:1 on the pill in dark, which is why a separate accent
+      // token existed at all. It no longer does, in either mode. So the choice
+      // survives on the rule rather than on the number: a label on
+      // `primaryContainer` takes `onPrimaryContainer`, and a brand mark on a
+      // plain surface takes `primary`. Same grammar, different grounds.
       //
       // Asserted rather than written down, because a number that stopped
       // forcing a decision is exactly the kind that gets quietly re-cited.
@@ -135,12 +131,12 @@ void main() {
         })!;
 
         expect(
-          contrast(semanticOf(entry.value).primaryAccent, fill),
+          contrast(entry.value.colorScheme.primary, fill),
           greaterThanOrEqualTo(textFloor),
           reason:
-              '${entry.key}: the accent no longer clears 4.5:1 on the selected '
-              'pill, so the separation is forced again and this test should '
-              'say which measurement forces it',
+              '${entry.key}: `primary` no longer clears 4.5:1 on the selected '
+              'pill, so the choice is forced again and this test should say '
+              'which measurement forces it',
         );
       }
     });

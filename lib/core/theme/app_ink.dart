@@ -33,9 +33,10 @@ enum AppInk {
   /// exactly this.
   quiet,
 
-  /// `primaryAccent` — brand as *text*. Not `primary`: the fill-level brand
-  /// measures 3.33:1 as bare text on the dark page, which is why the
-  /// text-safe alias exists.
+  /// `primary` — brand as *text*. It used to be a separate text-safe alias,
+  /// because the old dark fill tone measured 3.33:1 as bare text on the page;
+  /// since M100.18 inverted it to tone 80 the role itself reads at 11.36:1 and
+  /// the alias is gone.
   accent,
 
   /// The verdict and status family.
@@ -78,7 +79,7 @@ enum AppInk {
     return switch (this) {
       AppInk.stated => colors.onSurface,
       AppInk.quiet => colors.onSurfaceVariant,
-      AppInk.accent => semantic.primaryAccent,
+      AppInk.accent => colors.primary,
       AppInk.success => semantic.success,
       AppInk.warning => semantic.warning,
       AppInk.danger => semantic.danger,

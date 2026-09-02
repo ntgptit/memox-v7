@@ -201,7 +201,7 @@ class _TouchTargetDemo extends StatelessWidget {
             dimension: AppSpacing.minimumTouchTarget,
             child: DecoratedBox(
               decoration: BoxDecoration(
-                border: Border.all(color: context.semanticColors.focusRing),
+                border: Border.all(color: context.colors.primary),
                 borderRadius: BorderRadius.circular(AppRadius.sm),
               ),
             ),

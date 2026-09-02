@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.18 (dark `primary` đảo tone theo M3; ba token thay thế thành dẫn xuất); M100.17 (`ColorScheme` đúng 45 role M3 — gỡ `surfaceTint` khai tường minh, catalog đủ 45 swatch); M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
+| **Updated by task** | M100.19 (gỡ ba token thay thế khỏi 112 call-site, golden chứng minh không đổi pixel); M100.18 (dark `primary` đảo tone theo M3; ba token thay thế thành dẫn xuất); M100.17 (`ColorScheme` đúng 45 role M3 — gỡ `surfaceTint` khai tường minh, catalog đủ 45 swatch); M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
 | **Last updated** | 2026-09-01 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -16564,6 +16564,49 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Tests required:** năm file trên; `app_toggle_themes_test` (viền checkbox);
   goldens dark.
 - **Checklist phases:** 7, 13.
+
+### M100.19 · Gỡ ba token thay thế khỏi 112 call-site — không một pixel dịch
+
+- **Status:** done
+- **Goal:** Đóng nửa còn lại của M100.18. Palette đã đảo tone nên
+  `primaryAccent`, `focusRing` và `selectedInk` chỉ còn là dẫn xuất của
+  `primary`/`onPrimaryContainer`; gỡ hẳn chúng để repo có **một** cách gọi mỗi
+  vai trò thay vì hai cách trỏ cùng một màu.
+- **Scope:** `AppSemanticColors` (bỏ hai field khỏi constructor, hai named
+  constructor, `copyWith`, `lerp`), `AppColors.primaryAccent*`,
+  `AppBorderColors.focusRing*`, `AppMaterialRoles.selectedInk`,
+  `AppInteractionStates.focusRing` (đổi tham số sang `ColorScheme`),
+  `progressFillDark`, 27 call-site trong `lib`, ~50 trong `test`, catalogue
+  Widgetbook, bản đồ token của hai bộ audit, và 25 khối doc comment mô tả
+  token không còn tồn tại.
+- **Out of scope:** mọi giá trị màu — đây là đổi tên, không phải đổi palette.
+- **Bằng chứng là golden, không phải lời hứa.** Toàn bộ 303 golden chạy ở chế
+  độ **so sánh** (không `--update-goldens`) và phải xanh: nếu một call-site nào
+  bị trỏ sai role, ảnh sẽ đổi. Đây là lý do M100.18 và M100.19 được tách đôi —
+  một PR đổi hình có review thị giác, một PR không đổi hình có bằng chứng cơ học.
+- **Hai lỗi tự gây trong lúc refactor, cả hai do thay thế mù:** regex đổi trúng
+  **khoá chuỗi** `'semantic.focusRing'` trong bảng inventory của
+  `audit_theme_steps.dart` và `token_resolver.dart` (đúng ra là xoá dòng, vì
+  token biến mất); và `replace(..., 1)` gỡ đúng khai báo `semantic` mà một
+  group khác đang đọc trong `focus_ring_contrast_test.dart` và
+  `card_detail_timeline_style_test.dart`. Cả hai lộ ra ở analyze, không lọt tới
+  test — nhưng chúng là lý do một refactor "cơ học" vẫn phải chạy đủ gate.
+- **`AppInteractionStates.focusRing` đổi chữ ký thay vì đổi thân hàm.** Nó nhận
+  `AppSemanticColors` chỉ để đọc một field; nay nhận `ColorScheme` và đọc
+  `primary`. Chữ ký là chỗ duy nhất ép mọi call-site khai đúng thứ nó cần.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** như Scope; `--color-primary-accent` và `--color-focus-ring` của
+  kit vẫn được khai (kit là snapshot của design project, không tự ý cắt), nay
+  map sang `AppColors.primary*` trong `css_token_parity_test.dart`.
+- **Acceptance criteria:**
+  - [x] Không còn tham chiếu nào tới ba token trong `lib/`, `test/`,
+        `widgetbook/`, kể cả trong doc comment.
+  - [x] 303 golden xanh ở chế độ so sánh — không một pixel dịch.
+  - [x] analyze 0/0, format sạch, full host suite, guard, architecture, docs.
+- **Dependencies:** M100.18
+- **Tests required:** golden ở chế độ so sánh (bằng chứng chính); full host
+  suite; `css_token_parity_test`.
+- **Checklist phases:** 7.
 
 ## Known technical debt
 

@@ -81,7 +81,7 @@ void main() {
         // original was written: a palette that drifts back under the floor
         // must fail here rather than quietly re-introduce a fallback ink.
         expect(
-          contrast(semantic.primaryAccent, scheme.errorContainer),
+          contrast(scheme.primary, scheme.errorContainer),
           greaterThanOrEqualTo(kAaBodyText),
           reason:
               'the brand ink fell back under AA on the error band, so the '

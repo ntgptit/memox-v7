@@ -151,7 +151,7 @@ ButtonStyle buildFilledStyle(
   // the shared `overlayColor` washes 10% of `primary` on focus, and 10% of the
   // accent painted on the accent is the accent — so the app's primary CTA had
   // no focus indicator at all, in either mode. Nor would the usual ring fix
-  // it: `semantic.focusRing` is the same indigo family as the fill and
+  // it: `scheme.primary` is the same indigo family as the fill and
   // measures 1.02:1 on it in light. `AppInteractionStates.focusRingOf` records
   // the table; the short version is that the label colour is the one value
   // already guaranteed to read on this fill, whatever the variant.
@@ -222,10 +222,10 @@ WidgetStateProperty<Color> textLinkForeground(
 /// trailing side, and `tapTargetSize: padded` gives the finger its horizontal
 /// 48 without drawing it.
 ///
-/// **Colour is the accent, not the fill.** `ColorScheme.primary` is held dark
-/// enough on dark surfaces that it measures 3.33:1 as bare text and fails AA
-/// at label size; `AppSemanticColors.primaryAccent` is the variant that reads
-/// as a label.
+/// **Colour is `primary`.** It used to be a separate accent token, because the
+/// old dark `primary` was a fill tone measuring 3.33:1 as bare text — failing
+/// AA at label size. Since M100.18 inverted it to tone 80 it reads 10.02:1 on
+/// the card, so the role carries its own label.
 ///
 /// **Focus is an underline, and it is declared here rather than only in
 /// `MxTextButton`.** Suppressing the overlay takes the wash away, and the zero
@@ -250,7 +250,7 @@ TextButtonThemeData buildTextButtonTheme(
   final foreground = textLinkForeground(
     scheme,
     semantic,
-    accent: semantic.primaryAccent,
+    accent: scheme.primary,
   );
 
   return TextButtonThemeData(
@@ -310,7 +310,7 @@ OutlinedButtonThemeData buildOutlinedButtonTheme(
       // layout — an `OutlinedBorder`'s side is painted on the shape, not added
       // to the box.
       if (states.contains(WidgetState.focused)) {
-        return AppInteractionStates.focusRing(semantic);
+        return AppInteractionStates.focusRing(scheme);
       }
 
       // **`borderControl`, which is what this app's own `outline` role maps

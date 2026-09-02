@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'app_material_roles.dart';
 import 'app_typography.dart';
 
 /// The bottom bar's whole appearance.
@@ -23,7 +22,7 @@ NavigationBarThemeData buildNavigationBarTheme(
   iconTheme: WidgetStateProperty.resolveWith(
     (Set<WidgetState> states) => IconThemeData(
       color: states.contains(WidgetState.selected)
-          ? selectedInk(scheme)
+          ? scheme.onPrimaryContainer
           : scheme.onSurfaceVariant,
     ),
   ),
@@ -45,7 +44,7 @@ NavigationBarThemeData buildNavigationBarTheme(
         : texts.labelMedium!;
 
     return rung.copyWith(
-      color: isSelected ? selectedInk(scheme) : scheme.onSurfaceVariant,
+      color: isSelected ? scheme.onPrimaryContainer : scheme.onSurfaceVariant,
     );
   }),
   surfaceTintColor: Colors.transparent,

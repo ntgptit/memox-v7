@@ -85,18 +85,12 @@ void main() {
       AppBorderColors.borderSubtleLight,
       AppBorderColors.borderSubtleDark,
     ),
-    '--color-focus-ring': (
-      AppBorderColors.focusRingLight,
-      AppBorderColors.focusRingDark,
-    ),
+    '--color-focus-ring': (AppColors.primaryLight, AppColors.primaryDark),
     // --- brand and actions ---
     '--color-seed': (AppColors.seed, AppColors.seed),
     '--color-primary': (AppColors.primaryLight, AppColors.primaryDark),
     '--color-on-primary': (AppColors.onPrimaryLight, AppColors.onPrimaryDark),
-    '--color-primary-accent': (
-      AppColors.primaryAccentLight,
-      AppColors.primaryAccentDark,
-    ),
+    '--color-primary-accent': (AppColors.primaryLight, AppColors.primaryDark),
     '--color-primary-container': (
       AppMaterialRoles.primaryContainerLight,
       AppMaterialRoles.primaryContainerDark,

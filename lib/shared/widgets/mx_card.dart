@@ -586,6 +586,7 @@ class _MxCardState extends State<MxCard> {
   /// token for. Adding one is a palette decision, not this change.
   Color? _restingEdgeColor(BuildContext context) {
     final semantic = context.semanticColors;
+    final colors = context.colors;
     // Precedence below the focus ring: selected > the recipe's stateful edge >
     // the recipe's resting edge. "This is the picked one" outranks a state the
     // recipe painted, which outranks decoration.
@@ -593,7 +594,7 @@ class _MxCardState extends State<MxCard> {
 
     switch (widget._recessedEdge) {
       case MxCardRecessedEdge.focus:
-        return semantic.focusRing;
+        return colors.primary;
       case MxCardRecessedEdge.success:
         return semantic.success;
       case MxCardRecessedEdge.danger:
@@ -642,9 +643,7 @@ class _MxCardState extends State<MxCard> {
     final fill = _fillColor(context, scheme);
     final restingEdge = _restingEdgeColor(context);
     final border = _isFocusVisible
-        ? Border.fromBorderSide(
-            AppInteractionStates.focusRing(context.semanticColors),
-          )
+        ? Border.fromBorderSide(AppInteractionStates.focusRing(context.colors))
         : Border.all(color: restingEdge ?? fill);
     final decoration = BoxDecoration(
       color: fill,

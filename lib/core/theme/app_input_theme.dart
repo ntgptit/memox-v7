@@ -37,7 +37,7 @@ InputDecorationTheme buildInputDecorationTheme(
   // A card's edge stays subtle because a card is identified by its content.
   border: _inputBorder(semantic.borderControl),
   enabledBorder: _inputBorder(semantic.borderControl),
-  focusedBorder: _inputBorder(semantic.focusRing),
+  focusedBorder: _inputBorder(scheme.primary),
   errorBorder: _inputBorder(semantic.danger),
   focusedErrorBorder: _inputBorder(semantic.danger),
   // Solid, per MX-VIS-002 rule R7. Blended here rather than read from

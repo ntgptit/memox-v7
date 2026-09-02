@@ -100,7 +100,6 @@ Map<String, Color> auditTokensOf(ThemeData theme) {
     'semantic.surfaceMuted': x.surfaceMuted,
     'semantic.surfaceElevated': x.surfaceElevated,
     'semantic.borderSubtle': x.borderSubtle,
-    'semantic.focusRing': x.focusRing,
     'semantic.secondaryAction': x.secondaryAction,
     // Resolved component colours, not tokens. `background` is an argument to
     // the private theme builder rather than a field on the extension (the

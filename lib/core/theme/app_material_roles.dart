@@ -203,24 +203,3 @@ abstract final class AppMaterialRoles {
   /// [tertiaryFixed] and 5.45:1 on [tertiaryFixedDim], against a 4.5 floor.
   static const Color onTertiaryFixedVariant = Color(0xFF2A4A64);
 }
-
-/// The ink of a control that is **selected** — a selected pill's label, the
-/// navigation bar's active tab.
-///
-/// **`onPrimaryContainer`, in both modes, which is the pair M3 names for a
-/// label on a container fill.** This used to switch role by brightness —
-/// `primary` in light, `onPrimaryContainer` in dark — because the old dark
-/// `primary` measured 2.13:1 on the container and the visual audit failed it.
-/// Switching the *role* to satisfy a ratio is the bug class M100.18 exists to
-/// close: a component binds to the role M3 gives it, and a failing ratio is
-/// answered by moving the palette, not by moving the component.
-///
-/// Light loses nothing by joining: it was drawing `primary` at 5.57:1 on
-/// `primaryContainer` where `onPrimaryContainer` draws at 11.46:1, so the
-/// label gets more legible and keeps the brand hue — `#1B1B5C` is the same
-/// family several tones down, which is exactly what an `on*Container` role is.
-///
-/// Kept as a function for one release rather than inlined at each call site:
-/// the pill, the tab and the time picker have to agree about what "selected"
-/// looks like, and the rename is a separate, pixel-free diff.
-Color selectedInk(ColorScheme scheme) => scheme.onPrimaryContainer;

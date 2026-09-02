@@ -24,11 +24,12 @@ import 'app_stroke.dart';
 /// `docs/reviews/design-parity-checklist.md`.
 ///
 /// **One rule decides every colour below, and it is the one the radio already
-/// draws:** a *glyph* takes an ink token, a *fill* takes `primary` with its
-/// `onPrimary` partner. A selected radio is a ring and a dot — glyph, so
-/// `primaryAccent`. A selected checkbox is a filled box with a tick inside, and
-/// a selected switch track is a filled pill — fills, so `primary`. That is why
-/// these two do not follow the radio into the accent.
+/// draws:** a *glyph* and a *fill* both take `primary`, with `onPrimary` as the
+/// fill's partner. A selected radio is a ring and a dot; a selected checkbox is
+/// a filled box with a tick inside; a selected switch track is a filled pill.
+/// Glyph and fill used to part company here — the glyph needed a brighter ink
+/// because the old dark fill tone reached only 2.90:1 against the card — and
+/// M100.18 closed that by inverting the tone rather than by keeping two inks.
 
 /// The switch, as the reminder toggle and the importer's two `SwitchListTile`s
 /// render it.
@@ -92,7 +93,7 @@ SwitchThemeData buildSwitchTheme(
     // Focus draws the ring in the track's outline slot, because
     // `SwitchThemeData` has no other. Same colour and same weight as every
     // other focus ring in the app; only the shape it follows differs.
-    if (states.contains(WidgetState.focused)) return semantic.focusRing;
+    if (states.contains(WidgetState.focused)) return scheme.primary;
     if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
     if (states.contains(WidgetState.selected)) return scheme.onPrimary;
 
@@ -171,7 +172,7 @@ CheckboxThemeData buildCheckboxTheme(
   }),
   side: WidgetStateBorderSide.resolveWith((states) {
     if (states.contains(WidgetState.focused)) {
-      return AppInteractionStates.focusRing(semantic);
+      return AppInteractionStates.focusRing(scheme);
     }
     if (states.contains(WidgetState.disabled)) {
       return _boxSide(semantic.onDisabled);

@@ -12,7 +12,6 @@ import 'app_border_colors.dart';
 @immutable
 final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   const AppSemanticColors({
-    required this.primaryAccent,
     required this.streakContainer,
     required this.onStreakContainer,
     required this.progressTrack,
@@ -31,15 +30,13 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     required this.borderAccent,
     required this.borderSubtle,
     required this.borderControl,
-    required this.focusRing,
     required this.secondaryAction,
     required this.disabledSurface,
     required this.onDisabled,
   });
 
   const AppSemanticColors.light()
-    : primaryAccent = AppColors.primaryAccentLight,
-      streakContainer = AppColors.streakContainerLight,
+    : streakContainer = AppColors.streakContainerLight,
       onStreakContainer = AppColors.onStreakContainerLight,
       progressTrack = AppColors.progressTrackLight,
       progressFill = AppColors.progressFillLight,
@@ -57,14 +54,12 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       borderAccent = AppBorderColors.borderAccentLight,
       borderSubtle = AppBorderColors.borderSubtleLight,
       borderControl = AppBorderColors.borderControlLight,
-      focusRing = AppBorderColors.focusRingLight,
       secondaryAction = AppColors.secondaryActionLight,
       disabledSurface = AppColors.disabledSurfaceLight,
       onDisabled = AppColors.onDisabledLight;
 
   const AppSemanticColors.dark()
-    : primaryAccent = AppColors.primaryAccentDark,
-      streakContainer = AppColors.streakContainerDark,
+    : streakContainer = AppColors.streakContainerDark,
       onStreakContainer = AppColors.onStreakContainerDark,
       progressTrack = AppColors.progressTrackDark,
       progressFill = AppColors.progressFillDark,
@@ -82,15 +77,9 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       borderAccent = AppBorderColors.borderAccentDark,
       borderSubtle = AppBorderColors.borderSubtleDark,
       borderControl = AppBorderColors.borderControlDark,
-      focusRing = AppBorderColors.focusRingDark,
       secondaryAction = AppColors.secondaryActionDark,
       disabledSurface = AppColors.disabledSurfaceDark,
       onDisabled = AppColors.onDisabledDark;
-
-  /// The brand hue as text — a text button, a link. `ColorScheme.primary` is a
-  /// fill colour, held dark enough on dark surfaces that it fails AA as a bare
-  /// label; this is the variant that passes. See `AppColors.primaryAccentDark`.
-  final Color primaryAccent;
 
   /// The due chip's fill and its label. See `AppColors.streakContainerLight`
   /// for why the label is not the design's own value.
@@ -172,9 +161,6 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   /// The same edge stated louder, not a different one: same hue, same stroke.
   final Color borderControl;
 
-  /// Input border while focused. Focus shifts hue, never stroke width.
-  final Color focusRing;
-
   /// Label of a secondary (outlined) action.
   final Color secondaryAction;
 
@@ -189,7 +175,6 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
 
   @override
   AppSemanticColors copyWith({
-    Color? primaryAccent,
     Color? streakContainer,
     Color? onStreakContainer,
     Color? progressTrack,
@@ -208,13 +193,11 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     Color? borderAccent,
     Color? borderSubtle,
     Color? borderControl,
-    Color? focusRing,
     Color? secondaryAction,
     Color? disabledSurface,
     Color? onDisabled,
   }) {
     return AppSemanticColors(
-      primaryAccent: primaryAccent ?? this.primaryAccent,
       streakContainer: streakContainer ?? this.streakContainer,
       onStreakContainer: onStreakContainer ?? this.onStreakContainer,
       progressTrack: progressTrack ?? this.progressTrack,
@@ -233,7 +216,6 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       borderAccent: borderAccent ?? this.borderAccent,
       borderSubtle: borderSubtle ?? this.borderSubtle,
       borderControl: borderControl ?? this.borderControl,
-      focusRing: focusRing ?? this.focusRing,
       secondaryAction: secondaryAction ?? this.secondaryAction,
       disabledSurface: disabledSurface ?? this.disabledSurface,
       onDisabled: onDisabled ?? this.onDisabled,
@@ -251,7 +233,6 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     if (other is! AppSemanticColors) return this;
 
     return AppSemanticColors(
-      primaryAccent: Color.lerp(primaryAccent, other.primaryAccent, t)!,
       streakContainer: Color.lerp(streakContainer, other.streakContainer, t)!,
       onStreakContainer: Color.lerp(
         onStreakContainer,
@@ -274,7 +255,6 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       borderAccent: Color.lerp(borderAccent, other.borderAccent, t)!,
       borderSubtle: Color.lerp(borderSubtle, other.borderSubtle, t)!,
       borderControl: Color.lerp(borderControl, other.borderControl, t)!,
-      focusRing: Color.lerp(focusRing, other.focusRing, t)!,
       secondaryAction: Color.lerp(secondaryAction, other.secondaryAction, t)!,
       disabledSurface: Color.lerp(disabledSurface, other.disabledSurface, t)!,
       onDisabled: Color.lerp(onDisabled, other.onDisabled, t)!,

@@ -131,7 +131,6 @@ List<_ColorEntry> _semanticEntries(BuildContext context) {
     _ColorEntry('surfaceMuted', semantic.surfaceMuted),
     _ColorEntry('surfaceElevated', semantic.surfaceElevated),
     _ColorEntry('borderSubtle', semantic.borderSubtle),
-    _ColorEntry('focusRing', semantic.focusRing),
     _ColorEntry('secondaryAction', semantic.secondaryAction),
   ];
 }

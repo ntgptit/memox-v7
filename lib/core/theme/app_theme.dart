@@ -468,7 +468,7 @@ ThemeData _buildTheme(
             // modes, where WCAG 1.4.11 asks 3:1 of a focus indicator.
             side: WidgetStateProperty.resolveWith((states) {
               if (!states.contains(WidgetState.focused)) return null;
-              return AppInteractionStates.focusRing(semantic);
+              return AppInteractionStates.focusRing(scheme);
             }),
           ),
     ),
@@ -506,19 +506,18 @@ ThemeData _buildTheme(
       minVerticalPadding: AppSpacing.sm,
       iconColor: scheme.onSurfaceVariant,
       textColor: scheme.onSurface,
-      // **`primaryAccent`, not `primary`, because the tile it lands on is
-      // `surfaceMuted` and not the page.** In dark, `primary` (#5656C9) on
-      // `surfaceMuted` (#28254B) measures **2.45:1** — under WCAG 1.4.11's 3:1
-      // for a state, and well under 4.5:1 for the label it actually paints. The
-      // accent variant is the one derived for exactly this ground: **4.66:1**.
-      // Light is unaffected — there `primaryAccent` *is* `primary`, at 6.36:1.
+      // **`primary`, and the ground is what used to make that hard.** A
+      // selected row lands on `surfaceMuted`, not the page, and the old dark
+      // fill tone measured 2.45:1 there — under WCAG 1.4.11's 3:1 for a state
+      // and far under the 4.5:1 its label needs, which is why a second token
+      // stood here until M100.19. Tone 80 clears both grounds outright.
       //
-      // Not `primaryContainer` + `selectedInk` like NavigationBar and the
+      // Not `primaryContainer` + `onPrimaryContainer` like NavigationBar and the
       // chips, though that would also pass: a row is a wide target, and the
       // saturated fill those controls use reads as a button when it is stretched
       // across a list. The muted tile with an accented label keeps the grammar
       // — brand tint means selected — at a weight a row can carry.
-      selectedColor: semantic.primaryAccent,
+      selectedColor: scheme.primary,
       selectedTileColor: semantic.surfaceMuted,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.md),

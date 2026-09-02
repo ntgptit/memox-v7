@@ -157,7 +157,7 @@ void main() {
         tester,
       ) async {
         final expectations = <MxCardRecessedEdge, Color>{
-          MxCardRecessedEdge.focus: semantic.focusRing,
+          MxCardRecessedEdge.focus: scheme.primary,
           MxCardRecessedEdge.success: semantic.success,
           MxCardRecessedEdge.danger: semantic.danger,
         };

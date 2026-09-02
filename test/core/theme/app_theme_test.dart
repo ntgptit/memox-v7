@@ -278,7 +278,7 @@ void main() {
           ('page', entry.value.scaffoldBackgroundColor),
         ]) {
           expect(
-            contrast(semantic.focusRing, ground.$2),
+            contrast(entry.value.colorScheme.primary, ground.$2),
             greaterThanOrEqualTo(3.0),
             reason: '${entry.key}: focus ring on ${ground.$1}',
           );

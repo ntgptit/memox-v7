@@ -101,8 +101,8 @@ void main() {
         final theme = entry.value;
         final semantic = theme.extension<AppSemanticColors>()!;
 
-        expect(theme.progressIndicatorTheme.color, semantic.focusRing);
-        expect(theme.textSelectionTheme.cursorColor, semantic.focusRing);
+        expect(theme.progressIndicatorTheme.color, theme.colorScheme.primary);
+        expect(theme.textSelectionTheme.cursorColor, theme.colorScheme.primary);
         expect(theme.textSelectionTheme.selectionHandleColor, isNotNull);
         expect(theme.dividerTheme.color, semantic.borderSubtle);
         expect(theme.scrollbarTheme.thumbColor, isNotNull);

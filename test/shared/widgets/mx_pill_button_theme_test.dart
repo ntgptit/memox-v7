@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_material_roles.dart';
 import 'package:memox/core/theme/app_interaction_states.dart';
-import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
 
@@ -198,9 +196,7 @@ void main() {
 
         expect(
           focused?.color,
-          AppInteractionStates.focusRing(
-            theme.extension<AppSemanticColors>()!,
-          ).color,
+          AppInteractionStates.focusRing(theme.colorScheme).color,
         );
         expect(focused?.width, greaterThan(resting?.width ?? 0));
       }
@@ -226,7 +222,7 @@ void main() {
         // contrast floor on this theme's container.
         expect(
           states.resolve(<WidgetState>{WidgetState.selected}),
-          selectedInk(theme.colorScheme),
+          theme.colorScheme.onPrimaryContainer,
         );
         expect(
           states.resolve(<WidgetState>{}),

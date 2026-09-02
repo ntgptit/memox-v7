@@ -23,7 +23,7 @@ import 'app_semantic_colors.dart';
 /// |---|---|---|---|
 /// | `borderSubtle` | 1.45 / 2.04 | `onSurfaceVariant` — 6.41 / 7.30 | every hairline reaches 3:1 on all three grounds |
 /// | `borderControl` | 3.19 / 3.00 | `onSurfaceVariant` — 6.41 / 7.30 | already passed on a card, but 2.79 / 2.54 on a muted tile |
-/// | `borderAccent` | 1.89 / 1.45 | `primaryAccent` — 7.27 / 5.51 | the Today card's edge is decoration at 1.45 |
+/// | `borderAccent` | 1.89 / 1.45 | `primary` — 7.27 / 10.02 | the Today card's edge is decoration at 1.45 |
 /// | `onDisabled` | 2.37 / 3.20 | the same ink at 62% — 4.88 / 6.33 | see below |
 ///
 /// Light figure first, dark second, each measured against `surface`.
@@ -72,7 +72,7 @@ AppSemanticColors highContrastSemantics(
 ) => base.copyWith(
   borderSubtle: scheme.onSurfaceVariant,
   borderControl: scheme.onSurfaceVariant,
-  borderAccent: base.primaryAccent,
+  borderAccent: scheme.primary,
   onDisabled: scheme.onSurface.withValues(alpha: highContrastDisabledAlpha),
 );
 

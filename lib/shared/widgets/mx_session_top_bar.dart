@@ -246,9 +246,9 @@ class _Chip extends StatelessWidget {
               context.textStyles.sectionLabel,
               FontWeight.w600,
             ).copyWith(
-              // `primaryAccent` is the brand hue *as text* — the variant held light
-              // enough to pass AA on a dark surface, which `primary` is not.
-              color: context.semanticColors.primaryAccent,
+              // The brand hue as text. `primary` is that since M100.18 —
+              // the dark tone inverted, so the role itself passes AA here.
+              color: context.colors.primary,
             ),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,

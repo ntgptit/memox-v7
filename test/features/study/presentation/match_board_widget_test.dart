@@ -172,7 +172,7 @@ void main() {
       await tester.pump(AppDurations.normal);
 
       final theme = Theme.of(tester.element(find.text('front-a')));
-      final accent = theme.extension<AppSemanticColors>()!.primaryAccent;
+      final accent = theme.colorScheme.primary;
       final label = tester.widget<Text>(find.text('front-a'));
 
       // `primaryAccent`, not `primary`: this is a label on a surface now, and
