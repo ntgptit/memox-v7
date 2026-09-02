@@ -331,15 +331,15 @@
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.shadow": {
-      "hex": "#0A0C18",
+      "hex": "#9FA2BF",
       "opaque": true,
-      "hue": 231.42857142857144,
-      "saturation": 0.41176470588235303,
-      "chroma": 0.054901960784313725,
-      "lightnessStar": 3.553776810099002,
+      "hue": 234.37500000000003,
+      "saturation": 0.2,
+      "chroma": 0.12549019607843137,
+      "lightnessStar": 67.2569019624395,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 1.5126050420167871,
-      "hueDistanceFromDarkSurfaceFamily": 0.8035714285714448,
+      "hueDistanceFromDeclaredSeed": 1.4338235294117965,
+      "hueDistanceFromDarkSurfaceFamily": 3.7500000000000284,
       "carriesNoHue": false
     },
     "colorScheme.scrim": {

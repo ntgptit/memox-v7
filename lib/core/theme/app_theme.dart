@@ -235,9 +235,9 @@ ThemeData _buildTheme(
     // sideways on every change.
     chipTheme: buildChipTheme(scheme, semantic, texts),
 
-    filledButtonTheme: buildFilledButtonTheme(scheme, semantic),
+    filledButtonTheme: buildFilledButtonTheme(scheme, semantic, texts),
 
-    outlinedButtonTheme: buildOutlinedButtonTheme(scheme, semantic),
+    outlinedButtonTheme: buildOutlinedButtonTheme(scheme, semantic, texts),
 
     textButtonTheme: buildTextButtonTheme(scheme, semantic, texts),
 

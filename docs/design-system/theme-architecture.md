@@ -5,10 +5,10 @@
 | **Status** | active |
 | **Purpose** | Nói rõ mỗi loại quyết định thị giác sống ở tầng nào trong `lib/core/theme/`, và chiều phụ thuộc giữa các tầng |
 | **Scope** | Cấu trúc thư mục, trách nhiệm từng tầng, public API của theme. Ngoài phạm vi: *giá trị* của token (AD-14), hợp đồng component-level (`.claude/skills/flutter-theme-design/`) |
-| **Source of truth for** | Layering của `lib/core/theme/` · chiều import giữa các tầng · ranh giới public/internal của theme · bảng "cần gì thì đọc ở đâu" |
+| **Source of truth for** | Layering của `lib/core/theme/` · chiều import giữa các tầng · ranh giới public/internal của theme · bảng "cần gì thì đọc ở đâu" · ma trận dịch Tokyo → MemoX |
 | **Depends on** | `document-conventions.md` · `architecture.md` (AD-14, AD-23) |
-| **Updated by task** | M100.29 |
-| **Last updated** | 2026-09-02 |
+| **Updated by task** | M100.30 |
+| **Last updated** | 2026-09-03 |
 
 ---
 
@@ -153,7 +153,43 @@ không đọc `app_material_roles`" kiểm tra được.
 
 ---
 
-## 5. Ranh giới với các tài liệu khác
+## 5. Dịch Tokyo sang MemoX
+
+Bảng này mô tả **ý đồ thị giác → token semantic**, không phải quy đổi giá trị.
+Một giá trị Tokyo không nằm trên thang MemoX thì *snap về tier gần nhất theo ý
+đồ*, không kéo thang ra để chứa nó.
+
+| Tokyo | Ý đồ | MemoX |
+|---|---|---|
+| `primary.main` / `primary.dark` | họ accent | `ColorScheme.primary` — hex chọn theo tone qua được mọi consumer canonical (M100.28) |
+| `background.default` | nền trang | `AppSurfaceColors.background*` (không có M3 role) |
+| `paper` | mặt card | `ColorScheme.surface` |
+| `text.primary` / `text.secondary` | mực chính / mực phụ | `onSurface` / `onSurfaceVariant` |
+| `divider` | hairline | `outlineVariant` |
+| `shadows.cardSm` | card ngồi trên trang | `shadowsFor(AppElevation.card)` — float + contact |
+| `shadows.card` | panel nổi hẳn lên | `shadowsFor(AppElevation.raised)` |
+| `shadows.card` (dark) | rim thay shade | `AppColors.cardRimDark` |
+| `MuiButton.root.fontWeight: bold` | action đọc ra là action | `buttonLabelWeight` = w700 |
+| `general.borderRadius` 10px | góc mặt phẳng | `AppRadius.lg` (16) — **giữ nguyên thang MemoX** |
+| `MuiButtonBase.borderRadius` 6px | góc control | `AppRadius.md` (12) — như trên |
+| `sizeMedium` padding `8px 20px` | nút chắc, không rỗng | `AppSpacing.xl` / `md` — 20 không có trên thang |
+| chiều cao nút ~38 | dày vừa phải | `AppSizing.touchTarget` 48 — sàn a11y thắng |
+
+### Đã cân nhắc và **không** làm
+
+Ghi lại để lần sau không đề xuất lại:
+
+| Nét Tokyo | Vì sao không |
+|---|---|
+| Hạ tier radius (card 16→12, control 12→8) | Chủ dự án chọn phạm vi "shadow + density" cho lượt này; radius đụng mọi bề mặt và mọi golden. Để lượt sau |
+| `disableRipple: true` trên button | Tokyo thay ripple bằng transition màu. Android là release target và ripple là quy ước nền tảng ở đó, không phải tranh chấp Tokyo↔M3 |
+| Padding ngang 20 cho nút | 20 không có trên `AppSpacing`. Thêm bậc thứ bảy để nút chặt hơn 4dp là đúng thứ drift mà header của `AppSpacing` từ chối |
+| `MuiPaper.outlined` cũng có shadow | `MxCard.flat` cố ý không có bóng: nó dùng cho card nằm *trong* sheet, nơi bóng chồng bóng đọc thành lỗi render |
+| Chiều cao nút 33/38/44 | Dưới sàn touch target 48. Tokyo là personality, a11y là hợp đồng — hợp đồng thắng (§19 của brief) |
+
+---
+
+## 6. Ranh giới với các tài liệu khác
 
 - **Giá trị** của token — hex, tỉ lệ contrast, độ sâu tính bằng L\* — thuộc
   AD-14, không thuộc file này.

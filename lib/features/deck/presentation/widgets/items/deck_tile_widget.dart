@@ -270,7 +270,19 @@ class _DeckActionRow extends StatelessWidget {
         // and a greyed verb says you cannot do the thing when the truth is
         // there is nothing to do.
         if (hasStudy) ...<Widget>[
-          const SizedBox(width: AppSpacing.md),
+          // **One step narrower below the compact breakpoint, for the reason
+          // `deckTileGutter` is** — and the two are the same 4.9px argument.
+          // That comment records this row arriving at 320 with `textScaler` 2.0
+          // wanting more than the card had; shaving the gutter bought it back
+          // with nothing to spare, and M100.30's bolder button label (w600 →
+          // w700) then took 0.624px of the nothing. A gap is the cheapest thing
+          // in the row to give: the gauge has already been sized, the figure
+          // deliberately has no flex, and the verb is a touch target.
+          SizedBox(
+            width: AppBreakpoints.isCompact(MediaQuery.sizeOf(context).width)
+                ? AppSpacing.sm
+                : AppSpacing.md,
+          ),
           DeckStudyButtonWidget(deckId: summary.deck.id),
         ],
       ],

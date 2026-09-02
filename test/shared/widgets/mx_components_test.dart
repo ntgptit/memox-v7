@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/components/app_button_themes.dart';
 import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
@@ -149,13 +150,19 @@ void main() {
         greaterThanOrEqualTo(48),
       );
 
-      // The label steps down with the box — and through the variable-font
-      // axis, because a `fontWeight` alone reports 600 and paints 500.
+      // The label steps down in *size* with the box and keeps the button
+      // weight — and it is asserted through the variable-font axis, because a
+      // `fontWeight` alone reports one weight and paints another.
+      //
+      // Size and weight move independently on purpose: `label-md` re-weighted,
+      // not `label-lg` shrunk, because a 48-button's rung on a 40 body reads as
+      // text escaping its control — while a compact button set lighter than the
+      // standard one would read as a different kind of control (M100.30).
       final text = tester.renderObject<RenderParagraph>(find.text('Study'));
       expect(text.text.style?.fontSize, 12);
       expect(
         text.text.style?.fontVariations,
-        contains(const FontVariation('wght', 600)),
+        contains(FontVariation('wght', buttonLabelWeight.value.toDouble())),
       );
     });
 

@@ -6,6 +6,7 @@ import '../foundations/app_radius.dart';
 import '../foundations/app_semantic_colors.dart';
 import '../foundations/app_spacing.dart';
 import '../foundations/app_stroke.dart';
+import '../typography/app_typography.dart';
 
 /// The filled, outlined, text-link and destructive button styles, and the
 /// geometry the filled and outlined pair share.
@@ -35,11 +36,14 @@ Color disabledSurfaceTint(ColorScheme scheme, {Color? over}) =>
       over ?? scheme.surface,
     );
 
-/// Geometry shared by every button.
+/// Geometry and label weight shared by every button.
 ///
 /// 48 high before padding: the minimum touch target, enforced here rather than
 /// per component so no button in the app can be built below it.
-ButtonStyle buildSharedButtonStyle(ColorScheme scheme) => ButtonStyle(
+ButtonStyle buildSharedButtonStyle(
+  ColorScheme scheme,
+  TextTheme texts,
+) => ButtonStyle(
   minimumSize: const WidgetStatePropertyAll<Size>(
     Size(AppSizing.buttonMinWidth, AppSizing.touchTarget),
   ),
@@ -48,6 +52,21 @@ ButtonStyle buildSharedButtonStyle(ColorScheme scheme) => ButtonStyle(
   ),
   shape: WidgetStatePropertyAll<OutlinedBorder>(
     RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
+  ),
+  // **The label rung, one weight above the app's emphatic 600** (M100.30).
+  //
+  // Left null this fell through to `_FilledButtonDefaultsM3.textStyle`, which
+  // is `labelLarge` — so a button's label wore the same weight as a section
+  // heading and a chip, and a filled action read as a coloured box with
+  // ordinary text on it. Tokyo states `fontWeight: 'bold'` on `MuiButton.root`
+  // for every variant, and that single declaration is most of why its actions
+  // look like actions.
+  //
+  // Through `withWeight`, never a bare `fontWeight:`: both faces are variable,
+  // and a weight that does not move the `wght` axis reports 700 and paints 600
+  // — the bug `component_theme_typography_test.dart` exists for.
+  textStyle: WidgetStatePropertyAll<TextStyle>(
+    AppTypography.withWeight(texts.labelLarge!, buttonLabelWeight),
   ),
   // **Hover used to fall through to `null`**, which handed it to Material's
   // default — a wash of the *foreground* colour, so a filled button hovered
@@ -70,10 +89,12 @@ ButtonStyle buildSharedButtonStyle(ColorScheme scheme) => ButtonStyle(
 FilledButtonThemeData buildFilledButtonTheme(
   ColorScheme scheme,
   AppSemanticColors semantic,
+  TextTheme texts,
 ) => FilledButtonThemeData(
   style: buildFilledStyle(
     scheme,
     semantic,
+    texts,
     fill: scheme.primary,
     label: scheme.onPrimary,
   ),
@@ -96,9 +117,11 @@ FilledButtonThemeData buildFilledButtonTheme(
 ButtonStyle buildFilledTonalStyle(
   ColorScheme scheme,
   AppSemanticColors semantic,
+  TextTheme texts,
 ) => buildFilledStyle(
   scheme,
   semantic,
+  texts,
   fill: scheme.secondaryContainer,
   label: scheme.onSecondaryContainer,
 );
@@ -114,10 +137,11 @@ ButtonStyle buildFilledTonalStyle(
 /// inert is the failure this whole file exists to prevent.
 ButtonStyle buildFilledStyle(
   ColorScheme scheme,
-  AppSemanticColors semantic, {
+  AppSemanticColors semantic,
+  TextTheme texts, {
   required Color fill,
   required Color label,
-}) => buildSharedButtonStyle(scheme).copyWith(
+}) => buildSharedButtonStyle(scheme, texts).copyWith(
   backgroundColor: WidgetStateProperty.resolveWith((states) {
     if (states.contains(WidgetState.disabled)) return semantic.disabledSurface;
     if (states.contains(WidgetState.pressed)) {
@@ -271,10 +295,17 @@ TextButtonThemeData buildTextButtonTheme(
       // rung's size, leading and tracking on its way past
       // `TextButton.defaultStyleOf`.
       textStyle: WidgetStateProperty.resolveWith((states) {
-        final rung = texts.labelLarge;
+        // Re-weighted like every other button (M100.30). Tokyo's
+        // `fontWeight: 'bold'` sits on `MuiButton.root`, which is the base all
+        // three variants share — a text button that stayed at the rung would be
+        // the one action in the app set lighter than the others.
+        final rung = AppTypography.withWeight(
+          texts.labelLarge!,
+          buttonLabelWeight,
+        );
         if (!states.contains(WidgetState.focused)) return rung;
 
-        return rung?.copyWith(
+        return rung.copyWith(
           decoration: TextDecoration.underline,
           // Explicit, for the reason `MxTextButton` records: left null the
           // engine picks a default that does not track the state-blended
@@ -306,8 +337,9 @@ TextButtonThemeData buildTextButtonTheme(
 OutlinedButtonThemeData buildOutlinedButtonTheme(
   ColorScheme scheme,
   AppSemanticColors semantic,
+  TextTheme texts,
 ) => OutlinedButtonThemeData(
-  style: buildSharedButtonStyle(scheme).copyWith(
+  style: buildSharedButtonStyle(scheme, texts).copyWith(
     foregroundColor: WidgetStateProperty.resolveWith((states) {
       if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
 
@@ -345,3 +377,17 @@ OutlinedButtonThemeData buildOutlinedButtonTheme(
     }),
   ),
 );
+
+/// The weight every button label wears.
+///
+/// **A second emphatic weight, and the app had exactly one before** — 600, the
+/// value `AppInk`'s `isEmphasized` still means. This is not that: 600 emphasises
+/// a word inside running text, and a button is not running text. Tokyo draws the
+/// distinction the same way — `MuiButton.root` is `fontWeight: 'bold'` while
+/// `typography.button` is 600 — and it is a large part of why its actions read
+/// as pressable rather than as coloured labels.
+///
+/// One constant rather than four literals: the filled, tonal, outlined and text
+/// builders all resolve through it, and a button family set one weight apart
+/// from its siblings is exactly the drift a shared style exists to stop.
+const FontWeight buttonLabelWeight = FontWeight.w700;

@@ -118,7 +118,11 @@
   --color-inverse-primary:#A4ABE0;
 
   /* --- semantic: shadow, scrim, chrome --------------------------------- */
-  --color-shadow:#0A0C18;
+  /* A cast shadow and a modal scrim stopped being one colour at M100.30: a
+     scrim is laid over the page and must be dark, a shadow is Tokyo's
+     blue-grey haze around an object. #9FA2BF is Tokyo's shadows.card literal
+     and is already on the seed hue (234.4 against 233). */
+  --color-shadow:#9FA2BF;
   --color-scrim:#0A0C18;
   --color-web-letterbox:#6E759F;
   --color-disabled-surface:#E4E7EA;
