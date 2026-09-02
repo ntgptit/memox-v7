@@ -71,20 +71,22 @@ void main() {
           contrast(scheme.onErrorContainer, scheme.errorContainer),
           greaterThanOrEqualTo(kAaBodyText),
         );
-        // **The band's Retry, which is the pair that failed.** Asserted on the
-        // ink the button *actually resolves*, not on the token it is supposed
-        // to pick: the first version of this checked
-        // `onErrorContainer/errorContainer` a second time, which is already two
-        // assertions above and stays true however the button is styled.
-        if (brightness == Brightness.dark) {
-          expect(
-            contrast(semantic.primaryAccent, scheme.errorContainer),
-            lessThan(kAaBodyText),
-            reason:
-                'the ink it would otherwise have used — 3.72:1 here, 5.87:1 in '
-                'light, which is why only dark failed',
-          );
-        }
+        // **The band's Retry, and the pair that used to fail.** This asserted
+        // the opposite until M100.18: the brand ink measured 3.72:1 on the
+        // error band in dark (5.87:1 in light), which is why only dark had to
+        // route the button away from it. Inverting the dark accent to tone 80
+        // took it to 6.76:1, so the ground no longer forces the choice.
+        //
+        // Kept in the other direction rather than deleted, for the reason the
+        // original was written: a palette that drifts back under the floor
+        // must fail here rather than quietly re-introduce a fallback ink.
+        expect(
+          contrast(semantic.primaryAccent, scheme.errorContainer),
+          greaterThanOrEqualTo(kAaBodyText),
+          reason:
+              'the brand ink fell back under AA on the error band, so the '
+              "band's Retry is forced onto a fallback again",
+        );
         // The reset action, which is `danger` as a label rather than a fill
         // (S5) — so it is held to the text floor, not to 3:1. Measured against
         // the **page**, which is where it sits; it is not on a card.
