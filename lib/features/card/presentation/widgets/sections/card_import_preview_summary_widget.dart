@@ -169,6 +169,15 @@ class _StatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final semantic = context.semanticColors;
+    // **Status is a semantic, not an accent** (M100.21). `ready` used to draw
+    // `secondaryContainer` and `duplicate` `tertiaryContainer` — the two roles
+    // M3 reserves for balancing an interface, standing in for "good" and
+    // "noted" because the semantics had no containers. They do now.
+    //
+    // `invalid` keeps `errorContainer`: a row that failed to parse *is* an
+    // error, which is the one place on this screen where that role is meant.
+    // `blank` stays neutral — an empty row is not a status, it is an absence.
     final (
       IconData icon,
       Color background,
@@ -176,8 +185,8 @@ class _StatusChip extends StatelessWidget {
     ) = switch (status) {
       CardImportRowStatus.ready => (
         Icons.check,
-        colors.secondaryContainer,
-        AppInk.onSecondaryContainer,
+        semantic.successContainer,
+        AppInk.onSuccessContainer,
       ),
       CardImportRowStatus.invalid => (
         Icons.error_outline,
@@ -187,8 +196,8 @@ class _StatusChip extends StatelessWidget {
       CardImportRowStatus.duplicateExisting ||
       CardImportRowStatus.duplicateInFile => (
         Icons.copy_outlined,
-        colors.tertiaryContainer,
-        AppInk.onTertiaryContainer,
+        semantic.infoContainer,
+        AppInk.onInfoContainer,
       ),
       CardImportRowStatus.blank => (
         Icons.remove,

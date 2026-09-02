@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
+import 'app_material_roles.dart';
 import 'app_surface_colors.dart';
 import 'app_border_colors.dart';
 
@@ -20,6 +21,14 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     required this.warning,
     required this.danger,
     required this.info,
+    required this.successContainer,
+    required this.onSuccessContainer,
+    required this.warningContainer,
+    required this.onWarningContainer,
+    required this.infoContainer,
+    required this.onInfoContainer,
+    required this.dangerContainer,
+    required this.onDangerContainer,
     required this.borderOption,
     required this.borderDivider,
     required this.borderSelected,
@@ -44,6 +53,14 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       warning = AppColors.warningLight,
       danger = AppColors.dangerLight,
       info = AppColors.infoLight,
+      successContainer = AppColors.successContainerLight,
+      onSuccessContainer = AppColors.onSuccessContainerLight,
+      warningContainer = AppColors.warningContainerLight,
+      onWarningContainer = AppColors.onWarningContainerLight,
+      infoContainer = AppColors.infoContainerLight,
+      onInfoContainer = AppColors.onInfoContainerLight,
+      dangerContainer = AppMaterialRoles.errorContainerLight,
+      onDangerContainer = AppMaterialRoles.onErrorContainerLight,
       borderOption = AppBorderColors.borderOptionLight,
       borderDivider = AppBorderColors.borderDividerLight,
       borderSelected = AppBorderColors.borderSelectedLight,
@@ -67,6 +84,14 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       warning = AppColors.warningDark,
       danger = AppColors.dangerDark,
       info = AppColors.infoDark,
+      successContainer = AppColors.successContainerDark,
+      onSuccessContainer = AppColors.onSuccessContainerDark,
+      warningContainer = AppColors.warningContainerDark,
+      onWarningContainer = AppColors.onWarningContainerDark,
+      infoContainer = AppColors.infoContainerDark,
+      onInfoContainer = AppColors.onInfoContainerDark,
+      dangerContainer = AppMaterialRoles.errorContainerDark,
+      onDangerContainer = AppMaterialRoles.onErrorContainerDark,
       borderOption = AppBorderColors.borderOptionDark,
       borderDivider = AppBorderColors.borderDividerDark,
       borderSelected = AppBorderColors.borderSelectedDark,
@@ -95,6 +120,30 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   final Color warning;
   final Color danger;
   final Color info;
+
+  /// The filled pill a status carries, and its label.
+  ///
+  /// **Added at M100.21 because the absence was putting business meaning on
+  /// accent roles** — an import chip reading `secondaryContainer` for "ready"
+  /// and `tertiaryContainer` for "duplicate". `AppColors` holds the derivation
+  /// and the measurements.
+  final Color successContainer;
+  final Color onSuccessContainer;
+  final Color warningContainer;
+  final Color onWarningContainer;
+  final Color infoContainer;
+  final Color onInfoContainer;
+
+  /// The danger family's container pair, which **is** `error`'s.
+  ///
+  /// **A derivation rather than a value, for the reason `error` is `danger`:**
+  /// this app has one red system, and declaring a second container for it
+  /// would be the same mistake one level down. What the name buys is the call
+  /// site — an overdue chip means *late*, not *fault*, and it said
+  /// `errorContainer` only because that was the only red container there was
+  /// (M100.21).
+  final Color dangerContainer;
+  final Color onDangerContainer;
 
   /// Overdue — a review past its day (BR-161 settled that late is a *red*
   /// signal, distinct from due-today's warm one). It **is** [danger]: the
@@ -183,6 +232,14 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     Color? warning,
     Color? danger,
     Color? info,
+    Color? successContainer,
+    Color? onSuccessContainer,
+    Color? warningContainer,
+    Color? onWarningContainer,
+    Color? infoContainer,
+    Color? onInfoContainer,
+    Color? dangerContainer,
+    Color? onDangerContainer,
     Color? borderOption,
     Color? borderDivider,
     Color? borderSelected,
@@ -206,6 +263,14 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       warning: warning ?? this.warning,
       danger: danger ?? this.danger,
       info: info ?? this.info,
+      successContainer: successContainer ?? this.successContainer,
+      onSuccessContainer: onSuccessContainer ?? this.onSuccessContainer,
+      warningContainer: warningContainer ?? this.warningContainer,
+      onWarningContainer: onWarningContainer ?? this.onWarningContainer,
+      infoContainer: infoContainer ?? this.infoContainer,
+      onInfoContainer: onInfoContainer ?? this.onInfoContainer,
+      dangerContainer: dangerContainer ?? this.dangerContainer,
+      onDangerContainer: onDangerContainer ?? this.onDangerContainer,
       borderOption: borderOption ?? this.borderOption,
       borderDivider: borderDivider ?? this.borderDivider,
       borderSelected: borderSelected ?? this.borderSelected,
@@ -245,6 +310,34 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       warning: Color.lerp(warning, other.warning, t)!,
       danger: Color.lerp(danger, other.danger, t)!,
       info: Color.lerp(info, other.info, t)!,
+      successContainer: Color.lerp(
+        successContainer,
+        other.successContainer,
+        t,
+      )!,
+      onSuccessContainer: Color.lerp(
+        onSuccessContainer,
+        other.onSuccessContainer,
+        t,
+      )!,
+      warningContainer: Color.lerp(
+        warningContainer,
+        other.warningContainer,
+        t,
+      )!,
+      onWarningContainer: Color.lerp(
+        onWarningContainer,
+        other.onWarningContainer,
+        t,
+      )!,
+      infoContainer: Color.lerp(infoContainer, other.infoContainer, t)!,
+      onInfoContainer: Color.lerp(onInfoContainer, other.onInfoContainer, t)!,
+      dangerContainer: Color.lerp(dangerContainer, other.dangerContainer, t)!,
+      onDangerContainer: Color.lerp(
+        onDangerContainer,
+        other.onDangerContainer,
+        t,
+      )!,
       borderOption: Color.lerp(borderOption, other.borderOption, t)!,
       borderDivider: Color.lerp(borderDivider, other.borderDivider, t)!,
       borderSelected: Color.lerp(borderSelected, other.borderSelected, t)!,

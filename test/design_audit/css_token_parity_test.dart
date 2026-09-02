@@ -140,6 +140,33 @@ void main() {
     '--color-warning': (AppColors.warningLight, AppColors.warningDark),
     '--color-danger': (AppColors.dangerLight, AppColors.dangerDark),
     '--color-info': (AppColors.infoLight, AppColors.infoDark),
+    // The status containers (M100.21). `danger` has none because `error`
+    // already carries this family's container — the same reason the fill map
+    // above points two names at one literal.
+    '--color-success-container': (
+      AppColors.successContainerLight,
+      AppColors.successContainerDark,
+    ),
+    '--color-on-success-container': (
+      AppColors.onSuccessContainerLight,
+      AppColors.onSuccessContainerDark,
+    ),
+    '--color-warning-container': (
+      AppColors.warningContainerLight,
+      AppColors.warningContainerDark,
+    ),
+    '--color-on-warning-container': (
+      AppColors.onWarningContainerLight,
+      AppColors.onWarningContainerDark,
+    ),
+    '--color-info-container': (
+      AppColors.infoContainerLight,
+      AppColors.infoContainerDark,
+    ),
+    '--color-on-info-container': (
+      AppColors.onInfoContainerLight,
+      AppColors.onInfoContainerDark,
+    ),
     // `error` is `danger`, not a second red system — AD-05. The CSS says the
     // same thing by pointing both names at one literal.
     '--color-error': (AppColors.dangerLight, AppColors.dangerDark),

@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.20 (bảy binding component về role M3; sàn độ nổi của menu bỏ theo quyết định chủ dự án); M100.19 (gỡ ba token thay thế khỏi 112 call-site, golden chứng minh không đổi pixel); M100.18 (dark `primary` đảo tone theo M3; ba token thay thế thành dẫn xuất); M100.17 (`ColorScheme` đúng 45 role M3 — gỡ `surfaceTint` khai tường minh, catalog đủ 45 swatch); M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
+| **Updated by task** | M100.21 (container cho bốn semantic; chip trạng thái thôi mượn role accent); M100.20 (bảy binding component về role M3; sàn độ nổi của menu bỏ theo quyết định chủ dự án); M100.19 (gỡ ba token thay thế khỏi 112 call-site, golden chứng minh không đổi pixel); M100.18 (dark `primary` đảo tone theo M3; ba token thay thế thành dẫn xuất); M100.17 (`ColorScheme` đúng 45 role M3 — gỡ `surfaceTint` khai tường minh, catalog đủ 45 swatch); M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
 | **Last updated** | 2026-09-01 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -16675,6 +16675,58 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Tests required:** `component_depth_and_state_test.dart`, `app_toggle_themes_test.dart`,
   `app_overlay_themes_test.dart`, visual audit, goldens.
 - **Checklist phases:** 7.
+
+### M100.21 · Container cho bốn semantic — trạng thái nghiệp vụ thôi mượn role accent
+
+- **Status:** done
+- **Goal:** Đóng P1 của bản audit chủ dự án giao: chip trạng thái của Import
+  đang vẽ `secondaryContainer` cho "ready" và `tertiaryContainer` cho
+  "duplicate" — hai role M3 dành cho accent cân bằng giao diện, bị dùng làm chỗ
+  giữ nghĩa nghiệp vụ. Và `overdue` đang gọi `errorContainer`, tức nói "lỗi"
+  ở chỗ nó nghĩa là "trễ".
+- **Scope:** `AppColors` (12 hằng số container), `AppSemanticColors` (6 field +
+  cặp `dangerContainer` dẫn xuất), `AppInk` (4 ink mới),
+  `design_system/tokens/colors.css`, chip trạng thái Import, hai call-site
+  overdue, `css_token_parity_test`, goldens.
+- **Out of scope:** giá trị của bốn fill semantic; `warningContainer` chưa có
+  caller nào — dựng cùng lô vì bốn semantic là một họ và để lại một lỗ là cách
+  lỗ đó được lấp bằng role accent lần sau.
+- **Nguyên nhân gốc, đo được: bốn semantic có fill mà không có container.**
+  Container pair duy nhất tồn tại thuộc về `primary`, `secondary`, `tertiary`,
+  `error`. Một chip trạng thái cần nền tô kèm nhãn, nên nó với tay lấy cái gần
+  nhất. Đây đúng là hình mẫu mà M100.18 đã đóng ở tầng role: thiếu một token
+  thì component đi mượn, và chỗ mượn là bug.
+- **Dẫn xuất, không phải chọn tay, theo đúng cách container hiện có được dựng.**
+  Bốn container light hiện có tái dựng được thành tint của chính fill trên
+  `surface` ở alpha 0,127–0,171 (trung bình 0,142, sai số tái dựng 0,6–5,4/255)
+  — nên ba cái mới lấy trung bình đó. Bốn container **dark thì không** tái dựng
+  được như vậy (sai số tới 28/255, tức hand-tuned); cái chúng chia sẻ là một
+  dải: L\* 21,5–29,0 ở chroma 0,153–0,263 — nên dark đặt ở L\* 24,0, chroma
+  0,20, trên hue của chính role. Ink lấy tone mà các cặp `on*Container` hiện có
+  đang chiếm (L\* 14–23 light, 86–89 dark), cho ra 10,80–10,98:1 và 8,35:1 —
+  nằm trong dải 9,75–11,46 và 7,24–9,09 của app, thay vì gần đen mà một phép
+  tìm "cái đầu tiên đạt 4,5" sinh ra (bản đầu của tôi cho 15,06:1).
+- **`danger` không có giá trị mới, và đó là điểm của việc `error` là `danger`.**
+  `dangerContainer`/`onDangerContainer` dẫn xuất từ `AppMaterialRoles.errorContainer*`.
+  Không pixel nào đổi ở overdue; cái đổi là call-site thôi tự nhận là lỗi.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** 12 hằng số trong `AppColors`; 6 field + 2 field dẫn xuất trong
+  `AppSemanticColors`; 4 thành viên `AppInk`; 6 token trong kit CSS; chip Import
+  đọc `successContainer`/`infoContainer`; hai site overdue đọc `dangerContainer`;
+  map parity mở rộng; goldens của Import vẽ lại.
+- **Acceptance criteria:**
+  - [x] Không call-site nào còn dùng role accent (`secondary`/`tertiary`) để
+        mang trạng thái nghiệp vụ.
+  - [x] Mọi cặp container/ink mới đo trong dải của các cặp sẵn có, hue nằm
+        trong ba họ mà `color_scheme_roles_test` cưỡng chế.
+  - [x] Kit mang giá trị trước, Dart theo sau (AD-14); parity xanh.
+  - [x] `invalid` giữ `errorContainer` — một hàng parse hỏng **là** lỗi, đúng
+        chỗ duy nhất trên màn đó role ấy có nghĩa.
+  - [x] analyze 0/0, theme + design audit 319, visual audit + card/deck/study
+        2204, full host suite, goldens vẽ lại, gallery publish lại.
+- **Dependencies:** M100.20
+- **Tests required:** `css_token_parity_test`; visual audit của Import; goldens.
+- **Checklist phases:** 7, 14.
 
 ## Known technical debt
 

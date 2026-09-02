@@ -186,6 +186,48 @@ abstract final class AppColors {
   static const Color dangerLight = Color(0xFFC02B3A);
   static const Color dangerDark = Color(0xFFF2808F);
 
+  // --- Status containers ---------------------------------------------------
+  //
+  // **The four semantics had a fill and no container, and that gap is what put
+  // domain state on accent roles** (M100.21). An import row's status chip
+  // needed a filled pill with a label on it; the only container pairs that
+  // existed belonged to `primary`, `secondary`, `tertiary` and `error`, so
+  // "ready" took `secondaryContainer` and "duplicate" took `tertiaryContainer`
+  // — roles M3 defines as accents for balancing an interface, not as a place
+  // to keep business meaning.
+  //
+  // **Derived, not chosen, by the method the existing containers already use.**
+  // The four hand-tuned light containers reconstruct as a tint of their own
+  // fill over `surface` at alpha 0.127–0.171 (mean 0.142, reconstruction error
+  // 0.6–5.4 of 255); these take that mean. The dark containers do *not*
+  // reconstruct that way — the error is up to 28/255, so they were hand-placed
+  // — and what they share is a band: L\* 21.5–29.0 at chroma 0.153–0.263. So
+  // dark is placed at L\* 24.0, chroma 0.20, on each role's own hue.
+  //
+  // The inks take the tone the existing `on*Container` pairs occupy (L\* 14–23
+  // light, 86–89 dark), which lands them at 10.80–10.98:1 and 8.35:1 — inside
+  // the app's own band of 9.75–11.46 and 7.24–9.09, rather than at the
+  // near-black a bare 4.5:1 search would have produced.
+  //
+  // **`danger` gets none, and that is the point of `error` being `danger`.**
+  // `AppMaterialRoles.errorContainer*` already holds this family's container;
+  // `AppSemanticColors.dangerContainer` derives from it rather than declaring
+  // a second red, exactly as the class header refuses a second red fill.
+  static const Color successContainerLight = Color(0xFFDAE9E7);
+  static const Color successContainerDark = Color(0xFF0E412F);
+  static const Color onSuccessContainerLight = Color(0xFF003627);
+  static const Color onSuccessContainerDark = Color(0xFFBFE3D6);
+
+  static const Color warningContainerLight = Color(0xFFEDE6DC);
+  static const Color warningContainerDark = Color(0xFF453812);
+  static const Color onWarningContainerLight = Color(0xFF402A00);
+  static const Color onWarningContainerDark = Color(0xFFE4DBC1);
+
+  static const Color infoContainerLight = Color(0xFFE0E7EF);
+  static const Color infoContainerDark = Color(0xFF213B54);
+  static const Color onInfoContainerLight = Color(0xFF073053);
+  static const Color onInfoContainerDark = Color(0xFFCBDEEF);
+
   // --- Progress -----------------------------------------------------------
   //
   // **Its own family, and not the accent.** A bar drawn in `primary` sits beside

@@ -69,7 +69,17 @@ enum AppInk {
   onSecondaryContainer,
   onErrorContainer,
   onTertiaryContainer,
-  onDueContainer;
+  onDueContainer,
+
+  /// The label on a status container — the pills an import summary prints.
+  ///
+  /// `onDangerContainer` **is** [onErrorContainer]; both exist so a call site
+  /// can say which it means. A row that failed to parse is an error; a card
+  /// that is overdue is not (M100.21).
+  onSuccessContainer,
+  onWarningContainer,
+  onInfoContainer,
+  onDangerContainer;
 
   /// The colour this ink resolves to under [context]'s theme.
   Color resolve(BuildContext context) {
@@ -95,6 +105,10 @@ enum AppInk {
       AppInk.onErrorContainer => colors.onErrorContainer,
       AppInk.onTertiaryContainer => colors.onTertiaryContainer,
       AppInk.onDueContainer => semantic.onDueContainer,
+      AppInk.onSuccessContainer => semantic.onSuccessContainer,
+      AppInk.onWarningContainer => semantic.onWarningContainer,
+      AppInk.onInfoContainer => semantic.onInfoContainer,
+      AppInk.onDangerContainer => semantic.onDangerContainer,
     };
   }
 }
