@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../foundations/app_radius.dart';
+import '../../foundations/app_radius.dart';
 
 /// The safety net for a bare or third-party `Card` — no app widget renders
 /// one. `MxCard` is the canonical card and paints itself, because its

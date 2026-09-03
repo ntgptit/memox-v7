@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../foundations/app_sizing.dart';
-import '../states/app_interaction_states.dart';
-import '../foundations/app_radius.dart';
-import '../foundations/app_semantic_colors.dart';
-import '../foundations/app_spacing.dart';
-import '../foundations/app_stroke.dart';
-import '../typography/app_typography.dart';
+import '../../foundations/app_sizing.dart';
+import '../../states/app_interaction_states.dart';
+import '../../foundations/app_radius.dart';
+import '../../foundations/app_semantic_colors.dart';
+import '../../foundations/app_spacing.dart';
+import '../../foundations/app_stroke.dart';
+import '../../typography/app_typography.dart';
 
 /// The filled, outlined, text-link and destructive button styles, and the
 /// geometry the filled and outlined pair share.
@@ -76,6 +76,47 @@ ButtonStyle buildSharedButtonStyle(
   overlayColor: AppInteractionStates.controlOverlay(scheme),
 );
 
+/// The three fills a filled button is allowed to wear.
+///
+/// **An enum, because `buildFilledStyle` used to take `fill` and `label` as
+/// two `Color`s** (M100.31). That is a builder API a caller can break the
+/// semantic mapping through: any pair of colours went in, including a pair
+/// that was not a Material role at all, and nothing above the widget could
+/// see it. The builder now resolves the pair itself, so the only way to reach
+/// a filled button is to name one of the three the design system admits.
+///
+/// Each member is a canonical M3 pair, and the fill and its `on` colour travel
+/// together — passing one without the other is the mismatch this closes.
+enum MxFilledPair {
+  /// `primary` / `onPrimary` — `_FilledButtonDefaultsM3`'s own pair, and the
+  /// screen's one call to action.
+  brand,
+
+  /// `secondaryContainer` / `onSecondaryContainer` —
+  /// `_FilledTonalButtonDefaultsM3`'s pair. Emphasis above outlined and below
+  /// the brand fill; the same pair the selected pill wears, so "tinted surface
+  /// = secondary emphasis" stays one fact.
+  tonal,
+
+  /// `error` / `onError` — the destructive action. `error` is `danger` in this
+  /// palette, so this is not a second red.
+  destructive;
+
+  /// The fill, read off the scheme rather than handed in.
+  Color fillOf(ColorScheme scheme) => switch (this) {
+    MxFilledPair.brand => scheme.primary,
+    MxFilledPair.tonal => scheme.secondaryContainer,
+    MxFilledPair.destructive => scheme.error,
+  };
+
+  /// The label that travels with [fillOf].
+  Color labelOf(ColorScheme scheme) => switch (this) {
+    MxFilledPair.brand => scheme.onPrimary,
+    MxFilledPair.tonal => scheme.onSecondaryContainer,
+    MxFilledPair.destructive => scheme.onError,
+  };
+}
+
 /// The primary action: `MxActionButton`'s `primary` variant.
 ///
 /// Reads `scheme.primary` / `scheme.onPrimary` itself — it used to take the
@@ -91,13 +132,7 @@ FilledButtonThemeData buildFilledButtonTheme(
   AppSemanticColors semantic,
   TextTheme texts,
 ) => FilledButtonThemeData(
-  style: buildFilledStyle(
-    scheme,
-    semantic,
-    texts,
-    fill: scheme.primary,
-    label: scheme.onPrimary,
-  ),
+  style: buildFilledStyle(scheme, semantic, texts, pair: MxFilledPair.brand),
 );
 
 /// The tonal action: emphasis above outlined, below the brand fill.
@@ -118,15 +153,9 @@ ButtonStyle buildFilledTonalStyle(
   ColorScheme scheme,
   AppSemanticColors semantic,
   TextTheme texts,
-) => buildFilledStyle(
-  scheme,
-  semantic,
-  texts,
-  fill: scheme.secondaryContainer,
-  label: scheme.onSecondaryContainer,
-);
+) => buildFilledStyle(scheme, semantic, texts, pair: MxFilledPair.tonal);
 
-/// A filled button's colours, for any fill.
+/// A filled button's colours, for one of the three admitted pairs.
 ///
 /// Public so `MxActionButton`'s destructive variant can be the same button with
 /// a different pair rather than a second implementation. It used to reach for
@@ -135,66 +164,74 @@ ButtonStyle buildFilledTonalStyle(
 /// so a destructive button did not darken on press and, worse, stayed fully red
 /// when disabled while its label went to 38%. A button that looks armed and is
 /// inert is the failure this whole file exists to prevent.
+///
+/// [pair] rather than two `Color`s since M100.31 — see [MxFilledPair].
 ButtonStyle buildFilledStyle(
   ColorScheme scheme,
   AppSemanticColors semantic,
   TextTheme texts, {
-  required Color fill,
-  required Color label,
-}) => buildSharedButtonStyle(scheme, texts).copyWith(
-  backgroundColor: WidgetStateProperty.resolveWith((states) {
-    if (states.contains(WidgetState.disabled)) return semantic.disabledSurface;
-    if (states.contains(WidgetState.pressed)) {
-      return Color.lerp(
-        fill,
-        scheme.onSurface,
-        AppStateOpacity.filledPressedBlend,
-      );
-    }
-    // **A blend, where every other control gets an overlay.** The shared
-    // `overlayColor` washes 6% of `primary`, and 6% of the accent painted on
-    // the accent is the accent — the primary button had no visible hover at
-    // all. `.mx-btn--primary:hover` mixes toward the ink instead, and only a
-    // colour that is not already the fill can show up on it.
-    if (states.contains(WidgetState.hovered)) {
-      return Color.lerp(
-        fill,
-        scheme.onSurface,
-        AppStateOpacity.filledHoverBlend,
-      );
-    }
+  required MxFilledPair pair,
+}) {
+  final Color fill = pair.fillOf(scheme);
+  final Color label = pair.labelOf(scheme);
 
-    return fill;
-  }),
-  foregroundColor: WidgetStateProperty.resolveWith((states) {
-    if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
+  return buildSharedButtonStyle(scheme, texts).copyWith(
+    backgroundColor: WidgetStateProperty.resolveWith((states) {
+      if (states.contains(WidgetState.disabled)) {
+        return semantic.disabledSurface;
+      }
+      if (states.contains(WidgetState.pressed)) {
+        return Color.lerp(
+          fill,
+          scheme.onSurface,
+          AppStateOpacity.filledPressedBlend,
+        );
+      }
+      // **A blend, where every other control gets an overlay.** The shared
+      // `overlayColor` washes 6% of `primary`, and 6% of the accent painted on
+      // the accent is the accent — the primary button had no visible hover at
+      // all. `.mx-btn--primary:hover` mixes toward the ink instead, and only a
+      // colour that is not already the fill can show up on it.
+      if (states.contains(WidgetState.hovered)) {
+        return Color.lerp(
+          fill,
+          scheme.onSurface,
+          AppStateOpacity.filledHoverBlend,
+        );
+      }
 
-    return label;
-  }),
-  // **The focus ring, and it is drawn in [label] rather than in the ring
-  // token.** Same argument as the hover blend directly above, one state later:
-  // the shared `overlayColor` washes 10% of `primary` on focus, and 10% of the
-  // accent painted on the accent is the accent — so the app's primary CTA had
-  // no focus indicator at all, in either mode. Nor would the usual ring fix
-  // it: `scheme.primary` is the same indigo family as the fill and
-  // measures 1.02:1 on it in light. `AppInteractionStates.focusRingOf` records
-  // the table; the short version is that the label colour is the one value
-  // already guaranteed to read on this fill, whatever the variant.
-  //
-  // Null everywhere else, so the button keeps its borderless resting shape —
-  // a filled button is a fill, not a fill inside a frame.
-  side: WidgetStateProperty.resolveWith((states) {
-    // Unreachable in practice — `ButtonStyleButton` refuses focus while
-    // disabled — but stated so the resolver reads in the same disabled-first
-    // order as every other one in this file.
-    if (states.contains(WidgetState.disabled)) return null;
-    if (states.contains(WidgetState.focused)) {
-      return AppInteractionStates.focusIndicatorOf(label);
-    }
+      return fill;
+    }),
+    foregroundColor: WidgetStateProperty.resolveWith((states) {
+      if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
 
-    return null;
-  }),
-);
+      return label;
+    }),
+    // **The focus ring, and it is drawn in [label] rather than in the ring
+    // token.** Same argument as the hover blend directly above, one state later:
+    // the shared `overlayColor` washes 10% of `primary` on focus, and 10% of the
+    // accent painted on the accent is the accent — so the app's primary CTA had
+    // no focus indicator at all, in either mode. Nor would the usual ring fix
+    // it: `scheme.primary` is the same indigo family as the fill and
+    // measures 1.02:1 on it in light. `AppInteractionStates.focusRingOf` records
+    // the table; the short version is that the label colour is the one value
+    // already guaranteed to read on this fill, whatever the variant.
+    //
+    // Null everywhere else, so the button keeps its borderless resting shape —
+    // a filled button is a fill, not a fill inside a frame.
+    side: WidgetStateProperty.resolveWith((states) {
+      // Unreachable in practice — `ButtonStyleButton` refuses focus while
+      // disabled — but stated so the resolver reads in the same disabled-first
+      // order as every other one in this file.
+      if (states.contains(WidgetState.disabled)) return null;
+      if (states.contains(WidgetState.focused)) {
+        return AppInteractionStates.focusIndicatorOf(label);
+      }
+
+      return null;
+    }),
+  );
+}
 
 /// A text link's label colour, resolved per state.
 ///

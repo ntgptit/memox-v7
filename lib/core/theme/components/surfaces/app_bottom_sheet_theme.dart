@@ -1,50 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../foundations/app_elevation.dart';
-import '../foundations/app_radius.dart';
-import '../states/app_interaction_states.dart';
-import 'app_overlay_themes.dart';
-
-/// The three surfaces that appear **over** the page and then go away: the
-/// dialog, the modal bottom sheet and the snack bar.
-///
-/// One family by behaviour rather than by widget class. Each has a barrier
-/// or a float; each has to answer "does this mode paint a shadow?", and all
-/// three answer it through `overlayElevationFor` or a stated `elevation: 0`
-/// rather than by leaving the slot silent; two of them share
-/// `modalBarrierColor`. Dialog and BottomSheet were two of the four
-/// component themes added at M4.8, SnackBar came with UC-05.
-///
-/// `timePickerTheme` and `popupMenuTheme` are overlays too and live in
-/// `app_overlay_themes.dart` beside the non-modal chrome. That seam is
-/// history rather than taxonomy — they were split out earlier — and moving
-/// them now would be churn in a pass whose whole claim is that no pixel
-/// moved.
-DialogThemeData buildDialogTheme(ColorScheme scheme, TextTheme texts) =>
-    DialogThemeData(
-      barrierColor: modalBarrierColor(scheme),
-      backgroundColor: scheme.surfaceContainerHigh,
-      surfaceTintColor: Colors.transparent,
-      // Zero, and the shadow is hand-painted instead: a Material elevation on
-      // top of `shadowsFor` is a second depth mechanism, which AD-14 does not
-      // admit. See F15. The FAB and the SnackBar are the two that keep a dp
-      // value, because their slots have nowhere to put a painted shadow.
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        side: BorderSide(color: scheme.outlineVariant),
-      ),
-      titleTextStyle: texts.titleMedium?.copyWith(color: scheme.onSurface),
-      contentTextStyle: texts.bodyMedium?.copyWith(
-        color: scheme.onSurfaceVariant,
-      ),
-      // **`actionsPadding` deliberately stays unset here** — it moved to
-      // `MxDialogMetrics` while this was in flight (#348). The footer's width
-      // has to be *computed* from that inset, so the dialog states it on the
-      // widget; a theme entry saying the same 24 would be a second answer that
-      // all three dialogs override, and the one that could silently drift out
-      // of step with the arithmetic that reads it.
-    );
+import '../../foundations/app_radius.dart';
+import '../../states/app_interaction_states.dart';
+import '../overlays/app_backdrop_recipe.dart';
 
 /// The modal sheet — `MxFormSheet`, `MxActionSheet`, and every direct
 /// `showModalBottomSheet` call.
@@ -108,26 +66,4 @@ BottomSheetThemeData buildBottomSheetTheme(ColorScheme scheme) =>
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
       ),
-    );
-
-/// The snack bar — `MxMessenger` and `MxUndoSnackBar`.
-SnackBarThemeData buildSnackBarTheme(ColorScheme scheme, TextTheme texts) =>
-    SnackBarThemeData(
-      backgroundColor: scheme.inverseSurface,
-      contentTextStyle: texts.bodyMedium?.copyWith(
-        color: scheme.onInverseSurface,
-      ),
-      behavior: SnackBarBehavior.floating,
-      // The SDK's own default, restated so the action's colour is a decision
-      // on record rather than a silence that resolves to one.
-      actionTextColor: scheme.inversePrimary,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.md),
-      ),
-      // The last overlay that let Material decide its depth: Dialog,
-      // BottomSheet, PopupMenu and the FAB all state theirs, and this slot's
-      // silence resolved to the SDK's 6.0 — in dark too, where every other
-      // surface has measurably opted out of shadows. Same brightness split as
-      // the FAB, for the same reason (theme-composition review, 2026-08).
-      elevation: overlayElevationFor(scheme),
     );

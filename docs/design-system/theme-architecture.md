@@ -7,7 +7,7 @@
 | **Scope** | Cấu trúc thư mục, trách nhiệm từng tầng, public API của theme. Ngoài phạm vi: *giá trị* của token (AD-14), hợp đồng component-level (`.claude/skills/flutter-theme-design/`) |
 | **Source of truth for** | Layering của `lib/core/theme/` · chiều import giữa các tầng · ranh giới public/internal của theme · bảng "cần gì thì đọc ở đâu" · ma trận dịch Tokyo → MemoX |
 | **Depends on** | `document-conventions.md` · `architecture.md` (AD-14, AD-23) |
-| **Updated by task** | M100.30 |
+| **Updated by task** | M100.31 |
 | **Last updated** | 2026-09-03 |
 
 ---
@@ -137,14 +137,46 @@ widget và theme slot không thể lệch nhau). Vẫn MUST NOT đọc bốn fil
 `applyCompactScale`, và vẽ hai bề mặt nằm **ngoài** `MaterialApp` (bootstrap
 error screen, letterbox của bản web) nơi không `Theme.of(context)` nào với tới.
 
-**Ranh giới `components/` ↔ `app_theme.dart`.** Một file trong `components/`
-chịu trách nhiệm cho **một** họ component, và "họ" được tính theo thứ mà một
-quyết định chạm tới cùng lúc: `app_button_themes.dart` giữ bốn button vì chúng
-dùng chung `buildSharedButtonStyle`, `app_modal_themes.dart` giữ dialog + bottom
-sheet + snack bar vì cả ba phải trả lời "mode này có vẽ shadow không" và hai
-trong ba dùng chung `modalBarrierColor`. `app_theme.dart` giữ đúng bốn thứ:
-`ThemeData` base, các fall-through cấp framework (`hoverColor`, `canvasColor`,
-`disabledColor`, `iconTheme`), extension, và danh sách slot → builder.
+**`components/` chia theo họ component (M100.31).** Chín thư mục, mỗi file một
+họ:
+
+```
+actions/     button · icon button · fab
+inputs/      input decoration · text selection
+selection/   chip · toggle · radio · slider · segmented button
+navigation/  navigation bar · tab bar · app bar
+surfaces/    card · dialog · bottom sheet
+content/     list tile · divider · scrollbar
+feedback/    progress · snackbar · tooltip
+overlays/    popup menu · backdrop recipe
+pickers/     date picker · time picker
+```
+
+Trước đó có ba file gom: `app_overlay_themes.dart` giữ tám thứ không liên quan
+(progress, tooltip, text selection, divider, scrollbar, time picker, popup menu,
+scrim), `app_modal_themes.dart` giữ ba, và `app_planned_themes.dart` là nơi
+chứa mọi component chưa biết đặt ở đâu. Cái cuối là vấn đề riêng: "planned"
+không phải một họ, và bốn component trong đó đã có consumer thật.
+
+`app_theme.dart` giữ đúng bốn thứ: `ThemeData` base, các fall-through cấp
+framework (`hoverColor`, `canvasColor`, `disabledColor`, `iconTheme`),
+extension, và danh sách slot → builder.
+
+**Component theme chỉ chạm palette qua `ColorScheme`.** `components/` được
+import `foundations/`, nhưng **không** bốn file palette (`app_colors`,
+`app_material_roles`, `app_surface_colors`, `app_border_colors`): đó là thứ
+`ColorScheme` được *dựng từ*, và đọc thẳng chúng là đóng băng một giá trị vào
+một brightness. Token cấu trúc thì khác và vẫn được — một radius không phải
+role, và không có scheme nào để đọc nó qua.
+
+**Builder nhận hệ semantic, không nhận màu rời.** `ColorScheme`, `TextTheme`,
+`AppSemanticColors`, hoặc một enum đóng của những cặp design system chấp nhận
+(`MxFilledPair`). Hai ngoại lệ có tên — `background` của app bar và `accent` của
+`textLinkForeground` — được ghi lý do ngay trong guard; cái thứ ba phải tranh
+luận ở đó chứ không xuất hiện lặng lẽ.
+
+Ma trận role canonical từng component, và bốn sai lệch đã biết, nằm ở
+[`tokyo-component-mapping.md`](tokyo-component-mapping.md).
 
 **Không có barrel `theme.dart`.** Một barrel gom cả 31 file sẽ biến mọi internal
 token thành public API, và guard ở §2 sẽ mất khả năng phân biệt — mọi import đều

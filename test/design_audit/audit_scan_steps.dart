@@ -103,9 +103,9 @@ Map<String, Object?> buildViolations() {
     'lib/core/theme/foundations/app_material_roles.dart',
     'lib/core/theme/app_theme.dart',
     'lib/core/theme/foundations/app_semantic_colors.dart',
-    'lib/core/theme/components/app_button_themes.dart',
+    'lib/core/theme/components/actions/app_button_themes.dart',
     'lib/core/theme/foundations/app_elevation.dart',
-    'lib/core/theme/components/app_overlay_themes.dart',
+    'lib/core/theme/components/pickers/app_time_picker_theme.dart',
     // The state layers. Translucent by definition — an overlay's job is to
     // composite over whatever surface the control happens to sit on, so there
     // is no fixed ground to precompute against. Exactly the exemption a shadow

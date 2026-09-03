@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/components/app_button_themes.dart';
+import '../../core/theme/components/actions/app_button_themes.dart';
 import '../../core/theme/foundations/app_icon_size.dart';
 import '../../core/theme/foundations/app_sizing.dart';
 import '../../core/theme/foundations/app_spacing.dart';
@@ -269,8 +269,7 @@ class MxActionButton extends StatelessWidget {
             context.colors,
             context.semanticColors,
             context.texts,
-            fill: context.colors.error,
-            label: context.colors.onError,
+            pair: MxFilledPair.destructive,
           ),
         ),
         child: child,

@@ -49,6 +49,7 @@ quét nó (M100.29).
 | Document | Purpose | Status |
 |---|---|---|
 | [`design-system/theme-architecture.md`](design-system/theme-architecture.md) | Layering của `lib/core/theme/`, chiều import giữa các tầng, và ranh giới public/internal của theme | active |
+| [`design-system/tokyo-component-mapping.md`](design-system/tokyo-component-mapping.md) | Ma trận component → canonical M3 role (đọc từ SDK ghim), dịch ý đồ Tokyo, và bốn sai lệch role đã biết | active |
 
 Cả hai MUST tham chiếu BR/AD/UC bằng ID và MUST NOT phát biểu lại luật — cùng
 quy tắc canonical location ở `document-conventions.md` §5. `check_docs.py` chỉ

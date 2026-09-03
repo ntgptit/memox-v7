@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../foundations/app_radius.dart';
-import '../foundations/app_semantic_colors.dart';
-import '../foundations/app_spacing.dart';
+import '../../foundations/app_radius.dart';
+import '../../foundations/app_semantic_colors.dart';
+import '../../foundations/app_spacing.dart';
 
 /// Every `ListTile` in the app, and `MxListTile` with it.
 ///

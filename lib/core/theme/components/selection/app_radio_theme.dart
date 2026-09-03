@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../states/app_interaction_states.dart';
-import '../foundations/app_semantic_colors.dart';
+import '../../states/app_interaction_states.dart';
+import '../../foundations/app_semantic_colors.dart';
 
 /// The radio, as the deck form's scheduler picker renders it through
 /// `RadioListTile`.

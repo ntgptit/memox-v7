@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
-import 'package:memox/core/theme/components/app_button_themes.dart';
+import 'package:memox/core/theme/components/actions/app_button_themes.dart';
 import 'package:memox/core/theme/typography/app_typography.dart';
 
 /// **`ThemeData.textTheme` being right is not the same as a component using it.**

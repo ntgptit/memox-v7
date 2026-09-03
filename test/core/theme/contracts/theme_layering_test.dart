@@ -221,6 +221,96 @@ void main() {
     expect(offenders, isEmpty);
   });
 
+  test('a component theme reaches the palette only through the scheme', () {
+    // **`components/` may import `foundations/`, but not all of it** (M100.31).
+    // The four palette files are what `ColorScheme` is *built from*; a
+    // component that reads one has stepped around the scheme and frozen a
+    // value to one brightness — which is the whole bug class M100.18–23 spent
+    // six PRs removing. The route is fixed:
+    //
+    //     component  →  ColorScheme  →  AppMaterialRoles / AppColors
+    //
+    // Structural tokens are a different matter and stay allowed: a radius is
+    // not a role, and there is no scheme to read it through.
+    const paletteSources = <String>{
+      'app_colors.dart',
+      'app_material_roles.dart',
+      'app_surface_colors.dart',
+      'app_border_colors.dart',
+    };
+
+    final offenders = <String>[];
+    for (final path in themeFiles.where(
+      (String path) => layerOf(path) == 'components',
+    )) {
+      for (final uri in importsIn(File(path).readAsStringSync())) {
+        if (!paletteSources.contains(uri.split('/').last)) continue;
+        offenders.add('$path imports $uri');
+      }
+    }
+
+    expect(
+      offenders,
+      isEmpty,
+      reason:
+          'Read the role off the ColorScheme. If the role is wrong, the palette '
+          'moves — the component does not pick a different token.',
+    );
+  });
+
+  test('a component builder takes semantic systems, never loose paint', () {
+    // **A builder that accepts a `Color` accepts any colour**, including one
+    // that is not a Material role at all, and nothing above it can see the
+    // difference. `buildFilledStyle` took `fill` and `label` that way until
+    // M100.31; it takes `MxFilledPair` now, so the three admitted pairs are the
+    // only reachable ones.
+    //
+    // **Two exemptions, both named rather than pattern-matched**, so a third
+    // one has to be argued for here instead of appearing quietly.
+    //
+    // `background` (app bar): the page ground is the one colour the scheme
+    // genuinely has no role for — `surface` is the card sitting on it — so the
+    // composition root passes it, and picking the ground is a decision that
+    // root already owns alongside picking the scheme. The alternative is an
+    // `AppSemanticColors.pageBackground` field.
+    //
+    // `accent` (`textLinkForeground`): this resolver is shared between the
+    // theme and `MxTextButton`, and the vocabulary that closes it is `AppInk`
+    // — `MxTextButton.accent` is an `AppInk?` and "can only name a token".
+    // `AppInk` cannot be the parameter type: it lives in `extensions/`, needs a
+    // `BuildContext`, and `components/` may not import either. Closing it
+    // further means narrowing the widget's API or moving `AppInk` down, both
+    // shared-widget changes.
+    const allowed = <String>{'background', 'accent'};
+
+    final offenders = <String>[];
+    for (final path in themeFiles.where(
+      (String path) => layerOf(path) == 'components',
+    )) {
+      final source = File(path)
+          .readAsStringSync()
+          .replaceAll(RegExp(r'/\*.*?\*/', dotAll: true), '')
+          .replaceAll(RegExp('//.*'), '');
+
+      for (final match in RegExp(
+        r'^\s*(?:required\s+)?Color\??\s+(\w+)\s*[,)]',
+        multiLine: true,
+      ).allMatches(source)) {
+        final name = match.group(1)!;
+        if (allowed.contains(name)) continue;
+        offenders.add('$path takes Color $name');
+      }
+    }
+
+    expect(
+      offenders,
+      isEmpty,
+      reason:
+          'Pass a semantic system — a ColorScheme, an AppSemanticColors, or a '
+          'closed enum of the pairs the design system admits — not a colour.',
+    );
+  });
+
   test('features and shared widgets read only the theme it publishes', () {
     // **The public API, stated as a rule rather than as a convention.** A
     // feature that reads `AppMaterialRoles.secondaryContainerLight` has taken a

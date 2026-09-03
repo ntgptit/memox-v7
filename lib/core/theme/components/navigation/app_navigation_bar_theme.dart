@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../typography/app_typography.dart';
+import '../../typography/app_typography.dart';
 
 /// The bottom bar's whole appearance.
 ///

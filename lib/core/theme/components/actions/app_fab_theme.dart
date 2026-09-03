@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../foundations/app_elevation.dart';
-import '../foundations/app_radius.dart';
-import '../states/app_interaction_states.dart';
+import '../../foundations/app_elevation.dart';
+import '../../foundations/app_radius.dart';
+import '../../states/app_interaction_states.dart';
 
 /// **The brand pair, stated.** Material 3's default is the
 /// `primaryContainer` tonal pair, which puts the screen's one create action

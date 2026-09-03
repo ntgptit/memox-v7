@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../foundations/app_radius.dart';
-import '../foundations/app_semantic_colors.dart';
-import '../foundations/app_spacing.dart';
-import '../foundations/app_stroke.dart';
+import '../../foundations/app_radius.dart';
+import '../../foundations/app_semantic_colors.dart';
+import '../../foundations/app_spacing.dart';
+import '../../foundations/app_stroke.dart';
 
 /// The text field, as `MxTextField` (and `MxSearchField`'s inner field)
 /// renders it.

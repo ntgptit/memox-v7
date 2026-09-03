@@ -200,11 +200,20 @@ class _NamedArgument extends RecursiveAstVisitor<void> {
   }
 }
 
-const String _nav = 'lib/core/theme/components/app_navigation_bar_theme.dart';
-const String _chip = 'lib/core/theme/components/app_chip_theme.dart';
-const String _planned = 'lib/core/theme/components/app_planned_themes.dart';
-const String _buttons = 'lib/core/theme/components/app_button_themes.dart';
-const String _toggles = 'lib/core/theme/components/app_toggle_themes.dart';
+const String _nav =
+    'lib/core/theme/components/navigation/app_navigation_bar_theme.dart';
+const String _chip = 'lib/core/theme/components/selection/app_chip_theme.dart';
+// The three that left `app_planned_themes.dart` at M100.31, each to the
+// family it belongs to. One constant each, because a guard that pointed at a
+// grab-bag could not say which component it was reading.
+const String _segmented =
+    'lib/core/theme/components/selection/app_segmented_button_theme.dart';
+const String _tabs =
+    'lib/core/theme/components/navigation/app_tab_bar_theme.dart';
+const String _buttons =
+    'lib/core/theme/components/actions/app_button_themes.dart';
+const String _toggles =
+    'lib/core/theme/components/selection/app_toggle_themes.dart';
 
 const List<_Binding> _bindings = <_Binding>[
   _Binding(
@@ -288,7 +297,7 @@ const List<_Binding> _bindings = <_Binding>[
   _Binding(
     component: 'SegmentedButton',
     slot: 'backgroundColor',
-    file: _planned,
+    file: _segmented,
     scope: 'buildSegmentedButtonTheme',
     requires: <String>['secondaryContainer'],
     refuses: <String>['primaryContainer'],
@@ -299,7 +308,7 @@ const List<_Binding> _bindings = <_Binding>[
   _Binding(
     component: 'SegmentedButton',
     slot: 'foregroundColor',
-    file: _planned,
+    file: _segmented,
     scope: 'buildSegmentedButtonTheme',
     requires: <String>['onSecondaryContainer', 'onSurface'],
     refuses: <String>['onPrimaryContainer', 'onSurfaceVariant'],
@@ -310,7 +319,7 @@ const List<_Binding> _bindings = <_Binding>[
   _Binding(
     component: 'SegmentedButton',
     slot: 'side',
-    file: _planned,
+    file: _segmented,
     scope: 'buildSegmentedButtonTheme',
     requires: <String>['outline'],
     refuses: <String>['primary', 'outlineVariant'],
@@ -337,7 +346,7 @@ const List<_Binding> _bindings = <_Binding>[
   _Binding(
     component: 'TabBar',
     slot: 'labelColor',
-    file: _planned,
+    file: _tabs,
     scope: 'buildTabBarTheme',
     requires: <String>['primary'],
     refuses: <String>[
@@ -353,7 +362,7 @@ const List<_Binding> _bindings = <_Binding>[
   _Binding(
     component: 'TabBar',
     slot: 'indicatorColor',
-    file: _planned,
+    file: _tabs,
     scope: 'buildTabBarTheme',
     requires: <String>['primary'],
     refuses: <String>['secondary', 'tertiary', 'secondaryContainer'],
