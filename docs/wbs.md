@@ -16945,6 +16945,55 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
 - **Checklist phases:** 14, 21.
 
+### M100.37 · Đóng ba nợ P3 còn lại của M100.36
+
+- **Status:** done (2026-09-04)
+- **Owner:** Claude
+- **Goal:** Không còn dòng DEBT nào trong ma trận disposition #431–#434: mỗi
+  finding P3 hoặc đã sửa, hoặc là ACCEPTED với lý do đo được.
+- **Quyết định:**
+  - **#432 P3-3 `MxTextButton.accent` → ACCEPTED có hợp đồng.** Bỏ đã được
+    thử và hoàn tác: caller duy nhất là `MxFeedbackBand` — một shared widget
+    đóng ghép link lên nền `errorContainer` của chính nó và cần mực
+    `onErrorContainer`. Tham số nhận `AppInk` (enum token đóng, không bao giờ
+    là `Color`), và chính audit ghi "a narrow hatch, not an open one … not
+    worth closing on its own". Hợp đồng: `accent` MAY chỉ được gọi từ một
+    shared widget sở hữu nền nó vẽ lên; một feature truyền `accent` là vi
+    phạm — `grep -rn "accent:" lib/features` phải rỗng (đang rỗng).
+    `mx_text_button.dart` không vào `kClosedApiFiles` vì allowlist ở đó không
+    nhận `AppInk`, và nới allowlist để nhận một enum không phải của chính
+    component là mở rộng đúng thứ scan tồn tại để chặn.
+  - **#431 P2-11 góc 12-trong-16 → FIXED: bỏ `shape` của ListTile theme.**
+    M3 canonical là hình chữ nhật (`shape ?? tileTheme.shape ?? const
+    Border()`, `list_tile.dart:1001`). Mọi hàng trong app nằm trong `MxCard`
+    (clip 16) hoặc sheet, nên 12 chỉ hiện ra như lệch: fill/ripple cong 12
+    trong góc 16, hàng giữa card bo tròn ở mép thẳng. Hình chữ nhật đồng tâm
+    với mọi container theo cấu trúc, không cần tile biết nó nằm ở đâu và
+    không mở API Card (#435 bảo vệ). `MxFocusRing` của hàng theo shape:
+    `zero`. Kit `.mx-tile` bỏ radius; parity C6; mapping §2 thêm dòng shape.
+  - **#434 P3-4 cờ `hasSelectedState` trên tag `Chip` → ACCEPTED.**
+    `RawChip.selected` là `bool` không nullable (`chip.dart:930`) và được
+    đưa thẳng vào `Semantics`; không có cách nào giữ `Chip` mà bỏ cờ. Bỏ
+    `Chip` là đổi nút xoá 33×48 chủ dự án đã chốt (P3-5). Nhiễu, không sai:
+    screen reader vẫn đọc nhãn và hành động xoá bình thường.
+- **Scope:** `app_list_tile_theme.dart`, `mx_list_tile.dart`,
+  `mx_list_tile_contract_test.dart`, kit `.mx-tile`, ba tài liệu review,
+  golden của hàng được chọn.
+- **Editable documents:** `docs/wbs.md`, `docs/design-system/tokyo-component-mapping.md`,
+  `docs/reviews/design-parity-checklist.md`, `docs/reviews/mx-*-deep-audit.md`
+  (chỉ chú thích status), `design_system/components/mx.css`.
+- **Output:** ba dòng DEBT của M100.36 thành ACCEPTED / FIXED / ACCEPTED;
+  golden Linux regenerate cho các tấm có hàng được chọn.
+- **Acceptance criteria:**
+  - [x] `listTileTheme.shape == null`; ring của hàng `BorderRadius.zero`;
+        test hợp đồng ghim cả hai.
+  - [x] `grep -rn "accent:" lib/features` rỗng; hợp đồng `accent` ghi ở trên.
+  - [x] Golden Linux 100% sau regenerate; gallery publish lại.
+- **Dependencies:** M100.36.
+- **Tests required:** `mx_list_tile_contract_test`, `mx_list_tile_test`,
+  `component_depth_and_state_test`, golden Linux, CI.
+- **Checklist phases:** 7, 12, 13.
+
 ### M100.36 · Bốn họ component đóng hợp đồng: Button, TextField/Search, Row, Chip/Pill
 
 - **Status:** done (2026-09-04)
@@ -17149,7 +17198,7 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
     `mxScreenGutter`, `block` → 0) nên theo compact scale.
   - **P2-11** `MxListTile` sở hữu `Material(transparency)`; hai shim tay ở
     Settings/Reminder gỡ; comment D20 lỗi thời sửa. Góc 12-trong-16 khi hàng
-    nằm trong card: **DEBT** (P3).
+    nằm trong card: đóng ở M100.37 (shape bỏ, hàng là hình chữ nhật M3).
   - **P2-12** `MxSwitchRow` một rung `body-lg` cho cả hai nhánh.
   - **P2-7** `MxIcon` leading không xám khi disabled: **ACCEPTED (contract)** —
     không caller nào kết hợp; `MxIcon` đặt màu tường minh theo thiết kế, hàng
@@ -17297,8 +17346,8 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
     `wght`), P2-2 (Good/Remembered primary), P2-3 (bỏ `tonal`), P2-4 (80 =
     ràng buộc layout, ghi rõ), P2-5 (icon gap lerp theo scale), P3-1 (tỉ lệ
     2.05/2.51), P3-2 (comment w700), P3-4 (keepLabel ghim test). ACCEPTED:
-    P2-6 (icon "học" khác nhau hai màn — chủ dự án đã duyệt trên deck tile).
-    DEBT: P3-3 (`MxTextButton.accent`, 1 caller).
+    P2-6 (icon "học" khác nhau hai màn — chủ dự án đã duyệt trên deck tile),
+    P3-3 (`MxTextButton.accent` — ACCEPTED ở M100.37, xem entry đó).
   - **#433 TextField** — FIXED: F1 (`semanticLabel` bắt buộc, hint
     `ExcludeSemantics`), F2 (`minHeight`, bỏ 48 cứng), F3 (focused-error
     `AppStroke.focus`), F4 (suffix `WidgetStateColor`), F5 (supporting line
@@ -17310,14 +17359,14 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
     P2-12, P2-14, P2-15, P2-17. ACCEPTED có hợp đồng: P2-7 (leading mờ theo
     hàng), P2-9 (trailing trình bày), P2-10 (một danh sách một leading), P2-13
     (ngữ pháp multi-select), P2-16 (khoảng cách card = feature), P3-D5
-    (semibold khi chọn — §4L từ chối). DEBT: P2-11 góc 12-trong-16 của tile
-    trong card. P3: `highlightColor` ghi là giới hạn SDK, `FocusNode` chỉ khi
+    (semibold khi chọn — §4L từ chối). P2-11 góc 12-trong-16: FIXED ở
+    M100.37. P3: `highlightColor` ghi là giới hạn SDK, `FocusNode` chỉ khi
     interactive, comment/token cũ dọn, 375 vào stress.
   - **#434 Chip/Pill** — FIXED: P1-1…P1-5, P2-1 (`MxBadge`), P2-3, P2-6, P2-8,
     P2-9, P3-1, P3-2, P3-3, P3-6. ACCEPTED có hợp đồng: P2-2, P2-4, P2-5, P2-7,
-    P3-5 (owner 2026-08-26). DEBT: P3-4 — `Chip` của tag strip mang cờ
-    `hasSelectedState` thừa từ `RawChip` (audit đã đo); sửa nghĩa là thay
-    `Chip`, kéo theo nút xoá 33×48 mà chủ dự án đã chốt ở P3-5, nên để lại.
+    P3-5 (owner 2026-08-26), P3-4 (ACCEPTED ở M100.37: `RawChip.selected` là
+    `bool` không nullable, `chip.dart:930`, nên mọi `Chip` mang cờ; sửa nghĩa
+    là bỏ `Chip`, đụng nút xoá đã chốt ở P3-5).
   - **Không tái tạo được trên main:** không có — mọi finding P1/P2 của bốn
     audit đều tái tạo được tại `3207e7b7` trước khi sửa.
 

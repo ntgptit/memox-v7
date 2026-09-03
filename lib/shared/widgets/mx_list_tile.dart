@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/states/app_interaction_states.dart';
-import '../../core/theme/foundations/app_radius.dart';
 import '../../core/theme/extensions/app_ink.dart';
 import '../../core/theme/extensions/theme_context_extension.dart';
 import 'mx_focus_ring.dart';
@@ -165,7 +164,9 @@ class MxListTile extends StatelessWidget {
     }
 
     return MxFocusRing(
-      borderRadius: BorderRadius.circular(AppRadius.md),
+      // Square, like the row (M100.37): the ring traces the shape the ink
+      // takes, and a container's clip trims both at its own corner.
+      borderRadius: BorderRadius.zero,
       // An inert row is not a stop on the keyboard.
       child: ExcludeFocus(
         excluding: !_isInteractive,

@@ -272,7 +272,10 @@ textarea.mx-field__input{resize:vertical;min-height:96px}
 .mx-field--disabled .mx-field__input{border-color:var(--color-disabled-surface);color:var(--color-on-disabled)}
 
 /* --- MxListTile ------------------------------------------------------- */
-.mx-tile{display:flex;align-items:center;gap:var(--space-lg);width:100%;box-sizing:border-box;min-height:var(--touch-target-min);padding:var(--space-sm) var(--space-lg);border:0;background:transparent;border-radius:var(--radius-md);text-align:left;color:var(--color-text-primary);font-family:var(--font-body);transition:background-color var(--duration-fast) var(--ease-standard)}
+/* No radius: the row is the rectangle Material draws it as (M100.37). Every
+   row sits in a card or a sheet that owns the corner, and a 12 inside a 16 was
+   only ever visible as a mismatch on the picked fill and the ripple. */
+.mx-tile{display:flex;align-items:center;gap:var(--space-lg);width:100%;box-sizing:border-box;min-height:var(--touch-target-min);padding:var(--space-sm) var(--space-lg);border:0;background:transparent;text-align:left;color:var(--color-text-primary);font-family:var(--font-body);transition:background-color var(--duration-fast) var(--ease-standard)}
 button.mx-tile{cursor:pointer}
 button.mx-tile:hover{background:color-mix(in srgb,var(--color-text-secondary) 7%,transparent)}
 button.mx-tile:focus-visible{outline:none;box-shadow:inset 0 0 0 var(--border-focus) var(--color-primary)}

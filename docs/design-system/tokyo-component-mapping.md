@@ -107,6 +107,7 @@ canonical M3 role  >  accessibility  >  MemoX structural system  >  Tokyo exact 
 | ListTile | selectedColor | `primary` | = | guard AST |
 | ListTile | icon / title / subtitle / trailing text | `onSurfaceVariant` / `onSurface` / `onSurfaceVariant` / `onSurfaceVariant` | = | guard AST (M100.36). Trước đó theme đặt `textColor: onSurface`, thứ `ListTile` chép lên **cả** subtitle (`list_tile.dart:934`) — subtitle mọi hàng từng mang mực title (#431 P1-1) |
 | ListTile | selectedTileColor | *(null — M3 không có)* | `semantic.surfaceSelected` | Bề mặt "đã chọn" app-owned duy nhất, dùng chung với tint của `MxCard` (§4I, M100.36) |
+| ListTile | shape | `null` → `Border()` (hình chữ nhật) | = | M100.37: từng là `AppRadius.md`; hàng luôn nằm trong card/sheet đã sở hữu góc, 12-trong-16 chỉ hiện ra như lệch (#431 P2-11) |
 | ListTile | minTileHeight | 56 (`_defaultTileHeight`) | = `AppSizing.rowMinHeight` | Nêu tường minh ở M100.36 — 48 là sàn chạm, 56 là hàng đọc (§4J) |
 | Divider | — | `outlineVariant` (M3 dùng ThemeData) | = | |
 | ProgressIndicator | color | `primary` | = | |

@@ -1331,7 +1331,7 @@ mattered most.
 | **P3-1** | `RawChip`'s 48dp **width** floor is undeclared in MemoX tokens, and is what produces P1-4's horizontal bleed | §15 |
 | **P3-2** | The 1.0dp border width is Flutter's `BorderSide` default; nothing in `AppStroke` owns it | §15 |
 | **P3-3** | The badge family has nine call sites and no shared primitive (must **not** be unified with the chip API) | §17 |
-| **P3-4** | The tag strip's `Chip` announces `hasSelectedState` and is never selected | §17 |
+| **P3-4** | The tag strip's `Chip` announces `hasSelectedState` and is never selected | §17 | **ACCEPTED at M100.37:** `RawChip.selected` is a non-nullable `bool` (`chip.dart:930`, 3.44.8) handed to `Semantics` as-is, so every `Chip` carries the flag; the only fix is leaving `Chip`, which the owner-pinned delete affordance (P3-5) forbids.
 | **P3-5** | The tag delete affordance is 33 × 48 — **an owner decision of 2026-08-26**, listed only so it is not "fixed" unknowingly | §20 |
 | **P3-6** | `MxPillButton` re-metrics `chipTheme.labelStyle` to `labelMedium`, so the theme's `label-lg` size is dead for every pill — contradicting `tokyo-component-mapping.md` §5's MUST NOT | §26 |
 
