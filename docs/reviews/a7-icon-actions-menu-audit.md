@@ -36,39 +36,45 @@ field's clear button, which correctly hand-replicates the accessibility
 pattern) and **zero** raw `FloatingActionButton(`, `PopupMenuButton(`,
 `showMenu(`, `MenuAnchor(`, `DropdownButton(` or `DropdownMenu(` calls.
 
-What is wrong is narrower and sharper than the button audit's finding, but
-the same shape: **a shared resolver written for one control family leaks an
-accent colour into a control whose own documentation says it must not have
-one.** `AppInteractionStates._overlay`'s pressed/focused branches always
-return `scheme.primary`, regardless of which neutral `hoverColor` the caller
-passed in. `iconOverlay`'s doc comment says outright — *"Hover is the
-neutral, not the accent... a row of icons in an app bar does not light up in
-brand colour under the pointer"* — and that is true for exactly one of the
-three interactive states. Press and focus light up in brand indigo on
-**every icon button in the app**, silently, because the shared helper was
-built for buttons (where an accent overlay is the correct role) and reused
-without adapting its two hardcoded branches.
+**Correction record.** An earlier draft of this report registered two
+additional P1s — an icon-button press/focus "accent leak" and a speculative
+`MxDropdown` error-state gap. Both were checked against
+`design_system/components/mx.css` (the actual design source of truth, not
+read in the first pass) and against `CardTransferMapping`'s domain model,
+after an automated PR review flagged both claims — neither holds up:
+`.mx-iconbtn:active{background:color-mix(in srgb,var(--color-primary)
+12%,transparent)}` (`mx.css:43`) is explicit — press is *supposed* to be
+`primary` @ 12%, exactly what the code does, and the `iconOverlay` doc
+comment I read that as contradicting only ever discusses hover. The
+`MxDropdown` gap does not survive contact with `CardTransferMapping.assign`
+(`card_transfer_mapping_model.dart:52–62`), which makes a duplicate
+destination structurally unrepresentable, or with
+`card_import_preview_step_widget.dart:288–292`, which already renders the
+BR-169 aggregate error MemoX actually needs. Both are corrected in place
+below (§4.1, §5.2, §7) rather than left as a stale first pass — see §7's
+retracted-findings note for exactly what changed and why.
 
-The second finding is a single miswired call site with an outsized
-consequence: `tag_catalog_row_widget.dart`'s "Delete tag" `MxMenuAction`
-does not set `isDestructive: true`. It is the one delete action in the whole
-app — of four comparable sites — that renders in the same ink as Rename. The
-widget exists specifically to make destructive rows unmistakable
-(`_MenuRow`'s own logic: `isDestructive ? AppInk.error : AppInk.stated`), and
-one caller does not use it.
+The one finding that does hold: a single miswired call site with an
+outsized consequence. `tag_catalog_row_widget.dart`'s "Delete tag"
+`MxMenuAction` does not set `isDestructive: true`. It is the one delete
+action in the whole app — of four comparable sites — that renders in the
+same ink as Rename. The widget exists specifically to make destructive rows
+unmistakable (`_MenuRow`'s own logic: `isDestructive ? AppInk.error :
+AppInk.stated`), and one caller does not use it.
 
-Third, `MxDropdown` is the shallowest of the four wrappers audited here: no
-error slot, no visible resting-state boundary once the underline is hidden,
-and a doc comment claiming a sibling widget ("Material's `DropdownMenu`...
-is themed") that `app_theme.dart`'s own comment and `theme_coverage_test.dart`'s
-own acknowledged blind spot both contradict — neither `DropdownButton` nor
-`DropdownMenu` has a customised theme slot in this app.
+Second, `MxDropdown`'s doc comment inaccurately describes a sibling widget:
+it claims a field-anchored picker should use "Material's `DropdownMenu`,
+which is themed" — `app_theme.dart`'s own comment and
+`theme_coverage_test.dart`'s acknowledged blind spot both establish that
+neither `DropdownButton` nor `DropdownMenu` has a customised theme slot in
+this app. That claim is wrong regardless of whether an error slot is ever
+needed (§7, P2-4).
 
 **P0: none.** No contrast floor reachable by a user is broken, no control is
-unreachable, nothing crashes. Two P1s (the overlay leak, the missing
-destructive flag) are systemic and cheap to close; the rest is coverage debt
-and one architectural question (two overflow-menu surfaces, no documented
-rule for which to use) worth an owner decision rather than a fix.
+unreachable, nothing crashes. **P1: one** — the missing destructive flag,
+systemic and cheap to close. The rest is coverage debt and one architectural
+question (two overflow-menu surfaces, no documented rule for which to use)
+worth an owner decision rather than a fix.
 
 ---
 
@@ -108,7 +114,7 @@ doc-comment claim of "four call sites":**
 |---|---|---|
 | `card_list_menu_widget.dart:37` (deck's card-list overflow) | Import (always) · Export (`if deckTotal > 0`) · Tag catalog (always) | none |
 | `card_sort_control_widget.dart:38` (sort control) | one row per `CardListSort.values`, label-only | none |
-| `tag_catalog_row_widget.dart:103` (per-tag row menu) | Rename · **Delete tag** | **missing** — see P1-2 |
+| `tag_catalog_row_widget.dart:103` (per-tag row menu) | Rename · **Delete tag** | **missing** — see P1-1 |
 | `card_selection_bar_widget.dart:189` (`_ActionMenu`, bulk overflow) | Move · Add tag · Flag · Unflag · Export · **Delete** | `isDestructive: true` ✓ |
 
 **A second, separate overflow-menu mechanism exists and is not
@@ -268,8 +274,8 @@ control, which is the primitive that would answer audit item 6's
 | **minimumSize** | `Size.square(48)` (`AppSizing.touchTarget`) | **M3 default is 40×40; MemoX states 48×48 as the painted `Material`/`InkWell` box itself** — the ripple fills the full 48dp target rather than sitting inside an invisible padded zone. This *exceeds* M3's own floor and is a deliberate, correct choice (comment: "so no screen can pass a smaller one — there is no parameter to pass") |
 | shape | `RoundedRectangleBorder(12)` (`AppRadius.md`) | M3: `StadiumBorder` — tier translation, consistent with every other control |
 | **overlay (hover)** | `onSurfaceVariant` @ **.08** (`AppInteractionStates.iconOverlay`) | = role, = alpha |
-| **overlay (press)** | `primary` @ **.12** | **role violation — M3 is `onSurfaceVariant` @ .10** |
-| **overlay (focus)** | `primary` @ **.10** | **role violation — M3 is `onSurfaceVariant` @ .10** (alpha matches, role does not) |
+| **overlay (press)** | `primary` @ **.12** | M3's own role is `onSurfaceVariant` @ .10 — but MemoX's actual source of truth here is `design_system/components/mx.css:43`, `.mx-iconbtn:active{background:color-mix(in srgb,var(--color-primary) 12%,transparent)}`, which explicitly specifies the accent at this exact alpha. **Confirmed deliberate, not a defect** — a tier translation from M3's role, same status as the shape/radius rows above |
+| **overlay (focus)** | `primary` @ **.10** | M3's role is `onSurfaceVariant` @ .10; `mx.css:44`'s per-component rule (`.mx-iconbtn:focus-visible`) specifies only the ring (`box-shadow`), not a background wash — so the per-component CSS neither confirms nor contradicts an accent wash on focus. `AppStateOpacity.focus`'s own comment attributes the 10% figure to "`mx.css`'s interaction-model header" (a cross-component convention, not this selector specifically), which is the same source `controlOverlay` (buttons) draws its focus wash from. **No finding** — nothing establishes this as wrong, and the app-wide convention is consistent |
 | focus ring | `BorderSide(primary, AppStroke.focus)` only when focused | M3: no `side` at all — MemoX adds one because a wash-only focus cue measured 1.15:1 against the WCAG-1.4.11 3:1 floor (comment, ` :32–34`) — same justified pattern as `MxActionButton`'s filled family |
 
 `isCompact` (`MxIconButton`): shrinks the **glyph** (`AppIconSize.mdCompact`
@@ -370,7 +376,7 @@ comment presents it as. See P2-4.
 
 ### 5.1 Caller-level (semantics/grammar)
 
-- **P1-2** — one destructive menu action out of four comparable sites is not
+- **P1-1** — one destructive menu action out of four comparable sites is not
   flagged destructive (`tag_catalog_row_widget.dart:113–118`).
 - Back/close/command semantics (audit item 2): checked across every
   `leading:`/manual-close call site found in §2 — `card_editor_screen.dart`'s
@@ -387,31 +393,30 @@ comment presents it as. See P2-4.
 
 ### 5.2 State-layer (accessibility)
 
-- **P1-1** — icon-button press/focus overlay resolves to `primary` instead
-  of the documented neutral role, on every icon button in the app. Quantified
-  (`alphaBlend` over the page/AppBar ground, both modes):
+- Icon-button press and focus overlay both resolve to `primary` rather than
+  the neutral `onSurfaceVariant` hover uses. **Checked against the design
+  source and confirmed deliberate, not a defect** — `mx.css:43`
+  (`.mx-iconbtn:active{background:color-mix(in srgb,var(--color-primary)
+  12%,transparent)}`) specifies the accent explicitly for press, and
+  `AppStateOpacity.pressed`'s own comment already named `.mx-iconbtn:active`
+  as an accent state before this report was written; the earlier draft of
+  this audit missed that and over-read the `iconOverlay` doc comment's
+  hover-only claim ("Hover is the neutral, not the accent") as covering all
+  three interactive states. Composited for reference (`alphaBlend` over the
+  page/AppBar ground, both modes) — no action implied, these are the correct
+  pixels:
 
-  | mode | hover (neutral, correct) | press (accent, wrong) | focus (accent, wrong) | press if it used the hover role |
-  |---|---|---|---|---|
-  | light | `#E6EAEF` | `#DDE2F4` | `#E1E5F4` | `#E0E4EA` |
-  | dark | `#121731` | `#1D2241` | `#191E3D` | `#181C36` |
+  | mode | hover (neutral) | press (accent, confirmed correct) | focus (accent, unresolved role but not contradicted) |
+  |---|---|---|---|
+  | light | `#E6EAEF` | `#DDE2F4` | `#E1E5F4` |
+  | dark | `#121731` | `#1D2241` | `#191E3D` |
 
-  The hue shift is visible (indigo creeping into what the design calls a
-  neutral wash) though not large enough to move any WCAG number — this is a
-  role/consistency finding, not a contrast failure, and per the audit's own
-  rule a contrast issue would be retuned in place rather than resolved by
-  swapping roles; here the fix *is* the retune, back to the role the
-  component's own doc already claims to implement.
-  Root cause: `AppInteractionStates._overlay` (` :197–214`) takes a
-  `hoverColor`/`hoverAlpha` pair for the hover branch only; its `pressed` and
-  `focused` branches (` :203–208`) hardcode `scheme.primary` unconditionally,
-  because the helper was designed for `controlOverlay` (buttons), where
-  `primary` *is* the correct press/focus role, and `iconOverlay`/`rowOverlay`
-  reuse it without a second parameter for those two states.
   `app_interaction_states_test.dart:103–118`'s own coverage
   (`overlay.resolve(pressed) isNotNull`) asserts non-null, never asserts
-  *which* colour — so nothing pins the role and the test would pass either
-  way.
+  *which* colour — so nothing pins the role either way, which is a coverage
+  observation (§6) rather than a defect: the value the test would need to
+  pin is the one `mx.css:43` already specifies, and the code already matches
+  it.
 - Disabled-item dimming exists in the M3 `PopupMenuItem` mechanism (icon
   opacity 0.38/0.5) but has no path from `MxMenuAction` — see P2-1.
 - Focus ring on icon buttons: correct and measured (§4.1) — `AppStroke.focus`
@@ -436,9 +441,9 @@ comment presents it as. See P2-4.
   site any `grep`/AST scan of `lib/` can see — it is constructed inside the
   framework. It **does** inherit `IconButtonThemeData` correctly (M3's
   `AppBar` routes its default leading through a plain `IconButton`, which
-  resolves `IconButtonTheme.of(context)`), so the 48dp floor and the (buggy)
-  overlay role from P1-1 both apply to it too — but it has **zero
-  MemoX-specific test or golden coverage** despite being the single
+  resolves `IconButtonTheme.of(context)`), so the confirmed-correct 48dp
+  floor and overlay behaviour (§5.2) both apply to it too — but it has
+  **zero MemoX-specific test or golden coverage** despite being the single
   most-rendered icon button in the app (every screen without a manual
   `leading:` override uses it). See P2-6.
 - FAB-vs-empty-state clearance: reserved for the populated list, not
@@ -452,8 +457,12 @@ comment presents it as. See P2-4.
 - `MxFab`: no `Color`, `shape`, `elevation`. Clean.
 - `MxMenuButton`/`MxMenuAction`: no colour escape; the one structural gap is
   the missing `isEnabled` on `MxMenuAction` (P2-1), not an escape hatch.
-- `MxDropdown`: no colour escape either, but also no error/validation slot
-  at all — see P1-3.
+- `MxDropdown`: no colour escape. It also has no error/validation slot at
+  all; investigated as a possible gap and found not needed for either
+  current call site — the import wizard's `CardTransferMapping.assign`
+  makes a duplicate mapping structurally unrepresentable and the wizard
+  already renders the BR-169 aggregate error MemoX actually requires (§7
+  retraction note, §10).
 - Raw widgets outside the four wrappers: **exactly one**,
   `mx_search_field.dart:206`'s plain `IconButton(...)` for the clear (✕)
   action. It correctly sets `Icon(..., semanticLabel: ...)` by hand,
@@ -471,7 +480,6 @@ comment presents it as. See P2-4.
 | No `mx_dropdown_test.dart` | `MxDropdown` coverage is one stress specimen only. No golden, no disabled/error-state assertion (none of the latter two states exist to assert). This gap is already named by `theme_coverage_test.dart`'s own comment as an accepted mechanism limit — but that comment covers the *theming* blind spot, not the missing widget-level test file. |
 | Automatic `AppBar` back/close button | No test constructs a bare `Scaffold(appBar: AppBar())` and asserts the auto-leading button's size/tooltip/overlay — the app's most common icon button has no direct regression coverage (§5.3). |
 | `MxMenuAction` disabled state | Untestable because unimplemented (P2-1) — flagged as a gap in the audited dimension "menu item... disabled" (item 5), not a broken test. |
-| `MxDropdown` error state | Same — untestable because unimplemented (P1-3). |
 | FAB + empty state, 320dp × textScale 2.0 | No stress specimen or golden combines a visible `MxFab` with `MxEmptyState`'s centred content at the smallest width / largest scale the audit's own matrix (item 9) requires. |
 | Widgetbook | `MxDropdown`'s catalogue entry (`form_components.dart:629–639`) has a fixed 3-option showcase and no knobs — cannot preview long-text truncation, disabled, or (if added) an error state interactively. `MxMenuButton`'s entry does cover `hasDestructive`; it cannot preview a disabled row because none exists to preview. |
 | No PopupMenu Linux golden beyond the demo | `card_overflow_menu_demo_test.dart` is the only rendered popup-menu picture in the repo (added specifically because none of the four `PopupMenuButton` sites had ever been golden-rendered before, per its own comment) — it covers one of the four menus, not all four, and does not cover a disabled or long-label row. |
@@ -485,29 +493,48 @@ comment presents it as. See P2-4.
 No contrast floor reachable by a user is broken; no control drops under
 48dp; nothing is unreachable by keyboard or screen reader; nothing crashes.
 
+### Retracted findings (verify-before-report, caught in review)
+
+A first pass of this report registered two additional P1s. Both were
+challenged by an automated PR review
+([chatgpt-codex-connector](https://github.com/ntgptit/memox-v7/pull/436#discussion_r0))
+with specific, checkable evidence; both challenges were verified directly
+against source and hold. Recorded here rather than silently deleted, per
+this audit's own evidentiary standard:
+
+- **Icon-button press/focus overlay "accent leak."** The claim was that
+  `AppInteractionStates._overlay`'s pressed/focused branches hardcoding
+  `scheme.primary` violated a "hover is neutral" rule `iconOverlay`'s doc
+  comment states. **Wrong** — `design_system/components/mx.css:43`,
+  `.mx-iconbtn:active{background:color-mix(in srgb,var(--color-primary)
+  12%,transparent)}`, explicitly specifies the accent for press at exactly
+  this alpha, and `AppStateOpacity.pressed`'s own comment already named
+  `.mx-iconbtn:active` as an accent state. The doc comment the first pass
+  relied on ("Hover is the neutral, not the accent...") only ever discusses
+  hover; reading it as a blanket "icon buttons are always neutral" rule was
+  the error, not the code. Corrected in §4.1 and §5.2 — the current
+  behaviour is deliberate and matches the design source exactly for press;
+  nothing establishes focus as wrong either, so neither is a finding.
+- **`MxDropdown` speculative error-state gap.** The claim was that the
+  card-import mapping wizard "most plausibly" needs a per-row dropdown error
+  state `MxDropdown` cannot provide. **Overreach** —
+  `CardTransferMapping.assign` (`card_transfer_mapping_model.dart:52–62`)
+  removes a field from any column that previously held it before assigning
+  it to a new one, so two columns cannot ever both claim the same
+  destination — the state a per-row error would flag is structurally
+  unrepresentable. `card_import_preview_step_widget.dart:288–292` already
+  renders the BR-169 aggregate error ("both required fields have a column")
+  the wizard actually needs. No canonical document requires a row-level
+  error, so this was a defect claim built on "plausible," not on a read
+  business rule — exactly the failure mode this audit's own method note
+  warns against for anything short of a structural fact. `MxDropdown`'s
+  missing error slot remains a true structural fact (§4.4, §5.4); it is not
+  a P1, and is not registered below at any priority — see §10 for the
+  closed decision.
+
 ### P1 — systemic
 
-**P1-1 · Icon-button press and focus overlay silently use the accent role
-its own documentation says it must not use.**
-`app_icon_button_theme.dart:31` wires `AppInteractionStates.iconOverlay`,
-whose doc comment (` :109–111`) states hover is deliberately neutral so a
-row of icons "does not light up in brand colour under the pointer" — true
-only for hover. `AppInteractionStates._overlay`'s shared `pressed`/`focused`
-branches (`app_interaction_states.dart:203–208`) hardcode `scheme.primary`
-regardless of the `hoverColor` the caller passed. Every one of the 28
-`MxIconButton` call sites, the one raw `IconButton` in `mx_search_field.dart`,
-and the framework's own automatic AppBar back/close button all press and
-focus in brand indigo instead of the neutral ink the design specifies.
-Composited pixels in §5.2. **Recommendation:** give `_overlay` a second
-colour/alpha pair for pressed and focused (mirroring what it already does
-for hover), or add a `pressedColor`/`focusedColor` parameter defaulting to
-`primary` for `controlOverlay` and to `hoverColor` for `iconOverlay`/
-`rowOverlay`. **Closure test:** extend
-`app_interaction_states_test.dart:103–118` to assert *which* colour each
-state resolves to (`overlay.resolve(pressed) == onSurfaceVariant.withValues(...)`
-for the icon-button theme specifically), not just non-null.
-
-**P1-2 · The one delete action out of four comparable menu sites is not
+**P1-1 · The one delete action out of four comparable menu sites is not
 flagged destructive.**
 `tag_catalog_row_widget.dart:108–119`'s `MxMenuAction(icon:
 Icons.delete_outline, label: context.l10n.tagDeleteAction, onSelected:
@@ -522,30 +549,6 @@ opening the tag row's menu and asserting the "Delete tag" row's `Text`/`Icon`
 resolve to `AppInk.error`'s colour — the same assertion shape
 `mx_menu_button_test.dart` already uses for its other three tests, extended
 to a real production call site rather than only the widget's own API.
-
-**P1-3 · `MxDropdown` has no error or validation state, in the one feature
-that most plausibly needs one.**
-`MxDropdown<T>` (`mx_dropdown.dart`) wraps bare `DropdownButtonHideUnderline
-(DropdownButton(...))` with no `errorText`, no error border, no visible
-resting-state field boundary at all once the underline is hidden — its only
-affordance is the trailing caret Material draws automatically. Both call
-sites (`card_import_mapping_row_widget.dart:55`,
-`card_import_preview_step_widget.dart:341`) are in the card-import
-column-mapping wizard, the one flow in the app where a per-row choice
-(which source column maps to which card field) can plausibly be invalid or
-duplicated. Whether the import validation actually needs a per-row visual
-error is an open question this report cannot settle without reading the
-import use case/business rules in depth (out of this audit's scope) — what
-is established is that **the widget has no structural path to show one if it
-does.** **Recommendation:** confirm against the import wizard's validation
-requirements (`UC`/`BR` docs for card import) whether row-level error display
-is needed; if so, either add an `errorText`/error-border slot to
-`MxDropdown` or migrate it to `DropdownMenu` (which already exposes
-`errorText` natively, §3.5) once `dropdownMenuTheme` is set. If not needed,
-downgrade this to a documented, deliberate deferral (owner decision, §9).
-**Closure test:** whichever way the owner decision goes, a golden/state test
-exercising `MxDropdown`'s (new or confirmed-absent) error path — currently
-impossible because the path does not exist.
 
 ### P2 — local quality
 
@@ -609,8 +612,7 @@ comment to state the actual fact (no theme exists for either; `DropdownMenu`
 is the *better* primitive for a field-shaped picker because of its native
 `errorText`/`label` slots, not because it is currently themed), or add
 `dropdownMenuTheme` to `app_theme.dart` so the comment becomes true.
-**Closure test:** none — documentation accuracy only, unless paired with
-P1-3's resolution.
+**Closure test:** none — documentation accuracy only.
 
 **P2-5 · `MxFab` has no dedicated test file.**
 Confirmed via `Glob` — no `mx_fab_test.dart` anywhere in `test/`. Coverage is
@@ -624,9 +626,9 @@ the app suggests. **Recommendation:** a small dedicated test file mirroring
 
 **P2-6 · The automatic AppBar back/close button has zero MemoX-specific
 regression coverage.**
-Established in §5.3: it inherits `IconButtonThemeData` correctly (so P1-1
-also affects it), but no test in the repository constructs a bare
-`AppBar()` with implied leading and asserts its size, tooltip, or overlay —
+Established in §5.3: it inherits `IconButtonThemeData` correctly, but no
+test in the repository constructs a bare `AppBar()` with implied leading
+and asserts its size, tooltip, or overlay —
 every existing icon-button test targets `MxIconButton` or the one raw
 `IconButton` by name. **Recommendation:** one widget test pinning the
 default `AppBar` leading button's tap target (≥48dp) and tooltip presence,
@@ -669,26 +671,17 @@ is touched; not worth its own change.
 
 ## 8. Implementation order
 
-1. **P1-1** (icon overlay role) — smallest surface area (one file,
-   `app_interaction_states.dart`), affects every icon button at once, and is
-   the finding most likely to also be visible in a render once someone can
-   run one. Fix first, add the state-role assertion to
-   `app_interaction_states_test.dart` in the same change.
-2. **P1-2** (tag delete flag) — one-line fix, one new/extended test. No
+1. **P1-1** (tag delete flag) — one-line fix, one new/extended test. No
    dependency on anything else.
-3. **P2-6** (automatic back-button test) — cheap, and closes the blind spot
-   P1-1's fix would otherwise leave unverified for the app's most common
-   icon button.
-4. **P2-5** (`mx_fab_test.dart`) — cheap, standalone.
-5. **P2-3** (FAB/empty-state stress specimen) — write the specimen first;
+2. **P2-6** (automatic back-button test) — cheap, standalone, closes the one
+   real coverage gap on the app's most-rendered icon button.
+3. **P2-5** (`mx_fab_test.dart`) — cheap, standalone.
+4. **P2-3** (FAB/empty-state stress specimen) — write the specimen first;
    only touch layout code if it actually shows overlap once rendered.
-6. **P1-3** (`MxDropdown` error state) — gated on reading the import
-   wizard's validation requirements first; do not guess at an API shape
-   before that.
-7. **P2-1 / P2-2** (menu disabled state, two-surface consistency rule) —
+5. **P2-1 / P2-2** (menu disabled state, two-surface consistency rule) —
    both are owner decisions before they are code changes; sequence after
    everything with a clear technical answer.
-8. **P2-4 / P3-1 / P3-2 / P3-3** — opportunistic, bundle into whichever of
+6. **P2-4 / P3-1 / P3-2 / P3-3** — opportunistic, bundle into whichever of
    the above changes happens to touch the same file.
 
 ---
@@ -697,9 +690,7 @@ is touched; not worth its own change.
 
 | change | file |
 |---|---|
-| P1-1 | `lib/core/theme/states/app_interaction_states.dart`, `test/core/theme/states/app_interaction_states_test.dart` |
-| P1-2 | `lib/features/card/presentation/widgets/items/tag_catalog_row_widget.dart`, a test near `mx_menu_button_test.dart` or a tag-catalog widget test |
-| P1-3 | `lib/shared/widgets/mx_dropdown.dart`, possibly `lib/core/theme/app_theme.dart` (`dropdownMenuTheme`), gated on `docs/use-cases.md`/`docs/business-rules.md` for card import |
+| P1-1 | `lib/features/card/presentation/widgets/items/tag_catalog_row_widget.dart`, a test near `mx_menu_button_test.dart` or a tag-catalog widget test |
 | P2-1 | `lib/shared/widgets/mx_menu_button.dart` |
 | P2-2 | `docs/architecture.md` or a new AD, no code change by itself |
 | P2-3 | `test/shared/widgets/mx_stress_specimens.dart`, possibly `lib/shared/widgets/mx_empty_state.dart` |
@@ -715,8 +706,13 @@ is touched; not worth its own change.
 ## 10. Owner decisions / deferred
 
 - **Does the card-import mapping wizard need a per-row dropdown error
-  state?** (P1-3) — needs a read of the import UC/BR docs this audit did not
-  scope in; the finding is the structural gap, not the product answer.
+  state?** — investigated and resolved **no**, after an initial draft of
+  this report speculatively raised it as a P1 without reading the domain
+  model. `CardTransferMapping.assign` makes a duplicate mapping structurally
+  unrepresentable and `card_import_preview_step_widget.dart:288–292` already
+  renders the BR-169 aggregate error the wizard needs (retraction note,
+  §7). `MxDropdown`'s missing error slot remains a true structural fact
+  (§4.4) but is not a defect against any read requirement.
 - **Is a visible-but-disabled menu row ever wanted, or is conditional
   inclusion the house style?** (P2-1) — both `MxMenuButton` and
   `MxActionSheet` currently agree on "hide, don't disable," so this may
