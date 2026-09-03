@@ -100,8 +100,10 @@ canonical M3 role  >  accessibility  >  MemoX structural system  >  Tokyo exact 
 | Dialog | background | `surfaceContainerHigh` | = | |
 | BottomSheet | background | `surfaceContainerLow` | = | nay là mặt giấy, theo rung |
 | BottomSheet | dragHandle | `onSurfaceVariant` | = | + state layer, không đổi role |
-| ListTile | selectedColor | `primary` | = | |
-| ListTile | icon / title / subtitle | `onSurfaceVariant` / `onSurface` / `onSurfaceVariant` | = | |
+| ListTile | selectedColor | `primary` | = | guard AST |
+| ListTile | icon / title / subtitle / trailing text | `onSurfaceVariant` / `onSurface` / `onSurfaceVariant` / `onSurfaceVariant` | = | guard AST (M100.36). Trước đó theme đặt `textColor: onSurface`, thứ `ListTile` chép lên **cả** subtitle (`list_tile.dart:934`) — subtitle mọi hàng từng mang mực title (#431 P1-1) |
+| ListTile | selectedTileColor | *(null — M3 không có)* | `semantic.surfaceSelected` | Bề mặt "đã chọn" app-owned duy nhất, dùng chung với tint của `MxCard` (§4I, M100.36) |
+| ListTile | minTileHeight | 56 (`_defaultTileHeight`) | = `AppSizing.rowMinHeight` | Nêu tường minh ở M100.36 — 48 là sàn chạm, 56 là hàng đọc (§4J) |
 | Divider | — | `outlineVariant` (M3 dùng ThemeData) | = | |
 | ProgressIndicator | color | `primary` | = | |
 | ProgressIndicator | linearTrack | `secondaryContainer` | = | |
@@ -210,7 +212,7 @@ Component theme sở hữu hình học **toàn cục**; shared widget chỉ thê
 | `buildSharedButtonStyle` | chiều cao tối thiểu (`AppSizing.touchTarget`), bề rộng tối thiểu, padding, shape, weight nhãn. `MxActionButtonSize.compact` là **trục kích thước** của shared widget (40 vẽ / 48 chạm, `label-md`), không phải một feature nêu lại — ranh giới dưới áp cho feature |
 | `buildInputDecorationTheme` | content padding, radius, stroke (input; focus ở focused-error), hint style, suffix colour. `MxSearchField` là composition riêng: sở hữu rung `body-md` của nó (widget đóng, §4P) |
 | `buildChipTheme` | chiều cao pill, padding, radius, weight nhãn |
-| `buildListTileTheme` | content padding, minVerticalPadding, shape |
+| `buildListTileTheme` | content padding, minVerticalPadding, `minTileHeight` (`AppSizing.rowMinHeight`), shape, ba rung chữ |
 | `buildDialogTheme` | shape |
 | `buildCardTheme` | shape, hairline |
 
@@ -247,3 +249,45 @@ không có consumer. Ring focus của filled button giữ lại vì
 trên fill — dưới sàn 3:1 của 1.4.11; `focus_ring_contrast_test.dart` ghim cả hai
 nửa. Composite dưới ngón tay được đo ở
 `mx_action_button_composite_state_test.dart`: ΔL\* 2.5–12, hue không xoay quá 4°.
+
+---
+
+## 7. Ranh giới hàng — `MxListTile` / `MxCard` / hàng thuộc feature
+
+Không có một đáp án chung "mọi thứ là Card" hay "mọi thứ là ListTile"
+(M100.36 §4H). Ranh giới là **ngữ nghĩa**, không phải mật độ:
+
+| Dựng bằng | Khi | Ví dụ production |
+|---|---|---|
+| `MxListTile` | hàng điều hướng / thiết lập / điều khiển / lựa chọn thông thường — một tiêu đề, một dòng phụ, glyph hai bên, một cú chạm | mục Reminders trong Settings, giờ nhắc, đích di chuyển / khôi phục, chọn chế độ / hướng học |
+| `MxCard` | một **thực thể** hoặc **mặt nội dung** mà nhóm và độ sâu của chính nó mang nghĩa | deck tile, card tile, mặt học, panel tóm tắt |
+| hàng thuộc feature | **chỉ khi** composition thật sự vượt quá ngữ nghĩa ListTile — vùng thứ ba trở lên, lưới số liệu, thân là widget, control lồng bên trong | `deck_tile_widget` (bốn vùng + nút Study), `progress_deck_row_widget` (tên + đường dẫn **+ lưới bốn số liệu**), `search_result_shell_widget` (thân là widget của từng loại kết quả) |
+
+Hai ứng viên #431 nêu để "đơn giản hoá" đã được xét theo quy tắc này và **ở
+lại Card**: hàng Progress mang một lưới số liệu dưới tiêu đề, và vỏ kết quả
+tìm kiếm nhận một `child` widget — cả hai vượt quá `String title / subtitle`.
+Không có caller nào đang vi phạm ranh giới; không di trú hàng loạt.
+
+Kèm theo, cho hàng:
+
+- **Trailing của `MxListTile` chỉ trình bày** (§4K): chevron, số đếm, glyph.
+  Control tự hành động — switch, checkbox, radio — là `MxSwitchRow`,
+  `MxCheckboxRow`, `MxRadioRows`.
+- **Chọn không đổi typography** (§4L): fill `surfaceSelected` + title
+  `primary` + glyph; subtitle giữ mực phụ. Semibold-khi-chọn của kit
+  (`mx.css:205`) bị từ chối vì nó reflow.
+- **Một ngữ pháp semantics cho mỗi loại chọn** (§10E): chọn-một →
+  `selected` + `inMutuallyExclusiveGroup` (`MxListTile.isSelected` non-null,
+  `MxRadioRows`); chọn-nhiều → `checked` (`MxCheckboxRow`, hàng trash);
+  điều hướng → `button`, không có selection. Card thực thể chọn-nhiều giữ
+  `MxCard` tint + mark (card tile), hàng chọn-nhiều giữ `MxPressable` + glyph
+  (trash) — hai ngữ pháp cho hai loại bề mặt, mỗi ngữ pháp một recipe.
+- **Một ngôn ngữ phân cách** (§10H): `Divider` của theme — `outlineVariant`,
+  một hairline, không chừa khoảng. Khoảng cách thuộc layout (`SizedBox` /
+  `Padding`), độ dày thuộc stroke. `borderDivider` gỡ ở M100.36 (không
+  consumer; ở light nó *là* màu trang). Khoảng cách giữa các card trong một
+  danh sách là quyết định của feature trên thang `AppSpacing` (sm / md / lg
+  tuỳ mật độ màn), không phải của theme.
+- **Một danh sách quyết định leading một lần**: trộn hàng có glyph dẫn và hàng
+  không có trong cùng một danh sách làm cột chữ nhảy 40dp. Không có danh sách
+  production nào trộn; ghi làm quy tắc.

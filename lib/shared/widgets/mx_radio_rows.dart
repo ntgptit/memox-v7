@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/extensions/theme_context_extension.dart';
+import 'mx_content_shell.dart';
 
 /// A pick-one group drawn as radio rows.
 ///
@@ -37,8 +37,8 @@ enum MxRadioRowsShape {
   /// card that holds other things too.
   block,
 
-  /// Rows divided by `borderDivider`, edge to edge. Right when the rows *are*
-  /// the card's content.
+  /// Rows divided by the theme's hairline, edge to edge. Right when the rows
+  /// *are* the card's content.
   list,
 }
 
@@ -50,7 +50,6 @@ class MxRadioRows<T> extends StatelessWidget {
     required this.labelOf,
     this.subtitleOf,
     this.isEnabled = true,
-    this.contentPadding = EdgeInsets.zero,
     this.shape = MxRadioRowsShape.block,
     super.key,
   });
@@ -71,14 +70,18 @@ class MxRadioRows<T> extends StatelessWidget {
   /// While false the whole group is locked.
   final bool isEnabled;
 
-  /// The gutter each row supplies for itself. Zero inside a card that already
-  /// pads its content; a horizontal inset when the row's ink should span a
-  /// card that pads vertically only.
-  final EdgeInsetsGeometry contentPadding;
-
   /// See [MxRadioRowsShape]. Defaults to [MxRadioRowsShape.block] — a divider
   /// is something a caller asks for, because only the caller knows whether its
   /// rows are the card or a part of it.
+  ///
+  /// **The gutter follows the shape** (M100.36 10I). A public
+  /// `contentPadding` used to let the settings screen restate `AppSpacing.lg`
+  /// as a literal — a value the theme owns and one that did not follow
+  /// `applyCompactScale` down to 12 at 320dp (#431 P2-6, P2-17). A `list`
+  /// supplies the screen gutter itself so its ink and its dividers can run
+  /// edge to edge across a card that pads vertically only; a `block` sits
+  /// inside a card that already pads its content and supplies nothing. Two
+  /// densities, and both were already the shape's meaning.
   final MxRadioRowsShape shape;
 
   void _ignoreChange(T? _) {}
@@ -90,8 +93,17 @@ class MxRadioRows<T> extends StatelessWidget {
     onChanged(value);
   }
 
+  EdgeInsetsGeometry _contentPadding(BuildContext context) => switch (shape) {
+    MxRadioRowsShape.block => EdgeInsets.zero,
+    MxRadioRowsShape.list => EdgeInsets.symmetric(
+      horizontal: mxScreenGutter(context),
+    ),
+  };
+
   @override
   Widget build(BuildContext context) {
+    final contentPadding = _contentPadding(context);
+
     return RadioGroup<T>(
       groupValue: selected,
       onChanged: isEnabled ? _onChanged : _ignoreChange,
@@ -102,13 +114,12 @@ class MxRadioRows<T> extends StatelessWidget {
           children: <Widget>[
             for (final (index, value) in values.indexed) ...<Widget>[
               // Between rows only — never above the first or below the last,
-              // where it would read as the card's own edge coming back.
-              if (index > 0 && shape == MxRadioRowsShape.list)
-                Divider(
-                  height: 1,
-                  thickness: 1,
-                  color: context.semanticColors.borderDivider,
-                ),
+              // where it would read as the card's own edge coming back. The
+              // theme's divider: `outlineVariant` at one hairline, the one
+              // separator language every list uses (M100.36 10H) — this used
+              // to be `borderDivider`, a second hairline that in light was the
+              // page colour itself (#431 P2-4).
+              if (index > 0 && shape == MxRadioRowsShape.list) const Divider(),
               RadioListTile<T>(
                 value: value,
                 enabled: isEnabled,

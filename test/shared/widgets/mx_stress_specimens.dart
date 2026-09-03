@@ -313,6 +313,30 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
     isInteractive: true,
   ),
   MxStressSpecimen(
+    // The two states whose extra ink and fill are most likely to fail on a
+    // squeezed row — #431 F18.1 found only the resting row stressed.
+    name: 'MxListTile (selected)',
+    build: () => const MxListTile(
+      title: kLongTitle,
+      subtitle: kLongLabel,
+      leading: Icon(Icons.radio_button_checked),
+      isSelected: true,
+      onTap: _noop,
+    ),
+    isInteractive: true,
+  ),
+  MxStressSpecimen(
+    name: 'MxListTile (disabled)',
+    build: () => const MxListTile(
+      title: kLongTitle,
+      subtitle: kLongLabel,
+      leading: Icon(Icons.style_outlined),
+      trailing: Icon(Icons.chevron_right),
+      isEnabled: false,
+      onTap: _noop,
+    ),
+  ),
+  MxStressSpecimen(
     name: 'MxListTile',
     build: () => const MxListTile(
       title: kLongTitle,

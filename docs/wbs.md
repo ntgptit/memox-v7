@@ -17111,6 +17111,58 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
     `mx_search_field_focused`. Widgetbook: knob `minLines`/`maxLines`, gỡ
     `readOnly`, use case `Focused + error`; search `Focused · textScale 2.5`.
   - Audit #433 đánh dấu IMPLEMENTED.
+- **Phase 4 — Row / ListTile.** Sáu P1 của #431 đóng; ranh giới hàng vs Card
+  viết thành quy tắc trước rồi mới xét caller — không di trú hàng loạt.
+  - **P1-1 / P2-14** `buildListTileTheme` bỏ `textColor`; khai `titleTextStyle`
+    (`onSurface`), `subtitleTextStyle` (`onSurfaceVariant`),
+    `leadingAndTrailingTextStyle` (`body-md` / `onSurfaceVariant` — thay
+    `label-sm` 11px, P2-8); ba binding AST mới. `MxListTile` đặt màu subtitle
+    tường minh khi enabled nên chọn chỉ đổi title (kit: `.mx-tile--selected
+    .mx-tile__title`), disabled vẫn xám theo hàng. Test đọc `RenderParagraph`.
+  - **P1-2 / 10B** `ExcludeFocus(excluding: !isInteractive)`: hàng không có
+    `onTap` ra khỏi thứ tự focus, không ring, không `button`.
+  - **P1-3 / 10C** `MxPressable` bọc `MxFocusRing`; `MxFocusRing` nhận gate
+    `FocusHighlightMode.traditional` (như `MxCard`) nên ba nơi dùng ring —
+    hàng, pressable, pill — trả một câu (P2-2). `MxListTile` bỏ ring tự vẽ và
+    `FocusNode` riêng (P3 hiệu năng). Test: Tab → ring ≥ 3:1, rect không đổi;
+    focus lập trình ở touch mode → không ring.
+  - **P1-4 / §4I** `selectedTileColor` = `semantic.surfaceSelected`, chung với
+    tint của `MxCard`; `component_depth_and_state_test` bỏ tautology, ghim
+    `textColor == null` và fill chọn. `surfaceMuted` vẫn 37 consumer khác.
+  - **P1-5 / 10E** `isSelected` tri-state (`bool?`); non-null ⇒
+    `Semantics(inMutuallyExclusiveGroup: true)`. Ba ngữ pháp semantics ghi ở
+    §7 mapping. SDK: `ListTile` 3.44.8 vẫn phát `hasSelectedState` cho null —
+    ghi trong doc tham số, không giả vờ đã gỡ được.
+  - **P1-6 / §4H** ranh giới ghi ở `tokyo-component-mapping.md` §7; hai ứng
+    viên (`progress_deck_row`: lưới số liệu; `search_result_shell`: thân là
+    widget) vượt ngữ nghĩa ListTile → **ở lại Card**, có lý do.
+  - **P2-1 / §4J** `AppSizing.rowMinHeight = 56` khai trên theme
+    (`minTileHeight`); 48 vẫn là sàn chạm. Test sizing.
+  - **P2-4/5 / 10H** một ngôn ngữ phân cách: 9 site `Divider` về theme
+    (`outlineVariant`, hairline); khoảng cách chuyển sang `SizedBox`/`Padding`
+    trên thang; `borderDivider` gỡ khỏi extension, palette, kit CSS và parity
+    map (0 consumer; ở light nó là màu trang). `card_detail_hierarchy_test`
+    OLD "divider.color == borderSubtle" → NEW "color null, theme =
+    outlineVariant".
+  - **P2-6/17 / 10I** `MxRadioRows.contentPadding` và bản sao ở
+    `SettingsChoiceRowsWidget` gỡ; gutter suy từ `shape` (`list` →
+    `mxScreenGutter`, `block` → 0) nên theo compact scale.
+  - **P2-11** `MxListTile` sở hữu `Material(transparency)`; hai shim tay ở
+    Settings/Reminder gỡ; comment D20 lỗi thời sửa. Góc 12-trong-16 khi hàng
+    nằm trong card: **DEBT** (P3).
+  - **P2-12** `MxSwitchRow` một rung `body-lg` cho cả hai nhánh.
+  - **P2-7** `MxIcon` leading không xám khi disabled: **ACCEPTED (contract)** —
+    không caller nào kết hợp; `MxIcon` đặt màu tường minh theo thiết kế, hàng
+    disabled không sửa `MxIcon` toàn cục (10J). **P2-9** trailing chỉ trình
+    bày (§4K) → không có icon-button trailing. **P2-10** "một danh sách quyết
+    định leading một lần" ghi ở §7. **P2-13** hai ngữ pháp chọn-nhiều ghi ở
+    §7. **P2-16** khoảng cách giữa card thuộc feature — ghi ở §7.
+  - Stress: specimen `MxListTile (selected)` / `(disabled)`. Golden mới:
+    `mx_list_tile_states` (rest / selected / disabled / selected+disabled một
+    tấm). Widgetbook: knob `has onTap` tách khỏi `enabled`, `selection`
+    ba giá trị.
+  - **§4L** weight khi chọn không đổi — test ghim `fontWeight` của title.
+  - Audit #431 đánh dấu IMPLEMENTED; parity C6.
 - **Scope:** `lib/core/theme/components/{actions,inputs,content,selection}/`,
   `lib/core/theme/states/`, `lib/core/theme/foundations/app_sizing.dart`,
   `lib/shared/widgets/mx_{action_button,text_button,text_field,search_field,
@@ -17128,7 +17180,7 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
   - [x] Phase 0: baseline xanh trước khi sửa (số liệu ở trên).
   - [x] Phase 1: guard role/state cho FilledButton, TextField, ListTile;
         test giao điểm state cho hàng; `MxCheckboxRow` có test file.
-  - [x] Phase 2 Button · [x] Phase 3 Input · [ ] Phase 4 Row ·
+  - [x] Phase 2 Button · [x] Phase 3 Input · [x] Phase 4 Row ·
         [ ] Phase 5 Chip/Pill · [ ] Phase 6 cross-component/docs/Widgetbook ·
         [ ] Phase 7 golden Linux 100%.
   - [ ] Không invariant nào của #426/#427/#429/#435 lùi; không hạ sàn

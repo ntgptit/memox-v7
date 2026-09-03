@@ -31,6 +31,23 @@ void main() {
       }
     });
 
+    test(
+      'the reading row is above the touch floor, and the theme states it',
+      () {
+        // 48 is a floor a finger needs; 56 is what a list the eye reads down
+        // wants (M100.36 4J). Owned here rather than left to Flutter's
+        // `_defaultTileHeight`, and put on the theme so every ListTile reads it.
+        expect(AppSizing.rowMinHeight, greaterThan(AppSizing.touchTarget));
+        expect(AppSizing.rowMinHeight, 56);
+        for (final build in <ThemeData Function()>[
+          buildLightTheme,
+          buildDarkTheme,
+        ]) {
+          expect(build().listTileTheme.minTileHeight, AppSizing.rowMinHeight);
+        }
+      },
+    );
+
     test('the compact body is smaller than the target it keeps', () {
       // The whole point of the compact tier: the body comes down, the finger's
       // floor does not. If these ever met, `MaterialTapTargetSize.padded` would

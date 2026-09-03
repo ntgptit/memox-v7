@@ -19,16 +19,16 @@ guess.
 | | |
 |---|---|
 | Files scanned (`lib/`, hand-written) | 722 |
-| Colour sites found | 346 |
-| Violations | 26 |
+| Colour sites found | 337 |
+| Violations | 24 |
 
 **By element kind**
 
 | kind | sites |
 |---|---|
-| other | 280 |
+| other | 278 |
 | background | 28 |
-| border | 16 |
+| border | 9 |
 | shadow | 3 |
 | text | 19 |
 
@@ -40,8 +40,8 @@ guess.
 | opacity-modified-token | 21 |
 | blend-source | 5 |
 | Colors-material | 14 |
-| hardcoded-literal | 115 |
-| theme-token | 64 |
+| hardcoded-literal | 113 |
+| theme-token | 57 |
 
 **By violation code**
 
@@ -49,7 +49,7 @@ guess.
 |---|---|---|
 | V1 | 2 | neutral not derived from the seed |
 | V2 | 0 | role component using a colour outside its role |
-| V3 | 24 | literal duplicating an existing token |
+| V3 | 22 | literal duplicating an existing token |
 | V4 | 0 | hand-picked role variant instead of a generated one |
 | V5 | 0 | translucency applied at the paint site |
 | V6 | 0 | defined for one brightness, different mechanism in the other |
@@ -60,16 +60,14 @@ guess.
 |---|---|---|---|---|---|---|
 | V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:60` | Color(0xFFE4E7EA) | `#E4E7EA` | `#E4E7EA` | colorScheme.outlineVariant |
 | V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:64` | Color(0xFF272C48) | `#272C48` | `#272C48` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:114` | Color(0xFFF2F5F9) | `#F2F5F9` | `#F2F5F9` | colorScheme.surface |
-| V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:121` | Color(0xFF252C55) | `#252C55` | `#252C55` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:123` | Color(0xFF5569FF) | `#5569FF` | `#5569FF` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:127` | Color(0xFF8C7CF0) | `#8C7CF0` | `#8C7CF0` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:139` | Color(0xFFAAB4FF) | `#AAB4FF` | `#AAB4FF` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:154` | Color(0xFF7063C0) | `#7063C0` | `#7063C0` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:181` | Color(0xFF8896FF) | `#8896FF` | `#8896FF` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:186` | Color(0xFF5B65B2) | `#5B65B2` | `#5B65B2` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:235` | Color(0xFF6F727B) | `#6F727B` | `#6F727B` | colorScheme.outline |
-| V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:281` | Color(0xFF747BA3) | `#747BA3` | `#747BA3` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:66` | Color(0xFF5569FF) | `#5569FF` | `#5569FF` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:70` | Color(0xFF8C7CF0) | `#8C7CF0` | `#8C7CF0` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:82` | Color(0xFFAAB4FF) | `#AAB4FF` | `#AAB4FF` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:97` | Color(0xFF7063C0) | `#7063C0` | `#7063C0` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:124` | Color(0xFF8896FF) | `#8896FF` | `#8896FF` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:129` | Color(0xFF5B65B2) | `#5B65B2` | `#5B65B2` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:178` | Color(0xFF6F727B) | `#6F727B` | `#6F727B` | colorScheme.outline |
+| V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:224` | Color(0xFF747BA3) | `#747BA3` | `#747BA3` | no token within ΔE-ish range — needs a new one |
 | V3 | 🟡 | `lib/core/theme/foundations/app_surface_colors.dart:60` | Color(0xFFF2F5F9) | `#F2F5F9` | `#F2F5F9` | colorScheme.surface |
 | V3 | 🟡 | `lib/core/theme/foundations/app_surface_colors.dart:62` | Color(0xFF070C27) | `#070C27` | `#070C27` | no token within ΔE-ish range — needs a new one |
 | V3 | 🟡 | `lib/core/theme/foundations/app_surface_colors.dart:78` | Color(0xFFFFFFFF) | `#FFFFFF` | `#FFFFFF` | colorScheme.onPrimary |
@@ -88,10 +86,6 @@ guess.
 - **V3** `Color(0xFFE4E7EA)` — A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #E4E7EA.
 
 - **V3** `Color(0xFF272C48)` — A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #272C48.
-
-- **V3** `Color(0xFFF2F5F9)` — A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #F2F5F9.
-
-- **V3** `Color(0xFF252C55)` — A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #252C55.
 
 - **V3** `Color(0xFF5569FF)` — A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #5569FF.
 

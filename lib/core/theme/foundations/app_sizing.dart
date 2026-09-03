@@ -42,6 +42,18 @@ abstract final class AppSizing {
   /// one control dimension the design system could not see.
   static const double controlCompact = 40;
 
+  /// The one-line reading or control row — `ListTile`'s own 56, stated.
+  ///
+  /// **A row is not a button** (M100.36 4J). [touchTarget] is the floor a
+  /// finger needs; a list the eye reads down wants more than the floor, and
+  /// Material's `_defaultTileHeight` gives it 56 for one line, 72 for two.
+  /// The number was Flutter's and nobody's here (#431 P2-1) — the kit says 48
+  /// for a desktop tile, and the app had been rendering 56 + 4 + 4 without a
+  /// token to say so. A *minimum*: a two-line row grows past it, and text is
+  /// never clipped to hold it. Compact mode keeps it; 48 is reserved for
+  /// controls that are only a target.
+  static const double rowMinHeight = 56;
+
   /// Material's floating action button, which declares no public constant for
   /// its own size.
   ///

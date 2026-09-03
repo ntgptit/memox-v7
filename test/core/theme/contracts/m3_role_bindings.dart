@@ -435,6 +435,36 @@ const List<RoleBinding> roleBindings = <RoleBinding>[
   ),
   RoleBinding(
     component: 'ListTile',
+    slot: 'titleTextStyle',
+    file: _listTile,
+    scope: 'buildListTileTheme',
+    requires: <String>['onSurface'],
+    refuses: <String>['onSurfaceVariant', 'primary'],
+    because: '_LisTileDefaultsM3.titleTextStyle is bodyLarge in onSurface.',
+  ),
+  RoleBinding(
+    component: 'ListTile',
+    slot: 'subtitleTextStyle',
+    file: _listTile,
+    scope: 'buildListTileTheme',
+    requires: <String>['onSurfaceVariant'],
+    refuses: <String>['onSurface', 'primary'],
+    because:
+        '_LisTileDefaultsM3.subtitleTextStyle is bodyMedium in '
+        'onSurfaceVariant. A theme-level `textColor` flattened it onto the '
+        'title ink for every ListTile in the app until M100.36 (#431 P1-1).',
+  ),
+  RoleBinding(
+    component: 'ListTile',
+    slot: 'leadingAndTrailingTextStyle',
+    file: _listTile,
+    scope: 'buildListTileTheme',
+    requires: <String>['onSurfaceVariant'],
+    refuses: <String>['onSurface', 'primary'],
+    because: 'Trailing text is the secondary ink, at a readable rung.',
+  ),
+  RoleBinding(
+    component: 'ListTile',
     slot: 'iconColor',
     file: _listTile,
     scope: 'buildListTileTheme',

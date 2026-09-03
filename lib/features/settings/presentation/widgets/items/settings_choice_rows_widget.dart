@@ -32,7 +32,6 @@ class SettingsChoiceRowsWidget<T extends Enum> extends StatelessWidget {
     required this.labelOf,
     required this.onChanged,
     required this.isSubmitting,
-    this.contentPadding = EdgeInsets.zero,
     this.shape = MxRadioRowsShape.block,
     super.key,
   });
@@ -50,14 +49,9 @@ class SettingsChoiceRowsWidget<T extends Enum> extends StatelessWidget {
   /// While true the whole group is locked and says so (BR-216, W3 state 4).
   final bool isSubmitting;
 
-  /// The gutter each row supplies for itself.
-  ///
-  /// Zero inside a card that already pads its content; `AppSpacing.lg`
-  /// horizontally inside a card padded vertically only, so the row's target and
-  /// ink span the card while its content stays on the screen's one column (W5).
-  final EdgeInsetsGeometry contentPadding;
-
-  /// See [MxRadioRowsShape].
+  /// See [MxRadioRowsShape]. The gutter follows it: a `list` supplies the
+  /// screen gutter so the row's target and ink span the card while its content
+  /// stays on the screen's one column (W5); a `block` supplies none.
   final MxRadioRowsShape shape;
 
   @override
@@ -76,7 +70,6 @@ class SettingsChoiceRowsWidget<T extends Enum> extends StatelessWidget {
       isEnabled: !isSubmitting,
       onChanged: onChanged,
       labelOf: labelOf,
-      contentPadding: contentPadding,
       shape: shape,
     ),
   );

@@ -53,10 +53,6 @@ void main() {
       AppBorderColors.borderOptionLight,
       AppBorderColors.borderOptionDark,
     ),
-    '--color-border-divider': (
-      AppBorderColors.borderDividerLight,
-      AppBorderColors.borderDividerDark,
-    ),
     '--color-border-selected': (
       AppBorderColors.borderSelectedLight,
       AppBorderColors.borderSelectedDark,

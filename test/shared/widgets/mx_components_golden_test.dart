@@ -296,6 +296,7 @@ void main() {
         ),
       ),
     ),
+    'mx_list_tile_states': const ListTileStatesSpecimen(),
     'mx_list_tile': const Scaffold(
       body: OnSheetSurface(
         child: MxListTile(

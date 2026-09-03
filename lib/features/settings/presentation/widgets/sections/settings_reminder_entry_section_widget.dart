@@ -24,27 +24,21 @@ class SettingsReminderEntrySectionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MxCard.raised(
-      // Flat, like every other card in a scrolling body (D20). A raised card
-      // here would be the only shadow on the screen.
+      // Raised, like every sibling section on this screen (the D20 note that
+      // once stood here described a flat card the code had already left).
+      // `MxListTile` carries its own transparent `Material` since M100.36, so
+      // the shim that used to sit here is gone.
       padding: MxCardPadding.none,
-      // `Material` inside the card, and it is not decoration: `MxCard` paints
-      // its surface with a `DecoratedBox`, and `ListTile` paints its background
-      // and ink onto the nearest `Material` ancestor — which without this is the
-      // Scaffold, *behind* the card. Flutter asserts on exactly that
-      // arrangement. Transparent, so the card's own colour still shows.
-      child: Material(
-        type: MaterialType.transparency,
-        child: MxListTile(
-          title: context.l10n.reminderTitle,
-          leading: const Icon(Icons.notifications_outlined),
-          // Sized and coloured explicitly, and excluded from semantics, like
-          // the app's other navigation chevron: a screen reader announcing
-          // "chevron right" after the row's own label adds nothing, and the
-          // `ListTile` defaults it happens to agree with today are not a
-          // contract.
-          trailing: const ExcludeSemantics(child: MxIcon(Icons.chevron_right)),
-          onTap: onOpen,
-        ),
+      child: MxListTile(
+        title: context.l10n.reminderTitle,
+        leading: const Icon(Icons.notifications_outlined),
+        // Sized and coloured explicitly, and excluded from semantics, like
+        // the app's other navigation chevron: a screen reader announcing
+        // "chevron right" after the row's own label adds nothing, and the
+        // `ListTile` defaults it happens to agree with today are not a
+        // contract.
+        trailing: const ExcludeSemantics(child: MxIcon(Icons.chevron_right)),
+        onTap: onOpen,
       ),
     );
   }

@@ -4,9 +4,12 @@ import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/shared/widgets/mx_confirm_dialog.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
 import 'package:memox/shared/widgets/mx_progress_bar.dart';
+import 'package:memox/shared/widgets/mx_list_tile.dart';
 import 'package:memox/shared/widgets/mx_search_field.dart';
 import 'package:memox/shared/widgets/mx_session_top_bar.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
+
+import 'golden_surfaces.dart';
 
 /// Specimen widgets for the golden suite.
 ///
@@ -435,6 +438,58 @@ class SessionTopBarSpecimen extends StatelessWidget {
               trailing: Text('0:12'),
               onClose: _noop,
               closeLabel: 'Close session',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static void _noop() {}
+}
+
+/// The row in its four resting states on one sheet — rest, selected,
+/// disabled, and the intersection nothing pictured: selected + disabled.
+/// One image, one comparison, instead of three files and a gap (#431 §24).
+class ListTileStatesSpecimen extends StatelessWidget {
+  const ListTileStatesSpecimen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: OnSheetSurface(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            MxListTile(
+              title: 'Front → back',
+              subtitle: 'Show the term, recall the meaning',
+              leading: Icon(Icons.radio_button_unchecked),
+              isSelected: false,
+              onTap: _noop,
+            ),
+            MxListTile(
+              title: 'Back → front',
+              subtitle: 'Show the meaning, recall the term',
+              leading: Icon(Icons.radio_button_checked),
+              isSelected: true,
+              onTap: _noop,
+            ),
+            MxListTile(
+              title: 'Mixed',
+              subtitle: 'Not available for this deck',
+              leading: Icon(Icons.radio_button_unchecked),
+              isSelected: false,
+              isEnabled: false,
+              onTap: _noop,
+            ),
+            MxListTile(
+              title: 'Picked, then locked',
+              subtitle: 'A choice held while a request is in flight',
+              leading: Icon(Icons.radio_button_checked),
+              isSelected: true,
+              isEnabled: false,
+              onTap: _noop,
             ),
           ],
         ),

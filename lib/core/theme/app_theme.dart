@@ -258,7 +258,7 @@ ThemeData _buildTheme(ColorScheme scheme, AppSemanticColors semantic) {
     // renders through them — a theme for one nobody builds is a decision made
     // without a screen to check it against.
     iconButtonTheme: buildIconButtonTheme(scheme, semantic),
-    listTileTheme: buildListTileTheme(scheme, semantic),
+    listTileTheme: buildListTileTheme(scheme, semantic, texts),
     dialogTheme: buildDialogTheme(scheme, texts),
     bottomSheetTheme: buildBottomSheetTheme(scheme),
 

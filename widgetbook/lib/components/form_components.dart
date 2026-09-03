@@ -581,7 +581,17 @@ WidgetbookComponent listTileComponent() {
             label: 'enabled',
             initialValue: true,
           );
-          final isSelected = context.knobs.boolean(label: 'selected');
+          // Separate from `enabled`: an inert row is the state #431 P1-2
+          // found unreachable in the catalogue.
+          final isInteractive = context.knobs.boolean(
+            label: 'has onTap',
+            initialValue: true,
+          );
+          // Tri-state, as the API is: `none` announces nothing.
+          final selection = context.knobs.object.dropdown<String>(
+            label: 'selection',
+            options: const <String>['none', 'unselected', 'selected'],
+          );
 
           return Scaffold(
             body: SafeArea(
@@ -595,9 +605,13 @@ WidgetbookComponent listTileComponent() {
                   trailing: hasTrailing
                       ? const Icon(Icons.chevron_right)
                       : null,
-                  onTap: _noop,
+                  onTap: isInteractive ? _noop : null,
                   isEnabled: isEnabled,
-                  isSelected: isSelected,
+                  isSelected: switch (selection) {
+                    'selected' => true,
+                    'unselected' => false,
+                    _ => null,
+                  },
                 ),
               ),
             ),

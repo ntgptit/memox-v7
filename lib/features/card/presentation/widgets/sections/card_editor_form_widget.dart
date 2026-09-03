@@ -137,7 +137,11 @@ class CardEditorFormWidget extends StatelessWidget {
         const SizedBox(height: AppSpacing.xl),
         CardTagSectionWidget(cardId: cardId, onDraftChanged: onTagDraftChanged),
         const SizedBox(height: AppSpacing.xl),
-        const Divider(height: AppSpacing.xl),
+        // The gap is the layout's, the line is the theme's (M100.36 10H).
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
+          child: Divider(),
+        ),
         CardTrashActionWidget(
           deckId: deckId,
           cardId: cardId,
