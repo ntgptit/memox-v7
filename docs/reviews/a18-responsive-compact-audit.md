@@ -8,6 +8,7 @@
 | Declared SDK | Flutter **3.44.8** stable · Dart `^3.12.2` (`pubspec.yaml`) |
 | Scope | Every width-, orientation-, density- and text-scale-dependent decision under `lib/`, plus the tests, goldens, Widgetbook and CSS kit that are supposed to hold them |
 | Mode | **Report only.** No production, theme, test, Widgetbook, kit or golden file was changed. `git status` verified clean apart from this file |
+| Revised | **After merge.** `#448` merged at `999afe6a`; two Codex review comments on it identified real errors in **R3** and **R7**, both verified against the source and corrected here. R3 is reframed and downgraded to P3; R7's mechanism is replaced. §17 is the record |
 | Widths audited | **320 / 360 / 375 / 393**, plus the one upper edge that exists (`AppBreakpoints.medium` = 600) |
 
 ## 0 · Method, and what it could not do
@@ -58,21 +59,28 @@ looked at.
 
 ## 1 · Verdict
 
-**The breakpoint model is sound, deliberately small, and honestly documented,
-and there is no P0 or P1 in the responsive system.** Two findings survive as
-this audit's own: one constant compared against two different widths, and a
-scrollbar tuned for a desktop the app does not ship to while carrying a mobile
-job it cannot do at 1.79 : 1.
+**The breakpoint model is sound, deliberately small, and honestly documented.
+There is no P0 and no P1 in the responsive system, and after review there is
+exactly one P2:** the scrollbar thumb, tuned for a desktop the app does not ship
+to while carrying a mobile job it cannot do at 1.79 : 1.
 
-**Three of this audit's draft findings did not survive review**, and that is the
-honest headline. One was falsified outright by an SDK constant this session
-could not read. Two — including the one written here as a P1 — were filed
-independently by sibling audits that landed mid-pass, at P3, with better
-mechanisms and better fix shapes than this audit had. §15 is the ledger. It is
-part of the finding set rather than an appendix: a report that quietly drops a
-claim it made is worse than one that never made it, and a report that restates a
-neighbour's finding at a louder severity is how a project ends up with two
-answers to one question.
+**Five of this audit's draft findings did not survive review**, and that is the
+honest headline of the report.
+
+- One was **falsified** by an SDK constant this session could not read (R2 — the
+  `AppBar`'s 1.34× title clamp).
+- Two were **filed first by sibling audits** that landed mid-pass, at P3, with
+  better mechanisms and better fix shapes — including the finding written here
+  as a P1 (R1 → A19-20). §15 is that ledger.
+- Two were **wrong on the merits and corrected after the PR merged**, on review
+  comments that turned out to be right: **R3** called a documented, tested
+  contract "drift" and proposed a behaviour change to fix it; **R7** blamed a
+  code path the E2E channel never executes. §17 is that record.
+
+None of this is incidental to the deliverable. An audit's value is its
+description of the system, and its claims are only worth what its worst claim is
+worth — so the withdrawals are in the body rather than in a footnote. **Read
+§§2–12 as the description and §13 as the much shorter claim.**
 
 What is right, and what the next pass must not "simplify":
 
@@ -108,14 +116,15 @@ What the next pass has to fix:
 
 | # | Finding | Sev |
 |---|---|---|
-| R3 | `MxHeroCard` compares a **card** width against a **screen** constant → the effective threshold is 392 dp; 360 / 375 / 390 take one branch and 393 takes the other, and the two test harnesses straddle it | **P2** |
 | R5 | Scrollbar thumb measures **1.79 : 1** light / **2.00 : 1** dark on the card paper, from a bare `0.4` alpha that is on no token — on the one surface where the scrollbar *is* the "there is more to read" cue | **P2** |
+| R3′ | The effective hero threshold is **392 dp** and nothing says so — three of this audit's four required widths fall on the cramped side, and the project's three rendering surfaces (393 goldens, 390 host tests, 390 E2E) do not agree about the branch | P3 |
 | R2′ | The one breadcrumb path that sizes itself with a **fixed** `SizedBox(height:)` instead of a `minHeight` — safe today only because of the 1.34 AppBar clamp, and a hidden precondition on A8's P1-02 option (B) | P3 |
 | R6 | `ScrollbarThemeData.thickness` is a `WidgetStatePropertyAll`, so it is 4 dp in **every** state — no hover/drag thickening on the channel that has a pointer | P3 |
-| R7 | `MobileFrameWidget` zeroes `viewInsets`, `viewPadding` **and** `padding` → the E2E/visual channel cannot reproduce a keyboard or a cutout at all | P3 |
+| R7′ | The E2E/visual channel cannot reproduce a keyboard, cutout or gesture strip — **because a browser viewport has none**, not because of the frame's `copyWith`, which its 390×844 config never reaches. A decision to record, not a mechanism to change | P3 |
 | R8 | `mxSheetBottomObstruction` uses `MediaQuery.of` — one of only two full-data subscriptions in `lib/` | P3 |
 | R9 | `AppBreakpoints.medium` caps 4 surfaces of ~26 → above 600 dp the app is half-capped, by accretion rather than by decision | P3 |
 | R10 | Kit parity: the CSS kit publishes the compact tokens but has **no rule that applies them**, no compact gutter token, and neither shipped device is below 360 | P3 |
+| ~~R3~~ | "One tier constant, two measurement bases" — **withdrawn.** The card-width reading is documented at `mx_hero_card.dart:22-33,50-51` and pinned by `hero_action_width_test.dart:37-40`; the proposed fix would have changed rendering at 360–391 (§17) | — |
 | ~~R1~~ | Sheets omitting `useSafeArea` — **filed independently as A19-20 (P3)**, over a broader 17-site census and with the better fix shape. Written here as a P1; A19's severity and framing are adopted (§15.2) | — |
 | ~~R4~~ | The deck list's extra `viewPadding.bottom` — **already filed as A8's P3-20**, with a sharper mechanism than this audit had. Handed over, not restated (§15) | — |
 | ~~R6a~~ | The raw `4` thumb thickness as an *untokenised* dimension — **A16's G-21**. R6 above keeps only the half A16 did not look at: that the property is state-*invariant* | — |
@@ -128,7 +137,7 @@ reaches it. The arithmetic in §7.1 was right; the premise that the ambient
 scaler reaches that text was wrong, and it was wrong for exactly the reason §0
 gives — no SDK to read. What survives is R2′, at P3.
 
-And the coverage holes that let R3 and R5 exist unnoticed:
+And the coverage holes that let R3′ and R5 sit unnoticed:
 
 | # | Gap | Sev |
 |---|---|---|
@@ -354,7 +363,7 @@ it:
 | `_kButtonMinWidth` (`deck_study_button_widget.dart:11`) | 80 | yes | correct — a `minWidth`, grows |
 | `widthPerNavigationDestination` | 120 | yes | correct — a cap that self-disarms; parity-checked against the CSS kit |
 | `MxDialogMetrics.inset` / `actionsInset` | 40 / 24 | n/a | correct — stated so an SDK bump cannot move it silently |
-| `kMobileFrameSize` | 393 × 852 | n/a | dev-channel only; see R7 |
+| `kMobileFrameSize` | 393 × 852 | n/a | dev-channel only, and **not reached by the E2E config at all** — 390×844 passes straight through (§9.4, R7′) |
 | `NavigationBar` height | Material default, **no app token** | yes, labels | Resolved by A8: labels are clamped to **1.3×** (`navigation_bar.dart:31`, applied `:505-512`), so the default height is safe at any user setting. A8 files the *unstated assumption* as its G10 — nothing in this repo pins either SDK clamp |
 
 ---
@@ -424,7 +433,8 @@ most common phone widths in the world, they take a different branch from the
 reference device on at least one rule (R3), and the repository renders neither
 of them anywhere.** A8 filed the 375 half as its P3-21; the reason this audit
 still asks for a shared width matrix is G3 — the same fixture is what makes R3
-visible, and R3 is invisible at both of the widths currently tested.
+visible, and R3′'s 392 dp boundary is invisible at both of the widths
+currently tested.
 
 ### 7.4 320 × scale 2 and × scale 3, where it is critical
 
@@ -561,22 +571,41 @@ from #348 — so the row/stack decision is right in a dialog, a sheet and a page
 alike. All three dialogs are `scrollable: true`, with the reason written down.
 Nothing to file.
 
-### 9.4 R7 — what the E2E channel cannot see
+### 9.4 R7 — what the E2E channel cannot see, and why not
 
-`MobileFrameWidget` overrides the framed `MediaQuery` with:
+**Corrected after review** (Codex on #448, verified against the source). The
+first version of this section blamed `MobileFrameWidget`'s `copyWith`:
 
 ```dart
 size: kMobileFrameSize, padding: .zero, viewPadding: .zero, viewInsets: .zero
 ```
 
-Framing the size is the point of the widget. Zeroing the other three means the
-web build — the project's E2E and visual-regression channel — **can never
-reproduce a keyboard, a status bar, a cutout or a gesture strip.** Every finding
-in §9 is therefore host-test-only by construction, and no Playwright run can
-regress or confirm one. That is a defensible trade (a browser has no soft
-keyboard to report anyway) but it should be a written decision rather than a
-side effect of a `copyWith`, because it silently narrows what the E2E suite is
-evidence for.
+**That branch never runs on the E2E channel.** `e2e/playwright.config.ts:37`
+sets `viewport: { width: 390, height: 844 }`, and the frame only engages when
+**both** dimensions exceed it:
+
+```dart
+final hasRoomToFrame = constraints.maxWidth  > kMobileFrameSize.width    // > 393
+                    && constraints.maxHeight > kMobileFrameSize.height;  // > 852
+if (!hasRoomToFrame) return child;                    // mobile_frame_widget.dart:47-50
+```
+
+390 < 393 and 844 < 852, so Playwright gets the child unframed and the
+`copyWith` is not reached. The conclusion survives and the reason changes: the
+E2E channel reports no keyboard, status bar, cutout or gesture strip **because a
+browser viewport has none**, not because the app zeroed them. Every finding in
+§9 is still host-test-only, and no Playwright run can regress or confirm one —
+but that is a property of the channel, not a side effect of a widget, and R7 is
+therefore a decision to record rather than a mechanism to change.
+
+**The pass-through has a consequence worth more than the original finding.**
+Because 390×844 is *below* the frame, the E2E and visual-regression channel runs
+at a real width of **390**, not 393 — which puts it in the cramped band for
+`MxHeroCard` (390 − 32 = 358 < 360) while every committed golden at 393 renders
+the other branch. So the project's two rendering channels disagree about that
+one rule, and neither is wrong on its own terms. That is the coverage half of
+R3, and it is now measured on the E2E config rather than inferred from a test
+harness default.
 
 ---
 
@@ -756,46 +785,6 @@ R2′ will do. What replaced it is R2′, at P3, below.
 
 ---
 
-**R3 · One tier constant, two measurement bases**
-
-*Evidence.* `mx_hero_card.dart:58` passes `constraints.maxWidth` — the card,
-which is screen − 2 × gutter — to `AppBreakpoints.isCompact`, a constant defined
-and documented as a **screen** width. Solving `screen − 32 < 360` gives an
-effective threshold of **392 dp**. Table in §4: 360, 375 and 390 take the
-cramped branch; 393 does not. `hero_action_width_test.dart:37–40` states the
-1 dp margin at 393 explicitly and covers 320 and 393 only. §12.2: the two test
-harness defaults sit either side of the effective threshold.
-
-*Why it is P2, not P3.* This is not merely fragile — it means the hero primary
-renders stretched on most phones in circulation and hugging on the one device
-every committed picture is shot on, so the golden set systematically shows the
-minority branch.
-
-*Closure test.* Extend `hero_action_width_test.dart` to
-`const widths = [320, 360, 375, 390, 393]` and assert the branch for each
-against a stated table. Today's code will make 360/375/390 stretch; the test
-then records that as intended, or the constant is fixed and the test records
-that instead.
-
-*Decision required before fixing.* Either
-**(a)** the rule is "the *screen* is narrow" → read `MediaQuery.sizeOf().width`
-like the other five sites, and `MxHeroCard`'s `LayoutBuilder` is only for
-`isCramped`'s *value*, or
-**(b)** the rule is "the *card* is narrow" → it needs its own named constant
-(e.g. `AppBreakpoints.compactContent`), because reusing the screen tier is what
-makes the effective number invisible. **(a)** is the smaller change and matches
-what every neighbouring rule does; **(b)** is what the docstring currently
-argues for. Owner's call — do not pick it inside a fix commit.
-
----
-
-**R4 · handed to A8's P3-20 — see §8.** The mechanism this audit proposed was
-wrong and A8's is right; restating it here at a different severity is exactly
-the two-copies-one-drifts failure `docs/document-conventions.md` exists to
-prevent.
-
----
-
 **R5 · The scrollbar thumb is below the contrast floor where it is the only cue**
 
 *Evidence.* §11. Computed 1.79 : 1 light, 2.00 : 1 dark against
@@ -827,7 +816,7 @@ width matrix is what closes it**
 *Evidence.* §12.1. `375` occurs in one file (`mx_card_mobile_test.dart`); `360`
 is a default surface in `mx_navigation_bar_test.dart` and appears in two others;
 neither is a screen-level surface anywhere, and neither has a golden.
-`hero_action_width_test.dart` pins 320 and 393 — the two widths at which R3 is
+`hero_action_width_test.dart` pins 320 and 393 — the two widths at which R3′ is
 invisible. A8's **P3-21** already files the 375 half of this as a coverage gap;
 what this audit adds is *why it now has a defect attached to it.*
 
@@ -859,11 +848,62 @@ the next audit does not re-open it.
 
 ### P3
 
+---
+
+**R3′ · The effective threshold is 392 dp, and nothing says so**
+
+**Reframed and downgraded after review** (Codex on #448). The first version
+filed this as *drift* — "one tier constant, two measurement bases" — and leaned
+toward reading `MediaQuery.sizeOf().width` instead. **Both were wrong**, and the
+objection is correct on both counts:
+
+- The card-width reading is **deliberate and documented.** `mx_hero_card.dart:22-33`
+  is three paragraphs on why the measurement must sit outside the card, and
+  `:50-51` states the contract in as many words — *"the **card's** width against
+  the compact tier — 361 at a 393dp device, 296 at 320"*.
+- The boundary is **deliberately pinned.** `hero_action_width_test.dart:37-40`
+  names the 1 dp margin and says the file exists for it.
+- So switching to the screen width would **change rendering at 360–391**, where
+  the hero primary currently stretches. That is a behaviour change nobody asked
+  for, proposed in a report-only audit. Withdrawn.
+
+*What is actually true, and is all that is left.* Two facts follow from the
+documented contract and neither is written down anywhere:
+
+1. **The effective screen threshold is 392 dp.** `screen − 32 < 360` ⇒ every
+   width up to 391 is cramped. The docstring gives two data points, 393→361 and
+   320→296, and never states that 360, 375 and 390 — three of the four widths
+   this audit was asked about, and the most common phone widths in circulation —
+   fall on the cramped side. Nor does the test: it covers 320 and 393, which are
+   the two widths at which the 392 boundary is invisible.
+2. **The project's two rendering channels disagree about it.** Committed goldens
+   are shot at 393 (`kReviewSurface`) → hugging. Host widget tests default to
+   390 (`host_widget_app.dart:76`) → cramped. And the E2E/visual channel runs at
+   390 unframed (§9.4) → cramped. So the branch a reviewer sees depends on which
+   surface they are looking at, and no page or test states which is canonical.
+
+*Severity: P3, not P2.* There is no defect in the widget. What is missing is one
+sentence in the docstring and three widths in a test.
+
+*Closure test.* Extend `hero_action_width_test.dart` to
+`const widths = [320, 360, 375, 390, 393]` and assert the branch at each against
+a stated table — **recording today's behaviour, not changing it.** That is the
+whole remedy, plus a line in `MxHeroCard`'s docstring naming 392 and saying that
+360/375/390 are intended to stretch.
+
+*No decision required.* The earlier version asked the owner to choose between
+reading the screen and naming a second constant. Neither is needed: the contract
+is already stated, and the only open question — whether the stretch at 360–391
+is intended — is answered by the docstring's own argument that a hugging primary
+looks stranded on a narrow card.
+
+---
+
 | # | Finding | Evidence | Closure |
 |---|---|---|---|
 | R2′ | The one breadcrumb path sized by a fixed `SizedBox(height:)` rather than a `minHeight` | `mx_breadcrumb.dart:193` (`_buildSingleTarget`, the branch `DeckPathWidget` always takes) and `deck_subheader_widget.dart:42`; §7.1's clamp table is why it is safe | **A precondition, not a test.** If A8's **P1-02** is settled as option (B) — the strip form wins, the path moves to `subheader` — that text becomes unclamped and a fixed box is the wrong shape at 48 dp too (`bodySmall` measures exactly 48 at scale 3.0, zero slack). Whoever executes P1-02 should change these two to `BoxConstraints(minHeight:)` in the same commit, matching `mx_breadcrumb.dart:324`. Under option (A) it is a no-op |
 | R6 | Scrollbar `thickness` constant across states | `app_scrollbar_theme.dart:15` — `WidgetStatePropertyAll` resolves to 4 for `hovered`/`dragged` too | Resolver test asserting `thickness.resolve({hovered})` > resting |
-| R7 | Web frame zeroes `viewInsets`/`viewPadding`/`padding` | `mobile_frame_widget.dart:62–67` | No test — record the decision in `docs/architecture.md` beside AD-04, so "the E2E channel is not evidence for keyboard or inset behaviour" is written rather than inferred |
+| R7′ | The E2E channel cannot report a keyboard, cutout or gesture strip — a browser-viewport property, not the frame's `copyWith`, which `e2e/playwright.config.ts:37`'s 390×844 never reaches (§9.4, §17.2) | `e2e/playwright.config.ts:37` · `mobile_frame_widget.dart:47-50` | No test — record the decision in `docs/architecture.md` beside AD-04, so "the E2E channel is not evidence for keyboard or inset behaviour" is written rather than inferred |
 | R8 | `MediaQuery.of` in `mxSheetBottomObstruction` | `mx_sheet_insets.dart:26` — one of only two `MediaQuery.of` in `lib/`; subscribes to size, brightness and text scale to read two insets | Swap to `viewInsetsOf` + `viewPaddingOf`; no behaviour change, so a rebuild-count test or nothing |
 | R9 | `medium` caps 4 surfaces of ~26 | §2.3 | Not a tablet redesign. Record in the WBS which surfaces cap and why the rest do not, so the answer above 600 dp is a decision rather than an accident |
 | R10 | Kit publishes the compact tier but applies nothing | `design_system/tokens/layout.css:4`; no `@media` anywhere in `design_system/`; devices are 412 and 375 (`index.html:45–46`); kit compact changes the title and the prompt but **not** button padding, which the Dart scale does | Add a 320 device to `DEVICES`, and either a compact gutter token or a note that the kit's compact face is partial |
@@ -880,10 +920,10 @@ a decision that has not been made yet.
 | # | Step | Files | Gate |
 |---|---|---|---|
 | 1 | **G3** — the shared width matrix | new `test/support/phone_widths.dart`; extend `hero_action_width_test`, `deck_list`, `study_home_geometry`, `progress_screen_geometry` | green at 320/360/375/390/393; expect it to **record** R3's current behaviour, not fix it. Closes A8's P3-21 in the same move |
-| 2 | **R3 decision, then fix** | `mx_hero_card.dart` or `app_breakpoints.dart`; the matrix from step 1 | blocked on the owner's (a)/(b) choice in §13 |
+| 2 | **R3′** — one docstring line naming 392 and three widths in a test. **No code change** | `mx_hero_card.dart` (comment only); the matrix from step 1 | the matrix records today's branch at each width |
 | 3 | **R5** — the thumb | `app_scrollbar_theme.dart`, `study_card_face_pieces_widget.dart`, contrast suite | 3 : 1 in four themes; **regenerate goldens** — the study card face changes |
 | 4 | **R6 / R8 / R10** — the cheap ones | `app_scrollbar_theme.dart`, `mx_sheet_insets.dart`, `design_system/ui_kits/memox-app/index.html` | analyze + existing suites |
-| 5 | **R7 / R9 / G4 / G5** — decisions, not code | `docs/architecture.md` (AD-04 note), `docs/wbs.md` | `check_docs.py` |
+| 5 | **R7′ / R9 / G4 / G5** — decisions, not code | `docs/architecture.md` (AD-04 note), `docs/wbs.md` | `check_docs.py` |
 | — | **R2′** | `mx_breadcrumb.dart:193`, `deck_subheader_widget.dart:42` | **Not a step of its own.** It rides along with whoever executes A8's P1-02, and only if that lands as option (B) |
 | — | **R1 / G2** | — | Owned by A19 as **A19-20**. §9.2 has the census and a closure test to reuse; do not open a second change |
 | — | **R4 / G1 / §7.2** | — | Owned by A8 as **P3-20 / P3-21 / P2-13** |
@@ -901,10 +941,9 @@ and a republish to the existing gallery URL, on Linux — `dart_test.yaml` and
 not have regenerated them in any case (§0).
 
 **Sequence note.** Steps 3 and 4 are independent of every open decision and of
-every sibling audit; they can land today. Step 1 is test-only and is worth
-landing before step 2 so the R3 decision is taken against measured behaviour
-rather than against this report's arithmetic — it is also the only step here
-that closes a gap two other reports share.
+every sibling audit; they can land today. Steps 1 and 2 are a test and a comment
+and carry no behaviour change at all — which is the whole of what survived R3's
+review, and the right size for it.
 
 ## 15 · Relationship to the sibling audits
 
@@ -972,10 +1011,10 @@ audits:
 
 | Finding | Not in any other report because |
 |---|---|
-| **R3** · the tier constant against a card width | `isCramped` appears in no other audit. A14 §6 scored `MxHeroCard` "Responsive by construction (that is its entire purpose)" with **no gap** — reading the docstring's claim, which is exactly what the docstring is good enough to earn. The effective 392 dp is only visible if you subtract the gutter yourself |
+| **R3′** · the unstated 392 dp and the three-way channel disagreement | `isCramped` appears in no other audit. A14 §6 scored `MxHeroCard` "Responsive by construction (that is its entire purpose)" with **no gap** — reading the docstring's claim, which is what the docstring earns. After review this is a documentation and coverage gap rather than a defect (§17), and the channel disagreement is the part no report had |
 | **R5** · the thumb's 1.79 : 1 | The scoping gap is exact: **A16 owns the same line of code** and declares colour and contrast out of scope; **A19 owns contrast** and never mentions the scrollbar; the four component audits are organised by component family and a scrollbar belongs to none. It is the one finding here that eleven other reports could not have caught |
 | **R6** · `thickness` state-invariant | A16's G-21 has the literal; the *property shape* — a `WidgetStatePropertyAll` where Material varies by state — is what is left |
-| **R7** · the web frame zeroes three insets | Nobody else has had a reason to ask what the E2E channel is evidence *for* |
+| **R7′** · what the E2E channel is evidence for | Nobody else asked. The first answer given here was wrong about *why* (§17); the question was still the right one, and the 390-unframed fact it turned up is what sharpens R3′ |
 | **R9 / R10** · the 600 ceiling's coverage, and CSS-kit compact parity | Both are cross-cutting rather than per-component |
 
 ### 15.4 What this means for reading the two reports together
@@ -1007,16 +1046,88 @@ of its five defects first.
    moves the deck path out of the `AppBar` clamp, and the fixed 32/48 dp box
    that is safe today is the wrong shape once that text can grow. Whoever takes
    the decision should read §15.1 before executing it.
-2. **R3 (a) or (b)** — is the hero's rule about the screen or about the card? A
-   fix cannot be written until this is answered, and answering it inside the fix
-   commit is how the next audit finds the same ambiguity with a different number.
-3. **Landscape: supported or permitted?** Nothing locks it, one file tests it,
+2. **Landscape: supported or permitted?** Nothing locks it, one file tests it,
    no screen renders in it. Either answer is fine; the absence of one is not.
-4. **G4** — is the compact tier a per-component safety net (which is what
+3. **G4** — is the compact tier a per-component safety net (which is what
    `app_breakpoints.dart` says) or a screen-level rendering promise (which is
    what four screen goldens at 320 imply)? Whichever it is, it should be written
    in one place, because right now the code says one thing and the golden set
    says the other.
-5. **R9** — above 600 dp, is a half-capped app acceptable? "Yes, AD-04 says
+4. **R9** — above 600 dp, is a half-capped app acceptable? "Yes, AD-04 says
    phone" is a complete answer; it is just not currently written down anywhere
    that a reader of the four capped screens would find it.
+
+---
+
+## 17 · Corrected after merge
+
+`#448` merged at `999afe6a`. Two review comments from
+`chatgpt-codex-connector[bot]`, posted on the earlier head `414b7c66`, arrived
+after the merge. **Both were right**, and both were checked against the source
+before being accepted — a bot finding is a bug report, not a verdict.
+
+### 17.1 · R3 was not drift, and the fix proposed for it was worse than the finding
+
+*The objection.* `MxHeroCard` explicitly defines `isCramped` as the card's
+outer width against the compact tier, and `hero_action_width_test.dart`
+deliberately pins the 393 − 32 = 361 dp boundary; so the effective 392 dp screen
+threshold is documented and tested behaviour, not an accidental mixed
+measurement basis. Presenting a switch to `MediaQuery.sizeOf(context).width` as
+a valid fix could regress the intentionally cramped 360/375/390 layouts.
+
+*Verified.* `mx_hero_card.dart:22-33` argues at length that the measurement must
+sit outside the card; `:50-51` states the contract as *"the card's width against
+the compact tier — 361 at a 393dp device, 296 at 320"*;
+`hero_action_width_test.dart:37-40` names the 1 dp margin and says the file
+exists for it. All three read as claimed.
+
+*Accepted in full.* Calling a documented, tested contract "drift" was wrong, and
+proposing a screen-width read in a **report-only** audit was worse: it would
+have changed rendering on every phone from 360 to 391 to fix a finding that was
+really about documentation. R3 is withdrawn; **R3′** (§13, P3) keeps only what
+is true — the 392 dp figure is stated nowhere, three of this audit's four
+required widths fall on the cramped side without being named, and the remedy is
+a docstring line plus three widths in a test.
+
+*What the objection did not say, and this audit should have.* The docstring's two
+data points (393→361, 320→296) both sit far from the boundary, so nothing in the
+file or its test tells a reader what 360, 375 or 390 do. That is the finding, and
+it is a P3.
+
+### 17.2 · R7 blamed a branch the E2E channel never reaches
+
+*The objection.* `e2e/playwright.config.ts` uses a 390×844 viewport, while
+`MobileFrameWidget` returns the child unchanged unless **both** dimensions exceed
+393×852 — so the E2E path never executes the `copyWith` that zeroes the insets,
+and R7 cannot attribute its limitation to the frame or call it host-test-only
+"by construction". The browser reporting zero system insets is a separate
+limitation.
+
+*Verified.* `e2e/playwright.config.ts:37` is `viewport: { width: 390, height:
+844 }`. `mobile_frame_widget.dart:47-50` requires `maxWidth > 393 && maxHeight >
+852`. 390 < 393 and 844 < 852, so the framing branch is unreachable on that
+config and the `copyWith` never runs.
+
+*Accepted in full.* §9.4 now states the correct reason — a browser viewport has
+no keyboard, status bar, cutout or gesture strip, so the channel's blindness is
+a property of the channel — and R7′ is a decision to record rather than a
+mechanism to change.
+
+*And it turned up a better fact than the one it corrected.* Because 390×844 is
+below the frame, the E2E and visual-regression channel renders **unframed at a
+real width of 390**, which is inside the cramped band for `MxHeroCard` while
+every committed golden at 393 is outside it. The project therefore has three
+rendering surfaces — 393 goldens, 390 host tests, 390 E2E — that do not agree
+about that one branch, and none of them says which is canonical. That is now the
+substance of R3′, measured rather than inferred.
+
+### 17.3 · What this says about the audit
+
+Three of the five withdrawals in this report came from somewhere else: two from
+sibling audits that read the SDK (§15), two from a review bot reading the config
+files (§17). The common factor is not carelessness in a particular finding — it
+is §0. **An audit that cannot run the code will get the arithmetic right and the
+premises wrong**, and it will do so most often exactly where a premise is a
+framework constant or a config value rather than something visible in the file
+under review. The countermeasure that worked was other people's evidence, and
+the one that would have worked better is a toolchain.
