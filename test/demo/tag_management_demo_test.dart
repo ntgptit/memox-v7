@@ -12,7 +12,7 @@ import 'package:memox/features/card/domain/models/tag_catalog_entry_model.dart';
 import 'package:memox/features/card/presentation/screens/card_list_screen.dart';
 import 'package:memox/features/card/presentation/screens/tag_catalog_screen.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
-import 'package:memox/shared/widgets/mx_pill_button.dart';
+import 'package:memox/shared/widgets/mx_action_button.dart';
 
 import '../features/card/presentation/support/fake_card_repository.dart';
 import '../features/card/presentation/support/fake_tag_catalog_repository.dart';
@@ -129,7 +129,7 @@ void main() {
     await tester.tap(
       find.ancestor(
         of: find.byIcon(Icons.sell_outlined),
-        matching: find.byType(MxPillButton),
+        matching: find.byType(MxActionButton),
       ),
     );
     await tester.pumpAndSettle();
