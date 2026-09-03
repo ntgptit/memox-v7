@@ -105,6 +105,30 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
     isInteractive: true,
   ),
   MxStressSpecimen(
+    // The error pair at the stress width: the one fill whose palette is not
+    // the brand's, and the variant #432 found untested at 320 × 2.0.
+    name: 'MxActionButton (destructive)',
+    build: () => const MxActionButton(
+      label: kLongLabel,
+      onPressed: _noop,
+      variant: MxActionButtonVariant.destructive,
+    ),
+    isInteractive: true,
+  ),
+  MxStressSpecimen(
+    // 40 drawn, 48 hit, `label-md`: the deck row's verb, with the play glyph
+    // Study Home gives it. Compact had no stress specimen at all.
+    name: 'MxActionButton (compact)',
+    build: () => const MxActionButton(
+      label: kLongLabel,
+      onPressed: _noop,
+      icon: Icons.play_arrow,
+      size: MxActionButtonSize.compact,
+      variant: MxActionButtonVariant.secondary,
+    ),
+    isInteractive: true,
+  ),
+  MxStressSpecimen(
     // Two long labels, because the pair's promise is that they come out the
     // same size however unequal the copy is — and the stress width is where an
     // even split is tightest.

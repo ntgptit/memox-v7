@@ -363,6 +363,32 @@ const List<RoleBinding> roleBindings = <RoleBinding>[
     refuses: <String>['onErrorContainer', 'onPrimary', 'onSurface'],
     because: 'The label that travels with `error` is `onError`.',
   ),
+  // The slot #432 §5 was opened for: the state layer must be the *pair's*
+  // `on` role, never the brand. Two rows, because a swap on one pair while
+  // the other stays correct is exactly the shape the defect had.
+  RoleBinding(
+    component: 'FilledButton state layer',
+    slot: 'brand',
+    file: _buttons,
+    scope: 'MxFilledPair.stateLayerOf',
+    requires: <String>['onPrimary'],
+    refuses: <String>['primary', 'onSurface', 'onPrimaryContainer'],
+    because:
+        '_FilledButtonDefaultsM3.overlayColor is onPrimary at 0.08/0.10. A '
+        '`primary` layer on a `primary` fill is a no-op that cancelled the '
+        'blend it was stacked under (#432 §3.2).',
+  ),
+  RoleBinding(
+    component: 'FilledButton state layer',
+    slot: 'destructive',
+    file: _buttons,
+    scope: 'MxFilledPair.stateLayerOf',
+    requires: <String>['onError'],
+    refuses: <String>['primary', 'error', 'onSurface', 'onErrorContainer'],
+    because:
+        'The layer over `error` is `onError`. `primary` here painted indigo '
+        'over red and rotated the fill 345.7° → 338.5° on every press.',
+  ),
   RoleBinding(
     component: 'TextField',
     slot: 'enabledBorder',

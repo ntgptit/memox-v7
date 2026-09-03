@@ -248,6 +248,40 @@ void main() {
       expect(find.text('Remembered'), findsNothing);
     });
 
+    testWidgets('exactly one grade is primary — the one for a card that '
+        'worked (M100.36 4B)', (tester) async {
+      // Four brand fills stacked said nothing about which answer was the
+      // ordinary one, and disagreed with the recall timer, which had already
+      // drawn Forgot as the secondary beside Remembered (#432 P2-2). The
+      // hierarchy is pinned by primitive, not by hex: a `FilledButton` is the
+      // primary, an `OutlinedButton` is not, and no grade is destructive.
+      Iterable<FilledButton> filled() =>
+          tester.widgetList<FilledButton>(find.byType(FilledButton));
+      Iterable<OutlinedButton> outlined() =>
+          tester.widgetList<OutlinedButton>(find.byType(OutlinedButton));
+      String labelOf(ButtonStyleButton b) => tester
+          .widget<Text>(
+            find.descendant(of: find.byWidget(b), matching: find.byType(Text)),
+          )
+          .data!;
+
+      await pump(tester, actions: sm2, shouldShowBackImmediately: true);
+      expect(filled().map(labelOf), <String>['Good']);
+      expect(outlined().map(labelOf), <String>['Again', 'Hard', 'Easy']);
+
+      await pump(tester, actions: eightBox, shouldShowBackImmediately: true);
+      expect(filled().map(labelOf), <String>['Remembered']);
+      expect(outlined().map(labelOf), <String>['Forgot']);
+
+      for (final action in <StudyAction>[...sm2, ...eightBox]) {
+        expect(
+          action.isNormalGrade,
+          action == StudyAction.good || action == StudyAction.remembered,
+          reason: '$action',
+        );
+      }
+    });
+
     testWidgets('the next card arrives face down', (tester) async {
       // Without resetting on a new card, every card after the first shows its
       // answer before the user has tried to remember it.

@@ -385,10 +385,20 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
       ];
     }
 
+    // **One primary, and it is the grade the learner gives most** (M100.36
+    // 4B). Every grade used to be a brand fill — four stacked for `sm2` — so
+    // the face said nothing about which answer was the ordinary one, and
+    // disagreed with the recall timer, which had already drawn Forgot as the
+    // secondary beside Remembered. `secondary` for the rest rather than
+    // `destructive`: a lapse is a legitimate grade, not an error to be warned
+    // about, and red on a learning button says "you did something wrong".
     return <Widget>[
       for (final action in widget.actions) ...<Widget>[
         MxActionButton(
           label: context.studyAction(action),
+          variant: action.isNormalGrade
+              ? MxActionButtonVariant.primary
+              : MxActionButtonVariant.secondary,
           onPressed: widget.isLocked || _isSubmitting
               ? null
               : () => _grade(action),

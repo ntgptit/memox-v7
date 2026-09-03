@@ -323,7 +323,7 @@ void main() {
     // `components/` and `schemes/` are internal for a different reason. A
     // component theme is one half of a contract whose other half is an `Mx`
     // widget (see `flutter-theme-design`), so `shared/widgets/` may read it —
-    // `MxActionButton` calls `buildFilledTonalStyle` precisely so the widget
+    // `MxActionButton` calls `buildFilledStyle` precisely so the widget
     // and the slot cannot disagree. A *feature* reaching a builder would be
     // rebuilding a component the shared layer already owns.
     //

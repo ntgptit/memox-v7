@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | report only — no code, test, theme, Widgetbook or golden was changed |
+| **Status** | **IMPLEMENTED — superseded by M100.36** (Phase 2, commit `refactor(button)`). Findings below keep their measurements as history; the disposition of every P1/P2 is recorded in `docs/wbs.md` M100.36. Current contract: `docs/design-system/tokyo-component-mapping.md` §2 actions/ and §6 |
 | **Purpose** | Prepare the next `MxActionButton` implementation pass: what Flutter 3.44.8 paints, what MemoX paints, where they part, and which of those partings is worth acting on |
 | **Scope** | `lib/shared/widgets/mx_action_button.dart` · `lib/shared/widgets/mx_text_button.dart` · `lib/core/theme/components/actions/app_button_themes.dart` · `lib/core/theme/states/app_interaction_states.dart` · every production caller under `lib/` · the tests and Widgetbook cases that cover them |
 | **Audited against** | `origin/main` @ `4cfddd3d` · Flutter **3.44.8** (`058e0af2c2b`, Dart 3.12.2), SDK source read at `packages/flutter/lib/src/material/` |

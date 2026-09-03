@@ -1,3 +1,5 @@
+import 'dart:ui' show clampDouble, lerpDouble;
+
 import 'package:flutter/material.dart';
 
 import '../../core/theme/components/actions/app_button_themes.dart';
@@ -27,22 +29,6 @@ enum MxActionButtonVariant {
   /// flag beside a colour lets a caller pass one without the other, and the
   /// mismatch is invisible in review.
   destructive,
-
-  /// A filled button one step quieter than [primary] — `secondaryContainer`
-  /// under `onSecondaryContainer`.
-  ///
-  /// **For an action a screen must offer without leading with.** Card Detail's
-  /// `Edit` is the case it was added for: a reading surface where the action
-  /// has to be findable and must not out-weigh the card being read (BR-246,
-  /// M4.15 V3). A `primary` fill there competes with the content; an icon alone
-  /// says nothing until it is tapped.
-  ///
-  /// **Measured, so nobody has to re-measure:** the label pair is 10.37:1 in
-  /// light and 9.09:1 in dark, well past AA. The *container* is only 1.14:1 /
-  /// 1.56:1 against the app bar it usually sits on, so what identifies this
-  /// control is its label, not its fill — which is the conformant path, and the
-  /// reason this variant always carries visible words.
-  tonal,
 }
 
 /// How much room a button takes.
@@ -134,6 +120,12 @@ class MxActionButton extends StatelessWidget {
   /// answers a screen reader and answers nobody else. M4.13 W6 requires the
   /// export sheet's `Exporting…` to be real text rather than a mute spinner,
   /// and an accessible name alone satisfies half of that sentence.
+  ///
+  /// **While on, [icon] is not painted.** The spinner takes the leading slot
+  /// the glyph would have used, so the row reads "◌ Exporting…" rather than
+  /// as a glyph and a spinner competing for one corner. Pinned by
+  /// `mx_action_button_state_matrix_test.dart`; the card editor's Save is the
+  /// live case (`Icons.check` disappears for the duration of the save).
   final bool shouldKeepLabelWhileLoading;
 
   final IconData? icon;
@@ -227,28 +219,6 @@ class MxActionButton extends StatelessWidget {
         style: styled,
         child: child,
       ),
-      // The tonal pair the theme already builds. `buildFilledTonalStyle` rather
-      // than a second `styleFrom` call, for the reason the destructive branch
-      // gives below: `styleFrom` produces flat properties that shadow the
-      // theme's for every state at once.
-      MxActionButtonVariant.tonal => FilledButton(
-        onPressed: effectiveOnPressed,
-        autofocus: _takesFocus(),
-        // `busyStyle` first, or the branch for it in [_busyStyle] is dead code
-        // that reads as coverage. A tonal button keeping its label while
-        // loading would otherwise fall back to `disabledSurface`/`onDisabled` —
-        // the 2.29:1 pair that method exists to avoid.
-        style: _sized(
-          context,
-          busyStyle ??
-              buildFilledTonalStyle(
-                context.colors,
-                context.semanticColors,
-                context.texts,
-              ),
-        ),
-        child: child,
-      ),
       // `error` / `onError`, not a token read directly: the scheme pair is
       // already contrast-checked against each other in `app_theme_test.dart`,
       // and A2 maps `error` onto the `danger` token so the two cannot diverge.
@@ -260,17 +230,25 @@ class MxActionButton extends StatelessWidget {
       // label faded to 38%. A control that looks armed and is inert is worse
       // than one that looks disabled. The same builder the primary variant
       // resolves through, with the error pair substituted for the accent.
+      //
+      // **`busyStyle` first** (M100.36). This branch built its style straight
+      // from `buildFilledStyle` and never read `busyStyle`, so the destructive
+      // arm of [_busyStyle] was dead code and a destructive button keeping its
+      // label while loading fell to `disabledSurface` / `onDisabled` — the
+      // 2.05:1 pair that method exists to avoid, printed on the one sentence
+      // saying a deletion is in progress (#432 P1-2).
       MxActionButtonVariant.destructive => FilledButton(
         onPressed: effectiveOnPressed,
         autofocus: _takesFocus(),
         style: _sized(
           context,
-          buildFilledStyle(
-            context.colors,
-            context.semanticColors,
-            context.texts,
-            pair: MxFilledPair.destructive,
-          ),
+          busyStyle ??
+              buildFilledStyle(
+                context.colors,
+                context.semanticColors,
+                context.texts,
+                pair: MxFilledPair.destructive,
+              ),
         ),
         child: child,
       ),
@@ -315,8 +293,10 @@ class MxActionButton extends StatelessWidget {
   ///
   /// **Measured, and found by rendering the state for the first time.** A
   /// loading button is disabled, so it takes `disabledSurface` and
-  /// `onDisabled`: on light that composites to about `#93949E` on `#E0E0E5`,
-  /// which is **2.29:1**. That was invisible for as long as the label was, and
+  /// `onDisabled`: on light that composites to `#9AA3B1` on `#E4E7EA`, which
+  /// is **2.05:1** (dark 2.51:1 — re-measured at M100.36 against the palette
+  /// that has stood since M100.28; the 2.29:1 this note used to quote was the
+  /// pre-M100.22 pair). That was invisible for as long as the label was, and
   /// the moment [shouldKeepLabelWhileLoading] painted the words it became the
   /// one sentence on screen saying what is happening, printed below the
   /// legibility floor. WCAG exempts an inactive control's text; a status
@@ -356,15 +336,13 @@ class MxActionButton extends StatelessWidget {
       );
     }
 
+    // `secondary` returned above; the switch stays exhaustive so a variant
+    // added later fails the build here rather than silently rendering as an
+    // error button, which a two-armed conditional did. Both arms are
+    // consumed: `primary` through `styled`, `destructive` through its own
+    // `busyStyle ??` (M100.36).
     final (Color fill, Color label) = switch (variant) {
       MxActionButtonVariant.primary => (colors.primary, colors.onPrimary),
-      MxActionButtonVariant.tonal => (
-        colors.secondaryContainer,
-        colors.onSecondaryContainer,
-      ),
-      // `secondary` returned above; the switch is exhaustive so a variant added
-      // later fails the build here rather than silently rendering as an error
-      // button, which a two-armed conditional did.
       MxActionButtonVariant.secondary ||
       MxActionButtonVariant.destructive => (colors.error, colors.onError),
     };
@@ -390,6 +368,30 @@ class MxActionButton extends StatelessWidget {
     ),
   );
 
+  /// The space between the glyph and the word: `sm` at the default text
+  /// scale, closing to `xs` by 2.0×.
+  ///
+  /// **Scaled, the way `_FilledButtonWithIconChild` scales its own gap**
+  /// (`filled_button.dart:512` at 3.44.8 — `lerpDouble(8, 4, scale − 1)`).
+  /// A fixed 8 was 4dp of horizontal room the button did not give back at
+  /// 320dp × 2.0, where the label has already wrapped and every dp on the row
+  /// is spoken for (#432 P2-5). The scale is read off the label's own rung so
+  /// compact — `label-md` at 12 — closes at the same visual point as standard.
+  double _iconGap(BuildContext context) {
+    final TextStyle rung = size == MxActionButtonSize.compact
+        ? context.texts.labelMedium!
+        : context.texts.labelLarge!;
+    final double fontSize = rung.fontSize!;
+    final double scale =
+        MediaQuery.textScalerOf(context).scale(fontSize) / fontSize;
+
+    return lerpDouble(
+      AppSpacing.sm,
+      AppSpacing.xs,
+      clampDouble(scale - 1, 0, 1),
+    )!;
+  }
+
   Widget _buildChild(BuildContext context) {
     // Two lines before ellipsis. One line ellipsizes "Endgültig löschen" down
     // to "End…" at textScaler 3.0, which on a destructive dialog leaves the
@@ -403,6 +405,8 @@ class MxActionButton extends StatelessWidget {
       ),
     );
 
+    final gap = _iconGap(context);
+
     if (isLoading && shouldKeepLabelWhileLoading) {
       // The spinner takes the slot the leading icon would have used, so the
       // button reads as one row — "◌ Exporting…" — rather than as a glyph and
@@ -412,7 +416,7 @@ class MxActionButton extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           const _ForegroundSpinner(),
-          const SizedBox(width: AppSpacing.sm),
+          SizedBox(width: gap),
           text,
         ],
       );
@@ -423,7 +427,7 @@ class MxActionButton extends StatelessWidget {
       children: <Widget>[
         if (icon != null) ...<Widget>[
           Icon(icon, size: AppIconSize.sm),
-          const SizedBox(width: AppSpacing.sm),
+          SizedBox(width: gap),
         ],
         text,
       ],

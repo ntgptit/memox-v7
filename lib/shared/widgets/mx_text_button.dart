@@ -135,12 +135,31 @@ class _MxTextButtonState extends State<MxTextButton> {
   /// Merged rather than replaced: `TextButton.style` merges into
   /// `textButtonTheme`, so naming a `textStyle` here leaves the zero padding,
   /// the 48 floor and the state-blended foreground exactly where they were.
+  ///
+  /// **Compact re-metrics the theme's resolver; it does not replace it**
+  /// (M100.36). A flat `WidgetStatePropertyAll(labelMedium)` here shadowed
+  /// `buildTextButtonTheme`'s `textStyle` for every state at once — taking
+  /// the `buttonLabelWeight` re-weight with it, so the two compact links in
+  /// the app painted `label-md` at its own 500 while every other button in the
+  /// app painted 700 (#432 P2-1), and taking the theme's focus underline too.
+  /// Resolving through the theme and copying only size, leading and tracking
+  /// from the rung keeps weight, `wght` axis and decoration the theme's.
   ButtonStyle? _style(BuildContext context) {
     final accent = _accentStyle(context);
     if (!widget.isCompact) return accent;
 
+    final themed = TextButtonTheme.of(context).style?.textStyle;
+    final rung = context.texts.labelMedium!;
     final compact = ButtonStyle(
-      textStyle: WidgetStatePropertyAll<TextStyle?>(context.texts.labelMedium),
+      textStyle: WidgetStateProperty.resolveWith(
+        (states) => themed
+            ?.resolve(states)
+            ?.copyWith(
+              fontSize: rung.fontSize,
+              height: rung.height,
+              letterSpacing: rung.letterSpacing,
+            ),
+      ),
     );
 
     return accent == null ? compact : accent.merge(compact);

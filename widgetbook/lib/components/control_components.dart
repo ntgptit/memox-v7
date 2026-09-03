@@ -133,6 +133,23 @@ WidgetbookComponent actionButtonComponent() {
                   onPressed: _noop,
                 ),
               ),
+              // The busy state that keeps its words — M4.13 W6's `Exporting…`
+              // — on every variant, because #432 P1-2 found the destructive
+              // one silently falling to the disabled pair. Width is decided
+              // from outside, as the parameter's own doc requires.
+              row(
+                'loading · label kept',
+                (MxActionButtonVariant variant) => SizedBox(
+                  width: 180,
+                  child: MxActionButton(
+                    label: name(variant),
+                    variant: variant,
+                    isLoading: true,
+                    shouldKeepLabelWhileLoading: true,
+                    onPressed: _noop,
+                  ),
+                ),
+              ),
               row(
                 'compact · 40 drawn, 48 hit',
                 (MxActionButtonVariant variant) => MxActionButton(
@@ -150,6 +167,27 @@ WidgetbookComponent actionButtonComponent() {
                     label: 'Reset learning progress',
                     variant: variant,
                     onPressed: _noop,
+                  ),
+                ),
+              ),
+              // The mobile stress frame the audits ask for: 320dp of width at
+              // textScale 2.0, compact with a glyph. The icon gap should have
+              // closed to `xs` and the label wrapped rather than clipped.
+              row(
+                'compact · 320dp · textScale 2.0',
+                (MxActionButtonVariant variant) => MediaQuery(
+                  data: MediaQuery.of(
+                    context,
+                  ).copyWith(textScaler: const TextScaler.linear(2)),
+                  child: SizedBox(
+                    width: 320,
+                    child: MxActionButton(
+                      label: 'Reset learning progress',
+                      icon: Icons.play_arrow,
+                      variant: variant,
+                      size: MxActionButtonSize.compact,
+                      onPressed: _noop,
+                    ),
                   ),
                 ),
               ),

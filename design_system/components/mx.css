@@ -12,14 +12,17 @@
 .mx-btn__label{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
 .mx-btn--compact{padding:var(--space-md)}
 .mx-btn--primary{background:var(--color-primary);color:var(--color-on-primary)}
-.mx-btn--primary:hover{background:color-mix(in srgb,var(--color-primary) 94%,var(--color-text-primary))}
-.mx-btn--primary:active{background:color-mix(in srgb,var(--color-primary) 88%,var(--color-text-primary))}
+.mx-btn--primary:hover{background:color-mix(in srgb,var(--color-on-primary) 8%,var(--color-primary))}
+.mx-btn--primary:active{background:color-mix(in srgb,var(--color-on-primary) 10%,var(--color-primary))}
 .mx-btn--destructive{background:var(--color-error);color:var(--color-on-error)}
-.mx-btn--destructive:active{background:color-mix(in srgb,var(--color-error) 88%,var(--color-text-primary))}
+.mx-btn--destructive:hover{background:color-mix(in srgb,var(--color-on-error) 8%,var(--color-error))}
+.mx-btn--destructive:active{background:color-mix(in srgb,var(--color-on-error) 10%,var(--color-error))}
 .mx-btn--secondary{background:transparent;color:var(--color-secondary-action);border:var(--border-hairline) solid var(--color-border-subtle)}
 .mx-btn--secondary:hover{background:color-mix(in srgb,var(--color-primary) 6%,transparent)}
 .mx-btn--secondary:active{background:color-mix(in srgb,var(--color-primary) 12%,transparent)}
 .mx-btn:focus-visible{outline:none;box-shadow:0 0 0 var(--border-focus) var(--color-primary)}
+.mx-btn--primary:focus-visible{background:color-mix(in srgb,var(--color-on-primary) 10%,var(--color-primary));box-shadow:0 0 0 var(--border-focus) var(--color-on-primary)}
+.mx-btn--destructive:focus-visible{background:color-mix(in srgb,var(--color-on-error) 10%,var(--color-error));box-shadow:0 0 0 var(--border-focus) var(--color-on-error)}
 .mx-btn:disabled{background:var(--color-disabled-surface);color:var(--color-on-disabled);border-color:var(--color-disabled-surface);cursor:not-allowed}
 .mx-btn--secondary:disabled{background:transparent}
 .mx-btn--loading .mx-btn__label{opacity:0}

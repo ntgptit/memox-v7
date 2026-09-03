@@ -29,29 +29,42 @@ void main() {
   const resting = <WidgetState>{};
 
   group('the filled button', () {
-    test('hover, press and disabled each land on their own fill', () {
+    test('the fill holds its role; hover, press and focus are a state layer '
+        'in the pair-s own ink', () {
+      // OLD assertion: `fill(hovered) != rest`, `fill(pressed) != rest`,
+      // press != hover — the contract that the filled button lerps its fill,
+      // written when the overlay was `primary` on `primary` and invisible.
+      // WHY WRONG: the invisible half was the overlay's *colour*, and moving
+      // the fill instead left the overlay painting underneath — indigo over
+      // red on the error pair (#432 §5). NEW contract (M100.36): the fill is
+      // `primary` in every enabled state and the state layer is `onPrimary`
+      // at M3's alphas, pressed and focused heavier than hovered.
+      // AUTHORITY: `_FilledButtonDefaultsM3.backgroundColor` / `.overlayColor`
+      // at Flutter 3.44.8.
       for (final entry in themes.entries) {
         final style = entry.value.filledButtonTheme.style!;
+        final scheme = entry.value.colorScheme;
         final fill = style.backgroundColor!;
-        final rest = fill.resolve(resting);
+        final layer = style.overlayColor!;
 
+        for (final states in <Set<WidgetState>>[hovered, pressed, focused]) {
+          expect(
+            fill.resolve(states),
+            scheme.primary,
+            reason: '${entry.key}: the fill moved under $states',
+          );
+          expect(
+            layer.resolve(states)!.withValues(alpha: 1),
+            scheme.onPrimary,
+            reason: '${entry.key}: the layer under $states is not onPrimary',
+          );
+        }
         expect(
-          fill.resolve(hovered),
-          isNot(rest),
-          reason:
-              '${entry.key}: hover is invisible — a 6% accent overlay on an '
-              'accent fill is the accent again, which is why this is a blend',
+          layer.resolve(pressed)!.a,
+          greaterThan(layer.resolve(hovered)!.a),
+          reason: '${entry.key}: press is no heavier than hover',
         );
-        expect(
-          fill.resolve(pressed),
-          isNot(rest),
-          reason: '${entry.key}: press does not darken',
-        );
-        expect(
-          fill.resolve(pressed),
-          isNot(fill.resolve(hovered)),
-          reason: '${entry.key}: press and hover are the same colour',
-        );
+        expect(layer.resolve(resting), isNull, reason: entry.key);
       }
     });
 

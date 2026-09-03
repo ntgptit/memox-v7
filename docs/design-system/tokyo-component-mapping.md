@@ -7,7 +7,7 @@
 | **Scope** | `lib/core/theme/components/**`. Ngoài phạm vi: giá trị token (AD-14), layering của `lib/core/theme/` (`theme-architecture.md`), API của `Mx*` widget |
 | **Source of truth for** | Ma trận component → canonical M3 role · ma trận dịch ý đồ Tokyo → MemoX · hồ sơ các sai lệch role đã sửa và mô hình bề mặt |
 | **Depends on** | `document-conventions.md` · `architecture.md` (AD-14) · `design-system/theme-architecture.md` |
-| **Updated by task** | M100.32 |
+| **Updated by task** | M100.36 |
 | **Last updated** | 2026-09-03 |
 
 ---
@@ -42,9 +42,9 @@ canonical M3 role  >  accessibility  >  MemoX structural system  >  Tokyo exact 
 |---|---|---|---|---|
 | FilledButton | background | `primary` (disabled: `onSurface`) | = | disabled dùng `semantic.disabledSurface` — solid, R7 |
 | FilledButton | foreground | `onPrimary` (disabled: `onSurface`) | = | disabled dùng `semantic.onDisabled` |
-| FilledButton | overlay | `onPrimary` | blend về `onSurface` | 6% accent trên accent là vô hình — xem file |
-| FilledTonalButton | background | `secondaryContainer` | = | qua `MxFilledPair.tonal` |
-| FilledTonalButton | foreground | `onSecondaryContainer` | = | |
+| FilledButton | overlay | `onPrimary` @ .08/.10/.10 | = | qua `MxFilledPair.stateLayerOf`; guard AST (M100.36). Trước đó là blend về `onSurface` **cộng** overlay `primary` — xem §6 |
+| FilledButton (destructive) | background / foreground / overlay | `error` / `onError` / `onError` | = | `MxFilledPair.destructive`; guard AST cả ba slot |
+| FilledTonalButton | — | `secondaryContainer` / `onSecondaryContainer` | **không dựng** | `MxActionButtonVariant.tonal` gỡ ở M100.36: 0 caller từ #384, và hệ thứ bậc chấm điểm (§4B) chốt bằng `secondary` |
 | OutlinedButton | foreground | `primary` | = | guard AST |
 | OutlinedButton | side | `outline`, focus → `primary` | = | guard AST |
 | TextButton | foreground | `primary` | = | guard AST |
@@ -205,31 +205,43 @@ Component theme sở hữu hình học **toàn cục**; shared widget chỉ thê
 
 | Theme | Sở hữu |
 |---|---|
-| `buildSharedButtonStyle` | chiều cao tối thiểu (`AppSizing.touchTarget`), bề rộng tối thiểu, padding, shape, weight nhãn |
+| `buildSharedButtonStyle` | chiều cao tối thiểu (`AppSizing.touchTarget`), bề rộng tối thiểu, padding, shape, weight nhãn. `MxActionButtonSize.compact` là **trục kích thước** của shared widget (40 vẽ / 48 chạm, `label-md`), không phải một feature nêu lại — ranh giới dưới áp cho feature |
 | `buildInputDecorationTheme` | content padding, radius, stroke, hint style |
 | `buildChipTheme` | chiều cao pill, padding, radius, weight nhãn |
 | `buildListTileTheme` | content padding, minVerticalPadding, shape |
 | `buildDialogTheme` | shape |
 | `buildCardTheme` | shape, hairline |
 
-MUST NOT: một `Mx*` widget hoặc một feature nêu lại các giá trị này.
+MUST NOT: một **feature** nêu lại các giá trị này. Một shared widget đóng
+(`Mx*`) MAY chuyên biệt hoá một trục kích thước hoặc rung nhãn cho composition
+của chính nó **khi trục đó là một enum đóng và có caller production** —
+`MxActionButtonSize.compact`, `MxTextButton.isCompact`, `MxPillButton` với
+`label-md` (M100.36 §4P). Cái bị cấm là một *feature* làm việc đó.
 
 ---
 
-## 6. Blocking finding — FilledButton state, cho đợt Button kế tiếp
+## 6. FilledButton state — đã đóng ở M100.36
 
-**Trạng thái: MỞ.** Cho đến khi đóng, **không được tuyên bố button theme là
-canonical.**
+**Trạng thái: ĐÓNG.** Button theme nay canonical với `_FilledButtonDefaultsM3`
+ở cả ba slot (background, foreground, overlay), guard AST ghim từng nhánh của
+`MxFilledPair`.
 
-Chi tiết nằm ở **[`docs/reviews/mx-action-button-deep-audit.md`](../reviews/mx-action-button-deep-audit.md)**
-(#432) và **chỉ** ở đó — báo cáo ấy đã đọc `ink_well.dart` để dựng lại thứ tự
-composite thật, thứ mục này không lặp lại.
+Hồ sơ, vì đây là về **bảng dịch này**: dòng §2 từng ghi sai lệch FilledButton
+overlay là một **thay thế** (`onPrimary` → blend về `onSurface`), trong khi code
+thực hiện một **phép cộng** — `buildSharedButtonStyle` đặt `overlayColor:
+controlOverlay` (`primary` @ 6/10/12%) và `buildFilledStyle` chỉ `copyWith`
+`backgroundColor` (lerp về `onSurface`), nên hover/press vẽ *cả hai*. Trên
+`primary` overlay là no-op và còn triệt tiêu một phần blend (press ΔE 2.08 so
+với M3 5.74); trên `error` nó phủ indigo lên đỏ và xoay hue 345.7° → 338.5°.
+Chi tiết đo ở [`docs/reviews/mx-action-button-deep-audit.md`](../reviews/mx-action-button-deep-audit.md)
+(#432).
 
-Điều duy nhất ghi ở đây, vì nó là về **bảng dịch này**: dòng §2 nói sai lệch
-FilledButton overlay là một **thay thế** (`onPrimary` → blend về `onSurface`),
-trong khi code thực hiện một **phép cộng** — `buildSharedButtonStyle` đặt
-`overlayColor: controlOverlay` và `buildFilledStyle` chỉ `copyWith`
-`backgroundColor`, nên hover vẽ *cả hai*. Trên `primary` hệ quả đã biết và đã
-ghim (overlay là no-op); trên `tonal` và `destructive` thì không.
-
-Đợt Button phải sửa cả code lẫn dòng §2 trong cùng một lần.
+Cách đóng: **một cơ chế, và là của Material** — fill giữ nguyên role ở mọi state
+enabled; hover/focus/press là state layer màu `on` của chính cặp
+(`MxFilledPair.stateLayerOf`) ở alpha SDK (`AppStateOpacity.stateLayer*` =
+0.08/0.10/0.10). Hai token blend (`filledHoverBlend`, `filledPressedBlend`) gỡ,
+không có consumer. Ring focus của filled button giữ lại vì
+`_FilledButtonDefaultsM3` không khai `side` (slot trống) và wash 10% đo 1.29:1
+trên fill — dưới sàn 3:1 của 1.4.11; `focus_ring_contrast_test.dart` ghim cả hai
+nửa. Composite dưới ngón tay được đo ở
+`mx_action_button_composite_state_test.dart`: ΔL\* 2.5–12, hue không xoay quá 4°.

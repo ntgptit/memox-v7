@@ -16997,6 +16997,60 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
     nullable) vào `Semantics`, nên **mọi** tile mang `hasSelectedState` kể cả
     khi không có khái niệm chọn (`list_tile.dart:997`). Ghim ở test checkbox
     row với lý do, để SDK sau đổi thì thấy chứ không nuốt.
+- **Phase 2 — Button.** Ba P1 của #432 đóng bằng một quyết định: filled
+  button về **một** cơ chế state của Material.
+  - `buildFilledStyle`: fill giữ nguyên role ở mọi state enabled; hover/focus/
+    press là state layer màu `on` của chính cặp — `MxFilledPair.stateLayerOf`
+    (`onPrimary` / `onError`) ở alpha SDK `AppStateOpacity.stateLayer*` =
+    0.08/0.10/0.10 (`_FilledButtonDefaultsM3.overlayColor`, 3.44.8). Hai token
+    `filledHoverBlend` / `filledPressedBlend` gỡ (0 consumer ngoài builder).
+    `controlOverlay` nay chỉ là đáp án của họ outlined/text và doc nói rõ.
+    Ring focus của filled giữ: slot `side` trống trong SDK, wash 10% đo 1.29:1
+    trên fill (dưới 3:1) — điều kiện §4A.
+  - Đo composite (`mx_action_button_composite_state_test.dart`, 4 theme × 2
+    cặp): fill bất động; layer = ink của cặp; sàn hồi quy ΔL\* press/focus ≥
+    2.0, hover ≥ 1.5 (đo nhỏ nhất: trắng 10% trên `error` sáng 2.37, 8% là
+    1.82 — số của M3, không phải mục tiêu thiết kế), trần 12; hue không
+    xoay quá 4°; nhãn ≥ 4.5:1 trên composite press; **và một press thật** đọc
+    ink `InkHighlight` trên `Material` của nút, khẳng định layer của cặp có
+    đến canvas và wash brand không còn trên fill error.
+  - `_busyStyle` không còn nhánh chết: destructive nhận `busyStyle ??` như
+    primary/secondary; destructive + `shouldKeepLabelWhileLoading` ≥ 4.5:1
+    ở cả 4 theme (test). Icon bị bỏ khi giữ nhãn — ghim bằng test và doc tham
+    số.
+  - `MxTextButton.isCompact` giải qua resolver của theme và chỉ chép size/
+    leading/tracking của `label-md` → sơn 700 qua trục `wght` như mọi nút
+    khác (`mx_text_button_weight_test.dart` đọc `RenderParagraph`).
+  - Thứ bậc chấm điểm (§4B): `StudyAction.isNormalGrade` (`remembered` /
+    `good`) → primary duy nhất; còn lại `secondary`, không destructive.
+    `study_card_face_test` ghim theo primitive (`FilledButton` ×1,
+    `OutlinedButton` ×3 cho sm2). Hai mặt study nay cùng một thứ bậc.
+  - `MxActionButtonVariant.tonal` **gỡ end-to-end**: enum, `MxFilledPair.tonal`,
+    `buildFilledTonalStyle`, test, Widgetbook (ma trận lặp `values`), docs.
+  - Gap icon co `sm` → `xs` theo text scale như `filled_button.dart:512`.
+  - `_kButtonMinWidth = 80` của deck tile **giữ, ghi là layout constraint**
+    (`ConstrainedBox` quanh nút, sàn 64 của theme không bị nêu lại;
+    `deck_tile_geometry_test` ghim là sàn). Comment w600 lỗi thời sửa thành
+    `buttonLabelWeight`.
+  - Số 2.29:1 / 2.90:1 lỗi thời ở 5 chỗ → 2.05:1 / 2.51:1 (đo trên palette
+    M100.28); dòng lịch sử trong WBS giữ nguyên.
+  - Guard: hai binding `FilledButton state layer` (brand → `onPrimary` từ
+    chối `primary`; destructive → `onError` từ chối `primary`/`error`).
+  - **Test đổi hợp đồng (§22):** `mx_action_button_state_matrix_test`
+    OLD `fill(hovered) != rest` (blend) → NEW fill bất động + layer non-null
+    = ink; `mx_components_test` destructive OLD `fill(pressed) != error` →
+    NEW fill = `error`, layer = `onError`; `focus_ring_contrast_test` OLD
+    "wash < 1.1:1 (no-op)" → NEW "1.1 < wash < 3.0" (nhìn thấy nhưng dưới sàn
+    ring); `app_interaction_states_test` OLD "hover/press đổi fill, press ≠
+    hover" → NEW "fill = `primary`, layer = `onPrimary`, alpha press > hover"
+    (bị host suite đầy đủ bắt — 4313/4314 — rồi sửa trước khi commit).
+    Authority: `_FilledButtonDefaultsM3` 3.44.8 + WCAG 1.4.11.
+  - Widgetbook: hàng `loading · label kept` và `compact · 320dp · textScale
+    2.0`; stress specimen thêm destructive và compact.
+  - Docs: `tokyo-component-mapping.md` §2 (overlay `=`; tonal "không dựng";
+    §5 cho phép shared widget đóng có trục kích thước), §6 → ĐÓNG với hồ sơ;
+    `mx.css` `.mx-btn--primary/--destructive` hover/active/focus-visible về
+    state layer `on-*`; parity B1/B2; audit #432 đánh dấu IMPLEMENTED.
 - **Scope:** `lib/core/theme/components/{actions,inputs,content,selection}/`,
   `lib/core/theme/states/`, `lib/core/theme/foundations/app_sizing.dart`,
   `lib/shared/widgets/mx_{action_button,text_button,text_field,search_field,
@@ -17014,7 +17068,7 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
   - [x] Phase 0: baseline xanh trước khi sửa (số liệu ở trên).
   - [x] Phase 1: guard role/state cho FilledButton, TextField, ListTile;
         test giao điểm state cho hàng; `MxCheckboxRow` có test file.
-  - [ ] Phase 2 Button · [ ] Phase 3 Input · [ ] Phase 4 Row ·
+  - [x] Phase 2 Button · [ ] Phase 3 Input · [ ] Phase 4 Row ·
         [ ] Phase 5 Chip/Pill · [ ] Phase 6 cross-component/docs/Widgetbook ·
         [ ] Phase 7 golden Linux 100%.
   - [ ] Không invariant nào của #426/#427/#429/#435 lùi; không hạ sàn

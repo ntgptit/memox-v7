@@ -152,15 +152,11 @@ void main() {
       final ColorScheme scheme = theme.colorScheme;
 
       /// Every fill `buildFilledStyle` is applied to, with the label that
-      /// travels with it — the primary CTA, `MxActionButton`'s destructive
-      /// variant, and the tonal style the deck row's Study button uses.
+      /// travels with it — the primary CTA and `MxActionButton`'s destructive
+      /// variant. (The tonal pair left with the variant at M100.36.)
       final variants = <String, (Color, Color)>{
         'primary': (filledButtonFill(theme), scheme.onPrimary),
         'error': (scheme.error, scheme.onError),
-        'secondaryContainer': (
-          scheme.secondaryContainer,
-          scheme.onSecondaryContainer,
-        ),
       };
 
       test('a filled button draws a ring at all', () {
@@ -215,20 +211,35 @@ void main() {
         );
       });
 
-      test('the focus wash alone changes nothing, which is why', () {
-        // The other half of the reason. `controlOverlay` resolves focus to
-        // `primary` at 10%, and the fill it lands on IS `primary` — so the
-        // overlay composites to the colour it started from. Pinned so that a
-        // future "the wash is enough, drop the ring" reads this number first.
+      test('the focus wash alone is under the graphic floor, which is why', () {
+        // OLD assertion: the wash composites to < 1.1:1 against the fill —
+        // true while the overlay was `primary` on `primary`, a no-op. NEW
+        // contract (M100.36): the wash is M3's own state layer, `onPrimary` at
+        // 10%, and it *is* visible — but it measures under the 3:1 WCAG 1.4.11
+        // asks of a focus indicator (1.29:1 in light), so the ring in the
+        // label colour stays. AUTHORITY: `_FilledButtonDefaultsM3.overlayColor`
+        // for the wash; 1.4.11 for the floor the ring meets that it does not.
+        // Pinned so that a future "the wash is enough, drop the ring" reads
+        // this number first.
         final fill = filledButtonFill(theme);
         final overlay = theme.filledButtonTheme.style!.overlayColor!.resolve(
           const <WidgetState>{WidgetState.focused},
         )!;
+        final wash = contrast(Color.alphaBlend(overlay, fill), fill);
 
         expect(
-          contrast(Color.alphaBlend(overlay, fill), fill),
-          lessThan(1.1),
-          reason: '$mode: the focus wash is a visible change on its own',
+          wash,
+          greaterThan(1.1),
+          reason:
+              '$mode: the focus wash is invisible again — the state '
+              'layer has lost its colour',
+        );
+        expect(
+          wash,
+          lessThan(graphicFloor),
+          reason:
+              '$mode: the wash alone now clears 3:1, so the ring can be '
+              'reconsidered — reconsidered, not silently bypassed',
         );
       });
     });

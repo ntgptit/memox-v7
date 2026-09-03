@@ -139,7 +139,7 @@ void main() {
         // All four families, because the whole value of a shared style is that
         // none of them can drift: `buildSharedButtonStyle` carries it for
         // filled and outlined, `buildTextButtonTheme` restates it, and the
-        // tonal and destructive variants resolve through `buildFilledStyle`.
+        // the destructive variant resolves through `buildFilledStyle`.
         // A family set one weight apart from its siblings is the exact drift
         // this is here to catch.
         for (final (String slot, WidgetStateProperty<TextStyle?>? style)
