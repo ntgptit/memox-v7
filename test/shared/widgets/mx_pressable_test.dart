@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/foundations/app_radius.dart';
 import 'package:memox/core/theme/foundations/app_sizing.dart';
+import 'package:memox/core/theme/foundations/app_stroke.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/shared/widgets/mx_pressable.dart';
+
+import '../../support/color_math.dart';
 
 /// The three things the pressable exists to make non-optional: the ripple's
 /// Material, the 48 floor, and the closed shape list.
@@ -115,5 +119,66 @@ void main() {
 
     final inkWell = tester.widget<InkWell>(find.byType(InkWell));
     expect(inkWell.onTap, isNull);
+  });
+
+  testWidgets('keyboard focus draws the shared ring, and it moves nothing', (
+    tester,
+  ) async {
+    // #431 P1-3: five feature rows gave a keyboard user a ~1.15:1 wash and no
+    // ring, where WCAG 1.4.11 asks 3:1.
+    await tester.pumpWidget(
+      host(
+        MxPressable(
+          onTap: () {},
+          child: const SizedBox(height: 40, width: 200, child: Text('row')),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final atRest = tester.getRect(find.byType(MxPressable));
+
+    BorderSide? ring() {
+      final box = tester.widget<DecoratedBox>(
+        find
+            .descendant(
+              of: find.byType(MxPressable),
+              matching: find.byType(DecoratedBox),
+            )
+            .first,
+      );
+      final border = (box.decoration as BoxDecoration).border;
+      return border == null ? null : (border as Border).top;
+    }
+
+    expect(ring(), isNull);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+
+    final theme = buildLightTheme();
+    expect(ring()?.width, AppStroke.focus, reason: 'no ring on focus');
+    expect(
+      contrast(ring()!.color, theme.colorScheme.surface),
+      greaterThanOrEqualTo(3.0),
+    );
+    expect(tester.getRect(find.byType(MxPressable)), atRest);
+  });
+
+  testWidgets('an inert surface is not a focus stop', (tester) async {
+    await tester.pumpWidget(
+      host(const MxPressable(onTap: null, child: Text('row'))),
+    );
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+
+    final box = tester.widget<DecoratedBox>(
+      find
+          .descendant(
+            of: find.byType(MxPressable),
+            matching: find.byType(DecoratedBox),
+          )
+          .first,
+    );
+    expect((box.decoration as BoxDecoration).border, isNull);
   });
 }

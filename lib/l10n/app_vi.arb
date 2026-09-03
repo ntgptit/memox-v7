@@ -899,6 +899,10 @@
   "@cardSearchHint": {
     "description": "Card search (S1)."
   },
+  "cardSearchLabel": "Tìm trong bộ thẻ này",
+  "@cardSearchLabel": {
+    "description": "Tên trợ năng của ô tìm kiếm trong bộ thẻ, giữ nguyên dù ô trống hay đang có từ khoá (S1)."
+  },
   "cardSearchClearLabel": "Xoá tìm kiếm",
   "@cardSearchClearLabel": {
     "description": "Card search (S1)."
@@ -1009,6 +1013,10 @@
   "cardFilterAll": "Tất cả",
   "@cardFilterAll": {
     "description": "The All filter pill with its count (D3)."
+  },
+  "cardFilterGroupLabel": "Lọc thẻ",
+  "@cardFilterGroupLabel": {
+    "description": "Tên trợ năng của nhóm pill lọc thẻ, đọc trước các lựa chọn (M100.36 11F)."
   },
   "cardFilterDue": "Đến hạn",
   "@cardFilterDue": {
@@ -3366,6 +3374,10 @@
   "@tagSearchHint": {
     "description": "Placeholder of the catalog search field (BR-230)."
   },
+  "tagSearchLabel": "Tìm nhãn",
+  "@tagSearchLabel": {
+    "description": "Tên trợ năng của ô tìm kiếm danh mục nhãn, giữ nguyên dù ô trống hay đang có từ khoá (BR-230)."
+  },
   "tagSearchClearLabel": "Xoá từ khoá tìm nhãn",
   "@tagSearchClearLabel": {
     "description": "Screen-reader label of the clear button inside the catalog search field."
@@ -3839,6 +3851,10 @@
   "@librarySearchHint": {
     "description": "Placeholder of the search field. Names all three things that are matched (BR-247), because a user who does not know cards are searched will not try."
   },
+  "librarySearchLabel": "Tìm trong thư viện",
+  "@librarySearchLabel": {
+    "description": "Tên trợ năng của ô tìm kiếm thư viện, giữ nguyên dù ô trống hay đang có từ khoá."
+  },
   "librarySearchClearLabel": "Xoá tìm kiếm",
   "@librarySearchClearLabel": {
     "description": "Semantic label and tooltip of the clear button inside the search field."
@@ -3986,6 +4002,10 @@
   "trashFilterAll": "Tất cả",
   "@trashFilterAll": {
     "description": "Trash filter chip: both kinds (wireframe T3)."
+  },
+  "trashFilterGroupLabel": "Lọc thùng rác",
+  "@trashFilterGroupLabel": {
+    "description": "Tên trợ năng của nhóm pill lọc thùng rác, đọc trước các lựa chọn (M100.36 11F)."
   },
   "trashFilterCards": "Thẻ",
   "@trashFilterCards": {

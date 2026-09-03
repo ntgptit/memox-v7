@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:memox/core/theme/extensions/theme_context_extension.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/shared/widgets/mx_confirm_dialog.dart';
-import 'package:memox/shared/widgets/mx_pill_button.dart';
 import 'package:memox/shared/widgets/mx_progress_bar.dart';
+import 'package:memox/shared/widgets/mx_list_tile.dart';
 import 'package:memox/shared/widgets/mx_search_field.dart';
 import 'package:memox/shared/widgets/mx_session_top_bar.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
+
+import 'golden_surfaces.dart';
 
 /// Specimen widgets for the golden suite.
 ///
@@ -206,67 +208,110 @@ class ProgressBarSpecimen extends StatelessWidget {
   }
 }
 
-/// The pill group, over the hint it sits beside on the deck list.
-///
-/// **The reference line is the specimen, not decoration.** `MxPillButton` had no
-/// golden at all until the weight it borrowed from the button was measured off a
-/// device render — and a golden holding only pills would have recorded 600 as
-/// correct, because a weight has nothing to be wrong against on its own. Both
-/// rungs here are 14px, so the picture answers one question: does the control
-/// out-shout the text it belongs to?
-///
-/// Selected and unselected together, because the label colour swaps with the
-/// fill and only one of the two states would otherwise be pinned.
-class PillGroupSpecimen extends StatelessWidget {
-  const PillGroupSpecimen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              'Search your whole library',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            const Wrap(
-              spacing: AppSpacing.sm,
-              children: <Widget>[
-                MxPillButton(
-                  label: 'All decks',
-                  icon: Icons.filter_list,
-                  isSelected: false,
-                  onPressed: _noop,
-                ),
-                MxPillButton(
-                  label: 'Due only',
-                  icon: Icons.filter_list,
-                  isSelected: true,
-                  onPressed: _noop,
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  static void _noop() {}
-}
-
 /// Empty and in use, one above the other.
 ///
 /// The second is the half worth pinning: the count and the clear button only
 /// exist once something has been typed, and they are what the pill has to make
 /// room for without pushing the text out of it.
+/// The search pill with focus: the paper fill and the `primary` edge, the
+/// query and the count. Autofocused rather than tapped, so the frame carries
+/// no ripple.
+class SearchFieldFocusedSpecimen extends StatelessWidget {
+  const SearchFieldFocusedSpecimen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Padding(
+        padding: EdgeInsets.all(AppSpacing.lg),
+        child: Center(
+          child: MxSearchField(
+            value: 'nouns',
+            onChanged: _ignore,
+            hintText: 'Search in Academic Word List',
+            semanticLabel: 'Search this deck',
+            resultCount: 7,
+            clearSemanticLabel: 'Clear search',
+            shouldAutofocus: true,
+          ),
+        ),
+      ),
+    );
+  }
+
+  static void _ignore(String _) {}
+}
+
+/// A field with a trailing action, in its error state: the border and the
+/// `+` beside it must agree (#433 F4).
+class TextFieldSuffixErrorSpecimen extends StatefulWidget {
+  const TextFieldSuffixErrorSpecimen({super.key});
+
+  @override
+  State<TextFieldSuffixErrorSpecimen> createState() =>
+      _TextFieldSuffixErrorSpecimenState();
+}
+
+class _TextFieldSuffixErrorSpecimenState
+    extends State<TextFieldSuffixErrorSpecimen> {
+  final TextEditingController _controller = TextEditingController(
+    text: 'grammar',
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => MxTextField(
+    controller: _controller,
+    label: 'Add a tag',
+    errorText: 'This card already has that tag',
+    maxLength: 30,
+    trailingAction: MxTextFieldAction(
+      icon: Icons.add,
+      semanticLabel: 'Add this tag',
+      onPressed: () {},
+    ),
+  );
+}
+
+/// The multiline recipe — five of thirteen callers, and no golden showed one.
+class TextFieldMultilineSpecimen extends StatefulWidget {
+  const TextFieldMultilineSpecimen({super.key});
+
+  @override
+  State<TextFieldMultilineSpecimen> createState() =>
+      _TextFieldMultilineSpecimenState();
+}
+
+class _TextFieldMultilineSpecimenState
+    extends State<TextFieldMultilineSpecimen> {
+  final TextEditingController _controller = TextEditingController(
+    text:
+        'present, appearing, or found everywhere — a meaning long enough to '
+        'take a second line',
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => MxTextField(
+    controller: _controller,
+    label: 'Back',
+    helperText: 'Two languages, comma-separated',
+    maxLength: 240,
+    minLines: 3,
+    maxLines: 5,
+  );
+}
+
 class SearchFieldSpecimen extends StatelessWidget {
   const SearchFieldSpecimen({super.key});
 
@@ -282,12 +327,15 @@ class SearchFieldSpecimen extends StatelessWidget {
               value: '',
               onChanged: _ignore,
               hintText: 'Search your whole library',
+              semanticLabel: 'Search your library',
+              clearSemanticLabel: 'Clear search',
             ),
             SizedBox(height: AppSpacing.xl),
             MxSearchField(
               value: 'nouns',
               onChanged: _ignore,
               hintText: 'Search in Academic Word List',
+              semanticLabel: 'Search this deck',
               resultCount: 7,
               clearSemanticLabel: 'Clear search',
             ),
@@ -333,6 +381,58 @@ class SessionTopBarSpecimen extends StatelessWidget {
               trailing: Text('0:12'),
               onClose: _noop,
               closeLabel: 'Close session',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static void _noop() {}
+}
+
+/// The row in its four resting states on one sheet — rest, selected,
+/// disabled, and the intersection nothing pictured: selected + disabled.
+/// One image, one comparison, instead of three files and a gap (#431 §24).
+class ListTileStatesSpecimen extends StatelessWidget {
+  const ListTileStatesSpecimen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: OnSheetSurface(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            MxListTile(
+              title: 'Front → back',
+              subtitle: 'Show the term, recall the meaning',
+              leading: Icon(Icons.radio_button_unchecked),
+              isSelected: false,
+              onTap: _noop,
+            ),
+            MxListTile(
+              title: 'Back → front',
+              subtitle: 'Show the meaning, recall the term',
+              leading: Icon(Icons.radio_button_checked),
+              isSelected: true,
+              onTap: _noop,
+            ),
+            MxListTile(
+              title: 'Mixed',
+              subtitle: 'Not available for this deck',
+              leading: Icon(Icons.radio_button_unchecked),
+              isSelected: false,
+              isEnabled: false,
+              onTap: _noop,
+            ),
+            MxListTile(
+              title: 'Picked, then locked',
+              subtitle: 'A choice held while a request is in flight',
+              leading: Icon(Icons.radio_button_checked),
+              isSelected: true,
+              isEnabled: false,
+              onTap: _noop,
             ),
           ],
         ),

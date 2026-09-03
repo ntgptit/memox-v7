@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
+import 'package:memox/core/theme/foundations/app_stroke.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/shared/widgets/mx_search_field.dart';
 
@@ -31,6 +32,7 @@ void main() {
               value: value,
               onChanged: onChanged ?? (_) {},
               hintText: 'Search your whole library',
+              semanticLabel: 'Search your library',
               resultCount: resultCount,
               clearSemanticLabel: 'Clear search',
             ),
@@ -69,7 +71,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(decorationOf(tester).color, semantic.surfaceMuted);
-      expect(decorationOf(tester).border!.top.color, semantic.surfaceMuted);
+      // The boundary is the control system's, not the fill's own colour: an
+      // edge at 1.09:1 identified nothing (#433 §4.1, M100.36 4E).
+      expect(decorationOf(tester).border!.top.color, light.colorScheme.outline);
+      expect(decorationOf(tester).border!.top.width, AppStroke.input);
 
       await tester.tap(find.byType(TextField));
       await tester.pumpAndSettle();
@@ -80,6 +85,7 @@ void main() {
         reason: 'a field being typed into stops being a well in the page',
       );
       expect(decorationOf(tester).border!.top.color, light.colorScheme.primary);
+      expect(decorationOf(tester).border!.top.width, AppStroke.input);
     });
 
     testWidgets('the border is there at rest, so focus costs no layout', (
@@ -194,10 +200,14 @@ void main() {
   });
 
   group('layout', () {
-    testWidgets('the glyph and the text share a bottom edge', (tester) async {
-      // The bug this replaces: the field's vertical slack made the hint sit a
-      // touch lower than the search icon, which reads as the two being on
-      // different lines.
+    testWidgets('the glyph and the text share a centre line', (tester) async {
+      // OLD assertion: bottoms within a pixel — held by a `-0.1` vertical
+      // nudge on a field that filled a fixed 48 box. NEW contract (M100.36):
+      // the field is its own line box, centred in the row like the glyph, so
+      // the relationship a centred row actually has is the one asserted. A
+      // 16 glyph and a 20 line box centred together have bottoms 2 apart by
+      // construction, which is not the "hint sits lower" defect the old test
+      // was written for — that was a whole-box misalignment.
       await pump(tester);
       await tester.pumpAndSettle();
 
@@ -205,10 +215,99 @@ void main() {
       final text = tester.getRect(find.byType(EditableText));
 
       expect(
-        (text.bottom - icon.bottom).abs(),
+        (text.center.dy - icon.center.dy).abs(),
         lessThan(1),
         reason: 'the two are on one line, within a pixel',
       );
+    });
+
+    testWidgets('48 is a floor: the pill grows with the text and clips '
+        'nothing', (tester) async {
+      // #433 F2: `SizedBox(height: 48)` + `expands: true` turned a documented
+      // floor into a ceiling, and from 2.5× the placeholder was clipped to
+      // the box — silently, because clipping is not an overflow.
+      for (final width in <double>[320, 360, 393]) {
+        for (final scale in <double>[1.0, 1.3, 2.0, 2.5, 3.0]) {
+          tester.view.physicalSize = Size(width, 640);
+          tester.view.devicePixelRatio = 1;
+          addTearDown(tester.view.reset);
+          await tester.pumpWidget(
+            MaterialApp(
+              theme: light,
+              home: Builder(
+                builder: (context) => MediaQuery(
+                  data: MediaQuery.of(
+                    context,
+                  ).copyWith(textScaler: TextScaler.linear(scale)),
+                  child: Scaffold(
+                    body: MxSearchField(
+                      value: 'nouns',
+                      onChanged: (_) {},
+                      hintText: 'Search your whole library',
+                      semanticLabel: 'Search your library',
+                      resultCount: 7,
+                      clearSemanticLabel: 'Clear search',
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          final pill = tester.getRect(find.byType(MxSearchField));
+          final text = tester.getRect(find.byType(EditableText));
+          final why = '$width × $scale';
+          expect(tester.takeException(), isNull, reason: why);
+          expect(pill.height, greaterThanOrEqualTo(48), reason: why);
+          expect(text.top, greaterThanOrEqualTo(pill.top), reason: why);
+          expect(text.bottom, lessThanOrEqualTo(pill.bottom), reason: why);
+          if (scale == 1.0) expect(pill.height, 48, reason: why);
+          if (scale >= 2.5) {
+            expect(pill.height, greaterThan(48), reason: '$why: still pinned');
+          }
+        }
+      }
+    });
+  });
+
+  group('semantics', () {
+    testWidgets('the name survives typing, and the query is the value', (
+      tester,
+    ) async {
+      // #433 F1: named by its hint, the field was unnamed for exactly as long
+      // as it held a query — `InputDecorator` wraps the hint in an `Opacity`
+      // at zero, and `RenderOpacity` drops the child from the tree.
+      final handle = tester.ensureSemantics();
+
+      await pump(tester);
+      await tester.pumpAndSettle();
+      expect(find.bySemanticsLabel('Search your library'), findsOneWidget);
+
+      await pump(tester, value: 'nouns');
+      await tester.pumpAndSettle();
+      expect(find.bySemanticsLabel('Search your library'), findsOneWidget);
+      expect(
+        tester.getSemantics(find.byType(EditableText)).value,
+        'nouns',
+        reason: 'the query is not the field-s value',
+      );
+      expect(
+        tester.getSemantics(find.byType(EditableText)),
+        matchesSemantics(
+          isTextField: true,
+          value: 'nouns',
+          hasEnabledState: true,
+          isEnabled: true,
+          isFocusable: true,
+          hasTapAction: true,
+          hasFocusAction: true,
+        ),
+      );
+      // Painted once, announced never: the hint is excluded so the name is
+      // not read twice on an empty field.
+      expect(find.bySemanticsLabel('Search your whole library'), findsNothing);
+      handle.dispose();
     });
   });
 }

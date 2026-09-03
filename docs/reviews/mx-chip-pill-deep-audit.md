@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | active |
+| **Status** | **IMPLEMENTED — superseded by M100.36** (Phase 5, commit `refactor(chip)`). Measurements below are history; every P1/P2 disposition is in `docs/wbs.md` M100.36. Current contract: `docs/design-system/tokyo-component-mapping.md` §2 selection/, §4 #4 and §5 |
 | **Purpose** | Prepare the future implementation pass for the Chip/Pill/filter/selection-control stack: what exists, what Flutter 3.44.8 actually contracts, where the two disagree, and what an owner still has to decide |
 | **Scope** | `lib/core/theme/components/selection/app_chip_theme.dart`, `lib/shared/widgets/mx_pill_button.dart`, `lib/shared/widgets/mx_focus_ring.dart`, every chip-like control in `lib/features/**`, and the tests / Widgetbook / goldens that cover them. **Out of scope:** ColorScheme role values (AD-14 owns those), the button family, TextField, ListTile, Card — all four are being changed in parallel worktrees |
 | **Source of truth for** | Nothing yet. This is a discovery report; every finding must land in `docs/wbs.md` and the relevant component doc before it becomes a rule |

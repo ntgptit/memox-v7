@@ -63,63 +63,6 @@ abstract final class AppBorderColors {
   // reads on OLED. Same hue and saturation (0.41), lightness only.
   static const Color borderSubtleDark = Color(0xFF272C48);
 
-  /// Inset tile, chip, icon container.
-  /// The callout surface: a panel the screen wants noticed, at the quietest
-  /// weight that still reads as *noticed*.
-  ///
-  /// **A whisper of brand, not a step of grey** (M99.98). `MxCard.tonal` shipped
-  /// on `secondaryContainer`, which is `#E4E6EC` — chroma 0.0084, effectively
-  /// neutral, and **5.24 L\* below the page**. A callout that sits back and
-  /// carries no hue is indistinguishable from a disabled block, and Study Home's
-  /// resume card — the screen's primary action — was the greyest thing on it.
-  ///
-  /// The proportions come from the owner's reference concept, measured: its
-  /// callout sits **0.89 L\* below its page** with **1.6× the page's chroma**.
-  /// `#F1F1FC` is 1.11 below this page with **3.6×** its chroma, so what marks
-  /// it is hue rather than weight. Body ink measures 15.61:1 on it.
-  /// The edge a *picked* card wears.
-  ///
-  /// **Brand family, and the measurement that ruled it out no longer
-  /// applies** (M99.99). This was `ColorScheme.secondary` — `#4E5468`, chroma
-  /// **0.0337**, roughly a fifth of what the brand colours carry (focus ring
-  /// 0.1928, primary 0.1699). A slate line around a brand-tinted fill is the
-  /// card saying two different things about the same state, which is what
-  /// M99.98 left behind when it moved the fill and not the edge.
-  ///
-  /// `secondary` was chosen for a real reason, written down: dark `primary` on
-  /// `surface` measures 2.90:1, under WCAG 1.4.11's 3:1. **That measurement is
-  /// against `surface`**, and since M99.98 a selected card's edge does not sit
-  /// on `surface` — it sits on [surfaceSelectedLight]. On that ground `#6E6ECE`
-  /// measures **3.72:1**, and the dark pair **3.21:1** on `#332F58`.
-  ///
-  /// **Why not `primary` itself.** Today the ring is told
-  /// apart from the selected edge by *hue* alone: `#4E5468` and `#4141C0` are
-  /// **1.02:1** apart in luminance. Give the edge the brand hue and that
-  /// distinction is gone, so these two are picked to differ from the ring by
-  /// weight instead — lighter than it in light, dimmer in dark. The ring stays
-  /// the loudest edge a card can wear, in both modes.
-  /// The hairline *inside* a card, between the rows of one list.
-  ///
-  /// **Only inside** (M100.0). Cards stopped drawing an outer edge at M99.94
-  /// because a screen of framed boxes reads as frames rather than surfaces;
-  /// this is the opposite case — rows that belong to one list need to be told
-  /// apart *from each other*, and the reference concept divides exactly those:
-  /// its `RESULT BREAKDOWN` and `MASTERY BY DECK` rows, never the card around
-  /// them.
-  ///
-  /// `#E9ECF5` is the concept's own value, measuring **1.14:1** on this app's
-  /// card fill against 1.18:1 on the pure white it was drawn for. Far below
-  /// the 1.45:1 `borderSubtle` used to draw around every card — a divider that
-  /// competed with content would just be the frame again, one level in.
-  static const Color borderDividerLight = Color(0xFFF2F5F9);
-
-  /// **Derived by matching the light ratio, not guessed.** The concept is
-  /// light-only, so the dark value is solved for the same contrast on the fill
-  /// a divided card actually has in dark (`surfaceContainer` `#221E44`, since
-  /// these cards are `.raised`): `#2E2A54` measures **1.178:1** there against
-  /// the concept's 1.181 in light.
-  static const Color borderDividerDark = Color(0xFF252C55);
-
   static const Color borderSelectedLight = Color(0xFF5569FF);
 
   /// See [borderSelectedLight]. Dimmer than the focus indicator on purpose —

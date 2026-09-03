@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:memox/shared/widgets/mx_badge.dart';
 import 'package:memox/core/theme/extensions/theme_context_extension.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
@@ -37,11 +38,24 @@ WidgetbookComponent textFieldComponent() {
             label: 'enabled',
             initialValue: true,
           );
-          final isReadOnly = context.knobs.boolean(label: 'readOnly');
           final maxLength = context.knobs.intOrNull.slider(
             label: 'maxLength',
             min: 10,
             max: 200,
+          );
+          // Five of thirteen production fields are multiline and none was
+          // reachable in the catalogue (#433 G5).
+          final minLines = context.knobs.int.slider(
+            label: 'minLines',
+            initialValue: 1,
+            min: 1,
+            max: 5,
+          );
+          final maxLines = context.knobs.int.slider(
+            label: 'maxLines',
+            initialValue: 1,
+            min: 1,
+            max: 8,
           );
           final hasTrailingAction = context.knobs.boolean(
             label: 'trailingAction',
@@ -60,13 +74,35 @@ WidgetbookComponent textFieldComponent() {
               helperText: helperText,
               errorText: errorText,
               isEnabled: isEnabled,
-              isReadOnly: isReadOnly,
               maxLength: maxLength,
+              minLines: minLines,
+              maxLines: maxLines < minLines ? minLines : maxLines,
               hasTrailingAction: hasTrailingAction,
               labelPlacement: labelPlacement,
             ),
           );
         },
+      ),
+      WidgetbookUseCase(
+        // The one combination that should be visible in the catalogue: both
+        // borders are `error`, and the stroke is the whole difference (#433
+        // F3, M100.36 4C).
+        name: 'Focused + error',
+        builder: (BuildContext context) => const CatalogCenterPage(
+          child: _TextFieldDemo(
+            label: 'Card limit',
+            hintText: null,
+            helperText: null,
+            errorText: 'Enter a number from 1 to 500',
+            isEnabled: true,
+            maxLength: null,
+            minLines: 1,
+            maxLines: 1,
+            hasTrailingAction: true,
+            labelPlacement: MxTextFieldLabelPlacement.floating,
+            shouldAutofocus: true,
+          ),
+        ),
       ),
     ],
   );
@@ -82,10 +118,12 @@ class _TextFieldDemo extends StatefulWidget {
     required this.helperText,
     required this.errorText,
     required this.isEnabled,
-    required this.isReadOnly,
     required this.maxLength,
+    required this.minLines,
+    required this.maxLines,
     required this.hasTrailingAction,
     required this.labelPlacement,
+    this.shouldAutofocus = false,
   });
 
   final String label;
@@ -93,10 +131,12 @@ class _TextFieldDemo extends StatefulWidget {
   final String? helperText;
   final String? errorText;
   final bool isEnabled;
-  final bool isReadOnly;
   final int? maxLength;
+  final int minLines;
+  final int maxLines;
   final bool hasTrailingAction;
   final MxTextFieldLabelPlacement labelPlacement;
+  final bool shouldAutofocus;
 
   @override
   State<_TextFieldDemo> createState() => _TextFieldDemoState();
@@ -131,8 +171,10 @@ class _TextFieldDemoState extends State<_TextFieldDemo> {
       helperText: widget.helperText,
       errorText: widget.errorText,
       isEnabled: widget.isEnabled,
-      isReadOnly: widget.isReadOnly,
       maxLength: widget.maxLength,
+      minLines: widget.minLines,
+      maxLines: widget.maxLines,
+      shouldAutofocus: widget.shouldAutofocus,
       labelPlacement: widget.labelPlacement,
       trailingAction: widget.hasTrailingAction
           ? MxTextFieldAction(
@@ -540,7 +582,17 @@ WidgetbookComponent listTileComponent() {
             label: 'enabled',
             initialValue: true,
           );
-          final isSelected = context.knobs.boolean(label: 'selected');
+          // Separate from `enabled`: an inert row is the state #431 P1-2
+          // found unreachable in the catalogue.
+          final isInteractive = context.knobs.boolean(
+            label: 'has onTap',
+            initialValue: true,
+          );
+          // Tri-state, as the API is: `none` announces nothing.
+          final selection = context.knobs.object.dropdown<String>(
+            label: 'selection',
+            options: const <String>['none', 'unselected', 'selected'],
+          );
 
           return Scaffold(
             body: SafeArea(
@@ -554,9 +606,13 @@ WidgetbookComponent listTileComponent() {
                   trailing: hasTrailing
                       ? const Icon(Icons.chevron_right)
                       : null,
-                  onTap: _noop,
+                  onTap: isInteractive ? _noop : null,
                   isEnabled: isEnabled,
-                  isSelected: isSelected,
+                  isSelected: switch (selection) {
+                    'selected' => true,
+                    'unselected' => false,
+                    _ => null,
+                  },
                 ),
               ),
             ),
@@ -710,4 +766,44 @@ class _ToggleRow extends StatelessWidget {
       ],
     );
   }
+}
+
+WidgetbookComponent badgeComponent() {
+  return WidgetbookComponent(
+    name: 'MxBadge',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Playground',
+        builder: (BuildContext context) {
+          final label = context.knobs.string(
+            label: 'label',
+            initialValue: 'Due tomorrow',
+          );
+
+          return CatalogCenterPage(child: MxBadge(label: label));
+        },
+      ),
+      // The tag row on a card: three badges wrapping, on the paper.
+      WidgetbookUseCase(
+        name: 'On a card',
+        builder: (BuildContext context) {
+          return const CatalogCenterPage(
+            child: MxCard.flat(
+              child: Padding(
+                padding: EdgeInsets.all(AppSpacing.md),
+                child: Wrap(
+                  spacing: AppSpacing.xs,
+                  children: <Widget>[
+                    MxBadge(label: 'food'),
+                    MxBadge(label: 'chapter 3'),
+                    MxBadge(label: 'nouns'),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    ],
+  );
 }

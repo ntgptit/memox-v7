@@ -139,7 +139,7 @@ void main() {
         // All four families, because the whole value of a shared style is that
         // none of them can drift: `buildSharedButtonStyle` carries it for
         // filled and outlined, `buildTextButtonTheme` restates it, and the
-        // tonal and destructive variants resolve through `buildFilledStyle`.
+        // the destructive variant resolves through `buildFilledStyle`.
         // A family set one weight apart from its siblings is the exact drift
         // this is here to catch.
         for (final (String slot, WidgetStateProperty<TextStyle?>? style)
@@ -184,15 +184,37 @@ void main() {
         );
       });
 
-      test('an input hint is body-md, leading included', () {
-        expectSameRung(
-          'inputDecorationTheme.hintStyle',
-          theme.inputDecorationTheme.hintStyle,
-          texts.bodyMedium,
+      test('an input hint is body-lg — the value-s own rung — in every '
+          'state', () {
+        // OLD: body-md, pinned "leading included". WHY WRONG: the hint was a
+        // rung under the 16 that replaces it, so the text grew and shifted
+        // its line box as the first character landed (#433 F6); Material's
+        // own hint is `bodyLarge`. NEW (M100.36 4F): the value's rung, and a
+        // `WidgetStateTextStyle` so the disabled fade M3 gives it is back.
+        // AUTHORITY: `_InputDecoratorDefaultsM3.hintStyle` and
+        // `_getInlineHintStyle`, Flutter 3.44.8.
+        final hint = theme.inputDecorationTheme.hintStyle!;
+        for (final states in <Set<WidgetState>>[
+          const <WidgetState>{},
+          const <WidgetState>{WidgetState.disabled},
+        ]) {
+          expectSameRung(
+            'inputDecorationTheme.hintStyle $states',
+            WidgetStateProperty.resolveAs(hint, states),
+            texts.bodyLarge,
+          );
+        }
+        expect(
+          WidgetStateProperty.resolveAs(hint, const <WidgetState>{}).color,
+          theme.colorScheme.onSurfaceVariant,
         );
-        // The leading is the half of this a family check would miss: Material's
-        // body-md is 20/14, the design's is 1.45.
-        expect(theme.inputDecorationTheme.hintStyle?.height, 1.45);
+        expect(
+          WidgetStateProperty.resolveAs(hint, const <WidgetState>{
+            WidgetState.disabled,
+          }).color,
+          isNot(theme.colorScheme.onSurfaceVariant),
+          reason: 'a disabled empty field keeps its placeholder at full ink',
+        );
       });
 
       test('a tooltip is label-md', () {

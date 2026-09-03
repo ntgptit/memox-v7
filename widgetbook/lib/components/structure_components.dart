@@ -206,11 +206,36 @@ WidgetbookComponent searchFieldComponent() {
                 value: value,
                 onChanged: _noopString,
                 hintText: 'Search decks and cards',
+                semanticLabel: 'Search your library',
+                clearSemanticLabel: 'Clear search',
                 resultCount: hasCount ? count : null,
               ),
             ],
           );
         },
+      ),
+      WidgetbookUseCase(
+        // Focused, and at the text scale the pill used to clip at: 48 is a
+        // floor now, so the pill should stand taller than the clear button
+        // with the placeholder whole (#433 F2).
+        name: 'Focused · textScale 2.5',
+        builder: (BuildContext context) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: const TextScaler.linear(2.5)),
+          child: const CatalogListPage(
+            children: <Widget>[
+              MxSearchField(
+                value: '',
+                onChanged: _noopString,
+                hintText: 'Search decks and cards',
+                semanticLabel: 'Search your library',
+                clearSemanticLabel: 'Clear search',
+                shouldAutofocus: true,
+              ),
+            ],
+          ),
+        ),
       ),
     ],
   );

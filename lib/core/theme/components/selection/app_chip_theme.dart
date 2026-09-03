@@ -44,14 +44,16 @@ import '../../typography/app_typography.dart';
 /// "this one is active" looks the same whether it is a tab, a segment or a
 /// filter.
 ///
-/// **Unselected is `surfaceContainerLow`, and that is a canonical fill rather
-/// than a substitute** (M100.32). `_ChoiceChipDefaultsM3.color` is
-/// variant-dependent, and reading it as one value was an error in this file's
-/// own contract: a **flat** `ChoiceChip` has **no** unselected fill (`null`),
-/// while `ChoiceChip.elevated` fills with `surfaceContainerLow`. The pill this
-/// app draws is a paper pill sitting on the page — the recorded design, and the
-/// elevated variant's semantics — so `MxPillButton` builds an elevated chip and
-/// takes the role instead of painting a flat one.
+/// **Unselected is `surfaceContainerLow` — the paper — and this theme is what
+/// paints it** (M100.36, correcting M100.32). `_ChoiceChipDefaultsM3.color` is
+/// variant-dependent — a flat `ChoiceChip` has no unselected fill, the elevated
+/// one fills with `surfaceContainerLow` — and M100.32 reasoned that building
+/// the elevated variant would "take the role from the SDK". It does not:
+/// `ChipThemeData.color` short-circuits `chipDefaults.color` before either
+/// variant is consulted (`chip.dart:1529-1531`), so this resolver has owned the
+/// fill all along and the variant only ever changed the *shadow*. The pill is
+/// a flat chip whose paper fill is stated here, on the canonical slot, in the
+/// canonical role (#434 P1-2).
 ///
 /// It read `scheme.surface` until M100.32, which was the paper only because the
 /// app read `surface` as the paper. `surface` is the page now, and the same
@@ -79,15 +81,28 @@ Color _fillFor(ColorScheme scheme, Set<WidgetState> states) {
     isSelected: states.contains(WidgetState.selected),
   );
 
+  // **Disabled is M3's own answer, selected or not** (M100.36 11H):
+  // `_ChoiceChipDefaultsM3.color` resolves *both* disabled combinations to
+  // `onSurface @ 12%` over the ground, which is `disabledSurfaceTint` over the
+  // paper. Blending it over the *selected* fill instead — what this resolver
+  // did until M100.36 — kept the container tint under the grey, and in dark
+  // that lightens: a disabled selected pill measured 2.04:1 against the page
+  // where a live one measured 1.56:1, *more* prominent for being switched
+  // off (#434 P2-3). The selected identity is carried by the tick the pill
+  // composes and by `Semantics(selected:)`, both of which survive disabling;
+  // the fill's job is to recede, and one fill for both recedes honestly.
   if (states.contains(WidgetState.disabled)) {
-    return disabledSurfaceTint(scheme, over: resting);
+    return disabledSurfaceTint(scheme);
   }
-  if (states.contains(WidgetState.pressed)) {
-    return _tint(resting, scheme.primary, AppStateOpacity.pressed);
-  }
-  if (states.contains(WidgetState.focused)) {
-    return _tint(resting, scheme.primary, AppStateOpacity.focus);
-  }
+  // **Hover only, and only because `RawChip` owns it** (M100.36 4O, #434
+  // P2-6). The moment a theme supplies `color`, `chip.dart:1427` forces the
+  // `InkWell`'s `hoverColor` to transparent — so a hover fill composed here is
+  // the pill's *only* hover. Press and focus are different: the chip's
+  // `InkWell` still paints `ThemeData.splashColor` and `focusColor` for them,
+  // and this resolver used to tint the fill by the same amounts on top, so a
+  // press ran at ~24% effective where the token said 12. One transient
+  // mechanism per state: Material's ripple for press, Material's wash plus the
+  // external ring for focus, this fill for hover.
   if (states.contains(WidgetState.hovered)) {
     return _tint(resting, scheme.primary, AppStateOpacity.hoverControl);
   }
@@ -166,16 +181,17 @@ ChipThemeData buildChipTheme(
   TextTheme texts,
 ) => ChipThemeData(
   color: WidgetStateProperty.resolveWith((states) => _fillFor(scheme, states)),
-  // **Zero, because the variant is chosen for its fill and not for its
-  // shadow** (M100.32). `MxPillButton` builds `ChoiceChip.elevated` so the
-  // unselected pill takes `surfaceContainerLow` from the canonical role rather
-  // than from a substitute on a flat chip — and an elevated chip's own default
-  // is `elevation: 1`, a Material shadow this design does not draw. AD-14
-  // admits one depth mechanism, and it is `shadowsFor`.
+  // **Zero at rest and zero while pressed.** AD-14 admits one depth mechanism
+  // and it is `shadowsFor`; `_ChoiceChipDefaultsM3.pressElevation` is 1.0 and
+  // was reachable — measured `Material.elevation` 0 → 1 on every unselected
+  // press with a real `shadowColor` under it (#434 P1-2). Stated on both slots
+  // so neither can come back through a constructor default.
   elevation: AppElevation.none,
-  // No checkmark: the pill group is always visible in full, so the selected one
-  // is legible by contrast alone and the tick would shift the label sideways on
-  // every change.
+  pressElevation: AppElevation.none,
+  // No Material checkmark: with `showCheckmark: true` the avatar slot opens
+  // 20dp on selection and every pill after it slides. The tick is composed in
+  // `MxPillButton`'s leading slot, which is laid out in *both* states, so
+  // selection has a shape without a reflow (M100.36 4M).
   showCheckmark: false,
   // **Selected is read first, and the order is the contract rather than a
   // style.** `_ChoiceChipDefaultsM3.side` decides on `isSelected` before it
@@ -199,10 +215,23 @@ ChipThemeData buildChipTheme(
       return const BorderSide(color: Colors.transparent);
     }
     if (states.contains(WidgetState.disabled)) {
+      // The same value as the disabled fill, by construction: a disabled pill
+      // recedes into one grey and its edge says nothing — which is the
+      // canonical `onSurface @ 12%` chip too (#434 P2-2, accepted).
       return BorderSide(color: disabledSurfaceTint(scheme));
     }
     // `outlineVariant`, which is what `borderSubtle` had been aliasing — the
-    // two are the same value, and M3 names this slot the decorative one.
+    // two are the same value, and M3 names this slot the decorative one. It
+    // measures 1.24:1 against the paper: below the 3:1 WCAG 1.4.11 asks of a
+    // boundary that *identifies* a component, and deliberately so — the pill
+    // is identified by its shape, its label, its group and, when picked, its
+    // tick, the same exemption a card's edge takes (#434 P2-4, P2-5). Inside
+    // a sheet the fill equals the ground and this hairline is the only edge;
+    // `mx_pill_button_construction_test.dart` renders that case.
+    // The width is `BorderSide`'s default, and the default *is*
+    // `AppStroke.hairline` — stating it here trips `avoid_redundant_argument_values`,
+    // so the equality is pinned in `mx_pill_button_theme_test.dart` instead
+    // (#434 P3-2).
     return BorderSide(color: scheme.outlineVariant);
   }),
   // **Pill, kept.** `AppRadius.sm` is named "chips, badges, small indicators"

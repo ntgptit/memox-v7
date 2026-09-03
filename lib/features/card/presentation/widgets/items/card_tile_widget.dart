@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/extensions/app_ink.dart';
-import '../../../../../core/theme/foundations/app_radius.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_icon.dart';
+import '../../../../../shared/widgets/mx_badge.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../domain/models/card_due_badge_model.dart';
 import '../../../domain/models/card_list_item_model.dart';
@@ -274,8 +274,8 @@ class _TrailingBadges extends StatelessWidget {
 ///
 /// `surfaceMuted`, not the deck's peach `streakContainer`: on a card row the
 /// coloured chip pulled the eye to "when" over the word being learned, and the
-/// reference draws this mark neutral. The label measures 5.61:1 light / 6.17:1
-/// dark on the muted ground.
+/// reference draws this mark neutral. The recipe is `MxBadge`'s since M100.36;
+/// what stays here is the sentence a reader hears.
 class _DueBadge extends StatelessWidget {
   const _DueBadge({required this.label});
 
@@ -285,20 +285,7 @@ class _DueBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       label: context.l10n.cardDueBadgeSemantics(label),
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.sm,
-          vertical: AppSpacing.xs,
-        ),
-        decoration: BoxDecoration(
-          color: context.semanticColors.surfaceMuted,
-          borderRadius: BorderRadius.circular(AppRadius.pill),
-        ),
-        child: Text(
-          label,
-          style: context.texts.labelSmall!.inked(context, AppInk.quiet),
-        ),
-      ),
+      child: MxBadge(label: label),
     );
   }
 }

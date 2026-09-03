@@ -5,7 +5,7 @@
 | Base commit | `4cfddd3d` (`main`) — *the screen gallery is drawn as a proof sheet* (M100.34) |
 | Pinned SDK | Flutter **3.44.8** stable · framework `058e0af2c2` · Dart 3.12.2 |
 | Scope | Every text-input surface under `lib/`, its `InputDecorationTheme`, its Widgetbook stories and its tests |
-| Mode | **Report only.** No production, theme, test, Widgetbook or design-system file was changed; no golden was regenerated |
+| Mode | **IMPLEMENTED — superseded by M100.36** (Phase 3, commit `refactor(input)`). Measurements below are history; every P1/P2 disposition is in `docs/wbs.md` M100.36. Current contract: `docs/design-system/tokyo-component-mapping.md` §2 inputs/ |
 | Method | Flutter source read at the pinned SDK (`input_decorator.dart`, `text_field.dart`), plus a throwaway measurement suite run against the real themes and deleted before commit |
 
 Every number in this report was **measured**, not recalled. The measurement

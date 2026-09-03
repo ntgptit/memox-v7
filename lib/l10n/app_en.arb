@@ -899,6 +899,10 @@
   "@cardSearchHint": {
     "description": "Card search (S1)."
   },
+  "cardSearchLabel": "Search this deck",
+  "@cardSearchLabel": {
+    "description": "Accessible name of the in-deck search field, stable whether it is empty or holding a query (S1)."
+  },
   "cardSearchClearLabel": "Clear search",
   "@cardSearchClearLabel": {
     "description": "Card search (S1)."
@@ -1009,6 +1013,10 @@
   "cardFilterAll": "All",
   "@cardFilterAll": {
     "description": "The All filter pill (D3). No count in the label: with an icon on every pill the row no longer fits 390, and the counts for All, Due and New are repeated in the progress panel immediately below. The count still reaches a screen reader through cardFilterSemantics."
+  },
+  "cardFilterGroupLabel": "Filter cards",
+  "@cardFilterGroupLabel": {
+    "description": "Accessible name of the card list's filter pill group, spoken before its options (M100.36 11F)."
   },
   "cardFilterDue": "Due",
   "@cardFilterDue": {
@@ -3385,6 +3393,10 @@
   "@tagSearchHint": {
     "description": "Placeholder of the catalog search field (BR-230)."
   },
+  "tagSearchLabel": "Search tags",
+  "@tagSearchLabel": {
+    "description": "Accessible name of the tag catalog search field, stable whether it is empty or holding a query (BR-230)."
+  },
   "tagSearchClearLabel": "Clear tag search",
   "@tagSearchClearLabel": {
     "description": "Screen-reader label of the clear button inside the catalog search field."
@@ -3858,6 +3870,10 @@
   "@librarySearchHint": {
     "description": "Placeholder of the search field. Names all three things that are matched (BR-247), because a user who does not know cards are searched will not try."
   },
+  "librarySearchLabel": "Search your library",
+  "@librarySearchLabel": {
+    "description": "Accessible name of the library search field, stable whether it is empty or holding a query. Names the scope; the hint names what is matched."
+  },
   "librarySearchClearLabel": "Clear search",
   "@librarySearchClearLabel": {
     "description": "Semantic label and tooltip of the clear button inside the search field."
@@ -4005,6 +4021,10 @@
   "trashFilterAll": "All",
   "@trashFilterAll": {
     "description": "Trash filter chip: both kinds (wireframe T3)."
+  },
+  "trashFilterGroupLabel": "Filter trash",
+  "@trashFilterGroupLabel": {
+    "description": "Accessible name of the trash filter pill group, spoken before its options (M100.36 11F)."
   },
   "trashFilterCards": "Cards",
   "@trashFilterCards": {

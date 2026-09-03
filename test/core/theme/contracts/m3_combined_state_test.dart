@@ -87,22 +87,21 @@ void main() {
         ], scheme.outlineVariant);
       });
 
-      test('the fill carries the focus cue, and the roles do not move', () {
+      test('the fill keeps its role under focus; the ring is the cue', () {
+        // **Until M100.36 this asserted the opposite** — that `fill(focused)`
+        // must *differ* from the resting role, "a state layer over the
+        // resting fill". The layer was a second focus mechanism on top of the
+        // chip's own `focusColor` wash and `MxFocusRing` (#434 P2-6); it is
+        // gone, and the fill is the same role focused or not. The ring is
+        // asserted in `mx_pill_button_focus_test.dart` with a real Tab.
         holds('fill', fill, <Set<WidgetState>>[
           selected,
+          selectedFocused,
         ], scheme.secondaryContainer);
         holds('fill', fill, <Set<WidgetState>>[
           resting,
+          focused,
         ], scheme.surfaceContainerLow);
-        // Focus is visible — it is a state layer over the resting fill, not a
-        // different token. Both directions are asserted: it must change, and it
-        // must not become some other role.
-        expect(
-          fill(focused),
-          isNot(scheme.surfaceContainerLow),
-          reason: '$mode: no focus cue',
-        );
-        expect(fill(selectedFocused), isNot(scheme.secondaryContainer));
       });
 
       test('the label ink stays with its container in every combination', () {
@@ -285,6 +284,81 @@ void main() {
           <Set<WidgetState>>[selected, selectedFocused],
           scheme.onSurface,
         );
+      });
+    });
+
+    group('$mode · TextField', () {
+      // The one component whose theme declares five state borders by hand,
+      // and the one this file skipped (#433 G2). The framework picks the
+      // painted border *before* any resolver runs — `input_decorator.dart`
+      // 2362–2370 at 3.44.8 — so the combinations are reproduced here in the
+      // order it takes them: disabled first, then focus, then error inside
+      // each branch.
+      final input = theme.inputDecorationTheme;
+      Color edge(InputBorder? border) =>
+          (border! as OutlineInputBorder).borderSide.color;
+
+      test('error keeps its hue under focus — the stroke tells them apart', () {
+        // `{focused, error}` selects `focusedErrorBorder`; `{error}` selects
+        // `errorBorder`. Both are `error`: M3 never moves this slot to a
+        // third hue (its `onErrorContainer` is hover-under-error, which this
+        // theme cannot reach). Discriminability is the stroke's job and is
+        // asserted in `app_theme_test.dart`.
+        expect(edge(input.errorBorder), scheme.error, reason: mode);
+        expect(edge(input.focusedErrorBorder), scheme.error, reason: mode);
+      });
+
+      test('focused error is told apart by the stroke, and only there', () {
+        // Discriminability, which the audit found missing (#433 F3): both
+        // borders are `error`, so the width is the whole difference — 1.5 →
+        // 2, `_InputDecoratorDefaultsM3.outlineBorder`'s own answer, admitted
+        // for this one state by M100.36 4C. Plain focus keeps the house
+        // rule: hue changes, weight does not.
+        double width(InputBorder? b) =>
+            (b! as OutlineInputBorder).borderSide.width;
+        expect(
+          width(input.focusedErrorBorder),
+          greaterThan(width(input.errorBorder)),
+          reason: '$mode: focused error is indistinguishable from error',
+        );
+        expect(
+          width(input.focusedBorder),
+          width(input.enabledBorder),
+          reason: '$mode: plain focus changed the stroke',
+        );
+      });
+
+      test('focus alone is primary, never error', () {
+        expect(edge(input.focusedBorder), scheme.primary, reason: mode);
+        expect(edge(input.focusedBorder), isNot(scheme.error), reason: mode);
+      });
+
+      test('disabled with an error paints the error edge — canonical', () {
+        // `input_decorator.dart:2364`: inside the disabled branch, error wins.
+        // A busy form that disables its fields while an error is still on
+        // screen (`deck_form_widget`, `tag_rename_widget`) paints a full
+        // `error` outline on a greyed field. Pinned so the day the framework
+        // changes its mind, the goldens are regenerated on purpose.
+        // The framework's own selection, restated as data rather than
+        // re-run: `!enabled ? (hasError ? errorBorder : disabledBorder)`.
+        final InputBorder chosenWhenDisabledAndErrored = input.errorBorder!;
+        expect(edge(chosenWhenDisabledAndErrored), scheme.error, reason: mode);
+        expect(
+          edge(chosenWhenDisabledAndErrored),
+          isNot(edge(input.disabledBorder)),
+          reason: '$mode: the disabled edge and the error edge collapsed',
+        );
+      });
+
+      test('disabled without an error is not a live role', () {
+        final Color disabledEdge = edge(input.disabledBorder);
+        for (final Color live in <Color>[
+          scheme.outline,
+          scheme.primary,
+          scheme.error,
+        ]) {
+          expect(disabledEdge, isNot(live), reason: mode);
+        }
       });
     });
 

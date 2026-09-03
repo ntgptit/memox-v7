@@ -16,10 +16,8 @@ import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/shared/widgets/mx_fab.dart';
 import 'package:memox/shared/widgets/mx_icon.dart';
 import 'package:memox/shared/widgets/mx_icon_button.dart';
-import 'package:memox/shared/widgets/mx_list_tile.dart';
 import 'package:memox/shared/widgets/mx_loading_state.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
-import 'package:memox/shared/widgets/mx_pill_button.dart';
 import 'package:memox/shared/widgets/mx_metric_well.dart';
 import 'package:memox/shared/widgets/mx_pressable.dart';
 import 'package:memox/shared/widgets/mx_feedback_band.dart';
@@ -105,6 +103,30 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
     isInteractive: true,
   ),
   MxStressSpecimen(
+    // The error pair at the stress width: the one fill whose palette is not
+    // the brand's, and the variant #432 found untested at 320 × 2.0.
+    name: 'MxActionButton (destructive)',
+    build: () => const MxActionButton(
+      label: kLongLabel,
+      onPressed: _noop,
+      variant: MxActionButtonVariant.destructive,
+    ),
+    isInteractive: true,
+  ),
+  MxStressSpecimen(
+    // 40 drawn, 48 hit, `label-md`: the deck row's verb, with the play glyph
+    // Study Home gives it. Compact had no stress specimen at all.
+    name: 'MxActionButton (compact)',
+    build: () => const MxActionButton(
+      label: kLongLabel,
+      onPressed: _noop,
+      icon: Icons.play_arrow,
+      size: MxActionButtonSize.compact,
+      variant: MxActionButtonVariant.secondary,
+    ),
+    isInteractive: true,
+  ),
+  MxStressSpecimen(
     // Two long labels, because the pair's promise is that they come out the
     // same size however unequal the copy is — and the stress width is where an
     // even split is tightest.
@@ -163,6 +185,8 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
       value: '',
       onChanged: _ignoreText,
       hintText: kLongLabel,
+      semanticLabel: 'Search',
+      clearSemanticLabel: 'Clear search',
     ),
     isInteractive: true,
   ),
@@ -248,19 +272,6 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
     needsBoundedHeight: true,
   ),
   MxStressSpecimen(
-    // A pill's label is short by design, so the stress here is the *selected*
-    // pair plus an icon: that is the widest it gets, and the tap target still has
-    // to reach the minimum once the chip is padded.
-    name: 'MxPillButton',
-    build: () => const MxPillButton(
-      label: kLongLabel,
-      icon: Icons.filter_list,
-      isSelected: true,
-      onPressed: _noop,
-    ),
-    isInteractive: true,
-  ),
-  MxStressSpecimen(
     // The interesting stress is the tap target, not the width. This button
     // draws no padding at all, so nothing but `minimumSize` is holding it to
     // 48 — and a long label that wraps to its two-line ceiling is where a
@@ -283,17 +294,6 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
             onTap: i == 9 ? null : _noop,
           ),
       ],
-    ),
-    isInteractive: true,
-  ),
-  MxStressSpecimen(
-    name: 'MxListTile',
-    build: () => const MxListTile(
-      title: kLongTitle,
-      subtitle: kLongMessage,
-      leading: Icon(Icons.folder_outlined),
-      trailing: Icon(Icons.chevron_right),
-      onTap: _noop,
     ),
     isInteractive: true,
   ),

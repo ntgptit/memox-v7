@@ -78,9 +78,10 @@ class CardImportConfirmStepWidget extends ConsumerWidget {
                 l10n.cardImportConfirmTargetLabel(deckName),
                 style: context.texts.titleSmall,
               ),
-              Divider(
-                height: AppSpacing.lg,
-                color: context.colors.outlineVariant,
+              // The gap is the layout's, the line is the theme's (M100.36 10H).
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                child: Divider(),
               ),
               _ConfirmRow(
                 icon: Icons.check,

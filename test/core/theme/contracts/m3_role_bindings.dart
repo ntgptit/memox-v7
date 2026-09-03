@@ -1,4 +1,5 @@
 import 'm3_role_binding_guard_test.dart' show RoleBinding;
+import 'm3_role_bindings_inputs.dart';
 
 /// The slot-by-slot binding contract, split out of the guard at M100.32.
 ///
@@ -308,4 +309,6 @@ const List<RoleBinding> roleBindings = <RoleBinding>[
         '_CheckboxDefaultsM3.side decides `selected` before any '
         'interaction state and inks focus the same onSurface as hover.',
   ),
+
+  ...inputRoleBindings,
 ];

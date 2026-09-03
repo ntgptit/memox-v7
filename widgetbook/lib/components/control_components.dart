@@ -7,6 +7,7 @@ import 'package:memox/core/theme/extensions/app_ink.dart';
 import 'package:memox/shared/widgets/mx_icon.dart';
 import 'package:memox/shared/widgets/mx_breadcrumb.dart';
 import 'package:memox/shared/widgets/mx_button_pair.dart';
+import 'package:memox/shared/widgets/mx_card.dart';
 import 'package:memox/shared/widgets/mx_icon_button.dart';
 import 'package:memox/shared/widgets/mx_menu_button.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
@@ -133,6 +134,23 @@ WidgetbookComponent actionButtonComponent() {
                   onPressed: _noop,
                 ),
               ),
+              // The busy state that keeps its words — M4.13 W6's `Exporting…`
+              // — on every variant, because #432 P1-2 found the destructive
+              // one silently falling to the disabled pair. Width is decided
+              // from outside, as the parameter's own doc requires.
+              row(
+                'loading · label kept',
+                (MxActionButtonVariant variant) => SizedBox(
+                  width: 180,
+                  child: MxActionButton(
+                    label: name(variant),
+                    variant: variant,
+                    isLoading: true,
+                    shouldKeepLabelWhileLoading: true,
+                    onPressed: _noop,
+                  ),
+                ),
+              ),
               row(
                 'compact · 40 drawn, 48 hit',
                 (MxActionButtonVariant variant) => MxActionButton(
@@ -150,6 +168,27 @@ WidgetbookComponent actionButtonComponent() {
                     label: 'Reset learning progress',
                     variant: variant,
                     onPressed: _noop,
+                  ),
+                ),
+              ),
+              // The mobile stress frame the audits ask for: 320dp of width at
+              // textScale 2.0, compact with a glyph. The icon gap should have
+              // closed to `xs` and the label wrapped rather than clipped.
+              row(
+                'compact · 320dp · textScale 2.0',
+                (MxActionButtonVariant variant) => MediaQuery(
+                  data: MediaQuery.of(
+                    context,
+                  ).copyWith(textScaler: const TextScaler.linear(2)),
+                  child: SizedBox(
+                    width: 320,
+                    child: MxActionButton(
+                      label: 'Reset learning progress',
+                      icon: Icons.play_arrow,
+                      variant: variant,
+                      size: MxActionButtonSize.compact,
+                      onPressed: _noop,
+                    ),
                   ),
                 ),
               ),
@@ -429,6 +468,83 @@ WidgetbookComponent pillButtonComponent() {
               onPressed: isEnabled ? _noop : null,
               icon: hasIcon ? Icons.schedule : null,
               semanticLabel: semanticLabel,
+            ),
+          );
+        },
+      ),
+      // The way pills are actually met: one of N, and the tick moving between
+      // them without the row reflowing (M100.36 4M).
+      WidgetbookUseCase(
+        name: 'Group',
+        builder: (BuildContext context) {
+          const options = <String>['All', 'Due', 'New', 'Flagged'];
+          final selected = context.knobs.object.dropdown<String>(
+            label: 'selected',
+            options: options,
+          );
+          final isEnabled = context.knobs.boolean(
+            label: 'enabled',
+            initialValue: true,
+          );
+
+          return CatalogCenterPage(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: AppSpacing.sm,
+              children: <Widget>[
+                for (final option in options)
+                  MxPillButton(
+                    label: option,
+                    isSelected: option == selected,
+                    onPressed: isEnabled ? _noop : null,
+                  ),
+              ],
+            ),
+          );
+        },
+      ),
+      // `surfaceContainerLow` on `surfaceContainerLow`: the hairline is the
+      // only boundary here, which is the case #434 P2-4 accepted.
+      WidgetbookUseCase(
+        name: 'On a card',
+        builder: (BuildContext context) {
+          return const CatalogCenterPage(
+            child: MxCard.flat(
+              child: Padding(
+                padding: EdgeInsets.all(AppSpacing.md),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: AppSpacing.sm,
+                  children: <Widget>[
+                    MxPillButton(
+                      label: 'Newest first',
+                      isSelected: true,
+                      onPressed: _noop,
+                    ),
+                    MxPillButton(
+                      label: 'Random',
+                      isSelected: false,
+                      onPressed: _noop,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+      // One grey for both (M3's own); the tick is what remembers the choice.
+      WidgetbookUseCase(
+        name: 'Disabled pair',
+        builder: (BuildContext context) {
+          return const CatalogCenterPage(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: AppSpacing.sm,
+              children: <Widget>[
+                MxPillButton(label: 'All', isSelected: false, onPressed: null),
+                MxPillButton(label: 'Due', isSelected: true, onPressed: null),
+              ],
             ),
           );
         },

@@ -30,6 +30,16 @@ import '../../core/theme/extensions/theme_context_extension.dart';
 /// The child keeps its own size: this only adds a `foregroundDecoration`, and a
 /// decoration paints without participating in layout. Nothing moves when focus
 /// arrives.
+///
+/// **Keyboard focus only** (M100.36). `FocusHighlightMode.touch` — a phone with
+/// no keyboard attached — draws no ring: focus that arrived from a tap or a
+/// programmatic move is not something a touch user asked to see, and a
+/// keyboard affordance without a keyboard made one control read as a
+/// different component (the M99.75 defect `MxCard` already gates against;
+/// `mx.css` says the same with `:focus-visible`). Flutter moves the mode to
+/// `traditional` on the first key event, so a phone with a keyboard plugged in
+/// gets the ring the moment it is used. One gate, in the one ring, so
+/// `MxListTile`, `MxPressable` and `MxPillButton` cannot answer three ways.
 class MxFocusRing extends StatefulWidget {
   const MxFocusRing({
     required this.child,
@@ -41,7 +51,7 @@ class MxFocusRing extends StatefulWidget {
 
   /// The ring's corner radius. Supplied by the caller because it has to follow
   /// the shape being marked — a pill for `MxPillButton`, `AppRadius.md` for a
-  /// rectangular control.
+  /// rectangular control, zero for a full-bleed row.
   final BorderRadius borderRadius;
 
   @override
@@ -50,6 +60,29 @@ class MxFocusRing extends StatefulWidget {
 
 class _MxFocusRingState extends State<MxFocusRing> {
   bool _hasFocus = false;
+
+  bool get _showsRing =>
+      _hasFocus &&
+      FocusManager.instance.highlightMode == FocusHighlightMode.traditional;
+
+  @override
+  void initState() {
+    super.initState();
+    FocusManager.instance.addHighlightModeListener(_onHighlightModeChanged);
+  }
+
+  @override
+  void dispose() {
+    FocusManager.instance.removeHighlightModeListener(_onHighlightModeChanged);
+    super.dispose();
+  }
+
+  void _onHighlightModeChanged(FocusHighlightMode mode) {
+    // Only a focused ring has anything to redraw; an unfocused one is the
+    // same picture in either mode.
+    if (!_hasFocus) return;
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +97,7 @@ class _MxFocusRingState extends State<MxFocusRing> {
         position: DecorationPosition.foreground,
         decoration: BoxDecoration(
           borderRadius: widget.borderRadius,
-          border: _hasFocus
+          border: _showsRing
               ? Border.fromBorderSide(
                   AppInteractionStates.focusIndicator(context.colors),
                 )

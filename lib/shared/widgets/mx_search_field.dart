@@ -6,6 +6,7 @@ import '../../core/theme/foundations/app_motion_policy.dart';
 import '../../core/theme/foundations/app_radius.dart';
 import '../../core/theme/foundations/app_sizing.dart';
 import '../../core/theme/foundations/app_spacing.dart';
+import '../../core/theme/foundations/app_stroke.dart';
 import '../../core/theme/typography/app_typography.dart';
 import '../../core/theme/extensions/theme_context_extension.dart';
 import 'mx_icon.dart';
@@ -22,19 +23,40 @@ import 'mx_icon.dart';
 /// flat scan of one level or a walk of a whole subtree is the screen's decision,
 /// and the two want different result rows.
 ///
-/// **Focus changes the fill and the border, never a size.** The design's
-/// `.mx-search` carries a 1px *transparent* border at rest precisely so that
-/// gaining one on focus moves nothing beside it — the same rule the form input
-/// follows, where focus shifts the border's hue and not its width. The pill also
-/// lifts from `surfaceMuted` to `surface`: a field being typed into stops being
-/// a well in the page and becomes a surface of its own.
+/// **A custom filled mobile control, not an `InputDecorator` clone** (M100.36
+/// 4E). It keeps its own surface model — a well in the page at rest, the paper
+/// once focused — and takes its *boundary* from the same system every other
+/// control uses: `scheme.outline` at rest, `scheme.primary` with focus, at
+/// [AppStroke.input]. Until M100.36 the resting border was the fill's own
+/// colour, so the pill had no boundary at all: 1.09:1 against the light page,
+/// identified only by its glyph and placeholder (#433 §4.1). A control that is
+/// somewhere to type is identified by its edge, which is what WCAG 1.4.11 asks
+/// 3:1 of. No shadow: search is flat, and the fill and the edge each carry a
+/// different fact.
+///
+/// **Focus changes the fill and the border, never a size.** The border is drawn
+/// outside the box (`strokeAlignOutside`) so gaining a colour on focus moves
+/// nothing beside it — the same rule the form input follows.
+///
+/// **The name is not the placeholder** (M100.36 4D). A hint disappears the
+/// moment the user types — on screen *and* from the semantics tree, because
+/// `InputDecorator` wraps it in an `Opacity` at zero — so a search field named
+/// by its hint was unnamed for exactly as long as it held a query (#433 F1).
+/// [semanticLabel] is required and is the field's name in every state; the
+/// visible hint is excluded from semantics so the two are never read twice.
+///
+/// **It grows with the text, from a floor of 48** (#433 F2). The pill used to
+/// be pinned at `AppSizing.touchTarget` with `expands: true`, which made a
+/// documented *floor* into a ceiling: from `textScaler` 2.5 the placeholder
+/// was clipped to the box. The floor is a floor now.
 class MxSearchField extends StatefulWidget {
   const MxSearchField({
     required this.value,
     required this.onChanged,
     required this.hintText,
+    required this.semanticLabel,
+    required this.clearSemanticLabel,
     this.resultCount,
-    this.clearSemanticLabel,
     this.shouldAutofocus = false,
     super.key,
   });
@@ -44,13 +66,21 @@ class MxSearchField extends StatefulWidget {
 
   /// Already-localized, and it should name the **scope**: on a nested level the
   /// user needs to know whether they are searching this deck or everything.
+  /// Painted only; the accessible name is [semanticLabel].
   final String hintText;
+
+  /// Already-localized. What a screen reader calls this field, whether it is
+  /// empty or holding a query. Required, for the reason `MxTextField` requires
+  /// a `label`: a hint is not a name.
+  final String semanticLabel;
+
+  /// Already-localized label for the clear button. Required: a `null` here
+  /// left the button with no name and no tooltip, and two of three callers
+  /// happened to pass one.
+  final String clearSemanticLabel;
 
   /// Shown while there is a query. Omit when the screen does not know yet.
   final int? resultCount;
-
-  /// Already-localized label for the clear button.
-  final String? clearSemanticLabel;
 
   /// Focus the field the moment it appears.
   ///
@@ -99,6 +129,14 @@ class _MxSearchFieldState extends State<MxSearchField> {
     final semantic = context.semanticColors;
     final hasQuery = widget.value.isNotEmpty;
     final count = widget.resultCount;
+    // **Its own rung, and it is the pill's to own** (M100.36 4P analogue). The
+    // form field's hint is `body-lg` because its value is; this pill's value is
+    // `body-md` — a search strip under an app bar, not a form — so its
+    // placeholder is the same rung, in `onSurfaceVariant`. Stated here rather
+    // than read from `inputDecorationTheme.hintStyle`, so the two controls
+    // cannot drift apart by one following the other's rung.
+    final TextStyle text = context.texts.bodyMedium!;
+    final TextStyle hint = text.copyWith(color: colors.onSurfaceVariant);
 
     return AnimatedContainer(
       // The crossfade between the resting well and the focused surface is
@@ -107,22 +145,20 @@ class _MxSearchFieldState extends State<MxSearchField> {
       // frame. Reduced motion drops the fade and keeps the state.
       duration: AppMotionPolicy.durationOf(context, AppDurations.fast),
       curve: AppDurations.standard,
+      // A floor, as `AppSizing` names it. The row inside grows with the text
+      // and the clear button already stands 48 tall, so the pill is 48 at the
+      // default scale and taller only when the text needs it.
+      constraints: const BoxConstraints(minHeight: AppSizing.touchTarget),
       decoration: BoxDecoration(
         color: _hasFocus ? colors.surface : semantic.surfaceMuted,
         borderRadius: BorderRadius.circular(AppRadius.pill),
-        // **Always drawn, and the same colour as the fill at rest.** The design
-        // uses a transparent border here so that gaining one on focus moves
-        // nothing beside it; a fully transparent colour is not a palette token
-        // and the audit blocks it — correctly, since "alpha zero" is how an
-        // unowned colour hides. Painting the fill's own colour is invisible in
-        // the same way and is a token.
-        //
         // `strokeAlignOutside` keeps the stroke out of the layout: a border
-        // inside the box would make the pill 50 where the touch target needs
+        // inside the box would make the pill 51 where the touch target needs
         // its 48, and at 320 wide with `textScaler` 2.0 the chrome has no two
         // pixels to spare.
         border: Border.all(
-          color: _hasFocus ? colors.primary : semantic.surfaceMuted,
+          color: _hasFocus ? colors.primary : colors.outline,
+          width: AppStroke.input,
           strokeAlign: BorderSide.strokeAlignOutside,
         ),
       ),
@@ -138,29 +174,27 @@ class _MxSearchFieldState extends State<MxSearchField> {
           const MxIcon(Icons.search, size: MxIconSize.sm),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
-            // The 48 lives on the box, not on the decorator. Asking
-            // `InputDecoration` for a minimum height grew the box and left the
-            // text against its ceiling — which is exactly the "icon and hint on
-            // different lines" this was reported as. Letting the field expand
-            // into the fixed-height box keeps the tap target at 48, and the
-            // tiny upward nudge keeps the hint from sitting 2px lower than the
-            // search icon.
-            child: SizedBox(
-              height: AppSizing.touchTarget,
+            child: Semantics(
+              label: widget.semanticLabel,
+              textField: true,
               child: TextField(
                 controller: _controller,
                 focusNode: _focusNode,
                 autofocus: widget.shouldAutofocus,
                 onChanged: widget.onChanged,
                 textInputAction: TextInputAction.search,
-                style: context.texts.bodyMedium,
-                expands: true,
-                maxLines: null,
-                // Nudge the editable up a hair so the hint's bottom edge lines
-                // up with the search icon instead of sitting 2px lower.
-                textAlignVertical: const TextAlignVertical(y: -0.1),
+                keyboardType: TextInputType.text,
+                style: text,
                 decoration: InputDecoration(
-                  hintText: widget.hintText,
+                  // Painted, not announced: `semanticLabel` above is the name.
+                  hint: ExcludeSemantics(
+                    child: Text(
+                      widget.hintText,
+                      style: hint,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                   // The pill *is* the decoration. Left to the theme this would
                   // draw the form field's 1.5px outline inside it.
                   border: InputBorder.none,
@@ -168,9 +202,14 @@ class _MxSearchFieldState extends State<MxSearchField> {
                   focusedBorder: InputBorder.none,
                   // `isCollapsed`, not `isDense`: dense keeps some of the
                   // decorator's own vertical padding, and that padding is what
-                  // biased the text off the glyph's line.
+                  // biased the text off the glyph's line. The inset is stated
+                  // on the field rather than the pill so the 48-tall clear
+                  // button does not add to it: at the default scale the field
+                  // is 44 inside a 48 row, and it is the field that grows.
                   isCollapsed: true,
-                  contentPadding: EdgeInsets.zero,
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: AppSpacing.md,
+                  ),
                 ),
               ),
             ),

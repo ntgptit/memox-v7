@@ -36,23 +36,39 @@ void main() {
           contrast(tile.selectedColor!, tile.selectedTileColor!),
           greaterThanOrEqualTo(4.5),
           reason:
-              'In ${entry.key}, the selected label sits on `selectedTileColor`, '
-              'not on the page. `scheme.primary` measured 2.45:1 there in dark; '
-              '`primaryAccent` is the variant derived for that ground.',
+              'In ${entry.key}, the selected label sits on `selectedTileColor` '
+              '— `surfaceSelected` since M100.36 — not on the page. The old '
+              'dark fill tone measured 2.45:1 there; tone-80 `primary` clears '
+              'it, and the retired `primaryAccent` no longer stands in.',
         );
+        // The fill is the one app-owned "picked" surface, shared with the
+        // card's tint (M100.36 4I) — two fills for one meaning was #431 P1-4.
+        expect(tile.selectedTileColor, semanticsOf(theme).surfaceSelected);
       }
     });
 
-    test('light is unchanged, because there the accent is the primary', () {
-      final theme = themes['light']!;
+    test('the theme sets no textColor, so the subtitle keeps its own ink', () {
+      // `ListTile` copies a non-null `textColor` onto the title, the subtitle
+      // and the leading/trailing text alike (`list_tile.dart:920`, `:934`,
+      // `:899` at 3.44.8). A tautology stood here until M100.36; this is the
+      // assertion the row system actually needed (#431 P1-1).
+      for (final entry in themes.entries) {
+        final tile = entry.value.listTileTheme;
+        final scheme = entry.value.colorScheme;
 
-      expect(
-        theme.colorScheme.primary,
-        theme.colorScheme.primary,
-        reason:
-            'The dark fix must not quietly restyle light. If these ever differ, '
-            'the light selected row changed colour and nobody asked for it.',
-      );
+        expect(tile.textColor, isNull, reason: entry.key);
+        expect(tile.titleTextStyle?.color, scheme.onSurface, reason: entry.key);
+        expect(
+          tile.subtitleTextStyle?.color,
+          scheme.onSurfaceVariant,
+          reason: entry.key,
+        );
+        expect(
+          tile.leadingAndTrailingTextStyle?.fontSize,
+          entry.value.textTheme.bodyMedium?.fontSize,
+          reason: '${entry.key}: trailing text fell back to label-sm 11px',
+        );
+      }
     });
   });
 

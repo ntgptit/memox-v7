@@ -82,6 +82,9 @@ class CardImportSourceStepWidget extends ConsumerWidget {
             minLines: 4,
             maxLines: 8,
             keyboardType: TextInputType.multiline,
+            // No helper, no error, no limit: the one field in the app that can
+            // never produce supporting text, so it holds no line for it.
+            supportingLine: MxTextFieldSupportingLine.none,
           ),
         // `xl` between sections, `md` inside one (Card Detail's rhythm): the
         // options and the work surface are one decision, the info panel is

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | active |
+| **Status** | **IMPLEMENTED — superseded by M100.36** (Phase 4, commit `refactor(row)`). Measurements below are history; every P1/P2 disposition is in `docs/wbs.md` M100.36. Current contract: `docs/design-system/tokyo-component-mapping.md` §2 content/ and §7 |
 | **Purpose** | Prepare the implementation pass for the row/list-item system: inventory what exists, measure what it renders, name what disagrees |
 | **Scope** | `MxListTile`, `ListTileThemeData`, every row-like shared widget, every production list composition, their tests/goldens/Widgetbook entries. **Report only** — no fix is applied here |
 | **Source of truth for** | — (an audit; the decisions still live in AD-15, AD-23, `tokyo-component-mapping.md`, `flutter-theme-design`) |

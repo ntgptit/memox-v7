@@ -8,6 +8,14 @@ import '../../../../../shared/widgets/mx_action_button.dart';
 /// So a one-word verb is not narrower than the chips above it. Deck-local, so
 /// it constrains from outside rather than living in the shared button: the
 /// minimum a verb needs is decided by what it sits next to.
+///
+/// **A layout constraint, not a second `buttonMinWidth`** (M100.36, #432
+/// P2-4). The shared button keeps its 64 floor untouched; this is the deck
+/// tile deciding how much of its own row the verb may take, the same way a
+/// `ConstrainedBox` around any child would. 80 is on the 4px grid and off
+/// every token ladder because it answers a question no ladder asks — "as
+/// wide as the gauges beside it" — and `deck_tile_geometry_test.dart` pins
+/// it as a floor rather than a value, so a wider label still wins.
 const double _kButtonMinWidth = 80;
 
 /// Start studying what is due in one deck.
@@ -38,11 +46,12 @@ const double _kButtonMinWidth = 80;
 /// geometry stated inline — which made it one of the two feature files
 /// `memox_v7.design_system.no_raw_button` fired on the day the rule was
 /// written. `MxActionButtonSize.compact` now owns that geometry (40 drawn, 48
-/// hit, `label-md` at 600), so the next screen that needs a chip-row button
-/// gets this one instead of copying a style block. One real change rode along:
-/// the old inline label set `fontWeight: w600` without moving the variable
-/// font's `wght` axis, so it *painted* 500 — compact goes through
-/// `AppTypography.withWeight` and paints the 600 this file always claimed.
+/// hit, `label-md` at `buttonLabelWeight` — 700 since M100.30), so the next
+/// screen that needs a chip-row button gets this one instead of copying a
+/// style block. One real change rode along at the time: the old inline label
+/// set `fontWeight: w600` without moving the variable font's `wght` axis, so
+/// it *painted* 500 — compact goes through `AppTypography.withWeight`, which
+/// is why the weight M100.30 raised actually reached the glyphs.
 class DeckStudyButtonWidget extends StatelessWidget {
   const DeckStudyButtonWidget({required this.deckId, super.key});
 

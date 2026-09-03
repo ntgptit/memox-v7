@@ -7,7 +7,7 @@
 | **Scope** | `lib/core/theme/components/**`. Ngoài phạm vi: giá trị token (AD-14), layering của `lib/core/theme/` (`theme-architecture.md`), API của `Mx*` widget |
 | **Source of truth for** | Ma trận component → canonical M3 role · ma trận dịch ý đồ Tokyo → MemoX · hồ sơ các sai lệch role đã sửa và mô hình bề mặt |
 | **Depends on** | `document-conventions.md` · `architecture.md` (AD-14) · `design-system/theme-architecture.md` |
-| **Updated by task** | M100.32 |
+| **Updated by task** | M100.36 |
 | **Last updated** | 2026-09-03 |
 
 ---
@@ -42,9 +42,9 @@ canonical M3 role  >  accessibility  >  MemoX structural system  >  Tokyo exact 
 |---|---|---|---|---|
 | FilledButton | background | `primary` (disabled: `onSurface`) | = | disabled dùng `semantic.disabledSurface` — solid, R7 |
 | FilledButton | foreground | `onPrimary` (disabled: `onSurface`) | = | disabled dùng `semantic.onDisabled` |
-| FilledButton | overlay | `onPrimary` | blend về `onSurface` | 6% accent trên accent là vô hình — xem file |
-| FilledTonalButton | background | `secondaryContainer` | = | qua `MxFilledPair.tonal` |
-| FilledTonalButton | foreground | `onSecondaryContainer` | = | |
+| FilledButton | overlay | `onPrimary` @ .08/.10/.10 | = | qua `MxFilledPair.stateLayerOf`; guard AST (M100.36). Trước đó là blend về `onSurface` **cộng** overlay `primary` — xem §6 |
+| FilledButton (destructive) | background / foreground / overlay | `error` / `onError` / `onError` | = | `MxFilledPair.destructive`; guard AST cả ba slot |
+| FilledTonalButton | — | `secondaryContainer` / `onSecondaryContainer` | **không dựng** | `MxActionButtonVariant.tonal` gỡ ở M100.36: 0 caller từ #384, và hệ thứ bậc chấm điểm (§4B) chốt bằng `secondary` |
 | OutlinedButton | foreground | `primary` | = | guard AST |
 | OutlinedButton | side | `outline`, focus → `primary` | = | guard AST |
 | TextButton | foreground | `primary` | = | guard AST |
@@ -56,17 +56,23 @@ canonical M3 role  >  accessibility  >  MemoX structural system  >  Tokyo exact 
 
 | Component | Slot | M3 canonical | MemoX | Ghi chú |
 |---|---|---|---|---|
-| InputDecorator | outlineBorder | `outline`; focus `primary`; error `error` | = | |
+| InputDecorator | outlineBorder | `outline`; focus `primary`; error `error`; focus+error `error` **stroke 2** | = | guard AST bốn slot (M100.36). Stroke chỉ đổi ở focus+error — hue đã bận, stroke là kênh còn lại (§4C); focus thường vẫn chỉ đổi hue |
 | InputDecorator | fillColor | `surfaceContainerHighest` | `filled: false` | Cố ý: field là *khoảng mở*, không phải khối |
-| InputDecorator | hintStyle | `onSurfaceVariant` | = | |
+| InputDecorator | hintStyle | `bodyLarge` / `onSurfaceVariant`, disabled 38% | = | M100.36: từng là `body-md` — một rung dưới value (#433 F6) |
+| InputDecorator | suffixIconColor | `onSurfaceVariant`; error `error`; disabled 38% | = | M100.36: theme `IconButton` từng chặn nhánh error của SDK (#433 F4) |
+| MxSearchField (custom) | fill / edge | — (không phải InputDecorator) | `surfaceMuted` → `surface`; edge `outline` → `primary` @ `AppStroke.input` | Control tuỳ biến, ranh giới dùng hệ chung (§4E). Trước M100.36 edge = màu fill, 1.09:1 |
 
 ### selection/
 
 | Component | Slot | M3 canonical | MemoX | Ghi chú |
 |---|---|---|---|---|
 | ChoiceChip | selected fill | `secondaryContainer` | = | guard AST |
-| ChoiceChip (elevated) | unselected fill | `surfaceContainerLow` | = | flat sẽ là `null`; widget dùng `.elevated` — xem §4 |
-| ChoiceChip | side | `outlineVariant`, selected trong suốt | = | guard AST |
+| ChoiceChip (flat) | unselected fill | `null` | `surfaceContainerLow` — **theme khai, không phải variant** | `ChipThemeData.color` chặn `chipDefaults.color` trước khi variant được hỏi (`chip.dart:1529`); M100.36 sửa lại lời giải thích ở §4 |
+| ChoiceChip | side | `outlineVariant`, selected trong suốt | = | guard AST; width = `AppStroke.hairline` (test ghim); 1.24:1 trên giấy — **chấp nhận**, pill định danh bằng hình, nhãn, nhóm và tick (#434 P2-4) |
+| ChoiceChip | disabled fill | `onSurface @ 12%` — selected hay không | = (`disabledSurfaceTint`) | M100.36: trước đó selected+disabled blend thêm container, dark sáng *hơn* pill sống (#434 P2-3) |
+| ChoiceChip | elevation / pressElevation | 1 / 1 (M3) | **0 / 0** | AD-14 một cơ chế độ sâu; `pressElevation` từng để SDK → mỗi lần nhấn có bóng thật (#434 P1-2) |
+| ChoiceChip | hover / press / focus | state layer `onSurfaceVariant` | hover: fill tint (`RawChip` tắt `hoverColor` khi theme có `color`) · press: ripple SDK · focus: `MxFocusRing` | **một cơ chế mỗi state** (§4O). Fill *không* đổi khi press/focus |
+| MxPillButton (custom) | leading slot | — | 16dp luôn được layout: tick khi selected, `icon` của caller khi không | chọn có *hình*, không reflow (§4M); target 48 do widget tự nới **ngoài** ring |
 | Checkbox | fill | `primary` / trong suốt theo `selected` | = | guard AST |
 | Switch | thumb | `outline` off / `onPrimary` on | = | guard AST |
 | Switch | track | `surfaceContainerHighest` off / `primary` on | = | guard AST |
@@ -98,8 +104,10 @@ canonical M3 role  >  accessibility  >  MemoX structural system  >  Tokyo exact 
 | Dialog | background | `surfaceContainerHigh` | = | |
 | BottomSheet | background | `surfaceContainerLow` | = | nay là mặt giấy, theo rung |
 | BottomSheet | dragHandle | `onSurfaceVariant` | = | + state layer, không đổi role |
-| ListTile | selectedColor | `primary` | = | |
-| ListTile | icon / title / subtitle | `onSurfaceVariant` / `onSurface` / `onSurfaceVariant` | = | |
+| ListTile | selectedColor | `primary` | = | guard AST |
+| ListTile | icon / title / subtitle / trailing text | `onSurfaceVariant` / `onSurface` / `onSurfaceVariant` / `onSurfaceVariant` | = | guard AST (M100.36). Trước đó theme đặt `textColor: onSurface`, thứ `ListTile` chép lên **cả** subtitle (`list_tile.dart:934`) — subtitle mọi hàng từng mang mực title (#431 P1-1) |
+| ListTile | selectedTileColor | *(null — M3 không có)* | `semantic.surfaceSelected` | Bề mặt "đã chọn" app-owned duy nhất, dùng chung với tint của `MxCard` (§4I, M100.36) |
+| ListTile | minTileHeight | 56 (`_defaultTileHeight`) | = `AppSizing.rowMinHeight` | Nêu tường minh ở M100.36 — 48 là sàn chạm, 56 là hàng đọc (§4J) |
 | Divider | — | `outlineVariant` (M3 dùng ThemeData) | = | |
 | ProgressIndicator | color | `primary` | = | |
 | ProgressIndicator | linearTrack | `secondaryContainer` | = | |
@@ -176,13 +184,17 @@ app vẫn vẽ từ trước.
 | 1 | FAB bg/fg | `primaryContainer`/`onPrimaryContainer` | `primary`/`onPrimary` | **canonical** |
 | 2 | Card `color` | `surfaceContainerLow` | `surface` | **canonical** |
 | 3 | AppBar bg/fg | `surface`/`onSurface` | màu trang truyền vào | **canonical** |
-| 4 | ChoiceChip fill chưa chọn | flat `null` · elevated `surfaceContainerLow` | flat + `surface` | **elevated + `surfaceContainerLow`** |
+| 4 | ChoiceChip fill chưa chọn | flat `null` · elevated `surfaceContainerLow` | flat + `surface` | **flat + `surfaceContainerLow` do theme khai** (M100.36 sửa lại M100.32) |
 
-#4 đáng nói riêng: `MxPillButton` vẽ một *pill giấy nằm trên trang* — thiết kế
-đã ghi. Tô một chip **flat** là thay thế trên slot canonical, vì flat không có
-fill. Variant *elevated* có đúng ngữ nghĩa đó, nên widget dựng
-`ChoiceChip.elevated` và nhận fill từ role; `chipTheme` khai `elevation: 0` để
-variant mang ngữ nghĩa fill mà không mang cái bóng thiết kế này không vẽ.
+#4 đáng nói riêng, vì lời giải thích ở M100.32 sai và phải ghi lại: nó cho
+rằng dựng `ChoiceChip.elevated` là "nhận fill từ role". Không phải —
+`ChipThemeData.color` chặn `chipDefaults.color` *trước* khi variant được hỏi
+(`chip.dart:1529-1531`), nên `buildChipTheme` đã và đang là thứ tô fill; cái
+variant đổi được chỉ là `shadowColor`, và với `pressElevation` để nguyên 1.0
+của M3 thì mỗi lần nhấn pill chưa chọn có một bóng thật (#434 P1-2). M100.36
+dựng chip **flat**, khai fill giấy trên slot canonical, và ghim cả `elevation`
+lẫn `pressElevation` bằng 0. `mx_pill_button_construction_test.dart` ghim
+constructor ở mức source.
 
 Năm slot (FAB ×2, Card, AppBar ×2) được ghim ở `m3_role_binding_guard_test.dart`
 ở mức **source**, nên đổi `surfaceContainerLow` thành `surface` là đỏ kể cả khi
@@ -205,31 +217,125 @@ Component theme sở hữu hình học **toàn cục**; shared widget chỉ thê
 
 | Theme | Sở hữu |
 |---|---|
-| `buildSharedButtonStyle` | chiều cao tối thiểu (`AppSizing.touchTarget`), bề rộng tối thiểu, padding, shape, weight nhãn |
-| `buildInputDecorationTheme` | content padding, radius, stroke, hint style |
-| `buildChipTheme` | chiều cao pill, padding, radius, weight nhãn |
-| `buildListTileTheme` | content padding, minVerticalPadding, shape |
+| `buildSharedButtonStyle` | chiều cao tối thiểu (`AppSizing.touchTarget`), bề rộng tối thiểu, padding, shape, weight nhãn. `MxActionButtonSize.compact` là **trục kích thước** của shared widget (40 vẽ / 48 chạm, `label-md`), không phải một feature nêu lại — ranh giới dưới áp cho feature |
+| `buildInputDecorationTheme` | content padding, radius, stroke (input; focus ở focused-error), hint style, suffix colour. `MxSearchField` là composition riêng: sở hữu rung `body-md` của nó (widget đóng, §4P) |
+| `buildChipTheme` | chiều cao pill, padding, radius, weight nhãn, side hairline, hai elevation = 0. `MxPillButton` sở hữu slot dẫn 16dp, tick khi chọn, ring quanh hình vẽ và target 48 nới ngoài ring (§4P: rung `label-md`) |
+| `buildListTileTheme` | content padding, minVerticalPadding, `minTileHeight` (`AppSizing.rowMinHeight`), shape, ba rung chữ |
 | `buildDialogTheme` | shape |
 | `buildCardTheme` | shape, hairline |
 
-MUST NOT: một `Mx*` widget hoặc một feature nêu lại các giá trị này.
+MUST NOT: một **feature** nêu lại các giá trị này. Một shared widget đóng
+(`Mx*`) MAY chuyên biệt hoá một trục kích thước hoặc rung nhãn cho composition
+của chính nó **khi trục đó là một enum đóng và có caller production** —
+`MxActionButtonSize.compact`, `MxTextButton.isCompact`, `MxPillButton` với
+`label-md` (M100.36 §4P). Cái bị cấm là một *feature* làm việc đó.
+
+**Pill là một-trong-N, và chỉ thế** (M100.36 §4N). Một lệnh đứng cạnh nhóm pill
+— nút mở sheet lọc tag của danh sách thẻ — là `MxActionButton` compact
+secondary, không phải pill mang `isSelected` nó không có: năm node semantics
+giống hệt nhau trong một hàng, bốn cái loại trừ nhau và một cái toggle độc lập,
+không nói cho screen reader biết cái nào là cái nào (#434 P1-1). Nhóm pill tự
+giới thiệu (`Semantics(container, label)`) trước các lựa chọn của nó (§11F).
+
+**Badge không phải chip.** `MxBadge` là `Container` — không focus, không press,
+không selected, không target — cho một từ trên nền `surfaceMuted`; ba feature
+từng tự viết đúng recipe này (due label của card row, tag chỉ đọc). Badge mang
+*trạng thái* (overdue, recommended, imported) giữ container riêng cạnh hàng của
+nó và không gộp vào (#434 §17).
 
 ---
 
-## 6. Blocking finding — FilledButton state, cho đợt Button kế tiếp
+## 6. FilledButton state — đã đóng ở M100.36
 
-**Trạng thái: MỞ.** Cho đến khi đóng, **không được tuyên bố button theme là
-canonical.**
+**Trạng thái: ĐÓNG.** Button theme nay canonical với `_FilledButtonDefaultsM3`
+ở cả ba slot (background, foreground, overlay), guard AST ghim từng nhánh của
+`MxFilledPair`.
 
-Chi tiết nằm ở **[`docs/reviews/mx-action-button-deep-audit.md`](../reviews/mx-action-button-deep-audit.md)**
-(#432) và **chỉ** ở đó — báo cáo ấy đã đọc `ink_well.dart` để dựng lại thứ tự
-composite thật, thứ mục này không lặp lại.
+Hồ sơ, vì đây là về **bảng dịch này**: dòng §2 từng ghi sai lệch FilledButton
+overlay là một **thay thế** (`onPrimary` → blend về `onSurface`), trong khi code
+thực hiện một **phép cộng** — `buildSharedButtonStyle` đặt `overlayColor:
+controlOverlay` (`primary` @ 6/10/12%) và `buildFilledStyle` chỉ `copyWith`
+`backgroundColor` (lerp về `onSurface`), nên hover/press vẽ *cả hai*. Trên
+`primary` overlay là no-op và còn triệt tiêu một phần blend (press ΔE 2.08 so
+với M3 5.74); trên `error` nó phủ indigo lên đỏ và xoay hue 345.7° → 338.5°.
+Chi tiết đo ở [`docs/reviews/mx-action-button-deep-audit.md`](../reviews/mx-action-button-deep-audit.md)
+(#432).
 
-Điều duy nhất ghi ở đây, vì nó là về **bảng dịch này**: dòng §2 nói sai lệch
-FilledButton overlay là một **thay thế** (`onPrimary` → blend về `onSurface`),
-trong khi code thực hiện một **phép cộng** — `buildSharedButtonStyle` đặt
-`overlayColor: controlOverlay` và `buildFilledStyle` chỉ `copyWith`
-`backgroundColor`, nên hover vẽ *cả hai*. Trên `primary` hệ quả đã biết và đã
-ghim (overlay là no-op); trên `tonal` và `destructive` thì không.
+Cách đóng: **một cơ chế, và là của Material** — fill giữ nguyên role ở mọi state
+enabled; hover/focus/press là state layer màu `on` của chính cặp
+(`MxFilledPair.stateLayerOf`) ở alpha SDK (`AppStateOpacity.stateLayer*` =
+0.08/0.10/0.10). Hai token blend (`filledHoverBlend`, `filledPressedBlend`) gỡ,
+không có consumer. Ring focus của filled button giữ lại vì
+`_FilledButtonDefaultsM3` không khai `side` (slot trống) và wash 10% đo 1.29:1
+trên fill — dưới sàn 3:1 của 1.4.11; `focus_ring_contrast_test.dart` ghim cả hai
+nửa. Composite dưới ngón tay được đo ở
+`mx_action_button_composite_state_test.dart`: ΔL\* 2.5–12, hue không xoay quá 4°.
 
-Đợt Button phải sửa cả code lẫn dòng §2 trong cùng một lần.
+---
+
+## 7. Ranh giới hàng — `MxListTile` / `MxCard` / hàng thuộc feature
+
+Không có một đáp án chung "mọi thứ là Card" hay "mọi thứ là ListTile"
+(M100.36 §4H). Ranh giới là **ngữ nghĩa**, không phải mật độ:
+
+| Dựng bằng | Khi | Ví dụ production |
+|---|---|---|
+| `MxListTile` | hàng điều hướng / thiết lập / điều khiển / lựa chọn thông thường — một tiêu đề, một dòng phụ, glyph hai bên, một cú chạm | mục Reminders trong Settings, giờ nhắc, đích di chuyển / khôi phục, chọn chế độ / hướng học |
+| `MxCard` | một **thực thể** hoặc **mặt nội dung** mà nhóm và độ sâu của chính nó mang nghĩa | deck tile, card tile, mặt học, panel tóm tắt |
+| hàng thuộc feature | **chỉ khi** composition thật sự vượt quá ngữ nghĩa ListTile — vùng thứ ba trở lên, lưới số liệu, thân là widget, control lồng bên trong | `deck_tile_widget` (bốn vùng + nút Study), `progress_deck_row_widget` (tên + đường dẫn **+ lưới bốn số liệu**), `search_result_shell_widget` (thân là widget của từng loại kết quả) |
+
+Hai ứng viên #431 nêu để "đơn giản hoá" đã được xét theo quy tắc này và **ở
+lại Card**: hàng Progress mang một lưới số liệu dưới tiêu đề, và vỏ kết quả
+tìm kiếm nhận một `child` widget — cả hai vượt quá `String title / subtitle`.
+Không có caller nào đang vi phạm ranh giới; không di trú hàng loạt.
+
+Kèm theo, cho hàng:
+
+- **Trailing của `MxListTile` chỉ trình bày** (§4K): chevron, số đếm, glyph.
+  Control tự hành động — switch, checkbox, radio — là `MxSwitchRow`,
+  `MxCheckboxRow`, `MxRadioRows`.
+- **Chọn không đổi typography** (§4L): fill `surfaceSelected` + title
+  `primary` + glyph; subtitle giữ mực phụ. Semibold-khi-chọn của kit
+  (`mx.css:205`) bị từ chối vì nó reflow.
+- **Một ngữ pháp semantics cho mỗi loại chọn** (§10E): chọn-một →
+  `selected` + `inMutuallyExclusiveGroup` (`MxListTile.isSelected` non-null,
+  `MxRadioRows`); chọn-nhiều → `checked` (`MxCheckboxRow`, hàng trash);
+  điều hướng → `button`, không có selection. Card thực thể chọn-nhiều giữ
+  `MxCard` tint + mark (card tile), hàng chọn-nhiều giữ `MxPressable` + glyph
+  (trash) — hai ngữ pháp cho hai loại bề mặt, mỗi ngữ pháp một recipe.
+- **Một ngôn ngữ phân cách** (§10H): `Divider` của theme — `outlineVariant`,
+  một hairline, không chừa khoảng. Khoảng cách thuộc layout (`SizedBox` /
+  `Padding`), độ dày thuộc stroke. `borderDivider` gỡ ở M100.36 (không
+  consumer; ở light nó *là* màu trang). Khoảng cách giữa các card trong một
+  danh sách là quyết định của feature trên thang `AppSpacing` (sm / md / lg
+  tuỳ mật độ màn), không phải của theme.
+- **Một danh sách quyết định leading một lần**: trộn hàng có glyph dẫn và hàng
+  không có trong cùng một danh sách làm cột chữ nhảy 40dp. Không có danh sách
+  production nào trộn; ghi làm quy tắc.
+
+---
+
+## 8. Focus — một câu trả lời mỗi họ (M100.36 §12)
+
+Kiểm kê chéo sau khi bốn họ đóng. Mỗi control có **đúng một** chỉ báo bàn phím,
+và chỉ báo đó là `AppInteractionStates.focusIndicator` (`primary`, `AppStroke.focus`)
+hoặc — với nút filled — `focusIndicatorOf(label)` vì `primary` trên `primary`
+là vô hình. Không control nào có hai vòng, và không control nào chỉ có wash.
+
+| Họ | Cơ chế | Lớp | Gate `traditional` | Đo |
+|---|---|---|---|---|
+| FilledButton (`MxActionButton` primary/destructive) | `ButtonStyle.side` = `focusIndicatorOf(label)` | ngoài fill, không đổi kích thước | SDK (`ButtonStyleButton` chỉ nhận `focused` từ bàn phím) | `focus_ring_contrast_test` ≥ 3:1 trên fill |
+| OutlinedButton / TextButton (`MxActionButton` secondary, `MxTextButton`) | `ButtonStyle.side` = `focusIndicator(scheme)` | thay hairline khi focus | SDK | cùng test |
+| IconButton (`MxIconButton`, `MxMenuButton`) | `iconButtonTheme.side` khi focused | ngoài | SDK | cùng test |
+| FAB | `focusColor` (wash `onPrimaryContainer`) + shape | SDK | SDK | chấp nhận: FAB là control duy nhất trên màn của nó |
+| ChoiceChip (`MxPillButton`) | `MxFocusRing` quanh **hình vẽ**; SDK `focusColor` wash bên trong | ngoài, target 48 nới ngoài ring | `MxFocusRing` (`addHighlightModeListener`) | `mx_pill_button_focus_test`: rect ring == rect Material |
+| `MxListTile` (interactive) | `MxFocusRing`; SDK wash `rowOverlay(focused)` | ngoài | `MxFocusRing` | `mx_list_tile_test` |
+| `MxPressable` | `MxFocusRing` theo shape | ngoài | `MxFocusRing` | `mx_pressable_test` |
+| `MxCard` (actionable) | ring riêng của card (#435, **bảo vệ**) — cùng `focusIndicator` | additive | gate riêng, cùng cơ chế | `mx_card_*` |
+| TextField / `MxTextField` | `focusedBorder` `primary` @ `AppStroke.focus` (focused-error: `error` cùng width) | chính viền | SDK | `m3_combined_state_test` |
+| `MxSearchField` | viền `outline` → `primary` @ `AppStroke.input` | chính viền | SDK | `mx_search_field_test` |
+| Switch / Checkbox / Radio (`MxSwitchRow`, `MxCheckboxRow`, `MxRadioRows`) | overlay của control (`app_toggle_themes.dart`) — SDK vẽ vòng 40dp quanh thumb/box | trên control, không trên hàng | SDK | `app_toggle_themes_test` |
+
+**Hàng không interactive không có ring** — `MxListTile` không `onTap` là
+`ExcludeFocus`. **Không caller nào tự vẽ** `Border` cho focus ngoài các file ở
+bảng; `grep -rn "WidgetState.focused" lib/features` phải rỗng.

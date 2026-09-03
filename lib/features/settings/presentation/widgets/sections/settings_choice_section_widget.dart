@@ -107,9 +107,6 @@ class _SettingsChoiceSectionWidgetState<T extends Enum>
                 labelOf: widget.labelOf,
                 onChanged: _onChanged,
                 isSubmitting: widget.isSubmitting,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.lg,
-                ),
               ),
               if (band != null) ...<Widget>[
                 const SizedBox(height: AppSpacing.sm),

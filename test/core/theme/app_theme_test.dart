@@ -296,6 +296,15 @@ void main() {
     test('focus changes the border colour, never its weight', () {
       // Material's default goes 1px -> 2px on focus. That makes the field jump
       // and nudges whatever is laid out beside it.
+      //
+      // **Narrowed at M100.36 (4C).** OLD contract: the stroke never changes
+      // with focus, in any state. WHY WRONG: under error the hue is already
+      // taken, and holding the width too left `focusedErrorBorder` identical
+      // to `errorBorder` — an errored field acknowledged a tap with nothing
+      // (#433 F3). NEW: plain focus is hue-only (asserted here); focused
+      // error strengthens the stroke to `AppStroke.focus`, asserted in
+      // `m3_combined_state_test.dart`. AUTHORITY:
+      // `_InputDecoratorDefaultsM3.outlineBorder`, Flutter 3.44.8.
       for (final entry in themes.entries) {
         final input = entry.value.inputDecorationTheme;
         final enabled = input.enabledBorder! as OutlineInputBorder;

@@ -122,16 +122,13 @@ class CardImportPreviewSummaryWidget extends ConsumerWidget {
                 onChanged: (value) =>
                     _updateDuplicateChoice(ref, deckId, value: value),
               ),
-              Divider(
-                height: AppSpacing.xs,
-                color: context.colors.outlineVariant,
-              ),
+              // Spacing belongs to the layout and the line to the theme
+              // (M100.36 10H): a `Divider(height:)` was a gap decision hiding
+              // inside a separator.
+              const SizedBox(height: AppSpacing.xs),
+              const Divider(),
               for (var index = 0; index < shown.length; index++) ...<Widget>[
-                if (index > 0)
-                  Divider(
-                    height: AppSpacing.xs,
-                    color: context.colors.outlineVariant,
-                  ),
+                if (index > 0) const Divider(),
                 CardImportRowPreviewWidget(row: shown[index]),
               ],
               if (hiddenCount > 0)

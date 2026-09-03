@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/foundations/app_radius.dart';
 import '../../core/theme/foundations/app_sizing.dart';
+import 'mx_focus_ring.dart';
 
 /// How a pressable surface rounds its ripple. The values are `AppRadius`'s;
 /// the enum exists so a call site names a step instead of shipping a
@@ -43,6 +44,13 @@ enum MxPressableShape {
 /// guess row's outline, a card). Semantics likewise stay with the caller,
 /// because only the caller knows whether this is a button, a disclosure or a
 /// selection row.
+///
+/// **Focus is the shared ring** (M100.36 10C, #431 P1-3). Five feature rows —
+/// the trash row, the guess option, the match tile, two disclosure rows —
+/// gave a keyboard user a `ThemeData.focusColor` wash at ~1.15:1 and nothing
+/// else, where WCAG 1.4.11 asks 3:1. `MxFocusRing` adds the indicator in a
+/// foreground layer: additive, no layout movement, keyboard mode only, and
+/// it erases no selected or business state the caller painted underneath.
 class MxPressable extends StatelessWidget {
   const MxPressable({
     required this.onTap,
@@ -63,15 +71,20 @@ class MxPressable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      type: MaterialType.transparency,
-      child: InkWell(
-        onTap: onTap,
-        onLongPress: onLongPress,
-        borderRadius: shape.borderRadius,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: AppSizing.touchTarget),
-          child: child,
+    return MxFocusRing(
+      // A square surface gets a square ring; `BorderRadius.zero` is the
+      // shape's own answer for `none`, not a default the ring invented.
+      borderRadius: shape.borderRadius ?? BorderRadius.zero,
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: onTap,
+          onLongPress: onLongPress,
+          borderRadius: shape.borderRadius,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: AppSizing.touchTarget),
+            child: child,
+          ),
         ),
       ),
     );

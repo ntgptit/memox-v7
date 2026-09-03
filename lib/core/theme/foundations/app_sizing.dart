@@ -25,6 +25,11 @@ abstract final class AppSizing {
   /// It is enforced where it cannot be passed around: `iconButtonTheme` states
   /// it as `minimumSize` so no screen can build a smaller icon button, and
   /// `buildSharedButtonStyle` states it for every button family at once.
+  ///
+  /// **Both sides.** A one-glyph pill paints 33 wide and occupies 48, centred:
+  /// `MxPillButton` grows the box around the shape on the narrow axis as well
+  /// as the short one (#434 P3-1 — the number used to arrive from
+  /// `chip.dart:1493` and nothing here said so).
   static const double touchTarget = 48;
 
   /// A control that draws smaller than the target it keeps.
@@ -41,6 +46,18 @@ abstract final class AppSizing {
   /// private `_kCompactHeight` in `mx_action_button.dart` until M100.30 — the
   /// one control dimension the design system could not see.
   static const double controlCompact = 40;
+
+  /// The one-line reading or control row — `ListTile`'s own 56, stated.
+  ///
+  /// **A row is not a button** (M100.36 4J). [touchTarget] is the floor a
+  /// finger needs; a list the eye reads down wants more than the floor, and
+  /// Material's `_defaultTileHeight` gives it 56 for one line, 72 for two.
+  /// The number was Flutter's and nobody's here (#431 P2-1) — the kit says 48
+  /// for a desktop tile, and the app had been rendering 56 + 4 + 4 without a
+  /// token to say so. A *minimum*: a two-line row grows past it, and text is
+  /// never clipped to hold it. Compact mode keeps it; 48 is reserved for
+  /// controls that are only a target.
+  static const double rowMinHeight = 56;
 
   /// Material's floating action button, which declares no public constant for
   /// its own size.

@@ -29,29 +29,42 @@ void main() {
   const resting = <WidgetState>{};
 
   group('the filled button', () {
-    test('hover, press and disabled each land on their own fill', () {
+    test('the fill holds its role; hover, press and focus are a state layer '
+        'in the pair-s own ink', () {
+      // OLD assertion: `fill(hovered) != rest`, `fill(pressed) != rest`,
+      // press != hover — the contract that the filled button lerps its fill,
+      // written when the overlay was `primary` on `primary` and invisible.
+      // WHY WRONG: the invisible half was the overlay's *colour*, and moving
+      // the fill instead left the overlay painting underneath — indigo over
+      // red on the error pair (#432 §5). NEW contract (M100.36): the fill is
+      // `primary` in every enabled state and the state layer is `onPrimary`
+      // at M3's alphas, pressed and focused heavier than hovered.
+      // AUTHORITY: `_FilledButtonDefaultsM3.backgroundColor` / `.overlayColor`
+      // at Flutter 3.44.8.
       for (final entry in themes.entries) {
         final style = entry.value.filledButtonTheme.style!;
+        final scheme = entry.value.colorScheme;
         final fill = style.backgroundColor!;
-        final rest = fill.resolve(resting);
+        final layer = style.overlayColor!;
 
+        for (final states in <Set<WidgetState>>[hovered, pressed, focused]) {
+          expect(
+            fill.resolve(states),
+            scheme.primary,
+            reason: '${entry.key}: the fill moved under $states',
+          );
+          expect(
+            layer.resolve(states)!.withValues(alpha: 1),
+            scheme.onPrimary,
+            reason: '${entry.key}: the layer under $states is not onPrimary',
+          );
+        }
         expect(
-          fill.resolve(hovered),
-          isNot(rest),
-          reason:
-              '${entry.key}: hover is invisible — a 6% accent overlay on an '
-              'accent fill is the accent again, which is why this is a blend',
+          layer.resolve(pressed)!.a,
+          greaterThan(layer.resolve(hovered)!.a),
+          reason: '${entry.key}: press is no heavier than hover',
         );
-        expect(
-          fill.resolve(pressed),
-          isNot(rest),
-          reason: '${entry.key}: press does not darken',
-        );
-        expect(
-          fill.resolve(pressed),
-          isNot(fill.resolve(hovered)),
-          reason: '${entry.key}: press and hover are the same colour',
-        );
+        expect(layer.resolve(resting), isNull, reason: entry.key);
       }
     });
 
@@ -298,6 +311,35 @@ void main() {
       },
     );
 
+    test('the row resolver orders press above hover too', () {
+      // The card was pinned above; the row never was (#431 F11.4). Same
+      // resolver, same rule, stated for the shape every list uses so a
+      // reorder in `_overlay` cannot be caught on one shape and missed on
+      // the other.
+      for (final entry in themes.entries) {
+        final overlay = AppInteractionStates.rowOverlay(
+          entry.value.colorScheme,
+        );
+
+        expect(
+          overlay.resolve(const <WidgetState>{
+            WidgetState.hovered,
+            WidgetState.pressed,
+          }),
+          overlay.resolve(pressed),
+          reason: '${entry.key}: a pressed row renders as a hovered one',
+        );
+        expect(
+          overlay.resolve(const <WidgetState>{
+            WidgetState.hovered,
+            WidgetState.focused,
+          }),
+          overlay.resolve(const <WidgetState>{WidgetState.focused}),
+          reason: '${entry.key}: a focused, hovered row loses its focus wash',
+        );
+      }
+    });
+
     test('a card hovers lighter than a row, and a row lighter than an icon', () {
       // The kit gives four weights on purpose: the same wash reads heavier on a
       // full-width row than on a 48-wide button. Compared by alpha, which is
@@ -316,7 +358,13 @@ void main() {
   });
 
   group('strokes come from the token', () {
-    test('an input keeps the input stroke in every state', () {
+    test('an input keeps the input stroke in every state but focused error', () {
+      // OLD: every border at `AppStroke.input`. WHY WRONG: under error the hue
+      // is already `error`, so a same-width `focusedErrorBorder` gave an
+      // errored field no focus cue at all (#433 F3). NEW (M100.36 4C): four
+      // borders keep the input stroke; focused error alone takes
+      // `AppStroke.focus` — `_InputDecoratorDefaultsM3.outlineBorder`'s own
+      // answer. Still from the token, never a literal.
       for (final entry in themes.entries) {
         final input = entry.value.inputDecorationTheme;
 
@@ -324,7 +372,6 @@ void main() {
           ('enabled', input.enabledBorder),
           ('focused', input.focusedBorder),
           ('error', input.errorBorder),
-          ('focusedError', input.focusedErrorBorder),
           ('disabled', input.disabledBorder),
         ]) {
           expect(
@@ -333,6 +380,11 @@ void main() {
             reason: '${entry.key}: the ${border.$1} border left the token',
           );
         }
+        expect(
+          input.focusedErrorBorder!.borderSide.width,
+          AppStroke.focus,
+          reason: '${entry.key}: focused error lost its stroke',
+        );
       }
     });
 

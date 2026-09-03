@@ -34,7 +34,7 @@ import '../support/study_render.dart';
 /// a reviewer nothing", and the cost of believing it was two defects that only
 /// an image could show: the `Exporting…` label shipped at alpha 0, and once it
 /// was painted the button turned out to wear `disabledSurface`, printing the
-/// one sentence that says what is happening at 2.29:1 — with a `primary`
+/// one sentence that says what is happening at 2.05:1 — with a `primary`
 /// spinner invisible on a `primary` fill. `pump` at a fixed offset is not
 /// flaky: the arc lands at the same angle every run.
 const DeckContextModel _demoContext = DeckContextModel(

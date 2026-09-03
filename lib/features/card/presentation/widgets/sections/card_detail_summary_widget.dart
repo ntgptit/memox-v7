@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../../../core/theme/extensions/app_ink.dart';
 import '../../../../../core/theme/foundations/app_radius.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
-import '../../../../../core/theme/foundations/app_stroke.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_icon.dart';
@@ -89,11 +88,8 @@ class CardDetailSummaryWidget extends StatelessWidget {
             ],
             if (optionalFields.isNotEmpty) ...<Widget>[
               const SizedBox(height: AppSpacing.lg),
-              Divider(
-                height: AppStroke.hairline,
-                thickness: AppStroke.hairline,
-                color: context.semanticColors.borderSubtle,
-              ),
+              // The theme's divider — one hairline, one colour (M100.36 10H).
+              const Divider(),
               const SizedBox(height: AppSpacing.lg),
               for (var index = 0; index < optionalFields.length; index++) ...[
                 if (index > 0) const SizedBox(height: AppSpacing.md),

@@ -142,6 +142,7 @@ class _LibrarySearchScreenState extends ConsumerState<LibrarySearchScreen> {
         // The tap that opened this screen was the request to type.
         shouldAutofocus: true,
         hintText: context.l10n.librarySearchHint,
+        semanticLabel: context.l10n.librarySearchLabel,
         clearSemanticLabel: context.l10n.librarySearchClearLabel,
         // **Only a finished, complete read gets a number** (wireframe S5). A
         // count over a paged list would be the number *listed*; a count while

@@ -16945,6 +16945,382 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
 - **Checklist phases:** 14, 21.
 
+### M100.36 · Bốn họ component đóng hợp đồng: Button, TextField/Search, Row, Chip/Pill
+
+- **Status:** done (2026-09-04)
+- **Goal:** Đợt hiện thực sau bốn deep audit song song (#431 hàng, #432 nút,
+  #433 input, #434 chip/pill). Mỗi họ phải có: hợp đồng ngữ nghĩa nhất quán,
+  role M3 đúng chủ, hình học mobile-first, state tương tác tất định, phủ a11y,
+  API shared widget đóng, guard mức source/runtime, mặt review Widgetbook,
+  golden viết trên Linux, tài liệu cập nhật. **Không mở lại kiến trúc Card đã
+  chốt ở #435.**
+- **Quyết định chủ dự án đã duyệt trước (brief §4):** filled button về một
+  state layer M3 (`on` của chính cặp); Good/Remembered là primary duy nhất
+  trong nhóm chấm điểm; `tonal` gỡ nếu vẫn 0 caller; focused-error phân biệt
+  bằng stroke, role giữ `error`; `MxSearchField` bắt buộc `semanticLabel`;
+  viền search dùng `outline`/`primary`; hint lên rung của value; gỡ
+  `isReadOnly`; hàng vs Card theo ranh giới ngữ nghĩa, không đổi hàng loạt;
+  fill chọn của hàng app-owned là `surfaceSelected`; 56 là hàng đọc, 48 là
+  sàn; trailing của `MxListTile` chỉ trình bày; không đổi weight khi chọn;
+  pill có ô check ổn định; `_TagsPill` rời ChoiceChip; giữ ripple Android;
+  `MxPillButton` được chuyên biệt rung nhãn; giữ `warningContainer`.
+- **Baseline Phase 0 (trước khi sửa, tại `3207e7b7`):** format sạch; analyze
+  0 issue; guard kiến trúc / docs / generated / prompt contract đạt; host
+  suite non-golden **4234/4234**; golden Linux (WSL, Flutter 3.44.8,
+  không `--update`) **307/307** — 233 file PNG.
+- **Phase 1 — guard trước, pixel sau.** Ghim những hợp đồng *đang đúng* để
+  chúng không thể trôi trong lúc các phase sau sửa pixel:
+  - `m3_role_binding_guard_test.dart` đọc thêm được **nhánh switch trong
+    method của enum** (`scope: 'MxFilledPair.fillOf'`, `slot: 'brand'`).
+    Lý do: M100.31 đóng builder filled thành enum nên role không còn nằm
+    cạnh nhãn `backgroundColor:`, và guard cũ vì thế **không phủ slot nào
+    của FilledButton** (#432 §5) — đó là cách một overlay gốc `primary` ngồi
+    lên cặp `error` mà không gì đỏ.
+  - 10 binding mới: FilledButton brand/destructive (fill + label), TextField
+    `enabledBorder`/`focusedBorder`/`errorBorder`/`focusedErrorBorder`
+    (từ chối `onErrorContainer` cho focused-error — đáp án là stroke, §4C),
+    ListTile `iconColor`/`selectedColor`.
+  - `m3_combined_state_test.dart` có nhóm TextField: focused+error giữ hue
+    `error`; disabled+error vẽ `errorBorder` (canonical
+    `input_decorator.dart:2364`); disabled không phải role sống.
+  - `m3_role_contract_test.dart` ghim `focusedErrorBorder` → `error` và
+    `disabledBorder` là blend đục, không phải role sống (#433 G3).
+  - `control_border_grounds_test.dart` thêm hai nền field thật sự vẽ lên:
+    `surfaceContainerLow` (sheet) và `surfaceContainerHigh` (dialog) — dark
+    trên dialog 3.50:1 là biên mỏng nhất.
+  - `mx_list_tile_test.dart`: selected+focused, selected+pressed,
+    disabled+selected (#431 §24 — ba giao điểm chưa từng được assert).
+  - `mx_checkbox_row_test.dart` **mới** — widget này chưa có file test nào.
+  - `app_interaction_states_test.dart`: `rowOverlay` press thắng hover, focus
+    thắng hover (#431 F11.4).
+  - Ghi nhận SDK: `ListTile` 3.44.8 truyền `selected: selected` (bool không
+    nullable) vào `Semantics`, nên **mọi** tile mang `hasSelectedState` kể cả
+    khi không có khái niệm chọn (`list_tile.dart:997`). Ghim ở test checkbox
+    row với lý do, để SDK sau đổi thì thấy chứ không nuốt.
+- **Phase 2 — Button.** Ba P1 của #432 đóng bằng một quyết định: filled
+  button về **một** cơ chế state của Material.
+  - `buildFilledStyle`: fill giữ nguyên role ở mọi state enabled; hover/focus/
+    press là state layer màu `on` của chính cặp — `MxFilledPair.stateLayerOf`
+    (`onPrimary` / `onError`) ở alpha SDK `AppStateOpacity.stateLayer*` =
+    0.08/0.10/0.10 (`_FilledButtonDefaultsM3.overlayColor`, 3.44.8). Hai token
+    `filledHoverBlend` / `filledPressedBlend` gỡ (0 consumer ngoài builder).
+    `controlOverlay` nay chỉ là đáp án của họ outlined/text và doc nói rõ.
+    Ring focus của filled giữ: slot `side` trống trong SDK, wash 10% đo 1.29:1
+    trên fill (dưới 3:1) — điều kiện §4A.
+  - Đo composite (`mx_action_button_composite_state_test.dart`, 4 theme × 2
+    cặp): fill bất động; layer = ink của cặp; sàn hồi quy ΔL\* press/focus ≥
+    2.0, hover ≥ 1.5 (đo nhỏ nhất: trắng 10% trên `error` sáng 2.37, 8% là
+    1.82 — số của M3, không phải mục tiêu thiết kế), trần 12; hue không
+    xoay quá 4°; nhãn ≥ 4.5:1 trên composite press; **và một press thật** đọc
+    ink `InkHighlight` trên `Material` của nút, khẳng định layer của cặp có
+    đến canvas và wash brand không còn trên fill error.
+  - `_busyStyle` không còn nhánh chết: destructive nhận `busyStyle ??` như
+    primary/secondary; destructive + `shouldKeepLabelWhileLoading` ≥ 4.5:1
+    ở cả 4 theme (test). Icon bị bỏ khi giữ nhãn — ghim bằng test và doc tham
+    số.
+  - `MxTextButton.isCompact` giải qua resolver của theme và chỉ chép size/
+    leading/tracking của `label-md` → sơn 700 qua trục `wght` như mọi nút
+    khác (`mx_text_button_weight_test.dart` đọc `RenderParagraph`).
+  - Thứ bậc chấm điểm (§4B): `StudyAction.isNormalGrade` (`remembered` /
+    `good`) → primary duy nhất; còn lại `secondary`, không destructive.
+    `study_card_face_test` ghim theo primitive (`FilledButton` ×1,
+    `OutlinedButton` ×3 cho sm2). Hai mặt study nay cùng một thứ bậc.
+  - `MxActionButtonVariant.tonal` **gỡ end-to-end**: enum, `MxFilledPair.tonal`,
+    `buildFilledTonalStyle`, test, Widgetbook (ma trận lặp `values`), docs.
+  - Gap icon co `sm` → `xs` theo text scale như `filled_button.dart:512`.
+  - `_kButtonMinWidth = 80` của deck tile **giữ, ghi là layout constraint**
+    (`ConstrainedBox` quanh nút, sàn 64 của theme không bị nêu lại;
+    `deck_tile_geometry_test` ghim là sàn). Comment w600 lỗi thời sửa thành
+    `buttonLabelWeight`.
+  - Số 2.29:1 / 2.90:1 lỗi thời ở 5 chỗ → 2.05:1 / 2.51:1 (đo trên palette
+    M100.28); dòng lịch sử trong WBS giữ nguyên.
+  - Guard: hai binding `FilledButton state layer` (brand → `onPrimary` từ
+    chối `primary`; destructive → `onError` từ chối `primary`/`error`).
+  - **Test đổi hợp đồng (§22):** `mx_action_button_state_matrix_test`
+    OLD `fill(hovered) != rest` (blend) → NEW fill bất động + layer non-null
+    = ink; `mx_components_test` destructive OLD `fill(pressed) != error` →
+    NEW fill = `error`, layer = `onError`; `focus_ring_contrast_test` OLD
+    "wash < 1.1:1 (no-op)" → NEW "1.1 < wash < 3.0" (nhìn thấy nhưng dưới sàn
+    ring); `app_interaction_states_test` OLD "hover/press đổi fill, press ≠
+    hover" → NEW "fill = `primary`, layer = `onPrimary`, alpha press > hover"
+    (bị host suite đầy đủ bắt — 4313/4314 — rồi sửa trước khi commit).
+    Authority: `_FilledButtonDefaultsM3` 3.44.8 + WCAG 1.4.11.
+  - Widgetbook: hàng `loading · label kept` và `compact · 320dp · textScale
+    2.0`; stress specimen thêm destructive và compact.
+  - Docs: `tokyo-component-mapping.md` §2 (overlay `=`; tonal "không dựng";
+    §5 cho phép shared widget đóng có trục kích thước), §6 → ĐÓNG với hồ sơ;
+    `mx.css` `.mx-btn--primary/--destructive` hover/active/focus-visible về
+    state layer `on-*`; parity B1/B2; audit #432 đánh dấu IMPLEMENTED.
+- **Phase 3 — TextField / Search.** Ba P1 của #433 đóng; API `MxTextField`
+  đóng lại; `MxSearchField` có tên, có ranh giới, có sàn thay vì trần.
+  - **F1** `MxSearchField.semanticLabel` **bắt buộc**, `clearSemanticLabel`
+    bắt buộc (§4D). Tên đặt qua `Semantics(label:, textField: true)` bọc
+    ngoài, hint vẽ bằng `InputDecoration.hint` trong `ExcludeSemantics` —
+    mẫu `_FillInput` đã dùng. Test: tên còn sau khi gõ, value = query, hint
+    không bị đọc. Ba màn search truyền `*SearchLabel` mới (ARB en/vi).
+  - **F2** `SizedBox(height: 48)` + `expands` gỡ; pill là
+    `ConstrainedBox(minHeight: touchTarget)`, field một dòng với
+    `contentPadding` dọc `md` để nút xoá 48 không cộng thêm. Test ma trận
+    320/360/393 × 1.0/1.3/2.0/2.5/3.0: pill ≥ 48, = 48 ở 1.0, > 48 từ 2.5,
+    text nằm trong pill, không exception. Nudge `TextAlignVertical(-0.1)` gỡ;
+    test layout OLD "đáy glyph = đáy text" → NEW "tâm glyph = tâm text" (hàng
+    căn giữa; đáy lệch 2 là do line box 20 vs glyph 16, không phải lỗi cũ).
+  - **F3** `focusedErrorBorder` = `error` @ `AppStroke.focus` (2), bốn border
+    còn lại giữ `AppStroke.input` (§4C). Không đổi layout (side vẽ trong
+    box). Test: `m3_combined_state_test` (stroke focused-error > error, focus
+    thường không đổi), `mx_text_field_contract_test` (đo rect trước/sau
+    focus), golden `mx_text_field_focused_error`.
+  - **F4** `suffixIconColor` là `WidgetStateColor` trong theme: rest
+    `onSurfaceVariant`, error `error`, disabled `onDisabled` — thắng
+    `IconButtonTheme` theo đúng chuỗi `input_decorator.dart:2163`. Test đọc
+    `IconTheme` tại glyph của `MxIconButton`, hai theme.
+  - **F5** `MxTextFieldSupportingLine { reserved, none }`, mặc định
+    `reserved`: helper `' '` giữ hàng subtext từ frame đầu, lỗi thay thế
+    helper trong cùng hàng nên **không xê dịch** (test đo rect nút dưới
+    field). Kiểm kê 13 caller: 11 có `maxLength`/`errorText`, 2 field số
+    không có `maxLength` (chỗ nhảy 20dp) nay giữ hàng; ô dán import là
+    caller duy nhất không bao giờ có subtext → `none`.
+  - **F6** hint `bodyLarge` + `WidgetStateTextStyle` (disabled → `onDisabled`)
+    (§4F); `_FillInput` resolve hint ở rest. `MxSearchField` sở hữu rung
+    `body-md` cho cả value lẫn hint (widget đóng, §4P).
+  - **F7** `MxTextFieldContent { text, digits }` → `digitsOnly` + bàn phím số
+    suy ra; hai field giới hạn thẻ dùng `digits`. Test: `abc-12.5` → `125`.
+  - **F8** `isReadOnly` gỡ (§4G). **9I** `textAlign` gỡ (0 caller);
+    `textStyle` → `MxTextFieldEmphasis { body, prominent }` (caller: mặt
+    trước card editor qua `CardEditorFieldWidget.emphasis`).
+  - **F9** counter có `semanticsLabel` =
+    `MaterialLocalizations.remainingTextFieldCharacterCount` — chuỗi của
+    Flutter, có sẵn en/vi, shared widget không đọc ARB.
+  - **F10** ghi +4 `gapPadding` vào doc theme. **F11** kit: token mới
+    `--color-border-control` (map trong `css_token_parity_test`),
+    `.mx-field__input` / `.mx-search` về `border-control` / `primary`,
+    `.mx-search` `min-height` thay `height: 44`; parity B5/C5/C17.
+  - **9K** `TextInputAction.done` cho tag rename, hai field số, pronunciation
+    (field một dòng cuối); field nhiều dòng giữ phím xuống dòng.
+  - **§4E** ranh giới search: rest `outline`, focus `primary`, cùng
+    `AppStroke.input`, vẽ ngoài box; fill giữ `surfaceMuted`/`surface`.
+  - Guard đi theo: `theme_layering_test` (helper private tách thành
+    `_inputBorder` / `_inputBorderAt` để không có `Color` đầu dòng);
+    `app_interaction_states_test` OLD "mọi border = input" → NEW "bốn border
+    = input, focused-error = focus"; `component_theme_typography_test` OLD
+    hint body-md → NEW body-lg mọi state (authority
+    `_InputDecoratorDefaultsM3.hintStyle`); `app_theme_test` thu hẹp "focus
+    không đổi weight" về focus thường.
+  - Golden mới (đăng ký, PNG viết ở Phase 7): `mx_text_field_focused_error`,
+    `mx_text_field_suffix_error`, `mx_text_field_multiline`,
+    `mx_search_field_focused`. Widgetbook: knob `minLines`/`maxLines`, gỡ
+    `readOnly`, use case `Focused + error`; search `Focused · textScale 2.5`.
+  - Audit #433 đánh dấu IMPLEMENTED.
+- **Phase 4 — Row / ListTile.** Sáu P1 của #431 đóng; ranh giới hàng vs Card
+  viết thành quy tắc trước rồi mới xét caller — không di trú hàng loạt.
+  - **P1-1 / P2-14** `buildListTileTheme` bỏ `textColor`; khai `titleTextStyle`
+    (`onSurface`), `subtitleTextStyle` (`onSurfaceVariant`),
+    `leadingAndTrailingTextStyle` (`body-md` / `onSurfaceVariant` — thay
+    `label-sm` 11px, P2-8); ba binding AST mới. `MxListTile` đặt màu subtitle
+    tường minh khi enabled nên chọn chỉ đổi title (kit: `.mx-tile--selected
+    .mx-tile__title`), disabled vẫn xám theo hàng. Test đọc `RenderParagraph`.
+  - **P1-2 / 10B** `ExcludeFocus(excluding: !isInteractive)`: hàng không có
+    `onTap` ra khỏi thứ tự focus, không ring, không `button`.
+  - **P1-3 / 10C** `MxPressable` bọc `MxFocusRing`; `MxFocusRing` nhận gate
+    `FocusHighlightMode.traditional` (như `MxCard`) nên ba nơi dùng ring —
+    hàng, pressable, pill — trả một câu (P2-2). `MxListTile` bỏ ring tự vẽ và
+    `FocusNode` riêng (P3 hiệu năng). Test: Tab → ring ≥ 3:1, rect không đổi;
+    focus lập trình ở touch mode → không ring.
+  - **P1-4 / §4I** `selectedTileColor` = `semantic.surfaceSelected`, chung với
+    tint của `MxCard`; `component_depth_and_state_test` bỏ tautology, ghim
+    `textColor == null` và fill chọn. `surfaceMuted` vẫn 37 consumer khác.
+  - **P1-5 / 10E** `isSelected` tri-state (`bool?`); non-null ⇒
+    `Semantics(inMutuallyExclusiveGroup: true)`. Ba ngữ pháp semantics ghi ở
+    §7 mapping. SDK: `ListTile` 3.44.8 vẫn phát `hasSelectedState` cho null —
+    ghi trong doc tham số, không giả vờ đã gỡ được.
+  - **P1-6 / §4H** ranh giới ghi ở `tokyo-component-mapping.md` §7; hai ứng
+    viên (`progress_deck_row`: lưới số liệu; `search_result_shell`: thân là
+    widget) vượt ngữ nghĩa ListTile → **ở lại Card**, có lý do.
+  - **P2-1 / §4J** `AppSizing.rowMinHeight = 56` khai trên theme
+    (`minTileHeight`); 48 vẫn là sàn chạm. Test sizing.
+  - **P2-4/5 / 10H** một ngôn ngữ phân cách: 9 site `Divider` về theme
+    (`outlineVariant`, hairline); khoảng cách chuyển sang `SizedBox`/`Padding`
+    trên thang; `borderDivider` gỡ khỏi extension, palette, kit CSS và parity
+    map (0 consumer; ở light nó là màu trang). `card_detail_hierarchy_test`
+    OLD "divider.color == borderSubtle" → NEW "color null, theme =
+    outlineVariant".
+  - **P2-6/17 / 10I** `MxRadioRows.contentPadding` và bản sao ở
+    `SettingsChoiceRowsWidget` gỡ; gutter suy từ `shape` (`list` →
+    `mxScreenGutter`, `block` → 0) nên theo compact scale.
+  - **P2-11** `MxListTile` sở hữu `Material(transparency)`; hai shim tay ở
+    Settings/Reminder gỡ; comment D20 lỗi thời sửa. Góc 12-trong-16 khi hàng
+    nằm trong card: **DEBT** (P3).
+  - **P2-12** `MxSwitchRow` một rung `body-lg` cho cả hai nhánh.
+  - **P2-7** `MxIcon` leading không xám khi disabled: **ACCEPTED (contract)** —
+    không caller nào kết hợp; `MxIcon` đặt màu tường minh theo thiết kế, hàng
+    disabled không sửa `MxIcon` toàn cục (10J). **P2-9** trailing chỉ trình
+    bày (§4K) → không có icon-button trailing. **P2-10** "một danh sách quyết
+    định leading một lần" ghi ở §7. **P2-13** hai ngữ pháp chọn-nhiều ghi ở
+    §7. **P2-16** khoảng cách giữa card thuộc feature — ghi ở §7.
+  - Stress: specimen `MxListTile (selected)` / `(disabled)`. Golden mới:
+    `mx_list_tile_states` (rest / selected / disabled / selected+disabled một
+    tấm). Widgetbook: knob `has onTap` tách khỏi `enabled`, `selection`
+    ba giá trị.
+  - **§4L** weight khi chọn không đổi — test ghim `fontWeight` của title.
+  - Audit #431 đánh dấu IMPLEMENTED; parity C6.
+- **Phase 5 — Chip / Pill.** Bốn P1 của #434 đóng; badge tách khỏi chip.
+  - **P1-1 / §4N** `_TagsPill` (mở sheet, không phải một-trong-N) rời
+    `MxPillButton` → `MxActionButton(secondary, compact, Icons.sell_outlined)`.
+    Hai test caller đổi finder sang `MxActionButton`.
+  - **P1-2 / 11A** `MxPillButton` dựng `ChoiceChip` **flat**: lời giải thích
+    M100.32 ("elevated để nhận fill từ role") sai — `ChipThemeData.color` chặn
+    `chipDefaults.color` trước variant (`chip.dart:1529`); variant chỉ đổi
+    `shadowColor`, và `pressElevation` 1.0 của M3 vẫn reachable nên mỗi lần
+    nhấn có bóng thật. Theme khai `pressElevation: AppElevation.none`;
+    `mx_pill_button_construction_test.dart` ghim constructor ở source và đo
+    `Material.elevation` 0 lúc nhấn.
+  - **P1-3 / §4M** slot dẫn 16dp luôn được layout: tick khi selected, `icon`
+    của caller khi không. Chọn có hình mà không reflow; test ghim bề rộng
+    `ChoiceChip` không đổi khi toggle (có/không icon). `progress_range_selector`
+    bỏ `icon: Icons.check` per-caller (test `find.byIcon(Icons.check)` vẫn
+    xanh — giờ do component vẽ).
+  - **P1-4 / 11C** chip dựng `MaterialTapTargetSize.shrinkWrap`; `MxFocusRing`
+    bọc hình vẽ; target 48 nới **ngoài** ring bởi `_TapTarget` (RenderShiftedBox
+    redirect hit-test về tâm chip, như `_InputPadding` của SDK). Test: rect
+    ring == rect `Material` của chip, box target cao hơn ring; tap vào padding
+    dọc vẫn gọi `onPressed`.
+  - **P2-3 / 11H** disabled = `disabledSurfaceTint(scheme)` cho cả selected —
+    M3 canonical; bỏ blend container (dark: 2.04:1 vs 1.56:1 pill sống).
+  - **P2-6 / §4O** `_fillFor` chỉ còn hover (SDK tắt `hoverColor` khi theme
+    có `color`); press là ripple, focus là ring — bỏ tint chồng ~24%.
+  - **P2-8 / 11F** ba nhóm pill có `Semantics(container, label)`: ARB
+    `cardFilterGroupLabel`, `trashFilterGroupLabel` (en/vi); study options dùng
+    lại `studyOptionsOrderLabel`. `Semantics(inMutuallyExclusiveGroup: true)`
+    trên mỗi pill (MergeSemantics với node của chip).
+  - **P2-9** gap: `Row(spacing:)` ở cả ba nhóm, bỏ `SizedBox`/`Padding` xen.
+  - **P3-1** `AppSizing.touchTarget` ghi rõ sàn cả hai trục. **P3-2** side
+    width = `AppStroke.hairline` ghim bằng test (lint từ chối tham số trùng
+    default).
+  - **11K / #434 §17** `MxBadge` mới (`Container`, `surfaceMuted`, `label-sm`
+    quiet): `_DueBadge` và `CardTagChipWidget` dùng nó. `_SchedulerBadge`
+    (có icon), `_Chip` của session top bar (section label uppercase) và các
+    badge trạng thái giữ container riêng — ghi ở mapping §5.
+  - **Chấp nhận có hợp đồng:** P2-2 (disabled side = disabled fill), P2-4/P2-5
+    (side 1.24:1 — pill định danh bằng hình/nhãn/nhóm/tick, test "on a sheet"
+    ghim hairline là ranh giới duy nhất), P2-7 (ChoiceChip đúng cho một-trong-N).
+  - **Test đổi hợp đồng (§22):** `mx_pill_button_theme_test` "a disabled
+    group must not forget which pill was chosen" (OLD: disabled+selected ≠
+    disabled) → NEW: bằng nhau và = `disabledSurfaceTint` — WHY WRONG: blend
+    làm pill tắt nổi hơn pill sống ở dark; AUTHORITY: `_ChoiceChipDefaultsM3`.
+    Cùng file "pointer feedback… hovered/focused/pressed ≠ resting" → chỉ hover
+    khác, focus/press = resting — WHY WRONG: hai cơ chế cho một state (§4O).
+    `m3_combined_state_test` "the fill carries the focus cue" → fill giữ role
+    khi focus, ring là cue — cùng lý do. Không guard nào bị nới.
+  - Golden mới (PNG viết ở Phase 7): `mx_pill_states` (rest / selected /
+    disabled ×2 / có icon / trên card), `mx_badge`. Stress: `MxBadge`.
+    Widgetbook: `MxPillButton` thêm Group / On a card / Disabled pair;
+    `MxBadge` mới (Playground / On a card).
+  - Kit: `.mx-pill__slot`, disabled một xám; parity B4/C3; audit #434 đánh
+    dấu IMPLEMENTED.
+- **Phase 6 — chéo component, docs, Widgetbook.**
+  - **§12 focus:** kiểm kê 11 họ → bảng mới `tokyo-component-mapping.md` §8.
+    Mỗi họ đúng một chỉ báo; `MxFocusRing` dùng ở pill / row / pressable với
+    gate `traditional`; `MxCard` giữ ring riêng (#435). Không feature nào tự
+    xử `WidgetState.focused`.
+  - **§14 API closure:** `mx_pill_button`, `mx_badge`, `mx_list_tile` vào
+    `kClosedApiFiles` (xanh không cần nới allowlist). `MxTextField` /
+    `MxSearchField` **không** vào: chúng nhận `TextEditingController`,
+    `ValueChanged<String>` — loại hành vi hợp lệ ngoài allowlist; API của
+    chúng đóng bằng ba enum (Phase 3) và test hợp đồng riêng.
+  - **§15 / §4Q tokens:** `warningContainer` / `onWarningContainer` giữ; quy
+    tắc đủ cặp ghi ở `theme-architecture.md` §4. Blend token
+    `filledHover/PressedBlend` đã bỏ (Phase 2); `borderDivider` đã bỏ (Phase
+    4); không token mới ngoài `AppSizing.rowMinHeight` và
+    `AppInteractionStates.stateLayer*`.
+  - **§19 stress:** `mx_stress_test` thêm ma trận 360 / 375 / 393 × 1.3 / 2.0
+    cho mọi specimen và 2.5 / 3.0 × 320 cho input — 374/374 xanh, không
+    specimen nào phải sửa.
+  - **§20 perf tĩnh** (đọc code, không profile): `_RenderTapTarget` không cấp
+    phát theo frame ngoài `Matrix4` khi hit-test vào padding (đường hiếm);
+    `MxFocusRing` đăng ký listener một lần trong state và gỡ ở dispose;
+    `_Content` đọc `DefaultTextStyle.of` (inherited lookup O(1)) thay vì
+    resolve theme lần hai; `MxListTile` stateless, không `Opacity`/`saveLayer`
+    — ring là `BoxDecoration.border` trên foreground; resolver
+    `WidgetStateProperty` cấp phát một lần khi dựng theme. Không thấy điểm
+    nóng mới. **Android profiling: DEFERRED** — không có device trong phiên.
+  - Widgetbook: không catalogue tổ hợp; mỗi entry thêm đúng tình huống một
+    finding cần thấy. `widgetbook_coverage_test` xanh với `MxBadge`.
+- **Phase 7 — golden Linux.** WSL Ubuntu-24.04, Flutter 3.44.8, `TZ=UTC`.
+  Lượt phân loại (không update): 87 fail = 67 lệch pixel (demo) + 18 test
+  visual audit + 2 demo test tìm `MxPillButton` cho nút Tags. Không golden
+  nào thiếu file. Sửa audit: `_RenderTapTarget` vào danh sách render type
+  không vẽ (`render_classification.dart`), card list đếm lại 4 pill / 6
+  ShapeBorder / 7 clip, reminder đếm thêm ink layer + clip của Material mà
+  `MxListTile` sở hữu; demo test đổi finder. Regenerate trên Linux, lượt xác
+  nhận cuối **321/321**, không tolerance. **107 PNG**: 93 sửa, 14 mới
+  (`mx_pill_states`, `mx_badge`, `mx_list_tile_states`,
+  `mx_text_field_{focused_error,suffix_error,multiline}`,
+  `mx_search_field_focused` × light/dark). Không PNG nào sinh trên Windows.
+  Gallery dựng lại từ `700b79cc` và publish tại URL ghim (bản trước in từ
+  `3207e7b7`, chính là base — không cần splice).
+  - Bài học ghi lại: lượt WSL đầu `flutter pub get -q` (flag không hợp lệ)
+    làm gen-l10n không chạy → 103 file test không load (`loading … [E]`), đọc
+    nhầm thành "chỉ 38 PNG đổi". Compile fail không bao giờ là kết quả golden.
+- **Scope:** `lib/core/theme/components/{actions,inputs,content,selection}/`,
+  `lib/core/theme/states/`, `lib/core/theme/foundations/app_sizing.dart`,
+  `lib/shared/widgets/mx_{action_button,text_button,text_field,search_field,
+  list_tile,pressable,focus_ring,radio_rows,switch_row,checkbox_row,
+  pill_button}.dart`, các caller production được từng phase nêu tên;
+  `test/core/theme/contracts/`, `test/shared/widgets/`, Widgetbook; tài liệu
+  ở Editable documents. **Ngoài phạm vi:** `mx_card.dart` và recipe Card
+  (#435), business rule, database, routing.
+- **Editable documents:** `docs/wbs.md`, `docs/design-system/*.md`,
+  `docs/reviews/design-parity-checklist.md`, `docs/reviews/mx-*-deep-audit.md`
+  (chỉ mục status/superseded), `design_system/components/mx.css`.
+- **Output:** từng phase ghi ở trên; ma trận disposition toàn bộ finding
+  P1/P2 của bốn audit ở cuối entry này khi đợt đóng.
+- **Acceptance criteria:**
+  - [x] Phase 0: baseline xanh trước khi sửa (số liệu ở trên).
+  - [x] Phase 1: guard role/state cho FilledButton, TextField, ListTile;
+        test giao điểm state cho hàng; `MxCheckboxRow` có test file.
+  - [x] Phase 2 Button · [x] Phase 3 Input · [x] Phase 4 Row ·
+        [x] Phase 5 Chip/Pill · [x] Phase 6 cross-component/docs/Widgetbook ·
+        [x] Phase 7 golden Linux 100% (321/321).
+  - [x] Không invariant nào của #426/#427/#429/#435 lùi; không hạ sàn
+        contrast; không thêm escape hatch thị giác (host suite + golden xanh,
+        `mx_card_*` không đổi PNG).
+- **Dependencies:** M100.35, #431–#434.
+- **Tests required:** `m3_role_binding_guard_test`, `m3_role_contract_test`,
+  `m3_combined_state_test`, `control_border_grounds_test`,
+  `focus_ring_contrast_test`, `mx_*_test` của từng widget chạm tới,
+  `mx_stress_test`, `shared_api_closure_test`, `widgetbook_coverage_test`;
+  golden Linux; CI.
+- **Checklist phases:** 7, 12, 13, 14.
+- **Ma trận disposition (#431–#434), mọi P1/P2 và P3 có nêu:**
+  - **#432 Button** — FIXED: P1-1 (state layer `on-*`), P1-2 (destructive
+    nhận `busyStyle`), P1-3 (đóng cùng P1-1), P2-1 (compact w700 qua trục
+    `wght`), P2-2 (Good/Remembered primary), P2-3 (bỏ `tonal`), P2-4 (80 =
+    ràng buộc layout, ghi rõ), P2-5 (icon gap lerp theo scale), P3-1 (tỉ lệ
+    2.05/2.51), P3-2 (comment w700), P3-4 (keepLabel ghim test). ACCEPTED:
+    P2-6 (icon "học" khác nhau hai màn — chủ dự án đã duyệt trên deck tile).
+    DEBT: P3-3 (`MxTextButton.accent`, 1 caller).
+  - **#433 TextField** — FIXED: F1 (`semanticLabel` bắt buộc, hint
+    `ExcludeSemantics`), F2 (`minHeight`, bỏ 48 cứng), F3 (focused-error
+    `AppStroke.focus`), F4 (suffix `WidgetStateColor`), F5 (supporting line
+    đóng), F6 (hint `body-lg`), F7 (`content: digits`), F8 (bỏ `isReadOnly`),
+    F9 (counter semantics), F10 (gapPadding ghi), F11 (kit), G1–G3, G5,
+    API (bỏ `textAlign`/`textStyle`), KB (`TextInputAction.done`). G4: golden
+    đăng ký, PNG ở Phase 7.
+  - **#431 ListTile** — FIXED: P1-1…P1-6, P2-1, P2-3…P2-6, P2-8, P2-11 (shim),
+    P2-12, P2-14, P2-15, P2-17. ACCEPTED có hợp đồng: P2-7 (leading mờ theo
+    hàng), P2-9 (trailing trình bày), P2-10 (một danh sách một leading), P2-13
+    (ngữ pháp multi-select), P2-16 (khoảng cách card = feature), P3-D5
+    (semibold khi chọn — §4L từ chối). DEBT: P2-11 góc 12-trong-16 của tile
+    trong card. P3: `highlightColor` ghi là giới hạn SDK, `FocusNode` chỉ khi
+    interactive, comment/token cũ dọn, 375 vào stress.
+  - **#434 Chip/Pill** — FIXED: P1-1…P1-5, P2-1 (`MxBadge`), P2-3, P2-6, P2-8,
+    P2-9, P3-1, P3-2, P3-3, P3-6. ACCEPTED có hợp đồng: P2-2, P2-4, P2-5, P2-7,
+    P3-5 (owner 2026-08-26). DEBT: P3-4 — `Chip` của tag strip mang cờ
+    `hasSelectedState` thừa từ `RawChip` (audit đã đo); sửa nghĩa là thay
+    `Chip`, kéo theo nút xoá 33×48 mà chủ dự án đã chốt ở P3-5, nên để lại.
+  - **Không tái tạo được trên main:** không có — mọi finding P1/P2 của bốn
+    audit đều tái tạo được tại `3207e7b7` trước khi sửa.
+
 ### M100.35 · Card dark thôi phát sáng; elevation thôi mang hai nghĩa
 
 - **Status:** done

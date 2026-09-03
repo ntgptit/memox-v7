@@ -247,9 +247,10 @@ class _LoadedPreview extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               _SourceContext(deckId: deckId, document: AsyncData(document)),
-              Divider(
-                height: AppSpacing.lg,
-                color: context.colors.outlineVariant,
+              // The gap is the layout's, the line is the theme's (M100.36 10H).
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                child: Divider(),
               ),
               if (document.hasSheetChoice) ...<Widget>[
                 _SheetSelector(

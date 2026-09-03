@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/foundations/app_spacing.dart';
-import '../../../../../core/theme/foundations/app_stroke.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_card.dart';
@@ -105,15 +104,11 @@ class ReminderSettingsSectionWidget extends StatelessWidget {
                   // the toggle and the time are one decision, so the seam
                   // between them reads as a hairline, not as two cards
                   // pretending to be one.
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.lg,
-                    ),
-                    child: Divider(
-                      height: AppStroke.hairline,
-                      thickness: AppStroke.hairline,
-                      color: context.semanticColors.borderSubtle,
-                    ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                    // The theme's divider — `outlineVariant`, which is what
+                    // `borderSubtle` aliased; one spelling (M100.36 10H).
+                    child: Divider(),
                   ),
                   ReminderTimeRowWidget(
                     time: settings.time,

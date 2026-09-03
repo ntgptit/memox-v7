@@ -13,6 +13,19 @@ extension ThemeContextX on BuildContext {
 
   TextTheme get texts => Theme.of(this).textTheme;
 
+  /// The input hint at rest — what a placeholder composed *outside*
+  /// `InputDecorator` wears (`InputDecoration.hint` with a `Text` child).
+  ///
+  /// `hintStyle` resolves per state since M100.36 (disabled dims it), so a
+  /// caller handing its own widget to the decorator has to ask for one state.
+  /// Published here rather than resolved in a feature: `WidgetStateProperty`
+  /// is the design system's vocabulary, and the layering test refuses a
+  /// feature that imports a component theme to reach it.
+  TextStyle? get inputHintStyle => WidgetStateProperty.resolveAs(
+    Theme.of(this).inputDecorationTheme.hintStyle,
+    const <WidgetState>{},
+  );
+
   /// Meanings `ColorScheme` has no slot for — success, danger, and friends.
   ///
   /// Throws if the extension is missing rather than returning a default. A

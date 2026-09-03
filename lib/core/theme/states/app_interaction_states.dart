@@ -54,24 +54,31 @@ abstract final class AppStateOpacity {
   /// marks the focused control for people who can already see where they are.
   static const double focus = 0.10;
 
-  /// How far a filled button's fill moves toward the ink on hover —
-  /// `.mx-btn--primary:hover`, `color-mix(primary 94%, text-primary)`.
+  /// Material 3's own state layer, for a control whose ground is a **fill** —
+  /// hover, then focus and press.
   ///
-  /// A *blend*, not an overlay, and that distinction is the bug this fixes. A
-  /// 6% accent overlay painted on an accent fill is the accent again: the
-  /// primary button had no visible hover at all, because the one state layer it
-  /// had was the same colour as the thing underneath it.
-  static const double filledHoverBlend = 0.06;
-
-  /// The same, on press — `.mx-btn--primary:active`, 88%.
-  static const double filledPressedBlend = 0.12;
+  /// Transcribed from `_FilledButtonDefaultsM3.overlayColor` at 3.44.8:
+  /// `onPrimary` at 0.08 hovered, 0.10 focused, 0.10 pressed. The colour is
+  /// the fill's own `on` role and the alphas are the SDK's, because M3's
+  /// answer for a filled surface is a *lightness* move that leaves hue alone.
+  ///
+  /// **These replaced `filledHoverBlend` / `filledPressedBlend` at M100.36.**
+  /// The blends lerped the fill toward `onSurface` while `controlOverlay` —
+  /// `primary` @ 6/10/12% — still painted on top, so a filled button ran two
+  /// feedback mechanisms at once: on the brand fill the overlay was a no-op
+  /// and cancelled part of the blend (press ΔE 2.08 against M3's 5.74), on
+  /// the error fill it washed indigo over red and rotated hue 345.7° → 338.5°
+  /// (#432 §3.2). One mechanism, the canonical one, and the pair's own ink.
+  static const double stateLayerHover = 0.08;
+  static const double stateLayerFocus = 0.10;
+  static const double stateLayerPressed = 0.10;
 
   /// How far a text link's label moves toward the ink on hover —
   /// `.mx-textbtn:hover`, `color-mix(… 85%, var(--color-text-primary))`.
   ///
-  /// A blend of the label's own colour, like [filledHoverBlend]: `.mx-textbtn`
-  /// is the one control in the kit with no surface to wash, so its states are
-  /// carried by the text itself rather than by an overlay painted over it.
+  /// A blend of the label's own colour: `.mx-textbtn` is the one control in
+  /// the kit with no surface to wash, so its states are carried by the text
+  /// itself rather than by an overlay painted over it.
   static const double textHoverBlend = 0.15;
 
   /// The same, on press — `.mx-textbtn:active`, 72%.
@@ -98,7 +105,14 @@ abstract final class AppStateOpacity {
 /// needed: the wash says *something* is focused, the ring says *which*, and only
 /// the ring carries enough contrast to do that job.
 abstract final class AppInteractionStates {
-  /// Buttons — filled, outlined and text-weight.
+  /// **Outlined and text-weight controls** — the family whose canonical state
+  /// layer is `primary` (`_OutlinedButtonDefaultsM3.overlayColor`).
+  ///
+  /// Not the filled family. A filled button's state layer is its own `on`
+  /// colour — `onPrimary` on `primary`, `onError` on `error` — and
+  /// `buildFilledStyle` derives it from the pair. Until M100.36 this resolver
+  /// reached the filled family through `buildSharedButtonStyle` as well, which
+  /// painted `primary` over `error` on every destructive press (#432 P1-1).
   static WidgetStateProperty<Color?> controlOverlay(ColorScheme scheme) =>
       _overlay(
         scheme,

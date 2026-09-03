@@ -12,14 +12,17 @@
 .mx-btn__label{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
 .mx-btn--compact{padding:var(--space-md)}
 .mx-btn--primary{background:var(--color-primary);color:var(--color-on-primary)}
-.mx-btn--primary:hover{background:color-mix(in srgb,var(--color-primary) 94%,var(--color-text-primary))}
-.mx-btn--primary:active{background:color-mix(in srgb,var(--color-primary) 88%,var(--color-text-primary))}
+.mx-btn--primary:hover{background:color-mix(in srgb,var(--color-on-primary) 8%,var(--color-primary))}
+.mx-btn--primary:active{background:color-mix(in srgb,var(--color-on-primary) 10%,var(--color-primary))}
 .mx-btn--destructive{background:var(--color-error);color:var(--color-on-error)}
-.mx-btn--destructive:active{background:color-mix(in srgb,var(--color-error) 88%,var(--color-text-primary))}
+.mx-btn--destructive:hover{background:color-mix(in srgb,var(--color-on-error) 8%,var(--color-error))}
+.mx-btn--destructive:active{background:color-mix(in srgb,var(--color-on-error) 10%,var(--color-error))}
 .mx-btn--secondary{background:transparent;color:var(--color-secondary-action);border:var(--border-hairline) solid var(--color-border-subtle)}
 .mx-btn--secondary:hover{background:color-mix(in srgb,var(--color-primary) 6%,transparent)}
 .mx-btn--secondary:active{background:color-mix(in srgb,var(--color-primary) 12%,transparent)}
 .mx-btn:focus-visible{outline:none;box-shadow:0 0 0 var(--border-focus) var(--color-primary)}
+.mx-btn--primary:focus-visible{background:color-mix(in srgb,var(--color-on-primary) 10%,var(--color-primary));box-shadow:0 0 0 var(--border-focus) var(--color-on-primary)}
+.mx-btn--destructive:focus-visible{background:color-mix(in srgb,var(--color-on-error) 10%,var(--color-error));box-shadow:0 0 0 var(--border-focus) var(--color-on-error)}
 .mx-btn:disabled{background:var(--color-disabled-surface);color:var(--color-on-disabled);border-color:var(--color-disabled-surface);cursor:not-allowed}
 .mx-btn--secondary:disabled{background:transparent}
 .mx-btn--loading .mx-btn__label{opacity:0}
@@ -80,13 +83,20 @@
    size. `buildChipTheme` in lib/core/theme/app_chip_theme.dart carries the same
    decision. */
 .mx-pill__body{display:inline-flex;box-sizing:border-box;min-height:32px;align-items:center;gap:var(--space-xs);white-space:nowrap;padding:0 var(--space-md);border-radius:var(--radius-pill);border:var(--border-hairline) solid var(--color-border-subtle);background:var(--color-surface);color:var(--color-text-secondary);font-size:var(--text-label-md);line-height:var(--leading-label-md);letter-spacing:var(--tracking-label-md);font-weight:var(--weight-medium);transition:background-color var(--duration-fast) var(--ease-standard)}
+/* The leading slot is laid out in BOTH states — a tick when pressed, the
+   caller's icon (or nothing) when not — so a pill's width does not change on
+   toggle and its neighbours do not slide (M100.36 4M). */
+.mx-pill__slot{display:inline-flex;flex:none;width:var(--icon-sm);height:var(--icon-sm);align-items:center;justify-content:center}
 .mx-pill__body .mx-icon{font-size:var(--icon-sm)}
 .mx-pill[aria-pressed="true"] .mx-pill__body{background:var(--color-secondary-container);color:var(--color-on-secondary-container)}
 .mx-pill:hover .mx-pill__body{background:color-mix(in srgb,var(--color-primary) 6%,var(--color-surface))}
 .mx-pill:focus-visible{outline:none}
 .mx-pill:focus-visible .mx-pill__body{box-shadow:0 0 0 var(--border-focus) var(--color-primary)}
 .mx-pill:disabled{cursor:not-allowed}
-.mx-pill:disabled .mx-pill__body{color:var(--color-on-disabled);border-color:var(--color-disabled-surface)}
+/* One grey for disabled, selected or not — Material's own `onSurface @ 12%`.
+   Blending the container under it made a switched-off selected pill MORE
+   prominent than a live one in dark (#434 P2-3); the tick keeps the identity. */
+.mx-pill:disabled .mx-pill__body{background:var(--color-disabled-surface);color:var(--color-on-disabled);border-color:var(--color-disabled-surface)}
 
 /* --- MxCard ----------------------------------------------------------- */
 /* `overflow:hidden` so the CARD clips what it holds. A child seated on an edge —
@@ -248,15 +258,16 @@
 
 /* --- MxTextField ------------------------------------------------------ */
 .mx-field{display:block;position:relative}
-.mx-field__input{width:100%;box-sizing:border-box;padding:var(--space-md) var(--space-lg);background:transparent;color:var(--color-text-primary);border:var(--border-input) solid var(--color-border-subtle);border-radius:var(--radius-md);font-family:var(--font-body);font-size:var(--text-body-lg);line-height:var(--leading-body-lg);transition:border-color var(--duration-fast) var(--ease-standard)}
+.mx-field__input{width:100%;box-sizing:border-box;padding:var(--space-md) var(--space-lg);background:transparent;color:var(--color-text-primary);border:var(--border-input) solid var(--color-border-control);border-radius:var(--radius-md);font-family:var(--font-body);font-size:var(--text-body-lg);line-height:var(--leading-body-lg);transition:border-color var(--duration-fast) var(--ease-standard)}
 textarea.mx-field__input{resize:vertical;min-height:96px}
 .mx-field__input::placeholder{color:var(--color-text-secondary);opacity:1}
-.mx-field__input:focus{outline:none;border-color:var(--color-focus-ring)}
+.mx-field__input:focus{outline:none;border-color:var(--color-primary)}
 .mx-field__label{position:absolute;left:var(--space-md);top:14px;padding:0 var(--space-xs);color:var(--color-text-secondary);background:var(--color-surface-bg,var(--color-background));font-size:var(--text-body-lg);line-height:1;pointer-events:none;transition:transform var(--duration-fast) var(--ease-standard),font-size var(--duration-fast) var(--ease-standard),color var(--duration-fast) var(--ease-standard);transform-origin:left top}
 .mx-field__input:focus+.mx-field__label,.mx-field__input:not(:placeholder-shown)+.mx-field__label{transform:translateY(-21px);font-size:var(--text-body-sm)}
-.mx-field__input:focus+.mx-field__label{color:var(--color-focus-ring)}
+.mx-field__input:focus+.mx-field__label{color:var(--color-primary)}
 .mx-field__help{display:flex;gap:var(--space-lg);justify-content:space-between;padding:var(--space-xs) var(--space-lg) 0;font-size:var(--text-body-sm);line-height:var(--leading-body-sm);color:var(--color-text-secondary)}
 .mx-field--error .mx-field__input{border-color:var(--color-danger)}
+.mx-field--error .mx-field__input:focus{border-width:var(--border-focus)}
 .mx-field--error .mx-field__label,.mx-field--error .mx-field__help{color:var(--color-danger)}
 .mx-field--disabled .mx-field__input{border-color:var(--color-disabled-surface);color:var(--color-on-disabled)}
 
@@ -317,8 +328,8 @@ button.mx-tile:focus-visible{outline:none;box-shadow:inset 0 0 0 var(--border-fo
 .mx-crumbs__step--current{color:var(--color-text-secondary);font-weight:var(--weight-regular)}
 
 /* --- MxSearchField ------------------------------------------------------ */
-.mx-search{display:flex;align-items:center;gap:var(--space-sm);box-sizing:border-box;width:100%;height:44px;padding:0 var(--space-sm) 0 var(--space-md);background:var(--color-surface-muted);border:var(--border-hairline) solid transparent;border-radius:var(--radius-pill);transition:border-color var(--duration-fast) var(--ease-standard),background-color var(--duration-fast) var(--ease-standard)}
-.mx-search:focus-within{background:var(--color-surface);border-color:var(--color-focus-ring)}
+.mx-search{display:flex;align-items:center;gap:var(--space-sm);box-sizing:border-box;width:100%;min-height:var(--touch-target-min);padding:0 var(--space-sm) 0 var(--space-md);background:var(--color-surface-muted);border:var(--border-input) solid var(--color-border-control);border-radius:var(--radius-pill);transition:border-color var(--duration-fast) var(--ease-standard),background-color var(--duration-fast) var(--ease-standard)}
+.mx-search:focus-within{background:var(--color-surface);border-color:var(--color-primary)}
 .mx-search__icon{color:var(--color-text-secondary);flex:none}
 .mx-search__input{flex:1;min-width:0;border:0;background:none;outline:none;font-family:var(--font-body);font-size:var(--text-body-md);line-height:var(--leading-body-md);color:var(--color-text-primary)}
 .mx-search__input::placeholder{color:var(--color-text-secondary);opacity:1}

@@ -111,9 +111,14 @@ void main() {
         matching: find.byType(Divider),
       );
       expect(divider, findsOneWidget);
+      // OLD: `divider.color == borderSubtle`, a per-site colour. NEW
+      // (M100.36 10H): the divider is the theme's — one hairline, one colour,
+      // `outlineVariant`, which is the value `borderSubtle` aliases — so the
+      // site names nothing and the theme is what is asserted.
+      expect(tester.widget<Divider>(divider).color, isNull);
       expect(
-        tester.widget<Divider>(divider).color,
-        semanticOf(tester).borderSubtle,
+        Theme.of(tester.element(divider)).dividerTheme.color,
+        Theme.of(tester.element(divider)).colorScheme.outlineVariant,
       );
 
       await pumpCardDetail(tester, loaded(example: null));

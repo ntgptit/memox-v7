@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/foundations/app_breakpoints.dart';
 import '../../../../core/theme/foundations/app_spacing.dart';
-import '../../../../core/theme/foundations/app_stroke.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_card.dart';
 import '../../../../shared/widgets/mx_messenger.dart';
@@ -133,6 +132,7 @@ class _SearchStrip extends ConsumerWidget {
         value: query,
         onChanged: (value) => _updateSearch(ref, value),
         hintText: context.l10n.tagSearchHint,
+        semanticLabel: context.l10n.tagSearchLabel,
         clearSemanticLabel: context.l10n.tagSearchClearLabel,
       ),
     ),
@@ -192,8 +192,8 @@ class _CatalogList extends StatelessWidget {
                     // separator rather than the card being sliced through —
                     // the same move Card Detail's summary hairlines make.
                     const Divider(
-                      height: AppStroke.hairline,
-                      thickness: AppStroke.hairline,
+                      // Thickness and height are the theme's (one hairline,
+                      // no reserved space); only the inset is this list's.
                       indent: _rowTextInset,
                       endIndent: AppSpacing.md,
                     ),

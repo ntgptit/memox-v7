@@ -37,8 +37,10 @@ void main() {
     WidgetTester tester,
     MxStressSpecimen specimen, {
     required ThemeData theme,
+    Size size = narrow,
+    double textScale = largeTextScale,
   }) async {
-    tester.view.physicalSize = narrow;
+    tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
@@ -59,7 +61,7 @@ void main() {
           builder: (context) => MediaQuery(
             data: MediaQuery.of(
               context,
-            ).copyWith(textScaler: const TextScaler.linear(largeTextScale)),
+            ).copyWith(textScaler: TextScaler.linear(textScale)),
             child: Scaffold(body: child),
           ),
         ),
@@ -86,6 +88,68 @@ void main() {
             reason:
                 '${specimen.name} overflowed in ${theme.key}. Wrap the text in '
                 'Flexible/Expanded, or give it maxLines with an overflow.',
+          );
+        });
+      }
+    }
+  });
+
+  // **The phones the app is actually held on** (M100.36 §19). 320 is the
+  // floor and catches most overflows, but a `Row` that fits at 320 by
+  // wrapping can still overflow at 360 where a longer line is *almost* one
+  // line — and 1.3 is the accessibility step most users pick, not 2.0.
+  group('no layout overflow across phone widths and text scales', () {
+    const widths = <double>[360, 375, 393];
+    const scales = <double>[1.3, 2.0];
+
+    for (final specimen in stressSpecimens()) {
+      for (final double width in widths) {
+        for (final double scale in scales) {
+          testWidgets('${specimen.name} · ${width.toInt()}dp · ${scale}x', (
+            tester,
+          ) async {
+            await pumpSpecimen(
+              tester,
+              specimen,
+              theme: buildLightTheme(),
+              size: Size(width, 800),
+              textScale: scale,
+            );
+
+            expect(
+              tester.takeException(),
+              isNull,
+              reason:
+                  '${specimen.name} overflowed at ${width.toInt()}dp × '
+                  '${scale}x text',
+            );
+          });
+        }
+      }
+    }
+  });
+
+  // Inputs take the largest scales the OS offers: a field that clips its own
+  // value at 3.0x is a field a low-vision user cannot use (M100.36 §19).
+  group('inputs survive 2.5x and 3.0x text at 320px', () {
+    for (final specimen in stressSpecimens().where(
+      (specimen) =>
+          specimen.name.startsWith('MxTextField') ||
+          specimen.name.startsWith('MxSearchField'),
+    )) {
+      for (final double scale in <double>[2.5, 3.0]) {
+        testWidgets('${specimen.name} · ${scale}x', (tester) async {
+          await pumpSpecimen(
+            tester,
+            specimen,
+            theme: buildLightTheme(),
+            textScale: scale,
+          );
+
+          expect(
+            tester.takeException(),
+            isNull,
+            reason: '${specimen.name} overflowed at ${scale}x text',
           );
         });
       }

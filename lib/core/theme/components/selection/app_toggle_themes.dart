@@ -77,8 +77,9 @@ SwitchThemeData buildSwitchTheme(
     //
     // WCAG 1.4.11 does exempt inactive components from its 3:1 floor, so the
     // requirement here is *visible*, not *3:1* — and 1:1 fails the weaker one.
-    // The ink at 38% reads 2.29:1 in light and 2.90:1 in dark on the disabled
-    // track: plainly muted, plainly still there. It is also M3's own answer
+    // The ink at 38% reads 2.05:1 in light and 2.51:1 in dark on the disabled
+    // track (re-measured at M100.36; it was 2.29 / 2.90 on the pre-M100.22
+    // palette): plainly muted, plainly still there. It is also M3's own answer
     // for an unselected disabled thumb, and the value the radio's disabled
     // mark already takes.
     if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
@@ -174,7 +175,8 @@ CheckboxThemeData buildCheckboxTheme(
   checkColor: WidgetStateProperty.resolveWith((states) {
     // The same trap as the switch's thumb, one control over: a white tick on
     // the disabled fill measures 1.32:1 in light, so a disabled *ticked* box
-    // reads as an empty one. The disabled ink is 2.29:1 on that fill.
+    // reads as an empty one. The disabled ink is 2.05:1 on that fill (light;
+    // 2.51:1 dark — M100.36 measurement).
     if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
 
     return scheme.onPrimary;

@@ -44,6 +44,13 @@ void main() {
     ('page', t.scaffoldBackgroundColor),
     ('surface', t.colorScheme.surface),
     ('surfaceContainer', t.colorScheme.surfaceContainer),
+    // Two more a field is actually drawn on, found by the input audit (#433
+    // §5.2): the bottom sheet that hosts `deck_form_widget` and
+    // `tag_rename_widget`, and the `MxFormDialog` ground. Dark-on-dialog is
+    // the thinnest margin in the table — 3.50:1 at M100.36 — and the one to
+    // watch when the palette next moves.
+    ('surfaceContainerLow', t.colorScheme.surfaceContainerLow),
+    ('surfaceContainerHigh', t.colorScheme.surfaceContainerHigh),
   ];
 
   group('a control edge clears 3:1 on every ground it is drawn on', () {

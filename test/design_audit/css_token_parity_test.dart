@@ -53,10 +53,6 @@ void main() {
       AppBorderColors.borderOptionLight,
       AppBorderColors.borderOptionDark,
     ),
-    '--color-border-divider': (
-      AppBorderColors.borderDividerLight,
-      AppBorderColors.borderDividerDark,
-    ),
     '--color-border-selected': (
       AppBorderColors.borderSelectedLight,
       AppBorderColors.borderSelectedDark,
@@ -85,6 +81,13 @@ void main() {
     '--color-border-subtle': (
       AppBorderColors.borderSubtleLight,
       AppBorderColors.borderSubtleDark,
+    ),
+    // The edge that identifies a control (3:1) — `scheme.outline`. Added to
+    // the kit at M100.36 so `.mx-field__input` and `.mx-search` stop naming
+    // the retired `border-subtle` for a boundary the app draws with this.
+    '--color-border-control': (
+      AppBorderColors.borderControlLight,
+      AppBorderColors.borderControlDark,
     ),
     '--color-focus-ring': (AppColors.primaryLight, AppColors.primaryDark),
     // --- brand and actions ---

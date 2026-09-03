@@ -167,56 +167,6 @@ void main() {
     });
 
     for (final mode in <(String, bool)>[('light', false), ('dark', true)]) {
-      testWidgets('${mode.$1} · tonal resolves every state, and keeps the '
-          'floor', (tester) async {
-        // **The variant Card Detail added, tested where it lives.** A shared
-        // member with one feature call site is a member whose regressions only
-        // one screen can catch: if `buildFilledTonalStyle` ever stopped going
-        // through `buildSharedButtonStyle`, tonal would lose its 48dp floor,
-        // its focus ring and its state resolvers, and nothing outside that one
-        // screen would notice.
-        await tester.pumpWidget(
-          host(
-            Scaffold(
-              body: MxActionButton(
-                label: 'Edit card',
-                icon: Icons.edit_outlined,
-                variant: MxActionButtonVariant.tonal,
-                onPressed: () {},
-              ),
-            ),
-            isDark: mode.$2,
-          ),
-        );
-
-        final theme = mode.$2 ? buildDarkTheme() : buildLightTheme();
-        final semantic = theme.extension<AppSemanticColors>()!;
-        final fill = tester
-            .widget<FilledButton>(find.byType(FilledButton))
-            .style!
-            .backgroundColor!;
-
-        expect(
-          fill.resolve(const <WidgetState>{}),
-          theme.colorScheme.secondaryContainer,
-        );
-        expect(
-          fill.resolve(const <WidgetState>{WidgetState.pressed}),
-          isNot(theme.colorScheme.secondaryContainer),
-          reason: '${mode.$1}: a tonal press does not darken',
-        );
-        expect(
-          fill.resolve(const <WidgetState>{WidgetState.disabled}),
-          semantic.disabledSurface,
-          reason: '${mode.$1}: a disabled tonal button keeps its fill',
-        );
-
-        final size = tester.getSize(find.byType(FilledButton));
-        expect(size.height, greaterThanOrEqualTo(48));
-      });
-    }
-
-    for (final mode in <(String, bool)>[('light', false), ('dark', true)]) {
       testWidgets('${mode.$1} · destructive resolves every state, not one', (
         tester,
       ) async {
@@ -247,10 +197,23 @@ void main() {
             .backgroundColor!;
 
         expect(fill.resolve(const <WidgetState>{}), theme.colorScheme.error);
+        // OLD: `fill(pressed) != error` — press lerped the fill. NEW: the fill
+        // is `error` under press and the state layer is `onError`, which is
+        // `_FilledButtonDefaultsM3`'s mechanism at 3.44.8 (M100.36).
         expect(
           fill.resolve(const <WidgetState>{WidgetState.pressed}),
-          isNot(theme.colorScheme.error),
-          reason: '${mode.$1}: a destructive press does not darken',
+          theme.colorScheme.error,
+          reason: '${mode.$1}: a destructive press moved the fill itself',
+        );
+        final layer = tester
+            .widget<FilledButton>(find.byType(FilledButton))
+            .style!
+            .overlayColor!
+            .resolve(const <WidgetState>{WidgetState.pressed});
+        expect(
+          layer?.withValues(alpha: 1),
+          theme.colorScheme.onError,
+          reason: '${mode.$1}: the destructive press layer is not onError',
         );
         expect(
           fill.resolve(const <WidgetState>{WidgetState.disabled}),

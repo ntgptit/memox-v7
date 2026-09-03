@@ -263,4 +263,148 @@ void main() {
       expect(ringOf(tester), isNull, reason: 'a disabled row took focus');
     });
   });
+
+  group('MxListTile combined states', () {
+    // The intersections #431 §24 found untested: the row's own source argues
+    // for each of them (`mx_list_tile.dart:29-32` — the ring is drawn in the
+    // foreground *because* `selectedTileColor` would cover a background one),
+    // and nothing asserted them. `MxCard` has the twin at
+    // `mx_card_interaction_test.dart`.
+    BorderSide? ringOf(WidgetTester tester) {
+      final decorated = tester.widget<DecoratedBox>(
+        find
+            .descendant(
+              of: find.byType(MxListTile),
+              matching: find.byType(DecoratedBox),
+            )
+            .first,
+      );
+      final border = (decorated.decoration as BoxDecoration).border;
+
+      return border == null ? null : (border as Border).top;
+    }
+
+    for (final mode in <(String, bool)>[('light', false), ('dark', true)]) {
+      final label = mode.$1;
+      final isDark = mode.$2;
+      final theme = isDark ? buildDarkTheme() : buildLightTheme();
+
+      testWidgets('$label · selected + focused: the ring sits over the fill, '
+          'and selection survives', (tester) async {
+        await pump(
+          tester,
+          MxListTile(
+            title: 'Academic Word List',
+            isSelected: true,
+            onTap: () {},
+          ),
+          isDark: isDark,
+        );
+        final atRest = tester.getRect(find.byType(MxListTile));
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.pumpAndSettle();
+
+        final tile = tester.widget<ListTile>(find.byType(ListTile));
+        expect(
+          tile.selected,
+          isTrue,
+          reason: '$label: focus dropped selection',
+        );
+        expect(ringOf(tester)?.width, AppStroke.focus, reason: label);
+        expect(
+          ringOf(tester)?.color,
+          AppInteractionStates.focusIndicator(theme.colorScheme).color,
+          reason: '$label: the ring is not the focus indicator',
+        );
+        expect(
+          tester.getRect(find.byType(MxListTile)),
+          atRest,
+          reason: '$label: focus moved a selected row',
+        );
+      });
+
+      testWidgets('$label · selected + pressed: the press wash paints and '
+          'the row stays selected', (tester) async {
+        await pump(
+          tester,
+          MxListTile(
+            title: 'Academic Word List',
+            isSelected: true,
+            onTap: () {},
+          ),
+          isDark: isDark,
+        );
+        final pressWash = AppInteractionStates.rowOverlay(
+          theme.colorScheme,
+        ).resolve(const <WidgetState>{WidgetState.pressed})!;
+
+        final gesture = await tester.startGesture(
+          tester.getCenter(find.byType(MxListTile)),
+        );
+        // Two pumps, not one: a `Ticker` measures elapsed time from its first
+        // tick, so a single `pump(250ms)` lands on the highlight's first frame
+        // at alpha 0. The second is past the 200ms fade-in and before the
+        // ripple settles.
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 250));
+
+        expectInkColor(tester, pressWash, reason: '$label: no press wash');
+        expect(
+          tester.widget<ListTile>(find.byType(ListTile)).selected,
+          isTrue,
+          reason: '$label: the press dropped selection',
+        );
+        await gesture.up();
+        await tester.pumpAndSettle();
+      });
+
+      testWidgets('$label · disabled + selected: announced as both, and the '
+          'label leaves the live accent', (tester) async {
+        final handle = tester.ensureSemantics();
+        await pump(
+          tester,
+          MxListTile(
+            title: 'Academic Word List',
+            isSelected: true,
+            isEnabled: false,
+            onTap: () {},
+          ),
+          isDark: isDark,
+        );
+
+        expect(
+          tester.getSemantics(find.byType(ListTile)),
+          matchesSemantics(
+            hasSelectedState: true,
+            isSelected: true,
+            // A selectable row is one of an exclusive group (M100.36 10E).
+            isInMutuallyExclusiveGroup: true,
+            // `isEnabled` is left at the matcher's default — false — which is
+            // the assertion: the flag is present and it is off.
+            hasEnabledState: true,
+            label: 'Academic Word List',
+          ),
+          reason: label,
+        );
+        // Disabled falls through to `theme.disabledColor`, which is seeded to
+        // `semantic.onDisabled` — never `selectedColor`. A greyed row that
+        // kept the accent would read as the one live choice in a dead list.
+        final title = tester.widget<AnimatedDefaultTextStyle>(
+          find
+              .ancestor(
+                of: find.text('Academic Word List'),
+                matching: find.byType(AnimatedDefaultTextStyle),
+              )
+              .first,
+        );
+        expect(
+          title.style.color,
+          isNot(theme.colorScheme.primary),
+          reason: '$label: a disabled selected row still wears the accent',
+        );
+        handle.dispose();
+      });
+    }
+  });
 }

@@ -56,7 +56,11 @@ class MxSwitchRow extends StatelessWidget {
           value: isOn,
           onChanged: onChanged,
           contentPadding: EdgeInsets.zero,
-          title: Text(label, style: context.texts.bodyMedium),
+          // `body-lg`, the row title rung the announced variant and every
+          // `ListTile` already use — this branch alone was `body-md`, so one
+          // widget set its one label at two sizes decided by a semantics
+          // flag (#431 P2-12, M100.36 10J).
+          title: Text(label, style: context.texts.bodyLarge),
         ),
       );
     }
