@@ -24,20 +24,38 @@ implementation — so they are comparable with every ratio already quoted in
 
 ## 1 · Verdict
 
-**The three rendered controls are in good shape and stay on their Material
-roles in every state a user can reach today. The two unrendered ones are not,
-and one of the guards that is supposed to be watching them is asserting the
-wrong canonical class — it passes, and it is wrong.**
+**No rendered control substitutes a Material role — every colour the three of
+them paint is a canonical role for that component, and the semantic states
+match exactly. Where two of them diverge is by *not moving*: the radio and the
+switch hold their resting role under hover, press and focus where M3 steps to a
+different one. The two unrendered controls are in worse shape, and one of the
+guards that is supposed to be watching them is asserting the wrong canonical
+class — it passes, and it is wrong.**
 
-There is **no P0 and no P1 that a user of the shipped app can reach.** That is
-the honest reading and it is worth stating plainly rather than promoting
-something to fill the slot: the tag filter's checkbox, the reminder and importer
-switches, and the scheduler / appearance / language / order radios all resolve
-`primary`, `onPrimary`, `outline`, `onSurfaceVariant`, `onSurface`,
-`surfaceContainerHighest` and `secondaryContainer` exactly where
-`_CheckboxDefaultsM3`, `_RadioDefaultsM3` and `_SwitchDefaultsM3` do, under
-`{}`, `{selected}`, `{focused}`, `{selected, focused}`, `{hovered}` and
-`{pressed}`. M100.18 → M100.23 did that work and it holds.
+That distinction is the whole of the verdict, so it is worth being exact about
+which states were checked and what came back:
+
+| | checkbox | radio | switch |
+|---|---|---|---|
+| `{}` · `{selected}` · `{selected, focused}` | ✓ | ✓ | ✓ |
+| `{hovered}` · `{pressed}` · `{focused}` | ✓ | **✗ P2-4** | **✗** (§3.3 note) |
+| `{selected, hovered / pressed / focused}` | ✓ | ✓ | **✗** (§3.3 note) |
+| `{disabled}` · `{selected, disabled}` | **✗ P2-2, P2-3** | ✓ | **✗ P2-2** |
+
+So the earlier framing of this paragraph — that the rendered controls hold
+their roles "in every state a user can reach" — was **wrong, and contradicted
+this report's own matrices at §3.2 and §3.3.** Hover, press and focus are all
+reachable, on web by pointer and keyboard and on Android by an attached
+keyboard or switch-access device. What is true is the narrower claim: no
+rendered slot returns a role belonging to a *different* component or meaning,
+which is the class of defect M100.18 → M100.23 closed and which does still
+hold. The divergences below are missing interaction rungs and collapsed
+disabled states, not role substitutions — a real but different fault, and one
+this report goes on to register as P2-2, P2-3 and P2-4.
+
+There is **no P0, and no P1 that a user of the shipped app can reach.** That
+part stands, and it is worth stating plainly rather than promoting something to
+fill the slot.
 
 The one **P1** is a test defect, and it is a P1 because a guard that is wrong is
 worse than a guard that is absent:
@@ -81,6 +99,7 @@ time.
 | P3-14 | One house overlay for all three toggles; M3 flips hue between selected and unselected | P3 |
 | P3-15 | `app_planned_themes.dart` does not exist; five live references point at it, one of them the justification for `sliderTheme` | P3 |
 | P3-16 | Widgetbook: stale doc comment, no Radio in the state matrix, no Slider / SegmentedButton page | P3 |
+| P3-17 | `SwitchThemeData.thumbColor` has no interaction rung — canonical steps to `onSurfaceVariant` off and `primaryContainer` on | P3 |
 
 **Protected and deliberately left alone.** Under the rule that existing
 canonical role guards stand unless pinned source proves them wrong, the
@@ -231,14 +250,17 @@ identical.
 | `trackOutlineWidth` | — | 2.0 | `AppStroke.selectionControl` = 2.0 | ✓ |
 
 **Note on the interaction rungs.** M3 moves the thumb's *colour* under hover,
-press and focus; the app moves only the overlay. This is the same trade the
-checkbox made in the other direction, and it is not called out as its own
-finding because the switch's canonical hover thumb (`onSurfaceVariant`) and its
-resting thumb (`outline`) are near-neighbours — the cue M3 gets from that swap
-is small, and the app's overlay wash is drawn at 6–12 % of `primary` around a
-40 dp thumb, which is the louder of the two. The radio's case (P2-4) is
-different and is a finding, because there the app's *only* glyph-level cue is
-the one it dropped.
+press and focus; the app moves only the overlay. This is **P3-17**, and it is a
+P3 rather than a P2 because the switch's canonical hover thumb
+(`onSurfaceVariant`) and its resting thumb (`outline`) are near-neighbours — the
+cue M3 gets from that swap is small, and the app's overlay wash is drawn at
+6–12 % of `primary` around a 40 dp thumb, which is the louder of the two. The
+radio's case (P2-4) is the same gap one control over and is a P2, because there
+the app's *only* glyph-level cue is the one it dropped.
+
+It is registered rather than left as prose because §1's state table marks it,
+and a divergence a reader can see in the verdict has to be findable in the
+registry.
 
 ### 3.4 SegmentedButton — unrendered
 
@@ -405,9 +427,18 @@ switch, composited thumb over composited track:
 
 Both disabled states resolve `thumb = onDisabled` and `track = disabledSurface`,
 so the two are byte-identical. The stored value survives only as **thumb
-position**, and the reminder toggle is disabled for the whole of every in-flight
-command (BR-229) — which is exactly when a user is most likely to be checking
-what it currently says.
+position**, and `ReminderToggleRowWidget` passes `isChangeable: false` for the
+whole of every in-flight command — which is exactly when a user is most likely
+to be checking what it currently says.
+
+**Uncited deliberately.** An earlier draft attributed that lock to BR-229, and
+that was wrong: BR-229 governs a platform that *cannot* schedule reminders — a
+typed capability value, no crash, no silently-enabled state, and an unavailable
+state in the UI instead of a dead toggle. Nothing in BR-218…BR-229 requires the
+toggle to lock while a command runs. It is a controller-state decision the
+widget makes (`isChangeable` is false for two independent reasons and the widget
+merges them), and the second reason has no business rule behind it. If one is
+wanted, that is a `docs/business-rules.md` change and not this report's to make.
 
 `app_toggle_themes_test.dart`'s `disabled still shows what it is` group is the
 test that exists for this class of bug, and it does not catch it: it measures
@@ -475,7 +506,7 @@ the answer is "nothing to do":
 |---|---|---|---|
 | checkbox | independent / multi | tag filter — many tags at once | ✓ |
 | radio | exclusive | scheduler (BR-11), appearance, language, order | ✓ |
-| switch | immediate boolean **setting** | reminder on/off (BR-229) | ✓ |
+| switch | immediate boolean **setting** | reminder on/off (BR-218 — opt-in, explicit) | ✓ |
 | switch | immediate boolean setting | import "has header row", "include duplicates" | ✓ — verified |
 | segmented | bounded choice | — | no site |
 | slider | continuous value | — | no site |
@@ -802,13 +833,26 @@ written to fail on the current tree.
     }
   });
   ```
-  Plus, for the slider, in whichever file owns it once it is rendered:
+  Plus, for the slider, in whichever file owns it once it is rendered —
+  **composited over the ground, never raw:**
   ```dart
-  expect(contrast(sliderTheme.disabledActiveTrackColor!,
-                  sliderTheme.disabledInactiveTrackColor!),
-         greaterThan(1.5),
-         reason: 'a disabled slider shows no value');
+  // `contrast` in test/support/color_math.dart reads r/g/b and ignores alpha
+  // — its doc says "between two opaque colours". The canonical fix for this
+  // finding is onSurface@38 over onSurface@12, which share every RGB channel,
+  // so comparing the tokens raw returns exactly 1.00 and this test would fail
+  // on a correct implementation. Blend both over what the track is painted on,
+  // the way the switch and checkbox tests above already do.
+  final Color ground = theme.colorScheme.surfaceContainerLow;   // the card
+  final Color active   = Color.alphaBlend(sl.disabledActiveTrackColor!,   ground);
+  final Color inactive = Color.alphaBlend(sl.disabledInactiveTrackColor!, ground);
+  expect(contrast(active, inactive), greaterThan(1.5),
+    reason: 'a disabled slider shows no value');
   ```
+  The **measurements** in this finding's evidence were taken that way already —
+  `1.00 : 1` for the app is a like-for-like comparison of two identical opaque
+  tokens, and the canonical `1.70 : 1` / `2.09 : 1` figures were composited over
+  `surface` before dividing. It was the proposed test, not the number, that had
+  the bug; caught in review on this PR by `chatgpt-codex-connector`.
 
 ### P2-3 · A disabled ticked checkbox draws a ring M3 makes transparent
 
@@ -915,6 +959,7 @@ written to fail on the current tree.
 | P3-14 | measured app overlay `primary@6/12/10` in every state vs M3's selected/unselected hue flip | pinned by `both resolve the house control wash`; app-wide, out of A10 scope |
 | P3-15 | `lib/**/app_planned_themes.dart` does not exist; referenced by `app_theme.dart:288`, `app_sizing.dart:9,40`, `theme_coverage_test.dart:143`, `docs/design-system/theme-architecture.md:181`, and `app_planned_themes_test.dart` still exists | the justification for `sliderTheme` on the unrendered allowlist points at a missing file |
 | P3-16 | `form_components.dart:572-578` doc; no Radio in `_ToggleRow`; no Slider/Segmented page | |
+| P3-17 | measured thumb `outline` under hover/press/focus vs canonical `onSurfaceVariant`, and `onPrimary` vs canonical `primaryContainer` when on; see §3.3's note | the cue is carried by the overlay instead; P2-4 is the same gap where nothing else carries it |
 
 ---
 
