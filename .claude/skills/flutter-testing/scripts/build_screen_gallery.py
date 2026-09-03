@@ -30,6 +30,7 @@ Needs Pillow for the resize: `python -m pip install Pillow`.
 import base64
 import io
 import os
+import re
 import subprocess
 import sys
 
@@ -47,17 +48,30 @@ OUT = (
 )
 
 
+def _escape(text):
+    return (text.replace('&', '&amp;').replace('<', '&lt;')
+            .replace('>', '&gt;').replace('"', '&quot;'))
+
+
 def _stamp():
-    """What the reader is looking at, so a stale tab is recognisable."""
+    """The commit the sheet was printed from, so a stale tab is recognisable.
+
+    Returned split rather than joined: the sha is set in the mono face and the
+    subject is the part allowed to be clipped when the header runs out of room,
+    and one pre-joined string cannot be styled in two ways.
+    """
     try:
-        return subprocess.check_output(
-            ['git', 'log', '-1', '--format=%h · %s'],
+        out = subprocess.check_output(
+            ['git', 'log', '-1', '--format=%h\x1f%s'],
             cwd=ROOT,
             text=True,
             encoding='utf-8',
         ).strip()
+        sha, _, subject = out.partition('\x1f')
+
+        return sha, subject
     except Exception:
-        return 'unknown revision'
+        return 'unknown', 'revision không đọc được'
 
 
 SCREENS = [
@@ -183,157 +197,305 @@ for group, base, name, note in SCREENS:
     total += 1
     dark_attr = (' data-dark="%s"' % dark) if dark else ''
     tag = '' if dark else '<span class="chip">light only</span>'
+    # The slug line sits *above* the frame it names: a caption under a
+    # phone-shaped image reads as belonging to the next card down, because the
+    # gap above it is the frame's own edge and the gap below is only the grid's.
+    # The frame number is filled in by script, in DOM order, so it is the same
+    # address the lightbox's arrow keys use.
     card = (
         '<figure class="shot" tabindex="0" data-name="{name}"{dark}>'
-        '<figcaption><strong>{name}</strong>{tag}<span>{note}</span></figcaption>'
+        '<figcaption><span class="slug"><b class="num"></b>'
+        '<strong>{name}</strong>{tag}</span><span class="note">{note}</span>'
+        '</figcaption>'
         '<div class="frame"><img loading="lazy" src="{light}" alt="{name}"></div>'
         '</figure>'
-    ).format(name=name, dark=dark_attr, light=light, tag=tag, note=note)
+    ).format(name=_escape(name), dark=dark_attr, light=light, tag=tag,
+             note=_escape(note))
     groups.setdefault(group, []).append(card)
 
-sections = []
-for group, items in groups.items():
-    sections.append(
-        '<section><h2><span class="eyebrow">{g}</span>'
-        '<span class="count">{n}</span></h2>'
-        '<div class="grid">{cards}</div></section>'.format(
-            g=group, n=len(items), cards=''.join(items)))
 
-# The tab title counts the same list the header does. It used to carry a
-# literal 29 while the manifest had grown to 44 — the one number the owner
-# sees without opening the page, and the only one nothing regenerated.
-# #364 reached the same fix independently; this comment is why it was made.
-html = """<title>MemoX — __TOTAL__ màn hình</title>
+def _slug(text):
+    """A stable anchor id for a group name, so the rail can link to it."""
+    return 'g-' + re.sub(r'[^a-z0-9]+', '-', text.lower()).strip('-')
+
+
+sections, rail = [], []
+for group, items in groups.items():
+    gid = _slug(group)
+    label = _escape(group)
+    rail.append(
+        '<a href="#{id}"><span>{g}</span><b>{n}</b></a>'.format(
+            id=gid, g=label, n=len(items)))
+    sections.append(
+        '<section id="{id}"><h2><span class="eyebrow">{g}</span>'
+        '<span class="count">{n} màn</span></h2>'
+        '<div class="grid">{cards}</div></section>'.format(
+            id=gid, g=label, n=len(items), cards=''.join(items)))
+
+# **The tab title stopped counting** (M100.34). It used to read
+# "MemoX — 59 màn hình", and the number had drifted once already — a literal 29
+# against a manifest of 44, which is why it was generated in the first place
+# (#364 reached the same fix independently). Generating it fixed the drift and
+# left a worse problem: the artifact's title is its identity in the owner's
+# gallery, and one that changes every time a screen is added is a page that
+# looks new each time. The count moved into the header, beside the two numbers
+# that qualify it — how many have a dark capture, and at what size.
+html = """<meta charset="utf-8">
+<title>MemoX Proof Sheet</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
+/* A proof sheet's own colours stay out of the way of the frames on it. The
+   accent is a darkroom china-marker red — deliberately far from the app's
+   indigo, so nothing in the chrome can be mistaken for something in a
+   screenshot, and so a screen's own brand colour is the only brand colour on
+   the page. */
 :root{
-  --ground:#F6F6F9; --surface:#FFFFFF; --ink:#1B1B22; --muted:#5D5D6E;
-  --accent:#4F5BD5; --line:#E3E3EC; --frame:#23232B; --chip:#EEEEF6;
+  --paper:#EFEFEC; --card:#FFFFFF; --ink:#17171A; --muted:#6E6E73;
+  --rule:#D9D9D3; --accent:#B4341F; --bezel:#101014; --chip:#E4E4DE;
+  --lift:0 1px 2px rgba(20,18,14,.10), 0 8px 20px rgba(20,18,14,.10);
 }
-:root:not([data-theme="light"]){}
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --ground:#131318; --surface:#1D1D25; --ink:#ECECF3; --muted:#9C9CAF;
-    --accent:#8B95F2; --line:#2A2A36; --frame:#000000; --chip:#26262F;
+    --paper:#131316; --card:#1B1B1F; --ink:#EDEDE8; --muted:#9A9A9F;
+    --rule:#2C2C31; --accent:#E4654C; --bezel:#000000; --chip:#26262B;
+    --lift:0 1px 2px rgba(0,0,0,.5), 0 10px 26px rgba(0,0,0,.45);
   }
 }
 :root[data-theme="dark"]{
-  --ground:#131318; --surface:#1D1D25; --ink:#ECECF3; --muted:#9C9CAF;
-  --accent:#8B95F2; --line:#2A2A36; --frame:#000000; --chip:#26262F;
+  --paper:#131316; --card:#1B1B1F; --ink:#EDEDE8; --muted:#9A9A9F;
+  --rule:#2C2C31; --accent:#E4654C; --bezel:#000000; --chip:#26262B;
+  --lift:0 1px 2px rgba(0,0,0,.5), 0 10px 26px rgba(0,0,0,.45);
 }
 *{box-sizing:border-box}
-body{background:var(--ground); color:var(--ink);
-  font:16px/1.5 "Segoe UI",Roboto,system-ui,sans-serif; margin:0;
-  padding:0 0 4rem}
-header{position:sticky; top:0; z-index:5; background:var(--ground);
-  border-bottom:1px solid var(--line); padding:.45rem 1rem;
-  display:flex; align-items:center; gap:.8rem; flex-wrap:nowrap;
-  transition:transform .22s ease}
+body{background:var(--paper); color:var(--ink); margin:0; padding:0 0 5rem;
+  font:400 16px/1.5 Archivo,"Segoe UI",Roboto,system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased}
+.mono{font-family:"JetBrains Mono",ui-monospace,"Cascadia Mono",Consolas,
+  monospace; font-variant-numeric:tabular-nums}
+
+/* ---- edge stamp -------------------------------------------------------- */
+header{position:sticky; top:0; z-index:6; background:var(--paper);
+  border-bottom:1px solid var(--rule); transition:transform .22s ease}
 header.hidden{transform:translateY(-100%)}
-@media (prefers-reduced-motion: reduce){
-  header{transition:none}
-}
-header h1{font-size:.95rem; font-weight:700; letter-spacing:-.01em;
-  margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-header p{margin:0; color:var(--muted); font-size:.78rem;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-@media (max-width:640px){ header p{display:none} }
-.spacer{flex:1; min-width:0}
-.toggle{display:flex; border:1px solid var(--line); border-radius:999px;
-  overflow:hidden; flex:none}
-.toggle button{border:0; background:transparent; color:var(--muted);
-  font:inherit; font-size:.8rem; padding:.25rem .75rem; cursor:pointer}
-.toggle button[aria-pressed="true"]{background:var(--accent); color:#fff}
-.toggle button:focus-visible{outline:2px solid var(--accent);
-  outline-offset:-2px}
-main{max-width:1240px; margin:0 auto; padding:0 1.4rem}
-section h2{display:flex; align-items:baseline; gap:.6rem;
-  margin:2.2rem 0 1rem}
-.eyebrow{font-size:.78rem; font-weight:700; letter-spacing:.14em;
+@media (prefers-reduced-motion: reduce){ header{transition:none} }
+.bar{display:flex; align-items:center; gap:1rem; flex-wrap:nowrap;
+  max-width:1320px; margin:0 auto; padding:.55rem 1.4rem}
+.mark{display:flex; align-items:baseline; gap:.5rem; flex:none}
+.mark b{font-size:1rem; font-weight:700; letter-spacing:-.015em}
+.mark span{font-size:.72rem; font-weight:600; letter-spacing:.16em;
   text-transform:uppercase; color:var(--accent)}
-.count{font-size:.78rem; color:var(--muted);
+.stamp{flex:1; min-width:0; display:flex; align-items:center; gap:.55rem;
+  font-size:.74rem; color:var(--muted); white-space:nowrap; overflow:hidden}
+.stamp .sha{color:var(--ink); font-weight:500}
+.stamp .subj{overflow:hidden; text-overflow:ellipsis; min-width:0}
+.stamp i{font-style:normal; opacity:.45}
+@media (max-width:820px){ .stamp .subj{display:none} }
+@media (max-width:560px){ .stamp{display:none} }
+
+/* The segmented control picks which *capture* is shown, not the page's own
+   theme — the label says so, because a bare Light/Dark pair on a page that
+   also follows the reader's theme is read as a page toggle every time. */
+.pick{display:flex; align-items:center; gap:.5rem; flex:none}
+.pick > span{font-size:.74rem; color:var(--muted)}
+.seg{display:flex; border:1px solid var(--rule); border-radius:7px;
+  overflow:hidden; background:var(--card)}
+.seg button{border:0; background:transparent; color:var(--muted); font:inherit;
+  font-size:.78rem; font-weight:500; padding:.24rem .8rem; cursor:pointer;
+  line-height:1.5}
+.seg button + button{border-left:1px solid var(--rule)}
+.seg button[aria-pressed="true"]{background:var(--accent); color:#FFF8F4}
+.seg button:disabled{opacity:.4; cursor:not-allowed}
+.seg button:focus-visible{outline:2px solid var(--accent); outline-offset:-3px}
+
+/* ---- section rail ------------------------------------------------------ */
+nav{border-top:1px solid var(--rule); overflow-x:auto;
+  scrollbar-width:thin}
+nav ol{list-style:none; display:flex; gap:0; margin:0 auto; padding:0 1.4rem;
+  max-width:1320px}
+nav a{display:flex; align-items:center; gap:.4rem; padding:.4rem .7rem;
+  color:var(--muted); text-decoration:none; font-size:.78rem;
+  white-space:nowrap; border-bottom:2px solid transparent}
+nav a:hover{color:var(--ink)}
+nav a b{font-weight:500; font-size:.7rem; color:var(--muted);
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  background:var(--chip); border-radius:4px; padding:0 .3rem}
+nav a:focus-visible{outline:2px solid var(--accent); outline-offset:-2px}
+
+/* ---- the sheet --------------------------------------------------------- */
+main{max-width:1320px; margin:0 auto; padding:0 1.4rem}
+section{scroll-margin-top:6.5rem}
+section h2{display:flex; align-items:baseline; gap:.7rem; margin:2.6rem 0 1.2rem;
+  padding-bottom:.5rem; border-bottom:1px solid var(--rule)}
+.eyebrow{font-size:.78rem; font-weight:700; letter-spacing:.15em;
+  text-transform:uppercase; color:var(--accent)}
+.count{font-size:.74rem; color:var(--muted);
+  font-family:"JetBrains Mono",ui-monospace,monospace;
   font-variant-numeric:tabular-nums}
-.grid{display:grid; gap:1.1rem;
-  grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
-.shot{margin:0; cursor:zoom-in; border-radius:14px}
-.shot:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
-.frame{background:var(--frame); border-radius:18px; padding:7px;
-  box-shadow:0 6px 22px rgba(20,20,40,.16)}
-.frame img{display:block; width:100%; height:auto; border-radius:12px;
-  background:#fff}
-/* Above the screen it names: a caption under a phone-shaped image reads as
-   part of the next card down, because the gap to the image above it is the
-   frame's shadow and the gap below is only the grid's. */
-figcaption{padding:0 .15rem .5rem; font-size:.83rem; color:var(--muted)}
-figcaption strong{display:inline; color:var(--ink); font-size:.88rem;
-  margin-right:.4rem}
-figcaption span{display:block; margin-top:.05rem}
-.chip{display:inline-block; background:var(--chip); color:var(--muted);
-  border-radius:999px; padding:.05rem .5rem; font-size:.7rem;
-  vertical-align:middle}
-dialog{border:0; border-radius:16px; padding:0; background:var(--surface);
-  color:var(--ink); max-width:min(92vw,460px);
-  box-shadow:0 24px 80px rgba(0,0,0,.45)}
-dialog::backdrop{background:rgba(10,10,16,.72)}
-dialog img{display:block; width:100%; height:auto;
-  border-radius:0 0 16px 16px}
-dialog .bar{display:flex; align-items:center; gap:.8rem;
-  padding:.7rem 1rem}
-dialog .bar strong{font-size:.95rem}
-dialog .bar span{color:var(--muted); font-size:.8rem}
-dialog .bar button{margin-left:auto; border:1px solid var(--line);
-  background:transparent; color:var(--ink); border-radius:8px;
-  font:inherit; font-size:.85rem; padding:.3rem .8rem; cursor:pointer}
+.grid{display:grid; column-gap:1.5rem; row-gap:2.1rem;
+  grid-template-columns:repeat(auto-fill,minmax(208px,1fr))}
+.shot{margin:0; cursor:zoom-in}
+.shot:focus-visible{outline:2px solid var(--accent); outline-offset:4px;
+  border-radius:4px}
+figcaption{padding:0 .1rem .55rem}
+.slug{display:flex; align-items:baseline; gap:.45rem}
+.num{font-family:"JetBrains Mono",ui-monospace,monospace; font-size:.72rem;
+  font-weight:500; color:var(--accent); font-variant-numeric:tabular-nums;
+  flex:none}
+.slug strong{font-size:.87rem; font-weight:600; letter-spacing:-.005em;
+  color:var(--ink); overflow:hidden; text-overflow:ellipsis;
+  white-space:nowrap; min-width:0}
+.note{display:block; margin-top:.1rem; padding-left:1.55rem; font-size:.79rem;
+  color:var(--muted); line-height:1.35}
+.chip{flex:none; background:var(--chip); color:var(--muted); border-radius:4px;
+  padding:.05rem .35rem; font-size:.65rem; font-weight:500;
+  letter-spacing:.04em; text-transform:uppercase}
+/* A printed edge, not a floating mockup: a tight bezel and a crisp seat, so
+   fifty-nine of them read as one sheet rather than as fifty-nine stickers. */
+.frame{background:var(--bezel); border-radius:15px; padding:5px;
+  box-shadow:var(--lift)}
+.frame img{display:block; width:100%; height:auto; border-radius:11px;
+  background:#FFF}
 @media (prefers-reduced-motion: no-preference){
-  .shot{transition:transform .18s ease}
-  .shot:hover{transform:translateY(-3px)}
+  .shot{transition:transform .16s ease}
+  .shot:hover{transform:translateY(-2px)}
+}
+
+/* ---- loupe ------------------------------------------------------------- */
+dialog{border:0; border-radius:12px; padding:0; background:var(--card);
+  color:var(--ink); max-width:min(94vw,980px); width:max-content;
+  box-shadow:0 30px 90px rgba(0,0,0,.5)}
+dialog::backdrop{background:rgba(12,11,10,.8)}
+.loupebar{display:flex; align-items:center; gap:.9rem; padding:.6rem .9rem;
+  border-bottom:1px solid var(--rule)}
+.loupebar .n{font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:.75rem; color:var(--accent); font-variant-numeric:tabular-nums}
+.loupebar strong{font-size:.92rem; font-weight:600}
+.loupebar .keys{color:var(--muted); font-size:.74rem}
+@media (max-width:620px){ .loupebar .keys{display:none} }
+.loupebar .seg{margin-left:auto}
+.loupebar .x{border:1px solid var(--rule); background:transparent;
+  color:var(--ink); border-radius:7px; font:inherit; font-size:.8rem;
+  padding:.24rem .7rem; cursor:pointer}
+.loupebar .x:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
+.plates{display:flex; gap:.9rem; padding:.9rem; align-items:flex-start;
+  overflow:auto; max-height:78vh}
+.plate{flex:0 0 auto; display:flex; flex-direction:column; gap:.4rem}
+.plate figcaption{padding:0; font-size:.72rem; color:var(--muted);
+  letter-spacing:.1em; text-transform:uppercase; font-weight:600}
+.plate img{display:block; width:min(393px,42vw); height:auto;
+  border-radius:9px; background:#FFF; border:1px solid var(--rule)}
+.plates.solo .plate img{width:min(393px,84vw)}
+@media (max-width:620px){
+  .plates{flex-direction:column}
+  .plate img{width:min(393px,80vw)}
 }
 </style>
 <header id="hdr">
-  <h1>MemoX · __TOTAL__ màn</h1>
-  <div class="spacer"><p>golden suite @ __STAMP__ · __SURFACE__</p></div>
-  <div class="toggle" role="group" aria-label="Chế độ render">
-    <button id="btnLight" aria-pressed="true">Light</button>
-    <button id="btnDark" aria-pressed="false">Dark</button>
+  <div class="bar">
+    <div class="mark"><b>MemoX</b><span>Proof sheet</span></div>
+    <div class="stamp">
+      <span class="mono sha">__SHA__</span><i>·</i>
+      <span class="subj">__SUBJ__</span><i>·</i>
+      <span class="mono">__TOTAL__ màn</span><i>·</i>
+      <span class="mono">__DARKN__ có dark</span><i>·</i>
+      <span class="mono">__SURFACE__</span>
+    </div>
+    <div class="pick">
+      <span>Chụp ở</span>
+      <div class="seg" role="group" aria-label="Chế độ app trong ảnh chụp">
+        <button id="btnLight" aria-pressed="true">Light</button>
+        <button id="btnDark" aria-pressed="false">Dark</button>
+      </div>
+    </div>
   </div>
+  <nav aria-label="Nhóm màn hình"><ol>__RAIL__</ol></nav>
 </header>
 <main>__SECTIONS__</main>
-<dialog id="box">
-  <div class="bar"><strong id="boxName"></strong>
-    <span>&larr; &rarr; chuyển màn</span>
-    <button id="boxClose">Đóng</button></div>
-  <img id="boxImg" alt="">
+<dialog id="box" aria-label="Xem màn hình">
+  <div class="loupebar">
+    <span class="n" id="boxNum"></span>
+    <strong id="boxName"></strong>
+    <span class="keys">&larr; &rarr; chuyển màn · Esc đóng</span>
+    <div class="seg" role="group" aria-label="Bản chụp hiển thị">
+      <button id="pvLight" aria-pressed="true">Light</button>
+      <button id="pvDark" aria-pressed="false">Dark</button>
+      <button id="pvBoth" aria-pressed="false">Cả hai</button>
+    </div>
+    <button class="x" id="boxClose">Đóng</button>
+  </div>
+  <div class="plates" id="boxPlates"></div>
 </dialog>
 <script>
 (function(){
-  var dark = false;
   var shots = Array.prototype.slice.call(document.querySelectorAll('.shot'));
-  function srcFor(shot){
-    return (dark && shot.dataset.dark) ? shot.dataset.dark
-      : shot.querySelector('img').dataset.light;
-  }
-  shots.forEach(function(s){
+  shots.forEach(function(s, i){
     var img = s.querySelector('img');
     img.dataset.light = img.src;
+    s.querySelector('.num').textContent = String(i + 1).padStart(2, '0');
+    s.dataset.index = i;
   });
-  function apply(){
-    shots.forEach(function(s){ s.querySelector('img').src = srcFor(s); });
+
+  /* ---- which capture the sheet shows ---- */
+  var dark = false;
+  function sheetSrc(s){
+    return (dark && s.dataset.dark) ? s.dataset.dark
+      : s.querySelector('img').dataset.light;
+  }
+  function applySheet(){
+    shots.forEach(function(s){ s.querySelector('img').src = sheetSrc(s); });
     document.getElementById('btnLight').setAttribute('aria-pressed', String(!dark));
     document.getElementById('btnDark').setAttribute('aria-pressed', String(dark));
   }
-  document.getElementById('btnLight').onclick = function(){ dark=false; apply(); };
-  document.getElementById('btnDark').onclick = function(){ dark=true; apply(); };
+  document.getElementById('btnLight').onclick = function(){ dark = false; applySheet(); };
+  document.getElementById('btnDark').onclick = function(){ dark = true; applySheet(); };
 
-  var box = document.getElementById('box'), cur = -1;
+  /* ---- the loupe ----
+     Light, dark and both, because comparing the two is the review this
+     project keeps running: a role that resolves differently per brightness
+     is invisible in either picture alone. */
+  var box = document.getElementById('box');
+  var plates = document.getElementById('boxPlates');
+  var view = 'light', cur = -1;
+
+  function plate(label, src, name){
+    return '<figure class="plate"><figcaption>' + label + '</figcaption>'
+      + '<img src="' + src + '" alt="' + name + ' — ' + label + '"></figure>';
+  }
+  function render(){
+    var s = shots[cur];
+    var lightSrc = s.querySelector('img').dataset.light;
+    var darkSrc = s.dataset.dark || '';
+    var name = s.dataset.name;
+    var both = view === 'both' && darkSrc;
+    var html = '';
+    if(view === 'dark' && darkSrc) html = plate('Dark', darkSrc, name);
+    else if(both) html = plate('Light', lightSrc, name) + plate('Dark', darkSrc, name);
+    else html = plate('Light', lightSrc, name);
+    plates.innerHTML = html;
+    plates.classList.toggle('solo', !both);
+    document.getElementById('boxNum').textContent = String(cur + 1).padStart(2, '0');
+    document.getElementById('boxName').textContent = name;
+    document.getElementById('pvDark').disabled = !darkSrc;
+    document.getElementById('pvBoth').disabled = !darkSrc;
+    [['pvLight','light'],['pvDark','dark'],['pvBoth','both']].forEach(function(p){
+      document.getElementById(p[0]).setAttribute('aria-pressed', String(view === p[1]));
+    });
+  }
   function show(i){
     cur = (i + shots.length) % shots.length;
-    var s = shots[cur];
-    document.getElementById('boxImg').src = srcFor(s);
-    document.getElementById('boxImg').alt = s.dataset.name;
-    document.getElementById('boxName').textContent = s.dataset.name;
+    if(!shots[cur].dataset.dark && view !== 'light') view = 'light';
+    render();
     if(!box.open) box.showModal();
   }
+  [['pvLight','light'],['pvDark','dark'],['pvBoth','both']].forEach(function(p){
+    document.getElementById(p[0]).onclick = function(){ view = p[1]; render(); };
+  });
   shots.forEach(function(s, i){
-    s.addEventListener('click', function(){ show(i); });
+    s.addEventListener('click', function(){
+      view = dark && s.dataset.dark ? 'dark' : 'light';
+      show(i);
+    });
     s.addEventListener('keydown', function(e){
       if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); show(i); }
     });
@@ -342,25 +504,31 @@ dialog .bar button{margin-left:auto; border:1px solid var(--line);
   box.addEventListener('click', function(e){ if(e.target === box) box.close(); });
   document.addEventListener('keydown', function(e){
     if(!box.open) return;
-    if(e.key === 'ArrowRight') show(cur+1);
-    if(e.key === 'ArrowLeft') show(cur-1);
+    if(e.key === 'ArrowRight') show(cur + 1);
+    if(e.key === 'ArrowLeft') show(cur - 1);
   });
 
-  // The header gets out of the way while reviewing: hidden on scroll down,
-  // back on the first scroll up.
+  /* The stamp gets out of the way while reviewing: hidden on scroll down,
+     back on the first scroll up. */
   var hdr = document.getElementById('hdr'), lastY = 0;
   window.addEventListener('scroll', function(){
     var y = window.scrollY;
-    if(y > lastY + 6 && y > 60) hdr.classList.add('hidden');
+    if(y > lastY + 6 && y > 90) hdr.classList.add('hidden');
     else if(y < lastY - 6) hdr.classList.remove('hidden');
     lastY = y;
   }, {passive:true});
+
+  applySheet();
 })();
 </script>
 """
+sha, subject = _stamp()
 html = html.replace('__SECTIONS__', ''.join(sections))
+html = html.replace('__RAIL__', ''.join('<li>%s</li>' % a for a in rail))
 html = html.replace('__TOTAL__', str(total))
-html = html.replace('__STAMP__', _stamp())
+html = html.replace('__DARKN__', str(dark_count))
+html = html.replace('__SHA__', sha)
+html = html.replace('__SUBJ__', _escape(subject))
 html = html.replace(
     '__SURFACE__', '%d×%d' % (SURFACE[0] // DPR, SURFACE[1] // DPR)
 )

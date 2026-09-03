@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.33 (Card thành design primitive: một `ColorScheme` role cho cả hai mode — dark lấy độ sâu từ rim dày dần chứ không đổi role; viền state và focus ring ra hai lớp foreground vẽ chồng lên con, cộng thêm chứ không thay nhau; gỡ viền giả `Border.all(color: fill)`; phần web-only của brief 5A bị loại vì Tokyo là desktop còn memox là mobile); M100.32 (`ColorScheme.surface` là nền trang trở lại, giấy về `surfaceContainerLow`; FAB/Card/AppBar/ChoiceChip về binding canonical; `warning` retune cho sàn 4.5); M100.31 (`components/` chia chín họ; role canonical trích từ SDK ghim và tìm ra bốn sai lệch; builder thôi nhận `Color` rời); M100.30 (bóng đổ light thành hai lớp màu Tokyo `#9FA2BF` — `shadow` tách khỏi `scrim`; nhãn nút lên w700; `AppSizing.controlCompact`; golden còn chờ Linux); M100.29 (`lib/core/theme/` chia sáu tầng: token tách khỏi component builder, `ColorScheme` có nguồn riêng `schemes/app_color_scheme.dart`, `AppSizing` nhận ba giá trị đã có, guard chiều import đã kiểm ngược, tài liệu `docs/design-system/theme-architecture.md`); M100.28 (bất biến canonical binding: gỡ `primaryInk`, khôi phục `primary` cho TextButton/OutlinedButton/TabBar, sàn 4,5 và 12° trở lại, `primary` retune `#4454CC` / `#BCC2FF`); M100.27 (`primary`, nền trang, nền card lấy nguyên hex Tokyo theo chỉ định chủ dự án; `primaryInk` cho thương hiệu làm chữ; dark vẽ rim Tokyo thay shade; R9 miễn paper trắng, sàn 4,3 cho nhãn nút light); M100.26 (toàn bộ hệ màu về palette Tokyo — surface, ink, viền, bốn semantic, tertiary, thang container; ngân sách chroma semantic thay bằng luật bốn hue; golden vẽ lại); M100.25 (hai họ accent M3 lấy hue từ palette Tokyo; fill là giá trị Tokyo đầu tiên vượt sàn, container/on giữ tone và chroma; `surfaceContainerHighest` dark tách khỏi `secondaryContainer`); M100.24 (golden về một nền tảng: job CI chuyển sang Linux, thêm bước font, bỏ tolerance); M100.23 (tổ hợp state thôi phá canonical role; guard AST khoá slot→role; luật nền tảng golden); M100.22 (năm component về role M3 canonical; hai hex palette gánh phần contrast; gỡ khái niệm selected ink chung); M100.21 (container cho bốn semantic; chip trạng thái thôi mượn role accent); M100.20 (bảy binding component về role M3; sàn độ nổi của menu bỏ theo quyết định chủ dự án); M100.19 (gỡ ba token thay thế khỏi 112 call-site, golden chứng minh không đổi pixel); M100.18 (dark `primary` đảo tone theo M3; ba token thay thế thành dẫn xuất); M100.17 (`ColorScheme` đúng 45 role M3 — gỡ `surfaceTint` khai tường minh, catalog đủ 45 swatch); M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
+| **Updated by task** | M100.34 (screen gallery vẽ lại thành proof sheet: Archivo + JetBrains Mono, accent đỏ china-marker cố ý xa indigo của app, con dấu commit lên hàng đầu, rail 9 nhóm, số khung khớp thứ tự loupe, loupe thêm chế độ so light↔dark cạnh nhau ở 393dp; tên tab thôi đếm để danh tính artifact ổn định); M100.33 (Card thành design primitive: một `ColorScheme` role cho cả hai mode — dark lấy độ sâu từ rim dày dần chứ không đổi role; viền state và focus ring ra hai lớp foreground vẽ chồng lên con, cộng thêm chứ không thay nhau; gỡ viền giả `Border.all(color: fill)`; phần web-only của brief 5A bị loại vì Tokyo là desktop còn memox là mobile); M100.32 (`ColorScheme.surface` là nền trang trở lại, giấy về `surfaceContainerLow`; FAB/Card/AppBar/ChoiceChip về binding canonical; `warning` retune cho sàn 4.5); M100.31 (`components/` chia chín họ; role canonical trích từ SDK ghim và tìm ra bốn sai lệch; builder thôi nhận `Color` rời); M100.30 (bóng đổ light thành hai lớp màu Tokyo `#9FA2BF` — `shadow` tách khỏi `scrim`; nhãn nút lên w700; `AppSizing.controlCompact`; golden còn chờ Linux); M100.29 (`lib/core/theme/` chia sáu tầng: token tách khỏi component builder, `ColorScheme` có nguồn riêng `schemes/app_color_scheme.dart`, `AppSizing` nhận ba giá trị đã có, guard chiều import đã kiểm ngược, tài liệu `docs/design-system/theme-architecture.md`); M100.28 (bất biến canonical binding: gỡ `primaryInk`, khôi phục `primary` cho TextButton/OutlinedButton/TabBar, sàn 4,5 và 12° trở lại, `primary` retune `#4454CC` / `#BCC2FF`); M100.27 (`primary`, nền trang, nền card lấy nguyên hex Tokyo theo chỉ định chủ dự án; `primaryInk` cho thương hiệu làm chữ; dark vẽ rim Tokyo thay shade; R9 miễn paper trắng, sàn 4,3 cho nhãn nút light); M100.26 (toàn bộ hệ màu về palette Tokyo — surface, ink, viền, bốn semantic, tertiary, thang container; ngân sách chroma semantic thay bằng luật bốn hue; golden vẽ lại); M100.25 (hai họ accent M3 lấy hue từ palette Tokyo; fill là giá trị Tokyo đầu tiên vượt sàn, container/on giữ tone và chroma; `surfaceContainerHighest` dark tách khỏi `secondaryContainer`); M100.24 (golden về một nền tảng: job CI chuyển sang Linux, thêm bước font, bỏ tolerance); M100.23 (tổ hợp state thôi phá canonical role; guard AST khoá slot→role; luật nền tảng golden); M100.22 (năm component về role M3 canonical; hai hex palette gánh phần contrast; gỡ khái niệm selected ink chung); M100.21 (container cho bốn semantic; chip trạng thái thôi mượn role accent); M100.20 (bảy binding component về role M3; sàn độ nổi của menu bỏ theo quyết định chủ dự án); M100.19 (gỡ ba token thay thế khỏi 112 call-site, golden chứng minh không đổi pixel); M100.18 (dark `primary` đảo tone theo M3; ba token thay thế thành dẫn xuất); M100.17 (`ColorScheme` đúng 45 role M3 — gỡ `surfaceTint` khai tường minh, catalog đủ 45 swatch); M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
 | **Last updated** | 2026-09-02 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -16944,6 +16944,63 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Dependencies:** M100.23
 - **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
 - **Checklist phases:** 14, 21.
+
+### M100.34 · Screen gallery vẽ lại thành proof sheet
+
+- **Status:** done
+- **Goal:** Trang gallery là **dụng cụ soi bài**, không phải trang đọc: chủ dự
+  án quét 59 khung của cùng một app ở cùng một khổ, lật light/dark, và phải
+  phân biệt được tab cũ với tab hiện tại. Bản cũ trông như template: font hệ
+  thống, accent `#4F5BD5` — gần như đúng indigo thương hiệu của chính app, nên
+  chrome tranh màu với thứ đang được soi — và con dấu commit bị ép thành dòng
+  `0.78rem` xám cụt đuôi, dù CLAUDE.md coi nó là lý do trang này tồn tại.
+- **Scope:** `.claude/skills/flutter-testing/scripts/build_screen_gallery.py`
+  (template HTML/CSS/JS, `_stamp`, `_escape`), `.claude/launch.json` (một entry
+  tĩnh để soi trang local).
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `.claude/skills/flutter-testing/scripts/build_screen_gallery.py`,
+  `.claude/launch.json`, `docs/wbs.md`
+- **Hướng thiết kế: proof sheet của hiệu ảnh.** Trang này *đúng là* một tờ
+  contact sheet — 59 khung cùng khổ phim, chụp trên một "film stock" (393×852,
+  renderer Linux), đóng dấu cuộn phim ở mép. Nên: giấy trung tính hơi ấm, máng
+  chặt, số khung, con dấu mép in bằng mono. Accent là **đỏ china-marker
+  `#B4341F`** — cố ý xa indigo của app, để không nét nào trong chrome bị đọc
+  nhầm là nét trong ảnh chụp, và để màu thương hiệu duy nhất trên trang là màu
+  của chính màn hình.
+- **Acceptance criteria:**
+  - [x] Hai chữ: Archivo (grotesque, nhãn) + JetBrains Mono cho **dữ liệu máy**
+        — sha, số khung, số đếm, khổ màn. Mono ở đây là sự thật chứ không phải
+        trang trí.
+  - [x] Con dấu commit lên hàng đầu: sha đặt trong mono, subject là phần được
+        phép cắt khi header hết chỗ. `_stamp()` trả về tách đôi, vì một chuỗi
+        đã nối không thể style hai kiểu.
+  - [x] Rail 9 nhóm kèm số đếm — 59 màn không còn phải cuộn mù.
+  - [x] Số khung `01…59` theo đúng thứ tự DOM, tức đúng địa chỉ mà phím ←/→
+        trong loupe dùng. Đánh số vì nó *là* thông tin, không phải để trang trí.
+  - [x] Loupe có **Light / Dark / Cả hai**; "Cả hai" đặt hai bản cạnh nhau ở
+        đúng 393dp. Đây là phép so dự án liên tục phải chạy — một role giải
+        khác nhau theo brightness thì nhìn một bản không bao giờ thấy.
+  - [x] Segmented control có nhãn "Chụp ở": một cặp Light/Dark trần trên trang
+        vốn cũng theo theme người đọc thì luôn bị hiểu là công tắc theme trang.
+  - [x] Ba trạng thái theme đủ (`:root`, `prefers-color-scheme` có guard
+        `:not([data-theme="light"])`, `[data-theme="dark"]`); không màu nào chỉ
+        được định nghĩa bên trong media query.
+  - [x] `<meta charset="utf-8">` do trang tự khai, để mở file local cũng đúng
+        dấu chứ không chỉ đúng khi qua Artifact.
+  - [x] Tên nhóm được escape (`Library &amp; Deck`).
+  - [x] 68 test tooling xanh; `check_docs.py` và `check_prompt_contract.py` đạt.
+- **Tên tab thôi đếm.** Nó từng là "MemoX — 59 màn hình", và con số đó đã trôi
+  một lần rồi — literal 29 trên một manifest 44, đó là lý do nó được sinh động
+  (#364 tự tìm ra cùng cách sửa). Sinh động chữa được cái trôi và để lại cái tệ
+  hơn: tiêu đề artifact là *danh tính* của trang trong gallery của chủ dự án, mà
+  một tiêu đề đổi mỗi lần thêm màn thì lần nào cũng trông như trang mới. Số
+  đếm chuyển vào header, đứng cạnh hai con số bổ nghĩa cho nó — bao nhiêu màn có
+  bản dark, và ở khổ nào.
+- **Dependencies:** M100.33
+- **Tests required:** `.claude/skills/flutter-workflow/scripts/tests/`,
+  `check_docs.py`, `check_prompt_contract.py`; trang render kiểm bằng mắt ở cả
+  hai theme và cả ba chế độ loupe.
+- **Checklist phases:** 15, 21.
 
 ### M100.33 · Card là design primitive: một role cho hai mode, viền ra lớp trước
 
