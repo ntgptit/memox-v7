@@ -283,7 +283,11 @@ void main() {
       ) async {
         await pump(
           tester,
-          const MxCard.option(isSelected: false, child: Text('x')),
+          MxCard.option(
+            isSelected: false,
+            onTap: () {},
+            child: const Text('x'),
+          ),
           theme: theme,
         );
 

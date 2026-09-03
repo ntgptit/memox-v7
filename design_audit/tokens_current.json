@@ -522,18 +522,6 @@
       "hueDistanceFromDarkSurfaceFamily": 14.624999999999858,
       "carriesNoHue": false
     },
-    "semantic.surfaceElevated": {
-      "hex": "#FFFFFF",
-      "opaque": true,
-      "hue": null,
-      "saturation": 0.0,
-      "chroma": 0.0,
-      "lightnessStar": 100.0,
-      "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": null,
-      "hueDistanceFromDarkSurfaceFamily": null,
-      "carriesNoHue": true
-    },
     "semantic.borderSubtle": {
       "hex": "#E4E7EA",
       "opaque": true,
@@ -1239,18 +1227,6 @@
       "classifiedAs": "neutral",
       "hueDistanceFromDeclaredSeed": 1.3132694938440466,
       "hueDistanceFromDarkSurfaceFamily": 1.0029069767441854,
-      "carriesNoHue": false
-    },
-    "semantic.surfaceElevated": {
-      "hex": "#2F3660",
-      "opaque": true,
-      "hue": 231.42857142857144,
-      "saturation": 0.3426573426573426,
-      "chroma": 0.19215686274509802,
-      "lightnessStar": 23.957649050881685,
-      "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 1.5126050420167871,
-      "hueDistanceFromDarkSurfaceFamily": 0.8035714285714448,
       "carriesNoHue": false
     },
     "semantic.borderSubtle": {

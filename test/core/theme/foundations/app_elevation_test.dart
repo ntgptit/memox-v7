@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/foundations/app_colors.dart';
 import 'package:memox/core/theme/foundations/app_elevation.dart';
+import 'package:memox/core/theme/foundations/app_stroke.dart';
 import 'package:memox/core/theme/app_theme.dart';
 
 import '../../../support/color_math.dart';
@@ -86,32 +86,52 @@ void main() {
       );
     });
 
-    test(
-      'a dark card gets a rim, not a shade — and the same one at every level',
-      () {
-        // Tokyo's `shadows.card` (M100.27): an opaque one-pixel halo, because
-        // the measurement below shows a dark shade buys nothing and the card is
-        // fixed at Tokyo's `#111633`, 4.3 L* above its page.
-        final card = shadowsFor(AppElevation.card, dark).single;
-        final overlay = shadowsFor(AppElevation.overlay, dark).single;
+    test('a dark card gets a crisp rim, never a glow', () {
+      // **The rim used to be Tokyo's `shadows.card` verbatim** — `#6A7199` at
+      // `blurRadius: 2` with a spread that climbed by level. It measured
+      // 3.74:1 against the card it outlined, which is a *control* boundary's
+      // contrast on a resting neutral surface, and the blur turned it into a
+      // halo on a 16 px corner. Ten of those in a phone column read as neon
+      // stripes, and the owner rejected the look on sight (M100.35).
+      final card = shadowsFor(AppElevation.card, dark).single;
 
-        expect(card.color, AppColors.cardRimDark);
-        expect(card.color.a, 1.0, reason: 'a rim is an edge, not a wash');
-        expect(card.offset, Offset.zero);
-        // The solid ring is what the 3:1 ratios are measured on. Blur alone
-        // would leave every exposed pixel partially covered and the source
-        // colour's contrast a claim about paint nobody sees.
-        expect(
-          card.spreadRadius,
-          greaterThanOrEqualTo(1.0),
-          reason:
-              'without a spread the rim is only a blur, and a blurred edge '
-              'never reaches the colour its contrast was measured at',
-        );
-        expect(overlay.color, card.color);
-        expect(overlay.blurRadius, card.blurRadius);
-      },
-    );
+      expect(
+        card.color,
+        dark.outlineVariant,
+        reason:
+            'the resting dark edge is M3\'s decorative boundary role, '
+            'which is explicitly not held to 3:1',
+      );
+      expect(
+        card.blurRadius,
+        0,
+        reason: 'crisp: a blurred edge on a 16 px corner is a smear',
+      );
+      expect(card.spreadRadius, AppStroke.hairline);
+      expect(card.offset, Offset.zero);
+    });
+
+    test('dark says "higher" with a drop, and never with a thicker rim', () {
+      // The hierarchy still has to be readable — but not by growing the glow,
+      // which is how `none < card < raised` used to be spelled.
+      final card = shadowsFor(AppElevation.card, dark);
+      final raised = shadowsFor(AppElevation.raised, dark);
+
+      expect(card, hasLength(1), reason: 'a list card carries the rim alone');
+      expect(raised, hasLength(2));
+      expect(
+        raised.first.spreadRadius,
+        card.single.spreadRadius,
+        reason: 'the rim is one hairline at every level, forever',
+      );
+      expect(raised.first.color, card.single.color);
+
+      final drop = raised.last;
+      expect(drop.color.withValues(alpha: 1), dark.shadow);
+      expect(drop.spreadRadius, 0, reason: 'a drop must not lighten an edge');
+      expect(drop.offset.dy, greaterThan(0));
+      expect(drop.blurRadius, greaterThan(0));
+    });
 
     test('and that is because a dark shadow buys almost nothing', () {
       // **The measurement the decision rests on, re-derived here rather than

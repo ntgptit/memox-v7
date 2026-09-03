@@ -62,8 +62,10 @@ void main() {
       // M100.22 retired `secondaryAction`, the last token standing in for a
       // canonical role. The number is pinned rather than derived for exactly
       // the reason the message below states, so it moves only when someone
-      // decided it should.
-      hasLength(71),
+      // decided it should; 71 until M100.35 dropped `semantic.surfaceElevated`,
+      // an alias holding the same two hexes as the `surfaceBright` Sys role
+      // that is still listed here.
+      hasLength(70),
       reason:
           'a role added to Material and not listed in auditTokensOf is '
           'invisible to every later step',

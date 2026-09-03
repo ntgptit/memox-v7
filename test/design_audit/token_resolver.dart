@@ -55,7 +55,6 @@ class TokenResolver {
       'semantic.danger': x.danger,
       'semantic.info': x.info,
       'semantic.surfaceMuted': x.surfaceMuted,
-      'semantic.surfaceElevated': x.surfaceElevated,
       'semantic.borderSubtle': x.borderSubtle,
       'semantic.successContainer': x.successContainer,
       'semantic.onSuccessContainer': x.onSuccessContainer,

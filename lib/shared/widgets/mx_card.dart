@@ -36,9 +36,11 @@ enum MxCardSelectionTreatment {
   /// picked at a time and the border is enough to find it.
   edge,
 
-  /// Edge plus a `secondaryContainer` fill — for a multi-select list, where a
-  /// scanning eye has to catch several picked rows a border alone would let
-  /// slide.
+  /// Edge plus a `semantic.surfaceSelected` fill — for a multi-select list,
+  /// where a scanning eye has to catch several picked rows a border alone
+  /// would let slide. (It said `secondaryContainer` until M100.35; that has
+  /// not been the fill since M99.98, which moved it because the M3 container
+  /// was chroma 0.0084 — grey, and *darker* than the rows it marked.)
   tint,
 }
 
@@ -116,10 +118,14 @@ class _MxCardSpec {
 /// which is the same argument `MxActionButton` opens with: the moment a caller
 /// can pass a colour, the design system stops being enforceable.
 ///
-/// **The shadow appears in light and not in dark, by measurement** (AD-14).
-/// The dark page sits at the bottom of the lightness scale, so a shadow there
-/// moves it by ΔL\* 0.26 where the surface step already moves it 7.70 — see
-/// [shadowsFor]. Dark keeps its ladder and its border; light gains a shadow.
+/// **Each mode paints depth in its own idiom, by measurement** (AD-14). Light
+/// draws Tokyo's two-layer shade. Dark cannot: its page is at L\* 4.11 and the
+/// darkest ink in the palette is L\* 1.18, so a shade there has under three
+/// L\* to work in. It draws a crisp `outlineVariant` hairline instead, and
+/// above `card` adds a real drop — see [shadowsFor]. What it no longer draws,
+/// since M100.35, is the bright blurred rim that made a resting neutral card
+/// glow. The *role* is the same in both modes either way (M100.33); only the
+/// paint differs.
 ///
 /// [onTap] makes the whole surface one target rather than requiring a nested
 /// button. **A tappable card may still hold its own controls**: the ink covers
@@ -304,10 +310,19 @@ class MxCard extends StatefulWidget {
       onTap = null,
       onLongPress = null;
 
-  /// An emphasized callout on `secondaryContainer` — the same one-step-quieter
-  /// emphasis `MxActionButton`'s tonal variant carries, on a surface: a panel
-  /// the screen wants noticed without out-weighing the page's own action.
-  /// Study Home's resume callout is the caller.
+  /// An emphasized callout on `semantic.surfaceEmphasis` — the same
+  /// one-step-quieter emphasis `MxActionButton`'s tonal variant carries, on a
+  /// surface: a panel the screen wants noticed without out-weighing the page's
+  /// own action. Study Home's resume callout is the caller.
+  ///
+  /// **The name is `tonal` and it is correct; the doc was not.** This said
+  /// `secondaryContainer` until M100.35, which is what it painted until
+  /// M99.98 — that milestone moved the fill because M3's container measured
+  /// chroma 0.0084 in light, effectively neutral, and sat 5.24 L\* below the
+  /// page: the screen's primary callout was the greyest thing on it.
+  /// `surfaceEmphasis` is 1.11 below the page at 3.6× the chroma. A tonal
+  /// surface is still exactly what this is, so M100.35's audit corrected the
+  /// sentence rather than the recipe (see `docs/design-system/card-recipes.md`).
   const MxCard.tonal({
     required this.child,
     this.padding = MxCardPadding.standard,
@@ -379,7 +394,20 @@ class MxCard extends StatefulWidget {
     // meaning this recipe can carry — a caller writing `isSelected: null`
     // would get an option that never announces.
     required bool isSelected,
-    this.onTap,
+    // **Required, and still nullable** (M100.35). An option is a control, so
+    // "no handler" cannot mean "not a control" the way it does on a plain
+    // surface — it means *disabled*, and the recipe now renders and announces
+    // that. Required because the two are not interchangeable and a caller
+    // that omitted the argument was picking one by accident: before this, a
+    // null handler left an option looking enabled, announcing its selection,
+    // and doing nothing when tapped.
+    //
+    // Nullable rather than a separate `isEnabled` flag because the disabled
+    // state has exactly one production source and it already computes a
+    // nullable callback: the export sheet withholds the handler at
+    // `CardExportPhase.invalidScope`, where the formats stay readable as the
+    // record of what was asked for but can no longer be changed.
+    required this.onTap,
     super.key,
   }) : // Not an initializing formal: `this.isSelected` would reopen the
        // nullable tri-state this constructor exists to narrow.
@@ -535,8 +563,20 @@ class _MxCardState extends State<MxCard> {
   /// separates elevation there — see [shadowsFor]'s own alpha derivation —
   /// so stepping the fill too would be a second mechanism answering a
   /// question already settled, and every light golden stays untouched.
+  /// Whether this is an [MxCard.option] whose handler was withheld.
+  ///
+  /// The only recipe that can be disabled, because it is the only one whose
+  /// meaning *is* "a control you pick". Every other recipe with a null
+  /// `onTap` is simply a surface, which is a legitimate thing to be.
+  bool get _isDisabledOption =>
+      widget._spec.edge == _MxCardRestingEdge.option && widget.onTap == null;
+
   Color _fillColor(BuildContext context, ColorScheme scheme) {
     final semantic = context.semanticColors;
+    // Ahead of the selection tint: a disabled option may still be the picked
+    // one — the export sheet keeps showing which format was chosen — and
+    // "picked" must not out-shout "you cannot change this".
+    if (_isDisabledOption) return semantic.disabledSurface;
     if ((widget.isSelected ?? false) &&
         widget._selectionTreatment == MxCardSelectionTreatment.tint) {
       return semantic.surfaceSelected;
@@ -583,6 +623,10 @@ class _MxCardState extends State<MxCard> {
   Color? _restingEdgeColor(BuildContext context) {
     final semantic = context.semanticColors;
     final colors = context.colors;
+    // Same precedence argument as the fill, and the same token pair the
+    // buttons use for the state (`disabledSurface` / `onDisabled`), so a
+    // disabled option reads as the app's disabled and not as a card variant.
+    if (_isDisabledOption) return semantic.onDisabled;
     // Precedence below the focus ring: selected > the recipe's stateful edge >
     // the recipe's resting edge. "This is the picked one" outranks a state the
     // recipe painted, which outranks decoration.
@@ -703,6 +747,18 @@ class _MxCardState extends State<MxCard> {
     final longPress = widget.onLongPress;
     if (tap == null && longPress == null) {
       final box = DecoratedBox(decoration: decoration, child: content);
+      // A disabled option is still a control, and a screen reader has to hear
+      // that: `button` with `enabled: false` announces "dimmed", where the
+      // plain selected-surface annotation below would have offered a
+      // selection with no hint that it cannot be changed.
+      if (_isDisabledOption) {
+        return Semantics(
+          button: true,
+          enabled: false,
+          selected: widget.isSelected,
+          child: box,
+        );
+      }
       if (widget.isSelected == null) return box;
 
       return Semantics(selected: widget.isSelected, child: box);

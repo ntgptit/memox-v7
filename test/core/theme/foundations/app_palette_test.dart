@@ -44,7 +44,7 @@ void main() {
           ('page', dark.scaffoldBackgroundColor),
           ('card', dark.colorScheme.surfaceContainerLow),
           ('tile', darkSemantic.surfaceMuted),
-          ('raised', darkSemantic.surfaceElevated),
+          ('raised', dark.colorScheme.surfaceBright),
         ],
         // Light inverts it: white is the ceiling, so the card is the top and
         // the inset tile sits below the page rather than above it.
@@ -120,7 +120,7 @@ void main() {
       for (final surface in <(String, Color)>[
         ('card', dark.colorScheme.surfaceContainerLow),
         ('tile', darkSemantic.surfaceMuted),
-        ('raised', darkSemantic.surfaceElevated),
+        ('raised', dark.colorScheme.surfaceBright),
         ('border', darkSemantic.borderSubtle),
       ]) {
         expect(

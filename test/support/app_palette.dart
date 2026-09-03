@@ -154,7 +154,6 @@ final List<Color> darkPaletteTokens = <Color>[
   AppColors.disabledSurfaceDark,
   AppColors.onDisabledDark,
   AppColors.shadowDark,
-  AppColors.cardRimDark,
   AppColors.scrimDark,
   // The `*Fixed` family is the same in both schemes, so the dark scheme
   // legitimately carries these light tokens.

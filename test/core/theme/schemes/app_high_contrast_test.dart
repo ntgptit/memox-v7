@@ -135,8 +135,8 @@ void main() {
         expect(hc.scaffoldBackgroundColor, base.scaffoldBackgroundColor);
         expect(semanticOf(hc).surfaceMuted, semanticOf(base).surfaceMuted);
         expect(
-          semanticOf(hc).surfaceElevated,
-          semanticOf(base).surfaceElevated,
+          semanticOf(hc).surfaceEmphasis,
+          semanticOf(base).surfaceEmphasis,
         );
       }
     });

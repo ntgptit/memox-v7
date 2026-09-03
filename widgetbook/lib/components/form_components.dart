@@ -265,7 +265,11 @@ WidgetbookComponent cardComponent() {
           // *relative* claim — a card only reads as lifted against the one that
           // is not. This is the page the shadow was designed on (M100.30) and
           // the page to review it on: switch the theme addon to dark and the
-          // shade should be replaced by Tokyo's rim, not merely darkened.
+          // shade should be replaced by a crisp `outlineVariant` hairline —
+          // the same one at every rung — with a drop appearing only from
+          // `focal` up. Until M100.35 dark drew a bright blurred rim that grew
+          // thicker with the level, and the "Repeated list" case below is
+          // where that read as stripes rather than as depth.
           Widget rung(String title, String note, Widget card) => Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.xl),
             child: Column(
@@ -305,6 +309,160 @@ WidgetbookComponent cardComponent() {
                     'the Today hero.',
                 MxCard.focal(child: body('focal')),
               ),
+            ],
+          );
+        },
+      ),
+      WidgetbookUseCase(
+        name: 'Repeated list',
+        builder: (BuildContext context) {
+          // **The shape a depth cue fails in, and the one no other page has.**
+          // A single dark card wearing a bright rim looks deliberate; ten of
+          // them down a phone column look like neon stripes, which is the
+          // review that rejected the pre-M100.35 rim. The slider is here so
+          // the count can be pushed past what any real screen shows.
+          final count = context.knobs.int.slider(
+            label: 'cards',
+            initialValue: 10,
+            min: 3,
+            max: 40,
+          );
+
+          return CatalogListPage(
+            children: <Widget>[
+              for (int i = 0; i < count; i++)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                  child: MxCard.raised(
+                    onTap: _noop,
+                    child: Text(
+                      'Deck ${i + 1} · 20 cards',
+                      style: context.texts.bodyMedium,
+                    ),
+                  ),
+                ),
+            ],
+          );
+        },
+      ),
+      WidgetbookUseCase(
+        name: 'States',
+        builder: (BuildContext context) {
+          // Every state in one column with a neutral card at the top for
+          // scale. The property to check is an ordering, not a colour: each
+          // state edge has to stay obviously louder than the neutral depth
+          // cue underneath it, in both themes.
+          Widget row(String label, Widget card) => Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  label,
+                  style: context.texts.bodySmall!.inked(context, AppInk.quiet),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                card,
+              ],
+            ),
+          );
+          Widget body(String text) =>
+              Text(text, style: context.texts.bodyMedium);
+
+          return CatalogListPage(
+            children: <Widget>[
+              row('neutral, for scale', MxCard.raised(child: body('raised'))),
+              row(
+                'selected · edge',
+                MxCard.flat(
+                  isSelected: true,
+                  onTap: _noop,
+                  child: body('flat'),
+                ),
+              ),
+              row(
+                'selected · tint',
+                MxCard.flat(
+                  isSelected: true,
+                  selectionTreatment: MxCardSelectionTreatment.tint,
+                  onTap: _noop,
+                  child: body('flat'),
+                ),
+              ),
+              row(
+                'option · picked',
+                MxCard.option(
+                  isSelected: true,
+                  onTap: _noop,
+                  child: body('option'),
+                ),
+              ),
+              row(
+                'option · available',
+                MxCard.option(
+                  isSelected: false,
+                  onTap: _noop,
+                  child: body('option'),
+                ),
+              ),
+              row(
+                'option · disabled (M100.35)',
+                MxCard.option(
+                  isSelected: false,
+                  onTap: null,
+                  child: body('option'),
+                ),
+              ),
+              row(
+                'recessed · success',
+                MxCard.recessed(
+                  edge: MxCardRecessedEdge.success,
+                  child: body('recessed'),
+                ),
+              ),
+              row(
+                'recessed · danger',
+                MxCard.recessed(
+                  edge: MxCardRecessedEdge.danger,
+                  child: body('recessed'),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+      WidgetbookUseCase(
+        name: 'Edge-to-edge child',
+        builder: (BuildContext context) {
+          // The regression M100.33 fixed, kept visible. The state edge is a
+          // foreground layer now, so an opaque child that reaches the corner
+          // can no longer cover it — both cards below must still show a
+          // border.
+          Widget block() => const ColoredBox(
+            color: Color(0xFF9AA0B5),
+            child: SizedBox(height: 72, width: double.infinity),
+          );
+
+          return CatalogListPage(
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                child: Text(
+                  'Both cards hold an opaque child with no padding. Each must '
+                  'still show its own edge.',
+                  style: context.texts.bodySmall!.inked(context, AppInk.quiet),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                child: MxCard.flat(
+                  padding: MxCardPadding.none,
+                  isSelected: true,
+                  onTap: _noop,
+                  child: block(),
+                ),
+              ),
+              MxCard.option(isSelected: false, onTap: _noop, child: block()),
             ],
           );
         },
