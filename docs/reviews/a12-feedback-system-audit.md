@@ -36,19 +36,26 @@ and both are already in production:
 
 1. **Empty is being used to render Error.** `MxEmptyState`'s own doc says it is
    "deliberately distinct from `MxErrorState`" because painting a failure in
-   good-news styling "tells the user something is broken when nothing is"
-   (BR-29). Two production call sites do exactly the reverse — render a real
-   `AsyncValue.error` through `MxEmptyState` — which is the same mistake
-   pointed the other way: a real failure dressed as "nothing to see here,"
-   with the brand-accent icon colour instead of danger red, and in one case no
-   retry action at all. See §4.3.
+   good-news styling "tells the user something is broken when nothing is" —
+   citing BR-29 for that widget-choice principle. Two production call sites do
+   exactly the reverse — render a real `AsyncValue.error` through
+   `MxEmptyState` — which is the same mistake pointed the other way: a real
+   failure dressed as "nothing to see here," with the brand-accent icon colour
+   instead of danger red, and in one case no retry action at all. **Note:**
+   BR-29 itself (`docs/business-rules.md:331`) scopes narrowly to an empty
+   due-card set, not to `MxEmptyState`/`MxErrorState` choice in general — see
+   the correction in §4.3.2's Contract line. The finding stands on the
+   widget's own documented contract; it does not stand on BR-29 directly. See
+   §4.3.
 2. **The Feedback-band family has one tone, and a warning-class caller has
    already landed.** `MxCardFeedbackTone` only defines `danger`, on the
    documented basis that "success/warning/info containers have no token yet."
    That comment is now stale: `AppSemanticColors` has shipped
    `warningContainer`/`onWarningContainer` since M100.21. Meanwhile
-   `ReminderBannerSectionWidget` — a denied OS permission, a recoverable
-   condition — is painted in the same red as a genuine write failure. See §4.6.
+   `ReminderBannerSectionWidget`'s denied-permission branch — a recoverable
+   condition, distinct from the same widget's other four rejection branches,
+   which are genuine failures — is painted in the same red as those failures.
+   See §4.6.
 
 Three P2s round out the register: a raw, unlabelled loading spinner (§4.2), a
 `.when()` bypass of `MxAsyncView`'s centralised loading policy with no
@@ -293,8 +300,18 @@ bulk-move action (UC-04 A5). `CardEditorScreen._buildEdit` is reached
 whenever `CardEditorScreen(cardId: ...)` is pushed with a non-null `cardId`
 (every "edit existing card" entry point).
 
-**Contract violated.** `mx_empty_state.dart:10-14` (BR-29); this audit's
-taxonomy item 4 ("preserve empty ≠ error").
+**Contract violated.** `mx_empty_state.dart:10-14` — the widget's own
+documented distinction from `MxErrorState`; this audit's taxonomy item 4
+("preserve empty ≠ error"). **Correction from review:** the widget doc's own
+parenthetical cites BR-29, but BR-29 itself (`docs/business-rules.md:331`)
+reads "no cards due MUST be presented as a normal state, not an error — and
+MUST NOT have any path that opens a review session when the due set is empty"
+— it is scoped to the due-card-empty screen (UC-05/UC-06/BR-145), not to
+`MxEmptyState`/`MxErrorState` choice generally. Neither the move-target read
+nor the editor read failure is a due-card-empty case, so this finding does
+**not** rest on BR-29 — it rests on the widget's own documented design intent
+only. Treat this as a design-consistency finding, not a frozen-business-rule
+violation.
 
 **Recommendation.**
 1. `card_bulk_overlays_widget.dart:100-106` → `MxErrorState(title: ..., message: context.l10n.cardMoveErrorMessage, retryLabel: context.l10n.retryAction, onRetry: () => ref.invalidate(cardMoveTargetsProvider(sourceDeckId)))`. This needs a new, honest error-specific ARB string (`cardMoveErrorMessage` or similar) distinct from `cardMoveEmptyMessage`, since today the two states share one sentence.
@@ -354,7 +371,7 @@ currently exercises `_MoveTargetSheet` (none was found in
 appears to have **no dedicated widget test today**, which is itself a
 coverage gap worth recording — see §7 coverage gaps).
 
-### 4.5 Finding (P2): `.when()` bypassing `MxAsyncView` with no recorded reason
+### 4.5 Finding (P2, nonbinding): `.when()` bypassing `MxAsyncView` with no recorded reason
 
 Four production files call `AsyncValue.when()` directly instead of
 `MxAsyncView`. Two are justified in an inline comment:
@@ -380,11 +397,16 @@ one of them incorrectly (§4.3.2, §4.4):
   loading (raw spinner, §4.2) and error (`MxEmptyState` misuse, §4.3.2)
   independently rather than inheriting `MxAsyncView`'s policy.
 
-**Contract.** Not an explicit MUST — `MxAsyncView`'s doc frames itself as a
-shared policy "written down once, not a default nobody looked at in three
-separate files" (`mx_async_view.dart:11-14`), which is a SHOULD in spirit.
-Per `docs/document-conventions.md`, a SHOULD deviation needs its reason on
-record; two of the four sites don't have one.
+**Contract.** None — `mx_async_view.dart:11-14`'s doc contains no MUST/SHOULD/
+MAY keyword, so per this project's own rule ("prose without a MUST/SHOULD/MAY
+keyword is explanation, not a rule") it is explanatory, not binding, and this
+is **not** presented as a contract deviation. **Correction from review:** an
+earlier draft of this finding called the bypass a "SHOULD in spirit," which is
+exactly the mistake that rule exists to prevent — a constraint manufactured
+from explanatory prose. Reframed: this is a nonbinding consolidation
+suggestion only. Two of the four `.when()` sites have a recorded, specific
+reason to diverge (§4.5 above); the other two do not, which is worth noting
+for consistency, but nothing here requires them to change.
 
 **Recommendation.** Migrate `card_bulk_overlays_widget.dart` and
 `card_editor_screen.dart` to `MxAsyncView` where the shape fits (both are a
@@ -441,7 +463,19 @@ hears the same thing for both: there is no differentiated announcement for
 "you can fix this in Settings whenever you like" versus "your last save was
 lost."
 
-**Callers.** `ReminderBannerSectionWidget` (reminder settings screen, M6 W5).
+**Callers.** `ReminderBannerSectionWidget` (reminder settings screen, M6 W5),
+specifically the `ReminderSetupRejection.permissionDenied` branch. **Scope
+correction from review:** this widget renders all five
+`ReminderSetupRejection` values through the same `MxFeedbackBand`
+(`reminder_failure.dart:13-35`, `reminder_labels_widget.dart:54-81`) —
+`platformUnavailable` (BR-229), `permissionDenied` (BR-228),
+`scheduleFailed`/`cancelFailed`/`settingsWriteFailed` (BR-226). Only
+`permissionDenied` is the warning-class, recoverable-via-OS-settings case
+this finding is about; `scheduleFailed`, `cancelFailed` and
+`settingsWriteFailed` are genuine operation failures (the OS accepted the
+request and the work still could not be enqueued/cancelled/saved) and must
+stay `danger`. The tone therefore has to be selected **per rejection value**,
+not applied to the whole widget — see the corrected recommendation below.
 All 6 other `MxFeedbackBand` callers (`search_page_footer_widget.dart`,
 `tag_rename_widget.dart`, `card_history_section_widget.dart`,
 `settings_error_band_widget.dart`, `card_export_error_band_widget.dart`, and
@@ -462,7 +496,15 @@ a real caller lands, not before" — the caller has landed.
    to `MxCard.feedback(tone: tone, ...)` and to the icon/text ink (currently
    hardcoded `AppInk.onErrorContainer` at lines 92-117 — needs to resolve
    from the tone instead).
-3. Switch `ReminderBannerSectionWidget` to `tone: MxCardFeedbackTone.warning`.
+3. **Not** a blanket switch of `ReminderBannerSectionWidget` — that would
+   downgrade the three genuine-failure rejections (`scheduleFailed`,
+   `cancelFailed`, `settingsWriteFailed`) to warning styling alongside
+   `permissionDenied`. Instead add `tone` to `ReminderBanner`
+   (`reminder_labels_widget.dart:14-24`) and set it per case inside
+   `reminderBanner()`'s `switch` (lines 54-81): `permissionDenied` →
+   `MxCardFeedbackTone.warning`, every other value → `.danger` (unchanged).
+   `ReminderBannerSectionWidget` then passes `banner.tone` through instead of
+   relying on `MxFeedbackBand`'s default.
 4. Update the stale comment at `mx_card.dart:71-74` — the "no token yet"
    half is no longer true; only "no caller yet" was ever the operative
    constraint, and it no longer holds either.
@@ -483,9 +525,13 @@ warning alone). A contrast unit test asserting `onWarningContainer` on
 already records for danger (4.50:1 light / 4.53:1 dark) — extend whichever
 test currently owns that measurement (`focus_ring_contrast_test.dart` per
 the button audit's method note, or the semantic-colors contract test if a
-narrower one exists). A widget test on `ReminderBannerSectionWidget`
-asserting the rendered `MxCard`'s fill resolves to `warningContainer`, not
-`dangerContainer`, for a denied-permission `rejection`.
+narrower one exists). A parametrized widget/unit test over all five
+`ReminderSetupRejection` values asserting `reminderBanner(rejection).tone` is
+`warning` for `permissionDenied` only and `danger` for the remaining four
+(`platformUnavailable`, `scheduleFailed`, `cancelFailed`,
+`settingsWriteFailed`) — this is the test that would have caught a blanket
+tone switch, which is exactly the mistake an earlier draft of this
+recommendation would have introduced.
 
 ---
 
@@ -636,10 +682,10 @@ cannot reach at all).
 
 | # | Sev | Area | File:line | Summary |
 |---|---|---|---|---|
-| 1 | **P1** | Empty vs. Error | `card_bulk_overlays_widget.dart:100-106`, `card_editor_screen.dart:194-217` | Real `AsyncValue.error` rendered through `MxEmptyState` instead of `MxErrorState` — the exact anti-pattern BR-29/`mx_empty_state.dart` names |
+| 1 | **P1** | Empty vs. Error | `card_bulk_overlays_widget.dart:100-106`, `card_editor_screen.dart:194-217` | Real `AsyncValue.error` rendered through `MxEmptyState` instead of `MxErrorState` — the anti-pattern `mx_empty_state.dart`'s own doc names (design-consistency finding; not a BR-29 violation — see §4.3.2 correction) |
 | 2 | **P1** | Loading a11y | `card_bulk_overlays_widget.dart:93-99` | `CircularProgressIndicator()` with no `semanticsLabel` and no `Semantics` wrapper — the app's one silent spinner |
-| 3 | **P1** | Feedback taxonomy | `mx_card.dart:69-80`, `mx_feedback_band.dart:88`, `reminder_banner_section_widget.dart:36-41` | No `warning` tone exists; a real warning-class caller (denied permission) is forced into the danger/error tone, though the underlying `warningContainer` token already exists |
-| 4 | **P2** | `MxAsyncView` bypass | `card_bulk_overlays_widget.dart:93-114`, `card_editor_screen.dart:184-204` | Raw `.when()` with no recorded reason, reimplementing (and in this case mis-implementing) `MxAsyncView`'s centralised policy |
+| 3 | **P1** | Feedback taxonomy | `mx_card.dart:69-80`, `mx_feedback_band.dart:88`, `reminder_labels_widget.dart:54-81` | No `warning` tone exists; the `permissionDenied` rejection (one of five `ReminderSetupRejection` values `reminderBanner()` maps) is forced into the danger/error tone, though the underlying `warningContainer` token already exists — fix is per-rejection in `reminderBanner()`, not a blanket widget-level switch |
+| 4 | **P2, nonbinding** | `MxAsyncView` bypass | `card_bulk_overlays_widget.dart:93-114`, `card_editor_screen.dart:184-204` | Raw `.when()` with no recorded reason, reimplementing (and in this case mis-implementing, per #1/#2 above) `MxAsyncView`'s policy — a consolidation suggestion, not a contract deviation (`MxAsyncView`'s doc carries no MUST/SHOULD/MAY) |
 | 5 | **P2** | Snackbar duration | `mx_messenger.dart:40-63`, `study_session_screen.dart:125-130` | Actionable non-undo snackbar keeps the 4s SDK default while undo's identical "reach a button" reasoning got 8s |
 | 6 | **P2** | Snackbar semantics (unverified) | `mx_messenger.dart:57`, `mx_undo_snack_bar.dart:41` | Possible nested live region if `SnackBar` itself already sets one in 3.44.8 — needs SDK/device confirmation, not asserted |
 | 7 | **P3** | Loading duplication | `card_import_preview_step_widget.dart:192-195`, `card_import_submit_progress_widget.dart:31-34`, `card_editor_screen.dart:188-191` | Hand-rolled `Semantics(label) → CircularProgressIndicator()` instead of `MxLoadingState`, so none gets its `RepaintBoundary` fix — low risk today, same bug class `MxLoadingState` was built to close |
@@ -715,9 +761,11 @@ None of the following needs a new abstraction beyond one enum value
    `MxAsyncView`'s `loading`/`error` slots are exactly where those fixes
    live. Consider doing 1-2 as part of this step rather than before it.
 4. **§4.6** — extend `MxCardFeedbackTone` with `warning`, thread it through
-   `MxFeedbackBand`, switch `ReminderBannerSectionWidget`, fix the stale
-   comment, add the warning-tone golden (and `MxFeedbackBand`'s missing
-   danger-tone golden, if §8 confirms it is in fact missing).
+   `MxFeedbackBand`, set `ReminderBanner.tone` per rejection in
+   `reminderBanner()` (`permissionDenied` → warning, the other four stay
+   danger — not a blanket switch of the widget), fix the stale comment, add
+   the warning-tone golden (and `MxFeedbackBand`'s missing danger-tone
+   golden, if §8 confirms it is in fact missing).
 5. **§5.2** (duration policy) and **§5.3** (SDK/device verification) can land
    independently, in either order, once someone has time to (a) decide the
    duration policy and (b) check the pinned SDK source / run a TalkBack pass.
