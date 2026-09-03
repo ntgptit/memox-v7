@@ -41,9 +41,9 @@ Sheets have no such boundary. `showModalBottomSheet` is called **17 times**,
 **16 of them directly from a feature**, each restating `isScrollControlled`,
 `useSafeArea`, the barrier and the content inset by hand.
 `showMxFormSheet` exists and is used by five of them; the other twelve are
-hand-rolled. The three P1s below are all consequences of that, and each of them
-has already been discovered once, spot-fixed at one call site, and left
-standing at the rest:
+hand-rolled. The two P1s and the top-inset P2 below are all consequences of
+that, and each has already been discovered once, spot-fixed at one call site,
+and left standing at the rest:
 
 - **The scrim does not cover the app's own navigation.** `showDialog` defaults
   to the root navigator and `showModalBottomSheet` defaults to the nearest one —
@@ -51,13 +51,16 @@ standing at the rest:
   shell `Scaffold`'s body. Two goldens committed at this SHA show it side by
   side: `deck_delete_confirm_light.png` dims the bottom navigation bar,
   `deck_sort_sheet_light.png` leaves it fully lit and fully tappable.
-- **Seven scroll-controlled sheets can reach the top of the screen with
-  nothing between their first line and the status bar.** `useSafeArea` defaults
-  to `false`, and the framework then applies `MediaQuery.removePadding(removeTop:
-  true)` — which makes an inner `SafeArea` a **no-op at the top**. Two call
-  sites already carry `useSafeArea: true` as a spot fix, and one of them
-  (`study_entry_screen.dart:186`) documents the exact failure in prose. The
-  shared `showMxFormSheet` is one of the seven that does not.
+- **Seven scroll-controlled sheets can reach the top of the screen, putting
+  their drag handle under the status bar.** `useSafeArea` defaults to `false`,
+  and the framework then applies `MediaQuery.removePadding(removeTop: true)` —
+  which makes an inner `SafeArea` a **no-op at the top**. Two call sites already
+  carry `useSafeArea: true` as a spot fix; the shared `showMxFormSheet` is one
+  of the seven that does not. **This is a P2, not a P1, and the first version
+  of this report had it wrong** — see §6.3: the framework already reserves
+  48dp above every sheet's content for the handle, so the *text* clears a
+  cutout and it is the **handle** — the sheet's only visible dismissal
+  affordance, and a 48×48 target — that sits underneath one.
 - **A confirmation that disables both its buttons while a write runs leaves
   the barrier and the back gesture live.** Dismissing mid-write skips `onDone`,
   so the deck and card delete commit and their Undo batch id (BR-263) is never
@@ -425,30 +428,61 @@ nothing — 9/16 of the screen cannot reach the status bar. For the seven that
 **are** scroll-controlled and do not pass `useSafeArea: true`, the top is
 unprotected and reachable:
 
-| Sheet | Can it reach full height? | Top inset if it does |
-|---|---|---|
-| S9 `showMxFormSheet` × 5 | yes — keyboard + form at 320dp × 2.0 | `AppSpacing.lg` = **16dp** |
-| S10 card move target | yes — `Flexible(ListView)` over an unbounded deck list | **16dp** |
-| S11 card export | yes — `Flexible(SingleChildScrollView)` | **0dp** |
-| S12 move deck | yes — `Flexible(MxAsyncView)` over every deck in the tree | **16dp** |
-| S13 starter install | yes at 320dp × 2.0 | **16dp** |
-| S14 reset progress | yes at 320dp × 2.0 (two sections + picker + pair) | **16dp** |
-| S15 scheduler change | yes at 320dp × 2.0 | **16dp** |
+**The arithmetic has to include the handle, and the first version of this
+report omitted it.** `_BottomSheetState.build` (`bottom_sheet.dart:397–408`)
+wraps `widget.builder(context)` in `Padding(top: kMinInteractiveDimension)` —
+**48dp** — whenever a handle is shown, and `buildBottomSheetTheme` sets
+`showDragHandle: true` with `enableDrag` left at its default `true`, so a handle
+shows on **every** sheet in this app. §4.5 and §11.3 both state that 48dp; the
+conclusion drawn here originally did not, and it was wrong by exactly that term.
 
-A modern Android cutout is 24–48dp. **The project has already found this
-twice** and fixed it twice, in place:
+| Sheet | Can it reach full height? | Handle | Own top gutter | First-line clearance |
+|---|---|---|---|---|
+| S9 `showMxFormSheet` × 5 | yes — keyboard + form at 320dp × 2.0 | 48dp | `AppSpacing.lg` = 16 | **64dp** |
+| S10 card move target | yes — `Flexible(ListView)` over an unbounded deck list | 48dp | 16 | **64dp** |
+| S11 card export | yes — `Flexible(SingleChildScrollView)` | 48dp | 0 | **48dp** |
+| S12 move deck | yes — `Flexible(MxAsyncView)` over every deck in the tree | 48dp | 16 | **64dp** |
+| S13 starter install | yes at 320dp × 2.0 | 48dp | 16 | **64dp** |
+| S14 reset progress | yes at 320dp × 2.0 (two sections + picker + pair) | 48dp | 16 | **64dp** |
+| S15 scheduler change | yes at 320dp × 2.0 | 48dp | 16 | **64dp** |
 
-- `study_entry_screen.dart:186–192` — *"**And a safe area, because the cap is
-  gone.** … Scroll-controlled it can [reach the top], and at 320dp × 2.0 it
-  does — its 16dp top padding is less than a modern cutout, so the title lost
-  glyphs to the status bar."*
-- `trash_restore_target_sheet_widget.dart:30` — `useSafeArea: true`, no comment.
+A modern Android top inset is 24–48dp. So **the text is not the casualty** —
+48–64dp clears it, and a closure test asserting the first line's
+`dy >= 48` passes today without `useSafeArea`, which is what makes the
+original claim unfalsifiable as well as wrong.
 
-**And the audit that should have caught the rest looked only downward.** WBS
-M99.58 (`MxSheetInsets`) swept every `showModalBottomSheet` in `lib/`, found the
+**What actually sits in that band is the drag handle.** `_DragHandle` is a
+48 × 48 `SizedBox` pinned to the sheet's top by a `Stack(alignment:
+topCenter)`, with its 32 × 4 pill centred at roughly y 22–26dp. So on a
+full-height sheet:
+
+- a 24dp gesture-bar inset covers the top half of the handle's touch target and
+  clears the pill;
+- a 48dp inset covers the **whole** target and the pill with it.
+
+The handle carries `Semantics(button: true, onTap: onClosing)` and
+`modalBarrierDismissLabel` — it is the sheet's only *visible* way out, and the
+one thing on it that says the sheet can be dragged or dismissed. Losing it is a
+real defect and a real reachability loss. It is **not** a P1: the content stays
+legible, and the barrier and the system back gesture both still dismiss, so
+nobody is trapped.
+
+**The audit that should have caught this looked only downward.** WBS M99.58
+(`MxSheetInsets`) swept every `showModalBottomSheet` in `lib/`, found the
 `starter_install` bug, and concluded of four sheets: *"`SafeArea` **đã** là câu
 trả lời đúng cho system bar"* — true of the bar at the bottom, and the sentence
-that quietly made the top look answered too. → **A9-02 (P1)**
+that quietly made the top look answered too. Two call sites
+(`study_entry_screen.dart:192`, `trash_restore_target_sheet_widget.dart:30`)
+already pass `useSafeArea: true`.
+
+**One prose claim at a spot fix does not survive this arithmetic and is left
+standing rather than repeated as evidence.** `study_entry_screen.dart:186–192`
+says *"its 16dp top padding is less than a modern cutout, so the title lost
+glyphs to the status bar."* With the handle's 48dp in front of it that sheet's
+title sits 64dp down, so either the observation was of the handle and the
+corners rather than the title, or it predates something. It is a code comment
+without a rendered artefact attached, this report has no render of its own to
+put against it, and nothing here rests on it. → **A9-02 (P2)**
 
 ---
 
@@ -634,19 +668,36 @@ impact read. Both are correct and both are tested
 (`mx_async_confirm_dialog_test.dart`, group *"both actions go inert while the
 write runs"*). The gap is what that group does **not** cover — §10.3.
 
-### 9.4 One sheet has no way out but the gesture — A9-08 (P2)
+### 9.4 One sheet offers no secondary action — A9-08 (P3, and it is not a rule violation)
 
-`CardExportActionBarWidget`'s own doc states the rule:
+`starter_install_widget.dart:158` is a lone `MxActionButton` labelled *Install*.
+Every other form-shaped sheet in the app pairs its primary with a secondary.
+
+**This is an inconsistency, and the first version of this report over-claimed
+it as a broken rule.** The claim rested on `CardExportActionBarWidget`'s doc
+comment:
 
 > *"**`Cancel` sits beside the primary** … a sheet has no app bar, so without it
 > the only way out is the drag-down gesture — no affordance, and nothing a screen
 > reader can announce."*
 
-`starter_install_widget.dart:158` is a lone `MxActionButton` labelled *Install*.
-Every other form-shaped sheet in the app pairs its primary with a secondary.
-The drag handle *is* announced (`_DragHandle` carries `button: true` and the
-dismiss label), so this is not an accessibility dead end — it is the one sheet
-that breaks a rule the app wrote down for itself.
+That paragraph carries **no MUST/SHOULD/MAY keyword**, and `AGENTS.md:76–78`
+is explicit about what may be done with such a paragraph:
+
+> *"**Prose without a MUST/SHOULD/MAY keyword is explanation, not a rule.** Do
+> not derive a new constraint from a paragraph that was describing why something
+> is the way it is."*
+
+So it explains why *that* sheet has a Cancel; it does not bind the next one. And
+the sentence's own premise does not hold here: the drag handle **is** an
+announced affordance (`_DragHandle` carries `button: true` with
+`modalBarrierDismissLabel`), which §4.5 records and which this report cannot
+both rely on there and ignore here.
+
+What remains is worth one line in the registry and no implementation item: eight
+form-shaped sheets, seven with a secondary and one without, and no written rule
+either way. If the owner wants the pair to be the house grammar, that is a
+decision to write down — with a keyword — not one to read back out of a comment.
 
 `_TagFilterForm._Actions` pairs *Clear* with *Apply* and has no Cancel either,
 but there the barrier discards a draft that was never applied — a correct
@@ -876,8 +927,10 @@ dialogs that use it. Documentation only. → folded into A9-15.
   `mx_alert_dialog_test`, `mx_form_dialog_test`, `mx_form_sheet_test`) run at
   the default 800 × 600 test surface with no text scale.
 
-All three P1s live in exactly that intersection. That is not a coincidence — it
-is the shape of the blind spot.
+Both P1s and the top-inset P2 live in exactly that intersection. That is not a
+coincidence — it is the shape of the blind spot. It is also what let A9-02 be
+filed at the wrong severity on the wrong evidence: with no route-level render at
+a raised text scale, the original claim had nothing to be checked against.
 
 ### 12.2 Surfaces and scales actually exercised
 
@@ -908,7 +961,7 @@ is the shape of the blind spot.
 | Feature modals with **no** golden | deck actions, library menu, deck ancestors, deck create child, **reset progress**, **scheduler change**, **starter install**, **move deck**, card move target, trash restore target, trash row menu, study resume / mode / direction |
 
 Fourteen feature modal surfaces have no picture at all. Six of the seven sheets
-carrying A9-02 are among them, which is why the top-edge failure has survived two
+carrying A9-02 are among them, which is why the top-inset gap has survived two
 discoveries.
 
 ### 12.4 Widgetbook
@@ -944,13 +997,13 @@ and a **closure test** — the assertion that would have gone red.
 | ID | Sev | Finding | Evidence | Closure test |
 |---|---|---|---|---|
 | **A9-01** | **P1** | A modal sheet's scrim stops above the bottom navigation bar; the bar stays lit and tappable, and a tab tap leaves the sheet pushed on the branch the user left. Dialogs (root navigator) do cover it. | `bottom_sheet.dart:1301` `useRootNavigator = false` vs `dialog.dart:1629` `= true`; `app_navigation_shell.dart:33`; goldens `deck_sort_sheet_light.png` (bar lit) vs `deck_delete_confirm_light.png` (bar dimmed), both captured through `createAppRouter()` | Route test: open a sheet from a branch screen, assert the `ModalBarrier`'s global rect covers the full `tester.view` height — currently it stops at the shell body's bottom. |
-| **A9-02** | **P1** | Seven scroll-controlled sheets have 0–16dp between their first line and the status bar; `useSafeArea: false` makes their inner `SafeArea(top:)` a no-op. | `bottom_sheet.dart:1163` `MediaQuery.removePadding(removeTop: true)`; `mx_form_sheet.dart:40–43`; the two existing spot fixes at `study_entry_screen.dart:192` and `trash_restore_target_sheet_widget.dart:30`; WBS M99.58's bottom-only conclusion | Route test at 320 × 568, `viewPadding.top: 48`, textScale 2.0: open each scroll-controlled sheet and assert its topmost `Text`'s `globalTopLeft.dy >= 48`. |
+| **A9-02** | **P2** | Seven scroll-controlled sheets can reach full height with `useSafeArea: false`, putting the drag handle's 48 × 48 target — the sheet's only visible dismissal affordance — under a 24–48dp top inset. The **text** clears it (48–64dp), which is the correction: the first version of this row claimed 0–16dp and a P1, having omitted the framework's own 48dp handle padding. | `bottom_sheet.dart:397–408` `Padding(top: kMinInteractiveDimension)`; `bottom_sheet.dart:1163` `removePadding(removeTop: true)`; `_DragHandle` at `:457–471`; `mx_form_sheet.dart:40–43`; the two existing spot fixes | Route test at 320 × 568, `viewPadding.top: 48`, textScale 2.0: open each scroll-controlled sheet at full height and assert the **drag handle's** global rect is entirely below the top inset. Asserting the first `Text`'s `dy >= 48` does **not** work — it already passes. |
 | **A9-03** | **P1** | `MxAsyncConfirmDialog` disables both buttons while the write runs but leaves the barrier and the back gesture live; dismissing mid-write skips `onDone`, so the deck/card delete commits with no Undo (BR-263) and no message. | `mx_async_confirm_dialog.dart:203` (`showDialog`, `barrierDismissible` defaulted, no `PopScope`); `deck_confirm_widget.dart:130`; `card_confirm_widget.dart` `_finish`; the covering test group stops at the two buttons | Route test: submit, tap the barrier while `isSubmitting`, drive the state to `savedAndClose`, assert `onDone` fired exactly once (or that the barrier did not pop). |
 | **A9-04** | **P2** | `showStarterInstallSheet` resolves to `null` when the sheet is dragged away mid-install, while the install commits; the caller's contract defines `null` as "nothing happened". | `starter_install_widget.dart:102–115`; contrast with the only `PopScope` in `lib/`, `card_export_sheet_widget.dart:205` | Widget test: start the install, pop the sheet before it settles, assert the caller is told an install happened (or that the install is cancelled). |
 | **A9-05** | **P2** | Five sheet-header treatments across 17 sheets; exactly one marks itself `Semantics(header: true)`. No `MxSheetHeader` counterpart to `MxDialogHeader`. | §11.4 table; `card_export_sheet_widget.dart:306` is the only `header: true` in any `overlays/` file | Semantics test: every sheet's title node has `isHeader: true`; a source scan that every sheet title comes from one shared widget. |
 | **A9-06** | **P2** | Sheet content inset written four ways → top gutters of 0 / 8 / 16 on top of the handle's mandatory 48. | `_BottomSheetState.build:147` (`Padding(top: kMinInteractiveDimension)`); §11.3 table | Layout test: for each sheet, the distance from the sheet's own top to its first line is one value. |
 | **A9-07** | **P2** | `MxAlertDialog` does not state `MxDialogMetrics.insetPadding` / `actionsPadding`; the third dialog is geometrically not the other two, and no golden covers it. | `mx_alert_dialog.dart:55–58` vs `mx_confirm_dialog.dart:119–120` and `mx_form_dialog.dart:87–88`; `MxDialogMetrics`' own doc names three dialogs | Widget test: all three dialogs report the same `insetPadding` and `actionsPadding`. |
-| **A9-08** | **P2** | `starter_install` is the only form-shaped sheet with no secondary action, against the rule `CardExportActionBarWidget`'s doc states. | `starter_install_widget.dart:158`; `card_export_action_bar_widget.dart:10–12` | Widget test: the sheet offers a labelled way out that is not the drag handle. |
+| A9-08 | P3 | `starter_install` is the only form-shaped sheet with no secondary action — an inconsistency across eight sheets, **not** a rule violation. The first version of this row derived a rule from a keyword-less doc comment, which `AGENTS.md:76–78` forbids, and leaned on an affordance gap the announced drag handle does not have. No implementation item; a decision to write down if the owner wants one. | `starter_install_widget.dart:158`; `card_export_action_bar_widget.dart:10–12` (no keyword); `AGENTS.md:76–78` | — |
 | A9-09 | P3 | `app_bottom_sheet_theme.dart`'s drag-handle comment argues for `borderControl` and the code returns `onSurfaceVariant`; the stale half was reversed by M100.23. | `app_bottom_sheet_theme.dart:24–30` vs `:64` | — |
 | A9-10 | P3 | `app_dialog_theme.dart` says the dialog shadow is "hand-painted instead"; nothing paints one. The true reason `elevation: 0` is correct is that `_DialogDefaultsM3.shadowColor` is transparent. Also settles parity F15's premise. | `app_dialog_theme.dart:26–28`; `dialog.dart:1982`; measured 3.08:1 / ΔL\* 37.4 light | — |
 | A9-11 | P3 | `MxActionSheet`'s selected-check contrast note names `surface`; the check is drawn on `selectedTileColor` = `surfaceContainerHigh`, inside a sheet on `surfaceContainerLow`. Real numbers 5.19 / 8.43 — passes. | `mx_action_sheet.dart:178–182`; `app_list_tile_theme.dart:36` | — |
@@ -960,7 +1013,13 @@ and a **closure test** — the assertion that would have gone red.
 | A9-15 | P3 | Documentation and specimen drift: parity C13 records `_isDestructive` (code: `_shouldFocusCancel`); `OnSheetSurface` stands in for a sheet with `colorScheme.surface`. | `design-parity-checklist.md:138`; `golden_surfaces.dart:33` | — |
 | A9-16 | P3 | **Measurement, with the conclusion "do not act".** The dark sheet reads 1.14:1 against the scrimmed page — the lowest number in this report — but ΔL\* 6.58, larger than the ladder's own 4.31 page→card step. Closing it with a border, rim or shadow would re-introduce #435's halo on the one surface whose ground cannot be pre-composed. | §8.3; `mx_action_sheet_dark.png` | — |
 
-**Distribution: 0 × P0 · 3 × P1 · 5 × P2 · 8 × P3.**
+**Distribution: 0 × P0 · 2 × P1 · 5 × P2 · 9 × P3.**
+
+**Two rows were corrected after review** (Codex on #439, both findings verified
+against the SDK source and `AGENTS.md` and both upheld): A9-02 P1 → P2 with new
+evidence and a new closure test, and A9-08 P2 → P3 as an inconsistency rather
+than a defect. Neither correction changes what the next pass should do about
+A9-02; both change what may be claimed about it.
 
 ---
 
@@ -1012,9 +1071,11 @@ the file a sheet re-theme would start from.
 
 ### Step 4 — `useSafeArea: true` for the seven (A9-02) — **owner decision #1**
 
-The mechanical change is one flag at seven call sites, and two call sites
-already carry it. What needs the owner is whether it goes on the flag or on the
-shared function:
+A P2 rather than a P1, and the thing it protects is the drag handle rather than
+the text — so it sits here, after the mid-write exits and the shared header,
+rather than at the front. The mechanical change is one flag at seven call sites,
+and two call sites already carry it. What needs the owner is whether it goes on
+the flag or on the shared function:
 
 | Option | Cost |
 |---|---|
@@ -1028,7 +1089,9 @@ immediately.
 
 Goldens affected: only the sheets that actually reach full height under the
 golden's own 393 × 852 × 1.0 conditions — likely none, which is exactly why this
-survived. The closure test in §13 is what makes the change provable.
+survived. The closure test in §13 is what makes the change provable, and it
+asserts the **handle's** rect: the obvious assertion on the first line of text
+passes before the fix as well as after it.
 
 ### Step 5 — the scrim and the navigation bar (A9-01) — **owner decision #2**
 
@@ -1047,16 +1110,19 @@ two goldens make the result legible. But it is the owner's call, it should be
 made against a rendered before/after, and it should not be bundled with any
 other change in the same PR.
 
-### Step 6 — make the surface guardable (A9-07, A9-08, A9-12, coverage)
+### Step 6 — make the surface guardable (A9-07, A9-12, coverage)
 
 - `mx_alert_dialog.dart` — state the two metrics (A9-07).
-- `starter_install_widget.dart` — pair the primary (A9-08).
+- **Not** `starter_install_widget.dart`. A9-08 is an inconsistency with no rule
+  behind it (see §9.4), so pairing its primary is a decision to put to the owner
+  — with a MUST/SHOULD keyword written down if the answer is yes — and not an
+  item to slip into a guardability pass.
 - New route-level test file, e.g. `test/shared/widgets/mx_modal_route_test.dart`,
   covering §12.1's gap: every `showMxX` and every feature `showX` opened as a
   **route**, at 320 × 568 with `viewPadding.top` set and textScale 2.0,
   asserting top inset, barrier rect, focus containment (A9-12) and mid-write
   dismissal.
-- Goldens for the seven surfaces in §12.3 that carry a P1/P2: reset progress,
+- Goldens for the surfaces in §12.3 that carry a P1/P2: reset progress,
   scheduler change, starter install, move deck, card move target, deck actions,
   `MxConfirmDialog` **cautious**.
 - A `check_architecture.sh` rule once (c) in step 4 lands: no
