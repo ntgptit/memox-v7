@@ -28,9 +28,12 @@ guard's `no_raw_icon_color` / `no_raw_style_escape`, and
 `test/app/icon_ink_boundary_test.dart`, which walks balanced parentheses precisely
 because the line-anchored rule had a blind spot). Of 232 `Icons.*` references
 across 93 files, exactly **24** reach a raw `Icon(` widget, and of those only
-**four** name a colour — every one of the four through `<AppInk>.resolve(context)`,
-which is the one legal open spelling. That is a genuinely well-held boundary and
-nothing in this audit asks for it to be tightened.
+**four** name a colour: three through `<AppInk>.resolve(context)`, the one legal
+open spelling, and the fourth — `mx_pill_button.dart:184` — through the chip
+theme's already-resolved `WidgetStateColor`, which is the sole entry in
+`icon_ink_boundary_test.dart`'s allowlist and carries its reason there (§5.2).
+Three plus one argued exception is a genuinely well-held boundary, and nothing
+in this audit asks for it to be tightened.
 
 **What is not owned is meaning.** Nothing in the repo says which glyph means
 *tag*, *flag*, *wrong*, *not selected*, *share* or *history*, and the result is
@@ -59,7 +62,7 @@ system and the reason there is no P0 to write: 24 icon-only actions ship, and al
 without one.
 
 Verdict: **healthy foundation, unowned vocabulary, one systemic a11y gap.**
-Four P1, eleven P2, twelve P3.
+Four P1, twelve P2, twelve P3.
 
 ---
 
@@ -530,7 +533,7 @@ The seam: `settings_reminder_entry_section_widget.dart` uses a **bare `Icon`** f
 `leading` (line 39) and an **`MxIcon`** for `trailing` (line 45) **in the same
 row**, with a comment defending the trailing one ("the `ListTile` defaults it
 happens to agree with today are not a contract") that applies equally to the
-leading one. Two spellings of the same decision, four lines apart (P2-10).
+leading one. Two spellings of the same decision, four lines apart (P2-12).
 
 ### 9.4 · Outlined-rest → filled-selected: where it is right and where it is not
 
@@ -664,6 +667,7 @@ making `semanticLabel` required is why.
 | **P2-9** | *Tag* is `sell_outlined` at six sites and `label_outline` at the seventh — and both appear on the card list screen | `card_selection_bar_widget.dart:93` vs `card_filter_bar_widget.dart:198` |
 | **P2-10** | `Icons.ios_share` — the Apple share affordance — is the app's share glyph, on a project whose release target is Android and whose iOS support is deferred | `card_list_menu_widget.dart:54`, `card_selection_bar_widget.dart:111` |
 | **P2-11** | `ListTileThemeData` names an enabled `iconColor` and **no** disabled one, unlike `IconButtonThemeData` which names `disabledForegroundColor` and documents why. Production has genuinely disabled rows with bare leading `Icon`s | `app_list_tile_theme.dart:20` vs `app_icon_button_theme.dart:23`; live at `move_deck_sheet_widget.dart:176` |
+| **P2-12** | One row spells the same decision two ways: a bare `Icon` for `leading` and an `MxIcon` for `trailing`, four lines apart, with a comment defending the trailing spelling ("the `ListTile` defaults it happens to agree with today are not a contract") that applies verbatim to the leading one | `settings_reminder_entry_section_widget.dart:39` vs `:45`; §9.3 |
 
 ### P3 — polish / debt
 
@@ -775,10 +779,14 @@ contract and that each `MxIconSize` renders its `dp`. No production code moves.
 `test/shared/widgets/mx_icon_test.dart`.
 
 **Phase 3 — the accessibility fix (P1-3).**
-Add `inMutuallyExclusiveGroup: true` to the Study direction tiles, or move them
-onto `MxRadioRows`. The second is more correct and larger; the first is one line
-and closes the announcement gap. Ship with the semantics test from P1-3's closure
-column.
+Move the Study direction tiles onto `MxRadioRows`, or give them the two flags a
+radio owes: `inMutuallyExclusiveGroup` **and** a checked state.
+`MxListTile.isSelected` emits `selected`, not `hasCheckedState`, so adding
+`inMutuallyExclusiveGroup: true` alone supplies exclusivity and leaves the tile
+still announcing as a selected row — it does **not** pass P1-3's closure test,
+which asserts both flags. The one-line edit is a partial improvement, not the
+fix. Ship whichever route is taken with the semantics test from P1-3's closure
+column, unweakened.
 *Files:* `lib/features/study/presentation/widgets/overlays/study_direction_chooser_widget.dart`,
 `test/features/study/presentation/study_accessibility_test.dart`.
 
@@ -804,9 +812,9 @@ size (16 or 24) once and apply it.
 `test/design_audit/css_scale_parity_test.dart`, goldens.
 
 **Phase 6 — needs D2.** The vocabulary register (§7.2 V4–V8, V10, P2-4, P2-5,
-P2-11's sibling `restore`/`history`/`schedule` splits). Do not start this before
-D2 is answered; fixing eleven conflicts by hand without an owner for identity
-buys a clean snapshot and no guarantee.
+and P3-12's `restore`/`history`/`schedule` splits). Do not start this before D2
+is answered; fixing eleven conflicts by hand without an owner for identity buys a
+clean snapshot and no guarantee.
 
 **Phase 7 — needs D1.** Text scaling. Whatever D1 decides, the deliverable is the
 same: an explicit per-role policy written into `AppIconSize`, an
