@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../foundations/app_radius.dart';
 import '../../foundations/app_semantic_colors.dart';
 import '../../foundations/app_sizing.dart';
 import '../../foundations/app_spacing.dart';
@@ -67,7 +66,12 @@ ListTileThemeData buildListTileTheme(
   // keeps its own; this one now shares it. `primary` measures 5.4:1 light
   // and 7.3:1 dark on it (`component_depth_and_state_test.dart`).
   selectedTileColor: semantic.surfaceSelected,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(AppRadius.md),
-  ),
+  // **No `shape`: the row is the rectangle M3 draws it as** (M100.37, #431
+  // P2-11). It carried `AppRadius.md` (12), and every row in the app sits
+  // inside something that already owns the corner — an `MxCard` clipping at
+  // 16, a sheet clipping at its top — so the 12 was only ever visible as a
+  // mismatch: a picked row's fill and its ripple curved 12 inside a 16
+  // corner, and a middle row's ink rounded off at the card's straight edge.
+  // A rectangle is concentric with any container by construction; the
+  // container supplies the only curve.
 );

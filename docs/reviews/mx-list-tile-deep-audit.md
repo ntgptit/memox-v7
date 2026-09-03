@@ -638,7 +638,7 @@ No functional break, no architecture violation, no user-blocking accessibility f
 | P2-8 | A trailing `Text` renders at `labelSmall` 11 px (latent) | `_LisTileDefaultsM3` |
 | P2-9 | Trailing icons and trailing icon-buttons sit at different optical insets (16 vs 28) | `list_tile.dart:1683` |
 | P2-10 | A mixed leading/no-leading list steps its text column by 40 dp | `list_tile.dart:1607` |
-| P2-11 | An `MxListTile` inside an `MxCard` rounds its ink at 12 inside a 16 corner, and needs a hand-written `Material` shim `MxRadioRows`/`MxSwitchRow`/`MxPressable` all own internally | `settings_reminder_entry_section_widget.dart:35` |
+| P2-11 | An `MxListTile` inside an `MxCard` rounds its ink at 12 inside a 16 corner, and needs a hand-written `Material` shim `MxRadioRows`/`MxSwitchRow`/`MxPressable` all own internally | `settings_reminder_entry_section_widget.dart:35` | **Corner closed at M100.37:** the tile theme drops `shape`; the row is the M3 rectangle and the container's clip is the only curve.
 | P2-12 | `MxSwitchRow` uses two type scales for one label | `mx_switch_row.dart:59` vs `:72` |
 | P2-13 | Multi-select is answered twice (`MxCard` tint + mark swap vs `MxPressable` + glyph swap) | §15 |
 | P2-14 | Selected row turns the **subtitle** primary too, where `mx.css:269` selects only the title | §10 |

@@ -297,5 +297,41 @@ void main() {
       );
       expect(trailing.text.style?.color, theme.colorScheme.onSurfaceVariant);
     });
+
+    testWidgets('the row is the M3 rectangle, and its ring follows', (
+      tester,
+    ) async {
+      // M100.37 (#431 P2-11): the theme used to round the row at 12, which
+      // inside a card clipped at 16 was only ever visible as a mismatch on the
+      // picked fill and the ripple. No shape on the theme is the canonical
+      // rectangle (`shape ?? tileTheme.shape ?? const Border()`), and the
+      // focus ring traces the same rectangle so a container's clip trims both
+      // at its own corner.
+      await pump(
+        tester,
+        MxListTile(title: 'Reminder', onTap: () {}, isSelected: true),
+      );
+
+      final theme = Theme.of(tester.element(find.byType(MxListTile)));
+      expect(theme.listTileTheme.shape, isNull);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+      final ring = tester.widget<DecoratedBox>(
+        find
+            .descendant(
+              of: find.byType(MxListTile),
+              matching: find.byWidgetPredicate(
+                (Widget w) =>
+                    w is DecoratedBox &&
+                    w.position == DecorationPosition.foreground,
+              ),
+            )
+            .first,
+      );
+      final decoration = ring.decoration as BoxDecoration;
+      expect(decoration.border, isNotNull, reason: 'no ring after Tab');
+      expect(decoration.borderRadius, anyOf(isNull, BorderRadius.zero));
+    });
   });
 }
