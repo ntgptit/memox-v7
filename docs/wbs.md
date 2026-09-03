@@ -16945,6 +16945,88 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
 - **Checklist phases:** 14, 21.
 
+### M100.36 · Bốn họ component đóng hợp đồng: Button, TextField/Search, Row, Chip/Pill
+
+- **Status:** in progress
+- **Goal:** Đợt hiện thực sau bốn deep audit song song (#431 hàng, #432 nút,
+  #433 input, #434 chip/pill). Mỗi họ phải có: hợp đồng ngữ nghĩa nhất quán,
+  role M3 đúng chủ, hình học mobile-first, state tương tác tất định, phủ a11y,
+  API shared widget đóng, guard mức source/runtime, mặt review Widgetbook,
+  golden viết trên Linux, tài liệu cập nhật. **Không mở lại kiến trúc Card đã
+  chốt ở #435.**
+- **Quyết định chủ dự án đã duyệt trước (brief §4):** filled button về một
+  state layer M3 (`on` của chính cặp); Good/Remembered là primary duy nhất
+  trong nhóm chấm điểm; `tonal` gỡ nếu vẫn 0 caller; focused-error phân biệt
+  bằng stroke, role giữ `error`; `MxSearchField` bắt buộc `semanticLabel`;
+  viền search dùng `outline`/`primary`; hint lên rung của value; gỡ
+  `isReadOnly`; hàng vs Card theo ranh giới ngữ nghĩa, không đổi hàng loạt;
+  fill chọn của hàng app-owned là `surfaceSelected`; 56 là hàng đọc, 48 là
+  sàn; trailing của `MxListTile` chỉ trình bày; không đổi weight khi chọn;
+  pill có ô check ổn định; `_TagsPill` rời ChoiceChip; giữ ripple Android;
+  `MxPillButton` được chuyên biệt rung nhãn; giữ `warningContainer`.
+- **Baseline Phase 0 (trước khi sửa, tại `3207e7b7`):** format sạch; analyze
+  0 issue; guard kiến trúc / docs / generated / prompt contract đạt; host
+  suite non-golden **4234/4234**; golden Linux (WSL, Flutter 3.44.8,
+  không `--update`) **307/307** — 233 file PNG.
+- **Phase 1 — guard trước, pixel sau.** Ghim những hợp đồng *đang đúng* để
+  chúng không thể trôi trong lúc các phase sau sửa pixel:
+  - `m3_role_binding_guard_test.dart` đọc thêm được **nhánh switch trong
+    method của enum** (`scope: 'MxFilledPair.fillOf'`, `slot: 'brand'`).
+    Lý do: M100.31 đóng builder filled thành enum nên role không còn nằm
+    cạnh nhãn `backgroundColor:`, và guard cũ vì thế **không phủ slot nào
+    của FilledButton** (#432 §5) — đó là cách một overlay gốc `primary` ngồi
+    lên cặp `error` mà không gì đỏ.
+  - 10 binding mới: FilledButton brand/destructive (fill + label), TextField
+    `enabledBorder`/`focusedBorder`/`errorBorder`/`focusedErrorBorder`
+    (từ chối `onErrorContainer` cho focused-error — đáp án là stroke, §4C),
+    ListTile `iconColor`/`selectedColor`.
+  - `m3_combined_state_test.dart` có nhóm TextField: focused+error giữ hue
+    `error`; disabled+error vẽ `errorBorder` (canonical
+    `input_decorator.dart:2364`); disabled không phải role sống.
+  - `m3_role_contract_test.dart` ghim `focusedErrorBorder` → `error` và
+    `disabledBorder` là blend đục, không phải role sống (#433 G3).
+  - `control_border_grounds_test.dart` thêm hai nền field thật sự vẽ lên:
+    `surfaceContainerLow` (sheet) và `surfaceContainerHigh` (dialog) — dark
+    trên dialog 3.50:1 là biên mỏng nhất.
+  - `mx_list_tile_test.dart`: selected+focused, selected+pressed,
+    disabled+selected (#431 §24 — ba giao điểm chưa từng được assert).
+  - `mx_checkbox_row_test.dart` **mới** — widget này chưa có file test nào.
+  - `app_interaction_states_test.dart`: `rowOverlay` press thắng hover, focus
+    thắng hover (#431 F11.4).
+  - Ghi nhận SDK: `ListTile` 3.44.8 truyền `selected: selected` (bool không
+    nullable) vào `Semantics`, nên **mọi** tile mang `hasSelectedState` kể cả
+    khi không có khái niệm chọn (`list_tile.dart:997`). Ghim ở test checkbox
+    row với lý do, để SDK sau đổi thì thấy chứ không nuốt.
+- **Scope:** `lib/core/theme/components/{actions,inputs,content,selection}/`,
+  `lib/core/theme/states/`, `lib/core/theme/foundations/app_sizing.dart`,
+  `lib/shared/widgets/mx_{action_button,text_button,text_field,search_field,
+  list_tile,pressable,focus_ring,radio_rows,switch_row,checkbox_row,
+  pill_button}.dart`, các caller production được từng phase nêu tên;
+  `test/core/theme/contracts/`, `test/shared/widgets/`, Widgetbook; tài liệu
+  ở Editable documents. **Ngoài phạm vi:** `mx_card.dart` và recipe Card
+  (#435), business rule, database, routing.
+- **Editable documents:** `docs/wbs.md`, `docs/design-system/*.md`,
+  `docs/reviews/design-parity-checklist.md`, `docs/reviews/mx-*-deep-audit.md`
+  (chỉ mục status/superseded), `design_system/components/mx.css`.
+- **Output:** từng phase ghi ở trên; ma trận disposition toàn bộ finding
+  P1/P2 của bốn audit ở cuối entry này khi đợt đóng.
+- **Acceptance criteria:**
+  - [x] Phase 0: baseline xanh trước khi sửa (số liệu ở trên).
+  - [x] Phase 1: guard role/state cho FilledButton, TextField, ListTile;
+        test giao điểm state cho hàng; `MxCheckboxRow` có test file.
+  - [ ] Phase 2 Button · [ ] Phase 3 Input · [ ] Phase 4 Row ·
+        [ ] Phase 5 Chip/Pill · [ ] Phase 6 cross-component/docs/Widgetbook ·
+        [ ] Phase 7 golden Linux 100%.
+  - [ ] Không invariant nào của #426/#427/#429/#435 lùi; không hạ sàn
+        contrast; không thêm escape hatch thị giác.
+- **Dependencies:** M100.35, #431–#434.
+- **Tests required:** `m3_role_binding_guard_test`, `m3_role_contract_test`,
+  `m3_combined_state_test`, `control_border_grounds_test`,
+  `focus_ring_contrast_test`, `mx_*_test` của từng widget chạm tới,
+  `mx_stress_test`, `shared_api_closure_test`, `widgetbook_coverage_test`;
+  golden Linux; CI.
+- **Checklist phases:** 7, 12, 13, 14.
+
 ### M100.35 · Card dark thôi phát sáng; elevation thôi mang hai nghĩa
 
 - **Status:** done

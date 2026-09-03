@@ -243,6 +243,31 @@ void main() {
           scheme.primary,
         );
         pin('error border', t.errorBorder!.borderSide.color, scheme.error);
+        // The two slots the input audit (#433 G3) found unpinned. Focused
+        // error keeps `error` — M3 tells focus apart by the stroke, not a hue.
+        pin(
+          'focused error border',
+          t.focusedErrorBorder!.borderSide.color,
+          scheme.error,
+        );
+        // `disabledBorder` is the one input slot that is not a role: a solid
+        // blend of `outline` over the paper (MX-VIS-002 R7), stronger than
+        // M3's `onSurface @ 12%` because this field's whole identity is its
+        // edge. Pinned as *not a live role* and *opaque*, which is the shape
+        // of the decision rather than its value.
+        final disabledEdge = t.disabledBorder!.borderSide.color;
+        expect(disabledEdge.a, 1.0, reason: 'disabled edge is translucent');
+        for (final live in <Color>[
+          scheme.outline,
+          scheme.primary,
+          scheme.error,
+        ]) {
+          expect(
+            disabledEdge,
+            isNot(live),
+            reason: '$mode: a disabled field wears a live edge',
+          );
+        }
       });
 
       test('Dialog', () {

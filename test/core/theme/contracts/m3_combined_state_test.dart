@@ -288,6 +288,61 @@ void main() {
       });
     });
 
+    group('$mode · TextField', () {
+      // The one component whose theme declares five state borders by hand,
+      // and the one this file skipped (#433 G2). The framework picks the
+      // painted border *before* any resolver runs — `input_decorator.dart`
+      // 2362–2370 at 3.44.8 — so the combinations are reproduced here in the
+      // order it takes them: disabled first, then focus, then error inside
+      // each branch.
+      final input = theme.inputDecorationTheme;
+      Color edge(InputBorder? border) =>
+          (border! as OutlineInputBorder).borderSide.color;
+
+      test('error keeps its hue under focus — the stroke tells them apart', () {
+        // `{focused, error}` selects `focusedErrorBorder`; `{error}` selects
+        // `errorBorder`. Both are `error`: M3 never moves this slot to a
+        // third hue (its `onErrorContainer` is hover-under-error, which this
+        // theme cannot reach). Discriminability is the stroke's job and is
+        // asserted in `app_theme_test.dart`.
+        expect(edge(input.errorBorder), scheme.error, reason: mode);
+        expect(edge(input.focusedErrorBorder), scheme.error, reason: mode);
+      });
+
+      test('focus alone is primary, never error', () {
+        expect(edge(input.focusedBorder), scheme.primary, reason: mode);
+        expect(edge(input.focusedBorder), isNot(scheme.error), reason: mode);
+      });
+
+      test('disabled with an error paints the error edge — canonical', () {
+        // `input_decorator.dart:2364`: inside the disabled branch, error wins.
+        // A busy form that disables its fields while an error is still on
+        // screen (`deck_form_widget`, `tag_rename_widget`) paints a full
+        // `error` outline on a greyed field. Pinned so the day the framework
+        // changes its mind, the goldens are regenerated on purpose.
+        // The framework's own selection, restated as data rather than
+        // re-run: `!enabled ? (hasError ? errorBorder : disabledBorder)`.
+        final InputBorder chosenWhenDisabledAndErrored = input.errorBorder!;
+        expect(edge(chosenWhenDisabledAndErrored), scheme.error, reason: mode);
+        expect(
+          edge(chosenWhenDisabledAndErrored),
+          isNot(edge(input.disabledBorder)),
+          reason: '$mode: the disabled edge and the error edge collapsed',
+        );
+      });
+
+      test('disabled without an error is not a live role', () {
+        final Color disabledEdge = edge(input.disabledBorder);
+        for (final Color live in <Color>[
+          scheme.outline,
+          scheme.primary,
+          scheme.error,
+        ]) {
+          expect(disabledEdge, isNot(live), reason: mode);
+        }
+      });
+    });
+
     group('$mode · disabled does not leak a live role', () {
       test('a disabled control never resolves to an enabled accent', () {
         final chipFill = theme.chipTheme.color!;

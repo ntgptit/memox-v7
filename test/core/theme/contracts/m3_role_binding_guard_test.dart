@@ -90,9 +90,18 @@ class RoleBinding {
   final String slot;
   final String file;
 
-  /// The declaration the slot lives in — a top-level function name. The slot is
-  /// then found inside it, either as a named argument or as the whole body when
-  /// [slot] and [scope] name the same thing.
+  /// The declaration the slot lives in — a top-level function name, or
+  /// `Type.method` for a method on an enum or class. The slot is then found
+  /// inside it: as a named argument, as the whole body when [slot] and [scope]
+  /// name the same thing, or — when neither exists — as the arm of a switch
+  /// expression whose pattern ends in `.slot` (M100.36).
+  ///
+  /// **The third form exists for `MxFilledPair`.** M100.31 closed the filled
+  /// button's builder to an enum so a caller could not hand it two loose
+  /// colours; the price was that the role is no longer named beside a
+  /// `backgroundColor:` label but inside `fillOf`'s switch. A guard that could
+  /// only read named arguments therefore covered no `FilledButton` slot at all
+  /// (#432 §5), which is how a `primary`-based overlay sat on the error pair.
   final String scope;
 
   final List<String> requires;
@@ -117,7 +126,7 @@ _SchemeRoles _readsIn(RoleBinding binding) {
     throwIfDiagnostics: false,
   ).unit;
 
-  final AstNode? declaration = _functionNamed(unit, binding.scope);
+  final AstNode? declaration = _declarationNamed(unit, binding.scope);
   expect(
     declaration,
     isNotNull,
@@ -126,17 +135,47 @@ _SchemeRoles _readsIn(RoleBinding binding) {
 
   final AstNode? target = binding.slot == binding.scope
       ? declaration
-      : _namedArgument(declaration!, binding.slot);
+      : _namedArgument(declaration!, binding.slot) ??
+            _switchArm(declaration, binding.slot);
   expect(
     target,
     isNotNull,
-    reason: '${binding.scope} declares no `${binding.slot}:` argument',
+    reason:
+        '${binding.scope} declares no `${binding.slot}:` argument and no '
+        '`.${binding.slot}` switch arm',
   );
 
   final _SchemeRoles visitor = _SchemeRoles();
   target!.accept(visitor);
 
   return visitor;
+}
+
+/// A top-level function, or `Type.method` on an enum or class declaration.
+AstNode? _declarationNamed(CompilationUnit unit, String scope) {
+  final List<String> parts = scope.split('.');
+  if (parts.length == 1) return _functionNamed(unit, scope);
+
+  final String typeName = parts.first;
+  final String methodName = parts.last;
+  for (final CompilationUnitMember member in unit.declarations) {
+    final NodeList<ClassMember>? members = switch (member) {
+      EnumDeclaration(:final body)
+          when member.namePart.typeName.lexeme == typeName =>
+        body.members,
+      ClassDeclaration(:final body)
+          when member.namePart.typeName.lexeme == typeName =>
+        body.members,
+      _ => null,
+    };
+    if (members == null) continue;
+
+    for (final ClassMember m in members) {
+      if (m is MethodDeclaration && m.name.lexeme == methodName) return m;
+    }
+  }
+
+  return null;
 }
 
 AstNode? _functionNamed(CompilationUnit unit, String name) {
@@ -147,6 +186,16 @@ AstNode? _functionNamed(CompilationUnit unit, String name) {
   }
 
   return null;
+}
+
+/// The arm of a switch expression whose pattern names `.slot` — the body of
+/// `MxFilledPair.brand => scheme.primary`. Only the arm's expression is
+/// returned, so a role read in a sibling arm cannot satisfy this one.
+AstNode? _switchArm(AstNode declaration, String slot) {
+  final _SwitchArm visitor = _SwitchArm(slot);
+  declaration.accept(visitor);
+
+  return visitor.found;
 }
 
 AstNode? _namedArgument(AstNode declaration, String label) {
@@ -184,6 +233,22 @@ class _SchemeRoles extends RecursiveAstVisitor<void> {
       _record(target.name, node.propertyName.name);
     }
     super.visitPropertyAccess(node);
+  }
+}
+
+class _SwitchArm extends RecursiveAstVisitor<void> {
+  _SwitchArm(this.slot);
+
+  final String slot;
+  Expression? found;
+
+  @override
+  void visitSwitchExpressionCase(SwitchExpressionCase node) {
+    if (found == null &&
+        node.guardedPattern.pattern.toSource().endsWith('.$slot')) {
+      found = node.expression;
+    }
+    super.visitSwitchExpressionCase(node);
   }
 }
 

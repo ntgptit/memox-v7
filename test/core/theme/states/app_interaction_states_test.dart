@@ -298,6 +298,35 @@ void main() {
       },
     );
 
+    test('the row resolver orders press above hover too', () {
+      // The card was pinned above; the row never was (#431 F11.4). Same
+      // resolver, same rule, stated for the shape every list uses so a
+      // reorder in `_overlay` cannot be caught on one shape and missed on
+      // the other.
+      for (final entry in themes.entries) {
+        final overlay = AppInteractionStates.rowOverlay(
+          entry.value.colorScheme,
+        );
+
+        expect(
+          overlay.resolve(const <WidgetState>{
+            WidgetState.hovered,
+            WidgetState.pressed,
+          }),
+          overlay.resolve(pressed),
+          reason: '${entry.key}: a pressed row renders as a hovered one',
+        );
+        expect(
+          overlay.resolve(const <WidgetState>{
+            WidgetState.hovered,
+            WidgetState.focused,
+          }),
+          overlay.resolve(const <WidgetState>{WidgetState.focused}),
+          reason: '${entry.key}: a focused, hovered row loses its focus wash',
+        );
+      }
+    });
+
     test('a card hovers lighter than a row, and a row lighter than an icon', () {
       // The kit gives four weights on purpose: the same wash reads heavier on a
       // full-width row than on a 48-wide button. Compared by alpha, which is
