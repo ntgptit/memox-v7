@@ -35,7 +35,6 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     required this.surfaceEmphasis,
     required this.surfaceSelected,
     required this.surfaceMuted,
-    required this.surfaceElevated,
     required this.borderAccent,
     required this.borderSubtle,
     required this.borderControl,
@@ -66,7 +65,6 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       surfaceEmphasis = AppSurfaceColors.surfaceEmphasisLight,
       surfaceSelected = AppSurfaceColors.surfaceSelectedLight,
       surfaceMuted = AppSurfaceColors.surfaceMutedLight,
-      surfaceElevated = AppSurfaceColors.surfaceElevatedLight,
       borderAccent = AppBorderColors.borderAccentLight,
       borderSubtle = AppBorderColors.borderSubtleLight,
       borderControl = AppBorderColors.borderControlLight,
@@ -96,7 +94,6 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       surfaceEmphasis = AppSurfaceColors.surfaceEmphasisDark,
       surfaceSelected = AppSurfaceColors.surfaceSelectedDark,
       surfaceMuted = AppSurfaceColors.surfaceMutedDark,
-      surfaceElevated = AppSurfaceColors.surfaceElevatedDark,
       borderAccent = AppBorderColors.borderAccentDark,
       borderSubtle = AppBorderColors.borderSubtleDark,
       borderControl = AppBorderColors.borderControlDark,
@@ -181,11 +178,6 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
 
   final Color surfaceMuted;
 
-  /// The most prominent surface. In dark this is the fill of a primary action:
-  /// the button is the top of the surface ladder rather than a block of colour,
-  /// which leaves every saturated hue free to carry meaning.
-  final Color surfaceElevated;
-
   /// The accent hairline — see [AppBorderColors.borderAccentLight].
   final Color borderAccent;
 
@@ -240,7 +232,6 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     Color? surfaceEmphasis,
     Color? surfaceSelected,
     Color? surfaceMuted,
-    Color? surfaceElevated,
     Color? borderAccent,
     Color? borderSubtle,
     Color? borderControl,
@@ -270,7 +261,6 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       surfaceEmphasis: surfaceEmphasis ?? this.surfaceEmphasis,
       surfaceSelected: surfaceSelected ?? this.surfaceSelected,
       surfaceMuted: surfaceMuted ?? this.surfaceMuted,
-      surfaceElevated: surfaceElevated ?? this.surfaceElevated,
       borderAccent: borderAccent ?? this.borderAccent,
       borderSubtle: borderSubtle ?? this.borderSubtle,
       borderControl: borderControl ?? this.borderControl,
@@ -336,7 +326,6 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       surfaceEmphasis: Color.lerp(surfaceEmphasis, other.surfaceEmphasis, t)!,
       surfaceSelected: Color.lerp(surfaceSelected, other.surfaceSelected, t)!,
       surfaceMuted: Color.lerp(surfaceMuted, other.surfaceMuted, t)!,
-      surfaceElevated: Color.lerp(surfaceElevated, other.surfaceElevated, t)!,
       borderAccent: Color.lerp(borderAccent, other.borderAccent, t)!,
       borderSubtle: Color.lerp(borderSubtle, other.borderSubtle, t)!,
       borderControl: Color.lerp(borderControl, other.borderControl, t)!,

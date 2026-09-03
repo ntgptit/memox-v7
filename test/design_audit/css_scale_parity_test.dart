@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/foundations/app_colors.dart';
 import 'package:memox/core/theme/foundations/app_breakpoints.dart';
 import 'package:memox/core/theme/foundations/app_sizing.dart';
 import 'package:memox/core/theme/schemes/app_compact_scale.dart';
@@ -8,6 +7,7 @@ import 'package:memox/core/theme/foundations/app_durations.dart';
 import 'package:memox/core/theme/foundations/app_elevation.dart';
 import 'package:memox/core/theme/foundations/app_icon_size.dart';
 import 'package:memox/core/theme/foundations/app_radius.dart';
+import 'package:memox/core/theme/foundations/app_stroke.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/core/theme/states/app_interaction_states.dart';
 import 'package:memox/core/theme/app_theme.dart';
@@ -337,16 +337,16 @@ void main() {
 
       expect(shadowsFor(AppElevation.none, dark.colorScheme), isEmpty);
       for (final level in AppElevation.scale.skip(1)) {
-        final shadow = shadowsFor(level, dark.colorScheme).single;
-        expect(shadow.color, AppColors.cardRimDark, reason: 'level $level');
-        expect(shadow.blurRadius, 2, reason: 'level $level');
-        // Steps with the level since M100.33 — the ring is dark's depth cue.
-        expect(
-          shadow.spreadRadius,
-          greaterThanOrEqualTo(1),
-          reason: 'level $level',
-        );
-        expect(shadow.offset, Offset.zero, reason: 'level $level');
+        // **The rim is the first entry at every level and never changes**
+        // (M100.35). It used to be the *only* entry and to thicken as the
+        // level rose, which spelled depth as a brighter, wider glow; a phone
+        // column of ten cards printed that as stripes. Depth above `card` is a
+        // drop now — see the level loop below.
+        final rim = shadowsFor(level, dark.colorScheme).first;
+        expect(rim.color, dark.colorScheme.outlineVariant, reason: '$level');
+        expect(rim.blurRadius, 0, reason: 'level $level');
+        expect(rim.spreadRadius, AppStroke.hairline, reason: 'level $level');
+        expect(rim.offset, Offset.zero, reason: 'level $level');
       }
     });
 

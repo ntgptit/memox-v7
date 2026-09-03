@@ -254,18 +254,39 @@ void main() {
             'dark: the card sits only ${darkStep.toStringAsFixed(2)} L* above '
             'the page; even with a rim it needs a visible step of its own',
       );
-      final rim = shadowsFor(AppElevation.card, dark.colorScheme).single.color;
-      for (final ground in <String, Color>{
-        'page': darkPage,
-        'card': dark.colorScheme.surfaceContainerLow,
+      // **The rim is held to a ceiling now, not a floor** (M100.35). It used
+      // to be asserted at 3:1 against both grounds, on the reading that an
+      // edge is an interactive boundary under WCAG 1.4.11. It is not: nothing
+      // about a card's depth is a control, and the rim that cleared 3.74:1
+      // against its own card was the violet halo the owner rejected — a
+      // resting neutral surface wearing a louder edge than a focus ring.
+      //
+      // What the rim owes is the opposite property: to be quiet enough that
+      // ten of them down a phone column read as ten cards rather than ten
+      // outlines, and quiet enough that the edges which *do* carry state stay
+      // obviously louder. So the floor moves to those.
+      final rim = shadowsFor(AppElevation.card, dark.colorScheme).first.color;
+      final darkCard = dark.colorScheme.surfaceContainerLow;
+      expect(
+        contrast(rim, darkCard),
+        lessThan(2.0),
+        reason:
+            'dark: the neutral rim reads '
+            '${contrast(rim, darkCard).toStringAsFixed(2)}:1 against the card '
+            'it outlines. Above this it stops separating and starts glowing.',
+      );
+      final semantic = dark.extension<AppSemanticColors>()!;
+      for (final state in <String, Color>{
+        'selected': semantic.borderSelected,
+        'option': semantic.borderOption,
+        'focus': dark.colorScheme.primary,
       }.entries) {
         expect(
-          contrast(rim, ground.value),
-          greaterThanOrEqualTo(3.0),
+          contrast(state.value, darkCard),
+          greaterThan(contrast(rim, darkCard) * 2),
           reason:
-              'dark: the card rim reads '
-              '${contrast(rim, ground.value).toStringAsFixed(2)}:1 against '
-              'the ${ground.key} — under the 3:1 an edge needs to separate',
+              'dark: the ${state.key} edge must stay unmistakably louder than '
+              'the depth cue underneath it',
         );
       }
     });
@@ -367,12 +388,14 @@ void main() {
       test(
         '${entry.key}: the snackbar states its depth like every overlay',
         () {
-          // Silence here resolved to the SDK's 6.0 — in dark too, where the app
-          // has measurably opted out of shadows.
-          expect(
-            entry.value.snackBarTheme.elevation,
-            entry.key == 'dark' ? AppElevation.none : AppElevation.overlay,
-          );
+          // Silence here resolved to the SDK's 6.0. Stated — and **the same dp
+          // in both modes since M100.35**: this used to expect
+          // `AppElevation.none` in dark, which is a component claiming to be
+          // flush with the page in one theme and eight dp above it in the
+          // other. Whether the shadow is *visible* in dark is a separate
+          // question, answered by `materialShadowColor`, and it is the only
+          // one brightness is allowed to answer.
+          expect(entry.value.snackBarTheme.elevation, AppElevation.overlay);
           expect(
             entry.value.floatingActionButtonTheme.elevation,
             entry.value.snackBarTheme.elevation,

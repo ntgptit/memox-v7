@@ -14,6 +14,7 @@ import 'package:memox/shared/widgets/mx_list_tile.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 import 'package:memox/shared/widgets/mx_text_button.dart';
 
+import 'card_specimens.dart';
 import 'golden_hosts.dart';
 import 'golden_pump.dart';
 import 'golden_specimens.dart';
@@ -327,6 +328,11 @@ void main() {
     'mx_session_top_bar': const SessionTopBarSpecimen(),
     'mx_search_field': const SearchFieldSpecimen(),
     'mx_pill_group': const PillGroupSpecimen(),
+    // **Relation, not one card** (M100.35). See `card_specimens.dart`: the
+    // glow these two exist to catch was only ever visible in the plural, and
+    // `card_surface` above renders exactly one.
+    'card_depth': const CardDepthSpecimen(),
+    'card_states': const CardStatesSpecimen(),
   };
 
   for (final entry in cases.entries) {

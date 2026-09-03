@@ -159,7 +159,6 @@ void main() {
         'scrim': scheme.scrim,
         'scaffoldBackground': mode.value.scaffoldBackgroundColor,
         'surfaceMuted': semantic.surfaceMuted,
-        'surfaceElevated': semantic.surfaceElevated,
         'borderSubtle': semantic.borderSubtle,
       };
 
@@ -176,11 +175,7 @@ void main() {
       // meaning, so the day the paper gains a tint the exemption is deleted
       // rather than quietly covering a different role.
       if (mode.key == 'light') {
-        for (final paper in <String>[
-          'surfaceContainerLow',
-          'surfaceBright',
-          'surfaceElevated',
-        ]) {
+        for (final paper in <String>['surfaceContainerLow', 'surfaceBright']) {
           neutrals.remove(paper);
         }
       }

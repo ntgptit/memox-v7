@@ -213,3 +213,23 @@ Component theme sở hữu hình học **toàn cục**; shared widget chỉ thê
 | `buildCardTheme` | shape, hairline |
 
 MUST NOT: một `Mx*` widget hoặc một feature nêu lại các giá trị này.
+
+---
+
+## 6. Blocking finding — FilledButton state, cho đợt Button kế tiếp
+
+**Trạng thái: MỞ.** Cho đến khi đóng, **không được tuyên bố button theme là
+canonical.**
+
+Chi tiết nằm ở **[`docs/reviews/mx-action-button-deep-audit.md`](../reviews/mx-action-button-deep-audit.md)**
+(#432) và **chỉ** ở đó — báo cáo ấy đã đọc `ink_well.dart` để dựng lại thứ tự
+composite thật, thứ mục này không lặp lại.
+
+Điều duy nhất ghi ở đây, vì nó là về **bảng dịch này**: dòng §2 nói sai lệch
+FilledButton overlay là một **thay thế** (`onPrimary` → blend về `onSurface`),
+trong khi code thực hiện một **phép cộng** — `buildSharedButtonStyle` đặt
+`overlayColor: controlOverlay` và `buildFilledStyle` chỉ `copyWith`
+`backgroundColor`, nên hover vẽ *cả hai*. Trên `primary` hệ quả đã biết và đã
+ghim (overlay là no-op); trên `tonal` và `destructive` thì không.
+
+Đợt Button phải sửa cả code lẫn dòng §2 trong cùng một lần.

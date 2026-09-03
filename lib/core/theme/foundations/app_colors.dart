@@ -128,14 +128,6 @@ abstract final class AppColors {
   /// Tone 20 at the brand hue. 7.73:1 under [primaryDark].
   static const Color onPrimaryDark = Color(0xFF202771);
 
-  /// The 1 px halo a dark card wears instead of a shadow — Tokyo's
-  /// `shadows.card` (`0px 0px 2px #6A7199`) in NebulaFighter. The card is
-  /// Tokyo's `#111633` on the `#070C27` page — a 4.3 L\* step — and a dark
-  /// shade moves that page by under one L\*, so depth in dark comes from an
-  /// edge: this reads 4.07:1 against the page and 3.74:1 against the card.
-  /// See `shadowsFor` and AD-14 §4.
-  static const Color cardRimDark = Color(0xFF6A7199);
-
   // --- Semantic ------------------------------------------------------------
   //
   // On a chroma budget, `info` the quietest of the four. None reaches full

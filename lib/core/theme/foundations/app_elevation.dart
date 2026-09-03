@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'app_colors.dart';
+import 'app_stroke.dart';
 
 /// How far a surface sits above the one behind it.
 ///
@@ -32,84 +32,110 @@ abstract final class AppElevation {
   static const List<double> scale = <double>[none, card, raised, overlay];
 }
 
-/// Material elevation for the components that keep a dp value instead of
-/// `elevation: 0` + `shadowsFor` — the FAB and the SnackBar, whose theme slots
-/// have nowhere to put a hand-painted shadow.
-///
-/// Zero in dark, matching `shadowsFor`: the dark page is at the bottom of the
-/// lightness scale, so a shadow there is paint nobody can see.
-double overlayElevationFor(ColorScheme scheme) =>
-    scheme.brightness == Brightness.dark
-    ? AppElevation.none
-    : AppElevation.overlay;
-
 /// The shadow colour a **Material component** paints at a non-zero elevation.
 ///
 /// [shadowsFor] is for surfaces this app draws itself; a `PopupMenuThemeData` or
 /// a `Card` takes an `elevation` and paints its own shadow, so the only place to
-/// answer "which mode paints one" is the colour. Transparent in dark, for the
-/// measurement in [shadowsFor]'s comment and not for a second reason.
+/// answer "which mode paints one" is the colour. Transparent in dark, because
+/// the page there is at L\* 4.11 and the darkest ink available is L\* 1.18 —
+/// under three L\* of headroom, so a Material shadow in dark is paint with
+/// nowhere to land.
 ///
-/// **The level still travels in both modes.** AD-14 keeps the scale and the
-/// paint apart precisely so dark can opt out of shadows without opting out of
-/// depth — a component that dropped to `elevation: 0` in dark would be saying
-/// it is flush with what is behind it, which is not what dark means.
+/// **This is the only channel allowed to depend on brightness, and that is the
+/// point** (M100.35). The level travels unchanged in both modes; what varies is
+/// whether the paint is visible. Until this milestone `overlayElevationFor`
+/// answered the same question by returning `AppElevation.none` in dark, which
+/// made the *semantic* depth of a FAB depend on the theme — a component saying
+/// it is flush with the page in one mode and six dp above it in the other.
+///
+/// The SDK is what makes the separation safe, and it was read rather than
+/// assumed: in Flutter 3.44.8 `Material` puts `elevation` through
+/// `ElevationOverlay.applySurfaceTint`, which returns the colour untouched when
+/// `surfaceTint` is null or transparent. `_CardDefaultsM3.surfaceTintColor` is
+/// `Colors.transparent` and neither `_FABDefaultsM3` nor `_SnackbarDefaultsM3`
+/// sets one, so a non-zero elevation has exactly one visual effect in this app
+/// — the shadow — and suppressing the colour suppresses all of it.
 Color materialShadowColor(ColorScheme scheme) =>
     scheme.brightness == Brightness.dark ? Colors.transparent : scheme.shadow;
 
-/// The shadow a [level] paints, given the theme's own shadow colour.
+/// The depth a [level] paints, in the mode's own idiom.
 ///
-/// **This doc block had drifted onto [overlayElevationFor] at M100.29** — the
-/// split that moved that function up put it between the comment and the
-/// function it describes, and nothing objects to a doc comment landing on the
-/// wrong declaration. Restored here, and rewritten, because what it said is no
-/// longer true either.
+/// **Light draws Tokyo's two-layer shade** — see [_lightShadows], which carries
+/// the shape and the reason the alpha stopped being a solved number.
 ///
-/// **Empty in dark, and that is measured rather than assumed.** The dark page is
-/// at L\* 3.86 — the bottom of the scale — so there is no room below it for a
-/// shadow to occupy. At alpha 0.10 a dark shadow moves the page by **ΔL\* 0.26**;
-/// at 0.70, still only 2.04. The surface step already there is ΔL\* 7.70. A dark
-/// shadow is paint nobody can see, and Material 3 drops it for the same reason.
-/// Dark draws Tokyo's rim instead — see the branch below.
-///
-/// **Light draws Tokyo's two-layer shade since M100.30, and the alpha stopped
-/// being a solved number.** It used to be one layer whose opacity was fitted to
-/// a target: `0.06 + 0.01 * level`, solved so a card's total lift off the page
-/// matched dark's. That produced a *tight, near-black* drop — the right total,
-/// with the wrong character, and the reason a card read as stamped out of the
-/// page rather than laid on it. The lift is still measured, and still by
-/// `app_theme_test.dart`; it is now a floor the shape has to clear rather than a
-/// number the alpha was tuned to hit. [_lightShadows] carries the shape.
+/// **Dark cannot use a shade, and measured rather than assumed: the dark page
+/// sits at L\* 4.11 and the darkest ink in the palette is L\* 1.18, so under
+/// three L\* of headroom exists below it.** Material 3 drops the shadow in dark
+/// for the same reason. What replaces it is [_darkDepth].
 List<BoxShadow> shadowsFor(double level, ColorScheme scheme) {
   if (level <= AppElevation.none) return const <BoxShadow>[];
-  // **Dark paints a rim, not a shade (M100.27).** The measurement above still
-  // holds — a dark shadow moves the page by under one L* — and with the card
-  // fixed at Tokyo's `#111633` on Tokyo's `#070C27` the surface step is 4.3
-  // L*, below the 6 the ladder used to carry alone. Tokyo's own answer is its
-  // `shadows.card`: `0px 0px 2px #6A7199`, a one-pixel halo that reads 4.07:1
-  // against the page and 3.74:1 against the card. Same colour at every level —
-  // an edge does not change hue with depth — but the ring **thickens**, which
-  // is what carries `none < card < raised` in a mode with no shadow. See
-  // `_darkRimSpread`.
-  //
-  // **`spreadRadius: 1` is what makes those two ratios true on screen.** A
-  // blur alone rasterises the source colour into partially covered pixels, so
-  // the exposed ring would measure below the source (review on #427). The
-  // one-pixel spread paints a solid ring at the full colour before the 2 px
-  // blur falls off outside it — the cue the ratios describe is the ring, and
-  // `app_elevation_test.dart` pins the spread so the ring cannot quietly
-  // become a wash again.
-  if (scheme.brightness == Brightness.dark) {
-    return <BoxShadow>[
-      BoxShadow(
-        color: AppColors.cardRimDark,
-        blurRadius: 2,
-        spreadRadius: _darkRimSpread(level),
-      ),
-    ];
-  }
+  if (scheme.brightness == Brightness.dark) return _darkDepth(level, scheme);
 
   return _lightShadows(level, scheme.shadow);
+}
+
+/// Dark depth: a crisp hairline, and above `card` a real drop.
+///
+/// **The rim used to glow, and that is what this replaces** (M100.35). It was
+/// Tokyo's `shadows.card` taken literally — `#6A7199` at `blurRadius: 2` with a
+/// `spreadRadius` that climbed 1 → 2 → 3 by level. Three things were wrong with
+/// it, and only the third is a matter of taste:
+///
+/// * the colour reads **3.74:1 against the card it outlines**. That is the
+///   contrast of a *control* boundary, not of a decorative one, so a resting
+///   neutral card was wearing an edge as loud as a focus ring;
+/// * the blur turned that edge into a halo, and a halo on a 16 or 20 px corner
+///   is a smear rather than a corner;
+/// * the spread grew with the level, so the way to say "higher" was "brighter
+///   and thicker" — which on a phone, where ten cards stack in one column,
+///   prints as neon stripes rather than as depth.
+///
+/// Tokyo is a desktop dashboard with three panels on a wide canvas; this is a
+/// phone with a scrolling list. The effect did not survive the move, and the
+/// exact blur and spread were never a contract — they were one implementation
+/// of "dark needs an edge".
+///
+/// **What replaces it.** A **crisp** ring, one hairline wide, in
+/// `outlineVariant` — M3's own role for a boundary that is decorative and
+/// explicitly not required to reach 3:1. It measures **1.30:1 against the card
+/// and 1.41:1 against the page**: present as an edge, absent as a glow. It is
+/// painted as a zero-blur `BoxShadow` rather than as a `Border` on purpose —
+/// the border box belongs to *state* (selection, option, focus), and a depth
+/// cue that shared it would make one channel carry two facts again, which is
+/// the defect M100.33 spent itself removing.
+///
+/// The ring never thickens. `raised` says "higher" with a **drop** instead —
+/// `scheme.shadow` under the surface, offset and blurred, no spread, so nothing
+/// lightens. It is quiet by arithmetic rather than by choice: at alpha 0.8 it
+/// moves the page by ΔL\* 2.34, a little over half the 4.31 the page-to-card
+/// surface step already carries. That is the whole budget dark has.
+///
+/// Selection and focus stay far louder than either, which is the property that
+/// matters: `borderSelected` is 5.27:1 against the card and `borderOption`
+/// 3.33:1, against the rim's 1.30:1.
+List<BoxShadow> _darkDepth(double level, ColorScheme scheme) {
+  final BoxShadow rim = BoxShadow(
+    color: scheme.outlineVariant,
+    spreadRadius: AppStroke.hairline,
+  );
+  if (level <= AppElevation.card) return <BoxShadow>[rim];
+
+  // A switch and not a formula, for [_lightShadows]' reason: `overlay` has no
+  // production caller, so its numbers are derived by doubling rather than
+  // measured, and writing them out keeps that visible.
+  final (double dropY, double dropBlur) = switch (level) {
+    AppElevation.raised => (4, 12),
+    _ => (8, 24),
+  };
+
+  return <BoxShadow>[
+    rim,
+    BoxShadow(
+      color: scheme.shadow.withValues(alpha: _darkDropAlpha),
+      blurRadius: dropBlur,
+      offset: Offset(0, dropY),
+    ),
+  ];
 }
 
 /// **Two layers, and the second is not the one this file rejected** (M100.30).
@@ -163,29 +189,12 @@ List<BoxShadow> _lightShadows(double level, Color shadow) {
   ];
 }
 
-/// How thick the dark rim is drawn, by level.
+/// The drop a dark surface casts, at the top of the range it can use.
 ///
-/// **Dark needs this because it has no shadow to carry depth** (see above), and
-/// until M100.33 it drew *the same* rim at every level — so `MxCard.raised` and
-/// `MxCard.flat` printed the same box in dark, and the three depths the app
-/// claims collapsed to two. The old workaround was worse than the symptom: the
-/// card recipe resolved to a different `ColorScheme` role in dark than in
-/// light, which makes a component's semantic identity depend on brightness.
-///
-/// **The ring thickens rather than the fill moving or a shade appearing.** Of
-/// the three mechanisms available for dark depth — the surface-container
-/// ladder, the rim, elevation rendering — the ladder is the one that would have
-/// forced a per-brightness role, and a dark shade is paint nobody can see at
-/// this page lightness. The rim is the one left, and a thicker edge reads as a
-/// nearer object without any second colour entering the system.
-///
-/// Monotonic by construction, which is what makes `none < card < raised`
-/// perceptible: 0 (no rim at all), then 1, then 2.
-double _darkRimSpread(double level) => switch (level) {
-  AppElevation.card => 1,
-  AppElevation.raised => 2,
-  _ => 3,
-};
+/// Not a tuned number: `scheme.shadow` is L\* 1.18 against a page at 4.11, so
+/// even a fully opaque drop moves the ground by ΔL\* 2.93. 0.8 spends most of
+/// that (2.34) and keeps the falloff from banding on the blur.
+const double _darkDropAlpha = 0.8;
 
 /// Tokyo's own two alphas, and they do not climb with the level.
 ///

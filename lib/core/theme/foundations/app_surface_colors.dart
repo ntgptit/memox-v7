@@ -63,17 +63,18 @@ abstract final class AppSurfaceColors {
 
   /// Card and sheet — the flashcard surface.
   ///
-  /// **Not pure white, since M4.10i.** `#FFFFFF` carries no hue at all, so the
-  /// one surface the whole app is built on had no relation to the seed while
-  /// every other neutral did — the audit's largest finding, and the reason light
-  /// mode read as a different palette from dark. `#FBFBFE` is `seed @ 0.02` over
-  /// white: hue 240, chroma 0.012, nowhere near the light canvas's tint budget.
+  /// **Pure white, by owner decision at M100.27.** It is Tokyo's card value
+  /// verbatim, and the light page (`pageLight`) carries the tint instead — the
+  /// paper is the one light neutral the seed-relation rule exempts, and
+  /// `color_system_rules_test` exempts it *by role* so the exemption follows
+  /// the meaning rather than the hex.
   ///
-  /// It costs lightness. A tinted card is a *darker* card, so the surface step
-  /// drops from 3.46 L\* to 2.15 — which was the argument for leaving it alone
-  /// while the step was the only depth cue light had. It is not any more: the
-  /// shadow's alpha was re-solved to 0.07 and the total lift is 8.04 L\* against
-  /// dark's 6.58.
+  /// **Historical, and no longer true of this constant:** from M4.10i until
+  /// M100.27 the value was `#FBFBFE`, `seed @ 0.02` over white, on the argument
+  /// that a surface the whole app is built on should not be the one neutral
+  /// with no relation to the seed. That reasoning was overruled, not forgotten;
+  /// the doc said "not pure white" for two milestones after the token became
+  /// exactly that.
   static const Color paperLight = Color(0xFFFFFFFF);
 
   static const Color paperDark = Color(0xFF111633);

@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.34 (screen gallery vẽ lại thành proof sheet: Archivo + JetBrains Mono, accent đỏ china-marker cố ý xa indigo của app, con dấu commit lên hàng đầu, rail 9 nhóm, số khung khớp thứ tự loupe, loupe thêm chế độ so light↔dark cạnh nhau ở 393dp; tên tab thôi đếm để danh tính artifact ổn định); M100.33 (Card thành design primitive: một `ColorScheme` role cho cả hai mode — dark lấy độ sâu từ rim dày dần chứ không đổi role; viền state và focus ring ra hai lớp foreground vẽ chồng lên con, cộng thêm chứ không thay nhau; gỡ viền giả `Border.all(color: fill)`; phần web-only của brief 5A bị loại vì Tokyo là desktop còn memox là mobile); M100.32 (`ColorScheme.surface` là nền trang trở lại, giấy về `surfaceContainerLow`; FAB/Card/AppBar/ChoiceChip về binding canonical; `warning` retune cho sàn 4.5); M100.31 (`components/` chia chín họ; role canonical trích từ SDK ghim và tìm ra bốn sai lệch; builder thôi nhận `Color` rời); M100.30 (bóng đổ light thành hai lớp màu Tokyo `#9FA2BF` — `shadow` tách khỏi `scrim`; nhãn nút lên w700; `AppSizing.controlCompact`; golden còn chờ Linux); M100.29 (`lib/core/theme/` chia sáu tầng: token tách khỏi component builder, `ColorScheme` có nguồn riêng `schemes/app_color_scheme.dart`, `AppSizing` nhận ba giá trị đã có, guard chiều import đã kiểm ngược, tài liệu `docs/design-system/theme-architecture.md`); M100.28 (bất biến canonical binding: gỡ `primaryInk`, khôi phục `primary` cho TextButton/OutlinedButton/TabBar, sàn 4,5 và 12° trở lại, `primary` retune `#4454CC` / `#BCC2FF`); M100.27 (`primary`, nền trang, nền card lấy nguyên hex Tokyo theo chỉ định chủ dự án; `primaryInk` cho thương hiệu làm chữ; dark vẽ rim Tokyo thay shade; R9 miễn paper trắng, sàn 4,3 cho nhãn nút light); M100.26 (toàn bộ hệ màu về palette Tokyo — surface, ink, viền, bốn semantic, tertiary, thang container; ngân sách chroma semantic thay bằng luật bốn hue; golden vẽ lại); M100.25 (hai họ accent M3 lấy hue từ palette Tokyo; fill là giá trị Tokyo đầu tiên vượt sàn, container/on giữ tone và chroma; `surfaceContainerHighest` dark tách khỏi `secondaryContainer`); M100.24 (golden về một nền tảng: job CI chuyển sang Linux, thêm bước font, bỏ tolerance); M100.23 (tổ hợp state thôi phá canonical role; guard AST khoá slot→role; luật nền tảng golden); M100.22 (năm component về role M3 canonical; hai hex palette gánh phần contrast; gỡ khái niệm selected ink chung); M100.21 (container cho bốn semantic; chip trạng thái thôi mượn role accent); M100.20 (bảy binding component về role M3; sàn độ nổi của menu bỏ theo quyết định chủ dự án); M100.19 (gỡ ba token thay thế khỏi 112 call-site, golden chứng minh không đổi pixel); M100.18 (dark `primary` đảo tone theo M3; ba token thay thế thành dẫn xuất); M100.17 (`ColorScheme` đúng 45 role M3 — gỡ `surfaceTint` khai tường minh, catalog đủ 45 swatch); M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
+| **Updated by task** | M100.35 (card dark thôi phát sáng: rim Tokyo `#6A7199` blur-2 spread-1/2/3 thay bằng hairline `outlineVariant` blur-0 đo 1.30:1, độ cao nói bằng drop thật; `overlayElevationFor` bị gỡ — elevation ngữ nghĩa độc lập brightness, chỉ màu bóng phụ thuộc; `Card` trần có hairline dark như `MxCard`; `MxCard.option` bắt buộc `onTap` và có disabled thật; gỡ alias `surfaceElevated`; sửa docs lỗi thời; blocking finding cho FilledButton state); M100.34 (screen gallery vẽ lại thành proof sheet: Archivo + JetBrains Mono, accent đỏ china-marker cố ý xa indigo của app, con dấu commit lên hàng đầu, rail 9 nhóm, số khung khớp thứ tự loupe, loupe thêm chế độ so light↔dark cạnh nhau ở 393dp; tên tab thôi đếm để danh tính artifact ổn định); M100.33 (Card thành design primitive: một `ColorScheme` role cho cả hai mode — dark lấy độ sâu từ rim dày dần chứ không đổi role; viền state và focus ring ra hai lớp foreground vẽ chồng lên con, cộng thêm chứ không thay nhau; gỡ viền giả `Border.all(color: fill)`; phần web-only của brief 5A bị loại vì Tokyo là desktop còn memox là mobile); M100.32 (`ColorScheme.surface` là nền trang trở lại, giấy về `surfaceContainerLow`; FAB/Card/AppBar/ChoiceChip về binding canonical; `warning` retune cho sàn 4.5); M100.31 (`components/` chia chín họ; role canonical trích từ SDK ghim và tìm ra bốn sai lệch; builder thôi nhận `Color` rời); M100.30 (bóng đổ light thành hai lớp màu Tokyo `#9FA2BF` — `shadow` tách khỏi `scrim`; nhãn nút lên w700; `AppSizing.controlCompact`; golden còn chờ Linux); M100.29 (`lib/core/theme/` chia sáu tầng: token tách khỏi component builder, `ColorScheme` có nguồn riêng `schemes/app_color_scheme.dart`, `AppSizing` nhận ba giá trị đã có, guard chiều import đã kiểm ngược, tài liệu `docs/design-system/theme-architecture.md`); M100.28 (bất biến canonical binding: gỡ `primaryInk`, khôi phục `primary` cho TextButton/OutlinedButton/TabBar, sàn 4,5 và 12° trở lại, `primary` retune `#4454CC` / `#BCC2FF`); M100.27 (`primary`, nền trang, nền card lấy nguyên hex Tokyo theo chỉ định chủ dự án; `primaryInk` cho thương hiệu làm chữ; dark vẽ rim Tokyo thay shade; R9 miễn paper trắng, sàn 4,3 cho nhãn nút light); M100.26 (toàn bộ hệ màu về palette Tokyo — surface, ink, viền, bốn semantic, tertiary, thang container; ngân sách chroma semantic thay bằng luật bốn hue; golden vẽ lại); M100.25 (hai họ accent M3 lấy hue từ palette Tokyo; fill là giá trị Tokyo đầu tiên vượt sàn, container/on giữ tone và chroma; `surfaceContainerHighest` dark tách khỏi `secondaryContainer`); M100.24 (golden về một nền tảng: job CI chuyển sang Linux, thêm bước font, bỏ tolerance); M100.23 (tổ hợp state thôi phá canonical role; guard AST khoá slot→role; luật nền tảng golden); M100.22 (năm component về role M3 canonical; hai hex palette gánh phần contrast; gỡ khái niệm selected ink chung); M100.21 (container cho bốn semantic; chip trạng thái thôi mượn role accent); M100.20 (bảy binding component về role M3; sàn độ nổi của menu bỏ theo quyết định chủ dự án); M100.19 (gỡ ba token thay thế khỏi 112 call-site, golden chứng minh không đổi pixel); M100.18 (dark `primary` đảo tone theo M3; ba token thay thế thành dẫn xuất); M100.17 (`ColorScheme` đúng 45 role M3 — gỡ `surfaceTint` khai tường minh, catalog đủ 45 swatch); M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
 | **Last updated** | 2026-09-02 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -16944,6 +16944,122 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Dependencies:** M100.23
 - **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
 - **Checklist phases:** 14, 21.
+
+### M100.35 · Card dark thôi phát sáng; elevation thôi mang hai nghĩa
+
+- **Status:** done
+- **Goal:** Chủ dự án bác bỏ diện mạo card dark. Nguyên nhân đo được:
+  `shadowsFor` vẽ Tokyo `shadows.card` nguyên xi — `#6A7199`, `blurRadius: 2`,
+  `spreadRadius` leo 1 → 2 → 3 theo level. Màu đó đo **3.74:1 trên chính mặt
+  card**, tức độ tương phản của một viền *điều khiển* đặt lên một bề mặt đang
+  nghỉ; blur biến nó thành quầng trên góc 16/20 px; và cách nói "cao hơn" là
+  "sáng hơn và dày hơn", thứ mà mười card trong một cột điện thoại in ra thành
+  vệt neon. Tokyo là dashboard desktop ba panel trên canvas rộng; hiệu ứng
+  không sống sót qua chuyến đổi sang mobile, và blur/spread chưa bao giờ là hợp
+  đồng.
+- **Scope:** `app_elevation.dart`, `app_colors.dart` (gỡ `cardRimDark`),
+  `app_card_theme.dart`, `app_fab_theme.dart`, `app_snackbar_theme.dart`,
+  `app_semantic_colors.dart` (gỡ `surfaceElevated`), `app_surface_colors.dart`,
+  `mx_card.dart`; 9 file test; Widgetbook; `docs/design-system/card-recipes.md`
+  (mới), `tokyo-component-mapping.md`, `theme-architecture.md`, `docs/README.md`.
+- **Editable documents:** `docs/wbs.md`, `docs/README.md`,
+  `docs/design-system/*.md`
+- **Output:** như Scope, cộng `test/shared/widgets/card_specimens.dart` và
+  `test/shared/widgets/mx_card_mobile_test.dart` (mới), 4 golden component mới.
+- **Cơ chế độ sâu dark: cũ → mới.**
+
+  | | Trước | Sau |
+  |---|---|---|
+  | Viền nghỉ | `#6A7199`, blur 2, spread 1/2/3 | `ColorScheme.outlineVariant`, **blur 0**, spread `AppStroke.hairline`, **mọi level** |
+  | Đo trên mặt card | 3.74:1 | **1.30:1** (trên trang 1.41:1) |
+  | Nói "cao hơn" bằng | rim dày và sáng hơn | **drop thật**: `scheme.shadow` @ 0.8, có offset, blur, **spread 0** |
+  | Ngân sách drop | — | trang L\* 4.11, mực tối nhất L\* 1.18 → tối đa ΔL\* 2.93; 0.8 tiêu 2.34 |
+
+  `outlineVariant` là role M3 dành đúng cho **viền trang trí**, thứ M3 nói rõ
+  không bị buộc đạt 3:1. Vẽ bằng `BoxShadow` blur-0 chứ không phải `Border`, vì
+  hộp viền thuộc về **state** (chọn / option / focus) — một cue độ sâu dùng
+  chung hộp đó là đúng cái lỗi "một kênh chở hai sự thật" mà M100.33 vừa dọn.
+  Thứ tự vẫn đọc được: `borderSelected` 5.27:1 và `borderOption` 3.33:1 trên
+  mặt card, so với rim 1.30:1.
+- **`overlayElevationFor` bị gỡ, và đây là phần kiến trúc.** Nó trả
+  `AppElevation.none` ở dark — nên FAB *tuyên bố* nằm phẳng với trang ở theme
+  này và cao 8 dp ở theme kia, chỉ để giấu một cái bóng. Đọc SDK 3.44.8 trước
+  khi sửa, không đoán: `Material` đưa `elevation` qua
+  `ElevationOverlay.applySurfaceTint`, hàm này **trả nguyên màu** khi
+  `surfaceTint` là null hoặc trong suốt; `_CardDefaultsM3.surfaceTintColor` là
+  `Colors.transparent` và cả `_FABDefaultsM3` lẫn `_SnackbarDefaultsM3` đều
+  không đặt. Vậy elevation khác 0 trong app này có **đúng một** tác dụng thị
+  giác là cái bóng, nên tắt màu bóng là tắt trọn. Elevation ngữ nghĩa nay
+  **độc lập brightness**; `materialShadowColor` là kênh duy nhất được phép phụ
+  thuộc, và đó là chủ ý.
+  FAB phẳng cả bốn state ở `AppElevation.overlay`: canonical M3 là 6/6/**8**/6
+  và cái 8 là *hover*, thứ Android không có con trỏ để tạo ra.
+- **`Card` trần và `MxCard` nói một thứ tiếng ở dark.** `buildCardTheme` thêm
+  `shape.side` hairline `outlineVariant` ở dark (light không có, theo M99.94).
+  Vẽ trên shape chứ không phải vòng ngoài — khác implementation, cùng ngôn ngữ.
+- **`MxCard.option`: `onTap` bắt buộc, vẫn nullable.** Có trạng thái disabled
+  thật (`CardExportPhase.invalidScope`), và trước đây nó render y hệt bản bấm
+  được: trông bấm được + có ngữ nghĩa đã-chọn + bấm không ăn. Nay `null` nghĩa
+  là disabled, vẽ bằng `disabledSurface`/`onDisabled` (cặp các nút đã dùng) và
+  đọc lên là `button: true, enabled: false`.
+- **Kiểm kê token zero-consumer.** Quét `lib/` sau khi bỏ comment, không tính
+  test/Widgetbook/audit/docs.
+  - `surfaceElevated` — **gỡ (loại B)**. Alias của `ColorScheme.surfaceBright`:
+    hai hằng `AppSurfaceColors.surfaceElevated*` **ở lại** vì `surfaceBright`
+    dẫn xuất từ chúng và kit `--color-surface-elevated` đối chiếu với chúng;
+    chỉ field extension chết. Trả xong khoản nợ ghi ở M100.20.
+  - `onStreakContainer` — **giữ, không phải zero-consumer**. Nó sống qua getter
+    `onDueContainer`, thứ `AppInk` đọc. Đây đúng cái bẫy brief cảnh báo: quét
+    theo tên field bỏ sót alias dẫn xuất.
+  - `warningContainer` / `onWarningContainer` — **giữ, và đây là ngoại lệ có
+    chủ ý cần chủ dự án phúc quyết.** Chúng đúng là không có consumer nào, kể
+    cả case `AppInk.onWarningContainer`. Không thuộc loại A theo nghĩa chặt
+    (không có consumer nào đã duyệt), nhưng cũng không phải alias hay tàn dư:
+    ba trong bốn tone có container được vẽ, và người viết banner cảnh báo kế
+    tiếp mà không thấy `warningContainer` sẽ với tay lấy `tertiaryContainer` —
+    đúng lỗi M100.21 được lập ra để sửa. Rủi ro của việc giữ là một token thừa;
+    rủi ro của việc gỡ là lỗi đó quay lại.
+- **Docs lỗi thời đã sửa:** `MxCard` nói tint dùng `secondaryContainer` (thực
+  tế `surfaceSelected` từ M99.98) và `tonal` dùng `secondaryContainer` (thực tế
+  `surfaceEmphasis`); `paperLight` nói "không phải trắng thuần" trong khi token
+  là `#FFFFFF` từ M100.27; doc `MxCard` còn chép số ΔL\* của thang cũ và nói
+  "dark giữ viền của nó". Ma trận Tokyo bỏ hàng `shadows.card` (dark).
+- **`tonal`: tên đúng, câu chữ sai.** "Tonal" trong M3 nghĩa là một bề mặt mang
+  sắc, và `surfaceEmphasis` đúng là thế — nên sửa câu mô tả, **không** đổi tên.
+  Ghi ở `docs/design-system/card-recipes.md` §4.
+- **Blocking finding cho đợt Button, và nó đã có nhà.** Phát hiện là:
+  `buildSharedButtonStyle` đặt `overlayColor: controlOverlay` còn
+  `buildFilledStyle` chỉ `copyWith` `backgroundColor`, nên hover/press vẽ **cả
+  hai** cơ chế; canonical M3 là `onPrimary` 0.08/0.10 với `backgroundColor`
+  không đổi theo state. Trong lúc đợt này chạy, #432 đã đổ bộ với
+  `docs/reviews/mx-action-button-deep-audit.md` — phủ cùng chuyện, sâu hơn, có
+  đọc `ink_well.dart` để dựng lại thứ tự composite thật. Nên bản ghi đầy đủ tôi
+  viết ở `tokyo-component-mapping.md` §6 **đã bị rút xuống thành con trỏ**: một
+  sự thật sống ở đúng một chỗ. Thứ giữ lại ở §6 là điều thuộc về chính bảng
+  dịch đó — dòng §2 mô tả sai lệch là *thay thế* trong khi code là *phép cộng*.
+- **Acceptance criteria:**
+  - [x] Card dark nghỉ không có viền mờ phát sáng; không quầng tím ở góc 16/20.
+  - [x] `none < card < raised` ở dark vẫn đọc được, bằng drop chứ không bằng
+        glow dày thêm.
+  - [x] Role của card vẫn độc lập brightness (không lùi M100.33).
+  - [x] Viền state / focus foreground, cộng thêm, không xê dịch layout — có
+        test đo hộp ở 320/360/375/393.
+  - [x] `dart format`, `flutter analyze` sạch; **4234/4234** test non-golden
+        xanh; guard kiến trúc, docs, verify_invariants, prompt contract đạt.
+  - [x] Widgetbook thêm ba use-case *tương đối* (Repeated list, States,
+        Edge-to-edge child) và sửa chú thích depth ladder đã lỗi thời.
+  - [x] 4 golden component mới: `card_depth`/`card_states` × light/dark.
+- **Android runtime profiling: HOÃN.** Kiểm tĩnh đã chạy và đủ cho đợt này —
+  `BackdropFilter` 0, `antiAliasWithSaveLayer` 0, `saveLayer` tường minh 0,
+  không có `Material` elevation lồng dư; blur lớn nhất là 24 và chỉ ở
+  `AppElevation.overlay`, thứ không có caller production. Không có phiên đo
+  trên máy thật, nên không tuyên bố đã kiểm hiệu năng runtime.
+- **Dependencies:** M100.34
+- **Tests required:** `app_elevation_test`, `app_theme_test`,
+  `mx_card_recipes_test`, `mx_card_interaction_test`, `mx_card_test`,
+  `mx_card_mobile_test`, `app_semantic_colors_test`, `app_high_contrast_test`,
+  `app_palette_test`, `design_audit/`, `visual_audit/`; golden Linux; CI.
+- **Checklist phases:** 7, 12, 14.
 
 ### M100.34 · Screen gallery vẽ lại thành proof sheet
 

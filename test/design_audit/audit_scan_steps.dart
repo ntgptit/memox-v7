@@ -265,7 +265,6 @@ Map<String, Object?> buildViolations() {
     'colorScheme.shadow',
     'colorScheme.scrim',
     'semantic.surfaceMuted',
-    'semantic.surfaceElevated',
     'semantic.borderSubtle',
   ];
 

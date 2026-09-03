@@ -22,7 +22,7 @@ void main() {
       expect(changed.info, base.info);
       expect(changed.surfaceMuted, base.surfaceMuted);
       expect(changed.borderSubtle, base.borderSubtle);
-      expect(changed.surfaceElevated, base.surfaceElevated);
+      expect(changed.surfaceEmphasis, base.surfaceEmphasis);
       expect(changed.disabledSurface, base.disabledSurface);
       expect(changed.onDisabled, base.onDisabled);
     });
@@ -48,8 +48,8 @@ void main() {
         Color.lerp(light.borderSubtle, dark.borderSubtle, 0.5),
       );
       expect(
-        mid.surfaceElevated,
-        Color.lerp(light.surfaceElevated, dark.surfaceElevated, 0.5),
+        mid.surfaceEmphasis,
+        Color.lerp(light.surfaceEmphasis, dark.surfaceEmphasis, 0.5),
       );
       expect(
         mid.disabledSurface,

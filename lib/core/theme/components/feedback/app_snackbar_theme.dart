@@ -19,8 +19,9 @@ SnackBarThemeData buildSnackBarTheme(ColorScheme scheme, TextTheme texts) =>
       ),
       // The last overlay that let Material decide its depth: Dialog,
       // BottomSheet, PopupMenu and the FAB all state theirs, and this slot's
-      // silence resolved to the SDK's 6.0 — in dark too, where every other
-      // surface has measurably opted out of shadows. Same brightness split as
-      // the FAB, for the same reason (theme-composition review, 2026-08).
-      elevation: overlayElevationFor(scheme),
+      // silence resolved to the SDK's 6.0. Stated, and **the same dp in both
+      // modes since M100.35** — the brightness split this used to share with
+      // the FAB was hiding a shadow by lying about a depth. See
+      // `materialShadowColor`.
+      elevation: AppElevation.overlay,
     );

@@ -224,7 +224,7 @@ Một giá trị Tokyo không nằm trên thang MemoX thì *snap về tier gần
 | `divider` | hairline | `outlineVariant` |
 | `shadows.cardSm` | card ngồi trên trang | `shadowsFor(AppElevation.card)` — float + contact |
 | `shadows.card` | panel nổi hẳn lên | `shadowsFor(AppElevation.raised)` |
-| `shadows.card` (dark) | rim thay shade | `AppColors.cardRimDark` |
+| `shadows.card` (dark) | **không còn dùng** | Rim Tokyo `#6A7199` bị gỡ ở M100.35 — nó đo 3.74:1 trên chính mặt card, tức độ tương phản của một viền *điều khiển*, và blur biến nó thành quầng trên góc 16 px. Dark vẽ `ColorScheme.outlineVariant` sắc nét (1.30:1) + drop thật ở mức trên `card`. |
 | `MuiButton.root.fontWeight: bold` | action đọc ra là action | `buttonLabelWeight` = w700 |
 | `general.borderRadius` 10px | góc mặt phẳng | `AppRadius.lg` (16) — **giữ nguyên thang MemoX** |
 | `MuiButtonBase.borderRadius` 6px | góc control | `AppRadius.md` (12) — như trên |
