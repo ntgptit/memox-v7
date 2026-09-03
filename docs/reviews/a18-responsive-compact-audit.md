@@ -3,6 +3,7 @@
 | | |
 |---|---|
 | BASE_SHA | `3207e7b7e0d3a2ecefa5e6a85fed48a65890ba6b` — *refactor(theme): the dark card stops glowing* (M100.35, #435) |
+| Merged onto | `9d2f4b47` — eight audits (A7, A8, A10–A14, A17) landed on `main` mid-audit. **All eight are report-only: `git diff --stat 3207e7b7..9d2f4b47` is 8 files, all under `docs/reviews/`.** Not one `lib/`, `test/` or `design_system/` file moved, so the BASE_SHA above is still the code state this report describes |
 | Branch | `claude/a18-responsive-compact-audit-srftpd` (session-designated; the task's `audit/a18-responsive-compact` is recorded here rather than pushed, per the branch contract this session runs under) |
 | Declared SDK | Flutter **3.44.8** stable · Dart `^3.12.2` (`pubspec.yaml`) |
 | Scope | Every width-, orientation-, density- and text-scale-dependent decision under `lib/`, plus the tests, goldens, Widgetbook and CSS kit that are supposed to hold them |
@@ -31,18 +32,39 @@ on Flutter's own internals that could not be read at the pinned SDK, it is
 marked ⚠ *unverified against the SDK* rather than asserted.
 
 `flutter analyze`, `flutter test` and `dod_check.sh` were **not run**, for the
-same reason. This is a documentation-only change; the repo's own plan builder
-classifies a docs-only diff as verifying nothing, so nothing was skipped that
-CI will not itself run.
+same reason. `check_docs.py --quiet` **was** run and passes. This is a
+documentation-only change; the repo's own plan builder classifies a docs-only
+diff as verifying nothing, so nothing was skipped that CI will not itself run.
+
+**One sibling audit did read the SDK, and it corrected this one.**
+`a8-navigation-chrome-audit.md` landed on `main` while this audit was in
+progress and cites the pinned framework directly — `app_bar.dart:43-44`
+(`_kMaxTitleTextScaleFactor = 1.34`, applied at `:1091-1097`),
+`navigation_bar.dart:31` (`_kMaxLabelTextScaleFactor = 1.3`, applied at
+`:505-512`) and `navigation_bar.dart:291` (the bar's own `SafeArea`). Those
+three readings resolve every ⚠ item this audit had left open about the app bar
+and the navigation bar, and **one of them falsified a P1 finding written here
+before the merge.** Where A8 read the SDK its reading is adopted and mine
+deferred; §15 lists exactly what was withdrawn, downgraded or handed over, and
+why. A finding that survives that pass is one this audit found and A8 did not
+look at.
 
 ---
 
 ## 1 · Verdict
 
-**The breakpoint model is sound, deliberately small, and honestly documented —
-and it is undermined in two specific places: one constant is compared against
-two different widths, and the header's second line is a fixed 32 dp box with
-growable text in it.**
+**The breakpoint model is sound, deliberately small, and honestly documented.
+The system around it is in better shape than this audit expected, and the three
+findings that survived review are all at its edges rather than in it: a shared
+sheet helper that answers the bottom edge and forgets the top, one constant
+compared against two different widths, and a scrollbar tuned for a desktop it
+does not ship to while carrying a mobile job it cannot do at 1.79 : 1.**
+
+Two things this audit first filed as defects were withdrawn on review against
+the sibling audits that landed mid-pass — one of them a P1. §15 is the
+reconciliation, and it is part of the finding set rather than a note at the
+back: a report that quietly drops a claim it made is worse than one that never
+made it.
 
 What is right, and what the next pass must not "simplify":
 
@@ -57,10 +79,14 @@ What is right, and what the next pass must not "simplify":
   `titleLarge` (22→20) and `AppTextStyles.cardPrompt` (30→26) and nothing else
   typographic. `bodyLarge/Medium/Small` and every `label*` rung are untouched at
   every width.
-- **`textScaler` is never clamped, anywhere.** 43 references across `lib/`, and
-  not one is a `TextScaler.linear`, a clamp or a `MediaQuery(textScaler:)`
+- **The app never clamps `textScaler`.** 43 references across `lib/`, and not
+  one is a `TextScaler.linear`, a clamp or a `MediaQuery(textScaler:)`
   override. Fifteen call sites *scale a threshold by the live scaler* before
-  comparing it — the correct shape, and unusually consistent.
+  comparing it — the correct shape, and unusually consistent. (Flutter clamps
+  it in two slots of its own — the `AppBar` title at 1.34 and navigation-bar
+  labels at 1.3 — which §7.1 uses and A8's **G10** files as unstated. That is a
+  framework ceiling, not an app decision, and it does not weaken this bullet:
+  no app code takes the user's setting away.)
 - **The 48 dp touch floor is structural, not conventional.** `minimumSize` in
   `buildSharedButtonStyle` and `app_icon_button_theme`, `tapTargetSize: padded`
   on the theme, and `_compactPadding` explicitly giving back *horizontal* room
@@ -75,26 +101,34 @@ What the next pass has to fix:
 | # | Finding | Sev |
 |---|---|---|
 | R1 | **Seven `isScrollControlled` sheets omit `useSafeArea`** — the shared `showMxFormSheet` among them; the fix already exists at one call site and was never generalised | **P1** |
-| R2 | **The header's second line is a fixed 32 dp box**, at both of its implementations, holding text that measures 40 at scale 2.5 and 48 at 3.0 — clipped silently, on the app's landing screen and every deck screen | **P1** |
 | R3 | `MxHeroCard` compares a **card** width against a **screen** constant → the effective threshold is 392 dp; 360 / 375 / 390 take one branch and 393 takes the other, and the two test harnesses straddle it | **P2** |
-| R4 | The deck list **adds `viewPadding.bottom` a second time** — the nav bar already removed it and the shell's `SafeArea` already ran; it also contradicts the rule written in the search list | **P2** |
 | R5 | Scrollbar thumb measures **1.79 : 1** light / **2.00 : 1** dark on the card paper, from a bare `0.4` alpha that is on no token — on the one surface where the scrollbar *is* the "there is more to read" cue | **P2** |
+| R2′ | The one breadcrumb path that sizes itself with a **fixed** `SizedBox(height:)` instead of a `minHeight` — safe today only because of the 1.34 AppBar clamp, and a hidden precondition on A8's P1-02 option (B) | P3 |
 | R6 | `ScrollbarThemeData.thickness` is a `WidgetStatePropertyAll`, so it is 4 dp in **every** state — no hover/drag thickening on the channel that has a pointer | P3 |
 | R7 | `MobileFrameWidget` zeroes `viewInsets`, `viewPadding` **and** `padding` → the E2E/visual channel cannot reproduce a keyboard or a cutout at all | P3 |
 | R8 | `mxSheetBottomObstruction` uses `MediaQuery.of` — one of only two full-data subscriptions in `lib/` | P3 |
 | R9 | `AppBreakpoints.medium` caps 4 surfaces of ~26 → above 600 dp the app is half-capped, by accretion rather than by decision | P3 |
 | R10 | Kit parity: the CSS kit publishes the compact tokens but has **no rule that applies them**, no compact gutter token, and neither shipped device is below 360 | P3 |
+| ~~R4~~ | The deck list's extra `viewPadding.bottom` — **already filed as A8's P3-20**, with a sharper mechanism than this audit had. Handed over, not restated (§15) | — |
 
-And the coverage holes that let R1–R4 exist unnoticed:
+**R2 was written as a P1 and is withdrawn.** It claimed the header's second line
+clips above `textScaler` 2.0. It does not: `AppBar` clamps its title slot — and
+`titleSubline` is inside that slot — to **1.34×**, so the `bodySmall` line box
+tops out at 12 × 1.3333 × 1.34 = **21.4 dp** inside its 32 dp box and never
+reaches it. The arithmetic in §7.1 was right; the premise that the ambient
+scaler reaches that text was wrong, and it was wrong for exactly the reason §0
+gives — no SDK to read. What survives is R2′, at P3.
+
+And the coverage holes that let R1, R3 and R5 exist unnoticed:
 
 | # | Gap | Sev |
 |---|---|---|
-| G1 | **375 dp appears in exactly one test file** in the repository, and **360 dp in three** — neither is a screen-level surface anywhere | **P2** |
 | G2 | No test asserts a sheet's top edge against the status bar, at any width or scale — the class R1 lives in | **P2** |
 | G3 | `hero_action_width_test` pins 320 and 393 only, i.e. both sides of the *stated* threshold and neither side of the *effective* one | P2 |
 | G4 | **4 of 152** committed screen goldens are at a compact width, covering 3 screens; Library, Study Home, Progress, Settings, Card list and the study session have no compact picture at all | P2 |
 | G5 | No screen-level landscape test, though nothing in the manifest or in `lib/` locks the orientation | P3 |
 | G6 | Widgetbook renders the breakpoint tokens as swatches (`scale_sections.dart`) but has no compact-width or text-scale knob, so the tier is not reachable in the catalog | P3 |
+| ~~G1~~ | 375 dp untested — **already filed as A8's P3-21.** This audit adds only that 360 dp is no better off at screen level, and §13 keeps the shared-matrix remedy because it closes G3 in the same move (A8 · P3-21) | — |
 
 ---
 
@@ -286,7 +320,7 @@ anything added.
 | `mx_hero_card.dart:58` | the tier constant applied to a **card** width — see **R3** |
 | `deck_list_sliver_widget.dart:73` | gutter written as `AppSpacing.lg` rather than `mxScreenGutter(context)` — the rule `mxScreenGutter`'s own docstring says must not be re-derived |
 | `mx_sheet_insets.dart:50–54` | sheet gutter written as `AppSpacing.lg` ×4 — same shape, different surface |
-| `library_search_body_widget.dart:17–24` vs `deck_list_sliver_widget.dart:18–26` | two neighbouring lists inside **the same navigation shell** documenting **opposite** rules about the bottom system inset — see **R4** |
+| `library_search_body_widget.dart:17–24` vs `deck_list_sliver_widget.dart:18–26` | two neighbouring lists inside **the same navigation shell** documenting **opposite** rules about the bottom system inset, and reusing the same private name `_kListBottomInset` for two different numbers. A8 filed both halves — **P3-20** and **P3-22**; §8 and §15 defer to them |
 | `design_system/ui_kits/memox-app/index.html:50` | `COMPACT_BELOW = 360` is correct, but neither shipped device (412, 375) is below it — see **R10** |
 
 ---
@@ -298,10 +332,10 @@ it:
 
 | Constant | Value | Holds text? | Verdict |
 |---|---|---|---|
-| `MxBreadcrumb.compactLineHeight` used as `SizedBox(height:)` — `mx_breadcrumb.dart:193` | 32 | **yes**, `bodySmall` | **R2 — clips above scale 2.0** |
-| same, used as `SizedBox(height:)` — `deck_subheader_widget.dart:42` | 32 | **yes**, `bodySmall` | **R2 — clips above scale 2.0** |
-| same, used as `BoxConstraints(minHeight:)` — `mx_breadcrumb.dart:324`, `mx_breadcrumb_step.dart:144` | 32 / 48 | yes | correct — a floor, grows |
-| same, as an unscaled term in `_toolbarHeight` — `mx_content_shell.dart:275` | 32 | reserves for the subline | consistent **only because** the box above is fixed; fixing R2 without this makes the *bar* clip instead |
+| `MxBreadcrumb.compactLineHeight` used as `SizedBox(height:)` — `mx_breadcrumb.dart:193` | 32 | **yes**, `bodySmall` | **R2′** — safe at 21.4 dp under the 1.34 clamp; the only breadcrumb path with a fixed height rather than a floor |
+| same, used as `SizedBox(height:)` — `deck_subheader_widget.dart:42` | 32 | **yes**, `bodySmall` | same — safe under the clamp, for the same reason and by the same margin |
+| same, used as `BoxConstraints(minHeight:)` — `mx_breadcrumb.dart:324`, `mx_breadcrumb_step.dart:144` | 32 / 48 | yes | correct — a floor, grows; **this is the shape the two rows above should have** |
+| same, as an unscaled term in `_toolbarHeight` — `mx_content_shell.dart:275` | 32 | reserves for the subline | correct term, wrong scaler on the *other* term — **A8's P2-13**, over-reservation not exhaustion |
 | `AppGuessPrompt.cardMaxHeight` / `cardMinHeight` | 320 / 180 | yes, `cardPrompt` | correct — a clamp between two measured bounds, with the row demand measured first |
 | `_ringSize` (`card_progress_panel_widget.dart:154`) | 64 | no | fine |
 | `_stateDotSize` (×2) | 10 | no | fine |
@@ -311,7 +345,7 @@ it:
 | `widthPerNavigationDestination` | 120 | yes | correct — a cap that self-disarms; parity-checked against the CSS kit |
 | `MxDialogMetrics.inset` / `actionsInset` | 40 / 24 | n/a | correct — stated so an SDK bump cannot move it silently |
 | `kMobileFrameSize` | 393 × 852 | n/a | dev-channel only; see R7 |
-| `NavigationBar` height | Material default, **no app token** | yes, labels | ⚠ *unverified against the SDK* — the theme sets no `height`, so the bar's extent and any internal label-scale clamp are Material's. `mx_navigation_bar_test.dart:226` covers 320 @ 2.0; nothing covers 3.0 |
+| `NavigationBar` height | Material default, **no app token** | yes, labels | Resolved by A8: labels are clamped to **1.3×** (`navigation_bar.dart:31`, applied `:505-512`), so the default height is safe at any user setting. A8 files the *unstated assumption* as its G10 — nothing in this repo pins either SDK clamp |
 
 ---
 
@@ -320,37 +354,43 @@ it:
 Derived, not measured (§0). `bodySmall` = 12 px with declared `height: 16/12`,
 so its line box is exactly `12 × 1.3333 × scale`.
 
-### 7.1 The header's second line — the finding
+### 7.1 The header's second line — where the clamp lands
 
-| scale | `bodySmall` line box | Box (fixed) | Result |
+The box is a fixed 32 dp; the text is `bodySmall`, 12 px with a declared
+`height: 16/12`. So the question is only ever which scaler reaches it — and
+because both implementations sit in `MxContentShell.titleSubline`, which
+`_buildTitle` puts inside `AppBar`'s title slot, the answer is the clamp:
+
+| Effective scaler | `bodySmall` line box | Box (fixed) | Result |
 |---|---|---|---|
 | 1.0 | 16.0 | 32 | 16 dp of slack |
 | 1.3 | 20.8 | 32 | fits |
-| 2.0 | **32.0** | 32 | fits with **zero** slack |
-| 2.5 | **40.0** | 32 | **8 dp clipped** |
-| 3.0 | **48.0** | 32 | **16 dp clipped — roughly the lower quarter of every glyph** |
+| **1.34 — the ceiling** (`app_bar.dart:43-44`) | **21.4** | 32 | **fits, 10.6 dp to spare, at every user setting** |
+| *(2.0, unreachable here)* | *32.0* | 32 | *would fit with zero slack* |
+| *(2.5 / 3.0, unreachable here)* | *40.0 / 48.0* | 32 | *would clip 8 / 16 dp* |
 
-Width-independent: the box is 32 at 320, 360, 375 and 393 alike. `maxLines: 1` +
-`TextOverflow.ellipsis` means `RenderParagraph` sets `_needsClipping` itself, so
-this **clips rather than overflows** — no exception, no yellow stripe, and
-nothing a `takeException()` assertion can see. That is why the existing 320 ×
-2.0 suite is green: 2.0 is the last scale that fits, exactly.
+Width-independent: the box is 32 at 320, 360, 375 and 393 alike, and the clamp
+is width-independent too. **So there is no clip, at any width and any user text
+setting** — the rows in italics are what would happen if this text were ever
+moved out of the title slot, which is R2′ and which A8's P1-02 option (B) is
+one plausible route to.
 
-### 7.2 The app bar's own budget
+Worth stating because it is the trap: `maxLines: 1` + `TextOverflow.ellipsis`
+means `RenderParagraph` would set `_needsClipping` itself and **clip rather than
+overflow** — no exception, no yellow stripe, nothing a `takeException()`
+assertion could see. A fixed box holding growable text is therefore a defect
+that tests cannot find by accident; here it is disarmed by an SDK constant that
+nothing in the repository states.
 
-`_toolbarHeight = max(48, scale(titleSize) × titleHeight + 8 + 32 + 16)`.
+### 7.2 The app bar's own budget — deferred to A8's P2-13
 
-| Width | Title size | scale 1.0 | 2.0 | 3.0 |
-|---|---|---|---|---|
-| 320 (compact) | 20 | 81.5 | 106.9 | 132.4 |
-| 360 / 375 / 393 | 22 | 84.0 | 112.0 | 140.0 |
-
-The `+ 32` term is `MxBreadcrumb.compactLineHeight` **unscaled**, and `+ 16`
-(`_barPadding`) is the slack its own docstring says exists to absorb a subline
-growing past 32. That slack is **exactly 16**, and a `bodySmall` subline wants
-16 more than 32 at precisely `textScaler` 3.0. So the bar's arithmetic is
-correct today only because §7.1's box refuses to grow; the two defects cancel,
-and either one fixed alone moves the clip rather than removing it.
+`_toolbarHeight = max(48, scale(titleSize) × titleHeight + 8 + 32 + 16)` reads
+the **ambient** scaler for its title term while the content it measures is
+clamped at 1.34. A8 §9.4 has the full table and files it as **P2-13**: the
+error is 34.5 dp of *dead slack* at a user setting of 2.0, not a shortfall. This
+audit's earlier reading — that `_barPadding`'s 16 dp was exactly exhausted at
+3.0 — assumed the unclamped scaler reached both terms and is withdrawn. The
+`+ 32` term is correct precisely because the subline cannot grow.
 
 ### 7.3 Widths at a glance
 
@@ -369,18 +409,25 @@ and either one fixed alone moves the clip rather than removing it.
 | nav row | edge-to-edge (cap 480 never binds) | | | |
 | committed golden? | 4 of 152 | **none** | **none** | 148 of 152 |
 
-The two middle columns are the audit's blind spot and the reason G1 is filed at
-P2: **360 and 375 are the two most common phone widths in the world, they take a
-different branch from the reference device on at least one rule, and the
-repository renders neither of them anywhere.**
+The two middle columns are the audit's blind spot: **360 and 375 are the two
+most common phone widths in the world, they take a different branch from the
+reference device on at least one rule (R3), and the repository renders neither
+of them anywhere.** A8 filed the 375 half as its P3-21; the reason this audit
+still asks for a shared width matrix is G3 — the same fixture is what makes R3
+visible, and R3 is invisible at both of the widths currently tested.
 
 ### 7.4 320 × scale 2 and × scale 3, where it is critical
 
+A user setting of 2.0 or 3.0 does not reach every surface — §7.1's clamp table
+is the reason, and it is what makes two of these rows read the opposite way to
+how they were first written.
+
 | Surface | @ 2.0 | @ 3.0 |
 |---|---|---|
-| Deck list header second line | fits exactly (0 slack) | **clipped 16 dp** (R2) |
-| Deck detail path strip | fits exactly (0 slack) | **clipped 16 dp** (R2) |
-| App bar block | 16 dp slack | **0 slack** (§7.2) |
+| Deck list header second line | renders at **1.34** — fits, 10.6 dp spare | same; clamp is absolute |
+| Deck detail path strip | renders at **1.34** — fits | same |
+| App bar block | **34.5 dp of dead slack** (A8 P2-13) | more |
+| Card list path strip, one tap deeper | **unclamped, 2.0** — same component, different scale (A8 P1-02) | unclamped, 3.0 |
 | Confirm dialog | `scrollable: true`, `MxButtonPair` stacks — covered, with the reason written down | same |
 | Form dialog | `scrollable: true` — covered | same |
 | Study direction sheet | `isScrollControlled` **+ `useSafeArea`** — covered, and the only sheet that is | same |
@@ -402,25 +449,29 @@ can hide under the bar — the comment says this and the layout depends on it.
 rather than chosen, and read by the one screen that has a FAB (deck list). That
 part is right.
 
-**R4 is what sits on top of it.** `deck_list_sliver_widget.dart:79`:
+**The extra term at `deck_list_sliver_widget.dart:79` is A8's P3-20, and A8 got
+the mechanism right where this audit did not.**
 
 ```dart
 _kListBottomInset + MediaQuery.viewPaddingOf(context).bottom
 ```
 
-`viewPadding` is the inset **as if no widget had consumed it** — by design it
-survives both `MediaQuery.removePadding` (which the `Scaffold` applies to its
-body because a `bottomNavigationBar` is present) and `SafeArea` (which
-`MxContentShell` wraps the body in). So by the time this line runs, the gesture
-strip has already been accounted for twice, and this adds it a third time:
-**24 dp on a gesture-nav device, 48 dp with three-button navigation**, of empty
-scroll under the last deck card. `library_search_body_widget.dart:17–24`, a
-sibling list in the same shell, documents the opposite conclusion — "the shell
-has already reserved it" — and adds `lg` only. One of the two is wrong; the
-search list is the one that reasons correctly.
+This audit first read that as a flat 24–48 dp of dead scroll on every device,
+reasoning that `viewPadding` survives both the `Scaffold`'s `removePadding` and
+`MxContentShell`'s `SafeArea`. **That is wrong**, and A8 §11 shows why:
+`removePadding` leaves `max(0, viewPadding.bottom − padding.bottom)`, so inside
+a shell branch — where the navigation bar has already paid the gesture inset in
+its own `SafeArea` (`navigation_bar.dart:291`) — the term is normally **0**. It
+goes non-zero only while the keyboard is up, and then it is a little extra tail
+inset rather than a defect. What remains true is that the comment beside it
+claims a need the navigation bar has already met, and that
+`library_search_body_widget.dart:17–24` documents the opposite rule under the
+same private name. Both halves are filed as A8's **P3-20** and **P3-22**; this
+audit adds nothing and defers.
 
 `MediaQuery.viewPaddingOf` appears **once** in production outside the sheet
-helpers, and this is it.
+helpers, and this is it — which is the one fact worth keeping from the original
+reading, because it means there is exactly one place to change.
 
 ---
 
@@ -592,9 +643,13 @@ is the shape M100.23 spent a milestone removing from four other components.
 
 Histogram of every `Size(w, h)` literal under `test/`:
 
+Counted by **width**, summing every height — A8 §12 counts the same literals by
+full `Size(w, h)` pair, so its 320×568 (49) and 360×640 (27) are subsets of the
+rows below rather than different readings:
+
 | Width | Occurrences | Where |
 |---|---|---|
-| 320 | **80** | stress, compact goldens, geometry, screen tests |
+| 320 | **80** | stress, compact goldens, geometry, screen tests (568 / 640 / 720 / 852 / 1400) |
 | 393 | 30 | `kReviewSurface`, demo goldens, shell tests |
 | 390 | 28 | `host_widget_app.dart` default (390 × 780) |
 | 360 | **30** | `mx_navigation_bar_test` default, three others |
@@ -688,42 +743,9 @@ calls. It is one argument; there is no layout redesign in it.
 
 ---
 
-**R2 · The header's second line is a fixed 32 dp box holding growable text**
-
-*Evidence.* Two sites, one constant:
-
-- `mx_breadcrumb.dart:192–193` — `_buildSingleTarget` wraps the whole strip in
-  `SizedBox(height: widget.lineHeight)`. This is the branch taken whenever
-  `onUp != null`, which is **`DeckPathWidget` and only `DeckPathWidget`**
-  (`deck_path_widget.dart:81, 87` passes `lineHeight: compactLineHeight` = 32
-  and `onUp`). The three card-side callers pass no `onUp`, take the
-  `BoxConstraints(minHeight:)` branch at `:324`, and grow correctly.
-- `deck_subheader_widget.dart:41–42` — the root branch returns
-  `SizedBox(height: MxBreadcrumb.compactLineHeight)` around a `bodySmall` `Text`.
-
-Arithmetic in §7.1: `bodySmall` is 12 px × `height: 16/12`, so the line box is
-exactly 32 at `textScaler` 2.0 and 40 / 48 at 2.5 / 3.0. `maxLines: 1` with
-`TextOverflow.ellipsis` makes `RenderParagraph` clip itself, so there is **no
-exception and no overflow stripe** — which is why every existing 320 × 2.0
-assertion is green: 2.0 is the last scale that fits, to the pixel.
-
-*Blast radius.* The Library landing screen (root branch) and every deck detail
-screen (path branch) — the two most-visited surfaces in the app.
-
-*Closure test.* `test/shared/widgets/mx_breadcrumb_text_scale_test.dart`, new.
-At `textScaler` 2.5 and 3.0, pump `DeckSubheaderWidget` (root snapshot) and
-`DeckPathWidget`, then assert
-`tester.getSize(find.byType(Text).first).height >= painter.height`
-where `painter` is a `TextPainter` laid out with the same style and scaler —
-i.e. the box is at least as tall as the line it holds. Must fail at 2.5 today.
-
-*Fix shape.* `BoxConstraints(minHeight: lineHeight)` in place of
-`SizedBox(height: lineHeight)` at both sites — the same shape
-`mx_breadcrumb.dart:324` already uses. **And in the same commit**,
-`_toolbarHeight` must scale its subline term (`scaler.scale(compactLineHeight)`
-rather than the bare constant), or the clip moves from the text to the app bar:
-§7.2 shows the `_barPadding` slack is exactly 16 and is exactly spent at
-`textScaler` 3.0.
+**R2 · withdrawn — see §7.1.** It is reproduced in §15 with the reason, rather
+than deleted, because the arithmetic is still the arithmetic anyone re-deriving
+R2′ will do. What replaced it is R2′, at P3, below.
 
 ### P2
 
@@ -762,24 +784,10 @@ argues for. Owner's call — do not pick it inside a fix commit.
 
 ---
 
-**R4 · The deck list adds the system inset a second time**
-
-*Evidence.* §8. `deck_list_sliver_widget.dart:79` adds
-`MediaQuery.viewPaddingOf(context).bottom` to `fabScrollClearance`, inside a
-`Scaffold` whose `bottomNavigationBar` already removed the bottom padding and
-inside `MxContentShell`'s `SafeArea`. `viewPadding` survives both by definition.
-`library_search_body_widget.dart:17–24`, in the same shell, documents the
-opposite rule and adds `lg` only. Cost: 24 dp (gesture) to 48 dp (three-button)
-of dead scroll under the last card.
-
-*Closure test.* `test/features/deck/presentation/deck_list_bottom_inset_test.dart`,
-new. Pump the deck list through the real shell at 393 × 852 with
-`viewPadding: EdgeInsets.only(bottom: 48)`, scroll to the end, and assert the
-gap between the last card's bottom and the viewport bottom equals
-`AppSpacing.fabScrollClearance` — not 88 + 48.
-
-*Fix shape.* Delete the `viewPaddingOf` term. Then the two lists agree and the
-rule lives in one comment instead of two contradictory ones.
+**R4 · handed to A8's P3-20 — see §8.** The mechanism this audit proposed was
+wrong and A8's is right; restating it here at a different severity is exactly
+the two-copies-one-drifts failure `docs/document-conventions.md` exists to
+prevent.
 
 ---
 
@@ -804,24 +812,27 @@ the desktop channel should keep the fading thumb).
 
 ---
 
-**G1 · 375 dp is tested once and 360 dp never at screen level**
+**G3 · the hero test pins the stated threshold, not the effective one — and the
+width matrix is what closes it**
 
 *Evidence.* §12.1. `375` occurs in one file (`mx_card_mobile_test.dart`); `360`
 is a default surface in `mx_navigation_bar_test.dart` and appears in two others;
 neither is a screen-level surface anywhere, and neither has a golden.
+`hero_action_width_test.dart` pins 320 and 393 — the two widths at which R3 is
+invisible. A8's **P3-21** already files the 375 half of this as a coverage gap;
+what this audit adds is *why it now has a defect attached to it.*
 
-*Closure test.* This is the gap, so the test *is* the fix: promote
-`mx_card_mobile_test.dart`'s `const widths = [320, 360, 375, 393]` to a shared
-`test/support/phone_widths.dart` and drive at least the three shell-level
-geometry suites (deck list, study home, progress) over it, asserting gutters,
-the hero branch and no exception. No new goldens — the repo's own rule is that
+*Closure test.* Promote `mx_card_mobile_test.dart`'s
+`const widths = [320, 360, 375, 393]` to a shared
+`test/support/phone_widths.dart`, add 390 (the `host_widget_app` default, §12.2),
+and drive `hero_action_width_test.dart` plus at least the three shell-level
+geometry suites (deck list, study home, progress) over it — asserting gutters,
+the hero branch and no exception. No new goldens: the repo's own rule is that
 another width belongs to the test that measures it, not to the gallery.
 
 ---
 
-**G2 · No test asserts a sheet's top edge**, and **G3 · the hero test pins the
-stated threshold, not the effective one** — both closed by R1's and R3's tests
-above.
+**G2 · No test asserts a sheet's top edge** — closed by R1's test above.
 
 ---
 
@@ -839,6 +850,7 @@ the next audit does not re-open it.
 
 | # | Finding | Evidence | Closure |
 |---|---|---|---|
+| R2′ | The one breadcrumb path sized by a fixed `SizedBox(height:)` rather than a `minHeight` | `mx_breadcrumb.dart:193` (`_buildSingleTarget`, the branch `DeckPathWidget` always takes) and `deck_subheader_widget.dart:42`; §7.1's clamp table is why it is safe | **A precondition, not a test.** If A8's **P1-02** is settled as option (B) — the strip form wins, the path moves to `subheader` — that text becomes unclamped and a fixed box is the wrong shape at 48 dp too (`bodySmall` measures exactly 48 at scale 3.0, zero slack). Whoever executes P1-02 should change these two to `BoxConstraints(minHeight:)` in the same commit, matching `mx_breadcrumb.dart:324`. Under option (A) it is a no-op |
 | R6 | Scrollbar `thickness` constant across states | `app_scrollbar_theme.dart:15` — `WidgetStatePropertyAll` resolves to 4 for `hovered`/`dragged` too | Resolver test asserting `thickness.resolve({hovered})` > resting |
 | R7 | Web frame zeroes `viewInsets`/`viewPadding`/`padding` | `mobile_frame_widget.dart:62–67` | No test — record the decision in `docs/architecture.md` beside AD-04, so "the E2E channel is not evidence for keyboard or inset behaviour" is written rather than inferred |
 | R8 | `MediaQuery.of` in `mxSheetBottomObstruction` | `mx_sheet_insets.dart:26` — one of only two `MediaQuery.of` in `lib/`; subscribes to size, brightness and text scale to read two insets | Swap to `viewInsetsOf` + `viewPaddingOf`; no behaviour change, so a rebuild-count test or nothing |
@@ -857,15 +869,15 @@ a decision that has not been made yet.
 | # | Step | Files | Gate |
 |---|---|---|---|
 | 1 | **R1** — `useSafeArea: true` on seven sheets | `mx_form_sheet.dart`, `card_bulk_overlays_widget.dart`, `card_export_sheet_widget.dart`, `deck_actions_widget.dart`, `starter_install_widget.dart`, `deck_scheduler_change_widget.dart`, `deck_reset_progress_widget.dart` + new `mx_sheet_safe_area_test.dart` | new test red → green; existing sheet goldens unchanged (no top padding in the golden harness) |
-| 2 | **R2** — the fixed 32 dp box, **both halves in one commit** | `mx_breadcrumb.dart:193`, `deck_subheader_widget.dart:42`, `mx_content_shell.dart:275` + new `mx_breadcrumb_text_scale_test.dart` | new test red → green at 2.5 and 3.0; **regenerate goldens** — the app bar's height is unchanged at scale 1.0 by this arithmetic, so a golden diff here means the fix moved something it should not have |
-| 3 | **R4** — drop the double inset | `deck_list_sliver_widget.dart:79` + new `deck_list_bottom_inset_test.dart` | new test red → green; deck-list goldens unchanged (the harness reports no `viewPadding`) |
-| 4 | **G1** — the width matrix | new `test/support/phone_widths.dart`; extend `deck_list`, `study_home_geometry`, `progress_screen_geometry` | green at 320/360/375/393; expect it to **record** R3's current behaviour, not fix it |
-| 5 | **R3 decision, then fix** | `mx_hero_card.dart` or `app_breakpoints.dart`; extend `hero_action_width_test.dart` | blocked on the owner's (a)/(b) choice in §13 |
-| 6 | **R5** — the thumb | `app_scrollbar_theme.dart`, `study_card_face_pieces_widget.dart`, contrast suite | 3 : 1 in four themes; **regenerate goldens** — the study card face changes |
-| 7 | **R6 / R8 / R10** — the cheap ones | `app_scrollbar_theme.dart`, `mx_sheet_insets.dart`, `design_system/ui_kits/memox-app/index.html` | analyze + existing suites |
-| 8 | **R7 / R9 / G4 / G5** — decisions, not code | `docs/architecture.md` (AD-04 note), `docs/wbs.md` | `check_docs.py` |
+| 2 | **G3** — the shared width matrix | new `test/support/phone_widths.dart`; extend `hero_action_width_test`, `deck_list`, `study_home_geometry`, `progress_screen_geometry` | green at 320/360/375/390/393; expect it to **record** R3's current behaviour, not fix it. Closes A8's P3-21 in the same move |
+| 3 | **R3 decision, then fix** | `mx_hero_card.dart` or `app_breakpoints.dart`; the matrix from step 2 | blocked on the owner's (a)/(b) choice in §13 |
+| 4 | **R5** — the thumb | `app_scrollbar_theme.dart`, `study_card_face_pieces_widget.dart`, contrast suite | 3 : 1 in four themes; **regenerate goldens** — the study card face changes |
+| 5 | **R6 / R8 / R10** — the cheap ones | `app_scrollbar_theme.dart`, `mx_sheet_insets.dart`, `design_system/ui_kits/memox-app/index.html` | analyze + existing suites |
+| 6 | **R7 / R9 / G4 / G5** — decisions, not code | `docs/architecture.md` (AD-04 note), `docs/wbs.md` | `check_docs.py` |
+| — | **R2′** | `mx_breadcrumb.dart:193`, `deck_subheader_widget.dart:42` | **Not a step of its own.** It rides along with whoever executes A8's P1-02, and only if that lands as option (B) |
+| — | **R4 / G1 / §7.2** | — | Owned by A8 as P3-20 / P3-21 / P2-13. Do not open a second change for them |
 
-**Steps 2 and 6 move committed pictures**, so each ends with
+**Step 4 moves committed pictures**, so it ends with
 
 ```bash
 TZ=UTC flutter test --tags golden --update-goldens
@@ -876,18 +888,106 @@ and a republish to the existing gallery URL, on Linux — `dart_test.yaml` and
 `CLAUDE.md` both make Linux the only authoring platform, and this session could
 not have regenerated them in any case (§0).
 
-## 15 · Decisions this audit needs from the owner
+**Sequence note.** Steps 1, 4 and 5 are independent of every open decision and
+of A8 entirely; they can land today. Step 2 is a test-only change and is worth
+landing before step 3 so the decision is taken against measured behaviour rather
+than against this report's arithmetic.
 
-1. **R3 (a) or (b)** — is the hero's rule about the screen or about the card? A
+## 15 · Relationship to the sibling audits
+
+Eight audits landed on `main` while this one was in progress (§ header). Two
+overlap it — **A8 · navigation and screen chrome** and **A14 · shared
+compositions** — and A8 overlaps it heavily, because `MxContentShell`,
+`MxBreadcrumb`, `MxNavigationBar` and the deck list's bottom inset are its
+subject as much as they are this audit's. `docs/document-conventions.md` says
+one fact lives in exactly one place, so the reconciliation is part of the
+deliverable rather than an appendix to it.
+
+### 15.1 Withdrawn, because A8 read the SDK and this audit could not
+
+**R2 — "the header's second line clips above `textScaler` 2.0" — is false.**
+
+The arithmetic was right: `bodySmall` is 12 px × `height: 16/12`, so its line
+box is 16 × the effective scaler, and both implementations
+(`mx_breadcrumb.dart:193`, `deck_subheader_widget.dart:42`) put it in a fixed
+32 dp box. At an *ambient* scaler of 2.5 that is 40 into 32, and
+`RenderParagraph` would clip it silently.
+
+The premise was wrong. Both sites reach the screen through
+`MxContentShell.titleSubline`, which `_buildTitle` composes **inside `AppBar`'s
+title slot**, and `AppBar` wraps that slot in a clamp of **1.34×**
+(`_kMaxTitleTextScaleFactor`, `app_bar.dart:43-44`, applied `:1091-1097` — A8's
+citation, at the pinned SDK). 12 × 1.3333 × 1.34 = **21.4 dp** into a 32 dp box,
+at every user setting, at every width. There is no clip and there never was.
+
+`onUp != null` is the only route into `_buildSingleTarget`, and `DeckPathWidget`
+is its only caller, and it is only ever a `titleSubline` — so there is no third
+site where the ambient scaler reaches that box. The finding is dead, not merely
+mitigated.
+
+**Why it is written down rather than deleted.** The fixed box is still the only
+breadcrumb path sized by a `SizedBox(height:)` where the other three use
+`BoxConstraints(minHeight:)`, and it is safe by an SDK constant that
+**A8's own G10 records as unstated anywhere in this project**. That is R2′ at
+P3, and it is a live precondition on A8's P1-02: option (B) moves this text out
+of the clamp. The next person to re-derive R2 will do exactly this arithmetic,
+and the useful thing to hand them is the answer, not the absence of a question.
+
+### 15.2 Handed over — A8 filed it first, and better
+
+| This audit's draft | A8's finding | What A8 had that this did not |
+|---|---|---|
+| R4 · deck list adds `viewPadding.bottom` (claimed 24–48 dp always) | **P3-20** | `removePadding` leaves `max(0, viewPadding − padding)`, so the term is normally **0** inside a shell branch and non-zero only with the keyboard up — and `navigation_bar.dart:291` is where the inset is actually paid. The magnitude claim here was wrong |
+| §7.2 · `_toolbarHeight`'s subline budget "exactly exhausted at 3.0" | **P2-13** | The clamp again: the bar over-reserves by 34.5 dp at a 2.0 setting rather than running out. Opposite sign |
+| §5.3 · `_kListBottomInset` means two different numbers in two files | **P3-22** | Nothing — same finding, A8 got there first |
+| G1 · 375 dp untested | **P3-21** | Nothing — same finding, and A8's histogram is the same one |
+| §6 · `NavigationBar` height "⚠ unverified" | **G10** | `_kMaxLabelTextScaleFactor = 1.3` (`navigation_bar.dart:31`), which closes the question, plus the sharper framing that the *assumption* is what is missing |
+
+None of these should get a change of its own. Where this audit's step list
+mentions them (§14) it is to say: A8 owns it.
+
+### 15.3 This audit's own, and why the sibling passes did not catch them
+
+Verified by grep across all eight merged reports plus the four earlier component
+audits:
+
+| Finding | Not in any other report because |
+|---|---|
+| **R1** · `useSafeArea` missing on seven scroll-controlled sheets | `useSafeArea` appears in **no** other audit. A14 §6 examined `showMxFormSheet`, scored it a "True primitive", and cited its `isScrollControlled` + `max(viewInsets, viewPadding)` as a *documented fix* — which it is, for the **bottom** edge. Nobody asked what removing the height cap does to the **top** edge |
+| **R3** · the tier constant against a card width | `isCramped` appears in no other audit. A14 §6 scored `MxHeroCard` "Responsive by construction (that is its entire purpose)" with **no gap** — reading the docstring's claim, which is exactly what the docstring is good enough to earn. The effective 392 dp is only visible if you subtract the gutter yourself |
+| **R5 / R6** · the scrollbar | `ScrollbarTheme` appears in no other audit. It is one theme builder and one hand-written `Scrollbar`, sitting between "content" and "chrome", and every pass so far has been organised by component family |
+| **R7** · the web frame zeroes three insets | Nobody else has had a reason to ask what the E2E channel is evidence *for* |
+| **R9 / R10** · the 600 ceiling's coverage, and CSS-kit compact parity | Both are cross-cutting rather than per-component |
+
+### 15.4 What this means for reading the two reports together
+
+A8 is the better source on **`MxContentShell`, `MxBreadcrumb`,
+`MxNavigationBar` and the two Scaffolds** — it read the SDK and this audit did
+not. This report is the better source on **`AppBreakpoints` and the compact tier
+as a system** (§2–§5), on **sheets' top edge** (§9.2), on **the scrollbar**
+(§11) and on **what the width and text-scale coverage actually is** (§12). Where
+they touch the same line of code and disagree, A8 wins on mechanism and this
+report wins only where §15.3 says nobody else looked.
+
+---
+
+## 16 · Decisions this audit needs from the owner
+
+1. **A8's P1-02, option (A) or (B)** — this is A8's decision, not this audit's,
+   and it is listed first because **R2′ is a precondition on it.** Option (B)
+   moves the deck path out of the `AppBar` clamp, and the fixed 32/48 dp box
+   that is safe today is the wrong shape once that text can grow. Whoever takes
+   the decision should read §15.1 before executing it.
+2. **R3 (a) or (b)** — is the hero's rule about the screen or about the card? A
    fix cannot be written until this is answered, and answering it inside the fix
    commit is how the next audit finds the same ambiguity with a different number.
-2. **Landscape: supported or permitted?** Nothing locks it, one file tests it,
+3. **Landscape: supported or permitted?** Nothing locks it, one file tests it,
    no screen renders in it. Either answer is fine; the absence of one is not.
-3. **G4** — is the compact tier a per-component safety net (which is what
+4. **G4** — is the compact tier a per-component safety net (which is what
    `app_breakpoints.dart` says) or a screen-level rendering promise (which is
    what four screen goldens at 320 imply)? Whichever it is, it should be written
    in one place, because right now the code says one thing and the golden set
    says the other.
-4. **R9** — above 600 dp, is a half-capped app acceptable? "Yes, AD-04 says
+5. **R9** — above 600 dp, is a half-capped app acceptable? "Yes, AD-04 says
    phone" is a complete answer; it is just not currently written down anywhere
    that a reader of the four capped screens would find it.
