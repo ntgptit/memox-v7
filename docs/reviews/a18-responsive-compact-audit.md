@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | BASE_SHA | `3207e7b7e0d3a2ecefa5e6a85fed48a65890ba6b` — *refactor(theme): the dark card stops glowing* (M100.35, #435) |
-| Merged onto | `9d2f4b47` — eight audits (A7, A8, A10–A14, A17) landed on `main` mid-audit. **All eight are report-only: `git diff --stat 3207e7b7..9d2f4b47` is 8 files, all under `docs/reviews/`.** Not one `lib/`, `test/` or `design_system/` file moved, so the BASE_SHA above is still the code state this report describes |
+| Merged onto | `0fc7a61b` — **eleven** audits (A7, A8, A10–A17, A19) landed on `main` while this one was in progress. **All eight are report-only: `git diff --stat 3207e7b7..0fc7a61b` is 11 files, all under `docs/reviews/`.** Not one `lib/`, `test/` or `design_system/` file moved, so the BASE_SHA above is still the code state this report describes |
 | Branch | `claude/a18-responsive-compact-audit-srftpd` (session-designated; the task's `audit/a18-responsive-compact` is recorded here rather than pushed, per the branch contract this session runs under) |
 | Declared SDK | Flutter **3.44.8** stable · Dart `^3.12.2` (`pubspec.yaml`) |
 | Scope | Every width-, orientation-, density- and text-scale-dependent decision under `lib/`, plus the tests, goldens, Widgetbook and CSS kit that are supposed to hold them |
@@ -36,7 +36,7 @@ same reason. `check_docs.py --quiet` **was** run and passes. This is a
 documentation-only change; the repo's own plan builder classifies a docs-only
 diff as verifying nothing, so nothing was skipped that CI will not itself run.
 
-**One sibling audit did read the SDK, and it corrected this one.**
+**Three sibling audits corrected this one, and one of them read the SDK.**
 `a8-navigation-chrome-audit.md` landed on `main` while this audit was in
 progress and cites the pinned framework directly — `app_bar.dart:43-44`
 (`_kMaxTitleTextScaleFactor = 1.34`, applied at `:1091-1097`),
@@ -46,25 +46,33 @@ three readings resolve every ⚠ item this audit had left open about the app bar
 and the navigation bar, and **one of them falsified a P1 finding written here
 before the merge.** Where A8 read the SDK its reading is adopted and mine
 deferred; §15 lists exactly what was withdrawn, downgraded or handed over, and
-why. A finding that survives that pass is one this audit found and A8 did not
-look at.
+why. **A19 · accessibility** and **A16 · geometry foundations** landed later still
+and each independently filed something this audit had also found — A19 the
+sheets' top edge, A16 the scrollbar's untokenised thickness and the duplicated
+gutter helper. Where a sibling filed a finding first, this report defers to its
+ID and its severity rather than restating it at another; §15 is the full ledger.
+A finding that survives that pass is one this audit found and nobody else
+looked at.
 
 ---
 
 ## 1 · Verdict
 
-**The breakpoint model is sound, deliberately small, and honestly documented.
-The system around it is in better shape than this audit expected, and the three
-findings that survived review are all at its edges rather than in it: a shared
-sheet helper that answers the bottom edge and forgets the top, one constant
-compared against two different widths, and a scrollbar tuned for a desktop it
-does not ship to while carrying a mobile job it cannot do at 1.79 : 1.**
+**The breakpoint model is sound, deliberately small, and honestly documented,
+and there is no P0 or P1 in the responsive system.** Two findings survive as
+this audit's own: one constant compared against two different widths, and a
+scrollbar tuned for a desktop the app does not ship to while carrying a mobile
+job it cannot do at 1.79 : 1.
 
-Two things this audit first filed as defects were withdrawn on review against
-the sibling audits that landed mid-pass — one of them a P1. §15 is the
-reconciliation, and it is part of the finding set rather than a note at the
-back: a report that quietly drops a claim it made is worse than one that never
-made it.
+**Three of this audit's draft findings did not survive review**, and that is the
+honest headline. One was falsified outright by an SDK constant this session
+could not read. Two — including the one written here as a P1 — were filed
+independently by sibling audits that landed mid-pass, at P3, with better
+mechanisms and better fix shapes than this audit had. §15 is the ledger. It is
+part of the finding set rather than an appendix: a report that quietly drops a
+claim it made is worse than one that never made it, and a report that restates a
+neighbour's finding at a louder severity is how a project ends up with two
+answers to one question.
 
 What is right, and what the next pass must not "simplify":
 
@@ -100,7 +108,6 @@ What the next pass has to fix:
 
 | # | Finding | Sev |
 |---|---|---|
-| R1 | **Seven `isScrollControlled` sheets omit `useSafeArea`** — the shared `showMxFormSheet` among them; the fix already exists at one call site and was never generalised | **P1** |
 | R3 | `MxHeroCard` compares a **card** width against a **screen** constant → the effective threshold is 392 dp; 360 / 375 / 390 take one branch and 393 takes the other, and the two test harnesses straddle it | **P2** |
 | R5 | Scrollbar thumb measures **1.79 : 1** light / **2.00 : 1** dark on the card paper, from a bare `0.4` alpha that is on no token — on the one surface where the scrollbar *is* the "there is more to read" cue | **P2** |
 | R2′ | The one breadcrumb path that sizes itself with a **fixed** `SizedBox(height:)` instead of a `minHeight` — safe today only because of the 1.34 AppBar clamp, and a hidden precondition on A8's P1-02 option (B) | P3 |
@@ -109,7 +116,9 @@ What the next pass has to fix:
 | R8 | `mxSheetBottomObstruction` uses `MediaQuery.of` — one of only two full-data subscriptions in `lib/` | P3 |
 | R9 | `AppBreakpoints.medium` caps 4 surfaces of ~26 → above 600 dp the app is half-capped, by accretion rather than by decision | P3 |
 | R10 | Kit parity: the CSS kit publishes the compact tokens but has **no rule that applies them**, no compact gutter token, and neither shipped device is below 360 | P3 |
+| ~~R1~~ | Sheets omitting `useSafeArea` — **filed independently as A19-20 (P3)**, over a broader 17-site census and with the better fix shape. Written here as a P1; A19's severity and framing are adopted (§15.2) | — |
 | ~~R4~~ | The deck list's extra `viewPadding.bottom` — **already filed as A8's P3-20**, with a sharper mechanism than this audit had. Handed over, not restated (§15) | — |
+| ~~R6a~~ | The raw `4` thumb thickness as an *untokenised* dimension — **A16's G-21**. R6 above keeps only the half A16 did not look at: that the property is state-*invariant* | — |
 
 **R2 was written as a P1 and is withdrawn.** It claimed the header's second line
 clips above `textScaler` 2.0. It does not: `AppBar` clamps its title slot — and
@@ -119,15 +128,15 @@ reaches it. The arithmetic in §7.1 was right; the premise that the ambient
 scaler reaches that text was wrong, and it was wrong for exactly the reason §0
 gives — no SDK to read. What survives is R2′, at P3.
 
-And the coverage holes that let R1, R3 and R5 exist unnoticed:
+And the coverage holes that let R3 and R5 exist unnoticed:
 
 | # | Gap | Sev |
 |---|---|---|
-| G2 | No test asserts a sheet's top edge against the status bar, at any width or scale — the class R1 lives in | **P2** |
 | G3 | `hero_action_width_test` pins 320 and 393 only, i.e. both sides of the *stated* threshold and neither side of the *effective* one | P2 |
 | G4 | **4 of 152** committed screen goldens are at a compact width, covering 3 screens; Library, Study Home, Progress, Settings, Card list and the study session have no compact picture at all | P2 |
 | G5 | No screen-level landscape test, though nothing in the manifest or in `lib/` locks the orientation | P3 |
 | G6 | Widgetbook renders the breakpoint tokens as swatches (`scale_sections.dart`) but has no compact-width or text-scale knob, so the tier is not reachable in the catalog | P3 |
+| ~~G2~~ | No test asserts a sheet's top edge — A19-20's own closure test (*"sheet content respects top padding at 2.0×"*) covers it | — |
 | ~~G1~~ | 375 dp untested — **already filed as A8's P3-21.** This audit adds only that 360 dp is no better off at screen level, and §13 keeps the shared-matrix remedy because it closes G3 in the same move (A8 · P3-21) | — |
 
 ---
@@ -319,6 +328,7 @@ anything added.
 |---|---|
 | `mx_hero_card.dart:58` | the tier constant applied to a **card** width — see **R3** |
 | `deck_list_sliver_widget.dart:73` | gutter written as `AppSpacing.lg` rather than `mxScreenGutter(context)` — the rule `mxScreenGutter`'s own docstring says must not be re-derived |
+| `deck_tile_widget.dart:311-314` | `deckTileGutter` re-implements `mxScreenGutter` verbatim, against that helper's stated reason for being public — **A16's G-4 (P2)**, filed with the sharper closure test (`isCompact` should appear only in `shared/` and `core/theme/`). Noted here, owned there |
 | `mx_sheet_insets.dart:50–54` | sheet gutter written as `AppSpacing.lg` ×4 — same shape, different surface |
 | `library_search_body_widget.dart:17–24` vs `deck_list_sliver_widget.dart:18–26` | two neighbouring lists inside **the same navigation shell** documenting **opposite** rules about the bottom system inset, and reusing the same private name `_kListBottomInset` for two different numbers. A8 filed both halves — **P3-20** and **P3-22**; §8 and §15 defer to them |
 | `design_system/ui_kits/memox-app/index.html:50` | `COMPACT_BELOW = 360` is correct, but neither shipped device (412, 375) is below it — see **R10** |
@@ -431,7 +441,7 @@ how they were first written.
 | Confirm dialog | `scrollable: true`, `MxButtonPair` stacks — covered, with the reason written down | same |
 | Form dialog | `scrollable: true` — covered | same |
 | Study direction sheet | `isScrollControlled` **+ `useSafeArea`** — covered, and the only sheet that is | same |
-| Every other tall sheet | `isScrollControlled` **without `useSafeArea`** — **R1** | **R1** |
+| Every other tall sheet | `isScrollControlled` **without `useSafeArea`** — A19-20 | A19-20 |
 | Study session top bar | chip capped at 0.4 of the free row, start inset clamped at 0 — covered | same |
 | Guess board | card height measured against real row demand, then clamped 180…320 — covered | same |
 | Nav bar | test exists at 320 @ 2.0 | **no test** |
@@ -496,13 +506,23 @@ mxSheetBottomObstruction = max(viewInsets.bottom, viewPadding.bottom)
 explained. `MxSheetInsets` deliberately adds no `SafeArea` of its own, which
 keeps the function idempotent.
 
-### 9.2 R1 — the top edge, which nothing answers
+### 9.2 The top edge, which nothing answers — A19-20
 
 `showModalBottomSheet` with `isScrollControlled: true` removes Flutter's 9/16
 height cap, so the sheet can reach the top of the display. The default
 `useSafeArea: false` path then puts the sheet's content under the status bar and
 any camera cutout. ⚠ *unverified against the SDK*, from the framework's own
 documented behaviour and from the fix already in this repo.
+
+**A19 filed this independently as A19-20, at P3**, over a broader census — all
+17 `showModalBottomSheet` calls rather than the 9 scroll-controlled ones — and
+with the better fix: *"one line inside `MxFormSheet` plus a default in the two
+overlay helpers rather than 15 call-site edits."* This audit wrote it as a P1 on
+the strength of `showMxFormSheet`'s blast radius; **A19's P3 is the defensible
+severity**, because neither audit rendered a sheet and A19 says so plainly —
+*"no evidence of a live clip."* The mechanism below is the same in both reports
+and is kept here because §9 would be incomplete without it; the ID, the
+severity and the remedy are A19's.
 
 `study_entry_screen.dart:206` found this, fixed it, and wrote down the
 measurement — *"at 320 dp × 2.0 it does — its 16 dp top padding is less than a
@@ -627,9 +647,12 @@ Two aggravating details:
   reader needs to learn there is more — which is the stated purpose of the
   widget, half-met.
 
-**R6** is the desktop half of the same theme: `thickness` is a
-`WidgetStatePropertyAll`, which by definition returns 4 for every state,
-including `hovered` and `dragged`. Material thickens the thumb on hover to make
+**R6** is the desktop half of the same theme, and it is the half **A16's G-21**
+did not look at. A16 flags the same line for the same literal — a raw `4` with
+no token, *"the only unowned dimension in `components/`"* — and that is its
+finding, not this one's. What is left over is the *shape* of the property rather
+than its value: `thickness` is a `WidgetStatePropertyAll`, which by definition
+returns 4 for every state, including `hovered` and `dragged`. Material thickens the thumb on hover to make
 it draggable; pinning the property removes that, leaving a 4 dp drag target on
 the one channel that has a pointer. Low severity — the channel is
 development-only — but it is a state resolver that resolves to a constant, which
@@ -718,28 +741,10 @@ control at a shipped width and scale, or a touch target below 48 dp.
 
 ### P1
 
----
-
-**R1 · Seven `isScrollControlled` sheets can lay content under the status bar**
-
-*Evidence.* §9.2 census. `mx_form_sheet.dart:40–43` opens with
-`isScrollControlled: true` and no `useSafeArea`; `study_entry_screen.dart:194–206`
-opens with both and records the measurement that made the second necessary. The
-top padding `MxSheetInsets` supplies is 16, which that same comment states is
-less than a modern cutout.
-
-*Blast radius.* Every form in the app (create root deck, create child deck,
-rename deck, rename tag, tag filter) plus move-card, move-deck, export,
-starter install, scheduler change and reset progress.
-
-*Closure test.* `test/shared/widgets/mx_sheet_safe_area_test.dart`, new. For each
-of the seven entry points, at 320 × 568 with `padding: EdgeInsets.only(top: 44)`
-and `textScaler` 2.0: pump, then assert
-`tester.getTopLeft(find.byType(<sheet content>)).dy >= MediaQuery.paddingOf(context).top`.
-Must fail on `showMxFormSheet` today.
-
-*Fix shape.* `useSafeArea: true` on `showMxFormSheet` and on the six direct
-calls. It is one argument; there is no layout redesign in it.
+None that this audit can claim. **R1 was written here as a P1 and its severity
+is A19's to set** — A19-20, P3, §15.2. The evidence, the seven-site census and
+the closure test this audit drafted for it are in §9.2 and remain useful to
+whoever executes A19-20; the ID is not this report's.
 
 ---
 
@@ -794,7 +799,11 @@ prevent.
 **R5 · The scrollbar thumb is below the contrast floor where it is the only cue**
 
 *Evidence.* §11. Computed 1.79 : 1 light, 2.00 : 1 dark against
-`surfaceContainerLow`. Bare `0.4` alpha, not on `AppStateOpacity`, against
+`surfaceContainerLow`. **This is the one finding in the report that no sibling
+audit touched, and the scoping is why:** A16 owns the same line of code but
+declares *"colour values and contrast"* out of scope, A19 owns contrast but
+never mentions the scrollbar, and the four component audits are organised by
+component family — a scrollbar belongs to none of them. Bare `0.4` alpha, not on `AppStateOpacity`, against
 AD-14 §1's precompute rule. No `thumbVisibility`, so the cue is absent at rest —
 half-defeating `study_card_face_pieces_widget.dart:59`'s stated purpose.
 
@@ -832,7 +841,9 @@ another width belongs to the test that measures it, not to the gallery.
 
 ---
 
-**G2 · No test asserts a sheet's top edge** — closed by R1's test above.
+**G2 · No test asserts a sheet's top edge** — A19-20's own closure test covers
+it (*"sheet content respects top padding at 2.0×"*); §9.2 has a stricter
+assertion to reuse if it helps.
 
 ---
 
@@ -868,16 +879,17 @@ a decision that has not been made yet.
 
 | # | Step | Files | Gate |
 |---|---|---|---|
-| 1 | **R1** — `useSafeArea: true` on seven sheets | `mx_form_sheet.dart`, `card_bulk_overlays_widget.dart`, `card_export_sheet_widget.dart`, `deck_actions_widget.dart`, `starter_install_widget.dart`, `deck_scheduler_change_widget.dart`, `deck_reset_progress_widget.dart` + new `mx_sheet_safe_area_test.dart` | new test red → green; existing sheet goldens unchanged (no top padding in the golden harness) |
-| 2 | **G3** — the shared width matrix | new `test/support/phone_widths.dart`; extend `hero_action_width_test`, `deck_list`, `study_home_geometry`, `progress_screen_geometry` | green at 320/360/375/390/393; expect it to **record** R3's current behaviour, not fix it. Closes A8's P3-21 in the same move |
-| 3 | **R3 decision, then fix** | `mx_hero_card.dart` or `app_breakpoints.dart`; the matrix from step 2 | blocked on the owner's (a)/(b) choice in §13 |
-| 4 | **R5** — the thumb | `app_scrollbar_theme.dart`, `study_card_face_pieces_widget.dart`, contrast suite | 3 : 1 in four themes; **regenerate goldens** — the study card face changes |
-| 5 | **R6 / R8 / R10** — the cheap ones | `app_scrollbar_theme.dart`, `mx_sheet_insets.dart`, `design_system/ui_kits/memox-app/index.html` | analyze + existing suites |
-| 6 | **R7 / R9 / G4 / G5** — decisions, not code | `docs/architecture.md` (AD-04 note), `docs/wbs.md` | `check_docs.py` |
+| 1 | **G3** — the shared width matrix | new `test/support/phone_widths.dart`; extend `hero_action_width_test`, `deck_list`, `study_home_geometry`, `progress_screen_geometry` | green at 320/360/375/390/393; expect it to **record** R3's current behaviour, not fix it. Closes A8's P3-21 in the same move |
+| 2 | **R3 decision, then fix** | `mx_hero_card.dart` or `app_breakpoints.dart`; the matrix from step 1 | blocked on the owner's (a)/(b) choice in §13 |
+| 3 | **R5** — the thumb | `app_scrollbar_theme.dart`, `study_card_face_pieces_widget.dart`, contrast suite | 3 : 1 in four themes; **regenerate goldens** — the study card face changes |
+| 4 | **R6 / R8 / R10** — the cheap ones | `app_scrollbar_theme.dart`, `mx_sheet_insets.dart`, `design_system/ui_kits/memox-app/index.html` | analyze + existing suites |
+| 5 | **R7 / R9 / G4 / G5** — decisions, not code | `docs/architecture.md` (AD-04 note), `docs/wbs.md` | `check_docs.py` |
 | — | **R2′** | `mx_breadcrumb.dart:193`, `deck_subheader_widget.dart:42` | **Not a step of its own.** It rides along with whoever executes A8's P1-02, and only if that lands as option (B) |
-| — | **R4 / G1 / §7.2** | — | Owned by A8 as P3-20 / P3-21 / P2-13. Do not open a second change for them |
+| — | **R1 / G2** | — | Owned by A19 as **A19-20**. §9.2 has the census and a closure test to reuse; do not open a second change |
+| — | **R4 / G1 / §7.2** | — | Owned by A8 as **P3-20 / P3-21 / P2-13** |
+| — | **R6a / the `deckTileGutter` duplication** | — | Owned by A16 as **G-21 / G-4** |
 
-**Step 4 moves committed pictures**, so it ends with
+**Step 3 moves committed pictures**, so it ends with
 
 ```bash
 TZ=UTC flutter test --tags golden --update-goldens
@@ -888,20 +900,24 @@ and a republish to the existing gallery URL, on Linux — `dart_test.yaml` and
 `CLAUDE.md` both make Linux the only authoring platform, and this session could
 not have regenerated them in any case (§0).
 
-**Sequence note.** Steps 1, 4 and 5 are independent of every open decision and
-of A8 entirely; they can land today. Step 2 is a test-only change and is worth
-landing before step 3 so the decision is taken against measured behaviour rather
-than against this report's arithmetic.
+**Sequence note.** Steps 3 and 4 are independent of every open decision and of
+every sibling audit; they can land today. Step 1 is test-only and is worth
+landing before step 2 so the R3 decision is taken against measured behaviour
+rather than against this report's arithmetic — it is also the only step here
+that closes a gap two other reports share.
 
 ## 15 · Relationship to the sibling audits
 
-Eight audits landed on `main` while this one was in progress (§ header). Two
-overlap it — **A8 · navigation and screen chrome** and **A14 · shared
-compositions** — and A8 overlaps it heavily, because `MxContentShell`,
-`MxBreadcrumb`, `MxNavigationBar` and the deck list's bottom inset are its
-subject as much as they are this audit's. `docs/document-conventions.md` says
-one fact lives in exactly one place, so the reconciliation is part of the
-deliverable rather than an appendix to it.
+Eleven audits landed on `main` while this one was in progress (§ header). Four
+overlap it: **A8 · navigation and screen chrome**, **A19 · accessibility**,
+**A16 · geometry foundations** and **A14 · shared compositions**.
+`docs/document-conventions.md` says one fact lives in exactly one place, so the
+reconciliation is part of the deliverable rather than an appendix to it — and
+the rule cuts against this report three times.
+
+The tie-break used throughout: **whoever filed first owns the ID, and whoever
+has the better mechanism owns the severity.** By that rule this audit gives up
+one falsified P1, one P1 to A19, and two notes to A16, and keeps two findings.
 
 ### 15.1 Withdrawn, because A8 read the SDK and this audit could not
 
@@ -941,7 +957,10 @@ and the useful thing to hand them is the answer, not the absence of a question.
 | §7.2 · `_toolbarHeight`'s subline budget "exactly exhausted at 3.0" | **P2-13** | The clamp again: the bar over-reserves by 34.5 dp at a 2.0 setting rather than running out. Opposite sign |
 | §5.3 · `_kListBottomInset` means two different numbers in two files | **P3-22** | Nothing — same finding, A8 got there first |
 | G1 · 375 dp untested | **P3-21** | Nothing — same finding, and A8's histogram is the same one |
-| §6 · `NavigationBar` height "⚠ unverified" | **G10** | `_kMaxLabelTextScaleFactor = 1.3` (`navigation_bar.dart:31`), which closes the question, plus the sharper framing that the *assumption* is what is missing |
+| §6 · `NavigationBar` height "⚠ unverified" | A8 · **G10** | `_kMaxLabelTextScaleFactor = 1.3` (`navigation_bar.dart:31`), which closes the question, plus the sharper framing that the *assumption* is what is missing |
+| **R1 · sheets without `useSafeArea`, written here as a P1** | A19 · **A19-20** (P3) | A broader census — 17 `showModalBottomSheet` sites, not the 9 scroll-controlled ones — the honest severity (*"no evidence of a live clip"*, and neither audit rendered one), and the better remedy: one line in `MxFormSheet` plus a default in the two overlay helpers, rather than seven call-site edits |
+| R6a · the raw `4` thumb thickness as an untokenised value | A16 · **G-21** | The right frame: it is *"the only unowned dimension in `components/`"*, and A16's G-11 rule would catch it generically. R6 keeps only the state-invariance half |
+| §5.3 · `deckTileGutter` duplicates `mxScreenGutter` | A16 · **G-4** (P2) | A closure test this audit did not think of — after the fix, `AppBreakpoints.isCompact` should appear only in `shared/` and `core/theme/` |
 
 None of these should get a change of its own. Where this audit's step list
 mentions them (§14) it is to say: A8 owns it.
@@ -953,9 +972,9 @@ audits:
 
 | Finding | Not in any other report because |
 |---|---|
-| **R1** · `useSafeArea` missing on seven scroll-controlled sheets | `useSafeArea` appears in **no** other audit. A14 §6 examined `showMxFormSheet`, scored it a "True primitive", and cited its `isScrollControlled` + `max(viewInsets, viewPadding)` as a *documented fix* — which it is, for the **bottom** edge. Nobody asked what removing the height cap does to the **top** edge |
 | **R3** · the tier constant against a card width | `isCramped` appears in no other audit. A14 §6 scored `MxHeroCard` "Responsive by construction (that is its entire purpose)" with **no gap** — reading the docstring's claim, which is exactly what the docstring is good enough to earn. The effective 392 dp is only visible if you subtract the gutter yourself |
-| **R5 / R6** · the scrollbar | `ScrollbarTheme` appears in no other audit. It is one theme builder and one hand-written `Scrollbar`, sitting between "content" and "chrome", and every pass so far has been organised by component family |
+| **R5** · the thumb's 1.79 : 1 | The scoping gap is exact: **A16 owns the same line of code** and declares colour and contrast out of scope; **A19 owns contrast** and never mentions the scrollbar; the four component audits are organised by component family and a scrollbar belongs to none. It is the one finding here that eleven other reports could not have caught |
+| **R6** · `thickness` state-invariant | A16's G-21 has the literal; the *property shape* — a `WidgetStatePropertyAll` where Material varies by state — is what is left |
 | **R7** · the web frame zeroes three insets | Nobody else has had a reason to ask what the E2E channel is evidence *for* |
 | **R9 / R10** · the 600 ceiling's coverage, and CSS-kit compact parity | Both are cross-cutting rather than per-component |
 
@@ -963,11 +982,21 @@ audits:
 
 A8 is the better source on **`MxContentShell`, `MxBreadcrumb`,
 `MxNavigationBar` and the two Scaffolds** — it read the SDK and this audit did
-not. This report is the better source on **`AppBreakpoints` and the compact tier
-as a system** (§2–§5), on **sheets' top edge** (§9.2), on **the scrollbar**
-(§11) and on **what the width and text-scale coverage actually is** (§12). Where
-they touch the same line of code and disagree, A8 wins on mechanism and this
-report wins only where §15.3 says nobody else looked.
+not. A19 owns **the sheets' top edge** and every accessibility severity. A16
+owns **every geometry literal and token**, including the scrollbar's `4` and the
+duplicated gutter helper.
+
+This report is the source for **`AppBreakpoints` and the compact tier as a
+system** (§2–§5), for **the scrollbar's contrast and state shape** (§11), for
+**the width × text-scale coverage picture** (§12), and for **R3** — the one
+defect in the breakpoint model itself. Everything else in it is either a
+neighbour's finding, recorded so §§2–12 read as a complete description of the
+system, or a withdrawal.
+
+**Read §§2–12 as the description and §13 as the claim.** The description is
+worth more than the finding list here, which is the honest summary of an audit
+whose subject turned out to be in good shape and whose neighbours got to three
+of its five defects first.
 
 ---
 
