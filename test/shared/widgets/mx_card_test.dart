@@ -56,20 +56,26 @@ void main() {
   const long =
       'A deck name long enough that it has to wrap or be cut off, twice over';
 
-  /// The card's own border, which is where its focus indicator lives — the ring
-  /// replaces the hairline rather than being added beside it, so reading this
-  /// one value answers both "is the ring drawn" and "did the geometry move".
-  BorderSide borderOf(WidgetTester tester) {
-    final decorated = tester.widget<DecoratedBox>(
-      find
-          .descendant(
+  /// The topmost edge the card paints, or `null` when it paints none.
+  ///
+  /// Foreground layers since M100.33 — the fill sits behind the child and every
+  /// edge in front of it, so a card with nothing to say paints no border.
+  BorderSide? borderOf(WidgetTester tester) {
+    final borders = tester
+        .widgetList<DecoratedBox>(
+          find.descendant(
             of: find.byType(MxCard),
             matching: find.byType(DecoratedBox),
-          )
-          .first,
-    );
+          ),
+        )
+        .where(
+          (DecoratedBox box) => box.position == DecorationPosition.foreground,
+        )
+        .map((DecoratedBox box) => (box.decoration as BoxDecoration).border)
+        .whereType<Border>()
+        .toList();
 
-    return ((decorated.decoration as BoxDecoration).border! as Border).top;
+    return borders.isEmpty ? null : borders.first.top;
   }
 
   /// Tab, from a real keyboard. Focus that is only ever set programmatically
@@ -159,9 +165,23 @@ void main() {
         findsOneWidget,
         reason: 'the ink is painted over the surface, not under it',
       );
-      expect(
+      // **What may not sit between the ink and the eye is a *fill*.** Until
+      // M100.33 this was written as "no `DecoratedBox` at all below the
+      // `InkWell`", which was the same claim while the card had exactly one.
+      // It now paints its state edge and its focus ring as foreground layers
+      // over the child, and those belong above the splash — a selected card
+      // whose selection vanished under its own hover wash would be the same
+      // bug in the other direction. So the rule is the fill, not the widget.
+      final belowInk = tester.widgetList<DecoratedBox>(
         find.descendant(of: find.byType(InkWell), matching: inCard),
-        findsNothing,
+      );
+      expect(
+        belowInk.every(
+          (DecoratedBox box) =>
+              box.position == DecorationPosition.foreground &&
+              (box.decoration as BoxDecoration).color == null,
+        ),
+        isTrue,
         reason: 'no opaque surface may sit between the ink and the eye',
       );
     });
@@ -256,7 +276,7 @@ void main() {
             .extension<AppSemanticColors>()!;
         // **`borderSelected`, not `secondary`** (M99.99). The slate edge sat at
         // chroma 0.0337 around a fill M99.98 had just made brand-tinted.
-        expect(borderOf(tester).color, semantic.borderSelected);
+        expect(borderOf(tester)!.color, semantic.borderSelected);
       });
     }
 
@@ -272,13 +292,13 @@ void main() {
         MxCard.option(isSelected: false, onTap: () {}, child: const Text(long)),
       );
 
-      expect(borderOf(tester).color, semantic.borderOption);
+      expect(borderOf(tester)!.color, semantic.borderOption);
 
       await pump(
         tester,
         MxCard.option(isSelected: true, onTap: () {}, child: const Text(long)),
       );
-      expect(borderOf(tester).color, semantic.borderSelected);
+      expect(borderOf(tester)!.color, semantic.borderSelected);
     });
 
     testWidgets('tri-state semantics: null says nothing, false and true '

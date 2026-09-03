@@ -87,8 +87,10 @@ List<BoxShadow> shadowsFor(double level, ColorScheme scheme) {
   // fixed at Tokyo's `#111633` on Tokyo's `#070C27` the surface step is 4.3
   // L*, below the 6 the ladder used to carry alone. Tokyo's own answer is its
   // `shadows.card`: `0px 0px 2px #6A7199`, a one-pixel halo that reads 4.07:1
-  // against the page and 3.74:1 against the card. Same colour at every level:
-  // a halo is an edge, and an edge does not get deeper.
+  // against the page and 3.74:1 against the card. Same colour at every level —
+  // an edge does not change hue with depth — but the ring **thickens**, which
+  // is what carries `none < card < raised` in a mode with no shadow. See
+  // `_darkRimSpread`.
   //
   // **`spreadRadius: 1` is what makes those two ratios true on screen.** A
   // blur alone rasterises the source colour into partially covered pixels, so
@@ -98,8 +100,12 @@ List<BoxShadow> shadowsFor(double level, ColorScheme scheme) {
   // `app_elevation_test.dart` pins the spread so the ring cannot quietly
   // become a wash again.
   if (scheme.brightness == Brightness.dark) {
-    return const <BoxShadow>[
-      BoxShadow(color: AppColors.cardRimDark, blurRadius: 2, spreadRadius: 1),
+    return <BoxShadow>[
+      BoxShadow(
+        color: AppColors.cardRimDark,
+        blurRadius: 2,
+        spreadRadius: _darkRimSpread(level),
+      ),
     ];
   }
 
@@ -156,6 +162,30 @@ List<BoxShadow> _lightShadows(double level, Color shadow) {
     ),
   ];
 }
+
+/// How thick the dark rim is drawn, by level.
+///
+/// **Dark needs this because it has no shadow to carry depth** (see above), and
+/// until M100.33 it drew *the same* rim at every level — so `MxCard.raised` and
+/// `MxCard.flat` printed the same box in dark, and the three depths the app
+/// claims collapsed to two. The old workaround was worse than the symptom: the
+/// card recipe resolved to a different `ColorScheme` role in dark than in
+/// light, which makes a component's semantic identity depend on brightness.
+///
+/// **The ring thickens rather than the fill moving or a shade appearing.** Of
+/// the three mechanisms available for dark depth — the surface-container
+/// ladder, the rim, elevation rendering — the ladder is the one that would have
+/// forced a per-brightness role, and a dark shade is paint nobody can see at
+/// this page lightness. The rim is the one left, and a thicker edge reads as a
+/// nearer object without any second colour entering the system.
+///
+/// Monotonic by construction, which is what makes `none < card < raised`
+/// perceptible: 0 (no rim at all), then 1, then 2.
+double _darkRimSpread(double level) => switch (level) {
+  AppElevation.card => 1,
+  AppElevation.raised => 2,
+  _ => 3,
+};
 
 /// Tokyo's own two alphas, and they do not climb with the level.
 ///

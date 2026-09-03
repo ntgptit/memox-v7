@@ -217,13 +217,7 @@ void main() {
           .first;
       final tsv = tester.widget<MxCard>(tsvFinder);
       expect(tsv.isSelected, isFalse);
-      final tsvBox = tester.widget<DecoratedBox>(
-        find
-            .descendant(of: tsvFinder, matching: find.byType(DecoratedBox))
-            .first,
-      );
-      final tsvBorder =
-          ((tsvBox.decoration as BoxDecoration).border! as Border).top;
+      final tsvBorder = mxCardEdgeIn(tester, tsvFinder);
       expect(
         tsvBorder.color,
         buildDarkTheme().extension<AppSemanticColors>()!.borderOption,
@@ -237,4 +231,27 @@ void main() {
       expect(find.byTooltip(english.cardSelectionMoreLabel), findsOneWidget);
     });
   });
+}
+
+/// The topmost edge the `MxCard` found by [within] paints, resting or focus.
+///
+/// **Foreground layers since M100.33.** The card's fill sits behind its child
+/// and every edge in front of it, so an edge-to-edge child can no longer cover a
+/// selected or option border. Two consequences for a test: the first
+/// `DecoratedBox` under an `MxCard` is now the fill, and "any foreground border
+/// on screen" picks up whichever card happens to be focused. Hence the scope —
+/// it has to be the card, not the tree.
+BorderSide mxCardEdgeIn(WidgetTester tester, Finder within) {
+  final borders = tester
+      .widgetList<DecoratedBox>(
+        find.descendant(of: within, matching: find.byType(DecoratedBox)),
+      )
+      .where(
+        (DecoratedBox box) => box.position == DecorationPosition.foreground,
+      )
+      .map((DecoratedBox box) => (box.decoration as BoxDecoration).border)
+      .whereType<Border>()
+      .toList();
+
+  return borders.first.top;
 }

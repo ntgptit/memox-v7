@@ -33,5 +33,9 @@
   --border-focus:2px;     /* focus ring on icon buttons and outlined buttons */
 }
 [data-theme="dark"]{
-  --shadow-card:0 0 2px 1px #6A7199;--shadow-raised:0 0 2px 1px #6A7199;--shadow-overlay:0 0 2px 1px #6A7199;
+  /* The ring thickens with the level (M100.33): dark has no shadow to carry
+     depth, so without this `card` and `raised` printed the same box and the
+     three depths the system claims collapsed to two. Colour and blur are
+     constant — an edge does not change hue with depth. */
+  --shadow-card:0 0 2px 1px #6A7199;--shadow-raised:0 0 2px 2px #6A7199;--shadow-overlay:0 0 2px 3px #6A7199;
 }

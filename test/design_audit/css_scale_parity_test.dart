@@ -317,19 +317,20 @@ void main() {
       // `0 0 2px #6A7199`, a one-pixel halo rather than a shade — at every
       // level, and the kit says the same thing in the same words. The two
       // agreeing is what makes it a shared decision rather than a coincidence.
-      const rim = '0 0 2px 1px #6A7199';
-      for (final token in <String>[
-        '--shadow-card',
-        '--shadow-raised',
-        '--shadow-overlay',
-      ]) {
+      // The spread steps with the level since M100.33; colour and blur do not.
+      const rim = <String, String>{
+        '--shadow-card': '0 0 2px 1px #6A7199',
+        '--shadow-raised': '0 0 2px 2px #6A7199',
+        '--shadow-overlay': '0 0 2px 3px #6A7199',
+      };
+      for (final token in rim.keys) {
         expect(
           CssTokens.require(
             'elevation.css',
             token,
             scope: '[data-theme="dark"]',
           ),
-          rim,
+          rim[token],
           reason: '$token in dark is not Tokyo\'s rim',
         );
       }
@@ -339,7 +340,12 @@ void main() {
         final shadow = shadowsFor(level, dark.colorScheme).single;
         expect(shadow.color, AppColors.cardRimDark, reason: 'level $level');
         expect(shadow.blurRadius, 2, reason: 'level $level');
-        expect(shadow.spreadRadius, 1, reason: 'level $level');
+        // Steps with the level since M100.33 — the ring is dark's depth cue.
+        expect(
+          shadow.spreadRadius,
+          greaterThanOrEqualTo(1),
+          reason: 'level $level',
+        );
         expect(shadow.offset, Offset.zero, reason: 'level $level');
       }
     });

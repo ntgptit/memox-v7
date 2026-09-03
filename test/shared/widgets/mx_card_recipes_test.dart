@@ -51,19 +51,32 @@ void main() {
   double radiusOf(BoxDecoration decoration) =>
       (decoration.borderRadius! as BorderRadius).topLeft.x;
 
-  Color borderColorOf(BoxDecoration decoration) =>
-      (decoration.border! as Border).top.color;
-
-  /// Whether the card paints an edge a reader can see.
+  /// The colour of the edge the card paints over its child, or `null` for none.
   ///
-  /// **A card with no resting edge still carries a `Border`**, drawn in its own
-  /// fill, because `BoxDecoration.border` insets the child by its width —
-  /// dropping it would move the content one pixel the moment the focus ring
-  /// appears. So "no edge" is a border the same colour as the surface behind
-  /// it — not a null border, and not a zero-alpha literal, which the raw-colour
-  /// guard refuses.
-  bool hasVisibleBorder(BoxDecoration decoration) =>
-      borderColorOf(decoration) != decoration.color;
+  /// **The edge moved to a foreground layer at M100.33**, so it is no longer on
+  /// the decoration [decorationOf] returns — that one is the fill. A card with
+  /// nothing to show paints no border at all now; it used to draw one in its
+  /// own fill, on the belief that `BoxDecoration.border` insets the child.
+  /// `Container` does that. `DecoratedBox` does not, and this card has always
+  /// been a `DecoratedBox`, so the invisible line reserved nothing.
+  Color? edgeColorOf(WidgetTester tester) => tester
+      .widgetList<DecoratedBox>(
+        find.descendant(
+          of: find.byType(MxCard),
+          matching: find.byType(DecoratedBox),
+        ),
+      )
+      .where(
+        (DecoratedBox box) => box.position == DecorationPosition.foreground,
+      )
+      .map((DecoratedBox box) => (box.decoration as BoxDecoration).border)
+      .whereType<Border>()
+      .map((Border border) => border.top.color)
+      .firstOrNull;
+
+  Color borderColorOf(WidgetTester tester) => edgeColorOf(tester)!;
+
+  bool hasVisibleBorder(WidgetTester tester) => edgeColorOf(tester) != null;
 
   bool hasShadow(BoxDecoration decoration) =>
       decoration.boxShadow != null && decoration.boxShadow!.isNotEmpty;
@@ -88,7 +101,7 @@ void main() {
         // screen of cards read as a stack of frames. The reference concept
         // draws none: its cards are pure white on a tinted page, and the
         // boundary is a colour edge rather than a drawn line.
-        expect(hasVisibleBorder(decoration), isFalse);
+        expect(hasVisibleBorder(tester), isFalse);
         expect(radiusOf(decoration), AppRadius.lg);
         expect(hasShadow(decoration), isFalse);
       });
@@ -103,16 +116,14 @@ void main() {
           );
 
           final decoration = decorationOf(tester);
-          // AD-14: dark builds its depth from the surface step and draws no
-          // shadow; light carries the difference as paint. `raised` is the
-          // one step above `none`, so dark has to carry it in the fill —
-          // `surfaceContainer`, one rung lighter than `surface` — or the
-          // recipe prints identically to `.flat`.
-          expect(
-            decoration.color,
-            isDark ? scheme.surfaceContainer : scheme.surfaceContainerLow,
-          );
-          expect(hasVisibleBorder(decoration), isFalse);
+          // **One role in both modes since M100.33.** Dark used to resolve
+          // this recipe to `surfaceContainer` and light to
+          // `surfaceContainerLow`, so `MxCard.raised` had two semantic
+          // identities and which one you got depended on the theme. Dark still
+          // needs the step — it paints no shadow — but it takes it from the rim
+          // thickening with the level, which is paint rather than meaning.
+          expect(decoration.color, scheme.surfaceContainerLow);
+          expect(hasVisibleBorder(tester), isFalse);
           expect(radiusOf(decoration), AppRadius.lg);
           // Since M100.27 dark paints Tokyo's rim, so every lifted recipe
           // carries a BoxShadow in both modes.
@@ -126,13 +137,9 @@ void main() {
         await pump(tester, const MxCard.focal(child: Text('x')), theme: theme);
 
         final decoration = decorationOf(tester);
-        // Same fill step as `raised` in dark, for the same reason: `focal`
-        // sits at `AppElevation.raised`, so the two must not collapse onto
-        // `.flat`'s fill once the shadow drops out.
-        expect(
-          decoration.color,
-          isDark ? scheme.surfaceContainer : scheme.surfaceContainerLow,
-        );
+        // Same role as `raised`, in both modes; the depth between them is
+        // carried by the shadow in light and by the rim's width in dark.
+        expect(decoration.color, scheme.surfaceContainerLow);
         expect(radiusOf(decoration), AppRadius.xl);
         expect(hasShadow(decoration), isTrue);
       });
@@ -153,7 +160,7 @@ void main() {
         expect(decoration.color, scheme.surfaceContainerLowest);
         // At rest it draws no edge either; the edge is what its *states* use,
         // asserted by the case below.
-        expect(hasVisibleBorder(decoration), isFalse);
+        expect(hasVisibleBorder(tester), isFalse);
         expect(radiusOf(decoration), AppRadius.xl);
         expect(hasShadow(decoration), isFalse);
       });
@@ -173,7 +180,7 @@ void main() {
             theme: theme,
           );
           expect(
-            borderColorOf(decorationOf(tester)),
+            borderColorOf(tester),
             edge.value,
             reason: '$themeName: ${edge.key} lost its token',
           );
@@ -246,14 +253,10 @@ void main() {
         await pump(tester, const MxCard.accent(child: Text('x')), theme: theme);
 
         final decoration = decorationOf(tester);
-        // Same fill step as `raised`/`focal` in dark — `accent` also sits at
-        // `AppElevation.raised`, so its border colour is not the only cue
-        // that survives the shadow dropping out.
-        expect(
-          decoration.color,
-          isDark ? scheme.surfaceContainer : scheme.surfaceContainerLow,
-        );
-        expect(borderColorOf(decoration), semantic.borderAccent);
+        // The same role as `raised`/`focal`; `accent` is told apart by its
+        // edge, and its depth by the same shadow-or-rim the others use.
+        expect(decoration.color, scheme.surfaceContainerLow);
+        expect(borderColorOf(tester), semantic.borderAccent);
         expect(hasShadow(decoration), isTrue);
       });
 
@@ -262,13 +265,9 @@ void main() {
         await pump(tester, const MxCard.tile(child: Text('x')), theme: theme);
 
         final decoration = decorationOf(tester);
-        // Dark carries the level in the fill, as it does for `.raised`: with a
-        // non-zero elevation and no shadow to paint, `surfaceContainer` is the
-        // only thing left that can say a tile sits above its page.
-        expect(
-          decoration.color,
-          isDark ? scheme.surfaceContainer : scheme.surfaceContainerLow,
-        );
+        // One role in both modes, as for `.raised`: dark says "above the
+        // page" with the rim it paints, not by moving to another fill.
+        expect(decoration.color, scheme.surfaceContainerLow);
         expect(radiusOf(decoration), AppRadius.md);
         // **It was `flat`, and that stopped being survivable when the hairline
         // went** (M99.94). A tile is a card on a page — the study-history
@@ -296,8 +295,8 @@ void main() {
         // lavender tint" names `input` explicitly. That rule is about a text
         // field, which is canvas; a card sitting on a page is not, and its
         // neighbours' edges moved into the brand family at M99.99.
-        expect(borderColorOf(decoration), semantic.borderOption);
-        expect(borderColorOf(decoration), isNot(semantic.borderControl));
+        expect(borderColorOf(tester), semantic.borderOption);
+        expect(borderColorOf(tester), isNot(semantic.borderControl));
         expect(hasShadow(decoration), isFalse);
       });
     }
@@ -372,7 +371,7 @@ void main() {
       // state. The measurement that once ruled brand out was taken against
       // `surface`; this edge sits on `surfaceSelected`, where it clears 3:1.
       expect(
-        borderColorOf(decoration),
+        borderColorOf(tester),
         theme.extension<AppSemanticColors>()!.borderSelected,
       );
     });

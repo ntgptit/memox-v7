@@ -86,7 +86,7 @@
       "surfaceVsPage": 1.0,
       "borderVsSurface": 1.1351908056380269,
       "borderVsPage": 1.1351908056380269,
-      "cardElevation": 0.0,
+      "cardElevation": 1.0,
       "boxShadowSitesInLib": 3,
       "usesShadow": true,
       "shadowNote": "MxCard paints its own BoxShadow from AppElevation rather than going through Material elevation, so cardTheme.elevation stays 0 and the shadow site count is what says whether the app is flat. Light only: a dark shadow moves the page by dL* 0.26 against a surface step of 7.70, so dark keeps its ladder instead."
@@ -178,7 +178,7 @@
       "surfaceVsPage": 1.0,
       "borderVsSurface": 1.4117591204006499,
       "borderVsPage": 1.4117591204006499,
-      "cardElevation": 0.0,
+      "cardElevation": 1.0,
       "boxShadowSitesInLib": 3,
       "usesShadow": true,
       "shadowNote": "MxCard paints its own BoxShadow from AppElevation rather than going through Material elevation, so cardTheme.elevation stays 0 and the shadow site count is what says whether the app is flat. Light only: a dark shadow moves the page by dL* 0.26 against a surface step of 7.70, so dark keeps its ladder instead."

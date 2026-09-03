@@ -542,13 +542,8 @@ class _MxCardState extends State<MxCard> {
       return semantic.surfaceSelected;
     }
 
-    final isElevatedInDark =
-        scheme.brightness == Brightness.dark &&
-        widget._spec.elevation > AppElevation.none;
-
     return switch (widget._spec.fill) {
-      _MxCardFill.surface =>
-        isElevatedInDark ? scheme.surfaceContainer : scheme.surfaceContainerLow,
+      _MxCardFill.surface => scheme.surfaceContainerLow,
       _MxCardFill.recessed => scheme.surfaceContainerLowest,
       _MxCardFill.muted => scheme.surfaceContainerHigh,
       _MxCardFill.tonal => semantic.surfaceEmphasis,
@@ -621,48 +616,87 @@ class _MxCardState extends State<MxCard> {
   Widget build(BuildContext context) {
     final scheme = context.colors;
     final radius = widget._spec.radius;
-    // The focus ring replaces the resting edge rather than sitting outside it.
-    // Both are painted on the border box, so the swap moves nothing beside the
-    // card and nothing inside it — which is also why a card that draws *no*
-    // resting edge does not jump when it takes focus: the ring is painted on a
-    // box the layout already reserved.
-    // **A card with no resting edge still reserves the border box**, and it
-    // draws that box in its own fill rather than dropping it.
-    // `BoxDecoration.border` insets the child by its width, so a `null` border
-    // makes the content one pixel wider at rest and one pixel narrower the
-    // moment the focus ring appears — the card would breathe under the
-    // keyboard, which is exactly what `mx_card_interaction_test.dart` pins as
-    // "focus costs nothing".
+    // **No border at rest, and the fake one is gone** (M100.33).
     //
-    // **The fill, not a fully transparent literal.** Zero alpha reserves the
-    // same box, but it is a raw colour — `memox.design_token.no_raw_color`
-    // rejects it, and rightly: the guard cannot tell "no colour" from "a
-    // colour nobody declared". An edge painted in the card's own fill is
-    // invisible for the same reason and reads back as the token it is, so the
-    // paint audit needs no exception either. It also keeps the card its full
-    // size, where zero alpha gave that pixel back to the page.
+    // A card with no state to show drew `Border.all(color: fill)` — an
+    // invisible line in its own fill — on the argument that
+    // `BoxDecoration.border` insets the child, so dropping it would make the
+    // content breathe when the focus ring appeared. That is true of
+    // `Container`, which adds `decoration.padding` to its child. It is **not**
+    // true of `DecoratedBox`, which paints and nothing else; this card has
+    // always used `DecoratedBox`, so the border reserved no geometry and the
+    // paint bought nothing. `mx_card_interaction_test.dart` proves the bounds
+    // now rather than the comment asserting them.
     final fill = _fillColor(context, scheme);
     final restingEdge = _restingEdgeColor(context);
-    final border = _isFocusVisible
-        ? Border.fromBorderSide(
-            AppInteractionStates.focusIndicator(context.colors),
-          )
-        : Border.all(color: restingEdge ?? fill);
     final decoration = BoxDecoration(
       color: fill,
       borderRadius: BorderRadius.circular(radius),
-      border: border,
       boxShadow: shadowsFor(widget._spec.elevation, scheme),
     );
+
+    // **The edge paints in front of the child, and focus is a second layer
+    // rather than a replacement** (M100.33).
+    //
+    // Behind the child, an opaque edge-to-edge child covers the card's own
+    // state edge — a selected card whose content reaches the corner had no
+    // visible selection. And the focus ring used to *replace* the resting edge,
+    // so tabbing onto a selected card removed the cue that said it was picked.
+    // Both are the same mistake: one channel carrying two facts.
+    //
+    // The state edge sits on the boundary; the ring is drawn one stroke inside
+    // it, so the two are visible at once and neither moves layout — a
+    // foreground decoration paints without participating in it.
+    final Border? stateEdge = restingEdge == null
+        ? null
+        : Border.all(color: restingEdge);
+    final Border? focusRing = _isFocusVisible
+        ? Border.fromBorderSide(AppInteractionStates.focusIndicator(scheme))
+        : null;
     // **The card clips what it holds.** Anything a caller seats on an edge —
     // the deck card puts a progress track on its base — is otherwise cut by
     // its own box rather than by the card's corner: a `ClipRRect` around a
     // 4px-tall bar clamps a 16px radius down to 4. Clipping here is the only
     // place that knows the real geometry. `antiAlias`, not `hardEdge`: a
     // curve stepped by whole pixels is visible against a hairline border.
-    final content = ClipRRect(
+    Widget content = ClipRRect(
       borderRadius: BorderRadius.circular(radius),
       child: Padding(padding: _paddingInsets, child: widget.child),
+    );
+    // **Order is the whole mechanism, and both layers are unconditional.**
+    //
+    // The two paint on the same box and neither takes part in layout, so the
+    // ring is drawn first and the state edge over it: the ring's outer stroke
+    // is covered by the 1 px state line and the rest stays visible just inside.
+    // A selected card that takes focus shows both — the selection on the
+    // boundary, the ring within it — and the card's bounds, its content bounds
+    // and its size are identical in every combination.
+    //
+    // **They are added whether or not they draw**, and that is not tidiness.
+    // Wrapping only when there is something to paint changes the *shape* of the
+    // element tree between two builds, so Flutter reparents everything below
+    // and every `State` under the card is thrown away and rebuilt. The card
+    // that found this holds a `TextField`: taking focus flipped the resting
+    // edge on, the wrapper appeared, the field was recreated without its focus,
+    // and the keyboard connection was dropped — typing went nowhere and the
+    // submit button stayed disabled, with no error anywhere. A `BoxDecoration`
+    // whose `border` is null paints nothing, so the constant tree costs a
+    // render object and no pixels.
+    content = DecoratedBox(
+      position: DecorationPosition.foreground,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius),
+        border: focusRing,
+      ),
+      child: content,
+    );
+    content = DecoratedBox(
+      position: DecorationPosition.foreground,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius),
+        border: stateEdge,
+      ),
+      child: content,
     );
 
     final tap = widget.onTap;

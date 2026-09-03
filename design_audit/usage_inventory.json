@@ -1010,7 +1010,7 @@
     },
     {
       "file": "lib/core/theme/foundations/app_elevation.dart",
-      "line": 102,
+      "line": 105,
       "widget_context": "<top-level>",
       "element_kind": "shadow",
       "source_kind": "shared-constant",
@@ -1021,7 +1021,7 @@
     },
     {
       "file": "lib/core/theme/foundations/app_elevation.dart",
-      "line": 148,
+      "line": 154,
       "widget_context": "<top-level>",
       "element_kind": "shadow",
       "source_kind": "opacity-modified-token",
@@ -1032,7 +1032,7 @@
     },
     {
       "file": "lib/core/theme/foundations/app_elevation.dart",
-      "line": 153,
+      "line": 159,
       "widget_context": "<top-level>",
       "element_kind": "shadow",
       "source_kind": "opacity-modified-token",
