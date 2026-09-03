@@ -67,5 +67,40 @@ void main() {
         ).color,
       );
     });
+
+    testWidgets('$what: the ring traces the painted pill, not the finger box', (
+      tester,
+    ) async {
+      // The ring used to wrap `RawChip`'s 48 × 48 redirecting hit box, so it
+      // floated 7dp clear of the 34-tall pill at a corner the pill did not
+      // have (#434 P1-4). The chip is `shrinkWrap` now, the ring wraps the
+      // painted `Material`, and the 48 target is grown *outside* the ring.
+      await pump(tester, isSelected: isSelected);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+
+      final Rect ring = tester.getRect(
+        find.byWidgetPredicate(
+          (Widget w) =>
+              w is DecoratedBox && w.position == DecorationPosition.foreground,
+        ),
+      );
+      final Rect painted = tester.getRect(
+        find
+            .descendant(
+              of: find.byType(ChoiceChip),
+              matching: find.byType(Material),
+            )
+            .first,
+      );
+      final Rect target = tester.getRect(find.byType(MxPillButton));
+
+      expect(ring, painted, reason: 'the ring is not on the pill');
+      expect(
+        target.height,
+        greaterThan(ring.height),
+        reason: 'the touch target must be the larger box, outside the ring',
+      );
+    });
   }
 }

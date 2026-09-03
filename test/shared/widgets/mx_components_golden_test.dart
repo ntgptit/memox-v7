@@ -356,6 +356,8 @@ void main() {
     'mx_search_field': const SearchFieldSpecimen(),
     'mx_search_field_focused': const SearchFieldFocusedSpecimen(),
     'mx_pill_group': const PillGroupSpecimen(),
+    'mx_pill_states': const PillStatesSpecimen(),
+    'mx_badge': const BadgeSpecimen(),
     // **Relation, not one card** (M100.35). See `card_specimens.dart`: the
     // glow these two exist to catch was only ever visible in the plural, and
     // `card_surface` above renders exactly one.

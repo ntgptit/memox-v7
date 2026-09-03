@@ -98,6 +98,7 @@ void main() {
           hasEnabledState: true,
           isEnabled: true,
           isFocusable: true,
+          isInMutuallyExclusiveGroup: true,
           hasTapAction: true,
           hasFocusAction: true,
           label: 'Due only',
@@ -175,6 +176,42 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets('the touch target grows on the narrow axis too', (
+      tester,
+    ) async {
+      // A one-glyph pill paints ~33 wide. The 48 floor is both sides, and it
+      // is the widget's own now rather than `chip.dart:1493`'s (#434 P3-1).
+      await pump(
+        tester,
+        MxPillButton(label: 'A', isSelected: false, onPressed: () {}),
+      );
+
+      final size = tester.getSize(find.byType(MxPillButton));
+      expect(size.width, greaterThanOrEqualTo(AppSizing.touchTarget));
+    });
+
+    testWidgets('a tap in the padding still presses the pill', (tester) async {
+      // The target is a redirecting pad: a finger that lands beside the
+      // painted shape is handed to the chip's centre, so the chip's own ink and
+      // callback run. Without the redirect the padding would be dead area.
+      var presses = 0;
+      await pump(
+        tester,
+        MxPillButton(label: 'A', isSelected: false, onPressed: () => presses++),
+      );
+
+      // The short axis: the pill paints 34 tall inside the 48 box. (On the
+      // wide axis the 16dp leading slot already carries even a one-glyph
+      // pill past 48, so there is no horizontal padding to land in.)
+      final Rect target = tester.getRect(find.byType(MxPillButton));
+      final Rect painted = tester.getRect(find.byType(ChoiceChip));
+      expect(painted.top, greaterThan(target.top + 2));
+
+      await tester.tapAt(Offset(target.center.dx, target.top + 2));
+      await tester.pumpAndSettle();
+      expect(presses, 1);
+    });
+
     testWidgets('an icon does not replace the label', (tester) async {
       // The icon is decoration. A pill that dropped its text when given one
       // would be an icon button with a bigger hit area, which already exists.
@@ -191,5 +228,75 @@ void main() {
       expect(find.text('Due only'), findsOneWidget);
       expect(find.byIcon(Icons.filter_list), findsOneWidget);
     });
+  });
+
+  group('selection shape', () {
+    // M100.36 4M / #434 P1-3: selection is a tick in a slot that is laid out
+    // in both states, so it is never colour alone and never a reflow.
+    Future<double> paintedWidth(
+      WidgetTester tester, {
+      required bool isSelected,
+      IconData? icon,
+    }) async {
+      await pump(
+        tester,
+        MxPillButton(
+          label: 'Due',
+          icon: icon,
+          isSelected: isSelected,
+          onPressed: () {},
+        ),
+      );
+
+      return tester.getSize(find.byType(ChoiceChip)).width;
+    }
+
+    testWidgets('a selected pill carries a tick', (tester) async {
+      await pump(
+        tester,
+        MxPillButton(label: 'Due', isSelected: true, onPressed: () {}),
+      );
+
+      expect(find.byIcon(Icons.check), findsOneWidget);
+    });
+
+    testWidgets('an unselected pill carries no tick', (tester) async {
+      await pump(
+        tester,
+        MxPillButton(label: 'Due', isSelected: false, onPressed: () {}),
+      );
+
+      expect(find.byIcon(Icons.check), findsNothing);
+    });
+
+    testWidgets('the tick replaces the caller icon in the same slot', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        MxPillButton(
+          label: 'Due',
+          icon: Icons.schedule,
+          isSelected: true,
+          onPressed: () {},
+        ),
+      );
+
+      expect(find.byIcon(Icons.check), findsOneWidget);
+      expect(find.byIcon(Icons.schedule), findsNothing);
+    });
+
+    for (final IconData? icon in <IconData?>[null, Icons.schedule]) {
+      testWidgets(
+        'toggling ${icon == null ? 'a plain' : 'an iconed'} pill does not '
+        'change its width',
+        (tester) async {
+          final off = await paintedWidth(tester, isSelected: false, icon: icon);
+          final on = await paintedWidth(tester, isSelected: true, icon: icon);
+
+          expect(on, off, reason: 'the row reflows on every selection');
+        },
+      );
+    }
   });
 }

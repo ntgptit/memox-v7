@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:memox/shared/widgets/mx_badge.dart';
 import 'package:memox/core/theme/extensions/theme_context_extension.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
@@ -765,4 +766,44 @@ class _ToggleRow extends StatelessWidget {
       ],
     );
   }
+}
+
+WidgetbookComponent badgeComponent() {
+  return WidgetbookComponent(
+    name: 'MxBadge',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Playground',
+        builder: (BuildContext context) {
+          final label = context.knobs.string(
+            label: 'label',
+            initialValue: 'Due tomorrow',
+          );
+
+          return CatalogCenterPage(child: MxBadge(label: label));
+        },
+      ),
+      // The tag row on a card: three badges wrapping, on the paper.
+      WidgetbookUseCase(
+        name: 'On a card',
+        builder: (BuildContext context) {
+          return const CatalogCenterPage(
+            child: MxCard.flat(
+              child: Padding(
+                padding: EdgeInsets.all(AppSpacing.md),
+                child: Wrap(
+                  spacing: AppSpacing.xs,
+                  children: <Widget>[
+                    MxBadge(label: 'food'),
+                    MxBadge(label: 'chapter 3'),
+                    MxBadge(label: 'nouns'),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    ],
+  );
 }

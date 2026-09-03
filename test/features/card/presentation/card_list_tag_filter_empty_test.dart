@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/card/domain/models/tag_catalog_entry_model.dart';
 import 'package:memox/features/card/presentation/screens/card_list_screen.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
-import 'package:memox/shared/widgets/mx_pill_button.dart';
 
 import 'support/fake_card_repository.dart';
 import 'support/fake_tag_catalog_repository.dart';
@@ -61,10 +60,11 @@ void main() {
     repository.emitCount(1);
     await tester.pumpAndSettle();
 
-    // The whole pill, not its icon glyph: `MxPillButton`'s tappable area
-    // and its icon's reported geometry are not the same rect, and tapping
-    // the icon directly missed the button in practice.
-    await tester.tap(find.widgetWithText(MxPillButton, 'Tags'));
+    // The whole button, not its icon glyph: the tappable area and the icon's
+    // reported geometry are not the same rect, and tapping the icon directly
+    // missed the control in practice. It is the compact secondary
+    // `MxActionButton` since M100.36 (4N) — a command, not a pill.
+    await tester.tap(find.widgetWithText(MxActionButton, 'Tags'));
     await tester.pumpAndSettle();
     await tester.tap(find.byType(CheckboxListTile).first);
     await tester.pumpAndSettle();

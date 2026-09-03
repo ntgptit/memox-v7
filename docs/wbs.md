@@ -17163,6 +17163,60 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
     ba giá trị.
   - **§4L** weight khi chọn không đổi — test ghim `fontWeight` của title.
   - Audit #431 đánh dấu IMPLEMENTED; parity C6.
+- **Phase 5 — Chip / Pill.** Bốn P1 của #434 đóng; badge tách khỏi chip.
+  - **P1-1 / §4N** `_TagsPill` (mở sheet, không phải một-trong-N) rời
+    `MxPillButton` → `MxActionButton(secondary, compact, Icons.sell_outlined)`.
+    Hai test caller đổi finder sang `MxActionButton`.
+  - **P1-2 / 11A** `MxPillButton` dựng `ChoiceChip` **flat**: lời giải thích
+    M100.32 ("elevated để nhận fill từ role") sai — `ChipThemeData.color` chặn
+    `chipDefaults.color` trước variant (`chip.dart:1529`); variant chỉ đổi
+    `shadowColor`, và `pressElevation` 1.0 của M3 vẫn reachable nên mỗi lần
+    nhấn có bóng thật. Theme khai `pressElevation: AppElevation.none`;
+    `mx_pill_button_construction_test.dart` ghim constructor ở source và đo
+    `Material.elevation` 0 lúc nhấn.
+  - **P1-3 / §4M** slot dẫn 16dp luôn được layout: tick khi selected, `icon`
+    của caller khi không. Chọn có hình mà không reflow; test ghim bề rộng
+    `ChoiceChip` không đổi khi toggle (có/không icon). `progress_range_selector`
+    bỏ `icon: Icons.check` per-caller (test `find.byIcon(Icons.check)` vẫn
+    xanh — giờ do component vẽ).
+  - **P1-4 / 11C** chip dựng `MaterialTapTargetSize.shrinkWrap`; `MxFocusRing`
+    bọc hình vẽ; target 48 nới **ngoài** ring bởi `_TapTarget` (RenderShiftedBox
+    redirect hit-test về tâm chip, như `_InputPadding` của SDK). Test: rect
+    ring == rect `Material` của chip, box target cao hơn ring; tap vào padding
+    dọc vẫn gọi `onPressed`.
+  - **P2-3 / 11H** disabled = `disabledSurfaceTint(scheme)` cho cả selected —
+    M3 canonical; bỏ blend container (dark: 2.04:1 vs 1.56:1 pill sống).
+  - **P2-6 / §4O** `_fillFor` chỉ còn hover (SDK tắt `hoverColor` khi theme
+    có `color`); press là ripple, focus là ring — bỏ tint chồng ~24%.
+  - **P2-8 / 11F** ba nhóm pill có `Semantics(container, label)`: ARB
+    `cardFilterGroupLabel`, `trashFilterGroupLabel` (en/vi); study options dùng
+    lại `studyOptionsOrderLabel`. `Semantics(inMutuallyExclusiveGroup: true)`
+    trên mỗi pill (MergeSemantics với node của chip).
+  - **P2-9** gap: `Row(spacing:)` ở cả ba nhóm, bỏ `SizedBox`/`Padding` xen.
+  - **P3-1** `AppSizing.touchTarget` ghi rõ sàn cả hai trục. **P3-2** side
+    width = `AppStroke.hairline` ghim bằng test (lint từ chối tham số trùng
+    default).
+  - **11K / #434 §17** `MxBadge` mới (`Container`, `surfaceMuted`, `label-sm`
+    quiet): `_DueBadge` và `CardTagChipWidget` dùng nó. `_SchedulerBadge`
+    (có icon), `_Chip` của session top bar (section label uppercase) và các
+    badge trạng thái giữ container riêng — ghi ở mapping §5.
+  - **Chấp nhận có hợp đồng:** P2-2 (disabled side = disabled fill), P2-4/P2-5
+    (side 1.24:1 — pill định danh bằng hình/nhãn/nhóm/tick, test "on a sheet"
+    ghim hairline là ranh giới duy nhất), P2-7 (ChoiceChip đúng cho một-trong-N).
+  - **Test đổi hợp đồng (§22):** `mx_pill_button_theme_test` "a disabled
+    group must not forget which pill was chosen" (OLD: disabled+selected ≠
+    disabled) → NEW: bằng nhau và = `disabledSurfaceTint` — WHY WRONG: blend
+    làm pill tắt nổi hơn pill sống ở dark; AUTHORITY: `_ChoiceChipDefaultsM3`.
+    Cùng file "pointer feedback… hovered/focused/pressed ≠ resting" → chỉ hover
+    khác, focus/press = resting — WHY WRONG: hai cơ chế cho một state (§4O).
+    `m3_combined_state_test` "the fill carries the focus cue" → fill giữ role
+    khi focus, ring là cue — cùng lý do. Không guard nào bị nới.
+  - Golden mới (PNG viết ở Phase 7): `mx_pill_states` (rest / selected /
+    disabled ×2 / có icon / trên card), `mx_badge`. Stress: `MxBadge`.
+    Widgetbook: `MxPillButton` thêm Group / On a card / Disabled pair;
+    `MxBadge` mới (Playground / On a card).
+  - Kit: `.mx-pill__slot`, disabled một xám; parity B4/C3; audit #434 đánh
+    dấu IMPLEMENTED.
 - **Scope:** `lib/core/theme/components/{actions,inputs,content,selection}/`,
   `lib/core/theme/states/`, `lib/core/theme/foundations/app_sizing.dart`,
   `lib/shared/widgets/mx_{action_button,text_button,text_field,search_field,
@@ -17181,7 +17235,7 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
   - [x] Phase 1: guard role/state cho FilledButton, TextField, ListTile;
         test giao điểm state cho hàng; `MxCheckboxRow` có test file.
   - [x] Phase 2 Button · [x] Phase 3 Input · [x] Phase 4 Row ·
-        [ ] Phase 5 Chip/Pill · [ ] Phase 6 cross-component/docs/Widgetbook ·
+        [x] Phase 5 Chip/Pill · [ ] Phase 6 cross-component/docs/Widgetbook ·
         [ ] Phase 7 golden Linux 100%.
   - [ ] Không invariant nào của #426/#427/#429/#435 lùi; không hạ sàn
         contrast; không thêm escape hatch thị giác.

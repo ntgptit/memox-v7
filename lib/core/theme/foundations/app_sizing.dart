@@ -25,6 +25,11 @@ abstract final class AppSizing {
   /// It is enforced where it cannot be passed around: `iconButtonTheme` states
   /// it as `minimumSize` so no screen can build a smaller icon button, and
   /// `buildSharedButtonStyle` states it for every button family at once.
+  ///
+  /// **Both sides.** A one-glyph pill paints 33 wide and occupies 48, centred:
+  /// `MxPillButton` grows the box around the shape on the narrow axis as well
+  /// as the short one (#434 P3-1 — the number used to arrive from
+  /// `chip.dart:1493` and nothing here said so).
   static const double touchTarget = 48;
 
   /// A control that draws smaller than the target it keeps.

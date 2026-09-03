@@ -1014,6 +1014,10 @@
   "@cardFilterAll": {
     "description": "The All filter pill (D3). No count in the label: with an icon on every pill the row no longer fits 390, and the counts for All, Due and New are repeated in the progress panel immediately below. The count still reaches a screen reader through cardFilterSemantics."
   },
+  "cardFilterGroupLabel": "Filter cards",
+  "@cardFilterGroupLabel": {
+    "description": "Accessible name of the card list's filter pill group, spoken before its options (M100.36 11F)."
+  },
   "cardFilterDue": "Due",
   "@cardFilterDue": {
     "description": "The Due filter pill with its count (D3). Cards that have come back around: BR-22's study queue minus the never-reviewed ones, so this pill and New never describe the same card and their counts add up to what a session would hand over. 'Due', not 'Due now' — the pill sits in a row that has to be scrolled to reach the last one, and 'now' cost 38px while adding nothing."
@@ -4017,6 +4021,10 @@
   "trashFilterAll": "All",
   "@trashFilterAll": {
     "description": "Trash filter chip: both kinds (wireframe T3)."
+  },
+  "trashFilterGroupLabel": "Filter trash",
+  "@trashFilterGroupLabel": {
+    "description": "Accessible name of the trash filter pill group, spoken before its options (M100.36 11F)."
   },
   "trashFilterCards": "Cards",
   "@trashFilterCards": {

@@ -9,7 +9,7 @@ import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
-import 'package:memox/shared/widgets/mx_pill_button.dart';
+import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_search_field.dart';
 
 import 'support/fake_card_repository.dart';
@@ -245,7 +245,7 @@ void main() {
         final pill = tester.getRect(
           find.ancestor(
             of: find.byIcon(Icons.sell_outlined),
-            matching: find.byType(MxPillButton),
+            matching: find.byType(MxActionButton),
           ),
         );
 

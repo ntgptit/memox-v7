@@ -87,22 +87,21 @@ void main() {
         ], scheme.outlineVariant);
       });
 
-      test('the fill carries the focus cue, and the roles do not move', () {
+      test('the fill keeps its role under focus; the ring is the cue', () {
+        // **Until M100.36 this asserted the opposite** — that `fill(focused)`
+        // must *differ* from the resting role, "a state layer over the
+        // resting fill". The layer was a second focus mechanism on top of the
+        // chip's own `focusColor` wash and `MxFocusRing` (#434 P2-6); it is
+        // gone, and the fill is the same role focused or not. The ring is
+        // asserted in `mx_pill_button_focus_test.dart` with a real Tab.
         holds('fill', fill, <Set<WidgetState>>[
           selected,
+          selectedFocused,
         ], scheme.secondaryContainer);
         holds('fill', fill, <Set<WidgetState>>[
           resting,
+          focused,
         ], scheme.surfaceContainerLow);
-        // Focus is visible — it is a state layer over the resting fill, not a
-        // different token. Both directions are asserted: it must change, and it
-        // must not become some other role.
-        expect(
-          fill(focused),
-          isNot(scheme.surfaceContainerLow),
-          reason: '$mode: no focus cue',
-        );
-        expect(fill(selectedFocused), isNot(scheme.secondaryContainer));
       });
 
       test('the label ink stays with its container in every combination', () {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_action_sheet.dart';
+import 'package:memox/shared/widgets/mx_badge.dart';
 import 'package:memox/shared/widgets/mx_alert_dialog.dart';
 import 'package:memox/shared/widgets/mx_breadcrumb.dart';
 import 'package:memox/shared/widgets/mx_button_pair.dart';
@@ -274,9 +275,15 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
     needsBoundedHeight: true,
   ),
   MxStressSpecimen(
+    // A readout, not a control: no target to reach, so the stress is the long
+    // word at 2.0x inside a pill that must not clip it.
+    name: 'MxBadge',
+    build: () => const MxBadge(label: kLongLabel),
+  ),
+  MxStressSpecimen(
     // A pill's label is short by design, so the stress here is the *selected*
     // pair plus an icon: that is the widest it gets, and the tap target still has
-    // to reach the minimum once the chip is padded.
+    // to reach the minimum — the widget's own now, grown outside the ring.
     name: 'MxPillButton',
     build: () => const MxPillButton(
       label: kLongLabel,

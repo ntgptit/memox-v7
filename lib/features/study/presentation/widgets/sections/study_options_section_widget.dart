@@ -91,16 +91,23 @@ class _StudyOptionsSectionWidgetState extends State<StudyOptionsSectionWidget> {
         const SizedBox(height: AppSpacing.lg),
         Text(l10n.studyOptionsOrderLabel, style: context.texts.titleSmall),
         const SizedBox(height: AppSpacing.xs),
-        Wrap(
-          spacing: AppSpacing.sm,
-          children: <Widget>[
-            for (final order in NewCardOrder.values)
-              MxPillButton(
-                label: _orderLabel(context, order),
-                isSelected: _order == order,
-                onPressed: () => setState(() => _order = order),
-              ),
-          ],
+        // The heading above is what sighted users read; the accessibility
+        // tree did not associate it with the pills until the group carried it
+        // (M100.36 11F, #434 P2-8).
+        Semantics(
+          container: true,
+          label: l10n.studyOptionsOrderLabel,
+          child: Wrap(
+            spacing: AppSpacing.sm,
+            children: <Widget>[
+              for (final order in NewCardOrder.values)
+                MxPillButton(
+                  label: _orderLabel(context, order),
+                  isSelected: _order == order,
+                  onPressed: () => setState(() => _order = order),
+                ),
+            ],
+          ),
         ),
         const SizedBox(height: AppSpacing.lg),
         // BR-139 in one line: the session on screen keeps the ceiling it opened

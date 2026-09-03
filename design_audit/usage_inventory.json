@@ -1,10 +1,10 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 722,
-  "totalSites": 337,
+  "scannedFiles": 723,
+  "totalSites": 336,
   "byElementKind": {
     "other": 278,
-    "background": 28,
+    "background": 27,
     "border": 9,
     "shadow": 3,
     "text": 19
@@ -15,7 +15,7 @@
     "blend-source": 5,
     "Colors-material": 14,
     "hardcoded-literal": 113,
-    "theme-token": 57
+    "theme-token": 56
   },
   "sites": [
     {
@@ -295,7 +295,7 @@
     },
     {
       "file": "lib/core/theme/components/selection/app_chip_theme.dart",
-      "line": 99,
+      "line": 114,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "blend-source",
@@ -306,7 +306,7 @@
     },
     {
       "file": "lib/core/theme/components/selection/app_chip_theme.dart",
-      "line": 199,
+      "line": 215,
       "widget_context": "<top-level>",
       "element_kind": "border",
       "source_kind": "Colors-material",
@@ -3154,17 +3154,6 @@
       "resolved_value_dark": "#BCC2FF"
     },
     {
-      "file": "lib/features/card/presentation/widgets/items/card_tile_widget.dart",
-      "line": 294,
-      "widget_context": "_DueBadge",
-      "element_kind": "background",
-      "source_kind": "theme-token",
-      "expression": "context.semanticColors.surfaceMuted",
-      "token": "semantic.surfaceMuted",
-      "resolved_value_light": "#E9EBEE",
-      "resolved_value_dark": "#21274C"
-    },
-    {
       "file": "lib/features/card/presentation/widgets/items/tag_catalog_row_widget.dart",
       "line": 152,
       "widget_context": "_TagWell",
@@ -3374,17 +3363,6 @@
       "resolved_value_dark": "#2A3259"
     },
     {
-      "file": "lib/features/card/presentation/widgets/support/card_tag_chip_widget.dart",
-      "line": 33,
-      "widget_context": "CardTagChipWidget",
-      "element_kind": "background",
-      "source_kind": "theme-token",
-      "expression": "context.semanticColors.surfaceMuted",
-      "token": "semantic.surfaceMuted",
-      "resolved_value_light": "#E9EBEE",
-      "resolved_value_dark": "#21274C"
-    },
-    {
       "file": "lib/features/deck/presentation/widgets/items/deck_icon_area_widget.dart",
       "line": 57,
       "widget_context": "DeckIconArea",
@@ -3504,6 +3482,17 @@
       "token": "colorScheme.onSurfaceVariant",
       "resolved_value_light": "#596680",
       "resolved_value_dark": "#9395A2"
+    },
+    {
+      "file": "lib/shared/widgets/mx_badge.dart",
+      "line": 43,
+      "widget_context": "MxBadge",
+      "element_kind": "background",
+      "source_kind": "theme-token",
+      "expression": "context.semanticColors.surfaceMuted",
+      "token": "semantic.surfaceMuted",
+      "resolved_value_light": "#E9EBEE",
+      "resolved_value_dark": "#21274C"
     },
     {
       "file": "lib/shared/widgets/mx_breadcrumb.dart",

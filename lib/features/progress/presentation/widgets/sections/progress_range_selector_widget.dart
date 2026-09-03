@@ -38,21 +38,18 @@ class ProgressRangeSelectorWidget extends StatelessWidget {
       container: true,
       label: context.l10n.progressRangeSelectorSemanticLabel,
       child: Row(
+        spacing: AppSpacing.sm,
         children: <Widget>[
-          for (final ProgressRange option in ProgressRange.values) ...<Widget>[
-            if (option != ProgressRange.values.first)
-              const SizedBox(width: AppSpacing.sm),
+          for (final ProgressRange option in ProgressRange.values)
             MxPillButton(
               label: context.progressRangeLabel(option),
               semanticLabel: context.progressRangeSemanticLabel(option),
               isSelected: option == range,
-              // The second, non-colour signal. Absent when unselected rather
-              // than replaced by another glyph: two different icons would read
-              // as two different kinds of thing rather than one choice.
-              icon: option == range ? Icons.check : null,
+              // The tick is the component's now (M100.36 4M): every selected
+              // pill in the app carries it in a slot that is laid out either
+              // way, so this screen stopped being the one that drew its own.
               onPressed: () => onRangeChanged(option),
             ),
-          ],
         ],
       ),
     );

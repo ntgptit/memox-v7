@@ -7,6 +7,7 @@ import 'package:memox/core/theme/extensions/app_ink.dart';
 import 'package:memox/shared/widgets/mx_icon.dart';
 import 'package:memox/shared/widgets/mx_breadcrumb.dart';
 import 'package:memox/shared/widgets/mx_button_pair.dart';
+import 'package:memox/shared/widgets/mx_card.dart';
 import 'package:memox/shared/widgets/mx_icon_button.dart';
 import 'package:memox/shared/widgets/mx_menu_button.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
@@ -467,6 +468,83 @@ WidgetbookComponent pillButtonComponent() {
               onPressed: isEnabled ? _noop : null,
               icon: hasIcon ? Icons.schedule : null,
               semanticLabel: semanticLabel,
+            ),
+          );
+        },
+      ),
+      // The way pills are actually met: one of N, and the tick moving between
+      // them without the row reflowing (M100.36 4M).
+      WidgetbookUseCase(
+        name: 'Group',
+        builder: (BuildContext context) {
+          const options = <String>['All', 'Due', 'New', 'Flagged'];
+          final selected = context.knobs.object.dropdown<String>(
+            label: 'selected',
+            options: options,
+          );
+          final isEnabled = context.knobs.boolean(
+            label: 'enabled',
+            initialValue: true,
+          );
+
+          return CatalogCenterPage(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: AppSpacing.sm,
+              children: <Widget>[
+                for (final option in options)
+                  MxPillButton(
+                    label: option,
+                    isSelected: option == selected,
+                    onPressed: isEnabled ? _noop : null,
+                  ),
+              ],
+            ),
+          );
+        },
+      ),
+      // `surfaceContainerLow` on `surfaceContainerLow`: the hairline is the
+      // only boundary here, which is the case #434 P2-4 accepted.
+      WidgetbookUseCase(
+        name: 'On a card',
+        builder: (BuildContext context) {
+          return const CatalogCenterPage(
+            child: MxCard.flat(
+              child: Padding(
+                padding: EdgeInsets.all(AppSpacing.md),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: AppSpacing.sm,
+                  children: <Widget>[
+                    MxPillButton(
+                      label: 'Newest first',
+                      isSelected: true,
+                      onPressed: _noop,
+                    ),
+                    MxPillButton(
+                      label: 'Random',
+                      isSelected: false,
+                      onPressed: _noop,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+      // One grey for both (M3's own); the tick is what remembers the choice.
+      WidgetbookUseCase(
+        name: 'Disabled pair',
+        builder: (BuildContext context) {
+          return const CatalogCenterPage(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: AppSpacing.sm,
+              children: <Widget>[
+                MxPillButton(label: 'All', isSelected: false, onPressed: null),
+                MxPillButton(label: 'Due', isSelected: true, onPressed: null),
+              ],
             ),
           );
         },

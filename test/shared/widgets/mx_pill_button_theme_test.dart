@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/foundations/app_stroke.dart';
 import 'package:memox/core/theme/states/app_interaction_states.dart';
+import 'package:memox/core/theme/components/actions/app_button_themes.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
 
@@ -19,6 +21,12 @@ import 'package:memox/shared/widgets/mx_pill_button.dart';
 /// fill, so a pill nobody could press looked exactly as live as one they could.
 /// Nothing in `lib/` said either of those things, which is why nothing found
 /// them.
+///
+/// **M100.36 (#434) narrowed the state machine to what `RawChip` cannot do
+/// itself.** The fill answers hover only; press is the chip's own ripple and
+/// focus is `MxFocusRing`, so a press no longer stacks a fill tint on a splash.
+/// Disabled is M3's own single grey for selected and unselected alike — the
+/// tick and `Semantics(selected:)` carry the identity, not a lighter fill.
 void main() {
   Future<void> pump(
     WidgetTester tester,
@@ -121,13 +129,23 @@ void main() {
       }
     });
 
-    test('a disabled pill does not look live', () {
+    test('a disabled pill does not look live, selected or not', () {
       // `_IndividualOverrides` returns `selectedColor` for selected+disabled
       // *before* the defaults are consulted, so a theme declaring `selectedColor`
       // and no `color` gives a disabled selected pill the full container fill.
       // It is the one state combination that looks completely untouched.
+      //
+      // **Until M100.36 this test also required disabled+selected to differ
+      // from disabled — "a disabled group must not forget which pill was
+      // chosen".** That kept the container tint under the grey, and in dark
+      // the blend *lightened*: 2.04:1 against the page for the disabled pill
+      // against 1.56:1 for the live one, more prominent for being switched
+      // off (#434 P2-3). M3's own answer is one grey for both, and the memory
+      // of which pill was chosen lives in the tick the widget composes and in
+      // `Semantics(selected:)`, both of which survive disabling.
       for (final isDark in <bool>[false, true]) {
         final theme = isDark ? buildDarkTheme() : buildLightTheme();
+        final disabled = fill(theme, <WidgetState>{WidgetState.disabled});
 
         expect(
           fill(theme, <WidgetState>{
@@ -138,42 +156,85 @@ void main() {
           reason: 'disabled selected is indistinguishable from selected',
         );
         expect(
-          fill(theme, <WidgetState>{WidgetState.disabled}),
+          disabled,
           isNot(fill(theme, <WidgetState>{})),
           reason: 'disabled is indistinguishable from resting',
         );
-        // Dimmed, not erased. Blending the disabled tint over `surface` for both
-        // would make a disabled group forget which pill was chosen, and the
-        // selection reappears the moment the data arrives.
         expect(
           fill(theme, <WidgetState>{
             WidgetState.selected,
             WidgetState.disabled,
           }),
-          isNot(fill(theme, <WidgetState>{WidgetState.disabled})),
-          reason: 'a disabled group has forgotten which pill was selected',
+          disabled,
+          reason: 'disabled must be one grey — the canonical onSurface @ 12%',
+        );
+        expect(
+          disabled,
+          disabledSurfaceTint(theme.colorScheme),
+          reason: 'disabled is not the shared disabled ground',
         );
       }
     });
 
-    test('pointer feedback is answered by the theme, not by Material', () {
+    test('there is no chip elevation at rest or under press', () {
+      // `_ChoiceChipDefaultsM3.pressElevation` is 1.0 and *reachable*: the
+      // theme stated `elevation: 0` and left the press slot to the SDK, so
+      // every unselected press cast a real shadow (#434 P1-2). AD-14 admits
+      // one depth mechanism.
+      for (final isDark in <bool>[false, true]) {
+        final theme = isDark ? buildDarkTheme() : buildLightTheme();
+        expect(theme.chipTheme.elevation, 0);
+        expect(theme.chipTheme.pressElevation, 0);
+      }
+    });
+
+    test('the side is the hairline token wide in every state', () {
+      // `BorderSide`'s default width happens to equal `AppStroke.hairline`;
+      // the theme leaves it unstated (the lint refuses a redundant argument),
+      // so the equality is a fact this test owns (#434 P3-2).
+      for (final isDark in <bool>[false, true]) {
+        final theme = isDark ? buildDarkTheme() : buildLightTheme();
+        final side = theme.chipTheme.side! as WidgetStateBorderSide;
+        for (final states in <Set<WidgetState>>[
+          <WidgetState>{},
+          <WidgetState>{WidgetState.selected},
+          <WidgetState>{WidgetState.disabled},
+        ]) {
+          expect(side.resolve(states)!.width, AppStroke.hairline);
+        }
+      }
+    });
+
+    test('the fill answers hover, and only hover', () {
       // Declaring `color` makes Material set the InkWell's `hoverColor` to
-      // transparent, so these three are the only feedback a pill has left. A
-      // theme that resolved them all to the resting fill would leave the pill
-      // silent under a pointer on the web build — which is the E2E channel.
+      // transparent (`chip.dart:1427`), so the fill is the pill's *only* hover
+      // and a theme resolving it to the resting fill leaves the web build —
+      // the E2E channel — silent under a pointer.
+      //
+      // **Until M100.36 this test also required focus and press to move the
+      // fill.** They must not: the chip's `InkWell` still paints
+      // `ThemeData.splashColor` for press and `focusColor` for focus, so a fill
+      // tint on top ran a press at ~24% effective against a 12% token (#434
+      // P2-6, owner 4O). One transient mechanism per state — ripple for
+      // press, `MxFocusRing` for focus, this fill for hover.
       for (final isDark in <bool>[false, true]) {
         final theme = isDark ? buildDarkTheme() : buildLightTheme();
         final resting = fill(theme, <WidgetState>{});
+        final mode = isDark ? 'dark' : 'light';
 
+        expect(
+          fill(theme, <WidgetState>{WidgetState.hovered}),
+          isNot(resting),
+          reason: 'hover is silent in $mode',
+        );
         for (final state in <WidgetState>[
-          WidgetState.hovered,
           WidgetState.focused,
           WidgetState.pressed,
         ]) {
           expect(
             fill(theme, <WidgetState>{state}),
-            isNot(resting),
-            reason: '$state is silent in ${isDark ? 'dark' : 'light'}',
+            resting,
+            reason: '$state tints the fill in $mode — a second mechanism',
           );
         }
       }

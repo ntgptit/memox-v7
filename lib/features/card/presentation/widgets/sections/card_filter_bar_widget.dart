@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../../../shared/widgets/mx_pill_button.dart';
 import '../../../domain/models/card_list_filter_model.dart';
 import '../../controllers/card_list_filter_controller.dart';
@@ -69,69 +70,74 @@ class _CardFilterBarWidgetState extends ConsumerState<CardFilterBarWidget> {
       spacing: AppSpacing.sm,
       children: <Widget>[
         Expanded(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: <Widget>[
-                _pill(
-                  context,
-                  ref,
-                  context.l10n.cardFilterAll,
-                  CardListFilter.all,
-                  active,
-                  count: all,
-                  // The same glyph the deck's empty state uses for "cards".
-                  icon: Icons.style_outlined,
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                _pill(
-                  context,
-                  ref,
-                  context.l10n.cardFilterDue,
-                  CardListFilter.due,
-                  active,
-                  count: due,
-                  // The deck row's due state already means "when" with this clock
-                  // (`deck_workload_line_widget.dart`); a second glyph for the same idea
-                  // would be a second vocabulary to learn.
-                  icon: Icons.schedule,
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                _pill(
-                  context,
-                  ref,
-                  context.l10n.cardFilterNew,
-                  CardListFilter.isNew,
-                  active,
-                  count: fresh,
-                  // An open circle, because that is what "not started" looks like
-                  // beside the filled state dot each row carries. `fiber_new` was the
-                  // obvious pick and is wrong: it draws the word NEW, directly beside
-                  // the word New.
-                  icon: Icons.circle_outlined,
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                _pill(
-                  context,
-                  ref,
-                  context.l10n.cardFilterFlagged,
-                  CardListFilter.flagged,
-                  active,
-                  count: flagged,
-                  // **A glyph, not a character.** The label used to open with `⚑`
-                  // (U+2691) and no font in the bundle carries it — Inter,
-                  // PlusJakartaSans and NotoSansKR all miss it — so the shipped
-                  // goldens render a tofu box in both themes. A device with a wider
-                  // system font might draw a flag, which makes it worse: the mark was
-                  // correct or not depending on where you looked. The card row beside
-                  // it already uses `Icons.flag`; this is the same flag.
-                  icon: Icons.flag,
-                ),
-              ],
+          // **The group introduces itself** (M100.36 11F). Without a container
+          // a screen reader met four loose siblings — "All, selected, button /
+          // Due, button / …" — with no statement of what was being chosen
+          // (#434 P2-8). The children keep their own selected state.
+          child: Semantics(
+            container: true,
+            label: context.l10n.cardFilterGroupLabel,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                spacing: AppSpacing.sm,
+                children: <Widget>[
+                  _pill(
+                    context,
+                    ref,
+                    context.l10n.cardFilterAll,
+                    CardListFilter.all,
+                    active,
+                    count: all,
+                    // The same glyph the deck's empty state uses for "cards".
+                    icon: Icons.style_outlined,
+                  ),
+                  _pill(
+                    context,
+                    ref,
+                    context.l10n.cardFilterDue,
+                    CardListFilter.due,
+                    active,
+                    count: due,
+                    // The deck row's due state already means "when" with this
+                    // clock (`deck_workload_line_widget.dart`); a second glyph
+                    // for the same idea would be a second vocabulary to learn.
+                    icon: Icons.schedule,
+                  ),
+                  _pill(
+                    context,
+                    ref,
+                    context.l10n.cardFilterNew,
+                    CardListFilter.isNew,
+                    active,
+                    count: fresh,
+                    // An open circle, because that is what "not started" looks
+                    // like beside the filled state dot each row carries.
+                    // `fiber_new` was the obvious pick and is wrong: it draws
+                    // the word NEW, directly beside the word New.
+                    icon: Icons.circle_outlined,
+                  ),
+                  _pill(
+                    context,
+                    ref,
+                    context.l10n.cardFilterFlagged,
+                    CardListFilter.flagged,
+                    active,
+                    count: flagged,
+                    // **A glyph, not a character.** The label used to open with
+                    // `⚑` (U+2691) and no font in the bundle carries it —
+                    // Inter, PlusJakartaSans and NotoSansKR all miss it — so
+                    // the shipped goldens rendered a tofu box in both themes.
+                    // The card row beside it already uses `Icons.flag`; this
+                    // is the same flag.
+                    icon: Icons.flag,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-        _TagsPill(deckId: deckId),
+        _TagsEntry(deckId: deckId),
       ],
     );
   }
@@ -171,17 +177,21 @@ class _CardFilterBarWidgetState extends ConsumerState<CardFilterBarWidget> {
 
 /// The multi-tag filter's entry, last in the row (UC-18, M4.14 T3, T4).
 ///
-/// **A fifth pill on the existing bar, not a second bar.** This is where a user
-/// already looks to narrow the list; another strip under it costs height at
-/// 320dp and teaches a second vocabulary for one idea.
+/// **A fifth control on the existing bar, not a second bar.** This is where a
+/// user already looks to narrow the list; another strip under it costs height
+/// at 320dp and teaches a second vocabulary for one idea.
 ///
-/// **It is the one pill that does not belong to the four-way choice.** The other
-/// four are one-of-four, so exactly one is always lit and each says its own
-/// state. A tag filter is on or off independently, which is why it carries the
-/// number of selected tags: without it, nothing on the bar distinguishes "no tag
-/// filter" from "filtered by three tags" except the length of the list.
-class _TagsPill extends ConsumerWidget {
-  const _TagsPill({required this.deckId});
+/// **A command, not a pill** (M100.36 4N, #434 P1-1). It opens a sheet; the
+/// four pills beside it are one-of-four. It used to be an `MxPillButton` with
+/// `isSelected: tags.isActive`, which put an independent toggle that opens a
+/// dialog into an exclusive row wearing the same semantics node as its
+/// neighbours — a screen reader met five identical controls. It is the app's
+/// compact secondary action now: same 48 target, its own shape, `button`
+/// semantics and no selected state. Whether a tag filter is *active* is said
+/// by its content — the count in the label and in the spoken name — not by a
+/// selection the row does not have.
+class _TagsEntry extends ConsumerWidget {
+  const _TagsEntry({required this.deckId});
 
   final String deckId;
 
@@ -189,14 +199,15 @@ class _TagsPill extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final tags = ref.watch(cardListTagFilterProvider(deckId));
 
-    return MxPillButton(
+    return MxActionButton(
       label: tags.isActive
           ? context.l10n.tagFilterPillCount(tags.length)
           : context.l10n.tagFilterPillLabel,
       // The same glyph the catalog and its empty states use, so the two
       // surfaces read as one feature.
       icon: Icons.sell_outlined,
-      isSelected: tags.isActive,
+      variant: MxActionButtonVariant.secondary,
+      size: MxActionButtonSize.compact,
       onPressed: () => showCardTagFilterSheet(context, deckId),
       semanticLabel: tags.isActive
           ? context.l10n.tagFilterPillSemantics(tags.length)

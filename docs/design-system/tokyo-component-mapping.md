@@ -67,8 +67,12 @@ canonical M3 role  >  accessibility  >  MemoX structural system  >  Tokyo exact 
 | Component | Slot | M3 canonical | MemoX | Ghi chú |
 |---|---|---|---|---|
 | ChoiceChip | selected fill | `secondaryContainer` | = | guard AST |
-| ChoiceChip (elevated) | unselected fill | `surfaceContainerLow` | = | flat sẽ là `null`; widget dùng `.elevated` — xem §4 |
-| ChoiceChip | side | `outlineVariant`, selected trong suốt | = | guard AST |
+| ChoiceChip (flat) | unselected fill | `null` | `surfaceContainerLow` — **theme khai, không phải variant** | `ChipThemeData.color` chặn `chipDefaults.color` trước khi variant được hỏi (`chip.dart:1529`); M100.36 sửa lại lời giải thích ở §4 |
+| ChoiceChip | side | `outlineVariant`, selected trong suốt | = | guard AST; width = `AppStroke.hairline` (test ghim); 1.24:1 trên giấy — **chấp nhận**, pill định danh bằng hình, nhãn, nhóm và tick (#434 P2-4) |
+| ChoiceChip | disabled fill | `onSurface @ 12%` — selected hay không | = (`disabledSurfaceTint`) | M100.36: trước đó selected+disabled blend thêm container, dark sáng *hơn* pill sống (#434 P2-3) |
+| ChoiceChip | elevation / pressElevation | 1 / 1 (M3) | **0 / 0** | AD-14 một cơ chế độ sâu; `pressElevation` từng để SDK → mỗi lần nhấn có bóng thật (#434 P1-2) |
+| ChoiceChip | hover / press / focus | state layer `onSurfaceVariant` | hover: fill tint (`RawChip` tắt `hoverColor` khi theme có `color`) · press: ripple SDK · focus: `MxFocusRing` | **một cơ chế mỗi state** (§4O). Fill *không* đổi khi press/focus |
+| MxPillButton (custom) | leading slot | — | 16dp luôn được layout: tick khi selected, `icon` của caller khi không | chọn có *hình*, không reflow (§4M); target 48 do widget tự nới **ngoài** ring |
 | Checkbox | fill | `primary` / trong suốt theo `selected` | = | guard AST |
 | Switch | thumb | `outline` off / `onPrimary` on | = | guard AST |
 | Switch | track | `surfaceContainerHighest` off / `primary` on | = | guard AST |
@@ -180,13 +184,17 @@ app vẫn vẽ từ trước.
 | 1 | FAB bg/fg | `primaryContainer`/`onPrimaryContainer` | `primary`/`onPrimary` | **canonical** |
 | 2 | Card `color` | `surfaceContainerLow` | `surface` | **canonical** |
 | 3 | AppBar bg/fg | `surface`/`onSurface` | màu trang truyền vào | **canonical** |
-| 4 | ChoiceChip fill chưa chọn | flat `null` · elevated `surfaceContainerLow` | flat + `surface` | **elevated + `surfaceContainerLow`** |
+| 4 | ChoiceChip fill chưa chọn | flat `null` · elevated `surfaceContainerLow` | flat + `surface` | **flat + `surfaceContainerLow` do theme khai** (M100.36 sửa lại M100.32) |
 
-#4 đáng nói riêng: `MxPillButton` vẽ một *pill giấy nằm trên trang* — thiết kế
-đã ghi. Tô một chip **flat** là thay thế trên slot canonical, vì flat không có
-fill. Variant *elevated* có đúng ngữ nghĩa đó, nên widget dựng
-`ChoiceChip.elevated` và nhận fill từ role; `chipTheme` khai `elevation: 0` để
-variant mang ngữ nghĩa fill mà không mang cái bóng thiết kế này không vẽ.
+#4 đáng nói riêng, vì lời giải thích ở M100.32 sai và phải ghi lại: nó cho
+rằng dựng `ChoiceChip.elevated` là "nhận fill từ role". Không phải —
+`ChipThemeData.color` chặn `chipDefaults.color` *trước* khi variant được hỏi
+(`chip.dart:1529-1531`), nên `buildChipTheme` đã và đang là thứ tô fill; cái
+variant đổi được chỉ là `shadowColor`, và với `pressElevation` để nguyên 1.0
+của M3 thì mỗi lần nhấn pill chưa chọn có một bóng thật (#434 P1-2). M100.36
+dựng chip **flat**, khai fill giấy trên slot canonical, và ghim cả `elevation`
+lẫn `pressElevation` bằng 0. `mx_pill_button_construction_test.dart` ghim
+constructor ở mức source.
 
 Năm slot (FAB ×2, Card, AppBar ×2) được ghim ở `m3_role_binding_guard_test.dart`
 ở mức **source**, nên đổi `surfaceContainerLow` thành `surface` là đỏ kể cả khi
@@ -211,7 +219,7 @@ Component theme sở hữu hình học **toàn cục**; shared widget chỉ thê
 |---|---|
 | `buildSharedButtonStyle` | chiều cao tối thiểu (`AppSizing.touchTarget`), bề rộng tối thiểu, padding, shape, weight nhãn. `MxActionButtonSize.compact` là **trục kích thước** của shared widget (40 vẽ / 48 chạm, `label-md`), không phải một feature nêu lại — ranh giới dưới áp cho feature |
 | `buildInputDecorationTheme` | content padding, radius, stroke (input; focus ở focused-error), hint style, suffix colour. `MxSearchField` là composition riêng: sở hữu rung `body-md` của nó (widget đóng, §4P) |
-| `buildChipTheme` | chiều cao pill, padding, radius, weight nhãn |
+| `buildChipTheme` | chiều cao pill, padding, radius, weight nhãn, side hairline, hai elevation = 0. `MxPillButton` sở hữu slot dẫn 16dp, tick khi chọn, ring quanh hình vẽ và target 48 nới ngoài ring (§4P: rung `label-md`) |
 | `buildListTileTheme` | content padding, minVerticalPadding, `minTileHeight` (`AppSizing.rowMinHeight`), shape, ba rung chữ |
 | `buildDialogTheme` | shape |
 | `buildCardTheme` | shape, hairline |
@@ -221,6 +229,19 @@ MUST NOT: một **feature** nêu lại các giá trị này. Một shared widget
 của chính nó **khi trục đó là một enum đóng và có caller production** —
 `MxActionButtonSize.compact`, `MxTextButton.isCompact`, `MxPillButton` với
 `label-md` (M100.36 §4P). Cái bị cấm là một *feature* làm việc đó.
+
+**Pill là một-trong-N, và chỉ thế** (M100.36 §4N). Một lệnh đứng cạnh nhóm pill
+— nút mở sheet lọc tag của danh sách thẻ — là `MxActionButton` compact
+secondary, không phải pill mang `isSelected` nó không có: năm node semantics
+giống hệt nhau trong một hàng, bốn cái loại trừ nhau và một cái toggle độc lập,
+không nói cho screen reader biết cái nào là cái nào (#434 P1-1). Nhóm pill tự
+giới thiệu (`Semantics(container, label)`) trước các lựa chọn của nó (§11F).
+
+**Badge không phải chip.** `MxBadge` là `Container` — không focus, không press,
+không selected, không target — cho một từ trên nền `surfaceMuted`; ba feature
+từng tự viết đúng recipe này (due label của card row, tag chỉ đọc). Badge mang
+*trạng thái* (overdue, recommended, imported) giữ container riêng cạnh hàng của
+nó và không gộp vào (#434 §17).
 
 ---
 

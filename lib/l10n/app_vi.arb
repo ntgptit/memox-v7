@@ -1014,6 +1014,10 @@
   "@cardFilterAll": {
     "description": "The All filter pill with its count (D3)."
   },
+  "cardFilterGroupLabel": "Lọc thẻ",
+  "@cardFilterGroupLabel": {
+    "description": "Tên trợ năng của nhóm pill lọc thẻ, đọc trước các lựa chọn (M100.36 11F)."
+  },
   "cardFilterDue": "Đến hạn",
   "@cardFilterDue": {
     "description": "The Due filter pill with its count (D3): BR-22's queue minus the never-reviewed cards, so it never overlaps New."
@@ -3998,6 +4002,10 @@
   "trashFilterAll": "Tất cả",
   "@trashFilterAll": {
     "description": "Trash filter chip: both kinds (wireframe T3)."
+  },
+  "trashFilterGroupLabel": "Lọc thùng rác",
+  "@trashFilterGroupLabel": {
+    "description": "Tên trợ năng của nhóm pill lọc thùng rác, đọc trước các lựa chọn (M100.36 11F)."
   },
   "trashFilterCards": "Thẻ",
   "@trashFilterCards": {
