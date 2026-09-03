@@ -8,7 +8,7 @@
 | **A20_BASE_SHA** | **`b2d134b748c214c4130966358249d33fad5c4dea`** |
 | **Pinned SDK** | Flutter **3.44.8** stable · framework `058e0af2c2` · Dart 3.12.2 — installed locally and read directly for every Material claim |
 | **Supported product surface** | **Android only** (AD-04). Web builds and is the E2E/visual-regression channel; it is **not** a released surface. iOS deferred |
-| **Last updated** | 2026-09-04 |
+| **Last updated** | 2026-09-04 — **correction pass** (A20.1 is corrected in place; no A20.2): raw-Material arithmetic (22 + 17 = 39), the width finding reconciled against the current stress matrix, the loading-indicator guard narrowed so the determinate ring stays allowed, `Scaffold` reclassified, the P0 closure test made implementation-neutral, and the two scores recomputed with verification criteria removed from the architectural set |
 
 ---
 
@@ -20,12 +20,14 @@ Two verdicts, reported independently, because A20 conflated them.
 > Four systemic gaps remain: one component family has no route owner
 > (sheets), one has no semantic owner (loading/progress), the restyle
 > vocabulary is unenforced in three spellings, and the enforcement layer has no
-> ratchet for the names the architecture actually forbids. **Score 21/32.**
+> ratchet for the names the architecture actually forbids. **Score 13/30**
+> (§23 — ownership, role correctness, closed APIs, enforceability and
+> component-level accessibility contracts; coverage properties live in §24).
 >
 > **B · DESIGN SYSTEM V1 — FULLY VERIFIED / RELEASE READY: NO.**
-> High contrast is rendered nowhere, two of the four most common phone widths
-> are rendered nowhere, and eight screens sit in features with no accessibility
-> sweep at all. **Score 9/22.**
+> High contrast is rendered nowhere, no picture exists at 360 or 375 dp
+> (the layout tier does pump them — §24 #15), and eight screens sit in
+> features with no accessibility sweep at all. **Score 11/23.**
 
 **One P0**, and it is the only finding that blocks a user on the supported
 surface: the `browse` study mode can be advanced only by a 70 dp horizontal
@@ -42,11 +44,12 @@ onto the theme. What it did **not** touch is the enforcement layer (guard config
 is byte-identical to A20) and the kit (elevation.css unchanged).
 
 **The single most useful correction in this pass** is §8: A20's "40 raw-Material
-violations" is not 40 violations. Classified against the architecture, **26 of
+violations" is not 40 violations. Classified against the architecture, **17 of
 the 39 current sites are legitimate** — theme-owned separators, framework paint
-hosts, and compositions with written reasons. Only **13** represent a real
-ownership gap. A guard built from A20's list would have banned correct code and
-produced exactly the wrapper spam §20 warns against.
+hosts, and compositions with written reasons. **22** represent a real ownership
+gap, and they are two families: 16 raw sheet routes and 6 raw loading spinners.
+A guard built from A20's list would have banned correct code and produced
+exactly the wrapper spam §20 warns against.
 
 ---
 
@@ -87,7 +90,7 @@ the full non-golden host suite passes (§22).
 | **Features** | 9 `Divider` sites moved onto the theme; tag-filter entry left `MxPillButton`; study grading one-primary |
 | **Guard** | **nothing — `code-verification-guard-v2/` diff is empty** |
 | **Kit** | `mx.css` −/+34, `colors.css` ±6. **`elevation.css` untouched** |
-| **Tests / goldens** | +14 goldens (237 → **251**); 477 test files; new contract suites for list tile, text field, pill construction, composite button state |
+| **Tests / goldens** | +14 goldens (237 → **251**); 477 test files; new contract suites for list tile, text field, pill construction, composite button state; **`mx_stress_test.dart` gained a width × scale matrix — every shared specimen at 360 / 375 / 393 dp × 1.3 / 2.0, inputs at 2.5 / 3.0 × 320, on top of the 320 × 2.0 floor** |
 
 ### 3.2 · Two facts that decide many rows below
 
@@ -120,7 +123,7 @@ against CURRENT_SHA by re-running A20's own scanners plus targeted reads.
 | A20-P1-07 | P1 | boldText no-op **+** 19/21 all-caps unnamed | no | **yes**, but two root causes | **SPLIT** | P1-11, P2-02 | P1 / P2 |
 | A20-P1-08 | P1 | FAB + SnackBar elevation, no `materialShadowColor` | no | **yes** | **KEEP** | P1-12 | P1 |
 | A20-P1-09 | P1 | No warning tone **+** error/empty misuse **+** silent spinner | no | **yes**, three root causes | **SPLIT** | P1-13, P2-03, P1-02 | P1 / P2 |
-| A20-P1-10 | P1 | 360 / 375 dp rendered nowhere | no | **yes** | **KEEP** | P1-14 | P1 |
+| A20-P1-10 | P1 | 360 / 375 dp rendered nowhere | **yes — `mx_stress_test.dart` pumps 360 / 375 / 393 × 1.3 / 2.0 for every shared specimen (M100.36)** | **no** — the widths are laid out and rendered in widget tests; what remains is that no *golden* exists at them | **RESOLVED_BY_LATER_CHANGE** (residual golden gap → P3-15) | — (residual: P3-15) | P3 |
 | A20-P1-11 | P1 | `MxActionSheet` rows raw `ListTile`, no focus ring | focus grammar unified elsewhere | **yes** | **UPDATE** (now the hold-out) | P2-04 | P2 |
 | A20-P1-12 | P1 | Nav chrome: no bar on loading/error **+** two up-grammars **+** "ink is the inverse of M3" | no | 2 of 3 | **SPLIT + CORRECT** | P1-15, P1-16, P2-05 | P1/P1/P2 |
 | A20-P1-13 | P1 | Slider guard pins the wrong defaults class | no | **yes**, refined | **DOWNGRADE + UPDATE** | P2-06 | P2 |
@@ -153,25 +156,27 @@ against CURRENT_SHA by re-running A20's own scanners plus targeted reads.
 | A20-P3-11 | P3 | `MxBreadcrumb.lineHeight: 32` below the touch floor | no | **yes** | **KEEP** | P3-13 | P3 |
 | A20-P3-12 | P3 | `AppStroke.input` misnamed; `MxSearchField` implicit 1.0 | **search edge now `AppStroke.input`** | half | **UPDATE** | P3-14 | P3 |
 
-**Tally.** 46 in (5 P0 · 13 P1 · 16 P2 · 12 P3) · **0 fully resolved** ·
-**7 lowered in severity** (5 of them as the primary action, 2 inside a split) ·
-**0 raised** · **5 split** · **0 merged** · **8 updated** · **28 kept**.
-Out: **1 P0 · 16 P1 · 22 P2 · 14 P3 = 53**.
+**Tally.** 46 in (5 P0 · 13 P1 · 16 P2 · 12 P3) · **1 resolved by a later
+change** (A20-P1-10, with a P3 residual) · **7 lowered in severity** (5 of them
+as the primary action, 2 inside a split) · **0 raised** · **5 split** · **0
+merged** · **8 updated** · **27 kept**. 1 + 5 + 5 + 8 + 27 = 46.
+Out: **1 P0 · 15 P1 · 22 P2 · 15 P3 = 53** (P1-14 retired; P3-15 added).
 
-Nothing was resolved outright because M100.36 targeted the four component
-audits (#431–#434), not A20's registry — but it closed real ground inside
-several rows, which §5 records.
+M100.36 targeted the four component audits (#431–#434), not A20's registry;
+one A20 row was nevertheless closed by its Phase 6 stress matrix, and it closed
+real ground inside several other rows, which §5 records.
 
 ---
 
 ## 5 · Findings resolved since A20
 
-Nothing in A20's registry was fully resolved. **What M100.36 did close is
-narrower than the registry and worth recording**, because it is evidence about
-the direction of travel and it removes work from the DAG:
+One A20 row was resolved outright, and **what M100.36 closed inside other
+rows is narrower than the registry and worth recording**, because it is evidence
+about the direction of travel and it removes work from the DAG:
 
 | closed | evidence |
 |---|---|
+| **A20-P1-10 — "360 / 375 dp rendered nowhere"** (was A20.1-P1-14, now retired) | `test/shared/widgets/mx_stress_test.dart:102-103` pumps **360 / 375 / 393 × 1.3 / 2.0** for every shared specimen (`MxHeroCard` included) and **2.5 / 3.0 × 320** for the inputs, on top of the 320 × 2.0 floor; each pump asserts no layout overflow. The layout-tier width matrix A20 asked for exists. The residual — no *golden* at 360 or 375 — is a picture gap, not a layout gap, and is P3-15 |
 | `MxTextField.textStyle` — an open `TextStyle?` on the shared surface | gone; replaced by `emphasis` / `content` / `supportingLine`, three closed enums with a caller behind every member |
 | `MxTextField.textAlign`, `MxTextField.isReadOnly` | removed, zero callers |
 | `MxRadioRows.contentPadding` — an open `EdgeInsetsGeometry` | removed; the gutter follows the shape |
@@ -189,9 +194,10 @@ the direction of travel and it removes work from the DAG:
 ## 6 · Findings retained or changed — the four that changed most
 
 **A20-P0-01 → four findings.** A20 counted 40 raw-Material sites and treated
-the count as the defect. §8 below classifies all 39 current sites; 26 are
-legitimate. What survives is three ownership gaps (sheet route, loading
-semantics, screen chrome ratchet) and one enforcement gap.
+the count as the defect. §8 below classifies all 39 current sites; 17 are
+legitimate and 22 need a shared owner. What survives is two ownership gaps
+(sheet route, loading semantics), one pure ratchet (screen chrome, zero current
+violations) and one enforcement gap.
 
 **A20-P1-12's third claim is wrong and is corrected.** A20 wrote that
 "`app_app_bar_theme.dart:15` gives leading `onSurfaceVariant` and
@@ -252,22 +258,28 @@ raw Material usage.
 | `showModalBottomSheet` | **16** | 13 files across card/deck/study/trash | **SHARED_REQUIRED** | none exists — `showMxFormSheet` covers one shape | **yes, after the owner lands** |
 | `Divider` (bare) | **7** | card ×5, reminder ×1, study ×0 | **THEMED_RAW_ALLOWED** | `dividerTheme` — one hairline, `outlineVariant` | **no** |
 | `Divider` (per-site args) | **3** | `tag_catalog_screen:194` (list inset), `card_import_stepper:87` (colour = step state), `study_card_face_section:321` (face rule) | **FEATURE_SPECIAL_CASE_ALLOWED** — each carries a written reason | — | **no** |
-| `CircularProgressIndicator` — full-area | **2** | `card_editor_screen:190`, `card_bulk_overlays:97` | **SHARED_REQUIRED** | `MxLoadingState` exists and is bypassed | **yes** |
-| `CircularProgressIndicator` — in-column | **2** | `card_import_preview_step:194`, `card_import_submit_progress:33` | **SHARED_REQUIRED** | same recipe twice; needs a no-padding variant | **yes** |
-| `CircularProgressIndicator` — inline 16 dp | **2** | `card_history_section:306`, `search_page_footer:56` | **SHARED_REQUIRED** | none — the same recipe written twice in two features | **yes** |
-| `CircularProgressIndicator` — determinate ring | **1** | `card_progress_panel:178` (`value: fraction`, `Positioned.fill`) | **FEATURE_SPECIAL_CASE_ALLOWED** | a mastery ring is not a loading spinner | **no** |
+| `CircularProgressIndicator` — full-area | **2** | `card_editor_screen:190`, `card_bulk_overlays:97` | **SHARED_REQUIRED** | `MxLoadingState` exists and is bypassed | **yes, after the owner lands** (`no_raw_loading_indicator`, §9) |
+| `CircularProgressIndicator` — in-column | **2** | `card_import_preview_step:194`, `card_import_submit_progress:33` | **SHARED_REQUIRED** | same recipe twice; needs a no-padding variant | **yes, after the owner lands** |
+| `CircularProgressIndicator` — inline 16 dp | **2** | `card_history_section:306`, `search_page_footer:56` | **SHARED_REQUIRED** | none — the same recipe written twice in two features | **yes, after the owner lands** |
+| `CircularProgressIndicator` — determinate ring | **1** | `card_progress_panel:178` (`value: fraction`, `Positioned.fill`) | **FEATURE_SPECIAL_CASE_ALLOWED** | a mastery ring is not a loading spinner | **no — named on the rule's `exclude:` list with this reason** (§9) |
 | `Material` | **2** | `reminder_settings_section:91` (transparent **ink host** — Flutter asserts without it), `trash_selection_bar:42` (**surface host**, colour from a role) | **FRAMEWORK_PRIMITIVE_ALLOWED** | — | **no** |
 | `Chip` + `ActionChip` | **2** | `card_tag_section:290,299` — a deletable tag chip and an add-tag command | **FEATURE_SPECIAL_CASE_ALLOWED** — owner-accepted in #452 ("the only fix would replace the delete affordance the owner pinned"); `MxPillButton` is a pick-one `ChoiceChip`, a different semantic | `chipTheme` owns the paint | **`ChoiceChip` only** |
 | `TextField` | **1** | `fill_answer_pieces:187` — chrome-less editable that **is** the card (`expands: true`, every border state off, name supplied by `Semantics`) | **FEATURE_SPECIAL_CASE_ALLOWED** | `MxTextField` is a decorated field; it cannot express this | **no** |
 | `showTimePicker` | **1** | `reminder_time_picker:24` | **THEMED_RAW_ALLOWED** | `timePickerTheme` owns it; one caller | **no** |
 
-**Totals: 13 SHARED_REQUIRED · 8 THEMED_RAW_ALLOWED · 2 FRAMEWORK_PRIMITIVE ·
-16 FEATURE_SPECIAL_CASE · 0 UNRESOLVED.**
+**Totals: 22 SHARED_REQUIRED · 8 THEMED_RAW_ALLOWED · 2 FRAMEWORK_PRIMITIVE ·
+7 FEATURE_SPECIAL_CASE · 0 UNRESOLVED.** Arithmetic from the table:
+SHARED_REQUIRED = 16 sheets + (2 + 2 + 2) spinners = **22**; THEMED_RAW =
+7 bare `Divider` + 1 `showTimePicker` = 8; FRAMEWORK_PRIMITIVE = 2 `Material`;
+FEATURE_SPECIAL_CASE = 3 argued `Divider` + 1 determinate ring + 2 chips +
+1 chrome-less `TextField` = 7. 22 + 8 + 2 + 7 = **39**, and the allowed set is
+8 + 2 + 7 = **17** = 39 − 22.
 
 ### 8.1 · What this changes
 
-A20's headline "40 live violations" becomes **13**. The other 26 are code doing
-the right thing:
+A20's headline "40 live violations" becomes **22** — and those 22 are two
+families with two owners to build (16 sheet routes, 6 loading spinners), not
+twenty-two decisions. The other **17** are code doing the right thing:
 
 - A bare `Divider()` **is** the design system working — the theme owns the line
   and the layout owns the gap. That was M100.36's explicit decision (10H), and
@@ -286,16 +298,18 @@ follow from §8; the rest of A20's 71-name list does not.
 | proposed rule | names | scope | why | blocked by |
 |---|---|---|---|---|
 | `no_raw_sheet_route` | `showModalBottomSheet`, `showBottomSheet` | `presentation_files` | the app must open a sheet through one owner; five inset mechanisms are the proof it currently does not | **P1-01** — guarding first would ban the only mechanism that exists |
-| `no_raw_progress_indicator` | `CircularProgressIndicator`, `LinearProgressIndicator` | `presentation_files` | the accessible name must have one owner; the silent spinner is the proof | **P1-02** |
-| `no_raw_screen_chrome` | `AppBar`, `SliverAppBar`, `Scaffold` | `presentation_files` | `MxContentShell` owns screen chrome; **zero current violations**, so this is a pure ratchet | nothing — land immediately |
+| `no_raw_loading_indicator` | `CircularProgressIndicator`, `LinearProgressIndicator` — **with an explicit `exclude:` for the determinate-progress callers** (today exactly one: `lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart`, `value: fraction`, a mastery ring), each entry carrying its reason in the rule file | `presentation_files` | the *accessible name of a loading state* must have one owner; the silent spinner is the proof. A determinate ring is not a loading state — §8 classifies it FEATURE_SPECIAL_CASE_ALLOWED, and the rule must agree with the taxonomy it enforces. `exclude:` is the guard's existing per-rule mechanism (used by `memox-architecture-rules.yaml`), so this needs no new capability; the alternative — matching only constructions with no `value:` argument — is more precise but needs a balanced-paren file walk for one site, and was rejected as machinery for a scanner. A new determinate caller is added to `exclude:` **with its reason** in the same change; an entry without a `value:` at the site is a violation of the rule's own contract and the live-tree scan must say so. **No `MxProgressRing` wrapper is created to satisfy the scanner** | **P1-02** — the six SHARED_REQUIRED spinner sites become guardable only once the loading family owns their shapes |
+| `no_raw_screen_chrome` | `AppBar`, `SliverAppBar` — **`Scaffold` is not in this rule** | `presentation_files` | `MxContentShell` owns the *chrome* (bar, subheader, back affordance); **zero current violations**, so this is a pure ratchet. `Scaffold` is classified **FRAMEWORK_PRIMITIVE_ALLOWED**: it is the framework's layout host, not a design-system component; no architecture decision (AD-01…AD-19) forbids a feature from owning one, and `mx_content_shell.dart:99` ("owning the `Scaffold` is what makes this the shell's job") documents why the *shell* builds its own — it is not a prohibition on features. Zero raw `Scaffold` in `lib/features/` today, so nothing is lost by not ratcheting it; banning a framework host on the strength of a wrapper's existence is the reasoning §20 forbids. No `MxScaffold` is proposed | nothing — land immediately |
 | `no_raw_choice_chip` | `ChoiceChip` | `presentation_files` | `MxPillButton` owns pick-one. `Chip`/`ActionChip`/`InputChip` deliberately **not** included | nothing |
 | `no_text_restyle` (extend) | add `textStyles.<role>.copyWith(`; widen scope to `ui_surfaces`; `mode: file` | `ui_surfaces` | three spellings of one decision escape today | nothing |
 | `no_raw_style_escape` (extend) | add `BoxDecoration`, `Border.all` | `presentation_files` | 30 sites, **all token-fed today** — a ratchet, not a cleanup | nothing |
 
 **Explicitly not guarded**, and the reason recorded so the next audit does not
-re-propose them: `Divider`, `VerticalDivider`, `Material`, `Ink`, `SafeArea`,
-`Chip`, `ActionChip`, `InputChip`, `TextField`, `showTimePicker`,
-`showDatePicker`, `Tooltip`, `Drawer`, `DataTable`, `Stepper`.
+re-propose them: `Scaffold` (framework host, above), `Divider`,
+`VerticalDivider`, `Material`, `Ink`, `SafeArea`, `Chip`, `ActionChip`,
+`InputChip`, `TextField`, `showTimePicker`, `showDatePicker`, `Tooltip`,
+`Drawer`, `DataTable`, `Stepper`, and — by `exclude:` rather than by name — the
+determinate progress ring.
 
 Every proposed rule must ship with a **positive synthetic probe**, a **comment
 false-positive probe** and a **live-tree scan**, and must be fault-injected —
@@ -496,19 +510,32 @@ bare name would merge them.
   state on the only released surface.
 - **Who is blocked.** A sighted touch user who cannot complete a 70 dp
   horizontal drag and does not run an assistive technology.
-- **Resolution.** Give the card a single-pointer path. Cheapest correct fix: a
-  tap target on the card's forward half plus a visible affordance, or restore a
-  compact Continue/Back pair for `browse` only. `MxActionButton` and
-  `AppMotionPolicy` already exist; nothing new is needed in the design system.
+- **Resolution.** Give the card a single-pointer path. Any of these satisfies
+  the contract: a visible tap affordance on the card itself, a compact
+  Continue / Previous pair for `browse` only, or another visible single-pointer
+  non-drag action. `MxActionButton` and `AppMotionPolicy` already exist;
+  nothing new is needed in the design system. Swipe stays.
 - **Dependencies.** None. Independent of every other finding.
 - **Files.** `lib/features/study/presentation/widgets/support/study_swipe_deck_widget.dart`,
   `.../support/study_mode_view_widget.dart`,
   `.../sections/study_card_face_section_widget.dart`, ARB pair.
-- **Closure test.** Widget test: pump the `browse` face, dispatch a **tap**
-  (no drag), assert the card advanced; and assert the same for the `previous`
-  direction where `canGoBack`. Must fail today.
-- **Owner decision.** None — accessibility selects the outcome; only the visual
-  form is open, and that is a design detail, not a blocker.
+- **Closure test — implementation-neutral, it validates the accessibility
+  contract and does not prescribe the UI.** Widget test:
+  1. pump `browse` mode with a deck of ≥ 2 cards;
+  2. assert a **visible, enabled, non-drag single-pointer Continue affordance
+     exists** — found by its semantic label / `button` flag, not by widget
+     type, so a card-region tap target and a button both pass;
+  3. activate it with **one tap** (`tester.tap`, no drag gesture);
+  4. assert the study advanced (the next card is shown / the controller's
+     index moved);
+  5. where `canGoBack`, assert the equivalent **Previous** affordance exists
+     and one tap goes back;
+  6. assert the existing swipe (`kStudySwipeThreshold` drag) still advances —
+     the tap path is an addition, not a replacement.
+  Must fail today at step 2.
+- **Owner decision.** None — accessibility selects the outcome; whether the
+  affordance is a button or a card-region tap is a design detail the test
+  deliberately does not fix.
 
 ---
 
@@ -517,7 +544,7 @@ bare name would merge them.
 | ID | Axis | Summary | Source | Current evidence | Root cause | Resolution | Deps | Closure test |
 |---|---|---|---|---|---|---|---|---|
 | **P1-01** | CMP | **No sheet route owner.** 16 raw `showModalBottomSheet` in 13 files; bottom inset in **5** mechanisms (`SafeArea` ×7, `useSafeArea:` ×2, `MxSheetInsets` ×2, `mxSheetBottomObstruction` ×1, raw `viewInsets` ×1, none ×5); `Semantics(header: true)` on **1** of 17 sheets. Dialogs: 4 helpers, **0** raw | A9-01/02/05/06, A20-P1-01 | one decision, five owners | one `showMxSheet` + `MxSheetHeader` owning navigator, safe area, inset, handle, header semantics, traversal | — | route test per sheet: one inset value, one top gutter, `isHeader: true`, barrier covers `tester.view`; scan: `showModalBottomSheet` only in `lib/shared/` |
-| **P1-02** | CMP/A11Y | **No loading/progress semantic owner.** 6 of 7 raw spinner sites reimplement three shapes; `card_bulk_overlays:97` has **no accessible name at all**; `card_history_section:306` and `search_page_footer:56` are the same inline recipe written twice in two features | A12-#2/#7/#9, A20-P0-01 split | `MxLoadingState` covers one shape of three | keep `MxLoadingState`; add a no-padding variant and an inline 16 dp spinner; migrate 6 sites | — | semantics test: every progress indicator in `lib/` has a name; scan: the inline recipe exists once |
+| **P1-02** | CMP/A11Y | **No loading semantic owner.** 6 of 7 raw `CircularProgressIndicator` sites are *loading* states reimplementing three shapes; `card_bulk_overlays:97` has **no accessible name at all**; `card_history_section:306` and `search_page_footer:56` are the same inline recipe written twice in two features. The 7th (`card_progress_panel:178`) is a determinate mastery ring and is **not** part of this finding (§8) | A12-#2/#7/#9, A20-P0-01 split | `MxLoadingState` covers one shape of three | keep `MxLoadingState`; add a no-padding variant and an inline 16 dp spinner; migrate the 6 sites. Then `no_raw_loading_indicator` (§9) can land with the determinate ring on its `exclude:` list | — | semantics test: every *indeterminate* progress indicator in `lib/` has a name; scan: the inline recipe exists once; the guard's live-tree scan reports 0 with exactly one excluded file |
 | **P1-03** | ENF | **The guard has no ratchet for the names architecture forbids.** Config byte-identical to A20; guard prints *"No violations found"*; control group of 44 banned names = 0; the six rules of §9 do not exist | A20-P0-01, A8-P2-16 | enforcement was never rebuilt after the taxonomy was decided | land §9's six rules, warning → fix → error, each fault-injected | P1-01, P1-02 gate two of the six | two-way probe per rule + live-tree scan |
 | **P1-04** | A11Y | **`_MxBreadcrumbFold` is the last control outside the focus grammar.** `mx_breadcrumb.dart:397` `InkWell` with `overlayColor: _noOverlay` (a `WidgetStatePropertyAll` of `primary.withAlpha(0)`), `splashFactory: NoSplash`, no `onFocusChange`, no `MxFocusRing`. SDK-verified: `ink_well.dart` resolves `focus` as `overlayColor?.resolve(focused) ?? focusColor ?? theme.focusColor`, so both fallbacks are short-circuited. M100.36 unified focus for row/pressable/pill/card; this file was untouched | A17-P0-1, A20-P0-03 | one widget opts out of the app's focus system wholesale | drop the blanket `overlayColor`, or adopt `MxFocusRing` + `onFocusChange` as `mx_breadcrumb_step.dart:139` already does | after P1-04's grammar is the only one | `mx_breadcrumb_focus_test.dart`: tab to the fold, assert a border at `AppStroke.focus` in `focusIndicator(scheme).color`; absent at rest and under `alwaysTouch` |
 | **P1-05** | CMP | **Async confirm dismisses mid-write and drops the Undo.** `mx_async_confirm_dialog.dart:203` `showDialog<void>` with `barrierDismissible` defaulted and no `PopScope`; `deck_confirm_widget.dart:113` wires `onDone: _finish`, and `_finish` is the only path to `onDeleted(_batchId)` — the Undo. Popping the barrier unmounts the listener, the write commits, no message appears | A9-03, A20-P0-04 | the dialog disables its buttons but not its exits | `PopScope(canPop: !isSubmitting)` + `barrierDismissible: !isSubmitting`, in the shared widget so all four callers inherit it | — | route test: submit, tap the barrier while submitting, drive to `savedAndClose`, assert `onDone` fired exactly once |
@@ -529,7 +556,6 @@ bare name would merge them.
 | **P1-11** | A11Y | **The OS Bold-text setting is a complete no-op.** SDK-verified: `widgets/text.dart:722-723` honours `boldText` by merging `TextStyle(fontWeight: FontWeight.bold)`. Every rung in this app carries `fontVariations: _wght(...)` (`app_typography.dart:200,217`), and the app's own doc (`:163-169`) records that the renderer consults the axis *instead of* `fontWeight`. **Zero** `boldText` references in `lib/ test/ widgetbook/` | A15-F1, A20-P1-07 split | a variable-font axis silently overrides the flag Flutter uses | one `boldText`-aware wrapper at the composition root or in `AppTypography`, which must state what boldText means for `heroNumeral`'s derived cap-trim | — | pump `Text` at three rungs under `MediaQuery(boldText: true)`; assert the resolved `fontVariations` `wght` moves, not just `fontWeight` |
 | **P1-12** | CMP | **Elevation without a shadow colour, on the two components that float.** `app_fab_theme.dart:62` and `app_snackbar_theme.dart:26` state `elevation: AppElevation.overlay`; only `app_popup_menu_theme.dart:52` and `app_card_theme.dart:41` call `materialShadowColor(scheme)`. In dark the model returns transparent; these two paint `scheme.shadow` instead. `component_depth_and_state_test.dart:203` tests the invariant for `PopupMenu` alone | A16-G-14, A20-P1-08 | the invariant is tested for one component and stated for none | wire both; then loop the level-equal + dark-transparent assertions over every theme with non-zero elevation | P1-06 settles the elevation reference | the generalised loop, red today on two slots |
 | **P1-13** | CMP | **Feedback has no warning tone and a caller needs one.** `mx_feedback_band.dart:88` offers `MxCardFeedbackTone.danger` only; `reminder_labels_widget.dart` forces `permissionDenied` — one of five `ReminderSetupRejection` values — into danger, although `AppSemanticColors.warningContainer`/`onWarningContainer` exist | A12-#3, A20-P1-09 split | a four-tone palette and a one-tone band | add the warning tone; map the rejection **per value** in `reminderBanner()`, not with a blanket switch | — | widget test: `permissionDenied` renders the warning tone |
-| **P1-14** | COV | **360 dp and 375 dp are rendered nowhere.** Of 152 demo goldens, 148 are 393 dp and 4 are 320 dp. `MxHeroCard` takes its *cramped* branch at 360 and 375 while the 393 reference device hugs — the branch most phones take is the one never pictured | A18 §7.3, A8-P3-21, A20-P1-10 | the reference device is not the modal device | a shared width matrix fixture at 320/360/375/393 in the layout tier. **Not** gallery rows — `build_screen_gallery.py` enforces 393×852 and would reject them | — | the matrix exists and asserts the `MxHeroCard` branch at each width |
 | **P1-15** | CMP | **The shell drops its bar while loading and on error.** `mx_content_shell.dart:213` returns early when `title == null && subheader == null && subline == null`; `deck_list_screen.dart` and `deck_level_error_widget.dart` render exactly that state — no title, no back affordance, a 56 dp jump | A8-P1-01, A20-P1-12 split | the bar is conditional on content it does not need | keep the bar (and its `leading`) whenever the shell has a back affordance to draw | — | widget test: the shell renders a bar with a back affordance in loading and error states |
 | **P1-16** | CMP | **Two incompatible up-navigation grammars one tap apart.** `deck_path_widget.dart` and `card_breadcrumb_widget.dart` disagree about what the trail does | A8-P1-02, A20-P1-12 split | two features solved the same navigation question independently | pick one grammar; `MxBreadcrumb` already supports both forms, so this is a caller decision | — | a test asserting both screens' trails answer the same gesture the same way |
 
@@ -539,7 +565,7 @@ bare name would merge them.
 
 | ID | Axis | Summary and current evidence | Source | Resolution / closure |
 |---|---|---|---|---|
-| **P2-01** | ENF | Latent guard gaps with **zero** current violations: `AppBar`, `SliverAppBar`, `Scaffold`, `ChoiceChip` and 15 other names are unguarded. A pure ratchet | A8-P2-16 | land `no_raw_screen_chrome` + `no_raw_choice_chip` (§9); scan stays 0 |
+| **P2-01** | ENF | Latent guard gaps with **zero** current violations: `AppBar`, `SliverAppBar`, `ChoiceChip` and the other names §9 ratchets are unguarded. `Scaffold` is **not** among them — FRAMEWORK_PRIMITIVE_ALLOWED (§9). A pure ratchet | A8-P2-16 | land `no_raw_screen_chrome` (`AppBar`, `SliverAppBar`) + `no_raw_choice_chip` (§9); scan stays 0 |
 | **P2-02** | A11Y/CMP | **All-caps has three policies.** 16 localized headings uppercase with no accessible name; 1 does it correctly (`settings_section_widget.dart:53`); 1 screen refuses to uppercase at all with an l10n argument; **3 are format acronyms that must be excluded** (§13) | A15-F2, A19-07, A20-P1-07/P2-07 split | one `MxSectionLabel` carrying label + `header: true` + the tracking; the 3 acronyms exempt by contract. Test: every heading built by the component exposes the written sentence |
 | **P2-03** | CMP | `AsyncValue.error` rendered through `MxEmptyState` (`card_bulk_overlays:100-106`, `card_editor_screen:194-217`) — the conflation `mx_empty_state.dart`'s own doc renounces | A12-#1, A20-P1-09 split | route errors to `MxErrorState`; widget test per site |
 | **P2-04** | A11Y | `MxActionSheet` rows are raw `ListTile` (`mx_action_sheet.dart:149`) — the only non-family raw `ListTile(` in `lib/shared/` — so they inherit no row overlay and **no focus ring**, on a keyboard-focusable row. M100.36 unified focus for row/pressable/pill and did not reach this file | A14-F1, A20-P1-11 | route through `MxListTile`, or adopt the ring. Lands with P1-01 |
@@ -582,6 +608,7 @@ bare name would merge them.
 | **P3-12** | COV | `MxIcon` has no unit test; its null-label ⇒ `ExcludeSemantics` contract — the reason the widget exists — is asserted nowhere | A13-P3-3, A20-P3-10 |
 | **P3-13** | DOC | `MxBreadcrumb` accepts `lineHeight: 32` with tappable steps, below `AppSizing.touchTarget`; only convention prevents it | A16-G-7, A8-P3-17, A20-P3-11 |
 | **P3-14** | DOC | `AppStroke.input` names a component and 3 of its 5 call sites are not inputs. **Half resolved:** `MxSearchField`'s edge is now `outline` at `AppStroke.input` (M100.36 4E), so only the naming survives | A16-G-10/13, A20-P3-12 |
+| **P3-15** | COV | **No golden at 360 or 375 dp.** The layout tier now pumps and renders both (`mx_stress_test.dart`, every shared specimen, 1.3× and 2.0×) and asserts no overflow — the A20 width-matrix contract is met. What no test *pictures* is a screen at either width; demo goldens are 393 dp plus a few at 320. A picture at 360/375 belongs to a component golden beside its test, **not** to the gallery (`build_screen_gallery.py` enforces 393×852). P3: a layout defect at these widths would already fail the matrix; the golden would only make a passing layout visible | A18 §7.3, A8-P3-21, A20-P1-10 residual |
 
 ---
 
@@ -630,7 +657,8 @@ A20 listed five. Three are settled here by evidence; **two remain**.
 Rebuilt from current dependencies. Nine phases, not A20's twelve: the guard
 phase splits because two of its six rules are gated on primitives that do not
 exist yet, and A20's separate "responsive/motion" phase collapses (motion is
-closed; only the width matrix remains).
+closed and the width matrix landed with M100.36; only a P3 golden residual
+remains).
 
 ```
 Phase 0  RATCHET WHAT IS ALREADY CLEAN                  P2-01 P2-08 P2-09 P2-10 P2-22
@@ -655,20 +683,23 @@ Phase 4  PRIMITIVES                                      P1-01 P1-02 P2-02 P1-05
    │  MxSectionLabel MUST precede Phase 5 or P1-07's 9 sites migrate twice.
    │  Pixels: yes.
    ▼
-Phase 5  CALLERS                                         13 SHARED_REQUIRED sites · P1-07 · P1-13 · P2-03
+Phase 5  CALLERS                                         22 SHARED_REQUIRED sites · P1-07 · P1-13 · P2-03
    │  16 sheets → showMxSheet; 6 spinners → the loading family; 24 restyles
    │  → .inked/MxSectionLabel. Pixels: minimal (the restyles are zero-pixel).
    ▼
 Phase 6  ENFORCEMENT CLOSES                              P1-03 (remaining two rules)
-   │  now that the owners exist, showModalBottomSheet and the progress
-   │  indicators can be banned. Warning → error. Pixels: none.
+   │  now that the owners exist, showModalBottomSheet and the indeterminate
+   │  loading indicators can be banned (no_raw_loading_indicator, with the
+   │  determinate ring on its exclude: list). Warning → error. Pixels: none.
    ▼
 Phase 7  ACCESSIBILITY + CHROME                          P1-11 P1-15 P1-16 P2-13 P2-14 P2-17 P2-19 P2-20
    │  boldText, shell bar, one up-grammar, sweeps. Pixels: yes.
    ▼
-Phase 8  COVERAGE + DOCS + API                           P1-08 P1-09 P1-10 P1-14 P2-18 P2-21 P3-*
-   │  high-contrast modes and goldens, width matrix, accessor test, weight
-   │  registry, dead API, stale docs. Pixels: none in the app.
+Phase 8  COVERAGE + DOCS + API                           P1-08 P1-09 P1-10 P2-07 P2-18 P2-21
+   │                                                       P3-01…P3-08 P3-10…P3-13 P3-15
+   │  high-contrast modes and goldens, accessor test, weight registry,
+   │  MxMetricWell.wellColor (owner decision 2), dead API, stale docs, the
+   │  360/375 golden residual. Pixels: none in the app.
    ▼
 Phase 9  FULL VERIFICATION                               goldens on Linux · gallery · CI
 ```
@@ -703,19 +734,24 @@ a Windows checkout cannot regenerate them and have CI agree.
 
 **Phase 4** — new `lib/shared/widgets/mx_sheet.dart`, new `lib/shared/widgets/mx_section_label.dart`, `lib/shared/widgets/{mx_sheet_insets,mx_form_sheet,mx_action_sheet,mx_loading_state,mx_async_confirm_dialog,mx_breadcrumb,mx_feedback_band}.dart`
 
-**Phase 5** — the 13 sheet-owning overlay files under `lib/features/{card,deck,study,trash}/presentation/widgets/overlays/` and `study_entry_screen.dart`; the 6 spinner sites; the 9 `textStyles.copyWith` sites in `lib/features/card/presentation/`; the 15 shared restyles in `lib/shared/widgets/`
+**Phase 5** — the 22 SHARED_REQUIRED sites: 16 `showModalBottomSheet` calls in 13 overlay files under `lib/features/{card,deck,study,trash}/presentation/widgets/overlays/` and `study_entry_screen.dart`, and the 6 loading-spinner sites; plus the 9 `textStyles.copyWith` sites in `lib/features/card/presentation/` and the 15 shared restyles in `lib/shared/widgets/`
 
-**Phase 6** — the guard rules file again (two rules, warning → error)
+**Phase 6** — the guard rules file again (`no_raw_sheet_route`, `no_raw_loading_indicator` with its `exclude:` entry for `card_progress_panel_widget.dart`; warning → error)
 
 **Phase 7** — `lib/core/theme/typography/app_typography.dart`, `lib/app/app.dart`, `lib/shared/widgets/mx_content_shell.dart`, `lib/features/deck/presentation/widgets/sections/deck_path_widget.dart`, `lib/features/card/presentation/widgets/support/card_breadcrumb_widget.dart`, `lib/core/theme/foundations/app_border_colors.dart`, `lib/shared/widgets/mx_messenger.dart`, ~21 heading sites
 
-**Phase 8** — `widgetbook/lib/main.dart`, `test/demo/**`, `test/visual_audit/**`, new `test/core/theme/extensions/theme_context_extension_test.dart`, `test/core/theme/typography/app_typography_test.dart`, `lib/core/theme/app_theme.dart`, `lib/core/theme/foundations/app_sizing.dart`, `pubspec.yaml`, `code-verification-guard-v2/registries/projects/{memox,memox-v4,memox-v5,memox-design-jsx}/`
+**Phase 8** — `widgetbook/lib/main.dart`, `test/demo/**`, `test/visual_audit/**`, `test/shared/widgets/mx_components_golden_test.dart` (P3-15), new `test/core/theme/extensions/theme_context_extension_test.dart`, `test/core/theme/typography/app_typography_test.dart`, `lib/shared/widgets/mx_metric_well.dart` (P2-07), `lib/core/theme/app_theme.dart`, `lib/core/theme/foundations/app_sizing.dart`, `pubspec.yaml`, `code-verification-guard-v2/registries/projects/{memox,memox-v4,memox-v5,memox-design-jsx}/`
 
 ---
 
 ## 23 · Architectural closure criteria and score
 
-Mechanically checkable. **Score: 21 / 32.**
+Mechanically checkable. These answer *ownership* questions — who owns the
+semantic contract, are `ThemeData` roles correct, are shared APIs closed or
+explicitly constrained, is prohibited drift enforceable, are component-level
+accessibility contracts present, are unjustified raw usages eliminated.
+Coverage properties (catalogue, stress specimens, width matrices, goldens,
+sweeps) are **not** here; they are §24. **Score: 13 / 30** — 13 met, 17 unmet.
 
 | # | Criterion | State |
 |---|---|---|
@@ -728,36 +764,38 @@ Mechanically checkable. **Score: 21 / 32.**
 | 7 | `theme_coverage_test` green in both directions with current allowlist reasons | ✅ 56 mappings |
 | 8 | Every rendered Material component has its `ThemeData` slot filled | ✅ |
 | 9 | Component themes read only `ColorScheme`/`TextTheme`/`AppSemanticColors`/closed enums | ✅ |
-| 10 | Every shared widget has a Widgetbook entry or a written exclusion | ✅ |
-| 11 | Every file in `lib/shared/widgets` has a stress specimen or a written exclusion | ✅ |
-| 12 | Zero raw `showDialog` in features | ✅ |
-| 13 | Focus grammar: one answer for row, pressable, pill, card | ✅ since M100.36 |
-| 14 | Visual escape hatches on the shared surface ≤ 7, each token-fed at every call site | ✅ 7/7 |
-| 15 | No feature invents a colour: every `BoxDecoration` token-fed | ✅ 27/27 |
-| 16 | Raw high-level Material in features is **classified**, with every SHARED_REQUIRED site owned | ❌ 13 open |
-| 17 | Every modal route opens through a shared helper | ❌ 16 raw sheets |
-| 18 | One bottom-inset mechanism for sheets | ❌ 5 |
-| 19 | Sheet headers announce as headers | ❌ 1 of 17 |
-| 20 | Loading/progress semantics have one owner | ❌ 3 shapes, 1 silent |
-| 21 | Text restyle has one spelling, enforced across features **and** shared | ❌ 24 sites |
-| 22 | Every accessor on `ThemeContextX` is covered by a guard pattern or exempted | ❌ 1 of 5 uncovered |
-| 23 | The guard bans every name the architecture forbids, and nothing else | ❌ 6 rules missing |
-| 24 | Every guard rule has a positive probe, a comment probe and a live scan | ❌ |
-| 25 | Weight registry enumerated and asserted | ❌ |
-| 26 | Elevation: every theme with non-zero elevation wires `materialShadowColor` | ❌ 2 open |
-| 27 | Kit↔Dart parity compares the two systems, not a file to itself | ❌ |
-| 28 | Canonical role correctness: no theme slot deviates from its `*DefaultsM3` without a written reason | ❌ 3 open |
-| 29 | Every keyboard-focusable control has a visible focus indicator | ❌ 1 open |
-| 30 | Every core task completable by a single pointer without dragging | ❌ 1 open |
-| 31 | OS `boldText` moves the resolved `fontVariations` `wght` | ❌ |
-| 32 | Feedback tone taxonomy complete for every caller that needs one | ❌ |
+| 10 | Zero raw `showDialog` in features | ✅ |
+| 11 | Focus grammar: one answer for row, pressable, pill, card | ✅ since M100.36 |
+| 12 | Visual escape hatches on the shared surface ≤ 7, each token-fed at every call site | ✅ 7/7 |
+| 13 | No feature invents a colour: every `BoxDecoration` token-fed | ✅ 27/27 |
+| 14 | Raw high-level Material in features is **classified**, with every SHARED_REQUIRED site owned | ❌ 22 open (16 sheets, 6 spinners) |
+| 15 | Every modal route opens through a shared helper | ❌ 16 raw sheets |
+| 16 | One bottom-inset mechanism for sheets | ❌ 5 |
+| 17 | Sheet headers announce as headers | ❌ 1 of 17 |
+| 18 | Loading semantics have one owner (determinate progress excluded by contract) | ❌ 3 shapes, 1 silent |
+| 19 | Text restyle has one spelling, enforced across features **and** shared | ❌ 24 sites |
+| 20 | Every accessor on `ThemeContextX` is covered by a guard pattern or exempted | ❌ 1 of 5 uncovered |
+| 21 | The guard bans every name the architecture forbids, and nothing else (`Scaffold` and the determinate ring are *not* forbidden) | ❌ 6 rules missing |
+| 22 | Every guard rule has a positive probe, a comment probe and a live scan | ❌ |
+| 23 | Weight registry enumerated and asserted | ❌ |
+| 24 | Elevation: every theme with non-zero elevation wires `materialShadowColor` | ❌ 2 open |
+| 25 | Kit↔Dart parity compares the two systems, not a file to itself | ❌ |
+| 26 | Canonical role correctness: no theme slot deviates from its `*DefaultsM3` without a written reason | ❌ 3 open |
+| 27 | Every keyboard-focusable control has a visible focus indicator | ❌ 1 open |
+| 28 | Every core task completable by a single pointer without dragging | ❌ 1 open |
+| 29 | OS `boldText` moves the resolved `fontVariations` `wght` | ❌ |
+| 30 | Feedback tone taxonomy complete for every caller that needs one | ❌ |
+
+Moved to §24 in the correction pass: "every shared widget has a Widgetbook
+entry" and "every shared widget has a stress specimen" — both are coverage
+properties and were already counted there.
 
 ---
 
 ## 24 · Full-verification criteria and score
 
-**Score: 9 / 22.** These are *additional* to §23 and do not gate architectural
-closure.
+**Score: 11 / 23** — 11 met, 12 unmet (⚠️ NOT RUN / unknown counts as unmet).
+These are *additional* to §23 and do not gate architectural closure.
 
 | # | Criterion | State |
 |---|---|---|
@@ -775,7 +813,7 @@ closure.
 | 12 | Screen gallery published at the pinned URL from current goldens | ⚠️ unknown at this SHA |
 | 13 | Widgetbook offers 4 theme modes | ❌ 2 |
 | 14 | ≥2 screen goldens under each high-contrast theme | ❌ 0 of 251 |
-| 15 | Layout tier pumps 320 / 360 / 375 / 393 | ❌ 320 and 393 only |
+| 15 | Layout tier pumps 320 / 360 / 375 / 393 | ✅ `mx_stress_test.dart`: 320 × 2.0, 360 / 375 / 393 × 1.3 / 2.0, inputs 2.5 / 3.0 × 320 |
 | 16 | Gallery stays 393×852 only | ✅ enforced by `build_screen_gallery.py` |
 | 17 | `meetsGuideline` sweep on every screen | ❌ 8 screens in 4 unswept features |
 | 18 | Both pickers rendered in a test | ❌ |
@@ -783,6 +821,7 @@ closure.
 | 20 | Token scales fully catalogued and ordered (`mdCompact`, `AppRadius.xl`) | ❌ |
 | 21 | `MxIcon` has a unit test | ❌ |
 | 22 | `docs/wbs.md` current with the code | ✅ at this SHA |
+| 23 | ≥ 1 component golden at 360 dp and at 375 dp (P3-15) | ❌ 0 |
 
 ---
 
@@ -798,6 +837,10 @@ Per §15, each claim with its command, scope and result.
 | 4 | `flutter gen-l10n` + `dart run build_runner build --delete-conflicting-outputs` | codegen | 1601 outputs; required before (3) |
 | 5 | A20's own scanners re-run | `lib/`, `test/`, `widgetbook/` | counts in §8, §13, §17 |
 | 6 | Flutter 3.44.8 source reads | `app_bar.dart`, `ink_well.dart`, `slider.dart`, `widgets/text.dart`, `bottom_sheet.dart`, `color_scheme.dart` | §11.3, §12, §14, P1-04, P1-11, P2-06 |
+| 7 | **Correction pass** — §8 table re-summed by hand and by script | the 11 rows of §8 | 16+7+3+2+2+2+1+2+2+1+1 = **39**; SHARED_REQUIRED **22**; allowed **17** |
+| 8 | **Correction pass** — `test/shared/widgets/mx_stress_test.dart` read | `:33`, `:102-103`, `:140` | 320 × 2.0; **360 / 375 / 393 × 1.3 / 2.0**; inputs 2.5 / 3.0 |
+| 9 | **Correction pass** — guard registry read for `exclude:` and `mode: file` support | `memox-architecture-rules.yaml:131,191`, `memox-design-token-rules.yaml:227` | both exist; `no_raw_loading_indicator`'s allowlist needs no new capability |
+| 10 | **Correction pass** — `grep -rn "Scaffold(" lib/features` (excluding `ScaffoldMessenger`) and `docs/architecture.md` for an ownership contract | features, AD-01…AD-19 | **0** raw sites; no AD forbids feature-owned `Scaffold` |
 
 **NOT RUN, and stated as such:** the golden suite (a Windows checkout cannot
 author goldens and have CI agree — `dart_test.yaml` pins Linux), the Widgetbook
