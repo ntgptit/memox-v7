@@ -18,6 +18,7 @@
 |---|---|
 | **BASE_SHA** | `3207e7b7e0d3a2ecefa5e6a85fed48a65890ba6b` |
 | Base commit | `refactor(theme): the dark card stops glowing, and elevation stops meaning two things (M100.35) (#435)` — `main` at time of audit, 2026-09-03 |
+| Rebased onto | `9f2d226` — five sibling audit reports landed on `main` during this audit (#437, #438, #440, #441, #444). All five are report-only: `git diff 3207e7b origin/main` touches nothing outside `docs/reviews/`, so **no finding below moved**, and BASE_SHA remains the correct provenance for the code state. One of them overlaps and is cross-referenced in §7.3 |
 | Surface read | 722 Dart files under `lib/` (49 theme, 304 presentation), 471 test files, 233 committed goldens, 8 kit token files, 10 guard rule files |
 | Method | Static. Every number below was read out of the tree at BASE_SHA and cross-checked against its declaration, its call sites, the kit CSS, the guard scopes and the tests that touch it. A comment-stripping scanner (not a plain grep) produced the literal inventories in §7, so a value quoted inside a doc comment is never counted as a call site |
 | **Not verified** | Nothing was rendered. No Flutter SDK is present in this session, so no widget was pumped, no golden compared and no pixel measured. Every claim about *code* below is CONFIRMED by reading it; every claim about what a rendered frame looks like is marked as such and carries the probe that would settle it |
@@ -666,6 +667,29 @@ regenerated with it.
 **Probe that settles the render question** — pump `buildDarkTheme()`, read
 `Material.of` under a `FloatingActionButton` and a `SnackBar`, and assert the resolved
 `shadowColor`.
+
+**Cross-reference — this finding corrects a sibling report.**
+`docs/reviews/a12-feedback-system-audit.md` §3.2 landed on `main` while this audit was
+in flight (#437) and returned **"Verdict: correct"** on `SnackBarThemeData`. It read the
+level and not the paint channel, so the missing `shadowColor` is not a disagreement about
+judgement — it is a slot A12 did not look at. That verdict should be read as scoped to
+the roles and the level.
+
+Its supporting sentence is also inaccurate at this BASE_SHA, and the inaccuracy is worth
+correcting because it is the exact claim G-14 turns on:
+
+> *"the same overlay depth `Dialog`/`BottomSheet`/`PopupMenu`/FAB use, so a snackbar does
+> not float at a different depth than every other floating surface"*
+
+`Dialog` and `BottomSheet` do **not** state `overlay`. Both state a literal `0`
+(`app_dialog_theme.dart:30`, `app_bottom_sheet_theme.dart:14`) and separate themselves
+with a barrier instead — which their own comments say, and which §7.2's table records.
+Only `PopupMenu` (at `raised`, not `overlay`), the FAB and the SnackBar carry a non-zero
+Material elevation, and of those three exactly one wires `materialShadowColor`. The
+app's floating surfaces are **not** at one depth; they are at four (0, 3, 8, and
+`shadowsFor`'s own ladder), which is correct — a barrier and a shadow are different
+separators — but it means "every floating surface floats at the same depth" cannot be
+the argument that a snackbar's depth is right.
 **Closure test** — generalise `component_depth_and_state_test.dart:203` from
 `popupMenuTheme` to a loop over *every* component theme that states a non-zero
 elevation: the level must be equal across modes, and dark's `shadowColor` must be
