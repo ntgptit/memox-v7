@@ -41,9 +41,9 @@ class MxTextFieldAction {
 /// **A closed pair, replacing an open `TextStyle?`** (M100.36 9I). The one
 /// caller that needed a different rung — the card editor's front, which is
 /// the prompt a learner is shown and not an equal of the back — passed
-/// `context.texts.titleLarge`, a theme rung; but the type admitted
-/// `TextStyle(color: Colors.red, fontSize: 19)` just as readily, and no guard
-/// scanned it. Two values, both with a production caller.
+/// `context.texts.titleLarge`, a theme rung; but the type admitted a
+/// hand-built style with any colour and any size just as readily, and no
+/// guard scanned it. Two values, both with a production caller.
 enum MxTextFieldEmphasis {
   /// The theme's input style — `body-lg`. Every field but one.
   body,

@@ -237,11 +237,8 @@ class _FillInput extends StatelessWidget {
               textAlign: TextAlign.center,
               // The theme's hint resolves per state since M100.36; asked at
               // rest, which is the only state this card-sized field paints
-              // its placeholder in.
-              style: WidgetStateProperty.resolveAs(
-                Theme.of(context).inputDecorationTheme.hintStyle,
-                const <WidgetState>{},
-              ),
+              // its placeholder in. The theme does the asking.
+              style: context.inputHintStyle,
             ),
           ),
         ),

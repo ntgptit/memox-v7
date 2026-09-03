@@ -1,6 +1,10 @@
+import 'package:flutter/material.dart';
+import 'package:memox/shared/widgets/mx_badge.dart';
 import 'package:memox/shared/widgets/mx_checkbox_row.dart';
 import 'package:memox/shared/widgets/mx_dropdown.dart';
+import 'package:memox/shared/widgets/mx_list_tile.dart';
 import 'package:memox/shared/widgets/mx_menu_button.dart';
+import 'package:memox/shared/widgets/mx_pill_button.dart';
 import 'package:memox/shared/widgets/mx_radio_rows.dart';
 import 'package:memox/shared/widgets/mx_switch_row.dart';
 
@@ -84,6 +88,65 @@ List<MxStressSpecimen> selectionStressSpecimens() => <MxStressSpecimen>[
         MxDropdownOption<int>(value: 0, label: kLongTitle),
         MxDropdownOption<int>(value: 1, label: 'B'),
       ],
+    ),
+    isInteractive: true,
+  ),
+  // The pill and the badge moved here with M100.36 Phase 5: the pill is a
+  // selection control, and the badge is what a pill is *not* — kept beside
+  // it so the two are read together.
+  MxStressSpecimen(
+    // A readout, not a control: no target to reach, so the stress is the long
+    // word at 2.0x inside a pill that must not clip it.
+    name: 'MxBadge',
+    build: () => const MxBadge(label: kLongLabel),
+  ),
+  MxStressSpecimen(
+    // A pill's label is short by design, so the stress here is the *selected*
+    // pair plus an icon: that is the widest it gets, and the tap target still has
+    // to reach the minimum — the widget's own now, grown outside the ring.
+    name: 'MxPillButton',
+    build: () => const MxPillButton(
+      label: kLongLabel,
+      icon: Icons.filter_list,
+      isSelected: true,
+      onPressed: _noop,
+    ),
+    isInteractive: true,
+  ),
+  // The row's three states moved here with the pill: a picked row and a
+  // picked pill are the same decision drawn twice (M100.36 4I).
+  MxStressSpecimen(
+    // The two states whose extra ink and fill are most likely to fail on a
+    // squeezed row — #431 F18.1 found only the resting row stressed.
+    name: 'MxListTile (selected)',
+    build: () => const MxListTile(
+      title: kLongTitle,
+      subtitle: kLongLabel,
+      leading: Icon(Icons.radio_button_checked),
+      isSelected: true,
+      onTap: _noop,
+    ),
+    isInteractive: true,
+  ),
+  MxStressSpecimen(
+    name: 'MxListTile (disabled)',
+    build: () => const MxListTile(
+      title: kLongTitle,
+      subtitle: kLongLabel,
+      leading: Icon(Icons.style_outlined),
+      trailing: Icon(Icons.chevron_right),
+      isEnabled: false,
+      onTap: _noop,
+    ),
+  ),
+  MxStressSpecimen(
+    name: 'MxListTile',
+    build: () => const MxListTile(
+      title: kLongTitle,
+      subtitle: kLongMessage,
+      leading: Icon(Icons.folder_outlined),
+      trailing: Icon(Icons.chevron_right),
+      onTap: _noop,
     ),
     isInteractive: true,
   ),

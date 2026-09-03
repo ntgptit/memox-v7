@@ -18,6 +18,7 @@ import 'card_specimens.dart';
 import 'golden_hosts.dart';
 import 'golden_pump.dart';
 import 'golden_specimens.dart';
+import 'selection_specimens.dart';
 import 'golden_surfaces.dart';
 
 /// Golden tests for every shared component, light and dark.

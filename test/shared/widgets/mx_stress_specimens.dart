@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_action_sheet.dart';
-import 'package:memox/shared/widgets/mx_badge.dart';
 import 'package:memox/shared/widgets/mx_alert_dialog.dart';
 import 'package:memox/shared/widgets/mx_breadcrumb.dart';
 import 'package:memox/shared/widgets/mx_button_pair.dart';
@@ -17,10 +16,8 @@ import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/shared/widgets/mx_fab.dart';
 import 'package:memox/shared/widgets/mx_icon.dart';
 import 'package:memox/shared/widgets/mx_icon_button.dart';
-import 'package:memox/shared/widgets/mx_list_tile.dart';
 import 'package:memox/shared/widgets/mx_loading_state.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
-import 'package:memox/shared/widgets/mx_pill_button.dart';
 import 'package:memox/shared/widgets/mx_metric_well.dart';
 import 'package:memox/shared/widgets/mx_pressable.dart';
 import 'package:memox/shared/widgets/mx_feedback_band.dart';
@@ -275,25 +272,6 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
     needsBoundedHeight: true,
   ),
   MxStressSpecimen(
-    // A readout, not a control: no target to reach, so the stress is the long
-    // word at 2.0x inside a pill that must not clip it.
-    name: 'MxBadge',
-    build: () => const MxBadge(label: kLongLabel),
-  ),
-  MxStressSpecimen(
-    // A pill's label is short by design, so the stress here is the *selected*
-    // pair plus an icon: that is the widest it gets, and the tap target still has
-    // to reach the minimum — the widget's own now, grown outside the ring.
-    name: 'MxPillButton',
-    build: () => const MxPillButton(
-      label: kLongLabel,
-      icon: Icons.filter_list,
-      isSelected: true,
-      onPressed: _noop,
-    ),
-    isInteractive: true,
-  ),
-  MxStressSpecimen(
     // The interesting stress is the tap target, not the width. This button
     // draws no padding at all, so nothing but `minimumSize` is holding it to
     // 48 — and a long label that wraps to its two-line ceiling is where a
@@ -316,41 +294,6 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
             onTap: i == 9 ? null : _noop,
           ),
       ],
-    ),
-    isInteractive: true,
-  ),
-  MxStressSpecimen(
-    // The two states whose extra ink and fill are most likely to fail on a
-    // squeezed row — #431 F18.1 found only the resting row stressed.
-    name: 'MxListTile (selected)',
-    build: () => const MxListTile(
-      title: kLongTitle,
-      subtitle: kLongLabel,
-      leading: Icon(Icons.radio_button_checked),
-      isSelected: true,
-      onTap: _noop,
-    ),
-    isInteractive: true,
-  ),
-  MxStressSpecimen(
-    name: 'MxListTile (disabled)',
-    build: () => const MxListTile(
-      title: kLongTitle,
-      subtitle: kLongLabel,
-      leading: Icon(Icons.style_outlined),
-      trailing: Icon(Icons.chevron_right),
-      isEnabled: false,
-      onTap: _noop,
-    ),
-  ),
-  MxStressSpecimen(
-    name: 'MxListTile',
-    build: () => const MxListTile(
-      title: kLongTitle,
-      subtitle: kLongMessage,
-      leading: Icon(Icons.folder_outlined),
-      trailing: Icon(Icons.chevron_right),
-      onTap: _noop,
     ),
     isInteractive: true,
   ),
