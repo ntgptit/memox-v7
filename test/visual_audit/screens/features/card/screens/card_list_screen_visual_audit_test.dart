@@ -121,14 +121,16 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.customPainter,
         detailContains: '_ShapeBorderPainter',
-        // 4 since M99.16, for the same reason: the Select action is a second
-        // app-bar IconButton.
-        expectedMatches: 5,
+        // 4 since M99.16 (the Select action is a second app-bar IconButton);
+        // 6 since M100.36: the tag-filter entry is a compact secondary
+        // MxActionButton now — an OutlinedButton shape — rather than a pill.
+        expectedMatches: 6,
         rationale:
-            'The app-bar Select and add IconButtons and the panel Start-study pill draw '
-            'their rounded shapes through a ShapeBorder painter; both shapes '
-            'come from the component themes and are pinned by the mx_components '
-            'goldens.',
+            'The app-bar Select and add IconButtons, the panel Start-study pill '
+            'and the Tags entry (a compact secondary MxActionButton, M100.36 '
+            '4N) draw their rounded shapes through a ShapeBorder painter; the '
+            'shapes come from the component themes and are pinned by the '
+            'mx_components goldens.',
       ),
       // The four filter chips (D3). Their fill, border and label come from
       // ChipThemeData and are pinned by the mx_components chip goldens; the
@@ -137,10 +139,12 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.unknownRenderType,
         detailContains: '_RenderChip',
-        // 5 since M99.30: All, Due, New, Flagged and Tags (BR-231, M4.14 T3).
-        expectedMatches: 5,
+        // 5 since M99.30 (All, Due, New, Flagged and Tags); 4 since M100.36:
+        // Tags opens a sheet, so it is a command beside the group, not a pill
+        // in it (#434 P1-1).
+        expectedMatches: 4,
         rationale:
-            'The five filter pills, MxPillButton over ChoiceChip; their '
+            'The four filter pills, MxPillButton over ChoiceChip; their '
             'colours come from ChipThemeData, pinned by the mx_components chip '
             'goldens.',
       ),
@@ -157,9 +161,10 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.customPainter,
         detailContains: 'no painter',
-        expectedMatches: 8,
+        // 7 since M100.36: four chips, not five (see _RenderChip above).
+        expectedMatches: 7,
         rationale:
-            'A clip with no painter: the five filter chips, the two MxCard card '
+            'A clip with no painter: the four filter chips, the two MxCard card '
             'rows and the search pill each clip through a CustomPaint with no '
             'painter of its own.',
       ),

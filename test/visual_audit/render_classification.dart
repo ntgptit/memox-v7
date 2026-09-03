@@ -99,6 +99,12 @@ const Set<String> _privateAndTransparent = <String>{
   '_RenderScrollSemantics',
   '_RenderSingleChildViewport',
   '_RenderInputPadding', // the tap-target padding around a small control
+  // `MxPillButton`'s own tap-target pad (M100.36 11C): the same shape as
+  // `_RenderInputPadding` — a `RenderShiftedBox` that grows the box to 48 and
+  // redirects a hit in the padding to the child's centre — and, like it,
+  // inherits `RenderShiftedBox.paint`, which paints the child and nothing
+  // else. Verifiable in this repository: lib/shared/widgets/mx_pill_button.dart.
+  '_RenderTapTarget',
   '_RenderCompositionCallback',
   '_RenderSizeChangedWithCallback',
   '_RenderAppBarTitleBox', // layout only; the title's own paragraph is read

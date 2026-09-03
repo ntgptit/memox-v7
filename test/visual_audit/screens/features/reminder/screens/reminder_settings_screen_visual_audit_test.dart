@@ -73,12 +73,14 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.rasterOnly,
         detailContains: '_RenderInkFeatures',
-        expectedMatches: 3,
+        // 4 since M100.36: MxListTile owns its transparent Material (the
+        // caller's shim went), so the time row brings one ink layer of its own.
+        expectedMatches: 4,
         rationale:
-            'The Material ink layers of the Scaffold, the AppBar and the '
-            'transparent Material inside the settings card. Splash and '
-            'highlight paint into these; the overlay colours are asserted in '
-            'app_theme_test.dart.',
+            'The Material ink layers of the Scaffold, the AppBar, the '
+            'transparent Material inside the settings card and the one '
+            'MxListTile owns for the time row. Splash and highlight paint into '
+            'these; the overlay colours are asserted in app_theme_test.dart.',
       ),
       AuditSkipAllowance(
         itemId: 'shell',
@@ -93,7 +95,11 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.customPainter,
         detailContains: 'no painter',
-        rationale: 'A clip with no painter of its own, behind the time row.',
+        // 2 since M100.36, with the tile's own Material (see above).
+        expectedMatches: 2,
+        rationale:
+            'A clip with no painter of its own: one behind the time row, one '
+            'from the transparent Material MxListTile owns.',
       ),
       AuditSkipAllowance(
         itemId: 'screen',
