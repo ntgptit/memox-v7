@@ -496,8 +496,9 @@ No contrast floor reachable by a user is broken; no control drops under
 ### Retracted findings (verify-before-report, caught in review)
 
 A first pass of this report registered two additional P1s. Both were
-challenged by an automated PR review
-([chatgpt-codex-connector](https://github.com/ntgptit/memox-v7/pull/436#discussion_r0))
+challenged by an automated PR review (chatgpt-codex-connector,
+[comment 1](https://github.com/ntgptit/memox-v7/pull/436#discussion_r3923075720),
+[comment 2](https://github.com/ntgptit/memox-v7/pull/436#discussion_r3923075726))
 with specific, checkable evidence; both challenges were verified directly
 against source and hold. Recorded here rather than silently deleted, per
 this audit's own evidentiary standard:
