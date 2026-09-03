@@ -16947,7 +16947,7 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 
 ### M100.36 · Bốn họ component đóng hợp đồng: Button, TextField/Search, Row, Chip/Pill
 
-- **Status:** in progress
+- **Status:** done (2026-09-04)
 - **Goal:** Đợt hiện thực sau bốn deep audit song song (#431 hàng, #432 nút,
   #433 input, #434 chip/pill). Mỗi họ phải có: hợp đồng ngữ nghĩa nhất quán,
   role M3 đúng chủ, hình học mobile-first, state tương tác tất định, phủ a11y,
@@ -17245,6 +17245,22 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
     nóng mới. **Android profiling: DEFERRED** — không có device trong phiên.
   - Widgetbook: không catalogue tổ hợp; mỗi entry thêm đúng tình huống một
     finding cần thấy. `widgetbook_coverage_test` xanh với `MxBadge`.
+- **Phase 7 — golden Linux.** WSL Ubuntu-24.04, Flutter 3.44.8, `TZ=UTC`.
+  Lượt phân loại (không update): 87 fail = 67 lệch pixel (demo) + 18 test
+  visual audit + 2 demo test tìm `MxPillButton` cho nút Tags. Không golden
+  nào thiếu file. Sửa audit: `_RenderTapTarget` vào danh sách render type
+  không vẽ (`render_classification.dart`), card list đếm lại 4 pill / 6
+  ShapeBorder / 7 clip, reminder đếm thêm ink layer + clip của Material mà
+  `MxListTile` sở hữu; demo test đổi finder. Regenerate trên Linux, lượt xác
+  nhận cuối **321/321**, không tolerance. **107 PNG**: 93 sửa, 14 mới
+  (`mx_pill_states`, `mx_badge`, `mx_list_tile_states`,
+  `mx_text_field_{focused_error,suffix_error,multiline}`,
+  `mx_search_field_focused` × light/dark). Không PNG nào sinh trên Windows.
+  Gallery dựng lại từ `700b79cc` và publish tại URL ghim (bản trước in từ
+  `3207e7b7`, chính là base — không cần splice).
+  - Bài học ghi lại: lượt WSL đầu `flutter pub get -q` (flag không hợp lệ)
+    làm gen-l10n không chạy → 103 file test không load (`loading … [E]`), đọc
+    nhầm thành "chỉ 38 PNG đổi". Compile fail không bao giờ là kết quả golden.
 - **Scope:** `lib/core/theme/components/{actions,inputs,content,selection}/`,
   `lib/core/theme/states/`, `lib/core/theme/foundations/app_sizing.dart`,
   `lib/shared/widgets/mx_{action_button,text_button,text_field,search_field,
@@ -17264,9 +17280,10 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
         test giao điểm state cho hàng; `MxCheckboxRow` có test file.
   - [x] Phase 2 Button · [x] Phase 3 Input · [x] Phase 4 Row ·
         [x] Phase 5 Chip/Pill · [x] Phase 6 cross-component/docs/Widgetbook ·
-        [ ] Phase 7 golden Linux 100%.
-  - [ ] Không invariant nào của #426/#427/#429/#435 lùi; không hạ sàn
-        contrast; không thêm escape hatch thị giác.
+        [x] Phase 7 golden Linux 100% (321/321).
+  - [x] Không invariant nào của #426/#427/#429/#435 lùi; không hạ sàn
+        contrast; không thêm escape hatch thị giác (host suite + golden xanh,
+        `mx_card_*` không đổi PNG).
 - **Dependencies:** M100.35, #431–#434.
 - **Tests required:** `m3_role_binding_guard_test`, `m3_role_contract_test`,
   `m3_combined_state_test`, `control_border_grounds_test`,
