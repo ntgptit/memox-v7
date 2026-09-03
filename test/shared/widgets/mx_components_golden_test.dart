@@ -198,6 +198,32 @@ void main() {
         child: Center(child: TextFieldSpecimen(isEnabled: false)),
       ),
     ),
+    // The three states #433 found no picture of. Focused-error is the F3
+    // state — the stroke is the only thing telling it from error, so it is
+    // the one a numeric test cannot stand in for.
+    'mx_text_field_focused_error': const Scaffold(
+      body: Padding(
+        padding: EdgeInsets.all(16),
+        child: Center(
+          child: TextFieldSpecimen(
+            errorText: 'Name is required',
+            shouldAutofocus: true,
+          ),
+        ),
+      ),
+    ),
+    'mx_text_field_suffix_error': const Scaffold(
+      body: Padding(
+        padding: EdgeInsets.all(16),
+        child: Center(child: TextFieldSuffixErrorSpecimen()),
+      ),
+    ),
+    'mx_text_field_multiline': const Scaffold(
+      body: Padding(
+        padding: EdgeInsets.all(16),
+        child: Center(child: TextFieldMultilineSpecimen()),
+      ),
+    ),
     'mx_icon_button_enabled': const Scaffold(
       body: Center(
         child: MxIconButton(
@@ -327,6 +353,7 @@ void main() {
     'mx_progress_bar': const ProgressBarSpecimen(),
     'mx_session_top_bar': const SessionTopBarSpecimen(),
     'mx_search_field': const SearchFieldSpecimen(),
+    'mx_search_field_focused': const SearchFieldFocusedSpecimen(),
     'mx_pill_group': const PillGroupSpecimen(),
     // **Relation, not one card** (M100.35). See `card_specimens.dart`: the
     // glow these two exist to catch was only ever visible in the plural, and

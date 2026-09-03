@@ -309,6 +309,26 @@ void main() {
         expect(edge(input.focusedErrorBorder), scheme.error, reason: mode);
       });
 
+      test('focused error is told apart by the stroke, and only there', () {
+        // Discriminability, which the audit found missing (#433 F3): both
+        // borders are `error`, so the width is the whole difference — 1.5 →
+        // 2, `_InputDecoratorDefaultsM3.outlineBorder`'s own answer, admitted
+        // for this one state by M100.36 4C. Plain focus keeps the house
+        // rule: hue changes, weight does not.
+        double width(InputBorder? b) =>
+            (b! as OutlineInputBorder).borderSide.width;
+        expect(
+          width(input.focusedErrorBorder),
+          greaterThan(width(input.errorBorder)),
+          reason: '$mode: focused error is indistinguishable from error',
+        );
+        expect(
+          width(input.focusedBorder),
+          width(input.enabledBorder),
+          reason: '$mode: plain focus changed the stroke',
+        );
+      });
+
       test('focus alone is primary, never error', () {
         expect(edge(input.focusedBorder), scheme.primary, reason: mode);
         expect(edge(input.focusedBorder), isNot(scheme.error), reason: mode);

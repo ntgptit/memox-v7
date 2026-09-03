@@ -358,7 +358,13 @@ void main() {
   });
 
   group('strokes come from the token', () {
-    test('an input keeps the input stroke in every state', () {
+    test('an input keeps the input stroke in every state but focused error', () {
+      // OLD: every border at `AppStroke.input`. WHY WRONG: under error the hue
+      // is already `error`, so a same-width `focusedErrorBorder` gave an
+      // errored field no focus cue at all (#433 F3). NEW (M100.36 4C): four
+      // borders keep the input stroke; focused error alone takes
+      // `AppStroke.focus` — `_InputDecoratorDefaultsM3.outlineBorder`'s own
+      // answer. Still from the token, never a literal.
       for (final entry in themes.entries) {
         final input = entry.value.inputDecorationTheme;
 
@@ -366,7 +372,6 @@ void main() {
           ('enabled', input.enabledBorder),
           ('focused', input.focusedBorder),
           ('error', input.errorBorder),
-          ('focusedError', input.focusedErrorBorder),
           ('disabled', input.disabledBorder),
         ]) {
           expect(
@@ -375,6 +380,11 @@ void main() {
             reason: '${entry.key}: the ${border.$1} border left the token',
           );
         }
+        expect(
+          input.focusedErrorBorder!.borderSide.width,
+          AppStroke.focus,
+          reason: '${entry.key}: focused error lost its stroke',
+        );
       }
     });
 

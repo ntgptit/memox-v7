@@ -17051,6 +17051,66 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
     §5 cho phép shared widget đóng có trục kích thước), §6 → ĐÓNG với hồ sơ;
     `mx.css` `.mx-btn--primary/--destructive` hover/active/focus-visible về
     state layer `on-*`; parity B1/B2; audit #432 đánh dấu IMPLEMENTED.
+- **Phase 3 — TextField / Search.** Ba P1 của #433 đóng; API `MxTextField`
+  đóng lại; `MxSearchField` có tên, có ranh giới, có sàn thay vì trần.
+  - **F1** `MxSearchField.semanticLabel` **bắt buộc**, `clearSemanticLabel`
+    bắt buộc (§4D). Tên đặt qua `Semantics(label:, textField: true)` bọc
+    ngoài, hint vẽ bằng `InputDecoration.hint` trong `ExcludeSemantics` —
+    mẫu `_FillInput` đã dùng. Test: tên còn sau khi gõ, value = query, hint
+    không bị đọc. Ba màn search truyền `*SearchLabel` mới (ARB en/vi).
+  - **F2** `SizedBox(height: 48)` + `expands` gỡ; pill là
+    `ConstrainedBox(minHeight: touchTarget)`, field một dòng với
+    `contentPadding` dọc `md` để nút xoá 48 không cộng thêm. Test ma trận
+    320/360/393 × 1.0/1.3/2.0/2.5/3.0: pill ≥ 48, = 48 ở 1.0, > 48 từ 2.5,
+    text nằm trong pill, không exception. Nudge `TextAlignVertical(-0.1)` gỡ;
+    test layout OLD "đáy glyph = đáy text" → NEW "tâm glyph = tâm text" (hàng
+    căn giữa; đáy lệch 2 là do line box 20 vs glyph 16, không phải lỗi cũ).
+  - **F3** `focusedErrorBorder` = `error` @ `AppStroke.focus` (2), bốn border
+    còn lại giữ `AppStroke.input` (§4C). Không đổi layout (side vẽ trong
+    box). Test: `m3_combined_state_test` (stroke focused-error > error, focus
+    thường không đổi), `mx_text_field_contract_test` (đo rect trước/sau
+    focus), golden `mx_text_field_focused_error`.
+  - **F4** `suffixIconColor` là `WidgetStateColor` trong theme: rest
+    `onSurfaceVariant`, error `error`, disabled `onDisabled` — thắng
+    `IconButtonTheme` theo đúng chuỗi `input_decorator.dart:2163`. Test đọc
+    `IconTheme` tại glyph của `MxIconButton`, hai theme.
+  - **F5** `MxTextFieldSupportingLine { reserved, none }`, mặc định
+    `reserved`: helper `' '` giữ hàng subtext từ frame đầu, lỗi thay thế
+    helper trong cùng hàng nên **không xê dịch** (test đo rect nút dưới
+    field). Kiểm kê 13 caller: 11 có `maxLength`/`errorText`, 2 field số
+    không có `maxLength` (chỗ nhảy 20dp) nay giữ hàng; ô dán import là
+    caller duy nhất không bao giờ có subtext → `none`.
+  - **F6** hint `bodyLarge` + `WidgetStateTextStyle` (disabled → `onDisabled`)
+    (§4F); `_FillInput` resolve hint ở rest. `MxSearchField` sở hữu rung
+    `body-md` cho cả value lẫn hint (widget đóng, §4P).
+  - **F7** `MxTextFieldContent { text, digits }` → `digitsOnly` + bàn phím số
+    suy ra; hai field giới hạn thẻ dùng `digits`. Test: `abc-12.5` → `125`.
+  - **F8** `isReadOnly` gỡ (§4G). **9I** `textAlign` gỡ (0 caller);
+    `textStyle` → `MxTextFieldEmphasis { body, prominent }` (caller: mặt
+    trước card editor qua `CardEditorFieldWidget.emphasis`).
+  - **F9** counter có `semanticsLabel` =
+    `MaterialLocalizations.remainingTextFieldCharacterCount` — chuỗi của
+    Flutter, có sẵn en/vi, shared widget không đọc ARB.
+  - **F10** ghi +4 `gapPadding` vào doc theme. **F11** kit: token mới
+    `--color-border-control` (map trong `css_token_parity_test`),
+    `.mx-field__input` / `.mx-search` về `border-control` / `primary`,
+    `.mx-search` `min-height` thay `height: 44`; parity B5/C5/C17.
+  - **9K** `TextInputAction.done` cho tag rename, hai field số, pronunciation
+    (field một dòng cuối); field nhiều dòng giữ phím xuống dòng.
+  - **§4E** ranh giới search: rest `outline`, focus `primary`, cùng
+    `AppStroke.input`, vẽ ngoài box; fill giữ `surfaceMuted`/`surface`.
+  - Guard đi theo: `theme_layering_test` (helper private tách thành
+    `_inputBorder` / `_inputBorderAt` để không có `Color` đầu dòng);
+    `app_interaction_states_test` OLD "mọi border = input" → NEW "bốn border
+    = input, focused-error = focus"; `component_theme_typography_test` OLD
+    hint body-md → NEW body-lg mọi state (authority
+    `_InputDecoratorDefaultsM3.hintStyle`); `app_theme_test` thu hẹp "focus
+    không đổi weight" về focus thường.
+  - Golden mới (đăng ký, PNG viết ở Phase 7): `mx_text_field_focused_error`,
+    `mx_text_field_suffix_error`, `mx_text_field_multiline`,
+    `mx_search_field_focused`. Widgetbook: knob `minLines`/`maxLines`, gỡ
+    `readOnly`, use case `Focused + error`; search `Focused · textScale 2.5`.
+  - Audit #433 đánh dấu IMPLEMENTED.
 - **Scope:** `lib/core/theme/components/{actions,inputs,content,selection}/`,
   `lib/core/theme/states/`, `lib/core/theme/foundations/app_sizing.dart`,
   `lib/shared/widgets/mx_{action_button,text_button,text_field,search_field,
@@ -17068,7 +17128,7 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
   - [x] Phase 0: baseline xanh trước khi sửa (số liệu ở trên).
   - [x] Phase 1: guard role/state cho FilledButton, TextField, ListTile;
         test giao điểm state cho hàng; `MxCheckboxRow` có test file.
-  - [x] Phase 2 Button · [ ] Phase 3 Input · [ ] Phase 4 Row ·
+  - [x] Phase 2 Button · [x] Phase 3 Input · [ ] Phase 4 Row ·
         [ ] Phase 5 Chip/Pill · [ ] Phase 6 cross-component/docs/Widgetbook ·
         [ ] Phase 7 golden Linux 100%.
   - [ ] Không invariant nào của #426/#427/#429/#435 lùi; không hạ sàn

@@ -182,7 +182,11 @@ class _SettingsStudyDefaultsSectionWidgetState
               focusNode: _cardLimitFocus,
               label: l10n.studyOptionsCardLimitLabel,
               isEnabled: !widget.isSubmitting,
-              keyboardType: TextInputType.number,
+              // Digits only — the limit is an integer, and the numeric
+              // keyboard hides letters but paste does not. `done`, because
+              // this is the last text field on the screen.
+              content: MxTextFieldContent.digits,
+              textInputAction: TextInputAction.done,
               errorText: _fieldErrorText,
             ),
             const SizedBox(height: AppSpacing.lg),

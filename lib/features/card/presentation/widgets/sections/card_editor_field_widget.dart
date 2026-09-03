@@ -34,7 +34,7 @@ class CardEditorFieldWidget extends StatelessWidget {
     this.helperText,
     this.maxLines = 1,
     this.minLines,
-    this.textStyle,
+    this.emphasis = MxTextFieldEmphasis.body,
     this.focusNode,
     this.textInputAction,
     super.key,
@@ -67,7 +67,9 @@ class CardEditorFieldWidget extends StatelessWidget {
   final String? helperText;
   final int maxLines;
   final int? minLines;
-  final TextStyle? textStyle;
+
+  /// See [MxTextFieldEmphasis].
+  final MxTextFieldEmphasis emphasis;
   final FocusNode? focusNode;
   final TextInputAction? textInputAction;
 
@@ -92,7 +94,7 @@ class CardEditorFieldWidget extends StatelessWidget {
             minLines: minLines,
             errorText: errorText,
             helperText: helperText,
-            textStyle: textStyle,
+            emphasis: emphasis,
             textInputAction: textInputAction,
           ),
         ],

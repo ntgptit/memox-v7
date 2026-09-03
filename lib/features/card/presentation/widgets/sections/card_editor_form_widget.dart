@@ -5,6 +5,7 @@ import '../../../../../core/theme/extensions/app_ink.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_text_field.dart';
 import '../../../domain/failures/card_validation_failure.dart';
 import '../../../domain/models/deck_context_model.dart';
 import '../../states/card_submit_state.dart';
@@ -90,7 +91,7 @@ class CardEditorFormWidget extends StatelessWidget {
           // answer, so the two are not equals. The value only: label, counter,
           // error and border stay on the theme, so the two fields still line up
           // on every edge.
-          textStyle: context.texts.titleLarge,
+          emphasis: MxTextFieldEmphasis.prominent,
         ),
         const SizedBox(height: AppSpacing.lg),
         CardEditorFieldWidget(

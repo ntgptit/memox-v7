@@ -267,6 +267,105 @@ class PillGroupSpecimen extends StatelessWidget {
 /// The second is the half worth pinning: the count and the clear button only
 /// exist once something has been typed, and they are what the pill has to make
 /// room for without pushing the text out of it.
+/// The search pill with focus: the paper fill and the `primary` edge, the
+/// query and the count. Autofocused rather than tapped, so the frame carries
+/// no ripple.
+class SearchFieldFocusedSpecimen extends StatelessWidget {
+  const SearchFieldFocusedSpecimen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Padding(
+        padding: EdgeInsets.all(AppSpacing.lg),
+        child: Center(
+          child: MxSearchField(
+            value: 'nouns',
+            onChanged: _ignore,
+            hintText: 'Search in Academic Word List',
+            semanticLabel: 'Search this deck',
+            resultCount: 7,
+            clearSemanticLabel: 'Clear search',
+            shouldAutofocus: true,
+          ),
+        ),
+      ),
+    );
+  }
+
+  static void _ignore(String _) {}
+}
+
+/// A field with a trailing action, in its error state: the border and the
+/// `+` beside it must agree (#433 F4).
+class TextFieldSuffixErrorSpecimen extends StatefulWidget {
+  const TextFieldSuffixErrorSpecimen({super.key});
+
+  @override
+  State<TextFieldSuffixErrorSpecimen> createState() =>
+      _TextFieldSuffixErrorSpecimenState();
+}
+
+class _TextFieldSuffixErrorSpecimenState
+    extends State<TextFieldSuffixErrorSpecimen> {
+  final TextEditingController _controller = TextEditingController(
+    text: 'grammar',
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => MxTextField(
+    controller: _controller,
+    label: 'Add a tag',
+    errorText: 'This card already has that tag',
+    maxLength: 30,
+    trailingAction: MxTextFieldAction(
+      icon: Icons.add,
+      semanticLabel: 'Add this tag',
+      onPressed: () {},
+    ),
+  );
+}
+
+/// The multiline recipe — five of thirteen callers, and no golden showed one.
+class TextFieldMultilineSpecimen extends StatefulWidget {
+  const TextFieldMultilineSpecimen({super.key});
+
+  @override
+  State<TextFieldMultilineSpecimen> createState() =>
+      _TextFieldMultilineSpecimenState();
+}
+
+class _TextFieldMultilineSpecimenState
+    extends State<TextFieldMultilineSpecimen> {
+  final TextEditingController _controller = TextEditingController(
+    text:
+        'present, appearing, or found everywhere — a meaning long enough to '
+        'take a second line',
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => MxTextField(
+    controller: _controller,
+    label: 'Back',
+    helperText: 'Two languages, comma-separated',
+    maxLength: 240,
+    minLines: 3,
+    maxLines: 5,
+  );
+}
+
 class SearchFieldSpecimen extends StatelessWidget {
   const SearchFieldSpecimen({super.key});
 
@@ -282,12 +381,15 @@ class SearchFieldSpecimen extends StatelessWidget {
               value: '',
               onChanged: _ignore,
               hintText: 'Search your whole library',
+              semanticLabel: 'Search your library',
+              clearSemanticLabel: 'Clear search',
             ),
             SizedBox(height: AppSpacing.xl),
             MxSearchField(
               value: 'nouns',
               onChanged: _ignore,
               hintText: 'Search in Academic Word List',
+              semanticLabel: 'Search this deck',
               resultCount: 7,
               clearSemanticLabel: 'Clear search',
             ),

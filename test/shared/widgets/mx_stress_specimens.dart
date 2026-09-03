@@ -187,6 +187,8 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
       value: '',
       onChanged: _ignoreText,
       hintText: kLongLabel,
+      semanticLabel: 'Search',
+      clearSemanticLabel: 'Clear search',
     ),
     isInteractive: true,
   ),

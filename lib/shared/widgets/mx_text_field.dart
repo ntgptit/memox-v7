@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../core/theme/foundations/app_sizing.dart';
+import '../../core/theme/extensions/theme_context_extension.dart';
 import 'mx_icon_button.dart';
 
 /// A button drawn inside a field, at its trailing edge.
@@ -34,6 +36,62 @@ class MxTextFieldAction {
   final VoidCallback? onPressed;
 }
 
+/// How large the typed value is set.
+///
+/// **A closed pair, replacing an open `TextStyle?`** (M100.36 9I). The one
+/// caller that needed a different rung — the card editor's front, which is
+/// the prompt a learner is shown and not an equal of the back — passed
+/// `context.texts.titleLarge`, a theme rung; but the type admitted
+/// `TextStyle(color: Colors.red, fontSize: 19)` just as readily, and no guard
+/// scanned it. Two values, both with a production caller.
+enum MxTextFieldEmphasis {
+  /// The theme's input style — `body-lg`. Every field but one.
+  body,
+
+  /// `title-lg`. The value only: label, counter, error and border stay on the
+  /// theme, so a prominent field still lines up with its neighbours on every
+  /// edge.
+  prominent,
+}
+
+/// What the field accepts.
+///
+/// **Closed, because the alternative was `List<TextInputFormatter>`** (M100.36
+/// 9H). A `TextInputType.number` field accepted `abc-12.5` verbatim — the soft
+/// keyboard hides the letters, but paste, a hardware keyboard and a
+/// third-party IME do not — and the two numeric fields then fell through to a
+/// parse failure the user had to read as an error (#433 F7).
+enum MxTextFieldContent {
+  /// Anything.
+  text,
+
+  /// Digits only, `0–9`. The domain's card limit is an integer (BR-xx), so
+  /// this is `FilteringTextInputFormatter.digitsOnly` and not a decimal
+  /// mode; a field that needs `.` asks for a member that does not exist yet.
+  digits,
+}
+
+/// Whether a line is held under the box for a helper, an error or the counter.
+///
+/// **Reserved by default, and that is the product behaviour** (M100.36 9F): a
+/// form must not jump when validation appears. `InputDecorator` gives the
+/// subtext row 20dp only once it has something to show, so a field without a
+/// `maxLength` grew by 20dp the moment its `errorText` arrived and pushed the
+/// controls under it — the two card-limit fields, whose radio group and pill
+/// row sat directly below (#433 F5). The counter already held the line
+/// through `maintainSize`; this holds it for every field the same way.
+///
+/// [none] is for a field that can never produce supporting text — no helper,
+/// no error, no limit — so it does not carry 20dp of air for nothing. The
+/// import paste box is the one caller.
+enum MxTextFieldSupportingLine {
+  /// The subtext row is laid out from the first frame, empty or not.
+  reserved,
+
+  /// No row. The field's height is its box.
+  none,
+}
+
 /// Where a field's name is painted.
 ///
 /// **Two placements, one accessible name.** Material floats the label onto the
@@ -63,6 +121,9 @@ enum MxTextFieldLabelPlacement {
 /// disabled are already defined once for the whole app (M3.5). A caller able to
 /// pass decoration would be able to invent a second input style, and the first
 /// screen to do it would look correct in isolation and wrong beside the others.
+/// The three things a caller *may* vary — how large the value is, what it
+/// accepts, whether a subtext line is held — are closed enums with a
+/// production caller behind every member (M100.36).
 ///
 /// **It knows nothing about the rules it enforces.** [maxLength] is a number the
 /// caller supplies and [errorText] is a string the caller has already localized
@@ -83,7 +144,6 @@ class MxTextField extends StatelessWidget {
     this.helperText,
     this.errorText,
     this.isEnabled = true,
-    this.isReadOnly = false,
     this.keyboardType,
     this.textInputAction,
     this.minLines,
@@ -93,8 +153,9 @@ class MxTextField extends StatelessWidget {
     this.shouldAutofocus = false,
     this.onChanged,
     this.onSubmitted,
-    this.textAlign = TextAlign.start,
-    this.textStyle,
+    this.emphasis = MxTextFieldEmphasis.body,
+    this.content = MxTextFieldContent.text,
+    this.supportingLine = MxTextFieldSupportingLine.reserved,
     this.trailingAction,
     this.labelPlacement = MxTextFieldLabelPlacement.floating,
     super.key,
@@ -120,12 +181,14 @@ class MxTextField extends StatelessWidget {
   /// tells a colour-blind user that something is different and not what.
   final String? errorText;
 
+  /// **No `isReadOnly`** (M100.36 4G). It had zero callers and no visual cue —
+  /// identical ink to an editable field — so a user who reached it could not
+  /// tell why typing did nothing. Removed rather than given a look nobody has
+  /// asked for. The study answer's lock is `_FillInput`'s own, where the
+  /// reason is written.
   final bool isEnabled;
 
-  /// Focusable and selectable, but not editable. Distinct from `isEnabled: false`,
-  /// which greys the field out and removes it from the focus order.
-  final bool isReadOnly;
-
+  /// Null lets [content] decide: `digits` asks for the numeric keyboard.
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
   final int? minLines;
@@ -141,19 +204,16 @@ class MxTextField extends StatelessWidget {
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
 
-  /// How the typed value sits in the field.
-  ///
-  /// **Two axes, and only one of them is closed.** This widget refuses a
-  /// `decoration` on purpose — a caller that could pass one would invent a
-  /// second input *style*, and then there are two. The text itself is a
-  /// different question: `fill` asks a learner to type one word as the answer to
-  /// a card, and the handout draws that centred and large (§6) for the same
-  /// reason the card above it is centred and large. Left-aligned 16 in a field
-  /// under a 30pt prompt reads as a form field on a study screen.
-  final TextAlign textAlign;
+  /// See [MxTextFieldEmphasis]. (`textAlign` left with it at M100.36: its one
+  /// reason — the centred study answer — lives in `_FillInput`, and nothing
+  /// else passed it.)
+  final MxTextFieldEmphasis emphasis;
 
-  /// The typed value's own style. Null keeps the theme's.
-  final TextStyle? textStyle;
+  /// See [MxTextFieldContent].
+  final MxTextFieldContent content;
+
+  /// See [MxTextFieldSupportingLine].
+  final MxTextFieldSupportingLine supportingLine;
 
   /// A button at the field's trailing edge. Null for a field that commits some
   /// other way, or does not commit at all.
@@ -181,17 +241,28 @@ class MxTextField extends StatelessWidget {
   /// the field differently.
   static const int _maxMessageLines = 3;
 
+  /// The empty helper that keeps the subtext row laid out — see
+  /// [MxTextFieldSupportingLine]. `null` when the caller opted out.
+  String? get _reservedHelper =>
+      supportingLine == MxTextFieldSupportingLine.reserved ? ' ' : null;
+
   @override
   Widget build(BuildContext context) {
+    final bool isDigits = content == MxTextFieldContent.digits;
+
     return TextField(
       controller: controller,
       focusNode: focusNode,
-      textAlign: textAlign,
-      style: textStyle,
+      style: switch (emphasis) {
+        MxTextFieldEmphasis.body => null,
+        MxTextFieldEmphasis.prominent => context.texts.titleLarge,
+      },
       autofocus: shouldAutofocus,
       enabled: isEnabled,
-      readOnly: isReadOnly,
-      keyboardType: keyboardType,
+      keyboardType: keyboardType ?? (isDigits ? TextInputType.number : null),
+      inputFormatters: isDigits
+          ? <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly]
+          : null,
       textInputAction: textInputAction,
       minLines: minLines,
       maxLines: maxLines,
@@ -206,7 +277,11 @@ class MxTextField extends StatelessWidget {
           MxTextFieldLabelPlacement.external => null,
         },
         hintText: hintText,
-        helperText: helperText,
+        // A single space holds the subtext row when the caller has nothing
+        // to say yet — `InputDecorator` lays the row out for any non-null
+        // helper, and this is the narrowest way to ask it to. The error
+        // replaces the helper in the same row, so its arrival moves nothing.
+        helperText: helperText ?? _reservedHelper,
         helperMaxLines: _maxMessageLines,
         errorText: errorText,
         errorMaxLines: _maxMessageLines,
@@ -269,6 +344,16 @@ class MxTextField extends StatelessWidget {
       maintainState: true,
       child: Text(
         '$currentLength/$maxLength',
+        // **What a screen reader says instead of "55 slash 60"** (#433 F9).
+        // `TextField` sets `semanticCounterText` to the framework's localized
+        // "N characters remaining" for its own counter and returns early when
+        // `buildCounter` is supplied, so a custom counter has to say it
+        // itself. `MaterialLocalizations` rather than the app's ARB: the
+        // sentence is Flutter's and it is already in both shipped locales,
+        // and a shared widget does not reach for ARB.
+        semanticsLabel: MaterialLocalizations.of(
+          context,
+        ).remainingTextFieldCharacterCount(maxLength - currentLength),
         // The same pairing the framework's default counter paints, said
         // explicitly because a custom `buildCounter` starts from nothing.
         style: Theme.of(context).textTheme.bodySmall?.copyWith(

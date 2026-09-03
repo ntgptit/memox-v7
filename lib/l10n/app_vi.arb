@@ -899,6 +899,10 @@
   "@cardSearchHint": {
     "description": "Card search (S1)."
   },
+  "cardSearchLabel": "Tìm trong bộ thẻ này",
+  "@cardSearchLabel": {
+    "description": "Tên trợ năng của ô tìm kiếm trong bộ thẻ, giữ nguyên dù ô trống hay đang có từ khoá (S1)."
+  },
   "cardSearchClearLabel": "Xoá tìm kiếm",
   "@cardSearchClearLabel": {
     "description": "Card search (S1)."
@@ -3366,6 +3370,10 @@
   "@tagSearchHint": {
     "description": "Placeholder of the catalog search field (BR-230)."
   },
+  "tagSearchLabel": "Tìm nhãn",
+  "@tagSearchLabel": {
+    "description": "Tên trợ năng của ô tìm kiếm danh mục nhãn, giữ nguyên dù ô trống hay đang có từ khoá (BR-230)."
+  },
   "tagSearchClearLabel": "Xoá từ khoá tìm nhãn",
   "@tagSearchClearLabel": {
     "description": "Screen-reader label of the clear button inside the catalog search field."
@@ -3838,6 +3846,10 @@
   "librarySearchHint": "Tìm deck, thẻ và nhãn",
   "@librarySearchHint": {
     "description": "Placeholder of the search field. Names all three things that are matched (BR-247), because a user who does not know cards are searched will not try."
+  },
+  "librarySearchLabel": "Tìm trong thư viện",
+  "@librarySearchLabel": {
+    "description": "Tên trợ năng của ô tìm kiếm thư viện, giữ nguyên dù ô trống hay đang có từ khoá."
   },
   "librarySearchClearLabel": "Xoá tìm kiếm",
   "@librarySearchClearLabel": {

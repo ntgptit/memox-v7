@@ -56,9 +56,11 @@ canonical M3 role  >  accessibility  >  MemoX structural system  >  Tokyo exact 
 
 | Component | Slot | M3 canonical | MemoX | Ghi chú |
 |---|---|---|---|---|
-| InputDecorator | outlineBorder | `outline`; focus `primary`; error `error` | = | |
+| InputDecorator | outlineBorder | `outline`; focus `primary`; error `error`; focus+error `error` **stroke 2** | = | guard AST bốn slot (M100.36). Stroke chỉ đổi ở focus+error — hue đã bận, stroke là kênh còn lại (§4C); focus thường vẫn chỉ đổi hue |
 | InputDecorator | fillColor | `surfaceContainerHighest` | `filled: false` | Cố ý: field là *khoảng mở*, không phải khối |
-| InputDecorator | hintStyle | `onSurfaceVariant` | = | |
+| InputDecorator | hintStyle | `bodyLarge` / `onSurfaceVariant`, disabled 38% | = | M100.36: từng là `body-md` — một rung dưới value (#433 F6) |
+| InputDecorator | suffixIconColor | `onSurfaceVariant`; error `error`; disabled 38% | = | M100.36: theme `IconButton` từng chặn nhánh error của SDK (#433 F4) |
+| MxSearchField (custom) | fill / edge | — (không phải InputDecorator) | `surfaceMuted` → `surface`; edge `outline` → `primary` @ `AppStroke.input` | Control tuỳ biến, ranh giới dùng hệ chung (§4E). Trước M100.36 edge = màu fill, 1.09:1 |
 
 ### selection/
 
@@ -206,7 +208,7 @@ Component theme sở hữu hình học **toàn cục**; shared widget chỉ thê
 | Theme | Sở hữu |
 |---|---|
 | `buildSharedButtonStyle` | chiều cao tối thiểu (`AppSizing.touchTarget`), bề rộng tối thiểu, padding, shape, weight nhãn. `MxActionButtonSize.compact` là **trục kích thước** của shared widget (40 vẽ / 48 chạm, `label-md`), không phải một feature nêu lại — ranh giới dưới áp cho feature |
-| `buildInputDecorationTheme` | content padding, radius, stroke, hint style |
+| `buildInputDecorationTheme` | content padding, radius, stroke (input; focus ở focused-error), hint style, suffix colour. `MxSearchField` là composition riêng: sở hữu rung `body-md` của nó (widget đóng, §4P) |
 | `buildChipTheme` | chiều cao pill, padding, radius, weight nhãn |
 | `buildListTileTheme` | content padding, minVerticalPadding, shape |
 | `buildDialogTheme` | shape |

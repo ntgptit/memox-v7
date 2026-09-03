@@ -115,6 +115,9 @@ class CardDetailsSectionWidget extends StatelessWidget {
             hintText: context.l10n.cardPronunciationHint,
             isEnabled: !isBusy,
             maxLength: kCardDetailMaxLength,
+            // The last single-line field of the form; the two above it are
+            // multiline and keep their newline key (M100.36 9K).
+            textInputAction: TextInputAction.done,
             errorText: errorText(pronunciationProblem),
           ),
         ],

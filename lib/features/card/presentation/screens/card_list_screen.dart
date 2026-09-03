@@ -276,6 +276,7 @@ class CardListScreen extends ConsumerWidget {
           value: ref.watch(cardListSearchQueryProvider(deckId)),
           onChanged: (query) => _updateSearch(ref, deckId, query),
           hintText: context.l10n.cardSearchHint,
+          semanticLabel: context.l10n.cardSearchLabel,
           clearSemanticLabel: context.l10n.cardSearchClearLabel,
         ),
         CardFilterBarWidget(deckId: deckId),

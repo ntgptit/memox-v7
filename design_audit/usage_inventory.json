@@ -1,9 +1,9 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
   "scannedFiles": 722,
-  "totalSites": 343,
+  "totalSites": 346,
   "byElementKind": {
-    "other": 277,
+    "other": 280,
     "background": 28,
     "border": 16,
     "shadow": 3,
@@ -11,7 +11,7 @@
   },
   "bySourceKind": {
     "shared-constant": 127,
-    "opacity-modified-token": 18,
+    "opacity-modified-token": 21,
     "blend-source": 5,
     "Colors-material": 14,
     "hardcoded-literal": 115,
@@ -130,7 +130,40 @@
     },
     {
       "file": "lib/core/theme/components/actions/app_button_themes.dart",
-      "line": 326,
+      "line": 208,
+      "widget_context": "<top-level>",
+      "element_kind": "other",
+      "source_kind": "opacity-modified-token",
+      "expression": "layer.withValues(alpha: AppStateOpacity.stateLayerPressed)",
+      "token": null,
+      "resolved_value_light": "unresolvable: value depends on runtime state",
+      "resolved_value_dark": "unresolvable: value depends on runtime state"
+    },
+    {
+      "file": "lib/core/theme/components/actions/app_button_themes.dart",
+      "line": 211,
+      "widget_context": "<top-level>",
+      "element_kind": "other",
+      "source_kind": "opacity-modified-token",
+      "expression": "layer.withValues(alpha: AppStateOpacity.stateLayerFocus)",
+      "token": null,
+      "resolved_value_light": "unresolvable: value depends on runtime state",
+      "resolved_value_dark": "unresolvable: value depends on runtime state"
+    },
+    {
+      "file": "lib/core/theme/components/actions/app_button_themes.dart",
+      "line": 214,
+      "widget_context": "<top-level>",
+      "element_kind": "other",
+      "source_kind": "opacity-modified-token",
+      "expression": "layer.withValues(alpha: AppStateOpacity.stateLayerHover)",
+      "token": null,
+      "resolved_value_light": "unresolvable: value depends on runtime state",
+      "resolved_value_dark": "unresolvable: value depends on runtime state"
+    },
+    {
+      "file": "lib/core/theme/components/actions/app_button_themes.dart",
+      "line": 334,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "Colors-material",
@@ -196,7 +229,7 @@
     },
     {
       "file": "lib/core/theme/components/inputs/app_input_theme.dart",
-      "line": 48,
+      "line": 72,
       "widget_context": "<top-level>",
       "element_kind": "border",
       "source_kind": "blend-source",
@@ -317,7 +350,7 @@
     },
     {
       "file": "lib/core/theme/components/selection/app_toggle_themes.dart",
-      "line": 107,
+      "line": 108,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "Colors-material",
@@ -328,7 +361,7 @@
     },
     {
       "file": "lib/core/theme/components/selection/app_toggle_themes.dart",
-      "line": 166,
+      "line": 167,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -339,7 +372,7 @@
     },
     {
       "file": "lib/core/theme/components/selection/app_toggle_themes.dart",
-      "line": 172,
+      "line": 173,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -3045,7 +3078,7 @@
     },
     {
       "file": "lib/core/theme/states/app_interaction_states.dart",
-      "line": 204,
+      "line": 218,
       "widget_context": "AppInteractionStates",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -3056,7 +3089,7 @@
     },
     {
       "file": "lib/core/theme/states/app_interaction_states.dart",
-      "line": 207,
+      "line": 221,
       "widget_context": "AppInteractionStates",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -3067,7 +3100,7 @@
     },
     {
       "file": "lib/core/theme/states/app_interaction_states.dart",
-      "line": 210,
+      "line": 224,
       "widget_context": "AppInteractionStates",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -3342,7 +3375,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_source_step_widget.dart",
-      "line": 318,
+      "line": 321,
       "widget_context": "_UploadPanel",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -3782,7 +3815,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_text_field.dart",
-      "line": 275,
+      "line": 360,
       "widget_context": "MxTextField",
       "element_kind": "text",
       "source_kind": "theme-token",

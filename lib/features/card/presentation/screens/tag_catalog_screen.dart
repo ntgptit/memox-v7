@@ -133,6 +133,7 @@ class _SearchStrip extends ConsumerWidget {
         value: query,
         onChanged: (value) => _updateSearch(ref, value),
         hintText: context.l10n.tagSearchHint,
+        semanticLabel: context.l10n.tagSearchLabel,
         clearSemanticLabel: context.l10n.tagSearchClearLabel,
       ),
     ),

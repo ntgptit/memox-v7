@@ -51,6 +51,7 @@
   --color-text-primary:var(--mx-ink-light);
   --color-text-secondary:var(--mx-ink-quiet-light);
   --color-border-subtle:var(--mx-line-light);
+  --color-border-control:#6F727B; /* AppBorderColors.borderControl — the edge that identifies a control (3:1) */
   --color-focus-ring:var(--mx-indigo-light);
 
   /* --- semantic: brand and actions ------------------------------------ */
@@ -141,6 +142,7 @@
   --color-text-primary:var(--mx-ink-dark);
   --color-text-secondary:var(--mx-ink-quiet-dark);
   --color-border-subtle:var(--mx-line-dark);
+  --color-border-control:#747BA3; /* AppBorderColors.borderControl — the edge that identifies a control (3:1) */
   --color-focus-ring:var(--mx-indigo-dark);
   --color-primary:var(--mx-indigo-dark);
   --color-on-primary:#202771;

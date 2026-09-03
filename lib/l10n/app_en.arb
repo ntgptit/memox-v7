@@ -899,6 +899,10 @@
   "@cardSearchHint": {
     "description": "Card search (S1)."
   },
+  "cardSearchLabel": "Search this deck",
+  "@cardSearchLabel": {
+    "description": "Accessible name of the in-deck search field, stable whether it is empty or holding a query (S1)."
+  },
   "cardSearchClearLabel": "Clear search",
   "@cardSearchClearLabel": {
     "description": "Card search (S1)."
@@ -3385,6 +3389,10 @@
   "@tagSearchHint": {
     "description": "Placeholder of the catalog search field (BR-230)."
   },
+  "tagSearchLabel": "Search tags",
+  "@tagSearchLabel": {
+    "description": "Accessible name of the tag catalog search field, stable whether it is empty or holding a query (BR-230)."
+  },
   "tagSearchClearLabel": "Clear tag search",
   "@tagSearchClearLabel": {
     "description": "Screen-reader label of the clear button inside the catalog search field."
@@ -3857,6 +3865,10 @@
   "librarySearchHint": "Search decks, cards and tags",
   "@librarySearchHint": {
     "description": "Placeholder of the search field. Names all three things that are matched (BR-247), because a user who does not know cards are searched will not try."
+  },
+  "librarySearchLabel": "Search your library",
+  "@librarySearchLabel": {
+    "description": "Accessible name of the library search field, stable whether it is empty or holding a query. Names the scope; the hint names what is matched."
   },
   "librarySearchClearLabel": "Clear search",
   "@librarySearchClearLabel": {

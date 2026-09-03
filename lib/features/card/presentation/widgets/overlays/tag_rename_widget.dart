@@ -132,6 +132,8 @@ class _RenameFormState extends ConsumerState<_RenameForm> {
           label: context.l10n.tagRenameFieldLabel,
           maxLength: TagName.maxLength,
           shouldAutofocus: true,
+          // The key that submits should say so.
+          textInputAction: TextInputAction.done,
           isEnabled: !rename.submit.isSubmitting,
           errorText: context.tagProblemLabel(rename.submit.problem),
           onChanged: (value) => setState(() => _draft = value),
