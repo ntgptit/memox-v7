@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/components/app_button_themes.dart';
+import 'package:memox/core/theme/components/actions/app_button_themes.dart';
 import 'package:memox/core/theme/schemes/app_compact_scale.dart';
 import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_theme.dart';
@@ -38,6 +38,7 @@ void main() {
         filledButtonTheme: buildFilledButtonTheme(
           scheme,
           base.extension<AppSemanticColors>()!,
+          base.textTheme,
         ),
       );
 

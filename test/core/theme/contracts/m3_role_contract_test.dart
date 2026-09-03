@@ -97,7 +97,11 @@ void main() {
           t.color!.resolve(selected),
           scheme.secondaryContainer,
         );
-        pin('unselected fill', t.color!.resolve(resting), scheme.surface);
+        pin(
+          'unselected fill',
+          t.color!.resolve(resting),
+          scheme.surfaceContainerLow,
+        );
         pin(
           'selected label',
           label.resolve(selected),

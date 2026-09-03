@@ -5,6 +5,7 @@ import 'package:memox/core/theme/foundations/app_sizing.dart';
 import 'package:memox/core/theme/states/app_interaction_states.dart';
 import 'package:memox/core/theme/foundations/app_stroke.dart';
 import 'package:memox/core/theme/app_theme.dart';
+import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
 
 import '../../support/ink_probe.dart';
@@ -41,17 +42,30 @@ void main() {
   /// ring replaces the hairline rather than being added beside it, so reading
   /// this one value answers both "is the ring drawn" and "did the geometry
   /// move".
-  BorderSide borderOf(WidgetTester tester) {
-    final decorated = tester.widget<DecoratedBox>(
-      find
-          .descendant(
+  /// The topmost edge the card paints, or `null` when it paints none.
+  ///
+  /// **Foreground layers since M100.33.** The card used to carry its edge in
+  /// the background decoration — and an invisible `Border.all(color: fill)`
+  /// when it had no edge to show — so "the first `DecoratedBox`" always had a
+  /// border and the resting width was a hairline. The fill sits behind the
+  /// child now and every edge in front of it, so a card with nothing to say
+  /// paints no border at all.
+  BorderSide? borderOf(WidgetTester tester) {
+    final borders = tester
+        .widgetList<DecoratedBox>(
+          find.descendant(
             of: find.byType(MxCard),
             matching: find.byType(DecoratedBox),
-          )
-          .first,
-    );
+          ),
+        )
+        .where(
+          (DecoratedBox box) => box.position == DecorationPosition.foreground,
+        )
+        .map((DecoratedBox box) => (box.decoration as BoxDecoration).border)
+        .whereType<Border>()
+        .toList();
 
-    return ((decorated.decoration as BoxDecoration).border! as Border).top;
+    return borders.isEmpty ? null : borders.first.top;
   }
 
   /// Tab, from a real keyboard. Focus that is only ever set programmatically
@@ -133,12 +147,13 @@ void main() {
           isDark: isDark,
         );
         final atRest = tester.getRect(find.byType(MxCard));
-        expect(borderOf(tester).width, AppStroke.hairline);
+        // Nothing at rest: an ordinary card is a surface, not a frame.
+        expect(borderOf(tester), isNull);
 
         await tabTo(tester);
 
         expect(
-          borderOf(tester).width,
+          borderOf(tester)?.width,
           AppStroke.focus,
           reason: '$label: focus is invisible on a card',
         );
@@ -148,7 +163,7 @@ void main() {
         // the bug. `focus_ring_contrast_test.dart` measures it per ground.
         final theme = isDark ? buildDarkTheme() : buildLightTheme();
         expect(
-          borderOf(tester).color,
+          borderOf(tester)!.color,
           AppInteractionStates.focusIndicator(theme.colorScheme).color,
         );
         expect(
@@ -269,8 +284,8 @@ void main() {
 
       expect(focusNode.hasFocus, isTrue);
       expect(
-        borderOf(tester).width,
-        AppStroke.hairline,
+        borderOf(tester),
+        isNull,
         reason: 'touch-mode focus painted the keyboard ring',
       );
 
@@ -279,7 +294,7 @@ void main() {
       FocusManager.instance.highlightStrategy =
           FocusHighlightStrategy.alwaysTraditional;
       await tester.pumpAndSettle();
-      expect(borderOf(tester).width, AppStroke.focus);
+      expect(borderOf(tester)!.width, AppStroke.focus);
     });
 
     testWidgets('an interactive card keeps the 48dp floor structurally', (
@@ -302,6 +317,111 @@ void main() {
       final card = tester.getSize(find.byType(MxCard));
       expect(card.width, greaterThanOrEqualTo(AppSizing.touchTarget));
       expect(card.height, greaterThanOrEqualTo(AppSizing.touchTarget));
+    });
+  });
+
+  group('the edge layers (M100.33)', () {
+    /// Tab onto the only focusable thing on screen.
+    Future<void> tab(WidgetTester tester) async {
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('focus changes no bound, on the card or on its content', (
+      tester,
+    ) async {
+      // **The claim the old fake border existed to protect, now measured.**
+      // `MxCard` drew `Border.all(color: fill)` at rest so the box would not
+      // "breathe" when the ring arrived — an argument that holds for
+      // `Container`, which adds `decoration.padding` to its child, and not for
+      // `DecoratedBox`, which paints and nothing else. The border reserved no
+      // geometry, so removing it can move nothing; this is the proof rather
+      // than the comment.
+      await pump(
+        tester,
+        MxCard.raised(onTap: () {}, child: const Text('body')),
+      );
+
+      final Size before = tester.getSize(find.byType(MxCard));
+      final Rect contentBefore = tester.getRect(find.text('body'));
+
+      await tab(tester);
+
+      expect(tester.getSize(find.byType(MxCard)), before);
+      expect(tester.getRect(find.text('body')), contentBefore);
+    });
+
+    testWidgets('an edge-to-edge child cannot cover the selected edge', (
+      tester,
+    ) async {
+      // A card whose content reaches every corner used to paint over its own
+      // state edge, because the edge lived in the decoration *behind* the
+      // child. A selected row with a full-bleed child then showed no selection
+      // at all. The edge is a foreground layer now, so the child owns the whole
+      // content area and the state still reads.
+      await pump(
+        tester,
+        MxCard.flat(
+          isSelected: true,
+          padding: MxCardPadding.none,
+          child: Container(
+            width: 200,
+            height: 80,
+            color: const Color(0xFF123456),
+          ),
+        ),
+      );
+
+      final edges = tester
+          .widgetList<DecoratedBox>(find.byType(DecoratedBox))
+          .where(
+            (DecoratedBox box) =>
+                box.position == DecorationPosition.foreground &&
+                (box.decoration as BoxDecoration).border != null,
+          );
+
+      expect(
+        edges,
+        isNotEmpty,
+        reason: 'the selected edge is not painted in front of the child',
+      );
+    });
+
+    testWidgets('focus is additive: a selected card keeps its selection', (
+      tester,
+    ) async {
+      // One channel used to carry two facts — the ring *replaced* the resting
+      // edge — so tabbing onto a selected card removed the cue that said it was
+      // picked. Both layers are present now, and both are asserted.
+      await pump(
+        tester,
+        MxCard.flat(isSelected: true, onTap: () {}, child: const Text('body')),
+      );
+      await tab(tester);
+
+      final borders = tester
+          .widgetList<DecoratedBox>(find.byType(DecoratedBox))
+          .where(
+            (DecoratedBox box) => box.position == DecorationPosition.foreground,
+          )
+          .map((DecoratedBox box) => (box.decoration as BoxDecoration).border)
+          .whereType<Border>()
+          .map((Border border) => border.top)
+          .toList();
+
+      final theme = buildLightTheme();
+      final ring = AppInteractionStates.focusIndicator(theme.colorScheme);
+      final selected = theme.extension<AppSemanticColors>()!.borderSelected;
+
+      expect(
+        borders.map((BorderSide side) => side.color),
+        containsAll(<Color>[ring.color, selected]),
+        reason: 'focus and selection are not both on screen',
+      );
+      expect(
+        borders.map((BorderSide side) => side.width),
+        contains(AppStroke.focus),
+      );
     });
   });
 }

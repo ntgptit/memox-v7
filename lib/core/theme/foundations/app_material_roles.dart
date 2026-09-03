@@ -144,8 +144,16 @@ abstract final class AppMaterialRoles {
   static const Color onErrorContainerLight = Color(0xFF641423);
   static const Color onErrorContainerDark = Color(0xFFF4D3D9);
 
-  static const Color surfaceContainerLowestLight =
-      AppSurfaceColors.surfaceElevatedLight;
+  /// **The rung between the page and the paper** — one step off the page, and
+  /// the recess `MxCard.recessed` draws.
+  ///
+  /// It held the *paper* until M100.32, because `surface` did: the app read
+  /// `ColorScheme.surface` as the card and kept the page in a token outside the
+  /// scheme, which is M3's model upside down. `surface` is the page again and
+  /// the paper moved down to [surfaceContainerLowLight] — its canonical rung,
+  /// since `_CardDefaultsM3.color` is `surfaceContainerLow`. This rung took the
+  /// value `Low` used to carry, so nothing a recess draws changed colour.
+  static const Color surfaceContainerLowestLight = Color(0xFFF9FAFB);
 
   /// The dark half of this ladder moved with the four main tiers at M4.10aa —
   /// `surfaceContainerHigh`, `Highest` and `Bright` **are**
@@ -156,9 +164,24 @@ abstract final class AppMaterialRoles {
   /// now makes impossible rather than merely checked-for. `Highest` derived
   /// from [secondaryContainerDark] until M100.25, when that role left the
   /// surface family for Tokyo's hue; the rung itself did not move.
-  static const Color surfaceContainerLowestDark = Color(0xFF010624);
-  static const Color surfaceContainerLowLight = Color(0xFFF9FAFB);
-  static const Color surfaceContainerLowDark = Color(0xFF0D1335);
+  ///
+  /// Dark's `Lowest` was `#010624` — *below* the page — until M100.32. Nothing
+  /// draws a surface below the page in a mode whose page is already at the
+  /// bottom of the scale (L\* 4.11), and the two study tiles that read this
+  /// role are option cards: they take the paper now. See
+  /// [surfaceContainerLowDark].
+  static const Color surfaceContainerLowestDark = Color(0xFF0D1335);
+
+  /// **The paper: a card, a sheet, a menu.** `_CardDefaultsM3.color` and
+  /// `_BottomSheetDefaultsM3.backgroundColor` both name this rung, and since
+  /// M100.32 they get it rather than a substitute.
+  ///
+  /// Tokyo's white paper in light and its `#111633` navy card in dark — the
+  /// exact values `ColorScheme.surface` carried before the remap, so every
+  /// card in the app renders the colour it always did while the role beneath
+  /// it became the canonical one.
+  static const Color surfaceContainerLowLight = AppSurfaceColors.paperLight;
+  static const Color surfaceContainerLowDark = AppSurfaceColors.paperDark;
   // `onInverseSurfaceLight` is the same value from the other direction —
   // written there as the derivation, so this stays the source.
   static const Color surfaceContainerLight = Color(0xFFF0F2F6);
@@ -174,7 +197,7 @@ abstract final class AppMaterialRoles {
   /// **`surfaceDim` is the dimmest surface, which in this app is the page.**
   ///
   /// Dark says so by deriving. It used to be `0xFF0B0327` — three parts in 255
-  /// away from [AppSurfaceColors.backgroundDark], near enough that nobody could see
+  /// away from [AppSurfaceColors.pageDark], near enough that nobody could see
   /// the difference and far enough that an edit to the page would have left it
   /// behind. A colour that exists twice under two names is a colour that will
   /// disagree with itself eventually.
@@ -185,7 +208,7 @@ abstract final class AppMaterialRoles {
   /// is not in the scheme at all. Straightening that is a surface-ladder
   /// change with pixels behind it, not a rename — see the token audit.
   static const Color surfaceDimLight = Color(0xFFDDE0E6);
-  static const Color surfaceDimDark = AppSurfaceColors.backgroundDark;
+  static const Color surfaceDimDark = AppSurfaceColors.pageDark;
   static const Color surfaceBrightLight = AppSurfaceColors.surfaceElevatedLight;
   static const Color surfaceBrightDark = AppSurfaceColors.surfaceElevatedDark;
 

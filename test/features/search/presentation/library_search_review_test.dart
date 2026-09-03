@@ -145,18 +145,32 @@ void main() {
     ).requestFocus();
     await tester.pumpAndSettle();
 
-    final DecoratedBox box = tester.widget<DecoratedBox>(
-      find
-          .descendant(
+    // The ring is a foreground layer since M100.33, so it is found among the
+    // card's foreground decorations rather than on the first `DecoratedBox` —
+    // that one carries the fill and the shadow and no longer paints an edge.
+    final List<BorderSide> edges = tester
+        .widgetList<DecoratedBox>(
+          find.descendant(
             of: find.byType(MxCard),
             matching: find.byType(DecoratedBox),
-          )
-          .first,
-    );
-    final BoxDecoration decoration = box.decoration as BoxDecoration;
+          ),
+        )
+        .where(
+          (DecoratedBox box) => box.position == DecorationPosition.foreground,
+        )
+        .map((DecoratedBox box) => (box.decoration as BoxDecoration).border)
+        .whereType<Border>()
+        .map((Border border) => border.top)
+        .toList();
 
-    expect(decoration.border?.top.width, AppStroke.focus);
-    expect(decoration.border?.top.color, buildLightTheme().colorScheme.primary);
+    expect(
+      edges.map((BorderSide side) => side.width),
+      contains(AppStroke.focus),
+    );
+    expect(
+      edges.map((BorderSide side) => side.color),
+      contains(buildLightTheme().colorScheme.primary),
+    );
   });
 
   group('the field never states a count it cannot stand behind', () {

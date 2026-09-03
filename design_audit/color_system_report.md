@@ -18,18 +18,18 @@ guess.
 
 | | |
 |---|---|
-| Files scanned (`lib/`, hand-written) | 710 |
-| Colour sites found | 345 |
-| Violations | 30 |
+| Files scanned (`lib/`, hand-written) | 722 |
+| Colour sites found | 344 |
+| Violations | 28 |
 
 **By element kind**
 
 | kind | sites |
 |---|---|
-| other | 280 |
+| other | 278 |
 | background | 28 |
 | border | 16 |
-| shadow | 2 |
+| shadow | 3 |
 | text | 19 |
 
 **By source kind**
@@ -37,22 +37,22 @@ guess.
 | kind | sites |
 |---|---|
 | shared-constant | 128 |
-| opacity-modified-token | 16 |
+| opacity-modified-token | 17 |
 | blend-source | 5 |
 | Colors-material | 14 |
 | hardcoded-literal | 116 |
-| theme-token | 66 |
+| theme-token | 64 |
 
 **By violation code**
 
 | code | count | meaning |
 |---|---|---|
-| V1 | 4 | neutral not derived from the seed |
+| V1 | 3 | neutral not derived from the seed |
 | V2 | 0 | role component using a colour outside its role |
 | V3 | 24 | literal duplicating an existing token |
 | V4 | 0 | hand-picked role variant instead of a generated one |
 | V5 | 0 | translucency applied at the paint site |
-| V6 | 2 | defined for one brightness, different mechanism in the other |
+| V6 | 1 | defined for one brightness, different mechanism in the other |
 
 ## 2. Violations
 
@@ -60,7 +60,7 @@ guess.
 |---|---|---|---|---|---|---|
 | V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:60` | Color(0xFFE4E7EA) | `#E4E7EA` | `#E4E7EA` | colorScheme.outlineVariant |
 | V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:64` | Color(0xFF272C48) | `#272C48` | `#272C48` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:114` | Color(0xFFF2F5F9) | `#F2F5F9` | `#F2F5F9` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:114` | Color(0xFFF2F5F9) | `#F2F5F9` | `#F2F5F9` | colorScheme.surface |
 | V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:121` | Color(0xFF252C55) | `#252C55` | `#252C55` | no token within ΔE-ish range — needs a new one |
 | V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:123` | Color(0xFF5569FF) | `#5569FF` | `#5569FF` | no token within ΔE-ish range — needs a new one |
 | V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:127` | Color(0xFF8C7CF0) | `#8C7CF0` | `#8C7CF0` | no token within ΔE-ish range — needs a new one |
@@ -70,20 +70,18 @@ guess.
 | V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:186` | Color(0xFF5B65B2) | `#5B65B2` | `#5B65B2` | no token within ΔE-ish range — needs a new one |
 | V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:235` | Color(0xFF6F727B) | `#6F727B` | `#6F727B` | colorScheme.outline |
 | V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:281` | Color(0xFF747BA3) | `#747BA3` | `#747BA3` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/foundations/app_surface_colors.dart:51` | Color(0xFFF2F5F9) | `#F2F5F9` | `#F2F5F9` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/foundations/app_surface_colors.dart:53` | Color(0xFF070C27) | `#070C27` | `#070C27` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/foundations/app_surface_colors.dart:68` | Color(0xFFFFFFFF) | `#FFFFFF` | `#FFFFFF` | colorScheme.onPrimary |
-| V3 | 🟡 | `lib/core/theme/foundations/app_surface_colors.dart:70` | Color(0xFF111633) | `#111633` | `#111633` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/foundations/app_surface_colors.dart:72` | Color(0xFFF5F6FF) | `#F5F6FF` | `#F5F6FF` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/foundations/app_surface_colors.dart:79` | Color(0xFF2A3159) | `#2A3159` | `#2A3159` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/foundations/app_surface_colors.dart:93` | Color(0xFFE6E9FF) | `#E6E9FF` | `#E6E9FF` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/foundations/app_surface_colors.dart:96` | Color(0xFF2A3159) | `#2A3159` | `#2A3159` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/foundations/app_surface_colors.dart:98` | Color(0xFFE9EBEE) | `#E9EBEE` | `#E9EBEE` | semantic.surfaceMuted |
-| V3 | 🟡 | `lib/core/theme/foundations/app_surface_colors.dart:100` | Color(0xFF21274C) | `#21274C` | `#21274C` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/foundations/app_surface_colors.dart:109` | Color(0xFFFFFFFF) | `#FFFFFF` | `#FFFFFF` | colorScheme.onPrimary |
-| V3 | 🟡 | `lib/core/theme/foundations/app_surface_colors.dart:111` | Color(0xFF2F3660) | `#2F3660` | `#2F3660` | no token within ΔE-ish range — needs a new one |
-| V1 | 🔴 | `lib/core/theme/foundations/app_colors.dart` | colorScheme.surface (light) | `#FFFFFF` | `#111633` | blendOver(seed, base, small alpha) - see migration_map.md |
-| V6 | 🔴 | `lib/core/theme/foundations/app_colors.dart` | colorScheme.surface (mechanism differs by mode) | `#FFFFFF` | `#111633` | derive both from the seed, or neither |
+| V3 | 🟡 | `lib/core/theme/foundations/app_surface_colors.dart:60` | Color(0xFFF2F5F9) | `#F2F5F9` | `#F2F5F9` | colorScheme.surface |
+| V3 | 🟡 | `lib/core/theme/foundations/app_surface_colors.dart:62` | Color(0xFF070C27) | `#070C27` | `#070C27` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟡 | `lib/core/theme/foundations/app_surface_colors.dart:77` | Color(0xFFFFFFFF) | `#FFFFFF` | `#FFFFFF` | colorScheme.onPrimary |
+| V3 | 🟡 | `lib/core/theme/foundations/app_surface_colors.dart:79` | Color(0xFF111633) | `#111633` | `#111633` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟡 | `lib/core/theme/foundations/app_surface_colors.dart:81` | Color(0xFFF5F6FF) | `#F5F6FF` | `#F5F6FF` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟡 | `lib/core/theme/foundations/app_surface_colors.dart:88` | Color(0xFF2A3159) | `#2A3159` | `#2A3159` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟡 | `lib/core/theme/foundations/app_surface_colors.dart:102` | Color(0xFFE6E9FF) | `#E6E9FF` | `#E6E9FF` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟡 | `lib/core/theme/foundations/app_surface_colors.dart:105` | Color(0xFF2A3159) | `#2A3159` | `#2A3159` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟡 | `lib/core/theme/foundations/app_surface_colors.dart:107` | Color(0xFFE9EBEE) | `#E9EBEE` | `#E9EBEE` | semantic.surfaceMuted |
+| V3 | 🟡 | `lib/core/theme/foundations/app_surface_colors.dart:109` | Color(0xFF21274C) | `#21274C` | `#21274C` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟡 | `lib/core/theme/foundations/app_surface_colors.dart:118` | Color(0xFFFFFFFF) | `#FFFFFF` | `#FFFFFF` | colorScheme.onPrimary |
+| V3 | 🟡 | `lib/core/theme/foundations/app_surface_colors.dart:120` | Color(0xFF2F3660) | `#2F3660` | `#2F3660` | no token within ΔE-ish range — needs a new one |
 | V1 | 🔴 | `lib/core/theme/foundations/app_colors.dart` | semantic.surfaceElevated (light) | `#FFFFFF` | `#2F3660` | blendOver(seed, base, small alpha) - see migration_map.md |
 | V6 | 🔴 | `lib/core/theme/foundations/app_colors.dart` | semantic.surfaceElevated (mechanism differs by mode) | `#FFFFFF` | `#2F3660` | derive both from the seed, or neither |
 | V1 | 🟢 | `lib/core/theme/foundations/app_colors.dart` | colorScheme.outlineVariant (light) is 23 degrees from the seed hue | `#E4E7EA` | `#272C48` | regenerate from the seed at the same lightness |
@@ -137,10 +135,6 @@ guess.
 
 - **V3** `Color(0xFF2F3660)` — A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #2F3660.
 
-- **V1** `colorScheme.surface (light)` — A pure neutral: no hue at all, so it carries no trace of the seed and cannot move with it.
-
-- **V6** `colorScheme.surface (mechanism differs by mode)` — One mode derives this neutral from a hue and the other does not, so the two modes cannot drift together.
-
 - **V1** `semantic.surfaceElevated (light)` — A pure neutral: no hue at all, so it carries no trace of the seed and cannot move with it.
 
 - **V6** `semantic.surfaceElevated (mechanism differs by mode)` — One mode derives this neutral from a hue and the other does not, so the two modes cannot drift together.
@@ -160,22 +154,22 @@ an edge.
 
 | mode | border on ground | ratio | verdict |
 |---|---|---|---|
-| light | semantic.borderSubtle on card (colorScheme.surface) | 1.24 | in-band |
+| light | semantic.borderSubtle on card (colorScheme.surface) | 1.14 | in-band |
 | light | semantic.borderSubtle on page (scaffoldBackgroundColor) | 1.14 | in-band |
 | light | semantic.borderSubtle on muted tile (semantic.surfaceMuted) | 1.04 | invisible |
-| light | colorScheme.outline on card (colorScheme.surface) | 4.81 | too-heavy |
+| light | colorScheme.outline on card (colorScheme.surface) | 4.40 | too-heavy |
 | light | colorScheme.outline on page (scaffoldBackgroundColor) | 4.40 | too-heavy |
 | light | colorScheme.outline on muted tile (semantic.surfaceMuted) | 4.02 | too-heavy |
-| light | colorScheme.outlineVariant on card (colorScheme.surface) | 1.24 | in-band |
+| light | colorScheme.outlineVariant on card (colorScheme.surface) | 1.14 | in-band |
 | light | colorScheme.outlineVariant on page (scaffoldBackgroundColor) | 1.14 | in-band |
 | light | colorScheme.outlineVariant on muted tile (semantic.surfaceMuted) | 1.04 | invisible |
-| dark | semantic.borderSubtle on card (colorScheme.surface) | 1.30 | in-band |
+| dark | semantic.borderSubtle on card (colorScheme.surface) | 1.41 | in-band |
 | dark | semantic.borderSubtle on page (scaffoldBackgroundColor) | 1.41 | in-band |
 | dark | semantic.borderSubtle on muted tile (semantic.surfaceMuted) | 1.06 | invisible |
-| dark | colorScheme.outline on card (colorScheme.surface) | 4.30 | too-heavy |
+| dark | colorScheme.outline on card (colorScheme.surface) | 4.68 | too-heavy |
 | dark | colorScheme.outline on page (scaffoldBackgroundColor) | 4.68 | too-heavy |
 | dark | colorScheme.outline on muted tile (semantic.surfaceMuted) | 3.50 | too-heavy |
-| dark | colorScheme.outlineVariant on card (colorScheme.surface) | 1.30 | in-band |
+| dark | colorScheme.outlineVariant on card (colorScheme.surface) | 1.41 | in-band |
 | dark | colorScheme.outlineVariant on page (scaffoldBackgroundColor) | 1.41 | in-band |
 | dark | colorScheme.outlineVariant on muted tile (semantic.surfaceMuted) | 1.06 | invisible |
 
@@ -184,21 +178,21 @@ an edge.
 | mode | surface | hex | hue | saturation | pure neutral |
 |---|---|---|---|---|---|
 | light | page | `#F2F5F9` | 214 | 0.368 | false |
-| light | surface | `#FFFFFF` | none | 0.000 | true |
+| light | surface | `#F2F5F9` | 214 | 0.368 | false |
 | dark | page | `#070C27` | 231 | 0.696 | false |
-| dark | surface | `#111633` | 231 | 0.500 | false |
+| dark | surface | `#070C27` | 231 | 0.696 | false |
 
 ### Neutral family coherence
 
 | mode | token | hex | hue |
 |---|---|---|---|
 | light | page | `#F2F5F9` | 214 |
-| light | surface | `#FFFFFF` | **none** |
+| light | surface | `#F2F5F9` | 214 |
 | light | surfaceMuted | `#E9EBEE` | 216 |
 | light | borderSubtle | `#E4E7EA` | 210 |
 | light | onSurfaceVariant | `#596680` | 220 |
 | dark | page | `#070C27` | 231 |
-| dark | surface | `#111633` | 231 |
+| dark | surface | `#070C27` | 231 |
 | dark | surfaceMuted | `#21274C` | 232 |
 | dark | borderSubtle | `#272C48` | 231 |
 | dark | onSurfaceVariant | `#9395A2` | 232 |
@@ -260,7 +254,6 @@ be kept in step by editing one value.
 
 | token / site | light | dark |
 |---|---|---|
-| colorScheme.surface (mechanism differs by mode) | `#FFFFFF` | `#111633` |
 | semantic.surfaceElevated (mechanism differs by mode) | `#FFFFFF` | `#2F3660` |
 
 ## 5. Role families (V2 / V4 evidence)

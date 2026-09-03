@@ -5,7 +5,7 @@ import 'package:memox/core/theme/foundations/app_breakpoints.dart';
 import 'package:memox/core/theme/foundations/app_colors.dart';
 import 'package:memox/core/theme/foundations/app_durations.dart';
 import 'package:memox/core/theme/foundations/app_icon_size.dart';
-import 'package:memox/core/theme/components/app_overlay_themes.dart';
+import 'package:memox/core/theme/components/feedback/app_tooltip_theme.dart';
 import 'package:memox/core/theme/foundations/app_radius.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/core/theme/foundations/app_stroke.dart';

@@ -1,22 +1,32 @@
 import 'package:flutter/material.dart';
 
-import 'components/app_app_bar_theme.dart';
-import 'components/app_button_themes.dart';
-import 'components/app_card_theme.dart';
-import 'components/app_chip_theme.dart';
-import 'components/app_floating_action_button_theme.dart';
-import 'components/app_icon_button_theme.dart';
-import 'components/app_input_theme.dart';
-import 'components/app_list_tile_theme.dart';
-import 'components/app_modal_themes.dart';
-import 'components/app_navigation_bar_theme.dart';
-import 'components/app_overlay_themes.dart';
-import 'components/app_planned_themes.dart';
-import 'components/app_radio_theme.dart';
-import 'components/app_toggle_themes.dart';
+import 'components/actions/app_button_themes.dart';
+import 'components/actions/app_fab_theme.dart';
+import 'components/actions/app_icon_button_theme.dart';
+import 'components/content/app_divider_theme.dart';
+import 'components/content/app_list_tile_theme.dart';
+import 'components/content/app_scrollbar_theme.dart';
+import 'components/feedback/app_progress_theme.dart';
+import 'components/feedback/app_snackbar_theme.dart';
+import 'components/feedback/app_tooltip_theme.dart';
+import 'components/inputs/app_input_theme.dart';
+import 'components/inputs/app_text_selection_theme.dart';
+import 'components/navigation/app_app_bar_theme.dart';
+import 'components/navigation/app_navigation_bar_theme.dart';
+import 'components/navigation/app_tab_bar_theme.dart';
+import 'components/overlays/app_popup_menu_theme.dart';
+import 'components/pickers/app_date_picker_theme.dart';
+import 'components/pickers/app_time_picker_theme.dart';
+import 'components/selection/app_chip_theme.dart';
+import 'components/selection/app_radio_theme.dart';
+import 'components/selection/app_segmented_button_theme.dart';
+import 'components/selection/app_slider_theme.dart';
+import 'components/selection/app_toggle_themes.dart';
+import 'components/surfaces/app_bottom_sheet_theme.dart';
+import 'components/surfaces/app_card_theme.dart';
+import 'components/surfaces/app_dialog_theme.dart';
 import 'foundations/app_icon_size.dart';
 import 'foundations/app_semantic_colors.dart';
-import 'foundations/app_surface_colors.dart';
 import 'schemes/app_color_scheme.dart';
 import 'schemes/app_high_contrast.dart';
 import 'states/app_interaction_states.dart';
@@ -81,7 +91,7 @@ ThemeData buildHighContrastDarkTheme() => _highContrastDarkTheme;
 /// ground remains an argument, because the scheme genuinely has no role for
 /// it.
 ThemeData _light(ColorScheme scheme, AppSemanticColors semantic) =>
-    _buildTheme(scheme, semantic, background: AppSurfaceColors.backgroundLight);
+    _buildTheme(scheme, semantic);
 
 /// The dark theme. See [_light].
 ///
@@ -94,7 +104,7 @@ ThemeData _light(ColorScheme scheme, AppSemanticColors semantic) =>
 /// outlined button is a hairline and a label against two filled verdicts, and
 /// the weight difference is what separates them.
 ThemeData _dark(ColorScheme scheme, AppSemanticColors semantic) =>
-    _buildTheme(scheme, semantic, background: AppSurfaceColors.backgroundDark);
+    _buildTheme(scheme, semantic);
 
 final ThemeData _lightTheme = _light(
   lightColorScheme,
@@ -116,14 +126,15 @@ final ThemeData _highContrastDarkTheme = _dark(
   highContrastSemantics(const AppSemanticColors.dark(), darkColorScheme),
 );
 
-/// `background` stays a parameter where the button pairs did not: the page
-/// ground is deliberately not `scheme.surface` (surface is the card sitting on
-/// it), so there genuinely is no second source for it inside the scheme.
-ThemeData _buildTheme(
-  ColorScheme scheme,
-  AppSemanticColors semantic, {
-  required Color background,
-}) {
+/// The scheme is the only source of colour here, including the page.
+///
+/// **It took a `background` parameter until M100.32**, on the argument that the
+/// page ground had no role because `surface` was the card sitting on it. That
+/// was M3's model upside down: `surface` *is* the base ground, and the paper is
+/// a container placed on it (`surfaceContainerLow`). With the ladder the right
+/// way up there is no colour left for the composition root to hand in, and the
+/// last piece of loose paint in the theme goes with it.
+ThemeData _buildTheme(ColorScheme scheme, AppSemanticColors semantic) {
   final base = ThemeData(
     // The SDK's current default, restated because it is a dependency and not a
     // preference: the FAB state washes, the button overlays and the planned
@@ -171,7 +182,7 @@ ThemeData _buildTheme(
   return base.copyWith(
     // The page sits a step below the card, so a card reads as a card without
     // needing a shadow to say so.
-    scaffoldBackgroundColor: background,
+    scaffoldBackgroundColor: scheme.surface,
     textTheme: texts,
     extensions: <ThemeExtension<Object?>>[semantic, AppTextStyles.from(texts)],
 
@@ -205,7 +216,7 @@ ThemeData _buildTheme(
     // `theme_coverage_test.dart` cannot reach this pair — its whole mechanism
     // is a widget-to-slot map, and there is no slot — so the gap is closed
     // here and named in that file's blind-spot list.
-    canvasColor: scheme.surface,
+    canvasColor: scheme.surfaceContainerLow,
     disabledColor: semantic.onDisabled,
 
     // A bare `Icon` outside every themed component. Material's fallback is a
@@ -219,7 +230,7 @@ ThemeData _buildTheme(
 
     // The chrome: the two bars that frame every screen, and the one action that
     // floats over them.
-    appBarTheme: buildAppBarTheme(scheme, background: background),
+    appBarTheme: buildAppBarTheme(scheme),
     navigationBarTheme: buildNavigationBarTheme(scheme, texts),
     floatingActionButtonTheme: buildFloatingActionButtonTheme(scheme),
 
@@ -235,9 +246,9 @@ ThemeData _buildTheme(
     // sideways on every change.
     chipTheme: buildChipTheme(scheme, semantic, texts),
 
-    filledButtonTheme: buildFilledButtonTheme(scheme, semantic),
+    filledButtonTheme: buildFilledButtonTheme(scheme, semantic, texts),
 
-    outlinedButtonTheme: buildOutlinedButtonTheme(scheme, semantic),
+    outlinedButtonTheme: buildOutlinedButtonTheme(scheme, semantic, texts),
 
     textButtonTheme: buildTextButtonTheme(scheme, semantic, texts),
 

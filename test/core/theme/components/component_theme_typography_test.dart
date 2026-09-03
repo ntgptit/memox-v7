@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
+import 'package:memox/core/theme/components/actions/app_button_themes.dart';
 import 'package:memox/core/theme/typography/app_typography.dart';
 
 /// **`ThemeData.textTheme` being right is not the same as a component using it.**
@@ -125,6 +126,39 @@ void main() {
           texts.labelLarge,
           FontWeight.w500,
         );
+      });
+
+      test('every button label is label-lg at the button weight', () {
+        // **The rung is 600 and a button is 700** (M100.30). Tokyo puts
+        // `fontWeight: 'bold'` on `MuiButton.root`, which every variant shares,
+        // and that one declaration is most of why its actions read as
+        // pressable rather than as coloured labels. It is a second emphatic
+        // weight in an app that had one — 600 emphasises a word inside running
+        // text, and a button is not running text.
+        //
+        // All four families, because the whole value of a shared style is that
+        // none of them can drift: `buildSharedButtonStyle` carries it for
+        // filled and outlined, `buildTextButtonTheme` restates it, and the
+        // tonal and destructive variants resolve through `buildFilledStyle`.
+        // A family set one weight apart from its siblings is the exact drift
+        // this is here to catch.
+        for (final (String slot, WidgetStateProperty<TextStyle?>? style)
+            in <(String, WidgetStateProperty<TextStyle?>?)>[
+              ('filledButtonTheme', theme.filledButtonTheme.style?.textStyle),
+              (
+                'outlinedButtonTheme',
+                theme.outlinedButtonTheme.style?.textStyle,
+              ),
+              ('textButtonTheme', theme.textButtonTheme.style?.textStyle),
+            ]) {
+          expect(style, isNotNull, reason: '$slot declares no label style');
+          expectRungReweighted(
+            '$slot.textStyle',
+            style!.resolve(const <WidgetState>{}),
+            texts.labelLarge,
+            buttonLabelWeight,
+          );
+        }
       });
 
       test('the navigation label is label-md, and selection re-weights it', () {

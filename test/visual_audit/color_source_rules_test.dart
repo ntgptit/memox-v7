@@ -26,7 +26,7 @@ void main() {
     'lib/core/theme/foundations/app_border_colors.dart',
     'lib/core/theme/app_theme.dart',
     'lib/core/theme/foundations/app_semantic_colors.dart',
-    'lib/core/theme/components/app_button_themes.dart',
+    'lib/core/theme/components/actions/app_button_themes.dart',
   };
 
   /// The one literal outside those files that is allowed, with its reason.

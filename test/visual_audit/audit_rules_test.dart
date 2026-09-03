@@ -104,8 +104,13 @@ void main() {
     });
 
     test('a colour that is neither is reported, but does not block', () {
+      // A teal-green: no token in this palette is near it and no pair of them
+      // blends to it. It was an orange-brown until M100.32, when `warning` was
+      // retuned a step darker and the old fixture fell *inside* the closure —
+      // so the rule stopped reporting and this self-test caught it. The fixture
+      // is the thing that has to be outside; the rule was right both times.
       final findings = closureOn(
-        paintOf(const Color(0xFF7F3B12), source: PaintSource.raster),
+        paintOf(const Color(0xFF1F7A5A), source: PaintSource.raster),
       );
 
       expect(findings, hasLength(1));

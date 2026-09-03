@@ -16,8 +16,8 @@ import 'package:memox/core/theme/foundations/app_border_colors.dart';
 /// card, the raised surface and three `on*` labels at once — and a set literal
 /// calls that a duplicate.
 final List<Color> lightPaletteTokens = <Color>[
-  AppSurfaceColors.backgroundLight,
-  AppSurfaceColors.surfaceLight,
+  AppSurfaceColors.pageLight,
+  AppSurfaceColors.paperLight,
   AppBorderColors.borderOptionLight,
   AppBorderColors.borderDividerLight,
   AppBorderColors.borderSelectedLight,
@@ -98,8 +98,8 @@ final List<Color> lightPaletteTokens = <Color>[
 /// card, the raised surface and three `on*` labels at once — and a set literal
 /// calls that a duplicate.
 final List<Color> darkPaletteTokens = <Color>[
-  AppSurfaceColors.backgroundDark,
-  AppSurfaceColors.surfaceDark,
+  AppSurfaceColors.pageDark,
+  AppSurfaceColors.paperDark,
   AppBorderColors.borderOptionDark,
   AppBorderColors.borderDividerDark,
   AppBorderColors.borderSelectedDark,

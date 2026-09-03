@@ -27,6 +27,21 @@ abstract final class AppSizing {
   /// `buildSharedButtonStyle` states it for every button family at once.
   static const double touchTarget = 48;
 
+  /// A control that draws smaller than the target it keeps.
+  ///
+  /// The deck tile's Study verb is the case it encodes: a button living in a
+  /// row of chips and gauges rather than in an action bar. It paints 40 and
+  /// `MaterialTapTargetSize.padded` restores [touchTarget] around it, so the
+  /// body comes down and the finger's floor does not.
+  ///
+  /// **Two heights, not a five-rung ladder.** 32 / 40 / 48 / 56 / 64 is the
+  /// usual control scale and this app renders two of them; the other three
+  /// would be sizes with no screen to check them against, which is the rule
+  /// `app_planned_themes.dart` already follows for component themes. It was a
+  /// private `_kCompactHeight` in `mx_action_button.dart` until M100.30 — the
+  /// one control dimension the design system could not see.
+  static const double controlCompact = 40;
+
   /// Material's floating action button, which declares no public constant for
   /// its own size.
   ///

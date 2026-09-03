@@ -1,23 +1,41 @@
-/* Levels are dp; a shadow is what a level RENDERS as. Light renders a shade,
-   with the alpha solved for rather than picked: 0.06 + 0.01 x level. Dark
-   renders Tokyo's rim instead (M100.27): the dark page sits at L* 4.1 — the
-   bottom of the scale — so a shade there moves it by under one L*, and with
+/* Levels are dp; a shadow is what a level RENDERS as.
+
+   Light renders Tokyo's two-layer shade (M100.30): a wide float that says the
+   card is above the page, plus a tight contact layer that says where it
+   touches. The colour is Tokyo's own `shadows.card` blue-grey #9FA2BF, which
+   already sits on this palette's seed hue (234.4 against 233) — a shadow is
+   light passing around an object, not a dark smear, and that is most of why a
+   Tokyo panel reads as floating. The two painting levels are Tokyo's two tiers
+   verbatim: `card` is its `shadows.cardSm`, `raised` its `shadows.card`.
+   `overlay` has no caller in either kit and is `raised` doubled.
+
+   It replaced a single near-black layer whose alpha was solved to hit a lift
+   target (0.06 + 0.01 x level). The target is still measured — the app's
+   `app_theme_test.dart` holds it as a floor — but a solved opacity produced the
+   right total with the wrong character.
+
+   Dark renders Tokyo's rim instead (M100.27): the dark page sits at L* 4.1 —
+   the bottom of the scale — so a shade there moves it by under one L*, and with
    the card fixed at Tokyo's #111633 the surface step is 4.3 L*. Tokyo's own
-   card shadow, 0 0 2px #6A7199, is a one-pixel halo that reads 4.07:1 against
-   the page and 3.74:1 against the card. The app adds a 1px spread so the ring
-   is painted solid at that colour before the blur falls off — a blur alone
-   leaves every exposed pixel partially covered. Same at every level, because
-   an edge does not get deeper. */
+   dark card shadow, 0 0 2px #6A7199, is a one-pixel halo that reads 4.07:1
+   against the page and 3.74:1 against the card. The app adds a 1px spread so
+   the ring is painted solid at that colour before the blur falls off — a blur
+   alone leaves every exposed pixel partially covered. Same at every level,
+   because an edge does not get deeper. */
 :root{
   --elevation-none:0;--elevation-card:1;--elevation-raised:3;--elevation-overlay:8;
   --shadow-none:none;
-  --shadow-card:0 1px 3px rgb(11 12 24 / 0.07);
-  --shadow-raised:0 3px 9px rgb(11 12 24 / 0.09);
-  --shadow-overlay:0 8px 24px rgb(11 12 24 / 0.14);
+  --shadow-card:0 2px 3px rgb(159 162 191 / 0.18), 0 1px 1px rgb(159 162 191 / 0.32);
+  --shadow-raised:0 9px 16px rgb(159 162 191 / 0.18), 0 2px 2px rgb(159 162 191 / 0.32);
+  --shadow-overlay:0 18px 32px rgb(159 162 191 / 0.18), 0 4px 4px rgb(159 162 191 / 0.32);
   --border-hairline:1px;
   --border-input:1.5px;   /* same stroke in every state — only the hue moves */
   --border-focus:2px;     /* focus ring on icon buttons and outlined buttons */
 }
 [data-theme="dark"]{
-  --shadow-card:0 0 2px 1px #6A7199;--shadow-raised:0 0 2px 1px #6A7199;--shadow-overlay:0 0 2px 1px #6A7199;
+  /* The ring thickens with the level (M100.33): dark has no shadow to carry
+     depth, so without this `card` and `raised` printed the same box and the
+     three depths the system claims collapsed to two. Colour and blur are
+     constant — an edge does not change hue with depth. */
+  --shadow-card:0 0 2px 1px #6A7199;--shadow-raised:0 0 2px 2px #6A7199;--shadow-overlay:0 0 2px 3px #6A7199;
 }

@@ -1,0 +1,23 @@
+import 'package:flutter/material.dart';
+
+/// The top bar on every screen.
+///
+/// **`surface`/`onSurface`, which is what `_AppBarDefaultsM3` names** — and it
+/// is the page colour, because since M100.32 `ColorScheme.surface` *is* the
+/// page. The bar and the content it sits over therefore share one ground and
+/// the chrome reads as one frame, which is the appearance this app has always
+/// had; what changed is that it now comes from the role instead of from a
+/// `background` colour handed in past the scheme.
+///
+/// That parameter was the last piece of loose paint in a component builder:
+/// it existed only because the app read `surface` as the card, so there was no
+/// role left for the page. There is now.
+AppBarTheme buildAppBarTheme(ColorScheme scheme) => AppBarTheme(
+  backgroundColor: scheme.surface,
+  foregroundColor: scheme.onSurface,
+  // No tint on scroll: during a study session the header must stay still, because
+  // a colour shift behind the card reads as the card itself changing.
+  scrolledUnderElevation: 0,
+  elevation: 0,
+  centerTitle: false,
+);

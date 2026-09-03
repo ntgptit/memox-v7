@@ -257,6 +257,58 @@ WidgetbookComponent cardComponent() {
           return CatalogCenterPage(child: card);
         },
       ),
+      WidgetbookUseCase(
+        name: 'Depth ladder',
+        builder: (BuildContext context) {
+          // **The three depths side by side, which the playground cannot
+          // show.** A knob renders one recipe at a time, and depth is a
+          // *relative* claim — a card only reads as lifted against the one that
+          // is not. This is the page the shadow was designed on (M100.30) and
+          // the page to review it on: switch the theme addon to dark and the
+          // shade should be replaced by Tokyo's rim, not merely darkened.
+          Widget rung(String title, String note, Widget card) => Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(title, style: context.texts.titleSmall),
+                Text(
+                  note,
+                  style: context.texts.bodySmall!.inked(context, AppInk.quiet),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                card,
+              ],
+            ),
+          );
+
+          Widget body(String text) =>
+              Text(text, style: context.texts.bodyMedium);
+
+          return CatalogListPage(
+            children: <Widget>[
+              rung(
+                'flat · elevation none',
+                'No shade at all. A card inside a sheet, where a shadow on a '
+                    'shadow reads as a rendering fault.',
+                MxCard.flat(child: body('flat')),
+              ),
+              rung(
+                'raised / tile · elevation card',
+                "Tokyo's shadows.cardSm — a tight seat. The everyday list "
+                    'card, and 22 of the app’s callers.',
+                MxCard.raised(child: body('raised')),
+              ),
+              rung(
+                'focal / accent · elevation raised',
+                "Tokyo's shadows.card — the wide float. The study card and "
+                    'the Today hero.',
+                MxCard.focal(child: body('focal')),
+              ),
+            ],
+          );
+        },
+      ),
     ],
   );
 }

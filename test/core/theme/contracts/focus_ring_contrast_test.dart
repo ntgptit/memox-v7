@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/components/actions/app_button_themes.dart';
 import 'package:memox/core/theme/states/app_interaction_states.dart';
 import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/core/theme/foundations/app_stroke.dart';
@@ -256,10 +257,17 @@ void main() {
         );
       });
 
-      test('the rung survives being restated', () {
+      test('the rung survives being restated, at the button weight', () {
         // `ButtonStyle.textStyle` is taken wholesale rather than merged, so a
         // partial style here would silently drop `labelLarge`'s size, leading
         // and tracking on the way past `TextButton.defaultStyleOf`.
+        //
+        // **The weight is the one thing that is deliberately not the rung's**
+        // (M100.30). Every button family resolves through `buttonLabelWeight`,
+        // and a text button set at the rung's 600 would be the single action in
+        // the app a weight lighter than its siblings. Size, leading and
+        // tracking still have to be the rung's — that is what "restated" means,
+        // and dropping one of them is the bug this test was opened for.
         final rung = theme.textTheme.labelLarge;
 
         for (final states in <Set<WidgetState>>[
@@ -275,7 +283,19 @@ void main() {
             rung?.letterSpacing,
             reason: '$mode $states',
           );
-          expect(style?.fontWeight, rung?.fontWeight, reason: '$mode $states');
+          expect(
+            style?.fontWeight,
+            buttonLabelWeight,
+            reason: '$mode $states weight',
+          );
+          // The `wght` axis, not just the reported weight: both faces are
+          // variable, and a re-weight that moves only `fontWeight` paints the
+          // rung's 600 while reporting 700.
+          expect(
+            style?.fontVariations,
+            isNot(rung?.fontVariations),
+            reason: '$mode $states variable-font axis did not move',
+          );
         }
       });
     });

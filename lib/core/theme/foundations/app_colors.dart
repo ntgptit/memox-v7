@@ -181,7 +181,19 @@ abstract final class AppColors {
   /// card, 12.75:1 on the page, against a 3.0 floor. **A shade apart, not a
   /// hue:** the semantic hues map light→dark by keeping hue and raising
   /// lightness, and that rule lands warning back on the streak amber.
-  static const Color warningLight = Color(0xFFA46500);
+  /// **Retuned from `#A46500` at M100.32, and the number was already written
+  /// down.** The block above this one has said since M4.10p that warning
+  /// measures "4.33:1 on the page ... below the 4.5:1 a body-text colour would
+  /// need. It is not used as body text anywhere; if it ever is, that is the
+  /// number to re-check." `AppInk.warning` *is* a text ink, so it always was;
+  /// what changed is that `ColorScheme.surface` became the page, so
+  /// `app_ink_test.dart` finally measured the ground the ink actually lands on.
+  ///
+  /// The palette moves rather than the floor (AD-14). `#A06200` is the same hue
+  /// to within 0.2 degrees and the same saturation, one step darker in HSL
+  /// lightness: 4.53:1 on the page and 4.95:1 on the paper, against 4.33 and
+  /// 4.73. The chroma ordering `app_palette_test.dart` pins is untouched.
+  static const Color warningLight = Color(0xFFA06200);
   static const Color warningDark = Color(0xFFFFA319);
 
   /// Answer forgotten, destructive action, reset.
@@ -332,7 +344,7 @@ abstract final class AppColors {
   /// this one is the design's.
   static const Color webLetterbox = Color(0xFF6E759F);
 
-  /// The colour a drop shadow and a modal scrim are drawn from.
+  /// The colour a modal scrim is laid over the page in.
   ///
   /// **Both modes derive from the seed, and that stopped being cosmetic at
   /// M4.10g.** Dark was pure `#000000` while light was already `#0B0C18` (hue
@@ -344,12 +356,37 @@ abstract final class AppColors {
   /// `#04040B` is `seed @ 0.06` over black, which keeps hue 240 at a luminance
   /// low enough to read as a shadow rather than as a navy smear. Pinned by
   /// MX-VIS-002 rule R6.
-  static const Color shadowLight = Color(0xFF0A0C18);
-  static const Color shadowDark = Color(0xFF03040B);
+  static const Color scrimLight = Color(0xFF0A0C18);
+  static const Color scrimDark = Color(0xFF03040B);
 
-  /// The scrim is the shadow's colour by definition here — one dark-from-seed
-  /// per mode, whether it is cast or laid over — so it derives rather than
-  /// repeats the hex.
-  static const Color scrimLight = shadowLight;
-  static const Color scrimDark = shadowDark;
+  /// The colour a **cast** shadow is drawn from — Tokyo's `shadows.card`
+  /// (M100.30).
+  ///
+  /// **It was `scrimLight` until this token existed, and the two meanings had
+  /// started to pull apart.** A scrim is laid *over* the page to take it out of
+  /// reach, so it has to be dark by definition. A shadow is light passing
+  /// *around* an object, and Tokyo draws that as a desaturated blue-grey haze
+  /// rather than as a dark smear — which is most of why a Tokyo panel reads as
+  /// floating where a near-black drop reads as a cut-out. One name could not
+  /// hold both once one of them moved.
+  ///
+  /// `#9FA2BF` is Tokyo's own literal, and it needs no re-hueing: at HSL hue
+  /// **234.4** it already sits on this palette's seed hue (233), so MX-VIS-002
+  /// R6 — a shadow must carry a trace of the seed — holds by construction
+  /// rather than by adjustment.
+  ///
+  /// It is far lighter than the value it replaces (L 0.686 against 0.067) and
+  /// is drawn at far higher alpha to compensate; the pair is what [shadowsFor]
+  /// carries, and the lift it produces is re-measured in `app_theme_test.dart`
+  /// rather than asserted here.
+  static const Color shadowLight = Color(0xFF9FA2BF);
+
+  /// **Dark casts no shadow, so this is a declared role rather than a painted
+  /// one.** `shadowsFor` draws Tokyo's rim in dark and `materialShadowColor`
+  /// returns transparent, both because a shade at the bottom of the lightness
+  /// scale moves the page by under one L\* — the measurement
+  /// `app_elevation_test.dart` re-derives. `ColorScheme.shadow` still has to be
+  /// *something*, and the scrim's dark is the value that keeps that measurement
+  /// meaningful: it is the darkest thing this palette would ever cast.
+  static const Color shadowDark = scrimDark;
 }

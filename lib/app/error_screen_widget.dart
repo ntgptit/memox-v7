@@ -137,13 +137,13 @@ class _FallbackPalette {
 /// theme override — hence [_FallbackPalette] and the platform-brightness lookup
 /// rather than a single value.
 const _FallbackPalette _lightFallback = _FallbackPalette(
-  background: AppSurfaceColors.backgroundLight,
+  background: AppSurfaceColors.pageLight,
   title: AppColors.textPrimaryLight,
   message: AppColors.textSecondaryLight,
 );
 
 const _FallbackPalette _darkFallback = _FallbackPalette(
-  background: AppSurfaceColors.backgroundDark,
+  background: AppSurfaceColors.pageDark,
   title: AppColors.textPrimaryDark,
   message: AppColors.textSecondaryDark,
 );

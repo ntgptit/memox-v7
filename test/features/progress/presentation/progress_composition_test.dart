@@ -344,13 +344,10 @@ void main() {
     // under test and would hold whatever that resolved to. The second check is
     // the one that says the strip is not painted in the card's colour, which is
     // the mistake this replaced.
+    expect((box.decoration as BoxDecoration).color, AppSurfaceColors.pageLight);
     expect(
       (box.decoration as BoxDecoration).color,
-      AppSurfaceColors.backgroundLight,
-    );
-    expect(
-      (box.decoration as BoxDecoration).color,
-      isNot(Theme.of(context).colorScheme.surface),
+      isNot(Theme.of(context).colorScheme.surfaceContainerLow),
       reason: 'the two differ, which is the whole point',
     );
   });

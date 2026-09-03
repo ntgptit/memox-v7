@@ -259,26 +259,55 @@ void main() {
 
   group('what the kit states as a value, the app computes', () {
     test('a shadow at each level is the kit\'s shadow', () {
-      // `shadowsFor` derives offset, blur and alpha from the level — the alpha
-      // was solved for, not picked — where the kit has to write three literals.
-      // So this is the one place the *formula* is checked against the values,
-      // and it is why the elevation tokens can be in parity at all.
+      // **Two layers per level since M100.30**, and the pair is checked in
+      // order: the wide float first, the tight contact layer second. The kit
+      // writes both in one CSS value because that is what `box-shadow` takes,
+      // and a check that read only the first would have passed while the app
+      // dropped the layer that says where the card touches.
+      //
+      // The colour is asserted too, which it was not before. It could be left
+      // out while `--color-shadow` and the scrim were one token; they parted at
+      // M100.30, so "the kit and the app agree on a shadow" now includes
+      // agreeing on which of the two it is.
       for (final (String token, double level) in <(String, double)>[
         ('--shadow-card', AppElevation.card),
         ('--shadow-raised', AppElevation.raised),
         ('--shadow-overlay', AppElevation.overlay),
       ]) {
-        final declared = _shadow('elevation.css', token);
+        final declared = _shadowLayers('elevation.css', token);
         final shadows = shadowsFor(level, light.colorScheme);
 
-        expect(shadows, hasLength(1), reason: '$token: expected one shadow');
-        expect(shadows.single.offset.dy, declared.dy, reason: '$token offset');
-        expect(shadows.single.blurRadius, declared.blur, reason: '$token blur');
         expect(
-          shadows.single.color.a,
-          closeTo(declared.alpha, 0.005),
-          reason: '$token alpha',
+          shadows,
+          hasLength(declared.length),
+          reason: '$token: the kit declares ${declared.length} layer(s)',
         );
+        for (var i = 0; i < declared.length; i++) {
+          expect(
+            shadows[i].offset.dy,
+            declared[i].dy,
+            reason: '$token layer $i offset',
+          );
+          expect(
+            shadows[i].blurRadius,
+            declared[i].blur,
+            reason: '$token layer $i blur',
+          );
+          expect(
+            shadows[i].color.a,
+            closeTo(declared[i].alpha, 0.005),
+            reason: '$token layer $i alpha',
+          );
+          expect(
+            <int>[
+              (shadows[i].color.r * 255).round(),
+              (shadows[i].color.g * 255).round(),
+              (shadows[i].color.b * 255).round(),
+            ],
+            declared[i].rgb,
+            reason: '$token layer $i colour',
+          );
+        }
       }
     });
 
@@ -288,19 +317,20 @@ void main() {
       // `0 0 2px #6A7199`, a one-pixel halo rather than a shade — at every
       // level, and the kit says the same thing in the same words. The two
       // agreeing is what makes it a shared decision rather than a coincidence.
-      const rim = '0 0 2px 1px #6A7199';
-      for (final token in <String>[
-        '--shadow-card',
-        '--shadow-raised',
-        '--shadow-overlay',
-      ]) {
+      // The spread steps with the level since M100.33; colour and blur do not.
+      const rim = <String, String>{
+        '--shadow-card': '0 0 2px 1px #6A7199',
+        '--shadow-raised': '0 0 2px 2px #6A7199',
+        '--shadow-overlay': '0 0 2px 3px #6A7199',
+      };
+      for (final token in rim.keys) {
         expect(
           CssTokens.require(
             'elevation.css',
             token,
             scope: '[data-theme="dark"]',
           ),
-          rim,
+          rim[token],
           reason: '$token in dark is not Tokyo\'s rim',
         );
       }
@@ -310,7 +340,12 @@ void main() {
         final shadow = shadowsFor(level, dark.colorScheme).single;
         expect(shadow.color, AppColors.cardRimDark, reason: 'level $level');
         expect(shadow.blurRadius, 2, reason: 'level $level');
-        expect(shadow.spreadRadius, 1, reason: 'level $level');
+        // Steps with the level since M100.33 — the ring is dark's depth cue.
+        expect(
+          shadow.spreadRadius,
+          greaterThanOrEqualTo(1),
+          reason: 'level $level',
+        );
         expect(shadow.offset, Offset.zero, reason: 'level $level');
       }
     });
@@ -324,21 +359,39 @@ void main() {
   });
 }
 
-/// `0 1px 3px rgb(r g b / a)` — the parts Flutter needs.
-({double dy, double blur, double alpha}) _shadow(String file, String token) {
+/// Every `0 <dy>px <blur>px rgb(r g b / a)` layer of a `box-shadow`, in order.
+///
+/// Comma-separated, because a Tokyo shadow is a float plus a contact layer and
+/// CSS writes both inside one value. Splitting on `,` is safe here and only
+/// here: the kit's shadows use the space-separated `rgb()` form, which carries
+/// no comma of its own. A parser that returned only the first layer would
+/// silently stop checking the second — the failure mode this file exists for.
+List<({double dy, double blur, double alpha, List<int> rgb})> _shadowLayers(
+  String file,
+  String token,
+) {
   final raw = CssTokens.require(file, token);
-  final match = RegExp(
-    r'^0\s+(\d+)px\s+(\d+)px\s+rgb\([^/]+/\s*([\d.]+)\s*\)$',
-  ).firstMatch(raw);
-  if (match == null) {
-    throw StateError('$token is "$raw", which is not a single offset shadow');
-  }
 
-  return (
-    dy: double.parse(match.group(1)!),
-    blur: double.parse(match.group(2)!),
-    alpha: double.parse(match.group(3)!),
-  );
+  return raw.split(',').map((String layer) {
+    final match = RegExp(
+      r'^0\s+(\d+)px\s+(\d+)px\s+'
+      r'rgb\(\s*(\d+)\s+(\d+)\s+(\d+)\s*/\s*([\d.]+)\s*\)$',
+    ).firstMatch(layer.trim());
+    if (match == null) {
+      throw StateError('$token has a layer "$layer" this parser cannot read');
+    }
+
+    return (
+      dy: double.parse(match.group(1)!),
+      blur: double.parse(match.group(2)!),
+      alpha: double.parse(match.group(6)!),
+      rgb: <int>[
+        int.parse(match.group(3)!),
+        int.parse(match.group(4)!),
+        int.parse(match.group(5)!),
+      ],
+    );
+  }).toList();
 }
 
 void _expectSameCurve(String token, Curve dart) {

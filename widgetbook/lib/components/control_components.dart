@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:memox/core/theme/extensions/theme_context_extension.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_fab.dart';
 import 'package:memox/core/theme/extensions/app_ink.dart';
@@ -56,6 +58,102 @@ WidgetbookComponent actionButtonComponent() {
               icon: hasIcon ? Icons.add : null,
               onPressed: isEnabled ? _noop : null,
             ),
+          );
+        },
+      ),
+      WidgetbookUseCase(
+        name: 'Variants and states',
+        builder: (BuildContext context) {
+          // **Every variant against every state a static render can reach.**
+          // The playground shows one button; a design language is whether four
+          // variants agree with each other, which only a matrix shows.
+          //
+          // Resting, disabled and loading are properties and render as
+          // themselves. Focus is real too — the first button autofocuses, so
+          // the ring is on screen rather than described. Hover and pressed are
+          // the two a static page cannot hold: they need a pointer, and the
+          // reviewer has one here.
+          Widget row(
+            String title,
+            Widget Function(MxActionButtonVariant) build,
+          ) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(title, style: context.texts.titleSmall),
+                  const SizedBox(height: AppSpacing.sm),
+                  Wrap(
+                    spacing: AppSpacing.md,
+                    runSpacing: AppSpacing.md,
+                    children: MxActionButtonVariant.values.map(build).toList(),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          String name(MxActionButtonVariant variant) => variant.name;
+
+          return CatalogListPage(
+            children: <Widget>[
+              row(
+                'resting · the first has focus',
+                (MxActionButtonVariant variant) => MxActionButton(
+                  label: name(variant),
+                  variant: variant,
+                  shouldAutofocus: variant == MxActionButtonVariant.primary,
+                  onPressed: _noop,
+                ),
+              ),
+              row(
+                'with icon',
+                (MxActionButtonVariant variant) => MxActionButton(
+                  label: name(variant),
+                  variant: variant,
+                  icon: Icons.add,
+                  onPressed: _noop,
+                ),
+              ),
+              row(
+                'disabled',
+                (MxActionButtonVariant variant) => MxActionButton(
+                  label: name(variant),
+                  variant: variant,
+                  onPressed: null,
+                ),
+              ),
+              row(
+                'loading',
+                (MxActionButtonVariant variant) => MxActionButton(
+                  label: name(variant),
+                  variant: variant,
+                  isLoading: true,
+                  onPressed: _noop,
+                ),
+              ),
+              row(
+                'compact · 40 drawn, 48 hit',
+                (MxActionButtonVariant variant) => MxActionButton(
+                  label: name(variant),
+                  variant: variant,
+                  size: MxActionButtonSize.compact,
+                  onPressed: _noop,
+                ),
+              ),
+              row(
+                'long label, narrow column',
+                (MxActionButtonVariant variant) => SizedBox(
+                  width: 150,
+                  child: MxActionButton(
+                    label: 'Reset learning progress',
+                    variant: variant,
+                    onPressed: _noop,
+                  ),
+                ),
+              ),
+            ],
           );
         },
       ),

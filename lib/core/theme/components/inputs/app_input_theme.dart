@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../foundations/app_radius.dart';
-import '../foundations/app_semantic_colors.dart';
-import '../foundations/app_spacing.dart';
-import '../foundations/app_stroke.dart';
+import '../../foundations/app_radius.dart';
+import '../../foundations/app_semantic_colors.dart';
+import '../../foundations/app_spacing.dart';
+import '../../foundations/app_stroke.dart';
 
 /// The text field, as `MxTextField` (and `MxSearchField`'s inner field)
 /// renders it.
@@ -44,7 +44,10 @@ InputDecorationTheme buildInputDecorationTheme(
   // Solid, per MX-VIS-002 rule R7. Blended here rather than read from
   // `disabledSurface`: this is the *hairline* faded, that is the *ink*.
   disabledBorder: _inputBorder(
-    Color.alphaBlend(scheme.outline.withValues(alpha: 0.5), scheme.surface),
+    Color.alphaBlend(
+      scheme.outline.withValues(alpha: 0.5),
+      scheme.surfaceContainerLow,
+    ),
   ),
   hintStyle: texts.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
 );

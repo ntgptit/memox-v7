@@ -5,6 +5,8 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'm3_role_bindings.dart';
+
 /// **Which role does the source *name* in this slot?** — read off the AST, not
 /// off the rendered colour.
 ///
@@ -27,7 +29,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// an AST node, and every one of these files carries paragraphs naming the roles
 /// they used to read.
 void main() {
-  for (final _Binding binding in _bindings) {
+  for (final RoleBinding binding in roleBindings) {
     test('${binding.component} · ${binding.slot}', () {
       final _SchemeRoles reads = _readsIn(binding);
       final Set<String> roles = reads.roles;
@@ -73,8 +75,8 @@ void main() {
 }
 
 /// One slot's binding contract.
-class _Binding {
-  const _Binding({
+class RoleBinding {
+  const RoleBinding({
     required this.component,
     required this.slot,
     required this.file,
@@ -106,7 +108,7 @@ const Set<String> _allowedSemanticReads = <String>{
   'disabledSurface',
 };
 
-_SchemeRoles _readsIn(_Binding binding) {
+_SchemeRoles _readsIn(RoleBinding binding) {
   final File file = File(binding.file);
   expect(file.existsSync(), isTrue, reason: 'missing ${binding.file}');
 
@@ -199,234 +201,3 @@ class _NamedArgument extends RecursiveAstVisitor<void> {
     super.visitNamedExpression(node);
   }
 }
-
-const String _nav = 'lib/core/theme/components/app_navigation_bar_theme.dart';
-const String _chip = 'lib/core/theme/components/app_chip_theme.dart';
-const String _planned = 'lib/core/theme/components/app_planned_themes.dart';
-const String _buttons = 'lib/core/theme/components/app_button_themes.dart';
-const String _toggles = 'lib/core/theme/components/app_toggle_themes.dart';
-
-const List<_Binding> _bindings = <_Binding>[
-  _Binding(
-    component: 'NavigationBar',
-    slot: 'backgroundColor',
-    file: _nav,
-    scope: 'buildNavigationBarTheme',
-    requires: <String>['surfaceContainer'],
-    refuses: <String>['surface', 'surfaceContainerHigh'],
-    because:
-        '_NavigationBarDefaultsM3.backgroundColor is surfaceContainer; the '
-        'bar took the page colour until M100.22.',
-  ),
-  _Binding(
-    component: 'NavigationBar',
-    slot: 'indicatorColor',
-    file: _nav,
-    scope: 'buildNavigationBarTheme',
-    requires: <String>['secondaryContainer'],
-    refuses: <String>['primaryContainer'],
-    because:
-        '_NavigationBarDefaultsM3.indicatorColor is secondaryContainer. If '
-        'the indicator does not read against the bar, move the tone in '
-        'AppMaterialRoles — not this binding.',
-  ),
-  _Binding(
-    component: 'NavigationBar',
-    slot: 'iconTheme',
-    file: _nav,
-    scope: 'buildNavigationBarTheme',
-    requires: <String>['onSecondaryContainer', 'onSurfaceVariant'],
-    refuses: <String>['onPrimaryContainer'],
-    because:
-        'The active glyph sits inside the indicator and takes its `on` '
-        'role.',
-  ),
-  _Binding(
-    component: 'NavigationBar',
-    slot: 'labelTextStyle',
-    file: _nav,
-    scope: 'buildNavigationBarTheme',
-    requires: <String>['onSurface', 'onSurfaceVariant'],
-    refuses: <String>['onPrimaryContainer', 'onSecondaryContainer'],
-    because:
-        'The active label sits *below* the indicator, on the bar, so M3 '
-        'inks it onSurface rather than with the pill.',
-  ),
-  _Binding(
-    component: 'ChoiceChip',
-    slot: '_restingFill',
-    file: _chip,
-    scope: '_restingFill',
-    requires: <String>['secondaryContainer', 'surface'],
-    refuses: <String>['primaryContainer'],
-    because:
-        '_ChoiceChipDefaultsM3.color fills a selected chip with '
-        'secondaryContainer.',
-  ),
-  _Binding(
-    component: 'ChoiceChip',
-    slot: '_labelColorFor',
-    file: _chip,
-    scope: '_labelColorFor',
-    requires: <String>['onSecondaryContainer', 'onSurfaceVariant'],
-    refuses: <String>['onPrimaryContainer'],
-    because:
-        '_ChoiceChipDefaultsM3.labelStyle pairs the fill with its own ink.',
-  ),
-  _Binding(
-    component: 'ChoiceChip',
-    slot: 'side',
-    file: _chip,
-    scope: 'buildChipTheme',
-    requires: <String>['outlineVariant'],
-    refuses: <String>['primary', 'outline'],
-    because:
-        'Unselected is outlineVariant and selected is transparent. A focus '
-        'ring here left the canonical role on `selected + focused`; the cue '
-        'belongs in the fill.',
-  ),
-  _Binding(
-    component: 'SegmentedButton',
-    slot: 'backgroundColor',
-    file: _planned,
-    scope: 'buildSegmentedButtonTheme',
-    requires: <String>['secondaryContainer'],
-    refuses: <String>['primaryContainer'],
-    because:
-        '_SegmentedButtonDefaultsM3 fills a selected segment with '
-        'secondaryContainer.',
-  ),
-  _Binding(
-    component: 'SegmentedButton',
-    slot: 'foregroundColor',
-    file: _planned,
-    scope: 'buildSegmentedButtonTheme',
-    requires: <String>['onSecondaryContainer', 'onSurface'],
-    refuses: <String>['onPrimaryContainer', 'onSurfaceVariant'],
-    because:
-        'An unselected segment is onSurface — the navigation answer '
-        '(onSurfaceVariant) had been taken by mistake.',
-  ),
-  _Binding(
-    component: 'SegmentedButton',
-    slot: 'side',
-    file: _planned,
-    scope: 'buildSegmentedButtonTheme',
-    requires: <String>['outline'],
-    refuses: <String>['primary', 'outlineVariant'],
-    because:
-        '_SegmentedButtonDefaultsM3.side has no focus branch. The keyboard '
-        'cue is the overlay.',
-  ),
-  // **TextButton and TabBar are the two `primaryInk` reached first (M100.27),
-  // and neither had a row here.** The runtime contract compares resolved
-  // colours, so a token equal to `primary` passed it; only the source shows
-  // which name the slot reads. `accent` is the argument the text-link resolver
-  // takes its resting, hovered and pressed colour from, so it is the slot.
-  _Binding(
-    component: 'TextButton',
-    slot: 'accent',
-    file: _buttons,
-    scope: 'buildTextButtonTheme',
-    requires: <String>['primary'],
-    refuses: <String>['secondary', 'tertiary', 'onSurfaceVariant'],
-    because:
-        '_TextButtonDefaultsM3.foregroundColor is primary. A text link is bare '
-        'text on a surface; if the role fails 4.5:1 there, the palette moves.',
-  ),
-  _Binding(
-    component: 'TabBar',
-    slot: 'labelColor',
-    file: _planned,
-    scope: 'buildTabBarTheme',
-    requires: <String>['primary'],
-    refuses: <String>[
-      'secondary',
-      'tertiary',
-      'onSurfaceVariant',
-      'onSecondaryContainer',
-    ],
-    because:
-        '_TabBarDefaultsM3.labelColor is primary: the selected label sits on '
-        'the page, not on a container, so it is the accent as ink.',
-  ),
-  _Binding(
-    component: 'TabBar',
-    slot: 'indicatorColor',
-    file: _planned,
-    scope: 'buildTabBarTheme',
-    requires: <String>['primary'],
-    refuses: <String>['secondary', 'tertiary', 'secondaryContainer'],
-    because: '_TabBarDefaultsM3.indicatorColor is primary.',
-  ),
-  _Binding(
-    component: 'OutlinedButton',
-    slot: 'foregroundColor',
-    file: _buttons,
-    scope: 'buildOutlinedButtonTheme',
-    requires: <String>['primary'],
-    refuses: <String>['secondary', 'onSurfaceVariant'],
-    because:
-        '_OutlinedButtonDefaultsM3.foregroundColor is primary. The retired '
-        '`secondaryAction` token was a second name for it, and M100.27\'s '
-        '`primaryInk` was another — a role that fails a ratio is answered by '
-        'retuning the palette (M100.28), never by a substitute token.',
-  ),
-  _Binding(
-    component: 'OutlinedButton',
-    slot: 'side',
-    file: _buttons,
-    scope: 'buildOutlinedButtonTheme',
-    requires: <String>['outline', 'primary'],
-    refuses: <String>['outlineVariant'],
-    because:
-        'outline at rest and primary on focus — this is the one component '
-        'whose border role M3 itself changes with focus, so both are required.',
-  ),
-  _Binding(
-    component: 'Switch',
-    slot: 'thumbColor',
-    file: _toggles,
-    scope: 'buildSwitchTheme',
-    requires: <String>['outline', 'onPrimary'],
-    refuses: <String>['onSurfaceVariant'],
-    because:
-        '_SwitchDefaultsM3 rests the thumb on outline. It read '
-        'onSurfaceVariant to dodge a contrast failure that M100.22 fixed in the '
-        'palette instead.',
-  ),
-  _Binding(
-    component: 'Switch',
-    slot: 'trackColor',
-    file: _toggles,
-    scope: 'buildSwitchTheme',
-    requires: <String>['surfaceContainerHighest', 'primary'],
-    refuses: <String>['surfaceContainerHigh'],
-    because:
-        'The resting track is surfaceContainerHighest. `surfaceMuted` was '
-        'surfaceContainerHigh — one rung low.',
-  ),
-  _Binding(
-    component: 'Switch',
-    slot: 'trackOutlineColor',
-    file: _toggles,
-    scope: 'buildSwitchTheme',
-    requires: <String>['outline'],
-    refuses: <String>['primary'],
-    because:
-        '_SwitchDefaultsM3.trackOutlineColor is transparent when selected '
-        'and outline otherwise, with no focus branch. Reading focus first put a '
-        'focused-on switch on a boundary M3 says should not exist.',
-  ),
-  _Binding(
-    component: 'Checkbox',
-    slot: 'side',
-    file: _toggles,
-    scope: 'buildCheckboxTheme',
-    requires: <String>['onSurfaceVariant', 'onSurface'],
-    refuses: <String>['primary', 'outline'],
-    because:
-        '_CheckboxDefaultsM3.side decides `selected` before any '
-        'interaction state and inks focus the same onSurface as hover.',
-  ),
-];

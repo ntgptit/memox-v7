@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/components/app_button_themes.dart';
+import '../../core/theme/components/actions/app_button_themes.dart';
 import '../../core/theme/foundations/app_icon_size.dart';
+import '../../core/theme/foundations/app_sizing.dart';
 import '../../core/theme/foundations/app_spacing.dart';
 import '../../core/theme/typography/app_typography.dart';
 import '../../core/theme/extensions/theme_context_extension.dart';
@@ -240,7 +241,11 @@ class MxActionButton extends StatelessWidget {
         style: _sized(
           context,
           busyStyle ??
-              buildFilledTonalStyle(context.colors, context.semanticColors),
+              buildFilledTonalStyle(
+                context.colors,
+                context.semanticColors,
+                context.texts,
+              ),
         ),
         child: child,
       ),
@@ -263,8 +268,8 @@ class MxActionButton extends StatelessWidget {
           buildFilledStyle(
             context.colors,
             context.semanticColors,
-            fill: context.colors.error,
-            label: context.colors.onError,
+            context.texts,
+            pair: MxFilledPair.destructive,
           ),
         ),
         child: child,
@@ -286,7 +291,7 @@ class MxActionButton extends StatelessWidget {
 
     final ButtonStyle geometry = ButtonStyle(
       minimumSize: const WidgetStatePropertyAll<Size>(
-        Size(_kCompactMinWidth, _kCompactHeight),
+        Size(AppSizing.buttonMinWidth, AppSizing.controlCompact),
       ),
       padding: const WidgetStatePropertyAll<EdgeInsets>(
         EdgeInsets.symmetric(horizontal: AppSpacing.md),
@@ -294,8 +299,11 @@ class MxActionButton extends StatelessWidget {
       // 40 is what it paints; 48 is what a finger gets. `AppSpacing` calls the
       // touch target a floor, and `padded` is how a smaller body keeps it.
       tapTargetSize: MaterialTapTargetSize.padded,
+      // The compact rung, at the same weight the standard one wears
+      // (M100.30). `label-md` re-weighted rather than `label-lg` shrunk: a
+      // 48-button's rung on a 40 body reads as text escaping its control.
       textStyle: WidgetStatePropertyAll<TextStyle>(
-        AppTypography.withWeight(context.texts.labelMedium!, FontWeight.w600),
+        AppTypography.withWeight(context.texts.labelMedium!, buttonLabelWeight),
       ),
     );
 
@@ -467,11 +475,3 @@ class _ForegroundSpinner extends StatelessWidget {
     ),
   );
 }
-
-/// The compact body: 40 on the 4px grid (owner review, 2026-08-20), with
-/// `MaterialTapTargetSize.padded` restoring the 48 target around it.
-const double _kCompactHeight = 40;
-
-/// Same floor as `buildSharedButtonStyle` — compact lowers the body, not how
-/// narrow a button may get.
-const double _kCompactMinWidth = 64;

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../states/app_interaction_states.dart';
-import '../foundations/app_semantic_colors.dart';
-import '../foundations/app_stroke.dart';
+import '../../states/app_interaction_states.dart';
+import '../../foundations/app_semantic_colors.dart';
+import '../../foundations/app_stroke.dart';
 
 /// The two binary toggles — `Switch` and `Checkbox`.
 ///
