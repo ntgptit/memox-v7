@@ -29,6 +29,11 @@ import 'package:flutter_test/flutter_test.dart';
 const List<String> kClosedApiFiles = <String>[
   'lib/shared/widgets/mx_card.dart',
   'lib/shared/widgets/mx_action_button.dart',
+  // M100.36 (§14): the pill, the badge and the row joined when their APIs
+  // were closed — no colour, padding or style crosses these constructors.
+  'lib/shared/widgets/mx_pill_button.dart',
+  'lib/shared/widgets/mx_badge.dart',
+  'lib/shared/widgets/mx_list_tile.dart',
 ];
 
 /// Types a closed component API may expose: content, behaviour, identity.

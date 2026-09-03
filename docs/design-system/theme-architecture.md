@@ -113,6 +113,15 @@ MUST NOT: dựng một hệ "màu trang" song song nằm ngoài `ColorScheme`. K
 component theme nào được nhận màu trang như một tham số — `scheme.surface` là
 nguồn duy nhất.
 
+**Trạng thái tương tác — một cơ chế mỗi state, và fill không di chuyển**
+(M100.36). Hover, focus, press của một control là **state layer** M3: mực `on-*`
+của chính control đó ở `AppInteractionStates.stateLayerHover/Focus/Pressed`
+(8 / 10 / 10%) trên fill role không đổi. Không blend fill về `primary`, không
+tint chồng lên ripple của SDK, không token alias riêng cho từng control. Focus
+có đúng một chỉ báo mỗi họ — bảng ở
+[`tokyo-component-mapping.md`](tokyo-component-mapping.md) §8. Disabled là
+`disabledSurfaceTint` (`onSurface @ 12%`) cho *mọi* control, chọn hay không.
+
 Ma trận role từng component ở
 [`tokyo-component-mapping.md`](tokyo-component-mapping.md) §2, và §4 ở đó ghi
 bốn binding đã được trả về canonical cùng phép đo thang.
@@ -198,6 +207,15 @@ role, và không có scheme nào để đọc nó qua.
 (`MxFilledPair`). Hai ngoại lệ có tên — `background` của app bar và `accent` của
 `textLinkForeground` — được ghi lý do ngay trong guard; cái thứ ba phải tranh
 luận ở đó chứ không xuất hiện lặng lẽ.
+
+**`AppSemanticColors` đủ cặp, kể cả khi một nửa chưa có caller** (M100.36 §4Q).
+Một màu business (`success`, `warning`, `overdue`, `streak`…) là một **cặp**
+`x` / `xContainer` với mực `onX` / `onXContainer`; đơn vị của hệ là cặp, không
+phải từng màu. `warningContainer` / `onWarningContainer` được **giữ** với 0
+caller vì bỏ nó là bỏ một nửa của `warning`, và feature đầu tiên cần một band
+cảnh báo sẽ tự chế một `Container` màu — đúng cái guard tồn tại để chặn. MUST:
+một màu semantic mới đến cùng container và hai mực của nó, hoặc không đến.
+MUST NOT: xoá một nửa cặp vì "chưa ai dùng".
 
 Ma trận role canonical từng component, và bốn sai lệch đã biết, nằm ở
 [`tokyo-component-mapping.md`](tokyo-component-mapping.md).

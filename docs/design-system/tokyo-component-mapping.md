@@ -312,3 +312,30 @@ Kèm theo, cho hàng:
 - **Một danh sách quyết định leading một lần**: trộn hàng có glyph dẫn và hàng
   không có trong cùng một danh sách làm cột chữ nhảy 40dp. Không có danh sách
   production nào trộn; ghi làm quy tắc.
+
+---
+
+## 8. Focus — một câu trả lời mỗi họ (M100.36 §12)
+
+Kiểm kê chéo sau khi bốn họ đóng. Mỗi control có **đúng một** chỉ báo bàn phím,
+và chỉ báo đó là `AppInteractionStates.focusIndicator` (`primary`, `AppStroke.focus`)
+hoặc — với nút filled — `focusIndicatorOf(label)` vì `primary` trên `primary`
+là vô hình. Không control nào có hai vòng, và không control nào chỉ có wash.
+
+| Họ | Cơ chế | Lớp | Gate `traditional` | Đo |
+|---|---|---|---|---|
+| FilledButton (`MxActionButton` primary/destructive) | `ButtonStyle.side` = `focusIndicatorOf(label)` | ngoài fill, không đổi kích thước | SDK (`ButtonStyleButton` chỉ nhận `focused` từ bàn phím) | `focus_ring_contrast_test` ≥ 3:1 trên fill |
+| OutlinedButton / TextButton (`MxActionButton` secondary, `MxTextButton`) | `ButtonStyle.side` = `focusIndicator(scheme)` | thay hairline khi focus | SDK | cùng test |
+| IconButton (`MxIconButton`, `MxMenuButton`) | `iconButtonTheme.side` khi focused | ngoài | SDK | cùng test |
+| FAB | `focusColor` (wash `onPrimaryContainer`) + shape | SDK | SDK | chấp nhận: FAB là control duy nhất trên màn của nó |
+| ChoiceChip (`MxPillButton`) | `MxFocusRing` quanh **hình vẽ**; SDK `focusColor` wash bên trong | ngoài, target 48 nới ngoài ring | `MxFocusRing` (`addHighlightModeListener`) | `mx_pill_button_focus_test`: rect ring == rect Material |
+| `MxListTile` (interactive) | `MxFocusRing`; SDK wash `rowOverlay(focused)` | ngoài | `MxFocusRing` | `mx_list_tile_test` |
+| `MxPressable` | `MxFocusRing` theo shape | ngoài | `MxFocusRing` | `mx_pressable_test` |
+| `MxCard` (actionable) | ring riêng của card (#435, **bảo vệ**) — cùng `focusIndicator` | additive | gate riêng, cùng cơ chế | `mx_card_*` |
+| TextField / `MxTextField` | `focusedBorder` `primary` @ `AppStroke.focus` (focused-error: `error` cùng width) | chính viền | SDK | `m3_combined_state_test` |
+| `MxSearchField` | viền `outline` → `primary` @ `AppStroke.input` | chính viền | SDK | `mx_search_field_test` |
+| Switch / Checkbox / Radio (`MxSwitchRow`, `MxCheckboxRow`, `MxRadioRows`) | overlay của control (`app_toggle_themes.dart`) — SDK vẽ vòng 40dp quanh thumb/box | trên control, không trên hàng | SDK | `app_toggle_themes_test` |
+
+**Hàng không interactive không có ring** — `MxListTile` không `onTap` là
+`ExcludeFocus`. **Không caller nào tự vẽ** `Border` cho focus ngoài các file ở
+bảng; `grep -rn "WidgetState.focused" lib/features` phải rỗng.
