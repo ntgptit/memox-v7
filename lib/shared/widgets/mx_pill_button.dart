@@ -88,7 +88,16 @@ class MxPillButton extends StatelessWidget {
     // Material colour slot.
     return MxFocusRing(
       borderRadius: BorderRadius.circular(AppRadius.pill),
-      child: ChoiceChip(
+      // **`.elevated`, not the flat constructor** (M100.32).
+      //
+      // `_ChoiceChipDefaultsM3.color` is variant-dependent: flat has no
+      // unselected fill, elevated fills with `surfaceContainerLow`. This pill
+      // is a paper pill sitting on the page — filling a *flat* chip was a
+      // substitution on the canonical slot, where the elevated variant hands
+      // the same appearance from the role itself. `chipTheme` states
+      // `elevation: 0`, so the variant brings its fill semantics without
+      // bringing a shadow the design does not draw.
+      child: ChoiceChip.elevated(
         // `semanticsLabel` on the Text rather than a `Semantics` wrapper around the
         // chip. Wrapping was tried and is wrong twice over: `excludeSemantics` drops
         // the chip's tap action along with its label, and without it the reader

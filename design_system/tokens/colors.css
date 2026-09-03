@@ -24,7 +24,7 @@
   --mx-page-light:#F2F5F9;--mx-card-light:#FFFFFF;--mx-inset-light:#E9EBEE;--mx-emphasis-light:#F5F6FF;--mx-border-selected-light:#5569FF;--mx-border-divider-light:#F2F5F9;--mx-border-option-light:#8896FF;--mx-selected-light:#E6E9FF;--mx-raised-light:#FFFFFF;
   --mx-ink-light:#223354;--mx-ink-quiet-light:#596680;--mx-line-light:#E4E7EA;
   --mx-indigo-light:#4454CC;--mx-indigo-deep-light:#4141C0;--mx-indigo-container-light:#DADDF2;
-  --mx-success-light:#2A7800;--mx-warning-light:#A46500;--mx-danger-light:#CD0031;--mx-info-light:#00729A;
+  --mx-success-light:#2A7800;--mx-warning-light:#A06200;--mx-danger-light:#CD0031;--mx-info-light:#00729A;
   /* --- base literals: dark -------------------------------------------- */
   /* The dark surface ladder sits in the page's colour family, and since
      M100.26 that family is Tokyo's navy: the page is Tokyo's #070C27 and every
@@ -38,7 +38,7 @@
 
   /* --- semantic: surface ladder --------------------------------------- */
   --color-background:var(--mx-page-light);
-  --color-surface:var(--mx-card-light);
+  --color-surface:var(--mx-page-light);
   --color-surface-muted:var(--mx-inset-light);
   --color-border-option:var(--mx-border-option-light);
   --color-border-divider:var(--mx-border-divider-light);
@@ -106,8 +106,8 @@
   --color-streak-container:#FBEBD7;
 
   /* --- semantic: Material surface container ladder --------------------- */
-  --color-surface-container-lowest:#FFFFFF;
-  --color-surface-container-low:#F9FAFB;
+  --color-surface-container-lowest:#F9FAFB;
+  --color-surface-container-low:var(--mx-card-light);
   --color-surface-container:#F0F2F6;
   --color-surface-container-high:#E9EBEE;
   --color-surface-container-highest:#E2E5EB;
@@ -130,7 +130,7 @@
 }
 [data-theme="dark"]{
   --color-background:var(--mx-page-dark);
-  --color-surface:var(--mx-card-dark);
+  --color-surface:var(--mx-page-dark);
   --color-surface-muted:var(--mx-inset-dark);
   --color-border-option:#5B65B2;
   --color-border-divider:#252C55;
@@ -189,8 +189,8 @@
      warm accent. The label keeps its warm --color-streak; only the ground
      joins the surface family, at the same L*. */
   --color-streak-container:#342C4B;
-  --color-surface-container-lowest:#010624;
-  --color-surface-container-low:#0D1335;
+  --color-surface-container-lowest:#0D1335;
+  --color-surface-container-low:var(--mx-card-dark);
   --color-surface-container:#1A2045;
   --color-surface-container-high:#21274C;
   --color-surface-container-highest:#2A3159;

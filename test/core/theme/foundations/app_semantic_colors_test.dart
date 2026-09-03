@@ -91,7 +91,7 @@ void main() {
           AppColors.textPrimaryLight.withValues(
             alpha: AppStateOpacity.disabledSurfaceBlend,
           ),
-          AppSurfaceColors.surfaceLight,
+          AppSurfaceColors.paperLight,
         ).toARGB32(),
       );
       expect(
@@ -100,7 +100,7 @@ void main() {
           AppColors.textPrimaryDark.withValues(
             alpha: AppStateOpacity.disabledSurfaceBlend,
           ),
-          AppSurfaceColors.surfaceDark,
+          AppSurfaceColors.paperDark,
         ).toARGB32(),
       );
     });

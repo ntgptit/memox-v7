@@ -8,7 +8,7 @@ import '../../foundations/app_radius.dart';
 /// slot; this keeps an untended `Card` on the same surface, radius and
 /// hairline instead of Material's elevated default.
 CardThemeData buildCardTheme(ColorScheme scheme) => CardThemeData(
-  color: scheme.surface,
+  color: scheme.surfaceContainerLow,
   elevation: 0,
   margin: EdgeInsets.zero,
   shape: RoundedRectangleBorder(

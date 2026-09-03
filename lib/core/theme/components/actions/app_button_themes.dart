@@ -33,7 +33,7 @@ import '../../typography/app_typography.dart';
 Color disabledSurfaceTint(ColorScheme scheme, {Color? over}) =>
     Color.alphaBlend(
       scheme.onSurface.withValues(alpha: AppStateOpacity.disabledSurfaceBlend),
-      over ?? scheme.surface,
+      over ?? scheme.surfaceContainerLow,
     );
 
 /// Geometry and label weight shared by every button.

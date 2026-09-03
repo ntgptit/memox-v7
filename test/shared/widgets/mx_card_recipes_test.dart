@@ -82,7 +82,7 @@ void main() {
         await pump(tester, const MxCard.flat(child: Text('x')), theme: theme);
 
         final decoration = decorationOf(tester);
-        expect(decoration.color, scheme.surface);
+        expect(decoration.color, scheme.surfaceContainerLow);
         // **No edge, and that is M99.94.** Every card used to wear a
         // `borderSubtle` hairline — 1.45:1 on its own fill in light — so a
         // screen of cards read as a stack of frames. The reference concept
@@ -110,7 +110,7 @@ void main() {
           // recipe prints identically to `.flat`.
           expect(
             decoration.color,
-            isDark ? scheme.surfaceContainer : scheme.surface,
+            isDark ? scheme.surfaceContainer : scheme.surfaceContainerLow,
           );
           expect(hasVisibleBorder(decoration), isFalse);
           expect(radiusOf(decoration), AppRadius.lg);
@@ -131,7 +131,7 @@ void main() {
         // `.flat`'s fill once the shadow drops out.
         expect(
           decoration.color,
-          isDark ? scheme.surfaceContainer : scheme.surface,
+          isDark ? scheme.surfaceContainer : scheme.surfaceContainerLow,
         );
         expect(radiusOf(decoration), AppRadius.xl);
         expect(hasShadow(decoration), isTrue);
@@ -147,7 +147,10 @@ void main() {
         );
 
         final decoration = decorationOf(tester);
-        expect(decoration.color, scheme.surfaceContainerLow);
+        // One rung *below* the paper. It read `surfaceContainerLow` until
+        // M100.32; that rung is the paper now, so the recess moved down to
+        // `surfaceContainerLowest` and renders the colour it always did.
+        expect(decoration.color, scheme.surfaceContainerLowest);
         // At rest it draws no edge either; the edge is what its *states* use,
         // asserted by the case below.
         expect(hasVisibleBorder(decoration), isFalse);
@@ -248,7 +251,7 @@ void main() {
         // that survives the shadow dropping out.
         expect(
           decoration.color,
-          isDark ? scheme.surfaceContainer : scheme.surface,
+          isDark ? scheme.surfaceContainer : scheme.surfaceContainerLow,
         );
         expect(borderColorOf(decoration), semantic.borderAccent);
         expect(hasShadow(decoration), isTrue);
@@ -264,7 +267,7 @@ void main() {
         // only thing left that can say a tile sits above its page.
         expect(
           decoration.color,
-          isDark ? scheme.surfaceContainer : scheme.surface,
+          isDark ? scheme.surfaceContainer : scheme.surfaceContainerLow,
         );
         expect(radiusOf(decoration), AppRadius.md);
         // **It was `flat`, and that stopped being survivable when the hairline
@@ -286,7 +289,7 @@ void main() {
         );
 
         final decoration = decorationOf(tester);
-        expect(decoration.color, scheme.surface);
+        expect(decoration.color, scheme.surfaceContainerLow);
         // **`borderOption`, not `borderControl`** (M100.2). An option card had
         // been borrowing the *input* border, which `app_palette_test.dart`
         // keeps untinted by a recorded rule — "the light canvas carries no
@@ -362,7 +365,7 @@ void main() {
       );
 
       final decoration = decorationOf(tester);
-      expect(decoration.color, theme.colorScheme.surface);
+      expect(decoration.color, theme.colorScheme.surfaceContainerLow);
       // **`borderSelected`, not `secondary`** (M99.99). The slate edge carried
       // chroma 0.0337 — a fifth of the brand family — around a fill M99.98 had
       // just made brand-tinted, so the card said two different things about one
@@ -405,7 +408,7 @@ void main() {
         ),
         theme: theme,
       );
-      expect(decorationOf(tester).color, theme.colorScheme.surface);
+      expect(decorationOf(tester).color, theme.colorScheme.surfaceContainerLow);
     });
   });
 }

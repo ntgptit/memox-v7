@@ -7,7 +7,7 @@
 | **Scope** | Cấu trúc thư mục, trách nhiệm từng tầng, public API của theme. Ngoài phạm vi: *giá trị* của token (AD-14), hợp đồng component-level (`.claude/skills/flutter-theme-design/`) |
 | **Source of truth for** | Layering của `lib/core/theme/` · chiều import giữa các tầng · ranh giới public/internal của theme · bảng "cần gì thì đọc ở đâu" · ma trận dịch Tokyo → MemoX |
 | **Depends on** | `document-conventions.md` · `architecture.md` (AD-14, AD-23) |
-| **Updated by task** | M100.31 |
+| **Updated by task** | M100.32 |
 | **Last updated** | 2026-09-03 |
 
 ---
@@ -92,6 +92,30 @@ một ký tự escape hỏng khiến regex không khớp gì và test xanh giả
 widget gọi trên một `ThemeData` đã dựng xong (`context.colors`,
 `context.semanticColors`, `AppInk`). Nó không được biết app theme những component
 nào, vì `context.colors` phải chạy đúng cả với component chưa ai theme.
+
+---
+
+## 3. Mô hình bề mặt
+
+M3 định nghĩa `surface` là **nền cơ sở**, và mọi thứ đặt lên nó là container.
+memox từng làm ngược — gọi card là `surface`, để trang ngoài `ColorScheme` — nên
+component nào cần màu trang cũng phải được đưa một màu vào, vòng qua hệ role.
+Sửa ở M100.32 bằng cách dời hex qua thang, không đổi mapping component:
+
+| Vai trò thị giác | Role | light | dark |
+|---|---|---|---|
+| trang | `surface` | `#F2F5F9` | `#070C27` |
+| một bậc dưới giấy (recess) | `surfaceContainerLowest` | `#F9FAFB` | `#0D1335` |
+| **mặt giấy** — card, sheet, menu, pill | `surfaceContainerLow` | `#FFFFFF` | `#111633` |
+| inset / nhấn | `surfaceContainer` → `High` → `Highest` | 95.45 → 92.98 → 90.87 L\* | 13.72 → 16.97 → 21.62 L\* |
+
+MUST NOT: dựng một hệ "màu trang" song song nằm ngoài `ColorScheme`. Không
+component theme nào được nhận màu trang như một tham số — `scheme.surface` là
+nguồn duy nhất.
+
+Ma trận role từng component ở
+[`tokyo-component-mapping.md`](tokyo-component-mapping.md) §2, và §4 ở đó ghi
+bốn binding đã được trả về canonical cùng phép đo thang.
 
 ---
 

@@ -548,8 +548,8 @@ class _MxCardState extends State<MxCard> {
 
     return switch (widget._spec.fill) {
       _MxCardFill.surface =>
-        isElevatedInDark ? scheme.surfaceContainer : scheme.surface,
-      _MxCardFill.recessed => scheme.surfaceContainerLow,
+        isElevatedInDark ? scheme.surfaceContainer : scheme.surfaceContainerLow,
+      _MxCardFill.recessed => scheme.surfaceContainerLowest,
       _MxCardFill.muted => scheme.surfaceContainerHigh,
       _MxCardFill.tonal => semantic.surfaceEmphasis,
       // Exhaustive over the tone so a second tone fails the build here

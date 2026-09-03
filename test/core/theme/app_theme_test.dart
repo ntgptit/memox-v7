@@ -43,7 +43,7 @@ void main() {
       for (final entry in themes.entries) {
         final scheme = entry.value.colorScheme;
         final grounds = <(String, Color)>[
-          ('card', scheme.surface),
+          ('card', scheme.surfaceContainerLow),
           ('page', entry.value.scaffoldBackgroundColor),
         ];
 
@@ -97,7 +97,7 @@ void main() {
 
         for (final ground in <(String, Color)>[
           ('page', entry.value.scaffoldBackgroundColor),
-          ('card', entry.value.colorScheme.surface),
+          ('card', entry.value.colorScheme.surfaceContainerLow),
         ]) {
           expect(
             contrast(label, ground.$2),
@@ -121,7 +121,7 @@ void main() {
             .resolve(const <WidgetState>{})!;
 
         for (final ground in <(String, Color)>[
-          ('card', entry.value.colorScheme.surface),
+          ('card', entry.value.colorScheme.surfaceContainerLow),
           ('page', entry.value.scaffoldBackgroundColor),
         ]) {
           expect(
@@ -148,7 +148,7 @@ void main() {
           ('resting', fill.resolve(const <WidgetState>{})!),
         ]) {
           for (final ground in <(String, Color)>[
-            ('card', entry.value.colorScheme.surface),
+            ('card', entry.value.colorScheme.surfaceContainerLow),
             ('page', entry.value.scaffoldBackgroundColor),
           ]) {
             expect(
@@ -166,7 +166,7 @@ void main() {
         final semantic = entry.value.extension<AppSemanticColors>()!;
 
         for (final ground in <(String, Color)>[
-          ('card', entry.value.colorScheme.surface),
+          ('card', entry.value.colorScheme.surfaceContainerLow),
           ('page', entry.value.scaffoldBackgroundColor),
         ]) {
           for (final pair in <(String, Color)>[
@@ -207,7 +207,8 @@ void main() {
       double liftOf(ThemeData theme) {
         final page = theme.scaffoldBackgroundColor;
         final surfaceStep =
-            (lightnessStar(theme.colorScheme.surface) - lightnessStar(page))
+            (lightnessStar(theme.colorScheme.surfaceContainerLow) -
+                    lightnessStar(page))
                 .abs();
 
         var shadowStep = 0.0;
@@ -244,7 +245,8 @@ void main() {
       final dark = themes['dark']!;
       final darkPage = dark.scaffoldBackgroundColor;
       final darkStep =
-          lightnessStar(dark.colorScheme.surface) - lightnessStar(darkPage);
+          lightnessStar(dark.colorScheme.surfaceContainerLow) -
+          lightnessStar(darkPage);
       expect(
         darkStep,
         greaterThanOrEqualTo(4.0),
@@ -255,7 +257,7 @@ void main() {
       final rim = shadowsFor(AppElevation.card, dark.colorScheme).single.color;
       for (final ground in <String, Color>{
         'page': darkPage,
-        'card': dark.colorScheme.surface,
+        'card': dark.colorScheme.surfaceContainerLow,
       }.entries) {
         expect(
           contrast(rim, ground.value),
@@ -302,7 +304,7 @@ void main() {
 
         for (final ground in <(String, Color)>[
           ('tile', semantic.surfaceMuted),
-          ('card', entry.value.colorScheme.surface),
+          ('card', entry.value.colorScheme.surfaceContainerLow),
           ('page', entry.value.scaffoldBackgroundColor),
         ]) {
           expect(
@@ -319,16 +321,21 @@ void main() {
     // The rule the 2026-08 theme-composition review distilled: change a
     // component's resting fill/foreground away from Material's canonical pair,
     // and every state default that component owns is yours to restate — M3's
-    // are hardcoded to the *old* pair (`onPrimaryContainer` for the FAB), not
-    // derived from the override.
+    // are hardcoded to a pair, not derived from an override.
+    //
+    // **The FAB stopped needing that at M100.32**, because it stopped being an
+    // override: it is `primaryContainer`/`onPrimaryContainer` again, which is
+    // what `_FABDefaultsM3` names. The washes are still declared rather than
+    // left null, and they still have to be the foreground — a restated default
+    // that agrees with M3 is a dependency on record, not a no-op.
     for (final entry in themes.entries) {
       test('${entry.key}: the FAB state washes are its own foreground', () {
         final ColorScheme scheme = entry.value.colorScheme;
         final FloatingActionButtonThemeData fab =
             entry.value.floatingActionButtonTheme;
 
-        expect(fab.backgroundColor, scheme.primary);
-        expect(fab.foregroundColor, scheme.onPrimary);
+        expect(fab.backgroundColor, scheme.primaryContainer);
+        expect(fab.foregroundColor, scheme.onPrimaryContainer);
         // The house corner, owned here since the deck list stopped stating it
         // per-site — M3's default is the 16dp squircle nothing else uses.
         expect(
@@ -351,7 +358,7 @@ void main() {
           );
           expect(
             wash!.withValues(alpha: 1),
-            scheme.onPrimary.withValues(alpha: 1),
+            scheme.onPrimaryContainer.withValues(alpha: 1),
             reason: '$state washes in a colour that is not the foreground',
           );
         }

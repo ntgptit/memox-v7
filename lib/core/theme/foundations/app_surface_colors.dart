@@ -2,6 +2,15 @@ import 'package:flutter/material.dart';
 
 /// Every surface the app paints, as one family.
 ///
+/// **`page` and `paper`, renamed from `background` and `surface` at M100.32.**
+/// The old names encoded M3's model upside down: the app called the card
+/// `surface` and kept the page in a token outside `ColorScheme`, so
+/// `ColorScheme.surface` meant paper and every component that wanted the page
+/// had to be handed a colour. `surface` is the page again — the base ground M3
+/// defines — and `AppMaterialRoles.surfaceContainerLow` carries the paper,
+/// which is the rung `_CardDefaultsM3` and `_BottomSheetDefaultsM3` both name.
+/// No rendered colour moved; the names and the roles did.
+///
 /// **Split out of `AppColors` at M100.1**, which had grown to 513 lines against
 /// the guard's 400 — the same debt `AppMaterialRoles` was carved off to repay at
 /// M99.5, incurred again by M99.94…M100.0 adding four surface and border tokens
@@ -48,9 +57,9 @@ abstract final class AppSurfaceColors {
   /// shadow — it only explains why the ladder was built to work without one.
 
   /// Page background. The one component allowed a strong navy saturation.
-  static const Color backgroundLight = Color(0xFFF2F5F9);
+  static const Color pageLight = Color(0xFFF2F5F9);
 
-  static const Color backgroundDark = Color(0xFF070C27);
+  static const Color pageDark = Color(0xFF070C27);
 
   /// Card and sheet — the flashcard surface.
   ///
@@ -65,9 +74,9 @@ abstract final class AppSurfaceColors {
   /// while the step was the only depth cue light had. It is not any more: the
   /// shadow's alpha was re-solved to 0.07 and the total lift is 8.04 L\* against
   /// dark's 6.58.
-  static const Color surfaceLight = Color(0xFFFFFFFF);
+  static const Color paperLight = Color(0xFFFFFFFF);
 
-  static const Color surfaceDark = Color(0xFF111633);
+  static const Color paperDark = Color(0xFF111633);
 
   static const Color surfaceEmphasisLight = Color(0xFFF5F6FF);
 

@@ -44,7 +44,10 @@ InputDecorationTheme buildInputDecorationTheme(
   // Solid, per MX-VIS-002 rule R7. Blended here rather than read from
   // `disabledSurface`: this is the *hairline* faded, that is the *ink*.
   disabledBorder: _inputBorder(
-    Color.alphaBlend(scheme.outline.withValues(alpha: 0.5), scheme.surface),
+    Color.alphaBlend(
+      scheme.outline.withValues(alpha: 0.5),
+      scheme.surfaceContainerLow,
+    ),
   ),
   hintStyle: texts.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
 );

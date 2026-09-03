@@ -91,13 +91,15 @@ void main() {
         holds('fill', fill, <Set<WidgetState>>[
           selected,
         ], scheme.secondaryContainer);
-        holds('fill', fill, <Set<WidgetState>>[resting], scheme.surface);
+        holds('fill', fill, <Set<WidgetState>>[
+          resting,
+        ], scheme.surfaceContainerLow);
         // Focus is visible — it is a state layer over the resting fill, not a
         // different token. Both directions are asserted: it must change, and it
         // must not become some other role.
         expect(
           fill(focused),
-          isNot(scheme.surface),
+          isNot(scheme.surfaceContainerLow),
           reason: '$mode: no focus cue',
         );
         expect(fill(selectedFocused), isNot(scheme.secondaryContainer));

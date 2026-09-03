@@ -37,13 +37,14 @@ void main() {
   final colorParity = <String, (Color, Color)>{
     // --- surface ladder ---
     '--color-background': (
-      AppSurfaceColors.backgroundLight,
-      AppSurfaceColors.backgroundDark,
+      AppSurfaceColors.pageLight,
+      AppSurfaceColors.pageDark,
     ),
-    '--color-surface': (
-      AppSurfaceColors.surfaceLight,
-      AppSurfaceColors.surfaceDark,
-    ),
+    // `--color-surface` is the PAGE since M100.32, in the kit as in the app:
+    // M3's `surface` is the base ground and the paper is a container on it.
+    // `--color-background` is kept as the kit's older spelling of the same
+    // ground; both resolve to `--mx-page-*`.
+    '--color-surface': (AppSurfaceColors.pageLight, AppSurfaceColors.pageDark),
     '--color-surface-muted': (
       AppSurfaceColors.surfaceMutedLight,
       AppSurfaceColors.surfaceMutedDark,

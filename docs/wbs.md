@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.31 (`components/` chia chín họ; role canonical trích từ SDK ghim và tìm ra bốn sai lệch; builder thôi nhận `Color` rời); M100.30 (bóng đổ light thành hai lớp màu Tokyo `#9FA2BF` — `shadow` tách khỏi `scrim`; nhãn nút lên w700; `AppSizing.controlCompact`; golden còn chờ Linux); M100.29 (`lib/core/theme/` chia sáu tầng: token tách khỏi component builder, `ColorScheme` có nguồn riêng `schemes/app_color_scheme.dart`, `AppSizing` nhận ba giá trị đã có, guard chiều import đã kiểm ngược, tài liệu `docs/design-system/theme-architecture.md`); M100.28 (bất biến canonical binding: gỡ `primaryInk`, khôi phục `primary` cho TextButton/OutlinedButton/TabBar, sàn 4,5 và 12° trở lại, `primary` retune `#4454CC` / `#BCC2FF`); M100.27 (`primary`, nền trang, nền card lấy nguyên hex Tokyo theo chỉ định chủ dự án; `primaryInk` cho thương hiệu làm chữ; dark vẽ rim Tokyo thay shade; R9 miễn paper trắng, sàn 4,3 cho nhãn nút light); M100.26 (toàn bộ hệ màu về palette Tokyo — surface, ink, viền, bốn semantic, tertiary, thang container; ngân sách chroma semantic thay bằng luật bốn hue; golden vẽ lại); M100.25 (hai họ accent M3 lấy hue từ palette Tokyo; fill là giá trị Tokyo đầu tiên vượt sàn, container/on giữ tone và chroma; `surfaceContainerHighest` dark tách khỏi `secondaryContainer`); M100.24 (golden về một nền tảng: job CI chuyển sang Linux, thêm bước font, bỏ tolerance); M100.23 (tổ hợp state thôi phá canonical role; guard AST khoá slot→role; luật nền tảng golden); M100.22 (năm component về role M3 canonical; hai hex palette gánh phần contrast; gỡ khái niệm selected ink chung); M100.21 (container cho bốn semantic; chip trạng thái thôi mượn role accent); M100.20 (bảy binding component về role M3; sàn độ nổi của menu bỏ theo quyết định chủ dự án); M100.19 (gỡ ba token thay thế khỏi 112 call-site, golden chứng minh không đổi pixel); M100.18 (dark `primary` đảo tone theo M3; ba token thay thế thành dẫn xuất); M100.17 (`ColorScheme` đúng 45 role M3 — gỡ `surfaceTint` khai tường minh, catalog đủ 45 swatch); M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
+| **Updated by task** | M100.32 (`ColorScheme.surface` là nền trang trở lại, giấy về `surfaceContainerLow`; FAB/Card/AppBar/ChoiceChip về binding canonical; `warning` retune cho sàn 4.5); M100.31 (`components/` chia chín họ; role canonical trích từ SDK ghim và tìm ra bốn sai lệch; builder thôi nhận `Color` rời); M100.30 (bóng đổ light thành hai lớp màu Tokyo `#9FA2BF` — `shadow` tách khỏi `scrim`; nhãn nút lên w700; `AppSizing.controlCompact`; golden còn chờ Linux); M100.29 (`lib/core/theme/` chia sáu tầng: token tách khỏi component builder, `ColorScheme` có nguồn riêng `schemes/app_color_scheme.dart`, `AppSizing` nhận ba giá trị đã có, guard chiều import đã kiểm ngược, tài liệu `docs/design-system/theme-architecture.md`); M100.28 (bất biến canonical binding: gỡ `primaryInk`, khôi phục `primary` cho TextButton/OutlinedButton/TabBar, sàn 4,5 và 12° trở lại, `primary` retune `#4454CC` / `#BCC2FF`); M100.27 (`primary`, nền trang, nền card lấy nguyên hex Tokyo theo chỉ định chủ dự án; `primaryInk` cho thương hiệu làm chữ; dark vẽ rim Tokyo thay shade; R9 miễn paper trắng, sàn 4,3 cho nhãn nút light); M100.26 (toàn bộ hệ màu về palette Tokyo — surface, ink, viền, bốn semantic, tertiary, thang container; ngân sách chroma semantic thay bằng luật bốn hue; golden vẽ lại); M100.25 (hai họ accent M3 lấy hue từ palette Tokyo; fill là giá trị Tokyo đầu tiên vượt sàn, container/on giữ tone và chroma; `surfaceContainerHighest` dark tách khỏi `secondaryContainer`); M100.24 (golden về một nền tảng: job CI chuyển sang Linux, thêm bước font, bỏ tolerance); M100.23 (tổ hợp state thôi phá canonical role; guard AST khoá slot→role; luật nền tảng golden); M100.22 (năm component về role M3 canonical; hai hex palette gánh phần contrast; gỡ khái niệm selected ink chung); M100.21 (container cho bốn semantic; chip trạng thái thôi mượn role accent); M100.20 (bảy binding component về role M3; sàn độ nổi của menu bỏ theo quyết định chủ dự án); M100.19 (gỡ ba token thay thế khỏi 112 call-site, golden chứng minh không đổi pixel); M100.18 (dark `primary` đảo tone theo M3; ba token thay thế thành dẫn xuất); M100.17 (`ColorScheme` đúng 45 role M3 — gỡ `surfaceTint` khai tường minh, catalog đủ 45 swatch); M99.86 (bound cho Deck ancestry CTE, trả debt M99.28); M99.55–M99.59 (bộ overlay dùng chung: trục tone error/warning/info/success, `showMxConfirm`, `MxAsyncConfirmDialog`, `MxFormDialog`, `MxSheetInsets`, `MxAlertDialog`); M99.39 (token architecture pass — ColorScheme tường minh, cardPrompt rời scale, alias ngữ nghĩa); M99.38 (Library redesign pass 4 — path một target, caught-up, gate FAB); M99.37 (Library redesign pass 3 — FAB, header hai dòng, lưới 4px); M99.36 (Library redesign pass 2 — 16 sai lệch đo trên device); M99.35 (redesign header + hero Library theo mockup chủ dự án 2026-08-20); M99.34 (impact-aware verification plan builder, đánh lại số từ M99.23 của main — số đó thuộc Progress overview trên nhánh tích hợp); M99.33 (Trash và restore v1 — soft-delete, batch, retention 30 ngày, purge); M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
 | **Last updated** | 2026-09-02 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -16944,6 +16944,87 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Dependencies:** M100.23
 - **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
 - **Checklist phases:** 14, 21.
+
+### M100.32 · `ColorScheme.surface` là nền trang trở lại; bốn binding về canonical
+
+- **Status:** done
+- **Goal:** Sửa lỗi nền tảng mà M100.31 đã *ghi nhận nhưng giữ lại*: app đọc
+  `ColorScheme.surface` là **mặt giấy** và để màu trang trong một token nằm
+  **ngoài** `ColorScheme`. M3 định nghĩa ngược lại — `surface` là nền cơ sở, mọi
+  thứ đặt lên nó là container — và hệ quả lan ra bốn component: Card, AppBar,
+  ChoiceChip đều lệch role, còn `buildAppBarTheme` phải nhận một `Color` truyền
+  tay vì không còn role nào cho trang. Cái thứ tư (FAB) không liên quan tới thang
+  bề mặt và là một thay role thuần tuý.
+- **Scope:** `app_surface_colors.dart` (đổi tên `background`→`page`,
+  `surface`→`paper`), `app_material_roles.dart` (thang container),
+  `app_color_scheme.dart`, `app_colors.dart` (`warningLight` retune),
+  `app_theme.dart` (bỏ tham số `background`), 6 component theme, `mx_card.dart`,
+  `mx_pill_button.dart`, 2 study widget; kit `colors.css`; 12 file test/guard;
+  `tokyo-component-mapping.md`, `theme-architecture.md`.
+- **Cách sửa: dời hex qua thang, không đổi mapping component.**
+  | Role | Trước | Sau | Nghĩa |
+  |---|---|---|---|
+  | `surface` | `#FFFFFF` / `#111633` | `#F2F5F9` / `#070C27` | trang |
+  | `surfaceContainerLowest` | `#FFFFFF` / `#010624` | `#F9FAFB` / `#0D1335` | recess |
+  | `surfaceContainerLow` | `#F9FAFB` / `#0D1335` | `#FFFFFF` / `#111633` | **mặt giấy** |
+
+  Thang sau khi sửa (L\*): dark đơn điệu tăng từ trang 4.11 → giấy 8.41 → 13.72
+  → 16.97 → 21.62. Light chạm trần trắng ở giấy (100.00) nên `Container`/`High`/
+  `Highest` (95.45 / 92.98 / 90.87) nằm **dưới** trang 96.42 — chúng là inset, và
+  đó là thứ app vẫn vẽ.
+- **Bốn binding về canonical, cả năm slot ghim bằng guard AST:**
+  | Component | M3 | Trước |
+  |---|---|---|
+  | FAB bg/fg | `primaryContainer`/`onPrimaryContainer` | `primary`/`onPrimary` |
+  | Card `color` | `surfaceContainerLow` | `surface` |
+  | AppBar bg/fg | `surface`/`onSurface` | màu truyền tay |
+  | ChoiceChip fill chưa chọn | flat `null` · elevated `surfaceContainerLow` | flat + `surface` |
+- **ChoiceChip: extractor của M100.31 đọc sai SDK, và đó là lỗi của tôi.**
+  `_ChoiceChipDefaultsM3.color` phân nhánh theo `_chipVariant`; script gộp hai
+  nhánh và báo `surfaceContainerLow` là canonical cho *mọi* ChoiceChip. Thật ra
+  flat **không có** fill. `MxPillButton` vẽ pill giấy trên trang — thiết kế đã
+  ghi — nên tô một chip flat là thay thế trên slot canonical. Widget chuyển sang
+  `ChoiceChip.elevated`, variant có đúng ngữ nghĩa đó, và `chipTheme` khai
+  `elevation: 0` để nhận fill mà không nhận bóng.
+- **Một palette retune, theo AD-14.** `AppInk.warning` đo 4.33:1 trên nền trang,
+  dưới sàn 4.5 của text. Con số đó đã nằm trong `app_colors.dart` từ M4.10p kèm
+  đúng câu "nếu nó từng được dùng làm body text thì đây là số phải kiểm lại" —
+  `AppInk.warning` *là* text ink, nên nó luôn vi phạm; remap chỉ làm test đo đúng
+  nền. `warningLight` `#A46500` → `#A06200`: lệch hue 0.2°, saturation không đổi,
+  4.53 trên trang và 4.95 trên giấy. Sàn không hạ.
+- **Pixel đổi ở đúng ba chỗ, đo bằng `ThemeData` dump:**
+  | Slot | light | dark | Vì sao |
+  |---|---|---|---|
+  | FAB | `#4454CC`→`#DADDF2`, ink `#FFFFFF`→`#141D5D` | `#BCC2FF`→`#252C6F`, ink `#202771`→`#D2D6FF` | binding canonical |
+  | BottomSheet | `#F9FAFB`→`#FFFFFF` | `#0D1335`→`#111633` | theo rung `surfaceContainerLow`, nay là giấy |
+  | Study tile | không đổi | `#010624`→`#111633` | tile là option card, nhận giấy |
+
+  Card, chip, input, menu, page: **không đổi một pixel** — consumer dời theo rung.
+- **Không undo gì của M100.30–31:** bóng Tokyo hai lớp, rim dark, nhãn nút w700,
+  `AppSizing.controlCompact`, sàn 48, thang spacing/radius, cấu trúc chín họ,
+  `MxFocusRing` riêng, hợp đồng #426/#427 — tất cả nguyên vẹn. Radius **không**
+  đụng.
+- **Editable documents:** `docs/wbs.md`,
+  `docs/design-system/tokyo-component-mapping.md`,
+  `docs/design-system/theme-architecture.md`.
+- **Output:** như Scope.
+- **Acceptance criteria:**
+  - [x] `ColorScheme.surface` là nền trang; `surfaceContainerLow` là mặt giấy.
+  - [x] Thang bề mặt đo lại, đơn điệu ở dark, và light chạm trần trắng có ghi lý do.
+  - [x] Không còn hệ "màu trang" song song ngoài `ColorScheme`;
+        `buildAppBarTheme` không nhận `Color` nào.
+  - [x] FAB `primaryContainer`/`onPrimaryContainer`; Card `surfaceContainerLow`;
+        AppBar `surface`/`onSurface` — cả năm slot ghim guard AST ở mức source,
+        đã kiểm ngược (đổi `surfaceContainerLow`→`surface` là đỏ dù hex bằng nhau).
+  - [x] Extractor/ma trận phân biệt flat vs elevated ChoiceChip.
+  - [x] Không sàn contrast nào bị hạ; một palette retune thay vì một exception.
+  - [x] `dart format`, `flutter analyze` 0/0, guard, docs, host suite
+        4 203/4 203 xanh.
+  - [ ] Golden Linux vẽ lại + CI — mục cuối, xem verification.
+- **Dependencies:** M100.31
+- **Tests required:** guard AST +5 binding; 12 file test cập nhật để mã hoá hợp
+  đồng *đúng* thay vì hợp đồng cũ; golden vẽ lại trên Linux.
+- **Checklist phases:** 7.
 
 ### M100.31 · `components/` chia theo họ; role canonical đọc từ SDK ghim
 

@@ -338,22 +338,19 @@ void main() {
     final pairs = <String, (Color, Color)>{
       'info on light surface': (
         AppColors.infoLight,
-        AppSurfaceColors.surfaceLight,
+        AppSurfaceColors.paperLight,
       ),
-      'info on dark surface': (
-        AppColors.infoDark,
-        AppSurfaceColors.surfaceDark,
-      ),
+      'info on dark surface': (AppColors.infoDark, AppSurfaceColors.paperDark),
       // The whole due metric — clock and words — sits directly on the
       // surface in the streak ink. Measured 7.22:1 light / 8.58:1 dark when
       // the well was dropped; this holds the pair to the body-text floor.
       'due ink on light surface': (
         AppColors.onStreakContainerLight,
-        AppSurfaceColors.surfaceLight,
+        AppSurfaceColors.paperLight,
       ),
       'due ink on dark surface': (
         AppColors.onStreakContainerDark,
-        AppSurfaceColors.surfaceDark,
+        AppSurfaceColors.paperDark,
       ),
       // **The three workload chips**, each on its own ground (owner review,
       // 2026-08-20). Container pairs carry their own guarantee, but the floor
@@ -382,11 +379,11 @@ void main() {
       // card surface, so the same 4.5 floor as the rest of this table.
       'danger ink on light surface': (
         AppColors.dangerLight,
-        AppSurfaceColors.surfaceLight,
+        AppSurfaceColors.paperLight,
       ),
       'danger ink on dark surface': (
         AppColors.dangerDark,
-        AppSurfaceColors.surfaceDark,
+        AppSurfaceColors.paperDark,
       ),
     };
 

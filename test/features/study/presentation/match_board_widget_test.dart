@@ -195,7 +195,7 @@ void main() {
       // **The fill does not move, and that is the point.** A selected tile used
       // to be a solid block of `primary`; on a ten-slot board that is a fifth
       // of the screen changing at once, and the answer was never in the area.
-      expect(decoration.color, theme.colorScheme.surfaceContainerLowest);
+      expect(decoration.color, theme.colorScheme.surfaceContainerLow);
       expect(decoration.border!.top.color, accent);
       expect(decoration.border!.top.width, AppStroke.input);
 

@@ -42,7 +42,7 @@ void main() {
       final ladders = <String, List<(String, Color)>>{
         'dark': <(String, Color)>[
           ('page', dark.scaffoldBackgroundColor),
-          ('card', dark.colorScheme.surface),
+          ('card', dark.colorScheme.surfaceContainerLow),
           ('tile', darkSemantic.surfaceMuted),
           ('raised', darkSemantic.surfaceElevated),
         ],
@@ -51,7 +51,7 @@ void main() {
         'light': <(String, Color)>[
           ('tile', lightSemantic.surfaceMuted),
           ('page', light.scaffoldBackgroundColor),
-          ('card', light.colorScheme.surface),
+          ('card', light.colorScheme.surfaceContainerLow),
         ],
       };
 
@@ -81,7 +81,7 @@ void main() {
       // the separation is the rim `shadowsFor` paints in dark, measured in
       // `app_theme_test.dart` at 3:1 against both the page and the card.
       expect(
-        lightnessStar(dark.colorScheme.surface) -
+        lightnessStar(dark.colorScheme.surfaceContainerLow) -
             lightnessStar(dark.scaffoldBackgroundColor),
         greaterThanOrEqualTo(4.0),
       );
@@ -95,7 +95,7 @@ void main() {
         expect(
           contrast(
             filledButtonFill(entry.value),
-            entry.value.colorScheme.surface,
+            entry.value.colorScheme.surfaceContainerLow,
           ),
           greaterThanOrEqualTo(1.5),
           reason: '${entry.key}: the button disappears into the card',
@@ -118,7 +118,7 @@ void main() {
       final ceiling = pageSaturation * share;
 
       for (final surface in <(String, Color)>[
-        ('card', dark.colorScheme.surface),
+        ('card', dark.colorScheme.surfaceContainerLow),
         ('tile', darkSemantic.surfaceMuted),
         ('raised', darkSemantic.surfaceElevated),
         ('border', darkSemantic.borderSubtle),

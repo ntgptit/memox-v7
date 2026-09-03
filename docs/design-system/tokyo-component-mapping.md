@@ -5,9 +5,9 @@
 | **Status** | active |
 | **Purpose** | Bảng đối chiếu từng Material component: role canonical của M3, cái memox override, ý đồ Tokyo, và token hình học — để không ai phải nhớ hoặc đoán |
 | **Scope** | `lib/core/theme/components/**`. Ngoài phạm vi: giá trị token (AD-14), layering của `lib/core/theme/` (`theme-architecture.md`), API của `Mx*` widget |
-| **Source of truth for** | Ma trận component → canonical M3 role · ma trận dịch ý đồ Tokyo → MemoX · danh sách sai lệch role đã biết và lý do |
+| **Source of truth for** | Ma trận component → canonical M3 role · ma trận dịch ý đồ Tokyo → MemoX · hồ sơ các sai lệch role đã sửa và mô hình bề mặt |
 | **Depends on** | `document-conventions.md` · `architecture.md` (AD-14) · `design-system/theme-architecture.md` |
-| **Updated by task** | M100.31 |
+| **Updated by task** | M100.32 |
 | **Last updated** | 2026-09-03 |
 
 ---
@@ -49,8 +49,8 @@ canonical M3 role  >  accessibility  >  MemoX structural system  >  Tokyo exact 
 | OutlinedButton | side | `outline`, focus → `primary` | = | guard AST |
 | TextButton | foreground | `primary` | = | guard AST |
 | IconButton | foreground | `onSurfaceVariant` | = | |
-| **FAB** | **background** | **`primaryContainer`** | **`primary`** | **SAI LỆCH — xem §4** |
-| **FAB** | **foreground** | **`onPrimaryContainer`** | **`onPrimary`** | **SAI LỆCH — xem §4** |
+| FAB | background | `primaryContainer` | = | sửa ở M100.32; guard AST |
+| FAB | foreground | `onPrimaryContainer` | = | sửa ở M100.32; guard AST |
 
 ### inputs/
 
@@ -65,7 +65,7 @@ canonical M3 role  >  accessibility  >  MemoX structural system  >  Tokyo exact 
 | Component | Slot | M3 canonical | MemoX | Ghi chú |
 |---|---|---|---|---|
 | ChoiceChip | selected fill | `secondaryContainer` | = | guard AST |
-| **ChoiceChip** | **unselected fill** | **`surfaceContainerLow`** | **`surface`** | **SAI LỆCH — xem §4** |
+| ChoiceChip (elevated) | unselected fill | `surfaceContainerLow` | = | flat sẽ là `null`; widget dùng `.elevated` — xem §4 |
 | ChoiceChip | side | `outlineVariant`, selected trong suốt | = | guard AST |
 | Checkbox | fill | `primary` / trong suốt theo `selected` | = | guard AST |
 | Switch | thumb | `outline` off / `onPrimary` on | = | guard AST |
@@ -87,16 +87,16 @@ canonical M3 role  >  accessibility  >  MemoX structural system  >  Tokyo exact 
 | NavigationBar | labelTextStyle | `onSurface` / `onSurfaceVariant` | = | guard AST |
 | TabBar | labelColor | `primary` | = | guard AST |
 | TabBar | indicatorColor | `primary` | = | guard AST |
-| **AppBar** | **background** | **`surface`** | **nền trang** | **SAI LỆCH — xem §4** |
+| AppBar | background | `surface` | = | `surface` *là* nền trang từ M100.32; guard AST |
 | AppBar | foreground | `onSurface` | = | |
 
 ### surfaces/ · content/ · feedback/ · overlays/ · pickers/
 
 | Component | Slot | M3 canonical | MemoX | Ghi chú |
 |---|---|---|---|---|
-| **Card** | **color** | **`surfaceContainerLow`** | **`surface`** | **SAI LỆCH — xem §4** |
+| Card | color | `surfaceContainerLow` | = | sửa ở M100.32; guard AST |
 | Dialog | background | `surfaceContainerHigh` | = | |
-| BottomSheet | background | `surfaceContainerLow` | = | |
+| BottomSheet | background | `surfaceContainerLow` | = | nay là mặt giấy, theo rung |
 | BottomSheet | dragHandle | `onSurfaceVariant` | = | + state layer, không đổi role |
 | ListTile | selectedColor | `primary` | = | |
 | ListTile | icon / title / subtitle | `onSurfaceVariant` / `onSurface` / `onSurfaceVariant` | = | |
@@ -125,7 +125,7 @@ canonical M3 role  >  accessibility  >  MemoX structural system  >  Tokyo exact 
 | `general.borderRadius` 10 | góc mặt phẳng | `AppRadius.lg` (16) | — | tier |
 | `shadows.cardSm` / `card` | card ngồi / panel nổi | `shadowsFor(card)` / `(raised)` | — | hai lớp, màu qua `scheme.shadow` |
 | `shadows.card` (dark) | rim thay shade | rim `#6A7199` | — | edge không sâu thêm theo level |
-| `MuiPaper` paper | mặt giấy nổi | `ColorScheme.surface` | surface semantics | — |
+| `MuiPaper` paper | mặt giấy nổi | `ColorScheme.surfaceContainerLow` | `surface` là nền, giấy là container | — |
 | `divider` `#272C48` | vạch rất khẽ | `scheme.outlineVariant` | `outlineVariant` | `AppStroke.hairline` |
 | Backdrop tối + blur | tách modal khỏi trang | `modalBarrierColor` (`scheme.scrim`) | scrim | alpha token; **blur chưa nhận** |
 | `MuiIconButton` radius 8 / pad 8 | chrome gọn | `AppRadius.md` + `AppSizing.touchTarget` | `onSurfaceVariant` | sàn 48 thắng pad 8 |
@@ -137,26 +137,65 @@ chung, một phép đo hiệu năng, và một quyết định — không phải
 
 ---
 
-## 4. Bốn sai lệch role đã biết
+## 4. Bốn sai lệch role — đã sửa ở M100.32
 
-MUST: không sửa bốn mục này như một "dọn dẹp". Mỗi mục là một quyết định đã ghi,
-và ba trong bốn đụng vào toàn bộ hệ bề mặt của app.
+Mục này từng liệt kê bốn sai lệch "đã biết" kèm lý do giữ. Ba trong bốn là hệ
+quả của **một** lỗi nền tảng, cái thứ tư là một thay role thuần tuý. Cả bốn đã
+được sửa; bảng giữ lại làm hồ sơ, không phải làm ngoại lệ.
 
-| # | Component | M3 | MemoX | Lý do đã ghi | Trạng thái |
-|---|---|---|---|---|---|
-| 1 | FAB background/foreground | `primaryContainer`/`onPrimaryContainer` | `primary`/`onPrimary` | Mockup chủ dự án 2026-08-20: action tạo duy nhất của màn mặc màu thương hiệu, không mặc cùng bộ đồ với tab đang chọn của NavigationBar | **Cần chủ dự án quyết** — đây là *đổi canonical role*, thứ §4 của brief cấm. Hoặc đảo về `primaryContainer`, hoặc ghi thành ngoại lệ có tên trong AD-14 |
-| 2 | Card `color` | `surfaceContainerLow` | `surface` | Thang bề mặt của app định nghĩa `surface` **là** mặt card, `background` là trang | Giữ. Đổi sẽ dịch mọi card trong app |
-| 3 | ChoiceChip unselected fill | `surfaceContainerLow` | `surface` | Cùng lý do #2: pill chưa chọn là "một card nhỏ nằm trên trang" | Giữ |
-| 4 | AppBar background | `surface` | nền trang | Header phải đứng yên trong phiên học: một dịch chuyển màu sau tấm thẻ đọc ra như chính tấm thẻ đổi | Giữ |
+### Gốc: `ColorScheme.surface` bị đọc là mặt giấy
 
-#2–#4 là **cùng một quyết định** nhìn từ ba chỗ: memox đọc `surface` là mặt
-giấy và có một token trang riêng, còn M3 đọc `surface` là nền và leo thang
-`surfaceContainer*` cho mọi thứ đặt lên. Đó là một sai lệch có hệ thống, đã đo,
-và đảo nó là một task palette riêng chứ không phải một lượt dọn.
+M3 định nghĩa `surface` là **nền cơ sở**; mọi thứ đặt lên nó là container
+(`surfaceContainer*`). memox làm ngược: gọi card là `surface` và để trang trong
+một token **ngoài** `ColorScheme` — nên bất kỳ component nào cần màu trang cũng
+phải được *đưa* một màu vào, vòng qua hệ role.
 
-**#1 thì khác** và không nên gộp vào: nó không dính đến thang bề mặt, nó là một
-cặp accent bị thay bằng một cặp accent khác — đúng dạng thay role mà #426/#427
-đã dọn ở năm component khác.
+Sửa bằng cách dời **hex qua thang**, không đổi mapping component:
+
+| Role | Trước | Sau | Nghĩa |
+|---|---|---|---|
+| `surface` | `#FFFFFF` / `#111633` | `#F2F5F9` / `#070C27` | trang |
+| `surfaceContainerLowest` | `#FFFFFF` / `#010624` | `#F9FAFB` / `#0D1335` | một bậc dưới giấy — chỗ `MxCard.recessed` vẽ |
+| `surfaceContainerLow` | `#F9FAFB` / `#0D1335` | `#FFFFFF` / `#111633` | **mặt giấy**: card, sheet, menu, pill |
+
+Thang sau khi sửa, đo bằng L\*:
+
+| | Highest | High | Container | **surface** | Lowest | **Low** |
+|---|---|---|---|---|---|---|
+| light | 90.87 | 92.98 | 95.45 | **96.42** | 98.22 | **100.00** |
+| dark | 21.62 | 16.97 | 13.72 | **4.11** | 7.30 | **8.41** |
+
+Dark đơn điệu tăng từ trang lên. Light chạm trần trắng ở mặt giấy, nên
+`Container`/`High`/`Highest` nằm **dưới** trang — chúng là *inset*, và đó là thứ
+app vẫn vẽ từ trước.
+
+### Bốn binding
+
+| # | Component | M3 canonical | Trước | Sau |
+|---|---|---|---|---|
+| 1 | FAB bg/fg | `primaryContainer`/`onPrimaryContainer` | `primary`/`onPrimary` | **canonical** |
+| 2 | Card `color` | `surfaceContainerLow` | `surface` | **canonical** |
+| 3 | AppBar bg/fg | `surface`/`onSurface` | màu trang truyền vào | **canonical** |
+| 4 | ChoiceChip fill chưa chọn | flat `null` · elevated `surfaceContainerLow` | flat + `surface` | **elevated + `surfaceContainerLow`** |
+
+#4 đáng nói riêng: `MxPillButton` vẽ một *pill giấy nằm trên trang* — thiết kế
+đã ghi. Tô một chip **flat** là thay thế trên slot canonical, vì flat không có
+fill. Variant *elevated* có đúng ngữ nghĩa đó, nên widget dựng
+`ChoiceChip.elevated` và nhận fill từ role; `chipTheme` khai `elevation: 0` để
+variant mang ngữ nghĩa fill mà không mang cái bóng thiết kế này không vẽ.
+
+Năm slot (FAB ×2, Card, AppBar ×2) được ghim ở `m3_role_binding_guard_test.dart`
+ở mức **source**, nên đổi `surfaceContainerLow` thành `surface` là đỏ kể cả khi
+hai hex bằng nhau.
+
+### Một palette retune đi kèm
+
+`AppInk.warning` đo 4.33:1 trên nền trang, dưới sàn 4.5 của text. Con số đó đã
+nằm trong `app_colors.dart` từ M4.10p kèm ghi chú "nếu nó từng được dùng làm
+body text thì đây là số phải kiểm lại" — `AppInk.warning` *là* text ink, nên nó
+luôn vi phạm; remap chỉ làm test đo đúng nền. Theo AD-14 thì **palette dịch**:
+`warningLight` `#A46500` → `#A06200`, lệch hue 0.2°, saturation không đổi, đo
+4.53 trên trang và 4.95 trên giấy.
 
 ---
 

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../actions/app_button_themes.dart';
+import '../../foundations/app_elevation.dart';
 import '../../foundations/app_icon_size.dart';
 import '../../states/app_interaction_states.dart';
 import '../../foundations/app_radius.dart';
 import '../../foundations/app_semantic_colors.dart';
+import '../../foundations/app_sizing.dart';
 import '../../foundations/app_spacing.dart';
 import '../../typography/app_typography.dart';
-import 'package:memox/core/theme/foundations/app_sizing.dart';
 
 /// The chip theme — `MxPillButton`'s entire appearance.
 ///
@@ -41,18 +42,30 @@ import 'package:memox/core/theme/foundations/app_sizing.dart';
 /// Selected is `secondaryContainer` — `_ChoiceChipDefaultsM3.color`'s answer,
 /// and the same pair the navigation indicator and the segmented button take, so
 /// "this one is active" looks the same whether it is a tab, a segment or a
-/// filter. Unselected is a card sitting on the page, which is the same
-/// surface-over-background step every other panel uses.
+/// filter.
+///
+/// **Unselected is `surfaceContainerLow`, and that is a canonical fill rather
+/// than a substitute** (M100.32). `_ChoiceChipDefaultsM3.color` is
+/// variant-dependent, and reading it as one value was an error in this file's
+/// own contract: a **flat** `ChoiceChip` has **no** unselected fill (`null`),
+/// while `ChoiceChip.elevated` fills with `surfaceContainerLow`. The pill this
+/// app draws is a paper pill sitting on the page — the recorded design, and the
+/// elevated variant's semantics — so `MxPillButton` builds an elevated chip and
+/// takes the role instead of painting a flat one.
+///
+/// It read `scheme.surface` until M100.32, which was the paper only because the
+/// app read `surface` as the paper. `surface` is the page now, and the same
+/// pixels come from the rung that means paper.
 ///
 /// **It was `primaryContainer` between the owner review of 2026-08-20 and
 /// M100.22, and the review's complaint was real**: at `#E4E6EC` an applied
 /// filter and an unapplied one were nearly the same rectangle on a light page —
-/// 7.39 L\* of step against `surface`, where the brand container gave 10.34. The
+/// 7.39 L\* of step against the paper, where the brand container gave 10.34. The
 /// error was fixing that on the component. M100.22 moved the *tone* instead
 /// (`AppMaterialRoles.secondaryContainerLight`), so the role now gives 10.50 and
 /// the chip can say what it is.
 Color _restingFill(ColorScheme scheme, {required bool isSelected}) =>
-    isSelected ? scheme.secondaryContainer : scheme.surface;
+    isSelected ? scheme.secondaryContainer : scheme.surfaceContainerLow;
 
 /// The fill for [states], resolved to a solid colour over the ground that state
 /// actually has.
@@ -153,6 +166,13 @@ ChipThemeData buildChipTheme(
   TextTheme texts,
 ) => ChipThemeData(
   color: WidgetStateProperty.resolveWith((states) => _fillFor(scheme, states)),
+  // **Zero, because the variant is chosen for its fill and not for its
+  // shadow** (M100.32). `MxPillButton` builds `ChoiceChip.elevated` so the
+  // unselected pill takes `surfaceContainerLow` from the canonical role rather
+  // than from a substitute on a flat chip — and an elevated chip's own default
+  // is `elevation: 1`, a Material shadow this design does not draw. AD-14
+  // admits one depth mechanism, and it is `shadowsFor`.
+  elevation: AppElevation.none,
   // No checkmark: the pill group is always visible in full, so the selected one
   // is legible by contrast alone and the tick would shift the label sideways on
   // every change.

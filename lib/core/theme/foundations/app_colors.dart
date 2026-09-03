@@ -181,7 +181,19 @@ abstract final class AppColors {
   /// card, 12.75:1 on the page, against a 3.0 floor. **A shade apart, not a
   /// hue:** the semantic hues map light→dark by keeping hue and raising
   /// lightness, and that rule lands warning back on the streak amber.
-  static const Color warningLight = Color(0xFFA46500);
+  /// **Retuned from `#A46500` at M100.32, and the number was already written
+  /// down.** The block above this one has said since M4.10p that warning
+  /// measures "4.33:1 on the page ... below the 4.5:1 a body-text colour would
+  /// need. It is not used as body text anywhere; if it ever is, that is the
+  /// number to re-check." `AppInk.warning` *is* a text ink, so it always was;
+  /// what changed is that `ColorScheme.surface` became the page, so
+  /// `app_ink_test.dart` finally measured the ground the ink actually lands on.
+  ///
+  /// The palette moves rather than the floor (AD-14). `#A06200` is the same hue
+  /// to within 0.2 degrees and the same saturation, one step darker in HSL
+  /// lightness: 4.53:1 on the page and 4.95:1 on the paper, against 4.33 and
+  /// 4.73. The chroma ordering `app_palette_test.dart` pins is untouched.
+  static const Color warningLight = Color(0xFFA06200);
   static const Color warningDark = Color(0xFFFFA319);
 
   /// Answer forgotten, destructive action, reset.

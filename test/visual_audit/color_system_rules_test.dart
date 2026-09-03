@@ -164,15 +164,21 @@ void main() {
       };
 
       // **The light paper is exempt since M100.27, by owner decision.** The
-      // card is Tokyo's `#FFFFFF` verbatim, and the three roles that are the
-      // card under Material's names follow it. A rule cannot ask for a tint
-      // the owner has ruled out; what R9 still guards is every *other* light
+      // card is Tokyo's `#FFFFFF` verbatim, and the roles that *are* the card
+      // under Material's names follow it. A rule cannot ask for a tint the
+      // owner has ruled out; what R9 still guards is every *other* light
       // neutral and the whole of dark.
+      //
+      // **The list moved with the paper at M100.32.** `surface` is the page
+      // now — tinted, and back under the rule — while `surfaceContainerLow`
+      // carries the paper and takes its place here. Exempting a role rather
+      // than a value is what keeps this honest: the exemption follows the
+      // meaning, so the day the paper gains a tint the exemption is deleted
+      // rather than quietly covering a different role.
       if (mode.key == 'light') {
         for (final paper in <String>[
-          'surface',
+          'surfaceContainerLow',
           'surfaceBright',
-          'surfaceContainerLowest',
           'surfaceElevated',
         ]) {
           neutrals.remove(paper);
