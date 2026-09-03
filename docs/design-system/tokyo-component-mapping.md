@@ -218,63 +218,18 @@ MUST NOT: một `Mx*` widget hoặc một feature nêu lại các giá trị nà
 
 ## 6. Blocking finding — FilledButton state, cho đợt Button kế tiếp
 
-**Trạng thái: MỞ.** Cho đến khi mục này đóng, **không được tuyên bố button theme
-là canonical.** Ghi lại ở M100.35 (đợt Card/theme), cố ý *không* sửa ở đó: sửa
-state của button trong một đợt về Card là đúng cái mở rộng phạm vi mà brief cấm.
+**Trạng thái: MỞ.** Cho đến khi đóng, **không được tuyên bố button theme là
+canonical.**
 
-### Canonical, đọc từ Flutter 3.44.8
+Chi tiết nằm ở **[`docs/reviews/mx-action-button-deep-audit.md`](../reviews/mx-action-button-deep-audit.md)**
+(#432) và **chỉ** ở đó — báo cáo ấy đã đọc `ink_well.dart` để dựng lại thứ tự
+composite thật, thứ mục này không lặp lại.
 
-`_FilledButtonDefaultsM3.overlayColor`
-(`packages/flutter/lib/src/material/filled_button.dart:565`):
+Điều duy nhất ghi ở đây, vì nó là về **bảng dịch này**: dòng §2 nói sai lệch
+FilledButton overlay là một **thay thế** (`onPrimary` → blend về `onSurface`),
+trong khi code thực hiện một **phép cộng** — `buildSharedButtonStyle` đặt
+`overlayColor: controlOverlay` và `buildFilledStyle` chỉ `copyWith`
+`backgroundColor`, nên hover vẽ *cả hai*. Trên `primary` hệ quả đã biết và đã
+ghim (overlay là no-op); trên `tonal` và `destructive` thì không.
 
-| State | Role | Alpha |
-|---|---|---|
-| pressed | `onPrimary` | 0.10 |
-| hovered | `onPrimary` | 0.08 |
-| focused | `onPrimary` | 0.10 |
-
-`backgroundColor` canonical **không đổi theo state** (ngoài `disabled`).
-
-### MemoX hiện tại
-
-`buildSharedButtonStyle` (`app_button_themes.dart:76`) đặt
-`overlayColor: AppInteractionStates.controlOverlay(scheme)` — hover washes
-**`primary`** ở `hoverControl` 0.06, focus ở 0.10. `buildFilledStyle` sau đó
-`copyWith` **chỉ** `backgroundColor` và `foregroundColor`, nên overlay được
-**kế thừa nguyên vẹn**.
-
-### Hai cơ chế cùng vẽ, và đó là phần nặng nhất
-
-`backgroundColor` của `buildFilledStyle` tự đổi theo state:
-
-| State | Nền | Overlay kế thừa |
-|---|---|---|
-| hovered | `lerp(fill, onSurface, 0.06)` | `primary` @ 0.06 |
-| pressed | `lerp(fill, onSurface, 0.12)` | `primary` @ 0.06 |
-| focused | `fill` | `primary` @ 0.10 |
-
-Nên một FilledButton đang hover **đồng thời** đổi nền *và* nhận một lớp wash —
-hai phản hồi cho một sự kiện, không cái nào biết cái kia. Cần đo xem tổng hai
-lớp có còn khớp ý đồ không, hay chúng đang triệt tiêu / cộng dồn nhau.
-
-### Vì sao sai lệch tồn tại (lý do đã ghi, vẫn còn giá trị)
-
-6% `primary` vẽ trên chính `primary` là vô hình — nút chính của app không có
-hover thấy được. Đó là một vấn đề **thật**; câu hỏi mở là cách sửa có đúng
-không, vì cách canonical (`onPrimary` 0.08) vốn đã giải quyết đúng chuyện đó và
-không cần đổi nền.
-
-### Test đang bảo vệ sai lệch
-
-- `test/core/theme/components/component_depth_and_state_test.dart`
-- `test/core/theme/app_theme_test.dart` — nhóm "state ownership follows the
-  resting pair"
-- guard AST `m3_role_binding_guard_test.dart` **không** phủ `overlayColor` của
-  FilledButton; đó là lý do sai lệch này đi qua #426/#427 mà không ai chặn.
-
-### Đợt Button phải trả lời
-
-1. `onPrimary` @ 0.08/0.10 có đủ thấy trên fill hiện tại không — **đo**, đừng đoán.
-2. Nếu đủ: gỡ mutation nền, về canonical, mở rộng guard AST sang `overlayColor`.
-3. Nếu không đủ: giữ **một** cơ chế, không phải hai, và ghi lại phép đo chứng
-   minh cơ chế canonical không đạt.
+Đợt Button phải sửa cả code lẫn dòng §2 trong cùng một lần.

@@ -17027,12 +17027,16 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **`tonal`: tên đúng, câu chữ sai.** "Tonal" trong M3 nghĩa là một bề mặt mang
   sắc, và `surfaceEmphasis` đúng là thế — nên sửa câu mô tả, **không** đổi tên.
   Ghi ở `docs/design-system/card-recipes.md` §4.
-- **Blocking finding cho đợt Button kế tiếp** (`tokyo-component-mapping.md`
-  §6): `buildSharedButtonStyle` đặt `overlayColor: controlOverlay` (wash
-  `primary`), `buildFilledStyle` chỉ `copyWith` `backgroundColor` — nên **hai
-  cơ chế cùng vẽ** khi hover/press. Canonical M3 là `onPrimary` 0.08/0.10 và
-  `backgroundColor` **không** đổi theo state. Guard AST chưa phủ `overlayColor`.
-  Không được tuyên bố button theme là canonical cho tới khi mục này đóng.
+- **Blocking finding cho đợt Button, và nó đã có nhà.** Phát hiện là:
+  `buildSharedButtonStyle` đặt `overlayColor: controlOverlay` còn
+  `buildFilledStyle` chỉ `copyWith` `backgroundColor`, nên hover/press vẽ **cả
+  hai** cơ chế; canonical M3 là `onPrimary` 0.08/0.10 với `backgroundColor`
+  không đổi theo state. Trong lúc đợt này chạy, #432 đã đổ bộ với
+  `docs/reviews/mx-action-button-deep-audit.md` — phủ cùng chuyện, sâu hơn, có
+  đọc `ink_well.dart` để dựng lại thứ tự composite thật. Nên bản ghi đầy đủ tôi
+  viết ở `tokyo-component-mapping.md` §6 **đã bị rút xuống thành con trỏ**: một
+  sự thật sống ở đúng một chỗ. Thứ giữ lại ở §6 là điều thuộc về chính bảng
+  dịch đó — dòng §2 mô tả sai lệch là *thay thế* trong khi code là *phép cộng*.
 - **Acceptance criteria:**
   - [x] Card dark nghỉ không có viền mờ phát sáng; không quầng tím ở góc 16/20.
   - [x] `none < card < raised` ở dark vẫn đọc được, bằng drop chứ không bằng
