@@ -18,7 +18,7 @@
 |---|---|
 | **BASE_SHA** | `3207e7b7e0d3a2ecefa5e6a85fed48a65890ba6b` |
 | Base commit | `refactor(theme): the dark card stops glowing, and elevation stops meaning two things (M100.35) (#435)` — `main` at time of audit, 2026-09-03 |
-| Rebased onto | `9f2d226` — five sibling audit reports landed on `main` during this audit (#437, #438, #440, #441, #444). All five are report-only: `git diff 3207e7b origin/main` touches nothing outside `docs/reviews/`, so **no finding below moved**, and BASE_SHA remains the correct provenance for the code state. One of them overlaps and is cross-referenced in §7.3 |
+| Rebased onto | `9d2f4b4` — **eight** sibling audit reports landed on `main` during this audit (#436, #437, #438, #440, #441, #442, #443, #444). All eight are report-only: `git diff 3207e7b origin/main` touches nothing outside `docs/reviews/`, so **no finding below moved**, and BASE_SHA remains the correct provenance for the code state. Three overlap this scope and are reconciled rather than duplicated — A13 owns iconography and takes G-20 outright (§8.4), A13 owns half of G-8 (§5.2), and A7 and A12 are cross-referenced in §7.3 |
 | Surface read | 722 Dart files under `lib/` (49 theme, 304 presentation), 471 test files, 233 committed goldens, 8 kit token files, 10 guard rule files |
 | Method | Static. Every number below was read out of the tree at BASE_SHA and cross-checked against its declaration, its call sites, the kit CSS, the guard scopes and the tests that touch it. A comment-stripping scanner (not a plain grep) produced the literal inventories in §7, so a value quoted inside a doc comment is never counted as a call site |
 | **Not verified** | Nothing was rendered. No Flutter SDK is present in this session, so no widget was pumped, no golden compared and no pixel measured. Every claim about *code* below is CONFIRMED by reading it; every claim about what a rendered frame looks like is marked as such and carries the probe that would settle it |
@@ -85,7 +85,8 @@ all render 32 dp; the strokes all render at their intended widths. What is broke
 contradicts the code, and a depth invariant enforced for one component out of three.
 
 Verdict: **the foundation is sound, the depth contract is not, and the sizing scale is
-one rung short of matching what the app draws.** 1 × P0, 4 × P1, 9 × P2, 7 × P3.
+one rung short of matching what the app draws.** 1 × P0, 3 × P1, 7 × P2, 9 × P3 —
+twenty findings, after G-20 was withdrawn to A13 (§8.4).
 
 ---
 
@@ -399,15 +400,21 @@ which is what its comment claims. The kit declares the same five and
 `widgetbook/lib/tokens/scale_sections.dart:65-68` renders `sm`, `md`, `lg` and `pill`.
 `xl` is absent. The one rung whose whole justification is *"four pixels above `lg`, and
 it is the only thing at this radius"* is the one a reviewer cannot see beside `lg` to
-judge whether the four pixels earn their step. Same file, `:89-91`: `AppIconSize.mdCompact`
-is missing from the icon row for the same reason.
+judge whether the four pixels earn their step. `design_tokens_test.dart:47-49` likewise
+orders `sm < md < lg` and `pill > lg` and never places `xl`, so the rung has neither a
+picture nor an ordering guard.
 
-`widgetbook_coverage_test.dart` checks *components*, not tokens, so neither omission
-can fail.
+`widgetbook_coverage_test.dart:67` checks *components*, not tokens, so the omission
+cannot fail.
 
-**Closure** — add the two rows; extend the coverage test to assert every public member
-of `AppRadius`, `AppIconSize`, `AppStroke`, `AppElevation` and `AppSizing` appears in
-`scale_sections.dart`.
+**Scoped to radius on purpose.** The same file omits `AppIconSize.mdCompact` from its icon
+row, and `design_tokens_test` never orders that rung either — both already recorded as
+**P3-1** and **P3-2** in `docs/reviews/a13-iconography-audit.md` (#443), which owns the
+icon vocabulary. Not restated here.
+
+**Closure** — add the `xl` row and the ordering assertion; extend the coverage test to
+assert every public member of `AppRadius`, `AppStroke`, `AppElevation` and `AppSizing`
+appears in `scale_sections.dart`, which closes A13's P3-1 in the same move.
 
 ### 5.3 · G-9 (P3) — the radius guard is a warning where the spacing guard is an error
 
@@ -668,7 +675,17 @@ regenerated with it.
 `Material.of` under a `FloatingActionButton` and a `SnackBar`, and assert the resolved
 `shadowColor`.
 
-**Cross-reference — this finding corrects a sibling report.**
+**Cross-reference — and why three audits walked past this slot.**
+`docs/reviews/a7-icon-actions-menu-audit.md` §4.2 (#436) tabulates the FAB slot by slot —
+background, foreground, shape, elevation, state washes, icon size — and has **no
+`shadowColor` row**, because the file states none. Its §4.3 then describes `PopupMenu`'s
+dark suppression as *"the app-wide M100.35 pattern … consistent with `MxCard`/FAB"*; the
+`MxCard` half is right and **the FAB half is not**. A slot table built from what a builder
+*states* cannot show a slot the builder *omits*, which is exactly why an absent wire
+survives three separate audits of the same components — and why this is a P1 rather than
+a nit.
+
+
 `docs/reviews/a12-feedback-system-audit.md` §3.2 landed on `main` while this audit was
 in flight (#437) and returned **"Verdict: correct"** on `SnackBarThemeData`. It read the
 level and not the paint channel, so the missing `shadowColor` is not a disagreement about
@@ -857,24 +874,31 @@ reasons out of the tree. Instead add a *scan test* (not a regex guard) that pars
 declare themselves out by §2.2's comment rule. It passes today except where this report
 says otherwise, which is what makes it worth having.
 
-### 8.4 · G-20 (P2) — two rendered icon sizes the ladder does not own
+### 8.4 · G-20 — **withdrawn.** A13 owns this, got there first, and saw more of it
 
-`AppIconSize` declares 16 / 20 / 24 / 40 and `MxIconSize` closes the set so a widget
-cannot pass a `double`. Two sites render outside it, and **both say so in a comment**:
+This audit found two rendered icon sizes outside `AppIconSize` — `_flagIconSize = 18`
+(`card_tile_widget.dart:30, 254`) and `AppSpacing.xxl` (32) at
+`card_import_result_widget.dart:172` — each admitted in a comment saying the ladder has no
+step for it.
 
-| Site | Size | Comment |
-|---|---|---|
-| `card_tile_widget.dart:30, 254` | `_flagIconSize = 18` | *"18 has no `MxIconSize` step, so the closed-set spelling is the ink's own resolve"* |
-| `card_import_result_widget.dart:170-172` | `AppSpacing.xxl` (32) | *"32 has no `MxIconSize` step; the closed-set spelling here is the ink's own resolve"* |
+`docs/reviews/a13-iconography-audit.md` (#443) landed on `main` while this audit was in
+flight and **owns the iconography system**. It already records both, at its lines 190-191
+and as **P3-9** (*"`AppSpacing.xxl` used as an icon size — a spacing token spent on the
+size scale. The guard cannot see it because it is not a literal"* — which is also §8.3's
+point, reached independently). And it saw something this audit did not: its **P2-7** notes
+the 32 dp glyph is *the hero of a completed flow*, a role that is 40 dp
+(`MxIconSize.lg`) everywhere else in the app — so the defect is not only "off the ladder"
+but "the wrong rung for its role", which is the more useful framing and the more severe
+grade.
 
-Two files independently reaching the same conclusion — "the ladder is missing a rung, so
-I will use a bare `Icon`" — is the ladder telling you it is short. The 32 case is worse
-than the 18 one, because it borrows a *spacing* token to express an icon size (§3.2).
+**So the finding is withdrawn here rather than restated.** `document-conventions.md` puts
+one fact in exactly one place, and duplicating it across two reports in the same directory
+is how the two later disagree. Read A13 P2-7 and P3-9 for the icon-size half.
 
-**Closure** — decide per rung. 18 between `sm` (16) and `mdCompact` (20) is probably
-noise and the flag should move to 16 or 20. 32 between `md` (24) and `lg` (40) is a real
-gap — a hero glyph inside a 44 dp result circle is neither. Whichever way, the outcome
-is that no `lib/` file constructs a bare `Icon(size:)`, which is a one-line scan test.
+**What stays in this report** is the *spacing* side of the same call site, which is A16's
+scope and not A13's: `AppSpacing.xxl` is a rung of the **spacing** scale, and G-1 (§3.2)
+covers all seven of its non-gap call sites, of which the icon size is one. The two reports
+meet at one line of code and each owns a different token.
 
 ### 8.5 · G-21 (P3) — a raw `4` in the scrollbar theme
 
@@ -957,7 +981,7 @@ beside it names a role).
 | `AppRadius` | ⚠️ `no_raw_border_radius` (**warning**) | ⚠️ `sm < md < lg`, `pill > lg` — **`xl` not ordered** | ✅ all 5 incl. `xl` | ~ goldens | ⚠️ **`xl` missing** |
 | `AppStroke` | ❌ **none** | ✅ 3 canonical widths + kit parity; ⚠️ `selectionControl` unasserted | ✅ 3 of 4 (`selectionControl` not in kit — argued) | ✅ focus contrast | ❌ **absent** |
 | `AppElevation` | ❌ **none** | ✅ excellent — scale, both modes, rim shape, drop shape, L\* re-derived | ⚠️ **light ✅ / dark pins the stale kit (G-15)** | ✅ goldens both modes | ❌ **absent** |
-| `AppIconSize` | ~ via `no_raw_style_escape` + `MxIconSize` | ✅ `sm < md < lg`; ⚠️ `mdCompact` unordered | ✅ all 4 | ~ | ⚠️ **`mdCompact` missing** |
+| `AppIconSize` | ~ via `no_raw_style_escape` + `MxIconSize` | ✅ `sm < md < lg`; ⚠️ `mdCompact` unordered *(A13 P3-2)* | ✅ all 4 | ~ | ⚠️ **`mdCompact` missing** *(A13 P3-1)* |
 | `AppBreakpoints` | n/a | ✅ ordered | ✅ both | ✅ compact-scale suite | ✅ both |
 
 ### 11.2 · The four coverage gaps, ranked
@@ -1000,13 +1024,12 @@ it is protecting cannot fail when the token moves.
 | **G-4** | **P2** | `deckTileGutter` duplicates `mxScreenGutter` against its own stated reason for being public | `mx_content_shell.dart:378-385` · `deck_tile_widget.dart:311-314` | `AppBreakpoints.isCompact` appears only in `shared/` and `core/theme/` |
 | **G-10** | **P2** | `AppStroke.input` names a component; 3 of its 5 call sites are not inputs | `guess_option_item_widget.dart:84` · `match_tile_widget.dart:241` | Doc, or rename kit + Dart + parity test together |
 | **G-19** | **P2** | The spacing guard sees inline literals only; all 25 feature geometry constants sit in its blind spot, including both real violations | `memox-design-token-rules.yaml:56-76` vs §2.3 | Scan test classifying `const double` declarations, structural ones on the 4 dp grid |
-| **G-20** | **P2** | Two rendered icon sizes (18, 32) outside `AppIconSize`, both admitted in comments | `card_tile_widget.dart:30, 249-254` · `card_import_result_widget.dart:170-172` | Scan: no bare `Icon(size:)` in `lib/` |
 | **G-6** | **P2** | Two button minimum widths (64 global, 80 deck) with no relationship between them | `app_button_themes.dart:47-49` · `deck_study_button_widget.dart:11` | Deck test asserts `>= AppSizing.buttonMinWidth` too |
 | **G-16** | **P2** | `materialShadowColor` claims to be the only brightness-dependent channel; two others exist and are both correct | `app_card_theme.dart:55` · `app_backdrop_recipe.dart:14` | Doc-only |
 | **G-2** | **P3** | Three spacing rung comments name a minority of their call sites | §3.1 table | Doc-only |
 | **G-3** | **P3** | Vertical rhythm is 235 spacer widgets vs 26 `Flex.spacing` — unauditable structurally | scanner counts | none proposed |
 | **G-7** | **P3** | `MxBreadcrumb` accepts `lineHeight: 32` with tappable steps; only convention prevents it | `mx_breadcrumb.dart:79, 312` · `mx_breadcrumb_step.dart:81` | Constructor assertion + widget test |
-| **G-8** | **P3** | `AppRadius.xl` and `AppIconSize.mdCompact` missing from the Widgetbook token catalog; the coverage test checks components only | `scale_sections.dart:65-68, 89-91` · `widgetbook_coverage_test.dart:67` | Extend coverage test to token members |
+| **G-8** | **P3** | `AppRadius.xl` has neither a Widgetbook row nor an ordering assertion; the coverage test checks components only. (`mdCompact`'s equivalent is A13's P3-1/P3-2, not restated) | `scale_sections.dart:65-68` · `design_tokens_test.dart:47-49` · `widgetbook_coverage_test.dart:67` | Extend coverage test to token members |
 | **G-9** | **P3** | Radius guard is `warning` where the spacing guard beside it is `error` | `memox-design-token-rules.yaml:128` | Raise to error — zero violations today |
 | **G-13** | **P3** | `MxSearchField`'s boundary is an implicit 1.0 where every other input is `AppStroke.input` (1.5) | `mx_search_field.dart:124-127` vs `app_input_theme.dart:58` | State the width as a token |
 | **G-17** | **P3** | `AppElevation.overlay` documented as having "no production caller" — true of `shadowsFor`, false of the level | `app_elevation.dart:156-161` | Doc-only, rides with G-14 |
@@ -1051,7 +1074,7 @@ Dart owns the drop, and have the parity test assert exactly that split.
 **Goldens move here.** Dark FAB appears in at least two committed demos. Linux is the
 only authoring platform.
 
-### Pass 3 — own the 32 dp tier (G-5, G-1, G-20)
+### Pass 3 — own the 32 dp tier (G-5, G-1)
 
 The largest pass and the one that needs a decision before any code.
 
@@ -1064,8 +1087,11 @@ The largest pass and the one that needs a decision before any code.
    *"no screen renders"* — but six screens render this one, which is the same evidence
    that justified `controlCompact` at M100.30. The argument for adding it is stronger
    than the argument that created the last one.
-3. Does `AppIconSize` gain a 32 rung, or does the import result's hero glyph move to
-   `lg` (40)?
+3. The icon-size half of the same call site is **A13's**, not this pass's — its **P2-7**
+   already recommends the hero glyph move to `MxIconSize.lg` (40), the rung that role
+   uses everywhere else. Sequence the two so the `AppSpacing.xxl` at
+   `card_import_result_widget.dart:172` is removed once, by whichever pass lands first,
+   rather than twice.
 
 | File | Change |
 |---|---|
@@ -1074,7 +1100,7 @@ The largest pass and the one that needs a decision before any code.
 | 4 × `lib/features/card/presentation/widgets/**` | the wells become call sites or read the token |
 | `lib/core/theme/components/selection/app_chip_theme.dart` | `_containerHeight` reads the token |
 | `lib/shared/widgets/mx_breadcrumb.dart` | `compactLineHeight` reads the token |
-| `widgetbook/lib/tokens/scale_sections.dart` | the tier, and the missing `AppRadius.xl` / `AppIconSize.mdCompact` rows |
+| `widgetbook/lib/tokens/scale_sections.dart` | the tier, and the missing `AppRadius.xl` row (G-8). `mdCompact`'s row is A13's P3-1 — same file, so land them together |
 | goldens | **regenerate** if any well's rendered size changes |
 
 ### Pass 4 — the stroke system (G-11, G-12, G-13, G-10, G-21)
@@ -1105,7 +1131,7 @@ The pass that converts this report into something CI holds.
 | `lib/features/deck/.../deck_tile_widget.dart` | `deckTileGutter` → `mxScreenGutter`; name the second step-down |
 | `lib/shared/widgets/mx_breadcrumb.dart` | the constructor assertion |
 | `lib/core/theme/foundations/app_spacing.dart` | rung comments as magnitudes-with-examples |
-| `test/core/theme/foundations/design_tokens_test.dart` | order `AppRadius.xl` and `AppIconSize.mdCompact`; assert `AppStroke` has exactly four members |
+| `test/core/theme/foundations/design_tokens_test.dart` | order `AppRadius.xl` (G-8); assert `AppStroke` has exactly four members. `mdCompact`'s ordering is A13's P3-2 — same file, land together |
 
 ---
 
@@ -1119,7 +1145,7 @@ what the code should look like rather than how it is written.
 | **D1** | How does the kit express dark depth now that it is a rim **plus** a drop? | (a) two CSS layers in the dark block; (b) kit declares the rim, header states Dart owns the drop, parity test asserts that split | **(a)** — the kit is the specification; a specification that declares half a decision is how this divergence started |
 | **D2** | One well or two? | (a) `MxMetricWell` grows a size axis, four copies become call sites; (b) two named tiers, both in `AppSizing` and the catalog | **(a)** — the shared widget's own doc already made this call once at M99.26 and was right |
 | **D3** | Does `AppSizing` gain a 32 rung? | (a) yes, `controlSmall` / `wellStandard`; (b) no — keep "two heights" and let the wells read `MxMetricWell` | **(a)** — six render sites is stronger evidence than the one that justified `controlCompact` |
-| **D4** | Does `AppIconSize` gain 32, and does the flag's 18 stay? | (a) add 32, move 18 → 20; (b) hero glyph → `lg` (40), flag → 20; (c) leave both | **(b)** — one new rung is one more decision; moving two outliers onto existing rungs is none |
+| **D4** | ~~Does `AppIconSize` gain 32?~~ **Deferred to A13**, which owns the icon vocabulary and whose P2-7 already answers it: the hero glyph moves to `MxIconSize.lg` (40), the rung its role uses everywhere else | — | Take A13's answer. Recorded here only because the call site it changes is the same one G-1 touches, so the two passes must not both edit it |
 | **D5** | `AppStroke.input` — rename or document? | (a) rename kit + Dart + parity test to the role; (b) doc-only note | **(a)** if pass 4 is being done anyway; the file already argues that a token names a role, not a component |
 | **D6** | `MxSearchField`'s boundary — decorative or control? | (a) `AppStroke.hairline` (1.0, no pixel change); (b) `AppStroke.input` (1.5, matches every other input) | **(b)** — it is a control and it is the app's most-used input; `strokeAlignOutside` means the extra 0.5 costs no layout |
 | **D7** | Is THRESHOLD (§2.2) accepted as a third category? | (a) yes, with the measurement-comment requirement; (b) no — force everything into two boxes | **(a)** — without it the classifier test in pass 5 has to special-case eight constants, and `minimumCellWidth`'s measured 90 becomes a violation |
