@@ -2,12 +2,18 @@
 
 | | |
 |---|---|
-| **Status** | report only — no production, theme, test, Widgetbook or golden file changed |
+| **Status** | active |
 | **Purpose** | Prove that no shared UI primitive or composition under `lib/shared/widgets/` fell between the prior deep audits — enumerate every file, map what is already covered, and audit everything that is not |
-| **Scope** | Every file in `lib/shared/widgets/` (43 files), their production callers under `lib/`, and the tests/Widgetbook/golden entries that cover them |
-| **Audited against** | `main` @ `3207e7b7e0d3a2ecefa5e6a85fed48a65890ba6b` (**BASE_SHA**) |
-| **Not in scope** | Re-auditing `MxCard`, `MxActionButton`/`MxTextButton`, `MxTextField`/`MxSearchField`, `MxListTile`/`MxRadioRows`/`MxCheckboxRow`/`MxSwitchRow`, `MxPillButton`/`MxFocusRing` beyond verifying composition boundaries — see §2 |
+| **Scope** | Every file in `lib/shared/widgets/` (43 files), their production callers under `lib/`, and the tests/Widgetbook/golden entries that cover them. Re-auditing `MxCard`, `MxActionButton`/`MxTextButton`, `MxTextField`/`MxSearchField`, `MxListTile`/`MxRadioRows`/`MxCheckboxRow`/`MxSwitchRow`, `MxPillButton`/`MxFocusRing` is out of scope beyond verifying composition boundaries — see §2 |
+| **Source of truth for** | Nothing yet. This is an audit report; every finding becomes a rule only once it lands in `docs/wbs.md` and the component it names |
+| **Depends on** | `docs/document-conventions.md` · `docs/architecture.md` (AD-12, AD-13, AD-15, AD-23) · `mx-action-button-deep-audit.md` · `mx-list-tile-deep-audit.md` · `mx-chip-pill-deep-audit.md` · `mx-text-field-deep-audit.md` (the four prior deep audits this one maps against, §2) |
+| **Updated by task** | — (audit only, no WBS entry consumed) |
 | **Last updated** | 2026-09-03 |
+
+**Report only.** No production, theme, test, Widgetbook or golden file was
+changed by this task — `docs/reviews/a14-shared-composition-audit.md` is the
+only file this branch adds. **Audited against** `main` @
+`3207e7b7e0d3a2ecefa5e6a85fed48a65890ba6b` (**BASE_SHA**).
 
 **Method.** Every file was read in full. Caller counts are `grep -rl` over
 `lib/features/**` and `lib/app/**` for each public class name or top-level
@@ -38,33 +44,40 @@ the row audit (`mx-list-tile-deep-audit.md`) already found and fixed for
 
 **The rest of the previously-unaudited inventory is in good shape.** Twenty-
 nine files were not the subject of any of the four prior deep audits. Of
-those, one is genuinely dead in production with zero test coverage
-(`mxWriteFailure` reachable-but-inert path — no, see correction below), one
-is a documented, deliberate zero-caller component (`MxAlertDialog`, tracked at
-WBS M99.59), and the remainder range from true primitives (`MxIcon`,
-`MxProgressBar`, `MxPressable`) through well-composed structural widgets
-(`MxContentShell`, `MxSessionTopBar`, `MxHeroCard`) to overlay plumbing
-(`MxFormHost`, `MxAsyncConfirmDialog`) — all correctly composing the lower
-primitives the four prior audits already cleared. Two components carry a
-known, self-documented defect that has not yet been closed (F5, F6). None
-qualifies as a misplaced feature widget — every file stayed generic across
-its own doc comment's stated reason for existing.
+those, one is a documented, deliberate zero-caller component (`MxAlertDialog`,
+tracked at WBS M99.59), and the remainder range from true primitives
+(`MxIcon`, `MxProgressBar`, `MxPressable`) through well-composed structural
+widgets (`MxContentShell`, `MxSessionTopBar`, `MxHeroCard`) to overlay
+plumbing (`MxFormHost`, `MxAsyncConfirmDialog`) — all correctly composing the
+lower primitives the four prior audits already cleared. A handful carry a
+known, self-documented defect that has not yet been closed (F3, F5, F6, F8,
+F9). None qualifies as a misplaced feature widget — every file stayed generic
+across its own doc comment's stated reason for existing.
 
-**Correction made during this audit, recorded rather than silently fixed:**
-the first pass of this audit flagged `lib/shared/widgets/mx_failure_labels_widget.dart`
-(`MxFailureLabels.mxWriteFailure`) as dead code, because
-`grep -rn "\.mxWriteFailure("` over `lib/features/` returned nothing. That
-grep was wrong: five feature-level extensions
-(`CardFailureLabels.cardWriteFailure`, `TagLabels.tagCatalogWriteFailure`,
-`DeckLabels.deckWriteFailure`, `SettingsLabels.settingsWriteFailure`,
-`TrashLabels.trashWriteFailure`) call `mxWriteFailure(` **unqualified**, from
-inside their own `BuildContext` extensions — a valid call with no `.` prefix,
-which the pattern missed entirely. `mxWriteFailure` is a live, well-adopted
-primitive with five production consumers. What survives from that near-miss
-is a real, narrower finding: **none of the five consumers, nor the shared
-extension itself, has a single test** — the "exhaustive switch, no `_` branch"
-safety property the doc comment leans on has never been exercised by a test
-that would catch a regression. **P2** — see F7.
+**Two corrections made during review, recorded rather than silently fixed —
+both from `chatgpt-codex-connector[bot]`'s review of this PR, verified before
+acting on them:**
+
+1. The first pass of this audit flagged `lib/shared/widgets/mx_failure_labels_widget.dart`
+   (`MxFailureLabels.mxWriteFailure`) as dead code, because
+   `grep -rn "\.mxWriteFailure("` over `lib/features/` returned nothing. That
+   grep was wrong: five feature-level extensions
+   (`CardFailureLabels.cardWriteFailure`, `TagLabels.tagCatalogWriteFailure`,
+   `DeckLabels.deckWriteFailure`, `SettingsLabels.settingsWriteFailure`,
+   `TrashLabels.trashWriteFailure`) call `mxWriteFailure(` **unqualified**,
+   from inside their own `BuildContext` extensions — a valid call with no `.`
+   prefix, which the pattern missed entirely. `mxWriteFailure` is a live,
+   well-adopted primitive with five production consumers — self-corrected
+   before this report first published, see F7 for what survived the
+   correction.
+2. **Confirmed by an external reviewer, not self-caught:** F7's first
+   published version additionally claimed "none of the five consumers... has
+   a single test." That was also wrong — `tag_delete_test.dart:135`,
+   `tag_rename_test.dart:148` and `card_selection_test.dart:242` each inject a
+   typed `Failure` through a fake repository and assert the exact mapped
+   sentence a production caller renders, and `trash_labels_test.dart` and
+   `deck_level_create_test.dart:206` do the same for their features. F7 below
+   is corrected to name what is actually untested — one wrapper, not five.
 
 **Shared → feature dependency boundary: clean.** `grep -rn "import.*features/"`
 and the `/app/` equivalent over `lib/shared/` return nothing. No finding here;
@@ -142,7 +155,7 @@ row, blank if none.
 | `mx_dialog_metrics.dart` | 58 | `MxDialogMetrics` | 0\* | 2 | 0 | **none** |
 | `mx_form_sheet.dart` | 102 | `showMxFormSheet`, `MxFormHost` | 5 / 1 | 2 | 0 | **none — F9** |
 | `mx_sheet_insets.dart` | 64 | `MxSheetInsets`, `mxSheetBottomObstruction` | 2 / 1 | 2 | 1 | **none** |
-| `mx_failure_labels_widget.dart` | 60 | `MxFailureLabels` (`mxWriteFailure`) | 5\*\* | 0 | 0 | **none — F7** |
+| `mx_failure_labels_widget.dart` | 60 | `MxFailureLabels` (`mxWriteFailure`) | 5\*\* | 0\*\*\* | 0 | **none — F7** |
 | `mx_messenger.dart` | 63 | `showMxMessage`, `showMxMessageOn` | 5 / 2 | — | — | **none** |
 | `mx_undo_snack_bar.dart` | 54 | `showMxUndoSnackBar`, `kMxUndoDuration` | 2 | — | — | **none** |
 
@@ -152,6 +165,8 @@ design — they are internal composition helpers consumed only by
 themselves in `lib/shared/widgets/`. Not a finding; see §5.6.
 \*\* `mxWriteFailure` callers are unqualified in-extension calls; see §1's
 correction.
+\*\*\* No test names `mxWriteFailure` directly, but its mapping is exercised
+behaviorally through 5 tests in 4 features; see F7 (corrected).
 
 ---
 
@@ -346,30 +361,52 @@ informational only.
 
 ---
 
-### F7 — `mxWriteFailure` and its five feature wrappers have zero test coverage (P2)
+### F7 — `settingsWriteFailure` is the one of five wrappers with no behavioral test of its rendered mapping (P3)
 
-**Evidence.** See §1's correction for the caller count (5, not 0).
-`grep -rl "mxWriteFailure" test/` and
-`grep -rl "cardWriteFailure\|deckWriteFailure\|trashWriteFailure\|settingsWriteFailure\|tagCatalogWriteFailure" test/`
-both return nothing. The shared extension's own doc comment
-(`mx_failure_labels_widget.dart:12-18`) states its entire value proposition is
-the exhaustive `switch` with no `_` branch — a compile-time guarantee that a
-new `Failure` subtype cannot silently fall through. That guarantee is real and
-enforced by the compiler regardless of tests. What is untested is the
-*mapping* itself: whether `NotFoundFailure`/`ConflictFailure` route to the
-right feature-supplied callback, and whether the five feature-level
-extensions (`CardFailureLabels`, `TagLabels`, `DeckLabels`,
-`SettingsLabels`, `TrashLabels`) correctly narrow their own `ConflictFailure`
-reasons. A rename or a reordering that silently swapped `onNotFound` and
-`onConflict` at any of the five call sites would compile clean and fail
-nothing in CI.
+**Evidence, corrected.** This report first claimed none of the five
+`mxWriteFailure` consumers had a single test, based on
+`grep -rl "mxWriteFailure\|cardWriteFailure\|deckWriteFailure\|trashWriteFailure\|settingsWriteFailure\|tagCatalogWriteFailure" test/`
+returning nothing. That grep only finds tests that call the mapping function
+*by name*; it misses every test that exercises the mapping *behaviorally* —
+inject a typed `Failure` through a fake repository, drive the real screen, and
+assert the rendered sentence. `chatgpt-codex-connector[bot]`'s review of this
+PR caught the gap and named three such tests; checking them confirms all
+three, plus two more found while correcting this entry:
 
-**Classification.** True primitive, correctly adopted, under-tested. **P2** —
-dimension 8 (test coverage) gap on a component whose only stated safety
-property is otherwise unverified at the mapping level. Closure: one test per
-feature wrapper asserting `NotFoundFailure` and each `ConflictFailure` reason
-map to the expected string, following the pattern already used for the
-`_labels_widget.dart` files that do have tests elsewhere in the codebase.
+| Feature | Test | What it injects | What it asserts |
+|---|---|---|---|
+| Card (tag catalog) | `tag_delete_test.dart:135-149` | `NotFoundFailure(reason: tagMissing)` | `'That tag no longer exists.'` |
+| Card (tag catalog) | `tag_rename_test.dart:143-154` | `NotFoundFailure(reason: tagMissing)` | `'That tag no longer exists.'` |
+| Card (bulk write) | `card_selection_test.dart:241-256` | `DatabaseFailure` | `english.writeErrorMessage` (the generic-fallback branch) |
+| Deck | `deck_level_create_test.dart:206` | a conflicting create | `english.deckConflictMessage` |
+| Trash | `trash_screen_restore_test.dart:187-200` | `ConflictFailure(reason: targetNoLongerValid)` | `english.trashConflictTargetNoLongerValid` — the reason, not `Failure.message` |
+
+`trash_labels_widget.dart` additionally has a dedicated unit test
+(`trash_labels_test.dart`) for `TrashLabels.trashMoveRejection` — a sibling
+mapping in the same file, over a `DeckMoveRejection` rather than a `Failure`.
+
+**What is still actually untested**, after this correction:
+`settings_labels_widget.dart`'s `settingsWriteFailure`.
+`settings_write_controller_test.dart` asserts the controller's `state.failure`
+`isA<DatabaseFailure>()` (lines 108, 160, 217) but never renders the screen
+far enough to assert the mapped string — `grep -rn "settingsWriteFailure\|writeErrorMessage" test/features/settings/`
+finds nothing that asserts rendered copy. And across all five wrappers, no
+test was found that exercises more than one `ConflictFailure` reason per
+feature, so branches beyond the one each of the tests above happens to cover
+remain unverified — that residual gap is real, just far narrower than "zero
+coverage."
+
+**Classification.** True primitive, correctly adopted, mostly tested through
+production callers rather than through direct unit tests of the mapping
+function itself — a legitimate testing style (behavioral tests catch what the
+compiler-enforced exhaustiveness cannot: whether a feature's own switch routes
+the right reason to the right copy) and not the coverage gap first reported
+here. **Downgraded P2 → P3**: the residual gap is one wrapper
+(`settingsWriteFailure`) with no behavioral test, plus unverified
+multi-reason branch coverage on the other four. Closure: one
+`settings_write_controller`-level or widget-level test asserting the rendered
+string for a `settingsWriteFailure` call, matching the pattern the other four
+features already use.
 
 ---
 
@@ -441,7 +478,7 @@ owner as a stale deferral condition**, not as a defect of this component.
 | `MxDialogMetrics` | Dialog inset/actions-padding constants | 0\* | Shared | `AppSpacing` | N/A | N/A | N/A (all `static const`) | 2 test, 0 WBook | **Legitimate helper** |
 | `showMxFormSheet`/`MxFormHost` | Bottom-sheet form host with keyboard inset | 5/1 | Shared, generic on `P extends Enum` | Composes `MxSheetInsets` | Owns `shouldClose`-vs-`succeeded` transition (documented past bug: closing on `savedAndContinue`) | `isScrollControlled` + `max(viewInsets, viewPadding)` — documented fix for a keyboard-covers-submit bug | None | 2 test, 0 WBook | **True primitive** — see F9 |
 | `MxSheetInsets`/`mxSheetBottomObstruction` | Bottom-sheet content padding | 2/1 | Shared | `AppSpacing` | N/A | `max`, not sum, of keyboard vs. system-bar inset — documented fix for 3 divergent hand-written copies | None | 2 test, 1 WBook | **True primitive** |
-| `MxFailureLabels` (`mxWriteFailure`) | `Failure`-type → localized copy, exhaustive switch | 5\*\* | Shared | `core/error/failure.dart`, `l10n` | N/A (pure function) | N/A | Two required callbacks (`onNotFound`, `onConflict`) — closed by construction | 0 test | **True primitive, under-tested — see F7** |
+| `MxFailureLabels` (`mxWriteFailure`) | `Failure`-type → localized copy, exhaustive switch | 5\*\* | Shared | `core/error/failure.dart`, `l10n` | N/A (pure function) | N/A | Two required callbacks (`onNotFound`, `onConflict`) — closed by construction | 0 direct test, 5 behavioral tests across 4 features (§5, F7) | **True primitive, mostly tested behaviorally — one wrapper untested, see F7** |
 | `showMxMessage`/`showMxMessageOn` | Transient message (`SnackBar`) | 5/2 | Shared | Framework `ScaffoldMessenger`/`SnackBar` | N/A | `liveRegion` announcement + queue-clear on every call (documented: unifies 7 divergent call sites) | `actionLabel`/`onAction` pair, asserted | — | **True primitive** (no dedicated test file found by name; exercised via caller tests — not independently verified, informational only, not scored as a gap given low complexity) |
 | `showMxUndoSnackBar`/`kMxUndoDuration` | Undo-window snackbar | 2/— | Shared, "knows nothing about Trash" | Framework `ScaffoldMessenger`/`SnackBar` | N/A | 8s window (2× Material default, documented reasoning: large-text-scale reading time); one-shot `onUndo` | Message/label/callbacks all caller-supplied | — | **True primitive** |
 | `MxPressable`/`MxPressableShape` | Ripple leg for a custom interactive surface | — | Shared | `AppRadius`, `AppSizing` | Floors content at `AppSizing.touchTarget` | Already the subject of the row audit's F13.4 (`Material(transparency)` shim asymmetry) | `shape` — closed enum | 4 test, 1 WBook | **True primitive** — touched by Row audit, not independently re-scored |
@@ -467,16 +504,20 @@ in the current tree; the boundary this task asked A14 to also check is clean.
 |---|---|---|---|---|---|
 | F1 | **P1** | `MxActionSheet` rows use raw `ListTile`, inheriting no row-overlay tokens and drawing **no focus ring** on a keyboard-focusable row | `mx_action_sheet.dart:149-186` | §5, F1 — confirmed only non-family raw `ListTile(` in `lib/shared/widgets/`; no focus test exists | Widget test asserting a focused enabled action-sheet row paints a visible ring / reports `isFocusable`, mirroring `mx_list_tile_test.dart`'s own focus-ring test |
 | F5 | **P2** | `MxDropdown` has no documented disabled/error-state decision, unlike every sibling primitive | `mx_dropdown.dart` | §5, F5 — 65 lines, no owner-review commentary, 1 test file | `mx_dropdown_test.dart` case for `onChanged: null`; a decision recorded on how a caller signals a validation error |
-| F7 | **P2** | `mxWriteFailure` and its 5 feature wrappers have zero test coverage of the actual failure→copy mapping | `mx_failure_labels_widget.dart`, `card_failure_labels_widget.dart`, `tag_labels_widget.dart`, `deck_labels_widget.dart`, `settings_labels_widget.dart`, `trash_labels_widget.dart` | §5, F7 — `grep` for test callers of all six symbols returns nothing | One test per feature wrapper for `NotFoundFailure` + every `ConflictFailure`/reason enum value |
 | F3 | **P3** | `mx_icon.dart`'s doc comment cites a stale `MxMetricWell` defect fixed at M100.5 | `mx_icon.dart:63-69` | §5, F3 | Doc-comment correction naming `wellColor` specifically (no test — documentation only) |
 | F6 | **P3** | `MxDialogHeader`/`MxDialogMetrics` have no standalone Widgetbook entry | `mx_dialog_tone.dart`, `mx_dialog_metrics.dart` | §5, F6 | None required — visual already catalogued via the 3 dialogs that consume them |
+| F7 | **P3** (downgraded from P2, corrected — see §1) | `settingsWriteFailure` is the one of five `mxWriteFailure` wrappers with no behavioral test of its rendered mapping; the other four are tested through production callers, not by name | `mx_failure_labels_widget.dart`, `settings_labels_widget.dart` | §5, F7 — corrected against `chatgpt-codex-connector[bot]`'s review; verified `tag_delete_test.dart:135-149`, `tag_rename_test.dart:143-154`, `card_selection_test.dart:241-256`, `deck_level_create_test.dart:206`, `trash_screen_restore_test.dart:187-200` all assert rendered mapped copy | A `settings_write_controller`-level or widget-level test asserting the rendered string for a `settingsWriteFailure` call |
 | F8 | **P3** | `MxAsyncConfirmDialog` has no Widgetbook entry | `mx_async_confirm_dialog.dart` | §5, F8 | Optional — add if the next overlay pass touches this file |
 | F9 | **P3** | M4.10as's stated Widgetbook-deferral trigger ("when Card's editor exists") has already occurred | `mx_form_sheet.dart` | §5, F9 | Owner decision: add the deferred entry now that Card's editor is live, or re-state the deferral condition |
 | F2 | informational | `MxAlertDialog`/`showMxAlert`: zero callers, verified deliberate (WBS M99.59) | `mx_alert_dialog.dart` | §5, F2 | None — not a defect |
 | §4 | verified clean | Composition boundaries on Card/Button/Row/Chip/Input families | multiple | §4 | None — no violation found |
 | §7 | verified clean | Shared → feature import boundary | `lib/shared/**` | §7 | None — zero violations |
 
-**0 P0. 1 P1. 2 P2. 5 P3 (4 of which are informational/no-code-change).**
+**0 P0. 1 P1. 1 P2. 6 P3 (4 of which are informational/no-code-change).**
+Two corrections were made to this report before it was considered final — one
+self-caught (§1.1), one from an external bot reviewer on the PR and verified
+before being accepted (§1.2, F7). Both are recorded rather than silently
+edited away.
 
 ---
 
@@ -493,18 +534,16 @@ does not have to re-derive priority.
    `mx_action_sheet.dart`, possibly `mx_list_tile.dart`,
    `test/shared/widgets/mx_surface_components_test.dart` or a new
    `mx_action_sheet_test.dart`.
-2. **F7 (P2)** — test-only change, no owner decision needed, safe to batch
-   with any other work touching the five `*_labels_widget.dart` files. Files:
-   five new/extended test files under each feature's `presentation/widgets/support/`
-   test mirror.
-3. **F5 (P2)** — needs an owner decision on how `MxDropdown` should surface a
+2. **F5 (P2)** — needs an owner decision on how `MxDropdown` should surface a
    validation error (a new optional slot vs. leaving it to the caller's
    surrounding row) before any code changes; documentation-only fix (rationale
    comment) can land without that decision.
-4. **F3, F6, F8, F9 (P3)** — no urgency; bundle with whichever pass next
-   touches each file. F9 specifically needs an owner call on whether the
-   Widgetbook deferral condition in `docs/wbs.md` M4.10as should be closed now
-   or re-justified.
+3. **F3, F6, F7, F8, F9 (P3)** — no urgency; bundle with whichever pass next
+   touches each file. F7 is test-only (one test for `settingsWriteFailure`'s
+   rendered mapping, matching the pattern the other four features already
+   use). F9 specifically needs an owner call on whether the Widgetbook
+   deferral condition in `docs/wbs.md` M4.10as should be closed now or
+   re-justified.
 
 ---
 
@@ -515,6 +554,8 @@ file was changed by this task — `docs/reviews/a14-shared-composition-audit.md`
 is the only file this branch adds.** Every file under `lib/shared/widgets/`
 has been enumerated, mapped to prior coverage or audited fresh, and the
 shared→feature boundary has been verified clean. One P1 (composition boundary
-+ accessibility), two P2s (test coverage, documentation debt) and five P3s
-(four informational) are open for a future implementation pass; none blocks
-anything currently in flight.
++ accessibility), one P2 (documentation debt) and six P3s (four informational)
+are open for a future implementation pass; none blocks anything currently in
+flight. Two findings were corrected during review — one self-caught, one
+confirmed from an external bot reviewer on the PR — and both corrections are
+recorded in §1 and F7 rather than silently applied.
