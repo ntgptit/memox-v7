@@ -16990,7 +16990,7 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
     API chết (`flush`, `isSubmitting`, `isEnabled`, `cupertino_icons`), ba
     ruleset chết, prose cũ, catalogue token, `namesRoute`, `MxIcon` test,
     assert sàn chạm của breadcrumb, ghi nhận không có keyboard primitive.
-  - **Phase 9** — xác minh đầy đủ: golden trên Linux 321/321 sau khi vẽ lại (107 ảnh đổi: 103 vẽ lại, 4 HC mới); gallery republish tại URL
+  - **Phase 9** — xác minh đầy đủ: golden trên Linux 325/325 sau khi vẽ lại (321 lúc START + 4 HC) (107 ảnh đổi: 103 vẽ lại, 4 HC mới); gallery republish tại URL
     ghim; CI.
 - **Quyết định đáng ghi:**
   - **Contrast không sweep bằng `textContrastGuideline`** ở bốn sweep mới —
@@ -17025,7 +17025,7 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
   - [x] `dart format`, `flutter analyze` (app + widgetbook), `check_docs.py`,
         `check_architecture.py`, guard 84 rule, 195 probe pytest đều xanh.
   - [x] Host suite không golden: 4740/4740.
-  - [x] Golden suite trên Linux: 321/321 sau khi vẽ lại; không tolerance.
+  - [x] Golden suite trên Linux: 325/325 sau khi vẽ lại; không tolerance.
   - [x] Gallery republish từ golden của nhánh tại URL ghim.
   - [ ] `integration_test/` trên emulator: NOT RUN (không có thiết bị trong
         phiên); nhánh không đổi luồng nghiệp vụ nào tám kịch bản đi qua.

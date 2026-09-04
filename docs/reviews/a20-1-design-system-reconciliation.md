@@ -979,7 +979,7 @@ architecture never had; the denominator drops from 23 to 22 accordingly.
 | 3 | Active guard green | ✅ 84 rules |
 | 4 | `check_docs.py` green | ✅ |
 | 5 | Codegen fresh | ✅ |
-| 6 | Golden suite green on Linux | ✅ 321 / 321 on Linux (WSL Ubuntu 24.04, Flutter 3.44.8) after regeneration — 107 pictures changed: 103 regenerated, 4 new high-contrast screens; compare → regenerate → compare again |
+| 6 | Golden suite green on Linux | ✅ 325 / 325 on Linux (WSL Ubuntu 24.04, Flutter 3.44.8) after regeneration — 321 at START_SHA plus the 4 HC screens — 107 pictures changed: 103 regenerated, 4 new high-contrast screens; compare → regenerate → compare again |
 | 7 | Widgetbook smoke green | ✅ `widgetbook/`: analyze clean, smoke test green |
 | 8 | `integration_test/` 8 of 8 on a device | ⚠️ NOT RUN — no emulator in the closure session; the eight scenarios are unchanged by this branch |
 | 9 | Every shared component in the catalogue | ✅ |

@@ -3198,7 +3198,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 185,
+      "line": 194,
       "widget_context": "_ProgressRing",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3209,7 +3209,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 186,
+      "line": 195,
       "widget_context": "_ProgressRing",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -3396,7 +3396,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_session_top_bar.dart",
-      "line": 231,
+      "line": 236,
       "widget_context": "_Chip",
       "element_kind": "background",
       "source_kind": "theme-token",
