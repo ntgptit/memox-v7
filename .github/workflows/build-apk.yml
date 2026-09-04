@@ -1,0 +1,136 @@
+name: Build APK
+
+# An installable APK, on demand, downloadable from the Actions tab.
+#
+# **Why this exists.** A release APK for this app is ~37MB — `libflutter.so` and
+# `libapp.so` are 21MB of it and the CJK fallback faces (NotoSansKR / JP / SC,
+# already subset) are another 15MB. That is over the 30MB the assistant's chat
+# transport accepts, so a locally built APK cannot be handed to a phone that
+# way. A workflow artifact has no such limit and is reachable from any device
+# signed in to GitHub.
+#
+# **Manual only.** `workflow_dispatch` and nothing else: this builds no
+# contract, gates no merge and would only burn runner minutes on every push.
+# The PR pipeline in `ci.yml` stays the thing that decides whether a change is
+# correct; this decides nothing.
+#
+# **Debug-signed, and that is a fact about the repo, not a shortcut taken
+# here.** `android/app/build.gradle.kts` still points the release build type at
+# `signingConfigs.getByName("debug")` with its own TODO. Consequences the
+# downloader needs to know, both stated on the artifact:
+#   - "Install from unknown sources" must be allowed for whatever opens the file;
+#   - an APK signed with the debug key cannot be upgraded over by a future
+#     production build signed with a real key — Android refuses a signature
+#     change, so it would have to be uninstalled first.
+# The `development` flavor's `.dev` applicationId suffix is what keeps that from
+# ever mattering: it cannot collide with a production install.
+on:
+  workflow_dispatch:
+    inputs:
+      flavor:
+        description: 'Product flavor (development = ".dev" suffix, cannot collide with a production install)'
+        type: choice
+        default: development
+        options: [development, staging, production]
+      split_per_abi:
+        description: 'One APK per ABI (smaller; arm64-v8a suits essentially every current phone)'
+        type: boolean
+        default: true
+
+concurrency:
+  group: build-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  apk:
+    name: build ${{ inputs.flavor }} release APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Gradle needs a JDK of its own; `kotlin.compilerOptions.jvmTarget` in
+      # `android/app/build.gradle.kts` is JVM_17, so this is not a free choice.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # `flutter-version-file` rather than a literal: `.fvmrc` is where this
+      # repo's version lives, and a second copy here is a second thing to keep
+      # in step with it.
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: .fvmrc
+          cache: true
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:'
+
+      - name: cache build_runner
+        uses: actions/cache@v4
+        with:
+          path: .dart_tool/build
+          key: build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}-${{ github.sha }}-apk
+          restore-keys: |
+            build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}-
+
+      - name: pub get
+        run: flutter pub get
+
+      # **Not optional, and the reason is in `.gitignore`.** Generated code is
+      # not committed, so a fresh checkout has no `.g.dart`, no `.freezed.dart`
+      # and no l10n output. Skipping this step does not produce a smaller APK;
+      # it produces a build that cannot resolve `_$…Controller` or any
+      # `AppLocalizations` getter, which is the failure a cold clone always
+      # hits first.
+      - name: generate
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      # Args assembled in the shell rather than spliced by an expression: a
+      # false `split_per_abi` left a dangling line-continuation behind the
+      # flavor argument, which is the kind of breakage that only shows up the
+      # first time somebody unticks the box.
+      - name: build APK
+        env:
+          FLAVOR: ${{ inputs.flavor }}
+          SPLIT: ${{ inputs.split_per_abi }}
+        run: |
+          set -euo pipefail
+          args=(--release --flavor "$FLAVOR")
+          if [ "$SPLIT" = 'true' ]; then
+            args+=(--split-per-abi)
+          fi
+          echo "flutter build apk ${args[*]}"
+          flutter build apk "${args[@]}"
+
+      # Which ABI to install, without needing the workflow log open.
+      - name: summarise
+        run: |
+          {
+            echo "### ${{ inputs.flavor }} release APK"
+            echo
+            echo "Built from \`${GITHUB_SHA:0:8}\` on \`${GITHUB_REF_NAME}\`."
+            echo
+            echo '| file | size |'
+            echo '|---|---|'
+            for f in build/app/outputs/flutter-apk/*.apk; do
+              printf '| `%s` | %s |\n' "$(basename "$f")" "$(du -h "$f" | cut -f1)"
+            done
+            echo
+            echo '**arm64-v8a** is the one for essentially every current phone.'
+            echo 'Signed with the debug key: allow "Install from unknown sources",'
+            echo 'and note it cannot be upgraded over by a production-signed build.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: memox-${{ inputs.flavor }}-apk-${{ github.sha }}
+          path: build/app/outputs/flutter-apk/*.apk
+          if-no-files-found: error
+          # Long enough to install from a phone at leisure, short enough that
+          # debug-signed binaries do not accumulate indefinitely.
+          retention-days: 14
