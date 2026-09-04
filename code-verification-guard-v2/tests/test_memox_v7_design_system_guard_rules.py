@@ -99,3 +99,86 @@ def test_no_raw_choice_chip_leaves_the_allowed_chips_alone(tmp_path: Path) -> No
     MxPillButton(label: label, isSelected: isSelected, onPressed: onPick),
     """
     assert not _violations(CHOICE_CHIP, tmp_path, good)
+
+
+SHEET_ROUTE = "memox_v7.design_system.no_raw_sheet_route"
+LOADING = "memox_v7.design_system.no_raw_loading_indicator"
+RESTYLE = "memox_v7.design_system.no_text_restyle"
+
+
+def test_no_raw_sheet_route_goes_red_on_a_raw_route(tmp_path: Path) -> None:
+    bad = """
+    final chosen = await showModalBottomSheet<DeckListSort>(
+      context: context,
+      builder: (sheetContext) => MxActionSheet(actions: actions),
+    );
+    showBottomSheet(context: context, builder: (_) => child);
+    """
+    assert _violations(SHEET_ROUTE, tmp_path, bad)
+
+
+def test_no_raw_sheet_route_leaves_the_owner_and_prose_alone(tmp_path: Path) -> None:
+    good = """
+    // showModalBottomSheet( used to be called here; showMxSheet owns it.
+    final chosen = await showMxSheet<DeckListSort>(
+      context,
+      builder: (sheetContext) => MxActionSheet(actions: actions),
+    );
+    """
+    assert not _violations(SHEET_ROUTE, tmp_path, good)
+
+
+def test_no_raw_loading_indicator_goes_red_on_a_bare_spinner(tmp_path: Path) -> None:
+    bad = """
+    child: const CircularProgressIndicator(),
+    child: LinearProgressIndicator(),
+    child: CircularProgressIndicator.adaptive(),
+    """
+    assert _violations(LOADING, tmp_path, bad)
+
+
+def test_no_raw_loading_indicator_leaves_the_family_and_prose_alone(tmp_path: Path) -> None:
+    good = """
+    // A bare CircularProgressIndicator( announces nothing.
+    child: MxLoadingState.inline(semanticsLabel: label),
+    child: MxLoadingState(semanticsLabel: label),
+    """
+    assert not _violations(LOADING, tmp_path, good)
+
+
+def test_no_raw_loading_indicator_excludes_the_determinate_ring() -> None:
+    rule = _rule_config(LOADING)
+    assert rule["exclude"] == [
+        "**/card/presentation/widgets/sections/card_progress_panel_widget.dart"
+    ]
+
+
+def test_no_text_restyle_sees_all_four_spellings_across_lines(tmp_path: Path) -> None:
+    for bad in (
+        "style: context.texts.bodySmall?.copyWith(color: colors.error),",
+        "style: context.textStyles.sectionLabel.copyWith(color: colors.onSurfaceVariant),",
+        "style: Theme.of(context).textTheme.bodySmall?.copyWith(color: c),",
+        """
+    style: AppTypography.withWeight(
+      context.texts.labelMedium!,
+      FontWeight.w600,
+    ).copyWith(
+      color: ink,
+    ),
+    """,
+    ):
+        assert _violations(RESTYLE, tmp_path, bad), bad
+
+
+def test_no_text_restyle_accepts_inked_and_prose(tmp_path: Path) -> None:
+    good = """
+    // texts.bodySmall!.copyWith( is the spelling this rule refuses.
+    style: context.texts.bodySmall!.inked(context, AppInk.quiet),
+    style: AppTypography.withWeight(
+      context.texts.labelMedium!,
+      FontWeight.w600,
+    ).inked(context, AppInk.stated).copyWith(
+      fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
+    ),
+    """
+    assert not _violations(RESTYLE, tmp_path, good)
