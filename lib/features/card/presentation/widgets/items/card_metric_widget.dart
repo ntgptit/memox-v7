@@ -123,14 +123,13 @@ TextStyle cardMetricValueStyle(BuildContext context, CardMetricKind kind) {
       AppInk.stated,
       isTabular: true,
     ),
-    CardMetricKind.schedulerProgress =>
-      base
-          .copyWith(
-            // 6.36:1 light and 4.66:1 dark on `surfaceMuted`, 7.27 / 5.51 on
-            // `surface` — the accent as text (`AppInk.accent` is `primary`, which
-            // since M100.18 reads as text on the dark panel too).
-            fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
-          )
-          .inked(context, AppInk.accent),
+    // 6.36:1 light and 4.66:1 dark on `surfaceMuted`, 7.27 / 5.51 on
+    // `surface` — the accent as text (`AppInk.accent` is `primary`, which
+    // since M100.18 reads as text on the dark panel too).
+    CardMetricKind.schedulerProgress => base.inked(
+      context,
+      AppInk.accent,
+      isTabular: true,
+    ),
   };
 }
