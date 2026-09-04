@@ -5,8 +5,8 @@
 /// answer when this one is wrong. These three are floors and fixed extents: a
 /// touch target is not "one step below" anything, and inventing `controlSm` /
 /// `controlMd` / `controlLg` rungs nothing renders would be three decisions
-/// made without a screen to check them against, which is the rule
-/// `app_planned_themes.dart` already follows for component themes.
+/// made without a screen to check them against, which is the rule the
+/// unrendered component themes in `app_theme.dart` already follow.
 ///
 /// **Every value here already existed; none is new** (M100.29). Two were on
 /// `AppSpacing`, whose own header says it holds "every gap, pad and inset" —
@@ -42,7 +42,7 @@ abstract final class AppSizing {
   /// **Two heights, not a five-rung ladder.** 32 / 40 / 48 / 56 / 64 is the
   /// usual control scale and this app renders two of them; the other three
   /// would be sizes with no screen to check them against, which is the rule
-  /// `app_planned_themes.dart` already follows for component themes. It was a
+  /// the unrendered component themes in `app_theme.dart` already follow. It was a
   /// private `_kCompactHeight` in `mx_action_button.dart` until M100.30 — the
   /// one control dimension the design system could not see.
   static const double controlCompact = 40;

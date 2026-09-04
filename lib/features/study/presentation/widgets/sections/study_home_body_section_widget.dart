@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/foundations/app_breakpoints.dart';
 import '../../../../../core/theme/extensions/app_ink.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
@@ -12,6 +11,7 @@ import '../../../domain/models/study_home_model.dart';
 import '../items/study_home_deck_item_widget.dart';
 import 'study_home_resume_section_widget.dart';
 import '../../../../../shared/widgets/mx_section_label.dart';
+import '../../../../../shared/widgets/mx_reading_column.dart';
 
 /// Study Home once its read has landed: the two empty states, or the list.
 ///
@@ -119,8 +119,7 @@ class _StudyHomeList extends StatelessWidget {
         // reading column at, and a ceiling rather than a branch: below it the
         // layout is identical everywhere (AppBreakpoints.medium's own rule).
         Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: AppBreakpoints.medium),
+          child: MxReadingColumn(
             child: _StudyHomeColumn(
               home: home,
               onResume: onResume,

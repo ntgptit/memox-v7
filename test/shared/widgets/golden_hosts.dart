@@ -75,7 +75,6 @@ class _HostedModalSheetState extends State<HostedModalSheet> {
               MxActionSheetAction(
                 label: 'Move',
                 icon: Icons.drive_file_move_outlined,
-                isEnabled: false,
                 onPressed: noop,
               ),
               MxActionSheetAction(

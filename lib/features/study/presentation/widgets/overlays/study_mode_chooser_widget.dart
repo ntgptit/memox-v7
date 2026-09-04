@@ -56,9 +56,13 @@ class StudyModeChooserWidget extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Text(
-            context.l10n.studyChooseModeTitle,
-            style: context.texts.titleMedium,
+          // The sheet's title announces as a header (A20.1 P1-01, §23 #17).
+          Semantics(
+            header: true,
+            child: Text(
+              context.l10n.studyChooseModeTitle,
+              style: context.texts.titleMedium,
+            ),
           ),
           const SizedBox(height: AppSpacing.md),
           for (final mode in modes) _tile(context, mode),

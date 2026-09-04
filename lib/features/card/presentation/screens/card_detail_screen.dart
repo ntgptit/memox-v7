@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/error/failure.dart';
 import '../../../../core/navigation/route_names.dart';
-import '../../../../core/theme/foundations/app_breakpoints.dart';
 import '../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
@@ -21,6 +20,7 @@ import '../controllers/card_history_controller.dart';
 import '../widgets/sections/card_detail_summary_widget.dart';
 import '../widgets/sections/card_detail_state_widget.dart';
 import '../widgets/sections/card_history_section_widget.dart';
+import '../../../../shared/widgets/mx_reading_column.dart';
 
 /// Re-subscribes the content read after a failure (UC-19 E3).
 ///
@@ -222,8 +222,7 @@ class _Body extends ConsumerWidget {
       // the start of. `AppBreakpoints.medium` rather than a number invented
       // here, so the cap moves with the breakpoint it belongs to.
       child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: AppBreakpoints.medium),
+        child: MxReadingColumn(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,

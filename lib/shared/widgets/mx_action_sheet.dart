@@ -27,7 +27,6 @@ class MxActionSheetAction {
     required this.onPressed,
     this.icon,
     this.variant = MxActionSheetActionVariant.normal,
-    this.isEnabled = true,
     this.isSelected = false,
   });
 
@@ -37,11 +36,6 @@ class MxActionSheetAction {
   final VoidCallback onPressed;
   final IconData? icon;
   final MxActionSheetActionVariant variant;
-
-  /// `false` greys the row and blocks the callback. The row stays visible on
-  /// purpose: hiding an unavailable action makes the menu change shape between
-  /// visits, and the user cannot learn where anything is.
-  final bool isEnabled;
 
   /// Whether this row is the state the app is already in.
   ///
@@ -115,17 +109,12 @@ class _SheetRow extends StatelessWidget {
     final isDestructive =
         action.variant == MxActionSheetActionVariant.destructive;
 
-    // Disabled wins over destructive: a greyed row that is still red reads as
-    // available and dangerous, which is the worst of both.
-    // **The row names its ink rather than picking a colour** (M100.4). All
-    // three values were already `AppInk` members under the names the rest of
-    // the app uses them by; going through the enum is what stops the next
-    // colour here from being chosen instead of named.
-    final AppInk ink = !action.isEnabled
-        ? AppInk.disabled
-        : isDestructive
-        ? AppInk.danger
-        : AppInk.stated;
+    // **The row names its ink rather than picking a colour** (M100.4). Both
+    // values were already `AppInk` members under the names the rest of the
+    // app uses them by; going through the enum is what stops the next colour
+    // here from being chosen instead of named. (A disabled row left with
+    // `isEnabled` — A20.1 P3-11 — no production sheet ever showed one.)
+    final AppInk ink = isDestructive ? AppInk.danger : AppInk.stated;
 
     // **The row overlay and the ring, the same as every other row** (A20.1
     // P2-04). This was the one `ListTile` in `lib/shared/` outside the row
@@ -136,7 +125,6 @@ class _SheetRow extends StatelessWidget {
     return MxFocusRing(
       borderRadius: BorderRadius.circular(AppRadius.md),
       child: ListTile(
-        enabled: action.isEnabled,
         hoverColor: overlay.resolve(const <WidgetState>{WidgetState.hovered}),
         focusColor: overlay.resolve(const <WidgetState>{WidgetState.focused}),
         splashColor: overlay.resolve(const <WidgetState>{WidgetState.pressed}),
@@ -145,7 +133,7 @@ class _SheetRow extends StatelessWidget {
         // explicit flag is what makes "Recently studied, selected" the
         // announcement rather than "Recently studied".
         selected: action.isSelected,
-        onTap: action.isEnabled ? action.onPressed : null,
+        onTap: action.onPressed,
         leading: action.icon == null
             ? null
             // **Not `color`.** The label and the glyph were both `onSurface`, so a
@@ -156,10 +144,7 @@ class _SheetRow extends StatelessWidget {
             //
             // Destructive keeps the full colour: there the glyph is part of the
             // warning, and quieting it would leave red text beside a neutral bin.
-            : MxIcon(
-                action.icon!,
-                ink: isDestructive || !action.isEnabled ? ink : AppInk.quiet,
-              ),
+            : MxIcon(action.icon!, ink: isDestructive ? ink : AppInk.quiet),
         title: Text(
           action.label,
           style: context.texts.bodyLarge!.inked(context, ink),

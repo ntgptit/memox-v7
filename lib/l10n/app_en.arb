@@ -4293,10 +4293,6 @@
   "@deckPathAncestorsTitle": {
     "description": "Title of the sheet a long press on the deck path opens. It lists every ancestor of the open deck, so a reader can reach any level rather than only the one above."
   },
-  "deckPathAncestorsHint": "long press for all levels",
-  "@deckPathAncestorsHint": {
-    "description": "Screen-reader hint on the deck path line: tapping goes up one level, and long-pressing opens the list of every ancestor."
-  },
   "deckTileAllCaughtUpLabel": "All caught up",
   "@deckTileAllCaughtUpLabel": {
     "description": "The deck card’s one chip when a deck with cards has nothing pending: no reviews due and no new cards. It replaces the two zero chips, which stated the absence of work twice and said nothing."

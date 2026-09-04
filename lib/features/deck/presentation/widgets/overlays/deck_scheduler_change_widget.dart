@@ -86,7 +86,14 @@ class _SchedulerSheetState extends ConsumerState<_SchedulerSheet> {
     final l10n = context.l10n;
 
     return <Widget>[
-      Text(l10n.deckSchedulerLockedTitle, style: context.texts.titleLarge),
+      // The sheet's title announces as a header (A20.1 P1-01, §23 #17).
+      Semantics(
+        header: true,
+        child: Text(
+          l10n.deckSchedulerLockedTitle,
+          style: context.texts.titleLarge,
+        ),
+      ),
       const SizedBox(height: AppSpacing.md),
       Text(l10n.deckSchedulerLockedBody, style: context.texts.bodyMedium),
       const SizedBox(height: AppSpacing.lg),
@@ -156,7 +163,13 @@ class _SchedulerSheetState extends ConsumerState<_SchedulerSheet> {
     });
 
     return <Widget>[
-      Text(l10n.deckSchedulerChangeTitle, style: context.texts.titleLarge),
+      Semantics(
+        header: true,
+        child: Text(
+          l10n.deckSchedulerChangeTitle,
+          style: context.texts.titleLarge,
+        ),
+      ),
       const SizedBox(height: AppSpacing.md),
       // BR-14, in the user's terms: the schedules restart, the content does not
       // move. No second list, because nothing is being taken away.

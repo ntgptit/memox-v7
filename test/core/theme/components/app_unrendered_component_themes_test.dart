@@ -9,7 +9,7 @@ import '../../../support/color_math.dart';
 ///
 /// **What these can and cannot check.** No screen renders them, so there is no
 /// golden and no layout to assert. What there *is* — and what the admission
-/// test in `app_planned_themes.dart` turns on — is that every colour they use
+/// rule in `app_theme.dart` turns on — is that every colour they use
 /// was already decided and already measured. So each test below either compares
 /// a slot to the app's existing answer for the same question, or measures the
 /// pair the component will actually paint. A value that cannot be checked that

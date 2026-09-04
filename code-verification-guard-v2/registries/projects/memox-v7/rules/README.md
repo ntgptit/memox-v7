@@ -7,16 +7,17 @@ The main guard for the memox-v7 repository. It owns every check
 python code-verification-guard-v2/guard/run.py check --project . --ruleset memox-v7
 ```
 
-## Why this ruleset exists separately from `memox`, `memox-v4`, `memox-v5`
+## Why this ruleset exists separately from `memox`
 
-Those are for different repositories and different layouts, and none of them fit
-here:
+`memox-v4`, `memox-v5` and `memox-design-jsx` were vendored beside it for other
+repositories and were removed (A20.1 P3-06): none ran here, and a reader who
+guessed the name found rules bound to paths that matched nothing. `memox` stays
+for one reason — the guard's own test-suite exercises its rule engine through
+that ruleset — and it does not fit this repository either:
 
 | Ruleset | Why it does not apply |
 |---|---|
-| `memox`, `memox-v4` | Flutter, but a layer-first tree (`lib/presentation/features/**`, `lib/data/datasources/**`). memox-v7 is **feature-first**: `lib/features/<feature>/{domain,data,presentation}`. Every scope path differs, so the rules would silently match nothing. |
-| `memox-v5` | Expo + React Native. Different language entirely. |
-| `memox-design-jsx` | JSX design-kit rules. |
+| `memox` | Flutter, but a layer-first tree (`lib/presentation/features/**`, `lib/data/datasources/**`). memox-v7 is **feature-first**: `lib/features/<feature>/{domain,data,presentation}`. Every scope path differs, so the rules would silently match nothing. |
 
 They are deliberately **not vendored** into this repo — carrying them would make
 it easy to run the wrong one, and a ruleset that matches nothing reports a clean

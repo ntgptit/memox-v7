@@ -83,7 +83,11 @@ class MxBreadcrumb extends StatefulWidget {
     this.onShowAll,
     this.upIcon,
     super.key,
-  });
+  }) : assert(
+         lineHeight >= AppSizing.touchTarget || onUp != null,
+         'a strip below the touch floor must be one target: pass onUp '
+         '(A20.1 P3-13)',
+       );
 
   /// The compact line: a strip that is a *line of a header* rather than a band
   /// of its own.

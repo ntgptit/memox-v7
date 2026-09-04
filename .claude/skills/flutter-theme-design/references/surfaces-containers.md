@@ -120,7 +120,7 @@ meaning.
 - [ ] Semantics phát âm đúng.
 - [ ] Không expose color.
 
-Lưu ý repo: `badgeTheme` từng bị **từ chối** khỏi `app_planned_themes.dart` vì
+Lưu ý repo: `badgeTheme` từng bị **từ chối** khỏi nhóm component theme chưa có renderer (khi đó là `app_planned_themes.dart`) vì
 due-vs-overdue là một quyết định cần màn hình (BR-161) — mục này chỉ mở khi
 quyết định đó có screen để check.
 

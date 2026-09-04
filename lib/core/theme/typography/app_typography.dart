@@ -122,10 +122,16 @@ abstract final class AppTypography {
   /// The weight of the deck hero's numeral — **the app's fourth weight, and a
   /// deliberate exception.**
   ///
-  /// `headlineLarge` is `w600`, and the theme spends `w700` only on the two
-  /// display rungs (57 and 45), neither of which appears on the deck list. So
-  /// this is a feature overriding a type role, which is normally how a design
-  /// system stops being one.
+  /// `headlineLarge` is `w600`, and the scale spends `w700` only on the two
+  /// display rungs (57 and 45), neither of which appears on the deck list —
+  /// the button label reaches `w700` too, through `buttonLabelWeight`, but
+  /// that is a component theme re-weighting a rung, not a rung. So this is a
+  /// feature overriding a type role, which is normally how a design system
+  /// stops being one.
+  ///
+  /// **The registry is a test, not this comment** (A20.1 P1-10):
+  /// `app_typography_test.dart` enumerates every weight the built theme can
+  /// reach and names each `w700` source.
   ///
   /// It is kept because the numeral is the screen's only level-one emphasis:
   /// the deck list answers "what do I study today", and that answer is one

@@ -166,7 +166,14 @@ class _Body extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        Text(l10n.trashRestoreTargetTitle, style: theme.textTheme.titleMedium),
+        // The sheet's title announces as a header (A20.1 P1-01, §23 #17).
+        Semantics(
+          header: true,
+          child: Text(
+            l10n.trashRestoreTargetTitle,
+            style: theme.textTheme.titleMedium,
+          ),
+        ),
         const SizedBox(height: AppSpacing.md),
         Flexible(
           child: ListView.builder(

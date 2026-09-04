@@ -93,9 +93,6 @@ WidgetbookComponent actionSheetComponent() {
             label: 'title',
             initialValue: 'Deck actions',
           );
-          final isMoveEnabled = context.knobs.boolean(
-            label: 'second row enabled',
-          );
 
           return CatalogCenterPage(
             child: _SheetSurface(
@@ -107,11 +104,10 @@ WidgetbookComponent actionSheetComponent() {
                     onPressed: _noop,
                     icon: Icons.edit_outlined,
                   ),
-                  MxActionSheetAction(
+                  const MxActionSheetAction(
                     label: 'Move',
                     onPressed: _noop,
                     icon: Icons.drive_file_move_outlined,
-                    isEnabled: isMoveEnabled,
                   ),
                   const MxActionSheetAction(
                     label: 'Delete',
@@ -155,9 +151,10 @@ class _SheetSurface extends StatelessWidget {
 
 /// The form-in-a-dialog playground.
 ///
-/// The knobs worth turning together are `errorMessage` and `isSubmitting`: a
-/// refusal arriving while the previous attempt is still spinning is the state
-/// the hand-built version could not reach at all, because it had neither.
+/// The knob worth turning is `errorMessage`: a refusal is the state the
+/// hand-built version could not reach at all. (`isSubmitting` left with A20.1
+/// P3-11 — no production caller ever submitted through the dialog itself;
+/// the async confirm dialog owns that state.)
 WidgetbookComponent formDialogComponent() {
   return WidgetbookComponent(
     name: 'MxFormDialog',
@@ -173,7 +170,6 @@ WidgetbookComponent formDialogComponent() {
             label: 'errorMessage',
             initialValue: 'Tag name is too long.',
           );
-          final isSubmitting = context.knobs.boolean(label: 'isSubmitting');
           final tone = context.knobs.objectOrNull.dropdown<MxDialogTone>(
             label: 'tone',
             options: MxDialogTone.values,
@@ -187,7 +183,6 @@ WidgetbookComponent formDialogComponent() {
               title: title,
               tone: tone,
               errorMessage: errorMessage,
-              isSubmitting: isSubmitting,
               confirmLabel: 'Add',
               cancelLabel: 'Cancel',
               onConfirm: _noop,

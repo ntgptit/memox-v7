@@ -27,6 +27,10 @@ import 'package:flutter_test/flutter_test.dart';
 /// The files whose public widget APIs must stay closed. A new shared surface
 /// or action component joins this list in the same change that creates it.
 const List<String> kClosedApiFiles = <String>[
+  // `mx_metric_well.dart` is closed structurally (A20.1 P2-07: `AppInk` tint,
+  // `AppWellFill` fill) but is not listed: this scan's allowlist admits only a
+  // component's own enums, and widening it to token enums is the M100.37
+  // precedent this file declined — `app_well_fill_test.dart` pins the closure.
   'lib/shared/widgets/mx_card.dart',
   'lib/shared/widgets/mx_action_button.dart',
   // M100.36 (§14): the pill, the badge and the row joined when their APIs

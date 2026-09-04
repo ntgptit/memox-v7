@@ -272,9 +272,8 @@ ThemeData _buildTheme(ColorScheme scheme, AppSemanticColors semantic) {
     dialogTheme: buildDialogTheme(scheme, texts),
     bottomSheetTheme: buildBottomSheetTheme(scheme),
 
-    // The snack bar, from UC-05 — an overlay like the two above it, and the
-    // reason `app_modal_themes.dart` groups the three by behaviour rather than
-    // by widget class.
+    // The snack bar, from UC-05 — an overlay like the two above it; the
+    // three are grouped by behaviour rather than by widget class.
     snackBarTheme: buildSnackBarTheme(scheme, texts),
 
     progressIndicatorTheme: buildProgressIndicatorTheme(scheme),
@@ -294,9 +293,10 @@ ThemeData _buildTheme(ColorScheme scheme, AppSemanticColors semantic) {
 
     // Four components nothing renders yet. They are here rather than left to
     // Material because each one only restates a decision this app has already
-    // made and measured — the admission test, and the ones it turned away, are
-    // in `app_planned_themes.dart`. `theme_coverage_test.dart` is what stops
-    // the list growing on a hunch.
+    // made and measured — that is the admission rule, and
+    // `app_unrendered_component_themes_test.dart` measures each entry against
+    // it. `theme_coverage_test.dart` is what stops the list growing on a
+    // hunch.
     datePickerTheme: buildDatePickerTheme(scheme, semantic, texts),
     segmentedButtonTheme: buildSegmentedButtonTheme(scheme, semantic),
     sliderTheme: buildSliderTheme(scheme, semantic, texts),

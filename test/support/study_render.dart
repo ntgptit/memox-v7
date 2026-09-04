@@ -55,6 +55,7 @@ class ReviewApp extends StatelessWidget {
   const ReviewApp({
     required this.home,
     this.brightness = Brightness.light,
+    this.isHighContrast = false,
     this.locale,
     this.textScale = 1,
     super.key,
@@ -62,6 +63,10 @@ class ReviewApp extends StatelessWidget {
 
   final Widget home;
   final Brightness brightness;
+
+  /// The high-contrast pair the app wires beside light and dark — rendered
+  /// here so it has a picture (A20.1 P1-08).
+  final bool isHighContrast;
 
   /// Null follows the platform, which in a test is English. Pass `Locale('vi')`
   /// to render the translation — a review render is where a long translation
@@ -80,7 +85,12 @@ class ReviewApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MaterialApp(
     debugShowCheckedModeBanner: false,
-    theme: brightness == Brightness.dark ? buildDarkTheme() : buildLightTheme(),
+    theme: switch ((brightness, isHighContrast)) {
+      (Brightness.dark, true) => buildHighContrastDarkTheme(),
+      (Brightness.dark, false) => buildDarkTheme(),
+      (Brightness.light, true) => buildHighContrastLightTheme(),
+      (Brightness.light, false) => buildLightTheme(),
+    },
     locale: locale,
     localizationsDelegates: const <LocalizationsDelegate<Object>>[
       AppLocalizations.delegate,

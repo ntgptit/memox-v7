@@ -289,6 +289,10 @@ rules:
     patterns:
       - '^(?!\s*(?://|\*)).*\btexts\.[a-zA-Z]+[!?]?\s*\.copyWith\s*\('
       - '^(?!\s*(?://|\*)).*\btextStyles\.[a-zA-Z]+[!?]?\s*\.copyWith\s*\('
+      # `inputHintStyle` is a resolved style, consumed whole; a `.copyWith(`
+      # on it is the same restyle through the extension's fifth accessor
+      # (A20.1 P1-09).
+      - '^(?!\s*(?://|\*)).*\binputHintStyle[!?]?\s*\.copyWith\s*\('
       - '^(?!\s*(?://|\*)).*\btextTheme\.[a-zA-Z]+[!?]?\s*\.copyWith\s*\('
       - '\bwithWeight\s*\((?:[^()]|\([^()]*\))*\)\s*\.copyWith\s*\('
     tags:

@@ -31,7 +31,14 @@ class StudyResumeWidget extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        Text(context.l10n.studyResumeTitle, style: context.texts.titleMedium),
+        // The sheet's title announces as a header (A20.1 P1-01, §23 #17).
+        Semantics(
+          header: true,
+          child: Text(
+            context.l10n.studyResumeTitle,
+            style: context.texts.titleMedium,
+          ),
+        ),
         const SizedBox(height: AppSpacing.xs),
         Text(context.l10n.studyResumeBody, style: context.texts.bodyMedium),
         const SizedBox(height: AppSpacing.lg),

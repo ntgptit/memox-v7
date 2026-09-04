@@ -84,9 +84,13 @@ class _MoveTargetSheet extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Text(
-            context.l10n.cardMoveTargetTitle,
-            style: context.texts.titleMedium,
+          // The sheet's title announces as a header (A20.1 P1-01, §23 #17).
+          Semantics(
+            header: true,
+            child: Text(
+              context.l10n.cardMoveTargetTitle,
+              style: context.texts.titleMedium,
+            ),
           ),
           const SizedBox(height: AppSpacing.md),
           Flexible(

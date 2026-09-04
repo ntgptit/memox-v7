@@ -13,6 +13,7 @@ import '../../controllers/deck_write_controller.dart';
 import '../items/deck_tile_widget.dart';
 import '../overlays/deck_actions_widget.dart';
 import '../support/deck_undo_widget.dart';
+import '../../../../../shared/widgets/mx_scroll_end_inset.dart';
 
 /// Space under the last card, derived rather than chosen: the floating
 /// action's own height, the gap it keeps above the navigation bar, and one
@@ -23,7 +24,6 @@ import '../support/deck_undo_widget.dart';
 /// frame — see the screen's own note on M4.10ag. What it buys is that the last
 /// card's Study button is reachable once the list is scrolled home; the safe
 /// area is added at the call site, where the `MediaQuery` is.
-const double _kListBottomInset = AppSpacing.fabScrollClearance;
 
 /// The rows of one deck level, as a sliver.
 ///
@@ -74,9 +74,9 @@ class DeckListSliverWidget extends ConsumerWidget {
         AppSpacing.lg,
         0,
         AppSpacing.lg,
-        // The gesture inset too: on a device with a home indicator the last
-        // card would otherwise end under it.
-        _kListBottomInset + MediaQuery.viewPaddingOf(context).bottom,
+        // The shell knows whether a floating action sits over the list and
+        // answers the clearance, gesture inset included (A20.1 P2-18).
+        mxScrollEndInsetOf(context),
       ),
       sliver: SliverList.separated(
         itemCount: summaries.length,

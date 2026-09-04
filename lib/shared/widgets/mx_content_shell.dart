@@ -7,6 +7,7 @@ import '../../core/theme/foundations/app_breakpoints.dart';
 import '../../core/theme/foundations/app_spacing.dart';
 import '../../core/theme/extensions/theme_context_extension.dart';
 import 'mx_breadcrumb.dart';
+import 'mx_scroll_end_inset.dart';
 
 /// The frame every screen is built in: app bar, gutters, an optional pinned
 /// subheader and an optional floating action.
@@ -177,31 +178,39 @@ class _MxContentShellState extends State<MxContentShell> {
     return Scaffold(
       appBar: _buildAppBar(context),
       floatingActionButton: widget.floatingActionButton,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            if (widget.subheader != null)
-              MxSubheaderBand(
-                gutter: _defaultPadding(context).left,
-                child: widget.subheader!,
-              ),
-            Expanded(
-              child: NotificationListener<ScrollNotification>(
-                onNotification: _onScroll,
-                child: _buildBody(context),
-              ),
-            ),
-            if (footer != null)
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  border: Border(
-                    top: BorderSide(color: context.semanticColors.borderSubtle),
-                  ),
+      // The scroll-end inset is the shell's to answer: see
+      // `mxScrollEndInsetOf` (A20.1 P2-18).
+      body: MxScrollEndInsetScope(
+        hasFloatingAction: widget.floatingActionButton != null,
+        child: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              if (widget.subheader != null)
+                MxSubheaderBand(
+                  gutter: _defaultPadding(context).left,
+                  isScrolled: _hasScrolled,
+                  child: widget.subheader!,
                 ),
-                child: footer,
+              Expanded(
+                child: NotificationListener<ScrollNotification>(
+                  onNotification: _onScroll,
+                  child: _buildBody(context),
+                ),
               ),
-          ],
+              if (footer != null)
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    border: Border(
+                      top: BorderSide(
+                        color: context.semanticColors.borderSubtle,
+                      ),
+                    ),
+                  ),
+                  child: footer,
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -246,7 +255,12 @@ class _MxContentShellState extends State<MxContentShell> {
       // Below the whole chrome block rather than between bar and subheader: the
       // subheader is chrome too, and the line is there to say where chrome ends
       // and scrolled content begins.
-      shape: _hasScrolled
+      // **The hairline sits under the chrome, not inside it** (A20.1 P2-18).
+      // With a subheader the bar is only the top half of the chrome, and a
+      // line here drew between the bar and the band it belongs with; the
+      // band draws it instead, at the edge the content actually scrolls
+      // under.
+      shape: _hasScrolled && subheader == null
           ? Border(
               bottom: BorderSide(color: context.semanticColors.borderSubtle),
             )
@@ -279,8 +293,15 @@ class _MxContentShellState extends State<MxContentShell> {
   /// the total spendable: 28 + 8 + 32 + 16 = 84 against a 68px block, so the
   /// 16 left over halves into 8 on each side rather than 8.5. See
   /// [_lineFactor] for the five pixels this used to reserve for nothing.
+  /// `AppBar`'s own ceiling for its title — `_kMaxTitleTextScaleFactor`,
+  /// `app_bar.dart:44`. The bar clamps the title's scaling there, so a height
+  /// computed from the raw scaler over-reserved above it (A20.1 P2-18).
+  static const double _maxTitleTextScale = 1.34;
+
   double _toolbarHeight(BuildContext context) {
-    final scaler = MediaQuery.textScalerOf(context);
+    final scaler = MediaQuery.textScalerOf(
+      context,
+    ).clamp(maxScaleFactor: _maxTitleTextScale);
     final title = context.texts.titleLarge;
 
     return math.max(
@@ -339,10 +360,18 @@ class _MxContentShellState extends State<MxContentShell> {
 /// inside the body this widget is transparent, and content would scroll
 /// through it.
 class MxSubheaderBand extends StatelessWidget {
-  const MxSubheaderBand({required this.gutter, required this.child, super.key});
-
+  const MxSubheaderBand({
+    required this.gutter,
+    required this.child,
+    this.isScrolled = false,
+    super.key,
+  });
   final double gutter;
   final Widget child;
+
+  /// Whether the body has scrolled under the band, which is when the band
+  /// draws the hairline the bar used to draw above it.
+  final bool isScrolled;
 
   @override
   Widget build(BuildContext context) {
@@ -350,38 +379,51 @@ class MxSubheaderBand extends StatelessWidget {
       MediaQuery.sizeOf(context).width,
     );
 
-    return Padding(
-      // **The strip's total height is fixed; what changed is where its space
-      // sits.** Top used to be zero, on the reasoning that the app bar already
-      // provides the gap above. It provides some — a 56pt bar leaves roughly 17
-      // under its title — but that is the bar centring its own title, not a gap
-      // anyone chose between two elements, and the search pill read as stuck to
-      // the chrome. Splitting the regular-width gap `sm` above / `xs` below
-      // gives the pill air without moving the body a single pixel.
-      //
-      // **Keeping the total fixed is the constraint, not an aesthetic.** Adding
-      // the space instead of moving it pushes every body pixel down with it, and
-      // on the deck list that puts the last card's trailing icon under the
-      // floating action — 24px of `textSecondary` on `primary`, which the visual
-      // audit fails at 1.13:1. The clearance there is 7px, so any real addition
-      // above `xs` collides. See `deck_list_screen.dart`'s `_kListBottomInset`:
-      // it reserves room at the *end* of the scroll, which does nothing for a
-      // row sitting under the action at rest.
-      //
-      // More space above than below is also the right grouping. The strip
-      // belongs to the content it filters, not to the bar it hangs under.
-      //
-      // Compact keeps all of it below. At 320 with `textScaler` 2.0 the chrome
-      // and this strip together wanted four pixels more than the screen had —
-      // the same trade `app_compact_scale.dart` makes with gutters and button
-      // padding — and there is nothing left there to redistribute.
-      padding: EdgeInsets.only(
-        left: gutter,
-        right: gutter,
-        top: isCompact ? 0 : AppSpacing.sm,
-        bottom: AppSpacing.xs,
+    // **The hairline the bar used to draw sits here now** (A20.1 P2-18):
+    // painted in the foreground, so it moves no layout, and only once the
+    // body has scrolled under the band.
+    return DecoratedBox(
+      position: DecorationPosition.foreground,
+      decoration: BoxDecoration(
+        border: isScrolled
+            ? Border(
+                bottom: BorderSide(color: context.semanticColors.borderSubtle),
+              )
+            : null,
       ),
-      child: Align(alignment: AlignmentDirectional.centerStart, child: child),
+      child: Padding(
+        // **The strip's total height is fixed; what changed is where its space
+        // sits.** Top used to be zero, on the reasoning that the app bar already
+        // provides the gap above. It provides some — a 56pt bar leaves roughly 17
+        // under its title — but that is the bar centring its own title, not a gap
+        // anyone chose between two elements, and the search pill read as stuck to
+        // the chrome. Splitting the regular-width gap `sm` above / `xs` below
+        // gives the pill air without moving the body a single pixel.
+        //
+        // **Keeping the total fixed is the constraint, not an aesthetic.** Adding
+        // the space instead of moving it pushes every body pixel down with it, and
+        // on the deck list that puts the last card's trailing icon under the
+        // floating action — 24px of `textSecondary` on `primary`, which the visual
+        // audit fails at 1.13:1. The clearance there is 7px, so any real addition
+        // above `xs` collides. See `mxScrollEndInsetOf`: it reserves room at
+        // the *end* of the scroll, which does nothing for a row sitting under
+        // the action at rest.
+        //
+        // More space above than below is also the right grouping. The strip
+        // belongs to the content it filters, not to the bar it hangs under.
+        //
+        // Compact keeps all of it below. At 320 with `textScaler` 2.0 the chrome
+        // and this strip together wanted four pixels more than the screen had —
+        // the same trade `app_compact_scale.dart` makes with gutters and button
+        // padding — and there is nothing left there to redistribute.
+        padding: EdgeInsets.only(
+          left: gutter,
+          right: gutter,
+          top: isCompact ? 0 : AppSpacing.sm,
+          bottom: AppSpacing.xs,
+        ),
+        child: Align(alignment: AlignmentDirectional.centerStart, child: child),
+      ),
     );
   }
 }

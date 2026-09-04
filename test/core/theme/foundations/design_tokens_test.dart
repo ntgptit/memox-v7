@@ -46,9 +46,11 @@ void main() {
     test('radius, icon size, duration and breakpoint tokens are present', () {
       expect(AppRadius.sm, lessThan(AppRadius.md));
       expect(AppRadius.md, lessThan(AppRadius.lg));
-      expect(AppRadius.pill, greaterThan(AppRadius.lg));
+      expect(AppRadius.lg, lessThan(AppRadius.xl));
+      expect(AppRadius.pill, greaterThan(AppRadius.xl));
 
-      expect(AppIconSize.sm, lessThan(AppIconSize.md));
+      expect(AppIconSize.sm, lessThan(AppIconSize.mdCompact));
+      expect(AppIconSize.mdCompact, lessThan(AppIconSize.md));
       expect(AppIconSize.md, lessThan(AppIconSize.lg));
 
       expect(AppDurations.fast, lessThan(AppDurations.normal));

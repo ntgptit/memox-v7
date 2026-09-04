@@ -120,7 +120,14 @@ class _StudyDirectionChooserState extends State<StudyDirectionChooserWidget> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Text(l10n.studyDirectionTitle, style: context.texts.titleMedium),
+            // The sheet's title announces as a header (A20.1 P1-01, §23 #17).
+            Semantics(
+              header: true,
+              child: Text(
+                l10n.studyDirectionTitle,
+                style: context.texts.titleMedium,
+              ),
+            ),
             const SizedBox(height: AppSpacing.xs),
             Text(
               l10n.studyDirectionBody,

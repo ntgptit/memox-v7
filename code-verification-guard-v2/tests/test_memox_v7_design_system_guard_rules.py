@@ -182,3 +182,14 @@ def test_no_text_restyle_accepts_inked_and_prose(tmp_path: Path) -> None:
     ),
     """
     assert not _violations(RESTYLE, tmp_path, good)
+
+
+def test_no_text_restyle_sees_the_hint_accessor(tmp_path: Path) -> None:
+    # A20.1 P1-09: the extension's fifth accessor is a resolved style; a
+    # `.copyWith(` on it is the same restyle in a new spelling.
+    violations = _violations(
+        RESTYLE,
+        tmp_path,
+        "final s = context.inputHintStyle!.copyWith(color: Colors.red);\n",
+    )
+    assert len(violations) == 1

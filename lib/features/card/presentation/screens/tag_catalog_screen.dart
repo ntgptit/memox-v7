@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/foundations/app_breakpoints.dart';
 import '../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_card.dart';
@@ -17,6 +16,7 @@ import '../controllers/tag_catalog_controller.dart';
 import '../widgets/items/tag_catalog_row_widget.dart';
 import '../widgets/overlays/tag_delete_confirm_widget.dart';
 import '../widgets/overlays/tag_rename_widget.dart';
+import '../../../../shared/widgets/mx_reading_column.dart';
 
 /// Types into the catalog's search field (UC-18, BR-230). A free function for
 /// the reason every command in this feature is one — see
@@ -105,12 +105,7 @@ class _FaceColumn extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: AppBreakpoints.medium),
-          child: child,
-        ),
-      ),
+      child: Center(child: MxReadingColumn(child: child)),
     );
   }
 }
@@ -126,8 +121,7 @@ class _SearchStrip extends ConsumerWidget {
     // phone this binds nothing; at the framed web width it is what keeps the
     // search and the surface it filters sharing edges (M4.14 G2) instead of
     // the field running wide over a capped list.
-    child: ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: AppBreakpoints.medium),
+    child: MxReadingColumn(
       child: MxSearchField(
         value: query,
         onChanged: (value) => _updateSearch(ref, value),
@@ -179,8 +173,7 @@ class _CatalogList extends StatelessWidget {
         // The same reading-column cap Card Detail set (M4.15 W2): above
         // `AppBreakpoints.medium` a full-bleed list is a line nobody can
         // track back; below it, this binds nothing.
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: AppBreakpoints.medium),
+        child: MxReadingColumn(
           child: MxCard.raised(
             padding: MxCardPadding.none,
             child: Column(

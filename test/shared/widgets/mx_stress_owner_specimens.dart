@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:memox/shared/widgets/mx_reading_column.dart';
 import 'package:memox/shared/widgets/mx_section_label.dart';
 import 'package:memox/shared/widgets/mx_sheet.dart';
 
@@ -11,6 +13,10 @@ List<MxStressSpecimen> ownerStressSpecimens() => <MxStressSpecimen>[
     // names; the stress is the long label at 2.0x staying on its line.
     name: 'MxSectionLabel',
     build: () => const MxSectionLabel(label: kLongLabel, detail: '128'),
+  ),
+  MxStressSpecimen(
+    name: 'MxReadingColumn',
+    build: () => const MxReadingColumn(child: Text(kLongTitle)),
   ),
   MxStressSpecimen(
     name: 'MxSheet',

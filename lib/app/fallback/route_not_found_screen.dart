@@ -29,14 +29,21 @@ class RouteNotFoundScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MxContentShell(
-      body: MxErrorState(
-        title: context.l10n.pageNotFoundTitle,
-        message: context.l10n.pageNotFoundMessage,
-        retryLabel: context.l10n.goHomeAction,
-        // By name. The literal `'/'` would work today and break silently the
-        // first time home stops being the root — landing the user on this same
-        // screen, from the button meant to escape it.
-        onRetry: () => context.goNamed(RouteNames.decks),
+      // The screen has no bar to name the route, so the face names it
+      // (A20.1 P3-10): a reader arriving here hears where they are before
+      // the message.
+      body: Semantics(
+        namesRoute: true,
+        label: context.l10n.pageNotFoundTitle,
+        child: MxErrorState(
+          title: context.l10n.pageNotFoundTitle,
+          message: context.l10n.pageNotFoundMessage,
+          retryLabel: context.l10n.goHomeAction,
+          // By name. The literal `'/'` would work today and break silently the
+          // first time home stops being the root — landing the user on this same
+          // screen, from the button meant to escape it.
+          onRetry: () => context.goNamed(RouteNames.decks),
+        ),
       ),
     );
   }

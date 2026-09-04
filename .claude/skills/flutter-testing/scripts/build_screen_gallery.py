@@ -76,6 +76,9 @@ def _stamp():
 
 SCREENS = [
     ('Library & Deck', 'deck_list_root', 'Deck list — root', 'Hero hôm nay, chip workload, path một target'),
+    # High contrast: the theme pair had no picture until A20.1 P1-08. The
+    # densest border surface and the screen with disabled controls.
+    ('Library & Deck', 'deck_list_root_hc', 'Deck list — high contrast', 'Mọi viền, chip và hairline dưới cặp theme HC'),
     ('Library & Deck', 'deck_list_level', 'Deck list — trong deck', 'Cấp con: breadcrumb, sub-decks, chip trên tile'),
     ('Library & Deck', 'deck_list_empty', 'Deck list — rỗng', 'Hai lối vào: starter catalog / deck mới'),
     ('Library & Deck', 'deck_list_new_only', 'Deck chỉ có thẻ mới', 'BR-150: Study vẫn mở'),
@@ -144,6 +147,7 @@ SCREENS = [
     ('Settings & Reminder', 'settings_save_failed', 'Settings — lưu thất bại',
      'Band lỗi nằm trong card của chính nhóm đó (BR-216)'),
     ('Settings & Reminder', 'reminder_settings', 'Daily reminder', 'Opt-in, giờ địa phương (UC-17)'),
+    ('Reminder', 'reminder_settings_hc', 'Reminder — high contrast', 'Hàng giờ và workload inert dưới cặp theme HC'),
     ('Search', 'library_search', 'Global search', 'Deck + thẻ + nhãn, keyset (UC-20)'),
     ('Trash', 'trash', 'Trash', 'Soft delete, 30 ngày, restore/purge (UC-21)'),
 ]

@@ -192,7 +192,12 @@ class MxSessionTopBar extends StatelessWidget {
                     ) *
                     _kChipMaxWidthFraction,
               ),
-              child: _Chip(label: label),
+              // The chip is the only word that says which screen this is,
+              // so it names the route (A20.1 P3-10): the session has no bar
+              // to do it.
+              child: MergeSemantics(
+                child: Semantics(namesRoute: true, child: _Chip(label: label)),
+              ),
             ),
             const SizedBox(width: AppSpacing.sm),
             // Bare track: the bar's own header would put the same figure above

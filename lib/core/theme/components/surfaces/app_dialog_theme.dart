@@ -24,10 +24,11 @@ DialogThemeData buildDialogTheme(ColorScheme scheme, TextTheme texts) =>
       barrierColor: modalBarrierColor(scheme),
       backgroundColor: scheme.surfaceContainerHigh,
       surfaceTintColor: Colors.transparent,
-      // Zero, and the shadow is hand-painted instead: a Material elevation on
-      // top of `shadowsFor` is a second depth mechanism, which AD-14 does not
-      // admit. See F15. The FAB and the SnackBar are the two that keep a dp
-      // value, because their slots have nowhere to put a painted shadow.
+      // Zero, and nothing paints a shadow in its place: the dialog's depth
+      // is its scrim and its `outlineVariant` edge, and a Material elevation
+      // on top of that would be a second depth mechanism, which AD-14 does
+      // not admit. See F15. The FAB and the SnackBar are the two that keep a
+      // dp value, because their slots have nowhere else to state depth.
       elevation: AppElevation.none,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.lg),

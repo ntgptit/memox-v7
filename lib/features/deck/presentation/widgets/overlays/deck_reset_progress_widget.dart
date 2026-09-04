@@ -81,7 +81,14 @@ class _ResetProgressSheetState extends ConsumerState<_ResetProgressSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Text(l10n.deckResetProgressTitle, style: context.texts.titleLarge),
+            // The sheet's title announces as a header (A20.1 P1-01, §23 #17).
+            Semantics(
+              header: true,
+              child: Text(
+                l10n.deckResetProgressTitle,
+                style: context.texts.titleLarge,
+              ),
+            ),
             const SizedBox(height: AppSpacing.lg),
             _Section(
               title: l10n.deckResetProgressKeptTitle,

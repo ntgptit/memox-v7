@@ -243,32 +243,6 @@ void main() {
       expect(fired, <String>['delete']);
     });
 
-    testWidgets('a disabled action stays visible and fires nothing', (
-      tester,
-    ) async {
-      // Visible on purpose: hiding it makes the menu change shape between
-      // visits, and the user cannot learn where anything is.
-      var fired = 0;
-
-      await pump(
-        tester,
-        MxActionSheet(
-          actions: <MxActionSheetAction>[
-            MxActionSheetAction(
-              label: 'Move',
-              isEnabled: false,
-              onPressed: () => fired++,
-            ),
-          ],
-        ),
-      );
-      await tester.tap(find.text('Move'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Move'), findsOneWidget);
-      expect(fired, 0);
-    });
-
     testWidgets('a long list scrolls instead of overflowing', (tester) async {
       await pump(
         tester,

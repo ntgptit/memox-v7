@@ -65,6 +65,7 @@ class _RadiusSection extends StatelessWidget {
             _RadiusBox(name: 'sm', value: AppRadius.sm),
             _RadiusBox(name: 'md', value: AppRadius.md),
             _RadiusBox(name: 'lg', value: AppRadius.lg),
+            _RadiusBox(name: 'xl', value: AppRadius.xl),
             _RadiusBox(name: 'pill', value: AppRadius.pill),
           ],
         ),
@@ -87,6 +88,7 @@ class _IconSizeSection extends StatelessWidget {
           crossAxisAlignment: WrapCrossAlignment.end,
           children: <Widget>[
             _IconSizeDemo(name: 'sm', value: AppIconSize.sm),
+            _IconSizeDemo(name: 'mdCompact', value: AppIconSize.mdCompact),
             _IconSizeDemo(name: 'md', value: AppIconSize.md),
             _IconSizeDemo(name: 'lg', value: AppIconSize.lg),
           ],

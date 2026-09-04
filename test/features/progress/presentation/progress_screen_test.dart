@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/app/router/route_paths.dart';
 import 'package:memox/core/theme/extensions/app_ink.dart';
-import 'package:memox/core/theme/extensions/theme_context_extension.dart';
 import 'package:memox/features/progress/domain/models/deck_activity_model.dart';
 import 'package:memox/features/progress/domain/models/deck_activity_snapshot_model.dart';
 import 'package:memox/features/progress/presentation/widgets/sections/progress_streak_hero_widget.dart';
@@ -14,6 +13,7 @@ import 'package:memox/shared/widgets/mx_metric_well.dart';
 
 import 'support/fake_progress_repository.dart';
 import 'support/progress_screen_harness.dart';
+import 'package:memox/core/theme/extensions/app_well_fill.dart';
 
 /// The five faces of the Progress screen (UC-12, wireframe S-a…S-e).
 ///
@@ -200,8 +200,7 @@ void main() {
           matching: find.byType(MxMetricWell),
         ),
       );
-      final context = tester.element(find.byType(ProgressStreakHeroWidget));
-      expect(zeroWell.wellColor, context.semanticColors.surfaceMuted);
+      expect(zeroWell.fill, AppWellFill.muted);
       // `tint` is an `AppInk` since M100.5, so the assertion names the token
       // rather than a colour it happened to resolve to.
       expect(zeroWell.tint, AppInk.quiet);
@@ -224,8 +223,7 @@ void main() {
             matching: find.byType(MxMetricWell),
           ),
         );
-        final context = tester.element(find.byType(ProgressStreakHeroWidget));
-        expect(activeWell.wellColor, context.semanticColors.streakContainer);
+        expect(activeWell.fill, AppWellFill.streak);
         expect(activeWell.tint, AppInk.onDueContainer);
       },
     );

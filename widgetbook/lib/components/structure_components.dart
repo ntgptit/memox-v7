@@ -128,7 +128,7 @@ WidgetbookComponent asyncViewComponent() {
   );
 }
 
-/// The bar, at both sizes and both shapes, with and without its two labels.
+/// The bar, at both sizes, with and without its two labels.
 WidgetbookComponent progressBarComponent() {
   return WidgetbookComponent(
     name: 'MxProgressBar',
@@ -146,11 +146,6 @@ WidgetbookComponent progressBarComponent() {
             options: MxProgressBarSize.values,
             labelBuilder: (MxProgressBarSize value) => value.name,
           );
-          final shape = context.knobs.object.dropdown<MxProgressBarShape>(
-            label: 'shape',
-            options: MxProgressBarShape.values,
-            labelBuilder: (MxProgressBarShape value) => value.name,
-          );
           final label = context.knobs.stringOrNull(
             label: 'label',
             initialValue: 'Learned',
@@ -165,7 +160,6 @@ WidgetbookComponent progressBarComponent() {
               MxProgressBar(
                 value: value,
                 size: size,
-                shape: shape,
                 label: label,
                 valueLabel: valueLabel,
               ),

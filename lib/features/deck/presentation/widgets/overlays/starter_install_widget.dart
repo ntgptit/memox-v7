@@ -122,7 +122,14 @@ class _StarterInstallFormState extends ConsumerState<_StarterInstallForm> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        Text(widget.template.title.value, style: context.texts.titleLarge),
+        // The sheet's title announces as a header (A20.1 P1-01, §23 #17).
+        Semantics(
+          header: true,
+          child: Text(
+            widget.template.title.value,
+            style: context.texts.titleLarge,
+          ),
+        ),
         const SizedBox(height: AppSpacing.xs),
         Text(
           context.l10n.starterLibraryCardCount(widget.template.cardCount),
