@@ -124,7 +124,7 @@ against CURRENT_SHA by re-running A20's own scanners plus targeted reads.
 | A20-P0-04 | P0 | Async confirm mid-write dismissal loses Undo | no | **yes** | **DOWNGRADE** (soft delete, BR-264 recoverable) | P1-05 | P1 |
 | A20-P0-05 | P0 | Elevation parity gate self-referential; kit/Dart diverged | no | **yes** | **DOWNGRADE** (§6: false-green ≠ P0) | P1-06 | P1 |
 | A20-P1-01 | P1 | No `MxSheet`: 16 routes, 5 insets, 1/17 headers | no | **yes** | **KEEP** | P1-01 | P1 |
-| A20-P1-02 | P1 | `textStyles.copyWith` outside the rule; rule stops at features | no | **yes** (9 + 15) | **UPDATE** (counts; 3 sub-defects named) | P1-07 | P1 |
+| A20-P1-02 | P1 | `textStyles.copyWith` outside the rule; rule stops at features | no | **yes** — recounted canonically: **9 feature + 14 shared = 23 unique** | **UPDATE** (canonical count; 3 sub-defects named) | P1-07 | P1 |
 | A20-P1-03 | P1 | No glyph scales with text | no | yes (0 `applyTextScaling`) | **DOWNGRADE** (§12: no concrete defect) | P3-02 | P3 |
 | A20-P1-04 | P1 | High contrast rendered nowhere | goldens 237→251, still 0 | **yes** | **KEEP** (counts updated) | P1-08 | P1 |
 | A20-P1-05 | P1 | Accessor extension audited by nobody | **+1 accessor** | **yes, worse** | **UPDATE** (evidence strengthened) | P1-09 | P1 |
@@ -132,12 +132,12 @@ against CURRENT_SHA by re-running A20's own scanners plus targeted reads.
 | A20-P1-07 | P1 | boldText no-op **+** 19/21 all-caps unnamed | no | **yes**, but two root causes | **SPLIT** | P1-11, P2-02 | P1 / P2 |
 | A20-P1-08 | P1 | FAB + SnackBar elevation, no `materialShadowColor` | no | **yes** | **KEEP** | P1-12 | P1 |
 | A20-P1-09 | P1 | No warning tone **+** error/empty misuse **+** silent spinner | no | **yes**, three root causes | **SPLIT** | P1-13, P2-03, P1-02 | P1 / P2 |
-| A20-P1-10 | P1 | 360 / 375 dp rendered nowhere | **yes — `mx_stress_test.dart` pumps 360 / 375 / 393 × 1.3 / 2.0 for every shared specimen (M100.36)** | **no** — the widths are laid out and rendered in widget tests; what remains is that no *golden* exists at them | **RESOLVED_BY_LATER_CHANGE** (residual golden gap → P3-15) | — (residual: P3-15) | P3 |
+| A20-P1-10 | P1 | 360 / 375 dp rendered nowhere | **yes — `mx_stress_test.dart:102` pumps 360 / 375 / 393 × 1.3 / 2.0 for every shared specimen (M100.36)** | **no** | **RESOLVED_BY_LATER_CHANGE** — and its one-time residual (P3-15) was itself retired once 360 was confirmed as the component-golden surface (§19), so nothing carries forward | — | — |
 | A20-P1-11 | P1 | `MxActionSheet` rows raw `ListTile`, no focus ring | focus grammar unified elsewhere | **yes** | **UPDATE** (now the hold-out) | P2-04 | P2 |
 | A20-P1-12 | P1 | Nav chrome: no bar on loading/error **+** two up-grammars **+** "ink is the inverse of M3" | no | 2 of 3 | **SPLIT + CORRECT** | P1-15, P1-16, P2-05 | P1/P1/P2 |
 | A20-P1-13 | P1 | Slider guard pins the wrong defaults class | no | **yes**, refined | **DOWNGRADE + UPDATE** | P2-06 | P2 |
 | A20-P2-01 | P2 | `MxMetricWell.wellColor` open beside closed `AppInk` | no | **yes** | **KEEP** | P2-07 | P2 |
-| A20-P2-02 | P2 | `BoxDecoration`/`Border.all` outside the style rule | 29→27 | **yes** | **KEEP** (counts) | P2-08 | P2 |
+| A20-P2-02 | P2 | `BoxDecoration`/`Border.all` outside the style rule | 29→27 | **yes, but not a defect** — all 30 sites token-fed, and every decision inside them is already closed by an existing rule (§9) | **ACCEPTED_BY_CONTRACT** — token-fed composition is allowed; banning the constructor would go red on 30 correct sites | — | — |
 | A20-P2-03 | P2 | No stroke guard; 5 literals; 20 implicit `1.0` borders | **5 → 2 literals** | partly | **UPDATE** | P2-09 | P2 |
 | A20-P2-04 | P2 | Spacing guard blind to `const double` declarations | no | **yes** | **KEEP** | P2-10 | P2 |
 | A20-P2-05 | P2 | High-contrast `onDisabled` row wrong in all four figures | inputs unchanged | **yes** | **KEEP** | P2-11 | P2 |
@@ -165,18 +165,38 @@ against CURRENT_SHA by re-running A20's own scanners plus targeted reads.
 | A20-P3-11 | P3 | `MxBreadcrumb.lineHeight: 32` below the touch floor | no | **yes** | **KEEP** | P3-13 | P3 |
 | A20-P3-12 | P3 | `AppStroke.input` misnamed; `MxSearchField` implicit 1.0 | **search edge now `AppStroke.input`** | half | **UPDATE** | P3-14 | P3 |
 
-**Tally.** 46 in (5 P0 · 13 P1 · 16 P2 · 12 P3) · **1 resolved by a later
-change** (A20-P1-10, with a P3 residual) · **7 lowered in severity** (5 of them
-as the primary action, 2 inside a split) · **0 raised** · **5 split** · **0
-merged** · **8 updated** · **27 kept**. 1 + 5 + 5 + 8 + 27 = 46.
+**Tally.** 46 in (5 P0 · 13 P1 · 16 P2 · 12 P3), by final action:
+
+| ACTION | n |
+|---|---|
+| KEEP | 26 |
+| UPDATE | 8 |
+| SPLIT | 5 |
+| DOWNGRADE | 5 |
+| RESOLVED_BY_LATER_CHANGE | 1 |
+| ACCEPTED_BY_CONTRACT | 1 |
+| **total** | **46** |
+
+26 + 8 + 5 + 5 + 1 + 1 = 46. Counting severity movement rather than primary
+action, **7** rows were lowered (the 5 `DOWNGRADE`s plus 2 inside a split) and
+**0** raised.
+
 Out: **1 P0 · 15 P1 · 21 P2 · 14 P3 = 51**.
 
-Two further dispositions were made in the final correction pass, both because a
-claim was re-read against source rather than carried forward: **P2-08 closed**
-(ACCEPTED_BY_CONTRACT — token-fed composition is allowed and every decision
-inside it is already guarded, §9/§18) and **P3-15 retired** (its premise was
-false: 360 dp *is* the component-golden surface, and 375 closes no branch, §19).
-P1-14 was retired earlier into P3-15, which is why P1 has a gap at 14.
+**Three rows carry no forward obligation** and their `NEW_ID` is therefore `—`,
+not a finding id:
+
+- **A20-P1-10 → RESOLVED_BY_LATER_CHANGE.** M100.36's stress matrix pumps
+  360 / 375 / 393 (`mx_stress_test.dart:102`). Its one-time golden residual was
+  filed as P3-15 and then **retired** once 360 was confirmed as the
+  component-golden surface (§19), so nothing carries forward.
+- **A20-P2-02 → ACCEPTED_BY_CONTRACT.** Token-fed composition is allowed; every
+  decision inside a `BoxDecoration` is already closed by an existing rule (§9).
+  It was briefly filed as P2-08, which is now closed by the same contract (§18).
+- P1-14 was retired earlier into P3-15, which is why P1 has a gap at 14.
+
+**~~P2-08~~ and ~~P3-15~~ are historical only.** Neither is an active finding,
+neither appears in any implementation phase, and neither is counted in the 51.
 
 M100.36 targeted the four component audits (#431–#434), not A20's registry;
 one A20 row was nevertheless closed by its Phase 6 stress matrix, and it closed
@@ -308,8 +328,24 @@ twenty-two decisions. The other **17** are code doing the right thing:
 
 ## 9 · Corrected guard strategy
 
-A guard must represent an architectural decision, not create one. **Five**
-rules follow from §8; the rest of A20's 71-name list does not.
+A guard must represent an architectural decision, not create one.
+
+> **Two counts, kept apart deliberately, because conflating them is how §9 and
+> the DAG drifted apart before:**
+>
+> - **`GUARD_RULE_COUNT` = 5** — the design-system guard *rules* that follow
+>   from §8's taxonomy: `no_raw_sheet_route`, `no_raw_loading_indicator`,
+>   `no_raw_screen_chrome`, `no_raw_choice_chip`, `no_text_restyle`.
+> - **`ENFORCEMENT_ACTION_COUNT` = 8** — those 5 rules **plus** 3 enforcement
+>   actions that do not come from §8's taxonomy and are not design-system
+>   rules: the stroke-width guard (P2-09), the geometry `const double` scan
+>   (P2-10), and adding `lib/app/**` to the typography scope (P2-22).
+>
+> Phase 0 lands **2 guard rules**; Phase 6 lands the remaining **3 guard rules
+> + 3 enforcement actions = 6 Phase-6 actions**. "Six" is never a count of
+> rules.
+
+The five rules follow from §8; the rest of A20's 71-name list does not.
 
 **The admission test for every rule below is the same, and it is a
 sequencing rule, not a style preference:**
@@ -330,7 +366,7 @@ not an opinion.
 | `no_raw_loading_indicator` | `CircularProgressIndicator`, `LinearProgressIndicator` — **with an explicit `exclude:` for the determinate-progress callers** (today exactly one: `lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart`, `value: fraction`, a mastery ring), each entry carrying its reason in the rule file | `presentation_files` | the *accessible name of a loading state* must have one owner; the silent spinner is the proof. A determinate ring is not a loading state — §8 classifies it FEATURE_SPECIAL_CASE_ALLOWED, and the rule must agree with the taxonomy it enforces. `exclude:` is the guard's existing per-rule mechanism (used by `memox-architecture-rules.yaml`), so this needs no new capability; the alternative — matching only constructions with no `value:` argument — is more precise but needs a balanced-paren file walk for one site, and was rejected as machinery for a scanner. A new determinate caller is added to `exclude:` **with its reason** in the same change; an entry without a `value:` at the site is a violation of the rule's own contract and the live-tree scan must say so. **No `MxProgressRing` wrapper is created to satisfy the scanner** | **P1-02** — the six SHARED_REQUIRED spinner sites become guardable only once the loading family owns their shapes |
 | `no_raw_screen_chrome` | `AppBar`, `SliverAppBar` — **`Scaffold` is not in this rule** | `presentation_files` | `MxContentShell` owns the *chrome* (bar, subheader, back affordance); **zero current violations**, so this is a pure ratchet. `Scaffold` is classified **FRAMEWORK_PRIMITIVE_ALLOWED**: it is the framework's layout host, not a design-system component; no architecture decision (AD-01…AD-19) forbids a feature from owning one, and `mx_content_shell.dart:99` ("owning the `Scaffold` is what makes this the shell's job") documents why the *shell* builds its own — it is not a prohibition on features. Zero raw `Scaffold` in `lib/features/` today, so nothing is lost by not ratcheting it; banning a framework host on the strength of a wrapper's existence is the reasoning §20 forbids. No `MxScaffold` is proposed | nothing — land immediately |
 | `no_raw_choice_chip` | `ChoiceChip` | `presentation_files` | `MxPillButton` owns pick-one. `Chip`/`ActionChip`/`InputChip` deliberately **not** included | nothing |
-| `no_text_restyle` (extend) | add `textStyles.<role>.copyWith(`; widen scope to `ui_surfaces`; `mode: file` | `ui_surfaces` | three spellings of one decision escape today | **P1-07 — 18 live violations** (9 `textStyles.` in features + 9 `texts.` in `lib/shared/`). Cleanup first; the rule lands in Phase 6 |
+| `no_text_restyle` (extend) | add `textStyles.<role>.copyWith(`; widen scope to `ui_surfaces`; `mode: file` | `ui_surfaces` | three spellings of one decision escape today | **P1-07 — 23 live violations** (`FEATURE_UNIQUE` 9 + `SHARED_UNIQUE` 14). Cleanup first; the rule lands in Phase 6 |
 
 **Explicitly not guarded**, and the reason recorded so the next audit does not
 re-propose them: `Scaffold` (framework host, above), `Divider`,
@@ -610,11 +646,11 @@ bare name would merge them.
 |---|---|---|---|---|---|---|---|---|
 | **P1-01** | CMP | **No sheet route owner.** 16 raw `showModalBottomSheet` in 13 files; bottom inset in **5** mechanisms (`SafeArea` ×7, `useSafeArea:` ×2, `MxSheetInsets` ×2, `mxSheetBottomObstruction` ×1, raw `viewInsets` ×1, none ×5); `Semantics(header: true)` on **1** of 17 sheets. Dialogs: 4 helpers, **0** raw | A9-01/02/05/06, A20-P1-01 | one decision, five owners | one `showMxSheet` + `MxSheetHeader` owning navigator, safe area, inset, handle, header semantics, traversal | — | route test per sheet: one inset value, one top gutter, `isHeader: true`, barrier covers `tester.view`; scan: `showModalBottomSheet` only in `lib/shared/` |
 | **P1-02** | CMP/A11Y | **No loading semantic owner.** 6 of 7 raw `CircularProgressIndicator` sites are *loading* states reimplementing three shapes; `card_bulk_overlays:97` has **no accessible name at all**; `card_history_section:306` and `search_page_footer:56` are the same inline recipe written twice in two features. The 7th (`card_progress_panel:178`) is a determinate mastery ring and is **not** part of this finding (§8) | A12-#2/#7/#9, A20-P0-01 split | `MxLoadingState` covers one shape of three | keep `MxLoadingState`; add a no-padding variant and an inline 16 dp spinner; migrate the 6 sites. Then `no_raw_loading_indicator` (§9) can land with the determinate ring on its `exclude:` list | — | semantics test: every *indeterminate* progress indicator in `lib/` has a name; scan: the inline recipe exists once; the guard's live-tree scan reports 0 with exactly one excluded file |
-| **P1-03** | ENF | **The guard has no ratchet for the names architecture forbids.** Config byte-identical to A20; guard prints *"No violations found"*; control group of 44 banned names = 0; the six rules of §9 do not exist | A20-P0-01, A8-P2-16 | enforcement was never rebuilt after the taxonomy was decided | land §9's six rules, warning → fix → error, each fault-injected | P1-01, P1-02 gate two of the six | two-way probe per rule + live-tree scan |
+| **P1-03** | ENF | **The guard has no ratchet for the names architecture forbids.** Config byte-identical to A20; guard prints *"No violations found"*; control group of 44 banned names = 0; **none of §9's 5 guard rules exists** (`GUARD_RULE_COUNT` = 5), nor the 3 further enforcement actions (`ENFORCEMENT_ACTION_COUNT` = 8) | A20-P0-01, A8-P2-16 | enforcement was never rebuilt after the taxonomy was decided | land the 5 guard rules + 3 enforcement actions, warning → fix → error, each fault-injected. 2 rules ratchet in Phase 0; the other 3 rules and all 3 actions land in Phase 6 | P1-01 and P1-02 gate 2 of the 5 rules; P2-09/P2-10/P2-22 gate the 3 actions | two-way probe per rule + live-tree scan |
 | **P1-04** | A11Y | **`_MxBreadcrumbFold` is the last control outside the focus grammar.** `mx_breadcrumb.dart:397` `InkWell` with `overlayColor: _noOverlay` (a `WidgetStatePropertyAll` of `primary.withAlpha(0)`), `splashFactory: NoSplash`, no `onFocusChange`, no `MxFocusRing`. SDK-verified: `ink_well.dart` resolves `focus` as `overlayColor?.resolve(focused) ?? focusColor ?? theme.focusColor`, so both fallbacks are short-circuited. M100.36 unified focus for row/pressable/pill/card; this file was untouched | A17-P0-1, A20-P0-03 | one widget opts out of the app's focus system wholesale | drop the blanket `overlayColor`, or adopt `MxFocusRing` + `onFocusChange` as `mx_breadcrumb_step.dart:139` already does | after P1-04's grammar is the only one | `mx_breadcrumb_focus_test.dart`: tab to the fold, assert a border at `AppStroke.focus` in `focusIndicator(scheme).color`; absent at rest and under `alwaysTouch` |
 | **P1-05** | CMP | **Async confirm dismisses mid-write and drops the Undo.** `mx_async_confirm_dialog.dart:203` `showDialog<void>` with `barrierDismissible` defaulted and no `PopScope`; `deck_confirm_widget.dart:113` wires `onDone: _finish`, and `_finish` is the only path to `onDeleted(_batchId)` — the Undo. Popping the barrier unmounts the listener, the write commits, no message appears | A9-03, A20-P0-04 | the dialog disables its buttons but not its exits | `PopScope(canPop: !isSubmitting)` + `barrierDismissible: !isSubmitting`, in the shared widget so all four callers inherit it | — | route test: submit, tap the barrier while submitting, drive to `savedAndClose`, assert `onDone` fired exactly once |
 | **P1-06** | PAR | **Kit↔Dart elevation parity gate is self-referential and the two have diverged.** `css_scale_parity_test.dart:314-337` asserts the kit holds three string literals **copied from the kit**. Kit dark rim: `#6A7199`, blur 2 px, spread stepping 1/2/3. Dart `_darkDepth`: `scheme.outlineVariant` (= `#272C48` dark), blur **0**, spread constant `AppStroke.hairline` — and its doc says *"The ring never thickens"* | A16-G-15, A20-P0-05 | a gate comparing a file to a copy of itself | owner decision 1 first; then compare kit-derived values to the built `ThemeData` at every level in both brightnesses, and update the kit to Dart | owner decision 1 | the rewritten parity test, which must fail today |
-| **P1-07** | ENF | **The restyle vocabulary escapes in three ways.** (a) `textStyles.<role>.copyWith(` is unwatched — **9** sites, all in `lib/features/card/`, 8 setting `onSurfaceVariant` and 1 `onSurface`, i.e. exactly `AppInk.quiet` / `AppInk.stated`, a provably zero-pixel migration; (b) the rule is scoped to `presentation_files`, so `lib/shared/widgets/` holds **15** open-colour restyles; (c) 4 `withWeight(…).copyWith(` launderings, **3 of them multi-line**, escape a line-scoped pattern even after the scope widens. Control group: the three watched spellings = **0** | A15-F4/F5, A20-P1-02 | the rule lists three of the accessor surface's four spellings | add the fourth pattern; widen this rule to `ui_surfaces`; `mode: file` with a balanced-paren walk; migrate 9 + 15 | P1-09 (know the accessor surface first), P2-02 (`MxSectionLabel` is the better destination for the 9) | two-way probe red on today's 24 sites, green after |
+| **P1-07** | ENF | **The restyle vocabulary escapes in three ways.** Canonical count, one `.copyWith(` call on a text style = one site, deduplicated by source offset, comments stripped: **`FEATURE_UNIQUE` = 9 · `SHARED_UNIQUE` = 14 · `TOTAL_UNIQUE` = 23**. By receiver form: `textStyles.` 9 · `texts.` 9 · `withWeight(…)` 4 · `textTheme.` 1 (no site matches two forms). (a) `textStyles.<role>.copyWith(` is unwatched — the 9 feature sites, all in `lib/features/card/`, 8 setting `onSurfaceVariant` and 1 `onSurface`, i.e. exactly `AppInk.quiet` / `AppInk.stated`, a provably zero-pixel migration; (b) the rule is scoped to `presentation_files`, so the 14 in `lib/shared/widgets/` are out of scope entirely; (c) 4 `withWeight(…).copyWith(` launderings, **3 of them multi-line**, escape a line-scoped pattern even after the scope widens. Control group: the three watched spellings = **0**. **Known residual the rule will still not see:** `mx_search_field.dart:139` launders through a local (`final text = context.texts.bodyMedium!;` then `text.copyWith(color:)`) — no receiver pattern can match it, so it is excluded from the 23 and named here instead | A15-F4/F5, A20-P1-02 | the rule lists three of the accessor surface's four spellings | add the fourth pattern; widen this rule to `ui_surfaces`; `mode: file` with a balanced-paren walk; migrate all 23 | P1-09 (know the accessor surface first), P2-02 (`MxSectionLabel` is the better destination for the 9) | two-way probe red on today's **23** sites, green after |
 | **P1-08** | COV | **High contrast is rendered nowhere.** Both themes wired at `app.dart:93-94`; **0 of 251** goldens; Widgetbook offers Light and Dark only (`main.dart:78-79`); 5 test files exercise them, all at token or single-component level. The palette re-points `outline`, `outlineVariant` and four semantic tokens — every hairline and disabled control in the app | A19-15, A13-P3-10, A20-P1-04 | a whole theme pair with no picture | two `WidgetbookTheme` entries; ≥2 screen goldens under HC (densest border surface + one with disabled controls) | **P2-11** — the palette's own numbers are wrong, so a golden taken now pictures a decision made on a wrong figure | Widgetbook coverage test asserts 4 modes; golden job renders ≥2 HC screens |
 | **P1-09** | COV | **The accessor extension is audited by nobody and now has a fifth member.** `theme_context_extension.dart` — **367** call sites, named by 0 of 22 reports, no test. A20 predicted *"that test is what stops the fifth accessor repeating P1-02"*; M100.36 added `inputHintStyle` (+13 lines) and no test | A20-P1-05 | the file the guard's patterns are written against is unowned | a test asserting every public getter on `ThemeContextX` appears in a guard pattern or is explicitly exempted | — | that test, plus the accessor↔pattern list in both directions |
 | **P1-10** | CMP | **The w700 registry is prose.** `buttonLabelWeight = FontWeight.w700` (`app_button_themes.dart:438`, used at `:69`, `:349`, `mx_action_button.dart:284`) makes a button label the app's most repeated w700, while `app_typography.dart:126-127` still argues the hero exception is safe because *"the theme spends w700 only on the two display rungs"*. `app_typography_test.dart:271` is titled *"the hero numeral is the one weight a feature adds"* and passes | A15-F3/F21, A20-P1-06 | the registry is a comment, and the test asserts one member of it | enumerate every weight reachable from the built theme; assert the set is exactly `{400,500,600,700}` and each w700 site is on a named allowlist | — | that enumeration; a sixth weight or an unnamed w700 fails |
@@ -636,7 +672,7 @@ bare name would merge them.
 | **P2-04** | A11Y | `MxActionSheet` rows are raw `ListTile` (`mx_action_sheet.dart:149`) — the only non-family raw `ListTile(` in `lib/shared/` — so they inherit no row overlay and **no focus ring**, on a keyboard-focusable row. M100.36 unified focus for row/pressable/pill and did not reach this file | A14-F1, A20-P1-11 | route through `MxListTile`, or adopt the ring. Lands with P1-01 |
 | **P2-05** | CMP | **App-bar leading is one ink step quiet.** Actions resolve `onSurfaceVariant` (canonical); the leading also resolves `onSurfaceVariant` via `iconButtonTheme`, where `_AppBarDefaultsM3.iconTheme` says `onSurface` (§11.3). **Corrects A20's "inverse of M3"** | A8-P1-03, A20-P1-12 split | set the app bar's `iconTheme` explicitly to `onSurface`; role test pinning both slots |
 | **P2-06** | ENF | **The Slider theme is split across two Material generations.** It declares 11 colour slots from the 2024 palette and leaves `year2023` unset; `slider.dart:834` then resolves `_SliderDefaultsM3Year2023` for everything undeclared — geometry included. 4 of the 6 role pins name values that differ between the classes (`inactiveTrack`, both tick marks, `valueIndicator`). Latent: no renderer | A10-P1-1, A20-P1-13 | state `year2023: false`, or move the pins; assert the class **before** asserting its roles |
-| **P2-07** | API | `MxMetricWell.wellColor` is an open `Color?` beside a closed `AppInk tint` in the same constructor; all 8 callers feed semantic tokens | A20-P2-01 | owner decision 3; if structural, a closed `AppWellFill` mirroring `AppInk` |
+| **P2-07** | API | `MxMetricWell.wellColor` is an open `Color?` beside a closed `AppInk tint` in the same constructor; all 8 callers feed semantic tokens | A20-P2-01 | **owner decision 2**; if structural, a closed `AppWellFill` mirroring `AppInk` |
 | ~~**P2-08**~~ | ENF | **RESOLVED — ACCEPTED_BY_CONTRACT.** `BoxDecoration(` (27), `Border.all(` (3), `DecoratedBox(` (10) are framework *composition*, not a design decision, and all 30 are token-fed. Every visual decision reachable inside them is already closed by an existing `memox-v7` rule — colour, radius, shadow, `BorderSide`, `TextStyle`, spacing (table in §9) — and the guard is green on all of them. The one residual open decision is the border **width**, which is P2-09's. Banning the constructor would have gone red on 30 correct sites and invited the `MxDecoration` wrapper §20 forbids. **Not counted as an active finding** | A20-P2-02 | none — the architecture rule is written in §9: token-fed composition is allowed |
 | **P2-09** | ENF | Stroke widths: **2** raw literals left (both `strokeWidth: 2` in `mx_action_button.dart:367,476`, down from 5), and borders that name no width at all — measured at HEAD: **3** `Border.all(` with no `width:` (`card_history_event_widget.dart:178`, `mx_card.dart:696`, `mx_search_field.dart:159`) taking Flutter's implicit `1.0` instead of `AppStroke.hairline`. **Live violations: 5** | A16-G-11/12, A20-P2-03 | **cleanup first (Phase 2), guard second (Phase 6)**: token the 5 sites, verify zero, then enable `no_raw_stroke_width` on `ui_and_theme_surfaces` plus an AST scan that every `BorderSide`/`Border.all` names a width |
 | **P2-10** | ENF | The spacing guard sees inline literals only; feature geometry `const double` declarations sit in its blind spot — **16 measured at HEAD** in `lib/features/*/presentation/`, of which some are genuine geometry (`_minCardWidth = 164`, `minRowHeight = 112`) and some are not geometry at all (`dimmedOpacity = 0.7`, `clearedOutlineAlpha = 0.45`), so the rule must classify before it bans. **Live violations: > 0** | A16-G-19, A20-P2-04 | **cleanup first (Phase 5), guard second (Phase 6)**: classify all 16, token or justify each, verify zero, then land the scan test against the 4 dp grid |
@@ -735,14 +771,14 @@ invariant rather than risking it.
 ## 21 · Implementation DAG
 
 Rebuilt from current dependencies. Nine phases, not A20's twelve: the guard
-phase splits because two of its six rules are gated on primitives that do not
-exist yet, and A20's separate "responsive/motion" phase collapses (motion is
+phase splits because 2 of the 5 guard rules (`GUARD_RULE_COUNT`, §9) are gated
+on primitives that do not exist yet, and A20's separate "responsive/motion" phase collapses (motion is
 closed and the width matrix landed with M100.36; only a P3 golden residual
 remains).
 
 ```
 Phase 0  PURE ZERO-VIOLATION RATCHETS                    P2-01
-   │  ONLY rules whose live-tree scan is 0 today, measured this pass:
+   │  2 of the 5 guard rules (§9). ONLY rules whose live-tree scan is 0 today:
    │      no_raw_screen_chrome (AppBar, SliverAppBar)  -> 0
    │      no_raw_choice_chip   (ChoiceChip)            -> 0
    │  No production change. Pixels: none. Cannot regress, so it may land first.
@@ -769,17 +805,18 @@ Phase 4  SHARED PRIMITIVES / SEMANTIC OWNERS             P1-01 P1-02 P2-02 P1-05
    ▼
 Phase 5  CALLER MIGRATIONS                               22 SHARED_REQUIRED sites · P1-07 · P1-13
    │                                                       P2-03 P2-10(cleanup) P2-22(cleanup)
-   │  16 sheets -> showMxSheet; 6 spinners -> the loading family; 18 restyles
+   │  16 sheets -> showMxSheet; 6 spinners -> the loading family; 23 restyles
    │  -> .inked / MxSectionLabel; 16 geometry consts classified; the error
    │  screen onto AppTypography. Every family Phase 6 guards becomes clean HERE.
    │  Pixels: minimal (the restyles are zero-pixel).
    ▼
 Phase 6  GUARDS FOR FAMILIES THAT ARE NOW CLEAN          P1-03
-   │  Every rule below is enabled only after its Phase 2/5 cleanup verified 0:
+   │  6 actions = 3 of the 5 guard rules + 3 enforcement actions (§9).
+   │  Every one is enabled only after its Phase 2/5 cleanup verified 0:
    │      no_raw_sheet_route          <- Phase 4 owner + Phase 5 migration
    │      no_raw_loading_indicator    <- Phase 4 owner + Phase 5 migration
    │                                     (+ the determinate companion assertion, §9)
-   │      no_text_restyle  (extended) <- Phase 5 (18 sites)
+   │      no_text_restyle  (extended) <- Phase 5 (23 sites)
    │      no_raw_stroke_width         <- Phase 2 (5 sites)
    │      geometry const-double scan  <- Phase 5 (16 sites)
    │      typography scope + lib/app  <- Phase 5 (3 sites)
@@ -808,7 +845,7 @@ Phase 9  FULL VERIFICATION                               goldens on Linux · gal
 | 2 → 8 | a high-contrast golden taken before P2-11 pictures a decision made on a wrong number |
 | 4 → 5 | callers cannot migrate to owners that do not exist |
 | 4(MxSectionLabel) → 5(P1-07) | otherwise the nine sites are touched twice |
-| **5 → 6 (all six rules)** | this is the load-bearing edge of the whole plan: `no_raw_sheet_route` before `showMxSheet` bans the only mechanism there is; `no_text_restyle` before the migration is red on 18 sites; the geometry and typography rules are red on 16 and 3. Every Phase-6 rule is enabled against a scan that Phase 2 or Phase 5 has already driven to zero |
+| **5 → 6 (all six Phase-6 actions: 3 guard rules + 3 enforcement actions)** | this is the load-bearing edge of the whole plan: `no_raw_sheet_route` before `showMxSheet` bans the only mechanism there is; `no_text_restyle` before the migration is red on 23 sites; the geometry and typography rules are red on 16 and 3. Every Phase-6 rule is enabled against a scan that Phase 2 or Phase 5 has already driven to zero |
 
 **Pixel-moving phases: 1, 2 (partly), 3, 4, 5 (minimal), 7.** Each ends with
 goldens regenerated **on Linux** and the gallery republished at the pinned URL —
@@ -829,7 +866,7 @@ a Windows checkout cannot regenerate them and have CI agree.
 
 **Phase 4** — new `lib/shared/widgets/mx_sheet.dart`, new `lib/shared/widgets/mx_section_label.dart`, `lib/shared/widgets/{mx_sheet_insets,mx_form_sheet,mx_action_sheet,mx_loading_state,mx_async_confirm_dialog,mx_breadcrumb,mx_feedback_band}.dart`
 
-**Phase 5** — the 22 SHARED_REQUIRED sites: 16 `showModalBottomSheet` calls in 13 overlay files under `lib/features/{card,deck,study,trash}/presentation/widgets/overlays/` and `study_entry_screen.dart`, and the 6 loading-spinner sites; plus the 9 `textStyles.copyWith` sites in `lib/features/card/presentation/` and the 9 `texts.<rung>.copyWith` sites in `lib/shared/widgets/`
+**Phase 5** — the 22 SHARED_REQUIRED sites: 16 `showModalBottomSheet` calls in 13 overlay files under `lib/features/{card,deck,study,trash}/presentation/widgets/overlays/` and `study_entry_screen.dart`, and the 6 loading-spinner sites; plus **P1-07's 23 restyle sites**: the 9 `textStyles.copyWith` in `lib/features/card/presentation/` and the 14 in `lib/shared/widgets/` (`mx_action_sheet.dart:118,173`, `mx_breadcrumb.dart:184`, `mx_breadcrumb_step.dart:97,122,187`, `mx_empty_state.dart:82`, `mx_error_state.dart:86`, `mx_form_dialog.dart:142`, `mx_progress_bar.dart:172,184`, `mx_search_field.dart:230`, `mx_session_top_bar.dart:247`, `mx_text_field.dart:359`)
 · **P2-10 cleanup (16 declarations):** `card_import_row_preview_widget.dart:28`, `tag_catalog_row_widget.dart:48`, `card_export_format_options_widget.dart:96`, `card_import_source_step_widget.dart:119`, `progress_metric_widget.dart:67`, `guess_option_item_widget.dart:216`, `match_tile_widget.dart:333,361`, and the 8 remaining under `lib/features/*/presentation/`
 · **P2-22 cleanup (3 sites):** `lib/app/error_screen_widget.dart:92,94,102`
 
@@ -870,9 +907,9 @@ sweeps) are **not** here; they are §24. **Score: 13 / 30** — 13 met, 17 unmet
 | 16 | One bottom-inset mechanism for sheets | ❌ 5 |
 | 17 | Sheet headers announce as headers | ❌ 1 of 17 |
 | 18 | Loading semantics have one owner (determinate progress excluded by contract) | ❌ 3 shapes, 1 silent |
-| 19 | Text restyle has one spelling, enforced across features **and** shared | ❌ 24 sites |
+| 19 | Text restyle has one spelling, enforced across features **and** shared | ❌ 23 sites (9 feature + 14 shared) |
 | 20 | Every accessor on `ThemeContextX` is covered by a guard pattern or exempted | ❌ 1 of 5 uncovered |
-| 21 | The guard bans every name the architecture forbids, and nothing else (`Scaffold`, the determinate ring **and token-fed composition primitives** are *not* forbidden) | ❌ 5 rules missing (§9) |
+| 21 | The guard bans every name the architecture forbids, and nothing else (`Scaffold`, the determinate ring **and token-fed composition primitives** are *not* forbidden) | ❌ 0 of 5 guard rules exist (`GUARD_RULE_COUNT`, §9); 0 of 8 enforcement actions |
 | 22 | Every guard rule has a positive probe, a comment probe and a live scan | ❌ |
 | 23 | Weight registry enumerated and asserted | ❌ |
 | 24 | Elevation: every theme with non-zero elevation wires `materialShadowColor` | ❌ 2 open |
@@ -958,6 +995,28 @@ guard, kit or generated file was touched; no golden was run or regenerated.
 
 **No delta in the taxonomy**: 22 SHARED_REQUIRED + 17 allowed = 39, identical to
 the figures the report already carried.
+
+### 25.2 · Final consistency pass (docs-only)
+
+Run at `f36307f2`. No production, test, guard, kit, Widgetbook, golden or
+generated file was touched.
+
+| # | What was checked | How | Result |
+|---|---|---|---|
+| 1 | **P1-07 canonical count** | balanced-paren scan of every `.copyWith(` whose receiver is a text style, over `lib/features/**` + `lib/shared/widgets/**`, comments blanked in place so offsets survive, deduplicated by source offset | **`FEATURE_UNIQUE` 9 · `SHARED_UNIQUE` 14 · `TOTAL_UNIQUE` 23.** By receiver form: `textStyles.` 9 · `texts.` 9 · `withWeight(…)` 4 · `textTheme.` 1. **Zero sites matched two forms**, so no dedup was actually needed — the earlier disagreement was not double-counting |
+| 2 | Why **24** was wrong | re-read the site it counted | it included `mx_search_field.dart:139`, where the receiver is a **local** (`final text = context.texts.bodyMedium!;` then `text.copyWith(color:)`). Semantically a restyle, but no receiver pattern can match it, so it cannot be a rule violation. Excluded from the 23 and recorded in P1-07 as a known residual instead of dropped silently |
+| 3 | Why **18** was wrong | re-ran the line-scoped patterns | it counted only `textStyles.` (9) + `texts.` (9) and **missed 5**: the 4 `withWeight(…).copyWith(` launderings — 3 of them multi-line, which is exactly the defect P1-07 (c) describes — and the 1 `textTheme.` site. 18 + 5 = 23 |
+| 4 | Guard counts | counted `§9`'s rule rows | **5** rule rows, matching `GUARD_RULE_COUNT`; `ENFORCEMENT_ACTION_COUNT` = 8 declared and Phase 6's "six" is now explicitly six *actions* (3 rules + 3 actions) |
+| 5 | Owner decisions | scanned for stale references | exactly **2** retained (OD1 → P1-06 only, OD2 → P2-07 only). P2-07's resolution cell had pointed at a third, non-existent owner decision; it now points at OD2 |
+| 6 | Matrix `NEW_ID` validity | every row's `NEW_ID` checked against the active registry | **0** rows reference a non-active id; A20-P1-10 and A20-P2-02 now carry `—` |
+| 7 | Registry arithmetic | counted rows, excluding strikethrough | 1 + 15 + 21 + 14 = **51**, matching the stated total; every active id appears in exactly one registry row |
+| 8 | Scores | recomputed from the criteria tables themselves | §23 30 rows / 13 ✅ → **13/30**; §24 22 rows / 11 ✅ → **11/22** |
+| 9 | DAG hygiene | stripped `~~…~~` pointers, then checked every id | 42 ids referenced, **all active**; no retired id assigned work in the DAG, the files-by-phase list or the verification criteria |
+| 10 | Raw taxonomy | re-verified at HEAD | **39 = 22 + 17**, unchanged |
+
+All ten pass. The checker is written to fail on a bare retired id anywhere work
+is assigned, which is why retired ids appear struck through wherever they are
+mentioned as history.
 | 7 | **Correction pass** — §8 table re-summed by hand and by script | the 11 rows of §8 | 16+7+3+2+2+2+1+2+2+1+1 = **39**; SHARED_REQUIRED **22**; allowed **17** |
 | 8 | **Correction pass** — `test/shared/widgets/mx_stress_test.dart` read | `:33`, `:102-103`, `:140` | 320 × 2.0; **360 / 375 / 393 × 1.3 / 2.0**; inputs 2.5 / 3.0 |
 | 9 | **Correction pass** — guard registry read for `exclude:` and `mode: file` support | `memox-architecture-rules.yaml:131,191`, `memox-design-token-rules.yaml:227` | both exist; `no_raw_loading_indicator`'s allowlist needs no new capability |
