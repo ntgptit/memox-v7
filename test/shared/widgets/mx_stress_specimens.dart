@@ -6,6 +6,7 @@ import 'package:memox/shared/widgets/mx_breadcrumb.dart';
 import 'package:memox/shared/widgets/mx_button_pair.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
 
+import 'mx_stress_owner_specimens.dart';
 import 'mx_stress_selection_specimens.dart';
 import 'package:memox/shared/widgets/mx_confirm_dialog.dart';
 import 'package:memox/shared/widgets/mx_content_shell.dart';
@@ -84,6 +85,7 @@ class MxStressSpecimen {
 /// `mx_stress_test.dart` asserts this list covers `lib/shared/widgets/`.
 List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
   ...selectionStressSpecimens(),
+  ...ownerStressSpecimens(),
   MxStressSpecimen(
     name: 'MxActionButton',
     build: () => const MxActionButton(

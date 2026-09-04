@@ -165,17 +165,28 @@ class _MxAsyncConfirmDialogState<P extends Enum>
 
   @override
   Widget build(BuildContext context) {
-    return MxConfirmDialog(
-      title: widget.title,
-      message: widget.message,
-      confirmLabel: widget.confirmLabel,
-      cancelLabel: widget.cancelLabel,
-      variant: widget.variant,
-      tone: widget.tone,
-      isSubmitting: widget.state.isSubmitting,
-      isConfirmBlocked: widget.isBlocked,
-      onConfirm: widget.onConfirm,
-      onCancel: widget.onCancel,
+    // **The dialog disables its buttons while the write is in flight, and
+    // until A20.1 P1-05 it did not disable its exits.** A tap on the barrier
+    // or the system back gesture popped the route, which unmounted this
+    // listener; the write then committed with nobody waiting for the
+    // transition, so `onDone` — the only path to the Undo — never ran.
+    // `PopScope` closes both exits for exactly as long as the buttons are
+    // closed: `Navigator.maybePop` is what the barrier and the back gesture
+    // call, and it asks here first.
+    return PopScope(
+      canPop: !widget.state.isSubmitting,
+      child: MxConfirmDialog(
+        title: widget.title,
+        message: widget.message,
+        confirmLabel: widget.confirmLabel,
+        cancelLabel: widget.cancelLabel,
+        variant: widget.variant,
+        tone: widget.tone,
+        isSubmitting: widget.state.isSubmitting,
+        isConfirmBlocked: widget.isBlocked,
+        onConfirm: widget.onConfirm,
+        onCancel: widget.onCancel,
+      ),
     );
   }
 }

@@ -34,6 +34,10 @@ const List<String> kClosedApiFiles = <String>[
   'lib/shared/widgets/mx_pill_button.dart',
   'lib/shared/widgets/mx_badge.dart',
   'lib/shared/widgets/mx_list_tile.dart',
+  // A20.1 Phase 4: the three semantic owners the closure added.
+  'lib/shared/widgets/mx_sheet.dart',
+  'lib/shared/widgets/mx_section_label.dart',
+  'lib/shared/widgets/mx_loading_state.dart',
 ];
 
 /// Types a closed component API may expose: content, behaviour, identity.

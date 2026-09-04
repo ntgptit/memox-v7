@@ -6,6 +6,7 @@ import 'package:memox/shared/widgets/mx_alert_dialog.dart';
 import 'package:memox/shared/widgets/mx_confirm_dialog.dart';
 import 'package:memox/shared/widgets/mx_dialog_tone.dart';
 import 'package:memox/shared/widgets/mx_form_dialog.dart';
+import 'package:memox/shared/widgets/mx_sheet.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
 import 'package:widgetbook/widgetbook.dart';
 
@@ -245,6 +246,25 @@ WidgetbookComponent alertDialogComponent() {
               onDismiss: _noop,
             ),
           );
+        },
+      ),
+    ],
+  );
+}
+
+WidgetbookComponent sheetHeaderComponent() {
+  return WidgetbookComponent(
+    name: 'MxSheetHeader',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Playground',
+        builder: (context) {
+          final title = context.knobs.string(
+            label: 'title',
+            initialValue: 'Sort by',
+          );
+
+          return CatalogCenterPage(child: MxSheetHeader(title: title));
         },
       ),
     ],
