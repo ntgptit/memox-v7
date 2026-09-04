@@ -27,6 +27,15 @@ class MxDropdownOption<T> {
 ///
 /// This is the *inline* select. A field-anchored picker with a text box is
 /// Material's `DropdownMenu`, which is themed and needs no wrapper.
+///
+/// **Disabled and error are decided, not missing** (A20.1 P2-21).
+/// *Disabled* is `onChanged: null` — Material's own grammar for a
+/// `DropdownButton`, which then paints the theme's disabled ink and drops
+/// the tap; there is no second flag to fall out of step with it. *Error* has
+/// no slot on purpose: the control sits inside form rows (the import
+/// mapping, the sheet selector) and the **row** owns its validation band, so
+/// a red edge here would be a second place the same fault is stated.
+/// `mx_picker_render_test.dart` pins both.
 class MxDropdown<T> extends StatelessWidget {
   const MxDropdown({
     required this.value,

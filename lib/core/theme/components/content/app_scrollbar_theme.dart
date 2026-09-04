@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../foundations/app_radius.dart';
+import '../../foundations/app_sizing.dart';
 
 /// The scroll thumb.
 ///
@@ -12,5 +13,7 @@ ScrollbarThemeData buildScrollbarTheme(ColorScheme scheme) =>
         scheme.onSurfaceVariant.withValues(alpha: 0.4),
       ),
       radius: const Radius.circular(AppRadius.sm),
-      thickness: const WidgetStatePropertyAll<double>(4),
+      thickness: const WidgetStatePropertyAll<double>(
+        AppSizing.scrollbarThickness,
+      ),
     );

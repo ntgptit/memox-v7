@@ -302,9 +302,15 @@ void main() {
     // widget it is known not to build is not.
     final rendered = renderedNames();
 
+    // OLD ASSERTION: `Switch` — the reminder toggle built a bare one.
+    // WHY IT WAS WRONG: `MxSwitchRow` is a `SwitchListTile` since A20.1
+    // P2-13 (one state channel), and no hand-written file builds a `Switch`.
+    // NEW CONTRACT: the scan sees the tile the app actually draws.
+    // FLUTTER-A20.1 AUTHORITY: A20.1 P2-13; `SwitchListTile` is the
+    // widget `lib/shared/widgets/mx_switch_row.dart` constructs.
     expect(
       rendered,
-      contains('Switch'),
+      contains('SwitchListTile'),
       reason: 'the reminder toggle builds one — the scan is broken',
     );
     expect(

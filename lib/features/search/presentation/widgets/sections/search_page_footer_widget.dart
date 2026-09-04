@@ -1,22 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/foundations/app_icon_size.dart';
 import '../../../../../core/theme/foundations/app_sizing.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_text_button.dart';
 import '../../states/library_search_state.dart';
 import '../../../../../shared/widgets/mx_feedback_band.dart';
-
-/// What sits under the last result: the way to load more, the fact that more is
-/// loading, or the fact that loading more failed.
-///
-/// **A page failing never removes what is already listed** — only this band
-/// changes. The results above it are exactly what was found, and an error state
-/// over the whole screen would claim otherwise.
-/// The stroke `MxActionButton`'s inline spinner uses; the loading-more face
-/// borrows the same drawing so the two read as one family.
-const double _kSpinnerStroke = 2;
+import '../../../../../shared/widgets/mx_loading_state.dart';
 
 class SearchPageFooterWidget extends StatelessWidget {
   const SearchPageFooterWidget({
@@ -51,12 +41,8 @@ class SearchPageFooterWidget extends StatelessWidget {
           child: SizedBox(
             height: AppSizing.touchTarget,
             child: Center(
-              child: SizedBox.square(
-                dimension: AppIconSize.sm,
-                child: CircularProgressIndicator(
-                  strokeWidth: _kSpinnerStroke,
-                  semanticsLabel: context.l10n.librarySearchLoadingMoreLabel,
-                ),
+              child: MxLoadingState.inline(
+                semanticsLabel: context.l10n.librarySearchLoadingMoreLabel,
               ),
             ),
           ),

@@ -359,7 +359,7 @@ void main() {
 
   group('strokes come from the token', () {
     test('an input keeps the input stroke in every state but focused error', () {
-      // OLD: every border at `AppStroke.input`. WHY WRONG: under error the hue
+      // OLD: every border at `AppStroke.control`. WHY WRONG: under error the hue
       // is already `error`, so a same-width `focusedErrorBorder` gave an
       // errored field no focus cue at all (#433 F3). NEW (M100.36 4C): four
       // borders keep the input stroke; focused error alone takes
@@ -376,7 +376,7 @@ void main() {
         ]) {
           expect(
             border.$2!.borderSide.width,
-            AppStroke.input,
+            AppStroke.control,
             reason: '${entry.key}: the ${border.$1} border left the token',
           );
         }

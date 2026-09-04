@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../core/theme/extensions/app_ink.dart';
 import '../../../../../core/theme/foundations/app_radius.dart';
+import '../../../../../core/theme/foundations/app_sizing.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/typography/app_typography.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
@@ -72,8 +73,8 @@ class CardMetricWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Container(
-          width: _wellSize,
-          height: _wellSize,
+          width: AppSizing.controlDense,
+          height: AppSizing.controlDense,
           decoration: BoxDecoration(
             color: context.semanticColors.surfaceMuted,
             borderRadius: BorderRadius.circular(AppRadius.sm),
@@ -116,21 +117,19 @@ TextStyle cardMetricValueStyle(BuildContext context, CardMetricKind kind) {
   );
 
   return switch (kind) {
-    CardMetricKind.date => base.copyWith(color: context.colors.onSurface),
-    CardMetricKind.numeric => base.copyWith(
-      color: context.colors.onSurface,
-      fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
+    CardMetricKind.date => base.inked(context, AppInk.stated),
+    CardMetricKind.numeric => base.inked(
+      context,
+      AppInk.stated,
+      isTabular: true,
     ),
-    CardMetricKind.schedulerProgress => base.copyWith(
-      // 6.36:1 light and 4.66:1 dark on `surfaceMuted`, 7.27 / 5.51 on
-      // `surface` — the accent as text, not `ColorScheme.primary`, which is a
-      // fill colour and fails AA as a bare label on the dark panel.
-      color: context.colors.primary,
-      fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
+    // 6.36:1 light and 4.66:1 dark on `surfaceMuted`, 7.27 / 5.51 on
+    // `surface` — the accent as text (`AppInk.accent` is `primary`, which
+    // since M100.18 reads as text on the dark panel too).
+    CardMetricKind.schedulerProgress => base.inked(
+      context,
+      AppInk.accent,
+      isTabular: true,
     ),
   };
 }
-
-/// The glyph well. Square, so a column of cells has one left edge whatever the
-/// glyph inside it is.
-const double _wellSize = 32;

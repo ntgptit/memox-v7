@@ -21,7 +21,7 @@
    Light is the default scope; dark re-points the same semantic names. */
 :root{
   /* --- base literals: light ------------------------------------------- */
-  --mx-page-light:#F2F5F9;--mx-card-light:#FFFFFF;--mx-inset-light:#E9EBEE;--mx-emphasis-light:#F5F6FF;--mx-border-selected-light:#5569FF;--mx-border-option-light:#8896FF;--mx-selected-light:#E6E9FF;--mx-raised-light:#FFFFFF;
+  --mx-page-light:#F2F5F9;--mx-card-light:#FFFFFF;--mx-inset-light:#E9EBEE;--mx-emphasis-light:#F5F6FF;--mx-border-selected-light:#5569FF;--mx-border-option-light:#7383FF;--mx-selected-light:#E6E9FF;--mx-raised-light:#FFFFFF;
   --mx-ink-light:#223354;--mx-ink-quiet-light:#596680;--mx-line-light:#E4E7EA;
   --mx-indigo-light:#4454CC;--mx-indigo-deep-light:#4141C0;--mx-indigo-container-light:#DADDF2;
   --mx-success-light:#2A7800;--mx-warning-light:#A06200;--mx-danger-light:#CD0031;--mx-info-light:#00729A;

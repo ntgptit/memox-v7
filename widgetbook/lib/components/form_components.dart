@@ -14,6 +14,7 @@ import 'package:widgetbook/widgetbook.dart';
 
 import '../support/catalog_page.dart';
 import 'package:memox/core/theme/extensions/app_ink.dart';
+import 'package:memox/core/theme/extensions/app_well_fill.dart';
 
 void _noop() {}
 
@@ -537,9 +538,7 @@ WidgetbookComponent metricWellComponent() {
                 MxMetricWell(
                   icon: isActive ? Icons.event_busy : Icons.event_busy_outlined,
                   tint: isActive ? AppInk.onErrorContainer : AppInk.quiet,
-                  wellColor: isActive
-                      ? context.colors.errorContainer
-                      : context.semanticColors.surfaceMuted,
+                  fill: isActive ? AppWellFill.danger : AppWellFill.muted,
                 ),
                 const SizedBox(width: AppSpacing.xs),
                 Text(
@@ -640,13 +639,11 @@ WidgetbookComponent selectionRowsComponent() {
         name: 'MxSwitchRow',
         builder: (BuildContext context) {
           final isOn = context.knobs.boolean(label: 'on', initialValue: true);
-          final isAnnounced = context.knobs.boolean(label: 'announced variant');
 
           return CatalogCenterPage(
             child: MxSwitchRow(
               label: 'Enable reminders',
               isOn: isOn,
-              announcedValue: isAnnounced ? (isOn ? 'On' : 'Off') : null,
               onChanged: _noopBool,
             ),
           );

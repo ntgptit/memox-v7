@@ -262,7 +262,7 @@ void main() {
 
       final atRest = painted()! as OutlineInputBorder;
       expect(atRest.borderSide.color, scheme.error);
-      expect(atRest.borderSide.width, AppStroke.input);
+      expect(atRest.borderSide.width, AppStroke.control);
 
       await tester.tap(find.byType(TextField));
       await tester.pumpAndSettle();

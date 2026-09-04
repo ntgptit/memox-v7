@@ -12,6 +12,8 @@ import '../../../domain/entities/trash_batch_entity.dart';
 import '../../../domain/models/trash_restore_target_model.dart';
 import '../../controllers/trash_controller.dart';
 import '../support/trash_labels_widget.dart';
+import '../../../../../shared/widgets/mx_sheet.dart';
+import '../../../../../shared/widgets/mx_sheet_insets.dart';
 
 /// Asks where a batch should go back to (BR-261, wireframe T8, T9).
 ///
@@ -24,10 +26,8 @@ import '../support/trash_labels_widget.dart';
 Future<TrashRestoreTarget?> showTrashRestoreTargetSheet(
   BuildContext context, {
   required TrashBatchEntity batch,
-}) => showModalBottomSheet<TrashRestoreTarget>(
-  context: context,
-  isScrollControlled: true,
-  useSafeArea: true,
+}) => showMxSheet<TrashRestoreTarget>(
+  context,
   builder: (sheetContext) => _TrashRestoreTargetSheet(batch: batch),
 );
 
@@ -56,50 +56,47 @@ class _TrashRestoreTargetSheetState
       trashRestoreTargetsProvider(widget.batch.batchId),
     );
 
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: MxAsyncView<List<TrashRestoreTarget>>(
-          value: targets,
-          loadingLabel: l10n.trashRestoreTargetTitle,
-          // The app's one full-surface error grammar (C10): a failed read
-          // offers Retry where it failed, not a dead face the user can only
-          // dismiss. Invalidate re-runs the watch.
-          //
-          // **Inside a min Column, deliberately.** The sheet hands down a
-          // bounded height and `MxErrorState` centres itself, so bare it
-          // would balloon this compact sheet to full height. A min Column
-          // gives its child unbounded height, which is exactly what makes a
-          // `Center`-based state hug its content. The data face stays outside
-          // the wrap on purpose — its `Flexible(ListView)` needs the bounded
-          // constraint the sheet provides.
-          error: (error, _) => Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              MxErrorState(
-                title: l10n.trashRestoreTargetTitle,
-                message: context.trashCommandError(error),
-                retryLabel: l10n.retryAction,
-                onRetry: () => ref.invalidate(
-                  trashRestoreTargetsProvider(widget.batch.batchId),
-                ),
+    return MxSheetInsets(
+      child: MxAsyncView<List<TrashRestoreTarget>>(
+        value: targets,
+        loadingLabel: l10n.trashRestoreTargetTitle,
+        // The app's one full-surface error grammar (C10): a failed read
+        // offers Retry where it failed, not a dead face the user can only
+        // dismiss. Invalidate re-runs the watch.
+        //
+        // **Inside a min Column, deliberately.** The sheet hands down a
+        // bounded height and `MxErrorState` centres itself, so bare it
+        // would balloon this compact sheet to full height. A min Column
+        // gives its child unbounded height, which is exactly what makes a
+        // `Center`-based state hug its content. The data face stays outside
+        // the wrap on purpose — its `Flexible(ListView)` needs the bounded
+        // constraint the sheet provides.
+        error: (error, _) => Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            MxErrorState(
+              title: l10n.trashRestoreTargetTitle,
+              message: context.trashCommandError(error),
+              retryLabel: l10n.retryAction,
+              onRetry: () => ref.invalidate(
+                trashRestoreTargetsProvider(widget.batch.batchId),
               ),
-            ],
-          ),
-          data: (values) => _Body(
-            batch: widget.batch,
-            targets: values,
-            selectedDeckId: _resolveSelection(values),
-            onSelect: (deckId) => setState(() {
-              _selectedDeckId = deckId;
-              _hasSelection = true;
-            }),
-            onConfirm: () {
-              final chosen = _chosen(values);
-              if (chosen == null) return;
-              Navigator.of(context).pop(chosen);
-            },
-          ),
+            ),
+          ],
+        ),
+        data: (values) => _Body(
+          batch: widget.batch,
+          targets: values,
+          selectedDeckId: _resolveSelection(values),
+          onSelect: (deckId) => setState(() {
+            _selectedDeckId = deckId;
+            _hasSelection = true;
+          }),
+          onConfirm: () {
+            final chosen = _chosen(values);
+            if (chosen == null) return;
+            Navigator.of(context).pop(chosen);
+          },
         ),
       ),
     );
@@ -169,7 +166,14 @@ class _Body extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        Text(l10n.trashRestoreTargetTitle, style: theme.textTheme.titleMedium),
+        // The sheet's title announces as a header (A20.1 P1-01, §23 #17).
+        Semantics(
+          header: true,
+          child: Text(
+            l10n.trashRestoreTargetTitle,
+            style: theme.textTheme.titleMedium,
+          ),
+        ),
         const SizedBox(height: AppSpacing.md),
         Flexible(
           child: ListView.builder(

@@ -80,6 +80,18 @@ const List<RoleBinding> roleBindings = <RoleBinding>[
   ),
   RoleBinding(
     component: 'AppBar',
+    slot: 'iconTheme',
+    file: _appBar,
+    scope: 'buildAppBarTheme',
+    requires: <String>['onSurface'],
+    refuses: <String>['onSurfaceVariant'],
+    because:
+        '_AppBarDefaultsM3.iconTheme is onSurface. Left unset, app_bar.dart '
+        'hands the leading to iconButtonTheme (onSurfaceVariant), one ink '
+        'step quieter than canonical (A20.1 P2-05).',
+  ),
+  RoleBinding(
+    component: 'AppBar',
     slot: 'foregroundColor',
     file: _appBar,
     scope: 'buildAppBarTheme',

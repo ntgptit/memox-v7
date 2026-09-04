@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -118,15 +119,22 @@ void main() {
     // is the cross-feature dependency the architecture guard refuses — and the
     // fake here is deliberately enabled, so a row that leaked state would have
     // something to leak.
-    for (final leaked in <String>[
-      english.reminderStatusOn,
-      english.reminderStatusOff,
-    ]) {
-      expect(
-        find.descendant(of: row, matching: find.text(leaked)),
-        findsNothing,
-        reason: 'the row must not mirror reminder state',
-      );
-    }
+    // OLD ASSERTION: neither `reminderStatusOn` nor `reminderStatusOff` was
+    // painted in the row.
+    // WHY IT WAS WRONG: those strings left the ARB with the toggle's second
+    // state channel (A20.1 P2-13), so the check matched nothing.
+    // NEW CONTRACT: the row carries no toggle and no state word at all.
+    // FLUTTER-A20.1 AUTHORITY: A20.1 P2-13; M6 R1 (the row says nothing
+    // about whether the reminder is on).
+    expect(
+      find.descendant(of: row, matching: find.byType(Switch)),
+      findsNothing,
+      reason: 'the row must not mirror reminder state',
+    );
+    expect(
+      find.descendant(of: row, matching: find.byType(SwitchListTile)),
+      findsNothing,
+      reason: 'the row must not mirror reminder state',
+    );
   });
 }

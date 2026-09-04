@@ -177,7 +177,7 @@ Luồng đúng:
 
 **Ngoại lệ có kiểm soát — planned themes:** một theme cho component chưa render
 được phép vào `ThemeData` khi và chỉ khi qua admission test ba điều kiện của
-`app_planned_themes.dart` (chỉ restate token đã quyết và đã đo; component có
+các component theme chưa có renderer trong `app_theme.dart` — trước M100.31 là `app_planned_themes.dart` (chỉ restate token đã quyết và đã đo; component có
 tên trong roadmap thật; M3 default sai theo cách đã xác lập), và
 `theme_coverage_test` giữ hai chiều: rendered ⇒ themed, themed-chưa-rendered ⇒
 nằm trong allowlist có lý do, allowlist-mà-đã-rendered ⇒ test fail.

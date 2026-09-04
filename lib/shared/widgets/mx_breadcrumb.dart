@@ -7,6 +7,8 @@ import '../../core/theme/typography/app_typography.dart';
 import '../../core/theme/extensions/theme_context_extension.dart';
 import '../../core/theme/extensions/app_ink.dart';
 import 'mx_icon.dart';
+import 'mx_focus_ring.dart';
+import '../../core/theme/foundations/app_radius.dart';
 
 part 'mx_breadcrumb_step.dart';
 
@@ -81,7 +83,11 @@ class MxBreadcrumb extends StatefulWidget {
     this.onShowAll,
     this.upIcon,
     super.key,
-  });
+  }) : assert(
+         lineHeight >= AppSizing.touchTarget || onUp != null,
+         'a strip below the touch floor must be one target: pass onUp '
+         '(A20.1 P3-13)',
+       );
 
   /// The compact line: a strip that is a *line of a header* rather than a band
   /// of its own.
@@ -93,7 +99,7 @@ class MxBreadcrumb extends StatefulWidget {
   /// is **one** target spanning most of the bar, which is far more area than
   /// the floor asks for, and it buys the action a reader wants nine times in
   /// ten. The steps stop being controls. See [onUp].
-  static const double compactLineHeight = 32;
+  static const double compactLineHeight = AppSizing.controlDense;
 
   /// Ordered from the top of the hierarchy to the current step.
   ///
@@ -180,8 +186,7 @@ class _MxBreadcrumbState extends State<MxBreadcrumb> {
     BuildContext context,
     List<MxBreadcrumbItem> items,
   ) {
-    final quiet = context.colors.onSurfaceVariant;
-    final style = context.texts.bodySmall?.copyWith(color: quiet);
+    final style = context.texts.bodySmall!.inked(context, AppInk.quiet);
 
     return Semantics(
       button: true,
@@ -392,23 +397,33 @@ class _MxBreadcrumbFoldState extends State<_MxBreadcrumbFold> {
       // what pressing it does.
       label: MaterialLocalizations.of(context).moreButtonTooltip,
       value: '${widget.hiddenCount}',
-      child: Material(
-        type: MaterialType.transparency,
-        child: InkWell(
-          onTap: widget.onExpand,
-          onHover: (bool value) => setState(() => _isHovered = value),
-          overlayColor: _noOverlay(context),
-          splashFactory: NoSplash.splashFactory,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              minHeight: AppSizing.touchTarget,
-              minWidth: AppSizing.touchTarget,
-            ),
-            child: Center(
-              child: MxIcon(
-                Icons.more_horiz,
-                ink: _isHovered ? AppInk.stated : AppInk.quiet,
-                size: MxIconSize.sm,
+      // **The fold was the last control outside the focus grammar** (A20.1
+      // P1-04). `_noOverlay` switches off the ink well's own focus wash — on
+      // purpose, the step beside it does the same — but the step then draws
+      // its focus on the text, and the fold, a glyph with no text, drew
+      // nothing: a keyboard or Switch Access user could land on it and see
+      // no sign of it. The ring `MxCard`, `MxListTile`, `MxPressable` and
+      // `MxPillButton` share is the answer, on the 48 box the fold occupies.
+      child: MxFocusRing(
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            onTap: widget.onExpand,
+            onHover: (bool value) => setState(() => _isHovered = value),
+            overlayColor: _noOverlay(context),
+            splashFactory: NoSplash.splashFactory,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: AppSizing.touchTarget,
+                minWidth: AppSizing.touchTarget,
+              ),
+              child: Center(
+                child: MxIcon(
+                  Icons.more_horiz,
+                  ink: _isHovered ? AppInk.stated : AppInk.quiet,
+                  size: MxIconSize.sm,
+                ),
               ),
             ),
           ),

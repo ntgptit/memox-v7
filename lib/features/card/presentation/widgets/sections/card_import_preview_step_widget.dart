@@ -20,6 +20,7 @@ import '../items/card_import_mapping_row_widget.dart';
 import '../support/card_import_labels_widget.dart';
 import 'card_import_preview_summary_widget.dart';
 import 'card_import_source_summary_widget.dart';
+import '../../../../../shared/widgets/mx_section_label.dart';
 
 /// Free functions rather than inline reads in `build()`, the same shape
 /// every widget in this feature uses for its commands.
@@ -78,12 +79,7 @@ class CardImportPreviewStepWidget extends ConsumerWidget {
           loading: () => Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              Text(
-                context.l10n.cardImportPreviewHeading.toUpperCase(),
-                style: context.textStyles.sectionLabel.copyWith(
-                  color: context.colors.onSurfaceVariant,
-                ),
-              ),
+              MxSectionLabel(label: context.l10n.cardImportPreviewHeading),
               const SizedBox(height: AppSpacing.md),
               _ParsingPanel(deckId: deckId),
             ],
@@ -189,10 +185,7 @@ class _ParsingPanel extends ConsumerWidget {
       child: Column(
         children: <Widget>[
           const SizedBox(height: AppSpacing.md),
-          Semantics(
-            label: l10n.cardImportParsingLabel,
-            child: const CircularProgressIndicator(),
-          ),
+          MxLoadingState.inColumn(semanticsLabel: l10n.cardImportParsingLabel),
           const SizedBox(height: AppSpacing.lg),
           Text(
             kind == CardImportSourceKind.upload
@@ -269,11 +262,9 @@ class _LoadedPreview extends ConsumerWidget {
               const SizedBox(height: AppSpacing.md),
               // The panel's inner group label — a rung below the section
               // labels outside, same tracked-uppercase voice.
-              Text(
-                context.l10n.cardImportMappingHeading.toUpperCase(),
-                style: context.textStyles.sectionLabelSmall.copyWith(
-                  color: context.colors.onSurfaceVariant,
-                ),
+              MxSectionLabel(
+                label: context.l10n.cardImportMappingHeading,
+                rung: MxSectionLabelRung.small,
               ),
               const SizedBox(height: AppSpacing.sm),
               for (var column = 0; column < (sheet?.columnCount ?? 0); column++)

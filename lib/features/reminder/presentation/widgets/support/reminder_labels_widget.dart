@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../domain/failures/reminder_failure.dart';
 import '../../../domain/models/reminder_time_model.dart';
+import '../../../../../shared/widgets/mx_feedback_band.dart';
 
 /// The banner copy for one rejection: a heading, a body, and whether it can be
 /// retried at all.
@@ -16,11 +17,17 @@ final class ReminderBanner {
     required this.title,
     required this.message,
     required this.isRetryable,
+    this.tone = MxFeedbackTone.danger,
   });
 
   final String title;
   final String message;
   final bool isRetryable;
+
+  /// Which band carries it. Mapped **per value** (A20.1 P1-13): a refused OS
+  /// permission is not a failure of the app, it is a condition the user can
+  /// change in settings, and painting it as an error said something untrue.
+  final MxFeedbackTone tone;
 }
 
 /// Where a reminder domain value becomes something a person reads.
@@ -38,17 +45,16 @@ extension ReminderLabels on BuildContext {
   /// 24-hour locale and a device with the 24-hour setting on are different
   /// questions, and only this knows both — a hand-rolled `HH:mm` would print
   /// `20:00` to a user whose phone says `8:00 PM` everywhere else.
-  String reminderTimeText(ReminderTime time) => MaterialLocalizations.of(
-    this,
-  ).formatTimeOfDay(TimeOfDay(hour: time.hour, minute: time.minute));
-
-  /// The accessibility value of the toggle (M6 R7).
   ///
-  /// Exists so the state is spoken as a word rather than inferred from the
-  /// switch's colour, which is the one signal a colour-blind or screen-reader
-  /// user does not get.
-  String reminderToggleValue({required bool isEnabled}) =>
-      isEnabled ? l10n.reminderStatusOn : l10n.reminderStatusOff;
+  /// **The device's 12/24-hour setting travels with it** (A20.1 P2-16).
+  /// `formatTimeOfDay` defaults `alwaysUse24HourFormat` to false, while the
+  /// picker the row opens reads `MediaQuery.alwaysUse24HourFormat` — so a
+  /// 24-hour phone showed `8:00 PM` on the row and `20:00` in the picker.
+  String reminderTimeText(ReminderTime time) =>
+      MaterialLocalizations.of(this).formatTimeOfDay(
+        TimeOfDay(hour: time.hour, minute: time.minute),
+        alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(this),
+      );
 
   /// The banner for a rejection (UC-17 E1…E4, E6).
   ReminderBanner reminderBanner(ReminderSetupRejection rejection) =>
@@ -62,6 +68,7 @@ extension ReminderLabels on BuildContext {
           title: l10n.reminderPermissionDeniedTitle,
           message: l10n.reminderPermissionDeniedMessage,
           isRetryable: true,
+          tone: MxFeedbackTone.warning,
         ),
         ReminderSetupRejection.scheduleFailed => ReminderBanner(
           title: l10n.reminderScheduleErrorTitle,

@@ -173,8 +173,10 @@ class _ActionBadge extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppRadius.pill),
         // `AppStroke.hairline` is `Border.all`'s own default, so it is not
-        // restated — the analyzer rejects that, and the badge's edge is the
-        // same 1dp every other hairline in the app draws.
+        // restated — the analyzer rejects a redundant argument — and the
+        // default *is* `AppStroke.hairline`: `app_stroke_test.dart` pins
+        // `Border.all()`'s width to the token, so the omission is the token
+        // (A20.1 P2-09).
         border: Border.all(color: ink),
       ),
       child: Row(

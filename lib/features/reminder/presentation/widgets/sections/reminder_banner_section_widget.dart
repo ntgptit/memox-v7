@@ -34,6 +34,7 @@ class ReminderBannerSectionWidget extends StatelessWidget {
     // screen reader that does not announce it leaves them with a toggle that
     // silently sprang back (M6 A5).
     return MxFeedbackBand(
+      tone: banner.tone,
       title: banner.title,
       message: banner.message,
       actionLabel: banner.isRetryable ? context.l10n.retryAction : null,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/error/failure.dart';
 import '../../../../../core/theme/extensions/app_ink.dart';
+import '../../../../../core/theme/foundations/app_sizing.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -158,18 +159,18 @@ class _HeroCard extends StatelessWidget {
         children: <Widget>[
           const SizedBox(height: AppSpacing.md),
           Container(
-            width: AppSpacing.xxl + AppSpacing.md,
-            height: AppSpacing.xxl + AppSpacing.md,
+            width: AppSizing.touchTarget,
+            height: AppSizing.touchTarget,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: context.semanticColors.surfaceMuted,
               shape: BoxShape.circle,
             ),
-            // 32 has no MxIconSize step; the closed-set spelling here is
-            // the ink's own resolve.
+            // 32 has no `AppIconSize` step: the hero glyph fills the dense
+            // tier, which is a dimension, not a gap (A20.1 P2-12).
             child: Icon(
               heroIcon,
-              size: AppSpacing.xxl,
+              size: AppSizing.controlDense,
               color: heroColor.resolve(context),
             ),
           ),

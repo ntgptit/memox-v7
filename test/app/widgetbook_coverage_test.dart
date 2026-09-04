@@ -48,6 +48,10 @@ void main() {
         'the gutter arithmetic it inherits from the shell. Shown alone it is a '
         'Padding with a number in it; the entry that means anything is '
         "MxContentShell's, which draws the band in the frame it belongs to.",
+    'MxReadingColumn':
+        'a ConstrainedBox with one number in it — the reading-column cap the '
+        'shell owns. Shown alone it is an empty width; every capped screen in '
+        'the catalogue already draws it in the frame it belongs to.',
     'MxDialogHeader':
         'the shared headline row inside MxConfirmDialog and MxFormDialog, both '
         'of which are catalogued. An entry would be the same row twice.',
@@ -61,6 +65,7 @@ void main() {
     'mx_dialog_metrics.dart',
     'mx_failure_labels_widget.dart',
     'mx_messenger.dart',
+    'mx_scroll_end_inset.dart',
     'mx_undo_snack_bar.dart',
   };
 
@@ -141,5 +146,24 @@ void main() {
         reason: '$name is listed as "not a component" but no longer exists',
       );
     }
+  });
+
+  test('the catalogue offers every theme the app can render', () {
+    // A20.1 P1-08: the app wires four themes; a catalogue showing two of
+    // them is a catalogue in which half the palette has no picture.
+    final main = File('widgetbook/lib/main.dart').readAsStringSync();
+    for (final builder in <String>[
+      'buildLightTheme',
+      'buildDarkTheme',
+      'buildHighContrastLightTheme',
+      'buildHighContrastDarkTheme',
+    ]) {
+      expect(main, contains('$builder()'), reason: '$builder is not offered');
+    }
+    expect(
+      RegExp(r'WidgetbookTheme<ThemeData>\(').allMatches(main).length,
+      4,
+      reason: 'four modes, exactly',
+    );
   });
 }

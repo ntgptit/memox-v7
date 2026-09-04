@@ -14,6 +14,8 @@ import '../../controllers/deck_write_controller.dart';
 import '../../states/deck_submit_state.dart';
 import '../items/deck_scheduler_picker_widget.dart';
 import '../support/deck_labels_widget.dart';
+import '../../../../../shared/widgets/mx_sheet.dart';
+import '../../../../../shared/widgets/mx_sheet_insets.dart';
 
 /// The Reset learning progress confirmation (UC-07, BR-50).
 ///
@@ -27,9 +29,8 @@ Future<void> showDeckResetProgressConfirm(
   BuildContext context, {
   required DeckEntity deck,
   required bool hasLearnedCards,
-}) => showModalBottomSheet<void>(
-  context: context,
-  isScrollControlled: true,
+}) => showMxSheet<void>(
+  context,
   builder: (sheetContext) => _ResetProgressSheet(
     deck: deck,
     hasLearnedCards: hasLearnedCards,
@@ -74,82 +75,83 @@ class _ResetProgressSheetState extends ConsumerState<_ResetProgressSheet> {
       }
     });
 
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Text(
+    return MxSheetInsets(
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            // The sheet's title announces as a header (A20.1 P1-01, §23 #17).
+            Semantics(
+              header: true,
+              child: Text(
                 l10n.deckResetProgressTitle,
                 style: context.texts.titleLarge,
               ),
-              const SizedBox(height: AppSpacing.lg),
-              _Section(
-                title: l10n.deckResetProgressKeptTitle,
-                body: l10n.deckResetProgressKeptBody,
-                icon: Icons.check_circle_outline,
-                tone: AppInk.success,
-              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            _Section(
+              title: l10n.deckResetProgressKeptTitle,
+              body: l10n.deckResetProgressKeptBody,
+              icon: Icons.check_circle_outline,
+              tone: AppInk.success,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            // UC-07 A2: still allowed, and said plainly. A deck nobody has
+            // studied is the easiest case to reset and the one where a list of
+            // losses would be a warning about nothing.
+            _Section(
+              title: l10n.deckResetProgressLostTitle,
+              body: widget.hasLearnedCards
+                  ? l10n.deckResetProgressLostBody
+                  : l10n.deckResetProgressNothingToLose,
+              icon: Icons.remove_circle_outline,
+              tone: widget.hasLearnedCards ? AppInk.danger : AppInk.quiet,
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              l10n.deckResetProgressSchedulerLabel,
+              style: context.texts.labelLarge,
+            ),
+            DeckSchedulerPickerWidget(
+              // Titled two lines up as "Study mode after the reset".
+              sectionLabel: null,
+              selected: _scheduler,
+              isEnabled: !submit.isSubmitting,
+              // The lock is what this operation undoes (BR-44); repeating the
+              // warning here would describe the state being left behind.
+              shouldShowLockNotice: false,
+              onChanged: (value) =>
+                  setState(() => _scheduler = value ?? _scheduler),
+            ),
+            if (submit.failure != null) ...<Widget>[
               const SizedBox(height: AppSpacing.md),
-              // UC-07 A2: still allowed, and said plainly. A deck nobody has
-              // studied is the easiest case to reset and the one where a list of
-              // losses would be a warning about nothing.
-              _Section(
-                title: l10n.deckResetProgressLostTitle,
-                body: widget.hasLearnedCards
-                    ? l10n.deckResetProgressLostBody
-                    : l10n.deckResetProgressNothingToLose,
-                icon: Icons.remove_circle_outline,
-                tone: widget.hasLearnedCards ? AppInk.danger : AppInk.quiet,
-              ),
-              const SizedBox(height: AppSpacing.lg),
               Text(
-                l10n.deckResetProgressSchedulerLabel,
-                style: context.texts.labelLarge,
-              ),
-              DeckSchedulerPickerWidget(
-                // Titled two lines up as "Study mode after the reset".
-                sectionLabel: null,
-                selected: _scheduler,
-                isEnabled: !submit.isSubmitting,
-                // The lock is what this operation undoes (BR-44); repeating the
-                // warning here would describe the state being left behind.
-                shouldShowLockNotice: false,
-                onChanged: (value) =>
-                    setState(() => _scheduler = value ?? _scheduler),
-              ),
-              if (submit.failure != null) ...<Widget>[
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  context.deckWriteFailure(submit.failure!),
-                  style: context.texts.bodySmall!.inked(context, AppInk.danger),
-                ),
-              ],
-              const SizedBox(height: AppSpacing.xl),
-              // The row the shortened labels were for: Reset beside Cancel,
-              // stacking only if a locale outgrows the line.
-              MxButtonPair(
-                primary: MxActionButton(
-                  label: l10n.deckResetProgressConfirm,
-                  variant: MxActionButtonVariant.destructive,
-                  isLoading: submit.isSubmitting,
-                  onPressed: submit.isSubmitting
-                      ? null
-                      : () => ref
-                            .read(provider.notifier)
-                            .submit(schedulerType: _scheduler),
-                ),
-                secondary: MxActionButton(
-                  label: l10n.commonCancelAction,
-                  variant: MxActionButtonVariant.secondary,
-                  onPressed: submit.isSubmitting ? null : widget.onClose,
-                ),
+                context.deckWriteFailure(submit.failure!),
+                style: context.texts.bodySmall!.inked(context, AppInk.danger),
               ),
             ],
-          ),
+            const SizedBox(height: AppSpacing.xl),
+            // The row the shortened labels were for: Reset beside Cancel,
+            // stacking only if a locale outgrows the line.
+            MxButtonPair(
+              primary: MxActionButton(
+                label: l10n.deckResetProgressConfirm,
+                variant: MxActionButtonVariant.destructive,
+                isLoading: submit.isSubmitting,
+                onPressed: submit.isSubmitting
+                    ? null
+                    : () => ref
+                          .read(provider.notifier)
+                          .submit(schedulerType: _scheduler),
+              ),
+              secondary: MxActionButton(
+                label: l10n.commonCancelAction,
+                variant: MxActionButtonVariant.secondary,
+                onPressed: submit.isSubmitting ? null : widget.onClose,
+              ),
+            ),
+          ],
         ),
       ),
     );

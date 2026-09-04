@@ -161,9 +161,17 @@ CheckboxThemeData buildCheckboxTheme(
   AppSemanticColors semantic,
 ) => CheckboxThemeData(
   fillColor: WidgetStateProperty.resolveWith((states) {
+    // **Disabled keeps its boolean, M3's way** (A20.1 P2-15). A ticked box
+    // that cannot be changed fills with the *disabled ink* — `onSurface` at
+    // 38%, `_CheckboxDefaultsM3.fillColor` — not with `disabledSurface`: the
+    // surface tint is a face for things that have one, and on a box it read
+    // 1.32:1 against the card, so a disabled tick and an empty box were one
+    // grey. The ink at 38% still reads as a box, and the tick inside it is
+    // the page colour (below), which is how M3 keeps "ticked" legible while
+    // "unavailable" stays obvious.
     if (states.contains(WidgetState.disabled)) {
       return states.contains(WidgetState.selected)
-          ? semantic.disabledSurface
+          ? semantic.onDisabled
           : Colors.transparent;
     }
     if (states.contains(WidgetState.selected)) return scheme.primary;
@@ -173,11 +181,12 @@ CheckboxThemeData buildCheckboxTheme(
     return Colors.transparent;
   }),
   checkColor: WidgetStateProperty.resolveWith((states) {
-    // The same trap as the switch's thumb, one control over: a white tick on
-    // the disabled fill measures 1.32:1 in light, so a disabled *ticked* box
-    // reads as an empty one. The disabled ink is 2.05:1 on that fill (light;
-    // 2.51:1 dark — M100.36 measurement).
-    if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
+    // `_CheckboxDefaultsM3.checkColor` disabled is `surface`: the tick is cut
+    // out of the disabled-ink fill above in the page colour, so it reads at
+    // the ink's own contrast rather than as a second grey on a grey (A20.1
+    // P2-15). Until then the tick was `onDisabled` on `disabledSurface` —
+    // 2.05:1, a disabled ticked box that read as an empty one.
+    if (states.contains(WidgetState.disabled)) return scheme.surface;
 
     return scheme.onPrimary;
   }),
@@ -188,7 +197,14 @@ CheckboxThemeData buildCheckboxTheme(
   // invisible to a test that only ever asked about `{selected}` and `{}`.
   side: WidgetStateBorderSide.resolveWith((states) {
     if (states.contains(WidgetState.disabled)) {
-      return _boxSide(semantic.onDisabled);
+      // A disabled *ticked* box has no edge — `_CheckboxDefaultsM3.side` is
+      // transparent there, for the same reason the live selected box has
+      // none: the fill is the box. An edge on it only subtracted its width
+      // from the one shape left to read (A20.1 P2-15). Unticked keeps the
+      // disabled-ink ring, which is the whole control when there is no fill.
+      return states.contains(WidgetState.selected)
+          ? BorderSide.none
+          : _boxSide(semantic.onDisabled);
     }
     if (states.contains(WidgetState.selected)) {
       // **No edge, which is M3's own answer** (`_CheckboxDefaultsM3.side`

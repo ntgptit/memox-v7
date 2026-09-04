@@ -51,7 +51,10 @@ FloatingActionButtonThemeData buildFloatingActionButtonTheme(
   // *claimed* to be flush with the page in one theme and eight dp above it in
   // the other, to express something that was only ever about paint. The dark
   // shadow it was hiding is invisible on its own terms (`materialShadowColor`
-  // carries the measurement), and Flutter 3.44.8 makes the substitution safe:
+  // carries the measurement, and since A20.1 P1-12 `app_theme.dart` wires it
+  // through `ThemeData.shadowColor`, which is the one slot the FAB's
+  // `RawMaterialButton` reads — `button.dart:387`), and Flutter 3.44.8 makes
+  // the substitution safe:
   // `_FABDefaultsM3` sets no `surfaceTintColor`, so elevation has no effect
   // here beyond the shadow.
   //

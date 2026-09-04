@@ -11,6 +11,7 @@ import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_breadcrumb.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../domain/models/deck_context_model.dart';
+import '../overlays/card_ancestors_widget.dart';
 
 /// Where this card sits, and the one way out of the editor into its history.
 ///
@@ -106,37 +107,24 @@ class CardEditorContextWidget extends StatelessWidget {
   /// parameter to make its leaf configurable would make two screens share a
   /// widget whose whole shape is "the last crumb is me".
   Widget _buildBreadcrumb(BuildContext context, DeckContextModel deck) {
+    // One grammar with the card list's trail (A20.1 P1-16): tap goes up,
+    // long-press reaches any ancestor. Both go through `onLeave`, which asks
+    // about unsaved changes first.
+    // One grammar with the card list's trail (A20.1 P1-16): tap goes up,
+    // long-press reaches any ancestor. Both go through `onLeave`, which asks
+    // about unsaved changes first.
     return MxBreadcrumb(
       semanticLabel: context.l10n.deckPathSemanticLabel,
       rootIcon: Icons.home_outlined,
       collapseAfter: 3,
+      onUp: () => goUpFromCardContext(context, deck, onLeave: onLeave),
+      onShowAll: () =>
+          showCardAncestors(context, deckContext: deck, onLeave: onLeave),
       items: <MxBreadcrumbItem>[
-        MxBreadcrumbItem(
-          label: context.l10n.deckPathRootLabel,
-          onTap: () => onLeave(() => context.goNamed(RouteNames.decks)),
-        ),
+        MxBreadcrumbItem(label: context.l10n.deckPathRootLabel),
         for (final DeckBreadcrumbSegment segment in deck.ancestors)
-          MxBreadcrumbItem(
-            label: segment.name,
-            onTap: () => onLeave(
-              () => context.goNamed(
-                RouteNames.deckDetail,
-                pathParameters: <String, String>{
-                  RoutePathParams.deckId: segment.id,
-                },
-              ),
-            ),
-          ),
-        MxBreadcrumbItem(
-          label: deck.deckName,
-          onTap: () => onLeave(
-            () => context.goNamed(
-              RouteNames.deckDetail,
-              pathParameters: <String, String>{RoutePathParams.deckId: deckId},
-            ),
-          ),
-        ),
-        // The leaf: no tap, because this is the screen the user is on.
+          MxBreadcrumbItem(label: segment.name),
+        MxBreadcrumbItem(label: deck.deckName),
         MxBreadcrumbItem(label: context.l10n.cardEditorBreadcrumbLabel),
       ],
     );
@@ -167,7 +155,7 @@ class CardEditorContextWidget extends StatelessWidget {
       child: Row(
         children: <Widget>[
           // MxIcon excludes itself from semantics when unlabeled.
-          const MxIcon(Icons.history_outlined, size: MxIconSize.sm),
+          const MxIcon(Icons.history, size: MxIconSize.sm),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(

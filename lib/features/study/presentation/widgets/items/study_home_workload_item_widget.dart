@@ -6,6 +6,7 @@ import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_metric_well.dart';
 import '../../../domain/models/study_home_deck_model.dart';
+import '../../../../../core/theme/extensions/app_well_fill.dart';
 
 /// What is waiting in one deck: `2 overdue` `5 due today` `12 new` (BR-201).
 ///
@@ -43,7 +44,6 @@ class StudyHomeWorkloadItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final semantic = context.semanticColors;
 
     return Semantics(
       // `container: true`, or the label has no node of its own to sit on and is
@@ -83,9 +83,9 @@ class StudyHomeWorkloadItemWidget extends StatelessWidget {
               // See `deck_workload_line_widget.dart`: overdue is `danger`, and
               // `dangerContainer` is `errorContainer` under the name that says
               // late rather than faulty (M100.21).
-              wellColor: deck.overdueCount > 0
-                  ? semantic.dangerContainer
-                  : semantic.surfaceMuted,
+              fill: deck.overdueCount > 0
+                  ? AppWellFill.danger
+                  : AppWellFill.muted,
               wellTint: deck.overdueCount > 0
                   ? AppInk.onDangerContainer
                   : AppInk.quiet,
@@ -97,9 +97,9 @@ class StudyHomeWorkloadItemWidget extends StatelessWidget {
               color: deck.dueTodayCount > 0
                   ? AppInk.onDueContainer
                   : AppInk.quiet,
-              wellColor: deck.dueTodayCount > 0
-                  ? semantic.dueContainer
-                  : semantic.surfaceMuted,
+              fill: deck.dueTodayCount > 0
+                  ? AppWellFill.due
+                  : AppWellFill.muted,
               wellTint: deck.dueTodayCount > 0
                   ? AppInk.onDueContainer
                   : AppInk.quiet,
@@ -111,7 +111,7 @@ class StudyHomeWorkloadItemWidget extends StatelessWidget {
               count: deck.newCount,
               word: l10n.studyHomeNewWord,
               color: deck.newCount > 0 ? AppInk.info : AppInk.quiet,
-              wellColor: semantic.surfaceMuted,
+              fill: AppWellFill.muted,
               wellTint: deck.newCount > 0 ? AppInk.info : AppInk.quiet,
             ),
           ],
@@ -132,7 +132,7 @@ class _Metric extends StatelessWidget {
     required this.count,
     required this.word,
     required this.color,
-    required this.wellColor,
+    required this.fill,
     required this.wellTint,
   });
 
@@ -142,7 +142,7 @@ class _Metric extends StatelessWidget {
 
   /// The well behind the glyph and the glyph's own ink — the same pair the deck
   /// summary passes, so the two screens' anchors resolve to the same tokens.
-  final Color wellColor;
+  final AppWellFill fill;
   final AppInk wellTint;
 
   /// The metric's tint. It reaches the well and the word; the numeral stays
@@ -162,7 +162,7 @@ class _Metric extends StatelessWidget {
       // **The same anchor the deck summary and Progress use** (M99.26). This
       // was a bare glyph, which made the third screen in the app read as a
       // different grammar for the same kind of fact.
-      MxMetricWell(icon: icon, tint: wellTint, wellColor: wellColor),
+      MxMetricWell(icon: icon, tint: wellTint, fill: fill),
       const SizedBox(width: AppSpacing.xs),
       Flexible(
         child: Text.rich(

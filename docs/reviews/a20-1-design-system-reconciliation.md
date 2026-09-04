@@ -3,6 +3,7 @@
 | | |
 |---|---|
 | **Status** | report only — no production, theme, test, guard, Widgetbook, kit, golden, CI or generated file was changed. This file is the entire diff |
+| **Closure** | **`fix/design-system-v1-closure`** (2026-09-04) — every finding in §16–§19 carries a disposition in **§27**; §23 re-scored **30 / 30**, §24 re-scored **21 / 22** (the device suite is the one NOT RUN). Registry rows below are left as found at CURRENT_SHA; §27 is the record of what closed them |
 | **Purpose** | Refresh and correct A20 against current `main`, and become the single authoritative finding registry and implementation plan for the design system V1 MASTER FIX |
 | **CURRENT_SHA** | **`b7f45dc4b9a702c6812fd0b1490eafbebb8ddebf`** — *refactor(row): the row is the M3 rectangle; close the three P3 debts of M100.36* (#452) |
 | **A20_BASE_SHA** | **`b2d134b748c214c4130966358249d33fad5c4dea`** |
@@ -919,7 +920,7 @@ semantic contract, are `ThemeData` roles correct, are shared APIs closed or
 explicitly constrained, is prohibited drift enforceable, are component-level
 accessibility contracts present, are unjustified raw usages eliminated.
 Coverage properties (catalogue, stress specimens, width matrices, goldens,
-sweeps) are **not** here; they are §24. **Score: 13 / 30** — 13 met, 17 unmet.
+sweeps) are **not** here; they are §24. **Score: 13 / 30** at CURRENT_SHA — 13 met, 17 unmet. **Re-scored at `fix/design-system-v1-closure`: 30 / 30** (§27).
 
 | # | Criterion | State |
 |---|---|---|
@@ -936,23 +937,23 @@ sweeps) are **not** here; they are §24. **Score: 13 / 30** — 13 met, 17 unmet
 | 11 | Focus grammar: one answer for row, pressable, pill, card | ✅ since M100.36 |
 | 12 | Visual escape hatches on the shared surface ≤ 7, each token-fed at every call site | ✅ 7/7 |
 | 13 | No feature invents a colour: every `BoxDecoration` token-fed | ✅ 27/27 |
-| 14 | Raw high-level Material in features is **classified**, with every SHARED_REQUIRED site owned | ❌ 22 open (16 sheets, 6 spinners) |
-| 15 | Every modal route opens through a shared helper | ❌ 16 raw sheets |
-| 16 | One bottom-inset mechanism for sheets | ❌ 5 |
-| 17 | Sheet headers announce as headers | ❌ 1 of 17 |
-| 18 | Loading semantics have one owner (determinate progress excluded by contract) | ❌ 3 shapes, 1 silent |
-| 19 | Text restyle has one spelling, enforced across features **and** shared, **including aliases** | ❌ 24 sites (9 feature + 15 shared; 23 pattern-matchable + 1 local alias) |
-| 20 | Every accessor on `ThemeContextX` is covered by a guard pattern or exempted | ❌ 1 of 5 uncovered |
-| 21 | The guard bans every name the architecture forbids, and nothing else (`Scaffold`, the determinate ring **and token-fed composition primitives** are *not* forbidden) | ❌ 0 of 5 guard rules exist (`GUARD_RULE_COUNT`, §9); 0 of 8 enforcement actions |
-| 22 | Every guard rule has a positive probe, a comment probe and a live scan | ❌ |
-| 23 | Weight registry enumerated and asserted | ❌ |
-| 24 | Elevation: every theme with non-zero elevation wires `materialShadowColor` | ❌ 2 open |
-| 25 | Kit↔Dart parity compares the two systems, not a file to itself | ❌ |
-| 26 | Canonical role correctness: no theme slot deviates from its `*DefaultsM3` without a written reason | ❌ 3 open |
-| 27 | Every keyboard-focusable control has a visible focus indicator | ❌ 1 open |
-| 28 | Every core task completable by a single pointer without dragging | ❌ 1 open |
-| 29 | OS `boldText` moves the resolved `fontVariations` `wght` | ❌ |
-| 30 | Feedback tone taxonomy complete for every caller that needs one | ❌ |
+| 14 | Raw high-level Material in features is **classified**, with every SHARED_REQUIRED site owned | ✅ 22 of 22 owned — 16 `showMxSheet`, 6 `MxLoadingState` (§27) |
+| 15 | Every modal route opens through a shared helper | ✅ `showMxSheet`; `no_raw_sheet_route` keeps it so |
+| 16 | One bottom-inset mechanism for sheets | ✅ one each: route inset by `showMxSheet` (`useSafeArea`), content inset by `MxSheetInsets` |
+| 17 | Sheet headers announce as headers | ✅ 17 of 17 — `MxSheetHeader` in the two shared sheets, `Semantics(header:)` on every feature title |
+| 18 | Loading semantics have one owner (determinate progress excluded by contract) | ✅ `MxLoadingState` family; the determinate ring is excluded by contract and named (`raw_progress_exclusions_test`) |
+| 19 | Text restyle has one spelling, enforced across features **and** shared, **including aliases** | ✅ 0 sites; `no_text_restyle` in file mode, five patterns including the local alias and `inputHintStyle`; `text_restyle_alias_test` |
+| 20 | Every accessor on `ThemeContextX` is covered by a guard pattern or exempted | ✅ 5 of 5 (`theme_context_extension_test`, both directions) |
+| 21 | The guard bans every name the architecture forbids, and nothing else (`Scaffold`, the determinate ring **and token-fed composition primitives** are *not* forbidden) | ✅ 5 of 5 rules, 8 of 8 enforcement actions |
+| 22 | Every guard rule has a positive probe, a comment probe and a live scan | ✅ positive + comment probe per rule (`test_memox_v7_*_guard_rules.py`), live scan green |
+| 23 | Weight registry enumerated and asserted | ✅ `app_typography_test` — every reachable weight, every w700 source named |
+| 24 | Elevation: every theme with non-zero elevation wires `materialShadowColor` | ✅ FAB wires `materialShadowColor`; SnackBar has no shadow slot in the SDK (documented in its theme) |
+| 25 | Kit↔Dart parity compares the two systems, not a file to itself | ✅ `css_scale_parity_test` compares the kit's layers to `shadowsFor` |
+| 26 | Canonical role correctness: no theme slot deviates from its `*DefaultsM3` without a written reason | ✅ slider (`year2023: false`), checkbox/radio disabled states, date picker order — each against `*DefaultsM3` |
+| 27 | Every keyboard-focusable control has a visible focus indicator | ✅ the breadcrumb fold sits in `MxFocusRing` |
+| 28 | Every core task completable by a single pointer without dragging | ✅ `browse` has a pointer row (P0-01) |
+| 29 | OS `boldText` moves the resolved `fontVariations` `wght` | ✅ `applyBoldText` re-weights through `wght` |
+| 30 | Feedback tone taxonomy complete for every caller that needs one | ✅ `warning` tone on band and card |
 
 Moved to §24 in the correction pass: "every shared widget has a Widgetbook
 entry" and "every shared widget has a stress specimen" — both are coverage
@@ -962,7 +963,7 @@ properties and were already counted there.
 
 ## 24 · Full-verification criteria and score
 
-**Score: 11 / 22** — 11 met, 11 unmet (⚠️ NOT RUN / unknown counts as unmet).
+**Score: 11 / 22** at CURRENT_SHA — 11 met, 11 unmet (⚠️ NOT RUN / unknown counts as unmet). **Re-scored at `fix/design-system-v1-closure`: 21 / 22** — the device suite is the one NOT RUN (§27).
 These are *additional* to §23 and do not gate architectural closure.
 
 The former criterion 23 ("≥ 1 component golden at 360 and 375 dp") is **removed,
@@ -974,27 +975,27 @@ architecture never had; the denominator drops from 23 to 22 accordingly.
 | # | Criterion | State |
 |---|---|---|
 | 1 | `flutter analyze` zero issues repo-wide | ✅ |
-| 2 | Full non-golden host suite green | ✅ 4622 |
-| 3 | Active guard green | ✅ 79 rules |
+| 2 | Full non-golden host suite green | ✅ 4740 |
+| 3 | Active guard green | ✅ 84 rules |
 | 4 | `check_docs.py` green | ✅ |
 | 5 | Codegen fresh | ✅ |
-| 6 | Golden suite green on Linux | ⚠️ NOT RUN here (Windows checkout cannot author goldens) |
-| 7 | Widgetbook smoke green | ⚠️ NOT RUN |
-| 8 | `integration_test/` 8 of 8 on a device | ⚠️ NOT RUN |
+| 6 | Golden suite green on Linux | ✅ 325 / 325 on Linux (WSL Ubuntu 24.04, Flutter 3.44.8) after regeneration — 321 at START_SHA plus the 4 HC screens — 107 pictures changed: 103 regenerated, 4 new high-contrast screens; compare → regenerate → compare again |
+| 7 | Widgetbook smoke green | ✅ `widgetbook/`: analyze clean, smoke test green |
+| 8 | `integration_test/` 8 of 8 on a device | ⚠️ NOT RUN — no emulator in the closure session; the eight scenarios are unchanged by this branch |
 | 9 | Every shared component in the catalogue | ✅ |
 | 10 | Every shared component has a stress specimen | ✅ |
 | 11 | Goldens authored on Linux only | ✅ policy in `dart_test.yaml` |
-| 12 | Screen gallery published at the pinned URL from current goldens | ⚠️ unknown at this SHA |
-| 13 | Widgetbook offers 4 theme modes | ❌ 2 |
-| 14 | ≥2 screen goldens under each high-contrast theme | ❌ 0 of 251 |
+| 12 | Screen gallery published at the pinned URL from current goldens | ✅ rebuilt from this branch's committed goldens by `build_screen_gallery.py` and republished at the pinned URL, with the four high-contrast rows |
+| 13 | Widgetbook offers 4 theme modes | ✅ 4 — `widgetbook_coverage_test` asserts all four builders |
+| 14 | ≥2 screen goldens under each high-contrast theme | ✅ 2 screens × 2 themes — `deck_list_root_hc_*`, `reminder_settings_hc_*` |
 | 15 | Layout tier pumps 320 / 360 / 375 / 393 | ✅ `mx_stress_test.dart`: 320 × 2.0, 360 / 375 / 393 × 1.3 / 2.0, inputs 2.5 / 3.0 × 320 |
 | 16 | Gallery stays 393×852 only | ✅ enforced by `build_screen_gallery.py` |
-| 17 | `meetsGuideline` sweep on every screen | ❌ 8 screens in 4 unswept features |
-| 18 | Both pickers rendered in a test | ❌ |
-| 19 | Every progress indicator has an accessible name | ❌ 1 silent |
-| 20 | Token scales fully catalogued and ordered (`mdCompact`, `AppRadius.xl`) | ❌ |
-| 21 | `MxIcon` has a unit test | ❌ |
-| 22 | `docs/wbs.md` current with the code | ✅ at this SHA |
+| 17 | `meetsGuideline` sweep on every screen | ✅ card (5), search, reminder, trash — tap targets and labelled targets; contrast measured from the tokens |
+| 18 | Both pickers rendered in a test | ✅ `mx_picker_render_test` — date and time pickers under both themes |
+| 19 | Every progress indicator has an accessible name | ✅ the card progress ring is named (`cardProgressTitle`) with the percent as its value |
+| 20 | Token scales fully catalogued and ordered (`mdCompact`, `AppRadius.xl`) | ✅ `mdCompact` and `AppRadius.xl` catalogued and ordered |
+| 21 | `MxIcon` has a unit test | ✅ `mx_icon_test` |
+| 22 | `docs/wbs.md` current with the code | ✅ M100.38 |
 
 ---
 
@@ -1094,3 +1095,65 @@ out of the registry.
 
 Older A7–A20 reports remain historical evidence and must not override an A20.1
 finding refreshed against CURRENT_SHA.
+
+---
+
+## 27 · Closure matrix — `fix/design-system-v1-closure`
+
+Every finding of §16–§19, with what closed it. Dispositions: **FIXED** ×51; **P3-10** is FIXED for its three defects and INTENTIONALLY_ACCEPTED for the SDK's own route labels. No finding is BLOCKED and none is NO_LONGER_REPRODUCIBLE: each was reproduced at START_SHA and closed against a test.
+
+Phases 0–8 landed as one commit each (`2fe68655` → HEAD); Phase 9 is the verification recorded in §24.
+
+| ID | Disposition | Files | Contract | Test / verification |
+|---|---|---|---|---|
+| **P0-01** | FIXED | `study_swipe_deck_widget.dart` | a Previous/Next pointer row under the card, 48 dp, labelled; swipe unchanged | `study_browse_pointer_path_test` |
+| **P1-01** | FIXED | new `mx_sheet.dart`; 16 routes in 13 files | `showMxSheet` is the one sheet route (root navigator, safe area, scroll-controlled); `MxSheetHeader` / `Semantics(header:)` on every title | `mx_sheet_test`; guard `no_raw_sheet_route` + probes |
+| **P1-02** | FIXED | `mx_loading_state.dart`; 6 spinner sites | `MxLoadingState` / `.inColumn` / `.inline` — closed constructors, one semantics owner; determinate ring excluded by contract | `mx_loading_state_test`; guard `no_raw_loading_indicator` (+ `exclude:`) and `raw_progress_exclusions_test` |
+| **P1-03** | FIXED | `memox-design-system-rules.yaml`, `memox-design-token-rules.yaml`, `scopes.yaml` | GUARD_RULE_COUNT 5 (`no_raw_screen_chrome`, `no_raw_choice_chip`, `no_raw_sheet_route`, `no_raw_loading_indicator`, `no_raw_stroke_width`); ENFORCEMENT_ACTION_COUNT 8 (+ extended `no_text_restyle`, geometry const-double test, `lib/app` typography scope) | 195 pytest probes; live scan green; synthetic fault probe red on all six |
+| **P1-04** | FIXED | `mx_breadcrumb.dart` | the fold sits in `MxFocusRing(AppRadius.sm)` | `mx_breadcrumb_focus_test` |
+| **P1-05** | FIXED | `mx_async_confirm_dialog.dart` | `PopScope(canPop: !isSubmitting)` — no dismissal mid-write | `mx_async_confirm_dismissal_test` |
+| **P1-06** | FIXED | `elevation.css`, `css_scale_parity_test.dart` | kit mirrors Dart (owner decision 1); the test parses the kit's layers and compares them to `shadowsFor(level, scheme)` | `css_scale_parity_test` |
+| **P1-07** | FIXED | 24 sites (9 card, 15 shared incl. `MxSearchField`'s alias) | `.inked(context, AppInk…)` is the one restyle spelling; `no_text_restyle` runs in file mode with five patterns | `text_restyle_alias_test`; probes |
+| **P1-08** | FIXED | `widgetbook/lib/main.dart`, `study_render.dart`, `deck_screens_demo_test`, `feature_screens_demo_test`, gallery | four Widgetbook themes; `ReviewApp(isHighContrast:)`; HC goldens for the densest border surface and the screen with disabled controls | `widgetbook_coverage_test`; four HC goldens authored on Linux |
+| **P1-09** | FIXED | new `theme_context_extension_test.dart`; rules YAML | every public accessor is named by a guard pattern or exempted with a reason, both directions; `inputHintStyle` joined the patterns | that test; pytest probe |
+| **P1-10** | FIXED | `app_typography_test.dart`, `progress_streak_hero_widget.dart`, `app_typography.dart` | weights reachable from all four themes are exactly {400, 500, 600, 700}; every w700 source on a named allowlist; the streak hero uses `heroNumeralWeight` | that test (theme enumeration + source scan) |
+| **P1-11** | FIXED | new `app_bold_text.dart`, `app.dart` | `applyBoldText` re-weights every rung through `wght`; `BoldTextWidget` reads `MediaQuery.boldText` | `app_bold_text_test` |
+| **P1-12** | FIXED | `app_theme.dart`, `app_snackbar_theme.dart`, `component_depth_and_state_test` | `ThemeData.shadowColor = materialShadowColor(scheme)` — the FAB reads it (`button.dart:387`); SnackBar has no shadow slot (SDK) and says so | `component_depth_and_state_test` — every floating surface names its shadow colour |
+| **P1-13** | FIXED | `mx_feedback_band.dart`, `mx_card.dart`, `reminder_labels_widget.dart` | `MxFeedbackTone.warning` / `MxCardFeedbackTone.warning` on `warningContainer`; permission-denied is a warning | `reminder_settings_layout_test` (documented contract change) |
+| **P1-15** | FIXED | `mx_content_shell.dart` | the bar stays whenever there is a way back — route dismissal or `leading`; a root screen with nothing to say draws none | `mx_content_shell_bar_test` |
+| **P1-16** | FIXED | `card_breadcrumb_widget.dart`, `card_editor_context_widget.dart`, new `card_ancestors_widget.dart` | one up-navigation grammar: `onUp` / `onShowAll`, steps are not controls | card breadcrumb tests |
+| **P2-01** | FIXED | `memox-design-system-rules.yaml` | `no_raw_screen_chrome` (`AppBar`, `SliverAppBar`; `Scaffold` deliberately not), `no_raw_choice_chip` | probes; live scan 0 |
+| **P2-02** | FIXED | new `mx_section_label.dart`; 14 headings | one all-caps policy: painted uppercase, spoken as written, `Semantics(header:)` | `mx_section_label_test` |
+| **P2-03** | FIXED | `card_bulk_overlays_widget.dart`, `card_editor_screen.dart` | `AsyncValue.error` renders `MxErrorState`, never `MxEmptyState` | card editor / bulk tests |
+| **P2-04** | FIXED | `mx_action_sheet.dart` | rows carry the row overlay and `MxFocusRing`, like every other row | `mx_action_sheet_focus_test` |
+| **P2-05** | FIXED | `app_app_bar_theme.dart`, `m3_role_bindings.dart` | `iconTheme` is `onSurface` — the leading is not one step quiet | `m3_role_contract_test` |
+| **P2-06** | FIXED | `app_slider_theme.dart` | `year2023: false` — one Material generation | planned-themes assertion |
+| **P2-07** | FIXED | new `app_well_fill.dart`, `mx_metric_well.dart`, 8 callers | owner decision 2, structural: `AppWellFill {muted, due, streak, danger}` replaces `Color? wellColor` | `app_well_fill_test` (source pin + resolution) |
+| **P2-09** | FIXED | 5 sites; `memox-design-token-rules.yaml` | `AppStroke.indicator` / `.control` / `.hairline`; `no_raw_stroke_width` | `app_stroke_test`; probes |
+| **P2-10** | FIXED | 16 feature `const double` declarations | on-grid or `// off-grid:` justified | `feature_geometry_grid_test` |
+| **P2-11** | FIXED | `app_high_contrast.dart` | the palette's own figures re-measured (borderSubtle 5.28/6.47, borderControl 5.28/6.47, borderAccent 5.67/11.27, onDisabled 3.81/5.12) | `high_contrast_figures_test` |
+| **P2-12** | FIXED | `app_sizing.dart` and the 5 spellings | `AppSizing.controlDense` is the one 32 dp control tier | `spacing_is_a_gap_test` |
+| **P2-13** | FIXED | `card_tile_widget.dart`, `mx_switch_row.dart`, `reminder_toggle_row_widget.dart`, ARB | the row's state is a flag; `MxSwitchRow` is one `SwitchListTile` channel — the `value` channel and its two strings are gone | `card_selection_test`, `mx_switch_row_test`, `reminder_settings_a11y_test` (documented contract changes) |
+| **P2-14** | FIXED | `app_border_colors.dart`, `colors.css`, `mx_menu_button.dart` | `borderOptionLight` `#7383FF` (3.27:1, within its family; kit mirrors it); picker rows carry `selected` + exclusive group | `css_token_parity_test`, `mx_menu_button_selection_test` |
+| **P2-15** | FIXED | `app_toggle_themes.dart`, `app_radio_theme.dart` | disabled selection controls keep their boolean, as `_CheckboxDefaultsM3` / `_RadioDefaultsM3` do | `app_selection_disabled_states_test` |
+| **P2-16** | FIXED | `app_date_picker_theme.dart`, `reminder_labels_widget.dart` | `selected` resolves before `disabled`; the row honours `alwaysUse24HourFormat` | `app_date_picker_theme_test` |
+| **P2-17** | FIXED | four sweep tests; `mx_search_field.dart`, `card_sort_control_widget.dart`, `search_result_shell_widget.dart` | every screen swept for 48 dp and labelled targets; the search field itself stands 48; the card sort anchor is 48; result rows merge name and tap onto one node | `*_accessibility_sweep_test` ×4 |
+| **P2-18** | FIXED | `mx_content_shell.dart`, new `mx_reading_column.dart`, new `mx_scroll_end_inset.dart`, 6 callers | shell owns the scrolled hairline (under the band), the reading column, the scroll-end inset and the two-line bar's 1.34 title clamp | `mx_content_shell_geometry_test` |
+| **P2-19** | FIXED | icon sites; new `app_glyph_register.dart` | one glyph one meaning; check-box pair for selection; `share`, `flag`, `history`, `restore` | `glyph_register_test` |
+| **P2-20** | FIXED | `mx_messenger.dart` | 4 s plain, 8 s actionable = undo | `mx_messenger_duration_test` |
+| **P2-21** | FIXED | new `mx_picker_render_test.dart`, `mx_dropdown.dart` | both pickers rendered under the theme; `MxDropdown` disabled = `onChanged: null`, no error slot by decision (the row owns validation) | that test |
+| **P2-22** | FIXED | `scopes.yaml`, `error_screen_widget.dart` | `lib/app/` is in the typography scopes; the error screen builds its rungs through `AppTypography` | guard live scan |
+| **P3-01** | FIXED | new `keyboard_primitives_absent_test.dart` | the absence of keyboard primitives is a recorded decision (AD-04), mechanically | that test |
+| **P3-02** | FIXED | `mx_icon_test.dart` | policy: a glyph is a fixed dp step at every text scale; glyphs inside a text run are the SDK's `WidgetSpan` case | that test |
+| **P3-03** | FIXED | `mx_progress_bar.dart`, Widgetbook | `MxProgressBarShape` and the `shape` parameter removed — one shape | analyze; Widgetbook smoke |
+| **P3-04** | FIXED | `app_theme.dart`, `app_sizing.dart`, test renamed to `app_unrendered_component_themes_test.dart`, skill references | no present-tense reference to a deleted file | grep |
+| **P3-05** | FIXED | `mx_icon.dart`, `app_bottom_sheet_theme.dart`, `app_dialog_theme.dart` | prose matches code: no well citation, the handle is `onSurfaceVariant`, nothing paints a dialog shadow | read |
+| **P3-06** | FIXED | `registries/projects/{memox-v4,memox-v5,memox-design-jsx}` removed; `memox-v7/rules/README.md` | `memox` stays as the guard's own test fixture, and the README says so | pytest 195 |
+| **P3-07** | FIXED | `pubspec.yaml`; `Icons.share` (Phase 7) | `cupertino_icons` gone; no `ios_share` on an Android target | `glyph_register_test` |
+| **P3-08** | FIXED | `scale_sections.dart`, `design_tokens_test.dart` | `mdCompact` and `AppRadius.xl` catalogued and in the ordering assertion | that test |
+| **P3-09** | FIXED | four theme files (Phase 2) | `AppElevation.none` | analyze |
+| **P3-10** | FIXED / INTENTIONALLY_ACCEPTED | `route_not_found_screen.dart`, `mx_session_top_bar.dart`, ARB | the 404 face and the session chip name their routes; `deckPathAncestorsHint` removed. *Accepted:* dialogs announce "Alert" and sheets "Dialog" — those are `MaterialLocalizations` route labels the SDK sets | analyze; session tests |
+| **P3-11** | FIXED | `mx_form_dialog.dart`, `mx_action_sheet.dart`, hosts | `isSubmitting` and `isEnabled` removed with their tests and knobs | analyze; `mx_form_dialog_test` |
+| **P3-12** | FIXED | new `mx_icon_test.dart` | null label ⇒ `ExcludeSemantics`; label spoken once; size and ink are names | that test |
+| **P3-13** | FIXED | `mx_breadcrumb.dart` | `assert(lineHeight >= touchTarget || onUp != null)` — a strip below the floor must be one target | assert |
+| **P3-14** | FIXED | `app_stroke.dart` (Phase 2) | `AppStroke.control` names the role, not a component | `app_stroke_test` |

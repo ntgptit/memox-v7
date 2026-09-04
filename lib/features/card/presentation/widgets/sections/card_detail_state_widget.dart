@@ -13,6 +13,7 @@ import '../items/card_box_progress_widget.dart';
 import '../items/card_metric_widget.dart';
 import '../support/card_action_tone_widget.dart';
 import '../support/card_state_widget.dart';
+import '../../../../../shared/widgets/mx_section_label.dart';
 
 /// Where the scheduler has this card right now (BR-240, M4.15 W2 band 2).
 ///
@@ -47,12 +48,7 @@ class CardDetailStateWidget extends StatelessWidget {
         // Upper-cased with the section tracking, the same heading shape the
         // deck list, the progress panel and the session bar already use — so a
         // reader meets one kind of group title in this app rather than four.
-        Text(
-          context.l10n.cardDetailStateSectionTitle.toUpperCase(),
-          style: context.textStyles.sectionLabel.copyWith(
-            color: context.colors.onSurfaceVariant,
-          ),
-        ),
+        MxSectionLabel(label: context.l10n.cardDetailStateSectionTitle),
         const SizedBox(height: AppSpacing.md),
         SizedBox(
           width: double.infinity,
@@ -105,7 +101,7 @@ class CardDetailStateWidget extends StatelessWidget {
       CardMetric.date(
         l10n.cardDetailDueLabel,
         date(state.dueAt, whenNull: unscheduled),
-        Icons.schedule_rounded,
+        Icons.schedule,
       ),
       CardMetric.date(
         l10n.cardDetailLearnedLabel,
@@ -115,36 +111,36 @@ class CardDetailStateWidget extends StatelessWidget {
       CardMetric.date(
         l10n.cardDetailLastAnsweredLabel,
         date(state.lastAnsweredAt, whenNull: l10n.cardDetailNeverAnsweredValue),
-        Icons.history_rounded,
+        Icons.history,
       ),
       CardMetric.numeric(
         l10n.cardDetailReviewsLabel,
         '${state.answerCount}',
-        Icons.autorenew_rounded,
+        Icons.autorenew,
       ),
       CardMetric.numeric(
         l10n.cardDetailLapsesLabel,
         '${state.lapseCount}',
-        Icons.replay_rounded,
+        Icons.replay,
       ),
       if (state.schedulerType == SchedulerType.sm2) ...<CardMetric>[
         if (state.easeFactor != null)
           CardMetric.numeric(
             l10n.cardDetailEaseLabel,
             state.easeFactor!.toStringAsFixed(2),
-            Icons.speed_rounded,
+            Icons.speed,
           ),
         if (state.intervalDays != null)
           CardMetric.numeric(
             l10n.cardDetailIntervalLabel,
             l10n.cardDetailDayCount(state.intervalDays!),
-            Icons.event_repeat_rounded,
+            Icons.event_repeat,
           ),
         if (state.repetitions != null)
           CardMetric.numeric(
             l10n.cardDetailRepetitionsLabel,
             '${state.repetitions}',
-            Icons.repeat_one_rounded,
+            Icons.repeat_one,
           ),
       ],
     ];
@@ -285,6 +281,7 @@ class _StateRow extends StatelessWidget {
 
 /// The state dot's diameter, matching the list row's — colour and position
 /// carry it, not size.
+// off-grid: matches the list row's dot for the same reason it has
 const double _stateDotSize = 10;
 
 /// The narrowest a cell may be before the grid drops to one column.

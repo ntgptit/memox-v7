@@ -68,7 +68,7 @@ void main() {
       for (final label in <String>['front-a', 'back-a']) {
         expect(_fill(tester, label), _idleFill(tester));
         expect(_edge(tester, label).color, _semantic(tester).success);
-        expect(_edge(tester, label).width, AppStroke.input);
+        expect(_edge(tester, label).width, AppStroke.control);
         expect(
           tester.widget<Text>(find.text(label)).style?.color,
           _semantic(tester).success,
@@ -107,7 +107,7 @@ void main() {
       for (final label in <String>['front-a', 'back-b']) {
         expect(_fill(tester, label), _idleFill(tester));
         expect(_edge(tester, label).color, _semantic(tester).danger);
-        expect(_edge(tester, label).width, AppStroke.input);
+        expect(_edge(tester, label).width, AppStroke.control);
         expect(
           tester.widget<Text>(find.text(label)).style?.color,
           _semantic(tester).danger,

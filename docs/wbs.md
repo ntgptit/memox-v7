@@ -16945,6 +16945,93 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
 - **Checklist phases:** 14, 21.
 
+### M100.38 · Đóng Design System V1 theo registry A20.1
+
+- **Status:** done (2026-09-04)
+- **Owner:** Claude
+- **Goal:** Thực thi và đóng toàn bộ registry A20.1 (1 P0, 15 P1, 21 P2, 14 P3
+  = 51 finding) theo đúng DAG Phase 0–9 của tài liệu; §23 lên 30/30, §24 lên
+  21/22 (chỉ suite thiết bị là NOT RUN). Ma trận đóng nằm ở A20.1 §27.
+- **Nhánh / PR:** `fix/design-system-v1-closure` —
+  `refactor(design-system): close Design System V1`. START_SHA `2fe68655`.
+- **Scope:** toàn bộ 51 finding của A20.1, theo phase (mỗi phase một commit):
+  - **Phase 0** — hai ratchet thuần (`no_raw_screen_chrome`,
+    `no_raw_choice_chip`) kèm probe dương / probe comment và live scan.
+  - **Phase 1 (P0-01)** — `browse` có hàng nút Previous/Next 48 dp dưới thẻ;
+    vuốt giữ nguyên; test trung lập với cách hiện thực.
+  - **Phase 2** — nền tảng: kit là **gương** của Dart (OD1): `elevation.css`
+    dark bỏ viền phát sáng, parity so kit ↔ `shadowsFor`; `AppStroke.control`
+    / `.indicator`; `AppSizing.controlDense` gom năm cách viết 32 dp; bảng
+    high-contrast đo lại đúng số; `AppSpacing` chỉ còn là gap.
+  - **Phase 3** — `ThemeData` đúng vai: `shadowColor` cho FAB, app bar
+    `iconTheme` `onSurface`, slider một thế hệ M3, checkbox/radio disabled giữ
+    boolean, date picker resolve `selected` trước `disabled`, 24h theo
+    `MediaQuery`.
+  - **Phase 4** — primitive dùng chung: `showMxSheet` + `MxSheetHeader`,
+    họ `MxLoadingState`, `MxSectionLabel`, `PopScope` cho async-confirm, focus
+    ring cho breadcrumb fold và hàng action sheet; API đóng.
+  - **Phase 5** — di trú caller: 16 route sheet, 6 spinner, 24 site restyle
+    (kể cả alias của `MxSearchField`), 16 khai báo `const double`, typography
+    trong `lib/app`, `MxErrorState` cho lỗi, tone `warning`.
+  - **Phase 6** — chỉ enforce khi live = 0: `no_raw_sheet_route`,
+    `no_raw_loading_indicator` (+ `exclude:` và test đồng hành),
+    `no_text_restyle` mở rộng, `no_raw_stroke_width`, test grid hình học,
+    scope typography có `lib/app`. GUARD_RULE_COUNT 5, ENFORCEMENT_ACTION_COUNT
+    8; mọi cơ chế đều được fault-inject.
+  - **Phase 7** — a11y / chrome / hành vi: OS boldText đổi trục `wght`; shell
+    giữ bar khi loading/lỗi; một ngữ pháp up-navigation cho card; một kênh
+    trạng thái cho hàng card và `MxSwitchRow`; `borderOption` `#7383FF`;
+    snackbar 4 s / 8 s; từ vựng icon + `app_glyph_register`; bốn sweep màn
+    hình; ô search và anchor sort đứng 48; hàng kết quả tìm kiếm một node.
+  - **Phase 8** — coverage / API / nợ tài liệu: Widgetbook 4 theme, 4 golden
+    HC, audit accessor `ThemeContextX`, registry trọng số, `AppWellFill`
+    (OD2, đóng cấu trúc), shell sở hữu hairline / reading column / scroll-end
+    inset / clamp bar hai dòng, picker render + quyết định `MxDropdown`, xoá
+    API chết (`flush`, `isSubmitting`, `isEnabled`, `cupertino_icons`), ba
+    ruleset chết, prose cũ, catalogue token, `namesRoute`, `MxIcon` test,
+    assert sàn chạm của breadcrumb, ghi nhận không có keyboard primitive.
+  - **Phase 9** — xác minh đầy đủ: golden trên Linux 325/325 sau khi vẽ lại (321 lúc START + 4 HC) (107 ảnh đổi: 103 vẽ lại, 4 HC mới); gallery republish tại URL
+    ghim; CI.
+- **Quyết định đáng ghi:**
+  - **Contrast không sweep bằng `textContrastGuideline`** ở bốn sweep mới —
+    guideline lấy mẫu pixel và báo 1,35:1 cho cặp đo 7,0:1 (tiền lệ
+    `settings_accessibility_test`); contrast đo từ token ở `test/core/theme/`.
+  - **`SwitchListTile` trên Flutter 3.44 giữ node switch dưới tile** — hợp
+    đồng test là "một tên, một trạng thái", không phải "một node".
+  - **`MxMetricWell` không vào `kClosedApiFiles`**: allowlist của scan đó
+    không nhận enum token (tiền lệ M100.37); `app_well_fill_test` ghim đóng.
+  - **`memox` ruleset giữ lại** làm fixture cho test engine của guard; ba
+    ruleset còn lại xoá.
+  - **Tiêu đề sheet tuỳ biến dùng `Semantics(header:)`** thay vì đổi sang
+    `MxSheetHeader` — A20.1 yêu cầu *announce as headers*, không yêu cầu đổi
+    rung chữ của chín sheet.
+- **Editable documents:** `docs/wbs.md`,
+  `docs/reviews/a20-1-design-system-reconciliation.md` (§23, §24 re-score, §27
+  ma trận đóng), `docs/design-system/tokyo-component-mapping.md`,
+  `code-verification-guard-v2/registries/projects/memox-v7/rules/README.md`,
+  `.claude/skills/flutter-theme-design/references/*.md`.
+- **Output:** 10 commit theo phase trên `fix/design-system-v1-closure`; guard
+  thêm 6 rule; 30+ test mới; 4 golden HC; gallery republish.
+- **Tests required:** host suite không golden (4740), golden trên Linux,
+  Widgetbook smoke, 195 probe pytest của guard, guard live scan, sweep a11y
+  bốn feature; `integration_test/` trên thiết bị (NOT RUN — xem acceptance).
+- **Test đổi hợp đồng (đều ghi OLD / WHY / NEW / AUTHORITY):**
+  `reminder_settings_layout_test`, `library_search_states_test`,
+  `reminder_settings_a11y_test`, `settings_reminder_entry_test`,
+  `theme_coverage_test` (pin `SwitchListTile`), `card_detail_history_faces_test`,
+  `mx_switch_row_test`, `card_selection_test`.
+- **Acceptance criteria:**
+  - [x] 51/51 finding có disposition trong A20.1 §27; §23 30/30; §24 21/22.
+  - [x] `dart format`, `flutter analyze` (app + widgetbook), `check_docs.py`,
+        `check_architecture.py`, guard 84 rule, 195 probe pytest đều xanh.
+  - [x] Host suite không golden: 4740/4740.
+  - [x] Golden suite trên Linux: 325/325 sau khi vẽ lại; không tolerance.
+  - [x] Gallery republish từ golden của nhánh tại URL ghim.
+  - [ ] `integration_test/` trên emulator: NOT RUN (không có thiết bị trong
+        phiên); nhánh không đổi luồng nghiệp vụ nào tám kịch bản đi qua.
+- **Dependencies:** M100.37; `docs/reviews/a20-1-design-system-reconciliation.md`.
+- **Checklist phases:** 7, 12, 13, 14, 21.
+
 ### M100.37 · Đóng ba nợ P3 còn lại của M100.36
 
 - **Status:** done (2026-09-04)

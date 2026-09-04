@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../../core/navigation/route_names.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_sheet.dart';
+import '../../../../../shared/widgets/mx_sheet.dart';
 
 /// What the library's overflow chose.
 enum _LibraryAction { tagCatalog, trash, toggleDueFilter }
@@ -22,8 +23,8 @@ Future<void> showLibraryMenu(
   required bool isDueFilterActive,
   required VoidCallback onToggleDueFilter,
 }) async {
-  final action = await showModalBottomSheet<_LibraryAction>(
-    context: context,
+  final action = await showMxSheet<_LibraryAction>(
+    context,
     builder: (sheetContext) => MxActionSheet(
       title: sheetContext.l10n.libraryActionsTitle,
       actions: <MxActionSheetAction>[

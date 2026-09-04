@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/navigation/route_names.dart';
-import '../../../../core/theme/foundations/app_breakpoints.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_icon_button.dart';
@@ -22,6 +21,7 @@ import '../widgets/sections/card_import_result_widget.dart';
 import '../widgets/sections/card_import_source_step_widget.dart';
 import '../widgets/sections/card_import_stepper_widget.dart';
 import '../states/card_import_state.dart';
+import '../../../../shared/widgets/mx_reading_column.dart';
 
 /// The import wizard (UC-10, wireframe M4.12): one full-screen route, three
 /// steps switched in place, so the draft has one lifetime — the route's.
@@ -254,8 +254,7 @@ class _CardImportScreenState extends ConsumerState<CardImportScreen> {
         // plain Center would float the wizard into the middle of that space.
         body: Align(
           alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: AppBreakpoints.medium),
+          child: MxReadingColumn(
             child: phase.isOutcome
                 ? _outcomeBody(deckId, phase)
                 : switch (step) {

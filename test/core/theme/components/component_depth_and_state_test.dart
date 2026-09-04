@@ -241,4 +241,59 @@ void main() {
       );
     });
   });
+
+  group('every floating surface names its shadow colour', () {
+    // **A20.1 P1-12.** `materialShadowColor` — `scheme.shadow` in light,
+    // transparent in dark — was wired on two of the four themes that state a
+    // non-zero elevation. This loop is the invariant, stated for every slot
+    // the SDK offers, and the one slot it does not offer is pinned as a named
+    // exemption rather than left to silence.
+    test('the FAB, the card and the menu — dark transparent, light shadow', () {
+      for (final entry in themes.entries) {
+        final theme = entry.value;
+        final isDark = theme.brightness == Brightness.dark;
+        final Color expected = isDark
+            ? Colors.transparent
+            : theme.colorScheme.shadow;
+
+        // The FAB reads `ThemeData.shadowColor` (`button.dart:387`), the only
+        // route to its `Material`.
+        expect(theme.shadowColor, expected, reason: '${entry.key}: FAB');
+        expect(
+          theme.floatingActionButtonTheme.elevation,
+          greaterThan(0),
+          reason: '${entry.key}: the FAB floats',
+        );
+        expect(
+          theme.cardTheme.shadowColor,
+          expected,
+          reason: '${entry.key}: card',
+        );
+        expect(
+          theme.popupMenuTheme.shadowColor,
+          expected,
+          reason: '${entry.key}: menu',
+        );
+      }
+    });
+
+    test('the snack bar is the one exemption, and it is named', () {
+      // `SnackBarThemeData` has no `shadowColor`; `snack_bar.dart` builds a
+      // bare `Material`, which in M3 shadows with `colorScheme.shadow`
+      // (`material.dart:465`). Its dark shadow is `#03040B` on a page at
+      // L* 4.1 — invisible by the same measurement `materialShadowColor`
+      // encodes. Pinned here so the exemption cannot quietly grow: the level
+      // still travels in both modes, and the SDK is still the reason.
+      expect(
+        themes['light']!.snackBarTheme.elevation,
+        themes['dark']!.snackBarTheme.elevation,
+      );
+      expect(themes['dark']!.snackBarTheme.elevation, greaterThan(0));
+      expect(
+        lightnessStar(themes['dark']!.colorScheme.shadow),
+        lessThan(lightnessStar(themes['dark']!.colorScheme.surface)),
+        reason: 'the dark shadow must sit below the page it cannot show on',
+      );
+    });
+  });
 }

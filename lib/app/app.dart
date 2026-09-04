@@ -14,6 +14,7 @@ import '../l10n/generated/app_localizations.dart';
 import '../l10n/l10n_extension.dart';
 import 'mobile_frame_widget.dart';
 import 'router/app_router.dart';
+import '../core/theme/schemes/app_bold_text.dart';
 
 /// Root widget of the application.
 ///
@@ -119,7 +120,9 @@ class MemoxApp extends ConsumerWidget {
       // above it would read the browser window and decide the app is roomy
       // even though it renders at phone size.
       builder: (context, child) => MobileFrameWidget(
-        child: CompactScaleWidget(child: child ?? const SizedBox.shrink()),
+        child: CompactScaleWidget(
+          child: BoldTextWidget(child: child ?? const SizedBox.shrink()),
+        ),
       ),
     );
   }
@@ -145,6 +148,25 @@ Locale? _localeOf(AppLanguage language) {
   final code = language.languageCode;
 
   return code == null ? null : Locale(code);
+}
+
+/// Applies [applyBoldText] when the OS reports its Bold text setting
+/// (A20.1 P1-11).
+///
+/// Inside [CompactScaleWidget], so the emboldened theme is the compact one
+/// where the width asks for it — the two transforms compose in either order,
+/// but the outer one must see the inner one's output.
+class BoldTextWidget extends StatelessWidget {
+  const BoldTextWidget({required this.child, super.key});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!MediaQuery.boldTextOf(context)) return child;
+
+    return Theme(data: applyBoldText(Theme.of(context)), child: child);
+  }
 }
 
 /// Applies [applyCompactScale] when the surface is narrower than

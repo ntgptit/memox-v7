@@ -4,6 +4,7 @@ import '../../../../../l10n/generated/app_localizations.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_sheet.dart';
 import '../../states/deck_list_view_state.dart';
+import '../../../../../shared/widgets/mx_sheet.dart';
 
 /// The word for one order, in the language the sheet is being read in.
 ///
@@ -59,8 +60,8 @@ Future<void> showDeckSortSheet(
   required DeckListSort current,
   required ValueChanged<DeckListSort> onSelected,
 }) async {
-  final chosen = await showModalBottomSheet<DeckListSort>(
-    context: context,
+  final chosen = await showMxSheet<DeckListSort>(
+    context,
     builder: (sheetContext) => MxActionSheet(
       title: sheetContext.l10n.deckSortSheetTitle,
       actions: <MxActionSheetAction>[

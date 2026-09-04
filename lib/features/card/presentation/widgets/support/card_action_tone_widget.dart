@@ -75,9 +75,9 @@ extension CardActionTonePresentation on BuildContext {
   /// The glyph beside the word, so the verdict survives being read without
   /// colour.
   IconData cardActionToneIcon(CardActionTone tone) => switch (tone) {
-    CardActionTone.success => Icons.check_rounded,
-    CardActionTone.warning => Icons.trending_flat_rounded,
-    CardActionTone.danger => Icons.replay_rounded,
+    CardActionTone.success => Icons.check,
+    CardActionTone.warning => Icons.trending_flat,
+    CardActionTone.danger => Icons.replay,
   };
 
   /// The scheduler's identity, in the words the deck sheets use.

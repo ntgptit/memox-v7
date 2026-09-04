@@ -6,6 +6,7 @@ import '../../core/theme/foundations/app_radius.dart';
 import '../../core/theme/foundations/app_spacing.dart';
 import '../../core/theme/typography/app_typography.dart';
 import '../../core/theme/extensions/theme_context_extension.dart';
+import '../../core/theme/extensions/app_ink.dart';
 
 /// How tall the track is.
 ///
@@ -44,15 +45,6 @@ enum MxProgressBarSize {
 /// cards is a real case — `DeckSummary.learnedFraction` returns 0 for exactly
 /// that — and a bar drawn past its own track is a rendering bug shipped to a user
 /// instead of a number caught in a test.
-/// Whether the track's ends are rounded.
-///
-/// **A shape, not a size.** [MxProgressBarShape.pill] is the bar as a component
-/// on a surface — its ends are its own. [MxProgressBarShape.flush] is the bar
-/// used as an *edge*: the deck card seats one on its base, where a pill end adds
-/// a second rounding inside the card's own corner and the track reads as a
-/// lozenge tucked into it rather than as the card's foundation. The caller
-/// supplying the clip is the caller that owns the shape.
-enum MxProgressBarShape { pill, flush }
 
 class MxProgressBar extends StatelessWidget {
   const MxProgressBar({
@@ -60,7 +52,6 @@ class MxProgressBar extends StatelessWidget {
     this.label,
     this.valueLabel,
     this.size = MxProgressBarSize.md,
-    this.shape = MxProgressBarShape.pill,
     super.key,
   });
 
@@ -77,10 +68,6 @@ class MxProgressBar extends StatelessWidget {
   final String? valueLabel;
 
   final MxProgressBarSize size;
-
-  /// [MxProgressBarShape.flush] for a bar that forms an edge rather than sitting
-  /// on a surface — the clipping is then the caller's to do.
-  final MxProgressBarShape shape;
 
   @override
   Widget build(BuildContext context) {
@@ -109,9 +96,10 @@ class MxProgressBar extends StatelessWidget {
               const SizedBox(height: AppSpacing.sm),
             ],
             ClipRRect(
-              borderRadius: BorderRadius.circular(
-                shape == MxProgressBarShape.pill ? AppRadius.pill : 0,
-              ),
+              // **One shape.** A `flush` variant — the bar as a card's edge,
+              // clipped by the caller — existed with zero callers (A20.1
+              // P3-03); the deck tile seats the pill inside its own padding.
+              borderRadius: BorderRadius.circular(AppRadius.pill),
               child: TweenAnimationBuilder<double>(
                 // The bar animates to its new value rather than jumping. `slow`
                 // is the app's ceiling and this is the one thing it is for: a
@@ -169,9 +157,7 @@ class _MxProgressHeader extends StatelessWidget {
               label!,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: texts.labelMedium?.copyWith(
-                color: context.colors.onSurfaceVariant,
-              ),
+              style: texts.labelMedium!.inked(context, AppInk.quiet),
             ),
           ),
         if (valueLabel != null) ...<Widget>[
@@ -181,10 +167,8 @@ class _MxProgressHeader extends StatelessWidget {
             // Through the wght axis — a bare `fontWeight:` paints the rung's
             // old weight.
             style: AppTypography.withWeight(texts.labelMedium!, FontWeight.w600)
+                .inked(context, isComplete ? AppInk.success : AppInk.stated)
                 .copyWith(
-                  color: isComplete
-                      ? context.semanticColors.success
-                      : context.colors.onSurface,
                   // Tabular figures so a bar that ticks 61% -> 62% does not
                   // shift the label sideways under it.
                   fontFeatures: const <FontFeature>[

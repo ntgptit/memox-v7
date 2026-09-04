@@ -15,7 +15,7 @@ import '../../foundations/app_stroke.dart';
 /// **Focus changes the border's COLOUR, not its weight — except under error.**
 /// Material's default goes 1 → 2 on focus in every state, which makes the
 /// field jump and nudges anything laid out beside it; keeping the stroke at
-/// [AppStroke.input] for plain focus and moving the hue to `scheme.primary` is
+/// [AppStroke.control] for plain focus and moving the hue to `scheme.primary` is
 /// the difference between a field answering and a field shouting. But M3 uses
 /// that width for a second job as well: under error the *hue* is already
 /// spoken for (`error`, unfocused or focused), so the stroke is the only
@@ -106,7 +106,7 @@ InputDecorationTheme buildInputDecorationTheme(
 
 /// Same geometry in every state — only the colour speaks.
 OutlineInputBorder _inputBorder(Color color) =>
-    _inputBorderAt(color, AppStroke.input);
+    _inputBorderAt(color, AppStroke.control);
 
 /// The one state whose stroke differs: focused error, at [AppStroke.focus].
 OutlineInputBorder _inputBorderAt(Color color, double width) =>

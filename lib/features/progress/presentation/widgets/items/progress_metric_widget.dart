@@ -6,6 +6,7 @@ import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_metric_well.dart';
 import '../../../domain/models/deck_activity_metrics_model.dart';
+import '../../../../../core/theme/extensions/app_well_fill.dart';
 
 /// How large the numerals in a metric grid read.
 ///
@@ -64,6 +65,7 @@ class ProgressMetricGridWidget extends StatelessWidget {
   /// figures. At 320dp a cell is 124, so the grid stays two columns for every
   /// normal reader; at scale 2.0 the demand becomes 180 and the grid folds,
   /// which is the right trade — a taller card, and nothing lost.
+  // off-grid: a content threshold, not a size: the widest figure the cell must hold at 1.0x
   static const double minimumCellWidth = 90;
 
   @override
@@ -144,10 +146,7 @@ TextStyle? _numeralStyle(BuildContext context, ProgressMetricScale scale) =>
     (scale == ProgressMetricScale.panel
             ? context.texts.titleMedium
             : context.texts.titleSmall)
-        ?.copyWith(
-          color: context.colors.onSurface,
-          fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
-        );
+        ?.inked(context, AppInk.stated, isTabular: true);
 
 /// One metric: anchor, numeral, word — one shape for all four.
 ///
@@ -169,7 +168,7 @@ class _Metric extends StatelessWidget {
     required this.word,
     required this.icon,
     required this.tint,
-    required this.wellColor,
+    required this.fill,
     required this.scale,
   });
 
@@ -177,7 +176,7 @@ class _Metric extends StatelessWidget {
   final String word;
   final IconData icon;
   final AppInk tint;
-  final Color wellColor;
+  final AppWellFill fill;
   final ProgressMetricScale scale;
 
   @override
@@ -190,7 +189,7 @@ class _Metric extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.baseline,
       textBaseline: TextBaseline.alphabetic,
       children: <Widget>[
-        MxMetricWell(icon: icon, tint: tint, wellColor: wellColor),
+        MxMetricWell(icon: icon, tint: tint, fill: fill),
         const SizedBox(width: AppSpacing.xs),
         // Flexible so the text owns the rest of its fixed-width grid cell: a
         // long word at double scale wraps onto a second line inside the cell
@@ -227,7 +226,6 @@ class _ActiveCardsMetric extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final semantic = context.semanticColors;
     final tint = count == 0 ? AppInk.quiet : AppInk.info;
 
     return Semantics(
@@ -239,7 +237,7 @@ class _ActiveCardsMetric extends StatelessWidget {
           word: context.l10n.progressActiveCardsMetricWord,
           icon: Icons.style_outlined,
           tint: tint,
-          wellColor: semantic.surfaceMuted,
+          fill: AppWellFill.muted,
           scale: scale,
         ),
       ),
@@ -258,7 +256,6 @@ class _ActiveDaysMetric extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final semantic = context.semanticColors;
     final hasDays = count > 0;
 
     return Semantics(
@@ -270,7 +267,7 @@ class _ActiveDaysMetric extends StatelessWidget {
           word: context.l10n.progressActiveDaysMetricWord,
           icon: Icons.calendar_month_outlined,
           tint: hasDays ? AppInk.onDueContainer : AppInk.quiet,
-          wellColor: hasDays ? semantic.streakContainer : semantic.surfaceMuted,
+          fill: hasDays ? AppWellFill.streak : AppWellFill.muted,
           scale: scale,
         ),
       ),
@@ -288,7 +285,6 @@ class _LearningMetric extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final semantic = context.semanticColors;
     final tint = count == 0 ? AppInk.quiet : AppInk.info;
 
     return Semantics(
@@ -302,7 +298,7 @@ class _LearningMetric extends StatelessWidget {
           // pair the deck hero and Study Home use for this fact.
           icon: count > 0 ? Icons.auto_awesome : Icons.auto_awesome_outlined,
           tint: tint,
-          wellColor: semantic.surfaceMuted,
+          fill: AppWellFill.muted,
           scale: scale,
         ),
       ),
@@ -332,7 +328,7 @@ class _ReviewingMetric extends StatelessWidget {
           word: context.l10n.progressReviewingMetricWord,
           icon: Icons.event_repeat_outlined,
           tint: AppInk.quiet,
-          wellColor: context.semanticColors.surfaceMuted,
+          fill: AppWellFill.muted,
           scale: scale,
         ),
       ),

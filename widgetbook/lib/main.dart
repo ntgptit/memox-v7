@@ -77,6 +77,17 @@ class MemoxWidgetbook extends StatelessWidget {
           themes: <WidgetbookTheme<ThemeData>>[
             WidgetbookTheme<ThemeData>(name: 'Light', data: buildLightTheme()),
             WidgetbookTheme<ThemeData>(name: 'Dark', data: buildDarkTheme()),
+            // The two high-contrast themes the app wires at `app.dart` — a
+            // theme pair with no picture was A20.1 P1-08. Every hairline and
+            // disabled control re-points under them.
+            WidgetbookTheme<ThemeData>(
+              name: 'High contrast light',
+              data: buildHighContrastLightTheme(),
+            ),
+            WidgetbookTheme<ThemeData>(
+              name: 'High contrast dark',
+              data: buildHighContrastDarkTheme(),
+            ),
           ],
         ),
         TextScaleAddon(),
@@ -193,10 +204,12 @@ class MemoxWidgetbook extends StatelessWidget {
             errorStateComponent(),
             feedbackBandComponent(),
             loadingStateComponent(),
+            sectionLabelComponent(),
             confirmDialogComponent(),
             formDialogComponent(),
             alertDialogComponent(),
             actionSheetComponent(),
+            sheetHeaderComponent(),
             contentShellComponent(),
             asyncViewComponent(),
             progressBarComponent(),

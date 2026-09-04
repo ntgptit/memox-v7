@@ -32,6 +32,7 @@ import 'schemes/app_high_contrast.dart';
 import 'states/app_interaction_states.dart';
 import 'typography/app_text_styles.dart';
 import 'typography/app_typography.dart';
+import 'foundations/app_elevation.dart';
 
 /// Material 3 themes for the app.
 ///
@@ -143,6 +144,15 @@ ThemeData _buildTheme(ColorScheme scheme, AppSemanticColors semantic) {
     // corrections without a line here changing.
     useMaterial3: true,
     colorScheme: scheme,
+    // **The FAB's shadow colour, and only the FAB's** (A20.1 P1-12). Read
+    // from Flutter 3.44.8, not assumed: `Material` in M3 resolves its shadow
+    // from `colorScheme.shadow` and ignores this slot (`material.dart:465`),
+    // but `RawMaterialButton` — the FAB's body — passes
+    // `Theme.of(context).shadowColor` explicitly (`button.dart:387`). So this
+    // is where the FAB is told what every other floating surface already
+    // knows: `materialShadowColor` is `scheme.shadow` in light and transparent
+    // in dark, where a shade on a page at L* 4.1 is paint nobody can see.
+    shadowColor: materialShadowColor(scheme),
     // Pinned, not platform-adaptive. Android is the release target, but the
     // web build is the E2E channel (AD-04) — and Flutter's platform defaults
     // hand a desktop browser `compact` density and `shrinkWrap` tap targets,
@@ -262,9 +272,8 @@ ThemeData _buildTheme(ColorScheme scheme, AppSemanticColors semantic) {
     dialogTheme: buildDialogTheme(scheme, texts),
     bottomSheetTheme: buildBottomSheetTheme(scheme),
 
-    // The snack bar, from UC-05 — an overlay like the two above it, and the
-    // reason `app_modal_themes.dart` groups the three by behaviour rather than
-    // by widget class.
+    // The snack bar, from UC-05 — an overlay like the two above it; the
+    // three are grouped by behaviour rather than by widget class.
     snackBarTheme: buildSnackBarTheme(scheme, texts),
 
     progressIndicatorTheme: buildProgressIndicatorTheme(scheme),
@@ -284,9 +293,10 @@ ThemeData _buildTheme(ColorScheme scheme, AppSemanticColors semantic) {
 
     // Four components nothing renders yet. They are here rather than left to
     // Material because each one only restates a decision this app has already
-    // made and measured — the admission test, and the ones it turned away, are
-    // in `app_planned_themes.dart`. `theme_coverage_test.dart` is what stops
-    // the list growing on a hunch.
+    // made and measured — that is the admission rule, and
+    // `app_unrendered_component_themes_test.dart` measures each entry against
+    // it. `theme_coverage_test.dart` is what stops the list growing on a
+    // hunch.
     datePickerTheme: buildDatePickerTheme(scheme, semantic, texts),
     segmentedButtonTheme: buildSegmentedButtonTheme(scheme, semantic),
     sliderTheme: buildSliderTheme(scheme, semantic, texts),

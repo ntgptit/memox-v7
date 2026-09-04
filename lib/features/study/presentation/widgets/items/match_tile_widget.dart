@@ -106,7 +106,7 @@ class MatchTileWidget extends StatelessWidget {
                     FontWeight.w500,
                   )
                 : context.texts.bodySmall)
-            ?.copyWith(color: skin.foreground.resolve(context));
+            ?.inked(context, skin.foreground);
     final radius = BorderRadius.circular(AppRadius.md);
     // **Only the transition is reduced, never the beat a state is held for.**
     // The hold is feedback; the crossfade is decoration, and `AppMotionPolicy`
@@ -238,7 +238,7 @@ class _TileSkin {
       // `input`, not `focus`: 2px is the ring that says *keyboard focus is
       // here*, and a board where half the tiles wore it would leave the focus
       // indicator nothing of its own to say.
-      outlineWidth: AppStroke.input,
+      outlineWidth: AppStroke.control,
       foreground: ink,
       mark: mark,
     );

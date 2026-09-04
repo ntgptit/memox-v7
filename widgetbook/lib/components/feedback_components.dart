@@ -4,6 +4,7 @@ import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/shared/widgets/mx_feedback_band.dart';
 import 'package:memox/shared/widgets/mx_loading_state.dart';
+import 'package:memox/shared/widgets/mx_section_label.dart';
 import 'package:memox/shared/widgets/mx_session_top_bar.dart';
 import 'package:widgetbook/widgetbook.dart';
 
@@ -129,6 +130,76 @@ WidgetbookComponent loadingStateComponent() {
 
           return CatalogCenterPage(
             child: MxLoadingState(semanticsLabel: semanticsLabel),
+          );
+        },
+      ),
+      // The two shapes the closure added (A20.1 P1-02): the bare indicator a
+      // column lays out itself, and the 16 dp inline mark.
+      WidgetbookUseCase(
+        name: 'In a column',
+        builder: (context) => const CatalogCenterPage(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              MxLoadingState.inColumn(semanticsLabel: 'Parsing file'),
+              SizedBox(height: AppSpacing.lg),
+              Text('Reading 128 rows'),
+            ],
+          ),
+        ),
+      ),
+      WidgetbookUseCase(
+        name: 'Inline',
+        builder: (context) => const CatalogCenterPage(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              MxLoadingState.inline(semanticsLabel: 'Loading more'),
+              SizedBox(width: AppSpacing.sm),
+              Text('Loading more'),
+            ],
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
+WidgetbookComponent sectionLabelComponent() {
+  return WidgetbookComponent(
+    name: 'MxSectionLabel',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Playground',
+        builder: (context) {
+          final label = context.knobs.string(
+            label: 'label',
+            initialValue: 'Your decks',
+          );
+          final detail = context.knobs.stringOrNull(
+            label: 'detail',
+            description: 'A figure beside the label — never uppercased',
+          );
+          final rung = context.knobs.object.dropdown<MxSectionLabelRung>(
+            label: 'rung',
+            options: MxSectionLabelRung.values,
+          );
+          final emphasis = context.knobs.object
+              .dropdown<MxSectionLabelEmphasis>(
+                label: 'emphasis',
+                options: MxSectionLabelEmphasis.values,
+              );
+
+          return CatalogCenterPage(
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: MxSectionLabel(
+                label: label,
+                detail: detail,
+                rung: rung,
+                emphasis: emphasis,
+              ),
+            ),
           );
         },
       ),

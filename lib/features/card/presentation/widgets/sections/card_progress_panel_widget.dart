@@ -14,6 +14,7 @@ import '../../../domain/models/card_state_distribution_model.dart';
 import '../../controllers/card_list_filter_controller.dart';
 import '../../controllers/card_progress_controller.dart';
 import 'card_state_distribution_widget.dart';
+import '../../../../../shared/widgets/mx_section_label.dart';
 
 /// The deck progress panel (D5): a mastered ring, the mastered/total line, and
 /// the four-state distribution as a bar and a legend (BR-88…BR-91).
@@ -155,6 +156,7 @@ const double _ringSize = 64;
 
 /// Scaled with the ring so the arc keeps its weight rather than thinning out as
 /// the circle grows.
+// off-grid: scaled with the 64 ring so the arc keeps its weight; 4 thinned out, 8 closed the centre
 const double _ringStroke = 6;
 
 /// The mastered ring with its percentage (BR-88).
@@ -178,15 +180,26 @@ class _ProgressRing extends StatelessWidget {
             child: CircularProgressIndicator(
               value: fraction,
               strokeWidth: _ringStroke,
+              // **Named, and the number is its value** (A20.1 §24 #19). The
+              // ring was the one progress indicator with no accessible name;
+              // the percent painted beside it is what a reader hears as the
+              // ring's value, so the text itself stays out of the tree rather
+              // than saying the figure twice.
+              semanticsLabel: context.l10n.cardProgressTitle,
+              semanticsValue: context.l10n.cardProgressPercent(
+                (fraction * 100).round(),
+              ),
               // The arc is non-text — 3:1 is enough — so `success` carries the
               // "mastered" meaning; the track is the muted surface behind it.
               color: context.semanticColors.success,
               backgroundColor: context.semanticColors.progressTrack,
             ),
           ),
-          Text(
-            context.l10n.cardProgressPercent((fraction * 100).round()),
-            style: context.texts.labelMedium,
+          ExcludeSemantics(
+            child: Text(
+              context.l10n.cardProgressPercent((fraction * 100).round()),
+              style: context.texts.labelMedium,
+            ),
           ),
         ],
       ),
@@ -239,21 +252,14 @@ class _Headline extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        Text(
-          context.l10n.cardProgressTitle.toUpperCase(),
-          // **`label-md` on `onSurface`, not `label-sm` on the muted colour.**
-          // It is the panel's heading and it was set smaller *and* fainter than
-          // the line it introduces — 11px at `onSurfaceVariant` above 14px at
-          // `onSurface` — so it read as a caption under the ring rather than as
-          // the title of the block. Same rung as `YOUR DECKS` on the deck list
-          // now, and the same colour as the count it heads.
-          //
-          // It stays uppercase with the section tracking, which is what keeps it
-          // a heading rather than a competing statistic: it is 12 against the
-          // count's 14, and it carries no number of its own.
-          style: context.textStyles.sectionLabel.copyWith(
-            color: context.colors.onSurface,
-          ),
+        // **`label-md` on `onSurface`, not `label-sm` on the muted colour.**
+        // It is the panel's heading and it was set smaller *and* fainter than
+        // the line it introduces, so it read as a caption under the ring
+        // rather than as the title of the block. Same rung as `YOUR DECKS` on
+        // the deck list, and the same colour as the count it heads.
+        MxSectionLabel(
+          label: context.l10n.cardProgressTitle,
+          emphasis: MxSectionLabelEmphasis.stated,
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(

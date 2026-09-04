@@ -6,6 +6,7 @@ import 'package:memox/core/error/failure.dart';
 import 'package:memox/core/theme/foundations/app_sizing.dart';
 import 'package:memox/features/card/domain/models/card_history_page_model.dart';
 import 'package:memox/features/card/presentation/widgets/items/card_history_event_widget.dart';
+import 'package:memox/features/card/presentation/widgets/sections/card_history_section_widget.dart';
 import 'package:memox/features/study/domain/models/study_answer_kind_model.dart';
 import 'package:memox/features/study/domain/models/study_mode.dart';
 import 'package:memox/features/study/domain/models/study_outcome_reason_model.dart';
@@ -35,8 +36,16 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('No reviews yet'), findsOneWidget);
-      // W3 face 2 asks for a glyph beside the words.
-      expect(find.byIcon(Icons.history), findsOneWidget);
+      // W3 face 2 asks for a glyph beside the words. Scoped to the history
+      // band: the summary's "Last answered" metric carries the same glyph
+      // since the icon register was reconciled (A20.1 P3-09).
+      expect(
+        find.descendant(
+          of: find.byType(CardHistorySectionWidget),
+          matching: find.byIcon(Icons.history),
+        ),
+        findsOneWidget,
+      );
       expect(find.text('Load more'), findsNothing);
       expect(find.text('Retry'), findsNothing);
     });

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../foundations/app_radius.dart';
 import '../../states/app_interaction_states.dart';
 import '../overlays/app_backdrop_recipe.dart';
+import '../../foundations/app_elevation.dart';
 
 /// The modal sheet — `MxFormSheet`, `MxActionSheet`, and every direct
 /// `showModalBottomSheet` call.
@@ -11,7 +12,7 @@ BottomSheetThemeData buildBottomSheetTheme(ColorScheme scheme) =>
       modalBarrierColor: modalBarrierColor(scheme),
       backgroundColor: scheme.surfaceContainerLow,
       surfaceTintColor: Colors.transparent,
-      elevation: 0,
+      elevation: AppElevation.none,
       showDragHandle: true,
       // **The handle is a button, not a decoration, and the SDK is explicit
       // about it:** `_DragHandle` wraps itself in `Semantics(button: true,
@@ -21,13 +22,13 @@ BottomSheetThemeData buildBottomSheetTheme(ColorScheme scheme) =>
       // **1.45:1** in light and **2.04:1** in dark. It is the only thing on the
       // sheet that says the sheet can be dragged or dismissed.
       //
-      // **`borderControl` rather than `onSurfaceVariant`, and that was decided
-      // by looking.** Material's default for this slot is `onSurfaceVariant`,
-      // which here measures 6.45 and 7.29 — it clears the floor twice over and
-      // renders as a bar heavy enough to take the eye *before* the sheet's own
-      // heading. A sheet's first job is to say what it is. `borderControl`
-      // reads as an affordance at 3.19 and 3.00 without competing, and it is
-      // the token this app already means by "interactive control".
+      // **`onSurfaceVariant`, the slot's canonical role, and the history of
+      // how it got there is below.** `borderControl` was argued for once —
+      // it reads as an affordance at 3.19 and 3.00 without competing with
+      // the heading — and superseded at M100.22/23 by the role M3 gives the
+      // slot with the grab as a state layer over it; the paragraph that
+      // still argued for `borderControl` while the code returned
+      // `onSurfaceVariant` was A20.1 P3-05.
       dragHandleColor: WidgetStateColor.resolveWith((states) {
         // **Two states, because two is all the SDK ever sets here** — it adds
         // `hovered` from its own `MouseRegion` and `dragged` while the sheet is

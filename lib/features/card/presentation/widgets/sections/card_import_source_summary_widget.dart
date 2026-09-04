@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/extensions/app_ink.dart';
 import '../../../../../core/theme/foundations/app_radius.dart';
+import '../../../../../core/theme/foundations/app_sizing.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -60,8 +61,8 @@ class CardImportSourceSummaryWidget extends StatelessWidget {
     final row = Row(
       children: <Widget>[
         Container(
-          width: AppSpacing.xxl,
-          height: AppSpacing.xxl,
+          width: AppSizing.controlDense,
+          height: AppSizing.controlDense,
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: colors.surfaceContainerHigh,

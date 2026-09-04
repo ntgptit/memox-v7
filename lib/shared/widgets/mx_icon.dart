@@ -64,9 +64,7 @@ enum MxIconSize {
 /// **A colour that is genuinely computed cannot be a name.**
 /// `MxPillButton` reads `DefaultTextStyle.of(context).style.color`, which is
 /// the chip theme's `WidgetStateColor` already resolved for this row's state;
-/// there is no enum member for "whatever the chip decided". `MxMetricWell`
-/// takes a `Color` parameter, which is its own defect and belongs to the API
-/// cleanup, not here.
+/// there is no enum member for "whatever the chip decided".
 ///
 /// So the rule this widget enforces is narrower and firmer than "always use
 /// MxIcon": **a glyph that names a palette token must name it through

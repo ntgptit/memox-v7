@@ -235,6 +235,10 @@ void main() {
       //   the page every time focus arrived. It has nothing to show until a
       //   descendant is focused, which a static specimen cannot arrange;
       //   `mx_pill_button_focus_test.dart` reaches it with a real Tab instead.
+      // * `MxScrollEndInset` is an `InheritedWidget` and one function — the
+      //   shell's answer to how far a list ends from its edge. Nothing lays
+      //   out; `mx_content_shell_geometry_test.dart` reads the answer under
+      //   a real shell, with and without a floating action.
       expect(files.difference(covered), <String>{
         'MxAsyncConfirmDialog',
         'MxAsyncView',
@@ -245,6 +249,7 @@ void main() {
         'MxFailureLabelsWidget',
         'MxFormSheet',
         'MxMessenger',
+        'MxScrollEndInset',
         'MxSheetInsets',
         'MxUndoSnackBar',
       });

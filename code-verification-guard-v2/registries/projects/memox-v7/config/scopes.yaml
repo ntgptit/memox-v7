@@ -251,6 +251,32 @@ scopes:
       - '**/*.g.dart'
       - '**/*.freezed.dart'
 
+  # **Typography only, plus `lib/app/`** (A20.1 P2-22). The composition root
+  # was in no typography scope, and `error_screen_widget.dart` — the one
+  # screen that must render with no `Theme` — set two literal sizes in the
+  # platform font because nothing looked. It builds from `AppTypography` now;
+  # these two scopes are what keep it there. Colour is *not* widened: the
+  # error screen's fallback palette and `MobileFrameWidget` hold literals for
+  # reasons their files state, and the colour rules keep their scopes.
+  typography_ui_surfaces:
+    include:
+      - lib/features/*/presentation/**/*.dart
+      - lib/shared/**/*.dart
+      - lib/app/**/*.dart
+    exclude:
+      - '**/*.g.dart'
+      - '**/*.freezed.dart'
+
+  typography_and_theme_surfaces:
+    include:
+      - lib/features/*/presentation/**/*.dart
+      - lib/shared/**/*.dart
+      - lib/core/theme/**/*.dart
+      - lib/app/**/*.dart
+    exclude:
+      - '**/*.g.dart'
+      - '**/*.freezed.dart'
+
   # Riverpod-owned files: controllers, notifiers and generated-provider sources.
   # The theme alone — where `ColorScheme` is constructed and the one place a
   # retired role could be handed a value. Product UI never builds a scheme, so

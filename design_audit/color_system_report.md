@@ -18,19 +18,18 @@ guess.
 
 | | |
 |---|---|
-| Files scanned (`lib/`, hand-written) | 723 |
-| Colour sites found | 336 |
+| Files scanned (`lib/`, hand-written) | 731 |
+| Colour sites found | 308 |
 | Violations | 24 |
 
 **By element kind**
 
 | kind | sites |
 |---|---|
-| other | 278 |
-| background | 27 |
-| border | 9 |
+| other | 269 |
+| background | 26 |
+| border | 10 |
 | shadow | 3 |
-| text | 19 |
 
 **By source kind**
 
@@ -41,7 +40,7 @@ guess.
 | blend-source | 5 |
 | Colors-material | 14 |
 | hardcoded-literal | 113 |
-| theme-token | 56 |
+| theme-token | 28 |
 
 **By violation code**
 
@@ -64,10 +63,10 @@ guess.
 | V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:70` | Color(0xFF8C7CF0) | `#8C7CF0` | `#8C7CF0` | no token within ΔE-ish range — needs a new one |
 | V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:82` | Color(0xFFAAB4FF) | `#AAB4FF` | `#AAB4FF` | no token within ΔE-ish range — needs a new one |
 | V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:97` | Color(0xFF7063C0) | `#7063C0` | `#7063C0` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:124` | Color(0xFF8896FF) | `#8896FF` | `#8896FF` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:129` | Color(0xFF5B65B2) | `#5B65B2` | `#5B65B2` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:178` | Color(0xFF6F727B) | `#6F727B` | `#6F727B` | colorScheme.outline |
-| V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:224` | Color(0xFF747BA3) | `#747BA3` | `#747BA3` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:131` | Color(0xFF7383FF) | `#7383FF` | `#7383FF` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:136` | Color(0xFF5B65B2) | `#5B65B2` | `#5B65B2` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:185` | Color(0xFF6F727B) | `#6F727B` | `#6F727B` | colorScheme.outline |
+| V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:231` | Color(0xFF747BA3) | `#747BA3` | `#747BA3` | no token within ΔE-ish range — needs a new one |
 | V3 | 🟡 | `lib/core/theme/foundations/app_surface_colors.dart:60` | Color(0xFFF2F5F9) | `#F2F5F9` | `#F2F5F9` | colorScheme.surface |
 | V3 | 🟡 | `lib/core/theme/foundations/app_surface_colors.dart:62` | Color(0xFF070C27) | `#070C27` | `#070C27` | no token within ΔE-ish range — needs a new one |
 | V3 | 🟡 | `lib/core/theme/foundations/app_surface_colors.dart:78` | Color(0xFFFFFFFF) | `#FFFFFF` | `#FFFFFF` | colorScheme.onPrimary |
@@ -95,7 +94,7 @@ guess.
 
 - **V3** `Color(0xFF7063C0)` — A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #7063C0.
 
-- **V3** `Color(0xFF8896FF)` — A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #8896FF.
+- **V3** `Color(0xFF7383FF)` — A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #7383FF.
 
 - **V3** `Color(0xFF5B65B2)` — A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #5B65B2.
 

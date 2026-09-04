@@ -77,6 +77,26 @@ void main() {
     ),
   ];
 
+  // The densest border surface in the app, under the high-contrast pair:
+  // every card edge, chip edge and hairline re-points there (A20.1 P1-08).
+  for (final (String mode, Brightness brightness) in <(String, Brightness)>[
+    ('light', Brightness.light),
+    ('dark', Brightness.dark),
+  ]) {
+    testWidgets('deck list — root level, high contrast $mode', (tester) async {
+      await pumpReview(
+        tester,
+        ReviewApp(
+          home: deckShellWith(FakeDeckRepository.withSummaries(roots())),
+          brightness: brightness,
+          isHighContrast: true,
+        ),
+      );
+
+      await matchesReviewGolden('goldens/deck_list_root_hc_$mode.png');
+    });
+  }
+
   for (final (String mode, Brightness brightness) in <(String, Brightness)>[
     ('light', Brightness.light),
     ('dark', Brightness.dark),

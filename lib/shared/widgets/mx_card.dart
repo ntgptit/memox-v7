@@ -77,6 +77,12 @@ enum MxCardFeedbackTone {
   /// The icon and the copy stay product content — the recipe owns only the
   /// surface, so colour is never the sole cue.
   danger,
+
+  /// Something the user should know and can act on, that has not failed —
+  /// a permission the OS refused, a reminder that will not fire until it is
+  /// granted. `warningContainer`, the pair `AppSemanticColors` kept for
+  /// exactly this band (A20.1 P1-13).
+  warning,
 }
 
 /// The surface a recipe fills with, named as a role.
@@ -591,6 +597,7 @@ class _MxCardState extends State<MxCard> {
       // rather than silently rendering as danger.
       _MxCardFill.feedback => switch (widget._tone!) {
         MxCardFeedbackTone.danger => scheme.errorContainer,
+        MxCardFeedbackTone.warning => semantic.warningContainer,
       },
     };
   }

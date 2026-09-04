@@ -1354,6 +1354,10 @@
   "@cardMoveTargetTitle": {
     "description": "Title of the move-target picker (UC-04 A5)."
   },
+  "cardMoveTargetsLoadingLabel": "Đang tải bộ thẻ",
+  "@cardMoveTargetsLoadingLabel": {
+    "description": "Tên trợ năng của spinner khi sheet chuyển thẻ đang tải danh sách bộ đích (A20.1 P1-02)."
+  },
   "cardMoveEmptyTitle": "Không có bộ thẻ nào để chuyển tới",
   "@cardMoveEmptyTitle": {
     "description": "Empty state of the move picker: every candidate was excluded (BR-165)."
@@ -3262,14 +3266,6 @@
   "@reminderToggleLabel": {
     "description": "Nhãn hàng bật/tắt. Lặp lại **nguyên văn** tiêu đề màn vì hàng này là control chính của màn; một danh từ thứ hai cho cùng một thứ đọc thành một cài đặt thứ hai (M6 W3). Rút ngắn cùng lúc với reminderTitle: hai chuỗi khác nhau cách nhau 12dp trên cùng một màn là đúng thứ mô tả này cấm."
   },
-  "reminderStatusOff": "Tắt",
-  "@reminderStatusOff": {
-    "description": "Giá trị accessibility của toggle khi tắt, để trạng thái không chỉ nằm ở màu (M6 R7, A3). Hàng ở Settings cố ý không hiện giá trị — xem M6 W1."
-  },
-  "reminderStatusOn": "Bật",
-  "@reminderStatusOn": {
-    "description": "Giá trị accessibility của toggle khi bật (M6 R7, A3)."
-  },
   "reminderTimeLabel": "Giờ nhắc",
   "@reminderTimeLabel": {
     "description": "Nhãn hàng mở dialog chọn giờ, và cũng là tiêu đề của chính dialog đó (M6 W4, R6)."
@@ -4277,10 +4273,6 @@
   "deckPathAncestorsTitle": "Đi tới",
   "@deckPathAncestorsTitle": {
     "description": "Title of the sheet a long press on the deck path opens. It lists every ancestor of the open deck, so a reader can reach any level rather than only the one above."
-  },
-  "deckPathAncestorsHint": "nhấn giữ để xem mọi cấp",
-  "@deckPathAncestorsHint": {
-    "description": "Screen-reader hint on the deck path line: tapping goes up one level, and long-pressing opens the list of every ancestor."
   },
   "deckTileAllCaughtUpLabel": "Đã học hết",
   "@deckTileAllCaughtUpLabel": {

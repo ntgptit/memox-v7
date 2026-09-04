@@ -269,35 +269,6 @@ void main() {
       expect(width, lessThan(393));
     });
 
-    testWidgets('isSubmitting makes both inert', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: buildLightTheme(),
-          home: Scaffold(
-            body: MxFormDialog(
-              title: 'Add tag',
-              confirmLabel: 'Add',
-              cancelLabel: 'Cancel',
-              isSubmitting: true,
-              onConfirm: () {},
-              onCancel: () {},
-              child: const SizedBox.shrink(),
-            ),
-          ),
-        ),
-      );
-
-      for (final label in <String>['Add', 'Cancel']) {
-        final button = tester.widget<ButtonStyleButton>(
-          find.ancestor(
-            of: find.text(label),
-            matching: find.byWidgetPredicate((w) => w is ButtonStyleButton),
-          ),
-        );
-        expect(button.onPressed, isNull, reason: label);
-      }
-    });
-
     testWidgets('a null error adds nothing to the content at all', (
       tester,
     ) async {

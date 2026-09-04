@@ -1354,6 +1354,10 @@
   "@cardMoveTargetTitle": {
     "description": "Title of the move-target picker (UC-04 A5)."
   },
+  "cardMoveTargetsLoadingLabel": "Loading decks",
+  "@cardMoveTargetsLoadingLabel": {
+    "description": "Accessible name of the spinner while the move-to-deck sheet loads its targets (A20.1 P1-02)."
+  },
   "cardMoveEmptyTitle": "No deck to move to",
   "@cardMoveEmptyTitle": {
     "description": "Empty state of the move picker: every candidate was excluded (BR-165)."
@@ -3262,14 +3266,6 @@
   "@reminderToggleLabel": {
     "description": "Label of the on/off row. Repeats the screen title because the row is the screen's primary control, and a second noun for the same thing reads as a second setting (M6 W3)."
   },
-  "reminderStatusOff": "Off",
-  "@reminderStatusOff": {
-    "description": "Accessibility value of the toggle when the reminder is off, so the state is not carried by colour alone (M6 R7, A3). The Settings row deliberately shows no value — see M6 W1."
-  },
-  "reminderStatusOn": "On",
-  "@reminderStatusOn": {
-    "description": "Accessibility value of the toggle when the reminder is on (M6 R7, A3). The visible trailing value in Settings is the time itself, which says more."
-  },
   "reminderTimeLabel": "Reminder time",
   "@reminderTimeLabel": {
     "description": "Label of the row that opens the time picker, and the picker dialog's own heading (M6 W4, R6)."
@@ -4296,10 +4292,6 @@
   "deckPathAncestorsTitle": "Go to",
   "@deckPathAncestorsTitle": {
     "description": "Title of the sheet a long press on the deck path opens. It lists every ancestor of the open deck, so a reader can reach any level rather than only the one above."
-  },
-  "deckPathAncestorsHint": "long press for all levels",
-  "@deckPathAncestorsHint": {
-    "description": "Screen-reader hint on the deck path line: tapping goes up one level, and long-pressing opens the list of every ancestor."
   },
   "deckTileAllCaughtUpLabel": "All caught up",
   "@deckTileAllCaughtUpLabel": {

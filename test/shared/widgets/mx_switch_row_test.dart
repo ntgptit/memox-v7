@@ -1,122 +1,102 @@
+import 'dart:ui' show Tristate;
+
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/shared/widgets/mx_switch_row.dart';
 
-/// The axis the widget owns is a semantics decision, so that is what the
-/// tests pin: the announced variant speaks its value in words from the switch
-/// alone, and the tile variant makes the whole row the target.
-void main() {
-  Widget host(Widget child) => MaterialApp(
-    theme: buildLightTheme(),
-    home: Scaffold(body: Center(child: child)),
-  );
+/// `MxSwitchRow` — one node, one state channel (A20.1 P2-13).
+///
+/// OLD ASSERTIONS: the "announced" variant carried the value in words
+/// (`value: 'On'`) on a switch that also carried `toggled`, and the label was
+/// "the tap target for nothing". WHY WRONG: two channels for one state — a
+/// reader heard "On, switch, on" (A19-19). NEW CONTRACT: the row is a
+/// `SwitchListTile` — its name is the label, its state is the toggle, and
+/// the whole row toggles. AUTHORITY: A20.1 P2-13.
+/// The toggle state, on the node or on the switch node beneath it.
+Tristate _toggledIn(SemanticsNode node) {
+  var found = node.flagsCollection.isToggled;
+  node.visitChildren((child) {
+    if (child.flagsCollection.isToggled != Tristate.none) {
+      found = child.flagsCollection.isToggled;
+    }
+    return true;
+  });
+  return found;
+}
 
-  testWidgets('announced: the switch alone carries label and value in words', (
+List<String> _valuesIn(SemanticsNode node) {
+  final values = <String>[node.value];
+  node.visitChildren((child) {
+    values.addAll(_valuesIn(child));
+    return true;
+  });
+  return values;
+}
+
+void main() {
+  Future<void> pump(WidgetTester tester, Widget child) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildLightTheme(),
+        home: Scaffold(body: child),
+      ),
+    );
+  }
+
+  testWidgets('the label names the switch and the toggle is its state', (
     tester,
   ) async {
     final handle = tester.ensureSemantics();
-    await tester.pumpWidget(
-      host(
-        MxSwitchRow(
-          label: 'Reminders',
-          announcedValue: 'On',
-          isOn: true,
-          onChanged: (_) {},
-        ),
-      ),
+    await pump(
+      tester,
+      MxSwitchRow(label: 'Reminders', isOn: true, onChanged: (_) {}),
     );
 
-    final node = tester.getSemantics(find.byType(Switch));
+    final node = tester.getSemantics(find.byType(SwitchListTile));
     expect(node.label, contains('Reminders'));
-    expect(node.value, 'On');
+    // Flutter 3.44's `SwitchListTile` keeps the switch's own node under the
+    // named tile — `MergeSemantics` folds the name onto the tile and leaves
+    // the toggle where the platform reads a toggle. One name, one state.
+    expect(_toggledIn(node), Tristate.isTrue);
+    expect(node.value, isEmpty, reason: 'a second state channel');
+    expect(_valuesIn(node), everyElement(isEmpty), reason: 'no "On" text');
     handle.dispose();
   });
 
-  testWidgets('announced: the label is the tap target for nothing', (
-    tester,
-  ) async {
+  testWidgets('the whole row toggles as one control', (tester) async {
     var changes = 0;
-    await tester.pumpWidget(
-      host(
-        MxSwitchRow(
-          label: 'Reminders',
-          announcedValue: 'Off',
-          isOn: false,
-          onChanged: (_) => changes += 1,
-        ),
-      ),
+    await pump(
+      tester,
+      MxSwitchRow(label: 'Reminders', isOn: false, onChanged: (_) => changes++),
     );
 
-    await tester.tap(find.text('Reminders'), warnIfMissed: false);
+    await tester.tap(find.text('Reminders'));
     await tester.pumpAndSettle();
-    expect(changes, 0);
-
-    await tester.tap(find.byType(Switch));
     expect(changes, 1);
   });
 
-  testWidgets('tile: the whole row toggles', (tester) async {
-    var changes = 0;
-    await tester.pumpWidget(
-      host(
-        MxSwitchRow(
-          label: 'Has header row',
-          isOn: false,
-          onChanged: (_) => changes += 1,
-        ),
-      ),
+  testWidgets('a null handler disables the row and says so', (tester) async {
+    final handle = tester.ensureSemantics();
+    await pump(
+      tester,
+      const MxSwitchRow(label: 'Reminders', isOn: true, onChanged: null),
     );
-
-    await tester.tap(find.text('Has header row'));
-    expect(changes, 1);
+    final node = tester.getSemantics(find.byType(SwitchListTile));
+    expect(node.flagsCollection.isEnabled, Tristate.isFalse);
+    handle.dispose();
   });
 
-  testWidgets('null onChanged locks both variants', (tester) async {
-    await tester.pumpWidget(
-      host(
-        const Column(
-          children: <Widget>[
-            MxSwitchRow(label: 'tile', isOn: true, onChanged: null),
-            MxSwitchRow(
-              label: 'announced',
-              announcedValue: 'On',
-              isOn: true,
-              onChanged: null,
-            ),
-          ],
-        ),
-      ),
+  testWidgets('the label sits at the body-lg rung', (tester) async {
+    await pump(
+      tester,
+      MxSwitchRow(label: 'Reminders', isOn: true, onChanged: (_) {}),
     );
-
-    for (final switchWidget in tester.widgetList<Switch>(find.byType(Switch))) {
-      expect(switchWidget.onChanged, isNull);
-    }
-  });
-
-  testWidgets('both variants set the label at one rung', (tester) async {
-    // #431 P2-12: the tile branch was body-md and the announced one body-lg —
-    // one widget, two type scales, decided by a semantics flag.
-    await tester.pumpWidget(
-      host(
-        Column(
-          children: <Widget>[
-            MxSwitchRow(label: 'tile', isOn: true, onChanged: (_) {}),
-            MxSwitchRow(
-              label: 'announced',
-              announcedValue: 'On',
-              isOn: true,
-              onChanged: (_) {},
-            ),
-          ],
-        ),
-      ),
+    final text = tester.widget<Text>(find.text('Reminders'));
+    expect(
+      text.style?.fontSize,
+      buildLightTheme().textTheme.bodyLarge?.fontSize,
     );
-    final rung = buildLightTheme().textTheme.bodyLarge!.fontSize;
-    for (final label in <String>['tile', 'announced']) {
-      final text = tester.renderObject<RenderParagraph>(find.text(label));
-      expect(text.text.style?.fontSize, rung, reason: label);
-    }
   });
 }

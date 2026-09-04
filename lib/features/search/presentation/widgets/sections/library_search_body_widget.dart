@@ -13,6 +13,7 @@ import '../items/card_result_tile_widget.dart';
 import '../items/deck_result_tile_widget.dart';
 import 'search_group_header_widget.dart';
 import 'search_page_footer_widget.dart';
+import '../../../../../shared/widgets/mx_scroll_end_inset.dart';
 
 /// Breathing room under the last row.
 ///
@@ -21,7 +22,6 @@ import 'search_page_footer_widget.dart';
 /// the shell has already reserved it. This is the gap that stops the last row
 /// sitting on the bar's hairline — `lg`, the same value every other
 /// scrollable list uses for the same reason (D21).
-const double _kListBottomInset = AppSpacing.lg;
 
 /// Every state the search surface can be in, in one place.
 ///
@@ -137,7 +137,7 @@ class LibrarySearchBodyWidget extends StatelessWidget {
             gutter,
             AppSpacing.sm,
             gutter,
-            _kListBottomInset,
+            mxScrollEndInsetOf(context),
           ),
           sliver: SliverToBoxAdapter(
             child: SearchPageFooterWidget(

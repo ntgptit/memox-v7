@@ -45,7 +45,7 @@ rules:
       No hardcoded `TextStyle` in product UI. Use the typography tokens
       (`context.texts`) so text scales consistently.
     scopes:
-      - ui_surfaces
+      - typography_ui_surfaces
     patterns:
       - '\bTextStyle\s*\('
     tags:
@@ -125,7 +125,10 @@ rules:
 
   - id: memox.design_token.no_raw_border_radius
     type: regex
-    severity: warning
+    # `error` since the Design System V1 closure (A20.1 P3-09): it sat at
+    # `warning` beside a spacing rule at `error`, and a warning nobody reads is
+    # a rule nobody has. Live-tree scan was 0 when it was raised.
+    severity: error
     enabled: true
     message: No hardcoded corner radius in product UI. Use `AppRadius` tokens.
     scopes:
@@ -137,3 +140,28 @@ rules:
       - memox
       - design-token
       - ui
+
+  # --- Design System V1 closure (A20.1 §9, Phase 6) -----------------------
+  # A stroke width is a design decision with a four-step scale
+  # (`AppStroke.hairline` / `control` / `focus` / `indicator`); a literal beside
+  # `strokeWidth:` or `width:` on a border is a fifth rung nobody named. Five
+  # live sites were tokened first (A20.1 P2-09), then the rule ratcheted.
+  # `Border.all(color:)` with no width is legal — Flutter's default IS the
+  # hairline, and `app_stroke_test.dart` pins that equality.
+  - id: memox.design_token.no_raw_stroke_width
+    type: regex
+    severity: error
+    enabled: true
+    message: >-
+      No literal stroke width. `AppStroke` names the scale — hairline, control,
+      focus, indicator — so a border or an arc is one of four weights, not a
+      number typed at the site. A width none of them fits is a fifth rung to
+      argue for in lib/core/theme/foundations/app_stroke.dart.
+    scopes:
+      - ui_and_theme_surfaces
+    patterns:
+      - '^(?!\s*(?://|\*)).*\bstrokeWidth\s*:\s*\d'
+      - '^(?!\s*(?://|\*)).*\b(?:BorderSide|Border\.all|Border\.symmetric)\s*\([^)]*\bwidth\s*:\s*\d'
+    tags:
+      - memox-v7
+      - design-token

@@ -81,7 +81,9 @@ class GuessOptionItemWidget extends StatelessWidget {
         // The row's fill sits 1.06:1 from the page, so the border is doing all
         // the separating — and a row is a control (WCAG 1.4.11), not a card.
         semantic.borderControl;
-    final outlineWidth = accent == null ? AppStroke.hairline : AppStroke.input;
+    final outlineWidth = accent == null
+        ? AppStroke.hairline
+        : AppStroke.control;
     final verdict = switch (state) {
       GuessOptionState.correct => Icons.check,
       GuessOptionState.chosenWrong => Icons.close,
@@ -166,7 +168,7 @@ abstract final class AppGuessOption {
   /// The border the row draws, counted on both edges — at its heaviest, so the
   /// measurement below is a ceiling rather than a number that is right for four
   /// rows out of five.
-  static const double rowBorder = AppStroke.input * 2;
+  static const double rowBorder = AppStroke.control * 2;
 
   /// How tall this row wants to be for [text] at [width].
   ///

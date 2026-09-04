@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
-import '../../../../shared/widgets/mx_empty_state.dart';
 import '../../../../shared/widgets/mx_icon_button.dart';
 import '../../domain/entities/card_entity.dart';
 import '../controllers/card_editor_load_controller.dart';
@@ -21,6 +20,8 @@ import '../widgets/sections/card_editor_form_widget.dart';
 import '../widgets/sections/card_editor_save_shortcut_widget.dart';
 import '../widgets/sections/card_flag_toggle_widget.dart';
 import '../widgets/support/card_failure_labels_widget.dart';
+import '../../../../shared/widgets/mx_loading_state.dart';
+import '../../../../shared/widgets/mx_error_state.dart';
 
 /// The card editor — create and edit (UC-04 W4, A1).
 ///
@@ -184,11 +185,8 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
     return loaded.when(
       loading: () => _shell(
         context,
-        body: Center(
-          child: Semantics(
-            label: context.l10n.cardEditorLoadingLabel,
-            child: const CircularProgressIndicator(),
-          ),
+        body: MxLoadingState(
+          semanticsLabel: context.l10n.cardEditorLoadingLabel,
         ),
       ),
       error: (error, stackTrace) =>
@@ -206,13 +204,18 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
 
   /// A dead end with a way back. Both of the editor's are the same shape, so
   /// only the sentence differs.
-  Widget _recoveryFace(BuildContext context, String title) => _shell(
+  ///
+  /// **`MxErrorState`, not `MxEmptyState`** (A20.1 P2-03): a card that could
+  /// not be opened is a failure with a recovery, and `mx_empty_state.dart`'s
+  /// own doc renounces standing in for one. The recovery here is the way
+  /// back, which is what the action slot carries.
+  Widget _recoveryFace(BuildContext context, String message) => _shell(
     context,
-    body: MxEmptyState(
-      icon: Icons.error_outline,
-      title: title,
-      actionLabel: context.l10n.cardEditorLoadRetry,
-      onAction: _pop,
+    body: MxErrorState(
+      title: context.l10n.unexpectedErrorTitle,
+      message: message,
+      retryLabel: context.l10n.cardEditorLoadRetry,
+      onRetry: _pop,
     ),
   );
 

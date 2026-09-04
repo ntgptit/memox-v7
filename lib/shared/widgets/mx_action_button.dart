@@ -6,6 +6,7 @@ import '../../core/theme/components/actions/app_button_themes.dart';
 import '../../core/theme/foundations/app_icon_size.dart';
 import '../../core/theme/foundations/app_sizing.dart';
 import '../../core/theme/foundations/app_spacing.dart';
+import '../../core/theme/foundations/app_stroke.dart';
 import '../../core/theme/typography/app_typography.dart';
 import '../../core/theme/extensions/theme_context_extension.dart';
 
@@ -364,7 +365,7 @@ class MxActionButton extends StatelessWidget {
   static const Widget _spinner = RepaintBoundary(
     child: SizedBox.square(
       dimension: AppIconSize.sm,
-      child: CircularProgressIndicator(strokeWidth: 2),
+      child: CircularProgressIndicator(strokeWidth: AppStroke.indicator),
     ),
   );
 
@@ -473,7 +474,7 @@ class _ForegroundSpinner extends StatelessWidget {
     child: SizedBox.square(
       dimension: AppIconSize.sm,
       child: CircularProgressIndicator(
-        strokeWidth: 2,
+        strokeWidth: AppStroke.indicator,
         color: IconTheme.of(context).color,
       ),
     ),

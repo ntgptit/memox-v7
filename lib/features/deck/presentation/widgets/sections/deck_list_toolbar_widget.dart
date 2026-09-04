@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/extensions/app_ink.dart';
-import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_text_button.dart';
 import '../../states/deck_list_view_state.dart';
 import '../overlays/deck_sort_sheet_widget.dart';
+import '../../../../../shared/widgets/mx_section_label.dart';
 
 /// The list's heading and the one control that acts on it.
 ///
@@ -67,19 +66,19 @@ class DeckListToolbarWidget extends StatelessWidget {
     return Row(
       children: <Widget>[
         Expanded(
-          child: Text(
-            // **One count per level, and the root's lives in the header.**
-            // The header's second line states the root's own totals now
-            // (owner review, 2026-08-21), so repeating the figure here would
-            // be the redundancy that line was freed of. Inside a deck the
-            // header shows the path instead, so the heading keeps it. Middle
-            // dot, not parentheses: it reads as part of the label.
-            isRootLevel
-                ? context.l10n.decksSectionLabelRoot.toUpperCase()
-                : '${context.l10n.decksSectionLabelChild.toUpperCase()} · $visibleCount',
-            style: context.textStyles.listHeading.inked(context, AppInk.quiet),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          // **One count per level, and the root's lives in the header.**
+          // The header's second line states the root's own totals now
+          // (owner review, 2026-08-21), so repeating the figure here would
+          // be the redundancy that line was freed of. Inside a deck the
+          // header shows the path instead, so the heading keeps it as its
+          // detail; the middle dot is `MxSectionLabel`'s and reads as part
+          // of the label (A20.1 P2-02).
+          child: MxSectionLabel(
+            label: isRootLevel
+                ? context.l10n.decksSectionLabelRoot
+                : context.l10n.decksSectionLabelChild,
+            detail: isRootLevel ? null : '$visibleCount',
+            rung: MxSectionLabelRung.list,
           ),
         ),
         // **48 tall, and it is the row's whole height.** The design asks for a

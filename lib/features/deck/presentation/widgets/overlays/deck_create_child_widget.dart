@@ -7,6 +7,7 @@ import '../../../../../shared/widgets/mx_action_sheet.dart';
 import '../../../domain/entities/deck_entity.dart';
 import '../../../domain/models/deck_content_type_model.dart';
 import 'deck_actions_widget.dart';
+import '../../../../../shared/widgets/mx_sheet.dart';
 
 /// What an `unset` deck can be asked to create — or to be filled from.
 /// Import is a third door, not a third child kind: it leads to the card
@@ -68,8 +69,8 @@ Future<void> showCreateChildForm(
 }
 
 Future<_ChildKind?> _askChildKind(BuildContext context) =>
-    showModalBottomSheet<_ChildKind>(
-      context: context,
+    showMxSheet<_ChildKind>(
+      context,
       builder: (sheetContext) => MxActionSheet(
         title: sheetContext.l10n.deckCreateChildTitle,
         actions: <MxActionSheetAction>[

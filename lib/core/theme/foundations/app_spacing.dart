@@ -22,6 +22,10 @@ abstract final class AppSpacing {
   static const double xl = 24;
 
   /// Around a lone focal element — an empty state, a single card in a session.
+  ///
+  /// **A gap, never a size.** The same 32 as a box's width, height or an
+  /// icon's size is `AppSizing.controlDense`; `spacing_is_a_gap_test.dart`
+  /// refuses a spacing token on both axes of one box (A20.1 P2-12).
   static const double xxl = 32;
 
   /// The permitted values, in order. `AppSpacing` is the only source of

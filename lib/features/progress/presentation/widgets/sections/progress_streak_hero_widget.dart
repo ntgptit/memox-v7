@@ -9,6 +9,7 @@ import '../../../../../shared/widgets/mx_card.dart';
 import '../../../../../shared/widgets/mx_metric_well.dart';
 import '../../../domain/models/progress_overview_model.dart';
 import '../support/progress_labels_widget.dart';
+import '../../../../../core/theme/extensions/app_well_fill.dart';
 
 /// The hero: how many days in a row, and what today looks like (W2, visual
 /// revision 2026-08-28).
@@ -35,7 +36,6 @@ class ProgressStreakHeroWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final texts = context.texts;
-    final semantic = context.semanticColors;
     final hasStreak = overview.currentStreakDays > 0;
 
     return Semantics(
@@ -78,9 +78,7 @@ class ProgressStreakHeroWidget extends StatelessWidget {
                     child: MxMetricWell(
                       icon: Icons.local_fire_department_outlined,
                       tint: hasStreak ? AppInk.onDueContainer : AppInk.quiet,
-                      wellColor: hasStreak
-                          ? semantic.streakContainer
-                          : semantic.surfaceMuted,
+                      fill: hasStreak ? AppWellFill.streak : AppWellFill.muted,
                     ),
                   ),
                   const SizedBox(width: AppSpacing.sm),
@@ -103,9 +101,11 @@ class ProgressStreakHeroWidget extends StatelessWidget {
                       // property the extremes test reads off the render
                       // object is only populated once something states it.
                       textScaler: MediaQuery.textScalerOf(context),
+                      // The one weight a feature adds, by its name: the hero
+                      // numeral's (A20.1 P1-10).
                       style: AppTypography.withWeight(
                         texts.headlineMedium!,
-                        FontWeight.w700,
+                        AppTypography.heroNumeralWeight,
                       ).inked(context, AppInk.stated),
                     ),
                   ),

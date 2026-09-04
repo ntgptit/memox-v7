@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/foundations/app_radius.dart';
 import '../../core/theme/foundations/app_spacing.dart';
 import '../../core/theme/extensions/app_ink.dart';
-import '../../core/theme/extensions/theme_context_extension.dart';
+import '../../core/theme/extensions/app_well_fill.dart';
 import 'mx_icon.dart';
 
 /// The small icon well a metric anchors on: same size, same radius, same
@@ -21,15 +21,15 @@ import 'mx_icon.dart';
 /// and every one of the five already wrote [tint] as `<AppInk>.resolve(context)`
 /// — the vocabulary, spelled out longhand at each site.
 ///
-/// So [tint] is an `AppInk` and [wellColor] defaults to `surfaceMuted`. It stays
-/// overridable, because the deck hero genuinely moves it with the deck's state;
-/// what changes is that a caller wanting the ordinary well no longer has to say
-/// so. What must not vary is still the shape.
+/// So [tint] is an `AppInk` and [fill] is an `AppWellFill` that defaults to
+/// the muted well (A20.1 P2-07, owner decision 2: structural closure). The
+/// deck hero still moves the fill with the deck's state — it just picks a
+/// named fill rather than a colour. What must not vary is still the shape.
 class MxMetricWell extends StatelessWidget {
   const MxMetricWell({
     required this.icon,
     required this.tint,
-    this.wellColor,
+    this.fill = AppWellFill.muted,
     super.key,
   });
 
@@ -38,15 +38,14 @@ class MxMetricWell extends StatelessWidget {
   /// The glyph's ink, named rather than picked.
   final AppInk tint;
 
-  /// The well behind it. Null takes `surfaceMuted` — what four of the five call
-  /// sites were spelling out by hand.
-  final Color? wellColor;
+  /// The well behind it, named rather than picked.
+  final AppWellFill fill;
 
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: wellColor ?? context.semanticColors.surfaceMuted,
+        color: fill.resolve(context),
         borderRadius: BorderRadius.circular(AppRadius.pill),
       ),
       child: Padding(

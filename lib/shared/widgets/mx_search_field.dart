@@ -10,6 +10,7 @@ import '../../core/theme/foundations/app_stroke.dart';
 import '../../core/theme/typography/app_typography.dart';
 import '../../core/theme/extensions/theme_context_extension.dart';
 import 'mx_icon.dart';
+import '../../core/theme/extensions/app_ink.dart';
 
 /// The search bar that sits under an app bar.
 ///
@@ -27,7 +28,7 @@ import 'mx_icon.dart';
 /// 4E). It keeps its own surface model — a well in the page at rest, the paper
 /// once focused — and takes its *boundary* from the same system every other
 /// control uses: `scheme.outline` at rest, `scheme.primary` with focus, at
-/// [AppStroke.input]. Until M100.36 the resting border was the fill's own
+/// [AppStroke.control]. Until M100.36 the resting border was the fill's own
 /// colour, so the pill had no boundary at all: 1.09:1 against the light page,
 /// identified only by its glyph and placeholder (#433 §4.1). A control that is
 /// somewhere to type is identified by its edge, which is what WCAG 1.4.11 asks
@@ -49,6 +50,15 @@ import 'mx_icon.dart';
 /// be pinned at `AppSizing.touchTarget` with `expands: true`, which made a
 /// documented *floor* into a ceiling: from `textScaler` 2.5 the placeholder
 /// was clipped to the box. The floor is a floor now.
+/// The inset that brings a one-line field to [AppSizing.touchTarget] at the
+/// default scale: (48 − 20) / 2. Off-grid on purpose — the target is the
+/// contract, and the grid step above it would make the pill 52.
+const double _fieldInset = (AppSizing.touchTarget - _lineHeight) / 2;
+
+/// `body-md`'s line at the default scale — 14 × 1.43, rounded as the engine
+/// rounds it.
+const double _lineHeight = 20; // off-grid: a type metric, not a gap
+
 class MxSearchField extends StatefulWidget {
   const MxSearchField({
     required this.value,
@@ -136,7 +146,10 @@ class _MxSearchFieldState extends State<MxSearchField> {
     // than read from `inputDecorationTheme.hintStyle`, so the two controls
     // cannot drift apart by one following the other's rung.
     final TextStyle text = context.texts.bodyMedium!;
-    final TextStyle hint = text.copyWith(color: colors.onSurfaceVariant);
+    // The one restyle a regex could not see — it went through this local
+    // (A20.1 P1-07 d). `inked` names the ink; `mx_text_restyle_alias_test`
+    // keeps the next alias out.
+    final TextStyle hint = text.inked(context, AppInk.quiet);
 
     return AnimatedContainer(
       // The crossfade between the resting well and the focused surface is
@@ -158,7 +171,7 @@ class _MxSearchFieldState extends State<MxSearchField> {
         // pixels to spare.
         border: Border.all(
           color: _hasFocus ? colors.primary : colors.outline,
-          width: AppStroke.input,
+          width: AppStroke.control,
           strokeAlign: BorderSide.strokeAlignOutside,
         ),
       ),
@@ -204,11 +217,13 @@ class _MxSearchFieldState extends State<MxSearchField> {
                   // decorator's own vertical padding, and that padding is what
                   // biased the text off the glyph's line. The inset is stated
                   // on the field rather than the pill so the 48-tall clear
-                  // button does not add to it: at the default scale the field
-                  // is 44 inside a 48 row, and it is the field that grows.
+                  // button does not add to it. **The field itself stands 48**
+                  // (A20.1 P2-17): the pill was 48 while the field inside it
+                  // was 44, and Android's target guideline reads the node
+                  // that takes the tap, which is the field.
                   isCollapsed: true,
                   contentPadding: const EdgeInsets.symmetric(
-                    vertical: AppSpacing.md,
+                    vertical: _fieldInset,
                   ),
                 ),
               ),
@@ -225,17 +240,18 @@ class _MxSearchFieldState extends State<MxSearchField> {
                 // rung's old weight.
                 style:
                     AppTypography.withWeight(
-                      context.texts.labelSmall!,
-                      FontWeight.w600,
-                    ).copyWith(
-                      color: colors.onSurfaceVariant,
-                      letterSpacing: AppTypography.sectionLabelTracking,
-                      // Tabular figures so a count ticking 9 -> 10 does not shift
-                      // the button beside it.
-                      fontFeatures: const <FontFeature>[
-                        FontFeature.tabularFigures(),
-                      ],
-                    ),
+                          context.texts.labelSmall!,
+                          FontWeight.w600,
+                        )
+                        .inked(context, AppInk.quiet)
+                        .copyWith(
+                          letterSpacing: AppTypography.sectionLabelTracking,
+                          // Tabular figures so a count ticking 9 -> 10 does not shift
+                          // the button beside it.
+                          fontFeatures: const <FontFeature>[
+                            FontFeature.tabularFigures(),
+                          ],
+                        ),
               ),
               const SizedBox(width: AppSpacing.xs),
             ],

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../../../shared/widgets/mx_switch_row.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../l10n/l10n_extension.dart';
-import '../support/reminder_labels_widget.dart';
 
 /// The on/off row of the reminder card (M6 W3).
 ///
@@ -39,12 +38,11 @@ class ReminderToggleRowWidget extends StatelessWidget {
         horizontal: AppSpacing.lg,
         vertical: AppSpacing.xs,
       ),
-      // The announced variant (M6 A3, WCAG 4.1.2): the switch alone carries
-      // the label and the value in words, and the label is the tap target for
-      // nothing — MxSwitchRow owns the pattern and its reasoning now.
+      // One node, one state (WCAG 4.1.2, A20.1 P2-13): the label is the
+      // switch's name and the toggle is its state — MxSwitchRow owns the
+      // pattern.
       child: MxSwitchRow(
         label: context.l10n.reminderToggleLabel,
-        announcedValue: context.reminderToggleValue(isEnabled: isEnabled),
         isOn: isEnabled,
         onChanged: isChangeable ? onChanged : null,
       ),

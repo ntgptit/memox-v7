@@ -18,6 +18,8 @@ import '../../states/deck_submit_state.dart';
 import '../items/deck_scheduler_picker_widget.dart';
 import '../support/deck_labels_widget.dart';
 import 'deck_reset_progress_widget.dart';
+import '../../../../../shared/widgets/mx_sheet.dart';
+import '../../../../../shared/widgets/mx_sheet_insets.dart';
 
 /// The study-mode sheet of UC-03 — the unlocked change, and the locked
 /// explanation that replaces it.
@@ -36,9 +38,8 @@ import 'deck_reset_progress_widget.dart';
 Future<void> showDeckSchedulerSheet(
   BuildContext context, {
   required DeckEntity deck,
-}) => showModalBottomSheet<void>(
-  context: context,
-  isScrollControlled: true,
+}) => showMxSheet<void>(
+  context,
   builder: (sheetContext) => _SchedulerSheet(
     deck: deck,
     onClose: () => Navigator.of(sheetContext).pop(),
@@ -69,15 +70,12 @@ class _SchedulerSheetState extends ConsumerState<_SchedulerSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: _isLocked ? _locked(context) : _unlocked(context),
-          ),
+    return MxSheetInsets(
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: _isLocked ? _locked(context) : _unlocked(context),
         ),
       ),
     );
@@ -88,7 +86,14 @@ class _SchedulerSheetState extends ConsumerState<_SchedulerSheet> {
     final l10n = context.l10n;
 
     return <Widget>[
-      Text(l10n.deckSchedulerLockedTitle, style: context.texts.titleLarge),
+      // The sheet's title announces as a header (A20.1 P1-01, §23 #17).
+      Semantics(
+        header: true,
+        child: Text(
+          l10n.deckSchedulerLockedTitle,
+          style: context.texts.titleLarge,
+        ),
+      ),
       const SizedBox(height: AppSpacing.md),
       Text(l10n.deckSchedulerLockedBody, style: context.texts.bodyMedium),
       const SizedBox(height: AppSpacing.lg),
@@ -158,7 +163,13 @@ class _SchedulerSheetState extends ConsumerState<_SchedulerSheet> {
     });
 
     return <Widget>[
-      Text(l10n.deckSchedulerChangeTitle, style: context.texts.titleLarge),
+      Semantics(
+        header: true,
+        child: Text(
+          l10n.deckSchedulerChangeTitle,
+          style: context.texts.titleLarge,
+        ),
+      ),
       const SizedBox(height: AppSpacing.md),
       // BR-14, in the user's terms: the schedules restart, the content does not
       // move. No second list, because nothing is being taken away.

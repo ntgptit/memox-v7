@@ -75,7 +75,9 @@ const double _segmentGap = AppSpacing.xs;
 /// heavier at every text scale, because neither grows with the scaler — the
 /// track is a graphic, and a graphic that scaled with type would break the
 /// eight-across grid at 2.0.
+// off-grid: the track is a graphic between the hairline and the 8 grid; at 8 it reads as a bar, at 4 it vanishes at 2.0x
 const double _stepHeight = 6;
 
 /// The step the card is on now.
+// off-grid: one step above the 6 track so the current box reads as raised, and still under the 12 that would read as a control
 const double _currentHeight = 10;

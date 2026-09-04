@@ -93,9 +93,11 @@ abstract final class AppRecallAnswer {
   /// Wide enough to read as a line of text that is coming, narrow enough not to
   /// read as an input field waiting to be typed in.
   static const double hiddenBarWidth = 140;
+  // off-grid: the x-height of the line it stands in for; 16 read as a field
   static const double hiddenBarHeight = 14;
 
   /// Soft, not gone. Enough that the eye stops trying to resolve it.
+  // off-grid: a blur radius, not a length on the grid
   static const double hiddenBlur = 2;
 }
 

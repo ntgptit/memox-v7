@@ -90,7 +90,7 @@ class CardSelectionBarWidget extends ConsumerWidget {
       ),
       (
         label: l10n.cardSelectionAddTagAction,
-        icon: Icons.label_outline,
+        icon: Icons.sell_outlined,
         isDestructive: false,
         onPressed: onAddTag,
       ),
@@ -102,13 +102,13 @@ class CardSelectionBarWidget extends ConsumerWidget {
       ),
       (
         label: l10n.cardSelectionUnflagAction,
-        icon: Icons.outlined_flag,
+        icon: Icons.flag,
         isDestructive: false,
         onPressed: onUnflag,
       ),
       (
         label: l10n.cardExportSelectionAction,
-        icon: Icons.ios_share,
+        icon: Icons.share,
         isDestructive: false,
         onPressed: onExport,
       ),

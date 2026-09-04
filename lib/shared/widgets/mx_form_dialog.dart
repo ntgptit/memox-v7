@@ -7,6 +7,7 @@ import 'mx_button_pair.dart';
 import 'mx_dialog_metrics.dart';
 import 'mx_dialog_tone.dart';
 import 'mx_text_field.dart';
+import '../../core/theme/extensions/app_ink.dart';
 
 /// A form the user fills in without leaving the screen behind.
 ///
@@ -40,7 +41,6 @@ class MxFormDialog extends StatelessWidget {
     required this.onCancel,
     this.tone,
     this.errorMessage,
-    this.isSubmitting = false,
     super.key,
   });
 
@@ -66,10 +66,6 @@ class MxFormDialog extends StatelessWidget {
   /// Null renders nothing — not an empty box that shifts the layout when a
   /// failure arrives.
   final String? errorMessage;
-
-  /// While true both actions are inert and confirm shows a spinner. Submitting
-  /// a form twice is the same double-write `MxConfirmDialog` guards against.
-  final bool isSubmitting;
 
   final VoidCallback onConfirm;
   final VoidCallback onCancel;
@@ -107,14 +103,10 @@ class MxFormDialog extends StatelessWidget {
           // is this dialog's footer.
           secondary: MxActionButton(
             label: cancelLabel,
-            onPressed: isSubmitting ? null : onCancel,
+            onPressed: onCancel,
             variant: MxActionButtonVariant.secondary,
           ),
-          primary: MxActionButton(
-            label: confirmLabel,
-            onPressed: isSubmitting ? null : onConfirm,
-            isLoading: isSubmitting,
-          ),
+          primary: MxActionButton(label: confirmLabel, onPressed: onConfirm),
         ),
       ],
     );
@@ -139,7 +131,7 @@ class _FormError extends StatelessWidget {
       liveRegion: true,
       child: Text(
         message,
-        style: context.texts.bodySmall?.copyWith(color: context.colors.error),
+        style: context.texts.bodySmall!.inked(context, AppInk.error),
       ),
     );
   }

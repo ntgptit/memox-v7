@@ -46,9 +46,11 @@ void main() {
     test('radius, icon size, duration and breakpoint tokens are present', () {
       expect(AppRadius.sm, lessThan(AppRadius.md));
       expect(AppRadius.md, lessThan(AppRadius.lg));
-      expect(AppRadius.pill, greaterThan(AppRadius.lg));
+      expect(AppRadius.lg, lessThan(AppRadius.xl));
+      expect(AppRadius.pill, greaterThan(AppRadius.xl));
 
-      expect(AppIconSize.sm, lessThan(AppIconSize.md));
+      expect(AppIconSize.sm, lessThan(AppIconSize.mdCompact));
+      expect(AppIconSize.mdCompact, lessThan(AppIconSize.md));
       expect(AppIconSize.md, lessThan(AppIconSize.lg));
 
       expect(AppDurations.fast, lessThan(AppDurations.normal));
@@ -83,7 +85,7 @@ void main() {
       // that only has to be *increasing* passes with 1 / 1.6 / 3, which is three
       // numbers nobody chose.
       expect(AppStroke.hairline, 1);
-      expect(AppStroke.input, 1.5);
+      expect(AppStroke.control, 1.5);
       expect(AppStroke.focus, 2);
     });
 
@@ -102,7 +104,7 @@ void main() {
       }
 
       expect(AppStroke.hairline, declared('hairline'));
-      expect(AppStroke.input, declared('input'));
+      expect(AppStroke.control, declared('control'));
       expect(AppStroke.focus, declared('focus'));
     });
   });

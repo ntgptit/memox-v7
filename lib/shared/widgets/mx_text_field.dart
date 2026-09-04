@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../core/theme/foundations/app_sizing.dart';
 import '../../core/theme/extensions/theme_context_extension.dart';
 import 'mx_icon_button.dart';
+import '../../core/theme/extensions/app_ink.dart';
 
 /// A button drawn inside a field, at its trailing edge.
 ///
@@ -356,9 +357,9 @@ class MxTextField extends StatelessWidget {
         ).remainingTextFieldCharacterCount(maxLength - currentLength),
         // The same pairing the framework's default counter paints, said
         // explicitly because a custom `buildCounter` starts from nothing.
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.bodySmall!.inked(context, AppInk.quiet),
       ),
     );
   }

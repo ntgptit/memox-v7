@@ -83,9 +83,7 @@ class MxErrorState extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: context.texts.bodyMedium?.copyWith(
-                color: context.colors.onSurfaceVariant,
-              ),
+              style: context.texts.bodyMedium!.inked(context, AppInk.quiet),
             ),
             if (retryLabel != null && onRetry != null) ...<Widget>[
               const SizedBox(height: AppSpacing.xl),

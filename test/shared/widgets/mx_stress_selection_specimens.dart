@@ -45,12 +45,8 @@ List<MxStressSpecimen> selectionStressSpecimens() => <MxStressSpecimen>[
     // The announced variant: the label wraps beside the switch instead of
     // pushing it off the row.
     name: 'MxSwitchRow (announced)',
-    build: () => const MxSwitchRow(
-      label: kLongTitle,
-      announcedValue: 'Bật',
-      isOn: true,
-      onChanged: _noopBool,
-    ),
+    build: () =>
+        const MxSwitchRow(label: kLongTitle, isOn: true, onChanged: _noopBool),
     isInteractive: true,
   ),
   MxStressSpecimen(

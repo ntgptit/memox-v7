@@ -17,10 +17,22 @@ abstract final class AppStroke {
   /// navigation bar's top edge, the app bar's scrolled-under line.
   static const double hairline = 1;
 
-  /// An input's border — `--border-input`. The same in every state: focus
-  /// shifts the hue and never the width, because Material's 1→2 jump nudges
-  /// whatever is laid out beside the field.
-  static const double input = 1.5;
+  /// The stroke a *control* draws to read as a control — `--border-control`.
+  /// An input's border, an answer option's outline, a match tile's edge: one
+  /// step heavier than the hairline that separates, one step lighter than the
+  /// ring that says "focused". The same in every state: focus shifts the hue
+  /// and never the width, because Material's 1→2 jump nudges whatever is laid
+  /// out beside the field.
+  ///
+  /// **Was `input` until A20.1 P3-14**, when three of its five call sites were
+  /// not inputs — the name described the first caller, not the role.
+  static const double control = 1.5;
+
+  /// The stroke of a compact progress indicator — the 16 dp spinner inside a
+  /// busy button. Material's own `CircularProgressIndicator` default is 4,
+  /// sized for its 48 dp ring; at 16 dp that is a quarter of the diameter.
+  /// Named so the number is a decision rather than a literal (A20.1 P2-09).
+  static const double indicator = 2;
 
   /// A focus-visible indicator — `--border-focus`. The ring on an icon button,
   /// an outlined button and a tappable card, and the thickness of the underline

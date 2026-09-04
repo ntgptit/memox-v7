@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../typography/app_typography.dart';
+import '../../foundations/app_elevation.dart';
 
 /// The bottom bar's whole appearance.
 ///
@@ -64,7 +65,7 @@ NavigationBarThemeData buildNavigationBarTheme(
     );
   }),
   surfaceTintColor: Colors.transparent,
-  elevation: 0,
+  elevation: AppElevation.none,
   // Labels always visible, on every destination. The M3 default hides the
   // unselected ones, which leaves unlabelled icons whose selection is
   // readable only as a colour difference — exactly what an accessibility

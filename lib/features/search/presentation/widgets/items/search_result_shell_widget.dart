@@ -45,35 +45,44 @@ class SearchResultShellWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: semanticLabel,
-      child: MxCard.raised(
-        // Flat: this card sits inside a list on the page's own surface, and a
-        // shadow per row would make the list read as a stack of sheets. The
-        // row's content area is its own — tighter ends than sides.
-        padding: MxCardPadding.none,
-        onTap: onOpen,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.md,
-          ),
-          child: ConstrainedBox(
-            // The row is taller than this at every scale that has been measured;
-            // the floor is here so a future single-line variant cannot fall under
-            // the target a finger needs.
-            constraints: const BoxConstraints(minHeight: AppSizing.touchTarget),
-            child: ExcludeSemantics(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  MxIcon(icon, size: MxIconSize.sm),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(child: child),
-                  const SizedBox(width: AppSpacing.sm),
-                  const MxIcon(Icons.north_east, size: MxIconSize.sm),
-                ],
+    // **One node** (A20.1 P2-17). The label used to sit on a `Semantics`
+    // *above* the card while the tap lived on the card's own ink node below
+    // it, so the node that takes the tap had no name — the labelled-target
+    // guideline reads the node with the action, not its parent. Merging
+    // folds the name onto the tap.
+    return MergeSemantics(
+      child: Semantics(
+        button: true,
+        label: semanticLabel,
+        child: MxCard.raised(
+          // Flat: this card sits inside a list on the page's own surface, and a
+          // shadow per row would make the list read as a stack of sheets. The
+          // row's content area is its own — tighter ends than sides.
+          padding: MxCardPadding.none,
+          onTap: onOpen,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.md,
+            ),
+            child: ConstrainedBox(
+              // The row is taller than this at every scale that has been measured;
+              // the floor is here so a future single-line variant cannot fall under
+              // the target a finger needs.
+              constraints: const BoxConstraints(
+                minHeight: AppSizing.touchTarget,
+              ),
+              child: ExcludeSemantics(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    MxIcon(icon, size: MxIconSize.sm),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(child: child),
+                    const SizedBox(width: AppSpacing.sm),
+                    const MxIcon(Icons.north_east, size: MxIconSize.sm),
+                  ],
+                ),
               ),
             ),
           ),

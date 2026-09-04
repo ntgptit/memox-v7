@@ -13,6 +13,7 @@ import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/features/reminder/presentation/widgets/items/reminder_toggle_row_widget.dart';
 import 'package:memox/features/reminder/presentation/widgets/sections/reminder_banner_section_widget.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
+import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 
 /// The M6 geometry contract (G1, G3, G4, G5, G7, G8), measured with `getRect`
 /// and `didExceedMaxLines` rather than asserted by eye.
@@ -363,9 +364,16 @@ void main() {
           )
           .style;
 
+      // OLD ASSERTION: the Retry ink is `onErrorContainer`. WHY WRONG: a
+      // refused OS permission is not a failure of the app, and since A20.1
+      // P1-13 the band says so — `permissionDenied` is the *warning* tone, so
+      // the ink is the warning pair's. NEW CONTRACT: the ink is the band's own
+      // `on*Container`, whichever band it is. AUTHORITY: A20.1 P1-13 / §4Q.
       expect(
         style?.foregroundColor?.resolve(<WidgetState>{}),
-        Theme.of(bannerContext).colorScheme.onErrorContainer,
+        Theme.of(
+          bannerContext,
+        ).extension<AppSemanticColors>()!.onWarningContainer,
       );
     });
 

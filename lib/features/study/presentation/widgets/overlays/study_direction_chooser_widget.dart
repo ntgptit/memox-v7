@@ -11,6 +11,7 @@ import '../../../../../shared/widgets/mx_list_tile.dart';
 import '../../../domain/failures/study_refusal_failure.dart';
 import '../../../domain/models/study_direction_model.dart';
 import '../support/study_labels_widget.dart';
+import '../../../../../shared/widgets/mx_sheet_insets.dart';
 
 /// Picks the way a self-assess review will ask (BR-203).
 ///
@@ -111,16 +112,22 @@ class _StudyDirectionChooserState extends State<StudyDirectionChooserWidget> {
     // capped at a fraction of the screen, so three options with two lines each
     // overflow it on a short screen long before a large text scale is involved —
     // and an overflowing sheet hides the Start button, which is the one control
-    // the choice needs. `SafeArea` keeps that button clear of the gesture bar.
-    return SafeArea(
-      top: false,
+    // the choice needs. `MxSheetInsets` keeps that button clear of the
+    // keyboard or the gesture bar, whichever is covering the bottom.
+    return MxSheetInsets(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Text(l10n.studyDirectionTitle, style: context.texts.titleMedium),
+            // The sheet's title announces as a header (A20.1 P1-01, §23 #17).
+            Semantics(
+              header: true,
+              child: Text(
+                l10n.studyDirectionTitle,
+                style: context.texts.titleMedium,
+              ),
+            ),
             const SizedBox(height: AppSpacing.xs),
             Text(
               l10n.studyDirectionBody,

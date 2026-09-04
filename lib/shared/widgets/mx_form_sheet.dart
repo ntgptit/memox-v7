@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/state/submit_state.dart';
+import 'mx_sheet.dart';
 import 'mx_sheet_insets.dart';
 
 /// Shows a form in a bottom sheet with the keyboard inset applied.
@@ -10,8 +11,9 @@ import 'mx_sheet_insets.dart';
 /// capped at half the screen and the keyboard covers the submit button — a form
 /// the user cannot submit without dismissing the keyboard first. That is a bug
 /// this project has already had once, which is the argument for the function
-/// existing at all rather than each caller configuring `showModalBottomSheet`
-/// again.
+/// existing at all rather than each caller configuring the route again. Since
+/// A20.1 P1-01 the route itself is `showMxSheet`'s; this adds the form's
+/// insets, scroll and reset discipline on top.
 ///
 /// **The bottom padding clears the keyboard *or* the system bar, whichever is
 /// larger.** `viewInsets` alone covers only the keyboard; with the keyboard
@@ -37,9 +39,10 @@ Future<void> showMxFormSheet(
 }) {
   reset(ProviderScope.containerOf(context));
 
-  return showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
+  // Through the one sheet owner (A20.1 P1-01): navigator, safe area and the
+  // scroll-control flag are its decisions, not this helper's.
+  return showMxSheet<void>(
+    context,
     builder: (sheetContext) => MxSheetInsets(
       child: SingleChildScrollView(
         child: Consumer(

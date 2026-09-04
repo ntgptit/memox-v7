@@ -209,7 +209,7 @@ void main() {
       // The edge is what changed, and it stepped up in weight to say so.
       expect(_borderOf(tester, 'back-a').color, successOf(tester));
       expect(_borderOf(tester, 'back-b').color, dangerOf(tester));
-      expect(_borderOf(tester, 'back-a').width, AppStroke.input);
+      expect(_borderOf(tester, 'back-a').width, AppStroke.control);
       expect(_borderOf(tester, 'back-c').width, AppStroke.hairline);
     });
 

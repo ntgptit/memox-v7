@@ -1,3 +1,5 @@
+import 'package:flutter/semantics.dart';
+import 'dart:ui' show Tristate;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
@@ -10,6 +12,27 @@ import '../support/reminder_screen_harness.dart';
 /// guard's 400-line ceiling. The seam is the honest one: this file reads the
 /// semantics tree, that one measures rectangles, and neither needed the
 /// other's imports.
+/// The toggle state, on the node or on the switch node beneath it.
+Tristate _toggledIn(SemanticsNode node) {
+  var found = node.flagsCollection.isToggled;
+  node.visitChildren((child) {
+    if (child.flagsCollection.isToggled != Tristate.none) {
+      found = child.flagsCollection.isToggled;
+    }
+    return true;
+  });
+  return found;
+}
+
+List<String> _valuesIn(SemanticsNode node) {
+  final values = <String>[node.value];
+  node.visitChildren((child) {
+    values.addAll(_valuesIn(child));
+    return true;
+  });
+  return values;
+}
+
 void main() {
   final english = AppLocalizationsEn();
 
@@ -18,9 +41,19 @@ void main() {
   setUp(() => harness = ReminderScreenHarness());
 
   group('accessibility (M6 A3, A4)', () {
-    testWidgets('the toggle is spoken with its own name and value', (
+    testWidgets('the toggle is spoken with its own name, and its state once', (
       tester,
     ) async {
+      // OLD ASSERTION: the switch node carried `value: 'Off'` beside its
+      // toggled flag.
+      // WHY IT WAS WRONG: the flag already *is* the state — a reader heard
+      // "Reminders, Off, switch, off", the state twice in two grammars.
+      // NEW CONTRACT: the tile is named, the toggle is the switch's own
+      // flag beneath it, and no node writes the state as text.
+      // FLUTTER-A20.1 AUTHORITY: A20.1 P2-13 (one state channel);
+      // `SwitchListTile` keeps the switch node under the named tile on
+      // Flutter 3.44.
+      //
       // Disposed at the end of the body rather than through `addTearDown`:
       // the framework verifies no handle is live *before* tear-downs run.
       final handle = tester.ensureSemantics();
@@ -29,17 +62,14 @@ void main() {
       // Read off the control itself, not by label: the screen title is the
       // same words, so a label search would find two nodes and prove nothing
       // about which one carries the switch.
-      final node = tester.getSemantics(find.byType(Switch));
+      final node = tester.getSemantics(find.byType(SwitchListTile));
 
       // The label lives on the control, not only on the Text beside it: a
       // reader that focuses the switch would otherwise hear "Off" with no idea
       // what is off (WCAG 4.1.2).
       expect(node.label, english.reminderToggleLabel);
-      // The value is what carries the state in words. The toggled *flag* is
-      // Material's own and is asserted by the framework's Switch tests; what
-      // this screen owns, and what M6 R7 is about, is that the state is also
-      // readable without seeing the colour.
-      expect(node.value, english.reminderStatusOff);
+      expect(_toggledIn(node), Tristate.isFalse);
+      expect(_valuesIn(node), everyElement(isEmpty));
 
       handle.dispose();
     });

@@ -86,6 +86,109 @@ rules:
       - memox-v7
       - design-system
 
+  # --- Design System V1 closure (A20.1 §9, Phase 0) -----------------------
+  # Two pure ratchets: both names scanned 0 in `lib/features/*/presentation/`
+  # on the day the rules landed, so neither can go red on existing code. They
+  # exist so the next screen cannot quietly build its own chrome or its own
+  # pick-one control.
+  #
+  # `Scaffold` is deliberately NOT here. It is the framework's layout host, not
+  # a design-system component: no architecture decision forbids a feature from
+  # owning one, and `MxContentShell` documents why the *shell* builds its own —
+  # that is not a prohibition on features (A20.1 §9, FRAMEWORK_PRIMITIVE_ALLOWED).
+  - id: memox_v7.design_system.no_raw_screen_chrome
+    type: regex
+    severity: error
+    enabled: true
+    message: >-
+      No raw screen chrome in feature code. `MxContentShell` owns the bar, the
+      subheader and the back affordance, so every screen's chrome resolves
+      through one owner. A bar the shell cannot express is a gap in the shell —
+      extend it in lib/shared, do not build an `AppBar` / `SliverAppBar` here.
+    scopes:
+      - presentation_files
+    # Line-anchored with the comment exemption every rule in this file uses.
+    # `\b` keeps `MxAppBar`-style names legal and `\s*\(` keeps `AppBarTheme(`
+    # (a theme, not chrome) legal.
+    patterns:
+      - '^(?!\s*(?://|\*)).*\b(?:AppBar|SliverAppBar)\s*\('
+    tags:
+      - memox-v7
+      - design-system
+
+  # `MxPillButton` owns pick-one. `Chip`, `ActionChip`, `InputChip` and
+  # `FilterChip` are deliberately not included: the tag strip's deletable
+  # `Chip` and its add-tag `ActionChip` are FEATURE_SPECIAL_CASE_ALLOWED
+  # (A20.1 §8), and a multi-select `FilterChip` has no shared owner to point at.
+  # Landed in Phase 6, after `showMxSheet` existed and every caller had moved
+  # (A20.1 P1-01 → P1-03): guarding first would have banned the only route.
+  - id: memox_v7.design_system.no_raw_sheet_route
+    type: regex
+    severity: error
+    enabled: true
+    message: >-
+      No raw bottom-sheet route in feature code. `showMxSheet` owns the
+      navigator, the safe area and the scroll control, and `MxSheetHeader`
+      announces the title; sixteen callers each deciding those was how one
+      sheet came to sit under the navigation bar and another under the status
+      bar. Open the sheet through lib/shared/widgets/mx_sheet.dart.
+    scopes:
+      - presentation_files
+    patterns:
+      - '^(?!\s*(?://|\*)).*\bshow(?:Modal)?BottomSheet\s*[<(]'
+    tags:
+      - memox-v7
+      - design-system
+
+  # Landed in Phase 6, after the loading family owned every shape and the six
+  # spinner sites had moved (A20.1 P1-02 → P1-03).
+  #
+  # **The determinate mastery ring is excluded by file, with its reason.** A
+  # ring that shows `value: fraction` is progress, not loading; it is
+  # FEATURE_SPECIAL_CASE_ALLOWED in A20.1 §8 and the rule must agree with the
+  # taxonomy it enforces. The exclusion is only safe with its companion:
+  # `raw_progress_exclusions_test.dart` walks every construction in every
+  # excluded file and fails on one with no `value:` — so a loading spinner
+  # added to an excluded file does not inherit the exemption silently. A new
+  # determinate caller is added here **with its reason** in the same change.
+  - id: memox_v7.design_system.no_raw_loading_indicator
+    type: regex
+    severity: error
+    enabled: true
+    message: >-
+      No raw progress indicator in feature code. A loading state has one
+      owner for its accessible name — `MxLoadingState`, `.inColumn` or
+      `.inline` — because a bare spinner announces nothing. A *determinate*
+      ring (`value:`) is not a loading state: name its file on this rule's
+      `exclude:` with the reason, and keep `value:` non-null.
+    scopes:
+      - presentation_files
+    exclude:
+      # The card's mastery ring: `CircularProgressIndicator(value: fraction)`
+      # inside `Positioned.fill` — progress shown, not time waited.
+      - '**/card/presentation/widgets/sections/card_progress_panel_widget.dart'
+    patterns:
+      - '^(?!\s*(?://|\*)).*\b(?:CircularProgressIndicator|LinearProgressIndicator)(?:\.adaptive)?\s*\('
+    tags:
+      - memox-v7
+      - design-system
+
+  - id: memox_v7.design_system.no_raw_choice_chip
+    type: regex
+    severity: error
+    enabled: true
+    message: >-
+      No raw `ChoiceChip` in feature code. `MxPillButton` owns the pick-one
+      control — its tick slot, its focus ring, its 48dp target and its
+      exclusive-group semantics — so every pill in the app is one component.
+    scopes:
+      - presentation_files
+    patterns:
+      - '^(?!\s*(?://|\*)).*\bChoiceChip(?:\.[A-Za-z_][A-Za-z0-9_]*)?\s*\('
+    tags:
+      - memox-v7
+      - design-system
+
   - id: memox_v7.design_system.no_raw_style_escape
     type: regex
     severity: error
@@ -150,7 +253,7 @@ rules:
       `AppTypography.withWeight(style, FontWeight.wXXX)`, which moves the
       `wght` axis with it.
     scopes:
-      - ui_and_theme_surfaces
+      - typography_and_theme_surfaces
     patterns:
       - '^(?!\s*(?://|\*)).*\bfontWeight\s*:\s*FontWeight\.'
     tags:
@@ -158,26 +261,40 @@ rules:
       - design-system
       - typography
 
-  # A feature picks a rung and an AppInk; it does not mix styles. The first
-  # pattern is the direct spelling; the second closes the laundering route the
-  # M99.65 migration itself used to write — withWeight(...).copyWith(color:)
-  # smuggles an open colour past a rule that only watches texts.*.copyWith.
+  # A widget picks a rung and an AppInk; it does not mix styles. Four
+  # spellings of the same escape, and the scope is the whole UI surface
+  # (A20.1 P1-07): features *and* `lib/shared/widgets/`, where fifteen open
+  # colours lived while the rule watched only features. File mode, because
+  # `withWeight(...)` is written over three lines by `dart format` and a
+  # line-scoped pattern could not see the `.copyWith(` on the fourth; the
+  # balanced-paren walk stops at a bare paren, so an unbalanced one inside a
+  # comment shortens the check rather than leaking it.
+  #
+  # What it cannot see — a restyle through a local alias
+  # (`final text = texts.bodyMedium!; text.copyWith(color:)`) — is
+  # `text_restyle_alias_test.dart`'s, a two-pass scan a regex cannot be.
   - id: memox_v7.design_system.no_text_restyle
     type: regex
+    mode: file
     severity: error
     enabled: true
     message: >-
-      No per-site text styling in feature code. Pick a rung and apply a closed
+      No per-site text styling in UI code. Pick a rung and apply a closed
       ink: `texts.bodySmall!.inked(context, AppInk.quiet, isEmphasized:,
       isTabular:)`, or a named role on `context.textStyles`. A combination
       neither can express is a missing role — add it to AppTextStyles/AppInk in
       lib/core/theme, do not assemble it here.
     scopes:
-      - presentation_files
+      - ui_surfaces
     patterns:
       - '^(?!\s*(?://|\*)).*\btexts\.[a-zA-Z]+[!?]?\s*\.copyWith\s*\('
-      - '^(?!\s*(?://|\*)).*withWeight\s*\([^)]*\)\s*\.copyWith\s*\('
+      - '^(?!\s*(?://|\*)).*\btextStyles\.[a-zA-Z]+[!?]?\s*\.copyWith\s*\('
+      # `inputHintStyle` is a resolved style, consumed whole; a `.copyWith(`
+      # on it is the same restyle through the extension's fifth accessor
+      # (A20.1 P1-09).
+      - '^(?!\s*(?://|\*)).*\binputHintStyle[!?]?\s*\.copyWith\s*\('
       - '^(?!\s*(?://|\*)).*\btextTheme\.[a-zA-Z]+[!?]?\s*\.copyWith\s*\('
+      - '\bwithWeight\s*\((?:[^()]|\([^()]*\))*\)\s*\.copyWith\s*\('
     tags:
       - memox-v7
       - design-system

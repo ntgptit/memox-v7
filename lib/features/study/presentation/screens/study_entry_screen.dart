@@ -26,6 +26,7 @@ import '../widgets/overlays/study_resume_widget.dart';
 import '../widgets/sections/study_entry_section_widget.dart';
 import 'study_options_screen.dart';
 import 'study_session_screen.dart';
+import '../../../../shared/widgets/mx_sheet.dart';
 
 /// The way into a deck's study flow.
 ///
@@ -70,8 +71,8 @@ class _StudyEntryScreenState extends ConsumerState<StudyEntryScreen> {
     final open = await _openSession();
     if (open == null || !mounted) return;
 
-    final choice = await showModalBottomSheet<StudyResumeChoice>(
-      context: context,
+    final choice = await showMxSheet<StudyResumeChoice>(
+      context,
       builder: (sheetContext) => StudyResumeWidget(
         onChoice: (value) => Navigator.of(sheetContext).pop(value),
       ),
@@ -159,8 +160,8 @@ class _StudyEntryScreenState extends ConsumerState<StudyEntryScreen> {
       return _startReview(context, options: options, mode: modes.single);
     }
 
-    final chosen = await showModalBottomSheet<StudyMode>(
-      context: context,
+    final chosen = await showMxSheet<StudyMode>(
+      context,
       builder: (sheetContext) => StudyModeChooserWidget(
         modes: modes,
         summary: summary,
@@ -189,21 +190,15 @@ class _StudyEntryScreenState extends ConsumerState<StudyEntryScreen> {
       return _open(context, kind: StudySessionKind.reviewing, reviewMode: mode);
     }
 
-    return showModalBottomSheet<void>(
-      context: context,
-      // **Scroll-controlled, or the button that answers the question is off
-      // screen.** Flutter caps an ordinary sheet at 9/16 of the display; at
-      // 320dp with textScaler 2.0 this sheet's content is roughly 916dp against
-      // that cap of 319, so `Start review` sat far below the fold with nothing
-      // on Android saying there was more to scroll to.
-      isScrollControlled: true,
-      // **And a safe area, because the cap is gone.** The sheet's own
-      // `SafeArea(top: false)` was written for a sheet Flutter stopped at
-      // 9/16 of the display, which could never reach the top. Scroll-
-      // controlled it can, and at 320dp × 2.0 it does — its 16dp top
-      // padding is less than a modern cutout, so the title lost glyphs to
-      // the status bar.
-      useSafeArea: true,
+    // **Scroll-controlled and status-bar-safe by the route owner** (A20.1
+    // P1-01). Both used to be this call's own flags, argued here: Flutter
+    // caps an ordinary sheet at 9/16 of the display, and at 320dp × 2.0 this
+    // content is roughly 916dp against a cap of 319, so `Start review` sat
+    // below the fold; and once the cap was gone the 16dp top gutter was less
+    // than a modern cutout. `showMxSheet` makes both decisions for every
+    // sheet, so they cannot be forgotten by the next one.
+    return showMxSheet<void>(
+      context,
       // The choice is locked for the session (BR-207), so it is confirmed rather
       // than taken on a tap — and a sheet that dismisses on a background tap
       // would still be dismissible, which is the correct way out of a question

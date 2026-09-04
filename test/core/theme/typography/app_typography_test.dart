@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/typography/app_text_styles.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/core/theme/typography/app_typography.dart';
+import 'dart:io';
 
 /// The type scale, pinned against `design_system/tokens/typography.css`.
 ///
@@ -257,7 +258,8 @@ void main() {
 
     test('the scale itself spends three', () {
       // 400 body, 500 and 600 for emphasis. `w700` belongs to the two display
-      // rungs (57 and 45), which no screen in the app currently uses.
+      // rungs (57 and 45), which no screen in the app currently uses; the
+      // registry below names every other place it is reached.
       expect(
         themeWeights(),
         containsAll(<FontWeight>[
@@ -292,6 +294,157 @@ void main() {
         greaterThan(theme.headlineLarge!.fontWeight!.value),
         reason: 'an exception that is not heavier buys nothing',
       );
+    });
+  });
+
+  group('the weight registry (A20.1 P1-10)', () {
+    // Every weight the built theme can reach, by the slot that reaches it.
+    // Component themes re-weight rungs — a button label is w700 — so the
+    // text theme alone is not the registry.
+    Map<String, FontWeight> reachable(ThemeData theme) {
+      final texts = theme.textTheme;
+      final styles = theme.extension<AppTextStyles>()!;
+      const states = <WidgetState>{};
+      TextStyle? resolve(WidgetStateProperty<TextStyle?>? p) =>
+          p?.resolve(states);
+      final found = <String, TextStyle?>{
+        'displayLarge': texts.displayLarge,
+        'displayMedium': texts.displayMedium,
+        'displaySmall': texts.displaySmall,
+        'headlineLarge': texts.headlineLarge,
+        'headlineMedium': texts.headlineMedium,
+        'headlineSmall': texts.headlineSmall,
+        'titleLarge': texts.titleLarge,
+        'titleMedium': texts.titleMedium,
+        'titleSmall': texts.titleSmall,
+        'bodyLarge': texts.bodyLarge,
+        'bodyMedium': texts.bodyMedium,
+        'bodySmall': texts.bodySmall,
+        'labelLarge': texts.labelLarge,
+        'labelMedium': texts.labelMedium,
+        'labelSmall': texts.labelSmall,
+        'textStyles.heroNumeral': styles.heroNumeral,
+        'textStyles.cardPrompt': styles.cardPrompt,
+        'textStyles.sectionLabel': styles.sectionLabel,
+        'textStyles.sectionLabelSmall': styles.sectionLabelSmall,
+        'filledButton.textStyle': resolve(
+          theme.filledButtonTheme.style?.textStyle,
+        ),
+        'outlinedButton.textStyle': resolve(
+          theme.outlinedButtonTheme.style?.textStyle,
+        ),
+        'textButton.textStyle': resolve(theme.textButtonTheme.style?.textStyle),
+        'elevatedButton.textStyle': resolve(
+          theme.elevatedButtonTheme.style?.textStyle,
+        ),
+        'segmentedButton.textStyle': resolve(
+          theme.segmentedButtonTheme.style?.textStyle,
+        ),
+        'chip.labelStyle': theme.chipTheme.labelStyle,
+        'input.labelStyle': theme.inputDecorationTheme.labelStyle,
+        'input.hintStyle': theme.inputDecorationTheme.hintStyle,
+        'input.helperStyle': theme.inputDecorationTheme.helperStyle,
+        'input.errorStyle': theme.inputDecorationTheme.errorStyle,
+        'input.counterStyle': theme.inputDecorationTheme.counterStyle,
+        'appBar.titleTextStyle': theme.appBarTheme.titleTextStyle,
+        'appBar.toolbarTextStyle': theme.appBarTheme.toolbarTextStyle,
+        'navigationBar.labelTextStyle': resolve(
+          theme.navigationBarTheme.labelTextStyle,
+        ),
+        'navigationBar.labelTextStyle.selected': theme
+            .navigationBarTheme
+            .labelTextStyle
+            ?.resolve(<WidgetState>{WidgetState.selected}),
+        'dialog.titleTextStyle': theme.dialogTheme.titleTextStyle,
+        'dialog.contentTextStyle': theme.dialogTheme.contentTextStyle,
+        'snackBar.contentTextStyle': theme.snackBarTheme.contentTextStyle,
+        'tooltip.textStyle': theme.tooltipTheme.textStyle,
+        'listTile.titleTextStyle': theme.listTileTheme.titleTextStyle,
+        'listTile.subtitleTextStyle': theme.listTileTheme.subtitleTextStyle,
+        'listTile.leadingAndTrailingTextStyle':
+            theme.listTileTheme.leadingAndTrailingTextStyle,
+        'popupMenu.labelTextStyle': resolve(
+          theme.popupMenuTheme.labelTextStyle,
+        ),
+        'tabBar.labelStyle': theme.tabBarTheme.labelStyle,
+        'tabBar.unselectedLabelStyle': theme.tabBarTheme.unselectedLabelStyle,
+        'datePicker.dayStyle': theme.datePickerTheme.dayStyle,
+        'datePicker.headerHeadlineStyle':
+            theme.datePickerTheme.headerHeadlineStyle,
+        'timePicker.hourMinuteTextStyle':
+            theme.timePickerTheme.hourMinuteTextStyle,
+        'timePicker.dayPeriodTextStyle':
+            theme.timePickerTheme.dayPeriodTextStyle,
+      };
+      return <String, FontWeight>{
+        for (final entry in found.entries)
+          if (entry.value?.fontWeight != null)
+            entry.key: entry.value!.fontWeight!,
+      };
+    }
+
+    /// The only sources allowed to reach `w700`, each one named.
+    const boldAllowlist = <String>{
+      // The two display rungs (`app_typography.dart`).
+      'displayLarge',
+      'displayMedium',
+      // `AppTypography.heroNumeralWeight` — the deck hero's numeral.
+      'textStyles.heroNumeral',
+      // `buttonLabelWeight` — every button family, one constant.
+      'filledButton.textStyle',
+      'outlinedButton.textStyle',
+      'textButton.textStyle',
+    };
+
+    for (final (name, theme) in <(String, ThemeData)>[
+      ('light', buildLightTheme()),
+      ('dark', buildDarkTheme()),
+      ('high contrast light', buildHighContrastLightTheme()),
+      ('high contrast dark', buildHighContrastDarkTheme()),
+    ]) {
+      test(
+        '$name reaches exactly the four weights, and every w700 is named',
+        () {
+          final weights = reachable(theme);
+          expect(weights.values.toSet(), <FontWeight>{
+            FontWeight.w400,
+            FontWeight.w500,
+            FontWeight.w600,
+            FontWeight.w700,
+          });
+          final bold = <String>{
+            for (final entry in weights.entries)
+              if (entry.value == FontWeight.w700) entry.key,
+          };
+          expect(
+            bold.difference(boldAllowlist),
+            isEmpty,
+            reason: 'a w700 source nobody named',
+          );
+          expect(
+            boldAllowlist.difference(bold),
+            isEmpty,
+            reason: 'an allowlisted source that is no longer bold — prune it',
+          );
+        },
+      );
+    }
+
+    test('the sources that may spell w700 are exactly the named ones', () {
+      // The other half of the registry: the literal itself. `withWeight`
+      // through a named constant is the only way a feature reaches bold.
+      final spellers = Directory('lib')
+          .listSync(recursive: true)
+          .whereType<File>()
+          .where((f) => f.path.endsWith('.dart') && !f.path.endsWith('.g.dart'))
+          .where((f) => f.readAsStringSync().contains('FontWeight.w700'))
+          .map((f) => f.uri.pathSegments.last)
+          .toSet();
+      expect(spellers, <String>{
+        'app_typography.dart', // the display rungs and `heroNumeralWeight`
+        'app_button_themes.dart', // `buttonLabelWeight`
+        'app_bold_text.dart', // the OS bold-text setting, every rung
+      });
     });
   });
 }

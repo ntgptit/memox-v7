@@ -121,7 +121,14 @@ abstract final class AppBorderColors {
   /// border keeps `borderControl` and its canvas rule. So does
   /// `guess_option_item_widget`, which writes down that its row "is a control
   /// (WCAG 1.4.11), not a card" — the same distinction from the other side.
-  static const Color borderOptionLight = Color(0xFF8896FF);
+  // **Retuned within its own family** (A20.1 P2-14, A19-02): `#8896FF`
+  // measured 2.67:1 on the option card's own fill (`surfaceContainerLow`,
+  // white in light) — the whole boundary of a component that *is* its edge,
+  // under the 3:1 WCAG 1.4.11 asks. Same hue (233°), same saturation, one
+  // step darker: 3.27:1, and still 1.32 quieter than `borderSelectedLight`'s
+  // 4.33, so a picked option keeps winning its row. Not `primary`: the
+  // family is the point, and the role is a fill.
+  static const Color borderOptionLight = Color(0xFF7383FF);
 
   /// See [borderOptionLight]. Measured on the fill `.option` actually has in
   /// dark (`surface`, since the recipe is flat): **3.22:1**, chroma 0.120, and

@@ -27,10 +27,12 @@ import '../support/card_tag_chip_widget.dart';
 /// (`onSurfaceVariant` clears 4.5:1 as text where the state hues do not on both
 /// themes). Tags and the due badge are quiet filled pills — the deck's chip
 /// language — rather than the colour-per-state the reference draws.
+// off-grid: between `AppIconSize.sm` (16) and `md` (24): the flag sits beside a 14 label and at 16 it read as punctuation
 const double _flagIconSize = 18;
 
 /// The state dot's diameter — small, because colour and position carry it, not
 /// size.
+// off-grid: colour and position carry the dot; 8 vanished beside a 16 glyph and 12 read as a control
 const double _stateDotSize = 10;
 
 class CardTileWidget extends StatelessWidget {
@@ -62,11 +64,12 @@ class CardTileWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Selection is announced, not just tinted: a screen reader hears the state
-    // and a colour-blind reader sees the check, so colour is never the only
-    // signal (UC-04 A6).
+    // Selection is announced, not just tinted: `MxCard.isSelected` carries
+    // the `selected` flag a screen reader speaks, and a colour-blind reader
+    // sees the check, so colour is never the only signal (UC-04 A6). **One
+    // channel** (A20.1 P2-13): the row used to add a "selected" label on top
+    // of the flag, so the state was spoken twice.
     return Semantics(
-      label: isSelected ? context.l10n.cardSelectedSemanticLabel : null,
       child: MxCard.raised(
         onTap: onTap,
         onLongPress: onLongPress,
@@ -114,7 +117,7 @@ class _SelectionMark extends StatelessWidget {
       height: _stateDotSize,
       child: FittedBox(
         child: MxIcon(
-          isSelected ? Icons.check_circle : Icons.circle_outlined,
+          isSelected ? Icons.check_box_outlined : Icons.check_box_outline_blank,
           ink: isSelected ? AppInk.secondary : AppInk.quiet,
         ),
       ),

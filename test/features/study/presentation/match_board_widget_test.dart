@@ -197,7 +197,7 @@ void main() {
       // of the screen changing at once, and the answer was never in the area.
       expect(decoration.color, theme.colorScheme.surfaceContainerLow);
       expect(decoration.border!.top.color, accent);
-      expect(decoration.border!.top.width, AppStroke.input);
+      expect(decoration.border!.top.width, AppStroke.control);
 
       // Read from the widget rather than the compiled node: `matchesSemantics`
       // asserts the *whole* node, so it fails on every unrelated flag the tile

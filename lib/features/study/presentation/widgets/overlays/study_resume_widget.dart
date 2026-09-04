@@ -4,6 +4,7 @@ import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
+import '../../../../../shared/widgets/mx_sheet_insets.dart';
 
 /// Which of the three paths the user took (BR-103).
 ///
@@ -25,35 +26,39 @@ class StudyResumeWidget extends StatelessWidget {
   final ValueChanged<StudyResumeChoice> onChoice;
 
   @override
-  Widget build(BuildContext context) => SafeArea(
-    child: Padding(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Text(context.l10n.studyResumeTitle, style: context.texts.titleMedium),
-          const SizedBox(height: AppSpacing.xs),
-          Text(context.l10n.studyResumeBody, style: context.texts.bodyMedium),
-          const SizedBox(height: AppSpacing.lg),
-          MxActionButton(
-            label: context.l10n.studyResumeContinue,
-            onPressed: () => onChoice(StudyResumeChoice.resume),
+  Widget build(BuildContext context) => MxSheetInsets(
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        // The sheet's title announces as a header (A20.1 P1-01, §23 #17).
+        Semantics(
+          header: true,
+          child: Text(
+            context.l10n.studyResumeTitle,
+            style: context.texts.titleMedium,
           ),
-          const SizedBox(height: AppSpacing.sm),
-          MxActionButton(
-            label: context.l10n.studyStartLearning,
-            onPressed: () => onChoice(StudyResumeChoice.learn),
-            variant: MxActionButtonVariant.secondary,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          MxActionButton(
-            label: context.l10n.studyStartReview,
-            onPressed: () => onChoice(StudyResumeChoice.review),
-            variant: MxActionButtonVariant.secondary,
-          ),
-        ],
-      ),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(context.l10n.studyResumeBody, style: context.texts.bodyMedium),
+        const SizedBox(height: AppSpacing.lg),
+        MxActionButton(
+          label: context.l10n.studyResumeContinue,
+          onPressed: () => onChoice(StudyResumeChoice.resume),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        MxActionButton(
+          label: context.l10n.studyStartLearning,
+          onPressed: () => onChoice(StudyResumeChoice.learn),
+          variant: MxActionButtonVariant.secondary,
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        MxActionButton(
+          label: context.l10n.studyStartReview,
+          onPressed: () => onChoice(StudyResumeChoice.review),
+          variant: MxActionButtonVariant.secondary,
+        ),
+      ],
     ),
   );
 }

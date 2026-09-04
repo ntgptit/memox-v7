@@ -150,6 +150,47 @@ void main() {
       await matchesReviewGolden('goldens/settings_save_failed_$mode.png');
     });
 
+    // The screen with disabled controls — the time row and the workload
+    // rows go inert while the toggle is off — under the high-contrast pair
+    // (A20.1 P1-08).
+    testWidgets('reminder settings — enabled, high contrast $mode', (
+      tester,
+    ) async {
+      await pumpReview(
+        tester,
+        ReviewApp(
+          home: ProviderScope(
+            overrides: [
+              reminderSettingsRepositoryProvider.overrideWithValue(
+                FakeReminderSettings(
+                  const ReminderSettingsModel(
+                    isEnabled: true,
+                    time: ReminderTime.suggested,
+                  ),
+                ),
+              ),
+              reminderPlatformRepositoryProvider.overrideWithValue(
+                FakeReminderPlatform(),
+              ),
+              reminderWorkloadRepositoryProvider.overrideWithValue(
+                FakeReminderWorkload(),
+              ),
+              clockProvider.overrideWithValue(
+                () => DateTime.utc(2026, 7, 29, 3),
+              ),
+              utcOffsetProvider.overrideWithValue(
+                () => const Duration(hours: 7),
+              ),
+            ],
+            child: const ReminderSettingsScreen(),
+          ),
+          brightness: brightness,
+          isHighContrast: true,
+        ),
+      );
+      await matchesReviewGolden('goldens/reminder_settings_hc_$mode.png');
+    });
+
     testWidgets('reminder settings — enabled, $mode', (tester) async {
       await pumpReview(
         tester,

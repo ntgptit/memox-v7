@@ -1,5 +1,6 @@
 import 'dart:ui' show PlatformDispatcher;
 
+import 'package:flutter/material.dart' show Typography;
 import 'package:flutter/widgets.dart';
 
 import '../core/theme/foundations/app_colors.dart';
@@ -8,6 +9,7 @@ import '../core/theme/foundations/app_spacing.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../l10n/generated/app_localizations_en.dart';
 import '../core/theme/foundations/app_surface_colors.dart';
+import '../core/theme/typography/app_typography.dart';
 
 /// Which failure the screen is reporting.
 enum AppErrorKind {
@@ -70,6 +72,15 @@ class ErrorScreenWidget extends StatelessWidget {
     final isDark =
         PlatformDispatcher.instance.platformBrightness == Brightness.dark;
     final palette = isDark ? _darkFallback : _lightFallback;
+    // **The app's own families, without a `Theme`** (A20.1 P2-22). This was
+    // the one screen rendering in the platform font, with two literal sizes,
+    // because `context.texts` needs a `Theme` it cannot assume. `AppTypography`
+    // does not: it builds the same rungs from Material's 2021 metrics, which
+    // is exactly what `app_theme.dart` hands it, so the failure screen and the
+    // app it stands in for now set the same type.
+    final texts = AppTypography.buildTextTheme(
+      Typography.material2021().englishLike,
+    );
 
     return Directionality(
       textDirection: TextDirection.ltr,
@@ -79,9 +90,7 @@ class ErrorScreenWidget extends StatelessWidget {
           child: Padding(
             // The real spacing tokens, like the colours below: `AppSpacing` is
             // a class of compile-time constants and needs no theme to be
-            // alive. Only the two font sizes stay literal — the text theme
-            // does need a `Theme`, which is exactly what this screen cannot
-            // assume it has.
+            // alive — and so is the type, since A20.1 P2-22 (see `texts`).
             padding: const EdgeInsets.all(AppSpacing.xl),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -89,17 +98,13 @@ class ErrorScreenWidget extends StatelessWidget {
                 Text(
                   title,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: palette.title,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: texts.titleLarge!.copyWith(color: palette.title),
                 ),
                 const SizedBox(height: AppSpacing.md),
                 Text(
                   message,
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: palette.message, fontSize: 14),
+                  style: texts.bodyMedium!.copyWith(color: palette.message),
                 ),
               ],
             ),
