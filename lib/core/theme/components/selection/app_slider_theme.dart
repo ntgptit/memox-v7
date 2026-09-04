@@ -35,6 +35,15 @@ SliderThemeData buildSliderTheme(
   AppSemanticColors semantic,
   TextTheme texts,
 ) => SliderThemeData(
+  // **One Material generation, stated** (A20.1 P2-06). The colours below are
+  // the 2024 palette's slots, and with `year2023` unset `slider.dart:834`
+  // resolves `_SliderDefaultsM3Year2023` for everything this theme does not
+  // declare — geometry included — so the slider was split across two
+  // generations. `false` selects the 2024 defaults the colours belong to.
+  // The flag is marked deprecated *because* its default is changing to
+  // `false`; until it does, stating `false` is the SDK's own instruction.
+  // ignore: deprecated_member_use
+  year2023: false,
   activeTrackColor: scheme.primary,
   // `secondaryContainer` is M3's, and it is also the one neutral fill in this
   // palette that is not already a surface tier — so the inactive half cannot be

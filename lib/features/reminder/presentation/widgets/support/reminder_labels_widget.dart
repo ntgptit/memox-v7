@@ -38,9 +38,16 @@ extension ReminderLabels on BuildContext {
   /// 24-hour locale and a device with the 24-hour setting on are different
   /// questions, and only this knows both — a hand-rolled `HH:mm` would print
   /// `20:00` to a user whose phone says `8:00 PM` everywhere else.
-  String reminderTimeText(ReminderTime time) => MaterialLocalizations.of(
-    this,
-  ).formatTimeOfDay(TimeOfDay(hour: time.hour, minute: time.minute));
+  ///
+  /// **The device's 12/24-hour setting travels with it** (A20.1 P2-16).
+  /// `formatTimeOfDay` defaults `alwaysUse24HourFormat` to false, while the
+  /// picker the row opens reads `MediaQuery.alwaysUse24HourFormat` — so a
+  /// 24-hour phone showed `8:00 PM` on the row and `20:00` in the picker.
+  String reminderTimeText(ReminderTime time) =>
+      MaterialLocalizations.of(this).formatTimeOfDay(
+        TimeOfDay(hour: time.hour, minute: time.minute),
+        alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(this),
+      );
 
   /// The accessibility value of the toggle (M6 R7).
   ///

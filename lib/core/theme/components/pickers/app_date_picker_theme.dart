@@ -31,8 +31,14 @@ DatePickerThemeData buildDatePickerTheme(
     weekdayStyle: texts.labelMedium?.copyWith(color: scheme.onSurfaceVariant),
     dayStyle: texts.bodyMedium,
     dayForegroundColor: WidgetStateProperty.resolveWith((states) {
-      if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
+      // **Selected before disabled — `_DatePickerDefaultsM3`'s own order**
+      // (A20.1 P2-16). Read the other way round, a selected day that is also
+      // disabled kept the `primary` fill from `dayBackgroundColor` and took
+      // the disabled ink on it: 1.32:1 in light, 1.02:1 in dark, a number on
+      // a fill nobody could read. `onPrimary` on `primary` is what the SDK
+      // draws, and what the selected fill was chosen for.
       if (states.contains(WidgetState.selected)) return scheme.onPrimary;
+      if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
 
       return scheme.onSurface;
     }),

@@ -32,6 +32,7 @@ import 'schemes/app_high_contrast.dart';
 import 'states/app_interaction_states.dart';
 import 'typography/app_text_styles.dart';
 import 'typography/app_typography.dart';
+import 'foundations/app_elevation.dart';
 
 /// Material 3 themes for the app.
 ///
@@ -143,6 +144,15 @@ ThemeData _buildTheme(ColorScheme scheme, AppSemanticColors semantic) {
     // corrections without a line here changing.
     useMaterial3: true,
     colorScheme: scheme,
+    // **The FAB's shadow colour, and only the FAB's** (A20.1 P1-12). Read
+    // from Flutter 3.44.8, not assumed: `Material` in M3 resolves its shadow
+    // from `colorScheme.shadow` and ignores this slot (`material.dart:465`),
+    // but `RawMaterialButton` — the FAB's body — passes
+    // `Theme.of(context).shadowColor` explicitly (`button.dart:387`). So this
+    // is where the FAB is told what every other floating surface already
+    // knows: `materialShadowColor` is `scheme.shadow` in light and transparent
+    // in dark, where a shade on a page at L* 4.1 is paint nobody can see.
+    shadowColor: materialShadowColor(scheme),
     // Pinned, not platform-adaptive. Android is the release target, but the
     // web build is the E2E channel (AD-04) — and Flutter's platform defaults
     // hand a desktop browser `compact` density and `shrinkWrap` tap targets,

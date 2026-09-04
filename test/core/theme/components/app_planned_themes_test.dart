@@ -119,6 +119,21 @@ void main() {
   });
 
   group('slider', () {
+    test('resolves the 2024 generation before any role is read', () {
+      // A20.1 P2-06: assert the class first. Every role pin below is measured
+      // against `_SliderDefaultsM3`'s 2024 slots; with `year2023` unset the
+      // SDK would resolve the 2023 class for everything the theme leaves
+      // undeclared, and the pins would be describing half a slider.
+      for (final entry in themes.entries) {
+        expect(
+          // ignore: deprecated_member_use
+          entry.value.sliderTheme.year2023,
+          isFalse,
+          reason: '${entry.key}: the slider is split across two generations',
+        );
+      }
+    });
+
     test('takes the hue at the intensity that reads', () {
       // The same token the progress indicator moved to, for the same reason.
       for (final entry in themes.entries) {

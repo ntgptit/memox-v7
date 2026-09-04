@@ -33,6 +33,16 @@ RadioThemeData buildRadioTheme(
     // `disabledSurface`, which is a fill for things that have a face.
     if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
     if (states.contains(WidgetState.selected)) return scheme.primary;
+    // **The interaction rung, which the radio alone lacked** (A20.1 P2-15).
+    // `_RadioDefaultsM3.fillColor` darkens an unselected ring to `onSurface`
+    // under press, hover and focus — the same step the checkbox's edge takes
+    // — and this theme resolved every unselected state to the resting
+    // `onSurfaceVariant`, so a finger on a radio changed nothing but the wash.
+    if (states.contains(WidgetState.pressed) ||
+        states.contains(WidgetState.hovered) ||
+        states.contains(WidgetState.focused)) {
+      return scheme.onSurface;
+    }
 
     return scheme.onSurfaceVariant;
   }),
