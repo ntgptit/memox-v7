@@ -1010,6 +1010,24 @@ Per §15, each claim with its command, scope and result.
 | 4 | `flutter gen-l10n` + `dart run build_runner build --delete-conflicting-outputs` | codegen | 1601 outputs; required before (3) |
 | 5 | A20's own scanners re-run | `lib/`, `test/`, `widgetbook/` | counts in §8, §13, §17 |
 | 6 | Flutter 3.44.8 source reads | `app_bar.dart`, `ink_well.dart`, `slider.dart`, `widgets/text.dart`, `bottom_sheet.dart`, `color_scheme.dart` | §11.3, §12, §14, P1-04, P1-11, P2-06 |
+| 7 | **Correction pass** — §8 table re-summed by hand and by script | the 11 rows of §8 | 16+7+3+2+2+2+1+2+2+1+1 = **39**; SHARED_REQUIRED **22**; allowed **17** |
+| 8 | **Correction pass** — `test/shared/widgets/mx_stress_test.dart` read | `:33`, `:102-103`, `:140` | 320 × 2.0; **360 / 375 / 393 × 1.3 / 2.0**; inputs 2.5 / 3.0 |
+| 9 | **Correction pass** — guard registry read for `exclude:` and `mode: file` support | `memox-architecture-rules.yaml:131,191`, `memox-design-token-rules.yaml:227` | both exist; `no_raw_loading_indicator`'s allowlist needs no new capability |
+| 10 | **Correction pass** — `grep -rn "Scaffold(" lib/features` (excluding `ScaffoldMessenger`) and `docs/architecture.md` for an ownership contract | features, AD-01…AD-19 | **0** raw sites; no AD forbids feature-owned `Scaffold` |
+
+**NOT RUN, and stated as such:** the golden suite (a Windows checkout cannot
+author goldens and have CI agree — `dart_test.yaml` pins Linux), the Widgetbook
+smoke test, and `integration_test/` on a device. No golden was regenerated and
+no golden was updated for this report.
+
+**Scanner discipline.** Every count came from a scanner run with a **control
+group** — the raw-widget scan carries the 44 names the guard *does* ban and they
+return 0; the restyle scan carries the three spellings the rule *does* watch and
+they return 0. Two of this pass's own scanner results were discarded for method
+errors and are recorded rather than deleted: an unstripped comment produced a
+phantom 11th `Divider(` (the guard's comment-exempt pattern is right, my scan
+was wrong), and a bare-name grep merged `MxActionSheetAction.isEnabled` with the
+live `DeckSchedulerPickerWidget.isEnabled`.
 
 ### 25.1 · Final correction pass (docs-only)
 
@@ -1067,24 +1085,6 @@ source.
 `TOTAL_MIGRATION_SITES` 24. Registry totals, scores, guard counts and the raw
 taxonomy are unchanged — this moved one site into a count, not a finding into or
 out of the registry.
-| 7 | **Correction pass** — §8 table re-summed by hand and by script | the 11 rows of §8 | 16+7+3+2+2+2+1+2+2+1+1 = **39**; SHARED_REQUIRED **22**; allowed **17** |
-| 8 | **Correction pass** — `test/shared/widgets/mx_stress_test.dart` read | `:33`, `:102-103`, `:140` | 320 × 2.0; **360 / 375 / 393 × 1.3 / 2.0**; inputs 2.5 / 3.0 |
-| 9 | **Correction pass** — guard registry read for `exclude:` and `mode: file` support | `memox-architecture-rules.yaml:131,191`, `memox-design-token-rules.yaml:227` | both exist; `no_raw_loading_indicator`'s allowlist needs no new capability |
-| 10 | **Correction pass** — `grep -rn "Scaffold(" lib/features` (excluding `ScaffoldMessenger`) and `docs/architecture.md` for an ownership contract | features, AD-01…AD-19 | **0** raw sites; no AD forbids feature-owned `Scaffold` |
-
-**NOT RUN, and stated as such:** the golden suite (a Windows checkout cannot
-author goldens and have CI agree — `dart_test.yaml` pins Linux), the Widgetbook
-smoke test, and `integration_test/` on a device. No golden was regenerated and
-no golden was updated for this report.
-
-**Scanner discipline.** Every count came from a scanner run with a **control
-group** — the raw-widget scan carries the 44 names the guard *does* ban and they
-return 0; the restyle scan carries the three spellings the rule *does* watch and
-they return 0. Two of this pass's own scanner results were discarded for method
-errors and are recorded rather than deleted: an unstripped comment produced a
-phantom 11th `Divider(` (the guard's comment-exempt pattern is right, my scan
-was wrong), and a bare-name grep merged `MxActionSheetAction.isEnabled` with the
-live `DeckSchedulerPickerWidget.isEnabled`.
 
 ---
 
