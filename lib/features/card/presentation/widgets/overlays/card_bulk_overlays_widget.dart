@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../core/error/failure.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -19,6 +18,10 @@ import '../../controllers/card_selection_controller.dart';
 import '../../states/card_submit_state.dart';
 import '../support/card_failure_labels_widget.dart';
 import '../support/tag_labels_widget.dart';
+import '../../../../../shared/widgets/mx_sheet.dart';
+import '../../../../../shared/widgets/mx_sheet_insets.dart';
+import '../../../../../shared/widgets/mx_loading_state.dart';
+import '../../../../../shared/widgets/mx_error_state.dart';
 
 /// The bulk-delete confirmation (UC-04 A6).
 ///
@@ -62,9 +65,8 @@ Future<bool> showCardBulkDeleteConfirm(
 Future<String?> showCardMoveTargetSheet(
   BuildContext context, {
   required String sourceDeckId,
-}) => showModalBottomSheet<String>(
-  context: context,
-  isScrollControlled: true,
+}) => showMxSheet<String>(
+  context,
   builder: (sheetContext) => _MoveTargetSheet(sourceDeckId: sourceDeckId),
 );
 
@@ -77,44 +79,40 @@ class _MoveTargetSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final targets = ref.watch(cardMoveTargetsProvider(sourceDeckId));
 
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Text(
-              context.l10n.cardMoveTargetTitle,
-              style: context.texts.titleMedium,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Flexible(
-              child: targets.when(
-                loading: () => const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(AppSpacing.xl),
-                    child: CircularProgressIndicator(),
-                  ),
-                ),
-                error: (error, _) => MxEmptyState(
-                  icon: Icons.error_outline,
-                  title: context.l10n.unexpectedErrorTitle,
-                  message: error is Failure
-                      ? context.l10n.cardMoveEmptyMessage
-                      : context.l10n.cardMoveEmptyMessage,
-                ),
-                data: (list) => list.isEmpty
-                    ? MxEmptyState(
-                        icon: Icons.folder_off_outlined,
-                        title: context.l10n.cardMoveEmptyTitle,
-                        message: context.l10n.cardMoveEmptyMessage,
-                      )
-                    : _TargetList(targets: list),
+    return MxSheetInsets(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Text(
+            context.l10n.cardMoveTargetTitle,
+            style: context.texts.titleMedium,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Flexible(
+            child: targets.when(
+              // Named (A20.1 P1-02): this was the one spinner in the app with
+              // no accessible name at all.
+              loading: () => MxLoadingState(
+                semanticsLabel: context.l10n.cardMoveTargetsLoadingLabel,
               ),
+              // A failed read is an error face, not an empty one (A20.1
+              // P2-03) — and it says so, rather than borrowing the empty
+              // state's sentence for both branches.
+              error: (error, _) => MxErrorState(
+                title: context.l10n.unexpectedErrorTitle,
+                message: context.l10n.unexpectedErrorMessage,
+              ),
+              data: (list) => list.isEmpty
+                  ? MxEmptyState(
+                      icon: Icons.folder_off_outlined,
+                      title: context.l10n.cardMoveEmptyTitle,
+                      message: context.l10n.cardMoveEmptyMessage,
+                    )
+                  : _TargetList(targets: list),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

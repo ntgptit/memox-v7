@@ -10,6 +10,7 @@ import '../../../../../shared/widgets/mx_metric_well.dart';
 import '../../../domain/models/card_import_preview_model.dart';
 import '../../controllers/card_import_commit_controller.dart';
 import 'card_import_submit_progress_widget.dart';
+import '../../../../../shared/widgets/mx_section_label.dart';
 
 /// Step 3 — confirm and submit (UC-10 steps 6–7).
 ///
@@ -58,12 +59,7 @@ class CardImportConfirmStepWidget extends ConsumerWidget {
       children: <Widget>[
         // The heading joins the section-label grammar the other steps speak
         // now; the panel below carries the plan itself.
-        Text(
-          l10n.cardImportConfirmHeading.toUpperCase(),
-          style: context.textStyles.sectionLabel.copyWith(
-            color: context.colors.onSurfaceVariant,
-          ),
-        ),
+        MxSectionLabel(label: l10n.cardImportConfirmHeading),
         const SizedBox(height: AppSpacing.md),
         // **The Card Detail current-state hierarchy, not its metrics**: one
         // flat full-width panel, the subject on top, a subtle divider, then

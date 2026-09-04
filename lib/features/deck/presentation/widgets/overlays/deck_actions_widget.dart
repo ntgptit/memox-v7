@@ -13,6 +13,7 @@ import 'deck_scheduler_change_widget.dart';
 import 'deck_form_widget.dart';
 import '../../controllers/deck_write_controller.dart';
 import 'move_deck_sheet_widget.dart';
+import '../../../../../shared/widgets/mx_sheet.dart';
 
 /// Opens the per-deck action menu and everything it leads to.
 ///
@@ -61,8 +62,8 @@ Future<void> showDeckActions(
   VoidCallback? onMoveEarlier,
   VoidCallback? onMoveLater,
 }) async {
-  final action = await showModalBottomSheet<_DeckAction>(
-    context: context,
+  final action = await showMxSheet<_DeckAction>(
+    context,
     builder: (sheetContext) => MxActionSheet(
       title: sheetContext.l10n.deckActionsTitle,
       actions: <MxActionSheetAction>[
@@ -261,9 +262,8 @@ Future<void> showCreateSubDeckForm(
 Future<void> showDeckMoveSheet(
   BuildContext context, {
   required String deckId,
-}) => showModalBottomSheet<void>(
-  context: context,
-  isScrollControlled: true,
+}) => showMxSheet<void>(
+  context,
   builder: (sheetContext) => MoveDeckSheetWidget(
     deckId: deckId,
     onDone: () => Navigator.of(sheetContext).pop(),

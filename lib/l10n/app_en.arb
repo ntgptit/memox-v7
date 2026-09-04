@@ -1354,6 +1354,10 @@
   "@cardMoveTargetTitle": {
     "description": "Title of the move-target picker (UC-04 A5)."
   },
+  "cardMoveTargetsLoadingLabel": "Loading decks",
+  "@cardMoveTargetsLoadingLabel": {
+    "description": "Accessible name of the spinner while the move-to-deck sheet loads its targets (A20.1 P1-02)."
+  },
   "cardMoveEmptyTitle": "No deck to move to",
   "@cardMoveEmptyTitle": {
     "description": "Empty state of the move picker: every candidate was excluded (BR-165)."

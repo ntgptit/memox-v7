@@ -10,6 +10,7 @@ import '../../core/theme/foundations/app_stroke.dart';
 import '../../core/theme/typography/app_typography.dart';
 import '../../core/theme/extensions/theme_context_extension.dart';
 import 'mx_icon.dart';
+import '../../core/theme/extensions/app_ink.dart';
 
 /// The search bar that sits under an app bar.
 ///
@@ -136,7 +137,10 @@ class _MxSearchFieldState extends State<MxSearchField> {
     // than read from `inputDecorationTheme.hintStyle`, so the two controls
     // cannot drift apart by one following the other's rung.
     final TextStyle text = context.texts.bodyMedium!;
-    final TextStyle hint = text.copyWith(color: colors.onSurfaceVariant);
+    // The one restyle a regex could not see — it went through this local
+    // (A20.1 P1-07 d). `inked` names the ink; `mx_text_restyle_alias_test`
+    // keeps the next alias out.
+    final TextStyle hint = text.inked(context, AppInk.quiet);
 
     return AnimatedContainer(
       // The crossfade between the resting well and the focused surface is
@@ -225,17 +229,18 @@ class _MxSearchFieldState extends State<MxSearchField> {
                 // rung's old weight.
                 style:
                     AppTypography.withWeight(
-                      context.texts.labelSmall!,
-                      FontWeight.w600,
-                    ).copyWith(
-                      color: colors.onSurfaceVariant,
-                      letterSpacing: AppTypography.sectionLabelTracking,
-                      // Tabular figures so a count ticking 9 -> 10 does not shift
-                      // the button beside it.
-                      fontFeatures: const <FontFeature>[
-                        FontFeature.tabularFigures(),
-                      ],
-                    ),
+                          context.texts.labelSmall!,
+                          FontWeight.w600,
+                        )
+                        .inked(context, AppInk.quiet)
+                        .copyWith(
+                          letterSpacing: AppTypography.sectionLabelTracking,
+                          // Tabular figures so a count ticking 9 -> 10 does not shift
+                          // the button beside it.
+                          fontFeatures: const <FontFeature>[
+                            FontFeature.tabularFigures(),
+                          ],
+                        ),
               ),
               const SizedBox(width: AppSpacing.xs),
             ],

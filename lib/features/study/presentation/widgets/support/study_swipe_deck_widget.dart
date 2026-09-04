@@ -17,6 +17,7 @@ import '../../../../../shared/widgets/mx_icon_button.dart';
 /// one makes the gesture feel like it did not take. 70 is the design kit's
 /// figure and it survives a 320-wide screen, where it is still under a quarter
 /// of the width.
+// off-grid: the kit's figure for a committed drag — a gesture distance, not a laid-out size
 const double kStudySwipeThreshold = 70;
 
 /// The distance over which a dragged card fades, and the most it may fade.

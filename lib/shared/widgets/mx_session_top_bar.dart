@@ -9,6 +9,7 @@ import '../../core/theme/extensions/theme_context_extension.dart';
 import 'mx_content_shell.dart';
 import 'mx_icon_button.dart';
 import 'mx_progress_bar.dart';
+import '../../core/theme/extensions/app_ink.dart';
 
 /// The most of the row's *content* space the chip may claim before it starts
 /// ellipsizing — content space being what is left once the close button and the
@@ -240,15 +241,12 @@ class _Chip extends StatelessWidget {
         // *classification*, not the sentence a screen wrote — the same reason
         // the context line under it is uppercase and a deck name never is.
         label.toUpperCase(),
-        style:
-            AppTypography.withWeight(
-              context.textStyles.sectionLabel,
-              FontWeight.w600,
-            ).copyWith(
-              // The brand hue as text. `primary` is that since M100.18 —
-              // the dark tone inverted, so the role itself passes AA here.
-              color: context.colors.primary,
-            ),
+        style: AppTypography.withWeight(
+          context.textStyles.sectionLabel,
+          FontWeight.w600,
+          // The brand hue as text. `primary` is that since M100.18 —
+          // the dark tone inverted, so the role itself passes AA here.
+        ).inked(context, AppInk.accent),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),

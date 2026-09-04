@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../domain/failures/reminder_failure.dart';
 import '../../../domain/models/reminder_time_model.dart';
+import '../../../../../shared/widgets/mx_feedback_band.dart';
 
 /// The banner copy for one rejection: a heading, a body, and whether it can be
 /// retried at all.
@@ -16,11 +17,17 @@ final class ReminderBanner {
     required this.title,
     required this.message,
     required this.isRetryable,
+    this.tone = MxFeedbackTone.danger,
   });
 
   final String title;
   final String message;
   final bool isRetryable;
+
+  /// Which band carries it. Mapped **per value** (A20.1 P1-13): a refused OS
+  /// permission is not a failure of the app, it is a condition the user can
+  /// change in settings, and painting it as an error said something untrue.
+  final MxFeedbackTone tone;
 }
 
 /// Where a reminder domain value becomes something a person reads.
@@ -69,6 +76,7 @@ extension ReminderLabels on BuildContext {
           title: l10n.reminderPermissionDeniedTitle,
           message: l10n.reminderPermissionDeniedMessage,
           isRetryable: true,
+          tone: MxFeedbackTone.warning,
         ),
         ReminderSetupRejection.scheduleFailed => ReminderBanner(
           title: l10n.reminderScheduleErrorTitle,

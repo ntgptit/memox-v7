@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/extensions/app_ink.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
-import '../../../../../core/theme/extensions/theme_context_extension.dart';
+import '../../../../../shared/widgets/mx_section_label.dart';
 
 /// One labelled group of the settings screen: a heading, then a card.
 ///
@@ -49,14 +48,8 @@ class SettingsSectionWidget extends StatelessWidget {
         // typographic treatment. Some TTS engines spell an all-caps run out
         // letter by letter, and these headings are what tell three rows all
         // labelled "System" apart.
-        child: Semantics(
-          label: label,
-          excludeSemantics: true,
-          child: Text(
-            label.toUpperCase(),
-            style: context.textStyles.sectionLabel.inked(context, AppInk.quiet),
-          ),
-        ),
+        // `MxSectionLabel` is this pattern, promoted (A20.1 P2-02).
+        child: MxSectionLabel(label: label),
       ),
       const SizedBox(height: headingGap),
       child,

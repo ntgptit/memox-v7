@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_sheet.dart';
+import '../../../../../shared/widgets/mx_sheet.dart';
 
 /// The row's overflow menu, holding exactly one action on purpose.
 ///
@@ -15,8 +16,8 @@ Future<void> showTrashRowMenu(
   BuildContext context, {
   required VoidCallback onPurge,
 }) async {
-  final bool? purge = await showModalBottomSheet<bool>(
-    context: context,
+  final bool? purge = await showMxSheet<bool>(
+    context,
     builder: (sheetContext) => MxActionSheet(
       title: sheetContext.l10n.trashRowMenuTitle,
       actions: <MxActionSheetAction>[

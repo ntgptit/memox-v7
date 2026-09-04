@@ -182,8 +182,7 @@ class _MxBreadcrumbState extends State<MxBreadcrumb> {
     BuildContext context,
     List<MxBreadcrumbItem> items,
   ) {
-    final quiet = context.colors.onSurfaceVariant;
-    final style = context.texts.bodySmall?.copyWith(color: quiet);
+    final style = context.texts.bodySmall!.inked(context, AppInk.quiet);
 
     return Semantics(
       button: true,

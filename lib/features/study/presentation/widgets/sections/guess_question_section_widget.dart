@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/extensions/app_ink.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -11,6 +10,7 @@ import '../../../domain/models/study_turn_model.dart';
 import '../../../domain/models/study_answer_commit_model.dart';
 import '../../../domain/models/guess_mode.dart';
 import '../items/guess_option_item_widget.dart';
+import '../../../../../shared/widgets/mx_section_label.dart';
 
 /// One term and five meanings (BR-121).
 ///
@@ -298,13 +298,11 @@ class _PromptCard extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Text(
-            context.l10n.studyGuessOverline.toUpperCase(),
-            style: context.textStyles.sectionLabelSmall.inked(
-              context,
-              AppInk.quiet,
+          Center(
+            child: MxSectionLabel(
+              label: context.l10n.studyGuessOverline,
+              rung: MxSectionLabelRung.small,
             ),
-            textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.md),
           Flexible(

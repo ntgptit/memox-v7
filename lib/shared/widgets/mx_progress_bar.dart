@@ -6,6 +6,7 @@ import '../../core/theme/foundations/app_radius.dart';
 import '../../core/theme/foundations/app_spacing.dart';
 import '../../core/theme/typography/app_typography.dart';
 import '../../core/theme/extensions/theme_context_extension.dart';
+import '../../core/theme/extensions/app_ink.dart';
 
 /// How tall the track is.
 ///
@@ -169,9 +170,7 @@ class _MxProgressHeader extends StatelessWidget {
               label!,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: texts.labelMedium?.copyWith(
-                color: context.colors.onSurfaceVariant,
-              ),
+              style: texts.labelMedium!.inked(context, AppInk.quiet),
             ),
           ),
         if (valueLabel != null) ...<Widget>[
@@ -181,10 +180,8 @@ class _MxProgressHeader extends StatelessWidget {
             // Through the wght axis — a bare `fontWeight:` paints the rung's
             // old weight.
             style: AppTypography.withWeight(texts.labelMedium!, FontWeight.w600)
+                .inked(context, isComplete ? AppInk.success : AppInk.stated)
                 .copyWith(
-                  color: isComplete
-                      ? context.semanticColors.success
-                      : context.colors.onSurface,
                   // Tabular figures so a bar that ticks 61% -> 62% does not
                   // shift the label sideways under it.
                   fontFeatures: const <FontFeature>[

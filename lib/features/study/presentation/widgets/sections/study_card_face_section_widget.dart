@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/extensions/app_ink.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/foundations/app_stroke.dart';
 import '../../../../../core/theme/typography/app_typography.dart';
@@ -13,6 +12,7 @@ import '../../../domain/models/study_action_model.dart';
 import '../../../domain/models/study_direction_model.dart';
 import '../../../domain/models/study_turn_model.dart';
 import '../support/study_labels_widget.dart';
+import '../../../../../shared/widgets/mx_section_label.dart';
 
 part 'study_card_face_pieces_widget.dart';
 

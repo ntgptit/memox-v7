@@ -83,8 +83,6 @@ class _MxBreadcrumbStepState extends State<_MxBreadcrumbStep> {
     // only strip that shrinks is one made entirely of text, which is the deck
     // list's.
     if (tap == null) {
-      final quiet = context.colors.onSurfaceVariant;
-
       return Padding(
         padding: _padding,
         child: Row(
@@ -94,7 +92,7 @@ class _MxBreadcrumbStepState extends State<_MxBreadcrumbStep> {
             ?_icon(AppInk.quiet),
             Text(
               widget.item.label,
-              style: context.texts.labelMedium?.copyWith(color: quiet),
+              style: context.texts.labelMedium!.inked(context, AppInk.quiet),
               maxLines: 1,
             ),
           ],
@@ -110,23 +108,21 @@ class _MxBreadcrumbStepState extends State<_MxBreadcrumbStep> {
     // `decorationColor` is set explicitly: left null the engine falls back to a
     // default that does not track this colour, and the underline visibly
     // disagrees with the text it belongs to.
-    final ink = _isHovered
-        ? context.colors.onSurface
-        : context.colors.onSurfaceVariant;
+    final AppInk ink = _isHovered ? AppInk.stated : AppInk.quiet;
     // Through the wght axis — a bare `fontWeight:` paints the rung's old
     // weight.
     final style =
-        AppTypography.withWeight(
-          context.texts.labelMedium!,
-          FontWeight.w600,
-        ).copyWith(
-          color: ink,
-          decoration: _isHovered || _isFocused
-              ? TextDecoration.underline
-              : null,
-          decorationColor: ink,
-          decorationThickness: _isFocused ? _kFocusUnderlineThickness : null,
-        );
+        AppTypography.withWeight(context.texts.labelMedium!, FontWeight.w600)
+            .inked(context, ink)
+            .copyWith(
+              decoration: _isHovered || _isFocused
+                  ? TextDecoration.underline
+                  : null,
+              decorationColor: ink.resolve(context),
+              decorationThickness: _isFocused
+                  ? _kFocusUnderlineThickness
+                  : null,
+            );
 
     return Semantics(
       button: true,
@@ -184,9 +180,7 @@ class _MxBreadcrumbSeparator extends StatelessWidget {
     return ExcludeSemantics(
       child: Text(
         _kSeparator,
-        style: context.texts.bodySmall?.copyWith(
-          color: context.colors.onSurfaceVariant,
-        ),
+        style: context.texts.bodySmall!.inked(context, AppInk.quiet),
       ),
     );
   }

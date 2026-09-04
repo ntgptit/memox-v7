@@ -32,6 +32,7 @@ class MxFeedbackBand extends StatelessWidget {
     required this.message,
     this.actionLabel,
     this.onAction,
+    this.tone = MxFeedbackTone.danger,
     super.key,
   }) : assert(
          (actionLabel == null) == (onAction == null),
@@ -75,9 +76,27 @@ class MxFeedbackBand extends StatelessWidget {
   /// Null means no action; see [actionLabel] for the pair rule.
   final VoidCallback? onAction;
 
+  /// Which band this is. `danger` unless the caller has something that has
+  /// *not* failed to say (A20.1 P1-13): the reminder screen forced an OS
+  /// permission refusal into the danger band because it was the only one,
+  /// while `warningContainer` sat unused in the palette.
+  final MxFeedbackTone tone;
+
   @override
   Widget build(BuildContext context) {
     final texts = context.texts;
+    final AppInk ink = switch (tone) {
+      MxFeedbackTone.danger => AppInk.onErrorContainer,
+      MxFeedbackTone.warning => AppInk.onWarningContainer,
+    };
+    final IconData icon = switch (tone) {
+      MxFeedbackTone.danger => Icons.error_outline,
+      MxFeedbackTone.warning => Icons.warning_amber_outlined,
+    };
+    final MxCardFeedbackTone cardTone = switch (tone) {
+      MxFeedbackTone.danger => MxCardFeedbackTone.danger,
+      MxFeedbackTone.warning => MxCardFeedbackTone.warning,
+    };
 
     return Semantics(
       // `container: true` as well, so the title and the message announce as
@@ -85,36 +104,20 @@ class MxFeedbackBand extends StatelessWidget {
       container: true,
       liveRegion: true,
       child: MxCard.feedback(
-        tone: MxCardFeedbackTone.danger,
+        tone: cardTone,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            const MxIcon(
-              Icons.error_outline,
-              ink: AppInk.onErrorContainer,
-              size: MxIconSize.mdCompact,
-            ),
+            MxIcon(icon, ink: ink, size: MxIconSize.mdCompact),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  Text(
-                    title,
-                    style: texts.titleSmall!.inked(
-                      context,
-                      AppInk.onErrorContainer,
-                    ),
-                  ),
+                  Text(title, style: texts.titleSmall!.inked(context, ink)),
                   const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    message,
-                    style: texts.bodySmall!.inked(
-                      context,
-                      AppInk.onErrorContainer,
-                    ),
-                  ),
+                  Text(message, style: texts.bodySmall!.inked(context, ink)),
                   if (actionLabel case final label?) ...<Widget>[
                     const SizedBox(height: AppSpacing.xs),
                     Align(
@@ -125,7 +128,7 @@ class MxFeedbackBand extends StatelessWidget {
                       child: MxTextButton(
                         label: label,
                         onPressed: onAction,
-                        accent: AppInk.onErrorContainer,
+                        accent: ink,
                       ),
                     ),
                   ],
@@ -137,4 +140,14 @@ class MxFeedbackBand extends StatelessWidget {
       ),
     );
   }
+}
+
+/// The two things a feedback band can be.
+enum MxFeedbackTone {
+  /// A failure: `errorContainer`, the error glyph.
+  danger,
+
+  /// A condition to act on that has not failed: `warningContainer`, the
+  /// warning glyph. Kept in the palette for this band (A20.1 §4Q / P1-13).
+  warning,
 }

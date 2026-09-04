@@ -5,6 +5,7 @@ import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_card.dart';
+import '../../../../../shared/widgets/mx_loading_state.dart';
 
 /// The one honest face of the commit (M4.12 state 5): a single indeterminate
 /// loader, the count being written, and why the app must stay open.
@@ -28,9 +29,8 @@ class CardImportSubmitProgressWidget extends StatelessWidget {
       child: Column(
         children: <Widget>[
           const SizedBox(height: AppSpacing.md),
-          Semantics(
-            label: context.l10n.cardImportSubmittingLabel,
-            child: const CircularProgressIndicator(),
+          MxLoadingState.inColumn(
+            semanticsLabel: context.l10n.cardImportSubmittingLabel,
           ),
           const SizedBox(height: AppSpacing.lg),
           Text(

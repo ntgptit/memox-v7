@@ -6,6 +6,7 @@ import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_sheet.dart';
 import '../../../domain/models/deck_list_snapshot_model.dart';
 import '../../../domain/models/deck_path_segment_model.dart';
+import '../../../../../shared/widgets/mx_sheet.dart';
 
 /// Every level above the open deck, reachable in one tap.
 ///
@@ -22,8 +23,8 @@ Future<void> showDeckAncestors(
   BuildContext context, {
   required DeckListSnapshot snapshot,
 }) async {
-  final target = await showModalBottomSheet<String?>(
-    context: context,
+  final target = await showMxSheet<String?>(
+    context,
     builder: (sheetContext) => MxActionSheet(
       title: sheetContext.l10n.deckPathAncestorsTitle,
       actions: <MxActionSheetAction>[

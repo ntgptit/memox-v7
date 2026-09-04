@@ -1354,6 +1354,10 @@
   "@cardMoveTargetTitle": {
     "description": "Title of the move-target picker (UC-04 A5)."
   },
+  "cardMoveTargetsLoadingLabel": "Đang tải bộ thẻ",
+  "@cardMoveTargetsLoadingLabel": {
+    "description": "Tên trợ năng của spinner khi sheet chuyển thẻ đang tải danh sách bộ đích (A20.1 P1-02)."
+  },
   "cardMoveEmptyTitle": "Không có bộ thẻ nào để chuyển tới",
   "@cardMoveEmptyTitle": {
     "description": "Empty state of the move picker: every candidate was excluded (BR-165)."

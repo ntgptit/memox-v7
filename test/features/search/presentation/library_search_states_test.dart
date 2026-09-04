@@ -15,6 +15,7 @@ import 'package:memox/shared/widgets/mx_loading_state.dart';
 
 import 'support/fake_library_search_repository.dart';
 import 'support/search_screen_harness.dart';
+import 'package:memox/core/theme/foundations/app_icon_size.dart';
 
 /// Every state the search surface renders (wireframe M99.32 W3).
 void main() {
@@ -215,9 +216,14 @@ void main() {
             'the loading-more face is the button-footprint spinner, for '
             "card history's documented reason",
       );
+      // OLD ASSERTION: no `MxLoadingState` at all. WHY WRONG: since A20.1
+      // P1-02 the footer's 16 dp spinner *is* an `MxLoadingState.inline` —
+      // the widget is the family, not the 88 dp face. NEW CONTRACT: what must
+      // not appear mid-list is the centred face; the inline mark stays at the
+      // indicator size. AUTHORITY: A20.1 P1-02.
       expect(
-        find.byType(MxLoadingState),
-        findsNothing,
+        tester.getSize(find.byType(CircularProgressIndicator)),
+        const Size.square(AppIconSize.sm),
         reason: 'nothing balloons to the centered 88dp face mid-list',
       );
       expect(

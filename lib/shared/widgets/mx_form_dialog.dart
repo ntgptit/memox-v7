@@ -7,6 +7,7 @@ import 'mx_button_pair.dart';
 import 'mx_dialog_metrics.dart';
 import 'mx_dialog_tone.dart';
 import 'mx_text_field.dart';
+import '../../core/theme/extensions/app_ink.dart';
 
 /// A form the user fills in without leaving the screen behind.
 ///
@@ -139,7 +140,7 @@ class _FormError extends StatelessWidget {
       liveRegion: true,
       child: Text(
         message,
-        style: context.texts.bodySmall?.copyWith(color: context.colors.error),
+        style: context.texts.bodySmall!.inked(context, AppInk.error),
       ),
     );
   }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/extensions/app_ink.dart';
-import '../../../../../core/theme/foundations/app_icon_size.dart';
 import '../../../../../core/theme/foundations/app_sizing.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
@@ -11,6 +10,8 @@ import '../../../../../shared/widgets/mx_text_button.dart';
 import '../../states/card_history_state.dart';
 import '../items/card_history_event_widget.dart';
 import '../../../../../shared/widgets/mx_feedback_band.dart';
+import '../../../../../shared/widgets/mx_loading_state.dart';
+import '../../../../../shared/widgets/mx_section_label.dart';
 
 /// The review timeline (BR-241…BR-244, M4.15 W2 band 3).
 ///
@@ -59,12 +60,7 @@ class CardHistorySectionWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        Text(
-          context.l10n.cardHistoryTitle.toUpperCase(),
-          style: context.textStyles.sectionLabel.copyWith(
-            color: context.colors.onSurfaceVariant,
-          ),
-        ),
+        MxSectionLabel(label: context.l10n.cardHistoryTitle),
         const SizedBox(height: AppSpacing.md),
         if (state.isLoadingInitial)
           // **Not `MxLoadingState`** (V12). That widget centres a 36dp
@@ -301,13 +297,7 @@ class _InlineSpinner extends StatelessWidget {
       height: AppSizing.touchTarget,
       child: Align(
         alignment: AlignmentDirectional.centerStart,
-        child: SizedBox.square(
-          dimension: AppIconSize.sm,
-          child: CircularProgressIndicator(
-            strokeWidth: _spinnerStroke,
-            semanticsLabel: semanticsLabel,
-          ),
-        ),
+        child: MxLoadingState.inline(semanticsLabel: semanticsLabel),
       ),
     );
   }
@@ -343,10 +333,3 @@ class _PageError extends StatelessWidget {
     );
   }
 }
-
-/// The stroke of the inline spinner, on either face that spins.
-///
-/// 2, the same weight `MxActionButton` uses for its in-button indicator — a
-/// spinner sized down to a glyph keeps the default 4 only by looking like a
-/// ring rather than a spinner.
-const double _spinnerStroke = 2;

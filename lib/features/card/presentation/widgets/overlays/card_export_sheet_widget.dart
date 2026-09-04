@@ -20,6 +20,8 @@ import '../sections/card_export_error_band_widget.dart';
 import '../sections/card_export_format_options_widget.dart';
 import '../sections/card_export_scope_summary_widget.dart';
 import '../support/card_export_labels_widget.dart';
+import '../../../../../shared/widgets/mx_sheet.dart';
+import '../../../../../shared/widgets/mx_section_label.dart';
 
 /// A free function for the same reason every command in this feature is one:
 /// a `ref.read` written inline in `build()` is indistinguishable — to the
@@ -70,9 +72,8 @@ Future<CardExportResult?> showCardExportSheet(
     context,
   ).read(exportCardsProvider(deckId).notifier).reset();
 
-  return showModalBottomSheet<CardExportResult>(
-    context: context,
-    isScrollControlled: true,
+  return showMxSheet<CardExportResult>(
+    context,
     builder: (sheetContext) => CardExportSheetWidget(
       deckId: deckId,
       scope: scope,
@@ -320,12 +321,7 @@ class _Body extends StatelessWidget {
         // tracked uppercase `sectionLabel` on `onSurfaceVariant`, not sentence
         // case — the format band is a group of three options, not a row of
         // content, and this is the name of the group.
-        Text(
-          l10n.cardExportFormatHeading.toUpperCase(),
-          style: context.textStyles.sectionLabel.copyWith(
-            color: context.colors.onSurfaceVariant,
-          ),
-        ),
+        MxSectionLabel(label: l10n.cardExportFormatHeading),
         const SizedBox(height: AppSpacing.sm),
         CardExportFormatOptionsWidget(
           selected: format,

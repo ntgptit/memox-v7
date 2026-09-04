@@ -14,6 +14,7 @@ import '../../../domain/models/scheduler_type_model.dart';
 import '../../../domain/repositories/deck_template_repository.dart';
 import '../../controllers/starter_library_controller.dart';
 import '../items/deck_scheduler_picker_widget.dart';
+import '../../../../../shared/widgets/mx_sheet.dart';
 
 /// The one question a copy needs answered before it exists: which schedule.
 ///
@@ -28,9 +29,8 @@ Future<DeckTemplateInstallOutcome?> showStarterInstallSheet(
   BuildContext context, {
   required DeckTemplate template,
   bool shouldAllowDuplicate = false,
-}) => showModalBottomSheet<DeckTemplateInstallOutcome>(
-  context: context,
-  isScrollControlled: true,
+}) => showMxSheet<DeckTemplateInstallOutcome>(
+  context,
   // **This sheet used to clear the keyboard and nothing else.** It has no text
   // field, so `viewInsets.bottom` was always zero and there was no `SafeArea`
   // either — which put the scheduler picker's primary action underneath the

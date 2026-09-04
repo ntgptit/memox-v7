@@ -126,7 +126,6 @@ class _SheetRow extends StatelessWidget {
         : isDestructive
         ? AppInk.danger
         : AppInk.stated;
-    final Color color = ink.resolve(context);
 
     // **The row overlay and the ring, the same as every other row** (A20.1
     // P2-04). This was the one `ListTile` in `lib/shared/` outside the row
@@ -163,7 +162,7 @@ class _SheetRow extends StatelessWidget {
               ),
         title: Text(
           action.label,
-          style: context.texts.bodyLarge?.copyWith(color: color),
+          style: context.texts.bodyLarge!.inked(context, ink),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),

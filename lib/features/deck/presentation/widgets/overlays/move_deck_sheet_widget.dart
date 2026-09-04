@@ -14,6 +14,7 @@ import '../support/deck_labels_widget.dart';
 import '../../controllers/deck_move_targets_controller.dart';
 import '../../states/deck_submit_state.dart';
 import '../../controllers/deck_write_controller.dart';
+import '../../../../../shared/widgets/mx_sheet_insets.dart';
 
 /// The move-target picker (UC-09).
 ///
@@ -49,64 +50,58 @@ class MoveDeckSheetWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Consumer(
-          builder: (context, ref, child) {
-            final submit = ref.watch(moveDeckControllerProvider(deckId));
-            // A one-shot side effect driven by a state transition rather than
-            // fired from a rebuild: `listen` runs on change, so the sheet closes
-            // once instead of on every rebuild that happens to see the outcome.
-            ref.listen<DeckSubmitState>(moveDeckControllerProvider(deckId), (
-              previous,
-              next,
-            ) {
-              if (next.shouldClose && !(previous?.shouldClose ?? false)) {
-                onDone();
-              }
-            });
+    return MxSheetInsets(
+      child: Consumer(
+        builder: (context, ref, child) {
+          final submit = ref.watch(moveDeckControllerProvider(deckId));
+          // A one-shot side effect driven by a state transition rather than
+          // fired from a rebuild: `listen` runs on change, so the sheet closes
+          // once instead of on every rebuild that happens to see the outcome.
+          ref.listen<DeckSubmitState>(moveDeckControllerProvider(deckId), (
+            previous,
+            next,
+          ) {
+            if (next.shouldClose && !(previous?.shouldClose ?? false)) {
+              onDone();
+            }
+          });
 
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Text(
+                context.l10n.deckMoveTitle,
+                style: context.texts.titleMedium,
+              ),
+              if (submit.failure != null) ...<Widget>[
+                const SizedBox(height: AppSpacing.sm),
                 Text(
-                  context.l10n.deckMoveTitle,
-                  style: context.texts.titleMedium,
-                ),
-                if (submit.failure != null) ...<Widget>[
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    context.deckWriteFailure(submit.failure!),
-                    style: context.texts.bodySmall!.inked(
-                      context,
-                      AppInk.danger,
-                    ),
-                  ),
-                ],
-                const SizedBox(height: AppSpacing.md),
-                Flexible(
-                  child: MxAsyncView<List<DeckMoveTarget>>(
-                    value: ref.watch(deckMoveTargetsProvider(deckId)),
-                    loadingLabel: context.l10n.deckMoveLoadingLabel,
-                    data: (targets) => _TargetList(
-                      targets: targets,
-                      canSubmit: submit.canSubmit,
-                      onChoose: (target) => ref
-                          .read(moveDeckControllerProvider(deckId).notifier)
-                          .submit(targetParentDeckId: target.deck.id),
-                    ),
-                    error: (error, stackTrace) => MxErrorState(
-                      title: context.l10n.deckWriteErrorTitle,
-                      message: context.l10n.deckWriteErrorMessage,
-                    ),
-                  ),
+                  context.deckWriteFailure(submit.failure!),
+                  style: context.texts.bodySmall!.inked(context, AppInk.danger),
                 ),
               ],
-            );
-          },
-        ),
+              const SizedBox(height: AppSpacing.md),
+              Flexible(
+                child: MxAsyncView<List<DeckMoveTarget>>(
+                  value: ref.watch(deckMoveTargetsProvider(deckId)),
+                  loadingLabel: context.l10n.deckMoveLoadingLabel,
+                  data: (targets) => _TargetList(
+                    targets: targets,
+                    canSubmit: submit.canSubmit,
+                    onChoose: (target) => ref
+                        .read(moveDeckControllerProvider(deckId).notifier)
+                        .submit(targetParentDeckId: target.deck.id),
+                  ),
+                  error: (error, stackTrace) => MxErrorState(
+                    title: context.l10n.deckWriteErrorTitle,
+                    message: context.l10n.deckWriteErrorMessage,
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

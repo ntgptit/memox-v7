@@ -15,6 +15,7 @@ import '../../controllers/card_import_draft_controller.dart';
 import '../../states/card_import_state.dart';
 import '../support/card_import_labels_widget.dart';
 import 'card_import_source_summary_widget.dart';
+import '../../../../../shared/widgets/mx_section_label.dart';
 
 /// Free functions for the same reason the screen's are: a `ref.read`
 /// written inline in `build()` is indistinguishable from the unsubscribed
@@ -64,12 +65,7 @@ class CardImportSourceStepWidget extends ConsumerWidget {
         // sentence case read as a row of content, not as the name of a group
         // — which mattered here more than anywhere, because everything under
         // it *is* one group: the choice, its work surface, its guidance.
-        Text(
-          context.l10n.cardImportChooseSourceHeading.toUpperCase(),
-          style: context.textStyles.sectionLabel.copyWith(
-            color: context.colors.onSurfaceVariant,
-          ),
-        ),
+        MxSectionLabel(label: context.l10n.cardImportChooseSourceHeading),
         const SizedBox(height: AppSpacing.md),
         _SourceOptions(deckId: deckId, kind: kind),
         const SizedBox(height: AppSpacing.md),

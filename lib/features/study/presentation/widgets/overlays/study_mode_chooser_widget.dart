@@ -7,6 +7,7 @@ import '../../../../../shared/widgets/mx_list_tile.dart';
 import '../../../domain/models/study_entry_summary_model.dart';
 import '../../../domain/models/study_mode.dart';
 import '../support/study_labels_widget.dart';
+import '../../../../../shared/widgets/mx_sheet_insets.dart';
 
 /// Picks the one mode a review session will run in (BR-146).
 ///
@@ -49,10 +50,8 @@ class StudyModeChooserWidget extends StatelessWidget {
   /// chooser's entry test (BR-203) rather than by anything about the modes —
   /// same shape, same fix, and neither changes the layout when it fits.
   @override
-  Widget build(BuildContext context) => SafeArea(
-    top: false,
+  Widget build(BuildContext context) => MxSheetInsets(
     child: SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -11,6 +11,7 @@ import '../../../domain/models/study_home_deck_model.dart';
 import '../../../domain/models/study_home_model.dart';
 import '../items/study_home_deck_item_widget.dart';
 import 'study_home_resume_section_widget.dart';
+import '../../../../../shared/widgets/mx_section_label.dart';
 
 /// Study Home once its read has landed: the two empty states, or the list.
 ///
@@ -179,28 +180,14 @@ class _StudyHomeColumn extends StatelessWidget {
         // visually; without `header: true` that break is invisible to a screen
         // reader, which hears the Resume card run straight into the first deck
         // and cannot jump by heading at all.
+        // **The app's one section-label treatment**, now the component
+        // (A20.1 P2-02): caps at paint, the written sentence as the header's
+        // name. Its own boundary — the heading used to inherit one from being
+        // a `ListView` child, and merged into the resume card's text without
+        // it now that the column is one child.
         Semantics(
-          header: true,
-          // Its own boundary: the heading used to inherit one from being a
-          // `ListView` child, and merged into the resume card's text without
-          // it now that the column is one child.
           container: true,
-          // **The name is the sentence, not the shouting.** The uppercase is a
-          // typographic treatment; some TTS engines spell an all-caps run out
-          // letter by letter, so the label states the heading as written and
-          // the painted text is excluded.
-          label: l10n.studyHomeNextTitle,
-          excludeSemantics: true,
-          child: Text(
-            // **The app's one section-label treatment** (M99.26): `labelMedium`,
-            // `onSurfaceVariant`, and the tracking `AppTypography` keeps for
-            // exactly this role. It was `titleMedium` at full-strength
-            // `onSurface`, which made this heading louder than every other list
-            // heading in the app while saying the same kind of thing. The deck
-            // list's toolbar is the treatment this now matches.
-            l10n.studyHomeNextTitle.toUpperCase(),
-            style: context.textStyles.sectionLabel.inked(context, AppInk.quiet),
-          ),
+          child: MxSectionLabel(label: l10n.studyHomeNextTitle),
         ),
         if (!hasWork) ...<Widget>[
           const SizedBox(height: AppSpacing.xs),

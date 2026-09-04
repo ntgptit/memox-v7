@@ -64,6 +64,7 @@ class ProgressMetricGridWidget extends StatelessWidget {
   /// figures. At 320dp a cell is 124, so the grid stays two columns for every
   /// normal reader; at scale 2.0 the demand becomes 180 and the grid folds,
   /// which is the right trade — a taller card, and nothing lost.
+  // off-grid: a content threshold, not a size: the widest figure the cell must hold at 1.0x
   static const double minimumCellWidth = 90;
 
   @override
@@ -144,10 +145,7 @@ TextStyle? _numeralStyle(BuildContext context, ProgressMetricScale scale) =>
     (scale == ProgressMetricScale.panel
             ? context.texts.titleMedium
             : context.texts.titleSmall)
-        ?.copyWith(
-          color: context.colors.onSurface,
-          fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
-        );
+        ?.inked(context, AppInk.stated, isTabular: true);
 
 /// One metric: anchor, numeral, word — one shape for all four.
 ///

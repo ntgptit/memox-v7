@@ -13,6 +13,7 @@ import '../../../domain/models/card_import_preview_model.dart';
 import '../../controllers/card_import_draft_controller.dart';
 import '../items/card_import_row_preview_widget.dart';
 import '../support/card_import_labels_widget.dart';
+import '../../../../../shared/widgets/mx_section_label.dart';
 
 /// The duplicate-policy command, a free function for the same reason the
 /// step's are: a `ref.read` written inline in `build()` is indistinguishable
@@ -65,12 +66,7 @@ class CardImportPreviewSummaryWidget extends ConsumerWidget {
           crossAxisAlignment: WrapCrossAlignment.end,
           spacing: AppSpacing.sm,
           children: <Widget>[
-            Text(
-              l10n.cardImportPreviewHeading.toUpperCase(),
-              style: context.textStyles.sectionLabel.copyWith(
-                color: context.colors.onSurfaceVariant,
-              ),
-            ),
+            MxSectionLabel(label: l10n.cardImportPreviewHeading),
             Text(
               l10n.cardImportPreviewReadyOfTotal(importable, preview.totalRows),
               style: context.texts.bodySmall!.inked(context, AppInk.quiet),

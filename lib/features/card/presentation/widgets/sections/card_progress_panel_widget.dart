@@ -14,6 +14,7 @@ import '../../../domain/models/card_state_distribution_model.dart';
 import '../../controllers/card_list_filter_controller.dart';
 import '../../controllers/card_progress_controller.dart';
 import 'card_state_distribution_widget.dart';
+import '../../../../../shared/widgets/mx_section_label.dart';
 
 /// The deck progress panel (D5): a mastered ring, the mastered/total line, and
 /// the four-state distribution as a bar and a legend (BR-88…BR-91).
@@ -155,6 +156,7 @@ const double _ringSize = 64;
 
 /// Scaled with the ring so the arc keeps its weight rather than thinning out as
 /// the circle grows.
+// off-grid: scaled with the 64 ring so the arc keeps its weight; 4 thinned out, 8 closed the centre
 const double _ringStroke = 6;
 
 /// The mastered ring with its percentage (BR-88).
@@ -239,21 +241,14 @@ class _Headline extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        Text(
-          context.l10n.cardProgressTitle.toUpperCase(),
-          // **`label-md` on `onSurface`, not `label-sm` on the muted colour.**
-          // It is the panel's heading and it was set smaller *and* fainter than
-          // the line it introduces — 11px at `onSurfaceVariant` above 14px at
-          // `onSurface` — so it read as a caption under the ring rather than as
-          // the title of the block. Same rung as `YOUR DECKS` on the deck list
-          // now, and the same colour as the count it heads.
-          //
-          // It stays uppercase with the section tracking, which is what keeps it
-          // a heading rather than a competing statistic: it is 12 against the
-          // count's 14, and it carries no number of its own.
-          style: context.textStyles.sectionLabel.copyWith(
-            color: context.colors.onSurface,
-          ),
+        // **`label-md` on `onSurface`, not `label-sm` on the muted colour.**
+        // It is the panel's heading and it was set smaller *and* fainter than
+        // the line it introduces, so it read as a caption under the ring
+        // rather than as the title of the block. Same rung as `YOUR DECKS` on
+        // the deck list, and the same colour as the count it heads.
+        MxSectionLabel(
+          label: context.l10n.cardProgressTitle,
+          emphasis: MxSectionLabelEmphasis.stated,
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
