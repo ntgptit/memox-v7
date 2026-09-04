@@ -21,12 +21,19 @@ import '../foundations/app_semantic_colors.dart';
 ///
 /// | token | normal | high contrast | why |
 /// |---|---|---|---|
-/// | `borderSubtle` | 1.45 / 2.04 | `onSurfaceVariant` — 6.41 / 7.30 | every hairline reaches 3:1 on all three grounds |
-/// | `borderControl` | 3.19 / 3.00 | `onSurfaceVariant` — 6.41 / 7.30 | already passed on a card, but 2.79 / 2.54 on a muted tile |
-/// | `borderAccent` | 1.89 / 1.45 | `primary` — 7.27 / 10.02 | the Today card's edge is decoration at 1.45 |
-/// | `onDisabled` | 2.37 / 3.20 | the same ink at 62% — 4.88 / 6.33 | see below |
+/// | `borderSubtle` | 1.14 / 1.41 | `onSurfaceVariant` — 5.28 / 6.47 | every hairline reaches 3:1 on all three grounds |
+/// | `borderControl` | 4.40 / 4.68 | `onSurfaceVariant` — 5.28 / 6.47 | already passed on a card; the swap keeps one grey for every edge |
+/// | `borderAccent` | 1.80 / 3.88 | `primary` — 5.67 / 11.27 | the Today card's edge is decoration at 1.80 |
+/// | `onDisabled` | 2.11 / 2.62 | the same ink at 62% — 3.81 / 5.12 | see below |
 ///
-/// Light figure first, dark second, each measured against `surface`.
+/// Light figure first, dark second, each measured against `surface` and
+/// composited over it first (the inks carry alpha). **Re-measured at the
+/// Design System V1 closure (A20.1 P2-11)**: the table had carried figures
+/// from an earlier palette — `onDisabled` 2.37 / 3.20 → 4.88 / 6.33 and
+/// `onSurface` 14.81 — that were 28% optimistic at the cell the 62% decision
+/// rests on. The real light figure is **3.81:1**, above the 3:1 floor by a
+/// smaller margin than the old table implied, and `high_contrast_figures_test`
+/// now measures every cell so the table cannot drift again.
 ///
 /// **Why `onSurfaceVariant` and not `borderControl` for the hairline.**
 /// `borderControl` is the 3:1 edge, and it clears 3:1 on a card and on the page
@@ -43,11 +50,14 @@ import '../foundations/app_semantic_colors.dart';
 /// **Raising `onDisabled` is the one swap that trades something away, and it is
 /// the trade the flag is asking for.** A disabled control is *supposed* to
 /// recede, and 38% is what makes it read as unavailable at a glance; pushing it
-/// to 62% costs some of that. But 2.37:1 in light is below the 3:1 floor for
-/// any graphic a user has to perceive at all, and a control nobody can read is
+/// to 62% costs some of that. But 2.11:1 in light is below the 3:1 floor for
+/// any graphic a user has to perceive at all (2.11:1 in light on the current
+/// palette), and a control nobody can read is
 /// worse than one whose unavailability takes a moment longer to notice. 62%
-/// lands at 4.88:1 — legible, and still less than a third of `onSurface`'s
-/// 14.81:1, so the hierarchy survives.
+/// lands at 3.81:1 in light and 5.12:1 in dark — above the 3:1 floor, and
+/// still a third of `onSurface`'s 11.50 / 12.01, so the hierarchy survives.
+/// The 62% is kept at that measured figure, not raised: SC 1.4.3 exempts
+/// inactive components, and the floor this palette sets for itself is 3:1.
 ///
 /// **What is deliberately NOT changed.** Not `primary`, not the semantic four,
 /// not the surface ladder. High contrast is a legibility setting, not a second

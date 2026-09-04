@@ -219,7 +219,7 @@ void main() {
         tester.element(find.text(term)),
       ).colorScheme.primary;
       expect(skinOf(tester).border!.top.color, accent);
-      expect(skinOf(tester).border!.top.width, AppStroke.input);
+      expect(skinOf(tester).border!.top.width, AppStroke.control);
       expect(textOf(tester, term).style?.color, accent);
       expect(find.byType(Icon), findsNothing);
     });
@@ -236,7 +236,7 @@ void main() {
 
       final danger = semanticOf(tester).danger;
       expect(skinOf(tester).border!.top.color, danger);
-      expect(skinOf(tester).border!.top.width, AppStroke.input);
+      expect(skinOf(tester).border!.top.width, AppStroke.control);
       expect(textOf(tester, term).style?.color, danger);
       expect(tester.widget<Icon>(find.byIcon(Icons.close)).color, danger);
     });
@@ -253,7 +253,7 @@ void main() {
 
       final success = semanticOf(tester).success;
       expect(skinOf(tester).border!.top.color, success);
-      expect(skinOf(tester).border!.top.width, AppStroke.input);
+      expect(skinOf(tester).border!.top.width, AppStroke.control);
       expect(textOf(tester, term).style?.color, success);
       expect(tester.widget<Icon>(find.byIcon(Icons.check)).color, success);
     });

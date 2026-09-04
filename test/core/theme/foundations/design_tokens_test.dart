@@ -83,7 +83,7 @@ void main() {
       // that only has to be *increasing* passes with 1 / 1.6 / 3, which is three
       // numbers nobody chose.
       expect(AppStroke.hairline, 1);
-      expect(AppStroke.input, 1.5);
+      expect(AppStroke.control, 1.5);
       expect(AppStroke.focus, 2);
     });
 
@@ -102,7 +102,7 @@ void main() {
       }
 
       expect(AppStroke.hairline, declared('hairline'));
-      expect(AppStroke.input, declared('input'));
+      expect(AppStroke.control, declared('control'));
       expect(AppStroke.focus, declared('focus'));
     });
   });

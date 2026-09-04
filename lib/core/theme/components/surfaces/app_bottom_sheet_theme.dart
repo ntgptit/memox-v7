@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../foundations/app_radius.dart';
 import '../../states/app_interaction_states.dart';
 import '../overlays/app_backdrop_recipe.dart';
+import '../../foundations/app_elevation.dart';
 
 /// The modal sheet — `MxFormSheet`, `MxActionSheet`, and every direct
 /// `showModalBottomSheet` call.
@@ -11,7 +12,7 @@ BottomSheetThemeData buildBottomSheetTheme(ColorScheme scheme) =>
       modalBarrierColor: modalBarrierColor(scheme),
       backgroundColor: scheme.surfaceContainerLow,
       surfaceTintColor: Colors.transparent,
-      elevation: 0,
+      elevation: AppElevation.none,
       showDragHandle: true,
       // **The handle is a button, not a decoration, and the SDK is explicit
       // about it:** `_DragHandle` wraps itself in `Semantics(button: true,

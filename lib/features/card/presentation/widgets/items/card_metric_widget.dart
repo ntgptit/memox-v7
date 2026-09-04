@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../core/theme/extensions/app_ink.dart';
 import '../../../../../core/theme/foundations/app_radius.dart';
+import '../../../../../core/theme/foundations/app_sizing.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/typography/app_typography.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
@@ -72,8 +73,8 @@ class CardMetricWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Container(
-          width: _wellSize,
-          height: _wellSize,
+          width: AppSizing.controlDense,
+          height: AppSizing.controlDense,
           decoration: BoxDecoration(
             color: context.semanticColors.surfaceMuted,
             borderRadius: BorderRadius.circular(AppRadius.sm),
@@ -130,7 +131,3 @@ TextStyle cardMetricValueStyle(BuildContext context, CardMetricKind kind) {
     ),
   };
 }
-
-/// The glyph well. Square, so a column of cells has one left edge whatever the
-/// glyph inside it is.
-const double _wellSize = 32;

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../foundations/app_elevation.dart';
 
 /// The top bar on every screen.
 ///
@@ -18,6 +19,6 @@ AppBarTheme buildAppBarTheme(ColorScheme scheme) => AppBarTheme(
   // No tint on scroll: during a study session the header must stay still, because
   // a colour shift behind the card reads as the card itself changing.
   scrolledUnderElevation: 0,
-  elevation: 0,
+  elevation: AppElevation.none,
   centerTitle: false,
 );

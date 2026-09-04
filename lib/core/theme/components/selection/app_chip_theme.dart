@@ -297,7 +297,7 @@ ChipThemeData buildChipTheme(
 /// "32dp tall". The two hairlines sit outside it, so the painted shape measures
 /// 34; the tap target is [AppSizing.touchTarget] and is grown around
 /// both, never instead of them.
-const double _containerHeight = 32;
+const double _containerHeight = AppSizing.controlDense;
 
 /// The `label-lg` line box the vertical padding is derived from.
 const double _labelLineHeight = 20;

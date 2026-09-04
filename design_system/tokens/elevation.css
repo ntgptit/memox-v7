@@ -14,14 +14,18 @@
    `app_theme_test.dart` holds it as a floor — but a solved opacity produced the
    right total with the wrong character.
 
-   Dark renders Tokyo's rim instead (M100.27): the dark page sits at L* 4.1 —
-   the bottom of the scale — so a shade there moves it by under one L*, and with
-   the card fixed at Tokyo's #111633 the surface step is 4.3 L*. Tokyo's own
-   dark card shadow, 0 0 2px #6A7199, is a one-pixel halo that reads 4.07:1
-   against the page and 3.74:1 against the card. The app adds a 1px spread so
-   the ring is painted solid at that colour before the blur falls off — a blur
-   alone leaves every exposed pixel partially covered. Same at every level,
-   because an edge does not get deeper. */
+   Dark renders what Dart renders (A20.1 P1-06, owner decision 1: the kit is a
+   MIRROR of the built ThemeData, never the other way round). `shadowsFor` in
+   lib/core/theme/foundations/app_elevation.dart is the source: every level
+   above `none` paints a quiet rim — `outlineVariant` (#272C48), one hairline of
+   spread, no blur — and `raised` / `overlay` add a drop of `scheme.shadow`
+   (#03040B) at 0.8 alpha, offset and blurred, no spread, so nothing lightens.
+   The rim never thickens: depth above `card` is the drop, not a wider glow.
+   Tokyo's `0 0 2px #6A7199` halo (M100.27/M100.33) is gone from both sides —
+   #435 removed it from Dart because it re-introduced the glow, and the kit
+   carried it for four releases while `css_scale_parity_test.dart` compared the
+   kit to a copy of itself. The gate now compares these values to the built
+   ThemeData. */
 :root{
   --elevation-none:0;--elevation-card:1;--elevation-raised:3;--elevation-overlay:8;
   --shadow-none:none;
@@ -29,13 +33,13 @@
   --shadow-raised:0 9px 16px rgb(159 162 191 / 0.18), 0 2px 2px rgb(159 162 191 / 0.32);
   --shadow-overlay:0 18px 32px rgb(159 162 191 / 0.18), 0 4px 4px rgb(159 162 191 / 0.32);
   --border-hairline:1px;
-  --border-input:1.5px;   /* same stroke in every state — only the hue moves */
+  --border-control:1.5px; /* same stroke in every state — only the hue moves (was --border-input; A20.1 P3-14) */
   --border-focus:2px;     /* focus ring on icon buttons and outlined buttons */
 }
 [data-theme="dark"]{
-  /* The ring thickens with the level (M100.33): dark has no shadow to carry
-     depth, so without this `card` and `raised` printed the same box and the
-     three depths the system claims collapsed to two. Colour and blur are
-     constant — an edge does not change hue with depth. */
-  --shadow-card:0 0 2px 1px #6A7199;--shadow-raised:0 0 2px 2px #6A7199;--shadow-overlay:0 0 2px 3px #6A7199;
+  /* Mirrors `_darkDepth`: the rim is the first layer at every level and never
+     changes; `raised` and `overlay` add the drop. See the note above. */
+  --shadow-card:0 0 0 1px #272C48;
+  --shadow-raised:0 0 0 1px #272C48, 0 4px 12px rgb(3 4 11 / 0.8);
+  --shadow-overlay:0 0 0 1px #272C48, 0 8px 24px rgb(3 4 11 / 0.8);
 }

@@ -60,7 +60,7 @@ canonical M3 role  >  accessibility  >  MemoX structural system  >  Tokyo exact 
 | InputDecorator | fillColor | `surfaceContainerHighest` | `filled: false` | Cố ý: field là *khoảng mở*, không phải khối |
 | InputDecorator | hintStyle | `bodyLarge` / `onSurfaceVariant`, disabled 38% | = | M100.36: từng là `body-md` — một rung dưới value (#433 F6) |
 | InputDecorator | suffixIconColor | `onSurfaceVariant`; error `error`; disabled 38% | = | M100.36: theme `IconButton` từng chặn nhánh error của SDK (#433 F4) |
-| MxSearchField (custom) | fill / edge | — (không phải InputDecorator) | `surfaceMuted` → `surface`; edge `outline` → `primary` @ `AppStroke.input` | Control tuỳ biến, ranh giới dùng hệ chung (§4E). Trước M100.36 edge = màu fill, 1.09:1 |
+| MxSearchField (custom) | fill / edge | — (không phải InputDecorator) | `surfaceMuted` → `surface`; edge `outline` → `primary` @ `AppStroke.control` | Control tuỳ biến, ranh giới dùng hệ chung (§4E). Trước M100.36 edge = màu fill, 1.09:1 |
 
 ### selection/
 
@@ -133,7 +133,7 @@ canonical M3 role  >  accessibility  >  MemoX structural system  >  Tokyo exact 
 | `MuiButtonBase` radius 6 | góc control chặt | `AppRadius.md` (12) | — | tier, không phải px |
 | `general.borderRadius` 10 | góc mặt phẳng | `AppRadius.lg` (16) | — | tier |
 | `shadows.cardSm` / `card` | card ngồi / panel nổi | `shadowsFor(card)` / `(raised)` | — | hai lớp, màu qua `scheme.shadow` |
-| `shadows.card` (dark) | rim thay shade | rim `#6A7199` | — | edge không sâu thêm theo level |
+| `shadows.card` (dark) | rim thay shade | rim `outlineVariant` hairline + drop `shadow` @ 0.8 từ `raised` | `outlineVariant` | kit là mirror của Dart (A20.1 P1-06, OD1): `elevation.css` dark chép từ `shadowsFor`, gate so kit ↔ `ThemeData` |
 | `MuiPaper` paper | mặt giấy nổi | `ColorScheme.surfaceContainerLow` | `surface` là nền, giấy là container | — |
 | `divider` `#272C48` | vạch rất khẽ | `scheme.outlineVariant` | `outlineVariant` | `AppStroke.hairline` |
 | Backdrop tối + blur | tách modal khỏi trang | `modalBarrierColor` (`scheme.scrim`) | scrim | alpha token; **blur chưa nhận** |
@@ -334,7 +334,7 @@ là vô hình. Không control nào có hai vòng, và không control nào chỉ 
 | `MxPressable` | `MxFocusRing` theo shape | ngoài | `MxFocusRing` | `mx_pressable_test` |
 | `MxCard` (actionable) | ring riêng của card (#435, **bảo vệ**) — cùng `focusIndicator` | additive | gate riêng, cùng cơ chế | `mx_card_*` |
 | TextField / `MxTextField` | `focusedBorder` `primary` @ `AppStroke.focus` (focused-error: `error` cùng width) | chính viền | SDK | `m3_combined_state_test` |
-| `MxSearchField` | viền `outline` → `primary` @ `AppStroke.input` | chính viền | SDK | `mx_search_field_test` |
+| `MxSearchField` | viền `outline` → `primary` @ `AppStroke.control` | chính viền | SDK | `mx_search_field_test` |
 | Switch / Checkbox / Radio (`MxSwitchRow`, `MxCheckboxRow`, `MxRadioRows`) | overlay của control (`app_toggle_themes.dart`) — SDK vẽ vòng 40dp quanh thumb/box | trên control, không trên hàng | SDK | `app_toggle_themes_test` |
 
 **Hàng không interactive không có ring** — `MxListTile` không `onTap` là

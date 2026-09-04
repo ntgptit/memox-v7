@@ -238,7 +238,7 @@ class _TileSkin {
       // `input`, not `focus`: 2px is the ring that says *keyboard focus is
       // here*, and a board where half the tiles wore it would leave the focus
       // indicator nothing of its own to say.
-      outlineWidth: AppStroke.input,
+      outlineWidth: AppStroke.control,
       foreground: ink,
       mark: mark,
     );

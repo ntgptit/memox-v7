@@ -74,7 +74,7 @@ void main() {
       // The boundary is the control system's, not the fill's own colour: an
       // edge at 1.09:1 identified nothing (#433 §4.1, M100.36 4E).
       expect(decorationOf(tester).border!.top.color, light.colorScheme.outline);
-      expect(decorationOf(tester).border!.top.width, AppStroke.input);
+      expect(decorationOf(tester).border!.top.width, AppStroke.control);
 
       await tester.tap(find.byType(TextField));
       await tester.pumpAndSettle();
@@ -85,7 +85,7 @@ void main() {
         reason: 'a field being typed into stops being a well in the page',
       );
       expect(decorationOf(tester).border!.top.color, light.colorScheme.primary);
-      expect(decorationOf(tester).border!.top.width, AppStroke.input);
+      expect(decorationOf(tester).border!.top.width, AppStroke.control);
     });
 
     testWidgets('the border is there at rest, so focus costs no layout', (

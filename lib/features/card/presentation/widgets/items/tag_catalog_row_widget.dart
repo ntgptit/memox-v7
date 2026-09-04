@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/extensions/app_ink.dart';
 import '../../../../../core/theme/foundations/app_radius.dart';
+import '../../../../../core/theme/foundations/app_sizing.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -45,7 +46,7 @@ class TagCatalogRowWidget extends StatelessWidget {
   /// The leading well's square, public because the screen derives the
   /// separator's text-column inset from it and the geometry test pins the
   /// two together — one fact, one place, and a change here moves all three.
-  static const double wellSize = 32;
+  static const double wellSize = AppSizing.controlDense;
 
   final TagCatalogEntry entry;
   final VoidCallback onRename;

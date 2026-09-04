@@ -135,7 +135,7 @@ const Set<String> _asserted = <String>{
   '--shadow-raised',
   '--shadow-overlay',
   '--border-hairline',
-  '--border-input',
+  '--border-control',
   '--border-focus',
   // motion.css
   '--duration-fast',

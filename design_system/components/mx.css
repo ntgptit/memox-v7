@@ -258,7 +258,7 @@
 
 /* --- MxTextField ------------------------------------------------------ */
 .mx-field{display:block;position:relative}
-.mx-field__input{width:100%;box-sizing:border-box;padding:var(--space-md) var(--space-lg);background:transparent;color:var(--color-text-primary);border:var(--border-input) solid var(--color-border-control);border-radius:var(--radius-md);font-family:var(--font-body);font-size:var(--text-body-lg);line-height:var(--leading-body-lg);transition:border-color var(--duration-fast) var(--ease-standard)}
+.mx-field__input{width:100%;box-sizing:border-box;padding:var(--space-md) var(--space-lg);background:transparent;color:var(--color-text-primary);border:var(--border-control) solid var(--color-border-control);border-radius:var(--radius-md);font-family:var(--font-body);font-size:var(--text-body-lg);line-height:var(--leading-body-lg);transition:border-color var(--duration-fast) var(--ease-standard)}
 textarea.mx-field__input{resize:vertical;min-height:96px}
 .mx-field__input::placeholder{color:var(--color-text-secondary);opacity:1}
 .mx-field__input:focus{outline:none;border-color:var(--color-primary)}
@@ -331,7 +331,7 @@ button.mx-tile:focus-visible{outline:none;box-shadow:inset 0 0 0 var(--border-fo
 .mx-crumbs__step--current{color:var(--color-text-secondary);font-weight:var(--weight-regular)}
 
 /* --- MxSearchField ------------------------------------------------------ */
-.mx-search{display:flex;align-items:center;gap:var(--space-sm);box-sizing:border-box;width:100%;min-height:var(--touch-target-min);padding:0 var(--space-sm) 0 var(--space-md);background:var(--color-surface-muted);border:var(--border-input) solid var(--color-border-control);border-radius:var(--radius-pill);transition:border-color var(--duration-fast) var(--ease-standard),background-color var(--duration-fast) var(--ease-standard)}
+.mx-search{display:flex;align-items:center;gap:var(--space-sm);box-sizing:border-box;width:100%;min-height:var(--touch-target-min);padding:0 var(--space-sm) 0 var(--space-md);background:var(--color-surface-muted);border:var(--border-control) solid var(--color-border-control);border-radius:var(--radius-pill);transition:border-color var(--duration-fast) var(--ease-standard),background-color var(--duration-fast) var(--ease-standard)}
 .mx-search:focus-within{background:var(--color-surface);border-color:var(--color-primary)}
 .mx-search__icon{color:var(--color-text-secondary);flex:none}
 .mx-search__input{flex:1;min-width:0;border:0;background:none;outline:none;font-family:var(--font-body);font-size:var(--text-body-md);line-height:var(--leading-body-md);color:var(--color-text-primary)}

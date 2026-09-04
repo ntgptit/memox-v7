@@ -47,6 +47,21 @@ abstract final class AppSizing {
   /// one control dimension the design system could not see.
   static const double controlCompact = 40;
 
+  /// The dense tier — a chip's content box, the compact breadcrumb line, the
+  /// 32 dp icon well beside a metric or a catalog row.
+  ///
+  /// **One owner for a number that had five spellings** (A20.1 P2-12):
+  /// `app_chip_theme._containerHeight`, `MxBreadcrumb.compactLineHeight`,
+  /// `card_metric_widget._wellSize`, `tag_catalog_row_widget.wellSize` and
+  /// `AppSpacing.xxl` used as a width, a height and an icon size. A spacing
+  /// token is a *gap* on one axis; the moment it is the size of a box it is a
+  /// dimension, and dimensions live here. `spacing_is_a_gap_test.dart` keeps
+  /// the two apart.
+  static const double controlDense = 32;
+
+  /// The scrollbar's thumb — Material's own 4, stated (A20.1 P3-09).
+  static const double scrollbarThickness = 4;
+
   /// The one-line reading or control row — `ListTile`'s own 56, stated.
   ///
   /// **A row is not a button** (M100.36 4J). [touchTarget] is the floor a

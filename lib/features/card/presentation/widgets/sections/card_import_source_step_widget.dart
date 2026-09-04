@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/theme/extensions/app_ink.dart';
 import '../../../../../core/theme/foundations/app_radius.dart';
+import '../../../../../core/theme/foundations/app_sizing.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -314,8 +315,8 @@ class _UploadPanel extends ConsumerWidget {
         children: <Widget>[
           Align(
             child: Container(
-              width: AppSpacing.xxl,
-              height: AppSpacing.xxl,
+              width: AppSizing.controlDense,
+              height: AppSizing.controlDense,
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: context.colors.surfaceContainerHigh,

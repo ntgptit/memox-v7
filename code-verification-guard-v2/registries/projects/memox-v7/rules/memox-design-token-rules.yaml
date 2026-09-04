@@ -125,7 +125,10 @@ rules:
 
   - id: memox.design_token.no_raw_border_radius
     type: regex
-    severity: warning
+    # `error` since the Design System V1 closure (A20.1 P3-09): it sat at
+    # `warning` beside a spacing rule at `error`, and a warning nobody reads is
+    # a rule nobody has. Live-tree scan was 0 when it was raised.
+    severity: error
     enabled: true
     message: No hardcoded corner radius in product UI. Use `AppRadius` tokens.
     scopes:

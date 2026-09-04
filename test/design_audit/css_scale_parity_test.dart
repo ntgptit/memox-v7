@@ -123,7 +123,7 @@ void main() {
           light.inputDecorationTheme.enabledBorder! as OutlineInputBorder;
       expect(
         border.borderSide.width,
-        CssTokens.number('elevation.css', '--border-input'),
+        CssTokens.number('elevation.css', '--border-control'),
       );
 
       // Read from the ring's one definition rather than off a component.
@@ -294,6 +294,11 @@ void main() {
             reason: '$token layer $i blur',
           );
           expect(
+            shadows[i].spreadRadius,
+            declared[i].spread,
+            reason: '$token layer $i spread',
+          );
+          expect(
             shadows[i].color.a,
             closeTo(declared[i].alpha, 0.005),
             reason: '$token layer $i alpha',
@@ -311,42 +316,74 @@ void main() {
       }
     });
 
-    test('dark paints Tokyo\'s rim at every level, as the kit does', () {
-      // Until M100.27 `[data-theme="dark"]` re-pointed all three to `none` and
-      // Dart returned an empty list. Dark now paints Tokyo's `shadows.card` —
-      // `0 0 2px #6A7199`, a one-pixel halo rather than a shade — at every
-      // level, and the kit says the same thing in the same words. The two
-      // agreeing is what makes it a shared decision rather than a coincidence.
-      // The spread steps with the level since M100.33; colour and blur do not.
-      const rim = <String, String>{
-        '--shadow-card': '0 0 2px 1px #6A7199',
-        '--shadow-raised': '0 0 2px 2px #6A7199',
-        '--shadow-overlay': '0 0 2px 3px #6A7199',
-      };
-      for (final token in rim.keys) {
-        expect(
-          CssTokens.require(
-            'elevation.css',
-            token,
-            scope: '[data-theme="dark"]',
-          ),
-          rim[token],
-          reason: '$token in dark is not Tokyo\'s rim',
-        );
-      }
-
+    test('dark paints what Dart paints at every level — kit vs built theme', () {
+      // **A20.1 P1-06.** Until the Design System V1 closure this test asserted
+      // that the kit held three string literals copied from the kit — Tokyo's
+      // `0 0 2px #6A7199` halo, stepping 1/2/3 — and separately that Dart drew
+      // a hairline `outlineVariant` rim. Both passed while the two systems
+      // disagreed on colour, blur and spread: a gate comparing a file to a
+      // copy of itself. The kit is a mirror of Dart (owner decision 1), so the
+      // comparison runs the same way light's does: parse the kit's layers and
+      // hold them against `shadowsFor(level, dark.colorScheme)`.
+      //
+      // OLD ASSERTION: kit dark tokens == three literals (from the kit) and
+      //   Dart's rim == outlineVariant, checked independently.
+      // WHY WRONG: it could not fail when kit and Dart diverged — and they had.
+      // NEW CONTRACT: every kit dark layer equals the built theme's layer in
+      //   colour, alpha, blur, spread and offset, in order.
+      // AUTHORITY: A20.1 P1-06 / §20 OD1; `_darkDepth` is the source of truth.
       expect(shadowsFor(AppElevation.none, dark.colorScheme), isEmpty);
-      for (final level in AppElevation.scale.skip(1)) {
+      final Color rimColor = dark.colorScheme.outlineVariant;
+
+      for (final (String token, double level) in <(String, double)>[
+        ('--shadow-card', AppElevation.card),
+        ('--shadow-raised', AppElevation.raised),
+        ('--shadow-overlay', AppElevation.overlay),
+      ]) {
+        final declared = _shadowLayers(
+          'elevation.css',
+          token,
+          scope: '[data-theme="dark"]',
+        );
+        final shadows = shadowsFor(level, dark.colorScheme);
+
+        expect(
+          shadows,
+          hasLength(declared.length),
+          reason: '$token: the kit declares ${declared.length} layer(s)',
+        );
+        for (var i = 0; i < declared.length; i++) {
+          expect(shadows[i].offset.dy, declared[i].dy, reason: '$token $i dy');
+          expect(
+            shadows[i].blurRadius,
+            declared[i].blur,
+            reason: '$token $i blur',
+          );
+          expect(
+            shadows[i].spreadRadius,
+            declared[i].spread,
+            reason: '$token $i spread',
+          );
+          expect(
+            shadows[i].color.a,
+            closeTo(declared[i].alpha, 0.005),
+            reason: '$token $i alpha',
+          );
+          expect(
+            _rgbOf(shadows[i].color),
+            declared[i].rgb,
+            reason: '$token $i',
+          );
+        }
+
         // **The rim is the first entry at every level and never changes**
-        // (M100.35). It used to be the *only* entry and to thicken as the
-        // level rose, which spelled depth as a brighter, wider glow; a phone
-        // column of ten cards printed that as stripes. Depth above `card` is a
-        // drop now — see the level loop below.
-        final rim = shadowsFor(level, dark.colorScheme).first;
-        expect(rim.color, dark.colorScheme.outlineVariant, reason: '$level');
-        expect(rim.blurRadius, 0, reason: 'level $level');
-        expect(rim.spreadRadius, AppStroke.hairline, reason: 'level $level');
-        expect(rim.offset, Offset.zero, reason: 'level $level');
+        // (M100.35): outlineVariant, one hairline of spread, no blur. Depth
+        // above `card` is the drop that follows it, never a wider ring.
+        final rim = shadows.first;
+        expect(rim.color, rimColor, reason: '$token rim colour');
+        expect(rim.blurRadius, 0, reason: '$token rim blur');
+        expect(rim.spreadRadius, AppStroke.hairline, reason: '$token rim');
+        expect(rim.offset, Offset.zero, reason: '$token rim offset');
       }
     });
 
@@ -359,40 +396,61 @@ void main() {
   });
 }
 
-/// Every `0 <dy>px <blur>px rgb(r g b / a)` layer of a `box-shadow`, in order.
+/// Every layer of a `box-shadow`, in order — `0 dy blur [spread] colour`
+/// in px, where the colour is `rgb(r g b / a)` or a `#RRGGBB` hex.
 ///
 /// Comma-separated, because a Tokyo shadow is a float plus a contact layer and
 /// CSS writes both inside one value. Splitting on `,` is safe here and only
 /// here: the kit's shadows use the space-separated `rgb()` form, which carries
 /// no comma of its own. A parser that returned only the first layer would
 /// silently stop checking the second — the failure mode this file exists for.
-List<({double dy, double blur, double alpha, List<int> rgb})> _shadowLayers(
-  String file,
-  String token,
-) {
-  final raw = CssTokens.require(file, token);
+///
+/// The spread and the hex form arrived with A20.1 P1-06: dark's rim is
+/// `0 0 0 1px #272C48`, and a parser that could not read it is how the dark
+/// gate ended up comparing literals instead of layers.
+List<({double dy, double blur, double spread, double alpha, List<int> rgb})>
+_shadowLayers(String file, String token, {String? scope}) {
+  final raw = scope == null
+      ? CssTokens.require(file, token)
+      : CssTokens.require(file, token, scope: scope);
 
   return raw.split(',').map((String layer) {
     final match = RegExp(
-      r'^0\s+(\d+)px\s+(\d+)px\s+'
-      r'rgb\(\s*(\d+)\s+(\d+)\s+(\d+)\s*/\s*([\d.]+)\s*\)$',
+      r'^0\s+(\d+)(?:px)?\s+(\d+)(?:px)?(?:\s+(\d+)px)?\s+'
+      r'(?:rgb\(\s*(\d+)\s+(\d+)\s+(\d+)\s*/\s*([\d.]+)\s*\)|#([0-9A-Fa-f]{6}))$',
     ).firstMatch(layer.trim());
     if (match == null) {
       throw StateError('$token has a layer "$layer" this parser cannot read');
     }
 
+    final String? hex = match.group(8);
+    final List<int> rgb = hex == null
+        ? <int>[
+            int.parse(match.group(4)!),
+            int.parse(match.group(5)!),
+            int.parse(match.group(6)!),
+          ]
+        : <int>[
+            int.parse(hex.substring(0, 2), radix: 16),
+            int.parse(hex.substring(2, 4), radix: 16),
+            int.parse(hex.substring(4, 6), radix: 16),
+          ];
+
     return (
       dy: double.parse(match.group(1)!),
       blur: double.parse(match.group(2)!),
-      alpha: double.parse(match.group(6)!),
-      rgb: <int>[
-        int.parse(match.group(3)!),
-        int.parse(match.group(4)!),
-        int.parse(match.group(5)!),
-      ],
+      spread: double.parse(match.group(3) ?? '0'),
+      alpha: hex == null ? double.parse(match.group(7)!) : 1.0,
+      rgb: rgb,
     );
   }).toList();
 }
+
+List<int> _rgbOf(Color color) => <int>[
+  (color.r * 255).round(),
+  (color.g * 255).round(),
+  (color.b * 255).round(),
+];
 
 void _expectSameCurve(String token, Curve dart) {
   // `AppDurations` types these as `Curve`, so the cast is also the assertion

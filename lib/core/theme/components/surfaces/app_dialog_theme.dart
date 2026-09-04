@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../foundations/app_radius.dart';
 import '../overlays/app_backdrop_recipe.dart';
+import '../../foundations/app_elevation.dart';
 
 /// The three surfaces that appear **over** the page and then go away: the
 /// dialog, the modal bottom sheet and the snack bar.
@@ -27,7 +28,7 @@ DialogThemeData buildDialogTheme(ColorScheme scheme, TextTheme texts) =>
       // top of `shadowsFor` is a second depth mechanism, which AD-14 does not
       // admit. See F15. The FAB and the SnackBar are the two that keep a dp
       // value, because their slots have nowhere to put a painted shadow.
-      elevation: 0,
+      elevation: AppElevation.none,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.lg),
         side: BorderSide(color: scheme.outlineVariant),

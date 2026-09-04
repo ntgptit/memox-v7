@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/extensions/app_ink.dart';
+import '../../../../../core/theme/foundations/app_icon_size.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -191,9 +192,11 @@ class _StepNode extends StatelessWidget {
           // A plain decorated circle, not CircleAvatar: the avatar paints a
           // PhysicalShape and a DefaultTextStyle from ThemeData's legacy
           // primary swatch, neither of which resolves to a palette token.
+          // A node is the size of a medium glyph — a dimension, so it is
+          // named as one rather than as a gap (A20.1 P2-12).
           Container(
-            width: AppSpacing.xl,
-            height: AppSpacing.xl,
+            width: AppIconSize.md,
+            height: AppIconSize.md,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: background,

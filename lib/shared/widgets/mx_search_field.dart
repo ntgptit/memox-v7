@@ -27,7 +27,7 @@ import 'mx_icon.dart';
 /// 4E). It keeps its own surface model — a well in the page at rest, the paper
 /// once focused — and takes its *boundary* from the same system every other
 /// control uses: `scheme.outline` at rest, `scheme.primary` with focus, at
-/// [AppStroke.input]. Until M100.36 the resting border was the fill's own
+/// [AppStroke.control]. Until M100.36 the resting border was the fill's own
 /// colour, so the pill had no boundary at all: 1.09:1 against the light page,
 /// identified only by its glyph and placeholder (#433 §4.1). A control that is
 /// somewhere to type is identified by its edge, which is what WCAG 1.4.11 asks
@@ -158,7 +158,7 @@ class _MxSearchFieldState extends State<MxSearchField> {
         // pixels to spare.
         border: Border.all(
           color: _hasFocus ? colors.primary : colors.outline,
-          width: AppStroke.input,
+          width: AppStroke.control,
           strokeAlign: BorderSide.strokeAlignOutside,
         ),
       ),

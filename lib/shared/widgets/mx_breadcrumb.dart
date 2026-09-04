@@ -93,7 +93,7 @@ class MxBreadcrumb extends StatefulWidget {
   /// is **one** target spanning most of the bar, which is far more area than
   /// the floor asks for, and it buys the action a reader wants nine times in
   /// ten. The steps stop being controls. See [onUp].
-  static const double compactLineHeight = 32;
+  static const double compactLineHeight = AppSizing.controlDense;
 
   /// Ordered from the top of the hierarchy to the current step.
   ///
