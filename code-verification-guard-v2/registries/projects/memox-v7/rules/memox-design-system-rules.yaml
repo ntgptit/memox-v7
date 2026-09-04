@@ -86,6 +86,56 @@ rules:
       - memox-v7
       - design-system
 
+  # --- Design System V1 closure (A20.1 §9, Phase 0) -----------------------
+  # Two pure ratchets: both names scanned 0 in `lib/features/*/presentation/`
+  # on the day the rules landed, so neither can go red on existing code. They
+  # exist so the next screen cannot quietly build its own chrome or its own
+  # pick-one control.
+  #
+  # `Scaffold` is deliberately NOT here. It is the framework's layout host, not
+  # a design-system component: no architecture decision forbids a feature from
+  # owning one, and `MxContentShell` documents why the *shell* builds its own —
+  # that is not a prohibition on features (A20.1 §9, FRAMEWORK_PRIMITIVE_ALLOWED).
+  - id: memox_v7.design_system.no_raw_screen_chrome
+    type: regex
+    severity: error
+    enabled: true
+    message: >-
+      No raw screen chrome in feature code. `MxContentShell` owns the bar, the
+      subheader and the back affordance, so every screen's chrome resolves
+      through one owner. A bar the shell cannot express is a gap in the shell —
+      extend it in lib/shared, do not build an `AppBar` / `SliverAppBar` here.
+    scopes:
+      - presentation_files
+    # Line-anchored with the comment exemption every rule in this file uses.
+    # `\b` keeps `MxAppBar`-style names legal and `\s*\(` keeps `AppBarTheme(`
+    # (a theme, not chrome) legal.
+    patterns:
+      - '^(?!\s*(?://|\*)).*\b(?:AppBar|SliverAppBar)\s*\('
+    tags:
+      - memox-v7
+      - design-system
+
+  # `MxPillButton` owns pick-one. `Chip`, `ActionChip`, `InputChip` and
+  # `FilterChip` are deliberately not included: the tag strip's deletable
+  # `Chip` and its add-tag `ActionChip` are FEATURE_SPECIAL_CASE_ALLOWED
+  # (A20.1 §8), and a multi-select `FilterChip` has no shared owner to point at.
+  - id: memox_v7.design_system.no_raw_choice_chip
+    type: regex
+    severity: error
+    enabled: true
+    message: >-
+      No raw `ChoiceChip` in feature code. `MxPillButton` owns the pick-one
+      control — its tick slot, its focus ring, its 48dp target and its
+      exclusive-group semantics — so every pill in the app is one component.
+    scopes:
+      - presentation_files
+    patterns:
+      - '^(?!\s*(?://|\*)).*\bChoiceChip(?:\.[A-Za-z_][A-Za-z0-9_]*)?\s*\('
+    tags:
+      - memox-v7
+      - design-system
+
   - id: memox_v7.design_system.no_raw_style_escape
     type: regex
     severity: error
