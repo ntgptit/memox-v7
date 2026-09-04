@@ -180,15 +180,26 @@ class _ProgressRing extends StatelessWidget {
             child: CircularProgressIndicator(
               value: fraction,
               strokeWidth: _ringStroke,
+              // **Named, and the number is its value** (A20.1 §24 #19). The
+              // ring was the one progress indicator with no accessible name;
+              // the percent painted beside it is what a reader hears as the
+              // ring's value, so the text itself stays out of the tree rather
+              // than saying the figure twice.
+              semanticsLabel: context.l10n.cardProgressTitle,
+              semanticsValue: context.l10n.cardProgressPercent(
+                (fraction * 100).round(),
+              ),
               // The arc is non-text — 3:1 is enough — so `success` carries the
               // "mastered" meaning; the track is the muted surface behind it.
               color: context.semanticColors.success,
               backgroundColor: context.semanticColors.progressTrack,
             ),
           ),
-          Text(
-            context.l10n.cardProgressPercent((fraction * 100).round()),
-            style: context.texts.labelMedium,
+          ExcludeSemantics(
+            child: Text(
+              context.l10n.cardProgressPercent((fraction * 100).round()),
+              style: context.texts.labelMedium,
+            ),
           ),
         ],
       ),

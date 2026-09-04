@@ -75,12 +75,15 @@ void main() {
         detailContains: '_RenderInkFeatures',
         // 4 since M100.36: MxListTile owns its transparent Material (the
         // caller's shim went), so the time row brings one ink layer of its own.
-        expectedMatches: 4,
+        // 5 since A20.1 P2-13: MxSwitchRow is a SwitchListTile inside its own
+        // transparent Material, for the same reason the tile has one.
+        expectedMatches: 5,
         rationale:
             'The Material ink layers of the Scaffold, the AppBar, the '
-            'transparent Material inside the settings card and the one '
-            'MxListTile owns for the time row. Splash and highlight paint into '
-            'these; the overlay colours are asserted in app_theme_test.dart.',
+            'transparent Material inside the settings card, the one MxListTile '
+            'owns for the time row and the one MxSwitchRow owns for the toggle '
+            'row. Splash and highlight paint into these; the overlay colours '
+            'are asserted in app_theme_test.dart.',
       ),
       AuditSkipAllowance(
         itemId: 'shell',
@@ -95,11 +98,13 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.customPainter,
         detailContains: 'no painter',
-        // 2 since M100.36, with the tile's own Material (see above).
-        expectedMatches: 2,
+        // 2 since M100.36, with the tile's own Material (see above); 3 since
+        // A20.1 P2-13, with the switch row's.
+        expectedMatches: 3,
         rationale:
             'A clip with no painter of its own: one behind the time row, one '
-            'from the transparent Material MxListTile owns.',
+            'from the transparent Material MxListTile owns, one from the '
+            'transparent Material MxSwitchRow owns.',
       ),
       AuditSkipAllowance(
         itemId: 'screen',

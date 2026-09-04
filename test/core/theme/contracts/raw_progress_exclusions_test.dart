@@ -83,6 +83,13 @@ void main() {
                 '${file.path}: an indeterminate indicator inherits the '
                 'determinate exemption — use MxLoadingState:\n$call',
           );
+          // A20.1 §24 #19: the exemption is from the *loading* owner, not
+          // from having a name. A determinate ring still says what it is.
+          expect(
+            RegExp(r'\bsemanticsLabel\s*:').hasMatch(call),
+            isTrue,
+            reason: '${file.path}: a progress indicator with no name:\n$call',
+          );
         }
       }
     }

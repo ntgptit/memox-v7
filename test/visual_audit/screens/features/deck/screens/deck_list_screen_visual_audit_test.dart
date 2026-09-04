@@ -389,12 +389,14 @@ void main() {
       AuditAnchor.type('navigation_bar', MxNavigationBar),
     ],
     allowances: <AuditSkipAllowance>[
-      // No app-bar title on this state, so one Material layer rather than two,
-      // and no icon buttons at all — there is no deck left to act on.
+      // **The bar stays, with Back** (A20.1 P1-15): a screen in its error
+      // state used to drop its bar and the way back with it. No title and no
+      // deck actions — there is no deck left to act on — but the route
+      // implies dismissal, so the shell draws the bar and its one icon button.
       ...deckShellAllowances(
         screenIconButtons: 0,
         screenItemId: 'deck_screen',
-        hasAppBar: false,
+        hasBackButton: true,
         hasSearchField: false, // error widget, not the level shell
       ),
       ...mxActionButtonAllowances('error_state'),
