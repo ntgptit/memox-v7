@@ -365,13 +365,12 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
     // `browse` grades nothing, so it gets one way forward and no judgement to
     // make (BR-111). Showing it disabled action buttons would ask a question it
     // is not allowed to record an answer to.
-    // **`browse` has no controls, because it has nothing to ask** (BR-111).
-    // Moving between cards is the swipe (BR-155), and a Next button beside it
-    // was a second way to do the one thing the gesture already does — while
-    // taking a band of the screen from the card, which is the whole content of
-    // this mode. What the button was carrying for accessibility is now a pair
-    // of custom semantics actions on the swipe itself, so a screen reader has
-    // the same two moves without anything being drawn.
+    // **`browse` has no grading controls, because it has nothing to ask**
+    // (BR-111). Moving between cards belongs to `StudySwipeDeckWidget`, which
+    // owns both paths — the swipe (BR-155) and, since A20.1-P0-01, the
+    // Previous / Next pair a single pointer can use without dragging. This
+    // face draws neither; it would be a second place deciding how the mode
+    // moves.
     if (widget.actions.isEmpty) return const <Widget>[];
 
     if (!_showsBack) {

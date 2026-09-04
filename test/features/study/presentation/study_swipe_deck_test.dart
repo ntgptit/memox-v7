@@ -35,6 +35,10 @@ void main() {
             onBack: () => events.add('back'),
             child: const SizedBox(height: 300, child: Text('card')),
           ),
+          // Bounded, like the session frame: the deck gives the card the
+          // height it is handed and keeps a row under it for the pointer path
+          // (A20.1-P0-01), which a scroll host cannot size.
+          isScrollable: false,
         ),
       );
 
@@ -149,6 +153,7 @@ void main() {
             onBack: () => events.add('back'),
             child: const SizedBox(height: 300, child: Text('card')),
           ),
+          isScrollable: false,
         ),
       );
 
@@ -156,9 +161,10 @@ void main() {
     }
 
     testWidgets('both moves are offered when there is a trail', (tester) async {
-      // **Removing the buttons made this the only way through** for anyone who
-      // cannot make a 70dp horizontal drag. Nothing else in the suite would
-      // notice it disappearing: the screen renders identically without it.
+      // **The reader's own path, kept beside the pointer row.** The deck draws
+      // Previous / Next since A20.1-P0-01, and a reader can use those too —
+      // but the actions on the card let it move without leaving the card, and
+      // nothing else in the suite would notice them disappearing.
       final handle = tester.ensureSemantics();
       final events = <String>[];
 

@@ -6,7 +6,9 @@ import 'package:flutter/semantics.dart';
 
 import '../../../../../core/theme/foundations/app_durations.dart';
 import '../../../../../core/theme/foundations/app_motion_policy.dart';
+import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_icon_button.dart';
 
 /// How far a drag must travel before it counts as a swipe.
 ///
@@ -38,6 +40,17 @@ const double _kTiltPerPixel = 0.025 * math.pi / 180;
 /// left off screen with nothing to bring it back. Settling and letting the new
 /// content arrive at rest cannot strand it, and it costs the throw, not the
 /// gesture.
+///
+/// **The swipe is one path, not the only one** (A20.1-P0-01, WCAG 2.5.7). A
+/// 70 dp horizontal drag cannot be performed by everyone who holds a phone —
+/// a tremor, one hand, a stylus, a head pointer — and until the Design System
+/// V1 closure this mode had no other input: the custom semantics actions below
+/// serve TalkBack and Switch Access, and nobody else. The deck therefore draws
+/// a Previous / Next pair under the card: two 48 dp icon buttons, a visible,
+/// enabled, single-pointer path that a screen reader also meets as ordinary
+/// buttons. The swipe stays; the buttons are an addition, and the closure test
+/// (`study_browse_pointer_path_test.dart`) finds them by their semantics, not
+/// by their widget, so the affordance's form is free to change.
 class StudySwipeDeckWidget extends StatefulWidget {
   const StudySwipeDeckWidget({
     required this.cardKey,
@@ -167,6 +180,11 @@ class _StudySwipeDeckWidgetState extends State<StudySwipeDeckWidget>
     // than an action that is not there, which is the same reason Back appears
     // only when there is somewhere to go.
     return Semantics(
+      // Its own node, with the two buttons as children: the custom actions
+      // ride on the deck and the buttons announce themselves. Without
+      // `container` the actions would merge into whatever node is above.
+      container: true,
+      explicitChildNodes: true,
       customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
         if (!widget.isLocked) ...<CustomSemanticsAction, VoidCallback>{
           CustomSemanticsAction(label: l10n.studyContinueAction):
@@ -176,7 +194,68 @@ class _StudySwipeDeckWidgetState extends State<StudySwipeDeckWidget>
                 widget.onBack,
         },
       },
-      child: _gestureLayer(),
+      // The card fills what the frame gives it — its halves are `Expanded`
+      // and need a bounded height — and the pointer row takes its own 48
+      // underneath.
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Expanded(child: _gestureLayer()),
+          _pointerRow(context),
+        ],
+      ),
+    );
+  }
+
+  /// The single-pointer path (A20.1-P0-01): Previous on the leading edge, Next
+  /// on the trailing one, in the order the swipe reads.
+  ///
+  /// **Previous keeps its room when it is not offered.** At the front of the
+  /// trail there is nothing behind, and a button that does nothing is worse
+  /// than one that is not there (the same rule the custom actions follow) —
+  /// but a button that *appears* on the second card would slide Next across
+  /// the row on every first step. `Visibility` with the maintain flags holds
+  /// the slot and drops the control from the tree and from semantics.
+  ///
+  /// **Locked disables rather than hides.** `isLocked` is a moment — a write in
+  /// flight — and a control that vanishes and returns within a second reads as
+  /// a glitch; a disabled one reads as "wait". The custom actions above are
+  /// absent while locked because an action menu has no disabled state to show.
+  Widget _pointerRow(BuildContext context) {
+    final l10n = context.l10n;
+    final VoidCallback? forward = widget.isLocked ? null : widget.onForward;
+    final VoidCallback? back = widget.isLocked || !widget.canGoBack
+        ? null
+        : widget.onBack;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.sm),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Visibility(
+            visible: widget.canGoBack,
+            maintainSize: true,
+            maintainAnimation: true,
+            maintainState: true,
+            child: MxIconButton(
+              // `navigate_before` / `navigate_next`, not `arrow_back`: the
+              // arrow is the app bar's "leave this screen", and the same
+              // glyph one row below it would say the wrong thing (P2-19).
+              icon: Icons.navigate_before,
+              semanticLabel: l10n.studyBrowsePreviousCard,
+              tooltip: l10n.studyBrowsePreviousCard,
+              onPressed: back,
+            ),
+          ),
+          MxIconButton(
+            icon: Icons.navigate_next,
+            semanticLabel: l10n.studyContinueAction,
+            tooltip: l10n.studyContinueAction,
+            onPressed: forward,
+          ),
+        ],
+      ),
     );
   }
 
