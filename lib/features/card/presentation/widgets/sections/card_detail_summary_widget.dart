@@ -178,11 +178,7 @@ class _SchedulerBadge extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              const MxIcon(
-                Icons.bolt_rounded,
-                ink: AppInk.accent,
-                size: MxIconSize.sm,
-              ),
+              const MxIcon(Icons.bolt, ink: AppInk.accent, size: MxIconSize.sm),
               const SizedBox(width: AppSpacing.xs),
               // **No `Flexible` here, and that is deliberate.** This badge is a
               // non-flex child of the hero's `Row`, so it is measured against an

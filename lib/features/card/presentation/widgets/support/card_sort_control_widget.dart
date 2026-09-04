@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../shared/widgets/mx_menu_button.dart';
 import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../core/theme/extensions/app_ink.dart';
-import '../../../../../core/theme/foundations/app_spacing.dart';
+import '../../../../../core/theme/foundations/app_sizing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../domain/models/card_list_sort_model.dart';
@@ -48,10 +48,12 @@ class CardSortControlWidget extends ConsumerWidget {
       child: Semantics(
         button: true,
         label: context.l10n.cardSortLabel,
-        child: Padding(
-          // Vertical padding, not a bare row: the label is small text and this is
-          // a tap target, so it takes room to be hit without growing the line.
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+        child: SizedBox(
+          // **48 tall, and it is the row's whole height** — the deck toolbar's
+          // resolution, for the same reason: a 32 row and a 48 target are
+          // mutually exclusive, and a box overflowing its slot passes the
+          // guideline while missing the tap (A20.1 P2-17).
+          height: AppSizing.touchTarget,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[

@@ -50,6 +50,15 @@ import '../../core/theme/extensions/app_ink.dart';
 /// be pinned at `AppSizing.touchTarget` with `expands: true`, which made a
 /// documented *floor* into a ceiling: from `textScaler` 2.5 the placeholder
 /// was clipped to the box. The floor is a floor now.
+/// The inset that brings a one-line field to [AppSizing.touchTarget] at the
+/// default scale: (48 − 20) / 2. Off-grid on purpose — the target is the
+/// contract, and the grid step above it would make the pill 52.
+const double _fieldInset = (AppSizing.touchTarget - _lineHeight) / 2;
+
+/// `body-md`'s line at the default scale — 14 × 1.43, rounded as the engine
+/// rounds it.
+const double _lineHeight = 20; // off-grid: a type metric, not a gap
+
 class MxSearchField extends StatefulWidget {
   const MxSearchField({
     required this.value,
@@ -208,11 +217,13 @@ class _MxSearchFieldState extends State<MxSearchField> {
                   // decorator's own vertical padding, and that padding is what
                   // biased the text off the glyph's line. The inset is stated
                   // on the field rather than the pill so the 48-tall clear
-                  // button does not add to it: at the default scale the field
-                  // is 44 inside a 48 row, and it is the field that grows.
+                  // button does not add to it. **The field itself stands 48**
+                  // (A20.1 P2-17): the pill was 48 while the field inside it
+                  // was 44, and Android's target guideline reads the node
+                  // that takes the tap, which is the field.
                   isCollapsed: true,
                   contentPadding: const EdgeInsets.symmetric(
-                    vertical: AppSpacing.md,
+                    vertical: _fieldInset,
                   ),
                 ),
               ),

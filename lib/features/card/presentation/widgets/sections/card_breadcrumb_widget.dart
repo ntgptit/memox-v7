@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../../../../core/navigation/route_names.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_breadcrumb.dart';
 import '../../../domain/models/deck_context_model.dart';
+import '../overlays/card_ancestors_widget.dart';
 
 /// Where the card list sits in the deck tree (W1).
 ///
@@ -30,6 +29,18 @@ class CardBreadcrumbWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // **The deck list's grammar, adopted** (A20.1 P1-16): the strip is one
+    // wide target that goes up a level, long-press reaches any ancestor
+    // through a sheet, and the steps are a sentence rather than four small
+    // controls — the model the owner chose for the deck path (2026-08-21).
+    // Until now this trail was the other grammar, per-step taps, one tap
+    // away from a screen that answered the same gesture differently.
+    // **The deck list's grammar, adopted** (A20.1 P1-16): the strip is one
+    // wide target that goes up a level, long-press reaches any ancestor
+    // through a sheet, and the steps are a sentence rather than four small
+    // controls — the model the owner chose for the deck path (2026-08-21).
+    // Until now this trail was the other grammar, per-step taps, one tap
+    // away from a screen that answered the same gesture differently.
     return MxBreadcrumb(
       // Shared copy with the deck path: this walks the same tree.
       semanticLabel: context.l10n.deckPathSemanticLabel,
@@ -39,24 +50,12 @@ class CardBreadcrumbWidget extends StatelessWidget {
       // folds to `Root · … · parent · here` rather than filling the strip; the
       // ellipsis still expands. The deck list keeps the full path on purpose.
       collapseAfter: 3,
+      onUp: () => goUpFromCardContext(context, deckContext),
+      onShowAll: () => showCardAncestors(context, deckContext: deckContext),
       items: <MxBreadcrumbItem>[
-        // The top of the tree; always tappable here, because the card list is
-        // never the root (a root holds decks, not cards — BR-58).
-        MxBreadcrumbItem(
-          label: context.l10n.deckPathRootLabel,
-          onTap: () => context.goNamed(RouteNames.decks),
-        ),
+        MxBreadcrumbItem(label: context.l10n.deckPathRootLabel),
         for (final DeckBreadcrumbSegment segment in deckContext.ancestors)
-          MxBreadcrumbItem(
-            label: segment.name,
-            onTap: () => context.goNamed(
-              RouteNames.deckDetail,
-              pathParameters: <String, String>{
-                RoutePathParams.deckId: segment.id,
-              },
-            ),
-          ),
-        // No `onTap`: this is the deck the user is already in.
+          MxBreadcrumbItem(label: segment.name),
         MxBreadcrumbItem(label: deckContext.deckName),
       ],
     );

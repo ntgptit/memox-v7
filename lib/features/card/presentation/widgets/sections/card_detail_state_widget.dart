@@ -101,7 +101,7 @@ class CardDetailStateWidget extends StatelessWidget {
       CardMetric.date(
         l10n.cardDetailDueLabel,
         date(state.dueAt, whenNull: unscheduled),
-        Icons.schedule_rounded,
+        Icons.schedule,
       ),
       CardMetric.date(
         l10n.cardDetailLearnedLabel,
@@ -111,36 +111,36 @@ class CardDetailStateWidget extends StatelessWidget {
       CardMetric.date(
         l10n.cardDetailLastAnsweredLabel,
         date(state.lastAnsweredAt, whenNull: l10n.cardDetailNeverAnsweredValue),
-        Icons.history_rounded,
+        Icons.history,
       ),
       CardMetric.numeric(
         l10n.cardDetailReviewsLabel,
         '${state.answerCount}',
-        Icons.autorenew_rounded,
+        Icons.autorenew,
       ),
       CardMetric.numeric(
         l10n.cardDetailLapsesLabel,
         '${state.lapseCount}',
-        Icons.replay_rounded,
+        Icons.replay,
       ),
       if (state.schedulerType == SchedulerType.sm2) ...<CardMetric>[
         if (state.easeFactor != null)
           CardMetric.numeric(
             l10n.cardDetailEaseLabel,
             state.easeFactor!.toStringAsFixed(2),
-            Icons.speed_rounded,
+            Icons.speed,
           ),
         if (state.intervalDays != null)
           CardMetric.numeric(
             l10n.cardDetailIntervalLabel,
             l10n.cardDetailDayCount(state.intervalDays!),
-            Icons.event_repeat_rounded,
+            Icons.event_repeat,
           ),
         if (state.repetitions != null)
           CardMetric.numeric(
             l10n.cardDetailRepetitionsLabel,
             '${state.repetitions}',
-            Icons.repeat_one_rounded,
+            Icons.repeat_one,
           ),
       ],
     ];

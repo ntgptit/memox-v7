@@ -298,7 +298,7 @@ class _Verdict extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 MxIcon(
-                  isCorrect ? Icons.check_circle_outline : Icons.error_outline,
+                  isCorrect ? Icons.check_circle_outline : Icons.close,
                   size: MxIconSize.sm,
                   ink: accent,
                 ),

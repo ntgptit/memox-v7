@@ -130,7 +130,7 @@ class TrashRowWidget extends StatelessWidget {
                 ),
                 if (!isSelecting) ...<Widget>[
                   MxIconButton(
-                    icon: Icons.restore_outlined,
+                    icon: Icons.restore,
                     semanticLabel: l10n.trashRestoreAction,
                     tooltip: l10n.trashRestoreAction,
                     onPressed: onRestore,

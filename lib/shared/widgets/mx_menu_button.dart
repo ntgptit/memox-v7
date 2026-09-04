@@ -4,6 +4,7 @@ import '../../core/theme/extensions/app_ink.dart';
 import '../../core/theme/foundations/app_spacing.dart';
 import '../../core/theme/extensions/theme_context_extension.dart';
 import 'mx_icon.dart';
+import '../../core/theme/foundations/app_icon_size.dart';
 
 /// One action in an [MxMenuButton]'s menu.
 class MxMenuAction {
@@ -81,7 +82,12 @@ class MxMenuButton extends StatelessWidget {
         for (var index = 0; index < actions.length; index++)
           PopupMenuItem<int>(
             value: index,
-            child: _MenuRow(action: actions[index]),
+            child: _MenuRow(
+              action: actions[index],
+              // Only a menu that picks one of a set carries the exclusive
+              // group; an overflow menu of commands has nothing to select.
+              isPicker: selectedIndex >= 0,
+            ),
           ),
       ],
       child: child,
@@ -90,9 +96,12 @@ class MxMenuButton extends StatelessWidget {
 }
 
 class _MenuRow extends StatelessWidget {
-  const _MenuRow({required this.action});
+  const _MenuRow({required this.action, required this.isPicker});
 
   final MxMenuAction action;
+
+  /// Whether the menu picks one of a set — see [MxMenuAction.isSelected].
+  final bool isPicker;
 
   @override
   Widget build(BuildContext context) {
@@ -101,21 +110,49 @@ class _MenuRow extends StatelessWidget {
       action.label,
       style: context.texts.bodyMedium!.inked(context, ink),
     );
-    if (action.icon == null) {
-      return label;
-    }
 
-    return Row(
-      children: <Widget>[
-        MxIcon(
-          action.icon!,
-          ink: action.isDestructive ? AppInk.error : AppInk.quiet,
-        ),
-        const SizedBox(width: AppSpacing.md),
-        // Expanded, not bare: a long localized label wraps instead of
-        // overflowing the menu's fixed width.
-        Expanded(child: label),
-      ],
+    // **A picked row is perceivable and announced** (A20.1 P2-14, A19-03).
+    // Material highlights `initialValue`'s row at 1.18:1 / 1.32:1 and says
+    // nothing to a reader; the check is the mark every other pick-one in the
+    // app draws (the pill's tick, the sort sheet's check), and `selected`
+    // inside an exclusive group is what a reader hears.
+    final Widget row = action.icon == null && !isPicker
+        ? label
+        : Row(
+            children: <Widget>[
+              if (action.icon != null) ...<Widget>[
+                MxIcon(
+                  action.icon!,
+                  ink: action.isDestructive ? AppInk.error : AppInk.quiet,
+                ),
+                const SizedBox(width: AppSpacing.md),
+              ],
+              // Expanded, not bare: a long localized label wraps instead of
+              // overflowing the menu's fixed width.
+              Expanded(child: label),
+              if (isPicker) ...<Widget>[
+                const SizedBox(width: AppSpacing.md),
+                // A stable slot, so rows do not shift as the choice moves.
+                SizedBox.square(
+                  dimension: AppIconSize.sm,
+                  child: action.isSelected
+                      ? const MxIcon(
+                          Icons.check,
+                          ink: AppInk.accent,
+                          size: MxIconSize.sm,
+                        )
+                      : null,
+                ),
+              ],
+            ],
+          );
+
+    if (!isPicker) return row;
+
+    return Semantics(
+      selected: action.isSelected,
+      inMutuallyExclusiveGroup: true,
+      child: row,
     );
   }
 }

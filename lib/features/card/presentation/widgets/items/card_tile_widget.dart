@@ -64,11 +64,12 @@ class CardTileWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Selection is announced, not just tinted: a screen reader hears the state
-    // and a colour-blind reader sees the check, so colour is never the only
-    // signal (UC-04 A6).
+    // Selection is announced, not just tinted: `MxCard.isSelected` carries
+    // the `selected` flag a screen reader speaks, and a colour-blind reader
+    // sees the check, so colour is never the only signal (UC-04 A6). **One
+    // channel** (A20.1 P2-13): the row used to add a "selected" label on top
+    // of the flag, so the state was spoken twice.
     return Semantics(
-      label: isSelected ? context.l10n.cardSelectedSemanticLabel : null,
       child: MxCard.raised(
         onTap: onTap,
         onLongPress: onLongPress,
@@ -116,7 +117,7 @@ class _SelectionMark extends StatelessWidget {
       height: _stateDotSize,
       child: FittedBox(
         child: MxIcon(
-          isSelected ? Icons.check_circle : Icons.circle_outlined,
+          isSelected ? Icons.check_box_outlined : Icons.check_box_outline_blank,
           ink: isSelected ? AppInk.secondary : AppInk.quiet,
         ),
       ),

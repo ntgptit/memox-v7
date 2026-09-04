@@ -3266,14 +3266,6 @@
   "@reminderToggleLabel": {
     "description": "Nhãn hàng bật/tắt. Lặp lại **nguyên văn** tiêu đề màn vì hàng này là control chính của màn; một danh từ thứ hai cho cùng một thứ đọc thành một cài đặt thứ hai (M6 W3). Rút ngắn cùng lúc với reminderTitle: hai chuỗi khác nhau cách nhau 12dp trên cùng một màn là đúng thứ mô tả này cấm."
   },
-  "reminderStatusOff": "Tắt",
-  "@reminderStatusOff": {
-    "description": "Giá trị accessibility của toggle khi tắt, để trạng thái không chỉ nằm ở màu (M6 R7, A3). Hàng ở Settings cố ý không hiện giá trị — xem M6 W1."
-  },
-  "reminderStatusOn": "Bật",
-  "@reminderStatusOn": {
-    "description": "Giá trị accessibility của toggle khi bật (M6 R7, A3)."
-  },
   "reminderTimeLabel": "Giờ nhắc",
   "@reminderTimeLabel": {
     "description": "Nhãn hàng mở dialog chọn giờ, và cũng là tiêu đề của chính dialog đó (M6 W4, R6)."

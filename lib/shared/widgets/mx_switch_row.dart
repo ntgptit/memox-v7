@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/foundations/app_spacing.dart';
 import '../../core/theme/extensions/theme_context_extension.dart';
 
 /// A labeled switch row.
@@ -10,21 +9,15 @@ import '../../core/theme/extensions/theme_context_extension.dart';
 /// and this widget owns both, because the difference is a semantics decision
 /// and not a layout preference:
 ///
-/// - the default is a `SwitchListTile`: the whole row is the target, and the
-///   tile merges label and control into one spoken node. Dense form rows
-///   (the import step's header and duplicate toggles) read this way.
-/// - with [announcedValue] set, the row is the reminder pattern (M6 R7,
-///   owner-reviewed): the label is visible but excluded, the switch alone
-///   carries `Semantics(label, value)` so a reader hears the *value in words*
-///   — and the label is deliberately the tap target for nothing, because a
-///   row that flips a setting when the user meant to read it is the wrong
-///   trade for something that then asks the OS for a permission.
+/// One shape since A20.1 P2-13: a `SwitchListTile` — the whole row is the
+/// target, and the tile merges label and control into one spoken node with
+/// one state. The "announced" variant that put the value in words beside the
+/// switch's own toggle stacked two channels for one fact (A19-19) and is gone.
 class MxSwitchRow extends StatelessWidget {
   const MxSwitchRow({
     required this.label,
     required this.isOn,
     required this.onChanged,
-    this.announcedValue,
     super.key,
   });
 
@@ -36,53 +29,31 @@ class MxSwitchRow extends StatelessWidget {
   /// `null` locks the control.
   final ValueChanged<bool>? onChanged;
 
-  /// The value spoken in words ("On" / "Off", localized). Setting it switches
-  /// the row to the announced pattern described above.
-  final String? announcedValue;
-
   @override
   Widget build(BuildContext context) {
-    if (announcedValue == null) {
-      // **Its own transparent `Material`, so the row can sit on any surface.**
-      // A `SwitchListTile` paints its ink on the nearest `Material` ancestor;
-      // inside a non-tappable `MxCard` — a bare `DecoratedBox`, by design —
-      // the nearest one is the Scaffold's, behind the card's opaque fill, and
-      // the framework rightly flags the splash as invisible. Transparency
-      // adds a paint layer for the ink and no colour of its own, so callers
-      // that sit on the bare page render exactly as before.
-      return Material(
-        type: MaterialType.transparency,
-        child: SwitchListTile(
-          value: isOn,
-          onChanged: onChanged,
-          contentPadding: EdgeInsets.zero,
-          // `body-lg`, the row title rung the announced variant and every
-          // `ListTile` already use — this branch alone was `body-md`, so one
-          // widget set its one label at two sizes decided by a semantics
-          // flag (#431 P2-12, M100.36 10J).
-          title: Text(label, style: context.texts.bodyLarge),
-        ),
-      );
-    }
-
-    return Row(
-      children: <Widget>[
-        // Excluded, and the label moves onto the switch: the visible text and
-        // the control are two nodes, so a reader focusing the control would
-        // otherwise hear "Off, switch" with no idea what is off (WCAG 4.1.2)
-        // — and without the exclusion the same words are announced twice.
-        Expanded(
-          child: ExcludeSemantics(
-            child: Text(label, style: context.texts.bodyLarge),
-          ),
-        ),
-        const SizedBox(width: AppSpacing.md),
-        Semantics(
-          label: label,
-          value: announcedValue,
-          child: Switch(value: isOn, onChanged: onChanged),
-        ),
-      ],
+    // **One state channel** (A20.1 P2-13, A19-19). The row used to offer a
+    // second variant that put `Semantics(label, value: 'On')` on the switch
+    // beside the switch's own `toggled` flag, so a reader heard the state
+    // twice — "Reminders, On, switch, on". `SwitchListTile` is Material's
+    // grammar: the label is the tile's name and the toggle is the switch's
+    // own flag beneath it — Flutter 3.44 keeps that node under the tile —
+    // and nothing writes the state as text a second time.
+    //
+    // **Its own transparent `Material`, so the row can sit on any surface.**
+    // A `SwitchListTile` paints its ink on the nearest `Material` ancestor;
+    // inside a non-tappable `MxCard` — a bare `DecoratedBox`, by design —
+    // the nearest one is the Scaffold's, behind the card's opaque fill, and
+    // the framework rightly flags the splash as invisible. Transparency
+    // adds a paint layer for the ink and no colour of its own.
+    return Material(
+      type: MaterialType.transparency,
+      child: SwitchListTile(
+        value: isOn,
+        onChanged: onChanged,
+        contentPadding: EdgeInsets.zero,
+        // `body-lg`, the row title rung every `ListTile` uses (#431 P2-12).
+        title: Text(label, style: context.texts.bodyLarge),
+      ),
     );
   }
 }

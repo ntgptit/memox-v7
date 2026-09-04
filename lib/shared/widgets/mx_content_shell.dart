@@ -210,7 +210,21 @@ class _MxContentShellState extends State<MxContentShell> {
   PreferredSizeWidget? _buildAppBar(BuildContext context) {
     final subheader = widget.subheader;
     final subline = widget.titleSubline;
-    if (widget.title == null && subheader == null && subline == null) {
+    // **The bar stays whenever there is a way back to draw** (A20.1 P1-15).
+    // It used to be conditional on content — title, subheader, subline — so
+    // a screen in its loading or error state, which has none of the three,
+    // lost the bar and the back affordance with it, and the chrome jumped
+    // 56 dp when the content arrived. A back affordance is not content; the
+    // route's own dismissal (`impliesAppBarDismissal`) or an explicit
+    // `leading` keeps the bar, and only a root screen with nothing to say
+    // draws none.
+    final bool hasBackAffordance =
+        widget.leading != null ||
+        (ModalRoute.of(context)?.impliesAppBarDismissal ?? false);
+    if (widget.title == null &&
+        subheader == null &&
+        subline == null &&
+        !hasBackAffordance) {
       return null;
     }
 

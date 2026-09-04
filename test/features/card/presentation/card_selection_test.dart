@@ -14,6 +14,7 @@ import 'package:memox/l10n/generated/app_localizations.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 
 import 'support/fake_card_repository.dart';
+import 'dart:ui' show Tristate;
 
 /// Selection mode on the card list (UC-04 A6, BR-167).
 ///
@@ -186,16 +187,31 @@ void main() {
 
     // Colour is never the only signal: the row carries a semantics label and
     // the check glyph replaces the state dot.
-    expect(
-      find.bySemanticsLabel(RegExp(english.cardSelectedSemanticLabel)),
-      findsOneWidget,
-    );
-    expect(find.byIcon(Icons.check_circle), findsOneWidget);
-    // Scoped to the rows: the New filter pill draws the same outline glyph.
+    // OLD ASSERTION: a "selected" semantics label on the row. WHY WRONG:
+    // `MxCard.isSelected` already announces the `selected` flag, so the label
+    // spoke the state a second time (A20.1 P2-13). NEW CONTRACT: exactly one
+    // row carries the selected flag. AUTHORITY: A20.1 P2-13 / A19-11.
+    final handle = tester.ensureSemantics();
+    final selectedRows = find
+        .byType(CardTileWidget)
+        .evaluate()
+        .where(
+          (e) =>
+              tester
+                  .getSemantics(find.byWidget(e.widget))
+                  .flagsCollection
+                  .isSelected ==
+              Tristate.isTrue,
+        );
+    expect(selectedRows, hasLength(1));
+    handle.dispose();
+    // The multi-select glyph is the checkbox pair the Trash rows use too
+    // (A20.1 P2-19, V8) — one vocabulary for "picked" across the app.
+    expect(find.byIcon(Icons.check_box_outlined), findsOneWidget);
     expect(
       find.descendant(
         of: find.byType(CardTileWidget),
-        matching: find.byIcon(Icons.circle_outlined),
+        matching: find.byIcon(Icons.check_box_outline_blank),
       ),
       findsNWidgets(2),
     );

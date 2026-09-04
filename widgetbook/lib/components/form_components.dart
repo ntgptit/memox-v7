@@ -640,13 +640,11 @@ WidgetbookComponent selectionRowsComponent() {
         name: 'MxSwitchRow',
         builder: (BuildContext context) {
           final isOn = context.knobs.boolean(label: 'on', initialValue: true);
-          final isAnnounced = context.knobs.boolean(label: 'announced variant');
 
           return CatalogCenterPage(
             child: MxSwitchRow(
               label: 'Enable reminders',
               isOn: isOn,
-              announcedValue: isAnnounced ? (isOn ? 'On' : 'Off') : null,
               onChanged: _noopBool,
             ),
           );

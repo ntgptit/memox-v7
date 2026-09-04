@@ -56,14 +56,6 @@ extension ReminderLabels on BuildContext {
         alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(this),
       );
 
-  /// The accessibility value of the toggle (M6 R7).
-  ///
-  /// Exists so the state is spoken as a word rather than inferred from the
-  /// switch's colour, which is the one signal a colour-blind or screen-reader
-  /// user does not get.
-  String reminderToggleValue({required bool isEnabled}) =>
-      isEnabled ? l10n.reminderStatusOn : l10n.reminderStatusOff;
-
   /// The banner for a rejection (UC-17 E1…E4, E6).
   ReminderBanner reminderBanner(ReminderSetupRejection rejection) =>
       switch (rejection) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'mx_undo_snack_bar.dart';
 
 /// The app's one way to say something transient.
 ///
@@ -52,6 +53,14 @@ void showMxMessageOn(
     ..clearSnackBars()
     ..showSnackBar(
       SnackBar(
+        // **One duration policy** (A20.1 P2-20). A message with a button
+        // stays as long as the undo bar does — 8 s, `kMxUndoDuration`,
+        // chosen there so a user can *reach* the control — because the
+        // reason is the button, not the undo. A plain message keeps the SDK's
+        // 4 s: there is nothing to reach.
+        duration: actionLabel == null
+            ? kMxMessageDuration
+            : kMxActionableMessageDuration,
         // Announced, not only drawn — the liveRegion every dynamically-
         // appearing message in the app carries.
         content: Semantics(liveRegion: true, child: Text(message)),
@@ -61,3 +70,10 @@ void showMxMessageOn(
       ),
     );
 }
+
+/// A message with nothing to press: Material's own 4 s.
+const Duration kMxMessageDuration = Duration(seconds: 4);
+
+/// A message with a button to reach — the same 8 s the undo bar holds, for
+/// the same reason (A20.1 P2-20).
+const Duration kMxActionableMessageDuration = kMxUndoDuration;

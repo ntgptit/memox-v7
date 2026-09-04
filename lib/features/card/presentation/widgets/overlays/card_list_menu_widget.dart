@@ -51,7 +51,7 @@ class CardListMenuWidget extends StatelessWidget {
         // holds cards directly.
         if (deckTotal > 0)
           MxMenuAction(
-            icon: Icons.ios_share,
+            icon: Icons.share,
             label: context.l10n.cardExportEntryAction,
             onSelected: () => exportDeckCards(
               context,
