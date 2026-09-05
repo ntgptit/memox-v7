@@ -59,11 +59,121 @@ ThemeData _buildBoldText(ThemeData base) {
     labelSmall: _bold(texts.labelSmall),
   );
 
+  // **Component themes carry their own copies of these styles** (A20.1
+  // P1-11, corrective pass). Every slot below was built from the text theme
+  // at theme-build time, so re-weighting the text theme alone left a list
+  // tile, a hint, a menu row and a dialog title at their resting weight —
+  // the OS setting visibly moved body text and nothing around it. Each slot
+  // the app's theme sets is re-weighted through the same `wght` path; a slot
+  // the theme leaves null stays null.
   return base.copyWith(
     textTheme: boldTexts,
+    appBarTheme: base.appBarTheme.copyWith(
+      titleTextStyle: _bold(base.appBarTheme.titleTextStyle),
+      toolbarTextStyle: _bold(base.appBarTheme.toolbarTextStyle),
+    ),
+    listTileTheme: base.listTileTheme.copyWith(
+      titleTextStyle: _bold(base.listTileTheme.titleTextStyle),
+      subtitleTextStyle: _bold(base.listTileTheme.subtitleTextStyle),
+      leadingAndTrailingTextStyle: _bold(
+        base.listTileTheme.leadingAndTrailingTextStyle,
+      ),
+    ),
+    navigationBarTheme: base.navigationBarTheme.copyWith(
+      labelTextStyle: _boldStates(base.navigationBarTheme.labelTextStyle),
+    ),
+    bottomNavigationBarTheme: base.bottomNavigationBarTheme.copyWith(
+      selectedLabelStyle: _bold(
+        base.bottomNavigationBarTheme.selectedLabelStyle,
+      ),
+      unselectedLabelStyle: _bold(
+        base.bottomNavigationBarTheme.unselectedLabelStyle,
+      ),
+    ),
+    inputDecorationTheme: base.inputDecorationTheme.copyWith(
+      labelStyle: _bold(base.inputDecorationTheme.labelStyle),
+      floatingLabelStyle: _bold(base.inputDecorationTheme.floatingLabelStyle),
+      helperStyle: _bold(base.inputDecorationTheme.helperStyle),
+      hintStyle: _bold(base.inputDecorationTheme.hintStyle),
+      errorStyle: _bold(base.inputDecorationTheme.errorStyle),
+      prefixStyle: _bold(base.inputDecorationTheme.prefixStyle),
+      suffixStyle: _bold(base.inputDecorationTheme.suffixStyle),
+      counterStyle: _bold(base.inputDecorationTheme.counterStyle),
+    ),
+    popupMenuTheme: base.popupMenuTheme.copyWith(
+      textStyle: _bold(base.popupMenuTheme.textStyle),
+      labelTextStyle: _boldStates(base.popupMenuTheme.labelTextStyle),
+    ),
+    dialogTheme: base.dialogTheme.copyWith(
+      titleTextStyle: _bold(base.dialogTheme.titleTextStyle),
+      contentTextStyle: _bold(base.dialogTheme.contentTextStyle),
+    ),
+    datePickerTheme: base.datePickerTheme.copyWith(
+      dayStyle: _bold(base.datePickerTheme.dayStyle),
+      yearStyle: _bold(base.datePickerTheme.yearStyle),
+      weekdayStyle: _bold(base.datePickerTheme.weekdayStyle),
+      headerHeadlineStyle: _bold(base.datePickerTheme.headerHeadlineStyle),
+      headerHelpStyle: _bold(base.datePickerTheme.headerHelpStyle),
+      rangePickerHeaderHeadlineStyle: _bold(
+        base.datePickerTheme.rangePickerHeaderHeadlineStyle,
+      ),
+      rangePickerHeaderHelpStyle: _bold(
+        base.datePickerTheme.rangePickerHeaderHelpStyle,
+      ),
+    ),
+    timePickerTheme: base.timePickerTheme.copyWith(
+      hourMinuteTextStyle: _bold(base.timePickerTheme.hourMinuteTextStyle),
+      dayPeriodTextStyle: _bold(base.timePickerTheme.dayPeriodTextStyle),
+      helpTextStyle: _bold(base.timePickerTheme.helpTextStyle),
+    ),
+    snackBarTheme: base.snackBarTheme.copyWith(
+      contentTextStyle: _bold(base.snackBarTheme.contentTextStyle),
+    ),
+    chipTheme: base.chipTheme.copyWith(
+      labelStyle: _bold(base.chipTheme.labelStyle),
+      secondaryLabelStyle: _bold(base.chipTheme.secondaryLabelStyle),
+    ),
+    tooltipTheme: base.tooltipTheme.copyWith(
+      textStyle: _bold(base.tooltipTheme.textStyle),
+    ),
+    tabBarTheme: base.tabBarTheme.copyWith(
+      labelStyle: _bold(base.tabBarTheme.labelStyle),
+      unselectedLabelStyle: _bold(base.tabBarTheme.unselectedLabelStyle),
+    ),
+    dropdownMenuTheme: base.dropdownMenuTheme.copyWith(
+      textStyle: _bold(base.dropdownMenuTheme.textStyle),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: _boldButton(base.elevatedButtonTheme.style),
+    ),
+    filledButtonTheme: FilledButtonThemeData(
+      style: _boldButton(base.filledButtonTheme.style),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: _boldButton(base.outlinedButtonTheme.style),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: _boldButton(base.textButtonTheme.style),
+    ),
+    segmentedButtonTheme: base.segmentedButtonTheme.copyWith(
+      style: _boldButton(base.segmentedButtonTheme.style),
+    ),
     extensions: <ThemeExtension<Object?>>[
       ...base.extensions.values.where((ext) => ext is! AppTextStyles),
       AppTextStyles.from(boldTexts),
     ],
   );
 }
+
+/// A state-resolved slot re-weighted per state: the resting, selected and
+/// disabled styles each go through `wght` rather than only the default.
+WidgetStateProperty<TextStyle?>? _boldStates(
+  WidgetStateProperty<TextStyle?>? property,
+) => property == null
+    ? null
+    : WidgetStateProperty.resolveWith(
+        (states) => _bold(property.resolve(states)),
+      );
+
+ButtonStyle? _boldButton(ButtonStyle? style) =>
+    style?.copyWith(textStyle: _boldStates(style.textStyle));

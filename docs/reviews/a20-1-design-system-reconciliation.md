@@ -1117,11 +1117,11 @@ Phases 0–8 landed as one commit each (`2fe68655` → HEAD); Phase 9 is the ver
 | **P1-08** | FIXED | `widgetbook/lib/main.dart`, `study_render.dart`, `deck_screens_demo_test`, `feature_screens_demo_test`, gallery | four Widgetbook themes; `ReviewApp(isHighContrast:)`; HC goldens for the densest border surface and the screen with disabled controls | `widgetbook_coverage_test`; four HC goldens authored on Linux |
 | **P1-09** | FIXED | new `theme_context_extension_test.dart`; rules YAML | every public accessor is named by a guard pattern or exempted with a reason, both directions; `inputHintStyle` joined the patterns | that test; pytest probe |
 | **P1-10** | FIXED | `app_typography_test.dart`, `progress_streak_hero_widget.dart`, `app_typography.dart` | weights reachable from all four themes are exactly {400, 500, 600, 700}; every w700 source on a named allowlist; the streak hero uses `heroNumeralWeight` | that test (theme enumeration + source scan) |
-| **P1-11** | FIXED | new `app_bold_text.dart`, `app.dart` | `applyBoldText` re-weights every rung through `wght`; `BoldTextWidget` reads `MediaQuery.boldText` | `app_bold_text_test` |
+| **P1-11** | FIXED — **reopened and re-closed in the corrective pass** | new `app_bold_text.dart`, `app.dart`, corrective: `app_bold_text.dart` | `applyBoldText` re-weighted only `textTheme` and `AppTextStyles`; every component-theme text slot (ListTile, NavigationBar, InputDecoration, PopupMenu, Dialog, date/time pickers, SnackBar, AppBar, Chip, Tooltip, TabBar, the button families) now goes through the same `wght` path | `app_bold_text_components_test` — every slot the theme sets resolves `wght 700`, and rendered ListTile / NavigationBar / InputDecoration / PopupMenu / Dialog / pickers / SnackBar text emboldens under `MediaQuery.boldText` |
 | **P1-12** | FIXED | `app_theme.dart`, `app_snackbar_theme.dart`, `component_depth_and_state_test` | `ThemeData.shadowColor = materialShadowColor(scheme)` — the FAB reads it (`button.dart:387`); SnackBar has no shadow slot (SDK) and says so | `component_depth_and_state_test` — every floating surface names its shadow colour |
 | **P1-13** | FIXED | `mx_feedback_band.dart`, `mx_card.dart`, `reminder_labels_widget.dart` | `MxFeedbackTone.warning` / `MxCardFeedbackTone.warning` on `warningContainer`; permission-denied is a warning | `reminder_settings_layout_test` (documented contract change) |
-| **P1-15** | FIXED | `mx_content_shell.dart` | the bar stays whenever there is a way back — route dismissal or `leading`; a root screen with nothing to say draws none | `mx_content_shell_bar_test` |
-| **P1-16** | FIXED | `card_breadcrumb_widget.dart`, `card_editor_context_widget.dart`, new `card_ancestors_widget.dart` | one up-navigation grammar: `onUp` / `onShowAll`, steps are not controls | card breadcrumb tests |
+| **P1-15** | FIXED — **reopened and re-closed in the corrective pass** | `mx_content_shell.dart`, corrective: `mx_content_shell.dart` (`MxShellChrome`), `study_session_screen.dart` | the bar stays whenever there is a way back; **and** the policy is explicit: `MxShellChrome { auto, none }`, `none` asserted content-free. `StudySessionScreen` chooses `none` — it had been getting a bar with an inferred Back when pushed, a regression of BR-82 | `mx_content_shell_bar_test`, `mx_content_shell_chrome_test`, `study_session_chrome_test` (pushed through a real route: no `AppBar`, no `BackButton`, `MxSessionTopBar` present) |
+| **P1-16** | FIXED — **reopened and re-closed in the corrective pass** | `card_breadcrumb_widget.dart`, `card_editor_context_widget.dart`, new `card_ancestors_widget.dart`, corrective: `card_ancestors_widget.dart`, `card_editor_context_widget.dart` | one up-navigation grammar, `onUp` / `onShowAll`; **and** the editor's Up is the deck the card is in (`goUpToDeck`), not that deck's parent, and its ancestor sheet lists the deck last — both still through `onLeave` | `card_editor_up_navigation_test` — editor Up → current deck, dirty draft still asks, sheet lists and reaches the deck; card-list Up and sheet unchanged |
 | **P2-01** | FIXED | `memox-design-system-rules.yaml` | `no_raw_screen_chrome` (`AppBar`, `SliverAppBar`; `Scaffold` deliberately not), `no_raw_choice_chip` | probes; live scan 0 |
 | **P2-02** | FIXED | new `mx_section_label.dart`; 14 headings | one all-caps policy: painted uppercase, spoken as written, `Semantics(header:)` | `mx_section_label_test` |
 | **P2-03** | FIXED | `card_bulk_overlays_widget.dart`, `card_editor_screen.dart` | `AsyncValue.error` renders `MxErrorState`, never `MxEmptyState` | card editor / bulk tests |
@@ -1157,3 +1157,18 @@ Phases 0–8 landed as one commit each (`2fe68655` → HEAD); Phase 9 is the ver
 | **P3-12** | FIXED | new `mx_icon_test.dart` | null label ⇒ `ExcludeSemantics`; label spoken once; size and ink are names | that test |
 | **P3-13** | FIXED | `mx_breadcrumb.dart` | `assert(lineHeight >= touchTarget || onUp != null)` — a strip below the floor must be one target | assert |
 | **P3-14** | FIXED | `app_stroke.dart` (Phase 2) | `AppStroke.control` names the role, not a component | `app_stroke_test` |
+
+### 27.1 · Corrective pass — `fix/design-system-v1-corrective`
+
+Three closures in #460 were re-examined after merge and found short of their
+own contract; each was reopened, fixed and re-closed against a rendered test:
+
+| ID | What #460 proved | What it missed | Re-closure |
+|---|---|---|---|
+| P1-11 | the text theme and `AppTextStyles` re-weight through `wght` | component themes keep their own copies of those styles, so a tile, a hint, a menu row, a dialog and both pickers stayed at resting weight | every text slot the theme sets is re-weighted; rendered tests per family |
+| P1-15 | a pushed loading/error screen keeps its bar and Back | the study session, custom chrome by design, gained the same inferred bar — a BR-82 regression | `MxShellChrome { auto, none }`; the session says `none`; pushed-route test |
+| P1-16 | one up-navigation grammar for card trails | the editor's Up went to the deck's parent, one level too far, and its sheet could not reach the deck | `goUpToDeck`; the sheet lists the deck last; `onLeave` preserved; tests both ways |
+
+§23 stays **30 / 30** and §24 **21 / 22**: the criteria were met at #460's
+level of evidence, and the corrective pass raised the evidence, not the score.
+

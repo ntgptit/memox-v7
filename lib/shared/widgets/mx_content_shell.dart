@@ -31,6 +31,27 @@ import 'mx_scroll_end_inset.dart';
 /// whose content fits shows no line at all; once the body has scrolled under the
 /// chrome, one appears to separate them. That is a 1px line, not Material's
 /// `scrolledUnderElevation` tint, which stays off for the reason above.
+/// What the shell draws above the body.
+///
+/// **A policy, not a boolean** (A20.1 P1-15, corrective pass). `auto` is the
+/// shell's own judgement: a bar whenever there is a title, a subheader, a
+/// subline, an explicit leading, or a way back to draw. `none` is a screen
+/// saying it owns its chrome — the study session's frame carries the mode
+/// and the ✕, and a Material bar above it with an inferred Back would be a
+/// second bar naming the same screen, with an arrow that pops the route and
+/// leaves the session open (BR-82). That screen used to get `none` for free
+/// by passing no title; once `auto` learned to keep the bar for the way back
+/// the free ride ended, and the policy has to be said.
+enum MxShellChrome {
+  /// The shell decides, from content and from the route.
+  auto,
+
+  /// No Material bar, whatever the route implies. The screen must also pass
+  /// no title, leading, actions, subheader or subline — a `none` policy with
+  /// chrome content is a contradiction, and the constructor asserts it.
+  none,
+}
+
 class MxContentShell extends StatefulWidget {
   const MxContentShell({
     required this.body,
@@ -43,10 +64,22 @@ class MxContentShell extends StatefulWidget {
     this.isScrollable = false,
     this.floatingActionButton,
     this.footer,
+    this.chrome = MxShellChrome.auto,
     super.key,
-  });
+  }) : assert(
+         chrome == MxShellChrome.auto ||
+             (title == null &&
+                 leading == null &&
+                 actions == null &&
+                 subheader == null &&
+                 titleSubline == null),
+         'MxShellChrome.none draws no bar, so it cannot take bar content',
+       );
 
   final Widget body;
+
+  /// See [MxShellChrome]. Defaults to [MxShellChrome.auto].
+  final MxShellChrome chrome;
 
   /// Already-localized text. Components never reach for ARB themselves — the
   /// screen that owns the copy passes it in.
@@ -217,6 +250,7 @@ class _MxContentShellState extends State<MxContentShell> {
   }
 
   PreferredSizeWidget? _buildAppBar(BuildContext context) {
+    if (widget.chrome == MxShellChrome.none) return null;
     final subheader = widget.subheader;
     final subline = widget.titleSubline;
     // **The bar stays whenever there is a way back to draw** (A20.1 P1-15).

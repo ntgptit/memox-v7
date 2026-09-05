@@ -160,11 +160,14 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
         unawaited(_controller.leave());
       },
       child: MxContentShell(
-        // No app-bar title, and therefore no app bar at all: the frame's own top
-        // bar carries the mode and the ✕, and a Material bar above it would be a
-        // second bar naming the same screen — with a back arrow that pops the
-        // route and leaves the session open, which is the one thing BR-82
-        // forbids.
+        // **`none`, said out loud** (A20.1 P1-15, corrective pass). The frame's
+        // own top bar carries the mode and the ✕; a Material bar above it would
+        // be a second bar naming the same screen — with a back arrow that pops
+        // the route and leaves the session open, which is the one thing BR-82
+        // forbids. Passing no title used to be enough; since the shell keeps
+        // its bar for any route that implies dismissal, the screen has to
+        // state the policy rather than rely on an absence.
+        chrome: MxShellChrome.none,
         //
         // **No gutter from the shell, and the frame applies its own.** The
         // session's top bar puts a 48×48 close button first; inside a 16px gutter

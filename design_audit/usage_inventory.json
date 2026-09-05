@@ -3341,7 +3341,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_content_shell.dart",
-      "line": 206,
+      "line": 239,
       "widget_context": "_MxContentShellState",
       "element_kind": "border",
       "source_kind": "theme-token",
@@ -3352,7 +3352,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_content_shell.dart",
-      "line": 265,
+      "line": 299,
       "widget_context": "_MxContentShellState",
       "element_kind": "border",
       "source_kind": "theme-token",
@@ -3363,7 +3363,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_content_shell.dart",
-      "line": 390,
+      "line": 424,
       "widget_context": "MxSubheaderBand",
       "element_kind": "border",
       "source_kind": "theme-token",

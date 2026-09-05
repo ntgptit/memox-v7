@@ -117,9 +117,17 @@ class CardEditorContextWidget extends StatelessWidget {
       semanticLabel: context.l10n.deckPathSemanticLabel,
       rootIcon: Icons.home_outlined,
       collapseAfter: 3,
-      onUp: () => goUpFromCardContext(context, deck, onLeave: onLeave),
-      onShowAll: () =>
-          showCardAncestors(context, deckContext: deck, onLeave: onLeave),
+      // **Up is the deck this card is in**, not that deck's parent: the path
+      // reads `… / Deck / Edit`, and the strip goes one level up from the
+      // screen, which is Edit (A20.1 P1-16, corrective pass). The sheet
+      // lists the deck too, last, for the same reason.
+      onUp: () => goUpToDeck(context, deckId, onLeave: onLeave),
+      onShowAll: () => showCardAncestors(
+        context,
+        deckContext: deck,
+        currentDeck: DeckBreadcrumbSegment(id: deckId, name: deck.deckName),
+        onLeave: onLeave,
+      ),
       items: <MxBreadcrumbItem>[
         MxBreadcrumbItem(label: context.l10n.deckPathRootLabel),
         for (final DeckBreadcrumbSegment segment in deck.ancestors)
