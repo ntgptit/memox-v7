@@ -127,7 +127,8 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.customPainter,
         detailContains: '_ShapeBorderPainter',
-        expectedMatches: 1,
+        // Exactly one, which is the default and therefore left unwritten: a
+        // second action button on this screen would miscount and fail here.
         rationale:
             'The one MxActionButton on this screen: the way out of a finished '
             'session whose summary could not be read. An action button draws '
