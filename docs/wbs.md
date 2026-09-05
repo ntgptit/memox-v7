@@ -16945,6 +16945,57 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
 - **Checklist phases:** 14, 21.
 
+### M100.41 · Điều kiện mở lại V1 thành ràng buộc, không còn là prose
+
+- **Status:** done (2026-09-05)
+- **Owner:** Claude
+- **Goal:** Làm cho chính sách đóng băng ở M100.40 **ràng buộc được**. Không đổi
+  chính sách, không đổi hợp đồng nào — chỉ đổi cách nó được viết và chỗ nó được
+  đọc.
+- **Nhánh / PR:** `docs/design-system-v1-freeze-normative`.
+- **Vấn đề:** `v1-freeze.md` §3 viết điều kiện mở lại thành **prose trần, không
+  từ khoá**. Theo `document-conventions.md` §3, câu không mang MUST/SHOULD/MAY
+  là *giải thích, không phải ràng buộc* — và cùng mục đó cấm suy ra rule mới từ
+  prose giải thích. Nói cách khác: điều khoản trung tâm của một tài liệu đóng
+  băng, theo đúng hợp đồng tài liệu của repo này, **chưa từng ràng buộc ai**.
+  Câu cấm task feature thì có MUST nhưng chỉ kể **5 trong 14** dòng của §2
+  (mục 2, 4, 5, 12, 13) — đúng bằng những dòng có guard.
+- **Scope:**
+  - §3 viết lại bằng MUST / MUST NOT: V1 **MUST NOT** mở lại trừ bằng task
+    design-system tường minh; task đó **MUST** có ít nhất một trong năm trigger;
+    task feature **MUST NOT** sửa **bất kỳ** hợp đồng nào trong 14 dòng, và
+    **MUST** dừng lại để mở task riêng.
+  - Thêm một điều khoản chưa từng có: **sửa thứ đang canh hợp đồng cũng là sửa
+    hợp đồng**. Đếm được chứ không phải cảm tính — 5/14 dòng có guard quét
+    `lib/features/`, 9/14 chỉ có test, mà test là file trong repo và nhánh
+    feature sửa được. Guard không đỏ khi chính nó bị sửa.
+  - §2 nói rõ "hợp đồng đóng băng" nghĩa là **cả 14 dòng**, và nêu rõ cái task
+    feature **MAY** làm (compose shared widget, layout, primitive framework),
+    để rào chắn không biến thành cớ dựng wrapper thừa.
+  - `CLAUDE.md` thêm một mục Non-negotiables trỏ sang file này. Không có nó thì
+    rào chắn vô hiệu trên thực tế: `CLAUDE.md` bảo chỉ đọc tài liệu mà task
+    chạm tới, còn task feature thì không tự nhận là nó chạm design system —
+    đúng lúc nó vi phạm.
+- **Quyết định:** không đổi nội dung hợp đồng nào, không thêm guard mới. Việc
+  bịt lỗ hổng "sửa test canh gác" bằng cơ chế (chứ bằng văn bản như hiện tại)
+  được ghi nhận là nợ, xem Known technical debt.
+- **Editable documents:** `docs/design-system/v1-freeze.md`, `CLAUDE.md`,
+  `docs/wbs.md`.
+- **Output:** `v1-freeze.md` §2 và §3 viết lại theo MUST/MUST NOT phủ cả 14 hợp
+  đồng, thêm điều khoản cấm nới guard/test canh gác; một mục Non-negotiables mới
+  trong `CLAUDE.md` trỏ sang file đó; entry WBS này. Không file `lib/` hay
+  `test/` nào đổi.
+- **Tests required:** không — thay đổi tài liệu thuần, không file nào trong
+  `lib/` hay `test/` đổi.
+- **Acceptance criteria:**
+  - [x] §3 mọi câu ràng buộc đều mang MUST / MUST NOT.
+  - [x] Cấm task feature phủ **cả 14** hợp đồng, không phải 5.
+  - [x] Có điều khoản cấm nới guard/test ở cột Enforcement.
+  - [x] `CLAUDE.md` trỏ tới `v1-freeze.md` trong Non-negotiables.
+  - [x] `check_docs.py`, `check_format.sh`, guard xanh; CI xanh.
+- **Dependencies:** M100.40.
+- **Checklist phases:** 7.
+
 ### M100.40 · Đóng băng Design System V1 — verify, không audit lại
 
 - **Status:** done (2026-09-05)
@@ -18499,3 +18550,4 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 | Server phát web chưa gửi COOP/COEP | M4.2 | `crossOriginIsolated` là `false`, nên drift chọn backend lưu trữ kém hơn OPFS. Không có lỗi nào — chỉ là hiệu năng và độ bền khác đi, âm thầm | Thêm `Cross-Origin-Opener-Policy: same-origin` và `Cross-Origin-Embedder-Policy: require-corp` vào server phát web ở M7, và kiểm lại `crossOriginIsolated` trong E2E |
 | ~~Bản build web MUST dùng `--no-web-resources-cdn`~~ | M2.1a | Mặc định Flutter tải CanvasKit từ `gstatic.com` lúc **runtime** dù đã bundle sẵn cục bộ. Trong môi trường chặn CDN, app im lặng không render — không có lỗi build nào cảnh báo | **Đã trả ở M4.10b.** Job `web-build` trong `.github/workflows/ci.yml` dùng cờ này. **Chưa trả:** hướng dẫn chạy web thủ công vẫn chưa nhắc nó |
 | ~~`check_docs.sh` chỉ đếm task ID dạng `T*`, bỏ sót `M*`~~ | T1.4 | Báo "no duplicate WBS task IDs (8 tasks)" trong khi có 33 — **pass gây hiểu nhầm**, 25 task M2–M5 không được bảo vệ khỏi trùng ID | **Đã trả ở M2.1b.** Regex sửa thành `[TM][0-9]+(\.[0-9]+)?[a-z]?` (giờ báo 35 task), thêm check dependency resolve và check `M*` đủ field + acceptance criteria không rỗng. Cả ba verify bằng test tiêm lỗi, 4/4 case đạt |
+| Chín trong mười bốn hợp đồng đóng băng của V1 chỉ được giữ bằng test | M100.41 | Guard quét `lib/features/` cho 5 dòng (mục 2, 4, 5, 12, 13); 9 dòng còn lại — role identity, ThemeData mapping, shared API, sàn 48dp, ripple/state, high contrast, depth của card, chrome của shell, golden Linux-only — chỉ có test giữ. Test là file trong repo, nên một nhánh feature nới nó ra là đi qua được, và **guard không đỏ khi chính nó bị sửa**. Hiện chỉ có văn bản (`v1-freeze.md` §3) cấm điều đó | Một cơ chế thay cho một câu văn: hoặc CODEOWNERS trên các file Enforcement của §2, hoặc một rule guard đọc diff và bắt PR nào vừa chạm `lib/features/` vừa nới một file canh gác. Chưa làm ở M100.41 vì nó là thay đổi tooling, không phải thay đổi tài liệu — và MUST được kiểm bằng tiêm lỗi trước khi tin |

@@ -246,6 +246,24 @@ up-navigation grammars, a chip tier in five spellings and a switch with two
 state channels. Where M3 gives a choice, the repo's own tokens and
 `docs/design-system/` decide; where the repo is silent, M3 is the answer.
 
+**Design System V1 is frozen, and a feature task is not allowed to thaw it.**
+`docs/design-system/v1-freeze.md` names fourteen frozen contracts — the 45-role
+`ColorScheme` identity, the ThemeData mappings, the type scale and its
+variable-font weight contract, the spacing/radius/sizing/stroke/elevation
+foundations, the shared primitive APIs, the 48dp floor, high contrast, the card
+depth contract, `MxContentShell`'s chrome, the text-restyle policy, the raw
+Material ownership policy and Linux-only golden authoring. A feature task **MUST
+NOT** modify any of them; if it needs one changed it **MUST** stop and open a
+separate design-system task, which itself is only justified by one of the five
+reopen triggers in that file's §3. It may still compose shared widgets and lay
+them out — that was never the restriction.
+
+**Read that file before assuming a UI change is ordinary feature work**, because
+the bypass is quiet: only five of the fourteen contracts are watched by a guard
+over `lib/features/`; the other nine are held by tests, and a test is a file in
+this repo that a feature branch can edit. Loosening the thing that watches a
+contract counts as changing the contract.
+
 **State.** Immutable. Data and task-status are separate concerns — one
 `isLoading` boolean for every operation on a screen is a bug waiting to happen.
 Controllers never hold a `BuildContext`; `command_query_separation_test.dart`
