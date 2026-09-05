@@ -190,3 +190,9 @@ __pycache__/
 # PR gate writes it now, so anyone reproducing the CI command locally gets one
 # in their working tree.
 golden-report.jsonl
+
+# Attachments downloaded by remote Codex sessions. They are session artifacts,
+# not repository content, and 2.4 MB of them accumulated untracked before this
+# entry existed — which left the working tree permanently dirty and blocked
+# `git worktree` flows that require a clean base.
+.codex-remote-attachments/
