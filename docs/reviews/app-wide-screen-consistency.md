@@ -27,9 +27,10 @@ soi `MxCard` có đúng không, chứ cấu trúc không cho phép nó thấy **
 `MxCard` đúng nhưng giãn cách chúng khác nhau**. 123 finding dưới đây gần như toàn bộ
 thuộc loại thứ hai.
 
-**Tài liệu này ở trạng thái recon.** Nó ghi nhận cái đã đo được; nó chưa sửa gì. Mỗi
-cụm sẽ đóng bằng một PR riêng, và cột trạng thái của từng cụm được cập nhật tại chính
-PR đó.
+**Tài liệu này vừa là registry vừa là sổ đóng.** Phần §4 ghi cái đã đo được ở lần
+recon; mỗi cụm có thêm một mục *dispositions* ghi kết luận cuối sau khi tái xác minh,
+và cột PR ở §5 nói cụm đó đóng ở đâu. Một finding **không bao giờ bị xoá** — nó đổi
+trạng thái.
 
 ### 1.1 Phương pháp, và giới hạn của nó
 
@@ -280,6 +281,37 @@ phản biện; P2 và P3 ở dạng bảng nhưng giữ nguyên `file:line` và 
 | SC-C1-20 | P2 | J | Study entry — resume sheet (BR-103) | StudyResumeWidget is the only sheet body in the app that is neither a SingleChildScrollView nor a ListView. Its Column of title + 86-character body + three full-width MxActionButtons overflows the sheet at 320dp x textScaler 2.0 and paints the third button off the bottom of the display, with no way to scroll to it.<br>`study_resume_widget.dart:29-63` `study_mode_chooser_widget.dart:53-54` `study_direction_chooser_widget.dart:117-118` — study_resume_widget.dart:29-63 — MxSheetInsets(child: Column(...)), no scroll view. Rendered inside the real showMxSheet route at 320x568, viewPadding top 24 / bottom 48, textScaler 2.0: 'A RenderFlex… |  |
 
 ---
+
+### C1 — dispositions
+
+Đóng bởi PR #472. 17 finding đã sửa; 1 bị bác vì hành vi nó gọi là lỗi là hợp đồng của một wireframe đang active; 2 chạm hợp đồng đóng băng nên hoãn.
+
+Mỗi finding đi qua **hai pass tái xác minh độc lập** trên `main` hiện tại trước khi một dòng code được viết; chỗ nào hai pass bất đồng thì được phân xử bằng cách đọc code, không phải bằng cách lấy đa số.
+
+| ID | Kết luận cuối | Vì sao |
+|---|---|---|
+| `SC-C1-01` | **FIXED** | Reproduces exactly. starter_library_screen.dart:34-46 passes neither `padding` nor `isScrollable`, so mx_content_shell.dart:352-355 wraps the body in `Padding(EdgeInsets.all(mxScreenGutter(context)))` (:477-478 `_defaultPadding`),… |
+| `SC-C1-02` | **FIXED** | Reproduces. card_editor_screen.dart:172-177 builds create mode as `MxContentShell(title:..., leading:..., isScrollable: true, body: CardCreateFormWidget(...))` with no `footer:`; card_create_form_widget.dart:160-176 makes `MxButto… |
+| `SC-C1-03` | **REFUTED** | The arithmetic is right and the conclusion is wrong. Content width reaching the LayoutBuilder = viewport − 2×mxScreenGutter (study_home_body_section_widget.dart:106-111 applies it to the ListView) − 2×MxCardPadding.standard (mx_ca… |
+| `SC-C1-04` | **FIXED** | Reproduces, and the two footers really are the whole population: `grep -rn 'footer:' lib/features lib/shared` returns card_editor_screen.dart:280, card_editor_screen.dart:401 (the same `_shell` helper) and card_import_screen.dart:… |
+| `SC-C1-05` | **FIXED** | Reproduces. progress_screen.dart:66-72 `Widget shell(Widget body) => MxContentShell(title: ..., isScrollable: true, body: body)` — no `padding`, so mx_content_shell.dart:352 resolves `_defaultPadding(context)` = :477-478 `EdgeInse… |
+| `SC-C1-06` | **REVISED_AND_FIXED** | The measurement is right; the fix as scoped would trade an intra-screen step for an inter-screen one. Confirmed: card_list_body_widget.dart:59-64 is `const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.xl, AppSpacing.lg, AppSpacin… **Target đã đổi:** Same edit, wider scope — this must land as one change with SC-C1-10, not on its own. (1) lib/features/card/presentation/widgets/sections/card_list_body_widget.dart: `final gutter = mxScreenGutter(cont |
+| `SC-C1-07` | **REVISED_AND_FIXED** | The defect is real and the measurement is right; the proposed fix cites a precedent that does the opposite and leaves the error face wrong. Confirmed: study_options_screen.dart:45-49 is `MxContentShell(title: ..., body: Padding(pa… **Target đã đổi:** Pass `padding: EdgeInsets.zero` to the MxContentShell at study_options_screen.dart:45-47 and wrap only the `data:` branch: `data: (options) => Padding(padding: EdgeInsets.all(mxScreenGutter(context)), |
+| `SC-C1-08` | **REVISED_AND_FIXED** | The measured half is right; the restructure bundled with it is not required by any measurement and carries the cost. Confirmed: trash_selection_bar_widget.dart:49-54 is `const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppS… **Target đã đổi:** Two edits in lib/features/trash/presentation/widgets/sections/trash_selection_bar_widget.dart and nothing else: (1) :49-54 -> `EdgeInsets.fromLTRB(mxScreenGutter(context), AppSpacing.md, mxScreenGutte |
+| `SC-C1-09` | **REVISED_AND_FIXED** | The measurement is right and the sibling argument is right, but the fix as written breaks the selecting state. Confirmed: trash_row_widget.dart:86-89 `EdgeInsets.symmetric(horizontal: mxScreenGutter(context), vertical: AppSpacing.… **Target đã đổi:** Make the trailing inset follow the trailing content: at trash_row_widget.dart:86-89 use `EdgeInsets.only(left: mxScreenGutter(context), right: isSelecting ? mxScreenGutter(context) : AppSpacing.xs, to |
+| `SC-C1-10` | **FIXED** | Reproduces, and this finding already carries the scope SC-C1-06 is missing. tag_catalog_screen.dart:106-108 (`_FaceColumn`) is `const EdgeInsets.symmetric(horizontal: AppSpacing.lg)` and :166-171 (`_CatalogList`) is `const EdgeIns… |
+| `SC-C1-11` | **REVISED_AND_FIXED** | The defect and the false precedent are both real, but the target offers two mutually exclusive fixes and does not choose, which is how a reviewer ships the wrong one. Verified: tag_catalog_screen.dart:187-192 is `Divider(indent: _… **Target đã đổi:** Keep the derived leading `indent` and set `endIndent: AppSpacing.xs` at tag_catalog_screen.dart:191, so the painted line ends exactly on the row's own content edge (373 at 393dp) — the same `xs` tag_c |
+| `SC-C1-12` | **FIXED** | Reproduces, and it is the worst item in the cluster. study_session_screen.dart:307-308 renders `MxEmptyState(title: context.l10n.studySessionFinished)` with no `message`, no `actionLabel`, no `onAction`, while :309-312 — the very … |
+| `SC-C1-13` | **REVISED_AND_FIXED** | The defect and the measurement are right; the target's first sentence contradicts the precedent it cites. Confirmed: study_entry_screen.dart:116-142 is `MxContentShell(title: ..., actions: [...], body: Padding(padding: const EdgeI… **Target đã đổi:** Take the finding's second option and drop the first. Pass `padding: EdgeInsets.zero` to the MxContentShell at study_entry_screen.dart:116-118, delete the `Padding` at :126-127, and wrap only the `data |
+| `SC-C1-14` | **FIXED** | Reproduces. reminder_toggle_row_widget.dart:36-40 is `const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.xs)` — a fixed 16 — and reminder_settings_section_widget.dart:107-108 wraps the Divider in `const Pad… |
+| `SC-C1-15` | **DESIGN_SYSTEM_BLOCKED** | The defect is real and the cause analysis is right. mx_switch_row.dart:48-56 builds `SwitchListTile(... contentPadding: EdgeInsets.zero ...)`, passed explicitly — so ListTileTheme cannot override it and applyCompactScale cannot re… **Hợp đồng:** 6 — Public contract của shared primitive (docs/design-system/v1-freeze.md §2, enforced by shared_api_closure_test and mx |
+| `SC-C1-16` | **DESIGN_SYSTEM_BLOCKED** | Real, and correctly self-diagnosed as unreachable. `MxDialogMetrics.inset = 40` (mx_dialog_metrics.dart:28) with `insetPadding = EdgeInsets.symmetric(horizontal: inset, vertical: AppSpacing.xl)` at :38-41, and every dialog in the … **Hợp đồng:** 6 — Public contract của shared primitive (docs/design-system/v1-freeze.md §2). The only fix is a new shared `MxTimePicke |
+| `SC-C1-17` | **FIXED** | Reproduces, and the justification really does fail to distinguish. card_export_sheet_widget.dart:216-221 is `Padding(padding: EdgeInsets.only(left: AppSpacing.lg, right: AppSpacing.lg, bottom: AppSpacing.lg + mxSheetBottomObstruct… |
+| `SC-C1-18` | **FIXED** | Reproduces, and the arithmetic checks out from source. settings_study_defaults_section_widget.dart:166 is `MxCard.raised(child: Column(...))` with no `padding:`, so it takes `MxCardPadding.standard` = `const EdgeInsets.all(AppSpac… |
+| `SC-C1-19` | **FIXED** | Reproduces, and it is a one-line miss inside a rule the file itself states. settings_choice_section_widget.dart:113-116 wraps SettingsErrorBandWidget in `const Padding(padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg)… |
+| `SC-C1-20` | **FIXED** | Reproduces structurally, and the sibling evidence is unusually strong. study_resume_widget.dart:28-63 is `MxSheetInsets(child: Column(mainAxisSize: MainAxisSize.min, ...))` with no scroll view — title, an `studyResumeBody` paragra… |
+
+**Tổng: DESIGN_SYSTEM_BLOCKED 2 · FIXED 11 · REFUTED 1 · REVISED_AND_FIXED 6 = 20**
 
 ### C2 — List and section rhythm — gaps one step below the composition grammar
 
@@ -726,7 +758,7 @@ mà reviewer nhìn một màn đã gán. Chênh lệch giữa hai cột là §1.
 
 | Cụm | n | Đơn vị | Cao nhất theo màn | Severity cụm | PR |
 |---|---|---|---|---|---|
-| **C1** Sở hữu gutter | 20 | 16 | P1 | **P1** | chưa mở |
+| **C1** Sở hữu gutter | 20 | 16 | P1 | **P1** | **đóng — #472** · FIXED 11 · REVISED_AND_FIXED 6 · REFUTED 1 · BLOCKED 2 |
 | **C2** Nhịp danh sách và section | 20 | 14 | P2 | **P1** — cùng một grammar sai ở 14 đơn vị | chưa mở |
 | **C3** Mặt lỗi và mặt rỗng | 27 | 15 | **P0** | **P0** | chưa mở |
 | **C4** Grammar điều hướng và chrome | 21 | 12 | P1 | **P1** | chưa mở |
