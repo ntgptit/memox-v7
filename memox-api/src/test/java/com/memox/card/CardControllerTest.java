@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.UUID;
+import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -50,7 +51,35 @@ class CardControllerTest {
 		mockMvc.perform(get("/api/v1/decks/{deckId}", cardDeckId))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.contentType").value("card"));
+		mockMvc.perform(get("/api/v1/decks/{deckId}/cards", cardDeckId).param("limit", "20"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.items[0].id").value(cardId))
+				.andExpect(jsonPath("$.nextCursor").doesNotExist());
 		assertStudyState(cardId, "eight_box", 1);
+	}
+
+	@Test
+	void continuesCardPagesFromTheLastReturnedKeyWithoutSkippingRows() throws Exception {
+		final var rootId = UUID.randomUUID().toString();
+		final var cardDeckId = UUID.randomUUID().toString();
+		final var firstCardId = UUID.randomUUID().toString();
+		final var secondCardId = UUID.randomUUID().toString();
+		createRoot(rootId);
+		createChild(rootId, cardDeckId);
+		createCard(cardDeckId, firstCardId, "First", "One");
+		createCard(cardDeckId, secondCardId, "Second", "Two");
+
+		final var firstPage = mockMvc.perform(get("/api/v1/decks/{deckId}/cards", cardDeckId).param("limit", "1"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.items[0].id").value(firstCardId))
+				.andReturn();
+		final var cursor = JsonPath.read(firstPage.getResponse().getContentAsString(), "$.nextCursor").toString();
+
+		mockMvc.perform(get("/api/v1/decks/{deckId}/cards", cardDeckId)
+					.param("limit", "1")
+					.param("after", cursor))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.items[0].id").value(secondCardId));
 	}
 
 	private void createRoot(String rootId) throws Exception {
@@ -68,6 +97,15 @@ class CardControllerTest {
 					.content("""
 							{"id":"%s","name":"Cards"}
 							""".formatted(childId)))
+				.andExpect(status().isCreated());
+	}
+
+	private void createCard(String deckId, String cardId, String front, String back) throws Exception {
+		mockMvc.perform(post("/api/v1/decks/{deckId}/cards", deckId)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""
+							{"id":"%s","front":"%s","back":"%s"}
+							""".formatted(cardId, front, back)))
 				.andExpect(status().isCreated());
 	}
 

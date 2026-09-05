@@ -11,6 +11,7 @@ public class CardRow {
 	private String deckId;
 	private String front;
 	private String back;
+	private boolean flagged;
 	private String example;
 	private String hint;
 	private String pronunciation;
@@ -18,7 +19,7 @@ public class CardRow {
 	private Instant updatedAt;
 
 	public Card toDomain() {
-		return new Card(id, deckId, front, back, false, example, hint, pronunciation, createdAt, updatedAt);
+		return new Card(id, deckId, front, back, flagged, example, hint, pronunciation, createdAt, updatedAt);
 	}
 
 	public String getFrontFolded() { return front.toLowerCase(Locale.ROOT); }
@@ -31,6 +32,8 @@ public class CardRow {
 	public void setFront(String front) { this.front = front; }
 	public String getBack() { return back; }
 	public void setBack(String back) { this.back = back; }
+	public boolean isFlagged() { return flagged; }
+	public void setFlagged(boolean flagged) { this.flagged = flagged; }
 	public String getExample() { return example; }
 	public void setExample(String example) { this.example = example; }
 	public String getHint() { return hint; }

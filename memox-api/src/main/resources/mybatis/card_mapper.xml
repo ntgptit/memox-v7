@@ -4,6 +4,19 @@
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.memox.repository.CardRepository">
 
+  <resultMap id="cardRow" type="com.memox.card.persistence.CardRow">
+    <id column="id" property="id"/>
+    <result column="deck_id" property="deckId"/>
+    <result column="front" property="front"/>
+    <result column="back" property="back"/>
+    <result column="is_flagged" property="flagged"/>
+    <result column="example" property="example"/>
+    <result column="hint" property="hint"/>
+    <result column="pronunciation" property="pronunciation"/>
+    <result column="created_at" property="createdAt"/>
+    <result column="updated_at" property="updatedAt"/>
+  </resultMap>
+
   <insert id="insertCard" parameterType="com.memox.card.persistence.CardRow">
     INSERT INTO cards (
       id, deck_id, front, back, front_folded, back_folded,
@@ -21,4 +34,17 @@
       #{cardId}, #{schedulerType}, #{schedulerVersion}, #{schedulerGeneration}
     )
   </insert>
+
+  <select id="findActiveCardsByDeck" resultMap="cardRow">
+    SELECT id, deck_id, front, back, is_flagged, example, hint, pronunciation, created_at, updated_at
+    FROM cards
+    WHERE deck_id = #{deckId}
+      AND delete_batch_id IS NULL
+    <if test="afterCreatedAt != null">
+      AND (created_at &gt; #{afterCreatedAt}
+        OR (created_at = #{afterCreatedAt} AND id &gt; #{afterId}))
+    </if>
+    ORDER BY created_at ASC, id ASC
+    LIMIT #{limit}
+  </select>
 </mapper>

@@ -2,6 +2,9 @@ package com.memox.service.impl;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Locale;
 
 import org.springframework.stereotype.Service;
@@ -9,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.memox.card.application.CreateCardCommand;
 import com.memox.card.domain.Card;
+import com.memox.card.domain.CardPage;
+import com.memox.card.persistence.CardPageQuery;
 import com.memox.card.persistence.CardRow;
 import com.memox.exception.DeckConflictException;
 import com.memox.exception.DeckNotFoundException;
@@ -72,6 +77,26 @@ public class CardServiceImpl implements CardService {
 		return card.toDomain();
 	}
 
+	@Override
+	@Transactional(readOnly = true)
+	public CardPage listCards(String deckId, int limit, String afterCursor) {
+		if (deckRepository.findActiveDeckById(deckId) == null) {
+			throw new DeckNotFoundException(deckId);
+		}
+		final var cursor = decodeCursor(afterCursor);
+		final var rows = new ArrayList<>(cardRepository.findActiveCardsByDeck(
+				new CardPageQuery(deckId, cursor.createdAt(), cursor.id(), limit + 1)));
+		final String nextCursor;
+		if (rows.size() > limit) {
+			rows.remove(rows.size() - 1);
+			final var lastReturned = rows.get(rows.size() - 1);
+			nextCursor = encodeCursor(lastReturned.getCreatedAt(), lastReturned.getId());
+		} else {
+			nextCursor = null;
+		}
+		return new CardPage(rows.stream().map(CardRow::toDomain).toList(), nextCursor);
+	}
+
 	private String validateText(String rawText, String field, int maxLength) {
 		final var text = rawText.trim();
 		if (text.isEmpty()) {
@@ -98,5 +123,29 @@ public class CardServiceImpl implements CardService {
 					"Card %s must be at most 240 characters.".formatted(field));
 		}
 		return text;
+	}
+
+	private Cursor decodeCursor(String value) {
+		if (value == null || value.isBlank()) {
+			return new Cursor(null, null);
+		}
+		try {
+			final var decoded = new String(Base64.getUrlDecoder().decode(value), StandardCharsets.UTF_8);
+			final var separator = decoded.indexOf('|');
+			if (separator <= 0 || separator == decoded.length() - 1) {
+				throw new IllegalArgumentException();
+			}
+			return new Cursor(Instant.parse(decoded.substring(0, separator)), decoded.substring(separator + 1));
+		} catch (IllegalArgumentException exception) {
+			throw new DeckValidationException("after", "INVALID_CURSOR", "The card cursor is invalid.");
+		}
+	}
+
+	private String encodeCursor(Instant createdAt, String id) {
+		return Base64.getUrlEncoder().withoutPadding()
+				.encodeToString((createdAt + "|" + id).getBytes(StandardCharsets.UTF_8));
+	}
+
+	private record Cursor(Instant createdAt, String id) {
 	}
 }
