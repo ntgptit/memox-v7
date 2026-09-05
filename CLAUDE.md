@@ -380,7 +380,7 @@ Widgetbook surface. Layer ownership provides the starting set; reverse Dart
 imports add app, integration and cross-feature test consumers, and existing
 untracked tests are discoverable locally. Golden-only changes use runnable
 non-golden surrogates **locally**, because the local loop excludes the golden
-tag; **pixel comparison is a PR gate now** — `ci.yml` runs `goldens (windows)`
+tag; **pixel comparison is a PR gate now** — `ci.yml` runs `goldens (linux)`
 whenever the plan sets `needs_goldens`, which any code change or any change to
 `test/demo/` does. It used to live only in `ci-full.yml`, which is
 `workflow_dispatch:`, so nothing compared a committed PNG against a fresh

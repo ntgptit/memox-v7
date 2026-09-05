@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Status** | report only — no production, theme, test, guard, Widgetbook, kit, golden, CI or generated file was changed. This file is the entire diff |
-| **Closure** | **`fix/design-system-v1-closure`** (2026-09-04) — every finding in §16–§19 carries a disposition in **§27**; §23 re-scored **30 / 30**, §24 re-scored **21 / 22** (the device suite is the one NOT RUN). Registry rows below are left as found at CURRENT_SHA; §27 is the record of what closed them |
+| **Status** | **historical closure evidence — not an active backlog.** Design System V1 was frozen at `b4599c35` (M100.40); the freeze record, the frozen contracts and the reopen triggers live in `docs/design-system/v1-freeze.md`. This file stays as the registry of what was found and what closed it. Do **not** open an A21 |
+| **Closure** | **`fix/design-system-v1-closure`** (2026-09-04) — every finding in §16–§19 carries a disposition in **§27**. **Final scores at the V1 freeze (M100.40, 2026-09-05): §23 = 30 / 30, §24 = 22 / 22.** The device suite, the one criterion still NOT RUN at closure, was run: 8 of 8 on `emulator-5554`. Registry rows below are left as found at CURRENT_SHA; §27 is the record of what closed them |
 | **Purpose** | Refresh and correct A20 against current `main`, and become the single authoritative finding registry and implementation plan for the design system V1 MASTER FIX |
 | **CURRENT_SHA** | **`b7f45dc4b9a702c6812fd0b1490eafbebb8ddebf`** — *refactor(row): the row is the M3 rectangle; close the three P3 debts of M100.36* (#452) |
 | **A20_BASE_SHA** | **`b2d134b748c214c4130966358249d33fad5c4dea`** |
@@ -920,7 +920,7 @@ semantic contract, are `ThemeData` roles correct, are shared APIs closed or
 explicitly constrained, is prohibited drift enforceable, are component-level
 accessibility contracts present, are unjustified raw usages eliminated.
 Coverage properties (catalogue, stress specimens, width matrices, goldens,
-sweeps) are **not** here; they are §24. **Score: 13 / 30** at CURRENT_SHA — 13 met, 17 unmet. **Re-scored at `fix/design-system-v1-closure`: 30 / 30** (§27).
+sweeps) are **not** here; they are §24. **Score: 13 / 30** at CURRENT_SHA — 13 met, 17 unmet. **Re-scored at `fix/design-system-v1-closure`: 30 / 30** (§27), and re-verified mechanically at the V1 freeze (M100.40, §28).
 
 | # | Criterion | State |
 |---|---|---|
@@ -963,7 +963,7 @@ properties and were already counted there.
 
 ## 24 · Full-verification criteria and score
 
-**Score: 11 / 22** at CURRENT_SHA — 11 met, 11 unmet (⚠️ NOT RUN / unknown counts as unmet). **Re-scored at `fix/design-system-v1-closure`: 21 / 22** — the device suite is the one NOT RUN (§27).
+**Score: 11 / 22** at CURRENT_SHA — 11 met, 11 unmet (⚠️ NOT RUN / unknown counts as unmet). **Re-scored at `fix/design-system-v1-closure`: 21 / 22** — the device suite was the one NOT RUN (§27). **Final: 22 / 22 at the V1 freeze** (M100.40, §28).
 These are *additional* to §23 and do not gate architectural closure.
 
 The former criterion 23 ("≥ 1 component golden at 360 and 375 dp") is **removed,
@@ -981,7 +981,7 @@ architecture never had; the denominator drops from 23 to 22 accordingly.
 | 5 | Codegen fresh | ✅ |
 | 6 | Golden suite green on Linux | ✅ 325 / 325 on Linux (WSL Ubuntu 24.04, Flutter 3.44.8) after regeneration — 321 at START_SHA plus the 4 HC screens — 107 pictures changed: 103 regenerated, 4 new high-contrast screens; compare → regenerate → compare again |
 | 7 | Widgetbook smoke green | ✅ `widgetbook/`: analyze clean, smoke test green |
-| 8 | `integration_test/` 8 of 8 on a device | ⚠️ NOT RUN — no emulator in the closure session; the eight scenarios are unchanged by this branch |
+| 8 | `integration_test/` 8 of 8 on a device | ✅ **8 / 8** on `emulator-5554`, `--flavor development`, exit 0 (M100.40) — the last NOT RUN criterion, and the one that moved §24 to 22 / 22 |
 | 9 | Every shared component in the catalogue | ✅ |
 | 10 | Every shared component has a stress specimen | ✅ |
 | 11 | Goldens authored on Linux only | ✅ policy in `dart_test.yaml` |
@@ -1019,7 +1019,9 @@ Per §15, each claim with its command, scope and result.
 **NOT RUN, and stated as such:** the golden suite (a Windows checkout cannot
 author goldens and have CI agree — `dart_test.yaml` pins Linux), the Widgetbook
 smoke test, and `integration_test/` on a device. No golden was regenerated and
-no golden was updated for this report.
+no golden was updated for this report. *All three were run later:* the goldens
+and the Widgetbook smoke at `fix/design-system-v1-closure` (§24 rows 6 and 7),
+and the device suite at the V1 freeze (§28).
 
 **Scanner discipline.** Every count came from a scanner run with a **control
 group** — the raw-widget scan carries the 44 names the guard *does* ban and they
@@ -1091,7 +1093,14 @@ out of the registry.
 
 ## 26 · Final source-of-truth statement
 
-**A20.1 IS THE PRIMARY IMPLEMENTATION REGISTRY FOR THE DESIGN SYSTEM V1 MASTER FIX.**
+**A20.1 WAS THE PRIMARY IMPLEMENTATION REGISTRY FOR THE DESIGN SYSTEM V1 MASTER
+FIX. That work is finished.**
+
+Since the V1 freeze (M100.40, 2026-09-05) this file is historical closure
+evidence: every finding of §16–§19 is dispositioned in §27, and no row here is
+an open item. What a design-system task reads *now* is
+`docs/design-system/v1-freeze.md` — the frozen contracts, what enforces each of
+them, and the five triggers that reopen V1.
 
 Older A7–A20 reports remain historical evidence and must not override an A20.1
 finding refreshed against CURRENT_SHA.
@@ -1169,8 +1178,10 @@ own contract; each was reopened, fixed and re-closed against a rendered test:
 | P1-15 | a pushed loading/error screen keeps its bar and Back | the study session, custom chrome by design, gained the same inferred bar — a BR-82 regression | `MxShellChrome { auto, none }`; the session says `none`; pushed-route test |
 | P1-16 | one up-navigation grammar for card trails | the editor's Up went to the deck's parent, one level too far, and its sheet could not reach the deck | `goUpToDeck`; the sheet lists the deck last; `onLeave` preserved; tests both ways |
 
-§23 stays **30 / 30** and §24 **21 / 22**: the criteria were met at #460's
-level of evidence, and the corrective pass raised the evidence, not the score.
+§23 stays **30 / 30** and §24 **21 / 22** *at this pass*: the criteria were met
+at #460's level of evidence, and the corrective pass raised the evidence, not
+the score. §24 reached **22 / 22** later, at the V1 freeze, when the device
+suite was actually run (§28).
 
 **Corrective pass 2 (P1-11 again).** The owner's review of #462 found three
 gaps the re-closure still had: `hintStyle` is a `WidgetStateTextStyle`
@@ -1184,3 +1195,68 @@ each one, so a slot cannot be missed by hand a third time. Rendered proof: a
 disabled field's hint is emboldened *and* keeps `onDisabled`; the slider's
 value indicator and the dial resolve `wght 700` in place.
 
+
+---
+
+## 28 · V1 freeze verification — `chore/design-system-v1-release-freeze`
+
+M100.40, 2026-09-05. **No audit was performed and no component was redesigned.**
+This section records the run that closed §24 and froze V1; the frozen contracts
+themselves live in `docs/design-system/v1-freeze.md`, which is where a later
+task should look.
+
+| | |
+|---|---|
+| START_SHA | `9443c49c` (= `origin/main`) |
+| FREEZE_SHA | `b4599c35` — the last commit touching anything a gate measures |
+| Flutter | 3.44.8 · Dart 3.12.2, matching `.fvmrc` and the CI runners |
+| §23 architecture | **30 / 30** |
+| §24 verification | **22 / 22** |
+
+| # | Gate | Command | Result |
+|---|---|---|---|
+| 1 | format | `dart format --set-exit-if-changed .` | 1532 files, 0 changed |
+| 2 | analyze | `flutter analyze --no-fatal-infos` (after `pub get` in `widgetbook/`, as CI does) | **No issues found** |
+| 3 | guard | `guard/run.py check --ruleset memox-v7` | 84 rules, **no violations** |
+| 4 | guard probes | `pytest` in `code-verification-guard-v2/` | **195 passed** |
+| 5 | docs | `check_docs.py` | internally consistent |
+| 6 | codegen | `check_generated.py` | fresh, complete, uncommitted |
+| 7 | host suite | `TZ=UTC flutter test --exclude-tags golden` | **4772 passed**, exit 0 |
+| 8 | Widgetbook | `flutter test --reporter failures-only` in `widgetbook/` | passed |
+| 9 | goldens | `goldens (linux)` job reproduced in WSL Ubuntu 24.04, `TZ=UTC`, Flutter 3.44.8 | **325 / 325**, count floor 325 ≥ 70, working tree clean afterwards |
+| 10 | Android integration | `flutter test integration_test/ -d emulator-5554 --flavor development` | **8 / 8**, exit 0 |
+
+Accessibility is inside gate 7: the four `*_accessibility_sweep_test` files
+(card, search, reminder, trash) run `meetsGuideline` for tap-target size and
+labelled targets on every screen.
+
+### 28.1 · The two things this branch changed, and why they are not a redesign
+
+**The Bold-text registry is now keyed by component theme + slot.** §27.1's
+corrective pass 2 added a registry that read every `*Style:` / `*TextStyle:`
+slot the component themes set and asserted `applyBoldText` names each one — but
+it collected **bare field names** into a single set and matched them as
+substrings against the file. Four component themes spell a slot `labelStyle`
+and two more spell one `labelTextStyle`, so one owner's re-weight satisfied
+every other owner's check. Deleting the whole `tabBarTheme` block left
+`labelStyle:` in the file twice and `unselectedLabelStyle:` once, and the
+registry stayed green.
+
+The registry is now discovered from the built `ThemeData` through its own
+diagnostics — which emit all forty-odd component sub-themes and suppress a slot
+the app left null — and keyed `owner.slot`: 23 pairs, identical across all four
+themes, pinned. Each pair is asserted per state against
+`AppTypography.withWeight(before, w700)`, so one equality carries the `wght`
+resolution, the surviving resolver, the state colour and the geometry at once.
+Four fault injections were run before it was trusted; the first is the one above.
+
+**`MaterialApp.builder` is now under test.** Every one of the twenty-two
+Bold-text tests wired `BoldTextWidget` by hand, so none of them could see the
+wrapper leaving `app.dart`. Measured: with that line deleted, all 52 tests under
+`test/core/theme/schemes/` still pass while the OS setting is once again the
+exact no-op P1-11 was raised for. `CompactScaleWidget` sits on the same line and
+had the same hole. `app_media_query_wiring_test` closes both against the real
+root widget.
+
+Neither changes a pixel: gate 9 compared 325 goldens against the committed PNGs
+and rewrote none of them.
