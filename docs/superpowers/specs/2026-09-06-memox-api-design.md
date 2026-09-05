@@ -73,7 +73,9 @@ The Flutter domain repositories and their tests are the behavior source.  The
 Drift table definitions are the schema source.  They are not code-generation
 input: SQLite-specific syntax such as `INSERT OR IGNORE`, `GROUP_CONCAT`,
 `json_group_array`, boolean expressions and recursive CTE details are ported
-deliberately to PostgreSQL and proven by PostgreSQL integration tests.
+deliberately to PostgreSQL. The automated backend suite uses isolated H2 in
+PostgreSQL compatibility mode; PostgreSQL-specific behavior is validated during
+local runtime checks against the configured PostgreSQL database.
 
 ## HTTP contract
 
@@ -97,7 +99,7 @@ responses state their cursor, ordering and stable tie-breaker explicitly.
 ### Phase 0 — configuration and verification
 
 - Establish profiles, environment-backed datasource configuration, Hikari,
-  Flyway, MyBatis, Actuator health, Docker Compose and a test PostgreSQL setup.
+  Flyway, MyBatis, Actuator health and an isolated H2 test setup.
 - Add a failing startup/configuration test before implementation and prove local
   startup against the configured PostgreSQL database.
 
@@ -107,12 +109,13 @@ responses state their cursor, ordering and stable tie-breaker explicitly.
   controller test harness.
 - Port the complete persisted MemoX schema through an initial Flyway migration,
   including constraints and indexes defined in `docs/data-model.md`.
-- Add migration and mapper/XML alignment tests against PostgreSQL.
+- Add migration and mapper/XML alignment tests against H2 in PostgreSQL
+  compatibility mode.
 
 ### Phase 2 — library writes
 
 - Deliver Deck, Card, Tag and Trash vertical slices, each with controller,
-  application-service, mapper/XML and PostgreSQL integration tests.
+  application-service, mapper/XML and H2 integration tests.
 - Port transactional rules such as maximum deck depth, content-type locking,
   subtree move rejection, delete/restore and tag merge from their Flutter
   repositories.
@@ -133,7 +136,7 @@ responses state their cursor, ordering and stable tie-breaker explicitly.
 
 ### Phase 5 — hardening
 
-- Add full HTTP contract tests, PostgreSQL query semantics coverage, exported
+- Add full HTTP contract tests, H2 query semantics coverage, exported
   OpenAPI diff verification, production profile validation and CI wiring.
 - Run all migrations from an empty PostgreSQL database and verify no endpoint
   logs card content, notes, history or transfer payloads.

@@ -16,15 +16,15 @@
 
 **Goal:** Make `memox-api` start against the configured local PostgreSQL
 database, expose a versioned health probe, and prove Flyway/MyBatis run against
-PostgreSQL before feature endpoints are added.
+PostgreSQL before feature endpoints are added; H2 for the automated test suite.
 
 **Architecture:** Configuration is environment-backed and profile-specific.
 Flyway is the only schema writer. MyBatis mapper interfaces delegate to XML SQL
 and are exercised through an integration test; controllers return RFC 9457
 Problem Details via one advice.
 
-**Tech Stack:** Java 17, Spring Boot 3.5, PostgreSQL, Flyway, MyBatis,
-Testcontainers, Spring MVC, Spring Boot Actuator, JUnit 5.
+**Tech Stack:** Java 17, Spring Boot 3.5, PostgreSQL runtime, H2 test runtime,
+Flyway, MyBatis, Spring MVC, Spring Boot Actuator, JUnit 5.
 
 **Spec:** `docs/superpowers/specs/2026-09-06-memox-api-design.md`
 
@@ -49,14 +49,15 @@ Testcontainers, Spring MVC, Spring Boot Actuator, JUnit 5.
 - Modify: `memox-api/pom.xml`
 - Modify: `memox-api/src/main/resources/application.properties`
 - Create: `memox-api/src/main/resources/application-local.properties`
-- Create: `memox-api/src/main/resources/application-test.properties`
+- Create: `memox-api/src/test/resources/application-test.properties`
 - Create: `memox-api/src/main/resources/application-prod.properties`
 - Create: `memox-api/src/test/java/com/memox/config/DatabaseConfigurationTest.java`
 
 **Interfaces:**
 - Consumes: `MEMOX_DB_URL`, `MEMOX_DB_USERNAME`, `MEMOX_DB_PASSWORD`.
-- Produces: an active `test` profile whose datasource is PostgreSQL Testcontainers
-  and local/prod profiles whose datasource properties resolve only from env vars.
+- Produces: an active `test` profile whose datasource is an in-memory H2
+  database in PostgreSQL compatibility mode; local/prod datasource properties
+  resolve only from env vars.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -66,9 +67,9 @@ class DatabaseConfigurationTest {
   @Autowired DataSource dataSource;
 
   @Test
-  void connects_to_postgresql_and_exposes_a_database_product_name() throws Exception {
+  void connects_to_in_memory_h2() throws Exception {
     try (var connection = dataSource.getConnection()) {
-      assertThat(connection.getMetaData().getDatabaseProductName()).isEqualTo("PostgreSQL");
+      assertThat(connection.getMetaData().getDatabaseProductName()).isEqualTo("H2");
     }
   }
 }
@@ -78,13 +79,14 @@ class DatabaseConfigurationTest {
 
 Run: `./mvnw.cmd -Dtest=DatabaseConfigurationTest test`
 
-Expected: FAIL because no PostgreSQL Testcontainers datasource is configured.
+Expected: FAIL because no H2 test datasource is configured.
 
 - [ ] **Step 3: Implement the minimum configuration**
 
-Add `spring-boot-testcontainers`, `org.testcontainers:junit-jupiter`,
-`org.testcontainers:postgresql` and `spring-boot-starter-actuator` to
-`pom.xml`. Define a `@ServiceConnection` PostgreSQL container in the test.
+Add `com.h2database:h2` (test scope) and `spring-boot-starter-actuator` to
+`pom.xml`. Configure the H2 test datasource and test-only Flyway migration
+location. Keep the PostgreSQL migration unchanged because it is the runtime
+schema source; the H2 equivalent exists only to support isolated tests.
 Configure local and production datasource URL/username/password with required
 environment placeholders; configure Flyway and MyBatis mapper locations.
 
@@ -92,7 +94,7 @@ environment placeholders; configure Flyway and MyBatis mapper locations.
 
 Run: `./mvnw.cmd -Dtest=DatabaseConfigurationTest test`
 
-Expected: PASS and the JDBC metadata product name is `PostgreSQL`.
+Expected: PASS and the JDBC metadata product name is `H2`.
 
 - [ ] **Step 5: Commit**
 
@@ -298,8 +300,8 @@ starting Compose and running `./mvnw.cmd -Dspring-boot.run.profiles=local spring
 
 Run: `./mvnw.cmd test`
 
-Expected: all unit, MVC, Flyway and PostgreSQL mapper tests pass.  With Docker
-running and the three environment variables set, run
+Expected: all unit, MVC, Flyway and H2 mapper tests pass. With the three
+environment variables set, run
 `./mvnw.cmd -Dspring-boot.run.profiles=local spring-boot:run` and request
 `GET /api/v1/health`.
 

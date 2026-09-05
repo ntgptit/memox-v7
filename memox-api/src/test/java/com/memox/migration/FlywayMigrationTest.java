@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-@SpringBootTest(properties = "spring.profiles.active=local")
+@SpringBootTest(properties = "spring.profiles.active=test")
 class FlywayMigrationTest {
 
 	@Autowired
