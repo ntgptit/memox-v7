@@ -43,7 +43,7 @@ public class CardController {
 	public CardPageResponse listCards(
 			@PathVariable String deckId,
 			@RequestParam(defaultValue = "50") @Min(1) @Max(100) int limit,
-			@RequestParam(required = false) String after) {
-		return CardPageResponse.from(cardService.listCards(deckId, limit, after));
+			@RequestParam(defaultValue = "0") @Min(0) int offset) {
+		return CardPageResponse.from(cardService.listCards(deckId, limit, offset));
 	}
 }

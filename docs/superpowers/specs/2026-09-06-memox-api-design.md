@@ -91,8 +91,8 @@ is diagnostic, not Flutter UI copy.
 
 Springdoc generates the runtime OpenAPI document.  A canonical exported
 OpenAPI JSON file is committed and diffed in CI so code changes cannot silently
-change the future Flutter contract.  Cursor/keyset responses and pageable
-responses state their cursor, ordering and stable tie-breaker explicitly.
+change the API contract.  Paginated responses state their `limit`,
+`offset`, ordering and stable tie-breaker explicitly.
 
 ## Delivery phases
 
@@ -131,8 +131,7 @@ responses state their cursor, ordering and stable tie-breaker explicitly.
 
 - Deliver search, progress, persisted settings and server-owned card
   import/export.
-- Use whitelist-based sorting and deterministic cursor/keyset pagination where
-  the Flutter feature already requires it.
+- Use whitelist-based sorting and deterministic `limit`/`offset` pagination.
 
 ### Phase 5 — hardening
 

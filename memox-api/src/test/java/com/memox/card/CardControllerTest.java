@@ -6,7 +6,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.UUID;
-import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -24,6 +23,15 @@ class CardControllerTest {
 
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
+
+	@Test
+	void rejectsNegativeOffset() throws Exception {
+		mockMvc.perform(get("/api/v1/decks/{deckId}/cards", UUID.randomUUID())
+					.param("offset", "-1"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
+				.andExpect(jsonPath("$.fieldErrors.offset").exists());
+	}
 
 	@Test
 	void createsCardAndInitialStudyStateInAnUnsetSubDeck() throws Exception {
@@ -54,12 +62,13 @@ class CardControllerTest {
 		mockMvc.perform(get("/api/v1/decks/{deckId}/cards", cardDeckId).param("limit", "20"))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.items[0].id").value(cardId))
-				.andExpect(jsonPath("$.nextCursor").doesNotExist());
+				.andExpect(jsonPath("$.limit").value(20))
+				.andExpect(jsonPath("$.offset").value(0));
 		assertStudyState(cardId, "eight_box", 1);
 	}
 
 	@Test
-	void continuesCardPagesFromTheLastReturnedKeyWithoutSkippingRows() throws Exception {
+	void returnsCardPagesUsingLimitAndOffset() throws Exception {
 		final var rootId = UUID.randomUUID().toString();
 		final var cardDeckId = UUID.randomUUID().toString();
 		final var firstCardId = UUID.randomUUID().toString();
@@ -69,17 +78,21 @@ class CardControllerTest {
 		createCard(cardDeckId, firstCardId, "First", "One");
 		createCard(cardDeckId, secondCardId, "Second", "Two");
 
-		final var firstPage = mockMvc.perform(get("/api/v1/decks/{deckId}/cards", cardDeckId).param("limit", "1"))
+		mockMvc.perform(get("/api/v1/decks/{deckId}/cards", cardDeckId)
+					.param("limit", "1")
+					.param("offset", "0"))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.items[0].id").value(firstCardId))
-				.andReturn();
-		final var cursor = JsonPath.read(firstPage.getResponse().getContentAsString(), "$.nextCursor").toString();
+				.andExpect(jsonPath("$.limit").value(1))
+				.andExpect(jsonPath("$.offset").value(0));
 
 		mockMvc.perform(get("/api/v1/decks/{deckId}/cards", cardDeckId)
 					.param("limit", "1")
-					.param("after", cursor))
+					.param("offset", "1"))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.items[0].id").value(secondCardId));
+				.andExpect(jsonPath("$.items[0].id").value(secondCardId))
+				.andExpect(jsonPath("$.limit").value(1))
+				.andExpect(jsonPath("$.offset").value(1));
 	}
 
 	private void createRoot(String rootId) throws Exception {

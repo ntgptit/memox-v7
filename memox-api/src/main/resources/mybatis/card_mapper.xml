@@ -40,11 +40,8 @@
     FROM cards
     WHERE deck_id = #{deckId}
       AND delete_batch_id IS NULL
-    <if test="afterCreatedAt != null">
-      AND (created_at &gt; #{afterCreatedAt}
-        OR (created_at = #{afterCreatedAt} AND id &gt; #{afterId}))
-    </if>
     ORDER BY created_at ASC, id ASC
     LIMIT #{limit}
+    OFFSET #{offset}
   </select>
 </mapper>

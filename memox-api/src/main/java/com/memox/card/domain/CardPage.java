@@ -2,5 +2,5 @@ package com.memox.card.domain;
 
 import java.util.List;
 
-public record CardPage(List<Card> items, String nextCursor) {
+public record CardPage(List<Card> items, int limit, int offset) {
 }

@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import jakarta.validation.ConstraintViolationException;
+
 @ControllerAdvice
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
@@ -34,6 +36,17 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	ResponseEntity<Object> handleDeckValidation(DeckValidationException exception) {
 		return problem(HttpStatus.BAD_REQUEST, exception.getCode(), exception.getMessage(),
 				Map.of(exception.getField(), exception.getMessage()));
+	}
+
+	@ExceptionHandler(ConstraintViolationException.class)
+	ResponseEntity<Object> handleConstraintViolation(ConstraintViolationException exception) {
+		final Map<String, String> fieldErrors = new LinkedHashMap<>();
+		exception.getConstraintViolations().forEach(violation -> {
+			final var path = violation.getPropertyPath().toString();
+			final var field = path.substring(path.lastIndexOf('.') + 1);
+			fieldErrors.putIfAbsent(field, violation.getMessage());
+		});
+		return problem(HttpStatus.BAD_REQUEST, "VALIDATION_FAILED", "Request validation failed.", fieldErrors);
 	}
 
 	@ExceptionHandler(DeckConflictException.class)

@@ -8,5 +8,5 @@ public interface CardService {
 
 	Card createCard(CreateCardCommand command);
 
-	CardPage listCards(String deckId, int limit, String afterCursor);
+	CardPage listCards(String deckId, int limit, int offset);
 }
