@@ -42,7 +42,7 @@ public class CardServiceImpl implements CardService {
 		if (deck.getParentDeckId() == null) {
 			throw new DeckConflictException("ROOT_CANNOT_HOLD_CARDS", "A root deck cannot contain cards.");
 		}
-		if (DeckContentType.fromValue(deck.getContentType()) == DeckContentType.DECK) {
+		if (deck.getContentType() == DeckContentType.DECK) {
 			throw new DeckConflictException("DECK_HOLDS_CHILDREN", "A deck containing child decks cannot contain cards.");
 		}
 
@@ -53,8 +53,8 @@ public class CardServiceImpl implements CardService {
 		}
 
 		final var now = Instant.now(clock);
-		if (DeckContentType.fromValue(deck.getContentType()) == DeckContentType.UNSET) {
-			deckRepository.updateContentType(deck.getId(), DeckContentType.CARD.getValue(), now);
+		if (deck.getContentType() == DeckContentType.UNSET) {
+			deckRepository.updateContentType(deck.getId(), DeckContentType.CARD, now);
 		}
 
 		final var card = CardRow.builder()
@@ -69,7 +69,7 @@ public class CardServiceImpl implements CardService {
 				.updatedAt(now)
 				.build();
 		cardRepository.insertCard(card);
-		cardRepository.insertInitialStudyState(card.getId(), root.getSchedulerType(),
+		cardRepository.insertInitialStudyState(card.getId(), root.getSchedulerType().getValue(),
 				root.getSchedulerVersion(), root.getSchedulerGeneration());
 
 		return card.toDomain();

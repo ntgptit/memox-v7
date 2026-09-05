@@ -2,12 +2,14 @@ package com.memox.deck.domain;
 
 import java.util.Arrays;
 
+import com.memox.common.mybatis.PersistableEnum;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum DeckContentType {
+public enum DeckContentType implements PersistableEnum {
 
 	UNSET("unset"),
 	DECK("deck"),

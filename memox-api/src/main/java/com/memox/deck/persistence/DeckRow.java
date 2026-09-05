@@ -23,8 +23,8 @@ public class DeckRow {
 	private String name;
 	private String parentDeckId;
 	private String rootDeckId;
-	private String contentType;
-	private String schedulerType;
+	private DeckContentType contentType;
+	private SchedulerType schedulerType;
 	private Integer schedulerVersion;
 	private Integer schedulerGeneration;
 	private int siblingPosition;
@@ -32,8 +32,7 @@ public class DeckRow {
 	private Instant updatedAt;
 
 	public Deck toDomain() {
-		return new Deck(id, name, parentDeckId, rootDeckId, DeckContentType.fromValue(contentType),
-				SchedulerType.fromNullableValue(schedulerType),
+		return new Deck(id, name, parentDeckId, rootDeckId, contentType, schedulerType,
 				schedulerVersion, schedulerGeneration, siblingPosition, createdAt, updatedAt);
 	}
 }

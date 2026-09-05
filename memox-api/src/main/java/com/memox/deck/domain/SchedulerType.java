@@ -2,12 +2,14 @@ package com.memox.deck.domain;
 
 import java.util.Arrays;
 
+import com.memox.common.mybatis.PersistableEnum;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum SchedulerType {
+public enum SchedulerType implements PersistableEnum {
 
 	EIGHT_BOX("eight_box"),
 	SM2("sm2");

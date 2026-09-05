@@ -4,6 +4,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.memox.deck.domain.DeckContentType;
 import com.memox.deck.persistence.DeckRow;
 
 @Mapper
@@ -25,6 +26,6 @@ public interface DeckRepository {
 
 	void updateContentType(
 			@Param("deckId") String deckId,
-			@Param("contentType") String contentType,
+			@Param("contentType") DeckContentType contentType,
 			@Param("updatedAt") java.time.Instant updatedAt);
 }

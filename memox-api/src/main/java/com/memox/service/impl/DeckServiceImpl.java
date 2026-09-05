@@ -41,8 +41,8 @@ public class DeckServiceImpl implements DeckService {
 				.id(command.id())
 				.name(name)
 				.rootDeckId(command.id())
-				.contentType(DeckContentType.DECK.getValue())
-				.schedulerType(command.schedulerType().getValue())
+				.contentType(DeckContentType.DECK)
+				.schedulerType(command.schedulerType())
 				.schedulerVersion(INITIAL_SCHEDULER_VERSION)
 				.schedulerGeneration(INITIAL_SCHEDULER_GENERATION)
 				.siblingPosition(deckRepository.nextRootSiblingPosition())
@@ -58,7 +58,7 @@ public class DeckServiceImpl implements DeckService {
 	@Transactional
 	public Deck createSubDeck(CreateSubDeckCommand command) {
 		final var parent = requireActiveDeck(command.parentDeckId());
-		if (DeckContentType.fromValue(parent.getContentType()) == DeckContentType.CARD) {
+		if (parent.getContentType() == DeckContentType.CARD) {
 			throw new DeckConflictException("PARENT_HOLDS_CARDS", "A card deck cannot contain child decks.");
 		}
 		if (depthOf(parent) >= MAX_TREE_DEPTH) {
@@ -66,8 +66,8 @@ public class DeckServiceImpl implements DeckService {
 		}
 
 		final var now = Instant.now(clock);
-		if (DeckContentType.fromValue(parent.getContentType()) == DeckContentType.UNSET) {
-			deckRepository.updateContentType(parent.getId(), DeckContentType.DECK.getValue(), now);
+		if (parent.getContentType() == DeckContentType.UNSET) {
+			deckRepository.updateContentType(parent.getId(), DeckContentType.DECK, now);
 		}
 
 		final var deck = DeckRow.builder()
@@ -75,7 +75,7 @@ public class DeckServiceImpl implements DeckService {
 				.name(validateName(command.name()))
 				.parentDeckId(parent.getId())
 				.rootDeckId(parent.getRootDeckId())
-				.contentType(DeckContentType.UNSET.getValue())
+				.contentType(DeckContentType.UNSET)
 				.siblingPosition(deckRepository.nextChildSiblingPosition(parent.getId()))
 				.createdAt(now)
 				.updatedAt(now)
