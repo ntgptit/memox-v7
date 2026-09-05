@@ -7,7 +7,7 @@
 | **Scope** | Composition ở **mức màn hình** — section nào có, thứ tự ra sao, phân cấp thông tin, các `Mx*` sẵn có được xếp và giãn cách thế nào. Ngoài phạm vi: 14 hợp đồng đóng băng của `design-system/v1-freeze.md` §2, giá trị token (AD-14), hợp đồng component-level (`.claude/skills/flutter-theme-design/`) |
 | **Source of truth for** | Inventory 21 màn production (20 trong phạm vi) và 35 bề mặt overlay (33 được review) · composition grammar áp cho việc lắp ráp màn hình · registry 123 finding SC-* và cụm của chúng · danh sách `DESIGN_SYSTEM_BLOCKED` của pass này |
 | **Depends on** | `document-conventions.md` · `design-system/v1-freeze.md` · `architecture.md` (AD-04, AD-12, AD-14, AD-15) · `reviews/a18-responsive-compact-audit.md` · `reviews/a20-1-design-system-reconciliation.md` |
-| **Updated by task** | M100.42 |
+| **Updated by task** | M100.44 |
 | **Last updated** | 2026-09-05 |
 
 ---

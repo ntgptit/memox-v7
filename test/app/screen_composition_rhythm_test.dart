@@ -14,18 +14,32 @@
 ///
 /// The scan itself is `support/composition_rhythm_scan.dart`.
 ///
-/// ## The ratchet is per violation, not per file
+/// ## The ratchet is per violation, and identity is structural
 ///
-/// The first version of this file allowlisted whole files, which meant a file
-/// already on the list could grow a second, unrelated violation and stay green
-/// — the allowlist exempted the file, not the defect. Each expected violation
-/// now carries a **signature**:
+/// This has been wrong twice, each time in a way that was green rather than
+/// loud, so both corrections are recorded here.
 ///
-///     rule | path | enclosing declaration chain | offending pattern | ordinal
+/// **#469 allowlisted whole files.** A file already on the list could grow a
+/// second, unrelated violation and stay green: it exempted the file, not the
+/// defect.
 ///
-/// No line numbers: a signature has to survive an edit above it. The ordinal
-/// disambiguates two identical violations in one declaration and is assigned in
-/// source order, so it is stable too.
+/// **#470 keyed identity on (declaration, pattern, ordinal).** That still let a
+/// defect *move*: retire one `AppSpacing.md` separator, add an identical one
+/// somewhere else in the same `build`, and the newcomer inherited the retired
+/// one's ordinal and therefore its identity. Green again.
+///
+/// A violation is now identified by where it structurally **is**:
+///
+///     rule | path | declaration chain | structural path | pattern | ordinal
+///
+/// The structural path is the chain of AST anchors from the declaration down —
+/// `ListView.separated>separatorBuilder:`,
+/// `SliverPadding>sliver:>SliverList.separated>separatorBuilder:`. Move the
+/// violation and the path changes, so the move reads as one retirement plus one
+/// arrival. No line number appears: a signature must survive an edit above it,
+/// because a ratchet that reddens for unrelated reasons is one somebody
+/// loosens. Positional indices are added only inside a group that genuinely
+/// collides, which keeps an ordinary sibling reorder free.
 ///
 /// [kExpectedViolations] is compared with the scan **in both directions**:
 ///
@@ -33,6 +47,7 @@
 /// |---|---|
 /// | a new violation appears | its signature is not in the map |
 /// | a second violation lands in an allowlisted file | same — its signature is its own |
+/// | a violation moves inside its declaration | one stale entry, one unexpected arrival |
 /// | a violation is fixed but the entry stays | the entry is stale, and stale entries fail |
 /// | a violation is fixed and its entry removed | both sides agree — green, ratchet tightened |
 ///
@@ -48,19 +63,19 @@ import 'support/composition_rhythm_scan.dart';
 /// Every violation that exists on `main` today, keyed by signature, valued by
 /// the finding that owns it. Delete an entry in the same commit that fixes it.
 const Map<String, String> kExpectedViolations = <String, String>{
-  'list-item-gap|lib/features/card/presentation/widgets/sections/card_list_body_widget.dart|CardListBodyWidget.build|AppSpacing.md|0':
+  'list-item-gap|lib/features/card/presentation/widgets/sections/card_list_body_widget.dart|CardListBodyWidget.build|ListView.separated>separatorBuilder:|AppSpacing.md|0':
       'SC-C2-08 — card rows at md (12); the deck list this tile is modelled on '
       'is at lg (16)',
-  'list-item-gap|lib/features/search/presentation/widgets/sections/library_search_body_widget.dart|LibrarySearchBodyWidget._group|AppSpacing.sm|0':
+  'list-item-gap|lib/features/search/presentation/widgets/sections/library_search_body_widget.dart|LibrarySearchBodyWidget._group|SliverPadding>sliver:>SliverList.separated>separatorBuilder:|AppSpacing.sm|0':
       'SC-C2-01 — search results at sm (8), one step below every other MxCard '
       'list in the app',
-  'list-item-gap|lib/features/progress/presentation/widgets/sections/progress_deck_list_widget.dart|ProgressDeckListWidget.build|AppSpacing.md|0':
+  'list-item-gap|lib/features/progress/presentation/widgets/sections/progress_deck_list_widget.dart|ProgressDeckListWidget.build|SliverPadding>sliver:>SliverList.separated>separatorBuilder:|AppSpacing.md|0':
       'SC-C2-20 — progress deck rows at md (12). Found by this test, not by the '
       'review: no reviewer named it, which is the argument for the test',
-  'double-gutter|lib/features/study/presentation/screens/study_entry_screen.dart|_StudyEntryScreenState.build|EdgeInsets.all(AppSpacing.lg)|0':
+  'double-gutter|lib/features/study/presentation/screens/study_entry_screen.dart|_StudyEntryScreenState.build|MxContentShell>body:|EdgeInsets.all(AppSpacing.lg)|0':
       'SC-C1-13 — content sits at a 32dp left edge instead of 16, and the '
       'compact step at 320dp becomes 28 instead of 12, inverting the rule',
-  'double-gutter|lib/features/study/presentation/screens/study_options_screen.dart|StudyOptionsScreen.build|EdgeInsets.all(AppSpacing.lg)|0':
+  'double-gutter|lib/features/study/presentation/screens/study_options_screen.dart|StudyOptionsScreen.build|MxContentShell>body:|EdgeInsets.all(AppSpacing.lg)|0':
       'SC-C1-07 — the same second EdgeInsets.all(AppSpacing.lg)',
 };
 
@@ -179,7 +194,55 @@ class Body extends StatelessWidget {
       );
     });
 
-    test('3. fixing one violation and adding a different one fails', () {
+    test(
+      '3. a violation cannot MOVE inside its declaration and keep its id',
+      () {
+        // The defect #470 shipped. Retire one `AppSpacing.md` separator and put
+        // an identical one somewhere else in the same `build`: keyed on
+        // (declaration, pattern, ordinal) the newcomer inherits the retired
+        // one's identity and the ratchet stays green. The structural path is
+        // what stops that.
+        const String before = '''
+class Body extends StatelessWidget {
+  Widget build(BuildContext context) => ListView.separated(
+        separatorBuilder: (c, i) => const SizedBox(height: AppSpacing.md),
+        itemBuilder: (c, i) => const Text('x'),
+        itemCount: 1,
+      );
+}
+''';
+        // Same declaration, same pattern, different structural location: the
+        // offending list is now nested under a Column's `children:`.
+        const String after = '''
+class Body extends StatelessWidget {
+  Widget build(BuildContext context) => Column(
+        children: <Widget>[
+          ListView.separated(
+            separatorBuilder: (c, i) => const SizedBox(height: AppSpacing.md),
+            itemBuilder: (c, i) => const Text('x'),
+            itemCount: 1,
+          ),
+        ],
+      );
+}
+''';
+        final List<String> was = signatures(before);
+        final List<String> now = signatures(after);
+        expect(was, hasLength(1));
+        expect(now, hasLength(1));
+        expect(
+          now.single,
+          isNot(was.single),
+          reason: 'moving a violation must change its identity',
+        );
+
+        final result = compareToAllowlist(now, was.toSet());
+        expect(result.stale, hasLength(1), reason: 'the retired location');
+        expect(result.unexpected, hasLength(1), reason: 'the new location');
+      },
+    );
+
+    test('3b. fixing one violation and adding a different one fails', () {
       final List<String> before = signatures(
         separatorAt.replaceAll('%s', 'md'),
       );
