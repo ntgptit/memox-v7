@@ -62,22 +62,7 @@ import 'support/composition_rhythm_scan.dart';
 
 /// Every violation that exists on `main` today, keyed by signature, valued by
 /// the finding that owns it. Delete an entry in the same commit that fixes it.
-const Map<String, String> kExpectedViolations = <String, String>{
-  'list-item-gap|lib/features/card/presentation/widgets/sections/card_list_body_widget.dart|CardListBodyWidget.build|ListView.separated>separatorBuilder:|AppSpacing.md|0':
-      'SC-C2-08 — card rows at md (12); the deck list this tile is modelled on '
-      'is at lg (16)',
-  'list-item-gap|lib/features/search/presentation/widgets/sections/library_search_body_widget.dart|LibrarySearchBodyWidget._group|SliverPadding>sliver:>SliverList.separated>separatorBuilder:|AppSpacing.sm|0':
-      'SC-C2-01 — search results at sm (8), one step below every other MxCard '
-      'list in the app',
-  'list-item-gap|lib/features/progress/presentation/widgets/sections/progress_deck_list_widget.dart|ProgressDeckListWidget.build|SliverPadding>sliver:>SliverList.separated>separatorBuilder:|AppSpacing.md|0':
-      'SC-C2-20 — progress deck rows at md (12). Found by this test, not by the '
-      'review: no reviewer named it, which is the argument for the test',
-  'double-gutter|lib/features/study/presentation/screens/study_entry_screen.dart|_StudyEntryScreenState.build|MxContentShell>body:|EdgeInsets.all(AppSpacing.lg)|0':
-      'SC-C1-13 — content sits at a 32dp left edge instead of 16, and the '
-      'compact step at 320dp becomes 28 instead of 12, inverting the rule',
-  'double-gutter|lib/features/study/presentation/screens/study_options_screen.dart|StudyOptionsScreen.build|MxContentShell>body:|EdgeInsets.all(AppSpacing.lg)|0':
-      'SC-C1-07 — the same second EdgeInsets.all(AppSpacing.lg)',
-};
+const Map<String, String> kExpectedViolations = <String, String>{};
 
 void main() {
   group('the composition grammar', () {

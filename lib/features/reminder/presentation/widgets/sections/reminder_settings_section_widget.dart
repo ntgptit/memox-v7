@@ -4,6 +4,7 @@ import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_card.dart';
+import '../../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../domain/models/reminder_overview_model.dart';
 import '../../../domain/models/reminder_time_model.dart';
@@ -104,11 +105,16 @@ class ReminderSettingsSectionWidget extends StatelessWidget {
                   // the toggle and the time are one decision, so the seam
                   // between them reads as a hairline, not as two cards
                   // pretending to be one.
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                  Padding(
+                    // The same gutter the two rows resolve, not a fixed `lg`:
+                    // below 360dp the rows step to 12 and a literal left the
+                    // hairline starting 4dp right of the text it separates.
+                    padding: EdgeInsets.symmetric(
+                      horizontal: mxScreenGutter(context),
+                    ),
                     // The theme's divider — `outlineVariant`, which is what
                     // `borderSubtle` aliased; one spelling (M100.36 10H).
-                    child: Divider(),
+                    child: const Divider(),
                   ),
                   ReminderTimeRowWidget(
                     time: settings.time,
@@ -121,10 +127,24 @@ class ReminderSettingsSectionWidget extends StatelessWidget {
           ),
         ),
         if (banner != null) ...<Widget>[
+          // `lg`, the item gap, on purpose: the banner reports *this card's*
+          // failure, so it belongs to the card and binds to it. Settings
+          // spells the same relation by keeping the band inside the card
+          // (`settings_choice_section_widget.dart`); here the band is its own
+          // surface, so the binding has to come from the gap.
           const SizedBox(height: AppSpacing.lg),
           ReminderBannerSectionWidget(rejection: banner, onRetry: onRetry),
         ],
-        const SizedBox(height: AppSpacing.lg),
+        // **`xl`, because this is a section break and not another item gap.**
+        // The panel explains the feature rather than reporting on the card, so
+        // it is a separate region — and every sibling screen puts `xl` between
+        // two stacked top-level surfaces (`SettingsScreen.sectionGap`, Card
+        // Detail, Progress). At `lg` the disclosure sat exactly as far from the
+        // card as the banner that belongs to it, and the column said nothing
+        // about what belonged to what. Spelled here rather than read from
+        // `SettingsScreen`: `features/reminder` may not import another
+        // feature (AD-13).
+        const SizedBox(height: AppSpacing.xl),
         // **One quiet info panel, not two floating paragraphs** (M6 W6
         // restated in visual terms). Card Detail's own supporting-copy
         // grammar is `MxCard.muted` with a leading glyph; two sentences that

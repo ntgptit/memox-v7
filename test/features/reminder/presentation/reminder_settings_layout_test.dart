@@ -53,6 +53,44 @@ void main() {
       // and pushes the info panel down rather than sitting under it (G8).
       expect(banner.top, greaterThan(settingsCard.bottom));
       expect(infoPanel.top, greaterThanOrEqualTo(banner.bottom));
+
+      // **The two gaps are different ranks, and only a measurement says so.**
+      // The ordering assertions above pass on any spacing at all, which is how
+      // the screen came to separate all three surfaces by the same 16 — the
+      // banner that belongs to the card sat exactly as far from it as the
+      // disclosure that does not. `lg` binds the banner to the card it reports
+      // on; `xl` is the section break every sibling screen uses between two
+      // stacked top-level surfaces.
+      expect(
+        banner.top - settingsCard.bottom,
+        closeTo(AppSpacing.lg, 0.5),
+        reason: 'the banner reports the card above it and binds to it',
+      );
+      expect(
+        infoPanel.top - banner.bottom,
+        closeTo(AppSpacing.xl, 0.5),
+        reason: 'the disclosure is its own region, not another item in a list',
+      );
+    });
+
+    testWidgets('the info panel keeps its section break with no banner '
+        '(M6 G8)', (tester) async {
+      // The banner is conditional, so the gap below it and the gap that
+      // replaces it are two different `SizedBox`es in the tree. Measuring only
+      // the banner face leaves the ordinary face — the one a user sees every
+      // time — unmeasured.
+      await harness.pump(tester);
+
+      expect(find.byType(ReminderBannerSectionWidget), findsNothing);
+
+      final settingsCard = tester.getRect(find.byType(MxCard).first);
+      final infoPanel = tester.getRect(find.byType(MxCard).last);
+
+      expect(
+        infoPanel.top - settingsCard.bottom,
+        closeTo(AppSpacing.xl, 0.5),
+        reason: 'the section break does not depend on the banner being up',
+      );
     });
 
     /// The card's height across a write, measured rather than reasoned about.
@@ -146,6 +184,65 @@ void main() {
       final value = tester.getRect(find.text('8:00 PM'));
 
       expect(value.left, closeTo(label.left, 0.5));
+    });
+
+    testWidgets('the card\'s two rows and their hairline share one left edge, '
+        'on the compact tier too (M6 R2)', (tester) async {
+      // **Three widths, because the defect only existed on one tier.** The
+      // toggle row and the hairline resolve `mxScreenGutter`; the time row
+      // takes its inset from `ListTileTheme.contentPadding`, which
+      // `applyCompactScale` steps to `md` below `AppBreakpoints.compact`. A
+      // fixed `lg` on either of the first two held at 393 and split the card
+      // into two left edges at 320 and at 359 — 4dp, which is exactly the size
+      // nothing catches by eye.
+      for (final surface in <Size>[
+        const Size(320, 568),
+        const Size(359, 700),
+        const Size(393, 852),
+      ]) {
+        await harness.pump(tester, surface: surface);
+
+        // Scoped to the row: the screen's own title is the same words (M6 R2),
+        // so an unscoped text finder matches both.
+        final toggleLabel = tester.getRect(
+          find.descendant(
+            of: find.byType(ReminderToggleRowWidget),
+            matching: find.text(english.reminderToggleLabel),
+          ),
+        );
+        final timeLabel = tester.getRect(find.text(english.reminderTimeLabel));
+        final card = tester.getRect(find.byType(MxCard).first);
+        final hairline = tester.getRect(
+          find.descendant(
+            of: find.byType(MxCard).first,
+            matching: find.byType(Divider),
+          ),
+        );
+
+        final expected = surface.width < 360 ? AppSpacing.md : AppSpacing.lg;
+        expect(
+          toggleLabel.left,
+          closeTo(card.left + expected, 0.5),
+          reason: 'toggle label at $surface',
+        );
+        expect(
+          timeLabel.left,
+          closeTo(card.left + expected, 0.5),
+          reason: 'time label at $surface',
+        );
+        expect(
+          hairline.left,
+          closeTo(card.left + expected, 0.5),
+          reason: 'hairline at $surface',
+        );
+        // The hairline is inset the same on both sides; a one-ended assertion
+        // would pass on a line that reaches the card's right edge.
+        expect(
+          hairline.right,
+          closeTo(card.right - expected, 0.5),
+          reason: 'hairline at $surface',
+        );
+      }
     });
 
     testWidgets('both rows clear the 48dp touch target (M6 G4)', (

@@ -1,5 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/app/router/route_paths.dart';
+import 'package:memox/core/error/failure.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/core/theme/extensions/app_ink.dart';
 import 'package:memox/features/progress/domain/models/deck_activity_model.dart';
 import 'package:memox/features/progress/domain/models/deck_activity_snapshot_model.dart';
@@ -8,6 +11,7 @@ import 'package:memox/features/progress/presentation/widgets/sections/progress_t
 import 'package:memox/features/progress/presentation/widgets/sections/progress_week_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
+import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/shared/widgets/mx_loading_state.dart';
 import 'package:memox/shared/widgets/mx_metric_well.dart';
 
@@ -286,6 +290,82 @@ void main() {
         router.routerDelegate.currentConfiguration.uri.path,
         RoutePaths.study,
       );
+    });
+  });
+
+  group('the two state faces are inset once, not twice', () {
+    // The screen used to hand `MxContentShell` no `padding`, so both faces took
+    // the screen gutter *and* their own `EdgeInsets.all(AppSpacing.xl)` — 40dp
+    // a side at 393, 36 at 320. The deck level below already passed
+    // `EdgeInsets.zero`, so the same component rendered at two widths one retry
+    // apart. These read the number rather than the intent: 16dp of silent inset
+    // is exactly what a screenshot fails to report.
+    const List<Size> surfaces = <Size>[Size(393, 852), Size(320, 640)];
+
+    Rect copyColumnOf(WidgetTester tester, Type face) => tester.getRect(
+      find
+          .descendant(of: find.byType(face), matching: find.byType(Column))
+          .first,
+    );
+
+    for (final Size surface in surfaces) {
+      testWidgets('the empty face keeps its own xl at $surface', (
+        tester,
+      ) async {
+        await pumpProgressScreen(
+          tester,
+          repository: seeded(
+            totals: const <int>[0, 0, 0, 0, 0, 0, 0],
+            streak: 0,
+            hasLifetimeActivity: false,
+          ),
+          surface: surface,
+        );
+
+        // Full-bleed box: the face owns the whole content width, so the `xl` it
+        // pads itself with is the only inset there is.
+        final Rect empty = tester.getRect(find.byType(MxEmptyState));
+        expect(empty.left, 0);
+        expect(empty.right, surface.width);
+        expect(copyColumnOf(tester, MxEmptyState).left, AppSpacing.xl);
+      });
+
+      testWidgets('the error face keeps its own xl at $surface', (
+        tester,
+      ) async {
+        // Pumped from a repository that has emitted nothing: an error *after* a
+        // value is a refresh failure, which keeps the last snapshot on screen.
+        final repository = FakeProgressRepository();
+        await pumpProgressScreen(
+          tester,
+          repository: repository,
+          surface: surface,
+        );
+        repository.fail(const DatabaseFailure(message: 'read failed'));
+        await tester.pump();
+
+        final Rect error = tester.getRect(find.byType(MxErrorState));
+        expect(error.left, 0);
+        expect(error.right, surface.width);
+      });
+    }
+
+    testWidgets('the error copy starts at its own xl on the narrow tier', (
+      tester,
+    ) async {
+      // Asserted at 320 only: above it the error column is narrower than the
+      // viewport and its own `Center` picks the left edge, so the number there
+      // would measure centring rather than padding.
+      final repository = FakeProgressRepository();
+      await pumpProgressScreen(
+        tester,
+        repository: repository,
+        surface: const Size(320, 640),
+      );
+      repository.fail(const DatabaseFailure(message: 'read failed'));
+      await tester.pump();
+
+      expect(copyColumnOf(tester, MxErrorState).left, AppSpacing.xl);
     });
   });
 }

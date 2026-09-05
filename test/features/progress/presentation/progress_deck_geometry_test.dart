@@ -5,6 +5,7 @@ import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/features/progress/domain/models/deck_activity_model.dart';
 import 'package:memox/features/progress/presentation/screens/progress_deck_screen.dart';
 import 'package:memox/features/progress/presentation/widgets/items/progress_deck_row_widget.dart';
+import 'package:memox/features/progress/presentation/widgets/items/progress_metric_widget.dart';
 import 'package:memox/features/progress/presentation/widgets/sections/progress_range_selector_widget.dart';
 import 'package:memox/features/progress/presentation/widgets/sections/progress_summary_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
@@ -152,7 +153,11 @@ void main() {
       final first = tester.getRect(find.byType(ProgressDeckRowWidget).at(0));
       final second = tester.getRect(find.byType(ProgressDeckRowWidget).at(1));
 
-      expect(second.top - first.bottom, AppSpacing.md);
+      // `lg`, not `md`: `app_spacing.dart` defines `lg` as the gap between
+      // list items and `md` as the step *inside a compact control*, and the
+      // deck list separates its own rows by `lg`. The wireframe's §2 row was
+      // written against the old value and moved with this one (SC-C2-20).
+      expect(second.top - first.bottom, AppSpacing.lg);
     });
 
     testWidgets('the inset below the last row is lg, not a bottom-bar '
@@ -274,6 +279,36 @@ void main() {
       );
 
       expect(learning.top, greaterThanOrEqualTo(cards.bottom));
+    });
+
+    testWidgets('the totals panel steps its label → grid by sm, like the '
+        'three overview cards (G7)', (tester) async {
+      // The fourth card of a family of four. The hero, Today and the week
+      // chart are pinned at `sm` in `progress_screen_geometry_test.dart`
+      // (:311/:353/:363); this panel was the one still at `md`, and `md` is
+      // the *deck row's* step — a name + path title block, two blocks in one
+      // card — not a section label's. Nothing measured this panel, which is
+      // why the four could disagree on one screen (SC-C2-06).
+      await pumpProgressScreen(
+        tester,
+        repository: level(),
+        screen: const ProgressDeckScreen(),
+      );
+
+      final Rect label = tester.getRect(
+        find.descendant(
+          of: find.byType(ProgressSummaryWidget),
+          matching: find.text(english.progressSummaryLast7DaysTitle),
+        ),
+      );
+      final Rect grid = tester.getRect(
+        find.descendant(
+          of: find.byType(ProgressSummaryWidget),
+          matching: find.byType(ProgressMetricGridWidget),
+        ),
+      );
+
+      expect(grid.top - label.bottom, AppSpacing.sm);
     });
   });
 }

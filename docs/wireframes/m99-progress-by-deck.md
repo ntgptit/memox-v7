@@ -51,7 +51,7 @@ cấp của deck đó (UC-13). Từ trên xuống:
 │ │ ▣ 42 thẻ đã học   ▣ 6 ngày có học   │ │
 │ │ ▣ 12 học mới      ▣ 60 ôn tập       │ │
 │ └─────────────────────────────────────┘ │
-│                 md                      │
+│                 lg                      │
 │ ┌─────────────────────────────────────┐ │
 │ │ Idle deck                        ›  │ │
 │ │ ▣ 0 thẻ đã học    ▣ 0 ngày có học   │ │
@@ -119,10 +119,11 @@ quét literal thấy được.
 | Content gutter | `mxScreenGutter(context)` — 16, và 12 dưới 360 | Gutter chuẩn **phụ thuộc bề rộng**; viết cứng `AppSpacing.lg` làm màn này thụt sâu hơn Thư viện và Học 4px mỗi bên ở 320dp, đúng 8px mà ô metric đang thiếu |
 | Cạnh trái/phải của bộ chọn · bảng tổng · hàng | **bằng nhau** | Hai file sở hữu hai gutter; lệch 4px đọc như danh sách bị thụt vào so với bảng ở trên |
 | Bảng tổng → hàng đầu | `AppSpacing.xl` (24) | Ngắt giữa hai **section**; dùng `lg` sẽ làm bảng đọc như hàng đầu của danh sách |
-| Hàng → hàng | `AppSpacing.md` (12) | Khoảng cách trong một danh sách |
+| Hàng → hàng | `AppSpacing.lg` (16) | `app_spacing.dart` định nghĩa `lg` là khoảng cách giữa hai item của danh sách, còn `md` là bước *bên trong một control gọn*; deck list cách hai hàng của nó đúng `lg`. Từng là `md`, và `screen_composition_rhythm_test.dart` là thứ tìm ra nó (SC-C2-20) |
 | Padding trong card | `AppSpacing.lg` (mặc định của `MxCard`) | Không ghi đè |
 | Tên → đường dẫn | `AppSpacing.xs` (4) | Hai dòng của cùng một khối |
-| Khối tiêu đề → lưới metric | `AppSpacing.md` (12) | Hai khối trong một card |
+| Khối tiêu đề **của hàng deck** → lưới metric | `AppSpacing.md` (12) | Hai khối trong một card. Dòng này chỉ nói về `progress_deck_row_widget.dart` — tên + đường dẫn là một **khối tiêu đề**, không phải nhãn section |
+| Nhãn bảng tổng → lưới metric | `AppSpacing.sm` (8) | Bảng tổng mở đầu bằng một **nhãn section**, nên đi theo G7 của `m99-23-progress-overview.md` cùng ba card kia trong một scroll — không dùng `md` của hàng deck |
 | Cột metric | hai nửa `Expanded`, cách nhau `AppSpacing.lg` | Cột phải giữ nguyên cạnh trái xuống cả hai hàng; intrinsic sizing để chữ dài kéo lệch |
 | Ngưỡng gập lưới | `ProgressMetricGridWidget.minimumCellWidth` (90) **nhân theo `textScaler`** | Một dãy chữ số **không có điểm ngắt dòng**: ô hẹp hơn nhu cầu thì số bị **cắt**, không wrap — và một con số bị cắt là một con số khác. Ở 320dp scale 2.0 lưới gập xuống một cột thay vì cắt `1234` thành `123` |
 | Rung chữ số | panel `titleMedium`, hàng `titleSmall` | Cùng họ chữ (Inter) và cách nhau đúng một rung — `titleLarge` là rung của họ *display*, nên hai bậc lệch nhau cả typeface. Hàng ở `titleSmall` cũng để tên deck (`titleMedium`) thắng bốn con số cạnh nó |

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/app/app.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/features/settings/di/app_settings_repository_provider.dart';
 import 'package:memox/features/settings/presentation/screens/settings_screen.dart';
@@ -35,6 +36,14 @@ Future<void> pumpSettings(
 }) async {
   await tester.binding.setSurfaceSize(surface);
   addTearDown(() => tester.binding.setSurfaceSize(null));
+  // **The view too, not only the surface.** `setSurfaceSize` resizes what the
+  // tree is laid out into; it leaves `MediaQuery` reporting the test view's own
+  // 800x600. Everything that branches on width reads `MediaQuery` —
+  // `mxScreenGutter` and `CompactScaleWidget` both do — so without this a
+  // `320dp` case laid itself out 320 wide while every width decision inside it
+  // was still answering "roomy".
+  tester.view.physicalSize = surface * tester.view.devicePixelRatio;
+  addTearDown(tester.view.resetPhysicalSize);
 
   await tester.pumpWidget(
     ProviderScope(
@@ -56,7 +65,13 @@ Future<void> pumpSettings(
             textScaler: TextScaler.linear(textScale),
             viewInsets: EdgeInsets.only(bottom: keyboardInset),
           ),
-          child: child ?? const SizedBox.shrink(),
+          // **The compact scale, because the real app applies it here too**
+          // (`app.dart`'s `MaterialApp.builder`). Without it every `320dp`
+          // case in this suite rendered the roomy theme, so the tier those
+          // cases exist to exercise was the one thing they could not see —
+          // which is how a card kept a fixed 16dp inner gutter while the rows
+          // beside it stepped to 12.
+          child: CompactScaleWidget(child: child ?? const SizedBox.shrink()),
         ),
         home: const SettingsScreen(),
       ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/core/time/clock_provider.dart';
 import 'package:memox/features/trash/di/trash_repository_provider.dart';
 import 'package:memox/features/trash/domain/entities/trash_batch_entity.dart';
@@ -10,6 +11,8 @@ import 'package:memox/features/trash/presentation/screens/trash_screen.dart';
 import 'package:memox/l10n/generated/app_localizations.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/features/trash/presentation/widgets/items/trash_row_widget.dart';
+import 'package:memox/features/trash/presentation/widgets/sections/trash_selection_bar_widget.dart';
+import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_icon_button.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
 
@@ -92,81 +95,159 @@ void main() {
   double left(WidgetTester tester, Finder finder) =>
       double.parse(tester.getRect(finder).left.toStringAsFixed(1));
 
-  /// The page gutter every contract below is written against.
-  const double gutter = 16;
+  /// The right edge of the last glyph a subtree paints, rounded like [left].
+  double glyphRight(WidgetTester tester, Finder of) => double.parse(
+    tester
+        .getRect(find.descendant(of: of, matching: find.byType(Icon)).last)
+        .right
+        .toStringAsFixed(1),
+  );
+
+  /// The page gutters every contract below is written against, and how much of
+  /// the trailing side the overflow button's own inset cannot give back.
+  ///
+  /// **Two surfaces, not one.** `mxScreenGutter` steps down to `md` under
+  /// `AppBreakpoints.compact`, so a shared-edge contract measured at a single
+  /// width cannot see the tier where the edges actually come apart — which is
+  /// how the selection bar held a literal 16 while everything above it went
+  /// to 12.
+  ///
+  /// The third figure is the trailing residue. The row buys its right edge by
+  /// paying `xs` outside a button that centres a 24dp glyph in a 48dp box, so
+  /// 4 + 12 lands on 16 — exactly the gutter at regular width, and 4dp inside
+  /// it on the compact tier, where the button's half-box does not step down
+  /// with the gutter. `deck_tile_widget.dart:113-117` makes the same trade for
+  /// the same reason; buying the last 4dp would mean a zero trailing pad at
+  /// 320dp, which is a different decision from this one.
+  const List<(Size, double, double)> surfaces = <(Size, double, double)>[
+    (Size(320, 640), AppSpacing.md, AppSpacing.xs),
+    (Size(393, 852), AppSpacing.lg, 0),
+  ];
 
   group('G1 · one left edge for the whole screen', () {
-    testWidgets('chip, explanation and row all start at the gutter', (
+    for (final (Size size, double gutter, _) in surfaces) {
+      testWidgets(
+        'chip, explanation, row and selection bar start at $gutter at '
+        '${size.width.toInt()}dp',
+        (tester) async {
+          await pumpTrash(tester, batches: twoRows(), size: size);
+
+          // Read before the long press: the chips are the shell's subheader,
+          // and the screen drops it while a selection is held.
+          final chip = left(tester, find.byType(MxPillButton).first);
+
+          await tester.longPress(find.text('give up'));
+          await tester.pumpAndSettle();
+
+          // The row is full-bleed — its own rect starts at 0 and its padding
+          // makes the inset — so what G1 constrains is the first thing the row
+          // *paints*, which in selection is the checkbox glyph.
+          final rowLeading = left(
+            tester,
+            find
+                .descendant(
+                  of: find.byType(TrashRowWidget),
+                  matching: find.byType(Icon),
+                )
+                .first,
+          );
+
+          expect(
+            <double>{
+              chip,
+              left(tester, find.text(english.trashRetentionNotice)),
+              rowLeading,
+              left(
+                tester,
+                find.descendant(
+                  of: find.byType(TrashSelectionBarWidget),
+                  matching: find.byType(MxActionButton),
+                ),
+              ),
+            },
+            <double>{gutter},
+            reason:
+                'G1: the first chip, the explanation line, every row and the '
+                'selection bar share one left edge, and it is the gutter — '
+                '$gutter at ${size.width.toInt()}dp',
+          );
+        },
+      );
+    }
+  });
+
+  group('G2 · the row lines its trailing glyph up with the gutter', () {
+    for (final (Size size, double gutter, double residue) in surfaces) {
+      testWidgets('the kebab ends one gutter in at ${size.width.toInt()}dp', (
+        tester,
+      ) async {
+        await pumpTrash(tester, batches: twoRows(), size: size);
+
+        // The row pays `xs` outside the overflow button rather than the
+        // gutter, because the button is a 48 box around a 24 glyph and carries
+        // 12dp of its own inset. It used to pay the gutter there, which put
+        // the glyph 28dp from the edge against a 16dp left one.
+        expect(
+          glyphRight(tester, find.byType(TrashRowWidget).first),
+          size.width - gutter - residue,
+          reason:
+              'G2: the row\'s trailing glyph sits on the same edge the chips, '
+              'the notice and its own leading icon use, less the $residue the '
+              'button\'s half-box keeps on the compact tier',
+        );
+      });
+    }
+
+    testWidgets('a selecting row keeps the real gutter on that side', (
       tester,
     ) async {
       await pumpTrash(tester, batches: twoRows());
 
-      // The row is full-bleed — its own rect starts at 0 and its padding makes
-      // the inset — so what G1 constrains is the first thing the row *paints*,
-      // which is the type glyph.
-      final rowLeading = left(
-        tester,
+      await tester.longPress(find.text('give up'));
+      await tester.pumpAndSettle();
+
+      // Nothing trailing left to absorb the button's own inset, so the
+      // conditional hands the row its full gutter back and the body ends where
+      // the glyphs did. This is the assertion that stops the conditional being
+      // 'simplified' into a constant `xs`.
+      final body = tester.getRect(
         find
             .descendant(
-              of: find.byType(TrashRowWidget),
-              matching: find.byType(Icon),
+              of: find.byType(TrashRowWidget).first,
+              matching: find.byType(Expanded),
             )
             .first,
       );
 
-      expect(
-        <double>{
-          left(tester, find.byType(MxPillButton).first),
-          left(tester, find.text(english.trashRetentionNotice)),
-          rowLeading,
-        },
-        <double>{gutter},
-        reason:
-            'G1: the first chip, the explanation line and every row share one '
-            'left edge, and it is the gutter',
-      );
+      expect(double.parse(body.right.toStringAsFixed(1)), 393 - AppSpacing.lg);
     });
-  });
 
-  group('G2 · the two overflow controls do NOT share a right edge', () {
-    testWidgets('and this test pins the violation until someone fixes it', (
+    testWidgets('what is left of the violation is the AppBar\'s own inset', (
       tester,
     ) async {
       await pumpTrash(tester, batches: twoRows());
 
-      double glyphRight(Finder of) => double.parse(
-        tester
-            .getRect(find.descendant(of: of, matching: find.byType(Icon)).last)
-            .right
-            .toStringAsFixed(1),
-      );
+      final rowOverflow = glyphRight(tester, find.byType(TrashRowWidget).first);
+      final barOverflow = glyphRight(tester, find.byType(AppBar));
 
-      final rowOverflow = glyphRight(find.byType(TrashRowWidget).first);
-      final barOverflow = glyphRight(find.byType(AppBar));
-
-      // **G2 says these MUST be equal. They are not, and writing this file is
-      // how that was found.** The row's kebab glyph ends 28dp from the screen
-      // edge; the app bar's ends 12dp from it. Two right margins on one screen,
-      // which is exactly what the contract exists to prevent.
+      // **G2 asks for these to be equal, and they still are not — but the
+      // remainder is no longer the row's.** The row's half is fixed by the
+      // cases above; what is left is Material's `AppBar` action padding, which
+      // every screen in the app shares, so moving it is a kit-wide decision
+      // and not part of giving Trash its measurements.
       //
-      // Not fixed here, and the reason is scope rather than difficulty: the
-      // app bar's inset is Material's `AppBar` action padding, shared by every
-      // screen in the app, so moving it is a kit-wide decision and not part of
-      // giving Trash its measurements. Narrowing the row instead would leave
-      // the row itself asymmetric — 16 on the left against 12 on the right —
-      // and G1 pins that left edge.
-      //
-      // **So this asserts the defect rather than the contract**, the way
-      // `app_high_contrast_test.dart` pins "the normal theme still cannot".
-      // When someone aligns them this test fails, and the fix is to invert it
-      // into the equality G2 actually asks for.
+      // Kept as an assertion rather than deleted, so the open half of G2 stays
+      // visible the way `app_high_contrast_test.dart` pins "the normal theme
+      // still cannot". When someone aligns the AppBar this fails, and the fix
+      // is to invert it into `expect(rowOverflow, barOverflow)`.
       expect(
         barOverflow - rowOverflow,
-        16.0,
+        4.0,
         reason:
-            'G2 is violated by 16dp (row=$rowOverflow, bar=$barOverflow). If '
-            'this number changed, either the violation was fixed — invert this '
-            'test into `expect(rowOverflow, barOverflow)` — or it got worse.',
+            'G2 is still open by 4dp, and all of it is the AppBar\'s '
+            '(row=$rowOverflow, bar=$barOverflow). If this number changed, '
+            'either the AppBar was aligned too — invert this into '
+            '`expect(rowOverflow, barOverflow)` — or the row regressed.',
       );
     });
   });
@@ -267,6 +348,49 @@ void main() {
     });
   });
 
+  group('T4 · the age and the countdown are two facts, not one line', () {
+    testWidgets('a separator and a full item gap part them at 393dp', (
+      tester,
+    ) async {
+      await pumpTrash(tester, batches: twoRows());
+
+      final age = tester.getRect(find.text(english.trashDeletedDaysAgo(2)));
+      final countdown = tester.getRect(find.text(english.trashDaysLeft(28)));
+      final dot = tester.getRect(
+        find.descendant(
+          of: find.byType(TrashRowWidget).first,
+          matching: find.text('·'),
+        ),
+      );
+
+      // Same run, or the gap below is a line break rather than a gap.
+      expect(
+        age.top,
+        countdown.top,
+        reason:
+            'T4: at 393dp both facts fit one line; if they no longer do, the '
+            'measurement below is reading across a wrap',
+      );
+
+      // **W2 draws the row as `Deleted 2 days ago · 27 days left`.** The two
+      // facts used to sit `xs` apart with nothing between them, and `xs` is
+      // the icon-to-label step — at that distance the only boundary left was
+      // an ink shift the light theme barely carries, so the line read as one
+      // sentence. The dot is the boundary; `sm` on each side of it is the gap
+      // `deck_workload_line_widget.dart` gives the same kind of row.
+      expect(
+        <double>[
+          double.parse((dot.left - age.right).toStringAsFixed(1)),
+          double.parse((countdown.left - dot.right).toStringAsFixed(1)),
+        ],
+        <double>[AppSpacing.sm, AppSpacing.sm],
+        reason:
+            'T4: the middle dot sits one item gap from each fact — '
+            'age=$age dot=$dot countdown=$countdown',
+      );
+    });
+  });
+
   group('R1 · 320dp at 2.0x text scale', () {
     testWidgets('nothing overflows horizontally', (tester) async {
       final overflows = <String>[];
@@ -318,6 +442,43 @@ void main() {
         isNot(TextOverflow.ellipsis),
         reason: 'R1: `N days left` must not be the line that ellipsises',
       );
+    });
+
+    testWidgets('the separator never becomes a run of its own', (tester) async {
+      // **The cost of a separator that is its own `Wrap` child, measured
+      // rather than assumed.** The two facts do not fit one line at 320dp —
+      // that was already true before the dot existed — so the dot lands
+      // wherever the run breaks, and where that is depends on the scale:
+      // at 1.0 it stays behind the age (`Deleted 2 days ago ·` / `28 days
+      // left`), at 2.0 the age fills the line alone and the dot leads the
+      // second run (`· 28 days left`). Both are legible; neither is what a
+      // reviewer would draw. What must not happen is the third case — a line
+      // holding nothing but the dot — and that is what this pins, because it
+      // is the one that reads as a rendering fault rather than as a wrap.
+      for (final double scale in <double>[1, 2]) {
+        await pumpTrash(
+          tester,
+          batches: twoRows(),
+          size: const Size(320, 640),
+          textScale: scale,
+        );
+
+        final row = find.byType(TrashRowWidget).first;
+        Rect inRow(Finder matching) =>
+            tester.getRect(find.descendant(of: row, matching: matching).first);
+
+        final age = inRow(find.text(english.trashDeletedDaysAgo(2)));
+        final dot = inRow(find.text('·'));
+        final countdown = inRow(find.text(english.trashDaysLeft(28)));
+
+        expect(
+          dot.top == age.top || dot.top == countdown.top,
+          isTrue,
+          reason:
+              'R1: at 320dp @${scale}x the middle dot shares a run with one of '
+              'the two facts — age=$age dot=$dot countdown=$countdown',
+        );
+      }
     });
   });
 

@@ -208,17 +208,13 @@ class _CardExportSheetState extends ConsumerState<CardExportSheetWidget> {
         if (!didPop) return;
         _cancelExport(ref, widget.deckId);
       },
-      // No top gutter: the sheet's drag handle already provides one, which is
-      // why this composes `mxSheetBottomObstruction` rather than wearing
-      // `MxSheetInsets`. The `SafeArea` that used to be here is gone with it —
-      // the obstruction already accounts for `viewPadding`, so keeping both
-      // inset the navigation bar twice.
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: AppSpacing.lg,
-          right: AppSpacing.lg,
-          bottom: AppSpacing.lg + mxSheetBottomObstruction(context),
-        ),
+      // `MxSheetInsets`, not a hand-built copy of it: this sheet used to drop
+      // the top gutter on the grounds that the drag handle supplies one, but
+      // the handle is set once for the whole app, so that argument holds for
+      // all twelve sheets and left this one as the only title sitting 16dp
+      // higher than its siblings'. No `SafeArea` either — the bottom
+      // obstruction inside already accounts for `viewPadding`.
+      child: MxSheetInsets(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,

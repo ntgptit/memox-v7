@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/error/failure.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/features/card/domain/failures/tag_catalog_failure.dart';
 import 'package:memox/features/card/domain/failures/tag_validation_failure.dart';
 import 'package:memox/features/card/domain/models/tag_catalog_entry_model.dart';
 import 'package:memox/features/card/presentation/screens/tag_catalog_screen.dart';
+import 'package:memox/shared/widgets/mx_button_pair.dart';
+import 'package:memox/shared/widgets/mx_feedback_band.dart';
+import 'package:memox/shared/widgets/mx_text_field.dart';
 
 import 'support/fake_tag_catalog_repository.dart';
 import 'support/tag_catalog_harness.dart';
@@ -179,6 +183,91 @@ void main() {
       // And the recovery, named, where the action was.
       expect(find.text('Retry'), findsOneWidget);
       expect(find.text('Rename'), findsNothing);
+    });
+  });
+
+  group('each gap binds to what it separates, not to one uniform value', () {
+    // **The sheet used to set one `spacing:` for all four seams.** At `lg` the
+    // merge disclosure — a sentence about the field directly above it — sat as
+    // far from that field as the action row does, and the shared failure band
+    // was promoted to a section of its own, where the export sheet it copied
+    // the band from binds it to what it reports on. Measured rather than
+    // eyeballed: a uniform value looks deliberate in a screenshot, which is
+    // exactly why it survived.
+    Rect rectOf(WidgetTester tester, Finder finder) => tester.getRect(finder);
+
+    testWidgets('the merge notice binds to the field at sm', (tester) async {
+      await openRename(tester, FakeTagCatalogRepository.seeded(tags));
+
+      await tester.enterText(find.byType(TextField).last, 'noun');
+      await tester.pumpAndSettle();
+
+      final title = rectOf(tester, find.text('Rename tag'));
+      final field = rectOf(tester, find.byType(MxTextField));
+      // The notice is a `Semantics` over one `Row`; the row is its whole box.
+      final notice = rectOf(
+        tester,
+        find
+            .ancestor(of: find.byIcon(Icons.merge), matching: find.byType(Row))
+            .first,
+      );
+      final actions = rectOf(tester, find.byType(MxButtonPair));
+
+      expect(
+        field.top - title.bottom,
+        AppSpacing.lg,
+        reason: 'form opens at lg',
+      );
+      expect(
+        notice.top - field.bottom,
+        AppSpacing.sm,
+        reason: 'a notice describing the control above it binds tightest',
+      );
+      expect(
+        actions.top - notice.bottom,
+        AppSpacing.lg,
+        reason: 'the action row closes the sheet at lg',
+      );
+    });
+
+    testWidgets('the failure band binds to the field at md', (tester) async {
+      final catalog = FakeTagCatalogRepository.seeded(tags)
+        ..nextFailure = const NotFoundFailure(
+          message: 'gone',
+          reason: TagCatalogProblem.tagMissing,
+        );
+      await openRename(tester, catalog);
+
+      await tester.enterText(find.byType(TextField).last, 'substantives');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Rename'));
+      await tester.pumpAndSettle();
+
+      final field = rectOf(tester, find.byType(MxTextField));
+      final band = rectOf(tester, find.byType(MxFeedbackBand));
+      final actions = rectOf(tester, find.byType(MxButtonPair));
+
+      expect(
+        band.top - field.bottom,
+        AppSpacing.md,
+        reason: 'the in-flow-failure gap five deck sheets already use',
+      );
+      expect(
+        actions.top - band.bottom,
+        AppSpacing.lg,
+        reason: 'the band reports on the form, it is not a section of its own',
+      );
+    });
+
+    testWidgets('the pristine sheet gains no stray gap', (tester) async {
+      // The hazard of trading `spacing:` for explicit boxes: a gap written
+      // outside its `if` opens a hole where nothing is rendered.
+      await openRename(tester, FakeTagCatalogRepository.seeded(tags));
+
+      final field = rectOf(tester, find.byType(MxTextField));
+      final actions = rectOf(tester, find.byType(MxButtonPair));
+
+      expect(actions.top - field.bottom, AppSpacing.lg);
     });
   });
 }

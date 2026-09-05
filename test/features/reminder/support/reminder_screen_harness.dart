@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/app/app.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/core/time/clock_provider.dart';
 import 'package:memox/core/time/time_zone_provider.dart';
@@ -71,10 +72,22 @@ class ReminderScreenHarness {
             GlobalCupertinoLocalizations.delegate,
           ],
           supportedLocales: AppLocalizations.supportedLocales,
-          home: MediaQuery(
-            data: MediaQueryData(textScaler: TextScaler.linear(textScale)),
-            child: const ReminderSettingsScreen(),
+          // `copyWith`, not a bare `MediaQueryData`: that constructor defaults
+          // `size` to zero, so every `mxScreenGutter` call under it read the
+          // app as compact whatever [surface] said — the screen measured 12dp
+          // at 393 and the width this harness varies changed nothing.
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(
+              context,
+            ).copyWith(textScaler: TextScaler.linear(textScale)),
+            // **The compact scale, because the real app applies it here too**
+            // (`app.dart`'s `MaterialApp.builder`). Without it every 320dp
+            // case rendered the roomy theme, so `ListTileTheme.contentPadding`
+            // stayed at 16 below 360dp while the gutter-derived rows beside it
+            // stepped to 12 — the tier those cases exist to exercise.
+            child: CompactScaleWidget(child: child ?? const SizedBox.shrink()),
           ),
+          home: const ReminderSettingsScreen(),
         ),
       ),
     );

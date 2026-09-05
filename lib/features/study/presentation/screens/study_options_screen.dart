@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/state/submit_outcome.dart';
-import '../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
@@ -45,16 +44,24 @@ class StudyOptionsScreen extends ConsumerWidget {
 
     return MxContentShell(
       title: context.l10n.studyOptionsTitle,
-      body: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: MxAsyncView<StudyOptionsModel>(
-          value: ref.watch(studyOptionsProvider(deckId)),
-          loadingLabel: context.l10n.studyOptionsTitle,
-          error: (_, _) => MxErrorState(
-            title: context.l10n.studyOptionsTitle,
-            message: context.l10n.studyOptionsNextSessionNote,
-          ),
-          data: (options) => StudyOptionsSectionWidget(
+      // Every branch below owns its gutters — the form through the padding on
+      // the `data:` branch, the error and loading faces through their own — so
+      // the shell's default would pad each of them twice. It was costing this
+      // screen 16dp a side, which also defeated the compact step-down: at 320dp
+      // the form ended up inset *more* than at regular width.
+      padding: EdgeInsets.zero,
+      body: MxAsyncView<StudyOptionsModel>(
+        value: ref.watch(studyOptionsProvider(deckId)),
+        loadingLabel: context.l10n.studyOptionsTitle,
+        error: (_, _) => MxErrorState(
+          title: context.l10n.studyOptionsTitle,
+          message: context.l10n.studyOptionsNextSessionNote,
+        ),
+        data: (options) => Padding(
+          // The screen gutter, so the form's left edge lines up with the
+          // app-bar title on every width.
+          padding: EdgeInsets.all(mxScreenGutter(context)),
+          child: StudyOptionsSectionWidget(
             // Keyed on the resolved values so the draft re-seeds after
             // `Use app defaults` swaps the override for the app defaults —
             // without it the fields would keep showing the numbers that were

@@ -96,7 +96,15 @@ class _ResetProgressSheetState extends ConsumerState<_ResetProgressSheet> {
               icon: Icons.check_circle_outline,
               tone: AppInk.success,
             ),
-            const SizedBox(height: AppSpacing.md),
+            // **`xl`, because these two are opposites.** Each `_Section` is a
+            // group of its own — glyph, heading, line — so the gap between them
+            // is a boundary between sections, and `AppSpacing.xl` is the
+            // scale's step "between sections of a screen". It was `md`, the
+            // inside-a-compact-control step, which made the strongest bond on
+            // the sheet the one between what is kept and what is lost — the
+            // grouping inverted against the meaning. Same defect and same fix
+            // as `card_export_sheet_widget`'s `_Body`.
+            const SizedBox(height: AppSpacing.xl),
             // UC-07 A2: still allowed, and said plainly. A deck nobody has
             // studied is the easiest case to reset and the one where a list of
             // losses would be a warning about nothing.
@@ -108,7 +116,11 @@ class _ResetProgressSheetState extends ConsumerState<_ResetProgressSheet> {
               icon: Icons.remove_circle_outline,
               tone: widget.hasLearnedCards ? AppInk.danger : AppInk.quiet,
             ),
-            const SizedBox(height: AppSpacing.lg),
+            // The study mode is the sheet's third section, not a line under the
+            // second, so it is separated at the same `xl` as the two lists are
+            // from each other. The title above stays at `lg`: a title binds to
+            // the block it introduces.
+            const SizedBox(height: AppSpacing.xl),
             Text(
               l10n.deckResetProgressSchedulerLabel,
               style: context.texts.labelLarge,

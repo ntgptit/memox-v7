@@ -5,6 +5,7 @@ import '../../../../../core/theme/extensions/app_ink.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
+import '../../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../../shared/widgets/mx_text_button.dart';
 import '../../../domain/models/trash_item_type_model.dart';
 
@@ -41,53 +42,56 @@ class TrashSelectionBarWidget extends StatelessWidget {
 
     return Material(
       color: theme.colorScheme.surfaceContainerHigh,
-      child: SafeArea(
-        // The bar owns the bottom inset; the list adds its height as padding so
-        // the last row is never underneath it (G5).
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.lg,
-            AppSpacing.md,
-            AppSpacing.lg,
-            AppSpacing.md,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Text(switch (selectedType) {
-                TrashItemType.card => l10n.trashSelectionCardsOnly,
-                TrashItemType.deck => l10n.trashSelectionDecksOnly,
-                null => l10n.trashSelectionCount(selectedCount),
-              }, style: context.texts.bodySmall!.inked(context, AppInk.quiet)),
-              const SizedBox(height: AppSpacing.sm),
-              // **`Wrap`, not `Row`, and that is a correctness fix rather than
-              // a nicety.** As a `Row` the destructive text button was the
-              // non-flex child, so it took its full intrinsic width first and
-              // squeezed `Restore` into an ellipsis at 360dp with a large text
-              // scale — leaving "Delete permanently" perfectly legible beside
-              // a truncated way out. The safe action must never be the one
-              // that loses the space.
-              Wrap(
-                alignment: WrapAlignment.spaceBetween,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: AppSpacing.sm,
-                runSpacing: AppSpacing.sm,
-                children: <Widget>[
-                  MxActionButton(
-                    label: l10n.trashRestoreAction,
-                    onPressed: isBusy ? null : onRestore,
-                  ),
-                  MxTextButton(
-                    label: l10n.trashPurgeAction,
-                    isDestructive: true,
-                    onPressed: isBusy ? null : onPurge,
-                  ),
-                ],
-              ),
-            ],
-          ),
+      // **No `SafeArea` of its own.** `MxContentShell` already wraps the whole
+      // body in one, and the bar is a Column sibling of the list rather than
+      // something stacked over it — so the inner one resolved to zero while
+      // reading as the bar owning the bottom inset. It would become
+      // load-bearing again if this bar were ever mounted outside the shell.
+      child: Padding(
+        // The screen gutter, not a fixed `lg`: G1 asks for one left edge across
+        // the chips, the retention notice and every row, and all of those step
+        // down to 12 below 360dp where a literal stays at 16.
+        padding: EdgeInsets.fromLTRB(
+          mxScreenGutter(context),
+          AppSpacing.md,
+          mxScreenGutter(context),
+          AppSpacing.md,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Text(switch (selectedType) {
+              TrashItemType.card => l10n.trashSelectionCardsOnly,
+              TrashItemType.deck => l10n.trashSelectionDecksOnly,
+              null => l10n.trashSelectionCount(selectedCount),
+            }, style: context.texts.bodySmall!.inked(context, AppInk.quiet)),
+            const SizedBox(height: AppSpacing.sm),
+            // **`Wrap`, not `Row`, and that is a correctness fix rather than
+            // a nicety.** As a `Row` the destructive text button was the
+            // non-flex child, so it took its full intrinsic width first and
+            // squeezed `Restore` into an ellipsis at 360dp with a large text
+            // scale — leaving "Delete permanently" perfectly legible beside
+            // a truncated way out. The safe action must never be the one
+            // that loses the space.
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              children: <Widget>[
+                MxActionButton(
+                  label: l10n.trashRestoreAction,
+                  onPressed: isBusy ? null : onRestore,
+                ),
+                MxTextButton(
+                  label: l10n.trashPurgeAction,
+                  isDestructive: true,
+                  onPressed: isBusy ? null : onPurge,
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
