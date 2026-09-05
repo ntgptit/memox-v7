@@ -2,13 +2,13 @@ package com.memox.service.impl;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.util.Locale;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.memox.card.application.CreateCardCommand;
 import com.memox.card.domain.Card;
+import com.memox.card.domain.CardTextField;
 import com.memox.card.persistence.CardPageQuery;
 import com.memox.card.persistence.CardRow;
 import com.memox.common.pagination.PageHelper;
@@ -17,6 +17,7 @@ import com.memox.common.pagination.PagingResponse;
 import com.memox.exception.DeckConflictException;
 import com.memox.exception.DeckNotFoundException;
 import com.memox.exception.DeckValidationException;
+import com.memox.deck.domain.DeckContentType;
 import com.memox.repository.CardRepository;
 import com.memox.repository.DeckRepository;
 import com.memox.service.CardService;
@@ -41,7 +42,7 @@ public class CardServiceImpl implements CardService {
 		if (deck.getParentDeckId() == null) {
 			throw new DeckConflictException("ROOT_CANNOT_HOLD_CARDS", "A root deck cannot contain cards.");
 		}
-		if ("deck".equals(deck.getContentType())) {
+		if (DeckContentType.fromValue(deck.getContentType()) == DeckContentType.DECK) {
 			throw new DeckConflictException("DECK_HOLDS_CHILDREN", "A deck containing child decks cannot contain cards.");
 		}
 
@@ -52,18 +53,18 @@ public class CardServiceImpl implements CardService {
 		}
 
 		final var now = Instant.now(clock);
-		if ("unset".equals(deck.getContentType())) {
-			deckRepository.updateContentType(deck.getId(), "card", now);
+		if (DeckContentType.fromValue(deck.getContentType()) == DeckContentType.UNSET) {
+			deckRepository.updateContentType(deck.getId(), DeckContentType.CARD.getValue(), now);
 		}
 
 		final var card = CardRow.builder()
 				.id(command.id())
 				.deckId(deck.getId())
-				.front(validateText(command.front(), "front", 60))
-				.back(validateText(command.back(), "back", 240))
-				.example(normalizeOptional(command.example(), "example"))
-				.hint(normalizeOptional(command.hint(), "hint"))
-				.pronunciation(normalizeOptional(command.pronunciation(), "pronunciation"))
+				.front(validateText(command.front(), CardTextField.FRONT))
+				.back(validateText(command.back(), CardTextField.BACK))
+				.example(normalizeOptional(command.example(), CardTextField.EXAMPLE))
+				.hint(normalizeOptional(command.hint(), CardTextField.HINT))
+				.pronunciation(normalizeOptional(command.pronunciation(), CardTextField.PRONUNCIATION))
 				.createdAt(now)
 				.updatedAt(now)
 				.build();
@@ -86,20 +87,20 @@ public class CardServiceImpl implements CardService {
 		return PageHelper.create(pageQuery, cards, totalItems);
 	}
 
-	private String validateText(String rawText, String field, int maxLength) {
+	private String validateText(String rawText, CardTextField field) {
 		final var text = rawText.trim();
 		if (text.isEmpty()) {
-			throw new DeckValidationException(field, "CARD_%s_REQUIRED".formatted(field.toUpperCase(Locale.ROOT)),
-					"Card %s must not be blank.".formatted(field));
+			throw new DeckValidationException(field.getFieldName(), requiredCode(field),
+					"Card %s must not be blank.".formatted(field.getFieldName()));
 		}
-		if (text.length() > maxLength) {
-			throw new DeckValidationException(field, "CARD_%s_TOO_LONG".formatted(field.toUpperCase(Locale.ROOT)),
-					"Card %s must be at most %d characters.".formatted(field, maxLength));
+		if (text.length() > field.getMaxLength()) {
+			throw new DeckValidationException(field.getFieldName(), tooLongCode(field),
+					"Card %s must be at most %d characters.".formatted(field.getFieldName(), field.getMaxLength()));
 		}
 		return text;
 	}
 
-	private String normalizeOptional(String rawText, String field) {
+	private String normalizeOptional(String rawText, CardTextField field) {
 		if (rawText == null) {
 			return null;
 		}
@@ -107,11 +108,19 @@ public class CardServiceImpl implements CardService {
 		if (text.isEmpty()) {
 			return null;
 		}
-		if (text.length() > 240) {
-			throw new DeckValidationException(field, "CARD_%s_TOO_LONG".formatted(field.toUpperCase(Locale.ROOT)),
-					"Card %s must be at most 240 characters.".formatted(field));
+		if (text.length() > field.getMaxLength()) {
+			throw new DeckValidationException(field.getFieldName(), tooLongCode(field),
+					"Card %s must be at most %d characters.".formatted(field.getFieldName(), field.getMaxLength()));
 		}
 		return text;
+	}
+
+	private String requiredCode(CardTextField field) {
+		return "CARD_%s_REQUIRED".formatted(field.name());
+	}
+
+	private String tooLongCode(CardTextField field) {
+		return "CARD_%s_TOO_LONG".formatted(field.name());
 	}
 
 }

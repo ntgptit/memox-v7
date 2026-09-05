@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.memox.deck.application.CreateRootDeckCommand;
 import com.memox.deck.application.CreateSubDeckCommand;
 import com.memox.deck.domain.Deck;
+import com.memox.deck.domain.DeckContentType;
 import com.memox.deck.persistence.DeckRow;
 import com.memox.exception.DeckValidationException;
 import com.memox.exception.DeckConflictException;
@@ -40,8 +41,8 @@ public class DeckServiceImpl implements DeckService {
 				.id(command.id())
 				.name(name)
 				.rootDeckId(command.id())
-				.contentType("deck")
-				.schedulerType(command.schedulerType())
+				.contentType(DeckContentType.DECK.getValue())
+				.schedulerType(command.schedulerType().getValue())
 				.schedulerVersion(INITIAL_SCHEDULER_VERSION)
 				.schedulerGeneration(INITIAL_SCHEDULER_GENERATION)
 				.siblingPosition(deckRepository.nextRootSiblingPosition())
@@ -57,7 +58,7 @@ public class DeckServiceImpl implements DeckService {
 	@Transactional
 	public Deck createSubDeck(CreateSubDeckCommand command) {
 		final var parent = requireActiveDeck(command.parentDeckId());
-		if ("card".equals(parent.getContentType())) {
+		if (DeckContentType.fromValue(parent.getContentType()) == DeckContentType.CARD) {
 			throw new DeckConflictException("PARENT_HOLDS_CARDS", "A card deck cannot contain child decks.");
 		}
 		if (depthOf(parent) >= MAX_TREE_DEPTH) {
@@ -65,8 +66,8 @@ public class DeckServiceImpl implements DeckService {
 		}
 
 		final var now = Instant.now(clock);
-		if ("unset".equals(parent.getContentType())) {
-			deckRepository.updateContentType(parent.getId(), "deck", now);
+		if (DeckContentType.fromValue(parent.getContentType()) == DeckContentType.UNSET) {
+			deckRepository.updateContentType(parent.getId(), DeckContentType.DECK.getValue(), now);
 		}
 
 		final var deck = DeckRow.builder()
@@ -74,7 +75,7 @@ public class DeckServiceImpl implements DeckService {
 				.name(validateName(command.name()))
 				.parentDeckId(parent.getId())
 				.rootDeckId(parent.getRootDeckId())
-				.contentType("unset")
+				.contentType(DeckContentType.UNSET.getValue())
 				.siblingPosition(deckRepository.nextChildSiblingPosition(parent.getId()))
 				.createdAt(now)
 				.updatedAt(now)

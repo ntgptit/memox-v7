@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.memox.deck.application.CreateRootDeckCommand;
 import com.memox.deck.application.CreateSubDeckCommand;
+import com.memox.deck.domain.SchedulerType;
 import com.memox.service.DeckService;
 
 import jakarta.validation.Valid;
@@ -31,7 +32,7 @@ public class DeckController {
 	@PostMapping
 	public ResponseEntity<DeckResponse> createRootDeck(@Valid @RequestBody CreateRootDeckRequest request) {
 		final var deck = deckService.createRootDeck(
-				new CreateRootDeckCommand(request.id(), request.name(), request.schedulerType()));
+				new CreateRootDeckCommand(request.id(), request.name(), SchedulerType.fromValue(request.schedulerType())));
 		final var response = DeckResponse.from(deck);
 		return ResponseEntity.created(URI.create("/api/v1/decks/" + deck.id())).body(response);
 	}

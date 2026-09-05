@@ -3,6 +3,8 @@ package com.memox.deck.persistence;
 import java.time.Instant;
 
 import com.memox.deck.domain.Deck;
+import com.memox.deck.domain.DeckContentType;
+import com.memox.deck.domain.SchedulerType;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,7 +32,8 @@ public class DeckRow {
 	private Instant updatedAt;
 
 	public Deck toDomain() {
-		return new Deck(id, name, parentDeckId, rootDeckId, contentType, schedulerType,
+		return new Deck(id, name, parentDeckId, rootDeckId, DeckContentType.fromValue(contentType),
+				SchedulerType.fromNullableValue(schedulerType),
 				schedulerVersion, schedulerGeneration, siblingPosition, createdAt, updatedAt);
 	}
 }
