@@ -61,7 +61,16 @@ class SettingsResetSectionWidget extends StatelessWidget {
           style: context.texts.bodySmall!.inked(context, AppInk.quiet),
         ),
         if (band != null) ...<Widget>[
-          const SizedBox(height: AppSpacing.md),
+          // **`lg`, the same step the study-defaults band takes** — one widget
+          // introduced by three different gaps on one screen says the band is
+          // three different kinds of thing. The other two at least follow their
+          // own container: the choice card breathes at `sm` and the study card
+          // separates its clusters at `lg`. The `md` that used to be here
+          // followed nothing — this section's own internal step is `xs` above
+          // and `SettingsScreen.sectionGap` is `xl` — and the screen this one
+          // links to puts its failure banner under the card it reports on at
+          // `lg` too (`reminder_settings_section_widget.dart`).
+          const SizedBox(height: AppSpacing.lg),
           SettingsErrorBandWidget(
             failure: band,
             onRetry: isSubmitting ? null : onRetry,

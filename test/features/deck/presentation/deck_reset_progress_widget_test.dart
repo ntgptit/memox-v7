@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/features/deck/domain/entities/deck_entity.dart';
 import 'package:memox/features/deck/domain/models/deck_content_type_model.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
@@ -131,6 +132,40 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(repository.progressResets, isEmpty);
+  });
+
+  testWidgets('the two opposed lists are separated as sections, not lines', (
+    tester,
+  ) async {
+    // BR-50 exists because the contrast between the two lists is the warning.
+    // The boundary between them therefore has to be a section break —
+    // `AppSpacing.xl`, the scale's step between sections of a screen — and
+    // strictly wider than the `lg` that binds the title to the first list. It
+    // was `md`, the inside-a-compact-control step, which made the two
+    // opposites the most tightly bound pair on the sheet.
+    await pumpSheet(tester, hasLearnedCards: true);
+
+    // `_Section` is private, so each one is reached through the innermost Row
+    // above its heading — the Row `_Section.build` returns.
+    Rect sectionOf(String title) => tester.getRect(
+      find.ancestor(of: find.text(title), matching: find.byType(Row)).first,
+    );
+
+    final Rect title = tester.getRect(find.text('Reset learning progress?'));
+    final Rect kept = sectionOf('Kept');
+    final Rect lost = sectionOf('Lost');
+    final Rect schedulerLabel = tester.getRect(
+      find.text('Study mode after the reset'),
+    );
+
+    expect(kept.top - title.bottom, AppSpacing.lg);
+    expect(lost.top - kept.bottom, AppSpacing.xl);
+    expect(schedulerLabel.top - lost.bottom, AppSpacing.xl);
+    expect(
+      lost.top - kept.bottom,
+      greaterThan(kept.top - title.bottom),
+      reason: 'the two lists must not be bound tighter than the title is',
+    );
   });
 
   testWidgets('the mode section is titled once, by this sheet', (tester) async {

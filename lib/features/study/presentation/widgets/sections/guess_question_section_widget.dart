@@ -185,7 +185,15 @@ class _GuessQuestionSectionWidgetState
                 width: constraints.maxWidth,
               ),
         );
-    final cardHeight = (constraints.maxHeight - AppSpacing.md - needed).clamp(
+    // **The gap below the card is subtracted here and drawn below, so the two
+    // spellings must move together** — reserve less than is drawn and the card
+    // quietly absorbs the difference, which is a layout that is wrong only on
+    // the viewports where the clamp does not already hide it.
+    //
+    // It is `lg`, the frame's own band gap (SC-C2-10). It was `md`, the step
+    // `AppSpacing` reserves for the inside of a compact control, used here for
+    // the seam between the prompt and the five things you answer with.
+    final cardHeight = (constraints.maxHeight - AppSpacing.lg - needed).clamp(
       AppGuessPrompt.cardMinHeight,
       AppGuessPrompt.cardMaxHeight,
     );
@@ -197,7 +205,8 @@ class _GuessQuestionSectionWidgetState
           height: cardHeight,
           child: _PromptCard(term: widget.question.term.front),
         ),
-        const SizedBox(height: AppSpacing.md),
+        // Keep in step with the subtraction in `cardHeight` above.
+        const SizedBox(height: AppSpacing.lg),
         Expanded(child: LayoutBuilder(builder: _options)),
       ],
     );

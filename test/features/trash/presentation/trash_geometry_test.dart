@@ -348,6 +348,49 @@ void main() {
     });
   });
 
+  group('T4 · the age and the countdown are two facts, not one line', () {
+    testWidgets('a separator and a full item gap part them at 393dp', (
+      tester,
+    ) async {
+      await pumpTrash(tester, batches: twoRows());
+
+      final age = tester.getRect(find.text(english.trashDeletedDaysAgo(2)));
+      final countdown = tester.getRect(find.text(english.trashDaysLeft(28)));
+      final dot = tester.getRect(
+        find.descendant(
+          of: find.byType(TrashRowWidget).first,
+          matching: find.text('·'),
+        ),
+      );
+
+      // Same run, or the gap below is a line break rather than a gap.
+      expect(
+        age.top,
+        countdown.top,
+        reason:
+            'T4: at 393dp both facts fit one line; if they no longer do, the '
+            'measurement below is reading across a wrap',
+      );
+
+      // **W2 draws the row as `Deleted 2 days ago · 27 days left`.** The two
+      // facts used to sit `xs` apart with nothing between them, and `xs` is
+      // the icon-to-label step — at that distance the only boundary left was
+      // an ink shift the light theme barely carries, so the line read as one
+      // sentence. The dot is the boundary; `sm` on each side of it is the gap
+      // `deck_workload_line_widget.dart` gives the same kind of row.
+      expect(
+        <double>[
+          double.parse((dot.left - age.right).toStringAsFixed(1)),
+          double.parse((countdown.left - dot.right).toStringAsFixed(1)),
+        ],
+        <double>[AppSpacing.sm, AppSpacing.sm],
+        reason:
+            'T4: the middle dot sits one item gap from each fact — '
+            'age=$age dot=$dot countdown=$countdown',
+      );
+    });
+  });
+
   group('R1 · 320dp at 2.0x text scale', () {
     testWidgets('nothing overflows horizontally', (tester) async {
       final overflows = <String>[];
@@ -399,6 +442,43 @@ void main() {
         isNot(TextOverflow.ellipsis),
         reason: 'R1: `N days left` must not be the line that ellipsises',
       );
+    });
+
+    testWidgets('the separator never becomes a run of its own', (tester) async {
+      // **The cost of a separator that is its own `Wrap` child, measured
+      // rather than assumed.** The two facts do not fit one line at 320dp —
+      // that was already true before the dot existed — so the dot lands
+      // wherever the run breaks, and where that is depends on the scale:
+      // at 1.0 it stays behind the age (`Deleted 2 days ago ·` / `28 days
+      // left`), at 2.0 the age fills the line alone and the dot leads the
+      // second run (`· 28 days left`). Both are legible; neither is what a
+      // reviewer would draw. What must not happen is the third case — a line
+      // holding nothing but the dot — and that is what this pins, because it
+      // is the one that reads as a rendering fault rather than as a wrap.
+      for (final double scale in <double>[1, 2]) {
+        await pumpTrash(
+          tester,
+          batches: twoRows(),
+          size: const Size(320, 640),
+          textScale: scale,
+        );
+
+        final row = find.byType(TrashRowWidget).first;
+        Rect inRow(Finder matching) =>
+            tester.getRect(find.descendant(of: row, matching: matching).first);
+
+        final age = inRow(find.text(english.trashDeletedDaysAgo(2)));
+        final dot = inRow(find.text('·'));
+        final countdown = inRow(find.text(english.trashDaysLeft(28)));
+
+        expect(
+          dot.top == age.top || dot.top == countdown.top,
+          isTrue,
+          reason:
+              'R1: at 320dp @${scale}x the middle dot shares a run with one of '
+              'the two facts — age=$age dot=$dot countdown=$countdown',
+        );
+      }
     });
   });
 

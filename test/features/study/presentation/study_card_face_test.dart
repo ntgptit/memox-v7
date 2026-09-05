@@ -427,4 +427,55 @@ void main() {
     final front = tester.getRect(find.text('front-c1'));
     expect(front.center.dy, closeTo(card.center.dy, 8));
   });
+
+  testWidgets('the last grade sits flush with the foot of the body', (
+    tester,
+  ) async {
+    // SC-C2-11. The `sm` separator used to close the loop body, so it also ran
+    // after the *last* grade: the revealed `self_assess` face ended in 8dp of
+    // dead space that `browse`, `recall` and `fill` measure 0.0 at. Both action
+    // sets are measured because the guard has to hold for `sm2`'s four grades,
+    // not only for the two `eight_box` gives — the one-button unrevealed branch
+    // never had the trailing gap, which is what made the foot of the body
+    // change shape across the flip.
+    tester.view.physicalSize = const Size(393, 852);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    for (final actions in <List<StudyAction>>[eightBox, sm2]) {
+      await tester.pumpWidget(
+        wrapForTest(
+          SizedBox(
+            height: 700,
+            child: StudyCardFaceSectionWidget(
+              turn: turnOf('c1'),
+              actions: actions,
+              onAction: (_) async => null,
+              onContinue: () {},
+              shouldShowBackImmediately: true,
+            ),
+          ),
+          isScrollable: false,
+        ),
+      );
+
+      final buttons = find.byType(MxActionButton);
+      expect(buttons, findsNWidgets(actions.length));
+
+      final body = tester.getRect(find.byType(StudyCardFaceSectionWidget));
+      final last = tester.getRect(buttons.at(actions.length - 1));
+      expect(
+        last.bottom,
+        closeTo(body.bottom, 0.01),
+        reason:
+            'dead space under the last of ${actions.length} grades: '
+            '${body.bottom - last.bottom}',
+      );
+
+      // And the separator itself is unchanged — it moved, it did not go.
+      final first = tester.getRect(buttons.first);
+      final second = tester.getRect(buttons.at(1));
+      expect(second.top - first.bottom, closeTo(AppSpacing.sm, 0.01));
+    }
+  });
 }

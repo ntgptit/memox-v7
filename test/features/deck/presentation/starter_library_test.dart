@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/features/card/domain/failures/card_validation_failure.dart';
 import 'package:memox/features/card/domain/models/card_text_model.dart';
 import 'package:memox/features/deck/di/deck_template_provider.dart';
@@ -240,6 +241,59 @@ void main() {
       final card = tester.getRect(find.byType(MxCard));
 
       expect(glyph.left, card.left);
+    });
+  });
+
+  /// The catalog's vertical rhythm, measured (SC-C2-02).
+  ///
+  /// Nothing pinned these two gaps before, and the screen had drifted a full
+  /// step below the app's grammar in both: `sm` (8) between two cards that
+  /// each pad themselves `lg` (16), so the space *between* two rows was half
+  /// the space *inside* one; and `md` (12) under the BR-87 notice, which is a
+  /// break between two sections rather than a gap between two rows. Every
+  /// value involved is a legitimate token, so only geometry after layout can
+  /// tell either of them apart from the right one — hence `getRect`.
+  group('list rhythm (SC-C2-02)', () {
+    testWidgets('two template cards sit one list-item gap apart', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        catalog: <DeckTemplate>[
+          template(),
+          template(id: 'starter-2'),
+        ],
+      );
+
+      final first = tester.getRect(find.byType(MxCard).at(0));
+      final second = tester.getRect(find.byType(MxCard).at(1));
+
+      expect(
+        second.top - first.bottom,
+        AppSpacing.lg,
+        reason:
+            'two MxCard.raised rows are `lg` apart — the value '
+            'deck_list_sliver_widget.dart settled on for the same row',
+      );
+    });
+
+    testWidgets('the fixture notice is a section break, not another row', (
+      tester,
+    ) async {
+      await pump(tester);
+
+      final notice = tester.getRect(find.byType(DeckNoticeWidget));
+      final card = tester.getRect(find.byType(MxCard));
+
+      expect(
+        card.top - notice.bottom,
+        AppSpacing.xl,
+        reason: 'the BR-87 notice heads the catalog rather than joining it',
+      );
+      // The point of the number, not the number itself: the notice has to be
+      // further from the first card than two cards are from each other, or it
+      // reads as one more thing in the list to tap.
+      expect(card.top - notice.bottom, greaterThan(AppSpacing.lg));
     });
   });
 }

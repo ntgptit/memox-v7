@@ -136,10 +136,16 @@ class CardEditorFormWidget extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.xl),
         CardTagSectionWidget(cardId: cardId, onDraftChanged: onTagDraftChanged),
-        const SizedBox(height: AppSpacing.xl),
         // The gap is the layout's, the line is the theme's (M100.36 10H).
+        //
+        // The whole separation is the divider's own padding now, so it is
+        // symmetric. It used to be a `SizedBox(xl)` above the `Padding` as
+        // well: 36dp over the hairline against 12 under it, so the line sat
+        // three times closer to the destructive block and grouped with it
+        // instead of dividing the two. `xl` both sides keeps the
+        // section-rank total (SC-C2-04).
         const Padding(
-          padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
+          padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
           child: Divider(),
         ),
         CardTrashActionWidget(

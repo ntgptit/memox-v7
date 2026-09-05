@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/features/card/presentation/widgets/sections/card_create_action_bar_widget.dart';
+import 'package:memox/features/card/presentation/widgets/sections/card_details_section_widget.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_button_pair.dart';
+import 'package:memox/shared/widgets/mx_text_field.dart';
 
 import 'support/card_editor_harness.dart';
 import 'support/fake_card_repository.dart';
@@ -30,8 +33,8 @@ void main() {
     return repository;
   }
 
-  Future<void> pumpCreate(WidgetTester tester) =>
-      pumpCardEditor(tester, seed(), cardId: null);
+  Future<void> pumpCreate(WidgetTester tester, {Size? surfaceSize}) =>
+      pumpCardEditor(tester, seed(), cardId: null, surfaceSize: surfaceSize);
 
   group('geometry', () {
     testWidgets('both dispositions sit outside the scroll', (tester) async {
@@ -95,6 +98,28 @@ void main() {
       // been made for the user by the layout (M99.53).
       expect(save.width, addAnother.width);
       expect(save.height, addAnother.height);
+    });
+
+    testWidgets('the details disclosure opens at a section gap', (
+      tester,
+    ) async {
+      await pumpCreate(tester, surfaceSize: const Size(393, 852));
+
+      // The two sides ending and the optional details beginning is a section
+      // boundary, and edit spells that same seam `xl`
+      // (`card_editor_form_widget.dart`). Create spelled it `md` — the
+      // scale's inside-a-compact-control step — so one boundary of one rank
+      // was 12 on this mode and 24 on the other (SC-C2-03).
+      //
+      // Pristine on purpose: a save failure inserts its own `lg` and a `Text`
+      // between the two, so the seam being measured would no longer be this
+      // one.
+      final Rect back = tester.getRect(find.byType(MxTextField).at(1));
+      final Rect details = tester.getRect(
+        find.byType(CardDetailsSectionWidget),
+      );
+
+      expect(details.top - back.bottom, AppSpacing.xl);
     });
   });
 }

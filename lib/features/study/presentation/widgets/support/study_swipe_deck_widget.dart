@@ -222,6 +222,14 @@ class _StudySwipeDeckWidgetState extends State<StudySwipeDeckWidget>
   /// flight — and a control that vanishes and returns within a second reads as
   /// a glitch; a disabled one reads as "wait". The custom actions above are
   /// absent while locked because an action menu has no disabled state to show.
+  ///
+  /// **The gap above is `lg`, the same band gap the frame uses** (SC-C2-10).
+  /// It was `sm`, which put a 48dp control 8dp under a card that fills the
+  /// body — the tightest content-to-action seam of the five modes, where the
+  /// other four measured 12, 16, 16 and 24 for the identical role. `lg` is
+  /// what `study_session_frame_section_widget.dart` already puts above and
+  /// below this whole band, so the mode now agrees with the frame that wraps
+  /// it instead of each mode answering the question separately.
   Widget _pointerRow(BuildContext context) {
     final l10n = context.l10n;
     final VoidCallback? forward = widget.isLocked ? null : widget.onForward;
@@ -230,7 +238,7 @@ class _StudySwipeDeckWidgetState extends State<StudySwipeDeckWidget>
         : widget.onBack;
 
     return Padding(
-      padding: const EdgeInsets.only(top: AppSpacing.sm),
+      padding: const EdgeInsets.only(top: AppSpacing.lg),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[

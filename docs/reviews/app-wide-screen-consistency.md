@@ -344,6 +344,37 @@ Mỗi finding đi qua **hai pass tái xác minh độc lập** trên `main` hi�
 
 ---
 
+### C2 — dispositions
+
+Đóng bởi PR #473. Cả ba chữ ký list-item-gap của ratchet được retire tại đây; map rỗng.
+
+Mỗi finding đi qua **hai pass tái xác minh độc lập** trên `main` hiện tại trước khi một dòng code được viết; chỗ nào hai pass bất đồng thì được phân xử bằng cách đọc code, không phải bằng cách lấy đa số.
+
+| ID | Kết luận cuối | Vì sao |
+|---|---|---|
+| `SC-C2-01` | **REVISED_AND_FIXED** | Measurements reproduce exactly. library_search_body_widget.dart:174-175 is `separatorBuilder: (BuildContext context, int index) => const SizedBox(height: AppSpacing.sm)` (8), and :160-166 is `EdgeInsets.fromLTRB(gutter, AppSpacing… **Target đã đổi:** Two edits in lib/features/search/presentation/widgets/sections/library_search_body_widget.dart. (1) :174-175 `AppSpacing.sm` -> `AppSpacing.lg`, the same value deck_list_sliver_widget.dart:85-86 uses  |
+| `SC-C2-02` | **FIXED** | Reproduces. starter_library_screen.dart:70 `const SizedBox(height: AppSpacing.md)` after DeckNoticeWidget and :73 `const SizedBox(height: AppSpacing.sm)` inside the `for` over `_TemplateTile`. `_TemplateTile` is `MxCard.raised(onT… |
+| `SC-C2-03` | **FIXED** | Reproduces exactly. card_create_form_widget.dart:147 `const SizedBox(height: AppSpacing.md)` between the back field (and its conditional failure text at :140-146) and CardDetailsSectionWidget at :148; :159 is `AppSpacing.xl` for t… |
+| `SC-C2-04` | **FIXED** | Reproduces. card_editor_form_widget.dart:139 `const SizedBox(height: AppSpacing.xl)` then :141-144 `const Padding(padding: EdgeInsets.symmetric(vertical: AppSpacing.md), child: Divider())`, then CardTrashActionWidget at :145. buil… |
+| `SC-C2-05` | **FIXED** | Reproduces. card_import_result_widget.dart:78 and :85 are both `const SizedBox(height: AppSpacing.md)`, separating three independent top-level surfaces in one Column: `_HeroCard` (:67), `_SummaryCard` (:79-83) and `MxCard.muted` (… |
+| `SC-C2-06` | **FIXED** | The measurement and, importantly, the sibling claim both hold — the latter is not obvious and I checked it. progress_summary_widget.dart:47-55: `labelLarge` heading inked quiet, then `const SizedBox(height: AppSpacing.md)` (line 5… |
+| `SC-C2-07` | **FIXED** | Reproduces. card_list_body_widget.dart:59-64 is `padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.xl, AppSpacing.lg, AppSpacing.xxl)` — the comment at :54-58 reasons only about the `xl` on TOP and says nothing about th… |
+| `SC-C2-08` | **FIXED** | Reproduces. card_list_body_widget.dart:69-70 `separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.md)`; the comment at :66-68 justifies HAVING a plain gap ("each card row is now its own bordered surface (MxCard… |
+| `SC-C2-09` | **REVISED_AND_FIXED** | The measurements are right, including the colour ones, which I recomputed rather than trusted. trash_row_widget.dart:186-200 is `Wrap(spacing: AppSpacing.xs, runSpacing: AppSpacing.xs)` over two bare Texts with no separator child;… **Target đã đổi:** Two edits only, both in the Wrap at trash_row_widget.dart:186-200: (1) `spacing: AppSpacing.xs` -> `AppSpacing.sm`, matching deck_workload_line_widget.dart:103; (2) insert a third Wrap child between t |
+| `SC-C2-10` | **FIXED** | All five sites reproduce with the cited tokens. study_swipe_deck_widget.dart:232-233 `Padding(padding: const EdgeInsets.only(top: AppSpacing.sm))` on the Previous/Next row (build at :204-205 is `Expanded(child: _gestureLayer())` t… |
+| `SC-C2-11` | **FIXED** | Reproduces exactly. study_card_face_section_widget.dart:394-407 — the revealed branch is `return <Widget>[ for (final action in widget.actions) ...<Widget>[ MxActionButton(...), const SizedBox(height: AppSpacing.sm) ] ]` with the … |
+| `SC-C2-12` | **FIXED** | Reproduces, and the target is corroborated by a source the finding did not cite. study_entry_section_widget.dart:62 `const SizedBox(height: AppSpacing.md)` between the primary MxActionButton at :59 and the secondary at :63-68. stu… |
+| `SC-C2-13` | **REVISED_AND_FIXED** | The problem is real and the measurements are right. deck_reset_progress_widget.dart:99 `const SizedBox(height: AppSpacing.md)` binds the Kept _Section (:93-98) to the Lost _Section (:103-110) more tightly than :92's `AppSpacing.lg… **Target đã đổi:** Raise BOTH section boundaries in lib/features/deck/presentation/widgets/overlays/deck_reset_progress_widget.dart: :99 `AppSpacing.md` -> `AppSpacing.xl` and :111 `AppSpacing.lg` -> `AppSpacing.xl`. Le |
+| `SC-C2-14` | **REVISED_AND_FIXED** | The spacing half reproduces and is right; the footer half is scoped too narrowly. starter_install_widget.dart:164 is `const SizedBox(height: AppSpacing.lg)` followed by a lone `MxActionButton(label: starterLibraryInstallAction)` a… **Target đã đổi:** In this cluster, one edit: lib/features/deck/presentation/widgets/overlays/starter_install_widget.dart:164 `AppSpacing.lg` -> `AppSpacing.xl`, matching the three sibling sheets in the same unit. Leave |
+| `SC-C2-15` | **FIXED** | Reproduces. reminder_settings_section_widget.dart:124 `const SizedBox(height: AppSpacing.lg)` inside the `if (banner != null)` block at :123-126, and :127 an unconditional `const SizedBox(height: AppSpacing.lg)` before the `MxCard… |
+| `SC-C2-16` | **FIXED** | Reproduces. trash_restore_target_sheet_widget.dart:200 `const SizedBox(height: AppSpacing.md)` immediately before the MxActionButton at :201-209, and :177 the same `AppSpacing.md` between the title and the ListView — the terminal … |
+| `SC-C2-17` | **FIXED** | Reproduces. card_tag_filter_sheet_widget.dart:86-121 is one Column with `spacing: AppSpacing.lg` at :89, and the four children give exactly three uniform 16dp gaps: title Text (:91) -> subtitle Text (:95-98) -> MxAsyncView tag lis… |
+| `SC-C2-18` | **REVISED_AND_FIXED** | The defect reproduces: tag_rename_widget.dart:127 `spacing: AppSpacing.lg` gives all four gaps 16 — title (:129) -> MxTextField (:130-141) -> `_MergeNotice` (:142) -> `_FailureBand` (:143-144) -> MxButtonPair (:150). The claim tha… **Target đã đổi:** In lib/features/card/presentation/widgets/overlays/tag_rename_widget.dart: drop `spacing: AppSpacing.lg` at :127 and set the gaps explicitly — `AppSpacing.lg` title -> MxTextField (unchanged, matches  |
+| `SC-C2-19` | **FIXED** | Reproduces: one widget, three gaps, none commented — settings_choice_section_widget.dart:112 `AppSpacing.sm`, settings_study_defaults_section_widget.dart:219 `AppSpacing.lg`, settings_reset_section_widget.dart:64 `AppSpacing.md`. … |
+| `SC-C2-20` | **REVISED_AND_FIXED** | The value is right and the target is incomplete in a way that ships red. progress_deck_list_widget.dart:59-61 `separatorBuilder: (BuildContext context, int index) => const SizedBox(height: AppSpacing.md)`; deck_list_sliver_widget.… **Target đã đổi:** Same value, four files instead of two. (1) progress_deck_list_widget.dart:61 `AppSpacing.md` → `AppSpacing.lg`. (2) Delete the `list-item-gap\|…progress_deck_list_widget.dart\|…\|AppSpacing.md\|0` entry f |
+
+**Tổng: FIXED 14 · REVISED_AND_FIXED 6 = 20**
+
 ### C3 — Failure and empty faces — screen title as error title, success copy as error copy, retry that says nothing
 
 **27 findings** (P0 1 · P1 5 · P2 14 · P3 7), across 15 surface units.
@@ -759,7 +790,7 @@ mà reviewer nhìn một màn đã gán. Chênh lệch giữa hai cột là §1.
 | Cụm | n | Đơn vị | Cao nhất theo màn | Severity cụm | PR |
 |---|---|---|---|---|---|
 | **C1** Sở hữu gutter | 20 | 16 | P1 | **P1** | **đóng — #472** · FIXED 11 · REVISED_AND_FIXED 6 · REFUTED 1 · BLOCKED 2 |
-| **C2** Nhịp danh sách và section | 20 | 14 | P2 | **P1** — cùng một grammar sai ở 14 đơn vị | chưa mở |
+| **C2** Nhịp danh sách và section | 20 | 14 | P2 | **P1** — cùng một grammar sai ở 14 đơn vị | **đóng — #473** · FIXED 14 · REVISED_AND_FIXED 6 |
 | **C3** Mặt lỗi và mặt rỗng | 27 | 15 | **P0** | **P0** | chưa mở |
 | **C4** Grammar điều hướng và chrome | 21 | 12 | P1 | **P1** | chưa mở |
 | **C5** Section heading tự dựng | 6 | 6 | P2 | P2 | chưa mở |

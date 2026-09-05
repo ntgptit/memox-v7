@@ -121,12 +121,25 @@ class _RenameFormState extends ConsumerState<_RenameForm> {
       if (outcome != null) widget.onDone(outcome);
     });
 
+    // **Four seams, four decisions — not one `spacing:` for all of them.** A
+    // uniform `lg` gave the merge disclosure, which describes the field directly
+    // above it, the same distance this sheet uses as its section gap, and
+    // promoted the failure band to a section of its own. Each gap now states
+    // what it binds: `lg` opens the form (deck_form_widget.dart:106-107), `sm`
+    // ties a notice to the control it describes
+    // (move_deck_sheet_widget.dart:77-78), `md` is the gap five deck sheets
+    // already give an in-flow failure (deck_form_widget.dart:138-139), and `lg`
+    // closes to the action row (card_export_sheet_widget.dart:241-242).
+    //
+    // Both middle children are conditional, so each gap lives **inside** its own
+    // `if`: hoisted out, it would open a hole in the pristine sheet, which is
+    // the whole hazard of trading `spacing:` for explicit boxes.
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
-      spacing: AppSpacing.lg,
       children: <Widget>[
         Text(context.l10n.tagRenameTitle, style: context.texts.titleMedium),
+        const SizedBox(height: AppSpacing.lg),
         MxTextField(
           controller: _input,
           label: context.l10n.tagRenameFieldLabel,
@@ -139,9 +152,15 @@ class _RenameFormState extends ConsumerState<_RenameForm> {
           onChanged: (value) => setState(() => _draft = value),
           onSubmitted: (_) => _submit(),
         ),
-        if (target != null) _MergeNotice(targetName: target.name),
-        if (failure != null)
+        if (target != null) ...<Widget>[
+          const SizedBox(height: AppSpacing.sm),
+          _MergeNotice(targetName: target.name),
+        ],
+        if (failure != null) ...<Widget>[
+          const SizedBox(height: AppSpacing.md),
           _FailureBand(message: context.tagCatalogWriteFailure(failure)),
+        ],
+        const SizedBox(height: AppSpacing.lg),
         // `MxButtonPair` keeps the stacking `OverflowBar` was here for — a
         // button is a non-flex child of a `Row`, so its label cannot wrap, and
         // at textScale 2.0 `Cancel` + `Merge tags` measure 346dp, over the

@@ -5,6 +5,11 @@ import 'package:memox/features/card/domain/models/card_list_item_model.dart';
 import 'package:memox/features/card/domain/models/tag_catalog_entry_model.dart';
 import 'package:memox/features/card/domain/models/tag_filter_model.dart';
 import 'package:memox/features/card/presentation/screens/card_list_screen.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
+import 'package:memox/shared/widgets/mx_async_view.dart';
+import 'package:memox/shared/widgets/mx_button_pair.dart';
+import 'package:memox/shared/widgets/mx_empty_state.dart';
+import 'package:memox/shared/widgets/mx_sheet_insets.dart';
 
 import 'support/fake_card_repository.dart';
 import 'support/fake_tag_catalog_repository.dart';
@@ -60,6 +65,23 @@ void main() {
     await tester.tap(find.byIcon(Icons.sell_outlined).first);
     await tester.pumpAndSettle();
   }
+
+  /// Sub-pixel slack for a laid-out rectangle. Not a tolerance for a wrong
+  /// number — a gap that is 4dp out fails at this epsilon.
+  const double epsilon = 0.5;
+
+  /// The tag list region, as the widget a reader sees.
+  ///
+  /// `MxAsyncView` renders the branch directly, so its rect is the rows' rect —
+  /// there is no invisible wrapper between them. The type argument is what makes
+  /// this unambiguous: the only other `MxAsyncView<List<TagCatalogEntry>>` in
+  /// the app is on the catalog screen, which this test never pumps.
+  final tagList = find.byType(MxAsyncView<List<TagCatalogEntry>>);
+
+  /// The form's own `Column`, first in depth order under the sheet's insets.
+  final sheetColumn = find
+      .descendant(of: find.byType(MxSheetInsets), matching: find.byType(Column))
+      .first;
 
   testWidgets('the pill sits on the filter bar and opens the sheet', (
     tester,
@@ -191,6 +213,69 @@ void main() {
 
     expect(harness.cards.requestedTagFilters.last, before);
     expect(find.text('Tags'), findsOneWidget, reason: 'still unselected');
+  });
+
+  testWidgets('the sheet reads as three regions, not one uniform column '
+      '(SC-C2-17)', (tester) async {
+    // The defect this pins: a single `spacing: AppSpacing.lg` gave the title's
+    // own explanatory line the same 16dp as the gap from the tag list to the
+    // action row, so the header pair had nothing binding it and the three
+    // regions had nothing dividing them. Measured rectangles rather than
+    // source text — the export sheet's W5 lesson, one file over.
+    await pump(tester);
+    await openSheet(tester);
+
+    final title = tester.getRect(find.text('Filter by tags'));
+    final subtitle = tester.getRect(
+      find.text('Shows cards with any of the selected tags.'),
+    );
+    final list = tester.getRect(tagList);
+    final actions = tester.getRect(find.byType(MxButtonPair));
+
+    final double headerPair = subtitle.top - title.bottom;
+    final double sectionBreak = list.top - subtitle.bottom;
+    final double actionGap = actions.top - list.bottom;
+
+    expect(
+      headerPair,
+      moreOrLessEquals(AppSpacing.xs, epsilon: epsilon),
+      reason:
+          'the OR line explains the title above it; at $headerPair it is a '
+          'sibling of the title rather than part of it',
+    );
+    expect(
+      sectionBreak,
+      moreOrLessEquals(AppSpacing.xl, epsilon: epsilon),
+      reason:
+          'header block and tag list are two sections of the sheet, and xl is '
+          "the scale's step between sections",
+    );
+    expect(
+      actionGap,
+      moreOrLessEquals(AppSpacing.lg, epsilon: epsilon),
+      reason: 'an action row opens at lg, as it does on the export sheet',
+    );
+    // The ranking, not just the three numbers: the failure was that all three
+    // were equal, and three assertions that each happen to be right would still
+    // pass if the grammar were re-flattened to some other single value.
+    expect(headerPair, lessThan(actionGap));
+    expect(sectionBreak, greaterThan(actionGap));
+  });
+
+  testWidgets('an empty catalog ends at the empty state, with no gap left '
+      'behind the missing action row', (tester) async {
+    // The hazard of replacing `spacing:` with explicit boxes: `_Actions` is
+    // conditional, so a lead-in gap written outside its `if` would leave 16dp
+    // of nothing under an empty catalog.
+    await pump(tester, catalogEntries: const <TagCatalogEntry>[]);
+    await openSheet(tester);
+
+    expect(find.byType(MxEmptyState), findsOneWidget);
+    expect(
+      tester.getRect(sheetColumn).bottom,
+      moreOrLessEquals(tester.getRect(tagList).bottom, epsilon: epsilon),
+      reason: 'the column must end where its last visible child does',
+    );
   });
 
   testWidgets('an empty catalog offers the empty state and no actions', (

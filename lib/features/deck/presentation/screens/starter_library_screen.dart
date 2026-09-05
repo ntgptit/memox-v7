@@ -84,10 +84,21 @@ class _Catalog extends StatelessWidget {
       ),
       children: <Widget>[
         DeckNoticeWidget(message: context.l10n.starterLibraryFixtureNotice),
-        const SizedBox(height: AppSpacing.md),
-        for (final row in rows) ...<Widget>[
+        // `xl`, the scale's break between two sections of a screen. The BR-87
+        // notice is not the first row of the catalog, and at the old `md` it
+        // stood closer to the list than two rows stood to each other, so it
+        // read as one more card to tap.
+        const SizedBox(height: AppSpacing.xl),
+        for (final (index, row) in rows.indexed) ...<Widget>[
+          // `lg`, the gap between two list items, and what
+          // `deck_list_sliver_widget.dart` settled on for the same
+          // `MxCard.raised` row. Each card pads itself `lg` inside, so the
+          // old `sm` made the space *between* two cards half the space
+          // *inside* one and the grouping cue pointed the wrong way. Leading,
+          // so the last card leaves the end gap to the list's own padding
+          // instead of adding a stray one to it.
+          if (index > 0) const SizedBox(height: AppSpacing.lg),
           _TemplateTile(row: row),
-          const SizedBox(height: AppSpacing.sm),
         ],
       ],
     );

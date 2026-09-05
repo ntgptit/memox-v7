@@ -110,7 +110,12 @@ class _CardCreateFormWidgetState extends State<CardCreateFormWidget> {
             style: context.texts.bodyMedium!.inked(context, AppInk.error),
           ),
         ],
-        const SizedBox(height: AppSpacing.md),
+        // The two sides end and the optional details begin: a section
+        // boundary, so `xl`. It was `md`, which the scale reserves for the
+        // inside of a compact control — and edit spells this same seam `xl`
+        // (`card_editor_form_widget.dart`), so the two modes were 12 and 24
+        // apart at the boundary they share (SC-C2-03).
+        const SizedBox(height: AppSpacing.xl),
         CardDetailsSectionWidget(
           isExpanded: _detailsExpanded,
           onToggle: () => setState(() => _detailsExpanded = !_detailsExpanded),

@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/features/card/domain/models/card_transfer_format_model.dart';
 import 'package:memox/features/card/domain/models/card_transfer_source_model.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
@@ -244,5 +245,37 @@ void main() {
       'summary card': cardHolding(find.text(english.cardImportAddedRowLabel)),
       'helper panel': cardHolding(find.text(english.cardImportFixInvalidHint)),
     });
+
+    // ...and the column separates them at the section step, not the
+    // inside-a-control one. Edges alone cannot see this: three bands stacked
+    // 12dp apart share every edge and still read as one surface, which is how
+    // the outcome column ran a step below the rest of the wizard while this
+    // test was green (SC-C2-05). `xl` is what the source and preview faces
+    // already put between their own bands.
+    final hero = tester.getRect(
+      cardHolding(find.text(english.cardImportSkipsTitle)),
+    );
+    final summary = tester.getRect(
+      cardHolding(find.text(english.cardImportAddedRowLabel)),
+    );
+    final helper = tester.getRect(
+      cardHolding(find.text(english.cardImportFixInvalidHint)),
+    );
+
+    expect(
+      summary.top - hero.bottom,
+      moreOrLessEquals(AppSpacing.xl, epsilon: epsilon),
+      reason:
+          'hero ends at ${hero.bottom}, summary starts at ${summary.top} — '
+          'two bands of the outcome are a section apart',
+    );
+    expect(
+      helper.top - summary.bottom,
+      moreOrLessEquals(AppSpacing.xl, epsilon: epsilon),
+      reason:
+          'summary ends at ${summary.bottom}, helper starts at '
+          '${helper.top} — the hint is its own band, not a row of the '
+          'summary',
+    );
   });
 }

@@ -242,10 +242,13 @@ void main() {
 
     expect(
       padding.bottom,
-      AppSpacing.xxl,
+      AppSpacing.lg,
       reason:
-          'restated from card_list_body_widget.dart so the two cannot '
-          'drift silently',
+          'D21 settled on one end inset for every scrolling list and it is '
+          'lg. This screen carries no floating action, so the shell helper '
+          'mxScrollEndInsetOf answers lg here. The assertion used to read '
+          'xxl, double the value named in this test title, which pinned the '
+          'divergence instead of catching it (SC-C2-07).',
     );
   });
 
@@ -400,5 +403,25 @@ void main() {
 
       expect(tester.takeException(), isNull);
     });
+  });
+
+  testWidgets('G10 — two rows sit one list-item gap apart', (tester) async {
+    // The rows used to be `md` (12) apart while the deck list they are
+    // modelled on used `lg` (16) — one semantic role, two spellings
+    // (SC-C2-08). Measured rather than read off the source, so a later edit
+    // to the separator fails here as well as in the composition ratchet.
+    await pumpList(tester, loadedRepository());
+    await tester.pumpAndSettle();
+
+    final first = tester.getRect(find.byType(CardTileWidget).at(0));
+    final second = tester.getRect(find.byType(CardTileWidget).at(1));
+
+    expect(
+      second.top - first.bottom,
+      moreOrLessEquals(AppSpacing.lg, epsilon: epsilon),
+      reason:
+          'app_spacing.dart defines lg as the gap between list items, and '
+          'deck_list_sliver_widget.dart separates the deck rows by it',
+    );
   });
 }
