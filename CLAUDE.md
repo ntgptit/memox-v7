@@ -234,6 +234,18 @@ strings or a pile of booleans.
 access from a widget. No hardcoded colors, text styles, or padding — everything
 comes from design tokens. No user-visible string outside the ARB files.
 
+**Material 3 first.** Before designing or changing any UI — a screen, a shared
+component, a theme slot, a state, a gesture — read the component's page at
+<https://m3.material.io/components> and design against it: its anatomy, its
+states, its measurements, its accessibility notes. The design system here is
+a token-fed Material 3, not a house style beside it: every `Mx*` widget
+wraps or restates an M3 component, every theme slot answers a `*DefaultsM3`,
+and the audits that scored this app (A8–A20.1) measured it against those
+pages. A widget invented without reading them is how the app grew two
+up-navigation grammars, a chip tier in five spellings and a switch with two
+state channels. Where M3 gives a choice, the repo's own tokens and
+`docs/design-system/` decide; where the repo is silent, M3 is the answer.
+
 **State.** Immutable. Data and task-status are separate concerns — one
 `isLoading` boolean for every operation on a screen is a bug waiting to happen.
 Controllers never hold a `BuildContext`; `command_query_separation_test.dart`
