@@ -201,7 +201,7 @@ String structuralPath(AstNode node, {bool withIndices = false}) {
             : at.methodName.name,
       );
     } else if (withIndices && at is ListLiteral && child is CollectionElement) {
-      final int index = at.elements.indexOf(child as CollectionElement);
+      final int index = at.elements.indexOf(child);
       if (index >= 0) segments.add('[$index]');
     }
     child = at;
