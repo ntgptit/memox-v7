@@ -4,9 +4,57 @@
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.memox.repository.DeckRepository">
 
+  <resultMap id="deckRow" type="com.memox.deck.persistence.DeckRow">
+    <id column="id" property="id"/>
+    <result column="name" property="name"/>
+    <result column="parent_deck_id" property="parentDeckId"/>
+    <result column="root_deck_id" property="rootDeckId"/>
+    <result column="content_type" property="contentType"/>
+    <result column="scheduler_type" property="schedulerType"/>
+    <result column="scheduler_version" property="schedulerVersion"/>
+    <result column="scheduler_generation" property="schedulerGeneration"/>
+    <result column="sibling_position" property="siblingPosition"/>
+    <result column="created_at" property="createdAt"/>
+    <result column="updated_at" property="updatedAt"/>
+  </resultMap>
+
   <select id="readSchemaVersion" resultType="java.lang.String">
     SELECT metadata_value
     FROM api_metadata
     WHERE metadata_key = 'schema_version'
   </select>
+
+  <select id="findRootDecks" resultMap="deckRow">
+    SELECT id, name, parent_deck_id, root_deck_id, content_type, scheduler_type,
+           scheduler_version, scheduler_generation, sibling_position, created_at, updated_at
+    FROM decks
+    WHERE parent_deck_id IS NULL
+      AND delete_batch_id IS NULL
+    ORDER BY sibling_position ASC, id ASC
+  </select>
+
+  <select id="findActiveDeckById" resultMap="deckRow">
+    SELECT id, name, parent_deck_id, root_deck_id, content_type, scheduler_type,
+           scheduler_version, scheduler_generation, sibling_position, created_at, updated_at
+    FROM decks
+    WHERE id = #{deckId}
+      AND delete_batch_id IS NULL
+  </select>
+
+  <select id="nextRootSiblingPosition" resultType="int">
+    SELECT COALESCE(MAX(sibling_position), -1) + 1
+    FROM decks
+    WHERE parent_deck_id IS NULL
+      AND delete_batch_id IS NULL
+  </select>
+
+  <insert id="insertRootDeck" parameterType="com.memox.deck.persistence.DeckRow">
+    INSERT INTO decks (
+      id, name, parent_deck_id, sibling_position, root_deck_id, content_type,
+      scheduler_type, scheduler_version, scheduler_generation, created_at, updated_at
+    ) VALUES (
+      #{id}, #{name}, NULL, #{siblingPosition}, #{rootDeckId}, #{contentType},
+      #{schedulerType}, #{schedulerVersion}, #{schedulerGeneration}, #{createdAt}, #{updatedAt}
+    )
+  </insert>
 </mapper>
