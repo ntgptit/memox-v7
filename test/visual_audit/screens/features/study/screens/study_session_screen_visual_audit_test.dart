@@ -100,14 +100,19 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.rasterOnly,
         detailContains: '_RenderInkFeatures',
+        // Two since the finished face gained a way out (SC-C1-12): the Scaffold
+        // and the MxActionButton's own Material. Still no AppBar — the count
+        // is the assertion that none appeared.
+        expectedMatches: 2,
         rationale:
-            'The Scaffold Material ink layer, and the only one: this screen has '
-            'no AppBar. Its top bar is the session frame, which carries the '
-            'mode and the ✕ that ends the session (BR-82) — a Material bar '
-            'above it would name the screen twice and offer a back arrow that '
-            'pops the route with the session still open. The card is an MxCard '
-            'with no ink of its own; the overlay colours are asserted in '
-            'app_theme_test.dart.',
+            'The Scaffold Material ink layer and the one MxActionButton draws '
+            'for its ripple. There is no AppBar: this screen's top bar is the '
+            'session frame, which carries the mode and the ✕ that ends the '
+            'session (BR-82) — a Material bar above it would name the screen '
+            'twice and offer a back arrow that pops the route with the session '
+            'still open. The card is an MxCard with no ink of its own; the '
+            'overlay colours are asserted in app_theme_test.dart and the '
+            'button states in mx_action_button_state_matrix_test.dart.',
       ),
       // **New with the finished face's way out (SC-C1-12).** A session whose
       // epilogue read fails used to end in a title and nothing else, on the one
