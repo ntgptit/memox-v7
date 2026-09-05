@@ -108,6 +108,7 @@ SCREENS = [
     # menu vẽ cùng giấy với card nó mở đè lên, nổi 0.00 L*, và mọi assertion
     # về nó vẫn xanh. Hai mode vì độ nổi được dựng khác nhau ở mỗi mode.
     ('Card', 'card_overflow_menu', 'Overflow menu', 'Import / Export / Manage tags, mở đè lên list'),
+    ('Card', 'card_editor_create', 'Card editor — tạo mới', 'Form rỗng, autofocus mặt trước; khác edit về chrome (SC-C1-02)'),
     ('Card', 'card_editor_edit', 'Card editor', 'Sửa nội dung, tag, cờ; danger zone'),
     ('Card', 'card_detail', 'Card detail', 'Ba bề mặt: hero, panel lịch, timeline (M99.60)'),
     ('Card', 'card_detail_sm2', 'Card detail — sm2', 'Ba vắng mặt: divider, chip cờ, accent'),
@@ -136,6 +137,8 @@ SCREENS = [
     ('Tag', 'tag_filter_sheet', 'Tag filter', 'Lọc OR nhiều nhãn (BR-231)'),
     ('Tag', 'tag_rename_merge', 'Tag rename/gộp', 'Đổi tên trùng = gộp, nói trước'),
     ('Study', 'study_home', 'Study Home', 'Resume + workload thật (UC-14)'),
+    ('Study', 'study_entry', 'Study entry — vào một deck', 'Đếm new/due, hai lối vào, nút tuỳ chọn (UC-14)'),
+    ('Study', 'study_options', 'Study options', 'Giới hạn thẻ, thứ tự thẻ mới; override theo deck (BR-212)'),
     ('Study', 'study_browse', 'Browse', 'Giai đoạn đọc của learning'),
     ('Study', 'study_match', 'Match', 'Ghép cặp'),
     ('Study', 'study_guess', 'Guess', 'Chọn nghĩa'),
@@ -150,6 +153,7 @@ SCREENS = [
     ('Reminder', 'reminder_settings_hc', 'Reminder — high contrast', 'Hàng giờ và workload inert dưới cặp theme HC'),
     ('Search', 'library_search', 'Global search', 'Deck + thẻ + nhãn, keyset (UC-20)'),
     ('Trash', 'trash', 'Trash', 'Soft delete, 30 ngày, restore/purge (UC-21)'),
+    ('App', 'route_not_found', 'Route not found', 'errorBuilder của router — màn duy nhất không thuộc feature nào'),
 ]
 
 
