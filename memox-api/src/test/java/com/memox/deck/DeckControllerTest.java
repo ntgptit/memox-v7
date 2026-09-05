@@ -4,6 +4,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,7 @@ class DeckControllerTest {
 				""".formatted(deckId);
 
 		mockMvc.perform(post("/api/v1/decks")
+					.header("X-Request-Id", "client-request-1")
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(request))
 				.andExpect(status().isCreated())
@@ -45,13 +47,14 @@ class DeckControllerTest {
 
 		mockMvc.perform(get("/api/v1/decks"))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$[?(@.id == '%s')].name".formatted(deckId))
+				.andExpect(jsonPath("$.items[?(@.id == '%s')].name".formatted(deckId))
 						.value("Korean basics"));
 	}
 
 	@Test
 	void returnsProblemDetailsForInvalidRootDeckInput() throws Exception {
 		mockMvc.perform(post("/api/v1/decks")
+					.header("X-Request-Id", "client-request-1")
 					.contentType(MediaType.APPLICATION_JSON)
 					.content("""
 							{
@@ -62,9 +65,26 @@ class DeckControllerTest {
 							"""))
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
+				.andExpect(jsonPath("$.requestId").value("client-request-1"))
+				.andExpect(header().string("X-Request-Id", "client-request-1"))
 				.andExpect(jsonPath("$.fieldErrors.id").exists())
 				.andExpect(jsonPath("$.fieldErrors.name").exists())
 				.andExpect(jsonPath("$.fieldErrors.schedulerType").exists());
+	}
+
+	@Test
+	void returnsConflictProblemDetailsForADuplicateClientId() throws Exception {
+		final var deckId = UUID.randomUUID().toString();
+		final var request = """
+				{"id":"%s","name":"Root","schedulerType":"sm2"}
+				""".formatted(deckId);
+
+		mockMvc.perform(post("/api/v1/decks").contentType(MediaType.APPLICATION_JSON).content(request))
+				.andExpect(status().isCreated());
+
+		mockMvc.perform(post("/api/v1/decks").contentType(MediaType.APPLICATION_JSON).content(request))
+				.andExpect(status().isConflict())
+				.andExpect(jsonPath("$.code").value("DATA_INTEGRITY_VIOLATION"));
 	}
 
 	@Test

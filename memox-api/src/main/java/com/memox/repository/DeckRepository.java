@@ -4,27 +4,33 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.memox.deck.domain.DeckContentType;
 import com.memox.deck.persistence.DeckRow;
+import com.memox.common.pagination.PageQuery;
 
 @Mapper
 public interface DeckRepository {
 
 	String readSchemaVersion();
 
-	List<DeckRow> findRootDecks();
+	List<DeckRow> findRootDecks(PageQuery pageQuery);
+
+	long countActiveRootDecks();
 
 	DeckRow findActiveDeckById(@Param("deckId") String deckId);
 
-	int nextRootSiblingPosition();
+	DeckRow findActiveDeckByIdForUpdate(@Param("deckId") String deckId);
 
-	int nextChildSiblingPosition(@Param("parentDeckId") String parentDeckId);
+	int lockRootDeckCreation();
+
+	int nextSiblingPosition(@Param("siblingScopeId") String siblingScopeId);
 
 	void insertRootDeck(DeckRow deck);
 
 	void insertSubDeck(DeckRow deck);
 
-	void updateContentType(
+	int updateContentType(
 			@Param("deckId") String deckId,
-			@Param("contentType") String contentType,
+			@Param("contentType") DeckContentType contentType,
 			@Param("updatedAt") java.time.Instant updatedAt);
 }

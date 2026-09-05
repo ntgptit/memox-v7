@@ -1,4 +1,6 @@
 package com.memox.deck.application;
 
-public record CreateRootDeckCommand(String id, String name, String schedulerType) {
+import com.memox.deck.domain.SchedulerType;
+
+public record CreateRootDeckCommand(String id, String name, SchedulerType schedulerType) {
 }

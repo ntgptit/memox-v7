@@ -1,7 +1,7 @@
 package com.memox.service;
 
-import java.util.List;
-
+import com.memox.common.pagination.PageQuery;
+import com.memox.common.pagination.PagingResponse;
 import com.memox.deck.application.CreateRootDeckCommand;
 import com.memox.deck.application.CreateSubDeckCommand;
 import com.memox.deck.domain.Deck;
@@ -14,5 +14,5 @@ public interface DeckService {
 
 	Deck getDeck(String deckId);
 
-	List<Deck> listRootDecks();
+	PagingResponse<Deck> listRootDecks(PageQuery pageQuery);
 }

@@ -4,8 +4,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+import com.memox.deck.domain.SchedulerType;
+
 public record CreateRootDeckRequest(
-		@NotBlank @Pattern(regexp = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$") String id,
-		@NotBlank @Size(max = 200) String name,
-		@NotBlank @Pattern(regexp = "eight_box|sm2") String schedulerType) {
+		@NotBlank(message = "{validation.required}")
+		@Pattern(regexp = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", message = "{validation.uuid}") String id,
+		@NotBlank(message = "{validation.required}") @Size(max = 200, message = "{validation.max-length}") String name,
+		@NotBlank(message = "{validation.required}")
+		@Pattern(regexp = SchedulerType.VALIDATION_PATTERN, message = "{validation.scheduler-type}") String schedulerType) {
 }

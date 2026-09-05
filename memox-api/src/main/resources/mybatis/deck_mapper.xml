@@ -9,8 +9,8 @@
     <result column="name" property="name"/>
     <result column="parent_deck_id" property="parentDeckId"/>
     <result column="root_deck_id" property="rootDeckId"/>
-    <result column="content_type" property="contentType"/>
-    <result column="scheduler_type" property="schedulerType"/>
+    <result column="content_type" property="contentType" typeHandler="com.memox.deck.persistence.DeckContentTypeTypeHandler"/>
+    <result column="scheduler_type" property="schedulerType" typeHandler="com.memox.deck.persistence.SchedulerTypeTypeHandler"/>
     <result column="scheduler_version" property="schedulerVersion"/>
     <result column="scheduler_generation" property="schedulerGeneration"/>
     <result column="sibling_position" property="siblingPosition"/>
@@ -31,6 +31,15 @@
     WHERE parent_deck_id IS NULL
       AND delete_batch_id IS NULL
     ORDER BY sibling_position ASC, id ASC
+    LIMIT #{limit}
+    OFFSET #{offset}
+  </select>
+
+  <select id="countActiveRootDecks" resultType="long">
+    SELECT COUNT(*)
+    FROM decks
+    WHERE parent_deck_id IS NULL
+      AND delete_batch_id IS NULL
   </select>
 
   <select id="findActiveDeckById" resultMap="deckRow">
@@ -41,41 +50,52 @@
       AND delete_batch_id IS NULL
   </select>
 
-  <select id="nextRootSiblingPosition" resultType="int">
-    SELECT COALESCE(MAX(sibling_position), -1) + 1
+  <select id="findActiveDeckByIdForUpdate" resultMap="deckRow">
+    SELECT id, name, parent_deck_id, root_deck_id, content_type, scheduler_type,
+           scheduler_version, scheduler_generation, sibling_position, created_at, updated_at
     FROM decks
-    WHERE parent_deck_id IS NULL
+    WHERE id = #{deckId}
       AND delete_batch_id IS NULL
+    FOR UPDATE
   </select>
 
-  <select id="nextChildSiblingPosition" resultType="int">
+  <select id="lockRootDeckCreation" resultType="int">
+    SELECT id
+    FROM app_settings
+    WHERE id = 1
+    FOR UPDATE
+  </select>
+
+  <select id="nextSiblingPosition" resultType="int">
     SELECT COALESCE(MAX(sibling_position), -1) + 1
     FROM decks
-    WHERE parent_deck_id = #{parentDeckId}
-      AND delete_batch_id IS NULL
+    WHERE sibling_scope_id = #{siblingScopeId}
   </select>
 
   <insert id="insertRootDeck" parameterType="com.memox.deck.persistence.DeckRow">
     INSERT INTO decks (
-      id, name, parent_deck_id, sibling_position, root_deck_id, content_type,
+      id, name, parent_deck_id, sibling_position, sibling_scope_id, root_deck_id, content_type,
       scheduler_type, scheduler_version, scheduler_generation, created_at, updated_at
     ) VALUES (
-      #{id}, #{name}, NULL, #{siblingPosition}, #{rootDeckId}, #{contentType},
-      #{schedulerType}, #{schedulerVersion}, #{schedulerGeneration}, #{createdAt}, #{updatedAt}
+      #{id}, #{name}, NULL, #{siblingPosition}, #{siblingScopeId}, #{rootDeckId},
+      #{contentType,typeHandler=com.memox.deck.persistence.DeckContentTypeTypeHandler},
+      #{schedulerType,typeHandler=com.memox.deck.persistence.SchedulerTypeTypeHandler},
+      #{schedulerVersion}, #{schedulerGeneration}, #{createdAt}, #{updatedAt}
     )
   </insert>
 
   <insert id="insertSubDeck" parameterType="com.memox.deck.persistence.DeckRow">
     INSERT INTO decks (
-      id, name, parent_deck_id, sibling_position, root_deck_id, content_type, created_at, updated_at
+      id, name, parent_deck_id, sibling_position, sibling_scope_id, root_deck_id, content_type, created_at, updated_at
     ) VALUES (
-      #{id}, #{name}, #{parentDeckId}, #{siblingPosition}, #{rootDeckId}, #{contentType}, #{createdAt}, #{updatedAt}
+      #{id}, #{name}, #{parentDeckId}, #{siblingPosition}, #{siblingScopeId}, #{rootDeckId},
+      #{contentType,typeHandler=com.memox.deck.persistence.DeckContentTypeTypeHandler}, #{createdAt}, #{updatedAt}
     )
   </insert>
 
   <update id="updateContentType">
     UPDATE decks
-    SET content_type = #{contentType}, updated_at = #{updatedAt}
+    SET content_type = #{contentType,typeHandler=com.memox.deck.persistence.DeckContentTypeTypeHandler}, updated_at = #{updatedAt}
     WHERE id = #{deckId}
       AND delete_batch_id IS NULL
   </update>

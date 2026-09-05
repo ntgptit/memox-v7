@@ -21,7 +21,14 @@ public record DeckResponse(
 
 	static DeckResponse from(Deck deck) {
 		return new DeckResponse(deck.id(), deck.name(), deck.parentDeckId(), deck.rootDeckId(),
-				deck.contentType(), deck.schedulerType(), deck.schedulerVersion(),
+				deck.contentType().getValue(), schedulerValue(deck), deck.schedulerVersion(),
 				deck.schedulerGeneration(), deck.siblingPosition(), deck.createdAt(), deck.updatedAt());
+	}
+
+	private static String schedulerValue(Deck deck) {
+		if (deck.schedulerType() == null) {
+			return null;
+		}
+		return deck.schedulerType().getValue();
 	}
 }

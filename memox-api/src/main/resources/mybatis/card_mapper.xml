@@ -41,7 +41,14 @@
     WHERE deck_id = #{deckId}
       AND delete_batch_id IS NULL
     ORDER BY created_at ASC, id ASC
-    LIMIT #{limit}
-    OFFSET #{offset}
+    LIMIT #{page.limit}
+    OFFSET #{page.offset}
+  </select>
+
+  <select id="countActiveCardsByDeck" resultType="long">
+    SELECT COUNT(*)
+    FROM cards
+    WHERE deck_id = #{deckId}
+      AND delete_batch_id IS NULL
   </select>
 </mapper>
