@@ -2,23 +2,37 @@ package com.memox.exception;
 
 import java.net.URI;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 
+import org.slf4j.MDC;
+import org.springframework.context.MessageSource;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import jakarta.validation.ConstraintViolationException;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
+
+	private static final String REQUEST_ID_PROPERTY = "requestId";
+
+	private final MessageSource messageSource;
 
 	@Override
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(
@@ -28,14 +42,16 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 			WebRequest request) {
 		final Map<String, String> fieldErrors = new LinkedHashMap<>();
 		exception.getBindingResult().getFieldErrors().forEach(error ->
-				fieldErrors.putIfAbsent(error.getField(), error.getDefaultMessage()));
-		return problem(HttpStatus.BAD_REQUEST, "VALIDATION_FAILED", "Request validation failed.", fieldErrors);
+				fieldErrors.putIfAbsent(error.getField(), resolveFieldMessage(error)));
+		return problem(ApiErrorCode.VALIDATION_FAILED, fieldErrors);
 	}
 
-	@ExceptionHandler(DeckValidationException.class)
-	ResponseEntity<Object> handleDeckValidation(DeckValidationException exception) {
-		return problem(HttpStatus.BAD_REQUEST, exception.getCode(), exception.getMessage(),
-				Map.of(exception.getField(), exception.getMessage()));
+	@ExceptionHandler(MemoxException.class)
+	ResponseEntity<Object> handleMemoxException(MemoxException exception) {
+		if (exception instanceof DeckValidationException validationException) {
+			return problem(exception.getErrorCode(), Map.of(validationException.getField(), resolve(exception.getErrorCode())));
+		}
+		return problem(exception.getErrorCode(), Map.of());
 	}
 
 	@ExceptionHandler(ConstraintViolationException.class)
@@ -46,31 +62,38 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 			final var field = path.substring(path.lastIndexOf('.') + 1);
 			fieldErrors.putIfAbsent(field, violation.getMessage());
 		});
-		return problem(HttpStatus.BAD_REQUEST, "VALIDATION_FAILED", "Request validation failed.", fieldErrors);
+		return problem(ApiErrorCode.VALIDATION_FAILED, fieldErrors);
 	}
 
-	@ExceptionHandler(DeckConflictException.class)
-	ResponseEntity<Object> handleDeckConflict(DeckConflictException exception) {
-		return problem(HttpStatus.CONFLICT, exception.getCode(), exception.getMessage(), Map.of());
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	ResponseEntity<Object> handleDataIntegrityViolation(DataIntegrityViolationException exception) {
+		log.warn("Database constraint rejected request: {}", exception.getClass().getSimpleName());
+		return problem(ApiErrorCode.DATA_INTEGRITY_VIOLATION, Map.of());
 	}
 
-	@ExceptionHandler(DeckNotFoundException.class)
-	ResponseEntity<Object> handleDeckNotFound(DeckNotFoundException exception) {
-		return problem(HttpStatus.NOT_FOUND, "DECK_NOT_FOUND", exception.getMessage(), Map.of());
+	@ExceptionHandler(Exception.class)
+	ResponseEntity<Object> handleUnexpectedException(Exception exception) {
+		log.error("Unhandled API exception: {}", exception.getClass().getSimpleName(), exception);
+		return problem(ApiErrorCode.INTERNAL_SERVER_ERROR, Map.of());
 	}
 
-	private ResponseEntity<Object> problem(
-			HttpStatus status,
-			String code,
-			String detail,
-			Map<String, String> fieldErrors) {
-		final var problem = ProblemDetail.forStatusAndDetail(status, detail);
-		problem.setType(URI.create("urn:memox:error:" + code.toLowerCase()));
-		problem.setTitle(status.getReasonPhrase());
-		problem.setProperty("code", code);
+	private ResponseEntity<Object> problem(ApiErrorCode errorCode, Map<String, String> fieldErrors) {
+		final var problem = ProblemDetail.forStatusAndDetail(errorCode.getStatus(), resolve(errorCode));
+		problem.setType(URI.create("urn:memox:error:" + errorCode.name().toLowerCase(Locale.ROOT)));
+		problem.setTitle(errorCode.getStatus().getReasonPhrase());
+		problem.setProperty("code", errorCode.name());
+		problem.setProperty(REQUEST_ID_PROPERTY, MDC.get(REQUEST_ID_PROPERTY));
 		if (!fieldErrors.isEmpty()) {
 			problem.setProperty("fieldErrors", fieldErrors);
 		}
-		return ResponseEntity.status(status).body(problem);
+		return ResponseEntity.status(errorCode.getStatus()).body(problem);
+	}
+
+	private String resolveFieldMessage(FieldError error) {
+		return messageSource.getMessage(error, LocaleContextHolder.getLocale());
+	}
+
+	private String resolve(ApiErrorCode errorCode) {
+		return messageSource.getMessage(errorCode.getMessageKey(), null, LocaleContextHolder.getLocale());
 	}
 }

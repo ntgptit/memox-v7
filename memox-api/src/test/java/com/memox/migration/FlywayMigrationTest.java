@@ -47,4 +47,23 @@ class FlywayMigrationTest {
 		assertThat(tables).containsAll(expectedTables);
 		assertThat(settingsRows).isEqualTo(1);
 	}
+
+	@Test
+	void enforcesSiblingPositionsWithinTheSameScope() {
+		final var firstDeckId = "11111111-1111-4111-8111-111111111111";
+		final var secondDeckId = "22222222-2222-4222-8222-222222222222";
+		final var rootScope = "00000000-0000-0000-0000-000000000000";
+		jdbcTemplate.update("""
+				INSERT INTO decks (id, name, sibling_position, sibling_scope_id, root_deck_id, content_type,
+				                   scheduler_type, scheduler_version, scheduler_generation, created_at, updated_at)
+				VALUES (?, 'First', 99, ?, ?, 'deck', 'sm2', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+				""", firstDeckId, rootScope, firstDeckId);
+
+		org.assertj.core.api.Assertions.assertThatThrownBy(() -> jdbcTemplate.update("""
+					INSERT INTO decks (id, name, sibling_position, sibling_scope_id, root_deck_id, content_type,
+					                   scheduler_type, scheduler_version, scheduler_generation, created_at, updated_at)
+					VALUES (?, 'Second', 99, ?, ?, 'deck', 'sm2', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+					""", secondDeckId, rootScope, secondDeckId))
+				.isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
+	}
 }

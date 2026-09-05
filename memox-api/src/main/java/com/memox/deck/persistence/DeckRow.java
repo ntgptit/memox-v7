@@ -23,6 +23,7 @@ public class DeckRow {
 	private String name;
 	private String parentDeckId;
 	private String rootDeckId;
+	private String siblingScopeId;
 	private DeckContentType contentType;
 	private SchedulerType schedulerType;
 	private Integer schedulerVersion;

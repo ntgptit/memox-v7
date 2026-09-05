@@ -17,6 +17,7 @@ import com.memox.common.pagination.PagingResponse;
 import com.memox.exception.DeckConflictException;
 import com.memox.exception.DeckNotFoundException;
 import com.memox.exception.DeckValidationException;
+import com.memox.exception.ApiErrorCode;
 import com.memox.deck.domain.DeckContentType;
 import com.memox.repository.CardRepository;
 import com.memox.repository.DeckRepository;
@@ -35,21 +36,21 @@ public class CardServiceImpl implements CardService {
 	@Override
 	@Transactional
 	public Card createCard(CreateCardCommand command) {
-		final var deck = deckRepository.findActiveDeckById(command.deckId());
+		final var deck = deckRepository.findActiveDeckByIdForUpdate(command.deckId());
 		if (deck == null) {
 			throw new DeckNotFoundException(command.deckId());
 		}
 		if (deck.getParentDeckId() == null) {
-			throw new DeckConflictException("ROOT_CANNOT_HOLD_CARDS", "A root deck cannot contain cards.");
+			throw new DeckConflictException(ApiErrorCode.ROOT_CANNOT_HOLD_CARDS);
 		}
 		if (deck.getContentType() == DeckContentType.DECK) {
-			throw new DeckConflictException("DECK_HOLDS_CHILDREN", "A deck containing child decks cannot contain cards.");
+			throw new DeckConflictException(ApiErrorCode.DECK_HOLDS_CHILDREN);
 		}
 
 		final var root = deckRepository.findActiveDeckById(deck.getRootDeckId());
 		if (root == null || root.getSchedulerType() == null || root.getSchedulerVersion() == null
 				|| root.getSchedulerGeneration() == null) {
-			throw new DeckConflictException("ROOT_SCHEDULER_INVALID", "The root deck scheduler is invalid.");
+			throw new DeckConflictException(ApiErrorCode.ROOT_SCHEDULER_INVALID);
 		}
 
 		final var now = Instant.now(clock);
@@ -90,12 +91,10 @@ public class CardServiceImpl implements CardService {
 	private String validateText(String rawText, CardTextField field) {
 		final var text = rawText.trim();
 		if (text.isEmpty()) {
-			throw new DeckValidationException(field.getFieldName(), requiredCode(field),
-					"Card %s must not be blank.".formatted(field.getFieldName()));
+			throw new DeckValidationException(field.getFieldName(), requiredCode(field));
 		}
 		if (text.length() > field.getMaxLength()) {
-			throw new DeckValidationException(field.getFieldName(), tooLongCode(field),
-					"Card %s must be at most %d characters.".formatted(field.getFieldName(), field.getMaxLength()));
+			throw new DeckValidationException(field.getFieldName(), tooLongCode(field));
 		}
 		return text;
 	}
@@ -109,18 +108,28 @@ public class CardServiceImpl implements CardService {
 			return null;
 		}
 		if (text.length() > field.getMaxLength()) {
-			throw new DeckValidationException(field.getFieldName(), tooLongCode(field),
-					"Card %s must be at most %d characters.".formatted(field.getFieldName(), field.getMaxLength()));
+			throw new DeckValidationException(field.getFieldName(), tooLongCode(field));
 		}
 		return text;
 	}
 
-	private String requiredCode(CardTextField field) {
-		return "CARD_%s_REQUIRED".formatted(field.name());
+	private ApiErrorCode requiredCode(CardTextField field) {
+		return switch (field) {
+			case FRONT -> ApiErrorCode.CARD_FRONT_REQUIRED;
+			case BACK -> ApiErrorCode.CARD_BACK_REQUIRED;
+			case EXAMPLE, HINT, PRONUNCIATION -> throw new IllegalArgumentException(
+					"Optional card fields cannot require a value.");
+		};
 	}
 
-	private String tooLongCode(CardTextField field) {
-		return "CARD_%s_TOO_LONG".formatted(field.name());
+	private ApiErrorCode tooLongCode(CardTextField field) {
+		return switch (field) {
+			case FRONT -> ApiErrorCode.CARD_FRONT_TOO_LONG;
+			case BACK -> ApiErrorCode.CARD_BACK_TOO_LONG;
+			case EXAMPLE -> ApiErrorCode.CARD_EXAMPLE_TOO_LONG;
+			case HINT -> ApiErrorCode.CARD_HINT_TOO_LONG;
+			case PRONUNCIATION -> ApiErrorCode.CARD_PRONUNCIATION_TOO_LONG;
+		};
 	}
 
 }
