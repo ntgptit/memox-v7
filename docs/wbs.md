@@ -10747,6 +10747,12 @@ của M2.
 | ~~Tag~~ | **đã vào MVP** | Màn card cần hiển thị và lọc theo tag; bảng `tags` + `card_tags` không kéo theo lưu trữ file như media | Đã làm ở M4.10at (BR-93, BR-94) |
 | Dải metadata trên card editor — `78% recall` và link `History` | hoãn khỏi M4.11 | Hai nửa của nó chặn bởi hai thứ khác nhau. **`% recall`** cần một BR định nghĩa "nhớ được" cho từng scheduler — `remembered` với `eight_box`, còn `sm2` phải chốt `hard\|good\|easy` có tính là nhớ không — tức cùng hình dạng BR-89…BR-91. **Link `History`** mở một màn study answers, thứ M4.11 đặt thẳng vào out-of-scope | Cùng M5.x, khi study answers có màn của nó. `study_answers.action` đã lưu sẵn đủ dữ liệu (BR-77), nên đây là câu hỏi định nghĩa và UI, không phải câu hỏi schema |
 | Nhập giọng nói (mic) và phát âm bằng TTS (loa) trên card editor | hoãn khỏi M4.11 | Cả hai có trong ảnh tham chiếu. Mỗi cái cần một plugin, một quyền hệ điều hành và một luồng lỗi riêng — gần với media, vốn đã hoãn | Sau MVP, cùng lúc với media |
+| `SC-C1-15` — ReminderSettingsScreen | **DESIGN_SYSTEM_BLOCKED** (M100.42) | The two rows of one card have tap targets and ripples of different width. The toggle row's InkWell is 329dp wide, the time row's is 361dp - the full card - so a 16dp strip down each edge of … Sửa nó chạm hợp đồng đóng băng **#6** của `design-system/v1-freeze.md` §2, nên một task feature MUST NOT tự làm | **Trigger 3** — khi thêm một họ shared primitive/component mới |
+| `SC-C1-16` — Reminder settings — time picker dialog | **DESIGN_SYSTEM_BLOCKED** (M100.42) | The time picker sits 16dp in from each screen edge while every other dialog in the app sits 40dp in, so the app's one Material-owned modal is 48dp wider than its siblings on the same screen … Sửa nó chạm hợp đồng đóng băng **#6** của `design-system/v1-freeze.md` §2, nên một task feature MUST NOT tự làm | **Trigger 3** — khi thêm một họ shared primitive/component mới |
+| `SC-C3-20` — RouteNotFoundScreen | **DESIGN_SYSTEM_BLOCKED** (M100.42) | The route name is a second, invisible copy of the visible title, so a screen-reader user meets two nodes labelled "Page not found" one after the other — a container node spanning the whole p… Sửa nó chạm hợp đồng đóng băng **#6** của `design-system/v1-freeze.md` §2, nên một task feature MUST NOT tự làm | **Trigger 3** — khi thêm một họ shared primitive/component mới |
+| `SC-C4-08` — ProgressScreen | **DESIGN_SYSTEM_BLOCKED** (M100.42) | The pinned range strip never draws the chrome/content hairline, so deck rows scroll under it with no seam — the strip is painted in `scaffoldBackgroundColor` and the rows behind it are on th… Sửa nó chạm hợp đồng đóng băng **#11** của `design-system/v1-freeze.md` §2, nên một task feature MUST NOT tự làm | **Trigger 3** — `MxContentShell` phải học một khái niệm mới, tức là một họ chrome mới |
+| `SC-C9-04` — StudyHomeScreen | **DESIGN_SYSTEM_BLOCKED** (M100.42) | The resume card paints container ink on a surface fill. All three of its text lines take AppInk.onSecondaryContainer — an ink app_ink.dart:66 documents as "for text on a tinted container, ne… Sửa nó chạm hợp đồng đóng băng **#2** của `design-system/v1-freeze.md` §2, nên một task feature MUST NOT tự làm | **Trigger 2** — khi có một lần thiết kế lại palette/theme có chủ đích |
+| `SC-C9-14` — Reminder settings — time picker dialog footer | **DESIGN_SYSTEM_BLOCKED** (M100.42) | The picker's footer offers Cancel and the commit action at identical emphasis, both drawn as zero-padding text links with no fill, no ripple and no hover surface — so the one modal in this f… Sửa nó chạm hợp đồng đóng băng **#3** của `design-system/v1-freeze.md` §2, nên một task feature MUST NOT tự làm | **Trigger 2** — khi có một lần thiết kế lại palette/theme có chủ đích |
 
 ### M99.32 · Global Library Search v1 — deck, hai mặt card và tag trong một danh sách
 
@@ -16944,6 +16950,71 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Dependencies:** M100.23
 - **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
 - **Checklist phases:** 14, 21.
+
+### M100.42 · App-wide screen consistency — recon, và grammar composition thành test
+
+- **Status:** in progress (2026-09-05) — PR recon là PR đầu trong chuỗi; các cụm
+  C1…C9 đóng bằng PR riêng sau khi chủ dự án duyệt registry.
+- **Owner:** Claude
+- **Goal:** Làm mọi màn production đọc như một sản phẩm, ở **đúng tầng mà
+  `v1-freeze.md` §2 cố ý để mở** — composition của màn hình nghiệp vụ. Không đụng
+  một hợp đồng đóng băng nào.
+- **Nhánh / PR:** `claude/app-wide-screen-consistency-0820fe` · `refactor(ui): unify app-wide screen composition`
+- **Vấn đề:** A7–A20.1 đóng 51/51 finding ở **mức component**, và 14 hợp đồng ở
+  §2 được guard và test canh. Nhưng một audit component không có cấu trúc để
+  thấy **hai màn dùng `MxCard` đúng mà giãn cách chúng khác nhau**. Đó là khoảng
+  trống duy nhất còn lại, và nó không rỗng: 123 finding, trong đó một P0 làm
+  `StarterLibraryScreen` bung assertion đỏ ở debug và nuốt mất nút retry ở
+  release.
+- **Scope:**
+  - 21 màn production + 15 sheet có bố cục thật, review theo một rubric mười
+    chiều; 20 confirm dialog một dòng chỉ inventory vì hình dạng của chúng thuộc
+    hợp đồng #6.
+  - `screen_composition_rhythm_test.dart`: hai luật AST — item gap của danh sách
+    phải là `AppSpacing.lg`, và không màn nào được pad chồng lên `MxContentShell`.
+  - Bốn demo test + bốn hàng gallery cho bốn màn chưa từng có ảnh nào.
+  - **Không** sửa code feature ở PR này.
+- **Quyết định:**
+  - **Grammar lấy từ token của repo, không lấy từ brief.** Brief ghi "item gap =
+    12"; `app_spacing.dart` định nghĩa `lg` (16) là *"the gap between list
+    items"*, còn `md` (12) là *"inside a compact control"*. Làm theo brief sẽ
+    siết mọi danh sách trong app và dịch pixel gần như toàn bộ golden. Luật nhà
+    thắng.
+  - **Allowlist thu dần, không phải test đặt cuối chuỗi.** Test vào ngay PR
+    recon kèm allowlist đúng bằng thực tại, nên CI xanh; mỗi PR cụm **MUST** xoá
+    bớt dòng. Test tự bắt cả chiều ngược: sửa xong mà quên xoá entry cũng đỏ.
+  - **Widget mới chỉ được lắp ghép `Mx*` và ở lại trong feature.** Thêm một họ
+    shared primitive là reopen trigger #3 của `v1-freeze.md` §3, tức phải là một
+    task design-system riêng.
+  - **Severity của cụm ≠ severity theo màn.** Reviewer chỉ thấy một đơn vị nên
+    đánh giá thấp lỗi hệ thống; báo cáo ghi **cả hai** con số chứ không lặng lẽ
+    nâng cấp.
+- **Editable documents:** `docs/reviews/app-wide-screen-consistency.md` (mới),
+  `docs/wbs.md`
+- **Output:**
+  - `docs/reviews/app-wide-screen-consistency.md` — inventory 21 màn, grammar,
+    registry 123 finding `SC-*`, 9 cụm, thứ tự thi hành, 6 mục
+    `DESIGN_SYSTEM_BLOCKED`.
+  - `test/app/screen_composition_rhythm_test.dart` — 2 luật + 6 fault probe.
+  - `test/demo/{study_entry,study_options,route_not_found,card_editor_create}_demo_test.dart`
+    và 4 hàng `SCREENS` tương ứng.
+- **Acceptance criteria:**
+  - [x] 24/24 đơn vị bề mặt được review; không màn production nào bỏ sót.
+  - [x] 16/17 finding P0/P1 qua hai lăng kính phản biện độc lập — 13 CONFIRMED,
+        3 CONTESTED, 0 bị bác hoàn toàn. Cái thứ 17 (`SC-C4-21`) đến sau khi
+        vòng phản biện đã đóng và mang trạng thái UNVERIFIED.
+  - [x] Ba finding CONTESTED giữ nguyên kèm lập luận phản bác — cả ba đều có số
+        đo đúng và cả ba đều sẽ làm app tệ hơn nếu áp đúng như đề xuất.
+  - [x] Guard mới fault-inject được cả hai chiều trên cây code thật, không phải
+        chỉ trên chuỗi probe.
+  - [x] Không hợp đồng đóng băng nào bị sửa; không guard/test nào ở cột
+        Enforcement của §2 bị nới lỏng, thêm exclude hay xoá.
+  - [ ] Bốn hàng gallery mới có PNG, vẽ trên Linux.
+  - [ ] Các cụm C1…C9 đóng — từng PR riêng.
+- **Dependencies:** M100.41
+- **Tests required:** `screen_composition_rhythm_test.dart` (9 test),
+  `check_docs.py`, `flutter analyze` repo-wide, golden Linux cho 4 ảnh mới.
+- **Checklist phases:** 7, 14.
 
 ### M100.41 · Điều kiện mở lại V1 thành ràng buộc, không còn là prose
 
