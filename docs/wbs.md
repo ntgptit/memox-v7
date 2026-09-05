@@ -16951,6 +16951,54 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
 - **Checklist phases:** 14, 21.
 
+### M100.44 · Danh tính vi phạm phải là cấu trúc, không phải thứ tự
+
+- **Status:** done (2026-09-05)
+- **Owner:** Claude
+- **Goal:** Đóng lỗ hổng thứ hai của ratchet. M100.43 bỏ được miễn trừ theo file
+  nhưng vẫn để một khuyết tật **di chuyển** mà giữ nguyên danh tính.
+- **Nhánh / PR:** `claude/ui-c1-gutter-ownership`
+- **Vấn đề:** Chữ ký của M100.43 là `rule | path | declaration | pattern |
+  ordinal`, với `ordinal` gán theo thứ tự source. Sửa vi phạm `AppSpacing.md`
+  thứ nhất rồi thêm một vi phạm **cùng pattern ở chỗ khác trong cùng
+  `build`**: cái mới nhận lại ordinal 0, trùng chữ ký đã retire, và ratchet
+  xanh. Cùng họ với lỗi của #469 — xanh mà không bảo vệ gì.
+- **Scope:**
+  - Thêm **structural path**: chuỗi neo AST từ declaration xuống tới vi phạm —
+    `ListView.separated>separatorBuilder:`,
+    `SliverPadding>sliver:>SliverList.separated>separatorBuilder:`,
+    `MxContentShell>body:`.
+  - Chữ ký thành `rule | path | declaration | structure | pattern | ordinal`.
+  - Đặt `Updated by task` của registry về task này.
+- **Quyết định:**
+  - **Chỉ thêm chỉ số ở nơi thật sự đụng nhau.** Gắn `[i]` cho mọi tổ tiên là
+    list literal sẽ làm chữ ký đổi mỗi lần chèn một sibling không liên quan —
+    và một ratchet đỏ vì lý do không liên quan là ratchet sẽ bị nới. Nên
+    `scanSource` tính đường dẫn trần trước, chỉ tính lại kèm chỉ số trong nhóm
+    thực sự trùng. Đây là đánh đổi có ý thức cho yêu cầu #4.
+  - **Không quay lại số dòng.** Yêu cầu #1 và #4 loại trừ nó, và số dòng chính
+    là thứ làm người ta nới luật khi test đỏ vì một lần format.
+- **Editable documents:** `docs/reviews/app-wide-screen-consistency.md`,
+  `docs/wbs.md`
+- **Đo, sau khi đổi:**
+  - 14 test xanh (3 quét thật + 11 probe hành vi).
+  - **Ca #3 tiêm vào cây thật**: sửa separator `md` của
+    `card_list_body_widget.dart` thành `lg` rồi thêm một separator `md` khác ở
+    chỗ khác trong cùng `build` → đỏ **hai lần**: một *stale* cho vị trí cũ, một
+    *unexpected* mang danh tính mới
+    `Column>children:>ListView.separated>separatorBuilder:`. Sơ đồ của M100.43
+    cho lọt ca này.
+- **Output:** ratchet có danh tính cấu trúc; registry ghi đúng task đã sửa nó.
+- **Acceptance criteria:**
+  - [x] Một khuyết tật đổi vị trí trong cùng declaration thì đổi danh tính.
+  - [x] Sửa ở trên vi phạm không làm đổi danh tính.
+  - [x] Không dùng số dòng ở bất kỳ đâu trong chữ ký.
+  - [x] Không guard/test nào ở cột Enforcement của §2 bị nới lỏng.
+- **Dependencies:** M100.43
+- **Tests required:** `screen_composition_rhythm_test.dart`, `check_docs.py`,
+  guard, `flutter analyze`.
+- **Checklist phases:** 7, 14.
+
 ### M100.43 · Sửa hai khuyết tật của bản recon trước khi thi hành C1–C9
 
 - **Status:** done (2026-09-05)
