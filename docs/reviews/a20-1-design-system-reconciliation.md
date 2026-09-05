@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **historical closure evidence — not an active backlog.** Design System V1 was frozen at `b4599c35` (M100.40); the freeze record, the frozen contracts and the reopen triggers live in `docs/design-system/v1-freeze.md`. This file stays as the registry of what was found and what closed it. Do **not** open an A21 |
+| **Status** | **historical closure evidence — not an active backlog.** Design System V1 was frozen at `e516af4b` (M100.40, #466); the freeze record, the frozen contracts and the reopen triggers live in `docs/design-system/v1-freeze.md`. This file stays as the registry of what was found and what closed it. Do **not** open an A21 |
 | **Closure** | **`fix/design-system-v1-closure`** (2026-09-04) — every finding in §16–§19 carries a disposition in **§27**. **Final scores at the V1 freeze (M100.40, 2026-09-05): §23 = 30 / 30, §24 = 22 / 22.** The device suite, the one criterion still NOT RUN at closure, was run: 8 of 8 on `emulator-5554`. Registry rows below are left as found at CURRENT_SHA; §27 is the record of what closed them |
 | **Purpose** | Refresh and correct A20 against current `main`, and become the single authoritative finding registry and implementation plan for the design system V1 MASTER FIX |
 | **CURRENT_SHA** | **`b7f45dc4b9a702c6812fd0b1490eafbebb8ddebf`** — *refactor(row): the row is the M3 rectangle; close the three P3 debts of M100.36* (#452) |
@@ -1208,7 +1208,7 @@ task should look.
 | | |
 |---|---|
 | START_SHA | `9443c49c` (= `origin/main`) |
-| FREEZE_SHA | `b4599c35` — the last commit touching anything a gate measures |
+| FREEZE_SHA | **`e516af4b`** — the squash commit of #466 on `main`. A pre-merge SHA is not a usable marker: the branch was squashed, so it is unreachable from `main`. This commit's tree is byte-identical to the PR head that CI verified end to end, `goldens (linux)` included |
 | Flutter | 3.44.8 · Dart 3.12.2, matching `.fvmrc` and the CI runners |
 | §23 architecture | **30 / 30** |
 | §24 verification | **22 / 22** |

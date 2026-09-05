@@ -16954,7 +16954,8 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
   component, không đổi ngôn ngữ thị giác** — trừ khi verify lộ ra defect thật.
 - **Nhánh / PR:** `chore/design-system-v1-release-freeze` —
   `chore(design-system): verify and freeze V1`.
-- **START_SHA:** `9443c49c` · **FREEZE_SHA:** `b4599c35` · Flutter 3.44.8.
+- **START_SHA:** `9443c49c` · **FREEZE_SHA:** `e516af4b` (commit squash của #466 trên
+  `main`; SHA trước merge bị squash nên không nằm trên `main`) · Flutter 3.44.8.
 - **Scope:**
   - **Registry Bold text đổi khoá sang COMPONENT_THEME + SLOT.** Bản cũ gom
     *tên field trần* (`textStyle`, `labelStyle`, `labelTextStyle`) vào một set
