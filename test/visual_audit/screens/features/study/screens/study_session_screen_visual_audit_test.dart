@@ -109,6 +109,27 @@ void main() {
             'with no ink of its own; the overlay colours are asserted in '
             'app_theme_test.dart.',
       ),
+      // **New with the finished face's way out (SC-C1-12).** A session whose
+      // epilogue read fails used to end in a title and nothing else, on the one
+      // screen that has deliberately removed every other control — no AppBar,
+      // no frame, no ✕. It now carries `MxEmptyState.actionLabel`/`onAction`,
+      // and an `MxActionButton` draws its shape through a `CustomPainter`, so
+      // the outline lives in no render object. The audit's own `customPainter`
+      // doc names this case. The button's fill and label colours come from
+      // `filledButtonTheme` and are asserted in `app_theme_test.dart`; its
+      // states are pinned by `mx_action_button_state_matrix_test.dart`.
+      AuditSkipAllowance(
+        itemId: 'shell',
+        reason: SkipReason.customPainter,
+        detailContains: '_ShapeBorderPainter',
+        expectedMatches: 1,
+        rationale:
+            'The one MxActionButton on this screen: the way out of a finished '
+            'session whose summary could not be read. An action button draws '
+            'its shape with a CustomPainter, so the outline exists in no '
+            'render object; the fill and label come from filledButtonTheme, '
+            'asserted in app_theme_test.dart.',
+      ),
     ],
   );
 }

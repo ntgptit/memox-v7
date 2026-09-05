@@ -156,17 +156,15 @@ void main() {
       // ways to swap one empty message for another. An allowance for a chip
       // that is no longer painted would fail as unused, which is the right
       // direction: fewer things this audit is unable to read.
-      AuditSkipAllowance(
-        itemId: 'shell',
-        reason: SkipReason.rasterNotFlat,
-        detailContains: 'covers only',
-        rationale:
-            'The empty state centres an icon and two lines of text on a page '
-            'the shell fills with `surface`, and the raster check finds no '
-            "colour at its 90% threshold. The declared value is the theme's own "
-            '`surface`, asserted in app_theme_test.dart; the raster cannot '
-            'confirm it here, which is not the same as contradicting it.',
-      ),
+      // **No `rasterNotFlat` allowance any more, and its absence is the
+      // assertion.** It was needed while the filter band sat over an empty
+      // Trash: the band's chips broke the page up so no colour reached the
+      // raster check's 90% threshold, and the audit could neither confirm nor
+      // contradict the declared `surface`. W3 state 2 takes the band away, so
+      // the page is now flat enough for the raster to confirm the declaration
+      // outright. An allowance for a reading the audit can now make would fail
+      // as unused — which is the right direction: fewer things this audit is
+      // unable to read.
     ],
   );
 }
