@@ -66,4 +66,41 @@ class DeckControllerTest {
 				.andExpect(jsonPath("$.fieldErrors.name").exists())
 				.andExpect(jsonPath("$.fieldErrors.schedulerType").exists());
 	}
+
+	@Test
+	void createsASubDeckAndLocksAnUnsetParentToDeckContent() throws Exception {
+		final var rootId = UUID.randomUUID().toString();
+		final var childId = UUID.randomUUID().toString();
+		final var grandchildId = UUID.randomUUID().toString();
+		mockMvc.perform(post("/api/v1/decks")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""
+							{"id":"%s","name":"Root","schedulerType":"sm2"}
+							""".formatted(rootId)))
+				.andExpect(status().isCreated());
+
+		mockMvc.perform(post("/api/v1/decks/{parentDeckId}/children", rootId)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""
+							{"id":"%s","name":"Child"}
+							""".formatted(childId)))
+				.andExpect(status().isCreated())
+				.andExpect(jsonPath("$.id").value(childId))
+				.andExpect(jsonPath("$.parentDeckId").value(rootId))
+				.andExpect(jsonPath("$.rootDeckId").value(rootId))
+				.andExpect(jsonPath("$.contentType").value("unset"))
+				.andExpect(jsonPath("$.schedulerType").doesNotExist());
+
+		mockMvc.perform(post("/api/v1/decks/{parentDeckId}/children", childId)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""
+							{"id":"%s","name":"Grandchild"}
+							""".formatted(grandchildId)))
+				.andExpect(status().isCreated());
+
+		mockMvc.perform(get("/api/v1/decks/{deckId}", childId))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.contentType").value("deck"))
+				.andExpect(jsonPath("$.rootDeckId").value(rootId));
+	}
 }

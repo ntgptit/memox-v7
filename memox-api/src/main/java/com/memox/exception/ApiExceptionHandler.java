@@ -36,6 +36,16 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 				Map.of(exception.getField(), exception.getMessage()));
 	}
 
+	@ExceptionHandler(DeckConflictException.class)
+	ResponseEntity<Object> handleDeckConflict(DeckConflictException exception) {
+		return problem(HttpStatus.CONFLICT, exception.getCode(), exception.getMessage(), Map.of());
+	}
+
+	@ExceptionHandler(DeckNotFoundException.class)
+	ResponseEntity<Object> handleDeckNotFound(DeckNotFoundException exception) {
+		return problem(HttpStatus.NOT_FOUND, "DECK_NOT_FOUND", exception.getMessage(), Map.of());
+	}
+
 	private ResponseEntity<Object> problem(
 			HttpStatus status,
 			String code,

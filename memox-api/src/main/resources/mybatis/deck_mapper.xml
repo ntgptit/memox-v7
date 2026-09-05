@@ -48,6 +48,13 @@
       AND delete_batch_id IS NULL
   </select>
 
+  <select id="nextChildSiblingPosition" resultType="int">
+    SELECT COALESCE(MAX(sibling_position), -1) + 1
+    FROM decks
+    WHERE parent_deck_id = #{parentDeckId}
+      AND delete_batch_id IS NULL
+  </select>
+
   <insert id="insertRootDeck" parameterType="com.memox.deck.persistence.DeckRow">
     INSERT INTO decks (
       id, name, parent_deck_id, sibling_position, root_deck_id, content_type,
@@ -57,4 +64,19 @@
       #{schedulerType}, #{schedulerVersion}, #{schedulerGeneration}, #{createdAt}, #{updatedAt}
     )
   </insert>
+
+  <insert id="insertSubDeck" parameterType="com.memox.deck.persistence.DeckRow">
+    INSERT INTO decks (
+      id, name, parent_deck_id, sibling_position, root_deck_id, content_type, created_at, updated_at
+    ) VALUES (
+      #{id}, #{name}, #{parentDeckId}, #{siblingPosition}, #{rootDeckId}, #{contentType}, #{createdAt}, #{updatedAt}
+    )
+  </insert>
+
+  <update id="updateContentType">
+    UPDATE decks
+    SET content_type = #{contentType}, updated_at = #{updatedAt}
+    WHERE id = #{deckId}
+      AND delete_batch_id IS NULL
+  </update>
 </mapper>

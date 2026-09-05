@@ -17,5 +17,14 @@ public interface DeckRepository {
 
 	int nextRootSiblingPosition();
 
+	int nextChildSiblingPosition(@Param("parentDeckId") String parentDeckId);
+
 	void insertRootDeck(DeckRow deck);
+
+	void insertSubDeck(DeckRow deck);
+
+	void updateContentType(
+			@Param("deckId") String deckId,
+			@Param("contentType") String contentType,
+			@Param("updatedAt") java.time.Instant updatedAt);
 }
