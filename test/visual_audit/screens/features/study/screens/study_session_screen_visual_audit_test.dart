@@ -106,7 +106,7 @@ void main() {
         expectedMatches: 2,
         rationale:
             'The Scaffold Material ink layer and the one MxActionButton draws '
-            'for its ripple. There is no AppBar: this screen's top bar is the '
+            'for its ripple. There is no AppBar — the top bar here is the '
             'session frame, which carries the mode and the ✕ that ends the '
             'session (BR-82) — a Material bar above it would name the screen '
             'twice and offer a back arrow that pops the route with the session '
