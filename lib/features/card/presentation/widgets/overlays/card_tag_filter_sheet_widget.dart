@@ -83,12 +83,23 @@ class _TagFilterForm extends ConsumerWidget {
     final tags = ref.watch(allTagsProvider);
     final hasTags = tags.value?.isNotEmpty ?? false;
 
+    // **Three regions, and the gaps say so.** One `spacing: AppSpacing.lg` for
+    // the whole column gave the title's own explanatory line the same 16dp as
+    // the gap from the tag list down to the action row, so nothing bound the
+    // header pair together and nothing divided the three regions — the defect
+    // the export sheet in this unit already diagnosed in writing
+    // (`card_export_sheet_widget.dart:272-280`: `lg` is also the gap between
+    // two list rows, so groups had nothing separating them from their own
+    // internals). `xs` is what pairs a sheet title with its subtitle
+    // (`starter_install_widget.dart:133`, `study_resume_widget.dart:42`), `xl`
+    // is the scale's step between sections of a screen, and `lg` opens an
+    // action row (`card_export_sheet_widget.dart:245`).
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
-      spacing: AppSpacing.lg,
       children: <Widget>[
         Text(context.l10n.tagFilterTitle, style: context.texts.titleMedium),
+        const SizedBox(height: AppSpacing.xs),
         // **The one place OR is spelled out.** Two tags widen the result, which
         // is the opposite of what the four state pills next to this control do,
         // and nothing else on the screen says so (BR-231, M4.14 W6 item 2).
@@ -96,6 +107,7 @@ class _TagFilterForm extends ConsumerWidget {
           context.l10n.tagFilterSubtitle,
           style: context.texts.bodySmall!.inked(context, AppInk.quiet),
         ),
+        const SizedBox(height: AppSpacing.xl),
         MxAsyncView<List<TagCatalogEntry>>(
           value: tags,
           loadingLabel: context.l10n.tagCatalogLoadingLabel,
@@ -111,13 +123,17 @@ class _TagFilterForm extends ConsumerWidget {
         ),
         // No action row when there is nothing to choose: `Apply` over an empty
         // list applies the empty selection, which is what closing already does.
-        if (hasTags)
+        // Its lead-in gap sits inside the same guard — left outside it, the
+        // empty and the failed catalog would each end in 16dp of nothing.
+        if (hasTags) ...<Widget>[
+          const SizedBox(height: AppSpacing.lg),
           _Actions(
             deckId: deckId,
             draft: draft,
             catalog: tags.value ?? const <TagCatalogEntry>[],
             onClose: onClose,
           ),
+        ],
       ],
     );
   }

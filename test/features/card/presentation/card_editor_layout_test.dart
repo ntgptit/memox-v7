@@ -9,6 +9,7 @@ import 'package:memox/features/card/domain/models/deck_context_model.dart';
 import 'package:memox/features/card/domain/failures/tag_validation_failure.dart';
 import 'package:memox/features/card/presentation/widgets/sections/card_editor_action_bar_widget.dart';
 import 'package:memox/features/card/presentation/widgets/sections/card_editor_context_widget.dart';
+import 'package:memox/features/card/presentation/widgets/sections/card_tag_section_widget.dart';
 import 'package:memox/features/card/presentation/widgets/sections/card_trash_action_widget.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 
@@ -186,6 +187,30 @@ void main() {
         expect(rect.left, gutter, reason: 'section left edge');
         expect(rect.right, 390 - gutter);
       }
+    });
+
+    testWidgets('the Trash divider separates evenly', (tester) async {
+      final repository = seed();
+      await pumpCardEditor(
+        tester,
+        repository,
+        surfaceSize: const Size(393, 852),
+      );
+      repository.emitTags(<TagEntity>[repository.tag('t1', name: 'noun')]);
+      await tester.pumpAndSettle();
+
+      // The divider theme sets `space` to the hairline, so the line carries no
+      // height of its own and the whole separation is the `Padding` around it.
+      // It used to be a `SizedBox(xl)` plus `md` either side: 36 above the
+      // line, 12 below, so the only asymmetric divider in the app sat three
+      // times closer to the destructive block it was meant to be separating
+      // (SC-C2-04). Equal first, then the value — the equality is the claim.
+      final Rect divider = tester.getRect(find.byType(Divider));
+      final Rect tags = tester.getRect(find.byType(CardTagSectionWidget));
+      final Rect trash = tester.getRect(find.byType(CardTrashActionWidget));
+
+      expect(divider.top - tags.bottom, trash.top - divider.bottom);
+      expect(divider.top - tags.bottom, AppSpacing.xl);
     });
 
     testWidgets('the footer is outside the scroll and both actions match', (

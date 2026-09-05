@@ -109,6 +109,10 @@ class LibrarySearchBodyWidget extends StatelessWidget {
         if (state.decks.isNotEmpty)
           ..._group(
             gutter: gutter,
+            // The first group opens under the pinned field, so what it needs is
+            // the screen's own breathing room, not a break from something
+            // above it.
+            topGap: AppSpacing.lg,
             group: SearchResultGroup.decks,
             children: <Widget>[
               for (final DeckSearchHit hit in state.decks)
@@ -122,6 +126,12 @@ class LibrarySearchBodyWidget extends StatelessWidget {
         if (state.cards.isNotEmpty)
           ..._group(
             gutter: gutter,
+            // Decks and cards are two sections, so the break between them is
+            // `xl` — the item gap would make the Cards heading read as one more
+            // row of the deck list above it. When there are no decks this group
+            // *is* the first one, and takes the first group's lead-in instead;
+            // a cards-only answer must not open lower than a decks-only one.
+            topGap: state.decks.isEmpty ? AppSpacing.lg : AppSpacing.xl,
             group: SearchResultGroup.cards,
             children: <Widget>[
               for (final CardSearchHit hit in state.cards)
@@ -152,16 +162,24 @@ class LibrarySearchBodyWidget extends StatelessWidget {
   }
 
   /// One section: its header, then its rows, all on the screen gutter.
+  ///
+  /// [topGap] is the group's lead-in and belongs to the caller, because it says
+  /// what the group is *following*: the field, or another group.
   List<Widget> _group({
     required double gutter,
+    required double topGap,
     required SearchResultGroup group,
     required List<Widget> children,
   }) => <Widget>[
     SliverPadding(
       padding: EdgeInsets.fromLTRB(
         gutter,
-        AppSpacing.lg,
+        topGap,
         gutter,
+        // `sm` under the heading is the label-to-content step
+        // (`docs/wireframes/m99-23-progress-overview.md` G7), not a gap between
+        // two things of equal rank — it binds the heading down onto the rows it
+        // names, which is what makes the `topGap` above read as the break.
         AppSpacing.sm,
       ),
       sliver: SliverToBoxAdapter(child: SearchGroupHeaderWidget(group: group)),
@@ -171,8 +189,13 @@ class LibrarySearchBodyWidget extends StatelessWidget {
       sliver: SliverList.separated(
         itemCount: children.length,
         itemBuilder: (BuildContext context, int index) => children[index],
+        // `lg`, which `AppSpacing` defines as "the gap between list items" and
+        // which `deck_list_sliver_widget.dart` already uses for the same kind
+        // of list. `sm` here was half the row's own 12dp vertical inset, so the
+        // space between two rows was tighter than the space inside one and the
+        // grouping cue pointed the wrong way.
         separatorBuilder: (BuildContext context, int index) =>
-            const SizedBox(height: AppSpacing.sm),
+            const SizedBox(height: AppSpacing.lg),
       ),
     ),
   ];

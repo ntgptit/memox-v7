@@ -127,10 +127,24 @@ class ReminderSettingsSectionWidget extends StatelessWidget {
           ),
         ),
         if (banner != null) ...<Widget>[
+          // `lg`, the item gap, on purpose: the banner reports *this card's*
+          // failure, so it belongs to the card and binds to it. Settings
+          // spells the same relation by keeping the band inside the card
+          // (`settings_choice_section_widget.dart`); here the band is its own
+          // surface, so the binding has to come from the gap.
           const SizedBox(height: AppSpacing.lg),
           ReminderBannerSectionWidget(rejection: banner, onRetry: onRetry),
         ],
-        const SizedBox(height: AppSpacing.lg),
+        // **`xl`, because this is a section break and not another item gap.**
+        // The panel explains the feature rather than reporting on the card, so
+        // it is a separate region — and every sibling screen puts `xl` between
+        // two stacked top-level surfaces (`SettingsScreen.sectionGap`, Card
+        // Detail, Progress). At `lg` the disclosure sat exactly as far from the
+        // card as the banner that belongs to it, and the column said nothing
+        // about what belonged to what. Spelled here rather than read from
+        // `SettingsScreen`: `features/reminder` may not import another
+        // feature (AD-13).
+        const SizedBox(height: AppSpacing.xl),
         // **One quiet info panel, not two floating paragraphs** (M6 W6
         // restated in visual terms). Card Detail's own supporting-copy
         // grammar is `MxCard.muted` with a leading glyph; two sentences that

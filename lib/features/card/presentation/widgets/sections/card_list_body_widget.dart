@@ -6,6 +6,7 @@ import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_content_shell.dart';
+import '../../../../../shared/widgets/mx_scroll_end_inset.dart';
 import '../../../../../shared/widgets/mx_text_button.dart';
 import '../../../domain/models/card_list_item_model.dart';
 import '../../controllers/card_list_now_controller.dart';
@@ -68,14 +69,27 @@ class CardListBodyWidget extends ConsumerWidget {
         gutter,
         AppSpacing.xl,
         gutter,
-        AppSpacing.xxl,
+        // The end inset is the shell's answer, not this list's. `xxl` was
+        // double the `lg` D21 settled on for every scrolling list, and the
+        // one test that measured it restated the wrong number rather than
+        // catching it (SC-C2-07). Asking the shell also keeps the clearance
+        // right if this screen ever grows a floating action, which is why
+        // the deck list asks the same question the same way.
+        mxScrollEndInsetOf(context),
       ),
       itemCount: items.length + headerCount + 1,
       // A plain gap between everything: each card row is now its own bordered
       // surface (MxCard, like the deck list), so the separation is the space
       // between cards, not a hairline drawn through one dense block.
+      //
+      // `lg` is the gap `app_spacing.dart` defines between list items, and it
+      // is what the deck list this tile is built to read like already uses;
+      // at `md` the two lists spelled one role two ways (SC-C2-08). The same
+      // builder also spaces the two header items, which is the wanted answer
+      // there too: the counts row adds its own `sm` below, so the header
+      // block ends 24 above the first card, which is the section break.
       separatorBuilder: (context, index) =>
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.lg),
       itemBuilder: (context, index) {
         if (index == 0) {
           return CardProgressPanelWidget(deckId: deckId);

@@ -52,7 +52,14 @@ class ProgressSummaryWidget extends StatelessWidget {
             // headings on one screen would change apart.
             style: context.texts.labelLarge!.inked(context, AppInk.quiet),
           ),
-          const SizedBox(height: AppSpacing.md),
+          // `sm`, the step G7 pins for a section label → its content, and the
+          // one the three sibling cards in this same scroll already take
+          // (`progress_streak_hero_widget.dart`, `progress_today_widget.dart`,
+          // `progress_week_widget.dart`). The `md` this used to be belongs to
+          // the *deck row* — a name + path title block stepping to its grid,
+          // two blocks in one card — and a quiet `labelLarge` section label is
+          // not that. Four headings on one screen, one step.
+          const SizedBox(height: AppSpacing.sm),
           ProgressMetricGridWidget(
             metrics: snapshot.scopeMetricsFor(range),
             scale: ProgressMetricScale.panel,

@@ -350,11 +350,16 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
           ),
         ),
         // **The gap belongs to the controls, so it goes when they do.** `browse`
-        // draws none (BR-155), and a fixed gap under the card left 24px of
+        // draws none (BR-155), and a fixed gap under the card left a band of
         // nothing below it — the exact shape of the complaint this screen was
         // rebuilt to answer.
+        //
+        // **And it is `lg`, the frame's own band gap** (SC-C2-10). At `xl` this
+        // was the widest of five spellings of one role on one screen — 8, 12,
+        // 16, 16, 24 — where `study_session_frame_section_widget.dart` already
+        // sets `lg` above and below the whole band.
         if (controls.isNotEmpty) ...<Widget>[
-          const SizedBox(height: AppSpacing.xl),
+          const SizedBox(height: AppSpacing.lg),
           ...controls,
         ],
       ],
@@ -391,8 +396,17 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
     // secondary beside Remembered. `secondary` for the rest rather than
     // `destructive`: a lapse is a legitimate grade, not an error to be warned
     // about, and red on a learning button says "you did something wrong".
+    // **The gap sits between two buttons, so it leads rather than trails.** It
+    // used to close the loop body, which meant it also ran after the *last*
+    // grade: the revealed `self_assess` body ended in 8dp of dead space that
+    // no other mode has — measured 8.0 at 393×600 against 0.0 for `browse`,
+    // `recall` and `fill` — and the unrevealed branch above, which draws one
+    // button and no trailing gap, changed the foot of the body across the
+    // flip. `if (index > 0)` is the guard the two neighbouring lists already
+    // use: `guess_question_section_widget.dart` and `match_board_grid_widget`.
     return <Widget>[
-      for (final action in widget.actions) ...<Widget>[
+      for (final (index, action) in widget.actions.indexed) ...<Widget>[
+        if (index > 0) const SizedBox(height: AppSpacing.sm),
         MxActionButton(
           label: context.studyAction(action),
           variant: action.isNormalGrade
@@ -402,7 +416,6 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
               ? null
               : () => _grade(action),
         ),
-        const SizedBox(height: AppSpacing.sm),
       ],
     ];
   }

@@ -194,11 +194,30 @@ class _Body extends StatelessWidget {
         // countdown on its own line instead, which costs a line and truncates
         // nothing.
         Wrap(
-          spacing: AppSpacing.xs,
+          // **`sm` between two facts, not `xs`.** `xs` is the gap between an
+          // icon and its label (`app_spacing.dart`); spent between two whole
+          // sentences it left them 4dp apart with nothing else to part them,
+          // and the row read as one run of text — "Deleted 2 days ago 28 days
+          // left". `deck_workload_line_widget.dart:103` is the same `Wrap` of
+          // meta facts on an entity row and separates them at `sm`.
+          spacing: AppSpacing.sm,
           runSpacing: AppSpacing.xs,
           children: <Widget>[
             Text(
               l10n.trashDeletedDaysAgo(now.difference(batch.deletedAt).inDays),
+              style: context.texts.bodySmall!.inked(context, AppInk.quiet),
+            ),
+            // **The boundary the ink cannot carry alone.** The countdown is
+            // the accent and the age is quiet, but in light those two are 11.5
+            // ΔE2000 apart (against 26.2 in dark), so on the theme the screen
+            // ships in first the colour shift is not a separator. W2 spells
+            // the row with a middle dot — `Deleted 2 days ago · 27 days left`
+            // — and this is it. Quiet, so the punctuation stays behind both
+            // facts; it narrates nothing, because `_Body` sits inside the
+            // row's `ExcludeSemantics` and the row's own label joins the same
+            // facts with commas.
+            Text(
+              _inlineSeparator,
               style: context.texts.bodySmall!.inked(context, AppInk.quiet),
             ),
             // **The one number allowed to carry urgency** (T4). Everything else
@@ -229,3 +248,15 @@ class _Body extends StatelessWidget {
     );
   }
 }
+
+/// The separator between the row's two inline meta facts.
+///
+/// Punctuation, not copy: a middle dot reads the same in every language this
+/// app ships, so it is a constant here rather than a translated string — the
+/// spelling `card_history_event_widget.dart`, `deck_summary_metrics_widget.dart`
+/// and `starter_library_screen.dart` already use between inline facts.
+///
+/// Bare, without the spaces those three carry, because there the dot sits
+/// inside one text run and the spaces are its whole separation; here the
+/// `Wrap` pays `sm` on each side of it.
+const String _inlineSeparator = '·';

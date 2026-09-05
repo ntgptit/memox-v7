@@ -161,7 +161,13 @@ class _StarterInstallFormState extends ConsumerState<_StarterInstallForm> {
             style: context.texts.bodySmall!.inked(context, AppInk.danger),
           ),
         ],
-        const SizedBox(height: AppSpacing.lg),
+        // **`xl`, the step the other commit sheets in this unit already use.**
+        // Deck create (`deck_form_widget.dart`), scheduler change and reset
+        // progress all put `AppSpacing.xl` between their last content element
+        // and the footer action. This sheet was the only one at `lg` — the
+        // item gap — so the one commit with no explicit way out was also the
+        // one sitting closest to the picker above it (SC-C2-14).
+        const SizedBox(height: AppSpacing.xl),
         MxActionButton(
           label: context.l10n.starterLibraryInstallAction,
           isLoading: install.isInstalling,

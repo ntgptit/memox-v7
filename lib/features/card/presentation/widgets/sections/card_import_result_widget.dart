@@ -75,14 +75,22 @@ class CardImportResultWidget extends StatelessWidget {
           ),
         ],
         if (commit != null) ...<Widget>[
-          const SizedBox(height: AppSpacing.md),
+          // `xl` between bands, both here and before the hint below: the hero,
+          // the counts and the hint are three sections of one result, not
+          // three surfaces of one control. It is the step the wizard's other
+          // two faces already take (card_import_source_step_widget.dart,
+          // card_import_preview_step_widget.dart) and the rhythm Card Detail
+          // set for three stacked surfaces — `md` bound them tight enough to
+          // read as one. The `md` above the failure sentence stays: that line
+          // is the hero's caption, not a band of its own.
+          const SizedBox(height: AppSpacing.xl),
           _SummaryCard(
             result: commit,
             invalidCount: invalidCount,
             blankCount: blankCount,
           ),
           if (helperCopy != null) ...<Widget>[
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.xl),
             MxCard.muted(
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,

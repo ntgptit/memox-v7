@@ -197,7 +197,15 @@ class _Body extends StatelessWidget {
             },
           ),
         ),
-        const SizedBox(height: AppSpacing.md),
+        // `lg`, not the `md` above: this is the sheet's terminal boundary,
+        // not another gap inside the picker. At `md` the control that ends
+        // the sheet was separated from the list by exactly as much as the
+        // title is from the first row — `md` is the scale's inside-a-compact-
+        // control step — so the primary read as one more item of the list it
+        // closes. Every sibling sheet that ends in an action steps at `lg` or
+        // wider (study_direction_chooser_widget.dart:152,
+        // study_resume_widget.dart:44, starter_install_widget.dart:164).
+        const SizedBox(height: AppSpacing.lg),
         MxActionButton(
           label: l10n.trashRestoreConfirmAction,
           // Disabled rather than silently inert: with several targets and no

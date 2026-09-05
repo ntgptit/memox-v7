@@ -59,7 +59,12 @@ class StudyEntrySectionWidget extends StatelessWidget {
           MxActionButton(label: l10n.studyStartLearning, onPressed: onLearn)
         else
           Text(l10n.studyNothingNewMessage),
-        const SizedBox(height: AppSpacing.md),
+        // `sm`, the gap `study_resume_widget.dart` already stacks these same
+        // two labels at. It was `md`, which `app_spacing.dart` reserves for the
+        // inside of a compact control — so one dismiss apart, on the same
+        // route, `Learn new` and `Review` sat 12 apart here and 8 apart there
+        // (SC-C2-12). A stacked action group gets one gap.
+        const SizedBox(height: AppSpacing.sm),
         if (summary.dueCount > 0)
           MxActionButton(
             label: l10n.studyStartReview,
