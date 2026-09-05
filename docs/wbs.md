@@ -16945,6 +16945,71 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
 - **Checklist phases:** 14, 21.
 
+### M100.40 · Đóng băng Design System V1 — verify, không audit lại
+
+- **Status:** done (2026-09-05)
+- **Owner:** Claude
+- **Goal:** Chứng minh V1 sẵn sàng release, đóng nốt tiêu chí §24 còn `NOT RUN`,
+  rồi đóng băng V1 làm baseline ổn định. **Không audit lại, không thiết kế lại
+  component, không đổi ngôn ngữ thị giác** — trừ khi verify lộ ra defect thật.
+- **Nhánh / PR:** `chore/design-system-v1-release-freeze` —
+  `chore(design-system): verify and freeze V1`.
+- **START_SHA:** `9443c49c` · **FREEZE_SHA:** `b4599c35` · Flutter 3.44.8.
+- **Scope:**
+  - **Registry Bold text đổi khoá sang COMPONENT_THEME + SLOT.** Bản cũ gom
+    *tên field trần* (`textStyle`, `labelStyle`, `labelTextStyle`) vào một set
+    rồi so substring với `app_bold_text.dart`. Bốn component theme viết slot là
+    `labelStyle` và hai cái nữa viết `labelTextStyle`, nên một owner được
+    re-weight là mọi owner khác cùng tên đều pass. Registry mới **đọc ra từ
+    `ThemeData` đã build** qua diagnostics của chính nó — thứ liệt kê đủ hơn
+    bốn mươi component sub-theme và giấu slot null — khoá theo `owner.slot`:
+    23 cặp, giống nhau ở cả bốn theme, được ghim.
+  - **`MaterialApp.builder` vào diện có test.** Cả 22 test bold text đều tự
+    dựng `BoldTextWidget` bằng tay, nên không cái nào thấy wrapper rời khỏi
+    `app.dart`. `CompactScaleWidget` nằm cùng dòng và cùng lỗ hổng.
+  - **Tài liệu:** `docs/design-system/v1-freeze.md` (mới — freeze record, 14
+    hợp đồng đóng băng kèm bản đồ enforcement, 5 reopen trigger); A20.1 §23/§24
+    tính lại, §26 đổi vai, §28 mới; `CLAUDE.md` sửa tên job `goldens (windows)`
+    → `goldens (linux)` cho khớp `ci.yml` (lệch từ M100.24).
+- **Quyết định:** FREEZE_SHA là commit cuối chạm thứ gate đo được, không phải
+  commit tài liệu cuối — để bản ghi khớp đúng cái đã được verify. Không đóng
+  băng composition của màn hình nghiệp vụ. Không mở A21.
+- **Editable documents:** `docs/wbs.md`, `docs/design-system/v1-freeze.md`,
+  `docs/reviews/a20-1-design-system-reconciliation.md`, `CLAUDE.md`.
+- **Output:** 1 test file viết lại, 1 test file mới, 1 doc mới, 3 doc sửa.
+  Không đổi file nào trong `lib/` — 325 golden so sánh và không PNG nào bị vẽ lại.
+- **Tests required:** `app_bold_text_components_test` (registry theo owner+slot,
+  ma trận state, cross-check nguồn theme), `app_media_query_wiring_test`.
+- **Fault injection (bắt buộc trước khi tin):**
+  - [x] Xoá cả block `tabBarTheme` khỏi `applyBoldText` → test mới đỏ, gọi đúng
+        tên `tabBarTheme.labelStyle`, ở cả bốn theme; test cũ vẫn **xanh** vì
+        `labelStyle:` còn xuất hiện 2 lần trong file.
+  - [x] Làm phẳng resolver của `hintStyle` → đỏ "changed resolver kind".
+  - [x] Giữ resolver nhưng trả ink lúc nghỉ cho mọi state → đỏ ở dòng
+        `{disabled}` — đúng defect của corrective pass 2.
+  - [x] Cho một component theme set thêm slot mới → đỏ ở set đã ghim **và** ở
+        cross-check nguồn, hai cơ chế độc lập.
+  - [x] Gỡ `BoldTextWidget` khỏi `app.dart` → 52 test dưới
+        `test/core/theme/schemes/` vẫn xanh trong khi tính năng đã chết; chỉ
+        `app_media_query_wiring_test` đỏ.
+  - [x] Gỡ `CompactScaleWidget` → đỏ, 30.0 chỗ chờ 26.0.
+- **Acceptance criteria:**
+  - [x] `dart format` 1532 file, 0 đổi.
+  - [x] `flutter analyze --no-fatal-infos` repo-wide: **No issues found**
+        (sau `pub get` trong `widgetbook/`, đúng như CI làm).
+  - [x] Guard 84 rule, 0 violation; 195 pytest probe xanh.
+  - [x] `check_docs.py`, `check_generated.py` xanh.
+  - [x] Host suite `TZ=UTC flutter test --exclude-tags golden`: **4772 passed**.
+  - [x] Widgetbook catalog smoke xanh.
+  - [x] Golden Linux (WSL Ubuntu 24.04, Flutter 3.44.8, `TZ=UTC`), dựng lại
+        đúng job `goldens (linux)`: **325/325**, count floor 325 ≥ 70, cây làm
+        việc sạch sau khi chạy.
+  - [x] Android integration trên `emulator-5554`, `--flavor development`:
+        **8/8**, exit 0 — tiêu chí §24 #8 cuối cùng còn `NOT RUN`.
+  - [x] §23 = **30/30**, §24 = **22/22**. Không mục nào tính PASS mà không chạy.
+- **Dependencies:** M100.38, M100.39.
+- **Checklist phases:** 7, 12, 13, 20.
+
 ### M100.39 · Sửa ba regression sau khi đóng Design System V1 (#460)
 
 - **Status:** done (2026-09-05)
