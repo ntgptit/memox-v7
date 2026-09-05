@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/theme/extensions/app_ink.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../../../shared/widgets/mx_async_view.dart';
 import '../../../../../shared/widgets/mx_empty_state.dart';
 import '../../../../../shared/widgets/mx_error_state.dart';
+import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_list_tile.dart';
 import '../../../domain/entities/trash_batch_entity.dart';
 import '../../../domain/models/trash_restore_target_model.dart';
@@ -60,22 +62,35 @@ class _TrashRestoreTargetSheetState
       child: MxAsyncView<List<TrashRestoreTarget>>(
         value: targets,
         loadingLabel: l10n.trashRestoreTargetTitle,
+        // **Every `Center`-based face gets a min Column, not just the error
+        // one.** The sheet hands down a bounded, loose height and each of
+        // `MxLoadingState`, `MxErrorState` and `MxEmptyState` centres itself,
+        // so bare they stretch this compact sheet to full height. A min Column
+        // gives its child unbounded height, which is exactly what makes a
+        // `Center`-based state hug its content. The wrap used to be on the
+        // error face alone, so the same modal opened full-screen while loading
+        // and then snapped ~350dp shorter the moment the targets arrived. The
+        // data face stays outside the wrap on purpose — its
+        // `Flexible(ListView)` needs the bounded constraint the sheet
+        // provides.
+        loadingFrame: (loading) =>
+            Column(mainAxisSize: MainAxisSize.min, children: <Widget>[loading]),
         // The app's one full-surface error grammar (C10): a failed read
         // offers Retry where it failed, not a dead face the user can only
         // dismiss. Invalidate re-runs the watch.
-        //
-        // **Inside a min Column, deliberately.** The sheet hands down a
-        // bounded height and `MxErrorState` centres itself, so bare it
-        // would balloon this compact sheet to full height. A min Column
-        // gives its child unbounded height, which is exactly what makes a
-        // `Center`-based state hug its content. The data face stays outside
-        // the wrap on purpose — its `Flexible(ListView)` needs the bounded
-        // constraint the sheet provides.
         error: (error, _) => Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             MxErrorState(
-              title: l10n.trashRestoreTargetTitle,
+              // The headline names the failure, not the sheet. `Restore to`
+              // in large type above a failure message told the reader nothing
+              // about what went wrong — the same correction `trash_screen`
+              // made for the list itself. Not `trashLoadErrorTitle` though:
+              // Trash is open, it is the target read that failed, so this
+              // takes the generic phrase its structural sibling
+              // `card_bulk_overlays_widget` already uses, and the specifics
+              // stay in the message below.
+              title: l10n.unexpectedErrorTitle,
               message: context.trashCommandError(error),
               retryLabel: l10n.retryAction,
               onRetry: () => ref.invalidate(
@@ -155,10 +170,18 @@ class _Body extends StatelessWidget {
     final l10n = context.l10n;
 
     if (targets.isEmpty) {
-      return MxEmptyState(
-        icon: Icons.block_outlined,
-        title: l10n.trashRestoreTargetTitle,
-        message: l10n.trashRestoreTargetEmpty,
+      // Min Column for the same reason the loading and error faces have one:
+      // `MxEmptyState` is a `Center`, and bare it made one sentence — "there
+      // is nowhere this can go back to" — fill the whole screen.
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          MxEmptyState(
+            icon: Icons.block_outlined,
+            title: l10n.trashRestoreTargetTitle,
+            message: l10n.trashRestoreTargetEmpty,
+          ),
+        ],
       );
     }
 
@@ -181,6 +204,7 @@ class _Body extends StatelessWidget {
             itemCount: targets.length,
             itemBuilder: (context, index) {
               final target = targets[index];
+              final isSelected = target.deckId == selectedDeckId;
 
               return MxListTile(
                 title: switch (target) {
@@ -191,7 +215,21 @@ class _Body extends StatelessWidget {
                   TrashTopLevelTarget() => null,
                   TrashDeckTarget(parentName: final parent) => parent,
                 },
-                isSelected: target.deckId == selectedDeckId,
+                // Selected state is never colour alone — the same rule and
+                // the same glyph as the study-direction chooser, this
+                // picker's pair in `MxListTile`'s own note. Without it the
+                // only difference between the chosen deck and the rest was
+                // the tile tint and a recoloured title, which a monochrome
+                // display and a colour-blind reader both lose. `accent` on
+                // the filled glyph because it is the signal here; the tint is
+                // the reinforcement.
+                leading: MxIcon(
+                  isSelected
+                      ? Icons.radio_button_checked
+                      : Icons.radio_button_unchecked,
+                  ink: isSelected ? AppInk.accent : AppInk.quiet,
+                ),
+                isSelected: isSelected,
                 onTap: () => onSelect(target.deckId),
               );
             },

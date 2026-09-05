@@ -15,7 +15,9 @@ import 'package:memox/features/deck/presentation/screens/starter_library_screen.
 import 'package:memox/features/deck/presentation/widgets/sections/deck_notice_widget.dart';
 import 'package:memox/l10n/generated/app_localizations.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
+import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
+import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/shared/widgets/mx_icon.dart';
 
 /// The starter catalog: what it discloses, and what installing from it does —
@@ -49,6 +51,7 @@ void main() {
     List<DeckTemplate>? catalog,
     Set<({String templateId, int version})>? installed,
     Object? failWith,
+    Exception? catalogFailsWith,
   }) async {
     final repository = _ScriptedTemplateRepository(
       installed: installed ?? <({String templateId, int version})>{},
@@ -57,9 +60,14 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          deckTemplateCatalogProvider.overrideWith(
-            (ref) async => catalog ?? <DeckTemplate>[template()],
-          ),
+          deckTemplateCatalogProvider.overrideWith((ref) async {
+            // The read failing, not the install: this is the branch the
+            // screen's `MxErrorState` covers, and nothing in the app had ever
+            // rendered it.
+            if (catalogFailsWith != null) throw catalogFailsWith;
+
+            return catalog ?? <DeckTemplate>[template()];
+          }),
           deckTemplateRepositoryProvider.overrideWithValue(repository),
         ],
         child: MaterialApp(
@@ -211,6 +219,85 @@ void main() {
     await pump(tester, catalog: <DeckTemplate>[]);
 
     expect(find.text(english.starterLibraryEmpty), findsOneWidget);
+    // The heading names the situation, not the screen (SC-C3-02). Titled with
+    // `starterLibraryTitle` it printed "Starter library" twice — once in the
+    // bar, once over the empty face — and said nothing about the state.
+    expect(find.text(english.starterLibraryEmptyTitle), findsOneWidget);
+    expect(
+      find.text(english.starterLibraryTitle),
+      findsOneWidget,
+      reason: 'the screen name belongs to the app bar and nowhere else here',
+    );
+  });
+
+  /// The read failing, which is a different failure from an install failing.
+  ///
+  /// Nothing rendered this branch before (SC-C3-01): it passed `onRetry`
+  /// without `retryLabel`, which `MxErrorState` asserts against and a release
+  /// build answers by dropping the button — a failure the user can read and
+  /// cannot act on.
+  group('a catalog that cannot be read (SC-C3-01, SC-C3-02)', () {
+    testWidgets('renders a retryable failure instead of an assertion', (
+      tester,
+    ) async {
+      await pump(tester, catalogFailsWith: Exception('asset missing'));
+
+      expect(
+        tester.takeException(),
+        isNull,
+        reason:
+            'the half-pair used to trip MxErrorState\'s assert and replace '
+            'the whole screen with the error box',
+      );
+      expect(find.byType(MxErrorState), findsOneWidget);
+      expect(find.text(english.retryAction), findsOneWidget);
+    });
+
+    testWidgets('the headline names the load, and no copy was claimed', (
+      tester,
+    ) async {
+      await pump(tester, catalogFailsWith: Exception('asset missing'));
+
+      expect(find.text(english.starterLibraryLoadErrorTitle), findsOneWidget);
+      expect(find.text(english.starterLibraryLoadFailed), findsOneWidget);
+      // The install copy belongs to the install sheet. On a failed read
+      // nothing has been added, so "Nothing was copied" named an action the
+      // user never took.
+      expect(find.text(english.starterLibraryInstallFailed), findsNothing);
+    });
+
+    testWidgets('the retry re-reads the row model and says it is running', (
+      tester,
+    ) async {
+      await pump(tester, catalogFailsWith: Exception('asset missing'));
+
+      final retry = find.widgetWithText(MxActionButton, english.retryAction);
+      expect(
+        tester.widget<MxActionButton>(retry).isLoading,
+        isFalse,
+        reason: 'nothing is running before the tap',
+      );
+
+      await tester.tap(retry);
+      // Exactly one frame, never `pumpAndSettle`. `invalidate` is a refresh
+      // and `MxAsyncView` keeps the previous state through one, so the error
+      // face is painted again unchanged — settling past it settles past the
+      // whole gap this asserts.
+      await tester.pump();
+
+      // **This flag is the evidence the read restarted.** `isRetrying` is
+      // `catalog.isRefreshing`, which only becomes true because the tap put
+      // `starterLibraryProvider` back in flight; a tap that did nothing would
+      // leave it false. Without it the face is repainted identically and the
+      // user gets no evidence the app noticed.
+      expect(
+        tester.widget<MxActionButton>(retry).isLoading,
+        isTrue,
+        reason: 'the tap re-read the provider, and the button says so',
+      );
+
+      await tester.pumpAndSettle();
+    });
   });
 
   /// The gutter is the list's, not the shell's — one edge for every mark.

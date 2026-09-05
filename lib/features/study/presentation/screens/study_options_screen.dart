@@ -41,6 +41,9 @@ class StudyOptionsScreen extends ConsumerWidget {
 
     final submit = ref.watch(studyOptionsWriteControllerProvider(deckId));
     final clear = ref.watch(studyOptionsClearControllerProvider(deckId));
+    // Watched here rather than inline in `value:` so the error branch can read
+    // `isRefreshing` off the same snapshot — see `isRetrying` below.
+    final options = ref.watch(studyOptionsProvider(deckId));
 
     return MxContentShell(
       title: context.l10n.studyOptionsTitle,
@@ -51,11 +54,26 @@ class StudyOptionsScreen extends ConsumerWidget {
       // the form ended up inset *more* than at regular width.
       padding: EdgeInsets.zero,
       body: MxAsyncView<StudyOptionsModel>(
-        value: ref.watch(studyOptionsProvider(deckId)),
+        value: options,
         loadingLabel: context.l10n.studyOptionsTitle,
+        // **The read failed, so neither the screen name nor the save note is
+        // the right sentence.** `studyOptionsTitle` under a red glyph reads as
+        // a heading — and it is already the app-bar title one line up, so the
+        // face printed it twice — while "Takes effect from your next session"
+        // describes a save that succeeded, which denies that anything went
+        // wrong. `settingsLoadErrorTitle` and `reminderLoadErrorTitle` are the
+        // same situation on the two other screens that read this pair.
         error: (_, _) => MxErrorState(
-          title: context.l10n.studyOptionsTitle,
-          message: context.l10n.studyOptionsNextSessionNote,
+          title: context.l10n.studyOptionsLoadErrorTitle,
+          message: context.l10n.writeErrorMessage,
+          retryLabel: context.l10n.retryAction,
+          // Rebuilding the provider, not re-navigating: the read failed, and a
+          // fresh subscription is the only thing that can change the answer.
+          onRetry: () => ref.invalidate(studyOptionsProvider(deckId)),
+          // Without this the tap repaints an identical face: `invalidate` is a
+          // refresh, and `MxAsyncView` holds the previous value through one, so
+          // nothing on screen would tell the user the app had noticed.
+          isRetrying: options.isRefreshing,
         ),
         data: (options) => Padding(
           // The screen gutter, so the form's left edge lines up with the

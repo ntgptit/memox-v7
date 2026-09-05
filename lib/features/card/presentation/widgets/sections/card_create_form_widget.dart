@@ -105,9 +105,19 @@ class _CardCreateFormWidgetState extends State<CardCreateFormWidget> {
         ),
         if (state.failure != null) ...<Widget>[
           const SizedBox(height: AppSpacing.lg),
-          Text(
-            context.l10n.cardEditorSaveFailed,
-            style: context.texts.bodyMedium!.inked(context, AppInk.error),
+          // Live, exactly as edit spells it (`card_editor_form_widget.dart`).
+          // The accessibility sweep only ever mounted edit, so the fix that
+          // found this — a screen-reader user pressed Save and was told
+          // nothing at all — was applied to one mode of one screen and create
+          // was never looked at. It is the same sentence, after the same
+          // command, at the same distance from the pinned footer that caused
+          // it (SC-C3-03).
+          Semantics(
+            liveRegion: true,
+            child: Text(
+              context.l10n.cardEditorSaveFailed,
+              style: context.texts.bodyMedium!.inked(context, AppInk.error),
+            ),
           ),
         ],
         // The two sides end and the optional details begin: a section

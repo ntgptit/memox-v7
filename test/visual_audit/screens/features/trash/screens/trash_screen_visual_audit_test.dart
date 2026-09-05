@@ -136,44 +136,35 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.rasterOnly,
         detailContains: '_RenderInkFeatures',
-        // Scaffold, AppBar and the three filter chips. No rows, and no Select
-        // action: there is nothing to select.
-        expectedMatches: 5,
+        // The Scaffold and the AppBar, and nothing else. No rows, no Select
+        // action — there is nothing to select — and, since W3 state 2 was
+        // implemented, no filter chips either.
+        expectedMatches: 2,
         rationale:
-            'Material ink layers: the Scaffold, the AppBar and one per '
-            'MxPillButton. Same raster-only reason as the loaded state.',
+            'Material ink layers: the Scaffold and the AppBar. Same '
+            'raster-only reason as the loaded state.',
       ),
-      AuditSkipAllowance(
-        itemId: 'shell',
-        reason: SkipReason.unknownRenderType,
-        detailContains: '_RenderChip',
-        expectedMatches: 3,
-        rationale:
-            'The three filter chips, unreadable for the same reason as in the '
-            'loaded state. They stay on an empty Trash on purpose: a filter '
-            'that vanished when its result was empty would leave the user with '
-            'no way back to All.',
-      ),
-      AuditSkipAllowance(
-        itemId: 'shell',
-        reason: SkipReason.customPainter,
-        detailContains: 'CustomPaint (no painter)',
-        expectedMatches: 3,
-        rationale:
-            "The InkWell ripple clip of each MxPillButton — see the loaded "
-            'state for why it has no painter to read.',
-      ),
-      AuditSkipAllowance(
-        itemId: 'shell',
-        reason: SkipReason.rasterNotFlat,
-        detailContains: 'covers only',
-        rationale:
-            'The empty state centres an icon and two lines of text on a page '
-            'the shell fills with `surface`, and the raster check finds no '
-            "colour at its 90% threshold. The declared value is the theme's own "
-            '`surface`, asserted in app_theme_test.dart; the raster cannot '
-            'confirm it here, which is not the same as contradicting it.',
-      ),
+      // **No `_RenderChip` and no pill ripple-clip allowance here, and their
+      // absence is the assertion.** They were declared at 3 each while the
+      // screen rendered the filter band over an empty Trash, with a rationale
+      // that read "they stay on an empty Trash on purpose … no way back to
+      // All". That conflated two states the wireframe separates: a *filtered*
+      // emptiness does need the way back and keeps its chips (W3 states 3/4,
+      // still true and still covered by the loaded state above), while the
+      // whole-Trash emptiness this test renders is drawn "Không chip, không
+      // overflow" (W3 state 2) — three live filters over zero items are three
+      // ways to swap one empty message for another. An allowance for a chip
+      // that is no longer painted would fail as unused, which is the right
+      // direction: fewer things this audit is unable to read.
+      // **No `rasterNotFlat` allowance any more, and its absence is the
+      // assertion.** It was needed while the filter band sat over an empty
+      // Trash: the band's chips broke the page up so no colour reached the
+      // raster check's 90% threshold, and the audit could neither confirm nor
+      // contradict the declared `surface`. W3 state 2 takes the band away, so
+      // the page is now flat enough for the raster to confirm the declaration
+      // outright. An allowance for a reading the audit can now make would fail
+      // as unused — which is the right direction: fewer things this audit is
+      // unable to read.
     ],
   );
 }

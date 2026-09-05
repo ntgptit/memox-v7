@@ -28,6 +28,7 @@ import 'package:memox/features/study/presentation/widgets/sections/study_session
 import 'package:memox/features/study/presentation/widgets/support/study_swipe_deck_widget.dart';
 import 'package:memox/shared/widgets/mx_loading_state.dart';
 import 'package:memox/l10n/generated/app_localizations.dart';
+import 'package:memox/l10n/generated/app_localizations_en.dart';
 
 import '../domain/support/fake_study_repository.dart';
 
@@ -83,6 +84,12 @@ void main() {
     /// Makes the epilogue read throw, which is how the summary provider comes
     /// back with `null` and the finished screen falls back to its empty state.
     bool summaryFails = false,
+
+    /// Makes `openSession` refuse, which is the only way to reach the error
+    /// face with **no turn behind it** — the branch SC-C3-12 is about. A
+    /// failure with a card still in state goes to the snackbar instead, and a
+    /// test that produced one would assert nothing.
+    bool openFails = false,
   }) async {
     // BR-208: an `sm2` self-assess review is refused without a recall direction,
     // so the screen would render its error state rather than a session. Korean
@@ -107,6 +114,7 @@ void main() {
               : FakeStudyRepository(
                   schedulerType: schedulerType,
                   stageExhausted: false,
+                  openSessionFails: openFails,
                 ))
           ..nextTurn_ = turnOf(mode);
 
@@ -329,6 +337,44 @@ void main() {
     expect(find.byTooltip('Close session'), findsNothing);
     expect(find.text('Flip the card, then say how it went'), findsNothing);
     expect(repository.ended, hasLength(1));
+  });
+
+  testWidgets('a session that cannot open names the failure, not the app', (
+    tester,
+  ) async {
+    // **The one face with nothing behind it**: no session, no turn, and so no
+    // frame and no ✕. It was titled `appTitle` — the product name — over
+    // `studyNothingDueMessage`, the empty-deck sentence, under
+    // `Icons.error_outline` in `AppInk.danger`: breakage drawn as an empty
+    // deck, with a heading that said only which app the user was in
+    // (SC-C3-12). Asserted as `isNot` first, because naming the new copy alone
+    // would keep passing if someone put the old pair back beside it.
+    await pumpSession(
+      tester,
+      mode: StudyMode.selfAssess,
+      kind: StudySessionKind.reviewing,
+      openFails: true,
+    );
+
+    final l10n = AppLocalizationsEn();
+    final face = tester.widget<MxErrorState>(find.byType(MxErrorState));
+
+    expect(face.title, isNot(l10n.appTitle));
+    expect(face.title, l10n.studySessionErrorTitle);
+    expect(face.message, isNot(l10n.studyNothingDueMessage));
+    expect(face.message, l10n.studySessionErrorMessage);
+
+    // **The control, and that it is live.** `MxErrorState` asserts that
+    // `retryLabel` and `onRetry` come as a pair, but an assert is stripped in
+    // release and the build below simply drops the button — so the label on
+    // screen proves nothing on its own. This branch is the same "one sentence
+    // and nothing to press" the finished-with-no-summary face was fixed for.
+    expect(find.text(l10n.studySummaryBackToDeck), findsOneWidget);
+    expect(
+      tester.widget<MxActionButton>(find.byType(MxActionButton)).onPressed,
+      isNotNull,
+      reason: 'a label with no callback renders a button that does nothing',
+    );
   });
 
   testWidgets('a finished session with no counts still offers the way out', (

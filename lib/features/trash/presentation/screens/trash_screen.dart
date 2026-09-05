@@ -74,11 +74,34 @@ class TrashScreen extends ConsumerWidget {
           ),
       ],
       padding: EdgeInsets.zero,
-      subheader: selection.isActive
+      // **Two conditions on one band, and neither of them is
+      // `selection.isActive` on its own.**
+      //
+      // *Gone only once the read has answered, and answered empty* — W3 state
+      // 2 draws the whole-Trash emptiness as "Không chip, không overflow",
+      // three live filters over zero items being three ways to swap one empty
+      // message for another. `hasValue` is false during the first load and on
+      // an error carrying no previous value, so the chips hold through W3
+      // state 1, which asks for the skeleton to "giữ nguyên chip". Do not
+      // simplify this to `batches.value?.isNotEmpty`: that drops the band
+      // while loading and puts it back a frame later. A *filtered* emptiness
+      // still has a non-empty `batches`, which is what leaves W3 states 3 and
+      // 4 their chips — the whole point of those two rows.
+      //
+      // *Mounted but inert while selecting*, rather than removed. `_TrashBody`
+      // keeps applying the filter during selection, so taking the band away
+      // leaves the user with a narrowed list and nothing naming what narrowed
+      // it — and dropping ~60dp of subheader on the frame the long press lands
+      // moves the row out from under the finger. A null `onChanged` keeps the
+      // 48dp box and the selected chip's paint while making a filter change
+      // unable to orphan the selection.
+      subheader: (batches.hasValue && batches.value!.isEmpty)
           ? null
           : TrashFilterBarWidget(
               filter: filter,
-              onChanged: (value) => _setFilter(ref, value),
+              onChanged: selection.isActive
+                  ? null
+                  : (value) => _setFilter(ref, value),
             ),
       body: MxAsyncView<List<TrashBatchEntity>>(
         value: batches,
