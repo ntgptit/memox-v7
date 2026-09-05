@@ -513,7 +513,7 @@ Mỗi finding đi qua **hai pass tái xác minh độc lập** trên `main` hi�
 
 ### C3 — dispositions
 
-Đóng bởi PR #474. Chứa P0 duy nhất của pass. Bốn test visual_audit phải cập nhật khai báo — không phải golden lệch pixel.
+Đóng bởi PR #476. Chứa P0 duy nhất của pass. Bốn test visual_audit phải cập nhật khai báo — không phải golden lệch pixel.
 
 Mỗi finding đi qua **hai pass tái xác minh độc lập** trên `main` hiện tại trước khi một dòng code được viết; chỗ nào hai pass bất đồng thì được phân xử bằng cách đọc code, không phải bằng cách lấy đa số.
 
@@ -829,7 +829,7 @@ mà reviewer nhìn một màn đã gán. Chênh lệch giữa hai cột là §1.
 |---|---|---|---|---|---|
 | **C1** Sở hữu gutter | 20 | 16 | P1 | **P1** | **đóng — #472** · FIXED 11 · REVISED_AND_FIXED 6 · REFUTED 1 · BLOCKED 2 |
 | **C2** Nhịp danh sách và section | 20 | 14 | P2 | **P1** — cùng một grammar sai ở 14 đơn vị | **đóng — #473** · FIXED 14 · REVISED_AND_FIXED 6 |
-| **C3** Mặt lỗi và mặt rỗng | 27 | 15 | **P0** | **P0** | **đóng — #474** · FIXED 14 · REVISED_AND_FIXED 11 · REFUTED 1 · BLOCKED 1 |
+| **C3** Mặt lỗi và mặt rỗng | 27 | 15 | **P0** | **P0** | **đóng — #476** · FIXED 14 · REVISED_AND_FIXED 11 · REFUTED 1 · BLOCKED 1 |
 | **C4** Grammar điều hướng và chrome | 21 | 12 | P1 | **P1** | chưa mở |
 | **C5** Section heading tự dựng | 6 | 6 | P2 | P2 | chưa mở |
 | **C6** Bậc type cho một phần tử ngữ nghĩa | 5 | 5 | P2 | P2 | chưa mở |
