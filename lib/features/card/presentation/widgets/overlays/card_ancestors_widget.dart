@@ -17,9 +17,14 @@ import '../../../domain/models/deck_context_model.dart';
 ///
 /// [onLeave] wraps the navigation for screens that must confirm before
 /// leaving — the editor with unsaved changes.
+/// [currentDeck] is the deck the screen sits *under* — the editor's deck —
+/// which the sheet lists last, so a reader can reach it as well as the levels
+/// above it. The card list passes none: it *is* that deck (A20.1 P1-16,
+/// corrective pass).
 Future<void> showCardAncestors(
   BuildContext context, {
   required DeckContextModel deckContext,
+  DeckBreadcrumbSegment? currentDeck,
   void Function(VoidCallback go)? onLeave,
 }) async {
   final String? target = await showMxSheet<String?>(
@@ -32,7 +37,10 @@ Future<void> showCardAncestors(
           icon: Icons.home_outlined,
           onPressed: () => Navigator.of(sheetContext).pop(_kLibrary),
         ),
-        for (final DeckBreadcrumbSegment segment in deckContext.ancestors)
+        for (final DeckBreadcrumbSegment segment in <DeckBreadcrumbSegment>[
+          ...deckContext.ancestors,
+          ?currentDeck,
+        ])
           MxActionSheetAction(
             label: segment.name,
             icon: Icons.folder_outlined,
@@ -63,6 +71,26 @@ Future<void> showCardAncestors(
 
 /// Go up one level from the deck a card screen sits in: the nearest ancestor,
 /// or the library when there is none.
+/// One level up from a screen that sits *under* [deckId] — the editor's Up
+/// is its deck, not the deck's parent (A20.1 P1-16, corrective pass). The
+/// card list, which *is* the deck, goes up through [goUpFromCardContext].
+void goUpToDeck(
+  BuildContext context,
+  String deckId, {
+  void Function(VoidCallback go)? onLeave,
+}) {
+  void go() => context.goNamed(
+    RouteNames.deckDetail,
+    pathParameters: <String, String>{RoutePathParams.deckId: deckId},
+  );
+
+  if (onLeave == null) {
+    go();
+    return;
+  }
+  onLeave(go);
+}
+
 void goUpFromCardContext(
   BuildContext context,
   DeckContextModel deckContext, {

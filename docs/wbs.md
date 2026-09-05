@@ -16945,6 +16945,48 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
 - **Checklist phases:** 14, 21.
 
+### M100.39 · Sửa ba regression sau khi đóng Design System V1 (#460)
+
+- **Status:** done (2026-09-05)
+- **Owner:** Claude
+- **Goal:** Mở lại và đóng lại ba finding của A20.1 mà bằng chứng ở #460
+  chưa đủ: P1-11 (bold chỉ tới text theme), P1-15 (session gain bar thừa khi
+  push), P1-16 (Up của editor đi sai một cấp). Không audit lại toàn hệ.
+- **Nhánh / PR:** `fix/design-system-v1-corrective` —
+  `refactor(design-system): correct V1 closure regressions`.
+- **Scope:**
+  - **P1-11** — `applyBoldText` re-weight mọi slot TextStyle của component
+    theme (ListTile, NavigationBar, InputDecoration, PopupMenu, Dialog,
+    date/time picker, SnackBar, AppBar, Chip, Tooltip, TabBar, các button
+    family, SegmentedButton) qua trục `wght`; slot null giữ null.
+  - **P1-15** — `MxShellChrome { auto, none }` trên `MxContentShell`
+    (mặc định `auto`; `none` assert không có nội dung bar);
+    `StudySessionScreen` chọn `none`.
+  - **P1-16** — `goUpToDeck` cho editor (Up = deck chứa thẻ, qua `onLeave`);
+    `showCardAncestors(currentDeck:)` liệt kê deck hiện tại ở cuối; card
+    list giữ nguyên.
+- **Quyết định (grill, 2026-09-05):** sheet thêm Current Deck chỉ ở editor;
+  Up bằng `goNamed(deckDetail)`; enum + assert thay vì boolean; bold phủ mọi
+  slot theme có set chứ không chỉ 7 họ đại diện.
+- **Editable documents:** `docs/wbs.md`,
+  `docs/reviews/a20-1-design-system-reconciliation.md` (§27 ba dòng, §27.1).
+- **Output:** ba sửa trên, bốn file test mới.
+- **Tests required:** `app_bold_text_components_test` (enumerate + rendered),
+  `mx_content_shell_chrome_test`, `study_session_chrome_test` (push qua route
+  thật), `card_editor_up_navigation_test`; full host suite; CI (kể cả golden
+  Linux — không đổi pixel).
+- **Acceptance criteria:**
+  - [x] Text của ListTile/NavigationBar/InputDecoration/PopupMenu/Dialog/
+        picker/SnackBar render `wght 700` dưới `MediaQuery.boldText`.
+  - [x] Session push qua `MaterialPageRoute`: không `AppBar`, không
+        `BackButton`, còn `MxSessionTopBar`; màn loading/error push vẫn giữ bar.
+  - [x] Editor Up → deck hiện tại; draft bẩn vẫn hỏi; sheet có và tới được
+        deck hiện tại; card list không đổi.
+  - [x] format, analyze, guard, host suite, CI xanh; §23 30/30, §24 21/22
+        giữ nguyên vì bằng chứng được nâng, không hạ.
+- **Dependencies:** M100.38.
+- **Checklist phases:** 7, 12, 13.
+
 ### M100.38 · Đóng Design System V1 theo registry A20.1
 
 - **Status:** done (2026-09-04)
