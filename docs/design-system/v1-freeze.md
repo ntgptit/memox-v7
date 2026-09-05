@@ -5,9 +5,9 @@
 | **Status** | active |
 | **Purpose** | Ghi nhận Design System V1 là baseline ổn định của repo: hợp đồng nào đóng băng, bằng chứng nào chứng minh, và điều kiện nào mở lại |
 | **Scope** | Foundation, theme mapping, shared primitive contract, a11y floor, golden authoring policy. Ngoài phạm vi: **composition của từng màn hình nghiệp vụ** (không đóng băng), giá trị token cụ thể (AD-14), hợp đồng component-level (`.claude/skills/flutter-theme-design/`) |
-| **Source of truth for** | Freeze record của V1 · danh sách hợp đồng đóng băng · reopen trigger · bản đồ enforcement cho từng hợp đồng |
+| **Source of truth for** | Freeze record của V1 · danh sách hợp đồng đóng băng · reopen trigger · bản đồ enforcement cho từng hợp đồng · ràng buộc lên task feature |
 | **Depends on** | `document-conventions.md` · `architecture.md` (AD-14, AD-15, AD-23) · `design-system/theme-architecture.md` · `reviews/a20-1-design-system-reconciliation.md` (bằng chứng lịch sử) |
-| **Updated by task** | M100.40 |
+| **Updated by task** | M100.41 |
 | **Last updated** | 2026-09-05 |
 
 ---
@@ -55,15 +55,22 @@ khi bị phá — không phải prose, mà là một rule hoặc một test ch�
 | 13 | Chính sách sở hữu raw Material | guard `no_raw_button`, `no_raw_widget`, `no_raw_screen_chrome`, `no_raw_sheet_route`, `no_raw_loading_indicator`, `no_raw_choice_chip`; `raw_progress_exclusions_test` |
 | 14 | Golden chỉ được author trên Linux | policy ở `dart_test.yaml`; job `goldens (linux)` của `ci.yml` — một PNG vẽ trên Windows làm job đỏ |
 
-**Không đóng băng:** composition của màn hình nghiệp vụ. Một feature vẫn được
-xếp đặt, thêm, bớt section; cái nó không được làm là mục 2, 4, 5, 12, 13 ở trên.
+Mười bốn dòng trên là **hợp đồng đóng băng** của V1. Cụm từ "hợp đồng đóng
+băng" ở tài liệu này luôn có nghĩa là *cả mười bốn dòng*, không phải riêng
+những dòng có guard: chín dòng được giữ bằng test, và một test cũng là hợp
+đồng.
+
+**Không đóng băng:** composition của màn hình nghiệp vụ. Một task feature **MAY**
+xếp đặt, thêm, bớt section, và **MAY** compose shared widget rồi layout chúng —
+primitive của framework và của layout vẫn dùng bình thường, và **MUST NOT** dựng
+wrapper chỉ để có wrapper.
 
 ---
 
 ## 3. Điều kiện mở lại
 
-V1 chỉ mở lại bằng **một task design-system tường minh**, và chỉ khi có một
-trong năm trigger sau:
+V1 **MUST NOT** được mở lại, trừ bằng **một task design-system tường minh**; và
+task đó **MUST** được kích hoạt bởi ít nhất một trong năm điều kiện sau:
 
 1. Nâng Flutter SDK làm đổi hành vi Material.
 2. Chủ đích thiết kế lại palette / theme.
@@ -71,9 +78,24 @@ trong năm trigger sau:
 4. Thay đổi spec hoặc yêu cầu accessibility buộc hợp đồng phải đổi.
 5. Một defect production được chứng minh nằm trong một hợp đồng đã đóng băng.
 
-**Làm feature không phải là quyền sửa foundation hay shared contract.** Một task
-feature chạm vào mục 2, 4, 5, 12 hoặc 13 của bảng trên MUST dừng lại và mở một
-task design-system riêng.
+Không điều kiện nào trong năm điều kiện trên đúng, thì hợp đồng ở §2 **MUST NOT**
+bị sửa.
+
+**Một task feature MUST NOT sửa bất kỳ hợp đồng đóng băng nào ở §2** — cả mười
+bốn dòng. Nếu công việc đòi hỏi một thay đổi như vậy, task feature **MUST** dừng
+lại và mở một task design-system riêng; nó **MUST NOT** tự sửa rồi ghi chú lại,
+và **MUST NOT** merge một phần thay đổi để "mở đường".
+
+**Sửa thứ đang canh hợp đồng cũng là sửa hợp đồng.** Một task feature **MUST
+NOT** nới lỏng, thêm exclude, hay xoá rule guard và test ở cột Enforcement của
+§2 để code của nó đi qua. Đây là lối vòng thật chứ không phải giả định: năm
+trong mười bốn dòng được guard canh trên `lib/features/`, còn chín dòng còn lại
+chỉ có test — mà test thì nằm trong repo và sửa được. Guard sẽ không đỏ khi
+chính nó bị sửa.
+
+Ba câu trên có từ khoá là **cố ý**. Theo `document-conventions.md` §3, câu không
+mang MUST/SHOULD/MAY là *giải thích, không phải ràng buộc* — bản đầu của tài liệu
+này viết điều kiện mở lại thành prose trần, nên nó chưa từng ràng buộc ai.
 
 ---
 
