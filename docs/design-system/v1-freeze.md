@@ -16,7 +16,7 @@
 
 | | |
 |---|---|
-| **FREEZE_SHA** | `b4599c35` — commit cuối cùng chạm thứ mà gate đo được (`lib/`, `test/`, `widgetbook/`). Commit tài liệu sau nó không đổi app |
+| **FREEZE_SHA** | **`e516af4b`** — commit squash của #466 trên `main`. Đây là SHA có thật và `git`-resolve được; nhánh bị squash nên SHA trước merge (`b4599c35`) không nằm trên `main` và không dùng làm mốc được. Tree của `e516af4b` **trùng byte** với head của PR mà cả bảy check của CI đã chạy qua, kể cả `goldens (linux)` |
 | **START_SHA** | `9443c49c` (= `origin/main` lúc bắt đầu) |
 | **Flutter** | 3.44.8 · Dart 3.12.2 (khớp `.fvmrc`, khớp runner của CI) |
 | **Architecture (A20.1 §23)** | **30 / 30** |
