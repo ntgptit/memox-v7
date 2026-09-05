@@ -42,13 +42,15 @@ class ReminderSettingsScreen extends ConsumerWidget {
     final enable = ref.watch(reminderEnableControllerProvider);
     final disable = ref.watch(reminderDisableControllerProvider);
     final time = ref.watch(reminderTimeControllerProvider);
-    // Watched rather than only read, and the value is deliberately unused here:
-    // the draft is auto-dispose, and a provider nothing subscribes to is
-    // disposed the frame after `_pickTime` writes it — so the retry read `null`
-    // every time and silently re-submitted the stored time. The subscription is
-    // what gives it the screen's lifetime, and popping the route still clears
-    // it.
-    ref.watch(reminderTimeDraftControllerProvider);
+    // Watched rather than only read, for two reasons. The draft is
+    // auto-dispose, and a provider nothing subscribes to is disposed the frame
+    // after `_pickTime` writes it — so the retry read `null` every time and
+    // silently re-submitted the stored time. The subscription is what gives it
+    // the screen's lifetime, and popping the route still clears it. The value
+    // is now used here as well: while a time change stands rejected it is what
+    // the row and the picker have to show, so that they name the same time the
+    // banner's `Retry` would re-submit.
+    final draft = ref.watch(reminderTimeDraftControllerProvider);
 
     return MxContentShell(
       title: context.l10n.reminderTitle,
@@ -71,20 +73,44 @@ class ReminderSettingsScreen extends ConsumerWidget {
           retryLabel: context.l10n.retryAction,
           onRetry: () => ref.invalidate(reminderOverviewProvider),
         ),
-        data: (overview) => ReminderSettingsSectionWidget(
-          overview: overview,
-          // A command is running if any of the three is. They are mutually
-          // exclusive in practice — one card, one control at a time — and each
-          // submit clears the other two, so at most one rejection is ever live.
-          isBusy:
-              enable.isSubmitting || disable.isSubmitting || time.isSubmitting,
-          rejection: enable.rejection ?? disable.rejection ?? time.rejection,
-          onEnabledChanged: (isEnabled) =>
-              _setEnabled(ref, overview, isEnabled: isEnabled),
-          onTimePressed: (current) =>
-              unawaited(_pickTime(context, ref, current)),
-          onRetry: () => _retry(ref, overview),
-        ),
+        data: (overview) {
+          // **The row, the dial it opens and `Retry` name one time.** A
+          // refused reschedule rolls the stored row back
+          // (`ChangeReminderTimeUseCase`), so while that rejection is live the
+          // stored time is the value the user *abandoned* — and a row and a
+          // picker built from it silently discard the pick the banner beside
+          // them is still offering to re-submit. Someone who answers "The
+          // reminder couldn't be scheduled" by choosing a slightly different
+          // time would have to dial back from the old value first.
+          //
+          // Gated on that one command's rejection rather than applied
+          // unconditionally: once it clears — including after a successful
+          // disable then enable — the stored time is authoritative again, and
+          // an ungated `draft ??` would leave the row naming a time the
+          // database does not hold with no banner beside it to say why.
+          final pendingTime = time.rejection == null
+              ? overview.settings.time
+              : draft ?? overview.settings.time;
+
+          return ReminderSettingsSectionWidget(
+            overview: overview,
+            pendingTime: pendingTime,
+            // A command is running if any of the three is. They are mutually
+            // exclusive in practice — one card, one control at a time — and
+            // each submit clears the other two, so at most one rejection is
+            // ever live.
+            isBusy:
+                enable.isSubmitting ||
+                disable.isSubmitting ||
+                time.isSubmitting,
+            rejection: enable.rejection ?? disable.rejection ?? time.rejection,
+            onEnabledChanged: (isEnabled) =>
+                _setEnabled(ref, overview, isEnabled: isEnabled),
+            onTimePressed: (current) =>
+                unawaited(_pickTime(context, ref, current)),
+            onRetry: () => _retry(ref, overview),
+          );
+        },
       ),
     );
   }

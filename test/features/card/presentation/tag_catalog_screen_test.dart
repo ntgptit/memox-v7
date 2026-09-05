@@ -4,6 +4,7 @@ import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/card/domain/models/tag_catalog_entry_model.dart';
 import 'package:memox/features/card/presentation/screens/tag_catalog_screen.dart';
 import 'package:memox/features/card/presentation/widgets/items/tag_catalog_row_widget.dart';
+import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/shared/widgets/mx_search_field.dart';
@@ -94,6 +95,36 @@ void main() {
 
     expect(find.byType(MxErrorState), findsOneWidget);
     expect(find.byType(MxSearchField), findsNothing);
+  });
+
+  testWidgets('face 5 — the retry says it is running', (tester) async {
+    final catalog = FakeTagCatalogRepository();
+    await pump(tester, catalog);
+
+    catalog.emitError(const DatabaseFailure(message: 'nope'));
+    await tester.pumpAndSettle();
+
+    final retry = find.widgetWithText(MxActionButton, 'Retry');
+    expect(
+      tester.widget<MxActionButton>(retry).isLoading,
+      isFalse,
+      reason: 'nothing is running before the tap',
+    );
+
+    await tester.tap(retry);
+    // Exactly one frame, never `pumpAndSettle`. `invalidate` is a refresh and
+    // `MxAsyncView` keeps the previous state through one, so the error face is
+    // painted again unchanged — settling past it is settling past the whole
+    // gap this asserts, and the re-subscribed stream never emits anyway.
+    await tester.pump();
+
+    expect(
+      tester.widget<MxActionButton>(retry).isLoading,
+      isTrue,
+      reason:
+          'without `isRetrying` the tap repaints the identical face and the '
+          'user gets no evidence the app noticed',
+    );
   });
 
   testWidgets('the search term reaches the read, not a Dart filter', (

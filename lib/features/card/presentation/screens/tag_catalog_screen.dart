@@ -73,6 +73,16 @@ class TagCatalogScreen extends ConsumerWidget {
             message: context.l10n.tagCatalogError,
             retryLabel: context.l10n.retryAction,
             onRetry: () => ref.invalidate(tagCatalogProvider),
+            // Without this the retry was a control with no feedback:
+            // `invalidate` is a *refresh*, and `MxAsyncView` is built with
+            // `skipLoadingOnRefresh: true`, so the identical error face is
+            // painted again and the tap looks ignored until the read lands.
+            // `catalog` is already watched above, so this is the same read,
+            // not a second one. The three siblings that pass it —
+            // `progress_screen.dart`, `progress_deck_screen.dart`,
+            // `study_home_screen.dart` — are the screens whose re-read is slow
+            // enough to see; a full scan of the tag catalog is another.
+            isRetrying: catalog.isRefreshing,
           ),
         ),
         data: (tags) =>

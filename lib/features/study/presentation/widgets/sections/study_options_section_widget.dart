@@ -63,13 +63,81 @@ class _StudyOptionsSectionWidgetState extends State<StudyOptionsSectionWidget> {
   late final TextEditingController _cardLimit = TextEditingController(
     text: '${widget.initialCardLimit}',
   );
+  final FocusNode _cardLimitFocus = FocusNode();
   late NewCardOrder _order = widget.initialNewCardOrder;
 
   @override
+  void initState() {
+    super.initState();
+    // Save's enablement is derived from the draft on every keystroke, and a
+    // plain `TextEditingController` does not rebuild its widget by itself —
+    // without this listener Save would never re-enable after a correction.
+    // `_order` already rebuilds through the pills' own `setState`.
+    _cardLimit.addListener(_onDraftChanged);
+    // The error *text* is on a different schedule from Save's enablement — see
+    // `_fieldErrorText`.
+    _cardLimitFocus.addListener(_onDraftChanged);
+  }
+
+  @override
   void dispose() {
+    _cardLimit.removeListener(_onDraftChanged);
     _cardLimit.dispose();
+    _cardLimitFocus.removeListener(_onDraftChanged);
+    _cardLimitFocus.dispose();
     super.dispose();
   }
+
+  void _onDraftChanged() => setState(() {});
+
+  /// The one submit path, so the button cannot send anything other than the
+  /// draft the user is looking at.
+  void _submit() => widget.onSave(_cardLimit.text, _order);
+
+  /// The draft's own bound check, live and reused rather than re-derived.
+  ///
+  /// **The same parser the use case runs, not a second opinion.**
+  /// `StudyCardLimit.parse` is what lets Save disable itself *before* a round
+  /// trip instead of guessing at the rule from outside it — the identical form
+  /// on the Settings screen has gated on it since BR-211, and this screen was
+  /// the one still waiting for a refusal to come back.
+  StudyCardLimitProblem? get _draftProblem =>
+      StudyCardLimit.parse(_cardLimit.text).problem;
+
+  /// The message shown **under the field**, as opposed to [_draftProblem]
+  /// which gates Save.
+  ///
+  /// **Only while the field is not focused.** Save's disabled paint already
+  /// says "something is wrong" the instant a keystroke crosses the
+  /// valid/invalid boundary; showing the text on the same schedule would grow
+  /// the field by the error line's height on every one of those crossings.
+  /// Deferring to blur keeps the reflow to the one transition a blur already
+  /// is. Same reasoning, same behaviour as the Settings form.
+  String? get _fieldErrorText => _cardLimitFocus.hasFocus
+      ? null
+      : _cardLimitError(context, _draftProblem ?? widget.cardLimitProblem);
+
+  /// Whether the draft differs from what is actually persisted.
+  ///
+  /// Compared by value, not by string: `"020"` beside a stored `20` is the same
+  /// session ceiling, and calling it dirty would light Save for a change that
+  /// saves nothing. An unparsable draft counts as dirty unconditionally —
+  /// [_canSubmit] gates on validity separately, so this only has to decide
+  /// whether there is something to compare.
+  bool get _isDirty {
+    final parsed = StudyCardLimit.parse(_cardLimit.text).limit;
+    final limitChanged =
+        parsed == null || parsed.value != widget.initialCardLimit;
+
+    return limitChanged || _order != widget.initialNewCardOrder;
+  }
+
+  /// **Disabled when pristine, invalid or submitting.** A bright Save over an
+  /// unchanged draft reads as "something is waiting to be saved" when nothing
+  /// is; an enabled Save over an unparsable number is a control promising an
+  /// action it would immediately refuse.
+  bool get _canSubmit =>
+      !widget.isSubmitting && _isDirty && _draftProblem == null;
 
   @override
   Widget build(BuildContext context) {
@@ -80,13 +148,14 @@ class _StudyOptionsSectionWidgetState extends State<StudyOptionsSectionWidget> {
       children: <Widget>[
         MxTextField(
           controller: _cardLimit,
+          focusNode: _cardLimitFocus,
           label: l10n.studyOptionsCardLimitLabel,
           // No hint: the field opens holding the value in force, so a hint
           // would be a second copy of the same number — and the default is not
           // what this deck necessarily uses.
           content: MxTextFieldContent.digits,
           textInputAction: TextInputAction.done,
-          errorText: _cardLimitError(context),
+          errorText: _fieldErrorText,
         ),
         const SizedBox(height: AppSpacing.lg),
         Text(l10n.studyOptionsOrderLabel, style: context.texts.titleSmall),
@@ -117,7 +186,7 @@ class _StudyOptionsSectionWidgetState extends State<StudyOptionsSectionWidget> {
         MxActionButton(
           label: l10n.studyOptionsSave,
           isLoading: widget.isSubmitting,
-          onPressed: () => widget.onSave(_cardLimit.text, _order),
+          onPressed: _canSubmit ? _submit : null,
         ),
         // BR-212's affordance, and it lives here rather than on the global
         // Settings screen: it acts on **one** deck, and a global page offering
@@ -151,15 +220,25 @@ class _StudyOptionsSectionWidgetState extends State<StudyOptionsSectionWidget> {
         NewCardOrder.random => context.l10n.studyOptionsOrderRandom,
       };
 
-  String? _cardLimitError(BuildContext context) =>
-      switch (widget.cardLimitProblem) {
-        StudyCardLimitProblem.notANumber =>
-          context.l10n.studyOptionsCardLimitNotANumber,
-        StudyCardLimitProblem.tooSmall || StudyCardLimitProblem.tooLarge =>
-          context.l10n.studyOptionsCardLimitOutOfRange(
-            kMinCardLimit,
-            kMaxCardLimit,
-          ),
-        null => null,
-      };
+  /// The field message for [problem], or null when there is nothing wrong.
+  ///
+  /// Takes the problem rather than reading `widget.cardLimitProblem` itself:
+  /// since the draft is checked live, the caller decides which of the two
+  /// sources — the live parse or the refusal the controller came back with —
+  /// is the one to show. Study keeps its own copy of this switch rather than
+  /// borrowing Settings' `context.cardLimitError`, because a feature never
+  /// imports another feature's `presentation/`.
+  String? _cardLimitError(
+    BuildContext context,
+    StudyCardLimitProblem? problem,
+  ) => switch (problem) {
+    StudyCardLimitProblem.notANumber =>
+      context.l10n.studyOptionsCardLimitNotANumber,
+    StudyCardLimitProblem.tooSmall || StudyCardLimitProblem.tooLarge =>
+      context.l10n.studyOptionsCardLimitOutOfRange(
+        kMinCardLimit,
+        kMaxCardLimit,
+      ),
+    null => null,
+  };
 }

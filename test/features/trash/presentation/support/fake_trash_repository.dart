@@ -16,7 +16,9 @@ final class FakeTrashRepository implements TrashRepository {
   FakeTrashRepository({
     List<TrashBatchEntity> batches = const <TrashBatchEntity>[],
     this.targets = const <TrashRestoreTarget>[],
-  }) : _latest = batches;
+    bool holdFirstEmission = false,
+  }) : _latest = batches,
+       _gate = holdFirstEmission ? Completer<void>() : null;
 
   final StreamController<List<TrashBatchEntity>> _batches =
       StreamController<List<TrashBatchEntity>>.broadcast();
@@ -27,6 +29,15 @@ final class FakeTrashRepository implements TrashRepository {
   /// forever — which looks exactly like a hung query rather than like a fake
   /// that spoke too early.
   List<TrashBatchEntity> _latest;
+
+  /// Holds the stream open with nothing on it until [releaseFirstEmission].
+  ///
+  /// **The loading frame is a state this screen has a rule about**, and every
+  /// other test here skips straight past it: `watchBatches` answers in the same
+  /// turn, so `pumpAndSettle` never sees it. W3 state 1 says the filter chips
+  /// stay up through the skeleton, which is a claim about the frame where the
+  /// read has not answered yet — unreachable without a way to keep it there.
+  final Completer<void>? _gate;
 
   List<TrashRestoreTarget> targets;
 
@@ -47,10 +58,23 @@ final class FakeTrashRepository implements TrashRepository {
     _batches.add(batches);
   }
 
-  Future<void> dispose() => _batches.close();
+  /// Lets the held first emission through. Safe to call twice.
+  void releaseFirstEmission() {
+    final gate = _gate;
+    if (gate == null || gate.isCompleted) return;
+
+    gate.complete();
+  }
+
+  Future<void> dispose() async {
+    await _pendingTargets.close();
+    await _batches.close();
+  }
 
   @override
   Stream<List<TrashBatchEntity>> watchBatches() async* {
+    final gate = _gate;
+    if (gate != null) await gate.future;
     yield _latest;
     yield* _batches.stream;
   }
@@ -63,8 +87,21 @@ final class FakeTrashRepository implements TrashRepository {
   /// own error face (C10), unreachable before this existed.
   Failure? targetsFailure;
 
+  /// When true, the targets read never answers, so the sheet stays on its
+  /// loading face. `Stream.value` resolves within the first pump, which makes
+  /// the loading frame unobservable — and the loading frame is the one that
+  /// used to open the sheet full-screen.
+  bool isTargetsPending = false;
+
+  /// Never fed. A controller rather than an empty stream, because a stream that
+  /// closes without emitting is "done with nothing", not "still reading".
+  final StreamController<List<TrashRestoreTarget>> _pendingTargets =
+      StreamController<List<TrashRestoreTarget>>.broadcast();
+
   @override
   Stream<List<TrashRestoreTarget>> watchRestoreTargets(String batchId) {
+    if (isTargetsPending) return _pendingTargets.stream;
+
     final failure = targetsFailure;
     if (failure != null) {
       return Stream<List<TrashRestoreTarget>>.error(failure);

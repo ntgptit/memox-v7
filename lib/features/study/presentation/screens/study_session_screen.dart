@@ -268,13 +268,37 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
     // A persistence failure on a *write* still lands here, because it ends the
     // session (BR-85) and so clears the turn — that behaviour is untouched.
     if (state.error != null && state.turn == null) {
+      // **The heading named the app, and the body named the wrong state.** It
+      // read `MemoX` over `studyNothingDueMessage` — "Nothing to review yet" —
+      // under `Icons.error_outline` in `AppInk.danger`. `MxEmptyState` and
+      // `MxErrorState` are deliberately distinct so that good news is never
+      // drawn as breakage (BR-29); this was the inverse, breakage drawn with
+      // the empty-deck sentence, while the title said only which app the user
+      // was in. `studyNothingDueMessage` stays where it belongs — the entry
+      // section's line for a deck with nothing due, which is a normal state.
+      //
+      // **A way out rather than a retry, and the pair is all-or-nothing.**
+      // `MxShellChrome.none` means no bar and this branch draws no frame, so
+      // the ✕ is gone too — the same "one sentence and nothing to press" the
+      // finished-with-no-summary face below was fixed for. Re-reading is not
+      // on offer: `start()` runs once from `initState`, so the honest action is
+      // the pop the summary beside it already draws.
       return MxErrorState(
-        title: context.l10n.appTitle,
-        message: context.l10n.studyNothingDueMessage,
+        title: context.l10n.studySessionErrorTitle,
+        message: context.l10n.studySessionErrorMessage,
+        retryLabel: context.l10n.studySummaryBackToDeck,
+        onRetry: () => Navigator.of(context).pop(),
       );
     }
     if (state.isOpening) {
-      return MxLoadingState(semanticsLabel: context.l10n.appTitle);
+      // **A loading label names its subject, not the product.** All three
+      // spinners on this screen announced `appTitle` — "MemoX" — which tells
+      // somebody who cannot see the screen neither that something is happening
+      // nor what. Every other loading site in the app names what is being
+      // read, this feature's own Study Home and Study Options included.
+      return MxLoadingState(
+        semanticsLabel: context.l10n.studySessionLoadingLabel,
+      );
     }
     // **Nothing is unmounted to fetch its replacement.** Advancing used to
     // replace the whole body, so every mode threw its card away, drew a
@@ -321,13 +345,23 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
                     summary: summary,
                     onBackToDeck: () => Navigator.of(context).pop(),
                   ),
-            orElse: () => MxLoadingState(semanticsLabel: context.l10n.appTitle),
+            // A label of its own rather than the session's: by here the
+            // session has ended and what is in flight is the epilogue, so
+            // "Opening study session" would announce something that already
+            // finished.
+            orElse: () => MxLoadingState(
+              semanticsLabel: context.l10n.studySummaryLoadingLabel,
+            ),
           );
     }
 
     final session = state.session;
     if (session == null || state.turn == null) {
-      return MxLoadingState(semanticsLabel: context.l10n.appTitle);
+      // The same wait as `isOpening` above, one frame later — the session is
+      // open and its first turn has not arrived — so it says the same thing.
+      return MxLoadingState(
+        semanticsLabel: context.l10n.studySessionLoadingLabel,
+      );
     }
 
     final trail = ref.watch(studyBrowseTrailControllerProvider(widget.deckId));

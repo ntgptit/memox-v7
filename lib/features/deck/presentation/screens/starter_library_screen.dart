@@ -32,6 +32,15 @@ class StarterLibraryScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Read once and held: the error face below needs the same `AsyncValue` the
+    // view is rendering, to say whether the retry it started is still in
+    // flight. Watching a second time inside the error closure would be two
+    // reads of one fact — what `progress_deck_screen.dart` records at its own
+    // `ref.watch`.
+    final AsyncValue<List<StarterTemplateRow>> catalog = ref.watch(
+      starterLibraryProvider,
+    );
+
     return MxContentShell(
       title: context.l10n.starterLibraryTitle,
       // The shell's own padding is dropped: the body is one scroll view and
@@ -40,13 +49,34 @@ class StarterLibraryScreen extends ConsumerWidget {
       // child that already carries one — the notice and the empty face.
       padding: EdgeInsets.zero,
       body: MxAsyncView<List<StarterTemplateRow>>(
-        value: ref.watch(starterLibraryProvider),
+        value: catalog,
+        // The subject, which here happens to be the screen's own name —
+        // `study_options_screen.dart` and `trash_screen.dart` do the same. A
+        // loading label naming the product instead would say nothing about
+        // what is being waited on.
         loadingLabel: context.l10n.starterLibraryTitle,
         data: (rows) => _Catalog(rows: rows),
         error: (error, stackTrace) => MxErrorState(
-          title: context.l10n.starterLibraryTitle,
-          message: context.l10n.starterLibraryInstallFailed,
+          // The failure, not the screen. `trash_screen.dart` states the reason
+          // for the whole app: the screen name alone told the user nothing
+          // about what went wrong.
+          title: context.l10n.starterLibraryLoadErrorTitle,
+          // **A read failure, not an install failure.** This branch fires when
+          // the catalog cannot be *read*, so it cannot borrow
+          // `starterLibraryInstallFailed` ("Could not add this deck. Nothing
+          // was copied.") — nothing has been added at that point and the
+          // sentence named an action the user never took. That key stays with
+          // the install sheet, the only place an install can fail.
+          message: context.l10n.starterLibraryLoadFailed,
+          // Both halves or neither: `MxErrorState` asserts the pair, and the
+          // release build drops the button silently when only one arrives —
+          // which left a failure the user could read and could not act on.
+          retryLabel: context.l10n.retryAction,
           onRetry: () => ref.invalidate(starterLibraryProvider),
+          // Without this the tap repaints the identical face: `invalidate` is
+          // a refresh, and `MxAsyncView` holds the previous value through one,
+          // so nothing on screen tells the user the app noticed.
+          isRetrying: catalog.isRefreshing,
         ),
       ),
     );
@@ -65,7 +95,12 @@ class _Catalog extends StatelessWidget {
     if (rows.isEmpty) {
       return MxEmptyState(
         icon: Icons.auto_stories_outlined,
-        title: context.l10n.starterLibraryTitle,
+        // The situation, not the screen. Titling this with
+        // `starterLibraryTitle` printed "Starter library" twice on one screen
+        // — once in the bar, once here — and said nothing about the state.
+        // Every other empty face names its own: `decksEmptyTitle`,
+        // `cardListEmptyTitle`, `tagCatalogEmptyTitle`, `deckMoveEmptyTitle`.
+        title: context.l10n.starterLibraryEmptyTitle,
         message: context.l10n.starterLibraryEmpty,
       );
     }

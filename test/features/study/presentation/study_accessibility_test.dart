@@ -1,18 +1,28 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
+import 'package:memox/core/time/clock_provider.dart';
+import 'package:memox/core/time/time_zone_provider.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
+import 'package:memox/features/study/di/study_repository_provider.dart';
 import 'package:memox/features/study/domain/entities/study_queue_item_entity.dart';
+import 'package:memox/features/study/domain/models/study_deck_context_model.dart';
 import 'package:memox/features/study/domain/models/study_mode.dart';
 import 'package:memox/features/study/domain/models/study_queue_item_status_model.dart';
 import 'package:memox/features/study/domain/models/study_scheduler.dart';
 import 'package:memox/features/study/domain/models/study_session_kind_model.dart';
 import 'package:memox/features/study/domain/models/study_turn_model.dart';
+import 'package:memox/features/study/presentation/screens/study_session_screen.dart';
 import 'package:memox/features/study/presentation/widgets/sections/study_card_face_section_widget.dart';
 import 'package:memox/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart';
+import 'package:memox/l10n/generated/app_localizations_en.dart';
 
 import '../../../support/color_math.dart';
+import '../domain/support/fake_study_repository.dart';
 import 'support/study_widget_harness.dart';
 
 /// What the Study screens owe somebody who is not looking at them, or not
@@ -198,6 +208,61 @@ void main() {
     expect(node.value, '2 / 5');
   });
 
+  testWidgets('the session spinner says what is opening, not which app', (
+    tester,
+  ) async {
+    // **A loading label names its subject** (SC-C3-13). All three spinners on
+    // the session screen announced `appTitle` — "MemoX" — which tells somebody
+    // who is not looking neither that something is happening nor what. The
+    // other fourteen `loadingLabel` sites in the app name what they are
+    // reading, this feature's own Study Home among them.
+    //
+    // Held open at `deckContext`, the first read `StartStudySessionUseCase`
+    // makes: `isOpening` is set before it and cleared after `openSession`
+    // returns, so a double that merely fails would flash past this branch
+    // inside one pump.
+    final repository = _HeldOpenRepository();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          studyRepositoryProvider.overrideWithValue(repository),
+          clockProvider.overrideWithValue(() => DateTime.utc(2026, 8, 7, 2)),
+          utcOffsetProvider.overrideWithValue(() => const Duration(hours: 7)),
+        ],
+        child: wrapForTest(
+          const StudySessionScreen(
+            deckId: 'deck-1',
+            kind: StudySessionKind.learning,
+          ),
+          isScrollable: false,
+        ),
+      ),
+    );
+    // `start` is posted for after the first frame, so the branch it opens is
+    // rendered by the second.
+    await tester.pump();
+
+    final l10n = AppLocalizationsEn();
+    expect(
+      find.bySemanticsLabel(l10n.studySessionLoadingLabel),
+      findsOneWidget,
+    );
+    // The negative half, and it is the finding: the label was the product
+    // name. Asserted on this branch rather than over the whole app, because a
+    // harness that pumped a shell would catch its app-bar title instead.
+    expect(find.bySemanticsLabel(l10n.appTitle), findsNothing);
+
+    // Let the held read finish so the test does not end mid-await. Two bounded
+    // pumps rather than `pumpAndSettle`: the fake serves no turn, so the branch
+    // the release lands on draws another spinner, and a settle waits on an
+    // indeterminate `CircularProgressIndicator` that schedules a frame forever
+    // — ten minutes, then a timeout that says nothing about this assertion.
+    repository.gate.complete();
+    await tester.pump();
+    await tester.pump();
+  });
+
   testWidgets('the whole frame survives 320x568 at double text scale', (
     tester,
   ) async {
@@ -232,3 +297,19 @@ void main() {
 
 /// WCAG 2.1 AA for body text.
 const double _kAaBodyText = 4.5;
+
+/// Holds the session's first read open, so `isOpening` can be looked at.
+///
+/// `deckContext` rather than `openSession`: it is the first thing
+/// `StartStudySessionUseCase` awaits, and a gate any later would leave the
+/// branch under test to a race with the microtask queue.
+final class _HeldOpenRepository extends FakeStudyRepository {
+  final Completer<void> gate = Completer<void>();
+
+  @override
+  Future<StudyDeckContextModel> deckContext(String deckId) async {
+    await gate.future;
+
+    return super.deckContext(deckId);
+  }
+}

@@ -75,11 +75,21 @@ class StudyModeChooserWidget extends StatelessWidget {
     final count = _capacity(mode);
     final isAvailable = count > 0;
 
+    // **Disabled, not merely untappable.** A null `onTap` takes the row out of
+    // the focus order but leaves it at full ink, so an unavailable mode painted
+    // title and subtitle at exactly the values a runnable one does — the reason
+    // sentence was the only signal the row was dead, which the class doc above
+    // already claims it is not. `isEnabled` is what resolves the disabled ink;
+    // the picker doing the identical job passes it (move_deck_sheet_widget.dart
+    // `_MoveTargetTile`). Both are passed, as that sibling does: `_isInteractive`
+    // ANDs them, so the pair is redundant rather than contradictory, and the tap
+    // guard stays readable where the availability is decided.
     return MxListTile(
       title: context.studyMode(mode),
       subtitle: isAvailable
           ? context.l10n.studyModeCardCount(count)
           : context.studyModeUnavailable(mode),
+      isEnabled: isAvailable,
       onTap: isAvailable ? () => onModeSelected(mode) : null,
     );
   }

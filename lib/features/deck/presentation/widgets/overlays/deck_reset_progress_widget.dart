@@ -6,6 +6,7 @@ import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_button_pair.dart';
+import '../../../../../shared/widgets/mx_feedback_band.dart';
 import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../domain/entities/deck_entity.dart';
@@ -137,10 +138,16 @@ class _ResetProgressSheetState extends ConsumerState<_ResetProgressSheet> {
                   setState(() => _scheduler = value ?? _scheduler),
             ),
             if (submit.failure != null) ...<Widget>[
-              const SizedBox(height: AppSpacing.md),
-              Text(
-                context.deckWriteFailure(submit.failure!),
-                style: context.texts.bodySmall!.inked(context, AppInk.danger),
+              // The one grammar for an in-flow failure — see
+              // `deck_form_widget.dart` for why the bare red line went
+              // (SC-C3-19). It matters most here: `AppInk.danger` is already
+              // spoken twice on this sheet, by the "what is lost" glyph and
+              // its heading, so a third red line was the one element on the
+              // screen whose colour carried a meaning nothing else did.
+              const SizedBox(height: AppSpacing.lg),
+              MxFeedbackBand(
+                title: context.l10n.deckWriteErrorTitle,
+                message: context.deckWriteFailure(submit.failure!),
               ),
             ],
             const SizedBox(height: AppSpacing.xl),

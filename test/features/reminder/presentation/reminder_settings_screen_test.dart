@@ -340,6 +340,84 @@ void main() {
       expect(platform.scheduled.single.minuteOfDay, 9 * 60);
     });
 
+    testWidgets('a refused time change leaves the row and the picker on the '
+        'picked time, not the rolled-back one', (tester) async {
+      platform.shouldFailSchedule = true;
+      await pumpScreen(tester);
+
+      await tester.tap(find.text(english.reminderTimeLabel));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.keyboard_outlined));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField).first, '9');
+      await tester.enterText(find.byType(TextField).last, '00');
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+
+      // The reschedule failed, so the row rolled back to 7:30 — but `Retry`
+      // still carries 9:00. A row and a picker built from the stored value
+      // would name a time no control on this screen would act on, and the user
+      // who answers the banner by picking 9:05 would have to dial back from
+      // 7:30 first.
+      expect(find.text(english.reminderScheduleErrorTitle), findsOneWidget);
+      expect(settings.current.time.minuteOfDay, 7 * 60 + 30);
+      expect(find.text('9:00 AM'), findsOneWidget);
+
+      await tester.tap(find.text(english.reminderTimeLabel));
+      await tester.pumpAndSettle();
+
+      expect(
+        tester
+            .widget<TimePickerDialog>(find.byType(TimePickerDialog))
+            .initialTime,
+        const TimeOfDay(hour: 9, minute: 0),
+      );
+    });
+
+    testWidgets('the picked time is dropped once the rejection clears', (
+      tester,
+    ) async {
+      // **The edge the gate exists for.** A *successful* pick cannot pin it:
+      // it leaves the draft and the stored row holding the same time, so a
+      // gated read and an ungated one agree. The only sequence where they
+      // differ with no rejection live is a refusal — which leaves the draft
+      // ahead of the row — followed by a command that clears it.
+      platform.shouldFailSchedule = true;
+      await pumpScreen(tester);
+
+      await tester.tap(find.text(english.reminderTimeLabel));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.keyboard_outlined));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField).first, '9');
+      await tester.enterText(find.byType(TextField).last, '00');
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+
+      // Off, then on. Both succeed, and each `_setEnabled` resets the time
+      // command — so the rejection is gone and the stored 7:30 is what the
+      // reminder is actually scheduled at.
+      platform.shouldFailSchedule = false;
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+
+      expect(toggleOf(tester).value, isTrue);
+      expect(find.text('7:30 AM'), findsOneWidget);
+      expect(find.text('9:00 AM'), findsNothing);
+
+      await tester.tap(find.text(english.reminderTimeLabel));
+      await tester.pumpAndSettle();
+
+      expect(
+        tester
+            .widget<TimePickerDialog>(find.byType(TimePickerDialog))
+            .initialTime,
+        const TimeOfDay(hour: 7, minute: 30),
+      );
+    });
+
     testWidgets('the time is localized, not formatted by hand', (tester) async {
       await pumpScreen(tester, locale: const Locale('vi'));
 

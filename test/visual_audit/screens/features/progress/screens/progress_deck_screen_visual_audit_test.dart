@@ -211,6 +211,24 @@ void main() {
         screenItemId: 'progress_screen',
         hasSearchField: false,
       ),
+      const AuditSkipAllowance(
+        itemId: 'progress_screen',
+        reason: SkipReason.unknownRenderType,
+        detailContains: 'RenderSliverFillRemaining',
+        rationale:
+            'ProgressHeaderedBody hands this face a '
+            'SliverFillRemaining(hasScrollBody: false), so the state is sized '
+            'to its content and centred in what the overview band leaves '
+            '(SC-C3-18) — the same composition the loaded level and the deck '
+            'list already use. Same case as _RenderPinnedHeaderSliver in the '
+            'states above: it lays its child out and paints nothing of its own. '
+            'Verified against the pinned SDK rather than assumed — '
+            'rendering/sliver_fill.dart declares no paint method at all, so '
+            'RenderSliverFillRemaining inherits '
+            'RenderSliverSingleBoxAdapter.paint, whose whole body is one '
+            'context.paintChild. It has no colour, border or shape; the face '
+            'under it is anchored as empty_state and read in full.',
+      ),
     ],
   );
 }
