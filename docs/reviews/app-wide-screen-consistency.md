@@ -5,7 +5,7 @@
 | **Status** | active |
 | **Purpose** | Làm mọi màn production đọc như một sản phẩm: ghi lại inventory màn hình, grammar composition đang được đo, và registry finding mà các PR cluster sau sẽ đóng từng cụm |
 | **Scope** | Composition ở **mức màn hình** — section nào có, thứ tự ra sao, phân cấp thông tin, các `Mx*` sẵn có được xếp và giãn cách thế nào. Ngoài phạm vi: 14 hợp đồng đóng băng của `design-system/v1-freeze.md` §2, giá trị token (AD-14), hợp đồng component-level (`.claude/skills/flutter-theme-design/`) |
-| **Source of truth for** | Inventory 21 màn production và các bề mặt overlay · composition grammar áp cho việc lắp ráp màn hình · registry 123 finding SC-* và cụm của chúng · danh sách `DESIGN_SYSTEM_BLOCKED` của pass này |
+| **Source of truth for** | Inventory 21 màn production (20 trong phạm vi) và 35 bề mặt overlay (33 được review) · composition grammar áp cho việc lắp ráp màn hình · registry 123 finding SC-* và cụm của chúng · danh sách `DESIGN_SYSTEM_BLOCKED` của pass này |
 | **Depends on** | `document-conventions.md` · `design-system/v1-freeze.md` · `architecture.md` (AD-04, AD-12, AD-14, AD-15) · `reviews/a18-responsive-compact-audit.md` · `reviews/a20-1-design-system-reconciliation.md` |
 | **Updated by task** | M100.42 |
 | **Last updated** | 2026-09-05 |
@@ -33,7 +33,10 @@ PR đó.
 
 ### 1.1 Phương pháp, và giới hạn của nó
 
-24 đơn vị bề mặt được review độc lập theo cùng một rubric mười chiều (§3). Mỗi finding
+**24 đơn vị bề mặt** được review độc lập theo cùng một rubric mười chiều (§3) — 18
+đơn vị màn hình phủ 20 màn trong phạm vi (một đơn vị phủ `DeckListScreen` ở cả hai cấp,
+một đơn vị phủ `CardEditorScreen` ở cả hai chế độ), 1 đơn vị cho `AppNavigationShell`,
+và 5 đơn vị overlay phủ 33 trong 35 bề mặt overlay (§2.1). Mỗi finding
 buộc phải trỏ `file:line`, nêu **giá trị đo được** ở đó, và **nêu tên một bề mặt anh
 em làm khác** kèm `file:line` của nó — vì tính nhất quán là một mệnh đề so sánh, không
 phải một cảm giác.
@@ -121,11 +124,31 @@ grammar composition không áp được vào thứ cố ý sống ngoài design 
 
 ### 2.1 Overlay
 
-35 bề mặt overlay: 30 hàm `show*` trong `presentation/widgets/overlays/`, 2 undo
-snackbar, và 3 sheet body của study. Trong đó **15 cái có bố cục thật** (form sheet,
-picker, export/import, filter, action sheet) và được review. 20 cái còn lại là confirm
-dialog một dòng: hình dạng của chúng do `MxConfirmDialog` / `MxSheet` quyết định, tức
-hợp đồng đóng băng #6, nên chúng được inventory chứ không review.
+**35 bề mặt overlay, 33 được review, 2 không.** Con số đếm được từ repo, không
+ước lượng:
+
+| Nguồn | Số | Đã review |
+|---|---|---|
+| `show*` trong `deck/…/overlays/` | 14 | ✅ đơn vị *Deck content-bearing sheets* |
+| `show*` trong `card/…/overlays/` | 11 | ✅ đơn vị *Card content-bearing sheets* |
+| `show*` trong `trash/…/overlays/` | 3 | ✅ đơn vị *Trash sheets* |
+| `show*` trong `reminder/…/overlays/` | 1 | ✅ đơn vị *Reminder time picker* |
+| `show*` trong `settings/…/overlays/` | 1 | ✅ trong đơn vị màn *SettingsScreen* |
+| sheet body của `study/…/overlays/` (không có hàm bọc) | 3 | ✅ đơn vị *Study sheets* |
+| undo snackbar trong `…/widgets/support/` | 2 | ❌ **không đơn vị nào nhận** |
+| | **35** | **33** |
+
+Hai cái không review là `showCardMovedToTrash` và `showDeckMovedToTrash`. Chúng nằm
+trong `support/` chứ không phải `overlays/`, nên rơi ngoài mọi glob của các đơn vị
+overlay. Đây là khoảng trống có thật của pass này, không phải một lựa chọn — ghi lại
+để không ai nhầm nó là đã xét.
+
+Bản recon (#469) ghi *"15 cái có bố cục thật được review, 20 cái còn lại là confirm
+dialog"*. **Cả hai con số đều sai**, và sai theo hướng khiến độ phủ trông hẹp hơn thực
+tế: phạm vi của mỗi đơn vị overlay là **cả thư mục** `overlays/` của feature đó, không
+phải một danh sách chọn lọc. Confirm dialog cũng đã được đọc; điều đúng trong câu cũ
+là *hình dạng* của chúng do `MxConfirmDialog` / `MxSheet` quyết định, tức hợp đồng đóng
+băng #6, nên phần lớn không sinh ra finding sửa được ở tầng composition.
 
 **`study` là feature duy nhất mở sheet inline bằng `showMxSheet`** với ba widget body
 trần, thay vì gói trong một hàm `show*` có tên như năm feature còn lại — xem SC-C4-19.

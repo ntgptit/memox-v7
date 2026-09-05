@@ -16951,6 +16951,57 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
 - **Checklist phases:** 14, 21.
 
+### M100.43 · Sửa hai khuyết tật của bản recon trước khi thi hành C1–C9
+
+- **Status:** done (2026-09-05)
+- **Owner:** Claude
+- **Goal:** Làm baseline của M100.42 đủ tin để dựa vào. Hai khuyết tật, cả hai
+  đều thuộc loại "xanh mà không bảo vệ gì".
+- **Nhánh / PR:** `claude/app-wide-screen-consistency-impl`
+- **Vấn đề:**
+  - **Allowlist theo file không phải ratchet.** `screen_composition_rhythm_test`
+    miễn trừ *cả file*, nên một file đã nằm trong danh sách có thể mọc thêm vi
+    phạm thứ hai không liên quan mà vẫn xanh. Nó bảo vệ cái tên file, không bảo
+    vệ khuyết tật.
+  - **Ba con số về độ phủ không khớp nhau.** Báo cáo ghi "15 sheet có bố cục
+    thật được review, 20 cái còn lại là confirm dialog". Cả hai đều sai: phạm vi
+    của mỗi đơn vị overlay là **cả thư mục** `overlays/` của feature đó.
+- **Scope:**
+  - Thay allowlist theo file bằng **chữ ký từng vi phạm**:
+    `rule | path | enclosing declaration chain | offending pattern | ordinal`.
+    Không có số dòng — chữ ký phải sống sót qua một lần sửa ở phía trên nó.
+  - So khớp **hai chiều**: vi phạm mới → đỏ; entry đã được sửa mà còn sót → đỏ.
+  - Tách scanner sang `test/app/support/composition_rhythm_scan.dart` (guard
+    `no_large_source_file` chặn ở 400 dòng).
+  - Đếm lại độ phủ overlay từ repo và sửa §1.1, §2.1, header của registry.
+- **Quyết định:**
+  - **Ordinal, không phải số dòng.** Hai vi phạm giống hệt trong cùng một
+    declaration phải là hai chữ ký, nếu không cái thứ hai vô hình. Ordinal gán
+    theo thứ tự source nên ổn định; số dòng thì không.
+  - **Đổi tên trường `token` → `pattern`.** Guard `no_hardcoded_secret_assignment`
+    bắt `token: '...'`. Guard đúng ở mức luật; sửa tên trường chứ **không** nới
+    guard — §3 của `v1-freeze.md` cấm điều đó.
+- **Editable documents:** `docs/reviews/app-wide-screen-consistency.md`,
+  `docs/wbs.md`
+- **Đo, sau khi đổi:**
+  - 13 test (3 quét thật + 10 probe hành vi), 0 đỏ.
+  - Năm hành vi bắt buộc đều fault-inject: ba bằng probe tổng hợp, **hai bằng
+    tiêm lỗi vào cây code thật** — thêm vi phạm thứ hai vào một file đã
+    allowlist (đỏ, đúng chữ ký `_SmuggledList.build|AppSpacing.sm|0`), và sửa
+    thật `study_options` mà để lại entry (đỏ vì stale).
+  - Overlay: **35 bề mặt, 33 được review, 2 không** — hai undo snackbar ở
+    `support/` không đơn vị nào nhận. Đây là khoảng trống thật của M100.42.
+- **Output:** ratchet theo từng vi phạm; registry có ba con số khớp nhau.
+- **Acceptance criteria:**
+  - [x] Không còn miễn trừ nào ở mức file.
+  - [x] Cả năm hành vi ratchet đã fault-inject trước khi tin.
+  - [x] Không guard/test nào ở cột Enforcement của §2 bị nới lỏng.
+  - [x] `check_docs.py` xanh; số liệu registry đối chiếu cơ học được.
+- **Dependencies:** M100.42
+- **Tests required:** `screen_composition_rhythm_test.dart`, `check_docs.py`,
+  code-verification guard, `flutter analyze`.
+- **Checklist phases:** 7, 14.
+
 ### M100.42 · App-wide screen consistency — recon, và grammar composition thành test
 
 - **Status:** in progress (2026-09-05) — PR recon là PR đầu trong chuỗi; các cụm
