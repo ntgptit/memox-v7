@@ -16,8 +16,11 @@ import 'package:memox/features/study/domain/models/study_mode.dart';
 import 'package:memox/features/study/domain/models/study_queue_item_status_model.dart';
 import 'package:memox/features/study/domain/models/study_session_kind_model.dart';
 import 'package:memox/features/study/domain/models/study_session_status_model.dart';
+import 'package:memox/features/study/domain/models/study_session_summary_model.dart';
 import 'package:memox/features/study/domain/models/study_turn_model.dart';
 import 'package:memox/features/study/presentation/controllers/study_session_controller.dart';
+import 'package:memox/shared/widgets/mx_action_button.dart';
+import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/features/study/presentation/screens/study_session_screen.dart';
 import 'package:memox/features/study/presentation/widgets/sections/study_blocked_section_widget.dart';
@@ -76,6 +79,10 @@ void main() {
     required StudyMode mode,
     required StudySessionKind kind,
     SchedulerType schedulerType = SchedulerType.sm2,
+
+    /// Makes the epilogue read throw, which is how the summary provider comes
+    /// back with `null` and the finished screen falls back to its empty state.
+    bool summaryFails = false,
   }) async {
     // BR-208: an `sm2` self-assess review is refused without a recall direction,
     // so the screen would render its error state rather than a session. Korean
@@ -91,10 +98,17 @@ void main() {
     // `sm2`, so `self_assess` is a review mode the algorithm actually offers
     // (BR-146). Asking an `eight_box` deck for it is refused, and the screen
     // would then be its error state rather than a session.
-    final repository = FakeStudyRepository(
-      schedulerType: schedulerType,
-      stageExhausted: false,
-    )..nextTurn_ = turnOf(mode);
+    final repository =
+        (summaryFails
+              ? _FailingSummary(
+                  schedulerType: schedulerType,
+                  stageExhausted: false,
+                )
+              : FakeStudyRepository(
+                  schedulerType: schedulerType,
+                  stageExhausted: false,
+                ))
+          ..nextTurn_ = turnOf(mode);
 
     await tester.pumpWidget(
       ProviderScope(
@@ -316,4 +330,54 @@ void main() {
     expect(find.text('Flip the card, then say how it went'), findsNothing);
     expect(repository.ended, hasLength(1));
   });
+
+  testWidgets('a finished session with no counts still offers the way out', (
+    tester,
+  ) async {
+    // **The one branch that had removed every control.** The screen wears
+    // `MxShellChrome.none`, and finishing drops the frame and its ✕ with it —
+    // so when the epilogue read failed the user was left with one centred
+    // sentence and nothing to press. The summary beside it has always drawn
+    // `Back to deck`; the fallback says less than it, not nothing.
+    await pumpSession(
+      tester,
+      mode: StudyMode.selfAssess,
+      kind: StudySessionKind.reviewing,
+      summaryFails: true,
+    );
+
+    await tester.tap(find.byTooltip('Close session'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(MxEmptyState), findsOneWidget);
+    expect(find.text('Back to deck'), findsOneWidget);
+    expect(
+      tester.widget<MxActionButton>(find.byType(MxActionButton)).onPressed,
+      isNotNull,
+      reason: 'a label with no callback renders a button that does nothing',
+    );
+
+    // The negative half, and the reason this test exists rather than a
+    // `findsOneWidget` on the label: the button is only the *only* control
+    // while these two stay absent, and it is their absence that made the
+    // missing button unnoticeable in the first place.
+    expect(find.byType(AppBar), findsNothing);
+    expect(find.byTooltip('Close session'), findsNothing);
+  });
+}
+
+/// Refuses to summarise, the way a failed epilogue read reaches the screen:
+/// `studySessionSummaryProvider` swallows it and returns null (BR-85 has
+/// already ended the session, so there is nothing to retry).
+final class _FailingSummary extends FakeStudyRepository {
+  _FailingSummary({
+    required super.schedulerType,
+    required super.stageExhausted,
+  });
+
+  @override
+  Future<StudySessionSummaryModel> sessionSummary({
+    required String sessionId,
+    required List<StudyAction> wrongActions,
+  }) async => throw StateError('the summary could not be read');
 }

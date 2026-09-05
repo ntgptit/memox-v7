@@ -1,76 +1,63 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../core/state/submit_outcome.dart';
 import '../../../../../core/theme/extensions/app_ink.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
-import '../../../../../shared/widgets/mx_button_pair.dart';
-import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../../../shared/widgets/mx_text_field.dart';
 import '../../../domain/failures/card_validation_failure.dart';
-import '../../controllers/card_create_controller.dart';
 import '../../states/card_submit_state.dart';
 import 'card_details_section_widget.dart';
 
-/// The editor's create mode: two sides, the optional details, and two ways to
-/// save (UC-04 W4, A4).
+/// The editor's create mode: two sides and the optional details (UC-04 W4, A4).
 ///
-/// **Moved out of `CardEditorScreen` unchanged, and that is the point.** Edit
-/// mode is being redesigned; create is explicitly out of that scope. While both
-/// modes shared the screen's five `TextEditingController`s and its field
-/// builder, every decision taken for edit landed here too — which is how a
-/// front field on a screen nobody had reviewed silently changed size the last
-/// time these two shared a builder.
+/// **Its own file, and that is the point.** Edit mode has been redesigned twice;
+/// create is explicitly out of that scope. While both modes shared one field
+/// builder, every decision taken for edit landed here too — which is how a front
+/// field on a screen nobody had reviewed silently changed size the last time
+/// these two shared a builder. `CardEditorFormWidget` is edit's; this is
+/// create's, and neither reads the other.
 ///
-/// One instance is only ever one mode, so nothing was shared at runtime; what
-/// was shared was the *risk*. Every behaviour below is the one create already
-/// had: floating labels, the counter that appears near the limit, no tags, no
-/// delete, no pinned footer, no discard guard.
-class CardCreateFormWidget extends ConsumerStatefulWidget {
-  const CardCreateFormWidget({required this.deckId, super.key});
+/// **What it does not own is the save.** The two dispositions live in
+/// `CardCreateActionBarWidget`, pinned in `MxContentShell.footer` — the pair
+/// used to be the last child of this column, inside the scroll, on a screen
+/// that autofocuses its first field and so meets the user with the keyboard
+/// already up (SC-C1-02). The screen owns the controllers, the submit state and
+/// the outcome, exactly as it does for edit; this widget is handed them.
+///
+/// Every other behaviour below is the one create already had: floating labels,
+/// the counter that appears near the limit, no tags, no delete, no discard
+/// guard.
+class CardCreateFormWidget extends StatefulWidget {
+  const CardCreateFormWidget({
+    required this.state,
+    required this.isBusy,
+    required this.front,
+    required this.back,
+    required this.example,
+    required this.hint,
+    required this.pronunciation,
+    required this.frontFocus,
+    super.key,
+  });
 
-  final String deckId;
+  final CardSubmitState state;
+  final bool isBusy;
+  final TextEditingController front;
+  final TextEditingController back;
+  final TextEditingController example;
+  final TextEditingController hint;
+  final TextEditingController pronunciation;
+  final FocusNode frontFocus;
 
   @override
-  ConsumerState<CardCreateFormWidget> createState() =>
-      _CardCreateFormWidgetState();
+  State<CardCreateFormWidget> createState() => _CardCreateFormWidgetState();
 }
 
-class _CardCreateFormWidgetState extends ConsumerState<CardCreateFormWidget> {
-  final TextEditingController _front = TextEditingController();
-  final TextEditingController _back = TextEditingController();
-  final TextEditingController _example = TextEditingController();
-  final TextEditingController _hint = TextEditingController();
-  final TextEditingController _pronunciation = TextEditingController();
-  final FocusNode _frontFocus = FocusNode();
-
+class _CardCreateFormWidgetState extends State<CardCreateFormWidget> {
   /// The optional-detail fields start collapsed (W4); nothing here can open
   /// them but a tap, because a new card has no detail to reveal.
   bool _detailsExpanded = false;
-
-  @override
-  void dispose() {
-    _front.dispose();
-    _back.dispose();
-    _example.dispose();
-    _hint.dispose();
-    _pronunciation.dispose();
-    _frontFocus.dispose();
-    super.dispose();
-  }
-
-  void _submit({SubmitDisposition disposition = SubmitDisposition.close}) => ref
-      .read(cardCreateProvider(widget.deckId).notifier)
-      .submit(
-        rawFront: _front.text,
-        rawBack: _back.text,
-        rawExample: _example.text,
-        rawHint: _hint.text,
-        rawPronunciation: _pronunciation.text,
-        disposition: disposition,
-      );
 
   String? _frontError(CardValidationProblem? problem) => switch (problem) {
     CardValidationProblem.frontEmpty => context.l10n.cardFrontEmptyError,
@@ -86,36 +73,15 @@ class _CardCreateFormWidgetState extends ConsumerState<CardCreateFormWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final provider = cardCreateProvider(widget.deckId);
-    final state = ref.watch(provider);
-
-    ref.listen<CardSubmitState>(provider, (previous, next) {
-      if (next.shouldClose && !(previous?.shouldClose ?? false)) {
-        Navigator.of(context).pop();
-
-        return;
-      }
-      // Save-and-add-another: empty the form, return focus to the front, and
-      // clear the outcome so the next save is a fresh attempt (UC-04 A4).
-      if (next.shouldClearDraft && !(previous?.shouldClearDraft ?? false)) {
-        _front.clear();
-        _back.clear();
-        _example.clear();
-        _hint.clear();
-        _pronunciation.clear();
-        _frontFocus.requestFocus();
-        ref.read(provider.notifier).reset();
-      }
-    });
-
-    final busy = state.isSubmitting;
+    final state = widget.state;
+    final busy = widget.isBusy;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         MxTextField(
-          controller: _front,
-          focusNode: _frontFocus,
+          controller: widget.front,
+          focusNode: widget.frontFocus,
           label: context.l10n.cardFrontLabel,
           hintText: context.l10n.cardFrontHint,
           isEnabled: !busy,
@@ -128,7 +94,7 @@ class _CardCreateFormWidgetState extends ConsumerState<CardCreateFormWidget> {
         ),
         const SizedBox(height: AppSpacing.lg),
         MxTextField(
-          controller: _back,
+          controller: widget.back,
           label: context.l10n.cardBackLabel,
           hintText: context.l10n.cardBackHint,
           isEnabled: !busy,
@@ -148,31 +114,13 @@ class _CardCreateFormWidgetState extends ConsumerState<CardCreateFormWidget> {
         CardDetailsSectionWidget(
           isExpanded: _detailsExpanded,
           onToggle: () => setState(() => _detailsExpanded = !_detailsExpanded),
-          exampleController: _example,
-          hintController: _hint,
-          pronunciationController: _pronunciation,
+          exampleController: widget.example,
+          hintController: widget.hint,
+          pronunciationController: widget.pronunciation,
           isBusy: busy,
           exampleProblem: state.exampleProblem,
           hintProblem: state.hintProblem,
           pronunciationProblem: state.pronunciationProblem,
-        ),
-        const SizedBox(height: AppSpacing.xl),
-        // Same-size pair, one row when the labels fit: the two dispositions
-        // are one choice, and stacked full-width buttons spent a row of the
-        // form for it (owner ask, 2026-08-28).
-        MxButtonPair(
-          primary: MxActionButton(
-            label: context.l10n.cardEditorSave,
-            onPressed: busy ? null : _submit,
-            isLoading: busy,
-          ),
-          secondary: MxActionButton(
-            label: context.l10n.cardEditorSaveAndAdd,
-            variant: MxActionButtonVariant.secondary,
-            onPressed: busy
-                ? null
-                : () => _submit(disposition: SubmitDisposition.addAnother),
-          ),
         ),
       ],
     );

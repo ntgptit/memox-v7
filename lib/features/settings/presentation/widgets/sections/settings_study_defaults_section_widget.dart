@@ -7,6 +7,7 @@ import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../../../shared/widgets/mx_card.dart';
+import '../../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../../shared/widgets/mx_text_field.dart';
 import '../../../../study/domain/models/new_card_order_model.dart';
 import '../../../../study/domain/models/study_card_limit_model.dart';
@@ -167,73 +168,90 @@ class _SettingsStudyDefaultsSectionWidgetState
         // Flat, like every other card in a scrolling column (D20). This
         // screen was the last one still taking `AppElevation.card`, and
         // its own error band already passes `none` for the same reason.
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            // **The field owns its label; there is no `Text` above it.**
-            // `MxTextField` passes `label` to `InputDecoration.labelText` and
-            // the theme leaves `floatingLabelBehavior` at `auto`, so a field
-            // that always has a value always floats its label — the same
-            // string then rendered twice, 4dp apart, and TalkBack read it
-            // twice. The order group below keeps its `Text` because a radio
-            // group has no decoration to carry one.
-            MxTextField(
-              controller: _cardLimit,
-              focusNode: _cardLimitFocus,
-              label: l10n.studyOptionsCardLimitLabel,
-              isEnabled: !widget.isSubmitting,
-              // Digits only — the limit is an integer, and the numeric
-              // keyboard hides letters but paste does not. `done`, because
-              // this is the last text field on the screen.
-              content: MxTextFieldContent.digits,
-              textInputAction: TextInputAction.done,
-              errorText: _fieldErrorText,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Text(l10n.studyOptionsOrderLabel, style: context.texts.titleSmall),
-            const SizedBox(height: AppSpacing.xs),
-            // **Radio rows, not the pills `StudyOptionsSectionWidget` uses.**
-            // W6 requires a selected state not to rest on colour, and a
-            // `ChoiceChip` under `buildChipTheme` differs when selected only in
-            // fill and label colour — `showCheckmark` is false and `side` is
-            // resolved for disabled and focused only. The three groups on this
-            // screen therefore share one control, which is also what W1 draws.
-            //
-            // `contentPadding: zero` because this card already pads its content
-            // — the rows must start on the same x as the label above them (W5).
-            SettingsChoiceRowsWidget<NewCardOrder>(
-              values: NewCardOrder.values,
-              selected: _order,
-              labelOf: context.newCardOrderLabel,
-              onChanged: (order) => setState(() => _order = order),
-              isSubmitting: widget.isSubmitting,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            // BR-213 in one line. Without it the change reads as one that did
-            // not apply, because a session already running keeps its ceiling.
-            Text(
-              l10n.settingsStudyDefaultsNote,
-              style: context.texts.bodySmall!.inked(context, AppInk.quiet),
-            ),
-            if (band != null) ...<Widget>[
+        //
+        // The inner gutter is the screen's, not the fixed 16 of
+        // `MxCardPadding.standard`: below 360dp the choice rows and the
+        // reminder row step to 12 with it, and a card that held its own
+        // would start this column 4dp inside theirs (W5).
+        padding: MxCardPadding.none,
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: mxScreenGutter(context),
+            vertical: AppSpacing.lg,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              // **The field owns its label; there is no `Text` above it.**
+              // `MxTextField` passes `label` to `InputDecoration.labelText` and
+              // the theme leaves `floatingLabelBehavior` at `auto`, so a field
+              // that always has a value always floats its label — the same
+              // string then rendered twice, 4dp apart, and TalkBack read it
+              // twice. The order group below keeps its `Text` because a radio
+              // group has no decoration to carry one.
+              MxTextField(
+                controller: _cardLimit,
+                focusNode: _cardLimitFocus,
+                label: l10n.studyOptionsCardLimitLabel,
+                isEnabled: !widget.isSubmitting,
+                // Digits only — the limit is an integer, and the numeric
+                // keyboard hides letters but paste does not. `done`, because
+                // this is the last text field on the screen.
+                content: MxTextFieldContent.digits,
+                textInputAction: TextInputAction.done,
+                errorText: _fieldErrorText,
+              ),
               const SizedBox(height: AppSpacing.lg),
-              SettingsErrorBandWidget(
-                failure: band,
-                // Retry sends the same draft Save would — so it is gated by
-                // the same validity check, just not by dirtiness: resending
-                // an unchanged value after a failed save is legitimate.
-                onRetry: (widget.isSubmitting || _draftProblem != null)
-                    ? null
-                    : _submit,
+              Text(
+                l10n.studyOptionsOrderLabel,
+                style: context.texts.titleSmall,
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              // **Radio rows, not the pills `StudyOptionsSectionWidget`
+              // uses.** W6 requires a selected state not to rest on colour,
+              // and a `ChoiceChip` under `buildChipTheme` differs when
+              // selected only in fill and label colour — `showCheckmark` is
+              // false and `side` is resolved for disabled and focused only.
+              // The three groups on this screen therefore share one control,
+              // which is also what W1 draws.
+              //
+              // `contentPadding: zero` because this card already pads its
+              // content — the rows must start on the same x as the label
+              // above them (W5).
+              SettingsChoiceRowsWidget<NewCardOrder>(
+                values: NewCardOrder.values,
+                selected: _order,
+                labelOf: context.newCardOrderLabel,
+                onChanged: (order) => setState(() => _order = order),
+                isSubmitting: widget.isSubmitting,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              // BR-213 in one line. Without it the change reads as one that did
+              // not apply, because a session already running keeps its ceiling.
+              Text(
+                l10n.settingsStudyDefaultsNote,
+                style: context.texts.bodySmall!.inked(context, AppInk.quiet),
+              ),
+              if (band != null) ...<Widget>[
+                const SizedBox(height: AppSpacing.lg),
+                SettingsErrorBandWidget(
+                  failure: band,
+                  // Retry sends the same draft Save would — so it is gated by
+                  // the same validity check, just not by dirtiness: resending
+                  // an unchanged value after a failed save is legitimate.
+                  onRetry: (widget.isSubmitting || _draftProblem != null)
+                      ? null
+                      : _submit,
+                ),
+              ],
+              const SizedBox(height: AppSpacing.lg),
+              MxActionButton(
+                label: l10n.studyOptionsSave,
+                isLoading: widget.isSubmitting,
+                onPressed: _canSubmit ? _submit : null,
               ),
             ],
-            const SizedBox(height: AppSpacing.lg),
-            MxActionButton(
-              label: l10n.studyOptionsSave,
-              isLoading: widget.isSubmitting,
-              onPressed: _canSubmit ? _submit : null,
-            ),
-          ],
+          ),
         ),
       ),
     );

@@ -64,6 +64,16 @@ class ProgressScreen extends ConsumerWidget {
     // again here would give the branch two app bars. The other three faces have
     // no level to defer to, so they carry their own shell.
     Widget shell(Widget body) => MxContentShell(
+      // Zero for the same reason `ProgressLevelErrorWidget` uses it: every face
+      // this helper wraps pads itself — `MxEmptyState`/`MxErrorState` carry
+      // their own `xl`, `MxLoadingState` centres — so the shell's gutter was a
+      // second inset. It cost the two state faces 16dp a side (40 instead of
+      // 24), and left the same component rendering at two widths one retry
+      // apart from the deck level, which already passes zero.
+      //
+      // Unconditional rather than per-branch: the loading frame is
+      // self-centring, so one value in one place is safer than a branch.
+      padding: EdgeInsets.zero,
       title: context.l10n.progressTitle,
       // Taller than a small screen at a large text scale, and W6 forbids buying
       // the height back by shrinking anything.

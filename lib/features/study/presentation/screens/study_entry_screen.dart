@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
@@ -123,16 +122,22 @@ class _StudyEntryScreenState extends ConsumerState<StudyEntryScreen> {
         onPressed: () => unawaited(_openOptions(context)),
       ),
     ],
-    body: Padding(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      child: MxAsyncView<StudyEntrySummaryModel>(
-        value: ref.watch(studyEntryProvider(deckId)),
-        loadingLabel: context.l10n.appTitle,
-        error: (_, _) => MxErrorState(
-          title: context.l10n.appTitle,
-          message: context.l10n.studyNothingDueMessage,
-        ),
-        data: (summary) => StudyEntrySectionWidget(
+    // Every branch below owns its gutters — the loaded body through the
+    // gutter it pads itself with, the error face through `MxErrorState`'s own
+    // `AppSpacing.xl` — so the shell's default would pad each of them twice.
+    padding: EdgeInsets.zero,
+    body: MxAsyncView<StudyEntrySummaryModel>(
+      value: ref.watch(studyEntryProvider(deckId)),
+      loadingLabel: context.l10n.appTitle,
+      error: (_, _) => MxErrorState(
+        title: context.l10n.appTitle,
+        message: context.l10n.studyNothingDueMessage,
+      ),
+      data: (summary) => Padding(
+        // The screen gutter, not a fixed `lg`: below 360dp every other screen
+        // narrows to `md`, and this one used to widen to 28 instead.
+        padding: EdgeInsets.all(mxScreenGutter(context)),
+        child: StudyEntrySectionWidget(
           summary: summary,
           onLearn: () =>
               unawaited(_open(context, kind: StudySessionKind.learning)),

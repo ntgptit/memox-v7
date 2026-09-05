@@ -4,6 +4,7 @@ import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_card.dart';
+import '../../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../domain/models/reminder_overview_model.dart';
 import '../../../domain/models/reminder_time_model.dart';
@@ -104,11 +105,16 @@ class ReminderSettingsSectionWidget extends StatelessWidget {
                   // the toggle and the time are one decision, so the seam
                   // between them reads as a hairline, not as two cards
                   // pretending to be one.
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                  Padding(
+                    // The same gutter the two rows resolve, not a fixed `lg`:
+                    // below 360dp the rows step to 12 and a literal left the
+                    // hairline starting 4dp right of the text it separates.
+                    padding: EdgeInsets.symmetric(
+                      horizontal: mxScreenGutter(context),
+                    ),
                     // The theme's divider — `outlineVariant`, which is what
                     // `borderSubtle` aliased; one spelling (M100.36 10H).
-                    child: Divider(),
+                    child: const Divider(),
                   ),
                   ReminderTimeRowWidget(
                     time: settings.time,

@@ -72,11 +72,6 @@ const Map<String, String> kExpectedViolations = <String, String>{
   'list-item-gap|lib/features/progress/presentation/widgets/sections/progress_deck_list_widget.dart|ProgressDeckListWidget.build|SliverPadding>sliver:>SliverList.separated>separatorBuilder:|AppSpacing.md|0':
       'SC-C2-20 — progress deck rows at md (12). Found by this test, not by the '
       'review: no reviewer named it, which is the argument for the test',
-  'double-gutter|lib/features/study/presentation/screens/study_entry_screen.dart|_StudyEntryScreenState.build|MxContentShell>body:|EdgeInsets.all(AppSpacing.lg)|0':
-      'SC-C1-13 — content sits at a 32dp left edge instead of 16, and the '
-      'compact step at 320dp becomes 28 instead of 12, inverting the rule',
-  'double-gutter|lib/features/study/presentation/screens/study_options_screen.dart|StudyOptionsScreen.build|MxContentShell>body:|EdgeInsets.all(AppSpacing.lg)|0':
-      'SC-C1-07 — the same second EdgeInsets.all(AppSpacing.lg)',
 };
 
 void main() {

@@ -1,6 +1,6 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 731,
+  "scannedFiles": 732,
   "totalSites": 308,
   "byElementKind": {
     "other": 269,
@@ -3308,7 +3308,7 @@
     },
     {
       "file": "lib/features/trash/presentation/widgets/sections/trash_selection_bar_widget.dart",
-      "line": 43,
+      "line": 44,
       "widget_context": "TrashSelectionBarWidget",
       "element_kind": "background",
       "source_kind": "theme-token",

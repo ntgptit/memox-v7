@@ -113,11 +113,11 @@ void main() {
   }
 
   group('G1 — shared left/right edges', () {
-    // Phone and wide only, like `tag_catalog_alignment_test.dart`'s own G1:
-    // below `AppBreakpoints.compact` the shell's subheader gutter steps to
-    // `md` while the list keeps its fixed `lg` — a pre-existing shell trade
-    // this screen makes identically, not something this file reopens.
-    for (final size in <Size>[phone, wide]) {
+    // Narrow included since the body took its gutter from `mxScreenGutter`:
+    // below `AppBreakpoints.compact` the shell's subheader steps to `md`, and
+    // the list now steps with it instead of holding a fixed `lg` and standing
+    // 4dp outside the field — which is the width the claim matters at most.
+    for (final size in <Size>[narrow, phone, wide]) {
       testWidgets('search field, progress panel and rows align at '
           '${size.width.toInt()}dp', (tester) async {
         await pumpList(tester, loadedRepository(), size: size);

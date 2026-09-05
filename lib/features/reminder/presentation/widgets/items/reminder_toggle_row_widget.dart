@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../shared/widgets/mx_switch_row.dart';
+import '../../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../l10n/l10n_extension.dart';
 
@@ -34,8 +35,12 @@ class ReminderToggleRowWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
+      // The screen gutter, not a fixed `lg`: the time row below takes its
+      // horizontal inset from `ListTileTheme.contentPadding`, which
+      // `applyCompactScale` steps down to 12 below 360dp. A literal here left
+      // the two rows of one card on two left edges at 320dp (M6 R2).
+      padding: EdgeInsets.symmetric(
+        horizontal: mxScreenGutter(context),
         vertical: AppSpacing.xs,
       ),
       // One node, one state (WCAG 4.1.2, A20.1 P2-13): the label is the

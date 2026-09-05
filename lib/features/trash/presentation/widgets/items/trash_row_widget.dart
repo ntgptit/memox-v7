@@ -80,12 +80,22 @@ class TrashRowWidget extends StatelessWidget {
           onLongPress: canSelect ? onToggleSelection : null,
           shape: MxPressableShape.none,
           child: Padding(
-            // The screen gutter, not a fixed token: G1 requires the chips, the
-            // notice and every row to share one left edge, and the shell's
-            // gutter is 12 below 360dp and 16 above it.
-            padding: EdgeInsets.symmetric(
-              horizontal: mxScreenGutter(context),
-              vertical: AppSpacing.md,
+            // Leading: the screen gutter, not a fixed token — G1 requires the
+            // chips, the notice and every row to share one left edge, and the
+            // shell's gutter is 12 below 360dp and 16 above it.
+            //
+            // **Trailing: `xs`, and only while the row carries its buttons.**
+            // The overflow button is a 48 box around a 24 glyph, so 4 + its own
+            // 12 inset paints the kebab on the same 16 the leading edge uses;
+            // the gutter outside it painted at 28 and made the row optically
+            // 16 left / 28 right (G2). A selecting row has no trailing button
+            // to absorb the difference, so it takes the real gutter on both
+            // sides — which is why this is a conditional and not a constant.
+            padding: EdgeInsets.only(
+              left: mxScreenGutter(context),
+              right: isSelecting ? mxScreenGutter(context) : AppSpacing.xs,
+              top: AppSpacing.md,
+              bottom: AppSpacing.md,
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,

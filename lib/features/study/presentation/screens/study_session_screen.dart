@@ -301,11 +301,22 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
       // No summary means the read failed, not that nothing happened: the
       // session has ended either way, and inventing counts for it would be
       // worse than saying only that.
+      //
+      // **It still carries the way out.** This screen has removed every other
+      // control by then — `MxShellChrome.none` means no bar, and a finished
+      // session drops the frame and its ✕ with it — so a title-only empty
+      // state left one sentence with nothing to press, on the one branch the
+      // user reaches by accident. The summary beside it draws `Back to deck`;
+      // the fallback says less, not nothing.
       return ref
           .watch(studySessionSummaryProvider(widget.deckId))
           .maybeWhen(
             data: (summary) => summary == null
-                ? MxEmptyState(title: context.l10n.studySessionFinished)
+                ? MxEmptyState(
+                    title: context.l10n.studySessionFinished,
+                    actionLabel: context.l10n.studySummaryBackToDeck,
+                    onAction: () => Navigator.of(context).pop(),
+                  )
                 : StudySummarySectionWidget(
                     summary: summary,
                     onBackToDeck: () => Navigator.of(context).pop(),
