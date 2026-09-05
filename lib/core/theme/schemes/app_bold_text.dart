@@ -36,8 +36,23 @@ final Expando<ThemeData> _boldTextCache = Expando<ThemeData>('applyBoldText');
 /// The weight Flutter itself would merge for `boldText`.
 const FontWeight _boldTextWeight = FontWeight.w700;
 
-TextStyle? _bold(TextStyle? style) =>
-    style == null ? null : AppTypography.withWeight(style, _boldTextWeight);
+/// One style re-weighted through `wght`.
+///
+/// **A state-resolved style keeps its resolver.** `hintStyle` is a
+/// `WidgetStateTextStyle` — `onSurfaceVariant` at rest, `onDisabled` when the
+/// field is disabled. Re-weighting its resting resolution alone froze the hint
+/// at full ink on a disabled field (corrective pass 2, Codex review on #462);
+/// the resolver is wrapped instead, so every state it answers is re-weighted.
+TextStyle? _bold(TextStyle? style) {
+  if (style == null) return null;
+  if (style is WidgetStateTextStyle) {
+    return WidgetStateTextStyle.resolveWith(
+      (states) =>
+          AppTypography.withWeight(style.resolve(states), _boldTextWeight),
+    );
+  }
+  return AppTypography.withWeight(style, _boldTextWeight);
+}
 
 ThemeData _buildBoldText(ThemeData base) {
   final texts = base.textTheme;
@@ -124,7 +139,11 @@ ThemeData _buildBoldText(ThemeData base) {
     timePickerTheme: base.timePickerTheme.copyWith(
       hourMinuteTextStyle: _bold(base.timePickerTheme.hourMinuteTextStyle),
       dayPeriodTextStyle: _bold(base.timePickerTheme.dayPeriodTextStyle),
+      dialTextStyle: _bold(base.timePickerTheme.dialTextStyle),
       helpTextStyle: _bold(base.timePickerTheme.helpTextStyle),
+    ),
+    sliderTheme: base.sliderTheme.copyWith(
+      valueIndicatorTextStyle: _bold(base.sliderTheme.valueIndicatorTextStyle),
     ),
     snackBarTheme: base.snackBarTheme.copyWith(
       contentTextStyle: _bold(base.snackBarTheme.contentTextStyle),

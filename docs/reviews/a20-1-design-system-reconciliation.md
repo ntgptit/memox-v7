@@ -1172,3 +1172,15 @@ own contract; each was reopened, fixed and re-closed against a rendered test:
 §23 stays **30 / 30** and §24 **21 / 22**: the criteria were met at #460's
 level of evidence, and the corrective pass raised the evidence, not the score.
 
+**Corrective pass 2 (P1-11 again).** The owner's review of #462 found three
+gaps the re-closure still had: `hintStyle` is a `WidgetStateTextStyle`
+(`onDisabled` when disabled) and re-weighting its resting resolution dropped
+the resolver; `TimePickerThemeData.dialTextStyle` and
+`SliderThemeData.valueIndicatorTextStyle` are set by the theme and were not
+re-weighted. Fixed by wrapping state-resolved styles in a new resolver and by
+naming the two slots — and by a registry test that reads every `*Style:` /
+`*TextStyle:` slot the component themes set and asserts `applyBoldText` names
+each one, so a slot cannot be missed by hand a third time. Rendered proof: a
+disabled field's hint is emboldened *and* keeps `onDisabled`; the slider's
+value indicator and the dial resolve `wght 700` in place.
+

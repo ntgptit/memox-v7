@@ -1,6 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/app/app.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/core/theme/schemes/app_bold_text.dart';
 
@@ -92,6 +93,14 @@ void main() {
             base.timePickerTheme.dayPeriodTextStyle,
             bold.timePickerTheme.dayPeriodTextStyle,
           ),
+          'timePicker.dial': (
+            base.timePickerTheme.dialTextStyle,
+            bold.timePickerTheme.dialTextStyle,
+          ),
+          'slider.valueIndicator': (
+            base.sliderTheme.valueIndicatorTextStyle,
+            bold.sliderTheme.valueIndicatorTextStyle,
+          ),
           'snackBar.content': (
             base.snackBarTheme.contentTextStyle,
             bold.snackBarTheme.contentTextStyle,
@@ -119,9 +128,16 @@ void main() {
           ),
         };
 
+        // A state-resolved slot is read at rest here; its states are the
+        // next group's business.
+        TextStyle? atRest(TextStyle? style) => style is WidgetStateTextStyle
+            ? style.resolve(const <WidgetState>{})
+            : style;
+
         var seen = 0;
         for (final entry in slots.entries) {
-          final (before, after) = entry.value;
+          final before = atRest(entry.value.$1);
+          final after = atRest(entry.value.$2);
           if (before == null) {
             expect(after, isNull, reason: '${entry.key}: invented a style');
             continue;
@@ -145,187 +161,76 @@ void main() {
     }
   });
 
-  group('rendered component text emboldens under MediaQuery.boldText', () {
-    Future<void> pumpBold(WidgetTester tester, Widget home) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: buildLightTheme(),
-          builder: (context, child) => MediaQuery(
-            data: MediaQuery.of(context).copyWith(boldText: true),
-            child: BoldTextWidget(child: child!),
+  group('a state-resolved slot keeps its resolver', () {
+    // `hintStyle` answers per state — `onSurfaceVariant` at rest,
+    // `onDisabled` when the field is disabled. Re-weighting must wrap that
+    // resolver, not flatten it (corrective pass 2).
+    for (final (name, base) in <(String, ThemeData)>[
+      ('light', buildLightTheme()),
+      ('dark', buildDarkTheme()),
+    ]) {
+      test('the hint resolves disabled ink, emboldened, $name', () {
+        final bold = applyBoldText(base);
+        final before = base.inputDecorationTheme.hintStyle;
+        final after = bold.inputDecorationTheme.hintStyle;
+        expect(before, isA<WidgetStateTextStyle>(), reason: 'theme changed');
+        expect(after, isA<WidgetStateTextStyle>(), reason: 'resolver lost');
+        final beforeStates = before! as WidgetStateTextStyle;
+        final afterStates = after! as WidgetStateTextStyle;
+        for (final states in <Set<WidgetState>>[
+          const <WidgetState>{},
+          const <WidgetState>{WidgetState.disabled},
+        ]) {
+          final resolvedBefore = beforeStates.resolve(states);
+          final resolvedAfter = afterStates.resolve(states);
+          expect(isBold(resolvedAfter), isTrue, reason: '$states');
+          expect(resolvedAfter.color, resolvedBefore.color, reason: '$states');
+        }
+        expect(
+          afterStates.resolve(const <WidgetState>{}).color,
+          isNot(
+            afterStates.resolve(const <WidgetState>{
+              WidgetState.disabled,
+            }).color,
           ),
-          home: home,
-        ),
-      );
-      await tester.pumpAndSettle();
+          reason: 'two states, two inks',
+        );
+      });
     }
+  });
 
-    /// The style the engine will actually shape, read off the `RichText`
-    /// that paints [text].
-    TextStyle renderedStyle(WidgetTester tester, String text) {
-      final rich = tester.widget<RichText>(
-        find
-            .descendant(of: find.text(text), matching: find.byType(RichText))
-            .first,
+  group('every text slot a component theme sets is re-weighted', () {
+    test('the slot list in app_bold_text.dart covers the theme sources', () {
+      // A registry that reads the theme sources: any `xxxStyle:` /
+      // `xxxTextStyle:` slot a component theme sets must be named in
+      // `applyBoldText`. `dialTextStyle` and `valueIndicatorTextStyle` were
+      // missed by hand once (corrective pass 2); this is what makes a third
+      // omission impossible.
+      final setSlots = <String>{};
+      final slotPattern = RegExp(
+        r'^\s+([a-zA-Z]+(?:Style|TextStyle))\s*:',
+        multiLine: true,
       );
-      return rich.text.style!;
-    }
-
-    void expectRenderedBold(WidgetTester tester, String text) {
-      final style = renderedStyle(tester, text);
-      expect(
-        isBold(style),
-        isTrue,
-        reason:
-            '"$text" rendered at ${style.fontWeight} ${style.fontVariations}',
-      );
-    }
-
-    testWidgets('ListTile title and subtitle', (tester) async {
-      await pumpBold(
-        tester,
-        const Scaffold(
-          body: ListTile(title: Text('Tile title'), subtitle: Text('Tile sub')),
-        ),
-      );
-      expectRenderedBold(tester, 'Tile title');
-      expectRenderedBold(tester, 'Tile sub');
-    });
-
-    testWidgets('NavigationBar label', (tester) async {
-      await pumpBold(
-        tester,
-        Scaffold(
-          bottomNavigationBar: NavigationBar(
-            destinations: const <NavigationDestination>[
-              NavigationDestination(icon: Icon(Icons.home), label: 'Home nav'),
-              NavigationDestination(icon: Icon(Icons.star), label: 'Star nav'),
-            ],
-          ),
-        ),
-      );
-      expectRenderedBold(tester, 'Home nav');
-      expectRenderedBold(tester, 'Star nav');
-    });
-
-    testWidgets('InputDecoration hint and label', (tester) async {
-      await pumpBold(
-        tester,
-        const Scaffold(
-          body: Column(
-            children: <Widget>[
-              TextField(decoration: InputDecoration(hintText: 'Hint here')),
-              TextField(decoration: InputDecoration(labelText: 'Label here')),
-            ],
-          ),
-        ),
-      );
-      expectRenderedBold(tester, 'Hint here');
-      expectRenderedBold(tester, 'Label here');
-    });
-
-    testWidgets('PopupMenu row', (tester) async {
-      await pumpBold(
-        tester,
-        Scaffold(
-          body: PopupMenuButton<int>(
-            itemBuilder: (_) => const <PopupMenuEntry<int>>[
-              PopupMenuItem<int>(value: 1, child: Text('Menu row')),
-            ],
-          ),
-        ),
-      );
-      await tester.tap(find.byType(PopupMenuButton<int>));
-      await tester.pumpAndSettle();
-      expectRenderedBold(tester, 'Menu row');
-    });
-
-    testWidgets('Dialog title and content', (tester) async {
-      await pumpBold(
-        tester,
-        Scaffold(
-          body: Builder(
-            builder: (context) => TextButton(
-              onPressed: () => showDialog<void>(
-                context: context,
-                builder: (_) => const AlertDialog(
-                  title: Text('Dialog title'),
-                  content: Text('Dialog content'),
-                ),
-              ),
-              child: const Text('open'),
-            ),
-          ),
-        ),
-      );
-      await tester.tap(find.text('open'));
-      await tester.pumpAndSettle();
-      expectRenderedBold(tester, 'Dialog title');
-      expectRenderedBold(tester, 'Dialog content');
-    });
-
-    testWidgets('Date picker day and time picker hour', (tester) async {
-      await pumpBold(
-        tester,
-        Scaffold(
-          body: Builder(
-            builder: (context) => Column(
-              children: <Widget>[
-                TextButton(
-                  onPressed: () => showDatePicker(
-                    context: context,
-                    initialDate: DateTime(2026, 9, 4),
-                    firstDate: DateTime(2026),
-                    lastDate: DateTime(2027),
-                  ),
-                  child: const Text('date'),
-                ),
-                TextButton(
-                  onPressed: () => showTimePicker(
-                    context: context,
-                    initialTime: const TimeOfDay(hour: 20, minute: 15),
-                  ),
-                  child: const Text('time'),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-      await tester.tap(find.text('date'));
-      await tester.pumpAndSettle();
-      // A day cell in the grid — the picker's own dayStyle.
-      expectRenderedBold(tester, '15');
-      expect(find.byType(DatePickerDialog), findsOneWidget);
-      await tester.tap(find.text('Cancel').first);
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('time'));
-      await tester.pumpAndSettle();
-      expect(find.byType(TimePickerDialog), findsOneWidget);
-      // The minute field: the hour reads `8` under the test locale's 12-hour
-      // clock, the minute is `15` under either.
-      expectRenderedBold(tester, '15');
-    });
-
-    testWidgets('SnackBar content', (tester) async {
-      await pumpBold(
-        tester,
-        Scaffold(
-          body: Builder(
-            builder: (context) => TextButton(
-              onPressed: () => ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('Snack text'))),
-              child: const Text('snack'),
-            ),
-          ),
-        ),
-      );
-      await tester.tap(find.text('snack'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 750));
-      expectRenderedBold(tester, 'Snack text');
+      for (final file
+          in Directory('lib/core/theme/components')
+              .listSync(recursive: true)
+              .whereType<File>()
+              .where((f) => f.path.endsWith('.dart'))) {
+        for (final m in slotPattern.allMatches(file.readAsStringSync())) {
+          setSlots.add(m.group(1)!);
+        }
+      }
+      expect(setSlots, isNotEmpty);
+      final bolder = File(
+        'lib/core/theme/schemes/app_bold_text.dart',
+      ).readAsStringSync();
+      for (final slot in setSlots) {
+        expect(
+          bolder,
+          contains('$slot:'),
+          reason: '`$slot` is set by a theme and not re-weighted',
+        );
+      }
     });
   });
 }

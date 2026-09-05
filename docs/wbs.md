@@ -16978,6 +16978,11 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Acceptance criteria:**
   - [x] Text của ListTile/NavigationBar/InputDecoration/PopupMenu/Dialog/
         picker/SnackBar render `wght 700` dưới `MediaQuery.boldText`.
+  - [x] (pass 2, review của chủ dự án trên #462) `hintStyle` giữ resolver
+        trạng thái — hint của field disabled vừa đậm vừa giữ `onDisabled`;
+        `dialTextStyle` và `valueIndicatorTextStyle` được re-weight; test
+        registry đọc nguồn theme để mọi slot `*Style:` phải có mặt trong
+        `applyBoldText`.
   - [x] Session push qua `MaterialPageRoute`: không `AppBar`, không
         `BackButton`, còn `MxSessionTopBar`; màn loading/error push vẫn giữ bar.
   - [x] Editor Up → deck hiện tại; draft bẩn vẫn hỏi; sheet có và tới được
