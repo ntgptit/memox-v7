@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.memox.repository.CardRepository">
+
+  <insert id="insertCard" parameterType="com.memox.card.persistence.CardRow">
+    INSERT INTO cards (
+      id, deck_id, front, back, front_folded, back_folded,
+      example, hint, pronunciation, created_at, updated_at
+    ) VALUES (
+      #{id}, #{deckId}, #{front}, #{back}, #{frontFolded}, #{backFolded},
+      #{example}, #{hint}, #{pronunciation}, #{createdAt}, #{updatedAt}
+    )
+  </insert>
+
+  <insert id="insertInitialStudyState">
+    INSERT INTO card_study_states (
+      card_id, scheduler_type, scheduler_version, scheduler_generation
+    ) VALUES (
+      #{cardId}, #{schedulerType}, #{schedulerVersion}, #{schedulerGeneration}
+    )
+  </insert>
+</mapper>
