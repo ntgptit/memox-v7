@@ -6,9 +6,6 @@ import 'package:memox/features/card/presentation/screens/tag_catalog_screen.dart
 import 'package:memox/features/card/presentation/widgets/items/tag_catalog_row_widget.dart';
 import 'package:memox/features/card/presentation/widgets/sections/card_filter_bar_widget.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
-import 'package:memox/shared/widgets/mx_card.dart';
-import 'package:memox/shared/widgets/mx_empty_state.dart';
-import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_search_field.dart';
 
