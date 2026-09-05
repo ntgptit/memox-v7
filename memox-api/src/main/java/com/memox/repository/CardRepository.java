@@ -20,4 +20,6 @@ public interface CardRepository {
 			@Param("schedulerGeneration") int schedulerGeneration);
 
 	List<CardRow> findActiveCardsByDeck(CardPageQuery query);
+
+	long countActiveCardsByDeck(String deckId);
 }

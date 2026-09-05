@@ -18,16 +18,15 @@ import com.memox.service.DeckService;
 
 import jakarta.validation.Valid;
 
+import lombok.RequiredArgsConstructor;
+
 @Validated
 @RestController
 @RequestMapping("/api/v1/decks")
+@RequiredArgsConstructor
 public class DeckController {
 
 	private final DeckService deckService;
-
-	public DeckController(DeckService deckService) {
-		this.deckService = deckService;
-	}
 
 	@PostMapping
 	public ResponseEntity<DeckResponse> createRootDeck(@Valid @RequestBody CreateRootDeckRequest request) {

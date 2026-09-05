@@ -17,10 +17,10 @@ import com.memox.exception.DeckNotFoundException;
 import com.memox.repository.DeckRepository;
 import com.memox.service.DeckService;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 
-@Slf4j
 @Service
+@RequiredArgsConstructor
 public class DeckServiceImpl implements DeckService {
 
 	private static final int INITIAL_SCHEDULER_VERSION = 1;
@@ -30,28 +30,24 @@ public class DeckServiceImpl implements DeckService {
 	private final DeckRepository deckRepository;
 	private final Clock clock;
 
-	public DeckServiceImpl(DeckRepository deckRepository, Clock clock) {
-		this.deckRepository = deckRepository;
-		this.clock = clock;
-	}
-
 	@Override
 	@Transactional
 	public Deck createRootDeck(CreateRootDeckCommand command) {
 		final var name = validateName(command.name());
 
 		final var now = Instant.now(clock);
-		final var deck = new DeckRow();
-		deck.setId(command.id());
-		deck.setName(name);
-		deck.setRootDeckId(command.id());
-		deck.setContentType("deck");
-		deck.setSchedulerType(command.schedulerType());
-		deck.setSchedulerVersion(INITIAL_SCHEDULER_VERSION);
-		deck.setSchedulerGeneration(INITIAL_SCHEDULER_GENERATION);
-		deck.setSiblingPosition(deckRepository.nextRootSiblingPosition());
-		deck.setCreatedAt(now);
-		deck.setUpdatedAt(now);
+		final var deck = DeckRow.builder()
+				.id(command.id())
+				.name(name)
+				.rootDeckId(command.id())
+				.contentType("deck")
+				.schedulerType(command.schedulerType())
+				.schedulerVersion(INITIAL_SCHEDULER_VERSION)
+				.schedulerGeneration(INITIAL_SCHEDULER_GENERATION)
+				.siblingPosition(deckRepository.nextRootSiblingPosition())
+				.createdAt(now)
+				.updatedAt(now)
+				.build();
 		deckRepository.insertRootDeck(deck);
 
 		return deck.toDomain();
@@ -73,15 +69,16 @@ public class DeckServiceImpl implements DeckService {
 			deckRepository.updateContentType(parent.getId(), "deck", now);
 		}
 
-		final var deck = new DeckRow();
-		deck.setId(command.id());
-		deck.setName(validateName(command.name()));
-		deck.setParentDeckId(parent.getId());
-		deck.setRootDeckId(parent.getRootDeckId());
-		deck.setContentType("unset");
-		deck.setSiblingPosition(deckRepository.nextChildSiblingPosition(parent.getId()));
-		deck.setCreatedAt(now);
-		deck.setUpdatedAt(now);
+		final var deck = DeckRow.builder()
+				.id(command.id())
+				.name(validateName(command.name()))
+				.parentDeckId(parent.getId())
+				.rootDeckId(parent.getRootDeckId())
+				.contentType("unset")
+				.siblingPosition(deckRepository.nextChildSiblingPosition(parent.getId()))
+				.createdAt(now)
+				.updatedAt(now)
+				.build();
 		deckRepository.insertSubDeck(deck);
 
 		return deck.toDomain();

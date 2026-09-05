@@ -1,4 +1,14 @@
 package com.memox.card.persistence;
 
-public record CardPageQuery(String deckId, int limit, int offset) {
+import com.memox.common.pagination.PageQuery;
+
+import lombok.Builder;
+import lombok.Value;
+
+@Value
+@Builder
+public class CardPageQuery {
+
+	String deckId;
+	PageQuery page;
 }

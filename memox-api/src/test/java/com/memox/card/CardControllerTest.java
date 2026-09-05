@@ -63,7 +63,11 @@ class CardControllerTest {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.items[0].id").value(cardId))
 				.andExpect(jsonPath("$.limit").value(20))
-				.andExpect(jsonPath("$.offset").value(0));
+				.andExpect(jsonPath("$.offset").value(0))
+				.andExpect(jsonPath("$.totalItems").value(1))
+				.andExpect(jsonPath("$.totalPages").value(1))
+				.andExpect(jsonPath("$.hasNext").value(false))
+				.andExpect(jsonPath("$.hasPrevious").value(false));
 		assertStudyState(cardId, "eight_box", 1);
 	}
 
@@ -84,7 +88,11 @@ class CardControllerTest {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.items[0].id").value(firstCardId))
 				.andExpect(jsonPath("$.limit").value(1))
-				.andExpect(jsonPath("$.offset").value(0));
+				.andExpect(jsonPath("$.offset").value(0))
+				.andExpect(jsonPath("$.totalItems").value(2))
+				.andExpect(jsonPath("$.totalPages").value(2))
+				.andExpect(jsonPath("$.hasNext").value(true))
+				.andExpect(jsonPath("$.hasPrevious").value(false));
 
 		mockMvc.perform(get("/api/v1/decks/{deckId}/cards", cardDeckId)
 					.param("limit", "1")
@@ -92,7 +100,11 @@ class CardControllerTest {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.items[0].id").value(secondCardId))
 				.andExpect(jsonPath("$.limit").value(1))
-				.andExpect(jsonPath("$.offset").value(1));
+				.andExpect(jsonPath("$.offset").value(1))
+				.andExpect(jsonPath("$.totalItems").value(2))
+				.andExpect(jsonPath("$.totalPages").value(2))
+				.andExpect(jsonPath("$.hasNext").value(false))
+				.andExpect(jsonPath("$.hasPrevious").value(true));
 	}
 
 	private void createRoot(String rootId) throws Exception {

@@ -9,9 +9,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.memox.card.application.CreateCardCommand;
 import com.memox.card.domain.Card;
-import com.memox.card.domain.CardPage;
 import com.memox.card.persistence.CardPageQuery;
 import com.memox.card.persistence.CardRow;
+import com.memox.common.pagination.PageHelper;
+import com.memox.common.pagination.PageQuery;
+import com.memox.common.pagination.PagingResponse;
 import com.memox.exception.DeckConflictException;
 import com.memox.exception.DeckNotFoundException;
 import com.memox.exception.DeckValidationException;
@@ -19,18 +21,15 @@ import com.memox.repository.CardRepository;
 import com.memox.repository.DeckRepository;
 import com.memox.service.CardService;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class CardServiceImpl implements CardService {
 
 	private final CardRepository cardRepository;
 	private final DeckRepository deckRepository;
 	private final Clock clock;
-
-	public CardServiceImpl(CardRepository cardRepository, DeckRepository deckRepository, Clock clock) {
-		this.cardRepository = cardRepository;
-		this.deckRepository = deckRepository;
-		this.clock = clock;
-	}
 
 	@Override
 	@Transactional
@@ -57,16 +56,17 @@ public class CardServiceImpl implements CardService {
 			deckRepository.updateContentType(deck.getId(), "card", now);
 		}
 
-		final var card = new CardRow();
-		card.setId(command.id());
-		card.setDeckId(deck.getId());
-		card.setFront(validateText(command.front(), "front", 60));
-		card.setBack(validateText(command.back(), "back", 240));
-		card.setExample(normalizeOptional(command.example(), "example"));
-		card.setHint(normalizeOptional(command.hint(), "hint"));
-		card.setPronunciation(normalizeOptional(command.pronunciation(), "pronunciation"));
-		card.setCreatedAt(now);
-		card.setUpdatedAt(now);
+		final var card = CardRow.builder()
+				.id(command.id())
+				.deckId(deck.getId())
+				.front(validateText(command.front(), "front", 60))
+				.back(validateText(command.back(), "back", 240))
+				.example(normalizeOptional(command.example(), "example"))
+				.hint(normalizeOptional(command.hint(), "hint"))
+				.pronunciation(normalizeOptional(command.pronunciation(), "pronunciation"))
+				.createdAt(now)
+				.updatedAt(now)
+				.build();
 		cardRepository.insertCard(card);
 		cardRepository.insertInitialStudyState(card.getId(), root.getSchedulerType(),
 				root.getSchedulerVersion(), root.getSchedulerGeneration());
@@ -76,12 +76,14 @@ public class CardServiceImpl implements CardService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public CardPage listCards(String deckId, int limit, int offset) {
+	public PagingResponse<Card> listCards(String deckId, PageQuery pageQuery) {
 		if (deckRepository.findActiveDeckById(deckId) == null) {
 			throw new DeckNotFoundException(deckId);
 		}
-		final var rows = cardRepository.findActiveCardsByDeck(new CardPageQuery(deckId, limit, offset));
-		return new CardPage(rows.stream().map(CardRow::toDomain).toList(), limit, offset);
+		final var query = CardPageQuery.builder().deckId(deckId).page(pageQuery).build();
+		final var cards = cardRepository.findActiveCardsByDeck(query).stream().map(CardRow::toDomain).toList();
+		final var totalItems = cardRepository.countActiveCardsByDeck(deckId);
+		return PageHelper.create(pageQuery, cards, totalItems);
 	}
 
 	private String validateText(String rawText, String field, int maxLength) {

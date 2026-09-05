@@ -91,8 +91,9 @@ is diagnostic, not Flutter UI copy.
 
 Springdoc generates the runtime OpenAPI document.  A canonical exported
 OpenAPI JSON file is committed and diffed in CI so code changes cannot silently
-change the API contract.  Paginated responses state their `limit`,
-`offset`, ordering and stable tie-breaker explicitly.
+change the API contract.  Paginated responses state their `limit`, `offset`,
+`totalItems`, `totalPages`, navigation flags, ordering and stable tie-breaker
+explicitly.
 
 ## Delivery phases
 
