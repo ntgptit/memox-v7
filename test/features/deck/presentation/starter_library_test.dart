@@ -11,8 +11,11 @@ import 'package:memox/features/deck/domain/models/deck_template_model.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 import 'package:memox/features/deck/domain/repositories/deck_template_repository.dart';
 import 'package:memox/features/deck/presentation/screens/starter_library_screen.dart';
+import 'package:memox/features/deck/presentation/widgets/sections/deck_notice_widget.dart';
 import 'package:memox/l10n/generated/app_localizations.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
+import 'package:memox/shared/widgets/mx_card.dart';
+import 'package:memox/shared/widgets/mx_icon.dart';
 
 /// The starter catalog: what it discloses, and what installing from it does —
 /// and refuses to do (UC-01, BR-33, BR-37, BR-87).
@@ -207,6 +210,37 @@ void main() {
     await pump(tester, catalog: <DeckTemplate>[]);
 
     expect(find.text(english.starterLibraryEmpty), findsOneWidget);
+  });
+
+  /// The gutter is the list's, not the shell's — one edge for every mark.
+  ///
+  /// The screen used to keep `MxContentShell`'s static padding around a scroll
+  /// view, which cost it both halves of this group: the rows clipped at a 16dp
+  /// dead band under the bar instead of scrolling to the chrome edge, and every
+  /// child that carried its own gutter paid it twice.
+  group('gutter ownership', () {
+    testWidgets('the list scrolls to the chrome edge', (tester) async {
+      await pump(tester);
+
+      final bar = tester.getRect(find.byType(AppBar));
+      final scroll = tester.getRect(find.byType(Scrollable));
+
+      expect(scroll.top, bar.bottom);
+    });
+
+    testWidgets('the notice starts on the card edge', (tester) async {
+      await pump(tester);
+
+      final glyph = tester.getRect(
+        find.descendant(
+          of: find.byType(DeckNoticeWidget),
+          matching: find.byType(MxIcon),
+        ),
+      );
+      final card = tester.getRect(find.byType(MxCard));
+
+      expect(glyph.left, card.left);
+    });
   });
 }
 

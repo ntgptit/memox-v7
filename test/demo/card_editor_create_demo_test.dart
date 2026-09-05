@@ -24,11 +24,13 @@ import '../visual_audit/deck_audit_harness.dart';
 /// create at all, which is the gap that matters most on this screen because
 /// the two modes compose *differently on purpose*. `card_editor_screen.dart`
 /// builds create as a bare `MxContentShell` — an `×` rather than a back arrow,
-/// no app-bar actions, no pinned footer — and `CardCreateFormWidget` puts the
-/// `Save` / `Save and add another` pair at the end of the scroll instead
-/// (`docs/reviews/app-wide-screen-consistency.md`, SC-C1-02 and the C4
-/// cluster). None of that is visible in the edit render, so reviewing the two
-/// side by side needed a second frame.
+/// no app-bar actions, no breadcrumb and no tag strip. What it no longer
+/// differs on is where `Save` sits: the `Save` / `Save and add another` pair
+/// used to be the last child of the scroll and is now pinned in
+/// `MxContentShell.footer` like edit's
+/// (`docs/reviews/app-wide-screen-consistency.md`, SC-C1-02). None of that is
+/// visible in the edit render, so reviewing the two side by side needed a
+/// second frame.
 ///
 /// **Mounted through the production router**, unlike the edit renders in
 /// `card_screens_demo_test.dart`, which pump `CardEditorScreen` directly and so
@@ -94,9 +96,11 @@ void main() {
       // **The autofocus stays.** `CardCreateFormWidget` asks the front field
       // for focus on the first frame, so the focused outline and the caret are
       // what a user actually meets. A widget test raises no software keyboard,
-      // so `viewInsets` stay zero and the whole form is in frame — which is the
-      // render SC-C1-02 needs, since its claim is about where `Save` sits in
-      // the scroll *before* the keyboard takes half the height away.
+      // so `viewInsets` stay zero and the whole screen is in frame — which is
+      // what this render is for. The keyboard case SC-C1-02 was about is
+      // measured rather than photographed, at
+      // `card_editor_create_layout_test.dart`, because a golden with no
+      // keyboard in it cannot show what the keyboard covered.
       await pumpReview(tester, scope(repository, brightness));
 
       await matchesReviewGolden('goldens/card_editor_create_$mode.png');

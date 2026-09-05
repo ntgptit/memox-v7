@@ -11,6 +11,11 @@ import '../../../../../core/theme/extensions/theme_context_extension.dart';
 /// enabled-looking button that does nothing is worse than no button, and hiding
 /// the fact entirely would leave an `unset` deck looking as though it could only
 /// ever hold decks — which contradicts BR-61.
+///
+/// **It carries no horizontal gutter of its own**: it is a band inside a list
+/// that already owns one, and restating it put the notice's icon 16dp inside
+/// the card edges it sits between. A caller that mounts it outside a gutter has
+/// to supply one.
 class DeckNoticeWidget extends StatelessWidget {
   const DeckNoticeWidget({required this.message, super.key});
 
@@ -19,10 +24,7 @@ class DeckNoticeWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.sm,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[

@@ -32,7 +32,12 @@ const String kDetailsToggleLabel = 'Add example, hint & pronunciation';
 Future<GoRouter> pumpCardEditor(
   WidgetTester tester,
   FakeCardRepository repository, {
-  String cardId = 'card-1',
+
+  /// `null` mounts **create** mode — the same screen, the other branch. The two
+  /// modes place one command differently enough that create needs measurements
+  /// of its own (SC-C1-02), and a harness that could only reach edit is why
+  /// they were only ever taken on edit.
+  String? cardId = 'card-1',
   Locale locale = const Locale('en'),
   ThemeData? theme,
   Size? surfaceSize,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/error/failure.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/features/card/domain/failures/card_export_failure.dart';
 import 'package:memox/features/card/domain/models/card_transfer_format_model.dart';
 import 'package:memox/features/card/presentation/widgets/sections/card_export_action_bar_widget.dart';
@@ -10,6 +11,7 @@ import 'package:memox/features/card/presentation/widgets/sections/card_export_fo
 import 'package:memox/features/card/presentation/widgets/sections/card_export_scope_summary_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
+import 'package:memox/shared/widgets/mx_sheet_insets.dart';
 
 import 'support/card_export_sheet_harness.dart';
 
@@ -93,6 +95,38 @@ void main() {
     await h.openWholeDeckExport(tester);
 
     expectSharedEdges(tester, bandsOf(hasError: false));
+  });
+
+  testWidgets('the sheet is inset on all four edges, top included', (
+    tester,
+  ) async {
+    // The edge this sheet used to drop. It padded itself by hand and left the
+    // top out, arguing that the drag handle supplied one — but the handle is
+    // set once for the whole app, so the same argument covers all twelve
+    // sheets and this was simply the only title sitting a gutter higher than
+    // its siblings'. `MxSheetInsets` is the answer the other eleven take.
+    await h.pump(tester);
+    await h.openWholeDeckExport(tester);
+
+    expect(find.byType(MxSheetInsets), findsOneWidget);
+    final Rect sheet = tester.getRect(find.byType(MxSheetInsets));
+    final Rect title = tester.getRect(find.text(english.cardExportEntryAction));
+
+    expect(
+      title.top - sheet.top,
+      moreOrLessEquals(AppSpacing.lg, epsilon: epsilon),
+      reason:
+          'the title starts ${title.top - sheet.top} below the sheet edge; '
+          'every other sheet in the app starts one gutter below it',
+    );
+    expect(
+      title.left - sheet.left,
+      moreOrLessEquals(AppSpacing.lg, epsilon: epsilon),
+    );
+    expect(
+      sheet.right - title.right,
+      moreOrLessEquals(AppSpacing.lg, epsilon: epsilon),
+    );
   });
 
   testWidgets('error: the band is part of the column, not a box inset into '

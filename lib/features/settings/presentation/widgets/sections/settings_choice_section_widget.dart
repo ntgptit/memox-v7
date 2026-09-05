@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../../core/error/failure.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../shared/widgets/mx_card.dart';
+import '../../../../../shared/widgets/mx_content_shell.dart';
 import '../items/settings_choice_rows_widget.dart';
 import '../items/settings_error_band_widget.dart';
 import '../../../../../shared/widgets/mx_radio_rows.dart';
@@ -111,8 +112,11 @@ class _SettingsChoiceSectionWidgetState<T extends Enum>
               if (band != null) ...<Widget>[
                 const SizedBox(height: AppSpacing.sm),
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.lg,
+                  // The same gutter the rows above take, not a restated
+                  // `lg`: below 360dp they step to 12 and a band that did
+                  // not would sit 4dp inside the thing it reports on (W5).
+                  padding: EdgeInsets.symmetric(
+                    horizontal: mxScreenGutter(context),
                   ),
                   child: SettingsErrorBandWidget(
                     failure: band,

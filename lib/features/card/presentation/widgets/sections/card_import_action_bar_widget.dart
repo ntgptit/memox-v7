@@ -133,9 +133,14 @@ class CardImportActionBarWidget extends ConsumerWidget {
     };
 
     return Padding(
+      // One rhythm for both footer bands. The app has exactly two
+      // `MxContentShell.footer` callers drawing the same anatomy — a pair of
+      // actions over a centred quiet line — and this one used to sit 12dp
+      // shorter than `CardEditorActionBarWidget`, which is the older of the
+      // two and the bar the footer slot was built for.
       padding: EdgeInsets.symmetric(
         horizontal: mxScreenGutter(context),
-        vertical: AppSpacing.sm,
+        vertical: AppSpacing.md,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -152,7 +157,9 @@ class CardImportActionBarWidget extends ConsumerWidget {
           _actions(context, ref),
           if (hint != null)
             Padding(
-              padding: const EdgeInsets.only(top: AppSpacing.xs),
+              // `sm`, not `xs`: `xs` is the icon-to-label step, too tight to
+              // read as the gap between a control and the line explaining it.
+              padding: const EdgeInsets.only(top: AppSpacing.sm),
               child: Text(
                 hint,
                 style: context.texts.bodySmall!.inked(context, AppInk.quiet),

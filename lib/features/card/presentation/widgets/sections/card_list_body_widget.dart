@@ -5,6 +5,7 @@ import '../../../../../core/theme/extensions/app_ink.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../../shared/widgets/mx_text_button.dart';
 import '../../../domain/models/card_list_item_model.dart';
 import '../../controllers/card_list_now_controller.dart';
@@ -50,16 +51,23 @@ class CardListBodyWidget extends ConsumerWidget {
     // they stay reachable while the panel scrolls away.
     const headerCount = 2;
 
+    // **The shell's helper, not a literal `lg`.** The subheader directly above
+    // this scroll takes `mxScreenGutter`, which steps to `md` below 360dp; a
+    // fixed 16 here left the pills at 12 and every row at 16 — a 4dp step
+    // between two stacked regions of one screen, at the width that can least
+    // afford it (M4.11 G1).
+    final gutter = mxScreenGutter(context);
+
     return ListView.separated(
       // `xl` on top, not `md`: with the shell no longer padding this scroll view
       // the only space above the panel would be the subheader's `xs`, and the
       // panel would sit tighter under the pills than it did before the double
       // gutter was removed. `xl` under the strip's `xs` is the 28 the deck
       // list's first section already stands at.
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
+      padding: EdgeInsets.fromLTRB(
+        gutter,
         AppSpacing.xl,
-        AppSpacing.lg,
+        gutter,
         AppSpacing.xxl,
       ),
       itemCount: items.length + headerCount + 1,

@@ -10,6 +10,7 @@ import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
 import 'package:memox/l10n/generated/app_localizations_vi.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
+import 'package:memox/shared/widgets/mx_feedback_band.dart';
 
 import '../domain/support/fake_app_settings_repository.dart';
 import 'support/settings_widget_harness.dart';
@@ -263,6 +264,79 @@ void main() {
       expect(rects.map((rect) => rect.right).toSet(), hasLength(1));
       // Two, not one: `Theo hệ thống` labels a theme row and a language row.
       expect(find.text(vietnamese.settingsThemeSystem), findsNWidgets(2));
+    });
+
+    testWidgets('all four cards still start their interior column on one x', (
+      tester,
+    ) async {
+      // The compact half of the '390' claim above, and the tier that claim
+      // cannot see. Below 360dp the screen gutter steps to `md`, and the
+      // choice rows and the reminder row step with it — the Study defaults
+      // card took `MxCardPadding.standard`'s fixed 16 and did not, so four
+      // cards sharing their outer edges held their content at three different
+      // x positions (W5).
+      await pumpSettings(
+        tester,
+        FakeAppSettingsRepository(),
+        surface: const Size(320, 568),
+        textScale: 2,
+      );
+
+      final cardLeft = cardRects(tester).first.left;
+      final content = cardLeft + AppSpacing.md;
+
+      // Study defaults: the field is the card's own content edge, and its
+      // `block`-shaped rows carry no gutter of their own, so both land on it.
+      expect(tester.getRect(find.byType(MxTextField).first).left, content);
+      expect(
+        tester.getRect(find.byType(RadioListTile<NewCardOrder>).first).left,
+        content,
+      );
+      // The choice cards get to the same x from the opposite direction: the
+      // card pads vertically only and each `list` row supplies the gutter.
+      expect(
+        tester.getRect(find.byType(RadioListTile<AppThemeMode>).first).left +
+            AppSpacing.md,
+        content,
+      );
+      // The reminder row's gutter comes from `applyCompactScale`'s
+      // `listTileTheme.contentPadding`, which is the value the other three
+      // now agree with.
+      expect(
+        tester.getRect(find.byIcon(Icons.notifications_outlined)).left,
+        content,
+      );
+    });
+
+    testWidgets('a failing save puts its band on the rows it reports on', (
+      tester,
+    ) async {
+      // The band restated `AppSpacing.lg` while the rows above it took the
+      // screen gutter, so below 360dp it was inset 4dp further than the thing
+      // it was explaining — in the one state where the user is reading
+      // carefully.
+      await pumpSettings(
+        tester,
+        FailingAppSettingsRepository(),
+        surface: const Size(320, 568),
+        textScale: 2,
+      );
+
+      await tester.ensureVisible(find.text(english.settingsThemeDark));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.ancestor(
+          of: find.text(english.settingsThemeDark),
+          matching: find.byWidgetPredicate((widget) => widget is RadioListTile),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final rowContentLeft =
+          tester.getRect(find.byType(RadioListTile<AppThemeMode>).first).left +
+          AppSpacing.md;
+
+      expect(tester.getRect(find.byType(MxFeedbackBand)).left, rowContentLeft);
     });
 
     testWidgets('the last row is reachable by scrolling', (tester) async {

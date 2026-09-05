@@ -104,7 +104,10 @@ class _FaceColumn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      // The shell's gutter, not a fixed `lg`: the search field above these
+      // faces comes from the subheader, which steps to `md` below 360dp, and a
+      // face that stayed at 16 there would sit inside the field it belongs to.
+      padding: EdgeInsets.symmetric(horizontal: mxScreenGutter(context)),
       child: Center(child: MxReadingColumn(child: child)),
     );
   }
@@ -153,20 +156,25 @@ class _CatalogList extends StatelessWidget {
     // catalog is tens of rows, the same order Card Detail's summary renders
     // in one pass. If catalogs ever reach the hundreds, pagination is the
     // answer (as history's is), not splitting the card.
+    // Horizontal from the shell's helper, so the surface follows the search
+    // field down to `md` below 360dp instead of holding a fixed 16 the field
+    // has already left (M4.14 G2). The card list moved to the same call in the
+    // same change, which is what keeps G1's pairing true at every width.
+    final gutter = mxScreenGutter(context);
+
     return SingleChildScrollView(
-      // **`lg` at the foot, not `sm`** (D21). Progress, Study Home and the
-      // deck level all end a scrolling list a full gutter above the
-      // navigation bar. Horizontal stays `lg` — fixed, not `mxScreenGutter` —
-      // because G1 measures this edge against the card list's, and that list
-      // stands at `lg` on every width it ships.
+      // **`lg` at the foot, not `sm`, and not the gutter** (D21). Progress,
+      // Study Home and the deck level all end a scrolling list a full `lg`
+      // above the navigation bar — that is an end-of-scroll gap, not a page
+      // edge, so it does not step down with the width.
       // `xl` on top, the rhythm both references keep: the card list's body
       // stands `xl` under its subheader and Card Detail opens at `xl`. This
       // was `sm` when the rows were bare lines — invisible then, a visibly
       // short 12dp once the surface grew a hairline edge.
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
+      padding: EdgeInsets.fromLTRB(
+        gutter,
         AppSpacing.xl,
-        AppSpacing.lg,
+        gutter,
         AppSpacing.lg,
       ),
       child: Center(
@@ -181,14 +189,20 @@ class _CatalogList extends StatelessWidget {
               children: <Widget>[
                 for (var index = 0; index < tags.length; index++) ...<Widget>[
                   if (index > 0)
-                    // Inset to the text column, so the line reads as a row
-                    // separator rather than the card being sliced through —
-                    // the same move Card Detail's summary hairlines make.
+                    // Inset to the text column at the head, so the line reads
+                    // as a row separator rather than the card being sliced
+                    // through. Card Detail's summary hairlines are full-bleed
+                    // — this list is the one that insets, because its rows
+                    // carry a leading well the summary's do not.
                     const Divider(
                       // Thickness and height are the theme's (one hairline,
                       // no reserved space); only the inset is this list's.
                       indent: _rowTextInset,
-                      endIndent: AppSpacing.md,
+                      // `xs`, the row's own trailing inset: the line then ends
+                      // exactly on the row's content edge. `md` ended it on
+                      // nothing — 8dp short of the content, 4dp past the menu
+                      // glyph, 12dp inside the card.
+                      endIndent: AppSpacing.xs,
                     ),
                   TagCatalogRowWidget(
                     entry: tags[index],

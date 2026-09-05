@@ -10,6 +10,7 @@ import '../../../../shared/widgets/mx_card.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_empty_state.dart';
 import '../../../../shared/widgets/mx_error_state.dart';
+import '../../../../shared/widgets/mx_scroll_end_inset.dart';
 import '../controllers/starter_library_controller.dart';
 import '../widgets/overlays/starter_install_widget.dart';
 import '../widgets/sections/deck_notice_widget.dart';
@@ -33,6 +34,11 @@ class StarterLibraryScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return MxContentShell(
       title: context.l10n.starterLibraryTitle,
+      // The shell's own padding is dropped: the body is one scroll view and
+      // owns its gutters. Keeping it outside the scroll clipped the rows at a
+      // 16dp dead band under the bar, and paid the gutter twice for every
+      // child that already carries one — the notice and the empty face.
+      padding: EdgeInsets.zero,
       body: MxAsyncView<List<StarterTemplateRow>>(
         value: ref.watch(starterLibraryProvider),
         loadingLabel: context.l10n.starterLibraryTitle,
@@ -64,7 +70,18 @@ class _Catalog extends StatelessWidget {
       );
     }
 
+    final gutter = mxScreenGutter(context);
+
     return ListView(
+      padding: EdgeInsets.fromLTRB(
+        gutter,
+        AppSpacing.lg,
+        gutter,
+        // The shell knows whether a floating action sits over the list and
+        // answers the clearance; there is none here, so this is the ordinary
+        // end gap (A20.1 P2-18).
+        mxScrollEndInsetOf(context),
+      ),
       children: <Widget>[
         DeckNoticeWidget(message: context.l10n.starterLibraryFixtureNotice),
         const SizedBox(height: AppSpacing.md),

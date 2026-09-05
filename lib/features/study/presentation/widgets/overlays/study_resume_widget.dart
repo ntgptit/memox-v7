@@ -25,40 +25,50 @@ class StudyResumeWidget extends StatelessWidget {
 
   final ValueChanged<StudyResumeChoice> onChoice;
 
+  /// **Scrollable, and the bottom inset is the sheet's own.**
+  ///
+  /// A modal sheet is capped at a fraction of the screen, and this is the
+  /// longest body paragraph of the three study sheets: the title, that
+  /// paragraph and three full-width buttons overflow at 320dp long before a
+  /// large text scale, which paints `Review` off the bottom with no way to
+  /// reach it. Same shape and same fix as the mode and direction choosers, and
+  /// like them it does not change the layout wherever the content already fits.
   @override
   Widget build(BuildContext context) => MxSheetInsets(
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        // The sheet's title announces as a header (A20.1 P1-01, §23 #17).
-        Semantics(
-          header: true,
-          child: Text(
-            context.l10n.studyResumeTitle,
-            style: context.texts.titleMedium,
+    child: SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          // The sheet's title announces as a header (A20.1 P1-01, §23 #17).
+          Semantics(
+            header: true,
+            child: Text(
+              context.l10n.studyResumeTitle,
+              style: context.texts.titleMedium,
+            ),
           ),
-        ),
-        const SizedBox(height: AppSpacing.xs),
-        Text(context.l10n.studyResumeBody, style: context.texts.bodyMedium),
-        const SizedBox(height: AppSpacing.lg),
-        MxActionButton(
-          label: context.l10n.studyResumeContinue,
-          onPressed: () => onChoice(StudyResumeChoice.resume),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        MxActionButton(
-          label: context.l10n.studyStartLearning,
-          onPressed: () => onChoice(StudyResumeChoice.learn),
-          variant: MxActionButtonVariant.secondary,
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        MxActionButton(
-          label: context.l10n.studyStartReview,
-          onPressed: () => onChoice(StudyResumeChoice.review),
-          variant: MxActionButtonVariant.secondary,
-        ),
-      ],
+          const SizedBox(height: AppSpacing.xs),
+          Text(context.l10n.studyResumeBody, style: context.texts.bodyMedium),
+          const SizedBox(height: AppSpacing.lg),
+          MxActionButton(
+            label: context.l10n.studyResumeContinue,
+            onPressed: () => onChoice(StudyResumeChoice.resume),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          MxActionButton(
+            label: context.l10n.studyStartLearning,
+            onPressed: () => onChoice(StudyResumeChoice.learn),
+            variant: MxActionButtonVariant.secondary,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          MxActionButton(
+            label: context.l10n.studyStartReview,
+            onPressed: () => onChoice(StudyResumeChoice.review),
+            variant: MxActionButtonVariant.secondary,
+          ),
+        ],
+      ),
     ),
   );
 }

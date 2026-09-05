@@ -148,6 +148,65 @@ void main() {
       expect(value.left, closeTo(label.left, 0.5));
     });
 
+    testWidgets('the card\'s two rows and their hairline share one left edge, '
+        'on the compact tier too (M6 R2)', (tester) async {
+      // **Three widths, because the defect only existed on one tier.** The
+      // toggle row and the hairline resolve `mxScreenGutter`; the time row
+      // takes its inset from `ListTileTheme.contentPadding`, which
+      // `applyCompactScale` steps to `md` below `AppBreakpoints.compact`. A
+      // fixed `lg` on either of the first two held at 393 and split the card
+      // into two left edges at 320 and at 359 — 4dp, which is exactly the size
+      // nothing catches by eye.
+      for (final surface in <Size>[
+        const Size(320, 568),
+        const Size(359, 700),
+        const Size(393, 852),
+      ]) {
+        await harness.pump(tester, surface: surface);
+
+        // Scoped to the row: the screen's own title is the same words (M6 R2),
+        // so an unscoped text finder matches both.
+        final toggleLabel = tester.getRect(
+          find.descendant(
+            of: find.byType(ReminderToggleRowWidget),
+            matching: find.text(english.reminderToggleLabel),
+          ),
+        );
+        final timeLabel = tester.getRect(find.text(english.reminderTimeLabel));
+        final card = tester.getRect(find.byType(MxCard).first);
+        final hairline = tester.getRect(
+          find.descendant(
+            of: find.byType(MxCard).first,
+            matching: find.byType(Divider),
+          ),
+        );
+
+        final expected = surface.width < 360 ? AppSpacing.md : AppSpacing.lg;
+        expect(
+          toggleLabel.left,
+          closeTo(card.left + expected, 0.5),
+          reason: 'toggle label at $surface',
+        );
+        expect(
+          timeLabel.left,
+          closeTo(card.left + expected, 0.5),
+          reason: 'time label at $surface',
+        );
+        expect(
+          hairline.left,
+          closeTo(card.left + expected, 0.5),
+          reason: 'hairline at $surface',
+        );
+        // The hairline is inset the same on both sides; a one-ended assertion
+        // would pass on a line that reaches the card's right edge.
+        expect(
+          hairline.right,
+          closeTo(card.right - expected, 0.5),
+          reason: 'hairline at $surface',
+        );
+      }
+    });
+
     testWidgets('both rows clear the 48dp touch target (M6 G4)', (
       tester,
     ) async {

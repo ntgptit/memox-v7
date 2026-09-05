@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/state/submit_outcome.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_icon_button.dart';
 import '../../domain/entities/card_entity.dart';
+import '../controllers/card_create_controller.dart';
 import '../controllers/card_editor_load_controller.dart';
 import '../controllers/card_flag_controller.dart';
 import '../controllers/card_write_controller.dart';
@@ -14,6 +16,7 @@ import '../controllers/deck_context_controller.dart';
 import '../states/card_content_draft_state.dart';
 import '../states/card_submit_state.dart';
 import '../widgets/overlays/card_discard_confirm_widget.dart';
+import '../widgets/sections/card_create_action_bar_widget.dart';
 import '../widgets/sections/card_create_form_widget.dart';
 import '../widgets/sections/card_editor_action_bar_widget.dart';
 import '../widgets/sections/card_editor_form_widget.dart';
@@ -25,17 +28,21 @@ import '../../../../shared/widgets/mx_error_state.dart';
 
 /// The card editor — create and edit (UC-04 W4, A1).
 ///
-/// One screen, two modes, decided by [cardId]. This file holds **only edit**;
-/// create lives in `CardCreateFormWidget` with its own controllers, because
-/// while the two shared five `TextEditingController`s and a field builder,
-/// every decision taken for edit landed on a screen nobody had reviewed.
+/// One screen, two modes, decided by [cardId]. It owns the shell, the five
+/// content controllers and the submit state in both; what the body *contains*
+/// is a mode's own — `CardEditorFormWidget` draws edit's, `CardCreateFormWidget`
+/// draws create's, and neither reads the other. That split is what stops a
+/// decision taken for edit landing on a screen nobody has reviewed, which is
+/// what happened the last time the two shared one field builder.
 ///
-/// It owns the shell, the controllers and the state; `CardEditorFormWidget`
-/// owns what the body contains. Four facts, in the order they were got wrong:
+/// Four facts, in the order they were got wrong:
 ///
 /// - **Save owns five fields and nothing else.** Tags and the flag write the
 ///   moment they are touched (BR-92, BR-93); a Save lit by them would promise
-///   what it does not carry. It is pinned in the footer, not in the scroll.
+///   what it does not carry. It is pinned in the footer, not in the scroll —
+///   in **both** modes: create's pair sat at the end of the scroll on a screen
+///   that autofocuses its first field, so the keyboard covered the primary
+///   action from the first frame (SC-C1-02).
 /// - **Two affordances, one command.** The app bar carries a compact `Save`;
 ///   it and the footer read the same dirty state and call the same `_save()`.
 ///   Only the footer spins — two spinners read as two operations.
@@ -99,9 +106,9 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
   @override
   void initState() {
     super.initState();
-    // Edit's alone. Create has its own controllers in `CardCreateFormWidget`
-    // and no baseline to compare against, so tracking dirtiness there would be
-    // five listeners answering a question nobody asks.
+    // Edit's alone. Create shares the controllers but has no baseline to
+    // compare against — it saves whatever is typed and closes — so tracking
+    // dirtiness there would be five listeners answering a question nobody asks.
     if (widget.cardId == null) return;
     for (final controller in _contentControllers) {
       controller.addListener(_recomputeDirty);
@@ -169,11 +176,69 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
     final cardId = widget.cardId;
     if (cardId != null) return _buildEdit(context, cardId);
 
+    return _buildCreate(context);
+  }
+
+  // ---- create ------------------------------------------------------------
+
+  /// Create's shell: no breadcrumb, no tags, no discard guard — and the two
+  /// dispositions pinned in [MxContentShell.footer] rather than sitting at the
+  /// end of the scroll. The front field autofocuses, so the keyboard is up on
+  /// the first frame and the body has already shrunk; a Save inside that scroll
+  /// starts off screen, which is the failure the footer slot was added to fix
+  /// (SC-C1-02).
+  Widget _buildCreate(BuildContext context) {
+    final provider = cardCreateProvider(widget.deckId);
+    final state = ref.watch(provider);
+
+    ref.listen<CardSubmitState>(provider, (previous, next) {
+      if (next.shouldClose && !(previous?.shouldClose ?? false)) {
+        _pop();
+
+        return;
+      }
+      // Save-and-add-another: empty the form, return focus to the front, and
+      // clear the outcome so the next save is a fresh attempt (UC-04 A4).
+      if (next.shouldClearDraft && !(previous?.shouldClearDraft ?? false)) {
+        for (final controller in _contentControllers) {
+          controller.clear();
+        }
+        _frontFocus.requestFocus();
+        ref.read(provider.notifier).reset();
+      }
+    });
+
+    final busy = state.isSubmitting;
+    void submit(SubmitDisposition disposition) => ref
+        .read(provider.notifier)
+        .submit(
+          rawFront: _front.text,
+          rawBack: _back.text,
+          rawExample: _example.text,
+          rawHint: _hint.text,
+          rawPronunciation: _pronunciation.text,
+          disposition: disposition,
+        );
+
     return MxContentShell(
       title: context.l10n.cardEditorCreateTitle,
       leading: _closeButton(context, _pop),
       isScrollable: true,
-      body: CardCreateFormWidget(deckId: widget.deckId),
+      footer: CardCreateActionBarWidget(
+        isSaving: busy,
+        onSave: busy ? null : () => submit(SubmitDisposition.close),
+        onSaveAndAdd: busy ? null : () => submit(SubmitDisposition.addAnother),
+      ),
+      body: CardCreateFormWidget(
+        state: state,
+        isBusy: busy,
+        front: _front,
+        back: _back,
+        example: _example,
+        hint: _hint,
+        pronunciation: _pronunciation,
+        frontFocus: _frontFocus,
+      ),
     );
   }
 
