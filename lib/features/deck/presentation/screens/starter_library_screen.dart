@@ -260,11 +260,17 @@ class _TemplateTile extends ConsumerWidget {
             children: <Widget>[
               Expanded(child: identity),
               const SizedBox(width: AppSpacing.md),
-              // `Flexible`, not the bare `Text` this used to be: `maxLines`
-              // alone does nothing in a non-flex `Row` slot, because the slot
-              // is sized to the intrinsic width before the line count is ever
-              // consulted.
-              Flexible(child: state),
+              // **Not `Flexible`, and that was tried.** Making the state a
+              // second flex child gives the two halves `flex: 1` each, so the
+              // `Row` splits the line 50/50 and the identity column loses the
+              // share it had: the regenerated golden showed the state label
+              // sitting mid-row and `Language: English` ellipsizing to
+              // `Language: E…` at 393dp and ordinary text scale — a
+              // regression on the render this change must not move. Above the
+              // threshold the intrinsic-width slot is the *right* arrangement;
+              // the crushing case is the one below it, and stacking is what
+              // answers that.
+              state,
             ],
           );
         },
