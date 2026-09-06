@@ -153,6 +153,13 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
                           // not the screen's, so the table names the child it
                           // owns rather than leaving the screen to guess.
                           optionsRouteName: RouteNames.deckStudyOptions,
+                          // And where it lands if the deck is deleted while it
+                          // is open. Not the parent route: `/decks/<id>` is the
+                          // deleted deck's own screen, so popping one level
+                          // would land on the same absence one route up. The
+                          // library list is the nearest place that still
+                          // exists.
+                          homeRouteName: RouteNames.decks,
                         ),
                         routes: <RouteBase>[
                           // How much to study, and in what order (UC-15,
@@ -291,6 +298,10 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
                       // the Library branch's, for the same reason this route
                       // is the sibling of `deckStudy`.
                       optionsRouteName: RouteNames.studyDeckOptions,
+                      // And its own home: the tab's list of decks, which is
+                      // where a deck vanishing from under this screen leaves
+                      // the user (UC-14).
+                      homeRouteName: RouteNames.study,
                     ),
                     routes: <RouteBase>[
                       GoRoute(

@@ -13,6 +13,7 @@ import '../../../../shared/widgets/mx_icon_button.dart';
 import '../../../../core/error/failure.dart';
 import '../../domain/entities/study_session_entity.dart';
 import '../../domain/failures/study_refusal_failure.dart';
+import '../../domain/models/study_deck_context_model.dart';
 import '../../domain/models/study_direction_model.dart';
 import '../../domain/models/study_entry_summary_model.dart';
 import '../../domain/models/study_mode.dart';
@@ -38,6 +39,7 @@ class StudyEntryScreen extends ConsumerStatefulWidget {
   const StudyEntryScreen({
     required this.deckId,
     required this.optionsRouteName,
+    required this.homeRouteName,
     super.key,
   });
 
@@ -57,6 +59,22 @@ class StudyEntryScreen extends ConsumerStatefulWidget {
   /// written down twice.
   final String optionsRouteName;
 
+  /// Where this screen goes when its deck stops existing — the home of the
+  /// branch it is mounted in.
+  ///
+  /// **Named by the route table for the same reason [optionsRouteName] is.**
+  /// The screen is mounted twice and only the branch differs, so the honest
+  /// landing differs too: from the Study tab the deck's disappearance leaves
+  /// the user at Study Home, from the Library tab at the deck list. The screen
+  /// cannot work that out without reading its own location, which is the fact
+  /// the route already owns.
+  ///
+  /// **Not a pop.** `/decks/<id>/study` pops onto `/decks/<id>` — the deleted
+  /// deck's own screen — so the one call that looks simplest lands on the next
+  /// route up that is equally gone. A named destination is the only one that
+  /// is deterministic from either mount.
+  final String homeRouteName;
+
   @override
   ConsumerState<StudyEntryScreen> createState() => _StudyEntryScreenState();
 }
@@ -64,6 +82,14 @@ class StudyEntryScreen extends ConsumerStatefulWidget {
 class _StudyEntryScreenState extends ConsumerState<StudyEntryScreen> {
   String get deckId => widget.deckId;
   String get optionsRouteName => widget.optionsRouteName;
+
+  /// Set the first time the unwind is scheduled, so it happens exactly once.
+  ///
+  /// The deleted-deck emission is sticky — the stream keeps reporting `null`,
+  /// and the screen keeps being rebuilt while it waits for the frame — so
+  /// without this the navigation would be requested on every rebuild between
+  /// the deletion and the route actually changing.
+  bool _isUnwinding = false;
 
   @override
   void initState() {
@@ -133,12 +159,50 @@ class _StudyEntryScreenState extends ConsumerState<StudyEntryScreen> {
     }
   }
 
+  /// Leaves the route once the deck it is scoped to has been deleted.
+  ///
+  /// **Only while this branch is the one on screen.** `StatefulShellRoute`
+  /// keeps every branch mounted — go_router wraps the inactive ones in
+  /// `Offstage` + `TickerMode(enabled: false)` — so this screen is alive and
+  /// rebuilding even while the user is in Library doing the deleting. A
+  /// `goNamed` fired then would yank them out of the tab they are standing in,
+  /// mid-gesture, to watch a screen leave. `TickerMode.of(context)` is
+  /// go_router's own signal for "this branch is the visible one", and reading
+  /// it in `build` registers the dependency: when the user comes back to
+  /// Study, that flip rebuilds this widget and the unwind runs then.
+  ///
+  /// **After the frame, not during it.** The trigger is a stream emission
+  /// arriving mid-build, and `goNamed` rebuilds the router; doing that inside
+  /// a build is the error Flutter names rather than a race worth taking.
+  void _unwindAfterFrame() {
+    if (_isUnwinding) return;
+    _isUnwinding = true;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.goNamed(widget.homeRouteName);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     // Read once and used twice: `MxAsyncView` renders it, and the error face
     // asks the same snapshot whether the retry it was given is still running.
     // A second `watch` inside the error closure would be two reads of one fact.
     final entry = ref.watch(studyEntryProvider(deckId));
+
+    final deckContext = ref.watch(studyDeckContextProvider(deckId));
+    // `AsyncData(null)` and nothing else. `AsyncError` keeps whatever value it
+    // had, so `hasValue`/`value == null` would read a failed read as a deleted
+    // deck and navigate away from an error the user could have retried.
+    final bool isDeckGone = switch (deckContext) {
+      AsyncData<StudyDeckContextModel?>(value: null) => true,
+      _ => false,
+    };
+    // Read unconditionally, so the dependency is registered on every build and
+    // a branch becoming visible is what re-runs this.
+    final bool isBranchVisible = TickerMode.valuesOf(context).enabled;
+    if (isDeckGone && isBranchVisible) _unwindAfterFrame();
 
     // **The deck, not the product** (SC-C9-09, SC-C9-15). This was
     // `context.l10n.appTitle` — the only `appTitle` among the eighteen
@@ -156,9 +220,7 @@ class _StudyEntryScreenState extends ConsumerState<StudyEntryScreen> {
     // `card_list_screen.dart` titles from its own deck-context read for the
     // same reason.
     return MxContentShell(
-      title:
-          ref.watch(studyDeckContextProvider(deckId)).value?.deckName ??
-          context.l10n.studyEntryTitle,
+      title: deckContext.value?.deckName ?? context.l10n.studyEntryTitle,
       actions: <Widget>[
         MxIconButton(
           icon: Icons.tune,

@@ -104,8 +104,8 @@ base class FakeStudyRepository
   ///
   /// Broadcast because the entry screen and a test may both listen, and seeded
   /// on subscribe so the first frame has a name rather than a spinner.
-  final StreamController<StudyDeckContextModel> deckContextChanges =
-      StreamController<StudyDeckContextModel>.broadcast();
+  final StreamController<StudyDeckContextModel?> deckContextChanges =
+      StreamController<StudyDeckContextModel?>.broadcast();
 
   StudyDeckContextModel _context(String deckId) => StudyDeckContextModel(
     deckId: deckId,
@@ -126,9 +126,21 @@ base class FakeStudyRepository
       _context(deckId);
 
   @override
-  Stream<StudyDeckContextModel> watchDeckContext(String deckId) async* {
-    yield _context(deckId);
+  Stream<StudyDeckContextModel?> watchDeckContext(String deckId) async* {
+    yield isDeckDeleted ? null : _context(deckId);
     yield* deckContextChanges.stream;
+  }
+
+  /// Whether the deck is in Trash. Seeds the stream, so a screen mounted after
+  /// the deletion sees the absence on its first frame too.
+  bool isDeckDeleted = false;
+
+  /// Deletes the deck and emits, the way `deckById`'s watch does once
+  /// `delete_batch_id` is written: the row stops matching, so the stream
+  /// carries `null` (BR-257).
+  void deleteDeck() {
+    isDeckDeleted = true;
+    deckContextChanges.add(null);
   }
 
   /// Whether [effectiveOptions] reports the values as a root override

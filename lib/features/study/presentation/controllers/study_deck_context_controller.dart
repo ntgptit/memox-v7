@@ -25,6 +25,12 @@ part 'study_deck_context_controller.g.dart';
 /// **No automatic retry**: the read is a local SQLite watch. A failure here is a
 /// schema or a disk problem, not a flaky network, and retrying it on a timer
 /// hides it behind a spinner that never resolves.
+/// **`AsyncData(null)` is the deck's deletion**, and the four states the screen
+/// has to tell apart are exactly the four this provider can be in: `AsyncLoading`
+/// before the first row, `AsyncData(context)` while the deck exists,
+/// `AsyncData(null)` once it does not, `AsyncError` when the read itself failed.
+/// A sealed domain state would spell the third one differently and add nothing —
+/// `Deck?` is already how the row arrives from Drift.
 @Riverpod(retry: noAutomaticRetry)
-Stream<StudyDeckContextModel> studyDeckContext(Ref ref, String deckId) =>
+Stream<StudyDeckContextModel?> studyDeckContext(Ref ref, String deckId) =>
     WatchStudyDeckContextUseCase(ref.watch(studyRepositoryProvider))(deckId);

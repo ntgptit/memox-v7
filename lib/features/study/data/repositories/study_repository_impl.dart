@@ -93,18 +93,22 @@ final class StudyRepositoryImpl
   }) => _dao.watchEntryCounts(deckId, now).map(studyEntrySummaryFromRow);
 
   @override
-  Stream<StudyDeckContextModel> watchDeckContext(String deckId) => _dao
-      .watchDeckById(deckId)
-      .asyncMap(_contextOf)
-      .where((StudyDeckContextModel? context) => context != null)
-      .cast<StudyDeckContextModel>();
+  Stream<StudyDeckContextModel?> watchDeckContext(String deckId) =>
+      _dao.watchDeckById(deckId).asyncMap(_contextOf);
 
-  /// `null` for a deck that is gone, so the stream simply stops emitting.
+  /// `null` for a deck that is gone, and it is **emitted** rather than filtered.
+  ///
+  /// It used to be dropped — `.where((c) => c != null)` — so the one event that
+  /// says the deck was deleted was the one event this stream refused to carry.
+  /// The screen kept the last good name, and because
+  /// `StatefulShellRoute.indexedStack` never unmounts the Study branch, nothing
+  /// downstream ever asked again: deleting the open deck from Library left a
+  /// live Study Entry titled with it.
   ///
   /// The `Future` twin below throws `NotFoundFailure` instead, and both are
   /// right for their caller: a session about to be opened must fail loudly, a
-  /// title on a screen that is unwinding must not replace the last good name
-  /// with an error face.
+  /// screen already open needs a state it can unwind from, not an error face
+  /// for something that is not an error.
   Future<StudyDeckContextModel?> _contextOf(Deck? deck) async {
     if (deck == null) return null;
 

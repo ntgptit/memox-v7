@@ -42,6 +42,7 @@ class WatchStudyDeckContextUseCase {
 
   final StudyRepository _repository;
 
-  Stream<StudyDeckContextModel> call(String deckId) =>
+  /// `null` when the deck has been deleted — see the contract.
+  Stream<StudyDeckContextModel?> call(String deckId) =>
       _repository.watchDeckContext(deckId);
 }

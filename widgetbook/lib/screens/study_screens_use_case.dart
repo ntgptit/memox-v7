@@ -238,6 +238,7 @@ class _StudyRouterState extends State<_StudyRouter> {
                   // the Study branch. The screen is mounted twice in the app
                   // and the branch is the route's fact, not the screen's.
                   optionsRouteName: RouteNames.studyDeckOptions,
+                  homeRouteName: RouteNames.study,
                 ),
             routes: <RouteBase>[
               GoRoute(
