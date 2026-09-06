@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../core/theme/extensions/app_ink.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_async_view.dart';
 import '../../../../../shared/widgets/mx_empty_state.dart';
 import '../../../../../shared/widgets/mx_error_state.dart';
+import '../../../../../shared/widgets/mx_feedback_band.dart';
 import '../../../../../shared/widgets/mx_list_tile.dart';
 import '../../../domain/models/deck_move_target_model.dart';
 import '../support/deck_labels_widget.dart';
@@ -75,10 +75,19 @@ class MoveDeckSheetWidget extends StatelessWidget {
                 style: context.texts.titleMedium,
               ),
               if (submit.failure != null) ...<Widget>[
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  context.deckWriteFailure(submit.failure!),
-                  style: context.texts.bodySmall!.inked(context, AppInk.danger),
+                // The one grammar for an in-flow failure, as in every other
+                // sheet in this unit — see `deck_form_widget.dart` for why the
+                // bare red line went (SC-C3-19).
+                //
+                // The band sits above a `Flexible` list, so it takes height
+                // from the targets rather than from the sheet. That is the
+                // right way round: a refused move is the only reason to still
+                // be looking at this list, and the list is scrollable while
+                // the reason is not.
+                const SizedBox(height: AppSpacing.lg),
+                MxFeedbackBand(
+                  title: context.l10n.deckWriteErrorTitle,
+                  message: context.deckWriteFailure(submit.failure!),
                 ),
               ],
               const SizedBox(height: AppSpacing.md),

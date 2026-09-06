@@ -18,6 +18,7 @@ import 'package:memox/features/deck/domain/models/deck_list_snapshot_model.dart'
 import 'package:memox/features/deck/domain/models/deck_path_segment_model.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
+import 'package:memox/shared/widgets/mx_action_sheet.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/features/settings/di/app_settings_repository_provider.dart';
@@ -212,7 +213,7 @@ void main() {
     );
     expect(find.byType(DeckListScreen), findsOneWidget);
 
-    await tester.tap(find.text(english.deckCreateChildAction).last);
+    await tester.tap(find.text(english.deckCreateSubDeckAction).last);
     await tester.pumpAndSettle();
     await tester.tap(find.text(english.cardImportEntryAction).last);
     await tester.pumpAndSettle();
@@ -232,10 +233,27 @@ void main() {
       reason: 'the URL is the deck again, not the cards list',
     );
 
-    await tester.tap(find.text(english.deckCreateChildAction).last);
+    // The opener is named for the action the FAB already starts (SC-C3-05),
+    // so the assertions below are scoped to the sheet: the button behind it now
+    // carries the sub-deck string too, and an unscoped finder could not tell a
+    // sheet offering both kinds from one offering neither.
+    await tester.tap(find.text(english.deckCreateSubDeckAction).last);
     await tester.pumpAndSettle();
-    expect(find.text(english.deckCreateSubDeckAction), findsOneWidget);
-    expect(find.text(english.deckCreateCardAction), findsOneWidget);
+    final sheet = find.byType(MxActionSheet);
+    expect(
+      find.descendant(
+        of: sheet,
+        matching: find.text(english.deckCreateSubDeckAction),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: sheet,
+        matching: find.text(english.deckCreateCardAction),
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('a deep link with no history falls back to a canonical route '

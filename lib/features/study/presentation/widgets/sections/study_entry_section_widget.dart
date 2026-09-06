@@ -4,6 +4,7 @@ import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
+import '../../../../../shared/widgets/mx_empty_state.dart';
 import '../../../domain/models/study_entry_summary_model.dart';
 
 /// The way into a deck's study flow: two numbers, and up to two ways in.
@@ -17,6 +18,14 @@ import '../../../domain/models/study_entry_summary_model.dart';
 /// **Nothing due means no way in, and that is a normal screen** (BR-29, BR-145).
 /// Studying ahead is a rule rather than a missing feature, so the review button
 /// is absent with an explanation rather than present and refusing.
+///
+/// **Nothing new *and* nothing due is a different face, not this one with its
+/// numbers set to zero.** Both entries are gone, so what is left is two loose
+/// sentences under a readout row whose largest type spends itself saying
+/// "New 0" — the app's loudest element stating an absence. `MxEmptyState` is
+/// the face the rest of the app gives a dead end, and like `trash_screen.dart`
+/// and `progress_deck_screen.dart` this one carries no action: the way out is
+/// the app bar, and a button here would be a second one.
 class StudyEntrySectionWidget extends StatelessWidget {
   const StudyEntrySectionWidget({
     required this.summary,
@@ -32,6 +41,16 @@ class StudyEntrySectionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+
+    // Before the counts row, because at (0, 0) the row is the problem: it is
+    // the only thing left at `titleMedium` and it says nothing. Deliberately
+    // action-free — see the class doc.
+    if (summary.newCount == 0 && summary.dueCount == 0) {
+      return MxEmptyState(
+        title: l10n.studyEntryAllCaughtUpTitle,
+        message: l10n.studyNothingDueMessage,
+      );
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

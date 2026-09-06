@@ -11,6 +11,8 @@ import 'package:memox/features/trash/presentation/screens/trash_screen.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/l10n/generated/app_localizations.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
+import 'package:memox/shared/widgets/mx_loading_state.dart';
+import 'package:memox/shared/widgets/mx_pill_button.dart';
 
 import 'support/fake_trash_repository.dart';
 
@@ -23,8 +25,13 @@ void main() {
     WidgetTester tester, {
     required List<TrashBatchEntity> batches,
     List<TrashRestoreTarget> targets = const <TrashRestoreTarget>[],
+    bool holdFirstEmission = false,
   }) async {
-    final repository = FakeTrashRepository(batches: batches, targets: targets);
+    final repository = FakeTrashRepository(
+      batches: batches,
+      targets: targets,
+      holdFirstEmission: holdFirstEmission,
+    );
     addTearDown(repository.dispose);
 
     await tester.pumpWidget(
@@ -44,6 +51,13 @@ void main() {
         ),
       ),
     );
+    // A held read never answers, and `MxLoadingState` spins for as long as it
+    // is on screen — `pumpAndSettle` would time out rather than settle.
+    if (holdFirstEmission) {
+      await tester.pump();
+
+      return repository;
+    }
     await tester.pumpAndSettle();
 
     return repository;
@@ -150,6 +164,47 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text(english.trashEmptyDecksMessage), findsOneWidget);
+      // **And it keeps its chips** (W3 states 3/4). The way back out of a
+      // filtered emptiness is the chip the user just left; only the
+      // whole-Trash emptiness below loses the band.
+      expect(find.byType(MxPillButton), findsNWidgets(3));
+    });
+
+    testWidgets('an empty Trash has no filters to offer (W3 state 2)', (
+      tester,
+    ) async {
+      await pumpTrash(tester, batches: const <TrashBatchEntity>[]);
+
+      // Three live chips over zero items are three ways to swap one empty
+      // message for another, which is why W3 state 2 draws this screen as
+      // "Không chip, không overflow".
+      expect(find.byType(MxPillButton), findsNothing);
+      expect(find.text(english.trashEmptyTitle), findsOneWidget);
+    });
+
+    testWidgets('the band holds through the loading frame (W3 state 1)', (
+      tester,
+    ) async {
+      // The predicate is `hasValue`, not `value?.isNotEmpty`, and this is the
+      // difference: with nothing read yet there is no emptiness to test, so a
+      // value-shaped predicate would drop the chips for the length of the load
+      // and put them back — the flicker W3 state 1 rules out by asking the
+      // skeleton to "giữ nguyên chip".
+      final repository = await pumpTrash(
+        tester,
+        batches: const <TrashBatchEntity>[],
+        holdFirstEmission: true,
+      );
+
+      expect(find.byType(MxLoadingState), findsOneWidget);
+      expect(find.byType(MxPillButton), findsNWidgets(3));
+
+      repository.releaseFirstEmission();
+      await tester.pumpAndSettle();
+
+      // Only once the read has answered, and answered empty, do they go.
+      expect(find.text(english.trashEmptyTitle), findsOneWidget);
+      expect(find.byType(MxPillButton), findsNothing);
     });
   });
 

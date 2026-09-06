@@ -132,12 +132,14 @@ void main() {
         (tester) async {
           await pumpTrash(tester, batches: twoRows(), size: size);
 
-          // Read before the long press: the chips are the shell's subheader,
-          // and the screen drops it while a selection is held.
-          final chip = left(tester, find.byType(MxPillButton).first);
-
           await tester.longPress(find.text('give up'));
           await tester.pumpAndSettle();
+
+          // Read *after* the long press, which it could not be while the
+          // screen dropped its subheader during selection. The band now stays
+          // mounted and inert, so G1's left edge is one edge in both modes
+          // rather than one edge and an absence.
+          final chip = left(tester, find.byType(MxPillButton).first);
 
           // The row is full-bleed — its own rect starts at 0 and its padding
           // makes the inset — so what G1 constrains is the first thing the row
@@ -174,6 +176,47 @@ void main() {
         },
       );
     }
+  });
+
+  group('W3 6/7 · selection does not move the list it is selecting from', () {
+    testWidgets('the row under the finger stays where the finger left it', (
+      tester,
+    ) async {
+      await pumpTrash(tester, batches: twoRows());
+
+      final before = tester.getRect(find.byType(TrashRowWidget).first).top;
+
+      await tester.longPress(find.text('give up'));
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.getRect(find.byType(TrashRowWidget).first).top,
+        before,
+        reason:
+            'the filter band is the shell\'s subheader, ~60dp at 393dp; '
+            'removing it on the frame the long press lands pulls the whole '
+            'list up past the finger that just pressed it',
+      );
+
+      // Still three chips, and the active one still says which filter the
+      // list below is narrowed by — `_TrashBody` keeps applying it during
+      // selection, so a band that left would take the only explanation of a
+      // shortened list with it.
+      final pills = tester.widgetList<MxPillButton>(find.byType(MxPillButton));
+      expect(pills, hasLength(3));
+      expect(
+        pills.where((MxPillButton pill) => pill.isSelected),
+        hasLength(1),
+        reason: 'the selected chip keeps its paint while it is inert',
+      );
+
+      // Inert, not live: changing the filter mid-selection would orphan rows
+      // the user had already picked.
+      expect(
+        pills.every((MxPillButton pill) => pill.onPressed == null),
+        isTrue,
+      );
+    });
   });
 
   group('G2 · the row lines its trailing glyph up with the gutter', () {

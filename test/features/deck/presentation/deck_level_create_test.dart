@@ -10,6 +10,7 @@ import 'package:memox/features/deck/domain/models/deck_path_segment_model.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
+import 'package:memox/shared/widgets/mx_action_sheet.dart';
 
 import 'support/deck_screen_harness.dart';
 import 'support/fake_deck_repository.dart';
@@ -94,15 +95,44 @@ void main() {
 
         expect(find.text(english.deckDetailEmptyUnsetTitle), findsOneWidget);
 
-        await tester.tap(find.text(english.deckCreateChildAction));
+        // **The opener carries the FAB's name for it now** (SC-C3-05). The
+        // floating button starts this same `showCreateChildForm` at every
+        // content type and calls it "New sub-deck", so a second name here read
+        // as a second, different action. BR-61 is a rule about what pressing
+        // Create *shows*, not about what the opener is called, and what it
+        // shows is asserted below and unchanged.
+        await tester.tap(find.text(english.deckCreateSubDeckAction));
         await tester.pumpAndSettle();
 
-        expect(find.text(english.deckCreateSubDeckAction), findsOneWidget);
-        expect(find.text(english.deckCreateCardAction), findsOneWidget);
+        // **Scoped to the sheet, and it has to be now.** The opener behind it
+        // carries the sub-deck string too, so an unscoped finder would match
+        // the button that was just tapped and could not tell a sheet offering
+        // both kinds from one offering neither.
+        final sheet = find.byType(MxActionSheet);
+        expect(
+          find.descendant(
+            of: sheet,
+            matching: find.text(english.deckCreateSubDeckAction),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: sheet,
+            matching: find.text(english.deckCreateCardAction),
+          ),
+          findsOneWidget,
+        );
         // The bulk way in rides the same sheet (UC-10, M4.12 W6): an unset
         // deck can be filled from a file, and the first written card settles
         // the type inside the import transaction (BR-172).
-        expect(find.text(english.cardImportEntryAction), findsOneWidget);
+        expect(
+          find.descendant(
+            of: sheet,
+            matching: find.text(english.cardImportEntryAction),
+          ),
+          findsOneWidget,
+        );
       },
     );
 
@@ -162,9 +192,16 @@ void main() {
     /// On an `unset` deck the Create action asks which kind first (BR-61), so
     /// reaching the sub-deck form is two taps rather than one.
     Future<void> openSubDeckForm(WidgetTester tester) async {
-      await tester.tap(find.text(english.deckCreateChildAction));
-      await tester.pumpAndSettle();
       await tester.tap(find.text(english.deckCreateSubDeckAction));
+      await tester.pumpAndSettle();
+      // The sheet's own row rather than the opener behind it: both carry the
+      // same string since SC-C3-05 gave this one action one name.
+      await tester.tap(
+        find.descendant(
+          of: find.byType(MxActionSheet),
+          matching: find.text(english.deckCreateSubDeckAction),
+        ),
+      );
       await tester.pumpAndSettle();
     }
 

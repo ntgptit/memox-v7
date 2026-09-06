@@ -8,6 +8,7 @@ import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../../../shared/widgets/mx_confirm_dialog.dart';
 import '../../../../../shared/widgets/mx_dialog_tone.dart';
+import '../../../../../shared/widgets/mx_feedback_band.dart';
 import '../../../../../shared/widgets/mx_sheet_insets.dart';
 import '../../../domain/models/deck_template_model.dart';
 import '../../../domain/models/scheduler_type_model.dart';
@@ -155,10 +156,21 @@ class _StarterInstallFormState extends ConsumerState<_StarterInstallForm> {
           },
         ),
         if (install.error != null) ...<Widget>[
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            context.l10n.starterLibraryInstallFailed,
-            style: context.texts.bodySmall!.inked(context, AppInk.danger),
+          // The one grammar for an in-flow failure — see
+          // `deck_form_widget.dart` for why the bare red line went (SC-C3-19).
+          //
+          // **Its own title, not `deckWriteErrorTitle`.** The other four sheets
+          // in this unit failed to *save* a deck; this one failed to *copy*
+          // one, and the message beside it already says so. "Couldn't save"
+          // over "Could not add this deck. Nothing was copied." names two
+          // events in one band. There is no `Failure` to map here either — the
+          // controller keeps only that the install threw (BR-39 rolled it
+          // back), so the message is the one fixed sentence rather than
+          // `deckWriteFailure`.
+          const SizedBox(height: AppSpacing.lg),
+          MxFeedbackBand(
+            title: context.l10n.starterLibraryInstallErrorTitle,
+            message: context.l10n.starterLibraryInstallFailed,
           ),
         ],
         // **`xl`, the step the other commit sheets in this unit already use.**

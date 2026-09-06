@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/extensions/app_ink.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -8,6 +7,7 @@ import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../../../shared/widgets/mx_button_pair.dart';
 import '../../../../../shared/widgets/mx_confirm_dialog.dart';
 import '../../../../../shared/widgets/mx_dialog_tone.dart';
+import '../../../../../shared/widgets/mx_feedback_band.dart';
 import '../../../../../shared/widgets/mx_text_field.dart';
 import '../../../domain/models/scheduler_type_model.dart';
 import '../items/deck_scheduler_picker_widget.dart';
@@ -136,10 +136,27 @@ class _DeckFormWidgetState extends State<DeckFormWidget> {
           ),
         ],
         if (state.failure != null) ...<Widget>[
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            context.deckWriteFailure(state.failure!),
-            style: context.texts.bodySmall!.inked(context, AppInk.danger),
+          // **A band, not a red line, and the reason is not tidiness.** All
+          // five deck sheets disclosed a failed write as one `bodySmall` line
+          // inked `danger`: colour was the only cue, and nothing announced it
+          // — a screen-reader user pressed Create and was told nothing at all.
+          // `MxFeedbackBand` is the grammar this app already settled on for an
+          // in-flow failure (glyph, title, message, `container` + `liveRegion`
+          // by construction), and `tag_rename_widget` speaks it for the
+          // identical event one sheet away (SC-C3-19).
+          //
+          // No action: this sheet's own primary stays live for the retry, and
+          // the band asserts the label/callback pair, so a button here would
+          // be a second one for the same attempt.
+          //
+          // `lg`, not `md`. A band is a block of its own, and `md` is the
+          // scale's inside-a-compact-control step — the gap that used to
+          // separate a bare line from the field above it. Card create, card
+          // edit and the settings sections all put `lg` in front of theirs.
+          const SizedBox(height: AppSpacing.lg),
+          MxFeedbackBand(
+            title: context.l10n.deckWriteErrorTitle,
+            message: context.deckWriteFailure(state.failure!),
           ),
         ],
         const SizedBox(height: AppSpacing.xl),

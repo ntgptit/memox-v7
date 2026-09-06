@@ -174,7 +174,14 @@ void main() {
         // A failed read renders no rows and no toolbar — there is nothing to
         // filter or order when nothing arrived. The app bar stays: the root
         // level's title is a constant, so it survives a failed read.
-        screenIconButtons: 0,
+        //
+        // **Two, where this said zero until SC-C3-04.** The bar's row is built
+        // outside the async branches now, so search and the library overflow
+        // survive the failure that used to take them — and at the root that
+        // overflow is the only door to Trash (AD-22) and the tag catalogue.
+        // Losing them was the defect; the two painters they add here are the
+        // fix showing up in the inventory.
+        screenIconButtons: 2,
         screenItemId: 'deck_screen',
         hasSearchField: false, // error widget, not the level shell
       ),
@@ -370,8 +377,10 @@ void main() {
     ],
   );
 
-  // A deck deleted elsewhere (UC-03 E1). No app-bar actions at all, because
-  // there is no deck to act on — so zero icon buttons.
+  // A deck deleted elsewhere (UC-03 E1). No *deck* actions — there is no deck
+  // left to act on — but the level still carries the search entry, which
+  // navigates and so depends on nothing that failed (SC-C3-04). The library
+  // overflow is root-only, so it is absent here and the count is one, not two.
   memoxProductionScreenAuditTest(
     'deck_list_screen',
     () => deckLevelWith(FakeDeckRepository.missingDeck()),
@@ -391,10 +400,11 @@ void main() {
     allowances: <AuditSkipAllowance>[
       // **The bar stays, with Back** (A20.1 P1-15): a screen in its error
       // state used to drop its bar and the way back with it. No title and no
-      // deck actions — there is no deck left to act on — but the route
-      // implies dismissal, so the shell draws the bar and its one icon button.
+      // deck actions, but the route implies dismissal, so the shell draws the
+      // bar and its Back button — plus, since SC-C3-04, the level's search
+      // entry, which the failed read has no business closing.
       ...deckShellAllowances(
-        screenIconButtons: 0,
+        screenIconButtons: 1,
         screenItemId: 'deck_screen',
         hasBackButton: true,
         hasSearchField: false, // error widget, not the level shell

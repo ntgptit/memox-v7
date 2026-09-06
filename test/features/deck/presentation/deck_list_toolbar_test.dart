@@ -116,6 +116,10 @@ void main() {
         findsOneWidget,
         reason: 'the header states the level, filtered or not',
       );
+      // The guard on the rule below: a filter is only a reason to drop the
+      // toolbar when it matched *nothing*. One row left is still a list, and a
+      // list still has an order worth changing.
+      expect(find.byType(DeckListToolbarWidget), findsOneWidget);
     });
 
     /// Opens the sort sheet and picks [option].
@@ -259,8 +263,12 @@ void main() {
     testWidgets('a filter that matches nothing offers the way back', (
       tester,
     ) async {
-      // The one empty state that must keep the toolbar: it is how the user
-      // undoes the choice that emptied the list.
+      // **And loses the toolbar with the list.** The screen already refused to
+      // build a filter and a sort over an empty *level* — "two controls that
+      // visibly do nothing" — and this state was exempt only because that is
+      // where the early return happened to stop, never because anyone decided
+      // it. Dropping it costs nothing: the way back out of the filter is on
+      // the empty face itself, which is what the rest of this test walks.
       await pumpDeckScreen(
         tester,
         repository: FakeDeckRepository.withSummaries(<DeckSummary>[
@@ -276,11 +284,50 @@ void main() {
 
       expect(find.byType(DeckTileWidget), findsNothing);
       expect(find.text(english.decksNoDueTitle), findsOneWidget);
+      expect(find.byType(DeckListToolbarWidget), findsNothing);
 
       await tester.tap(find.text(english.decksShowAllAction));
       await tester.pumpAndSettle();
 
       expect(find.byType(DeckTileWidget), findsOneWidget);
+    });
+
+    testWidgets('and inside a deck the count-to-zero heading goes with it', (
+      tester,
+    ) async {
+      // The level where the dead control was loudest. The root's figure lives
+      // in the header, so its heading is the label alone; inside a deck the
+      // heading keeps the figure as its detail — which made a filter that
+      // matched nothing print "SUB-DECKS · 0" over a sort acting on no rows.
+      await pumpDeckScreen(
+        tester,
+        repository: FakeDeckRepository.withLevel(
+          parent: fakeRootDeck(id: 'deck-1', name: 'Japanese'),
+          children: <DeckSummary>[
+            fakeChildSummary(id: 'c1', name: 'Hiragana', parentId: 'deck-1'),
+          ],
+        ),
+        screen: const DeckListScreen(parentDeckId: 'deck-1'),
+      );
+
+      expect(find.byType(DeckListToolbarWidget), findsOneWidget);
+      expect(find.textContaining('· 1'), findsOneWidget);
+
+      // The level's own overflow, not the library's — scoped to the bar,
+      // because every deck row draws the same glyph.
+      await tester.tap(
+        find.descendant(
+          of: find.byType(AppBar),
+          matching: find.byIcon(Icons.more_vert),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(english.deckFilterDueLabel));
+      await tester.pumpAndSettle();
+
+      expect(find.text(english.decksNoDueTitle), findsOneWidget);
+      expect(find.byType(DeckListToolbarWidget), findsNothing);
+      expect(find.textContaining('· 0'), findsNothing);
     });
   });
 }

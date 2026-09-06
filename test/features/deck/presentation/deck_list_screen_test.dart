@@ -75,13 +75,20 @@ void main() {
       final empty = tester.widget<MxEmptyState>(find.byType(MxEmptyState));
       expect(find.text(english.decksEmptyTitle), findsOneWidget);
       expect(find.text(english.decksEmptyMessage), findsOneWidget);
-      // **Two ways forward, and ready-made content leads** (UC-01). Production
-      // seeds nothing, so this is a real first-run screen: the starter catalog
-      // is the primary action and the blank deck stays one tap away as the
-      // quieter second path.
-      expect(empty.actionLabel, english.deckStarterLibraryAction);
+      // **Two ways forward, and the primary is the one the FAB already
+      // starts.** UC-01 step 3 states the two paths and no ranking between
+      // them; the ranking asserted here until C3 was the screen's own, and it
+      // put the quieter control on the louder action — a filled brand FAB
+      // saying "New deck" over an empty state whose filled button said
+      // "Starter library", with "New deck" repeated under it in outline. One
+      // action, named once, in the weight the FAB already gives it — the
+      // pairing `card_list_screen.dart` uses and whose comment already claimed
+      // this screen used it too. Starter library keeps its place as the real
+      // second path (production seeds nothing), one tap away rather than
+      // loudest.
+      expect(empty.actionLabel, english.deckCreateRootAction);
       expect(empty.onAction, isNotNull);
-      expect(empty.secondaryActionLabel, english.deckCreateRootAction);
+      expect(empty.secondaryActionLabel, english.deckStarterLibraryAction);
       expect(empty.onSecondaryAction, isNotNull);
       expect(find.byType(MxErrorState), findsNothing);
       expect(tester.takeException(), isNull);

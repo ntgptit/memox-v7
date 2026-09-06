@@ -146,7 +146,31 @@ class CardDetailScreen extends ConsumerWidget {
       body: MxAsyncView<CardDetailModel>(
         value: detail,
         loadingLabel: context.l10n.cardDetailLoadingLabel,
-        error: (error, _) => _failureFace(context, ref, error),
+        // **Announced, because it arrives in place.** The read is a live
+        // stream, so both faces below can replace a card the user is already
+        // reading — a delete from elsewhere, or a read that fails mid-session —
+        // and neither moves anything the eye is drawn to. Without a live region
+        // a screen-reader user is told nothing and is left on a focus node that
+        // no longer exists.
+        //
+        // At the call site rather than inside `MxEmptyState`/`MxErrorState`,
+        // for the reason Progress states: those primitives also draw faces that
+        // arrive *with* a route, where the route change is the announcement.
+        // Wrapping the whole return covers both faces `_failureFace` can pick.
+        //
+        // Study Home and both Progress faces already compose it exactly this
+        // way — but most whole-screen failure faces in this app still do not,
+        // so this is the grammar being adopted, not one already settled.
+        error: (error, _) => Semantics(
+          container: true,
+          liveRegion: true,
+          child: _failureFace(
+            context,
+            ref,
+            error,
+            isRetrying: detail.isRefreshing,
+          ),
+        ),
         data: (value) => _Body(cardId: cardId, detail: value),
       ),
     );
@@ -158,7 +182,16 @@ class CardDetailScreen extends ConsumerWidget {
   ///
   /// The typed reason decides, never the message — a message is sanitized text
   /// for a human and matching on it would break the first time it is reworded.
-  Widget _failureFace(BuildContext context, WidgetRef ref, Object error) {
+  ///
+  /// [isRetrying] is the detail read's own `isRefreshing`, and it reaches only
+  /// the error face: the not-found recovery navigates rather than re-reads, so
+  /// there is nothing in flight for it to report.
+  Widget _failureFace(
+    BuildContext context,
+    WidgetRef ref,
+    Object error, {
+    required bool isRetrying,
+  }) {
     final isGone =
         error is NotFoundFailure && error.reason == CardNotFoundReason.cardGone;
     if (isGone) {
@@ -181,6 +214,13 @@ class CardDetailScreen extends ConsumerWidget {
       message: context.l10n.cardDetailErrorMessage,
       retryLabel: context.l10n.retryAction,
       onRetry: () => _retryDetail(ref, cardId),
+      // Without this the control was a lie. `invalidate` is a *refresh* to
+      // Riverpod, and `MxAsyncView` passes `skipLoadingOnRefresh: true`, so the
+      // same error face is repainted unchanged until the re-read lands — the
+      // person presses a button and gets no evidence the app noticed. The
+      // default loading shape keeps the label's layout slot, so the button's
+      // rect does not move under the finger that just pressed it.
+      isRetrying: isRetrying,
     );
   }
 }

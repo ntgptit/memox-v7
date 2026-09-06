@@ -18,11 +18,22 @@ class TrashFilterBarWidget extends StatelessWidget {
   });
 
   final TrashFilter filter;
-  final ValueChanged<TrashFilter> onChanged;
+
+  /// Null while a selection is held.
+  ///
+  /// **The band stays on screen and stops answering, rather than leaving.**
+  /// The filter is still applied to the list underneath, so a band that
+  /// vanished would leave a narrowed list with nothing naming what narrowed
+  /// it, and its ~60dp of height would come out from under the finger on the
+  /// frame the long press lands. Changing the filter mid-selection would
+  /// orphan rows the user had already picked, so the answer is inert, not
+  /// absent. `MxPillButton` documents a null `onPressed` as exactly this case.
+  final ValueChanged<TrashFilter>? onChanged;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final onChanged = this.onChanged;
 
     // The group introduces itself to a screen reader before its options
     // (M100.36 11F, #434 P2-8); the pills keep their own selected state.
@@ -52,7 +63,7 @@ class TrashFilterBarWidget extends StatelessWidget {
               MxPillButton(
                 label: entry.$2,
                 isSelected: filter == entry.$1,
-                onPressed: () => onChanged(entry.$1),
+                onPressed: onChanged == null ? null : () => onChanged(entry.$1),
               ),
           ],
         ),

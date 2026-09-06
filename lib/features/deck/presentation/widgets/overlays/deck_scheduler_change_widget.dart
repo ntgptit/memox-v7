@@ -10,6 +10,7 @@ import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_button_pair.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
+import '../../../../../shared/widgets/mx_feedback_band.dart';
 import '../../../domain/entities/deck_entity.dart';
 import '../../../domain/failures/deck_conflict_failure.dart';
 import '../../../domain/models/scheduler_type_model.dart';
@@ -191,10 +192,16 @@ class _SchedulerSheetState extends ConsumerState<_SchedulerSheet> {
         onChanged: (value) => setState(() => _scheduler = value ?? _scheduler),
       ),
       if (submit.failure != null) ...<Widget>[
-        const SizedBox(height: AppSpacing.md),
-        Text(
-          context.deckWriteFailure(submit.failure!),
-          style: context.texts.bodySmall!.inked(context, AppInk.danger),
+        // The one grammar for an in-flow failure — see `deck_form_widget.dart`
+        // for why the bare red line went (SC-C3-19).
+        //
+        // Still no action on the band, including for the lock refusal below:
+        // there the recovery is not a retry at all, and the footer already
+        // swaps its primary to the one operation that still works.
+        const SizedBox(height: AppSpacing.lg),
+        MxFeedbackBand(
+          title: context.l10n.deckWriteErrorTitle,
+          message: context.deckWriteFailure(submit.failure!),
         ),
       ],
       const SizedBox(height: AppSpacing.xl),

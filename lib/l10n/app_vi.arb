@@ -391,13 +391,29 @@
   "@starterLibrarySchedulerPrompt": {
     "description": "Label above the scheduler picker in the install sheet. The template only suggests a default (BR-34)."
   },
+  "starterLibraryInstallErrorTitle": "Chưa thêm được bộ thẻ này",
+  "@starterLibraryInstallErrorTitle": {
+    "description": "Title of the failure band in the starter install sheet. Not deckWriteErrorTitle (“Couldn’t save”): a copy that rolled back is a different event from a save that did not land, and a band whose title and message name two events reads as two failures. Its message, starterLibraryInstallFailed, still opens by restating this headline — tightening that string to the consequence alone is a copy change that belongs to that key’s own owner, not to this consistency pass."
+  },
   "starterLibraryInstallFailed": "Không thêm được bộ thẻ này. Chưa có gì được sao chép.",
   "@starterLibraryInstallFailed": {
-    "description": "Install failure line; the transaction rolled back (BR-39). Shown with a retry."
+    "description": "Install failure line; the transaction rolled back (BR-39). Shown with a retry. Belongs to the install sheet and nowhere else — it is the only place an install can fail. The catalog screen borrowed it for a read failure and told the user a copy had been attempted when none had; that face now uses starterLibraryLoadFailed."
+  },
+  "starterLibraryLoadErrorTitle": "Không tải được thư viện mẫu",
+  "@starterLibraryLoadErrorTitle": {
+    "description": "Title of the full-screen error face when the starter catalog itself fails to load. The \"Couldn’t …\" phrase carries the failure, like every other screen-level load failure; the screen name alone told the user nothing about what went wrong."
+  },
+  "starterLibraryLoadFailed": "Chưa có gì được thêm. Hãy thử lại sau giây lát.",
+  "@starterLibraryLoadFailed": {
+    "description": "Supporting line under starterLibraryLoadErrorTitle. Says the read failed and that it copied nothing — true by construction, because reading the catalog has no write path. Distinct from starterLibraryInstallFailed, which describes an add the user actually asked for."
+  },
+  "starterLibraryEmptyTitle": "Chưa có bộ thẻ mẫu",
+  "@starterLibraryEmptyTitle": {
+    "description": "Heading of the empty state when the manifest publishes no starter decks. Not an error — an empty manifest is a legitimate build, the same way decksEmptyTitle covers a library nobody has filled yet."
   },
   "starterLibraryEmpty": "Bản dựng này chưa công bố bộ thẻ mẫu nào.",
   "@starterLibraryEmpty": {
-    "description": "Catalog screen with an empty manifest."
+    "description": "Catalog screen with an empty manifest. The supporting line under starterLibraryEmptyTitle."
   },
   "starterLibraryLocaleLabel": "Ngôn ngữ: {locale, select, en{English} vi{Tiếng Việt} ko{한국어} other{{locale}}}",
   "@starterLibraryLocaleLabel": {
@@ -1671,9 +1687,17 @@
   "@studySummaryBackToDeck": {
     "description": "Leaves the summary."
   },
+  "studySummaryLoadingLabel": "Đang tải tổng kết phiên học",
+  "@studySummaryLoadingLabel": {
+    "description": "Screen-reader label for the spinner shown while the epilogue read is in flight, after the session has already ended. Separate from studySessionLoadingLabel because what is loading is the summary, not the session."
+  },
   "studyOptionsTitle": "Bạn học thế nào",
   "@studyOptionsTitle": {
     "description": "Title of the study options screen (BR-147)."
+  },
+  "studyOptionsLoadErrorTitle": "Không tải được tuỳ chọn học",
+  "@studyOptionsLoadErrorTitle": {
+    "description": "Title of the whole-screen error state when a deck's study options could not be READ. Deliberately not studyOptionsTitle: the screen name repeated under a red glyph reads as a heading, not a failure, and tells the user nothing about what went wrong. Mirrors settingsLoadErrorTitle and reminderLoadErrorTitle, which are the same situation on the other two screens that read this pair of values."
   },
   "studyOptionsCardLimitLabel": "Số thẻ mỗi phiên",
   "@studyOptionsCardLimitLabel": {
@@ -1758,6 +1782,18 @@
   "studyNothingNewMessage": "Mọi thẻ ở đây đều đã học xong.",
   "@studyNothingNewMessage": {
     "description": "Shown when the deck has no unlearned cards left (BR-142)."
+  },
+  "studyEntryAllCaughtUpTitle": "Đã học hết",
+  "@studyEntryAllCaughtUpTitle": {
+    "description": "Heading of the study entry screen when a deck has nothing new and nothing due. Same words as the deck card's chip for that state (deckTileAllCaughtUpLabel), because it is the same fact about the same deck. A normal state, never an error (BR-29, BR-145)."
+  },
+  "studyEntryLoadingLabel": "Đang tải bộ thẻ này",
+  "@studyEntryLoadingLabel": {
+    "description": "Screen-reader label for the study entry spinner. It names what is loading: the label used to be the product name, which says neither that something is happening nor what."
+  },
+  "studyEntryErrorMessage": "Không đọc được bộ thẻ này. Không có gì bị thay đổi.",
+  "@studyEntryErrorMessage": {
+    "description": "Body of the study entry read failure. Says the read failed and that it wrote nothing — true by construction, because the counts come from a query controller with no write path. Names no table, no query and no path (AD-04)."
   },
   "studyChooseModeTitle": "Bạn muốn ôn kiểu nào?",
   "@studyChooseModeTitle": {
@@ -1904,6 +1940,18 @@
   "studySessionFinished": "Đã xong phiên học.",
   "@studySessionFinished": {
     "description": "Shown when every stage has run out of queue (BR-81)."
+  },
+  "studySessionErrorTitle": "Không thể mở phiên học này",
+  "@studySessionErrorTitle": {
+    "description": "Title of the whole-screen error face when a session could not be opened, resumed, or handed its first card — the one state where nothing is left on screen to act on. Names the failure rather than the app."
+  },
+  "studySessionErrorMessage": "Tiến độ của bạn vẫn an toàn. Hãy quay lại deck và thử lại.",
+  "@studySessionErrorMessage": {
+    "description": "Body of that error face. Says no answer is lost, including a resumed session's earlier ones, and points at the only control on screen. Never carries the failure's own message."
+  },
+  "studySessionLoadingLabel": "Đang mở phiên học",
+  "@studySessionLoadingLabel": {
+    "description": "Screen-reader label for the spinner shown while a session is being opened and its first turn read. Names its subject rather than the product name."
   },
   "studyRecallSecondsLeft": "{seconds} giây",
   "@studyRecallSecondsLeft": {

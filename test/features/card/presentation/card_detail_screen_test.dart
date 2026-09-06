@@ -5,6 +5,9 @@ import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/features/card/domain/failures/card_not_found_failure.dart';
 import 'package:memox/features/card/domain/models/card_history_page_model.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
+import 'package:memox/shared/widgets/mx_action_button.dart';
+import 'package:memox/shared/widgets/mx_empty_state.dart';
+import 'package:memox/shared/widgets/mx_error_state.dart';
 
 import 'support/card_detail_harness.dart';
 import 'support/fake_card_detail_repository.dart';
@@ -226,6 +229,105 @@ void main() {
 
       expect(find.textContaining('secret-card'), findsNothing);
       expect(find.textContaining('SELECT'), findsNothing);
+    });
+
+    testWidgets('both faces announce themselves to a reader already on the '
+        'screen', (tester) async {
+      // The detail read is a live stream, so either face can replace a card
+      // somebody is in the middle of reading — a delete from elsewhere, a read
+      // that fails mid-session — without moving anything the eye is drawn to.
+      // Without a live region a TalkBack user is told nothing and is left on a
+      // focus node that no longer exists.
+      //
+      // Asserted through `getSemantics(find.byType(...))` — the shape
+      // `progress_error_face_test.dart` uses for the same wrapper — rather
+      // than through the nearest ancestor `Semantics` *widget* of the title.
+      // Both faces put their copy inside a `SingleChildScrollView`, and a
+      // `Scrollable` builds a `Semantics` of its own; the nearest-ancestor
+      // shape would find that one and pass whatever the call site does.
+      final handle = tester.ensureSemantics();
+      final repository = FakeCardDetailRepository();
+      await pumpCardDetail(tester, repository);
+
+      repository.emitDetailError(const DatabaseFailure(message: 'read failed'));
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .getSemantics(find.byType(MxErrorState))
+            .getSemanticsData()
+            .flagsCollection
+            .isLiveRegion,
+        isTrue,
+      );
+
+      repository.emitDetailError(
+        const NotFoundFailure(
+          message: 'That card no longer exists.',
+          reason: CardNotFoundReason.cardGone,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .getSemantics(find.byType(MxEmptyState))
+            .getSemanticsData()
+            .flagsCollection
+            .isLiveRegion,
+        isTrue,
+      );
+      handle.dispose();
+    });
+
+    testWidgets('Retry says the tap was received, without moving under the '
+        'finger', (tester) async {
+      final repository = FakeCardDetailRepository();
+      await pumpCardDetail(tester, repository);
+      repository.emitDetailError(const DatabaseFailure(message: 'read failed'));
+      await tester.pumpAndSettle();
+
+      final Rect idleButton = tester.getRect(find.byType(MxActionButton));
+
+      await tester.tap(find.text('Retry'));
+      // One frame, not `pumpAndSettle`: the re-read is what is being asserted,
+      // and the fake's stream never answers it, so settling would time out on
+      // the spinner this test is looking for.
+      await tester.pump();
+
+      // The face stays — `invalidate` is a *refresh* and `MxAsyncView` skips
+      // the loading branch on one — so without the button's own busy state
+      // nothing on screen changed at all for as long as the read takes.
+      expect(find.byType(MxErrorState), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(MxActionButton),
+          matching: find.byType(CircularProgressIndicator),
+        ),
+        findsOneWidget,
+      );
+
+      // `MxActionButton` keeps the label in the tree either way — at
+      // `opacity 0` under the spinner by default, beside it when
+      // `shouldKeepLabelWhileLoading` is on, which widens the button by
+      // `AppIconSize.sm + AppSpacing.sm`. Both halves are asserted because only
+      // together do they say which shape is on screen, and only the default one
+      // leaves the rect where the finger found it.
+      expect(
+        tester
+            .widget<Opacity>(
+              find
+                  .ancestor(
+                    of: find.text('Retry'),
+                    matching: find.byType(Opacity),
+                  )
+                  .first,
+            )
+            .opacity,
+        0,
+        reason:
+            'the label holds its slot rather than being laid out beside '
+            'the spinner',
+      );
+      expect(tester.getRect(find.byType(MxActionButton)), idleButton);
     });
   });
 

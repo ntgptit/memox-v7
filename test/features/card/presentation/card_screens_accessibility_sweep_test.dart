@@ -75,6 +75,18 @@ void main() {
     await sweep(tester);
   });
 
+  // **The other mode of the same screen, which the sweep never mounted.** Every
+  // accessibility measurement taken on the editor was taken on edit, so a fix
+  // made there — the save failure's live region — sat unmade in create for as
+  // long as it took someone to read both files side by side (SC-C3-03).
+  testWidgets('card editor, creating', (tester) async {
+    final repository = FakeCardRepository();
+    addTearDown(repository.dispose);
+    await pumpCardEditor(tester, repository, cardId: null);
+    await tester.pumpAndSettle();
+    await sweep(tester);
+  });
+
   final importHarness = installCardImportWizardHarness();
 
   testWidgets('card import, first step', (tester) async {

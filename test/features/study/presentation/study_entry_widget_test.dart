@@ -1,9 +1,13 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/study/domain/models/study_entry_summary_model.dart';
 import 'package:memox/features/study/domain/models/study_mode.dart';
 import 'package:memox/features/study/presentation/widgets/overlays/study_mode_chooser_widget.dart';
 import 'package:memox/features/study/presentation/widgets/overlays/study_resume_widget.dart';
 import 'package:memox/features/study/presentation/widgets/sections/study_entry_section_widget.dart';
+import 'package:memox/shared/widgets/mx_action_button.dart';
+import 'package:memox/shared/widgets/mx_empty_state.dart';
+import 'package:memox/shared/widgets/mx_list_tile.dart';
 
 import 'support/study_widget_harness.dart';
 
@@ -84,6 +88,31 @@ void main() {
       expect(find.text('Learn new'), findsNothing);
       expect(find.textContaining('has been learned'), findsOneWidget);
     });
+
+    testWidgets('nothing new and nothing due is an empty state, not zeroes', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrapForTest(
+          StudyEntrySectionWidget(
+            summary: summaryOf(newCount: 0, dueCount: 0),
+            onLearn: () {},
+            onReview: () {},
+          ),
+        ),
+      );
+
+      // Both entries are gone at (0, 0), so the readout row was the loudest
+      // thing left on the screen and all it said was "New 0": the app's
+      // largest type spent stating an absence twice.
+      expect(find.byType(MxEmptyState), findsOneWidget);
+      expect(find.text('New 0'), findsNothing);
+      expect(find.text('Due 0'), findsNothing);
+      expect(find.text('All caught up'), findsOneWidget);
+      // Action-free, like the app's other dead ends: the way out is the app
+      // bar, and a button here would be a second one.
+      expect(find.byType(MxActionButton), findsNothing);
+    });
   });
 
   group('the mode chooser', () {
@@ -150,6 +179,43 @@ void main() {
       await tester.pump();
 
       expect(chosen, isEmpty);
+    });
+
+    testWidgets('an unavailable mode is greyed, not merely untappable (BR-99)', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrapForTest(
+          StudyModeChooserWidget(
+            modes: eightBoxModes,
+            summary: summaryOf(fillableCount: 0),
+            onModeSelected: (_) {},
+          ),
+        ),
+      );
+
+      // A null `onTap` alone leaves the row at full ink: before this was fixed
+      // all four titles measured #ff223354 and all four subtitles #ff596680,
+      // so the reason sentence was the only thing telling a sighted user the
+      // row was dead. Read off the rendered paragraph rather than the tile's
+      // flag, because the flag is what regressed into being decorative.
+      Color inkOf(String label) {
+        final rich = tester.widget<RichText>(
+          find
+              .descendant(of: find.text(label), matching: find.byType(RichText))
+              .first,
+        );
+        return (rich.text as TextSpan).style!.color!;
+      }
+
+      final disabled = Theme.of(
+        tester.element(find.byType(MxListTile).first),
+      ).disabledColor;
+
+      expect(inkOf('Fill in'), disabled);
+      expect(inkOf('Needs cards with an example'), disabled);
+      // The runnable neighbour keeps full ink, so the difference is the signal.
+      expect(inkOf('Recall'), isNot(disabled));
     });
 
     testWidgets('guess needs five distinct meanings (BR-121, BR-124)', (

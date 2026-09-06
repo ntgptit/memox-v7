@@ -11,6 +11,7 @@ import 'package:memox/features/trash/domain/models/trash_restore_target_model.da
 import 'package:memox/features/trash/presentation/screens/trash_screen.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
+import 'package:memox/shared/widgets/mx_list_tile.dart';
 import 'package:memox/l10n/generated/app_localizations.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 
@@ -102,6 +103,13 @@ void main() {
       expect(find.text(english.retryAction), findsOneWidget);
       expect(repository.restores, isEmpty);
 
+      // The headline names the failure, not the sheet. "Restore to" in large
+      // type above a failure message says nothing about what went wrong; the
+      // generic phrase is what the structurally identical card move sheet
+      // uses, and `trashCommandError` carries the specifics below it.
+      expect(find.text(english.unexpectedErrorTitle), findsOneWidget);
+      expect(find.text(english.trashRestoreTargetTitle), findsNothing);
+
       // The compact sheet must not balloon to the whole screen the moment
       // the read fails: the error face shrink-wraps inside a min Column.
       // Measured on the sheet itself, not the error widget: the error face
@@ -146,6 +154,96 @@ void main() {
       expect(find.text(english.trashRestoreTargetEmpty), findsOneWidget);
       // No disabled rows: the picker draws only what would be accepted (T8).
       expect(find.text(english.trashRestoreConfirmAction), findsNothing);
+
+      // One sentence must not occupy the whole screen. Same measurement, same
+      // reason as the error case: `MxEmptyState` is a `Center`, so only the
+      // min Column around it keeps the *sheet* off the loose height.
+      final Size sheet = tester.getSize(find.byType(BottomSheet));
+      final Size screen = tester.getSize(find.byType(MaterialApp));
+      expect(
+        sheet.height,
+        lessThan(screen.height * 0.6),
+        reason: 'the sheet hugs its content instead of filling the screen',
+      );
+    });
+
+    testWidgets('the sheet is already compact while the targets load', (
+      tester,
+    ) async {
+      final repository = await pumpTrash(
+        tester,
+        batches: <TrashBatchEntity>[fakeBatch(id: 'b1', name: 'a card')],
+      );
+      repository.isTargetsPending = true;
+
+      await tester.tap(find.byTooltip(english.trashRestoreAction));
+      // Not `pumpAndSettle`: the spinner never stops, and the frame under test
+      // is the one before any answer arrives. Two pumps — one to start the
+      // sheet's entrance, one long enough to finish it.
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+      // The sheet used to open at full height and snap ~350dp shorter the
+      // moment the targets landed, because the min Column was on the error
+      // face alone. Every open showed that jump.
+      final Size sheet = tester.getSize(find.byType(BottomSheet));
+      final Size screen = tester.getSize(find.byType(MaterialApp));
+      expect(
+        sheet.height,
+        lessThan(screen.height * 0.6),
+        reason: 'the sheet hugs its content instead of filling the screen',
+      );
+    });
+
+    testWidgets('the picked target carries a filled radio, not colour alone', (
+      tester,
+    ) async {
+      await pumpTrash(
+        tester,
+        batches: <TrashBatchEntity>[fakeBatch(id: 'b1', name: 'a card')],
+        targets: <TrashRestoreTarget>[
+          const TrashDeckTarget(
+            deckId: 'origin',
+            name: 'Origin',
+            parentName: null,
+          ),
+          const TrashDeckTarget(
+            deckId: 'other',
+            name: 'Other',
+            parentName: null,
+          ),
+        ],
+      );
+
+      await tester.tap(find.byTooltip(english.trashRestoreAction));
+      await tester.pumpAndSettle();
+
+      // The origin is preselected (BR-262), so exactly one glyph is filled —
+      // the state survives a monochrome display, which the tile tint and a
+      // recoloured title alone did not.
+      expect(find.byIcon(Icons.radio_button_checked), findsOneWidget);
+      expect(find.byIcon(Icons.radio_button_unchecked), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.widgetWithText(MxListTile, 'Origin'),
+          matching: find.byIcon(Icons.radio_button_checked),
+        ),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.text('Other'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.descendant(
+          of: find.widgetWithText(MxListTile, 'Other'),
+          matching: find.byIcon(Icons.radio_button_checked),
+        ),
+        findsOneWidget,
+      );
+      expect(find.byIcon(Icons.radio_button_checked), findsOneWidget);
     });
 
     testWidgets('the primary is inert until a target is chosen', (

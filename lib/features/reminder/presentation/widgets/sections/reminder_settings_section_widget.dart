@@ -26,6 +26,7 @@ import 'reminder_banner_section_widget.dart';
 class ReminderSettingsSectionWidget extends StatelessWidget {
   const ReminderSettingsSectionWidget({
     required this.overview,
+    required this.pendingTime,
     required this.isBusy,
     required this.onEnabledChanged,
     required this.onTimePressed,
@@ -35,6 +36,17 @@ class ReminderSettingsSectionWidget extends StatelessWidget {
   });
 
   final ReminderOverviewModel overview;
+
+  /// The time the row shows and the picker opens at — one value, so the two
+  /// cannot disagree about which time is the user's.
+  ///
+  /// Normally `overview.settings.time`. While a time change stands rejected it
+  /// is the time the user picked, because the stored one has been rolled back
+  /// and the banner below is still offering to re-submit the pick. **The screen
+  /// decides which**, not this section: choosing needs to know *which* of the
+  /// three commands failed, and this widget is only handed the one banner they
+  /// collapse into.
+  final ReminderTime pendingTime;
 
   /// Whether any of the screen's three commands is in flight (UC-17 S3).
   final bool isBusy;
@@ -117,9 +129,9 @@ class ReminderSettingsSectionWidget extends StatelessWidget {
                     child: const Divider(),
                   ),
                   ReminderTimeRowWidget(
-                    time: settings.time,
+                    time: pendingTime,
                     isChangeable: canPickTime,
-                    onTap: () => onTimePressed(settings.time),
+                    onTap: () => onTimePressed(pendingTime),
                   ),
                 ],
               ),

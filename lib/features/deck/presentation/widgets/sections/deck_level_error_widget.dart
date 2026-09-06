@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../../core/error/failure.dart';
 import '../../../../../core/navigation/route_names.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_breadcrumb.dart';
 import '../../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../../shared/widgets/mx_error_state.dart';
 
@@ -23,6 +24,7 @@ class DeckLevelErrorWidget extends StatelessWidget {
   const DeckLevelErrorWidget({
     required this.error,
     required this.title,
+    required this.actions,
     required this.isRootLevel,
     required this.onRetry,
     super.key,
@@ -33,6 +35,17 @@ class DeckLevelErrorWidget extends StatelessWidget {
   /// The app-bar title, or null inside a deck — where the name was in the read
   /// that just failed.
   final String? title;
+
+  /// The level's bar actions, built by the screen and identical to the ones the
+  /// loaded level draws.
+  ///
+  /// **A failure must not also remove the way out.** This branch used to pass
+  /// none, so at the root a failed read took the search entry and the overflow
+  /// with it — and that overflow is the only door to Trash (AD-22) and to the
+  /// tag catalogue. Neither depends on the read that failed, so neither has any
+  /// business disappearing with it.
+  final List<Widget> actions;
+
   final bool isRootLevel;
 
   /// Re-reads the level. Supplied by the caller, which owns the `ref`.
@@ -44,6 +57,15 @@ class DeckLevelErrorWidget extends StatelessWidget {
 
     return MxContentShell(
       title: title,
+      actions: actions,
+      // The empty second line the loading frame also reserves, so the bar is
+      // one height across loading, failure and the loaded level rather than
+      // stepping 56 -> 84dp when the data lands. Root only: inside a deck a
+      // subline would tell the shell the title owns the way back, and the
+      // failed level has no breadcrumb to draw one with.
+      titleSubline: isRootLevel
+          ? const SizedBox(height: MxBreadcrumb.compactLineHeight)
+          : null,
       body: MxErrorState(
         title: isMissing
             ? context.l10n.deckDetailNotFoundTitle
