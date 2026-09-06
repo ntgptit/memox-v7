@@ -83,14 +83,25 @@ class ReminderSettingsScreen extends ConsumerWidget {
           // reminder couldn't be scheduled" by choosing a slightly different
           // time would have to dial back from the old value first.
           //
-          // Gated on that one command's rejection rather than applied
-          // unconditionally: once it clears — including after a successful
-          // disable then enable — the stored time is authoritative again, and
-          // an ungated `draft ??` would leave the row naming a time the
-          // database does not hold with no banner beside it to say why.
-          final pendingTime = time.rejection == null
-              ? overview.settings.time
-              : draft ?? overview.settings.time;
+          // Gated on that one command rather than applied unconditionally:
+          // once it settles — including after a successful disable then enable
+          // — the stored time is authoritative again, and an ungated `draft ??`
+          // would leave the row naming a time the database does not hold with
+          // no banner beside it to say why.
+          //
+          // **The gate is rejection *or* in flight**, and the second half is
+          // the correction. It used to be rejection alone, which meant that
+          // pressing `Retry` rolled the row back to the abandoned time for the
+          // whole duration of the resubmit: the rejection clears the instant
+          // the command starts, and the new one has not arrived yet. So the
+          // one moment the user is watching to see whether their pick took,
+          // the screen stopped showing their pick — and if the retry failed
+          // again it reappeared, which reads as the app changing its mind.
+          final pendingTime = pendingReminderTime(
+            time,
+            draft: draft,
+            persisted: overview.settings.time,
+          );
 
           return ReminderSettingsSectionWidget(
             overview: overview,
@@ -182,18 +193,52 @@ class ReminderSettingsScreen extends ConsumerWidget {
       return _setEnabled(ref, overview, isEnabled: false);
     }
 
-    if (ref.read(reminderTimeControllerProvider).rejection != null) {
-      final draft = ref.read(reminderTimeDraftControllerProvider);
+    final ReminderSubmitState timeState = ref.read(
+      reminderTimeControllerProvider,
+    );
+    if (timeState.rejection != null) {
+      // The same expression the row is built from, so `Retry` can only ever
+      // resubmit the time the user is looking at.
+      final ReminderTime resubmit = pendingReminderTime(
+        timeState,
+        draft: ref.read(reminderTimeDraftControllerProvider),
+        persisted: overview.settings.time,
+      );
       ref.read(reminderEnableControllerProvider.notifier).reset();
       ref.read(reminderDisableControllerProvider.notifier).reset();
 
       return unawaited(
-        ref
-            .read(reminderTimeControllerProvider.notifier)
-            .submit(draft ?? overview.settings.time),
+        ref.read(reminderTimeControllerProvider.notifier).submit(resubmit),
       );
     }
 
     _setEnabled(ref, overview, isEnabled: true);
   }
 }
+
+/// The time the row, the dial and `Retry` all name.
+///
+/// **One function because there were two copies of it**, and they were allowed
+/// to disagree: the display gated on `rejection != null`, the retry resubmitted
+/// `draft ?? persisted` unconditionally at its own call site. A change to
+/// either rule had to be made twice or the screen would show one time and
+/// resubmit another.
+///
+/// **While the change is rejected, and while it is in flight.** A rejected
+/// reschedule rolls the stored row back, so the persisted value is the time the
+/// user *abandoned*; showing it discards the pick the banner beside it is still
+/// offering to re-submit. And the retry itself clears the rejection the instant
+/// it starts, so a rule gated on rejection alone put the abandoned time back on
+/// screen for exactly as long as the user was watching to see whether their
+/// pick had taken.
+///
+/// Once the command settles with no rejection the stored value is authoritative
+/// again: a success has persisted the draft, and anything else has a banner
+/// beside it saying so.
+ReminderTime pendingReminderTime(
+  ReminderSubmitState time, {
+  required ReminderTime? draft,
+  required ReminderTime persisted,
+}) => time.rejection != null || time.isSubmitting
+    ? draft ?? persisted
+    : persisted;

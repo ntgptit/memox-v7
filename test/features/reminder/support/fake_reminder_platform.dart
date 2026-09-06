@@ -42,6 +42,15 @@ class FakeReminderPlatform implements ReminderPlatformRepository {
   /// deliberately grown by 120dp mid-write.
   final Completer<ReminderPermission>? permissionGate;
 
+  /// Held open, a `schedule` never answers — the only way a widget test can
+  /// stop on the *submitting* frame of a time change and measure it.
+  ///
+  /// [permissionGate] does this for the enable path and records the reason;
+  /// this is the same device for the reschedule path. Checked before
+  /// [shouldFailSchedule] so one test can hold a retry open, flip the failure
+  /// flag while it waits, and let it settle either way.
+  Completer<void>? scheduleGate;
+
   /// Every schedule ever asked for, so idempotency is asserted on the count
   /// rather than on a boolean somebody has to reset.
   final List<ReminderTime> scheduled = <ReminderTime>[];
@@ -74,6 +83,8 @@ class FakeReminderPlatform implements ReminderPlatformRepository {
     DateTime? notBefore,
   }) async {
     lastNotBefore = notBefore;
+    final gate = scheduleGate;
+    if (gate != null) await gate.future;
     if (shouldFailSchedule) {
       throw const ConflictFailure(
         message: 'refused',
@@ -129,6 +140,15 @@ class FakeReminderSettings implements ReminderSettingsRepository {
   /// *save* copy for a failure that was a read.
   bool shouldFailRead = false;
 
+  /// Held open, the **next** `saveSettings` never lands — which is how a widget
+  /// test reaches the one frame between a command starting and its optimistic
+  /// write arriving on the settings stream.
+  ///
+  /// One-shot on purpose: `ChangeReminderTimeUseCase` writes, reconciles, and
+  /// on failure writes again to roll back. A gate that held every save would
+  /// deadlock that rollback and prove nothing.
+  Completer<void>? saveGate;
+
   ReminderSettingsModel get current => _current;
 
   @override
@@ -151,6 +171,11 @@ class FakeReminderSettings implements ReminderSettingsRepository {
     required bool isEnabled,
     required ReminderTime time,
   }) async {
+    final gate = saveGate;
+    if (gate != null) {
+      saveGate = null;
+      await gate.future;
+    }
     if (shouldFailWrite) {
       throw const DatabaseFailure(
         message: 'write refused',
