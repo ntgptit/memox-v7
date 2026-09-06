@@ -22,6 +22,17 @@ class DeckControllerTest extends PostgresIntegrationTest {
 	private MockMvc mockMvc;
 
 	@Test
+	void returnsAnEmptyPageWhenNoRootDecksExist() throws Exception {
+		mockMvc.perform(get("/api/v1/decks").param("limit", "20"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.items").isEmpty())
+				.andExpect(jsonPath("$.totalItems").value(0))
+				.andExpect(jsonPath("$.totalPages").value(0))
+				.andExpect(jsonPath("$.hasNext").value(false))
+				.andExpect(jsonPath("$.hasPrevious").value(false));
+	}
+
+	@Test
 	void createsAndListsAClientIdentifiedRootDeck() throws Exception {
 		final var deckId = UUID.randomUUID().toString();
 		final var request = """
@@ -49,6 +60,22 @@ class DeckControllerTest extends PostgresIntegrationTest {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.items[?(@.id == '%s')].name".formatted(deckId))
 						.value("Korean basics"));
+	}
+
+	@Test
+	void retainsRootDeckTotalsWhenOffsetExceedsAvailableDecks() throws Exception {
+		createRootDeck(UUID.randomUUID().toString(), "First root");
+		createRootDeck(UUID.randomUUID().toString(), "Second root");
+
+		mockMvc.perform(get("/api/v1/decks")
+					.param("limit", "1")
+					.param("offset", "100"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.items").isEmpty())
+				.andExpect(jsonPath("$.totalItems").value(2))
+				.andExpect(jsonPath("$.totalPages").value(2))
+				.andExpect(jsonPath("$.hasNext").value(false))
+				.andExpect(jsonPath("$.hasPrevious").value(true));
 	}
 
 	@Test
@@ -122,5 +149,14 @@ class DeckControllerTest extends PostgresIntegrationTest {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.contentType").value("deck"))
 				.andExpect(jsonPath("$.rootDeckId").value(rootId));
+	}
+
+	private void createRootDeck(String deckId, String name) throws Exception {
+		mockMvc.perform(post("/api/v1/decks")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""
+							{"id":"%s","name":"%s","schedulerType":"sm2"}
+							""".formatted(deckId, name)))
+				.andExpect(status().isCreated());
 	}
 }

@@ -33,6 +33,22 @@ class CardControllerTest extends PostgresIntegrationTest {
 	}
 
 	@Test
+	void returnsAnEmptyPageForAnExistingDeckWithoutCards() throws Exception {
+		final var rootId = UUID.randomUUID().toString();
+		final var cardDeckId = UUID.randomUUID().toString();
+		createRoot(rootId);
+		createChild(rootId, cardDeckId);
+
+		mockMvc.perform(get("/api/v1/decks/{deckId}/cards", cardDeckId).param("limit", "20"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.items").isEmpty())
+				.andExpect(jsonPath("$.totalItems").value(0))
+				.andExpect(jsonPath("$.totalPages").value(0))
+				.andExpect(jsonPath("$.hasNext").value(false))
+				.andExpect(jsonPath("$.hasPrevious").value(false));
+	}
+
+	@Test
 	void createsCardAndInitialStudyStateInAnUnsetSubDeck() throws Exception {
 		final var rootId = UUID.randomUUID().toString();
 		final var cardDeckId = UUID.randomUUID().toString();
@@ -100,6 +116,26 @@ class CardControllerTest extends PostgresIntegrationTest {
 				.andExpect(jsonPath("$.items[0].id").value(secondCardId))
 				.andExpect(jsonPath("$.limit").value(1))
 				.andExpect(jsonPath("$.offset").value(1))
+				.andExpect(jsonPath("$.totalItems").value(2))
+				.andExpect(jsonPath("$.totalPages").value(2))
+				.andExpect(jsonPath("$.hasNext").value(false))
+				.andExpect(jsonPath("$.hasPrevious").value(true));
+	}
+
+	@Test
+	void retainsCardTotalsWhenOffsetExceedsAvailableCards() throws Exception {
+		final var rootId = UUID.randomUUID().toString();
+		final var cardDeckId = UUID.randomUUID().toString();
+		createRoot(rootId);
+		createChild(rootId, cardDeckId);
+		createCard(cardDeckId, UUID.randomUUID().toString(), "First", "One");
+		createCard(cardDeckId, UUID.randomUUID().toString(), "Second", "Two");
+
+		mockMvc.perform(get("/api/v1/decks/{deckId}/cards", cardDeckId)
+					.param("limit", "1")
+					.param("offset", "100"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.items").isEmpty())
 				.andExpect(jsonPath("$.totalItems").value(2))
 				.andExpect(jsonPath("$.totalPages").value(2))
 				.andExpect(jsonPath("$.hasNext").value(false))
