@@ -14,6 +14,14 @@ name: Build APK
 # The PR pipeline in `ci.yml` stays the thing that decides whether a change is
 # correct; this decides nothing.
 #
+# **Draft release, not a published one.** With `publish_release` ticked the APKs
+# are also attached to a draft release tagged `<flavor>-<sha8>`. Draft is the
+# point, not a step left unfinished: a draft is visible only to write access,
+# never takes the "Latest" label, and creates no git tag until somebody
+# publishes it by hand — all three of which are what a debug-signed binary
+# deserves. The step is idempotent, so re-running on the same commit refreshes
+# that draft's assets instead of failing on a tag that already exists.
+#
 # **Debug-signed, and that is a fact about the repo, not a shortcut taken
 # here.** `android/app/build.gradle.kts` still points the release build type at
 # `signingConfigs.getByName("debug")` with its own TODO. Consequences the
@@ -36,13 +44,20 @@ on:
         description: 'One APK per ABI (smaller; arm64-v8a suits essentially every current phone)'
         type: boolean
         default: true
+      publish_release:
+        description: 'Attach the APKs to a draft GitHub Release (uncheck for a throwaway build)'
+        type: boolean
+        default: true
 
 concurrency:
   group: build-apk-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
-  contents: read
+  # `write` is what lets the publish step create a draft release. GitHub has no
+  # per-step permission, so the scope is job-wide even though every other step
+  # here only reads.
+  contents: write
 
 jobs:
   apk:
@@ -106,12 +121,15 @@ jobs:
           echo "flutter build apk ${args[*]}"
           flutter build apk "${args[@]}"
 
-      # Which ABI to install, without needing the workflow log open.
-      - name: summarise
+      # Which ABI to install, without needing the workflow log open. Written to
+      # a file rather than straight into the summary because the release body
+      # needs the same text: two copies drift the first time one is edited.
+      - name: compose notes
+        env:
+          FLAVOR: ${{ inputs.flavor }}
         run: |
+          set -euo pipefail
           {
-            echo "### ${{ inputs.flavor }} release APK"
-            echo
             echo "Built from \`${GITHUB_SHA:0:8}\` on \`${GITHUB_REF_NAME}\`."
             echo
             echo '| file | size |'
@@ -121,8 +139,14 @@ jobs:
             done
             echo
             echo '**arm64-v8a** is the one for essentially every current phone.'
+            echo
             echo 'Signed with the debug key: allow "Install from unknown sources",'
             echo 'and note it cannot be upgraded over by a production-signed build.'
+          } > release-notes.md
+          {
+            echo "### ${FLAVOR} release APK"
+            echo
+            cat release-notes.md
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: upload APK
@@ -134,3 +158,35 @@ jobs:
           # Long enough to install from a phone at leisure, short enough that
           # debug-signed binaries do not accumulate indefinitely.
           retention-days: 14
+
+      # `gh` is preinstalled on the runner, so attaching the APKs adds no
+      # third-party action. `--clobber` on the update path is what makes a
+      # re-run replace the assets rather than duplicate them.
+      - name: publish draft release
+        if: ${{ inputs.publish_release }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FLAVOR: ${{ inputs.flavor }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          apks=(build/app/outputs/flutter-apk/*.apk)
+          if [ ${#apks[@]} -eq 0 ]; then
+            echo 'No APK to attach — the build step produced nothing.' >&2
+            exit 1
+          fi
+
+          tag="${FLAVOR}-${GITHUB_SHA:0:8}"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" "${apks[@]}" --clobber
+            echo "Refreshed assets on existing release \`$tag\`." >> "$GITHUB_STEP_SUMMARY"
+          else
+            gh release create "$tag" "${apks[@]}" \
+              --draft \
+              --target "$GITHUB_SHA" \
+              --title "MemoX ${FLAVOR} — release APK (${GITHUB_SHA:0:8})" \
+              --notes-file release-notes.md
+            echo "Created draft release \`$tag\`." >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo >> "$GITHUB_STEP_SUMMARY"
+          echo "Publish it from the Releases tab when you want the tag to exist." >> "$GITHUB_STEP_SUMMARY"
