@@ -10,7 +10,17 @@ abstract final class ItText {
   static const String eightBox = 'Eight boxes';
   static const String sm2 = 'SM-2';
   static const String decksEmpty = 'No decks yet';
+
+  /// The old empty-deck button. **Gone from the empty face since #477** — it
+  /// survives here because the same chooser is still reached from a level that
+  /// already lists decks, and the robot takes whichever way in the screen
+  /// offers.
   static const String addToThisDeck = 'Add to this deck';
+
+  /// The chooser sheet's own title. It is how the robot tells "the sheet asking
+  /// which kind" apart from "the form asking for a name", which look alike to a
+  /// finder that only knows button labels.
+  static const String chooseChildTitle = 'What are you adding?';
   static const String newSubDeck = 'New sub-deck';
   static const String newCard = 'New card';
   static const String cardListEmptyAction = 'Add card';
