@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/extensions/app_ink.dart';
 import '../../../../../shared/widgets/mx_icon.dart';
+import '../../../../../core/text/text_scale.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -75,9 +76,17 @@ class CardImportRowPreviewWidget extends StatelessWidget {
               children: <Widget>[
                 LayoutBuilder(
                   builder: (context, constraints) {
-                    final scale = MediaQuery.textScalerOf(context).scale(1);
+                    // The factor is read off the cell's own rung, not off
+                    // the threshold and not off a 1sp font: Android's curve is
+                    // flat past 100sp and extrapolated below 8sp, so neither
+                    // end describes what this row's `bodyMedium` does.
                     final isStacked =
-                        constraints.maxWidth < _twoColumnMinWidth * scale;
+                        constraints.maxWidth <
+                        scaledLayoutWidth(
+                          context,
+                          dp: _twoColumnMinWidth,
+                          rung: context.texts.bodyMedium!,
+                        );
                     if (isStacked) {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

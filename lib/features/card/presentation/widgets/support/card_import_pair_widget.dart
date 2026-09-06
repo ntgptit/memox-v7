@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/text/text_scale.dart';
+import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 
 /// A label and the control it names, side by side while both fit and stacked
@@ -20,10 +22,18 @@ import '../../../../../core/theme/foundations/app_spacing.dart';
 /// `TextPainter` before choosing a face. This is that same shape, named once
 /// so the two rows cannot drift apart again.
 ///
-/// **The threshold is scaled by the live text factor**, which is what makes it
-/// a measurement rather than a breakpoint: the line does not get narrower at
-/// text scale 2.0, the words get wider, and it is the ratio between them that
-/// decides whether two columns still work.
+/// **The threshold is scaled by the factor the row's own text grows by**,
+/// which is what makes it a measurement rather than a breakpoint: the line does
+/// not get narrower at a large text setting, the words get wider, and it is the
+/// ratio between them that decides whether two columns still work.
+///
+/// **Asked of `bodyMedium`, not of the threshold.** This used to read
+/// `MediaQuery.textScalerOf(context).scale(inlinePairMinWidth)` — which asks
+/// the platform to size a 240sp font. Android has not scaled fonts linearly
+/// since 14, and its table is flat past 100sp, so on a real phone at the
+/// largest accessibility setting that call returned 240 unchanged and the row
+/// never stacked — on exactly the device the stacking is for.
+/// `layoutScaleOf` asks about a rung this row actually renders.
 class CardImportPairWidget extends StatelessWidget {
   const CardImportPairWidget({
     required this.label,
@@ -51,9 +61,13 @@ class CardImportPairWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final threshold = MediaQuery.textScalerOf(
+        final double threshold = scaledLayoutWidth(
           context,
-        ).scale(inlinePairMinWidth);
+          dp: inlinePairMinWidth,
+          // The label is `bodyMedium` and the dropdown paints its selected
+          // option at the same rung, so one rung answers for both halves.
+          rung: context.texts.bodyMedium!,
+        );
 
         if (constraints.maxWidth < threshold) {
           return Column(
