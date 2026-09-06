@@ -47,11 +47,22 @@ class StudyOptionsScreen extends ConsumerWidget {
 
     return MxContentShell(
       title: context.l10n.studyOptionsTitle,
+      // **It scrolls, like every other form in the app** (SC-C7-03). This was
+      // the one that did not, so its column simply ran off the bottom: measured
+      // by pumping the real screen, 320×640 at `textScaler` 2.0 overflows by
+      // 28px and 360×640 at 2.5 by 130, and what falls off is `Use app
+      // defaults` — an action with nothing to scroll it back into reach. The
+      // reason is written next to the same argument on the sibling screen
+      // (`reminder_settings_screen.dart`): "the honest fix for a screen that
+      // outgrows its viewport is to let it scroll".
+      isScrollable: true,
       // Every branch below owns its gutters — the form through the padding on
       // the `data:` branch, the error and loading faces through their own — so
       // the shell's default would pad each of them twice. It was costing this
       // screen 16dp a side, which also defeated the compact step-down: at 320dp
-      // the form ended up inset *more* than at regular width.
+      // the form ended up inset *more* than at regular width. `EdgeInsets.zero`
+      // stays right with the scroll view too: it takes the zero padding and
+      // each branch still supplies its own inset inside it.
       padding: EdgeInsets.zero,
       body: MxAsyncView<StudyOptionsModel>(
         value: options,

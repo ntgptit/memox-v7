@@ -347,16 +347,25 @@ base class FakeStudyRepository
   @override
   Future<bool> buildNextRound(String sessionId) async => false;
 
+  /// The entry counts the screen reads, when a test cares what they are.
+  ///
+  /// Null for the ordinary three-and-four fixture. A test sets it when the
+  /// *size* of a count is the subject — four figures is what a deck subtree
+  /// reaches after a fortnight away, and it is what broke the readout row at a
+  /// doubled text scale (SC-C7-05).
+  StudyEntrySummaryModel? entrySummary_;
+
   @override
   Stream<StudyEntrySummaryModel> watchStudyEntry(
     String deckId, {
     required DateTime now,
   }) => Stream<StudyEntrySummaryModel>.value(
-    const StudyEntrySummaryModel(
-      newCount: 3,
-      dueCount: 4,
-      fillableCount: 1,
-      distinctMeanings: 4,
-    ),
+    entrySummary_ ??
+        const StudyEntrySummaryModel(
+          newCount: 3,
+          dueCount: 4,
+          fillableCount: 1,
+          distinctMeanings: 4,
+        ),
   );
 }

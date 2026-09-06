@@ -172,58 +172,119 @@ class _TemplateTile extends ConsumerWidget {
     final template = row.template;
     final quiet = context.texts.bodySmall!.inked(context, AppInk.quiet);
 
+    final identity = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Text(
+          template.title.value,
+          style: context.texts.titleMedium,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          '${context.l10n.starterLibraryCardCount(template.cardCount)}'
+          ' · '
+          '${context.l10n.starterLibraryLocaleLabel(template.locale)}',
+          style: quiet,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          context.l10n.starterLibrarySource(template.contentSource),
+          style: quiet,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
+
+    // The row's state, worded: an installed template says so, an open one
+    // names the way in. Weight carries the affordance rather than the brand
+    // colour — `primary` at label size measured 2.90:1 on the dark card, and
+    // the whole card is the target anyway.
+    final state = Text(
+      row.isInstalled
+          ? context.l10n.starterLibraryInstalledLabel
+          : context.l10n.starterLibraryInstallAction,
+      style: context.texts.labelMedium!.inked(
+        context,
+        row.isInstalled ? AppInk.success : AppInk.quiet,
+        isEmphasized: true,
+      ),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
+
     return MxCard.raised(
       onTap: () => _add(context),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Expanded(
-            child: Column(
+      // **The pair re-arranges rather than one of them being crushed**
+      // (SC-C7-01). A `RenderFlex` sizes its non-flex child at full intrinsic
+      // width first, so the repeated word `Add to library` — identical on
+      // every open row, and therefore the half carrying no information — took
+      // what it wanted and the deck name took what was left. Measured on the
+      // card's own content band: at 393dp and scale 2.0 in Vietnamese the
+      // title got 93.8dp against the state's 223.2; at 360dp, 60.8; at 320dp,
+      // 28.8 — about one glyph, on the only thing that tells one row from
+      // another.
+      //
+      // The arrangement is `study_home_deck_item_widget.dart`'s, which solved
+      // the same shape: a `LayoutBuilder` against a threshold scaled by the
+      // live text factor. The threshold is declared here rather than imported
+      // — a feature never reads another feature's internals (AD-13), and the
+      // two rows are answering the question about different content anyway.
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final threshold = MediaQuery.textScalerOf(
+            context,
+          ).scale(AppStarterTile.inlineStateMinWidth);
+
+          if (constraints.maxWidth < threshold) {
+            return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Text(
-                  template.title.value,
-                  style: context.texts.titleMedium,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  '${context.l10n.starterLibraryCardCount(template.cardCount)}'
-                  ' · '
-                  '${context.l10n.starterLibraryLocaleLabel(template.locale)}',
-                  style: quiet,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  context.l10n.starterLibrarySource(template.contentSource),
-                  style: quiet,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                identity,
+                // The same step the study row puts between what a deck is and
+                // what can be done about it (G8).
+                const SizedBox(height: AppSpacing.md),
+                state,
               ],
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          // The row's state, worded: an installed template says so, an open
-          // one names the way in. Weight carries the affordance rather than
-          // the brand colour — `primary` at label size measured 2.90:1 on the
-          // dark card, and the whole card is the target anyway.
-          Text(
-            row.isInstalled
-                ? context.l10n.starterLibraryInstalledLabel
-                : context.l10n.starterLibraryInstallAction,
-            style: context.texts.labelMedium!.inked(
-              context,
-              row.isInstalled ? AppInk.success : AppInk.quiet,
-              isEmphasized: true,
-            ),
-          ),
-        ],
+            );
+          }
+
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Expanded(child: identity),
+              const SizedBox(width: AppSpacing.md),
+              // `Flexible`, not the bare `Text` this used to be: `maxLines`
+              // alone does nothing in a non-flex `Row` slot, because the slot
+              // is sized to the intrinsic width before the line count is ever
+              // consulted.
+              Flexible(child: state),
+            ],
+          );
+        },
       ),
     );
   }
+}
+
+/// What the starter row decides for itself.
+abstract final class AppStarterTile {
+  /// The narrowest content width at which the template's identity and its
+  /// state share a band, at `textScaler` 1.0 — scaled by the live text factor
+  /// before use.
+  ///
+  /// Read against the widths the app actually hands this row, measured at the
+  /// level the `LayoutBuilder` sees (viewport minus the screen gutter minus
+  /// the card's own padding): a 393dp phone gives 329 and stays inline, a
+  /// 360dp phone gives 296 and stacks, and a 320dp screen gives 264. At text
+  /// scale 2.0 the scaled threshold is 640, so every supported phone stacks —
+  /// which is the point: that is the range where the deck name was being cut
+  /// to a glyph.
+  static const double inlineStateMinWidth = 320;
 }

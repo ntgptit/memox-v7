@@ -193,10 +193,13 @@ class _RecallActionArea extends StatelessWidget {
         ),
       ),
 
-      // **Forgot on the left, Remembered on the right.** The one that admits a
-      // miss is the secondary and sits where a Cancel sits; they are not a pair
-      // of equals dressed the same, because only one of them is what the learner
-      // presses when the card worked.
+      // **Forgot on the left, Remembered on the right — and Remembered on top
+      // when the pair stacks.** The one that admits a miss is the secondary and
+      // sits where a Cancel sits; they are not a pair of equals dressed the
+      // same, because only one of them is what the learner presses when the
+      // card worked. `MxButtonPair` reverses the order in a column for that
+      // same reason, so the order below reads left-to-right *and*
+      // bottom-to-top: do not swap these two to "fix" the stacked case.
       RecallPhase.selfAssessment ||
       RecallPhase.submittingAssessment => StudyCtaRowWidget(
         children: <Widget>[
@@ -253,15 +256,29 @@ class _RecallActionArea extends StatelessWidget {
 /// with `fill`, which asks the same two questions in the other direction and
 /// held an identical private copy of this.
 ///
-/// **When there are two, they are the same size — the row's whole job.** They
-/// used to be `Flexible` around their own labels, so `Forgotten` came out
-/// narrower than `Remembered` and `Show hint` narrower than `Check`: two verdict
-/// buttons at two widths, on the screen a learner presses more than any other,
-/// with the size difference reading as a recommendation the app never meant to
-/// make. Each half now fills its share up to [AppStudyPair.ctaMaxWidth] — the
-/// cap survives, and both halves get the same share — and
-/// [CrossAxisAlignment.stretch] under an [IntrinsicHeight] gives them one
-/// height when a label wraps at a large text scale.
+/// **When there are two, this is an [MxButtonPair] under a cap — it is no
+/// longer a hand-built `Row`** (SC-C7-04). It was one, and it had restated that
+/// widget's contract almost sentence for sentence while diverging from it
+/// twice: it separated its two halves by `AppSpacing.md` where the shared pair
+/// separates every other adjacent action in the app by `AppSpacing.sm`, and it
+/// never stacked, so at a large text scale the two verdicts stayed side by side
+/// at 138dp each and wrapped their labels over three lines instead of
+/// reflowing. `MxButtonPair`'s own doc says every pair in the app goes through
+/// it rather than through a hand-built `Row`; this was the one exception, on
+/// the screen a learner presses more than any other.
+///
+/// The cap survives as the [ConstrainedBox] around it — two halves of
+/// [AppStudyPair.ctaMaxWidth] plus the pair's own gap — so at ordinary text
+/// scale the row is the same centred choice it has always been. What changes is
+/// the case the cap was never about: measured at 320×640 and `textScaler`
+/// 2.0, the row goes from two 138dp buttons with three-line labels to two
+/// stacked 231dp buttons with one line each, costing 32dp of height that the
+/// session frame absorbs by shrinking its cards from 254 to 238 — both still
+/// far above [AppStudyPair.cardMinHeight].
+///
+/// **Stacked, the primary is on top**, which is [MxButtonPair]'s rule and the
+/// right one here: `Remembered` above `Forgotten` keeps the answer a learner
+/// gives when the card worked out of the position a mis-tap lands in.
 ///
 /// A lone action still hugs its label: it is not next to anything, so there is
 /// nothing for it to match, and stretching it to the cap would draw a
@@ -269,35 +286,29 @@ class _RecallActionArea extends StatelessWidget {
 class StudyCtaRowWidget extends StatelessWidget {
   const StudyCtaRowWidget({required this.children, super.key});
 
+  /// One or two actions. Two are read as `[secondary, primary]` — the order a
+  /// row draws them in, left to right.
   final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {
     if (children.isEmpty) return const SizedBox.shrink();
 
-    final isPair = children.length > 1;
+    if (children.length > 1) {
+      return Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            maxWidth: AppStudyPair.ctaMaxWidth * 2 + AppSpacing.sm,
+          ),
+          child: MxButtonPair(secondary: children.first, primary: children[1]),
+        ),
+      );
+    }
 
-    return IntrinsicHeight(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          for (final (index, child) in children.indexed) ...<Widget>[
-            if (index > 0) const SizedBox(width: AppSpacing.md),
-            Flexible(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxWidth: AppStudyPair.ctaMaxWidth,
-                ),
-                // `Flexible` hands every child the same loose share; filling it
-                // is what turns "the same room" into "the same width".
-                child: isPair
-                    ? SizedBox(width: double.infinity, child: child)
-                    : child,
-              ),
-            ),
-          ],
-        ],
+    return Align(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: AppStudyPair.ctaMaxWidth),
+        child: children.first,
       ),
     );
   }

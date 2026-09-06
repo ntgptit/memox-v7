@@ -143,11 +143,17 @@ class _ConfirmRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       child: Row(
         children: <Widget>[
-          // The shared metric well: the same anchored square Card Detail's
+          // The shared metric well: the same anchored pill Card Detail's
           // schedule and the Progress grid read by, so a fact here and a
           // fact there are entries of one grammar. The bare glyph this row
           // used to draw left the counts' left edge to whichever icon was
           // widest.
+          //
+          // It said *square* until SC-C8-04, and that sentence was false in
+          // both halves: this well has been a pill since it was shared, and
+          // Card Detail was drawing a 32×32 rounded square of its own. The
+          // comment asserting the agreement is what kept anybody from
+          // checking it.
           MxMetricWell(icon: icon, tint: color),
           const SizedBox(width: AppSpacing.md),
           Expanded(child: Text(label, style: context.texts.bodyMedium)),
