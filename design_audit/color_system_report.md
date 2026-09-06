@@ -18,7 +18,7 @@ guess.
 
 | | |
 |---|---|
-| Files scanned (`lib/`, hand-written) | 736 |
+| Files scanned (`lib/`, hand-written) | 737 |
 | Colour sites found | 307 |
 | Violations | 24 |
 
@@ -65,8 +65,8 @@ guess.
 | V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:97` | Color(0xFF7063C0) | `#7063C0` | `#7063C0` | no token within ΔE-ish range — needs a new one |
 | V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:131` | Color(0xFF7383FF) | `#7383FF` | `#7383FF` | no token within ΔE-ish range — needs a new one |
 | V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:136` | Color(0xFF5B65B2) | `#5B65B2` | `#5B65B2` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:185` | Color(0xFF6F727B) | `#6F727B` | `#6F727B` | colorScheme.outline |
-| V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:231` | Color(0xFF747BA3) | `#747BA3` | `#747BA3` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:229` | Color(0xFF7B7E88) | `#7B7E88` | `#7B7E88` | colorScheme.outline |
+| V3 | 🟡 | `lib/core/theme/foundations/app_border_colors.dart:275` | Color(0xFF747BA3) | `#747BA3` | `#747BA3` | no token within ΔE-ish range — needs a new one |
 | V3 | 🟡 | `lib/core/theme/foundations/app_surface_colors.dart:60` | Color(0xFFF2F5F9) | `#F2F5F9` | `#F2F5F9` | colorScheme.surface |
 | V3 | 🟡 | `lib/core/theme/foundations/app_surface_colors.dart:62` | Color(0xFF070C27) | `#070C27` | `#070C27` | no token within ΔE-ish range — needs a new one |
 | V3 | 🟡 | `lib/core/theme/foundations/app_surface_colors.dart:78` | Color(0xFFFFFFFF) | `#FFFFFF` | `#FFFFFF` | colorScheme.onPrimary |
@@ -98,7 +98,7 @@ guess.
 
 - **V3** `Color(0xFF5B65B2)` — A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #5B65B2.
 
-- **V3** `Color(0xFF6F727B)` — A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #6F727B.
+- **V3** `Color(0xFF7B7E88)` — A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #7B7E88.
 
 - **V3** `Color(0xFF747BA3)` — A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #747BA3.
 
@@ -144,9 +144,9 @@ an edge.
 | light | semantic.borderSubtle on card (colorScheme.surface) | 1.14 | in-band |
 | light | semantic.borderSubtle on page (scaffoldBackgroundColor) | 1.14 | in-band |
 | light | semantic.borderSubtle on muted tile (semantic.surfaceMuted) | 1.04 | invisible |
-| light | colorScheme.outline on card (colorScheme.surface) | 4.40 | too-heavy |
-| light | colorScheme.outline on page (scaffoldBackgroundColor) | 4.40 | too-heavy |
-| light | colorScheme.outline on muted tile (semantic.surfaceMuted) | 4.02 | too-heavy |
+| light | colorScheme.outline on card (colorScheme.surface) | 3.71 | too-heavy |
+| light | colorScheme.outline on page (scaffoldBackgroundColor) | 3.71 | too-heavy |
+| light | colorScheme.outline on muted tile (semantic.surfaceMuted) | 3.39 | too-heavy |
 | light | colorScheme.outlineVariant on card (colorScheme.surface) | 1.14 | in-band |
 | light | colorScheme.outlineVariant on page (scaffoldBackgroundColor) | 1.14 | in-band |
 | light | colorScheme.outlineVariant on muted tile (semantic.surfaceMuted) | 1.04 | invisible |

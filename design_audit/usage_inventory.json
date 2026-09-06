@@ -1,6 +1,6 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 736,
+  "scannedFiles": 737,
   "totalSites": 307,
   "byElementKind": {
     "other": 269,
@@ -234,7 +234,7 @@
       "source_kind": "blend-source",
       "expression": "scheme.outline.withValues(alpha: 0.5)",
       "token": "colorScheme.outline",
-      "resolved_value_light": "#6F727B",
+      "resolved_value_light": "#7B7E88",
       "resolved_value_dark": "#747BA3"
     },
     {
@@ -503,18 +503,18 @@
     },
     {
       "file": "lib/core/theme/foundations/app_border_colors.dart",
-      "line": 185,
+      "line": 229,
       "widget_context": "AppBorderColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
-      "expression": "Color(0xFF6F727B)",
+      "expression": "Color(0xFF7B7E88)",
       "token": null,
-      "resolved_value_light": "#6F727B",
-      "resolved_value_dark": "#6F727B"
+      "resolved_value_light": "#7B7E88",
+      "resolved_value_dark": "#7B7E88"
     },
     {
       "file": "lib/core/theme/foundations/app_border_colors.dart",
-      "line": 231,
+      "line": 275,
       "widget_context": "AppBorderColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -3121,7 +3121,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_export_format_options_widget.dart",
-      "line": 321,
+      "line": 331,
       "widget_context": "_RecommendedBadge",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -3154,7 +3154,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_source_step_widget.dart",
-      "line": 322,
+      "line": 332,
       "widget_context": "_UploadPanel",
       "element_kind": "background",
       "source_kind": "theme-token",

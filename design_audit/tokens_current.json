@@ -280,15 +280,15 @@
       "carriesNoHue": false
     },
     "colorScheme.outline": {
-      "hex": "#6F727B",
+      "hex": "#7B7E88",
       "opaque": true,
-      "hue": 224.99999999999997,
-      "saturation": 0.05128205128205128,
-      "chroma": 0.047058823529411764,
-      "lightnessStar": 48.063118989871896,
+      "hue": 226.15384615384613,
+      "saturation": 0.051792828685258946,
+      "chroma": 0.05098039215686273,
+      "lightnessStar": 52.85111364272569,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 7.94117647058826,
-      "hueDistanceFromDarkSurfaceFamily": 5.625000000000028,
+      "hueDistanceFromDeclaredSeed": 6.7873303167421,
+      "hueDistanceFromDarkSurfaceFamily": 4.471153846153868,
       "carriesNoHue": false
     },
     "colorScheme.outlineVariant": {
@@ -607,15 +607,15 @@
       "classifiedAs": "role-or-on-color"
     },
     "inputDecorationTheme.enabledBorder": {
-      "hex": "#6F727B",
+      "hex": "#7B7E88",
       "opaque": true,
-      "hue": 224.99999999999997,
-      "saturation": 0.05128205128205128,
-      "chroma": 0.047058823529411764,
-      "lightnessStar": 48.063118989871896,
+      "hue": 226.15384615384613,
+      "saturation": 0.051792828685258946,
+      "chroma": 0.05098039215686273,
+      "lightnessStar": 52.85111364272569,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 7.94117647058826,
-      "hueDistanceFromDarkSurfaceFamily": 5.625000000000028,
+      "hueDistanceFromDeclaredSeed": 6.7873303167421,
+      "hueDistanceFromDarkSurfaceFamily": 4.471153846153868,
       "carriesNoHue": false
     },
     "inputDecorationTheme.focusedBorder": {
@@ -628,15 +628,15 @@
       "classifiedAs": "role-or-on-color"
     },
     "inputDecorationTheme.disabledBorder": {
-      "hex": "#B7B9BD",
+      "hex": "#BDBFC3",
       "opaque": true,
-      "hue": 225.00000000000009,
-      "saturation": 0.04347826086956528,
-      "chroma": 0.02352941176470591,
-      "lightnessStar": 74.97007184862436,
+      "hue": 226.15384615384616,
+      "saturation": 0.05179282868525878,
+      "chroma": 0.025490196078431282,
+      "lightnessStar": 77.17637222586428,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 7.941176470588147,
-      "hueDistanceFromDarkSurfaceFamily": 5.624999999999915,
+      "hueDistanceFromDeclaredSeed": 6.7873303167420715,
+      "hueDistanceFromDarkSurfaceFamily": 4.47115384615384,
       "carriesNoHue": false
     },
     "cardTheme.color": {

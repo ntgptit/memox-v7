@@ -22,7 +22,7 @@ import '../foundations/app_semantic_colors.dart';
 /// | token | normal | high contrast | why |
 /// |---|---|---|---|
 /// | `borderSubtle` | 1.14 / 1.41 | `onSurfaceVariant` — 5.28 / 6.47 | every hairline reaches 3:1 on all three grounds |
-/// | `borderControl` | 4.40 / 4.68 | `onSurfaceVariant` — 5.28 / 6.47 | already passed on a card; the swap keeps one grey for every edge |
+/// | `borderControl` | 3.71 / 4.68 | `onSurfaceVariant` — 5.28 / 6.47 | already passed on a card; the swap keeps one grey for every edge |
 /// | `borderAccent` | 1.80 / 3.88 | `primary` — 5.67 / 11.27 | the Today card's edge is decoration at 1.80 |
 /// | `onDisabled` | 2.11 / 2.62 | the same ink at 62% — 3.81 / 5.12 | see below |
 ///

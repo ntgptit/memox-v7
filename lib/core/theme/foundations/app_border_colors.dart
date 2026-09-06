@@ -182,7 +182,51 @@ abstract final class AppBorderColors {
   /// `surfaceContainerHighest`, and it is the top rung — pushing it down
   /// compresses it into `surfaceContainerHigh` and breaks the ladder to fix a
   /// control.
-  static const Color borderControlLight = Color(0xFF6F727B);
+  /// Lightened from `#6F727B` at M100.48, because the value had drifted past
+  /// the constraint that set it and the drift was visible.
+  ///
+  /// **The number the block above derives is `#7D7D85`, and the constant said
+  /// something else.** M100.22 measured that value against the tightest ground
+  /// this role is drawn on — M3's resting switch thumb, `outline` on
+  /// `surfaceContainerHighest` — and landed it at 3.24:1, a deliberate 0.24
+  /// over the floor. The Tokyo palette move then darkened the token to
+  /// `#6F727B` as part of re-hueing the neutrals, and nothing re-derived it:
+  /// the ground moved too, and the pair ended up at **3.81:1**, 0.81 clear of a
+  /// 3.0 floor. A contrast test only ever asks whether a value is dark enough,
+  /// so nothing objected.
+  ///
+  /// What that cost is legible on the Guess screen, where five answer rows draw
+  /// this edge on `surfaceContainerLow` — white, the lightest ground in the
+  /// palette, and therefore the pairing where an over-dark token shows most.
+  /// At `#6F727B` the row edge scored **4.81:1** and the five options read as
+  /// five heavy form fields rather than as five things to choose between. The
+  /// dialog's Cancel button draws the same token on the same white.
+  ///
+  /// **It also out-ranked the state above it.** A resting edge must be quieter
+  /// than a selected one; on the page `#6F727B` measured 4.40 against
+  /// `borderSelected`'s 3.96, so the hierarchy was inverted — the loudest edge
+  /// on a card was the one that means nothing has happened.
+  ///
+  /// `#7B7E88` is the same neutral line — hue 226 against 225, raw chroma 0.051
+  /// against 0.047 and both far under the 0.06 the light-canvas rule caps a
+  /// border at — 4.79 L\* lighter. Every ground softens by about a sixth, and
+  /// the binding one keeps a real margin rather than a rounding one:
+  ///
+  /// | ground | was | now | floor |
+  /// |---|---|---|---|
+  /// | `surfaceContainerLow` (white: guess row, dialog button) | 4.81 | 4.05 | 3.0 |
+  /// | page / `surface` | 4.40 | 3.71 | 3.0 |
+  /// | `surfaceContainer` | 4.29 | 3.62 | 3.0 |
+  /// | `surfaceContainerHigh` | 4.02 | 3.39 | 3.0 |
+  /// | **`surfaceContainerHighest`** (switch thumb) | 3.81 | **3.21** | 3.0 |
+  ///
+  /// The ordering is right way up again: `borderSubtle` 1.14 → this 3.71 →
+  /// `borderSelected` 3.96 → `primary` 5.67, all on the page.
+  ///
+  /// **Dark is untouched.** Its own binding pairing sits at 3.04 — a margin of
+  /// 0.04, not 0.81 — so the two modes drifted in opposite directions and only
+  /// one of them has room to give back.
+  static const Color borderControlLight = Color(0xFF7B7E88);
 
   /// Raised from `#66628D` at M100.3, and the census is the reason.
   ///
