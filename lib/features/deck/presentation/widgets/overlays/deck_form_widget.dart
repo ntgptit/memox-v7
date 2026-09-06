@@ -103,7 +103,11 @@ class _DeckFormWidgetState extends State<DeckFormWidget> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        Text(widget.title, style: context.texts.titleMedium),
+        // The sheet's title announces as a header (A20.1 P1-01, §23 #17).
+        Semantics(
+          header: true,
+          child: Text(widget.title, style: context.texts.titleMedium),
+        ),
         const SizedBox(height: AppSpacing.lg),
         MxTextField(
           controller: _name,

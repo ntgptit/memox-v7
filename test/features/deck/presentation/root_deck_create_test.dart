@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
+import 'package:memox/features/deck/presentation/widgets/overlays/deck_form_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 
@@ -145,6 +146,32 @@ void main() {
 
       expect(find.text(english.deckFormDiscardTitle), findsNothing);
       expect(find.text(english.deckFormSubmitAction), findsNothing);
+    });
+
+    testWidgets('the form title announces as a heading (SC-C4-21)', (
+      tester,
+    ) async {
+      // The form is a sheet, and a sheet's title names a surface that just
+      // opened (A20.1 P1-01). `DeckFormWidget` is the one widget behind all
+      // three deck forms — create root, create sub-deck, rename — so this
+      // covers the grammar for every one of them.
+      final handle = tester.ensureSemantics();
+      await pumpDeckApp(tester, repository: FakeDeckRepository());
+
+      await tester.tap(find.text(english.deckCreateRootAction));
+      await tester.pumpAndSettle();
+
+      // Scoped to the form: "New deck" is also the label of the action that
+      // opened it, and that button is still mounted behind the sheet.
+      final node = tester.getSemantics(
+        find.descendant(
+          of: find.byType(DeckFormWidget),
+          matching: find.text(english.deckCreateRootTitle),
+        ),
+      );
+      expect(node.flagsCollection.isHeader, isTrue);
+      expect(node.label, english.deckCreateRootTitle);
+      handle.dispose();
     });
   });
 

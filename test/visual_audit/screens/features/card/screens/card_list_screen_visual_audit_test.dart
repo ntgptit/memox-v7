@@ -101,8 +101,8 @@ void main() {
             'renders Colors.transparent at rest and ColorScheme.surface only '
             'mid-transition; the surface value is asserted in app_theme_test.dart.',
       ),
-      // The shell: Scaffold, AppBar, the app-bar add action and the four filter
-      // chips.
+      // The shell: Scaffold, AppBar, the app-bar Select action, the floating
+      // create and the four filter chips.
       AuditSkipAllowance(
         itemId: 'shell',
         reason: SkipReason.rasterOnly,
@@ -110,10 +110,20 @@ void main() {
         // 12 since M99.16: the app bar gained the Select action, the visible
         // way into selection mode, and an IconButton is one more ink host.
         // 14 since M99.30: the filter bar gained the Tags pill (BR-231).
-        expectedMatches: 14,
+        // 15 since SC-C4-13: the count row's sort control is an MxTextButton
+        // over a sheet now, and a TextButton brings its own Material. The
+        // MxMenuButton it replaced anchored on a bare InkWell and hosted none,
+        // which is why the count moved by exactly one.
+        // Untouched by SC-C4-05, which moved the create action off the bar and
+        // into a floating one: an IconButton and a FloatingActionButton are
+        // each exactly one ink host, so the -1 and the +1 cancel. What that
+        // change does move is the two allowances below.
+        expectedMatches: 15,
         rationale:
             'The Material ink layers of the Scaffold, the AppBar, the app-bar '
-            'Select and add IconButtons, the panel Start-study button, the two MxCard card '
+            'Select IconButton, the floating create, the panel Start-study '
+            'button, the '
+            'count row sort link, the two MxCard card '
             'rows and the five filter chips. Splash and highlight paint into '
             'these layers; the overlay colours are asserted in app_theme_test.dart.',
       ),
@@ -124,9 +134,19 @@ void main() {
         // 4 since M99.16 (the Select action is a second app-bar IconButton);
         // 6 since M100.36: the tag-filter entry is a compact secondary
         // MxActionButton now — an OutlinedButton shape — rather than a pill.
+        // 5 since SC-C4-05: the add action left the bar for a floating one, and
+        // a FloatingActionButton takes its shape from the theme rather than
+        // drawing it through this painter — its rounded clip lands under
+        // 'no painter' below instead. One IconButton fewer, one shape fewer.
+        // 6 since SC-C4-13: the count row's sort control is an MxTextButton
+        // over a sheet, and its Material draws the button's shape through this
+        // painter. The MxMenuButton it replaced anchored on a bare InkWell and
+        // drew none — so this count is back where M100.36 left it, by way of a
+        // different pair of controls.
         expectedMatches: 6,
         rationale:
-            'The app-bar Select and add IconButtons, the panel Start-study pill '
+            'The app-bar Select IconButton, the panel Start-study pill, '
+            'the count row sort link '
             'and the Tags entry (a compact secondary MxActionButton, M100.36 '
             '4N) draw their rounded shapes through a ShapeBorder painter; the '
             'shapes come from the component themes and are pinned by the '
@@ -162,11 +182,15 @@ void main() {
         reason: SkipReason.customPainter,
         detailContains: 'no painter',
         // 7 since M100.36: four chips, not five (see _RenderChip above).
-        expectedMatches: 7,
+        // 8 since SC-C4-05: the create action floats now, and an InkWell's
+        // rounded ripple boundary is a clip with no painter to interrogate —
+        // the same node a tappable MxCard contributes, which is why the
+        // deck list's allowances count a floating action here too.
+        expectedMatches: 8,
         rationale:
             'A clip with no painter: the four filter chips, the two MxCard card '
-            'rows and the search pill each clip through a CustomPaint with no '
-            'painter of its own.',
+            'rows, the search pill and the floating create each clip through a '
+            'CustomPaint with no painter of its own.',
       ),
       // The search field (S1) — the same two allowances the deck list's field
       // carries, for the same reasons; see `deck_audit_allowances.dart`.

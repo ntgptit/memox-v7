@@ -82,6 +82,23 @@ abstract final class RouteNames {
   /// session was started from, rather than to whatever the Study tab last held.
   static const String deckStudy = 'deckStudy';
 
+  /// The study options screen, opened from the study entry inside the **Study**
+  /// branch. A child of [studyDeck] (UC-15, BR-147, BR-148).
+  static const String studyDeckOptions = 'studyDeckOptions';
+
+  /// The study options screen, opened from the study entry inside the
+  /// **Library** branch. A child of [deckStudy].
+  ///
+  /// **Two names onto one screen, for the reason [studyDeck] and [deckStudy]
+  /// are two names onto one screen.** The options screen is reached by a push
+  /// from the entry screen, and a push has to land in the branch the user is
+  /// already in; a single mount would move the bottom bar's selected tab and
+  /// send Back into a branch nobody chose. Which of the two a given entry
+  /// screen speaks is decided by the route table — `StudyEntryScreen` is handed
+  /// the name rather than working it out, because the branch is the route's
+  /// fact and not the screen's.
+  static const String deckStudyOptions = 'deckStudyOptions';
+
   /// The card list of a card-type deck. A child of [deckDetail], so it stays in
   /// the Decks branch and the bottom bar remains visible (UC-04).
   static const String cardList = 'cardList';

@@ -182,8 +182,14 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Korean'), findsWidgets);
-      // The strip paints the deck's name once; the sheet adds no second copy.
-      expect(find.text('TOPIK II — Vocab'), findsOneWidget);
+      // **Neither surface names the open deck** (SC-C4-06). It used to be
+      // `findsOneWidget` — the strip painted it as a trailing step and the
+      // sheet added no second copy. The strip dropped that step to match the
+      // deck path, whose name for the open deck is the app-bar title one line
+      // up, so on this harness — the strip alone, no bar — the count is zero.
+      // The claim the test makes is unchanged: the sheet lists ancestors, not
+      // where you already are.
+      expect(find.text('TOPIK II — Vocab'), findsNothing);
     });
   });
 }

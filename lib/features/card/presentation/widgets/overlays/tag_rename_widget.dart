@@ -138,7 +138,14 @@ class _RenameFormState extends ConsumerState<_RenameForm> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        Text(context.l10n.tagRenameTitle, style: context.texts.titleMedium),
+        // The sheet's title announces as a header (A20.1 P1-01, §23 #17).
+        Semantics(
+          header: true,
+          child: Text(
+            context.l10n.tagRenameTitle,
+            style: context.texts.titleMedium,
+          ),
+        ),
         const SizedBox(height: AppSpacing.lg),
         MxTextField(
           controller: _input,

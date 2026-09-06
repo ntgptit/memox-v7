@@ -19,6 +19,7 @@ import '../widgets/sections/progress_level_error_widget.dart';
 import '../widgets/sections/progress_level_header_widget.dart';
 import '../widgets/sections/progress_range_selector_widget.dart';
 import '../widgets/sections/progress_summary_widget.dart';
+import '../widgets/support/progress_labels_widget.dart';
 
 /// The range command, bound to a `ref`.
 ///
@@ -315,6 +316,38 @@ class _ProgressLevel extends StatelessWidget {
         : context.l10n.progressEmptySubDecksTitle,
     message: snapshot.isTopLevel
         ? context.l10n.progressEmptyDecksMessage
-        : context.l10n.progressEmptySubDecksMessage,
+        : _subDeckMessage(context),
   );
+
+  /// The no-sub-decks sentence, naming the deck's place when it has one.
+  ///
+  /// **The one state where "where am I" goes unanswered.** Every row prints its
+  /// own path, so while there are rows the bare deck name in the bar is enough;
+  /// with no rows the title is a word like `Verbs` and nothing on screen says
+  /// *which* `Verbs` — the question the Library answers above every body
+  /// state, empty ones included (`deck_list_screen.dart`). It is answered in the
+  /// sentence rather than in a subline on purpose: a subline appears only once
+  /// the data lands, so it would put a bar-height step between the loading and
+  /// loaded faces of a screen that deliberately carries no breadcrumb
+  /// (`m99-progress-by-deck.md` §5).
+  ///
+  /// `scopePath` is empty at the top level *and* one level in, because a root
+  /// has no ancestors — and one level in the bar's own name is already the
+  /// whole answer, so the plain sentence stands there.
+  String _subDeckMessage(BuildContext context) {
+    final String? name = snapshot.scopeName;
+    if (snapshot.scopePath.isEmpty || name == null) {
+      return context.l10n.progressEmptySubDecksMessage;
+    }
+
+    // The scope is appended as the last step and joined with the list's own
+    // separator: the mark that reads as "contains" is localizable and carries
+    // its own spaces, so spelling it a second time here is how the sentence and
+    // the rows above it end up punctuating one path two ways.
+    return context.l10n.progressEmptySubDecksScopeMessage(
+      '${context.progressPathLabel(snapshot.scopePath)}'
+      '${context.l10n.progressPathSeparator}'
+      '$name',
+    );
+  }
 }

@@ -180,7 +180,11 @@ void main() {
         body: MoveDeckSheetWidget(deckId: 'deck-1', onDone: () {}),
       ),
     );
+    // Two taps, not one: the picker selects on tap and writes on the primary
+    // (SC-C4-16), so reaching a refused write means pressing the commit.
     await tester.tap(find.text('Sibling'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(english.deckMoveAction));
     await tester.pumpAndSettle();
 
     expectDeckWriteBand(tester);
@@ -199,7 +203,8 @@ void main() {
     // every `find.text` assertion above.
     //
     // 320 x 640 at scale 2.0 is the narrow-and-large corner: three targets,
-    // double-height text, and a two-line band all asking for the same column.
+    // double-height text, a two-line band and — since SC-C4-16 — the commit
+    // that ends the sheet, all asking for the same column.
     final root = fakeRootDeck(id: 'root', name: 'Root');
     final source = fakeSubDeck(
       id: 'deck-1',
@@ -233,6 +238,8 @@ void main() {
       textScale: 2,
     );
     await tester.tap(find.text('Sibling 0'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(english.deckMoveAction));
     await tester.pumpAndSettle();
 
     // No overflow: `pumpDeckScreen` would already have thrown, so this asserts

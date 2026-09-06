@@ -7,6 +7,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/navigation/route_names.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 import 'package:memox/features/study/presentation/screens/study_entry_screen.dart';
 import 'package:memox/features/study/presentation/widgets/overlays/study_direction_chooser_widget.dart';
@@ -83,7 +84,10 @@ void main() {
       studyScreenWith(
         repository ?? FakeStudyRepository(schedulerType: scheduler),
         wrapForTest(
-          const StudyEntryScreen(deckId: 'deck-1'),
+          const StudyEntryScreen(
+            deckId: 'deck-1',
+            optionsRouteName: RouteNames.deckStudyOptions,
+          ),
           isScrollable: false,
         ),
       ),

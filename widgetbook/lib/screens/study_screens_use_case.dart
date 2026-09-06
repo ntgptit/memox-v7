@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:memox/core/navigation/route_names.dart';
 import 'package:memox/core/time/clock_provider.dart';
 import 'package:memox/core/time/time_zone_provider.dart';
 import 'package:memox/features/study/di/study_home_repository_provider.dart';
@@ -38,7 +39,10 @@ List<WidgetbookComponent> studyScreenComponents() => <WidgetbookComponent>[
   _screen('StudyHomeScreen', (scenario) => const StudyHomeScreen()),
   _screen(
     'StudyEntryScreen',
-    (scenario) => const StudyEntryScreen(deckId: 'catalog-deck'),
+    (scenario) => const StudyEntryScreen(
+      deckId: 'catalog-deck',
+      optionsRouteName: RouteNames.deckStudyOptions,
+    ),
   ),
   _screen(
     'StudySessionScreen',

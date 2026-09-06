@@ -9,11 +9,11 @@ import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_empty_state.dart';
 import '../../../../shared/widgets/mx_error_state.dart';
+import '../../../../shared/widgets/mx_fab.dart';
 import '../../../../shared/widgets/mx_icon_button.dart';
 import '../../../../shared/widgets/mx_search_field.dart';
 import '../../domain/models/card_list_filter_model.dart';
 import '../../domain/models/card_list_item_model.dart';
-import '../../domain/models/deck_context_model.dart';
 import '../../domain/models/tag_filter_model.dart';
 import '../controllers/card_list_controller.dart';
 import '../controllers/card_list_filter_controller.dart';
@@ -21,6 +21,7 @@ import '../controllers/card_list_tag_filter_controller.dart';
 import '../controllers/card_bulk_controller.dart';
 import '../controllers/card_selection_controller.dart';
 import '../controllers/deck_context_controller.dart';
+import '../states/card_selection_state.dart';
 import '../widgets/sections/card_breadcrumb_widget.dart';
 import '../widgets/overlays/card_bulk_overlays_widget.dart';
 import '../widgets/overlays/card_export_sheet_widget.dart';
@@ -142,8 +143,49 @@ class CardListScreen extends ConsumerWidget {
         ref.watch(addTagToCardsProvider(deckId)).isSubmitting;
 
     return MxContentShell(
-      title: deckContext?.deckName ?? context.l10n.cardListTitle,
-      subheader: _subheader(ref, context, deckContext, deckTotal),
+      // **While selecting, the bar names the selection rather than the place**
+      // (SC-C4-12) — the shape `trash_screen.dart` already uses: the count as
+      // the title, one ✕ in the leading slot, and no path under it. A path
+      // below a count answers a question nobody asked, and a `chevron_left`
+      // sitting under a ✕ would be the second dismiss-looking control this
+      // change exists to remove.
+      title: selection.isSelecting
+          ? _selectionTitle(context, selection)
+          : deckContext?.deckName ?? context.l10n.cardListTitle,
+      // **One control leaves selection, not two.** A non-null leading turns
+      // `automaticallyImplyLeading` off (`mx_content_shell.dart`), so the
+      // platform arrow that used to sit beside the band's own ✕ — both meaning
+      // "stop selecting" — is gone and the ✕ is the one control. Back still
+      // leaves selection, through the `PopScope` below: a gesture, not a
+      // second affordance.
+      leading: selection.isSelecting
+          ? MxIconButton(
+              icon: Icons.close,
+              semanticLabel: context.l10n.cardSelectionCloseLabel,
+              onPressed: () => _clearSelection(ref, deckId),
+            )
+          : null,
+      // **The path is a line of the title, not a band below it** (SC-C4-06,
+      // SC-C4-10). It was a 48dp subheader strip with no chevron and the
+      // deck's own name repeated at its end, one tap from a deck level that
+      // draws a 32dp header line with a chevron and no repeat — four
+      // differences answering one question. The deck level's is the reviewed
+      // composition (owner review 2026-08-20/21, with the ~60dp measurement
+      // recorded at `deck_list_screen.dart`), so this side adopts it.
+      //
+      // Nothing is reserved before the read lands: a subline tells the shell
+      // the title owns the way back, so reserving one inside a deck would buy
+      // an even bar and pay for it with a back-less one — the same call
+      // `deck_list_screen.dart._sublineBeforeData` makes for the same reason.
+      titleSubline: deckContext == null || selection.isSelecting
+          ? null
+          : CardBreadcrumbWidget(deckContext: deckContext),
+      subheader: _subheader(
+        ref,
+        context,
+        deckTotal,
+        isSelecting: selection.isSelecting,
+      ),
       // **The shell's own padding is dropped, exactly as the deck list drops
       // it.** Every branch below owns its gutters — the loaded list through its
       // `ListView` padding, the empty and error states through `MxEmptyState` /
@@ -154,11 +196,14 @@ class CardListScreen extends ConsumerWidget {
       // from this value, sat at 16. Two gutters on one screen, and neither
       // matched the deck list's 16 next door.
       padding: EdgeInsets.zero,
-      // The add action lives on the app bar, not a floating button — the same
-      // place the deck list puts its create action, so "the primary action" sits
-      // in one spot across the app. A FAB would also carry Material's default
-      // `primaryContainer`, a second emphasis tone for the same "add" the deck
-      // screen renders in `primary`; one app-bar icon keeps that consistent.
+      // **Create floats here too, matching the deck list** (owner decision,
+      // 2026-09-06). The comment this replaces claimed the app bar was "the
+      // same place the deck list puts its create action"; that stopped being
+      // true when the deck list's create floated again (M4.10ag reversal, owner
+      // review 2026-08-20), so a user drilling deck level -> card list watched
+      // the primary create verb change position, weight and colour tier one tap
+      // apart. Two grammars for one action, and only one of them can be right.
+      // See [floatingActionButton] below for the button itself.
       actions: <Widget>[
         // A visible way into selection mode. Long-press is the platform
         // gesture and it has no affordance at all, so a user who does not
@@ -170,18 +215,9 @@ class CardListScreen extends ConsumerWidget {
             tooltip: context.l10n.cardSelectAction,
             onPressed: () => _beginSelection(ref, deckId),
           ),
-        // Creating a card is not a thing to offer mid-selection: it leaves the
-        // screen, which would abandon the selection to open an editor the user
-        // did not ask for.
-        if (!selection.isSelecting)
-          MxIconButton(
-            icon: Icons.add,
-            semanticLabel: context.l10n.cardListNewAction,
-            tooltip: context.l10n.cardListNewAction,
-            onPressed: () => _openEditor(context),
-          ),
         // The overflow — import, export, tag catalog. Hidden during selection
-        // for the same reason Add is: every item leaves the screen.
+        // for the same reason the floating create is: every item leaves the
+        // screen, which would abandon the selection.
         if (!selection.isSelecting)
           CardListMenuWidget(
             deckId: deckId,
@@ -189,6 +225,24 @@ class CardListScreen extends ConsumerWidget {
             onImport: () => _openImport(context),
           ),
       ],
+      // The create verb, in the deck list's grammar (see [actions] above).
+      // Labelled, because a bare glyph does not say what it creates — the label
+      // is the tooltip and the name a screen reader announces.
+      //
+      // Absent mid-selection, which is the same rule the app-bar glyph carried:
+      // creating a card leaves the screen, and that would abandon a selection
+      // the user did not ask to lose.
+      //
+      // No clearance work is needed here: passing this makes the shell tell its
+      // body a floating action exists, and `card_list_body_widget.dart` already
+      // takes its end inset from `mxScrollEndInsetOf`.
+      floatingActionButton: selection.isSelecting
+          ? null
+          : MxFab(
+              icon: Icons.add,
+              label: context.l10n.cardListNewAction,
+              onPressed: () => _openEditor(context),
+            ),
       // Back leaves selection first (UC-04 A6): a user who selected twenty
       // cards and pressed Back meant "stop selecting", not "leave the deck".
       body: PopScope<Object?>(
@@ -256,34 +310,31 @@ class CardListScreen extends ConsumerWidget {
     );
   }
 
-  // The pinned strip: the breadcrumb (W1) above the filter pills (D3). The
-  // breadcrumb is drawn as soon as the deck context lands, even on an empty deck
-  // — "where am I" is most worth answering on a level with nothing to recognise,
-  // the same rule the deck screen follows. The pills wait for the deck to hold
-  // cards. When neither is ready there is no strip at all.
+  // The count, in the words the selection band used to carry (BR-167). One
+  // label for one fact: drawing it here and again on the band would be two
+  // numbers free to disagree about the set the actions run over.
+  String _selectionTitle(BuildContext context, CardSelectionState selection) =>
+      selection.isAllMatching
+      ? context.l10n.cardSelectionAllLabel(selection.selectedCount)
+      : context.l10n.cardSelectionCountLabel(selection.selectedCount);
+
+  // The pinned strip: the search field over the filter pills (D3). Both narrow
+  // the list, so they arrive together once the deck has anything to narrow;
+  // on an empty deck there is no strip at all. The breadcrumb used to lead this
+  // band and is a line of the title now (SC-C4-06, SC-C4-10).
+  //
+  // **Mounted but inert while selecting**, which is the rule `trash_screen.dart`
+  // states for its own filter band. Removing it would drop ~60dp of chrome on
+  // the frame the long press lands, moving the row out from under the finger;
+  // leaving it live lets the narrowing change under a "select all matching"
+  // that resolves against exactly that narrowing.
   Widget? _subheader(
     WidgetRef ref,
     BuildContext context,
-    DeckContextModel? deckContext,
-    int deckTotal,
-  ) {
-    final strips = <Widget>[
-      if (deckContext != null) CardBreadcrumbWidget(deckContext: deckContext),
-      // Search and the pills both narrow the list, so they arrive together once
-      // the deck has anything to narrow.
-      if (deckTotal > 0) ...<Widget>[
-        MxSearchField(
-          value: ref.watch(cardListSearchQueryProvider(deckId)),
-          onChanged: (query) => _updateSearch(ref, deckId, query),
-          hintText: context.l10n.cardSearchHint,
-          semanticLabel: context.l10n.cardSearchLabel,
-          clearSemanticLabel: context.l10n.cardSearchClearLabel,
-        ),
-        CardFilterBarWidget(deckId: deckId),
-      ],
-    ];
-    if (strips.isEmpty) return null;
-    if (strips.length == 1) return strips.first;
+    int deckTotal, {
+    required bool isSelecting,
+  }) {
+    if (deckTotal <= 0) return null;
 
     return Column(
       // Stretch, not start: the strips scroll horizontally, so they take the
@@ -291,7 +342,33 @@ class CardListScreen extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       spacing: AppSpacing.sm,
-      children: strips,
+      children: <Widget>[
+        // **Inert at the call site, not through the field's own API.**
+        // `MxSearchField.onChanged` is required and non-nullable, and V1
+        // freezes the public contract of every shared primitive — contract 6
+        // in `docs/design-system/v1-freeze.md`. So the way to stop the field
+        // answering is to take the pointer and the focus away from it: the
+        // focus too, because a field that already held it when the long press
+        // landed would otherwise keep the keyboard and keep typing into a
+        // query the selection is resolved against. No pixel moves either way.
+        ExcludeFocus(
+          excluding: isSelecting,
+          child: IgnorePointer(
+            ignoring: isSelecting,
+            child: MxSearchField(
+              value: ref.watch(cardListSearchQueryProvider(deckId)),
+              onChanged: (query) => _updateSearch(ref, deckId, query),
+              hintText: context.l10n.cardSearchHint,
+              semanticLabel: context.l10n.cardSearchLabel,
+              clearSemanticLabel: context.l10n.cardSearchClearLabel,
+            ),
+          ),
+        ),
+        // The pills say so themselves: a null callback keeps the 48dp box and
+        // the selected pill's paint while making a filter change unable to
+        // orphan the selection.
+        CardFilterBarWidget(deckId: deckId, isEnabled: !isSelecting),
+      ],
     );
   }
 
@@ -332,7 +409,7 @@ class _Empty extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The empty state carries its own "add first card" CTA; the app-bar add
+    // The empty state carries its own "add first card" CTA; the floating add
     // action stays too, so there is one consistent place to add whatever the
     // body shows — the same pairing the deck list's empty level uses. Import
     // rides along as the secondary way in (M4.12 W6): a deep link or a stale

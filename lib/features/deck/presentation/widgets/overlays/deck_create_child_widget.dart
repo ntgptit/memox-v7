@@ -32,6 +32,16 @@ enum _ChildKind { subDeck, card, importCards }
 /// The card editor is reached by route name, the way every other cross-feature
 /// jump in this feature works; the deck feature never imports the card feature's
 /// widgets (AD-13).
+///
+/// **One sheet, one verb: both card doors `push`.** The rule belongs to the
+/// sheet rather than to either row — an `unset` deck must land on its own
+/// detail again when the user backs out, not on a card list it never chose
+/// (UC-10, M4.12 W5), and that is as true of the editor as of the import
+/// wizard. The editor used to `go`, which rebuilds the match list from
+/// `/decks/<id>/cards/new` and materialises a `CardListScreen` page underneath
+/// it, so ✕ dropped the user exactly where the import row forbids (SC-C4-20).
+/// Save is unaffected: the write settles `content_type` to `card` (BR-62), and
+/// the deck's own level is what answers a card deck from there.
 Future<void> showCreateChildForm(
   BuildContext context, {
   required DeckEntity parent,
@@ -52,9 +62,10 @@ Future<void> showCreateChildForm(
   }
 
   if (kind == _ChildKind.importCards) {
-    // Pushed: the wizard covers the shell, and Cancel pops back to this deck
-    // — an unset deck must land on its own detail again, not on a card list
-    // it never chose (UC-10, M4.12 W5).
+    // The wizard mounts on the root navigator, so this push covers the shell
+    // and its bottom bar (M4.12 I1); the editor below pushes inside the branch
+    // and keeps them. Which navigator receives the page is the only difference
+    // between the two rows — where cancelling lands is the same.
     await context.pushNamed(
       RouteNames.cardImport,
       pathParameters: <String, String>{RoutePathParams.deckId: parent.id},
@@ -62,7 +73,7 @@ Future<void> showCreateChildForm(
     return;
   }
 
-  context.goNamed(
+  await context.pushNamed(
     RouteNames.cardEditor,
     pathParameters: <String, String>{RoutePathParams.deckId: parent.id},
   );

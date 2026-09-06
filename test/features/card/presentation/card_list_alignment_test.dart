@@ -12,6 +12,8 @@ import 'package:memox/features/card/presentation/widgets/items/card_tile_widget.
 import 'package:memox/features/card/presentation/widgets/sections/card_progress_panel_widget.dart';
 import 'package:memox/features/card/presentation/widgets/sections/card_selection_bar_widget.dart';
 import 'package:memox/l10n/generated/app_localizations.dart';
+import 'package:memox/shared/widgets/mx_action_button.dart';
+import 'package:memox/shared/widgets/mx_fab.dart';
 import 'package:memox/shared/widgets/mx_icon_button.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
 import 'package:memox/shared/widgets/mx_search_field.dart';
@@ -242,24 +244,38 @@ void main() {
 
     expect(
       padding.bottom,
-      AppSpacing.lg,
+      AppSpacing.fabScrollClearance,
       reason:
-          'D21 settled on one end inset for every scrolling list and it is '
-          'lg. This screen carries no floating action, so the shell helper '
-          'mxScrollEndInsetOf answers lg here. The assertion used to read '
-          'xxl, double the value named in this test title, which pinned the '
-          'divergence instead of catching it (SC-C2-07).',
+          'The screen carries a floating create action since SC-C4-05, so the '
+          'shell helper mxScrollEndInsetOf answers the FAB clearance rather '
+          'than the bare lg end gap D21 settled on for a list with nothing '
+          'over it. Re-aimed rather than relaxed: what this test measures is '
+          "that the inset is still the shell's answer, and the shell's answer "
+          'changed because the screen did. It read xxl once — double the lg it '
+          'then wanted — which pinned a divergence instead of catching it '
+          '(SC-C2-07), so the constant is named here and never spelled as a '
+          'number.',
     );
   });
 
   group('G6 — touch targets clear 48dp', () {
-    testWidgets('the app-bar Select and Add actions', (tester) async {
+    // **Add is the floating create now, not a second app-bar glyph**
+    // (SC-C4-05): the deck list's grammar, adopted here by owner decision on
+    // 2026-09-06. So the pair measured is one bar button and one FAB, and the
+    // index walk over `MxIconButton` that used to reach the Add glyph is gone
+    // — it would now land on whatever control happened to be second.
+    testWidgets('the app-bar Select action and the floating create', (
+      tester,
+    ) async {
       await pumpList(tester, loadedRepository());
       await tester.pumpAndSettle();
 
       for (final finder in [
-        find.byType(MxIconButton).first,
-        find.byType(MxIconButton).at(1),
+        find.descendant(
+          of: find.byType(AppBar),
+          matching: find.byType(MxIconButton),
+        ),
+        find.byType(MxFab),
       ]) {
         final rect = tester.getRect(finder);
         expect(rect.width, greaterThanOrEqualTo(48 - epsilon));
@@ -267,9 +283,7 @@ void main() {
       }
     });
 
-    testWidgets('the selection bar close and select-all actions', (
-      tester,
-    ) async {
+    testWidgets('the selection close and select-all actions', (tester) async {
       await pumpList(tester, loadedRepository());
       await tester.pumpAndSettle();
       await tester.longPress(find.byType(CardTileWidget).first);
@@ -278,10 +292,16 @@ void main() {
       // The icon glyph itself measures its own small size — the tap target
       // is the `MxIconButton` around it, the same distinction G6's app-bar
       // case draws by measuring the button type directly.
+      //
+      // **The ✕ is the app bar's leading now, not the band's first child**
+      // (SC-C4-12): it used to sit on the band while the shell also drew the
+      // platform back arrow, two controls for one act. Measured through the
+      // AppBar so the move is pinned rather than merely allowed — a ✕ that
+      // slid back onto the band would fail here.
       final close = tester.getRect(
         find.ancestor(
           of: find.descendant(
-            of: find.byType(CardSelectionBarWidget),
+            of: find.byType(AppBar),
             matching: find.byIcon(Icons.close),
           ),
           matching: find.byType(MxIconButton),
@@ -329,8 +349,10 @@ void main() {
       await tester.longPress(find.byType(CardTileWidget).first);
       await tester.pumpAndSettle();
       // A RenderFlex overflow throws into the binding, so reaching here with
-      // no exception is the claim; the selection bar's two-line count label
-      // exists specifically for this width×scale (its own comment).
+      // no exception is the claim. The count is the app-bar title since
+      // SC-C4-12, where `AppBar` ellipsizes it, so this width×scale is now a
+      // claim about the band's two icon buttons and the bar's own row rather
+      // than about the two-line label that used to sit between them.
       expect(tester.takeException(), isNull);
 
       final bar = tester.getRect(find.byType(CardSelectionBarWidget));
@@ -422,6 +444,34 @@ void main() {
       reason:
           'app_spacing.dart defines lg as the gap between list items, and '
           'deck_list_sliver_widget.dart separates the deck rows by it',
+    );
+  });
+
+  testWidgets('G11 — the floating create clears the empty face CTA', (
+    tester,
+  ) async {
+    // The list answers its clearance through `mxScrollEndInsetOf` (G5), but
+    // the empty faces are not that list: `MxEmptyState` centres itself and
+    // pads on its own, so nothing about G5 says the button cannot land on the
+    // "Add card" action underneath it. Measured because the two are the same
+    // verb — a FAB sitting on the CTA it duplicates is the one overlap on this
+    // screen a reader would misread as a single control (SC-C4-05 risk note).
+    final repository = FakeCardRepository();
+    addTearDown(repository.dispose);
+    await pumpList(tester, repository);
+    repository.emitItems(<dynamic>[].cast());
+    repository.emitCount(0);
+    await tester.pumpAndSettle();
+
+    final fab = tester.getRect(find.byType(MxFab));
+    final cta = tester.getRect(find.widgetWithText(MxActionButton, 'Add card'));
+
+    expect(
+      fab.overlaps(cta),
+      isFalse,
+      reason:
+          "the floating create and the empty face's Add card action are the "
+          'same verb; overlapping them reads as one control that half works',
     );
   });
 }

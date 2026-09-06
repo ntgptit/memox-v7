@@ -8,6 +8,7 @@ import 'package:memox/features/trash/domain/entities/trash_batch_entity.dart';
 import 'package:memox/features/trash/domain/models/trash_item_type_model.dart';
 import 'package:memox/features/trash/domain/models/trash_restore_target_model.dart';
 import 'package:memox/features/trash/presentation/screens/trash_screen.dart';
+import 'package:memox/features/trash/presentation/widgets/sections/trash_selection_bar_widget.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/l10n/generated/app_localizations.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
@@ -20,12 +21,15 @@ import 'support/fake_trash_repository.dart';
 void main() {
   final english = AppLocalizationsEn();
   final now = DateTime.utc(2026, 8, 15, 12);
+  const String routeUnderTest = '/trash';
+  const String routeBeneathTrash = 'wherever Trash was opened from';
 
   Future<FakeTrashRepository> pumpTrash(
     WidgetTester tester, {
     required List<TrashBatchEntity> batches,
     List<TrashRestoreTarget> targets = const <TrashRestoreTarget>[],
     bool holdFirstEmission = false,
+    bool pushedOntoARoute = false,
   }) async {
     final repository = FakeTrashRepository(
       batches: batches,
@@ -47,7 +51,17 @@ void main() {
           theme: buildLightTheme(),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: const TrashScreen(),
+          // Trash is a pushed route in the app, and a `PopScope` only has
+          // something to refuse when a route sits underneath it: as `home:`
+          // the back gesture reaches the engine instead of the navigator, so
+          // a back-gesture test would pass against no guard at all.
+          initialRoute: pushedOntoARoute ? routeUnderTest : '/',
+          routes: <String, WidgetBuilder>{
+            '/': (context) => pushedOntoARoute
+                ? const Scaffold(body: Text(routeBeneathTrash))
+                : const TrashScreen(),
+            routeUnderTest: (context) => const TrashScreen(),
+          },
         ),
       ),
     );
@@ -371,6 +385,40 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text(english.trashSelectionCardsOnly), findsOneWidget);
+    });
+
+    testWidgets('Back clears the selection before it leaves Trash '
+        '(UC-21 A2)', (tester) async {
+      // While selecting, the app bar's ✕ is the only exit on screen and it
+      // clears the selection. The system gesture used to pop the route
+      // instead, so the same "go back" meant two different things depending
+      // on which one the user reached for.
+      await pumpTrash(
+        tester,
+        batches: <TrashBatchEntity>[fakeBatch(id: 'card', name: 'a card')],
+        pushedOntoARoute: true,
+      );
+
+      await tester.longPress(find.text('a card'));
+      await tester.pumpAndSettle();
+      expect(find.text(english.trashSelectionCount(1)), findsOneWidget);
+
+      // The platform gesture, not the ✕: the point of the guard is that
+      // the two agree.
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+
+      expect(find.byType(TrashScreen), findsOneWidget);
+      expect(find.byType(TrashSelectionBarWidget), findsNothing);
+      expect(find.text(english.trashTitle), findsOneWidget);
+      expect(find.text(routeBeneathTrash), findsNothing);
+
+      // And Trash is not a trap: with nothing selected the next Back leaves.
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+
+      expect(find.byType(TrashScreen), findsNothing);
+      expect(find.text(routeBeneathTrash), findsOneWidget);
     });
   });
 }

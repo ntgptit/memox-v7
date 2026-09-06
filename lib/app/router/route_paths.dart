@@ -96,6 +96,19 @@ abstract final class RoutePaths {
   /// One deck's study entry, relative to `/decks/:deckId`.
   static const String deckStudyRelative = 'study';
 
+  /// The study options screen, **relative** to whichever study entry opened it:
+  /// `/study/<id>/options` inside the Study branch, `/decks/<id>/study/options`
+  /// inside the Library branch (UC-15, BR-147, BR-148).
+  ///
+  /// **One segment, two mounts**, for the same reason [studyDeckRelative] and
+  /// [deckStudyRelative] are two routes onto one screen. The options screen is
+  /// pushed *from* the entry screen, so it has to land in the branch the user is
+  /// already standing in. Mounted under one entry only, opening it from the
+  /// other would move the bottom bar's selected tab and send Back into a branch
+  /// the user never chose: `StatefulNavigationShell` takes its index from the
+  /// branch that owns the matched route, not from where the push came from.
+  static const String studyOptionsRelative = 'options';
+
   /// The progress branch. A real path for the same reason as [study]: a deep
   /// link must open the app directly on the Progress tab. It shows Progress by
   /// Deck at the library level — every root deck (UC-12).

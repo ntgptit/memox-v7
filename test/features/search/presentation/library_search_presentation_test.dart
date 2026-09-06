@@ -120,6 +120,32 @@ void main() {
     );
   });
 
+  testWidgets('every row ends in the one navigation glyph', (tester) async {
+    // SC-C4-01. The trailing glyph was `north_east`, the app's only one and
+    // conventionally "this leaves here" — so the same deck route wore one
+    // affordance when reached from search and another from every other list.
+    // `north_east` is asserted absent rather than merely `chevron_right`
+    // present, because a second trailing glyph beside the chevron would pass
+    // the positive half on its own.
+    await pumpSearchScreen(
+      tester,
+      repository: FakeLibrarySearchRepository.serving(
+        fakeSearchPage(
+          decks: <DeckSearchHit>[fakeDeckHit()],
+          cards: <CardSearchHit>[fakeCardHit()],
+        ),
+      ),
+    );
+    await typeSearch(tester, 'noun');
+
+    expect(
+      find.byIcon(Icons.chevron_right),
+      findsNWidgets(2),
+      reason: 'one per result row, deck and card alike',
+    );
+    expect(find.byIcon(Icons.north_east), findsNothing);
+  });
+
   testWidgets('every row clears the 48dp touch floor', (tester) async {
     await pumpSearchScreen(
       tester,

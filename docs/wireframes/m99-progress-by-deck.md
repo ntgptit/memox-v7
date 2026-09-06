@@ -7,8 +7,8 @@
 | **Scope** | Bộ chọn khoảng, bảng tổng, hàng deck và mọi trạng thái của hai cấp. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md` BR-182…BR-189), luồng (`use-cases.md` UC-13), giá trị token (`lib/core/theme/`) |
 | **Source of truth for** | Bố cục màn hình tiến độ · hình học được pin bằng test · danh sách divergence đã duyệt |
 | **Depends on** | `document-conventions.md`, `business-rules.md` (BR-182…BR-189), `use-cases.md` (UC-13), `wbs.md` (M99.24) |
-| **Updated by task** | M99.24 · rà soát UI/UX vòng một (bộ chọn ghim, gutter theo breakpoint, lưới gập, rung chữ số, chú thích đơn vị, AppBar ở mọi cấp) · hợp nhất `/progress` thành một màn (phần đầu tổng quan ở cấp thư viện) |
-| **Last updated** | 2026-08-15 |
+| **Updated by task** | M99.24 · rà soát UI/UX vòng một (bộ chọn ghim, gutter theo breakpoint, lưới gập, rung chữ số, chú thích đơn vị, AppBar ở mọi cấp) · hợp nhất `/progress` thành một màn (phần đầu tổng quan ở cấp thư viện) · SC-C4-09 · empty state cấp deck nói đường dẫn |
+| **Last updated** | 2026-09-06 |
 
 ---
 
@@ -178,7 +178,7 @@ Những chỗ màn hình này cố ý khác deck list, và vì sao:
 
 | Divergence | Lý do |
 |---|---|
-| Không breadcrumb; đường dẫn nằm trên hàng | §1 |
+| Không breadcrumb; đường dẫn nằm trên hàng — và trong câu của empty state khi không còn hàng nào | §1. Mỗi hàng tự in đường dẫn của nó, nên khi còn hàng thì tên deck trần ở AppBar đã đủ. Ở state "không có bộ thẻ con" không còn hàng nào, và một tiêu đề như `Động từ` không nói đó là `Động từ` nào — nên chính câu đó mang đường dẫn xuống tới deck đang mở (`progressEmptySubDecksScopeMessage`). Vẫn **không** thêm subline: subline chỉ xuất hiện khi dữ liệu về, nên nó tạo một bậc cao bằng thanh bar giữa mặt loading và mặt loaded (§3) |
 | Lưới metric 2×2 thay vì hero 2×2 + workload line | Bốn số ở đây không có thứ tự khẩn cấp; không số nào "dẫn" |
 | Không filter, không sort control | Thứ tự là một rule (BR-187), không phải lựa chọn xem |
 | Không nút hành động ở hai empty state "không có gì để liệt kê" | Bước tiếp theo nằm ở tab khác; nút nhảy tab đọc như đường vòng. **Không** áp cho state deck-missing: nó có đường quay lại, vì đó là lối ra duy nhất còn đúng (§3, UC-13 E2) |
