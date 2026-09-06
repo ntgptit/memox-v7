@@ -629,6 +629,38 @@ Mỗi finding đi qua **hai pass tái xác minh độc lập** trên `main` hi�
 
 ---
 
+### C4 — dispositions
+
+Đóng bởi PR #478. Grammar tạo mới do chủ dự án chốt: card list theo MxFab của deck list.
+
+Mỗi finding đi qua **hai pass tái xác minh độc lập** trên `main` hiện tại trước khi một dòng code được viết; chỗ nào hai pass bất đồng thì được phân xử bằng cách đọc code, không phải bằng cách lấy đa số.
+
+| ID | Kết luận cuối | Vì sao |
+|---|---|---|
+| `SC-C4-01` | **FIXED** | search_result_shell_widget.dart:83 is `const MxIcon(Icons.north_east, size: MxIconSize.sm)`, inside the row-wide `ExcludeSemantics` opened at :75. `grep -rn "north_east\|chevron_right" lib/` returns exactly 5 hits: this one plus ch… |
+| `SC-C4-02` | **REVISED_AND_FIXED** | The defect reproduces exactly. card_editor_screen.dart:172-177 (_buildCreate) returns MxContentShell with `leading: _closeButton(context, _pop)` and no PopScope; `_pop()` at :452 is a bare `Navigator.of(context).pop()`. Worse than… **Target đã đổi:** Same shape, its own copy. (a) Register the dirty listeners in create too and seed `_baseline = _draft` (the all-empty draft) in initState so the existing snapshot comparison — not a new predicate — an |
+| `SC-C4-03` | **REVISED_AND_FIXED** | The inversion is real. card_editor_screen.dart:337-342 puts CardWriteFailureTextWidget (flag failure) in MxContentShell.subheader, while the breadcrumb is the first child of the scrolling body: card_editor_form_widget.dart:72 Card… **Target đã đổi:** Pin the breadcrumb, leave the failure pinned and keep its copy. Extract `_buildBreadcrumb` out of CardEditorContextWidget into a feature-local section the screen mounts, and pass `subheader:` a Column |
+| `SC-C4-04` | **REVISED_AND_FIXED** | The stacking is real but the problem statement is wrong about who does it, and the fix breaks working navigation. Verified: both editor routes are in the Decks branch — app_router.dart:169 `cardCreateRelative` and :194 `cardEditRe… **Target đã đổi:** Do not move the EDIT route. Take the finding's own stated alternative for edit — accept the footer above the navigation bar and record it, because edit is a pushed page inside the branch by design (ca |
+| `SC-C4-05` | **FIXED** | Both endpoints verified. deck_list_screen.dart:284-291 `floatingActionButton: _mayCreate(parent) ? MxFab(icon: Icons.add, label: _createLabel(context, parent), …)`, directly under the comment at :273-283 '**Create floats again, re… |
+| `SC-C4-06` | **FIXED** | Every delta measured and every reason checked. deck_path_widget.dart:81 `lineHeight: MxBreadcrumb.compactLineHeight` (= AppSizing.controlDense, 32), :86 `upIcon: Icons.chevron_left`, default collapseAfter 4 (mx_breadcrumb.dart:80)… |
+| `SC-C4-07` | **FIXED** | card_import_context_widget.dart:43-56 passes only semanticLabel, rootIcon, collapseAfter: 3 and items — no onUp, no onShowAll, and no MxBreadcrumbItem carries an onTap. mx_breadcrumb.dart:317 (`if (widget.onUp != null) return _bui… |
+| `SC-C4-08` | **DESIGN_SYSTEM_BLOCKED** | The measurement is right and the fix cannot be completed from the feature. progress_deck_screen.dart:231-237 is `MxSubheaderBand(gutter: gutter, child: ProgressRangeSelectorWidget(...))` with `isScrolled` omitted, so it takes the … **Hợp đồng:** 11 — Chrome contract của MxContentShell (v1-freeze.md §2 row 11; enforcement mx_content_shell_chrome_test, mx_content_sh |
+| `SC-C4-09` | **REVISED_AND_FIXED** | The gap is real in the empty state and the data claim holds: progress_deck_screen.dart:162 is `title: snapshot.scopeName ?? context.l10n.progressTitle` with no titleSubline and no subheader; `_emptyLevel` at :312-319 renders only … **Target đã đổi:** Answer it where it is actually missing, in Progress's own grammar, without touching the chrome. In `_emptyLevel` (progress_deck_screen.dart:312-319), for the `!snapshot.isTopLevel` branch, name the de |
+| `SC-C4-10` | **FIXED** | Same defect as SC-C4-06, verified from the card side. card_list_screen.dart:146 and :271 put CardBreadcrumbWidget in `subheader:`; no titleSubline is passed, so mx_content_shell.dart:281 `automaticallyImplyLeading: widget.leading … |
+| `SC-C4-11` | **FIXED** | Duplicate of SC-C4-05, verified from the card side and equally sound. card_list_screen.dart:157-161 carries the justification and :176-182 the MxIconButton(Icons.add); deck_list_screen.dart:273-291 carries '**Create floats again, … |
+| `SC-C4-12` | **REVISED_AND_FIXED** | Half of this is right and the sibling half is wrong. Right: card_list_screen.dart:194-199 `PopScope(canPop: !selection.isSelecting, …_clearSelection)` repurposes the bar's back affordance, which is still drawn (no leading, no subl… **Target đã đổi:** Take the dismiss-control half and follow trash's actual chrome treatment for the rest. (a) While `selection.isSelecting`, pass `leading: MxIconButton(icon: Icons.close, semanticLabel: l10n.cardSelecti |
+| `SC-C4-13` | **REVISED_AND_FIXED** | The divergence is measurable but the finding's decisive evidence is a misreading. card_sort_control_widget.dart:38-68 is an MxMenuButton whose child is `Text(_label, labelSmall.inked(AppInk.quiet))` plus `const MxIcon(Icons.expand… **Target đã đổi:** If this is worth doing at P3, align the mechanism in the direction that carries the owner reviews and say so honestly: compose the card control as `MxTextButton(label: _label(context, active), icon: I |
+| `SC-C4-14` | **FIXED** | `grep -rn PopScope lib/` returns no hit in lib/features/trash/ at all; trash_screen.dart:42-121 hands the body straight to MxAsyncView at :105. The visible exit is swapped at :46-52 (`leading: selection.isActive ? MxIconButton(ico… |
+| `SC-C4-15` | **REFUTED** | The claim is filed against `state: populated`, and in the populated state the screen does answer 'which Verbs is this'. progress_mapper.dart:136-139 builds every child row's path as `scopePath + ProgressPathSegment(scopeDeckId, sc… |
+| `SC-C4-16` | **REVISED_AND_FIXED** | The commit-on-tap measurement is right: move_deck_sheet_widget.dart:145-149 wires `_TargetRow(onTap: () => onChoose(targets[index]))` straight to :100-102 `ref.read(moveDeckControllerProvider(deckId).notifier).submit(targetParentD… **Target đã đổi:** Adopt the selection + confirm shape, and leave the failure band where C3 put it. `_TargetRow` gains `isSelected` (MxListTile's existing field) and a radio leading pair the way trash_restore_target_she |
+| `SC-C4-17` | **FIXED** | route_not_found_screen.dart:31 is `MxContentShell(body: …)` with neither `title:` nor `chrome:`, so `chrome` defaults to MxShellChrome.auto (mx_content_shell.dart:67) and the bar is decided by `hasBackAffordance` — `widget.leading… |
+| `SC-C4-18` | **REVISED_AND_FIXED** | The split reproduces exactly: app_router.dart:187 gives cardImport `parentNavigatorKey: rootNavigatorKey` and a URL, while study_entry_screen.dart:339-349 and study_home_screen.dart:147-148 push StudySessionScreen imperatively via… **Target đã đổi:** Split the finding and take only the half that is composition-shaped. Mount **StudyOptionsScreen** as an ordinary in-branch GoRoute under the study routes, exactly as reminderSettings is at app_router. |
+| `SC-C4-19` | **REFUTED** | The premise misquotes the source it rests on. a8-navigation-chrome-audit.md:855-868 (§10.3) is titled 'Back vs close is right where it is stated', and it quotes card_editor_screen.dart's rule approvingly: 'The three screens that s… |
+| `SC-C4-20` | **FIXED** | deck_create_child_widget.dart:64-67 is `context.goNamed(RouteNames.cardEditor, …)` for the create-card row, three lines after :56-61 `await context.pushNamed(RouteNames.cardImport, …)` with the reason spelled out: 'Pushed: the wiz… |
+| `SC-C4-21` | **FIXED** | Both offenders reproduce (line numbers have drifted by C2/C3): card_tag_filter_sheet_widget.dart:101 is a bare `Text(context.l10n.tagFilterTitle, style: context.texts.titleMedium)` and tag_rename_widget.dart:141 a bare `Text(conte… |
+
+**Tổng: DESIGN_SYSTEM_BLOCKED 1 · FIXED 10 · REFUTED 2 · REVISED_AND_FIXED 8 = 21**
+
 ### C5 — Section headings — hand-rolled Text where the shared heading belongs
 
 **6 findings** (P2 5 · P3 1), across 6 surface units.
@@ -830,7 +862,7 @@ mà reviewer nhìn một màn đã gán. Chênh lệch giữa hai cột là §1.
 | **C1** Sở hữu gutter | 20 | 16 | P1 | **P1** | **đóng — #472** · FIXED 11 · REVISED_AND_FIXED 6 · REFUTED 1 · BLOCKED 2 |
 | **C2** Nhịp danh sách và section | 20 | 14 | P2 | **P1** — cùng một grammar sai ở 14 đơn vị | **đóng — #473** · FIXED 14 · REVISED_AND_FIXED 6 |
 | **C3** Mặt lỗi và mặt rỗng | 27 | 15 | **P0** | **P0** | **đóng — #476** · FIXED 14 · REVISED_AND_FIXED 11 · REFUTED 1 · BLOCKED 1 |
-| **C4** Grammar điều hướng và chrome | 21 | 12 | P1 | **P1** | chưa mở |
+| **C4** Grammar điều hướng và chrome | 21 | 12 | P1 | **P1** | **đóng — #478** · FIXED 10 · REVISED_AND_FIXED 8 · REFUTED 2 · BLOCKED 1 |
 | **C5** Section heading tự dựng | 6 | 6 | P2 | P2 | chưa mở |
 | **C6** Bậc type cho một phần tử ngữ nghĩa | 5 | 5 | P2 | P2 | chưa mở |
 | **C7** Vỡ ở responsive / text scale | 5 | 5 | P1 | **P1** | chưa mở |
