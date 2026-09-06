@@ -9,6 +9,7 @@ import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../../../shared/widgets/mx_confirm_dialog.dart';
 import '../../../../../shared/widgets/mx_dialog_tone.dart';
 import '../../../../../shared/widgets/mx_feedback_band.dart';
+import '../../../../../shared/widgets/mx_section_label.dart';
 import '../../../../../shared/widgets/mx_sheet_insets.dart';
 import '../../../domain/models/deck_template_model.dart';
 import '../../../domain/models/scheduler_type_model.dart';
@@ -124,11 +125,16 @@ class _StarterInstallFormState extends ConsumerState<_StarterInstallForm> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         // The sheet's title announces as a header (A20.1 P1-01, §23 #17).
+        // `titleMedium`, the rung ten sibling sheets and the dialog theme
+        // already give a modal its name at (`app_dialog_theme.dart`). At
+        // `titleLarge` this sheet titled itself at the AppBar's own rung — the
+        // screen title still visible behind the scrim — so one surface carried
+        // two title hierarchies (SC-C6-04).
         Semantics(
           header: true,
           child: Text(
             widget.template.title.value,
-            style: context.texts.titleLarge,
+            style: context.texts.titleMedium,
           ),
         ),
         const SizedBox(height: AppSpacing.xs),
@@ -137,10 +143,13 @@ class _StarterInstallFormState extends ConsumerState<_StarterInstallForm> {
           style: context.texts.bodySmall!.inked(context, AppInk.quiet),
         ),
         const SizedBox(height: AppSpacing.lg),
-        Text(
-          context.l10n.starterLibrarySchedulerPrompt,
-          style: context.texts.labelMedium!.inked(context, AppInk.quiet),
-        ),
+        // The unit's one scheduler heading, through the app's one
+        // section-heading treatment (D18): this sheet spelled it
+        // `labelMedium` quiet, the reset sheet `labelLarge`, and the picker
+        // `labelLarge` again — one semantic element, three spellings, none
+        // of them announcing as a header (SC-C5-04). The `sm` below it was
+        // already right and is what the other two now take.
+        MxSectionLabel(label: context.l10n.starterLibrarySchedulerPrompt),
         const SizedBox(height: AppSpacing.sm),
         DeckSchedulerPickerWidget(
           // Titled two lines up as "Review schedule".

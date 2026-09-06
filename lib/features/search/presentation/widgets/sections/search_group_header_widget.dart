@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/extensions/app_ink.dart';
-import '../../../../../core/theme/extensions/theme_context_extension.dart';
+import '../../../../../shared/widgets/mx_section_label.dart';
 import '../../../domain/models/search_result_model.dart';
 import '../support/search_labels_widget.dart';
 
@@ -23,26 +22,30 @@ class SearchGroupHeaderWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      header: true,
-      // Rendered exactly as the ARB authored it. `toUpperCase()` on a localized
-      // string is the translator's decision to make, not the widget's — it is
-      // wrong for locales with no case and changes the width the layout was
-      // measured at.
-      child: Text(
-        context.mxSearchGroupLabel(group),
-        // **No `sectionLabelTracking`.** That token exists to open up 11px
-        // *uppercase*, which is what every other section label in the app is;
-        // this one renders as authored, so the extra 1.1px would be loosening
-        // lowercase text the type scale has already spaced.
-        // Through the wght axis — a bare `fontWeight:` paints the rung's
-        // old weight.
-        style: context.texts.labelSmall!.inked(
-          context,
-          AppInk.quiet,
-          isEmphasized: true,
-        ),
-      ),
-    );
+    // **The app's one section-heading treatment** (D18), at its default
+    // `standard` rung: `sectionLabel` = 12 / w500 / tracking 1.1, uppercased at
+    // paint, with the ARB sentence kept as the accessible name and the node
+    // marked `header` — so the component supplies the `Semantics(header: true)`
+    // this file used to wrap by hand.
+    //
+    // **Why this file no longer renders the string exactly as authored.** It
+    // refused `toUpperCase()` on the grounds that the case of a localized
+    // string "is the translator's decision to make, not the widget's". A19 §7
+    // agreed and asked the shared component to adopt the rule; A20.1 P2-02
+    // answered the argument instead of overriding it — uppercasing a caseless
+    // string is the identity, and what a reader hears is the sentence, not the
+    // shouting (`mx_section_label.dart:34-36`). What the refusal actually cost
+    // was hierarchy: at `labelSmall` emphasised, this heading was the same 11px
+    // and the same quiet ink as the path caption printed *inside* the rows it
+    // heads, one weight step apart, so a group read as three peer caption lines
+    // rather than a heading over a list.
+    //
+    // **Not `small`, not `list`.** `MxSectionLabelRung.small` is
+    // `sectionLabelSmall` — labelSmall, 11px, the caption's own size — so it
+    // would keep the very defect this closes; it is reserved for a face label
+    // inside a card. `list` exists only because the deck toolbar's heading
+    // shares its row with the sort control (`app_typography.dart:151-160`).
+    // This header has no control beside it, so `standard` is the rung.
+    return MxSectionLabel(label: context.mxSearchGroupLabel(group));
   }
 }

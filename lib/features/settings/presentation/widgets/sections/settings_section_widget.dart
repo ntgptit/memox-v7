@@ -30,7 +30,17 @@ class SettingsSectionWidget extends StatelessWidget {
   ///
   /// Named because the geometry contract measures it and a literal in two
   /// places is two numbers that can disagree.
-  static const double headingGap = AppSpacing.xs;
+  ///
+  /// **`sm`, the app's one label-to-content step** (`m99-23-progress-overview.md`
+  /// G7). At `xs` this screen bound its headings four pixels above their
+  /// cards while every other surface using the same standard-rung
+  /// `MxSectionLabel` bound them at twelve — with both screens separating
+  /// their bands at `xl`, the heading-to-content ratio was 24:4 here and
+  /// 24:12 everywhere else, so one component read as two (SC-C5-06). The
+  /// value was settled for the whole cluster rather than for this screen:
+  /// `sm` is the only one of the three written down as a rule, and the
+  /// six card-feature call sites moved to it in the same commit.
+  static const double headingGap = AppSpacing.sm;
 
   @override
   Widget build(BuildContext context) => Column(

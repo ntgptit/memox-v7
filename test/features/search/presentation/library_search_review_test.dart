@@ -11,6 +11,7 @@ import 'package:memox/features/search/presentation/widgets/items/deck_result_til
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
 import 'package:memox/shared/widgets/mx_search_field.dart';
+import 'package:memox/shared/widgets/mx_section_label.dart';
 
 import 'support/fake_library_search_repository.dart';
 import 'support/search_screen_harness.dart';
@@ -62,7 +63,11 @@ void main() {
           fieldLeft,
         );
         expect(
-          tester.getRect(find.text(english.librarySearchDecksGroupLabel)).left,
+          tester
+              .getRect(
+                find.text(english.librarySearchDecksGroupLabel.toUpperCase()),
+              )
+              .left,
           fieldLeft,
         );
       });
@@ -321,6 +326,50 @@ void main() {
           "spinner's own semanticsLabel into one node, like card history's "
           'tail',
     );
+    handle.dispose();
+  });
+
+  testWidgets('each group heading is a heading, announced as written', (
+    tester,
+  ) async {
+    // SC-C5-01. The two headings go through `MxSectionLabel` now, which is the
+    // only thing that makes the caps safe: they are paint, and the accessible
+    // name stays the sentence the ARB authored — a reader that hears
+    // "D-E-C-K-S" is exactly the failure the component exists to prevent
+    // (A20.1 P2-02). The `header` flag is the other half: without it there is
+    // nothing to jump between when both groups are on screen.
+    final handle = tester.ensureSemantics();
+    await pumpSearchScreen(
+      tester,
+      repository: FakeLibrarySearchRepository.serving(
+        fakeSearchPage(
+          decks: <DeckSearchHit>[fakeDeckHit()],
+          cards: <CardSearchHit>[fakeCardHit()],
+        ),
+      ),
+    );
+    await typeSearch(tester, 'noun');
+
+    final Finder headings = find.byType(MxSectionLabel);
+    expect(headings, findsNWidgets(2));
+
+    final List<String> written = <String>[
+      english.librarySearchDecksGroupLabel,
+      english.librarySearchCardsGroupLabel,
+    ];
+    for (int index = 0; index < written.length; index++) {
+      final node = tester.getSemantics(headings.at(index));
+      expect(
+        node.flagsCollection.isHeader,
+        isTrue,
+        reason: '"${written[index]}" names a group a reader can jump to',
+      );
+      expect(
+        node.label,
+        written[index],
+        reason: 'the shouting is paint; the name is the sentence',
+      );
+    }
     handle.dispose();
   });
 }

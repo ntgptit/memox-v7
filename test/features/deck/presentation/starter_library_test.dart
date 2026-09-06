@@ -126,14 +126,20 @@ void main() {
     await tester.pumpAndSettle();
 
     // The sheet asks the one question a copy needs (BR-34).
-    expect(find.text(english.starterLibrarySchedulerPrompt), findsOneWidget);
+    expect(
+      find.text(english.starterLibrarySchedulerPrompt.toUpperCase()),
+      findsOneWidget,
+    );
 
     await tester.tap(find.text(english.starterLibraryInstallAction).last);
     await tester.pumpAndSettle();
 
     expect(repository.installs, hasLength(1));
     expect(repository.installs.single.schedulerType, SchedulerType.eightBox);
-    expect(find.text(english.starterLibrarySchedulerPrompt), findsNothing);
+    expect(
+      find.text(english.starterLibrarySchedulerPrompt.toUpperCase()),
+      findsNothing,
+    );
   });
 
   testWidgets('cancelling the sheet installs nothing', (tester) async {
@@ -205,14 +211,20 @@ void main() {
 
     // Nothing was copied (BR-39), the sheet stays, and the line says so.
     expect(find.text(english.starterLibraryInstallFailed), findsOneWidget);
-    expect(find.text(english.starterLibrarySchedulerPrompt), findsOneWidget);
+    expect(
+      find.text(english.starterLibrarySchedulerPrompt.toUpperCase()),
+      findsOneWidget,
+    );
 
     repository.failWith = null;
     await tester.tap(find.text(english.starterLibraryInstallAction).last);
     await tester.pumpAndSettle();
 
     expect(repository.installs, hasLength(1));
-    expect(find.text(english.starterLibrarySchedulerPrompt), findsNothing);
+    expect(
+      find.text(english.starterLibrarySchedulerPrompt.toUpperCase()),
+      findsNothing,
+    );
   });
 
   testWidgets('an empty manifest is a state, not an error', (tester) async {

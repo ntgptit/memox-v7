@@ -199,7 +199,7 @@ void main() {
 
       expect(find.text(vietnamese.progressRange7Label), findsOneWidget);
       expect(
-        find.text(vietnamese.progressSummaryLast7DaysTitle),
+        find.text(vietnamese.progressSummaryLast7DaysTitle.toUpperCase()),
         findsOneWidget,
       );
       expect(tester.takeException(), isNull);

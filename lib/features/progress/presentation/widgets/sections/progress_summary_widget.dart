@@ -5,6 +5,7 @@ import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_card.dart';
+import '../../../../../shared/widgets/mx_section_label.dart';
 import '../../../domain/models/deck_activity_snapshot_model.dart';
 import '../../../domain/models/progress_range_model.dart';
 import '../items/progress_metric_widget.dart';
@@ -43,15 +44,14 @@ class ProgressSummaryWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Text(
-            context.progressSummaryTitle(range),
-            // `labelLarge`, the role its three sibling card headings already
-            // use (M99.26). `titleSmall` resolves to the same Inter w600 14/20
-            // today, so nothing moves — which is exactly why it was worth
-            // fixing now: the day one of the two roles is retuned, two adjacent
-            // headings on one screen would change apart.
-            style: context.texts.labelLarge!.inked(context, AppInk.quiet),
-          ),
+          // **The app's one section-heading treatment** (D18). M99.26 put
+          // all four Progress headings on one *role* — `labelLarge` — which
+          // held them level with each other and left all four differing from
+          // every other group title in the app. One component rather than one
+          // role name is that same argument a level up, and it is the level
+          // that holds: the rung, the case and the `header` node travel
+          // together (SC-C5-03).
+          MxSectionLabel(label: context.progressSummaryTitle(range)),
           // `sm`, the step G7 pins for a section label → its content, and the
           // one the three sibling cards in this same scroll already take
           // (`progress_streak_hero_widget.dart`, `progress_today_widget.dart`,

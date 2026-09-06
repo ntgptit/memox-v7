@@ -1,6 +1,6 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 734,
+  "scannedFiles": 733,
   "totalSites": 308,
   "byElementKind": {
     "other": 269,
@@ -3165,7 +3165,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_source_step_widget.dart",
-      "line": 318,
+      "line": 322,
       "widget_context": "_UploadPanel",
       "element_kind": "background",
       "source_kind": "theme-token",

@@ -51,8 +51,14 @@ void main() {
       );
       await typeSearch(tester, 'noun');
 
-      expect(find.text(english.librarySearchDecksGroupLabel), findsOneWidget);
-      expect(find.text(english.librarySearchCardsGroupLabel), findsOneWidget);
+      expect(
+        find.text(english.librarySearchDecksGroupLabel.toUpperCase()),
+        findsOneWidget,
+      );
+      expect(
+        find.text(english.librarySearchCardsGroupLabel.toUpperCase()),
+        findsOneWidget,
+      );
       expect(find.byType(DeckResultTileWidget), findsOneWidget);
       expect(find.byType(CardResultTileWidget), findsOneWidget);
     });
@@ -87,8 +93,14 @@ void main() {
       );
       await typeSearch(tester, 'noun');
 
-      expect(find.text(english.librarySearchDecksGroupLabel), findsOneWidget);
-      expect(find.text(english.librarySearchCardsGroupLabel), findsNothing);
+      expect(
+        find.text(english.librarySearchDecksGroupLabel.toUpperCase()),
+        findsOneWidget,
+      );
+      expect(
+        find.text(english.librarySearchCardsGroupLabel.toUpperCase()),
+        findsNothing,
+      );
     });
 
     testWidgets('a cards-only result draws no deck header', (tester) async {
@@ -100,8 +112,14 @@ void main() {
       );
       await typeSearch(tester, 'noun');
 
-      expect(find.text(english.librarySearchDecksGroupLabel), findsNothing);
-      expect(find.text(english.librarySearchCardsGroupLabel), findsOneWidget);
+      expect(
+        find.text(english.librarySearchDecksGroupLabel.toUpperCase()),
+        findsNothing,
+      );
+      expect(
+        find.text(english.librarySearchCardsGroupLabel.toUpperCase()),
+        findsOneWidget,
+      );
     });
 
     testWidgets('a settled query that found nothing echoes what was typed', (

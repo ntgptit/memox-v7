@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../shared/widgets/mx_radio_rows.dart';
+import '../../../../../shared/widgets/mx_section_label.dart';
 import '../../../../../core/theme/extensions/app_ink.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
@@ -67,8 +68,18 @@ class DeckSchedulerPickerWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        if (sectionLabel != null)
-          Text(sectionLabel!, style: context.texts.labelLarge),
+        // **The app's one section-heading treatment** (D18). This heading
+        // named the same semantic element three ways across the unit —
+        // `labelLarge` here, `labelLarge` again hand-rolled in the reset
+        // sheet, `labelMedium` quiet in the starter install — and none of
+        // the three announced as a header, while the sibling export sheet's
+        // choice group did (SC-C5-04). `sm` after it is the step
+        // `card_export_sheet_widget` takes between a group label and the
+        // choices it names; there was no gap at all before.
+        if (sectionLabel != null) ...<Widget>[
+          MxSectionLabel(label: sectionLabel!),
+          const SizedBox(height: AppSpacing.sm),
+        ],
         MxRadioRows<SchedulerType>(
           values: _choices,
           selected: selected,

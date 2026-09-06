@@ -5,6 +5,8 @@ import 'package:memox/features/deck/domain/entities/deck_entity.dart';
 import 'package:memox/features/deck/domain/models/deck_content_type_model.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 import 'package:memox/features/deck/presentation/widgets/overlays/deck_reset_progress_widget.dart';
+import 'package:memox/l10n/generated/app_localizations_en.dart';
+import 'package:memox/shared/widgets/mx_section_label.dart';
 
 import 'support/deck_screen_harness.dart';
 import 'support/fake_deck_repository.dart';
@@ -16,6 +18,15 @@ import 'support/fake_deck_repository.dart';
 /// at all is that a destructive action described by only one of them reads as
 /// safer than it is.
 void main() {
+  final english = AppLocalizationsEn();
+
+  /// The scheduler heading as it is *painted*: `MxSectionLabel` uppercases
+  /// at paint and leaves the written sentence to the semantics node, so a
+  /// finder for the ARB string matches nothing (SC-C5-04).
+  final Finder schedulerHeading = find.text(
+    english.deckResetProgressSchedulerLabel.toUpperCase(),
+  );
+
   DeckEntity root({SchedulerType scheduler = SchedulerType.eightBox}) =>
       DeckEntity(
         id: 'root',
@@ -154,9 +165,7 @@ void main() {
     final Rect title = tester.getRect(find.text('Reset learning progress?'));
     final Rect kept = sectionOf('Kept');
     final Rect lost = sectionOf('Lost');
-    final Rect schedulerLabel = tester.getRect(
-      find.text('Study mode after the reset'),
-    );
+    final Rect schedulerLabel = tester.getRect(schedulerHeading);
 
     expect(kept.top - title.bottom, AppSpacing.lg);
     expect(lost.top - kept.bottom, AppSpacing.xl);
@@ -169,12 +178,18 @@ void main() {
   });
 
   testWidgets('the mode section is titled once, by this sheet', (tester) async {
-    // This sheet titles the section `Study mode after the reset`; the picker
-    // used to add `Study mode` directly under it, so the sheet read as two
-    // headings stacked with nothing between them.
+    // This sheet titles the section itself; the picker used to add its own
+    // `Study mode` directly under it, so the sheet read as two headings
+    // stacked with nothing between them.
+    //
+    // **Counted by component, not by the absent string.** Both headings now
+    // read `Study mode` — the sheet's copy was shortened to fit one line at
+    // 320dp x 2.0 (SC-C5-04) — so `findsNothing` on the picker's old label
+    // would pass whether or not the picker drew one. One `MxSectionLabel`
+    // on the sheet is the thing this test has always meant.
     await pumpSheet(tester, hasLearnedCards: true);
 
-    expect(find.text('Study mode after the reset'), findsOneWidget);
-    expect(find.text('Study mode'), findsNothing);
+    expect(schedulerHeading, findsOneWidget);
+    expect(find.byType(MxSectionLabel), findsOneWidget);
   });
 }

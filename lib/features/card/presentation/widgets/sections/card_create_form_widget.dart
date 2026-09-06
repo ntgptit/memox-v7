@@ -7,16 +7,29 @@ import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_text_field.dart';
 import '../../../domain/failures/card_validation_failure.dart';
 import '../../states/card_submit_state.dart';
-import 'card_details_section_widget.dart';
+import 'card_editor_details_widget.dart';
+import 'card_editor_field_widget.dart';
 
 /// The editor's create mode: two sides and the optional details (UC-04 W4, A4).
 ///
-/// **Its own file, and that is the point.** Edit mode has been redesigned twice;
-/// create is explicitly out of that scope. While both modes shared one field
-/// builder, every decision taken for edit landed here too — which is how a front
-/// field on a screen nobody had reviewed silently changed size the last time
-/// these two shared a builder. `CardEditorFormWidget` is edit's; this is
-/// create's, and neither reads the other.
+/// **Its own file, and still the point — but no longer its own field grammar.**
+/// The two modes compose differently on purpose: create has no breadcrumb, no
+/// tag strip, no delete, no discard guard and no BR-10 note, so
+/// `CardEditorFormWidget` is edit's column and this is create's. What create
+/// also had, and should not have, was a second way of drawing the same five
+/// card values — Material floating labels against edit's external upper-case
+/// label row, the app-wide counter that only speaks near the limit against
+/// edit's always-on one, no `Required` marker, and a 16sp front against edit's
+/// 22. One semantic field was two sizes depending on which mode you were in
+/// (SC-C6-02).
+///
+/// That split was deliberate while it lasted: edit had been redesigned twice
+/// and create had not been reviewed, so letting edit's decisions reach it
+/// through a shared builder would have changed a screen nobody had looked at.
+/// The app-wide screen-consistency pass is that review, so the fields below now
+/// come from `CardEditorFieldWidget` and `CardEditorDetailsWidget` like edit's.
+/// What stays create's own is content: a placeholder for each of the five
+/// fields, because this form opens empty, and the autofocus on the front.
 ///
 /// **What it does not own is the save.** The two dispositions live in
 /// `CardCreateActionBarWidget`, pinned in `MxContentShell.footer` — the pair
@@ -24,10 +37,6 @@ import 'card_details_section_widget.dart';
 /// that autofocuses its first field and so meets the user with the keyboard
 /// already up (SC-C1-02). The screen owns the controllers, the submit state and
 /// the outcome, exactly as it does for edit; this widget is handed them.
-///
-/// Every other behaviour below is the one create already had: floating labels,
-/// the counter that appears near the limit, no tags, no delete, no discard
-/// guard.
 class CardCreateFormWidget extends StatefulWidget {
   const CardCreateFormWidget({
     required this.state,
@@ -56,7 +65,10 @@ class CardCreateFormWidget extends StatefulWidget {
 
 class _CardCreateFormWidgetState extends State<CardCreateFormWidget> {
   /// The optional-detail fields start collapsed (W4); nothing here can open
-  /// them but a tap, because a new card has no detail to reveal.
+  /// them but a tap, because a new card has no detail to reveal. Opening is
+  /// one-way, as it is in edit: `CardEditorDetailsWidget` replaces the
+  /// disclosure with the section heading once the three fields are on screen,
+  /// so a form the user has begun filling cannot fold itself over their typing.
   bool _detailsExpanded = false;
 
   String? _frontError(CardValidationProblem? problem) => switch (problem) {
@@ -79,29 +91,40 @@ class _CardCreateFormWidgetState extends State<CardCreateFormWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        MxTextField(
+        CardEditorFieldWidget(
+          label: context.l10n.cardEditorFrontFieldLabel,
           controller: widget.front,
           focusNode: widget.frontFocus,
-          label: context.l10n.cardFrontLabel,
           hintText: context.l10n.cardFrontHint,
+          maxLength: kCardFrontMaxLength,
+          isRequired: true,
           isEnabled: !busy,
           shouldAutofocus: true,
-          maxLength: kCardFrontMaxLength,
-          maxLines: 2,
+          maxLines: 3,
           minLines: 1,
           errorText: _frontError(state.frontProblem),
           textInputAction: TextInputAction.next,
+          // Edit's argument, and it was never edit's alone: the front is the
+          // prompt a learner is shown and the back is the answer, so the two
+          // are not equals. Stated here rather than left to the default,
+          // because inheriting `body` would put the same field at 16 on this
+          // mode and 22 on the other — the size split SC-C6-02 measured.
+          emphasis: MxTextFieldEmphasis.prominent,
         ),
         const SizedBox(height: AppSpacing.lg),
-        MxTextField(
+        CardEditorFieldWidget(
+          label: context.l10n.cardEditorBackFieldLabel,
           controller: widget.back,
-          label: context.l10n.cardBackLabel,
           hintText: context.l10n.cardBackHint,
-          isEnabled: !busy,
           maxLength: kCardBackMaxLength,
-          maxLines: 4,
+          isRequired: true,
+          isEnabled: !busy,
+          maxLines: 6,
           minLines: 2,
           errorText: _backError(state.backProblem),
+          // No BR-10 helper: that sentence reassures an editor that changing
+          // the text leaves the card's progress alone, and a card being created
+          // has none.
         ),
         if (state.failure != null) ...<Widget>[
           const SizedBox(height: AppSpacing.lg),
@@ -126,7 +149,7 @@ class _CardCreateFormWidgetState extends State<CardCreateFormWidget> {
         // (`card_editor_form_widget.dart`), so the two modes were 12 and 24
         // apart at the boundary they share (SC-C2-03).
         const SizedBox(height: AppSpacing.xl),
-        CardDetailsSectionWidget(
+        CardEditorDetailsWidget(
           isExpanded: _detailsExpanded,
           onToggle: () => setState(() => _detailsExpanded = !_detailsExpanded),
           exampleController: widget.example,
@@ -136,6 +159,13 @@ class _CardCreateFormWidgetState extends State<CardCreateFormWidget> {
           exampleProblem: state.exampleProblem,
           hintProblem: state.hintProblem,
           pronunciationProblem: state.pronunciationProblem,
+          // The three placeholders create had and edit does not: this form
+          // opens empty, so the fields have room to say what they are for.
+          examplePlaceholder: context.l10n.cardExampleHint,
+          hintPlaceholder: context.l10n.cardHintHint,
+          pronunciationPlaceholder: context.l10n.cardPronunciationHint,
+          // The last field of create's form (M100.36 9K).
+          pronunciationTextInputAction: TextInputAction.done,
         ),
       ],
     );

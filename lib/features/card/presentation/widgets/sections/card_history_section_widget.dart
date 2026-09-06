@@ -61,7 +61,11 @@ class CardHistorySectionWidget extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         MxSectionLabel(label: context.l10n.cardHistoryTitle),
-        const SizedBox(height: AppSpacing.md),
+        // `sm`, the one step between a section label and the content it
+        // names (G7). It was `md` here and `xs` on Settings, so the same
+        // component read as a differently-bound label depending on which
+        // screen the user was on (SC-C5-06).
+        const SizedBox(height: AppSpacing.sm),
         if (state.isLoadingInitial)
           // **Not `MxLoadingState`** (V12). That widget centres a 36dp
           // indicator inside `EdgeInsets.all(xl)`, so the spinner would float

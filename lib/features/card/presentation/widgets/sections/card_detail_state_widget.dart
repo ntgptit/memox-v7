@@ -49,7 +49,11 @@ class CardDetailStateWidget extends StatelessWidget {
         // deck list, the progress panel and the session bar already use — so a
         // reader meets one kind of group title in this app rather than four.
         MxSectionLabel(label: context.l10n.cardDetailStateSectionTitle),
-        const SizedBox(height: AppSpacing.md),
+        // `sm`, the one step between a section label and the content it
+        // names (G7). It was `md` here and `xs` on Settings, so the same
+        // component read as a differently-bound label depending on which
+        // screen the user was on (SC-C5-06).
+        const SizedBox(height: AppSpacing.sm),
         SizedBox(
           width: double.infinity,
           child: MxCard.raised(

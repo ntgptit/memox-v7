@@ -9,6 +9,7 @@ import 'package:memox/features/deck/domain/models/deck_list_snapshot_model.dart'
 import 'package:memox/features/deck/domain/models/deck_path_segment_model.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
+import 'package:memox/features/deck/presentation/widgets/items/deck_scheduler_picker_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_action_sheet.dart';
 
@@ -216,7 +217,16 @@ void main() {
       await pumpLevel(tester, repository);
 
       await openSubDeckForm(tester);
-      expect(find.text(english.schedulerSectionLabel), findsNothing);
+      // **The widget, and the caps the heading is painted in.** The heading
+      // goes through `MxSectionLabel` now, which uppercases at paint, so a
+      // finder for the ARB sentence stopped matching anywhere in the app —
+      // this assertion would have kept passing with the section on screen
+      // (SC-C5-04).
+      expect(find.byType(DeckSchedulerPickerWidget), findsNothing);
+      expect(
+        find.text(english.schedulerSectionLabel.toUpperCase()),
+        findsNothing,
+      );
 
       await tester.enterText(deckFormField, 'Hiragana');
       await tester.tap(find.text(english.deckFormSubmitAction));

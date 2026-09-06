@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/features/card/presentation/widgets/sections/card_create_action_bar_widget.dart';
-import 'package:memox/features/card/presentation/widgets/sections/card_details_section_widget.dart';
+import 'package:memox/features/card/presentation/widgets/sections/card_editor_details_widget.dart';
+import 'package:memox/features/card/presentation/widgets/sections/card_editor_field_widget.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_button_pair.dart';
-import 'package:memox/shared/widgets/mx_text_field.dart';
 
 import 'support/card_editor_harness.dart';
 import 'support/fake_card_repository.dart';
@@ -114,10 +114,14 @@ void main() {
       // Pristine on purpose: a save failure inserts its own `lg` and a `Text`
       // between the two, so the seam being measured would no longer be this
       // one.
-      final Rect back = tester.getRect(find.byType(MxTextField).at(1));
-      final Rect details = tester.getRect(
-        find.byType(CardDetailsSectionWidget),
+      // `CardEditorFieldWidget`, not `MxTextField`: create composes edit's
+      // field now (SC-C6-02), and the label row that composite adds sits above
+      // the box — so the type that owns the whole field is the one whose bottom
+      // this seam is measured from.
+      final Rect back = tester.getRect(
+        find.byType(CardEditorFieldWidget).at(1),
       );
+      final Rect details = tester.getRect(find.byType(CardEditorDetailsWidget));
 
       expect(details.top - back.bottom, AppSpacing.xl);
     });

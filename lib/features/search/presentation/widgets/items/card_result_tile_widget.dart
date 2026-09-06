@@ -73,8 +73,15 @@ class CardResultTileWidget extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
           Text(
+            // titleMedium, for the reason written out at
+            // `deck_result_tile_widget.dart` — the primary line of an `MxCard`
+            // row titles at the rung the rest of the app's rows do, and
+            // bodyLarge's w400 left it lighter than its own w500 path caption.
+            // It also lands this row on the same 16-w600 front over 14-quiet
+            // back that `card_tile_widget.dart` already draws, so one card
+            // reads the same whether it was reached by browsing or by search.
             hit.front,
-            style: context.texts.bodyLarge,
+            style: context.texts.titleMedium,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

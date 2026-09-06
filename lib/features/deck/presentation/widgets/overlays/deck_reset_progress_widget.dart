@@ -8,6 +8,7 @@ import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_button_pair.dart';
 import '../../../../../shared/widgets/mx_feedback_band.dart';
 import '../../../../../shared/widgets/mx_icon.dart';
+import '../../../../../shared/widgets/mx_section_label.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../domain/entities/deck_entity.dart';
 import '../../../domain/models/scheduler_type_model.dart';
@@ -83,11 +84,16 @@ class _ResetProgressSheetState extends ConsumerState<_ResetProgressSheet> {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             // The sheet's title announces as a header (A20.1 P1-01, §23 #17).
+            // `titleMedium`, the rung ten sibling sheets and the dialog theme
+            // already give a modal its name at (`app_dialog_theme.dart`). At
+            // `titleLarge` this sheet titled itself at the AppBar's own rung — the
+            // screen title still visible behind the scrim — so one surface carried
+            // two title hierarchies (SC-C6-04).
             Semantics(
               header: true,
               child: Text(
                 l10n.deckResetProgressTitle,
-                style: context.texts.titleLarge,
+                style: context.texts.titleMedium,
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
@@ -122,12 +128,21 @@ class _ResetProgressSheetState extends ConsumerState<_ResetProgressSheet> {
             // from each other. The title above stays at `lg`: a title binds to
             // the block it introduces.
             const SizedBox(height: AppSpacing.xl),
-            Text(
-              l10n.deckResetProgressSchedulerLabel,
-              style: context.texts.labelLarge,
-            ),
+            // The same heading the picker itself draws for the create form, so
+            // the one element gets one grammar wherever the choice is offered
+            // (SC-C5-04). It stays out here rather than being handed to
+            // `sectionLabel` because this sheet used to say it twice.
+            //
+            // **The copy is "Study mode", not "Study mode after the reset".**
+            // A section label is one line with an ellipsis, and the sentence
+            // needed 408.8dp of a 288dp line at 320dp × 2.0 — measured, then
+            // shortened rather than left to lose its last three words. The
+            // scope it dropped is still said twice above it, by the sheet's
+            // own title and by the two sections it follows.
+            MxSectionLabel(label: l10n.deckResetProgressSchedulerLabel),
+            const SizedBox(height: AppSpacing.sm),
             DeckSchedulerPickerWidget(
-              // Titled two lines up as "Study mode after the reset".
+              // Titled two lines up by this sheet.
               sectionLabel: null,
               selected: _scheduler,
               isEnabled: !submit.isSubmitting,
