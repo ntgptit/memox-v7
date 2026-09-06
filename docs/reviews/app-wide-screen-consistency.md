@@ -915,6 +915,32 @@ Mỗi finding đi qua **hai pass tái xác minh độc lập** trên `main` hi�
 
 ---
 
+### C9 — dispositions
+
+Đóng bởi PR #483. Sáu trong mười lăm không đúng như đã ghi: hai bị bác, hai không còn tái hiện, một rời bảng blocked và một vào thay.
+
+Mỗi finding đi qua **hai pass tái xác minh độc lập** trên `main` hiện tại trước khi một dòng code được viết; chỗ nào hai pass bất đồng thì được phân xử bằng cách đọc code, không phải bằng cách lấy đa số.
+
+| ID | Kết luận cuối | Vì sao |
+|---|---|---|
+| `SC-C9-01` | **REFUTED** | The finding's premise is that "the screen's only affordance is painted AppInk.quiet". It is not: starter_library_screen.dart:175-176 is `MxCard.raised(onTap: () => _add(context))`, so the affordance is the whole card, exactly as d… |
+| `SC-C9-02` | **REVISED_AND_FIXED** | The defect reproduces. card_editor_screen.dart:253-277 builds create's MxContentShell with title, leading, footer and body and passes no subheader; its own doc says so at :199 ("Create's shell: no breadcrumb, no tags"). CardCreate… **Target đã đổi:** In lib/features/card/presentation/widgets/sections/card_editor_breadcrumb_widget.dart add a required `String leafLabel` field and use it at :70 in place of `context.l10n.cardEditorBreadcrumbLabel`; ed |
+| `SC-C9-03` | **DESIGN_SYSTEM_BLOCKED** | Measured with a throwaway widget test (deleted) against buildLightTheme/buildDarkTheme. LIGHT: page scheme.surface #F2F5F9 L* 96.42; MxCard.tonal fill semantic.surfaceEmphasis #F5F6FF L* 97.04, 0 boxShadows; MxCard.raised fill sch… **Hợp đồng:** 10 (hop dong depth cua Card, #435) - the fix must change MxCard.tonal's elevation spec at lib/shared/widgets/mx_card.dar |
+| `SC-C9-04` | **REVISED_AND_FIXED** | The defect reproduces. I pumped Study Home through study_home_harness.dart in a throwaway probe (since deleted) and read the render tree: the resume card's single DecoratedBox fill is #F5F6FF light / #2A3159 dark, i.e. semantic.su… **Target đã đổi:** Feature-only change in lib/features/study/presentation/widgets/sections/study_home_resume_section_widget.dart, inside _ResumeCard.build: replace all three `AppInk.onSecondaryContainer` arguments (the  |
+| `SC-C9-05` | **NO_LONGER_REPRODUCIBLE** | The measured premise is dead. The finding says label→options and options→work-surface are both 12, so nothing binds the label. At the current tree the label gap is 8: card_import_source_step_widget.dart:68 is MxSectionLabel, :69-7… |
+| `SC-C9-06` | **REVISED_AND_FIXED** | The defect reproduces. card_selection_bar_widget.dart:138-152 builds Row[Spacer():144, MxIconButton(Icons.select_all):145-150, _ActionMenu:151]; all six actions built at :88-127 go into MxMenuButton at :174. Selection mode therefo… **Target đã đổi:** In lib/features/card/presentation/widgets/sections/card_selection_bar_widget.dart, promote exactly two verbs as MxIconButton (not MxActionButton/MxTextButton), inserted into the existing Row between t |
+| `SC-C9-07` | **FIXED** | Reproduces at the current tree (line numbers drifted from :115/:133 to :184/:202). study_options_section_widget.dart:184 is `Text(l10n.studyOptionsNextSessionNote, style: context.texts.bodySmall)`; :200-203 is `Text(l10n.studyOpti… |
+| `SC-C9-08` | **REVISED_AND_FIXED** | The defect reproduces. lib/features/trash/presentation/widgets/items/trash_row_widget.dart:75-76 still reads `Opacity(opacity: isDimmed ? 0.38 : 1, ...)`; `grep 0.38 lib/` returns only that line, the token at lib/core/theme/states… **Target đã đổi:** In lib/features/trash/presentation/widgets/items/trash_row_widget.dart, delete the `Opacity` wrapper at :75-76 entirely and route the ineligible state through the palette instead of a paint-time layer |
+| `SC-C9-09` | **REVISED_AND_FIXED** | The defect reproduces. study_entry_screen.dart:143 is `title: context.l10n.appTitle`, and MxContentShell puts that string in the app bar (mx_content_shell.dart:86 `final String? title`, :275 `title: _buildTitle(...)`). app_en.arb:… **Target đã đổi:** Composition + one new ARB pair, no shared-widget change. (1) Add `studyEntryTitle` to lib/l10n/app_en.arb = "Study" and lib/l10n/app_vi.arb = "Hoc" (matching studyHomeTitle at app_vi.arb:3183), with a |
+| `SC-C9-10` | **REVISED_AND_FIXED** | The defect reproduces; the target as written is under-specified and incomplete. MEASURED (throwaway widget test, since deleted, over `wrapForTest` + `buildLightTheme()`): both counts at study_entry_section_widget.dart:65-73 declar… **Target đã đổi:** One edit to lib/features/study/presentation/widgets/sections/study_entry_section_widget.dart, replacing the Row at :58-75 with the composition StudyHomeWorkloadItemWidget already uses, at the Progress |
+| `SC-C9-11` | **FIXED** | Measured, not inferred. A throwaway widget test pumped through test/features/card/presentation/support/card_detail_harness.dart and resolved each Text against its DefaultTextStyle: front onSurface 24sp; card.back onSurfaceVariant … |
+| `SC-C9-12` | **REFUTED** | Re-measured myself with a throwaway widget test over the exact fixture the finding names (ReviewApp + progressShellWith + FakeProgressRepository.withSnapshot, test/demo/feature_screens_demo_test.dart:78-111) at 393x852, en, light,… |
+| `SC-C9-13` | **NO_LONGER_REPRODUCIBLE** | Both cited titles already carry the heading node at the current tree state. lib/features/deck/presentation/widgets/overlays/deck_form_widget.dart:106-110 reads `// The sheet's title announces as a header (A20.1 P1-01, §23 #17).` t… |
+| `SC-C9-14` | **DESIGN_SYSTEM_BLOCKED** | Defect reproduces at HEAD, and every escape route lands inside frozen contract 3. buildTimePickerTheme (lib/core/theme/components/pickers/app_time_picker_theme.dart:33-137) sets 19 slots and stops at entryModeIconColor:136 — neith… **Hợp đồng:** 3 |
+| `SC-C9-15` | **REVISED_AND_FIXED** | One third of the finding reproduces; two thirds were fixed by b0cc522f (#477, C3) and the target still asks for them. Still true: study_entry_screen.dart:143 `title: context.l10n.appTitle`, and it is the only appTitle among the ei… **Target đã đổi:** Change only study_entry_screen.dart:143 to `ref.watch(studyDeckContextProvider(deckId)).value?.deckName ?? context.l10n.studyEntryTitle`; leave :160 and :176 exactly as they are. Add lib/features/stud |
+
+**Tổng: DESIGN_SYSTEM_BLOCKED 2 · FIXED 2 · NO_LONGER_REPRODUCIBLE 2 · REFUTED 2 · REVISED_AND_FIXED 7 = 15**
+
 ## 5. Cụm, và thứ tự đóng
 
 Một cụm là **một grammar bị vi phạm nhiều lần**, không phải một nhóm màn giống nhau.
@@ -931,7 +957,28 @@ mà reviewer nhìn một màn đã gán. Chênh lệch giữa hai cột là §1.
 | **C6** Bậc type cho một phần tử ngữ nghĩa | 5 | 5 | P2 | P2 | **đóng — #481** · FIXED 3 · REVISED_AND_FIXED 1 · REFUTED 1 |
 | **C7** Vỡ ở responsive / text scale | 5 | 5 | P1 | **P1** | **đóng — #482** · FIXED 1 · REVISED_AND_FIXED 4 |
 | **C8** Mật độ và kích thước target | 4 | 4 | P1 | P2 | **đóng — #482** · REVISED_AND_FIXED 2 · REFUTED 2 |
-| **C9** Cục bộ, không có mẫu lặp | 15 | 13 | P1 | P2 — sửa từng cái | chưa mở |
+| **C9** Cục bộ, không có mẫu lặp | 15 | 13 | P1 | P2 — sửa từng cái | **đóng — #483** · FIXED 2 · REVISED_AND_FIXED 7 · REFUTED 2 · NO_LONGER_REPRODUCIBLE 2 · BLOCKED 2 |
+
+### 5.0 Đối soát đóng sổ
+
+**123 finding, năm trạng thái cuối, không cái nào bị xoá.** Cột số của bảng
+trên cộng đúng bằng tổng ở đây; mỗi cụm còn có một bảng
+`### Cn — dispositions` liệt kê từng ID kèm lý do.
+
+| Trạng thái | Số | Nghĩa |
+|---|---|---|
+| `FIXED` | 55 | Đích như registry ghi, đã thi hành |
+| `REVISED_AND_FIXED` | 50 | Khuyết tật thật, đích phải sửa lại rồi mới thi hành |
+| `REFUTED` | 10 | Không phải khuyết tật — xem lý do ở dispositions của cụm |
+| `NO_LONGER_REPRODUCIBLE` | 2 | Một PR sau đó đã đóng, trước khi tới lượt cụm này |
+| `DESIGN_SYSTEM_BLOCKED` | 6 | Sửa được thì phải mở một hợp đồng đóng băng — §7 |
+| **Tổng** | **123** | |
+
+**105 được sửa, và 50 trong số đó không sửa theo cách registry đề xuất.** Đó là
+con số đáng ghi nhớ nhất của cả chuỗi: gần một nửa số finding có số đo đúng nhưng
+đề xuất sai — quá tay, hoặc sữa đúng thứ đã được quyết định có chủ ý ở chỗ khác.
+Mười ca bị bác có chung một hình dạng: finding dẫn một nguồn để tự biện hộ, và
+nguồn đó nói điều ngược lại.
 
 ### 5.1 Thứ tự thi hành
 
@@ -964,41 +1011,51 @@ nhất được ghi lại nằm ở `deck_list_screen.dart:197-204` và nó ch�
 
 ## 6. Trạng thái từng bề mặt
 
-Không màn nào đã sửa. Cột trạng thái sẽ được cập nhật bởi chính PR đóng cụm.
+**Mọi đơn vị đã đóng.** Cột trạng thái đếm kết luận cuối của các finding trên bề mặt đó, không phải đếm số lần sửa — một đơn vị có `bác` hay `blocked` vẫn là đã đóng, vì lý do nằm ở bảng dispositions của cụm tương ứng và ở §7.
 
 
 | Surface unit | P0 | P1 | P2 | P3 | Total | Status |
 |---|---|---|---|---|---|---|
-| AppNavigationShell (the chrome binding all four branches) — lib/app/sh | 0 | 0 | 3 | 0 | 3 | reviewed · unfixed |
-| Card content-bearing sheets | 0 | 1 | 2 | 1 | 4 | reviewed · unfixed |
-| CardDetailScreen | 0 | 2 | 2 | 0 | 4 | reviewed · unfixed |
-| CardEditorScreen (create + edit) — lib/features/card/presentation/scre | 0 | 1 | 6 | 2 | 9 | reviewed · unfixed |
-| CardImportScreen | 0 | 0 | 4 | 2 | 6 | reviewed · unfixed |
-| CardListScreen | 0 | 0 | 7 | 1 | 8 | reviewed · unfixed |
-| Deck content-bearing sheets | 0 | 2 | 4 | 1 | 7 | reviewed · unfixed |
-| DeckListScreen (root + level) | 0 | 2 | 3 | 0 | 5 | reviewed · unfixed |
-| LibrarySearchScreen | 0 | 0 | 4 | 1 | 5 | reviewed · unfixed |
-| ProgressDeckScreen | 0 | 1 | 2 | 1 | 4 | reviewed · unfixed |
-| ProgressScreen | 0 | 0 | 3 | 2 | 5 | reviewed · unfixed |
-| Reminder time picker (showReminderTimePicker) | 0 | 0 | 2 | 2 | 4 | reviewed · unfixed |
-| ReminderSettingsScreen | 0 | 0 | 3 | 1 | 4 | reviewed · unfixed |
-| RouteNotFoundScreen | 0 | 0 | 0 | 2 | 2 | reviewed · unfixed |
-| SettingsScreen | 0 | 0 | 3 | 1 | 4 | reviewed · unfixed |
-| StarterLibraryScreen | 1 | 1 | 4 | 0 | 6 | reviewed · unfixed |
-| Study sheets — StudyResumeWidget, StudyModeChooserWidget, StudyDirecti | 0 | 0 | 3 | 2 | 5 | reviewed · unfixed |
-| StudyEntryScreen | 0 | 3 | 3 | 1 | 7 | reviewed · unfixed |
-| StudyHomeScreen | 0 | 0 | 2 | 1 | 3 | reviewed · unfixed |
-| StudyOptionsScreen | 0 | 2 | 2 | 2 | 6 | reviewed · unfixed |
-| StudySessionScreen (all 5 modes) | 0 | 1 | 4 | 2 | 7 | reviewed · unfixed |
-| TagCatalogScreen | 0 | 0 | 1 | 3 | 4 | reviewed · unfixed |
-| Trash sheets | 0 | 0 | 3 | 1 | 4 | reviewed · unfixed |
-| TrashScreen | 0 | 0 | 6 | 1 | 7 | reviewed · unfixed |
+| AppNavigationShell (the chrome binding all four branches) — lib/app/sh | 0 | 0 | 3 | 0 | 3 | đóng — sửa 1 · sửa (đích đổi) 1 · bác 1 |
+| Card content-bearing sheets | 0 | 1 | 2 | 1 | 4 | đóng — sửa 3 · sửa (đích đổi) 1 |
+| CardDetailScreen | 0 | 2 | 2 | 0 | 4 | đóng — sửa 3 · sửa (đích đổi) 1 |
+| CardEditorScreen (create + edit) — lib/features/card/presentation/scre | 0 | 1 | 6 | 2 | 9 | đóng — sửa 3 · sửa (đích đổi) 6 |
+| CardImportScreen | 0 | 0 | 4 | 2 | 6 | đóng — sửa 4 · sửa (đích đổi) 1 · hết tái hiện 1 |
+| CardListScreen | 0 | 0 | 7 | 1 | 8 | đóng — sửa 4 · sửa (đích đổi) 4 |
+| Deck content-bearing sheets | 0 | 2 | 4 | 1 | 7 | đóng — sửa 1 · sửa (đích đổi) 5 · hết tái hiện 1 |
+| DeckListScreen (root + level) | 0 | 2 | 3 | 0 | 5 | đóng — sửa 3 · sửa (đích đổi) 2 |
+| LibrarySearchScreen | 0 | 0 | 4 | 1 | 5 | đóng — sửa 2 · sửa (đích đổi) 2 · bác 1 |
+| ProgressDeckScreen | 0 | 1 | 2 | 1 | 4 | đóng — sửa (đích đổi) 2 · bác 2 |
+| ProgressScreen | 0 | 0 | 3 | 2 | 5 | đóng — sửa 2 · sửa (đích đổi) 2 · blocked 1 |
+| Reminder time picker (showReminderTimePicker) | 0 | 0 | 2 | 2 | 4 | đóng — sửa (đích đổi) 1 · bác 1 · blocked 2 |
+| ReminderSettingsScreen | 0 | 0 | 3 | 1 | 4 | đóng — sửa 2 · bác 1 · blocked 1 |
+| RouteNotFoundScreen | 0 | 0 | 0 | 2 | 2 | đóng — sửa 1 · blocked 1 |
+| SettingsScreen | 0 | 0 | 3 | 1 | 4 | đóng — sửa 3 · sửa (đích đổi) 1 |
+| StarterLibraryScreen | 1 | 1 | 4 | 0 | 6 | đóng — sửa 4 · sửa (đích đổi) 1 · bác 1 |
+| Study sheets — StudyResumeWidget, StudyModeChooserWidget, StudyDirecti | 0 | 0 | 3 | 2 | 5 | đóng — sửa 4 · sửa (đích đổi) 1 |
+| StudyEntryScreen | 0 | 3 | 3 | 1 | 7 | đóng — sửa 2 · sửa (đích đổi) 5 |
+| StudyHomeScreen | 0 | 0 | 2 | 1 | 3 | đóng — sửa (đích đổi) 1 · bác 1 · blocked 1 |
+| StudyOptionsScreen | 0 | 2 | 2 | 2 | 6 | đóng — sửa 3 · sửa (đích đổi) 3 |
+| StudySessionScreen (all 5 modes) | 0 | 1 | 4 | 2 | 7 | đóng — sửa 3 · sửa (đích đổi) 3 · bác 1 |
+| TagCatalogScreen | 0 | 0 | 1 | 3 | 4 | đóng — sửa 2 · sửa (đích đổi) 1 · bác 1 |
+| Trash sheets | 0 | 0 | 3 | 1 | 4 | đóng — sửa 4 |
+| TrashScreen | 0 | 0 | 6 | 1 | 7 | đóng — sửa 1 · sửa (đích đổi) 6 |
 
 ---
 
 ## 7. DESIGN_SYSTEM_BLOCKED
 
 Sáu finding là **thật** nhưng sửa chúng đòi thay một hợp đồng ở `v1-freeze.md` §2.
+
+**Một dòng ở bảng này đã đổi, và đó là kết quả của vòng tái xác minh.**
+`SC-C9-04` từng được ghi là chạm hợp đồng #2. Cả hai pass độc lập đều chỉ ra
+cột Enforcement của #2 gồm `color_scheme_arguments_are_m3_roles`,
+`color_scheme_reads_are_m3_roles` và `no_raw_color` — tất cả canh việc **dựng và
+đọc `ColorScheme`**, chứ không canh việc một call site gọi tên `AppInk` nào; và
+`theme-architecture.md` nói thẳng `AppInk` **là** API mà `lib/features/` phải dùng
+để tô chữ. Nên nó là composition, và đã được sửa. Chỗ của nó do `SC-C9-03`
+thay vào — finding này **không** ở trong bảng lúc recon, và vòng tái xác minh mới
+cho thấy không có cách nào sửa nó từ trong `lib/features/`.
 Không cái nào được sửa trong pass này, và không cái nào tự mở được một task
 design-system:
 §3 bắt task đó phải được kích hoạt bởi **một trong năm reopen trigger**, và cột cuối
@@ -1017,5 +1074,5 @@ dùng thay vì đẻ ra sáu số `M100.xx` cho việc có thể không bao gi�
 | `SC-C1-16` | P3 | Reminder settings — time picker dialog | The time picker sits 16dp in from each screen edge while every other dialog in the app sits 40dp in, so the app's one Material-owned modal is 48dp wider than it… | #6 | **trigger 3** — thêm một họ shared primitive/component mới |
 | `SC-C3-20` | P3 | RouteNotFoundScreen | The route name is a second, invisible copy of the visible title, so a screen-reader user meets two nodes labelled "Page not found" one after the other — a conta… | #6 | **trigger 3** — thêm một họ shared primitive/component mới |
 | `SC-C4-08` | P2 | ProgressScreen | The pinned range strip never draws the chrome/content hairline, so deck rows scroll under it with no seam — the strip is painted in `scaffoldBackgroundColor` an… | #11 | **trigger 3** — `MxContentShell` phải học thêm một khái niệm mới |
-| `SC-C9-04` | P2 | StudyHomeScreen | The resume card paints container ink on a surface fill. All three of its text lines take AppInk.onSecondaryContainer — an ink app_ink.dart:66 documents as "for … | #2 | trigger 2 — thiết kế lại palette/theme có chủ đích |
+| `SC-C9-03` | P2 | StudyHomeScreen | The resume panel does not out-rank the rows under it in light: measured on the committed goldens, ΔE(hero, page) is 2.73 while ΔE(row, page) is 4.25 — and the row casts two shadow layers where the hero casts none. `MxCard.tonal` is the only page-level recipe still at `AppElevation.none`, and no composition available to `lib/features/` can add depth to it: `MxCard` exposes no elevation, a hand-rolled shadow is barred by the raw-Material policy, and the swap the finding proposed (`MxCard.accent`) fills with the same paper the rows use — which deletes the tint and regresses dark, where the hero is correct today (ΔE 19.23 against the rows' 5.23). | #10 | trigger 2 — thiết kế lại palette/theme có chủ đích, hoặc #6/trigger 3 nếu đi đường thêm một recipe mới |
 | `SC-C9-14` | P2 | Reminder settings — time picker dialog foote | The picker's footer offers Cancel and the commit action at identical emphasis, both drawn as zero-padding text links with no fill, no ripple and no hover surfac… | #3 | trigger 2 — thiết kế lại palette/theme có chủ đích |

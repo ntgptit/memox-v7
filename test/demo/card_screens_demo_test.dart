@@ -512,8 +512,26 @@ Future<void> _enterSelection(WidgetTester tester, {int taps = 1}) async {
   }
 }
 
-/// Opens the overflow and picks one bulk action by its label.
+/// Runs one bulk action, through whichever control the band gives it.
+///
+/// **Two of the six are on the band itself since SC-C9-06** — Move and Add
+/// tag, as icon buttons carrying their label in semantics — and the other four
+/// are still behind the overflow. This helper asks the screen rather than
+/// assuming: an action that has moved out of the menu is tapped where it now
+/// is, and one that has not still opens the menu first.
+///
+/// The distinction is not cosmetic here. `find.text(label)` inside a closed
+/// menu matches nothing, so scripting the old route does not render a different
+/// picture — it throws, which is what these two renders did.
 Future<void> _openBulkAction(WidgetTester tester, String label) async {
+  final onBand = find.bySemanticsLabel(label);
+  if (onBand.evaluate().isNotEmpty) {
+    await tester.tap(onBand.last);
+    await tester.pumpAndSettle();
+
+    return;
+  }
+
   await tester.tap(find.byIcon(Icons.more_vert));
   await tester.pumpAndSettle();
   await tester.tap(find.text(label).last);

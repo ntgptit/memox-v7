@@ -85,19 +85,11 @@ class CardSelectionBarWidget extends ConsumerWidget {
     final l10n = context.l10n;
     final canAct = selection.hasSelection && !isBusy;
 
+    // **The four that stay behind the overflow.** Move and Add tag are drawn
+    // in the band itself — see the row below — because a mode the user
+    // deliberately entered should show what it is *for*, and this one showed
+    // nothing but a close, a count, select-all and a kebab (SC-C9-06).
     final actions = <CardBulkAction>[
-      (
-        label: l10n.cardSelectionMoveAction,
-        icon: Icons.drive_file_move_outlined,
-        isDestructive: false,
-        onPressed: onMove,
-      ),
-      (
-        label: l10n.cardSelectionAddTagAction,
-        icon: Icons.sell_outlined,
-        isDestructive: false,
-        onPressed: onAddTag,
-      ),
       (
         label: l10n.cardSelectionFlagAction,
         icon: Icons.flag_outlined,
@@ -142,6 +134,32 @@ class CardSelectionBarWidget extends ConsumerWidget {
               // `AppBar` ellipsizes it and no width on this row depends on how
               // long the word for "selected" is in the current locale.
               const Spacer(),
+              // **Two verbs, as icon buttons rather than labelled ones.** The
+              // labelled pair was measured first and does not fit: at 320dp
+              // and `textScaler` 2.0 an `MxActionButton('Move')` plus an
+              // `MxTextButton('Delete')` plus the two icon buttons come to
+              // 308.5dp against 304 of line, which overflows — and those are
+              // the *shortest* English labels. Four 48dp icon buttons come to
+              // 192 and cannot, whatever the locale does, which is the
+              // fixed-width property this bar's own doc argues for.
+              MxIconButton(
+                icon: Icons.drive_file_move_outlined,
+                semanticLabel: l10n.cardSelectionMoveAction,
+                tooltip: l10n.cardSelectionMoveAction,
+                onPressed: canAct ? onMove : null,
+              ),
+              MxIconButton(
+                icon: Icons.sell_outlined,
+                semanticLabel: l10n.cardSelectionAddTagAction,
+                tooltip: l10n.cardSelectionAddTagAction,
+                onPressed: canAct ? onAddTag : null,
+              ),
+              // **Delete is deliberately not one of them.** `MxIconButton`'s
+              // tone axis is `standard | warning` only, so an icon-only Delete
+              // would silently drop the destructive role this file insists on
+              // three lines down — and adding a destructive tone to a shared
+              // primitive is frozen contract 6. In the overflow it keeps the
+              // role through `MxMenuAction(isDestructive: true)`.
               MxIconButton(
                 icon: Icons.select_all,
                 semanticLabel: l10n.cardSelectAllAction,
@@ -157,12 +175,21 @@ class CardSelectionBarWidget extends ConsumerWidget {
   }
 }
 
-/// Every bulk action behind one overflow.
+/// The bulk actions that do not fit the band.
 ///
-/// **One menu rather than a responsive split.** Deciding how many icons fit
-/// needs the available width, and a `LayoutBuilder` that guesses wrong at one
-/// text scale is worse than a menu that is always correct: the row's width
-/// stops depending on how many actions the feature grows.
+/// **A fixed split, not a responsive one, and that distinction is the whole
+/// argument** (SC-C9-06). Deciding *how many* icons fit needs the available
+/// width, and a `LayoutBuilder` that guesses wrong at one text scale is worse
+/// than a menu that is always correct — so the row's width still does not
+/// depend on how many actions the feature grows. What changed is that two of
+/// them are now always in the band and four are always here: four 48dp icon
+/// buttons measure 192dp against the 304 a 320dp screen offers, at any text
+/// scale and in either locale, because an icon button's width is its target
+/// rather than its label.
+///
+/// The bar used to send all six here, which left the contextual mode with no
+/// visible verb at all — against this widget's own class doc, the typedef's
+/// doc, the `cardSelectionMoreLabel` ARB description, and UC-04 A6.
 class _ActionMenu extends StatelessWidget {
   const _ActionMenu({required this.actions, required this.isEnabled});
 

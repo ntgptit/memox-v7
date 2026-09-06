@@ -141,9 +141,16 @@ void main() {
     expect(find.byType(MxErrorState), findsOneWidget);
     expect(find.text(english.unexpectedErrorTitle), findsOneWidget);
     expect(find.text(english.studyEntryErrorMessage), findsOneWidget);
-    // The product name survives in the app bar and nowhere else — it used to be
-    // the heading of this face as well, so "MemoX" rendered twice on one screen.
-    expect(find.text(english.appTitle), findsOneWidget);
+    // **The product name is gone from this screen entirely** (SC-C9-09). It
+    // used to be the heading of this face *and* the app-bar title, so "MemoX"
+    // rendered twice; C3 took it off the face, and the bar now names the deck,
+    // falling back to `studyEntryTitle` while the deck read has not answered —
+    // which is the state this test is in.
+    expect(find.text(english.appTitle), findsNothing);
+    // The deck read is a different read from the counts, so it answers even
+    // when they fail — which is the point of keeping them apart: a screen that
+    // cannot say how many cards are due can still say whose they are.
+    expect(find.text('Korean'), findsOneWidget);
     // The empty-state sentence belongs to the state that knows the deck is
     // finished. A failed read does not know that.
     expect(find.text(english.studyNothingDueMessage), findsNothing);

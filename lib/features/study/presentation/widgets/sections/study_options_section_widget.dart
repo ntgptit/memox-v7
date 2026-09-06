@@ -181,7 +181,19 @@ class _StudyOptionsSectionWidgetState extends State<StudyOptionsSectionWidget> {
         const SizedBox(height: AppSpacing.lg),
         // BR-139 in one line: the session on screen keeps the ceiling it opened
         // with, so without this the change reads as one that did not apply.
-        Text(l10n.studyOptionsNextSessionNote, style: context.texts.bodySmall),
+        //
+        // **`quiet`, like the override note 80dp below it** (SC-C9-07). The two
+        // are the same thing — 12sp `bodySmall` explanatory copy under a
+        // control, on the page surface — and this one was the only supporting
+        // note in the feature left on the un-inked default, so one screen said
+        // the same kind of sentence in two inks. Measured: `onSurface`
+        // #223354 here against `onSurfaceVariant` #596680 there. The
+        // counterpart note on Settings takes `quiet` too, and the ARB ties the
+        // two strings together by name.
+        Text(
+          l10n.studyOptionsNextSessionNote,
+          style: context.texts.bodySmall!.inked(context, AppInk.quiet),
+        ),
         const SizedBox(height: AppSpacing.lg),
         MxActionButton(
           label: l10n.studyOptionsSave,

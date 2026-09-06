@@ -256,6 +256,33 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
           context,
           () => unawaited(_handleCreateExitRequest()),
         ),
+        // **Create names its deck too** (SC-C9-02). The screen said "New
+        // flashcard" over two empty fields and nothing said which of a
+        // ten-level tree the card was about to be written into — on a route
+        // that is deep-linkable, and beside two sibling surfaces in this same
+        // feature that both lead with the path: edit pins this very widget,
+        // and the import wizard pins a breadcrumb of its own.
+        //
+        // **The same widget, not a second `MxBreadcrumb`.** Building one here
+        // is how the app grew a third up-navigation grammar the last time:
+        // without `onUp` every crumb is inert (SC-C4-07). Reusing the section
+        // keeps `onUp`, `onShowAll` and `collapseAfter: 3` identical to edit's.
+        //
+        // **And every crumb goes through the exit guard.** Create gained
+        // `_handleCreateExitRequest` in C4; crumbs that navigated around it are
+        // exactly what dropped drafts silently in edit before
+        // `card_editor_breadcrumb_widget.dart` was written.
+        subheader: ref
+            .watch(deckContextProvider(widget.deckId))
+            .whenOrNull(
+              data: (DeckContextModel deck) => CardEditorBreadcrumbWidget(
+                deckId: widget.deckId,
+                deck: deck,
+                leafLabel: context.l10n.cardEditorCreateBreadcrumbLabel,
+                onLeave: (navigate) =>
+                    unawaited(_handleCreateExitRequest(then: navigate)),
+              ),
+            ),
         isScrollable: true,
         footer: CardCreateActionBarWidget(
           isSaving: busy,
@@ -287,11 +314,11 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
   /// method rather than folded into edit's with a nullable `cardId`: the two
   /// read different providers, and a coordinator that branches on mode is a
   /// third thing to keep in step rather than a shared one.
-  Future<void> _handleCreateExitRequest() async {
+  Future<void> _handleCreateExitRequest({VoidCallback? then}) async {
     if (ref.read(cardCreateProvider(widget.deckId)).isSubmitting) return;
     if (_isDiscardOpen) return;
     if (!_hasUnsavedWork) {
-      _pop();
+      (then ?? _pop)();
 
       return;
     }
@@ -303,7 +330,7 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
     // `Keep editing` returns false and does nothing at all, which is what
     // leaves the draft, the focus and the scroll where the user left them.
     if (!shouldDiscard) return;
-    _pop();
+    (then ?? _pop)();
   }
 
   // ---- edit --------------------------------------------------------------
@@ -461,6 +488,7 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
       data: (DeckContextModel deck) => CardEditorBreadcrumbWidget(
         deckId: widget.deckId,
         deck: deck,
+        leafLabel: context.l10n.cardEditorBreadcrumbLabel,
         // Every crumb is a way out, so every crumb asks the same question the
         // back arrow, Cancel and the system gesture ask.
         onLeave: (navigate) =>

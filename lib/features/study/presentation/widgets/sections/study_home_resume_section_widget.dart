@@ -85,13 +85,28 @@ class _ResumeCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
+            // **`stated`, not `onSecondaryContainer`** (SC-C9-04). All three
+            // lines took an ink `app_ink.dart` scopes to "text on a tinted
+            // container, never on the page", and `app_ink_test.dart` measures
+            // it only against `scheme.secondaryContainer` — while the fill
+            // this card actually paints is `MxCard.tonal`'s
+            // `semantic.surfaceEmphasis`, ΔE 9.21 away from it in light. The
+            // visible half: the deck name here and the deck name in the rows
+            // one section down are the same rung and were ΔE 11.82 apart.
+            //
+            // Measured on the fill this card really has, `onSurface` is
+            // 11.68:1 light and 7.79:1 dark, and the hero's deck name then
+            // paints the identical #223354 the row's does. `quiet` was
+            // rejected: 4.20:1 in dark, under the floor its own test pins it
+            // to. The hierarchy inside the card is carried by rung and weight,
+            // which is all it was ever carried by.
             Text(
               l10n.studyHomeResumeTitle,
               // Through the wght axis — a bare `fontWeight:` paints the rung's
               // old weight.
               style: context.texts.labelMedium!.inked(
                 context,
-                AppInk.onSecondaryContainer,
+                AppInk.stated,
                 isEmphasized: true,
               ),
               maxLines: 1,
@@ -100,10 +115,7 @@ class _ResumeCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.xs),
             Text(
               resume.deckName,
-              style: context.texts.titleMedium!.inked(
-                context,
-                AppInk.onSecondaryContainer,
-              ),
+              style: context.texts.titleMedium!.inked(context, AppInk.stated),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
@@ -113,10 +125,7 @@ class _ResumeCard extends StatelessWidget {
                 context.studySessionKind(resume.kind),
                 context.studyMode(resume.currentMode),
               ),
-              style: context.texts.bodySmall!.inked(
-                context,
-                AppInk.onSecondaryContainer,
-              ),
+              style: context.texts.bodySmall!.inked(context, AppInk.stated),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),

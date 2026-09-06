@@ -12,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/navigation/route_names.dart';
 import 'package:memox/features/study/presentation/screens/study_entry_screen.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
+import 'package:memox/shared/widgets/mx_metric_well.dart';
 
 import '../../../visual_audit/study_audit_harness.dart';
 import '../domain/support/fake_study_repository.dart';
@@ -49,7 +50,12 @@ void main() {
       (tester) async {
         await pumpEntry(tester, surface.size);
 
-        expect(tester.getRect(find.text('New 3')).left, surface.gutter);
+        // The well is the readout's leading edge since SC-C9-10 gave each
+        // count an anchor; before that the numeral was.
+        expect(
+          tester.getRect(find.byType(MxMetricWell).first).left,
+          surface.gutter,
+        );
 
         // The buttons stretch, so their width is the same statement made from
         // both edges at once — a gutter applied twice shows up here as 32dp of

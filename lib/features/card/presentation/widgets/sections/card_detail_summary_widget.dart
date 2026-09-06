@@ -73,9 +73,23 @@ class CardDetailSummaryWidget extends StatelessWidget {
               ],
             ),
             const SizedBox(height: AppSpacing.xs),
+            // **The meaning is the answer, so it is not the quietest thing
+            // on the card** (SC-C9-11). It took `quiet` — the same ink as the
+            // `Example` / `Hint` / `Pronunciation` *labels* below, and one step
+            // lighter than those labels' un-inked values — so the optional
+            // supporting fields out-weighed the thing this read-only screen
+            // exists to show (BR-240). Measured through the harness: front
+            // `onSurface` 24sp, back `onSurfaceVariant` 14sp, the labels
+            // `onSurfaceVariant` 11sp, their values `onSurface` 14sp.
+            //
+            // The list row one tap away already paints this same string at
+            // `stated`, and says why: the meaning is what the learner reads.
+            // The hero keeps its hierarchy from `headlineSmall` over
+            // `bodyMedium`, not from a colour step — and the optional-field
+            // labels stay the only `quiet` text in the band.
             Text(
               card.back,
-              style: context.texts.bodyMedium!.inked(context, AppInk.quiet),
+              style: context.texts.bodyMedium!.inked(context, AppInk.stated),
             ),
             if (marks.isNotEmpty) ...<Widget>[
               const SizedBox(height: AppSpacing.md),

@@ -10756,7 +10756,7 @@ của M2.
 | `SC-C1-16` — Reminder settings — time picker dialog | **DESIGN_SYSTEM_BLOCKED** (M100.42) | The time picker sits 16dp in from each screen edge while every other dialog in the app sits 40dp in, so the app's one Material-owned modal is 48dp wider than its siblings on the same screen … Sửa nó chạm hợp đồng đóng băng **#6** của `design-system/v1-freeze.md` §2, nên một task feature MUST NOT tự làm | **Trigger 3** — khi thêm một họ shared primitive/component mới |
 | `SC-C3-20` — RouteNotFoundScreen | **DESIGN_SYSTEM_BLOCKED** (M100.42) | The route name is a second, invisible copy of the visible title, so a screen-reader user meets two nodes labelled "Page not found" one after the other — a container node spanning the whole p… Sửa nó chạm hợp đồng đóng băng **#6** của `design-system/v1-freeze.md` §2, nên một task feature MUST NOT tự làm | **Trigger 3** — khi thêm một họ shared primitive/component mới |
 | `SC-C4-08` — ProgressScreen | **DESIGN_SYSTEM_BLOCKED** (M100.42) | The pinned range strip never draws the chrome/content hairline, so deck rows scroll under it with no seam — the strip is painted in `scaffoldBackgroundColor` and the rows behind it are on th… Sửa nó chạm hợp đồng đóng băng **#11** của `design-system/v1-freeze.md` §2, nên một task feature MUST NOT tự làm | **Trigger 3** — `MxContentShell` phải học một khái niệm mới, tức là một họ chrome mới |
-| `SC-C9-04` — StudyHomeScreen | **DESIGN_SYSTEM_BLOCKED** (M100.42) | The resume card paints container ink on a surface fill. All three of its text lines take AppInk.onSecondaryContainer — an ink app_ink.dart:66 documents as "for text on a tinted container, ne… Sửa nó chạm hợp đồng đóng băng **#2** của `design-system/v1-freeze.md` §2, nên một task feature MUST NOT tự làm | **Trigger 2** — khi có một lần thiết kế lại palette/theme có chủ đích |
+| `SC-C9-03` — StudyHomeScreen | **DESIGN_SYSTEM_BLOCKED** (M100.42) | Panel resume không nổi hơn các hàng dưới nó ở light — đo trên golden đã commit: ΔE(hero, nền) 2,73 so với ΔE(row, nền) 4,25, và row còn có hai lớp shadow trong khi hero không có lớp nào. `MxCard.tonal` là recipe mức-trang duy nhất còn ở `AppElevation.none`. Không composition nào trong `lib/features/` chạm tới được: `MxCard` không phơi elevation, shadow tự vẽ bị chính sách raw-Material cấm, và phép đổi sang `MxCard.accent` mà finding đề xuất lại tô cùng thứ giấy các hàng dùng — xóa sắc độ và làm dark tệ đi, nơi hero đang đúng (ΔE 19,23 so với 5,23 của row). Sửa nó chạm hợp đồng đóng băng **#10** của `design-system/v1-freeze.md` §2, nên một task feature MUST NOT tự làm | **Trigger 2** — khi có một lần thiết kế lại palette/theme có chủ đích |
 | `SC-C9-14` — Reminder settings — time picker dialog footer | **DESIGN_SYSTEM_BLOCKED** (M100.42) | The picker's footer offers Cancel and the commit action at identical emphasis, both drawn as zero-padding text links with no fill, no ripple and no hover surface — so the one modal in this f… Sửa nó chạm hợp đồng đóng băng **#3** của `design-system/v1-freeze.md` §2, nên một task feature MUST NOT tự làm | **Trigger 2** — khi có một lần thiết kế lại palette/theme có chủ đích |
 
 ### M99.32 · Global Library Search v1 — deck, hai mặt card và tag trong một danh sách
@@ -17057,13 +17057,16 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 
 ### M100.42 · App-wide screen consistency — recon, và grammar composition thành test
 
-- **Status:** in progress (2026-09-05) — PR recon là PR đầu trong chuỗi; các cụm
-  C1…C9 đóng bằng PR riêng sau khi chủ dự án duyệt registry.
+- **Status:** **done** (2026-09-06) — cả chín cụm đã đóng, 123/123 finding có
+  kết luận cuối, gate thiết bị đã chạy: `integration_test/` 8/8 trên
+  `emulator-5554`, flavor `development`.
 - **Owner:** Claude
 - **Goal:** Làm mọi màn production đọc như một sản phẩm, ở **đúng tầng mà
   `v1-freeze.md` §2 cố ý để mở** — composition của màn hình nghiệp vụ. Không đụng
   một hợp đồng đóng băng nào.
-- **Nhánh / PR:** `claude/app-wide-screen-consistency-0820fe` · `refactor(ui): unify app-wide screen composition`
+- **Nhánh / PR:** chuỗi mười PR — recon #469, hai PR sửa ratchet #470 và #471,
+  rồi một PR mỗi cụm: C1 #472, C2 #473, C3 #477 (thay #476 bị GitHub
+  auto-close), C4 #478, C5+C6 #481, C7+C8 #482, C9 #483.
 - **Vấn đề:** A7–A20.1 đóng 51/51 finding ở **mức component**, và 14 hợp đồng ở
   §2 được guard và test canh. Nhưng một audit component không có cấu trúc để
   thấy **hai màn dùng `MxCard` đúng mà giãn cách chúng khác nhau**. Đó là khoảng
@@ -17095,10 +17098,29 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
     nâng cấp.
 - **Editable documents:** `docs/reviews/app-wide-screen-consistency.md` (mới),
   `docs/wbs.md`
+- **Đo, sau khi đóng:**
+  - **123/123 finding có kết luận cuối.** Tái xác minh là việc đáng giá nhất của
+    cả chuỗi: **khoảng một nửa** số finding cần sửa lại đích hoặc bị bác bỏ.
+    Các ca bị bác có chung một hình dạng: finding dẫn một nguồn để tự biện hộ,
+    và nguồn đó nói điều ngược lại — metadata ARB cấm đích đề xuất đích danh,
+    class doc ghi cái bị gọi là drift là một đánh đổi có chủ ý, wireframe
+    `active` đã quyết định chuyện đó.
+  - **C5 là ca đắt nhất.** Registry đề xuất `MxSectionLabelRung.small` cho cả sáu
+    finding; `small` dành cho nhãn mặt thẻ **bên trong** một card, nên làm theo sẽ
+    để heading ở 11px — đúng bằng caption mà nó phải nổi hơn, tức xóa chính cái
+    thứ bậc mà finding đo được.
+  - **Golden bắt một regression mà test không bắt.** Đích thống nhất của
+    `SC-C7-01` bảo bọc chữ trạng thái của hàng starter trong `Flexible`; hai flex
+    child chia đôi dòng, nhãn dịch vào giữa và `Language: English` bị cắt thành
+    `Language: E…` ở 393dp scale 1.0. Stress test vẫn xanh; chỉ vẽ lại ảnh mới
+    thấy.
+  - Host suite 4781 → 5015+ test, luôn 0 failed.
+  - **Gate thiết bị bắt hai thứ không gate nào khác thấy**, đúng hình dạng `CLAUDE.md` mô tả: *một luật hoặc một dây đổi, và thứ mô phỏng nó không đi theo*. (1) `it_robot.dart` vẫn diễn lại mặt deck rỗng **hai nút** mà #477 đã gộp thành một — sáu trong tám kịch bản chết ở `setUp`. (2) Nó cũng không biết một deck `card` **bàn giao** sang danh sách thẻ: lưu thẻ đầu tiên pop về route của deck chứ không phải card list, vì `_cardDeckRedirect` chỉ chạy khi **vào** route. Cả hai đều xanh ở `flutter analyze`, ở 5035 test host và ở guard.
+  - **Golden job bắt một cái nữa cùng họ**: `card_screens_demo_test.dart` mở overflow để tìm `Move`, vốn đã lên băng thành icon button ở SC-C9-06 — hai render ném exception thay vì vẽ sai.
 - **Output:**
   - `docs/reviews/app-wide-screen-consistency.md` — inventory 21 màn, grammar,
-    registry 123 finding `SC-*`, 9 cụm, thứ tự thi hành, 6 mục
-    `DESIGN_SYSTEM_BLOCKED`.
+    registry 123 finding `SC-*`, 9 cụm **đã đóng kèm dispositions**, thứ tự thi
+    hành, 6 mục `DESIGN_SYSTEM_BLOCKED`.
   - `test/app/screen_composition_rhythm_test.dart` — 2 luật + 6 fault probe.
   - `test/demo/{study_entry,study_options,route_not_found,card_editor_create}_demo_test.dart`
     và 4 hàng `SCREENS` tương ứng.
@@ -17113,8 +17135,13 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
         chỉ trên chuỗi probe.
   - [x] Không hợp đồng đóng băng nào bị sửa; không guard/test nào ở cột
         Enforcement của §2 bị nới lỏng, thêm exclude hay xoá.
-  - [ ] Bốn hàng gallery mới có PNG, vẽ trên Linux.
-  - [ ] Các cụm C1…C9 đóng — từng PR riêng.
+  - [x] Bốn hàng gallery mới có PNG, vẽ trên Linux.
+  - [x] Các cụm C1…C9 đóng — từng PR riêng.
+  - [x] 123/123 finding đối soát về một trong năm trạng thái cuối; không finding
+        nào bị xoá.
+  - [x] Mỗi finding đi qua **hai pass tái xác minh độc lập** trên `main` hiện tại
+        trước khi viết một dòng code; chỗ hai pass bất đồng thì phân xử bằng
+        cách đọc code, không bằng đa số.
 - **Dependencies:** M100.41
 - **Tests required:** `screen_composition_rhythm_test.dart` (9 test),
   `check_docs.py`, `flutter analyze` repo-wide, golden Linux cho 4 ảnh mới.

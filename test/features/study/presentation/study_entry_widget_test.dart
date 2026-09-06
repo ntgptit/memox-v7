@@ -48,11 +48,21 @@ void main() {
         ),
       );
 
-      expect(find.text('New 3'), findsOneWidget);
-      expect(find.text('Due 6'), findsOneWidget);
+      // **Two nodes, and each still says both halves** (SC-C9-10). The
+      // counts are drawn as numeral + word at two inks now, so the
+      // rendered string is `3 new` rather than `New 3` — but the
+      // sentence a reader hears is the unchanged ARB string, carried on
+      // the `Semantics` node wrapping each pair. Asserting the semantics
+      // is what keeps BR-150's promise under test: the visual split may
+      // be re-drawn, the two disjoint facts may not be merged.
+      expect(find.text('3 new', findRichText: true), findsOneWidget);
+      expect(find.text('6 due', findRichText: true), findsOneWidget);
+      expect(find.bySemanticsLabel('New 3'), findsOneWidget);
+      expect(find.bySemanticsLabel('Due 6'), findsOneWidget);
       // A combined 9 would tell the user nothing about what the next ten
       // minutes cost: five stages a card, or one turn a card.
-      expect(find.text('New 9'), findsNothing);
+      expect(find.text('9 new', findRichText: true), findsNothing);
+      expect(find.bySemanticsLabel('New 9'), findsNothing);
     });
 
     testWidgets('with nothing due there is no way to review (BR-145)', (

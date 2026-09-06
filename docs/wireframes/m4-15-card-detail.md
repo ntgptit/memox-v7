@@ -7,7 +7,7 @@
 | **Scope** | Màn chi tiết card: entry point, anatomy, dòng thời gian lịch sử, mọi trạng thái, hợp đồng geometry, responsive/a11y. Ngoài phạm vi: luật nghiệp vụ (BR-239…BR-246), luồng (UC-19), editor (`m4-11-card-management.md`) |
 | **Source of truth for** | Anatomy màn chi tiết card · copy các band của màn này · hợp đồng geometry của màn này · responsive/a11y contract của màn này |
 | **Depends on** | `../use-cases.md` (UC-19), `../business-rules.md` (BR-239…BR-246), `../architecture.md` (AD-08, AD-11, AD-13, AD-15), `m4-11-card-management.md` |
-| **Updated by task** | Card Detail compact history layout (V13…V19: summary hero, scheduler-adaptive progress, event cards, tonal Edit; W2/W4 viết lại, G1…G12 đo theo bố cục mới) — trước đó M99.31 (phase 6: V10 bỏ đếm ở đuôi, V11 canh trái đuôi, V12 spinner tại chỗ, G3 co giãn, W6 thêm dạng nói) |
+| **Updated by task** | M100.42 SC-C9-11 (V14 và §1.1: mặt sau đổi từ `onSurfaceVariant` sang `onSurface` — nghĩa của thẻ thôi nhẹ hơn nhãn của các field bổ trợ) — trước đó Card Detail compact history layout (V13…V19: summary hero, scheduler-adaptive progress, event cards, tonal Edit; W2/W4 viết lại, G1…G12 đo theo bố cục mới) — trước đó M99.31 (phase 6: V10 bỏ đếm ở đuôi, V11 canh trái đuôi, V12 spinner tại chỗ, G3 co giãn, W6 thêm dạng nói) |
 | **Last updated** | 2026-08-26 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham chiếu bằng ID theo
@@ -36,7 +36,7 @@ sách được phép cắt bằng ellipsis còn màn này thì không (BR-240).
 | V11 | Đuôi danh sách lịch sử **canh trái theo mép band**, khác với card list vốn canh giữa đuôi của nó | Ghi lại vì nó là một divergence có chủ ý so với V5. Đuôi ở đây không phải một event nên không thụt vào cột chữ của event, nhưng nó thuộc band lịch sử nên đứng đúng mép band — cùng mép với tiêu đề `Study history` và với hai band trên (G1). Canh giữa sẽ tạo mép thứ ba trên một màn chỉ có một cột. Thống nhất hai màn là việc của một lượt design-system, không phải của task này | 2026-08-14 |
 | V12 | Trạng thái `loading-more` là **spinner cỡ glyph, canh trái, cao đúng 48dp** — không phải `MxLoadingState` | `MxLoadingState` canh giữa một indicator 36dp trong `EdgeInsets.all(xl)`, nên đuôi sẽ cao 84 và nhảy vào giữa màn. W3 mặt 5 cấm đúng điều đó. Hình dạng này là footprint của chính nút `Load more` với spinner của nút — cùng shape `MxActionButton` đã dùng inline | 2026-08-14 |
 | V13 | Màn là **ba bề mặt phẳng cùng một gutter**: summary hero, current-progress panel, và **một `MxCard` cho mỗi event**. Tất cả `AppElevation.none`; hairline `borderSubtle` làm việc tách bề mặt | Ba band cũ chỉ phân biệt bằng khoảng trắng — tín hiệu yếu nhất một layout có. Phẳng chứ không nổi vì D20: hai độ sâu trong một cột cuộn đọc như lỗi render chứ không như thứ bậc, và ở dark `shadowsFor` vẽ rỗng nên một "card nổi" chỉ nổi ở một trong hai theme | 2026-08-26 |
-| V14 | **Summary hero**: mặt trước ở `headlineSmall` (24sp) — **không** phải `AppTextStyles.cardPrompt` (30sp) — mặt sau ở `bodyMedium`/`onSurfaceVariant`, cờ và tag trong cùng một `Wrap`, rồi divider `borderSubtle` và nhóm field tuỳ chọn. Divider **chỉ tồn tại khi nhóm đó tồn tại** | `cardPrompt` là rung của màn ôn, nơi thuật ngữ *là* nhiệm vụ và chiếm cả màn. Ở đây nó là một fact trong nhiều fact; một summary hét lên là summary không ai đọc tiếp. Divider không có gì bên dưới là divider cắt nghĩa khỏi đáy card | 2026-08-26 |
+| V14 | **Summary hero**: mặt trước ở `headlineSmall` (24sp) — **không** phải `AppTextStyles.cardPrompt` (30sp) — mặt sau ở `bodyMedium`/`onSurface` — **đổi từ `onSurfaceVariant` ở SC-C9-11**, xem ghi chú dưới §1.1 — cờ và tag trong cùng một `Wrap`, rồi divider `borderSubtle` và nhóm field tuỳ chọn. Divider **chỉ tồn tại khi nhóm đó tồn tại** | `cardPrompt` là rung của màn ôn, nơi thuật ngữ *là* nhiệm vụ và chiếm cả màn. Ở đây nó là một fact trong nhiều fact; một summary hét lên là summary không ai đọc tiếp. Divider không có gì bên dưới là divider cắt nghĩa khỏi đáy card | 2026-08-26 |
 | V15 | **Scheduler badge** ở mép phải hàng đầu của hero: `eight_box` nói vị trí `Box N / 8` (N/8 lấy từ `kMaxBox` của chính scheduler), `sm2` nói tên `SM-2`. Badge và mặt trước ở trong một `Wrap` `spaceBetween` | Hai thuật toán biết hai thứ khác nhau: SM-2 không có bậc thang để ở 3/8 quãng đường, và bịa ra một cái cho cân đối là bịa ra một metric (BR-243, AD-08). `Wrap` vì một thuật ngữ dài phải được lấy trọn một hàng và badge xuống hàng riêng — không có đường nào khác ngoài thu nhỏ font, và type scale cấm điều đó | 2026-08-26 |
 | V16 | **Current-progress panel**: trạng thái hiển thị (chấm + chữ), rồi — chỉ với `eight_box` — hàng `Box  N / 8` và một track **8 đoạn**, rồi lưới metric hai cột. Đoạn đã qua `progressFill`, đoạn hiện tại `primaryAccent` **và cao hơn**, đoạn còn lại `progressTrack` | Chiều cao chứ không chỉ màu, vì ở dark `progressFillDark` và `primaryAccentDark` **là cùng một màu** (`focusRingDark`). Ai không phân biệt được hai sắc đó vẫn đọc được vị trí nhờ chiều cao và nhờ dòng `N / 8` ngay trên track | 2026-08-26 |
 | V17 | Mỗi event là **marker + connector bên trái, một `MxCard` phẳng bên phải**. Hàng đầu của card: **badge viền** (icon + action đã localize) bên trái, timestamp bên phải, trong một `Wrap` `spaceBetween`. Dòng dưới là mode · kind; rồi các dòng schedule; rồi mark | Badge mang phán quyết nên dòng dưới thôi lặp lại nó. Badge **viền chứ không tô nền**: container duy nhất mà bảng màu có cho cả ba tone là `surfaceMuted`, nơi `warning` chỉ đạt 4.00:1 ở light — dưới 4.5 mà chính nhãn của nó cần. Trên `surface` của card thì cả ba đều đạt (success 5.20/8.10, danger 5.57/6.71, warning 4.58/11.24) | 2026-08-26 |
@@ -70,13 +70,24 @@ thì buộc phải cắt. Action duy nhất: `Edit`, biến thể tonal có nhã
 Body là một cột cuộn, tối đa rộng `AppBreakpoints.medium`, từ trên xuống:
 
 1. **Summary hero** — một `MxCard` phẳng.
-   1. Hàng đầu: mặt trước (`headlineSmall`) và mặt sau (`bodyMedium`, muted) ở
+   1. Hàng đầu: mặt trước (`headlineSmall`) và mặt sau (`bodyMedium`, `stated`) ở
       bên trái; scheduler badge (V15) ở mép phải, xuống hàng riêng khi hẹp.
    2. Cờ (chỉ khi được đánh cờ) và dãy chip tag (chỉ khi có tag), trong **một**
       `Wrap` — cả hai đều là dấu ai đó đặt lên thẻ.
    3. Divider hairline, **chỉ khi** có ít nhất một field tuỳ chọn.
    4. `example` · `hint` · `pronunciation` — nhãn `labelSmall` trên giá trị
       `bodyMedium`; field không có giá trị **vắng mặt hoàn toàn** (BR-240).
+
+      **Mặt sau đã từng là `muted`, và đó là một đảo thứ bậc** (SC-C9-11,
+      2026-09-06). Ở rung `bodyMedium`, nhãn `Example`/`Hint`/`Pronunciation`
+      dùng `onSurfaceVariant` còn **giá trị** của chúng không ink, tức
+      `onSurface` — nên các field bổ trợ nặng hơn chính **nghĩa của thẻ**,
+      thứ mà màn chỉ-đọc này tồn tại để hiển thị (BR-240). Đo qua harness:
+      mặt trước `onSurface` 24sp, mặt sau `onSurfaceVariant` 14sp, nhãn
+      `onSurfaceVariant` 11sp, giá trị `onSurface` 14sp. Hàng danh sách cách
+      đó một lần chạm đã vẽ cùng chuỗi này ở `stated`. Thứ bậc của hero
+      vẫn đến từ `headlineSmall` trên `bodyMedium`, không phải từ một bước
+      màu; nhãn field vẫn là chữ `quiet` duy nhất trong băng.
 2. **Current progress** — tiêu đề section, rồi một `MxCard` phẳng.
    1. Trạng thái hiển thị: cùng chấm màu + nhãn chữ mà hàng danh sách dùng, nên
       hai mặt không nói hai cách về một sự thật (BR-89…BR-91).

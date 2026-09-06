@@ -18,6 +18,7 @@ import '../../domain/models/study_entry_summary_model.dart';
 import '../../domain/models/study_mode.dart';
 import '../../domain/models/study_review_options_model.dart';
 import '../../domain/models/study_session_kind_model.dart';
+import '../controllers/study_deck_context_controller.dart';
 import '../controllers/study_entry_controller.dart';
 import '../controllers/study_resume_controller.dart';
 import '../controllers/study_review_options_controller.dart';
@@ -139,8 +140,25 @@ class _StudyEntryScreenState extends ConsumerState<StudyEntryScreen> {
     // A second `watch` inside the error closure would be two reads of one fact.
     final entry = ref.watch(studyEntryProvider(deckId));
 
+    // **The deck, not the product** (SC-C9-09, SC-C9-15). This was
+    // `context.l10n.appTitle` — the only `appTitle` among the eighteen
+    // `MxContentShell` titles in `lib/features/`, and a string whose own ARB
+    // description scopes it to the `MaterialApp` title and the Android task
+    // switcher. Arriving from a named deck row, the back stack read
+    // `Study → MemoX`, and nothing on the screen said whose two counts these
+    // were.
+    //
+    // **Read separately from the counts, deliberately.** AD-13's one-read rule
+    // is about two facts a screen renders *together*; these are two different
+    // subjects with two different lifetimes — the counts are a `watch()`
+    // stream over card state, the name is a property of the deck row — so
+    // folding the name into the count query would re-emit it on every answer.
+    // `card_list_screen.dart` titles from its own deck-context read for the
+    // same reason.
     return MxContentShell(
-      title: context.l10n.appTitle,
+      title:
+          ref.watch(studyDeckContextProvider(deckId)).value?.deckName ??
+          context.l10n.studyEntryTitle,
       actions: <Widget>[
         MxIconButton(
           icon: Icons.tune,
@@ -398,5 +416,9 @@ class _StudyEntryScreenState extends ConsumerState<StudyEntryScreen> {
   void _refresh() {
     ref.invalidate(studyResumeProvider(deckId));
     ref.invalidate(studyEntryProvider(deckId));
+    // The title's read too: a rename made on the options route would otherwise
+    // leave the app bar naming the deck by its old name until the route is
+    // rebuilt for some other reason.
+    ref.invalidate(studyDeckContextProvider(deckId));
   }
 }

@@ -75,11 +75,15 @@ void main() {
       // regression: a later change reaching for `cardPrompt` here would still
       // be "a headline" to a looser assertion.
       expect(front.fontSize, isNot(30));
-      // The back steps down a full rung and takes the muted ink, so the pair
-      // reads as term-then-meaning rather than as two headings.
+      // The back steps down a full rung, which is what makes the pair read as
+      // term-then-meaning rather than as two headings.
       expect(back.fontSize, theme.textTheme.bodyMedium!.fontSize);
-      expect(back.color, theme.colorScheme.onSurfaceVariant);
       expect(back.fontSize! < front.fontSize!, isTrue);
+      // **The rung carries the hierarchy; the ink no longer does** (SC-C9-11).
+      // The back took `onSurfaceVariant` — the ink of the *labels* below it,
+      // and a step lighter than those labels' own values — so the optional
+      // supporting fields out-weighed the meaning the screen exists to show.
+      expect(back.color, theme.colorScheme.onSurface);
     });
 
     testWidgets('an optional field labels quietly and answers in body text', (

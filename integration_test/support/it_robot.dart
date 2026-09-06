@@ -238,22 +238,44 @@ final class ItRobot {
     await _harness.settle();
   }
 
-  /// `SETUP-TREE-UNSET` step: a sub-deck under the currently open deck.
+  /// Opens the "what kind of child" chooser, and says whether it opened.
   ///
-  /// An unset deck asks what kind of child is being added; a deck already fixed
-  /// to sub-decks goes straight to the form. Both routes are handled because
-  /// which one appears is the very thing several scenarios are asserting, and a
-  /// robot that assumed one would make those assertions vacuous.
-  Future<void> createSubDeck(String name) async {
-    _harness.tick();
+  /// **The empty deck offers one button now, not two** (#477). It used to draw
+  /// `Add to this deck` beside `New sub-deck`, and the robot tapped the first;
+  /// the empty face now carries a single action that starts the same
+  /// `showCreateChildForm`, and the *sheet* is what asks which kind (BR-61).
+  /// Scripting the old face is scripting a screen the app no longer draws —
+  /// which is exactly what six device scenarios were doing, and only a run on a
+  /// device could say so.
+  ///
+  /// Returns `false` when the tap went straight to the form: a deck already
+  /// fixed to sub-decks skips the question. Both routes are live and which one
+  /// appears is itself under test, so the robot must not assume either.
+  Future<bool> _openChildChooser() async {
     if (find.text(ItText.addToThisDeck).evaluate().isNotEmpty) {
       await tapText(ItText.addToThisDeck);
-      await tapText(ItText.newSubDeck);
     } else {
       // A level that already lists decks moves the action into the app bar as
       // an icon — same shape-shift as "New deck" and "New card".
       await tapCreateAction(ItText.newSubDeck);
     }
+
+    return find.text(ItText.chooseChildTitle).evaluate().isNotEmpty;
+  }
+
+  /// Whether a control carrying [label] is on screen, as text or as semantics.
+  ///
+  /// The same either/or `tapCreateAction` resolves: an empty level labels its
+  /// button, a populated one moves the action into the app bar as an icon whose
+  /// label lives in semantics.
+  bool _hasControl(String label) =>
+      find.text(label).evaluate().isNotEmpty ||
+      find.bySemanticsLabel(RegExp(RegExp.escape(label))).evaluate().isNotEmpty;
+
+  /// `SETUP-TREE-UNSET` step: a sub-deck under the currently open deck.
+  Future<void> createSubDeck(String name) async {
+    _harness.tick();
+    if (await _openChildChooser()) await tapText(ItText.newSubDeck);
     await enterNthField(0, name);
     await tapText(ItText.createSubmit);
   }
@@ -263,19 +285,36 @@ final class ItRobot {
     // Distinct created_at per card — a frozen clock makes newest-first a
     // random-UUID coin flip (see ItHarness.tick).
     _harness.tick();
+    // **A `card` deck's own level hands off rather than listing** (BR-63, W1).
+    // Saving the first card fixes the deck's content type, and returning from
+    // the editor lands on the deck route, not the card list: `_cardDeckRedirect`
+    // fires on *entering* that route. The one tap the face offers is the same
+    // one a person takes, so the robot takes it too.
+    if (find.text(ItText.openCards).evaluate().isNotEmpty) {
+      await tapText(ItText.openCards);
+    }
     if (find.text(ItText.cardListEmptyAction).evaluate().isNotEmpty) {
+      // The card list's own empty face, which names the card directly.
       await tapText(ItText.cardListEmptyAction);
-    } else if (find.text(ItText.addToThisDeck).evaluate().isNotEmpty) {
-      await tapText(ItText.addToThisDeck);
-      await tapText(ItText.newCard);
-    } else {
+    } else if (_hasControl(ItText.newCard)) {
       // A card list that already has cards moves the action into the app bar,
       // where it is an icon carrying the label rather than a `Text`.
       await tapCreateAction(ItText.newCard);
+    } else {
+      // An `unset` deck names no card anywhere on screen: its one button says
+      // `New sub-deck` and the chooser behind it is where a card is asked for.
+      if (await _openChildChooser()) await tapText(ItText.newCard);
     }
     await enterNthField(0, front);
     await enterNthField(1, back);
     await tapText(ItText.saveCard);
+    // Saving pops back to the route the editor was pushed from, which for the
+    // first card is the deck's own level — now a `card` deck, so it draws the
+    // handoff. A person taps through it to reach the card they just made, and
+    // every scenario that calls this expects to be looking at the list.
+    if (find.text(ItText.openCards).evaluate().isNotEmpty) {
+      await tapText(ItText.openCards);
+    }
   }
 
   /// Pumps until [label] is on screen, or fails saying what was there instead.
