@@ -17058,8 +17058,8 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 ### M100.42 · App-wide screen consistency — recon, và grammar composition thành test
 
 - **Status:** **done** (2026-09-06) — cả chín cụm đã đóng, 123/123 finding có
-  kết luận cuối. Còn nợ gài thiết bị: `integration_test/` phải xanh 8/8 trên
-  emulator (gate cục bộ, CI cố ý không chạy).
+  kết luận cuối, gate thiết bị đã chạy: `integration_test/` 8/8 trên
+  `emulator-5554`, flavor `development`.
 - **Owner:** Claude
 - **Goal:** Làm mọi màn production đọc như một sản phẩm, ở **đúng tầng mà
   `v1-freeze.md` §2 cố ý để mở** — composition của màn hình nghiệp vụ. Không đụng
@@ -17115,6 +17115,8 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
     `Language: E…` ở 393dp scale 1.0. Stress test vẫn xanh; chỉ vẽ lại ảnh mới
     thấy.
   - Host suite 4781 → 5015+ test, luôn 0 failed.
+  - **Gate thiết bị bắt hai thứ không gate nào khác thấy**, đúng hình dạng `CLAUDE.md` mô tả: *một luật hoặc một dây đổi, và thứ mô phỏng nó không đi theo*. (1) `it_robot.dart` vẫn diễn lại mặt deck rỗng **hai nút** mà #477 đã gộp thành một — sáu trong tám kịch bản chết ở `setUp`. (2) Nó cũng không biết một deck `card` **bàn giao** sang danh sách thẻ: lưu thẻ đầu tiên pop về route của deck chứ không phải card list, vì `_cardDeckRedirect` chỉ chạy khi **vào** route. Cả hai đều xanh ở `flutter analyze`, ở 5035 test host và ở guard.
+  - **Golden job bắt một cái nữa cùng họ**: `card_screens_demo_test.dart` mở overflow để tìm `Move`, vốn đã lên băng thành icon button ở SC-C9-06 — hai render ném exception thay vì vẽ sai.
 - **Output:**
   - `docs/reviews/app-wide-screen-consistency.md` — inventory 21 màn, grammar,
     registry 123 finding `SC-*`, 9 cụm **đã đóng kèm dispositions**, thứ tự thi

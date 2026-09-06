@@ -308,6 +308,13 @@ final class ItRobot {
     await enterNthField(0, front);
     await enterNthField(1, back);
     await tapText(ItText.saveCard);
+    // Saving pops back to the route the editor was pushed from, which for the
+    // first card is the deck's own level — now a `card` deck, so it draws the
+    // handoff. A person taps through it to reach the card they just made, and
+    // every scenario that calls this expects to be looking at the list.
+    if (find.text(ItText.openCards).evaluate().isNotEmpty) {
+      await tapText(ItText.openCards);
+    }
   }
 
   /// Pumps until [label] is on screen, or fails saying what was there instead.
