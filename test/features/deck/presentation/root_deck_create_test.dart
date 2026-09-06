@@ -82,6 +82,59 @@ void main() {
       expect(repository.createdRootDecks, isEmpty);
     });
 
+    testWidgets('and the error clears as the correction is typed', (
+      tester,
+    ) async {
+      // **The error outlived its cause.** `nameProblem` is set by a failed
+      // submit and cleared only by the next one, so "Enter a name" stayed in
+      // red under the field while the reader typed the name it was asking
+      // for. The field is the one place the app tells them what is wrong;
+      // leaving it wrong is worse than saying nothing.
+      final repository = FakeDeckRepository();
+      await pumpDeckApp(tester, repository: repository);
+
+      await tester.tap(find.text(english.deckCreateRootAction));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(english.schedulerEightBoxLabel));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(english.deckFormSubmitAction));
+      await tester.pumpAndSettle();
+      expect(find.text(english.deckNameEmptyError), findsOneWidget);
+
+      await tester.enterText(deckFormField, 'J');
+      await tester.pumpAndSettle();
+
+      expect(find.text(english.deckNameEmptyError), findsNothing);
+    });
+
+    testWidgets('but the same bad input submitted twice says so twice', (
+      tester,
+    ) async {
+      // The counterpart, and the reason the flag resets on submit rather than
+      // remembering what was submitted: a reader who presses Save again
+      // without fixing anything must be told again, not met with silence.
+      final repository = FakeDeckRepository();
+      await pumpDeckApp(tester, repository: repository);
+
+      await tester.tap(find.text(english.deckCreateRootAction));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(english.schedulerEightBoxLabel));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(english.deckFormSubmitAction));
+      await tester.pumpAndSettle();
+
+      // Type, then take it back out again — still empty, still invalid.
+      await tester.enterText(deckFormField, 'J');
+      await tester.pumpAndSettle();
+      await tester.enterText(deckFormField, '');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(english.deckFormSubmitAction));
+      await tester.pumpAndSettle();
+
+      expect(find.text(english.deckNameEmptyError), findsOneWidget);
+      expect(repository.createdRootDecks, isEmpty);
+    });
+
     testWidgets('a persistence failure keeps the form and its input', (
       tester,
     ) async {
@@ -128,6 +181,28 @@ void main() {
       await tester.tap(find.text(english.deckCreateRootAction));
       await tester.pumpAndSettle();
       await tester.enterText(deckFormField, 'Half typed');
+      await tester.tap(find.text(english.commonCancelAction).first);
+      await tester.pumpAndSettle();
+
+      expect(find.text(english.deckFormDiscardTitle), findsOneWidget);
+    });
+
+    testWidgets('cancelling after choosing a study mode asks too', (
+      tester,
+    ) async {
+      // **The pick counts as input.** The discard guard read the name field
+      // alone, so a reader who chose a study mode and then cancelled lost it
+      // with no question — while one typed character earned a confirmation.
+      // The silent one is the more expensive: the algorithm is the deck's, it
+      // locks after the first review (BR-06), and the create-root form makes
+      // it required.
+      await pumpDeckApp(tester, repository: FakeDeckRepository());
+
+      await tester.tap(find.text(english.deckCreateRootAction));
+      await tester.pumpAndSettle();
+      // No name typed — the pick is the only thing entered.
+      await tester.tap(find.text(english.schedulerSm2Label));
+      await tester.pumpAndSettle();
       await tester.tap(find.text(english.commonCancelAction).first);
       await tester.pumpAndSettle();
 

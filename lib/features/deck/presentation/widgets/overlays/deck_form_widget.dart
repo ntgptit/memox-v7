@@ -92,7 +92,35 @@ class _DeckFormWidgetState extends State<DeckFormWidget> {
     super.dispose();
   }
 
-  bool get _hasUnsavedInput => _name.text.trim() != widget.initialName.trim();
+  /// Whether leaving now would throw away something the reader put in.
+  ///
+  /// **The scheduler pick counts, and it did not.** The predicate read the name
+  /// field alone, so choosing a study mode and then cancelling closed the sheet
+  /// with no question asked — while typing a single character and cancelling
+  /// asked one. The choice that gets discarded silently is the more expensive
+  /// of the two: it is the deck's algorithm, it locks after the first review
+  /// (BR-06), and on the create-root form it is a required field the reader had
+  /// already answered.
+  ///
+  /// Guarded by [DeckFormWidget.isSchedulerRequired] so only the form that
+  /// offers the picker consults it — rename and create-sub-deck have no
+  /// `_scheduler` to lose and keep exactly the behaviour they had.
+  /// Whether the name has been edited since the submit that produced the
+  /// error currently in [DeckSubmitState].
+  ///
+  /// **An error survives its own cause without this.** `nameProblem` is set by
+  /// a failed submit and cleared by the next one, so the red line and its
+  /// message stayed under the field while the reader typed the very correction
+  /// it asked for — "Enter a name" beneath a name. Material clears a submit
+  /// error on edit; this is that, scoped to the one field that has one.
+  ///
+  /// Reset by [_submit] rather than compared against the submitted text, so
+  /// pressing Save twice on the same bad input shows the error both times.
+  bool _isNameEditedSinceSubmit = false;
+
+  bool get _hasUnsavedInput =>
+      _name.text.trim() != widget.initialName.trim() ||
+      (widget.isSchedulerRequired && _scheduler != null);
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +140,7 @@ class _DeckFormWidgetState extends State<DeckFormWidget> {
         MxTextField(
           controller: _name,
           label: context.l10n.deckNameLabel,
-          errorText: nameProblem == null
+          errorText: nameProblem == null || _isNameEditedSinceSubmit
               ? null
               : context.deckFormError(nameProblem),
           isEnabled: !state.isSubmitting,
@@ -123,6 +151,12 @@ class _DeckFormWidgetState extends State<DeckFormWidget> {
           // still exists for text arriving by paste on platforms that allow it.
           maxLength: DeckName.maxLength,
           textInputAction: TextInputAction.done,
+          // Only the first keystroke after a failed submit has to rebuild;
+          // the rest change nothing this widget draws.
+          onChanged: (_) {
+            if (_isNameEditedSinceSubmit) return;
+            setState(() => _isNameEditedSinceSubmit = true);
+          },
           onSubmitted: (_) => _submit(),
         ),
         if (widget.isSchedulerRequired) ...<Widget>[
@@ -133,7 +167,9 @@ class _DeckFormWidgetState extends State<DeckFormWidget> {
             sectionLabel: context.l10n.schedulerSectionLabel,
             selected: _scheduler,
             isEnabled: !state.isSubmitting,
-            errorText: state.isSchedulerMissing
+            // Same rule, and here the correction is observable without a
+            // flag: a pick is exactly what the error asked for.
+            errorText: state.isSchedulerMissing && _scheduler == null
                 ? context.deckFormError(DeckValidationProblem.schedulerMissing)
                 : null,
             onChanged: (value) => setState(() => _scheduler = value),
@@ -184,7 +220,14 @@ class _DeckFormWidgetState extends State<DeckFormWidget> {
     );
   }
 
-  void _submit() => widget.onSubmit(_name.text, _scheduler);
+  void _submit() {
+    // The error about to arrive describes *this* text, so the field stops
+    // counting as edited. Resetting here rather than diffing against the
+    // submitted string is what keeps a second identical submit honest: the
+    // same bad name pressed twice must show the same error twice.
+    _isNameEditedSinceSubmit = false;
+    widget.onSubmit(_name.text, _scheduler);
+  }
 
   /// Backs out, asking first if anything would be lost (UC-02 A1).
   ///

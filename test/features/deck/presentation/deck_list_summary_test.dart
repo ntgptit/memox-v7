@@ -60,6 +60,59 @@ void main() {
     matching: matching,
   );
 
+  group('the hero CTA names what it actually does', () {
+    // **The two levels run the same button to two different places** — inside
+    // a deck it opens that deck's session (BR-101 allows it: one root, one
+    // session); at the root it can only open the Study tab, because a session
+    // cannot span roots. The routing was written for that from the start and
+    // the ARB description spelled it out; the label was not, so the root's
+    // primary CTA read "Study 15 due cards" and delivered a list with nothing
+    // started. A destination is invisible — the label is the whole promise.
+
+    testWidgets('the root offers the choice it actually opens', (tester) async {
+      await pumpDeckScreen(
+        tester,
+        repository: FakeDeckRepository.withSummaries(withDue()),
+        screen: const DeckListScreen(),
+      );
+
+      expect(
+        onPanel(find.text(english.deckSummaryPickDeckAction)),
+        findsOneWidget,
+      );
+      expect(
+        onPanel(find.text(english.deckSummaryStudyDueAction(7))),
+        findsNothing,
+        reason: 'the root cannot start a session, so it must not offer to',
+      );
+    });
+
+    testWidgets('a deck level still promises the session it starts', (
+      tester,
+    ) async {
+      await pumpDeckScreen(
+        tester,
+        repository: FakeDeckRepository.withLevel(
+          parent: fakeRootDeck(id: 'a', name: 'A'),
+          children: withDue(),
+        ),
+        screen: const DeckListScreen(),
+      );
+
+      // The counterpart, and the reason this is a split rather than a rename:
+      // without it, replacing the label everywhere would pass just as well and
+      // would have taken the honest promise down with the dishonest one.
+      expect(
+        onPanel(find.text(english.deckSummaryStudyDueAction(7))),
+        findsOneWidget,
+      );
+      expect(
+        onPanel(find.text(english.deckSummaryPickDeckAction)),
+        findsNothing,
+      );
+    });
+  });
+
   group('the summary panel', () {
     testWidgets('shows itself where something is due', (tester) async {
       await pumpDeckScreen(
@@ -95,15 +148,24 @@ void main() {
       );
 
       // What the collapsed panel says: how much is waiting, how bad it is, and
-      // the button that starts it.
+      // the button that acts on it.
       expect(onPanel(find.text('7')), findsWidgets);
       expect(
         onPanel(find.text(english.deckSummaryCardsDueWord)),
         findsOneWidget,
       );
+      // **At the root the button does not start a session, so it does not say
+      // it does.** A session belongs to one root deck (BR-101); this tap opens
+      // the Study tab, where the reader picks which one. The count stays off
+      // the button because the figure line above it already carries it.
+      expect(
+        onPanel(find.text(english.deckSummaryPickDeckAction)),
+        findsOneWidget,
+      );
       expect(
         onPanel(find.text(english.deckSummaryStudyDueAction(7))),
-        findsOneWidget,
+        findsNothing,
+        reason: 'the deck-level promise must not appear at the root',
       );
 
       // What it does not: the resting figures and the learned caption.

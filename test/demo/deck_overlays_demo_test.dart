@@ -171,9 +171,17 @@ void main() {
     await pumpReview(tester, levelShell(Brightness.light));
     // The level's own menu lives on the app bar and acts on the deck being
     // viewed — the only menu on this screen that offers Move.
-    await tester.tap(
-      find.bySemanticsLabel(english.deckActionsSemanticLabel).first,
-    );
+    //
+    // **`.first` used to pick a row's menu instead, and this golden recorded
+    // it.** Every card carried the same unqualified "Deck actions" name, so
+    // the finder matched three buttons and took whichever came first in the
+    // tree — a sub-deck row, whose sheet has no Move at all, under a test
+    // called "the one that can move". Row menus are named for their own deck
+    // now, so this string belongs to the app bar alone; asserted rather than
+    // indexed, so it cannot quietly go back to matching several.
+    final appBarMenu = find.bySemanticsLabel(english.deckActionsSemanticLabel);
+    expect(appBarMenu, findsOneWidget);
+    await tester.tap(appBarMenu);
     await tester.pumpAndSettle();
 
     await matchesReviewGolden('goldens/deck_actions_child_light.png');
@@ -322,9 +330,12 @@ void main() {
       tester,
       shell(repository, Brightness.light, location: '/decks/deck-1'),
     );
-    await tester.tap(
-      find.bySemanticsLabel(english.deckActionsSemanticLabel).first,
-    );
+    // The app bar's menu, which is the one that can move this level's deck —
+    // see the note on the sub-deck actions golden above for what `.first` was
+    // picking instead, and what this golden showed because of it.
+    final appBarMenu = find.bySemanticsLabel(english.deckActionsSemanticLabel);
+    expect(appBarMenu, findsOneWidget);
+    await tester.tap(appBarMenu);
     await tester.pumpAndSettle();
     await chooseAction(tester, english.deckMoveAction);
 

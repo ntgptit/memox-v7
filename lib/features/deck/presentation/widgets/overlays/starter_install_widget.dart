@@ -111,8 +111,20 @@ class _StarterInstallFormState extends ConsumerState<_StarterInstallForm> {
         );
     if (!mounted || outcome == null) return;
 
-    // Success closes the sheet and hands the outcome to the caller; a failure
-    // keeps the sheet up with its error line and the button live for a retry.
+    // Three outcomes, three behaviours. An install closes the sheet and hands
+    // the outcome to the caller. A failure keeps the sheet up with its error
+    // line and the button live for a retry — that is the `null` above.
+    //
+    // **`alreadyPresent` is the third, and it used to be read as the first.**
+    // It means the write finished and copied nothing, which happens when the
+    // row said "not installed" and the database disagreed (BR-37's check runs
+    // inside the transaction, so it is the race's answer). Closing on it
+    // returned the reader to the Library having been told a deck was added
+    // that was already there. The sheet stays up and says what happened
+    // instead; the catalogue behind it has been invalidated, so the row is
+    // correcting itself to "Installed" while they read it.
+    if (outcome == DeckTemplateInstallOutcome.alreadyPresent) return;
+
     Navigator.of(context).pop(outcome);
   }
 
@@ -164,6 +176,22 @@ class _StarterInstallFormState extends ConsumerState<_StarterInstallForm> {
             setState(() => _scheduler = value);
           },
         ),
+        if (install.wasAlreadyPresent) ...<Widget>[
+          // **`warning`, not `danger`, and the tone's own definition is the
+          // reason**: "a condition to act on that has not failed"
+          // (`mx_feedback_band.dart`). Nothing failed and nothing rolled back,
+          // so the error band's words and its invitation to retry would both
+          // be wrong — a retry reaches the same answer. There is no `info`
+          // tone and this task may not add one: `MxFeedbackBand`'s public API
+          // is frozen (v1-freeze.md, contract 6), and `warning` already means
+          // what this is.
+          const SizedBox(height: AppSpacing.lg),
+          MxFeedbackBand(
+            title: context.l10n.starterLibraryAlreadyPresentTitle,
+            message: context.l10n.starterLibraryAlreadyPresentMessage,
+            tone: MxFeedbackTone.warning,
+          ),
+        ],
         if (install.error != null) ...<Widget>[
           // The one grammar for an in-flow failure — see
           // `deck_form_widget.dart` for why the bare red line went (SC-C3-19).

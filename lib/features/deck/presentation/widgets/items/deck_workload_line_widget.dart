@@ -9,20 +9,23 @@ import '../../../domain/models/deck_summary_model.dart';
 
 /// The deck's workload, stated in full: `12 Due · 46 New` (BR-150, BR-142).
 ///
-/// **Both numbers, always — zero included.** An absent metric is ambiguous in
-/// exactly the way this line exists to prevent: "no due count" could mean zero
-/// due or could mean the screen only tracks new, and a reader should never
-/// have to know the convention to read the card. `0 Due · 14 New` says which.
+/// **Only the counts that are not zero**, and one chip standing for all of them
+/// when every count is. It printed `0 due · 0 new` for a while on the argument
+/// that an absent metric is ambiguous; two chips of zero turned out to be two
+/// facts about what is *not* there, and a reader scanning for work had to read
+/// both to learn nothing (owner review, 2026-08-21). `All caught up` states the
+/// whole of that in one.
 ///
-/// **Plain text, one typography, ink as the only state.** The icon-per-metric
-/// experiment put five visual anchors on a three-line block and the golden
-/// showed the cost: metadata wrapped, cards grew, hierarchy flattened. The
-/// schedule urgency the small clock used to carry moved up to the large
-/// status icon (BR-161), so this line is back to what it says: two counts,
-/// due first, `Due`/`New` as the non-colour signal. A positive due count
-/// wears the time-pressure ink — never `danger`, a review coming due is the
-/// product working (BR-29) — a positive new count wears `info`, and zeroes
-/// rest on the neutral variant.
+/// **Chips, not coloured words, and no icons.** The icon-per-metric experiment
+/// put five visual anchors on a three-line block and the golden showed the
+/// cost: metadata wrapped, cards grew, hierarchy flattened. The schedule
+/// urgency the small clock used to carry moved up to the large status icon
+/// (BR-161). What replaced the words is a tinted ground per count — see
+/// [_WorkloadChip] — so the row scans as three facts rather than one
+/// multicoloured sentence. `Overdue`/`Due`/`New` remain the non-colour signal:
+/// overdue wears the one semantic red left on the card — a review past its day
+/// is late, not a fault (BR-29, M100.21) — due wears the time-pressure pair,
+/// and new rests on the neutral muted surface.
 ///
 /// A deck with no cards at all has no workload to misreport, and says
 /// "No cards" instead — a different fact from `0 Due · 0 New`, which is a

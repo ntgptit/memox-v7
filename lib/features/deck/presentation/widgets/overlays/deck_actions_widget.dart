@@ -122,6 +122,20 @@ Future<void> showDeckActions(
           MxActionSheetAction(
             label: sheetContext.l10n.deckResetProgressAction,
             icon: Icons.restore,
+            // **Destructive when there is progress to destroy.** Delete below
+            // wears the cue and Reset did not, which had the risk the wrong way
+            // round: a deleted deck goes to Trash and can be restored for
+            // thirty days (BR-256), while a reset throws the schedule away with
+            // no Trash and no Undo (BR-42, BR-152). The one row here that
+            // cannot be taken back was the one that looked ordinary.
+            //
+            // Conditional rather than always-on, on the same fact the
+            // confirmation already tones itself by: with nothing learned the
+            // sheet says there is no progress to lose, and a red row would ask
+            // the reader to brace for nothing.
+            variant: hasLearnedCards
+                ? MxActionSheetActionVariant.destructive
+                : MxActionSheetActionVariant.normal,
             onPressed: () =>
                 Navigator.of(sheetContext).pop(_DeckAction.resetProgress),
           ),

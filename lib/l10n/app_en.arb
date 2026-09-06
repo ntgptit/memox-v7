@@ -391,6 +391,14 @@
   "@starterLibrarySchedulerPrompt": {
     "description": "Label above the scheduler picker in the install sheet. The template only suggests a default (BR-34)."
   },
+  "starterLibraryAlreadyPresentTitle": "This deck is already in your library",
+  "@starterLibraryAlreadyPresentTitle": {
+    "description": "Shown in the install sheet when the copy finished and copied nothing because the deck was already there (BR-37). Not a failure: the sheet stays open and says so instead of closing as though a deck had been added."
+  },
+  "starterLibraryAlreadyPresentMessage": "Nothing was added. Open it from the Library to keep studying.",
+  "@starterLibraryAlreadyPresentMessage": {
+    "description": "Body of the already-present notice in the starter install sheet."
+  },
   "starterLibraryInstallErrorTitle": "Couldn’t add this deck",
   "@starterLibraryInstallErrorTitle": {
     "description": "Title of the failure band in the starter install sheet. Not deckWriteErrorTitle (“Couldn’t save”): a copy that rolled back is a different event from a save that did not land, and a band whose title and message name two events reads as two failures. Its message, starterLibraryInstallFailed, still opens by restating this headline — tightening that string to the consequence alone is a copy change that belongs to that key’s own owner, not to this consistency pass."
@@ -586,9 +594,9 @@
   "@deckFormDiscardTitle": {
     "description": "Title of the confirmation shown when a deck form with typed input is cancelled (UC-02 A1)."
   },
-  "deckFormDiscardMessage": "What you typed will not be saved.",
+  "deckFormDiscardMessage": "What you filled in will not be saved.",
   "@deckFormDiscardMessage": {
-    "description": "Body of the discard confirmation for a partly filled deck form."
+    "description": "Body of the discard confirmation for a partly filled deck form. Deliberately does not say \"typed\": the form fires this for a study-mode choice made with no name entered, and that pick is the more costly of the two to lose."
   },
   "deckFormDiscardConfirmAction": "Discard",
   "@deckFormDiscardConfirmAction": {
@@ -657,6 +665,24 @@
   "deckStudyAction": "Study",
   "@deckStudyAction": {
     "description": "Label of the button on a deck card that starts a study session for that deck. Shown when the deck has due or new cards (BR-150) — hidden only when both sets are empty, because then there is nothing to start."
+  },
+  "deckRowActionsSemanticLabel": "Deck actions for {deck}",
+  "@deckRowActionsSemanticLabel": {
+    "placeholders": {
+      "deck": {
+        "type": "String"
+      }
+    },
+    "description": "Screen-reader name for a LIST ROW's overflow button. Every row carries the same glyph, so the deck name is what tells them apart. The app bar keeps the unqualified deckActionsSemanticLabel: there is exactly one of it, and the title already names the deck."
+  },
+  "deckRowStudySemanticLabel": "Study {deck}",
+  "@deckRowStudySemanticLabel": {
+    "placeholders": {
+      "deck": {
+        "type": "String"
+      }
+    },
+    "description": "Screen-reader name for a list row's Study action, matching studyHomeStudySemanticLabel in the Study tab: every row paints the same word, and the deck name is what distinguishes them."
   },
   "deckActionsSemanticLabel": "Deck actions",
   "@deckActionsSemanticLabel": {
@@ -4334,7 +4360,11 @@
         "type": "int"
       }
     },
-    "description": "The Today panel CTA. At the root it opens the Study tab (a session belongs to one root deck, BR-101, so a cross-deck session cannot be offered); inside a deck it starts that deck study."
+    "description": "The Today panel CTA INSIDE A DECK, where it starts that deck study. The root uses deckSummaryPickDeckAction instead: a session belongs to one root deck (BR-101), so the root cannot start one and must not promise to."
+  },
+  "deckSummaryPickDeckAction": "Choose a deck to study",
+  "@deckSummaryPickDeckAction": {
+    "description": "The Today panel CTA at the LIBRARY ROOT only. A session belongs to one root deck (BR-101), so the root button cannot start one — it opens the Study tab, where the reader picks which deck. Inside a deck the CTA is deckSummaryStudyDueAction, which does start a session. The count is not repeated here: the figure line directly above the button already states it."
   },
   "deckTileDueChipLabel": "{count} due",
   "@deckTileDueChipLabel": {

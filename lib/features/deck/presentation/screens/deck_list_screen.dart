@@ -367,10 +367,8 @@ class _DeckLevel extends ConsumerWidget {
               ),
               child: DeckListToolbarWidget(
                 isRootLevel: parent == null,
-                filter: filter,
                 sort: sort,
                 visibleCount: visible.length,
-                onFilterChanged: onFilterChanged,
                 onSortChanged: onSortChanged,
               ),
             ),

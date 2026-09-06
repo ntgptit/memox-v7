@@ -195,12 +195,24 @@ class DeckLevelSummaryWidget extends StatelessWidget {
         // session cannot honestly be offered; inside a deck it starts that
         // deck's study. The caller decides which; null means nothing is
         // due and the button would be a promise with no cards behind it.
+        //
+        // **And the label says which, because the two do different things.**
+        // Both levels used to read "Study 15 due cards" — the count from the
+        // figure line, the verb from the deck case. Inside a deck that is
+        // exactly what happens. At the root it is not: the tap lands on the
+        // Study tab's list with nothing started and one more choice to make,
+        // so the button promised a session and delivered an index. The split
+        // was already known — the routing above is written for it and the
+        // ARB description spelled it out — but only the destination had been
+        // made honest, and a reader never sees a destination, only a label.
         if (onStudyDue != null) ...<Widget>[
           const SizedBox(height: AppSpacing.md),
           MxHeroPrimary(
-            label: context.l10n.deckSummaryStudyDueAction(
-              snapshot.levelDueCardCount,
-            ),
+            label: snapshot.parent == null
+                ? context.l10n.deckSummaryPickDeckAction
+                : context.l10n.deckSummaryStudyDueAction(
+                    snapshot.levelDueCardCount,
+                  ),
             onPressed: onStudyDue!,
             isCramped: isCramped,
           ),
