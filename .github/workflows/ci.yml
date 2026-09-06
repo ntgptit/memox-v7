@@ -207,6 +207,10 @@ jobs:
           flutter test --exclude-tags golden --reporter failures-only "${test_files[@]}"
 
   widgetbook:
+    # The name understates it — the job runs the catalogue's interaction
+    # tests too. It stays anyway: this string is how branch protection
+    # identifies a required check, so renaming it makes the requirement
+    # point at a check that never reports again.
     name: Widgetbook smoke test
     needs: classify
     if: needs.classify.outputs.needs_widgetbook == 'true'
