@@ -16956,6 +16956,85 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
 - **Checklist phases:** 14, 21.
 
+### M100.47 · UX refinement giai đoạn 1 — Library / Deck
+
+- **Status:** done (2026-09-07)
+- **Owner:** Claude
+- **Goal:** Mở giai đoạn mới: tinh chỉnh UX **theo từng feature**, không phải
+  thêm một pass nhất quán toàn app. Feature đầu tiên là Library / Deck, xét như
+  **một luồng** chứ không phải một tập ảnh chụp rời.
+- **Nhánh / PR:** `ux/library-deck`
+- **Scope:** 2 màn production (`DeckListScreen` ở cả cấp gốc lẫn cấp deck,
+  `StarterLibraryScreen`) và 12 overlay do feature sở hữu. Không đụng Card,
+  Study, Progress, Search, Reminder, Settings.
+- **Cách làm:** 6 agent review một-surface-một, rồi **mỗi finding qua hai lăng
+  kính độc lập** (measurement / improvement) đọc lại code trước khi được tin.
+  9 finding ứng viên → **3 bị bác** (DECK-RHYTHM-01, DUE-TODAY-WORDING-SPLIT,
+  LIB-FILTER-GHOST, tất cả 2/2 REFUTED), 6 sống sót. Cộng thêm 3 finding tôi
+  tự tìm khi đọc luồng.
+- **Vấn đề đã sửa:**
+  - **CTA chính ở cấp gốc hứa một phiên học nó không mở được.** Panel Hôm nay
+    ghi "Study 15 due cards" ở cả hai cấp. Trong một deck thì đúng; ở gốc thì
+    không — một phiên thuộc về đúng một root deck (BR-101), nên cú chạm mở tab
+    Study với danh sách và chưa học gì. Chỗ tách đã được biết: routing viết
+    riêng cho nó và mô tả ARB đã ghi rõ — nhưng chỉ *điểm đến* được làm cho
+    trung thực, còn người đọc không bao giờ thấy điểm đến, chỉ thấy nhãn.
+  - **Hai control trên mỗi hàng không có tên riêng.** Mọi card đều mang
+    `more_vert` và `Study`; trình đọc màn hình đi theo control nghe N nút
+    giống hệt nhau. Study Home đã giải đúng bài này cho cùng bộ deck ở tab kế
+    bên và ghi sẵn lý do.
+  - **Reset learning progress trông an toàn hơn Delete.** Rủi ro ngược: xoá
+    deck vào Trash, khôi phục được 30 ngày (BR-256); reset vứt lịch học, không
+    Trash, không Undo (BR-42, BR-152).
+  - **Chọn chế độ ôn rồi Cancel thì mất im lặng.** Guard chỉ đọc ô tên.
+  - **Lỗi tên sống lâu hơn nguyên nhân của nó.** "Enter a name" đứng đỏ dưới ô
+    trong lúc người dùng đang gõ đúng cái tên nó đòi.
+  - **Một lần cài không chép gì lại báo là đã chép.** `alreadyPresent` là ghi
+    xong mà không thêm deck (BR-37); mọi caller coi outcome khác null là đã
+    cài và đóng sheet. Chính doc của controller đã hứa sheet sẽ "explain an
+    `alreadyPresent`" từ lúc viết.
+- **Sửa kèm (cùng feature, cùng gốc):** toolbar nhận 2 tham số bắt buộc không
+  đọc bao giờ; deck tile ghi doc cho field `isRootLevel` không tồn tại;
+  breadcrumb có 4 phát biểu bị chính `build()` của nó phủ định — kể cả câu
+  "present at every level", trong khi cấp gốc hiện dòng thống kê.
+- **Quyết định:**
+  - **Không dùng `DESIGN_SYSTEM_BLOCKED` làm cớ.** Băng thông báo
+    `alreadyPresent` cần một tone không phải lỗi; `MxFeedbackBand` chỉ có
+    `danger` và `warning`, và API của nó đóng băng. `warning` đã định nghĩa
+    đúng thứ này — "a condition to act on that has not failed" — nên hợp đồng
+    đóng băng **định hướng** thiết kế chứ không chặn nó. Không mục nào bị block.
+  - **Không tự lật quyết định FAB đè card thứ ba.** Đã đo lại và vẫn đúng ở
+    golden, nhưng chủ dự án đã cân nhắc và cố ý để mở, và bản thân
+    `deck_list_sliver_widget.dart` ghi rõ inset chỉ giữ được *cuối* scroll.
+    Ghi nhận, không sửa.
+  - **Không tạo widget mới.** Mọi bản sửa là một dòng ở đúng chỗ quyết định
+    sai đã được đưa ra.
+- **Đo, sau khi đổi:**
+  - 19 golden đổi, **giải thích được từng cái**: 17 cái một dải duy nhất
+    416-560 (nút CTA ở gốc, kể cả các overlay vẽ đè lên màn đó), bản tiếng
+    Việt cùng dải dịch xuống 488-632, `deck_actions_root_*` thêm dải
+    2217-2271 là hàng Reset nhận cue destructive.
+  - **Hai golden vốn đã sai từ trước, và việc tách nhãn làm lộ ra.** Hai demo
+    test dùng `find.bySemanticsLabel(deckActionsSemanticLabel).first` khi mọi
+    card còn mang cùng cái tên đó, nên `.first` bắt vào menu của một *hàng*:
+    `deck_actions_child_light` mang tên "the one that can move" mà ảnh không
+    có Move, và `deck_move_picker_light` mang tên "the targets, and the ones
+    it refuses" mà ảnh là mặt rỗng "Nowhere to move this". Cả hai giờ chụp
+    đúng thứ tên nó nói, và test `findsOneWidget` thay vì lấy chỉ số.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** luồng Library/Deck nói đúng những gì nó làm được.
+- **Acceptance criteria:**
+  - [x] Mọi surface production của feature được đọc, luồng được dựng lại.
+  - [x] Mỗi finding có bằng chứng file:line và một disposition.
+  - [x] Mọi FIX đã xác minh đều được thi hành, kèm test hẹp nhất bắt được nó.
+  - [x] Không hợp đồng đóng băng nào bị chạm, không primitive dùng chung nào
+        được thêm hay sửa.
+  - [x] Golden đổi đúng vùng giải thích được; 314/333 byte-identical.
+- **Dependencies:** M100.46
+- **Tests required:** `flutter analyze`, guard, `check_architecture.sh`,
+  `check_docs.py`, host suite, Widgetbook, golden Linux, `integration_test/`.
+- **Checklist phases:** 7, 14.
+
 ### M100.46 · Hai khuyết tật cuối của chuỗi screen-consistency
 
 - **Status:** done (2026-09-07)
