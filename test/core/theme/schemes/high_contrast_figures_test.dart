@@ -34,7 +34,10 @@ void main() {
         String r(Color c) => over(c, surface).toStringAsFixed(2);
         expect(r(base.borderSubtle), isLight ? '1.14' : '1.41');
         expect(r(hc.borderSubtle), isLight ? '5.28' : '6.47');
-        expect(r(base.borderControl), isLight ? '4.40' : '4.68');
+        // Light re-measured at M100.48: the token was lightened from
+        // `#6F727B` to `#7B7E88`, which is this cell moving 4.40 -> 3.71.
+        // Dark is untouched. The floor assertions below are not.
+        expect(r(base.borderControl), isLight ? '3.71' : '4.68');
         expect(r(hc.borderControl), isLight ? '5.28' : '6.47');
         expect(r(base.borderAccent), isLight ? '1.80' : '3.88');
         expect(r(hc.borderAccent), isLight ? '5.67' : '11.27');

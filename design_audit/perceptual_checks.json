@@ -15,15 +15,15 @@
         "verdict": "invisible"
       },
       "colorScheme.outline on card (colorScheme.surface)": {
-        "ratio": 4.395749660424437,
+        "ratio": 3.7059335651693224,
         "verdict": "too-heavy"
       },
       "colorScheme.outline on page (scaffoldBackgroundColor)": {
-        "ratio": 4.395749660424437,
+        "ratio": 3.7059335651693224,
         "verdict": "too-heavy"
       },
       "colorScheme.outline on muted tile (semantic.surfaceMuted)": {
-        "ratio": 4.024563274854216,
+        "ratio": 3.392996707640056,
         "verdict": "too-heavy"
       },
       "colorScheme.outlineVariant on card (colorScheme.surface)": {
