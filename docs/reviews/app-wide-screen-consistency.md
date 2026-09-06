@@ -915,6 +915,32 @@ Mỗi finding đi qua **hai pass tái xác minh độc lập** trên `main` hi�
 
 ---
 
+### C9 — dispositions
+
+Đóng bởi PR #483. Sáu trong mười lăm không đúng như đã ghi: hai bị bác, hai không còn tái hiện, một rời bảng blocked và một vào thay.
+
+Mỗi finding đi qua **hai pass tái xác minh độc lập** trên `main` hiện tại trước khi một dòng code được viết; chỗ nào hai pass bất đồng thì được phân xử bằng cách đọc code, không phải bằng cách lấy đa số.
+
+| ID | Kết luận cuối | Vì sao |
+|---|---|---|
+| `SC-C9-01` | **REFUTED** | The finding's premise is that "the screen's only affordance is painted AppInk.quiet". It is not: starter_library_screen.dart:175-176 is `MxCard.raised(onTap: () => _add(context))`, so the affordance is the whole card, exactly as d… |
+| `SC-C9-02` | **REVISED_AND_FIXED** | The defect reproduces. card_editor_screen.dart:253-277 builds create's MxContentShell with title, leading, footer and body and passes no subheader; its own doc says so at :199 ("Create's shell: no breadcrumb, no tags"). CardCreate… **Target đã đổi:** In lib/features/card/presentation/widgets/sections/card_editor_breadcrumb_widget.dart add a required `String leafLabel` field and use it at :70 in place of `context.l10n.cardEditorBreadcrumbLabel`; ed |
+| `SC-C9-03` | **DESIGN_SYSTEM_BLOCKED** | Measured with a throwaway widget test (deleted) against buildLightTheme/buildDarkTheme. LIGHT: page scheme.surface #F2F5F9 L* 96.42; MxCard.tonal fill semantic.surfaceEmphasis #F5F6FF L* 97.04, 0 boxShadows; MxCard.raised fill sch… **Hợp đồng:** 10 (hop dong depth cua Card, #435) - the fix must change MxCard.tonal's elevation spec at lib/shared/widgets/mx_card.dar |
+| `SC-C9-04` | **REVISED_AND_FIXED** | The defect reproduces. I pumped Study Home through study_home_harness.dart in a throwaway probe (since deleted) and read the render tree: the resume card's single DecoratedBox fill is #F5F6FF light / #2A3159 dark, i.e. semantic.su… **Target đã đổi:** Feature-only change in lib/features/study/presentation/widgets/sections/study_home_resume_section_widget.dart, inside _ResumeCard.build: replace all three `AppInk.onSecondaryContainer` arguments (the  |
+| `SC-C9-05` | **NO_LONGER_REPRODUCIBLE** | The measured premise is dead. The finding says label→options and options→work-surface are both 12, so nothing binds the label. At the current tree the label gap is 8: card_import_source_step_widget.dart:68 is MxSectionLabel, :69-7… |
+| `SC-C9-06` | **REVISED_AND_FIXED** | The defect reproduces. card_selection_bar_widget.dart:138-152 builds Row[Spacer():144, MxIconButton(Icons.select_all):145-150, _ActionMenu:151]; all six actions built at :88-127 go into MxMenuButton at :174. Selection mode therefo… **Target đã đổi:** In lib/features/card/presentation/widgets/sections/card_selection_bar_widget.dart, promote exactly two verbs as MxIconButton (not MxActionButton/MxTextButton), inserted into the existing Row between t |
+| `SC-C9-07` | **FIXED** | Reproduces at the current tree (line numbers drifted from :115/:133 to :184/:202). study_options_section_widget.dart:184 is `Text(l10n.studyOptionsNextSessionNote, style: context.texts.bodySmall)`; :200-203 is `Text(l10n.studyOpti… |
+| `SC-C9-08` | **REVISED_AND_FIXED** | The defect reproduces. lib/features/trash/presentation/widgets/items/trash_row_widget.dart:75-76 still reads `Opacity(opacity: isDimmed ? 0.38 : 1, ...)`; `grep 0.38 lib/` returns only that line, the token at lib/core/theme/states… **Target đã đổi:** In lib/features/trash/presentation/widgets/items/trash_row_widget.dart, delete the `Opacity` wrapper at :75-76 entirely and route the ineligible state through the palette instead of a paint-time layer |
+| `SC-C9-09` | **REVISED_AND_FIXED** | The defect reproduces. study_entry_screen.dart:143 is `title: context.l10n.appTitle`, and MxContentShell puts that string in the app bar (mx_content_shell.dart:86 `final String? title`, :275 `title: _buildTitle(...)`). app_en.arb:… **Target đã đổi:** Composition + one new ARB pair, no shared-widget change. (1) Add `studyEntryTitle` to lib/l10n/app_en.arb = "Study" and lib/l10n/app_vi.arb = "Hoc" (matching studyHomeTitle at app_vi.arb:3183), with a |
+| `SC-C9-10` | **REVISED_AND_FIXED** | The defect reproduces; the target as written is under-specified and incomplete. MEASURED (throwaway widget test, since deleted, over `wrapForTest` + `buildLightTheme()`): both counts at study_entry_section_widget.dart:65-73 declar… **Target đã đổi:** One edit to lib/features/study/presentation/widgets/sections/study_entry_section_widget.dart, replacing the Row at :58-75 with the composition StudyHomeWorkloadItemWidget already uses, at the Progress |
+| `SC-C9-11` | **FIXED** | Measured, not inferred. A throwaway widget test pumped through test/features/card/presentation/support/card_detail_harness.dart and resolved each Text against its DefaultTextStyle: front onSurface 24sp; card.back onSurfaceVariant … |
+| `SC-C9-12` | **REFUTED** | Re-measured myself with a throwaway widget test over the exact fixture the finding names (ReviewApp + progressShellWith + FakeProgressRepository.withSnapshot, test/demo/feature_screens_demo_test.dart:78-111) at 393x852, en, light,… |
+| `SC-C9-13` | **NO_LONGER_REPRODUCIBLE** | Both cited titles already carry the heading node at the current tree state. lib/features/deck/presentation/widgets/overlays/deck_form_widget.dart:106-110 reads `// The sheet's title announces as a header (A20.1 P1-01, §23 #17).` t… |
+| `SC-C9-14` | **DESIGN_SYSTEM_BLOCKED** | Defect reproduces at HEAD, and every escape route lands inside frozen contract 3. buildTimePickerTheme (lib/core/theme/components/pickers/app_time_picker_theme.dart:33-137) sets 19 slots and stops at entryModeIconColor:136 — neith… **Hợp đồng:** 3 |
+| `SC-C9-15` | **REVISED_AND_FIXED** | One third of the finding reproduces; two thirds were fixed by b0cc522f (#477, C3) and the target still asks for them. Still true: study_entry_screen.dart:143 `title: context.l10n.appTitle`, and it is the only appTitle among the ei… **Target đã đổi:** Change only study_entry_screen.dart:143 to `ref.watch(studyDeckContextProvider(deckId)).value?.deckName ?? context.l10n.studyEntryTitle`; leave :160 and :176 exactly as they are. Add lib/features/stud |
+
+**Tổng: DESIGN_SYSTEM_BLOCKED 2 · FIXED 2 · NO_LONGER_REPRODUCIBLE 2 · REFUTED 2 · REVISED_AND_FIXED 7 = 15**
+
 ## 5. Cụm, và thứ tự đóng
 
 Một cụm là **một grammar bị vi phạm nhiều lần**, không phải một nhóm màn giống nhau.
@@ -931,7 +957,28 @@ mà reviewer nhìn một màn đã gán. Chênh lệch giữa hai cột là §1.
 | **C6** Bậc type cho một phần tử ngữ nghĩa | 5 | 5 | P2 | P2 | **đóng — #481** · FIXED 3 · REVISED_AND_FIXED 1 · REFUTED 1 |
 | **C7** Vỡ ở responsive / text scale | 5 | 5 | P1 | **P1** | **đóng — #482** · FIXED 1 · REVISED_AND_FIXED 4 |
 | **C8** Mật độ và kích thước target | 4 | 4 | P1 | P2 | **đóng — #482** · REVISED_AND_FIXED 2 · REFUTED 2 |
-| **C9** Cục bộ, không có mẫu lặp | 15 | 13 | P1 | P2 — sửa từng cái | chưa mở |
+| **C9** Cục bộ, không có mẫu lặp | 15 | 13 | P1 | P2 — sửa từng cái | **đóng — #483** · FIXED 2 · REVISED_AND_FIXED 7 · REFUTED 2 · NO_LONGER_REPRODUCIBLE 2 · BLOCKED 2 |
+
+### 5.0 Đối soát đóng sổ
+
+**123 finding, năm trạng thái cuối, không cái nào bị xoá.** Cột số của bảng
+trên cộng đúng bằng tổng ở đây; mỗi cụm còn có một bảng
+`### Cn — dispositions` liệt kê từng ID kèm lý do.
+
+| Trạng thái | Số | Nghĩa |
+|---|---|---|
+| `FIXED` | 55 | Đích như registry ghi, đã thi hành |
+| `REVISED_AND_FIXED` | 50 | Khuyết tật thật, đích phải sửa lại rồi mới thi hành |
+| `REFUTED` | 10 | Không phải khuyết tật — xem lý do ở dispositions của cụm |
+| `NO_LONGER_REPRODUCIBLE` | 2 | Một PR sau đó đã đóng, trước khi tới lượt cụm này |
+| `DESIGN_SYSTEM_BLOCKED` | 6 | Sửa được thì phải mở một hợp đồng đóng băng — §7 |
+| **Tổng** | **123** | |
+
+**105 được sửa, và 50 trong số đó không sửa theo cách registry đề xuất.** Đó là
+con số đáng ghi nhớ nhất của cả chuỗi: gần một nửa số finding có số đo đúng nhưng
+đề xuất sai — quá tay, hoặc sữa đúng thứ đã được quyết định có chủ ý ở chỗ khác.
+Mười ca bị bác có chung một hình dạng: finding dẫn một nguồn để tự biện hộ, và
+nguồn đó nói điều ngược lại.
 
 ### 5.1 Thứ tự thi hành
 

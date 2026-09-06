@@ -17057,13 +17057,16 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 
 ### M100.42 · App-wide screen consistency — recon, và grammar composition thành test
 
-- **Status:** in progress (2026-09-05) — PR recon là PR đầu trong chuỗi; các cụm
-  C1…C9 đóng bằng PR riêng sau khi chủ dự án duyệt registry.
+- **Status:** **done** (2026-09-06) — cả chín cụm đã đóng, 123/123 finding có
+  kết luận cuối. Còn nợ gài thiết bị: `integration_test/` phải xanh 8/8 trên
+  emulator (gate cục bộ, CI cố ý không chạy).
 - **Owner:** Claude
 - **Goal:** Làm mọi màn production đọc như một sản phẩm, ở **đúng tầng mà
   `v1-freeze.md` §2 cố ý để mở** — composition của màn hình nghiệp vụ. Không đụng
   một hợp đồng đóng băng nào.
-- **Nhánh / PR:** `claude/app-wide-screen-consistency-0820fe` · `refactor(ui): unify app-wide screen composition`
+- **Nhánh / PR:** chuỗi mười PR — recon #469, hai PR sửa ratchet #470 và #471,
+  rồi một PR mỗi cụm: C1 #472, C2 #473, C3 #477 (thay #476 bị GitHub
+  auto-close), C4 #478, C5+C6 #481, C7+C8 #482, C9 #483.
 - **Vấn đề:** A7–A20.1 đóng 51/51 finding ở **mức component**, và 14 hợp đồng ở
   §2 được guard và test canh. Nhưng một audit component không có cấu trúc để
   thấy **hai màn dùng `MxCard` đúng mà giãn cách chúng khác nhau**. Đó là khoảng
@@ -17095,10 +17098,27 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
     nâng cấp.
 - **Editable documents:** `docs/reviews/app-wide-screen-consistency.md` (mới),
   `docs/wbs.md`
+- **Đo, sau khi đóng:**
+  - **123/123 finding có kết luận cuối.** Tái xác minh là việc đáng giá nhất của
+    cả chuỗi: **khoảng một nửa** số finding cần sửa lại đích hoặc bị bác bỏ.
+    Các ca bị bác có chung một hình dạng: finding dẫn một nguồn để tự biện hộ,
+    và nguồn đó nói điều ngược lại — metadata ARB cấm đích đề xuất đích danh,
+    class doc ghi cái bị gọi là drift là một đánh đổi có chủ ý, wireframe
+    `active` đã quyết định chuyện đó.
+  - **C5 là ca đắt nhất.** Registry đề xuất `MxSectionLabelRung.small` cho cả sáu
+    finding; `small` dành cho nhãn mặt thẻ **bên trong** một card, nên làm theo sẽ
+    để heading ở 11px — đúng bằng caption mà nó phải nổi hơn, tức xóa chính cái
+    thứ bậc mà finding đo được.
+  - **Golden bắt một regression mà test không bắt.** Đích thống nhất của
+    `SC-C7-01` bảo bọc chữ trạng thái của hàng starter trong `Flexible`; hai flex
+    child chia đôi dòng, nhãn dịch vào giữa và `Language: English` bị cắt thành
+    `Language: E…` ở 393dp scale 1.0. Stress test vẫn xanh; chỉ vẽ lại ảnh mới
+    thấy.
+  - Host suite 4781 → 5015+ test, luôn 0 failed.
 - **Output:**
   - `docs/reviews/app-wide-screen-consistency.md` — inventory 21 màn, grammar,
-    registry 123 finding `SC-*`, 9 cụm, thứ tự thi hành, 6 mục
-    `DESIGN_SYSTEM_BLOCKED`.
+    registry 123 finding `SC-*`, 9 cụm **đã đóng kèm dispositions**, thứ tự thi
+    hành, 6 mục `DESIGN_SYSTEM_BLOCKED`.
   - `test/app/screen_composition_rhythm_test.dart` — 2 luật + 6 fault probe.
   - `test/demo/{study_entry,study_options,route_not_found,card_editor_create}_demo_test.dart`
     và 4 hàng `SCREENS` tương ứng.
@@ -17113,8 +17133,13 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
         chỉ trên chuỗi probe.
   - [x] Không hợp đồng đóng băng nào bị sửa; không guard/test nào ở cột
         Enforcement của §2 bị nới lỏng, thêm exclude hay xoá.
-  - [ ] Bốn hàng gallery mới có PNG, vẽ trên Linux.
-  - [ ] Các cụm C1…C9 đóng — từng PR riêng.
+  - [x] Bốn hàng gallery mới có PNG, vẽ trên Linux.
+  - [x] Các cụm C1…C9 đóng — từng PR riêng.
+  - [x] 123/123 finding đối soát về một trong năm trạng thái cuối; không finding
+        nào bị xoá.
+  - [x] Mỗi finding đi qua **hai pass tái xác minh độc lập** trên `main` hiện tại
+        trước khi viết một dòng code; chỗ hai pass bất đồng thì phân xử bằng
+        cách đọc code, không bằng đa số.
 - **Dependencies:** M100.41
 - **Tests required:** `screen_composition_rhythm_test.dart` (9 test),
   `check_docs.py`, `flutter analyze` repo-wide, golden Linux cho 4 ảnh mới.
