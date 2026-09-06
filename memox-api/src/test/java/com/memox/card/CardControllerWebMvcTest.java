@@ -1,6 +1,7 @@
 package com.memox.card;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -10,6 +11,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.memox.card.api.CardController;
@@ -35,5 +37,19 @@ class CardControllerWebMvcTest {
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
 				.andExpect(jsonPath("$.fieldErrors.offset").exists());
+	}
+
+	@Test
+	void rejectsInvalidCardFieldsBeforeCallingTheService() throws Exception {
+		mockMvc.perform(post("/api/v1/decks/{deckId}/cards", "11111111-1111-4111-8111-111111111111")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""
+							{"id":"not-a-uuid","front":"   ","back":"%s"}
+							""".formatted("x".repeat(241))))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
+				.andExpect(jsonPath("$.fieldErrors.id").exists())
+				.andExpect(jsonPath("$.fieldErrors.front").exists())
+				.andExpect(jsonPath("$.fieldErrors.back").exists());
 	}
 }

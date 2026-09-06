@@ -4,13 +4,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+import com.memox.common.validation.ValidationPatterns;
 import com.memox.deck.domain.SchedulerType;
-import com.memox.deck.domain.DeckName;
 
 public record CreateRootDeckRequest(
 		@NotBlank(message = "{validation.required}")
-		@Pattern(regexp = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", message = "{validation.uuid}") String id,
-		@NotBlank(message = "{validation.required}") @Size(max = DeckName.MAX_LENGTH, message = "{validation.max-length}") String name,
+		@Pattern(regexp = ValidationPatterns.UUID, message = "{validation.uuid}") String id,
+		@NotBlank(message = "{validation.required}") @Size(max = 200, message = "{validation.max-length}") String name,
 		@NotBlank(message = "{validation.required}")
 		@Pattern(regexp = SchedulerType.VALIDATION_PATTERN, message = "{validation.scheduler-type}") String schedulerType) {
 }

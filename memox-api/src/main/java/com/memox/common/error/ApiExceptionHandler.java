@@ -48,9 +48,6 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(MemoxException.class)
 	ResponseEntity<Object> handleMemoxException(MemoxException exception) {
-		if (exception instanceof FieldValidationException validationException) {
-			return problem(exception.getErrorCode(), Map.of(validationException.getField(), resolve(exception.getErrorCode())));
-		}
 		return problem(exception.getErrorCode(), Map.of());
 	}
 

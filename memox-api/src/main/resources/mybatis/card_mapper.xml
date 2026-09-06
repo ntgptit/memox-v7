@@ -19,12 +19,6 @@
     </constructor>
   </resultMap>
 
-  <resultMap id="cardPageRow" type="com.memox.card.persistence.CardPageRow">
-    <result column="total_items" property="totalItems"/>
-	<result column="deck_exists" property="deckExists"/>
-    <association property="card" resultMap="card" notNullColumn="id"/>
-  </resultMap>
-
   <insert id="insertCard" parameterType="com.memox.card.domain.Card">
     INSERT INTO cards (
       id, deck_id, front, back, front_folded, back_folded,
@@ -43,36 +37,29 @@
     )
   </insert>
 
-  <select id="findActiveCardsByDeck" resultMap="cardPageRow">
-    WITH target_deck AS (
-      SELECT id
+  <select id="activeDeckExists" resultType="boolean">
+    SELECT EXISTS (
+      SELECT 1
       FROM decks
       WHERE id = #{deckId}
         AND delete_batch_id IS NULL
-    ), active_cards AS MATERIALIZED (
-      SELECT cards.id, cards.deck_id, cards.front, cards.back, cards.is_flagged, cards.example, cards.hint,
-             cards.pronunciation, cards.created_at, cards.updated_at
-      FROM cards
-      INNER JOIN target_deck ON target_deck.id = cards.deck_id
-      WHERE cards.delete_batch_id IS NULL
-    ), page AS (
-      SELECT active_cards.*, COUNT(*) OVER() AS total_items
-      FROM active_cards
-      ORDER BY created_at ASC, id ASC
-      LIMIT #{page.limit}
-      OFFSET #{page.offset}
     )
-    SELECT id, deck_id, front, back, is_flagged, example, hint, pronunciation, created_at, updated_at, total_items,
-           TRUE AS deck_exists
-    FROM page
+  </select>
 
-    UNION ALL
+  <select id="findActiveCardsByDeck" resultMap="card">
+    SELECT id, deck_id, front, back, is_flagged, example, hint, pronunciation, created_at, updated_at
+    FROM cards
+    WHERE deck_id = #{deckId}
+      AND delete_batch_id IS NULL
+    ORDER BY created_at ASC, id ASC
+    LIMIT #{pageQuery.limit}
+    OFFSET #{pageQuery.offset}
+  </select>
 
-    SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, COUNT(active_cards.id),
-           EXISTS (SELECT 1 FROM target_deck)
-    FROM active_cards
-    WHERE NOT EXISTS (SELECT 1 FROM page)
-
-    ORDER BY created_at ASC NULLS LAST, id ASC NULLS LAST
+  <select id="countActiveCardsByDeck" resultType="long">
+    SELECT COUNT(*)
+    FROM cards
+    WHERE deck_id = #{deckId}
+      AND delete_batch_id IS NULL
   </select>
 </mapper>

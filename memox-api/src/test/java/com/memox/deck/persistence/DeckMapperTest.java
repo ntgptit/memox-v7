@@ -23,12 +23,8 @@ class DeckMapperTest extends PostgresIntegrationTest {
 	}
 
 	@Test
-	void returnsAnEmptyRootPageWithZeroTotalFromOneQuery() {
-		final var pageRows = deckMapper.findRootDecks(PageQuery.builder().limit(10).offset(0).build());
-
-		assertThat(pageRows).singleElement().satisfies(pageRow -> {
-			assertThat(pageRow.getDeck()).isNull();
-			assertThat(pageRow.getTotalItems()).isZero();
-		});
+	void returnsAnEmptyRootPageAndZeroTotal() {
+		assertThat(deckMapper.findRootDecks(PageQuery.builder().limit(10).offset(0).build())).isEmpty();
+		assertThat(deckMapper.countRootDecks()).isZero();
 	}
 }

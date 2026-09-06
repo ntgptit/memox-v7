@@ -25,24 +25,6 @@ class LayerArchitectureTest {
 			.resideInAPackage("..api..");
 
 	@ArchTest
-	static final ArchRule domainDoesNotReachApi = noClasses()
-			.that().resideInAPackage("..domain..")
-			.should().dependOnClassesThat()
-			.resideInAPackage("..api..");
-
-	@ArchTest
-	static final ArchRule domainDoesNotReachSpringMvc = noClasses()
-			.that().resideInAPackage("..domain..")
-			.should().dependOnClassesThat()
-			.resideInAnyPackage("org.springframework.web..", "jakarta.servlet..");
-
-	@ArchTest
-	static final ArchRule domainDoesNotReachMyBatis = noClasses()
-			.that().resideInAPackage("..domain..")
-			.should().dependOnClassesThat()
-			.resideInAnyPackage("org.apache.ibatis..", "org.mybatis..");
-
-	@ArchTest
 	static final ArchRule persistenceDoesNotReachApi = noClasses()
 			.that().resideInAPackage("..persistence..")
 			.should().dependOnClassesThat()

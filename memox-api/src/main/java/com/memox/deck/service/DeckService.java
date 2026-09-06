@@ -2,7 +2,6 @@ package com.memox.deck.service;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.util.Objects;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,7 +11,6 @@ import com.memox.common.pagination.PageQuery;
 import com.memox.common.pagination.PagingResponse;
 import com.memox.deck.domain.Deck;
 import com.memox.deck.domain.DeckContentType;
-import com.memox.deck.domain.DeckName;
 import com.memox.deck.domain.DeckSchedulerState;
 import com.memox.deck.persistence.DeckMapper;
 import com.memox.deck.persistence.DeckPositionScope;
@@ -38,7 +36,7 @@ public class DeckService {
 		deckMapper.lockRootDeckCreation();
 
 		final var now = Instant.now(clock);
-		final var deck = new Deck(command.id(), DeckName.of(command.name()).value(), null, command.id(),
+		final var deck = new Deck(command.id(), normalizeName(command.name()), null, command.id(),
 				DeckContentType.DECK, command.schedulerType(), INITIAL_SCHEDULER_VERSION,
 				INITIAL_SCHEDULER_GENERATION, deckMapper.nextSiblingPosition(DeckPositionScope.ROOT_DECKS), now, now);
 		deckMapper.insertRootDeck(deck);
@@ -51,7 +49,7 @@ public class DeckService {
 		if (parent.contentType() == DeckContentType.CARD) {
 			throw new DeckConflictException(ApiErrorCode.PARENT_HOLDS_CARDS);
 		}
-		if (depthOf(parent.id()) >= MAX_TREE_DEPTH) {
+		if (depthOf(parent) >= MAX_TREE_DEPTH) {
 			throw new DeckConflictException(ApiErrorCode.DECK_DEPTH_EXCEEDED);
 		}
 
@@ -60,7 +58,7 @@ public class DeckService {
 			deckMapper.updateContentType(parent.id(), DeckContentType.DECK, now);
 		}
 
-		final var deck = new Deck(command.id(), DeckName.of(command.name()).value(), parent.id(), parent.rootDeckId(),
+		final var deck = new Deck(command.id(), normalizeName(command.name()), parent.id(), parent.rootDeckId(),
 				DeckContentType.UNSET, null, null, null, deckMapper.nextSiblingPosition(parent.id()), now, now);
 		deckMapper.insertSubDeck(deck);
 		return deck;
@@ -68,10 +66,7 @@ public class DeckService {
 
 	@Transactional(readOnly = true)
 	public PagingResponse<Deck> listRootDecks(PageQuery pageQuery) {
-		final var pageRows = deckMapper.findRootDecks(pageQuery);
-		final var totalItems = pageRows.get(0).getTotalItems();
-		final var decks = pageRows.stream().map(pageRow -> pageRow.getDeck()).filter(Objects::nonNull).toList();
-		return PageHelper.create(pageQuery, decks, totalItems);
+		return PageHelper.create(pageQuery, deckMapper.findRootDecks(pageQuery), deckMapper.countRootDecks());
 	}
 
 	@Transactional(readOnly = true)
@@ -115,11 +110,20 @@ public class DeckService {
 		return deck;
 	}
 
-	private int depthOf(String deckId) {
-		final var depth = deckMapper.findActiveDeckDepth(deckId);
-		if (depth == null) {
-			throw new DeckNotFoundException(deckId);
+	private int depthOf(Deck deck) {
+		int depth = 1;
+		var current = deck;
+		while (current.parentDeckId() != null) {
+			if (depth >= MAX_TREE_DEPTH) {
+				return depth;
+			}
+			current = requireActiveDeck(current.parentDeckId());
+			depth++;
 		}
 		return depth;
+	}
+
+	private String normalizeName(String name) {
+		return name.trim();
 	}
 }

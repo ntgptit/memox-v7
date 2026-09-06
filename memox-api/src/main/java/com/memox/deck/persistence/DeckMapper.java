@@ -15,13 +15,13 @@ public interface DeckMapper {
 
 	String readSchemaVersion();
 
-	List<DeckPageRow> findRootDecks(PageQuery pageQuery);
+	List<Deck> findRootDecks(PageQuery pageQuery);
+
+	long countRootDecks();
 
 	Deck findActiveDeckById(@Param("deckId") String deckId);
 
 	Deck findActiveDeckByIdForUpdate(@Param("deckId") String deckId);
-
-	Integer findActiveDeckDepth(@Param("deckId") String deckId);
 
 	int lockRootDeckCreation();
 

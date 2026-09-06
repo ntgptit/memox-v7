@@ -38,7 +38,7 @@ class DeckControllerTest extends PostgresIntegrationTest {
 		final var request = """
 				{
 				  "id": "%s",
-				  "name": "Korean basics",
+				  "name": "  Korean basics  ",
 				  "schedulerType": "eight_box"
 				}
 				""".formatted(deckId);
@@ -151,11 +151,40 @@ class DeckControllerTest extends PostgresIntegrationTest {
 				.andExpect(jsonPath("$.rootDeckId").value(rootId));
 	}
 
+	@Test
+	void rejectsCreatingAnEleventhDeckLevel() throws Exception {
+		final var rootId = UUID.randomUUID().toString();
+		createRootDeck(rootId, "Root");
+		var parentId = rootId;
+		for (int depth = 2; depth <= 10; depth++) {
+			final var childId = UUID.randomUUID().toString();
+			createSubDeck(parentId, childId, "Level " + depth);
+			parentId = childId;
+		}
+
+		mockMvc.perform(post("/api/v1/decks/{parentDeckId}/children", parentId)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""
+							{"id":"%s","name":"Too deep"}
+							""".formatted(UUID.randomUUID())))
+				.andExpect(status().isConflict())
+				.andExpect(jsonPath("$.code").value("DECK_DEPTH_EXCEEDED"));
+	}
+
 	private void createRootDeck(String deckId, String name) throws Exception {
 		mockMvc.perform(post("/api/v1/decks")
 					.contentType(MediaType.APPLICATION_JSON)
 					.content("""
 							{"id":"%s","name":"%s","schedulerType":"sm2"}
+							""".formatted(deckId, name)))
+				.andExpect(status().isCreated());
+	}
+
+	private void createSubDeck(String parentDeckId, String deckId, String name) throws Exception {
+		mockMvc.perform(post("/api/v1/decks/{parentDeckId}/children", parentDeckId)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""
+							{"id":"%s","name":"%s"}
 							""".formatted(deckId, name)))
 				.andExpect(status().isCreated());
 	}

@@ -20,42 +20,28 @@
     </constructor>
   </resultMap>
 
-  <resultMap id="deckPageRow" type="com.memox.deck.persistence.DeckPageRow">
-    <result column="total_items" property="totalItems"/>
-    <association property="deck" resultMap="deck" notNullColumn="id"/>
-  </resultMap>
-
   <select id="readSchemaVersion" resultType="java.lang.String">
     SELECT metadata_value
     FROM api_metadata
     WHERE metadata_key = 'schema_version'
   </select>
 
-  <select id="findRootDecks" resultMap="deckPageRow">
-    WITH filtered AS MATERIALIZED (
-      SELECT id, name, parent_deck_id, root_deck_id, content_type, scheduler_type,
-             scheduler_version, scheduler_generation, sibling_position, created_at, updated_at
-      FROM decks
-      WHERE parent_deck_id IS NULL
-        AND delete_batch_id IS NULL
-    ), page AS (
-      SELECT filtered.*, COUNT(*) OVER() AS total_items
-      FROM filtered
-      ORDER BY sibling_position ASC, id ASC
-      LIMIT #{limit}
-      OFFSET #{offset}
-    )
+  <select id="findRootDecks" resultMap="deck">
     SELECT id, name, parent_deck_id, root_deck_id, content_type, scheduler_type,
-           scheduler_version, scheduler_generation, sibling_position, created_at, updated_at, total_items
-    FROM page
+           scheduler_version, scheduler_generation, sibling_position, created_at, updated_at
+    FROM decks
+    WHERE parent_deck_id IS NULL
+      AND delete_batch_id IS NULL
+    ORDER BY sibling_position ASC, id ASC
+    LIMIT #{limit}
+    OFFSET #{offset}
+  </select>
 
-    UNION ALL
-
-    SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, COUNT(filtered.id)
-    FROM filtered
-    WHERE NOT EXISTS (SELECT 1 FROM page)
-
-    ORDER BY sibling_position ASC NULLS LAST, id ASC NULLS LAST
+  <select id="countRootDecks" resultType="long">
+    SELECT COUNT(*)
+    FROM decks
+    WHERE parent_deck_id IS NULL
+      AND delete_batch_id IS NULL
   </select>
 
   <select id="findActiveDeckById" resultMap="deck">
@@ -73,26 +59,6 @@
     WHERE id = #{deckId}
       AND delete_batch_id IS NULL
     FOR UPDATE
-  </select>
-
-  <select id="findActiveDeckDepth" resultType="int">
-    WITH RECURSIVE ancestors AS (
-      SELECT id, parent_deck_id, 1 AS depth, ARRAY[id] AS path
-      FROM decks
-      WHERE id = #{deckId}
-        AND delete_batch_id IS NULL
-
-      UNION ALL
-
-      SELECT parent.id, parent.parent_deck_id, ancestors.depth + 1, ancestors.path || parent.id
-      FROM decks parent
-      INNER JOIN ancestors ON parent.id = ancestors.parent_deck_id
-      WHERE parent.delete_batch_id IS NULL
-        AND ancestors.depth &lt; 11
-        AND NOT parent.id = ANY(ancestors.path)
-    )
-    SELECT MAX(depth)
-    FROM ancestors
   </select>
 
   <select id="lockRootDeckCreation" resultType="int">
