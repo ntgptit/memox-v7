@@ -7,6 +7,7 @@ import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_card.dart';
+import '../../../../../shared/widgets/mx_section_label.dart';
 import '../../../domain/models/progress_activity_day_model.dart';
 import '../items/progress_week_bar_widget.dart';
 import '../support/progress_labels_widget.dart';
@@ -36,8 +37,6 @@ class ProgressWeekWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final texts = context.texts;
-
     // The busiest day sets the scale, so the chart shows the shape of the week
     // rather than the shape of some fixed ceiling nobody reaches. Zero is a real
     // case — a fortnight off, with older history still on record — and it makes
@@ -55,10 +54,13 @@ class ProgressWeekWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(
-            context.l10n.progressWeekSectionLabel,
-            style: texts.labelLarge!.inked(context, AppInk.quiet),
-          ),
+          // **The app's one section-heading treatment** (D18), not a hand-set
+          // `labelLarge`. Progress was the last feature drawing its own group
+          // titles — 14px sentence case, no `header` node — so a screen reader
+          // could not jump between the sections and the tab read as the odd
+          // one out in a four-tab shell (SC-C5-03). Quiet, because the content
+          // under every one of them already carries the stated ink.
+          MxSectionLabel(label: context.l10n.progressWeekSectionLabel),
           const SizedBox(height: AppSpacing.sm),
           Table(
             columnWidths: const <int, TableColumnWidth>{

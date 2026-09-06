@@ -298,7 +298,9 @@ void main() {
       final Rect label = tester.getRect(
         find.descendant(
           of: find.byType(ProgressSummaryWidget),
-          matching: find.text(english.progressSummaryLast7DaysTitle),
+          matching: find.text(
+            english.progressSummaryLast7DaysTitle.toUpperCase(),
+          ),
         ),
       );
       final Rect grid = tester.getRect(

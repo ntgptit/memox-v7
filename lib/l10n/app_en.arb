@@ -106,7 +106,7 @@
   },
   "progressWeekSectionLabel": "Daily activity",
   "@progressWeekSectionLabel": {
-    "description": "Heading of the activity chart (W4). Names what the chart is rather than its window: the chart is always seven days including today (BR-196) while the range selector below it switches 7/30, and both headings reading 'Last 7 days' contradicted each other the moment 30 was picked (X9)."
+    "description": "Heading of the activity chart (W4). Names what the chart is rather than its window: the chart is always seven days including today (BR-196) while the range selector below it switches 7/30, and both headings reading 'Last 7 days' contradicted each other the moment 30 was picked (X9). It is an MxSectionLabel, so it renders on one uppercased line: a translation MUST fit the 264dp card at 320dp with textScaler 2.0, which is roughly 15 characters. Vietnamese was shortened for exactly that reason (SC-C5-03); the seven day rows under the heading already say daily."
   },
   "progressWeekTodayLabel": "Today",
   "@progressWeekTodayLabel": {
@@ -2228,9 +2228,9 @@
   "@deckResetProgressLostBody": {
     "description": "What a reset destroys (BR-42, BR-152, BR-83). The last sentence is the consequence people miss: cards do not merely become due, they walk the whole learning chain again (BR-142)."
   },
-  "deckResetProgressSchedulerLabel": "Study mode after the reset",
+  "deckResetProgressSchedulerLabel": "Study mode",
   "@deckResetProgressSchedulerLabel": {
-    "description": "Label of the scheduler picker inside the confirmation. Changing it is the main purpose of the operation (UC-07 step 3), and the reset is the only mechanism that unlocks it (BR-44)."
+    "description": "Label of the scheduler picker inside the confirmation. Changing it is the main purpose of the operation (UC-07 step 3), and the reset is the only mechanism that unlocks it (BR-44). Short on purpose: it is a section heading now (SC-C5-04), so it renders on one line, and \"after the reset\" is already said by the sheet's own title and by the two sections above it."
   },
   "deckResetProgressNothingToLose": "Nothing has been studied in this deck yet, so there is no progress to lose.",
   "@deckResetProgressNothingToLose": {
@@ -2755,6 +2755,10 @@
       }
     },
     "description": "Right-aligned readiness line beside the preview heading (state 3)."
+  },
+  "cardImportRowsHeading": "Rows",
+  "@cardImportRowsHeading": {
+    "description": "Group label over the classified preview rows, a rung below the step heading."
   },
   "cardImportStatusCountChip": "{label} · {count}",
   "@cardImportStatusCountChip": {

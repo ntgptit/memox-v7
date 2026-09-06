@@ -276,7 +276,7 @@ void main() {
       final label = tester.getRect(
         find.descendant(
           of: find.byType(ProgressTodayWidget),
-          matching: find.text(english.progressTodaySectionLabel),
+          matching: find.text(english.progressTodaySectionLabel.toUpperCase()),
         ),
       );
       final note = tester.getRect(
@@ -299,7 +299,7 @@ void main() {
       );
 
       final label = tester.getRect(
-        find.text(english.progressStreakSectionLabel),
+        find.text(english.progressStreakSectionLabel.toUpperCase()),
       );
       final headline = tester.getRect(
         find.text(english.progressStreakDaysLabel(5)),
@@ -328,7 +328,7 @@ void main() {
       final label = tester.getRect(
         find.descendant(
           of: find.byType(ProgressTodayWidget),
-          matching: find.text(english.progressTodaySectionLabel),
+          matching: find.text(english.progressTodaySectionLabel.toUpperCase()),
         ),
       );
       final total = tester.getRect(
@@ -357,7 +357,9 @@ void main() {
     testWidgets('the chart steps label → first row by sm (G7)', (tester) async {
       await pumpProgressScreen(tester, repository: seeded());
 
-      final label = tester.getRect(find.text(english.progressWeekSectionLabel));
+      final label = tester.getRect(
+        find.text(english.progressWeekSectionLabel.toUpperCase()),
+      );
       final firstRow = dayLabelRects(tester).first;
 
       expect(firstRow.top - label.bottom, AppSpacing.sm);

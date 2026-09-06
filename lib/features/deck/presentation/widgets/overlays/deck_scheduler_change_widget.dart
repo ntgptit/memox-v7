@@ -88,11 +88,16 @@ class _SchedulerSheetState extends ConsumerState<_SchedulerSheet> {
 
     return <Widget>[
       // The sheet's title announces as a header (A20.1 P1-01, §23 #17).
+      // `titleMedium`, the rung ten sibling sheets and the dialog theme
+      // already give a modal its name at (`app_dialog_theme.dart`). At
+      // `titleLarge` this sheet titled itself at the AppBar's own rung — the
+      // screen title still visible behind the scrim — so one surface carried
+      // two title hierarchies (SC-C6-04).
       Semantics(
         header: true,
         child: Text(
           l10n.deckSchedulerLockedTitle,
-          style: context.texts.titleLarge,
+          style: context.texts.titleMedium,
         ),
       ),
       const SizedBox(height: AppSpacing.md),
@@ -164,11 +169,13 @@ class _SchedulerSheetState extends ConsumerState<_SchedulerSheet> {
     });
 
     return <Widget>[
+      // `titleMedium`, for the reason written over the locked panel's
+      // title: one modal-title rung across the app (SC-C6-04).
       Semantics(
         header: true,
         child: Text(
           l10n.deckSchedulerChangeTitle,
-          style: context.texts.titleLarge,
+          style: context.texts.titleMedium,
         ),
       ),
       const SizedBox(height: AppSpacing.md),

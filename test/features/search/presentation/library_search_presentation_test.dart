@@ -190,7 +190,7 @@ void main() {
         .getRect(find.byType(CardResultTileWidget))
         .left;
     final double headerLeft = tester
-        .getRect(find.text(english.librarySearchDecksGroupLabel))
+        .getRect(find.text(english.librarySearchDecksGroupLabel.toUpperCase()))
         .left;
 
     expect(cardLeft, deckLeft);

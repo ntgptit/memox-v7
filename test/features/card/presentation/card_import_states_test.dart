@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/error/failure.dart';
+import 'package:memox/core/theme/extensions/theme_context_extension.dart';
+import 'package:memox/core/theme/typography/app_text_styles.dart';
 import 'package:memox/features/card/domain/models/card_import_preview_model.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 
@@ -71,6 +73,48 @@ void main() {
         find.text(english.cardImportPreviewReadyOfTotal(1, 1)),
         findsOneWidget,
       );
+    });
+
+    testWidgets('the step heading holds its position across the parse, at the '
+        'standard section rung — it names the step, not one of its faces', (
+      tester,
+    ) async {
+      final gate = Completer<void>();
+      h.transfer.parseGate = gate;
+      await h.pump(tester);
+      await tester.tap(find.text(english.cardImportPasteOptionTitle));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'front,back\n사과,apple\n');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(english.cardImportPreviewAction));
+      await tester.pump();
+
+      // Measured, not eyeballed: the defect this pins was a heading that
+      // travelled 229dp down the page when the parse resolved, because two
+      // widgets each drew it in one state only (SC-C5-02).
+      final heading = find.text(english.cardImportPreviewHeading.toUpperCase());
+      final double parsingTop = tester.getRect(heading).top;
+
+      gate.complete();
+      await tester.pumpAndSettle();
+
+      expect(heading, findsOneWidget);
+      expect(
+        tester.getRect(heading).top,
+        moreOrLessEquals(parsingTop, epsilon: 0.5),
+        reason:
+            'the heading sat at $parsingTop while parsing and at '
+            '${tester.getRect(heading).top} once rows arrived — one step, one '
+            'heading, one place',
+      );
+
+      // Standard rung, not the in-panel one: `sectionLabelSmall` is a face
+      // label inside a card, and at 11px it would read no louder than the
+      // captions underneath it.
+      final AppTextStyles styles = tester.element(heading).textStyles;
+      final double? renderedSize = tester.widget<Text>(heading).style?.fontSize;
+      expect(renderedSize, styles.sectionLabel.fontSize);
+      expect(renderedSize, isNot(styles.sectionLabelSmall.fontSize));
     });
   });
 

@@ -164,8 +164,10 @@ thứ hai do màn hình tự gọi (BR-210).
   trái của nhãn `Cards per session` ngay trên nó. Hai card choice làm ngược lại
   — card chỉ padding dọc, hàng tự mang `lg` ngang — và đích đến là cùng một toạ
   độ x.
-- **Nhịp dọc.** Nhãn nhóm → card của nó: `AppSpacing.xs`. Card → nhãn nhóm kế
-  tiếp: `AppSpacing.xl`. Card cuối → hành động reset: `AppSpacing.xl`.
+- **Nhịp dọc.** Nhãn nhóm → card của nó: `AppSpacing.sm` — bước nhãn →
+  nội dung dùng chung toàn app, xem `m99-23-progress-overview.md` G7. Trước
+  đây là `xs` và đó là màn duy nhất dùng giá trị này (SC-C5-06). Card → nhãn
+  nhóm kế tiếp: `AppSpacing.xl`. Card cuối → hành động reset: `AppSpacing.xl`.
 - **Dải lỗi** là một band của cùng cột **bên trong card của nhóm hỏng**, không
   phải một hộp thụt vào và không phải một band ở cuối màn.
 - **Bottom-nav clearance.** Màn nằm trong shell nên `NavigationBar` che phần

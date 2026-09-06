@@ -104,9 +104,9 @@
   "@progressTodayPartitionNote": {
     "description": "One line explaining that the two halves are a partition (BR-195)."
   },
-  "progressWeekSectionLabel": "Hoạt động hằng ngày",
+  "progressWeekSectionLabel": "Hoạt động",
   "@progressWeekSectionLabel": {
-    "description": "Heading of the activity chart (W4). Names what the chart is rather than its window — see the English entry (X9)."
+    "description": "Heading of the activity chart (W4). Names what the chart is rather than its window — see the English entry (X9). Shortened from \"Hoạt động hằng ngày\": the heading is an MxSectionLabel now, one uppercased line, and the long form needed 316.8dp of a 264dp card at 320dp × 2.0 (SC-C5-03). The seven day rows under it already say daily."
   },
   "progressWeekTodayLabel": "Hôm nay",
   "@progressWeekTodayLabel": {
@@ -2228,9 +2228,9 @@
   "@deckResetProgressLostBody": {
     "description": "What a reset destroys (BR-42, BR-152, BR-83). The last sentence is the consequence people miss: cards do not merely become due, they walk the whole learning chain again (BR-142)."
   },
-  "deckResetProgressSchedulerLabel": "Chế độ học sau khi đặt lại",
+  "deckResetProgressSchedulerLabel": "Chế độ ôn tập",
   "@deckResetProgressSchedulerLabel": {
-    "description": "Label of the scheduler picker inside the confirmation. Changing it is the main purpose of the operation (UC-07 step 3), and the reset is the only mechanism that unlocks it (BR-44)."
+    "description": "Label of the scheduler picker inside the confirmation. Changing it is the main purpose of the operation (UC-07 step 3), and the reset is the only mechanism that unlocks it (BR-44). Short on purpose: it is a section heading now (SC-C5-04), so it renders on one line, and \"after the reset\" is already said by the sheet's own title and by the two sections above it."
   },
   "deckResetProgressNothingToLose": "Deck này chưa học thẻ nào, nên không có tiến độ nào để mất.",
   "@deckResetProgressNothingToLose": {
@@ -2755,6 +2755,10 @@
       }
     },
     "description": "Right-aligned readiness line beside the preview heading (state 3)."
+  },
+  "cardImportRowsHeading": "Các dòng",
+  "@cardImportRowsHeading": {
+    "description": "Group label over the classified preview rows, a rung below the step heading."
   },
   "cardImportStatusCountChip": "{label} · {count}",
   "@cardImportStatusCountChip": {

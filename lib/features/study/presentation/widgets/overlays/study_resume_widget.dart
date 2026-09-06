@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/extensions/app_ink.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -49,7 +50,18 @@ class StudyResumeWidget extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.xs),
-          Text(context.l10n.studyResumeBody, style: context.texts.bodyMedium),
+          // **Quiet ink, because the gap above it is only `xs`.** Across the
+          // study and starter sheets the rule is one separation or the other,
+          // never neither: the direction chooser takes the same 4dp gap and
+          // quiets its supporting line, while the scheduler-change sheet keeps
+          // full ink and buys the step with `md` instead. At full `onSurface`
+          // this paragraph was the same colour as the semibold title 4dp above
+          // it, so the longest body copy of the three study sheets read as one
+          // block with its own heading.
+          Text(
+            context.l10n.studyResumeBody,
+            style: context.texts.bodyMedium!.inked(context, AppInk.quiet),
+          ),
           const SizedBox(height: AppSpacing.lg),
           MxActionButton(
             label: context.l10n.studyResumeContinue,

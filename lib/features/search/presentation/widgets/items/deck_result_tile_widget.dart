@@ -46,8 +46,18 @@ class DeckResultTileWidget extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
           Text(
+            // titleMedium, not bodyLarge: the name is the thing the row is
+            // about, and at bodyLarge's w400 it sat *lighter* than the w500
+            // path caption directly above it — the quietest line on the row
+            // carrying the most weight, so the row had no dominant element at
+            // all. titleMedium is also what every other `MxCard` row in the app
+            // titles at (`deck_tile_widget.dart`, `card_tile_widget.dart`,
+            // `progress_deck_row_widget.dart`,
+            // `study_home_deck_item_widget.dart`). bodyLarge is the *list tile*
+            // family's title rung (`app_list_tile_theme.dart`), and these rows
+            // are built on `MxCard.raised`, not on a list tile.
             hit.name,
-            style: context.texts.bodyLarge,
+            style: context.texts.titleMedium,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),

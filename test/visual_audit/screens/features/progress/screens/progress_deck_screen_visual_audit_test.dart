@@ -108,15 +108,18 @@ void main() {
         // there.
         screenIconButtons: 0,
         screenItemId: 'progress_screen',
-        // **`tappableCards` is left at its default of zero, and that is a
-        // measurement rather than a claim that the rows are not tappable.**
-        // This counts hosts the audit *reads*, and since M99.24 `/progress`
-        // renders the overview's three sections above this level: at the
-        // audit's viewport the deck rows start below the fold — the report says
-        // `66 off-surface` — so the only ink hosts on surface are the two range
-        // pills. Measured on the composed screen: 4 `_RenderInkFeatures` and 2
-        // `CustomPaint (no painter)`, both of which fall out of exactly this one
-        // fact.
+        // **One, and it is a measurement rather than a guess.** This counts
+        // ink hosts the audit *reads*, and since M99.24 `/progress` renders the
+        // overview's three sections above this level, so where the deck rows
+        // land depends on how tall those sections are. It was zero — every row
+        // below the 1040 fold — until the Progress headings went through
+        // `MxSectionLabel` (SC-C5-03), which took 4dp off each of the three
+        // section cards. Measured on the composed screen, at the audit's own
+        // viewport: the first row now spans 760…920.4 and the second 944.4…
+        // 1070.2, so two rows *begin* on surface where the same fixture put one
+        // at 772…936.4 and never built the second. One more `InkWell` host, one
+        // more clip: 5 `_RenderInkFeatures` and 3 `CustomPaint (no painter)`.
+        tappableCards: 1,
         pills: 2,
         // No search on this branch.
         hasSearchField: false,

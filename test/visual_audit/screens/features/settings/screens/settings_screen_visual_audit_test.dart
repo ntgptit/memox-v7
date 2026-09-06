@@ -52,13 +52,22 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.rasterOnly,
         detailContains: '_RenderInkFeatures',
-        // Eight: the Scaffold, the AppBar, the save button, the reset link,
-        // the transparent Material each of the three radio groups puts inside
-        // its card so its rows' ripples are not painted behind it, and the
-        // eighth for the same reason on the daily-reminder row (M99.29) — a
-        // `ListTile` inside an `MxCard` has no Material of its own, and
-        // without one Flutter paints its ink behind the card and asserts.
-        expectedMatches: 8,
+        // Seven: the Scaffold, the AppBar, the save button, the transparent
+        // Material each of the three radio groups puts inside its card so its
+        // rows' ripples are not painted behind it, and a seventh for the same
+        // reason on the daily-reminder row (M99.29) — a `ListTile` inside an
+        // `MxCard` has no Material of its own, and without one Flutter paints
+        // its ink behind the card and asserts.
+        //
+        // **It was eight, and the reset link is the one that left.** Binding
+        // each heading to its card at `sm` rather than `xs` (SC-C5-06) made
+        // this screen 12dp taller, which moved the link's top edge from 1028 to
+        // 1040 — the audit's viewport is 420x1040, so it stopped being painted
+        // by exactly the last frame of it. Nothing about the control changed:
+        // `settings_reset_test.dart` still drives it end to end through
+        // `ensureVisible`, and its ink and shape are the same two nodes the
+        // save button's allowances above already describe.
+        expectedMatches: 7,
         rationale:
             'Material ink layers. Splash and highlight are painted onto '
             'Material, so no render object carries them; the overlay colours '
@@ -117,9 +126,12 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.customPainter,
         detailContains: '_ShapeBorderPainter',
-        // Two: the save button and the reset link both draw a rounded shape
-        // through a ShapeBorder painter.
-        expectedMatches: 2,
+        // One — the save button — which is the default and therefore left
+        // unwritten: a second shaped control painting here would miscount and
+        // fail rather than pass quietly. The reset link draws the same rounded
+        // shape through the same painter and is off the audit's 1040 fold
+        // since SC-C5-06; the ink-layer allowance above carries the
+        // arithmetic.
         rationale:
             'Buttons draw their rounded shape through a ShapeBorder painter; '
             'the shape comes from the button theme and is pinned by the '

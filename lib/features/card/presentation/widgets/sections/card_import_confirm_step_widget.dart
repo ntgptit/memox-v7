@@ -60,7 +60,11 @@ class CardImportConfirmStepWidget extends ConsumerWidget {
         // The heading joins the section-label grammar the other steps speak
         // now; the panel below carries the plan itself.
         MxSectionLabel(label: l10n.cardImportConfirmHeading),
-        const SizedBox(height: AppSpacing.md),
+        // `sm`, the one step between a section label and the content it
+        // names (G7). It was `md` here and `xs` on Settings, so the same
+        // component read as a differently-bound label depending on which
+        // screen the user was on (SC-C5-06).
+        const SizedBox(height: AppSpacing.sm),
         // **The Card Detail current-state hierarchy, not its metrics**: one
         // flat full-width panel, the subject on top, a subtle divider, then
         // the facts as well-anchored rows with their counts on the trailing

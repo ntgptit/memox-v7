@@ -7,6 +7,7 @@ import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../../../shared/widgets/mx_metric_well.dart';
+import '../../../../../shared/widgets/mx_section_label.dart';
 import '../../../domain/models/progress_overview_model.dart';
 import '../support/progress_labels_widget.dart';
 import '../../../../../core/theme/extensions/app_well_fill.dart';
@@ -55,10 +56,19 @@ class ProgressStreakHeroWidget extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text(
-                context.l10n.progressStreakSectionLabel,
-                style: texts.labelLarge!.inked(context, AppInk.quiet),
-              ),
+              // **The app's one section-heading treatment** (D18), not a hand-set
+              // `labelLarge`. Progress was the last feature drawing its own group
+              // titles — 14px sentence case, no `header` node — so a screen reader
+              // could not jump between the sections and the tab read as the odd
+              // one out in a four-tab shell (SC-C5-03). Quiet, because the content
+              // under every one of them already carries the stated ink.
+              //
+              // Its `header` role is absorbed by the `ExcludeSemantics` above
+              // on purpose: this panel is one composed node (see the class
+              // doc), and a heading inside a node that already announces
+              // "Current streak, 7 days" would be a second way in to the
+              // same sentence.
+              MxSectionLabel(label: context.l10n.progressStreakSectionLabel),
               const SizedBox(height: AppSpacing.sm),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,

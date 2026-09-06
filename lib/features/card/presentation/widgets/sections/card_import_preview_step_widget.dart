@@ -54,6 +54,21 @@ class CardImportPreviewStepWidget extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
+        // **The heading belongs to the step, not to one of its faces**
+        // (SC-C5-02). It used to be drawn inside the `loading:` branch and
+        // again, further down, by the summary widget — so resolving the parse
+        // moved it 229dp down the page and left the loaded step the only one
+        // of the three opening with no heading at all. Rendered above the
+        // state switch it sits at the same y while parsing, on the error face
+        // and once rows exist, and Preview opens the way Source
+        // (card_import_source_step_widget.dart) and Confirm
+        // (card_import_confirm_step_widget.dart) do.
+        MxSectionLabel(label: context.l10n.cardImportPreviewHeading),
+        // `sm`, the one step between a section label and the content it
+        // names (G7). It was `md` here and `xs` on Settings, so the same
+        // component read as a differently-bound label depending on which
+        // screen the user was on (SC-C5-06).
+        const SizedBox(height: AppSpacing.sm),
         // The chosen source stays as one compact line of context (state 2) —
         // never the whole chooser again, and never the pasted content
         // itself, which is private (BR-173). While the decode runs (or
@@ -73,17 +88,10 @@ class CardImportPreviewStepWidget extends ConsumerWidget {
           // the source line renders twice (review finding, 2026-08-28).
           // Nobody refreshes it today, so this changes nothing visible.
           skipLoadingOnRefresh: false,
-          // The step's heading stays on screen while the decode runs
-          // (concept state 2): the loading panel is Preview's content, not a
-          // replacement for knowing which step this is.
-          loading: () => Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              MxSectionLabel(label: context.l10n.cardImportPreviewHeading),
-              const SizedBox(height: AppSpacing.md),
-              _ParsingPanel(deckId: deckId),
-            ],
-          ),
+          // Content only, in all three branches: the panel is Preview's
+          // content, and knowing which step this is comes from the heading
+          // above (concept state 2).
+          loading: () => _ParsingPanel(deckId: deckId),
           error: (error, _) => MxErrorState(
             title: context.l10n.cardImportParseErrorTitle,
             message: error is Failure
@@ -167,8 +175,13 @@ class _SourceContext extends ConsumerWidget {
 
 /// The parse in progress (state 2): one steady panel — a loader, what is
 /// being read, and the reassurance that nothing is written until Import is
-/// confirmed. Its shape never changes, so rows arriving replace it without
-/// the layout jumping.
+/// confirmed.
+///
+/// **It does not stand in for the height of what replaces it**, and the doc
+/// here used to claim it did. Rows arriving swap one panel for two plus a row
+/// list; nothing about this panel's shape could hold that still. What does
+/// hold still is the step heading, which is why that heading was hoisted out
+/// of the state switch and above it (SC-C5-02).
 class _ParsingPanel extends ConsumerWidget {
   const _ParsingPanel({required this.deckId});
 
@@ -179,8 +192,9 @@ class _ParsingPanel extends ConsumerWidget {
     final l10n = context.l10n;
     final kind = ref.watch(cardImportSourceChoiceProvider(deckId));
 
-    // Flat like the loaded panel that replaces it at this exact rect — the
-    // swap must not also be an elevation change (D20).
+    // Flat like the mapping panel that replaces it — not at the same rect,
+    // which it never was, but at the same height off the page: the swap must
+    // not also be an elevation change (D20).
     return MxCard.flat(
       child: Column(
         children: <Widget>[

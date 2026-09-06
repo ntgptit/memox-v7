@@ -285,18 +285,29 @@ void main() {
         locale: const Locale('vi'),
       );
 
-      expect(find.text(vietnamese.progressStreakSectionLabel), findsOneWidget);
-      // Scoped to the section, because Vietnamese spells the Today heading and
-      // the chart's last row label the same — "Hôm nay" — and an unscoped
-      // finder would report two and read as a duplicate-render bug.
+      expect(
+        find.text(vietnamese.progressStreakSectionLabel.toUpperCase()),
+        findsOneWidget,
+      );
+      // Scoped to the section: Vietnamese spells the Today heading and the
+      // chart's last row label the same — "Hôm nay" — so an unscoped finder
+      // would report two and read as a duplicate-render bug. The heading now
+      // also paints in caps, which separates the two strings as well; the
+      // scope stays because what this asserts is *the Today section's own*
+      // heading, not that the words appear somewhere.
       expect(
         find.descendant(
           of: find.byType(ProgressTodayWidget),
-          matching: find.text(vietnamese.progressTodaySectionLabel),
+          matching: find.text(
+            vietnamese.progressTodaySectionLabel.toUpperCase(),
+          ),
         ),
         findsOneWidget,
       );
-      expect(find.text(vietnamese.progressWeekSectionLabel), findsOneWidget);
+      expect(
+        find.text(vietnamese.progressWeekSectionLabel.toUpperCase()),
+        findsOneWidget,
+      );
       expect(tester.takeException(), isNull);
     });
 

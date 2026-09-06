@@ -678,6 +678,23 @@ Mỗi finding đi qua **hai pass tái xác minh độc lập** trên `main` hi�
 
 ---
 
+### C5 — dispositions
+
+Đóng bởi PR #481. Rung đúng là `standard`, không phải `small` như registry đề xuất — `small` dành cho nhãn mặt thẻ bên trong card.
+
+Mỗi finding đi qua **hai pass tái xác minh độc lập** trên `main` hiện tại trước khi một dòng code được viết; chỗ nào hai pass bất đồng thì được phân xử bằng cách đọc code, không phải bằng cách lấy đa số.
+
+| ID | Kết luận cuối | Vì sao |
+|---|---|---|
+| `SC-C5-01` | **REVISED_AND_FIXED** | The defect reproduces exactly. search_group_header_widget.dart:32-44 is `Text(context.mxSearchGroupLabel(group), style: context.texts.labelSmall!.inked(context, AppInk.quiet, isEmphasized: true))`; app_typography.dart:330-336 give… **Target đã đổi:** `MxSectionLabel(label: context.mxSearchGroupLabel(group))` — the default `rung: MxSectionLabelRung.standard`, default `emphasis: quiet`. That resolves to `sectionLabel` = labelMedium (12 / w500) + `Ap |
+| `SC-C5-02` | **REVISED_AND_FIXED** | I reproduced every number by pumping the wizard at 393x852 with `parseGate` held: while parsing the heading rect is LTRB(12.0, 268.0, 381.0, 284.0) and the source card is 184.0..244.0; once the gate completes the mapping card is 1… **Target đã đổi:** Put the standard `MxSectionLabel(context.l10n.cardImportPreviewHeading)` + `SizedBox(AppSpacing.md)` as the FIRST two children of `CardImportPreviewStepWidget.build`'s Column — above the `if (document |
+| `SC-C5-03` | **REVISED_AND_FIXED** | The code claim is exact: progress_streak_hero_widget.dart:58-61, progress_today_widget.dart:38-41, progress_week_widget.dart:57-60 and progress_summary_widget.dart:46-53 all render `Text(..., texts.labelLarge!.inked(context, AppIn… **Target đã đổi:** Same code change — swap the four `Text(..., labelLarge.inked(quiet))` for `MxSectionLabel(label: …)` at the default standard rung — but the test asserts THREE header nodes (Today, Daily activity, the  |
+| `SC-C5-04` | **REVISED_AND_FIXED** | All three spellings are verbatim as described. deck_scheduler_picker_widget.dart:70-71 `if (sectionLabel != null) Text(sectionLabel!, style: context.texts.labelLarge)` with `MxRadioRows` at :72 and no gap; deck_reset_progress_widg… **Target đã đổi:** Keep the component swap for all three — it is right — but add the missing constraint: assert the reset sheet's heading at 320dp / textScaler 2.0 and confirm it is not ellipsized. If it is (it will be) |
+| `SC-C5-05` | **REFUTED** | The duplication is real but it is deliberate, documented at the exact lines the finding read past, and the proposed fix is the specific thing the documentation forbids. app_en.arb:3333 `@reminderTitle`: 'The same words in both pla… |
+| `SC-C5-06` | **REVISED_AND_FIXED** | The measurement is right: settings_section_widget.dart:33 `static const double headingGap = AppSpacing.xs;` (4), applied at :55, and the six card-feature sites are all `AppSpacing.md` (12) — I read the gap line after every MxSecti… **Target đã đổi:** Decide the label→content step once, for the cluster, and apply it everywhere rather than moving one screen into the larger minority. `AppSpacing.sm` is the defensible pick: it is the only value writte |
+
+**Tổng: REFUTED 1 · REVISED_AND_FIXED 5 = 6**
+
 ### C6 — Type rung and emphasis for one semantic element
 
 **5 findings** (P2 3 · P3 2), across 5 surface units.
@@ -693,6 +710,22 @@ Mỗi finding đi qua **hai pass tái xác minh độc lập** trên `main` hi�
 | SC-C6-05 | P3 | F | Study entry — resume sheet (BR-103) | The supporting line under the sheet title is the only one of its kind painted at full onSurface ink, and it sits at a 4dp gap — so neither the gap nor a tonal step separates an 86-character paragraph from the 16sp semibold title directly above it, and the two read as one block.<br>`study_resume_widget.dart:42-43` `study_direction_chooser_widget.dart:131-134` `starter_install_widget.dart:133-136` — study_resume_widget.dart:42-43 — SizedBox(height: AppSpacing.xs) then Text(studyResumeBody, style: context.texts.bodyMedium) with no ink; |  |
 
 ---
+
+### C6 — dispositions
+
+Đóng bởi PR #481. Hai màn tìm kiếm và hai chế độ của card editor về một ngữ pháp; tag catalog giữ nguyên vì `titleSmall` ở đó là đánh đổi mật độ đã ghi.
+
+Mỗi finding đi qua **hai pass tái xác minh độc lập** trên `main` hiện tại trước khi một dòng code được viết; chỗ nào hai pass bất đồng thì được phân xử bằng cách đọc code, không phải bằng cách lấy đa số.
+
+| ID | Kết luận cuối | Vì sao |
+|---|---|---|
+| `SC-C6-01` | **FIXED** | Reproduces exactly. `deck_result_tile_widget.dart:50` and `card_result_tile_widget.dart:77` both read `style: context.texts.bodyLarge`, with no comment defending the choice. Values verified at source: `app_typography.dart:294` bod… |
+| `SC-C6-02` | **REVISED_AND_FIXED** | The divergence is real and reproduces, but every line number in the evidence is stale and the proposed fix is incomplete in three ways that would each lose behaviour. REAL: `card_create_form_widget.dart:82-94` front is a bare `MxT… **Target đã đổi:** Keep the direction — create composes `CardEditorFieldWidget` for the two sides and `CardEditorDetailsWidget` for the three optional fields — but land it in this order and with these corrections. (1) F |
+| `SC-C6-03` | **REFUTED** | The measurement is right — `tag_catalog_row_widget.dart:82` is `context.texts.titleSmall` = 14/w600 (`app_typography.dart:287`) — but a documented mechanism explains it, and the sibling set the finding compares against is a differ… |
+| `SC-C6-04` | **FIXED** | The core claim reproduces at all four call sites and the sibling comparison holds; two counts in the prose are wrong but neither is load-bearing. VERIFIED: `deck_reset_progress_widget.dart:90`, `deck_scheduler_change_widget.dart:9… |
+| `SC-C6-05` | **FIXED** | Reproduces, and both measured colours are verifiable from source rather than only from a render. `study_resume_widget.dart:44-50` is the title at `context.texts.titleMedium`, `:51` is `SizedBox(height: AppSpacing.xs)`, `:52` is `T… |
+
+**Tổng: FIXED 3 · REFUTED 1 · REVISED_AND_FIXED 1 = 5**
 
 ### C7 — Responsive and text-scale breakage
 
@@ -861,10 +894,10 @@ mà reviewer nhìn một màn đã gán. Chênh lệch giữa hai cột là §1.
 |---|---|---|---|---|---|
 | **C1** Sở hữu gutter | 20 | 16 | P1 | **P1** | **đóng — #472** · FIXED 11 · REVISED_AND_FIXED 6 · REFUTED 1 · BLOCKED 2 |
 | **C2** Nhịp danh sách và section | 20 | 14 | P2 | **P1** — cùng một grammar sai ở 14 đơn vị | **đóng — #473** · FIXED 14 · REVISED_AND_FIXED 6 |
-| **C3** Mặt lỗi và mặt rỗng | 27 | 15 | **P0** | **P0** | **đóng — #476** · FIXED 14 · REVISED_AND_FIXED 11 · REFUTED 1 · BLOCKED 1 |
+| **C3** Mặt lỗi và mặt rỗng | 27 | 15 | **P0** | **P0** | **đóng — #477** · FIXED 14 · REVISED_AND_FIXED 11 · REFUTED 1 · BLOCKED 1 |
 | **C4** Grammar điều hướng và chrome | 21 | 12 | P1 | **P1** | **đóng — #478** · FIXED 10 · REVISED_AND_FIXED 8 · REFUTED 2 · BLOCKED 1 |
-| **C5** Section heading tự dựng | 6 | 6 | P2 | P2 | chưa mở |
-| **C6** Bậc type cho một phần tử ngữ nghĩa | 5 | 5 | P2 | P2 | chưa mở |
+| **C5** Section heading tự dựng | 6 | 6 | P2 | P2 | **đóng — #481** · REVISED_AND_FIXED 5 · REFUTED 1 |
+| **C6** Bậc type cho một phần tử ngữ nghĩa | 5 | 5 | P2 | P2 | **đóng — #481** · FIXED 3 · REVISED_AND_FIXED 1 · REFUTED 1 |
 | **C7** Vỡ ở responsive / text scale | 5 | 5 | P1 | **P1** | chưa mở |
 | **C8** Mật độ và kích thước target | 4 | 4 | P1 | P2 | chưa mở |
 | **C9** Cục bộ, không có mẫu lặp | 15 | 13 | P1 | P2 — sửa từng cái | chưa mở |

@@ -7,8 +7,8 @@
 | **Scope** | Màn import: ba bước, entry point, back/close, error/result states. Ngoài phạm vi: luật nghiệp vụ (BR-168…BR-173), luồng (UC-10), export |
 | **Source of truth for** | Anatomy màn import · copy các panel · hành vi Back/Close/draft · responsive/a11y contract của wizard |
 | **Depends on** | `../use-cases.md` (UC-10), `../business-rules.md` (BR-168…BR-173), `m4-11-card-management.md` |
-| **Updated by task** | M99.19 · M99.19a |
-| **Last updated** | 2026-08-13 |
+| **Updated by task** | M99.19 · M99.19a · M99.87 · SC-C5-02 (heading bước Preview) |
+| **Last updated** | 2026-09-06 |
 
 Concept tham chiếu là một mockup mobile (dark) với app bar, breadcrumb, stepper
 ba bước, chip deck đích, hai lựa chọn nguồn, panel thông tin và sticky action.
@@ -80,6 +80,10 @@ hiện có. Ba điểm concept bị sửa có chủ đích:
 
 ### W3 — Bước Preview
 
+- Heading bước là `2 · Preview` ở **đầu bước, trên state switch**, nên nó
+  đứng nguyên một chỗ qua cả ba mặt parsing / error / loaded — Preview mở
+  đầu bằng heading đúng như Source (W2) và Import (W4). Trước SC-C5-02 nó
+  được vẽ hai lần ở hai nhánh state khác nhau nên nhảy 229dp khi parse xong.
 - Tóm tắt nguồn là **một dòng context gọn** ở đầu bước (cùng component với
   card tóm tắt của W2, không có Replace/Remove): tên file hoặc `Pasted text` ·
   meta · trạng thái decode (`Parsing…` → `N rows detected`). Không lặp lại cả
@@ -90,7 +94,8 @@ hiện có. Ba điểm concept bị sửa có chủ đích:
 - Mapping list: mỗi cột nguồn một hàng → dropdown đích (Front/Back/Example/
   Hint/Pronunciation/Tags/Ignore); một đích không nhận hai cột; Front và Back
   bắt buộc.
-- Kết quả phân loại: heading `2 · Preview` với `N of N ready` bên phải, dưới
+- Kết quả phân loại: nhãn nhóm `Rows` (rung nhỏ, cùng bậc với
+  `MATCH COLUMNS` trong panel mapping) với `N of N ready` bên phải, dưới
   là **chip theo trạng thái** (icon + chữ + số, không chỉ màu): `Ready` luôn
   hiện, `Invalid`/`Duplicate`/`Blank` chỉ khi > 0. Hai loại duplicate chung
   một chip; hàng chi tiết mới phân biệt `Already in deck` / `Duplicate in

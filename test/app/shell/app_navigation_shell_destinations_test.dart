@@ -97,7 +97,10 @@ void main() {
         initialLocation: RoutePaths.progress,
       );
 
-      expect(find.text(english.progressStreakSectionLabel), findsOneWidget);
+      expect(
+        find.text(english.progressStreakSectionLabel.toUpperCase()),
+        findsOneWidget,
+      );
       expect(find.byType(MxNavigationBar), findsOneWidget);
       expect(tester.takeException(), isNull);
     });

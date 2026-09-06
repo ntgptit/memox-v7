@@ -57,23 +57,33 @@ class CardImportPreviewSummaryWidget extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        // The section heading with the readiness verdict beside it (state 3):
-        // what the classification concluded, before the rows prove it. The
-        // same outside-the-panel label grammar Card Detail's bands use; the
-        // baseline row wraps intentionally when a narrow screen cannot hold
-        // both — the count drops under the label rather than ellipsizing.
+        // The rows group's own label with the readiness verdict beside it
+        // (state 3): what the classification concluded, before the rows prove
+        // it. A rung below the step heading, matching the mapping panel's
+        // inner label — this names one group inside Preview, not the step,
+        // which the step widget now heads for every state at once (SC-C5-02).
+        // The baseline row still wraps intentionally when a narrow screen
+        // cannot hold both — the count drops under the label rather than
+        // ellipsizing.
         Wrap(
           crossAxisAlignment: WrapCrossAlignment.end,
           spacing: AppSpacing.sm,
           children: <Widget>[
-            MxSectionLabel(label: l10n.cardImportPreviewHeading),
+            MxSectionLabel(
+              label: l10n.cardImportRowsHeading,
+              rung: MxSectionLabelRung.small,
+            ),
             Text(
               l10n.cardImportPreviewReadyOfTotal(importable, preview.totalRows),
               style: context.texts.bodySmall!.inked(context, AppInk.quiet),
             ),
           ],
         ),
-        const SizedBox(height: AppSpacing.md),
+        // `sm`, the one step between a section label and the content it
+        // names (G7). It was `md` here and `xs` on Settings, so the same
+        // component read as a differently-bound label depending on which
+        // screen the user was on (SC-C5-06).
+        const SizedBox(height: AppSpacing.sm),
         // **The verdict, the policy and the rows are one panel** (concept
         // states 3-4): the chips say what the classification found, the
         // toggle is the one decision that changes the plan, and the rows are

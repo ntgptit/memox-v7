@@ -22,6 +22,12 @@ import '../../../../../shared/widgets/mx_text_field.dart';
 /// the name, which is what the [MergeSemantics] below is for: the label, the
 /// requirement, the counter and the input are announced as one control rather
 /// than as four things that happen to be near each other.
+///
+/// **Both modes of the editor compose it.** Create drew the same five values as
+/// floating-label inputs until SC-C6-02 measured the two screens side by side;
+/// what create still varies is content — a placeholder for a field that opens
+/// empty, and the focus the screen hands its first field — so those are the two
+/// things below that edit passes nothing for.
 class CardEditorFieldWidget extends StatelessWidget {
   const CardEditorFieldWidget({
     required this.label,
@@ -30,12 +36,14 @@ class CardEditorFieldWidget extends StatelessWidget {
     required this.isRequired,
     required this.isEnabled,
     this.icon,
+    this.hintText,
     this.errorText,
     this.helperText,
     this.maxLines = 1,
     this.minLines,
     this.emphasis = MxTextFieldEmphasis.body,
     this.focusNode,
+    this.shouldAutofocus = false,
     this.textInputAction,
     super.key,
   });
@@ -63,6 +71,15 @@ class CardEditorFieldWidget extends StatelessWidget {
   /// glyph inside a merged control reads as an action.
   final IconData? icon;
 
+  /// Already-localized placeholder, or null.
+  ///
+  /// **Visible from the first frame here, unlike a floating-label field.** With
+  /// the label drawn outside the box there is no inline label sitting in the
+  /// hint's place, so an empty field shows it immediately instead of only once
+  /// focus has floated the name away. That is what create wants from it and why
+  /// edit — whose fields open with a card already in them — passes none.
+  final String? hintText;
+
   final String? errorText;
   final String? helperText;
   final int maxLines;
@@ -71,6 +88,12 @@ class CardEditorFieldWidget extends StatelessWidget {
   /// See [MxTextFieldEmphasis].
   final MxTextFieldEmphasis emphasis;
   final FocusNode? focusNode;
+
+  /// Whether the field takes focus on the first frame. Only create's front
+  /// does — that screen exists to be typed into and meets the user with the
+  /// keyboard already up.
+  final bool shouldAutofocus;
+
   final TextInputAction? textInputAction;
 
   @override
@@ -88,7 +111,9 @@ class CardEditorFieldWidget extends StatelessWidget {
             focusNode: focusNode,
             label: label,
             labelPlacement: MxTextFieldLabelPlacement.external,
+            hintText: hintText,
             isEnabled: isEnabled,
+            shouldAutofocus: shouldAutofocus,
             maxLength: maxLength,
             maxLines: maxLines,
             minLines: minLines,

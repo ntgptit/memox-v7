@@ -11,15 +11,19 @@ import 'card_editor_field_widget.dart';
 
 /// The three optional fields, in the editor's label grammar (BR-95, W5).
 ///
-/// **A second widget rather than a flag on `CardDetailsSectionWidget`.** Create
-/// mode keeps that one, unchanged, because this task redesigns *edit* and a
-/// boolean that swaps an entire layout is how one screen's decision reaches a
-/// screen nobody reviewed — which is exactly the regression that got through
-/// the last time the two modes shared a field builder.
+/// **One widget for both modes, which it was not.** It was written as edit's
+/// half of a pair, beside a create-only `CardDetailsSectionWidget` that drew
+/// the same three values as floating-label inputs behind a leading `+`. The
+/// pair was right while create had not been reviewed — a boolean that swaps an
+/// entire layout is how one screen's decision reaches a screen nobody looked
+/// at. The app-wide screen-consistency pass then looked at it (SC-C6-02) and
+/// measured what the split cost: five card values in two field grammars on one
+/// screen, the same front at two sizes. So the create copy is gone and this
+/// takes both callers.
 ///
-/// What differs is not small: create draws three floating-label inputs, edit
-/// draws a section heading and three labelled rows with their own icons and
-/// live counters.
+/// What create still varies is content, not grammar — a placeholder for each
+/// field of a form that opens empty, and the keyboard's `done` on the last one,
+/// because create's form ends here and edit's scrolls on into tags and Trash.
 class CardEditorDetailsWidget extends StatelessWidget {
   const CardEditorDetailsWidget({
     required this.isExpanded,
@@ -31,6 +35,10 @@ class CardEditorDetailsWidget extends StatelessWidget {
     this.exampleProblem,
     this.hintProblem,
     this.pronunciationProblem,
+    this.examplePlaceholder,
+    this.hintPlaceholder,
+    this.pronunciationPlaceholder,
+    this.pronunciationTextInputAction,
     super.key,
   });
 
@@ -43,6 +51,20 @@ class CardEditorDetailsWidget extends StatelessWidget {
   final CardValidationProblem? exampleProblem;
   final CardValidationProblem? hintProblem;
   final CardValidationProblem? pronunciationProblem;
+
+  /// Already-localized placeholders, or null for all three.
+  ///
+  /// Create opens on an empty form and says what each optional field is for;
+  /// edit opens on a card that has already answered the question, so it passes
+  /// none rather than covering the values it loaded.
+  final String? examplePlaceholder;
+  final String? hintPlaceholder;
+  final String? pronunciationPlaceholder;
+
+  /// The keyboard's action key on the last field. Create's form ends here so it
+  /// asks for `done`; edit scrolls on into the tags and the Trash card and
+  /// leaves the default (M100.36 9K).
+  final TextInputAction? pronunciationTextInputAction;
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +82,7 @@ class CardEditorDetailsWidget extends StatelessWidget {
           label: context.l10n.cardEditorExampleFieldLabel,
           icon: Icons.chat_bubble_outline,
           controller: exampleController,
+          hintText: examplePlaceholder,
           maxLength: kCardDetailMaxLength,
           isRequired: false,
           isEnabled: !isBusy,
@@ -72,6 +95,7 @@ class CardEditorDetailsWidget extends StatelessWidget {
           label: context.l10n.cardEditorHintFieldLabel,
           icon: Icons.lightbulb_outline,
           controller: hintController,
+          hintText: hintPlaceholder,
           maxLength: kCardDetailMaxLength,
           isRequired: false,
           isEnabled: !isBusy,
@@ -87,10 +111,12 @@ class CardEditorDetailsWidget extends StatelessWidget {
           // that looks like play and does nothing is worse than no glyph.
           icon: Icons.volume_up_outlined,
           controller: pronunciationController,
+          hintText: pronunciationPlaceholder,
           maxLength: kCardDetailMaxLength,
           isRequired: false,
           isEnabled: !isBusy,
           errorText: _errorText(context, pronunciationProblem),
+          textInputAction: pronunciationTextInputAction,
         ),
       ],
     );

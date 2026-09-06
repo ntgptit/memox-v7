@@ -195,7 +195,10 @@ void main() {
       // Both windows ride on one snapshot (BR-184), so the switch is a field
       // access. A second read here would mean two snapshots and a spinner.
       expect(repository.levelReadCount, readsBefore);
-      expect(find.text(english.progressSummaryLast30DaysTitle), findsOneWidget);
+      expect(
+        find.text(english.progressSummaryLast30DaysTitle.toUpperCase()),
+        findsOneWidget,
+      );
       expect(
         find.descendant(
           of: find.byType(ProgressSummaryWidget),

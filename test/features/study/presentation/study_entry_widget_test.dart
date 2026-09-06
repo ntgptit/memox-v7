@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/extensions/app_ink.dart';
 import 'package:memox/features/study/domain/models/study_entry_summary_model.dart';
 import 'package:memox/features/study/domain/models/study_mode.dart';
 import 'package:memox/features/study/presentation/widgets/overlays/study_mode_chooser_widget.dart';
@@ -290,6 +292,37 @@ void main() {
 
       expect(find.textContaining('ends the open session'), findsOneWidget);
     });
+
+    /// **The supporting line is quiet, and the title is not.**
+    ///
+    /// The gap between them is `AppSpacing.xs` (4), so ink is the only thing
+    /// separating an 86-character paragraph from the 16sp semibold line above
+    /// it — at full `onSurface` the two rendered the same colour and read as
+    /// one block. Asserted as a *pair*, in both brightnesses: a regression that
+    /// re-inks the title as well would leave the body's own colour correct and
+    /// still delete the step this test exists for.
+    for (final brightness in Brightness.values) {
+      testWidgets('the body is quieter than the title in ${brightness.name}', (
+        tester,
+      ) async {
+        await tester.pumpWidget(
+          wrapForTest(
+            StudyResumeWidget(onChoice: (_) {}),
+            brightness: brightness,
+          ),
+        );
+
+        final Finder bodyFinder = find.textContaining('ends the open session');
+        final body = tester.renderObject<RenderParagraph>(bodyFinder);
+        final title = tester.renderObject<RenderParagraph>(
+          find.text('You left a session open'),
+        );
+        final BuildContext context = tester.element(bodyFinder);
+
+        expect(body.text.style?.color, AppInk.quiet.resolve(context));
+        expect(title.text.style?.color, isNot(body.text.style?.color));
+      });
+    }
 
     for (final path in <({String label, StudyResumeChoice choice})>[
       (label: 'Continue', choice: StudyResumeChoice.resume),
