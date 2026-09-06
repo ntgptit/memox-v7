@@ -999,6 +999,16 @@ Không màn nào đã sửa. Cột trạng thái sẽ được cập nhật bở
 ## 7. DESIGN_SYSTEM_BLOCKED
 
 Sáu finding là **thật** nhưng sửa chúng đòi thay một hợp đồng ở `v1-freeze.md` §2.
+
+**Một dòng ở bảng này đã đổi, và đó là kết quả của vòng tái xác minh.**
+`SC-C9-04` từng được ghi là chạm hợp đồng #2. Cả hai pass độc lập đều chỉ ra
+cột Enforcement của #2 gồm `color_scheme_arguments_are_m3_roles`,
+`color_scheme_reads_are_m3_roles` và `no_raw_color` — tất cả canh việc **dựng và
+đọc `ColorScheme`**, chứ không canh việc một call site gọi tên `AppInk` nào; và
+`theme-architecture.md` nói thẳng `AppInk` **là** API mà `lib/features/` phải dùng
+để tô chữ. Nên nó là composition, và đã được sửa. Chỗ của nó do `SC-C9-03`
+thay vào — finding này **không** ở trong bảng lúc recon, và vòng tái xác minh mới
+cho thấy không có cách nào sửa nó từ trong `lib/features/`.
 Không cái nào được sửa trong pass này, và không cái nào tự mở được một task
 design-system:
 §3 bắt task đó phải được kích hoạt bởi **một trong năm reopen trigger**, và cột cuối
@@ -1017,5 +1027,5 @@ dùng thay vì đẻ ra sáu số `M100.xx` cho việc có thể không bao gi�
 | `SC-C1-16` | P3 | Reminder settings — time picker dialog | The time picker sits 16dp in from each screen edge while every other dialog in the app sits 40dp in, so the app's one Material-owned modal is 48dp wider than it… | #6 | **trigger 3** — thêm một họ shared primitive/component mới |
 | `SC-C3-20` | P3 | RouteNotFoundScreen | The route name is a second, invisible copy of the visible title, so a screen-reader user meets two nodes labelled "Page not found" one after the other — a conta… | #6 | **trigger 3** — thêm một họ shared primitive/component mới |
 | `SC-C4-08` | P2 | ProgressScreen | The pinned range strip never draws the chrome/content hairline, so deck rows scroll under it with no seam — the strip is painted in `scaffoldBackgroundColor` an… | #11 | **trigger 3** — `MxContentShell` phải học thêm một khái niệm mới |
-| `SC-C9-04` | P2 | StudyHomeScreen | The resume card paints container ink on a surface fill. All three of its text lines take AppInk.onSecondaryContainer — an ink app_ink.dart:66 documents as "for … | #2 | trigger 2 — thiết kế lại palette/theme có chủ đích |
+| `SC-C9-03` | P2 | StudyHomeScreen | The resume panel does not out-rank the rows under it in light: measured on the committed goldens, ΔE(hero, page) is 2.73 while ΔE(row, page) is 4.25 — and the row casts two shadow layers where the hero casts none. `MxCard.tonal` is the only page-level recipe still at `AppElevation.none`, and no composition available to `lib/features/` can add depth to it: `MxCard` exposes no elevation, a hand-rolled shadow is barred by the raw-Material policy, and the swap the finding proposed (`MxCard.accent`) fills with the same paper the rows use — which deletes the tint and regresses dark, where the hero is correct today (ΔE 19.23 against the rows' 5.23). | #10 | trigger 2 — thiết kế lại palette/theme có chủ đích, hoặc #6/trigger 3 nếu đi đường thêm một recipe mới |
 | `SC-C9-14` | P2 | Reminder settings — time picker dialog foote | The picker's footer offers Cancel and the commit action at identical emphasis, both drawn as zero-padding text links with no fill, no ripple and no hover surfac… | #3 | trigger 2 — thiết kế lại palette/theme có chủ đích |

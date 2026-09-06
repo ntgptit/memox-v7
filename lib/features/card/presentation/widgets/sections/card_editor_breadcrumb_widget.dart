@@ -25,12 +25,20 @@ class CardEditorBreadcrumbWidget extends StatelessWidget {
   const CardEditorBreadcrumbWidget({
     required this.deckId,
     required this.deck,
+    required this.leafLabel,
     required this.onLeave,
     super.key,
   });
 
   final String deckId;
   final DeckContextModel deck;
+
+  /// The last, untappable step — what this screen *is*.
+  ///
+  /// A parameter since create started pinning the path too (SC-C9-02): the two
+  /// modes share every crumb above the leaf and differ only in the leaf, so a
+  /// hardcoded `Edit` was the one thing stopping create from reusing the strip.
+  final String leafLabel;
 
   /// Runs a navigation **through the editor's exit coordinator**.
   ///
@@ -67,7 +75,7 @@ class CardEditorBreadcrumbWidget extends StatelessWidget {
         for (final DeckBreadcrumbSegment segment in deck.ancestors)
           MxBreadcrumbItem(label: segment.name),
         MxBreadcrumbItem(label: deck.deckName),
-        MxBreadcrumbItem(label: context.l10n.cardEditorBreadcrumbLabel),
+        MxBreadcrumbItem(label: leafLabel),
       ],
     );
   }

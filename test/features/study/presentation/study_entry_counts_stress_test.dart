@@ -153,8 +153,8 @@ void main() {
       // both counts still share one run, which is what the committed golden
       // and the screen gallery show.
       expect(
-        tester.getRect(find.text('New 3')).top,
-        tester.getRect(find.text('Due 4')).top,
+        tester.getRect(find.text('3 new', findRichText: true)).top,
+        tester.getRect(find.text('4 due', findRichText: true)).top,
       );
     });
   });

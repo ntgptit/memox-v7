@@ -1423,6 +1423,10 @@
   "@cardEditorSaveShortAction": {
     "description": "The app-bar save shortcut. Short because it shares a 56dp row with the title and the flag; it runs the same command as the footer's Save changes."
   },
+  "cardEditorCreateBreadcrumbLabel": "New card",
+  "@cardEditorCreateBreadcrumbLabel": {
+    "description": "Last, untappable step of the card editor's breadcrumb in create mode (UC-04, wireframe W4) — the counterpart of cardEditorBreadcrumbLabel, which is edit's. Its own key rather than a shared one because the two modes name different things: one is editing a card that exists, the other is a card that does not yet."
+  },
   "cardEditorBreadcrumbLabel": "Edit",
   "@cardEditorBreadcrumbLabel": {
     "description": "Last, untappable step of the editor breadcrumb — where the user already is (W6b)."
@@ -1623,6 +1627,14 @@
       }
     },
     "description": "Screen-reader label for a card row: front then back as one announcement (UC-04 W1)."
+  },
+  "studyEntryNewWord": "new",
+  "@studyEntryNewWord": {
+    "description": "The word half of a study-entry count, rendered beside the numeral so the two can carry different ink — the numeral stays neutral and only the word takes the tint, which is the grammar study home, the deck summary and Progress already use. A screen reader hears neither half: the pair is wrapped in a Semantics node carrying studyNewCount / studyDueCount, which are the sentences that read aloud."
+  },
+  "studyEntryDueWord": "due",
+  "@studyEntryDueWord": {
+    "description": "The word half of a study-entry count, rendered beside the numeral so the two can carry different ink — the numeral stays neutral and only the word takes the tint, which is the grammar study home, the deck summary and Progress already use. A screen reader hears neither half: the pair is wrapped in a Semantics node carrying studyNewCount / studyDueCount, which are the sentences that read aloud."
   },
   "studyNewCount": "New {count}",
   "@studyNewCount": {
@@ -3179,6 +3191,10 @@
   "progressDeckMissingBackAction": "Back to progress",
   "@progressDeckMissingBackAction": {
     "description": "Returns to the library level of Progress by Deck from a level whose deck is gone."
+  },
+  "studyEntryTitle": "Study",
+  "@studyEntryTitle": {
+    "description": "Fallback app-bar title of a deck's study entry screen (UC-15), shown while the deck read is in flight or has failed — the loaded screen shows the deck's own name. Not studyHomeTitle: this screen is mounted in both the Library and the Study branch, so from Library it is not the Study tab at all, and the repo keeps one title key per screen even when the words match."
   },
   "studyHomeTitle": "Study",
   "@studyHomeTitle": {

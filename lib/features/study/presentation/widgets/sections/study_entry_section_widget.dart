@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/extensions/app_ink.dart';
+import '../../../../../core/theme/extensions/app_well_fill.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../../../shared/widgets/mx_empty_state.dart';
+import '../../../../../shared/widgets/mx_metric_well.dart';
 import '../../../domain/models/study_entry_summary_model.dart';
 
 /// The way into a deck's study flow: two numbers, and up to two ways in.
@@ -76,24 +79,28 @@ class StudyEntrySectionWidget extends StatelessWidget {
           runSpacing: AppSpacing.xs,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: <Widget>[
-            // Plain text, not a disabled pill. A first draft used
+            // Plain readouts, not disabled pills. A first draft used
             // `MxPillButton(onPressed: null)` for the shape, and the visual
             // audit refused it: a disabled control renders its label at 38%
             // alpha, which is not a palette colour — and these are readouts,
             // not controls somebody is being stopped from pressing.
-            //
-            // `maxLines: 2` rather than none: a count that clips mid-numeral
-            // does not read as truncated, it reads as a different number
-            // (`progress_metric_widget.dart` records measuring exactly that).
-            Text(
-              l10n.studyNewCount(summary.newCount),
-              style: context.texts.titleMedium,
-              maxLines: 2,
+            _EntryMetric(
+              icon: summary.newCount > 0
+                  ? Icons.auto_awesome
+                  : Icons.auto_awesome_outlined,
+              count: summary.newCount,
+              word: l10n.studyEntryNewWord,
+              sentence: l10n.studyNewCount(summary.newCount),
+              tint: summary.newCount > 0 ? AppInk.info : AppInk.quiet,
+              fill: AppWellFill.muted,
             ),
-            Text(
-              l10n.studyDueCount(summary.dueCount),
-              style: context.texts.titleMedium,
-              maxLines: 2,
+            _EntryMetric(
+              icon: summary.dueCount > 0 ? Icons.event : Icons.event_outlined,
+              count: summary.dueCount,
+              word: l10n.studyEntryDueWord,
+              sentence: l10n.studyDueCount(summary.dueCount),
+              tint: summary.dueCount > 0 ? AppInk.onDueContainer : AppInk.quiet,
+              fill: summary.dueCount > 0 ? AppWellFill.due : AppWellFill.muted,
             ),
           ],
         ),
@@ -117,6 +124,100 @@ class StudyEntrySectionWidget extends StatelessWidget {
         else
           Text(l10n.studyNothingDueMessage),
       ],
+    );
+  }
+}
+
+/// One count of the entry pair: its glyph in a well, its numeral, its word.
+///
+/// **The app's metric grammar, which this screen was the last to be outside of**
+/// (SC-C9-10). The two counts were undifferentiated `titleMedium` strings —
+/// numeral and word at one weight, no anchor — so the pair read as the
+/// screen's heading rather than as its data. Every other surface showing the
+/// same class of fact gives each count a boundary and steps the word down:
+/// `study_home_workload_item_widget.dart`, `progress_metric_widget.dart` and
+/// `deck_workload_line_widget.dart`.
+///
+/// **The numeral stays neutral and only the word takes the tint**, which is
+/// that grammar's own rule: tinting both makes the number a colour-coded
+/// signal, and two differently-coloured numerals read as two kinds of number
+/// rather than two counts of the same kind.
+///
+/// **The panel rung, not `bodySmall`.** Study Home draws these inside a deck
+/// row where they are supporting detail; here they are the screen's only
+/// content, so the numeral keeps `titleMedium` — the rung
+/// `progress_metric_widget.dart` uses for a panel.
+///
+/// **Tabular figures, and that is not decoration**: `New 1024` beside
+/// `Due 2048` is read as a column of two, and proportional digits put their
+/// units in different places.
+///
+/// **The split is visual only.** A reader hears [sentence] — the whole ARB
+/// string, unchanged — because the halves are excluded beneath it: `1024` and
+/// `new` announced as two nodes is worse than the one sentence they replace.
+class _EntryMetric extends StatelessWidget {
+  const _EntryMetric({
+    required this.icon,
+    required this.count,
+    required this.word,
+    required this.sentence,
+    required this.tint,
+    required this.fill,
+  });
+
+  final IconData icon;
+  final int count;
+  final String word;
+
+  /// What a screen reader hears instead of the two halves.
+  final String sentence;
+
+  final AppInk tint;
+  final AppWellFill fill;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: sentence,
+      child: ExcludeSemantics(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            MxMetricWell(icon: icon, tint: tint, fill: fill),
+            const SizedBox(width: AppSpacing.xs),
+            Flexible(
+              child: Text.rich(
+                TextSpan(
+                  children: <InlineSpan>[
+                    TextSpan(
+                      text: '$count ',
+                      style: context.texts.titleMedium!.inked(
+                        context,
+                        AppInk.stated,
+                        isTabular: true,
+                      ),
+                    ),
+                    TextSpan(
+                      text: word,
+                      style: context.texts.labelMedium!.inked(
+                        context,
+                        tint,
+                        isEmphasized: count > 0,
+                      ),
+                    ),
+                  ],
+                ),
+                // Two lines rather than one: a count clipped mid-numeral does
+                // not read as truncated, it reads as a different number, and
+                // these aggregate a whole deck subtree.
+                maxLines: 2,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
