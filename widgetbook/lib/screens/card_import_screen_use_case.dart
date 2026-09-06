@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:memox/app/router/route_paths.dart';
 import 'package:memox/core/error/failure.dart';
+import 'package:memox/core/navigation/route_names.dart';
 import 'package:memox/features/card/data/datasources/card_transfer_resolver_data_source.dart';
 import 'package:memox/features/card/di/card_import_repository_provider.dart';
 import 'package:memox/features/card/di/card_repository_provider.dart';
@@ -17,6 +20,8 @@ import 'package:memox/features/card/domain/repositories/card_repository.dart';
 import 'package:memox/features/card/domain/repositories/card_transfer_repository.dart';
 import 'package:memox/features/card/presentation/screens/card_import_screen.dart';
 import 'package:widgetbook/widgetbook.dart';
+
+import '../support/catalog_route_stub.dart';
 
 /// `CardImportScreen` mounted whole, its three contracts faked (UC-10).
 ///
@@ -62,13 +67,82 @@ enum CardImportScenario {
   final String label;
 }
 
-class _CardImportDemo extends StatelessWidget {
+/// The wizard's own deck, and the location the app opens the wizard at.
+const String _catalogDeckId = 'catalog-deck';
+const String _importLocation =
+    '/decks/$_catalogDeckId/'
+    '${RoutePaths.cardListRelative}/${RoutePaths.cardImportRelative}';
+
+class _CardImportDemo extends StatefulWidget {
   const _CardImportDemo({required this.scenario, super.key});
 
   final CardImportScenario scenario;
 
   @override
+  State<_CardImportDemo> createState() => _CardImportDemoState();
+}
+
+class _CardImportDemoState extends State<_CardImportDemo> {
+  /// The card branch down to the wizard, so the screen's three ways out land
+  /// somewhere instead of throwing.
+  ///
+  /// **The wizard is the app's most navigational screen and had no router at
+  /// all.** The deck path leaves for the deck (SC-C4-07), its long-press sheet
+  /// reaches any ancestor, `✕` pops or falls back to the deck, and
+  /// `View cards` goes to the list — four controls, every one of them
+  /// `goNamed`, every one of them throwing `GoError` in the catalogue.
+  ///
+  /// Nested exactly as `app_router.dart` nests it, so opening at
+  /// [_importLocation] builds the deck and the card list underneath: `✕` finds
+  /// something to pop, which is what it does in the app, rather than taking
+  /// the no-history fallback that only exists for a deep link.
+  late final GoRouter _router = GoRouter(
+    initialLocation: _importLocation,
+    routes: <RouteBase>[
+      GoRoute(
+        path: RoutePaths.decks,
+        name: RouteNames.decks,
+        builder: (BuildContext context, GoRouterState state) =>
+            const CatalogRouteStubPage(routeName: 'Library'),
+        routes: <RouteBase>[
+          GoRoute(
+            path: RoutePaths.deckDetailRelative,
+            name: RouteNames.deckDetail,
+            builder: (BuildContext context, GoRouterState state) =>
+                const CatalogRouteStubPage(routeName: 'Deck'),
+            routes: <RouteBase>[
+              GoRoute(
+                path: RoutePaths.cardListRelative,
+                name: RouteNames.cardList,
+                builder: (BuildContext context, GoRouterState state) =>
+                    const CatalogRouteStubPage(routeName: 'Card list'),
+                routes: <RouteBase>[
+                  GoRoute(
+                    path: RoutePaths.cardImportRelative,
+                    name: RouteNames.cardImport,
+                    builder: (BuildContext context, GoRouterState state) =>
+                        CardImportScreen(
+                          deckId: state.pathParameters[RoutePathParams.deckId]!,
+                        ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    ],
+  );
+
+  @override
+  void dispose() {
+    _router.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final scenario = widget.scenario;
     final importer = _CatalogImportRepository(
       existingKeys: scenario == CardImportScenario.duplicates
           ? <CardImportDuplicateKey>{
@@ -92,7 +166,7 @@ class _CardImportDemo extends StatelessWidget {
         ),
         cardImportRepositoryProvider.overrideWithValue(importer),
       ],
-      child: const CardImportScreen(deckId: 'catalog-deck'),
+      child: Router<Object>.withConfig(config: _router),
     );
   }
 }

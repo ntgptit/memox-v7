@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:memox/app/router/route_paths.dart';
 import 'package:memox/core/navigation/route_names.dart';
 import 'package:memox/core/time/clock_provider.dart';
 import 'package:memox/core/time/time_zone_provider.dart';
@@ -17,6 +19,7 @@ import 'package:memox/features/study/presentation/widgets/overlays/study_directi
 import 'package:widgetbook/widgetbook.dart';
 
 import 'study_catalog_repository.dart';
+import '../support/catalog_route_stub.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/study/domain/failures/study_refusal_failure.dart';
 import 'package:memox/features/study/domain/models/study_direction_model.dart';
@@ -33,21 +36,36 @@ import 'package:memox/features/study/domain/models/study_direction_model.dart';
 /// real would show a different screen every day it was opened.
 final DateTime _catalogNow = DateTime.utc(2026, 8, 8, 2);
 
+/// The one deck every Study use-case is scoped to.
+const String _catalogDeckId = 'catalog-deck';
+
+/// `/study/catalog-deck` — the entry screen's location inside the Study branch.
+const String _catalogEntryLocation = '${RoutePaths.study}/$_catalogDeckId';
+
 List<WidgetbookComponent> studyScreenComponents() => <WidgetbookComponent>[
   // First, because it is the tab's own screen: the Study branch opens here and
   // every other Study screen is reached through it (UC-14).
-  _screen('StudyHomeScreen', (scenario) => const StudyHomeScreen()),
+  //
+  // **The two that navigate by name are mounted through a router**, at the
+  // location the app opens them at. Mounted bare, `goNamed` and `pushNamed`
+  // find no `GoRouter` above them and throw — so Study Home's deck rows and
+  // the entry screen's options action were dead controls in the catalog, which
+  // is the one place a reviewer is expected to press them. The routes below
+  // are the Study branch's own, named from `RouteNames` and pathed from
+  // `RoutePaths`, so this is a mirror of the app's table rather than a second
+  // one that can drift from it.
+  _screen(
+    'StudyHomeScreen',
+    (scenario) => const _StudyRouter(location: RoutePaths.study),
+  ),
   _screen(
     'StudyEntryScreen',
-    (scenario) => const StudyEntryScreen(
-      deckId: 'catalog-deck',
-      optionsRouteName: RouteNames.deckStudyOptions,
-    ),
+    (scenario) => const _StudyRouter(location: _catalogEntryLocation),
   ),
   _screen(
     'StudySessionScreen',
     (scenario) => StudySessionScreen(
-      deckId: 'catalog-deck',
+      deckId: _catalogDeckId,
       kind: scenario.isReview
           ? StudySessionKind.reviewing
           : StudySessionKind.learning,
@@ -57,7 +75,7 @@ List<WidgetbookComponent> studyScreenComponents() => <WidgetbookComponent>[
   ),
   _screen(
     'StudyOptionsScreen',
-    (scenario) => const StudyOptionsScreen(deckId: 'catalog-deck'),
+    (scenario) => const StudyOptionsScreen(deckId: _catalogDeckId),
   ),
 
   // **The one overlay in this list, and it earns the exception.** The other
@@ -162,6 +180,91 @@ WidgetbookComponent _screen(
     ),
   ],
 );
+
+/// The Study branch's routes, so the screens' `goNamed` and `pushNamed` land.
+///
+/// Held on the state rather than built in `build`: a router rebuilt on every
+/// knob change would drop whatever the reviewer had navigated to, which is the
+/// one thing this widget exists to make possible. The scenario dropdown still
+/// resets it, because `_StudyDemo` is keyed by scenario — a router holding the
+/// previous scenario's stack is not a state the app can be in.
+///
+/// Every name a Study screen can reach is registered. The two that leave the
+/// branch — the library and the starter catalogue — land on
+/// [CatalogRouteStubPage]: they are other features' screens with their own
+/// entries and their own fakes, and a router that mounted them for real would
+/// be a second app rather than a catalogue.
+class _StudyRouter extends StatefulWidget {
+  const _StudyRouter({required this.location});
+
+  /// Where this use-case opens — the same location the app would be at.
+  final String location;
+
+  @override
+  State<_StudyRouter> createState() => _StudyRouterState();
+}
+
+class _StudyRouterState extends State<_StudyRouter> {
+  late final GoRouter _router = GoRouter(
+    initialLocation: widget.location,
+    routes: <RouteBase>[
+      GoRoute(
+        path: RoutePaths.decks,
+        name: RouteNames.decks,
+        builder: (BuildContext context, GoRouterState state) =>
+            const CatalogRouteStubPage(routeName: 'Library'),
+        routes: <RouteBase>[
+          GoRoute(
+            path: RoutePaths.starterLibraryRelative,
+            name: RouteNames.starterLibrary,
+            builder: (BuildContext context, GoRouterState state) =>
+                const CatalogRouteStubPage(routeName: 'Starter library'),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: RoutePaths.study,
+        name: RouteNames.study,
+        builder: (BuildContext context, GoRouterState state) =>
+            const StudyHomeScreen(),
+        routes: <RouteBase>[
+          GoRoute(
+            path: RoutePaths.studyDeckRelative,
+            name: RouteNames.studyDeck,
+            builder: (BuildContext context, GoRouterState state) =>
+                StudyEntryScreen(
+                  deckId: state.pathParameters[RoutePathParams.deckId]!,
+                  // The Study branch's options route, because this router is
+                  // the Study branch. The screen is mounted twice in the app
+                  // and the branch is the route's fact, not the screen's.
+                  optionsRouteName: RouteNames.studyDeckOptions,
+                ),
+            routes: <RouteBase>[
+              GoRoute(
+                path: RoutePaths.studyOptionsRelative,
+                name: RouteNames.studyDeckOptions,
+                builder: (BuildContext context, GoRouterState state) =>
+                    StudyOptionsScreen(
+                      deckId: state.pathParameters[RoutePathParams.deckId]!,
+                    ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ],
+  );
+
+  @override
+  void dispose() {
+    _router.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      Router<Object>.withConfig(config: _router);
+}
 
 class _StudyDemo extends StatelessWidget {
   const _StudyDemo({required this.scenario, required this.child, super.key});

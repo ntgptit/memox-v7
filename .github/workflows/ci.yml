@@ -242,7 +242,9 @@ jobs:
       - name: prepare material fonts
         run: bash .claude/skills/flutter-workflow/scripts/prepare_test_fonts.sh
 
-      - name: widgetbook catalog smoke test
+      # Not only the smoke test any more: `catalog_interaction_test.dart`
+      # taps the controls, which is the half a mount-only run cannot see.
+      - name: widgetbook catalog tests
         run: flutter test --reporter failures-only
         working-directory: widgetbook
 
