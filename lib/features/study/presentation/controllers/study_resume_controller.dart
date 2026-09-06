@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/state/retry_policy.dart';
 import '../../../../core/time/clock_provider.dart';
 import '../../../../core/time/time_zone_provider.dart';
 import '../../di/study_repository_provider.dart';
@@ -14,7 +15,7 @@ part 'study_resume_controller.g.dart';
 /// `abandoned`/`interrupted` — that is one call on purpose, because the second
 /// question has to be asked after the first write. Split, a caller can run them
 /// backwards and offer to resume a session it just closed.
-@riverpod
+@Riverpod(retry: noAutomaticRetry)
 class StudyResume extends _$StudyResume {
   @override
   Future<StudySessionEntity?> build(String deckId) =>

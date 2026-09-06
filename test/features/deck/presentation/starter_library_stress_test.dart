@@ -11,8 +11,11 @@ import 'package:memox/features/deck/domain/models/deck_template_model.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 import 'package:memox/features/deck/presentation/screens/starter_library_screen.dart';
 import 'package:memox/l10n/generated/app_localizations.dart';
+import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/l10n/generated/app_localizations_vi.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
+
+import '../../../support/android_text_scaler.dart';
 
 /// What a starter row gives the deck name when the words get long.
 ///
@@ -53,7 +56,7 @@ void main() {
   Future<void> pump(
     WidgetTester tester, {
     required Size size,
-    required double scale,
+    required TextScaler scaler,
     required String title,
     Locale? locale,
   }) async {
@@ -84,9 +87,7 @@ void main() {
           ],
           supportedLocales: AppLocalizations.supportedLocales,
           builder: (context, child) => MediaQuery(
-            data: MediaQuery.of(
-              context,
-            ).copyWith(textScaler: TextScaler.linear(scale)),
+            data: MediaQuery.of(context).copyWith(textScaler: scaler),
             child: child ?? const SizedBox.shrink(),
           ),
           home: const StarterLibraryScreen(),
@@ -101,31 +102,61 @@ void main() {
   const stacking = <({String name, Size size, Locale? locale})>[
     (name: 'vi 393dp', size: Size(393, 852), locale: Locale('vi')),
     (name: 'vi 360dp', size: Size(360, 780), locale: Locale('vi')),
+    (name: 'vi 320dp', size: Size(320, 640), locale: Locale('vi')),
     (name: 'en 393dp', size: Size(393, 852), locale: null),
     (name: 'en 360dp', size: Size(360, 780), locale: null),
+    (name: 'en 320dp', size: Size(320, 640), locale: null),
   ];
 
-  group('at textScaler 2.0 the row stacks', () {
-    for (final cell in stacking) {
-      testWidgets('${cell.name}: the name keeps the band', (tester) async {
-        await pump(
-          tester,
-          size: cell.size,
-          scale: 2,
-          title: title,
-          locale: cell.locale,
-        );
+  /// **Both curves, and the non-linear one is the one that matters** (final
+  /// corrective pass). The threshold used to be
+  /// `textScalerOf(context).scale(320)`, which under `TextScaler.linear(2.0)`
+  /// returns 640 — the row stacks and the test agrees with a broken layout.
+  /// Android's table is flat past 100sp, so on a real phone at the same setting
+  /// that call returned **320 unchanged** and the row stayed inline exactly
+  /// where the deck name was being cut to a glyph. `AndroidTextScaler.largest`
+  /// grows body rungs by 2.0 as well, so the only difference between the two
+  /// harnesses is the shape of the curve.
+  const curves = <({String name, TextScaler scaler})>[
+    (name: 'Android 2.0', scaler: AndroidTextScaler.largest),
+    (name: 'linear 2.0', scaler: TextScaler.linear(2)),
+  ];
 
-        final card = tester.getRect(find.byType(MxCard).first);
-        final name = tester.getRect(find.text(title));
+  for (final curve in curves) {
+    group('at ${curve.name} the row stacks', () {
+      for (final cell in stacking) {
+        testWidgets('${cell.name}: the name keeps the band', (tester) async {
+          await pump(
+            tester,
+            size: cell.size,
+            scaler: curve.scaler,
+            title: title,
+            locale: cell.locale,
+          );
 
-        // Stacked, so the name is on its own line and has the whole band
-        // minus the card's padding. Half is the bar the finding set; the
-        // arrangement clears it by a wide margin, which is the point.
-        expect(name.width, greaterThan(card.width / 2));
-      });
-    }
-  });
+          final card = tester.getRect(find.byType(MxCard).first);
+          final name = tester.getRect(find.text(title));
+
+          // Stacked, so the name is on its own line and has the whole band
+          // minus the card's padding. Half is the bar the finding set; the
+          // arrangement clears it by a wide margin, which is the point.
+          expect(name.width, greaterThan(card.width / 2));
+          // Stacked, not merely wide: the state sits below the name rather than
+          // beside it, which is the transition the threshold decides.
+          final state = tester.getRect(
+            find.text(
+              cell.locale == null
+                  ? AppLocalizationsEn().starterLibraryInstallAction
+                  : AppLocalizationsVi().starterLibraryInstallAction,
+            ),
+          );
+          expect(state.top, greaterThan(name.bottom));
+          // And nothing was cut to get there.
+          expect(tester.takeException(), isNull);
+        });
+      }
+    });
+  }
 
   testWidgets('at ordinary scale a 393dp phone still draws one line', (
     tester,
@@ -133,7 +164,7 @@ void main() {
     await pump(
       tester,
       size: const Size(393, 852),
-      scale: 1,
+      scaler: TextScaler.noScaling,
       title: title,
       locale: const Locale('vi'),
     );

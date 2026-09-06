@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/extensions/app_ink.dart';
+import '../../../../../core/text/text_scale.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -218,7 +219,17 @@ class _MetricGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final floor = MediaQuery.textScalerOf(context).scale(_minCellWidth);
+        // **The factor is read off a rung this row renders, not off the
+        // threshold** (final corrective pass). `TextScaler.scale` answers
+        // "a glyph declared at this many sp paints at how many pixels?";
+        // Android's table is flat past 100sp, so scaling a dp breakpoint
+        // through it returned the breakpoint unchanged on the device the
+        // reflow is for. `scale(1)` was the same mistake at the other end.
+        final double floor = scaledLayoutWidth(
+          context,
+          dp: _minCellWidth,
+          rung: context.texts.bodyMedium!,
+        );
         final columns = (constraints.maxWidth - AppSpacing.md) / 2 >= floor
             ? 2
             : 1;

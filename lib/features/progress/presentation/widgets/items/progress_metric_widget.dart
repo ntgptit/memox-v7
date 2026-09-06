@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/extensions/app_ink.dart';
+import '../../../../../core/text/text_scale.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -73,9 +74,21 @@ class ProgressMetricGridWidget extends StatelessWidget {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         final double cellWidth = (constraints.maxWidth - AppSpacing.lg) / 2;
+        // **The factor is read off a rung this row renders, not off the
+        // threshold** (final corrective pass). `TextScaler.scale` answers
+        // "a glyph declared at this many sp paints at how many pixels?";
+        // Android's table is flat past 100sp, so scaling a dp breakpoint
+        // through it returned the breakpoint unchanged on the device the
+        // reflow is for. `scale(1)` was the same mistake at the other end.
         final bool isTwoColumn =
             cellWidth >=
-            MediaQuery.textScalerOf(context).scale(minimumCellWidth);
+            scaledLayoutWidth(
+              context,
+              dp: minimumCellWidth,
+              // The numeral is the widest thing in a cell, and it is the
+              // largest rung the cell draws.
+              rung: context.texts.titleMedium!,
+            );
 
         final List<Widget> cells = <Widget>[
           _ActiveCardsMetric(count: metrics.activeCardCount, scale: scale),

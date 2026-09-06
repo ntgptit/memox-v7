@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/extensions/app_ink.dart';
+import '../../../../core/text/text_scale.dart';
 import '../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../l10n/l10n_extension.dart';
@@ -231,15 +232,27 @@ class _TemplateTile extends ConsumerWidget {
       // another.
       //
       // The arrangement is `study_home_deck_item_widget.dart`'s, which solved
-      // the same shape: a `LayoutBuilder` against a threshold scaled by the
-      // live text factor. The threshold is declared here rather than imported
-      // — a feature never reads another feature's internals (AD-13), and the
-      // two rows are answering the question about different content anyway.
+      // the same shape: a `LayoutBuilder` against a threshold widened by the
+      // factor the row's own text grows by. The threshold is declared here
+      // rather than imported — a feature never reads another feature's
+      // internals (AD-13), and the two rows are answering the question about
+      // different content anyway.
+      //
+      // **The factor is read off `titleMedium`, not off the threshold.** This
+      // used to be `textScalerOf(context).scale(inlineStateMinWidth)`, which
+      // asks the platform to size a 320sp font; Android's table is flat past
+      // 100sp, so at the largest accessibility setting it returned 320
+      // unchanged and the row stayed inline exactly where the deck name was
+      // being cut to a glyph.
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final threshold = MediaQuery.textScalerOf(
+          final double threshold = scaledLayoutWidth(
             context,
-          ).scale(AppStarterTile.inlineStateMinWidth);
+            dp: AppStarterTile.inlineStateMinWidth,
+            // The deck name is the half that runs out of line first, and it is
+            // the largest rung on the row.
+            rung: context.texts.titleMedium!,
+          );
 
           if (constraints.maxWidth < threshold) {
             return Column(

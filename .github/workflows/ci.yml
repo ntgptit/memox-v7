@@ -207,6 +207,10 @@ jobs:
           flutter test --exclude-tags golden --reporter failures-only "${test_files[@]}"
 
   widgetbook:
+    # The name understates it — the job runs the catalogue's interaction
+    # tests too. It stays anyway: this string is how branch protection
+    # identifies a required check, so renaming it makes the requirement
+    # point at a check that never reports again.
     name: Widgetbook smoke test
     needs: classify
     if: needs.classify.outputs.needs_widgetbook == 'true'
@@ -242,7 +246,9 @@ jobs:
       - name: prepare material fonts
         run: bash .claude/skills/flutter-workflow/scripts/prepare_test_fonts.sh
 
-      - name: widgetbook catalog smoke test
+      # Not only the smoke test any more: `catalog_interaction_test.dart`
+      # taps the controls, which is the half a mount-only run cannot see.
+      - name: widgetbook catalog tests
         run: flutter test --reporter failures-only
         working-directory: widgetbook
 

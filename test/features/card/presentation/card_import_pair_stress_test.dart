@@ -6,6 +6,7 @@ import 'package:memox/features/card/presentation/widgets/items/card_import_mappi
 import 'package:memox/features/card/presentation/widgets/support/card_import_pair_widget.dart';
 import 'package:memox/shared/widgets/mx_dropdown.dart';
 
+import '../../../support/android_text_scaler.dart';
 import '../../study/presentation/support/study_widget_harness.dart';
 
 /// The destination dropdown keeps room for the destination.
@@ -26,7 +27,7 @@ void main() {
   Future<void> pumpRow(
     WidgetTester tester, {
     required double width,
-    required double scale,
+    required TextScaler scaler,
   }) async {
     tester.view.physicalSize = Size(width, 800);
     tester.view.devicePixelRatio = 1;
@@ -44,7 +45,7 @@ void main() {
           ),
         ),
         isScrollable: false,
-        textScaler: TextScaler.linear(scale),
+        textScaler: scaler,
       ),
     );
     await tester.pumpAndSettle();
@@ -59,11 +60,37 @@ void main() {
     return tester.renderObject<RenderParagraph>(finder.first);
   }
 
+  // **The non-linear scaler is the one that matters here** (final corrective
+  // pass). The threshold used to be `textScalerOf(context).scale(240)`, and
+  // under `TextScaler.linear(2.0)` that returns 480 — the row stacks and the
+  // test passes over a broken layout. Android's table is flat past 100sp, so on
+  // a real phone the same call returned **240 unchanged** and the row never
+  // stacked. `AndroidTextScaler.largest` grows body rungs by exactly 2.0, so a
+  // difference between the two harnesses is a difference in the *shape* of the
+  // curve and nothing else.
+  for (final width in <double>[320, 360, 393]) {
+    testWidgets(
+      '${width.toInt()}dp at Android 2.0: the destination is not clipped',
+      (tester) async {
+        await pumpRow(tester, width: width, scaler: AndroidTextScaler.largest);
+
+        expect(selectedLabel(tester).didExceedMaxLines, isFalse);
+
+        // Stacked: the control has the whole band rather than half of it.
+        final row = tester.getRect(find.byType(CardImportPairWidget));
+        final control = tester.getRect(
+          find.byType(MxDropdown<CardTransferField?>),
+        );
+        expect(control.width, row.width);
+      },
+    );
+  }
+
   for (final width in <double>[360, 393]) {
     testWidgets('${width.toInt()}dp at 2.0: the destination is not clipped', (
       tester,
     ) async {
-      await pumpRow(tester, width: width, scale: 2);
+      await pumpRow(tester, width: width, scaler: const TextScaler.linear(2));
 
       final label = selectedLabel(tester);
       expect(label.didExceedMaxLines, isFalse);
@@ -80,7 +107,7 @@ void main() {
   testWidgets('393dp at 1.0: still two columns, and still not clipped', (
     tester,
   ) async {
-    await pumpRow(tester, width: 393, scale: 1);
+    await pumpRow(tester, width: 393, scaler: TextScaler.noScaling);
 
     expect(selectedLabel(tester).didExceedMaxLines, isFalse);
 

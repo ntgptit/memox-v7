@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/provider_scan.dart';
+
 /// The provider taxonomy, enforced instead of described.
 ///
 /// Deck settled a four-way split — infrastructure, query, command, input state —
@@ -118,7 +120,7 @@ void main() {
     );
   });
 
-  test('every async query provider disables automatic retry', () {
+  group('async providers disable automatic retry', () {
     // The one that will actually be forgotten on the next clone. Riverpod 3
     // retries a failed provider ten times with a backoff reaching 6.4s, and
     // reports `AsyncLoading` the whole time — so a failed local read shows a
@@ -128,27 +130,107 @@ void main() {
     //
     // Synchronous providers are exempt: a write controller returns its submit
     // state and catches `Failure` itself, so it never enters the retry path.
-    final asyncProvider = RegExp(
-      r'@(riverpod|Riverpod\([^)]*\))\s*\n\s*(Stream|Future)<',
-    );
-    final offenders = <String>[];
+    //
+    // **Discovery is an AST walk now, and that is the whole point of this
+    // block.** The regex it replaces matched an annotation immediately followed
+    // by `Stream<`/`Future<`, which is the function-provider shape; a class
+    // provider's next line is `class Foo extends _$Foo {` and its async
+    // `build()` carries only `@override`. Nine of this repo's async providers
+    // are class-shaped and four of them had no retry policy at all while the
+    // test stayed green.
 
-    for (final file in presentationFiles()) {
-      final source = file.readAsStringSync();
-      for (final match in asyncProvider.allMatches(source)) {
-        final annotation = match.group(1)!;
-        if (annotation.contains('noAutomaticRetry')) continue;
-        offenders.add('${relative(file)}: @$annotation');
-      }
-    }
+    List<ProviderDeclaration> allProviders() => <ProviderDeclaration>[
+      for (final file in presentationFiles())
+        ...scanProviders(file.readAsStringSync(), path: relative(file)),
+    ];
 
-    expect(
-      offenders,
-      isEmpty,
-      reason:
-          'An async provider under features/*/presentation/ must carry '
-          '@Riverpod(retry: noAutomaticRetry) — see core/state/retry_policy.dart '
-          'for the thirteen seconds it buys back.\n${offenders.join('\n')}',
-    );
+    test('every one of them, in either shape', () {
+      final offenders = <String>[
+        for (final provider in allProviders())
+          if (provider.isAsync && !provider.disablesRetry) '$provider',
+      ];
+
+      expect(
+        offenders,
+        isEmpty,
+        reason:
+            'An async provider under features/*/presentation/ must carry '
+            '@Riverpod(retry: noAutomaticRetry) — see '
+            'core/state/retry_policy.dart for the thirteen seconds it buys '
+            'back.\n${offenders.join('\n')}',
+      );
+    });
+
+    test('and the scan can still see both shapes', () {
+      // **A guard that finds nothing passes.** The regex this replaced was
+      // green for a year over four unannotated providers, because they were
+      // outside its sample space rather than inside it and compliant. So the
+      // sample space itself is asserted: if a refactor makes either shape
+      // invisible, this fails instead of the rule quietly ceasing to apply.
+      final providers = allProviders().where((p) => p.isAsync).toList();
+
+      expect(
+        providers.where((p) => p.isClassShaped),
+        isNotEmpty,
+        reason: 'no class-shaped async provider found — discovery is broken',
+      );
+      expect(
+        providers.where((p) => !p.isClassShaped),
+        isNotEmpty,
+        reason: 'no function-shaped async provider found — discovery is broken',
+      );
+    });
+
+    test('a class-shaped provider without the policy is caught', () {
+      // Fault injection, against a synthetic source rather than by editing
+      // `lib/` — the shape that used to slip through, verbatim.
+      const source = r'''
+@riverpod
+class StudySomething extends _$StudySomething {
+  @override
+  Future<int> build(String deckId) => Future<int>.value(1);
+}
+''';
+
+      final found = scanProviders(source, path: 'synthetic.dart');
+
+      expect(found, hasLength(1));
+      expect(found.single.isClassShaped, isTrue);
+      expect(found.single.isAsync, isTrue);
+      expect(found.single.disablesRetry, isFalse);
+    });
+
+    test('and one with it is not', () {
+      const source = r'''
+@Riverpod(retry: noAutomaticRetry)
+class StudySomething extends _$StudySomething {
+  @override
+  Stream<int> build(String deckId) => const Stream<int>.empty();
+}
+''';
+
+      expect(
+        scanProviders(source, path: 'synthetic.dart').single.disablesRetry,
+        isTrue,
+      );
+    });
+
+    test('a synchronous provider of either shape is exempt', () {
+      const source = r'''
+@riverpod
+class CardEditor extends _$CardEditor {
+  @override
+  CardEditorState build(String id) => const CardEditorState();
+}
+
+@riverpod
+int cardCount(Ref ref) => 0;
+''';
+
+      final found = scanProviders(source, path: 'synthetic.dart');
+
+      expect(found, hasLength(2));
+      expect(found.every((p) => !p.isAsync), isTrue);
+    });
   });
 }

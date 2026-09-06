@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/state/retry_policy.dart';
 import '../../../../core/time/clock_provider.dart';
 import '../../di/study_repository_provider.dart';
 import '../../domain/models/study_entry_summary_model.dart';
@@ -12,7 +13,7 @@ part 'study_entry_controller.g.dart';
 /// A **query** controller: it reports what the data layer says and holds no
 /// command. Opening a session is a write, and a write behind the same state as a
 /// read means a failed open would leave the counts showing an error.
-@riverpod
+@Riverpod(retry: noAutomaticRetry)
 class StudyEntry extends _$StudyEntry {
   @override
   Stream<StudyEntrySummaryModel> build(String deckId) => WatchStudyEntryUseCase(

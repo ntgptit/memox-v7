@@ -93,6 +93,35 @@ final class StudyRepositoryImpl
   }) => _dao.watchEntryCounts(deckId, now).map(studyEntrySummaryFromRow);
 
   @override
+  Stream<StudyDeckContextModel> watchDeckContext(String deckId) => _dao
+      .watchDeckById(deckId)
+      .asyncMap(_contextOf)
+      .where((StudyDeckContextModel? context) => context != null)
+      .cast<StudyDeckContextModel>();
+
+  /// `null` for a deck that is gone, so the stream simply stops emitting.
+  ///
+  /// The `Future` twin below throws `NotFoundFailure` instead, and both are
+  /// right for their caller: a session about to be opened must fail loudly, a
+  /// title on a screen that is unwinding must not replace the last good name
+  /// with an error face.
+  Future<StudyDeckContextModel?> _contextOf(Deck? deck) async {
+    if (deck == null) return null;
+
+    final root = deck.rootDeckId == deck.id
+        ? deck
+        : await _dao.deckById(deck.rootDeckId) ?? deck;
+
+    return StudyDeckContextModel(
+      deckId: deck.id,
+      deckName: deck.name,
+      rootDeckId: deck.rootDeckId,
+      schedulerType: SchedulerType.fromDbValue(root.schedulerType ?? ''),
+      schedulerGeneration: root.schedulerGeneration ?? 1,
+    );
+  }
+
+  @override
   Future<StudyDeckContextModel> deckContext(String deckId) async {
     final deck = await _dao.deckById(deckId);
     if (deck == null) {

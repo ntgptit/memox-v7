@@ -16956,6 +16956,101 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
 - **Checklist phases:** 14, 21.
 
+### M100.45 · Đóng phần dư của chuỗi C1–C9
+
+- **Status:** done (2026-09-07)
+- **Owner:** Claude
+- **Goal:** Đóng những khuyết tật còn lại sau khi cả chín cụm đã đóng. Không
+  audit lại, không mở cụm C10, không chạm hợp đồng đóng băng nào.
+- **Nhánh / PR:** `fix/app-wide-screen-consistency-final`
+- **Vấn đề:** Sáu thứ, không cùng một họ, nhưng cùng một tính chất — mỗi cái
+  đều **xanh dưới gate hiện có**:
+  - **C7 nhân với sai đại lượng.** Hai chỗ chọn layout bằng
+    `MediaQuery.textScalerOf(context).scale(240)`, tức là hỏi "font 240sp to
+    bao nhiêu" chứ không phải "breakpoint 240dp giãn ra bao nhiêu". Từ
+    Android 14, `FontScaleConverter` là **phi tuyến và phẳng ở đuôi bảng**: ở
+    mức 2.0, 14sp → 28 (2,00×) nhưng 100sp → 100 (1,00×), nên `scale(240)` trả
+    về đúng 240 và ngưỡng **không hề giãn**. `TextScaler.linear(2.0)` không
+    diễn đạt được chuyện này — dưới nó cả hai cách viết đều trông đúng, và đó
+    là lý do lỗi sống sót qua mọi test có sẵn.
+  - **Giờ nhắc chờ ghi mất một frame.** Màn hiện lại giá trị đã lưu ngay khi
+    một lần ghi bắt đầu, nên giữa "bấm lưu" và "lưu xong" người dùng thấy giờ
+    **cũ**, rồi giờ mới nhảy vào.
+  - **Study entry đọc tên deck một lần.** `StatefulShellRoute.indexedStack`
+    giữ nhánh Study luôn mounted, nên một provider `Future` chạy đúng một lần
+    rồi giữ mãi cái tên deck lúc mount. Màn che bằng `ref.invalidate` trong
+    pull-to-refresh của chính nó — đúng **một** đường trong nhiều đường có thể
+    đổi tên deck.
+  - **Guard retry chỉ nhìn thấy một nửa số provider.** Luật
+    `@Riverpod(retry: noAutomaticRetry)` được canh bằng regex đòi dòng ngay sau
+    annotation phải mở đầu `Stream<`/`Future<` — hình dạng của **function**
+    provider. Dòng sau một class provider luôn là `class Foo extends _$Foo {`.
+    Chín provider async của repo là class-shaped; bốn cái không mang policy nào
+    mà test vẫn xanh.
+  - **Widgetbook có nút không bấm được.** `StudyEntryScreen` và
+    `CardImportScreen` được mount trần, nên mọi control điều hướng bằng tên
+    (`goNamed`/`pushNamed`) ném `GoError` ngay khi chạm. `catalog_smoke_test`
+    xanh, vì mount một màn thì không chạm control nào của nó.
+  - **Registry bị cắt giữa token.** Hai script sinh bảng cắt theo **số ký tự**;
+    `close_cluster.py` còn nối hai nửa thành `{why}…{extra}`, nên vết cắt nằm
+    **giữa ô** chứ không ở cuối. 162 ô hỏng, trong đó có ô kết thúc ở
+    `` `Ap `` và `` `if (document ``, và mỗi nhát cắt rơi vào code span để hở
+    một backtick.
+- **Scope:**
+  - `lib/core/text/text_scale.dart` — `layoutScaleOf` / `scaledLayoutWidth`:
+    tỉ lệ đo từ **rung chữ thật của nội dung**, không từ một con số dp giả làm
+    cỡ chữ. Áp cho bảy chỗ (hai chỗ đề bài nêu + năm chỗ cùng lỗi).
+  - `test/support/android_text_scaler.dart` — bảng control point Android công
+    bố, để test đo được đường cong thật thay vì `linear`.
+  - `pendingReminderTime(...)`: hiện draft khi `rejection != null` **hoặc**
+    `isSubmitting`, trở về giá trị đã lưu sau khi lắng.
+  - Study deck context thành `watch()` stream — `study_dao`, contract, impl,
+    use case, controller; **xoá** `ref.invalidate` trong `_refresh()`, và
+    chính việc xoá đó là bản sửa.
+  - `test/app/support/provider_scan.dart` — phát hiện provider bằng **AST**
+    thay vì regex; ba class provider lộ ra được gắn policy.
+  - Widgetbook: router nhỏ cho hai màn, `CatalogRouteStubPage`,
+    `catalog_interaction_test.dart` — test **bấm** thật.
+  - Dựng lại 255 ô registry từ verdict gốc, cắt ở dấu chấm câu đầu tiên **ngoài
+    code span**.
+- **Quyết định:**
+  - **Không đo bằng `TextScaler.linear`.** Nó là đúng thứ giấu lỗi: dưới nó,
+    `scale(240)` và `240 * layoutScale` cho cùng kết quả. Test dùng bảng
+    Android; tiêm lỗi thì chỉ các ô đường-cong đỏ.
+  - **Không gộp tên deck vào `StudyEntrySummaryModel`.** Số đếm re-emit mỗi lần
+    trả lời một thẻ; cái tên thì không, và gộp lại sẽ kéo tiêu đề chết theo số
+    đếm ở mặt lỗi.
+  - **Không sửa production navigation cho Widgetbook.** Catalog mọc thêm cái
+    router nó thiếu; không route, tên, path hay màn nào của app đổi.
+  - **Không viết lại lịch sử finding.** Mỗi ô chỉ được ghi đè khi bản mới vẫn
+    **bắt đầu đúng bằng** bản cũ; bốn ô viết tay bị từ chối chứ không bị đè.
+- **Editable documents:** `docs/reviews/app-wide-screen-consistency.md`,
+  `docs/wbs.md`
+- **Đo, sau khi đổi:**
+  - `AndroidTextScaler.largest.scale(240) == 240` trong khi `scale(14)/14 ==
+    2.0` — lỗi tái lập được, và chỉ tái lập dưới đường cong thật.
+  - Guard provider mới bắt ngay ba class provider chưa có policy:
+    `StudyEntry`, `StudyResume`, `StudyReviewOptions`.
+  - Tiêm lỗi Widgetbook: trả một trong hai màn về mount trần → smoke test
+    **vẫn xanh**, interaction test của đúng màn đó đỏ.
+  - Registry: 123/123 finding có disposition, tổng từng cụm khớp, 0 ô kết thúc
+    giữa token, 0 code span để hở.
+- **Output:** phần dư của chuỗi đã đóng; guard nhìn thấy cả hai hình dạng
+  provider; catalog có test bấm; registry đọc được.
+- **Acceptance criteria:**
+  - [x] Không chỗ nào còn nhân breakpoint dp bằng `TextScaler.scale`.
+  - [x] Test text-scale chạy trên đường cong Android, không phải `linear`.
+  - [x] Rename deck tới được app bar mà không remount route.
+  - [x] Guard provider thấy cả class- lẫn function-shaped, và tự có test canh.
+  - [x] Interaction test bấm thật, và đỏ khi router bị gỡ.
+  - [x] Không ô nào kết thúc giữa token; không lịch sử finding nào bị viết lại.
+  - [x] Không hợp đồng đóng băng nào bị chạm.
+- **Dependencies:** M100.42
+- **Tests required:** `flutter analyze`, guard, `check_architecture.sh`,
+  `check_docs.py`, host suite (non-golden), Widgetbook suite, golden Linux,
+  `integration_test/` trên emulator.
+- **Checklist phases:** 7, 14, 21.
+
 ### M100.44 · Danh tính vi phạm phải là cấu trúc, không phải thứ tự
 
 - **Status:** done (2026-09-05)

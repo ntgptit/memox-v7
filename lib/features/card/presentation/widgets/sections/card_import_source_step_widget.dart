@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/theme/extensions/app_ink.dart';
 import '../../../../../core/theme/foundations/app_radius.dart';
 import '../../../../../core/theme/foundations/app_sizing.dart';
+import '../../../../../core/text/text_scale.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -138,9 +139,18 @@ class _SourceOptions extends ConsumerWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final scale = MediaQuery.textScalerOf(context).scale(1);
-        final fitsSideBySide =
-            constraints.maxWidth >= _minCardWidth * scale * 2 + AppSpacing.sm;
+        // **The factor is read off a rung this row renders, not off the
+        // threshold** (final corrective pass). `TextScaler.scale` answers
+        // "a glyph declared at this many sp paints at how many pixels?";
+        // Android's table is flat past 100sp, so scaling a dp breakpoint
+        // through it returned the breakpoint unchanged on the device the
+        // reflow is for. `scale(1)` was the same mistake at the other end.
+        final double card = scaledLayoutWidth(
+          context,
+          dp: _minCardWidth,
+          rung: context.texts.titleSmall!,
+        );
+        final fitsSideBySide = constraints.maxWidth >= card * 2 + AppSpacing.sm;
         if (!fitsSideBySide) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
