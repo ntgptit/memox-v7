@@ -391,6 +391,14 @@
   "@starterLibrarySchedulerPrompt": {
     "description": "Label above the scheduler picker in the install sheet. The template only suggests a default (BR-34)."
   },
+  "starterLibraryAlreadyPresentTitle": "Bộ thẻ này đã có trong thư viện",
+  "@starterLibraryAlreadyPresentTitle": {
+    "description": "Hiện trong sheet cài đặt khi lệnh sao chép kết thúc mà không chép gì vì bộ thẻ đã có sẵn (BR-37). Không phải lỗi."
+  },
+  "starterLibraryAlreadyPresentMessage": "Không có gì được thêm. Mở nó từ Thư viện để học tiếp.",
+  "@starterLibraryAlreadyPresentMessage": {
+    "description": "Nội dung thông báo đã-có-sẵn trong sheet cài đặt starter."
+  },
   "starterLibraryInstallErrorTitle": "Chưa thêm được bộ thẻ này",
   "@starterLibraryInstallErrorTitle": {
     "description": "Title of the failure band in the starter install sheet. Not deckWriteErrorTitle (“Couldn’t save”): a copy that rolled back is a different event from a save that did not land, and a band whose title and message name two events reads as two failures. Its message, starterLibraryInstallFailed, still opens by restating this headline — tightening that string to the consequence alone is a copy change that belongs to that key’s own owner, not to this consistency pass."
@@ -586,7 +594,7 @@
   "@deckFormDiscardTitle": {
     "description": "Title of the confirmation shown when a deck form with typed input is cancelled (UC-02 A1)."
   },
-  "deckFormDiscardMessage": "Nội dung bạn đã nhập sẽ không được lưu.",
+  "deckFormDiscardMessage": "Những gì bạn đã điền sẽ không được lưu.",
   "@deckFormDiscardMessage": {
     "description": "Body of the discard confirmation for a partly filled deck form."
   },
@@ -657,6 +665,24 @@
   "deckStudyAction": "Học",
   "@deckStudyAction": {
     "description": "Label of the button on a deck card that starts a study session for that deck. Shown when the deck has due or new cards (BR-150) — hidden only when both sets are empty, because then there is nothing to start."
+  },
+  "deckRowActionsSemanticLabel": "Tác vụ bộ thẻ {deck}",
+  "@deckRowActionsSemanticLabel": {
+    "placeholders": {
+      "deck": {
+        "type": "String"
+      }
+    },
+    "description": "Tên dành cho trình đọc màn hình của nút tràn trên MỘT HÀNG danh sách. Mọi hàng dùng cùng một biểu tượng, nên tên bộ thẻ là thứ phân biệt chúng."
+  },
+  "deckRowStudySemanticLabel": "Học {deck}",
+  "@deckRowStudySemanticLabel": {
+    "placeholders": {
+      "deck": {
+        "type": "String"
+      }
+    },
+    "description": "Tên dành cho trình đọc màn hình của nút Học trên một hàng, khớp với studyHomeStudySemanticLabel ở tab Học."
   },
   "deckActionsSemanticLabel": "Tác vụ bộ thẻ",
   "@deckActionsSemanticLabel": {
@@ -4307,6 +4333,10 @@
       }
     },
     "description": "The other half of the hero subline."
+  },
+  "deckSummaryPickDeckAction": "Chọn bộ thẻ để học",
+  "@deckSummaryPickDeckAction": {
+    "description": "Nút CTA của panel Hôm nay, chỉ ở cấp gốc của Thư viện."
   },
   "deckSummaryStudyDueAction": "Học {count} thẻ đến hạn",
   "@deckSummaryStudyDueAction": {

@@ -48,14 +48,6 @@ class DeckTileWidget extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onActions;
 
-  /// Whether the metadata line names the review algorithm.
-  ///
-  /// True at the root list, where decks genuinely differ; false inside a
-  /// deck, where every descendant inherits the root's scheduler (BR-06) and
-  /// repeating `8 boxes` on every child row is a column of non-information.
-  /// The *screen* passes this from its snapshot — a tile guessing the level
-  /// from its entity would be a second copy of `isRootLevel`.
-
   @override
   Widget build(BuildContext context) {
     // **Flat, and padded by its bands rather than as a whole.** The design's
@@ -148,7 +140,16 @@ class _DeckHeadRegion extends StatelessWidget {
           ),
           MxIconButton(
             icon: Icons.more_vert,
-            semanticLabel: context.l10n.deckActionsSemanticLabel,
+            // **Named for its own row.** Every card carries this glyph, so a
+            // screen reader moving control-to-control heard "Deck actions"
+            // once per deck with nothing to tell them apart — the exact
+            // problem `study_home_deck_item_widget.dart` already solved for
+            // its own list, one tab away, and wrote the reasoning for. The app
+            // bar's copy stays unqualified: there is one of it, and the title
+            // beside it is the deck's name.
+            semanticLabel: context.l10n.deckRowActionsSemanticLabel(
+              summary.deck.name,
+            ),
             onPressed: onActions,
           ),
         ],
@@ -283,7 +284,10 @@ class _DeckActionRow extends StatelessWidget {
                 ? AppSpacing.sm
                 : AppSpacing.md,
           ),
-          DeckStudyButtonWidget(deckId: summary.deck.id),
+          DeckStudyButtonWidget(
+            deckId: summary.deck.id,
+            deckName: summary.deck.name,
+          ),
         ],
       ],
     );

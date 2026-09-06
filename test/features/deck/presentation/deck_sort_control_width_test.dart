@@ -48,10 +48,8 @@ void main() {
             // The screen's own gutter, so the row is the width it really is.
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: DeckListToolbarWidget(
-              filter: DeckListFilter.all,
               sort: sort,
               visibleCount: 3,
-              onFilterChanged: (_) {},
               onSortChanged: (_) {},
               isRootLevel: true,
             ),

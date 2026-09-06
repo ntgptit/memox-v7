@@ -74,7 +74,14 @@ class StarterInstallController extends _$StarterInstallController {
       );
 
       if (!ref.mounted) return outcome;
-      state = const StarterInstallState();
+      // **The outcome is kept, not just returned.** `alreadyPresent` is a
+      // finished write that copied nothing (BR-37's in-transaction check),
+      // and the sheet has to say so — the doc above has promised that since
+      // the method was written, while every caller treated any non-null
+      // outcome as an install and closed.
+      state = StarterInstallState(
+        wasAlreadyPresent: outcome == DeckTemplateInstallOutcome.alreadyPresent,
+      );
       // The catalog rows carry `isInstalled`, and one of them just changed.
       ref.invalidate(starterLibraryProvider);
 
@@ -93,8 +100,19 @@ class StarterInstallController extends _$StarterInstallController {
 
 /// What the install command is doing, and what its last attempt left behind.
 class StarterInstallState {
-  const StarterInstallState({this.isInstalling = false, this.error});
+  const StarterInstallState({
+    this.isInstalling = false,
+    this.error,
+    this.wasAlreadyPresent = false,
+  });
 
   final bool isInstalling;
   final Object? error;
+
+  /// The last attempt found the deck already there and copied nothing (BR-37).
+  ///
+  /// Not an error — nothing failed and nothing rolled back — so it does not go
+  /// in [error], where it would wear the failure band's words and invite a
+  /// retry that would reach the same answer.
+  final bool wasAlreadyPresent;
 }

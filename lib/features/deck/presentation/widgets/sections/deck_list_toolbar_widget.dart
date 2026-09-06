@@ -34,18 +34,14 @@ import '../../../../../shared/widgets/mx_section_label.dart';
 /// and knows nothing about decks.
 class DeckListToolbarWidget extends StatelessWidget {
   const DeckListToolbarWidget({
-    required this.filter,
     required this.sort,
     required this.visibleCount,
-    required this.onFilterChanged,
     required this.onSortChanged,
     required this.isRootLevel,
     super.key,
   });
 
-  final DeckListFilter filter;
   final DeckListSort sort;
-  final ValueChanged<DeckListFilter> onFilterChanged;
   final ValueChanged<DeckListSort> onSortChanged;
 
   /// Which heading the list gets — the library's, or this deck's children's.

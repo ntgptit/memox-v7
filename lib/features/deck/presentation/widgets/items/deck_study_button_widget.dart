@@ -30,15 +30,15 @@ const double _kButtonMinWidth = 80;
 /// to the deck the session started from rather than to whatever the Study tab
 /// last held.
 ///
-/// **Primary again (owner mockup, 2026-08-20), reversing the tonal revision
-/// of 2026-08-05.** The full history is in
-/// `docs/reviews/design-parity-checklist.md`: outlined (the kit) lost to
-/// filled (owner), filled lost to tonal when a column of `primary` fills
-/// sprayed the accent across every row — and the redesign restores primary
-/// *because the rest of the card got quieter with it*: the metric chips gave
-/// up their containers, the `+Nd` badge is gone, and overdue's danger ink is
-/// the only other accent left, so one primary verb per card now reads as the
-/// hierarchy instead of competing with it.
+/// **Secondary, and the walk to it is recorded rather than repeated.** The full
+/// history is in `docs/reviews/design-parity-checklist.md`: outlined (the kit)
+/// lost to filled (owner), filled lost to tonal when a column of `primary`
+/// fills sprayed the accent across every row, and the 2026-08-20 redesign
+/// restored primary on the argument that the rest of the card had gone quieter
+/// with it. M99.98 reversed that last step for the reason written at the
+/// `variant:` below — the argument was true of one card and false of a screen
+/// showing four. What the button *is* is stated there, next to the code that
+/// sets it.
 ///
 /// **An `MxActionButton` since the raw-button guard landed (2026-08-27), and
 /// the geometry moved with it.** This widget used to build the `FilledButton`
@@ -53,9 +53,22 @@ const double _kButtonMinWidth = 80;
 /// it *painted* 500 — compact goes through `AppTypography.withWeight`, which
 /// is why the weight M100.30 raised actually reached the glyphs.
 class DeckStudyButtonWidget extends StatelessWidget {
-  const DeckStudyButtonWidget({required this.deckId, super.key});
+  const DeckStudyButtonWidget({
+    required this.deckId,
+    required this.deckName,
+    super.key,
+  });
 
   final String deckId;
+
+  /// The deck this verb belongs to, for the screen-reader name only.
+  ///
+  /// The painted label stays the one word — every row shows `Study`, and a row
+  /// that spelled out the deck would wrap on the narrowest screens the tile is
+  /// measured at. The *announced* name carries it instead, which is the split
+  /// `study_home_deck_item_widget.dart` already makes for the same list of the
+  /// same decks in the Study tab.
+  final String deckName;
 
   @override
   Widget build(BuildContext context) {
@@ -66,6 +79,7 @@ class DeckStudyButtonWidget extends StatelessWidget {
       // beside it needed at large text scales.
       child: MxActionButton(
         label: context.l10n.deckStudyAction,
+        semanticLabel: context.l10n.deckRowStudySemanticLabel(deckName),
         // **`secondary`, and the argument for `primary` was a per-card one**
         // (M99.98). "One primary verb per card reads as the hierarchy" is true
         // of a card; a screen shows three or four at once, and the Library's

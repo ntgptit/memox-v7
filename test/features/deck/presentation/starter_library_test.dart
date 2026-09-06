@@ -52,10 +52,12 @@ void main() {
     Set<({String templateId, int version})>? installed,
     Object? failWith,
     Exception? catalogFailsWith,
+    DeckTemplateInstallOutcome outcome = DeckTemplateInstallOutcome.installed,
   }) async {
     final repository = _ScriptedTemplateRepository(
       installed: installed ?? <({String templateId, int version})>{},
       failWith: failWith,
+      outcome: outcome,
     );
     await tester.pumpWidget(
       ProviderScope(
@@ -248,6 +250,56 @@ void main() {
   /// without `retryLabel`, which `MxErrorState` asserts against and a release
   /// build answers by dropping the button — a failure the user can read and
   /// cannot act on.
+  group('a copy that found the deck already there (BR-37)', () {
+    // The race the in-transaction check exists for: the catalogue row said the
+    // template was not installed, and by the time the write ran it was. The
+    // outcome is a *finished* write that copied nothing — not a failure, and
+    // not an install.
+
+    testWidgets('says so instead of closing as though it added one', (
+      tester,
+    ) async {
+      await pump(tester, outcome: DeckTemplateInstallOutcome.alreadyPresent);
+
+      await tester.tap(find.text('Everyday English'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(english.starterLibraryInstallAction).last);
+      await tester.pumpAndSettle();
+
+      // The sheet is still up, and it names what happened.
+      expect(
+        find.text(english.starterLibraryAlreadyPresentTitle),
+        findsOneWidget,
+      );
+      expect(
+        find.text(english.starterLibraryInstallAction),
+        findsWidgets,
+        reason: 'the sheet stays open, so its action is still on screen',
+      );
+      // And it is not dressed as a failure: nothing rolled back, so the
+      // failure copy must not appear beside it.
+      expect(find.text(english.starterLibraryInstallErrorTitle), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('an ordinary install still closes the sheet', (tester) async {
+      // The counterpart, so the branch above cannot be satisfied by a sheet
+      // that simply stopped closing.
+      await pump(tester);
+
+      await tester.tap(find.text('Everyday English'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(english.starterLibraryInstallAction).last);
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text(english.starterLibraryAlreadyPresentTitle),
+        findsNothing,
+      );
+      expect(find.text(english.starterLibraryInstallAction), findsNothing);
+    });
+  });
+
   group('a catalog that cannot be read (SC-C3-01, SC-C3-02)', () {
     testWidgets('renders a retryable failure instead of an assertion', (
       tester,
@@ -399,7 +451,16 @@ void main() {
 
 /// Answers what the test scripted, and records every install it was asked for.
 final class _ScriptedTemplateRepository implements DeckTemplateRepository {
-  _ScriptedTemplateRepository({required this.installed, this.failWith});
+  _ScriptedTemplateRepository({
+    required this.installed,
+    this.failWith,
+    this.outcome = DeckTemplateInstallOutcome.installed,
+  });
+
+  /// What a completed install answers. `alreadyPresent` is the race BR-37's
+  /// in-transaction check exists for: the row said the deck was not there
+  /// and the database disagreed.
+  final DeckTemplateInstallOutcome outcome;
 
   final Set<({String templateId, int version})> installed;
   Object? failWith;
@@ -426,7 +487,7 @@ final class _ScriptedTemplateRepository implements DeckTemplateRepository {
       allowDuplicate: allowDuplicate,
     ));
 
-    return DeckTemplateInstallOutcome.installed;
+    return outcome;
   }
 
   @override
