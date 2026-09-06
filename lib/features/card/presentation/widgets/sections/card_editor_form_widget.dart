@@ -33,7 +33,6 @@ class CardEditorFormWidget extends StatelessWidget {
     required this.deckId,
     required this.cardId,
     required this.deckContext,
-    required this.onLeave,
     required this.state,
     required this.isBusy,
     required this.front,
@@ -51,7 +50,6 @@ class CardEditorFormWidget extends StatelessWidget {
   final String deckId;
   final String cardId;
   final AsyncValue<DeckContextModel> deckContext;
-  final void Function(VoidCallback navigate) onLeave;
   final CardSubmitState state;
   final bool isBusy;
   final TextEditingController front;
@@ -73,7 +71,6 @@ class CardEditorFormWidget extends StatelessWidget {
           deckId: deckId,
           cardId: cardId,
           deckContext: deckContext,
-          onLeave: onLeave,
         ),
         const SizedBox(height: AppSpacing.xl),
         CardEditorFieldWidget(

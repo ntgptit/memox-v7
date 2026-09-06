@@ -387,4 +387,22 @@ void main() {
     expect(harness.cards.requestedTagFilters.last, TagFilter.none);
     expect(find.text('No cards match'), findsNothing);
   });
+
+  testWidgets('the title announces as a heading, not a sentence (SC-C4-21)', (
+    tester,
+  ) async {
+    // A sheet is a new surface, and a heading is how a reader learns it has a
+    // name and jumps to it (`mx_sheet.dart`, A20.1 P1-01). Pinned here because
+    // the shared guard cannot see this sheet: `mx_sheet_test.dart` asserts
+    // `isHeader` on `MxSheetHeader`, and a `showMxFormSheet` body builds its
+    // own title, so nothing above this file was looking.
+    final handle = tester.ensureSemantics();
+    await pump(tester);
+    await openSheet(tester);
+
+    final node = tester.getSemantics(find.text('Filter by tags'));
+    expect(node.flagsCollection.isHeader, isTrue);
+    expect(node.label, 'Filter by tags');
+    handle.dispose();
+  });
 }

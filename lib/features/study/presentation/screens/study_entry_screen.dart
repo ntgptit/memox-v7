@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/navigation/route_names.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
@@ -23,7 +25,6 @@ import '../widgets/overlays/study_direction_chooser_widget.dart';
 import '../widgets/overlays/study_mode_chooser_widget.dart';
 import '../widgets/overlays/study_resume_widget.dart';
 import '../widgets/sections/study_entry_section_widget.dart';
-import 'study_options_screen.dart';
 import 'study_session_screen.dart';
 import '../../../../shared/widgets/mx_sheet.dart';
 
@@ -33,9 +34,27 @@ import '../../../../shared/widgets/mx_sheet.dart';
 /// BR-150, and offers only the ways in that are actually open: with nothing due,
 /// there is no review entry at all (BR-29, BR-145).
 class StudyEntryScreen extends ConsumerStatefulWidget {
-  const StudyEntryScreen({required this.deckId, super.key});
+  const StudyEntryScreen({
+    required this.deckId,
+    required this.optionsRouteName,
+    super.key,
+  });
 
   final String deckId;
+
+  /// The options route to push, named by whichever route table entry built this
+  /// screen — `deckStudyOptions` in the Library branch, `studyDeckOptions` in
+  /// the Study branch.
+  ///
+  /// **Passed in rather than worked out here.** This screen is mounted twice,
+  /// and the two mounts differ in the only thing a route decides: which branch
+  /// a push lands in. A single options route would move the bottom bar's
+  /// selected tab whenever it was opened from the other branch, because
+  /// `StatefulNavigationShell` takes its index from the branch that owns the
+  /// matched route. The branch is the route's fact, so the route table is what
+  /// says it; a screen guessing from its own location would be the same fact
+  /// written down twice.
+  final String optionsRouteName;
 
   @override
   ConsumerState<StudyEntryScreen> createState() => _StudyEntryScreenState();
@@ -43,6 +62,7 @@ class StudyEntryScreen extends ConsumerStatefulWidget {
 
 class _StudyEntryScreenState extends ConsumerState<StudyEntryScreen> {
   String get deckId => widget.deckId;
+  String get optionsRouteName => widget.optionsRouteName;
 
   @override
   void initState() {
@@ -357,11 +377,18 @@ class _StudyEntryScreenState extends ConsumerState<StudyEntryScreen> {
   /// The card limit is one of the two numbers this screen is about, so coming
   /// back from changing it to a screen still showing the old one would be the
   /// same disagreement as returning from a session — see [_open].
+  ///
+  /// **By name, not by `MaterialPageRoute`** (A8 P2-15). The imperative push
+  /// put the options on the branch navigator with no location, so the router
+  /// went on naming this screen for as long as the options were the thing on
+  /// screen. The route is a child of whichever entry route built this screen,
+  /// so the pushed page still renders inside the shell and Back still lands
+  /// here — `pushNamed` returns a future that completes on the pop, which is
+  /// what keeps the refresh below.
   Future<void> _openOptions(BuildContext context) async {
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => StudyOptionsScreen(deckId: deckId),
-      ),
+    await context.pushNamed(
+      optionsRouteName,
+      pathParameters: <String, String>{RoutePathParams.deckId: deckId},
     );
 
     if (!mounted) return;

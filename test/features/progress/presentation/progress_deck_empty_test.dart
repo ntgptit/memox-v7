@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/progress/domain/models/deck_activity_model.dart';
 import 'package:memox/features/progress/domain/models/deck_activity_snapshot_model.dart';
+import 'package:memox/features/progress/domain/models/progress_path_segment_model.dart';
 import 'package:memox/features/progress/presentation/screens/progress_deck_screen.dart';
 import 'package:memox/features/progress/presentation/widgets/sections/progress_range_selector_widget.dart';
 import 'package:memox/features/progress/presentation/widgets/sections/progress_summary_widget.dart';
@@ -104,6 +105,47 @@ void main() {
       expect(find.text(english.progressEmptySubDecksTitle), findsOneWidget);
       expect(find.byType(ProgressSummaryWidget), findsOneWidget);
       expect(find.text('Verbs'), findsOneWidget);
+      // A root has no ancestors, so `scopePath` is empty one level in and the
+      // plain sentence stands — the name in the bar is already the whole
+      // answer to "which deck is this".
+      expect(find.text(english.progressEmptySubDecksMessage), findsOneWidget);
+    });
+
+    testWidgets('a deck deep in the tree names its place when nothing lists', (
+      tester,
+    ) async {
+      // The one state where nothing else on screen answers "where am I". Every
+      // row prints its own path, so while there are rows the bare name in the
+      // bar is enough; with none, a title of `Verbs` does not say which `Verbs`
+      // — the question the Library answers above every body state.
+      await pumpProgressScreen(
+        tester,
+        repository: FakeProgressRepository.withSnapshot(
+          activitySnapshot(
+            decks: const <DeckActivity>[],
+            scopeDeckId: 'leaf',
+            scopeName: 'Verbs',
+            scopePath: const <ProgressPathSegment>[
+              ProgressPathSegment(id: 'root', name: 'Spanish'),
+              ProgressPathSegment(id: 'mid', name: 'Grammar'),
+            ],
+            scopeLast7Days: activityMetrics(activeCards: 9, activeDays: 3),
+          ),
+        ),
+        screen: const ProgressDeckScreen(deckId: 'leaf'),
+      );
+
+      expect(
+        find.text(
+          english.progressEmptySubDecksScopeMessage(
+            'Spanish${english.progressPathSeparator}Grammar'
+            '${english.progressPathSeparator}Verbs',
+          ),
+        ),
+        findsOneWidget,
+      );
+      // One answer, not two: the deck-less sentence must not also be on screen.
+      expect(find.text(english.progressEmptySubDecksMessage), findsNothing);
     });
   });
 

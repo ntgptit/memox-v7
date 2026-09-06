@@ -8,6 +8,7 @@ import 'package:memox/features/card/domain/models/tag_catalog_entry_model.dart';
 import 'package:memox/features/card/presentation/screens/card_list_screen.dart';
 import 'package:memox/features/card/presentation/screens/tag_catalog_screen.dart';
 import 'package:memox/l10n/generated/app_localizations.dart';
+import 'package:memox/l10n/generated/app_localizations_en.dart';
 
 import 'support/card_detail_geometry.dart';
 import 'support/card_detail_harness.dart';
@@ -106,5 +107,78 @@ void main() {
     );
     await tester.pumpAndSettle();
     await sweep(tester);
+  });
+
+  // **A sheet is a new surface, and its title is that surface's name.**
+  //
+  // The durable half of SC-C4-21. Two card sheets set their title as a bare
+  // `Text`, so a reader met the name of a surface that had just opened as an
+  // ordinary sentence and had nothing to jump to. Each fix is also pinned
+  // beside the rest of its own sheet's anatomy; what is *here* is the grammar,
+  // and this is the group a newly-added sheet joins.
+  //
+  // It cannot live in `mx_sheet_test.dart`, which is where the rule is written
+  // down: that file asserts `isHeader` on `MxSheetHeader`, and only a
+  // `showMxSheet` call reaches it. A sheet opened through `showMxFormSheet`
+  // builds its own title inside the feature, and nothing was watching those —
+  // which is precisely the pair that drifted.
+  group('a sheet names itself as a heading (A20.1 P1-01)', () {
+    final english = AppLocalizationsEn();
+
+    void expectHeading(WidgetTester tester, String title) {
+      final node = tester.getSemantics(find.text(title));
+      expect(
+        node.flagsCollection.isHeader,
+        isTrue,
+        reason: '"$title" names a surface that just opened',
+      );
+      expect(node.label, title);
+    }
+
+    testWidgets('filter by tags, from the card list', (tester) async {
+      final handle = tester.ensureSemantics();
+      final cards = FakeCardRepository.loaded(
+        <dynamic>[FakeCardRepository().listItem('c1')].cast(),
+        total: 1,
+      );
+      addTearDown(cards.dispose);
+      await pumpTagSurface(
+        tester,
+        home: const CardListScreen(deckId: 'deck-1'),
+        catalog: FakeTagCatalogRepository.seeded(const <TagCatalogEntry>[
+          TagCatalogEntry(id: 't1', name: 'noun', cardCount: 12),
+        ]),
+        cards: cards,
+      );
+      await tester.pumpAndSettle();
+
+      // By its glyph, not its label: once a filter is applied the pill carries
+      // the count, so a text finder stops matching the control it just used.
+      await tester.tap(find.byIcon(Icons.sell_outlined).first);
+      await tester.pumpAndSettle();
+
+      expectHeading(tester, english.tagFilterTitle);
+      handle.dispose();
+    });
+
+    testWidgets('rename tag, from the tag catalog', (tester) async {
+      final handle = tester.ensureSemantics();
+      await pumpTagSurface(
+        tester,
+        home: const TagCatalogScreen(),
+        catalog: FakeTagCatalogRepository.seeded(const <TagCatalogEntry>[
+          TagCatalogEntry(id: 't1', name: 'nouns', cardCount: 3),
+        ]),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip(english.tagRowMenuSemantics('nouns')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(english.tagRenameAction));
+      await tester.pumpAndSettle();
+
+      expectHeading(tester, english.tagRenameTitle);
+      handle.dispose();
+    });
   });
 }

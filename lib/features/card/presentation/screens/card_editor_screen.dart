@@ -3,11 +3,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/error/failure.dart';
 import '../../../../core/state/submit_outcome.dart';
+import '../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_icon_button.dart';
 import '../../domain/entities/card_entity.dart';
+import '../../domain/models/deck_context_model.dart';
 import '../controllers/card_create_controller.dart';
 import '../controllers/card_editor_load_controller.dart';
 import '../controllers/card_flag_controller.dart';
@@ -19,6 +22,7 @@ import '../widgets/overlays/card_discard_confirm_widget.dart';
 import '../widgets/sections/card_create_action_bar_widget.dart';
 import '../widgets/sections/card_create_form_widget.dart';
 import '../widgets/sections/card_editor_action_bar_widget.dart';
+import '../widgets/sections/card_editor_breadcrumb_widget.dart';
 import '../widgets/sections/card_editor_form_widget.dart';
 import '../widgets/sections/card_editor_save_shortcut_widget.dart';
 import '../widgets/sections/card_flag_toggle_widget.dart';
@@ -48,9 +52,13 @@ import '../../../../shared/widgets/mx_error_state.dart';
 ///   Only the footer spins — two spinners read as two operations.
 /// - **Dirty is a comparison.** [CardContentDraft] holds the five values as a
 ///   save would store them, so typing a word and deleting it lands on pristine.
-/// - **There is one way out.** The back arrow, Cancel, the system gesture *and
-///   every breadcrumb crumb* reach `_handleExitRequest`. The crumbs were the
-///   ones that did not, and they dropped drafts silently.
+/// - **There is one way out, in both modes.** The back arrow, Cancel, the
+///   system gesture *and every breadcrumb crumb* reach `_handleExitRequest`.
+///   The crumbs were the ones that did not, and they dropped drafts silently.
+///   Create was the whole *mode* that did not: it had no guard at all until
+///   SC-C4-02, so its ✕ and the system gesture threw away a typed card without
+///   asking. It has the same shape now — `_handleCreateExitRequest`, its own
+///   sentence, everything else identical.
 ///
 /// It navigates nothing itself: controllers report outcomes and this widget
 /// reacts — a controller holding a `BuildContext` is the crash
@@ -106,13 +114,20 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
   @override
   void initState() {
     super.initState();
-    // Edit's alone. Create shares the controllers but has no baseline to
-    // compare against — it saves whatever is typed and closes — so tracking
-    // dirtiness there would be five listeners answering a question nobody asks.
-    if (widget.cardId == null) return;
     for (final controller in _contentControllers) {
       controller.addListener(_recomputeDirty);
     }
+    // **Create's baseline is the empty draft, and that is the whole fix**
+    // (SC-C4-02). It used to have no baseline at all, on the reasoning that a
+    // form which saves whatever is typed has nothing to compare against — and
+    // the consequence was that create was the one form route in the app with
+    // no unsaved-work guard: the ✕ and the system gesture dropped a fully
+    // typed card without a word. Seeding it here reuses the snapshot
+    // comparison rather than adding a second predicate beside it, so
+    // save-and-add-another lands back on pristine for free: it clears the
+    // controllers, and cleared *is* the baseline.
+    if (widget.cardId != null) return;
+    _baseline = _draft;
   }
 
   /// **Unreachable today, and cheap enough to keep that way.** Nothing rebuilds
@@ -181,12 +196,17 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
 
   // ---- create ------------------------------------------------------------
 
-  /// Create's shell: no breadcrumb, no tags, no discard guard — and the two
-  /// dispositions pinned in [MxContentShell.footer] rather than sitting at the
-  /// end of the scroll. The front field autofocuses, so the keyboard is up on
-  /// the first frame and the body has already shrunk; a Save inside that scroll
-  /// starts off screen, which is the failure the footer slot was added to fix
-  /// (SC-C1-02).
+  /// Create's shell: no breadcrumb, no tags — and the two dispositions pinned
+  /// in [MxContentShell.footer] rather than sitting at the end of the scroll.
+  /// The front field autofocuses, so the keyboard is up on the first frame and
+  /// the body has already shrunk; a Save inside that scroll starts off screen,
+  /// which is the failure the footer slot was added to fix (SC-C1-02).
+  ///
+  /// **The discard guard is edit's, said again here** (SC-C4-02). It is the
+  /// same `PopScope` keyed on the same `_hasUnsavedWork`, reaching one
+  /// coordinator that the ✕ also calls — because "there is one way out" is a
+  /// claim about the screen, and a screen that honours it in one mode and not
+  /// the other has two grammars, in the direction that costs a typed card.
   Widget _buildCreate(BuildContext context) {
     final provider = cardCreateProvider(widget.deckId);
     final state = ref.watch(provider);
@@ -220,26 +240,70 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
           disposition: disposition,
         );
 
-    return MxContentShell(
-      title: context.l10n.cardEditorCreateTitle,
-      leading: _closeButton(context, _pop),
-      isScrollable: true,
-      footer: CardCreateActionBarWidget(
-        isSaving: busy,
-        onSave: busy ? null : () => submit(SubmitDisposition.close),
-        onSaveAndAdd: busy ? null : () => submit(SubmitDisposition.addAnother),
-      ),
-      body: CardCreateFormWidget(
-        state: state,
-        isBusy: busy,
-        front: _front,
-        back: _back,
-        example: _example,
-        hint: _hint,
-        pronunciation: _pronunciation,
-        frontFocus: _frontFocus,
+    // `canPop` tracks the draft rather than sitting at `false`, for the reason
+    // spelled out on edit's: claiming the gesture unconditionally suppresses
+    // Android's predictive-back preview even on a pristine form it is going to
+    // let through anyway.
+    return PopScope<Object?>(
+      canPop: !_hasUnsavedWork,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        unawaited(_handleCreateExitRequest());
+      },
+      child: MxContentShell(
+        title: context.l10n.cardEditorCreateTitle,
+        leading: _closeButton(
+          context,
+          () => unawaited(_handleCreateExitRequest()),
+        ),
+        isScrollable: true,
+        footer: CardCreateActionBarWidget(
+          isSaving: busy,
+          onSave: busy ? null : () => submit(SubmitDisposition.close),
+          onSaveAndAdd: busy
+              ? null
+              : () => submit(SubmitDisposition.addAnother),
+        ),
+        body: CardCreateFormWidget(
+          state: state,
+          isBusy: busy,
+          front: _front,
+          back: _back,
+          example: _example,
+          hint: _hint,
+          pronunciation: _pronunciation,
+          frontFocus: _frontFocus,
+        ),
       ),
     );
+  }
+
+  /// The one way out of the create form, whichever affordance asked.
+  ///
+  /// Edit's `_handleExitRequest` in every respect that matters — the same
+  /// re-entrancy guard, the same in-flight lock, the same "pristine leaves
+  /// without a question" — differing only in which provider is asked whether a
+  /// write is running and which sentence the dialog carries. Kept as its own
+  /// method rather than folded into edit's with a nullable `cardId`: the two
+  /// read different providers, and a coordinator that branches on mode is a
+  /// third thing to keep in step rather than a shared one.
+  Future<void> _handleCreateExitRequest() async {
+    if (ref.read(cardCreateProvider(widget.deckId)).isSubmitting) return;
+    if (_isDiscardOpen) return;
+    if (!_hasUnsavedWork) {
+      _pop();
+
+      return;
+    }
+
+    _isDiscardOpen = true;
+    final shouldDiscard = await showCardCreateDiscardConfirm(context);
+    if (!mounted) return;
+    _isDiscardOpen = false;
+    // `Keep editing` returns false and does nothing at all, which is what
+    // leaves the draft, the focus and the scroll where the user left them.
+    if (!shouldDiscard) return;
+    _pop();
   }
 
   // ---- edit --------------------------------------------------------------
@@ -336,12 +400,12 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
           // the footer owns saying that a save is running.
           CardEditorSaveShortcutWidget(onSave: canSave ? save : null),
         ],
-        subheader: flagState.failure == null
-            ? null
-            : CardWriteFailureTextWidget(
-                failure: flagState.failure!,
-                message: context.l10n.cardEditorFlagFailed,
-              ),
+        subheader: _editSubheader(
+          context,
+          cardId,
+          deckContext,
+          flagState.failure,
+        ),
         footer: CardEditorActionBarWidget(
           isSaving: busy,
           onCancel: () => unawaited(_handleExitRequest(cardId)),
@@ -351,8 +415,6 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
           deckId: widget.deckId,
           cardId: cardId,
           deckContext: deckContext,
-          onLeave: (navigate) =>
-              unawaited(_handleExitRequest(cardId, then: navigate)),
           state: state,
           isBusy: busy,
           front: _front,
@@ -367,6 +429,60 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
           onTagDraftChanged: _onTagDraftChanged,
         ),
       ),
+    );
+  }
+
+  /// Edit's pinned chrome: where this card is, and what the flag write just
+  /// did to it.
+  ///
+  /// **The slots were inverted, and this is the correction** (SC-C4-03).
+  /// `mx_content_shell.dart` names a body-mounted breadcrumb as the exact
+  /// defect [MxContentShell.subheader] was added to fix — and this screen had
+  /// the path scrolling away with the form while the pinned band carried a
+  /// transient flag-write failure on its own. The path is now what the band is
+  /// for, and the failure sits under it.
+  ///
+  /// **`subheader`, not `titleSubline`.** A subline's line ends where the
+  /// actions begin (`mx_content_shell.dart`), and this bar already carries a
+  /// leading, a title and two actions — the flag toggle and the compact Save.
+  ///
+  /// The failure keeps its own sentence: a generic `Please try again.` in the
+  /// opposite corner from the flag reads as a page error or as the front
+  /// field's. That the band grows by a line while the write is failing is the
+  /// same behaviour the save failure already has inline in the form, so it is
+  /// the message that is transient, not the chrome.
+  Widget? _editSubheader(
+    BuildContext context,
+    String cardId,
+    AsyncValue<DeckContextModel> deckContext,
+    Failure? flagFailure,
+  ) {
+    final Widget? breadcrumb = deckContext.whenOrNull(
+      data: (DeckContextModel deck) => CardEditorBreadcrumbWidget(
+        deckId: widget.deckId,
+        deck: deck,
+        // Every crumb is a way out, so every crumb asks the same question the
+        // back arrow, Cancel and the system gesture ask.
+        onLeave: (navigate) =>
+            unawaited(_handleExitRequest(cardId, then: navigate)),
+      ),
+    );
+    // Nothing to pin is no band at all, rather than an empty one with the
+    // band's own padding standing in for chrome.
+    if (breadcrumb == null && flagFailure == null) return null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        ?breadcrumb,
+        if (flagFailure != null) ...<Widget>[
+          if (breadcrumb != null) const SizedBox(height: AppSpacing.xs),
+          CardWriteFailureTextWidget(
+            failure: flagFailure,
+            message: context.l10n.cardEditorFlagFailed,
+          ),
+        ],
+      ],
     );
   }
 
@@ -470,9 +586,10 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
 
   /// **A back arrow in edit, an `×` in create, and the difference is real.**
   /// Edit is pushed onto the card list and returns to it; create is a form the
-  /// user opened and can abandon. [onClose] is the same coordinator the system
-  /// gesture reaches, which is the whole reason the discard question cannot be
-  /// answered differently depending on how the user tried to leave.
+  /// user opened and can abandon. **Abandon is not the same as discard
+  /// silently** — both modes now pass [onClose], the same coordinator the
+  /// system gesture reaches, which is the whole reason the discard question
+  /// cannot be answered differently depending on how the user tried to leave.
   Widget _closeButton(BuildContext context, VoidCallback onClose) =>
       MxIconButton(
         icon: widget.cardId == null ? Icons.close : Icons.arrow_back,

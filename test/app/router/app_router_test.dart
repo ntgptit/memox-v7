@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -326,6 +328,36 @@ void main() {
         ),
         findsOneWidget,
       );
+    });
+
+    // A20.1 P1-15, corrective pass — the 404 is a bar-less screen, and it has
+    // to say so. Both cases below are the same screen; the only difference is
+    // how the user got here, which is exactly what used to decide the chrome.
+    // Written as a pair on purpose: either one alone passes against the bug.
+    testWidgets('a top-level unknown location draws no bar', (tester) async {
+      await pumpApp(tester, initialLocation: missing);
+
+      expect(find.byType(MxErrorState), findsOneWidget);
+      expect(find.byType(AppBar), findsNothing);
+      expect(find.byType(BackButton), findsNothing);
+    });
+
+    testWidgets('an unknown location pushed onto a stack draws no bar either', (
+      tester,
+    ) async {
+      // The case that failed before `chrome: MxShellChrome.none`: go_router
+      // builds the error page on top of the existing stack, so the route
+      // implies dismissal and `auto` kept a 56dp untitled bar with an inferred
+      // Back above a face that already names the screen.
+      final router = await pumpApp(tester);
+
+      unawaited(router.push(missing));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(RouteNotFoundScreen), findsOneWidget);
+      expect(find.byType(MxErrorState), findsOneWidget);
+      expect(find.byType(AppBar), findsNothing);
+      expect(find.byType(BackButton), findsNothing);
     });
   });
 }

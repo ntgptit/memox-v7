@@ -34,3 +34,24 @@ Future<bool> showCardEditorDiscardConfirm(BuildContext context) =>
       variant: MxConfirmDialogVariant.destructive,
       tone: MxDialogTone.warning,
     );
+
+/// The same question in create mode (SC-C4-02).
+///
+/// **One sentence differs, and only that one.** Title, both labels, the
+/// destructive variant and the warning tone are edit's — asking the same
+/// question two ways is how one screen ends up with two guard grammars, which
+/// is the defect this pass exists to close. What cannot carry over is the
+/// body: edit's reassures that tags and the flag are already written, and on a
+/// card that has never been saved there is nothing of the sort to reassure
+/// about. A sentence naming things that do not exist is worse than no
+/// reassurance at all.
+Future<bool> showCardCreateDiscardConfirm(BuildContext context) =>
+    showMxConfirm(
+      context,
+      title: context.l10n.cardEditorDiscardTitle,
+      message: context.l10n.cardCreateDiscardMessage,
+      confirmLabel: context.l10n.cardEditorDiscardConfirm,
+      cancelLabel: context.l10n.cardEditorDiscardCancel,
+      variant: MxConfirmDialogVariant.destructive,
+      tone: MxDialogTone.warning,
+    );

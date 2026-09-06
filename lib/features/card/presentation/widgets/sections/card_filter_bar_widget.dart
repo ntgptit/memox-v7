@@ -26,9 +26,22 @@ void _selectFilter(WidgetRef ref, String deckId, CardListFilter filter) =>
 /// carries its own count from its own statement; the label reads it once loaded,
 /// showing the base word until then rather than a flickering zero.
 class CardFilterBarWidget extends ConsumerStatefulWidget {
-  const CardFilterBarWidget({required this.deckId, super.key});
+  const CardFilterBarWidget({
+    required this.deckId,
+    this.isEnabled = true,
+    super.key,
+  });
 
   final String deckId;
+
+  /// False while the list is in selection mode (SC-C4-12).
+  ///
+  /// The bar stays mounted and keeps its paint — removing it would drop ~60dp
+  /// of chrome on the frame the long press lands — but every control drops its
+  /// callback, so the narrowing that "select all matching" resolves against
+  /// cannot change under it. The same treatment, for the same reason,
+  /// `trash_screen.dart` gives its own filter band.
+  final bool isEnabled;
 
   @override
   ConsumerState<CardFilterBarWidget> createState() =>
@@ -137,7 +150,7 @@ class _CardFilterBarWidgetState extends ConsumerState<CardFilterBarWidget> {
             ),
           ),
         ),
-        _TagsEntry(deckId: deckId),
+        _TagsEntry(deckId: deckId, isEnabled: widget.isEnabled),
       ],
     );
   }
@@ -163,7 +176,9 @@ class _CardFilterBarWidgetState extends ConsumerState<CardFilterBarWidget> {
     label: label,
     icon: icon,
     isSelected: filter == active,
-    onPressed: () => _selectFilter(ref, deckId, filter),
+    onPressed: widget.isEnabled
+        ? () => _selectFilter(ref, deckId, filter)
+        : null,
     // **The count left the label, not the pill.** The row stopped fitting once
     // every pill carried an icon, and the visible number was the cheapest thing
     // to give up: the progress panel directly below repeats All, Due and New.
@@ -191,9 +206,14 @@ class _CardFilterBarWidgetState extends ConsumerState<CardFilterBarWidget> {
 /// by its content — the count in the label and in the spoken name — not by a
 /// selection the row does not have.
 class _TagsEntry extends ConsumerWidget {
-  const _TagsEntry({required this.deckId});
+  const _TagsEntry({required this.deckId, required this.isEnabled});
 
   final String deckId;
+
+  /// See [CardFilterBarWidget.isEnabled]: this control opens a sheet that
+  /// rewrites the same narrowing the pills beside it do, so it goes inert with
+  /// them rather than staying the one live way to change the set.
+  final bool isEnabled;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -208,7 +228,9 @@ class _TagsEntry extends ConsumerWidget {
       icon: Icons.sell_outlined,
       variant: MxActionButtonVariant.secondary,
       size: MxActionButtonSize.compact,
-      onPressed: () => showCardTagFilterSheet(context, deckId),
+      onPressed: isEnabled
+          ? () => showCardTagFilterSheet(context, deckId)
+          : null,
       semanticLabel: tags.isActive
           ? context.l10n.tagFilterPillSemantics(tags.length)
           : null,

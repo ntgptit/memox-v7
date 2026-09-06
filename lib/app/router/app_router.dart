@@ -19,6 +19,7 @@ import '../../features/search/presentation/screens/library_search_screen.dart';
 import '../../features/trash/presentation/screens/trash_screen.dart';
 import '../../features/study/presentation/screens/study_entry_screen.dart';
 import '../../features/study/presentation/screens/study_home_screen.dart';
+import '../../features/study/presentation/screens/study_options_screen.dart';
 import '../fallback/route_not_found_screen.dart';
 import '../shell/app_navigation_shell.dart';
 import 'route_paths.dart';
@@ -147,7 +148,29 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
                         name: RouteNames.deckStudy,
                         builder: (context, state) => StudyEntryScreen(
                           deckId: state.pathParameters[RoutePathParams.deckId]!,
+                          // The options route of *this* branch. The screen is
+                          // mounted twice and the branch is the route's fact,
+                          // not the screen's, so the table names the child it
+                          // owns rather than leaving the screen to guess.
+                          optionsRouteName: RouteNames.deckStudyOptions,
                         ),
+                        routes: <RouteBase>[
+                          // How much to study, and in what order (UC-15,
+                          // BR-147, BR-148). A child route rather than the
+                          // imperative `MaterialPageRoute` it used to be
+                          // (A8 P2-15): it rendered inside the shell either
+                          // way, and this way it also has a location, so the
+                          // router stops naming the entry screen while the
+                          // options are the thing on screen.
+                          GoRoute(
+                            path: RoutePaths.studyOptionsRelative,
+                            name: RouteNames.deckStudyOptions,
+                            builder: (context, state) => StudyOptionsScreen(
+                              deckId:
+                                  state.pathParameters[RoutePathParams.deckId]!,
+                            ),
+                          ),
+                        ],
                       ),
                       // The card list of a card-type deck, nested so its URL is
                       // `/decks/<id>/cards` and it stays inside the Decks branch.
@@ -190,6 +213,20 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
                                   state.pathParameters[RoutePathParams.deckId]!,
                             ),
                           ),
+                          // **Edit stays inside the branch, and that is a
+                          // decision rather than an accident of nesting**
+                          // (SC-C4-04). It is a page pushed onto the card list
+                          // and returning to it — its back arrow says so — and
+                          // it pushes a branch route of its own for the card's
+                          // history, which a root-navigator placement would
+                          // render *beneath* the editor. The cost is real and
+                          // accepted: the screen pins its own action bar in
+                          // `MxContentShell.footer`, so that band sits above
+                          // the branch's four-destination navigation bar. The
+                          // import wizard above escapes because it is a task
+                          // with no branch route under it; this is not that.
+                          // Recorded in `docs/wbs.md`, "Deferred and
+                          // descoped".
                           GoRoute(
                             path: RoutePaths.cardEditRelative,
                             name: RouteNames.cardEditorEdit,
@@ -250,7 +287,20 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
                     // occur without it.
                     builder: (context, state) => StudyEntryScreen(
                       deckId: state.pathParameters[RoutePathParams.deckId]!,
+                      // The Study branch's own options route — the sibling of
+                      // the Library branch's, for the same reason this route
+                      // is the sibling of `deckStudy`.
+                      optionsRouteName: RouteNames.studyDeckOptions,
                     ),
+                    routes: <RouteBase>[
+                      GoRoute(
+                        path: RoutePaths.studyOptionsRelative,
+                        name: RouteNames.studyDeckOptions,
+                        builder: (context, state) => StudyOptionsScreen(
+                          deckId: state.pathParameters[RoutePathParams.deckId]!,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

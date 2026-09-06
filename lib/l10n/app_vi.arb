@@ -936,10 +936,6 @@
   "@cardSearchEmptyMessage": {
     "description": "Card search (S1)."
   },
-  "cardSortLabel": "Sắp xếp",
-  "@cardSortLabel": {
-    "description": "Semantic label of the card list's sort control (D3)."
-  },
   "cardSortNewest": "Mới nhất",
   "@cardSortNewest": {
     "description": "Sort option: newest cards first — the default (UC-04 A4)."
@@ -947,6 +943,19 @@
   "cardSortDueFirst": "Đến hạn trước",
   "@cardSortDueFirst": {
     "description": "Sort option: cards due soonest first (BR-22)."
+  },
+  "cardSortSheetTitle": "Sắp xếp thẻ theo",
+  "@cardSortSheetTitle": {
+    "description": "Title of the bottom sheet that chooses the card-list order (D3). Names the axis, because each row names a value of it."
+  },
+  "cardSortControlSemanticLabel": "Sắp xếp thẻ. Hiện đang {current}",
+  "@cardSortControlSemanticLabel": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      }
+    },
+    "description": "Screen-reader label of the sort control on the card list's count row. The painted label is a value — the order in force — so a reader hearing it alone is told a word and not what pressing it does; the announcement contains the painted label rather than replacing it (WCAG 2.5.3). Replaces the bare cardSortLabel the menu-shaped control carried."
   },
   "cardProgressStudyAction": "{count, plural, other{Bắt đầu học · {count} thẻ}}",
   "@cardProgressStudyAction": {
@@ -1525,6 +1534,10 @@
   "cardEditorDiscardCancel": "Tiếp tục sửa",
   "@cardEditorDiscardCancel": {
     "description": "Secondary action of the discard dialog: stay on the editor with the draft intact."
+  },
+  "cardCreateDiscardMessage": "Thẻ này chưa được lưu và sẽ mất.",
+  "@cardCreateDiscardMessage": {
+    "description": "Body of the discard dialog in create mode. Its own sentence, not the edit one: nothing about this card is written yet, so the edit copy's reassurance about tags and the flag would name things that do not exist (SC-C4-02)."
   },
   "cardEditorTagCapReached": "Đã dùng hết {max} nhãn. Xóa bớt một nhãn để thêm nhãn mới.",
   "@cardEditorTagCapReached": {
@@ -3133,6 +3146,15 @@
   "progressEmptySubDecksMessage": "Bộ thẻ này chứa thẻ, nên số liệu tổng ở trên đã là toàn bộ.",
   "@progressEmptySubDecksMessage": {
     "description": "Body of the no-sub-decks state."
+  },
+  "progressEmptySubDecksScopeMessage": "{path} chứa thẻ, nên số liệu tổng ở trên đã là toàn bộ.",
+  "@progressEmptySubDecksScopeMessage": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    },
+    "description": "Same sentence for a deck that has ancestors, with the path down to and including the deck in place of \"This deck\"."
   },
   "progressNoActivityTitle": "Chưa học gì trong khoảng này",
   "@progressNoActivityTitle": {

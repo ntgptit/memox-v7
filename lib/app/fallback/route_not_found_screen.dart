@@ -29,6 +29,14 @@ class RouteNotFoundScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MxContentShell(
+      // **`none`, said out loud** (A20.1 P1-15, corrective pass). Passing no
+      // title used to be enough; since the shell keeps its bar for any route
+      // that implies dismissal, the chrome was decided by how the user arrived
+      // rather than by the screen — a top-level error match drew no bar, and a
+      // pushed one grew a 56dp untitled bar with an inferred Back above a face
+      // that already carries the screen's name. The face is the whole screen,
+      // so the policy is stated, and both arrival paths look the same.
+      chrome: MxShellChrome.none,
       // The screen has no bar to name the route, so the face names it
       // (A20.1 P3-10): a reader arriving here hears where they are before
       // the message.

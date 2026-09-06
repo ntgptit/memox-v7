@@ -270,4 +270,20 @@ void main() {
       expect(actions.top - field.bottom, AppSpacing.lg);
     });
   });
+
+  testWidgets('the title announces as a heading, not a sentence (SC-C4-21)', (
+    tester,
+  ) async {
+    // The same grammar every other sheet in the app writes, and the same blind
+    // spot: `mx_sheet_test.dart` only watches `MxSheetHeader`, which is the
+    // `showMxSheet` path. This sheet opens through `showMxFormSheet` and sets
+    // its own title, so this file is what holds the rule.
+    final handle = tester.ensureSemantics();
+    await openRename(tester, FakeTagCatalogRepository.seeded(tags));
+
+    final node = tester.getSemantics(find.text('Rename tag'));
+    expect(node.flagsCollection.isHeader, isTrue);
+    expect(node.label, 'Rename tag');
+    handle.dispose();
+  });
 }

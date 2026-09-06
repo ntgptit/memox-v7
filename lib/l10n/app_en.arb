@@ -936,10 +936,6 @@
   "@cardSearchEmptyMessage": {
     "description": "Card search (S1)."
   },
-  "cardSortLabel": "Sort",
-  "@cardSortLabel": {
-    "description": "Semantic label of the card list's sort control (D3)."
-  },
   "cardSortNewest": "Newest",
   "@cardSortNewest": {
     "description": "Sort option: newest cards first — the default (UC-04 A4)."
@@ -947,6 +943,19 @@
   "cardSortDueFirst": "Due first",
   "@cardSortDueFirst": {
     "description": "Sort option: cards due soonest first (BR-22)."
+  },
+  "cardSortSheetTitle": "Sort cards by",
+  "@cardSortSheetTitle": {
+    "description": "Title of the bottom sheet that chooses the card-list order (D3). Names the axis, because each row names a value of it."
+  },
+  "cardSortControlSemanticLabel": "Sort cards. Currently {current}",
+  "@cardSortControlSemanticLabel": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      }
+    },
+    "description": "Screen-reader label of the sort control on the card list's count row. The painted label is a value — the order in force — so a reader hearing it alone is told a word and not what pressing it does; the announcement contains the painted label rather than replacing it (WCAG 2.5.3). Replaces the bare cardSortLabel the menu-shaped control carried."
   },
   "cardProgressStudyAction": "{count, plural, =1{Start study · 1 card} other{Start study · {count} cards}}",
   "@cardProgressStudyAction": {
@@ -1525,6 +1534,10 @@
   "cardEditorDiscardCancel": "Keep editing",
   "@cardEditorDiscardCancel": {
     "description": "Secondary action of the discard dialog: stay on the editor with the draft intact."
+  },
+  "cardCreateDiscardMessage": "This card hasn't been saved yet and will be lost.",
+  "@cardCreateDiscardMessage": {
+    "description": "Body of the discard dialog in create mode. Its own sentence, not the edit one: nothing about this card is written yet, so the edit copy's reassurance about tags and the flag would name things that do not exist (SC-C4-02)."
   },
   "cardEditorTagCapReached": "All {max} tags are in use. Remove one to add another.",
   "@cardEditorTagCapReached": {
@@ -3133,6 +3146,15 @@
   "progressEmptySubDecksMessage": "This deck holds cards, so its own totals above are the whole story.",
   "@progressEmptySubDecksMessage": {
     "description": "Body of the no-sub-decks state. Points back at the summary rather than presenting the level as empty, because it is not: the deck has figures."
+  },
+  "progressEmptySubDecksScopeMessage": "{path} holds cards, so its own totals above are the whole story.",
+  "@progressEmptySubDecksScopeMessage": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    },
+    "description": "Same sentence for a deck that has ancestors, with the path down to and including the deck in place of \"This deck\". Every row prints its own path, so the bare name in the app bar is enough while there are rows; with none, nothing else on screen says which of several same-named decks this level is."
   },
   "progressNoActivityTitle": "Nothing studied in this window",
   "@progressNoActivityTitle": {

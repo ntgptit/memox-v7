@@ -72,7 +72,20 @@ class _CardImportScreenState extends ConsumerState<CardImportScreen> {
   ///
   /// Never mid-commit: the transaction is atomic and cannot honestly be
   /// cancelled, so leaving is locked until it resolves either way (F).
-  Future<void> _cancel() async {
+  Future<void> _cancel() => _leaveVia(_popOrFallback);
+
+  /// Leaving the wizard for somewhere the user picked, guarded once.
+  ///
+  /// **The path strip is a way out too** (SC-C4-07). Its tap goes up to the
+  /// deck and its long-press reaches any ancestor, which is the app's one
+  /// up-navigation grammar — and both leave a draft behind. So they route
+  /// through the same question ✕ asks and inherit the same commit lock: a
+  /// transaction in flight cannot honestly be cancelled, so nothing on this
+  /// screen may navigate away from it.
+  ///
+  /// The editor's `onLeave` shape, deliberately: [navigate] is a thunk, so
+  /// this decides *whether* the navigation happens rather than what it is.
+  Future<void> _leaveVia(VoidCallback navigate) async {
     if (ref.read(commitCardImportProvider(widget.deckId)).isSubmitting) {
       return;
     }
@@ -81,7 +94,7 @@ class _CardImportScreenState extends ConsumerState<CardImportScreen> {
       final discard = await showCardImportDiscardConfirm(context);
       if (!mounted || !discard) return;
     }
-    _popOrFallback();
+    navigate();
   }
 
   /// Android Back: a step back first (W5); the Source step behaves as
@@ -239,6 +252,7 @@ class _CardImportScreenState extends ConsumerState<CardImportScreen> {
             ? null
             : CardImportContextWidget(
                 deckId: deckId,
+                onLeave: (navigate) => unawaited(_leaveVia(navigate)),
                 stepper: CardImportStepperWidget(
                   current: step,
                   completed: completed,

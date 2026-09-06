@@ -9,9 +9,12 @@ import 'package:memox/features/card/domain/models/card_list_filter_model.dart';
 import 'package:memox/features/card/domain/models/card_list_item_model.dart';
 import 'package:memox/features/card/presentation/screens/card_list_screen.dart';
 import 'package:memox/features/card/presentation/widgets/items/card_tile_widget.dart';
+import 'package:memox/features/card/presentation/widgets/sections/card_filter_bar_widget.dart';
 import 'package:memox/features/card/presentation/widgets/sections/card_selection_bar_widget.dart';
 import 'package:memox/l10n/generated/app_localizations.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
+import 'package:memox/shared/widgets/mx_pill_button.dart';
+import 'package:memox/shared/widgets/mx_search_field.dart';
 
 import 'support/fake_card_repository.dart';
 import 'dart:ui' show Tristate;
@@ -297,5 +300,114 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(repository.bulkDeletes.single, hasLength(2));
+  });
+
+  /// The chrome of selection mode (SC-C4-12), against the shape
+  /// `trash_screen.dart` settled on: the bar names the selection and offers one
+  /// way out, the band offers the verbs, and the narrowing above cannot move
+  /// while a set is held against it.
+  group('the chrome while selecting', () {
+    testWidgets('offers exactly one way out, in the bar', (tester) async {
+      final repository = seeded();
+      addTearDown(repository.dispose);
+      await pump(tester, repository);
+      await tester.longPress(tileAt(0));
+      await tester.pumpAndSettle();
+
+      // One ✕ on the whole screen, and it is the bar's leading. It used to be
+      // the band's first child *and* the shell drew the platform arrow beside
+      // it — two controls, one act.
+      expect(find.byIcon(Icons.close), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(AppBar),
+          matching: find.byIcon(Icons.close),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byType(CardSelectionBarWidget),
+          matching: find.byIcon(Icons.close),
+        ),
+        findsNothing,
+      );
+      expect(
+        tester.widget<AppBar>(find.byType(AppBar)).automaticallyImplyLeading,
+        isFalse,
+        reason: 'an explicit leading is what suppresses the platform arrow',
+      );
+      expect(find.byType(BackButton), findsNothing);
+    });
+
+    testWidgets('states the count once, in the bar', (tester) async {
+      final repository = seeded();
+      addTearDown(repository.dispose);
+      await pump(tester, repository);
+      await tester.longPress(tileAt(0));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.descendant(
+          of: find.byType(AppBar),
+          matching: find.text(english.cardSelectionCountLabel(1)),
+        ),
+        findsOneWidget,
+      );
+      // Not a second copy on the band: two numbers for one set are two numbers
+      // free to disagree about what the actions will run over.
+      expect(find.text(english.cardSelectionCountLabel(1)), findsOneWidget);
+    });
+
+    testWidgets('keeps the narrowing chrome mounted and makes it inert', (
+      tester,
+    ) async {
+      final repository = seeded();
+      addTearDown(repository.dispose);
+      await pump(tester, repository);
+
+      // Live before the long press: the control case, so the assertion below
+      // cannot pass by the pills never having had a callback.
+      expect(
+        tester
+            .widgetList<MxPillButton>(find.byType(MxPillButton))
+            .every((MxPillButton pill) => pill.onPressed != null),
+        isTrue,
+      );
+
+      await tester.longPress(tileAt(0));
+      await tester.pumpAndSettle();
+
+      // Still on screen — removing it would drop ~60dp of chrome on the frame
+      // the long press lands, moving the row out from under the finger.
+      expect(find.byType(MxSearchField), findsOneWidget);
+      expect(find.byType(CardFilterBarWidget), findsOneWidget);
+
+      // And inert: the set "select all matching" resolves against cannot move
+      // while a selection is held against it.
+      expect(
+        tester
+            .widgetList<MxPillButton>(find.byType(MxPillButton))
+            .every((MxPillButton pill) => pill.onPressed == null),
+        isTrue,
+      );
+      expect(
+        tester
+            .widget<IgnorePointer>(
+              find
+                  .ancestor(
+                    of: find.byType(MxSearchField),
+                    matching: find.byType(IgnorePointer),
+                  )
+                  .first,
+            )
+            .ignoring,
+        isTrue,
+        reason:
+            "MxSearchField.onChanged is required and non-nullable and the "
+            'shared primitive contract is frozen, so the field is made inert '
+            'at the call site instead',
+      );
+    });
   });
 }

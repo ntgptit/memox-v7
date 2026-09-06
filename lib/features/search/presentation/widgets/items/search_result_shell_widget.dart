@@ -6,7 +6,18 @@ import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 
 /// The frame every result row shares: the surface, the leading glyph, the
-/// trailing "opens elsewhere" arrow, and the tap target.
+/// trailing chevron, and the tap target.
+///
+/// **`chevron_right`, not `north_east`.** The trailing glyph was `north_east`,
+/// and it was the app's only one — the mark that conventionally says "this
+/// leaves here". Neither destination does: the deck row makes the same
+/// `pushNamed(RouteNames.deckDetail, ...)` call the deck list makes, so one
+/// route wore two affordances depending on which list it was reached from.
+/// `chevron_right` is what the rest of the app says for "there is a screen
+/// behind this" — the progress deck row, the settings reminder entry and the
+/// card editor's context row all use it, and `card_editor_details_widget.dart`
+/// states the rule outright. Same size step, same position, one glyph for one
+/// meaning.
 ///
 /// **One frame for two row types, so they cannot drift apart.** A deck row and
 /// a card row differ in what they say and in nothing else — the same gutter, the
@@ -80,7 +91,7 @@ class SearchResultShellWidget extends StatelessWidget {
                     const SizedBox(width: AppSpacing.md),
                     Expanded(child: child),
                     const SizedBox(width: AppSpacing.sm),
-                    const MxIcon(Icons.north_east, size: MxIconSize.sm),
+                    const MxIcon(Icons.chevron_right, size: MxIconSize.sm),
                   ],
                 ),
               ),

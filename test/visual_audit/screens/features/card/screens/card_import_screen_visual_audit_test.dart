@@ -57,13 +57,16 @@ void main() {
         itemId: 'wizard',
         reason: SkipReason.rasterOnly,
         detailContains: '_RenderInkFeatures',
-        expectedMatches: 8,
+        expectedMatches: 7,
         rationale:
             'The Material ink layers of the Scaffold, the AppBar, the close '
             'IconButton, the two tappable source cards, the two static MxCard '
             'panels and the action buttons. Splash and highlight paint into '
             'these layers; the overlay colours are asserted in '
-            'app_theme_test.dart.',
+            'app_theme_test.dart. '
+            'Seven, not eight: the path strip is one target now (SC-C4-07), so '
+            'the fold stopped being an interactive `more_horiz` button and '
+            'took its Material with it.',
       ),
       AuditSkipAllowance(
         itemId: 'wizard',
@@ -80,11 +83,13 @@ void main() {
         itemId: 'wizard',
         reason: SkipReason.customPainter,
         detailContains: 'CustomPaint (no painter)',
-        expectedMatches: 3,
+        expectedMatches: 2,
         rationale:
             'Material 3 buttons mount an empty CustomPaint per control as the '
             'ink-sparkle attachment point; with no painter installed it draws '
-            'nothing, so there is no colour to read or misread.',
+            'nothing, so there is no colour to read or misread. '
+            'Two, not three, for the same reason the ink layer dropped one: '
+            'the breadcrumb fold is no longer a control (SC-C4-07).',
       ),
     ],
   );

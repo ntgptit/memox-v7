@@ -103,20 +103,34 @@ class TrashScreen extends ConsumerWidget {
                   ? null
                   : (value) => _setFilter(ref, value),
             ),
-      body: MxAsyncView<List<TrashBatchEntity>>(
-        value: batches,
-        loadingLabel: l10n.trashTitle,
-        error: (error, _) => MxErrorState(
-          // The "Couldn't …" phrase is the headline, like every sibling
-          // screen-level failure; the screen name alone told the user
-          // nothing about what went wrong.
-          title: l10n.trashLoadErrorTitle,
-          message: l10n.trashLoadFailed,
-          retryLabel: l10n.trashRetryAction,
-          onRetry: () => ref.invalidate(trashBatchesProvider),
+      // **Back leaves selection first** (UC-21 A2), the rule the card list
+      // already states next door for the app's other multi-select list. While
+      // selecting, the bar's ✕ is the only exit on screen and it clears the
+      // selection — but the Android back gesture popped the route and took
+      // the selection with it. One gesture doing two things is one grammar too
+      // many; the guard makes the gesture mean what the visible affordance
+      // means, and the second Back still leaves Trash.
+      body: PopScope<Object?>(
+        canPop: !selection.isActive,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          _clearSelection(ref);
+        },
+        child: MxAsyncView<List<TrashBatchEntity>>(
+          value: batches,
+          loadingLabel: l10n.trashTitle,
+          error: (error, _) => MxErrorState(
+            // The "Couldn't …" phrase is the headline, like every sibling
+            // screen-level failure; the screen name alone told the user
+            // nothing about what went wrong.
+            title: l10n.trashLoadErrorTitle,
+            message: l10n.trashLoadFailed,
+            retryLabel: l10n.trashRetryAction,
+            onRetry: () => ref.invalidate(trashBatchesProvider),
+          ),
+          data: (values) =>
+              _TrashBody(filter: filter, selection: selection, batches: values),
         ),
-        data: (values) =>
-            _TrashBody(filter: filter, selection: selection, batches: values),
       ),
     );
   }

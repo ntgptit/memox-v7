@@ -1,6 +1,6 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 732,
+  "scannedFiles": 734,
   "totalSites": 308,
   "byElementKind": {
     "other": 269,
@@ -3143,7 +3143,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_context_widget.dart",
-      "line": 62,
+      "line": 101,
       "widget_context": "CardImportContextWidget",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -3220,7 +3220,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_selection_bar_widget.dart",
-      "line": 128,
+      "line": 132,
       "widget_context": "CardSelectionBarWidget",
       "element_kind": "background",
       "source_kind": "theme-token",

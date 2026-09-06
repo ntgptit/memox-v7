@@ -2,6 +2,7 @@
 library;
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/navigation/route_names.dart';
 import 'package:memox/features/study/presentation/screens/study_entry_screen.dart';
 import 'package:memox/shared/widgets/mx_content_shell.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
@@ -28,7 +29,10 @@ void main() {
     'study_entry_screen',
     () => studyScreenWith(
       FakeStudyRepository(),
-      const StudyEntryScreen(deckId: 'deck-1'),
+      const StudyEntryScreen(
+        deckId: 'deck-1',
+        optionsRouteName: RouteNames.deckStudyOptions,
+      ),
     ),
     // This screen declares one surface column (M99.19a): every row of
     // cards spans it, or stacks. Opted in explicitly, because a layout

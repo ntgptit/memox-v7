@@ -8,15 +8,21 @@ import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_icon.dart';
-import '../../../../../shared/widgets/mx_breadcrumb.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../domain/models/deck_context_model.dart';
-import '../overlays/card_ancestors_widget.dart';
 
 /// Where this card sits, and the one way out of the editor into its history.
 ///
-/// Three rows the concept puts above the form: the path, an entry to the card's
-/// detail screen, and the deck the card belongs to.
+/// Two rows the concept puts above the form: an entry to the card's detail
+/// screen, and the deck the card belongs to. **The path is no longer one of
+/// them** — it is chrome, and the shell pins it in `subheader`
+/// (`CardEditorBreadcrumbWidget`, SC-C4-03). What stays here is what scrolls
+/// with the form.
+///
+/// **And with the path went the exit coordinator.** The crumbs were the
+/// navigations in here that had to be guarded against dropping a draft; the
+/// one that remains — the history row — deliberately pushes without asking,
+/// because nothing is being left.
 ///
 /// **The deck row does not open a picker, and it is drawn so that it cannot
 /// look like one.** The concept shows a chevron beside the deck name; moving a
@@ -34,7 +40,6 @@ class CardEditorContextWidget extends StatelessWidget {
     required this.deckId,
     required this.cardId,
     required this.deckContext,
-    required this.onLeave,
     super.key,
   });
 
@@ -50,32 +55,24 @@ class CardEditorContextWidget extends StatelessWidget {
   /// away, the other is a screen that will never say where they are.
   final AsyncValue<DeckContextModel> deckContext;
 
-  /// Runs a navigation **through the editor's exit coordinator**.
-  ///
-  /// **Every crumb is a way out, and they were not guarded.** The screen's
-  /// whole contract is that leaving with unsaved work asks first; the back
-  /// arrow, Cancel and the system gesture all honoured it while four
-  /// `goNamed` calls in here walked straight past it and dropped the draft
-  /// without a word. The callback takes the navigation as a thunk so the guard
-  /// decides *whether* it happens, not this widget.
-  final void Function(VoidCallback navigate) onLeave;
-
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         ...deckContext.when(
-          data: (DeckContextModel deck) => <Widget>[
-            _buildBreadcrumb(context, deck),
-            const SizedBox(height: AppSpacing.md),
-          ],
+          // The path itself is the shell's now (SC-C4-03); with it gone this
+          // branch contributes nothing but the deck row further down.
+          data: (DeckContextModel deck) => const <Widget>[],
           // A frame, not a state worth drawing furniture for.
           loading: () => const <Widget>[],
           // **Said, not swallowed.** A deck that was deleted or a read that
           // failed used to look exactly like a deck that had not arrived yet:
           // the path simply was not there. The row below names what is
           // unavailable so the missing path is a fact rather than an absence.
+          // It stays in the body rather than following the path into the
+          // chrome: it is a sentence about this card's context, not a second
+          // pinned band, and the band already carries the flag failure.
           error: (Object error, StackTrace stackTrace) => <Widget>[
             Semantics(
               liveRegion: true,
@@ -96,44 +93,6 @@ class CardEditorContextWidget extends StatelessWidget {
           loading: () => const <Widget>[],
           error: (Object error, StackTrace stackTrace) => const <Widget>[],
         ),
-      ],
-    );
-  }
-
-  /// The card list's path with one more step: `Edit`, where the user is.
-  ///
-  /// Built here rather than reusing `CardBreadcrumbWidget` because that one
-  /// ends at the deck — its last step is the screen it belongs to. Adding a
-  /// parameter to make its leaf configurable would make two screens share a
-  /// widget whose whole shape is "the last crumb is me".
-  Widget _buildBreadcrumb(BuildContext context, DeckContextModel deck) {
-    // One grammar with the card list's trail (A20.1 P1-16): tap goes up,
-    // long-press reaches any ancestor. Both go through `onLeave`, which asks
-    // about unsaved changes first.
-    // One grammar with the card list's trail (A20.1 P1-16): tap goes up,
-    // long-press reaches any ancestor. Both go through `onLeave`, which asks
-    // about unsaved changes first.
-    return MxBreadcrumb(
-      semanticLabel: context.l10n.deckPathSemanticLabel,
-      rootIcon: Icons.home_outlined,
-      collapseAfter: 3,
-      // **Up is the deck this card is in**, not that deck's parent: the path
-      // reads `… / Deck / Edit`, and the strip goes one level up from the
-      // screen, which is Edit (A20.1 P1-16, corrective pass). The sheet
-      // lists the deck too, last, for the same reason.
-      onUp: () => goUpToDeck(context, deckId, onLeave: onLeave),
-      onShowAll: () => showCardAncestors(
-        context,
-        deckContext: deck,
-        currentDeck: DeckBreadcrumbSegment(id: deckId, name: deck.deckName),
-        onLeave: onLeave,
-      ),
-      items: <MxBreadcrumbItem>[
-        MxBreadcrumbItem(label: context.l10n.deckPathRootLabel),
-        for (final DeckBreadcrumbSegment segment in deck.ancestors)
-          MxBreadcrumbItem(label: segment.name),
-        MxBreadcrumbItem(label: deck.deckName),
-        MxBreadcrumbItem(label: context.l10n.cardEditorBreadcrumbLabel),
       ],
     );
   }

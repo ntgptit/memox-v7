@@ -98,7 +98,14 @@ class _TagFilterForm extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        Text(context.l10n.tagFilterTitle, style: context.texts.titleMedium),
+        // The sheet's title announces as a header (A20.1 P1-01, §23 #17).
+        Semantics(
+          header: true,
+          child: Text(
+            context.l10n.tagFilterTitle,
+            style: context.texts.titleMedium,
+          ),
+        ),
         const SizedBox(height: AppSpacing.xs),
         // **The one place OR is spelled out.** Two tags widen the result, which
         // is the opposite of what the four state pills next to this control do,

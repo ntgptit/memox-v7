@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../core/theme/extensions/app_ink.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -9,13 +8,10 @@ import '../../../../../shared/widgets/mx_menu_button.dart';
 import '../../../../../shared/widgets/mx_icon_button.dart';
 import '../../controllers/card_selection_controller.dart';
 
-/// Leaves selection mode, and takes every card the live filter matches
-/// (BR-167). Free functions rather than inline reads: `ref.read` written in
-/// `build()` reads without subscribing, and the guard cannot tell the two
-/// apart — the same shape `card_list_screen.dart` uses for its own commands.
-void _leaveSelection(WidgetRef ref, String deckId) =>
-    ref.read(cardSelectionProvider(deckId).notifier).clear();
-
+/// Takes every card the live filter matches (BR-167). A free function rather
+/// than an inline read: `ref.read` written in `build()` reads without
+/// subscribing, and the guard cannot tell the two apart — the same shape
+/// `card_list_screen.dart` uses for its own commands.
 Future<void> _takeAll(WidgetRef ref, String deckId) =>
     ref.read(cardSelectionProvider(deckId).notifier).includeAllMatching();
 
@@ -40,6 +36,14 @@ typedef CardBulkAction = ({
 /// wrapping. A band owns its own layout — the count can take a second line and
 /// the actions can fall into an overflow menu — which is what keeps the two
 /// requirements ("show the count", "never overflow") from fighting.
+///
+/// **The band carries the verbs; the app bar carries the identity**
+/// (SC-C4-12). It used to open with its own ✕ and print the count, while the
+/// shell drew the platform back arrow above it — two controls that both left
+/// selection, and a count on the band rather than in the bar that names the
+/// screen. The ✕ and the count moved to `MxContentShell`'s `leading` and
+/// `title`, which is where `trash_screen.dart` had already put them, and what
+/// is left here is what only this band can do.
 ///
 /// Two actions stay visible because they are the two the user came for; the
 /// rest live behind one overflow, so the row's width is fixed regardless of
@@ -133,30 +137,11 @@ class CardSelectionBarWidget extends ConsumerWidget {
           ),
           child: Row(
             children: <Widget>[
-              MxIconButton(
-                icon: Icons.close,
-                semanticLabel: l10n.cardSelectionCloseLabel,
-                onPressed: () => _leaveSelection(ref, deckId),
-              ),
-              Expanded(
-                child: Text(
-                  // Both labels count the same thing — the selection — and
-                  // differ only in wording. Printing a separate "matching"
-                  // total here would be a second number free to disagree with
-                  // the set the actions will run over.
-                  selection.isAllMatching
-                      ? l10n.cardSelectionAllLabel(selection.selectedCount)
-                      : l10n.cardSelectionCountLabel(selection.selectedCount),
-                  // Two lines rather than an ellipsis: the count is the one
-                  // thing on this bar the user must be able to read, and at
-                  // double scale the long form does not fit one line at 320.
-                  maxLines: 2,
-                  style: context.texts.titleSmall!.inked(
-                    context,
-                    AppInk.onSecondaryContainer,
-                  ),
-                ),
-              ),
+              // The count used to sit here, in a two-line label sized for
+              // 320dp at double scale. It is the app-bar title now, where
+              // `AppBar` ellipsizes it and no width on this row depends on how
+              // long the word for "selected" is in the current locale.
+              const Spacer(),
               MxIconButton(
                 icon: Icons.select_all,
                 semanticLabel: l10n.cardSelectAllAction,
