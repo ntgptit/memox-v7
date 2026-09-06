@@ -129,6 +129,21 @@ final class StudyDao {
   Future<Deck?> deckById(String id) =>
       (_db.select(_db.decks)..where((d) => d.id.equals(id))).getSingleOrNull();
 
+  /// The same row, watched.
+  ///
+  /// `deckById`'s generated query declares `readsFrom: {decks}`, so this
+  /// re-emits on any write to that table — a rename of this deck, and equally
+  /// a change to the root it resolves through. That is what the study entry
+  /// screen's title needs and what a `Future` could never give it: the Study
+  /// branch stays mounted inside `StatefulShellRoute.indexedStack`, so nothing
+  /// disposes the read and a one-shot never runs again.
+  ///
+  /// Emits `null` for a deck that is gone, which the repository turns into
+  /// "stop emitting" rather than an error — the same choice
+  /// `DeckContextReadDataSource` makes in the card feature.
+  Stream<Deck?> watchDeckById(String id) =>
+      _db.deckById(id).watchSingleOrNull();
+
   Future<CardStudyState?> studyStateOf(String cardId) => (_db.select(
     _db.cardStudyStates,
   )..where((s) => s.cardId.equals(cardId))).getSingleOrNull();

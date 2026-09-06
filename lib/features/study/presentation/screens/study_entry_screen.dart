@@ -416,9 +416,12 @@ class _StudyEntryScreenState extends ConsumerState<StudyEntryScreen> {
   void _refresh() {
     ref.invalidate(studyResumeProvider(deckId));
     ref.invalidate(studyEntryProvider(deckId));
-    // The title's read too: a rename made on the options route would otherwise
-    // leave the app bar naming the deck by its old name until the route is
-    // rebuilt for some other reason.
-    ref.invalidate(studyDeckContextProvider(deckId));
+    // **The title is not in this list any more, and that is the fix rather
+    // than an omission.** It used to be invalidated here because the read was
+    // a one-shot `Future` and `StatefulShellRoute.indexedStack` keeps this
+    // branch mounted, so nothing else ever re-ran it. That covered exactly one
+    // path — a rename made through this screen's own options round-trip — and
+    // left the app bar stale after a rename made anywhere else. The read is a
+    // `watch()` now, so it follows the row.
   }
 }

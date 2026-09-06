@@ -51,6 +51,20 @@ abstract interface class StudyRepository {
   /// two of the reads (AD-13).
   Future<StudyDeckContextModel> deckContext(String deckId);
 
+  /// The same context, watched.
+  ///
+  /// **Two methods, not one, and that is deliberate.** Everything that opens or
+  /// advances a session needs the context *once, now*, inside a transaction —
+  /// a stream there would be a subscription nobody closes. What the entry
+  /// screen needs is the opposite: a title that follows a rename while the
+  /// Study branch stays mounted. The verb prefix says which is which, as it
+  /// does on `CardRepository.watchDeckContext`.
+  ///
+  /// A deck that no longer exists stops the emissions rather than erroring:
+  /// the screen keeps the last name it had while the route unwinds, which is
+  /// better than replacing it with a failure the user cannot act on.
+  Stream<StudyDeckContextModel> watchDeckContext(String deckId);
+
   /// The schedule numbers of one card, for the scheduler to work from.
   ///
   /// Null when the card has no study state — broken data rather than a card

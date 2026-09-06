@@ -67,6 +67,39 @@ void main() {
     expect(find.text(english.appTitle), findsNothing);
   });
 
+  testWidgets('a rename reaches the app bar without remounting the screen', (
+    tester,
+  ) async {
+    final repository = FakeStudyRepository();
+    addTearDown(repository.deckContextChanges.close);
+    await pumpEntry(tester, repository: repository);
+
+    expect(
+      tester.widget<MxContentShell>(find.byType(MxContentShell)).title,
+      'Korean',
+    );
+
+    // The element the screen is mounted in, captured so the assertion below is
+    // about *this* screen surviving rather than about a new one appearing with
+    // the right name.
+    final Element before = tester.element(find.byType(StudyEntryScreen));
+
+    // A rename arriving from anywhere — a Drift `watch()` re-emitting after an
+    // UPDATE. Nothing on this screen asked for it.
+    repository.renameDeck('deck-1', 'Tiếng Hàn');
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.widget<MxContentShell>(find.byType(MxContentShell)).title,
+      'Tiếng Hàn',
+    );
+    // **The point of making the read a stream.** A `Future` provider could only
+    // have produced this by being invalidated, which means something had to
+    // rebuild the route — and `StatefulShellRoute.indexedStack` keeps this
+    // branch mounted precisely so that does not happen.
+    expect(tester.element(find.byType(StudyEntryScreen)), same(before));
+  });
+
   testWidgets('the fallback is this screen\'s own key, not the tab home\'s', (
     tester,
   ) async {

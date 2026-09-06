@@ -93,15 +93,43 @@ base class FakeStudyRepository
   /// it. Sessions built by this fake freeze generation 1.
   int schedulerGeneration = 1;
 
+  /// The deck name every context read reports.
+  ///
+  /// A field rather than a literal since the study title started watching it: a
+  /// rename is now something a test performs, and `deckContextChanges` is how
+  /// the watched read hears about it.
+  String deckName = 'Korean';
+
+  /// Pushes context emissions to whoever is watching.
+  ///
+  /// Broadcast because the entry screen and a test may both listen, and seeded
+  /// on subscribe so the first frame has a name rather than a spinner.
+  final StreamController<StudyDeckContextModel> deckContextChanges =
+      StreamController<StudyDeckContextModel>.broadcast();
+
+  StudyDeckContextModel _context(String deckId) => StudyDeckContextModel(
+    deckId: deckId,
+    deckName: deckName,
+    rootDeckId: 'root',
+    schedulerType: schedulerType,
+    schedulerGeneration: schedulerGeneration,
+  );
+
+  /// Renames the deck and emits, the way a Drift watch would after an UPDATE.
+  void renameDeck(String deckId, String name) {
+    deckName = name;
+    deckContextChanges.add(_context(deckId));
+  }
+
   @override
   Future<StudyDeckContextModel> deckContext(String deckId) async =>
-      StudyDeckContextModel(
-        deckId: deckId,
-        deckName: 'Korean',
-        rootDeckId: 'root',
-        schedulerType: schedulerType,
-        schedulerGeneration: schedulerGeneration,
-      );
+      _context(deckId);
+
+  @override
+  Stream<StudyDeckContextModel> watchDeckContext(String deckId) async* {
+    yield _context(deckId);
+    yield* deckContextChanges.stream;
+  }
 
   /// Whether [effectiveOptions] reports the values as a root override
   /// (BR-212). Drives whether `Use app defaults` is offered at all.

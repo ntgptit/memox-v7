@@ -194,13 +194,22 @@ class StudyCatalogRepository implements StudyRepository {
 
   @override
   Future<StudyDeckContextModel> deckContext(String deckId) async =>
-      StudyDeckContextModel(
-        deckId: deckId,
-        deckName: 'Chapter 1',
-        rootDeckId: 'catalog-root',
-        schedulerType: scenario.scheduler,
-        schedulerGeneration: 1,
-      );
+      _context(deckId);
+
+  /// The catalog has no database, so the watched read is one value that never
+  /// changes — which is the honest catalog answer: a rename is a scenario this
+  /// screen's use-cases do not offer.
+  @override
+  Stream<StudyDeckContextModel> watchDeckContext(String deckId) =>
+      Stream<StudyDeckContextModel>.value(_context(deckId));
+
+  StudyDeckContextModel _context(String deckId) => StudyDeckContextModel(
+    deckId: deckId,
+    deckName: 'Chapter 1',
+    rootDeckId: 'catalog-root',
+    schedulerType: scenario.scheduler,
+    schedulerGeneration: 1,
+  );
 
   @override
   Future<StudySessionEntity> openSession({
