@@ -791,6 +791,22 @@ Mỗi finding đi qua **hai pass tái xác minh độc lập** trên `main` hi�
 
 ---
 
+### C7 — dispositions
+
+Đóng bởi PR #482. Bốn ca vỡ responsive đều được đo lại trên widget thật; hai finding bị sửa lại chính phần bằng chứng của nó — C7-05 bỏ khẳng định về tiếng Anh, C7-03 đổi cell tái hiện.
+
+Mỗi finding đi qua **hai pass tái xác minh độc lập** trên `main` hiện tại trước khi một dòng code được viết; chỗ nào hai pass bất đồng thì được phân xử bằng cách đọc code, không phải bằng cách lấy đa số.
+
+| ID | Kết luận cuối | Vì sao |
+|---|---|---|
+| `SC-C7-01` | **REVISED_AND_FIXED** | Reproduced on current code and every cited number matches to the tenth of a dp. The Row is at lib/features/deck/presentation/screens/starter_library_screen.dart:177-225 (the finding cites 114-161 — stale line numbers, same shape):… **Target đã đổi:** Keep the LayoutBuilder + scaled-threshold arrangement, with two corrections. (a) Declare the threshold as a deck-local constant beside _TemplateTile in starter_library_screen.dart (an `abstract final  |
+| `SC-C7-02` | **FIXED** | Reproduced exactly. lib/features/card/presentation/widgets/items/card_import_mapping_row_widget.dart:43-71 is a flat Row of Expanded + SizedBox(AppSpacing.sm) + Expanded(MxDropdown) with no LayoutBuilder — line numbers cited are c… |
+| `SC-C7-03` | **REVISED_AND_FIXED** | The code claim and the fix are right; the evidence is not, and the test as specified would pass on unfixed code. Verified: study_options_screen.dart:48-55 constructs MxContentShell with padding: EdgeInsets.zero and no isScrollable… **Target đã đổi:** The one-line change is unchanged and correct — add `isScrollable: true` to the existing MxContentShell call at study_options_screen.dart:48, keeping padding: EdgeInsets.zero (each branch still owns it |
+| `SC-C7-04` | **REVISED_AND_FIXED** | The observation and every measured number check out; the proposed fix drops a live branch and buys vertical cost that has not been measured. Verified at 320dp, buildLightTheme(), labels Forgotten/Remembered: StudyCtaRowWidget keep… **Target đã đổi:** Split it into a safe half and a measured half. SAFE, do now: change recall_timer_pieces_widget.dart:286 from AppSpacing.md to AppSpacing.sm — one token, it settles the 12-vs-8 inconsistency against Mx |
+| `SC-C7-05` | **REVISED_AND_FIXED** | The defect is real at the promised floor and the fix is right, but the cited numbers are wrong in the same way SC-C7-03's are — measured against a double gutter this screen does not have. Code verified: study_entry_section_widget.… **Target đã đổi:** Keep the fix as stated — replace the Row at study_entry_section_widget.dart:58-74 with `Wrap(spacing: AppSpacing.lg, runSpacing: AppSpacing.xs, crossAxisAlignment: WrapCrossAlignment.center)` of the t |
+
+**Tổng: FIXED 1 · REVISED_AND_FIXED 4 = 5**
+
 ### C8 — Density and target size inside one semantic family
 
 **4 findings** (P1 1 · P2 1 · P3 2), across 4 surface units.
@@ -823,6 +839,21 @@ Mỗi finding đi qua **hai pass tái xác minh độc lập** trên `main` hi�
 | SC-C8-03 | P2 | E | StudySessionScreen — self_assess vs recall act… | The same string, `l10n.studyRevealAnswer`, is drawn as a 393dp full-bleed bar in `self_assess` and as a 141dp hugged, centred button in `recall` — same screen, same turn, same `MxActionButtonVariant.primary`.<br>`lib/features/study/presentation/widgets/sections/study_card_face_section_widget.dart:262-263` `lib/features/study/presentation/widgets/sections/recall_timer_pieces_widget.dart:189-194` — MEASURED at 393×600, `buildLightTheme()`, scale 1.0: `self_assess` reveal button rect = LTRB(0.0, 552.0, 393.0, 600.0) — width 393.0; |  |
 
 ---
+
+### C8 — dispositions
+
+Đóng bởi PR #482. Ba trong bốn không đổi control nào: hai bị bác bởi chính nguồn chúng dẫn, một có tiền đề đã bị bác nhưng việc đổi họ control thuộc wireframe m99-settings.md S9/S9a.
+
+Mỗi finding đi qua **hai pass tái xác minh độc lập** trên `main` hiện tại trước khi một dòng code được viết; chỗ nào hai pass bất đồng thì được phân xử bằng cách đọc code, không phải bằng cách lấy đa số.
+
+| ID | Kết luận cuối | Vì sao |
+|---|---|---|
+| `SC-C8-01` | **REFUTED** | The code reproduces (deck_result_tile_widget.dart:48-53 `maxLines: 2` on hit.name; card_result_tile_widget.dart:75-80 `maxLines: 1` on hit.front — both files carry an uncommitted in-flight edit from a parallel session that moves t… |
+| `SC-C8-02` | **REVISED_AND_FIXED** | The code facts reproduce, at drifted line numbers. lib/features/study/presentation/widgets/sections/study_options_section_widget.dart:161 `Text(l10n.studyOptionsOrderLabel, style: context.texts.titleSmall)`, :169-179 `Wrap(spacing… **Target đã đổi:** Two steps, in order. STEP 1 (safe now, code + docs, no pixels move): correct the stale paragraph at lib/features/settings/presentation/widgets/items/settings_choice_rows_widget.dart:13-21 so it stops  |
+| `SC-C8-03` | **REFUTED** | Four independent problems, any one of which sinks the fix. (1) THE PREMISE IS FALSE. `self_assess` and `recall` belong to disjoint schedulers: lib/features/study/domain/models/sm2_scheduler.dart:45-48 gives `stageSequence = [brows… |
+| `SC-C8-04` | **REVISED_AND_FIXED** | The core observation is correct and the well half of the fix is sound; the grid-gap half collides with a MUST. VERIFIED: lib/features/card/presentation/widgets/items/card_metric_widget.dart:75-83 is `Container(width: AppSizing.con… **Target đã đổi:** Ship the well, not the gaps. (a) card_metric_widget.dart:75-83 → `MxMetricWell(icon: metric.icon, tint: AppInk.accent)`; identical fill and glyph size, 24×24 instead of 32×32, and it removes a raw `Bo |
+
+**Tổng: REFUTED 2 · REVISED_AND_FIXED 2 = 4**
 
 ### C9 — Screen-local — no repeated pattern behind it
 
@@ -898,8 +929,8 @@ mà reviewer nhìn một màn đã gán. Chênh lệch giữa hai cột là §1.
 | **C4** Grammar điều hướng và chrome | 21 | 12 | P1 | **P1** | **đóng — #478** · FIXED 10 · REVISED_AND_FIXED 8 · REFUTED 2 · BLOCKED 1 |
 | **C5** Section heading tự dựng | 6 | 6 | P2 | P2 | **đóng — #481** · REVISED_AND_FIXED 5 · REFUTED 1 |
 | **C6** Bậc type cho một phần tử ngữ nghĩa | 5 | 5 | P2 | P2 | **đóng — #481** · FIXED 3 · REVISED_AND_FIXED 1 · REFUTED 1 |
-| **C7** Vỡ ở responsive / text scale | 5 | 5 | P1 | **P1** | chưa mở |
-| **C8** Mật độ và kích thước target | 4 | 4 | P1 | P2 | chưa mở |
+| **C7** Vỡ ở responsive / text scale | 5 | 5 | P1 | **P1** | **đóng — #482** · FIXED 1 · REVISED_AND_FIXED 4 |
+| **C8** Mật độ và kích thước target | 4 | 4 | P1 | P2 | **đóng — #482** · REVISED_AND_FIXED 2 · REFUTED 2 |
 | **C9** Cục bộ, không có mẫu lặp | 15 | 13 | P1 | P2 — sửa từng cái | chưa mở |
 
 ### 5.1 Thứ tự thi hành
