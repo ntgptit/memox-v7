@@ -5,14 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
+import com.memox.support.PostgresIntegrationTest;
 
-@SpringBootTest(properties = "spring.profiles.active=test")
-class FlywayMigrationTest {
-
-	@Autowired
-	private JdbcTemplate jdbcTemplate;
+class FlywayMigrationTest extends PostgresIntegrationTest {
 
 	@Test
 	void migratesApiMetadataTable() {
@@ -64,6 +59,18 @@ class FlywayMigrationTest {
 					                   scheduler_type, scheduler_version, scheduler_generation, created_at, updated_at)
 					VALUES (?, 'Second', 99, ?, ?, 'deck', 'sm2', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 					""", secondDeckId, rootScope, secondDeckId))
+				.isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
+	}
+
+	@Test
+	void rejectsNegativeSiblingPositions() {
+		org.assertj.core.api.Assertions.assertThatThrownBy(() -> jdbcTemplate.update("""
+				INSERT INTO decks (id, name, sibling_position, sibling_scope_id, root_deck_id, content_type,
+				                   scheduler_type, scheduler_version, scheduler_generation, created_at, updated_at)
+				VALUES ('33333333-3333-4333-8333-333333333333', 'Invalid', -1,
+				        '00000000-0000-0000-0000-000000000000', '33333333-3333-4333-8333-333333333333',
+				        'deck', 'sm2', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+				"""))
 				.isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
 	}
 }

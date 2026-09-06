@@ -2,27 +2,35 @@
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.memox.repository.CardRepository">
+<mapper namespace="com.memox.card.persistence.CardMapper">
 
-  <resultMap id="cardRow" type="com.memox.card.persistence.CardRow">
-    <id column="id" property="id"/>
-    <result column="deck_id" property="deckId"/>
-    <result column="front" property="front"/>
-    <result column="back" property="back"/>
-    <result column="is_flagged" property="flagged"/>
-    <result column="example" property="example"/>
-    <result column="hint" property="hint"/>
-    <result column="pronunciation" property="pronunciation"/>
-    <result column="created_at" property="createdAt"/>
-    <result column="updated_at" property="updatedAt"/>
+  <resultMap id="card" type="com.memox.card.domain.Card">
+    <constructor>
+      <idArg column="id" javaType="java.lang.String"/>
+      <arg column="deck_id" javaType="java.lang.String"/>
+      <arg column="front" javaType="java.lang.String"/>
+      <arg column="back" javaType="java.lang.String"/>
+      <arg column="is_flagged" javaType="boolean"/>
+      <arg column="example" javaType="java.lang.String"/>
+      <arg column="hint" javaType="java.lang.String"/>
+      <arg column="pronunciation" javaType="java.lang.String"/>
+      <arg column="created_at" javaType="java.time.Instant"/>
+      <arg column="updated_at" javaType="java.time.Instant"/>
+    </constructor>
   </resultMap>
 
-  <insert id="insertCard" parameterType="com.memox.card.persistence.CardRow">
+  <resultMap id="cardPageRow" type="com.memox.card.persistence.CardPageRow">
+    <result column="total_items" property="totalItems"/>
+	<result column="deck_exists" property="deckExists"/>
+    <association property="card" resultMap="card" notNullColumn="id"/>
+  </resultMap>
+
+  <insert id="insertCard" parameterType="com.memox.card.domain.Card">
     INSERT INTO cards (
       id, deck_id, front, back, front_folded, back_folded,
       example, hint, pronunciation, created_at, updated_at
     ) VALUES (
-      #{id}, #{deckId}, #{front}, #{back}, #{frontFolded}, #{backFolded},
+      #{id}, #{deckId}, #{front}, #{back}, LOWER(#{front}), LOWER(#{back}),
       #{example}, #{hint}, #{pronunciation}, #{createdAt}, #{updatedAt}
     )
   </insert>
@@ -35,20 +43,36 @@
     )
   </insert>
 
-  <select id="findActiveCardsByDeck" resultMap="cardRow">
-    SELECT id, deck_id, front, back, is_flagged, example, hint, pronunciation, created_at, updated_at
-    FROM cards
-    WHERE deck_id = #{deckId}
-      AND delete_batch_id IS NULL
-    ORDER BY created_at ASC, id ASC
-    LIMIT #{page.limit}
-    OFFSET #{page.offset}
-  </select>
+  <select id="findActiveCardsByDeck" resultMap="cardPageRow">
+    WITH target_deck AS (
+      SELECT id
+      FROM decks
+      WHERE id = #{deckId}
+        AND delete_batch_id IS NULL
+    ), active_cards AS MATERIALIZED (
+      SELECT cards.id, cards.deck_id, cards.front, cards.back, cards.is_flagged, cards.example, cards.hint,
+             cards.pronunciation, cards.created_at, cards.updated_at
+      FROM cards
+      INNER JOIN target_deck ON target_deck.id = cards.deck_id
+      WHERE cards.delete_batch_id IS NULL
+    ), page AS (
+      SELECT active_cards.*, COUNT(*) OVER() AS total_items
+      FROM active_cards
+      ORDER BY created_at ASC, id ASC
+      LIMIT #{page.limit}
+      OFFSET #{page.offset}
+    )
+    SELECT id, deck_id, front, back, is_flagged, example, hint, pronunciation, created_at, updated_at, total_items,
+           TRUE AS deck_exists
+    FROM page
 
-  <select id="countActiveCardsByDeck" resultType="long">
-    SELECT COUNT(*)
-    FROM cards
-    WHERE deck_id = #{deckId}
-      AND delete_batch_id IS NULL
+    UNION ALL
+
+    SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, COUNT(active_cards.id),
+           EXISTS (SELECT 1 FROM target_deck)
+    FROM active_cards
+    WHERE NOT EXISTS (SELECT 1 FROM page)
+
+    ORDER BY created_at ASC NULLS LAST, id ASC NULLS LAST
   </select>
 </mapper>

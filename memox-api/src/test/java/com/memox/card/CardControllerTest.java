@@ -9,14 +9,14 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.memox.support.PostgresIntegrationTest;
+
 @AutoConfigureMockMvc
-@SpringBootTest(properties = "spring.profiles.active=test")
-class CardControllerTest {
+class CardControllerTest extends PostgresIntegrationTest {
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -25,12 +25,11 @@ class CardControllerTest {
 	private JdbcTemplate jdbcTemplate;
 
 	@Test
-	void rejectsNegativeOffset() throws Exception {
+	void returnsNotFoundForCardsInAnUnknownDeck() throws Exception {
 		mockMvc.perform(get("/api/v1/decks/{deckId}/cards", UUID.randomUUID())
-					.param("offset", "-1"))
-				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
-				.andExpect(jsonPath("$.fieldErrors.offset").exists());
+					.param("limit", "20"))
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.code").value("DECK_NOT_FOUND"));
 	}
 
 	@Test

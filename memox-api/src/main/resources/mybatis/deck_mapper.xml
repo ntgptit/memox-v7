@@ -2,20 +2,27 @@
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.memox.repository.DeckRepository">
+<mapper namespace="com.memox.deck.persistence.DeckMapper">
 
-  <resultMap id="deckRow" type="com.memox.deck.persistence.DeckRow">
-    <id column="id" property="id"/>
-    <result column="name" property="name"/>
-    <result column="parent_deck_id" property="parentDeckId"/>
-    <result column="root_deck_id" property="rootDeckId"/>
-    <result column="content_type" property="contentType" typeHandler="com.memox.deck.persistence.DeckContentTypeTypeHandler"/>
-    <result column="scheduler_type" property="schedulerType" typeHandler="com.memox.deck.persistence.SchedulerTypeTypeHandler"/>
-    <result column="scheduler_version" property="schedulerVersion"/>
-    <result column="scheduler_generation" property="schedulerGeneration"/>
-    <result column="sibling_position" property="siblingPosition"/>
-    <result column="created_at" property="createdAt"/>
-    <result column="updated_at" property="updatedAt"/>
+  <resultMap id="deck" type="com.memox.deck.domain.Deck">
+    <constructor>
+      <idArg column="id" javaType="java.lang.String"/>
+      <arg column="name" javaType="java.lang.String"/>
+      <arg column="parent_deck_id" javaType="java.lang.String"/>
+      <arg column="root_deck_id" javaType="java.lang.String"/>
+      <arg column="content_type" javaType="com.memox.deck.domain.DeckContentType" typeHandler="com.memox.deck.persistence.DeckContentTypeTypeHandler"/>
+      <arg column="scheduler_type" javaType="com.memox.deck.domain.SchedulerType" typeHandler="com.memox.deck.persistence.SchedulerTypeTypeHandler"/>
+      <arg column="scheduler_version" javaType="java.lang.Integer"/>
+      <arg column="scheduler_generation" javaType="java.lang.Integer"/>
+      <arg column="sibling_position" javaType="int"/>
+      <arg column="created_at" javaType="java.time.Instant"/>
+      <arg column="updated_at" javaType="java.time.Instant"/>
+    </constructor>
+  </resultMap>
+
+  <resultMap id="deckPageRow" type="com.memox.deck.persistence.DeckPageRow">
+    <result column="total_items" property="totalItems"/>
+    <association property="deck" resultMap="deck" notNullColumn="id"/>
   </resultMap>
 
   <select id="readSchemaVersion" resultType="java.lang.String">
@@ -24,25 +31,34 @@
     WHERE metadata_key = 'schema_version'
   </select>
 
-  <select id="findRootDecks" resultMap="deckRow">
+  <select id="findRootDecks" resultMap="deckPageRow">
+    WITH filtered AS MATERIALIZED (
+      SELECT id, name, parent_deck_id, root_deck_id, content_type, scheduler_type,
+             scheduler_version, scheduler_generation, sibling_position, created_at, updated_at
+      FROM decks
+      WHERE parent_deck_id IS NULL
+        AND delete_batch_id IS NULL
+    ), page AS (
+      SELECT filtered.*, COUNT(*) OVER() AS total_items
+      FROM filtered
+      ORDER BY sibling_position ASC, id ASC
+      LIMIT #{limit}
+      OFFSET #{offset}
+    )
     SELECT id, name, parent_deck_id, root_deck_id, content_type, scheduler_type,
-           scheduler_version, scheduler_generation, sibling_position, created_at, updated_at
-    FROM decks
-    WHERE parent_deck_id IS NULL
-      AND delete_batch_id IS NULL
-    ORDER BY sibling_position ASC, id ASC
-    LIMIT #{limit}
-    OFFSET #{offset}
+           scheduler_version, scheduler_generation, sibling_position, created_at, updated_at, total_items
+    FROM page
+
+    UNION ALL
+
+    SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, COUNT(filtered.id)
+    FROM filtered
+    WHERE NOT EXISTS (SELECT 1 FROM page)
+
+    ORDER BY sibling_position ASC NULLS LAST, id ASC NULLS LAST
   </select>
 
-  <select id="countActiveRootDecks" resultType="long">
-    SELECT COUNT(*)
-    FROM decks
-    WHERE parent_deck_id IS NULL
-      AND delete_batch_id IS NULL
-  </select>
-
-  <select id="findActiveDeckById" resultMap="deckRow">
+  <select id="findActiveDeckById" resultMap="deck">
     SELECT id, name, parent_deck_id, root_deck_id, content_type, scheduler_type,
            scheduler_version, scheduler_generation, sibling_position, created_at, updated_at
     FROM decks
@@ -50,13 +66,33 @@
       AND delete_batch_id IS NULL
   </select>
 
-  <select id="findActiveDeckByIdForUpdate" resultMap="deckRow">
+  <select id="findActiveDeckByIdForUpdate" resultMap="deck">
     SELECT id, name, parent_deck_id, root_deck_id, content_type, scheduler_type,
            scheduler_version, scheduler_generation, sibling_position, created_at, updated_at
     FROM decks
     WHERE id = #{deckId}
       AND delete_batch_id IS NULL
     FOR UPDATE
+  </select>
+
+  <select id="findActiveDeckDepth" resultType="int">
+    WITH RECURSIVE ancestors AS (
+      SELECT id, parent_deck_id, 1 AS depth, ARRAY[id] AS path
+      FROM decks
+      WHERE id = #{deckId}
+        AND delete_batch_id IS NULL
+
+      UNION ALL
+
+      SELECT parent.id, parent.parent_deck_id, ancestors.depth + 1, ancestors.path || parent.id
+      FROM decks parent
+      INNER JOIN ancestors ON parent.id = ancestors.parent_deck_id
+      WHERE parent.delete_batch_id IS NULL
+        AND ancestors.depth &lt; 11
+        AND NOT parent.id = ANY(ancestors.path)
+    )
+    SELECT MAX(depth)
+    FROM ancestors
   </select>
 
   <select id="lockRootDeckCreation" resultType="int">
@@ -72,23 +108,23 @@
     WHERE sibling_scope_id = #{siblingScopeId}
   </select>
 
-  <insert id="insertRootDeck" parameterType="com.memox.deck.persistence.DeckRow">
+  <insert id="insertRootDeck" parameterType="com.memox.deck.domain.Deck">
     INSERT INTO decks (
       id, name, parent_deck_id, sibling_position, sibling_scope_id, root_deck_id, content_type,
       scheduler_type, scheduler_version, scheduler_generation, created_at, updated_at
     ) VALUES (
-      #{id}, #{name}, NULL, #{siblingPosition}, #{siblingScopeId}, #{rootDeckId},
+      #{id}, #{name}, NULL, #{siblingPosition}, '00000000-0000-0000-0000-000000000000', #{rootDeckId},
       #{contentType,typeHandler=com.memox.deck.persistence.DeckContentTypeTypeHandler},
       #{schedulerType,typeHandler=com.memox.deck.persistence.SchedulerTypeTypeHandler},
       #{schedulerVersion}, #{schedulerGeneration}, #{createdAt}, #{updatedAt}
     )
   </insert>
 
-  <insert id="insertSubDeck" parameterType="com.memox.deck.persistence.DeckRow">
+  <insert id="insertSubDeck" parameterType="com.memox.deck.domain.Deck">
     INSERT INTO decks (
       id, name, parent_deck_id, sibling_position, sibling_scope_id, root_deck_id, content_type, created_at, updated_at
     ) VALUES (
-      #{id}, #{name}, #{parentDeckId}, #{siblingPosition}, #{siblingScopeId}, #{rootDeckId},
+      #{id}, #{name}, #{parentDeckId}, #{siblingPosition}, #{parentDeckId}, #{rootDeckId},
       #{contentType,typeHandler=com.memox.deck.persistence.DeckContentTypeTypeHandler}, #{createdAt}, #{updatedAt}
     )
   </insert>
