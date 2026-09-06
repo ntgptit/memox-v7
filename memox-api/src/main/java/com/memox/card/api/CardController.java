@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.validation.annotation.Validated;
 
-import com.memox.card.application.CreateCardCommand;
+import com.memox.card.service.CreateCardCommand;
 import com.memox.common.pagination.PageQuery;
 import com.memox.common.pagination.PagingResponse;
 import com.memox.common.pagination.PaginationConstants;
-import com.memox.config.PaginationProperties;
-import com.memox.service.CardService;
+import com.memox.common.config.PaginationProperties;
+import com.memox.card.service.CardService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

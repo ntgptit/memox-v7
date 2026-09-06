@@ -2,27 +2,29 @@
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.memox.repository.CardRepository">
+<mapper namespace="com.memox.card.persistence.CardMapper">
 
-  <resultMap id="cardRow" type="com.memox.card.persistence.CardRow">
-    <id column="id" property="id"/>
-    <result column="deck_id" property="deckId"/>
-    <result column="front" property="front"/>
-    <result column="back" property="back"/>
-    <result column="is_flagged" property="flagged"/>
-    <result column="example" property="example"/>
-    <result column="hint" property="hint"/>
-    <result column="pronunciation" property="pronunciation"/>
-    <result column="created_at" property="createdAt"/>
-    <result column="updated_at" property="updatedAt"/>
+  <resultMap id="card" type="com.memox.card.domain.Card">
+    <constructor>
+      <idArg column="id" javaType="java.lang.String"/>
+      <arg column="deck_id" javaType="java.lang.String"/>
+      <arg column="front" javaType="java.lang.String"/>
+      <arg column="back" javaType="java.lang.String"/>
+      <arg column="is_flagged" javaType="boolean"/>
+      <arg column="example" javaType="java.lang.String"/>
+      <arg column="hint" javaType="java.lang.String"/>
+      <arg column="pronunciation" javaType="java.lang.String"/>
+      <arg column="created_at" javaType="java.time.Instant"/>
+      <arg column="updated_at" javaType="java.time.Instant"/>
+    </constructor>
   </resultMap>
 
-  <insert id="insertCard" parameterType="com.memox.card.persistence.CardRow">
+  <insert id="insertCard" parameterType="com.memox.card.domain.Card">
     INSERT INTO cards (
       id, deck_id, front, back, front_folded, back_folded,
       example, hint, pronunciation, created_at, updated_at
     ) VALUES (
-      #{id}, #{deckId}, #{front}, #{back}, #{frontFolded}, #{backFolded},
+      #{id}, #{deckId}, #{front}, #{back}, LOWER(#{front}), LOWER(#{back}),
       #{example}, #{hint}, #{pronunciation}, #{createdAt}, #{updatedAt}
     )
   </insert>
@@ -35,14 +37,23 @@
     )
   </insert>
 
-  <select id="findActiveCardsByDeck" resultMap="cardRow">
+  <select id="activeDeckExists" resultType="boolean">
+    SELECT EXISTS (
+      SELECT 1
+      FROM decks
+      WHERE id = #{deckId}
+        AND delete_batch_id IS NULL
+    )
+  </select>
+
+  <select id="findActiveCardsByDeck" resultMap="card">
     SELECT id, deck_id, front, back, is_flagged, example, hint, pronunciation, created_at, updated_at
     FROM cards
     WHERE deck_id = #{deckId}
       AND delete_batch_id IS NULL
     ORDER BY created_at ASC, id ASC
-    LIMIT #{page.limit}
-    OFFSET #{page.offset}
+    LIMIT #{pageQuery.limit}
+    OFFSET #{pageQuery.offset}
   </select>
 
   <select id="countActiveCardsByDeck" resultType="long">

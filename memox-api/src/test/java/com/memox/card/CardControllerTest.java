@@ -9,14 +9,14 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.memox.support.PostgresIntegrationTest;
+
 @AutoConfigureMockMvc
-@SpringBootTest(properties = "spring.profiles.active=test")
-class CardControllerTest {
+class CardControllerTest extends PostgresIntegrationTest {
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -25,12 +25,27 @@ class CardControllerTest {
 	private JdbcTemplate jdbcTemplate;
 
 	@Test
-	void rejectsNegativeOffset() throws Exception {
+	void returnsNotFoundForCardsInAnUnknownDeck() throws Exception {
 		mockMvc.perform(get("/api/v1/decks/{deckId}/cards", UUID.randomUUID())
-					.param("offset", "-1"))
-				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
-				.andExpect(jsonPath("$.fieldErrors.offset").exists());
+					.param("limit", "20"))
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.code").value("DECK_NOT_FOUND"));
+	}
+
+	@Test
+	void returnsAnEmptyPageForAnExistingDeckWithoutCards() throws Exception {
+		final var rootId = UUID.randomUUID().toString();
+		final var cardDeckId = UUID.randomUUID().toString();
+		createRoot(rootId);
+		createChild(rootId, cardDeckId);
+
+		mockMvc.perform(get("/api/v1/decks/{deckId}/cards", cardDeckId).param("limit", "20"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.items").isEmpty())
+				.andExpect(jsonPath("$.totalItems").value(0))
+				.andExpect(jsonPath("$.totalPages").value(0))
+				.andExpect(jsonPath("$.hasNext").value(false))
+				.andExpect(jsonPath("$.hasPrevious").value(false));
 	}
 
 	@Test
@@ -101,6 +116,26 @@ class CardControllerTest {
 				.andExpect(jsonPath("$.items[0].id").value(secondCardId))
 				.andExpect(jsonPath("$.limit").value(1))
 				.andExpect(jsonPath("$.offset").value(1))
+				.andExpect(jsonPath("$.totalItems").value(2))
+				.andExpect(jsonPath("$.totalPages").value(2))
+				.andExpect(jsonPath("$.hasNext").value(false))
+				.andExpect(jsonPath("$.hasPrevious").value(true));
+	}
+
+	@Test
+	void retainsCardTotalsWhenOffsetExceedsAvailableCards() throws Exception {
+		final var rootId = UUID.randomUUID().toString();
+		final var cardDeckId = UUID.randomUUID().toString();
+		createRoot(rootId);
+		createChild(rootId, cardDeckId);
+		createCard(cardDeckId, UUID.randomUUID().toString(), "First", "One");
+		createCard(cardDeckId, UUID.randomUUID().toString(), "Second", "Two");
+
+		mockMvc.perform(get("/api/v1/decks/{deckId}/cards", cardDeckId)
+					.param("limit", "1")
+					.param("offset", "100"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.items").isEmpty())
 				.andExpect(jsonPath("$.totalItems").value(2))
 				.andExpect(jsonPath("$.totalPages").value(2))
 				.andExpect(jsonPath("$.hasNext").value(false))

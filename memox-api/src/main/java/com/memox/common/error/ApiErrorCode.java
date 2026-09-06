@@ -1,0 +1,24 @@
+package com.memox.common.error;
+
+import org.springframework.http.HttpStatus;
+
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@Getter
+@RequiredArgsConstructor
+public enum ApiErrorCode {
+
+	VALIDATION_FAILED(HttpStatus.BAD_REQUEST, "error.validation-failed"),
+	PARENT_HOLDS_CARDS(HttpStatus.CONFLICT, "error.parent-holds-cards"),
+	DECK_DEPTH_EXCEEDED(HttpStatus.CONFLICT, "error.deck-depth-exceeded"),
+	ROOT_CANNOT_HOLD_CARDS(HttpStatus.CONFLICT, "error.root-cannot-hold-cards"),
+	DECK_HOLDS_CHILDREN(HttpStatus.CONFLICT, "error.deck-holds-children"),
+	ROOT_SCHEDULER_INVALID(HttpStatus.CONFLICT, "error.root-scheduler-invalid"),
+	DECK_NOT_FOUND(HttpStatus.NOT_FOUND, "error.deck-not-found"),
+	DATA_INTEGRITY_VIOLATION(HttpStatus.CONFLICT, "error.data-integrity-violation"),
+	INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "error.internal-server-error");
+
+	private final HttpStatus status;
+	private final String messageKey;
+}
