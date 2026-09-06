@@ -11,14 +11,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.memox.deck.application.CreateRootDeckCommand;
-import com.memox.deck.application.CreateSubDeckCommand;
+import com.memox.deck.service.CreateRootDeckCommand;
+import com.memox.deck.service.CreateSubDeckCommand;
 import com.memox.deck.domain.SchedulerType;
 import com.memox.common.pagination.PageQuery;
 import com.memox.common.pagination.PagingResponse;
 import com.memox.common.pagination.PaginationConstants;
-import com.memox.config.PaginationProperties;
-import com.memox.service.DeckService;
+import com.memox.common.config.PaginationProperties;
+import com.memox.deck.service.DeckService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

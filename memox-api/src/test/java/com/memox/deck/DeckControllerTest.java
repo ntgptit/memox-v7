@@ -10,16 +10,27 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.memox.support.PostgresIntegrationTest;
+
 @AutoConfigureMockMvc
-@SpringBootTest(properties = "spring.profiles.active=test")
-class DeckControllerTest {
+class DeckControllerTest extends PostgresIntegrationTest {
 
 	@Autowired
 	private MockMvc mockMvc;
+
+	@Test
+	void returnsAnEmptyPageWhenNoRootDecksExist() throws Exception {
+		mockMvc.perform(get("/api/v1/decks").param("limit", "20"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.items").isEmpty())
+				.andExpect(jsonPath("$.totalItems").value(0))
+				.andExpect(jsonPath("$.totalPages").value(0))
+				.andExpect(jsonPath("$.hasNext").value(false))
+				.andExpect(jsonPath("$.hasPrevious").value(false));
+	}
 
 	@Test
 	void createsAndListsAClientIdentifiedRootDeck() throws Exception {
@@ -27,7 +38,7 @@ class DeckControllerTest {
 		final var request = """
 				{
 				  "id": "%s",
-				  "name": "Korean basics",
+				  "name": "  Korean basics  ",
 				  "schedulerType": "eight_box"
 				}
 				""".formatted(deckId);
@@ -49,6 +60,22 @@ class DeckControllerTest {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.items[?(@.id == '%s')].name".formatted(deckId))
 						.value("Korean basics"));
+	}
+
+	@Test
+	void retainsRootDeckTotalsWhenOffsetExceedsAvailableDecks() throws Exception {
+		createRootDeck(UUID.randomUUID().toString(), "First root");
+		createRootDeck(UUID.randomUUID().toString(), "Second root");
+
+		mockMvc.perform(get("/api/v1/decks")
+					.param("limit", "1")
+					.param("offset", "100"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.items").isEmpty())
+				.andExpect(jsonPath("$.totalItems").value(2))
+				.andExpect(jsonPath("$.totalPages").value(2))
+				.andExpect(jsonPath("$.hasNext").value(false))
+				.andExpect(jsonPath("$.hasPrevious").value(true));
 	}
 
 	@Test
@@ -122,5 +149,43 @@ class DeckControllerTest {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.contentType").value("deck"))
 				.andExpect(jsonPath("$.rootDeckId").value(rootId));
+	}
+
+	@Test
+	void rejectsCreatingAnEleventhDeckLevel() throws Exception {
+		final var rootId = UUID.randomUUID().toString();
+		createRootDeck(rootId, "Root");
+		var parentId = rootId;
+		for (int depth = 2; depth <= 10; depth++) {
+			final var childId = UUID.randomUUID().toString();
+			createSubDeck(parentId, childId, "Level " + depth);
+			parentId = childId;
+		}
+
+		mockMvc.perform(post("/api/v1/decks/{parentDeckId}/children", parentId)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""
+							{"id":"%s","name":"Too deep"}
+							""".formatted(UUID.randomUUID())))
+				.andExpect(status().isConflict())
+				.andExpect(jsonPath("$.code").value("DECK_DEPTH_EXCEEDED"));
+	}
+
+	private void createRootDeck(String deckId, String name) throws Exception {
+		mockMvc.perform(post("/api/v1/decks")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""
+							{"id":"%s","name":"%s","schedulerType":"sm2"}
+							""".formatted(deckId, name)))
+				.andExpect(status().isCreated());
+	}
+
+	private void createSubDeck(String parentDeckId, String deckId, String name) throws Exception {
+		mockMvc.perform(post("/api/v1/decks/{parentDeckId}/children", parentDeckId)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""
+							{"id":"%s","name":"%s"}
+							""".formatted(deckId, name)))
+				.andExpect(status().isCreated());
 	}
 }

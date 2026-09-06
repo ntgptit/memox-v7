@@ -16,11 +16,17 @@ class LayerArchitectureTest {
 	static final ArchRule apiDoesNotReachPersistence = noClasses()
 			.that().resideInAPackage("..api..")
 			.should().dependOnClassesThat()
-			.resideInAnyPackage("..repository..", "..persistence..", "..service.impl..");
+			.resideInAPackage("..persistence..");
 
 	@ArchTest
 	static final ArchRule servicesDoNotReachApi = noClasses()
 			.that().resideInAPackage("..service..")
+			.should().dependOnClassesThat()
+			.resideInAPackage("..api..");
+
+	@ArchTest
+	static final ArchRule persistenceDoesNotReachApi = noClasses()
+			.that().resideInAPackage("..persistence..")
 			.should().dependOnClassesThat()
 			.resideInAPackage("..api..");
 

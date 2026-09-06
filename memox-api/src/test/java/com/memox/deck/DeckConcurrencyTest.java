@@ -11,21 +11,16 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
 
-import com.memox.deck.application.CreateRootDeckCommand;
+import com.memox.deck.service.CreateRootDeckCommand;
 import com.memox.deck.domain.SchedulerType;
-import com.memox.service.DeckService;
+import com.memox.deck.service.DeckService;
+import com.memox.support.PostgresIntegrationTest;
 
-@SpringBootTest(properties = "spring.profiles.active=test")
-class DeckConcurrencyTest {
+class DeckConcurrencyTest extends PostgresIntegrationTest {
 
 	@Autowired
 	private DeckService deckService;
-
-	@Autowired
-	private JdbcTemplate jdbcTemplate;
 
 	@Test
 	void assignsDistinctSiblingPositionsWhenRootDecksAreCreatedConcurrently() throws Exception {
