@@ -9,16 +9,30 @@ import '../../../../../shared/widgets/mx_radio_rows.dart';
 /// render it — Appearance, Language and the order half of Study defaults — so
 /// it is a repeated part, not a band one screen composes.
 ///
-/// **Radio rows rather than pills or a segmented button, and the reason is a
-/// MUST rather than a preference.** W6 requires a selected state not to rest on
-/// colour alone. `MxPillButton` over `ChoiceChip` cannot satisfy that today:
-/// `buildChipTheme` sets `showCheckmark: false` and resolves `side` for
-/// disabled and focused only, so a selected pill differs from an unselected one
-/// in fill and label colour and in nothing else. A radio carries a glyph, so
-/// the state survives being seen without colour. (The pill's own gap belongs to
-/// `app_chip_theme.dart` and to the web kit that mirrors it — see the M99.28
-/// note in `docs/wbs.md`; fixing it here would have been a second, private
-/// answer to a shared component's question.)
+/// **Radio rows rather than pills or a segmented button, and the surviving
+/// reason is W1, not W6.** This screen renders three closed choices —
+/// Appearance, Language and the order half of Study defaults — and W1 draws
+/// them as one control family; splitting them would make one screen ask the
+/// same kind of question in two ways.
+///
+/// **The reason this comment used to give is no longer true, and saying so is
+/// the point** (SC-C8-02). It read: `MxPillButton` over `ChoiceChip` cannot
+/// satisfy W6's "not by colour alone", because `buildChipTheme` sets
+/// `showCheckmark: false` and resolves `side` for disabled and focused only,
+/// so a selected pill differs from an unselected one in fill and label colour
+/// and in nothing else. That was measured and correct when it was written, and
+/// M100.36 4M closed it: `mx_pill_button.dart` now composes its own tick into
+/// an always-laid-out leading slot, so a selected pill carries a glyph and the
+/// state survives being seen without colour. A stale justification is worse
+/// than none — it answers the next reader's question with a fact they have no
+/// reason to re-check.
+///
+/// What that leaves open is the divergence itself: `StudyOptionsScreen` still
+/// edits `NewCardOrder` as pills while this screen edits it as radio rows,
+/// under the same heading and the same two labels. That split is a decision of
+/// `docs/wireframes/m99-settings.md` S9/S9a, which is `active` — so it is
+/// re-decided there, not here. The `Deferred and descoped` table in
+/// `docs/wbs.md` records that the premise S9a rests on is gone.
 ///
 /// Three choices with labels as long as `Theo hệ thống` at `textScaler` 2.0 on
 /// a 320dp screen also do not fit a segmented control, which then truncates or

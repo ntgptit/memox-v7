@@ -278,9 +278,9 @@ class _SummaryRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       child: Row(
         children: <Widget>[
-          // The shared well, for the same reason Confirm's rows carry it:
-          // one anchored left edge down the column, one grammar across the
-          // screens that count things.
+          // The shared well — a pill, like every other one — for the same
+          // reason Confirm's rows carry it: one anchored left edge down the
+          // column, one grammar across the screens that count things.
           MxMetricWell(icon: icon, tint: iconColor),
           const SizedBox(width: AppSpacing.md),
           Expanded(child: Text(label, style: context.texts.bodyMedium)),

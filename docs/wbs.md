@@ -10187,16 +10187,20 @@ binding của Study không đổi nhưng contract `openSession` thì có, và m�
   một `DecoratedBox` đục; `ListTile` vẽ splash lên `Material` gần nhất, vốn nằm
   **sau** card. Sửa bằng một `Material(type: transparency)` bên trong card —
   phát hiện bởi assertion của framework trong visual audit, không phải bởi mắt.
-- **Known gap, cố ý không sửa ở task này: `MxPillButton` mang trạng thái chọn
-  chỉ bằng màu.** `app_chip_theme.dart` đặt `showCheckmark: false` và chỉ
-  resolve `side` theo `disabled`/`focused`, nên một pill đang chọn khác pill
-  chưa chọn duy nhất ở nền và màu chữ. Đây **không** phải lỗi task này tạo ra:
-  nó có sẵn và đang được năm call site dùng — `card_filter_bar_widget.dart`,
-  `deck_list_toolbar_widget.dart` (×2), `study_entry_section_widget.dart`,
-  `study_options_section_widget.dart`. Settings né bằng cách dùng radio (S9),
-  nhưng `StudyOptionsScreen` thì vẫn còn. Sửa đúng chỗ là ở chip theme, và theo
-  quy ước parity thì phải đi cùng kit web trong cùng một PR, cộng toàn bộ golden
-  của chip — tức một task riêng, không phải một dòng nhét vào Settings v1.
+- **~~Known gap, cố ý không sửa ở task này: `MxPillButton` mang trạng thái chọn
+  chỉ bằng màu.~~ Đã đóng ở M100.36 4M.** `app_chip_theme.dart` đặt
+  `showCheckmark: false` và chỉ resolve `side` theo `disabled`/`focused`, nên
+  một pill đang chọn khác pill chưa chọn duy nhất ở nền và màu chữ. Đây
+  **không** phải lỗi task này tạo ra: nó có sẵn và đang được năm call site
+  dùng — `card_filter_bar_widget.dart`, `deck_list_toolbar_widget.dart` (×2),
+  `study_entry_section_widget.dart`, `study_options_section_widget.dart`.
+  Settings né bằng cách dùng radio (S9), nhưng `StudyOptionsScreen` thì vẫn
+  còn. **Cách trả không phải chip theme.** `MxPillButton` tự dựng tick trong
+  một leading slot luôn được layout (M100.36 4M, #434 P1-3), nên pill đang
+  chọn nay mang một glyph và W6 được thoả mà không cần đợi kit web hay toàn bộ
+  golden của chip. Điều còn lại **không phải một lỗi kỹ thuật mà là một quyết
+  định thiết kế**: hai màn vẫn sửa cùng một `NewCardOrder` bằng hai họ control.
+  Xem dòng SC-C8-02 ở bảng `Deferred and descoped`.
 - **Frame đầu tiên sau cold start dùng mặc định `system`.** Đọc `app_settings`
   là async, nên một người đã chọn Dark thấy một hai frame sáng trước khi giá trị
   về. Phương án chặn frame đầu để đọc database đã bị loại: nó đổi một lần đổi
@@ -10739,6 +10743,7 @@ của M2.
 
 | Item | Decision | Reason | Revisit when |
 |---|---|---|---|
+| `SC-C8-02` — `NewCardOrder` được sửa bằng hai họ control | **cần quyết định lại ở wireframe**, không sửa ở task feature | `StudyOptionsScreen` dùng `MxPillButton`, `SettingsScreen` dùng `MxRadioRows` — cùng heading `studyOptionsOrderLabel`, cùng hai nhãn `studyOptionsOrderCreated`/`studyOptionsOrderRandom`, cùng một enum. `docs/wireframes/m99-settings.md` (Status `active`) S9a ghi đây là lệch **có chủ ý**, và lý do nó nêu là "pill chỉ khác nhau ở nền và màu chữ" — tiền đề đó **đã bị bác bỏ** từ M100.36 4M: `MxPillButton` dựng tick trong leading slot luôn được layout. Hai pass tái xác minh đều kết luận đổi họ control là **re-decision của S9/S9a**, không phải composition của một màn — nên PR của C8 chỉ sửa đoạn doc đã sai, không đổi control nào | Khi có một task design/wireframe cho `m99-settings.md` S9/S9a: chọn một trong hai họ cho cả hai màn, rồi đo lại 320dp × textScaler 2.0 với nhãn tiếng Việt — đúng cell mà lập luận của S9 dựa vào |
 | `custom_lint` + `riverpod_lint` | descoped khỏi MVP | Không có phiên bản `custom_lint` nào tương thích `analyzer >=10`, trong khi `json_serializable`, `freezed` và `drift_dev` đều đòi mức đó. Cài được chỉ bằng cách hạ toàn bộ stack generator một thế hệ, kể cả `uuid` về `^3.0.6` — đi ngược AD-03. Chủ dự án quyết định không cần; nếu cần sẽ làm guard bên ngoài | Khi `custom_lint` hỗ trợ `analyzer >=10`, **hoặc** khi một guard ngoài được viết. Xem mục bên dưới về việc mất gì |
 | Flutter toolchain verification | **đã xong** | Từng hoãn vì `flutter` chưa có trong môi trường cloud | Đã kiểm chứng ở M2.1 trên máy local: `flutter doctor -v` → `No issues found!` |
 | Đưa deck con lên thành root deck | descoped khỏi MVP | Cần quyết định scheduler mới; là tính năng riêng chứ không phải phép di chuyển | Sau MVP (UC-09 A2) |

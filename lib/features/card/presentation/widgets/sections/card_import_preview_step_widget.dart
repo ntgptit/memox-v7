@@ -17,6 +17,7 @@ import '../../controllers/card_import_draft_controller.dart';
 import '../../controllers/card_import_query_controller.dart';
 import '../../states/card_import_state.dart';
 import '../items/card_import_mapping_row_widget.dart';
+import '../support/card_import_pair_widget.dart';
 import '../support/card_import_labels_widget.dart';
 import 'card_import_preview_summary_widget.dart';
 import 'card_import_source_summary_widget.dart';
@@ -334,30 +335,22 @@ class _SheetSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        Expanded(
-          child: Text(
-            context.l10n.cardImportSheetLabel,
-            style: context.texts.bodyMedium,
-          ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: MxDropdown<String>(
-            value: selected,
-            onChanged: onSelect,
-            options: <MxDropdownOption<String>>[
-              for (final sheet in document.sheets)
-                if (!sheet.isEmpty)
-                  MxDropdownOption<String>(
-                    value: sheet.name,
-                    label: sheet.name,
-                  ),
-            ],
-          ),
-        ),
-      ],
+    // The same measured pair the mapping rows take (SC-C7-02): these two were
+    // the only label-plus-control rows on this screen with no fallback.
+    return CardImportPairWidget(
+      label: Text(
+        context.l10n.cardImportSheetLabel,
+        style: context.texts.bodyMedium,
+      ),
+      control: MxDropdown<String>(
+        value: selected,
+        onChanged: onSelect,
+        options: <MxDropdownOption<String>>[
+          for (final sheet in document.sheets)
+            if (!sheet.isEmpty)
+              MxDropdownOption<String>(value: sheet.name, label: sheet.name),
+        ],
+      ),
     );
   }
 }

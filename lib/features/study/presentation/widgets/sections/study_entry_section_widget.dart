@@ -55,21 +55,45 @@ class StudyEntrySectionWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        Row(
+        // **A `Wrap`, because a `Row` of two unconstrained `Text`s cannot
+        // break** (SC-C7-05). There was no `Flexible`, no `maxLines` and no
+        // second run, so at the size the project promises to fit the pair
+        // simply painted overflow stripes across the screen's primary content:
+        // measured on this section at `textScaler` 2.0, Vietnamese overflowed
+        // by 7.9px at 360dp with three-digit counts, 51px with four, 18px at
+        // 393dp and 91px at 320dp. English fits in every one of those cells,
+        // which is why nobody saw it — `Mới {count}` and `Đến hạn {count}` are
+        // longer than `New` and `Due`, and these counts aggregate a whole deck
+        // subtree, so four figures is an ordinary number for somebody who has
+        // been away.
+        //
+        // `lg` keeps the gap the row already had — it is the item gap, and
+        // these are two items. The three siblings that solved the same problem
+        // reached for `Wrap` too: `study_home_workload_item_widget.dart`,
+        // `progress_metric_widget.dart` and `deck_workload_line_widget.dart`.
+        Wrap(
+          spacing: AppSpacing.lg,
+          runSpacing: AppSpacing.xs,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: <Widget>[
             // Plain text, not a disabled pill. A first draft used
             // `MxPillButton(onPressed: null)` for the shape, and the visual
             // audit refused it: a disabled control renders its label at 38%
             // alpha, which is not a palette colour — and these are readouts,
             // not controls somebody is being stopped from pressing.
+            //
+            // `maxLines: 2` rather than none: a count that clips mid-numeral
+            // does not read as truncated, it reads as a different number
+            // (`progress_metric_widget.dart` records measuring exactly that).
             Text(
               l10n.studyNewCount(summary.newCount),
               style: context.texts.titleMedium,
+              maxLines: 2,
             ),
-            const SizedBox(width: AppSpacing.lg),
             Text(
               l10n.studyDueCount(summary.dueCount),
               style: context.texts.titleMedium,
+              maxLines: 2,
             ),
           ],
         ),

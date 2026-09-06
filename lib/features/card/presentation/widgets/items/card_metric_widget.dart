@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../shared/widgets/mx_icon.dart';
+import '../../../../../shared/widgets/mx_metric_well.dart';
 import '../../../../../core/theme/extensions/app_ink.dart';
-import '../../../../../core/theme/foundations/app_radius.dart';
-import '../../../../../core/theme/foundations/app_sizing.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/typography/app_typography.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
@@ -62,6 +60,9 @@ final class CardMetric {
 /// the label and value take the ordinary ink pair. Nothing here is a control, so
 /// nothing here carries a touch target — a read-only cell may be as compact as
 /// its type allows.
+///
+/// The well itself is [MxMetricWell] and no longer a shape this file declares:
+/// the same fact drawn on two screens should not arrive at two sizes.
 class CardMetricWidget extends StatelessWidget {
   const CardMetricWidget({required this.metric, super.key});
 
@@ -72,16 +73,21 @@ class CardMetricWidget extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Container(
-          width: AppSizing.controlDense,
-          height: AppSizing.controlDense,
-          decoration: BoxDecoration(
-            color: context.semanticColors.surfaceMuted,
-            borderRadius: BorderRadius.circular(AppRadius.sm),
-          ),
-          child: MxIcon(metric.icon, ink: AppInk.accent, size: MxIconSize.sm),
-        ),
-        const SizedBox(width: AppSpacing.sm),
+        // **The shared well, not a second one** (SC-C8-04). This drew its own
+        // 32×32 rounded square at `AppRadius.sm` while every other metric in
+        // the app — including two call sites in this same feature, and the
+        // Progress grid this panel is read beside — anchored on the 24×24 pill
+        // `MxMetricWell` draws. Same fill, same 16dp glyph; what changes is
+        // that the shape is now declared in one place, and a raw
+        // `BoxDecoration` leaves `lib/features/` rather than another one being
+        // added to it.
+        MxMetricWell(icon: metric.icon, tint: AppInk.accent),
+        // `xs`, which is what the app's two other metric *grids* put between a
+        // well and the text it anchors (`progress_metric_widget.dart`,
+        // `study_home_workload_item_widget.dart`). The import rows keep `md`
+        // on purpose: a list row's icon gap is a different family, and
+        // `search_result_shell_widget.dart` uses the same `md` for it.
+        const SizedBox(width: AppSpacing.xs),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
