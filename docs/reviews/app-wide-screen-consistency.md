@@ -1011,35 +1011,35 @@ nhất được ghi lại nằm ở `deck_list_screen.dart:197-204` và nó ch�
 
 ## 6. Trạng thái từng bề mặt
 
-Không màn nào đã sửa. Cột trạng thái sẽ được cập nhật bởi chính PR đóng cụm.
+**Mọi đơn vị đã đóng.** Cột trạng thái đếm kết luận cuối của các finding trên bề mặt đó, không phải đếm số lần sửa — một đơn vị có `bác` hay `blocked` vẫn là đã đóng, vì lý do nằm ở bảng dispositions của cụm tương ứng và ở §7.
 
 
 | Surface unit | P0 | P1 | P2 | P3 | Total | Status |
 |---|---|---|---|---|---|---|
-| AppNavigationShell (the chrome binding all four branches) — lib/app/sh | 0 | 0 | 3 | 0 | 3 | reviewed · unfixed |
-| Card content-bearing sheets | 0 | 1 | 2 | 1 | 4 | reviewed · unfixed |
-| CardDetailScreen | 0 | 2 | 2 | 0 | 4 | reviewed · unfixed |
-| CardEditorScreen (create + edit) — lib/features/card/presentation/scre | 0 | 1 | 6 | 2 | 9 | reviewed · unfixed |
-| CardImportScreen | 0 | 0 | 4 | 2 | 6 | reviewed · unfixed |
-| CardListScreen | 0 | 0 | 7 | 1 | 8 | reviewed · unfixed |
-| Deck content-bearing sheets | 0 | 2 | 4 | 1 | 7 | reviewed · unfixed |
-| DeckListScreen (root + level) | 0 | 2 | 3 | 0 | 5 | reviewed · unfixed |
-| LibrarySearchScreen | 0 | 0 | 4 | 1 | 5 | reviewed · unfixed |
-| ProgressDeckScreen | 0 | 1 | 2 | 1 | 4 | reviewed · unfixed |
-| ProgressScreen | 0 | 0 | 3 | 2 | 5 | reviewed · unfixed |
-| Reminder time picker (showReminderTimePicker) | 0 | 0 | 2 | 2 | 4 | reviewed · unfixed |
-| ReminderSettingsScreen | 0 | 0 | 3 | 1 | 4 | reviewed · unfixed |
-| RouteNotFoundScreen | 0 | 0 | 0 | 2 | 2 | reviewed · unfixed |
-| SettingsScreen | 0 | 0 | 3 | 1 | 4 | reviewed · unfixed |
-| StarterLibraryScreen | 1 | 1 | 4 | 0 | 6 | reviewed · unfixed |
-| Study sheets — StudyResumeWidget, StudyModeChooserWidget, StudyDirecti | 0 | 0 | 3 | 2 | 5 | reviewed · unfixed |
-| StudyEntryScreen | 0 | 3 | 3 | 1 | 7 | reviewed · unfixed |
-| StudyHomeScreen | 0 | 0 | 2 | 1 | 3 | reviewed · unfixed |
-| StudyOptionsScreen | 0 | 2 | 2 | 2 | 6 | reviewed · unfixed |
-| StudySessionScreen (all 5 modes) | 0 | 1 | 4 | 2 | 7 | reviewed · unfixed |
-| TagCatalogScreen | 0 | 0 | 1 | 3 | 4 | reviewed · unfixed |
-| Trash sheets | 0 | 0 | 3 | 1 | 4 | reviewed · unfixed |
-| TrashScreen | 0 | 0 | 6 | 1 | 7 | reviewed · unfixed |
+| AppNavigationShell (the chrome binding all four branches) — lib/app/sh | 0 | 0 | 3 | 0 | 3 | đóng — sửa 1 · sửa (đích đổi) 1 · bác 1 |
+| Card content-bearing sheets | 0 | 1 | 2 | 1 | 4 | đóng — sửa 3 · sửa (đích đổi) 1 |
+| CardDetailScreen | 0 | 2 | 2 | 0 | 4 | đóng — sửa 3 · sửa (đích đổi) 1 |
+| CardEditorScreen (create + edit) — lib/features/card/presentation/scre | 0 | 1 | 6 | 2 | 9 | đóng — sửa 3 · sửa (đích đổi) 6 |
+| CardImportScreen | 0 | 0 | 4 | 2 | 6 | đóng — sửa 4 · sửa (đích đổi) 1 · hết tái hiện 1 |
+| CardListScreen | 0 | 0 | 7 | 1 | 8 | đóng — sửa 4 · sửa (đích đổi) 4 |
+| Deck content-bearing sheets | 0 | 2 | 4 | 1 | 7 | đóng — sửa 1 · sửa (đích đổi) 5 · hết tái hiện 1 |
+| DeckListScreen (root + level) | 0 | 2 | 3 | 0 | 5 | đóng — sửa 3 · sửa (đích đổi) 2 |
+| LibrarySearchScreen | 0 | 0 | 4 | 1 | 5 | đóng — sửa 2 · sửa (đích đổi) 2 · bác 1 |
+| ProgressDeckScreen | 0 | 1 | 2 | 1 | 4 | đóng — sửa (đích đổi) 2 · bác 2 |
+| ProgressScreen | 0 | 0 | 3 | 2 | 5 | đóng — sửa 2 · sửa (đích đổi) 2 · blocked 1 |
+| Reminder time picker (showReminderTimePicker) | 0 | 0 | 2 | 2 | 4 | đóng — sửa (đích đổi) 1 · bác 1 · blocked 2 |
+| ReminderSettingsScreen | 0 | 0 | 3 | 1 | 4 | đóng — sửa 2 · bác 1 · blocked 1 |
+| RouteNotFoundScreen | 0 | 0 | 0 | 2 | 2 | đóng — sửa 1 · blocked 1 |
+| SettingsScreen | 0 | 0 | 3 | 1 | 4 | đóng — sửa 3 · sửa (đích đổi) 1 |
+| StarterLibraryScreen | 1 | 1 | 4 | 0 | 6 | đóng — sửa 4 · sửa (đích đổi) 1 · bác 1 |
+| Study sheets — StudyResumeWidget, StudyModeChooserWidget, StudyDirecti | 0 | 0 | 3 | 2 | 5 | đóng — sửa 4 · sửa (đích đổi) 1 |
+| StudyEntryScreen | 0 | 3 | 3 | 1 | 7 | đóng — sửa 2 · sửa (đích đổi) 5 |
+| StudyHomeScreen | 0 | 0 | 2 | 1 | 3 | đóng — sửa (đích đổi) 1 · bác 1 · blocked 1 |
+| StudyOptionsScreen | 0 | 2 | 2 | 2 | 6 | đóng — sửa 3 · sửa (đích đổi) 3 |
+| StudySessionScreen (all 5 modes) | 0 | 1 | 4 | 2 | 7 | đóng — sửa 3 · sửa (đích đổi) 3 · bác 1 |
+| TagCatalogScreen | 0 | 0 | 1 | 3 | 4 | đóng — sửa 2 · sửa (đích đổi) 1 · bác 1 |
+| Trash sheets | 0 | 0 | 3 | 1 | 4 | đóng — sửa 4 |
+| TrashScreen | 0 | 0 | 6 | 1 | 7 | đóng — sửa 1 · sửa (đích đổi) 6 |
 
 ---
 
