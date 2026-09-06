@@ -200,7 +200,7 @@ class StudyCatalogRepository implements StudyRepository {
   /// changes — which is the honest catalog answer: a rename is a scenario this
   /// screen's use-cases do not offer.
   @override
-  Stream<StudyDeckContextModel> watchDeckContext(String deckId) =>
+  Stream<StudyDeckContextModel?> watchDeckContext(String deckId) =>
       Stream<StudyDeckContextModel>.value(_context(deckId));
 
   StudyDeckContextModel _context(String deckId) => StudyDeckContextModel(

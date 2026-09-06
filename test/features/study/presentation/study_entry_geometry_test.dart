@@ -31,6 +31,7 @@ void main() {
           const StudyEntryScreen(
             deckId: 'deck-1',
             optionsRouteName: RouteNames.deckStudyOptions,
+            homeRouteName: RouteNames.study,
           ),
           isScrollable: false,
         ),

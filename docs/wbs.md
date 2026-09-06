@@ -16956,6 +16956,98 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
 - **Checklist phases:** 14, 21.
 
+### M100.46 · Hai khuyết tật cuối của chuỗi screen-consistency
+
+- **Status:** done (2026-09-07)
+- **Owner:** Claude
+- **Goal:** Đóng hai khuyết tật còn lại sau M100.45. Không audit lại, không mở
+  cụm mới, không chạm hợp đồng đóng băng nào.
+- **Nhánh / PR:** `fix/screen-consistency-residuals`
+- **Vấn đề:**
+  - **Xoá deck không tới được màn Study Entry.** `watchDeckContext` lọc bỏ
+    chính `null` của mình — `.where((c) => c != null)` — nên sự kiện duy nhất
+    nói "deck đã bị xoá" là sự kiện duy nhất stream từ chối mang. Vì
+    `StatefulShellRoute.indexedStack` giữ nhánh Study luôn mounted, không có gì
+    đọc lại: xoá deck A từ Library rồi quay lại Study thì màn cũ vẫn còn,
+    tiêu đề vẫn tên deck đã xoá.
+  - **Và số đếm vẫn chạy.** `studyEntryCounts` phân giải deck đích qua
+    `(SELECT root_deck_id FROM decks WHERE id = :deckId)` **không** kèm
+    `delete_batch_id IS NULL`. Tombstone giữ nguyên mọi cột, nên một sub-deck
+    đã xoá vẫn ra được root còn sống và màn tiếp tục hiện workload của **phần
+    còn lại của cây** dưới một cái tên không còn tồn tại.
+    `query_inventory_test.dart` xanh vì nó hỏi *statement có nhắc tới* mệnh đề
+    loại trừ hay không, chứ không hỏi mệnh đề đó có phủ hết mọi tham chiếu bảng
+    trong statement hay không.
+  - **Rò rỉ thứ ba, tìm thấy khi truy nguồn cái thứ hai.** `StudyDao.deckById`
+    là một `select(decks)..where(id.equals(id))` viết tay **không** lọc
+    tombstone, trong khi `watchDeckById` ngay bên dưới đi qua statement `.drift`
+    có lọc. Cùng một tên, hai câu hỏi khác nhau: deck trong Trash *vắng mặt* với
+    stream và *có mặt* với mọi caller `Future` — `deckContext` trả context thay
+    vì `NotFoundFailure`, guard `if (deck == null) throw` của `openSession` cho
+    đi qua, và study-options ghi `study_config` lên một root đã tombstone.
+    Guard không thấy vì nó chỉ quét `lib/core/database/queries`.
+  - **`naturalHeightOf` nhân sàn chạm bằng text scaler.** Sàn được viết
+    `MediaQuery.textScalerOf(context).scale(rowMinHeight)` — 48dp đi qua bộ
+    scale chữ. Ở mức 2.0 của Android, `scale(48)` ≈ 64,3 vì 48 nằm ở khúc bảng
+    đã thoải; helper đặt trước ~64 cho mỗi hàng trong khi widget dựng ~59, và
+    thẻ prompt mất phần chênh nhân năm.
+- **Scope:**
+  - `study.drift`: thêm `delete_batch_id IS NULL` vào subquery phân giải root.
+  - `StudyDao.deckById`: dùng chính statement `.drift` mà `watchDeckById` dùng.
+  - `watchDeckContext` thành `Stream<StudyDeckContextModel?>` xuyên suốt
+    contract → use case → provider; **bỏ** bộ lọc.
+  - `StudyEntryScreen`: `AsyncData(null)` ⇒ rời route, một lần, sau frame, và
+    **chỉ khi nhánh đang hiện** (`TickerMode`).
+  - Bảng route đặt tên `homeRouteName` cho mỗi mount, như đã làm với
+    `optionsRouteName`.
+  - `naturalHeightOf`: `rowBorder + max(rowMinHeight, text + padding)`.
+- **Quyết định:**
+  - **Không điều hướng khi nhánh đang ẩn.** go_router bọc nhánh không hoạt động
+    bằng `Offstage` + `TickerMode(enabled: false)`, nên `TickerMode` là tín hiệu
+    của chính nó chứ không phải mẹo. Bắn `goNamed` ngay lúc stream phát sẽ giật
+    người dùng ra khỏi tab họ đang đứng, giữa thao tác xoá.
+  - **Không pop.** `/decks/<id>/study` pop về `/decks/<id>` — màn của chính deck
+    vừa bị xoá. Điểm đến có tên là cách duy nhất xác định được từ cả hai mount.
+  - **Chỉ `AsyncData(null)` mới là xoá.** `AsyncError` vẫn giữ value cũ, nên một
+    kiểm tra kiểu `hasValue && value == null` sẽ đưa người dùng đi khỏi một lỗi
+    đọc mà họ có thể thử lại.
+  - **Sàn 48 nằm *trong* viền, vì widget đặt nó ở đó.** `MxPressable` bọc
+    padding và chữ; viền vẽ quanh tất cả. Viết `max(48, …)` với viền gộp vào
+    trong cho ra 48 cho một hàng dựng ở 50 — đặt trước thiếu, và cái giá là năm
+    lựa chọn phải cuộn trên màn mà BR-121 nói phải thấy hết cùng lúc.
+- **Editable documents:** `docs/wbs.md`
+- **Đo, sau khi đổi:**
+  - Tiêm lỗi lại bộ lọc `null`: 3/4 test router đỏ, test rename vẫn xanh.
+  - Tiêm lỗi lại subquery + `deckById` viết tay: đúng hai test đỏ, mỗi rò rỉ
+    một test.
+  - Tiêm lỗi lại công thức sàn cũ: 5/9 test P2 đỏ.
+  - Test parity chính là thứ tìm ra rò rỉ thứ tư: helper nói 48, widget dựng
+    50/51.
+  - **Suite thiết bị flaky sẵn, không phải do thay đổi này.** `integration_test/`
+    đạt 8/8 hai lần trên nhánh, nhưng cũng đỏ hai lần ở `IT-CONT-008`. Chạy lại
+    baseline trên đúng `origin/main` (fdbc6056, detached, đã regen) ba lần:
+    **2 xanh / 1 đỏ ở `IT-PLAT-006`** — một scenario *khác*. Hai nhánh cùng đỏ
+    ngắt quãng ở hai chỗ khác nhau là hình dạng của flake theo thời gian trên
+    thiết bị, không phải hồi quy: hồi quy sẽ đỏ lặp lại ở cùng một chỗ.
+    Cơ chế cũng không có đường vào: emulator là 411×914dp — *cao hơn* golden
+    852dp — nên band `guess` còn dư chỗ hơn chứ không thiếu, và không scenario
+    nào xoá deck, nên cả hai bộ lọc tombstone lẫn unwind đều không chạy. Chính
+    `it_robot_study.dart` đã ghi sẵn nguyên nhân: "on a slow device the clock
+    can win a turn this robot meant to answer".
+- **Output:** xoá deck là một chuyển trạng thái quan sát được, và sàn chạm là
+  một sàn chạm.
+- **Acceptance criteria:**
+  - [x] Xoá deck đang mở ⇒ route tự tháo, về home của nhánh, đúng một lần.
+  - [x] Nhánh bị `indexedStack` giữ lại vẫn tháo đúng, và không cướp tab.
+  - [x] Deck đã xoá không còn phân giải ra root để sinh `studyEntryCounts`.
+  - [x] `deckById` và `watchDeckById` là cùng một câu SQL.
+  - [x] Sàn 48dp không đi qua `TextScaler`; helper khớp hình học đã dựng.
+  - [x] Không hợp đồng đóng băng nào bị chạm.
+- **Dependencies:** M100.45
+- **Tests required:** `flutter analyze`, guard, `check_architecture.sh`,
+  `check_docs.py`, host suite, Widgetbook, golden Linux, `integration_test/`.
+- **Checklist phases:** 7, 14, 21.
+
 ### M100.45 · Đóng phần dư của chuỗi C1–C9
 
 - **Status:** done (2026-09-07)

@@ -32,6 +32,7 @@ void main() {
       const StudyEntryScreen(
         deckId: 'deck-1',
         optionsRouteName: RouteNames.deckStudyOptions,
+        homeRouteName: RouteNames.study,
       ),
     ),
     // This screen declares one surface column (M99.19a): every row of

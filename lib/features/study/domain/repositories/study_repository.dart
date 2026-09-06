@@ -60,10 +60,17 @@ abstract interface class StudyRepository {
   /// Study branch stays mounted. The verb prefix says which is which, as it
   /// does on `CardRepository.watchDeckContext`.
   ///
-  /// A deck that no longer exists stops the emissions rather than erroring:
-  /// the screen keeps the last name it had while the route unwinds, which is
-  /// better than replacing it with a failure the user cannot act on.
-  Stream<StudyDeckContextModel> watchDeckContext(String deckId);
+  /// **`null` means the deck is gone, and it is emitted.** Deletion is a
+  /// domain transition, not a failure: it has no message worth showing and no
+  /// retry worth offering, so it belongs in the value rather than in an error.
+  /// A screen scoped to the deck reads that emission as "leave" and unwinds.
+  ///
+  /// It used to be filtered out, which made the four states the caller has to
+  /// tell apart — loading, present, deleted, failed — into three, and the one
+  /// it lost was the only one that requires the screen to act. With
+  /// `StatefulShellRoute.indexedStack` holding the Study branch mounted, a
+  /// swallowed deletion is permanent: nothing re-reads.
+  Stream<StudyDeckContextModel?> watchDeckContext(String deckId);
 
   /// The schedule numbers of one card, for the scheduler to work from.
   ///

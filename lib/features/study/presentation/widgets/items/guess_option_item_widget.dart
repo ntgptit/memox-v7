@@ -193,11 +193,33 @@ abstract final class AppGuessOption {
       textScaler: MediaQuery.textScalerOf(context),
     )..layout(maxWidth: width - rowPadding.horizontal - rowBorder);
 
-    final content = painter.height + rowPadding.vertical + rowBorder;
+    final content = painter.height + rowPadding.vertical;
     painter.dispose();
-    final floor = MediaQuery.textScalerOf(context).scale(rowMinHeight);
 
-    return content > floor ? content : floor;
+    // **The floor is not scaled, and the widget is why.** The row's floor is
+    // `MxPressable`'s `BoxConstraints(minHeight: AppSizing.touchTarget)` — a
+    // bare 48 — so a measurement that scaled the same number was measuring a
+    // row the app does not build. It used to read
+    // `MediaQuery.textScalerOf(context).scale(rowMinHeight)`, and under
+    // Android's non-linear curve at the 2.0 setting that returns ~64.3 for 48,
+    // because 48 sits where the table's growth has already fallen off. So the
+    // helper reserved ~64 a row while the widget rendered ~59, and the prompt
+    // card gave up the difference five times over for nothing.
+    //
+    // 48 is a touch target (WCAG 2.5.8, [AppSizing.touchTarget]), not a font
+    // size. Text scaling belongs to the painter above — where it is applied,
+    // through the real `TextScaler` — and the fingertip it is a floor for does
+    // not grow when the type does.
+    //
+    // **The border sits outside the floor, because that is where the widget
+    // puts it.** `MxPressable` is *inside* the decorated container, so its 48
+    // bounds the padding and the text and the stroke is drawn around all of
+    // it: the row is `border + max(48, padding + text)`, never `max(48, …)`
+    // with the border folded in. Written the other way the helper answered 48
+    // for a row that renders at 50 — an under-reservation the section pays for
+    // by scrolling five options that are supposed to be visible at once
+    // (BR-121).
+    return rowBorder + (content > rowMinHeight ? content : rowMinHeight);
   }
 
   /// The shortest a row may be. [AppSizing.touchTarget] rather than the

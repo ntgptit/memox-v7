@@ -102,6 +102,17 @@ LIMIT :limit;
 -- learned. The subquery is also what keeps these counts agreeing with what a
 -- session would actually serve — `openSession` takes the whole root tree.
 --
+-- **The subquery carries the tombstone predicate too, and it is not decoration
+-- there** (BR-257). Without it a deck in Trash still resolved to its root — a
+-- tombstone keeps every column — so a study entry opened on a deleted sub-deck
+-- went on counting the *rest of the tree*: the outer `d.delete_batch_id IS
+-- NULL` excludes the decks whose cards are counted, never the deck the numbers
+-- claim to be about. The statement passed `query_inventory_test.dart` because
+-- that scan asks whether a statement mentions the exclusion, not whether the
+-- mention covers every table reference in it. With the predicate the subquery
+-- resolves to NULL, nothing matches, and a deleted deck reports zeroes on its
+-- way off the screen.
+--
 -- `fillable` is the count `fill` can actually take: that mode needs an
 -- `example`, and it is optional, so a twenty-card review can be three cards long
 -- in that mode. `distinctMeanings` is what `guess` needs five of (BR-121,
@@ -120,7 +131,10 @@ SELECT
 FROM cards c
 INNER JOIN decks d ON d.id = c.deck_id
 INNER JOIN card_study_states s ON s.card_id = c.id
-WHERE d.root_deck_id = (SELECT root_deck_id FROM decks WHERE id = :deckId)
+WHERE d.root_deck_id = (
+    SELECT root_deck_id FROM decks
+    WHERE id = :deckId AND delete_batch_id IS NULL
+  )
   AND c.delete_batch_id IS NULL AND d.delete_batch_id IS NULL;
 
 -- The next card to serve (BR-23, BR-26).

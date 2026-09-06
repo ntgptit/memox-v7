@@ -126,8 +126,21 @@ final class StudyDao {
   Future<List<StudySession>> staleOpenSessions(DateTime dayStart) =>
       _db.staleOpenSessions(dayStart).get();
 
-  Future<Deck?> deckById(String id) =>
-      (_db.select(_db.decks)..where((d) => d.id.equals(id))).getSingleOrNull();
+  /// The active deck, or null — the same statement [watchDeckById] watches.
+  ///
+  /// **It was a different query with the same name, and that was the bug.**
+  /// This read a hand-built `select(decks)..where(id.equals(id))` with no
+  /// `delete_batch_id IS NULL`, while the watched twin below went through the
+  /// `.drift` statement that has one. So a deck in Trash was gone to the
+  /// stream and present to every `Future` caller: `deckContext` returned a
+  /// context for it instead of `NotFoundFailure`, `openSession`'s
+  /// `if (deck == null) throw` waved it past, and the study-options writes
+  /// wrote `study_config` onto a tombstoned root (BR-257).
+  ///
+  /// Nothing noticed because `query_inventory_test.dart` scans
+  /// `lib/core/database/queries` — a Dart-built select in a DAO is outside the
+  /// files it reads. One statement for both now, so the two cannot disagree.
+  Future<Deck?> deckById(String id) => _db.deckById(id).getSingleOrNull();
 
   /// The same row, watched.
   ///
@@ -138,9 +151,11 @@ final class StudyDao {
   /// branch stays mounted inside `StatefulShellRoute.indexedStack`, so nothing
   /// disposes the read and a one-shot never runs again.
   ///
-  /// Emits `null` for a deck that is gone, which the repository turns into
-  /// "stop emitting" rather than an error — the same choice
-  /// `DeckContextReadDataSource` makes in the card feature.
+  /// Emits `null` for a deck that is gone, and the repository **passes that
+  /// on** rather than filtering it. It used to drop it — `.where((c) => c !=
+  /// null)` — so the one emission that says the deck was deleted was the one
+  /// the stream refused to carry, and a study screen scoped to that deck had
+  /// nothing to react to (BR-257).
   Stream<Deck?> watchDeckById(String id) =>
       _db.deckById(id).watchSingleOrNull();
 
