@@ -166,8 +166,8 @@ class _StudyEntryScreenState extends ConsumerState<StudyEntryScreen> {
   /// `Offstage` + `TickerMode(enabled: false)` — so this screen is alive and
   /// rebuilding even while the user is in Library doing the deleting. A
   /// `goNamed` fired then would yank them out of the tab they are standing in,
-  /// mid-gesture, to watch a screen leave. `TickerMode.of(context)` is
-  /// go_router's own signal for "this branch is the visible one", and reading
+  /// mid-gesture, to watch a screen leave. `TickerMode` is go_router's own
+  /// signal for "this branch is the visible one", and reading
   /// it in `build` registers the dependency: when the user comes back to
   /// Study, that flip rebuilds this widget and the unwind runs then.
   ///

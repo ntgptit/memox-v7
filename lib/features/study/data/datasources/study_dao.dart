@@ -151,9 +151,11 @@ final class StudyDao {
   /// branch stays mounted inside `StatefulShellRoute.indexedStack`, so nothing
   /// disposes the read and a one-shot never runs again.
   ///
-  /// Emits `null` for a deck that is gone, which the repository turns into
-  /// "stop emitting" rather than an error — the same choice
-  /// `DeckContextReadDataSource` makes in the card feature.
+  /// Emits `null` for a deck that is gone, and the repository **passes that
+  /// on** rather than filtering it. It used to drop it — `.where((c) => c !=
+  /// null)` — so the one emission that says the deck was deleted was the one
+  /// the stream refused to carry, and a study screen scoped to that deck had
+  /// nothing to react to (BR-257).
   Stream<Deck?> watchDeckById(String id) =>
       _db.deckById(id).watchSingleOrNull();
 

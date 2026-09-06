@@ -17023,6 +17023,17 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
   - Tiêm lỗi lại công thức sàn cũ: 5/9 test P2 đỏ.
   - Test parity chính là thứ tìm ra rò rỉ thứ tư: helper nói 48, widget dựng
     50/51.
+  - **Suite thiết bị flaky sẵn, không phải do thay đổi này.** `integration_test/`
+    đạt 8/8 hai lần trên nhánh, nhưng cũng đỏ hai lần ở `IT-CONT-008`. Chạy lại
+    baseline trên đúng `origin/main` (fdbc6056, detached, đã regen) ba lần:
+    **2 xanh / 1 đỏ ở `IT-PLAT-006`** — một scenario *khác*. Hai nhánh cùng đỏ
+    ngắt quãng ở hai chỗ khác nhau là hình dạng của flake theo thời gian trên
+    thiết bị, không phải hồi quy: hồi quy sẽ đỏ lặp lại ở cùng một chỗ.
+    Cơ chế cũng không có đường vào: emulator là 411×914dp — *cao hơn* golden
+    852dp — nên band `guess` còn dư chỗ hơn chứ không thiếu, và không scenario
+    nào xoá deck, nên cả hai bộ lọc tombstone lẫn unwind đều không chạy. Chính
+    `it_robot_study.dart` đã ghi sẵn nguyên nhân: "on a slow device the clock
+    can win a turn this robot meant to answer".
 - **Output:** xoá deck là một chuyển trạng thái quan sát được, và sàn chạm là
   một sàn chạm.
 - **Acceptance criteria:**
