@@ -144,9 +144,13 @@ class _SchedulerSheetState extends ConsumerState<_SchedulerSheet> {
         showDeckResetProgressConfirm(
           context,
           deck: widget.deck,
-          // Locked means a card finished the chain, so there is something to
-          // lose and BR-50's second list is the true one.
-          hasLearnedCards: true,
+          // Reachable only from the locked branch, and the lock *is* the
+          // answer state — `firstAnsweredAt` non-null (BR-12, BR-13). So there
+          // is always something here for the reset to discard, and BR-50's
+          // second list is the true one. It used to read this as a card having
+          // finished the chain, which is the learned threshold and a different
+          // fact: the value was right and the reason was not.
+          hasStudyProgress: true,
         ),
       );
     },

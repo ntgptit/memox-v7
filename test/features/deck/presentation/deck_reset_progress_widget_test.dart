@@ -43,7 +43,7 @@ void main() {
 
   Future<FakeDeckRepository> pumpSheet(
     WidgetTester tester, {
-    required bool hasLearnedCards,
+    required bool hasStudyProgress,
     SchedulerType scheduler = SchedulerType.eightBox,
   }) async {
     final repository = FakeDeckRepository();
@@ -56,7 +56,7 @@ void main() {
           onPressed: () => showDeckResetProgressConfirm(
             context,
             deck: root(scheduler: scheduler),
-            hasLearnedCards: hasLearnedCards,
+            hasStudyProgress: hasStudyProgress,
           ),
           child: const Text('open'),
         ),
@@ -71,7 +71,7 @@ void main() {
   testWidgets('it states both what is kept and what is lost (BR-50)', (
     tester,
   ) async {
-    await pumpSheet(tester, hasLearnedCards: true);
+    await pumpSheet(tester, hasStudyProgress: true);
 
     expect(find.text('Kept'), findsOneWidget);
     expect(find.textContaining('past review history'), findsOneWidget);
@@ -84,7 +84,7 @@ void main() {
   testWidgets('a deck nobody has studied says so instead (A2)', (tester) async {
     // Still allowed — it is how the study mode is changed — and a list of
     // losses would be a warning about nothing.
-    await pumpSheet(tester, hasLearnedCards: false);
+    await pumpSheet(tester, hasStudyProgress: false);
 
     expect(find.text('Kept'), findsOneWidget);
     expect(find.textContaining('no progress to lose'), findsOneWidget);
@@ -98,7 +98,7 @@ void main() {
     // accidental change of algorithm.
     final repository = await pumpSheet(
       tester,
-      hasLearnedCards: true,
+      hasStudyProgress: true,
       scheduler: SchedulerType.sm2,
     );
 
@@ -115,7 +115,7 @@ void main() {
   ) async {
     // BR-44: this is the only way to change it once a card has been learned,
     // which is why the picker lives inside the confirmation (UC-07 step 3).
-    final repository = await pumpSheet(tester, hasLearnedCards: true);
+    final repository = await pumpSheet(tester, hasStudyProgress: true);
 
     await tester.tap(find.text('SM-2'));
     await tester.pumpAndSettle();
@@ -131,13 +131,13 @@ void main() {
     // The create form shows it because the choice is about to lock. Repeating
     // it here would warn about the state being left rather than the one being
     // entered (BR-44).
-    await pumpSheet(tester, hasLearnedCards: true);
+    await pumpSheet(tester, hasStudyProgress: true);
 
     expect(find.textContaining('locks after the first review'), findsNothing);
   });
 
   testWidgets('cancelling writes nothing', (tester) async {
-    final repository = await pumpSheet(tester, hasLearnedCards: true);
+    final repository = await pumpSheet(tester, hasStudyProgress: true);
 
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
@@ -154,7 +154,7 @@ void main() {
     // strictly wider than the `lg` that binds the title to the first list. It
     // was `md`, the inside-a-compact-control step, which made the two
     // opposites the most tightly bound pair on the sheet.
-    await pumpSheet(tester, hasLearnedCards: true);
+    await pumpSheet(tester, hasStudyProgress: true);
 
     // `_Section` is private, so each one is reached through the innermost Row
     // above its heading — the Row `_Section.build` returns.
@@ -187,7 +187,7 @@ void main() {
     // 320dp x 2.0 (SC-C5-04) — so `findsNothing` on the picker's old label
     // would pass whether or not the picker drew one. One `MxSectionLabel`
     // on the sheet is the thing this test has always meant.
-    await pumpSheet(tester, hasLearnedCards: true);
+    await pumpSheet(tester, hasStudyProgress: true);
 
     expect(schedulerHeading, findsOneWidget);
     expect(find.byType(MxSectionLabel), findsOneWidget);

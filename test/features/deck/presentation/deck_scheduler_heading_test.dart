@@ -104,7 +104,7 @@ void main() {
           onPressed: () => showDeckResetProgressConfirm(
             context,
             deck: root(),
-            hasLearnedCards: true,
+            hasStudyProgress: true,
           ),
           child: const Text('open'),
         ),
@@ -158,7 +158,7 @@ void main() {
               onPressed: () => showDeckResetProgressConfirm(
                 context,
                 deck: root(),
-                hasLearnedCards: true,
+                hasStudyProgress: true,
               ),
               child: const Text('open'),
             ),

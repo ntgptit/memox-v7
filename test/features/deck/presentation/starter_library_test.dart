@@ -1,98 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
-import 'package:memox/features/card/domain/failures/card_validation_failure.dart';
-import 'package:memox/features/card/domain/models/card_text_model.dart';
-import 'package:memox/features/deck/di/deck_template_provider.dart';
-import 'package:memox/features/deck/domain/models/deck_name_model.dart';
 import 'package:memox/features/deck/domain/models/deck_template_model.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
-import 'package:memox/features/deck/domain/repositories/deck_template_repository.dart';
-import 'package:memox/features/deck/presentation/screens/starter_library_screen.dart';
 import 'package:memox/features/deck/presentation/widgets/sections/deck_notice_widget.dart';
-import 'package:memox/l10n/generated/app_localizations.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/shared/widgets/mx_icon.dart';
 
+import 'support/starter_library_harness.dart';
+
 /// The starter catalog: what it discloses, and what installing from it does —
 /// and refuses to do (UC-01, BR-33, BR-37, BR-87).
 void main() {
   final english = AppLocalizationsEn();
 
-  DeckTemplate template({String id = 'starter-1', int version = 1}) =>
-      DeckTemplate(
-        templateId: id,
-        version: version,
-        locale: 'en',
-        title: DeckName.parse('Everyday English').name!,
-        contentSource: 'memox-fixture',
-        defaultSchedulerType: SchedulerType.eightBox,
-        children: <DeckTemplateNode>[
-          DeckTemplateNode.leaf(
-            name: DeckName.parse('Basics').name!,
-            cards: <DeckTemplateCard>[
-              DeckTemplateCard(
-                front: CardText.parse('hello', side: CardSide.front).text!,
-                back: CardText.parse('xin chào', side: CardSide.back).text!,
-              ),
-            ],
-          ),
-        ],
-      );
-
-  Future<_ScriptedTemplateRepository> pump(
-    WidgetTester tester, {
-    List<DeckTemplate>? catalog,
-    Set<({String templateId, int version})>? installed,
-    Object? failWith,
-    Exception? catalogFailsWith,
-    DeckTemplateInstallOutcome outcome = DeckTemplateInstallOutcome.installed,
-  }) async {
-    final repository = _ScriptedTemplateRepository(
-      installed: installed ?? <({String templateId, int version})>{},
-      failWith: failWith,
-      outcome: outcome,
-    );
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          deckTemplateCatalogProvider.overrideWith((ref) async {
-            // The read failing, not the install: this is the branch the
-            // screen's `MxErrorState` covers, and nothing in the app had ever
-            // rendered it.
-            if (catalogFailsWith != null) throw catalogFailsWith;
-
-            return catalog ?? <DeckTemplate>[template()];
-          }),
-          deckTemplateRepositoryProvider.overrideWithValue(repository),
-        ],
-        child: MaterialApp(
-          theme: buildLightTheme(),
-          localizationsDelegates: const <LocalizationsDelegate<Object>>[
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: const StarterLibraryScreen(),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    return repository;
-  }
-
   testWidgets('a row discloses name, size, language, source and the fixture '
       'notice (BR-87)', (tester) async {
-    await pump(tester);
+    await pumpStarterLibrary(tester);
 
     expect(find.text('Everyday English'), findsOneWidget);
     expect(
@@ -122,7 +49,7 @@ void main() {
 
   testWidgets('installing: scheduler defaults from the template, one write, '
       'sheet closes', (tester) async {
-    final repository = await pump(tester);
+    final repository = await pumpStarterLibrary(tester);
 
     await tester.tap(find.text('Everyday English'));
     await tester.pumpAndSettle();
@@ -145,7 +72,7 @@ void main() {
   });
 
   testWidgets('cancelling the sheet installs nothing', (tester) async {
-    final repository = await pump(tester);
+    final repository = await pumpStarterLibrary(tester);
 
     await tester.tap(find.text('Everyday English'));
     await tester.pumpAndSettle();
@@ -158,7 +85,7 @@ void main() {
 
   group('an installed template (BR-37, BR-38)', () {
     testWidgets('cancelling the confirm copies nothing', (tester) async {
-      final repository = await pump(
+      final repository = await pumpStarterLibrary(
         tester,
         installed: <({String templateId, int version})>{
           (templateId: 'starter-1', version: 1),
@@ -183,7 +110,7 @@ void main() {
     });
 
     testWidgets('confirming makes one deliberate duplicate', (tester) async {
-      final repository = await pump(
+      final repository = await pumpStarterLibrary(
         tester,
         installed: <({String templateId, int version})>{
           (templateId: 'starter-1', version: 1),
@@ -204,7 +131,10 @@ void main() {
 
   testWidgets('a failed install keeps the sheet, shows the failure, and '
       'retries into a second attempt', (tester) async {
-    final repository = await pump(tester, failWith: Exception('disk full'));
+    final repository = await pumpStarterLibrary(
+      tester,
+      failWith: Exception('disk full'),
+    );
 
     await tester.tap(find.text('Everyday English'));
     await tester.pumpAndSettle();
@@ -230,7 +160,7 @@ void main() {
   });
 
   testWidgets('an empty manifest is a state, not an error', (tester) async {
-    await pump(tester, catalog: <DeckTemplate>[]);
+    await pumpStarterLibrary(tester, catalog: <DeckTemplate>[]);
 
     expect(find.text(english.starterLibraryEmpty), findsOneWidget);
     // The heading names the situation, not the screen (SC-C3-02). Titled with
@@ -250,61 +180,14 @@ void main() {
   /// without `retryLabel`, which `MxErrorState` asserts against and a release
   /// build answers by dropping the button — a failure the user can read and
   /// cannot act on.
-  group('a copy that found the deck already there (BR-37)', () {
-    // The race the in-transaction check exists for: the catalogue row said the
-    // template was not installed, and by the time the write ran it was. The
-    // outcome is a *finished* write that copied nothing — not a failure, and
-    // not an install.
-
-    testWidgets('says so instead of closing as though it added one', (
-      tester,
-    ) async {
-      await pump(tester, outcome: DeckTemplateInstallOutcome.alreadyPresent);
-
-      await tester.tap(find.text('Everyday English'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text(english.starterLibraryInstallAction).last);
-      await tester.pumpAndSettle();
-
-      // The sheet is still up, and it names what happened.
-      expect(
-        find.text(english.starterLibraryAlreadyPresentTitle),
-        findsOneWidget,
-      );
-      expect(
-        find.text(english.starterLibraryInstallAction),
-        findsWidgets,
-        reason: 'the sheet stays open, so its action is still on screen',
-      );
-      // And it is not dressed as a failure: nothing rolled back, so the
-      // failure copy must not appear beside it.
-      expect(find.text(english.starterLibraryInstallErrorTitle), findsNothing);
-      expect(tester.takeException(), isNull);
-    });
-
-    testWidgets('an ordinary install still closes the sheet', (tester) async {
-      // The counterpart, so the branch above cannot be satisfied by a sheet
-      // that simply stopped closing.
-      await pump(tester);
-
-      await tester.tap(find.text('Everyday English'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text(english.starterLibraryInstallAction).last);
-      await tester.pumpAndSettle();
-
-      expect(
-        find.text(english.starterLibraryAlreadyPresentTitle),
-        findsNothing,
-      );
-      expect(find.text(english.starterLibraryInstallAction), findsNothing);
-    });
-  });
-
   group('a catalog that cannot be read (SC-C3-01, SC-C3-02)', () {
     testWidgets('renders a retryable failure instead of an assertion', (
       tester,
     ) async {
-      await pump(tester, catalogFailsWith: Exception('asset missing'));
+      await pumpStarterLibrary(
+        tester,
+        catalogFailsWith: Exception('asset missing'),
+      );
 
       expect(
         tester.takeException(),
@@ -320,7 +203,10 @@ void main() {
     testWidgets('the headline names the load, and no copy was claimed', (
       tester,
     ) async {
-      await pump(tester, catalogFailsWith: Exception('asset missing'));
+      await pumpStarterLibrary(
+        tester,
+        catalogFailsWith: Exception('asset missing'),
+      );
 
       expect(find.text(english.starterLibraryLoadErrorTitle), findsOneWidget);
       expect(find.text(english.starterLibraryLoadFailed), findsOneWidget);
@@ -333,7 +219,10 @@ void main() {
     testWidgets('the retry re-reads the row model and says it is running', (
       tester,
     ) async {
-      await pump(tester, catalogFailsWith: Exception('asset missing'));
+      await pumpStarterLibrary(
+        tester,
+        catalogFailsWith: Exception('asset missing'),
+      );
 
       final retry = find.widgetWithText(MxActionButton, english.retryAction);
       expect(
@@ -372,7 +261,7 @@ void main() {
   /// child that carried its own gutter paid it twice.
   group('gutter ownership', () {
     testWidgets('the list scrolls to the chrome edge', (tester) async {
-      await pump(tester);
+      await pumpStarterLibrary(tester);
 
       final bar = tester.getRect(find.byType(AppBar));
       final scroll = tester.getRect(find.byType(Scrollable));
@@ -381,7 +270,7 @@ void main() {
     });
 
     testWidgets('the notice starts on the card edge', (tester) async {
-      await pump(tester);
+      await pumpStarterLibrary(tester);
 
       final glyph = tester.getRect(
         find.descendant(
@@ -408,11 +297,11 @@ void main() {
     testWidgets('two template cards sit one list-item gap apart', (
       tester,
     ) async {
-      await pump(
+      await pumpStarterLibrary(
         tester,
         catalog: <DeckTemplate>[
-          template(),
-          template(id: 'starter-2'),
+          fakeDeckTemplate(),
+          fakeDeckTemplate(id: 'starter-2'),
         ],
       );
 
@@ -431,7 +320,7 @@ void main() {
     testWidgets('the fixture notice is a section break, not another row', (
       tester,
     ) async {
-      await pump(tester);
+      await pumpStarterLibrary(tester);
 
       final notice = tester.getRect(find.byType(DeckNoticeWidget));
       final card = tester.getRect(find.byType(MxCard));
@@ -447,50 +336,4 @@ void main() {
       expect(card.top - notice.bottom, greaterThan(AppSpacing.lg));
     });
   });
-}
-
-/// Answers what the test scripted, and records every install it was asked for.
-final class _ScriptedTemplateRepository implements DeckTemplateRepository {
-  _ScriptedTemplateRepository({
-    required this.installed,
-    this.failWith,
-    this.outcome = DeckTemplateInstallOutcome.installed,
-  });
-
-  /// What a completed install answers. `alreadyPresent` is the race BR-37's
-  /// in-transaction check exists for: the row said the deck was not there
-  /// and the database disagreed.
-  final DeckTemplateInstallOutcome outcome;
-
-  final Set<({String templateId, int version})> installed;
-  Object? failWith;
-  final List<
-    ({String templateId, SchedulerType? schedulerType, bool allowDuplicate})
-  >
-  installs =
-      <
-        ({String templateId, SchedulerType? schedulerType, bool allowDuplicate})
-      >[];
-
-  @override
-  Future<DeckTemplateInstallOutcome> installTemplate(
-    DeckTemplate template, {
-    SchedulerType? schedulerType,
-    bool allowDuplicate = false,
-  }) async {
-    final failure = failWith;
-    if (failure != null) throw Exception('$failure');
-
-    installs.add((
-      templateId: template.templateId,
-      schedulerType: schedulerType,
-      allowDuplicate: allowDuplicate,
-    ));
-
-    return outcome;
-  }
-
-  @override
-  Future<Set<({String templateId, int version})>> installedTemplateKeys() =>
-      Future<Set<({String templateId, int version})>>.value(installed);
 }

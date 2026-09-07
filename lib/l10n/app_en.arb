@@ -391,6 +391,10 @@
   "@starterLibrarySchedulerPrompt": {
     "description": "Label above the scheduler picker in the install sheet. The template only suggests a default (BR-34)."
   },
+  "starterLibraryCloseAction": "Close",
+  "@starterLibraryCloseAction": {
+    "description": "The install sheet's action once the copy has finished and found the deck already there. It replaces Add deck, which at that point can only reach the same answer again. Named like cardExportCloseAction, the app's other terminal dismiss."
+  },
   "starterLibraryAlreadyPresentTitle": "This deck is already in your library",
   "@starterLibraryAlreadyPresentTitle": {
     "description": "Shown in the install sheet when the copy finished and copied nothing because the deck was already there (BR-37). Not a failure: the sheet stays open and says so instead of closing as though a deck had been added."

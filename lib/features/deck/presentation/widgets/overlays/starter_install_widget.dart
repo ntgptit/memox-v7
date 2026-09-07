@@ -217,11 +217,28 @@ class _StarterInstallFormState extends ConsumerState<_StarterInstallForm> {
         // item gap — so the one commit with no explicit way out was also the
         // one sitting closest to the picker above it (SC-C2-14).
         const SizedBox(height: AppSpacing.xl),
-        MxActionButton(
-          label: context.l10n.starterLibraryInstallAction,
-          isLoading: install.isInstalling,
-          onPressed: install.isInstalling ? null : _install,
-        ),
+        // **Three outcomes, two footers.** A failure keeps Add deck live,
+        // because a retry can genuinely succeed. `alreadyPresent` cannot:
+        // the deck is there, and pressing Add again reaches the same answer
+        // and paints the same band, which is a loop with no way out of it
+        // except the gesture that dismisses a sheet. So the action becomes
+        // the one thing left to do.
+        //
+        // It pops with no outcome on purpose. The screen behind pops itself
+        // back to the Library on a non-null one, and nothing was added here
+        // — the reader stays in the catalogue they were browsing, with the
+        // row they tapped now reading Installed.
+        if (install.wasAlreadyPresent)
+          MxActionButton(
+            label: context.l10n.starterLibraryCloseAction,
+            onPressed: () => Navigator.of(context).pop(),
+          )
+        else
+          MxActionButton(
+            label: context.l10n.starterLibraryInstallAction,
+            isLoading: install.isInstalling,
+            onPressed: install.isInstalling ? null : _install,
+          ),
       ],
     );
   }
