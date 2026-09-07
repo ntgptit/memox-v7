@@ -118,8 +118,17 @@ cao — đó là lý do các finding dưới đây nằm ở tầng lắp ráp c
 | 14 | `StudySessionScreen` | `MaterialPageRoute` trên root navigator | study | study/session | `MxShellChrome.none` + `MxSessionTopBar` | 5 |
 | 15 | `StudyOptionsScreen` | `MaterialPageRoute` trên branch navigator | study | settings | `MxContentShell` | **0** |
 | 16 | `ProgressScreen` | `/progress` (nhánh 2) | progress | statistics | `MxAsyncView` ⊃ `MxContentShell` | 1 |
-| 17 | `ProgressDeckScreen` | `/progress/:deckId` | progress | statistics | `MxAsyncView` + `MxContentShell` | 1 |
+| 17 | `ProgressDeckScreen` | `/progress/:deckId` | progress | statistics | `MxAsyncView` + `MxContentShell` | 1 (`progress_deck_level`) [^ev03] |
 | 18 | `SettingsScreen` | `/settings` (nhánh 3) | settings | settings | `MxContentShell` | 2 |
+
+[^ev03]: **Ô này từng ghi công sai, sửa ở M100.58.** Nó ghi `1` khi cặp golden
+    duy nhất mang tên `progress_deck` thật ra vẽ **cấp thư viện** composed bên
+    trong `ProgressScreen` — mọi call site của `progressShellWith` đều lấy mặc
+    định `location: RoutePaths.progress`, nên drill-down `/progress/:deckId`
+    chưa từng có ảnh nào. Con số `1` nay đúng vì `progress_deck_level_{light,dark}`
+    tồn tại và resolve đúng route đó qua router thật; hàng gallery cũ đã được
+    đổi tên thành "Progress — cấp thư viện, hàng deck" để nói đúng cái nó vẽ.
+    Xem `reviews/impeccable-uiux-audit.md` EV-03.
 | 19 | `ReminderSettingsScreen` | `/settings/reminders` | reminder | settings | `MxContentShell` | 2 |
 | 20 | `RouteNotFoundScreen` | `errorBuilder` | app | result | `MxContentShell` | **0** |
 | 21 | `ErrorScreenWidget` | `runApp()` khi bootstrap chết · `ErrorWidget.builder` | app | result | không có — `widgets.dart` trần | ngoài phạm vi |

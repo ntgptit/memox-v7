@@ -144,8 +144,21 @@ SCREENS = [
     ('Study', 'study_guess', 'Guess', 'Chọn nghĩa'),
     ('Study', 'study_recall', 'Recall', 'Đếm ngược + tự chấm'),
     ('Study', 'study_fill', 'Fill', 'Gõ đáp án'),
+    # EV-02: the three faces after the asking stages. None had a picture
+    # anywhere — not a golden, not a catalogue scenario — so every branch the
+    # session takes once it stops asking was outside review.
+    ('Study', 'study_summary_completed', 'Session summary — finished', 'Hết thẻ: "Session finished" (BR-144)'),
+    ('Study', 'study_summary_stopped', 'Session summary — stopped', 'Rời sớm: cùng con số, khác tiêu đề'),
+    ('Study', 'study_session_blocked', 'Session blocked', 'Stage không dựng được: nói ra và mời rời phiên (BR-82)'),
+    ('Study', 'study_session_error', 'Session error', 'Không mở được phiên: lối ra, không phải retry'),
     ('Progress', 'progress_overview', 'Progress — tổng quan', 'Streak, 7 ngày, tổng đời (UC-12)'),
-    ('Progress', 'progress_deck', 'Progress — theo deck', 'Card-day, Learning/Reviewing (UC-13)'),
+    # **Renamed, because it never showed what it said.** This row renders the
+    # *library* level composed inside `ProgressScreen` — every `progressShellWith`
+    # call site took the default location — while its caption promised the
+    # drill-down. `app-wide-screen-consistency.md` §2 row 17 credited this pair
+    # to `/progress/:deckId` on the strength of that caption (EV-03).
+    ('Progress', 'progress_deck', 'Progress — cấp thư viện, hàng deck', 'Card-day, Learning/Reviewing (UC-13)'),
+    ('Progress', 'progress_deck_level', 'Progress — một deck', 'Drill-down thật ở /progress/:deckId'),
     ('Settings & Reminder', 'settings', 'Settings', 'Mặc định học, theme, ngôn ngữ (UC-16)'),
     ('Settings & Reminder', 'settings_save_failed', 'Settings — lưu thất bại',
      'Band lỗi nằm trong card của chính nhóm đó (BR-216)'),
