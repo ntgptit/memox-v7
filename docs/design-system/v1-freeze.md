@@ -7,8 +7,8 @@
 | **Scope** | Foundation, theme mapping, shared primitive contract, a11y floor, golden authoring policy. Ngoài phạm vi: **composition của từng màn hình nghiệp vụ** (không đóng băng), giá trị token cụ thể (AD-14), hợp đồng component-level (`.claude/skills/flutter-theme-design/`) |
 | **Source of truth for** | Freeze record của V1 · danh sách hợp đồng đóng băng · reopen trigger · bản đồ enforcement cho từng hợp đồng · ràng buộc lên task feature |
 | **Depends on** | `document-conventions.md` · `architecture.md` (AD-14, AD-15, AD-23) · `design-system/theme-architecture.md` · `reviews/a20-1-design-system-reconciliation.md` (bằng chứng lịch sử) |
-| **Updated by task** | M100.41 |
-| **Last updated** | 2026-09-05 |
+| **Updated by task** | M100.48 |
+| **Last updated** | 2026-09-07 |
 
 ---
 
@@ -60,6 +60,14 @@ băng" ở tài liệu này luôn có nghĩa là *cả mười bốn dòng*, kh�
 những dòng có guard: chín dòng được giữ bằng test, và một test cũng là hợp
 đồng.
 
+**Guard rule ở các dòng 2, 4, 5, 12 và 13 nay cũng được canh.**
+`code-verification-guard-v2/tests/test_memox_v7_frozen_contract_enforcement.py`
+đọc mười lăm rule đó **đúng như guard resolve chúng** — `scopes` đã bung,
+`exclude` cấp rule đã gộp, `enabled` đã tính — rồi đòi mỗi rule còn phủ một file
+presentation của **mọi** feature trong `lib/features/`. Thêm `exclude`, đặt
+`enabled: false`, hay xoá hẳn rule đều làm nó đỏ. Ghi ở đây một lần thay vì lặp
+vào năm ô của bảng, theo `document-conventions.md` §5.
+
 **Không đóng băng:** composition của màn hình nghiệp vụ. Một task feature **MAY**
 xếp đặt, thêm, bớt section, và **MAY** compose shared widget rồi layout chúng —
 primitive của framework và của layout vẫn dùng bình thường, và **MUST NOT** dựng
@@ -88,10 +96,15 @@ và **MUST NOT** merge một phần thay đổi để "mở đường".
 
 **Sửa thứ đang canh hợp đồng cũng là sửa hợp đồng.** Một task feature **MUST
 NOT** nới lỏng, thêm exclude, hay xoá rule guard và test ở cột Enforcement của
-§2 để code của nó đi qua. Đây là lối vòng thật chứ không phải giả định: năm
-trong mười bốn dòng được guard canh trên `lib/features/`, còn chín dòng còn lại
-chỉ có test — mà test thì nằm trong repo và sửa được. Guard sẽ không đỏ khi
-chính nó bị sửa.
+§2 để code của nó đi qua. Đây là lối vòng thật chứ không phải giả định, và nó
+**từng mở**: guard không đỏ khi chính nó bị sửa, nên tới trước M100.48, thêm một
+dòng `exclude` vào một rule ở §2 vẫn để guard, probe và CI xanh cùng lúc — đo
+được, không phải suy đoán. Mục 2 ở trên nói cái nay đóng đường đó cho năm dòng
+có guard canh.
+
+Chín dòng còn lại vẫn chỉ có test giữ, và test thì nằm trong repo và sửa được —
+kể cả chính probe vừa nói. Vòng này phải dừng ở đâu đó, và chỗ nó dừng là câu
+**MUST NOT** mở đầu đoạn này, không phải ở một lớp canh nữa.
 
 Ba câu trên có từ khoá là **cố ý**. Theo `document-conventions.md` §3, câu không
 mang MUST/SHOULD/MAY là *giải thích, không phải ràng buộc* — bản đầu của tài liệu
