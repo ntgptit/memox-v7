@@ -16956,6 +16956,69 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
 - **Checklist phases:** 14, 21.
 
+### M100.54 · Audit đóng chuỗi — 17/20 lên 19/20
+
+- **Status:** done (2026-09-07)
+- **Owner:** Claude
+- **Goal:** Chấm lại toàn app sau năm action, nói rõ dimension nào lên, dimension
+  nào **không** và vì sao. Đọc-và-báo-cáo; chỉ sửa nếu có regression do chính
+  năm action ấy gây ra.
+- **Nhánh / PR:** `claude/impeccable-a6-closing-audit`
+- **Scope:** `docs/wbs.md`. Không sửa code — không tìm thấy regression nào.
+
+| # | Dimension | Trước | Sau | Vì sao |
+|---|---|---|---|---|
+| 1 | Accessibility | 4 | 4 | kịch trần; vẫn tiến thật |
+| 2 | Performance | 3 | **4** | khuyết tật đo được duy nhất đã biến mất |
+| 3 | Appearance & Theming | 4 | 4 | không đụng tới |
+| 4 | Platform Conformance | 3 | **3** | cờ đã thêm nhưng **chưa xác minh được** |
+| 5 | Adaptivity | 3 | **4** | bề rộng đã chặn, landscape đã có người canh |
+| | **Tổng** | 17/20 | **19/20** | Excellent |
+
+- **Performance 3 → 4.** Payload font trong mỗi bản tải: **14,88 → 2,29 MB
+  deflated**. Đó là thứ duy nhất trong dimension này từng đo được là sai, và nó
+  đã hết. Danh sách đều ảo hoá (9 file dùng `SliverList` / `ListView.builder`),
+  `runApp` được gọi **không có `await` nào phía trước**, và đăng ký giấy phép là
+  callback lazy nên không chạm asset bundle cho tới khi ai đó mở trang. **Nói
+  thẳng phần chưa đo:** thời gian khởi động thật và frame timing khi cuộn chưa
+  được đo trên thiết bị; chúng trung tính chứ không phải bằng chứng.
+- **Adaptivity 3 → 4.** Cột đọc phủ **17/17** màn (16 trực tiếp, study_home qua
+  section body của nó), sweep landscape **18/18** ở 852x393, orientation không
+  bị khoá và `configChanges` đã gánh xoay màn nên activity không restart, inset
+  bàn phím có mặt ở 13 file. **Còn thiếu:** foldable và multi-window vẫn không có
+  bằng chứng nào — đó là thứ đầu tiên nên kiểm trước khi tin con số 4 này.
+- **Platform Conformance giữ 3, và đây là phần đáng đọc nhất.**
+  `android:enableOnBackInvokedCallback="true"` đã vào manifest, đúng thứ khoá
+  dimension này. Nhưng emulator ở đây là **API 36**, nơi `targetSdk` 36 đã bật
+  sẵn cờ đó — nên máy này **không thể** cho thấy khác biệt mà nó tạo ra trên
+  Android 13/14/15, tức đúng những phiên bản cần nó. Nâng điểm dựa trên một bản
+  sửa đúng-về-mặt-mã nhưng chưa nhìn thấy chạy là thứ chuỗi việc này đã tránh
+  suốt năm action; không nâng ở bước cuối.
+- **Accessibility giữ 4 vì kịch trần, không phải vì đứng yên.** Thêm được:
+  assertion thứ tự duyệt ở 3 sweep kèm fault probe, reduce-motion chạm tới
+  route cho sheet và cả bốn dialog helper, và ba moment haptic. **Còn thiếu:**
+  chuyển màn vẫn chạy khi bật "Remove animations" — chạm hợp đồng đóng băng #3,
+  đã dừng lại và cần task design-system riêng theo `v1-freeze.md` §3.
+- **Kiểm regression:** chạy lại toàn bộ gate trên `main` đã gộp cả năm PR —
+  format 1608/0, analyze repo-wide *No issues found*, host suite **5125 passed
+  0 failed**, guard 0 violation, architecture clean, `check_docs.py` nhất quán.
+  Không có gì để sửa.
+- **Ba việc đã tách ra thay vì làm kèm:** race trong study robot của IT
+  (IT-PLAT-006 / IT-CONT-008), `#489` viết `M100.48` vào hai comment mà không
+  tạo entry đó, và bất đồng thứ tự duyệt ở card editor / card import chưa xác
+  định được là khuyết tật thật hay do so node ở hai scroll root khác nhau.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** điểm đóng chuỗi, kèm tên của từng thứ đang giữ điểm lại.
+- **Acceptance criteria:**
+  - [x] Cả 5 dimension được chấm lại có bằng chứng đo được, không chấm cảm tính.
+  - [x] Dimension không lên đều có lý do nêu đích danh.
+  - [x] Kiểm regression chạy trên bản đã gộp, không phải trên từng nhánh.
+  - [x] Không sửa code vì không có regression.
+- **Dependencies:** M100.53
+- **Tests required:** `flutter analyze`, guard, `check_architecture.sh`,
+  `check_docs.py`, host suite.
+- **Checklist phases:** 7, 20.
+
 ### M100.53 · Mọi màn production, xoay ngang
 
 - **Status:** done (2026-09-07)
