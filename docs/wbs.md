@@ -16956,6 +16956,170 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
 - **Checklist phases:** 14, 21.
 
+### M100.60 · Mỗi ảnh đúng bề mặt có một chỗ — và trang từ chối tấm không có chỗ
+
+- **Status:** done (2026-09-08)
+- **Owner:** Claude
+- **Goal:** Đóng `EV-05` bằng phân loại có bằng chứng cho 52 PNG chụp đúng 393×852 mà
+  không hàng nào trên gallery, rồi biến kết luận đó thành thứ tự canh chính nó.
+- **Nhánh / PR:** `claude/memox-v7-ui-ux-audit-85d6fd` → PR #506
+- **Scope:** evidence-only. Không file nào dưới `lib/` bị sửa; không PNG nào đổi.
+- **Editable documents:** `docs/wbs.md`, `docs/reviews/impeccable-uiux-audit.md`
+- **Output:** 12 hàng `SCREENS` mới (70 → 82); Guard C trong chính
+  `build_screen_gallery.py`; bước `gallery ownership and surface` thêm vào job
+  `goldens` của `ci.yml`.
+
+**Phân loại: 12 REGISTER · phần còn lại KEEP_WITH_DOCUMENTED_EXCLUSION · 0 DELETE.**
+Tập rỗng ở cột xoá không phải sự thận trọng — nó là kết quả đo: mỗi tấm trong 52 đều do
+một test đang sống sinh ra, nên không tấm nào là di tích. Bảng đầy đủ (nhóm, số PNG,
+phân loại, hành động) nằm ở `impeccable-uiux-audit.md` §2 `EV-05`.
+
+**Guard C là hai phép kiểm trong chính script sinh trang**, không phải một test cạnh nó:
+`_check_every_on_surface_png_is_owned` buộc mọi PNG 393×852 hoặc có hàng, hoặc có một
+dòng lý do trong `EXCLUDED_FROM_GALLERY`; `_check_no_stale_exclusion` bắt chiều ngược
+lại, vì một lý do vắng mặt cho tấm đã lên hàng là lý do phải xoá. Nó chạy được ngay ở
+CI vì trang vốn đã dựng ở đó. **Lần chạy đầu nó bắt 4 tấm chưa xếp chỗ** —
+`guess_correct_*`, `study_fill_correct_*` — cả bốn nay có lý do viết ra.
+
+**Trần 16 MB của artifact là ràng buộc thật, không phải chi tiết.** Ở bề rộng nhúng cũ
+(560px) trang lên **18,9 MB** và không publish được; một trang không ai mở được thì
+không phải bằng chứng. Bề rộng hạ về 480 — vẫn trên 393dp mà ảnh được chụp, nên không
+tấm nào bị phóng to — và trang về **15,5 MB**.
+
+- **Acceptance criteria:**
+  - [x] Cả 52 PNG có đúng một phân loại; không tấm nào bị xoá mà chưa có bằng chứng.
+  - [x] Không PNG nào được thêm hàng chỉ để tăng độ phủ — duplicate và internal-only ở
+        lại với lý do viết ra.
+  - [x] Guard C fault-inject được: bỏ một hàng ra khỏi `SCREENS` thì script exit khác 0
+        và gọi tên đúng file.
+  - [x] Trang dựng lại từ golden **đã commit**, dưới trần 16 MB, publish ở URL ghim.
+  - [x] `check_docs.py` xanh; job `goldens (linux)` xanh.
+- **Dependencies:** M100.59
+- **Tests required:** `python .claude/skills/flutter-testing/scripts/build_screen_gallery.py`
+  (nay là bước CI), `goldens (linux)`.
+- **Checklist phases:** 14, 21
+
+### M100.59 · Tám hàng gallery đi qua router production, không còn `ReviewApp(home:)`
+
+- **Status:** done (2026-09-08)
+- **Owner:** Claude
+- **Goal:** Đóng `EV-04` — ảnh review toàn màn phải đứng trong khung production thật vẽ.
+- **Nhánh / PR:** `claude/memox-v7-ui-ux-audit-85d6fd` → PR #505
+- **Scope:** test + golden. Không file nào dưới `lib/` bị sửa.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `test/support/shell_render.dart` (`shellChild(location)`); 8 điểm mount
+  trong `feature_screens_demo_test.dart` chuyển qua nó; 16 golden vẽ lại; Guard B là
+  `test/app/gallery_shell_fidelity_test.dart`.
+
+**Phép đo là toàn bộ lý do.** Tám màn kia production route bên trong
+`StatefulShellBranch`, nhưng fixture dựng chúng trần: không router → không
+`AppNavigationShell`, không `MxNavigationBar`. Vẽ lại qua router, mỗi tấm dịch
+**10,2–10,5% khung** — thanh điều hướng, cộng phần inset nó lấy khỏi body. Đó không
+phải sai số làm tròn; đó là khác biệt giữa ảnh của app và ảnh của một khung app không
+bao giờ vẽ.
+
+**Bài học đã được viết ra từ trước, ở đúng một file làm đúng** — docstring của
+`study_options_demo_test.dart` nói thẳng rằng mount trần đánh mất thanh điều hướng và
+safe area, và đó chính là phần một review layout phải chấm. Nó được áp dụng ở một file
+và không ở các file anh em. Guard B tồn tại để chuyện đó không xảy ra lần thứ ba: nó
+**đọc danh sách màn từ chính bảng route**, nên một màn thêm vào bảng gia nhập hợp đồng
+bằng cách tồn tại, không bằng việc ai đó nhớ.
+
+`CardImportScreen` khai báo `parentNavigatorKey: rootNavigatorKey` — nó cố ý phủ lên
+thanh (M4.12 I1), nên mount trần mới là ảnh **trung thực** cho nó; guard ghi nó ở
+`overTheShell`. Bốn fixture của Card vẫn mount trần nằm ở `knownBare` kèm lý do, tức là
+**nợ có tên**, không phải khoảng trống.
+
+- **Acceptance criteria:**
+  - [x] Cả 8 hàng đi qua `createAppRouter`; không hàng nào giả lập thanh điều hướng.
+  - [x] Guard B đỏ khi thêm một fixture mount trần mới, **và** đỏ khi một dòng
+        `knownBare` trở nên thừa (đã fault-inject cả hai chiều).
+  - [x] Danh sách màn đọc từ `app_router.dart`, không chép lại trong test.
+  - [x] 16 golden vẽ trên Linux; `flutter analyze` sạch toàn repo.
+- **Dependencies:** M100.58
+- **Tests required:** `test/app/gallery_shell_fidelity_test.dart`, `goldens (linux)`.
+- **Checklist phases:** 14, 21
+
+### M100.58 · Ba mặt session chưa từng được chụp, và cấp drill-down của Progress
+
+- **Status:** done (2026-09-08)
+- **Owner:** Claude
+- **Goal:** Đóng `EV-02` (ba bề mặt không có ảnh ở bất kỳ đâu) và `EV-03` (một tài liệu
+  review ghi công một cặp golden cho màn mà cặp đó không vẽ).
+- **Nhánh / PR:** `claude/memox-v7-ui-ux-audit-85d6fd` → PR #504
+- **Scope:** test + golden + catalogue + một dòng tài liệu. Không file nào dưới `lib/`.
+- **Editable documents:** `docs/wbs.md`, `docs/reviews/app-wide-screen-consistency.md`
+- **Output:** 10 golden mới; `test/demo/study_session_faces_demo_test.dart`; 4 scenario
+  trong `widgetbook/lib/screens/study_catalog_repository.dart`; 5 hàng gallery mới.
+
+**EV-02.** `StudySessionScreen` vẽ ba mặt sau các stage hỏi — summary, blocked, error —
+và không mặt nào có ảnh: không golden, không scenario. Golden của shared widget ghim
+**hình dạng** primitive bên trong chúng và không nói gì về **composition**, mà
+composition mới là thứ ba mặt này là.
+
+Summary được hai render, và cặp đó mới là điểm: `StudySummarySectionWidget` tồn tại để
+giữ *"một phiên bị dừng không phải một phiên đã xong"*, tiêu đề đọc từ
+`StudySessionSummaryModel.hasCompleted`, và một tấm ảnh không thể cho thấy điều đó. Hai
+render giữ **cùng bộ đếm**, nên thứ duy nhất khác được là tiêu đề.
+
+Cả bốn mount qua màn production và tới nơi theo đúng cách người dùng tới — dấu ✕ kết
+thúc phiên rồi trao phần vĩ thanh (BR-82) — chứ không qua section widget. Mỗi tấm mang
+assertion mà một mặt sai không thoả được; đó là bài học `study_modes_demo_test.dart` đã
+ghi sau khi một fixture mở nhầm loại phiên và ảnh trông vẫn xanh y hệt.
+
+**EV-03.** `/progress/:deckId` không có golden nào: mọi call site `progressShellWith`
+đều lấy location mặc định, nên `progress_deck_*.png` vẽ **cấp thư viện** composed bên
+trong `ProgressScreen`. `app-wide-screen-consistency.md` §2 hàng 17 ghi công cặp đó cho
+drill-down dựa trên một dòng caption. Cặp mới resolve route thật qua router production;
+hàng gallery cũ đổi tên thành `progress_deck_level` để nói đúng thứ nó vẽ; và hàng 17
+mang footnote ghi lại thứ nó từng khẳng định.
+
+- **Acceptance criteria:**
+  - [x] Ba mặt session có **cả** golden **và** scenario catalogue.
+  - [x] Cặp summary phân biệt stopped/completed, và chỉ tiêu đề khác nhau.
+  - [x] Golden drill-down chứng minh nó resolve `/progress/:deckId` — assertion yêu cầu
+        tên deck có mặt và `CURRENT STREAK` vắng mặt.
+  - [x] Hàng 17 của tài liệu nói đúng thứ cặp golden vẽ, kèm ghi chú sai cũ.
+  - [x] 10 golden vẽ trên Linux; widgetbook test xanh.
+- **Dependencies:** M100.57
+- **Tests required:** `test/demo/study_session_faces_demo_test.dart`,
+  `test/demo/feature_screens_demo_test.dart`, widgetbook suite, `goldens (linux)`.
+- **Checklist phases:** 14, 21
+
+### M100.57 · Golden của Guess vẽ bàn mà màn hình thật sự dựng được
+
+- **Status:** done (2026-09-08)
+- **Owner:** Claude
+- **Goal:** Đóng `EV-01` — harness Guess dựng bàn đã trả lời kèm hint **chưa** giải,
+  một tổ hợp `StudySessionScreen` không bao giờ render, kể cả một frame chuyển tiếp.
+- **Nhánh / PR:** `claude/memox-v7-ui-ux-audit-85d6fd` → PR #503
+- **Scope:** test + 4 golden. **Production không đổi** — production là chuẩn ở đây.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `study_guess_states_demo_test.dart` truyền `hintOverride` + `onResolved`;
+  4 golden vẽ lại; Guard A là `test/app/session_evidence_truth_test.dart`.
+
+**Guard A đọc tập mode từ chính `studyModeHintResolved`**, không chép lại danh sách:
+một mode có hint đã-giải mà harness dựng `StudySessionFrameSectionWidget` cho nó thì
+harness phải cấp hint đó. `study_session_frame_test.dart` ghim thêm hai chuỗi thật
+(`guess`, `recall`) để chúng cũng là ARB chứ không phải chữ trong test.
+
+**Bản đầu của guard xanh trước đúng khuyết tật nó sinh ra để bắt.** Nó khớp chữ trần
+`hintOverride`, mà docstring của chính harness có chữ đó khi nhắc tên `_hintOverrideFor`.
+Chỉ fault injection mới lộ ra. Bản sửa strip comment (`///`, `//`, `/* */`) rồi khớp
+dạng tham số có tên `hintOverride:` / `onResolved:`. Ghi lại vì đây là dạng xanh giả rẻ
+nhất và khó thấy nhất: guard chạy, guard xanh, guard không đo gì.
+
+- **Acceptance criteria:**
+  - [x] Bốn golden Guess (correct/wrong × light/dark) vẽ trạng thái production dựng được.
+  - [x] Guard A **đỏ** khi harness quay lại hint chưa giải (đã fault-inject).
+  - [x] Guard A không khớp chữ trong comment (bản đầu khớp, đã sửa và kiểm lại).
+  - [x] Không dòng nào dưới `lib/` bị sửa.
+  - [x] Golden vẽ trên Linux với `TZ=UTC`.
+- **Dependencies:** M100.56
+- **Tests required:** `test/app/session_evidence_truth_test.dart`,
+  `test/features/study/presentation/study_session_frame_test.dart`, `goldens (linux)`.
+- **Checklist phases:** 14, 21
+
 ### M100.56 · Audit UI/UX bằng Impeccable — và vòng verify đã bác bỏ phần lớn nó
 
 - **Status:** done (2026-09-07)
