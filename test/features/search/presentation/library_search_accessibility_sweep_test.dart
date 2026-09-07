@@ -4,12 +4,17 @@ import 'package:memox/features/search/domain/models/search_result_model.dart';
 import 'support/fake_library_search_repository.dart';
 import 'support/search_screen_harness.dart';
 
+import '../../../support/semantics_traversal.dart';
+
 /// A20.1 P2-17 — the search screen under the accessibility guidelines.
 void main() {
   Future<void> sweep(WidgetTester tester) async {
     final handle = tester.ensureSemantics();
     await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
     await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+    // And in the order a reader would take them: both guidelines above pass
+    // on a screen that announces its footer first, because neither looks.
+    expectTraversalFollowsReadingOrder(tester);
     // Contrast is deliberately not swept here: `textContrastGuideline`
     // samples rendered pixels, and on a 12px line most glyph pixels are only
     // partially covered — `settings_accessibility_test.dart` records it

@@ -157,6 +157,10 @@
   "@progressErrorRetryAction": {
     "description": "Retry on the error face. Re-opens the read; it never writes (BR-226)."
   },
+  "settingsLicensesTitle": "Open-source licences",
+  "@settingsLicensesTitle": {
+    "description": "Settings row opening Flutter's licence page. The three bundled type faces are SIL Open Font License 1.1, which requires the licence to ship with the software, so this row is an obligation rather than an extra."
+  },
   "settingsTitle": "Settings",
   "@settingsTitle": {
     "description": "App bar title of the Settings branch. Kept separate from navigationSettingsLabel for the same reason as decksTitle: a tab label competes for width, a title does not."

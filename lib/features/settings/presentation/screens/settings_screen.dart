@@ -20,6 +20,7 @@ import '../controllers/settings_write_controller.dart';
 import '../states/settings_submit_state.dart';
 import '../widgets/overlays/settings_reset_confirm_widget.dart';
 import '../widgets/sections/settings_choice_section_widget.dart';
+import '../widgets/sections/settings_licenses_section_widget.dart';
 import '../widgets/sections/settings_reminder_entry_section_widget.dart';
 import '../widgets/sections/settings_reset_section_widget.dart';
 import '../widgets/sections/settings_study_defaults_section_widget.dart';
@@ -132,6 +133,11 @@ class _Body extends ConsumerWidget {
         SettingsReminderEntrySectionWidget(
           onOpen: () => context.goNamed(RouteNames.reminderSettings),
         ),
+        const SizedBox(height: SettingsScreen.sectionGap),
+        // Above the reset, not below it. The reset is the screen's one action
+        // and the screen deliberately ends on it; a licence row underneath
+        // would push a destructive control into the middle of the page.
+        const SettingsLicensesSectionWidget(),
         const SizedBox(height: SettingsScreen.sectionGap),
         SettingsResetSectionWidget(
           isSubmitting: reset.isSubmitting,
