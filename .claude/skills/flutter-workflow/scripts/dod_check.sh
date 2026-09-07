@@ -339,6 +339,27 @@ if [[ $HAS_PROMPT_CHANGES -eq 1 ]]; then
   fi
 fi
 
+# The guard's own probes, and they belong wherever the guard runs. A rule that
+# has been excluded, disabled or deleted leaves the guard green: the guard does
+# not go red when the thing being edited is itself, so its verdict is evidence
+# only once these have passed. Missing pytest fails rather than skips — a gate
+# that reports "skipped" is a gate nobody notices has gone.
+GUARD_TESTS="$REPO_ROOT/code-verification-guard-v2/tests"
+if [[ $NEEDS_STATIC -eq 0 ]]; then
+  :
+elif [[ ! -d "$GUARD_TESTS" ]]; then
+  FAILED+=("guard self-tests missing at $GUARD_TESTS")
+elif [[ -z "$PY" ]]; then
+  FAILED+=("guard self-tests cannot run without python")
+elif ! "$PY" -m pytest --version >/dev/null 2>&1; then
+  FAILED+=("guard self-tests need pytest: $PY -m pip install -r code-verification-guard-v2/requirements-dev.txt")
+else
+  # Run from the guard directory -- one probe reads `guard-manifest.yaml` by
+  # relative path -- and in a subshell so the `cd` cannot leak into the other
+  # planned commands, which `eval` runs in this same shell.
+  plan guard_self_tests "guard self-tests (probes)"     "(cd '$REPO_ROOT/code-verification-guard-v2' && $PY -m pytest -q)"
+fi
+
 # The project's main guard. Owns every check flutter analyze cannot express —
 # layer boundaries, Riverpod usage, design tokens, memox data invariants —
 # including the rules riverpod_lint covered before it was descoped.
