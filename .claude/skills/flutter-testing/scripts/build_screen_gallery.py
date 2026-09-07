@@ -133,9 +133,18 @@ SCREENS = [
     ('Card', 'card_export_sheet', 'Export sheet', 'Ba format, share qua OS'),
     ('Card', 'card_bulk_delete_dialog', 'Bulk delete — confirm', 'Variant cautious: vào Trash 30 ngày'),
     ('Card', 'card_move_picker', 'Move picker', 'Chỉ deck hợp lệ được chào'),
+    # EV-05: on-surface PNGs that existed but had no row. Registered because
+    # each is a state a user reaches and the page had no other picture of it.
+    ('Card', 'card_list_selection', 'Card list — selection mode', 'Bar ngữ cảnh, hàng đã chọn, lọc thành inert'),
+    ('Card', 'card_export_error', 'Export — thất bại', 'Mặt lỗi của sheet, có lối thử lại'),
+    ('Card', 'card_export_selection', 'Export — theo lựa chọn', 'Phạm vi là các thẻ đã chọn, không phải cả deck'),
+    ('Card', 'card_import_confirm', 'Import — xác nhận', 'Bước 3 trước khi ghi: đếm và cảnh báo'),
+    ('Card', 'card_import_failure', 'Import — hỏng', 'Không ghi gì; nói ra và giữ nguyên bước'),
     ('Tag', 'tag_catalog', 'Tag catalog', 'Nhãn toàn thư viện tại /tags'),
     ('Tag', 'tag_filter_sheet', 'Tag filter', 'Lọc OR nhiều nhãn (BR-231)'),
     ('Tag', 'tag_rename_merge', 'Tag rename/gộp', 'Đổi tên trùng = gộp, nói trước'),
+    ('Tag', 'tag_catalog_empty', 'Tag catalog — rỗng', 'Chưa có nhãn nào; cố ý không có CTA'),
+    ('Tag', 'tag_delete_confirm', 'Tag delete — confirm', 'Hành động huỷ diệt thật: đỏ, không phải cautious'),
     ('Study', 'study_home', 'Study Home', 'Resume + workload thật (UC-14)'),
     ('Study', 'study_entry', 'Study entry — vào một deck', 'Đếm new/due, hai lối vào, nút tuỳ chọn (UC-14)'),
     ('Study', 'study_options', 'Study options', 'Giới hạn thẻ, thứ tự thẻ mới; override theo deck (BR-212)'),
@@ -144,6 +153,14 @@ SCREENS = [
     ('Study', 'study_guess', 'Guess', 'Chọn nghĩa'),
     ('Study', 'study_recall', 'Recall', 'Đếm ngược + tự chấm'),
     ('Study', 'study_fill', 'Fill', 'Gõ đáp án'),
+    # The within-mode states. The five rows above are each mode's *asking*
+    # frame; these are what the learner sees after answering, which the page
+    # had no picture of at all.
+    ('Study', 'guess_wrong', 'Guess — đã trả lời sai', 'Ô sai đỏ, đáp án đúng xanh, hint đổi (EV-01)'),
+    ('Study', 'recall_self_assess', 'Recall — lật đáp án', 'Hết che: người học tự chấm'),
+    ('Study', 'recall_timed_out', 'Recall — hết giờ', 'Đồng hồ hết: tính là quên (BR-133)'),
+    ('Study', 'study_fill_hint', 'Fill — hiện gợi ý', 'Gợi ý mở ra, đáp án vẫn phải gõ'),
+    ('Study', 'study_fill_incorrect', 'Fill — sai', 'Verdict sai kèm đáp án đúng'),
     # EV-02: the three faces after the asking stages. None had a picture
     # anywhere — not a golden, not a catalogue scenario — so every branch the
     # session takes once it stops asking was outside review.
@@ -191,8 +208,15 @@ def _check_surface(path, im):
             SURFACE[0] // DPR, SURFACE[1] // DPR))
 
 
-def encode(path, width=560):
-    """A screen at review width, embedded — the page has to open offline."""
+def encode(path, width=480):
+    """A screen at review width, embedded — the page has to open offline.
+
+    **480, not 560, since EV-05 took the page from 70 rows to 82.** The artifact
+    host refuses a page over 16MB, and at 560 the sheet reached 18.9MB — a page
+    that cannot be published is not evidence anybody can review. 480 is still
+    well above the 393dp the screens are shot at, so nothing is upsampled and
+    the loupe still opens the full-resolution capture.
+    """
     im = Image.open(path)
     _check_surface(path, im)
     if im.width > width:
@@ -202,6 +226,96 @@ def encode(path, width=560):
     im.save(buf, format='PNG', optimize=True)
 
     return 'data:image/png;base64,' + base64.b64encode(buf.getvalue()).decode()
+
+
+# ---------------------------------------------------------------------------
+# Guard C — every on-surface PNG is owned, either by a row or by a reason.
+#
+# **The gap this closes.** 52 PNGs were shot at exactly the gallery surface and
+# had no row on the page (EV-05). Nothing was wrong with any of them; nothing
+# said so either, and an unowned picture is indistinguishable from a forgotten
+# one. `_check_surface` already refuses a PNG at the wrong size — this refuses a
+# PNG at the *right* size that nobody has placed.
+#
+# A file lands here for one of two reasons and both are decisions: it belongs on
+# the page, or it does not and somebody said why. Silence is the third state,
+# and it is the one this removes.
+EXCLUDED_FROM_GALLERY = {
+    # Duplicate evidence — the page already draws this exact frame.
+    'guess_open': 'the asking board; `study_guess` is the same frame',
+    'recall_counting_down': 'the clock running; `study_recall` is the same frame',
+    'guess_correct': 'the answered board when the pick was right; `guess_wrong` '
+                     'is the richer frame — it carries both a red row and a green one',
+    'study_fill_correct': 'the verdict when the answer was right; '
+                          '`study_fill_incorrect` also shows the correct answer',
+    'card_export_sheet_vi': 'locale variant of `card_export_sheet`',
+    'tag_catalog_vi': 'locale variant of `tag_catalog`',
+    'card_import_paste': 'a filled variant of the registered `card_import_source`',
+    'card_import_preview_valid': 'a clean variant of the registered `card_import_preview`',
+    'card_import_source_ready': 'a filled variant of `card_import_source`',
+    'card_import_result_skips': 'a count variant of `card_import_result_complete`',
+    'card_import_result_zero': 'a count variant of `card_import_result_complete`',
+    'card_export_scope_changed': 'a scope variant of `card_export_selection`',
+    'card_list_select_all': 'a selection-count variant of `card_list_selection`',
+    'card_move_picker_empty': 'the empty variant of `card_move_picker`',
+    # Meaningful transient — real, but one keystroke or one frame from a row.
+    'card_export_generating': 'the in-flight moment of `card_export_sheet`',
+    'card_import_submitting': 'the in-flight moment of the confirm step',
+    'card_import_parse_error': 'a parse failure inside the registered preview step',
+    'study_fill_typing': 'mid-typing; `study_fill` is the same screen a keystroke earlier',
+    # Internal-only — not a screen state.
+    'study_match_progress_idle': 'a Match *tile* state, not a screen; the board is `study_match`',
+    'study_match_progress_selected': 'a Match tile state',
+    'study_match_progress_paired': 'a Match tile state',
+    'study_match_progress_wrong': 'a Match tile state',
+    'card_editor_edit_dark_scrolled': 'a scroll position, not a product state',
+    'study_fill_long_meaning': 'a content-stress case; it belongs to the test that measures it',
+}
+
+
+def _owned_bases():
+    """Every base name a row or an exclusion accounts for."""
+    return {base for _g, base, _n, _note in SCREENS} | set(EXCLUDED_FROM_GALLERY)
+
+
+def _check_every_on_surface_png_is_owned():
+    owned = _owned_bases()
+    unowned = []
+    for name in sorted(os.listdir(G)):
+        if not name.endswith('.png'):
+            continue
+        with Image.open(os.path.join(G, name)) as im:
+            if (im.width, im.height) != SURFACE:
+                continue  # off-surface renders are `_check_surface`'s business
+        base = re.sub(r'_(light|dark)$', '', name[:-len('.png')])
+        if base in owned:
+            continue
+        unowned.append(name)
+
+    if not unowned:
+        return
+    raise SystemExit(
+        'These PNGs are shot at the gallery surface and nobody has placed '
+        'them — add a row to SCREENS, or an entry to EXCLUDED_FROM_GALLERY '
+        'saying why the page does not want them:\n  ' + '\n  '.join(unowned))
+
+
+def _check_no_stale_exclusion():
+    """An exclusion for a PNG that no longer exists is a list of files."""
+    present = set()
+    for name in os.listdir(G):
+        if name.endswith('.png'):
+            present.add(re.sub(r'_(light|dark)$', '', name[:-len('.png')]))
+    stale = sorted(set(EXCLUDED_FROM_GALLERY) - present)
+    if stale:
+        raise SystemExit(
+            'EXCLUDED_FROM_GALLERY names PNGs that no longer exist, so the '
+            'list has stopped being a list of exceptions:\n  '
+            + '\n  '.join(stale))
+
+
+_check_every_on_surface_png_is_owned()
+_check_no_stale_exclusion()
 
 
 cards, total, dark_count = [], 0, 0
