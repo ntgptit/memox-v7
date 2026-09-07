@@ -16956,7 +16956,7 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
 - **Checklist phases:** 14, 21.
 
-### M100.53 · Tiêu đề gọi tên Trash, và cặp verdict thôi nghiêng
+### M100.55 · Tiêu đề gọi tên Trash, và cặp verdict thôi nghiêng
 
 - **Status:** done (2026-09-07)
 - **Owner:** Claude
@@ -17028,6 +17028,11 @@ design-system theo §3 của `v1-freeze.md`. Nửa còn lại của cùng findin
 đáp án đang ngồi trên bề mặt phẳng hơn câu hỏi — cũng để lại: nó chạm hợp đồng
 depth của card (#10), và chủ dự án đã giới hạn lần này ở hai P0.
 
+- **Đánh số lại.** Nhánh này mở khi M100.52 còn là entry mới nhất, nên hai
+  commit đầu của nó ghi `(M100.53)` trong tiêu đề. #499 và #500 land trước
+  khi nó merge và lấy mất M100.53 + M100.54, nên entry là **M100.55**. Giữ
+  tiêu đề commit nguyên trạng thay vì viết lại lịch sử đã push: số đúng
+  sống ở đây, và dòng này là thứ nối hai cái lại.
 - **Editable documents:** `docs/wbs.md`
 - **Output:** hai tiêu đề gọi tên đích đến; cặp verdict cân bằng.
 - **Acceptance criteria:**
@@ -17039,10 +17044,116 @@ depth của card (#10), và chủ dự án đã giới hạn lần này ở hai 
   - [x] Hai quyết định bị đảo đều được ghi lại tại chỗ, kèm lý do — comment cũ
         không bị xoá trắng mà bị thay bằng lập luận mới.
   - [x] Phần chạm hợp đồng đóng băng bị dừng và nêu tên.
-- **Dependencies:** M100.52
+- **Dependencies:** M100.54
 - **Tests required:** `flutter analyze` repo-wide, guard + self-tests,
   `check_architecture.sh`, `check_docs.py`, host suite, golden Linux.
 - **Checklist phases:** 13, 14.
+### M100.54 · Audit đóng chuỗi — 17/20 lên 19/20
+
+- **Status:** done (2026-09-07)
+- **Owner:** Claude
+- **Goal:** Chấm lại toàn app sau năm action, nói rõ dimension nào lên, dimension
+  nào **không** và vì sao. Đọc-và-báo-cáo; chỉ sửa nếu có regression do chính
+  năm action ấy gây ra.
+- **Nhánh / PR:** `claude/impeccable-a6-closing-audit`
+- **Scope:** `docs/wbs.md`. Không sửa code — không tìm thấy regression nào.
+
+| # | Dimension | Trước | Sau | Vì sao |
+|---|---|---|---|---|
+| 1 | Accessibility | 4 | 4 | kịch trần; vẫn tiến thật |
+| 2 | Performance | 3 | **4** | khuyết tật đo được duy nhất đã biến mất |
+| 3 | Appearance & Theming | 4 | 4 | không đụng tới |
+| 4 | Platform Conformance | 3 | **3** | cờ đã thêm nhưng **chưa xác minh được** |
+| 5 | Adaptivity | 3 | **4** | bề rộng đã chặn, landscape đã có người canh |
+| | **Tổng** | 17/20 | **19/20** | Excellent |
+
+- **Performance 3 → 4.** Payload font trong mỗi bản tải: **14,88 → 2,29 MB
+  deflated**. Đó là thứ duy nhất trong dimension này từng đo được là sai, và nó
+  đã hết. Danh sách đều ảo hoá (9 file dùng `SliverList` / `ListView.builder`),
+  `runApp` được gọi **không có `await` nào phía trước**, và đăng ký giấy phép là
+  callback lazy nên không chạm asset bundle cho tới khi ai đó mở trang. **Nói
+  thẳng phần chưa đo:** thời gian khởi động thật và frame timing khi cuộn chưa
+  được đo trên thiết bị; chúng trung tính chứ không phải bằng chứng.
+- **Adaptivity 3 → 4.** Cột đọc phủ **17/17** màn (16 trực tiếp, study_home qua
+  section body của nó), sweep landscape **18/18** ở 852x393, orientation không
+  bị khoá và `configChanges` đã gánh xoay màn nên activity không restart, inset
+  bàn phím có mặt ở 13 file. **Còn thiếu:** foldable và multi-window vẫn không có
+  bằng chứng nào — đó là thứ đầu tiên nên kiểm trước khi tin con số 4 này.
+- **Platform Conformance giữ 3, và đây là phần đáng đọc nhất.**
+  `android:enableOnBackInvokedCallback="true"` đã vào manifest, đúng thứ khoá
+  dimension này. Nhưng emulator ở đây là **API 36**, nơi `targetSdk` 36 đã bật
+  sẵn cờ đó — nên máy này **không thể** cho thấy khác biệt mà nó tạo ra trên
+  Android 13/14/15, tức đúng những phiên bản cần nó. Nâng điểm dựa trên một bản
+  sửa đúng-về-mặt-mã nhưng chưa nhìn thấy chạy là thứ chuỗi việc này đã tránh
+  suốt năm action; không nâng ở bước cuối.
+- **Accessibility giữ 4 vì kịch trần, không phải vì đứng yên.** Thêm được:
+  assertion thứ tự duyệt ở 3 sweep kèm fault probe, reduce-motion chạm tới
+  route cho sheet và cả bốn dialog helper, và ba moment haptic. **Còn thiếu:**
+  chuyển màn vẫn chạy khi bật "Remove animations" — chạm hợp đồng đóng băng #3,
+  đã dừng lại và cần task design-system riêng theo `v1-freeze.md` §3.
+- **Kiểm regression:** chạy lại toàn bộ gate trên `main` đã gộp cả năm PR —
+  format 1608/0, analyze repo-wide *No issues found*, host suite **5125 passed
+  0 failed**, guard 0 violation, architecture clean, `check_docs.py` nhất quán.
+  Không có gì để sửa.
+- **Ba việc đã tách ra thay vì làm kèm:** race trong study robot của IT
+  (IT-PLAT-006 / IT-CONT-008), `#489` viết `M100.48` vào hai comment mà không
+  tạo entry đó, và bất đồng thứ tự duyệt ở card editor / card import chưa xác
+  định được là khuyết tật thật hay do so node ở hai scroll root khác nhau.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** điểm đóng chuỗi, kèm tên của từng thứ đang giữ điểm lại.
+- **Acceptance criteria:**
+  - [x] Cả 5 dimension được chấm lại có bằng chứng đo được, không chấm cảm tính.
+  - [x] Dimension không lên đều có lý do nêu đích danh.
+  - [x] Kiểm regression chạy trên bản đã gộp, không phải trên từng nhánh.
+  - [x] Không sửa code vì không có regression.
+- **Dependencies:** M100.53
+- **Tests required:** `flutter analyze`, guard, `check_architecture.sh`,
+  `check_docs.py`, host suite.
+- **Checklist phases:** 7, 20.
+
+### M100.53 · Mọi màn production, xoay ngang
+
+- **Status:** done (2026-09-07)
+- **Owner:** Claude
+- **Goal:** Biến kết quả probe thủ công ở 852x393 thành thứ được canh, chứ
+  không phải một lần kiểm rồi quên.
+- **Nhánh / PR:** `claude/impeccable-a5-landscape-sweep`
+- **Scope:** một file test mới, không golden. Không đụng `lib/`.
+- **Vấn đề:** cả **333 golden đều là 393x852**, và `mx_responsive_test.dart` là
+  test landscape duy nhất trong repo — nó dựng một composition tổng hợp của
+  shared widget chứ không phải màn nào. App có đúng **một** orientation được
+  kiểm.
+- **Cách làm:** 18 mục (17 màn production + route-not-found), mỗi mục pump ở
+  852x393 rồi assert `takeException()` null và `meetsGuideline(androidTapTarget)`.
+  Tái dùng sáu audit harness và `pumpReview` sẵn có; **không** thêm golden nào —
+  `build_screen_gallery.py` làm đỏ build nếu có hàng ngoài 393x852.
+- **Ba thứ phải sửa trong lúc làm, và cả ba đều đáng ghi:**
+  - `pumpReview` bật `debugDisableShadows = false` và để caller trả lại —
+    `matchesReviewGolden` vốn làm việc đó. Sweep không chụp ảnh nên phải tự trả,
+    và phải trả **trong thân test**: `addTearDown` chạy *sau* invariant
+    paint-vars của framework, nên cả 18 ca đỏ vì một lý do không liên quan gì
+    tới bố cục.
+  - Harness deck trả về một `Router` trần, không phải app — audit runner của nó
+    mới là chỗ cấp `MaterialApp`. Thiếu wrapper thì lỗi là
+    "No Directionality widget found".
+  - **Sweep cố ý không đòi tĩnh lặng.** Hai màn giữ một animation lặp mở, nên
+    `pumpAndSettle` chạy tới timeout và báo một "hang" thực chất là spinner đang
+    làm đúng việc của nó. Đòi quiescence là đi kiểm cái fake chứ không kiểm màn.
+    Pump theo thời lượng cố định — cũng tất định như không pump gì.
+- **Đo độ nhạy:** hạ surface xuống 240x120 làm **4/18** đỏ. Không phải 18, và đó
+  là sự thật đáng nói: phần lớn màn cuộn được nên không tràn theo chiều dọc; thứ
+  sweep này bắt là tràn thật và target dưới sàn chạm.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** orientation thứ hai của app có người canh.
+- **Acceptance criteria:**
+  - [x] 17 màn production đều có mặt, cộng màn route-not-found.
+  - [x] Không golden mới ở kích thước nào khác 393x852.
+  - [x] Sweep chứng minh được là nó đỏ được, có số đo kèm.
+  - [x] Không sửa `lib/`.
+- **Dependencies:** M100.52
+- **Tests required:** `flutter analyze`, guard, `check_architecture.sh`,
+  `check_docs.py`, host suite, Widgetbook, golden Linux.
+- **Checklist phases:** 7, 14.
 
 ### M100.52 · Haptic ở ba moment, và reduce-motion chạm tới route
 
