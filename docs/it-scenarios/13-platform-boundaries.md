@@ -110,3 +110,35 @@ Kịch bản duy nhất trong danh mục cố tình đi qua nhiều lớp. Nó k
 để bắt lỗi nghiệp vụ — nó tồn tại để bắt một bản dựng **không chạy được**:
 thiếu asset, sai flavor, hỏng chữ ký, R8 cắt nhầm, migration không chạy trên
 máy thật.
+
+## IT-PLAT-009 — Hệ thống cấp CJK mà app đã thôi bundle
+
+- **Ưu tiên:** P0
+- **Tiền điều kiện:** Bản dựng đã cài trên thiết bị, không sửa font hệ thống.
+
+| Bước | Thao tác người dùng | Kết quả mong đợi |
+|---|---|---|
+| 1 | Dựng `TextStyle` với `fontFamilyFallback` **rỗng** sau face Latin | Không face nào của app trả lời cho CJK |
+| 2 | Raster hoá Hangul, kana, Han và Hán giản thể | Mỗi ảnh có mực, không rỗng |
+| 3 | Raster hoá cùng số ký tự vùng Private Use làm đối chứng | Đây là hình dạng của "không tìm thấy glyph" |
+| 4 | So từng cặp | Bốn script phải **khác** đối chứng |
+
+Kịch bản duy nhất trong danh mục canh một **payload** chứ không canh một
+đường đi. App từng bundle ba face Noto CJK — 14,4 MB deflated, nhiều hơn
+toàn bộ phần còn lại của bản tải — vì một nền tảng thiếu font sẽ vẽ nội
+dung thẻ thành ô vuông. Android là target phát hành duy nhất và đã mang
+`NotoSansCJK-Regular.ttc` từ Lollipop, nên hai trong ba face là bản sao của
+một file đã nằm sẵn trên máy; chúng đã được gỡ.
+
+**Vì sao host không thay thế được.** `flutter test` không có font collection
+của hệ điều hành, nên nó không phân biệt được "nền tảng đã trả lời" với
+"không ai trả lời". Mọi unit test trong repo vẫn xanh trên một thiết bị chỉ
+hiện tofu. Đây là đúng nghĩa "thứ host không với tới".
+
+**Tofu là đối chứng, không phải ô trắng.** Glyph thiếu không phải là khoảng
+trống: Skia vẽ `.notdef` với advance thật, nên cả bề rộng lẫn việc "có mực"
+đều không chứng minh được gì. Hai codepoint Private Use không font nào nhận,
+nên chúng là hình dạng chuẩn của thất bại.
+
+Hangul vẫn nằm trong phép đo dù app còn bundle face Hàn: nếu chính nó cũng
+đỏ thì probe hỏng, chứ không phải ROM thiếu font.

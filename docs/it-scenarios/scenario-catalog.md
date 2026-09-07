@@ -214,6 +214,7 @@ các bước gốc. Ý nghĩa mức sẵn sàng, hồ sơ thực thi, chuẩn b�
 | IT-PLAT-004 | `13-platform-boundaries.md` | READY | `DEVICE-E2E` | IT-NAV-005 | SETUP-EMPTY | CLEAN-RESET | M4.1, UC-06 |
 | IT-PLAT-005 | `13-platform-boundaries.md` | READY | `DEVICE-E2E` | IT-NAV-010 | SETUP-EMPTY | CLEAN-RESET | UC-05 A3, BR-82 |
 | IT-PLAT-006 | `13-platform-boundaries.md` | READY | `DEVICE-E2E` | — | SETUP-EMPTY | CLEAN-RESET | UC-02, UC-04, UC-05, AD-04 |
+| IT-PLAT-009 | `13-platform-boundaries.md` | READY | `DEVICE-E2E` | — | SETUP-EMPTY | CLEAN-RESET | AD-04 |
 
 ## Bất biến của danh mục
 

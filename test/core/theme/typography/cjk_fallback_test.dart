@@ -4,9 +4,9 @@ import 'package:memox/core/theme/typography/app_text_styles.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/core/theme/typography/app_typography.dart';
 
-/// The CJK fallback is wired onto every text style **and** the faces it names
-/// are actually there, so a card whose content is Korean, Japanese or Chinese
-/// renders the script instead of tofu boxes.
+/// The CJK fallback is wired onto every text style **and** the face it names is
+/// actually there, so a card whose content is Korean renders Hangul instead of
+/// tofu boxes.
 ///
 /// **Two halves, because either one alone passes while the app is broken.**
 /// Wiring says the style names [AppTypography.cjkFallback] behind its Latin
@@ -29,10 +29,14 @@ import 'package:memox/core/theme/typography/app_typography.dart';
 /// does measure like the face that is supposed to carry it. It fails the moment
 /// the harness stops loading a face, which is the failure that went unnoticed.
 ///
-/// **What it does not prove.** All three faces set a full-width glyph to the
-/// same advance, so a width cannot tell Japanese apart from Simplified Chinese
-/// for the Han both cover. The order between those two is a documented decision
-/// in [AppTypography.cjkFallback], not something measured here.
+/// **What it does not prove, and who does.** Kana and Han left this file with
+/// the two faces that carried them. The app no longer bundles a face for either
+/// — the platform supplies them — and a host has no platform to ask: under
+/// `flutter test` there is no system font collection at all, so a Han sample
+/// here would measure like the missing-glyph box on a machine where the app is
+/// perfectly correct. That claim moved to the one place that can make it,
+/// `IT-PLAT-009` on a device, and this file is Hangul only on purpose rather
+/// than by omission.
 void main() {
   /// Every rung [AppTypography.buildTextTheme] sets — all fifteen.
   ///
@@ -133,14 +137,9 @@ void main() {
 typedef _Script = ({String name, String family, String sample});
 
 const List<_Script> _scripts = <_Script>[
-  // 사과 — "apple", from the starter deck.
+  // 사과 — "apple", from the starter deck. The only script the app ships a face
+  // for, and the only one a host can honestly measure.
   (name: 'Hangul', family: AppTypography.cjkFallbackFamily, sample: '사과'),
-  // ひらがな / カタカナ — kana, which no other loaded face carries in front of
-  // the Japanese one.
-  (name: 'Kana', family: AppTypography.japaneseFallbackFamily, sample: 'ひらがな'),
-  // 学校 — Han. Japanese is ahead of Simplified Chinese in the chain, so it is
-  // the face that answers for the codepoints both cover.
-  (name: 'Han', family: AppTypography.japaneseFallbackFamily, sample: '学校'),
 ];
 
 double _widthOf(String text, TextStyle style) {
