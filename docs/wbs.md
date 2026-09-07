@@ -16956,6 +16956,85 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
 - **Checklist phases:** 14, 21.
 
+### M100.48 · Bảng enforcement của V1 tự canh chính nó
+
+- **Status:** done (2026-09-07)
+- **Owner:** Claude
+- **Goal:** Đóng lối vòng mà `v1-freeze.md` §3 mô tả nhưng không có gì enforce:
+  nới lỏng thứ đang canh một hợp đồng đóng băng thì **mọi** cổng vẫn xanh.
+- **Scope:** `ci.yml`, `ci-full.yml`, `ci-device.yml`, `build-apk.yml`,
+  `dod_check.sh`, `code-verification-guard-v2/` (tests + `requirements-dev.txt`),
+  và hai tài liệu ở **Editable documents**.
+- **Nhánh / PR:** `claude/guard-self-tests-in-ci` (#491) ·
+  `claude/bump-deprecated-actions` (#492) ·
+  `claude/frozen-contract-enforcement` (#493) ·
+  `claude/freeze-doc-enforcement-map` (PR này)
+- **Phát hiện (đo, không suy đoán):** đặt một `AppBar(` thật vào
+  `lib/features/deck/presentation/screens/` rồi tác động lên rule
+  `no_raw_screen_chrome`:
+
+  | tác động | guard | probe cũ | CI |
+  |---|---|---|---|
+  | thêm `exclude` | xanh | xanh | xanh |
+  | `enabled: false` | xanh | xanh | xanh |
+  | xoá hẳn rule | xanh | **đỏ** | xanh |
+
+  Ba trên bốn cách vô hiệu hoá một hợp đồng đóng băng đi qua sạch. Cách thứ tư
+  bị probe bắt, nhưng **không cổng nào chạy probe** — `ci.yml`, `ci-full.yml`
+  và `dod_check.sh` đều không. Con số "195 pytest probe xanh" ở freeze record
+  là một lần chạy tay, không phải một cổng.
+- **Vấn đề đã sửa:**
+  - **Probe không chạy ở đâu cả.** Bước tên gần giống nhất, `CI tooling unit
+    tests`, quét `.claude/skills/flutter-workflow/scripts/tests` — thư mục khác
+    hẳn. Thêm bước `guard self-tests` vào job `static` và vào `dod_check.sh`,
+    kèm `requirements-dev.txt` ghim `pytest` tách khỏi deps runtime.
+  - **Probe cố ý xoá scope thật.** Chúng `pop("scopes")` rồi tự đặt
+    include/exclude/enabled — đúng cho việc kiểm regex, mù với việc rule còn
+    chạy ở đâu. `test_memox_v7_frozen_contract_enforcement.py` đọc rule **đúng
+    như guard resolve** rồi đòi nó còn phủ một file presentation của mọi
+    feature. Kiểm **tác dụng**, không kiểm chính tả: allowlist `exclude` sẽ bị
+    lách bằng cách viết khác cùng đường dẫn.
+  - **Suite phụ thuộc thư mục chạy.** `test_rule_set_resolver.py` đọc
+    `guard-manifest.yaml` bằng đường dẫn tương đối, nên 195/195 từ thư mục guard
+    và 194/195 từ repo root. Cố định bằng `working-directory`, và trong
+    `dod_check.sh` bọc `cd` trong subshell vì lệnh chạy qua `eval`.
+- **Bật cổng lên là bắt được lỗi ngay:** lần CI đầu đỏ ở một test nhánh không hề
+  đụng. `test_check_command_requires_ruleset` so chuỗi trên output đã render bởi
+  rich, mà rich tô màu token dạng option **nằm trong** message — nên ANSI cắt
+  chuỗi làm đôi ở mọi terminal báo có màu. Máy dev thường không báo màu.
+  195/195 ở máy và 194/195 trên runner đều là kết quả đúng của cùng một suite.
+  Sửa bằng strip ANSI trước khi assert; loại trừ bề rộng terminal trước
+  (`COLUMNS=60` vẫn xanh) rồi mới khoanh vào màu.
+- **Nhân tiện, không phải mục tiêu:** annotation deprecation của `Build APK` dẫn
+  tới việc đọc `runs.using` của từng major thay vì tin danh sách trong
+  annotation. Hai điều annotation không nói: `upload-artifact@v5` **vẫn** node20
+  (v6 mới thoát), và `setup-python@v5` cũng node20 dù không bị nêu tên. 34 chỗ
+  lên major mới nhất; `flutter-action@v2` là composite và
+  `android-emulator-runner@v2` đã node24 nên không đụng.
+- **Editable documents:** `docs/wbs.md`, `docs/design-system/v1-freeze.md`
+- **Output:** guard suite 195 → **241**; ba kiểu vô hiệu hoá rule đều đỏ; run CI
+  không còn annotation deprecation nào; §2 của `v1-freeze.md` ghi đúng thứ đang
+  canh, §3 không còn mô tả một lối vòng đã đóng.
+- **Acceptance criteria:**
+  - [x] `exclude`, `enabled: false` và xoá rule — cả ba làm suite đỏ (đã tiêm
+        lỗi trên ruleset thật, khôi phục xong cây sạch).
+  - [x] Assertion không rỗng: `test_the_watch_check_is_not_vacuous` tự tiêm lỗi,
+        vì mọi test còn lại vẫn xanh nếu helper luôn trả `True`.
+  - [x] Danh sách feature đọc từ `lib/features/` kèm chốt `>= 8`, để một lần đọc
+        rỗng không biến toàn bộ assertion thành xanh giả.
+  - [x] Suite xanh cả khi có màu lẫn không màu, và ở `COLUMNS=60`.
+  - [x] Sáu major tag của action đều resolve thật; diff nâng version đúng 34/34
+        dòng và **toàn bộ** là dòng `uses:` (kiểm bằng máy, không bằng mắt).
+  - [x] `check_docs.py` xanh; guard 0 violation.
+- **Out of scope:** không sửa hợp đồng nào ở §2 — đây là **thêm** enforcement,
+  nên không chạm điều kiện mở lại ở §3. Chín dòng chỉ có test canh vẫn nguyên
+  như cũ, và không đụng gì trong `lib/`.
+- **Dependencies:** M100.41
+- **Tests required:** guard self-test suite (241), guard, `check_docs.py`, và
+  full suite của CI cho mỗi PR.
+- **Emulator integration suite:** **not run** — không đụng `lib/`.
+- **Checklist phases:** 21.
+
 ### M100.47 · UX refinement giai đoạn 1 — Library / Deck
 
 - **Status:** done (2026-09-07)
