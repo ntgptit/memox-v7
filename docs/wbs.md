@@ -16956,6 +16956,98 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
 - **Checklist phases:** 14, 21.
 
+### M100.55 · Tiêu đề gọi tên Trash, và cặp verdict thôi nghiêng
+
+- **Status:** done (2026-09-07)
+- **Owner:** Claude
+- **Goal:** Đóng hai P0 của `/impeccable critique`: một dialog hỏi một đằng và
+  đề nghị một nẻo, và một cặp nút tự đánh giá được vẽ lệch về phía một câu
+  trả lời.
+- **Nhánh / PR:** `claude/impeccable-action-language`
+- **Scope:** hai tiêu đề trong ARB (en + vi), một `variant` ở call-site verdict,
+  hai comment ghi lại quyết định. Không đụng token màu, token typography, hay
+  chữ ký của bất kỳ shared primitive nào.
+
+**(a) Tiêu đề xác nhận phải gọi tên Trash — và nút thì không đổi.**
+
+`deck_delete_confirm_light.png` hỏi `Delete "Academic Word List"?` bên trên một
+nút ghi `Move`. Hai động từ, một dialog. Tệ hơn: `Move` **trùng nguyên văn**
+`deckMoveAction`, thao tác đổi deck cha, nên câu trả lời của dialog cũng là tên
+của một việc khác.
+
+**Bản sửa đầu tiên nghĩ tới — đổi nút thành `Move to Trash` — là sai, và repo
+đã ghi sẵn vì sao ở hai chỗ:**
+
+- `@deckDeleteConfirmAction` ghi *"Bare verb on purpose: **the dialog title names
+  Trash** … (owner, 2026-08-28)"*. Nút cộc lốc là quyết định có chủ, và nó dựa
+  trên một tiền đề về tiêu đề.
+- `mx_button_pair_test.dart` ghi phép đo đã dẫn tới quyết định ấy: `Move to
+  Trash` cần 145.3dp, hai nhãn đầy đủ cần 298.6dp trong một footer 265dp ở
+  393dp, nên cặp nút **stack** — và chủ dự án đã nhìn kết quả rồi bác.
+
+Nên khiếm khuyết không nằm ở nút mà ở **tiêu đề không giữ đúng phần của mình**.
+`cardDeleteConfirmTitle` giữ đúng (`Move this card to Trash?`); hai cái còn lại
+thì không. Sửa hai cái đó, giữ cả ba nút nguyên trạng:
+
+| key | trước | sau |
+|---|---|---|
+| `deckDeleteConfirmTitle` | `Delete "{name}"?` | `Move "{name}" to Trash?` |
+| `cardBulkDeleteTitle` | `Delete {count} cards?` | `Move {count} cards to Trash?` |
+
+Hệ quả phụ: không nhãn nút nào dài ra, nên **không có rủi ro tràn hay stack** —
+đó cũng là lý do bản sửa này rẻ hơn bản sửa đầu tiên.
+
+**Màu nút cũng KHÔNG đổi, và cũng vì một lý do đã ghi sẵn.** Critique đề xuất
+`MxActionButtonVariant.destructive`. `deck_confirm_widget.dart` ghi rõ dialog
+này là `cautious` chứ không `destructive` vì đây là soft delete: *"gives the
+destructive colour back to the one dialog that means it (BR-256, BR-266)"*. Tô
+đỏ một hành động phục hồi được trong 30 ngày sẽ phá chính hệ ba tầng
+normal / cautious / destructive, và làm mất giá trị của màu đỏ ở chỗ nó thật sự
+có nghĩa — purge và xoá tag.
+
+**(b) Cặp verdict: `Remembered` thôi là filled primary.**
+
+`recall_timer_pieces_widget.dart` vẽ `Forgot` outlined và `Remembered` filled,
+trên lập luận đã viết trong code: *"only one of them is what the learner presses
+when the card worked"*. Lập luận đó nói về **tần suất**, và nó được áp lên đúng
+cái control mà tần suất không được phép khuyến khích: cặp này không phải một
+hành động kèm phương án thay thế, nó là một **câu hỏi**, và câu trả lời là thứ
+duy nhất scheduler từng học được. Chi phí không hiện ra ngay — nó hiện sau vài
+tuần dưới dạng interval dựng trên recall bị thổi phồng, và trong dữ liệu không
+có gì chỉ về phía một cái nút.
+
+Cả hai nay là `secondary`. Thứ tự **giữ nguyên** (Forgot trái, Remembered phải;
+`MxButtonPair` đảo lại khi stack) vì nó nay là dấu hiệu duy nhất phân biệt hai
+nút, và nó giữ câu trả lời "nhớ rồi" khỏi vị trí một cú chạm nhầm rơi vào.
+
+**Chưa làm, và nêu tên thay vì tự mở băng:** mang hai câu trả lời lên
+`dangerContainer` / `successContainer` đọc còn tốt hơn, nhưng cần một
+`MxActionButtonVariant` thứ tư — tức chữ ký công khai của một shared primitive,
+**hợp đồng đóng băng #6** (`shared_api_closure_test`). Thuộc về một task
+design-system theo §3 của `v1-freeze.md`. Nửa còn lại của cùng finding — panel
+đáp án đang ngồi trên bề mặt phẳng hơn câu hỏi — cũng để lại: nó chạm hợp đồng
+depth của card (#10), và chủ dự án đã giới hạn lần này ở hai P0.
+
+- **Đánh số lại.** Nhánh này mở khi M100.52 còn là entry mới nhất, nên hai
+  commit đầu của nó ghi `(M100.53)` trong tiêu đề. #499 và #500 land trước
+  khi nó merge và lấy mất M100.53 + M100.54, nên entry là **M100.55**. Giữ
+  tiêu đề commit nguyên trạng thay vì viết lại lịch sử đã push: số đúng
+  sống ở đây, và dòng này là thứ nối hai cái lại.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** hai tiêu đề gọi tên đích đến; cặp verdict cân bằng.
+- **Acceptance criteria:**
+  - [x] Tiêu đề và nút của cả ba dialog xoá nói cùng một việc.
+  - [x] Không nhãn nút nào đổi, nên phép đo 145.3dp/265dp của
+        `mx_button_pair_test.dart` vẫn đúng nguyên.
+  - [x] Không token màu hoặc typography nào bị chạm.
+  - [x] Không tham số public nào thêm vào shared primitive.
+  - [x] Hai quyết định bị đảo đều được ghi lại tại chỗ, kèm lý do — comment cũ
+        không bị xoá trắng mà bị thay bằng lập luận mới.
+  - [x] Phần chạm hợp đồng đóng băng bị dừng và nêu tên.
+- **Dependencies:** M100.54
+- **Tests required:** `flutter analyze` repo-wide, guard + self-tests,
+  `check_architecture.sh`, `check_docs.py`, host suite, golden Linux.
+- **Checklist phases:** 13, 14.
 ### M100.54 · Audit đóng chuỗi — 17/20 lên 19/20
 
 - **Status:** done (2026-09-07)

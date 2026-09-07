@@ -306,7 +306,7 @@ void main() {
       await tester.pumpWidget(
         host(
           const MxConfirmDialog(
-            title: 'Delete "Academic Word List"?',
+            title: 'Move "Academic Word List" to Trash?',
             message: '4 sub-decks and 570 cards go to Trash with it.',
             confirmLabel: 'Move to Trash',
             cancelLabel: 'Cancel',

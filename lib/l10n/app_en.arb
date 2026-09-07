@@ -708,14 +708,14 @@
   "@deckDeleteAction": {
     "description": "Destructive action that opens the delete confirmation for a deck."
   },
-  "deckDeleteConfirmTitle": "Delete “{name}”?",
+  "deckDeleteConfirmTitle": "Move “{name}” to Trash?",
   "@deckDeleteConfirmTitle": {
     "placeholders": {
       "name": {
         "type": "String"
       }
     },
-    "description": "Title of the delete confirmation. Names the deck so the user can tell which one they are about to lose (BR-04)."
+    "description": "Title of the delete confirmation. Names the deck so the user can tell which one they are about to lose (BR-04), and names Trash because the confirm button below is a bare verb that leans on it: 'Delete X?' over a button reading 'Move' asked one question and offered a different answer, and 'Move' is also the verb of deckMoveAction, which re-parents a deck instead (BR-256)."
   },
   "deckDeleteImpactMessage": "{deckCount, plural, =0{{cardCount, plural, =0{No cards go} =1{1 card goes} other{{cardCount} cards go}}} =1{1 sub-deck and {cardCount, plural, =0{no cards} =1{1 card} other{{cardCount} cards}} go} other{{deckCount} sub-decks and {cardCount, plural, =0{no cards} =1{1 card} other{{cardCount} cards}} go}} to Trash with it. You can restore them for 30 days.",
   "@deckDeleteImpactMessage": {
@@ -1365,14 +1365,14 @@
   "@cardSelectedSemanticLabel": {
     "description": "Announced for a selected row beside its content: selection is never carried by colour alone."
   },
-  "cardBulkDeleteTitle": "Delete {count, plural, =1{1 card} other{{count} cards}}?",
+  "cardBulkDeleteTitle": "Move {count, plural, =1{1 card} other{{count} cards}} to Trash?",
   "@cardBulkDeleteTitle": {
     "placeholders": {
       "count": {
         "type": "int"
       }
     },
-    "description": "Title of the bulk delete confirmation. Names the number rather than asking a generic 'are you sure' (UC-04 A6)."
+    "description": "Title of the bulk delete confirmation. Names the number rather than asking a generic 'are you sure' (UC-04 A6), and names Trash for the reason deckDeleteConfirmTitle records: the bare-verb confirm button is only unambiguous while the title carries the destination (BR-256)."
   },
   "cardBulkDeleteMessage": "Their study history goes with them and comes back if you restore them. Trash keeps them for 30 days.",
   "@cardBulkDeleteMessage": {

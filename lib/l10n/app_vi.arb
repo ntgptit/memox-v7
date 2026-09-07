@@ -708,7 +708,7 @@
   "@deckDeleteAction": {
     "description": "Destructive action that opens the delete confirmation for a deck."
   },
-  "deckDeleteConfirmTitle": "Xoá “{name}”?",
+  "deckDeleteConfirmTitle": "Chuyển “{name}” vào Trash?",
   "@deckDeleteConfirmTitle": {
     "placeholders": {
       "name": {
@@ -1365,7 +1365,7 @@
   "@cardSelectedSemanticLabel": {
     "description": "Announced for a selected row beside its content: selection is never carried by colour alone."
   },
-  "cardBulkDeleteTitle": "Xoá {count} thẻ?",
+  "cardBulkDeleteTitle": "Chuyển {count} thẻ vào Trash?",
   "@cardBulkDeleteTitle": {
     "placeholders": {
       "count": {
