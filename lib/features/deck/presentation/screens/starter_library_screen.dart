@@ -53,7 +53,8 @@ class StarterLibraryScreen extends ConsumerWidget {
       // The catalogue row carries name, size, language and source on one
       // line. Capped, so those four stay a description instead of four
       // things scattered across a width.
-      body: Center(
+      body: Align(
+        alignment: Alignment.topCenter,
         child: MxReadingColumn(
           child: MxAsyncView<List<StarterTemplateRow>>(
             value: catalog,

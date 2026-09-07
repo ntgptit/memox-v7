@@ -182,7 +182,8 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
         // The prompt is the task, and it is set at 30. A card face stretched
         // the width of a landscape phone is the one line in this app that
         // must not be hard to read.
-        body: Center(
+        body: Align(
+          alignment: Alignment.topCenter,
           child: MxReadingColumn(
             child: session == null || turn == null || state.isFinished
                 // The transient states draw without the frame, so nothing has

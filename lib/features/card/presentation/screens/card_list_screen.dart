@@ -248,7 +248,8 @@ class CardListScreen extends ConsumerWidget {
       // cards and pressed Back meant "stop selecting", not "leave the deck".
       // A card row is a front, a back and a chevron. Stretched across a
       // landscape phone the chevron ends up nowhere near the text it opens.
-      body: Center(
+      body: Align(
+        alignment: Alignment.topCenter,
         child: MxReadingColumn(
           child: PopScope<Object?>(
             canPop: !selection.isSelecting,

@@ -301,7 +301,10 @@ class _DeckLevel extends ConsumerWidget {
       titleSubline: DeckSubheaderWidget(snapshot: snapshot),
       // The deck row carries a name, four counts and two controls. Capped,
       // so the Study button stays next to the deck it studies.
-      body: Center(child: MxReadingColumn(child: _body(context, parent))),
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: MxReadingColumn(child: _body(context, parent)),
+      ),
     );
   }
 

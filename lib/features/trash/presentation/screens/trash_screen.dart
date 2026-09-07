@@ -114,7 +114,8 @@ class TrashScreen extends ConsumerWidget {
       // Restore and Delete forever sit at the far end of every row here.
       // The wider the row, the further the destructive action drifts from
       // the name it acts on.
-      body: Center(
+      body: Align(
+        alignment: Alignment.topCenter,
         child: MxReadingColumn(
           child: PopScope<Object?>(
             canPop: !selection.isActive,

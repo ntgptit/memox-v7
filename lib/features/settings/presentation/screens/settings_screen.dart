@@ -54,7 +54,8 @@ class SettingsScreen extends ConsumerWidget {
       // width and this caps only what is read: at 1280 the option rows ran
       // 1248 wide, and a switch a screen-width away from the label it
       // belongs to is a row nobody can pair up.
-      body: Center(
+      body: Align(
+        alignment: Alignment.topCenter,
         child: MxReadingColumn(
           child: MxAsyncView<AppSettingsModel>(
             value: ref.watch(appSettingsProvider),

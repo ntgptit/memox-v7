@@ -68,7 +68,8 @@ class StudyOptionsScreen extends ConsumerWidget {
       // The last screen before a session starts, and every row on it is a
       // choice with its control on the far side. Capped so the pair reads
       // as a pair.
-      body: Center(
+      body: Align(
+        alignment: Alignment.topCenter,
         child: MxReadingColumn(
           child: MxAsyncView<StudyOptionsModel>(
             value: options,

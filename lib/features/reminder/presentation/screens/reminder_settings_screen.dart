@@ -62,7 +62,8 @@ class ReminderSettingsScreen extends ConsumerWidget {
       isScrollable: true,
       // Same cap as Settings, and for the same reason: these are option rows
       // whose control belongs beside its label.
-      body: Center(
+      body: Align(
+        alignment: Alignment.topCenter,
         child: MxReadingColumn(
           child: MxAsyncView<ReminderOverviewModel>(
             value: ref.watch(reminderOverviewProvider),

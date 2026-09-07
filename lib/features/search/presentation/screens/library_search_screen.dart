@@ -155,7 +155,8 @@ class _LibrarySearchScreenState extends ConsumerState<LibrarySearchScreen> {
       ),
       // A result is a match and its context. Capped so the eye returns to
       // the same left edge on every row it scans.
-      body: Center(
+      body: Align(
+        alignment: Alignment.topCenter,
         child: MxReadingColumn(
           child: LibrarySearchBodyWidget(
             state: state,

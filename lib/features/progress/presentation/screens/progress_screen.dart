@@ -81,7 +81,10 @@ class ProgressScreen extends ConsumerWidget {
       isScrollable: true,
       // The figures read as a column, not as a band. Stretched wide, a number
       // and the word naming it stop being one thing.
-      body: Center(child: MxReadingColumn(child: body)),
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: MxReadingColumn(child: body),
+      ),
     );
 
     return MxAsyncView<ProgressOverview>(

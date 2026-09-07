@@ -235,7 +235,8 @@ class _StudyEntryScreenState extends ConsumerState<StudyEntryScreen> {
       padding: EdgeInsets.zero,
       // The counts and the two entry points read as one block, which they
       // stop being when stretched.
-      body: Center(
+      body: Align(
+        alignment: Alignment.topCenter,
         child: MxReadingColumn(
           child: MxAsyncView<StudyEntrySummaryModel>(
             value: entry,

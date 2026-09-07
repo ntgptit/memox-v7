@@ -175,7 +175,8 @@ class _ProgressLevel extends StatelessWidget {
       // satisfies it without the misread.
       // A bar and the figure it stands for belong together; width is what
       // separates them.
-      body: Center(
+      body: Align(
+        alignment: Alignment.topCenter,
         child: MxReadingColumn(
           child: _hasNothingToMeasure
               ? _emptyLevelWithHeader(context)

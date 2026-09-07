@@ -614,7 +614,10 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
     // hands its body to this helper. A text field stretched the width of a
     // landscape phone puts the caret and its label at opposite ends of the
     // eye's travel, and a card's two faces are meant to be compared.
-    body: Center(child: MxReadingColumn(child: body)),
+    body: Align(
+      alignment: Alignment.topCenter,
+      child: MxReadingColumn(child: body),
+    ),
   );
 
   /// **A back arrow in edit, an `×` in create, and the difference is real.**
