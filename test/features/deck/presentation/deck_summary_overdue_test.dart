@@ -452,27 +452,20 @@ void main() {
       // Lower-cased because the row draws them that way: "the word is the
       // unit, the figure is the fact, and a capital gave the two equal
       // billing".
-      final quietRowWords = <String>{
+      //
+      // **The third is a debt, not a decision** (hero audit, 2026-09-08). At
+      // 320dp and textScaler 2.0 `MxProgressBar` draws `10 of 52 lear…`,
+      // which follows the quiet row's accepted shape — the figures survive,
+      // the trailing word clips — but the widget is a shared primitive and
+      // its layout is not this panel's to change. Reported for a design-system
+      // task; excluded here so this guard keeps measuring the hero.
+      final excluded = <String>{
         english.deckHeroScheduledMetricWord.toLowerCase(),
         english.deckHeroNewMetricWord.toLowerCase(),
+        english.deckLearnedProgressLabel(10, 52),
       };
 
-      // **`MxProgressBar`'s own caption is excluded, and it is excluded as a
-      // debt rather than as a decision** (hero audit, 2026-09-08). At 320dp
-      // and textScaler 2.0 the learned line draws `10 of 52 lear…`, which
-      // follows the quiet row's accepted shape — the figures survive, the
-      // trailing word clips — but the widget is a shared primitive and its
-      // layout is not this panel's to change. It is reported for a
-      // design-system task; excluding it here keeps this guard measuring the
-      // hero, which is what it is for.
-      final sharedCaptions = <String>{english.deckLearnedProgressLabel(10, 52)};
-
-      return clipped
-          .where(
-            (text) =>
-                !quietRowWords.contains(text) && !sharedCaptions.contains(text),
-          )
-          .toList();
+      return clipped.where((text) => !excluded.contains(text)).toList();
     }
 
     testWidgets('at 360 the subline moves down rather than being cut', (
@@ -493,12 +486,11 @@ void main() {
     });
 
     // **The whole matrix, because the two axes interact and one width was
-    // standing in for four.** This ran at 360 only, at 1.3 and 1.5, and the
-    // 2026-09-08 hero audit named the gap it left: the narrowest phone the app
-    // supports is 320, the accessibility scale that matters is 2.0, and the
-    // measurement that answered "does the hero clip?" had seen neither. The
-    // wrap branch is a width comparison, so the case that breaks it is the one
-    // where the numeral alone nearly fills the line — narrow *and* scaled.
+    // standing in for four.** This ran at 360 only, at 1.3 and 1.5, so the
+    // measurement answering "does the hero clip?" had seen neither the
+    // narrowest phone the app supports nor the scale that matters most. The
+    // wrap branch is a width comparison, so what breaks it is narrow *and*
+    // scaled — which is exactly the corner it had never been pointed at.
     for (final width in <double>[320, 360, 393, 412]) {
       for (final scale in <double>[1, 1.3, 1.5, 2]) {
         testWidgets('nothing is cut at ${width.toInt()}dp, textScaler $scale', (
