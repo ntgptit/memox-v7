@@ -10,6 +10,20 @@ import 'package:memox/shared/widgets/mx_progress_bar.dart';
 
 import 'support/study_widget_harness.dart';
 
+/// The line each mode shows while it is still asking.
+///
+/// Hoisted out of the test that used to hold it so the resolved-hint test can
+/// assert the asking line is *gone* without keeping a second copy of it — two
+/// copies of a translated string is how one of them goes stale.
+const _askingHints = <StudyMode, String>{
+  StudyMode.browse: 'Swipe left for next, right to go back',
+  StudyMode.selfAssess: 'Flip the card, then say how it went',
+  StudyMode.match: 'Tap one tile, then its match',
+  StudyMode.guess: 'Choose the right meaning',
+  StudyMode.recall: 'Recall it, then show the answer',
+  StudyMode.fill: 'Type the answer, then check',
+};
+
 /// The chrome the five study screens share (M5.18, §7.2, §7.3, §7.8).
 void main() {
   Widget frame({
@@ -23,6 +37,7 @@ void main() {
     ),
     ValueListenable<Duration>? timeLeft,
     VoidCallback? onClose,
+    String? hintOverride,
   }) => StudySessionFrameSectionWidget(
     mode: mode,
     kind: kind,
@@ -30,6 +45,7 @@ void main() {
     progress: progress,
     timeLeft: timeLeft,
     onClose: onClose ?? () {},
+    hintOverride: hintOverride,
     child: const Text('body'),
   );
 
@@ -147,21 +163,54 @@ void main() {
   testWidgets('every mode gets its own hint line, and it comes from ARB', (
     tester,
   ) async {
-    const hints = <StudyMode, String>{
-      StudyMode.browse: 'Swipe left for next, right to go back',
-      StudyMode.selfAssess: 'Flip the card, then say how it went',
-      StudyMode.match: 'Tap one tile, then its match',
-      StudyMode.guess: 'Choose the right meaning',
-      StudyMode.recall: 'Recall it, then show the answer',
-      StudyMode.fill: 'Type the answer, then check',
-    };
-
-    for (final entry in hints.entries) {
+    for (final entry in _askingHints.entries) {
       await pumpFrame(tester, frame(mode: entry.key));
       expect(
         find.text(entry.value),
         findsOneWidget,
         reason: '${entry.key.name} should carry its own instruction',
+      );
+    }
+  });
+
+  testWidgets('a resolved mode swaps its hint, and that string is ARB too', (
+    tester,
+  ) async {
+    // **The half the base-hint test above could not see.** It asserts the six
+    // asking hints and never passes `hintOverride`, which is why four committed
+    // Guess goldens carried "Choose the right meaning" over an answered board
+    // for as long as they did (EV-01). The screen owns the swap — `_grade`
+    // fires `onResolved`, `_hintOverrideFor` answers with
+    // `studyModeHintResolved` — so the frame's side of the contract is simply
+    // that it draws what it is handed, instead of the mode's own line.
+    //
+    // Only two modes have a second line. `browse` and `fill` resolve and
+    // advance, so they have nothing to describe; `match` and `selfAssess` never
+    // stop asking within a turn. `session_evidence_truth_test.dart` is what
+    // keeps this pair in step with `studyModeHintResolved` rather than with
+    // this literal.
+    const resolvedHints = <StudyMode, String>{
+      StudyMode.guess: 'Answer shown — the correct option is highlighted',
+      StudyMode.recall: 'The answer is showing',
+    };
+
+    for (final entry in resolvedHints.entries) {
+      await pumpFrame(
+        tester,
+        frame(mode: entry.key, hintOverride: entry.value),
+      );
+
+      expect(
+        find.text(entry.value),
+        findsOneWidget,
+        reason:
+            '${entry.key.name} should show the resolved line once handed it',
+      );
+      expect(
+        find.text(_askingHints[entry.key]!),
+        findsNothing,
+        reason:
+            '${entry.key.name} must not still be asking once it has answered',
       );
     }
   });
