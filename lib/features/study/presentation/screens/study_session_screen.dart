@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../l10n/l10n_extension.dart';
-import '../../../../shared/widgets/mx_messenger.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_empty_state.dart';
 import '../../../../shared/widgets/mx_error_state.dart';
 import '../../../../shared/widgets/mx_loading_state.dart';
+import '../../../../shared/widgets/mx_messenger.dart';
+import '../../../../shared/widgets/mx_reading_column.dart';
+import '../../domain/models/recall_mode.dart';
 import '../../domain/models/study_direction_model.dart';
 import '../../domain/models/study_mode.dart';
 import '../../domain/models/study_session_kind_model.dart';
@@ -17,12 +19,11 @@ import '../controllers/study_browse_trail_controller.dart';
 import '../controllers/study_session_controller.dart';
 import '../controllers/study_session_summary_controller.dart';
 import '../states/study_session_state.dart';
-import '../../domain/models/recall_mode.dart';
 import '../widgets/sections/study_blocked_section_widget.dart';
 import '../widgets/sections/study_session_frame_section_widget.dart';
 import '../widgets/sections/study_summary_section_widget.dart';
-import '../widgets/support/study_mode_feedback_widget.dart';
 import '../widgets/support/study_labels_widget.dart';
+import '../widgets/support/study_mode_feedback_widget.dart';
 import '../widgets/support/study_mode_view_widget.dart';
 
 /// One study session, from the first card to the last.
@@ -178,37 +179,45 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
         // `StudySessionFrameSectionWidget` gutters the context line, the body and
         // the hint itself — from `mxScreenGutter`, so 320 still gets 12.
         padding: EdgeInsets.zero,
-        body: session == null || turn == null || state.isFinished
-            // The transient states draw without the frame, so nothing has
-            // guttered them — they get it here rather than inheriting an
-            // edge-to-edge region meant for one bar.
-            ? Padding(
-                padding: EdgeInsets.all(mxScreenGutter(context)),
-                child: body,
-              )
-            : StudySessionFrameSectionWidget(
-                mode: session.currentMode,
-                kind: session.kind,
-                cardCount: state.sessionCards.length,
-                progress: turn.progress,
-                timeLeft: session.currentMode == StudyMode.recall
-                    ? _recallRemaining
-                    : null,
-                onClose: () => unawaited(_controller.leave()),
-                // BR-155: the chrome keeps describing the live turn, so the one
-                // line that speaks to the user has to say the card under it is
-                // not that turn.
-                hintOverride: _hintOverrideFor(
-                  turn,
-                  mode: session.currentMode,
-                  isLookingBack: state.isLookingBackAt(
-                    ref.watch(
-                      studyBrowseTrailControllerProvider(widget.deckId),
+        // The prompt is the task, and it is set at 30. A card face stretched
+        // the width of a landscape phone is the one line in this app that
+        // must not be hard to read.
+        body: Align(
+          alignment: Alignment.topCenter,
+          child: MxReadingColumn(
+            child: session == null || turn == null || state.isFinished
+                // The transient states draw without the frame, so nothing has
+                // guttered them — they get it here rather than inheriting an
+                // edge-to-edge region meant for one bar.
+                ? Padding(
+                    padding: EdgeInsets.all(mxScreenGutter(context)),
+                    child: body,
+                  )
+                : StudySessionFrameSectionWidget(
+                    mode: session.currentMode,
+                    kind: session.kind,
+                    cardCount: state.sessionCards.length,
+                    progress: turn.progress,
+                    timeLeft: session.currentMode == StudyMode.recall
+                        ? _recallRemaining
+                        : null,
+                    onClose: () => unawaited(_controller.leave()),
+                    // BR-155: the chrome keeps describing the live turn, so the one
+                    // line that speaks to the user has to say the card under it is
+                    // not that turn.
+                    hintOverride: _hintOverrideFor(
+                      turn,
+                      mode: session.currentMode,
+                      isLookingBack: state.isLookingBackAt(
+                        ref.watch(
+                          studyBrowseTrailControllerProvider(widget.deckId),
+                        ),
+                      ),
                     ),
+                    child: body,
                   ),
-                ),
-                child: body,
-              ),
+          ),
+        ),
       ),
     );
   }

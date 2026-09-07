@@ -8,6 +8,7 @@ import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_error_state.dart';
+import '../../../../shared/widgets/mx_reading_column.dart';
 import '../../domain/models/new_card_order_model.dart';
 import '../../domain/models/study_options_model.dart';
 import '../controllers/study_options_controller.dart';
@@ -64,50 +65,58 @@ class StudyOptionsScreen extends ConsumerWidget {
       // stays right with the scroll view too: it takes the zero padding and
       // each branch still supplies its own inset inside it.
       padding: EdgeInsets.zero,
-      body: MxAsyncView<StudyOptionsModel>(
-        value: options,
-        loadingLabel: context.l10n.studyOptionsTitle,
-        // **The read failed, so neither the screen name nor the save note is
-        // the right sentence.** `studyOptionsTitle` under a red glyph reads as
-        // a heading — and it is already the app-bar title one line up, so the
-        // face printed it twice — while "Takes effect from your next session"
-        // describes a save that succeeded, which denies that anything went
-        // wrong. `settingsLoadErrorTitle` and `reminderLoadErrorTitle` are the
-        // same situation on the two other screens that read this pair.
-        error: (_, _) => MxErrorState(
-          title: context.l10n.studyOptionsLoadErrorTitle,
-          message: context.l10n.writeErrorMessage,
-          retryLabel: context.l10n.retryAction,
-          // Rebuilding the provider, not re-navigating: the read failed, and a
-          // fresh subscription is the only thing that can change the answer.
-          onRetry: () => ref.invalidate(studyOptionsProvider(deckId)),
-          // Without this the tap repaints an identical face: `invalidate` is a
-          // refresh, and `MxAsyncView` holds the previous value through one, so
-          // nothing on screen would tell the user the app had noticed.
-          isRetrying: options.isRefreshing,
-        ),
-        data: (options) => Padding(
-          // The screen gutter, so the form's left edge lines up with the
-          // app-bar title on every width.
-          padding: EdgeInsets.all(mxScreenGutter(context)),
-          child: StudyOptionsSectionWidget(
-            // Keyed on the resolved values so the draft re-seeds after
-            // `Use app defaults` swaps the override for the app defaults —
-            // without it the fields would keep showing the numbers that were
-            // just cleared.
-            key: ValueKey<String>(
-              '${options.cardLimit}-${options.newCardOrder.dbValue}-'
-              '${options.isRootOverride}',
+      // The last screen before a session starts, and every row on it is a
+      // choice with its control on the far side. Capped so the pair reads
+      // as a pair.
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: MxReadingColumn(
+          child: MxAsyncView<StudyOptionsModel>(
+            value: options,
+            loadingLabel: context.l10n.studyOptionsTitle,
+            // **The read failed, so neither the screen name nor the save note is
+            // the right sentence.** `studyOptionsTitle` under a red glyph reads as
+            // a heading — and it is already the app-bar title one line up, so the
+            // face printed it twice — while "Takes effect from your next session"
+            // describes a save that succeeded, which denies that anything went
+            // wrong. `settingsLoadErrorTitle` and `reminderLoadErrorTitle` are the
+            // same situation on the two other screens that read this pair.
+            error: (_, _) => MxErrorState(
+              title: context.l10n.studyOptionsLoadErrorTitle,
+              message: context.l10n.writeErrorMessage,
+              retryLabel: context.l10n.retryAction,
+              // Rebuilding the provider, not re-navigating: the read failed, and a
+              // fresh subscription is the only thing that can change the answer.
+              onRetry: () => ref.invalidate(studyOptionsProvider(deckId)),
+              // Without this the tap repaints an identical face: `invalidate` is a
+              // refresh, and `MxAsyncView` holds the previous value through one, so
+              // nothing on screen would tell the user the app had noticed.
+              isRetrying: options.isRefreshing,
             ),
-            initialCardLimit: options.cardLimit,
-            initialNewCardOrder: options.newCardOrder,
-            isSubmitting: submit.isSubmitting,
-            cardLimitProblem: submit.cardLimitProblem,
-            isRootOverride: options.isRootOverride,
-            isClearing: clear.isSubmitting,
-            onSave: (rawCardLimit, newCardOrder) =>
-                _save(ref, rawCardLimit, newCardOrder),
-            onUseAppDefaults: () => _useAppDefaults(ref),
+            data: (options) => Padding(
+              // The screen gutter, so the form's left edge lines up with the
+              // app-bar title on every width.
+              padding: EdgeInsets.all(mxScreenGutter(context)),
+              child: StudyOptionsSectionWidget(
+                // Keyed on the resolved values so the draft re-seeds after
+                // `Use app defaults` swaps the override for the app defaults —
+                // without it the fields would keep showing the numbers that were
+                // just cleared.
+                key: ValueKey<String>(
+                  '${options.cardLimit}-${options.newCardOrder.dbValue}-'
+                  '${options.isRootOverride}',
+                ),
+                initialCardLimit: options.cardLimit,
+                initialNewCardOrder: options.newCardOrder,
+                isSubmitting: submit.isSubmitting,
+                cardLimitProblem: submit.cardLimitProblem,
+                isRootOverride: options.isRootOverride,
+                isClearing: clear.isSubmitting,
+                onSave: (rawCardLimit, newCardOrder) =>
+                    _save(ref, rawCardLimit, newCardOrder),
+                onUseAppDefaults: () => _useAppDefaults(ref),
+              ),
+            ),
           ),
         ),
       ),

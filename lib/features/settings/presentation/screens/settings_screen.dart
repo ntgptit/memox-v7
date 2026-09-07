@@ -10,6 +10,7 @@ import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_error_state.dart';
+import '../../../../shared/widgets/mx_reading_column.dart';
 import '../../../study/domain/models/new_card_order_model.dart';
 import '../../domain/models/app_language_model.dart';
 import '../../domain/models/app_settings_model.dart';
@@ -49,18 +50,27 @@ class SettingsScreen extends ConsumerWidget {
     return MxContentShell(
       title: context.l10n.settingsTitle,
       isScrollable: true,
-      body: MxAsyncView<AppSettingsModel>(
-        value: ref.watch(appSettingsProvider),
-        loadingLabel: context.l10n.settingsLoadingLabel,
-        error: (_, _) => MxErrorState(
-          title: context.l10n.settingsLoadErrorTitle,
-          message: context.l10n.writeErrorMessage,
-          retryLabel: context.l10n.retryAction,
-          // Rebuilding the provider, not re-navigating: the stream failed, and
-          // a fresh subscription is the only thing that can change the answer.
-          onRetry: () => ref.invalidate(appSettingsProvider),
+      // A reading column, not a full-bleed one. The shell scrolls the whole
+      // width and this caps only what is read: at 1280 the option rows ran
+      // 1248 wide, and a switch a screen-width away from the label it
+      // belongs to is a row nobody can pair up.
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: MxReadingColumn(
+          child: MxAsyncView<AppSettingsModel>(
+            value: ref.watch(appSettingsProvider),
+            loadingLabel: context.l10n.settingsLoadingLabel,
+            error: (_, _) => MxErrorState(
+              title: context.l10n.settingsLoadErrorTitle,
+              message: context.l10n.writeErrorMessage,
+              retryLabel: context.l10n.retryAction,
+              // Rebuilding the provider, not re-navigating: the stream failed, and
+              // a fresh subscription is the only thing that can change the answer.
+              onRetry: () => ref.invalidate(appSettingsProvider),
+            ),
+            data: (settings) => _Body(settings: settings),
+          ),
         ),
-        data: (settings) => _Body(settings: settings),
       ),
     );
   }

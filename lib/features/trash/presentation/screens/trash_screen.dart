@@ -6,20 +6,21 @@ import '../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../core/time/clock_provider.dart';
 import '../../../../l10n/l10n_extension.dart';
-import '../../../../shared/widgets/mx_messenger.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_empty_state.dart';
 import '../../../../shared/widgets/mx_error_state.dart';
 import '../../../../shared/widgets/mx_icon_button.dart';
+import '../../../../shared/widgets/mx_messenger.dart';
+import '../../../../shared/widgets/mx_reading_column.dart';
 import '../../domain/entities/trash_batch_entity.dart';
 import '../../domain/models/trash_restore_target_model.dart';
 import '../controllers/trash_controller.dart';
 import '../states/trash_state.dart';
 import '../widgets/items/trash_row_widget.dart';
 import '../widgets/overlays/trash_purge_dialog_widget.dart';
-import '../widgets/overlays/trash_row_menu_widget.dart';
 import '../widgets/overlays/trash_restore_target_sheet_widget.dart';
+import '../widgets/overlays/trash_row_menu_widget.dart';
 import '../widgets/sections/trash_filter_bar_widget.dart';
 import '../widgets/sections/trash_selection_bar_widget.dart';
 import '../widgets/support/trash_labels_widget.dart';
@@ -110,26 +111,37 @@ class TrashScreen extends ConsumerWidget {
       // the selection with it. One gesture doing two things is one grammar too
       // many; the guard makes the gesture mean what the visible affordance
       // means, and the second Back still leaves Trash.
-      body: PopScope<Object?>(
-        canPop: !selection.isActive,
-        onPopInvokedWithResult: (didPop, _) {
-          if (didPop) return;
-          _clearSelection(ref);
-        },
-        child: MxAsyncView<List<TrashBatchEntity>>(
-          value: batches,
-          loadingLabel: l10n.trashTitle,
-          error: (error, _) => MxErrorState(
-            // The "Couldn't …" phrase is the headline, like every sibling
-            // screen-level failure; the screen name alone told the user
-            // nothing about what went wrong.
-            title: l10n.trashLoadErrorTitle,
-            message: l10n.trashLoadFailed,
-            retryLabel: l10n.trashRetryAction,
-            onRetry: () => ref.invalidate(trashBatchesProvider),
+      // Restore and Delete forever sit at the far end of every row here.
+      // The wider the row, the further the destructive action drifts from
+      // the name it acts on.
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: MxReadingColumn(
+          child: PopScope<Object?>(
+            canPop: !selection.isActive,
+            onPopInvokedWithResult: (didPop, _) {
+              if (didPop) return;
+              _clearSelection(ref);
+            },
+            child: MxAsyncView<List<TrashBatchEntity>>(
+              value: batches,
+              loadingLabel: l10n.trashTitle,
+              error: (error, _) => MxErrorState(
+                // The "Couldn't …" phrase is the headline, like every sibling
+                // screen-level failure; the screen name alone told the user
+                // nothing about what went wrong.
+                title: l10n.trashLoadErrorTitle,
+                message: l10n.trashLoadFailed,
+                retryLabel: l10n.trashRetryAction,
+                onRetry: () => ref.invalidate(trashBatchesProvider),
+              ),
+              data: (values) => _TrashBody(
+                filter: filter,
+                selection: selection,
+                batches: values,
+              ),
+            ),
           ),
-          data: (values) =>
-              _TrashBody(filter: filter, selection: selection, batches: values),
         ),
       ),
     );

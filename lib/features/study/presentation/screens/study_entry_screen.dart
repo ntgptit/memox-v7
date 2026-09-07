@@ -4,13 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'study_session_screen.dart';
+import '../../../../core/error/failure.dart';
 import '../../../../core/navigation/route_names.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_error_state.dart';
 import '../../../../shared/widgets/mx_icon_button.dart';
-import '../../../../core/error/failure.dart';
+import '../../../../shared/widgets/mx_reading_column.dart';
+import '../../../../shared/widgets/mx_sheet.dart';
 import '../../domain/entities/study_session_entity.dart';
 import '../../domain/failures/study_refusal_failure.dart';
 import '../../domain/models/study_deck_context_model.dart';
@@ -27,8 +30,6 @@ import '../widgets/overlays/study_direction_chooser_widget.dart';
 import '../widgets/overlays/study_mode_chooser_widget.dart';
 import '../widgets/overlays/study_resume_widget.dart';
 import '../widgets/sections/study_entry_section_widget.dart';
-import 'study_session_screen.dart';
-import '../../../../shared/widgets/mx_sheet.dart';
 
 /// The way into a deck's study flow.
 ///
@@ -232,46 +233,53 @@ class _StudyEntryScreenState extends ConsumerState<StudyEntryScreen> {
       // gutter it pads itself with, the error face through `MxErrorState`'s own
       // `AppSpacing.xl` — so the shell's default would pad each of them twice.
       padding: EdgeInsets.zero,
-      body: MxAsyncView<StudyEntrySummaryModel>(
-        value: entry,
-        // Names what is loading, not the product. This announced "MemoX", which
-        // tells a screen-reader user neither that something is happening nor
-        // what — every other loading site in the app names its subject.
-        loadingLabel: context.l10n.studyEntryLoadingLabel,
-        error: (_, _) => Semantics(
-          // **Announced, because it can arrive in place.** The counts come from
-          // a stream, so a read that fails while this screen is already open
-          // swaps the two ways in for this face and moves nothing the eye is
-          // drawn to. Two of the app's sixteen whole-screen failure faces carry
-          // this today — `study_home_screen.dart` is one — so it is the grammar
-          // the app is moving towards rather than one already settled.
-          liveRegion: true,
-          container: true,
-          child: MxErrorState(
-            // **Names the failure, and claims nothing about the deck.** This
-            // face was `appTitle` over `studyNothingDueMessage`, so a user
-            // whose read had just failed was told their deck was finished —
-            // a claim the screen cannot support, and one that sends them away
-            // instead of letting them try again.
-            title: context.l10n.unexpectedErrorTitle,
-            message: context.l10n.studyEntryErrorMessage,
-            retryLabel: context.l10n.retryAction,
-            onRetry: () => ref.invalidate(studyEntryProvider(deckId)),
-            // Without the flag the tap repaints the identical face:
-            // `invalidate` is a refresh, and `MxAsyncView` holds the previous
-            // value through a refresh, so nothing says the app noticed.
-            isRetrying: entry.isRefreshing,
-          ),
-        ),
-        data: (summary) => Padding(
-          // The screen gutter, not a fixed `lg`: below 360dp every other screen
-          // narrows to `md`, and this one used to widen to 28 instead.
-          padding: EdgeInsets.all(mxScreenGutter(context)),
-          child: StudyEntrySectionWidget(
-            summary: summary,
-            onLearn: () =>
-                unawaited(_open(context, kind: StudySessionKind.learning)),
-            onReview: () => unawaited(_chooseMode(context, ref, summary)),
+      // The counts and the two entry points read as one block, which they
+      // stop being when stretched.
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: MxReadingColumn(
+          child: MxAsyncView<StudyEntrySummaryModel>(
+            value: entry,
+            // Names what is loading, not the product. This announced "MemoX", which
+            // tells a screen-reader user neither that something is happening nor
+            // what — every other loading site in the app names its subject.
+            loadingLabel: context.l10n.studyEntryLoadingLabel,
+            error: (_, _) => Semantics(
+              // **Announced, because it can arrive in place.** The counts come from
+              // a stream, so a read that fails while this screen is already open
+              // swaps the two ways in for this face and moves nothing the eye is
+              // drawn to. Two of the app's sixteen whole-screen failure faces carry
+              // this today — `study_home_screen.dart` is one — so it is the grammar
+              // the app is moving towards rather than one already settled.
+              liveRegion: true,
+              container: true,
+              child: MxErrorState(
+                // **Names the failure, and claims nothing about the deck.** This
+                // face was `appTitle` over `studyNothingDueMessage`, so a user
+                // whose read had just failed was told their deck was finished —
+                // a claim the screen cannot support, and one that sends them away
+                // instead of letting them try again.
+                title: context.l10n.unexpectedErrorTitle,
+                message: context.l10n.studyEntryErrorMessage,
+                retryLabel: context.l10n.retryAction,
+                onRetry: () => ref.invalidate(studyEntryProvider(deckId)),
+                // Without the flag the tap repaints the identical face:
+                // `invalidate` is a refresh, and `MxAsyncView` holds the previous
+                // value through a refresh, so nothing says the app noticed.
+                isRetrying: entry.isRefreshing,
+              ),
+            ),
+            data: (summary) => Padding(
+              // The screen gutter, not a fixed `lg`: below 360dp every other screen
+              // narrows to `md`, and this one used to widen to 28 instead.
+              padding: EdgeInsets.all(mxScreenGutter(context)),
+              child: StudyEntrySectionWidget(
+                summary: summary,
+                onLearn: () =>
+                    unawaited(_open(context, kind: StudySessionKind.learning)),
+                onReview: () => unawaited(_chooseMode(context, ref, summary)),
+              ),
+            ),
           ),
         ),
       ),

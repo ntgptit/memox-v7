@@ -8,7 +8,10 @@ import '../../../../core/state/submit_outcome.dart';
 import '../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
+import '../../../../shared/widgets/mx_error_state.dart';
 import '../../../../shared/widgets/mx_icon_button.dart';
+import '../../../../shared/widgets/mx_loading_state.dart';
+import '../../../../shared/widgets/mx_reading_column.dart';
 import '../../domain/entities/card_entity.dart';
 import '../../domain/models/deck_context_model.dart';
 import '../controllers/card_create_controller.dart';
@@ -27,8 +30,6 @@ import '../widgets/sections/card_editor_form_widget.dart';
 import '../widgets/sections/card_editor_save_shortcut_widget.dart';
 import '../widgets/sections/card_flag_toggle_widget.dart';
 import '../widgets/support/card_failure_labels_widget.dart';
-import '../../../../shared/widgets/mx_loading_state.dart';
-import '../../../../shared/widgets/mx_error_state.dart';
 
 /// The card editor — create and edit (UC-04 W4, A1).
 ///
@@ -609,7 +610,14 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
     subheader: subheader,
     footer: footer,
     isScrollable: true,
-    body: body,
+    // A reading column over the form, once — every state of this screen
+    // hands its body to this helper. A text field stretched the width of a
+    // landscape phone puts the caret and its label at opposite ends of the
+    // eye's travel, and a card's two faces are meant to be compared.
+    body: Align(
+      alignment: Alignment.topCenter,
+      child: MxReadingColumn(child: body),
+    ),
   );
 
   /// **A back arrow in edit, an `×` in create, and the difference is real.**

@@ -11,21 +11,22 @@ import '../../../../shared/widgets/mx_empty_state.dart';
 import '../../../../shared/widgets/mx_error_state.dart';
 import '../../../../shared/widgets/mx_fab.dart';
 import '../../../../shared/widgets/mx_icon_button.dart';
+import '../../../../shared/widgets/mx_reading_column.dart';
 import '../../../../shared/widgets/mx_search_field.dart';
 import '../../domain/models/card_list_filter_model.dart';
 import '../../domain/models/card_list_item_model.dart';
 import '../../domain/models/tag_filter_model.dart';
+import '../controllers/card_bulk_controller.dart';
 import '../controllers/card_list_controller.dart';
 import '../controllers/card_list_filter_controller.dart';
 import '../controllers/card_list_tag_filter_controller.dart';
-import '../controllers/card_bulk_controller.dart';
 import '../controllers/card_selection_controller.dart';
 import '../controllers/deck_context_controller.dart';
 import '../states/card_selection_state.dart';
-import '../widgets/sections/card_breadcrumb_widget.dart';
 import '../widgets/overlays/card_bulk_overlays_widget.dart';
 import '../widgets/overlays/card_export_sheet_widget.dart';
 import '../widgets/overlays/card_list_menu_widget.dart';
+import '../widgets/sections/card_breadcrumb_widget.dart';
 import '../widgets/sections/card_filter_bar_widget.dart';
 import '../widgets/sections/card_list_body_widget.dart';
 import '../widgets/sections/card_selection_bar_widget.dart';
@@ -245,66 +246,75 @@ class CardListScreen extends ConsumerWidget {
             ),
       // Back leaves selection first (UC-04 A6): a user who selected twenty
       // cards and pressed Back meant "stop selecting", not "leave the deck".
-      body: PopScope<Object?>(
-        canPop: !selection.isSelecting,
-        onPopInvokedWithResult: (didPop, _) {
-          if (didPop) return;
-          _clearSelection(ref, deckId);
-        },
-        child: Column(
-          children: <Widget>[
-            if (selection.isSelecting)
-              CardSelectionBarWidget(
-                deckId: deckId,
-                isBusy: isBulkBusy,
-                onMove: () => bulkMove(context, ref, deckId),
-                onAddTag: () => bulkAddTag(context, ref, deckId),
-                onFlag: () => bulkFlag(context, ref, deckId, isFlagged: true),
-                onUnflag: () =>
-                    bulkFlag(context, ref, deckId, isFlagged: false),
-                // Read-only, so it is not routed through `runBulk`: that
-                // helper clears the selection on success, which is exactly
-                // what an export must not do (BR-178).
-                onExport: () => exportSelectedCards(context, ref, deckId),
-                onDelete: () => bulkDelete(context, ref, deckId),
-              ),
-            Expanded(
-              child: MxAsyncView<List<CardListItemModel>>(
-                value: cards,
-                loadingLabel: context.l10n.cardListLoadingLabel,
-                error: (_, _) => MxErrorState(
-                  title: context.l10n.unexpectedErrorTitle,
-                  message: context.l10n.cardListError,
-                  retryLabel: context.l10n.retryAction,
-                  onRetry: () => _retryCardList(ref, deckId),
+      // A card row is a front, a back and a chevron. Stretched across a
+      // landscape phone the chevron ends up nowhere near the text it opens.
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: MxReadingColumn(
+          child: PopScope<Object?>(
+            canPop: !selection.isSelecting,
+            onPopInvokedWithResult: (didPop, _) {
+              if (didPop) return;
+              _clearSelection(ref, deckId);
+            },
+            child: Column(
+              children: <Widget>[
+                if (selection.isSelecting)
+                  CardSelectionBarWidget(
+                    deckId: deckId,
+                    isBusy: isBulkBusy,
+                    onMove: () => bulkMove(context, ref, deckId),
+                    onAddTag: () => bulkAddTag(context, ref, deckId),
+                    onFlag: () =>
+                        bulkFlag(context, ref, deckId, isFlagged: true),
+                    onUnflag: () =>
+                        bulkFlag(context, ref, deckId, isFlagged: false),
+                    // Read-only, so it is not routed through `runBulk`: that
+                    // helper clears the selection on success, which is exactly
+                    // what an export must not do (BR-178).
+                    onExport: () => exportSelectedCards(context, ref, deckId),
+                    onDelete: () => bulkDelete(context, ref, deckId),
+                  ),
+                Expanded(
+                  child: MxAsyncView<List<CardListItemModel>>(
+                    value: cards,
+                    loadingLabel: context.l10n.cardListLoadingLabel,
+                    error: (_, _) => MxErrorState(
+                      title: context.l10n.unexpectedErrorTitle,
+                      message: context.l10n.cardListError,
+                      retryLabel: context.l10n.retryAction,
+                      onRetry: () => _retryCardList(ref, deckId),
+                    ),
+                    data: (list) => list.isEmpty
+                        ? _empty(
+                            context,
+                            ref,
+                            filter,
+                            ref.watch(cardListSearchQueryProvider(deckId)),
+                            // A tag filter narrows the list exactly as the pills
+                            // do, so an empty result under one is "nothing
+                            // matched", never "this deck is empty" (M4.14 W7).
+                            // Without this the screen offers "add your first card"
+                            // to a user looking at a deck of 214.
+                            isTagFiltered: ref
+                                .watch(cardListTagFilterProvider(deckId))
+                                .isActive,
+                          )
+                        : CardListBodyWidget(
+                            deckId: deckId,
+                            items: list,
+                            // The count trails the window by at most a frame (C3);
+                            // until its first value arrives the window length is the
+                            // honest floor.
+                            total: count.value ?? list.length,
+                            onOpen: (item) =>
+                                _openDetail(context, item.card.id),
+                          ),
+                  ),
                 ),
-                data: (list) => list.isEmpty
-                    ? _empty(
-                        context,
-                        ref,
-                        filter,
-                        ref.watch(cardListSearchQueryProvider(deckId)),
-                        // A tag filter narrows the list exactly as the pills
-                        // do, so an empty result under one is "nothing
-                        // matched", never "this deck is empty" (M4.14 W7).
-                        // Without this the screen offers "add your first card"
-                        // to a user looking at a deck of 214.
-                        isTagFiltered: ref
-                            .watch(cardListTagFilterProvider(deckId))
-                            .isActive,
-                      )
-                    : CardListBodyWidget(
-                        deckId: deckId,
-                        items: list,
-                        // The count trails the window by at most a frame (C3);
-                        // until its first value arrives the window length is the
-                        // honest floor.
-                        total: count.value ?? list.length,
-                        onOpen: (item) => _openDetail(context, item.card.id),
-                      ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
