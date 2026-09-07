@@ -47,11 +47,11 @@ jobs:
       shard_matrix: ${{ steps.changes.outputs.shard_matrix }}
       test_files_json: ${{ steps.changes.outputs.test_files_json }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
 
@@ -79,9 +79,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
 
@@ -102,9 +102,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
           cache: pip
@@ -125,7 +125,7 @@ jobs:
           cache-key: 'flutter-:os:-:channel:-:version:-:arch:'
 
       - name: cache build_runner
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: .dart_tool/build
           key: build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}-${{ github.sha }}-static
@@ -186,7 +186,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: subosito/flutter-action@v2
         with:
@@ -195,7 +195,7 @@ jobs:
           cache-key: 'flutter-:os:-:channel:-:version:-:arch:'
 
       - name: cache build_runner
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: .dart_tool/build
           key: build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}-${{ github.sha }}-host-${{ matrix.shard }}
@@ -235,7 +235,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: subosito/flutter-action@v2
         with:
@@ -244,7 +244,7 @@ jobs:
           cache-key: 'flutter-:os:-:channel:-:version:-:arch:'
 
       - name: cache build_runner
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: .dart_tool/build
           key: build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}-${{ github.sha }}-widgetbook
@@ -303,7 +303,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: subosito/flutter-action@v2
         with:
@@ -312,7 +312,7 @@ jobs:
           cache-key: 'flutter-:os:-:channel:-:version:-:arch:'
 
       - name: cache build_runner
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: .dart_tool/build
           key: build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}-${{ github.sha }}-goldens
@@ -395,7 +395,7 @@ jobs:
       # them the reviewer knows a pixel moved and not which one.
       - name: upload failure images
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: golden-failures
           path: |
@@ -410,9 +410,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
 
