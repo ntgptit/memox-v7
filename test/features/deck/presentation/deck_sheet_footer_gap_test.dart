@@ -156,7 +156,7 @@ void main() {
       (context) => showDeckResetProgressConfirm(
         context,
         deck: deck(),
-        hasLearnedCards: true,
+        hasStudyProgress: true,
       ),
     );
 

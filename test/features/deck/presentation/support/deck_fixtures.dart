@@ -23,6 +23,11 @@ DeckEntity fakeRootDeck({
   int schedulerGeneration = 1,
   DeckContentType contentType = DeckContentType.deck,
   DateTime? createdAt,
+
+  /// Null is an unanswered deck, whose scheduler is still unlocked
+  /// (BR-12, BR-13). Non-null is the state a reset discards (BR-44), which
+  /// is a different fact from having learned cards.
+  DateTime? firstAnsweredAt,
 }) {
   final at = createdAt ?? DateTime.utc(2026);
 
@@ -34,7 +39,7 @@ DeckEntity fakeRootDeck({
     contentType: contentType,
     schedulerType: schedulerType,
     schedulerGeneration: schedulerGeneration,
-    firstAnsweredAt: null,
+    firstAnsweredAt: firstAnsweredAt,
     createdAt: at,
     updatedAt: at,
   );
@@ -110,6 +115,10 @@ DeckSummary fakeSummary({
   SchedulerType schedulerType = SchedulerType.eightBox,
   DeckContentType contentType = DeckContentType.deck,
   DateTime? createdAt,
+
+  /// See [fakeRootDeck]: the answer state, which is what a reset throws
+  /// away and is independent of [learnedCardCount].
+  DateTime? firstAnsweredAt,
 }) => DeckSummary(
   deck: fakeRootDeck(
     id: id,
@@ -117,6 +126,7 @@ DeckSummary fakeSummary({
     contentType: contentType,
     schedulerType: schedulerType,
     createdAt: createdAt,
+    firstAnsweredAt: firstAnsweredAt,
   ),
   totalCardCount: totalCardCount,
   newCardCount: newCardCount,

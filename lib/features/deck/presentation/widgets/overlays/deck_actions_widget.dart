@@ -41,12 +41,20 @@ Future<void> showDeckActions(
   /// Whether Reset learning progress is offered, and whether it has anything to
   /// take away (UC-07, A2).
   ///
-  /// **Null means the caller cannot see the counts, so it does not offer it.**
-  /// The level *inside* a deck reads its children, not the deck's own learned
-  /// total — offering the action from there would mean guessing which of BR-50's
-  /// two lists to show, and the guess would be a warning about nothing on a deck
-  /// nobody has studied.
-  bool? hasLearnedCards,
+  /// **Null means this caller does not offer the action at all.** The level
+  /// *inside* a deck lists that deck's children; Reset belongs to a root
+  /// (BR-05), so it is offered from the list where a root is a row and nowhere
+  /// else.
+  ///
+  /// **`true` means the reset would discard something — not that a card reached
+  /// the learned threshold.** It was fed `learnedCardCount > 0`: box 8 under
+  /// `eight_box`, a 128-day interval under `sm2` (BR-88), which is a far
+  /// narrower fact than having been studied. A deck answered up to box 3 has no
+  /// learned cards and a whole schedule to lose. The reset transaction settles
+  /// which fact this is: it writes `firstAnsweredAt: null` and is documented as
+  /// the only mechanism that does (BR-44, BR-13), so the answer state is the
+  /// risk, and the name now says that.
+  bool? hasStudyProgress,
 
   /// The level's due-only view toggle, shown when the caller passes both.
   /// The filter lives in this menu now — it and sort wore the same pill
@@ -118,7 +126,7 @@ Future<void> showDeckActions(
           ),
         // A root deck only: the scheduler and the generation belong to the root
         // (BR-05), so there is no such operation one level down (UC-07 A4).
-        if (deck.isRoot && hasLearnedCards != null)
+        if (deck.isRoot && hasStudyProgress != null)
           MxActionSheetAction(
             label: sheetContext.l10n.deckResetProgressAction,
             icon: Icons.restore,
@@ -130,10 +138,10 @@ Future<void> showDeckActions(
             // cannot be taken back was the one that looked ordinary.
             //
             // Conditional rather than always-on, on the same fact the
-            // confirmation already tones itself by: with nothing learned the
-            // sheet says there is no progress to lose, and a red row would ask
-            // the reader to brace for nothing.
-            variant: hasLearnedCards
+            // confirmation tones itself by: an unanswered deck is told there
+            // is nothing to lose, and a red row would ask the reader to brace
+            // for nothing.
+            variant: hasStudyProgress
                 ? MxActionSheetActionVariant.destructive
                 : MxActionSheetActionVariant.normal,
             onPressed: () =>
@@ -168,7 +176,7 @@ Future<void> showDeckActions(
       await showDeckResetProgressConfirm(
         context,
         deck: deck,
-        hasLearnedCards: hasLearnedCards ?? false,
+        hasStudyProgress: hasStudyProgress ?? false,
       );
     case _DeckAction.delete:
       await showDeckDeleteConfirm(context, deck: deck, onDeleted: onDeleted);

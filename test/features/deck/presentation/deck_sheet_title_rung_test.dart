@@ -149,7 +149,7 @@ void main() {
       (context) => showDeckResetProgressConfirm(
         context,
         deck: deck(isLocked: true),
-        hasLearnedCards: true,
+        hasStudyProgress: true,
       ),
     );
 

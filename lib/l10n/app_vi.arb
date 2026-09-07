@@ -391,6 +391,10 @@
   "@starterLibrarySchedulerPrompt": {
     "description": "Label above the scheduler picker in the install sheet. The template only suggests a default (BR-34)."
   },
+  "starterLibraryCloseAction": "Đóng",
+  "@starterLibraryCloseAction": {
+    "description": "Hành động kết thúc của sheet cài đặt khi bộ thẻ đã có sẵn."
+  },
   "starterLibraryAlreadyPresentTitle": "Bộ thẻ này đã có trong thư viện",
   "@starterLibraryAlreadyPresentTitle": {
     "description": "Hiện trong sheet cài đặt khi lệnh sao chép kết thúc mà không chép gì vì bộ thẻ đã có sẵn (BR-37). Không phải lỗi."

@@ -16963,7 +16963,7 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Goal:** Mở giai đoạn mới: tinh chỉnh UX **theo từng feature**, không phải
   thêm một pass nhất quán toàn app. Feature đầu tiên là Library / Deck, xét như
   **một luồng** chứ không phải một tập ảnh chụp rời.
-- **Nhánh / PR:** `ux/library-deck`
+- **Nhánh / PR:** `ux/library-deck` (#488) · `fix/library-deck-residuals`
 - **Scope:** 2 màn production (`DeckListScreen` ở cả cấp gốc lẫn cấp deck,
   `StarterLibraryScreen`) và 12 overlay do feature sở hữu. Không đụng Card,
   Study, Progress, Search, Reminder, Settings.
@@ -17021,6 +17021,34 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
     có Move, và `deck_move_picker_light` mang tên "the targets, and the ones
     it refuses" mà ảnh là mặt rỗng "Nowhere to move this". Cả hai giờ chụp
     đúng thứ tên nó nói, và test `findsOneWidget` thay vì lấy chỉ số.
+- **Đóng tồn đọng (review PR #488, 2026-09-07):** hai chỗ còn lại, và cả hai
+  là *vị từ đúng chưa được dùng* chứ không phải tính năng còn thiếu.
+  - **Cue destructive của Reset đọc nhầm cột.** Hàng được nuôi bằng
+    `learnedCardCount > 0` — box 8, hoặc interval 128 ngày (BR-88) — rồi coi
+    đó là "đã học". Một deck học tới box 3 có `learnedCardCount == 0` và
+    nguyên một lịch học: nó nhận hàng trông bình thường cùng một confirm hứa
+    *không mất gì*, cho đúng thao tác không có Trash và không có Undo (BR-42,
+    BR-152). Vị từ đúng là `deck.firstAnsweredAt != null` — chính cột mà
+    transaction reset xoá, và được ghi ngay tại đó là cơ chế duy nhất làm việc
+    ấy (BR-44, BR-13). Boolean đổi tên thành `hasStudyProgress`;
+    `learnedCardCount` giữ nguyên nghĩa "số thẻ đã thuộc" ở mọi chỗ khác.
+    **Đã đóng.**
+  - **`alreadyPresent` để lại một nút không đi tới đâu.** M100.47 đã làm nó
+    ngừng giả vờ là cài đặt thành công, nhưng footer vẫn là `Add deck`: bấm
+    lại chỉ tới đúng câu trả lời cũ và vẽ lại đúng dải cũ — một hành động mà
+    hiệu lực duy nhất là chứng minh nó không có hiệu lực. Đây là trạng thái
+    **kết thúc**, không phải lỗi để thử lại, nên footer thành `Close`. Thất
+    bại thật vẫn giữ `Add deck` vì retry ở đó có thể thành công. Không thêm
+    điều hướng "mở deck đang có": domain không trả về deck id nào để mở, và
+    BR-37 không hứa có đúng một deck để trỏ tới. **Đã đóng.**
+  - **Không thêm code reset state cho sheet.** `starterInstallControllerProvider`
+    chỉ có một listener là chính form, nên autoDispose đã dọn giữa hai lần mở.
+    Ghim bằng test thay vì thêm lệnh reset thừa — một `keepAlive` thêm sau này
+    sẽ mở sheet kế tiếp ở trạng thái đã xong, với `Close` ở chỗ `Add deck`.
+  - **Harness của starter library tách ra `support/`.** Hai file test cùng
+    dựng màn đó sau khi nhóm outcome tách khỏi file chạm trần 400 dòng; bản
+    sao thứ hai của repository giả là cách hai file bắt đầu bất đồng về việc
+    repository làm gì.
 - **Editable documents:** `docs/wbs.md`
 - **Output:** luồng Library/Deck nói đúng những gì nó làm được.
 - **Acceptance criteria:**
@@ -17030,6 +17058,8 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
   - [x] Không hợp đồng đóng băng nào bị chạm, không primitive dùng chung nào
         được thêm hay sửa.
   - [x] Golden đổi đúng vùng giải thích được; 314/333 byte-identical.
+  - [x] Hai tồn đọng của review PR #488 đã đóng, mỗi cái kèm test đỏ lại
+        khi vị từ cũ được khôi phục.
 - **Dependencies:** M100.46
 - **Tests required:** `flutter analyze`, guard, `check_architecture.sh`,
   `check_docs.py`, host suite, Widgetbook, golden Linux, `integration_test/`.

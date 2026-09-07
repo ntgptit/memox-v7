@@ -114,12 +114,18 @@ class DeckListSliverWidget extends ConsumerWidget {
             onActions: () => showDeckActions(
               context,
               deck: summary.deck,
-              // Whether a deck may be reset is a question about its own
-              // children, answered on its own level where they are known.
-              // Offering it from the level above would mean guessing.
-              // The one place that knows the learned total, so the one place
-              // Reset learning progress is offered from (UC-07).
-              hasLearnedCards: summary.learnedCardCount > 0,
+              // Reset belongs to a root (BR-05), so it is offered from the
+              // list where a root is a row and nowhere else (UC-07).
+              //
+              // **The answer state, not the learned count.** This read
+              // `learnedCardCount > 0` — box 8, or a 128-day interval (BR-88)
+              // — and treated it as having been studied. A deck answered up to
+              // box 3 has zero learned cards and a full schedule, and it got an
+              // ordinary-looking row and a confirmation promising nothing to
+              // lose, for the operation that throws that schedule away.
+              // `firstAnsweredAt` is the column the reset itself clears
+              // (BR-44), which is what makes it the one describing the risk.
+              hasStudyProgress: summary.deck.firstAnsweredAt != null,
               // Deleting from a list leaves the user on that list; there is
               // nowhere to navigate back from — so the only thing left to do
               // is say where the deck went and offer it back (BR-256, BR-263).

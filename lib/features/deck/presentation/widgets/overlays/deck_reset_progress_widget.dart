@@ -30,12 +30,12 @@ import '../../../../../shared/widgets/mx_sheet_insets.dart';
 Future<void> showDeckResetProgressConfirm(
   BuildContext context, {
   required DeckEntity deck,
-  required bool hasLearnedCards,
+  required bool hasStudyProgress,
 }) => showMxSheet<void>(
   context,
   builder: (sheetContext) => _ResetProgressSheet(
     deck: deck,
-    hasLearnedCards: hasLearnedCards,
+    hasStudyProgress: hasStudyProgress,
     onClose: () => Navigator.of(sheetContext).pop(),
   ),
 );
@@ -43,14 +43,18 @@ Future<void> showDeckResetProgressConfirm(
 class _ResetProgressSheet extends ConsumerStatefulWidget {
   const _ResetProgressSheet({
     required this.deck,
-    required this.hasLearnedCards,
+    required this.hasStudyProgress,
     required this.onClose,
   });
 
   final DeckEntity deck;
 
   /// Whether anything would actually be lost (UC-07 A2).
-  final bool hasLearnedCards;
+  ///
+  /// **The answer state, not the learned count.** A deck studied to box 3 has
+  /// no learned cards (BR-88) and a whole schedule for the reset to throw
+  /// away, and this sheet used to tell it there was nothing to lose.
+  final bool hasStudyProgress;
 
   final VoidCallback onClose;
 
@@ -117,11 +121,11 @@ class _ResetProgressSheetState extends ConsumerState<_ResetProgressSheet> {
             // losses would be a warning about nothing.
             _Section(
               title: l10n.deckResetProgressLostTitle,
-              body: widget.hasLearnedCards
+              body: widget.hasStudyProgress
                   ? l10n.deckResetProgressLostBody
                   : l10n.deckResetProgressNothingToLose,
               icon: Icons.remove_circle_outline,
-              tone: widget.hasLearnedCards ? AppInk.danger : AppInk.quiet,
+              tone: widget.hasStudyProgress ? AppInk.danger : AppInk.quiet,
             ),
             // The study mode is the sheet's third section, not a line under the
             // second, so it is separated at the same `xl` as the two lists are
