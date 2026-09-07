@@ -265,7 +265,30 @@ Progress, Card Detail, Import and every focal card are untouched.
 
 ### 6.1 · Recorded results
 
-Filled from the run on this branch; see the commit that carries this file.
+| Gate | Result |
+|---|---|
+| `flutter analyze` repo-wide | **No issues found** (122.6 s) |
+| `TZ=UTC flutter test --exclude-tags golden` | **5144 passed**, exit 0 |
+| Clipping matrix, 4 widths × 4 scales | 16/16 green *after* the fix; 15/16 before it, failing at 320 dp × 2.0 |
+| `goldens (linux)` job, WSL Ubuntu 24.04 · Flutter 3.44.8 · `TZ=UTC` | 44 test files, **343 tests**, all green; **26 PNGs** rewritten |
+| `check_docs.py` | PASS — specification internally consistent. C2 database invariants not run (no `--db`), so nothing here is runtime evidence |
+| `build_screen_gallery.py` (Guard C) | PASS — 82 screens, 50 with dark, 15.5 MB, every on-surface PNG still owned |
+| Android `integration_test/` | not run — see the table above for why |
+
+**Which 26 pictures moved, and why that number is larger than the change.**
+Twenty-three are Library screens whose sheet, dialog or menu is itself
+unchanged and whose hero simply sits behind it — the delete confirm, the sort
+sheet, the move picker, the rename form. Two are Study Home. One is the
+deck-list rhythm plate, which measures band geometry. The review page embeds
+the eight that show the change and lists the other seventeen by name rather
+than padding itself with pictures of a dialog that did not move.
+
+**Review page:** the before/after gallery is published as its own artifact,
+paired at 393 × 852 dp with the light/dark filter and a side swap. **The
+project's pinned gallery URL was deliberately not republished.** That page is
+supposed to answer "what does the app look like", and pointing it at an
+unmerged branch would make it answer "what might the app look like" without
+saying so.
 
 ## 7 · Follow-ups this audit opens and does not close
 
