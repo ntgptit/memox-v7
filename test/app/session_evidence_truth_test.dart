@@ -167,5 +167,6 @@ String _withoutComments(String source) {
 }
 
 /// Names the hint that would be shown wrongly, for the failure message only.
-String _baseHintName(StudyMode mode) => 'studyHint'
+String _baseHintName(StudyMode mode) =>
+    'studyHint'
     '${mode.name[0].toUpperCase()}${mode.name.substring(1)}';

@@ -203,7 +203,8 @@ void main() {
       expect(
         find.text(entry.value),
         findsOneWidget,
-        reason: '${entry.key.name} should show the resolved line once handed it',
+        reason:
+            '${entry.key.name} should show the resolved line once handed it',
       );
       expect(
         find.text(_askingHints[entry.key]!),
