@@ -16956,6 +16956,47 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
 - **Checklist phases:** 14, 21.
 
+### M100.50 · Cột đọc phủ hết 17 màn, không còn 4
+
+- **Status:** done (2026-09-07)
+- **Owner:** Claude
+- **Goal:** Chặn bề rộng cột nội dung ở mọi màn production, bằng composition
+  tại chỗ chứ không bằng cách sửa shell dùng chung.
+- **Nhánh / PR:** `claude/impeccable-a2-reading-column`
+- **Scope:** 13 màn dưới `lib/features/*/presentation/screens/`. Không đụng
+  `MxContentShell`, không đụng `MxReadingColumn`, không đụng token.
+- **Vấn đề:** `MxReadingColumn` tồn tại từ A20.1 P2-18 và chỉ có **4/17** màn
+  dùng: card_detail, card_import, tag_catalog, study_home. 13 màn còn lại chạy
+  full-bleed. Đo được: hàng Settings rộng **1248dp** ở 1280×800 và **820dp** ở
+  852×393 — tức điện thoại **xoay ngang**, không phải giả định tablet. Một
+  switch cách nhãn của nó gần một chiều màn hình thì không còn là một hàng.
+- **Cách làm:** đặt `Center(child: MxReadingColumn(child: …))` vào body của
+  từng màn, đúng khuôn bốn màn đã có. Với shell `isScrollable: true` thì cap
+  nằm **trong** `SingleChildScrollView` của shell, nên toàn bộ bề rộng vẫn kéo
+  được và chỉ nội dung bị canh giữa.
+- **Một chủ sở hữu mỗi màn.** `card_editor` có bốn state cùng đưa body qua một
+  helper `MxContentShell`; bọc ở cả bốn call-site sẽ lồng cap vào chính nó, nên
+  chỉ helper được bọc. `deck_list` và `progress_deck` có shell riêng cho trạng
+  thái loading — bọc một spinner không đổi gì nên chúng không được bọc.
+- **Quyết định:**
+  - **Không sửa `MxContentShell` để nó tự cap.** Đó là hợp đồng đóng băng #11.
+    Việc này không cần tới nó: shell truyền `body` xuống nguyên vẹn, nên caller
+    tự bọc là đủ và không có đường nào phải mở băng.
+  - **Cap không ràng buộc gì ở 393dp** (600 > 393). Cái có thể đổi ảnh là
+    `Center`, vì nó đổi ràng buộc chặt thành lỏng — một `Column` từng bị kéo
+    đầy 393 giờ co lại vừa nội dung. Golden được so chứ không được đoán.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** 17/17 màn có cột đọc; không màn nào còn chạy full-bleed.
+- **Acceptance criteria:**
+  - [x] 13 màn thiếu đều có cột đọc, mỗi màn đúng một chủ sở hữu.
+  - [x] Không chạm `MxContentShell`, không chạm hợp đồng đóng băng nào.
+  - [x] Không nới guard hay test để đi qua.
+  - [x] Golden được so trên Linux và mọi thay đổi được giải thích.
+- **Dependencies:** M100.49
+- **Tests required:** `flutter analyze`, guard, `check_architecture.sh`,
+  `check_docs.py`, host suite, Widgetbook, golden Linux.
+- **Checklist phases:** 7, 14.
+
 ### M100.49 · Cắt payload font CJK — 14,88 → 2,29 MB
 
 - **Status:** done (2026-09-07)

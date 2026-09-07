@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/extensions/app_ink.dart';
 import '../../../../core/text/text_scale.dart';
-import '../../../../core/theme/foundations/app_spacing.dart';
+import '../../../../core/theme/extensions/app_ink.dart';
 import '../../../../core/theme/extensions/theme_context_extension.dart';
+import '../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_card.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_empty_state.dart';
 import '../../../../shared/widgets/mx_error_state.dart';
+import '../../../../shared/widgets/mx_reading_column.dart';
 import '../../../../shared/widgets/mx_scroll_end_inset.dart';
 import '../controllers/starter_library_controller.dart';
 import '../widgets/overlays/starter_install_widget.dart';
@@ -49,35 +50,42 @@ class StarterLibraryScreen extends ConsumerWidget {
       // 16dp dead band under the bar, and paid the gutter twice for every
       // child that already carries one — the notice and the empty face.
       padding: EdgeInsets.zero,
-      body: MxAsyncView<List<StarterTemplateRow>>(
-        value: catalog,
-        // The subject, which here happens to be the screen's own name —
-        // `study_options_screen.dart` and `trash_screen.dart` do the same. A
-        // loading label naming the product instead would say nothing about
-        // what is being waited on.
-        loadingLabel: context.l10n.starterLibraryTitle,
-        data: (rows) => _Catalog(rows: rows),
-        error: (error, stackTrace) => MxErrorState(
-          // The failure, not the screen. `trash_screen.dart` states the reason
-          // for the whole app: the screen name alone told the user nothing
-          // about what went wrong.
-          title: context.l10n.starterLibraryLoadErrorTitle,
-          // **A read failure, not an install failure.** This branch fires when
-          // the catalog cannot be *read*, so it cannot borrow
-          // `starterLibraryInstallFailed` ("Could not add this deck. Nothing
-          // was copied.") — nothing has been added at that point and the
-          // sentence named an action the user never took. That key stays with
-          // the install sheet, the only place an install can fail.
-          message: context.l10n.starterLibraryLoadFailed,
-          // Both halves or neither: `MxErrorState` asserts the pair, and the
-          // release build drops the button silently when only one arrives —
-          // which left a failure the user could read and could not act on.
-          retryLabel: context.l10n.retryAction,
-          onRetry: () => ref.invalidate(starterLibraryProvider),
-          // Without this the tap repaints the identical face: `invalidate` is
-          // a refresh, and `MxAsyncView` holds the previous value through one,
-          // so nothing on screen tells the user the app noticed.
-          isRetrying: catalog.isRefreshing,
+      // The catalogue row carries name, size, language and source on one
+      // line. Capped, so those four stay a description instead of four
+      // things scattered across a width.
+      body: Center(
+        child: MxReadingColumn(
+          child: MxAsyncView<List<StarterTemplateRow>>(
+            value: catalog,
+            // The subject, which here happens to be the screen's own name —
+            // `study_options_screen.dart` and `trash_screen.dart` do the same. A
+            // loading label naming the product instead would say nothing about
+            // what is being waited on.
+            loadingLabel: context.l10n.starterLibraryTitle,
+            data: (rows) => _Catalog(rows: rows),
+            error: (error, stackTrace) => MxErrorState(
+              // The failure, not the screen. `trash_screen.dart` states the reason
+              // for the whole app: the screen name alone told the user nothing
+              // about what went wrong.
+              title: context.l10n.starterLibraryLoadErrorTitle,
+              // **A read failure, not an install failure.** This branch fires when
+              // the catalog cannot be *read*, so it cannot borrow
+              // `starterLibraryInstallFailed` ("Could not add this deck. Nothing
+              // was copied.") — nothing has been added at that point and the
+              // sentence named an action the user never took. That key stays with
+              // the install sheet, the only place an install can fail.
+              message: context.l10n.starterLibraryLoadFailed,
+              // Both halves or neither: `MxErrorState` asserts the pair, and the
+              // release build drops the button silently when only one arrives —
+              // which left a failure the user could read and could not act on.
+              retryLabel: context.l10n.retryAction,
+              onRetry: () => ref.invalidate(starterLibraryProvider),
+              // Without this the tap repaints the identical face: `invalidate` is
+              // a refresh, and `MxAsyncView` holds the previous value through one,
+              // so nothing on screen tells the user the app noticed.
+              isRetrying: catalog.isRefreshing,
+            ),
+          ),
         ),
       ),
     );

@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/foundations/app_spacing.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/navigation/route_names.dart';
+import '../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_breadcrumb.dart';
-import '../../../../shared/widgets/mx_fab.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_empty_state.dart';
+import '../../../../shared/widgets/mx_fab.dart';
 import '../../../../shared/widgets/mx_icon_button.dart';
+import '../../../../shared/widgets/mx_reading_column.dart';
 import '../../domain/entities/deck_entity.dart';
 import '../../domain/models/deck_content_type_model.dart';
 import '../../domain/models/deck_list_snapshot_model.dart';
@@ -19,15 +20,15 @@ import '../controllers/deck_list_controller.dart';
 import '../controllers/deck_list_view_controller.dart';
 import '../states/deck_list_view_state.dart';
 import '../widgets/overlays/deck_actions_widget.dart';
-import '../widgets/overlays/library_menu_widget.dart';
 import '../widgets/overlays/deck_confirm_widget.dart';
 import '../widgets/overlays/deck_create_child_widget.dart';
+import '../widgets/overlays/library_menu_widget.dart';
+import '../widgets/sections/deck_card_handoff_widget.dart';
 import '../widgets/sections/deck_level_error_widget.dart';
 import '../widgets/sections/deck_list_sliver_widget.dart';
-import '../widgets/sections/deck_summary_section_widget.dart';
 import '../widgets/sections/deck_list_toolbar_widget.dart';
 import '../widgets/sections/deck_subheader_widget.dart';
-import '../widgets/sections/deck_card_handoff_widget.dart';
+import '../widgets/sections/deck_summary_section_widget.dart';
 import '../widgets/support/deck_undo_widget.dart';
 
 /// The toolbar's two commands, bound to a `ref`.
@@ -298,7 +299,9 @@ class _DeckLevel extends ConsumerWidget {
       // Above every body state, including the empty ones — "where am I" is most
       // worth answering on a level with nothing in it to recognise.
       titleSubline: DeckSubheaderWidget(snapshot: snapshot),
-      body: _body(context, parent),
+      // The deck row carries a name, four counts and two controls. Capped,
+      // so the Study button stays next to the deck it studies.
+      body: Center(child: MxReadingColumn(child: _body(context, parent))),
     );
   }
 

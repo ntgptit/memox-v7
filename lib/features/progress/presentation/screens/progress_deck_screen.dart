@@ -8,6 +8,7 @@ import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_empty_state.dart';
+import '../../../../shared/widgets/mx_reading_column.dart';
 import '../../domain/models/deck_activity_model.dart';
 import '../../domain/models/deck_activity_order_model.dart';
 import '../../domain/models/deck_activity_snapshot_model.dart';
@@ -172,9 +173,15 @@ class _ProgressLevel extends StatelessWidget {
       // selector stays on screen while fifty decks scroll, not that it sits
       // under the app bar, and a `PinnedHeaderSliver` after the overview band
       // satisfies it without the misread.
-      body: _hasNothingToMeasure
-          ? _emptyLevelWithHeader(context)
-          : _level(context),
+      // A bar and the figure it stands for belong together; width is what
+      // separates them.
+      body: Center(
+        child: MxReadingColumn(
+          child: _hasNothingToMeasure
+              ? _emptyLevelWithHeader(context)
+              : _level(context),
+        ),
+      ),
     );
   }
 

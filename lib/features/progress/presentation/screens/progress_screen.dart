@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'progress_deck_screen.dart';
 import '../../../../core/navigation/route_names.dart';
 import '../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../l10n/l10n_extension.dart';
@@ -9,9 +10,9 @@ import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_empty_state.dart';
 import '../../../../shared/widgets/mx_error_state.dart';
+import '../../../../shared/widgets/mx_reading_column.dart';
 import '../../domain/models/progress_overview_model.dart';
 import '../controllers/progress_overview_controller.dart';
-import 'progress_deck_screen.dart';
 import '../widgets/sections/progress_streak_hero_widget.dart';
 import '../widgets/sections/progress_today_widget.dart';
 import '../widgets/sections/progress_week_widget.dart';
@@ -78,7 +79,9 @@ class ProgressScreen extends ConsumerWidget {
       // Taller than a small screen at a large text scale, and W6 forbids buying
       // the height back by shrinking anything.
       isScrollable: true,
-      body: body,
+      // The figures read as a column, not as a band. Stretched wide, a number
+      // and the word naming it stop being one thing.
+      body: Center(child: MxReadingColumn(child: body)),
     );
 
     return MxAsyncView<ProgressOverview>(

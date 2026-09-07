@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/navigation/route_names.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
+import '../../../../shared/widgets/mx_reading_column.dart';
 import '../../../../shared/widgets/mx_search_field.dart';
 import '../../domain/models/search_destination_model.dart';
 import '../../domain/models/search_query_model.dart';
@@ -152,12 +153,18 @@ class _LibrarySearchScreenState extends ConsumerState<LibrarySearchScreen> {
         // which is worse than no answer.
         resultCount: _resultCount(state, isDebouncing: isDebouncing),
       ),
-      body: LibrarySearchBodyWidget(
-        state: state,
-        isDebouncing: isDebouncing,
-        onOpen: _open,
-        onLoadMore: _loadMore,
-        onRetry: _retry,
+      // A result is a match and its context. Capped so the eye returns to
+      // the same left edge on every row it scans.
+      body: Center(
+        child: MxReadingColumn(
+          child: LibrarySearchBodyWidget(
+            state: state,
+            isDebouncing: isDebouncing,
+            onOpen: _open,
+            onLoadMore: _loadMore,
+            onRetry: _retry,
+          ),
+        ),
       ),
     );
   }

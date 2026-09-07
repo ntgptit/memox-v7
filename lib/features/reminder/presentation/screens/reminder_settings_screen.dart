@@ -7,6 +7,7 @@ import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_error_state.dart';
+import '../../../../shared/widgets/mx_reading_column.dart';
 import '../../domain/models/reminder_overview_model.dart';
 import '../../domain/models/reminder_time_model.dart';
 import '../controllers/reminder_disable_controller.dart';
@@ -59,69 +60,76 @@ class ReminderSettingsScreen extends ConsumerWidget {
       // — and the honest fix for a screen that outgrows its viewport is to let
       // it scroll, not to shrink the copy that carries the disclosure.
       isScrollable: true,
-      body: MxAsyncView<ReminderOverviewModel>(
-        value: ref.watch(reminderOverviewProvider),
-        loadingLabel: context.l10n.reminderTitle,
-        // **The read failed, so the save copy is the wrong sentence.** "Your
-        // change wasn't saved" describes an event that has not happened: the
-        // user has changed nothing, the screen simply could not be filled in.
-        // `settingsLoadErrorTitle` says the same thing one screen up, and this
-        // is its counterpart.
-        error: (_, _) => MxErrorState(
-          title: context.l10n.reminderLoadErrorTitle,
-          message: context.l10n.writeErrorMessage,
-          retryLabel: context.l10n.retryAction,
-          onRetry: () => ref.invalidate(reminderOverviewProvider),
-        ),
-        data: (overview) {
-          // **The row, the dial it opens and `Retry` name one time.** A
-          // refused reschedule rolls the stored row back
-          // (`ChangeReminderTimeUseCase`), so while that rejection is live the
-          // stored time is the value the user *abandoned* — and a row and a
-          // picker built from it silently discard the pick the banner beside
-          // them is still offering to re-submit. Someone who answers "The
-          // reminder couldn't be scheduled" by choosing a slightly different
-          // time would have to dial back from the old value first.
-          //
-          // Gated on that one command rather than applied unconditionally:
-          // once it settles — including after a successful disable then enable
-          // — the stored time is authoritative again, and an ungated `draft ??`
-          // would leave the row naming a time the database does not hold with
-          // no banner beside it to say why.
-          //
-          // **The gate is rejection *or* in flight**, and the second half is
-          // the correction. It used to be rejection alone, which meant that
-          // pressing `Retry` rolled the row back to the abandoned time for the
-          // whole duration of the resubmit: the rejection clears the instant
-          // the command starts, and the new one has not arrived yet. So the
-          // one moment the user is watching to see whether their pick took,
-          // the screen stopped showing their pick — and if the retry failed
-          // again it reappeared, which reads as the app changing its mind.
-          final pendingTime = pendingReminderTime(
-            time,
-            draft: draft,
-            persisted: overview.settings.time,
-          );
+      // Same cap as Settings, and for the same reason: these are option rows
+      // whose control belongs beside its label.
+      body: Center(
+        child: MxReadingColumn(
+          child: MxAsyncView<ReminderOverviewModel>(
+            value: ref.watch(reminderOverviewProvider),
+            loadingLabel: context.l10n.reminderTitle,
+            // **The read failed, so the save copy is the wrong sentence.** "Your
+            // change wasn't saved" describes an event that has not happened: the
+            // user has changed nothing, the screen simply could not be filled in.
+            // `settingsLoadErrorTitle` says the same thing one screen up, and this
+            // is its counterpart.
+            error: (_, _) => MxErrorState(
+              title: context.l10n.reminderLoadErrorTitle,
+              message: context.l10n.writeErrorMessage,
+              retryLabel: context.l10n.retryAction,
+              onRetry: () => ref.invalidate(reminderOverviewProvider),
+            ),
+            data: (overview) {
+              // **The row, the dial it opens and `Retry` name one time.** A
+              // refused reschedule rolls the stored row back
+              // (`ChangeReminderTimeUseCase`), so while that rejection is live the
+              // stored time is the value the user *abandoned* — and a row and a
+              // picker built from it silently discard the pick the banner beside
+              // them is still offering to re-submit. Someone who answers "The
+              // reminder couldn't be scheduled" by choosing a slightly different
+              // time would have to dial back from the old value first.
+              //
+              // Gated on that one command rather than applied unconditionally:
+              // once it settles — including after a successful disable then enable
+              // — the stored time is authoritative again, and an ungated `draft ??`
+              // would leave the row naming a time the database does not hold with
+              // no banner beside it to say why.
+              //
+              // **The gate is rejection *or* in flight**, and the second half is
+              // the correction. It used to be rejection alone, which meant that
+              // pressing `Retry` rolled the row back to the abandoned time for the
+              // whole duration of the resubmit: the rejection clears the instant
+              // the command starts, and the new one has not arrived yet. So the
+              // one moment the user is watching to see whether their pick took,
+              // the screen stopped showing their pick — and if the retry failed
+              // again it reappeared, which reads as the app changing its mind.
+              final pendingTime = pendingReminderTime(
+                time,
+                draft: draft,
+                persisted: overview.settings.time,
+              );
 
-          return ReminderSettingsSectionWidget(
-            overview: overview,
-            pendingTime: pendingTime,
-            // A command is running if any of the three is. They are mutually
-            // exclusive in practice — one card, one control at a time — and
-            // each submit clears the other two, so at most one rejection is
-            // ever live.
-            isBusy:
-                enable.isSubmitting ||
-                disable.isSubmitting ||
-                time.isSubmitting,
-            rejection: enable.rejection ?? disable.rejection ?? time.rejection,
-            onEnabledChanged: (isEnabled) =>
-                _setEnabled(ref, overview, isEnabled: isEnabled),
-            onTimePressed: (current) =>
-                unawaited(_pickTime(context, ref, current)),
-            onRetry: () => _retry(ref, overview),
-          );
-        },
+              return ReminderSettingsSectionWidget(
+                overview: overview,
+                pendingTime: pendingTime,
+                // A command is running if any of the three is. They are mutually
+                // exclusive in practice — one card, one control at a time — and
+                // each submit clears the other two, so at most one rejection is
+                // ever live.
+                isBusy:
+                    enable.isSubmitting ||
+                    disable.isSubmitting ||
+                    time.isSubmitting,
+                rejection:
+                    enable.rejection ?? disable.rejection ?? time.rejection,
+                onEnabledChanged: (isEnabled) =>
+                    _setEnabled(ref, overview, isEnabled: isEnabled),
+                onTimePressed: (current) =>
+                    unawaited(_pickTime(context, ref, current)),
+                onRetry: () => _retry(ref, overview),
+              );
+            },
+          ),
+        ),
       ),
     );
   }
