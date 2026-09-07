@@ -43,6 +43,7 @@ Widget progressScreenWith({
   List<int> totals = const <int>[12, 0, 6, 143, 3, 9, 8],
   int streakDays = 5,
   bool? hasLifetimeActivity,
+  Widget? child,
 }) => _progressScreenOver(
   FakeProgressRepository(
     initial: progressOverviewFixture(
@@ -52,6 +53,7 @@ Widget progressScreenWith({
       hasLifetimeActivity: hasLifetimeActivity,
     ),
   ),
+  child: child,
 );
 
 /// The empty face (UC-12 A2): nobody has answered a card yet.
@@ -74,13 +76,20 @@ Widget progressScreenStreakHeld() =>
 Widget progressScreenFailing() =>
     _progressScreenOver(const _FailingProgressRepository());
 
-Widget _progressScreenOver(ProgressRepository repository) => ProviderScope(
+Widget _progressScreenOver(
+  ProgressRepository repository, {
+  Widget? child,
+}) => ProviderScope(
   overrides: [
     progressRepositoryProvider.overrideWithValue(repository),
     clockProvider.overrideWithValue(() => kProgressAuditNow),
     utcOffsetProvider.overrideWithValue(() => Duration.zero),
   ],
-  child: const ProgressScreen(),
+  // Defaults to the screen alone, which is what the paint-graph audit wants.
+  // A caller that is taking *review evidence* passes `shellChild(...)`
+  // instead, so the picture carries the navigation bar production draws
+  // under it (EV-04).
+  child: child ?? const ProgressScreen(),
 );
 
 /// A read that fails immediately, for the error face.
