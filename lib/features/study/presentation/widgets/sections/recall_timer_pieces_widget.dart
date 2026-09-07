@@ -202,13 +202,33 @@ class _RecallActionArea extends StatelessWidget {
         ),
       ),
 
+      // **Both verdicts are `secondary`, and that is the whole point.**
+      // `Remembered` was the filled primary and `Forgot` the outlined one, on
+      // the argument that only one of them is what a learner presses when the
+      // card worked. That argument is about frequency, and it was applied to
+      // the one control in the app where frequency must not be encouraged:
+      // this pair is not an action with an alternative, it is a *question*,
+      // and the answer is the only thing the scheduler ever learns. A filled
+      // primary is how every other screen says "take this path"; pointing it
+      // at one of two honest answers puts the eye and the thumb on that side
+      // before the learner has decided, and the cost lands weeks later as
+      // intervals built on inflated recall — with nothing in the data to say a
+      // button caused it. Equal weight is the neutral instrument (owner,
+      // 2026-09-07).
+      //
+      // Emphasis is the axis that moved; hue is not. Carrying the two answers
+      // on `dangerContainer` / `successContainer` would read better still, and
+      // it needs a fourth `MxActionButtonVariant` — a change to a frozen
+      // shared-primitive contract (v1-freeze §2 #6), so it belongs to a
+      // design-system task rather than to this one.
+      //
       // **Forgot on the left, Remembered on the right — and Remembered on top
-      // when the pair stacks.** The one that admits a miss is the secondary and
-      // sits where a Cancel sits; they are not a pair of equals dressed the
-      // same, because only one of them is what the learner presses when the
-      // card worked. `MxButtonPair` reverses the order in a column for that
-      // same reason, so the order below reads left-to-right *and*
-      // bottom-to-top: do not swap these two to "fix" the stacked case.
+      // when the pair stacks.** `MxButtonPair` reverses the order in a column,
+      // so the order below reads left-to-right *and* bottom-to-top, keeping
+      // the answer a learner gives when the card worked out of the position a
+      // mis-tap lands in. That is now the *only* thing distinguishing the two,
+      // which is why it stays: do not swap these two to "fix" the stacked
+      // case.
       RecallPhase.selfAssessment ||
       RecallPhase.submittingAssessment => StudyCtaRowWidget(
         children: <Widget>[
@@ -228,6 +248,7 @@ class _RecallActionArea extends StatelessWidget {
           ),
           MxActionButton(
             label: l10n.studyActionRemembered,
+            variant: MxActionButtonVariant.secondary,
             onPressed: _canAssess
                 ? () => _assessWithHaptic(RecallOutcome.remembered)
                 : null,
