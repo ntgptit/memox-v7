@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/app/config/env_config.dart';
+import 'package:memox/app/router/route_paths.dart';
 import 'package:memox/app/config/env_config_provider.dart';
 import 'package:memox/core/time/delay_provider.dart';
 import 'package:memox/features/progress/domain/models/deck_activity_model.dart';
@@ -16,11 +17,6 @@ import 'package:memox/features/reminder/domain/models/reminder_settings_model.da
 import 'package:memox/features/reminder/domain/models/reminder_time_model.dart';
 import 'package:memox/features/search/di/library_search_repository_provider.dart';
 import 'package:memox/features/search/domain/models/search_result_model.dart';
-import 'package:memox/features/search/presentation/screens/library_search_screen.dart';
-import 'package:memox/features/reminder/presentation/screens/reminder_settings_screen.dart';
-import 'package:memox/features/settings/presentation/screens/settings_screen.dart';
-import 'package:memox/features/study/presentation/screens/study_home_screen.dart';
-import 'package:memox/features/trash/presentation/screens/trash_screen.dart';
 import 'package:memox/core/time/clock_provider.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 
@@ -31,6 +27,7 @@ import '../features/search/presentation/support/search_screen_harness.dart';
 import '../features/settings/domain/support/fake_app_settings_repository.dart';
 import '../features/study/domain/support/fake_study_home_repository.dart';
 import '../features/trash/presentation/support/fake_trash_repository.dart';
+import '../support/shell_render.dart';
 import '../support/study_render.dart';
 import '../visual_audit/progress_audit_harness.dart';
 import '../visual_audit/settings_audit_harness.dart';
@@ -59,7 +56,7 @@ void main() {
             FakeStudyHomeRepository(
               initial: fakeStudyHome(resume: fakeStudyHomeResume()),
             ),
-            const StudyHomeScreen(),
+            shellChild(RoutePaths.study),
           ),
           brightness: brightness,
         ),
@@ -70,7 +67,10 @@ void main() {
     testWidgets('progress overview — streak and totals, $mode', (tester) async {
       await pumpReview(
         tester,
-        ReviewApp(home: progressScreenWith(), brightness: brightness),
+        ReviewApp(
+          home: progressScreenWith(child: shellChild(RoutePaths.progress)),
+          brightness: brightness,
+        ),
       );
       await matchesReviewGolden('goldens/progress_overview_$mode.png');
     });
@@ -173,7 +173,7 @@ void main() {
         ReviewApp(
           home: settingsScreenWith(
             FakeAppSettingsRepository(),
-            const SettingsScreen(),
+            shellChild(RoutePaths.settings),
           ),
           brightness: brightness,
         ),
@@ -193,7 +193,7 @@ void main() {
         ReviewApp(
           home: settingsScreenWith(
             FailingAppSettingsRepository(),
-            const SettingsScreen(),
+            shellChild(RoutePaths.settings),
           ),
           brightness: brightness,
         ),
@@ -237,7 +237,7 @@ void main() {
                 () => const Duration(hours: 7),
               ),
             ],
-            child: const ReminderSettingsScreen(),
+            child: shellChild('/settings/reminders'),
           ),
           brightness: brightness,
           isHighContrast: true,
@@ -273,7 +273,7 @@ void main() {
                 () => const Duration(hours: 7),
               ),
             ],
-            child: const ReminderSettingsScreen(),
+            child: shellChild('/settings/reminders'),
           ),
           brightness: brightness,
         ),
@@ -306,7 +306,7 @@ void main() {
               ),
               delaySchedulerProvider.overrideWithValue(immediateScheduler),
             ],
-            child: const LibrarySearchScreen(),
+            child: shellChild('/search'),
           ),
           brightness: brightness,
         ),
@@ -322,7 +322,7 @@ void main() {
       await pumpReview(
         tester,
         ReviewApp(
-          home: trashScreenWith(repository, const TrashScreen()),
+          home: trashScreenWith(repository, shellChild('/trash')),
           brightness: brightness,
         ),
       );
