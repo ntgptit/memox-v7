@@ -37,6 +37,16 @@ void main() {
 
   /// A root deck with learned cards, so its menu offers every action a root
   /// can have: rename, change scheduler, reset progress, delete.
+  ///
+  /// **Answered, and it has to say so.** A card cannot reach box 8 without
+  /// somebody answering it, but `firstAnsweredAt` was left null here while
+  /// `learnedCardCount` said 120 — a state the app cannot produce. Nothing
+  /// noticed while the two facts were read by different sheets: the menu and
+  /// the reset confirm went by the count, the study-mode sheet by the column.
+  /// They agree now, so the fixture has to as well, or these renders show a
+  /// deck no user can own.
+  final DateTime answeredAt = DateTime.utc(2026, 6, 12, 9, 30);
+
   List<DeckSummary> roots() => <DeckSummary>[
     fakeSummary(
       id: 'd1',
@@ -48,6 +58,7 @@ void main() {
       overdueDayCount: 7,
       learnedCardCount: 120,
       subDeckCount: 4,
+      firstAnsweredAt: answeredAt,
     ),
     fakeSummary(
       id: 'd2',
@@ -56,6 +67,7 @@ void main() {
       dueCardCount: 3,
       learnedCardCount: 145,
       subDeckCount: 2,
+      firstAnsweredAt: answeredAt,
       schedulerType: SchedulerType.sm2,
     ),
     fakeSummary(
@@ -64,6 +76,7 @@ void main() {
       totalCardCount: 88,
       learnedCardCount: 88,
       subDeckCount: 1,
+      firstAnsweredAt: answeredAt,
     ),
   ];
 
@@ -127,6 +140,26 @@ void main() {
     );
 
   Widget rootShell(Brightness brightness) => shell(rootRepo(), brightness);
+
+  /// A root nobody has answered yet — the only state in which the study mode
+  /// may still be changed (BR-12, BR-13).
+  ///
+  /// Separate from [roots] because the two pictures need opposite decks and
+  /// there is no deck that is both: the sheet reads `firstAnsweredAt`, and a
+  /// deck with 120 learned cards has one. Until the reset risk was corrected
+  /// the contradiction was invisible, and this render was the unlocked panel
+  /// drawn over a library that had been studied for months.
+  Widget openChoiceShell(Brightness brightness) => shell(
+    FakeDeckRepository.withSummaries(<DeckSummary>[
+      fakeSummary(
+        id: 'd4',
+        name: 'Business idioms',
+        totalCardCount: 64,
+        newCardCount: 64,
+      ),
+    ]),
+    brightness,
+  );
 
   Widget levelShell(Brightness brightness) =>
       shell(levelRepo(), brightness, location: '/decks/deck-1');
@@ -372,7 +405,7 @@ void main() {
   testWidgets('change scheduler — BR-12, on a deck whose choice is open', (
     tester,
   ) async {
-    await pumpReview(tester, rootShell(Brightness.light));
+    await pumpReview(tester, openChoiceShell(Brightness.light));
     await openTileMenu(tester);
     await chooseAction(tester, english.deckSchedulerChangeAction);
 
