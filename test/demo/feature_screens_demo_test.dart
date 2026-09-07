@@ -110,6 +110,61 @@ void main() {
       await matchesReviewGolden('goldens/progress_deck_$mode.png');
     });
 
+    testWidgets('progress by deck — one deck, drilled in, $mode', (
+      tester,
+    ) async {
+      // **EV-03: the level that had no picture.** Every other `progressShellWith`
+      // call site takes the default `location`, so `progress_deck_*.png` render
+      // the *library* level composed inside `ProgressScreen` — and
+      // `app-wide-screen-consistency.md` §2 row 17 credited that pair to this
+      // drill-down, which it does not show. This render resolves
+      // `/progress/:deckId` through the production router, so what is
+      // photographed is `ProgressDeckScreen` standing on its own: its own bar
+      // title from `scopeName`, no library overview above it, and the range
+      // strip governing this deck's own totals.
+      await pumpReview(
+        tester,
+        ReviewApp(
+          home: progressShellWith(
+            FakeProgressRepository.withSnapshot(
+              activitySnapshot(
+                scopeDeckId: 'busy',
+                scopeName: 'Spanish',
+                decks: <DeckActivity>[
+                  deckActivity(
+                    deckId: 'nouns',
+                    name: 'Nouns',
+                    last7Days: activityMetrics(
+                      activeCards: 18,
+                      activeDays: 5,
+                      learning: 6,
+                      reviewing: 24,
+                    ),
+                  ),
+                  deckActivity(deckId: 'verbs', name: 'Verbs'),
+                ],
+                scopeLast7Days: activityMetrics(
+                  activeCards: 18,
+                  activeDays: 5,
+                  learning: 6,
+                  reviewing: 24,
+                ),
+              ),
+            ),
+            location: '/progress/busy',
+          ),
+          brightness: brightness,
+        ),
+      );
+
+      // A wrong route cannot satisfy these: the library level has no scope name
+      // in its bar, and it draws the overview sections this level omits.
+      expect(find.text('Spanish'), findsOneWidget);
+      expect(find.text('CURRENT STREAK'), findsNothing);
+
+      await matchesReviewGolden('goldens/progress_deck_level_$mode.png');
+    });
+
     testWidgets('settings — study defaults and appearance, $mode', (
       tester,
     ) async {

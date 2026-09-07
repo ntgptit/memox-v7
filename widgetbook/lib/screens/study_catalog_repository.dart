@@ -11,6 +11,7 @@ import 'package:memox/features/study/domain/models/study_deck_context_model.dart
 import 'package:memox/features/study/domain/models/study_direction_model.dart';
 import 'package:memox/features/study/domain/models/study_entry_summary_model.dart';
 import 'package:memox/features/study/domain/models/study_answer_commit_model.dart';
+import 'package:memox/features/study/domain/failures/study_refusal_failure.dart';
 import 'package:memox/features/study/domain/models/study_mode.dart';
 import 'package:memox/features/study/domain/models/study_options_model.dart';
 import 'package:memox/features/study/domain/models/study_outcome_reason_model.dart';
@@ -54,7 +55,15 @@ enum StudyCatalogScenario {
   homeNoCards('home · decks, no cards', StudyMode.browse),
   homeAllClear('home · nothing waiting', StudyMode.browse),
   homeLoading('home · loading', StudyMode.browse),
-  homeError('home · read failed', StudyMode.browse);
+  homeError('home · read failed', StudyMode.browse),
+  // The three faces the session renders after the asking stages, and the pair
+  // that keeps "a session that stopped is not a session that finished" (EV-02).
+  // They had no scenario at all: the catalogue offered five ways to be asked a
+  // question and no way to see what happens once the asking is over.
+  sessionSummaryCompleted('session · finished', StudyMode.selfAssess),
+  sessionSummaryStopped('session · stopped early', StudyMode.selfAssess),
+  sessionBlocked('session · stage cannot be shown', StudyMode.match),
+  sessionError('session · cannot open', StudyMode.selfAssess);
 
   const StudyCatalogScenario(this.label, this.mode);
 
@@ -220,7 +229,17 @@ class StudyCatalogRepository implements StudyRepository {
     required NewCardOrder newCardOrder,
     required DateTime now,
     StudySessionDirection? direction,
-  }) async => _session;
+  }) async {
+    if (scenario == StudyCatalogScenario.sessionError) {
+      // The refusal the screen's full-body error face is for: no session, so
+      // no turn to fall back on.
+      throw const ConflictFailure(
+        message: 'catalog: nothing to study',
+        reason: StudyRefusalReason.nothingDueToReview,
+      );
+    }
+    return _session;
+  }
 
   @override
   Future<StudyTurnModel?> nextTurn(String sessionId) async => StudyTurnModel(
@@ -247,10 +266,18 @@ class StudyCatalogRepository implements StudyRepository {
   );
 
   @override
-  Future<List<StudyCardModel>> sessionCards(String sessionId) async => _cards;
+  Future<List<StudyCardModel>> sessionCards(String sessionId) async =>
+      // One card for the blocked scenario: `match` needs a pair to deal, so a
+      // one-card round is a stage with nothing it can offer — the condition
+      // `studyModeView` refuses on, rather than a contrivance.
+      scenario == StudyCatalogScenario.sessionBlocked
+      ? <StudyCardModel>[_cards.first]
+      : _cards;
 
   @override
-  Future<bool> isStageExhausted(String sessionId) async => false;
+  Future<bool> isStageExhausted(String sessionId) async =>
+      scenario == StudyCatalogScenario.sessionSummaryCompleted ||
+      scenario == StudyCatalogScenario.sessionSummaryStopped;
 
   @override
   Future<StudyOptionsModel> effectiveOptions(String rootDeckId) async =>
@@ -265,8 +292,14 @@ class StudyCatalogRepository implements StudyRepository {
     required List<StudyAction> wrongActions,
   }) async => StudySessionSummaryModel(
     kind: _session.kind,
-    status: StudySessionStatus.completed,
-    endReason: null,
+    // The heading is read off `status`, so the two summary scenarios differ
+    // here and nowhere else — the counts are held still on purpose.
+    status: scenario == StudyCatalogScenario.sessionSummaryStopped
+        ? StudySessionStatus.abandoned
+        : StudySessionStatus.completed,
+    endReason: scenario == StudyCatalogScenario.sessionSummaryStopped
+        ? StudySessionEndReason.userExit
+        : null,
     finishedCards: 4,
     answeredCards: 5,
     wrongTurns: 2,
