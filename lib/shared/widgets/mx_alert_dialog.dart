@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/foundations/app_motion_policy.dart';
+
 import 'mx_action_button.dart';
 import 'mx_dialog_tone.dart';
 
@@ -90,6 +92,8 @@ Future<void> showMxAlert(
   required String dismissLabel,
   required MxDialogTone tone,
 }) => showDialog<void>(
+  // Reduced motion reaches the route as well; the signature is untouched.
+  animationStyle: AppMotionPolicy.animationStyleOf(context),
   context: context,
   builder: (dialogContext) => MxAlertDialog(
     title: title,

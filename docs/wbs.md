@@ -16956,6 +16956,62 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
 - **Checklist phases:** 14, 21.
 
+### M100.52 · Haptic ở ba moment, và reduce-motion chạm tới route
+
+- **Status:** done (2026-09-07) — một nửa của (b) **để lại**, xem mục cuối
+- **Owner:** Claude
+- **Goal:** Cho app một kênh phản hồi nó chưa từng dùng, và làm cho
+  "Remove animations" của hệ điều hành có hiệu lực ở chỗ nó đang bị bỏ qua.
+- **Nhánh / PR:** `claude/impeccable-a4-haptics-motion`
+- **Scope:** ba call-site haptic, `AppMotionPolicy`, `showMxSheet` và bốn helper
+  dialog. Không đụng `MxActionButton`, không đụng `ThemeData`.
+- **Haptic — `lib/` trước đó có 0 lần dùng `HapticFeedback`.**
+  - swipe vượt ngưỡng (`study_swipe_deck_widget.dart`) → `selectionClick`, đặt
+    **sau** guard ngưỡng nên một cú kéo hụt rồi trôi về không rung.
+  - vào/ra chế độ chọn nhiều (`card_selection_controller.dart`) →
+    `selectionClick`, bắn khi `isSelecting` **đổi** chứ không mỗi lần chạm thẻ:
+    hàng thẻ đã tự hiện trạng thái, và một tick mỗi thẻ biến việc chọn năm thẻ
+    thành năm lần rung. Đặt ở controller vì nó là chủ sở hữu duy nhất của cả ba
+    lối vào và ba lối ra.
+  - cặp nút verdict (`recall_timer_pieces_widget.dart`) → `lightImpact`.
+- **Quyết định phạm vi — hỏi chủ dự án, không tự chốt.** Nút verdict *chính là*
+  `MxActionButton`, và primitive đó có **73 call-site**. Đặt `lightImpact` bên
+  trong nó sẽ làm Cancel, Close, Retry và Save cùng rung. Chủ dự án chọn: gọi
+  tại call-site của riêng cặp verdict, primitive giữ im. Không tham số public
+  nào được thêm, nên hợp đồng đóng băng #6 không bị chạm.
+- **Reduce motion — `AnimationController` KHÔNG zero-hoá duration.** Nó chỉ
+  scale vận tốc khi `disableAnimations`, nên sheet và dialog vẫn trượt lên, chỉ
+  nhanh hơn — đúng thứ người bật cài đặt ấy muốn dừng. `AppMotionPolicy` nhận
+  thêm `animationStyleOf`, trả `AnimationStyle.noAnimation` hoặc `null`;
+  `showMxSheet` và bốn helper dialog truyền nó qua `sheetAnimationStyle` /
+  `animationStyle`. Không chữ ký nào đổi.
+  - `null` chứ không phải một style tự chế ở nhánh bình thường, để câu trả lời
+    của SDK vẫn là mặc định và đây không thành chỗ thứ hai phải bám theo nó.
+- **CHƯA LÀM ĐƯỢC — chuyển màn.** Đề bài yêu cầu bọc một `PageTransitionsBuilder`
+  trả child trần. Làm thế buộc phải đặt `ThemeData.pageTransitionsTheme`, tức
+  **hợp đồng đóng băng #3** (mapping `ThemeData` / component theme). Thêm nữa,
+  `app_theme.dart` đã ghi rõ lý do cố ý **để nó ở mặc định**: platform được ghim
+  là `TargetPlatform.android`, và "pinning the platform is what makes the default
+  correct, and naming a builder as well would be a second place to keep in step
+  with the SDK's own Android answer". Một task feature không được tự mở băng,
+  nên phần này dừng và cần một task design-system riêng theo §3 của
+  `v1-freeze.md`. Sheet và dialog — nơi phần lớn chuyển động của app xảy ra —
+  đã xong.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** ba moment có haptic, sheet và dialog tôn trọng reduce-motion.
+- **Acceptance criteria:**
+  - [x] Ba moment đúng như đề bài nêu tên, mỗi cái kèm test và một ca đối chứng
+        chứng minh nó **không** bắn ở chỗ không nên.
+  - [x] Không tham số public nào thêm vào primitive dùng chung.
+  - [x] `MxActionButton` vẫn im ở 73 call-site còn lại.
+  - [x] Sheet đứng yên ngay khung hình đầu khi reduce-motion, và vẫn animate
+        khi không — cả hai đều được assert.
+  - [x] Phần chạm hợp đồng đóng băng bị dừng và nêu tên, không tự mở.
+- **Dependencies:** M100.51
+- **Tests required:** `flutter analyze`, guard, `check_architecture.sh`,
+  `check_docs.py`, host suite, Widgetbook, golden Linux.
+- **Checklist phases:** 7, 14.
+
 ### M100.51 · Predictive back, giấy phép font, và thứ tự duyệt
 
 - **Status:** done (2026-09-07)

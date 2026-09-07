@@ -142,6 +142,15 @@ class _RecallActionArea extends StatelessWidget {
   final VoidCallback onNext;
   final VoidCallback onRetry;
 
+  /// The verdict, with the tick that says it was taken.
+  ///
+  /// A method rather than the haptic inlined twice, so the two buttons cannot
+  /// drift into disagreeing about whether an answer is felt.
+  void _assessWithHaptic(RecallOutcome outcome) {
+    unawaited(HapticFeedback.lightImpact());
+    onAssess(outcome);
+  }
+
   @override
   Widget build(BuildContext context) {
     final message = _messageOf(context);
@@ -203,17 +212,24 @@ class _RecallActionArea extends StatelessWidget {
       RecallPhase.selfAssessment ||
       RecallPhase.submittingAssessment => StudyCtaRowWidget(
         children: <Widget>[
+          // **The verdict ticks; the other seventy-one buttons do not.**
+          // `MxActionButton` is the app's one action button, so a haptic
+          // inside it would fire on Cancel, Close and Retry as well — and a
+          // tap that opens a sheet already has the sheet as its feedback. This
+          // pair is the exception the app earns: the answer lands with the
+          // eyes on the card rather than on the button, and the tick is what
+          // says the answer was taken.
           MxActionButton(
             label: l10n.studyActionForgotten,
             variant: MxActionButtonVariant.secondary,
             onPressed: _canAssess
-                ? () => onAssess(RecallOutcome.forgotten)
+                ? () => _assessWithHaptic(RecallOutcome.forgotten)
                 : null,
           ),
           MxActionButton(
             label: l10n.studyActionRemembered,
             onPressed: _canAssess
-                ? () => onAssess(RecallOutcome.remembered)
+                ? () => _assessWithHaptic(RecallOutcome.remembered)
                 : null,
           ),
         ],

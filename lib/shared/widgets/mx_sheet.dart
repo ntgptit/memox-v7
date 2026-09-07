@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/foundations/app_motion_policy.dart';
+
 import '../../core/theme/extensions/app_ink.dart';
 import '../../core/theme/extensions/theme_context_extension.dart';
 import '../../core/theme/foundations/app_spacing.dart';
@@ -41,6 +43,9 @@ Future<T?> showMxSheet<T>(
     useRootNavigator: true,
     useSafeArea: true,
     isScrollControlled: true,
+    // Reduced motion reaches the route too. Nothing about the public signature
+    // changes — the caller still passes a builder and gets a future.
+    sheetAnimationStyle: AppMotionPolicy.animationStyleOf(context),
     builder: builder,
   );
 }

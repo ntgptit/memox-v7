@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/semantics.dart';
 
 import '../../../../../core/theme/foundations/app_durations.dart';
@@ -133,6 +134,14 @@ class _StudySwipeDeckWidgetState extends State<StudySwipeDeckWidget>
 
     if (widget.isLocked) return;
     if (travelled.abs() < kStudySwipeThreshold) return;
+
+    // **Past the threshold, and only there.** The card follows the finger the
+    // whole way and settles back if the drag falls short, so the moment worth
+    // marking is the one the eye cannot see coming: the point where letting go
+    // stops meaning "nothing happens". A tick on every drag update would be
+    // noise; a tick on release would say the same thing the next card already
+    // says.
+    unawaited(HapticFeedback.selectionClick());
 
     // Left is forward, the way the text runs. Right goes back along the trail,
     // and only when there is one — a swipe into nothing still settles, so the

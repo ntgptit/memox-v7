@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/foundations/app_motion_policy.dart';
+
 import '../../core/theme/foundations/app_spacing.dart';
 import '../../core/theme/extensions/theme_context_extension.dart';
 import 'mx_action_button.dart';
@@ -181,6 +183,8 @@ Future<T?> showMxPromptDialog<T extends Object>(
   int? maxLength,
   MxDialogTone? tone,
 }) => showDialog<T>(
+  // Reduced motion reaches the route as well; the signature is untouched.
+  animationStyle: AppMotionPolicy.animationStyleOf(context),
   context: context,
   builder: (dialogContext) => _PromptDialog<T>(
     title: title,

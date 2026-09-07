@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/foundations/app_motion_policy.dart';
+
 import 'mx_action_button.dart';
 import 'mx_button_pair.dart';
 import 'mx_dialog_metrics.dart';
@@ -199,6 +201,8 @@ Future<bool> showMxConfirm(
   MxDialogTone? tone,
 }) async {
   final bool? confirmed = await showDialog<bool>(
+    // Reduced motion reaches the route as well; the signature is untouched.
+    animationStyle: AppMotionPolicy.animationStyleOf(context),
     context: context,
     builder: (dialogContext) => MxConfirmDialog(
       title: title,
