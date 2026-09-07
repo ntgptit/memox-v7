@@ -16956,6 +16956,74 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
 - **Checklist phases:** 14, 21.
 
+### M100.51 · Predictive back, giấy phép font, và thứ tự duyệt
+
+- **Status:** done (2026-09-07)
+- **Owner:** Claude
+- **Goal:** Ba khuyết tật cứng đầu, mỗi cái là một thứ app **đang thiếu** chứ
+  không phải một thứ làm sai.
+- **Nhánh / PR:** `claude/impeccable-a3-harden`
+- **Scope:** `AndroidManifest.xml`, đăng ký giấy phép font ở bootstrap, một
+  hàng trong Settings, và assertion thứ tự duyệt thêm vào ba sweep sẵn có.
+- **Đã làm:**
+  - **`android:enableOnBackInvokedCallback="true"`.** `targetSdk` 36 nên
+    Android 16 đã bật sẵn, nhưng 13/14/15 cần cờ này thì nền tảng mới gửi cử
+    chỉ back thành callback tiến trình. Thiếu nó,
+    `PredictiveBackPageTransitionsBuilder` không bao giờ thấy
+    `popGestureInProgress`, nên app chạy animation pop của chính nó **đè lên**
+    animation hệ thống vừa chạy xong.
+  - **Ba face font đang phát hành mà không có giấy phép đi kèm.** Cả ba đều
+    SIL OFL 1.1, vốn buộc giấy phép phải đi cùng phần mềm. `pubspec.yaml` khai
+    `.ttf` dưới `fonts:` — thứ chỉ đóng gói outline — nên ba file text nằm
+    trong repo và **chưa từng vào bản dựng**. Không có gì đỏ; app chỉ đơn giản
+    là không tuân thủ, một cách im lặng. Nay: ba file được liệt vào `assets:`
+    từng cái một (khai cả thư mục sẽ đóng gói `.ttf` lần thứ hai — riêng face
+    Hàn đã 4,6 MB), `registerFontLicenses` đăng ký lazy ở bootstrap, và một
+    hàng trong Settings mở `showLicensePage`.
+  - **Assertion thứ tự duyệt** thêm vào ba sweep: reminder settings, trash,
+    library search. Mọi sweep trong repo hỏi target có đủ lớn và có tên chưa;
+    **không cái nào hỏi thứ tự các tên đó đến**. Tất cả đều xanh trên một màn
+    đọc footer trước tiêu đề.
+- **Quyết định:**
+  - **Hàng giấy phép đặt TRÊN nút reset.** Reset là hành động duy nhất của màn
+    và màn cố ý kết thúc ở đó; đặt giấy phép bên dưới sẽ đẩy một control phá
+    huỷ vào giữa trang.
+  - **Dùng `showLicensePage` của Flutter, không tự viết màn.** Nó đã liệt kê
+    mọi package trong cây, đã bản địa hoá qua `MaterialLocalizations`, cuộn và
+    tìm được. Một màn tự viết là bản sao tệ hơn mà còn phải bám theo danh sách
+    dependency. Không rule nào của guard cấm nó.
+  - **Assertion phải chứng minh được là nó đỏ được.** Flutter suy ra traversal
+    từ hình học, nên trên một màn chỉ có layout thì phép kiểm trùng khít với
+    framework và sẽ xanh kể cả khi nó không so gì. Fault probe ghim điều đó:
+    hai hộp, hộp dưới nhận ordinal nhỏ hơn, traversal trả về `bottom, top` và
+    phép kiểm đỏ.
+- **Điều đã thử và ghi lại vì nó đánh lừa:** tiêm `OrdinalSortKey` vào một
+  section thật để lượt sweep, kết quả **vẫn xanh** — node tiêm vào bị merge
+  vào cha nên không bao giờ thành anh em trong nhóm sort. Đọc như "assertion
+  đang ngủ" trong khi nó không ngủ. Fault probe tổng hợp mới là thứ chứng minh.
+- **Chưa xác minh, nói thẳng:** emulator ở đây là **API 36**, nơi cờ predictive
+  back đã bật sẵn theo `targetSdk`, nên máy này **không thể** chứng minh khác
+  biệt mà cờ tạo ra trên Android 13/14/15. Cái đã xác minh: manifest parse hợp
+  lệ, bản dựng cài được, và cử chỉ back vẫn giữ hợp đồng cũ (IT-PLAT-005).
+- **Đã sửa phạm vi giữa chừng:** assertion ban đầu lấy hình học qua
+  `find.bySemanticsLabel`, và nhãn có thể phân giải về một widget **tổ tiên**
+  phủ hình chữ nhật khác — nó báo card editor đọc footer ngược, điều không
+  đúng. Nay lấy hình học thẳng từ semantics node.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** back đúng nền tảng, giấy phép đi cùng font, và thứ tự duyệt được
+  canh chứ không còn được giả định.
+- **Acceptance criteria:**
+  - [x] Manifest parse hợp lệ và cờ nằm đúng trên `<application>`.
+  - [x] Ba face đều được đăng ký kèm text OFL thật, có test đọc lại nội dung.
+  - [x] Hàng Settings mở đúng `LicensePage` của Flutter, không phải bản chép.
+  - [x] Assertion thêm vào ba sweep sẵn có, không tạo suite mới.
+  - [x] Assertion có fault probe chứng minh nó đỏ được.
+  - [x] Phần không xác minh được nêu tên thay vì báo xanh.
+- **Dependencies:** M100.50
+- **Tests required:** `flutter analyze`, guard, `check_architecture.sh`,
+  `check_docs.py`, host suite, Widgetbook, golden Linux, `integration_test/`.
+- **Checklist phases:** 7, 20.
+
 ### M100.50 · Cột đọc phủ hết 17 màn, không còn 4
 
 - **Status:** done (2026-09-07)

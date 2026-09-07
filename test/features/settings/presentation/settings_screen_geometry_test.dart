@@ -40,20 +40,21 @@ void main() {
       tester.getRect(find.text(label.toUpperCase()));
 
   group('one column', () {
-    testWidgets('the four group cards share both x edges', (tester) async {
+    testWidgets('the five group cards share both x edges', (tester) async {
       // Not a natural consequence: one card wrapped in an extra `Padding` is
       // enough to break it, and four pixels between cards twenty-four apart is
       // invisible to the eye.
       //
-      // Four since M99.29: study defaults, appearance, language, and the row
-      // that opens the daily reminder. The count is asserted rather than
-      // implied — a card that stops rendering would otherwise leave the
-      // remaining ones sharing their edges, and this test would agree.
+      // Five since M100.51: study defaults, appearance, language, the row that
+      // opens the daily reminder, and the row that opens the licences. The
+      // count is asserted rather than implied — a card that stops rendering
+      // would otherwise leave the remaining ones sharing their edges, and this
+      // test would agree.
       await pumpSettings(tester, FakeAppSettingsRepository());
 
       final rects = cardRects(tester);
 
-      expect(rects, hasLength(4));
+      expect(rects, hasLength(5));
       expect(rects.map((rect) => rect.left).toSet(), hasLength(1));
       expect(rects.map((rect) => rect.right).toSet(), hasLength(1));
     });

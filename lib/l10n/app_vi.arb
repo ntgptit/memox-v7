@@ -157,6 +157,10 @@
   "@progressErrorRetryAction": {
     "description": "Retry on the error face; it re-opens the read and never writes (BR-226)."
   },
+  "settingsLicensesTitle": "Giấy phép nguồn mở",
+  "@settingsLicensesTitle": {
+    "description": "Hàng trong Settings mở trang giấy phép của Flutter. Ba bộ chữ đi kèm đều theo SIL Open Font License 1.1, vốn buộc giấy phép phải đi cùng phần mềm."
+  },
   "settingsTitle": "Cài đặt",
   "@settingsTitle": {
     "description": "App bar title of the Settings branch."

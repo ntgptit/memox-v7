@@ -18,6 +18,7 @@ import 'config/env_config_provider.dart';
 import 'error_screen_widget.dart';
 import 'router/app_router.dart';
 import 'startup/fixture_seeder_widget.dart';
+import 'startup/font_licenses.dart';
 import 'startup/reminder_reconciler_widget.dart';
 import 'startup/trash_sweeper_widget.dart';
 
@@ -70,6 +71,9 @@ Future<void> bootstrap(EnvConfig config) async {
   runZonedGuarded<void>(() {
     final binding = WidgetsFlutterBinding.ensureInitialized();
     installErrorHandlers(logLevel: config.logLevel);
+    // Registration is a callback, not a read: nothing touches the asset bundle
+    // until somebody opens the licence page.
+    registerFontLicenses();
     if (isE2EBuild) keepSemanticsOn(binding);
 
     try {

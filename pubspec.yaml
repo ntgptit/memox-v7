@@ -211,6 +211,12 @@ flutter:
   # inspecting the app can read it.
   assets:
     - assets/templates/
+    # The OFL text of the three faces above. Listed one by one rather than as
+    # `assets/fonts/`, which would bundle the `.ttf` a second time — the KR face
+    # alone is 4.6 MB. `registerFontLicenses` reads these, and nothing else does.
+    - assets/fonts/OFL-Inter.txt
+    - assets/fonts/OFL-PlusJakartaSans.txt
+    - assets/fonts/OFL-NotoSansKR.txt
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

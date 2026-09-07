@@ -10,6 +10,8 @@ import 'package:memox/l10n/generated/app_localizations.dart';
 
 import 'support/fake_trash_repository.dart';
 
+import '../../../support/semantics_traversal.dart';
+
 /// A20.1 P2-17 — the trash screen under the accessibility guidelines.
 void main() {
   final now = DateTime.utc(2026, 8, 15, 12);
@@ -41,6 +43,9 @@ void main() {
     final handle = tester.ensureSemantics();
     await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
     await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+    // And in the order a reader would take them: both guidelines above pass
+    // on a screen that announces its footer first, because neither looks.
+    expectTraversalFollowsReadingOrder(tester);
     // Contrast is deliberately not swept here: `textContrastGuideline`
     // samples rendered pixels, and on a 12px line most glyph pixels are only
     // partially covered — `settings_accessibility_test.dart` records it

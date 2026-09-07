@@ -1,8 +1,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Predictive back: targetSdk 36 opts in by default on Android 16, but 13,
+         14 and 15 need the flag before the platform delivers a back gesture as
+         a progressive callback. Without it PredictiveBackPageTransitionsBuilder
+         never sees popGestureInProgress, so the app runs its own pop animation
+         over a system animation that has already played. -->
     <application
         android:label="@string/app_name"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:enableOnBackInvokedCallback="true">
         <activity
             android:name=".MainActivity"
             android:exported="true"
