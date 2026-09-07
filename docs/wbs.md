@@ -16956,6 +16956,76 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
 - **Checklist phases:** 14, 21.
 
+### M100.56 · Audit UI/UX bằng Impeccable — và vòng verify đã bác bỏ phần lớn nó
+
+- **Status:** done (2026-09-07)
+- **Owner:** Claude
+- **Goal:** Chấm toàn bộ bề mặt user-facing theo rubric native Android của Impeccable
+  ở những vùng `v1-freeze.md` §2 và `app-wide-screen-consistency.md` không phủ.
+- **Nhánh / PR:** `claude/memox-v7-ui-ux-audit-85d6fd`
+- **Scope:** **report-only.** Không file nào dưới `lib/`, `test/`, `widgetbook/`, ARB
+  hay golden bị sửa; `git status` sạch suốt vòng chạy.
+- **Editable documents:** `docs/wbs.md`, `docs/reviews/impeccable-uiux-audit.md`
+- **Output:** `docs/reviews/impeccable-uiux-audit.md`
+
+**Kết quả không như dự định, và đó mới là kết quả.** Bản nháp đầu ghi 6 P1, 14 P2, 8 P3
+và một điểm native 14/20. Trước khi land, cả 30 claim có trích dẫn `file:line` được đưa
+qua một pass verify đối kháng hai lăng kính — một literalist đọc code hỏi "có đúng chữ
+không", một warrant auditor đi tìm guard/test/quyết định đã ghi để **bác**. 61 agent.
+
+**1 CONFIRMED · 24 IMPRECISE · 5 REFUTED.**
+
+Nên tài liệu land ra **không phải bản audit đó**. Nó là phần còn lại sau khi bản audit
+tự bác bỏ mình, cộng lý do — và lý do đáng giá hơn phần lớn finding đã mất.
+
+**Phần sinh ra thông tin mới, và nó hẹp: bằng chứng repo dùng để tự review không hoàn
+toàn nói thật.** Năm finding `EV-01…EV-05`, tất cả ở tầng bằng chứng chứ không ở app:
+golden của Guess vẽ một cặp hint/bàn-đã-trả-lời mà `StudySessionScreen` **không bao giờ
+render**, kể cả một frame chuyển tiếp; ba mặt session (summary, blocked, error) không có
+ảnh **và** không có scenario catalogue; `app-wide-screen-consistency.md` §2 hàng 17
+**ghi công một cặp golden cho cấp drill-down mà cặp đó không vẽ**; tám hàng gallery dựng
+không có navigation shell; và 52 PNG chụp đúng 393×852 không có hàng nào trên trang.
+
+**Bốn ca cho thấy vì sao phần còn lại sụp đổ** — mỗi ca là một finding tự tin bị bác
+bằng một tài liệu mà reviewer chưa đọc:
+
+| Finding bị bác | Thứ đã trả lời nó từ trước |
+|---|---|
+| "Hai từ vựng cho workload, không ai sở hữu" — finding trung tâm | `BR-162` **và** `BR-201` trong `business-rules.md` (`frozen for MVP`) bắt buộc cả hai bên, và **`BR-201` trích dẫn thẳng `BR-162`** ở cột related |
+| "Thanh filter tràn ở mọi width" | Wireframe `m4-14` T3a (`active`, 2026-08-14) là quyết định đã cân giá và gọi tên đúng cái giá: *"ở 393dp `Flagged` cắt giữa chữ"* |
+| "Progress chồng hai phạm vi" | Divergence X9/X10 ghi quyết định M99.24 của chủ dự án, và `progress_composition_test.dart:151-185` ghim thứ tự |
+| "Test clears-the-touch-floor không thể đỏ" | `design_audit/layout_review/README.md:39` nêu **thành quy tắc phương pháp** rằng `meetsGuideline` không phải bằng chứng vùng chạm; F2 là phép đo hit-test của chính probe đó, **đã chấp nhận như ngoại lệ có ghi** |
+
+Cơ chế chung: reviewer đọc code và comment tại chỗ rồi kết luận "không ai sở hữu chuyện
+này", trong khi ba nguồn trả lời nằm ngoài code — `business-rules.md`,
+`docs/wireframes/`, `design_audit/` — và nguồn thứ tư là sổ nợ của chính `wbs.md`
+(`wbs.md:9766-9771` đã ghi Progress quét toàn bảng là nợ hoãn của M99.23, và `BR-199`
+**yêu cầu** stream chạy lại). `CLAUDE.md` xếp `business-rules.md` ở vị trí #5 của thứ tự
+đọc bắt buộc; vòng này bỏ qua nó.
+
+**Giá trị phụ, độc lập: năm defect còn mở của chuỗi A nay đã đóng thật**, kiểm tại
+`617b03f7` — `A19-01` (**P0**, `browse` không thao tác được → nay có `_pointerRow` hai
+nút có nhãn và tooltip), `A19 F1/F2/F3` (`MxSearchField`, focus dưới error), và `A9-02`
+(bảy sheet chui dưới status bar → `showMxSheet` là lối duy nhất, `useSafeArea: true`).
+
+**Mọi điểm số của bản nháp đã bị rút** — native score và thang UX 12 chiều đều dựng trên
+tập finding không đứng vững, và một con số dựng trên nền đó tệ hơn không có số.
+
+**Đây là bằng chứng thực nghiệm cho `v1-freeze.md` §4, không phải ngoại lệ của nó.**
+
+- **Acceptance criteria:**
+  - [x] `git status` sạch trước và sau — không sửa production code.
+  - [x] Cả 30 claim có trích dẫn đi qua pass verify hai lăng kính; tỉ lệ được ghi lại
+        nguyên vẹn thay vì chỉ giữ phần thắng.
+  - [x] Mọi finding không sống sót **bị rút**, không bị hạ bậc rồi giữ lại.
+  - [x] Không `SC-*` nào bị mở lại; không hợp đồng đóng băng nào được đề nghị sửa.
+  - [x] Lỗi phương pháp được ghi kèm bốn ca đo được, để vòng sau không lặp.
+  - [x] `check_docs.py` xanh.
+- **Dependencies:** M100.45, M100.48
+- **Tests required:** none — report-only. Cổng là `check_docs.py` và job `contracts`
+  của CI (`docs_only: true`).
+- **Checklist phases:** 12, 15
+
 ### M100.55 · Tiêu đề gọi tên Trash, và cặp verdict thôi nghiêng
 
 - **Status:** done (2026-09-07)
