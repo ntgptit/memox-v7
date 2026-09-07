@@ -16956,6 +16956,50 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
 - **Checklist phases:** 14, 21.
 
+### M100.53 · Mọi màn production, xoay ngang
+
+- **Status:** done (2026-09-07)
+- **Owner:** Claude
+- **Goal:** Biến kết quả probe thủ công ở 852x393 thành thứ được canh, chứ
+  không phải một lần kiểm rồi quên.
+- **Nhánh / PR:** `claude/impeccable-a5-landscape-sweep`
+- **Scope:** một file test mới, không golden. Không đụng `lib/`.
+- **Vấn đề:** cả **333 golden đều là 393x852**, và `mx_responsive_test.dart` là
+  test landscape duy nhất trong repo — nó dựng một composition tổng hợp của
+  shared widget chứ không phải màn nào. App có đúng **một** orientation được
+  kiểm.
+- **Cách làm:** 18 mục (17 màn production + route-not-found), mỗi mục pump ở
+  852x393 rồi assert `takeException()` null và `meetsGuideline(androidTapTarget)`.
+  Tái dùng sáu audit harness và `pumpReview` sẵn có; **không** thêm golden nào —
+  `build_screen_gallery.py` làm đỏ build nếu có hàng ngoài 393x852.
+- **Ba thứ phải sửa trong lúc làm, và cả ba đều đáng ghi:**
+  - `pumpReview` bật `debugDisableShadows = false` và để caller trả lại —
+    `matchesReviewGolden` vốn làm việc đó. Sweep không chụp ảnh nên phải tự trả,
+    và phải trả **trong thân test**: `addTearDown` chạy *sau* invariant
+    paint-vars của framework, nên cả 18 ca đỏ vì một lý do không liên quan gì
+    tới bố cục.
+  - Harness deck trả về một `Router` trần, không phải app — audit runner của nó
+    mới là chỗ cấp `MaterialApp`. Thiếu wrapper thì lỗi là
+    "No Directionality widget found".
+  - **Sweep cố ý không đòi tĩnh lặng.** Hai màn giữ một animation lặp mở, nên
+    `pumpAndSettle` chạy tới timeout và báo một "hang" thực chất là spinner đang
+    làm đúng việc của nó. Đòi quiescence là đi kiểm cái fake chứ không kiểm màn.
+    Pump theo thời lượng cố định — cũng tất định như không pump gì.
+- **Đo độ nhạy:** hạ surface xuống 240x120 làm **4/18** đỏ. Không phải 18, và đó
+  là sự thật đáng nói: phần lớn màn cuộn được nên không tràn theo chiều dọc; thứ
+  sweep này bắt là tràn thật và target dưới sàn chạm.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** orientation thứ hai của app có người canh.
+- **Acceptance criteria:**
+  - [x] 17 màn production đều có mặt, cộng màn route-not-found.
+  - [x] Không golden mới ở kích thước nào khác 393x852.
+  - [x] Sweep chứng minh được là nó đỏ được, có số đo kèm.
+  - [x] Không sửa `lib/`.
+- **Dependencies:** M100.52
+- **Tests required:** `flutter analyze`, guard, `check_architecture.sh`,
+  `check_docs.py`, host suite, Widgetbook, golden Linux.
+- **Checklist phases:** 7, 14.
+
 ### M100.52 · Haptic ở ba moment, và reduce-motion chạm tới route
 
 - **Status:** done (2026-09-07) — một nửa của (b) **để lại**, xem mục cuối
