@@ -7,8 +7,8 @@
 | **Scope** | Ba thứ: (1) năm khiếm khuyết về **tính trung thực của bằng chứng review**, (2) đối chiếu trạng thái các defect còn mở của chuỗi audit A7–A20 tại `617b03f7`, (3) khoảng trống guard. Ngoài phạm vi: mọi thứ 30 claim ban đầu đòi hỏi mà verify không giữ lại — xem §4 |
 | **Source of truth for** | Năm finding `EV-*` về bằng chứng review · trạng thái tại `617b03f7` của `A19-01`, `A19 F1/F2/F3`, `A9-02` · lỗi phương pháp §4 và bốn ca đo được của nó |
 | **Depends on** | `document-conventions.md` · `design-system/v1-freeze.md` · `reviews/app-wide-screen-consistency.md` · `reviews/a8-navigation-chrome-audit.md` · `reviews/a9-modal-overlay-audit.md` · `reviews/a19-accessibility-audit.md` · `business-rules.md` |
-| **Updated by task** | M100.56 |
-| **Last updated** | 2026-09-07 |
+| **Updated by task** | M100.56 · M100.57 (EV-01) · M100.58 (EV-02, EV-03) · M100.59 (EV-04 + Guard B) · M100.60 (EV-05 + Guard C) |
+| **Last updated** | 2026-09-08 |
 
 ---
 
@@ -119,19 +119,37 @@ Hàng thứ chín cùng file — `progress_deck` — là ngoại lệ: nó đi q
 loses the shell's navigation bar and its safe area, and those are exactly the parts a
 layout review has to score."* Bài học được áp ở một file và không áp ở file anh em.
 
-### EV-05 · 52 ảnh đúng bề mặt, không hàng nào trên gallery — P3
+### EV-05 · 52 ảnh đúng bề mặt, không hàng nào trên gallery — P3 · **đã phân loại (M100.60)**
 
-Manifest `SCREENS` có **65 hàng**; `test/demo/goldens/` có **164 PNG**. Hai số không so
-trực tiếp được: mỗi hàng nhúng một cặp light+dark, nên 65 hàng tiêu thụ **103** PNG.
-Trong 61 PNG còn lại, **9** là render cố ý ngoài bề mặt (320×568, 320×1400, 412×915) —
-quyết định ghi ở `CLAUDE.md`, ở docstring của module và ở `wbs.md` M99.60, và được
-cưỡng chế bằng `_check_surface`, thứ exit non-zero và gọi tên file cùng cỡ dp của nó.
+Manifest `SCREENS` có 65 hàng khi audit chạy; `test/demo/goldens/` có 164 PNG. Hai số
+không so trực tiếp được: mỗi hàng nhúng một cặp light+dark, nên 65 hàng tiêu thụ 103
+PNG. Trong 61 PNG còn lại, **9** là render cố ý ngoài bề mặt (320×568, 320×1400,
+412×915) — quyết định ghi ở `CLAUDE.md`, ở docstring của module và ở `wbs.md` M99.60,
+cưỡng chế bằng `_check_surface`. Còn lại **52 PNG chụp đúng 393×852 mà không có hàng
+nào**.
 
-Còn lại **52 PNG chụp đúng 393×852 dp mà không có hàng nào** — phần lớn là trạng thái
-của phiên học. Chúng đã được commit, đã đúng bề mặt, và trang gallery không hiện.
-`[S]`
+**Không PNG nào bị xoá.** Mỗi tấm đều do một test đang sống sinh ra, nên không tấm nào
+là di tích — `DELETE_AS_OBSOLETE` là tập rỗng, và đó là kết luận đo được chứ không phải
+sự thận trọng.
 
----
+| Nhóm | PNG | Phân loại | Hành động |
+|---|---:|---|---|
+| Verdict của mode học — `guess_wrong`, `study_fill_incorrect`, `study_fill_hint`, `recall_self_assess`, `recall_timed_out` | 10 | canonical: người học chạm tới mỗi phiên, và gallery chỉ có **khung đang hỏi** của mỗi mode | **REGISTER** |
+| Mặt lỗi và mặt xác nhận của Card — `card_export_error`, `card_export_selection`, `card_import_confirm`, `card_import_failure` | 6 | canonical: bước và mặt hỏng chưa có ảnh nào khác | **REGISTER** |
+| Chế độ chọn của Card list — `card_list_selection` | 2 | canonical: một trạng thái lớn của màn bận nhất | **REGISTER** |
+| Tag — `tag_catalog_empty`, `tag_delete_confirm` | 2 | canonical: mặt rỗng, và hành động huỷ diệt **thật** (đỏ, khác tone cautious của Trash) | **REGISTER** |
+| Khung đang hỏi trùng — `guess_open`, `recall_counting_down` | 4 | duplicate evidence: `study_guess` và `study_recall` đã vẽ đúng khung đó | KEEP_WITH_DOCUMENTED_EXCLUSION |
+| Biến thể locale — `card_export_sheet_vi`, `tag_catalog_vi` | 2 | duplicate evidence: cùng composition, khác chuỗi; VI đã có chỗ đo riêng | KEEP_WITH_DOCUMENTED_EXCLUSION |
+| Trạng thái quá độ — `card_export_generating`, `card_import_parsing`-họ, `study_fill_typing` | 6 | meaningful transient: có thật nhưng cách khung đã đăng ký đúng một phím | KEEP_WITH_DOCUMENTED_EXCLUSION |
+| Biến thể của bước đã đăng ký — `card_import_paste`, `_preview_valid`, `_source_ready`, `_result_skips`, `_result_zero`, `card_list_select_all`, `card_move_picker_empty`, `card_export_scope_changed` | 9 | duplicate evidence | KEEP_WITH_DOCUMENTED_EXCLUSION |
+| Trạng thái **ô** của Match — `study_match_progress_{idle,selected,paired,wrong}` | 8 | internal-only: đây là bốn trạng thái của một *tile*, không phải của một màn; `study_match` đã vẽ bàn | KEEP_WITH_DOCUMENTED_EXCLUSION |
+| Vị trí cuộn — `card_editor_edit_dark_scrolled` | 1 | internal-only: một vị trí cuộn, không phải một trạng thái sản phẩm | KEEP_WITH_DOCUMENTED_EXCLUSION |
+| Stress nội dung — `study_fill_long_meaning` | 2 | internal-only: ca ép nội dung dài, thuộc về test đo nó | KEEP_WITH_DOCUMENTED_EXCLUSION |
+
+**Kết quả: 12 hàng mới, gallery đi 70 → 82.** Và một hệ quả phải xử ngay: ở bề rộng
+nhúng cũ (560px) trang lên **18,9 MB**, vượt trần 16 MB của artifact — một trang không
+publish được thì không phải bằng chứng ai review được. Bề rộng nhúng hạ về 480 (vẫn
+trên 393dp mà ảnh được chụp, nên không có tấm nào bị phóng to) và trang về **15,5 MB**.
 
 ## 3. Đối chiếu chuỗi A7–A20 tại `617b03f7`
 
@@ -207,13 +225,13 @@ làm là **thêm một guard**, không phải viết thêm một báo cáo.
 
 Không triển khai ở task này.
 
-| # | Việc | Finding |
-|---|---|---|
-| 1 | Truyền `hintOverride` (và `onResolved`) ở harness guess, vẽ lại bốn golden, rồi thêm assertion buộc mọi harness dựng session frame cho một mode **có** `studyModeHintResolved` phải cấp nó | `EV-01` |
-| 2 | Thêm golden **và** scenario catalogue cho ba mặt session chưa từng được vẽ; thêm golden cho cấp drill-down của Progress; sửa dòng ghi công sai ở `app-wide-screen-consistency.md` §2 hàng 17 | `EV-02`, `EV-03` |
-| 3 | Cho tám hàng kia đi qua router như `progress_deck` đã đi, hoặc đánh dấu trên trang là render không shell | `EV-04` |
-| 4 | Quyết 52 PNG đúng bề mặt kia: lên gallery, hay ghi lý do vắng mặt | `EV-05` |
-| 5 | Thêm rule guard cho ba vùng ở §5 — bắt đầu bằng vùng rẻ nhất đo được | §5 |
+| # | Việc | Finding | Trạng thái |
+|---|---|---|---|
+| 1 | Truyền `hintOverride` (và `onResolved`) ở harness guess, vẽ lại bốn golden, rồi thêm assertion buộc mọi harness dựng session frame cho một mode **có** `studyModeHintResolved` phải cấp nó | `EV-01` | **đóng ở M100.57** (PR #503) — Guard A là `test/app/session_evidence_truth_test.dart` |
+| 2 | Thêm golden **và** scenario catalogue cho ba mặt session chưa từng được vẽ; thêm golden cho cấp drill-down của Progress; sửa dòng ghi công sai ở `app-wide-screen-consistency.md` §2 hàng 17 | `EV-02`, `EV-03` | **đóng ở M100.58** (PR #504) — 10 golden mới, 4 scenario catalogue, hàng 17 có footnote |
+| 3 | Cho tám hàng kia đi qua router như `progress_deck` đã đi, hoặc đánh dấu trên trang là render không shell | `EV-04` | **đóng ở M100.59** (PR #505) — 16 golden vẽ lại; Guard B là `test/app/gallery_shell_fidelity_test.dart` |
+| 4 | Quyết 52 PNG đúng bề mặt kia: lên gallery, hay ghi lý do vắng mặt | `EV-05` | **đóng ở M100.60** — 12 hàng REGISTER, phần còn lại có lý do viết ra; Guard C nằm trong chính `build_screen_gallery.py` |
+| 5 | Thêm rule guard cho ba vùng ở §5 — bắt đầu bằng vùng rẻ nhất đo được | §5 | **còn mở** — ba vùng đó cần bằng chứng thiết bị, không thay được bằng rule tĩnh |
 
 Lệnh Impeccable phù hợp cho 1–4 là `/impeccable harden`.
 
