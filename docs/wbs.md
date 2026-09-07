@@ -16956,6 +16956,67 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
 - **Checklist phases:** 14, 21.
 
+### M100.49 · Cắt payload font CJK — 14,88 → 2,29 MB
+
+- **Status:** done (2026-09-07)
+- **Owner:** Claude
+- **Goal:** Giảm kích thước bản tải bằng cách bỏ những gì thiết bị đã có sẵn,
+  không phải bằng cách bỏ những gì người dùng cần đọc.
+- **Nhánh / PR:** `perf/cjk-font-payload`
+- **Scope:** `assets/fonts/`, chuỗi fallback trong `app_typography.dart`, harness font của test, và một kịch bản thiết bị. Không đụng thang typography, không đụng weight, không đụng nội dung thẻ.
+- **Vấn đề:** App bundle ba face Noto CJK. Đo thật: **24,65 MB trên đĩa, 14,36
+  MB deflated** — nhiều hơn toàn bộ phần còn lại của bản tải. Chính sách subset
+  đã tồn tại và đã đúng (Ext A, compatibility ideographs, ngoài BMP đều đã bị
+  cắt), nên phần còn lại **không phải mỡ thừa**: khối CJK Unified là 20.976
+  codepoint và một app học từ vựng không có quyền đoán ký tự nào người dùng sẽ
+  học. Subset thêm là ngõ cụt.
+- **Cách đo:** Render bốn script với `fontFamilyFallback` **rỗng** trên
+  emulator, đọc ngược raster, đối chứng bằng chuỗi Private Use cùng độ dài —
+  vì glyph thiếu không phải ô trắng mà là `.notdef` có advance thật, nên bề
+  rộng và "có mực" đều không chứng minh được gì. Cả bốn đều khác đối chứng.
+  Chạy lại **control gỡ hẳn ba face khỏi `pubspec.yaml`**: kết quả
+  byte-identical, nên không phải Skia đang lén dùng chính face của app.
+- **Đã làm:**
+  - Bỏ `NotoSansJP` và `NotoSansSC` khỏi bundle và khỏi chuỗi fallback.
+    `AppTypography.cjkFallback` còn một mục.
+  - **Giữ `NotoSansKR`.** Card prompt đặt ở 30 và Hangul là thứ nó sinh ra để
+    hiện; giao chữ lớn nhất của app cho face mà ROM tình cờ cài sẽ khiến nó
+    xuống dòng khác nhau giữa các máy — Noto Sans CJK KR của hệ thống là một
+    thiết kế khác file này, metric khác.
+  - **IT-PLAT-009** ghim phép đo lại trên thiết bị. Baseline bộ integration
+    chuyển **8 → 9**, `CLAUDE.md` và `13-platform-boundaries.md` cập nhật theo.
+  - `flutter_test_config.dart` thôi nạp hai face đã bỏ. Không golden nào đổi:
+    **mọi ký tự CJK đi vào một bức ảnh trong repo đều là Hangul** — kana và Han
+    chỉ xuất hiện ở test redaction log và ở chính test fallback.
+  - Thêm `OFL-NotoSansKR.txt`. Face Hàn là face duy nhất còn phát hành và nó
+    đang thiếu giấy phép; file OFL của JP và SC byte-identical với nhau (cùng
+    bản Source Han upstream) nên bản giữ lại được đặt đúng tên face nó đi kèm.
+- **Quyết định:**
+  - **Không instance variable font về static weight.** `gvar` chiếm 9,84 MB
+    trong 24,65 MB, nên đây là khoản tiết kiệm lớn thứ hai — và nó phá hợp
+    đồng đóng băng #4 (thang typography và hợp đồng weight của variable font):
+    một instance tĩnh báo một weight và vẽ một weight khác, đúng thất bại mà
+    `withWeight` tồn tại để chặn. Muốn lấy khoản này thì phải mở một task
+    design-system riêng, không phải làm kèm.
+  - **Không bỏ nốt `NotoSansKR` để lấy thêm 1,78 MB.** Chủ dự án chọn giữ.
+  - **Chuỗi mới đọc *tốt hơn* chuỗi cũ, không chỉ nhẹ hơn.** Thứ tự cũ đặt
+    Nhật trước Trung giản thể, nên 12.747 chữ Hán của người đọc Trung Quốc
+    được vẽ bằng form Nhật. Đó không phải lỗi — đó là giới hạn của một danh
+    sách cố định, vì nó không biết thẻ thuộc quy ước nào còn nền tảng thì biết.
+- **Editable documents:** `docs/wbs.md` · `docs/it-scenarios/13-platform-boundaries.md` · `CLAUDE.md`
+- **Output:** bản tải nhẹ đi 12,58 MB, không script nào mất chữ.
+- **Acceptance criteria:**
+  - [x] Payload đo được trước và sau, cùng một cách đo.
+  - [x] Fallback hệ thống được chứng minh trên máy đích, có đối chứng tofu.
+  - [x] Control gỡ hẳn font cho kết quả trùng khớp, loại giả thuyết Skia tự
+        dùng face của app.
+  - [x] Không golden nào đổi.
+  - [x] Không hợp đồng đóng băng nào bị chạm; khoản tiết kiệm nào chạm thì
+        được nêu tên và để lại cho task riêng.
+- **Dependencies:** M100.47
+- **Tests required:** `flutter analyze`, guard, `check_architecture.sh`,
+  `check_docs.py`, host suite, Widgetbook, golden Linux, `integration_test/` 9/9.
+- **Checklist phases:** 7, 20.
 ### M100.48 · Bảng enforcement của V1 tự canh chính nó
 
 - **Status:** done (2026-09-07)

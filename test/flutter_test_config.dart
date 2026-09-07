@@ -81,9 +81,10 @@ Future<void> _loadAppFonts() async {
 const Map<String, String> _appFonts = <String, String>{
   'Inter': 'assets/fonts/Inter-Variable.ttf',
   'PlusJakartaSans': 'assets/fonts/PlusJakartaSans-Variable.ttf',
+  // Korean only, matching what the app bundles. Kana and Han are the
+  // platform's job now (IT-PLAT-009), and no golden draws either — every
+  // CJK literal under `test/` that reaches a picture is Hangul.
   'NotoSansKR': 'assets/fonts/NotoSansKR-Variable.ttf',
-  'NotoSansJP': 'assets/fonts/NotoSansJP-Variable.ttf',
-  'NotoSansSC': 'assets/fonts/NotoSansSC-Variable.ttf',
 };
 
 /// Family name to the SDK font files that make it up.

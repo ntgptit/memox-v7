@@ -428,15 +428,20 @@ flutter test integration_test/ -d emulator-5554 --flavor development
 ```
 
 The flavor is required — the app has three and Gradle produces no APK without
-one. The baseline is **8 passing, 0 failing**; anything less is a regression
+one. The baseline is **9 passing, 0 failing**; anything less is a regression
 until proven otherwise, against `origin/main` and not against a hunch.
 
-**Eight, not sixty-seven, since the testing-pyramid refactor.** Business
+**Nine, not sixty-seven, since the testing-pyramid refactor.** Business
 correctness moved to `flutter test`, which CI runs on every PR — 133 of 133
 scenarios in `docs/it-scenarios/14-host-coverage-map.md`. What is left on a
 device is what a host cannot reach: the engine's bootstrap, a real file on
-device storage, an OS deep link, Android's back gesture, and a release build
-that does not run. A scenario added here that walks a business rule is in the
+device storage, an OS deep link, Android's back gesture, a release build that
+does not run, and **the system font collection** — the ninth, added when the
+app stopped bundling the Japanese and Simplified Chinese faces and started
+relying on the platform for kana and Han. A host has no system fonts at all, so
+it cannot tell "the platform answered" from "nothing answered"; without
+IT-PLAT-009 the whole unit suite stays green on a device that draws card
+content as boxes. A scenario added here that walks a business rule is in the
 wrong place, and it is the copy that rots — it stays green while the rule
 changes underneath it, because nobody looks at a device suite until it is
 already red.

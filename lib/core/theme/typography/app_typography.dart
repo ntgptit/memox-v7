@@ -26,35 +26,45 @@ abstract final class AppTypography {
   static const String displayFamily = 'PlusJakartaSans';
   static const String bodyFamily = 'Inter';
 
-  /// The CJK fallback faces, behind both primary families on every text style.
+  /// The CJK fallback face, behind both primary families on every text style.
   ///
   /// Inter and Plus Jakarta Sans are Latin-only, so a card whose content is
-  /// Korean, Japanese or Chinese would render as tofu boxes on any platform
-  /// whose system font happens not to cover the script — the web build most of
-  /// all. Naming these as `fontFamilyFallback` on each style means Flutter
-  /// reaches for them only for the glyphs the primary lacks, so Latin UI text is
-  /// untouched and the fallback carries the vocabulary. All three are variable
-  /// fonts with a `wght` axis, so the same [_wght] setting drives their weight
-  /// too — which is why they are subset but *not* instanced to a static weight:
-  /// a static fallback would report the right weight and paint one weight, the
-  /// exact failure [withWeight] exists to prevent.
+  /// Korean would render as tofu boxes on any platform whose system font
+  /// happens not to cover Hangul — the web build most of all. Naming the face
+  /// as `fontFamilyFallback` on each style means Flutter reaches for it only
+  /// for the glyphs the primary lacks, so Latin UI text is untouched and the
+  /// fallback carries the vocabulary. It is a variable font with a `wght` axis,
+  /// so the same [_wght] setting drives its weight too — which is why it is
+  /// subset but *not* instanced to a static weight: a static fallback would
+  /// report the right weight and paint another, the exact failure [withWeight]
+  /// exists to prevent.
   ///
-  /// **The order is the contract, and only one part of it is arbitrary.** Korean
-  /// is first because it is what the app is for. Japanese before Simplified
-  /// Chinese decides the glyph *form* of the thousands of Han characters both
-  /// cover: the same codepoint is drawn differently in the two regional
-  /// conventions, the fallback chain takes the first face that has it, and there
-  /// is no way to satisfy both from one list. Japanese wins because its script
-  /// cannot be read at all without kanji, while Chinese in Japanese forms stays
-  /// legible. `NotoSansKR` is deliberately in front of both despite carrying no
-  /// Han at all — it costs nothing and keeps "Korean first" true by inspection.
+  /// **One face, and the two that left were measured out, not trimmed.** The
+  /// chain used to be Korean, then Japanese, then Simplified Chinese, and those
+  /// three files deflated to 14.4 MB — more of the download than the rest of
+  /// the app. They were there to cover kana and Han. Android is the only
+  /// release target and has shipped `NotoSansCJK-Regular.ttc` since Lollipop,
+  /// so every phone was carrying those characters twice. `IT-PLAT-009` renders
+  /// all four scripts on a real device behind an *empty* fallback and reads the
+  /// raster back, against a private-use control so tofu cannot pass as a glyph.
   ///
-  /// **Each face is subset, and what was dropped is a decision, not a default.**
-  /// All three keep everyday text — kana, Hangul, the main CJK Unified block,
-  /// CJK punctuation, halfwidth/fullwidth forms — and drop Extension A, the
-  /// compatibility ideographs and everything beyond the BMP. Those are historical
-  /// and specialist characters; carrying them costs megabytes a vocabulary deck
-  /// will not spend.
+  /// **Korean stays because it is what the app is for.** The card prompt is set
+  /// at 30 and Hangul is the text it exists to show; leaving the app's largest
+  /// type to whatever face a ROM installed would let it wrap differently from
+  /// one device to the next, and the system's Noto Sans CJK KR is a different
+  /// design from this file with different metrics.
+  ///
+  /// **The long tail reads better for having left.** Kana, Han, and the 8,229
+  /// simplified characters no bundled face ever carried now come from the
+  /// platform, in the reader's own regional form. The chain this replaces put
+  /// Japanese in front of Simplified Chinese, which drew 12,747 Chinese
+  /// characters in Japanese forms for every reader — not a bug, but the best a
+  /// fixed list can do, because it cannot know which convention a card belongs
+  /// to and the platform can.
+  ///
+  /// **The face is subset, and what was dropped is a decision, not a default.**
+  /// It keeps the Hangul syllables, the compatibility jamo, CJK punctuation and
+  /// the halfwidth/fullwidth forms, and carries no Han at all.
   ///
   /// **Every family named here MUST also be loaded by
   /// `test/flutter_test_config.dart`.** `flutter test` does not populate declared
@@ -62,15 +72,10 @@ abstract final class AppTypography {
   /// lacks is silently skipped — which is how Korean rendered as `NO GLYPH` in
   /// every golden for months while a test asserting this very list stayed green.
   static const String cjkFallbackFamily = 'NotoSansKR';
-  static const String japaneseFallbackFamily = 'NotoSansJP';
-  static const String simplifiedChineseFallbackFamily = 'NotoSansSC';
 
-  /// The fallback chain, in the order the renderer walks it.
-  static const List<String> cjkFallback = <String>[
-    cjkFallbackFamily,
-    japaneseFallbackFamily,
-    simplifiedChineseFallbackFamily,
-  ];
+  /// The fallback chain. One entry, and still a list because that is the shape
+  /// a `TextStyle` takes — and because the platform supplies the rest of it.
+  static const List<String> cjkFallback = <String>[cjkFallbackFamily];
 
   /// The front of a review card — the one place the app deliberately gets
   /// large, because that text is the task. The three metrics live here as the

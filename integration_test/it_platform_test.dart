@@ -1,6 +1,10 @@
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:memox/core/theme/typography/app_typography.dart';
 
 import 'support/it_harness.dart';
 import 'support/it_robot.dart';
@@ -24,6 +28,7 @@ import 'support/it_scenario.dart';
 /// | IT-PLAT-006 | A build that does not run: missing asset, wrong flavor, R8, migration |
 /// | IT-NAV-007 | Content management with the radios off |
 /// | IT-CONT-008 | A whole session with the radios off |
+/// | IT-PLAT-009 | The system font collection, which a host does not have |
 ///
 /// **The business rules are deliberately not re-asserted.** A scenario here
 /// that walked a rule would be a slower, flakier copy of a host test, and the
@@ -280,6 +285,93 @@ void main() {
       reason: 'progress did not survive the reopen',
     );
   });
+
+  testWidgets(
+    'IT-PLAT-009 · the device supplies the CJK the app stopped bundling',
+    (tester) async {
+      // **The one scenario here that guards a payload rather than a path.** The
+      // app used to bundle Korean, Japanese and Simplified Chinese — 14.4 MB
+      // deflated, more of the download than the rest of the app — because a
+      // platform whose system font missed the script would draw card content as
+      // tofu. Android has carried `NotoSansCJK-Regular.ttc` since Lollipop, so
+      // two of the three faces were a copy of a file already on the phone, and
+      // they are gone.
+      //
+      // What makes that safe is measurable only here. A host running
+      // `flutter test` has no system font collection at all, so it cannot tell
+      // "the platform answered" from "nothing answered"; every unit test in
+      // this repo would stay green on a device that shows nothing but boxes.
+      //
+      // **Tofu is the control, because a missing glyph is not blank.** Skia
+      // draws `.notdef` with a real advance, so neither width nor ink proves a
+      // glyph was found. Two private-use codepoints are claimed by no font, so
+      // a script that rasterises identically to a private-use string of the
+      // same length found nothing.
+      const TextStyle systemOnly = TextStyle(
+        fontFamily: AppTypography.displayFamily,
+        fontFamilyFallback: <String>[],
+        fontSize: 48,
+        color: Color(0xFF000000),
+      );
+
+      Future<Uint8List> raster(String text) async {
+        final painter = TextPainter(
+          text: TextSpan(text: text, style: systemOnly),
+          textDirection: TextDirection.ltr,
+        )..layout();
+        final recorder = ui.PictureRecorder();
+        painter.paint(Canvas(recorder), Offset.zero);
+        final image = await recorder.endRecording().toImage(
+          painter.width.ceil().clamp(1, 4096),
+          painter.height.ceil().clamp(1, 4096),
+        );
+        final bytes = await image.toByteData();
+
+        return bytes!.buffer.asUint8List();
+      }
+
+      // Hangul is here even though the app still bundles it: the assertion is
+      // about the platform, and a run where Korean fails too says the probe
+      // broke rather than that the ROM is thin.
+      const probes = <({String script, String sample})>[
+        (script: 'Hangul', sample: '사과나무'),
+        (script: 'Kana', sample: 'ひらがな'),
+        (script: 'Han', sample: '漢字学習'),
+        (script: 'Simplified Han', sample: '汉字学习'),
+      ];
+
+      for (final probe in probes) {
+        late Uint8List real;
+        late Uint8List tofu;
+        await tester.runAsync(() async {
+          real = await raster(probe.sample);
+          tofu = await raster('\uE000' * probe.sample.length);
+        });
+
+        // A blank raster is a broken probe, not a missing glyph, and must not
+        // read as either success or the failure below.
+        expect(
+          real.any((byte) => byte != 0),
+          isTrue,
+          reason: '${probe.script} rasterised to nothing at all',
+        );
+
+        var differs = real.length != tofu.length;
+        for (var i = 0; !differs && i < real.length; i++) {
+          differs = real[i] != tofu[i];
+        }
+        expect(
+          differs,
+          isTrue,
+          reason:
+              '${probe.script} rasterised identically to '
+              '${probe.sample.length} private-use codepoints, which is tofu: '
+              'this device supplied no glyph for "${probe.sample}", and card '
+              'content in that script is unreadable on it',
+        );
+      }
+    },
+  );
 }
 
 /// The running session's cursor, or -1 when there is none.

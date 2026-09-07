@@ -181,13 +181,18 @@ flutter:
     - family: PlusJakartaSans
       fonts:
         - asset: assets/fonts/PlusJakartaSans-Variable.ttf
-    # CJK fallback behind both Latin faces (see AppTypography.cjkFallback), so
-    # Korean/Japanese/Chinese card content renders on every platform, web
-    # included. Order is fixed in AppTypography, not here.
+    # The Korean fallback behind both Latin faces (see AppTypography.cjkFallback).
+    # Subset to Hangul and kept VARIABLE: the app drives weight through
+    # `fontVariations`, so a static instance would paint one weight while
+    # reporting another.
     #
-    # All three are subset to everyday text and kept VARIABLE: the app drives
-    # weight through `fontVariations`, so a static instance would paint one
-    # weight while reporting another.
+    # **The Japanese and Simplified Chinese faces used to sit here and no longer
+    # do.** The three of them deflated to 14.4 MB of every download; Android is
+    # the only release target and has carried `NotoSansCJK-Regular.ttc` since
+    # Lollipop, so kana and Han were shipped twice to every phone. IT-PLAT-009
+    # renders all four scripts on a device with an empty fallback and proves the
+    # system answers. Korean stays because it is the app's own script and its
+    # own type, at 30px on the card prompt.
     #
     # Declaring a family here is only half of it — `test/flutter_test_config.dart`
     # must load the same file, or `flutter test` renders the script as boxes
@@ -195,12 +200,6 @@ flutter:
     - family: NotoSansKR
       fonts:
         - asset: assets/fonts/NotoSansKR-Variable.ttf
-    - family: NotoSansJP
-      fonts:
-        - asset: assets/fonts/NotoSansJP-Variable.ttf
-    - family: NotoSansSC
-      fonts:
-        - asset: assets/fonts/NotoSansSC-Variable.ttf
 
   # The starter-deck templates (AD-07). Declared as a directory, so adding a
   # template is one JSON file plus one line in `manifest.json` — the manifest is
