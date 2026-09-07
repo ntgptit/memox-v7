@@ -14,6 +14,7 @@ import 'package:memox/features/study/domain/models/study_session_kind_model.dart
 import 'package:memox/features/study/domain/models/study_turn_model.dart';
 import 'package:memox/features/study/presentation/widgets/sections/guess_question_section_widget.dart';
 import 'package:memox/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart';
+import 'package:memox/features/study/presentation/widgets/support/study_labels_widget.dart';
 import 'package:memox/shared/widgets/mx_content_shell.dart';
 
 import '../support/study_render.dart';
@@ -116,28 +117,58 @@ void main() {
     card: pool.first,
   );
 
-  Widget screen({required Brightness brightness}) => ReviewApp(
-    brightness: brightness,
-    home: MxContentShell(
-      padding: EdgeInsets.zero,
-      body: StudySessionFrameSectionWidget(
-        mode: StudyMode.guess,
-        kind: StudySessionKind.reviewing,
-        cardCount: pool.length,
-        progress: turnOf().progress,
-        onClose: () {},
-        child: GuessQuestionSectionWidget(
-          question: question,
-          turn: turnOf(),
-          onChosen: (option) async => StudyAnswerCommitModel(
-            cardId: option.cardId,
-            round: 1,
-            currentItemStatus: StudyQueueItemStatus.completed,
+  /// The frame the screen builds, including the part the screen — not the body —
+  /// owns.
+  ///
+  /// **The hint line is swapped by `StudySessionScreen`, not by the question**
+  /// (§8.11). `_guessView` hands the body an `onResolved`, the screen records
+  /// the turn it fired for, and `_hintOverrideFor` then returns
+  /// `studyModeHintResolved(guess)` — so once a row is chosen the frame reads
+  /// "Answer shown — the correct option is highlighted", never
+  /// `studyHintGuess`. `_grade` fires `onResolved` in the same synchronous
+  /// block that sets the chosen card, and `didUpdateWidget` clears the choice in
+  /// the same rebuild that clears the key, so there is not even a transitional
+  /// frame where the two disagree.
+  ///
+  /// A body-only render leaves that swap out, and the picture then shows an
+  /// instruction over a board that has already answered it — a pairing
+  /// production cannot produce. `study_recall_states_demo_test.dart` solved this
+  /// first and its comment names the same failure; this harness now follows it
+  /// rather than re-learning it (EV-01).
+  Widget screen({required Brightness brightness}) {
+    var isResolved = false;
+
+    return ReviewApp(
+      brightness: brightness,
+      home: StatefulBuilder(
+        builder: (context, setState) => MxContentShell(
+          padding: EdgeInsets.zero,
+          body: StudySessionFrameSectionWidget(
+            mode: StudyMode.guess,
+            kind: StudySessionKind.reviewing,
+            cardCount: pool.length,
+            progress: turnOf().progress,
+            onClose: () {},
+            hintOverride: isResolved
+                ? context.studyModeHintResolved(StudyMode.guess)
+                : null,
+            child: GuessQuestionSectionWidget(
+              question: question,
+              turn: turnOf(),
+              // The same signal the screen subscribes to, so `guess_open` keeps
+              // the asking hint and only the answered states swap it.
+              onResolved: () => setState(() => isResolved = true),
+              onChosen: (option) async => StudyAnswerCommitModel(
+                cardId: option.cardId,
+                round: 1,
+                currentItemStatus: StudyQueueItemStatus.completed,
+              ),
+            ),
           ),
         ),
       ),
-    ),
-  );
+    );
+  }
 
   for (final (label, brightness) in <(String, Brightness)>[
     ('light', Brightness.light),
