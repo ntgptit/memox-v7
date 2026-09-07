@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/services.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../providers/card_use_case_provider.dart';
@@ -40,13 +43,31 @@ class CardSelection extends _$CardSelection {
     return const CardSelectionState();
   }
 
+  /// Writes [next] and ticks when the *mode* changes.
+  ///
+  /// **On the transition, not on every write.** Entering and leaving selection
+  /// swaps the whole bar at the top of the screen and changes what a tap on a
+  /// row does; that is the change a finger should feel. Toggling one more card
+  /// inside the mode does not — the row itself already shows it, and a tick per
+  /// card turns a five-card selection into five buzzes.
+  ///
+  /// Every entry path goes through here, which is why it is here and not at the
+  /// long-press: the mode is also entered from a visible `Select` action, and
+  /// left by deselecting the last card as well as by `clear`.
+  void _write(CardSelectionState next) {
+    if (next.isSelecting != state.isSelecting) {
+      unawaited(HapticFeedback.selectionClick());
+    }
+    state = next;
+  }
+
   /// Enters selection mode with [cardId] chosen — the long-press entry.
   void beginWith(String cardId) =>
-      state = CardSelectionState(isSelecting: true, selectedIds: {cardId});
+      _write(CardSelectionState(isSelecting: true, selectedIds: {cardId}));
 
   /// Enters selection mode with nothing chosen — the visible `Select` action,
   /// for a user who does not know the gesture.
-  void begin() => state = const CardSelectionState(isSelecting: true);
+  void begin() => _write(const CardSelectionState(isSelecting: true));
 
   /// Adds or removes one card. Deselecting the last one leaves the mode: a
   /// contextual bar with nothing to act on is chrome in the way.
@@ -54,19 +75,21 @@ class CardSelection extends _$CardSelection {
     final next = <String>{...state.selectedIds};
     if (!next.remove(cardId)) next.add(cardId);
     if (next.isEmpty) {
-      state = const CardSelectionState();
+      _write(const CardSelectionState());
 
       return;
     }
 
-    state = state.copyWith(
-      isSelecting: true,
-      selectedIds: next,
-      isAllMatching: false,
+    _write(
+      state.copyWith(
+        isSelecting: true,
+        selectedIds: next,
+        isAllMatching: false,
+      ),
     );
   }
 
-  void clear() => state = const CardSelectionState();
+  void clear() => _write(const CardSelectionState());
 
   /// Takes every card the live filter and search match — not just the loaded
   /// window (BR-167). The ids come from the same predicate the list and the

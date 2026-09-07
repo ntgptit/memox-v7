@@ -32,4 +32,24 @@ abstract final class AppMotionPolicy {
   /// there is none, and a second switch would let the two disagree.
   static Duration durationOf(BuildContext context, Duration duration) =>
       MediaQuery.disableAnimationsOf(context) ? Duration.zero : duration;
+
+  /// `AnimationStyle.noAnimation` when the user has asked for reduced motion,
+  /// and `null` — meaning "whatever the SDK does" — when they have not.
+  ///
+  /// **A route is the one animation `durationOf` cannot reach.** Everything it
+  /// covers is a widget the app builds and can hand a duration to. A sheet or a
+  /// dialog animates inside a route the framework drives, and
+  /// `AnimationController` does *not* zero a duration when
+  /// `disableAnimations` is set — it only scales the velocity
+  /// (`animation_controller.dart`), so the surface still slides up, just
+  /// faster. `showModalBottomSheet` and `showDialog` take an animation style,
+  /// which is where the same decision lands for them.
+  ///
+  /// `null` rather than a normal style on the other branch, so the SDK's own
+  /// answer stays the default and this is not a second place to keep in step
+  /// with it.
+  static AnimationStyle? animationStyleOf(BuildContext context) =>
+      MediaQuery.disableAnimationsOf(context)
+      ? AnimationStyle.noAnimation
+      : null;
 }

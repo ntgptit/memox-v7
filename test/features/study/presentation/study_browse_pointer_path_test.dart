@@ -1,6 +1,7 @@
 import 'dart:ui' show Tristate;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/study/presentation/widgets/support/study_swipe_deck_widget.dart';
@@ -102,6 +103,48 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('card-B'), findsOneWidget);
+  });
+
+  testWidgets('a swipe that commits is felt; one that settles back is not', (
+    tester,
+  ) async {
+    // **The threshold is invisible until it is crossed.** The card follows the
+    // finger the whole way and slides back if the drag falls short, so the
+    // moment worth a tick is the one the eye cannot see coming: where letting
+    // go stops meaning "nothing happens".
+    final haptics = <String>[];
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform, (call) async {
+          if (call.method == 'HapticFeedback.vibrate') {
+            haptics.add(call.arguments as String);
+          }
+
+          return null;
+        });
+    addTearDown(
+      () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.platform, null),
+    );
+
+    await pumpBrowse(tester);
+
+    await tester.drag(
+      find.text('card-A'),
+      const Offset(-(kStudySwipeThreshold - 20), 0),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      haptics,
+      isEmpty,
+      reason: 'a drag that settles back changed nothing to feel',
+    );
+
+    await tester.drag(
+      find.text('card-A'),
+      const Offset(-(kStudySwipeThreshold + 20), 0),
+    );
+    await tester.pumpAndSettle();
+    expect(haptics, <String>['HapticFeedbackType.selectionClick']);
   });
 
   testWidgets('the affordances meet the touch-target floor', (tester) async {
