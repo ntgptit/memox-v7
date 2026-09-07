@@ -16956,6 +16956,70 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
 - **Checklist phases:** 14, 21.
 
+### M100.61 · Bảy hero, hai cách nhấn — và một góc màn hình chưa ai đo
+
+- **Status:** in review (2026-09-08) — **bản thử, chưa merge theo yêu cầu chủ dự án**
+- **Owner:** Claude
+- **Goal:** Audit toàn bộ hero panel theo brief 2026-09-08 (hiện đại, dễ nhìn,
+  không màu mè, hợp app học tập), rồi thử sửa và dựng gallery để review.
+- **Nhánh / PR:** `feat/hero-panel-quieter` — **không mở PR, không merge**
+- **Scope:** hai call site hero + nhãn semantics của hero Thư viện. Không đụng
+  token, palette, shared API, hợp đồng đóng băng hay luật nghiệp vụ nào.
+- **Editable documents:** `docs/wbs.md`, `docs/reviews/hero-panel-audit.md`
+- **Output:** `docs/reviews/hero-panel-audit.md`; hai key ARB mới (EN + VI);
+  bốn file `lib/`; guard clipping mở rộng 2 → 16 case.
+
+**Kiểm kê là phát hiện chính, nên nó đứng trước mọi finding.** Bảy panel hero,
+**năm** đã nằm trên `MxCard.raised` và tự xếp hạng bằng typography — hai
+Progress, Card Detail, Import, session summary. Đúng **hai** tiêu thêm một lớp
+sơn: Thư viện `MxCard.accent` (viền indigo + một nấc elevation), Study Home
+Resume `MxCard.tonal` (nền `surfaceEmphasis` + elevation 0). Cả hai recipe đó
+mỗi cái đúng một caller production, và đó chính là hai panel này. Nên hướng đề
+xuất **không phải một look mới**: nó là look mà năm phần bảy của app đang có.
+
+**H1 — nhãn đọc của hero nói sai tập.** `_numeral` truyền `dueCount` vào
+`deckHeroDueTodaySemanticLabel`, trong khi BR-162 định nghĩa `Due today` là
+`due_at >= startOfToday` và giữ `dueCardCount = overdue + dueToday`. Trên
+fixture root — 15 due, 8 quá hạn — screen reader nghe *"15 thẻ đến hạn hôm nay"*
+về một panel mà dòng nhìn thấy của nó ghi `8 overdue · 7 today`. **Nó sống sót
+vì có một test ghim nó**: `deck_summary_overdue_test` assert đúng cái nhãn sai
+đó. BR-162 là cấp cao hơn. Nửa còn lại: node breakdown chỉ đọc câu overdue, nên
+phần `· 7 today` không tới tai ai trên cả panel.
+
+**H3 — và đây là chỗ phép đo đổi kết luận.** Viết từ source, H3 chỉ là *rủi ro*:
+hai `maxLines: 1` dưới một phép tính bề rộng. Guard clipping đã có sẵn và đúng
+loại — quét `RenderParagraph.didExceedMaxLines`, vì lỗi này không ném overflow —
+nhưng nó chỉ chạy **360dp, scale 1.3 và 1.5**. Mở ra 320/360/393/412 ×
+1.0/1.3/1.5/2.0: 15/16 case sạch, và **320dp × 2.0 cắt ba đoạn** — `cards due`,
+`8 overdue · 7 today` (tức toàn bộ split của BR-162), và caption của
+`MxProgressBar`. Trên máy hẹp nhất, ở mức chữ mà người cần nó nhất dùng, panel
+xoá đúng cái nó tồn tại để nói.
+
+**Cái không sửa, và lý do.** Caption `MxProgressBar` là layout của một shared
+primitive; nó theo đúng hình dạng đã được chấp nhận của quiet context row — số
+còn, chữ đuôi cắt — nhưng sửa nó là task design-system. Guard mới loại trừ đúng
+chuỗi đó **bằng tên**, kèm dòng ghi nợ tại chỗ loại trừ. Không nới guard, không
+im lặng.
+
+**Eyebrow của Thư viện vẫn không quay lại.** Quy tắc hoà giải được cả bảy panel
+không phải "hero nào cũng có eyebrow" mà là: **eyebrow xuất hiện khi headline
+không tự gọi tên mình.** `5 days` cần `CURRENT STREAK`; `Everyday Korean` cần
+`CARRY ON`; `15 cards due`, `사과`, `Import complete` thì không. Quyết định bỏ
+`TODAY` ngày 2026-08-25 được giữ nguyên.
+
+- **Acceptance criteria:**
+  - [x] Nhãn tổng và nhãn breakdown khớp BR-162 ở EN và VI; `deckHeroDueTodaySemanticLabel`
+        giữ nguyên nghĩa và nhận đúng số của nó; tuổi backlog vẫn tới reader qua
+        `deckHeroOverdueSemanticLabel` (BR-162 yêu cầu).
+  - [x] Guard clipping chạy đủ 16 case; case từng đỏ nay xanh vì code đổi, không
+        vì assertion đổi.
+  - [x] Không token, `ColorScheme` role, shared API, hợp đồng đóng băng hay BR nào bị sửa.
+  - [x] `flutter analyze` repo-wide sạch.
+  - [ ] Chủ dự án review gallery trước–sau rồi mới quyết merge hay bỏ.
+- **Dependencies:** BR-142, BR-150, BR-161, BR-162, BR-200; M100.35 (hợp đồng depth của card)
+- **Tests required:** host suite không golden; golden authoring trên Linux; gallery trước–sau.
+- **Checklist phases:** 7, 12, 14.
+
 ### M100.60 · Mỗi ảnh đúng bề mặt có một chỗ — và trang từ chối tấm không có chỗ
 
 - **Status:** done (2026-09-08)

@@ -5,6 +5,7 @@ import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_card.dart';
+import '../../../../../shared/widgets/mx_section_label.dart';
 import '../../../domain/models/study_home_resume_model.dart';
 import '../support/study_labels_widget.dart';
 import '../../../../../shared/widgets/mx_hero_card.dart';
@@ -70,10 +71,24 @@ class _ResumeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    return MxCard.tonal(
-      // The one surface on this screen that steps away from `surface`: it is a
-      // different kind of offer from the rows under it, and the pair only reads
-      // as a pair if one of them is distinguishable at a glance.
+    return MxCard.raised(
+      // **The same surface as the rows, distinguished by what is on it**
+      // (owner brief, 2026-09-08: modern, legible, not colourful).
+      //
+      // It was `MxCard.tonal`, whose argument was sound and whose execution
+      // spent two devices on it at once: a `surfaceEmphasis` fill *and*
+      // `AppElevation.none`, so the panel was both the only tinted area and
+      // the only unlifted card on a screen of lifted neutral ones. At 353×355
+      // it is the largest single area of colour in the app, holding four short
+      // lines — which is what made Study Home read heavier than Library while
+      // offering less.
+      //
+      // What tells it apart now is what should have been telling it apart:
+      // the `CARRY ON` eyebrow the rows do not have, first position, and the
+      // screen's only *filled* button against the rows' outlined `Study`.
+      // That is the M3 reading of a primary action, and it survives a
+      // greyscale print, which a tint does not. See
+      // `docs/reviews/hero-panel-audit.md` §H2.
       //
       // **Its own semantics boundary, stated rather than inherited.** The body
       // used to get one from being a `ListView` child; inside the centred
@@ -85,34 +100,33 @@ class _ResumeCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            // **`stated`, not `onSecondaryContainer`** (SC-C9-04). All three
-            // lines took an ink `app_ink.dart` scopes to "text on a tinted
-            // container, never on the page", and `app_ink_test.dart` measures
-            // it only against `scheme.secondaryContainer` — while the fill
-            // this card actually paints is `MxCard.tonal`'s
-            // `semantic.surfaceEmphasis`, ΔE 9.21 away from it in light. The
-            // visible half: the deck name here and the deck name in the rows
-            // one section down are the same rung and were ΔE 11.82 apart.
-            //
-            // Measured on the fill this card really has, `onSurface` is
-            // 11.68:1 light and 7.79:1 dark, and the hero's deck name then
-            // paints the identical #223354 the row's does. `quiet` was
-            // rejected: 4.20:1 in dark, under the floor its own test pins it
-            // to. The hierarchy inside the card is carried by rung and weight,
-            // which is all it was ever carried by.
-            Text(
-              l10n.studyHomeResumeTitle,
-              // Through the wght axis — a bare `fontWeight:` paints the rung's
-              // old weight.
-              style: context.texts.labelMedium!.inked(
-                context,
-                AppInk.stated,
-                isEmphasized: true,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+            // **The app's one face-label treatment** (D18), not a hand-set
+            // `labelMedium`. `MxSectionLabelRung.small` exists for exactly
+            // this position — a label on the face of a card — and five other
+            // sites already take it, the study prompt's own `QUESTION` among
+            // them. Drawn here by hand it was 12sp semibold at `stated`: the
+            // same ink and nearly the same weight as the deck name directly
+            // under it, so the card opened with two dark bold lines and the
+            // eyebrow competed with the thing it was introducing. Quiet caps
+            // subordinate it, which is what an eyebrow is for, and the node
+            // becomes a `header` a screen reader can jump to — the card had
+            // none.
+            MxSectionLabel(
+              label: l10n.studyHomeResumeTitle,
+              rung: MxSectionLabelRung.small,
             ),
             const SizedBox(height: AppSpacing.xs),
+            // **`stated`, and now it is trivially right** (SC-C9-04). The pair
+            // of lines below took `onSecondaryContainer` once — an ink
+            // `app_ink.dart` scopes to "text on a tinted container, never on
+            // the page" — while the fill underneath was `MxCard.tonal`'s
+            // `semantic.surfaceEmphasis`, ΔE 9.21 away from the ground that
+            // ink is measured against. The visible cost was this deck name and
+            // the deck name in the rows one section down: the same rung, ΔE
+            // 11.82 apart. `stated` closed that to zero on the tint, and the
+            // card now paints the rows' own fill, so the two names sit on
+            // identical ground as well as in identical ink. `quiet` stays
+            // rejected — 4.20:1 in dark, under the floor its own test pins.
             Text(
               resume.deckName,
               style: context.texts.titleMedium!.inked(context, AppInk.stated),

@@ -2311,6 +2311,27 @@
     },
     "description": "Screen-reader sentence for the hero's due-today metric (BR-162)."
   },
+  "deckHeroDueTotalSemanticLabel": "{count, plural, =1{1 card} other{{count} cards}} to review",
+  "@deckHeroDueTotalSemanticLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Screen-reader sentence for the hero's headline figure. That figure is the Reviewing total of BR-142 — overdue plus due today — so it MUST NOT reuse deckHeroDueTodaySemanticLabel, which names only one of the two disjoint sets BR-162 defines."
+  },
+  "deckHeroBreakdownSemanticLabel": "{overdue}, {dueToday}",
+  "@deckHeroBreakdownSemanticLabel": {
+    "placeholders": {
+      "overdue": {
+        "type": "String"
+      },
+      "dueToday": {
+        "type": "String"
+      }
+    },
+    "description": "Joins the hero's two BR-162 splits into one announcement: the overdue sentence, which carries the backlog age BR-162 requires a reader to reach, and the due-today sentence. Both halves arrive already localized; this resource supplies only the punctuation between them."
+  },
   "deckHeroNewSemanticLabel": "{count, plural, =1{1 new card} other{{count} new cards}}",
   "@deckHeroNewSemanticLabel": {
     "placeholders": {

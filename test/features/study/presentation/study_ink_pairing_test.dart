@@ -43,14 +43,29 @@ void main() {
       Color inkOf(Finder finder) => tester.widget<Text>(finder).style!.color!;
 
       final card = find.byType(StudyHomeResumeSectionWidget);
+      // The line the finding was about: the deck name, which the row one
+      // section down also draws. `stated` closed the ΔE 11.82 between them,
+      // and the card now paints the rows' own fill too, so they match in
+      // ground as well as in ink.
       for (final line in <Finder>[
-        find.descendant(
-          of: card,
-          matching: find.text(english.studyHomeResumeTitle),
-        ),
+        find.descendant(of: card, matching: find.text('Everyday Korean')),
       ]) {
         expect(inkOf(line), scheme.onSurface);
       }
+      // The eyebrow is not one of them, and that is the point: it is the
+      // app's shared section-label treatment, which is quiet by contract so
+      // an eyebrow subordinates the line it introduces. Pinned here rather
+      // than left unmeasured, because a hand-set `stated` label is exactly
+      // what this card used to draw.
+      expect(
+        inkOf(
+          find.descendant(
+            of: card,
+            matching: find.text(english.studyHomeResumeTitle.toUpperCase()),
+          ),
+        ),
+        scheme.onSurfaceVariant,
+      );
     });
 
     testWidgets('the hero deck name matches the row deck name exactly', (

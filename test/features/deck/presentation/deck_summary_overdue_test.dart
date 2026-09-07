@@ -231,15 +231,36 @@ void main() {
         levelOf(due: 15, overdueCards: 12, overdueDays: 7, newCards: 5),
       );
 
+      // **The headline announces the sum, and it used to announce it as
+      // due-today.** This assertion is the one that carried the defect: 15 due
+      // of which 12 are overdue is 3 cards due today by BR-162's own identity,
+      // and the panel was telling a listener all fifteen were. The eye never
+      // received that classification — the visible line reads `15 cards due`.
       expect(
         onPanel(
-          find.bySemanticsLabel(english.deckHeroDueTodaySemanticLabel(15)),
+          find.bySemanticsLabel(english.deckHeroDueTotalSemanticLabel(15)),
         ),
         findsOneWidget,
       );
       expect(
         onPanel(
-          find.bySemanticsLabel(english.deckHeroOverdueSemanticLabel(12, 7)),
+          find.bySemanticsLabel(english.deckHeroDueTodaySemanticLabel(15)),
+        ),
+        findsNothing,
+        reason: 'the due-today sentence names one of the two sets, not the sum',
+      );
+      // Both halves of the split, in one node, as the visible line has them —
+      // the overdue sentence still carrying the backlog age BR-162 requires a
+      // reader to reach, and the due-today sentence with the count that is
+      // actually due today.
+      expect(
+        onPanel(
+          find.bySemanticsLabel(
+            english.deckHeroBreakdownSemanticLabel(
+              english.deckHeroOverdueSemanticLabel(12, 7),
+              english.deckHeroDueTodaySemanticLabel(3),
+            ),
+          ),
         ),
         findsOneWidget,
         reason: 'the sentence carries both units: cards and days',
@@ -364,9 +385,14 @@ void main() {
       await tester.pump();
       await tester.pump();
 
+      // A pattern, not the whole string: the age travels inside the panel's
+      // composed breakdown sentence now, and what this test is about is the
+      // age moving — not the punctuation around it.
       expect(
         onPanel(
-          find.bySemanticsLabel(english.deckHeroOverdueSemanticLabel(7, 7)),
+          find.bySemanticsLabel(
+            _containing(english.deckHeroOverdueSemanticLabel(7, 7)),
+          ),
         ),
         findsOneWidget,
       );
@@ -377,13 +403,17 @@ void main() {
 
       expect(
         onPanel(
-          find.bySemanticsLabel(english.deckHeroOverdueSemanticLabel(7, 8)),
+          find.bySemanticsLabel(
+            _containing(english.deckHeroOverdueSemanticLabel(7, 8)),
+          ),
         ),
         findsOneWidget,
       );
       expect(
         onPanel(
-          find.bySemanticsLabel(english.deckHeroOverdueSemanticLabel(7, 7)),
+          find.bySemanticsLabel(
+            _containing(english.deckHeroOverdueSemanticLabel(7, 7)),
+          ),
         ),
         findsNothing,
       );
@@ -427,7 +457,22 @@ void main() {
         english.deckHeroNewMetricWord.toLowerCase(),
       };
 
-      return clipped.where((text) => !quietRowWords.contains(text)).toList();
+      // **`MxProgressBar`'s own caption is excluded, and it is excluded as a
+      // debt rather than as a decision** (hero audit, 2026-09-08). At 320dp
+      // and textScaler 2.0 the learned line draws `10 of 52 lear…`, which
+      // follows the quiet row's accepted shape — the figures survive, the
+      // trailing word clips — but the widget is a shared primitive and its
+      // layout is not this panel's to change. It is reported for a
+      // design-system task; excluding it here keeps this guard measuring the
+      // hero, which is what it is for.
+      final sharedCaptions = <String>{english.deckLearnedProgressLabel(10, 52)};
+
+      return clipped
+          .where(
+            (text) =>
+                !quietRowWords.contains(text) && !sharedCaptions.contains(text),
+          )
+          .toList();
     }
 
     testWidgets('at 360 the subline moves down rather than being cut', (
@@ -447,23 +492,34 @@ void main() {
       expectHero(15, english.deckSummaryCardsDueWord);
     });
 
-    testWidgets('nothing is cut at 1.3 or 1.5 either', (tester) async {
-      for (final scale in <double>[1.3, 1.5]) {
-        await pumpLevel(
+    // **The whole matrix, because the two axes interact and one width was
+    // standing in for four.** This ran at 360 only, at 1.3 and 1.5, and the
+    // 2026-09-08 hero audit named the gap it left: the narrowest phone the app
+    // supports is 320, the accessibility scale that matters is 2.0, and the
+    // measurement that answered "does the hero clip?" had seen neither. The
+    // wrap branch is a width comparison, so the case that breaks it is the one
+    // where the numeral alone nearly fills the line — narrow *and* scaled.
+    for (final width in <double>[320, 360, 393, 412]) {
+      for (final scale in <double>[1, 1.3, 1.5, 2]) {
+        testWidgets('nothing is cut at ${width.toInt()}dp, textScaler $scale', (
           tester,
-          levelOf(due: 15, overdueCards: 8, overdueDays: 7),
-          surface: const Size(360, 640),
-          textScale: scale,
-        );
-        await expandSummary(tester);
+        ) async {
+          await pumpLevel(
+            tester,
+            levelOf(due: 15, overdueCards: 8, overdueDays: 7),
+            surface: Size(width, 640),
+            textScale: scale,
+          );
+          await expandSummary(tester);
 
-        expect(
-          clippedOnPanel(tester),
-          isEmpty,
-          reason: 'the hero clipped at textScaler $scale',
-        );
+          expect(
+            clippedOnPanel(tester),
+            isEmpty,
+            reason: 'the hero clipped at ${width.toInt()}dp, textScaler $scale',
+          );
+        });
       }
-    });
+    }
 
     testWidgets('a line with room for both still draws them side by side', (
       tester,
@@ -489,3 +545,10 @@ void main() {
     });
   });
 }
+
+/// [sentence] wherever it sits inside a longer announcement.
+///
+/// `bySemanticsLabel` takes a `Pattern`, and a bare `String` matches the whole
+/// label. The hero's breakdown node joins two localized sentences, so a test
+/// about one of them has to say so rather than restating the join.
+RegExp _containing(String sentence) => RegExp(RegExp.escape(sentence));

@@ -259,11 +259,19 @@ class _HeroFigureLine extends StatelessWidget {
   }
 
   /// `15 cards due` — the figure and the unit it counts, on one baseline.
+  ///
+  /// **The headline is the Reviewing total, and it used to be announced as
+  /// due-today.** `dueCount` is `overdue + dueToday` by BR-162's own identity,
+  /// so `deckHeroDueTodaySemanticLabel(dueCount)` told a listener "15 cards due
+  /// today" about a figure the same panel splits into 8 overdue and 7 today —
+  /// a classification the eye never receives, contradicted one line below by
+  /// the panel's own breakdown. The due-today resource keeps its meaning and
+  /// keeps its own number; the headline gets a sentence for the sum.
   Widget _numeral(BuildContext context, int heroCount, String heroWord) =>
       Semantics(
         container: true,
         label: dueCount > 0
-            ? context.l10n.deckHeroDueTodaySemanticLabel(dueCount)
+            ? context.l10n.deckHeroDueTotalSemanticLabel(dueCount)
             : context.l10n.deckHeroNewSemanticLabel(newCount),
         child: ExcludeSemantics(
           child: Row(
@@ -299,7 +307,17 @@ class _HeroFigureLine extends StatelessWidget {
                 child: Text(
                   heroWord,
                   style: context.texts.titleMedium,
-                  maxLines: 1,
+                  // **Two, and it costs nothing where one was enough.** The
+                  // side-by-side branch is only taken once `fitsOnOneLine` has
+                  // proved the whole line fits, so this never wraps there; the
+                  // stacked branch is where it matters, and there it was
+                  // drawing `cards d…` on a 320dp screen at textScaler 2.0 —
+                  // the one corner of the responsive matrix this panel's
+                  // clipping guard had never been pointed at (hero audit,
+                  // 2026-09-08). Wrapping a two-word unit is not a defect;
+                  // ellipsizing it is, because the word is what says *what*
+                  // the numeral counts.
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -309,15 +327,26 @@ class _HeroFigureLine extends StatelessWidget {
       );
 
   /// `8 overdue · 7 today` — BR-162's split, in one sentence.
+  ///
+  /// **Both halves, because the visible line has both.** The node announced the
+  /// overdue sentence alone, so the `· 7 today` half of the split reached no
+  /// listener anywhere on the panel: the headline above it was announcing the
+  /// sum. The overdue sentence stays exactly as it was — BR-162 requires the
+  /// backlog age to arrive through this resource — and the due-today sentence
+  /// is appended with its own count.
   Widget _breakdown(BuildContext context) => Semantics(
-    label: context.l10n.deckHeroOverdueSemanticLabel(
-      overdueCount,
-      overdueDayCount,
+    label: context.l10n.deckHeroBreakdownSemanticLabel(
+      context.l10n.deckHeroOverdueSemanticLabel(overdueCount, overdueDayCount),
+      context.l10n.deckHeroDueTodaySemanticLabel(dueCount - overdueCount),
     ),
     child: ExcludeSemantics(
       child: Text.rich(
         _breakdownSpan(context),
-        maxLines: 1,
+        // Same reason as the unit word above, and a stronger one: this line
+        // *is* BR-162's split, so an ellipsis here deletes the half of the
+        // panel the split exists to state. Inert on the shared-baseline
+        // branch, which is measured to fit before it is chosen.
+        maxLines: 2,
         overflow: TextOverflow.ellipsis,
       ),
     ),
