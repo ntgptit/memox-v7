@@ -42,7 +42,7 @@ Checklist phases, with a non-empty acceptance-criteria block — reads
 `docs/wbs.md` alone, by design: a closed entry is an immutable record of what
 happened, not a live contract that still has to satisfy an evolving template,
 and re-validating 299 already-closed entries on every CI run would buy
-nothing. The other six reach this directory for a different reason, not by
+nothing. The other six miss this directory for a different reason, not by
 design: `_check_markers`, `_check_duplicate_headings`,
 `_check_superseded_rows`, `_check_duplicate_table_ids`,
 `_check_banned_coalesce` and `_check_deck_flow_drift` all read `_docs_md()`,
