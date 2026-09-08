@@ -193,7 +193,7 @@ void main() {
     ) async {
       await pumpTile(tester, text: term, isTerm: true);
 
-      // **Null, not a transparent line** (M100.63). The distinction is the
+      // **Null, not a transparent line** (M100.69). The distinction is the
       // point: a transparent border still occupies the channel a state needs,
       // and `BoxDecoration.border` is what the three marked states paint into.
       expect(skinOf(tester).border, isNull);

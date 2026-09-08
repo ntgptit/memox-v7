@@ -211,7 +211,7 @@ void main() {
       expect(_borderOf(tester, 'back-b').color, dangerOf(tester));
       expect(_borderOf(tester, 'back-a').width, AppStroke.control);
 
-      // **The row nobody touched draws no edge at all** (M100.63), and that is
+      // **The row nobody touched draws no edge at all** (M100.69), and that is
       // what makes the verdict legible: `success` and `danger` are now the only
       // two edges on the screen rather than heavier versions of one all five
       // rows already wore.

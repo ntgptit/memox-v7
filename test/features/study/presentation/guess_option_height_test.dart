@@ -90,7 +90,7 @@ void main() {
       );
 
       // The row the widget builds: `MxPressable`'s 48 around the padding and
-      // the text — and **exactly** that since M100.63, because a resting row
+      // the text — and **exactly** that since M100.69, because a resting row
       // draws no stroke and a verdict draws its one outside the box. The row is
       // the touch target, not the touch target plus a border.
       expect(result.rendered, AppGuessOption.rowMinHeight);
@@ -211,7 +211,7 @@ void main() {
       });
     }
 
-    // **`open` and `dimmed` are exact too since M100.63.** They used to be a
+    // **`open` and `dimmed` are exact too since M100.69.** They used to be a
     // stroke short of it: they drew a hairline where the helper's `rowBorder`
     // assumed a verdict's heavier stroke, so the helper was a documented
     // ceiling for four rows out of five. Now no state puts a stroke in the

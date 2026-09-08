@@ -120,7 +120,7 @@ void main() {
       expect(find.byIcon(Icons.close), findsNothing);
 
       // Back to idle on the edge and the ink too, not just the mark. Since
-      // M100.63 idle draws no edge at all, so "back to idle" is the *absence*
+      // M100.69 idle draws no edge at all, so "back to idle" is the *absence*
       // of one — which is the stronger assertion: a tile stuck in `wrong` and a
       // tile that merely lost its red both used to satisfy a colour check
       // against a resting token that existed either way.

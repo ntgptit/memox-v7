@@ -282,7 +282,7 @@ class _TileSkin {
         foreground: AppInk.stated,
         mark: null,
       ),
-      // **No edge at rest, and the board's depth carries it instead** (M100.63,
+      // **No edge at rest, and the board's depth carries it instead** (M100.69,
       // owner decision on a rendered comparison of all three treatments).
       //
       // The tile spent two rounds arguing about *which* line to draw — grey at
@@ -316,7 +316,7 @@ class _TileSkin {
   final Color? background;
 
   /// **Null means no edge at all**, which is what a resting tile wants since
-  /// M100.63 — not a transparent line, because a transparent line is still a
+  /// M100.69 — not a transparent line, because a transparent line is still a
   /// line somebody has to notice is transparent.
   final Color? outline;
 

@@ -7,7 +7,7 @@
 | **Scope** | Khung phiên học, năm màn `browse` · `match` · `guess` · `recall` · `fill`, và sheet chọn chiều hỏi của `self_assess` (§9). Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), luồng (`use-cases.md`), giá trị token (`design_system/tokens/`) |
 | **Source of truth for** | Bố cục màn học · phán quyết cho tám điểm design lệch với BR · bố cục sheet chọn chiều và thẻ khi chiều bị đảo |
 | **Depends on** | `document-conventions.md`, `business-rules.md` (BR-108…BR-154), `wbs-study.md` (M5.7…M5.20) |
-| **Updated by task** | M100.63 — §4: ô match lúc chưa chọn **thôi vẽ viền**, depth `AppElevation.card` thay chỗ (footnote ở §4) · M100.62 — §4: viền đó đổi `borderControl` → `borderOption` · M99.27 — §9: sheet chọn chiều hỏi (ba dòng chung mép, glyph chứ không chỉ màu, chạm chỉ chọn, sheet cuộn được) và thẻ khi chiều bị đảo (nhãn đi theo nội dung, ba phép đo ghim bằng `getRect`) · `fill` làm lại vùng đáp án lần hai — thẻ dưới **là** input surface, bỏ ô viền lồng trong thẻ, đề đổi sang `back` và chấm bằng `front_folded` (BR-134), phán quyết mặc lên viền thẻ, hàng CTA giữ đủ hai chỗ (§6, §8.10) · `recall` tách lật khỏi chấm — lật mở tự đánh giá, hết giờ ghi sai rồi chờ `Next` (§6.1, §8.12) · `guess` bỏ nền phán quyết — đúng/sai chỉ còn viền + chữ + icon, ba hàng còn lại lùi về 0.7 thay vì 0.36, reset theo lượt thay vì `cardId`, ngân sách đọc 800/1800ms (§5, §8.9, §8.12) · Rà soát UI 5 stage — `match` nhận cả hai chiều chọn và giữ trạng thái đủ lâu để đọc (§4, §8.8), chuyển feedback sang viền + chữ thay vì nền đặc (§4), đổi meaning sang trái, hạ thang chữ và nâng sàn hàng lên 112 (§4, §8.6), `guess` bỏ huy hiệu A–E (§5), `fill` làm lại vùng đáp án (§6), `browse` cân bằng hai mặt và đổi nhãn (§3) |
+| **Updated by task** | M100.69 — §4: ô match lúc chưa chọn **thôi vẽ viền**, depth `AppElevation.card` thay chỗ (footnote ở §4) · M100.62 — §4: viền đó đổi `borderControl` → `borderOption` · M99.27 — §9: sheet chọn chiều hỏi (ba dòng chung mép, glyph chứ không chỉ màu, chạm chỉ chọn, sheet cuộn được) và thẻ khi chiều bị đảo (nhãn đi theo nội dung, ba phép đo ghim bằng `getRect`) · `fill` làm lại vùng đáp án lần hai — thẻ dưới **là** input surface, bỏ ô viền lồng trong thẻ, đề đổi sang `back` và chấm bằng `front_folded` (BR-134), phán quyết mặc lên viền thẻ, hàng CTA giữ đủ hai chỗ (§6, §8.10) · `recall` tách lật khỏi chấm — lật mở tự đánh giá, hết giờ ghi sai rồi chờ `Next` (§6.1, §8.12) · `guess` bỏ nền phán quyết — đúng/sai chỉ còn viền + chữ + icon, ba hàng còn lại lùi về 0.7 thay vì 0.36, reset theo lượt thay vì `cardId`, ngân sách đọc 800/1800ms (§5, §8.9, §8.12) · Rà soát UI 5 stage — `match` nhận cả hai chiều chọn và giữ trạng thái đủ lâu để đọc (§4, §8.8), chuyển feedback sang viền + chữ thay vì nền đặc (§4), đổi meaning sang trái, hạ thang chữ và nâng sàn hàng lên 112 (§4, §8.6), `guess` bỏ huy hiệu A–E (§5), `fill` làm lại vùng đáp án (§6), `browse` cân bằng hai mặt và đổi nhãn (§3) |
 | **Last updated** | 2026-09-08 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham chiếu bằng ID.
@@ -132,13 +132,13 @@ nền nào cả.
 
 | Trạng thái | Nền | Viền | Độ dày | Chữ / icon |
 |---|---|---|---|---|
-| chưa chọn | `surfaceContainerLowest` | **không vẽ** [^m10062] | — (`AppElevation.card`) | `onSurface` |
+| chưa chọn | `surfaceContainerLowest` | **không vẽ** [^m10069] | — (`AppElevation.card`) | `onSurface` |
 | đang chọn (vế trước) | *không đổi* | `primaryAccent` | `AppStroke.input` | `primaryAccent` |
 | vừa ghép đúng | *không đổi* | `success` | `AppStroke.input` | `success` + ✓ — giữ **500ms** rồi tan (§8.8) |
 | vừa ghép sai | *không đổi* | `danger` | `AppStroke.input` | `danger` + ✕ — giữ **700ms** rồi về idle (§8.8) |
 | đã xong | **không vẽ** | viền cleared mờ | `AppStroke.hairline` | nội dung tan (§8.8) |
 
-[^m10062]: Ô lúc chưa chọn **thôi vẽ viền** ở M100.63, sau khi chủ dự án so ba
+[^m10069]: Ô lúc chưa chọn **thôi vẽ viền** ở M100.69, sau khi chủ dự án so ba
     phương án trên golden đã render và chọn phương án này. Trước đó nó mang
     `borderControl` (tới M100.62) rồi `borderOption` (M100.62).
 

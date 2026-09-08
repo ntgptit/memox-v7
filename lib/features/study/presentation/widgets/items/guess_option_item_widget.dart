@@ -78,7 +78,7 @@ class GuessOptionItemWidget extends StatelessWidget {
     // one that reads differently is the one that says so at its edge.
     //
     // **A resting row draws no edge at all, and the card's depth separates it
-    // instead** (M100.63, owner decision on a rendered comparison).
+    // instead** (M100.69, owner decision on a rendered comparison).
     //
     // Two rounds were spent choosing *which* line to draw here — grey at
     // 4.05:1, then the brand edge at 3.27 — and the question underneath was
@@ -133,7 +133,7 @@ class GuessOptionItemWidget extends StatelessWidget {
           decoration: BoxDecoration(
             color: ground,
             borderRadius: radius,
-            // **The verdict's stroke sits outside the box** (M100.63). With a
+            // **The verdict's stroke sits outside the box** (M100.69). With a
             // resting row drawing no edge, an inside stroke would make the two
             // marked rows 3dp taller than the three that were not picked — so
             // answering a question would push every row below the verdict down
@@ -237,7 +237,7 @@ abstract final class AppGuessOption {
     // through the real `TextScaler` — and the fingertip it is a floor for does
     // not grow when the type does.
     //
-    // **No border term at all since M100.63, and that is a simplification the
+    // **No border term at all since M100.69, and that is a simplification the
     // change earned rather than one it needed.** A resting row draws no edge
     // and a verdict draws its edge *outside* the box, so the stroke is out of
     // the layout in every state — the row is exactly `max(48, padding + text)`

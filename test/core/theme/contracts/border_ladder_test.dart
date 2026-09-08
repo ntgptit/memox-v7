@@ -85,7 +85,7 @@ void main() {
   });
 
   group('what separates a study surface that draws no edge', () {
-    /// Two widgets draw **no border at all** at rest since M100.63 — the Guess
+    /// Two widgets draw **no border at all** at rest since M100.69 — the Guess
     /// answer row and the Match tile — after the owner compared all three
     /// treatments on a rendered golden and chose this one.
     ///
@@ -120,7 +120,7 @@ void main() {
           source.contains('AppElevation.card'),
           isTrue,
           reason:
-              '$path no longer asks for AppElevation.card. Since M100.63 it '
+              '$path no longer asks for AppElevation.card. Since M100.69 it '
               'draws no resting edge, so that depth is the only thing between '
               'its surface and the board: without it the separation is the '
               'bare fill step, 1.09:1.',
