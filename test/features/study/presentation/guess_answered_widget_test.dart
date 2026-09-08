@@ -80,10 +80,6 @@ void main() {
       tester.element(find.byType(GuessQuestionSectionWidget)),
     ).extension<AppSemanticColors>()!.danger;
 
-    Color optionEdgeOf(WidgetTester tester) => Theme.of(
-      tester.element(find.byType(GuessQuestionSectionWidget)),
-    ).extension<AppSemanticColors>()!.borderOption;
-
     testWidgets('marks the right answer even when it was not chosen', (
       tester,
     ) async {
@@ -214,16 +210,23 @@ void main() {
       expect(_borderOf(tester, 'back-a').color, successOf(tester));
       expect(_borderOf(tester, 'back-b').color, dangerOf(tester));
       expect(_borderOf(tester, 'back-a').width, AppStroke.control);
-      expect(_borderOf(tester, 'back-c').width, AppStroke.hairline);
 
-      // **The row nobody touched keeps the brand edge, not the grey** (M100.62).
-      // Only the width was pinned here before, so the resting colour was the
-      // one thing about these five rows no test held — which is how the
-      // loudest resting line in the app sat on the busiest study screen
-      // through four palette moves. `border_ladder_test.dart` holds the
-      // measurement that licenses this token; this holds the row that spends
-      // it.
-      expect(_borderOf(tester, 'back-c').color, optionEdgeOf(tester));
+      // **The row nobody touched draws no edge at all** (M100.69), and that is
+      // what makes the verdict legible: `success` and `danger` are now the only
+      // two edges on the screen rather than heavier versions of one all five
+      // rows already wore.
+      //
+      // Asserted as `isNull` rather than as a colour, because a resting row
+      // that kept a transparent border would satisfy any colour check while
+      // still occupying the channel the verdict paints into.
+      expect(_decorationOf(tester, 'back-c').border, isNull);
+      expect(
+        _decorationOf(tester, 'back-c').boxShadow,
+        isNotEmpty,
+        reason:
+            'a resting row with neither an edge nor a shadow has only its '
+            'fill, which is 1.09:1 from the panel behind it',
+      );
     });
 
     testWidgets('the rows nobody picked stay readable', (tester) async {
@@ -265,8 +268,11 @@ Color? _fillOf(WidgetTester tester, String text) =>
     (_rowOf(tester, text).decoration! as BoxDecoration).color;
 
 /// The edge it draws.
+BoxDecoration _decorationOf(WidgetTester tester, String text) =>
+    _rowOf(tester, text).decoration! as BoxDecoration;
+
 BorderSide _borderOf(WidgetTester tester, String text) =>
-    (_rowOf(tester, text).decoration! as BoxDecoration).border!.top;
+    _decorationOf(tester, text).border!.top;
 
 AnimatedContainer _rowOf(WidgetTester tester, String text) =>
     tester.widget<AnimatedContainer>(

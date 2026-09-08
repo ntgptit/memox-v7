@@ -119,10 +119,22 @@ void main() {
 
       expect(find.byIcon(Icons.close), findsNothing);
 
-      // Back to idle on the edge and the ink too, not just the mark.
+      // Back to idle on the edge and the ink too, not just the mark. Since
+      // M100.69 idle draws no edge at all, so "back to idle" is the *absence*
+      // of one — which is the stronger assertion: a tile stuck in `wrong` and a
+      // tile that merely lost its red both used to satisfy a colour check
+      // against a resting token that existed either way.
       for (final label in <String>['front-a', 'back-b']) {
-        expect(_edge(tester, label).color, _semantic(tester).borderOption);
-        expect(_edge(tester, label).width, AppStroke.hairline);
+        expect(
+          _decorationOf(tester, label).border,
+          isNull,
+          reason: '$label kept an edge after returning to idle',
+        );
+        expect(
+          _decorationOf(tester, label).boxShadow,
+          isNotEmpty,
+          reason: '$label came back to idle with nothing separating it',
+        );
       }
     });
 
@@ -271,8 +283,11 @@ Color? _fill(WidgetTester tester, String label) =>
     (_tileOf(tester, label).decoration! as BoxDecoration).color;
 
 /// What that tile draws its edge with.
+BoxDecoration _decorationOf(WidgetTester tester, String label) =>
+    _tileOf(tester, label).decoration! as BoxDecoration;
+
 BorderSide _edge(WidgetTester tester, String label) =>
-    (_tileOf(tester, label).decoration! as BoxDecoration).border!.top;
+    _decorationOf(tester, label).border!.top;
 
 /// The fill of a tile nobody has touched — read from the board rather than
 /// named, so this stays a *relation* between states and not a second copy of

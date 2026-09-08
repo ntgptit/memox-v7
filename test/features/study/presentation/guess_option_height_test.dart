@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/foundations/app_stroke.dart';
 import 'package:memox/features/study/presentation/widgets/items/guess_option_item_widget.dart';
 
 import '../../../support/android_text_scaler.dart';
@@ -80,10 +79,6 @@ void main() {
       'Deep sleep / Giấc ngủ sâu (Danh từ, trạng thái ngủ ngon '
       'không bị gián đoạn trong nhiều giờ liền)';
 
-  /// The stroke a verdict row draws on both edges — the width `rowBorder`
-  /// assumes, so a verdict row is where the helper can be exact.
-  const double verdictBorder = AppStroke.control * 2;
-
   group('the floor is a touch target, so it does not scale', () {
     testWidgets('short text sits on the floor, and the helper says so', (
       tester,
@@ -95,8 +90,10 @@ void main() {
       );
 
       // The row the widget builds: `MxPressable`'s 48 around the padding and
-      // the text, with the stroke drawn around that.
-      expect(result.rendered, AppGuessOption.rowMinHeight + verdictBorder);
+      // the text — and **exactly** that since M100.69, because a resting row
+      // draws no stroke and a verdict draws its one outside the box. The row is
+      // the touch target, not the touch target plus a border.
+      expect(result.rendered, AppGuessOption.rowMinHeight);
       expect(result.helper, result.rendered);
     });
 
@@ -136,7 +133,7 @@ void main() {
       );
 
       expect(result.helper, greaterThanOrEqualTo(AppGuessOption.rowMinHeight));
-      expect(result.rendered, AppGuessOption.rowMinHeight + verdictBorder);
+      expect(result.rendered, AppGuessOption.rowMinHeight);
       expect(result.helper, result.rendered);
     });
   });
@@ -214,16 +211,18 @@ void main() {
       });
     }
 
-    // `open` and `dimmed` draw a hairline instead, so the helper is one stroke
-    // taller by design — `rowBorder` is documented as a ceiling rather than a
-    // number that is right for four rows out of five. A ceiling is the safe
-    // direction for a budget: it may reserve a little too much, never too
-    // little.
+    // **`open` and `dimmed` are exact too since M100.69.** They used to be a
+    // stroke short of it: they drew a hairline where the helper's `rowBorder`
+    // assumed a verdict's heavier stroke, so the helper was a documented
+    // ceiling for four rows out of five. Now no state puts a stroke in the
+    // layout — resting draws none and a verdict draws its own outside the box —
+    // so the ceiling is gone and with it the only place this helper was allowed
+    // to be approximately right.
     for (final GuessOptionState state in <GuessOptionState>[
       GuessOptionState.open,
       GuessOptionState.dimmed,
     ]) {
-      testWidgets('within one stroke, for $state', (tester) async {
+      testWidgets('exactly, for $state', (tester) async {
         for (final TextScaler scaler in <TextScaler>[
           TextScaler.noScaling,
           AndroidTextScaler.large,
@@ -236,16 +235,7 @@ void main() {
             state: state,
           );
 
-          expect(
-            result.helper,
-            greaterThanOrEqualTo(result.rendered),
-            reason: 'a budget may never under-reserve · $scaler',
-          );
-          expect(
-            result.helper - result.rendered,
-            lessThanOrEqualTo(AppStroke.control),
-            reason: 'and it may only over-reserve by the stroke · $scaler',
-          );
+          expect(result.helper, result.rendered, reason: '$state · $scaler');
         }
       });
     }
