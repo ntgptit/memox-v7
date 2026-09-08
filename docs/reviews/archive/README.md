@@ -1,7 +1,7 @@
 # Review archive
 
 Audits whose findings have landed and which nothing in the working tree cites
-any more. Moved 2026-09-08 (M100.66). Nothing was edited or deleted.
+any more. Moved 2026-09-08 (M100.65). Nothing was edited or deleted.
 
 An audit leaves this directory the moment something needs it again — the test
 is citation, not age. `docs/reviews/` keeps every audit still referenced by

@@ -616,7 +616,7 @@ mươi query sẽ đúng ở năm mươi chín chỗ, và chỗ thứ sáu mươ
 
 ## StudyMode
 
-Nội dung chuyển sang `business-rules/study-mode.md` ở M100.68. Trạng thái,
+Nội dung chuyển sang `business-rules/study-mode.md` ở M100.65. Trạng thái,
 cách đánh số và quyền sở hữu không đổi: tài liệu này vẫn là `Source of
 truth for` business rules, và `check_docs.py` đọc cả hai qua
 `_contract_files("BR")`.

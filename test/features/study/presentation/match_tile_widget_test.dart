@@ -188,11 +188,11 @@ void main() {
       });
     }
 
-    testWidgets('idle is a hairline in the control border', (tester) async {
+    testWidgets('idle is a hairline in the option border', (tester) async {
       await pumpTile(tester, text: term, isTerm: true);
 
       final semantic = semanticOf(tester);
-      expect(skinOf(tester).border!.top.color, semantic.borderControl);
+      expect(skinOf(tester).border!.top.color, semantic.borderOption);
       expect(skinOf(tester).border!.top.width, AppStroke.hairline);
       expect(
         textOf(tester, term).style?.color,

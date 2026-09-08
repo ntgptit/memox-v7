@@ -1,6 +1,6 @@
 # BR — StudyMode
 
-Tách khỏi `../business-rules.md` ở M100.68. Trạng thái, cách đánh số và quyền
+Tách khỏi `../business-rules.md` ở M100.65. Trạng thái, cách đánh số và quyền
 sở hữu không đổi: `../business-rules.md` vẫn là `Source of truth for` của
 business rules, và `check_docs.py` đọc cả hai qua `_contract_files("BR")`.
 

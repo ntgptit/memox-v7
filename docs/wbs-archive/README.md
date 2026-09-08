@@ -2,7 +2,10 @@
 
 Closed WBS entries, moved out of `../wbs.md` on 2026-09-08 (M100.65) so the
 living ledger holds only living work. **Nothing here was edited on the way
-out** — each entry is byte-identical to the one that left.
+out** — each entry is byte-identical to the one that left. `m100.md` carries
+two later exceptions, recorded at its own top: a same-branch id collision with
+`origin/main` renumbered one entry (`M100.62` → `M100.66`), and `main`'s own
+`M100.62` merged in verbatim alongside it.
 
 These files are still policed. `check_docs.py`'s `_wbs_ledgers()` globs this
 directory, so a retired id cannot be reused and a live task may depend on one
@@ -16,7 +19,7 @@ a contract.
 | `m4.md` | router and Drift foundation, deck and card slices | 83 | 4,844 |
 | `m5.md` | study vertical slice — UC-05 | 28 | 1,556 |
 | `m99.md` | adhoc feature and hardening work | 96 | 7,023 |
-| `m100.md` | design-system reconciliation and screen consistency | 63 | 4,658 |
+| `m100.md` | design-system reconciliation and screen consistency | 65 | 4,869 |
 
 **Where to look for what.** A task id tells you the file: `M4.10ap` is in
 `m4.md`, `M99.62` in `m99.md`. To find every mention of a task across both the

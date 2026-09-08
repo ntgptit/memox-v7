@@ -7,7 +7,7 @@
 | **Scope** | Seed, 45 role của `ColorScheme`, cue chiều sâu theo mode, nguồn giá trị token, lịch sử các lần áp lại luật. Ngoài phạm vi: quyết định AD khác, layering của `lib/core/theme/` (`theme-architecture.md`) |
 | **Source of truth for** | Suy luận đầy đủ, số đo và các phương án từng cân nhắc của AD-14 (quyết định và đánh đổi vẫn được tuyên bố ở `../architecture.md`) |
 | **Depends on** | `../architecture.md` (AD-14) · `../document-conventions.md` |
-| **Updated by task** | M100.67 |
+| **Updated by task** | M100.65 |
 | **Last updated** | 2026-09-08 |
 
 ---

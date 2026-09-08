@@ -80,6 +80,10 @@ void main() {
       tester.element(find.byType(GuessQuestionSectionWidget)),
     ).extension<AppSemanticColors>()!.danger;
 
+    Color optionEdgeOf(WidgetTester tester) => Theme.of(
+      tester.element(find.byType(GuessQuestionSectionWidget)),
+    ).extension<AppSemanticColors>()!.borderOption;
+
     testWidgets('marks the right answer even when it was not chosen', (
       tester,
     ) async {
@@ -211,6 +215,15 @@ void main() {
       expect(_borderOf(tester, 'back-b').color, dangerOf(tester));
       expect(_borderOf(tester, 'back-a').width, AppStroke.control);
       expect(_borderOf(tester, 'back-c').width, AppStroke.hairline);
+
+      // **The row nobody touched keeps the brand edge, not the grey** (M100.62).
+      // Only the width was pinned here before, so the resting colour was the
+      // one thing about these five rows no test held — which is how the
+      // loudest resting line in the app sat on the busiest study screen
+      // through four palette moves. `border_ladder_test.dart` holds the
+      // measurement that licenses this token; this holds the row that spends
+      // it.
+      expect(_borderOf(tester, 'back-c').color, optionEdgeOf(tester));
     });
 
     testWidgets('the rows nobody picked stay readable', (tester) async {
