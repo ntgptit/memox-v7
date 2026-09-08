@@ -97,8 +97,8 @@ void main() {
     /// depth `AppElevation.card` paints — a soft shadow in light, a zero-blur
     /// `outlineVariant` rim in dark.
     ///
-    /// Measured on the render this was approved from: **1.31:1** light and
-    /// **1.41:1** dark for the row, **1.25:1** and **1.41:1** for the tile.
+    /// Measured on the committed goldens: **1.394:1** light and **1.298:1**
+    /// dark for the row, **1.408:1** and **1.298:1** for the tile.
     /// Take the depth away and both fall to the bare fill step — **1.09:1** —
     /// and no contrast test in this repo would notice, because every one of
     /// them measures a *token* and there would no longer be a token to measure.

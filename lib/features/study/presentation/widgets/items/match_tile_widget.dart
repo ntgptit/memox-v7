@@ -294,9 +294,9 @@ class _TileSkin {
       // now the *only* edge on the board rather than a heavier version of one
       // every tile already wore.
       //
-      // Measured on the render this was approved from: the resting tile reads
-      // **1.25:1** in light, on a shadow, and **1.41:1** in dark, on the
-      // zero-blur `outlineVariant` rim `AppElevation` paints there. That is the
+      // Measured on the committed golden: the resting tile reads **1.408:1**
+      // in light, on a shadow, and **1.298:1** in dark, on the zero-blur
+      // `outlineVariant` rim `AppElevation` paints there. That is the
       // same separation every `MxCard` in the app has had since M99.94 — this
       // tile is not being given a weaker treatment than the rest of the app, it
       // is finally being given the same one.

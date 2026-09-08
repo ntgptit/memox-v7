@@ -16986,10 +16986,13 @@ vào một comment.
 
 | | bỏ viền + depth | M100.62 | trước đó |
 |---|---:|---:|---:|
-| Guess light | 1.31:1 (shadow) | 3.27 | 4.05 |
-| Guess dark | **1.41:1** (rim) | 3.33 | 4.30 |
-| Match light | 1.25:1 (shadow) | 3.27 | 4.05 |
-| Match dark | **1.41:1** (rim) | 3.33 | 4.30 |
+| Guess light | 1.394:1 (shadow) | 3.27 | 4.05 |
+| Guess dark | **1.298:1** (rim) | 3.33 | 4.30 |
+| Match light | 1.408:1 (shadow) | 3.27 | 4.05 |
+| Match dark | **1.298:1** (rim) | 3.33 | 4.30 |
+
+Đo trên **golden đã commit**, không phải trên bản nháp được duyệt — hàng Guess dịch
+vị trí sau khi `rowBorder` rời khỏi helper, nên số của bản nháp không còn đúng.
 
 Đồng đều, và **đúng bằng** thứ mọi `MxCard` mang từ M99.94 — vì "thẻ không viền"
 trong app này chưa bao giờ thật sự không viền: `_darkDepth` vẫn vẽ một rim hairline

@@ -148,7 +148,7 @@ nền nào cả.
     dung, đúng miễn trừ mà `app_high_contrast_test.dart` phát biểu.
 
     Thứ tách nó bây giờ là depth: đo trên chính bản render được duyệt,
-    **1.25:1** ở light (shadow) và **1.41:1** ở dark (rim `outlineVariant`
+    **1.408:1** ở light (shadow) và **1.298:1** ở dark (rim `outlineVariant`
     blur 0 mà `AppElevation` vẽ) — đúng bằng mọi `MxCard` từ M99.94. Bỏ depth
     đi thì tụt về fill step trần **1.09:1**, nên `border_ladder_test.dart`
     ghim depth chứ không còn ghim token viền.

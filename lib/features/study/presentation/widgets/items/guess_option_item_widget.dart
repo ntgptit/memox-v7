@@ -92,10 +92,11 @@ class GuessOptionItemWidget extends StatelessWidget {
     // heavier versions of one that all five rows already wore — the verdict
     // stops competing with the frame around it.
     //
-    // Measured on the render this was approved from: a resting row reads
-    // **1.31:1** in light, on a shadow, and **1.41:1** in dark, on the
-    // zero-blur `outlineVariant` rim `AppElevation` paints there. That is the
-    // separation every `MxCard` in this app has had since M99.94.
+    // Measured on the committed golden, not on the draft it was approved from:
+    // a resting row reads **1.394:1** in light, on a shadow (`#D7DAE6`), and
+    // **1.298:1** in dark, on the zero-blur `outlineVariant` rim
+    // (`#272C48`) `AppElevation` paints there. That is the separation every
+    // `MxCard` in this app has had since M99.94.
     final Color? outline = accent?.resolve(context);
     final outlineWidth = accent == null ? 0.0 : AppStroke.control;
     // A row that is saying something says it with the edge; one at rest says it
