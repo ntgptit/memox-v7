@@ -16958,7 +16958,7 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 
 ### M100.61 · Bảy hero, hai cách nhấn — và một góc màn hình chưa ai đo
 
-- **Status:** in review (2026-09-08) — **bản thử, chưa merge theo yêu cầu chủ dự án**
+- **Status:** done (2026-09-08) — merged as `3fdd3d65` (#508). Shipped as a trial for aesthetic review first; the owner approved it on the before/after gallery and it was merged in the same session.
 - **Owner:** Claude
 - **Goal:** Audit toàn bộ hero panel theo brief 2026-09-08 (hiện đại, dễ nhìn,
   không màu mè, hợp app học tập), rồi thử sửa và dựng gallery để review.
@@ -17015,7 +17015,7 @@ không tự gọi tên mình.** `5 days` cần `CURRENT STREAK`; `Everyday Korea
         vì assertion đổi.
   - [x] Không token, `ColorScheme` role, shared API, hợp đồng đóng băng hay BR nào bị sửa.
   - [x] `flutter analyze` repo-wide sạch.
-  - [ ] Chủ dự án review gallery trước–sau rồi mới quyết merge hay bỏ.
+  - [x] Chủ dự án review gallery trước–sau rồi mới quyết merge hay bỏ.
 - **Dependencies:** BR-142, BR-150, BR-161, BR-162, BR-200; M100.35 (hợp đồng depth của card)
 - **Tests required:** host suite không golden; golden authoring trên Linux; gallery trước–sau.
 - **Checklist phases:** 7, 12, 14.
