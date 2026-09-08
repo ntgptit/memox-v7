@@ -109,7 +109,8 @@ cuối". Đúng với `eight_box` và là trùng hợp: với `sm2` nó chấm `
 - **Vì sao ánh xạ bằng `Map`.** `study_labels_widget.dart` đã dùng đúng cách này
   và vì đúng lý do: một `switch` thứ hai trên `StudyMode` là chỗ chính sách của
   một mode rò ra khỏi handler. `Map` đọc y hệt và giữ luật.
-- **Dependencies:** M5.4c, M5.5
+- **Dependencies:** M5.4 (lát c), M5.5
+- **Note:** Dependency M5.4c was a `####` slice rather than a `###` task; scanned WBS ledger edges to surface it.
 - **Tests required:** widget test 4 trạng thái × 2 thuật toán; test chuyển stage;
   test deck `sm2` không hiện màn chọn mode
 - **Checklist phases:** 14.4, 15.3
