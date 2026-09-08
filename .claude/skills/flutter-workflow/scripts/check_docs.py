@@ -176,8 +176,21 @@ def _defined_ids(kind: str) -> list[str]:
 
 
 def _ref_files() -> list[str]:
+    """Documents scanned for BR-/AD-/UC- citations.
+
+    **A part file must be scanned even though it carries no header.** It is
+    outside `_docs_md()` on purpose (§ `_contract_files`), but a citation
+    written inside it — including the id's own defining row, which is also a
+    citation of itself — is exactly as real as one written in the root
+    document. Leaving part files out of this function would let a dangling
+    reference written inside `docs/business-rules/study-mode.md` go
+    unchecked, and would silently drop every id whose only citation was its
+    own row, once that row moved.
+    """
     files = set(_docs_md())
     files.add("CLAUDE.md")
+    for kind in _CONTRACT_ROOT:
+        files.update(_contract_files(kind))
     skills = _REPO / ".claude" / "skills"
     if skills.is_dir():
         for p in skills.rglob("*.md"):
