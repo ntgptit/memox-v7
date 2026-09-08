@@ -20,6 +20,7 @@ Format và thứ tự đọc: [`document-conventions.md`](document-conventions.m
 | [`checklist.md`](checklist.md) | The canonical 22-phase development plan | **frozen for MVP** |
 | [`wbs.md`](wbs.md) | Live progress ledger — the source of truth for what is done | active |
 | [`wbs-study.md`](wbs-study.md) | The Study feature's remaining work, from M5.7 on — `wbs.md` keeps M5.0…M5.6, which are done | active |
+| [`wbs-archive/`](wbs-archive/) | entry WBS đã đóng, tách khỏi `wbs.md` ở M100.65. Vẫn nằm trong kiểm trùng ID và đồ thị dependency; xem `wbs-archive/README.md` | active |
 | [`product.md`](product.md) | Problem, users, platform/data/auth decisions, **and MVP scope** | **frozen for MVP** |
 | [`architecture.md`](architecture.md) | Architecture decisions AD-01…11 with reasoning | active |
 | [`use-cases.md`](use-cases.md) | UC-01…09 cho must-have MVP | **frozen for MVP** |
