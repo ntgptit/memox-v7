@@ -371,7 +371,7 @@ Expected: PASS, 6 tests.
 - [ ] **Step 7: Run the guard and expect it to go RED — this is the point**
 
 Run: `python .claude/skills/flutter-workflow/scripts/check_docs.py --quiet`
-Expected: **FAIL**, with six findings:
+Expected: **FAIL**, with three findings — one per heading written at `##`:
 
 ```
 task heading written at section level
@@ -382,8 +382,10 @@ task heading written at section level
   docs/wbs.md: ## M99.53 — Pixel comparison trở thành cổng của PR
 ```
 
-plus, once those become `###` in Task 3, the duplicate rule. If the guard
-passes here, the rule is not wired in — go back to Step 5.
+The duplicate rule stays quiet here on purpose: `_TASK_HEAD_RE` anchors on
+`### `, so the `##` copies are still outside it. The new rule is the only thing
+that can see them, which is why it had to exist before Task 3 could act. If the
+guard passes here, the rule is not wired in — go back to Step 5.
 
 - [ ] **Step 8: Commit the guard alone, red**
 
@@ -472,9 +474,16 @@ criteria it actually satisfied and tick them.
 - [ ] **Step 5: Run the guard to verify it now passes**
 
 Run: `python .claude/skills/flutter-workflow/scripts/check_docs.py --quiet`
-Expected: exit 0, and the summary line now reads
-`no duplicate WBS task IDs (312 tasks)` — up from 282, because the widened
-regex and the re-levelled headings both feed it.
+Expected: exit 0, and the summary line reads
+`no duplicate WBS task IDs (320 tasks)`.
+
+**The arithmetic, because a bare number proves nothing.** The guard counts
+*distinct ids across both ledgers*, not headings in one file. It read **297**
+before Task 2; Task 2's widened suffix bound added the 20 `M4.10aa`…`M4.10at`
+entries it could not match, taking it to **317**; your three promoted headings
+are three ids it has never seen, so it lands on **320**. If you get 317, the
+headings are still at `##`. If you get 318 or 319, one or two of them kept a
+number that already exists — which is the collision this task exists to end.
 
 - [ ] **Step 6: Commit**
 
@@ -1315,7 +1324,7 @@ like Phase 3.
 | `docs/wbs.md` | 19,856 lines | ~600 | ~600 |
 | `docs/reviews/` working set | 24,221 lines | depends on Step 1's classification | same |
 | `docs/architecture.md` | 1,821 lines | 1,821 | ~1,508 |
-| Task headings the guard sees | 282 / 312 | 312 / 312 | 312 / 312 |
+| Distinct task ids the guard sees | 297 | 320 | 320 |
 | Duplicate task IDs | 3, unreported | 0 | 0 |
 | BR/AD/UC ids resolving | 315 | 315 | 315 |
 | Nothing deleted | — | ✓ | ✓ |
