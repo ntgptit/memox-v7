@@ -42,6 +42,7 @@ còn `use-cases.md` thì không.
 |---|---|---|
 | [`wireframes/`](wireframes/) | Bố cục và hành vi UI chốt **trước** khi viết code một task | `draft` → `active` khi code land |
 | [`reviews/`](reviews/) | Report và checklist của một vòng review đã chạy | Đóng băng sau khi task đóng |
+| [`reviews/archive/`](reviews/archive/) | Audit mà finding đã thành code và không còn gì trong working tree trích dẫn — xem `reviews/archive/README.md` | Đóng băng, di chuyển ở M100.66 |
 
 `design-system/` là ngoại lệ trong hai thư mục con: nó gắn với **sản phẩm**, không
 với một task, nên nó có header bảy dòng như tài liệu cấp một và `check_docs.py`
