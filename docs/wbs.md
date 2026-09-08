@@ -7921,7 +7921,7 @@ phần còn lại thì không).
 
 - **Đổi số 2026-09-08.** Entry này từng mang số `M99.55` và được viết ở cấp
   `##`, nên guard không nhìn thấy nó: `M99.55` khi đó cũng là số của một task
-  khác (`MxDialogTone`, dòng 12560). Sáu task dùng chung ba số và
+  khác (`MxDialogTone`). Sáu task dùng chung ba số và
   `check_docs.py` vẫn in "no duplicate WBS task IDs" vì nó chỉ thấy một nửa.
   Bản `###` giữ số cũ vì đã nằm trong đồ thị dependency; bản này nhận số mới.
 - **Goal:** Trả lời phần §16/§19 mà cả bốn báo cáo deck review phải để trống
@@ -8041,7 +8041,7 @@ Giữ dạng "rút lại kèm lý do" thay vì xoá: cách chúng sai có ích: 
   màn ở bốn màn học, và affordance của long-press breadcrumb.
 - **Chưa đo:** overlay ở 360/scale 1,5/vi (15/17 mới chỉ 393 × 1,0); trạng thái
   loading/error của mọi form; breadcrumb sâu 10 cấp (BR-55).
-- **Dependencies:** M99.54
+- **Dependencies:** M100.63
 - **Checklist phases:** 12.2, 15.1, 15.3
 - **Tests:** `deck_text_fit_test.dart` (14), `plural_forms_test.dart` (2),
   `mx_breadcrumb_test.dart` (+5), `deck_summary_overdue_test.dart` (+3),
@@ -8074,10 +8074,12 @@ Giữ dạng "rút lại kèm lý do" thay vì xoá: cách chúng sai có ích: 
 
 - **Đổi số 2026-09-08.** Entry này từng mang số `M99.54` và được viết ở cấp
   `##`, nên guard không nhìn thấy nó: `M99.54` khi đó cũng là số của một task
-  khác (Checkbox đã tick bị co lại 4dp, dòng 12516). Sáu task dùng chung ba số
+  khác (Checkbox đã tick bị co lại 4dp). Sáu task dùng chung ba số
   và `check_docs.py` vẫn in "no duplicate WBS task IDs" vì nó chỉ thấy một
   nửa. Bản `###` giữ số cũ vì đã nằm trong đồ thị dependency; bản này nhận số
-  mới.
+  mới. `Checklist phases` (`7, 15.4`) không được nêu trong lời văn của entry —
+  suy ra theo tiền lệ các entry cùng loại (shared widget + golden) trong tài
+  liệu này, không phải trích từ chính entry.
 - **Status:** **done** — `MxButtonPair` đo bằng `RenderBox.getMaxIntrinsicWidth`
   thay vì hằng số phỏng đoán; `minButtonWidth`, `availableWidth` và
   `MxConfirmDialog.footerWidth` đã gỡ; 5 golden sinh lại và test dialog viết
@@ -8161,9 +8163,12 @@ Giữ dạng "rút lại kèm lý do" thay vì xoá: cách chúng sai có ích: 
 
 - **Đổi số 2026-09-08.** Entry này từng mang số `M99.53` và được viết ở cấp
   `##`, nên guard không nhìn thấy nó: `M99.53` khi đó cũng là số của một task
-  khác (`MxButtonPair`, dòng 12431). Sáu task dùng chung ba số và
+  khác (`MxButtonPair`). Sáu task dùng chung ba số và
   `check_docs.py` vẫn in "no duplicate WBS task IDs" vì nó chỉ thấy một nửa.
   Bản `###` giữ số cũ vì đã nằm trong đồ thị dependency; bản này nhận số mới.
+  `Checklist phases` (`15.4, 19`) không được nêu trong lời văn của entry —
+  suy ra theo tiền lệ các entry cùng loại (CI gate + golden) trong tài liệu
+  này, không phải trích từ chính entry.
 - **Status:** **done** — job `goldens (windows)` chạy trong `ci.yml`,
   `check_ci_gate.py` có nhánh tương ứng, bug thiếu khai báo `needs_goldens`
   trong `outputs:` đã sửa, và lần chạy đầu bắt được 4 golden lệch múi giờ,
