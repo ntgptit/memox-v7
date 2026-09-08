@@ -16956,6 +16956,79 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
 - **Checklist phases:** 14, 21.
 
+### M100.62 · Viền xám thôi là đường đậm nhất app vẽ — và trần cuối cùng có guard
+
+- **Status:** done (2026-09-08)
+- **Owner:** Claude
+- **Goal:** Đóng khiếu nại của chủ dự án — *"viền xám bị nổi lên rất mạnh, gây mất
+  thẩm mĩ cho toàn app"* — bằng phép đo, rồi ghim thứ tự mà app vẫn chỉ phát biểu
+  bằng prose.
+- **Nhánh / PR:** `claude/border-ladder-study-edges`
+- **Scope:** hai call-site trong `lib/features/study/.../items/` đổi token viền, một
+  file test hợp đồng mới, ba test hiện có cập nhật, 18 golden vẽ lại. **Không**
+  đụng giá trị token, `ColorScheme` role, component theme, chữ ký shared primitive,
+  hay bất kỳ hợp đồng đóng băng nào ở `v1-freeze.md` §2.
+- **Editable documents:** `docs/wbs.md`, `docs/wireframes/m5-study-modes.md`
+- **Output:** hai widget study đổi sang `borderOption`; `border_ladder_test.dart`;
+  18 golden vẽ lại trên Linux; footnote ở §4 của wireframe.
+
+**Chủ dự án nói card list và primary button đúng, phần còn lại thì không — và lý do
+là hai thứ đó không vẽ viền nào cả.** `MxCard` với edge `subtle` trả `null` từ
+M99.94, `FilledButton` không có `side`. Mọi thứ mắt bắt được là **một token**:
+`borderControl`, cũng chính là `scheme.outline`.
+
+Trên card ở light nó đo **4.05:1**, so với hairline của chính một thẻ là 1.24 —
+nhân với độ dày là **mười chín lần** lượng mực nhìn thấy. Census pixel trên golden
+đã commit nói nó nằm ở đâu: `study_match_light` **10 987** pixel mẫu,
+`guess_open_light` **9 000**, so với card list **2 700** và study home **916**.
+Khiếu nại chỉ đích danh study, và study đúng là chỗ đó.
+
+**Ba hướng được đo; hai hướng tự tan, và đó mới là phần đáng giá.**
+
+*Nâng chroma của xám vào họ chàm* bị chặn bởi một luật **đúng**:
+`app_palette_test.dart:134` cap light canvas ở raw chroma 0.06 và gọi đích danh
+`input`, vì một ô nhập trống **là** canvas và bôi accent lên tất cả chúng là đúng
+vấn đề mật độ M99.98 vừa gỡ khỏi Library. Token đang ở 0.0588. Chủ dự án chốt:
+không retire luật đó.
+
+*Tách token theo nền* hoá ra **chính là** thay đổi này khi đo. `borderOption` đạt
+3:1 trên `surfaceContainerLow` — **3.27** sáng, **3.33** tối — và **không đạt trên
+bất kỳ nền control nào khác**: page 2.99, `surfaceContainer` 2.92,
+`surfaceContainerHigh` 2.74. Nên không có "xám thứ hai" để phát minh: nút outlined
+và ô nhập giữ `borderControl` vì chúng ngồi trên nền mà viền thương hiệu trượt, còn
+hàng Guess và ô Match chuyển vì chúng ngồi trên đúng nền mà nó không trượt.
+
+**WCAG 1.4.11 đòi 3:1. Nó không đòi màu xám.** Phân biệt đó là toàn bộ giấy phép,
+và nó là lập luận M100.2 cuối cùng cũng tới được hai component nó vốn nói về: một
+option là một thẻ trong chồng thẻ, và hai thứ này đang mượn đồ đạc của canvas.
+
+**Guard là cái trần mà `control_border_grounds_test.dart` chưa từng có.** File đó
+giữ một **sàn**, và docstring của chính `borderControlLight` đã ghi thứ một sàn
+không thấy được: *"A contrast test only ever asks whether a value is dark enough,
+so nothing objected."* Không gì phản đối thật — token trôi **3.24 → 4.81** giữa
+M100.22 và M100.48 với mọi test xanh, rồi M100.48 hạ tay và **không thêm guard
+nào**. `border_ladder_test.dart` giữ thứ tự app phát biểu bằng prose, cộng **tiền
+đề** mà ngoại lệ study dựa lên: cả hai widget phải còn vẽ trên `surfaceContainerLow`,
+không thì giấy phép vô hiệu.
+
+- **Acceptance criteria:**
+  - [x] Cả ba phép kiểm của guard mới **fault-inject đỏ**: đổi token của một trong
+        hai widget, dời nền của một trong hai, và cho xám trôi lên trên viền
+        selected — mỗi ca đỏ kèm thông điệp gọi tên con số.
+  - [x] `borderOption` đạt ≥3:1 trên nền thật của cả hai widget, hai mode.
+  - [x] Nút outlined, ô nhập, search field **không đổi** — chúng ngồi trên nền viền
+        thương hiệu trượt WCAG.
+  - [x] Đúng **18** golden đổi; mọi màn khác render byte-identical.
+  - [x] Census sau khi vẽ lại: xám 9 000 → 0 và 10 987 → 0, thương hiệu nhận đúng
+        từng ấy pixel — cùng hình học, không phải đổi layout trá hình.
+  - [x] Không hợp đồng đóng băng nào bị sửa; không test nào đang canh hợp đồng bị nới.
+  - [x] `flutter analyze` sạch toàn repo; guard 84 rule 0 vi phạm; `check_docs.py` xanh.
+- **Dependencies:** M100.2, M100.48
+- **Tests required:** `border_ladder_test.dart`, `match_tile_widget_test.dart`,
+  `match_board_feedback_test.dart`, `guess_answered_widget_test.dart`,
+  `control_border_grounds_test.dart`, `app_palette_test.dart`, `goldens (linux)`.
+- **Checklist phases:** 6, 12, 14
+
 ### M100.61 · Bảy hero, hai cách nhấn — và một góc màn hình chưa ai đo
 
 - **Status:** in review (2026-09-08) — **bản thử, chưa merge theo yêu cầu chủ dự án**
