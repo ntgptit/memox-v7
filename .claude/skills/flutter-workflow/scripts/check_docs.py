@@ -139,15 +139,39 @@ _DEF_RE = {
     for prefix in ("BR", "AD", "UC")
 }
 
+_CONTRACT_ROOT = {"BR": BR_FILE, "AD": AD_FILE, "UC": UC_FILE}
 
-def _defined_ids(path: str, prefix: str) -> list[str]:
+
+def _contract_files(kind: str) -> list[str]:
+    """The root contract document plus its part files.
+
+    Same shape as `_wbs_ledgers`, same reason: a definition set that lives in
+    more than one file is only checkable when the guard sees all of it. The
+    part directory takes the root's stem — `docs/business-rules/` beside
+    `docs/business-rules.md` — so the pairing needs no table.
+
+    Part files land inside `_docs_md()` only if they sit directly under
+    `docs/`; these sit one level down, so they inherit no header contract. The
+    root keeps the header, and it keeps `Source of truth for`.
+    """
+    root = _CONTRACT_ROOT[kind]
+    files = [root]
+    part_dir = _REPO / root[: -len(".md")]
+    if part_dir.is_dir():
+        files.extend(
+            sorted(p.relative_to(_REPO).as_posix() for p in part_dir.glob("*.md"))
+        )
+    return [f for f in files if (_REPO / f).is_file()]
+
+
+def _defined_ids(kind: str) -> list[str]:
     """Table rows `| BR-07` and headings `### BR-15 ·`, in document order."""
-    pat = _DEF_RE[prefix]
+    pat = _DEF_RE[kind]
     ids: list[str] = []
-    for line in _lines(path):
-        m = pat.match(line)
-        if m:
-            ids.append(m.group(2))
+    for path in _contract_files(kind):
+        for line in _lines(path):
+            if (m := pat.match(line)):
+                ids.append(m.group(2))
     return ids
 
 
@@ -169,9 +193,9 @@ _CITE_RE = re.compile(r"\b(?:BR|AD|UC)-[0-9]+")
 def _check_document_integrity() -> None:
     _head("A. Document integrity")
 
-    br_defined = _defined_ids(BR_FILE, "BR")
-    ad_defined = _defined_ids(AD_FILE, "AD")
-    uc_defined = _defined_ids(UC_FILE, "UC")
+    br_defined = _defined_ids("BR")
+    ad_defined = _defined_ids("AD")
+    uc_defined = _defined_ids("UC")
 
     # duplicates
     before = _problems
@@ -783,12 +807,13 @@ _BR_ROW_RE = re.compile(r"^\| BR-[0-9]+ \|")
 
 def _check_br_rows() -> None:
     bad: list[str] = []
-    for i, line in enumerate(_lines(BR_FILE), start=1):
-        if _BR_ROW_RE.match(line):
-            nf = len(line.split("|"))
-            if nf < 7:
-                col_id = line.split("|")[1].strip()
-                bad.append(f"{BR_FILE}:{i}: {col_id} has {nf - 2} columns, needs 5")
+    for path in _contract_files("BR"):
+        for i, line in enumerate(_lines(path), start=1):
+            if _BR_ROW_RE.match(line):
+                nf = len(line.split("|"))
+                if nf < 7:
+                    col_id = line.split("|")[1].strip()
+                    bad.append(f"{path}:{i}: {col_id} has {nf - 2} columns, needs 5")
     if bad:
         for b in bad:
             _fail(
@@ -803,26 +828,27 @@ _SEC_BR_RE = re.compile(r"^### (BR-[0-9]+) ")
 
 
 def _check_section_br() -> None:
-    bad: list[str] = []
-    cur = ""
-    found = False
-    for line in _lines(BR_FILE):
-        m = _SEC_BR_RE.match(line)
-        if m:
-            cur = m.group(1)
-            found = False
-            continue
-        if cur and "**Status:**" in line and "**Enforced by:**" in line:
-            found = True
-        if cur and (line.startswith("### ") or line.startswith("## ")):
-            if not found:
-                bad.append(cur)
-            cur = ""
-    if cur and not found:
-        bad.append(cur)
+    bad: list[tuple[str, str]] = []
+    for path in _contract_files("BR"):
+        cur = ""
+        found = False
+        for line in _lines(path):
+            m = _SEC_BR_RE.match(line)
+            if m:
+                cur = m.group(1)
+                found = False
+                continue
+            if cur and "**Status:**" in line and "**Enforced by:**" in line:
+                found = True
+            if cur and (line.startswith("### ") or line.startswith("## ")):
+                if not found:
+                    bad.append((cur, path))
+                cur = ""
+        if cur and not found:
+            bad.append((cur, path))
     if bad:
-        for s in bad:
-            _fail("section-form BR missing Status / Enforced by", f"{s} in {BR_FILE}  (§6.2)")
+        for s, path in bad:
+            _fail("section-form BR missing Status / Enforced by", f"{s} in {path}  (§6.2)")
     else:
         _ok("every section-form BR declares Status and Enforced by")
 
@@ -843,28 +869,29 @@ _UC_PARTS = (
 
 def _check_uc_sections() -> None:
     bad: list[str] = []
-    cur = ""
-    seen: set[str] = set()
+    for path in _contract_files("UC"):
+        cur = ""
+        seen: set[str] = set()
 
-    def finish() -> None:
-        if not cur:
-            return
-        miss = [p for p in _UC_PARTS if p not in seen]
-        if miss:
-            bad.append(f"{cur}: {', '.join(miss)}")
+        def finish() -> None:
+            if not cur:
+                return
+            miss = [p for p in _UC_PARTS if p not in seen]
+            if miss:
+                bad.append(f"{cur}: {', '.join(miss)}")
 
-    for line in _lines(UC_FILE):
-        m = _UC_RE.match(line)
-        if m:
-            finish()
-            cur = m.group(1)
-            seen = set()
-            continue
-        if cur:
-            for part in _UC_PARTS:
-                if f"**{part}" in line:
-                    seen.add(part)
-    finish()
+        for line in _lines(path):
+            m = _UC_RE.match(line)
+            if m:
+                finish()
+                cur = m.group(1)
+                seen = set()
+                continue
+            if cur:
+                for part in _UC_PARTS:
+                    if f"**{part}" in line:
+                        seen.add(part)
+        finish()
     if bad:
         for u in bad:
             _fail("UC missing required section", f"{u}  (§6.3)")
@@ -877,38 +904,39 @@ _AD_RE = re.compile(r"^## (AD-[0-9]+) ")
 
 def _check_ad_sections() -> None:
     bad: list[str] = []
-    cur = ""
-    s = a = d = False
+    for path in _contract_files("AD"):
+        cur = ""
+        s = a = d = False
 
-    def finish() -> None:
-        if not cur:
-            return
-        miss = ""
-        if not s:
-            miss += "Status "
-        if not a:
-            miss += "Affected-documents "
-        if not d:
-            miss += "Decision "
-        if miss:
-            bad.append(f"{cur}: missing {miss}")
+        def finish() -> None:
+            if not cur:
+                return
+            miss = ""
+            if not s:
+                miss += "Status "
+            if not a:
+                miss += "Affected-documents "
+            if not d:
+                miss += "Decision "
+            if miss:
+                bad.append(f"{cur}: missing {miss}")
 
-    for line in _lines(AD_FILE):
-        m = _AD_RE.match(line)
-        if m:
-            finish()
-            cur = m.group(1)
-            s = a = d = False
-            continue
-        if not cur:
-            continue
-        if line.startswith("| **Status**"):
-            s = True
-        if line.startswith("| **Affected documents**"):
-            a = True
-        if "**Quyết định" in line or "**Decision" in line:
-            d = True
-    finish()
+        for line in _lines(path):
+            m = _AD_RE.match(line)
+            if m:
+                finish()
+                cur = m.group(1)
+                s = a = d = False
+                continue
+            if not cur:
+                continue
+            if line.startswith("| **Status**"):
+                s = True
+            if line.startswith("| **Affected documents**"):
+                a = True
+            if "**Quyết định" in line or "**Decision" in line:
+                d = True
+        finish()
     if bad:
         for x in bad:
             _fail("AD missing required field", f"{x}  (§6.1)")

@@ -153,5 +153,29 @@ class DependencyGraphSpansAllLedgersTest(unittest.TestCase):
             self.assertIn("docs/wbs-archive/x.md", output)
 
 
+class ContractFileSetTest(unittest.TestCase):
+    """A split contract is still one definition set."""
+
+    def test_the_root_file_is_always_in_the_set(self) -> None:
+        self.assertIn("docs/business-rules.md", check_docs._contract_files("BR"))
+
+    def test_a_part_file_joins_without_a_code_change(self) -> None:
+        import tempfile, pathlib
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            (root / "docs" / "business-rules").mkdir(parents=True)
+            (root / "docs" / "business-rules.md").write_text("# x", encoding="utf-8")
+            (root / "docs" / "business-rules" / "deck.md").write_text(
+                "| BR-01 | active |", encoding="utf-8"
+            )
+            original = check_docs._REPO
+            try:
+                check_docs._REPO = root
+                files = check_docs._contract_files("BR")
+                self.assertIn("docs/business-rules/deck.md", files)
+            finally:
+                check_docs._REPO = original
+
+
 if __name__ == "__main__":
     unittest.main()
