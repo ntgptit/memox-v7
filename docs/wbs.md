@@ -7917,8 +7917,27 @@ phần còn lại thì không).
 
 ---
 
-## M99.55 — Deck review: đo những khung gallery chưa từng chụp, rồi sửa cái đo được
+### M100.62 · Deck review: đo những khung gallery chưa từng chụp, rồi sửa cái đo được
 
+- **Đổi số 2026-09-08.** Entry này từng mang số `M99.55` và được viết ở cấp
+  `##`, nên guard không nhìn thấy nó: `M99.55` khi đó cũng là số của một task
+  khác (`MxDialogTone`, dòng 12560). Sáu task dùng chung ba số và
+  `check_docs.py` vẫn in "no duplicate WBS task IDs" vì nó chỉ thấy một nửa.
+  Bản `###` giữ số cũ vì đã nằm trong đồ thị dependency; bản này nhận số mới.
+- **Goal:** Trả lời phần §16/§19 mà cả bốn báo cáo deck review phải để trống
+  (`➖`) — đo deck ở những frame chưa từng được dựng (bề rộng, text scale,
+  ngôn ngữ, theme khác bản chấm 29 màn), rồi sửa những gãy chữ mà phép đo
+  tìm ra.
+- **Scope:** `deck_stress_probe.dart` dựng ma trận 25 frame (360/393/412 ×
+  scale 1,0/1,3/1,5 × en/vi × light/dark, cộng 0/1/50 deck và tên dài thật);
+  đo và sửa sáu lỗi cắt chữ tìm được (bảng "Cái đo được, và cái đã sửa");
+  chụp lần đầu 17 bề mặt overlay của deck; thêm gate `deck_text_fit_test.dart`
+  và `plural_forms_test.dart`. Không mở rộng sang feature khác ngoài deck.
+- **Output:** `deck_stress_probe.dart` (mới); sáu sửa lỗi cắt chữ qua
+  #349–#359; `deck_text_fit_test.dart`, `plural_forms_test.dart`,
+  `mx_breadcrumb_test.dart`, `deck_summary_overdue_test.dart`,
+  `localization_test.dart`, `app_typography_test.dart`,
+  `deck_overlays_demo_test.dart`, `deck_starter_demo_test.dart`.
 - **Vì sao phải đo lại chứ không đọc lại.** Code deck không đổi dòng nào giữa
   `ea80d3f7` (bản chấm 29 màn) và `cd4f3eb2`. Chạy lại probe cũ trên frame cũ chỉ
   in ra số cũ. Thứ chưa ai biết nằm ở **các frame chưa từng được dựng**: gallery
@@ -7932,7 +7951,7 @@ phần còn lại thì không).
   token nào cũng hợp lệ, và golden khớp đúng cái ngày nó bị vẽ sai. Một dấu `…`
   trông như một lựa chọn thiết kế.
 
-### Cái đo được, và cái đã sửa
+#### Cái đo được, và cái đã sửa
 
 | | Đọc ra | Điều kiện | PR |
 |---|---|---|---|
@@ -7947,7 +7966,7 @@ phần còn lại thì không).
   chụp, chỉ đổi ngôn ngữ. Cả 29 golden đều là bản tiếng Anh, nên trục ngôn ngữ
   chưa từng xuất hiện trong bất kỳ vòng chấm nào — kể cả C1.
 
-### Một lỗi, ba lần, ba PR liên tiếp
+#### Một lỗi, ba lần, ba PR liên tiếp
 
 `Flexible` trong `Row` chia không gian **theo flex, không theo nhu cầu**: hai cái
 cùng flex thì mỗi cái lấy nửa dòng, kể cả khi tổng nhu cầu vừa khít.
@@ -7963,7 +7982,7 @@ hạn, numeral `12` đủ rộng để vượt ngưỡng và xếp dọc. Một 
 cắt. Fixture quyết định lỗi có xuất hiện hay không — nên gate phải render một ma
 trận, không phải một khung được chọn sẵn.
 
-### 17 bề mặt overlay lần đầu có ảnh
+#### 17 bề mặt overlay lần đầu có ảnh
 
 - Bản chấm 29 màn xét **4** bề mặt deck, và cả bốn là cùng một màn. Mọi sheet,
   menu, form, dialog — kể cả hai hành động phá huỷ và ô nhập tự do duy nhất —
@@ -7979,7 +7998,7 @@ trận, không phải một khung được chọn sẵn.
   tiết thì là. Probe **không thể** phân biệt — đó là câu hỏi về ý định — nên nó
   tách `tapTargetsUnder48Nested` và để người đọc trả lời.
 
-### Ba finding của bản chấm là sai, đã đính chính tại chỗ
+#### Ba finding của bản chấm là sai, đã đính chính tại chỗ
 
 - **S4** ghi "nhãn filter pill bị cắt" — thực ra là bậc đầu breadcrumb.
   `deckPathRootLabel` và `deckFilterAllLabel` **cùng giá trị**, nên phép đo
@@ -7994,7 +8013,7 @@ Giữ dạng "rút lại kèm lý do" thay vì xoá: cách chúng sai có ích: 
 đúng theo sách vẫn sai khi thứ nó mô tả không phải control, hoặc khi lý do đã
 được đo mà bức ảnh không kể.
 
-### Gate, và vì sao nó đến sau cùng
+#### Gate, và vì sao nó đến sau cùng
 
 - `deck_text_fit_test.dart` render ma trận thật và fail trên bất kỳ paragraph nào
   bị cắt. **Đặt sau các fix là có chủ ý**: gate đỏ ngay ngày đầu là gate bị mute.
@@ -8005,7 +8024,7 @@ Giữ dạng "rút lại kèm lý do" thay vì xoá: cách chúng sai có ích: 
   ngay một chuỗi danh sách tay của tôi bỏ sót: `reminderNotificationBodyManyDecks`
   đã có plural cho `others` nên bị lọc nhầm, và sẽ ship `1 cards are due…`.
 
-### Golden lệch múi giờ — CI xanh, local đỏ
+#### Golden lệch múi giờ — CI xanh, local đỏ
 
 - Ba golden `card_detail` vẽ trên CI (UTC) và sai đúng chín giờ trên máy KST.
   `cardHistoryTimestamp` render `toLocal()` đúng theo AD-06; fixture mới là chỗ
@@ -8028,10 +8047,56 @@ Giữ dạng "rút lại kèm lý do" thay vì xoá: cách chúng sai có ích: 
   `mx_breadcrumb_test.dart` (+5), `deck_summary_overdue_test.dart` (+3),
   `localization_test.dart` (+3), `app_typography_test.dart` (+2),
   `deck_overlays_demo_test.dart` (16 golden), `deck_starter_demo_test.dart` (2)
+- **Acceptance criteria:**
+  - [x] 25 frame (360/393/412 × scale 1,0/1,3/1,5 × en/vi × light/dark) được
+        dựng và đo bằng `deck_stress_probe.dart`.
+  - [x] Sáu lỗi cắt chữ đo được đều có PR sửa: hero BR-162 (#350, #358),
+        breadcrumb (#351), câu xác nhận xoá (#351), tiêu đề scheduler lặp
+        (#349), 21 chuỗi thiếu số nhiều (#354), starter in mã locale thô
+        (#356).
+  - [x] 17 bề mặt overlay của deck có ảnh và số đo lần đầu — 0 tap target
+        dưới 48, 0 spacing lệch scale.
+  - [x] `deck_text_fit_test.dart` gate render toàn bộ ma trận và fail trên
+        bất kỳ paragraph nào bị cắt ngoài hai ngoại lệ có chủ đích.
+  - [x] Ba finding sai của bản chấm 29 màn (S4, O6, O7) được đính chính tại
+        chỗ, không bị xoá khỏi hồ sơ.
+  - [x] Golden lệch múi giờ `card_detail` được xác định nguyên nhân (KST vs
+        UTC) và fixture đổi sang instant local.
+- **Editable documents:** `docs/wbs.md`
+- **Tests required:** `deck_text_fit_test.dart` (14), `plural_forms_test.dart`
+  (2), `mx_breadcrumb_test.dart` (+5), `deck_summary_overdue_test.dart` (+3),
+  `localization_test.dart` (+3), `app_typography_test.dart` (+2),
+  `deck_overlays_demo_test.dart` (16 golden), `deck_starter_demo_test.dart` (2)
 
 ---
 
-## M99.54 — `MxButtonPair` hỏi hai nút thay vì đoán
+### M100.63 · `MxButtonPair` hỏi hai nút thay vì đoán
+
+- **Đổi số 2026-09-08.** Entry này từng mang số `M99.54` và được viết ở cấp
+  `##`, nên guard không nhìn thấy nó: `M99.54` khi đó cũng là số của một task
+  khác (Checkbox đã tick bị co lại 4dp, dòng 12516). Sáu task dùng chung ba số
+  và `check_docs.py` vẫn in "no duplicate WBS task IDs" vì nó chỉ thấy một
+  nửa. Bản `###` giữ số cũ vì đã nằm trong đồ thị dependency; bản này nhận số
+  mới.
+- **Status:** **done** — `MxButtonPair` đo bằng `RenderBox.getMaxIntrinsicWidth`
+  thay vì hằng số phỏng đoán; `minButtonWidth`, `availableWidth` và
+  `MxConfirmDialog.footerWidth` đã gỡ; 5 golden sinh lại và test dialog viết
+  lại thành hai ca đối nhau.
+- **Goal:** Bỏ hai lần đoán bề rộng và ngưỡng xếp nhãn của `MxButtonPair`
+  (#337 rồi #348) — thứ khiến dialog vẽ một hàng không có chỗ hoặc xếp chồng
+  lãng phí không gian — bằng cách để hai nút tự trả lời qua `RenderBox` thay
+  vì giữ hằng số.
+- **Scope:** Chuyển `MxButtonPair` thành `MultiChildRenderObjectWidget` với
+  `_RenderPairLayout` đo bằng `getMaxIntrinsicWidth`; gỡ `minButtonWidth`,
+  `availableWidth`, `MxConfirmDialog.footerWidth`; khai `_RenderPairLayout`
+  vào `_privateAndTransparent` của `render_classification.dart`; viết lại
+  test dialog. Không đụng token, không đổi hành vi của
+  `card_bulk_delete_dialog` (nhãn thật sự không vừa).
+- **Output:** `MxButtonPair` chuyển thành `MultiChildRenderObjectWidget` +
+  `_RenderPairLayout`; gỡ `minButtonWidth`, `availableWidth`,
+  `MxConfirmDialog.footerWidth`; khai `_RenderPairLayout` vào
+  `_privateAndTransparent` của `render_classification.dart`; 5 golden
+  (`tag_delete_confirm`, `mx_confirm_dialog` × 4).
 
 - **Hai lần đoán, hai hướng sai.** #337 đọc `MediaQuery.width − 32` — đúng cho
   page column, sheet, empty state; **thừa 96px** trong dialog, nên mọi dialog vẽ
@@ -8071,8 +8136,53 @@ Giữ dạng "rút lại kèm lý do" thay vì xoá: cách chúng sai có ích: 
 - Test dialog viết lại thành hai ca đối nhau: nhãn vừa thì **phải** là hàng,
   nhãn không vừa thì **phải** xếp chồng; cả hai vẫn qua `expectNoWrappedLabel`
   và `expectOneSize`.
+- **Acceptance criteria:**
+  - [x] `Delete tag`/`Cancel` (243,4 cần, footer 265) và `Xoá nhãn`/`Huỷ`
+        (232,8 cần) vẽ một hàng thay vì xếp chồng.
+  - [x] `Move to Trash`/`Cancel` (298,6 cần) và `Chuyển vào Trash`/`Huỷ`
+        (351,6 cần) vẫn xếp chồng đúng — nhãn thật sự không vừa.
+  - [x] `minButtonWidth`, `availableWidth`, `MxConfirmDialog.footerWidth` gỡ
+        khỏi code — không còn hằng số phỏng đoán nào cho cặp nút.
+  - [x] `_RenderPairLayout` khai vào `_privateAndTransparent` của
+        `render_classification.dart`; visual audit không báo `1 unresolved`.
+  - [x] 5 golden sinh lại (`tag_delete_confirm`, `mx_confirm_dialog` × 4);
+        `card_bulk_delete_dialog` không đổi.
+  - [x] Test dialog viết lại thành hai ca đối nhau (nhãn vừa → hàng, nhãn
+        không vừa → xếp chồng), qua `expectNoWrappedLabel` và
+        `expectOneSize`.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** none — entry không nêu số task nào khác.
+- **Tests required:** Test dialog viết lại thành hai ca đối nhau (nhãn vừa →
+  một hàng, nhãn không vừa → xếp chồng) qua `expectNoWrappedLabel` và
+  `expectOneSize`; 5 golden (`tag_delete_confirm`, `mx_confirm_dialog` × 4).
+- **Checklist phases:** 7, 15.4
 
-## M99.53 — Pixel comparison trở thành cổng của PR
+### M100.64 · Pixel comparison trở thành cổng của PR
+
+- **Đổi số 2026-09-08.** Entry này từng mang số `M99.53` và được viết ở cấp
+  `##`, nên guard không nhìn thấy nó: `M99.53` khi đó cũng là số của một task
+  khác (`MxButtonPair`, dòng 12431). Sáu task dùng chung ba số và
+  `check_docs.py` vẫn in "no duplicate WBS task IDs" vì nó chỉ thấy một nửa.
+  Bản `###` giữ số cũ vì đã nằm trong đồ thị dependency; bản này nhận số mới.
+- **Status:** **done** — job `goldens (windows)` chạy trong `ci.yml`,
+  `check_ci_gate.py` có nhánh tương ứng, bug thiếu khai báo `needs_goldens`
+  trong `outputs:` đã sửa, và lần chạy đầu bắt được 4 golden lệch múi giờ,
+  đã sửa bằng `TZ=UTC`.
+- **Goal:** Bịt lỗ hổng `docs/wbs-study.md` §1549 đã ghi nhận nhưng chưa sửa:
+  `goldens (windows)` tồn tại từ đầu nhưng chưa từng chạy tự động, nên #337
+  đổi bố cục sáu component, để lại 26 golden cũ trên `main` mà mọi check
+  khác vẫn xanh.
+- **Scope:** Thêm output `needs_goldens` vào `build_verification_plan.py`,
+  job `goldens (windows)` vào `ci.yml`, nhánh tương ứng trong
+  `check_ci_gate.py`; điều kiện chọn là `code_required` hoặc đường dẫn chứa
+  `/goldens/`/bắt đầu bằng `test/demo/`; không always-on vì runner Windows
+  tính gấp đôi phút.
+- **Output:** `build_verification_plan.py` (`needs_goldens`), `ci.yml` (job
+  `goldens (windows)`, `TZ: UTC`), `check_ci_gate.py`, `test_ci_tooling.py`
+  (4 test mới), `PlanOutputsAreWiredIntoTheWorkflowTest`; 4 golden vẽ lại
+  dưới `TZ=UTC` (`card_detail_light`, `card_detail_dark`,
+  `card_detail_state_grid_vi_x2`, `tag_filter_sheet_light`); dòng `TZ=UTC`
+  thêm vào lệnh regenerate trong `CLAUDE.md`.
 
 - **Lỗ hổng đã được ghi nhận từ trước mà chưa bịt.** `docs/wbs-study.md` §1549
   đã viết: các job "chờ `ci-full.yml`, vốn chạy thủ công". Job
@@ -8122,6 +8232,26 @@ Giữ dạng "rút lại kèm lý do" thay vì xoá: cách chúng sai có ích: 
   ra phải vừa được khai báo ở `classify.outputs` vừa được truyền cho gate. Đọc
   `ci.yml` bằng quét text chứ không dùng PyYAML, vì job chạy test này không cài
   dependency Python nào. Đã kiểm nó **đỏ** khi gỡ dòng khai báo. Tổng 44 → 52.
+- **Acceptance criteria:**
+  - [x] Job `goldens (windows)` chạy tự động trong `ci.yml`, không còn chờ
+        `ci-full.yml` thủ công.
+  - [x] `check_ci_gate.py` đỏ cả khi job cần mà bị skip lẫn khi job chạy mà
+        không được chọn.
+  - [x] 4 test mới trong `test_ci_tooling.py` dựng theo hình dạng thật của
+        #337, #340, một PR đổi demo test, một PR docs-only.
+  - [x] Bug thiếu khai báo `needs_goldens` trong `outputs:` của job
+        `classify` được `check_ci_gate.py` bắt (từ chối parse chuỗi rỗng) và
+        đã sửa.
+  - [x] Lần chạy đầu của job mới bắt đúng 4 golden lệch múi giờ (KST vs UTC);
+        nguyên nhân xác định qua ảnh diff và tái hiện bằng `TZ=UTC` cục bộ.
+  - [x] `PlanOutputsAreWiredIntoTheWorkflowTest` thêm và xác nhận đỏ khi gỡ
+        dòng khai báo `needs_goldens`; tổng test 44 → 52.
+- **Editable documents:** `docs/wbs.md`
+- **Dependencies:** none — entry không nêu số task nào khác.
+- **Tests required:** `test_ci_tooling.py` (+4),
+  `PlanOutputsAreWiredIntoTheWorkflowTest` (mới); 4 golden vẽ lại dưới
+  `TZ=UTC`.
+- **Checklist phases:** 15.4, 19
 
 ## M99 · Adhoc
 
