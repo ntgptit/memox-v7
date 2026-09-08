@@ -67,5 +67,33 @@ class HeadingLevelTest(unittest.TestCase):
         )
 
 
+class LedgerSetTest(unittest.TestCase):
+    """Every file that can define a task id is in the duplicate scan."""
+
+    def test_the_live_ledgers_are_in_the_set(self) -> None:
+        ledgers = check_docs._wbs_ledgers()
+        self.assertIn("docs/wbs.md", ledgers)
+        self.assertIn("docs/wbs-study.md", ledgers)
+
+    def test_an_archive_file_joins_without_a_code_change(self) -> None:
+        # A glob rather than a list, because the alternative is what already
+        # happened: `wbs-study.md` was added by name and became the only
+        # companion the guard would ever know about.
+        import tempfile, pathlib
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            (root / "docs" / "wbs-archive").mkdir(parents=True)
+            (root / "docs" / "wbs.md").write_text("# x", encoding="utf-8")
+            (root / "docs" / "wbs-archive" / "m4.md").write_text(
+                "### M4.1 · x", encoding="utf-8"
+            )
+            original = check_docs._REPO
+            try:
+                check_docs._REPO = root
+                self.assertIn("docs/wbs-archive/m4.md", check_docs._wbs_ledgers())
+            finally:
+                check_docs._REPO = original
+
+
 if __name__ == "__main__":
     unittest.main()

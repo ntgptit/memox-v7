@@ -102,6 +102,35 @@ STUDY_WBS_FILE = "docs/wbs-study.md"
 README_FILE = "docs/README.md"
 DM_FILE = "docs/data-model.md"
 
+WBS_ARCHIVE_DIR = "docs/wbs-archive"
+
+
+def _wbs_ledgers() -> list[str]:
+    """Every file that can define a WBS task id.
+
+    **The duplicate rule and the dependency graph are only true over the whole
+    set.** An id retired into the archive is still spent — reusing it names two
+    pieces of work — and a live task may legitimately depend on one that closed.
+    Both facts stop being checkable the moment a ledger file is outside this
+    list.
+
+    A glob, not another named constant. `STUDY_WBS_FILE` was added by name when
+    the Study feature took its own ledger, and it has been the only companion
+    the guard knows about ever since; the next archive file must not need a
+    code change to be seen.
+
+    The archive lives outside `_docs_md()`'s three globs on purpose: a retired
+    entry is not a contract document and should not have to carry the 7-field
+    header or claim a source of truth.
+    """
+    paths = [WBS_FILE, STUDY_WBS_FILE]
+    archive = _REPO / WBS_ARCHIVE_DIR
+    if archive.is_dir():
+        paths.extend(
+            sorted(p.relative_to(_REPO).as_posix() for p in archive.glob("*.md"))
+        )
+    return [p for p in paths if (_REPO / p).is_file()]
+
 
 # --- A. Document integrity ------------------------------------------------
 
@@ -234,7 +263,7 @@ def _check_wbs_tasks() -> None:
     task_ids = _wbs_task_ids()
 
     before_level = _problems
-    for path in (WBS_FILE, STUDY_WBS_FILE):
+    for path in _wbs_ledgers():
         for heading in _wrong_level_task_headings(_lines(path)):
             _fail(
                 "task heading written at section level",
@@ -265,7 +294,7 @@ def _check_wbs_tasks() -> None:
     # you looking while "here are the two lines" does not.
     before = _problems
     seen: dict[str, list[str]] = {}
-    for path in (WBS_FILE, STUDY_WBS_FILE):
+    for path in _wbs_ledgers():
         try:
             lines = _lines(path)
         except OSError:
@@ -293,9 +322,10 @@ def _check_wbs_tasks() -> None:
     # own `### M5.x` sections in `docs/wbs-study.md`, so a task here that
     # genuinely waits on one of them had no way to say so: naming it failed the
     # check, and moving it into prose hid a real edge from the graph.
-    task_set = set(task_ids) | {
+    task_set = {
         m.group(1)
-        for line in _lines(STUDY_WBS_FILE)
+        for path in _wbs_ledgers()
+        for line in _lines(path)
         if (m := _TASK_HEAD_RE.match(line))
     }
     edges: list[tuple[str, str]] = []
@@ -316,8 +346,8 @@ def _check_wbs_tasks() -> None:
         if dep not in task_set:
             _fail(
                 "WBS dependency points at a task that does not exist",
-                f"{task} depends on {dep}, defined in neither {WBS_FILE} nor "
-                f"{STUDY_WBS_FILE}",
+                f"{task} depends on {dep}, defined in none of the WBS ledgers "
+                f"({', '.join(_wbs_ledgers())})",
             )
     if _problems == before:
         _ok(f"every WBS dependency resolves to a defined task ({len(edges)} edges)")
