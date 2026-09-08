@@ -103,11 +103,25 @@ class DeckLevelSummaryWidget extends StatelessWidget {
 
   /// The card itself, once the width question above has been answered.
   Widget _panel(BuildContext context, bool isCramped) {
-    // The accent recipe: indigo hairline, and a step further off the page
-    // (owner review, 2026-08-20). On the default border the panel did not
-    // separate from the background at all — a card that carries the screen's
-    // one answer has to look like a surface, not like a region of the page.
-    return MxCard.accent(
+    // **The page's own card, and the emphasis is in the content** (owner
+    // brief, 2026-09-08: modern, legible, not colourful, for a study app).
+    //
+    // It was `MxCard.accent` — an indigo edge plus a step of extra
+    // elevation — carrying the 2026-08-20 finding that the panel "did not
+    // separate from the background at all". That reading was taken against a
+    // *borderless* card; the recipe has had `AppElevation.card` since, so the
+    // separation the accent was bought for is already paid for. What the edge
+    // added on top was rank, and in dark it is the loudest line on the screen:
+    // the only outlined card above six hairlined ones.
+    //
+    // Five of the app's seven hero-tier panels — both Progress panels, the
+    // card-detail summary, the import outcome, the session summary — already
+    // rest on this recipe and rank themselves by type: an eyebrow, a numeral,
+    // a supporting line. This panel outranks its neighbours by a 34px numeral
+    // and the screen's only filled button, which is more emphasis than a
+    // 1px edge was ever supplying, and it now costs the page no second
+    // surface vocabulary. See `docs/reviews/hero-panel-audit.md` §H2.
+    return MxCard.raised(
       // **The card's own padding is zero and the content carries it**, so the
       // disclosure can take the corner. Its 48px target then spans the padding
       // plus the figure line rather than forcing that line to be 48 tall — see

@@ -82,7 +82,10 @@ void main() {
         find
             .descendant(
               of: resume,
-              matching: find.text(english.studyHomeResumeTitle),
+              // Uppercased at paint: the eyebrow is `MxSectionLabel` now,
+              // whose accessible name stays the written sentence while the
+              // glyphs are caps (D18).
+              matching: find.text(english.studyHomeResumeTitle.toUpperCase()),
             )
             .first,
       );
