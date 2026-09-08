@@ -20,6 +20,7 @@ Format và thứ tự đọc: [`document-conventions.md`](document-conventions.m
 | [`checklist.md`](checklist.md) | The canonical 22-phase development plan | **frozen for MVP** |
 | [`wbs.md`](wbs.md) | Live progress ledger — the source of truth for what is done | active |
 | [`wbs-study.md`](wbs-study.md) | The Study feature's remaining work, from M5.7 on — `wbs.md` keeps M5.0…M5.6, which are done | active |
+| [`wbs-archive/`](wbs-archive/) | entry WBS đã đóng, tách khỏi `wbs.md` ở M100.65. Vẫn nằm trong kiểm trùng ID và đồ thị dependency; xem `wbs-archive/README.md` | active |
 | [`product.md`](product.md) | Problem, users, platform/data/auth decisions, **and MVP scope** | **frozen for MVP** |
 | [`architecture.md`](architecture.md) | Architecture decisions AD-01…11 with reasoning | active |
 | [`use-cases.md`](use-cases.md) | UC-01…09 cho must-have MVP | **frozen for MVP** |
@@ -41,6 +42,7 @@ còn `use-cases.md` thì không.
 |---|---|---|
 | [`wireframes/`](wireframes/) | Bố cục và hành vi UI chốt **trước** khi viết code một task | `draft` → `active` khi code land |
 | [`reviews/`](reviews/) | Report và checklist của một vòng review đã chạy | Đóng băng sau khi task đóng |
+| [`reviews/archive/`](reviews/archive/) | Audit mà finding đã thành code và không còn gì trong working tree trích dẫn — xem `reviews/archive/README.md` | Đóng băng, di chuyển ở M100.65 |
 
 `design-system/` là ngoại lệ trong hai thư mục con: nó gắn với **sản phẩm**, không
 với một task, nên nó có header bảy dòng như tài liệu cấp một và `check_docs.py`
