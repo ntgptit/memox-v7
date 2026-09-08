@@ -188,12 +188,22 @@ void main() {
       });
     }
 
-    testWidgets('idle is a hairline in the option border', (tester) async {
+    testWidgets('idle draws no edge, and depth separates it instead', (
+      tester,
+    ) async {
       await pumpTile(tester, text: term, isTerm: true);
 
-      final semantic = semanticOf(tester);
-      expect(skinOf(tester).border!.top.color, semantic.borderOption);
-      expect(skinOf(tester).border!.top.width, AppStroke.hairline);
+      // **Null, not a transparent line** (M100.63). The distinction is the
+      // point: a transparent border still occupies the channel a state needs,
+      // and `BoxDecoration.border` is what the three marked states paint into.
+      expect(skinOf(tester).border, isNull);
+      expect(
+        skinOf(tester).boxShadow,
+        isNotEmpty,
+        reason:
+            'a resting tile with neither an edge nor a shadow has only its '
+            'fill, which is 1.09:1 from the board',
+      );
       expect(
         textOf(tester, term).style?.color,
         Theme.of(

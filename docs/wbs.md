@@ -16956,6 +16956,80 @@ flutter test integration_test/it_offline_test.dart  -d emulator-5554 --flavor de
 - **Tests required:** golden comparison trên CI Linux (bằng chứng cuối nằm ở CI).
 - **Checklist phases:** 14, 21.
 
+### M100.63 · Hai bề mặt study thôi vẽ viền — độ sâu thay chỗ
+
+- **Status:** done (2026-09-09)
+- **Owner:** Claude
+- **Goal:** Bỏ hẳn viền lúc nghỉ của hàng Guess và ô Match, cho depth của thẻ thay
+  chỗ — chủ dự án chốt sau khi so ba phương án trên golden đã render.
+- **Nhánh / PR:** `claude/borderless-study-surfaces`
+- **Scope:** hai widget dưới `lib/features/study/.../items/`, ba test hiện có, một
+  nhóm của `border_ladder_test.dart`, footnote §4 của wireframe, 18 golden vẽ lại.
+  **Không** đụng giá trị token, `ColorScheme` role, component theme, chữ ký shared
+  primitive, hay hợp đồng đóng băng nào ở `v1-freeze.md` §2.
+- **Editable documents:** `docs/wbs.md`, `docs/wireframes/m5-study-modes.md`
+- **Output:** hàng Guess và ô Match lúc nghỉ vẽ `border: null` + `AppElevation.card`;
+  nhóm "giấy phép" của guard đổi thành nhóm ghim **tiền đề depth**.
+
+**Hai vòng trước tranh luận sai câu hỏi.** M100.62 hạ viền xám 4.05:1 xuống viền
+thương hiệu 3.27:1; vòng trước nữa hạ chính con số xám. Cả hai đều hỏi *vẽ đường
+nào*, trong khi câu hỏi bên dưới là: một hàng đáp án lúc nghỉ có phải **control**
+nợ WCAG 1.4.11 một ranh giới 3:1, hay là **thẻ** được nhận diện bằng nội dung.
+
+Chủ dự án chốt vế thứ hai, sau khi nhìn bản render thật của cả ba phương án. Đây là
+quyết định của chủ dự án về phân loại component, không phải một lần chỉnh token —
+và nó **lật quyết định M99.70** (`mx_card.dart`: *"an option is a control, and a
+control's edge says so before it is picked"*), nên nó được ghi ở đây thay vì trôi
+vào một comment.
+
+**Phép đo, trên chính bản render được duyệt:**
+
+| | bỏ viền + depth | M100.62 | trước đó |
+|---|---:|---:|---:|
+| Guess light | 1.31:1 (shadow) | 3.27 | 4.05 |
+| Guess dark | **1.41:1** (rim) | 3.33 | 4.30 |
+| Match light | 1.25:1 (shadow) | 3.27 | 4.05 |
+| Match dark | **1.41:1** (rim) | 3.33 | 4.30 |
+
+Đồng đều, và **đúng bằng** thứ mọi `MxCard` mang từ M99.94 — vì "thẻ không viền"
+trong app này chưa bao giờ thật sự không viền: `_darkDepth` vẫn vẽ một rim hairline
+màu `outlineVariant`, và light thì có shadow. Hai bề mặt này không bị cho chế độ
+yếu hơn phần còn lại của app; chúng vừa được cho **cùng một chế độ**.
+
+**Một phép đo của chính tôi đã sai và phải ghi lại.** Vòng khảo sát báo Match dark
+chỉ đạt **1.09:1** và cần xử lý riêng. Sai: mẫu lấy cách mép 5px trong khi rim rộng
+1dp (3px), nên nó đo trượt qua rim xuống thẳng page. Profile sát mép cho `#272C48`
+đầy đủ, **1.41:1**. Không ca nào cần xử riêng.
+
+**Cái này mua được ba trạng thái còn lại.** `selected`, `paired`, `wrong` nay là
+**những đường duy nhất trên màn**, thay vì bản đậm hơn của một đường mà cả năm hàng
+hay mười ô đều đã đeo.
+
+**Guard đổi nghĩa chứ không bị xoá.** Nửa **trần** của `border_ladder_test.dart`
+(một viền nghỉ phải nhẹ hơn viền được chọn) vẫn đúng và vẫn giữ nguyên — nó bắt cơ
+chế trôi mà M100.48 để hở. Nửa **giấy phép** ghim token viền thì hết đối tượng, nên
+được thay bằng nhóm ghim **tiền đề mới**: cả hai file phải còn `AppElevation.card`
+**và** còn `shadowsFor(` vẽ nó ra. Gỡ depth đi là tụt về fill step trần 1.09:1, và
+**không test contrast nào trong repo bắt được** — vì tất cả chúng đo một *token*, mà
+lúc đó không còn token nào để đo.
+
+- **Acceptance criteria:**
+  - [x] Cả hai bề mặt vẽ `border: null` lúc nghỉ — **null, không phải đường trong
+        suốt**: một đường trong suốt vẫn chiếm đúng kênh mà trạng thái cần vẽ vào.
+  - [x] Ba trạng thái có màu giữ nguyên viền ở `AppStroke.control`, và **không**
+        mang depth — một sự kiện không đi trên hai kênh.
+  - [x] Guard mới fault-inject đỏ: gỡ `shadowsFor` khỏi một file thì đỏ kèm thông
+        điệp gọi tên file.
+  - [x] Test đổi sang khẳng định `border == null` + `boxShadow` không rỗng, thay vì
+        so màu — một hàng giữ viền trong suốt sẽ qua được phép so màu.
+  - [x] Đúng 18 golden đổi; mọi màn khác render byte-identical.
+  - [x] `flutter analyze` sạch toàn repo; guard 84 rule 0 vi phạm; `check_docs.py` xanh.
+- **Dependencies:** M100.62
+- **Tests required:** `border_ladder_test.dart`, `match_tile_widget_test.dart`,
+  `match_board_feedback_test.dart`, `guess_answered_widget_test.dart`,
+  `goldens (linux)`.
+- **Checklist phases:** 6, 12, 14
+
 ### M100.62 · Viền xám thôi là đường đậm nhất app vẽ — và trần cuối cùng có guard
 
 - **Status:** done (2026-09-08)

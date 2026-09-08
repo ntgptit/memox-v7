@@ -7,7 +7,7 @@
 | **Scope** | Khung phiên học, năm màn `browse` · `match` · `guess` · `recall` · `fill`, và sheet chọn chiều hỏi của `self_assess` (§9). Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), luồng (`use-cases.md`), giá trị token (`design_system/tokens/`) |
 | **Source of truth for** | Bố cục màn học · phán quyết cho tám điểm design lệch với BR · bố cục sheet chọn chiều và thẻ khi chiều bị đảo |
 | **Depends on** | `document-conventions.md`, `business-rules.md` (BR-108…BR-154), `wbs-study.md` (M5.7…M5.20) |
-| **Updated by task** | M100.62 — §4: viền ô match lúc chưa chọn đổi `borderControl` → `borderOption`, giấy phép là phép đo trên nền `surfaceContainerLow` (footnote ở §4) · M99.27 — §9: sheet chọn chiều hỏi (ba dòng chung mép, glyph chứ không chỉ màu, chạm chỉ chọn, sheet cuộn được) và thẻ khi chiều bị đảo (nhãn đi theo nội dung, ba phép đo ghim bằng `getRect`) · `fill` làm lại vùng đáp án lần hai — thẻ dưới **là** input surface, bỏ ô viền lồng trong thẻ, đề đổi sang `back` và chấm bằng `front_folded` (BR-134), phán quyết mặc lên viền thẻ, hàng CTA giữ đủ hai chỗ (§6, §8.10) · `recall` tách lật khỏi chấm — lật mở tự đánh giá, hết giờ ghi sai rồi chờ `Next` (§6.1, §8.12) · `guess` bỏ nền phán quyết — đúng/sai chỉ còn viền + chữ + icon, ba hàng còn lại lùi về 0.7 thay vì 0.36, reset theo lượt thay vì `cardId`, ngân sách đọc 800/1800ms (§5, §8.9, §8.12) · Rà soát UI 5 stage — `match` nhận cả hai chiều chọn và giữ trạng thái đủ lâu để đọc (§4, §8.8), chuyển feedback sang viền + chữ thay vì nền đặc (§4), đổi meaning sang trái, hạ thang chữ và nâng sàn hàng lên 112 (§4, §8.6), `guess` bỏ huy hiệu A–E (§5), `fill` làm lại vùng đáp án (§6), `browse` cân bằng hai mặt và đổi nhãn (§3) |
+| **Updated by task** | M100.63 — §4: ô match lúc chưa chọn **thôi vẽ viền**, depth `AppElevation.card` thay chỗ (footnote ở §4) · M100.62 — §4: viền đó đổi `borderControl` → `borderOption` · M99.27 — §9: sheet chọn chiều hỏi (ba dòng chung mép, glyph chứ không chỉ màu, chạm chỉ chọn, sheet cuộn được) và thẻ khi chiều bị đảo (nhãn đi theo nội dung, ba phép đo ghim bằng `getRect`) · `fill` làm lại vùng đáp án lần hai — thẻ dưới **là** input surface, bỏ ô viền lồng trong thẻ, đề đổi sang `back` và chấm bằng `front_folded` (BR-134), phán quyết mặc lên viền thẻ, hàng CTA giữ đủ hai chỗ (§6, §8.10) · `recall` tách lật khỏi chấm — lật mở tự đánh giá, hết giờ ghi sai rồi chờ `Next` (§6.1, §8.12) · `guess` bỏ nền phán quyết — đúng/sai chỉ còn viền + chữ + icon, ba hàng còn lại lùi về 0.7 thay vì 0.36, reset theo lượt thay vì `cardId`, ngân sách đọc 800/1800ms (§5, §8.9, §8.12) · Rà soát UI 5 stage — `match` nhận cả hai chiều chọn và giữ trạng thái đủ lâu để đọc (§4, §8.8), chuyển feedback sang viền + chữ thay vì nền đặc (§4), đổi meaning sang trái, hạ thang chữ và nâng sàn hàng lên 112 (§4, §8.6), `guess` bỏ huy hiệu A–E (§5), `fill` làm lại vùng đáp án (§6), `browse` cân bằng hai mặt và đổi nhãn (§3) |
 | **Last updated** | 2026-09-08 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham chiếu bằng ID.
@@ -132,22 +132,30 @@ nền nào cả.
 
 | Trạng thái | Nền | Viền | Độ dày | Chữ / icon |
 |---|---|---|---|---|
-| chưa chọn | `surfaceContainerLowest` | `borderOption` [^m10062] | `AppStroke.hairline` | `onSurface` |
+| chưa chọn | `surfaceContainerLowest` | **không vẽ** [^m10062] | — (`AppElevation.card`) | `onSurface` |
 | đang chọn (vế trước) | *không đổi* | `primaryAccent` | `AppStroke.input` | `primaryAccent` |
 | vừa ghép đúng | *không đổi* | `success` | `AppStroke.input` | `success` + ✓ — giữ **500ms** rồi tan (§8.8) |
 | vừa ghép sai | *không đổi* | `danger` | `AppStroke.input` | `danger` + ✕ — giữ **700ms** rồi về idle (§8.8) |
 | đã xong | **không vẽ** | viền cleared mờ | `AppStroke.hairline` | nội dung tan (§8.8) |
 
-[^m10062]: `borderControl` cho tới M100.62. Viền xám đo được **4.05:1** trên
-    nền của ô, so với hairline của một thẻ là 1.24 — gấp mười chín lần lượng
-    mực nhìn thấy, và bàn mười ô là 10 987 pixel mẫu của nó trên
-    `study_match_light`, gấp bốn lần card list. WCAG 1.4.11 đòi **3:1**, không
-    đòi màu xám: `borderOption` cho **3.27:1** sáng / **3.33:1** tối trên đúng
-    nền đó, nên ô vẫn tự nhận diện. Giấy phép này hẹp — `borderOption` **trượt**
-    3:1 trên page (2.99), `surfaceContainer` (2.92) và `surfaceContainerHigh`
-    (2.74) — nên nó chỉ áp cho ô match và hàng Guess, hai thứ vẽ trên
-    `surfaceContainerLow`. `border_ladder_test.dart` giữ cả phép đo lẫn tiền đề
-    về nền.
+[^m10062]: Ô lúc chưa chọn **thôi vẽ viền** ở M100.63, sau khi chủ dự án so ba
+    phương án trên golden đã render và chọn phương án này. Trước đó nó mang
+    `borderControl` (tới M100.62) rồi `borderOption` (M100.62).
+
+    Hai vòng đó tranh luận *vẽ đường nào*, trong khi câu hỏi bên dưới là ô lúc
+    nghỉ có phải một **control** nợ WCAG 1.4.11 một ranh giới 3:1 hay không.
+    Câu trả lời đã chốt là **không** — nó là một thẻ được nhận diện bằng nội
+    dung, đúng miễn trừ mà `app_high_contrast_test.dart` phát biểu.
+
+    Thứ tách nó bây giờ là depth: đo trên chính bản render được duyệt,
+    **1.25:1** ở light (shadow) và **1.41:1** ở dark (rim `outlineVariant`
+    blur 0 mà `AppElevation` vẽ) — đúng bằng mọi `MxCard` từ M99.94. Bỏ depth
+    đi thì tụt về fill step trần **1.09:1**, nên `border_ladder_test.dart`
+    ghim depth chứ không còn ghim token viền.
+
+    Cái này mua được ba trạng thái còn lại: `selected`, `paired`, `wrong` nay
+    là **những đường duy nhất trên bàn**, thay vì bản đậm hơn của một đường mà
+    cả mười ô đều đã đeo.
 
 **Tô kín ô là thứ làm bàn rối.** Mỗi lượt chạm **hai** ô, nên một trạng thái đặc
 tự nhân đôi diện tích của nó; trên bàn mười slot đó là một phần năm màn hình đổi

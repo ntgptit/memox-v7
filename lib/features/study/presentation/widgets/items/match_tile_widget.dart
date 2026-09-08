@@ -4,6 +4,7 @@ import '../../../../../core/theme/foundations/app_sizing.dart';
 import '../../../../../shared/widgets/mx_pressable.dart';
 import '../../../../../core/theme/extensions/app_ink.dart';
 import '../../../../../core/theme/foundations/app_durations.dart';
+import '../../../../../core/theme/foundations/app_elevation.dart';
 import '../../../../../core/theme/foundations/app_motion_policy.dart';
 import '../../../../../core/theme/foundations/app_radius.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
@@ -131,7 +132,10 @@ class MatchTileWidget extends StatelessWidget {
         decoration: BoxDecoration(
           color: skin.background,
           borderRadius: radius,
-          border: Border.all(color: skin.outline, width: skin.outlineWidth),
+          border: skin.outline == null
+              ? null
+              : Border.all(color: skin.outline!, width: skin.outlineWidth),
+          boxShadow: shadowsFor(skin.elevation, context.colors),
         ),
         // A cleared tile is finished, not merely busy: BR-116 has already
         // recorded it and a second tap could only record it twice. A tile
@@ -212,6 +216,7 @@ class _TileSkin {
     required this.background,
     required this.outline,
     required this.outlineWidth,
+    required this.elevation,
     required this.foreground,
     required this.mark,
   });
@@ -239,6 +244,7 @@ class _TileSkin {
       // here*, and a board where half the tiles wore it would leave the focus
       // indicator nothing of its own to say.
       outlineWidth: AppStroke.control,
+      elevation: AppElevation.none,
       foreground: ink,
       mark: mark,
     );
@@ -271,27 +277,34 @@ class _TileSkin {
           page,
         ),
         outlineWidth: AppStroke.hairline,
+        // A hole has nothing above the board to cast one.
+        elevation: AppElevation.none,
         foreground: AppInk.stated,
         mark: null,
       ),
+      // **No edge at rest, and the board's depth carries it instead** (M100.63,
+      // owner decision on a rendered comparison of all three treatments).
+      //
+      // The tile spent two rounds arguing about *which* line to draw — grey at
+      // 4.05:1, then the brand edge at 3.27 — while the question underneath was
+      // whether a resting tile is a control that owes 1.4.11 a 3:1 boundary, or
+      // a card identified by its content. It is the second. Ten tiles on a
+      // board are ten surfaces holding words, and the states that matter
+      // — selected, paired, wrong — still say so with a coloured edge that is
+      // now the *only* edge on the board rather than a heavier version of one
+      // every tile already wore.
+      //
+      // Measured on the render this was approved from: the resting tile reads
+      // **1.25:1** in light, on a shadow, and **1.41:1** in dark, on the
+      // zero-blur `outlineVariant` rim `AppElevation` paints there. That is the
+      // same separation every `MxCard` in the app has had since M99.94 — this
+      // tile is not being given a weaker treatment than the rest of the app, it
+      // is finally being given the same one.
       MatchTileState.idle => _TileSkin(
         background: ground,
-        // A tile is the control here, and its fill is 1.03:1 from the dark page
-        // — the outline is the whole grid (WCAG 1.4.11).
-        //
-        // **`borderOption` since M100.62.** 1.4.11 asks 3:1 and the brand edge
-        // gives **3.27:1** light / **3.33:1** dark on `ground`
-        // (`surfaceContainerLow`), so the grid stays identified. What changed
-        // is which of two qualifying tokens draws it: the grey measured
-        // **4.05:1**, and a board of ten tiles at that weight was the heaviest
-        // resting ink on any screen in the app — 10 987 sampled pixels on
-        // `study_match_light`, four times what the card list draws.
-        //
-        // Same reasoning as `guess_option_item_widget`, and the same narrow
-        // licence: `borderOption` clears 3:1 on `surfaceContainerLow` and on
-        // no other control ground, which is where this tile is drawn.
-        outline: semantic.borderOption,
-        outlineWidth: AppStroke.hairline,
+        outline: null,
+        outlineWidth: 0,
+        elevation: AppElevation.card,
         foreground: AppInk.stated,
         mark: null,
       ),
@@ -302,12 +315,22 @@ class _TileSkin {
   /// paints the same surface — a state is an edge and an ink, not a fill.
   final Color? background;
 
-  final Color outline;
+  /// **Null means no edge at all**, which is what a resting tile wants since
+  /// M100.63 — not a transparent line, because a transparent line is still a
+  /// line somebody has to notice is transparent.
+  final Color? outline;
 
   /// How heavy that edge is. The only geometry a state is allowed to change,
   /// and it changes it by half a pixel — enough to read as deliberate, small
   /// enough that nothing beside the tile moves.
   final double outlineWidth;
+
+  /// What separates a resting tile from the board once its edge is gone.
+  ///
+  /// The three marked states set this to [AppElevation.none]: they are saying
+  /// something with an edge, and a drop underneath a coloured edge is two
+  /// channels carrying one fact.
+  final double elevation;
 
   final AppInk foreground;
   final IconData? mark;

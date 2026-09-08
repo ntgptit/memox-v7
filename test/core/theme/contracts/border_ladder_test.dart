@@ -7,8 +7,8 @@ import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 
 import '../../../support/color_math.dart';
 
-/// The order the app's edges stand in, and the licence that lets a study
-/// surface wear the brand one.
+/// The order the app's edges stand in, and what holds up the two surfaces that
+/// stopped drawing one.
 ///
 /// **This file is the ceiling `control_border_grounds_test.dart` never had.**
 /// That file holds a *floor*: every ground a control edge is drawn on must
@@ -29,9 +29,6 @@ import '../../../support/color_math.dart';
 /// prose, in the same file: *"A resting edge must be quieter than a selected
 /// one."* Prose is not enforcement.
 void main() {
-  /// WCAG 1.4.11 — what a component boundary owes its ground.
-  const double graphic = 3.0;
-
   final themes = <String, ThemeData>{
     'light': buildLightTheme(),
     'dark': buildDarkTheme(),
@@ -87,77 +84,83 @@ void main() {
     }
   });
 
-  group('the licence a study surface spends', () {
-    /// Two widgets draw `borderOption` as a **control** boundary rather than as
-    /// a card's decoration: the Guess answer row and the Match tile. Both are
-    /// drawn on `surfaceContainerLow`, and that is not a detail — it is the
-    /// whole permission.
+  group('what separates a study surface that draws no edge', () {
+    /// Two widgets draw **no border at all** at rest since M100.63 — the Guess
+    /// answer row and the Match tile — after the owner compared all three
+    /// treatments on a rendered golden and chose this one.
     ///
-    /// `borderOption` clears 3:1 on `surfaceContainerLow` and **on no other
-    /// control ground**: at M100.62 it measured 2.99 on the page, 2.92 on
-    /// `surfaceContainer` and 2.74 on `surfaceContainerHigh`. So the outlined
-    /// button and the text field keep `borderControl`, and the two study
-    /// surfaces are an exception with a measurement under it rather than a
-    /// preference.
+    /// That decision moved them from "a control that owes 1.4.11 a 3:1
+    /// boundary" to "a card identified by its content", which is the exemption
+    /// `app_high_contrast_test.dart` states from the other side. The exemption
+    /// is legitimate and it is also the whole risk: with the edge gone, the
+    /// **only** thing separating either surface from what is behind it is the
+    /// depth `AppElevation.card` paints — a soft shadow in light, a zero-blur
+    /// `outlineVariant` rim in dark.
     ///
-    /// If a palette move drops this pairing under the floor, those two widgets
-    /// stop identifying themselves and nothing else in the suite would notice:
-    /// `control_border_grounds_test.dart` measures the *other* token.
-    for (final entry in themes.entries) {
-      test('${entry.key} · the brand edge identifies a control on a card', () {
-        final semantic = semanticOf(entry.value);
-        final ground = entry.value.colorScheme.surfaceContainerLow;
-        final measured = contrast(semantic.borderOption, ground);
+    /// Measured on the render this was approved from: **1.31:1** light and
+    /// **1.41:1** dark for the row, **1.25:1** and **1.41:1** for the tile.
+    /// Take the depth away and both fall to the bare fill step — **1.09:1** —
+    /// and no contrast test in this repo would notice, because every one of
+    /// them measures a *token* and there would no longer be a token to measure.
+    ///
+    /// So this replaces the licence check M100.62 put here. That one pinned
+    /// which token the edge used; there is no edge now, and the thing worth
+    /// pinning is that the replacement mechanism is still present.
+    const sources = <String>[
+      'lib/features/study/presentation/widgets/items/'
+          'guess_option_item_widget.dart',
+      'lib/features/study/presentation/widgets/items/match_tile_widget.dart',
+    ];
 
-        expect(
-          measured,
-          greaterThanOrEqualTo(graphic),
-          reason:
-              '${entry.key}: borderOption reads '
-              '${measured.toStringAsFixed(2)}:1 on surfaceContainerLow, under '
-              'the 3:1 WCAG 1.4.11 asks of a component boundary. The Guess row '
-              'and the Match tile draw it as their only boundary, so this is '
-              'the number that licenses them to use it instead of '
-              'borderControl.',
-        );
-      });
-    }
-
-    test('both surfaces are still drawn on the ground that licensed them', () {
-      // Pins the premise rather than the colour, the way
-      // `control_border_grounds_test.dart` pins that its three grounds are
-      // three. Moving either widget onto the page keeps every contrast test
-      // green while voiding the exception above, because the assertion would
-      // then be measuring a ground nothing draws.
-      const sources = <String>[
-        'lib/features/study/presentation/widgets/items/'
-            'guess_option_item_widget.dart',
-        'lib/features/study/presentation/widgets/items/match_tile_widget.dart',
-      ];
-
+    test('both still carry the depth that replaced their edge', () {
       for (final path in sources) {
         final source = File(path).readAsStringSync();
 
         expect(
-          source.contains('scheme.surfaceContainerLow'),
+          source.contains('AppElevation.card'),
           isTrue,
           reason:
-              '$path no longer names surfaceContainerLow as its ground. That '
-              'is the only ground on which borderOption clears 3:1, so the '
-              'exception this widget spends is void and its edge has to go '
-              'back to borderControl — or the ground has to be re-measured.',
+              '$path no longer asks for AppElevation.card. Since M100.63 it '
+              'draws no resting edge, so that depth is the only thing between '
+              'its surface and the board: without it the separation is the '
+              'bare fill step, 1.09:1.',
         );
 
         expect(
-          source.contains('semantic.borderOption'),
+          source.contains('shadowsFor('),
           isTrue,
           reason:
-              '$path stopped drawing borderOption. If that is deliberate, '
-              'delete its entry here; if it is a revert to borderControl, the '
-              'grey resting edge measured 4.05:1 on this ground and was the '
-              'loudest resting line in the app (M100.62).',
+              '$path names an elevation but never paints it. An elevation that '
+              'reaches no BoxDecoration is a number, not a depth cue.',
         );
       }
     });
+
+    test(
+      'the fill alone is not enough, which is why the depth is load-bearing',
+      () {
+        // Pins the premise rather than the prose. If a palette move ever makes a
+        // study surface step far enough off its ground to stand on its own, this
+        // failing is the signal to re-derive the decision above rather than to
+        // keep asserting a mechanism nothing needs.
+        for (final entry in themes.entries) {
+          final theme = entry.value;
+          final measured = contrast(
+            theme.colorScheme.surfaceContainerLow,
+            theme.scaffoldBackgroundColor,
+          );
+
+          expect(
+            measured,
+            lessThan(1.5),
+            reason:
+                '${entry.key}: surfaceContainerLow now reads '
+                '${measured.toStringAsFixed(2)}:1 against the page on its own. '
+                'The borderless study surfaces were argued on the basis that it '
+                'does not, so that argument needs re-reading.',
+          );
+        }
+      },
+    );
   });
 }
