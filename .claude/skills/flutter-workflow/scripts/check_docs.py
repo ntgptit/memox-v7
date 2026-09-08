@@ -197,8 +197,33 @@ def _check_document_integrity() -> None:
     _check_banned_coalesce()
 
 
-_TASK_HEAD_RE = re.compile(r"^### ([TM][0-9]+(?:\.[0-9]+)?[a-z]?) ")
-_TASK_TOKEN_RE = re.compile(r"^[TM][0-9]+(?:\.[0-9]+)?[a-z]?$")
+# **Two letters, because the ledger ran out of one.** `M4.10a`…`M4.10z` filled
+# up during the deck redesign and the next twenty-one entries became
+# `M4.10aa`…`M4.10at` — legal ids that this regex could not match, so twenty-one
+# tasks sat outside the duplicate check and outside the dependency graph while
+# the check reported success over the rest. The bound stays finite: `[a-z]*`
+# would match a prose heading that happens to open with an M and a number.
+_TASK_HEAD_RE = re.compile(r"^### ([TM][0-9]+(?:\.[0-9]+)?[a-z]{0,2}) ")
+_TASK_TOKEN_RE = re.compile(r"^[TM][0-9]+(?:\.[0-9]+)?[a-z]{0,2}$")
+
+# A task id carries a dot (`M99.55`); a milestone section does not (`M99`).
+# That is the whole difference, and it is enough to tell a task written at the
+# wrong level from a section header that has been legal since M0.
+_WRONG_LEVEL_RE = re.compile(r"^## [TM][0-9]+\.[0-9]+[a-z]{0,2} ")
+
+
+def _wrong_level_task_headings(lines: tuple[str, ...] | list[str]) -> list[str]:
+    """Task headings written at `##`, where the task rules cannot reach them.
+
+    **This is not a style rule.** `_TASK_HEAD_RE` anchors on `### `, so a task
+    written one level up is invisible to the duplicate-id check, to the
+    dependency graph, and to the 9-field template check — all three at once.
+    Three entries in `docs/wbs.md` were written that way and each collided with
+    a real `###` task: `M99.53`, `M99.54` and `M99.55` named six different
+    pieces of work between them, and the guard printed "no duplicate WBS task
+    IDs" over the top of it.
+    """
+    return [line.rstrip() for line in lines if _WRONG_LEVEL_RE.match(line)]
 
 
 def _wbs_task_ids() -> list[str]:
@@ -207,6 +232,19 @@ def _wbs_task_ids() -> list[str]:
 
 def _check_wbs_tasks() -> None:
     task_ids = _wbs_task_ids()
+
+    before_level = _problems
+    for path in (WBS_FILE, STUDY_WBS_FILE):
+        for heading in _wrong_level_task_headings(_lines(path)):
+            _fail(
+                "task heading written at section level",
+                f"{path}: {heading[:72]}\n      "
+                "a dotted task id belongs at '### '; at '##' it is invisible "
+                "to the duplicate check, the dependency graph and the template "
+                "check",
+            )
+    if _problems == before_level:
+        _ok("no task heading is written at section level")
 
     # duplicate task ids
     #
