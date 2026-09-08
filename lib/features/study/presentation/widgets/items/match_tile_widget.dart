@@ -258,8 +258,14 @@ class _TileSkin {
         // behind the board ever changes. The outline still has to be solid —
         // R7 — so *that* is blended against the page.
         background: null,
+        // Follows [MatchTileState.idle] into the brand family (M100.62) so one
+        // board is one family: a grid of faint grey holes around a brand-edged
+        // live tile reads as two grids. Blended, it lands at **1.58:1** light
+        // and **1.65:1** dark against the page, against the grey's 1.68 / 1.85
+        // — the same faint register, which is all this edge was ever asked for.
+        // A hole is not a control, so 1.4.11 does not reach it.
         outline: Color.alphaBlend(
-          semantic.borderControl.withValues(
+          semantic.borderOption.withValues(
             alpha: AppMatchTile.clearedOutlineAlpha,
           ),
           page,
@@ -272,7 +278,19 @@ class _TileSkin {
         background: ground,
         // A tile is the control here, and its fill is 1.03:1 from the dark page
         // — the outline is the whole grid (WCAG 1.4.11).
-        outline: semantic.borderControl,
+        //
+        // **`borderOption` since M100.62.** 1.4.11 asks 3:1 and the brand edge
+        // gives **3.27:1** light / **3.33:1** dark on `ground`
+        // (`surfaceContainerLow`), so the grid stays identified. What changed
+        // is which of two qualifying tokens draws it: the grey measured
+        // **4.05:1**, and a board of ten tiles at that weight was the heaviest
+        // resting ink on any screen in the app — 10 987 sampled pixels on
+        // `study_match_light`, four times what the card list draws.
+        //
+        // Same reasoning as `guess_option_item_widget`, and the same narrow
+        // licence: `borderOption` clears 3:1 on `surfaceContainerLow` and on
+        // no other control ground, which is where this tile is drawn.
+        outline: semantic.borderOption,
         outlineWidth: AppStroke.hairline,
         foreground: AppInk.stated,
         mark: null,

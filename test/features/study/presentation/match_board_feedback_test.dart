@@ -121,7 +121,7 @@ void main() {
 
       // Back to idle on the edge and the ink too, not just the mark.
       for (final label in <String>['front-a', 'back-b']) {
-        expect(_edge(tester, label).color, _semantic(tester).borderControl);
+        expect(_edge(tester, label).color, _semantic(tester).borderOption);
         expect(_edge(tester, label).width, AppStroke.hairline);
       }
     });
