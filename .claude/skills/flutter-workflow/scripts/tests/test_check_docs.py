@@ -95,5 +95,63 @@ class LedgerSetTest(unittest.TestCase):
                 check_docs._REPO = original
 
 
+class DependencyGraphSpansAllLedgersTest(unittest.TestCase):
+    """The dependency graph must read every ledger, not just docs/wbs.md.
+
+    `_wbs_ledgers()` was widened to cover the archive so a retired id stays
+    inside the duplicate check and the dependency graph — both halves of one
+    property. It is easy to widen only the id set and leave the edge-collection
+    loop reading a single file; that leaves every dependency line inside the
+    archive uninspected while the checker still prints success.
+    """
+
+    def test_a_bad_dependency_inside_the_archive_is_caught(self) -> None:
+        import contextlib
+        import io
+        import pathlib
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            (root / "docs" / "wbs-archive").mkdir(parents=True)
+            (root / "docs" / "wbs.md").write_text(
+                "### M1.1 · Task A\n\n- **Status:** done\n",
+                encoding="utf-8",
+            )
+            # M9.9's dependency on M2.2 is unresolvable — M2.2 is defined
+            # nowhere. This line lives only in the archive, so a loop that
+            # reads only docs/wbs.md can never see it.
+            (root / "docs" / "wbs-archive" / "x.md").write_text(
+                "### M9.9 · Task B\n\n"
+                "- **Status:** done\n"
+                "- **Dependencies:** M1.1, M2.2\n",
+                encoding="utf-8",
+            )
+
+            original_repo = check_docs._REPO
+            original_problems = check_docs._problems
+            check_docs._read.cache_clear()
+            check_docs._lines.cache_clear()
+            try:
+                check_docs._REPO = root
+                check_docs._problems = 0
+                buf = io.StringIO()
+                with contextlib.redirect_stdout(buf):
+                    check_docs._check_wbs_tasks()
+                output = buf.getvalue()
+            finally:
+                check_docs._REPO = original_repo
+                check_docs._problems = original_problems
+                check_docs._read.cache_clear()
+                check_docs._lines.cache_clear()
+
+            self.assertIn("M9.9", output)
+            self.assertIn("M2.2", output)
+            self.assertIn("does not exist", output)
+            # The failure must name the archive file the edge came from —
+            # otherwise a reader is sent looking in docs/wbs.md.
+            self.assertIn("docs/wbs-archive/x.md", output)
+
+
 if __name__ == "__main__":
     unittest.main()

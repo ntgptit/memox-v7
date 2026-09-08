@@ -328,26 +328,35 @@ def _check_wbs_tasks() -> None:
         for line in _lines(path)
         if (m := _TASK_HEAD_RE.match(line))
     }
-    edges: list[tuple[str, str]] = []
-    cur = ""
-    for line in _lines(WBS_FILE):
-        if line.startswith("### "):
-            parts = line.split()
-            cur = parts[1] if len(parts) > 1 and _TASK_TOKEN_RE.match(parts[1]) else ""
-            continue
-        if cur and line.startswith("- **Dependencies:**"):
-            rest = line[len("- **Dependencies:**") :]
-            for tok in re.split(r"[^A-Za-z0-9.]+", rest):
-                tok = tok.rstrip(".")
-                if _TASK_TOKEN_RE.match(tok):
-                    edges.append((cur, tok))
-    dep_bad = before = _problems
-    for task, dep in edges:
+    # This loop used to read only `WBS_FILE`. `task_set` above and the
+    # duplicate scan above that were both widened to every ledger when the
+    # archive was introduced — the id space and the dependency graph are two
+    # halves of the same property, "an archived id is still spent, and a live
+    # task may still depend on one that closed". Widening only two of the
+    # three left 373 archived `- **Dependencies:**` lines uncounted with
+    # nothing going red, because a loop that silently drops input looks
+    # identical to a loop with nothing to find.
+    edges: list[tuple[str, str, str]] = []
+    for path in _wbs_ledgers():
+        cur = ""
+        for line in _lines(path):
+            if line.startswith("### "):
+                parts = line.split()
+                cur = parts[1] if len(parts) > 1 and _TASK_TOKEN_RE.match(parts[1]) else ""
+                continue
+            if cur and line.startswith("- **Dependencies:**"):
+                rest = line[len("- **Dependencies:**") :]
+                for tok in re.split(r"[^A-Za-z0-9.]+", rest):
+                    tok = tok.rstrip(".")
+                    if _TASK_TOKEN_RE.match(tok):
+                        edges.append((path, cur, tok))
+    before = _problems
+    for path, task, dep in edges:
         if dep not in task_set:
             _fail(
                 "WBS dependency points at a task that does not exist",
-                f"{task} depends on {dep}, defined in none of the WBS ledgers "
-                f"({', '.join(_wbs_ledgers())})",
+                f"{task} ({path}) depends on {dep}, defined in none of the WBS "
+                f"ledgers ({', '.join(_wbs_ledgers())})",
             )
     if _problems == before:
         _ok(f"every WBS dependency resolves to a defined task ({len(edges)} edges)")
