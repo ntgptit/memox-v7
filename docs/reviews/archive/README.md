@@ -8,6 +8,8 @@ is citation, not age. `docs/reviews/` keeps every audit still referenced by
 `CLAUDE.md`, by a skill, by a design-system contract, or by production code
 or a test that cites it as the evidence behind a decision.
 
+When following a link to `docs/reviews/<name>.md` from inside a `docs/wbs-archive/` entry, note that those archive files are byte-identical historical snapshots — the path reflects the tree at the time that entry was written. The file is now here, under this directory, with the same name.
+
 | Audit | Subject | Closed by | Lines |
 |---|---|---|---|
 | `a7-icon-actions-menu-audit.md` | icon actions, FAB, popup menu, dropdown | — | 734 |
@@ -19,7 +21,7 @@ or a test that cites it as the evidence behind a decision.
 | `a15-typography-system-audit.md` | type scale and text-style usage | — | 956 |
 | `a16-geometry-foundations-audit.md` | spacing, radius, sizing, stroke foundations | — | 1151 |
 | `a17-interaction-motion-audit.md` | interaction states and motion | — | 1126 |
-| `a20-final-design-system-audit.md` | consolidated A7–A19 registry, V1 closure exit criteria | superseded by `a20-1-design-system-reconciliation.md` | 1502 |
+| `a20-final-design-system-audit.md` | consolidated A7–A19 registry, V1 closure exit criteria | — | 1502 |
 | `mx-chip-pill-deep-audit.md` | `MxChip` / pill component deep measurement | M100.36 | 1479 |
 | `mx-list-tile-deep-audit.md` | `MxListTile` / row component deep measurement | M100.36 | 718 |
 | `deck-golden-feature-final-hardening.md` | Deck feature golden-test hardening report | PR #56 | 269 |
