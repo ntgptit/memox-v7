@@ -80,7 +80,35 @@ class GuessOptionItemWidget extends StatelessWidget {
         accent?.resolve(context) ??
         // The row's fill sits 1.06:1 from the page, so the border is doing all
         // the separating — and a row is a control (WCAG 1.4.11), not a card.
-        semantic.borderControl;
+        //
+        // **`borderOption`, not `borderControl`, since M100.62 — and the rule
+        // above is the reason rather than the exception to it.** 1.4.11 asks
+        // for **3:1**; it does not ask for grey. On this row's own ground
+        // (`surfaceContainerLow`) the brand edge measures **3.27:1** light and
+        // **3.33:1** dark, so the control argument is satisfied by either
+        // token and stops being the thing that decides.
+        //
+        // What decides is that five of these rows are the screen, and the grey
+        // was the loudest resting line the app draws: **4.05:1** here against
+        // a card's own hairline at 1.24 — nineteen times the visible ink, and
+        // 9 000 sampled pixels of it on `guess_open_light` against the card
+        // list's 2 700. Five rows at that weight read as five form fields
+        // rather than as five things to choose between, which is the sentence
+        // `borderControlLight` already wrote down at M100.48 and then only
+        // half-fixed by lowering the token.
+        //
+        // This is M100.2's argument arriving at the second component it was
+        // always about: an option is a card in a stack of cards, and it was
+        // borrowing canvas furniture. `MxCard.option` moved then; this row is
+        // the same shape and did not.
+        //
+        // **Why this is safe here and nowhere else.** `borderOption` clears
+        // 3:1 on `surfaceContainerLow` and on **no other** control ground —
+        // page 2.99, `surfaceContainer` 2.92, `surfaceContainerHigh` 2.74.
+        // This row is drawn on `surfaceContainerLow` and only there (`ground`
+        // above), which is exactly why the outlined button and the text field
+        // keep the grey. `border_ladder_test.dart` holds both halves.
+        semantic.borderOption;
     final outlineWidth = accent == null
         ? AppStroke.hairline
         : AppStroke.control;
