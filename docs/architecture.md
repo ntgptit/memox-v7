@@ -818,7 +818,7 @@ lần hẹn theo dữ liệu bắt chính xác hơn).
 | | |
 |---|---|
 | **Status** | accepted |
-| **Affected documents** | `docs/checklist.md` (7.1 design tokens) · `wbs.md` · `design_audit/color_system_report.md` |
+| **Affected documents** | `docs/checklist.md` (7.1 design tokens) · `wbs.md` · `design_audit/color_system_report.md` · `design-system/ad-14-color-and-depth.md` |
 | **Decision** | Mọi màu trung tính suy từ một seed; mỗi role là một hue qua một bộ sinh; chiều sâu là **một mục tiêu đo được**, không phải một cơ chế cố định — mỗi mode được dựng nó bằng thứ mode đó có. |
 
 **Năm nguyên tắc:**

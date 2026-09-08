@@ -264,8 +264,8 @@ def _check_document_integrity() -> None:
 
 
 # **Two letters, because the ledger ran out of one.** `M4.10a`…`M4.10z` filled
-# up during the deck redesign and the next twenty-one entries became
-# `M4.10aa`…`M4.10at` — legal ids that this regex could not match, so twenty-one
+# up during the deck redesign and the next twenty entries became
+# `M4.10aa`…`M4.10at` — legal ids that this regex could not match, so twenty
 # tasks sat outside the duplicate check and outside the dependency graph while
 # the check reported success over the rest. The bound stays finite: `[a-z]*`
 # would match a prose heading that happens to open with an M and a number.
@@ -292,13 +292,7 @@ def _wrong_level_task_headings(lines: tuple[str, ...] | list[str]) -> list[str]:
     return [line.rstrip() for line in lines if _WRONG_LEVEL_RE.match(line)]
 
 
-def _wbs_task_ids() -> list[str]:
-    return [m.group(1) for line in _lines(WBS_FILE) if (m := _TASK_HEAD_RE.match(line))]
-
-
 def _check_wbs_tasks() -> None:
-    task_ids = _wbs_task_ids()
-
     before_level = _problems
     for path in _wbs_ledgers():
         for heading in _wrong_level_task_headings(_lines(path)):
@@ -401,7 +395,7 @@ def _check_wbs_tasks() -> None:
     _check_m_task_template()
 
 
-_M_HEAD_RE = re.compile(r"^### (M[0-9]+(?:\.[0-9]+)?[a-z]?) ")
+_M_HEAD_RE = re.compile(r"^### (M[0-9]+(?:\.[0-9]+)?[a-z]{0,2}) ")
 _M_REQUIRED = (
     "Status",
     "Goal",

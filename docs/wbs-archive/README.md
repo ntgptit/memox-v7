@@ -35,14 +35,24 @@ may depend on an archived one, and the edge must resolve), and the
 invisible to both) all run over every file `_wbs_ledgers()` returns, archive
 included.
 
-What does **not** run here is the **9-field template check**
-(`_check_m_task_template`) — the one that requires every `M`-level entry to
-carry Status, Goal, Scope, Editable documents, Output, Acceptance criteria,
-Dependencies, Tests required and Checklist phases, with a non-empty
-acceptance-criteria block. That check reads `docs/wbs.md` alone, by design: a
-closed entry is an immutable record of what happened, not a live contract that
-still has to satisfy an evolving template, and re-validating 299 already-closed
-entries on every CI run would buy nothing. If the template itself changes,
-archived entries stay written the way they were closed — the id and dependency
-checks above are the guarantees that actually matter for a retired task, and
-those still hold.
+Seven checks do **not** reach this directory. `_check_m_task_template` — the
+one that requires every `M`-level entry to carry Status, Goal, Scope, Editable
+documents, Output, Acceptance criteria, Dependencies, Tests required and
+Checklist phases, with a non-empty acceptance-criteria block — reads
+`docs/wbs.md` alone, by design: a closed entry is an immutable record of what
+happened, not a live contract that still has to satisfy an evolving template,
+and re-validating 299 already-closed entries on every CI run would buy
+nothing. The other six reach this directory for a different reason, not by
+design: `_check_markers`, `_check_duplicate_headings`,
+`_check_superseded_rows`, `_check_duplicate_table_ids`,
+`_check_banned_coalesce` and `_check_deck_flow_drift` all read `_docs_md()`,
+whose globs are `docs/*.md`, `docs/it-scenarios/*.md` and
+`docs/design-system/*.md` — none of which reach `docs/wbs-archive/`.
+
+The gap is real. It is also, as of this writing, empty: all seven checks were
+run by hand against every archived entry and found nothing to flag — no
+missing template field, no unresolved marker, no duplicate heading, no
+uncleared superseded row, no duplicate table id, no banned `COALESCE` pattern,
+no stale deck-flow claim. If a future archived entry ever fails one of these
+seven, `check_docs.py` will not catch it; only the three checks named above
+still cover the archive.
