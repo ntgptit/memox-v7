@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Param;
 
 import com.memox.common.pagination.PageSlice;
 import com.memox.deck.entity.Deck;
+import com.memox.deck.entity.DeckSummary;
 import com.memox.deck.enums.DeckContentType;
 
 @Mapper
@@ -16,6 +17,15 @@ public interface DeckMapper {
 	List<Deck> findRootDecks(@Param("slice") PageSlice slice);
 
 	long countRootDecks();
+
+	List<DeckSummary> findRootDeckSummaries(
+			@Param("slice") PageSlice slice,
+			@Param("now") Instant now,
+			@Param("startOfToday") Instant startOfToday);
+
+	List<Deck> findAllActiveDecks();
+
+	List<Deck> findDecksInTree(@Param("rootDeckId") String rootDeckId);
 
 	Deck findActiveDeckById(@Param("deckId") String deckId);
 

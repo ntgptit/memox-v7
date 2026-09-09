@@ -710,23 +710,23 @@ Expected: FAIL — `DeckTreeService` does not exist.
 `deck_mapper.xml`, applying translation rows 11 and 12. The five `LEFT JOIN` sub-aggregates and the `nextDueAt` scalar sub-select are copied structurally from `rootDeckSummaries`; only the parameter syntax changes.
 
 ```xml
-<resultMap id="deckSummary" type="com.memox.deck.domain.DeckSummary">
+<resultMap id="deckSummary" type="com.memox.deck.entity.DeckSummary">
   <constructor>
     <idArg column="id" javaType="java.lang.String"/>
     <arg column="name" javaType="java.lang.String"/>
     <arg column="root_deck_id" javaType="java.lang.String"/>
-    <arg column="content_type" javaType="com.memox.deck.domain.DeckContentType"
+    <arg column="content_type" javaType="com.memox.deck.enums.DeckContentType"
          typeHandler="com.memox.deck.persistence.DeckContentTypeTypeHandler"/>
-    <arg column="scheduler_type" javaType="com.memox.deck.domain.SchedulerType"
+    <arg column="scheduler_type" javaType="com.memox.deck.enums.SchedulerType"
          typeHandler="com.memox.deck.persistence.SchedulerTypeTypeHandler"/>
-    <arg column="sibling_position" javaType="int"/>
-    <arg column="total_card_count" javaType="long"/>
-    <arg column="new_card_count" javaType="long"/>
-    <arg column="due_card_count" javaType="long"/>
-    <arg column="overdue_card_count" javaType="long"/>
+    <arg column="sibling_position" javaType="_int"/>
+    <arg column="total_card_count" javaType="_long"/>
+    <arg column="new_card_count" javaType="_long"/>
+    <arg column="due_card_count" javaType="_long"/>
+    <arg column="overdue_card_count" javaType="_long"/>
     <arg column="oldest_due_at" javaType="java.time.Instant"/>
-    <arg column="learned_card_count" javaType="long"/>
-    <arg column="sub_deck_count" javaType="long"/>
+    <arg column="learned_card_count" javaType="_long"/>
+    <arg column="sub_deck_count" javaType="_long"/>
     <arg column="next_due_at" javaType="java.time.Instant"/>
     <arg column="created_at" javaType="java.time.Instant"/>
     <arg column="updated_at" javaType="java.time.Instant"/>
@@ -1080,7 +1080,7 @@ Expected: FAIL — `DeckStructureService` does not exist.
 - [ ] **Step 3: Port the five statements**
 
 ```xml
-<select id="probeDeckDepth" resultType="com.memox.deck.domain.DeckDepth">
+<select id="probeDeckDepth" resultType="com.memox.deck.entity.DeckDepth">
   WITH RECURSIVE ancestry (node_id, parent_id, depth) AS (
       SELECT id, parent_deck_id, 1 FROM decks
        WHERE id = #{deckId} AND delete_batch_id IS NULL
@@ -1417,7 +1417,7 @@ Expected: FAIL — `DeckMoveService` does not exist.
    WHERE id = #{deckId} AND delete_batch_id IS NULL
 </update>
 
-<select id="findCardMoveTargets" resultType="com.memox.deck.domain.DeckMoveTarget">
+<select id="findCardMoveTargets" resultType="com.memox.deck.entity.DeckMoveTarget">
   SELECT d.id AS deck_id, d.name AS deck_name, d.content_type AS content_type,
          p.name AS parent_name
     FROM decks d
@@ -1832,7 +1832,7 @@ Expected: FAIL — `CardBulkService` does not exist.
 - [ ] **Step 3: Port the statements**
 
 ```xml
-<select id="findCardDeckContextForIds" resultType="com.memox.card.domain.CardDeckContext">
+<select id="findCardDeckContextForIds" resultType="com.memox.card.entity.CardDeckContext">
   SELECT c.id AS card_id, d.id AS deck_id, d.root_deck_id AS root_deck_id,
          d.parent_deck_id AS parent_deck_id, d.content_type AS content_type
     FROM cards c
@@ -1999,7 +1999,7 @@ Expected: FAIL — the `com.memox.tag` package does not exist.
 - [ ] **Step 3: Port the statements**
 
 ```xml
-<select id="findTagCatalog" resultType="com.memox.tag.domain.TagCatalogEntry">
+<select id="findTagCatalog" resultType="com.memox.tag.entity.TagCatalogEntry">
   SELECT t.id AS id, t.name AS name,
          (SELECT COUNT(*)
             FROM card_tags ct
@@ -2159,7 +2159,7 @@ Expected: FAIL — `CardExportService` does not exist.
    ORDER BY c.created_at ASC, c.id ASC
 </select>
 
-<select id="findCardKeysInDeck" resultType="com.memox.card.domain.CardKey">
+<select id="findCardKeysInDeck" resultType="com.memox.card.entity.CardKey">
   SELECT front_folded AS front_folded, back_folded AS back_folded
     FROM cards
    WHERE deck_id = #{deckId} AND delete_batch_id IS NULL
@@ -2281,7 +2281,7 @@ Expected: FAIL — the `com.memox.trash` package does not exist.
 - [ ] **Step 3: Port the statements**
 
 ```xml
-<insert id="insertDeleteBatch" parameterType="com.memox.trash.domain.DeleteBatch">
+<insert id="insertDeleteBatch" parameterType="com.memox.trash.entity.DeleteBatch">
   INSERT INTO delete_batches (id, item_type, root_item_id, deleted_at)
   VALUES (#{id},
           #{itemType,typeHandler=com.memox.trash.persistence.TrashItemTypeTypeHandler},

@@ -1,6 +1,8 @@
 package com.memox.deck.controller;
 
 import java.net.URI;
+import java.time.Clock;
+import java.util.List;
 
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
@@ -8,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,7 +19,9 @@ import com.memox.deck.service.CreateSubDeckCommand;
 import com.memox.deck.enums.SchedulerType;
 import com.memox.common.pagination.PagingResponse;
 import com.memox.common.config.PaginationProperties;
+import com.memox.common.time.DayWindow;
 import com.memox.deck.service.DeckService;
+import com.memox.deck.service.DeckTreeService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -30,6 +35,7 @@ import com.memox.deck.dto.request.CreateRootDeckRequest;
 import com.memox.deck.dto.request.CreateSubDeckRequest;
 import com.memox.deck.dto.request.DeckPageRequest;
 import com.memox.deck.dto.response.DeckResponse;
+import com.memox.deck.dto.response.DeckSummaryResponse;
 
 @RestController
 @RequestMapping("/api/v1/decks")
@@ -38,7 +44,9 @@ import com.memox.deck.dto.response.DeckResponse;
 public class DeckController {
 
 	private final DeckService deckService;
+	private final DeckTreeService deckTreeService;
 	private final PaginationProperties paginationProperties;
+	private final Clock clock;
 
 	@PostMapping
 	@Operation(summary = "Create a root deck")
@@ -80,6 +88,30 @@ public class DeckController {
 		final var pageQuery = request.toPageQuery(
 				paginationProperties.getDefaultPage(), paginationProperties.getDefaultSize());
 		return deckService.listRootDecks(pageQuery).map(DeckResponse::from);
+	}
+
+	@GetMapping("/summaries")
+	@Operation(summary = "List root decks with their aggregate card counts")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Root deck summary page returned"),
+			@ApiResponse(responseCode = "400", description = "Invalid pagination, sort or UTC offset")
+	})
+	public PagingResponse<DeckSummaryResponse> listRootSummaries(
+			@Valid @ParameterObject DeckPageRequest request,
+			@RequestHeader(value = DayWindow.OFFSET_HEADER, required = false, defaultValue = "0")
+			int utcOffsetMinutes) {
+		final var pageQuery = request.toPageQuery(
+				paginationProperties.getDefaultPage(), paginationProperties.getDefaultSize());
+		final var window = DayWindow.of(clock, utcOffsetMinutes);
+		return deckTreeService.listRootSummaries(pageQuery, window.now(), window.startOfDay())
+				.map(DeckSummaryResponse::from);
+	}
+
+	@GetMapping("/{rootDeckId}/tree")
+	@Operation(summary = "List every deck in one root's tree, the root included")
+	@ApiResponses(@ApiResponse(responseCode = "200", description = "Tree returned"))
+	public List<DeckResponse> listTree(@PathVariable String rootDeckId) {
+		return deckTreeService.listTree(rootDeckId).stream().map(DeckResponse::from).toList();
 	}
 
 	@GetMapping("/{deckId}")
