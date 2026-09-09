@@ -49,6 +49,19 @@
             <property name="ignoreComments" value="true"/>
         </module>
 
+        <!--
+          The same content, one step earlier. An exception's detail is not a response field, it is
+          a log line: ApiExceptionHandler writes getMessage() at WARN for every MemoxException. So
+          a deck name put into an exception constructor reaches the log exactly as if it had been
+          passed to log.warn directly, and the rule above would never see it.
+        -->
+        <module name="RegexpSinglelineJava">
+            <property name="id" value="noPrivateContentInExceptions"/>
+            <property name="format" value="new \w*Exception\(.*\.(front|back|name|noteText|note|tags|tagName)\(\)"/>
+            <property name="message" value="BR-51/BR-52/BR-267: an exception detail is logged. Carry ids, counts and error codes, never content."/>
+            <property name="ignoreComments" value="true"/>
+        </module>
+
         <module name="FinalLocalVariable"/>
         <module name="IllegalCatch"/>
         <module name="EmptyCatchBlock"/>

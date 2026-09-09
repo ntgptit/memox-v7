@@ -267,6 +267,65 @@ pass; cho `Deck` phụ thuộc `persistence` → đỏ.
 **Còn nợ:** `this.` không có gì cưỡng chế — `RequireThis` của Checkstyle sẽ khoá
 được, nhưng đó là một diff cơ học rộng nữa nên để lại cho một task riêng.
 
+### M9.W3 · Wave 3 — đổi hợp đồng
+
+- **Status:** **done** — `./mvnw -o verify` xanh 61/61; guard mới đã tiêm lỗi.
+- **Goal:** Wave 1 làm module kiểm chứng được, Wave 2 dời chỗ. Wave 3 là wave duy
+  nhất **đổi thứ client nhìn thấy**, nên nó đi sau cùng và diff `openapi.json`
+  chính là biên bản của nó.
+- **Scope:** R4 (hợp đồng phân trang `page`/`size` zero-based, `PageQuery<TSort>`,
+  `SortSpec<TSort>`, `SortDirection`, `SortField`, `PageSlice`) · R2 (exception ôm
+  `deckId`) · I1 (log ở service + ở `ApiExceptionHandler`) · I2 (bỏ reflection
+  trong `DeckMapperTest`) · I3 (bỏ `readSchemaVersion` — method production không
+  có caller production).
+- **Hoãn có chủ đích:** trường `search` của `pagination-contract.md`. Chưa câu SQL
+  nào trong module tìm kiếm, nên khai nó ra là công bố một query param mà SQL
+  bỏ qua — client lọc, nhận về toàn bộ, và không có cách nào biết. Nó về cùng các
+  câu lệnh Phase 2 biết đáp ứng nó.
+
+**Hợp đồng cũ vẫn còn dấu vết trong SQL, và đó là chủ ý.** API đếm theo trang,
+database đếm theo dòng; `LIMIT`/`OFFSET` giữ nguyên, phép quy đổi `page × size`
+nằm đúng một chỗ (`PageQuery.offset()`) và mọi câu lệnh nhận `PageSlice`. Phép
+nhân đó được nới lên `long`: `page × size` ở đỉnh dải `int` tràn thành offset âm,
+và PostgreSQL trả lỗi chứ không trả trang đầu — một HTTP 500 cho một request chỉ
+vô lý chứ không sai cú pháp.
+
+**Sort là enum, không phải chuỗi — và đó là toàn bộ lý lẽ an toàn.** `ORDER BY`
+được render bằng `${}` của MyBatis (tên cột không phải giá trị, JDBC không bind
+được). An toàn ở đây vì mọi phần tử của `PageSlice.sorts` là `SortColumn`, mà
+`SortColumn` chỉ sinh ra từ hằng của `DeckSortField`/`CardSortField` và
+`SortDirection`. Một token client bịa ra bị `SortSpecs` chặn ở tầng transport,
+trả 400 — không có đường nào dựng `SortColumn` từ text của request.
+
+**Ba thứ Wave 3 học được, cả ba đều do test bắt chứ không do đọc lại code:**
+
+1. **Spring cắt query param theo dấu phẩy khi bind `List<String>`.** Cú pháp
+   `sort=createdAt,desc` bị xé làm đôi *trước khi* parser thấy, và `desc` bị đọc
+   như tên field — lỗi báo "unknown sort field" trong khi direction hoàn toàn
+   hợp lệ. Đổi dấu nối thành hai chấm: `sort=createdAt:desc`. Tác dụng phụ là
+   dấu phẩy trở thành dấu ngăn *giữa các khoá sort*, nên
+   `sort=a:asc,b:desc` và `sort=a:asc&sort=b:desc` là một. Hành vi bind này giờ
+   được ghim bằng một test, vì cú pháp đang dựa vào nó.
+2. **`ProblemDetail.instance` echo lại URI, mà `deckId` là path variable.** Test
+   khẳng định "id không lọt vào response" đỏ — và nó đúng, khẳng định của tôi
+   sai. Điều đúng là: không có property nào **được thêm** cho id; phần xuất hiện
+   trong `instance` là input của chính client quay về. Javadoc đã sửa theo.
+3. **`transient` trên field `String` của exception là sai.** Nó sinh đúng cảnh
+   báo `SE_TRANSIENT_FIELD_NOT_RESTORED` của SpotBugs. `String` vốn
+   serializable; bỏ `transient` là hết.
+
+**Guard mới đã tiêm lỗi:** thêm rule Checkstyle `noPrivateContentInExceptions`.
+Rule cũ chỉ canh lời gọi `log.*`, nhưng `ApiExceptionHandler` ghi
+`exception.getMessage()` ở WARN cho **mọi** `MemoxException` — nên một tên deck
+nhét vào constructor exception ra tới log y như gọi `log.warn` thẳng, mà rule cũ
+không thấy. Tiêm `parent.name()` vào `DeckConflictException` → BUILD FAILURE,
+đúng dòng 77.
+
+**I1 được chứng minh, không phải được khai báo:** một test dựng `ListAppender`
+của Logback trên `ApiExceptionHandler` và đòi dòng log chứa `deckId`. Nó khẳng
+định *tính chất* chứ không khẳng định câu chữ — đổi cách diễn đạt vẫn xanh, làm
+mất id thì đỏ.
+
 ## M99 · Adhoc
 
 Task do chủ dự án giao trực tiếp, không thuộc chuỗi phụ thuộc M0…M9. Đánh số từ

@@ -46,9 +46,30 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 		return problem(ApiErrorCode.VALIDATION_FAILED, fieldErrors);
 	}
 
+	/**
+	 * The one place a business refusal becomes a server-side record.
+	 *
+	 * <p>Every deck conflict — depth exceeded, parent holds cards, root cannot hold cards, invalid
+	 * scheduler — and every 404 used to leave no trace at all: the service threw, this method
+	 * answered, and nothing was written. WARN is the right level because these are the client's
+	 * mistakes rather than the server's, and the message is the exception's own detail, which by
+	 * construction is ids and codes.
+	 */
 	@ExceptionHandler(MemoxException.class)
 	ResponseEntity<Object> handleMemoxException(MemoxException exception) {
+		log.warn("Request refused by a business rule: {}", exception.getMessage());
 		return problem(exception.getErrorCode(), Map.of());
+	}
+
+	/**
+	 * A parameter Bean Validation cannot describe, reported in the same shape as one it can.
+	 *
+	 * <p>Without this, a bad {@code sort} token would answer with a bare VALIDATION_FAILED and the
+	 * client would have to guess which parameter it was.
+	 */
+	@ExceptionHandler(ValidationFailedException.class)
+	ResponseEntity<Object> handleValidationFailed(ValidationFailedException exception) {
+		return problem(exception.getErrorCode(), Map.of(exception.getField(), exception.getReason()));
 	}
 
 	@ExceptionHandler(ConstraintViolationException.class)

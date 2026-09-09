@@ -11,18 +11,18 @@ import lombok.Value;
 public class PagingResponse<T> {
 
 	List<T> items;
-	int limit;
-	int offset;
+	int page;
+	int size;
 	long totalItems;
-	long totalPages;
+	int totalPages;
 	boolean hasNext;
 	boolean hasPrevious;
 
 	public <R> PagingResponse<R> map(Function<? super T, R> mapper) {
 		return PagingResponse.<R>builder()
 				.items(items.stream().map(mapper).toList())
-				.limit(limit)
-				.offset(offset)
+				.page(page)
+				.size(size)
 				.totalItems(totalItems)
 				.totalPages(totalPages)
 				.hasNext(hasNext)

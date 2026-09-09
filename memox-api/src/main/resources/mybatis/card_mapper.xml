@@ -46,14 +46,21 @@
     )
   </select>
 
+  <!-- Same contract as deck_mapper.xml: see the note on its orderBySlice fragment for why ${} is
+       safe for a sort column and unsafe for anything else. -->
+  <sql id="orderBySlice">
+    ORDER BY
+    <foreach collection="slice.sorts" item="sort" separator=", ">${sort.column} ${sort.direction}</foreach>
+  </sql>
+
   <select id="findActiveCardsByDeck" resultMap="card">
     SELECT id, deck_id, front, back, is_flagged, example, hint, pronunciation, created_at, updated_at
     FROM cards
     WHERE deck_id = #{deckId}
       AND delete_batch_id IS NULL
-    ORDER BY created_at ASC, id ASC
-    LIMIT #{pageQuery.limit}
-    OFFSET #{pageQuery.offset}
+    <include refid="orderBySlice"/>
+    LIMIT #{slice.limit}
+    OFFSET #{slice.offset}
   </select>
 
   <select id="countActiveCardsByDeck" resultType="long">

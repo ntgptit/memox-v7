@@ -5,8 +5,10 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class PaginationConstants {
 
-	public static final int DEFAULT_LIMIT = 50;
-	public static final int MAX_LIMIT = 100;
-	public static final int MIN_LIMIT = 1;
-	public static final int MIN_OFFSET = 0;
+	/** Pages are zero-based, as `pagination-contract.md` specifies for a project with no prior standard. */
+	public static final int MIN_PAGE = 0;
+	public static final int DEFAULT_PAGE = 0;
+	public static final int DEFAULT_SIZE = 50;
+	public static final int MIN_SIZE = 1;
+	public static final int MAX_SIZE = 100;
 }

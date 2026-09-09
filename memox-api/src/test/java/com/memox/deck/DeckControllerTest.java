@@ -21,7 +21,7 @@ class DeckControllerTest extends PostgresIntegrationTest {
 
 	@Test
 	void returnsAnEmptyPageWhenNoRootDecksExist() throws Exception {
-		mockMvc.perform(get("/api/v1/decks").param("limit", "20"))
+		mockMvc.perform(get("/api/v1/decks").param("size", "20"))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.items").isEmpty())
 				.andExpect(jsonPath("$.totalItems").value(0))
@@ -61,19 +61,53 @@ class DeckControllerTest extends PostgresIntegrationTest {
 	}
 
 	@Test
-	void retainsRootDeckTotalsWhenOffsetExceedsAvailableDecks() throws Exception {
+	void retainsRootDeckTotalsWhenPageExceedsAvailableDecks() throws Exception {
 		createRootDeck(UUID.randomUUID().toString(), "First root");
 		createRootDeck(UUID.randomUUID().toString(), "Second root");
 
 		mockMvc.perform(get("/api/v1/decks")
-					.param("limit", "1")
-					.param("offset", "100"))
+					.param("size", "1")
+					.param("page", "100"))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.items").isEmpty())
 				.andExpect(jsonPath("$.totalItems").value(2))
 				.andExpect(jsonPath("$.totalPages").value(2))
 				.andExpect(jsonPath("$.hasNext").value(false))
 				.andExpect(jsonPath("$.hasPrevious").value(true));
+	}
+
+	/**
+	 * The whole sort chain, end to end: query string, binding, enum whitelist, rendered ORDER BY.
+	 *
+	 * <p>Each layer is unit-tested on its own, and each of those tests would still pass if the
+	 * layers were wired to each other wrongly — a sort that binds but is never applied looks
+	 * exactly like a sort that works, until someone reads the second page.
+	 */
+	@Test
+	void ordersRootDecksByTheRequestedFieldAndDirection() throws Exception {
+		createRootDeck(UUID.randomUUID().toString(), "Beta");
+		createRootDeck(UUID.randomUUID().toString(), "Alpha");
+		createRootDeck(UUID.randomUUID().toString(), "Gamma");
+
+		mockMvc.perform(get("/api/v1/decks").param("sort", "name:desc"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.items[0].name").value("Gamma"))
+				.andExpect(jsonPath("$.items[1].name").value("Beta"))
+				.andExpect(jsonPath("$.items[2].name").value("Alpha"));
+
+		mockMvc.perform(get("/api/v1/decks").param("sort", "name"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.items[0].name").value("Alpha"))
+				.andExpect(jsonPath("$.items[2].name").value("Gamma"));
+	}
+
+	@Test
+	void rejectsASortFieldTheDeckEndpointDoesNotPublish() throws Exception {
+		mockMvc.perform(get("/api/v1/decks").param("sort", "front"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
+				.andExpect(jsonPath("$.fieldErrors.sort").value(
+						"unknown sort field; allowed fields are siblingPosition, name, createdAt, updatedAt"));
 	}
 
 	@Test

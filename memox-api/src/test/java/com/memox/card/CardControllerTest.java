@@ -22,7 +22,7 @@ class CardControllerTest extends PostgresIntegrationTest {
 	@Test
 	void returnsNotFoundForCardsInAnUnknownDeck() throws Exception {
 		mockMvc.perform(get("/api/v1/decks/{deckId}/cards", UUID.randomUUID())
-					.param("limit", "20"))
+					.param("size", "20"))
 				.andExpect(status().isNotFound())
 				.andExpect(jsonPath("$.code").value("DECK_NOT_FOUND"));
 	}
@@ -34,7 +34,7 @@ class CardControllerTest extends PostgresIntegrationTest {
 		createRoot(rootId);
 		createChild(rootId, cardDeckId);
 
-		mockMvc.perform(get("/api/v1/decks/{deckId}/cards", cardDeckId).param("limit", "20"))
+		mockMvc.perform(get("/api/v1/decks/{deckId}/cards", cardDeckId).param("size", "20"))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.items").isEmpty())
 				.andExpect(jsonPath("$.totalItems").value(0))
@@ -69,11 +69,11 @@ class CardControllerTest extends PostgresIntegrationTest {
 		mockMvc.perform(get("/api/v1/decks/{deckId}", cardDeckId))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.contentType").value("card"));
-		mockMvc.perform(get("/api/v1/decks/{deckId}/cards", cardDeckId).param("limit", "20"))
+		mockMvc.perform(get("/api/v1/decks/{deckId}/cards", cardDeckId).param("size", "20"))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.items[0].id").value(cardId))
-				.andExpect(jsonPath("$.limit").value(20))
-				.andExpect(jsonPath("$.offset").value(0))
+				.andExpect(jsonPath("$.size").value(20))
+				.andExpect(jsonPath("$.page").value(0))
 				.andExpect(jsonPath("$.totalItems").value(1))
 				.andExpect(jsonPath("$.totalPages").value(1))
 				.andExpect(jsonPath("$.hasNext").value(false))
@@ -93,24 +93,24 @@ class CardControllerTest extends PostgresIntegrationTest {
 		createCard(cardDeckId, secondCardId, "Second", "Two");
 
 		mockMvc.perform(get("/api/v1/decks/{deckId}/cards", cardDeckId)
-					.param("limit", "1")
-					.param("offset", "0"))
+					.param("size", "1")
+					.param("page", "0"))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.items[0].id").value(firstCardId))
-				.andExpect(jsonPath("$.limit").value(1))
-				.andExpect(jsonPath("$.offset").value(0))
+				.andExpect(jsonPath("$.size").value(1))
+				.andExpect(jsonPath("$.page").value(0))
 				.andExpect(jsonPath("$.totalItems").value(2))
 				.andExpect(jsonPath("$.totalPages").value(2))
 				.andExpect(jsonPath("$.hasNext").value(true))
 				.andExpect(jsonPath("$.hasPrevious").value(false));
 
 		mockMvc.perform(get("/api/v1/decks/{deckId}/cards", cardDeckId)
-					.param("limit", "1")
-					.param("offset", "1"))
+					.param("size", "1")
+					.param("page", "1"))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.items[0].id").value(secondCardId))
-				.andExpect(jsonPath("$.limit").value(1))
-				.andExpect(jsonPath("$.offset").value(1))
+				.andExpect(jsonPath("$.size").value(1))
+				.andExpect(jsonPath("$.page").value(1))
 				.andExpect(jsonPath("$.totalItems").value(2))
 				.andExpect(jsonPath("$.totalPages").value(2))
 				.andExpect(jsonPath("$.hasNext").value(false))
@@ -127,8 +127,8 @@ class CardControllerTest extends PostgresIntegrationTest {
 		createCard(cardDeckId, UUID.randomUUID().toString(), "Second", "Two");
 
 		mockMvc.perform(get("/api/v1/decks/{deckId}/cards", cardDeckId)
-					.param("limit", "1")
-					.param("offset", "100"))
+					.param("size", "1")
+					.param("page", "100"))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.items").isEmpty())
 				.andExpect(jsonPath("$.totalItems").value(2))
