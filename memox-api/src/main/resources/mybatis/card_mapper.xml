@@ -10,7 +10,7 @@
       <arg column="deck_id" javaType="java.lang.String"/>
       <arg column="front" javaType="java.lang.String"/>
       <arg column="back" javaType="java.lang.String"/>
-      <arg column="is_flagged" javaType="boolean"/>
+      <arg column="is_flagged" javaType="_boolean"/>
       <arg column="example" javaType="java.lang.String"/>
       <arg column="hint" javaType="java.lang.String"/>
       <arg column="pronunciation" javaType="java.lang.String"/>

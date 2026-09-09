@@ -41,6 +41,7 @@ jobs:
       needs_host_tests: ${{ steps.changes.outputs.needs_host_tests }}
       needs_widgetbook: ${{ steps.changes.outputs.needs_widgetbook }}
       needs_goldens: ${{ steps.changes.outputs.needs_goldens }}
+      needs_memox_api: ${{ steps.changes.outputs.needs_memox_api }}
       full_suite: ${{ steps.changes.outputs.full_suite }}
       risk: ${{ steps.changes.outputs.risk }}
       shard_count: ${{ steps.changes.outputs.shard_count }}
@@ -414,10 +415,67 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
+  memox_api:
+    name: memox-api · verify
+    needs: classify
+    if: needs.classify.outputs.needs_memox_api == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Both backends, every run. The container leg is what most contributors have;
+    # the local leg is what a machine without Docker uses. They are only equivalent
+    # while something exercises both — otherwise the untested one rots and the first
+    # person without Docker discovers it.
+    strategy:
+      fail-fast: false
+      matrix:
+        backend: [testcontainers, local]
+    services:
+      postgres:
+        image: postgres:16-alpine
+        # Mapped off 5432 on purpose: a local-leg run that silently fell back to a
+        # default-port database would look identical to one that worked.
+        ports: ['5433:5432']
+        env:
+          POSTGRES_DB: memox_test
+          POSTGRES_USER: memox
+          POSTGRES_PASSWORD: memox
+          POSTGRES_INITDB_ARGS: '--encoding=UTF8'
+        options: >-
+          --health-cmd "pg_isready -U memox -d memox_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    defaults:
+      run:
+        working-directory: memox-api
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: assert the intended backend is the one selected
+        run: test "$MEMOX_TEST_DATABASE" = "${{ matrix.backend }}"
+        env:
+          MEMOX_TEST_DATABASE: ${{ matrix.backend }}
+
+      - name: verify
+        run: ./mvnw -B -ntp verify
+        env:
+          MEMOX_TEST_DATABASE: ${{ matrix.backend }}
+          MEMOX_TEST_DB_URL: jdbc:postgresql://localhost:5433/memox_test
+          MEMOX_TEST_DB_USERNAME: memox
+          MEMOX_TEST_DB_PASSWORD: memox
+
+      - name: the committed OpenAPI contract must not have drifted
+        run: git diff --exit-code -- openapi.json
+
+
   gate:
     name: CI gate
     if: always()
-    needs: [classify, contracts, static, host_tests, widgetbook, goldens]
+    needs: [classify, contracts, static, host_tests, widgetbook, goldens, memox_api]
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
@@ -434,8 +492,12 @@ jobs:
             --contracts-result '${{ needs.contracts.result }}' \
             --static-result '${{ needs.static.result }}' \
             --host-result '${{ needs.host_tests.result }}' \
-            --widgetbook-result '${{ needs.widgetbook.result }}'             --goldens-result '${{ needs.goldens.result }}' \
+            --widgetbook-result '${{ needs.widgetbook.result }}' \
+            --goldens-result '${{ needs.goldens.result }}' \
+            --memox-api-result '${{ needs.memox_api.result }}' \
             --needs-contracts '${{ needs.classify.outputs.needs_contracts }}' \
             --needs-static '${{ needs.classify.outputs.needs_static }}' \
             --needs-host-tests '${{ needs.classify.outputs.needs_host_tests }}' \
-            --needs-widgetbook '${{ needs.classify.outputs.needs_widgetbook }}'             --needs-goldens '${{ needs.classify.outputs.needs_goldens }}'
+            --needs-widgetbook '${{ needs.classify.outputs.needs_widgetbook }}' \
+            --needs-goldens '${{ needs.classify.outputs.needs_goldens }}' \
+            --needs-memox-api '${{ needs.classify.outputs.needs_memox_api }}'

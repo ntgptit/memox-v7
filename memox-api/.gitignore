@@ -33,3 +33,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# `.env.*` above hides every variant, including the template that tells the next
+# person which variables exist. The template carries names and defaults only —
+# never a secret — so it is exempted here, after the rule that would hide it.
+!.env.example

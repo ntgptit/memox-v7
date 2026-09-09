@@ -14,11 +14,13 @@ def evaluate(
     host_result: str,
     widgetbook_result: str,
     goldens_result: str,
+    memox_api_result: str,
     needs_contracts: bool,
     needs_static: bool,
     needs_host_tests: bool,
     needs_widgetbook: bool,
     needs_goldens: bool,
+    needs_memox_api: bool,
 ) -> list[str]:
     problems: list[str] = []
     if classify_result != "success":
@@ -30,6 +32,7 @@ def evaluate(
         ("host-test shards", host_result, needs_host_tests),
         ("Widgetbook smoke test", widgetbook_result, needs_widgetbook),
         ("golden comparison", goldens_result, needs_goldens),
+        ("memox-api verify", memox_api_result, needs_memox_api),
     ):
         expected = "success" if required else "skipped"
         if result != expected:
@@ -52,6 +55,7 @@ def main() -> int:
         "host-result",
         "widgetbook-result",
         "goldens-result",
+        "memox-api-result",
     ):
         parser.add_argument(f"--{name}", required=True)
     for name in (
@@ -60,6 +64,7 @@ def main() -> int:
         "needs-host-tests",
         "needs-widgetbook",
         "needs-goldens",
+        "needs-memox-api",
     ):
         parser.add_argument(f"--{name}", type=_parse_bool, required=True)
     args = parser.parse_args()
@@ -71,11 +76,13 @@ def main() -> int:
         host_result=args.host_result,
         widgetbook_result=args.widgetbook_result,
         goldens_result=args.goldens_result,
+        memox_api_result=args.memox_api_result,
         needs_contracts=args.needs_contracts,
         needs_static=args.needs_static,
         needs_host_tests=args.needs_host_tests,
         needs_widgetbook=args.needs_widgetbook,
         needs_goldens=args.needs_goldens,
+        needs_memox_api=args.needs_memox_api,
     )
     if problems:
         for problem in problems:

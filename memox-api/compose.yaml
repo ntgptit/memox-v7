@@ -1,0 +1,72 @@
+# Local PostgreSQL for memox-api.
+#
+# This file was specified by the Phase 0 plan and never written; the module has
+# been running against a hand-installed PostgreSQL since.
+#
+# PORT CLASH, READ THIS FIRST. This machine already runs PostgreSQL 17 as a
+# Windows service (`postgresql-x64-17`) holding 5432. Both cannot bind it. Either
+# stop that service, or set MEMOX_DB_PORT to something free in `.env` and point
+# MEMOX_DB_URL at the same number — the two are not linked automatically, and a
+# mismatch shows up as `connection refused` rather than as a config error.
+#
+#   docker compose up -d              # the app's development database
+#   docker compose --profile test up -d   # adds the disposable test database
+#   docker compose down -v            # stop and delete the volumes
+
+services:
+
+  # The database the application runs against under the `local` profile.
+  # Data survives `down`; only `down -v` removes it.
+  db:
+    image: postgres:16-alpine
+    container_name: memox-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${MEMOX_DB_NAME:-memox}
+      POSTGRES_USER: ${MEMOX_DB_USERNAME:-giapnt}
+      POSTGRES_PASSWORD: ${MEMOX_DB_PASSWORD:?set MEMOX_DB_PASSWORD in memox-api/.env}
+      # UTF-8 is pinned; collation deliberately is not. PostgreSQL's lower() follows
+      # LC_CTYPE, and pinning it to C would fold ASCII only — LOWER('ÁNH') would come
+      # back unchanged and the card mapper's fold would stop matching the Flutter
+      # app's. Deterministic ordering is taken per statement with COLLATE "C".
+      POSTGRES_INITDB_ARGS: --encoding=UTF8
+    ports:
+      - "${MEMOX_DB_PORT:-5432}:5432"
+    volumes:
+      - memox-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${MEMOX_DB_USERNAME:-giapnt} -d ${MEMOX_DB_NAME:-memox}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Opt-in, for running the suite with MEMOX_TEST_DATABASE=local.
+  #
+  # Not needed when Docker is available: Testcontainers provisions its own
+  # container per run and throws it away. This exists for the developer who wants
+  # to watch the database between tests, or to reproduce the CI `local` matrix leg
+  # exactly. Its data is NOT persisted — the suite truncates it on every test.
+  db-test:
+    profiles: ["test"]
+    image: postgres:16-alpine
+    container_name: memox-db-test
+    environment:
+      POSTGRES_DB: memox_test
+      POSTGRES_USER: memox
+      POSTGRES_PASSWORD: memox
+      POSTGRES_INITDB_ARGS: --encoding=UTF8
+    # 5433 on purpose. A test run that silently fell back to the development
+    # database on 5432 would look identical to one that worked — until it truncated
+    # it. The suite's own `_test` suffix guard is the second line of defence.
+    ports:
+      - "${MEMOX_TEST_DB_PORT:-5433}:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U memox -d memox_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  memox-db-data:

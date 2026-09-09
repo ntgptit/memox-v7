@@ -1,0 +1,598 @@
+{
+  "components" : {
+    "schemas" : {
+      "ApiHealthResponse" : {
+        "properties" : {
+          "status" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "CardResponse" : {
+        "properties" : {
+          "back" : {
+            "type" : "string"
+          },
+          "createdAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "deckId" : {
+            "type" : "string"
+          },
+          "example" : {
+            "type" : "string"
+          },
+          "flagged" : {
+            "type" : "boolean"
+          },
+          "front" : {
+            "type" : "string"
+          },
+          "hint" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "pronunciation" : {
+            "type" : "string"
+          },
+          "updatedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "CreateCardRequest" : {
+        "properties" : {
+          "back" : {
+            "maxLength" : 240,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "example" : {
+            "maxLength" : 240,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "front" : {
+            "maxLength" : 60,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "hint" : {
+            "maxLength" : 240,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "id" : {
+            "minLength" : 1,
+            "pattern" : "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+            "type" : "string"
+          },
+          "pronunciation" : {
+            "maxLength" : 240,
+            "minLength" : 0,
+            "type" : "string"
+          }
+        },
+        "required" : [
+          "back",
+          "front",
+          "id"
+        ],
+        "type" : "object"
+      },
+      "CreateRootDeckRequest" : {
+        "properties" : {
+          "id" : {
+            "minLength" : 1,
+            "pattern" : "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+            "type" : "string"
+          },
+          "name" : {
+            "maxLength" : 200,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "schedulerType" : {
+            "minLength" : 1,
+            "pattern" : "eight_box|sm2",
+            "type" : "string"
+          }
+        },
+        "required" : [
+          "id",
+          "name",
+          "schedulerType"
+        ],
+        "type" : "object"
+      },
+      "CreateSubDeckRequest" : {
+        "properties" : {
+          "id" : {
+            "minLength" : 1,
+            "pattern" : "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+            "type" : "string"
+          },
+          "name" : {
+            "maxLength" : 200,
+            "minLength" : 0,
+            "type" : "string"
+          }
+        },
+        "required" : [
+          "id",
+          "name"
+        ],
+        "type" : "object"
+      },
+      "DeckResponse" : {
+        "properties" : {
+          "contentType" : {
+            "type" : "string"
+          },
+          "createdAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "parentDeckId" : {
+            "type" : "string"
+          },
+          "rootDeckId" : {
+            "type" : "string"
+          },
+          "schedulerGeneration" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "schedulerType" : {
+            "type" : "string"
+          },
+          "schedulerVersion" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "siblingPosition" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "updatedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "PagingResponseCardResponse" : {
+        "properties" : {
+          "hasNext" : {
+            "type" : "boolean"
+          },
+          "hasPrevious" : {
+            "type" : "boolean"
+          },
+          "items" : {
+            "items" : {
+              "$ref" : "#/components/schemas/CardResponse"
+            },
+            "type" : "array"
+          },
+          "limit" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "offset" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "totalItems" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "totalPages" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "PagingResponseDeckResponse" : {
+        "properties" : {
+          "hasNext" : {
+            "type" : "boolean"
+          },
+          "hasPrevious" : {
+            "type" : "boolean"
+          },
+          "items" : {
+            "items" : {
+              "$ref" : "#/components/schemas/DeckResponse"
+            },
+            "type" : "array"
+          },
+          "limit" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "offset" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "totalItems" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "totalPages" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      }
+    }
+  },
+  "info" : {
+    "description" : "Standalone MemoX backend API. Authentication and sync are not enabled yet.",
+    "title" : "MemoX API",
+    "version" : "v1"
+  },
+  "openapi" : "3.1.0",
+  "paths" : {
+    "/api/v1/decks" : {
+      "get" : {
+        "operationId" : "listRootDecks",
+        "parameters" : [
+          {
+            "in" : "query",
+            "name" : "limit",
+            "required" : false,
+            "schema" : {
+              "format" : "int32",
+              "maximum" : 100,
+              "minimum" : 1,
+              "type" : "integer"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "offset",
+            "required" : false,
+            "schema" : {
+              "format" : "int32",
+              "minimum" : 0,
+              "type" : "integer"
+            }
+          }
+        ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PagingResponseDeckResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "List root decks",
+        "tags" : [
+          "Decks"
+        ]
+      },
+      "post" : {
+        "operationId" : "createRootDeck",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateRootDeckRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DeckResponse"
+                }
+              }
+            },
+            "description" : "Root deck created"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DeckResponse"
+                }
+              }
+            },
+            "description" : "Invalid request"
+          },
+          "409" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DeckResponse"
+                }
+              }
+            },
+            "description" : "Data conflict"
+          }
+        },
+        "summary" : "Create a root deck",
+        "tags" : [
+          "Decks"
+        ]
+      }
+    },
+    "/api/v1/decks/{deckId}" : {
+      "get" : {
+        "operationId" : "getDeck",
+        "parameters" : [
+          {
+            "in" : "path",
+            "name" : "deckId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          }
+        ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DeckResponse"
+                }
+              }
+            },
+            "description" : "Deck found"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DeckResponse"
+                }
+              }
+            },
+            "description" : "Deck not found"
+          }
+        },
+        "summary" : "Get a deck",
+        "tags" : [
+          "Decks"
+        ]
+      }
+    },
+    "/api/v1/decks/{deckId}/cards" : {
+      "get" : {
+        "operationId" : "listCards",
+        "parameters" : [
+          {
+            "in" : "path",
+            "name" : "deckId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "limit",
+            "required" : false,
+            "schema" : {
+              "format" : "int32",
+              "maximum" : 100,
+              "minimum" : 1,
+              "type" : "integer"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "offset",
+            "required" : false,
+            "schema" : {
+              "format" : "int32",
+              "minimum" : 0,
+              "type" : "integer"
+            }
+          }
+        ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PagingResponseCardResponse"
+                }
+              }
+            },
+            "description" : "Cards page returned"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PagingResponseCardResponse"
+                }
+              }
+            },
+            "description" : "Invalid pagination parameters"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PagingResponseCardResponse"
+                }
+              }
+            },
+            "description" : "Deck not found"
+          }
+        },
+        "summary" : "List cards using limit and offset pagination",
+        "tags" : [
+          "Cards"
+        ]
+      },
+      "post" : {
+        "operationId" : "createCard",
+        "parameters" : [
+          {
+            "in" : "path",
+            "name" : "deckId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          }
+        ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateCardRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CardResponse"
+                }
+              }
+            },
+            "description" : "Card created"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CardResponse"
+                }
+              }
+            },
+            "description" : "Deck not found"
+          },
+          "409" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CardResponse"
+                }
+              }
+            },
+            "description" : "Deck content conflict"
+          }
+        },
+        "summary" : "Create a card in a deck",
+        "tags" : [
+          "Cards"
+        ]
+      }
+    },
+    "/api/v1/decks/{parentDeckId}/children" : {
+      "post" : {
+        "operationId" : "createSubDeck",
+        "parameters" : [
+          {
+            "in" : "path",
+            "name" : "parentDeckId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          }
+        ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateSubDeckRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DeckResponse"
+                }
+              }
+            },
+            "description" : "Child deck created"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DeckResponse"
+                }
+              }
+            },
+            "description" : "Parent deck not found"
+          },
+          "409" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DeckResponse"
+                }
+              }
+            },
+            "description" : "Deck content or depth conflict"
+          }
+        },
+        "summary" : "Create a child deck",
+        "tags" : [
+          "Decks"
+        ]
+      }
+    },
+    "/api/v1/health" : {
+      "get" : {
+        "operationId" : "readHealth",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiHealthResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [
+          "api-health-controller"
+        ]
+      }
+    }
+  }
+}

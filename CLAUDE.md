@@ -146,6 +146,112 @@ shared components → router → data foundation → features as vertical slices
 tests → CI/CD → release. Do not build UI for a flow whose business rules are
 still open; the rework costs more than the wait.
 
+## Subagent model and effort
+
+**Every subagent runs Sonnet. Never Opus.** Opus is for the session you are
+reading this in; a subagent that inherits it is a billing accident, not a
+capability decision.
+
+This is not a preference you remember — it is enforced by a `PreToolUse` hook,
+`.claude/hooks/enforce_subagent_model.py`, wired in `.claude/settings.json` on
+the matcher `Agent|Workflow`:
+
+- **`Agent`** — the hook rewrites `model` to `sonnet` on every call, silently.
+  It covers agent types this repo does not own, including plugin agents that
+  declare `model: opus` or declare nothing and therefore inherit.
+- **`Workflow`** — a JS script cannot be rewritten by regex without corrupting
+  it, so the hook **refuses** instead: every `agent(...)` call in the script
+  must carry an explicit `model` and `effort` in its options object, or the
+  tool call is denied with the offending line numbers.
+- If the guard file cannot be found, the hook **denies** rather than allowing
+  an unguarded spawn. A guard that fails open is not a guard.
+
+**A pinned workflow still stops for your approval.** Once every `agent()` is
+pinned, the hook does not wave the script through — it returns `ask` with a
+manifest of what is about to run:
+
+```
+Confirm subagent spend before this workflow runs.
+  line 12   design:ci-pipeline         model=sonnet     effort=high
+  line 31   verify:does-it-work        model=sonnet     effort=medium
+  line 58   synthesise                 model=sonnet     effort=max
+
+3 call site(s), but parallel/pipeline fan out over a list — the REAL agent
+count is decided at run time and can be many times higher (a 4-site script
+once spawned 28 agents).
+Floor cost: at least 3 x ~68k = ~0.2M tokens, and more per item fanned out
+```
+
+Three things that manifest deliberately does **not** hide: a model that is not
+`sonnet` is flagged on its own line; a script using `parallel`/`pipeline` says
+plainly that the real agent count is unknown until run time, because a 4-site
+script once produced 28 agents; and the floor is quoted from a measurement —
+one subagent replying with a single word cost 68 549 tokens — not from a guess.
+
+This needs `permissions.ask: ["Workflow"]` in `.claude/settings.json` to fire
+while the session is in `bypassPermissions`. It is there. If prompts ever stop
+appearing, check that rule is still present before concluding the mechanism
+broke — a settings reload lag once made it look that way.
+
+**The popup shows `meta.description` and nothing else.** Not the manifest, not
+`permissionDecisionReason` — this was read off a screenshot of the real prompt,
+after assuming otherwise. So the description is the only place the owner can see
+what they are approving, and the hook **refuses a description that does not state
+the spend**. Write it as:
+
+```
+description: '8+ agents (fans out) · sonnet · effort low/high/max · floor ~0.5M tok — design the three waves'
+```
+
+**Approval is not choice.** The popup offers Allow and Deny; it cannot offer a
+model picker, and no hook can make it one. `AskUserQuestion` is the only real
+chooser, and it runs *before* Workflow is called at all.
+
+**The threshold, set by the owner on 2026-09-09.** Below it, decide alone. At or
+above it, offer the model/effort choice with `AskUserQuestion` first:
+
+| Trigger | Why it is the line |
+|---|---|
+| floor ≥ **300 000 tokens** (≈ 4 agents) | Roughly where a run stops being cheap enough to not ask about |
+| any `parallel` / `pipeline` **fan-out** | The real agent count is unknown until run time — 4 call sites once became 28 agents |
+| any model that is not `sonnet` | Never a default; always a decision |
+
+No hard `CLAUDE_CODE_MAX_SUBAGENTS_PER_SESSION` ceiling is set — deliberately.
+The owner chose the guard, the popup and the `small` size guideline over a cap
+that could cut a long job they actually wanted.
+
+Nothing can *prove* the question was asked, so the hook does the next best
+thing: when a run crosses any trigger, the manifest says **ABOVE THE
+ASK-THRESHOLD … you should have been offered the choice before this prompt. If
+you were not, say so.** An unenforceable rule becomes an observable one — if that
+line appears on a prompt you were never asked about, the rule was skipped.
+
+**The rule exists because the failure already happened.** One design pass on
+2026-09-09 ran 28 workflow agents with no `model` set. They inherited Opus and
+spent **5 051 931 tokens** in 36 minutes — for work every one of which Sonnet
+would have done. The settings schema has no subagent-model key, so nothing but
+this hook can prevent a repeat.
+
+**Effort is a decision per task, not a default.** Under ultracode the session
+sits at `xhigh`; a subagent that inherits it pays xhigh to grep a directory.
+Choose from what the task actually is:
+
+| effort | Use for | Examples in this repo |
+|---|---|---|
+| `low` | Mechanical work with a checkable answer | Locating files, extracting a list, applying a rename, reading a config and reporting values |
+| `medium` | Bounded reasoning over a known shape | Summarising one file's contract, porting one SQL statement, writing a single focused test |
+| `high` | Judgement across several sources | Designing one area, reviewing a diff for correctness, reconciling a rule against code |
+| `max` | The one or two hardest calls in a run | Adversarial verification that must not miss a defect, final cross-area synthesis |
+
+Two shapes to prefer, because they cost less than they look: put `low` on the
+fan-out and `high`/`max` only on the verify or synthesis stage; and give one
+expensive agent a small, pre-digested payload rather than a large one — the
+2026-09-09 synthesis died partly because it was handed ~600 KB of JSON in a
+single prompt.
+
+If a task genuinely needs Opus, that is a conversation with the owner, not a
+parameter you set.
+
 ## Non-negotiables
 
 These are the rules that survive every phase. Everything else is guidance.

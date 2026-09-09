@@ -65,6 +65,7 @@ class VerificationPlan:
     needs_host_tests: bool
     needs_widgetbook: bool
     needs_goldens: bool
+    needs_memox_api: bool
     full_suite: bool
 
     @property
@@ -140,6 +141,7 @@ class VerificationPlanBuilder:
         self.layers: set[str] = set()
         self.reasons: set[str] = set()
         self.unmatched_paths: set[str] = set()
+        self.needs_memox_api = False
         self.test_prefixes: set[str] = set()
         self.exact_test_files: set[str] = set()
         self.has_prompt_changes = False
@@ -270,6 +272,15 @@ class VerificationPlanBuilder:
             path.startswith(prefix) for prefix in self.impact_map.full_scope_prefixes
         ):
             self.require_full("high-risk or verification-infrastructure path changed")
+            return
+
+        # The Java backend is a build input, but not a Dart one. Without this branch
+        # `memox-api/**` reaches the unrecognised-path rule at the bottom and promotes
+        # itself to the full Flutter suite — goldens and Widgetbook included — none of
+        # which a Spring Boot change can fail. It selects its own Maven job instead.
+        if path.startswith("memox-api/"):
+            self.needs_memox_api = True
+            self.add_reason("memox-api changed; the Maven verify job covers it")
             return
 
         if path.startswith("widgetbook/"):
@@ -468,6 +479,7 @@ class VerificationPlanBuilder:
             needs_host_tests=needs_host_tests,
             needs_widgetbook=self.needs_widgetbook,
             needs_goldens=needs_goldens,
+            needs_memox_api=self.needs_memox_api,
             full_suite=self.full_suite,
         )
 
@@ -722,6 +734,7 @@ def write_github_output(path: Path, plan: VerificationPlan) -> None:
         "needs_host_tests": _bool(plan.needs_host_tests),
         "needs_widgetbook": _bool(plan.needs_widgetbook),
         "needs_goldens": _bool(plan.needs_goldens),
+        "needs_memox_api": _bool(plan.needs_memox_api),
         "full_suite": _bool(plan.full_suite),
         "risk": plan.risk,
         "shard_count": str(plan.shard_count),

@@ -8,21 +8,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.memox.support.PostgresIntegrationTest;
 
-@AutoConfigureMockMvc
 class CardControllerTest extends PostgresIntegrationTest {
 
 	@Autowired
 	private MockMvc mockMvc;
 
-	@Autowired
-	private JdbcTemplate jdbcTemplate;
 
 	@Test
 	void returnsNotFoundForCardsInAnUnknownDeck() throws Exception {

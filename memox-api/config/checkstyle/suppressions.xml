@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+    "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+    "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+
+<!--
+  Every `files` regex must accept BOTH separators. Checkstyle matches against
+  the OS-native path, so `[\\/]` matches the backslash a Windows checkout
+  reports and the slash the ubuntu-latest runner reports. A pattern written
+  with only `/` silently suppresses nothing on Windows, and only `\\`
+  silently suppresses nothing in CI. In both cases the build stays green
+  and the suppression is dead.
+-->
+<suppressions>
+
+    <!--
+      MyBatis mapper interfaces are a query DSL, not business methods: the
+      @Param list IS the SQL statement's parameter list, so a four-parameter
+      signature is the schema, not a design smell.
+    -->
+    <suppress checks="ParameterNumber"
+              files="[\\/]persistence[\\/][^\\/]*Mapper\.java$"/>
+
+    <!--
+      ArchUnit declares rules as `@ArchTest static final ArchRule someRuleName`
+      and prints the FIELD NAME when a rule fails, so the name is a sentence,
+      not a constant. SCREAMING_SNAKE_CASE would make every architecture
+      failure unreadable.
+    -->
+    <suppress checks="ConstantName"
+              files="[\\/]src[\\/]test[\\/].*[\\/]architecture[\\/].*\.java$"/>
+
+    <!--
+      Arrange/act/assert is three blocks in one method by design, and a test
+      fixture helper legitimately takes the fixture's fields. Both size rules
+      stay on for src/main, where they mean something.
+    -->
+    <suppress checks="MethodLength|ParameterNumber"
+              files="[\\/]src[\\/]test[\\/]"/>
+
+</suppressions>

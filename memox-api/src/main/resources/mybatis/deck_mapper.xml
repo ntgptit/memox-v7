@@ -14,7 +14,7 @@
       <arg column="scheduler_type" javaType="com.memox.deck.domain.SchedulerType" typeHandler="com.memox.deck.persistence.SchedulerTypeTypeHandler"/>
       <arg column="scheduler_version" javaType="java.lang.Integer"/>
       <arg column="scheduler_generation" javaType="java.lang.Integer"/>
-      <arg column="sibling_position" javaType="int"/>
+      <arg column="sibling_position" javaType="_int"/>
       <arg column="created_at" javaType="java.time.Instant"/>
       <arg column="updated_at" javaType="java.time.Instant"/>
     </constructor>
