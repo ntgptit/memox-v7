@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/extensions/app_ink.dart';
 import '../../../../../core/theme/foundations/app_durations.dart';
+import '../../../../../core/theme/foundations/app_elevation.dart';
 import '../../../../../core/theme/foundations/app_motion_policy.dart';
 import '../../../../../core/theme/foundations/app_radius.dart';
 import '../../../../../core/theme/foundations/app_sizing.dart';
@@ -66,7 +67,6 @@ class GuessOptionItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = context.colors;
-    final semantic = context.semanticColors;
     final ground = scheme.surfaceContainerLow;
 
     final AppInk? accent = switch (state) {
@@ -76,42 +76,32 @@ class GuessOptionItemWidget extends StatelessWidget {
     };
     // The surface never moves. Every state sits on the row's own fill, and the
     // one that reads differently is the one that says so at its edge.
-    final outline =
-        accent?.resolve(context) ??
-        // The row's fill sits 1.06:1 from the page, so the border is doing all
-        // the separating — and a row is a control (WCAG 1.4.11), not a card.
-        //
-        // **`borderOption`, not `borderControl`, since M100.62 — and the rule
-        // above is the reason rather than the exception to it.** 1.4.11 asks
-        // for **3:1**; it does not ask for grey. On this row's own ground
-        // (`surfaceContainerLow`) the brand edge measures **3.27:1** light and
-        // **3.33:1** dark, so the control argument is satisfied by either
-        // token and stops being the thing that decides.
-        //
-        // What decides is that five of these rows are the screen, and the grey
-        // was the loudest resting line the app draws: **4.05:1** here against
-        // a card's own hairline at 1.24 — nineteen times the visible ink, and
-        // 9 000 sampled pixels of it on `guess_open_light` against the card
-        // list's 2 700. Five rows at that weight read as five form fields
-        // rather than as five things to choose between, which is the sentence
-        // `borderControlLight` already wrote down at M100.48 and then only
-        // half-fixed by lowering the token.
-        //
-        // This is M100.2's argument arriving at the second component it was
-        // always about: an option is a card in a stack of cards, and it was
-        // borrowing canvas furniture. `MxCard.option` moved then; this row is
-        // the same shape and did not.
-        //
-        // **Why this is safe here and nowhere else.** `borderOption` clears
-        // 3:1 on `surfaceContainerLow` and on **no other** control ground —
-        // page 2.99, `surfaceContainer` 2.92, `surfaceContainerHigh` 2.74.
-        // This row is drawn on `surfaceContainerLow` and only there (`ground`
-        // above), which is exactly why the outlined button and the text field
-        // keep the grey. `border_ladder_test.dart` holds both halves.
-        semantic.borderOption;
-    final outlineWidth = accent == null
-        ? AppStroke.hairline
-        : AppStroke.control;
+    //
+    // **A resting row draws no edge at all, and the card's depth separates it
+    // instead** (M100.69, owner decision on a rendered comparison).
+    //
+    // Two rounds were spent choosing *which* line to draw here — grey at
+    // 4.05:1, then the brand edge at 3.27 — and the question underneath was
+    // never which token. It was whether a resting answer row is a control that
+    // owes WCAG 1.4.11 a 3:1 boundary, or a card identified by its content.
+    // It is the second: five rows of running text are five surfaces holding
+    // sentences, and this screen's job is to be *read* before it is answered.
+    //
+    // What this buys is the states. `success` and `danger` at
+    // [AppStroke.control] are now the only edges on the screen rather than
+    // heavier versions of one that all five rows already wore — the verdict
+    // stops competing with the frame around it.
+    //
+    // Measured on the committed golden, not on the draft it was approved from:
+    // a resting row reads **1.394:1** in light, on a shadow (`#D7DAE6`), and
+    // **1.298:1** in dark, on the zero-blur `outlineVariant` rim
+    // (`#272C48`) `AppElevation` paints there. That is the separation every
+    // `MxCard` in this app has had since M99.94.
+    final Color? outline = accent?.resolve(context);
+    final outlineWidth = accent == null ? 0.0 : AppStroke.control;
+    // A row that is saying something says it with the edge; one at rest says it
+    // with depth. Never both, or one fact arrives on two channels.
+    final elevation = accent == null ? AppElevation.card : AppElevation.none;
     final verdict = switch (state) {
       GuessOptionState.correct => Icons.check,
       GuessOptionState.chosenWrong => Icons.close,
@@ -143,7 +133,20 @@ class GuessOptionItemWidget extends StatelessWidget {
           decoration: BoxDecoration(
             color: ground,
             borderRadius: radius,
-            border: Border.all(color: outline, width: outlineWidth),
+            // **The verdict's stroke sits outside the box** (M100.69). With a
+            // resting row drawing no edge, an inside stroke would make the two
+            // marked rows 3dp taller than the three that were not picked — so
+            // answering a question would push every row below the verdict down
+            // the screen, which is the shift §8.9 spent itself removing. The
+            // same trick, for the same reason, as `MxSearchField`.
+            border: outline == null
+                ? null
+                : Border.all(
+                    color: outline,
+                    width: outlineWidth,
+                    strokeAlign: BorderSide.strokeAlignOutside,
+                  ),
+            boxShadow: shadowsFor(elevation, scheme),
           ),
           // MxPressable is the Material+InkWell pair in one piece; the
           // container above still paints the surface.
@@ -193,11 +196,6 @@ abstract final class AppGuessOption {
     vertical: AppSpacing.sm,
   );
 
-  /// The border the row draws, counted on both edges — at its heaviest, so the
-  /// measurement below is a ceiling rather than a number that is right for four
-  /// rows out of five.
-  static const double rowBorder = AppStroke.control * 2;
-
   /// How tall this row wants to be for [text] at [width].
   ///
   /// **Measured, not guessed, and that is what keeps the screen still.** The
@@ -219,7 +217,7 @@ abstract final class AppGuessOption {
       text: TextSpan(text: text, style: style),
       textDirection: Directionality.of(context),
       textScaler: MediaQuery.textScalerOf(context),
-    )..layout(maxWidth: width - rowPadding.horizontal - rowBorder);
+    )..layout(maxWidth: width - rowPadding.horizontal);
 
     final content = painter.height + rowPadding.vertical;
     painter.dispose();
@@ -239,15 +237,18 @@ abstract final class AppGuessOption {
     // through the real `TextScaler` — and the fingertip it is a floor for does
     // not grow when the type does.
     //
-    // **The border sits outside the floor, because that is where the widget
-    // puts it.** `MxPressable` is *inside* the decorated container, so its 48
-    // bounds the padding and the text and the stroke is drawn around all of
-    // it: the row is `border + max(48, padding + text)`, never `max(48, …)`
-    // with the border folded in. Written the other way the helper answered 48
-    // for a row that renders at 50 — an under-reservation the section pays for
-    // by scrolling five options that are supposed to be visible at once
-    // (BR-121).
-    return rowBorder + (content > rowMinHeight ? content : rowMinHeight);
+    // **No border term at all since M100.69, and that is a simplification the
+    // change earned rather than one it needed.** A resting row draws no edge
+    // and a verdict draws its edge *outside* the box, so the stroke is out of
+    // the layout in every state — the row is exactly `max(48, padding + text)`
+    // and the helper is exact for all four states instead of exact for two and
+    // a ceiling for the other two.
+    //
+    // The ceiling it replaces was load-bearing while it existed: written the
+    // other way round the helper answered 48 for a row that rendered at 50, an
+    // under-reservation the section paid for by scrolling five options that are
+    // supposed to be visible at once (BR-121).
+    return content > rowMinHeight ? content : rowMinHeight;
   }
 
   /// The shortest a row may be. [AppSizing.touchTarget] rather than the
