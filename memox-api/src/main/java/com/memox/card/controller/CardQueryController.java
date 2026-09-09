@@ -4,12 +4,15 @@ import java.util.List;
 
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.memox.card.dto.request.CardFilterRequest;
+import com.memox.card.dto.request.CardHistoryRequest;
 import com.memox.card.dto.request.CardPageRequest;
+import com.memox.card.dto.response.CardHistoryResponse;
 import com.memox.card.dto.response.CardListResponse;
 import com.memox.card.dto.response.CardStateCountsResponse;
 import com.memox.card.entity.StageThresholds;
@@ -69,6 +72,36 @@ public class CardQueryController {
 			@Valid @ParameterObject CardFilterRequest filter,
 			@Valid @ParameterObject CardPageRequest page) {
 		return cardQueryService.idsMatching(filter.toFilter(), toPageQuery(page));
+	}
+
+	@GetMapping("/{cardId}")
+	@Operation(summary = "One card with its schedule and tags")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Card found"),
+			@ApiResponse(responseCode = "404", description = "Card not found, or in Trash")
+	})
+	public CardListResponse detail(@PathVariable String cardId) {
+		return CardListResponse.from(cardQueryService.detail(cardId));
+	}
+
+	/**
+	 * One page of review history, newest first.
+	 *
+	 * <p>The cursor is two parameters rather than one opaque token because both halves are
+	 * meaningful and a client resuming a page needs to be able to see what it is resuming from.
+	 * Send back the {@code nextCursor} from the previous response.
+	 */
+	@GetMapping("/{cardId}/history")
+	@Operation(summary = "A card's review history, newest first, keyset-paged")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "History page returned"),
+			@ApiResponse(responseCode = "400", description = "Invalid limit or partial cursor")
+	})
+	public CardHistoryResponse history(
+			@PathVariable String cardId,
+			@Valid @ParameterObject CardHistoryRequest request) {
+		return CardHistoryResponse.from(
+				cardQueryService.history(cardId, request.toCursor(), request.effectiveLimit()));
 	}
 
 	@GetMapping("/state-counts")

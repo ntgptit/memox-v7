@@ -7,6 +7,8 @@ import org.apache.ibatis.annotations.Param;
 
 import com.memox.card.entity.Card;
 import com.memox.card.entity.CardFilter;
+import com.memox.card.entity.CardHistoryCursor;
+import com.memox.card.entity.CardHistoryEntry;
 import com.memox.card.entity.CardListItem;
 import com.memox.card.entity.CardStateCounts;
 import com.memox.card.entity.StageThresholds;
@@ -40,6 +42,17 @@ public interface CardMapper {
 	CardStateCounts countCardStatesByDeck(
 			@Param("deckId") String deckId,
 			@Param("thresholds") StageThresholds thresholds);
+
+	CardListItem findCardDetailById(@Param("cardId") String cardId);
+
+	List<CardHistoryEntry> findCardHistoryFirstPage(
+			@Param("cardId") String cardId,
+			@Param("limit") int limit);
+
+	List<CardHistoryEntry> findCardHistoryAfter(
+			@Param("cardId") String cardId,
+			@Param("cursor") CardHistoryCursor cursor,
+			@Param("limit") int limit);
 
 	long countActiveCardsByDeck(@Param("deckId") String deckId);
 }

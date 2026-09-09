@@ -16,6 +16,7 @@ public enum ApiErrorCode {
 	DECK_HOLDS_CHILDREN(HttpStatus.CONFLICT, "error.deck-holds-children"),
 	ROOT_SCHEDULER_INVALID(HttpStatus.CONFLICT, "error.root-scheduler-invalid"),
 	DECK_NOT_FOUND(HttpStatus.NOT_FOUND, "error.deck-not-found"),
+	CARD_NOT_FOUND(HttpStatus.NOT_FOUND, "error.card-not-found"),
 	DECK_POSITION_OUT_OF_RANGE(HttpStatus.BAD_REQUEST, "error.deck-position-out-of-range"),
 	DECK_CROSS_ROOT_MOVE(HttpStatus.CONFLICT, "error.deck-cross-root-move"),
 	DECK_MOVE_INTO_OWN_SUBTREE(HttpStatus.CONFLICT, "error.deck-move-into-own-subtree"),

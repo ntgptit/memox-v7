@@ -9,6 +9,110 @@
         },
         "type" : "object"
       },
+      "CardHistoryCursorResponse" : {
+        "properties" : {
+          "answeredAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "CardHistoryEntryResponse" : {
+        "properties" : {
+          "action" : {
+            "type" : "string"
+          },
+          "answeredAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "cardId" : {
+            "type" : "string"
+          },
+          "comparisonVersion" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "direction" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "kind" : {
+            "type" : "string"
+          },
+          "mode" : {
+            "type" : "string"
+          },
+          "nextBox" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "nextDueAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "nextEaseFactor" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "nextIntervalDays" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "outcomeReason" : {
+            "type" : "string"
+          },
+          "previousBox" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "previousEaseFactor" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "previousIntervalDays" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "schedulerGeneration" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "schedulerType" : {
+            "type" : "string"
+          },
+          "sessionId" : {
+            "type" : "string"
+          },
+          "usedHint" : {
+            "type" : "boolean"
+          }
+        },
+        "type" : "object"
+      },
+      "CardHistoryResponse" : {
+        "properties" : {
+          "entries" : {
+            "items" : {
+              "$ref" : "#/components/schemas/CardHistoryEntryResponse"
+            },
+            "type" : "array"
+          },
+          "hasMore" : {
+            "type" : "boolean"
+          },
+          "nextCursor" : {
+            "$ref" : "#/components/schemas/CardHistoryCursorResponse"
+          }
+        },
+        "type" : "object"
+      },
       "CardListResponse" : {
         "properties" : {
           "answerCount" : {
@@ -868,6 +972,116 @@
           }
         },
         "summary" : "How many of a deck's cards sit in each learning stage",
+        "tags" : [
+          "Cards"
+        ]
+      }
+    },
+    "/api/v1/cards/{cardId}" : {
+      "get" : {
+        "operationId" : "detail",
+        "parameters" : [
+          {
+            "in" : "path",
+            "name" : "cardId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          }
+        ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CardListResponse"
+                }
+              }
+            },
+            "description" : "Card found"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CardListResponse"
+                }
+              }
+            },
+            "description" : "Card not found, or in Trash"
+          }
+        },
+        "summary" : "One card with its schedule and tags",
+        "tags" : [
+          "Cards"
+        ]
+      }
+    },
+    "/api/v1/cards/{cardId}/history" : {
+      "get" : {
+        "operationId" : "history",
+        "parameters" : [
+          {
+            "in" : "path",
+            "name" : "cardId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "answeredAt",
+            "required" : false,
+            "schema" : {
+              "format" : "date-time",
+              "type" : "string"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "cursorId",
+            "required" : false,
+            "schema" : {
+              "type" : "string"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "limit",
+            "required" : false,
+            "schema" : {
+              "format" : "int32",
+              "maximum" : 100,
+              "minimum" : 1,
+              "type" : "integer"
+            }
+          }
+        ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CardHistoryResponse"
+                }
+              }
+            },
+            "description" : "History page returned"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CardHistoryResponse"
+                }
+              }
+            },
+            "description" : "Invalid limit or partial cursor"
+          }
+        },
+        "summary" : "A card's review history, newest first, keyset-paged",
         "tags" : [
           "Cards"
         ]

@@ -100,6 +100,77 @@ class CardQueryControllerTest extends PostgresIntegrationTest {
 				.andExpect(jsonPath("$.code").value("VALIDATION_FAILED"));
 	}
 
+	@Test
+	void publishesOneCardAndRefusesATrashedOne() throws Exception {
+		seedDeck();
+		insertCardWithState("card-1", "deck", null, null);
+
+		mockMvc.perform(get("/api/v1/cards/{cardId}", "card-1"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.id").value("card-1"))
+				.andExpect(jsonPath("$.deckId").value("deck"));
+
+		softDelete("card", "card-1");
+
+		mockMvc.perform(get("/api/v1/cards/{cardId}", "card-1"))
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.code").value("CARD_NOT_FOUND"));
+	}
+
+	@Test
+	void publishesHistoryWithACursorThatCanBeSentStraightBack() throws Exception {
+		seedDeck();
+		insertCardWithState("card-1", "deck", null, null);
+		insertAnswer("a1", Instant.parse("2026-09-01T10:00:00Z"));
+		insertAnswer("a2", Instant.parse("2026-09-02T10:00:00Z"));
+
+		final var body = mockMvc.perform(get("/api/v1/cards/{cardId}/history", "card-1")
+					.param("limit", "1"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.entries.length()").value(1))
+				.andExpect(jsonPath("$.entries[0].id").value("a2"))
+				.andExpect(jsonPath("$.entries[0].action").value("remembered"))
+				.andExpect(jsonPath("$.hasMore").value(true))
+				.andExpect(jsonPath("$.nextCursor.id").value("a2"))
+				.andReturn().getResponse().getContentAsString();
+
+		final var cursorAt = com.jayway.jsonpath.JsonPath.read(body, "$.nextCursor.answeredAt")
+				.toString();
+
+		mockMvc.perform(get("/api/v1/cards/{cardId}/history", "card-1")
+					.param("limit", "1").param("answeredAt", cursorAt).param("cursorId", "a2"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.entries[0].id").value("a1"))
+				.andExpect(jsonPath("$.hasMore").value(false))
+				.andExpect(jsonPath("$.nextCursor").doesNotExist());
+	}
+
+	/** Half a cursor would silently restart at page one and repeat rows the client already showed. */
+	@Test
+	void refusesHalfACursor() throws Exception {
+		seedDeck();
+		insertCardWithState("card-1", "deck", null, null);
+
+		mockMvc.perform(get("/api/v1/cards/{cardId}/history", "card-1").param("cursorId", "a2"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
+				.andExpect(jsonPath("$.fieldErrors.cursor").exists());
+	}
+
+	private void insertAnswer(final String answerId, final Instant answeredAt) {
+		this.jdbcTemplate.update("""
+				INSERT INTO study_sessions (id, deck_id, root_deck_id, scheduler_generation, status,
+				                            session_kind, current_mode, card_limit, started_at)
+				VALUES ('session', 'deck', 'root', 1, 'in_progress', 'reviewing', 'self_assess', 20, ?)
+				ON CONFLICT (id) DO NOTHING""", java.sql.Timestamp.from(answeredAt));
+		this.jdbcTemplate.update("""
+				INSERT INTO study_answers (id, card_id, session_id, scheduler_type,
+				                           scheduler_generation, kind, mode, "action", answered_at)
+				VALUES (?, 'card-1', 'session', 'eight_box', 1, 'scheduled', 'self_assess',
+				        'remembered', ?)""",
+				answerId, java.sql.Timestamp.from(answeredAt));
+	}
+
 	private void seedDeck() {
 		insertRootDeck("root", "Korean");
 		insertSubDeck("deck", "Unit 1", "root", "root", DeckContentType.CARD);

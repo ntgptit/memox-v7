@@ -1676,6 +1676,15 @@ Ports `cardById`, `cardDetailById`, `studyStateByCard`, `cardHistoryFirstPage`, 
 
 Keyset pagination, not offset: `cardHistoryAfter`'s `(answered_at, id) < (:answeredAt, :id)` is stable while rows are appended, which offset pagination is not.
 
+**CORRECTED — four things, all of them found by reading the Drift comments above the statements rather than the statements themselves.**
+
+1. **The projection in Step 3 drops `comparison_version`.** `study_answers` has twenty columns; the plan lists nineteen. Drift uses `SELECT *` there deliberately and says why directly above it: *"a column dropped from a projection is a fact that silently stops being displayed"* (BR-242). Nothing would have failed. The port carries all twenty.
+2. **No separate `CardDetail` record.** Drift's own note calls `cardDetailById` *"`cardListItems` narrowed to one id, and deliberately the same shape"*, and gives the reason: detail and the row it was opened from cannot disagree about a card's state or its chips. Two records for one projection is exactly how they would come to disagree. `detail(cardId)` returns `CardListItem`.
+3. **`history(...)` returns a page, not a bare list.** Drift: *"The caller asks for one row more than the page size and reports what it found: 'is there another page' answered by the read rather than guessed from a short result."* A bare list leaves the caller inferring, and a page that happens to be exactly full is indistinguishable from the last one. `CardHistoryPage(entries, hasMore)`.
+4. **`studyStateByCard` and `cardById` are not ported here.** Neither has a consumer: the detail read already carries the whole study state, and `cardById` is a write-path read that Task 9 needs. Port each in the task that first calls it, rather than shipping two statements nothing reads.
+
+One addition the plan did not specify: half a cursor is refused. `answeredAt` without `cursorId` would silently read as "first page" and repeat rows the client has already shown — the duplicate BR-241 forbids, arriving as a client bug instead of an error.
+
 - [ ] **Step 1: Write the failing test**
 
 ```java

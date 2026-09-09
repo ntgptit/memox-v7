@@ -6,10 +6,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.memox.card.entity.CardFilter;
+import com.memox.card.entity.CardHistoryCursor;
+import com.memox.card.entity.CardHistoryPage;
 import com.memox.card.entity.CardListItem;
 import com.memox.card.entity.CardStateCounts;
 import com.memox.card.entity.StageThresholds;
 import com.memox.card.enums.CardSortField;
+import com.memox.card.exception.CardNotFoundException;
 import com.memox.card.persistence.CardMapper;
 import com.memox.common.pagination.PageHelper;
 import com.memox.common.pagination.PageQuery;
@@ -67,6 +70,45 @@ public class CardQueryService {
 		final var ids = cardMapper.findCardIdsMatching(filter, slice);
 		log.debug("Matched {} card id(s) in deck {}", ids.size(), filter.deckId());
 		return ids;
+	}
+
+	/**
+	 * One card, in the same shape its list row has.
+	 *
+	 * @throws CardNotFoundException when the card does not exist or is in Trash — on every active
+	 *         surface a tombstoned card must read as not-found rather than show its content
+	 *         (BR-245, BR-257)
+	 */
+	@Transactional(readOnly = true)
+	public CardListItem detail(String cardId) {
+		final var card = cardMapper.findCardDetailById(cardId);
+		if (card == null) {
+			throw new CardNotFoundException(cardId);
+		}
+		return card;
+	}
+
+	/**
+	 * One page of a card's review history, newest first (BR-241).
+	 *
+	 * <p>Keyset rather than offset: the cursor is the last row of the previous page and the next page
+	 * starts strictly after it, which is stable while rows are being appended. Offset is not.
+	 *
+	 * <p>The statement asks for one row more than the page size, and that extra row is what answers
+	 * "is there another page". Guessing from a short result cannot tell the last page from one that
+	 * happens to be exactly full.
+	 *
+	 * @param cursor null for the first page
+	 */
+	@Transactional(readOnly = true)
+	public CardHistoryPage history(String cardId, CardHistoryCursor cursor, int limit) {
+		final var probe = limit + 1;
+		final var rows = cursor == null
+				? cardMapper.findCardHistoryFirstPage(cardId, probe)
+				: cardMapper.findCardHistoryAfter(cardId, cursor, probe);
+		final var hasMore = rows.size() > limit;
+		log.debug("Read {} history row(s) for card {}", rows.size(), cardId);
+		return new CardHistoryPage(hasMore ? rows.subList(0, limit) : rows, hasMore);
 	}
 
 	@Transactional(readOnly = true)
