@@ -177,6 +177,54 @@ migration test và enforcement cho các bất biến.
 
 Mọi task của milestone này đã đóng — xem `wbs-archive/m5.md`.
 
+## M9 · MemoX API
+
+Backend Spring Boot độc lập trong `memox-api/`. Ba plan Phase 0/1/2 đều ghi
+"Updated by task: M9", nhưng milestone này chưa từng có mặt trong sổ — WBS đã
+tụt sau code của module đó từ đầu.
+
+### M9.W1 · Wave 1 — làm cho module kiểm chứng được
+
+- **Status:** **done** — `./mvnw -B verify` xanh 37/37, cả hai gate đã tiêm lỗi.
+- **Goal:** Không thêm tính năng nào. Chỉ dựng đủ hạ tầng để mọi khẳng định về
+  module này là **phép đo** chứ không phải trí nhớ. Audit
+  (`docs/reviews/memox-api-spring-standards-audit.md`) tìm ra hai blocker: module
+  chưa từng được CI verify, và suite không chạy được trên máy dev.
+- **Scope:** `mvnw` thành executable · backend test chọn được giữa Testcontainers
+  và PostgreSQL local · reset dữ liệu đọc từ catalog · Checkstyle + PMD + SpotBugs
+  · ngưỡng JaCoCo · snapshot OpenAPI · job `memox_api` trong `ci.yml` và trong
+  `needs:` của `CI gate` · `compose.yaml` (deliverable còn nợ của Phase 0).
+- **Out of scope:** Wave 2 (đổi tên package) và Wave 3 (contract phân trang, log
+  service, exception ôm id) — cùng thiết kế, nhánh khác.
+
+**Hai lỗi thật mà Wave 1 phát hiện — đây là giá trị của nó, không phải hạ tầng:**
+
+1. **Mọi lệnh tạo deck/card trả HTTP 500.** `deck_mapper.xml` khai
+   `javaType="int"`, nhưng trong `TypeAliasRegistry` của MyBatis `int` là
+   `Integer`; kiểu nguyên thuỷ là `_int`. Record `Deck` nhận `int
+   siblingPosition`, nên constructor không khớp:
+   `NoSuchMethodException: Deck.<init>(…, Integer, Integer, Integer, …)`.
+   `card_mapper.xml` sai y hệt với `boolean`/`is_flagged`. Bảy trong tám failure
+   đầu tiên là nó. **Nó sống sót vì những test đó chưa từng chạy** — đúng câu
+   audit viết: trạng thái xanh của module là trí nhớ, không phải phép đo.
+2. **Snapshot OpenAPI ghi bằng CRLF.** Jackson dùng ký tự xuống dòng của nền
+   tảng. Hậu quả thật không phải một test đỏ mà là CI (Linux) và máy dev
+   (Windows) lật toàn bộ file qua lại mỗi lần regenerate — một contract diff
+   không ai đọc nổi. Đã ghim LF trong bộ ghi.
+
+**Ngưỡng coverage là số đo, không phải số chọn:** lần xanh đầu tiên cho
+INSTRUCTION 0.9364 / BRANCH 0.7258; ngưỡng đặt ở `đo − 0.02` = 0.92 / 0.71. Một
+ngưỡng bịa ra sẽ bị hạ xuống ngay lần đầu nó đỏ.
+
+**Cả hai gate đã tiêm lỗi, không nhận xanh suông:** Checkstyle — thêm một `else`
+và một biến không `final` → ERROR, BUILD FAILURE; JaCoCo — ép 0.99 →
+`Rule violated … 0.93 < 0.99`. Lần tiêm lỗi coverage **đầu tiên vô hiệu** (gọi
+`jacoco:check` thẳng từ CLI không nạp `<configuration>` của execution, nên nó đỏ
+vì thiếu tham số chứ không vì coverage); đã làm lại qua đúng lifecycle.
+
+**Còn nợ, có chủ đích:** Wave 2 và Wave 3. Và `openapi.json` mới chỉ phủ bốn
+endpoint hiện có — nó là đường cơ sở để Wave 3 diff, chưa phải hợp đồng đầy đủ.
+
 ## M99 · Adhoc
 
 Task do chủ dự án giao trực tiếp, không thuộc chuỗi phụ thuộc M0…M9. Đánh số từ
