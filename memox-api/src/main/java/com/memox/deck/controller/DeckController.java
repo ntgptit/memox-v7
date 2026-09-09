@@ -21,6 +21,7 @@ import com.memox.common.pagination.PagingResponse;
 import com.memox.common.config.PaginationProperties;
 import com.memox.common.time.DayWindow;
 import com.memox.deck.service.DeckService;
+import com.memox.deck.exception.DeckNotFoundException;
 import com.memox.deck.service.DeckTreeService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,6 +36,7 @@ import com.memox.deck.dto.request.CreateRootDeckRequest;
 import com.memox.deck.dto.request.CreateSubDeckRequest;
 import com.memox.deck.dto.request.DeckPageRequest;
 import com.memox.deck.dto.response.DeckResponse;
+import com.memox.deck.dto.response.DeckLevelResponse;
 import com.memox.deck.dto.response.DeckSummaryResponse;
 
 @RestController
@@ -112,6 +114,25 @@ public class DeckController {
 	@ApiResponses(@ApiResponse(responseCode = "200", description = "Tree returned"))
 	public List<DeckResponse> listTree(@PathVariable String rootDeckId) {
 		return deckTreeService.listTree(rootDeckId).stream().map(DeckResponse::from).toList();
+	}
+
+	@GetMapping("/{deckId}/level")
+	@Operation(summary = "Open a deck: its breadcrumb, its direct children and their subtree counts")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Level returned"),
+			@ApiResponse(responseCode = "400", description = "Invalid UTC offset"),
+			@ApiResponse(responseCode = "404", description = "Deck not found")
+	})
+	public DeckLevelResponse readLevel(
+			@PathVariable String deckId,
+			@RequestHeader(value = DayWindow.OFFSET_HEADER, required = false, defaultValue = "0")
+			int utcOffsetMinutes) {
+		final var window = DayWindow.of(clock, utcOffsetMinutes);
+		final var level = deckTreeService.readLevel(deckId, window.now(), window.startOfDay());
+		if (level == null) {
+			throw new DeckNotFoundException(deckId);
+		}
+		return DeckLevelResponse.from(level);
 	}
 
 	@GetMapping("/{deckId}")

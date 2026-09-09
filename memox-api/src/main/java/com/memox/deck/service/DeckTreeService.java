@@ -12,6 +12,10 @@ import com.memox.common.pagination.PagingResponse;
 import com.memox.common.pagination.SortColumn;
 import com.memox.common.pagination.SortDirection;
 import com.memox.deck.entity.Deck;
+import com.memox.deck.entity.DeckContext;
+import com.memox.deck.entity.DeckLevel;
+import com.memox.deck.entity.DeckLevelChild;
+import com.memox.deck.entity.DeckLevelRow;
 import com.memox.deck.entity.DeckSummary;
 import com.memox.deck.enums.DeckSortField;
 import com.memox.deck.persistence.DeckMapper;
@@ -65,6 +69,52 @@ public class DeckTreeService {
 		final var decks = deckMapper.findDecksInTree(rootDeckId);
 		log.debug("Read {} deck(s) in tree {}", decks.size(), rootDeckId);
 		return decks;
+	}
+
+	/**
+	 * One deck opened: its header, its breadcrumb and its direct children with subtree counts.
+	 *
+	 * <p>The statement returns one row per child, and one row with no child when the deck is empty,
+	 * because the join to children is a LEFT JOIN. Folding happens here rather than in the result
+	 * map: the header repeats on every row and a childless deck must produce an empty list, not a
+	 * child made of nulls.
+	 *
+	 * @return null when the deck does not exist or is in Trash — the same thing every write path in
+	 *         this module turns a missing row into (BR-257)
+	 */
+	@Transactional(readOnly = true)
+	public DeckLevel readLevel(String deckId, Instant now, Instant startOfToday) {
+		final var rows = deckMapper.findChildDeckLevel(deckId, now, startOfToday, DeckLimits.MAX_WALK);
+		if (rows.isEmpty()) {
+			return null;
+		}
+		final var header = rows.get(0);
+		final var children = rows.stream().filter(DeckLevelRow::hasChild).map(this::toChild).toList();
+		log.debug("Read level of deck {} with {} child/children", deckId, children.size());
+		return new DeckLevel(
+				new DeckContext(header.parentId(), header.parentName(), header.parentContentType(),
+						header.ancestry()),
+				children,
+				header.nextDueAt());
+	}
+
+	/**
+	 * A deck's own name and the path above it, for the card list header.
+	 *
+	 * @return null when the deck does not exist or is in Trash
+	 */
+	@Transactional(readOnly = true)
+	public DeckContext readContext(String deckId) {
+		return deckMapper.findDeckContext(deckId, DeckLimits.MAX_WALK);
+	}
+
+	private DeckLevelChild toChild(DeckLevelRow row) {
+		final var child = new Deck(row.childId(), row.childName(), row.childParentDeckId(),
+				row.childRootDeckId(), row.childContentType(), null, null, null,
+				row.childSiblingPosition(), row.childCreatedAt(), row.childUpdatedAt());
+		return new DeckLevelChild(child, row.inheritedSchedulerType(), row.totalCardCount(),
+				row.newCardCount(), row.dueCardCount(), row.overdueCardCount(), row.oldestDueAt(),
+				row.learnedCardCount(), row.subDeckCount());
 	}
 
 	/**
