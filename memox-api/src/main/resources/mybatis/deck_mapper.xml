@@ -326,6 +326,91 @@
      WHERE self.id = #{deckId} AND self.delete_batch_id IS NULL
   </select>
 
+  <!--
+    Explicit result map rather than resultType automapping. DeckDepth declares primitives, and this
+    module has already shipped one HTTP 500 caused by MyBatis's bare `int` being an alias for
+    `Integer`. `_int` and `_boolean` say which is meant.
+
+    reached_root is `(parent_id IS NULL)` — a real PostgreSQL boolean (translation row 7), not the
+    0/1 SMALLINT the schema uses for stored flags, so it needs no type handler.
+  -->
+  <resultMap id="deckDepth" type="com.memox.deck.entity.DeckDepth">
+    <constructor>
+      <arg column="depth" javaType="_int"/>
+      <arg column="reached_root" javaType="_boolean"/>
+    </constructor>
+  </resultMap>
+
+  <!--
+    Replaces a loop of up to ten SELECTs that ran inside the write transaction. One statement, one
+    round trip, and the depth rule stops being O(depth) queries deep in a lock.
+
+    UNION ALL, not UNION: the rows carry a growing `depth`, so nothing would deduplicate anyway, and
+    `a.depth < #{maxWalk}` is what actually terminates the walk. Cyclic data truncates instead of
+    hanging.
+  -->
+  <select id="probeDeckDepth" resultMap="deckDepth">
+    WITH RECURSIVE ancestry (node_id, parent_id, depth) AS (
+        SELECT id, parent_deck_id, 1 FROM decks
+         WHERE id = #{deckId} AND delete_batch_id IS NULL
+        UNION ALL
+        SELECT d.id, d.parent_deck_id, a.depth + 1
+          FROM decks d
+          INNER JOIN ancestry a ON d.id = a.parent_id
+         WHERE a.depth &lt; #{maxWalk} AND d.delete_batch_id IS NULL
+    )
+    SELECT depth AS depth, (parent_id IS NULL) AS reached_root
+      FROM ancestry
+     ORDER BY depth DESC
+     LIMIT 1
+  </select>
+
+  <select id="probeSubtreeHeight" resultType="java.lang.Integer">
+    WITH RECURSIVE walk (id, height) AS (
+        SELECT id, 1 FROM decks WHERE id = #{deckId} AND delete_batch_id IS NULL
+        UNION ALL
+        SELECT d.id, w.height + 1
+          FROM decks d
+          INNER JOIN walk w ON d.parent_deck_id = w.id
+         WHERE w.height &lt; #{maxWalk} AND d.delete_batch_id IS NULL
+    )
+    SELECT MAX(height) FROM walk
+  </select>
+
+  <!--
+    UNION here rather than UNION ALL: these rows are bare ids from a finite set, so UNION both
+    deduplicates and terminates on a cycle. That is the same argument Drift makes for `branch`, and
+    the reason it does NOT hold for the ancestry walks, whose rows carry a growing distance.
+  -->
+  <sql id="subtreeIds">
+    subtree (id) AS (
+        SELECT id FROM decks WHERE id = #{deckId} AND delete_batch_id IS NULL
+        UNION
+        SELECT d.id FROM decks d
+          INNER JOIN subtree s ON d.parent_deck_id = s.id
+         WHERE d.delete_batch_id IS NULL
+    )
+  </sql>
+
+  <select id="findSubtreeDeckIds" resultType="java.lang.String">
+    WITH RECURSIVE <include refid="subtreeIds"/>
+    SELECT id FROM subtree
+  </select>
+
+  <select id="countDirectChildDecks" resultType="long">
+    SELECT COUNT(*) FROM decks WHERE parent_deck_id = #{deckId} AND delete_batch_id IS NULL
+  </select>
+
+  <select id="countDirectCards" resultType="long">
+    SELECT COUNT(*) FROM cards WHERE deck_id = #{deckId} AND delete_batch_id IS NULL
+  </select>
+
+  <select id="countSubtreeCards" resultType="long">
+    WITH RECURSIVE <include refid="subtreeIds"/>
+    SELECT COUNT(*) FROM cards c
+     WHERE c.deck_id IN (SELECT id FROM subtree) AND c.delete_batch_id IS NULL
+  </select>
+
   <!-- Port of Drift's allDecks, ordering included. -->
   <select id="findAllActiveDecks" resultMap="deck">
     SELECT id, name, parent_deck_id, root_deck_id, content_type, scheduler_type,

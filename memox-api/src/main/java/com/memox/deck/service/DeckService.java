@@ -40,7 +40,6 @@ public class DeckService {
 
 	private static final int INITIAL_SCHEDULER_VERSION = 1;
 	private static final int INITIAL_SCHEDULER_GENERATION = 1;
-	private static final int MAX_TREE_DEPTH = 10;
 
 	/**
 	 * The tie-breaker every deck page carries.
@@ -55,6 +54,7 @@ public class DeckService {
 			List.of(new SortColumn(DeckSortField.SIBLING_POSITION.getColumn(), SortDirection.ASC));
 
 	private final DeckMapper deckMapper;
+	private final DeckStructureService deckStructureService;
 	private final Clock clock;
 
 	@Transactional
@@ -77,7 +77,8 @@ public class DeckService {
 		if (parent.contentType() == DeckContentType.CARD) {
 			throw new DeckConflictException(ApiErrorCode.PARENT_HOLDS_CARDS, parent.id());
 		}
-		if (depthOf(parent) >= MAX_TREE_DEPTH) {
+		// One recursive statement, not a loop of up to ten SELECTs inside this write transaction.
+		if (deckStructureService.depthOf(parent.id()) >= DeckLimits.MAX_TREE_DEPTH) {
 			throw new DeckConflictException(ApiErrorCode.DECK_DEPTH_EXCEEDED, parent.id());
 		}
 
@@ -148,19 +149,6 @@ public class DeckService {
 			throw new DeckNotFoundException(deckId);
 		}
 		return deck;
-	}
-
-	private int depthOf(Deck deck) {
-		int depth = 1;
-		var current = deck;
-		while (current.parentDeckId() != null) {
-			if (depth >= MAX_TREE_DEPTH) {
-				return depth;
-			}
-			current = requireActiveDeck(current.parentDeckId());
-			depth++;
-		}
-		return depth;
 	}
 
 	private String normalizeName(String name) {

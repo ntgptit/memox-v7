@@ -1026,7 +1026,7 @@ Replaces `DeckService.depthOf`, which today walks the tree with up to ten separa
 
 **Files:**
 - Create: `memox-api/src/main/java/com/memox/deck/entity/DeckDepth.java`
-- Modify: `memox-api/src/main/java/com/memox/deck/service/DeckLimits.java` *(created in Task 3; this task adds `MAX_WALK`)*
+- ~~Modify: `memox-api/src/main/java/com/memox/deck/service/DeckLimits.java`~~ *(both constants landed with Task 3, which needed `MAX_WALK` for its ancestry walks)*
 - Modify: `memox-api/src/main/java/com/memox/deck/persistence/DeckMapper.java`
 - Modify: `memox-api/src/main/resources/mybatis/deck_mapper.xml`
 - Create: `memox-api/src/main/java/com/memox/deck/service/DeckStructureService.java`
