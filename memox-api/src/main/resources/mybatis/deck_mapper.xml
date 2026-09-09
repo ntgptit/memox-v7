@@ -76,17 +76,23 @@
     walking parent_deck_id: a card three levels down belongs to the root, and
     COALESCE(parent_deck_id, id) returns the wrong deck from the third level down (BR-56).
 
-    Three deliberate divergences from the Drift original, all of them fixes, all of them to be
-    recorded in the parity document (Task 15) with a WBS entry against the Flutter query:
+    ONE deliberate divergence from the Drift original: next_due_at also excludes cards whose DECK
+    is in Trash. Drift joins `cards` alone, which keeps a card out when the card itself is trashed
+    but not when its deck is — and its own comment gives the reason that covers both: "a state
+    whose card is in Trash must not set the moment this screen wakes up at" (BR-257). Every count
+    beside it checks cd.delete_batch_id; this now agrees with them. Record it in the parity
+    document (Task 15) with a WBS entry against the Flutter query.
 
-    1. next_due_at is CORRELATED to d. Drift's sub-select has no reference to the deck row, so it
-       returns MIN(due_at) across the whole database and every root in the Library list shows the
-       same "next due" moment.
-    2. next_due_at also excludes cards whose DECK is in Trash. Drift joins `cards` alone, which
-       keeps a card out when the card itself is trashed but not when its deck is — inconsistent
-       with the five counts beside it, which all check cd.delete_batch_id (BR-257).
-    3. due_card_count requires learned_at IS NOT NULL, so a never-learned card is new and not also
-       due. A card in both buckets is counted twice on the same badge (BR-90, BR-151).
+    next_due_at is deliberately NOT correlated to d, and that is not an oversight to fix. It is the
+    earliest instant at which any dueCardCount on this page would change, and the list screen
+    schedules its next re-measure from it — a screen-level timer delivered on every row, not a
+    per-deck fact. Drift says so directly, and adds the cost argument: "one scalar subquery,
+    evaluated once per statement". Correlating it on root_deck_id changes both the meaning (the
+    screen would wake at the first tree's boundary and be late for the others) and the plan (once
+    per statement becomes once per row).
+
+    That correlation was written here and merged, on the strength of the plan calling it a bug fix.
+    Reading the SQL was not enough; the comment above the SQL is where the design lives.
   -->
   <select id="findRootDeckSummaries" resultMap="deckSummary">
     SELECT d.id, d.name, d.root_deck_id, d.content_type, d.scheduler_type, d.sibling_position,
@@ -102,7 +108,6 @@
               INNER JOIN cards nc ON nc.id = nx.card_id
               INNER JOIN decks nd ON nd.id = nc.deck_id
              WHERE nx.due_at &gt; #{now}
-               AND nd.root_deck_id = d.id
                AND nc.delete_batch_id IS NULL
                AND nd.delete_batch_id IS NULL) AS next_due_at,
            d.created_at, d.updated_at

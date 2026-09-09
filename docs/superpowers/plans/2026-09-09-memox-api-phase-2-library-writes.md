@@ -791,7 +791,9 @@ Expected: FAIL — `DeckTreeService` does not exist.
 </select>
 ```
 
-**One deliberate divergence from Drift, and it is a bug fix.** `rootDeckSummaries`'s `nextDueAt` sub-select has no correlation to `d` — it takes `MIN(due_at)` across the **entire database**, so every root deck in the Flutter list shows the same "next due" moment. The port adds `AND nd.root_deck_id = d.id`. Record this in the parity document (Task 15) and open a WBS entry against the Flutter side rather than editing `lib/`.
+**CORRECTED — this paragraph used to call the missing correlation a bug, and it is not one.** `nextDueAt` takes `MIN(due_at)` across the whole database on purpose: it is the earliest instant at which any `dueCardCount` on the page would change, and the list screen schedules its next re-measure from it. It is a screen-level timer delivered on every row, not a per-deck fact, and `deck.drift` says so twice — once above the statement ("one scalar subquery, evaluated once per statement") and once beside `childDeckLevel` ("the whole database is its horizon and the global MIN in `rootDeckSummaries` is correct there"). Correlating it on `root_deck_id` changes the meaning — the screen wakes at the first tree's boundary and is late for the others — and turns one scalar into a per-row correlated sub-query. **Do not add the correlation.** It was added and merged in PR #516 on the strength of this paragraph, and reverted immediately afterwards.
+
+**The real divergence is smaller.** `nextDueAt` also excludes cards whose *deck* is in Trash. Drift joins `cards` alone, so it drops a trashed card but keeps a card sitting in a trashed deck — while every count beside it checks `cd.delete_batch_id`. Drift's own reason covers both ("a state whose card is in Trash must not set the moment this screen wakes up at", BR-257). Record *that* in the parity document (Task 15) with a WBS entry against the Flutter side rather than editing `lib/`.
 
 `findAllActiveDecks` and `findDecksInTree` are direct copies of `allDecks` and `decksInTree` with the existing `deck` result map and the column list already used by `findRootDecks`.
 
@@ -985,7 +987,7 @@ The four `branch`-keyed aggregates are what make a child's counts cover its **wh
 
 `findChildDeckLevel` returns one row per child (or a single row with a null child when the parent is empty), so `DeckTreeService.readLevel` filters the null-child row out before building `DeckLevel`.
 
-**A second deliberate divergence, also a bug fix.** Drift's `nextDueAt` sub-select scans the whole `branch` CTE without restricting it to the current child, so every row on a level view reports the same next-due moment. The port adds `AND fb.branch_id = child.id`. Record it in Task 15 alongside the Task 2 finding.
+**CORRECTED — the same mistake as Task 2, for the same reason.** Reading the whole `branch` CTE is deliberate: this scalar is the level screen's re-measure timer, and `deck.drift` states its scope explicitly — "scoped to this level's subtrees, unlike the root's … the earliest instant at which one of *these* counts changes". Restricting it to `child.id` would turn a screen-level timer into a per-child value and a once-per-statement scalar into a per-row one. **Do not add `AND fb.branch_id = child.id`.** Port the sub-select unchanged.
 
 `AncestryJsonTypeHandler` extends `BaseTypeHandler<List<DeckAncestor>>` and reads the column with a shared `ObjectMapper`; it returns `List.of()` for `null` so a future non-`COALESCE`d caller still cannot NPE.
 

@@ -92,16 +92,21 @@ class DeckSummaryTest extends PostgresIntegrationTest {
 	}
 
 	/**
-	 * The one deliberate divergence from Drift, and the test that proves it is a fix.
+	 * {@code nextDueAt} is one number for the whole page, repeated on every row, and that is the
+	 * design rather than a missing correlation.
 	 *
-	 * <p>Drift's {@code rootDeckSummaries} computes {@code nextDueAt} with a sub-select that has no
-	 * correlation to the deck row, so it returns {@code MIN(due_at)} across the entire database and
-	 * every root in the Flutter list shows the same moment. The port correlates it on
-	 * {@code root_deck_id}. Two roots with different future due dates is the smallest arrangement
-	 * where the uncorrelated version and the correct one disagree.
+	 * <p>It answers "when would any count on this screen next change", and the list schedules its
+	 * re-measure from it. A per-root value would make the screen wake at the first tree's boundary
+	 * and be late for every other tree. Drift states it and adds the cost: one scalar subquery,
+	 * evaluated once per statement rather than once per row.
+	 *
+	 * <p>This test exists because the opposite was implemented and merged first, on the strength of
+	 * the plan calling the missing correlation a bug. Two roots with different future due dates is
+	 * the arrangement where the two readings disagree, so it is the arrangement that pins which one
+	 * this API promises.
 	 */
 	@Test
-	void reportsNextDueAtPerRootRatherThanAcrossTheWholeDatabase() {
+	void reportsOneNextDueAtForTheWholePageBecauseItIsTheScreensReMeasureTimer() {
 		insertRootDeck("early", "Korean");
 		insertSubDeck("early-cards", "Unit", "early", "early", DeckContentType.CARD);
 		insertCardWithState("soon", "early-cards", Instant.parse("2026-09-01T00:00:00Z"),
@@ -114,10 +119,35 @@ class DeckSummaryTest extends PostgresIntegrationTest {
 
 		final var summaries = deckTreeService.listRootSummaries(pageQuery(), NOW, START_OF_TODAY).getItems();
 
-		assertThat(summaries).extracting(DeckSummary::id, DeckSummary::nextDueAt)
-				.containsExactlyInAnyOrder(
-						org.assertj.core.groups.Tuple.tuple("early", Instant.parse("2026-09-20T00:00:00Z")),
-						org.assertj.core.groups.Tuple.tuple("late", Instant.parse("2026-10-31T00:00:00Z")));
+		assertThat(summaries).hasSize(2)
+				.extracting(DeckSummary::nextDueAt)
+				.containsOnly(Instant.parse("2026-09-20T00:00:00Z"));
+	}
+
+	/**
+	 * The one real divergence: a card whose DECK is in Trash must not set the wake-up moment either.
+	 *
+	 * <p>Drift joins {@code cards} alone, so it drops a trashed card but keeps a card sitting in a
+	 * trashed deck — while every count beside it checks the deck's tombstone. The port applies
+	 * Drift's own stated reason to both cases (BR-257): the state row survives a soft delete by
+	 * design, and without this the screen schedules a re-measure for a card no count includes.
+	 */
+	@Test
+	void ignoresCardsInATrashedDeckWhenSchedulingTheNextReMeasure() {
+		insertRootDeck("root", "Korean");
+		insertSubDeck("kept", "Unit A", "root", "root", DeckContentType.CARD);
+		insertSubDeck("trashed", "Unit B", "root", "root", DeckContentType.CARD);
+		insertCardWithState("far", "kept", Instant.parse("2026-09-01T00:00:00Z"),
+				Instant.parse("2026-10-31T00:00:00Z"));
+		insertCardWithState("near", "trashed", Instant.parse("2026-09-01T00:00:00Z"),
+				Instant.parse("2026-09-20T00:00:00Z"));
+		softDelete("deck", "trashed");
+
+		final var summaries = deckTreeService.listRootSummaries(pageQuery(), NOW, START_OF_TODAY).getItems();
+
+		assertThat(summaries).singleElement()
+				.extracting(DeckSummary::nextDueAt)
+				.isEqualTo(Instant.parse("2026-10-31T00:00:00Z"));
 	}
 
 	/**
