@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<ruleset name="memox-api"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+
+    <description>
+        Only rules that neither Checkstyle nor SpotBugs can express.
+    </description>
+
+    <rule ref="category/java/bestpractices.xml/UnusedFormalParameter">
+        <priority>4</priority>
+        <properties>
+            <property name="checkAll" value="true"/>
+        </properties>
+    </rule>
+
+    <rule ref="category/java/errorprone.xml/AvoidLiteralsInIfCondition"/>
+    <rule ref="category/java/design.xml/CognitiveComplexity"/>
+    <rule ref="category/java/design.xml/CollapsibleIfStatements"/>
+    <rule ref="category/java/codestyle.xml/ConfusingTernary"/>
+    <rule ref="category/java/bestpractices.xml/UnusedAssignment"/>
+    <rule ref="category/java/errorprone.xml/ReturnEmptyCollectionRatherThanNull"/>
+</ruleset>

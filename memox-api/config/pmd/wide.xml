@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<ruleset name="wide" xmlns="http://pmd.sourceforge.net/ruleset/2.0.0">
+    <description>wide probe</description>
+    <rule ref="category/java/bestpractices.xml"/>
+    <rule ref="category/java/errorprone.xml"/>
+    <rule ref="category/java/design.xml"/>
+</ruleset>
