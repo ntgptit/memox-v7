@@ -1,12 +1,30 @@
 {
+  "permissions": {
+    "ask": [
+      "Workflow"
+    ]
+  },
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Agent|Workflow",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "S=\"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/enforce_subagent_model.py\"; if [ -f \"$S\" ]; then python \"$S\"; else printf \"%s\" \"{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"PreToolUse\\\",\\\"permissionDecision\\\":\\\"deny\\\",\\\"permissionDecisionReason\\\":\\\"subagent-model guard missing at $S - refusing to spawn a subagent unguarded\\\"}}\"; fi",
+            "timeout": 15,
+            "statusMessage": "Pinning subagent to Sonnet…"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Write|Edit",
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/check_design_tokens.py",
+            "command": "python \"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/check_design_tokens.py\"",
             "timeout": 15,
             "statusMessage": "Checking design tokens…"
           }
