@@ -151,6 +151,181 @@
     OFFSET #{slice.offset}
   </select>
 
+  <resultMap id="deckLevelRow" type="com.memox.deck.entity.DeckLevelRow">
+    <constructor>
+      <idArg column="parent_id" javaType="java.lang.String"/>
+      <arg column="parent_name" javaType="java.lang.String"/>
+      <arg column="parent_content_type" javaType="com.memox.deck.enums.DeckContentType" typeHandler="com.memox.deck.persistence.DeckContentTypeTypeHandler"/>
+      <arg column="ancestry_json" javaType="java.util.List" typeHandler="com.memox.deck.persistence.AncestryJsonTypeHandler"/>
+      <arg column="next_due_at" javaType="java.time.Instant"/>
+      <arg column="child_id" javaType="java.lang.String"/>
+      <arg column="child_name" javaType="java.lang.String"/>
+      <arg column="child_parent_deck_id" javaType="java.lang.String"/>
+      <arg column="child_root_deck_id" javaType="java.lang.String"/>
+      <arg column="child_content_type" javaType="com.memox.deck.enums.DeckContentType" typeHandler="com.memox.deck.persistence.DeckContentTypeTypeHandler"/>
+      <!-- java.lang.Integer, not _int: the LEFT JOIN leaves this NULL for a childless parent. -->
+      <arg column="child_sibling_position" javaType="java.lang.Integer"/>
+      <arg column="child_created_at" javaType="java.time.Instant"/>
+      <arg column="child_updated_at" javaType="java.time.Instant"/>
+      <arg column="inherited_scheduler_type" javaType="com.memox.deck.enums.SchedulerType" typeHandler="com.memox.deck.persistence.SchedulerTypeTypeHandler"/>
+      <arg column="total_card_count" javaType="_long"/>
+      <arg column="new_card_count" javaType="_long"/>
+      <arg column="due_card_count" javaType="_long"/>
+      <arg column="overdue_card_count" javaType="_long"/>
+      <arg column="oldest_due_at" javaType="java.time.Instant"/>
+      <arg column="learned_card_count" javaType="_long"/>
+      <arg column="sub_deck_count" javaType="_long"/>
+    </constructor>
+  </resultMap>
+
+  <resultMap id="deckContext" type="com.memox.deck.entity.DeckContext">
+    <constructor>
+      <idArg column="deck_id" javaType="java.lang.String"/>
+      <arg column="deck_name" javaType="java.lang.String"/>
+      <arg column="content_type" javaType="com.memox.deck.enums.DeckContentType" typeHandler="com.memox.deck.persistence.DeckContentTypeTypeHandler"/>
+      <arg column="ancestry_json" javaType="java.util.List" typeHandler="com.memox.deck.persistence.AncestryJsonTypeHandler"/>
+    </constructor>
+  </resultMap>
+
+  <!--
+    The ancestry walk, shared by the two statements below.
+
+    #{maxWalk} is not optional. UNION makes `branch` cycle-safe because its (branch_id, deck_id)
+    rows come from a finite set; it does NOT make this walk cycle-safe, because `distance` grows on
+    every lap so every row stays distinct and there is nothing to deduplicate. Without the bound,
+    corrupt cyclic data does not fail the statement — it makes it never return.
+
+    Drift's deckContextById omits this bound and its comment claims UNION covers it. deck.drift
+    refutes exactly that beside the identical CTE in childDeckLevel. The port carries the bound in
+    both places.
+  -->
+  <sql id="ancestryWalk">
+    ancestry (deck_id, distance) AS (
+        SELECT parent_deck_id, 1 FROM decks
+         WHERE id = #{deckId} AND parent_deck_id IS NOT NULL
+        UNION
+        SELECT d.parent_deck_id, a.distance + 1
+          FROM decks d
+          INNER JOIN ancestry a ON d.id = a.deck_id
+         WHERE d.parent_deck_id IS NOT NULL AND a.distance &lt; #{maxWalk}
+    )
+  </sql>
+
+  <!--
+    Translation row 2: json_group_array(json_object(...)) becomes
+    json_agg(json_build_object(...)), COALESCEd to '[]' so an empty chain is an empty array and
+    never null, and explicitly ORDERed because SQL promises no aggregate input order and the client
+    displays nearest-first.
+  -->
+  <sql id="ancestryJson">
+    (SELECT COALESCE(json_agg(json_build_object('id', a.deck_id, 'name', d.name,
+                                                'distance', a.distance)
+                              ORDER BY a.distance), '[]'::json)
+       FROM ancestry a
+       INNER JOIN decks d ON d.id = a.deck_id) AS ancestry_json
+  </sql>
+
+  <!--
+    Port of Drift's childDeckLevel. One statement for the header, the breadcrumb and every child's
+    whole-subtree counts, because a screen that reads the title and the path separately can render
+    a name from before a rename and a path from after it (AD-13).
+
+    The four branch-keyed aggregates are what make a child's counts cover its subtree; `sub` is
+    deliberately NOT branch-keyed, because subDeckCount is a direct-child count in Drift and stays
+    one here.
+
+    next_due_at reads the whole `branch` CTE and is NOT restricted to child.id. It is this level's
+    re-measure timer — "the earliest instant at which one of THESE counts changes" — so it is one
+    value for the view. The plan told this task to add `AND fb.branch_id = child.id`; that is the
+    same per-row mistake PR #517 reverted for rootDeckSummaries, and the plan is corrected.
+  -->
+  <select id="findChildDeckLevel" resultMap="deckLevelRow">
+    WITH RECURSIVE branch (branch_id, deck_id) AS (
+        SELECT id, id FROM decks
+         WHERE parent_deck_id = #{deckId} AND delete_batch_id IS NULL
+        UNION
+        SELECT b.branch_id, d.id
+          FROM decks d
+          INNER JOIN branch b ON d.parent_deck_id = b.deck_id
+         WHERE d.delete_batch_id IS NULL
+    ),
+    <include refid="ancestryWalk"/>
+    SELECT parent.id AS parent_id, parent.name AS parent_name,
+           parent.content_type AS parent_content_type,
+           child.id AS child_id, child.name AS child_name,
+           child.parent_deck_id AS child_parent_deck_id,
+           child.root_deck_id AS child_root_deck_id,
+           child.content_type AS child_content_type,
+           child.sibling_position AS child_sibling_position,
+           child.created_at AS child_created_at, child.updated_at AS child_updated_at,
+           root.scheduler_type AS inherited_scheduler_type,
+           COALESCE(total.card_count, 0)      AS total_card_count,
+           COALESCE(fresh.new_count, 0)       AS new_card_count,
+           COALESCE(due.due_count, 0)         AS due_card_count,
+           COALESCE(due.overdue_count, 0)     AS overdue_card_count,
+           due.oldest_due_at                  AS oldest_due_at,
+           COALESCE(learned.learned_count, 0) AS learned_card_count,
+           COALESCE(sub.sub_count, 0)         AS sub_deck_count,
+           (SELECT MIN(nx.due_at)
+              FROM branch fb
+              INNER JOIN cards fc ON fc.deck_id = fb.deck_id
+              INNER JOIN card_study_states nx ON nx.card_id = fc.id
+             WHERE nx.due_at &gt; #{now} AND fc.delete_batch_id IS NULL) AS next_due_at,
+           <include refid="ancestryJson"/>
+      FROM decks AS parent
+      LEFT JOIN decks AS child ON child.parent_deck_id = parent.id AND child.delete_batch_id IS NULL
+      LEFT JOIN decks AS root ON root.id = child.root_deck_id
+      LEFT JOIN (SELECT b.branch_id AS branch_id, COUNT(*) AS card_count
+                   FROM branch b
+                   INNER JOIN cards c ON c.deck_id = b.deck_id
+                  WHERE c.delete_batch_id IS NULL
+                  GROUP BY b.branch_id) total ON total.branch_id = child.id
+      LEFT JOIN (SELECT b.branch_id AS branch_id, COUNT(*) AS new_count
+                   FROM branch b
+                   INNER JOIN cards c ON c.deck_id = b.deck_id
+                   INNER JOIN card_study_states s ON s.card_id = c.id
+                  WHERE s.learned_at IS NULL AND c.delete_batch_id IS NULL
+                  GROUP BY b.branch_id) fresh ON fresh.branch_id = child.id
+      LEFT JOIN (SELECT b.branch_id AS branch_id, COUNT(*) AS due_count,
+                        SUM(CASE WHEN s.due_at &lt; #{startOfToday} THEN 1 ELSE 0 END) AS overdue_count,
+                        MIN(s.due_at) AS oldest_due_at
+                   FROM branch b
+                   INNER JOIN cards c ON c.deck_id = b.deck_id
+                   INNER JOIN card_study_states s ON s.card_id = c.id
+                  WHERE s.learned_at IS NOT NULL AND s.due_at &lt;= #{now}
+                    AND c.delete_batch_id IS NULL
+                  GROUP BY b.branch_id) due ON due.branch_id = child.id
+      LEFT JOIN (SELECT b.branch_id AS branch_id, COUNT(*) AS learned_count
+                   FROM branch b
+                   INNER JOIN cards c ON c.deck_id = b.deck_id
+                   INNER JOIN card_study_states s ON s.card_id = c.id
+                  WHERE ((s.scheduler_type = 'eight_box' AND s.current_box = 8)
+                      OR (s.scheduler_type = 'sm2' AND s.interval_days &gt;= 128))
+                    AND c.delete_batch_id IS NULL
+                  GROUP BY b.branch_id) learned ON learned.branch_id = child.id
+      LEFT JOIN (SELECT parent_deck_id AS parent_id, COUNT(*) AS sub_count
+                   FROM decks
+                  WHERE parent_deck_id IS NOT NULL AND delete_batch_id IS NULL
+                  GROUP BY parent_deck_id) sub ON sub.parent_id = child.id
+     WHERE parent.id = #{deckId} AND parent.delete_batch_id IS NULL
+     ORDER BY child.sibling_position ASC, child.id ASC
+  </select>
+
+  <!--
+    Port of Drift's deckContextById (it lives in card.drift: it is the card list header). Same
+    ancestry contract as the level view, which is why both share the fragments above.
+
+    The deck itself is deliberately absent from the chain — it is deck_name here, and putting it in
+    both would let the title and the last crumb disagree.
+  -->
+  <select id="findDeckContext" resultMap="deckContext">
+    WITH RECURSIVE <include refid="ancestryWalk"/>
+    SELECT self.id AS deck_id, self.name AS deck_name, self.content_type AS content_type,
+           <include refid="ancestryJson"/>
+      FROM decks self
+     WHERE self.id = #{deckId} AND self.delete_batch_id IS NULL
+  </select>
+
   <!-- Port of Drift's allDecks, ordering included. -->
   <select id="findAllActiveDecks" resultMap="deck">
     SELECT id, name, parent_deck_id, root_deck_id, content_type, scheduler_type,

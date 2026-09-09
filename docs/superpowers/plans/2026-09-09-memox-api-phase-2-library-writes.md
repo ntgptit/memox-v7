@@ -837,8 +837,16 @@ The hardest read in the module: one statement returning the parent, every child,
 
 **Interfaces:**
 - Consumes: `DeckMapper`, translation rows 2 and 10.
-- Produces: `DeckAncestor(String id, String name, int distance)`; `DeckLevelChild(Deck child, SchedulerType inheritedSchedulerType, long totalCardCount, long newCardCount, long dueCardCount, long overdueCardCount, Instant oldestDueAt, long learnedCardCount, long subDeckCount, Instant nextDueAt)`; `DeckContext(String deckName, DeckContentType contentType, List<DeckAncestor> ancestry)`.
-- Produces: `DeckTreeService.readLevel(String parentDeckId, Instant now, Instant startOfToday)` → `DeckLevel(Deck parent, List<DeckAncestor> ancestry, List<DeckLevelChild> children)`.
+- Produces: `DeckAncestor(String id, String name, int distance)`; `DeckLevelChild(Deck child, SchedulerType inheritedSchedulerType, long totalCardCount, long newCardCount, long dueCardCount, long overdueCardCount, Instant oldestDueAt, long learnedCardCount, long subDeckCount)`; `DeckContext(String deckId, String deckName, DeckContentType contentType, List<DeckAncestor> ancestry)`.
+- Produces: `DeckTreeService.readLevel(String deckId, Instant now, Instant startOfToday)` → `DeckLevel(DeckContext parent, List<DeckLevelChild> children, Instant nextDueAt)`; `DeckTreeService.readContext(String deckId)` → `DeckContext`. Both return `null` for a deck that is missing or in Trash.
+
+**CORRECTED — three interface declarations here did not match the statement below them.**
+
+1. `DeckLevel` held a full `Deck parent`, but the SELECT lists three parent columns. The parent is a `DeckContext` now — which is also exactly what `deckContextById` produces, so the two statements this task ports share one shape rather than merely sharing a JSON contract.
+2. `DeckLevelChild` held `nextDueAt`. That instant is scoped to the level, not to a child, so it moved to `DeckLevel`. Per-child it would publish a number the statement does not measure.
+3. `DeckContext` had no `deckId`, leaving the response unable to say which deck it describes.
+
+**The result map is flat, not nested.** MyBatis can nest a result map inside a constructor argument; this module has already paid once for a mapping mistake that produced no error and no value (`javaType="int"` silently meaning `Integer`), so the row is scalars (`DeckLevelRow`) and the folding is ordinary Java in the service, where it is tested.
 
 - [ ] **Step 1: Write the failing test**
 

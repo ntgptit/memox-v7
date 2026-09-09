@@ -162,6 +162,47 @@ class DeckControllerTest extends PostgresIntegrationTest {
 				.andExpect(jsonPath("$[?(@.id == '%s')]".formatted(otherRootId)).doesNotExist());
 	}
 
+	/**
+	 * The level endpoint end to end: header, breadcrumb, child counts and the level's own timer.
+	 *
+	 * <p>Four response records map here for the first time, and the breadcrumb arrives through a
+	 * JSON column and a type handler rather than through columns — so this is the only place that
+	 * shows the ancestry surviving the whole trip.
+	 */
+	@Test
+	void publishesADeckLevelWithItsBreadcrumbAndChildSubtreeCounts() throws Exception {
+		final var rootId = UUID.randomUUID().toString();
+		final var midId = UUID.randomUUID().toString();
+		final var leafId = UUID.randomUUID().toString();
+		createRootDeck(rootId, "Korean");
+		createSubDeck(rootId, midId, "Unit 1");
+		createSubDeck(midId, leafId, "Lesson 1");
+		insertCardWithState(UUID.randomUUID().toString(), leafId, null, null);
+
+		mockMvc.perform(get("/api/v1/decks/{deckId}/level", rootId))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.parent.deckId").value(rootId))
+				.andExpect(jsonPath("$.parent.deckName").value("Korean"))
+				.andExpect(jsonPath("$.parent.ancestry").isEmpty())
+				.andExpect(jsonPath("$.children[0].deck.id").value(midId))
+				.andExpect(jsonPath("$.children[0].totalCardCount").value(1))
+				.andExpect(jsonPath("$.children[0].subDeckCount").value(1))
+				.andExpect(jsonPath("$.children[0].inheritedSchedulerType").value("sm2"));
+
+		mockMvc.perform(get("/api/v1/decks/{deckId}/level", midId))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.parent.ancestry[0].id").value(rootId))
+				.andExpect(jsonPath("$.parent.ancestry[0].name").value("Korean"))
+				.andExpect(jsonPath("$.parent.ancestry[0].distance").value(1));
+	}
+
+	@Test
+	void returnsNotFoundForTheLevelOfADeckThatDoesNotExist() throws Exception {
+		mockMvc.perform(get("/api/v1/decks/{deckId}/level", UUID.randomUUID()))
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.code").value("DECK_NOT_FOUND"));
+	}
+
 	@Test
 	void returnsProblemDetailsForInvalidRootDeckInput() throws Exception {
 		mockMvc.perform(post("/api/v1/decks")

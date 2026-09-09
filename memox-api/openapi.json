@@ -130,6 +130,98 @@
         ],
         "type" : "object"
       },
+      "DeckAncestorResponse" : {
+        "properties" : {
+          "distance" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "DeckContextResponse" : {
+        "properties" : {
+          "ancestry" : {
+            "items" : {
+              "$ref" : "#/components/schemas/DeckAncestorResponse"
+            },
+            "type" : "array"
+          },
+          "contentType" : {
+            "type" : "string"
+          },
+          "deckId" : {
+            "type" : "string"
+          },
+          "deckName" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "DeckLevelChildResponse" : {
+        "properties" : {
+          "deck" : {
+            "$ref" : "#/components/schemas/DeckResponse"
+          },
+          "dueCardCount" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "inheritedSchedulerType" : {
+            "type" : "string"
+          },
+          "learnedCardCount" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "newCardCount" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "oldestDueAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "overdueCardCount" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "subDeckCount" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "totalCardCount" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "DeckLevelResponse" : {
+        "properties" : {
+          "children" : {
+            "items" : {
+              "$ref" : "#/components/schemas/DeckLevelChildResponse"
+            },
+            "type" : "array"
+          },
+          "nextDueAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "parent" : {
+            "$ref" : "#/components/schemas/DeckContextResponse"
+          }
+        },
+        "type" : "object"
+      },
       "DeckResponse" : {
         "properties" : {
           "contentType" : {
@@ -714,6 +806,67 @@
         "summary" : "Create a card in a deck",
         "tags" : [
           "Cards"
+        ]
+      }
+    },
+    "/api/v1/decks/{deckId}/level" : {
+      "get" : {
+        "operationId" : "readLevel",
+        "parameters" : [
+          {
+            "in" : "path",
+            "name" : "deckId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          },
+          {
+            "in" : "header",
+            "name" : "X-Utc-Offset-Minutes",
+            "required" : false,
+            "schema" : {
+              "default" : 0,
+              "format" : "int32",
+              "type" : "integer"
+            }
+          }
+        ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DeckLevelResponse"
+                }
+              }
+            },
+            "description" : "Level returned"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DeckLevelResponse"
+                }
+              }
+            },
+            "description" : "Invalid UTC offset"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DeckLevelResponse"
+                }
+              }
+            },
+            "description" : "Deck not found"
+          }
+        },
+        "summary" : "Open a deck: its breadcrumb, its direct children and their subtree counts",
+        "tags" : [
+          "Decks"
         ]
       }
     },
