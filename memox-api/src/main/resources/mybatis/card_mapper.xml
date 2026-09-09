@@ -53,17 +53,163 @@
        safe for a sort column and unsafe for anything else. -->
   <sql id="orderBySlice">
     ORDER BY
-    <foreach collection="slice.sorts" item="sort" separator=", ">${sort.column} ${sort.direction}</foreach>
+    <foreach collection="slice.sorts" item="sort" separator=", ">${sort.column} ${sort.direction}${sort.nulls.sql}</foreach>
   </sql>
 
   <select id="findActiveCardsByDeck" resultMap="card">
-    SELECT id, deck_id, front, back, is_flagged, example, hint, pronunciation, created_at, updated_at
-    FROM cards
-    WHERE deck_id = #{deckId}
-      AND delete_batch_id IS NULL
+    SELECT c.id, c.deck_id, c.front, c.back, c.is_flagged, c.example, c.hint, c.pronunciation,
+           c.created_at, c.updated_at
+    FROM cards c
+    WHERE c.deck_id = #{deckId}
+      AND c.delete_batch_id IS NULL
     <include refid="orderBySlice"/>
     LIMIT #{slice.limit}
     OFFSET #{slice.offset}
+  </select>
+
+  <resultMap id="cardListItem" type="com.memox.card.entity.CardListItem">
+    <constructor>
+      <idArg column="id" javaType="java.lang.String"/>
+      <arg column="deck_id" javaType="java.lang.String"/>
+      <arg column="front" javaType="java.lang.String"/>
+      <arg column="back" javaType="java.lang.String"/>
+      <arg column="is_flagged" javaType="_boolean" typeHandler="com.memox.common.mybatis.BooleanSmallIntTypeHandler"/>
+      <arg column="example" javaType="java.lang.String"/>
+      <arg column="hint" javaType="java.lang.String"/>
+      <arg column="pronunciation" javaType="java.lang.String"/>
+      <arg column="created_at" javaType="java.time.Instant"/>
+      <arg column="updated_at" javaType="java.time.Instant"/>
+      <arg column="scheduler_type" javaType="com.memox.common.scheduler.SchedulerType" typeHandler="com.memox.common.mybatis.SchedulerTypeTypeHandler"/>
+      <arg column="scheduler_generation" javaType="_int"/>
+      <arg column="learned_at" javaType="java.time.Instant"/>
+      <arg column="due_at" javaType="java.time.Instant"/>
+      <arg column="last_answered_at" javaType="java.time.Instant"/>
+      <arg column="answer_count" javaType="_int"/>
+      <arg column="lapse_count" javaType="_int"/>
+      <arg column="current_box" javaType="java.lang.Integer"/>
+      <arg column="ease_factor" javaType="java.lang.Double"/>
+      <arg column="interval_days" javaType="java.lang.Integer"/>
+      <arg column="repetitions" javaType="java.lang.Integer"/>
+      <arg column="tag_names" javaType="java.util.List" typeHandler="com.memox.common.mybatis.UnitSeparatedListTypeHandler"/>
+    </constructor>
+  </resultMap>
+
+  <resultMap id="cardStateCounts" type="com.memox.card.entity.CardStateCounts">
+    <constructor>
+      <arg column="new_count" javaType="_long"/>
+      <arg column="learning_count" javaType="_long"/>
+      <arg column="reviewing_count" javaType="_long"/>
+      <arg column="mastered_count" javaType="_long"/>
+    </constructor>
+  </resultMap>
+
+  <!--
+    The filter, built from a whitelist rather than from a client string. Drift compiles $predicate at
+    build time from Dart expressions; here every branch is written out and every value is a bound
+    #{} parameter. Nothing a client sends is ever concatenated.
+
+    The tag filter is OR-semantics (BR-231) via EXISTS rather than a join, which is what keeps one
+    card to one row when it carries several of the selected tags (BR-252). A join would multiply it.
+
+    An empty tagIds list means "no tag filter" and is checked here, because PostgreSQL rejects
+    IN () outright — translation row 9.
+  -->
+  <sql id="cardListPredicate">
+    c.delete_batch_id IS NULL
+    <if test="filter.deckId != null and !filter.includeSubtree">
+      AND c.deck_id = #{filter.deckId}
+    </if>
+    <if test="filter.deckId != null and filter.includeSubtree">
+      AND c.deck_id IN (
+        WITH RECURSIVE subtree (id) AS (
+            SELECT id FROM decks WHERE id = #{filter.deckId} AND delete_batch_id IS NULL
+            UNION
+            SELECT d.id FROM decks d INNER JOIN subtree s2 ON d.parent_deck_id = s2.id
+             WHERE d.delete_batch_id IS NULL
+        )
+        SELECT id FROM subtree)
+    </if>
+    <if test="filter.flagged != null">
+      AND c.is_flagged = #{filter.flagged,typeHandler=com.memox.common.mybatis.BooleanSmallIntTypeHandler,jdbcType=SMALLINT}
+    </if>
+    <if test="filter.hasTagFilter()">
+      AND EXISTS (SELECT 1 FROM card_tags ct
+                   WHERE ct.card_id = c.id
+                     AND ct.tag_id IN
+        <foreach collection="filter.tagIds" open="(" separator="," close=")" item="tagId">#{tagId}</foreach>)
+    </if>
+    <if test="filter.searchFolded != null">
+      AND (strpos(c.front_folded, #{filter.searchFolded}) &gt; 0
+        OR strpos(c.back_folded, #{filter.searchFolded}) &gt; 0)
+    </if>
+  </sql>
+
+  <!--
+    Translation row 1: GROUP_CONCAT has no defined order in SQLite and string_agg has none either
+    unless given one. Tag strings that reorder between two reads make the list flicker, so the
+    ORDER BY inside the aggregate is not optional.
+  -->
+  <select id="findCardListItems" resultMap="cardListItem">
+    SELECT c.id, c.deck_id, c.front, c.back, c.is_flagged, c.example, c.hint, c.pronunciation,
+           c.created_at, c.updated_at,
+           s.scheduler_type, s.scheduler_generation, s.learned_at, s.due_at, s.last_answered_at,
+           s.answer_count, s.lapse_count, s.current_box, s.ease_factor, s.interval_days,
+           s.repetitions,
+           (SELECT string_agg(t.name, chr(31) ORDER BY t.name, t.id)
+              FROM card_tags ct
+              INNER JOIN tags t ON t.id = ct.tag_id
+             WHERE ct.card_id = c.id) AS tag_names
+      FROM cards c
+      INNER JOIN card_study_states s ON s.card_id = c.id
+     WHERE <include refid="cardListPredicate"/>
+    <include refid="orderBySlice"/>
+    LIMIT #{slice.limit}
+    OFFSET #{slice.offset}
+  </select>
+
+  <select id="countCardListItems" resultType="long">
+    SELECT COUNT(*)
+      FROM cards c
+      INNER JOIN card_study_states s ON s.card_id = c.id
+     WHERE <include refid="cardListPredicate"/>
+  </select>
+
+  <!-- Every matching id, unpaged: what "select all" in the management list acts on. -->
+  <select id="findCardIdsMatching" resultType="java.lang.String">
+    SELECT c.id
+      FROM cards c
+      INNER JOIN card_study_states s ON s.card_id = c.id
+     WHERE <include refid="cardListPredicate"/>
+    <include refid="orderBySlice"/>
+  </select>
+
+  <!--
+    The four stages partition the deck's active cards, so they sum to its total. Both schedulers are
+    decided in one pass because card_study_states carries scheduler_type denormalised; the
+    thresholds are bound parameters, not literals, so a boundary moves in one place.
+  -->
+  <select id="countCardStatesByDeck" resultMap="cardStateCounts">
+    SELECT
+      COALESCE(SUM(CASE WHEN s.learned_at IS NULL THEN 1 ELSE 0 END), 0) AS new_count,
+      COALESCE(SUM(CASE WHEN s.learned_at IS NOT NULL
+                    AND ((s.scheduler_type = 'eight_box' AND s.current_box &lt; #{thresholds.reviewingBox})
+                      OR (s.scheduler_type = 'sm2' AND s.interval_days &lt; #{thresholds.reviewingDays}))
+                   THEN 1 ELSE 0 END), 0) AS learning_count,
+      COALESCE(SUM(CASE WHEN s.learned_at IS NOT NULL
+                    AND ((s.scheduler_type = 'eight_box'
+                          AND s.current_box &gt;= #{thresholds.reviewingBox}
+                          AND s.current_box &lt; #{thresholds.masteredBox})
+                      OR (s.scheduler_type = 'sm2'
+                          AND s.interval_days &gt;= #{thresholds.reviewingDays}
+                          AND s.interval_days &lt; #{thresholds.masteredDays}))
+                   THEN 1 ELSE 0 END), 0) AS reviewing_count,
+      COALESCE(SUM(CASE WHEN s.learned_at IS NOT NULL
+                    AND ((s.scheduler_type = 'eight_box' AND s.current_box &gt;= #{thresholds.masteredBox})
+                      OR (s.scheduler_type = 'sm2' AND s.interval_days &gt;= #{thresholds.masteredDays}))
+                   THEN 1 ELSE 0 END), 0) AS mastered_count
+    FROM cards c
+    INNER JOIN card_study_states s ON s.card_id = c.id
+    WHERE c.deck_id = #{deckId} AND c.delete_batch_id IS NULL
   </select>
 
   <select id="countActiveCardsByDeck" resultType="long">

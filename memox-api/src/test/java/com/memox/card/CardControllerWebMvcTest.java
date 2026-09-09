@@ -75,7 +75,7 @@ class CardControllerWebMvcTest {
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
 				.andExpect(jsonPath("$.fieldErrors.sort").value(
-						"unknown sort field; allowed fields are front, createdAt, updatedAt"));
+						"unknown sort field; allowed fields are front, createdAt, updatedAt, dueAt"));
 
 		verifyNoInteractions(cardService);
 	}

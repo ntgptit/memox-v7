@@ -187,6 +187,7 @@ Every ported statement obeys this table. It is the reusable core of the whole pl
 | 10 | `WITH RECURSIVE x (a) AS (SELECT … UNION SELECT …)` | identical | PostgreSQL supports the same form. Two constraints it adds and SQLite does not: the recursive term may reference the CTE **once**, and may not contain `LIMIT`. No ported query violates either. Referencing the CTE from the outer query (as `childDeckLevel` does, in a scalar sub-select and in a `LEFT JOIN`) is fine. |
 | 11 | `DATETIME` | `TIMESTAMPTZ` | Bind `java.time.Instant`. Never call `now()` / `CURRENT_TIMESTAMP` inside a statement — the clock is `java.time.Clock` from `TimeConfiguration`, so a test can pin it. |
 | 12 | `SUM(CASE WHEN … THEN 1 ELSE 0 END)` over an empty group | returns `NULL` in both | Keep the existing `COALESCE(x, 0)` wrappers. |
+| 13 | `ORDER BY x ASC` over a nullable column | `ORDER BY x ASC NULLS FIRST` where the NULL carries meaning | **SQLite sorts NULLs FIRST ascending; PostgreSQL sorts them LAST.** Every ported ORDER BY over a nullable column silently changes meaning — the rows are all still there, in an order that looks plausible. The case that matters is `card_study_states.due_at`: a NULL means a NEW card, due now, so "soonest due first" must put those at the FRONT. The Dart source relies on SQLite's default and says so; PostgreSQL would bury the most urgent cards at the end of the list. Expressed as `NullOrder` on the sort field, because where NULLs belong is a property of what the column MEANS, not of the request. |
 
 ---
 
@@ -1493,7 +1494,15 @@ Ports `cardListItems`, `cardCount`, `cardIdsMatching`, `flaggedCardsByDeck`, `ca
 - Create: `memox-api/src/test/java/com/memox/card/CardListTest.java`
 
 **Interfaces:**
-- Produces: `CardSort` enum — `CREATED_DESC("c.created_at DESC, c.id DESC")`, `CREATED_ASC("c.created_at ASC, c.id ASC")`, `FRONT_ASC("c.front_folded ASC, c.id ASC")`, `DUE_ASC("s.due_at ASC NULLS LAST, c.id ASC")`, each with `String orderBy()` and a static `fromValue(String)` that throws `IllegalArgumentException` on anything not a constant name. Each constant owns its **literal** ORDER BY fragment; nothing else may reach `${}`.
+**CORRECTED — this line contradicted the Files list above it, and its DUE_ASC fragment was backwards.**
+
+No `CardSort` enum. Wave 3 shipped `CardSortField implements SortField`, and the module already has one sort vocabulary: a field supplies a column, `SortSpec` supplies a direction, `PageHelper.slice` appends the tie-breaker. A second vocabulary of whole ORDER BY fragments would mean two ways to express one thing, and the plan asked for both on adjacent lines.
+
+`CardSortField` gains `DUE_AT("dueAt", "s.due_at")`. Its columns are now qualified (`c.front_folded`, `c.created_at`, `s.due_at`) because the list statement joins two tables and an unqualified `created_at` is ambiguous there.
+
+**`DUE_ASC("s.due_at ASC NULLS LAST, …")` was the opposite of what the app means** — see translation row 13. A NULL `due_at` is a NEW card, due now, and belongs at the FRONT. Expressed as `NullOrder.FIRST` on the field rather than as text in a fragment.
+
+Two smaller corrections: the plan invented four sorts where the Dart source has two (`newest`, `dueFirst`), so `CREATED_ASC` is not published — an ordering no client asks for is surface with no consumer. And `StageThresholds` lives in `card/entity/`, not `card/service/`: it is a value passed INTO the statement, exactly like `CardFilter`, and a mapper importing from `service` is the wrong direction.
 - Produces: `CardFilter(String deckId, boolean includeSubtree, Boolean flagged, List<String> tagIds, String searchFolded)`, with `CardFilter.ofDeck(String deckId)` and `withTagIds(List<String>)` builders. `flagged` is a boxed `Boolean` on purpose: `null` means "don't filter", which a primitive cannot express.
 - Produces: `StageThresholds(int reviewingBox, int masteredBox, int reviewingDays, int masteredDays)` with `StageThresholds.DEFAULTS = new StageThresholds(2, 8, 21, 128)` — the same four numbers `cardStateCountsByDeck` is called with on the Flutter side. They are a constant here, not a literal inside SQL, so changing a stage boundary is one edit rather than four.
 - Produces: `UnitSeparatedListTypeHandler extends BaseTypeHandler<List<String>>` — splits the column on `chr(31)` (``) and returns `List.of()` for `null` or an empty string.

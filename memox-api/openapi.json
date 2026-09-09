@@ -9,6 +9,92 @@
         },
         "type" : "object"
       },
+      "CardListResponse" : {
+        "properties" : {
+          "answerCount" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "back" : {
+            "type" : "string"
+          },
+          "createdAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "currentBox" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "deckId" : {
+            "type" : "string"
+          },
+          "dueAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "easeFactor" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "example" : {
+            "type" : "string"
+          },
+          "flagged" : {
+            "type" : "boolean"
+          },
+          "front" : {
+            "type" : "string"
+          },
+          "hint" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "intervalDays" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "lapseCount" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "lastAnsweredAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "learnedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "pronunciation" : {
+            "type" : "string"
+          },
+          "repetitions" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "schedulerGeneration" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "schedulerType" : {
+            "type" : "string"
+          },
+          "tagNames" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "updatedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
       "CardResponse" : {
         "properties" : {
           "back" : {
@@ -42,6 +128,27 @@
           "updatedAt" : {
             "format" : "date-time",
             "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "CardStateCountsResponse" : {
+        "properties" : {
+          "learningCount" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "masteredCount" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "newCount" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "reviewingCount" : {
+            "format" : "int64",
+            "type" : "integer"
           }
         },
         "type" : "object"
@@ -359,6 +466,39 @@
         ],
         "type" : "object"
       },
+      "PagingResponseCardListResponse" : {
+        "properties" : {
+          "hasNext" : {
+            "type" : "boolean"
+          },
+          "hasPrevious" : {
+            "type" : "boolean"
+          },
+          "items" : {
+            "items" : {
+              "$ref" : "#/components/schemas/CardListResponse"
+            },
+            "type" : "array"
+          },
+          "page" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "size" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "totalItems" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "totalPages" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
       "PagingResponseCardResponse" : {
         "properties" : {
           "hasNext" : {
@@ -493,6 +633,246 @@
   },
   "openapi" : "3.1.0",
   "paths" : {
+    "/api/v1/cards" : {
+      "get" : {
+        "operationId" : "list",
+        "parameters" : [
+          {
+            "in" : "query",
+            "name" : "deckId",
+            "required" : false,
+            "schema" : {
+              "type" : "string"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "includeSubtree",
+            "required" : false,
+            "schema" : {
+              "type" : "boolean"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "flagged",
+            "required" : false,
+            "schema" : {
+              "type" : "boolean"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "tagIds",
+            "required" : false,
+            "schema" : {
+              "items" : {
+                "type" : "string"
+              },
+              "type" : "array"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "q",
+            "required" : false,
+            "schema" : {
+              "type" : "string"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "page",
+            "required" : false,
+            "schema" : {
+              "format" : "int32",
+              "minimum" : 0,
+              "type" : "integer"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "size",
+            "required" : false,
+            "schema" : {
+              "format" : "int32",
+              "maximum" : 100,
+              "minimum" : 1,
+              "type" : "integer"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "sort",
+            "required" : false,
+            "schema" : {
+              "items" : {
+                "type" : "string"
+              },
+              "type" : "array"
+            }
+          }
+        ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PagingResponseCardListResponse"
+                }
+              }
+            },
+            "description" : "Card page returned"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PagingResponseCardListResponse"
+                }
+              }
+            },
+            "description" : "Invalid pagination or sort parameters"
+          }
+        },
+        "summary" : "List cards by deck, subtree, flag, tags and text",
+        "tags" : [
+          "Cards"
+        ]
+      }
+    },
+    "/api/v1/cards/ids" : {
+      "get" : {
+        "operationId" : "listIds",
+        "parameters" : [
+          {
+            "in" : "query",
+            "name" : "deckId",
+            "required" : false,
+            "schema" : {
+              "type" : "string"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "includeSubtree",
+            "required" : false,
+            "schema" : {
+              "type" : "boolean"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "flagged",
+            "required" : false,
+            "schema" : {
+              "type" : "boolean"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "tagIds",
+            "required" : false,
+            "schema" : {
+              "items" : {
+                "type" : "string"
+              },
+              "type" : "array"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "q",
+            "required" : false,
+            "schema" : {
+              "type" : "string"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "page",
+            "required" : false,
+            "schema" : {
+              "format" : "int32",
+              "minimum" : 0,
+              "type" : "integer"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "size",
+            "required" : false,
+            "schema" : {
+              "format" : "int32",
+              "maximum" : 100,
+              "minimum" : 1,
+              "type" : "integer"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "sort",
+            "required" : false,
+            "schema" : {
+              "items" : {
+                "type" : "string"
+              },
+              "type" : "array"
+            }
+          }
+        ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "type" : "string"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "Ids returned"
+          }
+        },
+        "summary" : "Every card id matching the filter, unpaged",
+        "tags" : [
+          "Cards"
+        ]
+      }
+    },
+    "/api/v1/cards/state-counts" : {
+      "get" : {
+        "operationId" : "stateCounts",
+        "parameters" : [
+          {
+            "in" : "query",
+            "name" : "deckId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          }
+        ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CardStateCountsResponse"
+                }
+              }
+            },
+            "description" : "Counts returned"
+          }
+        },
+        "summary" : "How many of a deck's cards sit in each learning stage",
+        "tags" : [
+          "Cards"
+        ]
+      }
+    },
     "/api/v1/decks" : {
       "get" : {
         "operationId" : "listRootDecks",

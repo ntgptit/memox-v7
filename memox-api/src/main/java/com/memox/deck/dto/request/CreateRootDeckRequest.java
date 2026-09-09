@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import com.memox.common.validation.ValidationPatterns;
-import com.memox.deck.enums.SchedulerType;
+import com.memox.common.scheduler.SchedulerType;
 
 public record CreateRootDeckRequest(
 		@NotBlank(message = "{validation.required}")

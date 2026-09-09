@@ -2,7 +2,7 @@ package com.memox.deck.entity;
 
 import java.time.Instant;
 import com.memox.deck.enums.DeckContentType;
-import com.memox.deck.enums.SchedulerType;
+import com.memox.common.scheduler.SchedulerType;
 
 public record Deck(
 		String id,

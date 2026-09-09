@@ -34,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 public class CardService {
 
 	/** {@code created_at} repeats freely, so the card list needs a unique second key to page safely. */
-	private static final SortColumn CARD_TIE_BREAKER = new SortColumn("id", SortDirection.ASC);
+	private static final SortColumn CARD_TIE_BREAKER = new SortColumn("c.id", SortDirection.ASC);
 
 	private static final List<SortColumn> DEFAULT_CARD_SORT =
 			List.of(new SortColumn(CardSortField.CREATED_AT.getColumn(), SortDirection.ASC));

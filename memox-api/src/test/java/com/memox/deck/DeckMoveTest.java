@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.memox.common.error.ApiErrorCode;
 import com.memox.deck.entity.DeckMoveTarget;
 import com.memox.deck.enums.DeckContentType;
-import com.memox.deck.enums.SchedulerType;
+import com.memox.common.scheduler.SchedulerType;
 import com.memox.deck.exception.DeckConflictException;
 import com.memox.deck.exception.DeckNotFoundException;
 import com.memox.deck.service.DeckMoveService;

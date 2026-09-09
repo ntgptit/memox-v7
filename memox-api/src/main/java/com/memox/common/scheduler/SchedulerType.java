@@ -1,4 +1,4 @@
-package com.memox.deck.enums;
+package com.memox.common.scheduler;
 
 import java.util.Arrays;
 

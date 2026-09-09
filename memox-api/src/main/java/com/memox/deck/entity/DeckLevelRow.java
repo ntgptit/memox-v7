@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.util.List;
 
 import com.memox.deck.enums.DeckContentType;
-import com.memox.deck.enums.SchedulerType;
+import com.memox.common.scheduler.SchedulerType;
 
 /**
  * One row of the level statement, before the service folds it into a {@link DeckLevel}.

@@ -16,4 +16,15 @@ public interface SortField {
 
 	/** The database column this field orders by. Never client-supplied. */
 	String getColumn();
+
+	/**
+	 * Where NULLs belong in this column's ordering.
+	 *
+	 * <p>A property of what the column MEANS, not of the request: a null {@code due_at} is a new
+	 * card and therefore the most urgent, so it sorts first however the caller asked. Most columns
+	 * do not care, which is why the default is to let the database decide.
+	 */
+	default NullOrder getNulls() {
+		return NullOrder.DEFAULT;
+	}
 }

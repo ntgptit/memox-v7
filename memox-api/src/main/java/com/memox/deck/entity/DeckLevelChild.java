@@ -2,7 +2,7 @@ package com.memox.deck.entity;
 
 import java.time.Instant;
 
-import com.memox.deck.enums.SchedulerType;
+import com.memox.common.scheduler.SchedulerType;
 
 /**
  * One direct child of a deck, carrying the aggregate of its <em>whole</em> subtree.

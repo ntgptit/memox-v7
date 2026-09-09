@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.memox.deck.entity.DeckAncestor;
 import com.memox.deck.entity.DeckLevelChild;
 import com.memox.deck.enums.DeckContentType;
-import com.memox.deck.enums.SchedulerType;
+import com.memox.common.scheduler.SchedulerType;
 import com.memox.deck.service.DeckTreeService;
 import com.memox.support.PostgresIntegrationTest;
 
