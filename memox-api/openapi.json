@@ -9,6 +9,55 @@
         },
         "type" : "object"
       },
+      "BulkFlagRequest" : {
+        "properties" : {
+          "cardIds" : {
+            "items" : {
+              "type" : "string"
+            },
+            "minItems" : 1,
+            "type" : "array"
+          },
+          "flagged" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [
+          "cardIds",
+          "flagged"
+        ],
+        "type" : "object"
+      },
+      "BulkMoveRequest" : {
+        "properties" : {
+          "cardIds" : {
+            "items" : {
+              "type" : "string"
+            },
+            "minItems" : 1,
+            "type" : "array"
+          },
+          "targetDeckId" : {
+            "minLength" : 1,
+            "pattern" : "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+            "type" : "string"
+          }
+        },
+        "required" : [
+          "cardIds",
+          "targetDeckId"
+        ],
+        "type" : "object"
+      },
+      "BulkWriteResponse" : {
+        "properties" : {
+          "written" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
       "CardHistoryCursorResponse" : {
         "properties" : {
           "answeredAt" : {
@@ -727,6 +776,34 @@
           "targetPosition"
         ],
         "type" : "object"
+      },
+      "UpdateCardRequest" : {
+        "properties" : {
+          "back" : {
+            "maxLength" : 240,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "example" : {
+            "type" : "string"
+          },
+          "front" : {
+            "maxLength" : 240,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "hint" : {
+            "type" : "string"
+          },
+          "pronunciation" : {
+            "type" : "string"
+          }
+        },
+        "required" : [
+          "back",
+          "front"
+        ],
+        "type" : "object"
       }
     }
   },
@@ -840,6 +917,108 @@
           }
         },
         "summary" : "List cards by deck, subtree, flag, tags and text",
+        "tags" : [
+          "Cards"
+        ]
+      }
+    },
+    "/api/v1/cards/bulk-flag" : {
+      "post" : {
+        "operationId" : "bulkFlag",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/BulkFlagRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BulkWriteResponse"
+                }
+              }
+            },
+            "description" : "Flag written"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BulkWriteResponse"
+                }
+              }
+            },
+            "description" : "Empty batch, or more than 500 ids"
+          }
+        },
+        "summary" : "Set the flag on a batch of cards",
+        "tags" : [
+          "Cards"
+        ]
+      }
+    },
+    "/api/v1/cards/bulk-move" : {
+      "post" : {
+        "operationId" : "bulkMove",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/BulkMoveRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BulkWriteResponse"
+                }
+              }
+            },
+            "description" : "Cards moved"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BulkWriteResponse"
+                }
+              }
+            },
+            "description" : "Empty batch, or more than 500 ids"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BulkWriteResponse"
+                }
+              }
+            },
+            "description" : "A card or the target deck was not found"
+          },
+          "409" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BulkWriteResponse"
+                }
+              }
+            },
+            "description" : "Cross-root move, or an invalid target"
+          }
+        },
+        "summary" : "Move a batch of cards into one deck, or move none of them",
         "tags" : [
           "Cards"
         ]
@@ -1013,6 +1192,65 @@
           }
         },
         "summary" : "One card with its schedule and tags",
+        "tags" : [
+          "Cards"
+        ]
+      },
+      "patch" : {
+        "operationId" : "update",
+        "parameters" : [
+          {
+            "in" : "path",
+            "name" : "cardId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          }
+        ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateCardRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CardResponse"
+                }
+              }
+            },
+            "description" : "Card updated"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CardResponse"
+                }
+              }
+            },
+            "description" : "Invalid content"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CardResponse"
+                }
+              }
+            },
+            "description" : "Card not found, or in Trash"
+          }
+        },
+        "summary" : "Edit a card's content",
         "tags" : [
           "Cards"
         ]

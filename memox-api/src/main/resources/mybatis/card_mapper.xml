@@ -316,6 +316,77 @@
      WHERE c.id = #{cardId} AND c.delete_batch_id IS NULL
   </select>
 
+  <resultMap id="cardDeckContext" type="com.memox.card.entity.CardDeckContext">
+    <constructor>
+      <idArg column="card_id" javaType="java.lang.String"/>
+      <arg column="deck_id" javaType="java.lang.String"/>
+      <arg column="root_deck_id" javaType="java.lang.String"/>
+    </constructor>
+  </resultMap>
+
+  <!--
+    Where the whole batch currently lives, in one statement. A bulk move validates every card
+    against the same target, so a lookup per card would be N round trips inside the write
+    transaction.
+
+    A trashed card simply does not come back, which is how the service notices one is in the batch
+    (BR-245, BR-257) — it compares the rows it got against the ids it asked for.
+  -->
+  <select id="findCardDeckContextForIds" resultMap="cardDeckContext">
+    SELECT c.id AS card_id, d.id AS deck_id, d.root_deck_id AS root_deck_id
+    FROM cards c
+    INNER JOIN decks d ON d.id = c.deck_id
+    WHERE c.id IN
+    <foreach collection="cardIds" open="(" separator="," close=")" item="cardId">#{cardId}</foreach>
+      AND c.delete_batch_id IS NULL
+      AND d.delete_batch_id IS NULL
+  </select>
+
+  <update id="moveCardsToDeck">
+    UPDATE cards
+    SET deck_id = #{deckId}, updated_at = #{updatedAt}
+    WHERE id IN
+    <foreach collection="cardIds" open="(" separator="," close=")" item="cardId">#{cardId}</foreach>
+      AND delete_batch_id IS NULL
+  </update>
+
+  <!-- Translation row 6: a Java boolean bound into a SMALLINT column needs the handler named. -->
+  <update id="setCardsFlagByIds">
+    UPDATE cards
+    SET is_flagged = #{flagged,typeHandler=com.memox.common.mybatis.BooleanSmallIntTypeHandler,jdbcType=SMALLINT},
+        updated_at = #{updatedAt}
+    WHERE id IN
+    <foreach collection="cardIds" open="(" separator="," close=")" item="cardId">#{cardId}</foreach>
+      AND delete_batch_id IS NULL
+  </update>
+
+  <!--
+    Content columns only. BR-92: editing a card never touches is_flagged and never touches a
+    scheduler column — content survives every reset, and the schedule is not the content's business.
+
+    LOWER() is the fold, and it agrees with the Dart side's raw.trim().toLowerCase() because the
+    service trims before binding. A test pins that over a mixed-script string rather than assuming
+    it holds for the scripts this app ships.
+  -->
+  <update id="updateCardContent">
+    UPDATE cards
+    SET front = #{front}, back = #{back},
+        front_folded = LOWER(#{front}), back_folded = LOWER(#{back}),
+        example = #{example}, hint = #{hint}, pronunciation = #{pronunciation},
+        updated_at = #{updatedAt}
+    WHERE id = #{id}
+      AND delete_batch_id IS NULL
+  </update>
+
+  <!-- The write paths read the card back so the caller sees what was stored, not what was sent. -->
+  <select id="findCardById" resultMap="card">
+    SELECT c.id, c.deck_id, c.front, c.back, c.is_flagged, c.example, c.hint, c.pronunciation,
+           c.created_at, c.updated_at
+    FROM cards c
+    WHERE c.id = #{cardId}
+      AND c.delete_batch_id IS NULL
+  </select>
+
   <select id="countActiveCardsByDeck" resultType="long">
     SELECT COUNT(*)
     FROM cards

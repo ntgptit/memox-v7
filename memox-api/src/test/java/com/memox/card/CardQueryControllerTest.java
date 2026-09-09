@@ -1,6 +1,8 @@
 package com.memox.card;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -8,6 +10,7 @@ import java.time.Instant;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.memox.deck.enums.DeckContentType;
@@ -16,6 +19,7 @@ import com.memox.support.PostgresIntegrationTest;
 class CardQueryControllerTest extends PostgresIntegrationTest {
 
 	private static final Instant LEARNED = Instant.parse("2026-09-01T00:00:00Z");
+	private static final String TARGET_DECK_ID = "55555555-5555-4555-8555-555555555555";
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -155,6 +159,78 @@ class CardQueryControllerTest extends PostgresIntegrationTest {
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
 				.andExpect(jsonPath("$.fieldErrors.cursor").exists());
+	}
+
+	@Test
+	void editsACardWithoutTouchingItsFlag() throws Exception {
+		seedDeck();
+		insertFlaggedCard("c1", "deck");
+
+		mockMvc.perform(patch("/api/v1/cards/{cardId}", "c1")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""
+							{"front":"  안녕  ","back":"Hello"}"""))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.front").value("안녕"))
+				.andExpect(jsonPath("$.flagged").value(true));
+	}
+
+	/** The target id is validated as a UUID, so these tests use real ones rather than short names. */
+	@Test
+	void movesABatchAndReportsHowManyItWrote() throws Exception {
+		insertRootDeck("root", "Korean");
+		insertSubDeck("src", "Unit 1", "root", "root", DeckContentType.CARD);
+		insertSubDeck(TARGET_DECK_ID, "Unit 2", "root", "root", DeckContentType.UNSET);
+		insertCardWithState("c1", "src", null, null);
+		insertCardWithState("c2", "src", null, null);
+
+		mockMvc.perform(post("/api/v1/cards/bulk-move")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""
+							{"cardIds":["c1","c2"],"targetDeckId":"%s"}""".formatted(TARGET_DECK_ID)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.written").value(2));
+	}
+
+	@Test
+	void refusesAMoveIntoADeckThatHoldsSubDecks() throws Exception {
+		insertRootDeck("root", "Korean");
+		insertSubDeck("src", "Unit 1", "root", "root", DeckContentType.CARD);
+		insertSubDeck(TARGET_DECK_ID, "Unit 2", "root", "root", DeckContentType.DECK);
+		insertCardWithState("c1", "src", null, null);
+
+		mockMvc.perform(post("/api/v1/cards/bulk-move")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""
+							{"cardIds":["c1"],"targetDeckId":"%s"}""".formatted(TARGET_DECK_ID)))
+				.andExpect(status().isConflict())
+				.andExpect(jsonPath("$.code").value("MOVE_TARGET_INVALID"));
+	}
+
+	@Test
+	void setsTheFlagOnABatch() throws Exception {
+		seedDeck();
+		insertCardWithState("c1", "deck", null, null);
+
+		mockMvc.perform(post("/api/v1/cards/bulk-flag")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""
+							{"cardIds":["c1"],"flagged":true}"""))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.written").value(1));
+
+		mockMvc.perform(get("/api/v1/cards/{cardId}", "c1"))
+				.andExpect(jsonPath("$.flagged").value(true));
+	}
+
+	@Test
+	void refusesABulkRequestWithNoIds() throws Exception {
+		mockMvc.perform(post("/api/v1/cards/bulk-flag")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""
+							{"cardIds":[],"flagged":true}"""))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("VALIDATION_FAILED"));
 	}
 
 	private void insertAnswer(final String answerId, final Instant answeredAt) {

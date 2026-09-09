@@ -1,11 +1,13 @@
 package com.memox.card.persistence;
 
+import java.time.Instant;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import com.memox.card.entity.Card;
+import com.memox.card.entity.CardDeckContext;
 import com.memox.card.entity.CardFilter;
 import com.memox.card.entity.CardHistoryCursor;
 import com.memox.card.entity.CardHistoryEntry;
@@ -53,6 +55,22 @@ public interface CardMapper {
 			@Param("cardId") String cardId,
 			@Param("cursor") CardHistoryCursor cursor,
 			@Param("limit") int limit);
+
+	List<CardDeckContext> findCardDeckContextForIds(@Param("cardIds") List<String> cardIds);
+
+	int moveCardsToDeck(
+			@Param("cardIds") List<String> cardIds,
+			@Param("deckId") String deckId,
+			@Param("updatedAt") Instant updatedAt);
+
+	int setCardsFlagByIds(
+			@Param("cardIds") List<String> cardIds,
+			@Param("flagged") boolean flagged,
+			@Param("updatedAt") Instant updatedAt);
+
+	int updateCardContent(Card card);
+
+	Card findCardById(@Param("cardId") String cardId);
 
 	long countActiveCardsByDeck(@Param("deckId") String deckId);
 }
