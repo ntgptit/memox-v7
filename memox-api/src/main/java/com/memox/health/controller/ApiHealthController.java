@@ -1,9 +1,10 @@
-package com.memox.health;
+package com.memox.health.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.memox.health.dto.response.ApiHealthResponse;
 
 @RestController
 @RequestMapping("/api/v1/health")

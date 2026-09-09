@@ -1,9 +1,9 @@
-package com.memox.deck.api;
+package com.memox.deck.dto.response;
 
 import java.time.Instant;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.memox.deck.domain.Deck;
+import com.memox.deck.entity.Deck;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record DeckResponse(
@@ -19,7 +19,7 @@ public record DeckResponse(
 		Instant createdAt,
 		Instant updatedAt) {
 
-	static DeckResponse from(Deck deck) {
+	public static DeckResponse from(Deck deck) {
 		return new DeckResponse(deck.id(), deck.name(), deck.parentDeckId(), deck.rootDeckId(),
 				deck.contentType().getValue(), schedulerValue(deck), deck.schedulerVersion(),
 				deck.schedulerGeneration(), deck.siblingPosition(), deck.createdAt(), deck.updatedAt());

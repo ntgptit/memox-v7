@@ -5,7 +5,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import com.memox.card.domain.Card;
+import com.memox.card.entity.Card;
 import com.memox.common.pagination.PageQuery;
 
 @Mapper

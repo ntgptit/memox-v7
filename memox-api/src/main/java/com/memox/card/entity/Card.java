@@ -1,4 +1,4 @@
-package com.memox.card.domain;
+package com.memox.card.entity;
 
 import java.time.Instant;
 

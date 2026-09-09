@@ -14,7 +14,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.memox.card.api.CardController;
+import com.memox.card.controller.CardController;
 import com.memox.card.service.CardService;
 import com.memox.common.config.PaginationProperties;
 import com.memox.common.error.ApiExceptionHandler;

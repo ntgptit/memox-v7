@@ -1,4 +1,4 @@
-package com.memox.deck.api;
+package com.memox.deck.controller;
 
 import java.net.URI;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.memox.deck.service.CreateRootDeckCommand;
 import com.memox.deck.service.CreateSubDeckCommand;
-import com.memox.deck.domain.SchedulerType;
+import com.memox.deck.enums.SchedulerType;
 import com.memox.common.pagination.PageQuery;
 import com.memox.common.pagination.PagingResponse;
 import com.memox.common.pagination.PaginationConstants;
@@ -30,6 +30,9 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
 import lombok.RequiredArgsConstructor;
+import com.memox.deck.dto.request.CreateRootDeckRequest;
+import com.memox.deck.dto.request.CreateSubDeckRequest;
+import com.memox.deck.dto.response.DeckResponse;
 
 @Validated
 @RestController

@@ -5,7 +5,7 @@ import org.apache.ibatis.type.MappedJdbcTypes;
 import org.apache.ibatis.type.MappedTypes;
 
 import com.memox.common.mybatis.AbstractStringValueEnumTypeHandler;
-import com.memox.deck.domain.SchedulerType;
+import com.memox.deck.enums.SchedulerType;
 
 @MappedTypes(SchedulerType.class)
 @MappedJdbcTypes(JdbcType.VARCHAR)

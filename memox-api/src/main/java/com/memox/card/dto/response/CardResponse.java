@@ -1,9 +1,9 @@
-package com.memox.card.api;
+package com.memox.card.dto.response;
 
 import java.time.Instant;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.memox.card.domain.Card;
+import com.memox.card.entity.Card;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record CardResponse(
@@ -18,7 +18,7 @@ public record CardResponse(
 		Instant createdAt,
 		Instant updatedAt) {
 
-	static CardResponse from(Card card) {
+	public static CardResponse from(Card card) {
 		return new CardResponse(card.id(), card.deckId(), card.front(), card.back(), card.flagged(),
 				card.example(), card.hint(), card.pronunciation(), card.createdAt(), card.updatedAt());
 	}
