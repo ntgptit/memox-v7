@@ -1,22 +1,20 @@
 package com.memox.deck.controller;
 
 import java.net.URI;
+
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.memox.deck.service.CreateRootDeckCommand;
 import com.memox.deck.service.CreateSubDeckCommand;
 import com.memox.deck.enums.SchedulerType;
-import com.memox.common.pagination.PageQuery;
 import com.memox.common.pagination.PagingResponse;
-import com.memox.common.pagination.PaginationConstants;
 import com.memox.common.config.PaginationProperties;
 import com.memox.deck.service.DeckService;
 
@@ -26,15 +24,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 
 import lombok.RequiredArgsConstructor;
 import com.memox.deck.dto.request.CreateRootDeckRequest;
 import com.memox.deck.dto.request.CreateSubDeckRequest;
+import com.memox.deck.dto.request.DeckPageRequest;
 import com.memox.deck.dto.response.DeckResponse;
 
-@Validated
 @RestController
 @RequestMapping("/api/v1/decks")
 @RequiredArgsConstructor
@@ -75,14 +71,14 @@ public class DeckController {
 	}
 
 	@GetMapping
-	@Operation(summary = "List root decks")
-	public PagingResponse<DeckResponse> listRootDecks(
-			@RequestParam(required = false) @Min(PaginationConstants.MIN_LIMIT) @Max(PaginationConstants.MAX_LIMIT) Integer limit,
-			@RequestParam(required = false) @Min(PaginationConstants.MIN_OFFSET) Integer offset) {
-		final var pageQuery = PageQuery.builder()
-				.limit(limit == null ? paginationProperties.getDefaultLimit() : limit)
-				.offset(offset == null ? paginationProperties.getDefaultOffset() : offset)
-				.build();
+	@Operation(summary = "List root decks using zero-based page and size pagination")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Root deck page returned"),
+			@ApiResponse(responseCode = "400", description = "Invalid pagination or sort parameters")
+	})
+	public PagingResponse<DeckResponse> listRootDecks(@Valid @ParameterObject DeckPageRequest request) {
+		final var pageQuery = request.toPageQuery(
+				paginationProperties.getDefaultPage(), paginationProperties.getDefaultSize());
 		return deckService.listRootDecks(pageQuery).map(DeckResponse::from);
 	}
 

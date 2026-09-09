@@ -16,10 +16,10 @@ import lombok.Setter;
 @ConfigurationProperties(prefix = "memox.pagination")
 public class PaginationProperties {
 
-	@Min(PaginationConstants.MIN_LIMIT)
-	@Max(PaginationConstants.MAX_LIMIT)
-	private int defaultLimit = PaginationConstants.DEFAULT_LIMIT;
+	@Min(PaginationConstants.MIN_PAGE)
+	private int defaultPage = PaginationConstants.DEFAULT_PAGE;
 
-	@Min(PaginationConstants.MIN_OFFSET)
-	private int defaultOffset = PaginationConstants.MIN_OFFSET;
+	@Min(PaginationConstants.MIN_SIZE)
+	@Max(PaginationConstants.MAX_SIZE)
+	private int defaultSize = PaginationConstants.DEFAULT_SIZE;
 }

@@ -6,16 +6,14 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import com.memox.common.pagination.PageQuery;
+import com.memox.common.pagination.PageSlice;
 import com.memox.deck.entity.Deck;
 import com.memox.deck.enums.DeckContentType;
 
 @Mapper
 public interface DeckMapper {
 
-	String readSchemaVersion();
-
-	List<Deck> findRootDecks(PageQuery pageQuery);
+	List<Deck> findRootDecks(@Param("slice") PageSlice slice);
 
 	long countRootDecks();
 

@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import com.memox.card.entity.Card;
-import com.memox.common.pagination.PageQuery;
+import com.memox.common.pagination.PageSlice;
 
 @Mapper
 public interface CardMapper {
@@ -21,7 +21,7 @@ public interface CardMapper {
 
 	boolean activeDeckExists(@Param("deckId") String deckId);
 
-	List<Card> findActiveCardsByDeck(@Param("deckId") String deckId, @Param("pageQuery") PageQuery pageQuery);
+	List<Card> findActiveCardsByDeck(@Param("deckId") String deckId, @Param("slice") PageSlice slice);
 
 	long countActiveCardsByDeck(@Param("deckId") String deckId);
 }

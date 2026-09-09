@@ -187,11 +187,11 @@
             },
             "type" : "array"
           },
-          "limit" : {
+          "page" : {
             "format" : "int32",
             "type" : "integer"
           },
-          "offset" : {
+          "size" : {
             "format" : "int32",
             "type" : "integer"
           },
@@ -200,7 +200,7 @@
             "type" : "integer"
           },
           "totalPages" : {
-            "format" : "int64",
+            "format" : "int32",
             "type" : "integer"
           }
         },
@@ -220,11 +220,11 @@
             },
             "type" : "array"
           },
-          "limit" : {
+          "page" : {
             "format" : "int32",
             "type" : "integer"
           },
-          "offset" : {
+          "size" : {
             "format" : "int32",
             "type" : "integer"
           },
@@ -233,7 +233,7 @@
             "type" : "integer"
           },
           "totalPages" : {
-            "format" : "int64",
+            "format" : "int32",
             "type" : "integer"
           }
         },
@@ -254,7 +254,17 @@
         "parameters" : [
           {
             "in" : "query",
-            "name" : "limit",
+            "name" : "page",
+            "required" : false,
+            "schema" : {
+              "format" : "int32",
+              "minimum" : 0,
+              "type" : "integer"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "size",
             "required" : false,
             "schema" : {
               "format" : "int32",
@@ -265,12 +275,13 @@
           },
           {
             "in" : "query",
-            "name" : "offset",
+            "name" : "sort",
             "required" : false,
             "schema" : {
-              "format" : "int32",
-              "minimum" : 0,
-              "type" : "integer"
+              "items" : {
+                "type" : "string"
+              },
+              "type" : "array"
             }
           }
         ],
@@ -283,10 +294,20 @@
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Root deck page returned"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PagingResponseDeckResponse"
+                }
+              }
+            },
+            "description" : "Invalid pagination or sort parameters"
           }
         },
-        "summary" : "List root decks",
+        "summary" : "List root decks using zero-based page and size pagination",
         "tags" : [
           "Decks"
         ]
@@ -396,7 +417,17 @@
           },
           {
             "in" : "query",
-            "name" : "limit",
+            "name" : "page",
+            "required" : false,
+            "schema" : {
+              "format" : "int32",
+              "minimum" : 0,
+              "type" : "integer"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "size",
             "required" : false,
             "schema" : {
               "format" : "int32",
@@ -407,12 +438,13 @@
           },
           {
             "in" : "query",
-            "name" : "offset",
+            "name" : "sort",
             "required" : false,
             "schema" : {
-              "format" : "int32",
-              "minimum" : 0,
-              "type" : "integer"
+              "items" : {
+                "type" : "string"
+              },
+              "type" : "array"
             }
           }
         ],
@@ -435,7 +467,7 @@
                 }
               }
             },
-            "description" : "Invalid pagination parameters"
+            "description" : "Invalid pagination or sort parameters"
           },
           "404" : {
             "content" : {
@@ -448,7 +480,7 @@
             "description" : "Deck not found"
           }
         },
-        "summary" : "List cards using limit and offset pagination",
+        "summary" : "List cards using zero-based page and size pagination",
         "tags" : [
           "Cards"
         ]

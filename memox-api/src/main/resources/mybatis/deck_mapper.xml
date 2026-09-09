@@ -20,11 +20,18 @@
     </constructor>
   </resultMap>
 
-  <select id="readSchemaVersion" resultType="java.lang.String">
-    SELECT metadata_value
-    FROM api_metadata
-    WHERE metadata_key = 'schema_version'
-  </select>
+  <!--
+    ORDER BY is rendered with ${} rather than a bound #{} parameter, because a column name is not a
+    value and JDBC cannot bind one. That is safe here and only here: every entry of slice.sorts is a
+    SortColumn, whose column comes from a DeckSortField constant and whose direction is one of the
+    two SortDirection constants. A sort token a client invents is refused in SortSpecs, so no
+    client string can reach this fragment — there is no code path that builds a SortColumn from
+    request text.
+  -->
+  <sql id="orderBySlice">
+    ORDER BY
+    <foreach collection="slice.sorts" item="sort" separator=", ">${sort.column} ${sort.direction}</foreach>
+  </sql>
 
   <select id="findRootDecks" resultMap="deck">
     SELECT id, name, parent_deck_id, root_deck_id, content_type, scheduler_type,
@@ -32,9 +39,9 @@
     FROM decks
     WHERE parent_deck_id IS NULL
       AND delete_batch_id IS NULL
-    ORDER BY sibling_position ASC, id ASC
-    LIMIT #{limit}
-    OFFSET #{offset}
+    <include refid="orderBySlice"/>
+    LIMIT #{slice.limit}
+    OFFSET #{slice.offset}
   </select>
 
   <select id="countRootDecks" resultType="long">
