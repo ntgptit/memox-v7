@@ -492,8 +492,12 @@ jobs:
             --contracts-result '${{ needs.contracts.result }}' \
             --static-result '${{ needs.static.result }}' \
             --host-result '${{ needs.host_tests.result }}' \
-            --widgetbook-result '${{ needs.widgetbook.result }}'             --goldens-result '${{ needs.goldens.result }}' \n            --memox-api-result '${{ needs.memox_api.result }}' \
+            --widgetbook-result '${{ needs.widgetbook.result }}' \
+            --goldens-result '${{ needs.goldens.result }}' \
+            --memox-api-result '${{ needs.memox_api.result }}' \
             --needs-contracts '${{ needs.classify.outputs.needs_contracts }}' \
             --needs-static '${{ needs.classify.outputs.needs_static }}' \
             --needs-host-tests '${{ needs.classify.outputs.needs_host_tests }}' \
-            --needs-widgetbook '${{ needs.classify.outputs.needs_widgetbook }}'             --needs-goldens '${{ needs.classify.outputs.needs_goldens }}' \n            --needs-memox-api '${{ needs.classify.outputs.needs_memox_api }}'
+            --needs-widgetbook '${{ needs.classify.outputs.needs_widgetbook }}' \
+            --needs-goldens '${{ needs.classify.outputs.needs_goldens }}' \
+            --needs-memox-api '${{ needs.classify.outputs.needs_memox_api }}'
