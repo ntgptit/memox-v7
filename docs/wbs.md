@@ -225,6 +225,48 @@ vì thiếu tham số chứ không vì coverage); đã làm lại qua đúng lif
 **Còn nợ, có chủ đích:** Wave 2 và Wave 3. Và `openapi.json` mới chỉ phủ bốn
 endpoint hiện có — nó là đường cơ sở để Wave 3 diff, chưa phải hợp đồng đầy đủ.
 
+### M9.W2 · Wave 2 — đưa package về layout của skill
+
+- **Status:** **done** — `./mvnw -B verify` xanh 39/39; guard mới đã tiêm lỗi hai lần.
+- **Goal:** Đổi tên package, không đổi hành vi. Để một feature mới là bản sao của
+  feature cũ chứ không phải một lần phán đoán ở mỗi thư mục.
+- **Scope:** `<feature>/api/` → `controller/` + `dto/request/` + `dto/response/`;
+  `<feature>/domain/` → `entity/` + `enums/` + `exception/`; `health/` theo cùng
+  khuôn. Cộng I4 (javadoc rỗng) và I5 (`this.` lạc lõng).
+- **Giữ nguyên có lý do:** `persistence/` **không** đổi thành `mapper/` —
+  `spring-boot-mybatis.md` cho phép "package tương đương repository mà repo đã
+  dùng". `common/` không đụng: nó ngoài phạm vi đã duyệt, và đổi tên nó không mua
+  được gì.
+
+**Bằng chứng "không đổi hành vi" không phải là "test vẫn xanh".** Test cũng dời
+package, nên câu đó đã mất nghĩa. Bằng chứng thật là **`openapi.json` không đổi
+một byte**: hợp đồng mà ứng dụng công bố giống hệt trước và sau. Đó là thứ Wave 1
+dựng ra để hôm nay dùng được.
+
+**Ba hệ quả mà "chỉ đổi tên thư mục" không nhìn thấy:**
+
+1. **Tên class đầy đủ nằm trong chuỗi XML của MyBatis** — 8 chỗ ở `namespace`,
+   `type`, `javaType`, `typeHandler`. Đổi package làm hỏng chúng ở **runtime**,
+   không phải lúc biên dịch. Việc `DeckControllerTest`/`CardControllerTest` xanh
+   là bằng chứng cả 8 đã sửa đúng.
+2. **Tách `api/` xoá một ranh giới thật.** `DeckResponse.from()` và
+   `CardResponse.from()` là package-private khi controller còn nằm cạnh chúng;
+   sau khi tách thì phải `public`. Đây là mất mát thật, ghi ra chứ không lẳng lặng
+   coi là sửa cơ học.
+3. **Tham chiếu cùng-package giờ cần `import`** — 9 cái, javac chỉ đích danh từng
+   cái thay vì phải đoán.
+
+**Guard phải đi cùng nhịp, và giờ nó tự bắt được nếu không.** `LayerArchitectureTest`
+canh theo tên package; một luật trỏ vào package đã biến mất sẽ **chọn rỗng và
+xanh suông**. Thêm `everyGuardedPackageStillExists()` để đúng chuyện đó thành lỗi
+đỏ, và một luật mới `entitiesDependOnNoOuterLayer` — luật này **trước đây không
+phát biểu được**, khi entity/enum/exception còn chung một package `domain`. Cả
+hai đã tiêm lỗi: trỏ guard vào `..api..` → đỏ kèm đúng câu giải thích vacuous
+pass; cho `Deck` phụ thuộc `persistence` → đỏ.
+
+**Còn nợ:** `this.` không có gì cưỡng chế — `RequireThis` của Checkstyle sẽ khoá
+được, nhưng đó là một diff cơ học rộng nữa nên để lại cho một task riêng.
+
 ## M99 · Adhoc
 
 Task do chủ dự án giao trực tiếp, không thuộc chuỗi phụ thuộc M0…M9. Đánh số từ
