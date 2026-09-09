@@ -222,6 +222,23 @@
         },
         "type" : "object"
       },
+      "DeckMoveTargetResponse" : {
+        "properties" : {
+          "contentType" : {
+            "type" : "string"
+          },
+          "deckId" : {
+            "type" : "string"
+          },
+          "deckName" : {
+            "type" : "string"
+          },
+          "parentName" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
       "DeckResponse" : {
         "properties" : {
           "contentType" : {
@@ -329,6 +346,19 @@
         },
         "type" : "object"
       },
+      "MoveDeckRequest" : {
+        "properties" : {
+          "targetParentDeckId" : {
+            "minLength" : 1,
+            "pattern" : "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+            "type" : "string"
+          }
+        },
+        "required" : [
+          "targetParentDeckId"
+        ],
+        "type" : "object"
+      },
       "PagingResponseCardResponse" : {
         "properties" : {
           "hasNext" : {
@@ -426,6 +456,32 @@
             "type" : "integer"
           }
         },
+        "type" : "object"
+      },
+      "RenameDeckRequest" : {
+        "properties" : {
+          "name" : {
+            "maxLength" : 200,
+            "minLength" : 0,
+            "type" : "string"
+          }
+        },
+        "required" : [
+          "name"
+        ],
+        "type" : "object"
+      },
+      "ReorderDeckRequest" : {
+        "properties" : {
+          "targetPosition" : {
+            "format" : "int32",
+            "minimum" : 0,
+            "type" : "integer"
+          }
+        },
+        "required" : [
+          "targetPosition"
+        ],
         "type" : "object"
       }
     }
@@ -665,6 +721,65 @@
         "tags" : [
           "Decks"
         ]
+      },
+      "patch" : {
+        "operationId" : "renameDeck",
+        "parameters" : [
+          {
+            "in" : "path",
+            "name" : "deckId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          }
+        ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RenameDeckRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DeckResponse"
+                }
+              }
+            },
+            "description" : "Deck renamed"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DeckResponse"
+                }
+              }
+            },
+            "description" : "Invalid name"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DeckResponse"
+                }
+              }
+            },
+            "description" : "Deck not found"
+          }
+        },
+        "summary" : "Rename a deck",
+        "tags" : [
+          "Decks"
+        ]
       }
     },
     "/api/v1/decks/{deckId}/cards" : {
@@ -870,6 +985,137 @@
         ]
       }
     },
+    "/api/v1/decks/{deckId}/move" : {
+      "post" : {
+        "operationId" : "moveDeck",
+        "parameters" : [
+          {
+            "in" : "path",
+            "name" : "deckId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          }
+        ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MoveDeckRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DeckResponse"
+                }
+              }
+            },
+            "description" : "Deck moved"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DeckResponse"
+                }
+              }
+            },
+            "description" : "Deck or target not found"
+          },
+          "409" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DeckResponse"
+                }
+              }
+            },
+            "description" : "Depth, own-subtree, card-holder or scheduler conflict"
+          }
+        },
+        "summary" : "Move a deck, and everything under it, beneath another deck",
+        "tags" : [
+          "Decks"
+        ]
+      }
+    },
+    "/api/v1/decks/{deckId}/position" : {
+      "put" : {
+        "operationId" : "reorderDeck",
+        "parameters" : [
+          {
+            "in" : "path",
+            "name" : "deckId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          }
+        ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ReorderDeckRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/DeckResponse"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "The sibling group in its new order"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/DeckResponse"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "Target position outside the sibling group"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/DeckResponse"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "Deck not found"
+          }
+        },
+        "summary" : "Move a deck to a new position among its siblings",
+        "tags" : [
+          "Decks"
+        ]
+      }
+    },
     "/api/v1/decks/{parentDeckId}/children" : {
       "post" : {
         "operationId" : "createSubDeck",
@@ -926,6 +1172,48 @@
           }
         },
         "summary" : "Create a child deck",
+        "tags" : [
+          "Decks"
+        ]
+      }
+    },
+    "/api/v1/decks/{rootDeckId}/card-move-targets" : {
+      "get" : {
+        "operationId" : "listCardMoveTargets",
+        "parameters" : [
+          {
+            "in" : "path",
+            "name" : "rootDeckId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "sourceDeckId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          }
+        ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/DeckMoveTargetResponse"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "Targets returned"
+          }
+        },
+        "summary" : "List the decks in this root that could accept a card",
         "tags" : [
           "Decks"
         ]
