@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.memox.deck.service.CreateRootDeckCommand;
 import com.memox.deck.service.CreateSubDeckCommand;
-import com.memox.deck.enums.SchedulerType;
+import com.memox.common.scheduler.SchedulerType;
 import com.memox.common.pagination.PagingResponse;
 import com.memox.common.config.PaginationProperties;
 import com.memox.common.time.DayWindow;

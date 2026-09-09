@@ -47,7 +47,7 @@ public class PageHelper {
 	public <TSort extends Enum<TSort> & SortField> PageSlice slice(
 			PageQuery<TSort> pageQuery, List<SortColumn> defaultSorts, SortColumn tieBreaker) {
 		final var requested = pageQuery.getSorts().stream()
-				.map(spec -> new SortColumn(spec.field().getColumn(), spec.direction()))
+				.map(spec -> new SortColumn(spec.field().getColumn(), spec.direction(), spec.field().getNulls()))
 				.toList();
 		final var base = requested.isEmpty() ? defaultSorts : requested;
 		final var sorts = new ArrayList<>(base);

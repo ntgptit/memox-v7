@@ -9,7 +9,7 @@ import java.time.Instant;
 import org.junit.jupiter.api.Test;
 
 import com.memox.deck.enums.DeckContentType;
-import com.memox.deck.enums.SchedulerType;
+import com.memox.common.scheduler.SchedulerType;
 
 /**
  * Tests the fixture vocabulary itself.

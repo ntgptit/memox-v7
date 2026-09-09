@@ -9,6 +9,245 @@
         },
         "type" : "object"
       },
+      "BulkFlagRequest" : {
+        "properties" : {
+          "cardIds" : {
+            "items" : {
+              "type" : "string"
+            },
+            "minItems" : 1,
+            "type" : "array"
+          },
+          "flagged" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [
+          "cardIds",
+          "flagged"
+        ],
+        "type" : "object"
+      },
+      "BulkMoveRequest" : {
+        "properties" : {
+          "cardIds" : {
+            "items" : {
+              "type" : "string"
+            },
+            "minItems" : 1,
+            "type" : "array"
+          },
+          "targetDeckId" : {
+            "minLength" : 1,
+            "pattern" : "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+            "type" : "string"
+          }
+        },
+        "required" : [
+          "cardIds",
+          "targetDeckId"
+        ],
+        "type" : "object"
+      },
+      "BulkWriteResponse" : {
+        "properties" : {
+          "written" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "CardHistoryCursorResponse" : {
+        "properties" : {
+          "answeredAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "CardHistoryEntryResponse" : {
+        "properties" : {
+          "action" : {
+            "type" : "string"
+          },
+          "answeredAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "cardId" : {
+            "type" : "string"
+          },
+          "comparisonVersion" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "direction" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "kind" : {
+            "type" : "string"
+          },
+          "mode" : {
+            "type" : "string"
+          },
+          "nextBox" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "nextDueAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "nextEaseFactor" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "nextIntervalDays" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "outcomeReason" : {
+            "type" : "string"
+          },
+          "previousBox" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "previousEaseFactor" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "previousIntervalDays" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "schedulerGeneration" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "schedulerType" : {
+            "type" : "string"
+          },
+          "sessionId" : {
+            "type" : "string"
+          },
+          "usedHint" : {
+            "type" : "boolean"
+          }
+        },
+        "type" : "object"
+      },
+      "CardHistoryResponse" : {
+        "properties" : {
+          "entries" : {
+            "items" : {
+              "$ref" : "#/components/schemas/CardHistoryEntryResponse"
+            },
+            "type" : "array"
+          },
+          "hasMore" : {
+            "type" : "boolean"
+          },
+          "nextCursor" : {
+            "$ref" : "#/components/schemas/CardHistoryCursorResponse"
+          }
+        },
+        "type" : "object"
+      },
+      "CardListResponse" : {
+        "properties" : {
+          "answerCount" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "back" : {
+            "type" : "string"
+          },
+          "createdAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "currentBox" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "deckId" : {
+            "type" : "string"
+          },
+          "dueAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "easeFactor" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "example" : {
+            "type" : "string"
+          },
+          "flagged" : {
+            "type" : "boolean"
+          },
+          "front" : {
+            "type" : "string"
+          },
+          "hint" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "intervalDays" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "lapseCount" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "lastAnsweredAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "learnedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "pronunciation" : {
+            "type" : "string"
+          },
+          "repetitions" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "schedulerGeneration" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "schedulerType" : {
+            "type" : "string"
+          },
+          "tagNames" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "updatedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
       "CardResponse" : {
         "properties" : {
           "back" : {
@@ -42,6 +281,27 @@
           "updatedAt" : {
             "format" : "date-time",
             "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "CardStateCountsResponse" : {
+        "properties" : {
+          "learningCount" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "masteredCount" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "newCount" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "reviewingCount" : {
+            "format" : "int64",
+            "type" : "integer"
           }
         },
         "type" : "object"
@@ -359,6 +619,39 @@
         ],
         "type" : "object"
       },
+      "PagingResponseCardListResponse" : {
+        "properties" : {
+          "hasNext" : {
+            "type" : "boolean"
+          },
+          "hasPrevious" : {
+            "type" : "boolean"
+          },
+          "items" : {
+            "items" : {
+              "$ref" : "#/components/schemas/CardListResponse"
+            },
+            "type" : "array"
+          },
+          "page" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "size" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "totalItems" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "totalPages" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
       "PagingResponseCardResponse" : {
         "properties" : {
           "hasNext" : {
@@ -483,6 +776,34 @@
           "targetPosition"
         ],
         "type" : "object"
+      },
+      "UpdateCardRequest" : {
+        "properties" : {
+          "back" : {
+            "maxLength" : 240,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "example" : {
+            "type" : "string"
+          },
+          "front" : {
+            "maxLength" : 240,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "hint" : {
+            "type" : "string"
+          },
+          "pronunciation" : {
+            "type" : "string"
+          }
+        },
+        "required" : [
+          "back",
+          "front"
+        ],
+        "type" : "object"
       }
     }
   },
@@ -493,6 +814,517 @@
   },
   "openapi" : "3.1.0",
   "paths" : {
+    "/api/v1/cards" : {
+      "get" : {
+        "operationId" : "list",
+        "parameters" : [
+          {
+            "in" : "query",
+            "name" : "deckId",
+            "required" : false,
+            "schema" : {
+              "type" : "string"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "includeSubtree",
+            "required" : false,
+            "schema" : {
+              "type" : "boolean"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "flagged",
+            "required" : false,
+            "schema" : {
+              "type" : "boolean"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "tagIds",
+            "required" : false,
+            "schema" : {
+              "items" : {
+                "type" : "string"
+              },
+              "type" : "array"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "q",
+            "required" : false,
+            "schema" : {
+              "type" : "string"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "page",
+            "required" : false,
+            "schema" : {
+              "format" : "int32",
+              "minimum" : 0,
+              "type" : "integer"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "size",
+            "required" : false,
+            "schema" : {
+              "format" : "int32",
+              "maximum" : 100,
+              "minimum" : 1,
+              "type" : "integer"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "sort",
+            "required" : false,
+            "schema" : {
+              "items" : {
+                "type" : "string"
+              },
+              "type" : "array"
+            }
+          }
+        ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PagingResponseCardListResponse"
+                }
+              }
+            },
+            "description" : "Card page returned"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PagingResponseCardListResponse"
+                }
+              }
+            },
+            "description" : "Invalid pagination or sort parameters"
+          }
+        },
+        "summary" : "List cards by deck, subtree, flag, tags and text",
+        "tags" : [
+          "Cards"
+        ]
+      }
+    },
+    "/api/v1/cards/bulk-flag" : {
+      "post" : {
+        "operationId" : "bulkFlag",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/BulkFlagRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BulkWriteResponse"
+                }
+              }
+            },
+            "description" : "Flag written"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BulkWriteResponse"
+                }
+              }
+            },
+            "description" : "Empty batch, or more than 500 ids"
+          }
+        },
+        "summary" : "Set the flag on a batch of cards",
+        "tags" : [
+          "Cards"
+        ]
+      }
+    },
+    "/api/v1/cards/bulk-move" : {
+      "post" : {
+        "operationId" : "bulkMove",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/BulkMoveRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BulkWriteResponse"
+                }
+              }
+            },
+            "description" : "Cards moved"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BulkWriteResponse"
+                }
+              }
+            },
+            "description" : "Empty batch, or more than 500 ids"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BulkWriteResponse"
+                }
+              }
+            },
+            "description" : "A card or the target deck was not found"
+          },
+          "409" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BulkWriteResponse"
+                }
+              }
+            },
+            "description" : "Cross-root move, or an invalid target"
+          }
+        },
+        "summary" : "Move a batch of cards into one deck, or move none of them",
+        "tags" : [
+          "Cards"
+        ]
+      }
+    },
+    "/api/v1/cards/ids" : {
+      "get" : {
+        "operationId" : "listIds",
+        "parameters" : [
+          {
+            "in" : "query",
+            "name" : "deckId",
+            "required" : false,
+            "schema" : {
+              "type" : "string"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "includeSubtree",
+            "required" : false,
+            "schema" : {
+              "type" : "boolean"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "flagged",
+            "required" : false,
+            "schema" : {
+              "type" : "boolean"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "tagIds",
+            "required" : false,
+            "schema" : {
+              "items" : {
+                "type" : "string"
+              },
+              "type" : "array"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "q",
+            "required" : false,
+            "schema" : {
+              "type" : "string"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "page",
+            "required" : false,
+            "schema" : {
+              "format" : "int32",
+              "minimum" : 0,
+              "type" : "integer"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "size",
+            "required" : false,
+            "schema" : {
+              "format" : "int32",
+              "maximum" : 100,
+              "minimum" : 1,
+              "type" : "integer"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "sort",
+            "required" : false,
+            "schema" : {
+              "items" : {
+                "type" : "string"
+              },
+              "type" : "array"
+            }
+          }
+        ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "type" : "string"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "Ids returned"
+          }
+        },
+        "summary" : "Every card id matching the filter, unpaged",
+        "tags" : [
+          "Cards"
+        ]
+      }
+    },
+    "/api/v1/cards/state-counts" : {
+      "get" : {
+        "operationId" : "stateCounts",
+        "parameters" : [
+          {
+            "in" : "query",
+            "name" : "deckId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          }
+        ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CardStateCountsResponse"
+                }
+              }
+            },
+            "description" : "Counts returned"
+          }
+        },
+        "summary" : "How many of a deck's cards sit in each learning stage",
+        "tags" : [
+          "Cards"
+        ]
+      }
+    },
+    "/api/v1/cards/{cardId}" : {
+      "get" : {
+        "operationId" : "detail",
+        "parameters" : [
+          {
+            "in" : "path",
+            "name" : "cardId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          }
+        ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CardListResponse"
+                }
+              }
+            },
+            "description" : "Card found"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CardListResponse"
+                }
+              }
+            },
+            "description" : "Card not found, or in Trash"
+          }
+        },
+        "summary" : "One card with its schedule and tags",
+        "tags" : [
+          "Cards"
+        ]
+      },
+      "patch" : {
+        "operationId" : "update",
+        "parameters" : [
+          {
+            "in" : "path",
+            "name" : "cardId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          }
+        ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateCardRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CardResponse"
+                }
+              }
+            },
+            "description" : "Card updated"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CardResponse"
+                }
+              }
+            },
+            "description" : "Invalid content"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CardResponse"
+                }
+              }
+            },
+            "description" : "Card not found, or in Trash"
+          }
+        },
+        "summary" : "Edit a card's content",
+        "tags" : [
+          "Cards"
+        ]
+      }
+    },
+    "/api/v1/cards/{cardId}/history" : {
+      "get" : {
+        "operationId" : "history",
+        "parameters" : [
+          {
+            "in" : "path",
+            "name" : "cardId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "answeredAt",
+            "required" : false,
+            "schema" : {
+              "format" : "date-time",
+              "type" : "string"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "cursorId",
+            "required" : false,
+            "schema" : {
+              "type" : "string"
+            }
+          },
+          {
+            "in" : "query",
+            "name" : "limit",
+            "required" : false,
+            "schema" : {
+              "format" : "int32",
+              "maximum" : 100,
+              "minimum" : 1,
+              "type" : "integer"
+            }
+          }
+        ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CardHistoryResponse"
+                }
+              }
+            },
+            "description" : "History page returned"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CardHistoryResponse"
+                }
+              }
+            },
+            "description" : "Invalid limit or partial cursor"
+          }
+        },
+        "summary" : "A card's review history, newest first, keyset-paged",
+        "tags" : [
+          "Cards"
+        ]
+      }
+    },
     "/api/v1/decks" : {
       "get" : {
         "operationId" : "listRootDecks",

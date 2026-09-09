@@ -14,7 +14,7 @@ import com.memox.common.pagination.SortColumn;
 import com.memox.common.pagination.SortDirection;
 import com.memox.deck.entity.Deck;
 import com.memox.deck.enums.DeckContentType;
-import com.memox.deck.enums.SchedulerType;
+import com.memox.common.scheduler.SchedulerType;
 import com.memox.support.PostgresIntegrationTest;
 
 class DeckMapperTest extends PostgresIntegrationTest {

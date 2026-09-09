@@ -11,7 +11,7 @@
       <arg column="parent_deck_id" javaType="java.lang.String"/>
       <arg column="root_deck_id" javaType="java.lang.String"/>
       <arg column="content_type" javaType="com.memox.deck.enums.DeckContentType" typeHandler="com.memox.deck.persistence.DeckContentTypeTypeHandler"/>
-      <arg column="scheduler_type" javaType="com.memox.deck.enums.SchedulerType" typeHandler="com.memox.deck.persistence.SchedulerTypeTypeHandler"/>
+      <arg column="scheduler_type" javaType="com.memox.common.scheduler.SchedulerType" typeHandler="com.memox.common.mybatis.SchedulerTypeTypeHandler"/>
       <arg column="scheduler_version" javaType="java.lang.Integer"/>
       <arg column="scheduler_generation" javaType="java.lang.Integer"/>
       <arg column="sibling_position" javaType="_int"/>
@@ -30,7 +30,7 @@
   -->
   <sql id="orderBySlice">
     ORDER BY
-    <foreach collection="slice.sorts" item="sort" separator=", ">${sort.column} ${sort.direction}</foreach>
+    <foreach collection="slice.sorts" item="sort" separator=", ">${sort.column} ${sort.direction}${sort.nulls.sql}</foreach>
   </sql>
 
   <select id="findRootDecks" resultMap="deck">
@@ -56,7 +56,7 @@
       <arg column="name" javaType="java.lang.String"/>
       <arg column="root_deck_id" javaType="java.lang.String"/>
       <arg column="content_type" javaType="com.memox.deck.enums.DeckContentType" typeHandler="com.memox.deck.persistence.DeckContentTypeTypeHandler"/>
-      <arg column="scheduler_type" javaType="com.memox.deck.enums.SchedulerType" typeHandler="com.memox.deck.persistence.SchedulerTypeTypeHandler"/>
+      <arg column="scheduler_type" javaType="com.memox.common.scheduler.SchedulerType" typeHandler="com.memox.common.mybatis.SchedulerTypeTypeHandler"/>
       <arg column="sibling_position" javaType="_int"/>
       <arg column="total_card_count" javaType="_long"/>
       <arg column="new_card_count" javaType="_long"/>
@@ -167,7 +167,7 @@
       <arg column="child_sibling_position" javaType="java.lang.Integer"/>
       <arg column="child_created_at" javaType="java.time.Instant"/>
       <arg column="child_updated_at" javaType="java.time.Instant"/>
-      <arg column="inherited_scheduler_type" javaType="com.memox.deck.enums.SchedulerType" typeHandler="com.memox.deck.persistence.SchedulerTypeTypeHandler"/>
+      <arg column="inherited_scheduler_type" javaType="com.memox.common.scheduler.SchedulerType" typeHandler="com.memox.common.mybatis.SchedulerTypeTypeHandler"/>
       <arg column="total_card_count" javaType="_long"/>
       <arg column="new_card_count" javaType="_long"/>
       <arg column="due_card_count" javaType="_long"/>
@@ -478,7 +478,7 @@
     ) VALUES (
       #{id}, #{name}, NULL, #{siblingPosition}, '00000000-0000-0000-0000-000000000000', #{rootDeckId},
       #{contentType,typeHandler=com.memox.deck.persistence.DeckContentTypeTypeHandler},
-      #{schedulerType,typeHandler=com.memox.deck.persistence.SchedulerTypeTypeHandler},
+      #{schedulerType,typeHandler=com.memox.common.mybatis.SchedulerTypeTypeHandler},
       #{schedulerVersion}, #{schedulerGeneration}, #{createdAt}, #{updatedAt}
     )
   </insert>

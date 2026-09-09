@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.memox.deck.enums.DeckContentType;
-import com.memox.deck.enums.SchedulerType;
+import com.memox.common.scheduler.SchedulerType;
 
 /**
  * The seeding vocabulary every integration test shares, so no two features invent two different

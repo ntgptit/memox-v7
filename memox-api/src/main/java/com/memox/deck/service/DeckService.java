@@ -114,6 +114,36 @@ public class DeckService {
 	}
 
 	/**
+	 * Locks one active deck for the caller's transaction and hands it back.
+	 *
+	 * <p>Published so another feature can validate against a deck without reaching into deck
+	 * persistence: the card module needs the target of a bulk move held still while it checks the
+	 * roots match, and a lock taken through the owning service is the difference between
+	 * collaborating with this feature and reaching around it.
+	 *
+	 * @throws DeckNotFoundException when the deck does not exist or is in Trash
+	 */
+	@Transactional
+	public Deck lockActiveDeck(String deckId) {
+		return requireActiveDeckForUpdate(deckId);
+	}
+
+	/**
+	 * Writes a deck's content type, for a rule another feature detected.
+	 *
+	 * <p>What a deck holds is the deck's own column, so the write stays here; whether it just lost
+	 * its last card is a fact only the card module can count. That split is why this is a published
+	 * verb rather than a private step of {@code createSubDeck} (BR-163, BR-260).
+	 */
+	@Transactional
+	public void markContentType(String deckId, DeckContentType contentType) {
+		AffectedRows.requireExactlyOne(
+				deckMapper.updateContentType(deckId, contentType, Instant.now(clock)),
+				() -> new DeckNotFoundException(deckId));
+		log.info("Deck {} now holds {}", deckId, contentType);
+	}
+
+	/**
 	 * Moves a deck to a new place among its siblings and returns the group in its new order.
 	 *
 	 * <p><strong>The reorder permutes the positions the active siblings already own; it does not
