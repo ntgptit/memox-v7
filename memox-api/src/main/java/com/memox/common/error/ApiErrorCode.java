@@ -17,6 +17,9 @@ public enum ApiErrorCode {
 	ROOT_SCHEDULER_INVALID(HttpStatus.CONFLICT, "error.root-scheduler-invalid"),
 	DECK_NOT_FOUND(HttpStatus.NOT_FOUND, "error.deck-not-found"),
 	DECK_POSITION_OUT_OF_RANGE(HttpStatus.BAD_REQUEST, "error.deck-position-out-of-range"),
+	DECK_CROSS_ROOT_MOVE(HttpStatus.CONFLICT, "error.deck-cross-root-move"),
+	DECK_MOVE_INTO_OWN_SUBTREE(HttpStatus.CONFLICT, "error.deck-move-into-own-subtree"),
+	SCHEDULER_GENERATION_MISMATCH(HttpStatus.CONFLICT, "error.scheduler-generation-mismatch"),
 	DATA_INTEGRITY_VIOLATION(HttpStatus.CONFLICT, "error.data-integrity-violation"),
 	INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "error.internal-server-error");
 

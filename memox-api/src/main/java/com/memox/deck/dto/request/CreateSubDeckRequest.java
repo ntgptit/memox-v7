@@ -9,5 +9,5 @@ import com.memox.common.validation.ValidationPatterns;
 public record CreateSubDeckRequest(
 		@NotBlank(message = "{validation.required}")
 		@Pattern(regexp = ValidationPatterns.UUID, message = "{validation.uuid}") String id,
-		@NotBlank(message = "{validation.required}") @Size(max = 200, message = "{validation.max-length}") String name) {
+		@NotBlank(message = "{validation.required}") @Size(max = ValidationPatterns.DECK_NAME_MAX_LENGTH, message = "{validation.max-length}") String name) {
 }

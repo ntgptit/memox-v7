@@ -11,6 +11,7 @@ import com.memox.deck.entity.Deck;
 import com.memox.deck.entity.DeckContext;
 import com.memox.deck.entity.DeckDepth;
 import com.memox.deck.entity.DeckLevelRow;
+import com.memox.deck.entity.DeckMoveTarget;
 import com.memox.deck.entity.DeckSummary;
 import com.memox.deck.enums.DeckContentType;
 
@@ -68,6 +69,26 @@ public interface DeckMapper {
 			@Param("deckId") String deckId,
 			@Param("siblingPosition") int siblingPosition,
 			@Param("updatedAt") Instant updatedAt);
+
+	int updateSubtreeRootDeck(
+			@Param("deckId") String deckId,
+			@Param("newRootDeckId") String newRootDeckId,
+			@Param("updatedAt") Instant updatedAt);
+
+	int reparentDeck(
+			@Param("deckId") String deckId,
+			@Param("parentDeckId") String parentDeckId,
+			@Param("siblingPosition") int siblingPosition,
+			@Param("updatedAt") Instant updatedAt);
+
+	int updateDeckName(
+			@Param("deckId") String deckId,
+			@Param("name") String name,
+			@Param("updatedAt") Instant updatedAt);
+
+	List<DeckMoveTarget> findCardMoveTargets(
+			@Param("rootDeckId") String rootDeckId,
+			@Param("sourceDeckId") String sourceDeckId);
 
 	int updateContentType(
 			@Param("deckId") String deckId,

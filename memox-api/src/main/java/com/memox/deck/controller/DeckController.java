@@ -7,12 +7,14 @@ import java.util.List;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.memox.deck.service.CreateRootDeckCommand;
@@ -24,6 +26,9 @@ import com.memox.common.time.DayWindow;
 import com.memox.deck.service.DeckService;
 import com.memox.deck.exception.DeckNotFoundException;
 import com.memox.deck.service.DeckTreeService;
+import com.memox.deck.service.DeckMoveService;
+import com.memox.deck.service.MoveDeckCommand;
+import com.memox.deck.service.RenameDeckCommand;
 import com.memox.deck.service.ReorderDeckCommand;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,9 +42,12 @@ import lombok.RequiredArgsConstructor;
 import com.memox.deck.dto.request.CreateRootDeckRequest;
 import com.memox.deck.dto.request.CreateSubDeckRequest;
 import com.memox.deck.dto.request.DeckPageRequest;
+import com.memox.deck.dto.request.MoveDeckRequest;
+import com.memox.deck.dto.request.RenameDeckRequest;
 import com.memox.deck.dto.request.ReorderDeckRequest;
 import com.memox.deck.dto.response.DeckResponse;
 import com.memox.deck.dto.response.DeckLevelResponse;
+import com.memox.deck.dto.response.DeckMoveTargetResponse;
 import com.memox.deck.dto.response.DeckSummaryResponse;
 
 @RestController
@@ -50,6 +58,7 @@ public class DeckController {
 
 	private final DeckService deckService;
 	private final DeckTreeService deckTreeService;
+	private final DeckMoveService deckMoveService;
 	private final PaginationProperties paginationProperties;
 	private final Clock clock;
 
@@ -136,6 +145,44 @@ public class DeckController {
 			@Valid @RequestBody ReorderDeckRequest request) {
 		return deckService.reorderDeck(new ReorderDeckCommand(deckId, request.targetPosition()))
 				.stream().map(DeckResponse::from).toList();
+	}
+
+	@PatchMapping("/{deckId}")
+	@Operation(summary = "Rename a deck")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Deck renamed"),
+			@ApiResponse(responseCode = "400", description = "Invalid name"),
+			@ApiResponse(responseCode = "404", description = "Deck not found")
+	})
+	public DeckResponse renameDeck(
+			@PathVariable String deckId,
+			@Valid @RequestBody RenameDeckRequest request) {
+		return DeckResponse.from(deckMoveService.rename(new RenameDeckCommand(deckId, request.name())));
+	}
+
+	@PostMapping("/{deckId}/move")
+	@Operation(summary = "Move a deck, and everything under it, beneath another deck")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Deck moved"),
+			@ApiResponse(responseCode = "404", description = "Deck or target not found"),
+			@ApiResponse(responseCode = "409",
+					description = "Depth, own-subtree, card-holder or scheduler conflict")
+	})
+	public DeckResponse moveDeck(
+			@PathVariable String deckId,
+			@Valid @RequestBody MoveDeckRequest request) {
+		return DeckResponse.from(
+				deckMoveService.move(new MoveDeckCommand(deckId, request.targetParentDeckId())));
+	}
+
+	@GetMapping("/{rootDeckId}/card-move-targets")
+	@Operation(summary = "List the decks in this root that could accept a card")
+	@ApiResponses(@ApiResponse(responseCode = "200", description = "Targets returned"))
+	public List<DeckMoveTargetResponse> listCardMoveTargets(
+			@PathVariable String rootDeckId,
+			@RequestParam String sourceDeckId) {
+		return deckMoveService.listCardMoveTargets(rootDeckId, sourceDeckId)
+				.stream().map(DeckMoveTargetResponse::from).toList();
 	}
 
 	@GetMapping("/{deckId}/level")

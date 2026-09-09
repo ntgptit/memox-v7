@@ -1371,7 +1371,9 @@ class DeckMoveTest extends PostgresIntegrationTest {
 		insertChain(10);                       // d1..d10, d1 is the root
 		insertRootDeck("r2", "Japanese");
 		insertSubDeck("spare", "Spare", "r2", "r2");
-		// moving the 2-high subtree d9..d10 under d10 would produce 11
+		// CORRECTED: d10 is INSIDE d9 own subtree, so this input breaks two rules at once and
+		// cannot say which one answers. The shipped test moves a two-high subtree under a deck at
+		// depth nine in a DIFFERENT root, where only the depth rule is broken.
 		assertThatThrownBy(() -> deckMoveService.move(new MoveDeckCommand("d9", "d10")))
 				.isInstanceOf(DeckConflictException.class)
 				.extracting("errorCode").isEqualTo(ApiErrorCode.DECK_DEPTH_EXCEEDED);

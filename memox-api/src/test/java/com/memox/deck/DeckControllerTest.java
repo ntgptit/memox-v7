@@ -1,6 +1,7 @@
 package com.memox.deck;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -230,6 +231,87 @@ class DeckControllerTest extends PostgresIntegrationTest {
 							{"targetPosition":5}"""))
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.code").value("DECK_POSITION_OUT_OF_RANGE"));
+	}
+
+	@Test
+	void renamesADeckThroughPatch() throws Exception {
+		final var deckId = UUID.randomUUID().toString();
+		createRootDeck(deckId, "Korean");
+
+		mockMvc.perform(patch("/api/v1/decks/{deckId}", deckId)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""
+							{"name":"  Korean basics  "}"""))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.name").value("Korean basics"));
+	}
+
+	@Test
+	void rejectsARenameToBlank() throws Exception {
+		final var deckId = UUID.randomUUID().toString();
+		createRootDeck(deckId, "Korean");
+
+		mockMvc.perform(patch("/api/v1/decks/{deckId}", deckId)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""
+							{"name":"   "}"""))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.fieldErrors.name").exists());
+	}
+
+	@Test
+	void movesADeckBeneathAnotherAndReportsItsNewParent() throws Exception {
+		final var rootId = UUID.randomUUID().toString();
+		final var oldParentId = UUID.randomUUID().toString();
+		final var newParentId = UUID.randomUUID().toString();
+		final var movingId = UUID.randomUUID().toString();
+		createRootDeck(rootId, "Korean");
+		createSubDeck(rootId, oldParentId, "Old");
+		createSubDeck(rootId, newParentId, "New");
+		createSubDeck(oldParentId, movingId, "Moving");
+
+		mockMvc.perform(post("/api/v1/decks/{deckId}/move", movingId)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""
+							{"targetParentDeckId":"%s"}""".formatted(newParentId)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.id").value(movingId))
+				.andExpect(jsonPath("$.parentDeckId").value(newParentId));
+	}
+
+	@Test
+	void refusesToMoveADeckIntoItsOwnSubtree() throws Exception {
+		final var rootId = UUID.randomUUID().toString();
+		final var parentId = UUID.randomUUID().toString();
+		final var childId = UUID.randomUUID().toString();
+		createRootDeck(rootId, "Korean");
+		createSubDeck(rootId, parentId, "Unit 1");
+		createSubDeck(parentId, childId, "Lesson 1");
+
+		mockMvc.perform(post("/api/v1/decks/{deckId}/move", parentId)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""
+							{"targetParentDeckId":"%s"}""".formatted(childId)))
+				.andExpect(status().isConflict())
+				.andExpect(jsonPath("$.code").value("DECK_MOVE_INTO_OWN_SUBTREE"));
+	}
+
+	@Test
+	void listsTheCardMoveTargetsOfARoot() throws Exception {
+		final var rootId = UUID.randomUUID().toString();
+		final var sourceId = UUID.randomUUID().toString();
+		final var targetId = UUID.randomUUID().toString();
+		createRootDeck(rootId, "Korean");
+		createSubDeck(rootId, sourceId, "Source");
+		createSubDeck(rootId, targetId, "Target");
+
+		mockMvc.perform(get("/api/v1/decks/{rootDeckId}/card-move-targets", rootId)
+					.param("sourceDeckId", sourceId))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.length()").value(1))
+				.andExpect(jsonPath("$[0].deckId").value(targetId))
+				.andExpect(jsonPath("$[0].deckName").value("Target"))
+				.andExpect(jsonPath("$[0].parentName").value("Korean"));
 	}
 
 	@Test

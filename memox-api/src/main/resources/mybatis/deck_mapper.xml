@@ -520,6 +520,71 @@
       AND delete_batch_id IS NULL
   </update>
 
+  <resultMap id="deckMoveTarget" type="com.memox.deck.entity.DeckMoveTarget">
+    <constructor>
+      <idArg column="deck_id" javaType="java.lang.String"/>
+      <arg column="deck_name" javaType="java.lang.String"/>
+      <arg column="content_type" javaType="com.memox.deck.enums.DeckContentType" typeHandler="com.memox.deck.persistence.DeckContentTypeTypeHandler"/>
+      <arg column="parent_name" javaType="java.lang.String"/>
+    </constructor>
+  </resultMap>
+
+  <!--
+    Copied from Drift including its deliberate omission: the recursion does NOT filter
+    delete_batch_id. A moved subtree must carry its tombstoned descendants' root_deck_id too, or
+    restoring one later files it under a root the subtree no longer belongs to.
+  -->
+  <update id="updateSubtreeRootDeck">
+    UPDATE decks
+    SET root_deck_id = #{newRootDeckId}, updated_at = #{updatedAt}
+    WHERE id IN (
+      WITH RECURSIVE subtree (id) AS (
+          SELECT id FROM decks WHERE id = #{deckId}
+          UNION
+          SELECT d.id FROM decks d INNER JOIN subtree s ON d.parent_deck_id = s.id
+      )
+      SELECT id FROM subtree
+    )
+  </update>
+
+  <!--
+    No Drift counterpart: Drift stores no sibling_scope_id. This is the server-side half of
+    translation row 5, and leaving sibling_scope_id behind is how a moved deck keeps competing for
+    positions in its OLD parent's scope — surfacing later as a unique violation on an unrelated
+    write.
+  -->
+  <update id="reparentDeck">
+    UPDATE decks
+    SET parent_deck_id = #{parentDeckId},
+        sibling_scope_id = #{parentDeckId},
+        sibling_position = #{siblingPosition},
+        updated_at = #{updatedAt}
+    WHERE id = #{deckId}
+      AND delete_batch_id IS NULL
+  </update>
+
+  <update id="updateDeckName">
+    UPDATE decks
+    SET name = #{name}, updated_at = #{updatedAt}
+    WHERE id = #{deckId}
+      AND delete_batch_id IS NULL
+  </update>
+
+  <!-- Decks that could accept a card: never a root, never the source, and never one that has
+       already committed to holding sub-decks. -->
+  <select id="findCardMoveTargets" resultMap="deckMoveTarget">
+    SELECT d.id AS deck_id, d.name AS deck_name, d.content_type AS content_type,
+           p.name AS parent_name
+    FROM decks d
+    LEFT JOIN decks p ON p.id = d.parent_deck_id
+    WHERE d.root_deck_id = #{rootDeckId}
+      AND d.parent_deck_id IS NOT NULL
+      AND d.id &lt;&gt; #{sourceDeckId}
+      AND d.delete_batch_id IS NULL
+      AND d.content_type IN ('unset', 'card')
+    ORDER BY d.name ASC, d.id ASC
+  </select>
+
   <update id="updateContentType">
     UPDATE decks
     SET content_type = #{contentType,typeHandler=com.memox.deck.persistence.DeckContentTypeTypeHandler}, updated_at = #{updatedAt}
