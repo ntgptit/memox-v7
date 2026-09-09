@@ -12,6 +12,7 @@ import com.memox.common.pagination.PageQuery;
 import com.memox.common.pagination.PagingResponse;
 import com.memox.common.pagination.SortColumn;
 import com.memox.common.pagination.SortDirection;
+import com.memox.common.persistence.AffectedRows;
 import com.memox.deck.entity.Deck;
 import com.memox.deck.enums.DeckContentType;
 import com.memox.deck.enums.DeckSortField;
@@ -82,7 +83,9 @@ public class DeckService {
 
 		final var now = Instant.now(clock);
 		if (parent.contentType() == DeckContentType.UNSET) {
-			deckMapper.updateContentType(parent.id(), DeckContentType.DECK, now);
+			AffectedRows.requireExactlyOne(
+					deckMapper.updateContentType(parent.id(), DeckContentType.DECK, now),
+					() -> new IllegalStateException("locked parent deck vanished mid-transaction: " + parent.id()));
 			log.info("Deck {} now holds sub-decks", parent.id());
 		}
 
@@ -123,7 +126,9 @@ public class DeckService {
 			throw new DeckConflictException(ApiErrorCode.ROOT_SCHEDULER_INVALID, root.id());
 		}
 		if (deck.contentType() == DeckContentType.UNSET) {
-			deckMapper.updateContentType(deck.id(), DeckContentType.CARD, Instant.now(clock));
+			AffectedRows.requireExactlyOne(
+					deckMapper.updateContentType(deck.id(), DeckContentType.CARD, Instant.now(clock)),
+					() -> new IllegalStateException("locked deck vanished mid-transaction: " + deck.id()));
 			log.info("Deck {} now holds cards", deck.id());
 		}
 		return new DeckSchedulerState(root.schedulerType(), root.schedulerVersion(), root.schedulerGeneration());

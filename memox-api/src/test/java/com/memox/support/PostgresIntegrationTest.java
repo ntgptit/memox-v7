@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
 /**
@@ -20,15 +19,17 @@ import org.springframework.test.context.ActiveProfiles;
  * <p>{@code @AutoConfigureMockMvc} lives here rather than on the three subclasses that used to
  * carry it. Two different sets of annotations meant two context cache keys, therefore two context
  * boots, therefore two PostgreSQL containers for one test run.
+ *
+ * <p>It extends {@link MemoxFixtures}, so every subclass gets the shared seeding vocabulary —
+ * {@code insertRootDeck(...)}, {@code softDelete(...)}, {@code contentTypeOf(...)} — with no
+ * receiver and no per-feature helper. {@code jdbcTemplate} is inherited from there too: this class
+ * empties the database, that one fills it.
  */
 @ActiveProfiles("test")
 @SpringBootTest
 @AutoConfigureMockMvc
 @Import({ PostgresTestcontainersConfiguration.class, LocalPostgresConfiguration.class })
-public abstract class PostgresIntegrationTest {
-
-	@Autowired
-	protected JdbcTemplate jdbcTemplate;
+public abstract class PostgresIntegrationTest extends MemoxFixtures {
 
 	@Autowired
 	private DataSource dataSource;

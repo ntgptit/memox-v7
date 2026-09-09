@@ -424,6 +424,8 @@
                     <threshold>Low</threshold>
                     <includeTests>false</includeTests>
                     <failOnError>true</failOnError>
+                    <!-- One narrow entry per false positive; see the file's header for the rule. -->
+                    <excludeFilterFile>config/spotbugs/exclude.xml</excludeFilterFile>
                 </configuration>
                 <executions>
                     <execution>

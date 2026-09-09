@@ -10,7 +10,10 @@
       <arg column="deck_id" javaType="java.lang.String"/>
       <arg column="front" javaType="java.lang.String"/>
       <arg column="back" javaType="java.lang.String"/>
-      <arg column="is_flagged" javaType="_boolean"/>
+      <!-- Named explicitly rather than left to the registry: is_flagged is SMALLINT, and the
+           built-in boolean handler only reads it by grace of the PostgreSQL driver. Stating the
+           handler here means the read path exercises the same code the first flag WRITE will. -->
+      <arg column="is_flagged" javaType="_boolean" typeHandler="com.memox.common.mybatis.BooleanSmallIntTypeHandler"/>
       <arg column="example" javaType="java.lang.String"/>
       <arg column="hint" javaType="java.lang.String"/>
       <arg column="pronunciation" javaType="java.lang.String"/>
