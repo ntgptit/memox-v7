@@ -110,6 +110,58 @@ class DeckControllerTest extends PostgresIntegrationTest {
 						"unknown sort field; allowed fields are siblingPosition, name, createdAt, updatedAt"));
 	}
 
+	/**
+	 * The summaries endpoint end to end, including the response shape the Library screen reads.
+	 *
+	 * <p>`DeckSummaryTest` proves the counts; this proves they survive the trip out — a 16-field
+	 * mapping where a swapped pair of counts is invisible to any assertion that only checks the
+	 * page is non-empty.
+	 */
+	@Test
+	void publishesRootDeckSummariesWithTheirCounts() throws Exception {
+		final var rootId = UUID.randomUUID().toString();
+		final var childId = UUID.randomUUID().toString();
+		createRootDeck(rootId, "Korean");
+		createSubDeck(rootId, childId, "Unit 1");
+		insertCardWithState(UUID.randomUUID().toString(), childId, null, null);
+
+		mockMvc.perform(get("/api/v1/decks/summaries"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.items[0].id").value(rootId))
+				.andExpect(jsonPath("$.items[0].name").value("Korean"))
+				.andExpect(jsonPath("$.items[0].contentType").value("deck"))
+				.andExpect(jsonPath("$.items[0].totalCardCount").value(1))
+				.andExpect(jsonPath("$.items[0].newCardCount").value(1))
+				.andExpect(jsonPath("$.items[0].dueCardCount").value(0))
+				.andExpect(jsonPath("$.items[0].subDeckCount").value(1))
+				.andExpect(jsonPath("$.items[0].oldestDueAt").doesNotExist())
+				.andExpect(jsonPath("$.totalItems").value(1));
+	}
+
+	@Test
+	void rejectsAUtcOffsetNoPlaceOnEarthUses() throws Exception {
+		mockMvc.perform(get("/api/v1/decks/summaries").header("X-Utc-Offset-Minutes", "900"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
+				.andExpect(jsonPath("$.fieldErrors['X-Utc-Offset-Minutes']").exists());
+	}
+
+	@Test
+	void publishesOneRootsWholeTreeAndNothingFromAnother() throws Exception {
+		final var rootId = UUID.randomUUID().toString();
+		final var childId = UUID.randomUUID().toString();
+		final var otherRootId = UUID.randomUUID().toString();
+		createRootDeck(rootId, "Korean");
+		createSubDeck(rootId, childId, "Unit 1");
+		createRootDeck(otherRootId, "Japanese");
+
+		mockMvc.perform(get("/api/v1/decks/{rootDeckId}/tree", rootId))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.length()").value(2))
+				.andExpect(jsonPath("$[?(@.id == '%s')]".formatted(childId)).exists())
+				.andExpect(jsonPath("$[?(@.id == '%s')]".formatted(otherRootId)).doesNotExist());
+	}
+
 	@Test
 	void returnsProblemDetailsForInvalidRootDeckInput() throws Exception {
 		mockMvc.perform(post("/api/v1/decks")

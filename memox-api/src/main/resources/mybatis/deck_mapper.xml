@@ -44,6 +44,131 @@
     OFFSET #{slice.offset}
   </select>
 
+  <!--
+    javaType="_int" and "_long", not "int" and "long". In MyBatis's TypeAliasRegistry the bare names
+    are aliases for the WRAPPER types; the primitives are the underscore forms. DeckSummary declares
+    primitives, so the bare names would leave no constructor matching and every read of this map
+    would fail at run time — the exact defect that made every deck creation return HTTP 500.
+  -->
+  <resultMap id="deckSummary" type="com.memox.deck.entity.DeckSummary">
+    <constructor>
+      <idArg column="id" javaType="java.lang.String"/>
+      <arg column="name" javaType="java.lang.String"/>
+      <arg column="root_deck_id" javaType="java.lang.String"/>
+      <arg column="content_type" javaType="com.memox.deck.enums.DeckContentType" typeHandler="com.memox.deck.persistence.DeckContentTypeTypeHandler"/>
+      <arg column="scheduler_type" javaType="com.memox.deck.enums.SchedulerType" typeHandler="com.memox.deck.persistence.SchedulerTypeTypeHandler"/>
+      <arg column="sibling_position" javaType="_int"/>
+      <arg column="total_card_count" javaType="_long"/>
+      <arg column="new_card_count" javaType="_long"/>
+      <arg column="due_card_count" javaType="_long"/>
+      <arg column="overdue_card_count" javaType="_long"/>
+      <arg column="oldest_due_at" javaType="java.time.Instant"/>
+      <arg column="learned_card_count" javaType="_long"/>
+      <arg column="sub_deck_count" javaType="_long"/>
+      <arg column="next_due_at" javaType="java.time.Instant"/>
+      <arg column="created_at" javaType="java.time.Instant"/>
+      <arg column="updated_at" javaType="java.time.Instant"/>
+    </constructor>
+  </resultMap>
+
+  <!--
+    Port of Drift's rootDeckSummaries. Every count reaches its cards through root_deck_id, never by
+    walking parent_deck_id: a card three levels down belongs to the root, and
+    COALESCE(parent_deck_id, id) returns the wrong deck from the third level down (BR-56).
+
+    Three deliberate divergences from the Drift original, all of them fixes, all of them to be
+    recorded in the parity document (Task 15) with a WBS entry against the Flutter query:
+
+    1. next_due_at is CORRELATED to d. Drift's sub-select has no reference to the deck row, so it
+       returns MIN(due_at) across the whole database and every root in the Library list shows the
+       same "next due" moment.
+    2. next_due_at also excludes cards whose DECK is in Trash. Drift joins `cards` alone, which
+       keeps a card out when the card itself is trashed but not when its deck is — inconsistent
+       with the five counts beside it, which all check cd.delete_batch_id (BR-257).
+    3. due_card_count requires learned_at IS NOT NULL, so a never-learned card is new and not also
+       due. A card in both buckets is counted twice on the same badge (BR-90, BR-151).
+  -->
+  <select id="findRootDeckSummaries" resultMap="deckSummary">
+    SELECT d.id, d.name, d.root_deck_id, d.content_type, d.scheduler_type, d.sibling_position,
+           COALESCE(total.card_count, 0)      AS total_card_count,
+           COALESCE(fresh.new_count, 0)       AS new_card_count,
+           COALESCE(due.due_count, 0)         AS due_card_count,
+           COALESCE(due.overdue_count, 0)     AS overdue_card_count,
+           due.oldest_due_at                  AS oldest_due_at,
+           COALESCE(learned.learned_count, 0) AS learned_card_count,
+           COALESCE(sub.sub_count, 0)         AS sub_deck_count,
+           (SELECT MIN(nx.due_at)
+              FROM card_study_states nx
+              INNER JOIN cards nc ON nc.id = nx.card_id
+              INNER JOIN decks nd ON nd.id = nc.deck_id
+             WHERE nx.due_at &gt; #{now}
+               AND nd.root_deck_id = d.id
+               AND nc.delete_batch_id IS NULL
+               AND nd.delete_batch_id IS NULL) AS next_due_at,
+           d.created_at, d.updated_at
+      FROM decks d
+      LEFT JOIN (SELECT cd.root_deck_id AS root_deck_id, COUNT(*) AS card_count
+                   FROM cards c
+                   INNER JOIN decks cd ON cd.id = c.deck_id
+                  WHERE c.delete_batch_id IS NULL AND cd.delete_batch_id IS NULL
+                  GROUP BY cd.root_deck_id) total ON total.root_deck_id = d.id
+      LEFT JOIN (SELECT cd.root_deck_id AS root_deck_id, COUNT(*) AS new_count
+                   FROM cards c
+                   INNER JOIN decks cd ON cd.id = c.deck_id
+                   INNER JOIN card_study_states s ON s.card_id = c.id
+                  WHERE s.learned_at IS NULL
+                    AND c.delete_batch_id IS NULL AND cd.delete_batch_id IS NULL
+                  GROUP BY cd.root_deck_id) fresh ON fresh.root_deck_id = d.id
+      LEFT JOIN (SELECT cd.root_deck_id AS root_deck_id, COUNT(*) AS due_count,
+                        SUM(CASE WHEN s.due_at &lt; #{startOfToday} THEN 1 ELSE 0 END) AS overdue_count,
+                        MIN(s.due_at) AS oldest_due_at
+                   FROM cards c
+                   INNER JOIN decks cd ON cd.id = c.deck_id
+                   INNER JOIN card_study_states s ON s.card_id = c.id
+                  WHERE s.learned_at IS NOT NULL AND s.due_at &lt;= #{now}
+                    AND c.delete_batch_id IS NULL AND cd.delete_batch_id IS NULL
+                  GROUP BY cd.root_deck_id) due ON due.root_deck_id = d.id
+      LEFT JOIN (SELECT cd.root_deck_id AS root_deck_id, COUNT(*) AS learned_count
+                   FROM cards c
+                   INNER JOIN decks cd ON cd.id = c.deck_id
+                   INNER JOIN card_study_states s ON s.card_id = c.id
+                  WHERE ((s.scheduler_type = 'eight_box' AND s.current_box = 8)
+                      OR (s.scheduler_type = 'sm2' AND s.interval_days &gt;= 128))
+                    AND c.delete_batch_id IS NULL AND cd.delete_batch_id IS NULL
+                  GROUP BY cd.root_deck_id) learned ON learned.root_deck_id = d.id
+      LEFT JOIN (SELECT parent_deck_id AS parent_id, COUNT(*) AS sub_count
+                   FROM decks
+                  WHERE parent_deck_id IS NOT NULL AND delete_batch_id IS NULL
+                  GROUP BY parent_deck_id) sub ON sub.parent_id = d.id
+     WHERE d.parent_deck_id IS NULL AND d.delete_batch_id IS NULL
+    <include refid="orderBySlice"/>
+    LIMIT #{slice.limit}
+    OFFSET #{slice.offset}
+  </select>
+
+  <!-- Port of Drift's allDecks, ordering included. -->
+  <select id="findAllActiveDecks" resultMap="deck">
+    SELECT id, name, parent_deck_id, root_deck_id, content_type, scheduler_type,
+           scheduler_version, scheduler_generation, sibling_position, created_at, updated_at
+    FROM decks
+    WHERE delete_batch_id IS NULL
+    ORDER BY root_deck_id ASC, sibling_position ASC, id ASC
+  </select>
+
+  <!--
+    Port of Drift's decksInTree. No recursion: every descendant already carries the root's id
+    (BR-56). The ordering is flat rather than depth-first, exactly as the original — the client
+    rebuilds the tree from the parent pointers these rows already carry.
+  -->
+  <select id="findDecksInTree" resultMap="deck">
+    SELECT id, name, parent_deck_id, root_deck_id, content_type, scheduler_type,
+           scheduler_version, scheduler_generation, sibling_position, created_at, updated_at
+    FROM decks
+    WHERE root_deck_id = #{rootDeckId}
+      AND delete_batch_id IS NULL
+    ORDER BY sibling_position ASC, id ASC
+  </select>
+
   <select id="countRootDecks" resultType="long">
     SELECT COUNT(*)
     FROM decks
