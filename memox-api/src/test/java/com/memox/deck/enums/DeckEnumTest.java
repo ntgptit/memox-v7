@@ -1,4 +1,4 @@
-package com.memox.deck.domain;
+package com.memox.deck.enums;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

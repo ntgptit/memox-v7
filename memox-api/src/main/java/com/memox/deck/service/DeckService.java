@@ -9,14 +9,14 @@ import org.springframework.transaction.annotation.Transactional;
 import com.memox.common.pagination.PageHelper;
 import com.memox.common.pagination.PageQuery;
 import com.memox.common.pagination.PagingResponse;
-import com.memox.deck.domain.Deck;
-import com.memox.deck.domain.DeckContentType;
-import com.memox.deck.domain.DeckSchedulerState;
+import com.memox.deck.entity.Deck;
+import com.memox.deck.enums.DeckContentType;
+import com.memox.deck.entity.DeckSchedulerState;
 import com.memox.deck.persistence.DeckMapper;
 import com.memox.deck.persistence.DeckPositionScope;
 import com.memox.common.error.ApiErrorCode;
-import com.memox.deck.domain.DeckConflictException;
-import com.memox.deck.domain.DeckNotFoundException;
+import com.memox.deck.exception.DeckConflictException;
+import com.memox.deck.exception.DeckNotFoundException;
 
 import lombok.RequiredArgsConstructor;
 

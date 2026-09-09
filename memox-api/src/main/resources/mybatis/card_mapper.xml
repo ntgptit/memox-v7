@@ -4,7 +4,7 @@
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.memox.card.persistence.CardMapper">
 
-  <resultMap id="card" type="com.memox.card.domain.Card">
+  <resultMap id="card" type="com.memox.card.entity.Card">
     <constructor>
       <idArg column="id" javaType="java.lang.String"/>
       <arg column="deck_id" javaType="java.lang.String"/>
@@ -19,7 +19,7 @@
     </constructor>
   </resultMap>
 
-  <insert id="insertCard" parameterType="com.memox.card.domain.Card">
+  <insert id="insertCard" parameterType="com.memox.card.entity.Card">
     INSERT INTO cards (
       id, deck_id, front, back, front_folded, back_folded,
       example, hint, pronunciation, created_at, updated_at

@@ -4,14 +4,14 @@
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.memox.deck.persistence.DeckMapper">
 
-  <resultMap id="deck" type="com.memox.deck.domain.Deck">
+  <resultMap id="deck" type="com.memox.deck.entity.Deck">
     <constructor>
       <idArg column="id" javaType="java.lang.String"/>
       <arg column="name" javaType="java.lang.String"/>
       <arg column="parent_deck_id" javaType="java.lang.String"/>
       <arg column="root_deck_id" javaType="java.lang.String"/>
-      <arg column="content_type" javaType="com.memox.deck.domain.DeckContentType" typeHandler="com.memox.deck.persistence.DeckContentTypeTypeHandler"/>
-      <arg column="scheduler_type" javaType="com.memox.deck.domain.SchedulerType" typeHandler="com.memox.deck.persistence.SchedulerTypeTypeHandler"/>
+      <arg column="content_type" javaType="com.memox.deck.enums.DeckContentType" typeHandler="com.memox.deck.persistence.DeckContentTypeTypeHandler"/>
+      <arg column="scheduler_type" javaType="com.memox.deck.enums.SchedulerType" typeHandler="com.memox.deck.persistence.SchedulerTypeTypeHandler"/>
       <arg column="scheduler_version" javaType="java.lang.Integer"/>
       <arg column="scheduler_generation" javaType="java.lang.Integer"/>
       <arg column="sibling_position" javaType="_int"/>
@@ -74,7 +74,7 @@
     WHERE sibling_scope_id = #{siblingScopeId}
   </select>
 
-  <insert id="insertRootDeck" parameterType="com.memox.deck.domain.Deck">
+  <insert id="insertRootDeck" parameterType="com.memox.deck.entity.Deck">
     INSERT INTO decks (
       id, name, parent_deck_id, sibling_position, sibling_scope_id, root_deck_id, content_type,
       scheduler_type, scheduler_version, scheduler_generation, created_at, updated_at
@@ -86,7 +86,7 @@
     )
   </insert>
 
-  <insert id="insertSubDeck" parameterType="com.memox.deck.domain.Deck">
+  <insert id="insertSubDeck" parameterType="com.memox.deck.entity.Deck">
     INSERT INTO decks (
       id, name, parent_deck_id, sibling_position, sibling_scope_id, root_deck_id, content_type, created_at, updated_at
     ) VALUES (

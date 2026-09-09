@@ -1,6 +1,8 @@
-package com.memox.deck.domain;
+package com.memox.deck.entity;
 
 import java.time.Instant;
+import com.memox.deck.enums.DeckContentType;
+import com.memox.deck.enums.SchedulerType;
 
 public record Deck(
 		String id,

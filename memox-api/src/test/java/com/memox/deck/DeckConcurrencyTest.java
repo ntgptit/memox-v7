@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.memox.deck.service.CreateRootDeckCommand;
-import com.memox.deck.domain.SchedulerType;
+import com.memox.deck.enums.SchedulerType;
 import com.memox.deck.service.DeckService;
 import com.memox.support.PostgresIntegrationTest;
 

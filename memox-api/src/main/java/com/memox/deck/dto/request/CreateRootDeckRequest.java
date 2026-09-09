@@ -1,11 +1,11 @@
-package com.memox.deck.api;
+package com.memox.deck.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import com.memox.common.validation.ValidationPatterns;
-import com.memox.deck.domain.SchedulerType;
+import com.memox.deck.enums.SchedulerType;
 
 public record CreateRootDeckRequest(
 		@NotBlank(message = "{validation.required}")

@@ -1,13 +1,10 @@
-package com.memox.deck.domain;
+package com.memox.deck.exception;
 
 import com.memox.common.error.ApiErrorCode;
 import com.memox.common.error.MemoxException;
 
 public class DeckNotFoundException extends MemoxException {
 
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = -7648723892456827919L;
 
 	public DeckNotFoundException(String deckId) {

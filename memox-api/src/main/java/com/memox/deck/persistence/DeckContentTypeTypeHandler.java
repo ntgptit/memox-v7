@@ -5,7 +5,7 @@ import org.apache.ibatis.type.MappedJdbcTypes;
 import org.apache.ibatis.type.MappedTypes;
 
 import com.memox.common.mybatis.AbstractStringValueEnumTypeHandler;
-import com.memox.deck.domain.DeckContentType;
+import com.memox.deck.enums.DeckContentType;
 
 @MappedTypes(DeckContentType.class)
 @MappedJdbcTypes(JdbcType.VARCHAR)

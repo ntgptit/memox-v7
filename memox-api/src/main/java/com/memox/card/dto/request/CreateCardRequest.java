@@ -1,4 +1,4 @@
-package com.memox.card.api;
+package com.memox.card.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

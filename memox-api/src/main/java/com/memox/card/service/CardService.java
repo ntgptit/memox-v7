@@ -6,13 +6,13 @@ import java.time.Instant;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.memox.card.domain.Card;
+import com.memox.card.entity.Card;
 import com.memox.card.persistence.CardMapper;
 import com.memox.common.pagination.PageHelper;
 import com.memox.common.pagination.PageQuery;
 import com.memox.common.pagination.PagingResponse;
 import com.memox.deck.service.DeckService;
-import com.memox.deck.domain.DeckNotFoundException;
+import com.memox.deck.exception.DeckNotFoundException;
 
 import lombok.RequiredArgsConstructor;
 

@@ -7,8 +7,8 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import com.memox.common.pagination.PageQuery;
-import com.memox.deck.domain.Deck;
-import com.memox.deck.domain.DeckContentType;
+import com.memox.deck.entity.Deck;
+import com.memox.deck.enums.DeckContentType;
 
 @Mapper
 public interface DeckMapper {

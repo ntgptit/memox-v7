@@ -1,4 +1,4 @@
-package com.memox.deck.domain;
+package com.memox.deck.enums;
 
 import java.util.Arrays;
 

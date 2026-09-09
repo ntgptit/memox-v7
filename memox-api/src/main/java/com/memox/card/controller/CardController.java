@@ -1,4 +1,4 @@
-package com.memox.card.api;
+package com.memox.card.controller;
 
 import java.net.URI;
 
@@ -27,6 +27,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
+import com.memox.card.dto.request.CreateCardRequest;
+import com.memox.card.dto.response.CardResponse;
 
 @RestController
 @Validated
@@ -48,7 +50,7 @@ public class CardController {
 	public ResponseEntity<CardResponse> createCard(
 			@PathVariable String deckId,
 			@Valid @RequestBody CreateCardRequest request) {
-		final var card = this.cardService.createCard(new CreateCardCommand(request.id(), deckId, request.front(),
+		final var card = cardService.createCard(new CreateCardCommand(request.id(), deckId, request.front(),
 				request.back(), request.example(), request.hint(), request.pronunciation()));
 		return ResponseEntity.created(URI.create("/api/v1/cards/" + card.id())).body(CardResponse.from(card));
 	}
@@ -65,9 +67,9 @@ public class CardController {
 			@RequestParam(required = false) @Min(PaginationConstants.MIN_LIMIT) @Max(PaginationConstants.MAX_LIMIT) Integer limit,
 			@RequestParam(required = false) @Min(PaginationConstants.MIN_OFFSET) Integer offset) {
 		final var pageQuery = PageQuery.builder()
-				.limit(limit == null ? this.paginationProperties.getDefaultLimit() : limit)
-				.offset(offset == null ? this.paginationProperties.getDefaultOffset() : offset)
+				.limit(limit == null ? paginationProperties.getDefaultLimit() : limit)
+				.offset(offset == null ? paginationProperties.getDefaultOffset() : offset)
 				.build();
-		return this.cardService.listCards(deckId, pageQuery).map(CardResponse::from);
+		return cardService.listCards(deckId, pageQuery).map(CardResponse::from);
 	}
 }
