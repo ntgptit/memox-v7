@@ -17,7 +17,8 @@ public record PageSlice(int limit, long offset, List<SortColumn> sorts) {
 
 	public PageSlice {
 		if (sorts.isEmpty()) {
-			throw new IllegalArgumentException("a page slice needs at least one sort; ORDER BY cannot be empty");
+			throw new IllegalArgumentException(
+					"a page slice needs at least one sort; ORDER BY cannot be empty");
 		}
 		sorts = List.copyOf(sorts);
 	}

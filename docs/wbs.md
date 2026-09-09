@@ -326,6 +326,80 @@ của Logback trên `ApiExceptionHandler` và đòi dòng log chứa `deckId`. N
 định *tính chất* chứ không khẳng định câu chữ — đổi cách diễn đạt vẫn xanh, làm
 mất id thì đỏ.
 
+### M9.P0 · Dọn đường cho Phase 2
+
+- **Status:** **done** — `./mvnw -o verify` xanh 95/95; bốn guard mới đều đã tiêm lỗi.
+- **Goal:** Trả lời câu hỏi "base code Java đã đủ để làm feature chưa" bằng cách sửa
+  những chỗ chưa đủ, chứ không bằng một bản báo cáo.
+- **Nguồn:** audit 11-agent (5 mảng, mỗi mảng một agent phản biện có nhiệm vụ **bác
+  bỏ**, rồi tổng hợp). Kết luận `ready-with-gaps`: 19 finding sống / 1 bị bác. Tôi tự
+  kiểm chứng lại 5 claim nặng nhất trước khi làm.
+
+**Điều bất ngờ nhất của audit: trong 4 blocker, ba nằm ở *tài liệu*, một ở code.**
+Plan Phase 2 (2689 dòng) là thứ session sau sẽ cầm để thực thi, và nó viết trước cả
+ba wave. Một plan lỗi thời không trung tính — nó **sai một cách tự tin** và đọc như
+có thẩm quyền.
+
+**Đã sửa trong plan:** 30 đường dẫn `<feature>/domain/` và `<feature>/api/` mà Wave 2
+đã xoá · `#{pageQuery.limit}` ở hai câu SQL và `limit=&offset=` ở doc endpoint mà
+Wave 3 đã xoá · Task 0 viết lại thành lịch sử (nó đã được làm lại theo thiết kế tốt
+hơn — reset đọc từ `pg_catalog` thay vì danh sách bảng chép tay) · Task 0 Step 7 ghi
+vào `HELP.md` đang bị gitignore ngay dòng 1 → chuyển sang README · Task 15 trỏ nhầm
+`OpenApiContractTest` (smoke test) thay vì `OpenApiSnapshotTest` (chủ sở hữu snapshot)
+· `CardSort` trùng với `CardSortField` Wave 3 đã ship.
+
+**Đã bổ sung vào code:**
+
+- **`MemoxFixtures`** — bộ từ vựng seed mà ~186 call site trong plan gọi không định
+  danh, và **chưa từng tồn tại**: mọi test Task 2–14 sẽ không compile. Cho
+  `PostgresIntegrationTest extends MemoxFixtures` thay vì giữ nó làm field như plan
+  viết — cùng kết quả cho mọi call site, mà không cần 25 method uỷ quyền đặt bề mặt
+  fixture ở hai nơi. Có `MemoxFixturesTest` 15 ca, vì một DSL 186 chỗ dựa vào mà
+  không ai test là đúng thứ audit đang chỉ trích.
+- **`AffectedRows.requireExactlyOne`** — UPDATE duy nhất đang có vứt bỏ số dòng, và
+  chỉ an toàn nhờ một tiền đề không ai ghi ra (`SELECT … FOR UPDATE` đi trước). Áp
+  ngay vào hai call site đó chứ không kèm slice mới: helper không caller là lặp đúng
+  lỗi `readSchemaVersion` mà Wave 3 vừa xoá. 0 dòng → exception của caller; >1 dòng →
+  **luôn** `IllegalStateException`, vì WHERE hỏng không bao giờ là lỗi của client.
+- **`BooleanSmallIntTypeHandler`** — `is_flagged` là `SMALLINT`; đọc chạy nhờ driver,
+  **ghi thì hỏng thẳng**. Lệch một chỗ so với plan: **không** dùng
+  `includeNullJdbcType`, vì nó sẽ chiếm luôn mọi boolean không khai jdbcType — kể cả
+  `activeDeckExists` vốn đọc BOOLEAN thật.
+- **`V5__defer_deck_sibling_position.sql`** — `DEFERRABLE INITIALLY DEFERRED`, đổi
+  chỗ cho reorder deck. Không chỉ khẳng định `condeferrable`: có một test hoán vị hai
+  deck thật trong một transaction, vì kiểm cờ không phải là kiểm hành vi.
+- **Hai luật ArchUnit kéo từ Task 15 lên Task 1** — thêm sau khi tag/trash đã viết
+  xong thì chỉ báo cáo được cái đã có.
+
+**Bốn thứ chỉ lộ ra khi tiêm lỗi, không lộ ra khi đọc:**
+
+1. **`sqlLivesOnlyInMapperXml` trong plan là luật xanh giả.** Nó kiểm
+   `beAnnotatedWith` trên **class**, mà MyBatis đặt `@Select` trên **method** — nó
+   không bao giờ nổ được. Đổi sang `noMethods()`.
+2. **"Chỉ service gọi service" không phát biểu được.**
+   `DeckService.prepareCardCreation` trả `DeckSchedulerState`, nên `CardService` **tất
+   yếu** phụ thuộc `deck.entity` và `deck.enums`. Bề mặt công bố là service + entity +
+   enums + exception, và chỉ với tới được **từ** `..service..`.
+3. **Lần tiêm lỗi V5 đầu tiên vô hiệu** — gỡ file khỏi `src` nhưng bản copy trong
+   `target/classes` vẫn còn, Flyway vẫn báo "applied 5 migrations". Cùng loại với vụ
+   `jacoco:check` của Wave 1: xanh vì phép đo sai, không phải vì code đúng.
+4. **Ngưỡng JaCoCo đỏ ở đúng lần đầu tiên nó có cơ hội.** Audit đã hỏi thẳng: 0.92 là
+   sàn hay là bẫy sẽ bị hạ ngay lần đầu đỏ. Nó tụt còn 0.91 vì nhánh
+   `CallableStatement` tôi viết mà chưa test — hụt đúng **6 instruction**. Viết test,
+   không hạ ngưỡng. Đó là câu trả lời: nó là sàn.
+
+**Quyết định mà plan còn thiếu:** trần **500 id** cho mọi thao tác `IN`-list (bulk
+move/flag/delete, restore). Vượt thì trả `VALIDATION_FAILED` chứ không cắt bớt — client
+mất dòng mà không biết thì tệ hơn là bị từ chối.
+
+**Còn nợ có chủ đích:** `IdCollections` (chưa có caller — dựng ở Task 9 cùng trần
+trên) và trường `search` của hợp đồng phân trang (chưa câu SQL nào tìm kiếm).
+
+**Ngoại lệ SpotBugs đầu tiên của module**, `config/spotbugs/exclude.xml`: một entry hẹp
+đúng một class · một method · một pattern. `X extends RuntimeException` erase thành
+`RuntimeException`, nên bytecode đọc ra `throw (RuntimeException)` dù thực tế luôn là
+subclass do caller cấp. Giữ `threshold=Low, effort=Max` nguyên vẹn.
+
 ## M99 · Adhoc
 
 Task do chủ dự án giao trực tiếp, không thuộc chuỗi phụ thuộc M0…M9. Đánh số từ

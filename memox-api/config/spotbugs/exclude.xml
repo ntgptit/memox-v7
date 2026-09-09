@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SpotBugs exclusions for memox-api.
+
+  The analysis runs at effort=Max, threshold=Low, failOnError=true. That is a deliberate choice,
+  so this file stays deliberately small: every entry names ONE class, ONE method and ONE bug
+  pattern, and says why the finding is wrong rather than merely inconvenient. A pattern excluded
+  across the module would silence the next real occurrence of it too.
+-->
+<FindBugsFilter>
+
+    <!--
+      False positive from generic erasure, not a design smell.
+
+      requireExactlyOne is declared <X extends RuntimeException>(int, Supplier<X>) and rethrows
+      whatever the caller supplied. X erases to RuntimeException, so the bytecode reads as
+      `throw (RuntimeException)` and the detector concludes the method throws a bare
+      RuntimeException. It never does: the value comes from the caller's supplier and is always a
+      specific subclass — IllegalStateException at today's two call sites, and the feature's own
+      not-found or conflict exception at the ones Phase 2 adds.
+
+      Narrowed to the single method so that a genuine `throw new RuntimeException(...)` anywhere
+      else in this class, or in any other, still fails the build.
+    -->
+    <Match>
+        <Class name="com.memox.common.persistence.AffectedRows"/>
+        <Method name="requireExactlyOne"/>
+        <Bug pattern="THROWS_METHOD_THROWS_RUNTIMEEXCEPTION"/>
+    </Match>
+
+</FindBugsFilter>

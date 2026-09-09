@@ -2,13 +2,13 @@
 
 | | |
 |---|---|
-| **Status** | draft |
+| **Status** | draft, revised 2026-09-10 after M9.W1–W3 |
 | **Purpose** | Port the 69 Drift library queries (deck · card · tag · trash) to MyBatis PostgreSQL statements and build the vertical slices that call them. |
 | **Scope** | `memox-api` deck, card, tag and trash modules: mapper XML, mapper interfaces, domain records, application services, controllers, DTOs and their tests; plus the two migrations and one test-harness change those slices require. |
 | **Source of truth for** | Exact execution steps for MemoX API Phase 2, and the Drift→MyBatis statement mapping for the four library modules. |
 | **Depends on** | `docs/superpowers/specs/2026-09-06-memox-api-design.md` · `docs/business-rules.md` · `docs/data-model.md` · `docs/superpowers/plans/2026-09-06-memox-api-phase-1-schema.md` |
 | **Updated by task** | M9 API Phase 2 |
-| **Last updated** | 2026-09-09 |
+| **Last updated** | 2026-09-10 |
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:subagent-driven-development` (recommended) or `superpowers:executing-plans` to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -17,6 +17,42 @@
 **Architecture:** One seam per request: `HTTP controller → application service → MyBatis mapper/XML → PostgreSQL`. Controllers validate DTOs, delegate once and choose a status code. Services own the transaction and every rule that needs the data as it stands at the moment of writing. Mappers own SQL only, and all SQL lives in `*_mapper.xml`. The Drift `.drift` files are the **behaviour** source, not code-generation input: SQLite syntax is translated deliberately, statement by statement, under the contract in §2.
 
 **Tech Stack:** Java 17, Spring Boot 3.5, MyBatis (XML mappers), Flyway, PostgreSQL 16/17, Testcontainers *or* a local PostgreSQL test database (see Task 0), JUnit 5, AssertJ, ArchUnit, springdoc-openapi, Lombok.
+
+## 0. What changed under this plan before it ran
+
+This plan was written on 2026-09-09, before three standardisation waves landed. **The code moved; a
+plan that still describes the old code is not a neutral document — it is confidently wrong, and it
+reads as authoritative.** Every task below has been corrected. What changed, and what it means for
+the steps you are about to follow:
+
+| Landed | What it invalidated here | Now |
+|---|---|---|
+| **M9.W1** (#512) — CI gate, static analysis, coverage floor, dual-backend Postgres harness, `openapi.json` snapshot | Task 0's whole design; Task 15's assumption that no snapshot exists | Task 0 is history, Task 15 regenerates the snapshot |
+| **M9.W2** (#513) — `<feature>/api` → `controller` + `dto/{request,response}`, `<feature>/domain` → `entity` + `enums` + `exception` | **Every `Files:` path in Tasks 2–15** — 30 of them | Rewritten. A closed-world ArchUnit rule now fails any class outside the layout, so the old paths cannot be recreated quietly |
+| **M9.W3** (#514) — `page`/`size` paging, `PageQuery<TSort>`, `SortSpec`, `SortField`, `PageSlice`, `SortSpecs` | The `#{pageQuery.limit}` XML in Tasks 2 and 7, the `limit=&offset=` endpoint docs, and `CardSort` | Ported statements take `@Param("slice") PageSlice`; sort is an enum whitelist, not a string |
+| **Phase 2 prep** (this revision) | Task 0's `MemoxFixtures`, Task 1's handler, Task 5's migration, Task 15's architecture rules | All landed early — see the notes on each task |
+
+**New shared infrastructure you should use rather than reinvent:**
+
+- **`MemoxFixtures`** — the seeding vocabulary, reachable unqualified from any test extending
+  `PostgresIntegrationTest`. It writes through `JdbcTemplate` and maintains no invariants on
+  purpose, so it can place rows a service would refuse to place.
+- **`AffectedRows.requireExactlyOne(rows, supplier)`** — *use this on every UPDATE and DELETE in
+  Tasks 6, 9, 10, 12 and 13.* Discarding a mapper's row count makes a write that matched nothing
+  look exactly like one that succeeded. Zero rows raises the exception the caller supplies (the
+  feature's not-found or conflict); more than one is always an `IllegalStateException`, because a
+  single-row write that matched several has a defective WHERE clause and that is never a client's
+  fault.
+- **`PageHelper.slice(pageQuery, defaultSorts, tieBreaker)` → `PageSlice`** — every list statement
+  goes through it. It appends the tie-breaker automatically, which LIMIT/OFFSET needs and which is
+  otherwise forgotten once per endpoint. **A query with table aliases must give its sort enum the
+  qualified column** (`d.sibling_position`, not `sibling_position`), because the rendered
+  `ORDER BY` is inserted verbatim.
+- **`V5__defer_deck_sibling_position.sql`** — already applied, so Task 5 no longer creates it.
+
+**Still not built, deliberately:** `IdCollections` (no caller yet — see Task 1) and the
+`search` field of the shared paging contract (no statement searches yet; publishing a parameter the
+SQL ignores lets a client filter, get everything back, and never know).
 
 **Spec:** `docs/superpowers/specs/2026-09-06-memox-api-design.md`
 
@@ -164,25 +200,33 @@ memox-api/src/main/
 │  ├─ common/mybatis/BooleanSmallIntTypeHandler.java        NEW  (row 6)
 │  ├─ common/error/ApiErrorCode.java                        MOD  (+14 codes)
 │  ├─ deck/
-│  │  ├─ domain/     DeckSummary · DeckLevelChild · DeckAncestor · DeckDepth ·
-│  │  │              DeckCounts · DeckMoveTarget · DeckReorderException      NEW
-│  │  ├─ persistence/DeckMapper.java                         MOD
-│  │  ├─ service/    DeckTreeService · DeckStructureService ·
-│  │  │              DeckMoveService · RenameDeckCommand · MoveDeckCommand ·
-│  │  │              ReorderDeckCommand                                      NEW
-│  │  └─ api/        DeckSummaryResponse · DeckLevelResponse ·
-│  │                 RenameDeckRequest · MoveDeckRequest · ReorderDeckRequest NEW
+│  │  ├─ controller/ DeckController.java                                     MOD
+│  │  ├─ dto/request/  RenameDeckRequest · MoveDeckRequest ·
+│  │  │                ReorderDeckRequest                                    NEW
+│  │  ├─ dto/response/ DeckSummaryResponse · DeckLevelResponse               NEW
+│  │  ├─ entity/     DeckSummary · DeckLevelChild · DeckAncestor · DeckDepth ·
+│  │  │              DeckCounts · DeckMoveTarget                             NEW
+│  │  ├─ exception/  DeckReorderException                                    NEW
+│  │  ├─ persistence/DeckMapper.java                                         MOD
+│  │  └─ service/    DeckTreeService · DeckStructureService ·
+│  │                 DeckMoveService · DeckLimits · RenameDeckCommand ·
+│  │                 MoveDeckCommand · ReorderDeckCommand                    NEW
 │  ├─ card/
-│  │  ├─ domain/     CardListItem · CardDetail · CardStudyState ·
+│  │  ├─ controller/ CardController.java                                     MOD
+│  │  ├─ dto/request/  UpdateCardRequest · BulkMoveRequest · BulkFlagRequest NEW
+│  │  ├─ dto/response/ CardListResponse · CardDetailResponse ·
+│  │  │                CardHistoryResponse · ExportResponse                  NEW
+│  │  ├─ entity/     CardListItem · CardDetail · CardStudyState ·
 │  │  │              CardHistoryEntry · CardStateCounts · CardFilter ·
-│  │  │              CardSort · ExportCard · CardKey                         NEW
-│  │  ├─ persistence/CardMapper.java                         MOD
-│  │  ├─ service/    CardQueryService · CardEditService · CardBulkService ·
-│  │  │              CardExportService                                       NEW
-│  │  └─ api/        CardListResponse · CardDetailResponse · UpdateCardRequest ·
-│  │                 BulkMoveRequest · BulkFlagRequest · ExportResponse       NEW
-│  ├─ tag/           domain · persistence · service · api                    NEW module
-│  └─ trash/         domain · persistence · service · api                    NEW module
+│  │  │              ExportCard · CardKey                                    NEW
+│  │  ├─ enums/      CardSortField                                     ALREADY EXISTS
+│  │  ├─ persistence/CardMapper.java                                         MOD
+│  │  └─ service/    CardQueryService · CardEditService · CardBulkService ·
+│  │                 CardExportService · StageThresholds                     NEW
+│  ├─ tag/           controller · dto/{request,response} · entity ·
+│  │                 exception · persistence · service                       NEW module
+│  └─ trash/         controller · dto/{request,response} · entity · enums ·
+│                    exception · persistence · service                       NEW module
 └─ resources/
    ├─ db/migration/V5__defer_deck_sibling_position.sql       NEW
    ├─ db/migration/V6__add_trash_indexes.sql                 NEW
@@ -195,11 +239,24 @@ memox-api/src/main/
 
 ## Task 0: Make the test suite runnable on this machine
 
-**Why first:** `./mvnw test` on the current worktree is **32 tests, 21 errors**. Every error is the same root cause — `PostgresTestcontainersConfiguration` asks Testcontainers for `postgres:16-alpine` and **Docker is not installed on this machine** (`docker` resolves in neither Git Bash nor PowerShell). A local PostgreSQL 17 service *is* running on `localhost:5432`. Until this is fixed, no step in this plan can run its own verification, and TDD is impossible.
+> **DONE — and not the way this task describes.** Everything below was delivered by M9.W1
+> (PR #512) and the Phase 2 prep commit, under different names and a better design. Read this
+> section as history; do not execute it. What it asked for and what exists:
+>
+> | Task 0 asked for | What exists now |
+> |---|---|
+> | A local-Postgres escape from the Docker problem | `TestDatabaseBackends` + `LocalPostgresConfiguration`, chosen by `memox.test.database`; Docker Desktop is also installed now, so `testcontainers` is the working default |
+> | A hand-listed truncate that reaches `tags` and `delete_batches` | `MemoxTestDataReset` reads `pg_catalog.pg_tables` instead, so **a table a future migration adds is reset the day it appears**. Re-implementing the hand-list would be a regression |
+> | A `TestDataResetTest` | exists, and asserts the catalog-driven behaviour |
+> | `MemoxFixtures` as a `protected final` field on `PostgresIntegrationTest` | exists as a **superclass**: `PostgresIntegrationTest extends MemoxFixtures`. Same unqualified call sites (`insertRootDeck(...)`), without 25 one-line delegating methods putting the fixture surface in two places. Covered by `MemoxFixturesTest` |
+>
+> **Still open from this task: nothing.** Start at Task 1.
 
-Two further defects in the harness are fixed here because the same file is being edited:
+**Why it existed:** `./mvnw test` on the worktree at the time was **32 tests, 21 errors**. Every error had the same root cause — `PostgresTestcontainersConfiguration` asked Testcontainers for `postgres:16-alpine` and Docker was not installed. Until that was fixed, no step in this plan could run its own verification, and TDD was impossible.
 
-- `PostgresIntegrationTest.clearMemoXData` truncates only `decks CASCADE`. `tags`, `card_tags` and `delete_batches` have no FK path from `decks`, so **tag and trash rows leak between tests** — every Task 9–14 test would be order-dependent.
+Two further defects in the harness were fixed with it, because the same file was being edited:
+
+- `PostgresIntegrationTest.clearMemoXData` truncated only `decks CASCADE`. `tags`, `card_tags` and `delete_batches` have no FK path from `decks`, so **tag and trash rows leaked between tests** — every Task 9–14 test would have been order-dependent.
 - `app_settings` is seeded by `V2` with `id = 1`; a `TRUNCATE … CASCADE` that ever reaches it removes the singleton row. The truncate list must exclude it.
 
 **Files:**
@@ -400,20 +457,39 @@ void softDelete(String itemType, String itemId) {
 
 Verify with a fixture self-test that inserts two sub-decks under different parents at position `0` and asserts both exist — that is the assertion that fails if `sibling_scope_id` was forgotten.
 
-- [ ] **Step 7: Document the two ways to run the suite**
+- [x] **Step 7: Document the two ways to run the suite** — done, in `memox-api/README.md`.
 
-Add to `memox-api/HELP.md` a "Running the tests" section stating: CI and any machine with Docker uses the default (`memox.test.database=testcontainers`); a machine without Docker exports `MEMOX_TEST_DATABASE=local` and the three `MEMOX_TEST_DB_*` variables against a database that is **never** the developer's `memox` database.
+This step originally said to write it into `memox-api/HELP.md`. That file is **gitignored** (it is Spring Initializr's generated stub), so following the step literally produces a `git add` that silently does nothing and documentation nobody else ever receives. The content lives in `README.md`'s "Running the tests" section instead: CI and any machine with Docker uses the default (`memox.test.database=testcontainers`); a machine without Docker exports `MEMOX_TEST_DATABASE=local` and the three `MEMOX_TEST_DB_*` variables against a database that is **never** the developer's `memox` database.
 
-- [ ] **Step 8: Commit**
-
-```bash
-git add memox-api/src/test memox-api/pom.xml memox-api/HELP.md
-git commit -m "test(api): run the backend suite without Docker and reset every table"
-```
+- [x] **Step 8: Commit** — landed as PR #512 and the Phase 2 prep commit.
 
 ---
 
 ## Task 1: The translation kit — boolean handler, `IN`-guard and the parity test
+
+> **PARTLY DONE.** The Phase 2 prep commit landed the boolean handler and moved the two
+> architecture rules this plan had scheduled for Task 15 forward to here, where they can still
+> change what gets written. What each item's state is:
+>
+> | Item | State |
+> |---|---|
+> | `BooleanSmallIntTypeHandler` + `mybatis.type-handlers-package` | **done**, with one change from the code drafted below — see the note under it |
+> | `sqlLivesOnlyInMapperXml` | **done and live**, moved forward from Task 15. It is `noMethods`, not `noClasses`: MyBatis puts `@Select` on the method, so the drafted class-level check could never fire |
+> | `featuresDoNotReachEachOthersInternals` | **done and live**, moved forward from Task 15, renamed, and widened by one allowance the draft could not have anticipated — see Task 15 |
+> | `IdCollections.requireNonEmpty` | **deliberately not built yet.** It has no caller until the first `IN`-list statement, and a guard with no call site guards nothing; Wave 3 had just removed `readSchemaVersion` for exactly that. Build it in the task that first needs it — Task 9 — together with the cap below |
+> | A batch-size cap for `IN`-list operations | **decided here, because the plan never specified one:** **500 ids** per request for bulk move, bulk flag, bulk delete and restore. Reject a larger list with `VALIDATION_FAILED` rather than truncating it, so a client that exceeds it learns rather than silently loses rows. 500 keeps a single statement's parameter list well under PostgreSQL's 65 535 bind limit even at several parameters per id, and is far above any list a person assembles by hand in the UI |
+>
+> **One change from the drafted handler, and it matters.** The draft says
+> `@MappedJdbcTypes(value = JdbcType.SMALLINT, includeNullJdbcType = true)`. Do not use
+> `includeNullJdbcType`: it also makes this the handler for every boolean with no JDBC type
+> stated, including `activeDeckExists`, whose `SELECT EXISTS (...)` returns a real PostgreSQL
+> BOOLEAN that would then be read with `getShort`. It is bound to SMALLINT only, and statements
+> that want it say so — `typeHandler=` on the result-map argument, or `jdbcType=SMALLINT` on the
+> bind. `TypeHandlerRegistrationTest` asserts both halves of that.
+>
+> `@MappedTypes` names **both** `Boolean.class` and `boolean.class`. MyBatis keys its registry on
+> the exact class, and the primitive and the wrapper are different keys — the same distinction that
+> made `javaType="int"` mean `Integer` and turned every deck creation into an HTTP 500.
 
 **Files:**
 - Create: `memox-api/src/main/java/com/memox/common/mybatis/BooleanSmallIntTypeHandler.java`
@@ -563,12 +639,12 @@ git commit -m "feat(api): add the smallint boolean handler and the IN-collection
 Ports `rootDeckSummaries`, `allDecks`, `decksInTree`. `rootDeckSummaries` is the single largest read in the app and the one the Library screen depends on; it carries seven aggregate counts plus `nextDueAt`.
 
 **Files:**
-- Create: `memox-api/src/main/java/com/memox/deck/domain/DeckSummary.java`
+- Create: `memox-api/src/main/java/com/memox/deck/entity/DeckSummary.java`
 - Modify: `memox-api/src/main/java/com/memox/deck/persistence/DeckMapper.java`
 - Modify: `memox-api/src/main/resources/mybatis/deck_mapper.xml`
 - Create: `memox-api/src/main/java/com/memox/deck/service/DeckTreeService.java`
-- Create: `memox-api/src/main/java/com/memox/deck/api/DeckSummaryResponse.java`
-- Modify: `memox-api/src/main/java/com/memox/deck/api/DeckController.java`
+- Create: `memox-api/src/main/java/com/memox/deck/dto/response/DeckSummaryResponse.java`
+- Modify: `memox-api/src/main/java/com/memox/deck/controller/DeckController.java`
 - Create: `memox-api/src/test/java/com/memox/deck/DeckSummaryTest.java`
 
 **Interfaces:**
@@ -710,8 +786,8 @@ Expected: FAIL — `DeckTreeService` does not exist.
                 WHERE parent_deck_id IS NOT NULL AND delete_batch_id IS NULL
                 GROUP BY parent_deck_id) sub ON sub.parent_id = d.id
    WHERE d.parent_deck_id IS NULL AND d.delete_batch_id IS NULL
-   ORDER BY d.sibling_position ASC, d.id ASC
-   LIMIT #{pageQuery.limit} OFFSET #{pageQuery.offset}
+   <include refid="orderBySlice"/>
+   LIMIT #{slice.limit} OFFSET #{slice.offset}
 </select>
 ```
 
@@ -747,11 +823,11 @@ git commit -m "feat(deck): port root deck summaries and tree reads to MyBatis"
 The hardest read in the module: one statement returning the parent, every child, each child's whole-subtree counts via a recursive `branch` CTE, the inherited scheduler, and the parent's ancestry path as JSON. `deckContextById` is the same ancestry shape for a card's deck, so both land here and share one JSON contract.
 
 **Files:**
-- Create: `memox-api/src/main/java/com/memox/deck/domain/DeckAncestor.java`
-- Create: `memox-api/src/main/java/com/memox/deck/domain/DeckLevelChild.java`
-- Create: `memox-api/src/main/java/com/memox/deck/domain/DeckLevel.java`
-- Create: `memox-api/src/main/java/com/memox/deck/domain/DeckContext.java`
-- Create: `memox-api/src/main/java/com/memox/deck/domain/DeckLimits.java`
+- Create: `memox-api/src/main/java/com/memox/deck/entity/DeckAncestor.java`
+- Create: `memox-api/src/main/java/com/memox/deck/entity/DeckLevelChild.java`
+- Create: `memox-api/src/main/java/com/memox/deck/entity/DeckLevel.java`
+- Create: `memox-api/src/main/java/com/memox/deck/entity/DeckContext.java`
+- Create: `memox-api/src/main/java/com/memox/deck/service/DeckLimits.java` *(a constants holder; `entity/` is for what the mapper reads back, and the depth ceiling is a rule the service enforces)*
 - Create: `memox-api/src/main/java/com/memox/deck/persistence/AncestryJsonTypeHandler.java`
 - Modify: `memox-api/src/main/resources/mybatis/deck_mapper.xml`
 - Modify: `memox-api/src/main/java/com/memox/deck/service/DeckTreeService.java`
@@ -915,7 +991,7 @@ The four `branch`-keyed aggregates are what make a child's counts cover its **wh
 
 - [ ] **Step 4: Add the endpoint**
 
-`GET /api/v1/decks/{deckId}/level` → `DeckLevelResponse`. `maxWalk` is bound from the existing `MAX_TREE_DEPTH = 10`, promoted to `com.memox.deck.domain.DeckLimits.MAX_TREE_DEPTH` so the service, the mapper call and the depth probe in Task 4 read one constant.
+`GET /api/v1/decks/{deckId}/level` → `DeckLevelResponse`. `maxWalk` is bound from the existing `MAX_TREE_DEPTH = 10`, promoted to `com.memox.deck.service.DeckLimits.MAX_TREE_DEPTH` so the service, the mapper call and the depth probe in Task 4 read one constant.
 
 - [ ] **Step 5: Run the tests and verify they pass**
 
@@ -939,8 +1015,8 @@ git commit -m "feat(deck): port the deck level view and ancestry path"
 Replaces `DeckService.depthOf`, which today walks the tree with up to ten separate `SELECT`s inside the write transaction. Drift answers the same question in one recursive statement, and so should the server.
 
 **Files:**
-- Create: `memox-api/src/main/java/com/memox/deck/domain/DeckDepth.java`
-- Modify: `memox-api/src/main/java/com/memox/deck/domain/DeckLimits.java` *(created in Task 3; this task adds `MAX_WALK`)*
+- Create: `memox-api/src/main/java/com/memox/deck/entity/DeckDepth.java`
+- Modify: `memox-api/src/main/java/com/memox/deck/service/DeckLimits.java` *(created in Task 3; this task adds `MAX_WALK`)*
 - Modify: `memox-api/src/main/java/com/memox/deck/persistence/DeckMapper.java`
 - Modify: `memox-api/src/main/resources/mybatis/deck_mapper.xml`
 - Create: `memox-api/src/main/java/com/memox/deck/service/DeckStructureService.java`
@@ -1091,14 +1167,21 @@ git commit -m "feat(deck): answer depth and subtree questions in one statement"
 
 **Blocker discovered while reading the schema.** `V3` added `uq_decks_sibling_scope_position UNIQUE (sibling_scope_id, sibling_position)` and `V4` added `ck_decks_sibling_position_non_negative CHECK (sibling_position >= 0)`. A reorder that shifts a run of siblings collides on the unique index part-way through the run, and the usual escape — park the moved row at a negative position — is blocked by the check. The constraint is not `DEFERRABLE`, and PostgreSQL's `ALTER TABLE … ALTER CONSTRAINT` only re-arms foreign keys, so it must be dropped and re-added.
 
+> **The migration is already applied.** The Phase 2 prep commit landed
+> `V5__defer_deck_sibling_position.sql` and two `FlywayMigrationTest` assertions: one that
+> `condeferrable` is true, and one that performs a real two-row swap inside a transaction — because
+> checking the flag is not the same as checking that PostgreSQL then behaves the way the flag
+> promises. Removing V5 makes the second test fail on its *first* UPDATE, which is how it was
+> verified. This task now starts at the reorder statement itself.
+
 **Files:**
-- Create: `memox-api/src/main/resources/db/migration/V5__defer_deck_sibling_position.sql`
+- ~~Create: `memox-api/src/main/resources/db/migration/V5__defer_deck_sibling_position.sql`~~ *(done)*
 - Modify: `memox-api/src/main/resources/mybatis/deck_mapper.xml`
 - Modify: `memox-api/src/main/java/com/memox/deck/persistence/DeckMapper.java`
 - Create: `memox-api/src/main/java/com/memox/deck/service/ReorderDeckCommand.java`
 - Modify: `memox-api/src/main/java/com/memox/deck/service/DeckService.java`
-- Create: `memox-api/src/main/java/com/memox/deck/api/ReorderDeckRequest.java`
-- Modify: `memox-api/src/main/java/com/memox/deck/api/DeckController.java`
+- Create: `memox-api/src/main/java/com/memox/deck/dto/request/ReorderDeckRequest.java`
+- Modify: `memox-api/src/main/java/com/memox/deck/controller/DeckController.java`
 - Modify: `memox-api/src/main/java/com/memox/common/error/ApiErrorCode.java`
 - Modify: `memox-api/src/main/resources/messages.properties`, `messages_vi.properties`
 - Create: `memox-api/src/test/java/com/memox/deck/DeckReorderTest.java`
@@ -1230,10 +1313,10 @@ git commit -m "feat(deck): reorder siblings under a deferred position constraint
 **Files:**
 - Modify: `memox-api/src/main/resources/mybatis/deck_mapper.xml`
 - Modify: `memox-api/src/main/java/com/memox/deck/persistence/DeckMapper.java`
-- Create: `memox-api/src/main/java/com/memox/deck/domain/DeckMoveTarget.java`
+- Create: `memox-api/src/main/java/com/memox/deck/entity/DeckMoveTarget.java`
 - Create: `memox-api/src/main/java/com/memox/deck/service/DeckMoveService.java`, `MoveDeckCommand.java`, `RenameDeckCommand.java`
-- Modify: `memox-api/src/main/java/com/memox/deck/api/DeckController.java`
-- Create: `memox-api/src/main/java/com/memox/deck/api/MoveDeckRequest.java`, `RenameDeckRequest.java`
+- Modify: `memox-api/src/main/java/com/memox/deck/controller/DeckController.java`
+- Create: `memox-api/src/main/java/com/memox/deck/dto/request/MoveDeckRequest.java`, `RenameDeckRequest.java`
 - Modify: `memox-api/src/main/java/com/memox/common/error/ApiErrorCode.java`, both `messages*.properties`
 - Create: `memox-api/src/test/java/com/memox/deck/DeckMoveTest.java`
 
@@ -1378,13 +1461,15 @@ git commit -m "feat(deck): move a subtree, rename a deck and list card move targ
 Ports `cardListItems`, `cardCount`, `cardIdsMatching`, `flaggedCardsByDeck`, `cardStateCountsByDeck`. Drift compiles `$predicate` and `$order` at build time from Dart expressions; MyBatis builds them from a **whitelist** — never from a client-supplied string (spec: "whitelist-based sorting").
 
 **Files:**
-- Create: `memox-api/src/main/java/com/memox/card/domain/CardListItem.java`, `CardFilter.java`, `CardSort.java`, `CardStateCounts.java`, `StageThresholds.java`
+- Create: `memox-api/src/main/java/com/memox/card/entity/CardListItem.java`, `CardFilter.java`, `CardStateCounts.java`
+- Create: `memox-api/src/main/java/com/memox/card/service/StageThresholds.java`
+- **Do not create `CardSort`.** Wave 3 already shipped `memox-api/src/main/java/com/memox/card/enums/CardSortField.java` implementing `SortField`; extend that enum with the constants this task needs instead of adding a second sort vocabulary.
 - Create: `memox-api/src/main/java/com/memox/common/mybatis/UnitSeparatedListTypeHandler.java`
 - Modify: `memox-api/src/main/java/com/memox/card/persistence/CardMapper.java`
 - Modify: `memox-api/src/main/resources/mybatis/card_mapper.xml`
 - Create: `memox-api/src/main/java/com/memox/card/service/CardQueryService.java`
-- Create: `memox-api/src/main/java/com/memox/card/api/CardListResponse.java`
-- Modify: `memox-api/src/main/java/com/memox/card/api/CardController.java`
+- Create: `memox-api/src/main/java/com/memox/card/dto/response/CardListResponse.java`
+- Modify: `memox-api/src/main/java/com/memox/card/controller/CardController.java`
 - Create: `memox-api/src/test/java/com/memox/card/CardListTest.java`
 
 **Interfaces:**
@@ -1496,8 +1581,8 @@ Expected: FAIL — `CardQueryService` does not exist.
     FROM cards c
     INNER JOIN card_study_states s ON s.card_id = c.id
    WHERE <include refid="cardListPredicate"/>
-   ORDER BY ${sort.orderBy}
-   LIMIT #{pageQuery.limit} OFFSET #{pageQuery.offset}
+   <include refid="orderBySlice"/>
+   LIMIT #{slice.limit} OFFSET #{slice.offset}
 </select>
 
 <select id="countCardListItems" resultType="long">
@@ -1522,7 +1607,7 @@ Expected: FAIL — `CardQueryService` does not exist.
 
 - [ ] **Step 4: Add the endpoint**
 
-`GET /api/v1/cards?deckId=&includeSubtree=&flagged=&tagIds=&q=&sort=&limit=&offset=` → `PagingResponse<CardListResponse>`.
+`GET /api/v1/cards?deckId=&includeSubtree=&flagged=&tagIds=&q=&sort=&page=&size=` → `PagingResponse<CardListResponse>`.
 
 - [ ] **Step 5: Run and verify it passes**
 
@@ -1546,11 +1631,12 @@ git commit -m "feat(card): list, filter and count cards with whitelisted sorting
 Ports `cardById`, `cardDetailById`, `studyStateByCard`, `cardHistoryFirstPage`, `cardHistoryAfter`. History is **read** here; writing it is Phase 3.
 
 **Files:**
-- Create: `memox-api/src/main/java/com/memox/card/domain/CardDetail.java`, `CardStudyState.java`, `CardHistoryEntry.java`, `CardHistoryCursor.java`, `CardNotFoundException.java`
+- Create: `memox-api/src/main/java/com/memox/card/entity/CardDetail.java`, `CardStudyState.java`, `CardHistoryEntry.java`, `CardHistoryCursor.java`
+- Create: `memox-api/src/main/java/com/memox/card/exception/CardNotFoundException.java`
 - Modify: `memox-api/src/main/java/com/memox/card/persistence/CardMapper.java`, `card_mapper.xml`
 - Modify: `memox-api/src/main/java/com/memox/card/service/CardQueryService.java`
-- Create: `memox-api/src/main/java/com/memox/card/api/CardDetailResponse.java`, `CardHistoryResponse.java`
-- Modify: `memox-api/src/main/java/com/memox/card/api/CardController.java`
+- Create: `memox-api/src/main/java/com/memox/card/dto/response/CardDetailResponse.java`, `CardHistoryResponse.java`
+- Modify: `memox-api/src/main/java/com/memox/card/controller/CardController.java`
 - Modify: `ApiErrorCode.java`, both `messages*.properties`
 - Create: `memox-api/src/test/java/com/memox/card/CardDetailTest.java`
 
@@ -1667,9 +1753,10 @@ Ports `cardDeckContextForIds`, `moveCardsToDeck`, `setCardsFlagByIds`, plus the 
 
 **Files:**
 - Modify: `memox-api/src/main/java/com/memox/card/persistence/CardMapper.java`, `card_mapper.xml`
-- Create: `memox-api/src/main/java/com/memox/card/domain/CardDeckContext.java`, `CardConflictException.java`
+- Create: `memox-api/src/main/java/com/memox/card/entity/CardDeckContext.java`
+- Create: `memox-api/src/main/java/com/memox/card/exception/CardConflictException.java`
 - Create: `memox-api/src/main/java/com/memox/card/service/CardEditService.java`, `CardBulkService.java`, `UpdateCardCommand.java`, `BulkMoveCommand.java`, `BulkFlagCommand.java`
-- Create: `memox-api/src/main/java/com/memox/card/api/UpdateCardRequest.java`, `BulkMoveRequest.java`, `BulkFlagRequest.java`
+- Create: `memox-api/src/main/java/com/memox/card/dto/request/UpdateCardRequest.java`, `BulkMoveRequest.java`, `BulkFlagRequest.java`
 - Modify: `CardController.java`, `ApiErrorCode.java`, both `messages*.properties`
 - Create: `memox-api/src/test/java/com/memox/card/CardBulkTest.java`
 
@@ -1811,11 +1898,14 @@ git commit -m "feat(card): edit, bulk move and bulk flag cards in one transactio
 All 13 `tag.drift` statements plus `tagsByFoldedNames`, `tagCountsForCards` and `cardsAlreadyTagged` from `card.drift`. New module: `com.memox.tag`.
 
 **Files:**
-- Create: `memox-api/src/main/java/com/memox/tag/domain/Tag.java`, `TagCatalogEntry.java`, `TagName.java`, `TagNotFoundException.java`, `TagConflictException.java`
+- Create: `memox-api/src/main/java/com/memox/tag/entity/Tag.java`, `TagCatalogEntry.java`, `TagName.java`
+- Create: `memox-api/src/main/java/com/memox/tag/exception/TagNotFoundException.java`, `TagConflictException.java`
 - Create: `memox-api/src/main/java/com/memox/tag/persistence/TagMapper.java`
 - Create: `memox-api/src/main/resources/mybatis/tag_mapper.xml`
 - Create: `memox-api/src/main/java/com/memox/tag/service/TagCatalogService.java`, `CardTagService.java`, `RenameTagCommand.java`, `AttachTagCommand.java`
-- Create: `memox-api/src/main/java/com/memox/tag/api/TagController.java`, `TagResponse.java`, `TagCatalogResponse.java`, `RenameTagRequest.java`, `AttachTagRequest.java`
+- Create: `memox-api/src/main/java/com/memox/tag/controller/TagController.java`
+- Create: `memox-api/src/main/java/com/memox/tag/dto/response/TagResponse.java`, `TagCatalogResponse.java`
+- Create: `memox-api/src/main/java/com/memox/tag/dto/request/RenameTagRequest.java`, `AttachTagRequest.java`
 - Modify: `ApiErrorCode.java`, both `messages*.properties`
 - Create: `memox-api/src/test/java/com/memox/tag/TagCatalogTest.java`, `TagMergeTest.java`
 
@@ -1985,10 +2075,10 @@ git commit -m "feat(tag): port the tag catalog, rename-merge and delete"
 Ports `exportDeckName`, `exportCardsInDeck`, `exportCardsByIds`, `cardKeysInDeck`. The server exposes the **data**; writing a file is the client's job (spec: no device-only side effects).
 
 **Files:**
-- Create: `memox-api/src/main/java/com/memox/card/domain/ExportCard.java`, `CardKey.java`, `DeckExport.java`
+- Create: `memox-api/src/main/java/com/memox/card/entity/ExportCard.java`, `CardKey.java`, `DeckExport.java`
 - Modify: `card_mapper.xml`, `CardMapper.java`
 - Create: `memox-api/src/main/java/com/memox/card/service/CardExportService.java`
-- Create: `memox-api/src/main/java/com/memox/card/api/ExportResponse.java`
+- Create: `memox-api/src/main/java/com/memox/card/dto/response/ExportResponse.java`
 - Modify: `CardController.java`
 - Create: `memox-api/src/test/java/com/memox/card/CardExportTest.java`
 
@@ -2104,11 +2194,14 @@ git commit -m "feat(card): expose deck export data and the import duplicate prob
 New module `com.memox.trash`. Ports `activeSubtreeDeckIds`, `activeCardIdsInDecks`, `markDecksDeleted`, `markCardsDeleted`, plus the `delete_batches` insert.
 
 **Files:**
-- Create: `memox-api/src/main/java/com/memox/trash/domain/DeleteBatch.java`, `TrashItemType.java`, `TrashConflictException.java`
+- Create: `memox-api/src/main/java/com/memox/trash/entity/DeleteBatch.java`
+- Create: `memox-api/src/main/java/com/memox/trash/enums/TrashItemType.java`
+- Create: `memox-api/src/main/java/com/memox/trash/exception/TrashConflictException.java`
 - Create: `memox-api/src/main/java/com/memox/trash/persistence/TrashMapper.java`, `TrashItemTypeTypeHandler.java`
 - Create: `memox-api/src/main/resources/mybatis/trash_mapper.xml`
 - Create: `memox-api/src/main/java/com/memox/trash/service/TrashDeleteService.java`, `DeleteDeckCommand.java`, `DeleteCardsCommand.java`
-- Create: `memox-api/src/main/java/com/memox/trash/api/TrashController.java`, `DeleteBatchResponse.java`
+- Create: `memox-api/src/main/java/com/memox/trash/controller/TrashController.java`
+- Create: `memox-api/src/main/java/com/memox/trash/dto/response/DeleteBatchResponse.java`
 - Modify: `ApiErrorCode.java`, both `messages*.properties`
 - Create: `memox-api/src/test/java/com/memox/trash/TrashDeleteTest.java`
 
@@ -2258,7 +2351,8 @@ Ports `trashBatchRows`, `batchById`, `batchDeckIds`, `batchCardIds`, `tombstoneD
 
 **Files:**
 - Modify: `trash_mapper.xml`, `TrashMapper.java`
-- Create: `memox-api/src/main/java/com/memox/trash/domain/TrashBatchRow.java`, `TrashOrigin.java`
+- Create: `memox-api/src/main/java/com/memox/trash/entity/TrashBatchRow.java`
+- Create: `memox-api/src/main/java/com/memox/trash/enums/TrashOrigin.java`
 - Create: `memox-api/src/main/java/com/memox/trash/service/TrashRestoreService.java`, `RestoreBatchCommand.java`
 - Modify: `TrashController.java`, `ApiErrorCode.java`, both `messages*.properties`
 - Create: `memox-api/src/test/java/com/memox/trash/TrashRestoreTest.java`
@@ -2554,6 +2648,7 @@ git commit -m "feat(trash): purge batches past the thirty-day retention window"
 - Create: `docs/superpowers/specs/2026-09-09-drift-to-mybatis-parity.md`
 - Create: `memox-api/src/test/java/com/memox/contract/DriftParityTest.java`
 - Modify: `memox-api/src/test/java/com/memox/contract/OpenApiContractTest.java`
+- Regenerate: `memox-api/openapi.json` *(via `OpenApiSnapshotTest`; do not hand-edit)*
 - Modify: `memox-api/src/test/java/com/memox/architecture/LayerArchitectureTest.java`
 - Modify: `docs/wbs.md`
 
@@ -2614,27 +2709,31 @@ Each divergence names the BR it serves and, for 1–3, gets a WBS entry against 
 
 - [ ] **Step 4: Extend the contract and architecture tests**
 
-Add to `OpenApiContractTest` an assertion that every new path is published under `/api/v1` and that each documents its `409` Problem Details response. Add to `LayerArchitectureTest`:
+Add to `OpenApiContractTest` an assertion that every new path is published under `/api/v1` and that each documents its `409` Problem Details response.
 
-```java
-@ArchTest
-static final ArchRule sqlLivesOnlyInMapperXml = noClasses()
-		.that().resideInAPackage("..persistence..")
-		.should().beAnnotatedWith(org.apache.ibatis.annotations.Select.class)
-		.orShould().beAnnotatedWith(org.apache.ibatis.annotations.Update.class)
-		.orShould().beAnnotatedWith(org.apache.ibatis.annotations.Insert.class)
-		.orShould().beAnnotatedWith(org.apache.ibatis.annotations.Delete.class);
+**Both architecture rules that used to live in this step have moved to Task 1 and are already
+live.** Adding them here would have been too late to matter: a rule introduced after tag and trash
+are built can only report what was already written, and the whole point of `CardService → DeckMapper`
+being illegal is that nobody writes it in the first place.
 
-@ArchTest
-static final ArchRule featuresDoNotReachEachOthersPersistence = SlicesRuleDefinition.slices()
-		.matching("com.memox.(*)..")
-		.namingSlices("$1")
-		.should().notDependOnEachOther()
-		.ignoreDependency(DescribedPredicate.alwaysTrue(),
-				JavaClass.Predicates.resideInAPackage("com.memox.common.."));
-```
+Two things changed in the move, and both were found by injecting a fault rather than by reading:
 
-The first is the spec's "no annotation SQL" rule turned into a gate. The second is why `CardService → DeckService` is legal (both are services) but `CardService → DeckMapper` would not be; add `ignoreDependency` entries for the service-to-service edges the plan actually creates, and no others.
+- `sqlLivesOnlyInMapperXml` is `noMethods().that().areDeclaredInClassesThat()…`, not `noClasses()`.
+  MyBatis puts `@Select` on the **method**, so the class-level form drafted here compiles, reads
+  correctly and can never fire — a rule that would have passed green for the rest of the project.
+- `featuresDoNotReachEachOthersPersistence` is now `featuresDoNotReachEachOthersInternals`, and its
+  allowance is wider than "service-to-service" because service-to-service is not expressible on its
+  own: `DeckService.prepareCardCreation` returns a `DeckSchedulerState` and a `SchedulerType`, so
+  `CardService` *necessarily* depends on `deck.entity` and `deck.enums`. The published surface is
+  therefore service + entity + enums + exception, reachable only **from** a `..service..` package.
+  Another feature's `persistence`, `controller` and `dto` stay closed to everyone.
+
+**Snapshot ownership.** This step's Files list still names `OpenApiContractTest`. That class is a
+smoke test over four paths; the byte-for-byte snapshot is owned by `OpenApiSnapshotTest`, which
+M9.W1 added along with `memox-api/openapi.json` and the
+`./mvnw -Dmemox.openapi.write=true -Dtest=OpenApiSnapshotTest test` regeneration command. New paths
+need no change to that class — regenerate the snapshot and commit the diff, because **that diff is
+the contract change**.
 
 - [ ] **Step 5: Run the whole suite and the docs gate**
 
@@ -2683,7 +2782,7 @@ Also out of scope, and not a gap: auth (`owner_id` stays `NULL`), sync bookkeepi
 - `V5` and `V6` apply cleanly from an **empty** database, and `FlywayMigrationTest` asserts the deferrable constraint and the two partial indexes.
 - Every new failure has an `ApiErrorCode`, an English message and a Vietnamese message, and is reachable in a controller test asserting the Problem Details body.
 - `LayerArchitectureTest` passes including the two new rules; no `@Select`/`@Insert`/`@Update`/`@Delete` annotation exists anywhere.
-- `OpenApiContractTest` passes against the committed snapshot; the snapshot is regenerated in the same commit as any path change.
+- `OpenApiSnapshotTest` passes against the committed `openapi.json`, and that snapshot is regenerated in the same commit as any path change. `OpenApiContractTest` stays what it is — a smoke test that the four original paths and `info.title` are still published.
 - No endpoint, service or mapper logs card content, tag names, deck names, history or export payloads at any level.
 - `docs/wbs.md` carries one row per task, and the five divergences are recorded with their Flutter-side follow-ups.
 - `py -3 .claude/skills/flutter-workflow/scripts/check_docs.py --quiet` is clean.
