@@ -427,6 +427,19 @@
           }
         },
         "type" : "object"
+      },
+      "ReorderDeckRequest" : {
+        "properties" : {
+          "targetPosition" : {
+            "format" : "int32",
+            "minimum" : 0,
+            "type" : "integer"
+          }
+        },
+        "required" : [
+          "targetPosition"
+        ],
+        "type" : "object"
       }
     }
   },
@@ -865,6 +878,76 @@
           }
         },
         "summary" : "Open a deck: its breadcrumb, its direct children and their subtree counts",
+        "tags" : [
+          "Decks"
+        ]
+      }
+    },
+    "/api/v1/decks/{deckId}/position" : {
+      "put" : {
+        "operationId" : "reorderDeck",
+        "parameters" : [
+          {
+            "in" : "path",
+            "name" : "deckId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          }
+        ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ReorderDeckRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/DeckResponse"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "The sibling group in its new order"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/DeckResponse"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "Target position outside the sibling group"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/DeckResponse"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "Deck not found"
+          }
+        },
+        "summary" : "Move a deck to a new position among its siblings",
         "tags" : [
           "Decks"
         ]

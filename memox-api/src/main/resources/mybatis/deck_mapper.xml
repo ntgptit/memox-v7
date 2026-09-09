@@ -492,6 +492,34 @@
     )
   </insert>
 
+  <!--
+    The whole sibling group, locked, in the order the user sees.
+
+    FOR UPDATE and not a plain read: BR-268 requires the source and target to be re-read inside the
+    transaction, because a reorder computed from a group that changed underneath it renumbers rows
+    that are no longer there. Locking the group is also what makes "the positions these siblings
+    own" a stable set for the duration of the write.
+
+    Tombstoned siblings are excluded — they hold a sibling_position row, and therefore a slot in
+    uq_decks_sibling_scope_position, but not a place in the order a user sees (BR-257).
+  -->
+  <select id="findSiblingDecksForUpdate" resultMap="deck">
+    SELECT id, name, parent_deck_id, root_deck_id, content_type, scheduler_type,
+           scheduler_version, scheduler_generation, sibling_position, created_at, updated_at
+    FROM decks
+    WHERE sibling_scope_id = #{siblingScopeId}
+      AND delete_batch_id IS NULL
+    ORDER BY sibling_position ASC, id ASC
+    FOR UPDATE
+  </select>
+
+  <update id="updateSiblingPosition">
+    UPDATE decks
+    SET sibling_position = #{siblingPosition}, updated_at = #{updatedAt}
+    WHERE id = #{deckId}
+      AND delete_batch_id IS NULL
+  </update>
+
   <update id="updateContentType">
     UPDATE decks
     SET content_type = #{contentType,typeHandler=com.memox.deck.persistence.DeckContentTypeTypeHandler}, updated_at = #{updatedAt}

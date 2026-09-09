@@ -62,6 +62,13 @@ public interface DeckMapper {
 
 	void insertSubDeck(Deck deck);
 
+	List<Deck> findSiblingDecksForUpdate(@Param("siblingScopeId") String siblingScopeId);
+
+	int updateSiblingPosition(
+			@Param("deckId") String deckId,
+			@Param("siblingPosition") int siblingPosition,
+			@Param("updatedAt") Instant updatedAt);
+
 	int updateContentType(
 			@Param("deckId") String deckId,
 			@Param("contentType") DeckContentType contentType,

@@ -16,6 +16,7 @@ public enum ApiErrorCode {
 	DECK_HOLDS_CHILDREN(HttpStatus.CONFLICT, "error.deck-holds-children"),
 	ROOT_SCHEDULER_INVALID(HttpStatus.CONFLICT, "error.root-scheduler-invalid"),
 	DECK_NOT_FOUND(HttpStatus.NOT_FOUND, "error.deck-not-found"),
+	DECK_POSITION_OUT_OF_RANGE(HttpStatus.BAD_REQUEST, "error.deck-position-out-of-range"),
 	DATA_INTEGRITY_VIOLATION(HttpStatus.CONFLICT, "error.data-integrity-violation"),
 	INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "error.internal-server-error");
 

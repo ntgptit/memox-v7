@@ -23,4 +23,7 @@ public class DeckLimits {
 	 * is preferable to a statement that never returns.
 	 */
 	public static final int MAX_WALK = MAX_TREE_DEPTH + 1;
+
+	/** Sibling positions are zero-based, and V4 refuses a negative one at the database too. */
+	public static final int MIN_SIBLING_POSITION = 0;
 }

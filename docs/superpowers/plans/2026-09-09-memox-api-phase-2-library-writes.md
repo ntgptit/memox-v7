@@ -1299,7 +1299,15 @@ void deckSiblingPositionUniquenessIsDeferrable() {
 </update>
 ```
 
-`DeckService.reorderDeck` is `@Transactional`: read the group `FOR UPDATE` (BR-268 requires re-reading source and target inside the transaction), reject when the deck is absent from it, reject when `targetPosition` is outside `[0, group.size() - 1]`, rebuild the list with the deck at its new index, then write each row's new position. Positions are renumbered densely from `0`, which is why the deferred constraint is required.
+`DeckService.reorderDeck` is `@Transactional`: lock the deck, read its group `FOR UPDATE` (BR-268 requires re-reading source and target inside the transaction), reject when `targetPosition` is outside `[0, group.size() - 1]`, rebuild the list with the deck at its new index, then write each row a position.
+
+**CORRECTED — "renumbered densely from `0`" does not work, and this task's own third test is what shows it.** A soft-deleted sibling keeps its `sibling_position` row, so it still holds a slot in `uq_decks_sibling_scope_position` while holding no place in the order a user sees. Renumbering the active siblings from zero walks one of them straight onto the tombstone's slot, and that collision **survives to COMMIT** — a DEFERRABLE constraint makes a *transient* conflict legal, not a final one.
+
+The reorder instead **permutes the positions the active siblings already own**: gather their current positions, sort them, hand them out in the new order. Tombstones keep their slots, the order is dense among active siblings, and the deferred constraint is still required — for the states passed through while the rows are written one at a time.
+
+**The endpoint, which this task never named:** `PUT /api/v1/decks/{deckId}/position`, body `{"targetPosition": n}`, returning the sibling group in its new order. PUT rather than POST because a reorder sets a sub-resource to a value and repeating it changes nothing.
+
+**`DECK_NOT_SIBLING` is NOT added.** With the deck locked before its group is read, its sibling scope cannot change underneath, so no code path can return that error — and an `ApiErrorCode` is a published contract carrying two translations. The impossible case is guarded as an `IllegalStateException`, the same way `AffectedRows` treats a single-row write that matched several.
 
 - [ ] **Step 5: Run the tests and verify they pass**
 

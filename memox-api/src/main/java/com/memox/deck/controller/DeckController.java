@@ -8,6 +8,7 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -23,6 +24,7 @@ import com.memox.common.time.DayWindow;
 import com.memox.deck.service.DeckService;
 import com.memox.deck.exception.DeckNotFoundException;
 import com.memox.deck.service.DeckTreeService;
+import com.memox.deck.service.ReorderDeckCommand;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -35,6 +37,7 @@ import lombok.RequiredArgsConstructor;
 import com.memox.deck.dto.request.CreateRootDeckRequest;
 import com.memox.deck.dto.request.CreateSubDeckRequest;
 import com.memox.deck.dto.request.DeckPageRequest;
+import com.memox.deck.dto.request.ReorderDeckRequest;
 import com.memox.deck.dto.response.DeckResponse;
 import com.memox.deck.dto.response.DeckLevelResponse;
 import com.memox.deck.dto.response.DeckSummaryResponse;
@@ -114,6 +117,25 @@ public class DeckController {
 	@ApiResponses(@ApiResponse(responseCode = "200", description = "Tree returned"))
 	public List<DeckResponse> listTree(@PathVariable String rootDeckId) {
 		return deckTreeService.listTree(rootDeckId).stream().map(DeckResponse::from).toList();
+	}
+
+	/**
+	 * PUT rather than POST: a reorder sets a sub-resource to a value, and sending the same target
+	 * twice leaves the group in the same order. The plan named the request type but never the
+	 * endpoint; this is the choice, recorded there too.
+	 */
+	@PutMapping("/{deckId}/position")
+	@Operation(summary = "Move a deck to a new position among its siblings")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "The sibling group in its new order"),
+			@ApiResponse(responseCode = "400", description = "Target position outside the sibling group"),
+			@ApiResponse(responseCode = "404", description = "Deck not found")
+	})
+	public List<DeckResponse> reorderDeck(
+			@PathVariable String deckId,
+			@Valid @RequestBody ReorderDeckRequest request) {
+		return deckService.reorderDeck(new ReorderDeckCommand(deckId, request.targetPosition()))
+				.stream().map(DeckResponse::from).toList();
 	}
 
 	@GetMapping("/{deckId}/level")

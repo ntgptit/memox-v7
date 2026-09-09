@@ -2,6 +2,7 @@ package com.memox.deck;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -194,6 +195,41 @@ class DeckControllerTest extends PostgresIntegrationTest {
 				.andExpect(jsonPath("$.parent.ancestry[0].id").value(rootId))
 				.andExpect(jsonPath("$.parent.ancestry[0].name").value("Korean"))
 				.andExpect(jsonPath("$.parent.ancestry[0].distance").value(1));
+	}
+
+	@Test
+	void reordersSiblingsAndReturnsTheGroupInItsNewOrder() throws Exception {
+		final var rootId = UUID.randomUUID().toString();
+		final var firstId = UUID.randomUUID().toString();
+		final var secondId = UUID.randomUUID().toString();
+		createRootDeck(rootId, "Korean");
+		createSubDeck(rootId, firstId, "Unit 1");
+		createSubDeck(rootId, secondId, "Unit 2");
+
+		mockMvc.perform(put("/api/v1/decks/{deckId}/position", secondId)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""
+							{"targetPosition":0}"""))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$[0].id").value(secondId))
+				.andExpect(jsonPath("$[0].siblingPosition").value(0))
+				.andExpect(jsonPath("$[1].id").value(firstId))
+				.andExpect(jsonPath("$[1].siblingPosition").value(1));
+	}
+
+	@Test
+	void rejectsAReorderPastTheEndOfTheSiblingGroup() throws Exception {
+		final var rootId = UUID.randomUUID().toString();
+		final var childId = UUID.randomUUID().toString();
+		createRootDeck(rootId, "Korean");
+		createSubDeck(rootId, childId, "Unit 1");
+
+		mockMvc.perform(put("/api/v1/decks/{deckId}/position", childId)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("""
+							{"targetPosition":5}"""))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("DECK_POSITION_OUT_OF_RANGE"));
 	}
 
 	@Test
