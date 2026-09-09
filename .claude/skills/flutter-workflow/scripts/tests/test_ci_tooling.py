@@ -586,11 +586,13 @@ class AggregateGateTest(unittest.TestCase):
             "host_result": "success",
             "widgetbook_result": "success",
             "goldens_result": "success",
+            "memox_api_result": "success",
             "needs_contracts": True,
             "needs_static": True,
             "needs_host_tests": True,
             "needs_widgetbook": True,
             "needs_goldens": True,
+            "needs_memox_api": True,
         }
         values.update(overrides)
         return self.module.evaluate(**values)
@@ -614,6 +616,21 @@ class AggregateGateTest(unittest.TestCase):
         self.assertEqual(1, len(problems))
         self.assertIn("golden comparison", problems[0])
 
+    def test_a_required_memox_api_job_that_did_not_run_fails_the_gate(self) -> None:
+        """A backend change whose Maven job was skipped is not a neutral result.
+
+        It is the module going unverified again — the state the audit found it in,
+        where `memox-api` had no CI at all and its green status was a memory.
+        """
+        problems = self._evaluate(memox_api_result="skipped", needs_memox_api=True)
+        self.assertEqual(1, len(problems))
+        self.assertIn("memox-api verify", problems[0])
+
+    def test_memox_api_job_running_when_unselected_fails_the_gate(self) -> None:
+        problems = self._evaluate(memox_api_result="success", needs_memox_api=False)
+        self.assertEqual(1, len(problems))
+        self.assertIn("memox-api verify", problems[0])
+
     def test_docs_path_requires_only_contract_job(self) -> None:
         self.assertEqual(
             [],
@@ -622,10 +639,12 @@ class AggregateGateTest(unittest.TestCase):
                 host_result="skipped",
                 widgetbook_result="skipped",
                 goldens_result="skipped",
+                memox_api_result="skipped",
                 needs_static=False,
                 needs_host_tests=False,
                 needs_widgetbook=False,
                 needs_goldens=False,
+                needs_memox_api=False,
             ),
         )
 
