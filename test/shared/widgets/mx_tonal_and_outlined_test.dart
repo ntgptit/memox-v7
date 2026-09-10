@@ -35,7 +35,7 @@ void main() {
       ('light', light),
       ('dark', dark),
     ]) {
-      test('$name', () {
+      test(name, () {
         final scheme = theme.colorScheme;
 
         expect(MxFilledPair.tonal.fillOf(scheme), scheme.secondaryContainer);
