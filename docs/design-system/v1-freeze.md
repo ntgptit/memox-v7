@@ -149,7 +149,7 @@ vừa, vì cách thứ hai làm mọi điều kiện mất nghĩa.
 |---|---|---|
 | 6 — public contract của shared primitive | `MxActionButtonVariant` thêm `tonal`; `MxIconButton` thêm trục `MxIconButtonShape` | `shared_api_closure_test` không phải nới: allowlist của nó vốn nhận **enum do chính component khai báo**, nên cả hai giá trị mới đi qua mà không sửa test |
 | 1, 2 — role identity và role ngữ nghĩa | không | `tonal` đọc `secondaryContainer` / `onSecondaryContainer`, đúng cặp `_FilledButtonDefaultsM3` cấp cho `FilledButton.tonal`. Không role nào bị thay bằng role khác, không hex nào mới |
-| 5 — foundation | không | Viền tròn dùng `AppRadius.pill` đã có; độ dày là default của `BorderSide`, và `mx_tonal_and_outlined_test.dart` ghim sự trùng khớp giữa nó với `AppStroke.hairline` — đã kiểm bằng tiêm lỗi (dời token lên 1.5 thì test đỏ) |
+| 5 — foundation | **có, ở M100.76**: `AppSizing.statusDot = 8` | Ở M100.73 thì không: viền tròn dùng `AppRadius.pill` đã có; độ dày là default của `BorderSide`, và `mx_tonal_and_outlined_test.dart` ghim sự trùng khớp giữa nó với `AppStroke.hairline` — đã kiểm bằng tiêm lỗi (dời token lên 1.5 thì test đỏ). Xem §3b |
 | 8 — ripple / state | không | Cả hai variant đi qua `buildFilledStyle` / resolver dùng chung, không qua `styleFrom`. Đây đúng là điều `MxIconButton` đã tự ghi lại sau hai lần gỡ variant filled: *"build its colours from the shared resolvers, not from `styleFrom`"* |
 | 11 — chrome của `MxContentShell` | không | Shell không bị chạm. Nút bar là widget do feature truyền vào `actions:`, nên đổi hình dạng của chúng là việc của feature |
 
@@ -157,6 +157,32 @@ vừa, vì cách thứ hai làm mọi điều kiện mất nghĩa.
 và **MUST NOT** dùng chúng ở đâu cả; task feature đi sau (M100.74) là nơi chúng
 có caller đầu tiên. Tách như vậy vì §3 cấm "merge một phần thay đổi để mở đường"
 — một PR vừa nới primitive vừa dùng nó là đúng thứ câu đó nói tới.
+
+---
+
+## 3b. Reopen record — M100.76 (2026-09-10)
+
+**Cùng brief với §3a, cùng điều kiện số 6, và nó tồn tại vì một lối tắt đã bị
+CI bắt.**
+
+Chấm trạng thái ở header Library cần đường kính 8. M100.75 viết
+`width: AppSpacing.sm` kèm một comment lập luận rằng thêm token dimension mới là
+mở lại hợp đồng §2 dòng 5 và "một cái chấm không đáng". Lập luận đó **sai**, và
+repo đã trả lời từ trước: `spacing_is_a_gap_test` cấm đúng cặp
+`width:`/`height:` mang token `AppSpacing`, với lý do viết sẵn trong doc của nó
+— *"a spacing token names a gap on one axis... dimensions live in `AppSizing` /
+`AppIconSize`"*. Test đó đỏ ở shard 4 của CI.
+
+**Bài học ghi lại, vì nó là loại sai dễ lặp:** né một hợp đồng đóng băng bằng
+cách mượn token của trục khác không phải là tôn trọng hợp đồng, nó là vi phạm
+một hợp đồng khác lặng lẽ hơn. Đường đúng là mở task design-system — điều kiện
+số 6 đã có sẵn cho brief này.
+
+`AppSizing.statusDot = 8` là **giá trị duy nhất được thêm**. Nó nằm trên lưới
+4dp như mọi giá trị khác trong file (`app_sizing_test` giữ), và
+`app_sizing_test` có thêm một khẳng định nói rõ nó **không** phải control: nó
+nhỏ hơn `controlDense`, nên sàn 48dp không áp — và nếu ai đó làm nó bấm được mà
+quên chuyển nó ra khỏi nhóm này thì test đỏ.
 
 ---
 

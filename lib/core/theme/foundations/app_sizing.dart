@@ -90,4 +90,21 @@ abstract final class AppSizing {
   /// plus padding and read as a link beside its neighbour. Height comes from
   /// [touchTarget]; this is the other half of the same `Size`.
   static const double buttonMinWidth = 64;
+
+  /// A painted mark that reports state and is not a control: the Library
+  /// header's "something is ready to study" dot.
+  ///
+  /// **Here rather than borrowed from `AppSpacing`, and the repo had already
+  /// decided that.** 8 is also `AppSpacing.sm`, and reaching for it would have
+  /// worked and would have been wrong — `spacing_is_a_gap_test` bans a spacing
+  /// token in a `width`/`height` pair precisely because a token that names a
+  /// gap, used as a size, is a dimension wearing the wrong name. M100.76 tried
+  /// the shortcut and that test caught it in CI.
+  ///
+  /// **It is not on the control ladder and must not join it.** A control has a
+  /// 48dp floor; this thing is never touched, so a floor would be meaningless
+  /// on it. It sits at the bottom of the file next to the other values no
+  /// ladder asks for, and `app_sizing_test` holds it to the 4dp grid with the
+  /// rest.
+  static const double statusDot = 8;
 }
