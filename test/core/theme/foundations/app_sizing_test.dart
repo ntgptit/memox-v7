@@ -14,6 +14,14 @@ import 'package:memox/core/theme/foundations/app_spacing.dart';
 /// and that the theme actually resolves them.
 void main() {
   group('the values', () {
+    test('the status dot is a mark, not a control', () {
+      // It has no touch target because it is never touched. Stating that here
+      // is what stops the next reader assuming the 48dp floor was forgotten —
+      // and what would fail if someone made it tappable without moving it out
+      // of this bracket.
+      expect(AppSizing.statusDot, lessThan(AppSizing.controlDense));
+    });
+
     test('every control dimension sits on the 4dp grid', () {
       // Structural geometry follows the 4dp rhythm; stroke, type size and
       // opacity have scales of their own and are not covered by this rule.
@@ -22,6 +30,9 @@ void main() {
         ('controlCompact', AppSizing.controlCompact),
         ('floatingAction', AppSizing.floatingAction),
         ('buttonMinWidth', AppSizing.buttonMinWidth),
+        // Not a control, and on the grid all the same: the rhythm is what
+        // keeps a mark aligned with the text it sits beside.
+        ('statusDot', AppSizing.statusDot),
       ]) {
         expect(
           value % 4,
