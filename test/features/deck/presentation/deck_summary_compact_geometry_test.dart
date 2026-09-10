@@ -3,7 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/presentation/widgets/items/deck_tile_widget.dart';
 import 'package:memox/features/deck/presentation/widgets/sections/deck_level_summary_widget.dart';
+import 'package:memox/shared/widgets/mx_action_button.dart';
+import 'package:memox/shared/widgets/mx_icon_button.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
+import 'package:memox/shared/widgets/mx_progress_bar.dart';
 
 import 'support/deck_screen_harness.dart';
 import 'support/fake_deck_repository.dart';
@@ -101,14 +104,17 @@ void main() {
   testWidgets('three deck cards are whole above the bottom bar', (
     tester,
   ) async {
-    // **Three, finally, and the last 16px came from somewhere nobody had
-    // looked.** The first pass reached two whole cards and 89% of a third and
-    // said so: the hero was at its floor and the chrome had given back all it
-    // had. What was still on the panel was an unlabelled 4px gauge, and moving
-    // it behind the disclosure (owner review, 2026-08-25) returned the bar plus
-    // its `md` gap — exactly the 16px the third card was short. The target was
-    // never blocked by the hero's floor; it was blocked by something on the
-    // panel that had no reason to be there.
+    // **Three, and the 16px that bought the third one has changed hands.**
+    // The first pass reached two whole cards and 89% of a third: the hero was
+    // at its floor and the chrome had given back all it had. Folding the
+    // learned bar away (owner review, 2026-08-25) returned the bar plus its
+    // `md` gap — exactly the 16 the third card was short.
+    //
+    // The bar came back to rest on 2026-09-10 and the third card survived,
+    // because the root's CTA left in the same change: a button plus its gap is
+    // 56px against the bar's 16, so the panel is net shorter than it was even
+    // with the fold. The target was never blocked by the hero's floor; it was
+    // blocked by what the panel chose to carry.
     await pumpDeckApp(
       tester,
       repository: FakeDeckRepository.withSummaries(reportedLibrary()),
@@ -128,35 +134,41 @@ void main() {
     );
   });
 
-  testWidgets('the expansion is what costs height, and only while it is open', (
-    tester,
-  ) async {
+  testWidgets('the root panel is two bands, and a third has to come past '
+      'this test', (tester) async {
+    // **This replaces a test about the disclosure**, which measured that the
+    // chevron revealed something and gave the height back. There is no
+    // chevron: the fold's whole payload was one repeat of the numeral above it
+    // and two zeros, so it was managing a volume the deck rows already carry.
+    //
+    // What the old test was really holding is the panel's height discipline,
+    // and the two tests above hold that in pixels. This one holds the cause
+    // rather than the symptom: every band on this panel costs a slice of the
+    // list, so the composition is stated outright — the figure line, the level
+    // bar, and nothing else at the root. A fourth band cannot arrive by
+    // passing a percentage that happens to still fit.
     await pumpDeckApp(
       tester,
       repository: FakeDeckRepository.withSummaries(reportedLibrary()),
     );
 
-    final collapsed = tester
-        .getRect(find.byType(DeckLevelSummaryWidget))
-        .height;
-
-    await tester.tap(find.byIcon(Icons.expand_more).first);
-    await tester.pumpAndSettle();
-
-    final expanded = tester.getRect(find.byType(DeckLevelSummaryWidget)).height;
-    expect(
-      expanded,
-      greaterThan(collapsed),
-      reason: 'the chevron has to reveal something',
+    Finder onPanel(Finder matching) => find.descendant(
+      of: find.byType(DeckLevelSummaryWidget),
+      matching: matching,
     );
 
-    await tester.tap(find.byIcon(Icons.expand_less).first);
-    await tester.pumpAndSettle();
-
+    expect(onPanel(find.byType(MxProgressBar)), findsOneWidget);
     expect(
-      tester.getRect(find.byType(DeckLevelSummaryWidget)).height,
-      collapsed,
-      reason: 'and shutting it has to give the height back',
+      onPanel(find.byType(MxActionButton)),
+      findsNothing,
+      reason:
+          'the root cannot start a session (BR-101), so it offers no CTA — '
+          'and the 56px that button cost is what the level bar now spends',
+    );
+    expect(
+      onPanel(find.byType(MxIconButton)),
+      findsNothing,
+      reason: 'the panel states its facts; it has no control of its own',
     );
   });
 }

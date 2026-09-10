@@ -108,26 +108,34 @@ void main() {
     anchors: deckPlainAnchors,
     allowances: <AuditSkipAllowance>[
       ...deckShellAllowances(
-        // One action per row for three decks, plus the summary panel's
-        // collapse chevron, plus the bar's one overflow menu (tag catalog and
-        // Trash live inside it; search is the shell's own count), plus the
-        // list heading's sort control — which is an icon button rather than a
-        // pill since the 2026-08-25 review. Create is the floating action
-        // (owner review, 2026-08-20). No `pills:` at all now — the filter
-        // moved into the bar's overflow and sort gave up its chip, so the
-        // screen has none left.
-        screenIconButtons: 6,
+        // One action per row for three decks, plus the bar's one overflow menu
+        // (tag catalog and Trash live inside it; search is the shell's own
+        // count), plus the list heading's sort control — which is an icon
+        // button rather than a pill since the 2026-08-25 review. Create is the
+        // floating action (owner review, 2026-08-20). No `pills:` at all now —
+        // the filter moved into the bar's overflow and sort gave up its chip,
+        // so the screen has none left.
+        //
+        // **Five, where this was six until 2026-09-10.** The sixth was the
+        // summary panel's disclosure chevron; the panel has no control of its
+        // own now.
+        screenIconButtons: 5,
         hasFloatingAction: true,
         screenItemId: 'deck_screen',
         // Every row is a tappable card now rather than a ListTile.
         tappableCards: 3,
-        // One deck in this fixture has cards due, so one Study action — and
-        // the summary panel's own Study CTA above the list.
-        filledButtons: 2,
+        // **One, where this was two.** One deck in this fixture has cards due,
+        // so one Study action — and it is the filled one since 2026-09-10. The
+        // second used to be the panel's own CTA, which at the root promised a
+        // session it could not start (BR-101) and was removed rather than
+        // relabelled.
+        filledButtons: 1,
       ),
-      // One progress bar per deck that has cards; two of the three fixtures do.
-      // **The hero's own bar is not among them since 2026-08-25** — it moved
-      // behind the chevron, so the resting panel contributes no painter here.
+      // One progress bar per deck that has cards; two of the three fixtures do,
+      // **plus the panel's own level bar since 2026-09-10**. It spent a release
+      // behind the chevron and came back when the chevron went: it is the one
+      // figure the rows cannot state between them, because each row's bar
+      // measures its own deck and none of them measures the level.
       //
       // `LinearProgressIndicator` paints its track and its fill through
       // `_LinearProgressIndicatorPainter`, so neither colour exists on a render
@@ -145,9 +153,8 @@ void main() {
             'CustomPainter, so no render object carries either colour. Both are '
             'asserted in mx_progress_bar_test.dart and pinned by the '
             'mx_progress_bar_* goldens.',
-        // Two of the three fixtures have cards. The level summary contributes
-        // none: its bar is part of the disclosure now.
-        expectedMatches: 2,
+        // Two of the three fixtures have cards, plus the level summary's own.
+        expectedMatches: 3,
       ),
     ],
   );
@@ -308,22 +315,29 @@ void main() {
       // strip's last step — the deck the user is in — is text rather than a
       // control, so it hosts no ink.
       ...deckShellAllowances(
-        // Three row menus, the deck's overflow, the panel's collapse chevron
-        // and the list heading's sort control. Create floats, and the way back
-        // is the path's own chevron rather than the bar's platform arrow
-        // (owner review, 2026-08-20). No `pills:` — the filter lives in the
-        // deck's own overflow and sort is a bare glyph.
-        screenIconButtons: 6,
+        // Three row menus, the deck's overflow and the list heading's sort
+        // control. Create floats, and the way back is the path's own chevron
+        // rather than the bar's platform arrow (owner review, 2026-08-20). No
+        // `pills:` — the filter lives in the deck's own overflow and sort is a
+        // bare glyph.
+        //
+        // **Five, where this was six until 2026-09-10.** The sixth was the
+        // panel's collapse chevron, which went with the fold.
+        screenIconButtons: 5,
         screenItemId: 'deck_screen',
         hasFloatingAction: true,
         tappableCards: 3,
         // Two of the three children have cards due, and the summary panel's
-        // Study CTA makes a third filled action.
+        // Study CTA makes a third filled action. **Unchanged by the 2026-09-10
+        // flatten**, and that is the point of keeping this state beside
+        // `root_loaded`: inside a deck the panel's CTA does start that deck's
+        // session, so only the root lost one.
         filledButtons: 3,
         breadcrumbSteps: 3,
       ),
-      // Three cards, all with cards. The level summary adds none — its bar
-      // moved behind the chevron on 2026-08-25.
+      // Three cards, all with cards, **plus the level summary's own since
+      // 2026-09-10** — it spent a release behind the chevron and came back with
+      // it removed.
       // The count is exact on purpose — an allowance that said "any number" would
       // stop noticing when a bar appears on a row that should not have one.
       const AuditSkipAllowance(
@@ -335,7 +349,7 @@ void main() {
             'CustomPainter, so no render object carries either colour. Both are '
             'asserted in mx_progress_bar_test.dart and pinned by the '
             'mx_progress_bar_* goldens.',
-        expectedMatches: 3,
+        expectedMatches: 4,
       ),
     ],
   );

@@ -1,10 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
+import 'package:memox/shared/widgets/mx_hero_card.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
 import 'package:memox/features/deck/presentation/widgets/items/deck_tile_widget.dart';
 import 'package:memox/features/deck/presentation/widgets/sections/deck_level_summary_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_progress_bar.dart';
+import 'package:memox/shared/widgets/mx_icon_button.dart';
 
 import 'support/deck_screen_harness.dart';
 import 'support/fake_deck_repository.dart';
@@ -61,15 +64,17 @@ void main() {
   );
 
   group('the hero CTA names what it actually does', () {
-    // **The two levels run the same button to two different places** — inside
-    // a deck it opens that deck's session (BR-101 allows it: one root, one
-    // session); at the root it can only open the Study tab, because a session
-    // cannot span roots. The routing was written for that from the start and
-    // the ARB description spelled it out; the label was not, so the root's
-    // primary CTA read "Study 15 due cards" and delivered a list with nothing
-    // started. A destination is invisible — the label is the whole promise.
+    // **One level runs it now.** Inside a deck the button opens that deck's
+    // session (BR-101: one root, one session). At the root it could only open
+    // the Study tab — a list with nothing started — so it was relabelled to
+    // say so, and then removed: a filled hero pointing at the outlined verbs
+    // below it inverted the screen's hierarchy, and the row's own Study is the
+    // honest way to pick a deck. The label was the whole promise; the fix was
+    // to stop making one the screen could not keep.
 
-    testWidgets('the root offers the choice it actually opens', (tester) async {
+    testWidgets('the root offers no hero, because it opens no session', (
+      tester,
+    ) async {
       await pumpDeckScreen(
         tester,
         repository: FakeDeckRepository.withSummaries(withDue()),
@@ -77,14 +82,26 @@ void main() {
       );
 
       expect(
-        onPanel(find.text(english.deckSummaryPickDeckAction)),
-        findsOneWidget,
+        onPanel(find.byType(MxHeroPrimary)),
+        findsNothing,
+        reason: 'the root cannot start a session, so it must not offer to',
       );
       expect(
         onPanel(find.text(english.deckSummaryStudyDueAction(7))),
         findsNothing,
-        reason: 'the root cannot start a session, so it must not offer to',
       );
+    });
+
+    testWidgets('the row keeps the verb the panel gave up', (tester) async {
+      await pumpDeckScreen(
+        tester,
+        repository: FakeDeckRepository.withSummaries(withDue()),
+        screen: const DeckListScreen(),
+      );
+
+      // Removing the hero only reads as a simplification if what it pointed at
+      // is still there. It is, once per deck with something to study.
+      expect(find.text(english.deckStudyAction), findsWidgets);
     });
 
     testWidgets('a deck level still promises the session it starts', (
@@ -99,16 +116,11 @@ void main() {
         screen: const DeckListScreen(),
       );
 
-      // The counterpart, and the reason this is a split rather than a rename:
-      // without it, replacing the label everywhere would pass just as well and
-      // would have taken the honest promise down with the dishonest one.
+      // The counterpart, and the reason the root case was removed rather than
+      // the button: here the promise is one the screen can keep, so it stays.
       expect(
         onPanel(find.text(english.deckSummaryStudyDueAction(7))),
         findsOneWidget,
-      );
-      expect(
-        onPanel(find.text(english.deckSummaryPickDeckAction)),
-        findsNothing,
       );
     });
   });
@@ -139,7 +151,7 @@ void main() {
       expect(find.byType(DeckTileWidget), findsOneWidget);
     });
 
-    testWidgets('opens at rest with the figure line and the CTA, and nothing '
+    testWidgets('states the workload and the level progress, and nothing '
         'else', (tester) async {
       await pumpDeckScreen(
         tester,
@@ -154,21 +166,19 @@ void main() {
         onPanel(find.text(english.deckSummaryCardsDueWord)),
         findsOneWidget,
       );
-      // **At the root the button does not start a session, so it does not say
-      // it does.** A session belongs to one root deck (BR-101); this tap opens
-      // the Study tab, where the reader picks which one. The count stays off
-      // the button because the figure line above it already carries it.
-      expect(
-        onPanel(find.text(english.deckSummaryPickDeckAction)),
-        findsOneWidget,
-      );
+      // **And no button, because at the root there is no session to start.**
+      // A session belongs to one root deck (BR-101), so the panel states the
+      // workload and stops; the deck that gets studied is chosen on its own
+      // row, where the verb now carries the emphasis this hero used to hold.
       expect(
         onPanel(find.text(english.deckSummaryStudyDueAction(7))),
         findsNothing,
         reason: 'the deck-level promise must not appear at the root',
       );
 
-      // What it does not: the resting figures and the learned caption.
+      // **What it does not carry: New and Scheduled.** Not folded away — gone.
+      // `new` is a chip on every deck row below, and `scheduled` counts the one
+      // thing this screen cannot act on.
       expect(
         onPanel(find.text(english.deckHeroNewMetricWord.toLowerCase())),
         findsNothing,
@@ -177,87 +187,62 @@ void main() {
         onPanel(find.text(english.deckHeroScheduledMetricWord.toLowerCase())),
         findsNothing,
       );
+
+      // **And what it does carry, without being asked: the level's progress.**
+      // 160 cards across the level, 40 of them learned. This is the one figure
+      // the rows cannot state between them — each row's bar measures its own
+      // deck, none of them measures the level.
       expect(
         onPanel(find.text(english.deckLearnedProgressLabel(40, 160))),
-        findsNothing,
+        findsOneWidget,
       );
     });
 
-    testWidgets('the chevron opens the resting figures and shuts them again', (
-      tester,
-    ) async {
+    testWidgets('the panel has no control of its own', (tester) async {
+      // **This replaces a test that opened and shut a disclosure.** The panel
+      // was dismissible, then foldable; both controls existed because the panel
+      // was in the way of the list, and at two facts it is not. A chevron whose
+      // whole payload was one repeat of the number above it and two zeros was
+      // managing a volume the deck rows already carry.
+      //
+      // Asserted as "no button at all" rather than "no chevron": the point is
+      // that nothing here is tappable, so re-growing a different control has to
+      // come past this test rather than past a label match.
       await pumpDeckScreen(
         tester,
         repository: FakeDeckRepository.withSummaries(withDue()),
         screen: const DeckListScreen(),
       );
 
-      await tester.tap(
-        find.bySemanticsLabel(english.deckSummaryExpandLabel).first,
-      );
-      await tester.pumpAndSettle();
-
-      // 160 cards across the level, 7 due and 9 new, so 144 are resting.
+      expect(onPanel(find.byType(MxIconButton)), findsNothing);
       expect(
-        onPanel(find.text(english.deckHeroNewMetricWord.toLowerCase())),
-        findsOneWidget,
-      );
-      expect(onPanel(find.text('144')), findsOneWidget);
-      expect(
-        onPanel(find.text(english.deckLearnedProgressLabel(40, 160))),
-        findsOneWidget,
-      );
-
-      await tester.tap(
-        find.bySemanticsLabel(english.deckSummaryCollapseLabel).first,
-      );
-      await tester.pumpAndSettle();
-
-      expect(
-        onPanel(find.text(english.deckHeroNewMetricWord.toLowerCase())),
+        onPanel(find.byType(InkWell)),
         findsNothing,
-      );
-      expect(
-        onPanel(find.text(english.deckLearnedProgressLabel(40, 160))),
-        findsNothing,
+        reason: 'the panel states two facts; nothing on it is a control',
       );
     });
 
-    testWidgets(
-      'the learned figure waits behind the chevron for every reader',
-      (tester) async {
-        // **The bar left the resting panel with its caption** (owner review,
-        // 2026-08-25). It used to stay as a bare 4px rule, announced but not
-        // drawn — which put a screen reader ahead of a sighted user on one
-        // figure and left the sighted user a gauge measuring nothing nameable.
-        // Now neither gets it until the chevron opens, and both get it whole.
-        await pumpDeckScreen(
-          tester,
-          repository: FakeDeckRepository.withSummaries(withDue()),
-          screen: const DeckListScreen(),
-        );
+    testWidgets('the learned figure reaches every reader at rest', (
+      tester,
+    ) async {
+      // **The bar left the resting panel with its caption** (owner review,
+      // 2026-08-25) and came back with it (2026-09-10). What it must never
+      // be again is either half alone: a bare 4px rule announced but not
+      // drawn put a screen reader ahead of a sighted user, and a fold took
+      // the figure away from both. Drawn and announced, or not present.
+      await pumpDeckScreen(
+        tester,
+        repository: FakeDeckRepository.withSummaries(withDue()),
+        screen: const DeckListScreen(),
+      );
 
-        expect(onPanel(find.byType(MxProgressBar)), findsNothing);
-        expect(
-          onPanel(
-            find.bySemanticsLabel(english.deckLearnedProgressLabel(40, 160)),
-          ),
-          findsNothing,
-        );
-
-        await tester.tap(
-          find.bySemanticsLabel(english.deckSummaryExpandLabel).first,
-        );
-        await tester.pumpAndSettle();
-
-        expect(onPanel(find.byType(MxProgressBar)), findsOneWidget);
-        expect(
-          onPanel(
-            find.bySemanticsLabel(english.deckLearnedProgressLabel(40, 160)),
-          ),
-          findsOneWidget,
-        );
-      },
-    );
+      expect(onPanel(find.byType(MxProgressBar)), findsOneWidget);
+      expect(
+        onPanel(
+          find.bySemanticsLabel(english.deckLearnedProgressLabel(40, 160)),
+        ),
+        findsOneWidget,
+      );
+    });
   });
 }

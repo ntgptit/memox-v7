@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_card.dart';
-import '../../../../../shared/widgets/mx_icon_button.dart';
 import '../../../../../shared/widgets/mx_progress_bar.dart';
 import '../../../domain/models/deck_list_snapshot_model.dart';
 import '../../../domain/models/deck_summary_model.dart';
@@ -22,22 +21,20 @@ import '../../../../../shared/widgets/mx_hero_card.dart';
 /// below the fold. The panel now reads
 ///
 /// ```
-/// 15 cards due   8 overdue · 7 today            ⌄
+/// 15 cards due   8 overdue · 7 today
+/// ▓▓▓▓▓▓▓▓░░░░░░░░░░  353 of 868 learned      41%
 /// [        Study 15 due cards        ]
 /// ```
 ///
-/// which measures 140px, 16.4%. What went is not
-/// data but *ranking*: the eyebrow (`TODAY` said nothing "cards due" does not),
-/// the New/Scheduled band and the learned caption are resting figures, and they
-/// sit one chevron away rather than at the top of the screen every time it
-/// opens.
+/// What went is not data but *ranking*: the eyebrow (`TODAY` said nothing
+/// "cards due" does not) and the New/Scheduled band left, because the deck rows
+/// below already carry both.
 ///
-/// **The panel is no longer dismissible, and that is the same decision.** The
-/// dismiss button existed because the panel was in the way of the list; at 16%
-/// it is not, and one chevron cannot mean both "hide me" and "show me more"
-/// (owner decision, 2026-08-25). A level with nothing studyable renders no
-/// panel at all — [hasStudyable] is now the presence rule outright, where it
-/// used to be what `auto` resolved to.
+/// **The panel has no control of its own.** It was dismissible, then it was
+/// foldable; both existed because the panel was in the way of the list, and at
+/// two facts it is not (owner decision, 2026-08-25; 2026-09-10). A level with
+/// nothing studyable renders no panel at all — [hasStudyable] is the presence
+/// rule outright, where it used to be what `auto` resolved to.
 ///
 /// **Every number here is arithmetic over the snapshot the screen already has.**
 /// A child's counts are its whole subtree, and sibling subtrees are disjoint, so
@@ -47,13 +44,23 @@ import '../../../../../shared/widgets/mx_hero_card.dart';
 /// whose children are decks has no cards of its own to leave out of the sum.
 ///
 /// **The surface is [MxCard], not a hand-rolled box.** Radius, border,
-/// elevation and interaction states all come from the one shared surface; the
-/// panel itself is not tappable — the chevron is its only control.
+/// elevation and interaction states all come from the one shared surface, and
+/// the panel has no control of its own: it states two facts and stops.
+///
+/// **It used to fold, and the fold is gone.** A chevron hid the learned caption
+/// and a New/Scheduled row behind a disclosure. Opened on a library where
+/// nothing has been studied yet, that disclosure paid out one repeat of the
+/// number directly above it and two zeros — a control whose whole job was to
+/// manage the volume of figures the deck rows already carry. Removing the
+/// repetition left it nothing to manage.
+///
+/// What survives is what the rows cannot say between them: the level's total
+/// workload, and how far the level as a whole has come. The learned caption
+/// coming back to rest also returns it to a screen reader, which the fold had
+/// quietly taken away.
 class DeckLevelSummaryWidget extends StatelessWidget {
   const DeckLevelSummaryWidget({
     required this.snapshot,
-    required this.isExpanded,
-    required this.onToggleExpanded,
     this.onStudyDue,
     super.key,
   });
@@ -63,13 +70,6 @@ class DeckLevelSummaryWidget extends StatelessWidget {
   /// Starts studying what the hero counts. Null hides the CTA — the panel
   /// stays honest on a level with nothing due.
   final VoidCallback? onStudyDue;
-
-  /// Whether the resting figures — New, Scheduled, and the learned caption —
-  /// are on screen.
-  final bool isExpanded;
-
-  /// Opens or shuts them.
-  final VoidCallback onToggleExpanded;
 
   /// Whether this level has anything to summarise.
   ///
@@ -121,41 +121,11 @@ class DeckLevelSummaryWidget extends StatelessWidget {
     // and the screen's only filled button, which is more emphasis than a
     // 1px edge was ever supplying, and it now costs the page no second
     // surface vocabulary. See `docs/reviews/hero-panel-audit.md` §H2.
-    return MxCard.raised(
-      // **The card's own padding is zero and the content carries it**, so the
-      // disclosure can take the corner. Its 48px target then spans the padding
-      // plus the figure line rather than forcing that line to be 48 tall — see
-      // `DeckSummaryMetricsWidget` for the arithmetic that made this necessary.
-      padding: MxCardPadding.none,
-      child: Stack(
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: _content(context, isCramped: isCramped),
-          ),
-          // **A disclosure, not a dismissal.** It points down to open the
-          // resting figures and up to shut them — the arrow shows where the
-          // content goes, the same rule the old dismiss chevron followed for a
-          // different content.
-          //
-          // `Positioned` inside a `Stack` sized by the content: the target sits
-          // wholly inside the card, so nothing about it is a tap that misses.
-          // It ends level with the CTA's top rather than over it — see the
-          // measurement in the class doc.
-          Positioned(
-            top: 0,
-            right: 0,
-            child: MxIconButton(
-              icon: isExpanded ? Icons.expand_less : Icons.expand_more,
-              semanticLabel: isExpanded
-                  ? context.l10n.deckSummaryCollapseLabel
-                  : context.l10n.deckSummaryExpandLabel,
-              onPressed: onToggleExpanded,
-            ),
-          ),
-        ],
-      ),
-    );
+    // **The card's own padding again, and no `Stack`.** Both were bent around
+    // the chevron: zero padding so the 48px target could take the corner, a
+    // `Stack` so it could sit over the content without setting the figure
+    // line's height. With the chevron gone the card can simply be padded.
+    return MxCard.raised(child: _content(context, isCramped: isCramped));
   }
 
   Widget _content(BuildContext context, {required bool isCramped}) {
@@ -170,21 +140,20 @@ class DeckLevelSummaryWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        DeckSummaryMetricsWidget(snapshot: snapshot, isExpanded: isExpanded),
-        // **The bar belongs to the disclosure, not to the resting panel**
-        // (owner review, 2026-08-25, third pass). It shipped as a bare 4px
-        // rule on the brief's own instruction — "no label" — and the owner's
-        // read of the result is the argument against it: a 41% fill sitting
-        // between `15 cards due` and the Study button states a proportion of
-        // nothing the eye can name. A gauge with no referent is not quieter
-        // than a labelled one, it is only smaller.
+        DeckSummaryMetricsWidget(snapshot: snapshot),
+        // **The bar always arrives with its caption**, never as a bare rule
+        // (owner review, 2026-08-25, third pass). It shipped label-less on the
+        // brief's own instruction — "no label" — and a 41% fill between
+        // `15 cards due` and the Study button states a proportion of nothing
+        // the eye can name. A gauge with no referent is not quieter than a
+        // labelled one, only smaller.
         //
-        // So it goes where its caption already was. Collapsed, the panel is
-        // the figure line and the CTA and nothing else; open, the bar arrives
-        // with `353 of 868 learned` and `41%` attached. The learned figure is
-        // now behind the chevron for a screen reader too, which is the
-        // honest consequence — it was the only reader getting it at rest.
-        if (isExpanded && cardCount > 0) ...<Widget>[
+        // It then spent a release behind the chevron, which took the learned
+        // figure away from a screen reader as well — the one reader that had
+        // been getting it. Back at rest, both readers get it, and it is the
+        // one fact the deck rows cannot state between them: each row's bar
+        // measures its own deck, none of them measures the level.
+        if (cardCount > 0) ...<Widget>[
           // `md` between every band, not `lg` between some and `xl` between
           // others: the panel is two lines and a rule now, and a section
           // break inside three rows is a break between nothing.
@@ -210,23 +179,20 @@ class DeckLevelSummaryWidget extends StatelessWidget {
         // deck's study. The caller decides which; null means nothing is
         // due and the button would be a promise with no cards behind it.
         //
-        // **And the label says which, because the two do different things.**
-        // Both levels used to read "Study 15 due cards" — the count from the
-        // figure line, the verb from the deck case. Inside a deck that is
-        // exactly what happens. At the root it is not: the tap lands on the
-        // Study tab's list with nothing started and one more choice to make,
-        // so the button promised a session and delivered an index. The split
-        // was already known — the routing above is written for it and the
-        // ARB description spelled it out — but only the destination had been
-        // made honest, and a reader never sees a destination, only a label.
+        // **One label, because there is one destination left.** Both levels
+        // used to share this button and it needed two labels: inside a deck
+        // it starts that deck's session, at the root it landed on the Study
+        // tab with nothing started — "promised a session and delivered an
+        // index". The root case is gone rather than relabelled; the row's own
+        // Study verb is the honest way to pick a deck, and it is now the
+        // filled one. The caller passes null at the root, so only the
+        // deck-level label remains.
         if (onStudyDue != null) ...<Widget>[
           const SizedBox(height: AppSpacing.md),
           MxHeroPrimary(
-            label: snapshot.parent == null
-                ? context.l10n.deckSummaryPickDeckAction
-                : context.l10n.deckSummaryStudyDueAction(
-                    snapshot.levelDueCardCount,
-                  ),
+            label: context.l10n.deckSummaryStudyDueAction(
+              snapshot.levelDueCardCount,
+            ),
             onPressed: onStudyDue!,
             isCramped: isCramped,
           ),

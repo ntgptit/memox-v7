@@ -316,14 +316,6 @@
     },
     "description": "The figure at the right-hand end of a deck's progress bar. Whole percent -- a decimal on a 4px bar is precision nobody can act on."
   },
-  "deckSummaryExpandLabel": "Show more figures",
-  "@deckSummaryExpandLabel": {
-    "description": "The disclosure control on the level summary hero, while it is collapsed. Says what appears — the New/Scheduled figures and the learned line — rather than naming the chevron."
-  },
-  "deckSummaryCollapseLabel": "Show fewer figures",
-  "@deckSummaryCollapseLabel": {
-    "description": "The same disclosure control once the extra figures are open. Mirrors deckSummaryExpandLabel so a screen reader hears which way the control goes."
-  },
   "decksSectionLabelRoot": "Your decks",
   "@decksSectionLabelRoot": {
     "description": "Heads the list at the root level, beside the filter and sort pills. Uppercased by the widget, not here."
@@ -4389,11 +4381,7 @@
         "type": "int"
       }
     },
-    "description": "The Today panel CTA INSIDE A DECK, where it starts that deck study. The root uses deckSummaryPickDeckAction instead: a session belongs to one root deck (BR-101), so the root cannot start one and must not promise to."
-  },
-  "deckSummaryPickDeckAction": "Choose a deck to study",
-  "@deckSummaryPickDeckAction": {
-    "description": "The Today panel CTA at the LIBRARY ROOT only. A session belongs to one root deck (BR-101), so the root button cannot start one — it opens the Study tab, where the reader picks which deck. Inside a deck the CTA is deckSummaryStudyDueAction, which does start a session. The count is not repeated here: the figure line directly above the button already states it."
+    "description": "The Today panel CTA, and it only appears INSIDE A DECK, where it starts that deck's study. The root shows no CTA at all: a session belongs to one root deck (BR-101), so the root cannot start one and must not promise to. The row's own Study button is how a deck is picked."
   },
   "deckTileDueChipLabel": "{count} due",
   "@deckTileDueChipLabel": {

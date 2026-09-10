@@ -80,17 +80,32 @@ class DeckStudyButtonWidget extends StatelessWidget {
       child: MxActionButton(
         label: context.l10n.deckStudyAction,
         semanticLabel: context.l10n.deckRowStudySemanticLabel(deckName),
-        // **`secondary`, and the argument for `primary` was a per-card one**
-        // (M99.98). "One primary verb per card reads as the hierarchy" is true
-        // of a card; a screen shows three or four at once, and the Library's
-        // first viewport then carried the accent nine times — the page CTA,
-        // three filled row verbs, two progress fills, three deck icon wells —
-        // at which point the colour says repetition, not emphasis. It also
-        // cost the screen's one `MxCard.accent` its job: a hairline in the
-        // brand family cannot out-rank three solid fills below it. Study Home
-        // already drew this same verb outlined, so the two screens now agree
-        // rather than disagreeing.
-        variant: MxActionButtonVariant.secondary,
+        // **`primary`, reversing M99.98 — and the thing that changed is the
+        // page, not the opinion.** That task counted the accent nine times in
+        // the first viewport and made this verb outlined to spend less of it.
+        // The count was right and the target was wrong: the loudest of the
+        // nine was the root's `MxHeroPrimary`, and the comment above it in
+        // `deck_level_summary_widget.dart` already admitted what that button
+        // does at the root — it "promised a session and delivered an index",
+        // landing on the Study tab with nothing started. So the screen spent
+        // its whole accent budget on a signpost and dressed the control that
+        // actually opens a session as an alternative.
+        //
+        // The root CTA is gone (it stays inside a deck, where it does start
+        // that deck's session), which *lowers* the accent count rather than
+        // raising it: one hero removed, one fill per row added. What is left
+        // loud is the one control on the screen that does the thing the
+        // screen is for.
+        //
+        // The other half of M99.98 stands and is why nothing else moved: the
+        // deck wells, the gauges and the FAB stay tonal, so the fills have
+        // something quiet to be legible against.
+        //
+        // No `variant:` line: `primary` is `MxActionButton`'s default, and
+        // stating it again is the one thing the analyzer objects to here. What
+        // this call site now says is that it wants the button the system hands
+        // out by default — which is exactly the claim, since the outlined verb
+        // was the deliberate step down and it is the step that is gone.
         size: MxActionButtonSize.compact,
         onPressed: () => context.goNamed(
           RouteNames.deckStudy,

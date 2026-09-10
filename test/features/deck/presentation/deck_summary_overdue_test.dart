@@ -14,6 +14,7 @@ import 'package:memox/features/deck/presentation/widgets/sections/deck_level_sum
 import 'package:memox/l10n/generated/app_localizations.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
+import 'package:memox/shared/widgets/mx_icon_button.dart';
 import 'package:memox/shared/widgets/mx_progress_bar.dart';
 
 import 'support/deck_screen_harness.dart';
@@ -71,18 +72,9 @@ void main() {
     matching: matching,
   );
 
-  /// Opens the resting figures. The panel starts collapsed on every level.
-  Future<void> expandSummary(WidgetTester tester) async {
-    await tester.tap(
-      find.bySemanticsLabel(english.deckSummaryExpandLabel).first,
-    );
-    await tester.pumpAndSettle();
-  }
-
   /// The hero numeral and its word are separate texts on one baseline row.
   void expectHero(int count, String word) {
     expect(onPanel(find.text('$count')), findsWidgets);
-    // The word may also appear in the quiet context row ("New").
     expect(onPanel(find.text(word)), findsWidgets);
   }
 
@@ -143,20 +135,17 @@ void main() {
         ),
         findsOneWidget,
       );
-      // New and Scheduled keep no semantic ink and no tiles — one quiet row,
-      // and it is one chevron away since the compaction.
-      // 40 - 15 due - 0 new in C leaves 25 scheduled; B's 12 rows hold 5 new
-      // and 7 unscheduled, so the level's resting figure is 32.
-      await expandSummary(tester);
-      expect(onPanel(find.text('5')), findsWidgets);
+      // **And the resting figures are not stated at all** (2026-09-10). The
+      // level holds 5 new and 32 scheduled; the first is a chip on the rows
+      // below and the second is beyond the horizon this panel answers for.
+      expect(onPanel(find.text('32')), findsNothing);
       expect(
         onPanel(find.text(english.deckHeroNewMetricWord.toLowerCase())),
-        findsWidgets,
+        findsNothing,
       );
-      expect(onPanel(find.text('32')), findsOneWidget);
       expect(
         onPanel(find.text(english.deckHeroScheduledMetricWord.toLowerCase())),
-        findsOneWidget,
+        findsNothing,
       );
     });
 
@@ -210,18 +199,16 @@ void main() {
     ) async {
       // `TODAY` sat above the numeral as the panel's scope and cost a whole
       // row to say what "cards due" already says (owner review, 2026-08-25).
-      // What replaced it in that row is the disclosure, which is the one
-      // control the panel has left.
+      // A disclosure took that row for a while and then went the same way, for
+      // the same reason: the figure line is the panel's first line and its
+      // whole scope.
       await pumpLevel(tester, levelOf(due: 7, overdueCards: 0, overdueDays: 0));
 
       expect(
         onPanel(find.text(english.deckSummaryCardsDueWord)),
         findsOneWidget,
       );
-      expect(
-        find.bySemanticsLabel(english.deckSummaryExpandLabel),
-        findsOneWidget,
-      );
+      expect(onPanel(find.byType(MxIconButton)), findsNothing);
     });
 
     testWidgets('the screen reader hears the numeral, the backlog with its '
@@ -265,37 +252,41 @@ void main() {
         findsOneWidget,
         reason: 'the sentence carries both units: cards and days',
       );
-      // The resting figures announce from the context row, so it is opened —
-      // a screen reader gets the chevron like anyone else.
-      await expandSummary(tester);
+      // **And the resting sentences are gone for a listener too**, which is
+      // the honest half of removing the row: a screen reader had them behind
+      // the same chevron everyone else did, and now nobody is told the level's
+      // scheduled count. The deck rows carry `new`; `scheduled` is a figure
+      // today cannot act on.
       expect(
         onPanel(find.bySemanticsLabel(english.deckHeroNewSemanticLabel(5))),
-        findsOneWidget,
+        findsNothing,
       );
       expect(
         onPanel(
           find.bySemanticsLabel(english.deckHeroScheduledSemanticLabel(32)),
         ),
-        findsOneWidget,
+        findsNothing,
       );
     });
 
-    testWidgets('the learned bar closes the panel once it is opened', (
-      tester,
-    ) async {
-      // It used to sit in the resting panel as an unlabelled rule. A 41% fill
+    testWidgets('the learned bar closes the panel', (tester) async {
+      // It shipped in the resting panel as an unlabelled rule — a 41% fill
       // between the figure line and the CTA states a proportion of nothing the
-      // eye can name, so it went where its caption already was (owner review,
-      // 2026-08-25).
+      // eye can name — then moved behind the chevron to be with its caption
+      // (owner review, 2026-08-25). It is back at rest with the caption, which
+      // is the pairing that was ever the point.
       await pumpLevel(
         tester,
         levelOf(due: 15, overdueCards: 12, overdueDays: 7, newCards: 5),
       );
 
-      expect(onPanel(find.byType(MxProgressBar)), findsNothing);
-
-      await expandSummary(tester);
-      expect(onPanel(find.byType(MxProgressBar)), findsOneWidget);
+      final bar = onPanel(find.byType(MxProgressBar));
+      expect(bar, findsOneWidget);
+      expect(
+        tester.getRect(bar).bottom,
+        lessThan(tester.getRect(onPanel(find.byType(MxActionButton))).top),
+        reason: 'the bar closes the figures; the CTA closes the panel',
+      );
     });
 
     testWidgets('compact width at double scale wraps without overflow', (
@@ -444,26 +435,18 @@ void main() {
 
       tester.element(find.byType(DeckLevelSummaryWidget)).visitChildren(visit);
 
-      // **`scheduled` is excluded, and only that.** The quiet context row
-      // clips its unit word at large scales on purpose — "the figure holds,
-      // the word clips" is written into `_QuietContextRow`, because half that
-      // row is narrower than the word and the count is the fact. That is a
-      // decision; the hero's was not.
-      // Lower-cased because the row draws them that way: "the word is the
-      // unit, the figure is the fact, and a capital gave the two equal
-      // billing".
+      // **One exclusion left, and it is a debt rather than a decision** (hero
+      // audit, 2026-09-08). At 320dp and textScaler 2.0 `MxProgressBar` draws
+      // `10 of 52 lear…` — the figures survive and the trailing word clips —
+      // but the widget is a shared primitive and its layout is not this
+      // panel's to change. Reported for a design-system task; excluded here so
+      // this guard keeps measuring the hero.
       //
-      // **The third is a debt, not a decision** (hero audit, 2026-09-08). At
-      // 320dp and textScaler 2.0 `MxProgressBar` draws `10 of 52 lear…`,
-      // which follows the quiet row's accepted shape — the figures survive,
-      // the trailing word clips — but the widget is a shared primitive and
-      // its layout is not this panel's to change. Reported for a design-system
-      // task; excluded here so this guard keeps measuring the hero.
-      final excluded = <String>{
-        english.deckHeroScheduledMetricWord.toLowerCase(),
-        english.deckHeroNewMetricWord.toLowerCase(),
-        english.deckLearnedProgressLabel(10, 52),
-      };
+      // The other two exclusions went with the quiet context row they
+      // described (2026-09-10). That row clipped its unit words on purpose;
+      // nothing draws them now, so an exclusion for them would only hide a
+      // future clip of the hero's own `New`.
+      final excluded = <String>{english.deckLearnedProgressLabel(10, 52)};
 
       return clipped.where((text) => !excluded.contains(text)).toList();
     }
@@ -479,7 +462,6 @@ void main() {
         levelOf(due: 15, overdueCards: 8, overdueDays: 7),
         surface: const Size(360, 640),
       );
-      await expandSummary(tester);
 
       expect(clippedOnPanel(tester), isEmpty);
       expectHero(15, english.deckSummaryCardsDueWord);
@@ -502,7 +484,6 @@ void main() {
             surface: Size(width, 640),
             textScale: scale,
           );
-          await expandSummary(tester);
 
           expect(
             clippedOnPanel(tester),
@@ -522,7 +503,6 @@ void main() {
         tester,
         levelOf(due: 15, overdueCards: 8, overdueDays: 7),
       );
-      await expandSummary(tester);
 
       final numeral = tester.getRect(onPanel(find.text('15')).first);
       final subline = tester.getRect(

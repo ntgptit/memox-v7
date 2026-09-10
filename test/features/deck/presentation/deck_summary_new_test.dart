@@ -10,23 +10,17 @@ import 'support/deck_screen_harness.dart';
 import 'support/fake_deck_repository.dart';
 
 /// The hero with new cards in play (BR-150, owner mockup 2026-08-20): one
-/// numeral leads — what is due, or the new cards when nothing is — and New
-/// and Scheduled rest in the quiet context row one chevron away.
+/// numeral leads — what is due, or the new cards when nothing is.
 ///
-/// **The context row moved behind the disclosure with the 2026-08-25
-/// compaction**, so the tests that read it open it first. That tap is not
-/// scaffolding: what it asserts is that the figures are still the same fold
-/// over the same snapshot once they are on screen.
+/// **New and Scheduled used to sit beneath it in a quiet context row, and
+/// since 2026-09-10 they do not sit anywhere.** They spent one release inline
+/// and one behind a chevron; neither placement earned them, because `new` is a
+/// chip on every deck row below and `scheduled` counts the cards this screen is
+/// specifically not about. What these tests assert now is that the numeral is
+/// the same fold over the same snapshot, and that the context row did not come
+/// back.
 void main() {
   final english = AppLocalizationsEn();
-
-  /// Opens the resting figures. The panel starts collapsed on every level.
-  Future<void> expandSummary(WidgetTester tester) async {
-    await tester.tap(
-      find.bySemanticsLabel(english.deckSummaryExpandLabel).first,
-    );
-    await tester.pumpAndSettle();
-  }
 
   Finder inSummary(Finder matching) => find.descendant(
     of: find.byType(DeckLevelSummaryWidget),
@@ -72,18 +66,22 @@ void main() {
       ),
       findsNothing,
     );
-    // The context row: 14 new, and 180 − 12 − 14 = 154 scheduled ahead.
-    await expandSummary(tester);
-    expect(inSummary(find.text('14')), findsWidgets);
+    // **The context row is not here, at rest or otherwise.** It read `14 new ·
+    // 154 scheduled` under a numeral of the same snapshot; both figures are on
+    // the deck rows or beyond today's horizon.
+    expect(inSummary(find.text('14')), findsNothing);
+    expect(inSummary(find.text('154')), findsNothing);
     expect(
       inSummary(find.text(english.deckHeroNewMetricWord.toLowerCase())),
-      findsWidgets,
+      findsNothing,
     );
-    expect(inSummary(find.text('154')), findsOneWidget);
-    // The hero numeral speaks above the context row's figures.
-    expect(sizeOfText(tester, '12'), greaterThan(sizeOfText(tester, '14')));
+    // The hero numeral still outranks everything the panel draws.
+    expect(
+      sizeOfText(tester, '12'),
+      greaterThan(sizeOfText(tester, english.deckSummaryCardsDueWord)),
+    );
     // The learned line and its figure ride the shared progress component,
-    // announced as one semantics node.
+    // announced as one semantics node — at rest, so both readers get it.
     expect(
       inSummary(
         find.bySemanticsLabel(english.deckLearnedProgressLabel(82, 180)),
@@ -112,11 +110,9 @@ void main() {
     // Nothing due, so no "cards due" headline to mislead with.
     expect(inSummary(find.text(english.deckSummaryCardsDueWord)), findsNothing);
 
-    await expandSummary(tester);
-    expect(
-      inSummary(find.text(english.deckHeroNewMetricWord.toLowerCase())),
-      findsWidgets,
-    );
+    // The hero word instead, capitalised, because here it is the unit the
+    // numeral counts rather than a context-row label.
+    expect(inSummary(find.text(english.deckHeroNewMetricWord)), findsOneWidget);
 
     final bar = tester.widget<MxProgressBar>(
       inSummary(find.byType(MxProgressBar)),
