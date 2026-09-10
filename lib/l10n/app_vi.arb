@@ -316,14 +316,6 @@
     },
     "description": "Con số ở đầu bên phải thanh tiến độ. Phần trăm nguyên — một chữ số thập phân trên thanh 4px là độ chính xác không ai làm gì được."
   },
-  "deckSummaryExpandLabel": "Hiện thêm số liệu",
-  "@deckSummaryExpandLabel": {
-    "description": "The disclosure control on the level summary hero, while it is collapsed. Says what appears — the New/Scheduled figures and the learned line — rather than naming the chevron."
-  },
-  "deckSummaryCollapseLabel": "Thu gọn số liệu",
-  "@deckSummaryCollapseLabel": {
-    "description": "The same disclosure control once the extra figures are open. Mirrors deckSummaryExpandLabel so a screen reader hears which way the control goes."
-  },
   "decksSectionLabelRoot": "Deck của bạn",
   "@decksSectionLabelRoot": {
     "description": "Tiêu đề của danh sách ở cấp gốc, cạnh hai pill lọc và sắp xếp. Widget tự viết hoa."
@@ -4362,10 +4354,6 @@
       }
     },
     "description": "The other half of the hero subline."
-  },
-  "deckSummaryPickDeckAction": "Chọn bộ thẻ để học",
-  "@deckSummaryPickDeckAction": {
-    "description": "Nút CTA của panel Hôm nay, chỉ ở cấp gốc của Thư viện."
   },
   "deckSummaryStudyDueAction": "Học {count} thẻ đến hạn",
   "@deckSummaryStudyDueAction": {

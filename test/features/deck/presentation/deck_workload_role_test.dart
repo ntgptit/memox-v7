@@ -110,35 +110,44 @@ void main() {
       // M99.61 migration to `MxActionButton` the widget carries geometry only,
       // and the fill is the theme's — which is the ownership this test wants,
       // stated where it used to read a per-widget style.
-      // **Study is outlined, and it stopped being filled at M99.98.** The
-      // argument for a brand fill — "the card's one primary verb, and the chips
-      // gave up their containers so it no longer competes" — was made about one
-      // card. A screen shows three or four at once, and the Library's first
-      // viewport then carried the accent nine times, at which point the colour
-      // reads as repetition rather than emphasis; it also left the screen's own
-      // `MxCard.accent` hero out-shouted by three solid fills below it. Study
-      // Home already drew this same verb outlined.
+      // **Study carries the brand fill, reversing M99.98 — and what changed
+      // is the page, not the opinion.** That task counted the accent nine
+      // times in the Library's first viewport and made this verb outlined to
+      // spend less of it. The count was right and the target was wrong: the
+      // loudest of the nine was the root's own hero, a filled button that
+      // "promised a session and delivered an index" — the Study tab, nothing
+      // started. So the screen spent its accent on a signpost and dressed the
+      // one control that opens a session as an alternative.
+      //
+      // The root hero is gone (`deck_list_summary_test` holds that half), which
+      // *lowers* the count rather than raising it: one hero removed, one fill
+      // per row added. What stays loud is the control the screen is for.
+      //
+      // The other half of M99.98 is what makes this legible and is asserted
+      // above and below: the chips keep no containers, the well stays tonal.
       final studyButton = find.descendant(
         of: find.byType(DeckStudyButtonWidget),
-        matching: find.byType(OutlinedButton),
+        matching: find.byType(FilledButton),
       );
       expect(
         find.descendant(
           of: find.byType(DeckStudyButtonWidget),
-          matching: find.byType(FilledButton),
+          matching: find.byType(OutlinedButton),
         ),
         findsNothing,
-        reason: 'the row verb must not carry a brand fill',
+        reason: 'the row verb is the primary action, not an alternative',
       );
-      final study = tester.widget<OutlinedButton>(studyButton);
+      final study = tester.widget<FilledButton>(studyButton);
       final studyFill =
           study.style?.backgroundColor?.resolve(<WidgetState>{}) ??
-          Theme.of(tester.element(studyButton))
-              .outlinedButtonTheme
-              .style
-              ?.backgroundColor
-              ?.resolve(<WidgetState>{});
-      expect(studyFill, isNot(scheme.primary));
+          Theme.of(
+            tester.element(studyButton),
+          ).filledButtonTheme.style?.backgroundColor?.resolve(<WidgetState>{});
+      expect(
+        studyFill,
+        scheme.primary,
+        reason: 'the fill is the brand accent, not a semantic one',
+      );
       expect(studyFill, isNot(semantic.streakContainer));
     });
   }

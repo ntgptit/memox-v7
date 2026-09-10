@@ -86,8 +86,6 @@ void main() {
         ),
       ],
     ),
-    isExpanded: false,
-    onToggleExpanded: () {},
     onStudyDue: () {},
   );
 

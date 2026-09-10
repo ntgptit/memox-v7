@@ -266,16 +266,25 @@ void main() {
       // card mentioned the same total, which is exactly the ambiguity a bare
       // substring match hides.
       //
-      // **Announced, not painted — anywhere on this screen now.** The card
-      // stopped writing the figure out because a header saying `21 of 42
-      // learned` above a track of the same length is the same fact twice and
-      // it cost 24px on every row; the level summary stopped when it was
-      // compacted, and prints it only behind its chevron. Both still carry the
-      // words in `Semantics`, which is what the second expectation checks.
+      // **Announced, not painted — on the card.** It stopped writing the
+      // figure out because a header saying `21 of 42 learned` above a track of
+      // the same length is the same fact twice and it cost 24px on every row.
+      // It still carries the words in `Semantics`, which is what the second
+      // expectation checks.
+      //
+      // **Scoped to the card, because the level panel does paint it.** The
+      // finder used to be screen-wide, which only held while the panel's own
+      // learned caption was folded behind a chevron; the caption came back to
+      // rest on 2026-09-10 and a screen-wide match then found the panel's copy
+      // and blamed the card for it. The rule was always about this row — the
+      // panel's caption measures the level, the row's would measure the row.
       expect(
-        find.text(english.deckLearnedProgressLabel(21, 42)),
+        find.descendant(
+          of: find.byType(DeckTileWidget),
+          matching: find.text(english.deckLearnedProgressLabel(21, 42)),
+        ),
         findsNothing,
-        reason: 'the learned caption is announced, never drawn at rest',
+        reason: 'the learned caption is announced, never drawn on the card',
       );
       // On the card's own node, not as a separate one: `MxCard` announces the
       // whole card as one button, so everything inside it merges into that

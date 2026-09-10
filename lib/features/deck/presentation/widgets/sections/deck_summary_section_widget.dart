@@ -5,20 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../../core/navigation/route_names.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../domain/models/deck_list_snapshot_model.dart';
-import '../../controllers/deck_list_view_controller.dart';
-import '../../states/deck_list_view_state.dart';
 import 'deck_level_summary_widget.dart';
-
-/// Toggling the panel's disclosure, bound to a `ref`.
-///
-/// A free function rather than a closure written inline in `build()`. `ref.read`
-/// is the right call — opening or shutting is a command, and a `watch` inside a
-/// callback would subscribe the widget to a value it is about to set — but
-/// written inline it sits lexically inside `build`, where neither a reader nor
-/// `memox.state_management.no_ref_read_in_build` can tell a deliberate command
-/// from a missed subscription.
-VoidCallback _toggleSummaryDetail(WidgetRef ref) =>
-    () => ref.read(deckSummaryDetailChoiceProvider.notifier).toggle();
 
 /// The level summary, or nothing.
 ///
@@ -48,10 +35,6 @@ class DeckSummarySectionWidget extends ConsumerWidget {
     if (!DeckLevelSummaryWidget.hasStudyable(snapshot)) {
       return const SizedBox.shrink();
     }
-
-    final isExpanded =
-        ref.watch(deckSummaryDetailChoiceProvider) ==
-        DeckSummaryDetail.expanded;
 
     return Padding(
       // **Nothing above, and the bar already carries the break** (owner review,
@@ -98,20 +81,22 @@ class DeckSummarySectionWidget extends ConsumerWidget {
       ),
       child: DeckLevelSummaryWidget(
         snapshot: snapshot,
-        isExpanded: isExpanded,
-        onToggleExpanded: _toggleSummaryDetail(ref),
-        onStudyDue: snapshot.levelDueCardCount == 0
+        // **Inside a deck only.** At the root this button used to read
+        // "Choose a deck to study" and hand the tap to the Study tab — a
+        // session belongs to one root (BR-101), so there was no session to
+        // start and the comment on the label admitted as much: it "promised a
+        // session and delivered an index". A filled hero pointing at the
+        // outlined verbs below it inverted the screen's hierarchy, and the
+        // Study tab is already one tap away in the bottom bar. Inside a deck
+        // the same control does start that deck's session, so it stays there.
+        onStudyDue: snapshot.levelDueCardCount == 0 || snapshot.parent == null
             ? null
-            : () => snapshot.parent == null
-                  // The Study tab lists every root's workload; one
-                  // session cannot span roots (BR-101).
-                  ? context.goNamed(RouteNames.study)
-                  : context.goNamed(
-                      RouteNames.deckStudy,
-                      pathParameters: <String, String>{
-                        RoutePathParams.deckId: snapshot.parent!.id,
-                      },
-                    ),
+            : () => context.goNamed(
+                RouteNames.deckStudy,
+                pathParameters: <String, String>{
+                  RoutePathParams.deckId: snapshot.parent!.id,
+                },
+              ),
       ),
     );
   }

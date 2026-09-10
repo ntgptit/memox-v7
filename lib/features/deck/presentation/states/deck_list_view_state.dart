@@ -61,28 +61,6 @@ enum DeckListSort {
   progress,
 }
 
-/// How much of the level summary hero is on screen.
-///
-/// **Two states, because the hero now has two jobs and only one of them is the
-/// default.** The panel used to answer four questions at once and stood 320px
-/// tall on a 852px screen — 38% of the viewport for a screen whose subject is
-/// the list underneath it. Collapsed, it answers the one question the user
-/// actually opened the app with ("how much is waiting, and can I start now");
-/// the resting figures and the learned line are a disclosure away.
-///
-/// **It replaced a three-state visibility choice, and the dismiss button with
-/// it** (owner decision, 2026-08-25). The reason the panel was dismissible was
-/// that it was in the way of the list; at 18% of the viewport it no longer is,
-/// and a chevron cannot mean "hide me" and "show me more" at the same time.
-enum DeckSummaryDetail {
-  /// The default: one figure line and the CTA.
-  collapsed,
-
-  /// The resting figures — New and Scheduled — plus the learned line above the
-  /// progress track.
-  expanded,
-}
-
 /// Applies the current view choices to one snapshot's decks.
 ///
 /// Pure, and deliberately not a method on the controller: it is the whole of what
