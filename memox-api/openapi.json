@@ -181,6 +181,17 @@
         },
         "type" : "object"
       },
+      "CardKeyResponse" : {
+        "properties" : {
+          "backFolded" : {
+            "type" : "string"
+          },
+          "frontFolded" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
       "CardListResponse" : {
         "properties" : {
           "answerCount" : {
@@ -623,6 +634,61 @@
             "type" : "string"
           }
         },
+        "type" : "object"
+      },
+      "ExportCardResponse" : {
+        "properties" : {
+          "back" : {
+            "type" : "string"
+          },
+          "example" : {
+            "type" : "string"
+          },
+          "front" : {
+            "type" : "string"
+          },
+          "hint" : {
+            "type" : "string"
+          },
+          "pronunciation" : {
+            "type" : "string"
+          },
+          "tagNames" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
+      "ExportResponse" : {
+        "properties" : {
+          "cards" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ExportCardResponse"
+            },
+            "type" : "array"
+          },
+          "deckName" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "ExportSelectionRequest" : {
+        "properties" : {
+          "cardIds" : {
+            "items" : {
+              "type" : "string"
+            },
+            "minItems" : 1,
+            "type" : "array"
+          }
+        },
+        "required" : [
+          "cardIds"
+        ],
         "type" : "object"
       },
       "MoveDeckRequest" : {
@@ -1797,6 +1863,53 @@
         ]
       }
     },
+    "/api/v1/decks/{deckId}/card-keys" : {
+      "get" : {
+        "operationId" : "cardKeys",
+        "parameters" : [
+          {
+            "in" : "path",
+            "name" : "deckId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          }
+        ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/CardKeyResponse"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "Keys returned"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/CardKeyResponse"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "Deck not found, or in Trash"
+          }
+        },
+        "summary" : "The duplicate identities already in one deck, for an import preview",
+        "tags" : [
+          "Cards"
+        ]
+      }
+    },
     "/api/v1/decks/{deckId}/cards" : {
       "get" : {
         "operationId" : "listCards",
@@ -1934,6 +2047,126 @@
           }
         },
         "summary" : "Create a card in a deck",
+        "tags" : [
+          "Cards"
+        ]
+      }
+    },
+    "/api/v1/decks/{deckId}/export" : {
+      "get" : {
+        "operationId" : "exportDeck",
+        "parameters" : [
+          {
+            "in" : "path",
+            "name" : "deckId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          }
+        ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ExportResponse"
+                }
+              }
+            },
+            "description" : "Export data returned"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ExportResponse"
+                }
+              }
+            },
+            "description" : "Deck not found, or in Trash"
+          },
+          "409" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ExportResponse"
+                }
+              }
+            },
+            "description" : "The deck holds no active card"
+          }
+        },
+        "summary" : "Every card held directly by one deck, in the export's order",
+        "tags" : [
+          "Cards"
+        ]
+      },
+      "post" : {
+        "operationId" : "exportSelected",
+        "parameters" : [
+          {
+            "in" : "path",
+            "name" : "deckId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          }
+        ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ExportSelectionRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ExportResponse"
+                }
+              }
+            },
+            "description" : "Export data returned"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ExportResponse"
+                }
+              }
+            },
+            "description" : "Empty selection, or more than 500 ids"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ExportResponse"
+                }
+              }
+            },
+            "description" : "Deck not found, or in Trash"
+          },
+          "409" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ExportResponse"
+                }
+              }
+            },
+            "description" : "A selected card is no longer in this deck"
+          }
+        },
+        "summary" : "Exactly the selected cards of one deck, or none of them",
         "tags" : [
           "Cards"
         ]

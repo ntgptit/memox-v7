@@ -1,6 +1,7 @@
 package com.memox.card.persistence;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
@@ -11,8 +12,10 @@ import com.memox.card.entity.CardDeckContext;
 import com.memox.card.entity.CardFilter;
 import com.memox.card.entity.CardHistoryCursor;
 import com.memox.card.entity.CardHistoryEntry;
+import com.memox.card.entity.CardKey;
 import com.memox.card.entity.CardListItem;
 import com.memox.card.entity.CardStateCounts;
+import com.memox.card.entity.ExportCard;
 import com.memox.card.entity.StageThresholds;
 import com.memox.common.pagination.PageSlice;
 
@@ -73,4 +76,15 @@ public interface CardMapper {
 	Card findCardById(@Param("cardId") String cardId);
 
 	long countActiveCardsByDeck(@Param("deckId") String deckId);
+
+	List<ExportCard> findExportCardsInDeck(@Param("deckId") String deckId);
+
+	List<ExportCard> findExportCardsByIds(
+			@Param("deckId") String deckId,
+			@Param("cardIds") Collection<String> cardIds);
+
+	/** @return the deck name, or {@code null} when the deck does not exist or is in Trash */
+	String findExportDeckName(@Param("deckId") String deckId);
+
+	List<CardKey> findCardKeysInDeck(@Param("deckId") String deckId);
 }

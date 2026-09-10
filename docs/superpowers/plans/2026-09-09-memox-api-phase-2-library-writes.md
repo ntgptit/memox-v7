@@ -2093,73 +2093,51 @@ git commit -m "feat(tag): port the tag catalog, rename-merge and delete"
 
 Ports `exportDeckName`, `exportCardsInDeck`, `exportCardsByIds`, `cardKeysInDeck`. The server exposes the **data**; writing a file is the client's job (spec: no device-only side effects).
 
+> **Corrected while executing, 2026-09-10.** The section ported the SQL and left out most of the rules that govern it. BR-174 has three clauses this task must enforce and the draft named none of them; BR-177's tag ordering was written the wrong way round; and BR-175's line between a content transfer and a backup was drawn in the entity but not in the response. Each correction below is marked **[corrected]**.
+
 **Files:**
 - Create: `memox-api/src/main/java/com/memox/card/entity/ExportCard.java`, `CardKey.java`, `DeckExport.java`
 - Modify: `card_mapper.xml`, `CardMapper.java`
 - Create: `memox-api/src/main/java/com/memox/card/service/CardExportService.java`
-- Create: `memox-api/src/main/java/com/memox/card/dto/response/ExportResponse.java`
-- Modify: `CardController.java`
-- Create: `memox-api/src/test/java/com/memox/card/CardExportTest.java`
+- Create: `memox-api/src/main/java/com/memox/card/dto/response/ExportResponse.java`, `ExportCardResponse.java`, `CardKeyResponse.java`
+- Create: `memox-api/src/main/java/com/memox/card/dto/request/ExportSelectionRequest.java`
+- Create: `memox-api/src/main/java/com/memox/card/controller/CardExportController.java` — **not** a change to `CardController`, whose class-level path is `/api/v1/decks/{deckId}/cards`; these three endpoints are not under `/cards`. **[corrected]**
+- Modify: `ApiErrorCode.java`, both `messages*.properties`
+- Create: `memox-api/src/test/java/com/memox/card/CardExportTest.java`, `CardExportControllerTest.java`
 
 **Interfaces:**
-- Produces: `ExportCard(String cardId, Instant createdAt, String front, String back, String example, String hint, String pronunciation, List<String> tagNames)` — exactly AD-20's six content fields plus the id and creation time (BR-175); no study state, no flag.
-- Produces: `CardExportService.exportDeck(String deckId)` → `DeckExport(String deckName, List<ExportCard> cards)`; `.exportCards(String deckId, Collection<String> cardIds)` → `DeckExport`; `.existingKeys(String deckId)` → `Set<CardKey>`.
+- Produces: `ExportCard(String cardId, String front, String back, String example, String hint, String pronunciation, List<String> tagNames)` — AD-20's six content fields plus the id. **No `createdAt`. [corrected]** Drift reads it because its selected scope runs in chunks and the concatenation of several ordered statements is not itself ordered; here `IdCollections` caps a batch at 500 against PostgreSQL's 65 535 bind limit, so one statement answers it and its `ORDER BY` is the total order. A field with no reader is surface with no consumer.
+- Produces: `CardExportService.exportDeck(String deckId)` -> `DeckExport(String deckName, List<ExportCard> cards)`; `.exportCards(String deckId, Collection<String> cardIds)` -> `DeckExport`; `.existingKeys(String deckId)` -> `Set<CardKey>`. All three `@Transactional(readOnly = true)` (BR-178).
+- Produces: `ApiErrorCode.EXPORT_SCOPE_EMPTY(409, "error.export-scope-empty")`, `EXPORT_SELECTION_STALE(409, "error.export-selection-stale")`. **[corrected]** — BR-174 demands a *typed* reason for both refusals and the draft provided neither.
+
+**BR-174 has three clauses, and the draft enforced none of them. [corrected]**
+
+1. **All-or-nothing.** "Một id không còn tồn tại, hoặc không còn thuộc chính deck đó tại thời điểm đọc snapshot, MUST làm **cả request** thất bại bằng lý do có kiểu — MUST NOT export một phần im lặng." Measured by **subtracting the ids that came back from the ids asked for**, never by comparing counts: duplicates are normalised away first, so a short result and a stale id are indistinguishable by count alone. The statement filters on the deck as well as the id, so a deleted card and a card that moved elsewhere are both caught by the one subtraction.
+2. **Duplicates normalise to one.** "id trùng MUST được normalize về một lần và MUST NOT nhân bản hàng trong file."
+3. **An empty scope is refused, in the repository.** "Scope rỗng (deck không còn card, hoặc tập chọn rỗng) MUST bị từ chối ở domain/repository **kể cả khi UI đã ẩn action**." A deck whose last card was deleted from another screen arrives here with the export button still on screen. An empty selection is refused by `@NotEmpty` on the request; an empty deck by `EXPORT_SCOPE_EMPTY`.
+
+**BR-175 is a rule about the response, not only about the entity. [corrected]** The artifact "MUST chỉ mang sáu field nội dung canonical của AD-20 … MUST NOT mang bất cứ thứ gì khác: id card hay deck, timestamp …". This API's response *is* those cells, so `ExportCardResponse` carries the six and drops the id — matching the Drift comment's "Both stop at the repository". Re-importing the artifact must mint a new card (BR-171), which an id in the payload quietly invites a client to defeat.
+
+The tags travel as a **list**, not a joined cell: BR-176 puts the `;`-with-escapes codec in exactly one place shared by import and export, and that place is the client. An encoder here would be the second copy that rule forbids. Likewise BR-179's six lowercase headers and BR-180's sanitised file name plus date-from-the-client's-clock are properties of the file, which nothing on the server writes.
 
 - [ ] **Step 1: Write the failing test**
 
-```java
-class CardExportTest extends PostgresIntegrationTest {
+The draft's three cases are right and insufficient: they cover the six fields, the Trash exclusion and the empty tag list. Seven more, each attached to a rule the draft did not enforce:
 
-	@Autowired CardExportService cardExportService;
-
-	@Test
-	void exportsTheSixContentFieldsAndNothingElse() {
-		insertRootDeck("root", "Korean");
-		insertSubDeck("deck", "Unit 1", "root", "root", DeckContentType.CARD);
-		insertFlaggedCard("c1", "deck");
-		insertTag("t-a", "alpha");
-		linkTag("c1", "t-a");
-
-		final var export = cardExportService.exportDeck("deck");
-
-		assertThat(export.deckName()).isEqualTo("Unit 1");
-		assertThat(export.cards()).singleElement().satisfies(card -> {
-			assertThat(card.tagNames()).containsExactly("alpha");
-			assertThat(ExportCard.class.getRecordComponents())
-					.extracting(java.lang.reflect.RecordComponent::getName)
-					.doesNotContain("flagged", "dueAt", "currentBox");   // BR-175
-		});
-	}
-
-	@Test
-	void excludesTrashedCardsFromTheExport() {
-		insertRootDeck("root", "Korean");
-		insertSubDeck("deck", "Unit 1", "root", "root", DeckContentType.CARD);
-		insertCardWithState("kept", "deck", null, null);
-		insertCardWithState("trashed", "deck", null, null);
-		softDelete("card", "trashed");
-
-		assertThat(cardExportService.exportDeck("deck").cards())
-				.extracting(ExportCard::cardId).containsExactly("kept");   // BR-257
-	}
-
-	@Test
-	void returnsAnEmptyTagListRatherThanNullWhenACardHasNoTags() {
-		insertRootDeck("root", "Korean");
-		insertSubDeck("deck", "Unit 1", "root", "root", DeckContentType.CARD);
-		insertCardWithState("c1", "deck", null, null);
-
-		assertThat(cardExportService.exportDeck("deck").cards())
-				.singleElement().extracting(ExportCard::tagNames)
-				.isEqualTo(List.of());   // string_agg returns NULL, not ''
-	}
-}
-```
+- **BR-177, tags ordered by the folded name** — see below, this is the one that would have shipped wrong.
+- **BR-177, cards ordered `created_at ASC, id ASC` in *both* scopes.**
+- **BR-174, a descendant deck's cards are excluded** — `deck_id = ?` is a direct-children test.
+- **BR-174, a stale selection refuses the whole request** — once for a deleted card, once for a card that moved to a sibling deck.
+- **BR-174, a repeated id yields one row.**
+- **BR-174, an empty deck and an empty selection are both refused.**
+- **A deck that is gone is a 404** — `exportDeckName` returns no row, which is the missing-deck signal.
+- **BR-170, the key probe sees active cards only.**
+- **BR-175 over HTTP** — the response carries neither `cardId` nor `createdAt` nor the flag.
 
 - [ ] **Step 2: Run and verify it fails**
 
 ```bash
-cd memox-api && ./mvnw.cmd -Dtest=CardExportTest test
+cd memox-api && ./mvnw.cmd -Dtest='CardExportTest,CardExportControllerTest' test
 ```
 
 Expected: FAIL — `CardExportService` does not exist.
@@ -2167,42 +2145,60 @@ Expected: FAIL — `CardExportService` does not exist.
 - [ ] **Step 3: Port the statements**
 
 ```xml
-<select id="findExportCardsInDeck" resultMap="exportCard">
-  SELECT c.id AS card_id, c.created_at AS created_at, c.front, c.back,
-         c.example, c.hint, c.pronunciation,
-         (SELECT string_agg(t.name, chr(31) ORDER BY t.name, t.id)
+<sql id="exportCardColumns">
+  SELECT c.id AS card_id, c.front, c.back, c.example, c.hint, c.pronunciation,
+         (SELECT string_agg(t.name, chr(31) ORDER BY t.name_folded, t.name)
             FROM card_tags ct INNER JOIN tags t ON t.id = ct.tag_id
            WHERE ct.card_id = c.id) AS tag_names
     FROM cards c
+</sql>
+```
+
+**The draft ordered the tags by `t.name, t.id`, and BR-177 says the folded name. [corrected]** The rule is explicit: *"Tag của mỗi card MUST sắp theo tên đã fold (BR-93) với tie-break ổn định."* Byte-ordered, `Verb` sorts before `adjective`; folded, it does not — so the draft would have produced a different artifact from the Flutter export for the same deck, which is the one thing BR-177 exists to prevent. The tie-break is the raw spelling, matching `_byFoldedThenSpelling` in `card_export_repository_impl.dart`.
+
+**And the ordering belongs in the statement here, which is exactly where Drift cannot put it.** SQLite does not honour an `ORDER BY` inside an aggregate — the comment above `exportCardsInDeck` says so and calls the clause sitting there a courtesy that "read as a guarantee that did not exist" — so the Dart repository re-sorts after splitting. PostgreSQL's `string_agg(… ORDER BY …)` *is* a guarantee, so the rule lives in the SQL that has to keep it. This is deliberately **not** the order `findCardListItems` uses; that one only needs an order that does not flicker, and BR-177 does not govern a screen.
+
+The projection is a shared `<sql>` fragment. Drift pins both scopes to one generated row class with `AS ExportCardRow` for a stated reason — two row shapes would let one grow a column the other lacks — and the fragment is that same guarantee.
+
+```xml
+<select id="findExportCardsInDeck" resultMap="exportCard">
+  <include refid="exportCardColumns"/>
    WHERE c.deck_id = #{deckId} AND c.delete_batch_id IS NULL
    ORDER BY c.created_at ASC, c.id ASC
 </select>
 
-<select id="findCardKeysInDeck" resultType="com.memox.card.entity.CardKey">
-  SELECT front_folded AS front_folded, back_folded AS back_folded
-    FROM cards
+<select id="findExportDeckName" resultType="string">
+  SELECT name FROM decks WHERE id = #{deckId} AND delete_batch_id IS NULL
+</select>
+
+<select id="findCardKeysInDeck" resultMap="cardKey">
+  SELECT front_folded, back_folded FROM cards
    WHERE deck_id = #{deckId} AND delete_batch_id IS NULL
 </select>
 ```
 
-`findExportCardsByIds` is the same statement with the `<foreach>` `IN` clause from translation row 9 added. The `exportCard` result map reuses the `UnitSeparatedListTypeHandler` from Task 7, which is what makes the third test pass: `string_agg` over an empty set is `NULL`, and the handler returns `List.of()`.
+`findExportCardsByIds` is the same fragment with translation row 9's `<foreach>` added. `cardKey` binds through a `resultMap` with `<constructor>` rather than `resultType`, like every other record in this codebase. **[corrected]**
+
+The `exportCard` result map reuses `UnitSeparatedListTypeHandler` from Task 7, which is what makes the empty-tag test pass: `string_agg` over an empty set is `NULL`, and the handler returns `List.of()`.
 
 - [ ] **Step 4: Add the endpoints**
 
-`GET /api/v1/decks/{deckId}/export`, `POST /api/v1/decks/{deckId}/export` (body carries `cardIds`), `GET /api/v1/decks/{deckId}/card-keys`. All three are `@Transactional(readOnly = true)` and log **counts only** (BR-267).
+`GET /api/v1/decks/{deckId}/export`, `POST /api/v1/decks/{deckId}/export` (body carries `cardIds`), `GET /api/v1/decks/{deckId}/card-keys`. All three read-only and logging **counts and ids only** — never a card face, a tag or the deck name, which BR-173 extends to the file name derived from it.
+
+The selected scope is a POST although it mutates nothing. The verb describes how up to 500 ids are carried, not what the request does; BR-178 still applies, down to not clearing the selection it was given.
 
 - [ ] **Step 5: Run and verify it passes**
 
 ```bash
-cd memox-api && ./mvnw.cmd -Dtest=CardExportTest test
+cd memox-api && ./mvnw.cmd -Dtest='CardExportTest,CardExportControllerTest' test
 ```
 
-Expected: PASS, 3 tests.
+Expected: PASS, 18 tests. Then `./mvnw -o verify`, and regenerate `openapi.json` — three endpoints are new. Both response records holding a `List` need a compact-constructor `List.copyOf`, or SpotBugs fails the build on `EI_EXPOSE_REP`.
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add memox-api/src/main/java/com/memox/card memox-api/src/main/resources/mybatis/card_mapper.xml memox-api/src/test/java/com/memox/card
+git add memox-api/src/main/java/com/memox/card memox-api/src/main/resources memox-api/src/test/java/com/memox/card memox-api/openapi.json
 git commit -m "feat(card): expose deck export data and the import duplicate probe"
 ```
 
@@ -2723,6 +2719,7 @@ One table with the 68 ported statements (69 minus the deferred `resetTreeStudySt
 3. `tagCatalog.cardCount` — Drift counts `card_tags` rows without excluding trashed cards, which BR-237 forbids; the port joins `cards`. This one has a MUST behind it, unlike the two above. Raise a WBS entry against the Flutter query.
 4. ~~`orphanedTags`~~ — **not ported at all** (Task 10): no caller, and an automatic orphan purge would violate BR-230, which requires a zero-count tag to keep its row.
 5. `tagCountsForCards` -> `findCardsAtTagCeiling` — a count per card becomes the question the rule actually asks.
+5b. `exportCardsInDeck` / `exportCardsByIds` tag ordering — Drift orders inside the aggregate as a documented non-guarantee and re-sorts in Dart by folded name; the port puts BR-177's order in the statement, where PostgreSQL can actually keep it.
 6. Six `card.drift`/`tag.drift` statements answered by another statement rather than ported one-for-one, listed with their reasons in Task 10.
 5. `nextSiblingPosition` — Drift filters `delete_batch_id IS NULL`; the server must not, because `uq_decks_sibling_scope_position` covers tombstones too.
 
