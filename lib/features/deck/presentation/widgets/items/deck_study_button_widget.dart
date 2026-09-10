@@ -131,7 +131,18 @@ class DeckStudyButtonWidget extends StatelessWidget {
         // still gone, so the accent is still not spent on a signpost. What
         // changed is that the row's verb no longer has to spend it either.
         variant: MxActionButtonVariant.tonal,
-        size: MxActionButtonSize.compact,
+        // **`dense`, and it is a return rather than a discovery.** The
+        // 2026-08-20 review moved this verb from 32 up to 40 — "40 is on the
+        // 4px grid and clears the 32 the pill used to paint". The 2026-09-10
+        // brief measures the reference at ~34 and asks for the smaller body
+        // back, from a page where the row's verb is the lightest thing on the
+        // card rather than its loudest. M100.77 admitted `dense` as an option
+        // beside `compact` for that reason: the two readings disagree and
+        // neither is a rule, so the call site says which one this row wants.
+        //
+        // The floor is not part of the trade — 32 is the body, 48 is still
+        // what a finger gets, and `mx_action_button_size_test` measures it.
+        size: MxActionButtonSize.dense,
         onPressed: () => context.goNamed(
           RouteNames.deckStudy,
           pathParameters: <String, String>{RoutePathParams.deckId: deckId},

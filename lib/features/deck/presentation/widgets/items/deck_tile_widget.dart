@@ -194,10 +194,18 @@ class _DeckStateRegion extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        // `sm` either side of the rule, which is the seam the padding used to
-        // hold on its own — one step more than the line breaks inside the
-        // block above, because this is a section boundary and those are not.
-        const SizedBox(height: AppSpacing.sm),
+        // **`md` above the rule, `sm` below, and the ceiling is what chose it**
+        // (owner brief, 2026-09-10). The reference gives this seam 16 over and
+        // 14 under. 14 is off this app's 4dp grid, and 16 was measured: it
+        // costs 8 per card, three cards is 24, and
+        // `deck_summary_compact_geometry_test` had 14.1 to spend — card three
+        // ended 9.9 past the fold.
+        //
+        // 12 costs 4 per card and lands with **1.9px of slack**. That is a real
+        // fit and a thin one: this screen's vertical budget is now effectively
+        // spent, and the next band, gap or type rung that grows here will take
+        // the third card with it.
+        const SizedBox(height: AppSpacing.md),
         Padding(
           // Inset to the gutter, not bled to the card's edge. A rule that runs
           // edge to edge cuts the card in two; one that stops where the text
