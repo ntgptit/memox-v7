@@ -21,6 +21,8 @@ public enum ApiErrorCode {
 	TAG_LIMIT_EXCEEDED(HttpStatus.CONFLICT, "error.tag-limit-exceeded"),
 	CARD_CROSS_ROOT_MOVE(HttpStatus.CONFLICT, "error.card-cross-root-move"),
 	MOVE_TARGET_INVALID(HttpStatus.CONFLICT, "error.move-target-invalid"),
+	EXPORT_SCOPE_EMPTY(HttpStatus.CONFLICT, "error.export-scope-empty"),
+	EXPORT_SELECTION_STALE(HttpStatus.CONFLICT, "error.export-selection-stale"),
 	DECK_POSITION_OUT_OF_RANGE(HttpStatus.BAD_REQUEST, "error.deck-position-out-of-range"),
 	DECK_CROSS_ROOT_MOVE(HttpStatus.CONFLICT, "error.deck-cross-root-move"),
 	DECK_MOVE_INTO_OWN_SUBTREE(HttpStatus.CONFLICT, "error.deck-move-into-own-subtree"),

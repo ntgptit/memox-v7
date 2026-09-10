@@ -393,4 +393,114 @@
     WHERE deck_id = #{deckId}
       AND delete_batch_id IS NULL
   </select>
+  <resultMap id="exportCard" type="com.memox.card.entity.ExportCard">
+    <constructor>
+      <idArg column="card_id" javaType="java.lang.String"/>
+      <arg column="front" javaType="java.lang.String"/>
+      <arg column="back" javaType="java.lang.String"/>
+      <arg column="example" javaType="java.lang.String"/>
+      <arg column="hint" javaType="java.lang.String"/>
+      <arg column="pronunciation" javaType="java.lang.String"/>
+      <arg column="tag_names" javaType="java.util.List" typeHandler="com.memox.common.mybatis.UnitSeparatedListTypeHandler"/>
+    </constructor>
+  </resultMap>
+
+  <resultMap id="cardKey" type="com.memox.card.entity.CardKey">
+    <constructor>
+      <idArg column="front_folded" javaType="java.lang.String"/>
+      <idArg column="back_folded" javaType="java.lang.String"/>
+    </constructor>
+  </resultMap>
+
+  <!--
+    The projection both export scopes share.
+
+    Drift writes the two statements out twice and pins them to one generated row class with
+    `AS ExportCardRow`, for a stated reason: the scopes differ in which cards they name and in
+    nothing else, and two row shapes would let one grow a column the other does not have. A `<sql>`
+    fragment is that same guarantee here.
+
+    **The tag order is `name_folded`, then the spelling — not `name`, and not the id.** BR-177 fixes
+    it in the folded value, which is also BR-93's identity, so the two platforms produce the same
+    artifact for the same deck. Byte-ordered, `Verb` sorts before `adjective`; folded, it does not.
+    This is deliberately NOT the order `findCardListItems` uses: that one only needs an order that
+    does not flicker between two reads, and BR-177 does not govern a screen.
+
+    The ordering also lives here rather than in Java, which is where Drift has to put it. SQLite
+    does not honour an ORDER BY inside an aggregate, so the clause in `exportCardsInDeck` is a
+    courtesy the comment above it calls out as a non-guarantee, and the repository re-sorts. In
+    PostgreSQL `string_agg(… ORDER BY …)` is a guarantee, so the rule sits in the statement that
+    has to keep it.
+  -->
+  <sql id="exportCardColumns">
+    SELECT c.id AS card_id, c.front, c.back, c.example, c.hint, c.pronunciation,
+           (SELECT string_agg(t.name, chr(31) ORDER BY t.name_folded, t.name)
+              FROM card_tags ct
+              INNER JOIN tags t ON t.id = ct.tag_id
+             WHERE ct.card_id = c.id) AS tag_names
+      FROM cards c
+  </sql>
+
+  <!--
+    Every card held DIRECTLY by one deck, for scope `all` (BR-174).
+
+    `deck_id = #{deckId}` is a direct-children test — a descendant deck's cards carry that deck's
+    id — and BR-174 says a descendant's cards are not part of this export.
+
+    **ASC, and the direction is the export contract rather than the list's.** `findActiveCardsByDeck`
+    is newest-first because a management list is read from the top; an export is read as a document,
+    and BR-177 fixes `created_at ASC` with an `id ASC` tie-break so the same deck always produces the
+    same content. No LIMIT and no filter: the user asked for the deck, not for the view of it they
+    happened to be looking at.
+  -->
+  <select id="findExportCardsInDeck" resultMap="exportCard">
+    <include refid="exportCardColumns"/>
+     WHERE c.deck_id = #{deckId} AND c.delete_batch_id IS NULL
+     ORDER BY c.created_at ASC, c.id ASC
+  </select>
+
+  <!--
+    The same row, narrowed to an exact id set, for scope `selected` (BR-174).
+
+    **`deck_id` as well as the id list, and that pair is the rule.** An id that was deleted and an id
+    that moved to another deck both simply fail to come back, so one statement answers both halves
+    of BR-174 and the service subtracts what returned from what it asked for.
+
+    Translation row 9: `IN :cardIds` becomes a `<foreach>`. Not chunked, unlike Drift — `IdCollections`
+    caps a batch at 500 ids and PostgreSQL binds 65 535, so this is always one statement and its
+    ORDER BY is therefore the total order rather than the order within a chunk.
+  -->
+  <select id="findExportCardsByIds" resultMap="exportCard">
+    <include refid="exportCardColumns"/>
+     WHERE c.deck_id = #{deckId} AND c.delete_batch_id IS NULL
+       AND c.id IN
+    <foreach collection="cardIds" open="(" separator="," close=")" item="cardId">#{cardId}</foreach>
+     ORDER BY c.created_at ASC, c.id ASC
+  </select>
+
+  <!--
+    The deck's own name, for the exported file's name (BR-180).
+
+    Read inside the same transaction as the rows above, never beside them: the name and the cards are
+    one snapshot (BR-177). `findDeckContext` would answer this too and costs a recursive ancestry
+    walk for a breadcrumb no export renders — and this returns no row for a deck that is gone, which
+    is exactly the missing-deck signal the service needs.
+  -->
+  <select id="findExportDeckName" resultType="string">
+    SELECT name FROM decks WHERE id = #{deckId} AND delete_batch_id IS NULL
+  </select>
+
+  <!--
+    The duplicate identities already in one deck, for import's BR-170 check — one statement for the
+    whole preview and again for the in-transaction recheck, never a per-row lookup.
+
+    Active cards only. A card in Trash is not a duplicate an import has to avoid: it is not visible,
+    and refusing an import because of one would be refusing on evidence the user cannot see.
+  -->
+  <select id="findCardKeysInDeck" resultMap="cardKey">
+    SELECT front_folded, back_folded
+      FROM cards
+     WHERE deck_id = #{deckId} AND delete_batch_id IS NULL
+  </select>
+
 </mapper>
