@@ -17,7 +17,7 @@
    Dark renders what Dart renders (A20.1 P1-06, owner decision 1: the kit is a
    MIRROR of the built ThemeData, never the other way round). `shadowsFor` in
    lib/core/theme/foundations/app_elevation.dart is the source: every level
-   above `none` paints a quiet rim — `outlineVariant` (#272C48), one hairline of
+   above `none` paints a quiet rim — `outlineVariant` (#222743), one hairline of
    spread, no blur — and `raised` / `overlay` add a drop of `scheme.shadow`
    (#03040B) at 0.8 alpha, offset and blurred, no spread, so nothing lightens.
    The rim never thickens: depth above `card` is the drop, not a wider glow.
@@ -39,7 +39,7 @@
 [data-theme="dark"]{
   /* Mirrors `_darkDepth`: the rim is the first layer at every level and never
      changes; `raised` and `overlay` add the drop. See the note above. */
-  --shadow-card:0 0 0 1px #272C48;
-  --shadow-raised:0 0 0 1px #272C48, 0 4px 12px rgb(3 4 11 / 0.8);
-  --shadow-overlay:0 0 0 1px #272C48, 0 8px 24px rgb(3 4 11 / 0.8);
+  --shadow-card:0 0 0 1px #222743;
+  --shadow-raised:0 0 0 1px #222743, 0 4px 12px rgb(3 4 11 / 0.8);
+  --shadow-overlay:0 0 0 1px #222743, 0 8px 24px rgb(3 4 11 / 0.8);
 }
