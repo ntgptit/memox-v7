@@ -173,6 +173,66 @@ public abstract class MemoxFixtures {
 		this.jdbcTemplate.update("UPDATE decks SET delete_batch_id = NULL WHERE id = ?", deckId);
 	}
 
+	/**
+	 * Seeds an in-progress study session on one deck.
+	 *
+	 * <p>Only the columns the CHECK constraints demand. Everything else about a session belongs to
+	 * Phase 3; what BR-259 needs is a row that is {@code in_progress} and points somewhere.
+	 */
+	public void insertOpenSession(String id, String deckId, String rootDeckId) {
+		this.jdbcTemplate.update("""
+				INSERT INTO study_sessions (id, deck_id, root_deck_id, scheduler_generation, status,
+				                            session_kind, current_mode, card_limit, started_at)
+				VALUES (?, ?, ?, 1, 'in_progress', 'reviewing', 'self_assess', 20, ?)""",
+				id, deckId, rootDeckId, stamp());
+	}
+
+	/** A session that has already ended. BR-86 says its end state is never rewritten. */
+	public void insertEndedSession(String id, String deckId, String rootDeckId) {
+		this.jdbcTemplate.update("""
+				INSERT INTO study_sessions (id, deck_id, root_deck_id, scheduler_generation, status,
+				                            session_kind, current_mode, card_limit, started_at,
+				                            ended_at, end_reason)
+				VALUES (?, ?, ?, 1, 'completed', 'reviewing', 'self_assess', 20, ?, ?, 'user_exit')""",
+				id, deckId, rootDeckId, stamp(), stamp());
+	}
+
+	/** Puts one card in a session's queue — the only way the card-side lookup can find the session. */
+	public void queueCard(String sessionId, String cardId) {
+		this.jdbcTemplate.update("""
+				INSERT INTO study_queue_items (session_id, mode, round, card_id, position, status)
+				VALUES (?, 'self_assess', 1, ?, 0, 'pending')""",
+				sessionId, cardId);
+	}
+
+	/**
+	 * The batch's {@code deleted_at} as the column holds it.
+	 *
+	 * <p>Read back rather than compared against the in-memory {@code Instant}: {@code TIMESTAMPTZ}
+	 * keeps microseconds and the driver <em>rounds</em> to them, while {@code truncatedTo(MICROS)}
+	 * floors — so the two disagree by one microsecond whenever the clock lands past the half. A test
+	 * written that way passes or fails on the nanoseconds, which is not what it means to assert.
+	 */
+	public Instant batchDeletedAtOf(String batchId) {
+		return this.jdbcTemplate.queryForObject(
+				"SELECT deleted_at FROM delete_batches WHERE id = ?", Instant.class, batchId);
+	}
+
+	public String sessionStatusOf(String sessionId) {
+		return this.jdbcTemplate.queryForObject(
+				"SELECT status FROM study_sessions WHERE id = ?", String.class, sessionId);
+	}
+
+	public String sessionEndReasonOf(String sessionId) {
+		return this.jdbcTemplate.queryForObject(
+				"SELECT end_reason FROM study_sessions WHERE id = ?", String.class, sessionId);
+	}
+
+	public Instant sessionEndedAtOf(String sessionId) {
+		return this.jdbcTemplate.queryForObject(
+				"SELECT ended_at FROM study_sessions WHERE id = ?", Instant.class, sessionId);
+	}
+
 	public String deckIdOf(String cardId) {
 		return this.jdbcTemplate.queryForObject("SELECT deck_id FROM cards WHERE id = ?", String.class, cardId);
 	}

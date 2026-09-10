@@ -11,4 +11,9 @@ import '../../domain/models/tag_catalog_entry_model.dart';
 /// compares on, and nothing above the repository compares tags by hand —
 /// `TagName.collidesWith` owns that (see `tag_entity.dart`).
 TagCatalogEntry tagCatalogEntryFromRow(TagCatalogResult row) =>
-    TagCatalogEntry(id: row.id, name: row.name, cardCount: row.cardCount);
+    TagCatalogEntry(
+      id: row.id,
+      name: row.name,
+      cardCount: row.cardCount,
+      linkedCardCount: row.linkedCardCount,
+    );

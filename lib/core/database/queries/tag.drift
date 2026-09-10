@@ -82,6 +82,28 @@ SELECT COUNT(*) FROM card_tags WHERE card_id = :cardId;
 -- resting state and matches everything, which is why the guard is `= ''`
 -- rather than a second statement.
 --
+-- **The count is of ACTIVE cards, and the join is what makes it so (BR-237).**
+-- A card sitting in Trash keeps its `card_tags` rows — BR-259 preserves them so a
+-- restore loses no metadata — so counting `card_tags` alone would let a hidden
+-- card inflate the tag it carries. BR-237 forbids exactly that: a card hidden in
+-- Trash MUST NOT count towards the catalog. Hence
+-- `INNER JOIN cards … WHERE c.delete_batch_id IS NULL`, inside the scalar
+-- subquery and not on the outer `FROM tags`: joining outside would drop a tag
+-- nothing points at, and BR-230 requires that row to stay with a count of 0.
+--
+-- **`linkedCardCount` is the same question BR-235 asks, and it is a different number.**
+-- The catalog row shows active cards; the delete confirmation has to say how many cards will lose
+-- the tag, and deleting a tag removes EVERY `card_tags` row — BR-235 says so, and
+-- `card_tags.tag_id REFERENCES tags(id) ON DELETE CASCADE` would do it anyway. So a tag carried by
+-- one active and one trashed card reads `cardCount = 1` in the list and `linkedCardCount = 2` in the
+-- dialog. Both are true; they answer different questions, and one field cannot answer both without
+-- breaking one of the two rules.
+--
+-- **This is the other half of a rule whose two halves pull opposite ways.**
+-- `linkCardsOfTagTo` below deliberately does *not* join `cards`, because the same
+-- BR-237 requires a merge to carry a hidden card's links across. One rule, two
+-- statements, opposite predicates — which is why both say so here.
+--
 -- **This one's subquery tables *do* reach the generated stream dependencies**,
 -- unlike `cardListItems` — drift emits `readsFrom: {tags, cardTags}` here, so
 -- the count re-reads when a card gains or loses the tag without the manual
@@ -94,7 +116,13 @@ tagCatalog:
 SELECT
   t.id AS id,
   t.name AS name,
-  (SELECT COUNT(*) FROM card_tags ct WHERE ct.tag_id = t.id) AS cardCount
+  (
+    SELECT COUNT(*)
+    FROM card_tags ct
+    INNER JOIN cards c ON c.id = ct.card_id
+    WHERE ct.tag_id = t.id AND c.delete_batch_id IS NULL
+  ) AS cardCount,
+  (SELECT COUNT(*) FROM card_tags ct WHERE ct.tag_id = t.id) AS linkedCardCount
 FROM tags t
 WHERE t.owner_id IS :ownerId
   AND (:searchFolded = '' OR instr(t.name_folded, :searchFolded) > 0)
@@ -154,9 +182,19 @@ DELETE FROM tags WHERE id = :tagId;
 -- Tags nothing points at any more.
 --
 -- Deleting a card cascades its links away but leaves the tag itself, which is
--- correct — a tag is not owned by one card. This is what a later cleanup would
--- read; nothing calls it yet, and it is here because the question "what happened
--- to the tag" is asked the moment someone sees the cascade.
+-- correct — a tag is not owned by one card. It is here because the question
+-- "what happened to the tag" is asked the moment someone sees the cascade.
+--
+-- **Nothing calls it, and nothing may wire it to a cleanup job (BR-230).** That
+-- rule says a tag with no cards MUST still appear in the catalog with a count of
+-- zero, "nó vẫn là một tag người dùng tạo ra và vẫn phải xoá được" — a tag
+-- nothing points at is precisely what the catalog exists to let a user delete. A
+-- background sweep over this result would delete those rows out from under the
+-- one screen that exists to show them. BR-234's merge and BR-235's delete do
+-- remove `tags` rows, and neither is a precedent: both are a user naming one tag
+-- and asking for it. This statement answers a question; it does not authorise an
+-- action. `memox-api` deliberately did not port it for the same reason
+-- (`docs/superpowers/specs/2026-09-09-drift-to-mybatis-parity.md`, divergence 4).
 orphanedTags:
 SELECT * FROM tags
 WHERE id NOT IN (SELECT tag_id FROM card_tags)

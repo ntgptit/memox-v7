@@ -33,9 +33,9 @@ void main() {
   // a number, so the audit measures both label forms.
   FakeTagCatalogRepository loaded() =>
       FakeTagCatalogRepository.seeded(const <TagCatalogEntry>[
-        TagCatalogEntry(id: 't1', name: 'động từ', cardCount: 12),
-        TagCatalogEntry(id: 't2', name: 'food', cardCount: 1),
-        TagCatalogEntry(id: 't3', name: 'TOPIK II', cardCount: 0),
+        TagCatalogEntry(id: 't1', name: 'động từ', cardCount: 12, linkedCardCount: 12),
+        TagCatalogEntry(id: 't2', name: 'food', cardCount: 1, linkedCardCount: 1),
+        TagCatalogEntry(id: 't3', name: 'TOPIK II', cardCount: 0, linkedCardCount: 0),
       ]);
 
   memoxProductionScreenAuditTest(

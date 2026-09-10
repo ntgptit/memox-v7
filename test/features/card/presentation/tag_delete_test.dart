@@ -16,9 +16,9 @@ import 'support/tag_catalog_harness.dart';
 /// the only way to hold that is to assert the words.
 void main() {
   const tags = <TagCatalogEntry>[
-    TagCatalogEntry(id: 't1', name: 'noun', cardCount: 12),
-    TagCatalogEntry(id: 't2', name: 'lonely', cardCount: 1),
-    TagCatalogEntry(id: 't3', name: 'unused', cardCount: 0),
+    TagCatalogEntry(id: 't1', name: 'noun', cardCount: 12, linkedCardCount: 12),
+    TagCatalogEntry(id: 't2', name: 'lonely', cardCount: 1, linkedCardCount: 1),
+    TagCatalogEntry(id: 't3', name: 'unused', cardCount: 0, linkedCardCount: 0),
   ];
 
   Future<void> openDelete(

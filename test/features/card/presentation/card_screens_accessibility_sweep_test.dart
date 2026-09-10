@@ -101,8 +101,8 @@ void main() {
       tester,
       home: const TagCatalogScreen(),
       catalog: FakeTagCatalogRepository.seeded(const <TagCatalogEntry>[
-        TagCatalogEntry(id: 't1', name: 'động từ', cardCount: 12),
-        TagCatalogEntry(id: 't2', name: 'food', cardCount: 1),
+        TagCatalogEntry(id: 't1', name: 'động từ', cardCount: 12, linkedCardCount: 12),
+        TagCatalogEntry(id: 't2', name: 'food', cardCount: 1, linkedCardCount: 1),
       ]),
     );
     await tester.pumpAndSettle();
@@ -146,7 +146,7 @@ void main() {
         tester,
         home: const CardListScreen(deckId: 'deck-1'),
         catalog: FakeTagCatalogRepository.seeded(const <TagCatalogEntry>[
-          TagCatalogEntry(id: 't1', name: 'noun', cardCount: 12),
+          TagCatalogEntry(id: 't1', name: 'noun', cardCount: 12, linkedCardCount: 12),
         ]),
         cards: cards,
       );
@@ -167,7 +167,7 @@ void main() {
         tester,
         home: const TagCatalogScreen(),
         catalog: FakeTagCatalogRepository.seeded(const <TagCatalogEntry>[
-          TagCatalogEntry(id: 't1', name: 'nouns', cardCount: 3),
+          TagCatalogEntry(id: 't1', name: 'nouns', cardCount: 3, linkedCardCount: 3),
         ]),
       );
       await tester.pumpAndSettle();

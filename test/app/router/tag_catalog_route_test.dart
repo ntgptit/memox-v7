@@ -40,7 +40,7 @@ void main() {
   );
 
   const tags = <TagCatalogEntry>[
-    TagCatalogEntry(id: 't1', name: 'noun', cardCount: 3),
+    TagCatalogEntry(id: 't1', name: 'noun', cardCount: 3, linkedCardCount: 3),
   ];
 
   FakeCardRepository cardRepo() {

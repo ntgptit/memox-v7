@@ -105,12 +105,12 @@ final class TagCatalogFake implements TagCatalogRepository {
   final TagCatalogScenario scenario;
 
   static const List<TagCatalogEntry> _seed = <TagCatalogEntry>[
-    TagCatalogEntry(id: 't1', name: 'động từ', cardCount: 42),
-    TagCatalogEntry(id: 't2', name: 'food', cardCount: 12),
-    TagCatalogEntry(id: 't3', name: 'Noun', cardCount: 7),
-    TagCatalogEntry(id: 't4', name: 'nouns', cardCount: 3),
-    TagCatalogEntry(id: 't5', name: 'TOPIK II · chapter 3', cardCount: 1),
-    TagCatalogEntry(id: 't6', name: 'unused', cardCount: 0),
+    TagCatalogEntry(id: 't1', name: 'động từ', cardCount: 42, linkedCardCount: 42),
+    TagCatalogEntry(id: 't2', name: 'food', cardCount: 12, linkedCardCount: 12),
+    TagCatalogEntry(id: 't3', name: 'Noun', cardCount: 7, linkedCardCount: 7),
+    TagCatalogEntry(id: 't4', name: 'nouns', cardCount: 3, linkedCardCount: 3),
+    TagCatalogEntry(id: 't5', name: 'TOPIK II · chapter 3', cardCount: 1, linkedCardCount: 1),
+    TagCatalogEntry(id: 't6', name: 'unused', cardCount: 0, linkedCardCount: 0),
   ];
 
   final List<TagCatalogEntry> _tags = <TagCatalogEntry>[];
@@ -167,6 +167,7 @@ final class TagCatalogFake implements TagCatalogRepository {
         id: tagId,
         name: name.value,
         cardCount: _tags[index].cardCount,
+        linkedCardCount: _tags[index].linkedCardCount,
       );
       _changes.add(null);
 
@@ -180,6 +181,7 @@ final class TagCatalogFake implements TagCatalogRepository {
       // The overlap is unknown here, so the demo takes the sum — the shape of
       // a merge, not an arithmetic claim.
       cardCount: target.cardCount + _tags[index].cardCount,
+      linkedCardCount: target.linkedCardCount + _tags[index].linkedCardCount,
     );
     _tags.removeAt(index);
     _changes.add(null);

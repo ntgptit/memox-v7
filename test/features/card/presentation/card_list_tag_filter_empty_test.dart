@@ -17,8 +17,8 @@ import 'support/tag_catalog_harness.dart';
 /// the rest of that file has no reason to carry.
 void main() {
   const tags = <TagCatalogEntry>[
-    TagCatalogEntry(id: 't1', name: 'noun', cardCount: 12),
-    TagCatalogEntry(id: 't2', name: 'food', cardCount: 3),
+    TagCatalogEntry(id: 't1', name: 'noun', cardCount: 12, linkedCardCount: 12),
+    TagCatalogEntry(id: 't2', name: 'food', cardCount: 3, linkedCardCount: 3),
   ];
 
   Future<void> pump(

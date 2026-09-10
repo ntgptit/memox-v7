@@ -17,8 +17,8 @@ import 'support/tag_catalog_harness.dart';
 /// wireframe M4.14 W4).
 void main() {
   const tags = <TagCatalogEntry>[
-    TagCatalogEntry(id: 't1', name: 'nouns', cardCount: 3),
-    TagCatalogEntry(id: 't2', name: 'Noun', cardCount: 5),
+    TagCatalogEntry(id: 't1', name: 'nouns', cardCount: 3, linkedCardCount: 3),
+    TagCatalogEntry(id: 't2', name: 'Noun', cardCount: 5, linkedCardCount: 5),
   ];
 
   Future<void> openRename(
