@@ -217,9 +217,13 @@ void main() {
 
         expect(icon.icon, Icons.folder_outlined);
         // The tint is an AppInk now (M99.67): the widget names the role and
-        // MxIcon resolves it, so the role — not a resolved Color — is the claim.
-        expect(icon.tint, AppInk.onPrimaryContainer);
-        // `wellColor` null means the brand container — no state override.
+        // MxIcon resolves it, so the role — not a resolved Color — is the
+        // claim. `accent` has held since the well's fill first left
+        // `primaryContainer` (2026-09-10) and still holds now that the well
+        // has settled on `surfaceMuted` — the glyph names the brand colour on
+        // whatever neutral or bordered surface the well currently is.
+        expect(icon.tint, AppInk.accent);
+        // `wellColor` null means the neutral fill — no state override.
         expect(icon.wellColor, isNull);
         expect(icon.icon, isNot(Icons.event_busy));
         expect(icon.icon, isNot(Icons.event));

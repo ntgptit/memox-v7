@@ -28,6 +28,7 @@ business in git). Pass a path as the first argument to write elsewhere.
 Needs Pillow for the resize: `python -m pip install Pillow`.
 """
 import base64
+import hashlib
 import io
 import os
 import re
@@ -72,6 +73,33 @@ def _stamp():
         return sha, subject
     except Exception:
         return 'unknown', 'revision không đọc được'
+
+
+def _pictures(paths):
+    """The version of the *pictures*, which is what this page actually is.
+
+    **The commit cannot answer this, and reading it as though it could cost
+    four review rounds.** Goldens are regenerated and reviewed *before* they
+    are committed — that is the whole point of the gallery — so two builds of
+    the same HEAD carry the same sha while showing different screens. The
+    owner has no way to tell the sheet they were just handed from the tab
+    still open from an hour ago, and the natural reading of an unchanged
+    header is "nothing changed": one fix was argued as a caching artefact for
+    two rounds on exactly that.
+
+    So the identity is derived from the golden files themselves. It moves when
+    and only when a screen does, it is stable across rebuilds that changed
+    nothing, and adding or dropping a row moves it too because the name is
+    hashed beside the bytes.
+    """
+    digest = hashlib.sha256()
+    for path in sorted(set(paths)):
+        digest.update(os.path.basename(path).encode('utf-8'))
+        digest.update(b'\0')
+        with open(path, 'rb') as handle:
+            digest.update(hashlib.sha256(handle.read()).digest())
+
+    return digest.hexdigest()[:8]
 
 
 SCREENS = [
@@ -320,6 +348,7 @@ _check_no_stale_exclusion()
 
 cards, total, dark_count = [], 0, 0
 groups = {}
+embedded = []
 for group, base, name, note in SCREENS:
     light_p = os.path.join(G, base + '_light.png')
     if not os.path.exists(light_p):
@@ -327,7 +356,9 @@ for group, base, name, note in SCREENS:
     dark_p = os.path.join(G, base + '_dark.png')
     light = encode(light_p)
     dark = encode(dark_p) if os.path.exists(dark_p) else None
+    embedded.append(light_p)
     if dark:
+        embedded.append(dark_p)
         dark_count += 1
     total += 1
     dark_attr = (' data-dark="%s"' % dark) if dark else ''
@@ -426,7 +457,10 @@ header.hidden{transform:translateY(-100%)}
 .stamp .subj{overflow:hidden; text-overflow:ellipsis; min-width:0}
 .stamp i{font-style:normal; opacity:.45}
 @media (max-width:820px){ .stamp .subj{display:none} }
-@media (max-width:560px){ .stamp{display:none} }
+/* The picture digest is the last thing to go, not the first: a phone is where
+   the owner most often checks whether the tab is the build just handed to
+   them, and it is the only token on this bar that can answer that. */
+@media (max-width:560px){ .stamp > *:not(.sha){display:none} }
 
 /* The segmented control picks which *capture* is shown, not the page's own
    theme — the label says so, because a bare Light/Dark pair on a page that
@@ -530,7 +564,8 @@ dialog::backdrop{background:rgba(12,11,10,.8)}
   <div class="bar">
     <div class="mark"><b>MemoX</b><span>Proof sheet</span></div>
     <div class="stamp">
-      <span class="mono sha">__SHA__</span><i>·</i>
+      <span class="mono sha" title="Phiên bản của ảnh. Đổi khi và chỉ khi một màn hình đổi.">ảnh __PIX__</span><i>·</i>
+      <span class="mono base" title="Commit đã build ra trang này. Golden được review trước khi commit, nên số này KHÔNG phân biệt được hai bản render.">base __SHA__</span><i>·</i>
       <span class="subj">__SUBJ__</span><i>·</i>
       <span class="mono">__TOTAL__ màn</span><i>·</i>
       <span class="mono">__DARKN__ có dark</span><i>·</i>
@@ -659,6 +694,7 @@ dialog::backdrop{background:rgba(12,11,10,.8)}
 """
 sha, subject = _stamp()
 html = html.replace('__SECTIONS__', ''.join(sections))
+html = html.replace('__PIX__', _pictures(embedded))
 html = html.replace('__RAIL__', ''.join('<li>%s</li>' % a for a in rail))
 html = html.replace('__TOTAL__', str(total))
 html = html.replace('__DARKN__', str(dark_count))

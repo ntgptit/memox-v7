@@ -44,7 +44,14 @@ void main() {
         // rather than deriving it from the base, so no accessibility floor
         // moves with it.
         expect(r(base.borderSubtle), isLight ? '1.08' : '1.32');
-        expect(r(hc.borderSubtle), isLight ? '5.28' : '6.47');
+        // **No longer a swap at all** (M100.82, owner review). The hairline
+        // was `onSurfaceVariant` — 5.28 / 6.47, the secondary *label* ink —
+        // then briefly `borderControl` at 3.71 / 4.68. Both were reviewed on a
+        // rendered golden against the normal screen and both read as a rule
+        // ruled across the card. High contrast takes WCAG 1.4.11's decorative
+        // exemption for this one token now, so the two cells are equal and
+        // that equality is the record of the decision.
+        expect(r(hc.borderSubtle), r(base.borderSubtle));
         // Light re-measured at M100.48: the token was lightened from
         // `#6F727B` to `#7B7E88`, which is this cell moving 4.40 -> 3.71.
         // Dark is untouched. The floor assertions below are not.
@@ -64,8 +71,11 @@ void main() {
         // The floor the palette sets for itself: WCAG 1.4.11 for the edges,
         // and the same 3:1 chosen for the disabled ink although SC 1.4.3
         // exempts it. Not lowered here, and not raised on a wrong number.
+        //
+        // `borderSubtle` left this list at M100.82 because it stopped being a
+        // re-pointed token — it is the normal hairline in both palettes now,
+        // and it is `app_high_contrast_test.dart` that holds it there.
         for (final (String name, Color token) in <(String, Color)>[
-          ('borderSubtle', hc.borderSubtle),
           ('borderControl', hc.borderControl),
           ('borderAccent', hc.borderAccent),
           ('onDisabled', hc.onDisabled),

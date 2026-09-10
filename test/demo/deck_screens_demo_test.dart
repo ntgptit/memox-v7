@@ -77,8 +77,19 @@ void main() {
     ),
   ];
 
-  // The densest border surface in the app, under the high-contrast pair:
-  // every card edge, chip edge and hairline re-points there (A20.1 P1-08).
+  // The densest border surface in the app, under the high-contrast pair
+  // (A20.1 P1-08). It captured every card edge, chip edge and hairline
+  // re-pointing to a stronger token — and since M100.82 it captures the
+  // opposite, because the owner reviewed that and chose the exemption: the
+  // hairline is the normal token in both palettes now, so **these two goldens
+  // are byte-identical to their normal counterparts.**
+  //
+  // That is the reason to keep shooting them rather than to stop. Every
+  // stronger edge this screen could draw is one `borderSubtle` decision away,
+  // and a pair that is supposed to match is the only fixture that notices when
+  // it silently stops matching. `reminder_settings_hc_*` is where the pair
+  // still diverges — that screen draws controls, and a control's boundary is
+  // the thing high contrast does still strengthen.
   for (final (String mode, Brightness brightness) in <(String, Brightness)>[
     ('light', Brightness.light),
     ('dark', Brightness.dark),
