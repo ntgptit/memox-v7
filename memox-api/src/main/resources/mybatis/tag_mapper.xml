@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.memox.tag.persistence.TagMapper">
+
+  <resultMap id="tag" type="com.memox.tag.entity.Tag">
+    <constructor>
+      <idArg column="id" javaType="java.lang.String"/>
+      <arg column="name" javaType="java.lang.String"/>
+      <arg column="name_folded" javaType="java.lang.String"/>
+      <arg column="created_at" javaType="java.time.Instant"/>
+    </constructor>
+  </resultMap>
+
+  <resultMap id="tagCatalogEntry" type="com.memox.tag.entity.TagCatalogEntry">
+    <constructor>
+      <idArg column="id" javaType="java.lang.String"/>
+      <arg column="name" javaType="java.lang.String"/>
+      <!-- _long, not long: MyBatis' registry maps the bare name to java.lang.Long, and a wrapper
+           against a record's primitive component is the mismatch that shipped an HTTP 500 once. -->
+      <arg column="card_count" javaType="_long"/>
+    </constructor>
+  </resultMap>
+
+  <!--
+    The management catalog (BR-230): every tag, with how many ACTIVE cards carry it.
+
+    **The count joins `cards`, and Drift's does not.** `tagCatalog` counts `card_tags` rows alone,
+    so a card sitting in Trash keeps inflating its tags' counts — and BR-237 says a hidden card
+    must not count towards the catalog. The join is the fix; the WBS carries the same fix against
+    the Flutter query, and Task 15 records the divergence.
+
+    **Still a correlated scalar subquery, not a LEFT JOIN … GROUP BY.** A tag no card carries has
+    to keep its row with a count of zero (BR-230) — it is the row the delete action exists for —
+    and the subquery gives that without an outer join. `idx_card_tags_tag` leads on `tag_id`, so
+    each count is an index lookup.
+
+    **`name_folded ASC, id ASC` and the folded column is load-bearing.** Ordering by the spelling
+    puts `Verb` before `adjective` in a byte-ordered collation and reads as random to whoever typed
+    both. The folded value is the one BR-93's uniqueness is measured in, so the catalog's order and
+    its identity agree by construction.
+
+    Translation row 4: `instr(x, y) > 0` becomes `strpos(x, y) > 0`. `LIKE` would read a `%` in a
+    tag name as a wildcard. The empty term is the resting state and matches everything, which is why
+    the guard is `= ''` rather than a second statement.
+
+    No `owner_id` predicate: this API has no principal to fill one (AD-03), and threading a
+    permanently-null parameter through every layer would be a fourth spelling of "not yet".
+  -->
+  <select id="findTagCatalog" resultMap="tagCatalogEntry">
+    SELECT t.id AS id, t.name AS name,
+           (SELECT COUNT(*)
+              FROM card_tags ct
+              INNER JOIN cards c ON c.id = ct.card_id
+             WHERE ct.tag_id = t.id AND c.delete_batch_id IS NULL) AS card_count
+      FROM tags t
+     WHERE (#{searchFolded} = '' OR strpos(t.name_folded, #{searchFolded}) &gt; 0)
+     ORDER BY t.name_folded ASC, t.id ASC
+  </select>
+
+  <!--
+    Does this name already exist (BR-93)?
+
+    Matched on `name_folded`, never on `name` — the folded column is the one the unique index is
+    built on and the only comparison that treats `Động từ` and `động từ` as one tag.
+  -->
+  <select id="findTagByFoldedName" resultMap="tag">
+    SELECT id, name, name_folded, created_at FROM tags WHERE name_folded = #{nameFolded}
+  </select>
+
+  <!-- Read inside the rename/delete transaction, so the row acted on is the row that exists now. -->
+  <select id="findTagById" resultMap="tag">
+    SELECT id, name, name_folded, created_at FROM tags WHERE id = #{tagId}
+  </select>
+
+  <insert id="insertTag" parameterType="com.memox.tag.entity.Tag">
+    INSERT INTO tags (id, name, name_folded, created_at)
+    VALUES (#{id}, #{name}, #{nameFolded}, #{createdAt})
+  </insert>
+
+  <!--
+    BR-233's rename: the two name columns, on the tag's own row.
+
+    The id is never rewritten and `card_tags` is never touched, which is the whole point of the
+    no-collision path — every card keeps the tag it had. A rename done as delete-and-recreate would
+    drop the links and silently untag every card.
+  -->
+  <update id="renameTagById">
+    UPDATE tags SET name = #{name}, name_folded = #{nameFolded} WHERE id = #{tagId}
+  </update>
+
+  <!--
+    BR-234's merge, first half: give the target every card the source has and the target does not.
+
+    Translation row 3: SQLite's `INSERT OR IGNORE` becomes `ON CONFLICT … DO NOTHING`. The pair is
+    the primary key, so a card carrying both tags is skipped by the table's own identity rather
+    than by a read-then-decide that would need a round trip per card and could still race.
+
+    A merge therefore never raises any card's tag count (BR-94): a card that had only the source
+    trades one for one, and a card that had both ends up with one fewer once the source links go.
+
+    **No join to `cards`.** BR-237's other half: a card hidden in Trash keeps its links through a
+    merge, so restoring it gets the tag back instead of a card quietly stripped of its metadata.
+  -->
+  <insert id="linkCardsOfTagTo">
+    INSERT INTO card_tags (card_id, tag_id)
+    SELECT ct.card_id, #{targetTagId} FROM card_tags ct WHERE ct.tag_id = #{sourceTagId}
+    ON CONFLICT (card_id, tag_id) DO NOTHING
+  </insert>
+
+  <!--
+    BR-235's delete, and the second half of BR-234's merge.
+
+    Explicit, not left to the `ON DELETE CASCADE` on `card_tags.tag_id`: the cascade does the same
+    thing, and that is the problem — a rule that says "unlink every card" should be a statement that
+    unlinks every card, not a constraint someone could relax without reading this.
+  -->
+  <delete id="unlinkAllCardsFromTag">
+    DELETE FROM card_tags WHERE tag_id = #{tagId}
+  </delete>
+
+  <delete id="deleteTagById">
+    DELETE FROM tags WHERE id = #{tagId}
+  </delete>
+
+  <!-- The active cards of a batch, counted so a tombstoned or absent id refuses the batch. -->
+  <select id="countActiveCardsByIds" resultType="long">
+    SELECT COUNT(*) FROM cards
+     WHERE id IN
+    <foreach collection="cardIds" open="(" separator="," close=")" item="cardId">#{cardId}</foreach>
+       AND delete_batch_id IS NULL
+  </select>
+
+  <!--
+    Which cards of the batch already carry this tag, so linking is idempotent (BR-166) and the
+    ceiling counts only the cards that would actually gain one.
+  -->
+  <select id="findCardsAlreadyTagged" resultType="string">
+    SELECT ct.card_id FROM card_tags ct
+     WHERE ct.tag_id = #{tagId}
+       AND ct.card_id IN
+    <foreach collection="cardIds" open="(" separator="," close=")" item="cardId">#{cardId}</foreach>
+  </select>
+
+  <!--
+    Which cards are already at BR-94's ceiling.
+
+    Drift asks this as `tagCountsForCards` — a count per card, folded into the cap check in Dart.
+    The rule only ever asks "which of these is full", so the HAVING answers it in the statement and
+    the service compares two id sets instead of a map of numbers it does not otherwise use.
+  -->
+  <select id="findCardsAtTagCeiling" resultType="string">
+    SELECT ct.card_id FROM card_tags ct
+     WHERE ct.card_id IN
+    <foreach collection="cardIds" open="(" separator="," close=")" item="cardId">#{cardId}</foreach>
+     GROUP BY ct.card_id
+    HAVING COUNT(*) &gt;= #{ceiling}
+  </select>
+
+  <!--
+    One tag onto a batch, idempotent by the primary key.
+
+    Drift links one row at a time because it has already filtered the batch down to the cards that
+    would gain something; the same filter is what `ON CONFLICT DO NOTHING` does here, in one
+    statement rather than one per card.
+  -->
+  <insert id="linkTagToCards">
+    INSERT INTO card_tags (card_id, tag_id)
+    SELECT c.id, #{tagId} FROM cards c
+     WHERE c.id IN
+    <foreach collection="cardIds" open="(" separator="," close=")" item="cardId">#{cardId}</foreach>
+    ON CONFLICT (card_id, tag_id) DO NOTHING
+  </insert>
+
+  <!--
+    The chips on one card, with their ids.
+
+    Every card projection carries tag NAMES, which is what a chip draws; detaching one needs the id.
+    Resolving name back to id in the client would mean folding there — the second normaliser BR-230
+    forbids — so the id comes from the server that owns the fold.
+
+    Ordered by the spelling, not the folded name: this is a display list, and BR-230's folded
+    ordering is the catalog's rule because the catalog is also where identity is compared.
+  -->
+  <select id="findTagsForCard" resultMap="tag">
+    SELECT t.id, t.name, t.name_folded, t.created_at
+      FROM card_tags ct
+      INNER JOIN tags t ON t.id = ct.tag_id
+     WHERE ct.card_id = #{cardId}
+     ORDER BY t.name ASC, t.id ASC
+  </select>
+
+  <delete id="unlinkTag">
+    DELETE FROM card_tags WHERE card_id = #{cardId} AND tag_id = #{tagId}
+  </delete>
+
+</mapper>

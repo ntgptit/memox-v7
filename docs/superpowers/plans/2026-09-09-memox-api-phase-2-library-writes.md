@@ -1935,101 +1935,69 @@ git commit -m "feat(card): edit, bulk move and bulk flag cards in one transactio
 
 All 13 `tag.drift` statements plus `tagsByFoldedNames`, `tagCountsForCards` and `cardsAlreadyTagged` from `card.drift`. New module: `com.memox.tag`.
 
+> **Corrected while executing, 2026-09-10.** Eight things below were wrong or unbuildable as drafted; each correction is marked **[corrected]** where it applies. The short list: no `owner_id` predicate (this API has no principal to fill one), no `TAG_NAME_INVALID` code (that is what `ValidationFailedException` is for), attach is a **batch** endpoint (the three `card.drift` statements it asks to port all take `IN :cardIds`, and BR-166 makes the rule a batch rule), `tagCountsForCards` ports as "which cards are at the ceiling", `orphanedTags` is **not** ported at all, `tagsForCard` **is** ported because without it a client cannot reach the detach endpoint, and the section's own Step 1 test **cannot run** against the unique index.
+
 **Files:**
 - Create: `memox-api/src/main/java/com/memox/tag/entity/Tag.java`, `TagCatalogEntry.java`, `TagName.java`
 - Create: `memox-api/src/main/java/com/memox/tag/exception/TagNotFoundException.java`, `TagConflictException.java`
 - Create: `memox-api/src/main/java/com/memox/tag/persistence/TagMapper.java`
 - Create: `memox-api/src/main/resources/mybatis/tag_mapper.xml`
 - Create: `memox-api/src/main/java/com/memox/tag/service/TagCatalogService.java`, `CardTagService.java`, `RenameTagCommand.java`, `AttachTagCommand.java`
-- Create: `memox-api/src/main/java/com/memox/tag/controller/TagController.java`
+- Create: `memox-api/src/main/java/com/memox/tag/controller/TagController.java`, `CardTagController.java` *(two, because two resources: `/api/v1/tags` and `/api/v1/cards/**`)*
 - Create: `memox-api/src/main/java/com/memox/tag/dto/response/TagResponse.java`, `TagCatalogResponse.java`
 - Create: `memox-api/src/main/java/com/memox/tag/dto/request/RenameTagRequest.java`, `AttachTagRequest.java`
 - Modify: `ApiErrorCode.java`, both `messages*.properties`
-- Create: `memox-api/src/test/java/com/memox/tag/TagCatalogTest.java`, `TagMergeTest.java`
+- Create: `memox-api/src/test/java/com/memox/tag/TagCatalogTest.java`, `TagMergeTest.java`, `TagControllerTest.java`
 
 **Interfaces:**
-- Produces: `TagName.of(String raw)` → `TagName(String value, String folded)`; private constructor, `trim()`, rejects blank, > 50 chars, and any control character (BR-93). Validation lives on the type, so the mapper signature answers "has this been validated?".
-- Produces: `TagCatalogService.catalog(String searchFolded)` → `List<TagCatalogEntry>`; `.rename(RenameTagCommand)` → `Tag`; `.delete(String tagId)` → `void`; `.purgeOrphans()` → `int`.
-- Produces: `CardTagService.attach(AttachTagCommand)` → `List<Tag>`; `.detach(String cardId, String tagId)`; `.tagsForCards(Collection<String> cardIds)` → `Map<String, List<Tag>>`.
-- Produces: `ApiErrorCode.TAG_NOT_FOUND(404, "error.tag-not-found")`, `TAG_LIMIT_EXCEEDED(409, "error.tag-limit-exceeded")`, `TAG_NAME_INVALID(400, "error.tag-name-invalid")`.
+- Produces: `TagName.of(String raw)` -> a final class with a **private** constructor holding `value` and `folded`; `trim()`, rejects blank, > 50 chars, and any control character (BR-93). Validation lives on the type, so the mapper signature answers "has this been validated?". A record cannot express this — Java forbids a canonical constructor less accessible than the record — and a public canonical constructor would let a caller pair a value with somebody else's fold. **[corrected]**
+- Produces: `TagName.fold(String raw)` — public, because BR-230 requires the catalog's search term and the column it searches to go through **the same** fold, and a second normaliser is exactly what that rule forbids. **[corrected]**
+- Produces: `TagCatalogService.catalog(String search)` -> `List<TagCatalogEntry>`; `.rename(RenameTagCommand)` -> `Tag`; `.delete(String tagId)` -> `void`. The term arrives **unfolded**: folding it is the service's job, once. **[corrected]**
+- Produces: `CardTagService.attach(AttachTagCommand)` -> `Tag`; `.detach(String cardId, String tagId)` -> `void`; `.tagsForCard(String cardId)` -> `List<Tag>`. **[corrected]**
+- Produces: `ApiErrorCode.TAG_NOT_FOUND(404, "error.tag-not-found")`, `TAG_LIMIT_EXCEEDED(409, "error.tag-limit-exceeded")`.
+
+**`TAG_NAME_INVALID` is not one of them. [corrected]** `ValidationFailedException(field, reason)` already exists for "a parameter this API could not accept, named with the reason", and its own contract says both paths must reach the client as **one** `fieldErrors` shape rather than two. A blank, over-long or control-character tag name is that parameter. A third code would be the second shape that class was written to prevent.
+
+**No `owner_id` predicate anywhere. [corrected]** Drift writes `owner_id IS :ownerId` because the local profile's owner is NULL and `= NULL` never matches. This API has no principal at all (AD-03: "No auth yet, auth-ready"), no other mapper in the codebase carries one, and threading a permanently-null parameter from a controller through a service into every statement would be a fourth spelling of "not yet". The column stays on the table and the unique index over `COALESCE(owner_id, '')` still holds; `Tag` does not carry the field either, for the same reason no other entity does.
 
 - [ ] **Step 1: Write the failing tests**
 
-```java
-class TagCatalogTest extends PostgresIntegrationTest {
-
-	@Autowired TagCatalogService tagCatalogService;
-
-	@Test
-	void countsOnlyActiveCardsAgainstATag() {
-		insertRootDeck("root", "Korean");
-		insertSubDeck("deck", "Unit 1", "root", "root", DeckContentType.CARD);
-		insertCardWithState("kept", "deck", null, null);
-		insertCardWithState("trashed", "deck", null, null);
-		insertTag("t-a", "alpha");
-		linkTag("kept", "t-a");
-		linkTag("trashed", "t-a");
-		softDelete("card", "trashed");
-
-		assertThat(tagCatalogService.catalog("")).singleElement()
-				.extracting(TagCatalogEntry::cardCount).isEqualTo(1L);   // BR-237
-	}
-
-	@Test
-	void filtersTheCatalogOnTheFoldedName() {
-		insertTag("t-a", "Alpha");
-		insertTag("t-b", "Beta");
-
-		assertThat(tagCatalogService.catalog("alp"))
-				.extracting(TagCatalogEntry::id).containsExactly("t-a");   // translation row 4
-	}
-}
-```
+**The version of this test drafted below cannot run. [corrected]** It seeds `insertTag("src", "Alpha")` and `insertTag("dst", "alpha ")` — two rows whose folded name is the same string — into a table carrying `CREATE UNIQUE INDEX idx_tags_owner_folded ON tags (COALESCE(owner_id, ''), name_folded)`. The second insert dies on the constraint before the service is ever called. That is not a fixture problem to work around: **two tags with the same folded name cannot exist**, which is precisely why the collision the merge handles can only ever arise *from* the rename itself. Seed the source under a different name and rename it into the collision.
 
 ```java
 class TagMergeTest extends PostgresIntegrationTest {
 
-	@Autowired TagCatalogService tagCatalogService;
-
 	@Test
 	void mergesIntoTheExistingTagWhenTheFoldedNameCollides() {
-		insertRootDeck("root", "Korean");
-		insertSubDeck("deck", "Unit 1", "root", "root", DeckContentType.CARD);
 		insertCardWithState("c1", "deck", null, null);
 		insertCardWithState("c2", "deck", null, null);
-		insertTag("src", "Alpha");
-		insertTag("dst", "alpha ");     // folds to "alpha" too
+		insertTag("src", "Bravo");     // NOT "Alpha" — see above
+		insertTag("dst", "alpha");
 		linkTag("c1", "src");
 		linkTag("c2", "src");
-		linkTag("c2", "dst");           // already carries both
+		linkTag("c2", "dst");          // already carries both
 
-		tagCatalogService.rename(new RenameTagCommand("src", "alpha"));
+		assertThat(tagCatalogService.rename(new RenameTagCommand("src", "alpha")).id()).isEqualTo("dst");
 
 		assertThat(tagIdsOf("c1")).containsExactly("dst");
 		assertThat(tagIdsOf("c2")).containsExactly("dst");   // ON CONFLICT DO NOTHING, row 3
 		assertThat(tagExists("src")).isFalse();              // BR-234, one transaction
 	}
-
-	@Test
-	void deletingATagLeavesEveryCardIntact() {
-		insertRootDeck("root", "Korean");
-		insertSubDeck("deck", "Unit 1", "root", "root", DeckContentType.CARD);
-		insertCardWithState("c1", "deck", null, null);
-		insertTag("t-a", "alpha");
-		linkTag("c1", "t-a");
-
-		tagCatalogService.delete("t-a");
-
-		assertThat(cardExists("c1")).isTrue();               // BR-235: only card_tags and tags rows go
-		assertThat(tagIdsOf("c1")).isEmpty();
-	}
 }
 ```
+
+Beyond the two cases the plan named, five more that the business rules require and the drafted pair would have let through:
+
+- **BR-237's other half.** The rule has two clauses and the plan quotes one. A hidden card must not count towards the catalog *and* rename/merge **MUST still preserve the tag links of hidden cards so restore loses no metadata**. So `linkCardsOfTagTo` must **not** join `cards` — the opposite of what `findTagCatalog` does, in the same feature, for the same rule.
+- **BR-233's case-only rename.** Renaming `alpha` -> `Alpha` leaves `name_folded` unchanged, so the collision probe finds *the tag being renamed*. Comparing ids rather than testing for a row is what stops the merge path deleting the row it was asked to rename.
+- **BR-94 at the ceiling**, and the case that proves the rule is measured on the right set: a card already carrying the tag passes however full it is, because it gains nothing.
+- **BR-166 all-or-nothing**: a batch refused for one card must leave the *other* card untagged.
+- **A trashed card refuses the batch.** `linkTag` would succeed on a tombstoned row — the FK is on `cards` and the tombstone is a column — quietly writing metadata onto a card that reads as gone everywhere else (BR-245, BR-257).
 
 - [ ] **Step 2: Run and verify they fail**
 
 ```bash
-cd memox-api && ./mvnw.cmd -Dtest='TagCatalogTest,TagMergeTest' test
+cd memox-api && ./mvnw.cmd -Dtest='TagCatalogTest,TagMergeTest,TagControllerTest' test
 ```
 
 Expected: FAIL — the `com.memox.tag` package does not exist.
@@ -2037,72 +2005,85 @@ Expected: FAIL — the `com.memox.tag` package does not exist.
 - [ ] **Step 3: Port the statements**
 
 ```xml
-<select id="findTagCatalog" resultType="com.memox.tag.entity.TagCatalogEntry">
+<select id="findTagCatalog" resultMap="tagCatalogEntry">
   SELECT t.id AS id, t.name AS name,
          (SELECT COUNT(*)
             FROM card_tags ct
             INNER JOIN cards c ON c.id = ct.card_id
            WHERE ct.tag_id = t.id AND c.delete_batch_id IS NULL) AS card_count
     FROM tags t
-   WHERE t.owner_id IS NOT DISTINCT FROM #{ownerId}
-     AND (#{searchFolded} = '' OR strpos(t.name_folded, #{searchFolded}) &gt; 0)
+   WHERE (#{searchFolded} = '' OR strpos(t.name_folded, #{searchFolded}) &gt; 0)
    ORDER BY t.name_folded ASC, t.id ASC
-</select>
-
-<select id="findTagByFoldedName" resultMap="tag">
-  SELECT id, name, name_folded, owner_id, created_at
-    FROM tags
-   WHERE owner_id IS NOT DISTINCT FROM #{ownerId} AND name_folded = #{nameFolded}
-</select>
-
-<update id="renameTagById">
-  UPDATE tags SET name = #{name}, name_folded = #{nameFolded} WHERE id = #{tagId}
-</update>
-
-<insert id="linkCardsOfTagTo">
-  INSERT INTO card_tags (card_id, tag_id)
-  SELECT ct.card_id, #{targetTagId} FROM card_tags ct WHERE ct.tag_id = #{sourceTagId}
-  ON CONFLICT (card_id, tag_id) DO NOTHING
-</insert>
-
-<delete id="unlinkAllCardsFromTag">
-  DELETE FROM card_tags WHERE tag_id = #{tagId}
-</delete>
-
-<delete id="deleteTagById">
-  DELETE FROM tags WHERE id = #{tagId}
-</delete>
-
-<select id="findOrphanedTags" resultMap="tag">
-  SELECT id, name, name_folded, owner_id, created_at
-    FROM tags t
-   WHERE NOT EXISTS (SELECT 1 FROM card_tags ct WHERE ct.tag_id = t.id)
-   ORDER BY created_at ASC, id ASC
 </select>
 ```
 
-**One deliberate divergence, and it is a correctness fix.** Drift's `tagCatalog` counts `card_tags` rows without joining `cards`, so a card sitting in Trash still inflates the tag's count — which BR-237 forbids. The port joins `cards` and filters `delete_batch_id IS NULL`. Record it in Task 15 and raise a WBS entry against the Flutter query.
+`card_count` binds through a `resultMap` with `javaType="_long"`, not `resultType`: `TagCatalogEntry.cardCount` is a primitive `long`, and MyBatis' registry maps the bare alias `long` to `java.lang.Long`. That mismatch is the one that shipped an HTTP 500 in Wave 1.
 
-`orphanedTags` moves from `id NOT IN (SELECT tag_id FROM card_tags)` to `NOT EXISTS`: `NOT IN` against a subquery that can yield `NULL` returns no rows at all in PostgreSQL, and `card_tags.tag_id` being `NOT NULL` today is not a reason to write a statement that breaks if that ever changes.
+`renameTagById`, `linkCardsOfTagTo`, `unlinkAllCardsFromTag`, `deleteTagById`, `findTagByFoldedName` and `findTagById` port as drafted, minus the `owner_id` predicate.
 
-`renameTagById` is only reached when the folded name does **not** collide. When it does, the service runs `linkCardsOfTagTo` → `unlinkAllCardsFromTag` → `deleteTagById` in the same `@Transactional` method (BR-234).
+**Three more statements the drafted list did not have:**
+
+```xml
+<!-- Which cards are already at BR-94's ceiling. -->
+<select id="findCardsAtTagCeiling" resultType="string">
+  SELECT ct.card_id FROM card_tags ct
+   WHERE ct.card_id IN <foreach .../> GROUP BY ct.card_id HAVING COUNT(*) &gt;= #{ceiling}
+</select>
+
+<!-- One tag onto a batch, idempotent by the primary key. -->
+<insert id="linkTagToCards">
+  INSERT INTO card_tags (card_id, tag_id)
+  SELECT c.id, #{tagId} FROM cards c WHERE c.id IN <foreach .../>
+  ON CONFLICT (card_id, tag_id) DO NOTHING
+</insert>
+
+<!-- The chips on one card, with their ids. -->
+<select id="findTagsForCard" resultMap="tag">
+  SELECT t.id, t.name, t.name_folded, t.created_at
+    FROM card_tags ct INNER JOIN tags t ON t.id = ct.tag_id
+   WHERE ct.card_id = #{cardId} ORDER BY t.name ASC, t.id ASC
+</select>
+```
+
+**`tagCountsForCards` ports as `findCardsAtTagCeiling`. [corrected]** Drift returns a count per card and folds it into the cap check in Dart; the rule only ever asks "which of these is full", so the `HAVING` answers it in the statement and the service compares two id sets instead of a map of numbers nothing else reads.
+
+**`linkTagToCards` replaces the per-card `linkTag` loop. [corrected]** Drift links one row at a time because it has already narrowed the batch to the cards that would gain something; `ON CONFLICT DO NOTHING` is that same filter, in one statement.
+
+**`findTagsForCard` is not optional, and the plan's own endpoint list is why. [corrected]** `DELETE /api/v1/cards/{cardId}/tags/{tagId}` needs a tag **id**, and every card projection in this API carries tag **names** — `cardListItems`, `cardDetailById` and the export all use the joined-names shape. Without this read a client cannot construct the delete it was given. Turning a name back into an id client-side would put a second fold there, which BR-230 forbids. It orders by the spelling rather than the folded name: this is a display list, and BR-230's folded ordering is the *catalog's* rule because the catalog is also where identity is compared.
+
+**Six statements are deliberately not ported, and Task 15 records each with its reason:**
+
+| Drift statement | Why not |
+|---|---|
+| `allTags` | `findTagCatalog` with an empty term is the same list and carries the counts. Two list statements would be two orderings of one thing. |
+| `tagsForCards` | The card list already carries tag names per row from `card_mapper`; ids are needed on the detail screen only, which `findTagsForCard` serves. |
+| `tagCountForCard` | The rule it exists for is BR-94's ceiling, which `findCardsAtTagCeiling` answers directly. |
+| `tagCardCount` | "How many cards would lose this tag" is the number the catalog row already carries. |
+| `orphanedTags` | **No caller, and a purge would violate BR-230.** Drift says plainly that nothing calls it. More than that: deleting a card cascades its links away and leaves the tag at count 0, and BR-230 requires that row to *stay* — "a tag nothing points at is precisely what the catalog exists to let a user delete". An automatic orphan purge would delete it out from under that. The `NOT IN` -> `NOT EXISTS` note the plan makes is correct and moot. |
+| `tagsByFoldedNames` | Import only (`card_import_repository_impl.dart`), and import is not in Phase 2. |
 
 - [ ] **Step 4: Add the endpoints**
 
-`GET /api/v1/tags?q=`, `PATCH /api/v1/tags/{tagId}`, `DELETE /api/v1/tags/{tagId}`, `POST /api/v1/cards/{cardId}/tags`, `DELETE /api/v1/cards/{cardId}/tags/{tagId}`. Attach enforces the 10-tag ceiling (BR-94) using `countTagsForCard`, and is idempotent when the card already carries the tag (BR-166).
+`GET /api/v1/tags?q=`, `PATCH /api/v1/tags/{tagId}`, `DELETE /api/v1/tags/{tagId}`, **`POST /api/v1/cards/bulk-tag`**, `GET /api/v1/cards/{cardId}/tags`, `DELETE /api/v1/cards/{cardId}/tags/{tagId}`.
+
+**Attach is a batch endpoint, not `POST /api/v1/cards/{cardId}/tags`. [corrected]** Three things say so and they agree. The statements this task is told to port — `tagCountsForCards`, `cardsAlreadyTagged` — take `IN :cardIds`, and a single-card endpoint would not need either. BR-166 states the rule as a batch rule: *"one card at the ceiling refuses the whole batch"*, which cannot be expressed one card at a time. And the Flutter repository's own single-card path is literally `addTagToCards([cardId])` — one entry point, so the three sub-rules cannot drift apart. It sits beside the `bulk-move` and `bulk-flag` the card module already publishes.
+
+The catalog is **unpaged**: a tag list is bounded by how many names a person invents, and paging the screen whose job is to let a zero-count tag be deleted would put that tag on page four.
+
+`detach` returns 204 and performs **no existence check**, following the Dart comment: *"No existence check: unlinking an absent pair is the same end state."* A second click on a chip that has already gone is not a 404.
 
 - [ ] **Step 5: Run and verify they pass**
 
 ```bash
-cd memox-api && ./mvnw.cmd -Dtest='TagCatalogTest,TagMergeTest' test
+cd memox-api && ./mvnw.cmd -Dtest='TagCatalogTest,TagMergeTest,TagControllerTest' test
 ```
 
-Expected: PASS, 4 tests.
+Expected: PASS, 25 tests. Then `./mvnw -o verify` for the full gate, and regenerate `openapi.json` — six endpoints are new.
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add memox-api/src/main/java/com/memox/tag memox-api/src/main/resources memox-api/src/test/java/com/memox/tag
+git add memox-api/src/main/java/com/memox/tag memox-api/src/main/resources memox-api/src/test/java/com/memox/tag memox-api/openapi.json
 git commit -m "feat(tag): port the tag catalog, rename-merge and delete"
 ```
 
@@ -2737,10 +2718,12 @@ Expected: FAIL — the parity document does not exist.
 
 One table with the 68 ported statements (69 minus the deferred `resetTreeStudyStates`), plus a **Deliberate divergences** section recording the four found while porting:
 
-1. `rootDeckSummaries.nextDueAt` — Drift's sub-select is uncorrelated and returns the same instant for every root deck; the port correlates it on `nd.root_deck_id = d.id`.
-2. `childDeckLevel.nextDueAt` — the same defect on the level view; the port adds `fb.branch_id = child.id`.
-3. `tagCatalog.cardCount` — Drift counts `card_tags` rows without excluding trashed cards, which BR-237 forbids; the port joins `cards`.
-4. `orphanedTags` — `NOT IN` becomes `NOT EXISTS`, because `NOT IN` over a nullable subquery returns nothing in PostgreSQL.
+1. ~~`rootDeckSummaries.nextDueAt`~~ — **withdrawn.** The uncorrelated sub-select is deliberate: the comment above it calls it the list screen's re-measure timer, *"one scalar subquery, evaluated once per statement"*. Correlating it shipped in PR #516 and was reverted in #517. Record it here as a divergence that was tried and was wrong, so nobody re-derives it from the SQL alone.
+2. ~~`childDeckLevel.nextDueAt`~~ — **withdrawn**, same reason, caught before it shipped.
+3. `tagCatalog.cardCount` — Drift counts `card_tags` rows without excluding trashed cards, which BR-237 forbids; the port joins `cards`. This one has a MUST behind it, unlike the two above. Raise a WBS entry against the Flutter query.
+4. ~~`orphanedTags`~~ — **not ported at all** (Task 10): no caller, and an automatic orphan purge would violate BR-230, which requires a zero-count tag to keep its row.
+5. `tagCountsForCards` -> `findCardsAtTagCeiling` — a count per card becomes the question the rule actually asks.
+6. Six `card.drift`/`tag.drift` statements answered by another statement rather than ported one-for-one, listed with their reasons in Task 10.
 5. `nextSiblingPosition` — Drift filters `delete_batch_id IS NULL`; the server must not, because `uq_decks_sibling_scope_position` covers tombstones too.
 
 Each divergence names the BR it serves and, for 1–3, gets a WBS entry against the Flutter query so the client is fixed rather than the server quietly disagreeing with it.

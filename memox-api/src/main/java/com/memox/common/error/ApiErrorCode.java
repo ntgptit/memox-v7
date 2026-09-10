@@ -17,6 +17,8 @@ public enum ApiErrorCode {
 	ROOT_SCHEDULER_INVALID(HttpStatus.CONFLICT, "error.root-scheduler-invalid"),
 	DECK_NOT_FOUND(HttpStatus.NOT_FOUND, "error.deck-not-found"),
 	CARD_NOT_FOUND(HttpStatus.NOT_FOUND, "error.card-not-found"),
+	TAG_NOT_FOUND(HttpStatus.NOT_FOUND, "error.tag-not-found"),
+	TAG_LIMIT_EXCEEDED(HttpStatus.CONFLICT, "error.tag-limit-exceeded"),
 	CARD_CROSS_ROOT_MOVE(HttpStatus.CONFLICT, "error.card-cross-root-move"),
 	MOVE_TARGET_INVALID(HttpStatus.CONFLICT, "error.move-target-invalid"),
 	DECK_POSITION_OUT_OF_RANGE(HttpStatus.BAD_REQUEST, "error.deck-position-out-of-range"),

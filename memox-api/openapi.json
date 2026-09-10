@@ -9,6 +9,25 @@
         },
         "type" : "object"
       },
+      "AttachTagRequest" : {
+        "properties" : {
+          "cardIds" : {
+            "items" : {
+              "type" : "string"
+            },
+            "minItems" : 1,
+            "type" : "array"
+          },
+          "name" : {
+            "type" : "string"
+          }
+        },
+        "required" : [
+          "cardIds",
+          "name"
+        ],
+        "type" : "object"
+      },
       "BulkFlagRequest" : {
         "properties" : {
           "cardIds" : {
@@ -764,6 +783,17 @@
         ],
         "type" : "object"
       },
+      "RenameTagRequest" : {
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          }
+        },
+        "required" : [
+          "name"
+        ],
+        "type" : "object"
+      },
       "ReorderDeckRequest" : {
         "properties" : {
           "targetPosition" : {
@@ -775,6 +805,32 @@
         "required" : [
           "targetPosition"
         ],
+        "type" : "object"
+      },
+      "TagCatalogResponse" : {
+        "properties" : {
+          "cardCount" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "TagResponse" : {
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          }
+        },
         "type" : "object"
       },
       "UpdateCardRequest" : {
@@ -1021,6 +1077,67 @@
         "summary" : "Move a batch of cards into one deck, or move none of them",
         "tags" : [
           "Cards"
+        ]
+      }
+    },
+    "/api/v1/cards/bulk-tag" : {
+      "post" : {
+        "operationId" : "attach",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AttachTagRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TagResponse"
+                }
+              }
+            },
+            "description" : "The tag every card now carries"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TagResponse"
+                }
+              }
+            },
+            "description" : "Empty batch, more than 500 ids, or an invalid name"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TagResponse"
+                }
+              }
+            },
+            "description" : "An id names no active card"
+          },
+          "409" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TagResponse"
+                }
+              }
+            },
+            "description" : "A card that would gain the tag is at the ten-tag ceiling"
+          }
+        },
+        "summary" : "Attach one tag to a batch of cards, or attach it to none of them",
+        "tags" : [
+          "Tags"
         ]
       }
     },
@@ -1322,6 +1439,72 @@
         "summary" : "A card's review history, newest first, keyset-paged",
         "tags" : [
           "Cards"
+        ]
+      }
+    },
+    "/api/v1/cards/{cardId}/tags" : {
+      "get" : {
+        "operationId" : "tagsForCard",
+        "parameters" : [
+          {
+            "in" : "path",
+            "name" : "cardId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          }
+        ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/TagResponse"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "Tags returned"
+          }
+        },
+        "summary" : "The tags one card carries, with their ids",
+        "tags" : [
+          "Tags"
+        ]
+      }
+    },
+    "/api/v1/cards/{cardId}/tags/{tagId}" : {
+      "delete" : {
+        "operationId" : "detach",
+        "parameters" : [
+          {
+            "in" : "path",
+            "name" : "cardId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          },
+          {
+            "in" : "path",
+            "name" : "tagId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          }
+        ],
+        "responses" : {
+          "204" : {
+            "description" : "The card no longer carries the tag"
+          }
+        },
+        "summary" : "Remove one tag from one card",
+        "tags" : [
+          "Tags"
         ]
       }
     },
@@ -2102,6 +2285,127 @@
         },
         "tags" : [
           "api-health-controller"
+        ]
+      }
+    },
+    "/api/v1/tags" : {
+      "get" : {
+        "operationId" : "catalog",
+        "parameters" : [
+          {
+            "in" : "query",
+            "name" : "q",
+            "required" : false,
+            "schema" : {
+              "default" : "",
+              "type" : "string"
+            }
+          }
+        ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/TagCatalogResponse"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "Catalog returned"
+          }
+        },
+        "summary" : "Every tag with its active-card count, narrowed by an optional term",
+        "tags" : [
+          "Tags"
+        ]
+      }
+    },
+    "/api/v1/tags/{tagId}" : {
+      "delete" : {
+        "operationId" : "delete",
+        "parameters" : [
+          {
+            "in" : "path",
+            "name" : "tagId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          }
+        ],
+        "responses" : {
+          "204" : {
+            "description" : "Tag deleted"
+          },
+          "404" : {
+            "description" : "Tag not found"
+          }
+        },
+        "summary" : "Delete a tag and every link to it, leaving the cards untouched",
+        "tags" : [
+          "Tags"
+        ]
+      },
+      "patch" : {
+        "operationId" : "rename",
+        "parameters" : [
+          {
+            "in" : "path",
+            "name" : "tagId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          }
+        ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RenameTagRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TagResponse"
+                }
+              }
+            },
+            "description" : "The tag that survived the rename"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TagResponse"
+                }
+              }
+            },
+            "description" : "The name is blank, too long, or has control characters"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TagResponse"
+                }
+              }
+            },
+            "description" : "Tag not found"
+          }
+        },
+        "summary" : "Rename a tag, merging it when the folded name is already taken",
+        "tags" : [
+          "Tags"
         ]
       }
     }
