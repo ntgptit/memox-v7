@@ -164,6 +164,19 @@
             <scope>test</scope>
         </dependency>
 
+        <!--
+            @MybatisTest and its auto-configuration live here, not in mybatis-spring-boot-starter.
+            Version-pinned to ${mybatis.version} with the runtime starter deliberately: the two ship
+            as one release and a slice test configured by a different minor than the one it is
+            testing is a difference nobody would think to look for.
+        -->
+        <dependency>
+            <groupId>org.mybatis.spring.boot</groupId>
+            <artifactId>mybatis-spring-boot-starter-test</artifactId>
+            <version>${mybatis.version}</version>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-testcontainers</artifactId>

@@ -7,7 +7,7 @@
 | **Scope** | Task đang mở · blocker · technical debt · quyết định descope/superseded. Ngoài phạm vi: entry đã `done` — chúng ở `wbs-archive/`, vẫn trong đồ thị dependency qua `_wbs_ledgers()` |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.65 |
+| **Updated by task** | M9.T1 |
 | **Last updated** | 2026-09-08 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -568,6 +568,85 @@ nằm trong implementation.
 3. **`build_runner` không regenerate khi chỉ file sinh bị sửa.** Sau khi tiêm lỗi vào
    `app_database.g.dart`, lệnh build báo `5861 skipped` và giữ nguyên bản lỗi. Phải
    `build_runner clean` mới khôi phục. Cùng họ với bẫy `target/classes` cũ.
+
+### M9.T1 · Mapper test có tier riêng: `@MybatisTest` và `@Sql`
+
+- **Status:** **done** — `./mvnw -B -ntp verify` xanh **318/318**; hai fault injection đều đỏ
+  đúng chỗ.
+- **Goal:** Theo chỉ định của chủ dự án: test mapper phải chạy bằng `@MybatisTest` và nạp dữ
+  liệu bằng `@Sql` của `org.springframework.test.context.jdbc`, thay vì `@SpringBootTest` +
+  helper JdbcTemplate.
+- **Nhánh / PR:** `claude/api-mapper-slice-tests`
+- **Scope:** `pom.xml` (thêm `mybatis-spring-boot-starter-test`) ·
+  `support/MapperSliceTest.java` (**mới**, annotation ghép) · `sql/deck/*.sql` (**mới**, ba
+  fixture) · `deck/persistence/DeckMapperTest.java`. **Không** đụng `src/main`, không đụng
+  `PostgresIntegrationTest` hay `MemoxFixtures` — 40 test class còn lại giữ nguyên tier cũ.
+- **Out of scope:** `card_mapper.xml` và `tag_mapper.xml` chưa có mapper test nào; chúng được
+  phủ gián tiếp qua tier `@SpringBootTest`. Dựng chúng là task khác.
+
+**`DeckMapperTest` là test duy nhất của tầng này, và nó đang boot cả ứng dụng.** Nó hỏi hai
+câu — statement trong `deck_mapper.xml` có sinh ra SQL hợp lệ không, và result map có bind
+đúng cột vào đúng field không — nhưng nó thừa kế `PostgresIntegrationTest`, tức
+`@SpringBootTest` + `@AutoConfigureMockMvc`: controller, service, MockMvc, toàn bộ. Mọi thứ
+trên `persistence` là phông nền, và khi hỏng thì thông điệp lỗi gọi tên một tầng không liên
+quan gì tới nguyên nhân — đúng cái đã xảy ra với lỗi `javaType="int"` mà M9.W1 ghi lại: nó
+nổ ra thành HTTP 500 ở controller, ba tầng cách chỗ sai.
+
+**`replace = NONE` là thuộc tính chịu lực, và đã tiêm lỗi để biết chắc.** `@MybatisTest`
+mang sẵn `@AutoConfigureTestDatabase` với mặc định `Replace.ANY`, tức đổi `DataSource` sang
+một embedded database. Cả lý do tồn tại của mapper test là SQL được chính engine của
+production thực thi, nên mặc định đó phá đúng thứ cần giữ. Tiêm `Replace.ANY`: context chết
+ngay, với *"Failed to replace DataSource with an embedded database for tests… or tune the
+replace attribute of @AutoConfigureTestDatabase"*. Không có driver embedded trên classpath và
+thông điệp gọi đúng tên thuộc tính — nên đây là lỗi **không thể mắc im lặng**. Ghi lại trong
+javadoc theo đúng thông điệp thật, sau khi bản nháp đầu mô tả sai nó.
+
+**Mỗi script `@Sql` mở đầu bằng hai lệnh `DELETE`, và đó không phải thừa.** Trên backend
+`local`, tier này dùng chung một database với suite `@SpringBootTest`; mà suite đó truncate
+**trước** mỗi test chứ không phải sau, nên dữ liệu của test cuối cùng nó chạy vẫn còn commit
+khi mapper test bắt đầu. Trên `testcontainers` hai lệnh đó không khớp gì, vì slice có
+container riêng. Chạy trên cả hai là thứ giữ hai backend là **cùng một lần chạy** — luật
+`memox-api/README.md` đặt ra cho cặp này. Chúng là DML trong chính transaction của test, mà
+`@MybatisTest` rollback transaction đó, nên không có gì của test khác bị mất thật.
+
+Thứ tự `decks` trước `delete_batches` cũng có lý do: `decks.delete_batch_id` tham chiếu
+`delete_batches` với `ON DELETE CASCADE`, nên xoá batch trước sẽ kéo deck đi cùng và lệnh thứ
+hai chỉ đang mô tả một việc đã xảy ra rồi.
+
+**Hai fault injection, cả hai đỏ đúng chỗ:**
+
+| Tiêm | Kết quả |
+|---|---|
+| `Replace.NONE` → `Replace.ANY` | context không khởi động, `IllegalStateException` gọi tên thuộc tính |
+| `scheduler_version` 1 → 2 trong fixture | `bindsEveryColumnOfTheResultMapToItsOwnField` đỏ: `expected: 1 but was: 2` |
+
+Cái thứ hai là cái đáng giá: nó chứng minh `@Sql` thật sự nạp dữ liệu và assertion đọc chính
+dữ liệu đó, chứ không phải xanh vì bảng rỗng hay vì rơi vào một giá trị mặc định.
+
+**Lần tiêm đầu tiên không hợp lệ, và nó dạy một thứ về gate.** Bản đầu xoá luôn dòng
+annotation; build đỏ, nhưng đỏ ở **Checkstyle** (`UnusedImports`) trước khi tới test. Tức
+`includeTests=false` chỉ đúng cho PMD và SpotBugs — **Checkstyle có quét `src/test/`**. Một
+"đỏ" đọc qua thì giống bằng chứng, mà thực ra chưa chạy tới test nào.
+
+**Cái giá, đo được.** Tier mới là một context cache key thứ hai, nên trên backend
+`testcontainers` nó boot container PostgreSQL của riêng nó — đếm được: chạy hai class, một
+mỗi tier, ra **2** lần `Creating container for image: postgres:16-alpine`.
+
+| | trước | sau |
+|---|---:|---:|
+| `DeckMapperTest` (class) | 0,218 s | 6,146 s |
+| tổng thời gian test | 50,4 s | 53,8 s |
+| `./mvnw verify` | 1 m 42 s | 1 m 36 s |
+
+Con số đáng tin là **+3,4 s** thời gian test. Chênh lệch ở mức build nằm trong nhiễu giữa hai
+lần chạy, nên không đọc nó là "nhanh hơn". Đổi lại: mapper test không còn dựng controller và
+MockMvc để hỏi một câu về SQL, và `LocalPostgresConfiguration` đã lường trước context thứ hai
+từ trước — cờ `ALREADY_CLEANED` của nó có mặt chính vì lý do này, nên backend `local` chỉ
+migrate ở context thứ hai chứ không clean lại.
+
+- **Dependencies:** M9.W1 (hai backend test và ngưỡng gate), M9.Phase2 (`deck_mapper.xml`)
+- **Tests required:** `DeckMapperTest` (5), và toàn bộ `./mvnw verify`
+- **Checklist phases:** không thuộc phase nào — đây là harness của module backend.
 
 ## M99 · Adhoc
 

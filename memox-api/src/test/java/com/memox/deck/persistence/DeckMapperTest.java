@@ -2,27 +2,41 @@ package com.memox.deck.persistence;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.jdbc.Sql;
 
 import com.memox.common.pagination.PageSlice;
 import com.memox.common.pagination.SortColumn;
 import com.memox.common.pagination.SortDirection;
+import com.memox.common.scheduler.SchedulerType;
 import com.memox.deck.entity.Deck;
 import com.memox.deck.enums.DeckContentType;
-import com.memox.common.scheduler.SchedulerType;
-import com.memox.support.PostgresIntegrationTest;
+import com.memox.support.MapperSliceTest;
 
-class DeckMapperTest extends PostgresIntegrationTest {
+/**
+ * {@code deck_mapper.xml} against a real PostgreSQL, with nothing above {@code persistence} booted.
+ *
+ * <p>Rows arrive through {@code @Sql} rather than through a JdbcTemplate helper. The statement
+ * under test reads SQL; so does the fixture, and the two can now be read side by side — the columns
+ * a script writes are the columns the result map is asserted to bind. The scripts live in
+ * {@code src/test/resources/sql/deck/} and each begins by emptying the table it seeds, so a test
+ * asserting "nothing" is asserting it about a table this test emptied rather than about whatever
+ * the previous test left.
+ */
+@MapperSliceTest
+class DeckMapperTest {
 
 	private static final String ROOT_ID = "11111111-1111-4111-8111-111111111111";
 	private static final String SECOND_ID = "33333333-3333-4333-8333-333333333333";
 	private static final String THIRD_ID = "44444444-4444-4444-8444-444444444444";
-	private static final String DELETE_BATCH_ID = "22222222-2222-4222-8222-222222222222";
+
+	private static final String NO_DECKS = "/sql/deck/no-decks.sql";
+	private static final String THREE_ROOT_DECKS = "/sql/deck/three-root-decks.sql";
+	private static final String ONE_SOFT_DELETED_ROOT_DECK = "/sql/deck/one-soft-deleted-root-deck.sql";
 
 	private static final SortColumn BY_POSITION = new SortColumn("sibling_position", SortDirection.ASC);
 	private static final SortColumn BY_ID = new SortColumn("id", SortDirection.ASC);
@@ -31,6 +45,7 @@ class DeckMapperTest extends PostgresIntegrationTest {
 	private DeckMapper deckMapper;
 
 	@Test
+	@Sql(NO_DECKS)
 	void returnsAnEmptyRootPageAndZeroTotal() {
 		assertThat(deckMapper.findRootDecks(new PageSlice(50, 0, List.of(BY_POSITION, BY_ID)))).isEmpty();
 		assertThat(deckMapper.countRootDecks()).isZero();
@@ -47,12 +62,13 @@ class DeckMapperTest extends PostgresIntegrationTest {
 	 *
 	 * <p>Asserting each field rather than just "not null" is the point: a result map can bind and
 	 * still put the wrong column in the wrong argument, and every one here is a String or a number
-	 * that would happily slot into a neighbour's place.
+	 * that would happily slot into a neighbour's place. The fixture gives
+	 * {@code scheduler_version}, {@code scheduler_generation} and {@code sibling_position} three
+	 * different numbers for exactly that reason.
 	 */
 	@Test
+	@Sql(THREE_ROOT_DECKS)
 	void bindsEveryColumnOfTheResultMapToItsOwnField() {
-		insertRootDeck(ROOT_ID, "Korean", 7);
-
 		final var deck = deckMapper.findActiveDeckById(ROOT_ID);
 
 		assertThat(deck).isNotNull();
@@ -69,13 +85,8 @@ class DeckMapperTest extends PostgresIntegrationTest {
 	}
 
 	@Test
+	@Sql(ONE_SOFT_DELETED_ROOT_DECK)
 	void doesNotReturnASoftDeletedDeck() {
-		insertRootDeck(ROOT_ID, "Korean", 7);
-		this.jdbcTemplate.update(
-				"INSERT INTO delete_batches (id, item_type, root_item_id, deleted_at) VALUES (?, 'deck', ?, ?)",
-				DELETE_BATCH_ID, ROOT_ID, Timestamp.from(Instant.EPOCH));
-		this.jdbcTemplate.update("UPDATE decks SET delete_batch_id = ? WHERE id = ?", DELETE_BATCH_ID, ROOT_ID);
-
 		assertThat(deckMapper.findActiveDeckById(ROOT_ID)).isNull();
 		assertThat(deckMapper.countRootDecks()).isZero();
 	}
@@ -89,11 +100,8 @@ class DeckMapperTest extends PostgresIntegrationTest {
 	 * shows PostgreSQL accepted them and ordered by them.
 	 */
 	@Test
+	@Sql(THREE_ROOT_DECKS)
 	void ordersRowsByTheColumnAndDirectionTheSliceCarries() {
-		insertRootDeck(ROOT_ID, "Korean", 7);
-		insertRootDeck(SECOND_ID, "Japanese", 3);
-		insertRootDeck(THIRD_ID, "Vietnamese", 5);
-
 		final var ascending = deckMapper.findRootDecks(new PageSlice(50, 0, List.of(BY_POSITION, BY_ID)));
 		final var descending = deckMapper.findRootDecks(new PageSlice(50, 0,
 				List.of(new SortColumn("sibling_position", SortDirection.DESC), BY_ID)));
@@ -111,10 +119,8 @@ class DeckMapperTest extends PostgresIntegrationTest {
 	 * {@code id} key appended by {@code PageHelper.slice} is what makes these two pages disjoint.
 	 */
 	@Test
+	@Sql(THREE_ROOT_DECKS)
 	void breaksTiesByIdSoConsecutivePagesDoNotOverlap() {
-		insertRootDeck(ROOT_ID, "Korean", 1);
-		insertRootDeck(SECOND_ID, "Japanese", 2);
-		insertRootDeck(THIRD_ID, "Vietnamese", 3);
 		final var tiedSorts = List.of(new SortColumn("created_at", SortDirection.ASC), BY_ID);
 
 		final var firstPage = deckMapper.findRootDecks(new PageSlice(2, 0, tiedSorts));
@@ -122,18 +128,5 @@ class DeckMapperTest extends PostgresIntegrationTest {
 
 		assertThat(firstPage).extracting(Deck::id).containsExactly(ROOT_ID, SECOND_ID);
 		assertThat(secondPage).extracting(Deck::id).containsExactly(THIRD_ID);
-	}
-
-	private void insertRootDeck(String deckId, String name, int siblingPosition) {
-		// Deliberately distinct values: 1, 3 and the caller's position cannot be swapped between
-		// scheduler_version, scheduler_generation and sibling_position without a test noticing.
-		this.jdbcTemplate.update("""
-				INSERT INTO decks (id, name, parent_deck_id, sibling_scope_id, sibling_position,
-				                   root_deck_id, content_type, scheduler_type, scheduler_version,
-				                   scheduler_generation, created_at, updated_at)
-				VALUES (?, ?, NULL, '00000000-0000-0000-0000-000000000000', ?,
-				        ?, 'deck', 'eight_box', 1, 3, ?, ?)""",
-				deckId, name, siblingPosition, deckId, Timestamp.from(Instant.EPOCH),
-				Timestamp.from(Instant.EPOCH));
 	}
 }
