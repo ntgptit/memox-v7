@@ -58,6 +58,15 @@ SQL ignores lets a client filter, get everything back, and never know).
 
 ---
 
+**SQL layout, adopted 2026-09-10 between Task 11 and Task 12.** Every multi-line
+list in a mapper statement is comma-first — `SELECT` projections, `INSERT` column
+and `VALUES` lists, `SET`, `ORDER BY`, `GROUP BY` — one item per line, the comma
+at the head. Function argument lists keep their commas where they are: they are
+one expression that wraps, not a list anyone edits a line at a time. The three
+existing mappers were converted in one mechanical pass, so the SQL blocks quoted
+in tasks below still read comma-last while the files do not. New statements are
+written comma-first. See `memox-api/README.md`.
+
 ## Global Constraints
 
 - API paths start with `/api/v1`. IDs are client-supplied UUID strings. Times are `Instant`, rendered as UTC ISO-8601.

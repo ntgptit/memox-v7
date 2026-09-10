@@ -49,14 +49,16 @@
     permanently-null parameter through every layer would be a fourth spelling of "not yet".
   -->
   <select id="findTagCatalog" resultMap="tagCatalogEntry">
-    SELECT t.id AS id, t.name AS name,
-           (SELECT COUNT(*)
+    SELECT t.id AS id
+         , t.name AS name
+         , (SELECT COUNT(*)
               FROM card_tags ct
               INNER JOIN cards c ON c.id = ct.card_id
              WHERE ct.tag_id = t.id AND c.delete_batch_id IS NULL) AS card_count
       FROM tags t
      WHERE (#{searchFolded} = '' OR strpos(t.name_folded, #{searchFolded}) &gt; 0)
-     ORDER BY t.name_folded ASC, t.id ASC
+     ORDER BY t.name_folded ASC
+            , t.id ASC
   </select>
 
   <!--
@@ -66,12 +68,18 @@
     built on and the only comparison that treats `Động từ` and `động từ` as one tag.
   -->
   <select id="findTagByFoldedName" resultMap="tag">
-    SELECT id, name, name_folded, created_at FROM tags WHERE name_folded = #{nameFolded}
+    SELECT id
+         , name
+         , name_folded
+         , created_at FROM tags WHERE name_folded = #{nameFolded}
   </select>
 
   <!-- Read inside the rename/delete transaction, so the row acted on is the row that exists now. -->
   <select id="findTagById" resultMap="tag">
-    SELECT id, name, name_folded, created_at FROM tags WHERE id = #{tagId}
+    SELECT id
+         , name
+         , name_folded
+         , created_at FROM tags WHERE id = #{tagId}
   </select>
 
   <insert id="insertTag" parameterType="com.memox.tag.entity.Tag">
@@ -87,7 +95,8 @@
     drop the links and silently untag every card.
   -->
   <update id="renameTagById">
-    UPDATE tags SET name = #{name}, name_folded = #{nameFolded} WHERE id = #{tagId}
+    UPDATE tags SET name = #{name}
+  , name_folded = #{nameFolded} WHERE id = #{tagId}
   </update>
 
   <!--
@@ -105,7 +114,8 @@
   -->
   <insert id="linkCardsOfTagTo">
     INSERT INTO card_tags (card_id, tag_id)
-    SELECT ct.card_id, #{targetTagId} FROM card_tags ct WHERE ct.tag_id = #{sourceTagId}
+    SELECT ct.card_id
+         , #{targetTagId} FROM card_tags ct WHERE ct.tag_id = #{sourceTagId}
     ON CONFLICT (card_id, tag_id) DO NOTHING
   </insert>
 
@@ -167,7 +177,8 @@
   -->
   <insert id="linkTagToCards">
     INSERT INTO card_tags (card_id, tag_id)
-    SELECT c.id, #{tagId} FROM cards c
+    SELECT c.id
+         , #{tagId} FROM cards c
      WHERE c.id IN
     <foreach collection="cardIds" open="(" separator="," close=")" item="cardId">#{cardId}</foreach>
     ON CONFLICT (card_id, tag_id) DO NOTHING
@@ -184,11 +195,15 @@
     ordering is the catalog's rule because the catalog is also where identity is compared.
   -->
   <select id="findTagsForCard" resultMap="tag">
-    SELECT t.id, t.name, t.name_folded, t.created_at
+    SELECT t.id
+         , t.name
+         , t.name_folded
+         , t.created_at
       FROM card_tags ct
       INNER JOIN tags t ON t.id = ct.tag_id
      WHERE ct.card_id = #{cardId}
-     ORDER BY t.name ASC, t.id ASC
+     ORDER BY t.name ASC
+            , t.id ASC
   </select>
 
   <delete id="unlinkTag">

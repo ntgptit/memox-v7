@@ -34,8 +34,17 @@
   </sql>
 
   <select id="findRootDecks" resultMap="deck">
-    SELECT id, name, parent_deck_id, root_deck_id, content_type, scheduler_type,
-           scheduler_version, scheduler_generation, sibling_position, created_at, updated_at
+    SELECT id
+         , name
+         , parent_deck_id
+         , root_deck_id
+         , content_type
+         , scheduler_type
+         , scheduler_version
+         , scheduler_generation
+         , sibling_position
+         , created_at
+         , updated_at
     FROM decks
     WHERE parent_deck_id IS NULL
       AND delete_batch_id IS NULL
@@ -95,22 +104,28 @@
     Reading the SQL was not enough; the comment above the SQL is where the design lives.
   -->
   <select id="findRootDeckSummaries" resultMap="deckSummary">
-    SELECT d.id, d.name, d.root_deck_id, d.content_type, d.scheduler_type, d.sibling_position,
-           COALESCE(total.card_count, 0)      AS total_card_count,
-           COALESCE(fresh.new_count, 0)       AS new_card_count,
-           COALESCE(due.due_count, 0)         AS due_card_count,
-           COALESCE(due.overdue_count, 0)     AS overdue_card_count,
-           due.oldest_due_at                  AS oldest_due_at,
-           COALESCE(learned.learned_count, 0) AS learned_card_count,
-           COALESCE(sub.sub_count, 0)         AS sub_deck_count,
-           (SELECT MIN(nx.due_at)
+    SELECT d.id
+         , d.name
+         , d.root_deck_id
+         , d.content_type
+         , d.scheduler_type
+         , d.sibling_position
+         , COALESCE(total.card_count, 0)      AS total_card_count
+         , COALESCE(fresh.new_count, 0)       AS new_card_count
+         , COALESCE(due.due_count, 0)         AS due_card_count
+         , COALESCE(due.overdue_count, 0)     AS overdue_card_count
+         , due.oldest_due_at                  AS oldest_due_at
+         , COALESCE(learned.learned_count, 0) AS learned_card_count
+         , COALESCE(sub.sub_count, 0)         AS sub_deck_count
+         , (SELECT MIN(nx.due_at)
               FROM card_study_states nx
               INNER JOIN cards nc ON nc.id = nx.card_id
               INNER JOIN decks nd ON nd.id = nc.deck_id
              WHERE nx.due_at &gt; #{now}
                AND nc.delete_batch_id IS NULL
                AND nd.delete_batch_id IS NULL) AS next_due_at,
-           d.created_at, d.updated_at
+           d.created_at
+         , d.updated_at
       FROM decks d
       LEFT JOIN (SELECT cd.root_deck_id AS root_deck_id, COUNT(*) AS card_count
                    FROM cards c
@@ -201,10 +216,12 @@
   -->
   <sql id="ancestryWalk">
     ancestry (deck_id, distance) AS (
-        SELECT parent_deck_id, 1 FROM decks
+        SELECT parent_deck_id
+             , 1 FROM decks
          WHERE id = #{deckId} AND parent_deck_id IS NOT NULL
         UNION
-        SELECT d.parent_deck_id, a.distance + 1
+        SELECT d.parent_deck_id
+             , a.distance + 1
           FROM decks d
           INNER JOIN ancestry a ON d.id = a.deck_id
          WHERE d.parent_deck_id IS NOT NULL AND a.distance &lt; #{maxWalk}
@@ -241,32 +258,37 @@
   -->
   <select id="findChildDeckLevel" resultMap="deckLevelRow">
     WITH RECURSIVE branch (branch_id, deck_id) AS (
-        SELECT id, id FROM decks
+        SELECT id
+             , id FROM decks
          WHERE parent_deck_id = #{deckId} AND delete_batch_id IS NULL
         UNION
-        SELECT b.branch_id, d.id
+        SELECT b.branch_id
+             , d.id
           FROM decks d
           INNER JOIN branch b ON d.parent_deck_id = b.deck_id
          WHERE d.delete_batch_id IS NULL
     ),
     <include refid="ancestryWalk"/>
-    SELECT parent.id AS parent_id, parent.name AS parent_name,
-           parent.content_type AS parent_content_type,
-           child.id AS child_id, child.name AS child_name,
-           child.parent_deck_id AS child_parent_deck_id,
-           child.root_deck_id AS child_root_deck_id,
-           child.content_type AS child_content_type,
-           child.sibling_position AS child_sibling_position,
-           child.created_at AS child_created_at, child.updated_at AS child_updated_at,
-           root.scheduler_type AS inherited_scheduler_type,
-           COALESCE(total.card_count, 0)      AS total_card_count,
-           COALESCE(fresh.new_count, 0)       AS new_card_count,
-           COALESCE(due.due_count, 0)         AS due_card_count,
-           COALESCE(due.overdue_count, 0)     AS overdue_card_count,
-           due.oldest_due_at                  AS oldest_due_at,
-           COALESCE(learned.learned_count, 0) AS learned_card_count,
-           COALESCE(sub.sub_count, 0)         AS sub_deck_count,
-           (SELECT MIN(nx.due_at)
+    SELECT parent.id AS parent_id
+         , parent.name AS parent_name
+         , parent.content_type AS parent_content_type
+         , child.id AS child_id
+         , child.name AS child_name
+         , child.parent_deck_id AS child_parent_deck_id
+         , child.root_deck_id AS child_root_deck_id
+         , child.content_type AS child_content_type
+         , child.sibling_position AS child_sibling_position
+         , child.created_at AS child_created_at
+         , child.updated_at AS child_updated_at
+         , root.scheduler_type AS inherited_scheduler_type
+         , COALESCE(total.card_count, 0)      AS total_card_count
+         , COALESCE(fresh.new_count, 0)       AS new_card_count
+         , COALESCE(due.due_count, 0)         AS due_card_count
+         , COALESCE(due.overdue_count, 0)     AS overdue_card_count
+         , due.oldest_due_at                  AS oldest_due_at
+         , COALESCE(learned.learned_count, 0) AS learned_card_count
+         , COALESCE(sub.sub_count, 0)         AS sub_deck_count
+         , (SELECT MIN(nx.due_at)
               FROM branch fb
               INNER JOIN cards fc ON fc.deck_id = fb.deck_id
               INNER JOIN card_study_states nx ON nx.card_id = fc.id
@@ -308,7 +330,8 @@
                   WHERE parent_deck_id IS NOT NULL AND delete_batch_id IS NULL
                   GROUP BY parent_deck_id) sub ON sub.parent_id = child.id
      WHERE parent.id = #{deckId} AND parent.delete_batch_id IS NULL
-     ORDER BY child.sibling_position ASC, child.id ASC
+     ORDER BY child.sibling_position ASC
+            , child.id ASC
   </select>
 
   <!--
@@ -320,7 +343,9 @@
   -->
   <select id="findDeckContext" resultMap="deckContext">
     WITH RECURSIVE <include refid="ancestryWalk"/>
-    SELECT self.id AS deck_id, self.name AS deck_name, self.content_type AS content_type,
+    SELECT self.id AS deck_id
+         , self.name AS deck_name
+         , self.content_type AS content_type,
            <include refid="ancestryJson"/>
       FROM decks self
      WHERE self.id = #{deckId} AND self.delete_batch_id IS NULL
@@ -351,15 +376,20 @@
   -->
   <select id="probeDeckDepth" resultMap="deckDepth">
     WITH RECURSIVE ancestry (node_id, parent_id, depth) AS (
-        SELECT id, parent_deck_id, 1 FROM decks
+        SELECT id
+             , parent_deck_id
+             , 1 FROM decks
          WHERE id = #{deckId} AND delete_batch_id IS NULL
         UNION ALL
-        SELECT d.id, d.parent_deck_id, a.depth + 1
+        SELECT d.id
+             , d.parent_deck_id
+             , a.depth + 1
           FROM decks d
           INNER JOIN ancestry a ON d.id = a.parent_id
          WHERE a.depth &lt; #{maxWalk} AND d.delete_batch_id IS NULL
     )
-    SELECT depth AS depth, (parent_id IS NULL) AS reached_root
+    SELECT depth AS depth
+         , (parent_id IS NULL) AS reached_root
       FROM ancestry
      ORDER BY depth DESC
      LIMIT 1
@@ -367,9 +397,11 @@
 
   <select id="probeSubtreeHeight" resultType="java.lang.Integer">
     WITH RECURSIVE walk (id, height) AS (
-        SELECT id, 1 FROM decks WHERE id = #{deckId} AND delete_batch_id IS NULL
+        SELECT id
+             , 1 FROM decks WHERE id = #{deckId} AND delete_batch_id IS NULL
         UNION ALL
-        SELECT d.id, w.height + 1
+        SELECT d.id
+             , w.height + 1
           FROM decks d
           INNER JOIN walk w ON d.parent_deck_id = w.id
          WHERE w.height &lt; #{maxWalk} AND d.delete_batch_id IS NULL
@@ -413,11 +445,22 @@
 
   <!-- Port of Drift's allDecks, ordering included. -->
   <select id="findAllActiveDecks" resultMap="deck">
-    SELECT id, name, parent_deck_id, root_deck_id, content_type, scheduler_type,
-           scheduler_version, scheduler_generation, sibling_position, created_at, updated_at
+    SELECT id
+         , name
+         , parent_deck_id
+         , root_deck_id
+         , content_type
+         , scheduler_type
+         , scheduler_version
+         , scheduler_generation
+         , sibling_position
+         , created_at
+         , updated_at
     FROM decks
     WHERE delete_batch_id IS NULL
-    ORDER BY root_deck_id ASC, sibling_position ASC, id ASC
+    ORDER BY root_deck_id ASC
+           , sibling_position ASC
+           , id ASC
   </select>
 
   <!--
@@ -426,12 +469,22 @@
     rebuilds the tree from the parent pointers these rows already carry.
   -->
   <select id="findDecksInTree" resultMap="deck">
-    SELECT id, name, parent_deck_id, root_deck_id, content_type, scheduler_type,
-           scheduler_version, scheduler_generation, sibling_position, created_at, updated_at
+    SELECT id
+         , name
+         , parent_deck_id
+         , root_deck_id
+         , content_type
+         , scheduler_type
+         , scheduler_version
+         , scheduler_generation
+         , sibling_position
+         , created_at
+         , updated_at
     FROM decks
     WHERE root_deck_id = #{rootDeckId}
       AND delete_batch_id IS NULL
-    ORDER BY sibling_position ASC, id ASC
+    ORDER BY sibling_position ASC
+           , id ASC
   </select>
 
   <select id="countRootDecks" resultType="long">
@@ -442,16 +495,34 @@
   </select>
 
   <select id="findActiveDeckById" resultMap="deck">
-    SELECT id, name, parent_deck_id, root_deck_id, content_type, scheduler_type,
-           scheduler_version, scheduler_generation, sibling_position, created_at, updated_at
+    SELECT id
+         , name
+         , parent_deck_id
+         , root_deck_id
+         , content_type
+         , scheduler_type
+         , scheduler_version
+         , scheduler_generation
+         , sibling_position
+         , created_at
+         , updated_at
     FROM decks
     WHERE id = #{deckId}
       AND delete_batch_id IS NULL
   </select>
 
   <select id="findActiveDeckByIdForUpdate" resultMap="deck">
-    SELECT id, name, parent_deck_id, root_deck_id, content_type, scheduler_type,
-           scheduler_version, scheduler_generation, sibling_position, created_at, updated_at
+    SELECT id
+         , name
+         , parent_deck_id
+         , root_deck_id
+         , content_type
+         , scheduler_type
+         , scheduler_version
+         , scheduler_generation
+         , sibling_position
+         , created_at
+         , updated_at
     FROM decks
     WHERE id = #{deckId}
       AND delete_batch_id IS NULL
@@ -473,22 +544,58 @@
 
   <insert id="insertRootDeck" parameterType="com.memox.deck.entity.Deck">
     INSERT INTO decks (
-      id, name, parent_deck_id, sibling_position, sibling_scope_id, root_deck_id, content_type,
-      scheduler_type, scheduler_version, scheduler_generation, created_at, updated_at
+      id
+    , name
+    , parent_deck_id
+    , sibling_position
+    , sibling_scope_id
+    , root_deck_id
+    , content_type
+    , scheduler_type
+    , scheduler_version
+    , scheduler_generation
+    , created_at
+    , updated_at
     ) VALUES (
-      #{id}, #{name}, NULL, #{siblingPosition}, '00000000-0000-0000-0000-000000000000', #{rootDeckId},
-      #{contentType,typeHandler=com.memox.deck.persistence.DeckContentTypeTypeHandler},
-      #{schedulerType,typeHandler=com.memox.common.mybatis.SchedulerTypeTypeHandler},
-      #{schedulerVersion}, #{schedulerGeneration}, #{createdAt}, #{updatedAt}
+      #{id}
+    , #{name}
+    , NULL
+    , #{siblingPosition}
+    , '00000000-0000-0000-0000-000000000000'
+    , #{rootDeckId}
+    , #{contentType
+    , typeHandler=com.memox.deck.persistence.DeckContentTypeTypeHandler}
+    , #{schedulerType
+    , typeHandler=com.memox.common.mybatis.SchedulerTypeTypeHandler}
+    , #{schedulerVersion}
+    , #{schedulerGeneration}
+    , #{createdAt}
+    , #{updatedAt}
     )
   </insert>
 
   <insert id="insertSubDeck" parameterType="com.memox.deck.entity.Deck">
     INSERT INTO decks (
-      id, name, parent_deck_id, sibling_position, sibling_scope_id, root_deck_id, content_type, created_at, updated_at
+      id
+    , name
+    , parent_deck_id
+    , sibling_position
+    , sibling_scope_id
+    , root_deck_id
+    , content_type
+    , created_at
+    , updated_at
     ) VALUES (
-      #{id}, #{name}, #{parentDeckId}, #{siblingPosition}, #{parentDeckId}, #{rootDeckId},
-      #{contentType,typeHandler=com.memox.deck.persistence.DeckContentTypeTypeHandler}, #{createdAt}, #{updatedAt}
+      #{id}
+    , #{name}
+    , #{parentDeckId}
+    , #{siblingPosition}
+    , #{parentDeckId}
+    , #{rootDeckId}
+    , #{contentType
+    , typeHandler=com.memox.deck.persistence.DeckContentTypeTypeHandler}
+    , #{createdAt}
+    , #{updatedAt}
     )
   </insert>
 
@@ -504,18 +611,29 @@
     uq_decks_sibling_scope_position, but not a place in the order a user sees (BR-257).
   -->
   <select id="findSiblingDecksForUpdate" resultMap="deck">
-    SELECT id, name, parent_deck_id, root_deck_id, content_type, scheduler_type,
-           scheduler_version, scheduler_generation, sibling_position, created_at, updated_at
+    SELECT id
+         , name
+         , parent_deck_id
+         , root_deck_id
+         , content_type
+         , scheduler_type
+         , scheduler_version
+         , scheduler_generation
+         , sibling_position
+         , created_at
+         , updated_at
     FROM decks
     WHERE sibling_scope_id = #{siblingScopeId}
       AND delete_batch_id IS NULL
-    ORDER BY sibling_position ASC, id ASC
+    ORDER BY sibling_position ASC
+           , id ASC
     FOR UPDATE
   </select>
 
   <update id="updateSiblingPosition">
     UPDATE decks
-    SET sibling_position = #{siblingPosition}, updated_at = #{updatedAt}
+    SET sibling_position = #{siblingPosition}
+      , updated_at = #{updatedAt}
     WHERE id = #{deckId}
       AND delete_batch_id IS NULL
   </update>
@@ -536,7 +654,8 @@
   -->
   <update id="updateSubtreeRootDeck">
     UPDATE decks
-    SET root_deck_id = #{newRootDeckId}, updated_at = #{updatedAt}
+    SET root_deck_id = #{newRootDeckId}
+      , updated_at = #{updatedAt}
     WHERE id IN (
       WITH RECURSIVE subtree (id) AS (
           SELECT id FROM decks WHERE id = #{deckId}
@@ -555,17 +674,18 @@
   -->
   <update id="reparentDeck">
     UPDATE decks
-    SET parent_deck_id = #{parentDeckId},
-        sibling_scope_id = #{parentDeckId},
-        sibling_position = #{siblingPosition},
-        updated_at = #{updatedAt}
+    SET parent_deck_id = #{parentDeckId}
+      , sibling_scope_id = #{parentDeckId}
+      , sibling_position = #{siblingPosition}
+      , updated_at = #{updatedAt}
     WHERE id = #{deckId}
       AND delete_batch_id IS NULL
   </update>
 
   <update id="updateDeckName">
     UPDATE decks
-    SET name = #{name}, updated_at = #{updatedAt}
+    SET name = #{name}
+      , updated_at = #{updatedAt}
     WHERE id = #{deckId}
       AND delete_batch_id IS NULL
   </update>
@@ -573,8 +693,10 @@
   <!-- Decks that could accept a card: never a root, never the source, and never one that has
        already committed to holding sub-decks. -->
   <select id="findCardMoveTargets" resultMap="deckMoveTarget">
-    SELECT d.id AS deck_id, d.name AS deck_name, d.content_type AS content_type,
-           p.name AS parent_name
+    SELECT d.id AS deck_id
+         , d.name AS deck_name
+         , d.content_type AS content_type
+         , p.name AS parent_name
     FROM decks d
     LEFT JOIN decks p ON p.id = d.parent_deck_id
     WHERE d.root_deck_id = #{rootDeckId}
@@ -582,12 +704,15 @@
       AND d.id &lt;&gt; #{sourceDeckId}
       AND d.delete_batch_id IS NULL
       AND d.content_type IN ('unset', 'card')
-    ORDER BY d.name ASC, d.id ASC
+    ORDER BY d.name ASC
+           , d.id ASC
   </select>
 
   <update id="updateContentType">
     UPDATE decks
-    SET content_type = #{contentType,typeHandler=com.memox.deck.persistence.DeckContentTypeTypeHandler}, updated_at = #{updatedAt}
+    SET content_type = #{contentType
+      , typeHandler=com.memox.deck.persistence.DeckContentTypeTypeHandler}
+      , updated_at = #{updatedAt}
     WHERE id = #{deckId}
       AND delete_batch_id IS NULL
   </update>
