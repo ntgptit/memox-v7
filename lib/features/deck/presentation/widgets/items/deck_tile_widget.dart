@@ -162,11 +162,18 @@ class _DeckHeadRegion extends StatelessWidget {
 /// what to do about it.
 ///
 /// **Anatomy, fixed:** header (identity + menu) · workload line (`7 Due ·
-/// 14 New`) · action row (gauge, percentage, Study). The workload comes first
-/// because it is the decision input — a reader scans *what is pending* before
-/// choosing to act. The track lives inside the surface, inset to the content
-/// padding: flush on the card's bottom edge it read as a decorated border
-/// rather than a measurement.
+/// 14 New`) · rule · progress band (caption, gauge, Study). The workload comes
+/// first because it is the decision input — a reader scans *what is pending*
+/// before choosing to act. The track lives inside the surface, inset to the
+/// content padding: flush on the card's bottom edge it read as a decorated
+/// border rather than a measurement.
+///
+/// **The seam is drawn now, not merely spaced.** It was always a section
+/// boundary — facts above, verbs below — and the comment on its padding said so
+/// while nothing on screen did. `Divider` reads the app's `dividerTheme`, whose
+/// `space` equals its `thickness`, so the rule occupies exactly the line it
+/// draws and the spacing either side stays this widget's decision rather than
+/// Material's default 16.
 class _DeckStateRegion extends StatelessWidget {
   const _DeckStateRegion({required this.summary});
 
@@ -183,22 +190,60 @@ class _DeckStateRegion extends StatelessWidget {
 
     final gutter = deckTileGutter(context);
 
-    return Padding(
-      // `sm` on top: the seam between the metadata block and the action row is
-      // a *section* boundary — information above, verbs below — so it gets one
-      // step more than the line breaks inside the block.
-      padding: EdgeInsets.fromLTRB(
-        gutter,
-        AppSpacing.sm,
-        gutter,
-        AppSpacing.lg,
-      ),
-      child: _DeckActionRow(summary: summary),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        // `sm` either side of the rule, which is the seam the padding used to
+        // hold on its own — one step more than the line breaks inside the
+        // block above, because this is a section boundary and those are not.
+        const SizedBox(height: AppSpacing.sm),
+        Padding(
+          // Inset to the gutter, not bled to the card's edge. A rule that runs
+          // edge to edge cuts the card in two; one that stops where the text
+          // stops separates two parts of the same card.
+          padding: EdgeInsets.symmetric(horizontal: gutter),
+          child: const Divider(),
+        ),
+        Padding(
+          padding: EdgeInsets.fromLTRB(
+            gutter,
+            AppSpacing.sm,
+            gutter,
+            AppSpacing.lg,
+          ),
+          child: _DeckActionRow(summary: summary),
+        ),
+      ],
     );
   }
 }
 
-/// The gauge, its figure, and — when there is anything to study — the verb.
+/// The gauge with its caption above it, and — when there is anything to study
+/// — the verb beside it.
+///
+/// **The bar was a stub and now it is a measurement.** Caption and gauge shared
+/// one line, so the track ran about 43% of the card's inner width with the
+/// figure and the Study pill taking the rest — a 21% fill inside 43% of a
+/// phone-width card is a sliver nobody reads a proportion off. Stacking the
+/// caption over the track hands the gauge the whole column.
+///
+/// **And it costs nothing, which is why it is possible now.** The caption is
+/// `labelMedium` (12 × 1.3 = 15.6), the gap is `sm`, the track is 4 — 27.6 in
+/// total, under the [AppSizing.touchTarget] floor the Study pill already
+/// imposes on this row. A studyable card is exactly as tall as it was.
+///
+/// **A finished card does pay for it**, by roughly the caption's own height:
+/// with no verb there is no button, and with no button there is no floor. That
+/// is the honest trade and `deck_summary_compact_geometry_test` measures it —
+/// its fixture carries a fully-learned deck for exactly this reason.
+///
+/// **What is drawn is not what is announced.** The visible caption is
+/// `Progress` and `21% learned`; the [Semantics] wrapper announces
+/// `82 of 180 learned` with the percentage as its value, which is the fuller
+/// sentence and the one this row has always given a screen reader. Drawing the
+/// long form is what BR-88 removed from the card — "the same fact twice", a
+/// caption restating the track beneath it — and it stays removed.
 ///
 /// **The touch floor belongs to the button, not to the row.** With a Study
 /// pill the row stands 48 tall because the pill's hit area does — a minimum,
@@ -218,9 +263,11 @@ class _DeckActionRow extends StatelessWidget {
     final row = Row(
       children: <Widget>[
         Expanded(
-          // One semantics node for the pair: the gauge and its figure are
-          // one fact, and a reader should hear "82 of 180 learned,
-          // 46 percent learned" once, not a bar and then a stray number.
+          // One semantics node for the whole gauge: the caption, the track and
+          // the figure are one fact, and a reader should hear "82 of 180
+          // learned, 46 percent learned" once — not a word, then a bar, then a
+          // stray number. `MxProgressBar` announces its own label and value, so
+          // it is excluded here rather than left to speak twice.
           child: Semantics(
             label: context.l10n.deckLearnedProgressLabel(
               summary.learnedCardCount,
@@ -228,40 +275,7 @@ class _DeckActionRow extends StatelessWidget {
             ),
             value: context.l10n.deckLearnedPercentLabel(percent),
             child: ExcludeSemantics(
-              child: Row(
-                children: <Widget>[
-                  Expanded(
-                    child: MxProgressBar(
-                      size: MxProgressBarSize.sm,
-                      value: summary.learnedFraction,
-                    ),
-                  ),
-                  // `xs`, not `sm`: the figure belongs to the gauge it
-                  // measures, and the wider gap read as two elements (owner
-                  // review, 2026-08-20).
-                  const SizedBox(width: AppSpacing.xs),
-                  // **No flex on the label** (owner review, 2026-08-20). A
-                  // loose flex child takes only the width it needs and its
-                  // share of the leftover stays empty, which put a hole
-                  // between the gauge and its figure and left the bar at half
-                  // the row. Natural width here, and the gauge's `Expanded`
-                  // absorbs everything else — the mockup's `flex: 1`.
-                  Text(
-                    context.l10n.deckTileLearnedPercentLabel(percent),
-                    // Success is earned at 100% and only there — the same
-                    // moment the gauge's own fill turns (BR-88). Anything
-                    // less is the neutral figure, whatever today's due count
-                    // happens to be.
-                    style: context.texts.labelMedium!.inked(
-                      context,
-                      summary.isFullyLearned ? AppInk.success : AppInk.quiet,
-                      isEmphasized: true,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
+              child: _DeckGauge(summary: summary, percent: percent),
             ),
           ),
         ),
@@ -298,6 +312,147 @@ class _DeckActionRow extends StatelessWidget {
       constraints: const BoxConstraints(minHeight: AppSizing.touchTarget),
       alignment: AlignmentDirectional.centerStart,
       child: row,
+    );
+  }
+}
+
+/// The learned gauge: a caption line, then the track beneath it.
+///
+/// **The caption belongs to this widget, not to [MxProgressBar].** The
+/// primitive draws one — the hero panel uses it — but its header gives the
+/// left-hand label all the flex and the right-hand figure none, which is
+/// correct for the panel (`353 of 868 learned` beside `41%`: the long half is
+/// on the left) and wrong here (`Progress` beside `37% learned`: the long half
+/// is on the right). Measured at 320dp and textScaler 2.0 the tile's figure
+/// wants 155.2 in a 160.2 column and the primitive's leading `sm` gap takes it
+/// past the edge — a 3.0px `RenderFlex` overflow, reproduced before this was
+/// written.
+///
+/// That is a defect in a shared primitive, and `docs/design-system/v1-freeze.md`
+/// §2 line 6 freezes those: a feature task **MUST NOT** fix one in passing, so
+/// this one is written up in the WBS debt ledger for a design-system task and
+/// left alone. What the tile does instead is what the tile already did before
+/// the caption moved above the track — assemble its own figure, with its own
+/// ink rule.
+///
+/// **Measured, then drawn.** Whether both halves fit is a width question, so it
+/// is answered with a `TextPainter` rather than by giving both halves flex and
+/// hoping. Flex would not have worked anyway: two flexible children split the
+/// line by *flex* and not by need, which leaves a hole between the caption and
+/// a figure that should sit against the right edge — the same trap
+/// `_HeroFigureLine` records one file over. When both fit, the figure takes its
+/// natural width and the caption fills the rest, so the figure lands on the
+/// right edge exactly. When they do not, the caption goes and the figure keeps
+/// the line: the number is the fact, and `Progress` is the word that says the
+/// least.
+class _DeckGauge extends StatelessWidget {
+  const _DeckGauge({required this.summary, required this.percent});
+
+  final DeckSummary summary;
+  final int percent;
+
+  /// How wide [text] draws in [style], at the reader's own text scale.
+  double _widthOf(BuildContext context, String text, TextStyle? style) =>
+      (TextPainter(
+        text: TextSpan(text: text, style: style),
+        textDirection: Directionality.of(context),
+        textScaler: MediaQuery.textScalerOf(context),
+        maxLines: 1,
+      )..layout()).width;
+
+  @override
+  Widget build(BuildContext context) {
+    // Success is earned at 100% and only there — the same moment the gauge's
+    // own fill turns (BR-88). Anything less is the neutral figure, whatever
+    // today's due count happens to be. Unchanged from when this figure sat
+    // beside the track, so moving it above changes no colour.
+    final figureStyle = context.texts.labelMedium!.inked(
+      context,
+      summary.isFullyLearned ? AppInk.success : AppInk.quiet,
+      isEmphasized: true,
+    );
+    final captionStyle = context.texts.labelMedium!.inked(
+      context,
+      AppInk.quiet,
+    );
+
+    final figure = context.l10n.deckTileLearnedPercentLabel(percent);
+    final caption = context.l10n.deckTileProgressLabel;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bothFit =
+            _widthOf(context, caption, captionStyle) +
+                AppSpacing.sm +
+                _widthOf(context, figure, figureStyle) <=
+            constraints.maxWidth;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            _caption(
+              context,
+              caption,
+              figure,
+              captionStyle,
+              figureStyle,
+              bothFit: bothFit,
+            ),
+            // `sm`, matching the primitive's own caption gap: at 4 the figure
+            // sits on the track and the two read as one object.
+            const SizedBox(height: AppSpacing.sm),
+            // No `label` or `valueLabel` — the caption above is this widget's.
+            MxProgressBar(
+              size: MxProgressBarSize.sm,
+              value: summary.learnedFraction,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _caption(
+    BuildContext context,
+    String caption,
+    String figure,
+    TextStyle? captionStyle,
+    TextStyle? figureStyle, {
+    required bool bothFit,
+  }) {
+    final figureText = Text(
+      figure,
+      style: figureStyle,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
+
+    // Alone, the figure takes the whole line. `Expanded` rather than a bare
+    // `Text` so that a figure wider than even this column ellipsizes instead
+    // of overflowing — the failure mode this branch exists to avoid.
+    if (!bothFit) return Row(children: <Widget>[Expanded(child: figureText)]);
+
+    return Row(
+      // One baseline: a caption and a figure of the same rung sitting on two
+      // baselines read as two lines that happen to overlap.
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
+      children: <Widget>[
+        Expanded(
+          child: Text(
+            caption,
+            style: captionStyle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        // No flex, and it is safe: `bothFit` has already proved the natural
+        // width fits. That is what puts the figure against the right edge
+        // instead of somewhere in the middle of its flex share.
+        figureText,
+      ],
     );
   }
 }

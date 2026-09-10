@@ -4382,6 +4382,10 @@
     },
     "description": "Deck-card chip: new count."
   },
+  "deckTileProgressLabel": "Tiến độ",
+  "@deckTileProgressLabel": {
+    "description": "The left half of the deck tile gauge caption, opposite the percentage. A generic word on purpose: the figure beside it and the track below it both state the measurement, so a second statement of it here would be the duplication BR-88 removed from this card."
+  },
   "deckTileLearnedPercentLabel": "{percent}% đã thuộc",
   "@deckTileLearnedPercentLabel": {
     "placeholders": {
