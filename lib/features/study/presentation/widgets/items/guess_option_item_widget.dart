@@ -95,7 +95,7 @@ class GuessOptionItemWidget extends StatelessWidget {
     // Measured on the committed golden, not on the draft it was approved from:
     // a resting row reads **1.394:1** in light, on a shadow (`#D7DAE6`), and
     // **1.298:1** in dark, on the zero-blur `outlineVariant` rim
-    // (`#272C48`) `AppElevation` paints there. That is the separation every
+    // (`#222743`) `AppElevation` paints there. That is the separation every
     // `MxCard` in this app has had since M99.94.
     final Color? outline = accent?.resolve(context);
     final outlineWidth = accent == null ? 0.0 : AppStroke.control;

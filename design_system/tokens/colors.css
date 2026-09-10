@@ -22,7 +22,7 @@
 :root{
   /* --- base literals: light ------------------------------------------- */
   --mx-page-light:#F2F5F9;--mx-card-light:#FFFFFF;--mx-inset-light:#E9EBEE;--mx-emphasis-light:#F5F6FF;--mx-border-selected-light:#5569FF;--mx-border-option-light:#7383FF;--mx-selected-light:#E6E9FF;--mx-raised-light:#FFFFFF;
-  --mx-ink-light:#223354;--mx-ink-quiet-light:#596680;--mx-line-light:#E4E7EA;
+  --mx-ink-light:#223354;--mx-ink-quiet-light:#596680;--mx-line-light:#E9ECEF;
   --mx-indigo-light:#4454CC;--mx-indigo-deep-light:#4141C0;--mx-indigo-container-light:#DADDF2;
   --mx-success-light:#2A7800;--mx-warning-light:#A06200;--mx-danger-light:#CD0031;--mx-info-light:#00729A;
   /* --- base literals: dark -------------------------------------------- */
@@ -32,7 +32,7 @@
      24.0) at the page's HSL hue ~231, so the steps app_palette_test.dart holds
      are unchanged while the room reads as Tokyo's rather than A2's violet. */
   --mx-page-dark:#070C27;--mx-card-dark:#111633;--mx-inset-dark:#21274C;--mx-raised-dark:#2F3660;
-  --mx-ink-dark:#CBCCD2;--mx-ink-quiet-dark:#9395A2;--mx-line-dark:#272C48;
+  --mx-ink-dark:#CBCCD2;--mx-ink-quiet-dark:#9395A2;--mx-line-dark:#222743;
   --mx-indigo-dark:#BCC2FF;--mx-indigo-bright-dark:#8A8AE0;--mx-indigo-container-dark:#252C6F;
   --mx-success-dark:#57CA22;--mx-warning-dark:#FFA319;--mx-danger-dark:#FF768F;--mx-info-dark:#33C2FF;
 

@@ -13,7 +13,7 @@ import 'package:flutter/material.dart';
 ///
 /// Nothing changed value in that move. M100.26 then moved every value onto
 /// Tokyo's: the resting edge is Tokyo's `alpha.black[12]` divider (light) and
-/// its `#272C48` divider (dark); the picked edge is Tokyo's `primary.main`
+/// its `#222743` divider (dark); the picked edge is Tokyo's `primary.main`
 /// light and its dark-theme `primary` dark; the accent and option edges are
 /// tints of Tokyo's primary; the control edge is a low-chroma grey at Tokyo's
 /// ink hue, because `app_palette_test.dart` holds the light canvas — input
@@ -57,11 +57,28 @@ abstract final class AppBorderColors {
   /// Both values are hue 240 and inside the light canvas's chroma budget. The
   /// history is worth keeping: `#D7DAE3` (1.40:1) was too weak when it was the
   /// only cue, `#BEC0C3` (1.82:1) was right then and too heavy now.
-  static const Color borderSubtleLight = Color(0xFFE4E7EA);
+  // **Retuned at M100.80, and the reason is which surface it actually sits
+  // on.** The pinned figure for this token has always been measured against
+  // `scheme.surface` — #F2F5F9, the page ground — where #E4E7EA read 1.14:1.
+  // But almost every divider in this app is drawn *inside* an `MxCard`, whose
+  // face is #FFFFFF, and on white the same value reads **1.24:1**: 0.24 of ink
+  // against the 0.14 it was calibrated for, 1.8x heavier than intended.
+  //
+  // #E9ECEF puts the card case at **1.19** (0.19 of ink) and the page case at
+  // **1.08**. The page number is where the caution lives: at #EEF1F4 the card
+  // would finally read 1.13 — the figure this token was designed for — and the
+  // page would fall to **1.04**, which is the page colour itself. That is the
+  // exact failure #431 P2-4 removed when it deleted `borderDivider`, so the
+  // retune stops short of it deliberately rather than chasing the number.
+  static const Color borderSubtleLight = Color(0xFFE9ECEF);
 
   // Lifted from 0xFF403D67 so a fill-less hairline (a divider on the dark page)
   // reads on OLED. Same hue and saturation (0.41), lightness only.
-  static const Color borderSubtleDark = Color(0xFF272C48);
+  // Dark moves with it, by the same proportion rather than to the same
+  // figure: this hairline reads 1.33 on the dark card where light read 1.24,
+  // so it was the heavier of the two to begin with. #222743 brings the card
+  // case to 1.24 and the page case from 1.41 to 1.32.
+  static const Color borderSubtleDark = Color(0xFF222743);
 
   static const Color borderSelectedLight = Color(0xFF5569FF);
 
@@ -220,7 +237,7 @@ abstract final class AppBorderColors {
   /// | `surfaceContainerHigh` | 4.02 | 3.39 | 3.0 |
   /// | **`surfaceContainerHighest`** (switch thumb) | 3.81 | **3.21** | 3.0 |
   ///
-  /// The ordering is right way up again: `borderSubtle` 1.14 → this 3.71 →
+  /// The ordering is right way up again: `borderSubtle` 1.08 → this 3.71 →
   /// `borderSelected` 3.96 → `primary` 5.67, all on the page.
   ///
   /// **Dark is untouched.** Its own binding pairing sits at 3.04 — a margin of

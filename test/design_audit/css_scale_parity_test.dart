@@ -406,7 +406,7 @@ void main() {
 /// silently stop checking the second — the failure mode this file exists for.
 ///
 /// The spread and the hex form arrived with A20.1 P1-06: dark's rim is
-/// `0 0 0 1px #272C48`, and a parser that could not read it is how the dark
+/// `0 0 0 1px #222743` (`#272C48` before M100.80), and a parser that could not read it is how the dark
 /// gate ended up comparing literals instead of layers.
 List<({double dy, double blur, double spread, double alpha, List<int> rgb})>
 _shadowLayers(String file, String token, {String? scope}) {

@@ -32,7 +32,18 @@ void main() {
 
       test('the doc table is the measurement (2 dp)', () {
         String r(Color c) => over(c, surface).toStringAsFixed(2);
-        expect(r(base.borderSubtle), isLight ? '1.14' : '1.41');
+        // **Re-measured at M100.80, and the token moved, not the floor.**
+        // `borderSubtle` was retuned lighter because almost every divider in
+        // this app is drawn inside an `MxCard` — face #FFFFFF — while this
+        // cell measures it against `scheme.surface`, the page ground. On white
+        // the old value read 1.24 against the 1.14 recorded here, so the
+        // figure this table was pinning was not the one anyone was looking at.
+        //
+        // The high-contrast row below is **unchanged**, which is the reason
+        // this retune is safe: HC re-points the token to `onSurfaceVariant`
+        // rather than deriving it from the base, so no accessibility floor
+        // moves with it.
+        expect(r(base.borderSubtle), isLight ? '1.08' : '1.32');
         expect(r(hc.borderSubtle), isLight ? '5.28' : '6.47');
         // Light re-measured at M100.48: the token was lightened from
         // `#6F727B` to `#7B7E88`, which is this cell moving 4.40 -> 3.71.
