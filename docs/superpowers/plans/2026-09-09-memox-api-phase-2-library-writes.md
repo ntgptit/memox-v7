@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | draft, revised 2026-09-10 after M9.W1–W3 |
+| **Status** | **complete** — all 15 tasks executed and merged 2026-09-10 (PRs #512…#525). Corrections made while executing are marked **[corrected]** in place. |
 | **Purpose** | Port the 69 Drift library queries (deck · card · tag · trash) to MyBatis PostgreSQL statements and build the vertical slices that call them. |
 | **Scope** | `memox-api` deck, card, tag and trash modules: mapper XML, mapper interfaces, domain records, application services, controllers, DTOs and their tests; plus the two migrations and one test-harness change those slices require. |
 | **Source of truth for** | Exact execution steps for MemoX API Phase 2, and the Drift→MyBatis statement mapping for the four library modules. |
@@ -2615,12 +2615,12 @@ Also out of scope, and not a gap: auth (`owner_id` stays `NULL`), sync bookkeepi
 
 ## 8. Definition of Done
 
-- All 68 in-scope Drift statements have a MyBatis statement, a parity row, and at least one test that exercises them against a real PostgreSQL.
+- All 69 Phase 2 Drift statements have a parity row, and every row that names a MyBatis statement names one that exists and is exercised against a real PostgreSQL. **Ten are deliberately not ported**, each with its reason in the parity document — an unported statement with a reason is a decision, one with no row is something nobody noticed.
 - `./mvnw test` is green — every test, not a selected subset — on both test backends (Testcontainers where Docker exists, local PostgreSQL otherwise).
-- `V5` and `V6` apply cleanly from an **empty** database, and `FlywayMigrationTest` asserts the deferrable constraint and the two partial indexes.
+- `V5` applies cleanly from an **empty** database and `FlywayMigrationTest` asserts the deferrable constraint. **`V6` was measured and dropped** (Task 14): both queries it targeted were already index-driven, so the migration would have added two indexes nothing uses and every write pays for.
 - Every new failure has an `ApiErrorCode`, an English message and a Vietnamese message, and is reachable in a controller test asserting the Problem Details body.
-- `LayerArchitectureTest` passes including the two new rules; no `@Select`/`@Insert`/`@Update`/`@Delete` annotation exists anywhere.
+- `LayerArchitectureTest` passes — eight rules, including the two that moved to Task 1 and the closed-world layout rule; no `@Select`/`@Insert`/`@Update`/`@Delete` annotation exists anywhere.
 - `OpenApiSnapshotTest` passes against the committed `openapi.json`, and that snapshot is regenerated in the same commit as any path change. `OpenApiContractTest` stays what it is — a smoke test that the four original paths and `info.title` are still published.
 - No endpoint, service or mapper logs card content, tag names, deck names, history or export payloads at any level.
-- `docs/wbs.md` carries one row per task, and the five divergences are recorded with their Flutter-side follow-ups.
+- `docs/wbs.md` carries one row per task, and the ten divergences plus the two outstanding obligations are recorded with their Flutter-side follow-ups.
 - `py -3 .claude/skills/flutter-workflow/scripts/check_docs.py --quiet` is clean.
