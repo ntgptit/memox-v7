@@ -400,6 +400,95 @@ trên) và trường `search` của hợp đồng phân trang (chưa câu SQL n�
 `RuntimeException`, nên bytecode đọc ra `throw (RuntimeException)` dù thực tế luôn là
 subclass do caller cấp. Giữ `threshold=Low, effort=Max` nguyên vẹn.
 
+### M9.Phase2 · Port toàn bộ SQL thư viện từ Drift sang MyBatis
+
+- **Status:** **done** — `./mvnw -o verify` xanh 303/303; `check_docs.py` xanh; PR #516…#525.
+- **Goal:** `memox-api` trả lời được **mọi** câu hỏi mà màn hình thư viện của client
+  hỏi database, bằng đúng những luật BR mà client đang thi hành — không phải bằng một
+  bộ luật thứ hai tình cờ giống.
+- **Nguồn:** `docs/superpowers/plans/2026-09-09-memox-api-phase-2-library-writes.md`,
+  chạy 15 task một vòng lặp. Bản đồ kết quả:
+  `docs/superpowers/specs/2026-09-09-drift-to-mybatis-parity.md`.
+
+| Task | Nội dung | PR |
+|---|---|---|
+| 1–2 | Hạ tầng, `V5`, deck reads đầu tiên | #512…#516 |
+| 3–4 | Deck level view, ancestry, các probe cây | #518 |
+| 5–6 | Deck reorder và move | #519 |
+| 7–9 | Card list, detail, history keyset, edit, batch | #520 |
+| 10 | Tag catalog, rename-merge, delete, gắn tag | #521 |
+| 11 | Export deck và probe trùng lặp khi import | #522 |
+| — | SQL toàn module chuyển sang comma-first | #523 |
+| 12–14 | Trash: soft-delete, list/restore, purge theo retention | #525 |
+| 15 | Tài liệu parity, contract test, WBS | (PR này) |
+
+**Số liệu:** 69 câu Drift trong bốn file `deck/card/tag/trash.drift` → 77 câu MyBatis
+(chênh vì Drift ghi qua companion sinh sẵn, còn API phải viết insert/update ra tay).
+59 câu port thẳng, 10 câu **cố ý không port** — mỗi câu một dòng lý do trong tài liệu
+parity — và 10 phân kỳ có chủ đích.
+
+**Điều đáng nhớ nhất của cả phase: thiết kế nằm trong comment phía trên câu SQL, không
+nằm trong SQL.** Ba phát hiện nặng nhất đều chỉ nhìn thấy ở đó, và **không cái nào làm
+đỏ một test nào**:
+
+1. `rootDeckSummaries.nextDueAt` là sub-select **không tương quan** một cách cố ý —
+   comment gọi nó là đồng hồ đo lại của màn danh sách. Tôi "sửa" nó, ship ở #516, và
+   revert ở #517. Ghi vào tài liệu parity như một phân kỳ *đã thử và đã sai*, để lần
+   sau không ai suy ra lại từ SQL.
+2. **SQLite sắp NULL trước khi ASC, PostgreSQL sắp sau.** Plan viết
+   `DUE_ASC(… NULLS LAST)` — đúng ngược. Thẻ mới (`due_at IS NULL`) là thẻ *đến hạn
+   ngay*, nên sẽ bị đẩy xuống cuối một danh sách sinh ra để đưa chúng lên đầu. Thành
+   dòng dịch thứ 13 và thành `NullOrder` trên *trường* sort.
+3. **BR-177 bắt tag của mỗi card sắp theo tên đã fold**, plan sắp theo cách viết. Cùng
+   một deck sẽ export ra hai artifact khác nhau trên hai nền tảng — đúng thứ BR-177 tồn
+   tại để chặn. SQLite không tôn trọng `ORDER BY` trong aggregate nên Dart phải sort
+   lại ở tầng repository; PostgreSQL thì tôn trọng, nên luật về đúng chỗ của nó.
+
+**Bốn MUST mà plan không thi hành:**
+
+- **BR-256** — xoá nhiều item phải tạo **một batch cho mỗi item root**, không gộp
+  chung. Plan trả một batch cho cả lô. Xoá 50 thẻ giờ là 50 batch chung một
+  `deleted_at`.
+- **BR-261** — restore phải thoả **đúng** bộ luật move và *"MUST NOT có bộ luật thứ hai
+  dành riêng cho restore"*. Plan đề xuất kiểm lại luật độ sâu ở chỗ thứ hai. Restore
+  giờ xoá tombstone rồi **gọi thẳng move**: luật được *chạy*, không được chép lại.
+- **BR-262** — restore một deck phải viết lại `root_deck_id` cho **toàn bộ** subtree kể
+  cả tombstone bên trong. Plan không nhắc.
+- **BR-174** — ba mệnh đề của scope export (all-or-nothing, id trùng về một, scope rỗng
+  bị từ chối ở repository) không có mệnh đề nào được thi hành.
+
+**Phép đo thay cho phỏng đoán:** plan đề xuất `V6` thêm hai partial index và tự yêu cầu
+đo `EXPLAIN (ANALYZE, BUFFERS)` ở quy mô thật trước. Đo trên 10 000 deck fan-out 100,
+100 000 card, 10% tombstone: **cả hai truy vấn đã đi index từ trước**, sau vẫn cùng loại
+node và cùng số buffer. Bỏ migration. Lần đo đầu của tôi sai vì cho 10 000 deck chung
+một cha — seed phẳng thì đo cái seed.
+
+**Guard kiếm cơm:** ArchUnit ép `SchedulerType` về `common.scheduler` (Task 7) và
+`DeckAncestor` về `common.tree` (Task 13), chặn `CardBulkService` ghi thẳng
+`decks.content_type`, và bắt response DTO của trash mượn DTO của deck. JaCoCo đỏ hai lần
+và **không lần nào bị hạ ngưỡng**.
+
+**Nợ có chủ đích, đã ghi trong tài liệu parity §7:**
+
+- **BR-259 — đóng session khi xoá.** Soft-delete MUST đóng phiên đang chạy *trong cùng
+  transaction*. `trash.drift` nói rõ write đó thuộc `study.drift` vì cặp
+  `status × end_reason` là bất biến của module study. API chưa có module study, nên
+  đường xoá **thiếu đúng một write**. Slice study phải thêm vào *trong* transaction của
+  `TrashDeleteService`, không phải bên cạnh.
+- **BR-266 — purge do người dùng chọn.** Chỉ mới có vòng quét retention.
+  `countPurgeBlockers` giữ tập allowed là **tham số** để caller thứ hai không phải đổi
+  câu SQL.
+
+**Việc phía Flutter, còn mở:**
+
+- **`tagCatalog` đếm cả thẻ trong Trash.** Đếm `card_tags` mà không join `cards`, nên
+  một thẻ đang ẩn vẫn thổi phồng số đếm của tag — **BR-237 cấm**. Server đã join; client
+  chưa. Đây là phân kỳ duy nhất trong phase có một MUST đứng sau, nên nó là lỗi của
+  client chứ không phải khác biệt quan điểm.
+- **`orphanedTags` không nên được gọi.** Nếu sau này có ai nối nó vào một job dọn dẹp,
+  nó sẽ **vi phạm BR-230**: xoá thẻ làm tag rơi về đếm 0, và hàng đó phải ở lại vì đó
+  chính là hàng người dùng mở catalog để xoá.
+
 ## M99 · Adhoc
 
 Task do chủ dự án giao trực tiếp, không thuộc chuỗi phụ thuộc M0…M9. Đánh số từ
