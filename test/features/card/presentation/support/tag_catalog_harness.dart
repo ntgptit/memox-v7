@@ -58,9 +58,19 @@ Future<void> pumpTagSurface(
 /// English one, one long enough to wrap. Shared so two test files cannot drift
 /// into measuring different rows and calling the result a disagreement.
 const List<TagCatalogEntry> kTagFixtures = <TagCatalogEntry>[
-  TagCatalogEntry(id: 't1', name: 'động từ', cardCount: 12, linkedCardCount: 12),
+  TagCatalogEntry(
+    id: 't1',
+    name: 'động từ',
+    cardCount: 12,
+    linkedCardCount: 12,
+  ),
   TagCatalogEntry(id: 't2', name: 'food', cardCount: 1, linkedCardCount: 1),
-  TagCatalogEntry(id: 't3', name: 'phrasal verbs and idioms', cardCount: 340, linkedCardCount: 340),
+  TagCatalogEntry(
+    id: 't3',
+    name: 'phrasal verbs and idioms',
+    cardCount: 340,
+    linkedCardCount: 340,
+  ),
 ];
 
 /// Sub-pixel slack for a laid-out rectangle. Not a tolerance for a wrong

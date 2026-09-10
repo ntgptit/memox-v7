@@ -36,14 +36,20 @@ const DeckContextModel _demoContext = DeckContextModel(
 );
 
 const List<TagCatalogEntry> _tags = <TagCatalogEntry>[
-  TagCatalogEntry(id: 't1', name: 'động từ', cardCount: 42, linkedCardCount: 42),
+  TagCatalogEntry(
+    id: 't1',
+    name: 'động từ',
+    cardCount: 42,
+    linkedCardCount: 42,
+  ),
   TagCatalogEntry(id: 't2', name: 'food', cardCount: 12, linkedCardCount: 12),
   TagCatalogEntry(id: 't3', name: 'Noun', cardCount: 7, linkedCardCount: 7),
   TagCatalogEntry(id: 't4', name: 'nouns', cardCount: 3, linkedCardCount: 3),
   TagCatalogEntry(
     id: 't5',
     name: 'TOPIK II · vocabulary · chapter 3',
-    cardCount: 1, linkedCardCount: 1,
+    cardCount: 1,
+    linkedCardCount: 1,
   ),
   TagCatalogEntry(id: 't6', name: 'unused', cardCount: 0, linkedCardCount: 0),
 ];

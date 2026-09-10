@@ -174,25 +174,31 @@ void main() {
       expect((await catalog()).single.cardCount, 1);
     });
 
-    test('the delete count keeps the trashed card the catalog count drops', () async {
-      final deck = await seedDeck();
-      final kept = await seedCard(deck.id, 'a');
-      final trashed = await seedCard(deck.id, 'b');
-      await h.cardRepository.addCardTag(cardId: kept.id, name: tagName('noun'));
-      await h.cardRepository.addCardTag(
-        cardId: trashed.id,
-        name: tagName('noun'),
-      );
+    test(
+      'the delete count keeps the trashed card the catalog count drops',
+      () async {
+        final deck = await seedDeck();
+        final kept = await seedCard(deck.id, 'a');
+        final trashed = await seedCard(deck.id, 'b');
+        await h.cardRepository.addCardTag(
+          cardId: kept.id,
+          name: tagName('noun'),
+        );
+        await h.cardRepository.addCardTag(
+          cardId: trashed.id,
+          name: tagName('noun'),
+        );
 
-      await h.cardRepository.deleteCards(<String>[trashed.id]);
+        await h.cardRepository.deleteCards(<String>[trashed.id]);
 
-      // Two numbers for two rules. BR-230 scopes the catalog row to active
-      // cards; BR-235 makes the delete confirmation say how many cards lose the
-      // tag, and the delete removes every link including the hidden one.
-      final entry = (await catalog()).single;
-      expect(entry.cardCount, 1);
-      expect(entry.linkedCardCount, 2);
-    });
+        // Two numbers for two rules. BR-230 scopes the catalog row to active
+        // cards; BR-235 makes the delete confirmation say how many cards lose the
+        // tag, and the delete removes every link including the hidden one.
+        final entry = (await catalog()).single;
+        expect(entry.cardCount, 1);
+        expect(entry.linkedCardCount, 2);
+      },
+    );
 
     test('the stream re-emits when a card is trashed', () async {
       final deck = await seedDeck();

@@ -141,8 +141,18 @@ void main() {
       build: () => ReviewApp(
         home: tagScreenWith(
           FakeTagCatalogRepository.seeded(const <TagCatalogEntry>[
-            TagCatalogEntry(id: 't1', name: 'noun', cardCount: 12, linkedCardCount: 12),
-            TagCatalogEntry(id: 't2', name: 'food', cardCount: 3, linkedCardCount: 3),
+            TagCatalogEntry(
+              id: 't1',
+              name: 'noun',
+              cardCount: 12,
+              linkedCardCount: 12,
+            ),
+            TagCatalogEntry(
+              id: 't2',
+              name: 'food',
+              cardCount: 3,
+              linkedCardCount: 3,
+            ),
           ]),
           const TagCatalogScreen(),
         ),
