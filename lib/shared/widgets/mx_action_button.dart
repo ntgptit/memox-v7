@@ -46,6 +46,26 @@ enum MxActionButtonVariant {
   destructive,
 }
 
+/// Which side of the label the glyph sits on.
+///
+/// **An axis rather than a second `icon` parameter.** A `trailingIcon` beside
+/// `icon` lets a caller pass both, and a button with a glyph at each end is not
+/// a thing this app has a rule for — the enum makes the choice exclusive by
+/// construction.
+///
+/// **`leading` is every existing caller and stays the default.** A glyph before
+/// the word is the M3 default and the right one when it *classifies* the action:
+/// a check on Save, a trash on Delete. Trailing is for a glyph that points at
+/// what happens next rather than naming what the button is, which is the one
+/// case where reading order puts it after the verb.
+enum MxActionButtonIconSide {
+  /// Before the label. The M3 default, and what a classifying glyph wants.
+  leading,
+
+  /// After the label. For a glyph that indicates direction rather than kind.
+  trailing,
+}
+
 /// How much room a button takes.
 ///
 /// An enum for the same reason [MxActionButtonVariant] is: the moment a caller
@@ -82,6 +102,7 @@ class MxActionButton extends StatelessWidget {
     this.isLoading = false,
     this.shouldKeepLabelWhileLoading = false,
     this.icon,
+    this.iconSide = MxActionButtonIconSide.leading,
     this.shouldAutofocus = false,
     this.semanticLabel,
     super.key,
@@ -144,6 +165,14 @@ class MxActionButton extends StatelessWidget {
   final bool shouldKeepLabelWhileLoading;
 
   final IconData? icon;
+
+  /// Which side of the label [icon] sits on. Ignored when [icon] is null.
+  ///
+  /// **Not consulted while loading.** The spinner takes the leading slot
+  /// whichever side the glyph would have used, because "◌ Exporting…" is the
+  /// row a reader expects and a spinner arriving on the right of a label reads
+  /// as a second control.
+  final MxActionButtonIconSide iconSide;
 
   /// Whether this button takes focus when its route opens.
   ///
@@ -468,11 +497,18 @@ class MxActionButton extends StatelessWidget {
     final content = Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        if (icon != null) ...<Widget>[
+        if (icon != null && iconSide == MxActionButtonIconSide.leading) ...[
           Icon(icon, size: AppIconSize.sm),
           SizedBox(width: gap),
         ],
         text,
+        // The same gap on either side: [_iconGap] answers "how far a glyph
+        // stands from this word at this text scale", and that distance does
+        // not depend on which side it stands on.
+        if (icon != null && iconSide == MxActionButtonIconSide.trailing) ...[
+          SizedBox(width: gap),
+          Icon(icon, size: AppIconSize.sm),
+        ],
       ],
     );
 

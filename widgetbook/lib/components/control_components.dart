@@ -49,6 +49,14 @@ WidgetbookComponent actionButtonComponent() {
           );
           final isLoading = context.knobs.boolean(label: 'isLoading');
           final hasIcon = context.knobs.boolean(label: 'with icon');
+          // M100.74. Inert without a glyph, which is why it reads off the same
+          // switch rather than being a third state of one knob.
+          final iconSide = context.knobs.object
+              .dropdown<MxActionButtonIconSide>(
+                label: 'iconSide',
+                options: MxActionButtonIconSide.values,
+                labelBuilder: (MxActionButtonIconSide value) => value.name,
+              );
 
           return CatalogCenterPage(
             child: MxActionButton(
@@ -57,6 +65,7 @@ WidgetbookComponent actionButtonComponent() {
               size: size,
               isLoading: isLoading,
               icon: hasIcon ? Icons.add : null,
+              iconSide: iconSide,
               onPressed: isEnabled ? _noop : null,
             ),
           );
