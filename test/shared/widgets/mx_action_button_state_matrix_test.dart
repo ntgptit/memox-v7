@@ -28,9 +28,14 @@ void main() {
     'high-contrast dark': buildHighContrastDarkTheme(),
   };
 
+  // **`tonal` joined at M100.73**, in the same change that added it. A variant
+  // outside this map is a variant whose four themes, three states and two sizes
+  // nobody measured — and the map is the only thing that decides, because the
+  // enum is enumerated nowhere else here.
   const filledVariants = <String, MxActionButtonVariant>{
     'primary': MxActionButtonVariant.primary,
     'destructive': MxActionButtonVariant.destructive,
+    'tonal': MxActionButtonVariant.tonal,
   };
 
   Future<void> pump(

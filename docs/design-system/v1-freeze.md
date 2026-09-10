@@ -7,8 +7,8 @@
 | **Scope** | Foundation, theme mapping, shared primitive contract, a11y floor, golden authoring policy. Ngoài phạm vi: **composition của từng màn hình nghiệp vụ** (không đóng băng), giá trị token cụ thể (AD-14), hợp đồng component-level (`.claude/skills/flutter-theme-design/`) |
 | **Source of truth for** | Freeze record của V1 · danh sách hợp đồng đóng băng · reopen trigger · bản đồ enforcement cho từng hợp đồng · ràng buộc lên task feature |
 | **Depends on** | `document-conventions.md` · `architecture.md` (AD-14, AD-15, AD-23) · `design-system/theme-architecture.md` · `reviews/a20-1-design-system-reconciliation.md` (bằng chứng lịch sử) |
-| **Updated by task** | M100.48 |
-| **Last updated** | 2026-09-07 |
+| **Updated by task** | M100.73 |
+| **Last updated** | 2026-09-10 |
 
 ---
 
@@ -85,8 +85,10 @@ task đó **MUST** được kích hoạt bởi ít nhất một trong năm đi�
 3. Thêm một họ shared primitive / component mới.
 4. Thay đổi spec hoặc yêu cầu accessibility buộc hợp đồng phải đổi.
 5. Một defect production được chứng minh nằm trong một hợp đồng đã đóng băng.
+6. **Chủ dự án chỉ định một thay đổi hình thức cho component đã có**, kèm tham
+   chiếu thị giác cụ thể (mockup, ảnh chụp, bản dựng) — xem §3a.
 
-Không điều kiện nào trong năm điều kiện trên đúng, thì hợp đồng ở §2 **MUST NOT**
+Không điều kiện nào trong sáu điều kiện trên đúng, thì hợp đồng ở §2 **MUST NOT**
 bị sửa.
 
 **Một task feature MUST NOT sửa bất kỳ hợp đồng đóng băng nào ở §2** — cả mười
@@ -109,6 +111,52 @@ kể cả chính probe vừa nói. Vòng này phải dừng ở đâu đó, và 
 Ba câu trên có từ khoá là **cố ý**. Theo `document-conventions.md` §3, câu không
 mang MUST/SHOULD/MAY là *giải thích, không phải ràng buộc* — bản đầu của tài liệu
 này viết điều kiện mở lại thành prose trần, nên nó chưa từng ràng buộc ai.
+
+---
+
+## 3a. Reopen record — M100.73 (2026-09-10)
+
+**Đây là lần mở lại đầu tiên của V1, và điều kiện số 6 được thêm trong chính
+lần này.** Ghi nguyên nhân ở đây thay vì để lần sau tự suy ra.
+
+**Chuyện đã xảy ra.** Chủ dự án đưa một mockup HTML của màn Library kèm ảnh chụp
+bản dựng, yêu cầu bố cục theo đó và giữ nguyên token với chức năng. Đối chiếu
+xong, hai trong bốn chỗ lệch không làm được ở tầng feature:
+
+- nút search / overflow trên bar là **hình tròn có viền**, trong khi `MxIconButton`
+  chỉ có một hình dạng — và variant filled của nó đã bị gỡ **hai lần** trước đây;
+- nút Study trên hàng deck là **pill tông nhạt**, trong khi `MxActionButtonVariant`
+  có đúng ba giá trị và không giá trị nào là tonal: `primary` là fill đặc,
+  `secondary` là outline.
+
+**Vì sao phải thêm điều kiện thứ sáu.** Năm điều kiện cũ không cái nào đúng. Đây
+không phải nâng SDK (1), không phải thiết kế lại palette hay theme (2) — palette
+không đổi một giá trị nào; không phải thêm **họ** primitive mới (3) — cả hai đều
+là variant của primitive đã có; không phải yêu cầu accessibility (4); và không
+phải defect (5) — cái đang có chạy đúng, chỉ là không phải hình thức chủ dự án
+muốn.
+
+Nói cách khác: **tài liệu này chưa từng lường trước việc chủ dự án chủ động đổi
+hình thức của component đã có.** Nó lường trước SDK, palette, họ mới, a11y và
+defect — tất cả đều là sức ép từ bên ngoài đẩy vào. Một chỉ định thiết kế đi từ
+người sở hữu sản phẩm ra là hướng còn lại, và nó không có cửa nào. Bịt lỗ hổng
+đó bằng một điều kiện tường minh tốt hơn là nong một trong năm điều kiện kia cho
+vừa, vì cách thứ hai làm mọi điều kiện mất nghĩa.
+
+**Cái gì đã đổi, và cái gì không.**
+
+| Hợp đồng §2 | Đổi | Không đổi |
+|---|---|---|
+| 6 — public contract của shared primitive | `MxActionButtonVariant` thêm `tonal`; `MxIconButton` thêm trục `MxIconButtonShape` | `shared_api_closure_test` không phải nới: allowlist của nó vốn nhận **enum do chính component khai báo**, nên cả hai giá trị mới đi qua mà không sửa test |
+| 1, 2 — role identity và role ngữ nghĩa | không | `tonal` đọc `secondaryContainer` / `onSecondaryContainer`, đúng cặp `_FilledButtonDefaultsM3` cấp cho `FilledButton.tonal`. Không role nào bị thay bằng role khác, không hex nào mới |
+| 5 — foundation | không | Viền tròn dùng `AppRadius.pill` đã có; độ dày là default của `BorderSide`, và `mx_tonal_and_outlined_test.dart` ghim sự trùng khớp giữa nó với `AppStroke.hairline` — đã kiểm bằng tiêm lỗi (dời token lên 1.5 thì test đỏ) |
+| 8 — ripple / state | không | Cả hai variant đi qua `buildFilledStyle` / resolver dùng chung, không qua `styleFrom`. Đây đúng là điều `MxIconButton` đã tự ghi lại sau hai lần gỡ variant filled: *"build its colours from the shared resolvers, not from `styleFrom`"* |
+| 11 — chrome của `MxContentShell` | không | Shell không bị chạm. Nút bar là widget do feature truyền vào `actions:`, nên đổi hình dạng của chúng là việc của feature |
+
+**Ràng buộc lên task feature không đổi.** M100.73 chỉ thêm variant vào primitive
+và **MUST NOT** dùng chúng ở đâu cả; task feature đi sau (M100.74) là nơi chúng
+có caller đầu tiên. Tách như vậy vì §3 cấm "merge một phần thay đổi để mở đường"
+— một PR vừa nới primitive vừa dùng nó là đúng thứ câu đó nói tới.
 
 ---
 

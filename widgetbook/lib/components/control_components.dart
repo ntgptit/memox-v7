@@ -414,6 +414,13 @@ WidgetbookComponent iconButtonComponent() {
             options: MxIconButtonTone.values,
             labelBuilder: (MxIconButtonTone value) => value.name,
           );
+          // The second axis (M100.73). Independent of tone on purpose, so the
+          // catalog can show the product rather than a curated pair.
+          final shape = context.knobs.object.dropdown<MxIconButtonShape>(
+            label: 'shape',
+            options: MxIconButtonShape.values,
+            labelBuilder: (MxIconButtonShape value) => value.name,
+          );
 
           return CatalogCenterPage(
             child: MxIconButton(
@@ -427,6 +434,7 @@ WidgetbookComponent iconButtonComponent() {
                   : Icons.flag_outlined,
               semanticLabel: semanticLabel,
               tone: tone,
+              shape: shape,
               onPressed: isEnabled ? _noop : null,
             ),
           );
