@@ -70,6 +70,17 @@ ButtonStyle buildOutlinedIconButtonStyle(
   ColorScheme scheme,
   AppSemanticColors semantic,
 ) => ButtonStyle(
+  // **40 drawn, 48 hit** (owner brief, 2026-09-10). The plain style takes the
+  // whole 48 because there is nothing to see: an unfilled glyph has no edge,
+  // so the box is invisible and its size is only the target. An outlined one
+  // is a visible circle, and at 48 beside a 12px subtitle it is the largest
+  // object in the header. `padded` keeps the finger's floor while the circle
+  // comes down — the same split `MxActionButtonSize.compact` has used since
+  // 2026-08-20.
+  minimumSize: const WidgetStatePropertyAll<Size>(
+    Size.square(AppSizing.controlCompact),
+  ),
+  tapTargetSize: MaterialTapTargetSize.padded,
   backgroundColor: WidgetStateProperty.resolveWith((states) {
     if (states.contains(WidgetState.disabled)) return semantic.disabledSurface;
 

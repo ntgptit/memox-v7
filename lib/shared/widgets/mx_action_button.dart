@@ -86,6 +86,22 @@ enum MxActionButtonSize {
   /// to 600 through [AppTypography.withWeight], because a 48-button's
   /// `label-lg` on a 40 body reads as text escaping its control.
   compact,
+
+  /// Drawn at 32, hit at 48 — the same `padded` floor [compact] keeps.
+  ///
+  /// **This is a return to a body the owner moved away from, and the reason it
+  /// is admitted rather than swapped in.** The 2026-08-20 review took the deck
+  /// row's verb from 32 up to 40 because "40 is on the 4px grid and clears the
+  /// 32 the pill used to paint". The 2026-09-10 brief asks for the smaller
+  /// body again, from a reference where the row's verb is the lightest thing
+  /// on the card rather than its loudest.
+  ///
+  /// Both readings are defensible and neither is a rule, so this is an
+  /// *option* on the enum and not an edit to [compact]: the screens that chose
+  /// 40 keep it, and the one that wants 32 says so at the call site. What is
+  /// not optional is the floor — 32 is a body, 48 is still what a finger gets,
+  /// and `mx_stress_test` measures that rather than trusting this sentence.
+  dense,
 }
 
 /// The app's button.
@@ -331,8 +347,14 @@ class MxActionButton extends StatelessWidget {
     if (size == MxActionButtonSize.standard) return base;
 
     final ButtonStyle geometry = ButtonStyle(
-      minimumSize: const WidgetStatePropertyAll<Size>(
-        Size(AppSizing.buttonMinWidth, AppSizing.controlCompact),
+      minimumSize: WidgetStatePropertyAll<Size>(
+        Size(AppSizing.buttonMinWidth, switch (size) {
+          // Unreachable — `standard` returned above — but stated so the switch
+          // stays exhaustive and a fourth size fails the build here.
+          MxActionButtonSize.standard => AppSizing.touchTarget,
+          MxActionButtonSize.compact => AppSizing.controlCompact,
+          MxActionButtonSize.dense => AppSizing.controlDense,
+        }),
       ),
       padding: const WidgetStatePropertyAll<EdgeInsets>(
         EdgeInsets.symmetric(horizontal: AppSpacing.md),

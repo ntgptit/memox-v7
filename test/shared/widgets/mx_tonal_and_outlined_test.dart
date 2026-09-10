@@ -4,6 +4,7 @@ import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/core/theme/components/actions/app_button_themes.dart';
 import 'package:memox/core/theme/components/actions/app_icon_button_theme.dart';
 import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
+import 'package:memox/core/theme/foundations/app_sizing.dart';
 import 'package:memox/core/theme/foundations/app_stroke.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_icon_button.dart';
@@ -164,6 +165,48 @@ void main() {
       );
 
       expect(tester.widget<IconButton>(find.byType(IconButton)).style, isNull);
+    });
+
+    testWidgets('draws 40 and still hands a finger 48', (tester) async {
+      // The split this variant exists to make: a visible circle at 48 is the
+      // largest object in a header whose subtitle is 12px, so the circle comes
+      // down and the target does not. `mx_stress_test` measures the floor
+      // across every shared component; this measures that *this* one opted
+      // into the smaller body on purpose rather than by inheriting it.
+      await tester.pumpWidget(
+        host(
+          light,
+          const MxIconButton(
+            icon: Icons.search,
+            semanticLabel: 'Search',
+            shape: MxIconButtonShape.outlined,
+            onPressed: _noop,
+          ),
+        ),
+      );
+
+      // **Two boxes, and telling them apart is the test.** With
+      // `MaterialTapTargetSize.padded` the `IconButton` widget *is* the target
+      // and the ink `Material` inside it is what gets painted. Measuring the
+      // outer one and calling it the body is how a change like this gets
+      // reported as working when nothing moved — it was the first thing this
+      // test did, and it read 48.
+      final drawn = tester.getRect(
+        find
+            .descendant(
+              of: find.byType(IconButton),
+              matching: find.byType(Material),
+            )
+            .first,
+      );
+      expect(drawn.width, AppSizing.controlCompact);
+      expect(drawn.height, AppSizing.controlCompact);
+
+      expect(
+        tester.getRect(find.byType(IconButton)).height,
+        greaterThanOrEqualTo(AppSizing.touchTarget),
+        reason: 'the body came down; the floor must not have',
+      );
     });
 
     test('the border width is the app hairline, however it got there', () {
