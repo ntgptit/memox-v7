@@ -636,6 +636,39 @@
         },
         "type" : "object"
       },
+      "DeleteBatchResponse" : {
+        "properties" : {
+          "deletedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "itemType" : {
+            "type" : "string"
+          },
+          "rootItemId" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "DeleteCardsRequest" : {
+        "properties" : {
+          "cardIds" : {
+            "items" : {
+              "type" : "string"
+            },
+            "minItems" : 1,
+            "type" : "array"
+          }
+        },
+        "required" : [
+          "cardIds"
+        ],
+        "type" : "object"
+      },
       "ExportCardResponse" : {
         "properties" : {
           "back" : {
@@ -1041,6 +1074,66 @@
         "summary" : "List cards by deck, subtree, flag, tags and text",
         "tags" : [
           "Cards"
+        ]
+      }
+    },
+    "/api/v1/cards/bulk-delete" : {
+      "post" : {
+        "operationId" : "deleteCards",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DeleteCardsRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/DeleteBatchResponse"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "One batch per card, in request order"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/DeleteBatchResponse"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "Empty batch, or more than 500 ids"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/DeleteBatchResponse"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "An id names no active card"
+          }
+        },
+        "summary" : "Move a batch of cards to Trash, opening one batch per card",
+        "tags" : [
+          "Trash"
         ]
       }
     },
@@ -1764,6 +1857,45 @@
       }
     },
     "/api/v1/decks/{deckId}" : {
+      "delete" : {
+        "operationId" : "deleteDeck",
+        "parameters" : [
+          {
+            "in" : "path",
+            "name" : "deckId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          }
+        ],
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DeleteBatchResponse"
+                }
+              }
+            },
+            "description" : "The batch the deletion opened"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DeleteBatchResponse"
+                }
+              }
+            },
+            "description" : "Deck not found, or already in Trash"
+          }
+        },
+        "summary" : "Move a deck and its whole active subtree to Trash",
+        "tags" : [
+          "Trash"
+        ]
+      },
       "get" : {
         "operationId" : "getDeck",
         "parameters" : [

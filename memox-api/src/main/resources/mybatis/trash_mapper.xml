@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+  The one mapper whose statements deliberately read tombstones.
+
+  Every other statement in this codebase carries `delete_batch_id IS NULL`; a Trash that could not
+  see deleted rows would have nothing to show. The exception is confined to this file so that
+  "which reads can see a tombstone" stays a question with a short, checkable answer (AD-22, BR-257).
+-->
+<mapper namespace="com.memox.trash.persistence.TrashMapper">
+
+  <resultMap id="deleteBatch" type="com.memox.trash.entity.DeleteBatch">
+    <constructor>
+      <idArg column="id" javaType="java.lang.String"/>
+      <arg column="item_type" javaType="com.memox.trash.enums.TrashItemType"
+           typeHandler="com.memox.trash.persistence.TrashItemTypeTypeHandler"/>
+      <arg column="root_item_id" javaType="java.lang.String"/>
+      <arg column="deleted_at" javaType="java.time.Instant"/>
+    </constructor>
+  </resultMap>
+
+  <insert id="insertDeleteBatch" parameterType="com.memox.trash.entity.DeleteBatch">
+    INSERT INTO delete_batches
+      ( id
+      , item_type
+      , root_item_id
+      , deleted_at
+      )
+    VALUES
+      ( #{id}
+      , #{itemType,typeHandler=com.memox.trash.persistence.TrashItemTypeTypeHandler}
+      , #{rootItemId}
+      , #{deletedAt}
+      )
+  </insert>
+
+  <!--
+    The active descendants a deck deletion is about to take with it (BR-258).
+
+    Cycle-safe `UNION` and no depth cap, exactly like `findSubtreeDeckIds`: a cap turns corrupt data
+    into a silently short answer, and here that would mean a subtree half marked.
+
+    `delete_batch_id IS NULL` on the recursive step is what keeps a branch that is already in Trash,
+    and everything under it, out of the new batch. Restoring this batch will therefore leave that
+    branch exactly where it is.
+  -->
+  <select id="findActiveSubtreeDeckIds" resultType="string">
+    WITH RECURSIVE subtree (id) AS (
+        SELECT id
+          FROM decks
+         WHERE id = #{deckId} AND delete_batch_id IS NULL
+        UNION
+        SELECT d.id
+          FROM decks d
+          INNER JOIN subtree s ON d.parent_deck_id = s.id
+         WHERE d.delete_batch_id IS NULL
+    )
+    SELECT id FROM subtree
+  </select>
+
+  <select id="findActiveCardIdsInDecks" resultType="string">
+    SELECT id
+      FROM cards
+     WHERE deck_id IN
+    <foreach collection="deckIds" open="(" separator="," close=")" item="deckId">#{deckId}</foreach>
+       AND delete_batch_id IS NULL
+  </select>
+
+  <!-- Which of these ids still name an active card, so a batch is never opened over a tombstone. -->
+  <select id="findActiveCardIds" resultType="string">
+    SELECT id
+      FROM cards
+     WHERE id IN
+    <foreach collection="cardIds" open="(" separator="," close=")" item="cardId">#{cardId}</foreach>
+       AND delete_batch_id IS NULL
+  </select>
+
+  <!--
+    The decks these cards are leaving, read BEFORE the marking.
+
+    `countDirectCards` counts active cards, so once the cards are stamped there is nothing left to
+    say where they lived. The emptiness test then runs against the tree the deletion leaves behind
+    (BR-260), which is why the read and the count sit on opposite sides of the write.
+  -->
+  <select id="findSourceDeckIdsOfActiveCards" resultType="string">
+    SELECT DISTINCT deck_id
+      FROM cards
+     WHERE id IN
+    <foreach collection="cardIds" open="(" separator="," close=")" item="cardId">#{cardId}</foreach>
+       AND delete_batch_id IS NULL
+  </select>
+
+  <!--
+    Marking is one statement over a set, so a batch is one atomic step rather than N of them.
+
+    `AND delete_batch_id IS NULL` is BR-258's "keeps its old tombstone", written as a predicate: a
+    row already carrying a batch is skipped rather than re-stamped. The caller compares the count it
+    gets back with the number of ids it read in the same transaction — a short count is not a race
+    there, it is a batch that would claim rows it does not hold.
+  -->
+  <update id="markDecksDeleted">
+    UPDATE decks
+       SET delete_batch_id = #{batchId}
+         , updated_at = #{updatedAt}
+     WHERE id IN
+    <foreach collection="deckIds" open="(" separator="," close=")" item="deckId">#{deckId}</foreach>
+       AND delete_batch_id IS NULL
+  </update>
+
+  <update id="markCardsDeleted">
+    UPDATE cards
+       SET delete_batch_id = #{batchId}
+         , updated_at = #{updatedAt}
+     WHERE id IN
+    <foreach collection="cardIds" open="(" separator="," close=")" item="cardId">#{cardId}</foreach>
+       AND delete_batch_id IS NULL
+  </update>
+
+</mapper>
