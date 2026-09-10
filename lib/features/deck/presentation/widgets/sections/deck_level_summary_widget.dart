@@ -140,6 +140,23 @@ class DeckLevelSummaryWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
+        // **The eyebrow does not fit, and the number says by how much**
+        // (measured 2026-09-10, owner brief). The reference opens its panel
+        // with a small chip before the numeral and the owner asked for it. A
+        // fourth band costs this panel 32.0px — a badge plus its gap — and
+        // `deck_summary_compact_geometry_test` had 14.1px of slack, so card
+        // three ends at 789.9 against a fold at 772. Over by 17.9.
+        //
+        // **Not a decoration problem.** Stripping the pill and drawing bare
+        // uppercase text still costs about 22 and still misses by 8: what the
+        // panel cannot afford is the band existing, not what is drawn in it.
+        // The reference can afford one because its hero is tall by design —
+        // chip, numeral, a sentence and a full-width CTA. This one is two
+        // bands because 320px of a 852px viewport was the defect that started
+        // the compaction.
+        //
+        // Left out rather than merged with the guard relaxed: three whole
+        // cards is the rule that paid for every other decision on this panel.
         DeckSummaryMetricsWidget(snapshot: snapshot),
         // **The bar always arrives with its caption**, never as a bare rule
         // (owner review, 2026-08-25, third pass). It shipped label-less on the
