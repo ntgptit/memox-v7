@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/extensions/app_ink.dart';
+import '../../../../../core/theme/foundations/app_sizing.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -105,13 +106,15 @@ class _ReadyDot extends StatelessWidget {
       // catch, and it caught this one on the first run.
       container: true,
       label: context.l10n.deckHeaderReadySemanticLabel,
-      // **8, off the spacing scale rather than out of a new token.** A
-      // dimension token is `v1-freeze.md` §2 line 5, and one dot does not
-      // justify reopening a frozen foundation for the third time in a day.
-      // 8 is on the 4px grid and is the reference's own `w-2`.
+      // **`AppSizing.statusDot`, and the first attempt got this wrong.** It
+      // said `AppSpacing.sm` — the same 8 — with a comment arguing that a new
+      // dimension token would reopen a frozen foundation over one dot.
+      // `spacing_is_a_gap_test` had already answered that: a token naming a
+      // gap, used as a size, is a dimension wearing the wrong name. It went
+      // red on CI and M100.76 added the token the rule asks for.
       child: Container(
-        width: AppSpacing.sm,
-        height: AppSpacing.sm,
+        width: AppSizing.statusDot,
+        height: AppSizing.statusDot,
         decoration: BoxDecoration(
           color: context.semanticColors.success,
           shape: BoxShape.circle,
