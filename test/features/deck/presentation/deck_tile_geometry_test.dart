@@ -36,9 +36,18 @@ void main() {
     testWidgets('the block keeps one rhythm: title, metadata and workload', (
       tester,
     ) async {
-      // All three lines live in one column now, and each line break is the
-      // same `xs`. Measured on the real text boxes, so a stray floor, padding
-      // or alignment cannot quietly stretch one seam past the other.
+      // All three lines live in one column, and each line break is the same
+      // step. Measured on the real text boxes, so a stray floor, padding or
+      // alignment cannot quietly stretch one seam past the other.
+      //
+      // **`sm` since M100.79, and the guard's subject did not move.** What it
+      // has always held is that the two seams are *equal* — one rhythm, not
+      // two — and the token is the consequence. The brief of 2026-09-10 asked
+      // for the identity block to read as three kinds of fact rather than one
+      // paragraph with breaks in it, and 4 was below the step this system asks
+      // anyone to see. So the pair is asserted against each other first and
+      // against the token second: swapping to a single hard-coded 8 would have
+      // let one seam drift while the other stayed.
       await pump(
         tester,
         fakeSummary(
@@ -58,8 +67,12 @@ void main() {
       );
       final workload = tester.getRect(find.byType(DeckWorkloadLineWidget));
 
-      expect(meta.top - title.bottom, AppSpacing.xs);
-      expect(workload.top - meta.bottom, AppSpacing.xs);
+      expect(
+        meta.top - title.bottom,
+        workload.top - meta.bottom,
+        reason: 'one rhythm, whatever the step is',
+      );
+      expect(meta.top - title.bottom, AppSpacing.sm);
     });
 
     testWidgets('the workload line shares the title axis; the gauge keeps '

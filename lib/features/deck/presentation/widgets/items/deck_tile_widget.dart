@@ -131,9 +131,20 @@ class _DeckHeadRegion extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: AppSpacing.xs),
+                // **`sm`, where both of these were `xs`** (owner brief,
+                // 2026-09-10). Three lines 4 apart read as one paragraph that
+                // happens to have breaks in it; the deck's name, what it
+                // holds, and what is waiting in it are three different kinds
+                // of fact, and one spacing step is the least this system asks
+                // anyone to see as a difference.
+                //
+                // **It cost nothing, which is why it is here rather than on a
+                // wishlist.** The eight pixels come from the card's own bottom
+                // padding, which had been carrying the touch floor's slack on
+                // top of a full `lg` — see `_DeckStateRegion`.
+                const SizedBox(height: AppSpacing.sm),
                 _DeckMetaLine(summary: summary),
-                const SizedBox(height: AppSpacing.xs),
+                const SizedBox(height: AppSpacing.sm),
                 DeckWorkloadLineWidget(summary: summary),
               ],
             ),
@@ -214,11 +225,23 @@ class _DeckStateRegion extends StatelessWidget {
           child: const Divider(),
         ),
         Padding(
+          // **`sm` at the bottom, where it was `lg`, and the card is squarer
+          // for it** (owner brief, 2026-09-10). Measured before the change: 16
+          // above the title and **26** below the bar — the card was visibly
+          // bottom-heavy and nothing on it asked for that.
+          //
+          // The 26 is not a padding decision. The Study pill keeps a 48 touch
+          // floor while the caption, its gap and the track add up to 28, so
+          // the row centres them and leaves 10 unclaimed underneath. That 10
+          // sat on top of a full `lg`. At `sm` the space under the bar reads
+          // 18 against 16 over the title, which is the balance the eye was
+          // missing — and the eight pixels it returns are what pays for the
+          // identity block's step above.
           padding: EdgeInsets.fromLTRB(
             gutter,
             AppSpacing.sm,
             gutter,
-            AppSpacing.lg,
+            AppSpacing.sm,
           ),
           child: _DeckActionRow(summary: summary),
         ),

@@ -80,8 +80,20 @@ class DeckListSliverWidget extends ConsumerWidget {
       ),
       sliver: SliverList.separated(
         itemCount: summaries.length,
-        // `lg`: the track on each card's base makes that boundary loud, so 12
-        // after it read as part of the card rather than as the space between.
+        // **`lg`, and the original reason for it has expired while a better
+        // one took over.** The note here read: "the track on each card's base
+        // makes that boundary loud, so 12 after it read as part of the card
+        // rather than as the space between." That stopped being true at
+        // M100.72 — the track moved into its own band and the card now ends on
+        // 18 of padding.
+        //
+        // M100.79 tried `md` on exactly that reasoning and
+        // `screen_composition_rhythm_test` refused it: `list-item-gap` is an
+        // app-wide grammar rule, every list separates its items by `lg`, and
+        // one screen disagreeing is the inconsistency this list would have to
+        // justify to every other one. The eight pixels it would have returned
+        // are not worth that, so the value stays and the reason is now the
+        // grammar rather than the track.
         separatorBuilder: (context, index) =>
             const SizedBox(height: AppSpacing.lg),
         itemBuilder: (context, index) {
