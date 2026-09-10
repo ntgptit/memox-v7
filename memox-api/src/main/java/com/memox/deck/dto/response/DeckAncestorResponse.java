@@ -1,6 +1,6 @@
 package com.memox.deck.dto.response;
 
-import com.memox.deck.entity.DeckAncestor;
+import com.memox.common.tree.DeckAncestor;
 
 /**
  * One crumb of the breadcrumb.

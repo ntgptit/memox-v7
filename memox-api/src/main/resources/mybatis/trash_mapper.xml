@@ -118,4 +118,150 @@
        AND delete_batch_id IS NULL
   </update>
 
+  <resultMap id="trashBatchRow" type="com.memox.trash.entity.TrashBatchRow">
+    <constructor>
+      <idArg column="batch_id" javaType="java.lang.String"/>
+      <arg column="item_type" javaType="com.memox.trash.enums.TrashItemType"
+           typeHandler="com.memox.trash.persistence.TrashItemTypeTypeHandler"/>
+      <arg column="root_item_id" javaType="java.lang.String"/>
+      <arg column="deleted_at" javaType="java.time.Instant"/>
+      <arg column="item_name" javaType="java.lang.String"/>
+      <arg column="origin_deck_id" javaType="java.lang.String"/>
+      <arg column="origin_deck_name" javaType="java.lang.String"/>
+      <arg column="batch_deck_count" javaType="_long"/>
+      <arg column="batch_card_count" javaType="_long"/>
+      <arg column="origin_path_json" javaType="java.util.List"
+           typeHandler="com.memox.common.tree.AncestryJsonTypeHandler"/>
+    </constructor>
+  </resultMap>
+
+  <resultMap id="tombstoneDeck" type="com.memox.trash.entity.TombstoneDeck">
+    <constructor>
+      <idArg column="id" javaType="java.lang.String"/>
+      <arg column="parent_deck_id" javaType="java.lang.String"/>
+    </constructor>
+  </resultMap>
+
+  <!--
+    One row per deletion, newest first — the whole Trash list in one statement.
+
+    **The two LEFT JOINs are exclusive by `item_type`**, so exactly one of them matches and COALESCE
+    picks the side that exists. A batch whose item root is gone matches neither and yields a null
+    name; the service drops such a row rather than drawing a ghost.
+
+    **`batch_deck_count` / `batch_card_count` count the batch, not the subtree** — what a restore
+    would bring back (BR-262). A descendant already in Trash under an older batch carries that older
+    id and is absent from both, which is exactly the number a confirmation has to show.
+
+    **A CASE on `item_type`, not a COALESCE over `parent_deck_id`.** The two are equivalent here
+    because the joins are exclusive, but the COALESCE spelling is the exact shape BR-57 bans for
+    root resolution, and neither a reader nor a guard can tell at a glance that this one is picking
+    an origin rather than a root. Saying which branch is which removes the question.
+
+    **`origin_path_json` is one recursive walk for the whole list, not one per row.** The CTE maps
+    every deck to its ancestor chain once; the scalar then reads the chain of this row's origin.
+    Per-row recursion would be the N+1 the level view names by name. It walks tombstones on purpose:
+    the deck a card was deleted from may itself be in Trash today, and "where was this" is still the
+    honest answer (BR-267). It is information, never a restore target.
+
+    Translation row 2: `json_group_array(json_object(...))` becomes `json_agg(json_build_object(...))`,
+    COALESCEd to '[]' so a top-level item yields an empty array and never null, and explicitly
+    ORDERed because SQL promises no aggregate input order.
+
+    `item_name` is a deck name or a card's front. It goes to the owner in a response and is never
+    written to a log at any level (BR-267).
+  -->
+  <select id="findTrashBatchRows" resultMap="trashBatchRow">
+    WITH RECURSIVE ancestry (deck_id, node_id, distance) AS (
+        SELECT id
+             , parent_deck_id
+             , 1
+          FROM decks
+         WHERE parent_deck_id IS NOT NULL
+        UNION
+        SELECT a.deck_id
+             , d.parent_deck_id
+             , a.distance + 1
+          FROM decks d
+          INNER JOIN ancestry a ON d.id = a.node_id
+         WHERE d.parent_deck_id IS NOT NULL
+    )
+    SELECT b.id AS batch_id
+         , b.item_type AS item_type
+         , b.root_item_id AS root_item_id
+         , b.deleted_at AS deleted_at
+         , COALESCE(d.name, c.front) AS item_name
+         , CASE WHEN b.item_type = 'deck' THEN d.parent_deck_id ELSE c.deck_id END AS origin_deck_id
+         , (SELECT COUNT(*) FROM decks bd WHERE bd.delete_batch_id = b.id) AS batch_deck_count
+         , (SELECT COUNT(*) FROM cards bc WHERE bc.delete_batch_id = b.id) AS batch_card_count
+         , (SELECT COALESCE(json_agg(json_build_object('id', a.node_id, 'name', ad.name,
+                                                       'distance', a.distance)
+                                     ORDER BY a.distance), '[]'::json)
+              FROM ancestry a
+              INNER JOIN decks ad ON ad.id = a.node_id
+             WHERE a.deck_id = CASE WHEN b.item_type = 'deck' THEN d.parent_deck_id
+                                    ELSE c.deck_id END) AS origin_path_json
+         , (SELECT od.name
+              FROM decks od
+             WHERE od.id = CASE WHEN b.item_type = 'deck' THEN d.parent_deck_id
+                                ELSE c.deck_id END) AS origin_deck_name
+      FROM delete_batches b
+      LEFT JOIN decks d ON b.item_type = 'deck' AND d.id = b.root_item_id
+      LEFT JOIN cards c ON b.item_type = 'card' AND c.id = b.root_item_id
+     ORDER BY b.deleted_at DESC, b.id DESC
+  </select>
+
+  <select id="findBatchById" resultMap="deleteBatch">
+    SELECT id
+         , item_type
+         , root_item_id
+         , deleted_at
+      FROM delete_batches
+     WHERE id = #{batchId}
+  </select>
+
+  <!--
+    The tombstone rows themselves, read without the active filter every other statement carries.
+
+    Both are scoped to a batch as well as an id, so a stale batch id cannot read a row that has since
+    been restored: the pair either matches or the operation is a not-found.
+  -->
+  <select id="findTombstoneDeckInBatch" resultMap="tombstoneDeck">
+    SELECT id
+         , parent_deck_id
+      FROM decks
+     WHERE id = #{deckId} AND delete_batch_id = #{batchId}
+  </select>
+
+  <select id="findTombstoneCardIdInBatch" resultType="string">
+    SELECT id
+      FROM cards
+     WHERE id = #{cardId} AND delete_batch_id = #{batchId}
+  </select>
+
+  <update id="restoreDecksInBatch">
+    UPDATE decks
+       SET delete_batch_id = NULL
+         , updated_at = #{updatedAt}
+     WHERE delete_batch_id = #{batchId}
+  </update>
+
+  <update id="restoreCardsInBatch">
+    UPDATE cards
+       SET delete_batch_id = NULL
+         , updated_at = #{updatedAt}
+     WHERE delete_batch_id = #{batchId}
+  </update>
+
+  <!--
+    Safe only AFTER the rows have been cleared.
+
+    Both tombstone columns carry an `ON DELETE CASCADE` to this table, so deleting the batch while
+    its rows still name it would take them with it — a restore that hard-deletes what it was
+    restoring.
+  -->
+  <delete id="deleteBatch">
+    DELETE FROM delete_batches WHERE id = #{batchId}
+  </delete>
+
 </mapper>

@@ -8,7 +8,7 @@ import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.memox.deck.entity.DeckAncestor;
+import com.memox.common.tree.DeckAncestor;
 import com.memox.deck.entity.DeckLevelChild;
 import com.memox.deck.enums.DeckContentType;
 import com.memox.common.scheduler.SchedulerType;

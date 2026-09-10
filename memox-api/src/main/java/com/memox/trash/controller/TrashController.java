@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,10 +13,14 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.memox.trash.dto.request.DeleteCardsRequest;
+import com.memox.trash.dto.request.RestoreBatchRequest;
 import com.memox.trash.dto.response.DeleteBatchResponse;
+import com.memox.trash.dto.response.TrashBatchResponse;
 import com.memox.trash.service.DeleteCardsCommand;
 import com.memox.trash.service.DeleteDeckCommand;
+import com.memox.trash.service.RestoreBatchCommand;
 import com.memox.trash.service.TrashDeleteService;
+import com.memox.trash.service.TrashRestoreService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -39,6 +44,7 @@ import lombok.RequiredArgsConstructor;
 public class TrashController {
 
 	private final TrashDeleteService trashDeleteService;
+	private final TrashRestoreService trashRestoreService;
 
 	@DeleteMapping("/decks/{deckId}")
 	@ResponseStatus(HttpStatus.CREATED)
@@ -68,5 +74,39 @@ public class TrashController {
 	public List<DeleteBatchResponse> deleteCards(@Valid @RequestBody DeleteCardsRequest request) {
 		return trashDeleteService.deleteCards(new DeleteCardsCommand(request.cardIds())).stream()
 				.map(DeleteBatchResponse::from).toList();
+	}
+
+	/**
+	 * Everything still in Trash, newest first.
+	 *
+	 * <p>Unpaged: Trash holds thirty days of deletions and is read as a list to act on, not browsed.
+	 */
+	@GetMapping("/trash")
+	@Operation(summary = "Every deletion still in Trash, newest first")
+	@ApiResponses(@ApiResponse(responseCode = "200", description = "Trash listed"))
+	public List<TrashBatchResponse> list() {
+		return trashRestoreService.list().stream().map(TrashBatchResponse::from).toList();
+	}
+
+	/**
+	 * Puts one batch back, into a target the caller chose.
+	 *
+	 * <p>An absent {@code targetDeckId} means the top level — the one destination a root deck may
+	 * use, and one no other item may. The refusals are the move's own (409), because a restore is
+	 * held to the move's rules rather than to a second set written for it (BR-261).
+	 */
+	@PostMapping("/trash/{batchId}/restore")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	@Operation(summary = "Restore one batch into a chosen target")
+	@ApiResponses({
+			@ApiResponse(responseCode = "204", description = "The batch is back and no longer in Trash"),
+			@ApiResponse(responseCode = "404", description = "The batch is no longer in Trash"),
+			@ApiResponse(responseCode = "409", description = "The target cannot hold this item")
+	})
+	public void restore(
+			@PathVariable String batchId,
+			@RequestBody(required = false) RestoreBatchRequest request) {
+		final var targetDeckId = request == null ? null : request.targetDeckId();
+		trashRestoreService.restore(new RestoreBatchCommand(batchId, targetDeckId));
 	}
 }

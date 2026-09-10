@@ -8,6 +8,8 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import com.memox.trash.entity.DeleteBatch;
+import com.memox.trash.entity.TombstoneDeck;
+import com.memox.trash.entity.TrashBatchRow;
 
 /**
  * The tombstone columns on {@code decks} and {@code cards}, plus {@code delete_batches}.
@@ -39,4 +41,21 @@ public interface TrashMapper {
 			@Param("cardIds") Collection<String> cardIds,
 			@Param("batchId") String batchId,
 			@Param("updatedAt") Instant updatedAt);
+
+	List<TrashBatchRow> findTrashBatchRows();
+
+	/** @return the batch, or {@code null} when it has been restored or purged */
+	DeleteBatch findBatchById(@Param("batchId") String batchId);
+
+	TombstoneDeck findTombstoneDeckInBatch(
+			@Param("deckId") String deckId, @Param("batchId") String batchId);
+
+	String findTombstoneCardIdInBatch(
+			@Param("cardId") String cardId, @Param("batchId") String batchId);
+
+	int restoreDecksInBatch(@Param("batchId") String batchId, @Param("updatedAt") Instant updatedAt);
+
+	int restoreCardsInBatch(@Param("batchId") String batchId, @Param("updatedAt") Instant updatedAt);
+
+	int deleteBatch(@Param("batchId") String batchId);
 }

@@ -1,4 +1,4 @@
-package com.memox.deck.entity;
+package com.memox.common.tree;
 
 /**
  * One step of the path back up to the root, as the breadcrumb shows it.

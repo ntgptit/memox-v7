@@ -1,5 +1,7 @@
 package com.memox.deck.entity;
 
+import com.memox.common.tree.DeckAncestor;
+
 import java.util.List;
 
 import com.memox.deck.enums.DeckContentType;
