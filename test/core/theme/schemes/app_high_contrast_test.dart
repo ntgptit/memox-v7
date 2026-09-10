@@ -27,8 +27,10 @@ void main() {
   AppSemanticColors semanticOf(ThemeData t) =>
       t.extension<AppSemanticColors>()!;
 
-  /// Every ground a hairline is drawn on in this app: a card, the page, and an
-  /// inset tile. The third is the one `borderControl` alone does not clear.
+  /// Every ground an edge is drawn on in this app: a card, the page, and an
+  /// inset tile. The third used to be the one `borderControl` alone did not
+  /// clear, and that sentence outlived the palette by two milestones — it
+  /// measures **3.39 / 3.50** there now. Re-measure before quoting it again.
   List<(String, Color)> groundsOf(ThemeData t) => <(String, Color)>[
     ('surface', t.colorScheme.surface),
     ('page', t.scaffoldBackgroundColor),
@@ -196,7 +198,8 @@ void main() {
         expect(
           hc.colorScheme.outline,
           semantic.borderControl,
-          reason: '${entry.key}: the boundary role parted from the control edge',
+          reason:
+              '${entry.key}: the boundary role parted from the control edge',
         );
       }
     });
