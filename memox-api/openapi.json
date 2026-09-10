@@ -869,6 +869,19 @@
         },
         "type" : "object"
       },
+      "PurgeReportResponse" : {
+        "properties" : {
+          "purgedBatches" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "skippedBatches" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
       "RenameDeckRequest" : {
         "properties" : {
           "name" : {
@@ -2857,6 +2870,27 @@
           }
         },
         "summary" : "Every deletion still in Trash, newest first",
+        "tags" : [
+          "Trash"
+        ]
+      }
+    },
+    "/api/v1/trash/purge-expired" : {
+      "post" : {
+        "operationId" : "purgeExpired",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PurgeReportResponse"
+                }
+              }
+            },
+            "description" : "What the sweep did"
+          }
+        },
+        "summary" : "Purge every batch past the thirty-day retention window",
         "tags" : [
           "Trash"
         ]

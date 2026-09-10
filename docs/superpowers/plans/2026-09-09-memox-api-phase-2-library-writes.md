@@ -2404,62 +2404,31 @@ git commit -m "feat(trash): list batches and restore one into a chosen target"
 
 ## Task 14: Trash — retention purge
 
-Ports `eligibleBatches`, `purgeBlockerCount`, `purgeBatch`. Retention is 30 × 24 h from `deleted_at`, and the exact boundary is eligible (BR-264).
+Ports `eligibleBatches`, `purgeBlockerCount`, `purgeBatch`. Retention is 30 x 24 h from `deleted_at`, and the exact boundary is eligible (BR-264).
+
+> **Corrected while executing, 2026-09-10.** The section's own instruction about `V6` was followed to its conclusion and the answer was no. Everything else stands; three cases were added.
 
 **Files:**
-- Create: `memox-api/src/main/resources/db/migration/V6__add_trash_indexes.sql`
-- Modify: `trash_mapper.xml`, `TrashMapper.java`
+- ~~Create: `V6__add_trash_indexes.sql`~~ — **measured and dropped, see below. [corrected]**
+- Modify: `trash_mapper.xml`, `TrashMapper.java`, `TrashController.java`
 - Create: `memox-api/src/main/java/com/memox/trash/service/TrashPurgeService.java`, `RetentionPolicy.java`, `PurgeReport.java`
-- Modify: `TrashController.java`
+- Create: `memox-api/src/main/java/com/memox/trash/dto/response/PurgeReportResponse.java`
 - Create: `memox-api/src/test/java/com/memox/trash/TrashPurgeTest.java`
 
 **Interfaces:**
-- Produces: `RetentionPolicy.RETENTION = Duration.ofDays(30)`; `RetentionPolicy.cutoff(Instant now)` → `now.minus(RETENTION)`.
-- Produces: `TrashPurgeService.purgeExpired()` → `PurgeReport(int purgedBatches, int skippedBatches)`; idempotent, safe to call on every request that opens Trash.
+- Produces: `RetentionPolicy.RETENTION = Duration.ofDays(30)`; `RetentionPolicy.cutoff(Instant now)` -> `now.minus(RETENTION)`.
+- Produces: `TrashPurgeService.purgeExpired()` -> `PurgeReport(int purgedBatches, int skippedBatches)`; idempotent, safe on every trigger.
+
+**The user-requested purge is not built here.** BR-266's "purge exactly these, with a strong confirmation" is the other caller of the same three statements, and it differs in one behaviour: a blocked batch is **refused** rather than skipped, because the user named it. It has no endpoint in this plan. `countPurgeBlockers` still takes the allowed set as a **parameter** rather than deriving it from the cutoff, so that second caller needs no statement change — which is exactly the reason `trash.drift` gives for the parameter.
 
 - [ ] **Step 1: Write the failing test**
 
-```java
-class TrashPurgeTest extends PostgresIntegrationTest {
+The section's three cases stand. Four more:
 
-	@Autowired TrashPurgeService trashPurgeService;
-	@Autowired TrashDeleteService trashDeleteService;
-
-	@Test
-	void purgesABatchExactlyAtTheThirtyDayBoundary() {
-		insertRootDeck("root", "Korean");
-		insertSubDeck("a", "Unit 1", "root", "root", DeckContentType.CARD);
-		insertCardWithState("c1", "a", null, null);
-		final var batch = trashDeleteService.deleteCards(new DeleteCardsCommand(List.of("c1")));
-		backdateBatch(batch.id(), Duration.ofDays(30));   // deleted_at == cutoff
-
-		assertThat(trashPurgeService.purgeExpired().purgedBatches()).isEqualTo(1);   // BR-264: >= is eligible
-		assertThat(cardExists("c1")).isFalse();
-	}
-
-	@Test
-	void skipsABatchWhoseSubtreeStillHoldsAnActiveRow() {
-		insertRootDeck("root", "Korean");
-		insertSubDeck("a", "Unit 1", "root", "root");
-		insertSubDeck("b", "Lesson 1", "a", "root", DeckContentType.CARD);
-		final var batch = trashDeleteService.deleteDeck(new DeleteDeckCommand("a"));
-		reviveDeckWithoutBatch("b");                       // simulates a partial restore
-		backdateBatch(batch.id(), Duration.ofDays(31));
-
-		final var report = trashPurgeService.purgeExpired();
-
-		assertThat(report.purgedBatches()).isZero();
-		assertThat(report.skippedBatches()).isEqualTo(1);   // BR-265
-		assertThat(deckExists("a")).isTrue();
-	}
-
-	@Test
-	void isIdempotentWhenNothingIsEligible() {
-		assertThat(trashPurgeService.purgeExpired().purgedBatches()).isZero();
-		assertThat(trashPurgeService.purgeExpired().purgedBatches()).isZero();
-	}
-}
-```
+- **A day short of the window is not eligible** — the other side of the boundary the first case pins.
+- **The cascade reaches the study state and the tag links** (BR-265), asserted rather than assumed: `purgeBatch` deletes one row and nothing in the Java says what follows it.
+- **A descendant in a batch that is not *yet* eligible blocks its ancestor.** This is what makes `allowedBatchIds` load-bearing: measuring against "is it deleted" instead would let the ancestor's cascade take a tombstone whose own thirty days have not run out.
+- **Both eligible: the descendant goes and the ancestor follows** — the case that proves the skip is not permanent.
 
 - [ ] **Step 2: Run and verify it fails**
 
@@ -2469,53 +2438,26 @@ cd memox-api && ./mvnw.cmd -Dtest=TrashPurgeTest test
 
 Expected: FAIL — `TrashPurgeService` does not exist.
 
-- [ ] **Step 3: Port the statements and add `V6`**
+- [ ] **Step 3: Port the statements** (`V6` measured and dropped)
 
-```sql
-CREATE INDEX idx_cards_deck_active ON cards (deck_id) WHERE delete_batch_id IS NULL;
-CREATE INDEX idx_decks_parent_active ON decks (parent_deck_id) WHERE delete_batch_id IS NULL;
-```
+`findEligibleBatches`, `countPurgeBlockers` and `deleteBatch` port as drafted, comma-first.
 
-Both partial indexes serve the "active children of this deck" question that Tasks 2, 4, 12 and 14 all ask, and which `idx_decks_parent_position` cannot answer without also reading the tombstones. Add them only after measuring with `EXPLAIN (ANALYZE, BUFFERS)` on a seeded 10 000-deck / 100 000-card database; if the plan does not change, drop this migration rather than shipping an index nothing uses.
+`purgeBatch` deletes only the batch row; every tombstoned deck and card carries `delete_batch_id ... ON DELETE CASCADE`, so the rows and their `card_study_states`, `study_answers`, `study_queue_items` and `card_tags` follow through the FK graph (BR-265).
 
-```xml
-<select id="findEligibleBatches" resultMap="deleteBatch">
-  SELECT id, item_type, root_item_id, deleted_at
-    FROM delete_batches
-   WHERE deleted_at &lt;= #{cutoff}
-   ORDER BY deleted_at ASC, id ASC
-</select>
+**`V6` was measured and is not shipped. [corrected]** The section said to add the two partial indexes *only* after `EXPLAIN (ANALYZE, BUFFERS)` on data at real scale shows the plan change, and to drop the migration otherwise. The measurement ran on a seeded database of 10 000 decks in a 100-wide fan-out, 100 000 cards, and a tenth of both tombstoned:
 
-<select id="countPurgeBlockers" resultType="long">
-  WITH RECURSIVE subtree (id) AS (
-      SELECT id FROM decks WHERE delete_batch_id = #{batchId}
-      UNION
-      SELECT d.id FROM decks d INNER JOIN subtree s ON d.parent_deck_id = s.id
-  )
-  SELECT (SELECT COUNT(*) FROM decks d
-            WHERE d.id IN (SELECT id FROM subtree)
-              AND (d.delete_batch_id IS NULL
-                OR d.delete_batch_id NOT IN
-                   <foreach collection="allowedBatchIds" open="(" separator="," close=")" item="allowedId">#{allowedId}</foreach>))
-       + (SELECT COUNT(*) FROM cards c
-            WHERE c.deck_id IN (SELECT id FROM subtree)
-              AND (c.delete_batch_id IS NULL
-                OR c.delete_batch_id NOT IN
-                   <foreach collection="allowedBatchIds" open="(" separator="," close=")" item="allowedId">#{allowedId}</foreach>))
-</select>
+| query | before | after `idx_*_active` |
+|---|---|---|
+| `countDirectCards` | Bitmap Index Scan on `idx_cards_deck_created`, 13 buffers, 0.098 ms | Bitmap Index Scan on `idx_cards_deck_active`, 12 buffers, 0.118 ms |
+| `countDirectChildDecks` | Bitmap Index Scan on `idx_decks_parent_position`, 102 buffers, 0.403 ms | Bitmap Index Scan on `idx_decks_parent_active`, 102 buffers, 0.141 ms |
 
-<delete id="purgeBatch">
-  DELETE FROM delete_batches WHERE id = #{batchId}
-</delete>
-```
+**Both queries were already index-driven before the migration**, and stayed the same node type with the same buffer count after it. The section's premise — that `idx_decks_parent_position` "cannot answer without also reading the tombstones" — is true and turns out not to matter: at a 10% tombstone rate the extra heap rows cost nothing measurable, and the remaining timing spread is cache warmth rather than a plan change. So the migration is dropped, per the section's own instruction. Two indexes nothing uses would be two indexes every write pays for.
 
-`purgeBatch` deletes only the batch row; every tombstoned deck and card carries `delete_batch_id … ON DELETE CASCADE`, so the rows and their `card_study_states`, `study_answers`, `study_queue_items` and `card_tags` follow through the FK graph (BR-265). Assert that in the first test rather than assuming it.
-
-`allowedBatchIds` is the eligible set computed in the same call, so `IdCollections.requireNonEmpty` guards it before the statement runs.
+The first attempt at this measurement was itself wrong and is worth recording: it gave all 10 000 decks the same parent, so the predicate matched every row and PostgreSQL correctly chose a sequential scan both before and after. A flat seed measures the seed, not the index.
 
 - [ ] **Step 4: Wire the trigger points**
 
-`purgeExpired()` runs at the start of `GET /api/v1/trash` and is exposed as `POST /api/v1/trash/purge-expired` for the client's startup and resume hooks (BR-264). No scheduler bean — the server does not own the app lifecycle.
+`purgeExpired()` runs at the start of `GET /api/v1/trash` and is exposed as `POST /api/v1/trash/purge-expired` for the client's start and resume hooks (BR-264). No scheduler bean — the server does not own the app lifecycle, and BR-264 requires the sweep to run whether or not anyone opens Trash, which only the client can act on.
 
 - [ ] **Step 5: Run and verify it passes**
 
@@ -2523,12 +2465,12 @@ Both partial indexes serve the "active children of this deck" question that Task
 cd memox-api && ./mvnw.cmd -Dtest='TrashPurgeTest,FlywayMigrationTest' test
 ```
 
-Expected: PASS, 3 + existing.
+Expected: PASS, 7 + existing.
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add memox-api/src/main/resources/db/migration/V6__add_trash_indexes.sql memox-api/src/main/java/com/memox/trash memox-api/src/main/resources/mybatis/trash_mapper.xml memox-api/src/test/java/com/memox/trash
+git add memox-api/src/main/java/com/memox/trash memox-api/src/main/resources/mybatis/trash_mapper.xml memox-api/src/test/java/com/memox/trash memox-api/openapi.json
 git commit -m "feat(trash): purge batches past the thirty-day retention window"
 ```
 

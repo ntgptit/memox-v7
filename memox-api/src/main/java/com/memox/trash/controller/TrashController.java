@@ -15,11 +15,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.memox.trash.dto.request.DeleteCardsRequest;
 import com.memox.trash.dto.request.RestoreBatchRequest;
 import com.memox.trash.dto.response.DeleteBatchResponse;
+import com.memox.trash.dto.response.PurgeReportResponse;
 import com.memox.trash.dto.response.TrashBatchResponse;
 import com.memox.trash.service.DeleteCardsCommand;
 import com.memox.trash.service.DeleteDeckCommand;
 import com.memox.trash.service.RestoreBatchCommand;
 import com.memox.trash.service.TrashDeleteService;
+import com.memox.trash.service.TrashPurgeService;
 import com.memox.trash.service.TrashRestoreService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -45,6 +47,7 @@ public class TrashController {
 
 	private final TrashDeleteService trashDeleteService;
 	private final TrashRestoreService trashRestoreService;
+	private final TrashPurgeService trashPurgeService;
 
 	@DeleteMapping("/decks/{deckId}")
 	@ResponseStatus(HttpStatus.CREATED)
@@ -85,7 +88,23 @@ public class TrashController {
 	@Operation(summary = "Every deletion still in Trash, newest first")
 	@ApiResponses(@ApiResponse(responseCode = "200", description = "Trash listed"))
 	public List<TrashBatchResponse> list() {
+		// BR-264 names opening Trash as one of the three triggers, and the sweep is cheap when there
+		// is nothing to do: one indexed read that returns no rows.
+		trashPurgeService.purgeExpired();
 		return trashRestoreService.list().stream().map(TrashBatchResponse::from).toList();
+	}
+
+	/**
+	 * The retention sweep, for the client's start and resume hooks (BR-264).
+	 *
+	 * <p>No scheduler bean: the server does not own the app lifecycle, and BR-264 requires the sweep
+	 * to run whether or not anyone opens Trash — which is a decision only the client can act on.
+	 */
+	@PostMapping("/trash/purge-expired")
+	@Operation(summary = "Purge every batch past the thirty-day retention window")
+	@ApiResponses(@ApiResponse(responseCode = "200", description = "What the sweep did"))
+	public PurgeReportResponse purgeExpired() {
+		return PurgeReportResponse.from(trashPurgeService.purgeExpired());
 	}
 
 	/**

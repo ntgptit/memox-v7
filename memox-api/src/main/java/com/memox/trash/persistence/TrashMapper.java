@@ -57,5 +57,11 @@ public interface TrashMapper {
 
 	int restoreCardsInBatch(@Param("batchId") String batchId, @Param("updatedAt") Instant updatedAt);
 
+	List<DeleteBatch> findEligibleBatches(@Param("cutoff") Instant cutoff);
+
+	long countPurgeBlockers(
+			@Param("batchId") String batchId,
+			@Param("allowedBatchIds") Collection<String> allowedBatchIds);
+
 	int deleteBatch(@Param("batchId") String batchId);
 }
