@@ -79,6 +79,32 @@ enforced in code — `DisposableTestDatabase` — not by convention.
 | `Refusing to modify database 'memox'` | `MEMOX_TEST_DB_URL` points at the application database |
 | `Could not find a valid Docker environment` | No Docker, and `MEMOX_TEST_DATABASE=local` was not set |
 
+## How the SQL is laid out
+
+Every list in a mapper statement that spans more than one line is **comma-first**:
+
+```sql
+SELECT c.id
+     , c.deck_id
+     , c.front
+  FROM cards c
+ WHERE c.delete_batch_id IS NULL
+```
+
+Two reasons, and only the first is about taste. Adding or removing a column
+touches exactly the line it is on, so a diff shows the column that changed
+instead of that column plus its neighbour's comma. And a missing separator is
+visible down the left edge rather than hidden at a ragged right margin — which
+matters here, because a projection that silently loses a column is the failure
+mode `study_answers` already produced once.
+
+**Function arguments are not lists in this sense and keep their commas where
+they are.** `string_agg(t.name, chr(31) ORDER BY …)` and
+`json_build_object('id', x, 'name', y)` are one expression that happens to wrap;
+nobody maintains them a line at a time, and splitting them buys nothing. The
+rule is about the lists a person edits column by column: `SELECT` projections,
+`INSERT` column and `VALUES` lists, `SET`, `ORDER BY`, `GROUP BY`.
+
 ## Why the two backends must not drift
 
 CI runs the container backend; a machine without Docker runs the local one. They are only

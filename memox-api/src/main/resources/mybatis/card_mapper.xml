@@ -24,19 +24,43 @@
 
   <insert id="insertCard" parameterType="com.memox.card.entity.Card">
     INSERT INTO cards (
-      id, deck_id, front, back, front_folded, back_folded,
-      example, hint, pronunciation, created_at, updated_at
+      id
+    , deck_id
+    , front
+    , back
+    , front_folded
+    , back_folded
+    , example
+    , hint
+    , pronunciation
+    , created_at
+    , updated_at
     ) VALUES (
-      #{id}, #{deckId}, #{front}, #{back}, LOWER(#{front}), LOWER(#{back}),
-      #{example}, #{hint}, #{pronunciation}, #{createdAt}, #{updatedAt}
+      #{id}
+    , #{deckId}
+    , #{front}
+    , #{back}
+    , LOWER(#{front})
+    , LOWER(#{back})
+    , #{example}
+    , #{hint}
+    , #{pronunciation}
+    , #{createdAt}
+    , #{updatedAt}
     )
   </insert>
 
   <insert id="insertInitialStudyState">
     INSERT INTO card_study_states (
-      card_id, scheduler_type, scheduler_version, scheduler_generation
+      card_id
+    , scheduler_type
+    , scheduler_version
+    , scheduler_generation
     ) VALUES (
-      #{cardId}, #{schedulerType}, #{schedulerVersion}, #{schedulerGeneration}
+      #{cardId}
+    , #{schedulerType}
+    , #{schedulerVersion}
+    , #{schedulerGeneration}
     )
   </insert>
 
@@ -57,8 +81,16 @@
   </sql>
 
   <select id="findActiveCardsByDeck" resultMap="card">
-    SELECT c.id, c.deck_id, c.front, c.back, c.is_flagged, c.example, c.hint, c.pronunciation,
-           c.created_at, c.updated_at
+    SELECT c.id
+         , c.deck_id
+         , c.front
+         , c.back
+         , c.is_flagged
+         , c.example
+         , c.hint
+         , c.pronunciation
+         , c.created_at
+         , c.updated_at
     FROM cards c
     WHERE c.deck_id = #{deckId}
       AND c.delete_batch_id IS NULL
@@ -130,7 +162,9 @@
         SELECT id FROM subtree)
     </if>
     <if test="filter.flagged != null">
-      AND c.is_flagged = #{filter.flagged,typeHandler=com.memox.common.mybatis.BooleanSmallIntTypeHandler,jdbcType=SMALLINT}
+      AND c.is_flagged = #{filter.flagged
+    , typeHandler=com.memox.common.mybatis.BooleanSmallIntTypeHandler
+    , jdbcType=SMALLINT}
     </if>
     <if test="filter.hasTagFilter()">
       AND EXISTS (SELECT 1 FROM card_tags ct
@@ -150,12 +184,28 @@
     ORDER BY inside the aggregate is not optional.
   -->
   <select id="findCardListItems" resultMap="cardListItem">
-    SELECT c.id, c.deck_id, c.front, c.back, c.is_flagged, c.example, c.hint, c.pronunciation,
-           c.created_at, c.updated_at,
-           s.scheduler_type, s.scheduler_generation, s.learned_at, s.due_at, s.last_answered_at,
-           s.answer_count, s.lapse_count, s.current_box, s.ease_factor, s.interval_days,
-           s.repetitions,
-           (SELECT string_agg(t.name, chr(31) ORDER BY t.name, t.id)
+    SELECT c.id
+         , c.deck_id
+         , c.front
+         , c.back
+         , c.is_flagged
+         , c.example
+         , c.hint
+         , c.pronunciation
+         , c.created_at
+         , c.updated_at
+         , s.scheduler_type
+         , s.scheduler_generation
+         , s.learned_at
+         , s.due_at
+         , s.last_answered_at
+         , s.answer_count
+         , s.lapse_count
+         , s.current_box
+         , s.ease_factor
+         , s.interval_days
+         , s.repetitions
+         , (SELECT string_agg(t.name, chr(31) ORDER BY t.name, t.id)
               FROM card_tags ct
               INNER JOIN tags t ON t.id = ct.tag_id
              WHERE ct.card_id = c.id) AS tag_names
@@ -190,8 +240,8 @@
   -->
   <select id="countCardStatesByDeck" resultMap="cardStateCounts">
     SELECT
-      COALESCE(SUM(CASE WHEN s.learned_at IS NULL THEN 1 ELSE 0 END), 0) AS new_count,
-      COALESCE(SUM(CASE WHEN s.learned_at IS NOT NULL
+      COALESCE(SUM(CASE WHEN s.learned_at IS NULL THEN 1 ELSE 0 END), 0) AS new_count
+    , COALESCE(SUM(CASE WHEN s.learned_at IS NOT NULL
                     AND ((s.scheduler_type = 'eight_box' AND s.current_box &lt; #{thresholds.reviewingBox})
                       OR (s.scheduler_type = 'sm2' AND s.interval_days &lt; #{thresholds.reviewingDays}))
                    THEN 1 ELSE 0 END), 0) AS learning_count,
@@ -248,10 +298,26 @@
   </resultMap>
 
   <sql id="historyColumns">
-    id, card_id, session_id, scheduler_type, scheduler_generation, kind, mode,
-    outcome_reason, comparison_version, used_hint, "action", answered_at, next_due_at,
-    previous_box, next_box, previous_ease_factor, next_ease_factor,
-    previous_interval_days, next_interval_days, direction
+    id
+  , card_id
+  , session_id
+  , scheduler_type
+  , scheduler_generation
+  , kind
+  , mode
+  , outcome_reason
+  , comparison_version
+  , used_hint
+  , "action"
+  , answered_at
+  , next_due_at
+  , previous_box
+  , next_box
+  , previous_ease_factor
+  , next_ease_factor
+  , previous_interval_days
+  , next_interval_days
+  , direction
   </sql>
 
   <!--
@@ -268,7 +334,8 @@
     SELECT <include refid="historyColumns"/>
     FROM study_answers
     WHERE card_id = #{cardId}
-    ORDER BY answered_at DESC, id DESC
+    ORDER BY answered_at DESC
+           , id DESC
     LIMIT #{limit}
   </select>
 
@@ -289,7 +356,8 @@
     FROM study_answers
     WHERE card_id = #{cardId}
       AND (answered_at, id) &lt; (#{cursor.answeredAt}, #{cursor.id})
-    ORDER BY answered_at DESC, id DESC
+    ORDER BY answered_at DESC
+           , id DESC
     LIMIT #{limit}
   </select>
 
@@ -302,12 +370,28 @@
     its content (BR-245, BR-257).
   -->
   <select id="findCardDetailById" resultMap="cardListItem">
-    SELECT c.id, c.deck_id, c.front, c.back, c.is_flagged, c.example, c.hint, c.pronunciation,
-           c.created_at, c.updated_at,
-           s.scheduler_type, s.scheduler_generation, s.learned_at, s.due_at, s.last_answered_at,
-           s.answer_count, s.lapse_count, s.current_box, s.ease_factor, s.interval_days,
-           s.repetitions,
-           (SELECT string_agg(t.name, chr(31) ORDER BY t.name, t.id)
+    SELECT c.id
+         , c.deck_id
+         , c.front
+         , c.back
+         , c.is_flagged
+         , c.example
+         , c.hint
+         , c.pronunciation
+         , c.created_at
+         , c.updated_at
+         , s.scheduler_type
+         , s.scheduler_generation
+         , s.learned_at
+         , s.due_at
+         , s.last_answered_at
+         , s.answer_count
+         , s.lapse_count
+         , s.current_box
+         , s.ease_factor
+         , s.interval_days
+         , s.repetitions
+         , (SELECT string_agg(t.name, chr(31) ORDER BY t.name, t.id)
               FROM card_tags ct
               INNER JOIN tags t ON t.id = ct.tag_id
              WHERE ct.card_id = c.id) AS tag_names
@@ -333,7 +417,9 @@
     (BR-245, BR-257) — it compares the rows it got against the ids it asked for.
   -->
   <select id="findCardDeckContextForIds" resultMap="cardDeckContext">
-    SELECT c.id AS card_id, d.id AS deck_id, d.root_deck_id AS root_deck_id
+    SELECT c.id AS card_id
+         , d.id AS deck_id
+         , d.root_deck_id AS root_deck_id
     FROM cards c
     INNER JOIN decks d ON d.id = c.deck_id
     WHERE c.id IN
@@ -344,7 +430,8 @@
 
   <update id="moveCardsToDeck">
     UPDATE cards
-    SET deck_id = #{deckId}, updated_at = #{updatedAt}
+    SET deck_id = #{deckId}
+      , updated_at = #{updatedAt}
     WHERE id IN
     <foreach collection="cardIds" open="(" separator="," close=")" item="cardId">#{cardId}</foreach>
       AND delete_batch_id IS NULL
@@ -353,8 +440,10 @@
   <!-- Translation row 6: a Java boolean bound into a SMALLINT column needs the handler named. -->
   <update id="setCardsFlagByIds">
     UPDATE cards
-    SET is_flagged = #{flagged,typeHandler=com.memox.common.mybatis.BooleanSmallIntTypeHandler,jdbcType=SMALLINT},
-        updated_at = #{updatedAt}
+    SET is_flagged = #{flagged
+      , typeHandler=com.memox.common.mybatis.BooleanSmallIntTypeHandler
+      , jdbcType=SMALLINT}
+      , updated_at = #{updatedAt}
     WHERE id IN
     <foreach collection="cardIds" open="(" separator="," close=")" item="cardId">#{cardId}</foreach>
       AND delete_batch_id IS NULL
@@ -370,18 +459,30 @@
   -->
   <update id="updateCardContent">
     UPDATE cards
-    SET front = #{front}, back = #{back},
-        front_folded = LOWER(#{front}), back_folded = LOWER(#{back}),
-        example = #{example}, hint = #{hint}, pronunciation = #{pronunciation},
-        updated_at = #{updatedAt}
+    SET front = #{front}
+      , back = #{back}
+      , front_folded = LOWER(#{front})
+      , back_folded = LOWER(#{back})
+      , example = #{example}
+      , hint = #{hint}
+      , pronunciation = #{pronunciation}
+      , updated_at = #{updatedAt}
     WHERE id = #{id}
       AND delete_batch_id IS NULL
   </update>
 
   <!-- The write paths read the card back so the caller sees what was stored, not what was sent. -->
   <select id="findCardById" resultMap="card">
-    SELECT c.id, c.deck_id, c.front, c.back, c.is_flagged, c.example, c.hint, c.pronunciation,
-           c.created_at, c.updated_at
+    SELECT c.id
+         , c.deck_id
+         , c.front
+         , c.back
+         , c.is_flagged
+         , c.example
+         , c.hint
+         , c.pronunciation
+         , c.created_at
+         , c.updated_at
     FROM cards c
     WHERE c.id = #{cardId}
       AND c.delete_batch_id IS NULL
@@ -433,8 +534,13 @@
     has to keep it.
   -->
   <sql id="exportCardColumns">
-    SELECT c.id AS card_id, c.front, c.back, c.example, c.hint, c.pronunciation,
-           (SELECT string_agg(t.name, chr(31) ORDER BY t.name_folded, t.name)
+    SELECT c.id AS card_id
+         , c.front
+         , c.back
+         , c.example
+         , c.hint
+         , c.pronunciation
+         , (SELECT string_agg(t.name, chr(31) ORDER BY t.name_folded, t.name)
               FROM card_tags ct
               INNER JOIN tags t ON t.id = ct.tag_id
              WHERE ct.card_id = c.id) AS tag_names
@@ -456,7 +562,8 @@
   <select id="findExportCardsInDeck" resultMap="exportCard">
     <include refid="exportCardColumns"/>
      WHERE c.deck_id = #{deckId} AND c.delete_batch_id IS NULL
-     ORDER BY c.created_at ASC, c.id ASC
+     ORDER BY c.created_at ASC
+            , c.id ASC
   </select>
 
   <!--
@@ -475,7 +582,8 @@
      WHERE c.deck_id = #{deckId} AND c.delete_batch_id IS NULL
        AND c.id IN
     <foreach collection="cardIds" open="(" separator="," close=")" item="cardId">#{cardId}</foreach>
-     ORDER BY c.created_at ASC, c.id ASC
+     ORDER BY c.created_at ASC
+            , c.id ASC
   </select>
 
   <!--
@@ -498,7 +606,8 @@
     and refusing an import because of one would be refusing on evidence the user cannot see.
   -->
   <select id="findCardKeysInDeck" resultMap="cardKey">
-    SELECT front_folded, back_folded
+    SELECT front_folded
+         , back_folded
       FROM cards
      WHERE deck_id = #{deckId} AND delete_batch_id IS NULL
   </select>
