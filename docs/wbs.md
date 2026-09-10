@@ -479,15 +479,95 @@ và **không lần nào bị hạ ngưỡng**.
   `countPurgeBlockers` giữ tập allowed là **tham số** để caller thứ hai không phải đổi
   câu SQL.
 
-**Việc phía Flutter, còn mở:**
+**Việc phía Flutter và hai nghĩa vụ còn nợ:** đã làm hết trong **M9.Phase2b** ngay dưới.
 
-- **`tagCatalog` đếm cả thẻ trong Trash.** Đếm `card_tags` mà không join `cards`, nên
-  một thẻ đang ẩn vẫn thổi phồng số đếm của tag — **BR-237 cấm**. Server đã join; client
-  chưa. Đây là phân kỳ duy nhất trong phase có một MUST đứng sau, nên nó là lỗi của
-  client chứ không phải khác biệt quan điểm.
-- **`orphanedTags` không nên được gọi.** Nếu sau này có ai nối nó vào một job dọn dẹp,
-  nó sẽ **vi phạm BR-230**: xoá thẻ làm tag rơi về đếm 0, và hàng đó phải ở lại vì đó
-  chính là hàng người dùng mở catalog để xoá.
+### M9.Phase2b · Bốn điểm tồn đọng của Phase 2
+
+- **Status:** **done** — `./mvnw -o verify` xanh 317/317; `flutter analyze` 467 issues (đúng
+  bằng baseline, không thêm lint nào); `flutter test test/features/card/` xanh 893/893;
+  `check_docs.py` xanh.
+- **Goal:** Đóng bốn điểm mà M9.Phase2 để lại — hai nghĩa vụ phía server và hai việc phía
+  client — thay vì để chúng nằm trong sổ nợ.
+
+**1. BR-259 — đóng session khi xoá (server, xong).** Đường soft-delete ship ở Phase 2 mà
+thiếu đúng một write. `trash.drift` nói rõ vì sao write đó không thuộc Trash: cặp
+`status × end_reason` là bất biến của module study. Nên `com.memox.study` giờ tồn tại như
+**đúng lát cắt đó** — hai lookup, một update, hai enum — và `TrashDeleteService` gọi một
+verb. Verb sở hữu cả hai cột, nên một cặp sai là **không viết được**, chứ không phải
+"không nên viết": schema Postgres không hề ràng buộc tính hợp lệ của cặp, vì hai CHECK là
+hai danh sách độc lập.
+
+Ba điều chịu lực, mỗi điều một test: **hai lookup chứ không một** (phiên ôn cả root có
+`deck_id` là root, root không nằm trong batch — chỉ hàng đợi nối nó với sub-deck bị xoá);
+**chạy trước khi đánh dấu** (id phải còn mô tả hàng sống); và **chỉ `in_progress`** (phiên
+đã kết thúc giữ nguyên cách nó kết thúc — BR-86).
+
+**2. BR-266 — purge do người dùng chọn (server, xong).** `POST /api/v1/trash/purge`. Cùng
+một tín hiệu blocker mang hai nghĩa trái ngược: vòng quét **bỏ qua**, cái này **từ chối**,
+và từ chối nguyên khối — người dùng đã xác nhận một con số chính xác trước khi gọi. Kiểm
+tra tồn tại chạy trước và tách riêng; tập allowed đúng bằng những gì được nêu tên, không
+phải "mọi thứ quá hạn".
+
+**Một bổ sung, không phải port:** BR-266 cấm trộn card và deck, và cột *Enforced by* của
+nó ghi `UI`. App Flutter giữ luật đó ở selection state; repository của nó không kiểm, vì
+không gì tới được đó với danh sách trộn. Client HTTP thì không có selection state, nên ở
+biên này luật **không được thi hành** trừ khi endpoint thi hành. Hệ quả đã ghi thành test:
+một batch **deck** mà bên trong còn batch **card** cũ hơn thì **không thể purge bằng tay** —
+chọn cả hai là trộn loại. Nó chờ retention. Client Flutter cũng bí đúng như vậy.
+
+**3. `tagCatalog` join `cards` (client, xong).** BR-237. `readsFrom` đổi từ
+`{tags, cardTags}` thành `{tags, cardTags, cards}` — bắt buộc, vì nếu không catalog sẽ
+**đứng im đúng lúc một thẻ vào Trash**, tức đúng ca mà bản sửa nhắm tới. Hai test mới, và
+**đã tiêm lỗi**: bỏ `cards` khỏi `readsFrom` thì test stream đỏ (`Expected: <1>, Actual:
+<2>`) trong khi test đếm vẫn xanh — nên chỉ một trong hai là guard thật.
+
+Golden không bị ảnh hưởng: mọi widget test của catalog đi qua
+`tagCatalogRepositoryProvider.overrideWithValue`, không chạm database.
+
+**4. `orphanedTags` (client, xong).** Comment cũ chỉ nói "nothing calls it yet" — một mô tả
+hiện trạng, không phải lệnh cấm. Giờ nó nói rõ **không được nối vào job dọn dẹp** và vì sao
+(BR-230). Không sửa `docs/business-rules.md` — file đó frozen for MVP.
+
+**Một việc nữa, do vòng phản biện tìm ra và đã làm luôn (3 agent, 1 finding sống / 2 bị bác):**
+
+**Xác nhận xoá tag giờ nói hụt số thẻ.** BR-235 buộc xác nhận *"nêu rõ số thẻ sẽ bị gỡ tag"*, và
+`tag_delete_confirm_widget.dart:57-59` lấy con số đó từ `TagCatalogEntry.cardCount`. Xoá tag gỡ
+**mọi** hàng `card_tags` — BR-235 nói vậy, và `ON DELETE CASCADE` cũng làm vậy dù có
+`unlinkAllCardsFromTag` hay không — nên thẻ trong Trash cũng mất link mà không còn nằm trong con số.
+
+**Không trạng thái nào của code thoả cả hai rule.** Trước đây đếm mọi link: BR-235 đúng, BR-230 sai.
+Bây giờ đếm thẻ active: BR-230 đúng, BR-235 nói hụt. Việc gộp một con số cho hai mục đích đã có từ
+trước; thay đổi này chỉ dời phía đang sai — sang phía mà một MUST về catalog nêu đích danh.
+
+**Đã giải bằng hai con số cho hai mục đích** (chủ dự án chốt): `tagCatalog` thêm aggregate
+`linkedCardCount` đếm mọi hàng `card_tags`; `TagCatalogEntry` mang cả hai; dialog xoá đọc con số mới.
+Hai số **được phép lệch nhau**, và đó mới đúng: một tag chỉ còn thẻ trong Trash hiện `0` ở danh sách
+và "1 thẻ" ở dialog — nó không phải tag không còn thẻ nào, nên nhánh "unused" cũng chuyển sang
+`linkedCardCount`. Server giữ một số: `TagCatalogResponse` chưa có client nào vẽ dialog xác nhận, và
+thêm field không ai đọc đúng là thứ port này đã từ chối suốt.
+
+43 call site được vá **theo vị trí analyzer chỉ**, không theo grep — lần đầu tôi dùng regex trên
+`cardCount:` và nó đụng ~60 file vì đó là tên tham số dùng chung với deck/study/trash; đã revert sạch
+và làm lại, `flutter analyze` trở về **đúng** 467 issues của baseline.
+
+*Bị bác trong cùng vòng:* việc xoá tag làm mất link của thẻ trong Trash **không** phải defect và
+không mới — BR-235 yêu cầu, FK cascade thực thi, và nó có từ trước trên cả hai nền tảng. Nó có mâu
+thuẫn với BR-262 (*"tag MUST giữ nguyên"* khi restore), nhưng mâu thuẫn đó nằm trong **rule**, không
+nằm trong implementation.
+
+**Ba thứ bắt được trên đường đi:**
+
+1. **BR-80 lỗi thời so với chính tài liệu của nó.** Nó nói `end_reason` MUST có **năm** giá
+   trị, thiếu `content_deleted` và `scheduler_changed` — trong khi BR-259 (cùng file) *bắt
+   buộc* dùng `content_deleted`, CHECK constraint cho **bảy**, và enum Dart định nghĩa bảy.
+   Port nào lấy BR-80 làm miền giá trị sẽ **từ chối đúng giá trị BR-259 đòi**. Chỉ ghi lại,
+   không sửa: business-rules.md frozen, sửa rule là một documents task.
+2. **Postgres *làm tròn* phần dưới micro, `truncatedTo` *làm sàn*.** So một `Instant` trong
+   bộ nhớ với `TIMESTAMPTZ` đã lưu lệch một micro giây tuỳ lúc — test flaky theo đúng nghĩa
+   đen, và nó đã xanh một lần rồi mới đỏ. Giờ so hai giá trị **đã lưu** với nhau.
+3. **`build_runner` không regenerate khi chỉ file sinh bị sửa.** Sau khi tiêm lỗi vào
+   `app_database.g.dart`, lệnh build báo `5861 skipped` và giữ nguyên bản lỗi. Phải
+   `build_runner clean` mới khôi phục. Cùng họ với bẫy `target/classes` cũ.
 
 ## M99 · Adhoc
 

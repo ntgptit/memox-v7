@@ -54,9 +54,20 @@ class _DeleteTagDialog extends StatelessWidget {
         // Two sentences and two messages, not one with a count of zero:
         // "removed from 0 cards" is a sentence about nothing, and the
         // reassurance that cards survive is noise when none are involved.
-        final question = tag.cardCount == 0
+        //
+        // **`linkedCardCount`, not `cardCount`, and both branches use it**
+        // (BR-235). The catalog row counts active cards, which BR-230 requires;
+        // this dialog has to say how many cards will lose the tag, and the
+        // delete removes every link including a trashed card's. So a tag whose
+        // only remaining card is in Trash reads 0 in the list and "1 card" here
+        // — and it is genuinely not an unused tag, because deleting it does
+        // take something away.
+        final question = tag.linkedCardCount == 0
             ? context.l10n.tagDeleteConfirmMessageUnused(tag.name)
-            : context.l10n.tagDeleteConfirmMessage(tag.name, tag.cardCount);
+            : context.l10n.tagDeleteConfirmMessage(
+                tag.name,
+                tag.linkedCardCount,
+              );
 
         return MxAsyncConfirmDialog(
           state: submit,

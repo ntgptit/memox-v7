@@ -18,8 +18,8 @@ import 'support/tag_catalog_harness.dart';
 /// The card list's multi-tag filter (UC-18, BR-231, BR-232, M4.14 W6, W7).
 void main() {
   const tags = <TagCatalogEntry>[
-    TagCatalogEntry(id: 't1', name: 'noun', cardCount: 12),
-    TagCatalogEntry(id: 't2', name: 'verb', cardCount: 4),
+    TagCatalogEntry(id: 't1', name: 'noun', cardCount: 12, linkedCardCount: 12),
+    TagCatalogEntry(id: 't2', name: 'verb', cardCount: 4, linkedCardCount: 4),
   ];
 
   Future<({FakeCardRepository cards, FakeTagCatalogRepository catalog})> pump(
@@ -303,7 +303,7 @@ void main() {
     // `noun` is merged away elsewhere. Re-applying must not carry the id that
     // now matches nothing — the list would stay empty with no row to untick.
     harness.catalog.emitCatalog(const <TagCatalogEntry>[
-      TagCatalogEntry(id: 't2', name: 'verb', cardCount: 4),
+      TagCatalogEntry(id: 't2', name: 'verb', cardCount: 4, linkedCardCount: 4),
     ]);
     await tester.pumpAndSettle();
     await openSheet(tester);

@@ -21,6 +21,8 @@ public enum ApiErrorCode {
 	TAG_LIMIT_EXCEEDED(HttpStatus.CONFLICT, "error.tag-limit-exceeded"),
 	BATCH_NOT_FOUND(HttpStatus.NOT_FOUND, "error.batch-not-found"),
 	RESTORE_TARGET_INVALID(HttpStatus.CONFLICT, "error.restore-target-invalid"),
+	PURGE_BLOCKED(HttpStatus.CONFLICT, "error.purge-blocked"),
+	PURGE_MIXES_ITEM_TYPES(HttpStatus.CONFLICT, "error.purge-mixes-item-types"),
 	CARD_CROSS_ROOT_MOVE(HttpStatus.CONFLICT, "error.card-cross-root-move"),
 	MOVE_TARGET_INVALID(HttpStatus.CONFLICT, "error.move-target-invalid"),
 	EXPORT_SCOPE_EMPTY(HttpStatus.CONFLICT, "error.export-scope-empty"),

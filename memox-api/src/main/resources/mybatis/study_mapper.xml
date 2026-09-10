@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+  The first sliver of the study module, and it exists because Phase 2 needs it.
+
+  Session lifecycle, queue serving and answer recording are Phase 3. BR-259 is not: it is an
+  obligation of the *delete* path, which shipped in Phase 2 without it. What lives here is exactly
+  the two lookups and the one write that rule names, and nothing else.
+-->
+<mapper namespace="com.memox.study.persistence.StudyMapper">
+
+  <!--
+    Open sessions a deletion invalidates (BR-259).
+
+    **Two statements rather than one union, because the two reasons are genuinely different.** One
+    is a session opened *on* a deck that is going away. The other is a session whose queue holds a
+    card that is going away — and that second one is what catches a review of a whole root deck when
+    a sub-deck three levels down is deleted: the session's `deck_id` is the root there, and the root
+    is not in the batch. Drop the card-side lookup and that session stays `in_progress` over
+    material the user can no longer see.
+
+    Neither reads `cards` or `decks`, so neither needs a tombstone predicate: they take the id sets
+    the deletion has already decided on, and they run BEFORE the marking so those ids still describe
+    live rows.
+
+    `status = 'in_progress'` and nothing else. A session that already completed, was abandoned or
+    failed stays as it ended (BR-86) — a terminal end state is never overwritten, however much of
+    its material is now gone.
+  -->
+  <select id="findOpenSessionIdsForDecks" resultType="string">
+    SELECT id
+      FROM study_sessions
+     WHERE status = 'in_progress'
+       AND deck_id IN
+    <foreach collection="deckIds" open="(" separator="," close=")" item="deckId">#{deckId}</foreach>
+  </select>
+
+  <select id="findOpenSessionIdsForCards" resultType="string">
+    SELECT DISTINCT q.session_id
+      FROM study_queue_items q
+      INNER JOIN study_sessions s ON s.id = q.session_id
+     WHERE s.status = 'in_progress'
+       AND q.card_id IN
+    <foreach collection="cardIds" open="(" separator="," close=")" item="cardId">#{cardId}</foreach>
+  </select>
+
+  <!--
+    The close-write, and the pair is written as one unit on purpose.
+
+    BR-259: `status = invalidated` with `end_reason = content_deleted`, and the reason MUST be
+    stored rather than inferred later. Nothing enforces which pairs are legal — the Postgres schema
+    carries two independent CHECK lists, not a compound one — so the guarantee here is structural:
+    this is the only statement that writes the pair, its caller cannot choose either half, and the
+    values arrive as enum constants rather than literals.
+
+    `ended_at` is a parameter, not `now()`. It is the same instant the batch carries as its
+    `deleted_at`, because a session that ended a few milliseconds after the deletion it was
+    invalidated for is a session nobody can line up with anything later.
+  -->
+  <update id="invalidateSessions">
+    UPDATE study_sessions
+       SET status = #{status,typeHandler=com.memox.study.persistence.StudySessionStatusTypeHandler}
+         , end_reason = #{endReason,typeHandler=com.memox.study.persistence.StudySessionEndReasonTypeHandler}
+         , ended_at = #{endedAt}
+     WHERE id IN
+    <foreach collection="sessionIds" open="(" separator="," close=")" item="sessionId">#{sessionId}</foreach>
+       AND status = 'in_progress'
+  </update>
+
+</mapper>

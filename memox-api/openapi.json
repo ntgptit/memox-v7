@@ -869,6 +869,21 @@
         },
         "type" : "object"
       },
+      "PurgeBatchesRequest" : {
+        "properties" : {
+          "batchIds" : {
+            "items" : {
+              "type" : "string"
+            },
+            "minItems" : 1,
+            "type" : "array"
+          }
+        },
+        "required" : [
+          "batchIds"
+        ],
+        "type" : "object"
+      },
       "PurgeReportResponse" : {
         "properties" : {
           "purgedBatches" : {
@@ -2870,6 +2885,67 @@
           }
         },
         "summary" : "Every deletion still in Trash, newest first",
+        "tags" : [
+          "Trash"
+        ]
+      }
+    },
+    "/api/v1/trash/purge" : {
+      "post" : {
+        "operationId" : "purge",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PurgeBatchesRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PurgeReportResponse"
+                }
+              }
+            },
+            "description" : "How many batches were purged"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PurgeReportResponse"
+                }
+              }
+            },
+            "description" : "Empty selection, or more than 500 ids"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PurgeReportResponse"
+                }
+              }
+            },
+            "description" : "A named batch is no longer in Trash"
+          },
+          "409" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PurgeReportResponse"
+                }
+              }
+            },
+            "description" : "Mixed item types, or a cascade beyond the selection"
+          }
+        },
+        "summary" : "Delete the named batches permanently",
         "tags" : [
           "Trash"
         ]

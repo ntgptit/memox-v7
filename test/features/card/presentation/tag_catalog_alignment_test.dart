@@ -23,14 +23,20 @@ import 'support/tag_catalog_harness.dart';
 /// it manages reads as two apps, and nothing else would have caught it.
 void main() {
   const tags = <TagCatalogEntry>[
-    TagCatalogEntry(id: 't1', name: 'động từ', cardCount: 12),
-    TagCatalogEntry(id: 't2', name: 'food', cardCount: 1),
+    TagCatalogEntry(
+      id: 't1',
+      name: 'động từ',
+      cardCount: 12,
+      linkedCardCount: 12,
+    ),
+    TagCatalogEntry(id: 't2', name: 'food', cardCount: 1, linkedCardCount: 1),
     TagCatalogEntry(
       id: 't3',
       name:
           'a very long tag name that has to wrap or '
           'be truncated somewhere',
       cardCount: 0,
+      linkedCardCount: 0,
     ),
   ];
 

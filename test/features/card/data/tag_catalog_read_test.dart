@@ -155,6 +155,79 @@ void main() {
       expect(emissions.first.single.cardCount, 1);
       expect(emissions.last.single.cardCount, 2);
     });
+
+    test('a card in Trash stops counting towards its tag', () async {
+      final deck = await seedDeck();
+      final kept = await seedCard(deck.id, 'a');
+      final trashed = await seedCard(deck.id, 'b');
+      await h.cardRepository.addCardTag(cardId: kept.id, name: tagName('noun'));
+      await h.cardRepository.addCardTag(
+        cardId: trashed.id,
+        name: tagName('noun'),
+      );
+
+      await h.cardRepository.deleteCards(<String>[trashed.id]);
+
+      // BR-237: hidden means hidden. The row stays — BR-230 keeps a tag the user
+      // can still delete — but the card behind the tombstone is not content.
+      expect(await catalog(), hasLength(1));
+      expect((await catalog()).single.cardCount, 1);
+    });
+
+    test(
+      'the delete count keeps the trashed card the catalog count drops',
+      () async {
+        final deck = await seedDeck();
+        final kept = await seedCard(deck.id, 'a');
+        final trashed = await seedCard(deck.id, 'b');
+        await h.cardRepository.addCardTag(
+          cardId: kept.id,
+          name: tagName('noun'),
+        );
+        await h.cardRepository.addCardTag(
+          cardId: trashed.id,
+          name: tagName('noun'),
+        );
+
+        await h.cardRepository.deleteCards(<String>[trashed.id]);
+
+        // Two numbers for two rules. BR-230 scopes the catalog row to active
+        // cards; BR-235 makes the delete confirmation say how many cards lose the
+        // tag, and the delete removes every link including the hidden one.
+        final entry = (await catalog()).single;
+        expect(entry.cardCount, 1);
+        expect(entry.linkedCardCount, 2);
+      },
+    );
+
+    test('the stream re-emits when a card is trashed', () async {
+      final deck = await seedDeck();
+      final kept = await seedCard(deck.id, 'a');
+      final trashed = await seedCard(deck.id, 'b');
+      await h.cardRepository.addCardTag(cardId: kept.id, name: tagName('noun'));
+      await h.cardRepository.addCardTag(
+        cardId: trashed.id,
+        name: tagName('noun'),
+      );
+
+      final emissions = <List<TagCatalogEntry>>[];
+      final subscription = h.tagCatalogRepository.watchTagCatalog().listen(
+        emissions.add,
+      );
+      await pumpEventQueue();
+
+      await h.cardRepository.deleteCards(<String>[trashed.id]);
+      await pumpEventQueue();
+      await subscription.cancel();
+
+      // The count now depends on `cards.delete_batch_id`, so `cards` has to be in
+      // the query's `readsFrom`. The sibling test above cannot prove that: a
+      // `card_tags` change would wake this stream through `card_tags` alone. This
+      // one only passes if drift walked the subquery's JOIN — otherwise the
+      // catalog sits on 2 forever, which no screen would ever show as wrong.
+      expect(emissions.first.single.cardCount, 2);
+      expect(emissions.last.single.cardCount, 1);
+    });
   });
 
   group('tags from other paths are ordinary catalog rows (BR-238)', () {

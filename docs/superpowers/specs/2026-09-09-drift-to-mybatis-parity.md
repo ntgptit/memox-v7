@@ -116,6 +116,19 @@ NULLs first ascending; PostgreSQL sorts them last.**
 | `restoreCardsInBatch` | `restoreCardsInBatch` | |
 | `purgeBatch` | `deleteBatch` | One row; both tombstone columns cascade from it. |
 
+## 4b. `study.drift` — the sliver BR-259 requires
+
+Session lifecycle, queue serving and answer recording are Phase 3. These three are not: they are an
+obligation of the *delete* path, which shipped in Phase 2 without them.
+
+| Drift statement | MyBatis id | Notes |
+|---|---|---|
+| `openSessionIdsForDecks` | `findOpenSessionIdsForDecks` | Sessions opened on a deck in the deleted set. |
+| `openSessionIdsForCards` | `findOpenSessionIdsForCards` | Sessions whose queue holds a deleted card — the half a deck-side lookup cannot see, and the reason there are two statements. |
+| `—` | `invalidateSessions` | The close-write. Drift issues it as a generated Companion update per session id; here it is one set-based statement, which is the same atomic step in one round trip. |
+
+The remaining eighteen `study.drift` statements stay out of scope (§7).
+
 ## 5. Statements this API has and Drift does not
 
 Drift writes through generated companions, so an insert or a narrow update has no `.drift` query to
@@ -231,28 +244,120 @@ luật thứ hai dành riêng cho restore"*. So restore clears the batch's tombs
 executed, not re-listed; a refusal rolls the transaction back and the rows return to being
 tombstones. The refusals are the move's own error codes for the same reason.
 
-## 7. Outstanding obligations
+### 11. The permanent purge enforces BR-266's no-mixing rule server-side
 
-Not divergences. Rules this API is required to meet and does not yet.
+BR-266: *"Chọn nhiều trong Trash MUST tách theo loại item: một thao tác Restore hoặc Purge MUST NOT
+trộn card và deck."* Its **Enforced by** column says `UI`, and the Flutter app holds it exactly
+there — in `TrashSelectionState`, where a row of the wrong kind simply cannot be picked. Its
+repository has no such check, because nothing can reach it with a mixed list.
 
-### BR-259 — session invalidation on delete
+An HTTP client has no selection state. At this boundary the rule is unenforced unless the endpoint
+enforces it, so `POST /api/v1/trash/purge` refuses a mixed selection with
+`PURGE_MIXES_ITEM_TYPES`. **This is an addition, not a port** — there is no Dart code it mirrors.
+
+It has a consequence worth stating rather than discovering: a **deck** batch whose subtree still
+holds an older **card** batch cannot be hand-purged at all. The blocker refuses it, and the one
+selection that would clear the blocker names both kinds. It waits for retention, and the sweep takes
+both once each has served its thirty days. The Flutter client reaches the same dead end for the same
+reason; a test pins it.
+
+### 12. The session close-write is one statement, not one per session
+
+Drift closes each session with its own generated Companion update, looping over the id set. The port
+issues a single `UPDATE … WHERE id IN (…)`. Same rows, same three columns, same transaction — one
+round trip instead of N, and atomic per statement rather than per row.
+
+## 7. Obligations, and how they were met
+
+Both items this document listed as outstanding have since been implemented. They are kept here
+rather than deleted because *why* they were outstanding is the part worth reading.
+
+### BR-259 — session invalidation on delete · **done**
 
 A soft-delete MUST close an in-progress session touching the deleted content, **in the same
 transaction**, with `status = invalidated` and `end_reason = content_deleted`, and the reason MUST be
-stored rather than inferred later. `trash.drift` states plainly why the write is not a Trash
-statement:
+stored rather than inferred later. `trash.drift` says plainly why the write is not a Trash statement:
 
 > Session invalidation (BR-259) is **not** here. The two lookups and the write live in
 > `queries/study.drift`, because the session status × end_reason pair belongs to
 > `StudySessionStatus.isValidWith` and Trash may not write it behind that enum's back.
 
-This API has no study module, so **the delete path is incomplete by exactly that one write.** When
-the study slice lands it must add the invalidation *to* `TrashDeleteService`'s transaction, not
-beside it. Recorded in `docs/wbs.md`.
+So `com.memox.study` now exists as **exactly that sliver** — two lookups, one write, two enums — and
+`TrashDeleteService` asks it for a verb. The verb owns both columns, which is what makes an illegal
+pair unwritable rather than merely discouraged: nothing in the Postgres schema enforces pair
+legality, because the column CHECKs are two independent lists rather than a compound one.
 
-### BR-266 — the user-requested purge
+Three things about it are load-bearing and each has a test:
 
-`countPurgeBlockers` takes its allowed set as a parameter because there are two callers: the
-retention sweep, which **skips** a blocked batch, and a user-requested purge, which **refuses** one
-because the user named it. Only the sweep is built. The statement needs no change when the second
-arrives — which is the reason `trash.drift` gives for the parameter.
+- **Two lookups, not one.** A session reviewing a whole root has its own `deck_id` set to the root,
+  and the root is not in the batch when a sub-deck three levels down is deleted. Only its queue
+  connects it. Drop the card-side lookup and that session keeps running over hidden material.
+- **Before the marking.** The lookups take the id sets the deletion has already decided on, and
+  those ids have to still describe live rows.
+- **`in_progress` only.** A session that already ended stays as it ended (BR-86).
+
+The queue's own `delete_batch_id IS NULL` guard at serve time is a backstop for this write failing,
+not a substitute for it: BR-259 requires the session to be *closed and its reason stored*, not merely
+to have its queue starved.
+
+### BR-266 — the user-requested purge · **done**
+
+`POST /api/v1/trash/purge`. Not the sweep with a different trigger: the same blocker signal means
+opposite things to the two callers, which is why `countPurgeBlockers` takes its allowed set as a
+parameter. The sweep **skips** a blocked batch; this **refuses**, and refuses whole — a confirmation
+named an exact count before the call was made.
+
+The existence check runs first and on its own, never folded into the blocker probe: purging "the
+rest" would act on a set the user never saw. And the allowed set is exactly what was named, never
+"everything past retention" — conflating the two would let one request quietly carry away unrelated
+batches that happened to be old enough.
+
+### 13. One count, two rules — and they now want different numbers
+
+Making `tagCatalog.cardCount` mean *active* cards satisfies BR-230 and BR-237. It also changes what
+a second rule reads off the same field, and that is worth stating plainly because it was found by
+review rather than by any test.
+
+BR-235: *"Xác nhận MUST nêu rõ **số thẻ sẽ bị gỡ tag**"* — the delete confirmation must say how many
+cards will lose the tag. `tag_delete_confirm_widget.dart:57-59` takes that number from
+`TagCatalogEntry.cardCount`. Deleting a tag removes **every** `card_tags` row for it — BR-235 says so
+in the same sentence, and `card_tags.tag_id REFERENCES tags(id) ON DELETE CASCADE` would do it
+anyway. So a trashed card sharing the tag loses its link too, and is no longer in the number.
+
+**Neither state of the code satisfies both rules.** Before, one number counted every link: BR-235 was
+right and BR-230 was wrong. Now it counts active cards: BR-230 is right and BR-235 understates. The
+conflation was always there; this change moved which side of it is broken — to the side a MUST about
+the catalog explicitly names.
+
+**Resolved by giving them two numbers.** `tagCatalog` gained a second aggregate,
+`linkedCardCount`, counting every `card_tags` row; `TagCatalogEntry` carries both; and the delete
+confirmation reads the new one. The catalog row still shows active cards, and the dialog still says
+how many cards lose the tag. Both rules hold, and they hold with different numbers because they were
+always asking different questions.
+
+They can visibly disagree, and that is correct: a tag whose only remaining card is in Trash reads
+`0` in the list and "1 card" in the dialog. It is genuinely not an unused tag — deleting it does take
+something away — which is why the dialog's "unused" branch also switched to `linkedCardCount`.
+
+The server keeps one number. `TagCatalogResponse` has no consumer that draws a delete confirmation,
+and adding a field nothing reads is the surface this port has refused throughout (`allTags`,
+`tagsForCards`, `purgeOrphans`). When a client needs it, the aggregate is one line.
+
+**Not a defect, and not new:** that deleting a tag strips a trashed card's link at all. BR-235
+requires it, the cascade enforces it, and it predates this change on both platforms. It does sit in
+tension with BR-262's *"Id, nội dung, study state, history và tag MUST giữ nguyên"* for a card
+restored after its tag was deleted — a card can come back without a tag it had. That tension is in
+the rules, not in either implementation, and is recorded here for whoever reconciles them.
+
+## 8. A documents finding, recorded rather than fixed
+
+**BR-80 is stale against its own document.** It says `study_sessions.end_reason` MUST have **five**
+values — `user_exit`, `scheduler_reset`, `stale_generation`, `persistence_error`, `interrupted`.
+But BR-259, in the same file, requires `content_deleted`; BR-164 requires `scheduler_changed`; the
+`V2` CHECK constraint allows all **seven**; and the Dart `StudySessionEndReason` enum defines all
+seven. A port that took BR-80's list as the domain would reject the very value BR-259 demands.
+
+`docs/business-rules.md` is **frozen for MVP**, and a feature task must not edit it — changing a rule
+is a documents task. So this is recorded here and in `docs/wbs.md`, and
+`com.memox.study.enums.StudySessionEndReason` carries all seven with a comment saying why it does not
+match BR-80's prose.

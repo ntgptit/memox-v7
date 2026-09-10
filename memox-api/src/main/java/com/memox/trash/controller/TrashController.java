@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.memox.trash.dto.request.DeleteCardsRequest;
+import com.memox.trash.dto.request.PurgeBatchesRequest;
 import com.memox.trash.dto.request.RestoreBatchRequest;
 import com.memox.trash.dto.response.DeleteBatchResponse;
 import com.memox.trash.dto.response.PurgeReportResponse;
@@ -100,6 +101,26 @@ public class TrashController {
 	 * <p>No scheduler bean: the server does not own the app lifecycle, and BR-264 requires the sweep
 	 * to run whether or not anyone opens Trash — which is a decision only the client can act on.
 	 */
+	/**
+	 * Delete the named batches permanently (BR-266).
+	 *
+	 * <p>Not the sweep with a different trigger. The user named these and confirmed an exact count,
+	 * so every refusal is whole: a batch that has already gone is a 404 for the request rather than
+	 * a reason to purge the rest, and a cascade that would reach a batch they did not name is a 409
+	 * rather than something to skip past.
+	 */
+	@PostMapping("/trash/purge")
+	@Operation(summary = "Delete the named batches permanently")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "How many batches were purged"),
+			@ApiResponse(responseCode = "400", description = "Empty selection, or more than 500 ids"),
+			@ApiResponse(responseCode = "404", description = "A named batch is no longer in Trash"),
+			@ApiResponse(responseCode = "409", description = "Mixed item types, or a cascade beyond the selection")
+	})
+	public PurgeReportResponse purge(@Valid @RequestBody PurgeBatchesRequest request) {
+		return PurgeReportResponse.from(trashPurgeService.purge(request.batchIds()));
+	}
+
 	@PostMapping("/trash/purge-expired")
 	@Operation(summary = "Purge every batch past the thirty-day retention window")
 	@ApiResponses(@ApiResponse(responseCode = "200", description = "What the sweep did"))
