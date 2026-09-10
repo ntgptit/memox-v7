@@ -88,24 +88,22 @@ void main() {
     });
   });
 
-  testWidgets('the bar actions wear an edge', (tester) async {
-    // They sit over the page rather than inside a chrome band — the Library's
-    // bar has no fill of its own — so a bare glyph there had nothing to
-    // separate it from the content scrolling underneath.
-    //
-    // Asserted on `shape` rather than on a rendered border: the border is the
-    // theme's to draw and `mx_tonal_and_outlined_test.dart` pins what it draws.
-    // What belongs to this screen is the choice.
+  testWidgets('the bar actions are plain, not outlined', (tester) async {
+    // **Reversed on the device.** The 2026-09-10 mockup drew these as outlined
+    // circles and the screen was built that way; seen rendered, the owner
+    // asked for the edge back off. This asserts the reversal held rather than
+    // asserting a shape the screen no longer wants — a copy-pasted assertion
+    // for `.outlined` would have quietly proven the wrong thing green.
     await pump(tester, withDue());
 
-    final buttons = tester
+    final outlined = tester
         .widgetList<MxIconButton>(find.byType(MxIconButton))
         .where((MxIconButton b) => b.shape == MxIconButtonShape.outlined);
 
     expect(
-      buttons.length,
-      greaterThanOrEqualTo(2),
-      reason: 'search and the library overflow are both bar actions',
+      outlined,
+      isEmpty,
+      reason: 'the bar actions read plain again — search and the overflow menu',
     );
   });
 }
