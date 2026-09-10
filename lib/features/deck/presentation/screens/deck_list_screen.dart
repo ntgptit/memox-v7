@@ -74,25 +74,18 @@ List<Widget> _chromeActions(
   required bool isRootLevel,
 }) {
   return <Widget>[
-    // **Outlined, because these two sit over the page rather than in a chrome
-    // band** (owner brief, 2026-09-10). The Library's bar has no fill of its
-    // own — title, subtitle and actions rest straight on the app's tinted
-    // ground — so a bare glyph there had nothing separating it from the
-    // content scrolling underneath. The edge is what makes them read as
-    // controls rather than as two more marks on the page.
+    // **Bare glyphs, and the walk is worth recording because it was short.**
+    // The 2026-09-10 mockup drew these two as outlined circles and they were
+    // built that way (M100.73 added the shape, M100.75 used it, M100.77 brought
+    // the circle down to 40 drawn). Seen on a device the owner asked for the
+    // edge back off, and the glyph size goes with it: `isCompact` was here only
+    // because a 24 glyph inside a 40 circle left 8 of ring on each side. No
+    // circle, no reason.
     //
-    // `MxIconButtonShape` and its style landed at M100.73 as their own
-    // design-system task: `MxIconButton` had one shape, and `v1-freeze.md` §3
-    // forbids a feature reaching into a frozen primitive to grow a second.
+    // What is left is what the bar had before — the theme's own icon button, at
+    // the app's 48 target with a 24 glyph.
     MxIconButton(
       icon: Icons.search,
-      shape: MxIconButtonShape.outlined,
-      // **The glyph comes down with the circle** (owner brief, 2026-09-10).
-      // M100.77 took the outlined body from 48 to 40 drawn; a 24 glyph inside
-      // a 40 circle leaves 8 of ring on each side and reads as a glyph that
-      // outgrew its well. `mdCompact` is the rung already cut for this — the
-      // study session's close button uses it for the same reason.
-      isCompact: true,
       semanticLabel: context.l10n.librarySearchOpenLabel,
       tooltip: context.l10n.librarySearchOpenLabel,
       // **`push`, not `go`.** Search is a *sibling* of the deck-detail
@@ -108,8 +101,6 @@ List<Widget> _chromeActions(
     if (isRootLevel)
       MxIconButton(
         icon: Icons.more_vert,
-        shape: MxIconButtonShape.outlined,
-        isCompact: true,
         semanticLabel: context.l10n.libraryActionsTitle,
         tooltip: context.l10n.libraryActionsTitle,
         onPressed: () => showLibraryMenu(
