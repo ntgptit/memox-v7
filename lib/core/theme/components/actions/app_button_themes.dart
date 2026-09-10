@@ -106,18 +106,36 @@ enum MxFilledPair {
 
   /// `error` / `onError` — the destructive action. `error` is `danger` in this
   /// palette, so this is not a second red.
-  destructive;
+  destructive,
+
+  /// `secondaryContainer` / `onSecondaryContainer` — M3's own tonal button
+  /// pair, and the one rung between a filled button and an outlined one.
+  ///
+  /// **Admitted because a screen needed a third weight, not a third colour.**
+  /// The Library's deck row carries one verb per card, three or four cards to a
+  /// viewport. Filled, the accent repeats until it stops meaning emphasis;
+  /// outlined, the verb reads as an alternative to something — and there is
+  /// nothing else on the row for it to be an alternative *to*. Tonal is the
+  /// weight that says "this is the action" without spending the accent, which
+  /// is exactly the gap M3 defines it for.
+  ///
+  /// It is a pair on this enum rather than a fourth `MxFilledPair`-shaped
+  /// concept somewhere else, because it is the same button: same shape, same
+  /// state mechanism, same resolver. Only the two colours differ.
+  tonal;
 
   /// The fill, read off the scheme rather than handed in.
   Color fillOf(ColorScheme scheme) => switch (this) {
     MxFilledPair.brand => scheme.primary,
     MxFilledPair.destructive => scheme.error,
+    MxFilledPair.tonal => scheme.secondaryContainer,
   };
 
   /// The label that travels with [fillOf].
   Color labelOf(ColorScheme scheme) => switch (this) {
     MxFilledPair.brand => scheme.onPrimary,
     MxFilledPair.destructive => scheme.onError,
+    MxFilledPair.tonal => scheme.onSecondaryContainer,
   };
 
   /// The state layer painted over [fillOf] on hover, focus and press.
@@ -133,6 +151,11 @@ enum MxFilledPair {
   Color stateLayerOf(ColorScheme scheme) => switch (this) {
     MxFilledPair.brand => scheme.onPrimary,
     MxFilledPair.destructive => scheme.onError,
+    // Same role as [labelOf], as with every other pair — and here it is also
+    // what `_FilledButtonDefaultsM3` does for `FilledButton.tonal`, whose
+    // overlay is `onSecondaryContainer`. The layer moves lightness on a
+    // container that is already a tint, so hue stays put.
+    MxFilledPair.tonal => scheme.onSecondaryContainer,
   };
 }
 

@@ -22,6 +22,20 @@ enum MxActionButtonVariant {
   /// Everything else. Alternatives, "not now", secondary paths.
   secondary,
 
+  /// The action a screen wants taken, where a filled button would be the
+  /// third or fourth accent in one viewport.
+  ///
+  /// **A weight, not a colour.** M3's tonal button sits between filled and
+  /// outlined precisely here: a list whose every row carries the same verb.
+  /// Filled, the accent repeats until it stops reading as emphasis; outlined,
+  /// the verb reads as an alternative, and on a row with nothing to be an
+  /// alternative to that is a lie about the hierarchy.
+  ///
+  /// Same `FilledButton`, same resolver, same state mechanism as [primary] —
+  /// only `MxFilledPair` differs. Two button implementations is how a screen
+  /// ends up with two different "study" looks.
+  tonal,
+
   /// Deletes something, or discards work. Added for `MxConfirmDialog` in M4.8
   /// rather than as a second button widget: two button systems is how a screen
   /// ends up with two different "delete" looks.
@@ -220,6 +234,25 @@ class MxActionButton extends StatelessWidget {
         style: styled,
         child: child,
       ),
+      // The destructive branch's reasoning applies unchanged, so the shape
+      // does too: `buildFilledStyle` rather than `styleFrom`, and `busyStyle`
+      // first so a tonal button that keeps its label while loading resolves
+      // through the same disabled pair as every other variant.
+      MxActionButtonVariant.tonal => FilledButton(
+        onPressed: effectiveOnPressed,
+        autofocus: _takesFocus(),
+        style: _sized(
+          context,
+          busyStyle ??
+              buildFilledStyle(
+                context.colors,
+                context.semanticColors,
+                context.texts,
+                pair: MxFilledPair.tonal,
+              ),
+        ),
+        child: child,
+      ),
       // `error` / `onError`, not a token read directly: the scheme pair is
       // already contrast-checked against each other in `app_theme_test.dart`,
       // and A2 maps `error` onto the `danger` token so the two cannot diverge.
@@ -339,11 +372,20 @@ class MxActionButton extends StatelessWidget {
 
     // `secondary` returned above; the switch stays exhaustive so a variant
     // added later fails the build here rather than silently rendering as an
-    // error button, which a two-armed conditional did. Both arms are
-    // consumed: `primary` through `styled`, `destructive` through its own
+    // error button, which a two-armed conditional did. Every arm is consumed:
+    // `primary` through `styled`, `destructive` and `tonal` through their own
     // `busyStyle ??` (M100.36).
+    //
+    // **It did its job at M100.73.** Adding `tonal` broke this switch at
+    // compile time, which is the only reason a tonal button submitting a form
+    // is not currently red — the unreachable `secondary` arm would have caught
+    // it otherwise and painted `error`.
     final (Color fill, Color label) = switch (variant) {
       MxActionButtonVariant.primary => (colors.primary, colors.onPrimary),
+      MxActionButtonVariant.tonal => (
+        colors.secondaryContainer,
+        colors.onSecondaryContainer,
+      ),
       MxActionButtonVariant.secondary ||
       MxActionButtonVariant.destructive => (colors.error, colors.onError),
     };

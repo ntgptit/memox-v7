@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/components/actions/app_icon_button_theme.dart';
 import '../../core/theme/foundations/app_icon_size.dart';
 import '../../core/theme/foundations/app_sizing.dart';
 import '../../core/theme/extensions/theme_context_extension.dart';
@@ -24,6 +25,24 @@ enum MxIconButtonTone {
   /// outlined to filled — so the flag reads as raised without colour vision,
   /// and the accessible name says which way the next tap goes.
   warning,
+}
+
+/// How much of an edge an icon button draws around itself.
+///
+/// **A second axis, not a second widget.** [MxIconButtonTone] says what the
+/// glyph *means*; this says how much the control asks to be noticed as a
+/// control. They are independent — a warning glyph in an outlined well is a
+/// coherent thing — so folding them into one enum would multiply values to
+/// state a product.
+enum MxIconButtonShape {
+  /// No edge. The bar's ink on the bar's ground, which is every caller that
+  /// sits inside a surface already reading as a bar.
+  plain,
+
+  /// A hairline circle on the app's surface. For a bar whose actions sit over
+  /// the page rather than inside a chrome band, where a bare glyph on a tinted
+  /// ground has nothing to separate it from the content behind it.
+  outlined,
 }
 
 /// An action with no visible label.
@@ -52,6 +71,7 @@ class MxIconButton extends StatelessWidget {
     this.tooltip,
     this.isCompact = false,
     this.tone = MxIconButtonTone.standard,
+    this.shape = MxIconButtonShape.plain,
     super.key,
   });
 
@@ -86,6 +106,10 @@ class MxIconButton extends StatelessWidget {
   /// which is every existing caller.
   final MxIconButtonTone tone;
 
+  /// Whether the control draws its own edge. [MxIconButtonShape.plain] keeps
+  /// the theme's borderless style, which is every existing caller.
+  final MxIconButtonShape shape;
+
   // A filled variant existed here once (`isFilled`, for a Library mockup) and
   // was removed twice over: its one caller went in #328, and its style was
   // `IconButton.styleFrom(backgroundColor:)` — the flat-property spelling
@@ -97,6 +121,16 @@ class MxIconButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       onPressed: onPressed,
+      // Null for `plain`, so the theme's own style stands untouched: a style
+      // object here merges over the theme, and passing an empty one would
+      // still be a merge nobody asked for.
+      style: switch (shape) {
+        MxIconButtonShape.plain => null,
+        MxIconButtonShape.outlined => buildOutlinedIconButtonStyle(
+          context.colors,
+          context.semanticColors,
+        ),
+      },
       // Null keeps `iconButtonTheme`'s foreground. `IconButton` folds a
       // non-null `color` into a style that still resolves disabled through
       // `disabledColor`, so a toned button greys out like every other one —

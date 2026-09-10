@@ -36,12 +36,16 @@ void main() {
     'high-contrast dark': buildHighContrastDarkTheme(),
   };
 
+  // `tonal` joined at M100.73. The pairing is the point of this map: it is
+  // what asserts the variant and the pair it claims to draw agree, so a variant
+  // added without its pair would be measured against the wrong colours.
   const variants = <String, (MxActionButtonVariant, MxFilledPair)>{
     'primary': (MxActionButtonVariant.primary, MxFilledPair.brand),
     'destructive': (
       MxActionButtonVariant.destructive,
       MxFilledPair.destructive,
     ),
+    'tonal': (MxActionButtonVariant.tonal, MxFilledPair.tonal),
   };
 
   const rest = <WidgetState>{};
