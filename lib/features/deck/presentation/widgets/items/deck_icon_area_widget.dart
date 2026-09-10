@@ -6,7 +6,7 @@ import '../../../../../core/theme/extensions/app_ink.dart';
 import '../../../../../core/theme/foundations/app_radius.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 
-/// The card's leading glyph, in a tinted well.
+/// The card's leading glyph, in a neutral well.
 ///
 /// Feature-local rather than shared: it exists to give the deck list a scannable
 /// left column, and nothing else in the app has asked for one. Promoting it on the
@@ -17,13 +17,37 @@ import '../../../../../core/theme/extensions/theme_context_extension.dart';
 /// the one square in the row, and reusing the number the row's real controls use
 /// keeps the icon, the title and the action optically aligned.
 ///
-/// **The well is `primaryContainer` and the default glyph is
-/// `onPrimaryContainer`** — a Material 3 container pair, chosen because the pair
-/// is what carries a contrast guarantee. The first version used `surfaceMuted`
-/// with a `primary` glyph, which looked right in light and failed the strict
-/// audit in dark at **2.31:1** against a 3.0 floor: `primary` is a fill colour,
-/// and nothing promises it is legible *on* another surface. The audit is what
-/// caught it, on a screen that had already been looked at.
+/// **The well is `surfaceMuted` — neutral, no brand hue of its own — and the
+/// glyph alone carries the colour, as `AppInk.accent`.** Seven recipes were
+/// tried, in this order, each replacing the last, all on 2026-09-10:
+///
+/// 1. `surfaceMuted` fill, `primary` glyph — this same pairing, tried once
+///    before on an older palette and shelved on a report reading **2.31:1**
+///    in dark against a 3.0 floor. Re-measured on today's tokens rather than
+///    trusted from that report: **5.19:1** light, **8.43:1** dark — the
+///    palette moved under the old number, and nothing here reads it as still
+///    true. `deck_icon_area_test.dart` pins today's figures so the next
+///    palette change is caught by a test, not by re-reading an old doc.
+/// 2. `primaryContainer` / `onPrimaryContainer` — the M3 container pair,
+///    contrast-safe, but read as barely a colour at all: **1.35:1** against
+///    the light card face ("nhìn nhạt nhẽo quá").
+/// 3. A 25% blend of `primary` into that container — 1.87:1, still not close
+///    enough to the brand colour to be *it*.
+/// 4. Solid `primary` fill, `onPrimary` glyph — read as the brand colour, but
+///    as loud as [DeckStudyButtonWidget]'s own filled state.
+/// 5. The same fill eased toward grey in HSL, hue and lightness held — first
+///    20%, then 40% ("nổi bật hơn rồi nhưng làm nhạt đi hơn chút bằng độ bão
+///    hòa", then "làm cho nhạt bớt nữa").
+/// 6. No fill, a `primary` border instead — "nhìn cũng tởm lắm".
+/// 7. **This one.** `surfaceMuted`, chosen again from a side-by-side of eight
+///    options rather than guessed: the well itself carries no brand meaning,
+///    and the glyph is the only accent-coloured mark on the card.
+///
+/// **Still not [DeckStudyButtonWidget]'s weight.** That button is a filled
+/// surface (`secondaryContainer`, tonal, since M100.75); this well has none —
+/// one filled control and one neutral-background identity mark stays the
+/// hierarchy M99.98 asked this pairing to keep, whichever recipe answers "how
+/// do we mark identity."
 class DeckIconArea extends StatelessWidget {
   /// The well's square edge — [AppSizing.touchTarget], for the optical
   /// reason above.
@@ -46,15 +70,15 @@ class DeckIconArea extends StatelessWidget {
   final AppInk tint;
   final String? semanticLabel;
 
-  /// Null keeps the brand container. Pass one only to say the row is in a state
-  /// the brand colour would talk over.
+  /// Null keeps the neutral fill. Pass one only to say the row is in a state
+  /// the brand meaning would talk over.
   final Color? wellColor;
 
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: wellColor ?? context.colors.primaryContainer,
+        color: wellColor ?? context.semanticColors.surfaceMuted,
         borderRadius: BorderRadius.circular(AppRadius.md),
       ),
       child: SizedBox.square(

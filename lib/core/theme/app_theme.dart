@@ -117,14 +117,27 @@ final ThemeData _darkTheme = _dark(
   const AppSemanticColors.dark(),
 );
 
+/// Built before the scheme because the scheme now reads it: `outline` and
+/// `outlineVariant` are the semantic edges rather than a second copy of the
+/// decision. See `highContrastScheme`.
+final AppSemanticColors _highContrastLightSemantic = highContrastSemantics(
+  const AppSemanticColors.light(),
+  lightColorScheme,
+);
+
+final AppSemanticColors _highContrastDarkSemantic = highContrastSemantics(
+  const AppSemanticColors.dark(),
+  darkColorScheme,
+);
+
 final ThemeData _highContrastLightTheme = _light(
-  highContrastScheme(lightColorScheme),
-  highContrastSemantics(const AppSemanticColors.light(), lightColorScheme),
+  highContrastScheme(lightColorScheme, _highContrastLightSemantic),
+  _highContrastLightSemantic,
 );
 
 final ThemeData _highContrastDarkTheme = _dark(
-  highContrastScheme(darkColorScheme),
-  highContrastSemantics(const AppSemanticColors.dark(), darkColorScheme),
+  highContrastScheme(darkColorScheme, _highContrastDarkSemantic),
+  _highContrastDarkSemantic,
 );
 
 /// The scheme is the only source of colour here, including the page.

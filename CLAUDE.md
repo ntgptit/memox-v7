@@ -480,8 +480,19 @@ one screen. The gallery reads the *committed* goldens and renders nothing
 itself, so regenerating them first is not optional: build it from stale PNGs
 and it is confidently wrong.
 
-The page carries the commit it was built from in its header, which is what
-makes a stale tab recognisable rather than merely wrong.
+The page's header carries **`ảnh <digest>` — a hash of the golden files it
+embeds** — and that is what makes a stale tab recognisable rather than merely
+wrong. Quote it when you hand the page over; it is the only token that answers
+"is this the build you just made?".
+
+**It used to carry the commit, and the commit cannot answer that.** Goldens are
+regenerated and reviewed *before* they are committed — that is what the gallery
+is for — so two builds of the same HEAD carry the same sha while showing
+different screens, and an unchanged header reads as "nothing changed". One
+divider fix was argued as a caching artefact for two review rounds on exactly
+that misreading, by an agent that had the failing evidence in front of it. The
+commit is still in the header as `base <sha>`, demoted to what it actually is:
+traceability, not identity.
 
 **The gallery shows one surface and one only: 393 × 852 dp.** Every card is the
 same phone, so a difference the owner sees between two of them is a difference

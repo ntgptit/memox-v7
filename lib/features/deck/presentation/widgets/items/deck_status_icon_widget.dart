@@ -42,11 +42,15 @@ class DeckStatusIconWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // `accent` — see `DeckIconArea`'s class doc for the full walk (2026-09-10,
+    // owner feedback). It has held across every recipe the well's own fill
+    // went through, because it names the brand colour on whatever neutral or
+    // bordered surface the well is, rather than pairing with one container.
     final area = DeckIconArea(
       icon: contentType == DeckContentType.card
           ? Icons.style_outlined
           : Icons.folder_outlined,
-      tint: AppInk.onPrimaryContainer,
+      tint: AppInk.accent,
     );
 
     if (status != DeckScheduleStatus.overdue) return area;

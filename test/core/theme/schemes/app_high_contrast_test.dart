@@ -36,17 +36,23 @@ void main() {
   ];
 
   group('what high contrast changes', () {
-    test('every border clears 3:1 on every ground', () {
-      // The normal theme cannot do this and is not asked to: a card is
-      // identified by its content and its edge is decoration, which is the
-      // exemption WCAG grants. High contrast is the mode where the exemption
-      // is declined.
+    test('every border that identifies clears 3:1 on every ground', () {
+      // **The exemption, and exactly how far it reaches.** WCAG 1.4.11 asks
+      // 3:1 of the visual information required to *identify* a component or
+      // to understand a graphic. A card is identified by its content and its
+      // edge is decoration, which is the exemption the SC grants; a control's
+      // boundary is not, because there the edge is the component.
+      //
+      // High contrast declines the exemption for the edges 1.4.11 protects —
+      // `borderControl` and `borderAccent` — and **takes** it for the
+      // decorative hairline. `borderSubtle` is therefore absent from this
+      // list on purpose; `the decorative hairline is left at normal strength`
+      // below is what holds it, from the other side.
       for (final entry in pairs.entries) {
         final hc = entry.value.$2;
         final semantic = semanticOf(hc);
 
         for (final border in <(String, Color)>[
-          ('borderSubtle', semantic.borderSubtle),
           ('borderControl', semantic.borderControl),
           ('borderAccent', semantic.borderAccent),
         ]) {
@@ -63,19 +69,39 @@ void main() {
       }
     });
 
-    test('the normal theme is the one that could not, and still cannot', () {
-      // Pins the premise. If the base palette ever gets strong enough on its
-      // own, this fails and the whole file becomes dead weight worth deleting
-      // rather than a guard worth keeping.
+    test('the decorative hairline is left at normal strength', () {
+      // **Owner decision, 2026-09-11.** The hairline used to be re-pointed
+      // here — first to `onSurfaceVariant`, then to `borderControl` — and the
+      // owner reviewed both against the normal screen and rejected both: a
+      // separator that announces itself is a rule ruled across the card, and
+      // high contrast was turning every list into one.
+      //
+      // So the exemption is taken rather than declined for this one token.
+      // What that costs is real and worth stating plainly: a user on high
+      // contrast gets no stronger separator than anyone else. What it does
+      // not cost is the SC — 1.4.11 protects the information that identifies
+      // a component, and a row separator carries none; the rows are already
+      // told apart by their content and their spacing.
+      //
+      // The strong edges are still strong: `borderControl`, `borderAccent`
+      // and `outline` are asserted above.
       for (final entry in pairs.entries) {
-        final base = entry.value.$1;
+        final (base, hc) = entry.value;
 
         expect(
-          contrast(semanticOf(base).borderSubtle, base.colorScheme.surface),
-          lessThan(graphic),
+          semanticOf(hc).borderSubtle,
+          semanticOf(base).borderSubtle,
           reason:
-              '${entry.key}: the normal hairline now clears 3:1, so high '
-              'contrast has nothing left to fix',
+              '${entry.key}: the hairline is being re-pointed again. Three '
+              'recipes were reviewed on a rendered golden and this is the one '
+              'that was chosen — moving it needs another review, not a patch.',
+        );
+        expect(
+          hc.colorScheme.outlineVariant,
+          base.colorScheme.outlineVariant,
+          reason:
+              '${entry.key}: the decorative Material role parted from the '
+              'semantic hairline it is supposed to be',
         );
       }
     });
@@ -102,23 +128,76 @@ void main() {
       }
     });
 
-    test('the Material border roles move with the semantic ones', () {
-      // `outline` and `outlineVariant` are what an untended or third-party
-      // widget reads. Left behind, one control keeps the normal hairline on a
-      // screen where everything around it got stronger.
+    test('the Material boundary role moves with the semantic one', () {
+      // `outline` is what an untended or third-party widget reads for a
+      // component boundary. Left behind, one control keeps the normal edge on
+      // a screen where every edge that identifies something got stronger.
+      //
+      // `outlineVariant` is deliberately not here: it is M3's *decorative*
+      // hairline, it tracks `borderSubtle`, and both take the exemption.
       for (final entry in pairs.entries) {
         final hc = entry.value.$2;
 
-        for (final role in <(String, Color)>[
-          ('outline', hc.colorScheme.outline),
-          ('outlineVariant', hc.colorScheme.outlineVariant),
-        ]) {
-          expect(
-            contrast(role.$2, hc.colorScheme.surface),
-            greaterThanOrEqualTo(graphic),
-            reason: '${entry.key}: ${role.$1} was left at normal strength',
-          );
-        }
+        expect(
+          contrast(hc.colorScheme.outline, hc.colorScheme.surface),
+          greaterThanOrEqualTo(graphic),
+          reason: '${entry.key}: outline was left at normal strength',
+        );
+      }
+    });
+
+    test('the hairline stays quieter than the edge that identifies', () {
+      // **The ceiling this file never had.** High contrast pointed the
+      // hairline at `onSurfaceVariant` — the secondary *label* ink — which
+      // read at exactly `borderControl`'s strength, so the ladder was flat at
+      // the bottom: the line that merely separates rows shouted as loudly as
+      // the line that tells you where a control ends.
+      //
+      // A floor cannot see that. It asks whether a value is dark enough and
+      // never whether it is too dark — the same door
+      // `border_ladder_test.dart` was written to close for the normal themes,
+      // left open on the one palette whose whole job is contrast. The
+      // hairline takes the exemption now, so this holds by a wide margin; it
+      // is kept because the failure it caught was a re-point creeping back up
+      // to the strong token, and that is a one-line edit away in either
+      // direction.
+      for (final entry in pairs.entries) {
+        final hc = entry.value.$2;
+        final semantic = semanticOf(hc);
+        final ground = hc.colorScheme.surface;
+
+        expect(
+          contrast(semantic.borderSubtle, ground),
+          lessThan(contrast(semantic.borderControl, ground)),
+          reason:
+              '${entry.key}: the hairline that separates reads as loudly as '
+              'the edge that identifies a component. The ladder is flat at the '
+              'bottom, which is what made a deck-list divider read as a rule.',
+        );
+      }
+    });
+
+    test('the Material roles are the semantic ones, by construction', () {
+      // `app_divider_theme.dart` claims "`outlineVariant` *is* `borderSubtle`
+      // — the scheme maps the two onto one value". In high contrast that was
+      // true by coincidence: two call sites independently re-pointed both to
+      // `onSurfaceVariant`. The scheme reads the semantic palette now, so the
+      // claim is structural and a future retune of one cannot leave the other
+      // behind.
+      for (final entry in pairs.entries) {
+        final hc = entry.value.$2;
+        final semantic = semanticOf(hc);
+
+        expect(
+          hc.colorScheme.outlineVariant,
+          semantic.borderSubtle,
+          reason: '${entry.key}: the decorative role parted from the hairline',
+        );
+        expect(
+          hc.colorScheme.outline,
+          semantic.borderControl,
+          reason: '${entry.key}: the boundary role parted from the control edge',
+        );
       }
     });
   });
