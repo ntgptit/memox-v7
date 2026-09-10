@@ -87,6 +87,12 @@ List<Widget> _chromeActions(
     MxIconButton(
       icon: Icons.search,
       shape: MxIconButtonShape.outlined,
+      // **The glyph comes down with the circle** (owner brief, 2026-09-10).
+      // M100.77 took the outlined body from 48 to 40 drawn; a 24 glyph inside
+      // a 40 circle leaves 8 of ring on each side and reads as a glyph that
+      // outgrew its well. `mdCompact` is the rung already cut for this — the
+      // study session's close button uses it for the same reason.
+      isCompact: true,
       semanticLabel: context.l10n.librarySearchOpenLabel,
       tooltip: context.l10n.librarySearchOpenLabel,
       // **`push`, not `go`.** Search is a *sibling* of the deck-detail
@@ -103,6 +109,7 @@ List<Widget> _chromeActions(
       MxIconButton(
         icon: Icons.more_vert,
         shape: MxIconButtonShape.outlined,
+        isCompact: true,
         semanticLabel: context.l10n.libraryActionsTitle,
         tooltip: context.l10n.libraryActionsTitle,
         onPressed: () => showLibraryMenu(
