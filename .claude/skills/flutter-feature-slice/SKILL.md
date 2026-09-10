@@ -1,6 +1,6 @@
 ---
 name: flutter-feature-slice
-description: The end-to-end workflow for building one feature as a vertical slice in this Flutter app — the pre-flight checks that must pass before any code is written, then domain, then data, then presentation, then tests, docs and WBS update. Use this skill for any request to build, add, implement or finish a feature or screen — "add login", "build the deck list", "implement search", "finish the profile screen" — because it sequences the other flutter-* skills correctly and catches the missing use case, undefined state, or unagreed API contract before they turn into rework. Covers checklist phase 14, and it is the usual entry point for feature work.
+description: Use when a request asks to build, add, implement or finish a feature or screen in this Flutter app — "add login", "build the deck list", "implement search", "finish the profile screen" — and when a coding task turns out to rest on a missing use case, an undefined state, or an unagreed API contract. Covers checklist phase 14, and it is the usual entry point for feature work.
 ---
 
 # Building a feature as a vertical slice
