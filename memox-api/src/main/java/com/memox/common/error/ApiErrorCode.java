@@ -19,6 +19,8 @@ public enum ApiErrorCode {
 	CARD_NOT_FOUND(HttpStatus.NOT_FOUND, "error.card-not-found"),
 	TAG_NOT_FOUND(HttpStatus.NOT_FOUND, "error.tag-not-found"),
 	TAG_LIMIT_EXCEEDED(HttpStatus.CONFLICT, "error.tag-limit-exceeded"),
+	BATCH_NOT_FOUND(HttpStatus.NOT_FOUND, "error.batch-not-found"),
+	RESTORE_TARGET_INVALID(HttpStatus.CONFLICT, "error.restore-target-invalid"),
 	CARD_CROSS_ROOT_MOVE(HttpStatus.CONFLICT, "error.card-cross-root-move"),
 	MOVE_TARGET_INVALID(HttpStatus.CONFLICT, "error.move-target-invalid"),
 	EXPORT_SCOPE_EMPTY(HttpStatus.CONFLICT, "error.export-scope-empty"),

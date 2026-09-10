@@ -171,7 +171,7 @@
       <idArg column="parent_id" javaType="java.lang.String"/>
       <arg column="parent_name" javaType="java.lang.String"/>
       <arg column="parent_content_type" javaType="com.memox.deck.enums.DeckContentType" typeHandler="com.memox.deck.persistence.DeckContentTypeTypeHandler"/>
-      <arg column="ancestry_json" javaType="java.util.List" typeHandler="com.memox.deck.persistence.AncestryJsonTypeHandler"/>
+      <arg column="ancestry_json" javaType="java.util.List" typeHandler="com.memox.common.tree.AncestryJsonTypeHandler"/>
       <arg column="next_due_at" javaType="java.time.Instant"/>
       <arg column="child_id" javaType="java.lang.String"/>
       <arg column="child_name" javaType="java.lang.String"/>
@@ -198,7 +198,7 @@
       <idArg column="deck_id" javaType="java.lang.String"/>
       <arg column="deck_name" javaType="java.lang.String"/>
       <arg column="content_type" javaType="com.memox.deck.enums.DeckContentType" typeHandler="com.memox.deck.persistence.DeckContentTypeTypeHandler"/>
-      <arg column="ancestry_json" javaType="java.util.List" typeHandler="com.memox.deck.persistence.AncestryJsonTypeHandler"/>
+      <arg column="ancestry_json" javaType="java.util.List" typeHandler="com.memox.common.tree.AncestryJsonTypeHandler"/>
     </constructor>
   </resultMap>
 

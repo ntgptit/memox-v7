@@ -636,6 +636,39 @@
         },
         "type" : "object"
       },
+      "DeleteBatchResponse" : {
+        "properties" : {
+          "deletedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "itemType" : {
+            "type" : "string"
+          },
+          "rootItemId" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "DeleteCardsRequest" : {
+        "properties" : {
+          "cardIds" : {
+            "items" : {
+              "type" : "string"
+            },
+            "minItems" : 1,
+            "type" : "array"
+          }
+        },
+        "required" : [
+          "cardIds"
+        ],
+        "type" : "object"
+      },
       "ExportCardResponse" : {
         "properties" : {
           "back" : {
@@ -836,6 +869,19 @@
         },
         "type" : "object"
       },
+      "PurgeReportResponse" : {
+        "properties" : {
+          "purgedBatches" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "skippedBatches" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
       "RenameDeckRequest" : {
         "properties" : {
           "name" : {
@@ -873,6 +919,14 @@
         ],
         "type" : "object"
       },
+      "RestoreBatchRequest" : {
+        "properties" : {
+          "targetDeckId" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
       "TagCatalogResponse" : {
         "properties" : {
           "cardCount" : {
@@ -890,6 +944,62 @@
       },
       "TagResponse" : {
         "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "TrashBatchResponse" : {
+        "properties" : {
+          "batchCardCount" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "batchDeckCount" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "batchId" : {
+            "type" : "string"
+          },
+          "deletedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "itemName" : {
+            "type" : "string"
+          },
+          "itemType" : {
+            "type" : "string"
+          },
+          "originDeckId" : {
+            "type" : "string"
+          },
+          "originDeckName" : {
+            "type" : "string"
+          },
+          "originPath" : {
+            "items" : {
+              "$ref" : "#/components/schemas/TrashOriginStepResponse"
+            },
+            "type" : "array"
+          },
+          "rootItemId" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "TrashOriginStepResponse" : {
+        "properties" : {
+          "distance" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
           "id" : {
             "type" : "string"
           },
@@ -938,7 +1048,7 @@
   "paths" : {
     "/api/v1/cards" : {
       "get" : {
-        "operationId" : "list",
+        "operationId" : "list_1",
         "parameters" : [
           {
             "in" : "query",
@@ -1041,6 +1151,66 @@
         "summary" : "List cards by deck, subtree, flag, tags and text",
         "tags" : [
           "Cards"
+        ]
+      }
+    },
+    "/api/v1/cards/bulk-delete" : {
+      "post" : {
+        "operationId" : "deleteCards",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DeleteCardsRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/DeleteBatchResponse"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "One batch per card, in request order"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/DeleteBatchResponse"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "Empty batch, or more than 500 ids"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/DeleteBatchResponse"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "An id names no active card"
+          }
+        },
+        "summary" : "Move a batch of cards to Trash, opening one batch per card",
+        "tags" : [
+          "Trash"
         ]
       }
     },
@@ -1764,6 +1934,45 @@
       }
     },
     "/api/v1/decks/{deckId}" : {
+      "delete" : {
+        "operationId" : "deleteDeck",
+        "parameters" : [
+          {
+            "in" : "path",
+            "name" : "deckId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          }
+        ],
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DeleteBatchResponse"
+                }
+              }
+            },
+            "description" : "The batch the deletion opened"
+          },
+          "404" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DeleteBatchResponse"
+                }
+              }
+            },
+            "description" : "Deck not found, or already in Trash"
+          }
+        },
+        "summary" : "Move a deck and its whole active subtree to Trash",
+        "tags" : [
+          "Trash"
+        ]
+      },
       "get" : {
         "operationId" : "getDeck",
         "parameters" : [
@@ -2639,6 +2848,90 @@
         "summary" : "Rename a tag, merging it when the folded name is already taken",
         "tags" : [
           "Tags"
+        ]
+      }
+    },
+    "/api/v1/trash" : {
+      "get" : {
+        "operationId" : "list",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/TrashBatchResponse"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "Trash listed"
+          }
+        },
+        "summary" : "Every deletion still in Trash, newest first",
+        "tags" : [
+          "Trash"
+        ]
+      }
+    },
+    "/api/v1/trash/purge-expired" : {
+      "post" : {
+        "operationId" : "purgeExpired",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PurgeReportResponse"
+                }
+              }
+            },
+            "description" : "What the sweep did"
+          }
+        },
+        "summary" : "Purge every batch past the thirty-day retention window",
+        "tags" : [
+          "Trash"
+        ]
+      }
+    },
+    "/api/v1/trash/{batchId}/restore" : {
+      "post" : {
+        "operationId" : "restore",
+        "parameters" : [
+          {
+            "in" : "path",
+            "name" : "batchId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          }
+        ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RestoreBatchRequest"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "204" : {
+            "description" : "The batch is back and no longer in Trash"
+          },
+          "404" : {
+            "description" : "The batch is no longer in Trash"
+          },
+          "409" : {
+            "description" : "The target cannot hold this item"
+          }
+        },
+        "summary" : "Restore one batch into a chosen target",
+        "tags" : [
+          "Trash"
         ]
       }
     }

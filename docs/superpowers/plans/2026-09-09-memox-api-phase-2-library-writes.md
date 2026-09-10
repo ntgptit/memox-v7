@@ -2217,151 +2217,102 @@ git commit -m "feat(card): expose deck export data and the import duplicate prob
 
 New module `com.memox.trash`. Ports `activeSubtreeDeckIds`, `activeCardIdsInDecks`, `markDecksDeleted`, `markCardsDeleted`, plus the `delete_batches` insert.
 
+> **Corrected while executing, 2026-09-10.** The section's `deleteCards` signature breaks a MUST: BR-256 requires **one batch per item root**, so a batch delete of fifty cards opens fifty batches, not one. Four smaller gaps besides, and one obligation this API cannot yet meet and must therefore record. Each is marked **[corrected]**.
+
 **Files:**
 - Create: `memox-api/src/main/java/com/memox/trash/entity/DeleteBatch.java`
 - Create: `memox-api/src/main/java/com/memox/trash/enums/TrashItemType.java`
-- Create: `memox-api/src/main/java/com/memox/trash/exception/TrashConflictException.java`
 - Create: `memox-api/src/main/java/com/memox/trash/persistence/TrashMapper.java`, `TrashItemTypeTypeHandler.java`
 - Create: `memox-api/src/main/resources/mybatis/trash_mapper.xml`
 - Create: `memox-api/src/main/java/com/memox/trash/service/TrashDeleteService.java`, `DeleteDeckCommand.java`, `DeleteCardsCommand.java`
 - Create: `memox-api/src/main/java/com/memox/trash/controller/TrashController.java`
-- Create: `memox-api/src/main/java/com/memox/trash/dto/response/DeleteBatchResponse.java`
-- Modify: `ApiErrorCode.java`, both `messages*.properties`
-- Create: `memox-api/src/test/java/com/memox/trash/TrashDeleteTest.java`
+- Create: `memox-api/src/main/java/com/memox/trash/dto/response/DeleteBatchResponse.java`, `dto/request/DeleteCardsRequest.java`
+- Create: `memox-api/src/test/java/com/memox/trash/TrashDeleteTest.java`, `TrashDeleteControllerTest.java`
+
+`TrashConflictException` is **not** created here. **[corrected]** Nothing in the delete path conflicts: a deck already in Trash is a `DeckNotFoundException` and a card already in Trash is a `CardNotFoundException`, both because the caller is describing a database that has moved on. Tasks 13 and 14 create it when restore and purge give it something to mean.
 
 **Interfaces:**
-- Consumes: `DeckStructureService` (Task 4), `IdCollections` (Task 1).
+- Consumes: `DeckService.lockActiveDeck` / `.markContentType` (Task 9), `DeckStructureService` (Task 4), `IdCollections` (Task 1).
 - Produces: `DeleteBatch(String id, TrashItemType itemType, String rootItemId, Instant deletedAt)`.
-- Produces: `TrashDeleteService.deleteDeck(DeleteDeckCommand)` → `DeleteBatch`; `.deleteCards(DeleteCardsCommand)` → `DeleteBatch`.
+- Produces: `TrashDeleteService.deleteDeck(DeleteDeckCommand)` -> `DeleteBatch`; **`.deleteCards(DeleteCardsCommand)` -> `List<DeleteBatch>`. [corrected]**
 
-BR-256/258/260 in one transaction: exactly one batch row with one `deleted_at`; every **active** descendant deck and card is stamped with it; a descendant already tombstoned from an earlier batch keeps its old batch and is not absorbed; and a non-root parent that just lost its last active direct child drops to `unset`.
+**One batch per item root, and the draft's single return value breaks it. [corrected]** BR-256: *"Xoá nhiều item cùng lúc MUST tạo một batch cho mỗi item root, MUST NOT gộp thành một batch chung — mỗi item root là một thứ người dùng khôi phục được riêng."* The Flutter repository says the same thing in the same words:
+
+> **One batch per card, not one per action** (BR-256). The item root is singular, and a user who deletes fifty cards may want three of them back — which a shared batch could not give them without inventing a partial restore that BR-262 does not have.
+
+One action is still one instant: every batch it opens carries the same `deleted_at`.
+
+BR-256/258/260 in one transaction: exactly one batch row per item root with one `deleted_at`; every **active** descendant deck and card is stamped with it; a descendant already tombstoned from an earlier batch keeps its old batch and is not absorbed; and a non-root parent that just lost its last active direct child drops to `unset`.
+
+**Three checks the draft did not specify. [corrected]**
+
+1. **The item root must be active before a batch is opened.** A deck already in Trash has no row in `findActiveSubtreeDeckIds`, and a card already in Trash refuses the stamp. Either way the answer is not-found, and nothing is written — a batch with no rows is a Trash entry the user can see and cannot act on, because restoring it would revive nothing.
+2. **A short mark count rolls the transaction back.** The ids were read inside this transaction from rows that were active then, so a row refusing the stamp is not a race — it is a batch that would claim rows it does not hold.
+3. **A tombstone in the deck is not content.** BR-260's last sentence, and it is what makes `directChildDeckCount`/`directCardCount` the right pair to ask: both count active rows only.
+
+**BR-259 is an obligation this API cannot yet meet, and it must be recorded rather than assumed. [corrected]** A session in progress that touches deleted content MUST be closed **in this same transaction** with `status = invalidated` and `end_reason = content_deleted`. `trash.drift` says in as many words why it is not a Trash statement:
+
+> Session invalidation (BR-259) is **not** here. The two lookups and the write live in `queries/study.drift`, because the session status × end_reason pair belongs to `StudySessionStatus.isValidWith` and Trash may not write it behind that enum's back; it asks `StudyRepository` instead.
+
+There is no study module in this API yet, so the delete path is incomplete by exactly that one write. Task 15 records it as an outstanding obligation, and the study slice must add it **to** this transaction rather than beside it.
 
 - [ ] **Step 1: Write the failing test**
 
-```java
-class TrashDeleteTest extends PostgresIntegrationTest {
+The draft's four cases are right, with `deleteCards` returning a list. Six more, each attached to a rule the draft did not enforce:
 
-	@Autowired TrashDeleteService trashDeleteService;
-
-	@Test
-	void stampsTheWholeActiveSubtreeWithOneBatchAndOneInstant() {
-		insertRootDeck("root", "Korean");
-		insertSubDeck("a", "Unit 1", "root", "root");
-		insertSubDeck("b", "Lesson 1", "a", "root", DeckContentType.CARD);
-		insertCardWithState("c1", "b", null, null);
-
-		final var batch = trashDeleteService.deleteDeck(new DeleteDeckCommand("a"));
-
-		assertThat(batchIdOfDeck("a")).isEqualTo(batch.id());
-		assertThat(batchIdOfDeck("b")).isEqualTo(batch.id());
-		assertThat(batchIdOfCard("c1")).isEqualTo(batch.id());   // BR-258
-	}
-
-	@Test
-	void leavesAnEarlierTombstoneInItsOriginalBatch() {
-		insertRootDeck("root", "Korean");
-		insertSubDeck("a", "Unit 1", "root", "root");
-		insertSubDeck("b", "Lesson 1", "a", "root", DeckContentType.CARD);
-		insertCardWithState("old", "b", null, null);
-		final var first = trashDeleteService.deleteCards(new DeleteCardsCommand(List.of("old")));
-
-		final var second = trashDeleteService.deleteDeck(new DeleteDeckCommand("a"));
-
-		assertThat(batchIdOfCard("old")).isEqualTo(first.id());   // BR-258, not absorbed
-		assertThat(batchIdOfDeck("a")).isEqualTo(second.id());
-	}
-
-	@Test
-	void returnsTheEmptiedParentToUnset() {
-		insertRootDeck("root", "Korean");
-		insertSubDeck("a", "Unit 1", "root", "root", DeckContentType.CARD);
-		insertCardWithState("only", "a", null, null);
-
-		trashDeleteService.deleteCards(new DeleteCardsCommand(List.of("only")));
-
-		assertThat(contentTypeOf("a")).isEqualTo(DeckContentType.UNSET);   // BR-260
-	}
-
-	@Test
-	void keepsTheRootDeckAsDeckEvenWhenItIsEmptied() {
-		insertRootDeck("root", "Korean");
-		insertSubDeck("a", "Unit 1", "root", "root");
-
-		trashDeleteService.deleteDeck(new DeleteDeckCommand("a"));
-
-		assertThat(contentTypeOf("root")).isEqualTo(DeckContentType.DECK);   // BR-58
-	}
-}
-```
+- **BR-256, one batch per card** — two cards, two batch ids, each stamped on its own card.
+- **BR-256, one `deleted_at` for the whole action.**
+- **BR-260 for a deleted sub-deck**, not only for deleted cards — the draft tested the card path alone.
+- **BR-260 ignoring a tombstone** when measuring whether the deck is empty.
+- **A deck already in Trash is a 404.**
+- **One card already in Trash refuses the whole action**, and the other card keeps no batch.
 
 - [ ] **Step 2: Run and verify it fails**
 
 ```bash
-cd memox-api && ./mvnw.cmd -Dtest=TrashDeleteTest test
+cd memox-api && ./mvnw.cmd -Dtest='TrashDeleteTest,TrashDeleteControllerTest' test
 ```
 
 Expected: FAIL — the `com.memox.trash` package does not exist.
 
 - [ ] **Step 3: Port the statements**
 
+`insertDeleteBatch`, `findActiveSubtreeDeckIds`, `findActiveCardIdsInDecks`, `markDecksDeleted`, `markCardsDeleted` port as drafted, comma-first (see §0). Two more the draft did not have: **[corrected]**
+
 ```xml
-<insert id="insertDeleteBatch" parameterType="com.memox.trash.entity.DeleteBatch">
-  INSERT INTO delete_batches (id, item_type, root_item_id, deleted_at)
-  VALUES (#{id},
-          #{itemType,typeHandler=com.memox.trash.persistence.TrashItemTypeTypeHandler},
-          #{rootItemId}, #{deletedAt})
-</insert>
-
-<select id="findActiveSubtreeDeckIds" resultType="java.lang.String">
-  WITH RECURSIVE subtree (id) AS (
-      SELECT id FROM decks WHERE id = #{deckId} AND delete_batch_id IS NULL
-      UNION
-      SELECT d.id FROM decks d INNER JOIN subtree s ON d.parent_deck_id = s.id
-       WHERE d.delete_batch_id IS NULL
-  )
-  SELECT id FROM subtree
-</select>
-
-<select id="findActiveCardIdsInDecks" resultType="java.lang.String">
+<!-- Which of these ids still name an active card, so a batch is never opened over a tombstone. -->
+<select id="findActiveCardIds" resultType="string">
   SELECT id FROM cards
-   WHERE deck_id IN
-     <foreach collection="deckIds" open="(" separator="," close=")" item="deckId">#{deckId}</foreach>
-     AND delete_batch_id IS NULL
+   WHERE id IN <foreach .../> AND delete_batch_id IS NULL
 </select>
 
-<update id="markDecksDeleted">
-  UPDATE decks SET delete_batch_id = #{batchId}, updated_at = #{updatedAt}
-   WHERE id IN
-     <foreach collection="deckIds" open="(" separator="," close=")" item="deckId">#{deckId}</foreach>
-     AND delete_batch_id IS NULL
-</update>
-
-<update id="markCardsDeleted">
-  UPDATE cards SET delete_batch_id = #{batchId}, updated_at = #{updatedAt}
-   WHERE id IN
-     <foreach collection="cardIds" open="(" separator="," close=")" item="cardId">#{cardId}</foreach>
-     AND delete_batch_id IS NULL
-</update>
+<!-- The decks these cards are leaving, read BEFORE the marking. -->
+<select id="findSourceDeckIdsOfActiveCards" resultType="string">
+  SELECT DISTINCT deck_id FROM cards
+   WHERE id IN <foreach .../> AND delete_batch_id IS NULL
+</select>
 ```
 
-The `AND delete_batch_id IS NULL` on both `UPDATE`s is what makes the second test pass — it is Drift's own guard and it is the whole of BR-258's "keeps its old tombstone".
+The second one exists because **the order is load-bearing**: `countDirectCards` counts active cards, so once the cards are stamped there is nothing left to say where they lived. Read the sources before the write, count the emptiness after it — both inside one transaction, or they describe two different databases.
+
+The `AND delete_batch_id IS NULL` on both `UPDATE`s is Drift's own guard and the whole of BR-258's "keeps its old tombstone".
 
 - [ ] **Step 4: Add the endpoints**
 
-`DELETE /api/v1/decks/{deckId}` and `POST /api/v1/cards/bulk-delete` both return `201` with the `DeleteBatchResponse`, because a soft-delete **creates** a batch resource. Neither logs a name or a card face.
+`DELETE /api/v1/decks/{deckId}` returns **201** with one `DeleteBatchResponse`; `POST /api/v1/cards/bulk-delete` returns **201** with a **list** of them, one per card. **[corrected]** 201 rather than 204 because a soft-delete does not remove a thing — it creates the delete batch an undo or a restore later acts on (BR-263), and a 204 would leave a client nothing to undo with. Neither logs a name or a card face (BR-267).
 
 - [ ] **Step 5: Run and verify it passes**
 
 ```bash
-cd memox-api && ./mvnw.cmd -Dtest=TrashDeleteTest test
+cd memox-api && ./mvnw.cmd -Dtest='TrashDeleteTest,TrashDeleteControllerTest' test
 ```
 
-Expected: PASS, 4 tests.
+Expected: PASS, 15 tests. Then `./mvnw -o verify`, and regenerate `openapi.json` — two endpoints are new.
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add memox-api/src/main/java/com/memox/trash memox-api/src/main/resources memox-api/src/test/java/com/memox/trash
+git add memox-api/src/main/java/com/memox/trash memox-api/src/main/resources memox-api/src/test/java/com/memox/trash memox-api/openapi.json
 git commit -m "feat(trash): soft-delete a deck subtree or a batch of cards"
 ```
 
@@ -2369,81 +2320,50 @@ git commit -m "feat(trash): soft-delete a deck subtree or a batch of cards"
 
 ## Task 13: Trash — list and restore
 
-Ports `trashBatchRows`, `batchById`, `batchDeckIds`, `batchCardIds`, `tombstoneDeckInBatch`, `tombstoneCardInBatch`, `anyDeckById`, `batchSubtreeHeightProbe`, `restoreDecksInBatch`, `restoreCardsInBatch`.
+Ports `trashBatchRows`, `batchById`, `tombstoneDeckInBatch`, `tombstoneCardInBatch`, `restoreDecksInBatch`, `restoreCardsInBatch`, and the batch delete.
 
-**A design decision this task must settle, surfaced by the schema.** `V5`'s unique `(sibling_scope_id, sibling_position)` still covers tombstoned decks, so a restored deck's old position may now be occupied by a sibling created after the delete. BR-262 requires the rows to come back unchanged; it says nothing about the position, and BR-261/263 make the **target** an explicit user choice. Resolution: restore reassigns `sibling_position` to the next free slot in the chosen target scope, and leaves every other column untouched. The alternative — failing the restore — would make the deferred constraint from Task 5 a user-facing error, which is the wrong place for it.
+> **Corrected while executing, 2026-09-10.** The section's central design note rests on a premise that is false, and its validation rule is a **second rule set for restore** — the one thing BR-261 forbids by name. Both are replaced below, and three gaps are filled. Each is marked **[corrected]**.
+
+**The design question the section raises, answered differently. [corrected]** It says: *"V5's unique `(sibling_scope_id, sibling_position)` still covers tombstoned decks, so a restored deck's old position may now be occupied by a sibling created after the delete."* It cannot be. A tombstone keeps its `sibling_position`, and `nextSiblingPosition` is `MAX(sibling_position) + 1` over **every** row in the scope, tombstones included — so the slot was never released and nothing could have taken it.
+
+A restored deck does take a fresh position, but for a different and better reason: **a restore is a move**, and a move always takes the next free slot in the target scope. Which brings us to the rule the section missed.
+
+**Restore runs the move; it does not re-check the move's rules. [corrected]** BR-261: *"Target của một sub-deck MUST thoả **đúng** bộ luật của move (BR-55 độ sâu, BR-63/BR-64 loại nội dung, BR-70/BR-74 scheduler và generation của root) — MUST NOT có bộ luật thứ hai dành riêng cho restore."* The section proposes `depthOf(target) + probeBatchSubtreeHeight(root, batch) <= 10`, which is one of those four rules re-implemented in a second place — precisely what the MUST NOT names.
+
+The port instead **clears the batch's tombstones first and then calls `DeckMoveService.move` / `CardBulkService.move` on rows that are active again.** The rules are not re-listed or translated; they are executed. A refusal rolls the transaction back, so the rows return to being tombstones and the failure reads as "nothing happened". Two consequences worth stating:
+
+- **`batchSubtreeHeightProbe` and `anyDeckById` are not ported.** Once the batch is clear, `DeckMoveService` measures the height over rows that are active again — and a descendant still in Trash under an *older* batch is correctly excluded, because it is not coming back with this restore.
+- **The refusals are the move's own codes**: `DECK_DEPTH_EXCEEDED`, `PARENT_HOLDS_CARDS`, `DECK_CROSS_ROOT_MOVE`, `CARD_CROSS_ROOT_MOVE`. Translating them into private restore codes would be the second rule set wearing a different hat. `RESTORE_TARGET_INVALID` is left for the one thing only a restore can get wrong: the **level**.
 
 **Files:**
-- Modify: `trash_mapper.xml`, `TrashMapper.java`
-- Create: `memox-api/src/main/java/com/memox/trash/entity/TrashBatchRow.java`
-- Create: `memox-api/src/main/java/com/memox/trash/enums/TrashOrigin.java`
+- Modify: `trash_mapper.xml`, `TrashMapper.java`, `TrashController.java`, `ApiErrorCode.java`, both `messages*.properties`
+- Create: `memox-api/src/main/java/com/memox/trash/entity/TrashBatchRow.java`, `TombstoneDeck.java`
+- Create: `memox-api/src/main/java/com/memox/trash/exception/TrashNotFoundException.java`, `TrashConflictException.java`
 - Create: `memox-api/src/main/java/com/memox/trash/service/TrashRestoreService.java`, `RestoreBatchCommand.java`
-- Modify: `TrashController.java`, `ApiErrorCode.java`, both `messages*.properties`
+- Create: `memox-api/src/main/java/com/memox/trash/dto/response/TrashBatchResponse.java`, `TrashOriginStepResponse.java`, `dto/request/RestoreBatchRequest.java`
+- Move: `DeckAncestor.java` and `AncestryJsonTypeHandler.java` -> `com.memox.common.tree` **[corrected]**
 - Create: `memox-api/src/test/java/com/memox/trash/TrashRestoreTest.java`
 
+**`TrashOrigin` is not an enum. [corrected]** The origin path is a list of `{id, name, distance}`, which is the same shape the deck breadcrumb reads — so the *entity* moves to `common.tree.DeckAncestor` (two features read it now, exactly as `SchedulerType` did in Task 7) while the *response* stays each feature's own: `TrashOriginStepResponse`. The architecture guard said this first, and it was right — a response is a wire contract, and borrowing another feature's ties this endpoint to changes made for a deck screen.
+
+The handler moves to `common.tree` rather than `common.mybatis` deliberately: that package is auto-scanned by `mybatis.type-handlers-package`, and an unannotated `BaseTypeHandler<List<X>>` resolves against the raw `List` — which would offer this handler for every list MyBatis ever maps.
+
 **Interfaces:**
-- Consumes: `DeckStructureService.depthOf`, `DeckMapper.nextSiblingPosition`.
-- Produces: `TrashBatchRow(String batchId, TrashItemType itemType, Instant deletedAt, String itemName, String originDeckId, String originDeckName, long batchDeckCount, long batchCardCount, List<DeckAncestor> originPath)`.
-- Produces: `TrashRestoreService.list()` → `List<TrashBatchRow>`; `.restore(RestoreBatchCommand)` → `int`.
+- Produces: `TrashBatchRow(String batchId, TrashItemType itemType, String rootItemId, Instant deletedAt, String itemName, String originDeckId, String originDeckName, long batchDeckCount, long batchCardCount, List<DeckAncestor> originPath)`.
+- Produces: `TrashRestoreService.list()` -> `List<TrashBatchRow>`; `.restore(RestoreBatchCommand)` -> `void`.
+- Produces: `RestoreBatchCommand(String batchId, String targetDeckId)`, where **`targetDeckId == null` means the top level** — a real target, and the only one a root deck may use (BR-56). No other item may use it: promoting a sub-deck would need a scheduler of its own, which is a decision rather than a restore, and the top level holds no cards at all. **[corrected]**
 - Produces: `ApiErrorCode.RESTORE_TARGET_INVALID(409, "error.restore-target-invalid")`, `BATCH_NOT_FOUND(404, "error.batch-not-found")`.
 
 - [ ] **Step 1: Write the failing test**
 
-```java
-class TrashRestoreTest extends PostgresIntegrationTest {
+The section's four cases stand, with the position case reading "a fresh slot at the end of the group" and the depth case restoring from a **second tree** so it breaks the depth rule and only the depth rule. Twelve more, each on a rule the section did not cover — most importantly:
 
-	@Autowired TrashDeleteService trashDeleteService;
-	@Autowired TrashRestoreService trashRestoreService;
-
-	@Test
-	void revivesOnlyTheRowsOfTheChosenBatch() {
-		insertRootDeck("root", "Korean");
-		insertSubDeck("a", "Unit 1", "root", "root", DeckContentType.CARD);
-		insertCardWithState("c1", "a", null, null);
-		insertCardWithState("c2", "a", null, null);
-		final var first = trashDeleteService.deleteCards(new DeleteCardsCommand(List.of("c1")));
-		trashDeleteService.deleteCards(new DeleteCardsCommand(List.of("c2")));
-
-		trashRestoreService.restore(new RestoreBatchCommand(first.id(), "a"));
-
-		assertThat(batchIdOfCard("c1")).isNull();
-		assertThat(batchIdOfCard("c2")).isNotNull();   // BR-262
-	}
-
-	@Test
-	void givesARestoredDeckAFreePositionWhenItsOldOneIsTaken() {
-		insertRootDeck("root", "Korean");
-		insertSubDeckAt("a", "A", "root", "root", 0);
-		final var batch = trashDeleteService.deleteDeck(new DeleteDeckCommand("a"));
-		insertSubDeckAt("b", "B", "root", "root", 1);
-
-		trashRestoreService.restore(new RestoreBatchCommand(batch.id(), "root"));
-
-		assertThat(siblingPositionOf("a")).isEqualTo(2);
-		assertThat(siblingPositionOf("b")).isEqualTo(1);   // untouched
-	}
-
-	@Test
-	void refusesARestoreThatWouldExceedTenLevels() {
-		insertChain(10);
-		final var batch = trashDeleteService.deleteDeck(new DeleteDeckCommand("d10"));
-
-		assertThatThrownBy(() -> trashRestoreService.restore(new RestoreBatchCommand(batch.id(), "d10")))
-				.isInstanceOf(TrashConflictException.class)
-				.extracting("errorCode").isEqualTo(ApiErrorCode.RESTORE_TARGET_INVALID);   // BR-261
-	}
-
-	@Test
-	void reportsAnEmptyOriginPathForATopLevelItem() {
-		insertRootDeck("root", "Korean");
-		insertSubDeck("a", "Unit 1", "root", "root");
-		trashDeleteService.deleteDeck(new DeleteDeckCommand("a"));
-
-		assertThat(trashRestoreService.list()).singleElement()
-				.extracting(TrashBatchRow::originPath).isEqualTo(List.of());   // translation row 2
-	}
-}
-```
+- **BR-262's root rewrite.** *"Restore một deck MUST viết lại `root_deck_id` cho **toàn bộ** subtree của nó, gồm cả tombstone nằm bên trong."* The section does not mention it. It comes free from `updateSubtreeRootDeck`, whose CTE carries no active filter — but only if a test says so, because nothing else would notice a tombstone left naming the wrong root until the day it is restored itself. **[corrected]**
+- **The three move refusals**, each breaking exactly one rule.
+- **A root deck restores to the top level and nowhere else**; a sub-deck and a card are both refused there.
+- **The target learns what it holds** in the same transaction (BR-62, BR-163).
+- **The batch row is gone** once its rows are back — an empty Trash entry is one the user cannot act on.
+- **The list counts the batch, not the subtree**, and its origin path runs through a trashed ancestor.
 
 - [ ] **Step 2: Run and verify it fails**
 
@@ -2455,67 +2375,15 @@ Expected: FAIL — `TrashRestoreService` does not exist.
 
 - [ ] **Step 3: Port the statements**
 
-```xml
-<select id="findTrashBatchRows" resultMap="trashBatchRow">
-  WITH RECURSIVE ancestry (deck_id, node_id, distance) AS (
-      SELECT id, parent_deck_id, 1 FROM decks WHERE parent_deck_id IS NOT NULL
-      UNION
-      SELECT a.deck_id, d.parent_deck_id, a.distance + 1
-        FROM decks d INNER JOIN ancestry a ON d.id = a.node_id
-       WHERE d.parent_deck_id IS NOT NULL
-  )
-  SELECT b.id AS batch_id, b.item_type AS item_type, b.deleted_at AS deleted_at,
-         COALESCE(d.name, c.front) AS item_name,
-         CASE WHEN b.item_type = 'deck' THEN d.parent_deck_id ELSE c.deck_id END AS origin_deck_id,
-         (SELECT COUNT(*) FROM decks bd WHERE bd.delete_batch_id = b.id) AS batch_deck_count,
-         (SELECT COUNT(*) FROM cards bc WHERE bc.delete_batch_id = b.id) AS batch_card_count,
-         (SELECT COALESCE(json_agg(json_build_object('id', a.node_id, 'name', ad.name,
-                                                     'distance', a.distance)
-                                   ORDER BY a.distance), '[]'::json)
-            FROM ancestry a
-            INNER JOIN decks ad ON ad.id = a.node_id
-           WHERE a.deck_id = CASE WHEN b.item_type = 'deck' THEN d.parent_deck_id
-                                  ELSE c.deck_id END) AS origin_path_json,
-         (SELECT od.name FROM decks od
-           WHERE od.id = CASE WHEN b.item_type = 'deck' THEN d.parent_deck_id
-                              ELSE c.deck_id END) AS origin_deck_name
-    FROM delete_batches b
-    LEFT JOIN decks d ON b.item_type = 'deck' AND d.id = b.root_item_id
-    LEFT JOIN cards c ON b.item_type = 'card' AND c.id = b.root_item_id
-   ORDER BY b.deleted_at DESC, b.id DESC
-</select>
-```
+`findTrashBatchRows` ports as drafted (comma-first, and carrying `root_item_id` so a caller can tell what the batch is about), plus `findBatchById`, `findTombstoneDeckInBatch`, `findTombstoneCardIdInBatch`, `restoreDecksInBatch`, `restoreCardsInBatch` and `deleteBatch`.
 
-Three things this statement gets right that are easy to lose. The `ancestry` CTE walks **every** deck, not just the batch's — it has to, because the origin of a trashed item is a deck that may itself be trashed. `origin_path_json` goes through translation row 2, so a top-level item yields `[]` and not `null`. And `COALESCE(d.name, c.front)` returns a card face: it is sent to the owner in the response and **never** written to a log (BR-267).
+Three things the list statement gets right that are easy to lose. The `ancestry` CTE walks **every** deck, not just the batch's — it has to, because the origin of a trashed item is a deck that may itself be trashed. `origin_path_json` goes through translation row 2, so a top-level item yields `[]` and not `null`. And `COALESCE(d.name, c.front)` returns a card face: it is sent to the owner in the response and **never** written to a log (BR-267). A row whose item root has vanished matches neither exclusive join, yields a null name, and is dropped rather than drawn as a ghost.
 
-```xml
-<update id="restoreDecksInBatch">
-  UPDATE decks SET delete_batch_id = NULL, updated_at = #{updatedAt}
-   WHERE delete_batch_id = #{batchId}
-</update>
-
-<update id="restoreCardsInBatch">
-  UPDATE cards SET delete_batch_id = NULL, updated_at = #{updatedAt}
-   WHERE delete_batch_id = #{batchId}
-</update>
-
-<select id="probeBatchSubtreeHeight" resultType="java.lang.Integer">
-  WITH RECURSIVE walk (id, height) AS (
-      SELECT id, 1 FROM decks WHERE id = #{deckId} AND delete_batch_id = #{batchId}
-      UNION ALL
-      SELECT d.id, w.height + 1
-        FROM decks d INNER JOIN walk w ON d.parent_deck_id = w.id
-       WHERE d.delete_batch_id = #{batchId} AND w.height &lt; #{maxWalk}
-  )
-  SELECT MAX(height) FROM walk
-</select>
-```
-
-`TrashRestoreService.restore` is `@Transactional`: load the batch (404 if absent), validate the target against BR-261 using `depthOf(target) + probeBatchSubtreeHeight(root, batch) <= 10`, reparent the batch's root item into the target with a fresh `sibling_position`, run both restore updates, delete the batch row, then maintain `content_type` on the target (BR-163).
+**`deleteBatch` runs last, and only after the rows are clear. [corrected]** Both tombstone columns carry `ON DELETE CASCADE` to `delete_batches`, so deleting the batch while its rows still name it would take them with it — a restore that hard-deletes what it was restoring.
 
 - [ ] **Step 4: Add the endpoints**
 
-`GET /api/v1/trash` and `POST /api/v1/trash/{batchId}/restore`.
+`GET /api/v1/trash` and `POST /api/v1/trash/{batchId}/restore` (204; body optional, and an absent `targetDeckId` is the top level).
 
 - [ ] **Step 5: Run and verify it passes**
 
@@ -2523,12 +2391,12 @@ Three things this statement gets right that are easy to lose. The `ancestry` CTE
 cd memox-api && ./mvnw.cmd -Dtest=TrashRestoreTest test
 ```
 
-Expected: PASS, 4 tests.
+Expected: PASS, 16 tests. Then `./mvnw -o verify`, and regenerate `openapi.json` — two endpoints are new.
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add memox-api/src/main/java/com/memox/trash memox-api/src/main/resources memox-api/src/test/java/com/memox/trash
+git add memox-api/src/main/java memox-api/src/main/resources memox-api/src/test/java memox-api/openapi.json
 git commit -m "feat(trash): list batches and restore one into a chosen target"
 ```
 
@@ -2536,62 +2404,31 @@ git commit -m "feat(trash): list batches and restore one into a chosen target"
 
 ## Task 14: Trash — retention purge
 
-Ports `eligibleBatches`, `purgeBlockerCount`, `purgeBatch`. Retention is 30 × 24 h from `deleted_at`, and the exact boundary is eligible (BR-264).
+Ports `eligibleBatches`, `purgeBlockerCount`, `purgeBatch`. Retention is 30 x 24 h from `deleted_at`, and the exact boundary is eligible (BR-264).
+
+> **Corrected while executing, 2026-09-10.** The section's own instruction about `V6` was followed to its conclusion and the answer was no. Everything else stands; three cases were added.
 
 **Files:**
-- Create: `memox-api/src/main/resources/db/migration/V6__add_trash_indexes.sql`
-- Modify: `trash_mapper.xml`, `TrashMapper.java`
+- ~~Create: `V6__add_trash_indexes.sql`~~ — **measured and dropped, see below. [corrected]**
+- Modify: `trash_mapper.xml`, `TrashMapper.java`, `TrashController.java`
 - Create: `memox-api/src/main/java/com/memox/trash/service/TrashPurgeService.java`, `RetentionPolicy.java`, `PurgeReport.java`
-- Modify: `TrashController.java`
+- Create: `memox-api/src/main/java/com/memox/trash/dto/response/PurgeReportResponse.java`
 - Create: `memox-api/src/test/java/com/memox/trash/TrashPurgeTest.java`
 
 **Interfaces:**
-- Produces: `RetentionPolicy.RETENTION = Duration.ofDays(30)`; `RetentionPolicy.cutoff(Instant now)` → `now.minus(RETENTION)`.
-- Produces: `TrashPurgeService.purgeExpired()` → `PurgeReport(int purgedBatches, int skippedBatches)`; idempotent, safe to call on every request that opens Trash.
+- Produces: `RetentionPolicy.RETENTION = Duration.ofDays(30)`; `RetentionPolicy.cutoff(Instant now)` -> `now.minus(RETENTION)`.
+- Produces: `TrashPurgeService.purgeExpired()` -> `PurgeReport(int purgedBatches, int skippedBatches)`; idempotent, safe on every trigger.
+
+**The user-requested purge is not built here.** BR-266's "purge exactly these, with a strong confirmation" is the other caller of the same three statements, and it differs in one behaviour: a blocked batch is **refused** rather than skipped, because the user named it. It has no endpoint in this plan. `countPurgeBlockers` still takes the allowed set as a **parameter** rather than deriving it from the cutoff, so that second caller needs no statement change — which is exactly the reason `trash.drift` gives for the parameter.
 
 - [ ] **Step 1: Write the failing test**
 
-```java
-class TrashPurgeTest extends PostgresIntegrationTest {
+The section's three cases stand. Four more:
 
-	@Autowired TrashPurgeService trashPurgeService;
-	@Autowired TrashDeleteService trashDeleteService;
-
-	@Test
-	void purgesABatchExactlyAtTheThirtyDayBoundary() {
-		insertRootDeck("root", "Korean");
-		insertSubDeck("a", "Unit 1", "root", "root", DeckContentType.CARD);
-		insertCardWithState("c1", "a", null, null);
-		final var batch = trashDeleteService.deleteCards(new DeleteCardsCommand(List.of("c1")));
-		backdateBatch(batch.id(), Duration.ofDays(30));   // deleted_at == cutoff
-
-		assertThat(trashPurgeService.purgeExpired().purgedBatches()).isEqualTo(1);   // BR-264: >= is eligible
-		assertThat(cardExists("c1")).isFalse();
-	}
-
-	@Test
-	void skipsABatchWhoseSubtreeStillHoldsAnActiveRow() {
-		insertRootDeck("root", "Korean");
-		insertSubDeck("a", "Unit 1", "root", "root");
-		insertSubDeck("b", "Lesson 1", "a", "root", DeckContentType.CARD);
-		final var batch = trashDeleteService.deleteDeck(new DeleteDeckCommand("a"));
-		reviveDeckWithoutBatch("b");                       // simulates a partial restore
-		backdateBatch(batch.id(), Duration.ofDays(31));
-
-		final var report = trashPurgeService.purgeExpired();
-
-		assertThat(report.purgedBatches()).isZero();
-		assertThat(report.skippedBatches()).isEqualTo(1);   // BR-265
-		assertThat(deckExists("a")).isTrue();
-	}
-
-	@Test
-	void isIdempotentWhenNothingIsEligible() {
-		assertThat(trashPurgeService.purgeExpired().purgedBatches()).isZero();
-		assertThat(trashPurgeService.purgeExpired().purgedBatches()).isZero();
-	}
-}
-```
+- **A day short of the window is not eligible** — the other side of the boundary the first case pins.
+- **The cascade reaches the study state and the tag links** (BR-265), asserted rather than assumed: `purgeBatch` deletes one row and nothing in the Java says what follows it.
+- **A descendant in a batch that is not *yet* eligible blocks its ancestor.** This is what makes `allowedBatchIds` load-bearing: measuring against "is it deleted" instead would let the ancestor's cascade take a tombstone whose own thirty days have not run out.
+- **Both eligible: the descendant goes and the ancestor follows** — the case that proves the skip is not permanent.
 
 - [ ] **Step 2: Run and verify it fails**
 
@@ -2601,53 +2438,26 @@ cd memox-api && ./mvnw.cmd -Dtest=TrashPurgeTest test
 
 Expected: FAIL — `TrashPurgeService` does not exist.
 
-- [ ] **Step 3: Port the statements and add `V6`**
+- [ ] **Step 3: Port the statements** (`V6` measured and dropped)
 
-```sql
-CREATE INDEX idx_cards_deck_active ON cards (deck_id) WHERE delete_batch_id IS NULL;
-CREATE INDEX idx_decks_parent_active ON decks (parent_deck_id) WHERE delete_batch_id IS NULL;
-```
+`findEligibleBatches`, `countPurgeBlockers` and `deleteBatch` port as drafted, comma-first.
 
-Both partial indexes serve the "active children of this deck" question that Tasks 2, 4, 12 and 14 all ask, and which `idx_decks_parent_position` cannot answer without also reading the tombstones. Add them only after measuring with `EXPLAIN (ANALYZE, BUFFERS)` on a seeded 10 000-deck / 100 000-card database; if the plan does not change, drop this migration rather than shipping an index nothing uses.
+`purgeBatch` deletes only the batch row; every tombstoned deck and card carries `delete_batch_id ... ON DELETE CASCADE`, so the rows and their `card_study_states`, `study_answers`, `study_queue_items` and `card_tags` follow through the FK graph (BR-265).
 
-```xml
-<select id="findEligibleBatches" resultMap="deleteBatch">
-  SELECT id, item_type, root_item_id, deleted_at
-    FROM delete_batches
-   WHERE deleted_at &lt;= #{cutoff}
-   ORDER BY deleted_at ASC, id ASC
-</select>
+**`V6` was measured and is not shipped. [corrected]** The section said to add the two partial indexes *only* after `EXPLAIN (ANALYZE, BUFFERS)` on data at real scale shows the plan change, and to drop the migration otherwise. The measurement ran on a seeded database of 10 000 decks in a 100-wide fan-out, 100 000 cards, and a tenth of both tombstoned:
 
-<select id="countPurgeBlockers" resultType="long">
-  WITH RECURSIVE subtree (id) AS (
-      SELECT id FROM decks WHERE delete_batch_id = #{batchId}
-      UNION
-      SELECT d.id FROM decks d INNER JOIN subtree s ON d.parent_deck_id = s.id
-  )
-  SELECT (SELECT COUNT(*) FROM decks d
-            WHERE d.id IN (SELECT id FROM subtree)
-              AND (d.delete_batch_id IS NULL
-                OR d.delete_batch_id NOT IN
-                   <foreach collection="allowedBatchIds" open="(" separator="," close=")" item="allowedId">#{allowedId}</foreach>))
-       + (SELECT COUNT(*) FROM cards c
-            WHERE c.deck_id IN (SELECT id FROM subtree)
-              AND (c.delete_batch_id IS NULL
-                OR c.delete_batch_id NOT IN
-                   <foreach collection="allowedBatchIds" open="(" separator="," close=")" item="allowedId">#{allowedId}</foreach>))
-</select>
+| query | before | after `idx_*_active` |
+|---|---|---|
+| `countDirectCards` | Bitmap Index Scan on `idx_cards_deck_created`, 13 buffers, 0.098 ms | Bitmap Index Scan on `idx_cards_deck_active`, 12 buffers, 0.118 ms |
+| `countDirectChildDecks` | Bitmap Index Scan on `idx_decks_parent_position`, 102 buffers, 0.403 ms | Bitmap Index Scan on `idx_decks_parent_active`, 102 buffers, 0.141 ms |
 
-<delete id="purgeBatch">
-  DELETE FROM delete_batches WHERE id = #{batchId}
-</delete>
-```
+**Both queries were already index-driven before the migration**, and stayed the same node type with the same buffer count after it. The section's premise — that `idx_decks_parent_position` "cannot answer without also reading the tombstones" — is true and turns out not to matter: at a 10% tombstone rate the extra heap rows cost nothing measurable, and the remaining timing spread is cache warmth rather than a plan change. So the migration is dropped, per the section's own instruction. Two indexes nothing uses would be two indexes every write pays for.
 
-`purgeBatch` deletes only the batch row; every tombstoned deck and card carries `delete_batch_id … ON DELETE CASCADE`, so the rows and their `card_study_states`, `study_answers`, `study_queue_items` and `card_tags` follow through the FK graph (BR-265). Assert that in the first test rather than assuming it.
-
-`allowedBatchIds` is the eligible set computed in the same call, so `IdCollections.requireNonEmpty` guards it before the statement runs.
+The first attempt at this measurement was itself wrong and is worth recording: it gave all 10 000 decks the same parent, so the predicate matched every row and PostgreSQL correctly chose a sequential scan both before and after. A flat seed measures the seed, not the index.
 
 - [ ] **Step 4: Wire the trigger points**
 
-`purgeExpired()` runs at the start of `GET /api/v1/trash` and is exposed as `POST /api/v1/trash/purge-expired` for the client's startup and resume hooks (BR-264). No scheduler bean — the server does not own the app lifecycle.
+`purgeExpired()` runs at the start of `GET /api/v1/trash` and is exposed as `POST /api/v1/trash/purge-expired` for the client's start and resume hooks (BR-264). No scheduler bean — the server does not own the app lifecycle, and BR-264 requires the sweep to run whether or not anyone opens Trash, which only the client can act on.
 
 - [ ] **Step 5: Run and verify it passes**
 
@@ -2655,12 +2465,12 @@ Both partial indexes serve the "active children of this deck" question that Task
 cd memox-api && ./mvnw.cmd -Dtest='TrashPurgeTest,FlywayMigrationTest' test
 ```
 
-Expected: PASS, 3 + existing.
+Expected: PASS, 7 + existing.
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add memox-api/src/main/resources/db/migration/V6__add_trash_indexes.sql memox-api/src/main/java/com/memox/trash memox-api/src/main/resources/mybatis/trash_mapper.xml memox-api/src/test/java/com/memox/trash
+git add memox-api/src/main/java/com/memox/trash memox-api/src/main/resources/mybatis/trash_mapper.xml memox-api/src/test/java/com/memox/trash memox-api/openapi.json
 git commit -m "feat(trash): purge batches past the thirty-day retention window"
 ```
 
@@ -2730,6 +2540,7 @@ One table with the 68 ported statements (69 minus the deferred `resetTreeStudySt
 5. `tagCountsForCards` -> `findCardsAtTagCeiling` — a count per card becomes the question the rule actually asks.
 5b. `exportCardsInDeck` / `exportCardsByIds` tag ordering — Drift orders inside the aggregate as a documented non-guarantee and re-sorts in Dart by folded name; the port puts BR-177's order in the statement, where PostgreSQL can actually keep it.
 6. Six `card.drift`/`tag.drift` statements answered by another statement rather than ported one-for-one, listed with their reasons in Task 10.
+7. **Not a divergence but an outstanding obligation: BR-259's session invalidation.** A soft-delete MUST close an in-progress session touching the deleted content, in the same transaction, with `status = invalidated` and `end_reason = content_deleted`. `trash.drift` states plainly that the write belongs to `study.drift` because the status x end-reason pair is the study module's invariant; this API has no study module, so the delete path is incomplete by exactly that one write. Record it as a gap, not as a difference of opinion.
 5. `nextSiblingPosition` — Drift filters `delete_batch_id IS NULL`; the server must not, because `uq_decks_sibling_scope_position` covers tombstones too.
 
 Each divergence names the BR it serves and, for 1–3, gets a WBS entry against the Flutter query so the client is fixed rather than the server quietly disagreeing with it.
