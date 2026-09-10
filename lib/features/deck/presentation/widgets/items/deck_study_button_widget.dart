@@ -80,6 +80,19 @@ class DeckStudyButtonWidget extends StatelessWidget {
       child: MxActionButton(
         label: context.l10n.deckStudyAction,
         semanticLabel: context.l10n.deckRowStudySemanticLabel(deckName),
+        // **A glyph again, and pointing rather than naming** (owner brief,
+        // 2026-09-10). The 2026-08-20 review took one away and wrote why: "the
+        // play glyph said nothing the verb did not, and it cost the row width
+        // that the gauge beside it needed at large text scales."
+        //
+        // The first half is answered by the glyph itself — an arrow does not
+        // restate `Study`, it says where the tap goes, which is the one thing
+        // the word alone leaves out on a row that also opens the deck. The
+        // second half is a measurement, and it was re-measured rather than
+        // waved past: see the doc on this class for the 320dp figures and what
+        // gives way there.
+        icon: Icons.arrow_forward,
+        iconSide: MxActionButtonIconSide.trailing,
         // **`primary`, reversing M99.98 — and the thing that changed is the
         // page, not the opinion.** That task counted the accent nine times in
         // the first viewport and made this verb outlined to spend less of it.
@@ -101,11 +114,23 @@ class DeckStudyButtonWidget extends StatelessWidget {
         // deck wells, the gauges and the FAB stay tonal, so the fills have
         // something quiet to be legible against.
         //
-        // No `variant:` line: `primary` is `MxActionButton`'s default, and
-        // stating it again is the one thing the analyzer objects to here. What
-        // this call site now says is that it wants the button the system hands
-        // out by default — which is exactly the claim, since the outlined verb
-        // was the deliberate step down and it is the step that is gone.
+        // **`tonal`, and this is where the walk finally lands** (owner brief,
+        // 2026-09-10). The history above records the loop: outlined (the kit)
+        // → filled (owner) → **tonal**, "when a column of `primary` fills
+        // sprayed the accent across every row" → primary again at the
+        // 2026-08-20 redesign → outlined at M99.98 → filled at M100.71.
+        //
+        // The project reached the right answer once already and lost it,
+        // because `MxActionButtonVariant` had no tonal value to hold it. Every
+        // later pass had to choose between a fill that repeats four times in a
+        // viewport and an outline that says "alternative" on a row with
+        // nothing to be an alternative to. M100.73 added the value that ends
+        // the loop — the weight M3 defines for exactly this list.
+        //
+        // M100.71's finding is not undone by this: the root's hero CTA is
+        // still gone, so the accent is still not spent on a signpost. What
+        // changed is that the row's verb no longer has to spend it either.
+        variant: MxActionButtonVariant.tonal,
         size: MxActionButtonSize.compact,
         onPressed: () => context.goNamed(
           RouteNames.deckStudy,

@@ -110,21 +110,23 @@ void main() {
       // M99.61 migration to `MxActionButton` the widget carries geometry only,
       // and the fill is the theme's — which is the ownership this test wants,
       // stated where it used to read a per-widget style.
-      // **Study carries the brand fill, reversing M99.98 — and what changed
-      // is the page, not the opinion.** That task counted the accent nine
-      // times in the Library's first viewport and made this verb outlined to
-      // spend less of it. The count was right and the target was wrong: the
-      // loudest of the nine was the root's own hero, a filled button that
-      // "promised a session and delivered an index" — the Study tab, nothing
-      // started. So the screen spent its accent on a signpost and dressed the
-      // one control that opens a session as an alternative.
+      // **Study is filled and tonal — the end of a loop, not another step in
+      // it** (M100.75). The walk is recorded on the widget: outlined (the kit)
+      // → filled (owner) → tonal → filled again (2026-08-20) → outlined
+      // (M99.98) → filled (M100.71) → tonal. Six passes, because the enum had
+      // no tonal value and every pass had to pick between a fill that repeats
+      // four times in a viewport and an outline that says "alternative" on a
+      // row with nothing to be an alternative to. M100.73 added the weight M3
+      // defines for exactly this list.
       //
-      // The root hero is gone (`deck_list_summary_test` holds that half), which
-      // *lowers* the count rather than raising it: one hero removed, one fill
-      // per row added. What stays loud is the control the screen is for.
+      // Two halves of the contract, and both are asserted here rather than
+      // one: it **is** a `FilledButton` — the row's verb is the action, not an
+      // alternative — and it is **not** the brand accent, because the screen
+      // shows four of these at once. With only the first assertion, a swing
+      // back to `primary` would pass; with only the second, an outline would.
       //
-      // The other half of M99.98 is what makes this legible and is asserted
-      // above and below: the chips keep no containers, the well stays tonal.
+      // The rest of M99.98 still stands and is asserted above and below: the
+      // chips keep no containers, the well stays tonal.
       final studyButton = find.descendant(
         of: find.byType(DeckStudyButtonWidget),
         matching: find.byType(FilledButton),
@@ -145,8 +147,17 @@ void main() {
           ).filledButtonTheme.style?.backgroundColor?.resolve(<WidgetState>{});
       expect(
         studyFill,
-        scheme.primary,
-        reason: 'the fill is the brand accent, not a semantic one',
+        scheme.secondaryContainer,
+        reason:
+            'the tonal pair belongs to M3 — a fourth colour here would '
+            'make this a third accent rather than a third weight',
+      );
+      expect(
+        studyFill,
+        isNot(scheme.primary),
+        reason:
+            'four brand fills in one viewport is repetition, not emphasis — '
+            'the finding M99.98 made and M100.73 finally gave a home to',
       );
       expect(studyFill, isNot(semantic.streakContainer));
     });

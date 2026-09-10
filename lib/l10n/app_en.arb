@@ -4401,6 +4401,14 @@
     },
     "description": "Deck-card chip: new count."
   },
+  "deckSummaryEyebrowLabel": "TODAY",
+  "@deckSummaryEyebrowLabel": {
+    "description": "The scope badge that opens the Library summary panel. Upper case because it is a label on the panel, not a sentence in it."
+  },
+  "deckHeaderReadySemanticLabel": "Something is ready to study",
+  "@deckHeaderReadySemanticLabel": {
+    "description": "Spoken for the status dot beside the Library header count. The dot is only drawn when a level has new or due cards, and colour alone reaches neither a screen reader nor a reader who cannot separate this green from this grey."
+  },
   "deckTileProgressLabel": "Progress",
   "@deckTileProgressLabel": {
     "description": "The left half of the deck tile gauge caption, opposite the percentage. A generic word on purpose: the figure beside it and the track below it both state the measurement, so a second statement of it here would be the duplication BR-88 removed from this card."

@@ -74,8 +74,19 @@ List<Widget> _chromeActions(
   required bool isRootLevel,
 }) {
   return <Widget>[
+    // **Outlined, because these two sit over the page rather than in a chrome
+    // band** (owner brief, 2026-09-10). The Library's bar has no fill of its
+    // own — title, subtitle and actions rest straight on the app's tinted
+    // ground — so a bare glyph there had nothing separating it from the
+    // content scrolling underneath. The edge is what makes them read as
+    // controls rather than as two more marks on the page.
+    //
+    // `MxIconButtonShape` and its style landed at M100.73 as their own
+    // design-system task: `MxIconButton` had one shape, and `v1-freeze.md` §3
+    // forbids a feature reaching into a frozen primitive to grow a second.
     MxIconButton(
       icon: Icons.search,
+      shape: MxIconButtonShape.outlined,
       semanticLabel: context.l10n.librarySearchOpenLabel,
       tooltip: context.l10n.librarySearchOpenLabel,
       // **`push`, not `go`.** Search is a *sibling* of the deck-detail
@@ -91,6 +102,7 @@ List<Widget> _chromeActions(
     if (isRootLevel)
       MxIconButton(
         icon: Icons.more_vert,
+        shape: MxIconButtonShape.outlined,
         semanticLabel: context.l10n.libraryActionsTitle,
         tooltip: context.l10n.libraryActionsTitle,
         onPressed: () => showLibraryMenu(
