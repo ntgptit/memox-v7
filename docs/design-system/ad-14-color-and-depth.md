@@ -255,7 +255,23 @@ thứ hai (bậc ≥ 4 L\* **và** rim ≥ 3:1, đo tách theo mode); R9 miễn 
 là paper trắng của Tokyo; trần bão hoà surface dark 0,75. Những gì bị revert:
 sàn 4,3, khoảng hue 16° (về 12°), `primaryInk`, `onPrimary` dark `#111633`.
 
-### Nguồn của giá trị token đã đổi (M4.10p)
+### Nguồn của giá trị token đã đổi hai lần (M4.10p, rồi M100.83)
+
+**Hiện tại: `lib/core/theme/` lại là nơi duy nhất định nghĩa một token.** Bộ kit
+CSS đã bị xoá khỏi dự án ở M100.83 theo quyết định của chủ dự án, cùng lượt thay
+toàn bộ 45 role màu. Không còn `design_system/` để đối chiếu, và cũng không còn
+sáu test parity giữ hai bên bằng nhau.
+
+Lý do là thứ đã đúng trên thực tế từ lâu trước khi được ghi ra: kit không còn là
+nơi ra quyết định. Mọi retune từ M100.22 trở đi đều bắt đầu ở Dart — một phép đo
+hỏng, một sàn WCAG trượt — rồi mới chép ngược sang CSS để test parity khỏi đỏ.
+Một "nguồn chuẩn" chỉ nhận bản sao thì không phải nguồn; nó là một bản sao thứ
+hai phải bảo trì, và nó tính phí đúng vào lúc palette đổi.
+
+Đoạn dưới giữ lại làm bản ghi của giai đoạn M4.10p → M100.82, khi kit thật sự là
+chuẩn.
+
+---
 
 Khi AD này được viết, `lib/core/theme/` là nơi duy nhất định nghĩa một token.
 **Nay không còn.** Chủ dự án đưa một design system dựng ở claude.ai/design về

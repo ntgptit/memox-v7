@@ -88,25 +88,6 @@ void main() {
       expect(AppStroke.control, 1.5);
       expect(AppStroke.focus, 2);
     });
-
-    test('matches design_system/tokens/elevation.css', () {
-      // The kit is where these values are decided, and a Dart constant that
-      // silently drifts from it is exactly the divergence this project keeps
-      // finding by eye. Parsed rather than transcribed, so the two cannot part
-      // company without this failing.
-      final css = File('design_system/tokens/elevation.css').readAsStringSync();
-
-      double declared(String token) {
-        final match = RegExp('--border-$token:\\s*([0-9.]+)px').firstMatch(css);
-        expect(match, isNotNull, reason: '--border-$token is not in the kit');
-
-        return double.parse(match!.group(1)!);
-      }
-
-      expect(AppStroke.hairline, declared('hairline'));
-      expect(AppStroke.control, declared('control'));
-      expect(AppStroke.focus, declared('focus'));
-    });
   });
 
   test('a tooltip delay is not a motion duration', () {

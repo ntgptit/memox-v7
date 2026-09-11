@@ -5,7 +5,8 @@ import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/core/theme/typography/app_typography.dart';
 import 'dart:io';
 
-/// The type scale, pinned against `design_system/tokens/typography.css`.
+/// The type scale. The CSS kit it used to be pinned against was removed at
+/// M100.83 — the Dart tokens are the only source now.
 ///
 /// **This test exists because the scale was an accident.** Until now
 /// `app_typography.dart` set family and weight and left every size to Material

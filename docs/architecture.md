@@ -850,8 +850,8 @@ gì phía sau.
 
 > Lý luận đầy đủ, các phương án bị loại và số đo — bao gồm lần áp lại luật ở
 > M100.22 (role vs. token), redesign Tokyo ở M100.25/M100.26, hợp đồng role M3
-> khoá cứng ở M100.28, và nguồn giá trị token đổi sang
-> `design_system/tokens/*.css`:
+> khoá cứng ở M100.28, và nguồn giá trị token đổi sang `design_system/tokens/*.css`
+> rồi quay lại `lib/core/theme/` khi kit bị xoá ở M100.83:
 > `design-system/ad-14-color-and-depth.md`.
 
 

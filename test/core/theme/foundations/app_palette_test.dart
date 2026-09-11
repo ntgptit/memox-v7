@@ -38,7 +38,22 @@ void main() {
       // its page is asserted separately in `app_theme_test.dart` and has not
       // moved — 7.75 L* in light against 7.70 in dark. The ladder gave some up
       // and the shadow took it on.
-      const minimumStep = <String, double>{'dark': 3.0, 'light': 2.0};
+      // **Dark joins light at 2.0 since M100.83, and for light's own reason.**
+      // 3.0 was set at M3.5b when dark had no shadow at all: the ladder was the
+      // entire hierarchy there, so every rung had to earn its own separation.
+      // Light was allowed 2.0 at M4.10i precisely because it had a shadow to
+      // share the work with.
+      //
+      // The owner's palette puts the dark ground at L* 20.4 where Tokyo's navy
+      // sat at 4.1, and `app_elevation_test.dart` now measures a dark shade at
+      // **3.65 L\*** where it used to measure 0.26 — dark has the same second
+      // cue light has. It also has far less room: the whole dark range is
+      // 20.4→42.2 instead of 4.1→42.2, and inside it the brand still owes AA
+      // to the accent it writes on the inset tile (`primary` needs a ground at
+      // or under L* 27.76). Holding 3.0 and that floor at once leaves a 0.36
+      // L\* window, which is a number that breaks on the next retune rather
+      // than a margin.
+      const minimumStep = <String, double>{'dark': 2.0, 'light': 2.0};
       final ladders = <String, List<(String, Color)>>{
         'dark': <(String, Color)>[
           ('page', dark.scaffoldBackgroundColor),
@@ -104,18 +119,23 @@ void main() {
     });
   });
 
-  group('only the page is strongly navy', () {
-    test('every dark surface drops well below the page saturation', () {
-      // The page is the one component allowed a saturated navy. Once card,
-      // tile and input carry the same saturation there is no hierarchy left to
-      // spend — everything is equally coloured, so nothing is emphasised.
-      // 0.75 since M100.27. Tokyo's dark is navy on navy: the card `#111633`
-      // carries 72% of the page's saturation, and both hexes are the owner's.
-      // The tile, the raised surface and the border still sit well under 0.6;
-      // the ceiling now says only that nothing above the card climbs back up.
-      const share = 0.75;
-      final pageSaturation = saturation(dark.scaffoldBackgroundColor);
-      final ceiling = pageSaturation * share;
+  group('no dark surface reads as a coloured field', () {
+    test('every dark surface stays under the tint ceiling', () {
+      // **The measurement changed at M100.83 because its anchor did.** This
+      // used to read `0.75 × saturation(page)`: the page was the one component
+      // allowed a saturated navy, and the rule said nothing above the card
+      // climbs back up to it. The owner's palette makes the dark ground a
+      // near-neutral grey — saturation 0.020 where Tokyo's navy was 0.28 — so
+      // a share of the page is a share of almost nothing, and every rung
+      // "failed" a ceiling that had quietly collapsed to 0.015.
+      //
+      // What the rule always meant survives, stated absolutely: once card,
+      // tile and input carry a visible tint there is no hierarchy left to
+      // spend, because everything is equally coloured and nothing is
+      // emphasised. 0.12 is above the loudest rung this palette draws (the
+      // hairline, 0.091) and far below anything that reads as a colour rather
+      // than as a grey with a temperature.
+      const ceiling = 0.12;
 
       for (final surface in <(String, Color)>[
         ('card', dark.colorScheme.surfaceContainerLow),
@@ -126,7 +146,7 @@ void main() {
         expect(
           saturation(surface.$2),
           lessThanOrEqualTo(ceiling),
-          reason: '${surface.$1} is nearly as navy as the page',
+          reason: '${surface.$1} reads as a colour, not as a tinted grey',
         );
       }
     });
