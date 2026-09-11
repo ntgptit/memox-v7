@@ -187,9 +187,25 @@ bool _isInFamily(Color color) {
   final h = hue(color);
   if (h == null) return true;
 
+  // **Re-measured against the palette at M100.83, not widened to let something
+  // through.** A band describes the families the palette actually has; when
+  // the palette is replaced the bands are re-derived from it, or they stop
+  // describing anything. What each change admits:
+  //
+  // - the brand band ends at 262 because the new `secondary` is a violet grey
+  //   at hue 259, where the old one was a blue grey at 230;
+  // - `tertiary` gets a band of its own at 330–350 rather than being folded
+  //   into danger, so the guard can still tell a mauve tertiary from a red
+  //   error — telling those apart is the reason this check exists (the A2
+  //   audit found a *pink* tertiary that `fromSeed` had invented);
+  // - danger wraps through 0 now, because the new `error` is a true red at
+  //   hue 3 where the old one was a crimson at 346. The old band simply could
+  //   not express a hue past 360.
   const families = <(double, double)>[
-    (195, 255), // navy, indigo, steel — the brand and every surface
-    (340, 360), // danger
+    (195, 262), // navy, indigo, steel, violet — the brand and every surface
+    (330, 350), // tertiary — mauve
+    (355, 360), // danger, the upper arc
+    (0, 15), //    danger, wrapped past 360
     (145, 175), // success
     (25, 55), // warning
   ];

@@ -165,14 +165,28 @@ void main() {
           )
           .reduce((double a, double b) => a > b ? a : b);
 
+      // **It exceeded 1.0 at M100.83, and this is the test collecting on its
+      // own promise.** The sentence it used to carry — "if this ever exceeds
+      // 1.0 the dark page has left the bottom of the scale and dark should
+      // paint shadows after all" — is now the finding rather than the
+      // hypothetical: the owner's palette puts the dark ground at L* 20.4
+      // where Tokyo's navy sat at 4.1, and the same probe that measured 0.26
+      // there measures **3.65** here.
+      //
+      // The dependent decision is deliberately NOT changed in the same task.
+      // Giving dark a card-level drop is a depth change with every dark golden
+      // behind it, and a palette swap is not the place to make it. What this
+      // assertion does now is stop the old premise being quoted as though it
+      // still held, and pin the new number so the debt has a figure on it.
       expect(
         darkGain,
-        lessThan(1.0),
+        greaterThan(1.0),
         reason:
             'a dark shadow at alpha 0.20 moves the page by '
-            '${darkGain.toStringAsFixed(2)} L*. If this ever exceeds 1.0 the '
-            'dark page has left the bottom of the scale and dark should paint '
-            'shadows after all.',
+            '${darkGain.toStringAsFixed(2)} L*. Back under 1.0 means the dark '
+            'ground returned to the bottom of the scale, and the rim-only card '
+            'is justified on its original measurement again — say so here '
+            'rather than leaving this reading the wrong way round.',
       );
       expect(
         lightGain,

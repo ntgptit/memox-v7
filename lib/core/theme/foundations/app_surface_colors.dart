@@ -57,9 +57,9 @@ abstract final class AppSurfaceColors {
   /// shadow — it only explains why the ladder was built to work without one.
 
   /// Page background. The one component allowed a strong navy saturation.
-  static const Color pageLight = Color(0xFFF2F5F9);
+  static const Color pageLight = Color(0xFFF4F5F7);
 
-  static const Color pageDark = Color(0xFF070C27);
+  static const Color pageDark = Color(0xFF313133);
 
   /// Card and sheet — the flashcard surface.
   ///
@@ -77,16 +77,16 @@ abstract final class AppSurfaceColors {
   /// exactly that.
   static const Color paperLight = Color(0xFFFFFFFF);
 
-  static const Color paperDark = Color(0xFF111633);
+  static const Color paperDark = Color(0xFF393A41);
 
-  static const Color surfaceEmphasisLight = Color(0xFFF5F6FF);
+  static const Color surfaceEmphasisLight = Color(0xFFE9EBF4);
 
   /// **Dark keeps the value it has today.** The reference concept is light-only
   /// ("LIGHT · TOKYO PURE"), and the complaint that started this was light: in
   /// dark `#332F58` carries a real violet and already reads as a callout. A dark
   /// value invented without a reference to measure against would be the guess
   /// this whole pass exists to avoid.
-  static const Color surfaceEmphasisDark = Color(0xFF2A3159);
+  static const Color surfaceEmphasisDark = Color(0xFF585A66);
 
   /// The fill a *picked* card wears when its list uses the tint treatment.
   ///
@@ -100,14 +100,14 @@ abstract final class AppSurfaceColors {
   ///
   /// The *edge* stays `secondary`: its 2.90:1 measurement is about a line on
   /// `surface`, which the fill never had a stake in.
-  static const Color surfaceSelectedLight = Color(0xFFE6E9FF);
+  static const Color surfaceSelectedLight = Color(0xFFE7E9F8);
 
   /// Unchanged in dark, for the reason [surfaceEmphasisDark] is.
-  static const Color surfaceSelectedDark = Color(0xFF2A3159);
+  static const Color surfaceSelectedDark = Color(0xFF3C3E4E);
 
-  static const Color surfaceMutedLight = Color(0xFFE9EBEE);
+  static const Color surfaceMutedLight = Color(0xFFECECF1);
 
-  static const Color surfaceMutedDark = Color(0xFF21274C);
+  static const Color surfaceMutedDark = Color(0xFF3E3F47);
 
   /// Top of the ladder: a raised or selected surface.
   ///
@@ -118,5 +118,5 @@ abstract final class AppSurfaceColors {
   // are this value under Material's names, derived there.
   static const Color surfaceElevatedLight = Color(0xFFFFFFFF);
 
-  static const Color surfaceElevatedDark = Color(0xFF2F3660);
+  static const Color surfaceElevatedDark = Color(0xFF616371);
 }

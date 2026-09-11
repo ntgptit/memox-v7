@@ -61,10 +61,10 @@ abstract final class AppColors {
   // the surface hue makes text sit *in* the interface rather than on top of it.
   // Which is why both dark values moved with the ladder — a trace of the *old*
   // surface hue is a trace of a hue no surface carries any more.
-  static const Color textPrimaryLight = Color(0xFF223354);
-  static const Color textPrimaryDark = Color(0xFFCBCCD2);
-  static const Color textSecondaryLight = Color(0xFF596680);
-  static const Color textSecondaryDark = Color(0xFF9395A2);
+  static const Color textPrimaryLight = Color(0xFF313133);
+  static const Color textPrimaryDark = Color(0xFFE3E3E6);
+  static const Color textSecondaryLight = Color(0xFF585A66);
+  static const Color textSecondaryDark = Color(0xFFD8D9E6);
 
   /// The fill and the border of a disabled control — a solid, per MX-VIS-002
   /// rule R7. Material's idiom is the ink at 12% alpha, which composites
@@ -76,15 +76,15 @@ abstract final class AppColors {
   /// The kit's `--color-disabled-surface` reads `#E3E3E6` / `#312E4E`, ~3/255
   /// away: a stale transcription of this file rather than a decision of its
   /// own. Recorded in `docs/wbs.md` under M4.10an.
-  static const Color disabledSurfaceLight = Color(0xFFE4E7EA);
-  static const Color disabledSurfaceDark = Color(0xFF272C46);
+  static const Color disabledSurfaceLight = Color(0xFFE6E6E7);
+  static const Color disabledSurfaceDark = Color(0xFF4D4E55);
 
   /// A disabled label or glyph — the kit's `--color-on-disabled`, which is the
   /// ink at 38%. Translucent where the fill above is solid, and for a reason: a
   /// disabled fill has one ground, a disabled label has three — the page, a
   /// card, and the disabled fill itself.
-  static const Color onDisabledLight = Color(0x61223354);
-  static const Color onDisabledDark = Color(0x61CBCCD2);
+  static const Color onDisabledLight = Color(0x61313133);
+  static const Color onDisabledDark = Color(0x61E3E3E6);
 
   // --- Brand and actions ---------------------------------------------------
 
@@ -122,11 +122,11 @@ abstract final class AppColors {
   /// same ratios — 7.73 under [onPrimaryDark], 11.27 on the page, 10.37 on the
   /// card, 8.43 on the tile, 7.24 on `secondaryContainer`, 7.39 on the track,
   /// 6.74 on the error band — at 1.7°. Coherent family outranks exact hex.
-  static const Color primaryDark = Color(0xFFBCC2FF);
+  static const Color primaryDark = Color(0xFFA1A9E6);
   static const Color onPrimaryLight = Color(0xFFFFFFFF);
 
   /// Tone 20 at the brand hue. 7.73:1 under [primaryDark].
-  static const Color onPrimaryDark = Color(0xFF202771);
+  static const Color onPrimaryDark = Color(0xFF191F4C);
 
   // --- Semantic ------------------------------------------------------------
   //
@@ -185,12 +185,12 @@ abstract final class AppColors {
   /// to within 0.2 degrees and the same saturation, one step darker in HSL
   /// lightness: 4.53:1 on the page and 4.95:1 on the paper, against 4.33 and
   /// 4.73. The chroma ordering `app_palette_test.dart` pins is untouched.
-  static const Color warningLight = Color(0xFFA06200);
-  static const Color warningDark = Color(0xFFFFA319);
+  static const Color warningLight = Color(0xFF866B00);
+  static const Color warningDark = Color(0xFFFFD119);
 
   /// Answer forgotten, destructive action, reset.
-  static const Color dangerLight = Color(0xFFCD0031);
-  static const Color dangerDark = Color(0xFFFF768F);
+  static const Color dangerLight = Color(0xFFB3261E);
+  static const Color dangerDark = Color(0xFFE69490);
 
   // --- Status containers ---------------------------------------------------
   //
@@ -254,8 +254,8 @@ abstract final class AppColors {
   /// against the card (1.13:1 against 1.27) and **stronger against the fill**
   /// (3.75:1 against 3.34), which is the pair that carries the number. A track
   /// is a groove, not a second datum.
-  static const Color progressTrackLight = Color(0xFFEBEDFF);
-  static const Color progressTrackDark = Color(0xFF2E3247);
+  static const Color progressTrackLight = Color(0xFFE9EAF9);
+  static const Color progressTrackDark = Color(0xFF535566);
 
   /// The filled part, below 100%.
   ///
@@ -276,7 +276,7 @@ abstract final class AppColors {
   // beside the button is the failure this token exists to prevent
   // (`mx_progress_bar_test.dart`). `#6E6ECE` re-hued onto Tokyo's indigo with
   // its tone and chroma kept; 3.76:1 on its track.
-  static const Color progressFillLight = Color(0xFF6471CF);
+  static const Color progressFillLight = Color(0xFF6674D5);
   static const Color progressFillDark = primaryDark;
 
   // --- Due chip -----------------------------------------------------------
@@ -348,8 +348,8 @@ abstract final class AppColors {
   /// `#04040B` is `seed @ 0.06` over black, which keeps hue 240 at a luminance
   /// low enough to read as a shadow rather than as a navy smear. Pinned by
   /// MX-VIS-002 rule R6.
-  static const Color scrimLight = Color(0xFF0A0C18);
-  static const Color scrimDark = Color(0xFF03040B);
+  static const Color scrimLight = Color(0xFF1F2238);
+  static const Color scrimDark = Color(0xFF14172E);
 
   /// The colour a **cast** shadow is drawn from — Tokyo's `shadows.card`
   /// (M100.30).
@@ -371,7 +371,7 @@ abstract final class AppColors {
   /// is drawn at far higher alpha to compensate; the pair is what [shadowsFor]
   /// carries, and the lift it produces is re-measured in `app_theme_test.dart`
   /// rather than asserted here.
-  static const Color shadowLight = Color(0xFF9FA2BF);
+  static const Color shadowLight = Color(0xFF9295A5);
 
   /// **Dark casts no shadow, so this is a declared role rather than a painted
   /// one.** `shadowsFor` draws Tokyo's rim in dark and `materialShadowColor`

@@ -70,7 +70,7 @@ abstract final class AppBorderColors {
   // page would fall to **1.04**, which is the page colour itself. That is the
   // exact failure #431 P2-4 removed when it deleted `borderDivider`, so the
   // retune stops short of it deliberately rather than chasing the number.
-  static const Color borderSubtleLight = Color(0xFFE9ECEF);
+  static const Color borderSubtleLight = Color(0xFFE9E9ED);
 
   // Lifted from 0xFF403D67 so a fill-less hairline (a divider on the dark page)
   // reads on OLED. Same hue and saturation (0.41), lightness only.
@@ -78,13 +78,13 @@ abstract final class AppBorderColors {
   // figure: this hairline reads 1.33 on the dark card where light read 1.24,
   // so it was the heavier of the two to begin with. #222743 brings the card
   // case to 1.24 and the page case from 1.41 to 1.32.
-  static const Color borderSubtleDark = Color(0xFF222743);
+  static const Color borderSubtleDark = Color(0xFF3C3D48);
 
-  static const Color borderSelectedLight = Color(0xFF5569FF);
+  static const Color borderSelectedLight = Color(0xFF4454CC);
 
   /// See [borderSelectedLight]. Dimmer than the focus indicator on purpose —
   /// that ring is `scheme.primary` at [AppStroke.focus].
-  static const Color borderSelectedDark = Color(0xFF8C7CF0);
+  static const Color borderSelectedDark = Color(0xFFBBBCE9);
 
   /// The hairline a panel wears when it is the screen's *answer* rather than
   /// one row among many — today the Library's Today card.
@@ -96,7 +96,7 @@ abstract final class AppBorderColors {
   /// the contrast, and a resolved constant is what MX-VIS-002 rule R7 asks
   /// for — a translucent border composites against whatever is behind it, and
   /// the audit cannot read it back.
-  static const Color borderAccentLight = Color(0xFFAAB4FF);
+  static const Color borderAccentLight = Color(0xFFB0B7EA);
 
   /// Same recipe as [borderAccentLight], over the dark surface.
   /// **Solved against the one rule that matters here, and it is not the same
@@ -111,7 +111,7 @@ abstract final class AppBorderColors {
   /// `#6560B8` measures **2.93:1** on that fill — above the old hairline in both
   /// modes, and still short of the focus ring, which has to stay the loudest
   /// edge a card can wear.
-  static const Color borderAccentDark = Color(0xFF7063C0);
+  static const Color borderAccentDark = Color(0xFF73789A);
 
   /// The resting edge of a selectable **card** — `MxCard.option`.
   ///
@@ -145,12 +145,12 @@ abstract final class AppBorderColors {
   // step darker: 3.27:1, and still 1.32 quieter than `borderSelectedLight`'s
   // 4.33, so a picked option keeps winning its row. Not `primary`: the
   // family is the point, and the role is a fill.
-  static const Color borderOptionLight = Color(0xFF7383FF);
+  static const Color borderOptionLight = Color(0xFF838EDD);
 
   /// See [borderOptionLight]. Measured on the fill `.option` actually has in
   /// dark (`surface`, since the recipe is flat): **3.22:1**, chroma 0.120, and
   /// 1.37 quieter than [borderSelectedDark].
-  static const Color borderOptionDark = Color(0xFF5B65B2);
+  static const Color borderOptionDark = Color(0xFF747FDA);
 
   /// A control's edge at the 3:1 WCAG 1.4.11 asks. Why a control and not a
   /// card, and the measurements: `AppSemanticColors.borderControl`.
@@ -243,7 +243,7 @@ abstract final class AppBorderColors {
   /// **Dark is untouched.** Its own binding pairing sits at 3.04 — a margin of
   /// 0.04, not 0.81 — so the two modes drifted in opposite directions and only
   /// one of them has room to give back.
-  static const Color borderControlLight = Color(0xFF7B7E88);
+  static const Color borderControlLight = Color(0xFF787C87);
 
   /// Raised from `#66628D` at M100.3, and the census is the reason.
   ///
@@ -289,5 +289,5 @@ abstract final class AppBorderColors {
   /// It stays well under `onSurfaceVariant` (L\* 52.56 against 69.43), so the
   /// edge is still quieter than the secondary label it sits beside — the
   /// ordering the M100.3 census established, kept while the number moved.
-  static const Color borderControlDark = Color(0xFF747BA3);
+  static const Color borderControlDark = Color(0xFFACADBA);
 }

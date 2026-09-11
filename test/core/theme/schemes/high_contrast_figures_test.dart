@@ -43,7 +43,7 @@ void main() {
         // this retune is safe: HC re-points the token to `onSurfaceVariant`
         // rather than deriving it from the base, so no accessibility floor
         // moves with it.
-        expect(r(base.borderSubtle), isLight ? '1.08' : '1.32');
+        expect(r(base.borderSubtle), isLight ? '1.11' : '1.21');
         // **No longer a swap at all** (M100.82, owner review). The hairline
         // was `onSurfaceVariant` — 5.28 / 6.47, the secondary *label* ink —
         // then briefly `borderControl` at 3.71 / 4.68. Both were reviewed on a
@@ -55,15 +55,15 @@ void main() {
         // Light re-measured at M100.48: the token was lightened from
         // `#6F727B` to `#7B7E88`, which is this cell moving 4.40 -> 3.71.
         // Dark is untouched. The floor assertions below are not.
-        expect(r(base.borderControl), isLight ? '3.71' : '4.68');
-        expect(r(hc.borderControl), isLight ? '5.28' : '6.47');
-        expect(r(base.borderAccent), isLight ? '1.80' : '3.88');
-        expect(r(hc.borderAccent), isLight ? '5.67' : '11.27');
-        expect(r(base.onDisabled), isLight ? '2.11' : '2.62');
-        expect(r(hc.onDisabled), isLight ? '3.81' : '5.12');
+        expect(r(base.borderControl), isLight ? '3.83' : '5.84');
+        expect(r(hc.borderControl), isLight ? '6.27' : '9.26');
+        expect(r(base.borderAccent), isLight ? '1.78' : '3.02');
+        expect(r(hc.borderAccent), isLight ? '5.69' : '5.77');
+        expect(r(base.onDisabled), isLight ? '2.12' : '2.81');
+        expect(r(hc.onDisabled), isLight ? '3.85' : '4.94');
         expect(
           contrast(scheme.onSurface, surface).toStringAsFixed(2),
-          isLight ? '11.50' : '12.01',
+          isLight ? '11.90' : '10.14',
         );
       });
 
