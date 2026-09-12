@@ -39,10 +39,25 @@ import '../../typography/app_typography.dart';
 
 /// The resting fill for a pill, before any pointer or disabled state.
 ///
-/// Selected is `secondaryContainer` — `_ChoiceChipDefaultsM3.color`'s answer,
-/// and the same pair the navigation indicator and the segmented button take, so
-/// "this one is active" looks the same whether it is a tab, a segment or a
-/// filter.
+/// **Selected is `primaryContainer` — a named departure from
+/// `_ChoiceChipDefaultsM3.color`'s own answer (`secondaryContainer`), taken at
+/// M100.85 under `v1-freeze.md` §3 condition 6** (an owner-supplied Chip design
+/// spec, with a concrete kit reference, naming the role directly). Before this,
+/// selected read `secondaryContainer` — the same pair `NavigationBar`'s
+/// indicator and `SegmentedButton` take, so "this one is active" looked the
+/// same whether it was a tab, a segment or a filter. That cross-component
+/// match is deliberately given up here, for Chip only: `v1-freeze.md` §3c
+/// records why the other two did not move with it. `m3_role_contract_test.dart`
+/// ("the selected state is not one ink") is the guard that would have caught an
+/// accidental collapse onto one token; it now pins the departure by name
+/// instead of the coincidence.
+///
+/// (Chip's selected fill was briefly `primaryContainer` once before, between
+/// the owner review of 2026-08-20 and M100.22 — see the note below on the
+/// contrast complaint that moved it away. That was an accident of `surface`
+/// still meaning the paper at the time; this is a stated choice against a
+/// palette where the two roles are what the guard in `m3_role_bindings.dart`
+/// says they are.)
 ///
 /// **Unselected is `surfaceContainerLow` — the paper — and this theme is what
 /// paints it** (M100.36, correcting M100.32). `_ChoiceChipDefaultsM3.color` is
@@ -67,7 +82,7 @@ import '../../typography/app_typography.dart';
 /// (`AppMaterialRoles.secondaryContainerLight`), so the role now gives 10.50 and
 /// the chip can say what it is.
 Color _restingFill(ColorScheme scheme, {required bool isSelected}) =>
-    isSelected ? scheme.secondaryContainer : scheme.surfaceContainerLow;
+    isSelected ? scheme.primaryContainer : scheme.surfaceContainerLow;
 
 /// The fill for [states], resolved to a solid colour over the ground that state
 /// actually has.
@@ -129,7 +144,7 @@ Color _labelColorFor(
     return semantic.onDisabled;
   }
   if (states.contains(WidgetState.selected)) {
-    return scheme.onSecondaryContainer;
+    return scheme.onPrimaryContainer;
   }
 
   return scheme.onSurfaceVariant;
@@ -256,8 +271,12 @@ ChipThemeData buildChipTheme(
   // own glyph in the resolved *label* colour instead, because a selected pill
   // printing brand ink beside a grey glyph is one control disagreeing with
   // itself. See the note at its `Icon`.
+  //
+  // **`AppIconSize.md`, not `.sm`** (M100.85). The Chip design spec states the
+  // glyph step as fixed at 24; `MxPillButton` matches it in the leading slot it
+  // composes so the check and the caller's icon stay the same size.
   iconTheme: IconThemeData(
-    size: AppIconSize.sm,
+    size: AppIconSize.md,
     color: scheme.onSurfaceVariant,
   ),
   // **`labelPadding` zeroed, and that is the fix for the skew rather than a
