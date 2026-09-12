@@ -803,6 +803,40 @@ không nhầm chúng là một phase.
   và lượt giao thứ hai trong cùng ngày bị chặn ở use case.
 - **Checklist phases:** 9, 10, 11, 12, 13, 14, 15
 
+### M100.85 · StudyTopBar → MxSessionTopBar design-spec
+
+- **Status:** done
+- **Goal:** Đối chiếu component contract "StudyTopBar" của MemoX HTML design
+  kit (mục A · Chrome & navigation) với `MxSessionTopBar` +
+  `StudySessionFrameSectionWidget` đã triển khai, để một task design-system
+  tương lai (nếu có, theo `v1-freeze.md` §3) có điểm khởi đầu đã có nguồn
+  trích dẫn thay vì tự đối chiếu lại từ đầu.
+- **Scope:** Đọc toàn bộ `mx_session_top_bar.dart`,
+  `study_session_frame_section_widget.dart`, các hằng số theme liên quan
+  (`app_spacing.dart`, `app_sizing.dart`, `app_icon_size.dart`,
+  `app_breakpoints.dart`, `app_ink.dart`, `mx_progress_bar.dart`,
+  `mx_icon_button.dart`), `v1-freeze.md` và `study_session_chrome_test.dart`;
+  viết `docs/design-system/study-top-bar-design-spec.md`.
+- **Out of scope:** Bất kỳ thay đổi nào ở `lib/`, `test/`, `widgetbook/` hay
+  CI/config; implement accent theo từng mode (mục mở, xem tài liệu §7 và
+  `v1-freeze.md` §3 điều kiện 6); sửa bất kỳ tài liệu `frozen for MVP` nào.
+- **Editable documents:** `docs/design-system/study-top-bar-design-spec.md`,
+  `docs/wbs.md`
+- **Output:** `docs/design-system/study-top-bar-design-spec.md`
+- **Acceptance criteria:**
+  - [x] Tài liệu mở đầu bằng header 7 dòng đủ trường, `Status: draft`.
+  - [x] Dimension table (`accent`, `progress`), icon mapping, state matrix,
+        implementation handoff và cả ba mục P0 đều có trích dẫn file:line.
+  - [x] Xung đột accent-theo-mode được ghi làm mục mở (§7), không tự giải
+        quyết theo hướng nào.
+  - [x] Không file nào ngoài hai file ở "Editable documents" bị tạo/sửa/xoá.
+- **Dependencies:** none
+- **Tests required:** none — document only. Không có code nào được viết ở
+  task này; hành vi được đối chiếu đã có test giữ từ trước
+  (`study_session_chrome_test.dart` và bộ test hiện có của
+  `MxSessionTopBar`).
+- **Checklist phases:** 7
+
 ## Blocker
 
 | Blocker | Ảnh hưởng | Cách gỡ |
