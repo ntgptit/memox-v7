@@ -89,13 +89,20 @@ void main() {
       });
 
       test('ChoiceChip', () {
+        // **Selected fill and label are the one stated exception in this
+        // file** (M100.85, `v1-freeze.md` §3c). `_ChoiceChipDefaultsM3.color`
+        // answers `secondaryContainer`; the owner's Chip design spec named
+        // `primaryContainer` directly, and reopening the binding in
+        // `m3_role_bindings.dart` is the diff that says so, as this file's own
+        // header asks for. Unselected fill, both labels' other branch, and the
+        // outline are untouched — still the SDK's own answer.
         final t = theme.chipTheme;
         final label = t.labelStyle!.color! as WidgetStateColor;
 
         pin(
           'selected fill',
           t.color!.resolve(selected),
-          scheme.secondaryContainer,
+          scheme.primaryContainer,
         );
         pin(
           'unselected fill',
@@ -105,7 +112,7 @@ void main() {
         pin(
           'selected label',
           label.resolve(selected),
-          scheme.onSecondaryContainer,
+          scheme.onPrimaryContainer,
         );
         pin(
           'unselected label',
@@ -377,6 +384,15 @@ void main() {
       // The inverse of what `app_selected_ink_test.dart` pinned, and the reason
       // this file exists. If a future change collapses these back onto one
       // token "for consistency", this fails and says which M3 default it broke.
+      //
+      // **The chip's own row changed meaning at M100.85, not its value.**
+      // Before M100.85 `chipLabel` and `navGlyph` were the same *role*,
+      // `onSecondaryContainer`, arrived at independently by two different M3
+      // defaults — the coincidence this test was written to prove could
+      // diverge. Chip's stated departure to `onPrimaryContainer` (`v1-freeze.md`
+      // §3c) makes them diverge for real; the test still proves the same
+      // thing it always did — three components, three roles, none of them
+      // implicitly shared.
       final theme = buildLightTheme();
       final scheme = theme.colorScheme;
       const selected = <WidgetState>{WidgetState.selected};
@@ -390,7 +406,7 @@ void main() {
           .resolve(selected)!
           .color;
 
-      expect(chipLabel, scheme.onSecondaryContainer);
+      expect(chipLabel, scheme.onPrimaryContainer);
       expect(navGlyph, scheme.onSecondaryContainer);
       expect(
         navLabel,

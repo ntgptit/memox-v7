@@ -66,13 +66,14 @@ canonical M3 role  >  accessibility  >  MemoX structural system  >  Tokyo exact 
 
 | Component | Slot | M3 canonical | MemoX | Ghi chú |
 |---|---|---|---|---|
-| ChoiceChip | selected fill | `secondaryContainer` | = | guard AST |
+| ChoiceChip | selected fill | `secondaryContainer` | **`primaryContainer` — lệch có chủ đích** | M100.85: spec Chip của chủ dự án đặt tên role thẳng; `v1-freeze.md` §3c ghi lý do. `m3_role_bindings.dart` đảo `requires`/`refuses` cho hai binding `ChoiceChip` |
+| ChoiceChip | selected label | `onSecondaryContainer` | **`onPrimaryContainer`** | đi theo fill ở trên, cùng M100.85 |
 | ChoiceChip (flat) | unselected fill | `null` | `surfaceContainerLow` — **theme khai, không phải variant** | `ChipThemeData.color` chặn `chipDefaults.color` trước khi variant được hỏi (`chip.dart:1529`); M100.36 sửa lại lời giải thích ở §4 |
 | ChoiceChip | side | `outlineVariant`, selected trong suốt | = | guard AST; width = `AppStroke.hairline` (test ghim); 1.24:1 trên giấy — **chấp nhận**, pill định danh bằng hình, nhãn, nhóm và tick (#434 P2-4) |
 | ChoiceChip | disabled fill | `onSurface @ 12%` — selected hay không | = (`disabledSurfaceTint`) | M100.36: trước đó selected+disabled blend thêm container, dark sáng *hơn* pill sống (#434 P2-3) |
 | ChoiceChip | elevation / pressElevation | 1 / 1 (M3) | **0 / 0** | AD-14 một cơ chế độ sâu; `pressElevation` từng để SDK → mỗi lần nhấn có bóng thật (#434 P1-2) |
 | ChoiceChip | hover / press / focus | state layer `onSurfaceVariant` | hover: fill tint (`RawChip` tắt `hoverColor` khi theme có `color`) · press: ripple SDK · focus: `MxFocusRing` | **một cơ chế mỗi state** (§4O). Fill *không* đổi khi press/focus |
-| MxPillButton (custom) | leading slot | — | 16dp luôn được layout: tick khi selected, `icon` của caller khi không | chọn có *hình*, không reflow (§4M); target 48 do widget tự nới **ngoài** ring |
+| MxPillButton (custom) | leading slot | — | 24dp (`AppIconSize.md`, M100.85) luôn được layout: tick khi selected, `icon` của caller khi không | chọn có *hình*, không reflow (§4M); target 48 do widget tự nới **ngoài** ring |
 | Checkbox | fill | `primary` / trong suốt theo `selected` | = | guard AST |
 | Switch | thumb | `outline` off / `onPrimary` on | = | guard AST |
 | Switch | track | `surfaceContainerHighest` off / `primary` on | = | guard AST |

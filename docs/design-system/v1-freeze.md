@@ -8,7 +8,7 @@
 | **Source of truth for** | Freeze record của V1 · danh sách hợp đồng đóng băng · reopen trigger · bản đồ enforcement cho từng hợp đồng · ràng buộc lên task feature |
 | **Depends on** | `document-conventions.md` · `architecture.md` (AD-14, AD-15, AD-23) · `design-system/theme-architecture.md` · `reviews/a20-1-design-system-reconciliation.md` (bằng chứng lịch sử) |
 | **Updated by task** | M100.73 |
-| **Last updated** | 2026-09-10 |
+| **Last updated** | 2026-09-12 |
 
 ---
 
@@ -183,6 +183,57 @@ số 6 đã có sẵn cho brief này.
 `app_sizing_test` có thêm một khẳng định nói rõ nó **không** phải control: nó
 nhỏ hơn `controlDense`, nên sàn 48dp không áp — và nếu ai đó làm nó bấm được mà
 quên chuyển nó ra khỏi nhóm này thì test đỏ.
+
+---
+
+## 3c. Reopen record — M100.85 (2026-09-12)
+
+**Lần mở lại thứ ba, cùng điều kiện số 6, và lần này hợp đồng bị chạm là một
+guard AST chặn cứng — không phải một token bị mượn sai trục như §3b.**
+
+**Chuyện đã xảy ra.** Chủ dự án đưa một bản đặc tả component Chip (bảng
+dimension + state matrix, dẫn từ MemoX HTML design kit) và đặt tên role trực
+tiếp: `selected — primaryContainer fill, onPrimaryContainer label`. Đối chiếu
+với `m3_role_bindings.dart` thì phát hiện `ChoiceChip._restingFill` và
+`._labelColorFor` đang ghim `secondaryContainer` / `onSecondaryContainer`, với
+`refuses: ['primaryContainer']` / `['onPrimaryContainer']` tường minh — lý do
+ghi trong chính binding: đây là default canonical của `_ChoiceChipDefaultsM3`.
+`app_chip_theme.dart` còn nói thêm: `secondaryContainer` được chọn để "đang
+active" trông giống hệt `NavigationBar` indicator và `SegmentedButton`.
+
+**Đúng điều kiện thứ sáu, không phải điều kiện nào khác.** Không phải nâng SDK
+(1); không phải thiết kế lại palette (2) — không hex nào đổi; không phải thêm
+họ primitive mới (3) — `MxPillButton`/`ChoiceChip` đã có; không phải yêu cầu
+accessibility (4); không phải defect (5) — hành vi cũ chạy đúng theo đúng M3.
+Đây là chủ dự án chủ động chỉ định hình thức mới cho một component đã có, kèm
+tham chiếu cụ thể (bản đặc tả Chip) — đúng khuôn điều kiện 6 đã ghi từ §3a.
+
+**Quyết định được hỏi thẳng, không tự suy.** Ba hướng được đặt ra: giữ
+`secondaryContainer` (coi chữ trong spec là mô tả, không phải role Flutter bắt
+buộc); đổi `primaryContainer` chỉ cho Chip; hoặc đổi cả ba component
+(`ChoiceChip` + `SegmentedButton` + `NavigationBar` indicator) để giữ "đang
+active" đồng nhất toàn app. Chủ dự án chọn **chỉ Chip**. Hệ quả được chấp nhận
+tường minh, không phải bỏ sót: từ M100.85, Chip đọc `primaryContainer` trong
+khi tab đang chọn và segment đang chọn vẫn đọc `secondaryContainer` — ba
+component "đang active" không còn cùng một ngôn ngữ màu. `SegmentedButton` và
+`NavigationBar` **không đổi** trong task này; nếu sau này chúng cần đồng bộ lại
+với Chip, đó là một task design-system riêng, không phải phần mở rộng ngầm của
+M100.85.
+
+**Cái gì đã đổi, và cái gì không.**
+
+| Hợp đồng §2 | Đổi | Không đổi |
+|---|---|---|
+| 2 — role identity, role ngữ nghĩa | có: `ChoiceChip` selected fill/label rời `secondaryContainer`/`onSecondaryContainer` sang `primaryContainer`/`onPrimaryContainer`. `m3_role_bindings.dart` đảo `requires`/`refuses`; `m3_role_contract_test.dart` và `m3_combined_state_test.dart` ghim giá trị mới | `SegmentedButton`, `NavigationBar` indicator/label, mọi role khác của Chip (unselected fill vẫn `surfaceContainerLow`, side/disabled/elevation không đổi) |
+| 1 — 45 role là danh tính chuẩn | không | không role nào bị thêm hay bớt khỏi allowlist; `primaryContainer`/`onPrimaryContainer` đã có sẵn trong 45 role |
+| 3 — mapping ThemeData/component theme | có, ở đúng slot đang đổi | `docs/design-system/tokyo-component-mapping.md` selection/ cập nhật hai dòng (selected fill, selected label) |
+| 5 — foundation sizing | có, nhưng không thêm token: icon glyph của Chip đổi từ `AppIconSize.sm` (16) sang `AppIconSize.md` (24) — cả hai đã tồn tại | không token `AppSizing`/`AppSpacing`/`AppRadius` nào mới; `MxPillButton`'s `SizedBox.square` đổi theo cùng bước để tick và icon vẫn khớp khung |
+| 6 — public contract của shared primitive | không | `MxPillButton`'s API (`label`/`isSelected`/`onPressed`/`icon`/`semanticLabel`) không đổi; đây là retune bên trong theme, không phải một tham số mới |
+| 8 — ripple/state trên Android | không | Cơ chế "một mechanism mỗi state" (hover = fill tint, press = ripple SDK, focus = `MxFocusRing`) không bị chạm — chỉ giá trị resting/selected fill đổi |
+
+**Ràng buộc lên task feature không đổi.** Không có feature nào được sửa
+`SegmentedButton` hay `NavigationBar` để "theo kịp" Chip trong lúc chờ quyết
+định đồng bộ — đó vẫn là §3 cấm "mở đường".
 
 ---
 
