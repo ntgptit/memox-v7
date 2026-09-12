@@ -2,23 +2,25 @@
 
 | | |
 |---|---|
-| **Status** | draft |
-| **Purpose** | Đối chiếu component contract "StudyTopBar" (MemoX HTML design kit, mục A · Chrome & navigation) với `MxSessionTopBar` + `StudySessionFrameSectionWidget` đã triển khai, và ghi lại một xung đột cố ý (accent theo từng mode) làm điểm khởi đầu có nguồn cho một task design-system tương lai, nếu có |
+| **Status** | active |
+| **Purpose** | Đối chiếu component contract "StudyTopBar" (MemoX HTML design kit, mục A · Chrome & navigation) với `MxSessionTopBar` + `StudySessionFrameSectionWidget` đã triển khai: xác nhận phần đã thoả (dimension `progress`, icon, state matrix, cả ba mục P0), ghi lại phần còn lệch (accent cố định thay vì theo từng mode) và vì sao tài liệu này không tự sửa nó |
 | **Scope** | Đối chiếu dimension table, icon mapping, state matrix, implementation handoff và ba mục P0 của prompt gốc với `mx_session_top_bar.dart` / `study_session_frame_section_widget.dart` / `v1-freeze.md`. Ngoài phạm vi: giá trị token gốc (AD-14), thay đổi bất kỳ hợp đồng đóng băng nào (việc của một task design-system riêng, xem §7) |
-| **Source of truth for** | Kết quả đối chiếu spec StudyTopBar (kit) ↔ `MxSessionTopBar`; bản ghi xung đột accent-theo-mode và điều kiện mở lại duy nhất của nó |
-| **Depends on** | `document-conventions.md` · `design-system/v1-freeze.md` · `design-system/tokyo-component-mapping.md` |
-| **Updated by task** | M100.85 |
+| **Source of truth for** | Kết quả đối chiếu spec StudyTopBar (kit) ↔ `MxSessionTopBar`; điểm nào của spec gốc đã khớp, điểm nào còn mở (accent theo mode) |
+| **Depends on** | `document-conventions.md` · `architecture.md` (AD-14) · `design-system/v1-freeze.md` · `design-system/tokyo-component-mapping.md` |
+| **Updated by task** | — (khảo sát design-spec ngoài WBS; xem §0) |
 | **Last updated** | 2026-09-12 |
 
 ---
 
 ## 0. Tài liệu này là gì, và không phải là gì
 
-Nguồn: MemoX HTML design kit, mục *A · Chrome & navigation*. Prompt gốc giả
-định một tài liệu "MemoX Foundations spec" đọc trước; tài liệu đó **không tồn
-tại** trong repo này hay lịch sử git của nó. Nền tảng dùng thay là
-`lib/core/theme/` đọc thẳng từ nguồn, đúng quy ước "không bịa giá trị token"
-của repo.
+Nguồn: MemoX HTML design kit, mục *A · Chrome & navigation*. HTML design kit
+đã bị xoá ở M100.83 (#541, "the CSS kit goes") — spec gốc (nguyên văn ở §1)
+là bản ghi duy nhất còn lại của mục này trong repo. Prompt gốc còn giả định
+một tài liệu "MemoX Foundations spec" đọc trước; tài liệu đó cũng **không tồn
+tại** trong repo này hay lịch sử git của nó (đã tìm trước khi viết) — tài
+liệu này tự đọc thẳng `lib/core/theme/` thay cho nó, không chờ một phiên
+khác dựng ra bản đó trước.
 
 **Đây không phải một implementation task.** Component đã tồn tại và đã chạy
 production:
@@ -29,9 +31,24 @@ production:
   — compose bar vào khung phiên học đầy đủ (context line, hint line), dùng
   chung cho cả năm mode học.
 
-Cả hai file đã đọc toàn bộ để viết tài liệu này. Tài liệu này **MUST NOT**
-được dùng làm căn cứ để tự ý đổi code, test hay bất kỳ tài liệu đóng băng nào
-— nó chỉ đối chiếu và ghi lại đúng một xung đột cố ý (§7).
+Một phần hợp đồng của nó đã **đóng băng** ở `v1-freeze.md` §2, và bốn dòng
+đó giới hạn những gì tài liệu này có quyền kết luận: danh tính 45 role của
+`ColorScheme` (dòng 1) và nguyên tắc chỉ retune trong role, không đổi role
+ngữ nghĩa (dòng 2) — cả hai ràng buộc kết luận ở §2/§7 rằng ink `AppInk.accent`
+của chip không thể tự đổi thành một role khác theo mode; public contract của
+shared primitive (dòng 6) — ràng buộc kết luận ở §4 rằng trạng thái của nút
+đóng thuộc về `MxIconButton`, không phải thứ `StudyTopBar` tự định nghĩa
+riêng; và chrome contract của `MxContentShell` (dòng 11, giữ một phần bởi
+`study_session_chrome_test.dart`) — ràng buộc kết luận ở §5 về "system Back".
+Tài liệu này đối chiếu spec với code thật, không tự ý đổi bất kỳ dòng nào
+trong số đó.
+
+File đã đọc để đối chiếu: `mx_session_top_bar.dart`,
+`study_session_frame_section_widget.dart`, `mx_icon_button.dart`,
+`mx_progress_bar.dart`, `mx_content_shell.dart`, `app_spacing.dart`,
+`app_sizing.dart`, `app_icon_size.dart`, `app_breakpoints.dart`,
+`app_ink.dart`, `v1-freeze.md`, `study_session_chrome_test.dart`,
+`pubspec.yaml`.
 
 ## 1. Hợp đồng component (nguyên văn từ prompt gốc — binding)
 
