@@ -144,7 +144,8 @@ void main() {
     );
 
     expect(icon.icon, Icons.error_outline);
-    expect(icon.color, const AppSemanticColors.light().danger);
+    // The ink, not the fill: `AppInk` resolves only to inks since M100.86.
+    expect(icon.color, const AppSemanticColors.light().dangerInk);
   });
 
   testWidgets('a success alert is a different glyph and a different token', (
@@ -160,6 +161,6 @@ void main() {
     );
 
     expect(icon.icon, Icons.check_circle_outline);
-    expect(icon.color, const AppSemanticColors.light().success);
+    expect(icon.color, const AppSemanticColors.light().successInk);
   });
 }

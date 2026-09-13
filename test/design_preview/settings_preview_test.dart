@@ -160,14 +160,14 @@ class _DestructiveRow extends StatelessWidget {
       ),
       child: Row(
         children: <Widget>[
-          Icon(Icons.restart_alt, size: 20, color: semantic.danger),
+          Icon(Icons.restart_alt, size: 20, color: semantic.dangerInk),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Text(
               title,
               style: Theme.of(
                 context,
-              ).textTheme.bodyLarge?.copyWith(color: semantic.danger),
+              ).textTheme.bodyLarge?.copyWith(color: semantic.dangerInk),
             ),
           ),
         ],

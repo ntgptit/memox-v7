@@ -159,8 +159,9 @@ void main() {
         );
         expect(
           title.text.style?.color,
+          // The selected fill's own ink since M100.86 (`app_list_tile_theme`).
           selected == true
-              ? theme.colorScheme.primary
+              ? theme.colorScheme.onPrimaryContainer
               : theme.colorScheme.onSurface,
           reason: 'selected=$selected: title ink',
         );

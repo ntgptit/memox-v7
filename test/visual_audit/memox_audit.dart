@@ -41,9 +41,27 @@ List<AuditRule> memoxAuditRules({required bool isDark}) {
       // omission is why the connector shipped its first draft at 1.38:1 on the
       // page ground and the audit reported PASS.
       semantic.borderControl,
-    ]),
+    ], acceptedFloors: _acceptedControlEdges(semantic, scheme)),
     PaletteClosureRule(isDark ? darkPaletteTokens : lightPaletteTokens),
   ];
+}
+
+/// **The control edges the owner accepted under 3:1** (M100.86): the Tokyo
+/// handoff's `outline` on its inset rungs, at the figures
+/// `control_border_grounds_test.dart` pins for the same pairs.
+Map<(int, int), double> _acceptedControlEdges(
+  AppSemanticColors semantic,
+  ColorScheme scheme,
+) {
+  (int, int) on(Color ground) =>
+      (semantic.borderControl.toARGB32(), ground.toARGB32());
+
+  return scheme.brightness == Brightness.dark
+      ? <(int, int), double>{
+          on(scheme.surfaceContainer): 2.6,
+          on(scheme.surfaceContainerHigh): 2.2,
+        }
+      : <(int, int), double>{on(scheme.surfaceContainerHigh): 2.9};
 }
 
 /// Pumps [screen] under the production theme and audits what it paints.

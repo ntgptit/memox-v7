@@ -45,17 +45,19 @@ void main() {
       .widget<LinearProgressIndicator>(find.byType(LinearProgressIndicator));
 
   group('colour', () {
-    testWidgets('below 100% the fill is secondary, never the accent', (
+    testWidgets("below 100% the fill is the handoff's primary tone", (
       tester,
     ) async {
-      // The whole reason this is a component. A bar filled with `primary` sits
-      // beside a button filled with `primary` and neither reads as the pressable
-      // one.
+      // **`primary`, by the Tokyo handoff** (M100.86). Its LinearProgress spec
+      // names the tone `primary / mastery`, so the M99 rule that kept the bar
+      // off the brand — "neither reads as the pressable one" — gives way to
+      // the kit. `progressFill` stays the token, so a later spec can move it
+      // in one place.
       await pumpApp(tester, const MxProgressBar(value: 0.62));
       await tester.pumpAndSettle();
 
       expect(indicatorOf(tester).color, semantic.progressFill);
-      expect(indicatorOf(tester).color, isNot(light.colorScheme.primary));
+      expect(indicatorOf(tester).color, light.colorScheme.primary);
     });
 
     testWidgets('at 100% the fill turns success', (tester) async {

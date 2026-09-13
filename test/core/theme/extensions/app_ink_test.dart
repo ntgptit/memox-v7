@@ -98,11 +98,11 @@ void main() {
       });
     }
 
-    // `secondary` and `tertiary` are support inks: they pass 4.5 in light and
-    // sit at the large-text/UI bar in dark, which is where their two callers
-    // (the import preview's status glyphs and counts) use them beside a
-    // spelled-out reason line. Pinned at 3:1 so they cannot quietly sink
-    // below even that.
+    // `secondary` and `tertiary` are support inks. Since M100.86 each is its
+    // own solved ink (4.62 at worst in light) rather than the handoff's fill,
+    // so they clear 4.5 on `surface`; the floor below stays at the 3:1 their
+    // two callers (the import preview's status glyphs and counts) were
+    // written against, as the least they may ever sink to.
     for (final entry in themes.entries) {
       testWidgets('${entry.key}: support inks hold at least 3:1', (
         tester,

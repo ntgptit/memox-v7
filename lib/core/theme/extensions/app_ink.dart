@@ -49,12 +49,12 @@ enum AppInk {
   /// `error` is `danger`.
   error,
 
-  /// `scheme.tertiary` — the steel-blue "same family as info, quieter job"
-  /// role; the import preview wears it for duplicates.
+  /// `tertiary` as text — `semanticColors.tertiaryInk`; the import preview
+  /// wears it for duplicates.
   tertiary,
 
-  /// `scheme.secondary` — the slate support role; the import preview's
-  /// "ready" rows wear it.
+  /// `secondary` as text — `semanticColors.secondaryInk`; the import
+  /// preview's "ready" rows wear it.
   secondary,
 
   /// `semanticColors.overdue` — "this is late", distinct in name from
@@ -96,8 +96,8 @@ enum AppInk {
       AppInk.danger => semantic.dangerInk,
       AppInk.info => semantic.infoInk,
       AppInk.error => semantic.dangerInk,
-      AppInk.tertiary => colors.tertiary,
-      AppInk.secondary => colors.secondary,
+      AppInk.tertiary => semantic.tertiaryInk,
+      AppInk.secondary => semantic.secondaryInk,
       AppInk.overdue => semantic.dangerInk,
       AppInk.disabled => semantic.onDisabled,
       AppInk.onPrimary => colors.onPrimary,

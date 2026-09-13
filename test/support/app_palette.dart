@@ -39,6 +39,14 @@ final List<Color> lightPaletteTokens = <Color>[
   AppColors.warningLight,
   AppColors.dangerLight,
   AppColors.infoLight,
+  // The text inks (M100.86): each fill's hue solved to read as text.
+  AppColors.accentInkLight,
+  AppColors.successInkLight,
+  AppColors.warningInkLight,
+  AppColors.dangerInkLight,
+  AppColors.secondaryInkLight,
+  AppColors.tertiaryInkLight,
+  AppColors.inversePrimaryInk,
   // The status containers (M100.21). `danger` has no pair here because it
   // reuses `errorContainer`/`onErrorContainer`, already listed above as the
   // Material roles they are.
@@ -120,6 +128,9 @@ final List<Color> darkPaletteTokens = <Color>[
   AppColors.warningDark,
   AppColors.dangerDark,
   AppColors.infoDark,
+  // Dark's inks are its fills, already listed — except the snackbar action,
+  // which sits on a slate that does not flip.
+  AppColors.inversePrimaryInk,
   AppColors.successContainerDark,
   AppColors.onSuccessContainerDark,
   AppColors.warningContainerDark,

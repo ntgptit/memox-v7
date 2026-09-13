@@ -196,5 +196,35 @@ void main() {
       expect(findings, hasLength(1));
       expect(findings.first.message, contains('below 3.0'));
     });
+
+    test(
+      'an accepted pair holds its own floor, and only on its own ground',
+      () {
+        const edge = Color(0xFFB0B0B0); // 2.17:1 on white
+        List<AuditFinding> blocking(
+          Map<(int, int), double> floors,
+        ) => runAuditRules(
+          auditOf(<AuditPaint>[
+            paintOf(edge, source: PaintSource.declared, role: PaintRole.border),
+            background,
+          ]),
+          <AuditRule>[
+            NonTextContrastRule(const <Color>[edge], acceptedFloors: floors),
+          ],
+        ).where((finding) => finding.isBlocking).toList();
+
+        final onWhite = (edge.toARGB32(), white.toARGB32());
+        expect(blocking(<(int, int), double>{onWhite: 2.1}), isEmpty);
+        // Sunk below the figure it was accepted at: it blocks again.
+        expect(blocking(<(int, int), double>{onWhite: 2.3}), hasLength(1));
+        // Accepted on another ground only: this ground still owes 3:1.
+        expect(
+          blocking(<(int, int), double>{
+            (edge.toARGB32(), black.toARGB32()): 2.1,
+          }),
+          hasLength(1),
+        );
+      },
+    );
   });
 }

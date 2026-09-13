@@ -67,11 +67,12 @@ void main() {
       // sentence. The surface stays exactly what an idle tile has.
       for (final label in <String>['front-a', 'back-a']) {
         expect(_fill(tester, label), _idleFill(tester));
-        expect(_edge(tester, label).color, _semantic(tester).success);
+        // The ink, on the edge and the label alike (M100.86).
+        expect(_edge(tester, label).color, _semantic(tester).successInk);
         expect(_edge(tester, label).width, AppStroke.control);
         expect(
           tester.widget<Text>(find.text(label)).style?.color,
-          _semantic(tester).success,
+          _semantic(tester).successInk,
         );
       }
 
@@ -106,11 +107,11 @@ void main() {
       await _settleColour(tester);
       for (final label in <String>['front-a', 'back-b']) {
         expect(_fill(tester, label), _idleFill(tester));
-        expect(_edge(tester, label).color, _semantic(tester).danger);
+        expect(_edge(tester, label).color, _semantic(tester).dangerInk);
         expect(_edge(tester, label).width, AppStroke.control);
         expect(
           tester.widget<Text>(find.text(label)).style?.color,
-          _semantic(tester).danger,
+          _semantic(tester).dangerInk,
         );
       }
 
@@ -157,9 +158,7 @@ void main() {
       expect(find.byIcon(Icons.close), findsNothing);
 
       // And the tap was a real selection, not just a dismissal.
-      final ink = Theme.of(
-        tester.element(find.text('front-b')),
-      ).colorScheme.primary;
+      final ink = _semantic(tester).accentInk;
       expect(tester.widget<Text>(find.text('front-b')).style?.color, ink);
       expect(_edge(tester, 'front-b').color, ink);
 

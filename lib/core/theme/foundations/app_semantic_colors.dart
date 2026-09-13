@@ -32,6 +32,8 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     required this.dangerInk,
     required this.infoInk,
     required this.inversePrimaryInk,
+    required this.secondaryInk,
+    required this.tertiaryInk,
     required this.successContainer,
     required this.onSuccessContainer,
     required this.warningContainer,
@@ -67,6 +69,8 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       dangerInk = AppColors.dangerInkLight,
       infoInk = AppColors.infoInkLight,
       inversePrimaryInk = AppColors.inversePrimaryInk,
+      secondaryInk = AppColors.secondaryInkLight,
+      tertiaryInk = AppColors.tertiaryInkLight,
       successContainer = AppColors.successContainerLight,
       onSuccessContainer = AppColors.onSuccessContainerLight,
       warningContainer = AppColors.warningContainerLight,
@@ -101,6 +105,8 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       dangerInk = AppColors.dangerInkDark,
       infoInk = AppColors.infoInkDark,
       inversePrimaryInk = AppColors.inversePrimaryInk,
+      secondaryInk = AppColors.secondaryInkDark,
+      tertiaryInk = AppColors.tertiaryInkDark,
       successContainer = AppColors.successContainerDark,
       onSuccessContainer = AppColors.onSuccessContainerDark,
       warningContainer = AppColors.warningContainerDark,
@@ -146,6 +152,10 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
 
   /// The snackbar's action label on the slate that does not flip.
   final Color inversePrimaryInk;
+
+  /// `secondary` and `tertiary` as text — the support inks `AppInk` names.
+  final Color secondaryInk;
+  final Color tertiaryInk;
 
   /// The filled pill a status carries, and its label (M100.21).
   final Color successContainer;
@@ -218,6 +228,8 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     Color? dangerInk,
     Color? infoInk,
     Color? inversePrimaryInk,
+    Color? secondaryInk,
+    Color? tertiaryInk,
     Color? successContainer,
     Color? onSuccessContainer,
     Color? warningContainer,
@@ -251,6 +263,8 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     dangerInk: dangerInk ?? this.dangerInk,
     infoInk: infoInk ?? this.infoInk,
     inversePrimaryInk: inversePrimaryInk ?? this.inversePrimaryInk,
+    secondaryInk: secondaryInk ?? this.secondaryInk,
+    tertiaryInk: tertiaryInk ?? this.tertiaryInk,
     successContainer: successContainer ?? this.successContainer,
     onSuccessContainer: onSuccessContainer ?? this.onSuccessContainer,
     warningContainer: warningContainer ?? this.warningContainer,
@@ -298,6 +312,8 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       dangerInk: mix(dangerInk, other.dangerInk),
       infoInk: mix(infoInk, other.infoInk),
       inversePrimaryInk: mix(inversePrimaryInk, other.inversePrimaryInk),
+      secondaryInk: mix(secondaryInk, other.secondaryInk),
+      tertiaryInk: mix(tertiaryInk, other.tertiaryInk),
       successContainer: mix(successContainer, other.successContainer),
       onSuccessContainer: mix(onSuccessContainer, other.onSuccessContainer),
       warningContainer: mix(warningContainer, other.warningContainer),

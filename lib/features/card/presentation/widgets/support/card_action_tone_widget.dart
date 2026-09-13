@@ -50,17 +50,17 @@ extension CardActionTonePresentation on BuildContext {
     StudyAction.easy => CardActionTone.success,
   };
 
-  /// The ink a tone is drawn in.
+  /// The ink a tone is drawn in — the badge's outline and the timeline marker.
   ///
-  /// **Measured on `scheme.surface`, which is the event card's own ground:**
-  /// success 5.20:1 light / 8.10:1 dark, danger 5.57 / 6.71, warning 4.58 /
-  /// 11.24. All three clear the 4.5:1 text bar, which is why the badge is an
-  /// outline on the card's surface rather than a fill — on `surfaceMuted`,
-  /// warning falls to 4.00:1 in light.
+  /// **The inks, not the fills** (M100.86). The badge is an outline on the
+  /// card's surface with its word in the same colour, so the colour owes the
+  /// 4.5:1 text bar; the Tokyo handoff's light `success` reads under 3:1 there,
+  /// and each ink is that hue solved to clear 4.6. `card_detail_timeline_style
+  /// _test.dart` measures them.
   Color cardActionToneColor(CardActionTone tone) => switch (tone) {
-    CardActionTone.success => semanticColors.success,
-    CardActionTone.warning => semanticColors.warning,
-    CardActionTone.danger => semanticColors.danger,
+    CardActionTone.success => semanticColors.successInk,
+    CardActionTone.warning => semanticColors.warningInk,
+    CardActionTone.danger => semanticColors.dangerInk,
   };
 
   /// The tone as an [AppInk] — the text and glyph legs of the badge take it,

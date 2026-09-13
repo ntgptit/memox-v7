@@ -64,6 +64,15 @@ abstract final class AppColors {
   /// on the slate in light and 2.40:1 in dark, and this reads 4.61 in both.
   static const Color inversePrimaryInk = Color(0xFF93A0FF);
 
+  /// `AppInk.secondary` and `AppInk.tertiary` as text — the import preview's
+  /// counts and the trash row's urgency. Light's fills read 3.23:1 and 3.15:1
+  /// at worst on the grounds text lands on; these read 4.62. Dark's fills
+  /// already read 5.88 and 6.03, so they are the fills.
+  static const Color secondaryInkLight = Color(0xFF5263BD);
+  static const Color secondaryInkDark = AppMaterialRoles.secondaryDark;
+  static const Color tertiaryInkLight = Color(0xFF6C54D6);
+  static const Color tertiaryInkDark = AppMaterialRoles.tertiaryDark;
+
   // --- Status ---------------------------------------------------------------
 
   /// Answer remembered, session completed, saved.
