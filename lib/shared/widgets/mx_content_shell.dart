@@ -324,8 +324,9 @@ class _MxContentShellState extends State<MxContentShell> {
   /// the subline's own height, and the padding a bar puts around its content.
   ///
   /// **Each term is what that thing actually measures**, which is what makes
-  /// the total spendable: 28 + 8 + 32 + 16 = 84 against a 68px block, so the
-  /// 16 left over halves into 8 on each side rather than 8.5. See
+  /// the total spendable: 24 + 8 + 32 + 16 = 80 against a 64px block (28 and 84
+  /// before the handoff's title role, M100.89), so the 16 left over halves
+  /// into 8 on each side rather than 8.5. See
   /// [_lineFactor] for the five pixels this used to reserve for nothing.
   /// `AppBar`'s own ceiling for its title — `_kMaxTitleTextScaleFactor`,
   /// `app_bar.dart:44`. The bar clamps the title's scaling there, so a height

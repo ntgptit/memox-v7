@@ -410,7 +410,19 @@ String _report(List<_Band> bands) {
 /// else and an entry with a reason beats a threshold that quietly widens.
 /// Keyed by the pair, so an entry cannot cover a second gap that drifts to the
 /// same value elsewhere on the screen.
-const Map<String, String> _allowedOffScale = <String, String>{};
+///
+/// **The next sum came from the type scale** (M100.89). The handoff's caption
+/// leading makes the subline 17px, and the bar centres it in
+/// `MxBreadcrumb.compactLineHeight`: 7.5 of air each side where a 16px line
+/// had 8. Both distances out of the subline are that half plus a token. Task
+/// 22 rebuilds the breadcrumb strip and owns putting them back on 16.
+const Map<String, String> _allowedOffScale = <String, String>{
+  'Title -> Subtitle':
+      'sm (8) + (compactLineHeight 32 - the 17px caption line) / 2 = 15.5',
+  'Subtitle -> Hero':
+      '(compactLineHeight 32 - the 17px caption line) / 2 + half the bar '
+      'leftover (8) = 15.5',
+};
 
 /// Whether a distance is one of the spacing steps, or an overlap.
 ///

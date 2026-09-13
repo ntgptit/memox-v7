@@ -725,6 +725,12 @@ không nhầm chúng là một phase.
     xuống dòng làm band cao hơn, hàng deck nằm ngoài phần list đã build; test
     kéo hàng vào khung nhìn trước khi kiểm overflow, thay vì kiểm một hàng chưa
     từng được dựng.
+  - PLAN-DEV-4.5 — `deck_list_rhythm_golden_test.dart` (chỉ chạy trên Linux,
+    lộ ra ở P4): subline caption 17px căn giữa trong line compact 32 của
+    breadcrumb, nên Title → Subtitle và Subtitle → Hero là 15.5, lệch thang
+    spacing 0.5. Hai cặp vào `_allowedOffScale` kèm phép cộng, không nới
+    tolerance; Task 22 (Breadcrumb) phải đưa chúng về 16. `_capHeight` 0.741
+    giữ nguyên: luật nhóm nhãn vẫn đạt trên golden Linux.
 - **Audit:** hai audit độc lập trên `c7ee5103` — architecture/logic và UI/UX —
   cùng CLEAN_STOP, không P0–P2. P3 đã xử lý trong phase: tên test
   `mx_content_shell_geometry_test.dart` còn gọi đuôi cuộn là "ordinary gap"

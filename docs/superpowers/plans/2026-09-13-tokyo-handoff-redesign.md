@@ -3630,6 +3630,8 @@ git commit -m "feat(design-system): handoff navigation bar — primary pill, sha
 
 ### Task 22: Breadcrumb — chevron separators, bold current step
 
+> PLAN-DEV-4.5 (Phase 1): `deck_list_rhythm_golden_test.dart` excuses `Title -> Subtitle` and `Subtitle -> Hero` at 15.5 — a 17px caption centred in `MxBreadcrumb.compactLineHeight` (32). When this task resizes the compact strip, bring both back onto the spacing scale and empty `_allowedOffScale` again.
+
 **Files:**
 - Modify: `lib/shared/widgets/mx_breadcrumb.dart` (separator width, doc at lines ~142–143), `lib/shared/widgets/mx_breadcrumb_step.dart`
 - Test: `test/shared/widgets/mx_breadcrumb_test.dart`
