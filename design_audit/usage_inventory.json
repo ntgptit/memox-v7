@@ -295,7 +295,7 @@
     },
     {
       "file": "lib/core/theme/components/selection/app_chip_theme.dart",
-      "line": 114,
+      "line": 130,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "blend-source",
@@ -306,7 +306,7 @@
     },
     {
       "file": "lib/core/theme/components/selection/app_chip_theme.dart",
-      "line": 215,
+      "line": 231,
       "widget_context": "<top-level>",
       "element_kind": "border",
       "source_kind": "Colors-material",
@@ -3617,14 +3617,14 @@
     },
     {
       "file": "lib/shared/widgets/mx_icon_button.dart",
-      "line": 141,
+      "line": 143,
       "widget_context": "MxIconButton",
       "element_kind": "other",
       "source_kind": "theme-token",
-      "expression": "context.semanticColors.warning",
-      "token": "semantic.warning",
-      "resolved_value_light": "#F59E0B",
-      "resolved_value_dark": "#FFC658"
+      "expression": "context.semanticColors.warningInk",
+      "token": "semantic.warningInk",
+      "resolved_value_light": "unresolvable: semantic.warningInk not in the dumped theme",
+      "resolved_value_dark": "unresolvable: semantic.warningInk not in the dumped theme"
     },
     {
       "file": "lib/shared/widgets/mx_navigation_bar.dart",
