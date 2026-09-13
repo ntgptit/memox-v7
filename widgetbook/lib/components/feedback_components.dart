@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
+import 'package:memox/shared/widgets/mx_mastery_ring.dart';
 import 'package:memox/shared/widgets/mx_status_badge.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
@@ -278,6 +279,34 @@ WidgetbookComponent statusBadgeComponent() {
               ),
           ],
         ),
+      ),
+    ],
+  );
+}
+
+WidgetbookComponent masteryRingComponent() {
+  return WidgetbookComponent(
+    name: 'MxMasteryRing',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Playground',
+        builder: (BuildContext context) {
+          final value = context.knobs.double.slider(
+            label: 'value',
+            initialValue: 0.62,
+            max: 1,
+          );
+          final isComplete = context.knobs.boolean(label: 'isComplete');
+
+          return CatalogCenterPage(
+            child: MxMasteryRing(
+              value: value,
+              isComplete: isComplete,
+              semanticsLabel: 'Learned',
+              semanticsValue: '${(value * 100).round()}%',
+            ),
+          );
+        },
       ),
     ],
   );

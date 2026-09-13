@@ -761,6 +761,15 @@ không nhầm chúng là một phase.
     `mastery` mới `#1F8A5B` nằm sát nó nên fixture rơi vào closure — cùng kiểu
     trôi mà comment của test ghi cho M100.32. Fixture dời sang `#A21CAF`; palette
     giữ nguyên.
+  - PLAN-DEV-14.1 — plan chỉ nêu token, widget, test và mục Widgetbook cho
+    `MxMasteryRing`. Theo guard của repo: một specimen stress (ring có layout
+    riêng, không miễn trừ), `masteryRing` vào danh mục 4dp grid của
+    `app_sizing_test`, và vì không có danh mục đầy đủ cho stroke, `AppStroke.ring`
+    được ghim giá trị ở `design_tokens_test` (3) và thứ tự ở `app_stroke_test`
+    (`focus < ring`). Doc của `AppStroke` lập luận giá trị thứ sáu theo đúng cách
+    `selectionControl` đã làm: stroke của một component lấy từ bảng dimension của
+    handoff (`40×3px`), không phải stroke riêng của một màn. Test ring đỏ đúng lý
+    do (thiếu `AppStroke.ring`, `AppSizing.masteryRing`, widget) trước khi sửa.
 - **Editable documents:** `docs/wbs.md`,
   `docs/design-system/tokyo-component-mapping.md`,
   `docs/design-system/listtile-deck-row-spec.md`, `lib/features/deck/README.md`,

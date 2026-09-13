@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:memox/shared/widgets/mx_mastery_ring.dart';
 import 'package:memox/shared/widgets/mx_status_badge.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_action_sheet.dart';
@@ -207,6 +208,17 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
     name: 'MxProgressBar',
     build: () =>
         const MxProgressBar(value: 0.62, label: kLongLabel, valueLabel: '62%'),
+  ),
+  MxStressSpecimen(
+    // A painted mark with no copy: the stress is that its fixed 40 holds at
+    // 320dp and 2.0x, where nothing may stretch or clip it.
+    name: 'MxMasteryRing',
+    build: () => const MxMasteryRing(
+      value: 0.62,
+      isComplete: false,
+      semanticsLabel: kLongLabel,
+      semanticsValue: '62%',
+    ),
   ),
   MxStressSpecimen(
     // A long state word in the pill: the badge must hold one line beside its

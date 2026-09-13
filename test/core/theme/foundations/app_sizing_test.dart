@@ -39,6 +39,8 @@ void main() {
         ('iconTileLg', AppSizing.iconTileLg),
         // Where a row divider starts past the leading column.
         ('listDividerIndent', AppSizing.listDividerIndent),
+        // A painted mark: the handoff MasteryRing.
+        ('masteryRing', AppSizing.masteryRing),
       ]) {
         expect(
           value % 4,

@@ -1,9 +1,9 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 742,
-  "totalSites": 349,
+  "scannedFiles": 743,
+  "totalSites": 350,
   "byElementKind": {
-    "other": 310,
+    "other": 311,
     "background": 27,
     "border": 10,
     "shadow": 1,
@@ -15,7 +15,7 @@
     "blend-source": 6,
     "Colors-material": 14,
     "hardcoded-literal": 108,
-    "theme-token": 29
+    "theme-token": 30
   },
   "sites": [
     {
@@ -3834,6 +3834,17 @@
       "token": "colorScheme.surfaceContainerLowest",
       "resolved_value_light": "unresolvable: colorScheme.surfaceContainerLowest not in the dumped theme",
       "resolved_value_dark": "unresolvable: colorScheme.surfaceContainerLowest not in the dumped theme"
+    },
+    {
+      "file": "lib/shared/widgets/mx_mastery_ring.dart",
+      "line": 48,
+      "widget_context": "MxMasteryRing",
+      "element_kind": "other",
+      "source_kind": "theme-token",
+      "expression": "context.colors.primary",
+      "token": "colorScheme.primary",
+      "resolved_value_light": "#5265F5",
+      "resolved_value_dark": "#8B9AFF"
     },
     {
       "file": "lib/shared/widgets/mx_navigation_bar.dart",

@@ -82,6 +82,10 @@ abstract final class AppSizing {
   /// Divider `indent 0 / 56`): past the leading column, under the text.
   static const double listDividerIndent = 56;
 
+  /// Handoff MasteryRing extent (`40×3px`). A painted mark, not a control: the
+  /// row it sits in carries the target, so no 48 floor applies.
+  static const double masteryRing = 40;
+
   /// The handoff's extended FAB height (`size-fab`). Width is content-driven.
   ///
   /// It was Material's 56 circle as `floatingAction` until M100.90; the kit has

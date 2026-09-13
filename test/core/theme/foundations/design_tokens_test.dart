@@ -116,6 +116,8 @@ void main() {
       expect(AppStroke.hairline, 1);
       expect(AppStroke.control, 1.5);
       expect(AppStroke.focus, 2);
+      // The handoff MasteryRing's arc (`40×3px`, M100.91).
+      expect(AppStroke.ring, 3);
     });
   });
 
