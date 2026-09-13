@@ -8,7 +8,7 @@
 | **Source of truth for** | Ma trận component → canonical M3 role · ma trận dịch ý đồ Tokyo → MemoX · hồ sơ các sai lệch role đã sửa và mô hình bề mặt · quyết định của chủ dự án và mặc định D1–D27 của đợt redesign theo handoff (§9) |
 | **Depends on** | `document-conventions.md` · `architecture.md` (AD-14) · `design-system/theme-architecture.md` · `design-system/handoff/memox-flutter-handoff.json` |
 | **Updated by task** | M100.88 |
-| **Last updated** | 2026-09-13 |
+| **Last updated** | 2026-09-14 |
 
 ---
 
@@ -384,7 +384,7 @@ buộc của đợt redesign. Một mặc định D-id chỉ đổi khi chủ d�
 | D9 | Size variants with no caller: button large 52, chip compact 24, app bar compact 48 | Deferred (decision 10 covered whole widgets only) |
 | D10 | Nav destination glyphs `home · layers · bar-chart-3 · settings` | Keep today's Material glyphs — same meanings (Library, Study, Progress, Settings) |
 | D11 | Card lifecycle → status tokens | `isNew → statusNew` · `beginning → statusLearning` · `reviewing → statusReviewing` · `mastered → statusMastered` |
-| D12 | Foundations say "16 dialog, sheet" but the Dialog and BottomSheet specs say 20 | The widget specs win (they name the rejected value) |
+| D12 | Foundations say "16 FAB, dialog, sheet" and "24 bottom sheet top corners", but the Dialog and BottomSheet specs say 20 | The widget specs win: the Dialog spec says "not radius-lg 16", the BottomSheet spec "not radius-xl 24" |
 | D13 | Card prompt size (30 is off the scale) | 32 / w700 / 1.2 / −0.64; compact prompt 24 |
 | D14 | Hero numeral | Stat role 40 / w600 / tabular; keep `heroNumeralCapTrim` (a PJS cap-height trim, size-independent) |
 | D15 | Scroll tail with a FAB | `AppSizing.fab + AppSpacing.lg + AppSpacing.xxxl` (button + its margin + 48) |
