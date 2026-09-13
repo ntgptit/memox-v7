@@ -221,7 +221,7 @@ Component theme sở hữu hình học **toàn cục**; shared widget chỉ thê
 |---|---|
 | `buildSharedButtonStyle` | chiều cao tối thiểu (`AppSizing.touchTarget`), bề rộng tối thiểu, padding, shape, weight nhãn. `MxActionButtonSize.compact` là **trục kích thước** của shared widget (40 vẽ / 48 chạm, `label-md`), không phải một feature nêu lại — ranh giới dưới áp cho feature |
 | `buildInputDecorationTheme` | content padding, radius, stroke (input; focus ở focused-error), hint style, suffix colour. `MxSearchField` là composition riêng: sở hữu rung `body-md` của nó (widget đóng, §4P) |
-| `buildChipTheme` | chiều cao pill, padding, radius, weight nhãn, side hairline, hai elevation = 0. `MxPillButton` sở hữu slot dẫn 16dp, tick khi chọn, ring quanh hình vẽ và target 48 nới ngoài ring (§4P: rung `label-md`) |
+| `buildChipTheme` | chiều cao pill, padding, radius, weight nhãn, side hairline, hai elevation = 0, fill/label khi chọn (`primaryContainer`/`onPrimaryContainer`, M100.85, §3c). `MxPillButton` sở hữu slot dẫn 24dp (M100.85), tick khi chọn, ring quanh hình vẽ và target 48 nới ngoài ring (§4P: rung `label-md`) |
 | `buildListTileTheme` | content padding, minVerticalPadding, `minTileHeight` (`AppSizing.rowMinHeight`), shape, ba rung chữ |
 | `buildDialogTheme` | shape |
 | `buildCardTheme` | shape, hairline |

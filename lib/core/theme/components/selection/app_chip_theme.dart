@@ -275,6 +275,12 @@ ChipThemeData buildChipTheme(
   // **`AppIconSize.md`, not `.sm`** (M100.85). The Chip design spec states the
   // glyph step as fixed at 24; `MxPillButton` matches it in the leading slot it
   // composes so the check and the caller's icon stay the same size.
+  //
+  // **This slot is the fall-through for every Chip-family widget, not only
+  // `MxPillButton`.** The tag editor's delete `Chip` and its `+ Add tag`
+  // `ActionChip` (`card_tag_section_widget.dart`) read it too, so both grow
+  // the same 16→24 step. Checked rather than assumed: `card_editor_edit`'s
+  // golden shows the tag row at the new size and nothing clips or crowds.
   iconTheme: IconThemeData(
     size: AppIconSize.md,
     color: scheme.onSurfaceVariant,
