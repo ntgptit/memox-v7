@@ -80,7 +80,7 @@ canonical M3 role  >  accessibility  >  MemoX structural system  >  Tokyo exact 
 | Switch | trackOutline | `outline` off / trong suốt on | = | guard AST |
 | Radio | fill | `onSurfaceVariant` / `primary` | = | |
 | Slider | activeTrack | `primary` | = | |
-| Slider | inactiveTrack | `secondaryContainer` | = | |
+| Slider | inactiveTrack | `surfaceContainerHighest` | = | handoff Slider, M100.92 |
 | SegmentedButton | selected bg | `secondaryContainer` | = | guard AST |
 | SegmentedButton | side | `outline` | = | guard AST |
 

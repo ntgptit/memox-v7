@@ -1,10 +1,10 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 742,
-  "totalSites": 347,
+  "scannedFiles": 744,
+  "totalSites": 348,
   "byElementKind": {
     "other": 311,
-    "background": 25,
+    "background": 26,
     "border": 9,
     "shadow": 1,
     "text": 1
@@ -15,7 +15,7 @@
     "blend-source": 5,
     "Colors-material": 14,
     "hardcoded-literal": 108,
-    "theme-token": 28
+    "theme-token": 29
   },
   "sites": [
     {
@@ -328,7 +328,7 @@
     },
     {
       "file": "lib/core/theme/components/selection/app_slider_theme.dart",
-      "line": 61,
+      "line": 47,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -3823,6 +3823,17 @@
       "token": "semantic.borderSubtle",
       "resolved_value_light": "#C5CBE3",
       "resolved_value_dark": "#2A3267"
+    },
+    {
+      "file": "lib/shared/widgets/mx_segmented_control.dart",
+      "line": 55,
+      "widget_context": "MxSegmentedControl",
+      "element_kind": "background",
+      "source_kind": "theme-token",
+      "expression": "context.colors.surfaceContainer",
+      "token": "colorScheme.surfaceContainer",
+      "resolved_value_light": "unresolvable: colorScheme.surfaceContainer not in the dumped theme",
+      "resolved_value_dark": "unresolvable: colorScheme.surfaceContainer not in the dumped theme"
     },
     {
       "file": "lib/shared/widgets/mx_session_top_bar.dart",

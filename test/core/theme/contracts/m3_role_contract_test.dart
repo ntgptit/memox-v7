@@ -226,14 +226,14 @@ void main() {
         final t = theme.sliderTheme;
 
         pin('active track', t.activeTrackColor, scheme.primary);
-        pin('inactive track', t.inactiveTrackColor, scheme.secondaryContainer);
+        pin(
+          'inactive track',
+          t.inactiveTrackColor,
+          scheme.surfaceContainerHighest,
+        );
         pin('thumb', t.thumbColor, scheme.primary);
         pin('active tick', t.activeTickMarkColor, scheme.onPrimary);
-        pin(
-          'inactive tick',
-          t.inactiveTickMarkColor,
-          scheme.onSecondaryContainer,
-        );
+        pin('inactive tick', t.inactiveTickMarkColor, scheme.onSurfaceVariant);
         pin('value indicator', t.valueIndicatorColor, scheme.inverseSurface);
       });
 

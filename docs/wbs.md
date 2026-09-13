@@ -799,6 +799,37 @@ không nhầm chúng là một phase.
     Stress specimen thêm `MxSwitch` (không interactive, vì row mang target).
     Audit reminder bỏ allowance `_SwitchPainter`, vì `MxSwitch` vẽ bằng
     decorated box và audit đọc được trực tiếp.
+  - PLAN-DEV-20.1 — test của plan đọc cờ `isSelected` như bool, nhưng 3.44
+    dùng `Tristate`. Test "cao ≥ 48" để lọt lỗi layout: đổi thành "track cao
+    đúng 48, mỗi segment có vùng chạm ≥ 48". Test slider tìm node theo label,
+    nên vẫn qua khi label nằm trên node khác; đổi thành đọc dữ liệu đã gộp
+    (`getSemanticsData`) của node chứa `Slider`: `label`, `isSlider`, action
+    `increase`. Lần đầu đọc `flagsCollection` của chính node, vốn bỏ qua cờ
+    của node con đã gộp, nên đỏ cả với bản sửa; đọc dữ liệu gộp mới phân
+    biệt được hai bản. Đỏ đúng lý do: compile lỗi.
+  - PLAN-DEV-20.2 — chạy code của plan với các test trên ra `+3 -3`:
+    - theme slider vẫn là `secondaryContainer` (đỏ dự kiến);
+    - `MxSlider` (`Semantics(label:)` trần) cho node không phải slider mang
+      label, còn slider thật không có tên;
+    - `MxSegmentedControl` cao 600 trong `Center`: `AnimatedContainer
+      (alignment:)` nhận chiều cao tối đa của Row và giãn full màn, trong khi
+      test "≥ 48" vẫn qua.
+
+    Bản sửa: `MergeSemantics` quanh slider. Mỗi segment là
+    `ConstrainedBox(min 48)` → `Padding(xs)` → pill, chữ nằm trong
+    `Align(widthFactor: 1, heightFactor: 1)`. Nhờ vậy pill cao 40 và vùng chạm
+    48 mà không cần hằng số `_segmentMinHeight`. Test semantics của segment
+    qua ngay với bản plan; `container: true` được giữ để mỗi lựa chọn chắc
+    chắn là một node riêng khi có thêm `MxFocusRing`.
+  - PLAN-DEV-20.3 — những chỗ plan không nêu:
+    - `theme_coverage_test` bỏ `sliderTheme` khỏi `allowedUnrendered`, vì
+      `MxSlider` dựng `Slider`;
+    - test cặp M3 `primary`/`secondaryContainer` trong
+      `app_unrendered_component_themes_test` bị bỏ: cặp mới đã được test "the
+      filled half separates" đọc từ slot theme;
+    - mapping §2 dòng Slider inactiveTrack đổi theo;
+    - stress specimen thêm `MxSlider` và `MxSegmentedControl`;
+    - `segmentedButtonTheme` giữ nguyên, vẫn planned.
 - **Editable documents:** `docs/wbs.md`,
   `docs/design-system/tokyo-component-mapping.md`,
   `docs/design-system/switch-spec.md`,

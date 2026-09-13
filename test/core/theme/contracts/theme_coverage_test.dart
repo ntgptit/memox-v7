@@ -144,7 +144,6 @@ void main() {
     // `app_planned_themes.dart`, and this list is what stops it growing.
     'datePickerTheme': 'planned — reminder date, deferred history range',
     'segmentedButtonTheme': 'planned — deferred progress range switch',
-    'sliderTheme': 'planned — SM-2 parameters, deferred in CLAUDE.md',
     'tabBarTheme': 'planned — deferred card History view',
   };
 

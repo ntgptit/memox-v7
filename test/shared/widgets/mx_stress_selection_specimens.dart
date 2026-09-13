@@ -7,6 +7,8 @@ import 'package:memox/shared/widgets/mx_list_tile.dart';
 import 'package:memox/shared/widgets/mx_menu_button.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
 import 'package:memox/shared/widgets/mx_radio_rows.dart';
+import 'package:memox/shared/widgets/mx_segmented_control.dart';
+import 'package:memox/shared/widgets/mx_slider.dart';
 import 'package:memox/shared/widgets/mx_switch.dart';
 import 'package:memox/shared/widgets/mx_switch_row.dart';
 
@@ -20,6 +22,8 @@ void _noop() {}
 void _noopIndex(int index) {}
 
 void _noopBool(bool value) {}
+
+void _noopDouble(double value) {}
 
 void _noopNullableIndex(int? index) {}
 
@@ -56,6 +60,32 @@ List<MxStressSpecimen> selectionStressSpecimens() => <MxStressSpecimen>[
     // carries the target and the toggle, so this is not interactive.
     name: 'MxSwitch',
     build: () => const MxSwitch(isOn: true, onChanged: _noopBool),
+  ),
+  MxStressSpecimen(
+    // The label is the slider's name, not drawn text; the stress is the
+    // track's target at 2.0x.
+    name: 'MxSlider',
+    build: () => const MxSlider(
+      value: 0.5,
+      onChanged: _noopDouble,
+      semanticLabel: kLongLabel,
+    ),
+    isInteractive: true,
+  ),
+  MxStressSpecimen(
+    // Three long labels on a 320dp track: each ellipsizes inside its own
+    // segment, and every segment keeps its 48 target.
+    name: 'MxSegmentedControl',
+    build: () => MxSegmentedControl<int>(
+      segments: const <MxSegment<int>>[
+        MxSegment<int>(value: 0, label: kLongLabel),
+        MxSegment<int>(value: 1, label: kLongLabel),
+        MxSegment<int>(value: 2, label: kLongLabel),
+      ],
+      selected: 0,
+      onChanged: _noopIndex,
+    ),
+    isInteractive: true,
   ),
   MxStressSpecimen(
     name: 'MxCheckboxRow',
