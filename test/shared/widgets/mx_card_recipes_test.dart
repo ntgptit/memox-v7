@@ -284,14 +284,17 @@ void main() {
 
         final decoration = decorationOf(tester);
         expect(decoration.color, scheme.surfaceContainerLowest);
-        // **`borderOption`, not `borderControl`** (M100.2). An option card had
-        // been borrowing the *input* border, which `app_palette_test.dart`
-        // keeps untinted by a recorded rule — "the light canvas carries no
-        // lavender tint" names `input` explicitly. That rule is about a text
-        // field, which is canvas; a card sitting on a page is not, and its
-        // neighbours' edges moved into the brand family at M99.99.
         expect(borderColorOf(tester), semantic.borderOption);
-        expect(borderColorOf(tester), isNot(semantic.borderControl));
+        // **The option edge is the control edge again, by the handoff**
+        // (M100.86). M100.2 split them because the old input border was an
+        // untinted grey and a card on a page read wrong in it; the handoff's
+        // `outline` already carries the brand's indigo, and `AppBorderColors`
+        // aliases `borderOption` to it because an option *is* a control. High
+        // contrast strengthens only `borderControl`, so the alias is asserted
+        // where it holds rather than everywhere.
+        if (!themeName.startsWith('high-contrast')) {
+          expect(borderColorOf(tester), semantic.borderControl);
+        }
         expect(hasShadow(decoration), isFalse);
       });
     }
