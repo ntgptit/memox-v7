@@ -720,6 +720,16 @@ không nhầm chúng là một phase.
     phase xác nhận. Test "three rungs" (chỉ kiểm `isNotNull`) được thay bằng test
     đo 12/w600/1.2 cho overline và 0.72 cho `list`; đỏ đúng lý do
     (`hasLength(2)` nhận 3) trước khi sửa.
+  - PLAN-DEV-12.1 — plan nêu sửa `mx_list_tile_test.dart`, nhưng file đó không
+    có pin chiều cao nào nên giữ nguyên. Plan không nêu hai guard mà
+    `MxRowGroup` phải qua: một specimen trong `mx_stress_selection_specimens.dart`
+    (cạnh specimen của `MxListTile`) và một mục Widgetbook `name: 'MxRowGroup'`
+    trong `form_components.dart`. `listDividerIndent` vào danh mục 4dp grid của
+    `app_sizing_test`. Doc của `rowMinHeight` được viết lại: 56 là
+    `_defaultTileHeight` của Material từ M100.36 4J, handoff ListRow đặt hàng ở
+    sàn chạm 48 và để nội dung kéo cao. Full host suite sau thay đổi xanh
+    `+5191` mà không phải dời pin nào: không test host nào đo hàng ở sàn 56. Ảnh
+    của `ListTile` được kiểm ở golden compare trên Linux cuối phase.
 - **Editable documents:** `docs/wbs.md`,
   `docs/design-system/tokyo-component-mapping.md`,
   `docs/design-system/listtile-deck-row-spec.md`, `lib/features/deck/README.md`,

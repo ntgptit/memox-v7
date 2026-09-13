@@ -68,17 +68,19 @@ abstract final class AppSizing {
   /// The scrollbar's thumb — Material's own 4, stated (A20.1 P3-09).
   static const double scrollbarThickness = 4;
 
-  /// The one-line reading or control row — `ListTile`'s own 56, stated.
+  /// The handoff's list row: 48 MINIMUM, grows with content. Text is never
+  /// clipped to hold it.
   ///
-  /// **A row is not a button** (M100.36 4J). [touchTarget] is the floor a
-  /// finger needs; a list the eye reads down wants more than the floor, and
-  /// Material's `_defaultTileHeight` gives it 56 for one line, 72 for two.
-  /// The number was Flutter's and nobody's here (#431 P2-1) — the kit says 48
-  /// for a desktop tile, and the app had been rendering 56 + 4 + 4 without a
-  /// token to say so. A *minimum*: a two-line row grows past it, and text is
-  /// never clipped to hold it. Compact mode keeps it; 48 is reserved for
-  /// controls that are only a target.
-  static const double rowMinHeight = 56;
+  /// **It was 56 until M100.91** — Material's `_defaultTileHeight`, stated at
+  /// M100.36 4J on the argument that a list the eye reads down wants more than
+  /// a finger's floor. The Tokyo handoff's ListRow and SettingsTile set the
+  /// row at the touch floor and let content grow it, and the redesign follows
+  /// the kit. A two-line row still grows past it.
+  static const double rowMinHeight = 48;
+
+  /// Where a row divider starts when the rows lead with a tile (handoff
+  /// Divider `indent 0 / 56`): past the leading column, under the text.
+  static const double listDividerIndent = 56;
 
   /// The handoff's extended FAB height (`size-fab`). Width is content-driven.
   ///

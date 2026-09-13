@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:memox/shared/widgets/mx_row_group.dart';
 import 'package:memox/shared/widgets/mx_badge.dart';
 import 'package:memox/core/theme/extensions/theme_context_extension.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
@@ -798,6 +799,49 @@ WidgetbookComponent badgeComponent() {
                 ),
               ),
             ),
+          );
+        },
+      ),
+    ],
+  );
+}
+
+WidgetbookComponent rowGroupComponent() {
+  return WidgetbookComponent(
+    name: 'MxRowGroup',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Playground',
+        builder: (BuildContext context) {
+          final inset = context.knobs.object.dropdown<MxRowDividerInset>(
+            label: 'inset',
+            options: MxRowDividerInset.values,
+            labelBuilder: (MxRowDividerInset value) => value.name,
+          );
+
+          return CatalogListPage(
+            children: <Widget>[
+              MxRowGroup(
+                inset: inset,
+                children: const <Widget>[
+                  MxListTile(
+                    title: 'Everyday Korean',
+                    subtitle: '120 cards',
+                    leading: Icon(Icons.folder_outlined),
+                  ),
+                  MxListTile(
+                    title: 'JLPT N5',
+                    subtitle: '84 cards',
+                    leading: Icon(Icons.folder_outlined),
+                  ),
+                  MxListTile(
+                    title: 'Travel phrases',
+                    subtitle: '36 cards',
+                    leading: Icon(Icons.folder_outlined),
+                  ),
+                ],
+              ),
+            ],
           );
         },
       ),
