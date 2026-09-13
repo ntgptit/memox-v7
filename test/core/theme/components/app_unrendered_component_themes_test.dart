@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/foundations/app_elevation.dart';
 import 'package:memox/core/theme/app_theme.dart';
+import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 
 import '../../../support/color_math.dart';
 
@@ -45,8 +46,6 @@ void main() {
       }
     });
 
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     test('a selected day reads on its own fill', () {
       for (final entry in themes.entries) {
         final t = entry.value.datePickerTheme;
@@ -62,10 +61,7 @@ void main() {
         );
       }
     });
-    */
 
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     test("today's ring reads on the surface it is drawn on", () {
       // A ring rather than a fill is M3's answer, and it only works if the
       // ring itself clears the graphic floor — otherwise today is unmarked.
@@ -80,7 +76,6 @@ void main() {
         );
       }
     });
-    */
   });
 
   group('segmented button', () {
@@ -151,8 +146,6 @@ void main() {
       }
     });
 
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     test("M3's own pairing now passes, which retired the deviation", () {
       // **The premise flipped, and this test is how it was noticed.** It used
       // to assert the opposite — that `primary` on `secondaryContainer` failed
@@ -176,10 +169,7 @@ void main() {
         );
       }
     });
-    */
 
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     test('the filled half separates from the empty half', () {
       for (final entry in themes.entries) {
         final t = entry.value.sliderTheme;
@@ -191,21 +181,22 @@ void main() {
         );
       }
     });
-    */
   });
 
   group('tab bar', () {
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     test('the selected label reads on the page it sits on', () {
       // A tab's label sits on the page, not on a container fill, which is why
-      // `_TabBarDefaultsM3` inks it `primary` rather than an `on*` role. The
-      // role identity is pinned in `m3_role_contract_test.dart`; this asks
-      // whether it is readable where it actually lands.
+      // `_TabBarDefaultsM3` inks it with the brand rather than an `on*` role —
+      // the brand's text ink since M100.87. The role identity is pinned in
+      // `m3_role_contract_test.dart`; this asks whether it is readable where
+      // it actually lands.
       for (final entry in themes.entries) {
         final t = entry.value;
 
-        expect(t.tabBarTheme.labelColor, t.colorScheme.primary);
+        expect(
+          t.tabBarTheme.labelColor,
+          t.extension<AppSemanticColors>()!.accentInk,
+        );
         expect(
           contrast(t.tabBarTheme.labelColor!, t.colorScheme.surface),
           greaterThanOrEqualTo(text),
@@ -213,10 +204,7 @@ void main() {
         );
       }
     });
-    */
 
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     test('the indicator clears the graphic floor', () {
       for (final entry in themes.entries) {
         expect(
@@ -229,7 +217,6 @@ void main() {
         );
       }
     });
-    */
   });
 
   group('overflow menu', () {

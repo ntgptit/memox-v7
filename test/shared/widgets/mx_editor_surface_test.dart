@@ -157,7 +157,8 @@ void main() {
       final BuildContext context = tester.element(find.byType(IconButton));
       expect(
         tester.widget<IconButton>(find.byType(IconButton)).color,
-        context.semanticColors.warning,
+        // The warning ink — a glyph is read like a word (M100.87).
+        context.semanticColors.warningInk,
       );
     });
 

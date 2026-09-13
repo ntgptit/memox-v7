@@ -54,7 +54,8 @@ class MxTextButton extends StatefulWidget {
   /// Drawn after the label — `Icons.expand_more` on the show-summary link.
   final IconData? trailingIcon;
 
-  /// Danger as a label: the text goes `semanticColors.danger`.
+  /// Danger as a label: the text goes `semanticColors.dangerInk`, through
+  /// `AppInk.danger`.
   final bool isDestructive;
 
   /// Drops the label to `label-md`, for a link sharing a row with a heading.

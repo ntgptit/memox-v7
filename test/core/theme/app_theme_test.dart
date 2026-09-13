@@ -44,7 +44,7 @@ void main() {
       for (final entry in themes.entries) {
         final scheme = entry.value.colorScheme;
         final grounds = <(String, Color)>[
-          ('card', scheme.surfaceContainerLow),
+          ('card', scheme.surfaceContainerLowest),
           ('page', entry.value.scaffoldBackgroundColor),
         ];
 
@@ -63,8 +63,6 @@ void main() {
       }
     });
 
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     test('a label on a filled action is readable', () {
       // The failure this catches is specific: M3's light-on-light pairing gives
       // white text 1.71:1 on the tone-80 lavender, which passes no standard.
@@ -93,17 +91,14 @@ void main() {
         );
       }
     });
-    */
 
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     test('the outlined label is readable on page AND on card', () {
       for (final entry in themes.entries) {
         final label = outlinedButtonLabel(entry.value);
 
         for (final ground in <(String, Color)>[
           ('page', entry.value.scaffoldBackgroundColor),
-          ('card', entry.value.colorScheme.surfaceContainerLow),
+          ('card', entry.value.colorScheme.surfaceContainerLowest),
         ]) {
           expect(
             contrast(label, ground.$2),
@@ -113,10 +108,7 @@ void main() {
         }
       }
     });
-    */
 
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     test('the text link is readable at rest on page AND on card', () {
       // The link's label is bare text with no fill behind it, so it must clear
       // the body-text bar rather than the 3:1 UI bar. The slot is `primary`
@@ -130,7 +122,7 @@ void main() {
             .resolve(const <WidgetState>{})!;
 
         for (final ground in <(String, Color)>[
-          ('card', entry.value.colorScheme.surfaceContainerLow),
+          ('card', entry.value.colorScheme.surfaceContainerLowest),
           ('page', entry.value.scaffoldBackgroundColor),
         ]) {
           expect(
@@ -141,10 +133,7 @@ void main() {
         }
       }
     });
-    */
 
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     test('the radio mark is visible in both of its states', () {
       // WCAG 1.4.11 asks 3:1 of a UI component's visual information. Both
       // states matter: an invisible resting ring makes the unchosen options
@@ -160,7 +149,7 @@ void main() {
           ('resting', fill.resolve(const <WidgetState>{})!),
         ]) {
           for (final ground in <(String, Color)>[
-            ('card', entry.value.colorScheme.surfaceContainerLow),
+            ('card', entry.value.colorScheme.surfaceContainerLowest),
             ('page', entry.value.scaffoldBackgroundColor),
           ]) {
             expect(
@@ -172,16 +161,55 @@ void main() {
         }
       }
     });
-    */
 
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
-    test('semantic colours stay legible on card and page', () {
+    test('status inks read as text on card and page', () {
+      // **The inks, not the fills** (M100.87). A status word or glyph is drawn
+      // in its ink — `AppInk` resolves nothing else — so the ink is what owes
+      // 4.5:1. The fills are the handoff's hex and are held in the next test.
       for (final entry in themes.entries) {
         final semantic = entry.value.extension<AppSemanticColors>()!;
 
         for (final ground in <(String, Color)>[
-          ('card', entry.value.colorScheme.surfaceContainerLow),
+          ('card', entry.value.colorScheme.surfaceContainerLowest),
+          ('page', entry.value.scaffoldBackgroundColor),
+        ]) {
+          for (final pair in <(String, Color)>[
+            ('success', semantic.successInk),
+            ('warning', semantic.warningInk),
+            ('danger', semantic.dangerInk),
+            ('info', semantic.infoInk),
+            ('accent', semantic.accentInk),
+          ]) {
+            expect(
+              contrast(pair.$2, ground.$2),
+              greaterThanOrEqualTo(4.5),
+              reason: '${entry.key}: ${pair.$1} ink on ${ground.$1}',
+            );
+          }
+        }
+      }
+    });
+
+    test('status fills hold the floors the owner accepted', () {
+      // **Under 3:1 in light, by decision rather than by drift** (owner,
+      // 2026-09-13). The handoff's `success` and `warning` stay verbatim for
+      // dots, rings and containers, and in light they read under WCAG
+      // 1.4.11's 3:1 on both grounds a status fill lands on. Each pair is
+      // keyed by its ground and pinned at its own measured figure — success
+      // 2.97 on the card and 2.82 on the page, warning 2.15 and 2.04 — so
+      // neither ground can quietly get worse under the other's number; every
+      // other pair still owes the full 3:1.
+      const accepted = <String, double>{
+        'light success card': 2.9,
+        'light success page': 2.8,
+        'light warning card': 2.1,
+        'light warning page': 2.0,
+      };
+      for (final entry in themes.entries) {
+        final semantic = entry.value.extension<AppSemanticColors>()!;
+
+        for (final ground in <(String, Color)>[
+          ('card', entry.value.colorScheme.surfaceContainerLowest),
           ('page', entry.value.scaffoldBackgroundColor),
         ]) {
           for (final pair in <(String, Color)>[
@@ -192,14 +220,15 @@ void main() {
           ]) {
             expect(
               contrast(pair.$2, ground.$2),
-              greaterThanOrEqualTo(3.0),
-              reason: '${entry.key}: ${pair.$1} on ${ground.$1}',
+              greaterThanOrEqualTo(
+                accepted['${entry.key} ${pair.$1} ${ground.$1}'] ?? 3.0,
+              ),
+              reason: '${entry.key}: ${pair.$1} fill on ${ground.$1}',
             );
           }
         }
       }
     });
-    */
 
     test('a card edge produces the same step in both modes', () {
       // **This replaced a rule that had become wrong.** Until M4.10h it asserted
@@ -223,7 +252,7 @@ void main() {
       double liftOf(ThemeData theme) {
         final page = theme.scaffoldBackgroundColor;
         final surfaceStep =
-            (lightnessStar(theme.colorScheme.surfaceContainerLow) -
+            (lightnessStar(theme.colorScheme.surfaceContainerLowest) -
                     lightnessStar(page))
                 .abs();
 
@@ -248,10 +277,15 @@ void main() {
       // number and are instead each held to their own pair. The colour measured
       // here is painted solid by the rim's 1 px spread (`app_elevation_test`
       // pins it), so the ratio is the ring's, not a blurred approximation.
+      // **5, not 6, since M100.87.** The handoff's list card is `shadow-soft`
+      // — `0 1px 2px` at 4% — on a white card over a tinted page: 2.09 L\* of
+      // surface step and 3.14 of shade, 5.24 in all. The kit is "flat and
+      // quiet" on purpose; the floor still refuses a card that stops reading
+      // as an object.
       final lightLift = liftOf(themes['light']!);
       expect(
         lightLift,
-        greaterThanOrEqualTo(6.0),
+        greaterThanOrEqualTo(5.0),
         reason:
             'light: a card edge moves the page by only '
             '${lightLift.toStringAsFixed(2)} L*. Below this a card does not '
@@ -261,7 +295,7 @@ void main() {
       final dark = themes['dark']!;
       final darkPage = dark.scaffoldBackgroundColor;
       final darkStep =
-          lightnessStar(dark.colorScheme.surfaceContainerLow) -
+          lightnessStar(dark.colorScheme.surfaceContainerLowest) -
           lightnessStar(darkPage);
       expect(
         darkStep,
@@ -282,7 +316,7 @@ void main() {
       // outlines, and quiet enough that the edges which *do* carry state stay
       // obviously louder. So the floor moves to those.
       final rim = shadowsFor(AppElevation.card, dark.colorScheme).first.color;
-      final darkCard = dark.colorScheme.surfaceContainerLow;
+      final darkCard = dark.colorScheme.surfaceContainerLowest;
       expect(
         contrast(rim, darkCard),
         lessThan(2.0),
@@ -344,15 +378,13 @@ void main() {
       }
     });
 
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     test('the focus ring is visible on every surface a field can sit on', () {
       for (final entry in themes.entries) {
         final semantic = entry.value.extension<AppSemanticColors>()!;
 
         for (final ground in <(String, Color)>[
           ('tile', semantic.surfaceMuted),
-          ('card', entry.value.colorScheme.surfaceContainerLow),
+          ('card', entry.value.colorScheme.surfaceContainerLowest),
           ('page', entry.value.scaffoldBackgroundColor),
         ]) {
           expect(
@@ -363,7 +395,6 @@ void main() {
         }
       }
     });
-    */
   });
 
   group('state ownership follows the resting pair', () {

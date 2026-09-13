@@ -315,10 +315,10 @@ WidgetStateProperty<Color> textLinkForeground(
 /// trailing side, and `tapTargetSize: padded` gives the finger its horizontal
 /// 48 without drawing it.
 ///
-/// **Colour is `primary`.** It used to be a separate accent token, because the
-/// old dark `primary` was a fill tone measuring 3.33:1 as bare text — failing
-/// AA at label size. Since M100.18 inverted it to tone 80 it reads 10.02:1 on
-/// the card, so the role carries its own label.
+/// **Colour is the brand's ink, `accentInk`** (M100.87). The Tokyo handoff's
+/// light `primary` is a fill and reads 3.95:1 as bare text, so the link takes
+/// the same hue solved to clear 4.6:1 on the grounds text lands on; in dark the
+/// ink is the fill.
 ///
 /// **Focus is an underline, and it is declared here rather than only in
 /// `MxTextButton`.** Suppressing the overlay takes the wash away, and the zero
@@ -340,10 +340,12 @@ TextButtonThemeData buildTextButtonTheme(
   AppSemanticColors semantic,
   TextTheme texts,
 ) {
+  // The brand's *ink*, not its fill: the handoff's light `primary` reads
+  // 3.95:1 as bare text (M100.87, `AppColors.accentInkLight`).
   final foreground = textLinkForeground(
     scheme,
     semantic,
-    accent: scheme.primary,
+    accent: semantic.accentInk,
   );
 
   return TextButtonThemeData(
@@ -411,7 +413,8 @@ OutlinedButtonThemeData buildOutlinedButtonTheme(
     foregroundColor: WidgetStateProperty.resolveWith((states) {
       if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
 
-      return scheme.primary;
+      // The label is text, so it takes the brand's ink (M100.87).
+      return semantic.accentInk;
     }),
     side: WidgetStateProperty.resolveWith((states) {
       if (states.contains(WidgetState.disabled)) {

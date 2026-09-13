@@ -97,10 +97,11 @@ void main() {
         tester,
       ) async {
         final expected = <MxDialogTone, Color>{
-          MxDialogTone.info: semantic.info,
-          MxDialogTone.success: semantic.success,
-          MxDialogTone.warning: semantic.warning,
-          MxDialogTone.error: semantic.danger,
+          // The inks: `AppInk` resolves only to inks since M100.87.
+          MxDialogTone.info: semantic.infoInk,
+          MxDialogTone.success: semantic.successInk,
+          MxDialogTone.warning: semantic.warningInk,
+          MxDialogTone.error: semantic.dangerInk,
         };
 
         for (final tone in MxDialogTone.values) {
@@ -118,7 +119,7 @@ void main() {
       await tester.pumpWidget(host(tone: MxDialogTone.error));
       final errorColor = tester.widget<Icon>(toneIcon()).color;
 
-      expect(errorColor, const AppSemanticColors.light().danger);
+      expect(errorColor, const AppSemanticColors.light().dangerInk);
     });
   });
 

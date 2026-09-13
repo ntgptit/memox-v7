@@ -93,8 +93,6 @@ void main() {
   for (final brightness in Brightness.values) {
     final theme = brightness.name;
 
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     testWidgets('every colour the frame writes text in passes AA in $theme', (
       tester,
     ) async {
@@ -129,14 +127,14 @@ void main() {
         contrast(scheme.onSurface, scheme.surface),
         greaterThanOrEqualTo(_kAaBodyText),
       );
-      // The mode pill: `primary` on `surfaceMuted`, and §7.8's whole argument
-      // is that this pair is the one the project already owns.
+      // The mode pill: the brand ink on `surfaceMuted` — its label is text, so
+      // it takes the ink (M100.87) — and §7.8's whole argument is that this
+      // pair is the one the project already owns.
       expect(
-        contrast(scheme.primary, semantic.surfaceMuted),
+        contrast(semantic.accentInk, semantic.surfaceMuted),
         greaterThanOrEqualTo(_kAaBodyText),
       );
     });
-    */
 
     testWidgets('the ✕ and the four sm2 actions are reachable in $theme', (
       tester,

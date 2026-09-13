@@ -74,11 +74,13 @@ void main() {
 
     Color successOf(WidgetTester tester) => Theme.of(
       tester.element(find.byType(GuessQuestionSectionWidget)),
-    ).extension<AppSemanticColors>()!.success;
+    ).extension<AppSemanticColors>()!.successInk;
 
+    // The inks: a verdict's edge and label both resolve through `AppInk`,
+    // which returns only inks since M100.87.
     Color dangerOf(WidgetTester tester) => Theme.of(
       tester.element(find.byType(GuessQuestionSectionWidget)),
-    ).extension<AppSemanticColors>()!.danger;
+    ).extension<AppSemanticColors>()!.dangerInk;
 
     testWidgets('marks the right answer even when it was not chosen', (
       tester,

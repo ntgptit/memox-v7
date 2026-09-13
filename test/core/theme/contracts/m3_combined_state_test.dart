@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
+import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 
 /// **Does any combination of states move a slot off its canonical role?**
 ///
@@ -259,12 +260,13 @@ void main() {
         holds('side', side, <Set<WidgetState>>[focused], scheme.primary);
       });
 
-      test('the label is primary in both', () {
+      // The brand as text, so its ink (M100.87) — see `m3_role_contract_test`.
+      test('the label is the brand ink in every state', () {
         holds('foreground', fg, <Set<WidgetState>>[
           resting,
           focused,
           hovered,
-        ], scheme.primary);
+        ], theme.extension<AppSemanticColors>()!.accentInk);
       });
     });
 

@@ -406,15 +406,16 @@ class MxActionButton extends StatelessWidget {
     // and leaves `backgroundColor` to the theme — naming a fill for it would
     // mean naming a colour that is not a role.
     if (variant == MxActionButtonVariant.secondary) {
-      // `primary` and `outline`, the same pair the resting button draws since
-      // M100.22. This copy has been wrong twice now for the same reason — it
-      // is a second spelling of the theme's answer, and it does not move when
-      // the theme does. It said `borderSubtle` while the theme drew the control
-      // edge, then `secondaryAction`/`borderControl` while the theme moved to
-      // the canonical roles; both times a secondary button changed colour for
-      // the duration of a save.
+      // The brand's ink and `outline`, the same pair the resting button draws
+      // (M100.87). This copy has been wrong three times for the same reason —
+      // it is a second spelling of the theme's answer, and it does not move
+      // when the theme does: `borderSubtle`, then `secondaryAction`, then
+      // `primary` after the label moved to its ink. Each time a secondary
+      // button changed colour for the duration of a save.
       return ButtonStyle(
-        foregroundColor: WidgetStatePropertyAll<Color>(colors.primary),
+        foregroundColor: WidgetStatePropertyAll<Color>(
+          context.semanticColors.accentInk,
+        ),
         side: WidgetStatePropertyAll<BorderSide>(
           BorderSide(color: colors.outline),
         ),

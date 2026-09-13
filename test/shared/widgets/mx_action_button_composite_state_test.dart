@@ -28,6 +28,18 @@ import '../../support/ink_probe.dart';
 /// layer in the fill's own `on` colour at 0.08 / 0.10 / 0.10. In this palette
 /// every `on` colour is white or near-black against its fill, so the layer
 /// moves lightness and leaves hue where it was.
+/// **Pressed labels the owner accepted under 4.5:1** (M100.87). The handoff's
+/// light `primary` and `error` carry white at 4.20 and 4.66 at rest; M3's 10%
+/// white press layer lightens the fill under the label for the press's
+/// duration. Pinned at the measured figure rather than tuned, because the
+/// alphas are M3's and the fills are the kit's.
+const Map<String, double> _acceptedPressedLabel = <String, double>{
+  'light primary': 3.9,
+  'light destructive': 4.1,
+  'high-contrast light primary': 3.9,
+  'high-contrast light destructive': 4.1,
+};
+
 void main() {
   final themes = <String, ThemeData>{
     'light': buildLightTheme(),
@@ -203,8 +215,6 @@ void main() {
           }
         });
 
-        // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-        /*
         testWidgets('$variantName · the label still clears AA on the pressed '
             'composite', (tester) async {
           final style = await effectiveStyle(tester, theme, variant);
@@ -212,11 +222,12 @@ void main() {
 
           expect(
             contrast(label, composite(style, pressed)),
-            greaterThanOrEqualTo(4.5),
+            greaterThanOrEqualTo(
+              _acceptedPressedLabel['$themeName $variantName'] ?? 4.5,
+            ),
             reason: '$themeName $variantName: label under AA while pressed',
           );
         });
-        */
       }
     });
   }

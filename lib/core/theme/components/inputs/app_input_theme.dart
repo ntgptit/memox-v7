@@ -96,9 +96,14 @@ InputDecorationTheme buildInputDecorationTheme(
   // never reached: the tag field's border went red and its `+` stayed grey.
   // Stating the slot here is the canonical fix; weakening `IconButtonTheme`
   // would have moved every icon button in the app.
+  //
+  // **Under error it is the danger ink, not `error`** (M100.87). The glyph is
+  // read like the error text beside it, and the handoff's `error` is a fill
+  // that reads 4.21:1 on the field's own ground; the border keeps `error`,
+  // where 3:1 is what a boundary owes.
   suffixIconColor: WidgetStateColor.resolveWith((states) {
     if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
-    if (states.contains(WidgetState.error)) return scheme.error;
+    if (states.contains(WidgetState.error)) return semantic.dangerInk;
 
     return scheme.onSurfaceVariant;
   }),

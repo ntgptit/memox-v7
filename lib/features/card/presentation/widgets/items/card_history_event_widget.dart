@@ -145,11 +145,11 @@ class CardHistoryEventWidget extends StatelessWidget {
 /// **Outlined, not filled, and that is a measurement.** A tinted fill is what
 /// the concept draws, and the only container this palette could give all three
 /// tones is `surfaceMuted` — where `warning` measures **4.00:1** in light,
-/// under the 4.5:1 its own label needs. On the card's own `surface` every tone
-/// clears it (success 5.20 / 8.10, danger 5.57 / 6.71, warning 4.58 / 11.24),
-/// and the border carries the same colour at the same ratio, well past the 3:1
-/// a graphic needs. So the pill keeps its shape and gives up its fill rather
-/// than the palette gaining a colour.
+/// under the 4.5:1 its own label needs. On the card's own surface every tone's
+/// ink clears it (`card_detail_timeline_style_test.dart`), and the border
+/// carries the same ink at the same ratio, well past the 3:1 a graphic needs.
+/// So the pill keeps its shape and gives up its fill rather than the palette
+/// gaining a colour.
 ///
 /// **Not upper-cased.** The concept sets these in caps; `search_group_header`
 /// already records why that is the translator's decision and not the widget's —

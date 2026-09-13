@@ -36,8 +36,6 @@ void main() {
     });
   });
 
-  // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-  /*
   group('contrast', () {
     // **Measured from the tokens, not from `textContrastGuideline`**, which is
     // the call `study_accessibility_test.dart` already made and recorded: that
@@ -77,33 +75,28 @@ void main() {
           contrast(scheme.onErrorContainer, scheme.errorContainer),
           greaterThanOrEqualTo(kAaBodyText),
         );
-        // **The band's Retry, and the pair that used to fail.** This asserted
-        // the opposite until M100.18: the brand ink measured 3.72:1 on the
-        // error band in dark (5.87:1 in light), which is why only dark had to
-        // route the button away from it. Inverting the dark accent to tone 80
-        // took it to 6.76:1, so the ground no longer forces the choice.
-        //
-        // Kept in the other direction rather than deleted, for the reason the
-        // original was written: a palette that drifts back under the floor
-        // must fail here rather than quietly re-introduce a fallback ink.
+        // **The band's Retry is in the band's own ink, not the brand.**
+        // `MxFeedbackBand` resolves `onErrorContainer` for its action, so the
+        // pair above is the one Retry is drawn in. The brand on this ground
+        // (3.91:1 light, 3.65 dark on the Tokyo palette, M100.87) is not on
+        // screen, and this pins that it stays off it.
         expect(
           contrast(scheme.primary, scheme.errorContainer),
-          greaterThanOrEqualTo(kAaBodyText),
+          lessThan(kAaBodyText),
           reason:
-              'the brand ink fell back under AA on the error band, so the '
-              "band's Retry is forced onto a fallback again",
+              'the brand now reads on the error band; if Retry is moved back '
+              'onto it, delete this pin with that change',
         );
         // The reset action, which is `danger` as a label rather than a fill
         // (S5) — so it is held to the text floor, not to 3:1. Measured against
         // the **page**, which is where it sits; it is not on a card.
         expect(
-          contrast(semantic.danger, theme.scaffoldBackgroundColor),
+          contrast(semantic.dangerInk, theme.scaffoldBackgroundColor),
           greaterThanOrEqualTo(kAaBodyText),
         );
       });
     }
   });
-  */
 
   group('roles and values', () {
     testWidgets('each choice row is announced as a radio with its selected '

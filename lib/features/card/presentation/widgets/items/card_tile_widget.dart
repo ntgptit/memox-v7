@@ -203,13 +203,12 @@ class _CardFace extends StatelessWidget {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: <Widget>[
             Text(
-              // Uppercase **and** in the state's own colour. This became legal
-              // when the row turned into a card: measured on the card surface
-              // every state clears 4.5:1 — info 5.23/7.84, warning 4.58/8.58,
-              // accent 7.27/5.51, success 5.20/8.10 (light/dark) — where on the
-              // page ground warning sat at 4.33 and the label had to stay
-              // neutral. Colour is still never alone: the dot and the word carry
-              // the same fact.
+              // Uppercase **and** in the state's own ink. This became legal
+              // when the row turned into a card, and since M100.87 every state
+              // resolves to an ink solved to clear 4.5:1 on the card and the
+              // page alike (`AppColors`), so the label no longer depends on
+              // which ground it sits on. Colour is still never alone: the dot
+              // and the word carry the same fact.
               context.cardStateLabel(item.state).toUpperCase(),
               style: context.textStyles.stateChipLabel.inked(
                 context,

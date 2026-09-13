@@ -359,8 +359,6 @@ void main() {
     });
   });
 
-  // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-  /*
   test('the pairs this mapping leans on clear WCAG', () {
     // Body-size text, so 4.5:1 (WCAG 1.4.3). Asserted against the surfaces the
     // metrics actually sit on. If a palette edit ever fails one of these, the
@@ -436,5 +434,4 @@ void main() {
       greaterThanOrEqualTo(3),
     );
   });
-  */
 }

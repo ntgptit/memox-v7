@@ -35,15 +35,43 @@ List<AuditRule> memoxAuditRules({required bool isDark}) {
       semantic.warning,
       semantic.danger,
       semantic.info,
+      // **The inks too, since M100.87.** Verdict and selection edges moved from
+      // the fills to the inks with their labels (match tiles, the timeline
+      // badge). A rule that only recognised the fills would stop seeing those
+      // edges at all and pass them by not looking; in dark each ink is its
+      // fill, so only light gains coverage.
+      semantic.accentInk,
+      semantic.successInk,
+      semantic.warningInk,
+      semantic.dangerInk,
+      semantic.infoInk,
       // `borderControl` joined the list with the card-detail timeline (M99.31):
       // its connector is a hairline that carries the band's structure, so it is
       // a non-text mark holding meaning — exactly what this rule is for. The
       // omission is why the connector shipped its first draft at 1.38:1 on the
       // page ground and the audit reported PASS.
       semantic.borderControl,
-    ]),
+    ], acceptedFloors: _acceptedControlEdges(semantic, scheme)),
     PaletteClosureRule(isDark ? darkPaletteTokens : lightPaletteTokens),
   ];
+}
+
+/// **The control edges the owner accepted under 3:1** (M100.87): the Tokyo
+/// handoff's `outline` on its inset rungs, at the figures
+/// `control_border_grounds_test.dart` pins for the same pairs.
+Map<(int, int), double> _acceptedControlEdges(
+  AppSemanticColors semantic,
+  ColorScheme scheme,
+) {
+  (int, int) on(Color ground) =>
+      (semantic.borderControl.toARGB32(), ground.toARGB32());
+
+  return scheme.brightness == Brightness.dark
+      ? <(int, int), double>{
+          on(scheme.surfaceContainer): 2.6,
+          on(scheme.surfaceContainerHigh): 2.2,
+        }
+      : <(int, int), double>{on(scheme.surfaceContainerHigh): 2.9};
 }
 
 /// Pumps [screen] under the production theme and audits what it paints.

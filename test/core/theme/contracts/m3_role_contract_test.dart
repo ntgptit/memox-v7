@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
+import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 
 /// **What role does this component slot read?** — pinned as identity, for every
 /// Material component the app themes.
@@ -54,6 +55,11 @@ void main() {
     group('$mode · component slot resolves its canonical M3 role', () {
       final ThemeData theme = build();
       final ColorScheme scheme = theme.colorScheme;
+      // **The one departure, stated in this diff** (M100.87). The Tokyo
+      // handoff's light `primary` reads 3.95:1 as a label on the page, so the
+      // brand *as text* — TextButton, OutlinedButton, the selected tab — is
+      // `accentInk`. Every brand *fill* and *graphic* below keeps `primary`.
+      final Color brandText = theme.extension<AppSemanticColors>()!.accentInk;
 
       const Set<WidgetState> selected = <WidgetState>{WidgetState.selected};
       const Set<WidgetState> resting = <WidgetState>{};
@@ -156,7 +162,7 @@ void main() {
       test('OutlinedButton', () {
         final s = theme.outlinedButtonTheme.style!;
 
-        pin('foreground', s.foregroundColor!.resolve(resting), scheme.primary);
+        pin('foreground', s.foregroundColor!.resolve(resting), brandText);
         pin('side', s.side!.resolve(resting)!.color, scheme.outline);
       });
 
@@ -361,14 +367,14 @@ void main() {
       test('TextButton', () {
         final s = theme.textButtonTheme.style!;
 
-        pin('foreground', s.foregroundColor!.resolve(resting), scheme.primary);
-        pin('icon', s.iconColor!.resolve(resting), scheme.primary);
+        pin('foreground', s.foregroundColor!.resolve(resting), brandText);
+        pin('icon', s.iconColor!.resolve(resting), brandText);
       });
 
       test('TabBar', () {
         final t = theme.tabBarTheme;
 
-        pin('label', t.labelColor, scheme.primary);
+        pin('label', t.labelColor, brandText);
         pin(
           'unselected label',
           t.unselectedLabelColor,

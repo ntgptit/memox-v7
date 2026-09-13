@@ -40,8 +40,6 @@ void main() {
     }
   });
 
-  // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-  /*
   group('page-ground inks clear the text bar on surface and page', () {
     // The inks meant for plain grounds. `disabled` is exempt by WCAG's own
     // inactive-control carve-out; the on*Container inks are measured on their
@@ -100,11 +98,11 @@ void main() {
       });
     }
 
-    // `secondary` and `tertiary` are support inks: they pass 4.5 in light and
-    // sit at the large-text/UI bar in dark, which is where their two callers
-    // (the import preview's status glyphs and counts) use them beside a
-    // spelled-out reason line. Pinned at 3:1 so they cannot quietly sink
-    // below even that.
+    // `secondary` and `tertiary` are support inks. Since M100.87 each is its
+    // own solved ink (4.62 at worst in light) rather than the handoff's fill,
+    // so they clear 4.5 on `surface`; the floor below stays at the 3:1 their
+    // two callers (the import preview's status glyphs and counts) were
+    // written against, as the least they may ever sink to.
     for (final entry in themes.entries) {
       testWidgets('${entry.key}: support inks hold at least 3:1', (
         tester,
@@ -139,10 +137,7 @@ void main() {
       });
     }
   });
-  */
 
-  // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-  /*
   group('container inks are measured on their containers', () {
     for (final entry in themes.entries) {
       testWidgets(entry.key, (tester) async {
@@ -183,7 +178,6 @@ void main() {
       });
     }
   });
-  */
 
   group('inked()', () {
     testWidgets('emphasis moves the variable-font axis, not just the number', (

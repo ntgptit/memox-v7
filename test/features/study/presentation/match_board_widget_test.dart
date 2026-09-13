@@ -17,7 +17,7 @@ import 'support/study_widget_harness.dart';
 /// test cannot assert against a value copied out of the palette.
 Color wrapForTestSuccess(WidgetTester tester) => Theme.of(
   tester.element(find.byType(MatchBoardSectionWidget)),
-).extension<AppSemanticColors>()!.success;
+).extension<AppSemanticColors>()!.successInk;
 
 /// The two graded screens, and the four ways they must not grade.
 void main() {
@@ -172,11 +172,11 @@ void main() {
       await tester.pump(AppDurations.normal);
 
       final theme = Theme.of(tester.element(find.text('front-a')));
-      final accent = theme.colorScheme.primary;
+      final accent = theme.extension<AppSemanticColors>()!.accentInk;
       final label = tester.widget<Text>(find.text('front-a'));
 
-      // `primary`, the canonical accent, as a label on a surface — readable
-      // because the palette is tuned for it (M100.28), not via a second token.
+      // The brand as a label on a surface takes its ink (M100.87): the
+      // handoff's `primary` is a fill and reads under 4.5:1 as text.
       expect(label.style?.color, accent);
 
       // The surface is painted by the tile's own `AnimatedContainer`, not by

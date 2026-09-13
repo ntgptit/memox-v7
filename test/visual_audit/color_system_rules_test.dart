@@ -34,7 +34,12 @@ void main() {
     // V2 and V4 from the audit, held at zero. A role whose container was picked
     // by eye drifts off its fill's hue, and the drift is invisible until the two
     // appear side by side.
-    const maximumRoleSpread = 5.0;
+    //
+    // **6, not 5, since M100.87.** The handoff's light tertiary pair —
+    // `#8B6FF5` on `#EBE3FE` — sits 5.24 degrees apart, and its hex is verbatim
+    // by owner decision. One degree of headroom records that pair; it is not
+    // room for a hand-picked container.
+    const maximumRoleSpread = 6.0;
 
     for (final mode in <String, ThemeData>{
       'light': light,
@@ -175,8 +180,19 @@ void main() {
       // meaning, so the day the paper gains a tint the exemption is deleted
       // rather than quietly covering a different role.
       if (mode.key == 'light') {
-        for (final paper in <String>['surfaceContainerLow', 'surfaceBright']) {
+        for (final paper in <String>[
+          'surfaceContainerLowest',
+          'surfaceBright',
+        ]) {
           neutrals.remove(paper);
+        }
+      }
+      // **Dark's shadow and scrim are pure black, by the handoff** (M100.87).
+      // Exempt by role, for the reason the light paper is: a rule cannot ask
+      // for a tint the owner's kit rules out.
+      if (mode.key == 'dark') {
+        for (final black in <String>['shadow', 'scrim']) {
+          neutrals.remove(black);
         }
       }
 
@@ -231,32 +247,35 @@ void main() {
     }
   });
 
-  test('R6 — the shadow tokens are built the same way in both modes', () {
-    // **Promoted from a report finding to a rule by a product decision.** While
-    // nothing painted a shadow this was latent: light's `shadow` carried the seed
-    // (`#0B0C18`, hue 235) and dark's was pure `#000000`, and neither was drawn.
-    // The app is now to have real elevation, so the asymmetry becomes visible the
-    // moment it is switched on — one mode dropping a seed-tinted shadow and the
-    // other a flat black one.
+  test("R6 — the shadow tokens are the handoff's in both modes", () {
+    // **Promoted from a report finding to a rule by a product decision, and
+    // re-stated at M100.87.** The rule used to hold both modes to a seed-tinted
+    // shadow and scrim. The Tokyo handoff draws light's from its navy ink
+    // (`#0F1638`, `#0A0E27`) and dark's in pure black, by design — a dark
+    // shade has no hue to lend at the bottom of the lightness scale. So light
+    // keeps the seed trace, and dark is pinned to the black the kit chose, so
+    // neither half drifts on its own.
     for (final token in <String, (Color, Color)>{
       'colorScheme.shadow': (light.colorScheme.shadow, dark.colorScheme.shadow),
       'colorScheme.scrim': (light.colorScheme.scrim, dark.colorScheme.scrim),
     }.entries) {
       final (lightValue, darkValue) = token.value;
 
-      for (final mode in <String, Color>{
-        'light': lightValue,
-        'dark': darkValue,
-      }.entries) {
-        expect(
-          hueOf(mode.value),
-          isNotNull,
-          reason:
-              '${token.key} in ${mode.key} is ${hex(mode.value)} — a pure '
-              'neutral with no hue. A shadow that carries no trace of the seed '
-              'cannot move with it, and the other mode already does.',
-        );
-      }
+      expect(
+        hueOf(lightValue),
+        isNotNull,
+        reason:
+            '${token.key} in light is ${hex(lightValue)} — a pure neutral with '
+            'no hue. A light shadow that carries no trace of the seed cannot '
+            'move with it.',
+      );
+      expect(
+        darkValue,
+        const Color(0xFF000000),
+        reason:
+            '${token.key} in dark is ${hex(darkValue)}; the handoff draws it in '
+            'pure black.',
+      );
     }
   });
 }

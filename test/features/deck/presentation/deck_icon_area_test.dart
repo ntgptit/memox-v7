@@ -69,15 +69,12 @@ void main() {
     return (fill, icon.color!);
   }
 
-  // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-  /*
   group('the well is neutral, and the glyph carries the brand colour', () {
     for (final (name, theme) in <(String, ThemeData)>[
       ('light', buildLightTheme()),
       ('dark', buildDarkTheme()),
     ]) {
       testWidgets(name, (tester) async {
-        final scheme = theme.colorScheme;
         final semantic = theme.extension<AppSemanticColors>()!;
         final (fill, glyph) = await wellOf(tester, theme);
 
@@ -88,10 +85,10 @@ void main() {
         );
         expect(
           glyph,
-          scheme.primary,
+          semantic.accentInk,
           reason:
-              'AppInk.accent resolves to primary — the glyph is the well\'s '
-              'only coloured mark',
+              'AppInk.accent resolves to the brand ink — the glyph is the '
+              'well\'s only coloured mark',
         );
         expect(
           contrast(glyph, fill),
@@ -105,7 +102,6 @@ void main() {
       });
     }
   });
-  */
 
   testWidgets(
     "the well's fill is not the Study button's, so one row does not repeat "

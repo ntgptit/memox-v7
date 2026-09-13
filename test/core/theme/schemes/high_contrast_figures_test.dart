@@ -31,8 +31,6 @@ void main() {
       // ignore: unused_local_variable
       final isLight = mode == 'light';
 
-      // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-      /*
       test('the doc table is the measurement (2 dp)', () {
         String r(Color c) => over(c, surface).toStringAsFixed(2);
         // **Re-measured at M100.80, and the token moved, not the floor.**
@@ -46,7 +44,8 @@ void main() {
         // this retune is safe: HC re-points the token to `onSurfaceVariant`
         // rather than deriving it from the base, so no accessibility floor
         // moves with it.
-        expect(r(base.borderSubtle), isLight ? '1.11' : '1.21');
+        // Every cell below re-measured on the Tokyo handoff palette (M100.87).
+        expect(r(base.borderSubtle), isLight ? '1.53' : '1.58');
         // **No longer a swap at all** (M100.82, owner review). The hairline
         // was `onSurfaceVariant` — 5.28 / 6.47, the secondary *label* ink —
         // then briefly `borderControl` at 3.71 / 4.68. Both were reviewed on a
@@ -58,21 +57,18 @@ void main() {
         // Light re-measured at M100.48: the token was lightened from
         // `#6F727B` to `#7B7E88`, which is this cell moving 4.40 -> 3.71.
         // Dark is untouched. The floor assertions below are not.
-        expect(r(base.borderControl), isLight ? '3.83' : '5.84');
-        expect(r(hc.borderControl), isLight ? '6.27' : '9.26');
-        expect(r(base.borderAccent), isLight ? '1.78' : '3.02');
-        expect(r(hc.borderAccent), isLight ? '5.69' : '5.77');
-        expect(r(base.onDisabled), isLight ? '2.12' : '2.81');
-        expect(r(hc.onDisabled), isLight ? '3.85' : '4.94');
+        expect(r(base.borderControl), isLight ? '3.44' : '3.75');
+        expect(r(hc.borderControl), isLight ? '7.20' : '8.50');
+        expect(r(base.borderAccent), isLight ? '1.60' : '2.33');
+        expect(r(hc.borderAccent), isLight ? '4.39' : '7.39');
+        expect(r(base.onDisabled), isLight ? '2.39' : '3.11');
+        expect(r(hc.onDisabled), isLight ? '4.91' : '6.42');
         expect(
           contrast(scheme.onSurface, surface).toStringAsFixed(2),
-          isLight ? '11.90' : '10.14',
+          isLight ? '16.72' : '15.59',
         );
       });
-      */
 
-      // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-      /*
       test('every re-pointed token clears 3:1 on the page', () {
         // The floor the palette sets for itself: WCAG 1.4.11 for the edges,
         // and the same 3:1 chosen for the disabled ink although SC 1.4.3
@@ -93,7 +89,6 @@ void main() {
           );
         }
       });
-      */
 
       test('the raised disabled ink still recedes below the primary ink', () {
         expect(

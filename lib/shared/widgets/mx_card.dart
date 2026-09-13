@@ -588,9 +588,12 @@ class _MxCardState extends State<MxCard> {
       return semantic.surfaceSelected;
     }
 
+    // **The paper is `Lowest` and the recess is the page** (M100.87). The
+    // Tokyo handoff draws its card on `surfaceContainerLowest`; the only
+    // surface below that in both modes is the page itself.
     return switch (widget._spec.fill) {
-      _MxCardFill.surface => scheme.surfaceContainerLow,
-      _MxCardFill.recessed => scheme.surfaceContainerLowest,
+      _MxCardFill.surface => scheme.surfaceContainerLowest,
+      _MxCardFill.recessed => scheme.surface,
       _MxCardFill.muted => scheme.surfaceContainerHigh,
       _MxCardFill.tonal => semantic.surfaceEmphasis,
       // Exhaustive over the tone so a second tone fails the build here
