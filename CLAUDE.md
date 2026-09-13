@@ -352,23 +352,30 @@ up-navigation grammars, a chip tier in five spellings and a switch with two
 state channels. Where M3 gives a choice, the repo's own tokens and
 `docs/design-system/` decide; where the repo is silent, M3 is the answer.
 
-**Design System V1 is frozen, and a feature task is not allowed to thaw it.**
+**Design System V1 was frozen, and is reopened for the Tokyo redesign.**
 `docs/design-system/v1-freeze.md` names fourteen frozen contracts — the 45-role
 `ColorScheme` identity, the ThemeData mappings, the type scale and its
 variable-font weight contract, the spacing/radius/sizing/stroke/elevation
 foundations, the shared primitive APIs, the 48dp floor, high contrast, the card
 depth contract, `MxContentShell`'s chrome, the text-restyle policy, the raw
-Material ownership policy and Linux-only golden authoring. A feature task **MUST
-NOT** modify any of them; if it needs one changed it **MUST** stop and open a
-separate design-system task, which itself is only justified by one of the five
-reopen triggers in that file's §3. It may still compose shared widgets and lay
-them out — that was never the restriction.
+Material ownership policy and Linux-only golden authoring. On 2026-09-13
+(M100.85) the owner opened the first thirteen for a redesign against the Tokyo
+handoff. That file's §3c is the record, and it decides what follows:
 
-**Read that file before assuming a UI change is ordinary feature work**, because
-the bypass is quiet: only five of the fourteen contracts are watched by a guard
-over `lib/features/`; the other nine are held by tests, and a test is a file in
-this repo that a feature branch can edit. Loosening the thing that watches a
-contract counts as changing the contract.
+- A task implementing the handoff **MAY** change any of the thirteen, and
+  **MUST NOT** be stopped or deferred because a contract is frozen. Audit
+  documents that route every change through §3 do not bind it.
+- Changing a contract **MUST** move the test or guard that watches it to the
+  new value in the same PR. Deleting, excluding or disabling the check to get
+  through CI is not a change of contract — it hides one. The bypass is quiet:
+  only five of the fourteen are watched by a guard over `lib/features/`, the
+  other nine are held by tests, and a test is a file a branch can edit.
+- Goldens are still authored on Linux only. Line 14 is a fact about the CI
+  runner, not a design choice, and the redesign does not reopen it.
+- A bug fix, or a feature task that is not implementing the handoff, still
+  follows the freeze exactly as §3 describes: it **MUST NOT** thaw a contract on
+  the side. It may still compose shared widgets and lay them out — that was
+  never the restriction.
 
 **State.** Immutable. Data and task-status are separate concerns — one
 `isLoading` boolean for every operation on a screen is a bug waiting to happen.

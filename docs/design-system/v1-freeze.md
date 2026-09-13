@@ -7,8 +7,8 @@
 | **Scope** | Foundation, theme mapping, shared primitive contract, a11y floor, golden authoring policy. Ngoài phạm vi: **composition của từng màn hình nghiệp vụ** (không đóng băng), giá trị token cụ thể (AD-14), hợp đồng component-level (`.claude/skills/flutter-theme-design/`) |
 | **Source of truth for** | Freeze record của V1 · danh sách hợp đồng đóng băng · reopen trigger · bản đồ enforcement cho từng hợp đồng · ràng buộc lên task feature |
 | **Depends on** | `document-conventions.md` · `architecture.md` (AD-14, AD-15, AD-23) · `design-system/theme-architecture.md` · `reviews/a20-1-design-system-reconciliation.md` (bằng chứng lịch sử) |
-| **Updated by task** | M100.73 |
-| **Last updated** | 2026-09-10 |
+| **Updated by task** | M100.85 |
+| **Last updated** | 2026-09-13 |
 
 ---
 
@@ -183,6 +183,59 @@ số 6 đã có sẵn cho brief này.
 `app_sizing_test` có thêm một khẳng định nói rõ nó **không** phải control: nó
 nhỏ hơn `controlDense`, nên sàn 48dp không áp — và nếu ai đó làm nó bấm được mà
 quên chuyển nó ra khỏi nhóm này thì test đỏ.
+
+---
+
+## 3c. Reopen record — M100.85 (2026-09-13): redesign theo handoff Tokyo
+
+**Lần mở lại thứ ba, và là lần đầu theo điều kiện số 2** — chủ đích thiết kế lại
+palette / theme. Khác §3a và §3b ở phạm vi: hai lần trước mở một primitive cho
+một màn hình; lần này mở **mười ba hợp đồng đầu của §2** cho cả một đợt redesign.
+
+**Chuyện đã xảy ra.** Chủ dự án đưa bản handoff `memox-flutter-handoff.json`
+(sinh 2026-09-13 từ `ui_kits/mobile/flutter-prompt.html`: token cho hai theme,
+foundations, và 46 widget spec chia thành các section A–G), kèm yêu cầu cải
+thiện UI theo nó. Phiên đầu tiên đọc handoff như một loạt đối chiếu và mở ba PR
+docs-only (#551 FilledButton, #552 TonalButton, #553 FAB). Cả ba kết luận
+"không sửa, mọi thay đổi đi qua §3"; riêng #553 còn ghi `MUST NOT` đổi fill của
+FAB theo kit. Chủ dự án bác cách đọc đó: *đang redesign, không phải sửa lỗi*. Ba
+PR bị đóng, không merge.
+
+**Có hiệu lực trong đợt redesign:**
+
+- Một task thực hiện handoff **MAY** sửa bất kỳ hợp đồng nào từ dòng 1 tới dòng
+  13 của §2, và **MUST NOT** bị dừng hay hoãn chỉ vì hợp đồng đó đang đóng băng.
+- Các câu `MUST NOT` trong tài liệu đối chiếu component
+  (`docs/design-system/*-spec.md`, `docs/prompt/`) buộc thay đổi phải đi qua §3
+  **không ràng buộc** task redesign. Bản ghi này là chỗ duy nhất nói điều đó;
+  không sửa lại từng tài liệu kia (`document-conventions.md` §5).
+- Các hàng `DESIGN_SYSTEM_BLOCKED` trong `wbs.md` (M100.42) thôi chờ điều kiện
+  mở lại: chúng được mở khoá, nhưng chưa được lên lịch.
+
+**Không đổi:**
+
+- PR nào đổi một hợp đồng thì **MUST** dời test hoặc guard đang canh hợp đồng đó
+  sang giá trị mới, ngay trong PR ấy. Xoá test, thêm `exclude` hay đặt
+  `enabled: false` để đi qua CI thì **MUST NOT**: đó không phải đổi hợp đồng mà
+  là giấu nó. Câu "sửa thứ đang canh hợp đồng cũng là sửa hợp đồng" ở §3 vẫn
+  đúng nguyên văn.
+- Dòng 14 — golden chỉ author trên Linux — **không** mở. Nó là sự thật về runner
+  CI, không phải một lựa chọn thiết kế.
+- AD-23 (API của shared surface/action là tập đóng) không phải hợp đồng của tài
+  liệu này nên không mở theo: redesign thêm recipe có tên, không thêm tham số màu
+  hay hình dạng.
+- Task sửa lỗi, và task feature không thực hiện handoff, vẫn theo §3 như cũ.
+- Bản ghi này không đụng tới thứ tự ưu tiên ở `tokyo-component-mapping.md` §1 hay
+  mục *Material 3 first* của `CLAUDE.md`. Chỗ kit mâu thuẫn với role canonical
+  của M3 — ví dụ fill `primary` so với `primaryContainer` của FAB, hay accent
+  theo mode học — SHOULD được hỏi chủ dự án theo từng ca, thay vì tự chọn một
+  phía.
+
+**Nguồn thiết kế đang nằm ngoài repo.** Bản handoff hiện chỉ có trên máy của chủ
+dự án, nên session cloud không đọc được nó.
+
+**Khi redesign xong,** V1 SHOULD được đóng băng lại bằng một freeze record mới ở
+§1. Khi đó §2 mô tả hệ thống đã redesign, không phải hệ thống trước M100.85.
 
 ---
 
