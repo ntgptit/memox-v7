@@ -766,6 +766,21 @@ không nhầm chúng là một phase.
     `surfaceContainerLow`) làm 4 file audit xanh `+12`, rồi revert. Các
     allowance ghi đúng số chip và nêu cơ chế thật; rationale cũ ("transparent
     rest state") vốn sai.
+  - PLAN-DEV-18.6 — golden Linux báo `trash_screen audit · loaded` đỏ, còn
+    trên Windows vẫn xanh:
+    - trên Linux, canvas của hai chip chưa chọn không đủ phẳng 90%
+      (`flatEnoughToJudge`, `raster_cross_check.dart`), nên bị tính vào
+      `rasterNotFlat covers only` (khớp 3), và allowance
+      `declaredRasterMismatch` thành UNUSED;
+    - trên Windows, cũng hai chip đó đủ phẳng, nên là `declaredRasterMismatch`
+      (2).
+
+    Nguyên nhân là khử răng cưa chữ và mép khác nhau giữa hai nền, cùng lý do
+    golden chỉ author trên Linux. Allowance của trạng thái loaded giờ chọn theo
+    `Platform.isWindows`: Linux (nền CI chạy) đếm `covers only` 3; Windows đếm
+    1 cộng `declaredRasterMismatch` 2. Xanh trên cả hai (`+4`). Lưu ý:
+    `goldens_branch.sh` trả exit 0 dù lát cuối đỏ, vì `| tail -2` không có
+    `pipefail`; phải đọc dòng tổng kết của từng lát.
   - PLAN-DEV-19.1 — test của plan có hai chỗ không chạy được: `find.descendant`
     không match chính root `AnimatedContainer`, nên cần `matchRoot: true`; và
     3.44 không có `hasToggledState`, nên đọc `isToggled` / `isEnabled` dạng
