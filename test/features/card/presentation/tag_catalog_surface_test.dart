@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/foundations/app_spacing.dart';
+import 'package:memox/core/theme/foundations/app_sizing.dart';
 import 'package:memox/features/card/presentation/widgets/items/tag_catalog_row_widget.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
+import 'package:memox/shared/widgets/mx_row_group.dart';
 import 'package:memox/shared/widgets/mx_search_field.dart';
 
 import 'support/fake_tag_catalog_repository.dart';
@@ -20,12 +21,6 @@ import 'support/tag_catalog_harness.dart';
 /// row content rather than on a number (SC-C1-10, SC-C1-11).
 void main() {
   group('visual revision 2026-08-28 - one grouped surface', () {
-    // Where a row's text begins inside the card: leading inset, 32dp well,
-    // gap. Restated here from the screen so the two cannot drift silently -
-    // if the screen changes its inset, this file says where and by how much.
-    const rowTextInset =
-        AppSpacing.md + TagCatalogRowWidget.wellSize + AppSpacing.md;
-
     testWidgets('the search field and the catalog surface share edges', (
       tester,
     ) async {
@@ -85,24 +80,14 @@ void main() {
       expect(face.right, moreOrLessEquals(surface.right, epsilon: kTagEpsilon));
     });
 
-    testWidgets('separators live inside the text column, one per boundary', (
+    testWidgets("separators are the row group's hairlines, one per boundary", (
       tester,
     ) async {
       await pumpTagCatalog(tester);
       final surface = tester.getRect(find.byType(MxCard));
-      final dividers = find.byType(Divider);
-
-      // The row's own content edge: the menu button's 48dp box, which the row
-      // pads by `xs` from the card. The trailing end of every separator is
-      // measured against this rather than against a literal, which is how it
-      // came to end 8dp short of the content and 4dp past the glyph.
-      final menuButton = tester.getRect(
-        find
-            .ancestor(
-              of: find.byIcon(Icons.more_vert).first,
-              matching: find.byType(IconButton),
-            )
-            .first,
+      final dividers = find.descendant(
+        of: find.byType(MxRowGroup),
+        matching: find.byType(Divider),
       );
 
       expect(
@@ -111,44 +96,23 @@ void main() {
         reason: 'a separator marks a boundary, so rows minus one',
       );
       for (var i = 0; i < kTagFixtures.length - 1; i++) {
-        // The widget spans the card; the *painted* line is inset by the
-        // divider's own indent properties, which `getRect` cannot see - so
-        // the box is measured and the inset is read off the widget, the same
-        // split the D21 claim makes for a scroller's padding.
+        // The widget spans the card; the painted line is inset by the
+        // divider's own indent, which `getRect` cannot see - so the box is
+        // measured and the inset is read off the widget.
         final rect = tester.getRect(dividers.at(i));
         expect(rect.left, moreOrLessEquals(surface.left, epsilon: kTagEpsilon));
         expect(
           rect.right,
           moreOrLessEquals(surface.right, epsilon: kTagEpsilon),
         );
-
-        final divider = tester.widget<Divider>(dividers.at(i));
+        // **The handoff's leading inset since M100.91**, the one every
+        // grouped row list shares, where this screen derived its own from a
+        // 32dp well and ended the line on the menu's box.
         expect(
-          divider.indent,
-          rowTextInset,
-          reason:
-              'the line starts where the text column starts, not at the '
-              'card edge - a full-bleed line slices the card',
-        );
-        expect(
-          surface.right - divider.endIndent!,
-          moreOrLessEquals(menuButton.right, epsilon: kTagEpsilon),
-          reason:
-              'the line must stop on the row content it separates, not on a '
-              'number that matches neither the glyph nor the card edge',
+          tester.widget<Divider>(dividers.at(i)).indent,
+          AppSizing.listDividerIndent,
         );
       }
-
-      // And the inset is not just a number two files agree on: the name's
-      // laid-out left edge sits exactly there, so a well that grew would
-      // drag this assertion red instead of letting the line drift off the
-      // text column.
-      final name = tester.getRect(find.text('food'));
-      expect(
-        name.left,
-        moreOrLessEquals(surface.left + rowTextInset, epsilon: kTagEpsilon),
-        reason: 'the separator indent and the text column are one fact',
-      );
     });
 
     testWidgets('an error arriving after data takes the search with it '
@@ -169,14 +133,14 @@ void main() {
       );
     });
 
-    testWidgets('every row wears the same neutral well', (tester) async {
+    testWidgets('every row leads with the same tile', (tester) async {
       await pumpTagCatalog(tester);
 
       expect(
         find.byIcon(Icons.sell_outlined),
         findsNWidgets(kTagFixtures.length),
         reason:
-            'one glyph per row, all identical - a well that varied would '
+            'one glyph per row, all identical - a tile that varied would '
             'invent a hierarchy BR-230 does not have',
       );
     });

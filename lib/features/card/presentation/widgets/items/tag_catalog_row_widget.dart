@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/extensions/app_ink.dart';
-import '../../../../../core/theme/foundations/app_radius.dart';
-import '../../../../../core/theme/foundations/app_sizing.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
-import '../../../../../shared/widgets/mx_icon.dart';
+import '../../../../../shared/widgets/mx_icon_tile.dart';
 import '../../../../../shared/widgets/mx_menu_button.dart';
 import '../../../domain/models/tag_catalog_entry_model.dart';
 
@@ -17,7 +15,7 @@ import '../../../domain/models/tag_catalog_entry_model.dart';
 /// recorded.** The tile's type and insets come from `listTileTheme`, which is
 /// the reading-list density; the catalog sits inside one grouped `MxCard` and
 /// borrows Card Detail's compact grammar instead — `titleSmall` name,
-/// `bodySmall` count, a leading well. A themed tile cannot say any of that
+/// `bodySmall` count, a leading tile. A themed tile cannot say any of that
 /// without `copyWith`, which is the restyle the guard exists to refuse.
 ///
 /// **The count sits under the name, not opposite it** (M4.14 G3). A number
@@ -26,9 +24,10 @@ import '../../../domain/models/tag_catalog_entry_model.dart';
 /// the name it is a subtitle, which is also what a screen reader announces
 /// second — the order a person asks the two questions in.
 ///
-/// **Every row wears the same well, the same glyph, the same tone.** The well
-/// exists to give a long catalog a scannable left rhythm the way Card Detail's
-/// bands lead with a mark; it carries no per-tag colour and no meaning beyond
+/// **Every row leads with the same tile, the same glyph, the same tone.** The
+/// handoff IconTile (M100.91) gives a long catalog a scannable left rhythm the
+/// way Card Detail's bands lead with a mark; it carries no per-tag colour and
+/// no meaning beyond
 /// "this is a tag", because a tag is a text identifier in v1 (M4.14 T9) and a
 /// tone that varied would invent a hierarchy BR-230 does not have.
 ///
@@ -42,11 +41,6 @@ class TagCatalogRowWidget extends StatelessWidget {
     required this.onDelete,
     super.key,
   });
-
-  /// The leading well's square, public because the screen derives the
-  /// separator's text-column inset from it and the geometry test pins the
-  /// two together — one fact, one place, and a change here moves all three.
-  static const double wellSize = AppSizing.controlDense;
 
   final TagCatalogEntry entry;
   final VoidCallback onRename;
@@ -67,7 +61,8 @@ class TagCatalogRowWidget extends StatelessWidget {
       ),
       child: Row(
         children: <Widget>[
-          const _TagWell(),
+          // Decorative: the row's text says "tag" better than the glyph.
+          const MxIconTile(icon: Icons.sell_outlined),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
@@ -122,40 +117,6 @@ class TagCatalogRowWidget extends StatelessWidget {
             ],
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// The neutral leading well every row shares.
-///
-/// [TagCatalogRowWidget.wellSize] (32dp), not the 40 a deck tile leads with: a catalog row is an operational
-/// line, one step denser than a navigation tile, and the well is a rhythm
-/// mark rather than the row's identity. `surfaceMuted` is the neutral step
-/// Card Detail's metric wells stand on — the semantic name for the same
-/// pixel `surfaceContainerHigh` carries, chosen so this decision has one
-/// spelling wherever it is made.
-///
-/// The glyph is decorative — the row's text says "tag" better than the icon
-/// does — so `MxIcon` unlabeled keeps it out of the semantics tree on its own.
-class _TagWell extends StatelessWidget {
-  const _TagWell();
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox.square(
-      dimension: TagCatalogRowWidget.wellSize,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          // `surfaceMuted`, the spelling Card Detail's metric wells use —
-          // the same pixel as `surfaceContainerHigh`, but one decision with
-          // one name instead of two names that happen to agree.
-          color: context.semanticColors.surfaceMuted,
-          borderRadius: BorderRadius.circular(AppRadius.sm),
-        ),
-        child: const Center(
-          child: MxIcon(Icons.sell_outlined, size: MxIconSize.xs),
-        ),
       ),
     );
   }

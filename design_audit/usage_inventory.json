@@ -1,10 +1,10 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
   "scannedFiles": 741,
-  "totalSites": 349,
+  "totalSites": 348,
   "byElementKind": {
     "other": 311,
-    "background": 26,
+    "background": 25,
     "border": 10,
     "shadow": 1,
     "text": 1
@@ -15,7 +15,7 @@
     "blend-source": 6,
     "Colors-material": 14,
     "hardcoded-literal": 108,
-    "theme-token": 29
+    "theme-token": 28
   },
   "sites": [
     {
@@ -3537,17 +3537,6 @@
       "token": "semantic.borderControl",
       "resolved_value_light": "unresolvable: semantic.borderControl not in the dumped theme",
       "resolved_value_dark": "unresolvable: semantic.borderControl not in the dumped theme"
-    },
-    {
-      "file": "lib/features/card/presentation/widgets/items/tag_catalog_row_widget.dart",
-      "line": 153,
-      "widget_context": "_TagWell",
-      "element_kind": "background",
-      "source_kind": "theme-token",
-      "expression": "context.semanticColors.surfaceMuted",
-      "token": "semantic.surfaceMuted",
-      "resolved_value_light": "#E9EDF7",
-      "resolved_value_dark": "#232B5A"
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_export_format_options_widget.dart",

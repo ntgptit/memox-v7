@@ -831,6 +831,31 @@ không nhầm chúng là một phase.
     "ListTile · deck row" không quy định số dòng, còn gate đó cấm deck list làm
     mất chữ của một tên bình thường, và ghi rõ `maxLines: 2` là quyết định. Tên
     giữ ngân sách hai dòng; hàng vẫn tối thiểu 48 và cao theo nội dung.
+  - PLAN-DEV-16.1 — test đỏ của plan gõ bằng `enterText(searchInput)`. Test
+    dùng helper `typeSearch` của repo, và thêm một case hai nhóm (decks + cards):
+    hai card, không hairline vì mỗi nhóm một hàng. Test tag catalog dùng fixture
+    ba tag của chính `tag_catalog_screen_test` thay cho setup G5 của
+    `tag_catalog_alignment_test`; G3–G5 xanh mà không sửa. Test đỏ đúng lý do
+    trước khi sửa: 3 `MxCard` thay vì 1, và 0 `MxRowGroup`.
+  - PLAN-DEV-16.2 — plan ghi các dòng chữ trong hàng "giữ `maxLines: 1` +
+    ellipsis (ListRow)". Thực tế tên tag là 2 dòng (W2: tên tiếng Việt ở 2.0),
+    tiêu đề deck trong kết quả search cũng 2 dòng. Cả hai giữ nguyên hành vi đã
+    ship, cùng lý do PLAN-DEV-15.6.
+  - PLAN-DEV-16.3 — ba test dời theo hợp đồng mới:
+    - `library_search_rhythm_test`: hai hàng cách nhau `lg` → chạm nhau qua một
+      hairline.
+    - `library_search_review_test`: tìm vòng focus trong `MxCard` → trong hàng
+      (`MxFocusRing` của `MxPressable`).
+    - `tag_catalog_surface_test`: divider thụt tới cột chữ và dừng ở hộp nút
+      menu → hairline của `MxRowGroup`, thụt `AppSizing.listDividerIndent` (56)
+      và chạy tới mép phải.
+
+    Cho UI audit: cột chữ bắt đầu ở 60 với hàng tag (12 + tile 36 + 12) và ở 64
+    với hàng deck/search (16 + 36 + 12), còn hairline ở 56. Screen-audit của
+    search và tag không đổi số đếm: một hàng `MxPressable` góp đúng một ink
+    layer và một clip như card bấm được trước đó, và nền tile đã có trong
+    palette từ Task 15. Doc `AppSizing.controlDense` bỏ "catalog row" khỏi danh
+    sách nơi dùng 32.
 - **Editable documents:** `docs/wbs.md`,
   `docs/design-system/tokyo-component-mapping.md`,
   `docs/design-system/listtile-deck-row-spec.md`, `lib/features/deck/README.md`,

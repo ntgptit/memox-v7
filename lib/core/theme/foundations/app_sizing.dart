@@ -54,7 +54,8 @@ abstract final class AppSizing {
   static const double iconButtonInk = 36;
 
   /// The dense tier — a chip's content box, the compact breadcrumb line, the
-  /// 32 dp icon well beside a metric or a catalog row.
+  /// 32 dp icon well beside a metric. The catalog row led with one too until
+  /// it took the handoff's `MxIconTile` (M100.91).
   ///
   /// **One owner for a number that had five spellings** (A20.1 P2-12):
   /// `app_chip_theme._containerHeight`, `MxBreadcrumb.compactLineHeight`,
