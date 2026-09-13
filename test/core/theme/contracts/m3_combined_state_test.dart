@@ -98,7 +98,7 @@ void main() {
         holds('fill', fill, <Set<WidgetState>>[
           selected,
           selectedFocused,
-        ], scheme.secondaryContainer);
+        ], scheme.primaryContainer);
         holds('fill', fill, <Set<WidgetState>>[
           resting,
           focused,
@@ -109,7 +109,7 @@ void main() {
         holds('label', label, <Set<WidgetState>>[
           selected,
           selectedFocused,
-        ], scheme.onSecondaryContainer);
+        ], scheme.onPrimaryContainer);
         holds('label', label, <Set<WidgetState>>[
           resting,
           focused,
@@ -375,7 +375,7 @@ void main() {
         ]) {
           expect(
             chipFill.resolve(state),
-            isNot(scheme.secondaryContainer),
+            isNot(scheme.primaryContainer),
             reason: '$mode: a disabled chip looks as live as an enabled one',
           );
           expect(
