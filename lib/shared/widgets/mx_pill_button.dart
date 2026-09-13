@@ -206,7 +206,7 @@ class _Content extends StatelessWidget {
         // **Always laid out, whatever it paints.** The slot is what keeps the
         // pill's width the same selected and unselected — the tick arrives in
         // room that was already there (M100.36 4M). A `SizedBox` with a null
-        // child is a 24 × 24 box (`AppIconSize.md`, M100.85 — the Chip design
+        // child is a 24 × 24 box (`AppIconSize.md`, M100.86 — the Chip design
         // spec's fixed glyph step); an `Icon` at the same size fills it exactly.
         SizedBox.square(
           dimension: AppIconSize.md,

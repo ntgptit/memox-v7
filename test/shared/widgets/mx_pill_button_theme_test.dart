@@ -299,7 +299,7 @@ void main() {
 
         final states = color! as WidgetStateColor;
         // `onPrimaryContainer` on `primaryContainer` — the pairing stated at
-        // M100.85 (`v1-freeze.md` §3c), a named departure from
+        // M100.86 (`design-system/chip-spec.md`), a named departure from
         // `_ChoiceChipDefaultsM3.labelStyle`'s own `onSecondaryContainer`. The
         // role identity is pinned in `m3_role_contract_test.dart`; this file
         // cares that the *state resolution* still happens in the slot Material

@@ -90,7 +90,8 @@ void main() {
 
       test('ChoiceChip', () {
         // **Selected fill and label are the one stated exception in this
-        // file** (M100.85, `v1-freeze.md` §3c). `_ChoiceChipDefaultsM3.color`
+        // file** (M100.86, `design-system/chip-spec.md`; reopen authority is
+        // `v1-freeze.md` §3c). `_ChoiceChipDefaultsM3.color`
         // answers `secondaryContainer`; the owner's Chip design spec named
         // `primaryContainer` directly, and reopening the binding in
         // `m3_role_bindings.dart` is the diff that says so, as this file's own
@@ -385,14 +386,14 @@ void main() {
       // this file exists. If a future change collapses these back onto one
       // token "for consistency", this fails and says which M3 default it broke.
       //
-      // **The chip's own row changed meaning at M100.85, not its value.**
-      // Before M100.85 `chipLabel` and `navGlyph` were the same *role*,
+      // **The chip's own row changed meaning at M100.86, not its value.**
+      // Before M100.86 `chipLabel` and `navGlyph` were the same *role*,
       // `onSecondaryContainer`, arrived at independently by two different M3
       // defaults — the coincidence this test was written to prove could
-      // diverge. Chip's stated departure to `onPrimaryContainer` (`v1-freeze.md`
-      // §3c) makes them diverge for real; the test still proves the same
-      // thing it always did — three components, three roles, none of them
-      // implicitly shared.
+      // diverge. Chip's stated departure to `onPrimaryContainer`
+      // (`design-system/chip-spec.md`) makes them diverge for real; the test
+      // still proves the same thing it always did — three components, three
+      // roles, none of them implicitly shared.
       final theme = buildLightTheme();
       final scheme = theme.colorScheme;
       const selected = <WidgetState>{WidgetState.selected};

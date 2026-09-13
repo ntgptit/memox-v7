@@ -152,10 +152,10 @@ const List<RoleBinding> roleBindings = <RoleBinding>[
     requires: <String>['primaryContainer', 'surfaceContainerLow'],
     refuses: <String>['secondaryContainer'],
     because:
-        'M100.85: the owner\'s Chip design spec names primaryContainer for '
+        'M100.86: the owner\'s Chip design spec names primaryContainer for '
         'the selected fill, a stated departure from '
         '_ChoiceChipDefaultsM3.color\'s own secondaryContainer — '
-        'v1-freeze.md §3c.',
+        'design-system/chip-spec.md.',
   ),
   RoleBinding(
     component: 'ChoiceChip',
@@ -165,8 +165,8 @@ const List<RoleBinding> roleBindings = <RoleBinding>[
     requires: <String>['onPrimaryContainer', 'onSurfaceVariant'],
     refuses: <String>['onSecondaryContainer'],
     because:
-        'M100.85: the label follows the fill to primaryContainer\'s own ink, '
-        'onPrimaryContainer — v1-freeze.md §3c.',
+        'M100.86: the label follows the fill to primaryContainer\'s own ink, '
+        'onPrimaryContainer — design-system/chip-spec.md.',
   ),
   RoleBinding(
     component: 'ChoiceChip',

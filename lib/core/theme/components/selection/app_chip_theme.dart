@@ -41,16 +41,17 @@ import '../../typography/app_typography.dart';
 ///
 /// **Selected is `primaryContainer` — a named departure from
 /// `_ChoiceChipDefaultsM3.color`'s own answer (`secondaryContainer`), taken at
-/// M100.85 under `v1-freeze.md` §3 condition 6** (an owner-supplied Chip design
-/// spec, with a concrete kit reference, naming the role directly). Before this,
-/// selected read `secondaryContainer` — the same pair `NavigationBar`'s
-/// indicator and `SegmentedButton` take, so "this one is active" looked the
-/// same whether it was a tab, a segment or a filter. That cross-component
-/// match is deliberately given up here, for Chip only: `v1-freeze.md` §3c
-/// records why the other two did not move with it. `m3_role_contract_test.dart`
-/// ("the selected state is not one ink") is the guard that would have caught an
-/// accidental collapse onto one token; it now pins the departure by name
-/// instead of the coincidence.
+/// M100.86 implementing the Chip handoff spec** (`design-system/chip-spec.md`;
+/// authority for touching this frozen slot is `v1-freeze.md` §3c, the Tokyo
+/// redesign reopen). Before this, selected read `secondaryContainer` — the
+/// same pair `NavigationBar`'s indicator and `SegmentedButton` take, so "this
+/// one is active" looked the same whether it was a tab, a segment or a filter.
+/// That cross-component match is deliberately given up here, for Chip only —
+/// the owner was asked and chose Chip alone; `chip-spec.md` records the
+/// question and the answer. `m3_role_contract_test.dart` ("the selected state
+/// is not one ink") is the guard that would have caught an accidental
+/// collapse onto one token; it now pins the departure by name instead of the
+/// coincidence.
 ///
 /// (Chip's selected fill was briefly `primaryContainer` once before, between
 /// the owner review of 2026-08-20 and M100.22 — see the note below on the
@@ -272,7 +273,7 @@ ChipThemeData buildChipTheme(
   // printing brand ink beside a grey glyph is one control disagreeing with
   // itself. See the note at its `Icon`.
   //
-  // **`AppIconSize.md`, not `.sm`** (M100.85). The Chip design spec states the
+  // **`AppIconSize.md`, not `.sm`** (M100.86). The Chip design spec states the
   // glyph step as fixed at 24; `MxPillButton` matches it in the leading slot it
   // composes so the check and the caller's icon stay the same size.
   //
