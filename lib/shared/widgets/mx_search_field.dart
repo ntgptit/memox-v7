@@ -214,6 +214,11 @@ class _MxSearchFieldState extends State<MxSearchField> {
                   border: InputBorder.none,
                   enabledBorder: InputBorder.none,
                   focusedBorder: InputBorder.none,
+                  // The pill paints the fill and owns the height. The form
+                  // field theme is filled with a 52 floor since M100.92, and
+                  // `applyDefaults` would lay both inside the pill.
+                  filled: false,
+                  constraints: const BoxConstraints(),
                   // `isCollapsed`, not `isDense`: dense keeps some of the
                   // decorator's own vertical padding, and that padding is what
                   // biased the text off the glyph's line. The inset is stated

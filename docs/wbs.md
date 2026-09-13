@@ -7,7 +7,7 @@
 | **Scope** | Task đang mở · blocker · technical debt · quyết định descope/superseded. Ngoài phạm vi: entry đã `done` — chúng ở `wbs-archive/`, vẫn trong đồ thị dependency qua `_wbs_ledgers()` |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.91 |
+| **Updated by task** | M100.92 |
 | **Last updated** | 2026-09-14 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -653,6 +653,96 @@ migrate ở context thứ hai chứ không clean lại.
 Task do chủ dự án giao trực tiếp, không thuộc chuỗi phụ thuộc M0…M9. Đánh số từ
 99 để chúng không bao giờ tranh ID với một milestone thật, và để đọc bảng tiến độ
 không nhầm chúng là một phase.
+
+### M100.92 · Input và selection theo handoff: text field, search field, chip, switch, slider, segmented
+
+- **Status:** in-progress
+- **Owner:** Claude
+- **Goal:** Input theo handoff: text field filled 52 viền ghost, search field
+  kèm slot voice, chip nền `surfaceContainer`, switch 44×26, `MxSlider` và
+  `MxSegmentedControl` dựng sẵn — Phase 4 của
+  `docs/superpowers/plans/2026-09-13-tokyo-handoff-redesign.md`.
+- **Nhánh / PR:** `claude/tokyo-redesign-phase-4`
+- **Scope:**
+  - Task 17 — text field: filled `surfaceContainerLowest`, viền 1px
+    `outlineVariant`, tối thiểu 52, focus 1px `primary`, hàng lỗi có glyph,
+    disabled mờ 0.38 cả field, nhiều dòng tối thiểu 40.
+  - Task 18 — search field (nghỉ `surfaceContainer`, active `surfaceContainerLowest`
+    + viền `primary`, slot voice) và chip chưa chọn nền `surfaceContainer`.
+  - Task 19 — `MxSwitch` 44×26, thumb 20 `surfaceBright`, 160ms; `MxSwitchRow`
+    một node toggled.
+  - Task 20 — `MxSlider` và `MxSegmentedControl` (owner decision 10).
+- **Out of scope:** chrome và overlay (Phase 5).
+- **Plan deviations:**
+  - PLAN-DEV-17.1 — ngoài các guard plan nêu, còn ba pin đo hợp đồng cũ của
+    input phải dời theo:
+    - `app_interaction_states_test`: bốn viền ở `AppStroke.control` →
+      `AppStroke.hairline`. Handoff ghi focus là "1px primary, NOT 2px"; D27
+      giữ nét 2 riêng cho focused error.
+    - Hai pin trong `mx_text_field_contract_test`: hộp field `none` cao 48 →
+      `AppSizing.input` (52); viền error lúc nghỉ `control` → `hairline`.
+
+    `app_sizing_test` thêm `input` và `inputMultilineMin` vào danh mục 4dp.
+    Test đỏ đúng lý do plan nói (compile lỗi ở `AppSizing.input` và
+    `inputMultilineMin`) trước khi sửa.
+  - PLAN-DEV-17.2 — theme mới đặt `filled: true` và `constraints` tối thiểu 52.
+    `InputDecoration.applyDefaults` (`input_decorator.dart:4073–4084`, SDK
+    3.44.8) trao cả hai cho mọi decoration để trống các slot đó. Hai field tự vẽ
+    vỏ riêng vì thế bị ảnh hưởng:
+    - pill `MxSearchField`: ăn fill và cao 52; hai test layout đỏ;
+    - ô trả lời Fill: đã có `filled: false`, nhưng không đặt `constraints`.
+
+    Cả hai giờ khai `constraints: BoxConstraints()`; pill search khai thêm
+    `filled: false`. Plan không nêu hai chỗ này; full host suite lần đầu báo
+    `+5238 -6`.
+  - PLAN-DEV-17.3 — theme bỏ nhánh `disabled` của hint và suffix, vì handoff mờ
+    nguyên field 0.38 (`MxTextField`); giữ nhánh đó thì mực bị mờ hai lần. Ba
+    test dời theo:
+    - `component_theme_typography_test` (light và dark): hint disabled giữ
+      `onSurfaceVariant`;
+    - `app_bold_text_rendered_test`: hint của field disabled giữ mực nghỉ;
+    - `mx_text_field_contract_test`: suffix disabled là `onSurfaceVariant`.
+
+    `mx_editor_surface_test` ghim `errorMaxLines == 3`, nhưng slot đó vô tác
+    dụng khi lỗi đã là widget. Test giờ đọc `maxLines` trên dòng lỗi thật vẽ
+    ra (3); `helperMaxLines` giữ nguyên. Không đặt lại `errorMaxLines` chỉ để
+    test xanh.
+  - PLAN-DEV-17.4 — group `a text field edge on every ground it is drawn on`
+    trong `control_border_grounds_test` đỏ 12 lần ở sàn 3:1, rồi được ghim theo
+    số đo (làm tròn xuống một chữ số):
+    - light: page/surface 1.53, `surfaceContainerLowest` 1.61,
+      `surfaceContainer` 1.38, `surfaceContainerLow` 1.46,
+      `surfaceContainerHigh` 1.30;
+    - dark: page/surface 1.58, `surfaceContainerLowest` 1.42,
+      `surfaceContainer` 1.12, `surfaceContainerLow` 1.28,
+      `surfaceContainerHigh` 1.05.
+
+    Lý do theo đúng câu plan đưa ra (owner decision 5). Group `borderControl`
+    giờ chỉ nói về outlined button.
+- **Editable documents:** `docs/wbs.md`,
+  `docs/design-system/tokyo-component-mapping.md`,
+  `docs/design-system/switch-spec.md`,
+  `docs/superpowers/plans/2026-09-13-tokyo-handoff-redesign.md` (ghi deviation).
+- **Output:** `lib/core/theme/foundations/`, `lib/core/theme/components/inputs/`,
+  `lib/core/theme/components/selection/`, `lib/shared/widgets/` (`mx_text_field`,
+  `mx_search_field`, `mx_switch`, `mx_switch_row`, `mx_slider`,
+  `mx_segmented_control`), `widgetbook/lib/components/`.
+- **Acceptance criteria:**
+  - [ ] Text field: fill, viền, 52/40, hàng lỗi, disabled 0.38 có test ở tầng
+    theme và widget.
+  - [ ] Search field nghỉ/active và slot voice; chip chưa chọn `surfaceContainer`.
+  - [ ] `MxSwitch` 44×26, thumb 20 inset 3, một node toggled trên hàng.
+  - [ ] `MxSlider` và `MxSegmentedControl` có test và Widgetbook.
+  - [ ] `flutter analyze` 0/0 repo-wide; full host suite green; guard 0 findings
+  - [ ] Goldens re-authored on Linux, `TZ=UTC`; gallery republished at the pinned URL
+- **Dependencies:** M100.91
+- **Tests required:** `mx_text_field_contract_test.dart`,
+  `control_border_grounds_test.dart`, `m3_role_contract_test.dart`,
+  `m3_role_bindings_inputs.dart`, `mx_search_field_test.dart`,
+  `mx_pill_button_theme_test.dart`, `mx_switch_test.dart`,
+  `mx_switch_row_test.dart`, `app_toggle_themes_test.dart`,
+  `mx_slider_test.dart`, `mx_segmented_control_test.dart`
+- **Checklist phases:** 7, 12, 13
 
 ### M99.29 · Daily Reminders v1
 

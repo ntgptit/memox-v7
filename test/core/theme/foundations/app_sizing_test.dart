@@ -41,6 +41,9 @@ void main() {
         ('listDividerIndent', AppSizing.listDividerIndent),
         // A painted mark: the handoff MasteryRing.
         ('masteryRing', AppSizing.masteryRing),
+        // The handoff field: 52 single-line, 40 multi-line.
+        ('input', AppSizing.input),
+        ('inputMultilineMin', AppSizing.inputMultilineMin),
       ]) {
         expect(
           value % 4,

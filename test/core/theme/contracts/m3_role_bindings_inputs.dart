@@ -92,12 +92,13 @@ const List<RoleBinding> inputRoleBindings = <RoleBinding>[
     slot: 'enabledBorder',
     file: _inputs,
     scope: 'buildInputDecorationTheme',
-    requires: <String>['outline'],
-    refuses: <String>['outlineVariant', 'onSurface', 'primary'],
+    requires: <String>['outlineVariant'],
+    refuses: <String>['outline', 'onSurface', 'primary'],
     because:
-        '_InputDecoratorDefaultsM3.outlineBorder rests on outline. The '
-        'hairline (outlineVariant, once `borderSubtle`) measured 1.38:1 and '
-        'an empty field is identified by its edge alone.',
+        'The handoff TextField rests on a filled surfaceContainerLowest with '
+        'a 1px ghost border — `outlineVariant`, D2 — so the fill, not a '
+        'strong edge, identifies the field (M100.92). `outline` was the '
+        'canonical M3 edge the redesign leaves.',
   ),
   RoleBinding(
     component: 'TextField',

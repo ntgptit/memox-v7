@@ -17,9 +17,9 @@ import '../../../support/color_math.dart';
 /// **Why a control and not a card.** `app_high_contrast_test.dart` states the
 /// distinction from the other side: "a card is identified by its content and
 /// its edge is decoration, which is the exemption WCAG grants". An outlined
-/// button and an empty text field are not identified by their content — the
-/// edge *is* the component boundary, which is exactly what 1.4.11 protects. So
-/// the exemption that covers `borderSubtle` does not reach this token.
+/// button is not identified by its content — the edge *is* the component
+/// boundary, which is exactly what 1.4.11 protects. So the exemption that
+/// covers `borderSubtle` does not reach this token.
 ///
 /// **The list below is grounds a control is actually drawn on, not every
 /// surface in the palette.** `surfaceMuted` and `primaryContainer` measured 0
@@ -34,6 +34,32 @@ const Map<String, double> _acceptedBelowGraphic = <String, double>{
   'light surfaceContainerHigh': 2.9,
   'dark surfaceContainer': 2.6,
   'dark surfaceContainerHigh': 2.2,
+};
+
+/// **The grounds where the owner accepted the handoff's text field edge under
+/// 3:1** (owner decision 5, 2026-09-13; M100.92). The handoff TextField rests on
+/// a 1px `outlineVariant` ghost edge over its own `surfaceContainerLowest` fill
+/// (D2), so the fill — not the edge — identifies the field. Each ground is
+/// pinned at its measured figure, so the edge cannot quietly get fainter.
+///
+/// Measured at M100.92, floor to one decimal: light page and surface 1.53,
+/// surfaceContainerLowest 1.61, surfaceContainer 1.38, surfaceContainerLow 1.46,
+/// surfaceContainerHigh 1.30; dark page and surface 1.58, surfaceContainerLowest
+/// 1.42, surfaceContainer 1.12, surfaceContainerLow 1.28, surfaceContainerHigh
+/// 1.05.
+const Map<String, double> _acceptedFieldEdge = <String, double>{
+  'light page': 1.5,
+  'light surface': 1.5,
+  'light surfaceContainerLowest': 1.6,
+  'light surfaceContainer': 1.3,
+  'light surfaceContainerLow': 1.4,
+  'light surfaceContainerHigh': 1.3,
+  'dark page': 1.5,
+  'dark surface': 1.5,
+  'dark surfaceContainerLowest': 1.4,
+  'dark surfaceContainer': 1.1,
+  'dark surfaceContainerLow': 1.2,
+  'dark surfaceContainerHigh': 1.0,
 };
 
 void main() {
@@ -78,11 +104,12 @@ void main() {
               _acceptedBelowGraphic['${entry.key} ${ground.$1}'] ?? graphic,
             ),
             reason:
-                '${entry.key}: the outlined button and the text field both draw '
-                'borderControl, and on ${ground.$1} it is under the 3:1 floor '
-                'WCAG 1.4.11 sets for a component boundary. This is the check '
-                'that was missing when the dark value shipped at 2.76:1 on '
-                'surfaceContainer.',
+                '${entry.key}: the outlined button draws borderControl, and on '
+                '${ground.$1} it is under the 3:1 floor WCAG 1.4.11 sets for a '
+                'component boundary. This is the check that was missing when '
+                'the dark value shipped at 2.76:1 on surfaceContainer. (The '
+                'text field left this token for the handoff ghost edge at '
+                'M100.92; its own group is below.)',
           );
         });
       }
@@ -111,6 +138,26 @@ void main() {
         );
       }
     });
+  });
+
+  group('a text field edge on every ground it is drawn on', () {
+    for (final entry in themes.entries) {
+      final theme = entry.value;
+
+      for (final ground in groundsOf(theme)) {
+        test('${entry.key} · outlineVariant on ${ground.$1}', () {
+          expect(
+            contrast(theme.colorScheme.outlineVariant, ground.$2),
+            greaterThanOrEqualTo(
+              _acceptedFieldEdge['${entry.key} ${ground.$1}'] ?? graphic,
+            ),
+            reason:
+                'owner decision 5 (2026-09-13): kit input edge outlineVariant, '
+                'accepted under 3:1',
+          );
+        });
+      }
+    }
   });
 
   group('a brand mark is inked, not filled', () {

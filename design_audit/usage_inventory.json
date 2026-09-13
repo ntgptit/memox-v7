@@ -1,18 +1,18 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
   "scannedFiles": 741,
-  "totalSites": 348,
+  "totalSites": 347,
   "byElementKind": {
     "other": 311,
     "background": 25,
-    "border": 10,
+    "border": 9,
     "shadow": 1,
     "text": 1
   },
   "bySourceKind": {
     "shared-constant": 171,
     "opacity-modified-token": 21,
-    "blend-source": 6,
+    "blend-source": 5,
     "Colors-material": 14,
     "hardcoded-literal": 108,
     "theme-token": 28
@@ -226,17 +226,6 @@
       "token": "Colors.transparent",
       "resolved_value_light": "#00000000",
       "resolved_value_dark": "#00000000"
-    },
-    {
-      "file": "lib/core/theme/components/inputs/app_input_theme.dart",
-      "line": 72,
-      "widget_context": "<top-level>",
-      "element_kind": "border",
-      "source_kind": "blend-source",
-      "expression": "scheme.outline.withValues(alpha: 0.5)",
-      "token": "colorScheme.outline",
-      "resolved_value_light": "#7C85AB",
-      "resolved_value_dark": "#5A6BAE"
     },
     {
       "file": "lib/core/theme/components/inputs/app_text_selection_theme.dart",

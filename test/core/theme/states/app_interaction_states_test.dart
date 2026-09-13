@@ -365,6 +365,10 @@ void main() {
       // borders keep the input stroke; focused error alone takes
       // `AppStroke.focus` — `_InputDecoratorDefaultsM3.outlineBorder`'s own
       // answer. Still from the token, never a literal.
+      //
+      // **The input stroke is the hairline since M100.92**: the handoff
+      // TextField draws `1px` in every state (focus is "1px primary, NOT
+      // 2px"), and D27 keeps the 2 stroke for focused error alone.
       for (final entry in themes.entries) {
         final input = entry.value.inputDecorationTheme;
 
@@ -376,7 +380,7 @@ void main() {
         ]) {
           expect(
             border.$2!.borderSide.width,
-            AppStroke.control,
+            AppStroke.hairline,
             reason: '${entry.key}: the ${border.$1} border left the token',
           );
         }

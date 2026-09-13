@@ -191,6 +191,9 @@ void main() {
         // its line box as the first character landed (#433 F6); Material's
         // own hint is `bodyLarge`. NEW (M100.36 4F): the value's rung, and a
         // `WidgetStateTextStyle` so the disabled fade M3 gives it is back.
+        // **The fade moved to the field at M100.92**: the handoff dims a
+        // disabled field as a whole to 0.38 (`MxTextField`), so the hint keeps
+        // its resting ink rather than fading twice.
         // AUTHORITY: `_InputDecoratorDefaultsM3.hintStyle` and
         // `_getInlineHintStyle`, Flutter 3.44.8.
         final hint = theme.inputDecorationTheme.hintStyle!;
@@ -212,8 +215,8 @@ void main() {
           WidgetStateProperty.resolveAs(hint, const <WidgetState>{
             WidgetState.disabled,
           }).color,
-          isNot(theme.colorScheme.onSurfaceVariant),
-          reason: 'a disabled empty field keeps its placeholder at full ink',
+          theme.colorScheme.onSurfaceVariant,
+          reason: 'the field dims as a whole; the hint must not fade again',
         );
       });
 

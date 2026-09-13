@@ -89,6 +89,14 @@ abstract final class AppSizing {
   /// row it sits in carries the target, so no 48 floor applies.
   static const double masteryRing = 40;
 
+  /// The handoff text and search field height (`size-input`): a MINIMUM —
+  /// large text grows it (M100.92).
+  static const double input = 52;
+
+  /// A multi-line field's minimum (handoff TextField, multiline state): the
+  /// shell drops to 40 and its text wraps instead of truncating.
+  static const double inputMultilineMin = 40;
+
   /// The handoff's extended FAB height (`size-fab`). Width is content-driven.
   ///
   /// It was Material's 56 circle as `floatingAction` until M100.90; the kit has

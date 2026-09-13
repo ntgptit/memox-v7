@@ -724,15 +724,15 @@
       "classifiedAs": "role-or-on-color"
     },
     "inputDecorationTheme.enabledBorder": {
-      "hex": "#7C85AB",
+      "hex": "#C5CBE3",
       "opaque": true,
-      "hue": 228.5106382978723,
-      "saturation": 0.21860465116279063,
-      "chroma": 0.18431372549019603,
-      "lightnessStar": 56.08821256705363,
+      "hue": 228.00000000000006,
+      "saturation": 0.3488372093023252,
+      "chroma": 0.11764705882352933,
+      "lightnessStar": 81.90784377752152,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 4.495496671452855,
-      "hueDistanceFromDarkSurfaceFamily": 3.2134996331622006,
+      "hueDistanceFromDeclaredSeed": 5.006134969325103,
+      "hueDistanceFromDarkSurfaceFamily": 3.7241379310344485,
       "carriesNoHue": false
     },
     "inputDecorationTheme.focusedBorder": {
@@ -745,15 +745,15 @@
       "classifiedAs": "role-or-on-color"
     },
     "inputDecorationTheme.disabledBorder": {
-      "hex": "#B7BDD3",
+      "hex": "#C5CBE3",
       "opaque": true,
-      "hue": 227.36842105263156,
-      "saturation": 0.244635193133047,
-      "chroma": 0.11176470588235288,
-      "lightnessStar": 76.61212689663815,
+      "hue": 228.00000000000006,
+      "saturation": 0.3488372093023252,
+      "chroma": 0.11764705882352933,
+      "lightnessStar": 81.90784377752152,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 5.637713916693599,
-      "hueDistanceFromDarkSurfaceFamily": 4.355716878402944,
+      "hueDistanceFromDeclaredSeed": 5.006134969325103,
+      "hueDistanceFromDarkSurfaceFamily": 3.7241379310344485,
       "carriesNoHue": false
     },
     "cardTheme.color": {
@@ -1548,15 +1548,15 @@
       "classifiedAs": "role-or-on-color"
     },
     "inputDecorationTheme.enabledBorder": {
-      "hex": "#5A6BAE",
+      "hex": "#2A3267",
       "opaque": true,
-      "hue": 227.85714285714283,
-      "saturation": 0.34146341463414637,
-      "chroma": 0.32941176470588235,
-      "lightnessStar": 46.638199114076066,
+      "hue": 232.1311475409836,
+      "saturation": 0.4206896551724138,
+      "chroma": 0.23921568627450981,
+      "lightnessStar": 22.836487711562597,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 5.148992112182327,
-      "hueDistanceFromDarkSurfaceFamily": 3.8669950738916725,
+      "hueDistanceFromDeclaredSeed": 0.8749874283415693,
+      "hueDistanceFromDarkSurfaceFamily": 0.4070096099490854,
       "carriesNoHue": false
     },
     "inputDecorationTheme.focusedBorder": {
@@ -1569,15 +1569,15 @@
       "classifiedAs": "role-or-on-color"
     },
     "inputDecorationTheme.disabledBorder": {
-      "hex": "#3B477C",
+      "hex": "#2A3267",
       "opaque": true,
-      "hue": 228.9230769230769,
-      "saturation": 0.3571428571428571,
-      "chroma": 0.2549019607843137,
-      "lightnessStar": 31.348018095437723,
+      "hue": 232.1311475409836,
+      "saturation": 0.4206896551724138,
+      "chroma": 0.23921568627450981,
+      "lightnessStar": 22.836487711562597,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 4.083058046248254,
-      "hueDistanceFromDarkSurfaceFamily": 2.8010610079575997,
+      "hueDistanceFromDeclaredSeed": 0.8749874283415693,
+      "hueDistanceFromDarkSurfaceFamily": 0.4070096099490854,
       "carriesNoHue": false
     },
     "cardTheme.color": {
