@@ -92,6 +92,21 @@ void main() {
       ),
       AuditSkipAllowance(
         itemId: 'shell',
+        reason: SkipReason.declaredRasterMismatch,
+        detailContains: 'from RenderPhysicalShape',
+        // The two unselected filter chips, whose fill is flat enough for the
+        // raster to read it.
+        expectedMatches: 2,
+        rationale:
+            "Each chip's Material paints the theme's `canvasColor` "
+            '(`surfaceContainerLow`) beneath the fill `_RenderChip` draws over '
+            'the same shape, so the declared canvas covers none of its own '
+            'rect. One per chip since M100.92 moved the resting fill to '
+            '`surfaceContainer`; before that only the selected chip differed. '
+            'Chip fills are pinned in m3_role_contract_test.dart.',
+      ),
+      AuditSkipAllowance(
+        itemId: 'shell',
         reason: SkipReason.customPainter,
         detailContains: 'CustomPaint (no painter)',
         // One per MxPillButton, plus one per row MxPressable.

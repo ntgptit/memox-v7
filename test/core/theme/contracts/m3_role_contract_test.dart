@@ -114,7 +114,8 @@ void main() {
         pin(
           'unselected fill',
           t.color!.resolve(resting),
-          scheme.surfaceContainerLow,
+          // Handoff Chip (M100.92): `surface-container fill`.
+          scheme.surfaceContainer,
         );
         pin(
           'selected label',

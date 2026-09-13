@@ -213,6 +213,24 @@ WidgetbookComponent searchFieldComponent() {
         },
       ),
       WidgetbookUseCase(
+        // The handoff's trailing voice glyph on an empty field. No production
+        // caller passes `onVoice` yet (owner decision 10).
+        name: 'Voice slot',
+        builder: (BuildContext context) => const CatalogListPage(
+          children: <Widget>[
+            MxSearchField(
+              value: '',
+              onChanged: _noopString,
+              hintText: 'Search decks and cards',
+              semanticLabel: 'Search your library',
+              clearSemanticLabel: 'Clear search',
+              onVoice: _noop,
+              voiceSemanticLabel: 'Voice search',
+            ),
+          ],
+        ),
+      ),
+      WidgetbookUseCase(
         // Focused, and at the text scale the pill used to clip at: 48 is a
         // floor now, so the pill should stand taller than the clear button
         // with the placeholder whole (#433 F2).

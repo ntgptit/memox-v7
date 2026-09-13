@@ -99,10 +99,11 @@ void main() {
           selected,
           selectedFocused,
         ], scheme.primaryContainer);
+        // The handoff Chip rests on `surfaceContainer` since M100.92.
         holds('fill', fill, <Set<WidgetState>>[
           resting,
           focused,
-        ], scheme.surfaceContainerLow);
+        ], scheme.surfaceContainer);
       });
 
       test('the label ink stays with its container in every combination', () {

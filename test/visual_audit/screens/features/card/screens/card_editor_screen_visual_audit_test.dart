@@ -66,6 +66,7 @@ void main() {
       _inkLayersEdit,
       _shapesEdit,
       _chipsEdit,
+      _chipCanvasEdit,
     ],
   );
 }
@@ -150,6 +151,19 @@ const AuditSkipAllowance _chipsEdit = AuditSkipAllowance(
       'The `+ Add tag` action chip, and any tag chips the card carries. Chip '
       'colours come from app_chip_theme and are pinned by the mx_components '
       'goldens.',
+);
+
+/// The `+ Add tag` chip's canvas under its own fill (M100.92).
+const AuditSkipAllowance _chipCanvasEdit = AuditSkipAllowance(
+  itemId: 'shell',
+  reason: SkipReason.rasterNotFlat,
+  detailContains: 'covers only 0%',
+  rationale:
+      "The chip's Material paints the theme's `canvasColor` "
+      '(`surfaceContainerLow`) beneath the fill `_RenderChip` draws over the '
+      'same shape (`surfaceContainer` since M100.92), so the declared canvas '
+      'covers none of its own rect. Chip fills are pinned in '
+      'm3_role_contract_test.dart.',
 );
 
 const AuditSkipAllowance _shapesCreate = AuditSkipAllowance(

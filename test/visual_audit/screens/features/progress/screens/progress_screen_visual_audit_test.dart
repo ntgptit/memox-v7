@@ -111,11 +111,15 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.rasterNotFlat,
         detailContains: 'covers only 0%',
+        // The two range pills.
+        expectedMatches: 2,
         rationale:
-            'The unselected range pill declares a surface tint that its resting '
-            'state does not fill, and _RenderChip paints what it does fill '
-            'through a private render object. Same case the deck level records '
-            'for the same two pills.',
+            "Each chip's Material paints the theme's `canvasColor` "
+            '(`surfaceContainerLow`) beneath the fill `_RenderChip` draws over '
+            'the same shape, so the declared canvas covers none of its own '
+            'rect. One per chip since M100.92 moved the resting fill to '
+            '`surfaceContainer`; before that only the selected chip differed. '
+            'Chip fills are pinned in m3_role_contract_test.dart.',
       ),
     ],
   );
@@ -189,11 +193,15 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.rasterNotFlat,
         detailContains: 'covers only 0%',
+        // The two range pills.
+        expectedMatches: 2,
         rationale:
-            'The unselected range pill declares a surface tint that its resting '
-            'state does not fill, and _RenderChip paints what it does fill '
-            'through a private render object. Same case the deck level records '
-            'for the same two pills.',
+            "Each chip's Material paints the theme's `canvasColor` "
+            '(`surfaceContainerLow`) beneath the fill `_RenderChip` draws over '
+            'the same shape, so the declared canvas covers none of its own '
+            'rect. One per chip since M100.92 moved the resting fill to '
+            '`surfaceContainer`; before that only the selected chip differed. '
+            'Chip fills are pinned in m3_role_contract_test.dart.',
       ),
     ],
   );

@@ -154,13 +154,14 @@ const List<RoleBinding> roleBindings = <RoleBinding>[
     slot: '_restingFill',
     file: _chip,
     scope: '_restingFill',
-    requires: <String>['primaryContainer', 'surfaceContainerLow'],
-    refuses: <String>['secondaryContainer'],
+    requires: <String>['primaryContainer', 'surfaceContainer'],
+    refuses: <String>['secondaryContainer', 'surfaceContainerLow'],
     because:
         'M100.86: the owner\'s Chip design spec names primaryContainer for '
         'the selected fill, a stated departure from '
         '_ChoiceChipDefaultsM3.color\'s own secondaryContainer — '
-        'design-system/chip-spec.md.',
+        'design-system/chip-spec.md. M100.92: the handoff Chip rests on '
+        'surface-container, not the paper.',
   ),
   RoleBinding(
     component: 'ChoiceChip',

@@ -719,6 +719,53 @@ không nhầm chúng là một phase.
 
     Lý do theo đúng câu plan đưa ra (owner decision 5). Group `borderControl`
     giờ chỉ nói về outlined button.
+  - PLAN-DEV-18.1 — plan bảo dời kỳ vọng fill chip chưa chọn trong
+    `mx_pill_button_theme_test.dart`. File đó chỉ kiểm "chọn khác chưa chọn",
+    không ghim màu. Pin màu thật nằm ở `test('ChoiceChip'` của
+    `m3_role_contract_test.dart` (`surfaceContainerLow`), nên dời ở đó sang
+    `surfaceContainer`.
+  - PLAN-DEV-18.2 — plan thêm ba test mới cho search field, nhưng các test cũ
+    trong `mx_search_field_test.dart` ghim đúng hợp đồng bị thay: nghỉ
+    `surfaceMuted` + `outline` ở `AppStroke.control`, focus `surface`, sàn 48.
+    Các test đó được viết lại tại chỗ, không để song song hai hợp đồng:
+    - group focus: nghỉ `surfaceContainer`, radius 12, viền `outlineVariant`
+      hairline, cao ≥ 52; active `surfaceContainerLowest` + `primary` hairline;
+    - reduced motion: đích active là `surfaceContainerLowest`;
+    - layout: sàn là `AppSizing.input`.
+
+    Thêm group voice slot (mic khi rỗng, có query thì đổi sang clear; không
+    `onVoice` thì không có mic). Widgetbook "Voice slot" dùng lại `_noop` sẵn
+    có. Test đỏ đúng lý do trước khi sửa: compile lỗi `onVoice`; `ChoiceChip`
+    light/dark vẫn là `surfaceContainerLow`; binding guard không thấy
+    `surfaceContainer`.
+  - PLAN-DEV-18.3 — code của plan thêm slot voice vào ngay trong `build()` của
+    `MxSearchField`. Guard `flutter.max_build_lines` báo `build()` dài 102 dòng,
+    vượt ngưỡng 100. Khối control phía sau (số đếm, nút clear, nút voice) được
+    tách sang `_trailingControls`, giữ nguyên thứ tự và điều kiện hiển thị. Sau
+    khi tách, analyze sạch và guard 0 finding. Đồng thời bỏ `width:
+    AppStroke.hairline` trên `Border.all`, vì analyzer báo tham số trùng giá trị
+    mặc định 1; độ rộng này vẫn được ghim trong test.
+  - PLAN-DEV-18.4 — full host suite lần đầu ra `+5242 -4`. Plan không nêu bốn
+    test này; cả bốn đều do hợp đồng Task 18 dời:
+    - `m3_combined_state_test` (light, dark): fill ChoiceChip chưa chọn dưới
+      focus vẫn ghim `surfaceContainerLow` → dời sang `surfaceContainer`;
+    - `mx_pill_button_construction_test`: test trên sheet cho rằng fill pill
+      trùng nền sheet (`surfaceContainerLow`). Giờ fill là `surfaceContainer`,
+      nên test ghim fill khác nền và hairline vẫn còn; tên test đổi theo;
+    - `card_list_alignment_test` G7 (320dp, textScale 2): search field cao
+      thêm 4 (48→52) đẩy tâm tile đầu xuống y=641, ngoài viewport 640. Vòng
+      scroll dừng khi tile đã build (trong cache extent), chưa hiện, nên
+      long-press trượt. Thêm `ensureVisible` trước long-press; test vẫn chỉ
+      khẳng định không overflow.
+  - PLAN-DEV-18.5 — screen audit đỏ 16 case. Chip dựng `Material` kiểu canvas,
+    nên vẽ `canvasColor` (`surfaceContainerLow`) dưới fill của `_RenderChip`.
+    Trước đây fill chip chưa chọn cũng là `surfaceContainerLow`, nên chỉ chip
+    đã chọn lệch màu. Giờ mọi chip đều lệch: card_list khớp 4, progress /
+    progress_deck / study_options khớp 2, trash có 2 `declaredRasterMismatch`,
+    card_editor có 1 `rasterNotFlat`. Tiêm lỗi (dời fill về
+    `surfaceContainerLow`) làm 4 file audit xanh `+12`, rồi revert. Các
+    allowance ghi đúng số chip và nêu cơ chế thật; rationale cũ ("transparent
+    rest state") vốn sai.
 - **Editable documents:** `docs/wbs.md`,
   `docs/design-system/tokyo-component-mapping.md`,
   `docs/design-system/switch-spec.md`,
