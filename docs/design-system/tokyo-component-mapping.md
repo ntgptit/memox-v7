@@ -5,9 +5,9 @@
 | **Status** | active |
 | **Purpose** | Bảng đối chiếu từng Material component: role canonical của M3, cái memox override, ý đồ Tokyo, và token hình học — để không ai phải nhớ hoặc đoán |
 | **Scope** | `lib/core/theme/components/**`. Ngoài phạm vi: giá trị token (AD-14), layering của `lib/core/theme/` (`theme-architecture.md`), API của `Mx*` widget |
-| **Source of truth for** | Ma trận component → canonical M3 role · ma trận dịch ý đồ Tokyo → MemoX · hồ sơ các sai lệch role đã sửa và mô hình bề mặt |
-| **Depends on** | `document-conventions.md` · `architecture.md` (AD-14) · `design-system/theme-architecture.md` |
-| **Updated by task** | M100.87 |
+| **Source of truth for** | Ma trận component → canonical M3 role · ma trận dịch ý đồ Tokyo → MemoX · hồ sơ các sai lệch role đã sửa và mô hình bề mặt · quyết định của chủ dự án và mặc định D1–D27 của đợt redesign theo handoff (§9) |
+| **Depends on** | `document-conventions.md` · `architecture.md` (AD-14) · `design-system/theme-architecture.md` · `design-system/handoff/memox-flutter-handoff.json` |
+| **Updated by task** | M100.88 |
 | **Last updated** | 2026-09-13 |
 
 ---
@@ -343,3 +343,62 @@ là vô hình. Không control nào có hai vòng, và không control nào chỉ 
 **Hàng không interactive không có ring** — `MxListTile` không `onTap` là
 `ExcludeFocus`. **Không caller nào tự vẽ** `Border` cho focus ngoài các file ở
 bảng; `grep -rn "WidgetState.focused" lib/features` phải rỗng.
+
+---
+
+## 9. Handoff redesign — quyết định của chủ dự án và mặc định khi handoff im lặng
+
+Nguồn thiết kế: `docs/design-system/handoff/memox-flutter-handoff.json` (M100.88).
+Kế hoạch thực hiện: `docs/superpowers/plans/2026-09-13-tokyo-handoff-redesign.md`.
+Hai bảng dưới chép **nguyên văn** từ plan, giữ số và ID. Owner decisions là ràng
+buộc của đợt redesign. Một mặc định D-id chỉ đổi khi chủ dự án đảo nó — khi đó sửa
+ở bảng này, và các task còn lại đọc từ đây.
+
+### 9.1. Owner decisions (2026-09-13) — binding, do not re-ask
+
+| # | Decision |
+|---|---|
+| 1 | Foundations first, then sections A–G. |
+| 2 | Fill / surface / dot / icon hexes stay verbatim; **text** that fails AA uses a same-hue ink on `AppSemanticColors` (`accentInk`, `successInk`, `warningInk`, `dangerInk`, `infoInk`, `secondaryInk`, `tertiaryInk`, `inversePrimaryInk`). |
+| 3 | One family, Plus Jakarta Sans; drop Inter. |
+| 4 | Kit beats M3 canonical roles (FAB fill `primary`, NavigationBar indicator `primary`) — move `m3_role_binding_guard_test` bindings in the same commit. |
+| 5 | Control edges and status dots keep the kit hex even under 3:1; the gate pins the measured figure as the new floor. |
+| 6 | Shadows exactly as the handoff's three tiers (already in `app_elevation.dart`); dark = rim + drop. |
+| 7 | **Library deck row follows the handoff:** icon-tile leading, name + workload subtitle, trailing mastery ring drawing `learnedFraction` (mastery colour only at 100%, BR-88) + overflow. The Study button leaves the row; tapping the row opens the deck. This reverses M4.12. |
+| 8 | **StudyTopBar accent by session kind:** `StudySessionKind.learning` → `tertiary` (text via `tertiaryInk`); `StudySessionKind.reviewing` → `primary` (text via `accentInk`). Never green. |
+| 9 | **Rating buttons map onto existing semantic containers:** again / forgotten → danger · hard → warning · good → brand (`primaryContainer`) · easy / remembered → success. Tonal fills, `on*Container` labels. No new token. |
+| 10 | **Widgets with no feature yet are built into `lib/shared/widgets/` + Widgetbook**, tested, not wired into a screen: Avatar, OfflineBanner, BarChart, Slider, SegmentedControl, SearchField voice slot, Skeleton, StreakChip, SelfAssessment. |
+
+### 9.2. Decision log — where the handoff is silent
+
+| ID | Question the handoff does not answer | Default |
+|---|---|---|
+| D1 | Which of the 15 M3 `TextTheme` slots carries which of the 7 roles | Table in Task 2. Every slot resolves to a handoff size; `titleSmall`/`labelLarge` = 14 @ 600, `bodySmall` = 12/400/1.4/0, `labelMedium` = 12/600/1.4/0.72 are derived pairings of handoff tokens |
+| D2 | "ghost border", "ghost divider", "hairline at 12%" | `outlineVariant` at `AppStroke.hairline` — the Foundations say "1px solid outlineVariant on cards, inputs and dividers" |
+| D3 | Entries marked `[INFERRED]` | Keep the shipping behaviour (owner rule). Applies to: button/switch/slider disabled 38%, every "pressed 8%", card pressed tint, match-tile shake, sheet drag scrim, scrim tap-dismiss |
+| D4 | IconTile glyph size per tile size | sm 28 → icon xs 16 · md 36 → icon sm 20 · lg 44 → icon md 24 |
+| D5 | Which dialog is sm/md/lg | Confirm, alert, async-confirm → md 320; form dialog → lg 340. Inset horizontal 24, vertical 20 |
+| D6 | Which `secondary` call sites become Tonal ("Secondary — sits on surface") vs stay Outlined ("Low-emphasis / cancel") | Table in Task 6 |
+| D7 | Glass bottom nav | Solid `surface` — the handoff's own permitted fallback; `BackdropFilter` stays at 0 |
+| D8 | MasteryRing colour steps `<34 / <67 / ≥67` name no colours | BR-88 governs deck progress: `primary` below 100%, `mastery` at 100% |
+| D9 | Size variants with no caller: button large 52, chip compact 24, app bar compact 48 | Deferred (decision 10 covered whole widgets only) |
+| D10 | Nav destination glyphs `home · layers · bar-chart-3 · settings` | Keep today's Material glyphs — same meanings (Library, Study, Progress, Settings) |
+| D11 | Card lifecycle → status tokens | `isNew → statusNew` · `beginning → statusLearning` · `reviewing → statusReviewing` · `mastered → statusMastered` |
+| D12 | Foundations say "16 dialog, sheet" but the Dialog and BottomSheet specs say 20 | The widget specs win (they name the rejected value) |
+| D13 | Card prompt size (30 is off the scale) | 32 / w700 / 1.2 / −0.64; compact prompt 24 |
+| D14 | Hero numeral | Stat role 40 / w600 / tabular; keep `heroNumeralCapTrim` (a PJS cap-height trim, size-independent) |
+| D15 | Scroll tail with a FAB | `AppSizing.fab + AppSpacing.lg + AppSpacing.xxxl` (button + its margin + 48) |
+| D16 | Icon button glyph: spec says 20, Foundations say "24 app-bar and navigation actions" | App-bar actions 24 (`MxIconButtonPlacement.bar`), every other icon button 20 (default) |
+| D17 | Flashcard flip vs the shipped "back supports front" layout | Flip is the reveal transition: rotate Y 0→90° on the prompt layout, 90→180° onto the revealed layout (prompt + answer). Nothing the user reads disappears |
+| D18 | BarChart non-today bars | `primaryContainer`; today `primary` |
+| D19 | Dialog `shadow-card` is not reachable through `DialogThemeData` | Material elevation `AppElevation.raised` with `materialShadowColor(scheme)` |
+| D20 | Sheet enter "translateY 20% + fade" and scrim "220ms" | `showModalBottomSheet` only takes duration + curve: 260ms `Cubic(0.2,0,0,1)`. Dialog barrier fades with its 200ms route |
+| D21 | Sheet `shadow-chrome` over a 45% scrim | Not painted — invisible over the scrim and `BottomSheetThemeData` has no `BoxShadow` slot |
+| D22 | Spinner "0.8s linear, top segment transparent" | Deferred P3: keep `CircularProgressIndicator` (size and colour already match) |
+| D23 | Mastery as **text** | Keeps `successInk`; `mastery` is only a fill/arc/dot |
+| D24 | Status badge label colour | `onSurfaceVariant`; the dot carries the status colour |
+| D25 | Glyph size inside the empty/error state tile | 64 tile → icon xl 40 ("illustrative"); 52 tile → icon lg 32 |
+| D26 | ListRow says "both text lines truncate to one line"; SettingsTile and chooser rows carry sentence subtitles | One line applies to the ListRow compositions (search results, tag rows — Task 16). `MxListTile` keeps its two-line subtitle: the study direction chooser's recommendation must survive 320dp × 2.0 (`study_direction_chooser_layout_test.dart`) |
+| D27 | Focused **and** in error at once — the spec gives focus 1px ("NOT 2px") and error 1px, never both | Focused-error keeps `AppStroke.focus` (2), M100.36 §4C: the hue is already `error`, so the stroke is the only channel left to show focus |
+
+**Not built at all:** StatusBar (the spec says "build nothing"), backdrop blur, connectivity stream, speech recognition behind the mic glyph, `fl_chart`.

@@ -7,7 +7,7 @@
 | **Scope** | Task đang mở · blocker · technical debt · quyết định descope/superseded. Ngoài phạm vi: entry đã `done` — chúng ở `wbs-archive/`, vẫn trong đồ thị dependency qua `_wbs_ledgers()` |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.87 |
+| **Updated by task** | M100.88 |
 | **Last updated** | 2026-09-13 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -653,6 +653,40 @@ migrate ở context thứ hai chứ không clean lại.
 Task do chủ dự án giao trực tiếp, không thuộc chuỗi phụ thuộc M0…M9. Đánh số từ
 99 để chúng không bao giờ tranh ID với một milestone thật, và để đọc bảng tiến độ
 không nhầm chúng là một phase.
+
+### M100.88 · Handoff Tokyo vào repo, cùng sổ quyết định của đợt redesign
+
+- **Status:** in-progress
+- **Owner:** Claude
+- **Goal:** Đưa `memox-flutter-handoff.json` vào repo làm nguồn thiết kế đọc
+  được, kèm sổ quyết định cho mọi chỗ handoff im lặng — Phase 0 của
+  `docs/superpowers/plans/2026-09-13-tokyo-handoff-redesign.md`.
+- **Nhánh / PR:** `claude/tokyo-redesign-phase-0`
+- **Scope:** Task 1 của plan — bản sao nguyên byte của handoff ở
+  `docs/design-system/handoff/`; `v1-freeze.md` §3c trỏ tới nguồn trong repo và
+  tới quyết định của chủ dự án; `tokyo-component-mapping.md` §9 (owner decisions
+  1–10, D1–D27).
+- **Out of scope:** mọi thay đổi code, token, golden (Phase 1–7 của plan).
+- **Plan deviations:**
+  - PLAN-DEV-1.1 — plan cho Task 1 thêm file plan; plan đã vào `main` ở #557,
+    nên Task 1 chỉ thêm handoff và docs.
+  - PLAN-DEV-1.2 — `v1-freeze.md` §3c còn câu SHOULD "hỏi chủ dự án theo từng ca"
+    khi kit mâu thuẫn role canonical, trái owner decision 4 (kit thắng, không hỏi
+    lại). Câu đó nay trỏ về §9, để một fact chỉ ở một chỗ.
+- **Editable documents:** `docs/wbs.md`, `docs/wbs-archive/m100.md`,
+  `docs/design-system/v1-freeze.md`,
+  `docs/design-system/tokyo-component-mapping.md`.
+- **Output:** `docs/design-system/handoff/memox-flutter-handoff.json` (SHA-256
+  `d151265999182941f3377a134f6d133848d8864740f61a847110e4de13cd7722`); §3c và §9
+  như trên.
+- **Acceptance criteria:**
+  - [ ] Hash của bản trong repo bằng hash của bản chủ dự án giao.
+  - [ ] §9 chép nguyên văn owner decisions 1–10 và D1–D27 từ plan, giữ số và ID.
+  - [ ] `check_docs.py` và prompt contract xanh; không đổi code.
+  - [ ] Hai audit độc lập (architecture/logic, UI/UX) đạt clean stop.
+- **Dependencies:** M100.85, M100.87
+- **Tests required:** không — docs-only; gate là `check_docs.py`.
+- **Checklist phases:** 7.
 
 ### M99.29 · Daily Reminders v1
 
