@@ -199,7 +199,9 @@ constructor ở mức source.
 
 Năm slot (FAB ×2, Card, AppBar ×2) được ghim ở `m3_role_binding_guard_test.dart`
 ở mức **source**, nên đổi `surfaceContainerLow` thành `surface` là đỏ kể cả khi
-hai hex bằng nhau.
+hai hex bằng nhau. **Từ M100.87 slot Card ghim `surfaceContainerLowest`** và từ
+chối `surfaceContainerLow`, `surface`, `surfaceContainer` — card trắng của
+handoff Tokyo; bảng trên giữ nguyên làm hồ sơ của M100.32.
 
 ### Một palette retune đi kèm
 

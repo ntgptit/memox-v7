@@ -35,6 +35,16 @@ List<AuditRule> memoxAuditRules({required bool isDark}) {
       semantic.warning,
       semantic.danger,
       semantic.info,
+      // **The inks too, since M100.87.** Verdict and selection edges moved from
+      // the fills to the inks with their labels (match tiles, the timeline
+      // badge). A rule that only recognised the fills would stop seeing those
+      // edges at all and pass them by not looking; in dark each ink is its
+      // fill, so only light gains coverage.
+      semantic.accentInk,
+      semantic.successInk,
+      semantic.warningInk,
+      semantic.dangerInk,
+      semantic.infoInk,
       // `borderControl` joined the list with the card-detail timeline (M99.31):
       // its connector is a hairline that carries the band's structure, so it is
       // a non-text mark holding meaning — exactly what this rule is for. The
