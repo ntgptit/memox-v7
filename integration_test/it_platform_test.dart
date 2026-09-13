@@ -308,7 +308,7 @@ void main() {
       // a script that rasterises identically to a private-use string of the
       // same length found nothing.
       const TextStyle systemOnly = TextStyle(
-        fontFamily: AppTypography.displayFamily,
+        fontFamily: AppTypography.family,
         fontFamilyFallback: <String>[],
         fontSize: 48,
         color: Color(0xFF000000),

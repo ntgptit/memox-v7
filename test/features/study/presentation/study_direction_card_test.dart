@@ -132,7 +132,7 @@ void main() {
         if (find.text(korean).evaluate().isNotEmpty) {
           expect(
             tester.widget<Text>(find.text(korean)).style?.fontSize,
-            30,
+            32,
             reason: 'the term keeps the larger role, $direction/$isRevealed',
           );
         }

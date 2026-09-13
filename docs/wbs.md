@@ -7,7 +7,7 @@
 | **Scope** | Task đang mở · blocker · technical debt · quyết định descope/superseded. Ngoài phạm vi: entry đã `done` — chúng ở `wbs-archive/`, vẫn trong đồ thị dependency qua `_wbs_ledgers()` |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.88 |
+| **Updated by task** | M100.89 |
 | **Last updated** | 2026-09-14 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -653,6 +653,82 @@ migrate ở context thứ hai chứ không clean lại.
 Task do chủ dự án giao trực tiếp, không thuộc chuỗi phụ thuộc M0…M9. Đánh số từ
 99 để chúng không bao giờ tranh ID với một milestone thật, và để đọc bảng tiến độ
 không nhầm chúng là một phase.
+
+### M100.89 · Nền tảng theo handoff: một family, bảy vai chữ, thang token mang tên handoff
+
+- **Status:** in-progress
+- **Owner:** Claude
+- **Goal:** Nền tảng theo handoff: một family Plus Jakarta Sans với bảy vai chữ,
+  thang radius/icon/spacing mang tên handoff, pressed 12%, gutter 16 và đuôi
+  cuộn 48 — Phase 1 của
+  `docs/superpowers/plans/2026-09-13-tokyo-handoff-redesign.md`.
+- **Nhánh / PR:** `claude/tokyo-redesign-phase-1`
+- **Scope:**
+  - Task 2 — một family Plus Jakarta Sans, Inter rời bundle; bảy vai chữ của
+    handoff trên 15 slot `TextTheme` theo D1; card prompt 32/700 (D13); hero
+    numeral là vai stat 40/600 (D14); weight registry năm weight.
+  - Task 3 — thang radius, icon và spacing mang tên handoff; pressed state
+    layer 12%.
+  - Task 4 — gutter 16 ở mọi bề rộng; đuôi cuộn 48.
+- **Out of scope:** spec component section A–G (Phase 2–7 của plan).
+- **Plan deviations:**
+  - PLAN-DEV-2.1 — Inter còn ở `font_licenses.dart`,
+    `settings_licenses_test.dart`, `widgetbook/assets/fonts/` và nhãn của
+    `golden_specimens.dart`, ngoài danh sách Step 5; gỡ cùng lượt.
+  - PLAN-DEV-2.2 — `heroNumeral` và streak hero của Progress thôi đặt lại
+    weight; `AppTypography.heroNumeralWeight` bị xoá (plan giữ nó ở w600). Một
+    named style tự đặt weight ghim nó chống lại `applyBoldText`: khi stat là
+    600, Bold text của OS không còn làm đậm hero numeral —
+    `app_bold_text_test.dart` bắt được.
+  - PLAN-DEV-2.3 — `applyCompactScale` bỏ mệnh đề `titleLarge: 20`. Vai title
+    của handoff đã là 20 ở mọi bề rộng nên mệnh đề thành im lặng; test identity
+    của cache chuyển sang card prompt.
+  - PLAN-DEV-2.4 — nhãn selected của NavigationBar bỏ re-weight w600, vì rung
+    `labelMedium` đã là 600. Task 21 không đưa lại `withWeight` ở slot này.
+  - PLAN-DEV-2.5 — `MxSearchField._lineHeight` suy từ token của rung
+    (14 × 1.5) thay vì literal 20; literal cũ làm pill cao 49.
+  - PLAN-DEV-2.6 — X7 của wireframe M99.23 đo lại: 1234 card nay rộng 69.9dp,
+    qua sàn 66.0; ghim chuyển sang 2000 card (53.5dp). Empty face của Progress
+    chỉ đo `xl` của cột chữ ở 320, như error face.
+  - PLAN-DEV-2.7 — hàng đáp án Guess giữ chỗ glyph verdict ở mọi state, và
+    `AppGuessOption.naturalHeightOf` đo chữ bên cạnh chỗ đó. Trước đây hàng
+    nghỉ nhường chỗ cho chữ còn hàng đã chấm lấy lại, nên với metric mới
+    helper ước 58 cho hàng render 79 và chữ wrap lại khi chấm.
+  - PLAN-DEV-2.8 — chip workload của deck tile: sàn 24 với nhãn căn giữa thay
+    cho inset 4 mỗi phía; caption 1.4 làm chip cao 25, lệch lưới 4px.
+  - PLAN-DEV-2.9 — `deck_summary_compact_geometry_test.dart`: "ba thẻ trọn trên
+    thanh điều hướng" thành "hai thẻ trọn, thẻ thứ ba khuất không quá 4px" —
+    đo được 3.4px sau khi áp vai chữ của handoff. Đây là trạng thái trung gian,
+    không phải đích: Task 15 (hàng deck theo handoff) phải trả test về ba thẻ
+    trọn.
+  - PLAN-DEV-2.10 — `card_import_states_test.dart` bỏ khẳng định "không phải
+    `sectionLabelSmall`" ngay ở Task 2 thay vì Task 11: D1 đưa hai rung về cùng
+    caption 12px nên size không còn phân biệt được.
+- **Editable documents:** `docs/wbs.md`,
+  `docs/design-system/tokyo-component-mapping.md`,
+  `docs/wireframes/m99-23-progress-overview.md` (X7).
+- **Output:** `lib/core/theme/typography/`, `lib/core/theme/foundations/`,
+  `lib/core/theme/schemes/`, `lib/shared/widgets/`, `pubspec.yaml`,
+  `widgetbook/pubspec.yaml`, `widgetbook/lib/tokens/scale_sections.dart`; Inter
+  gỡ khỏi `assets/fonts/` và `widgetbook/assets/fonts/`.
+- **Acceptance criteria:**
+  - [ ] 15 slot `TextTheme` khớp bảng D1, một family; weight registry đúng
+    {400, 500, 600, 700, 800}, mọi nguồn 700/800 có tên.
+  - [ ] `AppRadius`, `AppIconSize`, `MxIconSize`, `AppSpacing` theo thang
+    handoff; `AppStateOpacity.stateLayerPressed` = 0.12.
+  - [ ] `mxScreenGutter` = 16 ở mọi bề rộng; `mxScrollEndInsetOf` = 48 khi
+    không có floating action.
+  - [ ] `flutter analyze` 0/0 repo-wide; full host suite green; guard 0 findings
+  - [ ] `integration_test/` trên emulator xanh.
+  - [ ] Goldens re-authored on Linux, `TZ=UTC`; gallery republished at the pinned URL
+- **Dependencies:** M100.88
+- **Tests required:** `app_typography_test.dart` (viết lại),
+  `component_theme_typography_test.dart`, `compact_scale_test.dart`,
+  `app_theme_identity_test.dart`, `app_bold_text_test.dart`,
+  `settings_licenses_test.dart`, `progress_screen_test.dart`,
+  `progress_screen_geometry_extremes_test.dart`, `design_tokens_test.dart`,
+  `mx_content_shell_geometry_test.dart`, `mx_scroll_end_inset_test.dart` (mới).
+- **Checklist phases:** 7, 12, 13
 
 ### M99.29 · Daily Reminders v1
 

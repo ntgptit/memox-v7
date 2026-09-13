@@ -42,12 +42,16 @@ void main() {
   }
 
   group('what the compact scale changes', () {
-    testWidgets('the app bar title gets smaller', (tester) async {
+    testWidgets('the app bar title is the title role at every width', (
+      tester,
+    ) async {
+      // It shrank 22 -> 20 here until the handoff's title role made 20 the
+      // base (M100.89); a compact clause restating 20 would be silent.
       final compact = await themeAt(tester, small);
       final roomy = await themeAt(tester, normal);
 
       expect(compact.textTheme.titleLarge!.fontSize, 20);
-      expect(roomy.textTheme.titleLarge!.fontSize, 22);
+      expect(roomy.textTheme.titleLarge!.fontSize, 20);
     });
 
     testWidgets('the study card prompt gets smaller', (tester) async {
@@ -63,8 +67,8 @@ void main() {
         AppTypography.cardPromptSize,
       );
       // The rung beside it no longer moves: the compact pass re-sizes the
-      // prompt's own slot, and `headlineMedium` stays on the M3 metric.
-      expect(compact.textTheme.headlineMedium!.fontSize, 28);
+      // prompt's own slot, and `headlineMedium` stays on the headline role.
+      expect(compact.textTheme.headlineMedium!.fontSize, 24);
     });
 
     testWidgets('list rows lose horizontal padding, not vertical', (

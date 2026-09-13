@@ -10,11 +10,9 @@ import 'app_typography.dart';
 ///
 /// **`headlineMedium` carried the card prompt until this class existed**, which
 /// put a component's purpose inside a scale rung: any widget reaching for the
-/// rung *as a rung* inherited the prompt's 30/−0.5 metrics, and the difference
-/// was invisible until such a widget was built. The rung is back on the
-/// Material 3 metric and the prompt owns its own name — which is also the
-/// design system's own shape: `typography.css` declares `--text-card-prompt`
-/// beside the scale, not as one of its steps.
+/// rung *as a rung* inherited the prompt's metrics, and the difference was
+/// invisible until such a widget was built. The rung is the handoff's headline
+/// role now and the prompt owns its own name (D13).
 @immutable
 final class AppTextStyles extends ThemeExtension<AppTextStyles> {
   const AppTextStyles({
@@ -26,12 +24,12 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     required this.heroNumeral,
   });
 
-  /// Both styles, derived from the built [texts] so they inherit whatever the
+  /// Every style, derived from the built [texts] so they inherit whatever the
   /// scale inherits (the `inherit` flag, a debug label's lineage) and restate
   /// only what makes them themselves.
   factory AppTextStyles.from(TextTheme texts) {
     final promptBase = (texts.headlineMedium ?? const TextStyle()).copyWith(
-      fontFamily: AppTypography.displayFamily,
+      fontFamily: AppTypography.family,
       fontFamilyFallback: AppTypography.cjkFallback,
       fontSize: AppTypography.cardPromptSize,
       height: AppTypography.cardPromptHeight,
@@ -39,7 +37,10 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     );
 
     return AppTextStyles(
-      cardPrompt: AppTypography.withWeight(promptBase, FontWeight.w600),
+      cardPrompt: AppTypography.withWeight(
+        promptBase,
+        AppTypography.cardPromptWeight,
+      ),
       sectionLabel: (texts.labelMedium ?? const TextStyle()).copyWith(
         letterSpacing: AppTypography.sectionLabelTracking,
       ),
@@ -58,47 +59,46 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
         ),
         FontWeight.w600,
       ),
-      heroNumeral: AppTypography.withWeight(
-        (texts.headlineLarge ?? const TextStyle()).copyWith(
-          height: AppTypography.heroNumeralCapTrim,
-          fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
-        ),
-        AppTypography.heroNumeralWeight,
+      // The stat rung's own weight, not a restated one: a named style that
+      // sets its weight again pins it against `applyBoldText`, which rebuilds
+      // these styles from emboldened rungs.
+      heroNumeral: (texts.displayLarge ?? const TextStyle()).copyWith(
+        height: AppTypography.heroNumeralCapTrim,
+        fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
       ),
     );
   }
 
   /// The front of a review card — the one place the app deliberately gets
-  /// large, because that text is the task. `--text-card-prompt`:
-  /// 30/1.22/−0.5 in the display face, 26 under the compact pass.
+  /// large, because that text is the task. The display size at the headline's
+  /// weight and leading (D13); the headline size under the compact pass.
   final TextStyle cardPrompt;
 
-  /// The uppercase label above a group of rows — `label-md` opened up by
-  /// `--tracking-section-label`. A complete style rather than a tracking
-  /// constant callers re-assemble; colour stays with the caller, because the
-  /// same heading is brand ink over the Today panel and quiet ink over the
-  /// list it titles.
+  /// The uppercase label above a group of rows — `label-md` opened up to the
+  /// handoff's `ls-section`. A complete style rather than a tracking constant
+  /// callers re-assemble; colour stays with the caller, because the same
+  /// heading is brand ink over the Today panel and quiet ink over the list it
+  /// titles.
   final TextStyle sectionLabel;
 
   /// [sectionLabel] one rung down — the overline above a study face or under a
-  /// toolbar, where `label-md` would out-weigh the content it introduces. Found
-  /// as four hand-assembled copies (one spelling the tracking token as a bare
-  /// `1.1`) when M99.65 clustered the app's text restyles.
+  /// toolbar. Found as four hand-assembled copies (one spelling the tracking
+  /// token as a bare `1.1`) when M99.65 clustered the app's text restyles.
   final TextStyle sectionLabelSmall;
 
-  /// The uppercase state word inside a card tile's chip — `label-sm` opened
-  /// by its own tracking and set at the emphatic 600.
+  /// The uppercase state word inside a card tile's chip — `label-sm` at the
+  /// label tracking and the emphatic 600.
   final TextStyle stateChipLabel;
 
   /// The toolbar heading over a list — [sectionLabel]'s tracking swapped for
-  /// `listHeadingTracking` and the weight raised to the emphatic 600.
+  /// `listHeadingTracking` and the weight set to the emphatic 600.
   final TextStyle listHeading;
 
-  /// The one huge number a summary leads with: `headline-lg` at the app's
-  /// fourth weight, cap-trimmed and tabular. **Moving it here fixed the
+  /// The one huge number a summary leads with: the handoff's stat role
+  /// (40/600, D14), cap-trimmed and tabular. **Moving it here fixed the
   /// twelfth instance of the weight-without-axis bug** — the style used to be
   /// assembled per-site with a bare `fontWeight: heroNumeralWeight`, which
-  /// declared the fourth weight and painted the rung's default.
+  /// declared the weight and painted the rung's default.
   final TextStyle heroNumeral;
 
   @override

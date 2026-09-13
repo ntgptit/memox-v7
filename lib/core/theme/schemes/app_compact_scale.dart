@@ -48,16 +48,12 @@ final Expando<ThemeData> _compactScaleCache = Expando<ThemeData>(
 );
 
 ThemeData _buildCompactScale(ThemeData base) {
-  final texts = base.textTheme;
   final styles = base.extension<AppTextStyles>();
 
+  // No `titleLarge` clause. The app bar title shrank 22 -> 20 here, because at
+  // 22 a real deck name truncated on a 320-wide screen; the handoff's title
+  // role is 20 at every width (M100.89), so the base already is that size.
   return base.copyWith(
-    textTheme: texts.copyWith(
-      // The app bar title. At 22 a real deck name truncates to "Academic
-      // Word ..." on a 320-wide screen; the name is the one thing that screen
-      // is about.
-      titleLarge: texts.titleLarge?.copyWith(fontSize: 20),
-    ),
     // The study card prompt, the app's one deliberately large style — its own
     // extension slot since it left `headlineMedium`, so the compact pass
     // re-sizes the prompt and no longer touches the M3 rung beside it.

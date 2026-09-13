@@ -67,11 +67,11 @@ class TypographySpecimen extends StatelessWidget {
           // it left the scale (`AppTextStyles.cardPrompt`).
           Text('Ephemeral', style: context.textStyles.cardPrompt),
           const SizedBox(height: 12),
-          Text('Display / Jakarta 600', style: texts.titleLarge),
-          Text('Title / Inter 600', style: texts.titleMedium),
-          Text('Body / Inter 400 — 0123456789', style: texts.bodyMedium),
-          Text('Label / Inter 600', style: texts.labelLarge),
-          Text('Caption / Inter 400', style: texts.bodySmall),
+          Text('Title / 20 · 700', style: texts.titleLarge),
+          Text('Body large / 16 · 500', style: texts.titleMedium),
+          Text('Body / 14 · 400 — 0123456789', style: texts.bodyMedium),
+          Text('Label / 14 · 600', style: texts.labelLarge),
+          Text('Caption / 12 · 400', style: texts.bodySmall),
         ],
       ),
     );

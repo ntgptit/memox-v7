@@ -251,7 +251,7 @@
     },
     {
       "file": "lib/core/theme/components/navigation/app_navigation_bar_theme.dart",
-      "line": 67,
+      "line": 62,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",

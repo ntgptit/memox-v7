@@ -172,10 +172,17 @@ class GuessOptionItemWidget extends StatelessWidget {
                       ),
                     ),
                   ),
-                  if (verdict != null) ...<Widget>[
-                    const SizedBox(width: AppSpacing.sm),
-                    MxIcon(verdict, size: MxIconSize.sm, ink: accent!),
-                  ],
+                  // The verdict's slot is held in every state, so the text
+                  // wraps the same before and after the answer marks a row.
+                  const SizedBox(width: AppSpacing.sm),
+                  if (verdict == null)
+                    SizedBox(width: AppGuessOption.verdictGlyphSize.dp)
+                  else
+                    MxIcon(
+                      verdict,
+                      size: AppGuessOption.verdictGlyphSize,
+                      ink: accent!,
+                    ),
                 ],
               ),
             ),
@@ -195,6 +202,12 @@ abstract final class AppGuessOption {
     horizontal: AppSpacing.lg,
     vertical: AppSpacing.sm,
   );
+
+  /// The verdict glyph's size, named once for the row and its measurement.
+  static const MxIconSize verdictGlyphSize = MxIconSize.sm;
+
+  /// The width a verdict takes beside the text: the gap, then the glyph.
+  static double get verdictSlotWidth => AppSpacing.sm + verdictGlyphSize.dp;
 
   /// How tall this row wants to be for [text] at [width].
   ///
@@ -217,7 +230,7 @@ abstract final class AppGuessOption {
       text: TextSpan(text: text, style: style),
       textDirection: Directionality.of(context),
       textScaler: MediaQuery.textScalerOf(context),
-    )..layout(maxWidth: width - rowPadding.horizontal);
+    )..layout(maxWidth: width - rowPadding.horizontal - verdictSlotWidth);
 
     final content = painter.height + rowPadding.vertical;
     painter.dispose();
@@ -240,9 +253,16 @@ abstract final class AppGuessOption {
     // **No border term at all since M100.69, and that is a simplification the
     // change earned rather than one it needed.** A resting row draws no edge
     // and a verdict draws its edge *outside* the box, so the stroke is out of
-    // the layout in every state — the row is exactly `max(48, padding + text)`
-    // and the helper is exact for all four states instead of exact for two and
-    // a ceiling for the other two.
+    // the layout in every state.
+    //
+    // **The verdict glyph's slot is held in every state** (M100.89). The row
+    // keeps [verdictSlotWidth] beside the text whether or not it wears its
+    // glyph yet, and the text is measured beside it, so the helper stays exact
+    // for all four states — and marking the answer never re-wraps a row the
+    // budget was taken from. Before, a resting row gave the text the slot and
+    // a marked one took it back: the long meaning in
+    // `guess_option_height_test.dart` rendered 79 once its glyph arrived,
+    // against the 58 it had been budgeted.
     //
     // The ceiling it replaces was load-bearing while it existed: written the
     // other way round the helper answered 48 for a row that rendered at 50, an

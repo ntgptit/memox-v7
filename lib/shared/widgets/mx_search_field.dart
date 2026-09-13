@@ -51,13 +51,14 @@ import '../../core/theme/extensions/app_ink.dart';
 /// documented *floor* into a ceiling: from `textScaler` 2.5 the placeholder
 /// was clipped to the box. The floor is a floor now.
 /// The inset that brings a one-line field to [AppSizing.touchTarget] at the
-/// default scale: (48 − 20) / 2. Off-grid on purpose — the target is the
+/// default scale: (48 − 21) / 2. Off-grid on purpose — the target is the
 /// contract, and the grid step above it would make the pill 52.
 const double _fieldInset = (AppSizing.touchTarget - _lineHeight) / 2;
 
-/// `body-md`'s line at the default scale — 14 × 1.43, rounded as the engine
-/// rounds it.
-const double _lineHeight = 20; // off-grid: a type metric, not a gap
+/// `body-md`'s line at the default scale — 14 × 1.5, the handoff's body role.
+/// Derived from the rung's tokens: a literal here stayed 20 while the rung's
+/// leading moved, and the pill quietly became 49.
+const double _lineHeight = AppTypography.bodySize * AppTypography.bodyHeight;
 
 class MxSearchField extends StatefulWidget {
   const MxSearchField({
