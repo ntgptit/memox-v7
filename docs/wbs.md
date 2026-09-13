@@ -872,6 +872,26 @@ không nhầm chúng là một phase.
       role của switch không đổi dưới HC, nên hôm nay không có regression.
     - Ghi chú: ở 320×640, search field cao 52 đẩy tâm hàng đầu của card list
       xuống 641/640 (PLAN-DEV-18.4).
+  - UI/UX, sweep 3 tại `e2398cf8`:
+    - P2-1 đã đóng: reviewer chạy lại test mới, 4/4 xanh.
+    - P2 mới: ba `MxPillButton` chọn thứ tự thẻ mới ở Study Options
+      (`study_options_section_widget.dart`) chỉ có golden, không có test ở
+      tầng widget; golden `study_options_*` đổi trong phase này. Coordinator
+      grep lại toàn bộ `test/`: chỉ Settings bấm các pill đó, Study Options
+      thì không. Đã sửa bằng `study_options_order_pills_test.dart` (393dp × 1
+      và 320dp × 2, EN và VI):
+      - mỗi pill có target ≥ 48;
+      - lựa chọn đang áp dụng là pill selected trên màn và trong semantics đã
+        gộp (`getSemanticsData`; cờ riêng của node không có `selected`, vì
+        `MxPillButton` gộp nó từ node con);
+      - tap đổi selection, bật Save, và `saveStudyOptions` nhận
+        `NewCardOrder.random`.
+
+      Fault-inject: `onPressed` của pill thành `() {}` thì test đỏ; trả lại
+      thì xanh.
+    - Các call site còn lại đã được xác nhận có pin: MxTextField × 7,
+      MxSearchField × 3, MxPillButton ở filter bar của card, trash và
+      progress range.
 - **Editable documents:** `docs/wbs.md`,
   `docs/design-system/tokyo-component-mapping.md`,
   `docs/design-system/switch-spec.md`,
