@@ -48,7 +48,7 @@ canonical M3 role  >  accessibility  >  MemoX structural system  >  Tokyo exact 
 | OutlinedButton | foreground | `primary` | `semantic.accentInk` | M100.87: `primary` của kit chỉ đạt 3.95:1 làm chữ ở light; guard AST (`requiresSemantic`) |
 | OutlinedButton | side | `outline`, focus → `primary` | = | guard AST |
 | TextButton | foreground | `primary` | `semantic.accentInk` | M100.87, cùng lý do OutlinedButton; guard AST (`requiresSemantic`) |
-| IconButton | foreground | `onSurfaceVariant` | = | |
+| IconButton | foreground | `onSurfaceVariant` | = | 36 ink `CircleBorder`, glyph 20 (bar 24, D16), hover/press `primary` 8% / 14% dark (M100.90) |
 | FAB | background | `primaryContainer` | = | sửa ở M100.32; guard AST |
 | FAB | foreground | `onPrimaryContainer` | = | sửa ở M100.32; guard AST |
 
@@ -138,7 +138,7 @@ canonical M3 role  >  accessibility  >  MemoX structural system  >  Tokyo exact 
 | `MuiPaper` paper | mặt giấy nổi | `ColorScheme.surfaceContainerLowest` (card, từ M100.87) | `surface` là nền, giấy là container | — |
 | `divider` `#272C48` | vạch rất khẽ | `scheme.outlineVariant` | `outlineVariant` | `AppStroke.hairline` |
 | Backdrop tối + blur | tách modal khỏi trang | `modalBarrierColor` (`scheme.scrim`) | scrim | alpha token; **blur chưa nhận** |
-| `MuiIconButton` radius 8 / pad 8 | chrome gọn | `AppRadius.md` + `AppSizing.touchTarget` | `onSurfaceVariant` | sàn 48 thắng pad 8 |
+| ~~`MuiIconButton` radius 8 / pad 8~~ | ~~chrome gọn~~ | ~~`AppRadius.md` + `AppSizing.touchTarget`~~ | ~~`onSurfaceVariant`~~ | Superseded ở M100.90 — xem §2 IconButton (vòng 36, glyph 20, đích chạm 48) |
 | `MuiTab` height 38 | nhịp điều hướng chặt | chưa áp dụng | `primary` | 38 dưới sàn; hoãn |
 
 **Blur của Backdrop chưa được nhận** (brief §32): nó cần một overlay recipe dùng

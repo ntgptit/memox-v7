@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
+import 'package:memox/core/theme/foundations/app_icon_size.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/core/time/clock_provider.dart';
 import 'package:memox/features/trash/di/trash_repository_provider.dart';
@@ -114,13 +115,14 @@ void main() {
   /// that came back would be seen.
   ///
   /// The third figure is the trailing residue. The row buys its right edge by
-  /// paying `xs` outside a button that centres a 24dp glyph in a 48dp box, so
-  /// 4 + 12 lands on 16 — exactly the gutter, at both widths now. It was 4dp
-  /// inside the gutter on the compact tier while the gutter stepped and the
-  /// button's half-box did not.
+  /// paying `xs` outside a button whose 48dp target centres its glyph. With the
+  /// 24dp glyph that was 4 + 12 = 16, exactly the gutter; the handoff draws a
+  /// content icon button's glyph at 20 (D16, M100.90), so it is 4 + 14 and the
+  /// glyph ends 2dp inside the gutter at both widths.
+  const double glyphResidue = (AppIconSize.md - AppIconSize.sm) / 2;
   const List<(Size, double, double)> surfaces = <(Size, double, double)>[
-    (Size(320, 640), AppSpacing.lg, 0),
-    (Size(393, 852), AppSpacing.lg, 0),
+    (Size(320, 640), AppSpacing.lg, glyphResidue),
+    (Size(393, 852), AppSpacing.lg, glyphResidue),
   ];
 
   group('G1 · one left edge for the whole screen', () {
@@ -282,11 +284,14 @@ void main() {
       // visible the way `app_high_contrast_test.dart` pins "the normal theme
       // still cannot". When someone aligns the AppBar this fails, and the fix
       // is to invert it into `expect(rowOverflow, barOverflow)`.
+      // Since M100.90 the row's 20dp glyph (D16) adds its 2dp residue to the
+      // AppBar's 4: the bar keeps a 24dp glyph, so the two glyph edges are 6
+      // apart.
       expect(
         barOverflow - rowOverflow,
-        4.0,
+        4.0 + glyphResidue,
         reason:
-            'G2 is still open by 4dp, and all of it is the AppBar\'s '
+            'G2 is still open by 6dp: 4 of it the AppBar\'s, 2 the row glyph\'s '
             '(row=$rowOverflow, bar=$barOverflow). If this number changed, '
             'either the AppBar was aligned too — invert this into '
             '`expect(rowOverflow, barOverflow)` — or the row regressed.',

@@ -680,6 +680,14 @@ không nhầm chúng là một phase.
     hằng, nhưng icon button viền vẫn vẽ 40 (glyph 24 + padding 8) vì `minimumSize`
     36 nhỏ hơn kích thước tự nhiên; pixel không đổi. Pin ghi đúng 40 bằng token;
     Task 7 dời pin sang `AppSizing.iconButtonInk`.
+  - PLAN-DEV-7.1 — ngoài các pin plan nêu, năm test đo "đích chạm 48" trên
+    `InkWell` của icon button (Card Detail ×2, menu hàng tag catalog, mép
+    separator của tag catalog) và `app_sizing_test` đòi `minimumSize` 48. Với
+    vòng mực 36 + `MaterialTapTargetSize.padded`, `InkWell` là vòng mực còn đích
+    chạm và node semantics là `IconButton` 48: các test đo lại đúng box nhận
+    chạm, và hợp đồng theme thành cặp (`minimumSize` 36, `padded`). Trash G2:
+    glyph kebab 20 (D16) kết thúc trong gutter 2dp; phần dư được ghim, khoảng
+    hở với AppBar thành 6dp (4 của AppBar, 2 của glyph).
 - **Editable documents:** `docs/wbs.md`,
   `docs/design-system/tokyo-component-mapping.md`,
   `docs/superpowers/plans/2026-09-13-tokyo-handoff-redesign.md` (ghi deviation).

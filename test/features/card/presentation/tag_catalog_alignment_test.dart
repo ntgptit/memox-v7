@@ -160,11 +160,12 @@ void main() {
         matching: find.byIcon(Icons.more_vert),
       ),
     );
+    // The padded target, not the ink: the `IconButton` around its 36 circle.
     final button = tester.getRect(
       find
           .ancestor(
             of: find.byIcon(Icons.more_vert).first,
-            matching: find.byType(InkWell),
+            matching: find.byType(IconButton),
           )
           .first,
     );

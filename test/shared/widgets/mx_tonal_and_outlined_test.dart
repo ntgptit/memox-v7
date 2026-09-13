@@ -3,10 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/core/theme/components/actions/app_button_themes.dart';
 import 'package:memox/core/theme/components/actions/app_icon_button_theme.dart';
-import 'package:memox/core/theme/foundations/app_icon_size.dart';
 import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/core/theme/foundations/app_sizing.dart';
-import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/core/theme/foundations/app_stroke.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_icon_button.dart';
@@ -169,7 +167,7 @@ void main() {
       expect(tester.widget<IconButton>(find.byType(IconButton)).style, isNull);
     });
 
-    testWidgets('draws 40 and still hands a finger 48', (tester) async {
+    testWidgets('draws 36 and still hands a finger 48', (tester) async {
       // The split this variant exists to make: a visible circle at 48 is the
       // largest object in a header whose subtitle is 12px, so the circle comes
       // down and the target does not. `mx_stress_test` measures the floor
@@ -201,11 +199,8 @@ void main() {
             )
             .first,
       );
-      // Its own 24 glyph and Material's 8 padding, not the compact token: that
-      // moved to 36 (M100.90) and sits below what the glyph needs. Plan Task 7
-      // gives the icon button its own 36 ink and moves this pin with it.
-      expect(drawn.width, AppIconSize.md + 2 * AppSpacing.sm);
-      expect(drawn.height, AppIconSize.md + 2 * AppSpacing.sm);
+      expect(drawn.width, AppSizing.iconButtonInk);
+      expect(drawn.height, AppSizing.iconButtonInk);
 
       expect(
         tester.getRect(find.byType(IconButton)).height,

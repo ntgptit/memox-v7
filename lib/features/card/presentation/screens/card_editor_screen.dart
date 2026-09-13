@@ -629,6 +629,7 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
   Widget _closeButton(BuildContext context, VoidCallback onClose) =>
       MxIconButton(
         icon: widget.cardId == null ? Icons.close : Icons.arrow_back,
+        placement: MxIconButtonPlacement.bar,
         semanticLabel: widget.cardId == null
             ? context.l10n.cardEditorClose
             : context.l10n.cardEditorBackAction,

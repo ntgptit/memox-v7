@@ -95,12 +95,16 @@ void main() {
       });
 
       test('$mode: an icon button cannot be built below the target', () {
-        final Size? minimum = build().iconButtonTheme.style?.minimumSize
-            ?.resolve(const <WidgetState>{});
+        // The handoff IconButton paints a 36 ink circle (M100.90); the target
+        // is what `MaterialTapTargetSize.padded` restores around it, so the
+        // contract is the pair — never a smaller ink without the padding.
+        final ButtonStyle? style = build().iconButtonTheme.style;
+        final Size? minimum = style?.minimumSize?.resolve(
+          const <WidgetState>{},
+        );
 
-        expect(minimum, isNotNull);
-        expect(minimum!.height, AppSizing.touchTarget);
-        expect(minimum.width, AppSizing.touchTarget);
+        expect(minimum, const Size.square(AppSizing.iconButtonInk));
+        expect(style?.tapTargetSize, MaterialTapTargetSize.padded);
       });
     }
   });

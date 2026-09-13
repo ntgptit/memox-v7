@@ -49,6 +49,10 @@ abstract final class AppSizing {
   /// one control dimension the design system could not see.
   static const double buttonCompact = 36;
 
+  /// The handoff icon button's painted circle (`size-icon-btn`). The target
+  /// around it is still [touchTarget]: expand the hit area, never the ink.
+  static const double iconButtonInk = 36;
+
   /// The dense tier — a chip's content box, the compact breadcrumb line, the
   /// 32 dp icon well beside a metric or a catalog row.
   ///
