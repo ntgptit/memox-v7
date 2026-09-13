@@ -1764,7 +1764,7 @@
       "source_kind": "shared-constant",
       "expression": "AppColors.accentInkLight",
       "token": "AppColors.accentInkLight",
-      "resolved_value_light": "unresolvable: no light counterpart in theme",
+      "resolved_value_light": "#425BE8",
       "resolved_value_dark": "unresolvable: no dark counterpart in theme"
     },
     {
@@ -1775,7 +1775,7 @@
       "source_kind": "shared-constant",
       "expression": "AppColors.successInkLight",
       "token": "AppColors.successInkLight",
-      "resolved_value_light": "unresolvable: no light counterpart in theme",
+      "resolved_value_light": "#027861",
       "resolved_value_dark": "unresolvable: no dark counterpart in theme"
     },
     {
@@ -1786,7 +1786,7 @@
       "source_kind": "shared-constant",
       "expression": "AppColors.warningInkLight",
       "token": "AppColors.warningInkLight",
-      "resolved_value_light": "unresolvable: no light counterpart in theme",
+      "resolved_value_light": "#955E00",
       "resolved_value_dark": "unresolvable: no dark counterpart in theme"
     },
     {
@@ -1797,7 +1797,7 @@
       "source_kind": "shared-constant",
       "expression": "AppColors.dangerInkLight",
       "token": "AppColors.dangerInkLight",
-      "resolved_value_light": "unresolvable: no light counterpart in theme",
+      "resolved_value_light": "#CF1B44",
       "resolved_value_dark": "unresolvable: no dark counterpart in theme"
     },
     {
@@ -1808,7 +1808,7 @@
       "source_kind": "shared-constant",
       "expression": "AppColors.infoInkLight",
       "token": "AppColors.infoInkLight",
-      "resolved_value_light": "unresolvable: no light counterpart in theme",
+      "resolved_value_light": "#425BE8",
       "resolved_value_dark": "unresolvable: no dark counterpart in theme"
     },
     {
@@ -1830,7 +1830,7 @@
       "source_kind": "shared-constant",
       "expression": "AppColors.secondaryInkLight",
       "token": "AppColors.secondaryInkLight",
-      "resolved_value_light": "unresolvable: no light counterpart in theme",
+      "resolved_value_light": "#5263BD",
       "resolved_value_dark": "unresolvable: no dark counterpart in theme"
     },
     {
@@ -1841,7 +1841,7 @@
       "source_kind": "shared-constant",
       "expression": "AppColors.tertiaryInkLight",
       "token": "AppColors.tertiaryInkLight",
-      "resolved_value_light": "unresolvable: no light counterpart in theme",
+      "resolved_value_light": "#6C54D6",
       "resolved_value_dark": "unresolvable: no dark counterpart in theme"
     },
     {
@@ -2051,7 +2051,7 @@
       "expression": "AppColors.accentInkDark",
       "token": "AppColors.accentInkDark",
       "resolved_value_light": "unresolvable: no light counterpart in theme",
-      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
+      "resolved_value_dark": "#8B9AFF"
     },
     {
       "file": "lib/core/theme/foundations/app_semantic_colors.dart",
@@ -2062,7 +2062,7 @@
       "expression": "AppColors.successInkDark",
       "token": "AppColors.successInkDark",
       "resolved_value_light": "unresolvable: no light counterpart in theme",
-      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
+      "resolved_value_dark": "#6FE0BD"
     },
     {
       "file": "lib/core/theme/foundations/app_semantic_colors.dart",
@@ -2073,7 +2073,7 @@
       "expression": "AppColors.warningInkDark",
       "token": "AppColors.warningInkDark",
       "resolved_value_light": "unresolvable: no light counterpart in theme",
-      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
+      "resolved_value_dark": "#FFC658"
     },
     {
       "file": "lib/core/theme/foundations/app_semantic_colors.dart",
@@ -2084,7 +2084,7 @@
       "expression": "AppColors.dangerInkDark",
       "token": "AppColors.dangerInkDark",
       "resolved_value_light": "unresolvable: no light counterpart in theme",
-      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
+      "resolved_value_dark": "#FF8FA3"
     },
     {
       "file": "lib/core/theme/foundations/app_semantic_colors.dart",
@@ -2095,7 +2095,7 @@
       "expression": "AppColors.infoInkDark",
       "token": "AppColors.infoInkDark",
       "resolved_value_light": "unresolvable: no light counterpart in theme",
-      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
+      "resolved_value_dark": "#8B9AFF"
     },
     {
       "file": "lib/core/theme/foundations/app_semantic_colors.dart",
@@ -2117,7 +2117,7 @@
       "expression": "AppColors.secondaryInkDark",
       "token": "AppColors.secondaryInkDark",
       "resolved_value_light": "unresolvable: no light counterpart in theme",
-      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
+      "resolved_value_dark": "#9DA8E8"
     },
     {
       "file": "lib/core/theme/foundations/app_semantic_colors.dart",
@@ -2128,7 +2128,7 @@
       "expression": "AppColors.tertiaryInkDark",
       "token": "AppColors.tertiaryInkDark",
       "resolved_value_light": "unresolvable: no light counterpart in theme",
-      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
+      "resolved_value_dark": "#B5A0FF"
     },
     {
       "file": "lib/core/theme/foundations/app_semantic_colors.dart",
@@ -3557,8 +3557,8 @@
       "source_kind": "theme-token",
       "expression": "context.semanticColors.accentInk",
       "token": "semantic.accentInk",
-      "resolved_value_light": "unresolvable: semantic.accentInk not in the dumped theme",
-      "resolved_value_dark": "unresolvable: semantic.accentInk not in the dumped theme"
+      "resolved_value_light": "#425BE8",
+      "resolved_value_dark": "#8B9AFF"
     },
     {
       "file": "lib/shared/widgets/mx_badge.dart",
@@ -3623,8 +3623,8 @@
       "source_kind": "theme-token",
       "expression": "context.semanticColors.warningInk",
       "token": "semantic.warningInk",
-      "resolved_value_light": "unresolvable: semantic.warningInk not in the dumped theme",
-      "resolved_value_dark": "unresolvable: semantic.warningInk not in the dumped theme"
+      "resolved_value_light": "#955E00",
+      "resolved_value_dark": "#FFC658"
     },
     {
       "file": "lib/shared/widgets/mx_navigation_bar.dart",
