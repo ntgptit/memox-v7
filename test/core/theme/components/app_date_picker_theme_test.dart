@@ -18,8 +18,6 @@ void main() {
     WidgetState.disabled,
   };
 
-  // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-  /*
   test(
     'a selected day that is disabled keeps the ink its fill was chosen for',
     () {
@@ -41,7 +39,6 @@ void main() {
       }
     },
   );
-  */
 
   test('a disabled day that is not selected takes the disabled ink', () {
     for (final entry in themes.entries) {

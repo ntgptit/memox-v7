@@ -159,7 +159,7 @@ void main() {
         final foreground = entry.value.textButtonTheme.style!.foregroundColor!;
         final rest = foreground.resolve(resting);
 
-        expect(rest, entry.value.colorScheme.primary, reason: entry.key);
+        expect(rest, semantic.accentInk, reason: entry.key);
         expect(
           foreground.resolve(hovered),
           isNot(rest),

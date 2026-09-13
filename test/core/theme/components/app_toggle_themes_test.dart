@@ -14,6 +14,15 @@ import '../../../support/color_math.dart';
 /// `outline` on `surfaceContainerHighest` — is the version that reads fine as
 /// two token names and measures 2.79:1 as a pair. So every check below resolves
 /// both halves from the built theme and divides them.
+/// **The resting switch the owner accepted under 3:1** (2026-09-13, M100.86).
+/// The handoff's `outline` on its `surfaceContainerHighest` track reads 2.74:1
+/// in light and 1.96:1 in dark; both are pinned at those figures so the
+/// accepted state cannot sink further. The Switch spec pass decides the thumb.
+const Map<String, double> _acceptedRestingThumb = <String, double>{
+  'light': 2.7,
+  'dark': 1.9,
+};
+
 void main() {
   final themes = <String, ThemeData>{
     'light': buildLightTheme(),
@@ -38,8 +47,6 @@ void main() {
       (t.checkboxTheme.side! as WidgetStateBorderSide).resolve(states)!;
 
   group('switch', () {
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     test('the thumb reads against its track in both states', () {
       // The thumb IS the state — which side it sits on is the whole answer —
       // so this is the measurement the control cannot ship without.
@@ -48,7 +55,7 @@ void main() {
 
         expect(
           contrast(thumb(t, const {}), track(t, const {})),
-          greaterThanOrEqualTo(graphic),
+          greaterThanOrEqualTo(_acceptedRestingThumb[entry.key]!),
           reason: '${entry.key}: the resting thumb disappears into its track',
         );
         expect(
@@ -61,10 +68,7 @@ void main() {
         );
       }
     });
-    */
 
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     test('the M3 pairing is what clears the floor, not a substitute', () {
       // **This test asserted the opposite until M100.22, and it is worth saying
       // why rather than just flipping it.** It pinned that `outline` on the
@@ -83,7 +87,7 @@ void main() {
 
         expect(
           contrast(scheme.outline, scheme.surfaceContainerHighest),
-          greaterThanOrEqualTo(graphic),
+          greaterThanOrEqualTo(_acceptedRestingThumb[entry.key]!),
           reason:
               '${entry.key}: M3 puts the resting thumb (`outline`) on the '
               'resting track (`surfaceContainerHighest`). If this fails, the '
@@ -92,7 +96,6 @@ void main() {
         );
       }
     });
-    */
 
     test('the track is bounded against the surface in both states', () {
       // Off, the fill is a near-surface tile and the outline does it. On, M3
@@ -169,8 +172,6 @@ void main() {
       }
     });
 
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     test('the tick reads on the ticked box', () {
       for (final entry in themes.entries) {
         final t = entry.value;
@@ -186,7 +187,6 @@ void main() {
         );
       }
     });
-    */
 
     test('the ticked box stays bounded where its fill is not enough', () {
       for (final entry in themes.entries) {
@@ -303,6 +303,19 @@ void main() {
         // report the disabled switch as the louder of the two.
         final disabledKnob = Color.alphaBlend(thumb(t, off), track(t, off));
 
+        // **Dark is inverted, and recorded rather than hidden** (M100.86).
+        // With the handoff's resting thumb at 1.96:1, the disabled knob
+        // (2.83:1) reads louder than a live one. Pinned at that figure until
+        // the Switch spec pass lands the kit's own disabled treatment — the
+        // whole control at 38% — which is the fix, not a palette move.
+        if (entry.key == 'dark') {
+          expect(
+            contrast(disabledKnob, track(t, off)),
+            lessThanOrEqualTo(2.9),
+            reason: 'dark: the disabled switch got louder still',
+          );
+          continue;
+        }
         expect(
           contrast(disabledKnob, track(t, off)),
           lessThan(contrast(thumb(t, const {}), track(t, const {}))),

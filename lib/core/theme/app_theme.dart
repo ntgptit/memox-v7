@@ -287,7 +287,7 @@ ThemeData _buildTheme(ColorScheme scheme, AppSemanticColors semantic) {
 
     // The snack bar, from UC-05 — an overlay like the two above it; the
     // three are grouped by behaviour rather than by widget class.
-    snackBarTheme: buildSnackBarTheme(scheme, texts),
+    snackBarTheme: buildSnackBarTheme(scheme, semantic, texts),
 
     progressIndicatorTheme: buildProgressIndicatorTheme(scheme),
     tooltipTheme: buildTooltipTheme(scheme, texts),
@@ -313,6 +313,6 @@ ThemeData _buildTheme(ColorScheme scheme, AppSemanticColors semantic) {
     datePickerTheme: buildDatePickerTheme(scheme, semantic, texts),
     segmentedButtonTheme: buildSegmentedButtonTheme(scheme, semantic),
     sliderTheme: buildSliderTheme(scheme, semantic, texts),
-    tabBarTheme: buildTabBarTheme(scheme, texts),
+    tabBarTheme: buildTabBarTheme(scheme, semantic, texts),
   );
 }

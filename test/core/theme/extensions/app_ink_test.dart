@@ -40,8 +40,6 @@ void main() {
     }
   });
 
-  // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-  /*
   group('page-ground inks clear the text bar on surface and page', () {
     // The inks meant for plain grounds. `disabled` is exempt by WCAG's own
     // inactive-control carve-out; the on*Container inks are measured on their
@@ -139,10 +137,7 @@ void main() {
       });
     }
   });
-  */
 
-  // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-  /*
   group('container inks are measured on their containers', () {
     for (final entry in themes.entries) {
       testWidgets(entry.key, (tester) async {
@@ -183,7 +178,6 @@ void main() {
       });
     }
   });
-  */
 
   group('inked()', () {
     testWidgets('emphasis moves the variable-font axis, not just the number', (

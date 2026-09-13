@@ -26,6 +26,16 @@ import '../../../support/color_math.dart';
 /// adjacent pixels in that census and are deliberately absent: sizing a token
 /// against a pairing nothing draws is how a palette drifts bright, one
 /// defensive rounding at a time.
+/// **The grounds where the owner accepted the handoff's `outline` under 3:1**
+/// (2026-09-13, M100.86). Each is pinned at the figure it was accepted at, so
+/// the decision holds rather than drifts; every other ground still owes the
+/// full floor.
+const Map<String, double> _acceptedBelowGraphic = <String, double>{
+  'light surfaceContainerHigh': 2.9,
+  'dark surfaceContainer': 2.6,
+  'dark surfaceContainerHigh': 2.2,
+};
+
 void main() {
   /// WCAG 1.4.11 — what a boundary has to reach to identify a component.
   const double graphic = 3.0;
@@ -43,6 +53,8 @@ void main() {
   List<(String, Color)> groundsOf(ThemeData t) => <(String, Color)>[
     ('page', t.scaffoldBackgroundColor),
     ('surface', t.colorScheme.surface),
+    // The paper since M100.86 — every card, and the fields inside one.
+    ('surfaceContainerLowest', t.colorScheme.surfaceContainerLowest),
     ('surfaceContainer', t.colorScheme.surfaceContainer),
     // Two more a field is actually drawn on, found by the input audit (#433
     // §5.2): the bottom sheet that hosts `deck_form_widget` and
@@ -62,7 +74,9 @@ void main() {
         test('${entry.key} · borderControl on ${ground.$1}', () {
           expect(
             contrast(semantic.borderControl, ground.$2),
-            greaterThanOrEqualTo(graphic),
+            greaterThanOrEqualTo(
+              _acceptedBelowGraphic['${entry.key} ${ground.$1}'] ?? graphic,
+            ),
             reason:
                 '${entry.key}: the outlined button and the text field both draw '
                 'borderControl, and on ${ground.$1} it is under the 3:1 floor '
@@ -106,10 +120,8 @@ void main() {
     // two tokens are equal in light by construction, which is precisely why
     // reaching for the wrong one was invisible for so long — so the assertion
     // that carries weight is the dark one.
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     test(
-      'the brand mark is `primary`, and reads on the page in both modes',
+      'the brand mark is the brand ink, and reads on the page in both modes',
       () {
         // **This used to assert that `primaryAccent` outranked `primary` in
         // dark**, which was true while dark `primary` was a tone-40 fill that
@@ -123,7 +135,10 @@ void main() {
           final theme = entry.value;
 
           expect(
-            contrast(theme.colorScheme.primary, theme.scaffoldBackgroundColor),
+            contrast(
+              semanticOf(theme).accentInk,
+              theme.scaffoldBackgroundColor,
+            ),
             greaterThanOrEqualTo(4.5),
             reason:
                 '${entry.key}: the brand hue no longer reads as a label on the '
@@ -132,7 +147,6 @@ void main() {
         }
       },
     );
-    */
 
     test('the accent resolves to primary in both modes', () {
       // The derivation, pinned while it lasts: removing the token in M100.19

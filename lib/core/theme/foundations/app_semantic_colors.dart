@@ -10,6 +10,11 @@ import 'app_border_colors.dart';
 /// A `ThemeExtension` rather than a set of globals, because these must change
 /// with the theme. A global `successColor` is correct in exactly one
 /// brightness, and wrong in the other on every screen at once.
+///
+/// **A status colour comes as a fill and an ink** (M100.86). The fill is the
+/// Tokyo handoff's hex, for a dot, a ring or a container; the ink is the same
+/// hue solved to read as text. `AppInk` hands features the inks. The reasoning
+/// and the measurements are in `AppColors`.
 @immutable
 final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   const AppSemanticColors({
@@ -21,6 +26,12 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     required this.warning,
     required this.danger,
     required this.info,
+    required this.accentInk,
+    required this.successInk,
+    required this.warningInk,
+    required this.dangerInk,
+    required this.infoInk,
+    required this.inversePrimaryInk,
     required this.successContainer,
     required this.onSuccessContainer,
     required this.warningContainer,
@@ -50,6 +61,12 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       warning = AppColors.warningLight,
       danger = AppColors.dangerLight,
       info = AppColors.infoLight,
+      accentInk = AppColors.accentInkLight,
+      successInk = AppColors.successInkLight,
+      warningInk = AppColors.warningInkLight,
+      dangerInk = AppColors.dangerInkLight,
+      infoInk = AppColors.infoInkLight,
+      inversePrimaryInk = AppColors.inversePrimaryInk,
       successContainer = AppColors.successContainerLight,
       onSuccessContainer = AppColors.onSuccessContainerLight,
       warningContainer = AppColors.warningContainerLight,
@@ -78,6 +95,12 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       warning = AppColors.warningDark,
       danger = AppColors.dangerDark,
       info = AppColors.infoDark,
+      accentInk = AppColors.accentInkDark,
+      successInk = AppColors.successInkDark,
+      warningInk = AppColors.warningInkDark,
+      dangerInk = AppColors.dangerInkDark,
+      infoInk = AppColors.infoInkDark,
+      inversePrimaryInk = AppColors.inversePrimaryInk,
       successContainer = AppColors.successContainerDark,
       onSuccessContainer = AppColors.onSuccessContainerDark,
       warningContainer = AppColors.warningContainerDark,
@@ -97,8 +120,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       disabledSurface = AppColors.disabledSurfaceDark,
       onDisabled = AppColors.onDisabledDark;
 
-  /// The due chip's fill and its label. See `AppColors.streakContainerLight`
-  /// for why the label is not the design's own value.
+  /// The due chip's fill and its label.
   final Color streakContainer;
   final Color onStreakContainer;
 
@@ -107,17 +129,25 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   final Color progressTrack;
   final Color progressFill;
 
+  /// The status **fills** — a dot, a ring, a container's hue. Not for text;
+  /// see the inks below.
   final Color success;
   final Color warning;
   final Color danger;
   final Color info;
 
-  /// The filled pill a status carries, and its label.
-  ///
-  /// **Added at M100.21 because the absence was putting business meaning on
-  /// accent roles** — an import chip reading `secondaryContainer` for "ready"
-  /// and `tertiaryContainer` for "duplicate". `AppColors` holds the derivation
-  /// and the measurements.
+  /// The same meanings as **text**. [accentInk] is the brand's; [infoInk] is
+  /// the same value under the name a fact-carrying label means.
+  final Color accentInk;
+  final Color successInk;
+  final Color warningInk;
+  final Color dangerInk;
+  final Color infoInk;
+
+  /// The snackbar's action label on the slate that does not flip.
+  final Color inversePrimaryInk;
+
+  /// The filled pill a status carries, and its label (M100.21).
   final Color successContainer;
   final Color onSuccessContainer;
   final Color warningContainer;
@@ -125,76 +155,47 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   final Color infoContainer;
   final Color onInfoContainer;
 
-  /// The danger family's container pair, which **is** `error`'s.
-  ///
-  /// **A derivation rather than a value, for the reason `error` is `danger`:**
-  /// this app has one red system, and declaring a second container for it
-  /// would be the same mistake one level down. What the name buys is the call
-  /// site — an overdue chip means *late*, not *fault*, and it said
-  /// `errorContainer` only because that was the only red container there was
-  /// (M100.21).
+  /// The danger family's container pair, which **is** `error`'s: one red
+  /// system, named for the call site that means *late* rather than *fault*.
   final Color dangerContainer;
   final Color onDangerContainer;
 
-  /// Overdue — a review past its day (BR-161 settled that late is a *red*
-  /// signal, distinct from due-today's warm one). It **is** [danger]: the
-  /// palette spends one red, and a deck that slipped and a destructive action
-  /// sharing it is the accepted cost. The alias exists so a call site says
-  /// *overdue* and an audit can find every place the state is painted —
-  /// which `danger` alone cannot, because it also names delete buttons.
+  /// Overdue — a review past its day (BR-161). It **is** [danger]; the alias
+  /// lets an audit find every place the state is painted.
   Color get overdue => danger;
 
-  /// The due chip's fill and label — [streakContainer] and [onStreakContainer]
-  /// under the name the call sites mean. The design reuses one warm family
-  /// for everything time-pressured; the streak display (Progress) and the due
-  /// chip (Library, Study home) both draw from it, so the stored pair keeps
-  /// the kit's `--color-streak-container` name and each meaning reads through
-  /// its own alias.
+  /// The due chip's fill and label under the names the call sites mean.
   Color get dueContainer => streakContainer;
   Color get onDueContainer => onStreakContainer;
 
-  /// Inset tile, chip, icon container — a step above the card.
-  /// See [AppBorderColors.borderOptionLight] — the resting edge of a
-  /// selectable card.
+  /// The resting edge of a selectable card.
   final Color borderOption;
 
-  /// See [AppBorderColors.borderSelectedLight] — the edge a picked card wears.
+  /// The edge a picked card wears.
   final Color borderSelected;
 
-  /// See [AppSurfaceColors.surfaceEmphasisLight] — the callout surface `MxCard.tonal`
-  /// fills with.
+  /// The callout surface `MxCard.tonal` fills with.
   final Color surfaceEmphasis;
 
-  /// See [AppSurfaceColors.surfaceSelectedLight] — the fill a picked card wears under
-  /// `MxCardSelectionTreatment.tint`.
+  /// The fill a picked card wears under `MxCardSelectionTreatment.tint`.
   final Color surfaceSelected;
 
+  /// An inset tile, a resting chip, an icon container.
   final Color surfaceMuted;
 
-  /// The accent hairline — see [AppBorderColors.borderAccentLight].
+  /// The accent hairline — the Today card's edge.
   final Color borderAccent;
 
+  /// The decorative hairline — `outlineVariant`.
   final Color borderSubtle;
 
   /// The edge of something a finger acts on — a text field, a tappable row, a
-  /// board tile — where the edge is the only thing saying so.
-  ///
-  /// **A second border token, and the reason is a measurement.** [borderSubtle]
-  /// is 1.38:1 against the light page and 2.32:1 against the dark one; WCAG
-  /// 1.4.11 asks 3:1 of the visual information required to *identify* a user
-  /// interface component. A card is identified by the text inside it and its
-  /// subtle edge is decoration, which is the exemption the rule grants. An empty
-  /// text field is not: with a placeholder and nothing else, its border is the
-  /// whole statement that there is somewhere to type. Five `guess` option rows
-  /// and ten `match` tiles are the same case — their fills sit 1.06:1 and 1.03:1
-  /// from the page, so the border is doing all the separating.
-  ///
-  /// The same edge stated louder, not a different one: same hue, same stroke.
+  /// board tile — where the edge is the only thing saying so. See
+  /// `AppBorderColors` for the figures the owner accepted under 3:1.
   final Color borderControl;
 
   /// The fill and the border of a disabled control — a solid, so the same
   /// disabled button is the same colour on a page, on a card and in a dialog.
-  /// See `AppColors.disabledSurfaceLight`.
   final Color disabledSurface;
 
   /// A disabled label or glyph. Translucent, because it has three possible
@@ -211,6 +212,12 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     Color? warning,
     Color? danger,
     Color? info,
+    Color? accentInk,
+    Color? successInk,
+    Color? warningInk,
+    Color? dangerInk,
+    Color? infoInk,
+    Color? inversePrimaryInk,
     Color? successContainer,
     Color? onSuccessContainer,
     Color? warningContainer,
@@ -229,36 +236,40 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     Color? borderControl,
     Color? disabledSurface,
     Color? onDisabled,
-  }) {
-    return AppSemanticColors(
-      streakContainer: streakContainer ?? this.streakContainer,
-      onStreakContainer: onStreakContainer ?? this.onStreakContainer,
-      progressTrack: progressTrack ?? this.progressTrack,
-      progressFill: progressFill ?? this.progressFill,
-      success: success ?? this.success,
-      warning: warning ?? this.warning,
-      danger: danger ?? this.danger,
-      info: info ?? this.info,
-      successContainer: successContainer ?? this.successContainer,
-      onSuccessContainer: onSuccessContainer ?? this.onSuccessContainer,
-      warningContainer: warningContainer ?? this.warningContainer,
-      onWarningContainer: onWarningContainer ?? this.onWarningContainer,
-      infoContainer: infoContainer ?? this.infoContainer,
-      onInfoContainer: onInfoContainer ?? this.onInfoContainer,
-      dangerContainer: dangerContainer ?? this.dangerContainer,
-      onDangerContainer: onDangerContainer ?? this.onDangerContainer,
-      borderOption: borderOption ?? this.borderOption,
-      borderSelected: borderSelected ?? this.borderSelected,
-      surfaceEmphasis: surfaceEmphasis ?? this.surfaceEmphasis,
-      surfaceSelected: surfaceSelected ?? this.surfaceSelected,
-      surfaceMuted: surfaceMuted ?? this.surfaceMuted,
-      borderAccent: borderAccent ?? this.borderAccent,
-      borderSubtle: borderSubtle ?? this.borderSubtle,
-      borderControl: borderControl ?? this.borderControl,
-      disabledSurface: disabledSurface ?? this.disabledSurface,
-      onDisabled: onDisabled ?? this.onDisabled,
-    );
-  }
+  }) => AppSemanticColors(
+    streakContainer: streakContainer ?? this.streakContainer,
+    onStreakContainer: onStreakContainer ?? this.onStreakContainer,
+    progressTrack: progressTrack ?? this.progressTrack,
+    progressFill: progressFill ?? this.progressFill,
+    success: success ?? this.success,
+    warning: warning ?? this.warning,
+    danger: danger ?? this.danger,
+    info: info ?? this.info,
+    accentInk: accentInk ?? this.accentInk,
+    successInk: successInk ?? this.successInk,
+    warningInk: warningInk ?? this.warningInk,
+    dangerInk: dangerInk ?? this.dangerInk,
+    infoInk: infoInk ?? this.infoInk,
+    inversePrimaryInk: inversePrimaryInk ?? this.inversePrimaryInk,
+    successContainer: successContainer ?? this.successContainer,
+    onSuccessContainer: onSuccessContainer ?? this.onSuccessContainer,
+    warningContainer: warningContainer ?? this.warningContainer,
+    onWarningContainer: onWarningContainer ?? this.onWarningContainer,
+    infoContainer: infoContainer ?? this.infoContainer,
+    onInfoContainer: onInfoContainer ?? this.onInfoContainer,
+    dangerContainer: dangerContainer ?? this.dangerContainer,
+    onDangerContainer: onDangerContainer ?? this.onDangerContainer,
+    borderOption: borderOption ?? this.borderOption,
+    borderSelected: borderSelected ?? this.borderSelected,
+    surfaceEmphasis: surfaceEmphasis ?? this.surfaceEmphasis,
+    surfaceSelected: surfaceSelected ?? this.surfaceSelected,
+    surfaceMuted: surfaceMuted ?? this.surfaceMuted,
+    borderAccent: borderAccent ?? this.borderAccent,
+    borderSubtle: borderSubtle ?? this.borderSubtle,
+    borderControl: borderControl ?? this.borderControl,
+    disabledSurface: disabledSurface ?? this.disabledSurface,
+    onDisabled: onDisabled ?? this.onDisabled,
+  );
 
   /// Interpolates every field.
   ///
@@ -270,57 +281,41 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   AppSemanticColors lerp(ThemeExtension<AppSemanticColors>? other, double t) {
     if (other is! AppSemanticColors) return this;
 
+    Color mix(Color a, Color b) => Color.lerp(a, b, t)!;
+
     return AppSemanticColors(
-      streakContainer: Color.lerp(streakContainer, other.streakContainer, t)!,
-      onStreakContainer: Color.lerp(
-        onStreakContainer,
-        other.onStreakContainer,
-        t,
-      )!,
-      progressTrack: Color.lerp(progressTrack, other.progressTrack, t)!,
-      progressFill: Color.lerp(progressFill, other.progressFill, t)!,
-      success: Color.lerp(success, other.success, t)!,
-      warning: Color.lerp(warning, other.warning, t)!,
-      danger: Color.lerp(danger, other.danger, t)!,
-      info: Color.lerp(info, other.info, t)!,
-      successContainer: Color.lerp(
-        successContainer,
-        other.successContainer,
-        t,
-      )!,
-      onSuccessContainer: Color.lerp(
-        onSuccessContainer,
-        other.onSuccessContainer,
-        t,
-      )!,
-      warningContainer: Color.lerp(
-        warningContainer,
-        other.warningContainer,
-        t,
-      )!,
-      onWarningContainer: Color.lerp(
-        onWarningContainer,
-        other.onWarningContainer,
-        t,
-      )!,
-      infoContainer: Color.lerp(infoContainer, other.infoContainer, t)!,
-      onInfoContainer: Color.lerp(onInfoContainer, other.onInfoContainer, t)!,
-      dangerContainer: Color.lerp(dangerContainer, other.dangerContainer, t)!,
-      onDangerContainer: Color.lerp(
-        onDangerContainer,
-        other.onDangerContainer,
-        t,
-      )!,
-      borderOption: Color.lerp(borderOption, other.borderOption, t)!,
-      borderSelected: Color.lerp(borderSelected, other.borderSelected, t)!,
-      surfaceEmphasis: Color.lerp(surfaceEmphasis, other.surfaceEmphasis, t)!,
-      surfaceSelected: Color.lerp(surfaceSelected, other.surfaceSelected, t)!,
-      surfaceMuted: Color.lerp(surfaceMuted, other.surfaceMuted, t)!,
-      borderAccent: Color.lerp(borderAccent, other.borderAccent, t)!,
-      borderSubtle: Color.lerp(borderSubtle, other.borderSubtle, t)!,
-      borderControl: Color.lerp(borderControl, other.borderControl, t)!,
-      disabledSurface: Color.lerp(disabledSurface, other.disabledSurface, t)!,
-      onDisabled: Color.lerp(onDisabled, other.onDisabled, t)!,
+      streakContainer: mix(streakContainer, other.streakContainer),
+      onStreakContainer: mix(onStreakContainer, other.onStreakContainer),
+      progressTrack: mix(progressTrack, other.progressTrack),
+      progressFill: mix(progressFill, other.progressFill),
+      success: mix(success, other.success),
+      warning: mix(warning, other.warning),
+      danger: mix(danger, other.danger),
+      info: mix(info, other.info),
+      accentInk: mix(accentInk, other.accentInk),
+      successInk: mix(successInk, other.successInk),
+      warningInk: mix(warningInk, other.warningInk),
+      dangerInk: mix(dangerInk, other.dangerInk),
+      infoInk: mix(infoInk, other.infoInk),
+      inversePrimaryInk: mix(inversePrimaryInk, other.inversePrimaryInk),
+      successContainer: mix(successContainer, other.successContainer),
+      onSuccessContainer: mix(onSuccessContainer, other.onSuccessContainer),
+      warningContainer: mix(warningContainer, other.warningContainer),
+      onWarningContainer: mix(onWarningContainer, other.onWarningContainer),
+      infoContainer: mix(infoContainer, other.infoContainer),
+      onInfoContainer: mix(onInfoContainer, other.onInfoContainer),
+      dangerContainer: mix(dangerContainer, other.dangerContainer),
+      onDangerContainer: mix(onDangerContainer, other.onDangerContainer),
+      borderOption: mix(borderOption, other.borderOption),
+      borderSelected: mix(borderSelected, other.borderSelected),
+      surfaceEmphasis: mix(surfaceEmphasis, other.surfaceEmphasis),
+      surfaceSelected: mix(surfaceSelected, other.surfaceSelected),
+      surfaceMuted: mix(surfaceMuted, other.surfaceMuted),
+      borderAccent: mix(borderAccent, other.borderAccent),
+      borderSubtle: mix(borderSubtle, other.borderSubtle),
+      borderControl: mix(borderControl, other.borderControl),
+      disabledSurface: mix(disabledSurface, other.disabledSurface),
+      onDisabled: mix(onDisabled, other.onDisabled),
     );
   }
 }

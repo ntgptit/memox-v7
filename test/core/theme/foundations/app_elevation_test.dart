@@ -42,49 +42,17 @@ void main() {
   });
 
   group('light paints, dark does not', () {
-    test('a light card gets a float and a contact layer', () {
-      // **This assertion was `hasLength(1)` until M100.30, and the reason it
-      // gave still holds for the layer it was turning down.** That was
-      // Material's *ambient* second shadow — a full-size blur per surface,
-      // moving the result by under half an L* step. Tokyo's second layer is the
-      // opposite animal: a 2 px contact blur at 32%, which is cheap and which
-      // moves the ground by 9.27 L*.
-      //
-      // The two say different things and one layer can only say one of them.
-      // The float carries "this is above the page"; the contact carries "and it
-      // touches here". A tight dark drop on its own reads as a cut-out, which
-      // is what the app looked like.
-      final shadows = shadowsFor(AppElevation.card, light);
-      expect(shadows, hasLength(2));
+    test("a light card gets the handoff's one soft shadow", () {
+      // **One layer since M100.86.** The two-layer float-and-contact shade was
+      // Tokyo-dashboard's; the handoff's Card spec gives a list card
+      // `shadow-soft` — `0 1px 2px` at 4% — and nothing else. A tight, faint
+      // shade is what the kit means by "flat and quiet".
+      final shadow = shadowsFor(AppElevation.card, light).single;
 
-      final (float, contact) = (shadows.first, shadows.last);
-      expect(
-        float.blurRadius,
-        greaterThan(contact.blurRadius),
-        reason: 'the float is the wide layer',
-      );
-      expect(
-        float.offset.dy,
-        greaterThan(contact.offset.dy),
-        reason: 'the float travels further from the surface than the contact',
-      );
-      expect(
-        contact.color.a,
-        greaterThan(float.color.a),
-        reason:
-            'the contact layer is the denser of the two — it is what puts the '
-            'card *on* something rather than merely above it',
-      );
-      // Still not Material's ambient wash: if this ever grows past the float it
-      // has stopped being a contact layer.
-      expect(
-        contact.blurRadius,
-        lessThanOrEqualTo(AppElevation.raised),
-        reason:
-            'a contact layer is a tight blur; at this width it is the ambient '
-            'wash this file turned down, and a list of twenty cards pays for '
-            'it twenty times',
-      );
+      expect(shadow.offset, const Offset(0, 1));
+      expect(shadow.blurRadius, 2);
+      expect(shadow.spreadRadius, 0);
+      expect(shadow.color.a, closeTo(0.04, 0.001));
     });
 
     test('a dark card gets a crisp rim, never a glow', () {
@@ -134,8 +102,6 @@ void main() {
       expect(drop.blurRadius, greaterThan(0));
     });
 
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     test('and that is because a dark shadow buys almost nothing', () {
       // **The measurement the decision rests on, re-derived here rather than
       // quoted.** If the palette ever changes so that a dark shadow *would* be
@@ -168,28 +134,20 @@ void main() {
           )
           .reduce((double a, double b) => a > b ? a : b);
 
-      // **It exceeded 1.0 at M100.83, and this is the test collecting on its
-      // own promise.** The sentence it used to carry — "if this ever exceeds
-      // 1.0 the dark page has left the bottom of the scale and dark should
-      // paint shadows after all" — is now the finding rather than the
-      // hypothetical: the owner's palette puts the dark ground at L* 20.4
-      // where Tokyo's navy sat at 4.1, and the same probe that measured 0.26
-      // there measures **3.65** here.
-      //
-      // The dependent decision is deliberately NOT changed in the same task.
-      // Giving dark a card-level drop is a depth change with every dark golden
-      // behind it, and a palette swap is not the place to make it. What this
-      // assertion does now is stop the old premise being quoted as though it
-      // still held, and pin the new number so the debt has a figure on it.
+      // **The dark ground is back at the bottom of the scale (M100.86).** The
+      // handoff's page is navy at L\* 4.7, and a generous 20% black shade over
+      // it moves the ground by about 1.2 L\* — little enough that the kit
+      // separates its dark card with a hairline rim rather than a shade, which
+      // is what `shadowsFor` paints. Held under 1.5 so the rim-only card is
+      // re-argued the day a palette gives a dark shade room to be seen.
       expect(
         darkGain,
-        greaterThan(1.0),
+        lessThan(1.5),
         reason:
             'a dark shadow at alpha 0.20 moves the page by '
-            '${darkGain.toStringAsFixed(2)} L*. Back under 1.0 means the dark '
-            'ground returned to the bottom of the scale, and the rim-only card '
-            'is justified on its original measurement again — say so here '
-            'rather than leaving this reading the wrong way round.',
+            '${darkGain.toStringAsFixed(2)} L*, so dark has room for a real '
+            'shade again — revisit the rim-only card rather than leaving it '
+            'justified by a measurement that no longer holds.',
       );
       expect(
         lightGain,
@@ -197,10 +155,9 @@ void main() {
         reason:
             "light's densest shadow layer moves the page by only "
             '${lightGain.toStringAsFixed(2)} L*, which is not enough to carry '
-            "light's depth on its own — the surface step there is just 3.58",
+            "light's depth on its own — the surface step there is just 2.09",
       );
     });
-    */
   });
 
   group('the shadow itself', () {
@@ -241,22 +198,17 @@ void main() {
     });
 
     test('grows with the level rather than jumping', () {
-      // Per layer, and by geometry alone. Tokyo's alphas do not climb with the
-      // level — depth is how far the float travels and how wide it spreads, not
-      // how dark it gets, which is what stops a raised card reading as a
-      // *darker* card. The old single layer had to climb its alpha because a
-      // tight shade was the only handle it had.
-      for (final index in <int>[0, 1]) {
-        final card = shadowsFor(AppElevation.card, light)[index];
-        final overlay = shadowsFor(AppElevation.overlay, light)[index];
+      // Each level the handoff names travels further and spreads wider than
+      // the list card, and is denser too (4% → 10% → 12%): they are three
+      // named shadows in the kit rather than one layer re-scaled, so the
+      // alpha is not held flat any more.
+      final card = shadowsFor(AppElevation.card, light).single;
+      for (final level in <double>[AppElevation.raised, AppElevation.overlay]) {
+        final higher = shadowsFor(level, light).single;
 
-        expect(overlay.blurRadius, greaterThan(card.blurRadius));
-        expect(overlay.offset.dy, greaterThan(card.offset.dy));
-        expect(
-          overlay.color.a,
-          card.color.a,
-          reason: 'layer $index changed its alpha with the level',
-        );
+        expect(higher.blurRadius, greaterThan(card.blurRadius));
+        expect(higher.offset.dy, greaterThan(card.offset.dy));
+        expect(higher.color.a, greaterThan(card.color.a));
       }
     });
   });

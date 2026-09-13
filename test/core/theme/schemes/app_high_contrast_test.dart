@@ -39,8 +39,6 @@ void main() {
   ];
 
   group('what high contrast changes', () {
-    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
-    /*
     test('every border that identifies clears 3:1 on every ground', () {
       // **The exemption, and exactly how far it reaches.** WCAG 1.4.11 asks
       // 3:1 of the visual information required to *identify* a component or
@@ -73,7 +71,6 @@ void main() {
         }
       }
     });
-    */
 
     test('the decorative hairline is left at normal strength', () {
       // **Owner decision, 2026-09-11.** The hairline used to be re-pointed

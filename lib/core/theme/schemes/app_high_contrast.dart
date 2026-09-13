@@ -23,10 +23,13 @@ import '../foundations/app_semantic_colors.dart';
 ///
 /// | token | normal | high contrast | why |
 /// |---|---|---|---|
-/// | `borderSubtle` | 1.08 / 1.32 | **unchanged** | a row separator identifies nothing; 1.4.11 exempts it, and the owner reviewed both stronger recipes and rejected them |
-/// | `borderControl` | 3.71 / 4.68 | `onSurfaceVariant` — 5.28 / 6.47 | already passed on a card; the component boundary keeps the strongest edge |
-/// | `borderAccent` | 1.80 / 3.88 | `primary` — 5.67 / 11.27 | the Today card's edge is decoration at 1.80 |
-/// | `onDisabled` | 2.11 / 2.62 | the same ink at 62% — 3.81 / 5.12 | see below |
+/// | `borderSubtle` | 1.53 / 1.58 | **unchanged** | a row separator identifies nothing; 1.4.11 exempts it, and the owner reviewed both stronger recipes and rejected them |
+/// | `borderControl` | 3.44 / 3.75 | `onSurfaceVariant` — 7.20 / 8.50 | already passed on a card; the component boundary keeps the strongest edge |
+/// | `borderAccent` | 1.60 / 2.33 | `primary` — 4.39 / 7.39 | the Today card's edge is decoration at 1.60 |
+/// | `onDisabled` | 2.39 / 3.11 | the same ink at 62% — 4.91 / 6.42 | see below |
+///
+/// **The table is the Tokyo handoff palette's (M100.86)**; the prose below
+/// quotes the figures each decision was originally taken on.
 ///
 /// Light figure first, dark second, each measured against `surface` and
 /// composited over it first (the inks carry alpha). **Re-measured at the
