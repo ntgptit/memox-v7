@@ -709,11 +709,15 @@ không nhầm chúng là một phase.
     (SDK 3.44.8), nên được thêm vào `_privateAndTransparent` của
     `render_classification.dart`; không nới allowance nào.
 - **Audit notes:**
-  - UI P1 (FAB chỉ có wash focus, `onPrimary` 10% trên `primary` đo 1.18–1.19:1)
-    đã có trả lời trong `tokyo-component-mapping.md` §8: FAB là ngoại lệ wash-only
-    được chấp nhận từ M100.36 (#451). Phase 2 chỉ đổi cặp màu theo owner decision
-    4, cơ chế giữ nguyên; handoff FAB không có state focus. Là debt, không sửa ở
-    phase này: nếu cần vòng focus riêng cho FAB thì chủ dự án quyết lại dòng §8.
+  - UI P1 (FAB chỉ có wash focus, `onPrimary` 10% trên `primary` đo 1.18–1.19:1):
+    lượt đầu ghi là debt, dựa trên ngoại lệ wash-only mà §8 chấp nhận từ M100.36
+    (#451). Re-audit giữ P1: lý do của §8 ("FAB là control duy nhất trên màn")
+    trả lời control nào đang focus, không trả lời indicator có nhìn thấy được
+    không, còn 1.4.11 đòi 3:1. Đã sửa bằng cơ chế sẵn có của nút filled:
+    `floatingActionButtonTheme.shape` là `WidgetStateOutlinedBorder`, khi focused
+    thì có `focusIndicatorOf(onPrimary)`. Không thêm token hay tham số widget. Pin
+    ở `focus_ring_contrast_test.dart` (nhóm `FAB focus ring`) và `mx_fab_test.dart`
+    (Tab thật). Hàng FAB ở §8 được cập nhật theo.
   - UI P2 (nhãn FAB chưa có pin ở 320×568, textScale 2.0): pin `getRect` riêng
     trong nhóm `MxFab` của `mx_components_test.dart`, nhãn VI dài nhất
     (`deckCreateSubDeckAction`): FAB nằm trong 320 và nhãn nằm trong FAB. Không

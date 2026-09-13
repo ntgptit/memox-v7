@@ -419,8 +419,13 @@ void main() {
         expect(fab.foregroundColor, scheme.onPrimary);
         // The house corner, owned here since the deck list stopped stating it
         // per-site — M3's default is the 16dp squircle nothing else uses.
+        // Resolved at rest: the shape is state-aware since M100.90 (the focus
+        // ring rides on it), so the resting state is the house corner alone.
         expect(
-          fab.shape,
+          WidgetStateProperty.resolveAs<ShapeBorder?>(
+            fab.shape,
+            const <WidgetState>{},
+          ),
           RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.lg),
           ),

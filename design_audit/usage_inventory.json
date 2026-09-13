@@ -174,7 +174,7 @@
     },
     {
       "file": "lib/core/theme/components/actions/app_fab_theme.dart",
-      "line": 33,
+      "line": 52,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -185,7 +185,7 @@
     },
     {
       "file": "lib/core/theme/components/actions/app_fab_theme.dart",
-      "line": 34,
+      "line": 53,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -196,7 +196,7 @@
     },
     {
       "file": "lib/core/theme/components/actions/app_fab_theme.dart",
-      "line": 35,
+      "line": 54,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",

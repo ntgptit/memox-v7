@@ -333,7 +333,7 @@ là vô hình. Không control nào có hai vòng, và không control nào chỉ 
 | FilledButton (`MxActionButton` primary/destructive) | `ButtonStyle.side` = `focusIndicatorOf(label)` | ngoài fill, không đổi kích thước | SDK (`ButtonStyleButton` chỉ nhận `focused` từ bàn phím) | `focus_ring_contrast_test` ≥ 3:1 trên fill |
 | OutlinedButton / TextButton (`MxActionButton` secondary, `MxTextButton`) | `ButtonStyle.side` = `focusIndicator(scheme)` | thay hairline khi focus | SDK | cùng test |
 | IconButton (`MxIconButton`, `MxMenuButton`) | `iconButtonTheme.side` khi focused | ngoài | SDK | cùng test |
-| FAB | `focusColor` (wash `onPrimary`, M100.90) + shape | SDK | SDK | chấp nhận: FAB là control duy nhất trên màn của nó |
+| FAB (`MxFab`) | `floatingActionButtonTheme.shape` khi focused: `focusIndicatorOf(onPrimary)`, cùng câu trả lời của nút filled; wash `onPrimary` 10% giữ lại | trên mép shape, không đổi kích thước | SDK (`RawMaterialButton` resolve `shape` theo `focused`) | `focus_ring_contrast_test` ≥ 3:1 trên fill; `mx_fab_test` với Tab thật. M100.90 rút lại ngoại lệ wash-only của M100.36: wash một mình đo 1.18:1 (UI audit P1) |
 | ChoiceChip (`MxPillButton`) | `MxFocusRing` quanh **hình vẽ**; SDK `focusColor` wash bên trong | ngoài, target 48 nới ngoài ring | `MxFocusRing` (`addHighlightModeListener`) | `mx_pill_button_focus_test`: rect ring == rect Material |
 | `MxListTile` (interactive) | `MxFocusRing`; SDK wash `rowOverlay(focused)` | ngoài | `MxFocusRing` | `mx_list_tile_test` |
 | `MxPressable` | `MxFocusRing` theo shape | ngoài | `MxFocusRing` | `mx_pressable_test` |

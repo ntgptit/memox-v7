@@ -22,9 +22,28 @@ FloatingActionButtonThemeData buildFloatingActionButtonTheme(
 ) => FloatingActionButtonThemeData(
   backgroundColor: scheme.primary,
   foregroundColor: scheme.onPrimary,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(AppRadius.lg),
-  ),
+  // **The focus ring rides on the shape, in the label colour** (M100.90, UI
+  // audit P1). The wash below is `onPrimary` at 10% over `primary`, which is
+  // 1.18:1 — under the 3:1 WCAG 1.4.11 asks of a focus indicator — and the
+  // shared ring token is `primary`, the fill itself. So the FAB takes the
+  // filled button's answer: `focusIndicatorOf(onPrimary)`. The theme has no
+  // `side` slot; `RawMaterialButton` resolves this shape with the `focused`
+  // state instead. Never null: null would fall back to the extended FAB's
+  // `StadiumBorder`.
+  shape: WidgetStateOutlinedBorder.resolveWith((states) {
+    final corner = BorderRadius.circular(AppRadius.lg);
+    if (states.contains(WidgetState.disabled)) {
+      return RoundedRectangleBorder(borderRadius: corner);
+    }
+    if (states.contains(WidgetState.focused)) {
+      return RoundedRectangleBorder(
+        borderRadius: corner,
+        side: AppInteractionStates.focusIndicatorOf(scheme.onPrimary),
+      );
+    }
+
+    return RoundedRectangleBorder(borderRadius: corner);
+  }),
   extendedSizeConstraints: const BoxConstraints.tightFor(height: AppSizing.fab),
   iconSize: AppIconSize.sm,
   // **The state washes move with the pair, or they describe the old one.**
