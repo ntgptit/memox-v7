@@ -4,6 +4,7 @@ import '../../../../../core/theme/extensions/app_ink.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../core/theme/extensions/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_status_badge.dart';
 import '../../../../../shared/widgets/mx_icon.dart';
 import '../../../../../shared/widgets/mx_badge.dart';
 import '../../../../../shared/widgets/mx_card.dart';
@@ -30,9 +31,10 @@ import '../support/card_tag_chip_widget.dart';
 // off-grid: between `AppIconSize.xs` (16) and `md` (24): the flag sits beside a 14 label and at 16 it read as punctuation
 const double _flagIconSize = 18;
 
-/// The state dot's diameter — small, because colour and position carry it, not
-/// size.
-// off-grid: colour and position carry the dot; 8 vanished beside a 16 glyph and 12 read as a control
+/// The state column's width — the check that replaces the dot while selecting
+/// shares it, so the list does not reflow. The dot inside it is the handoff
+/// StatusBadge's 8 (`AppSizing.statusDot`, M100.91).
+// off-grid: the column the dot and the selection check share; 8 would shrink the check
 const double _stateDotSize = 10;
 
 class CardTileWidget extends StatelessWidget {
@@ -137,16 +139,15 @@ class _StateDot extends StatelessWidget {
     // belonging to the card rather than floating above it.
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.xs),
-      child: Semantics(
-        label: context.l10n.cardStateDotSemantics(
-          context.cardStateLabel(item.state),
-        ),
-        child: Container(
-          width: _stateDotSize,
-          height: _stateDotSize,
-          decoration: BoxDecoration(
-            color: context.cardStateColor(item.state),
-            shape: BoxShape.circle,
+      child: SizedBox.square(
+        dimension: _stateDotSize,
+        child: Center(
+          child: MxStatusBadge(
+            tone: context.cardStateTone(item.state),
+            form: MxStatusBadgeForm.dot,
+            label: context.l10n.cardStateDotSemantics(
+              context.cardStateLabel(item.state),
+            ),
           ),
         ),
       ),

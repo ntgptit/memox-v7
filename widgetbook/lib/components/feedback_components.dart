@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
+import 'package:memox/shared/widgets/mx_status_badge.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/shared/widgets/mx_feedback_band.dart';
@@ -253,6 +254,30 @@ WidgetbookComponent sessionTopBarComponent() {
             ),
           );
         },
+      ),
+    ],
+  );
+}
+
+WidgetbookComponent statusBadgeComponent() {
+  return WidgetbookComponent(
+    name: 'MxStatusBadge',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Tones',
+        builder: (BuildContext context) => CatalogListPage(
+          children: <Widget>[
+            for (final form in MxStatusBadgeForm.values)
+              Wrap(
+                spacing: AppSpacing.md,
+                runSpacing: AppSpacing.sm,
+                children: <Widget>[
+                  for (final tone in MxStatusTone.values)
+                    MxStatusBadge(tone: tone, label: tone.name, form: form),
+                ],
+              ),
+          ],
+        ),
       ),
     ],
   );

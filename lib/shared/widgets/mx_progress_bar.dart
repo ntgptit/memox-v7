@@ -74,7 +74,7 @@ class MxProgressBar extends StatelessWidget {
     final fraction = value.clamp(0.0, 1.0);
     final isComplete = fraction >= 1;
     final semantic = context.semanticColors;
-    final fill = isComplete ? semantic.success : semantic.progressFill;
+    final fill = isComplete ? semantic.mastery : semantic.progressFill;
 
     return Semantics(
       label: label,

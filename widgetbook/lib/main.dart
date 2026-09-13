@@ -202,6 +202,7 @@ class MemoxWidgetbook extends StatelessWidget {
             selectionRowsComponent(),
             toggleComponent(),
             sessionTopBarComponent(),
+            statusBadgeComponent(),
             emptyStateComponent(),
             errorStateComponent(),
             feedbackBandComponent(),

@@ -39,6 +39,8 @@ final List<Color> lightPaletteTokens = <Color>[
   AppColors.warningLight,
   AppColors.dangerLight,
   AppColors.infoLight,
+  AppColors.masteryLight,
+  AppColors.statusNewLight,
   // The text inks (M100.87): each fill's hue solved to read as text.
   AppColors.accentInkLight,
   AppColors.successInkLight,
@@ -128,6 +130,8 @@ final List<Color> darkPaletteTokens = <Color>[
   AppColors.warningDark,
   AppColors.dangerDark,
   AppColors.infoDark,
+  AppColors.masteryDark,
+  AppColors.statusNewDark,
   // Dark's inks are its fills, already listed — except the snackbar action,
   // which sits on a slate that does not flip.
   AppColors.inversePrimaryInk,

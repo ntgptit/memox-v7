@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:memox/shared/widgets/mx_status_badge.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_action_sheet.dart';
 import 'package:memox/shared/widgets/mx_alert_dialog.dart';
@@ -206,6 +207,13 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
     name: 'MxProgressBar',
     build: () =>
         const MxProgressBar(value: 0.62, label: kLongLabel, valueLabel: '62%'),
+  ),
+  MxStressSpecimen(
+    // A long state word in the pill: the badge must hold one line beside its
+    // dot or ellipsize, never push the dot off.
+    name: 'MxStatusBadge',
+    build: () =>
+        const MxStatusBadge(tone: MxStatusTone.reviewing, label: kLongLabel),
   ),
   MxStressSpecimen(
     // A mode name long enough to want the whole row is the case that breaks

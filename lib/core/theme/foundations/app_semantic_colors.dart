@@ -26,6 +26,11 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     required this.warning,
     required this.danger,
     required this.info,
+    required this.mastery,
+    required this.statusNew,
+    required this.statusLearning,
+    required this.statusReviewing,
+    required this.statusMastered,
     required this.accentInk,
     required this.successInk,
     required this.warningInk,
@@ -63,6 +68,11 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       warning = AppColors.warningLight,
       danger = AppColors.dangerLight,
       info = AppColors.infoLight,
+      mastery = AppColors.masteryLight,
+      statusNew = AppColors.statusNewLight,
+      statusLearning = AppColors.statusLearningLight,
+      statusReviewing = AppColors.statusReviewingLight,
+      statusMastered = AppColors.statusMasteredLight,
       accentInk = AppColors.accentInkLight,
       successInk = AppColors.successInkLight,
       warningInk = AppColors.warningInkLight,
@@ -99,6 +109,11 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       warning = AppColors.warningDark,
       danger = AppColors.dangerDark,
       info = AppColors.infoDark,
+      mastery = AppColors.masteryDark,
+      statusNew = AppColors.statusNewDark,
+      statusLearning = AppColors.statusLearningDark,
+      statusReviewing = AppColors.statusReviewingDark,
+      statusMastered = AppColors.statusMasteredDark,
       accentInk = AppColors.accentInkDark,
       successInk = AppColors.successInkDark,
       warningInk = AppColors.warningInkDark,
@@ -131,7 +146,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   final Color onStreakContainer;
 
   /// The unfilled part of a progress track, and the filled part below 100%.
-  /// At 100% the fill becomes [success] — see `MxProgressBar`.
+  /// At 100% the fill becomes [mastery] — see `MxProgressBar`.
   final Color progressTrack;
   final Color progressFill;
 
@@ -141,6 +156,17 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   final Color warning;
   final Color danger;
   final Color info;
+
+  /// Mastery — a deck or card fully learned (BR-88). A fill, an arc, a dot;
+  /// never text (D23).
+  final Color mastery;
+
+  /// The card lifecycle's four dots (D11): new ▸ learning ▸ reviewing ▸
+  /// mastered. Fills only; the badge label reads in `onSurfaceVariant` (D24).
+  final Color statusNew;
+  final Color statusLearning;
+  final Color statusReviewing;
+  final Color statusMastered;
 
   /// The same meanings as **text**. [accentInk] is the brand's; [infoInk] is
   /// the same value under the name a fact-carrying label means.
@@ -222,6 +248,11 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     Color? warning,
     Color? danger,
     Color? info,
+    Color? mastery,
+    Color? statusNew,
+    Color? statusLearning,
+    Color? statusReviewing,
+    Color? statusMastered,
     Color? accentInk,
     Color? successInk,
     Color? warningInk,
@@ -257,6 +288,11 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     warning: warning ?? this.warning,
     danger: danger ?? this.danger,
     info: info ?? this.info,
+    mastery: mastery ?? this.mastery,
+    statusNew: statusNew ?? this.statusNew,
+    statusLearning: statusLearning ?? this.statusLearning,
+    statusReviewing: statusReviewing ?? this.statusReviewing,
+    statusMastered: statusMastered ?? this.statusMastered,
     accentInk: accentInk ?? this.accentInk,
     successInk: successInk ?? this.successInk,
     warningInk: warningInk ?? this.warningInk,
@@ -306,6 +342,11 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       warning: mix(warning, other.warning),
       danger: mix(danger, other.danger),
       info: mix(info, other.info),
+      mastery: mix(mastery, other.mastery),
+      statusNew: mix(statusNew, other.statusNew),
+      statusLearning: mix(statusLearning, other.statusLearning),
+      statusReviewing: mix(statusReviewing, other.statusReviewing),
+      statusMastered: mix(statusMastered, other.statusMastered),
       accentInk: mix(accentInk, other.accentInk),
       successInk: mix(successInk, other.successInk),
       warningInk: mix(warningInk, other.warningInk),

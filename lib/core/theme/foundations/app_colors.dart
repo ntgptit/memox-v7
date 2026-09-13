@@ -102,6 +102,25 @@ abstract final class AppColors {
   static const Color infoInkLight = accentInkLight;
   static const Color infoInkDark = accentInkDark;
 
+  // --- Mastery and the card lifecycle (handoff `mastery`, `status-*`) --------
+  //
+  // Fills and dots only (owner decision 5, D23): none of these is a text ink —
+  // mastery as text keeps `successInk`. Learning and reviewing are aliases of
+  // the warning and brand fills the handoff names for them.
+
+  /// A deck or card fully learned (BR-88): the progress fill at 100%, the
+  /// mastery ring's complete arc, the mastered dot.
+  static const Color masteryLight = Color(0xFF1F8A5B);
+  static const Color masteryDark = Color(0xFF6FE0BD);
+  static const Color statusNewLight = Color(0xFF8C95B8);
+  static const Color statusNewDark = Color(0xFF6B75A3);
+  static const Color statusLearningLight = warningLight;
+  static const Color statusLearningDark = warningDark;
+  static const Color statusReviewingLight = primaryLight;
+  static const Color statusReviewingDark = primaryDark;
+  static const Color statusMasteredLight = masteryLight;
+  static const Color statusMasteredDark = masteryDark;
+
   // --- Status containers ----------------------------------------------------
   //
   // **Derived, because the handoff names no container for success or warning,

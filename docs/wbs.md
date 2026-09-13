@@ -730,6 +730,37 @@ không nhầm chúng là một phase.
     sàn chạm 48 và để nội dung kéo cao. Full host suite sau thay đổi xanh
     `+5191` mà không phải dời pin nào: không test host nào đo hàng ở sàn 56. Ảnh
     của `ListTile` được kiểm ở golden compare trên Linux cuối phase.
+  - PLAN-DEV-13.1 — plan nói mọi constructor khác của `AppSemanticColors` (vd.
+    `app_high_contrast.dart`) sẽ không compile. Thực tế high contrast dựng bằng
+    `base.copyWith(...)`, nên năm field mới tự đi theo và chỉ file gốc phải sửa.
+    Plan không nêu các nơi liệt kê token: `token_resolver.dart` cũng phải thêm
+    năm tên (ngoài `auditTokensOf`, `hasLength` 78 → 83), `test/support/app_palette.dart`
+    thêm ba hex mới cho `PaletteClosureRule`, và bảng "status fills hold the floors
+    the owner accepted" trong `app_theme_test` thêm năm fill. Hai fill dưới 3:1 ở
+    light được ghim theo số đo, cùng mẫu owner decision 5: `statusNew` 2.96/2.81
+    (floor 2.9/2.8), `statusLearning` là fill warning 2.15/2.04 (floor 2.1/2.0).
+    `NonTextContrastRule` chỉ xét paint vai `border`, nên dot không vào danh sách
+    đó. Specimen stress và mục Widgetbook cho `MxStatusBadge` được thêm như Task
+    10.
+  - PLAN-DEV-13.2 — code `MxStatusBadge` của plan đặt nhãn trong
+    `Row(mainAxisSize: min)` không `Flexible`, nên specimen stress tràn 23–96px
+    ở 320–393dp × 2.0. Nhãn được bọc `Flexible` một dòng, cắt bằng ellipsis
+    (handoff: chữ trong hàng cắt một dòng); specimen stress đỏ 5 lần trước khi sửa.
+  - PLAN-DEV-13.3 — dot trạng thái của card tile theo handoff là 8
+    (`AppSizing.statusDot`), nhưng cột của nó vẫn rộng 10 (`_stateDotSize`):
+    `_SelectionMark` thay chỗ dot khi chọn và phải cùng footprint để danh sách
+    không xê dịch. Dot 8 được căn giữa trong cột 10. Comment cũ "8 vanished
+    beside a 16 glyph" nhường cho quyết định của handoff; UI audit xem lại.
+  - PLAN-DEV-13.4 — full host suite đỏ 2 guard mà plan không nêu.
+    (a) `design_tokens_test` cấm tên hằng trong `app_colors.dart` chứa từ chỉ
+    màu bằng so chuỗi con, nên `statusMasteredLight` bị bắt vì "maste*red*".
+    Guard đổi sang so theo từ camelCase, kèm test probe (`successGreenLight`,
+    `redLight` vẫn bị bắt; `statusMasteredLight` không). Luật không bị nới: chưa
+    hằng nào đang có từ chỉ màu nguyên từ.
+    (b) `audit_rules_test` dùng fixture `#1F7A5A` làm màu ngoài palette; hex
+    `mastery` mới `#1F8A5B` nằm sát nó nên fixture rơi vào closure — cùng kiểu
+    trôi mà comment của test ghi cho M100.32. Fixture dời sang `#A21CAF`; palette
+    giữ nguyên.
 - **Editable documents:** `docs/wbs.md`,
   `docs/design-system/tokyo-component-mapping.md`,
   `docs/design-system/listtile-deck-row-spec.md`, `lib/features/deck/README.md`,
