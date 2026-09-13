@@ -119,7 +119,7 @@ class StudyEntrySectionWidget extends StatelessWidget {
           MxActionButton(
             label: l10n.studyStartReview,
             onPressed: onReview,
-            variant: MxActionButtonVariant.secondary,
+            variant: MxActionButtonVariant.tonal,
           )
         else
           Text(l10n.studyNothingDueMessage),

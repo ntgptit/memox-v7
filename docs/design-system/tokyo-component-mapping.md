@@ -7,7 +7,7 @@
 | **Scope** | `lib/core/theme/components/**`. Ngoài phạm vi: giá trị token (AD-14), layering của `lib/core/theme/` (`theme-architecture.md`), API của `Mx*` widget |
 | **Source of truth for** | Ma trận component → canonical M3 role · ma trận dịch ý đồ Tokyo → MemoX · hồ sơ các sai lệch role đã sửa và mô hình bề mặt · quyết định của chủ dự án và mặc định D1–D27 của đợt redesign theo handoff (§9) |
 | **Depends on** | `document-conventions.md` · `architecture.md` (AD-14) · `design-system/theme-architecture.md` · `design-system/handoff/memox-flutter-handoff.json` |
-| **Updated by task** | M100.88 |
+| **Updated by task** | M100.88 · M100.90 |
 | **Last updated** | 2026-09-14 |
 
 ---
@@ -44,7 +44,7 @@ canonical M3 role  >  accessibility  >  MemoX structural system  >  Tokyo exact 
 | FilledButton | foreground | `onPrimary` (disabled: `onSurface`) | = | disabled dùng `semantic.onDisabled` |
 | FilledButton | overlay | `onPrimary` @ .08/.10/.10 | = | qua `MxFilledPair.stateLayerOf`; guard AST (M100.36). Trước đó là blend về `onSurface` **cộng** overlay `primary` — xem §6 |
 | FilledButton (destructive) | background / foreground / overlay | `error` / `onError` / `onError` | = | `MxFilledPair.destructive`; guard AST cả ba slot |
-| FilledTonalButton | — | `secondaryContainer` / `onSecondaryContainer` | **không dựng** | `MxActionButtonVariant.tonal` gỡ ở M100.36: 0 caller từ #384, và hệ thứ bậc chấm điểm (§4B) chốt bằng `secondary` |
+| FilledTonalButton | — | `secondaryContainer` / `onSecondaryContainer` | = (`MxActionButtonVariant.tonal`, handoff redesign D6: forward alternatives) | Gỡ ở M100.36, dựng lại ở M100.73; M100.90 đưa tám hành động phụ tiến tới về tonal. Cancel, back, clear, leave giữ Outlined; nút chấm điểm thuộc Task 28 |
 | OutlinedButton | foreground | `primary` | `semantic.accentInk` | M100.87: `primary` của kit chỉ đạt 3.95:1 làm chữ ở light; guard AST (`requiresSemantic`) |
 | OutlinedButton | side | `outline`, focus → `primary` | = | guard AST |
 | TextButton | foreground | `primary` | `semantic.accentInk` | M100.87, cùng lý do OutlinedButton; guard AST (`requiresSemantic`) |

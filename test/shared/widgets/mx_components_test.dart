@@ -335,6 +335,29 @@ void main() {
   });
 
   group('MxEmptyState', () {
+    testWidgets('an empty state\'s second action is tonal, not outlined', (
+      tester,
+    ) async {
+      // D6 (Tokyo redesign): Outlined is dismiss, back, cancel, clear or leave;
+      // a second way *forward* beside the primary is the handoff's TonalButton.
+      await tester.pumpWidget(
+        host(
+          Scaffold(
+            body: MxEmptyState(
+              title: 'No decks',
+              actionLabel: 'Starter library',
+              onAction: () {},
+              secondaryActionLabel: 'New deck',
+              onSecondaryAction: () {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(OutlinedButton), findsNothing);
+      expect(find.byType(FilledButton), findsNWidgets(2));
+    });
+
     test('half an action is refused at construction', () {
       // Same trap, and the more likely of the two to be written: an empty state
       // whose whole purpose is the call to action, shipped with the label wired

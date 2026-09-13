@@ -101,7 +101,7 @@ class MxEmptyState extends StatelessWidget {
                   ),
                   secondary: MxActionButton(
                     label: secondaryActionLabel!,
-                    variant: MxActionButtonVariant.secondary,
+                    variant: MxActionButtonVariant.tonal,
                     onPressed: onSecondaryAction,
                   ),
                 )
