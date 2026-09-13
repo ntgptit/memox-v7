@@ -34,9 +34,10 @@ import 'audit_model.dart';
 /// rather than folding it into every caller's number is what makes the arithmetic
 /// checkable by eye.
 ///
-/// [tappableCards] is the number of `MxCard`s built with an `onTap`. Each hosts
-/// an `InkWell`, which contributes an ink layer and a clip painted by a
-/// `CustomPaint` with no painter of its own.
+/// [tappableCards] is the number of `MxCard`s built with an `onTap`, and of
+/// `MxPressable` rows — the Library's deck rows since M100.91. Each hosts an
+/// `InkWell` in its own `Material`, which contributes an ink layer and a clip
+/// painted by a `CustomPaint` with no painter of its own.
 ///
 /// [pills] is the number of `MxPillButton`s. A `ChoiceChip` contributes three
 /// unreadable nodes rather than two: an ink layer, a `CustomPaint`, and
@@ -44,7 +45,7 @@ import 'audit_model.dart';
 /// private render object no extractor claims.
 ///
 /// [filledButtons] is the number of `FilledButton`s *inside the screen item* —
-/// the deck card's Study action. Each is an ink host and draws its own rounded
+/// the level panel's Study action. Each is an ink host and draws its own rounded
 /// `_ShapeBorderPainter`, the same pair an icon button contributes; it is a
 /// separate parameter because calling a labelled action an icon button in an
 /// allowance is how a count stops describing the screen.
@@ -191,8 +192,8 @@ List<AuditSkipAllowance> deckShellAllowances({
         detailContains: '_ShapeBorderPainter',
         expectedMatches: iconButtons + filledButtons,
         rationale:
-            'One per MxIconButton, and one per FilledButton: the deck card Study '
-            'action draws its pill through the same painter. An '
+            'One per MxIconButton, and one per FilledButton: the level panel '
+            'Study action draws its pill through the same painter. An '
             'IconButton draws its shape with a '
             "CustomPainter, so the outline exists in no render object — the "
             "audit's own SkipReason doc names this case for OutlinedButton and it "

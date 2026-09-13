@@ -662,10 +662,6 @@
   "@deckCreateCardAction": {
     "description": "Action that would create a card in the current deck. Shown disabled in this build (UC-08, BR-61)."
   },
-  "deckStudyAction": "Học",
-  "@deckStudyAction": {
-    "description": "Label of the button on a deck card that starts a study session for that deck. Shown when the deck has due or new cards (BR-150) — hidden only when both sets are empty, because then there is nothing to start."
-  },
   "deckRowActionsSemanticLabel": "Tác vụ bộ thẻ {deck}",
   "@deckRowActionsSemanticLabel": {
     "placeholders": {
@@ -674,15 +670,6 @@
       }
     },
     "description": "Tên dành cho trình đọc màn hình của nút tràn trên MỘT HÀNG danh sách. Mọi hàng dùng cùng một biểu tượng, nên tên bộ thẻ là thứ phân biệt chúng."
-  },
-  "deckRowStudySemanticLabel": "Học {deck}",
-  "@deckRowStudySemanticLabel": {
-    "placeholders": {
-      "deck": {
-        "type": "String"
-      }
-    },
-    "description": "Tên dành cho trình đọc màn hình của nút Học trên một hàng, khớp với studyHomeStudySemanticLabel ở tab Học."
   },
   "deckActionsSemanticLabel": "Tác vụ bộ thẻ",
   "@deckActionsSemanticLabel": {
@@ -4389,19 +4376,6 @@
   "deckHeaderReadySemanticLabel": "Có nội dung sẵn sàng để học",
   "@deckHeaderReadySemanticLabel": {
     "description": "Spoken for the status dot beside the Library header count. The dot is only drawn when a level has new or due cards, and colour alone reaches neither a screen reader nor a reader who cannot separate this green from this grey."
-  },
-  "deckTileProgressLabel": "Tiến độ",
-  "@deckTileProgressLabel": {
-    "description": "The left half of the deck tile gauge caption, opposite the percentage. A generic word on purpose: the figure beside it and the track below it both state the measurement, so a second statement of it here would be the duplication BR-88 removed from this card."
-  },
-  "deckTileLearnedPercentLabel": "{percent}% đã thuộc",
-  "@deckTileLearnedPercentLabel": {
-    "placeholders": {
-      "percent": {
-        "type": "int"
-      }
-    },
-    "description": "The tile gauge label, with the word so the number is not bare (\"21% learned\")."
   },
   "libraryActionsTitle": "Tác vụ thư viện",
   "@libraryActionsTitle": {

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/presentation/widgets/items/deck_tile_widget.dart';
 import 'package:memox/features/deck/presentation/widgets/sections/deck_level_summary_widget.dart';
@@ -129,24 +128,14 @@ void main() {
       (i) => tester.getRect(tiles.at(i)),
     );
 
-    // **Two whole and the third within 4px — the measured state until the row
-    // is rebuilt, not a new target** (M100.89). The handoff's type roles set
-    // the tile's captions at 1.4 and the hero numeral at the stat role's 40,
-    // and the same library now leaves the third card 3.4px under the bar.
-    // Task 15 of the Tokyo plan replaces this tile with the handoff's
-    // 48-minimum row; putting "three whole" back is that change's to own.
-    // M100.91's card interior (20) adds 8 more: 11.4px, still interim.
+    // **Three whole again** (M100.91, closing PLAN-DEV-2.9). The handoff's
+    // type roles and card interior had left the third card 11.4px under the
+    // bar; the handoff's rows on one card, each without a gauge band or a
+    // Study button, give back more than that.
     expect(
       rects.where((r) => r.bottom <= fold).length,
-      greaterThanOrEqualTo(2),
-      reason: 'two deck cards must be readable end to end without scrolling',
-    );
-    expect(
-      rects[2].bottom - fold,
-      lessThanOrEqualTo(AppSpacing.md),
-      reason:
-          'the third card may sit under the bar by the 11.4px the handoff type '
-          'and card interior added, and no further',
+      greaterThanOrEqualTo(3),
+      reason: 'three deck rows must be readable end to end without scrolling',
     );
   });
 

@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/extensions/app_ink.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_icon_tile.dart';
 import '../../../domain/models/deck_content_type_model.dart';
 import '../../../domain/models/deck_schedule_status_model.dart';
-import 'deck_icon_area_widget.dart';
 
-/// The deck's identity at a glance: one large icon, neutral in every schedule
+/// The deck's identity at a glance: one icon tile, the same in every schedule
 /// state.
 ///
-/// **The well answers "what", and the chips answer "when"** (owner review,
+/// **The tile answers "what", and the chips answer "when"** (owner review,
 /// 2026-08-20). It used to carry the schedule: an outlined calendar at rest, a
 /// filled one for today, a missed one in the error pair for a backlog. That
 /// was the only carrier of urgency when the counts were plain words; now the
@@ -32,7 +31,7 @@ class DeckStatusIconWidget extends StatelessWidget {
 
   final DeckScheduleStatus status;
 
-  /// Which glyph the well shows: a stack of cards for a deck that holds them,
+  /// Which glyph the tile shows: a stack of cards for a deck that holds them,
   /// a folder for one that holds decks. `unset` is a folder — it is what the
   /// deck is until its first child decides (BR-63).
   final DeckContentType contentType;
@@ -42,24 +41,23 @@ class DeckStatusIconWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // `accent` — see `DeckIconArea`'s class doc for the full walk (2026-09-10,
-    // owner feedback). It has held across every recipe the well's own fill
-    // went through, because it names the brand colour on whatever neutral or
-    // bordered surface the well is, rather than pairing with one container.
-    final area = DeckIconArea(
+    // The handoff IconTile at `md` (36) — `primary` at 10% under a `primary`
+    // glyph (M100.91). It replaced the feature's own 48 well, whose walk
+    // through seven recipes had already settled on the glyph as the one brand
+    // mark; the tile keeps that and takes the handoff's size.
+    final tile = MxIconTile(
       icon: contentType == DeckContentType.card
           ? Icons.style_outlined
           : Icons.folder_outlined,
-      tint: AppInk.accent,
     );
 
-    if (status != DeckScheduleStatus.overdue) return area;
+    if (status != DeckScheduleStatus.overdue) return tile;
 
-    // One sentence for the screen reader: the well is visual-only, and the day
+    // One sentence for the screen reader: the tile is visual-only, and the day
     // count has no visual carrier anymore — this label is where "how long
     // missed" lives now.
     return Semantics(
-      // Its own node: inside the card's tap target the label would otherwise
+      // Its own node: inside the row's tap target the label would otherwise
       // merge into the row's combined description and become unfindable as a
       // distinct announcement.
       container: true,
@@ -67,7 +65,7 @@ class DeckStatusIconWidget extends StatelessWidget {
         dueCardCount,
         overdueDayCount,
       ),
-      child: ExcludeSemantics(child: area),
+      child: ExcludeSemantics(child: tile),
     );
   }
 }

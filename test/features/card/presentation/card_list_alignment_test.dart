@@ -441,9 +441,7 @@ void main() {
     expect(
       second.top - first.bottom,
       moreOrLessEquals(AppSpacing.lg, epsilon: epsilon),
-      reason:
-          'app_spacing.dart defines lg as the gap between list items, and '
-          'deck_list_sliver_widget.dart separates the deck rows by it',
+      reason: 'app_spacing.dart defines lg as the gap between list items',
     );
   });
 

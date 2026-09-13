@@ -6,7 +6,9 @@ import '../../../../../core/navigation/route_names.dart';
 
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_card.dart';
 import '../../../../../shared/widgets/mx_empty_state.dart';
+import '../../../../../shared/widgets/mx_row_group.dart';
 import '../../../domain/models/deck_summary_model.dart';
 import '../../../domain/models/deck_reorder_placement_model.dart';
 import '../../controllers/deck_write_controller.dart';
@@ -14,16 +16,6 @@ import '../items/deck_tile_widget.dart';
 import '../overlays/deck_actions_widget.dart';
 import '../support/deck_undo_widget.dart';
 import '../../../../../shared/widgets/mx_scroll_end_inset.dart';
-
-/// Space under the last card, derived rather than chosen: the floating
-/// action's own height, the gap it keeps above the navigation bar, and one
-/// more of the same gap under it.
-///
-/// **An inset only reserves the end of the scroll**, which is exactly what is
-/// needed here and was not enough when the action floated over the *resting*
-/// frame — see the screen's own note on M4.10ag. What it buys is that the last
-/// card's Study button is reachable once the list is scrolled home; the safe
-/// area is added at the call site, where the `MediaQuery` is.
 
 /// The rows of one deck level, as a sliver.
 ///
@@ -78,98 +70,86 @@ class DeckListSliverWidget extends ConsumerWidget {
         // answers the clearance, gesture inset included (A20.1 P2-18).
         mxScrollEndInsetOf(context),
       ),
-      sliver: SliverList.separated(
-        itemCount: summaries.length,
-        // **`lg`, and the original reason for it has expired while a better
-        // one took over.** The note here read: "the track on each card's base
-        // makes that boundary loud, so 12 after it read as part of the card
-        // rather than as the space between." That stopped being true at
-        // M100.72 — the track moved into its own band and the card now ends on
-        // 18 of padding.
-        //
-        // M100.79 tried `md` on exactly that reasoning and
-        // `screen_composition_rhythm_test` refused it: `list-item-gap` is an
-        // app-wide grammar rule, every list separates its items by `lg`, and
-        // one screen disagreeing is the inconsistency this list would have to
-        // justify to every other one. The eight pixels it would have returned
-        // are not worth that, so the value stays and the reason is now the
-        // grammar rather than the track.
-        separatorBuilder: (context, index) =>
-            const SizedBox(height: AppSpacing.lg),
-        itemBuilder: (context, index) {
-          final summary = summaries[index];
-          final manualIndex = manualSummaries.indexWhere(
-            (DeckSummary candidate) => candidate.deck.id == summary.deck.id,
-          );
-          final earlier = manualIndex > 0
-              ? manualSummaries[manualIndex - 1]
-              : null;
-          final later =
-              manualIndex >= 0 && manualIndex < manualSummaries.length - 1
-              ? manualSummaries[manualIndex + 1]
-              : null;
+      // **One card, rows on it, a hairline between each pair** — the handoff's
+      // ListRow grouping (owner decision 7, M100.91). Each deck used to be its
+      // own card `lg` apart; as rows on one surface there is no gap to space,
+      // and the card clips the first and last row's ink to its corners.
+      //
+      // ponytail: builds every row eagerly — a level holds tens of decks, not
+      // thousands. Move to a DecoratedSliver-backed list if a level ever
+      // measures slow.
+      sliver: SliverToBoxAdapter(
+        child: MxCard.raised(
+          padding: MxCardPadding.none,
+          child: MxRowGroup(
+            children: <Widget>[
+              for (final summary in summaries) _tileFor(context, ref, summary),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
-          return DeckTileWidget(
-            summary: summary,
-            // By name, with the id as a path parameter. The literal path would
-            // work today and break silently the first time the route moves.
-            //
-            // `push`, not `go`: `go` replaces the one `/decks/:deckId` entry,
-            // so Back from level 5 landed on the root list. The breadcrumb
-            // keeps `go` — a jump *should* replace the stack (IT-NAV-003/004).
-            onTap: () => context.pushNamed(
-              RouteNames.deckDetail,
-              pathParameters: <String, String>{
-                RoutePathParams.deckId: summary.deck.id,
-              },
-            ),
-            onActions: () => showDeckActions(
-              context,
-              deck: summary.deck,
-              // Reset belongs to a root (BR-05), so it is offered from the
-              // list where a root is a row and nowhere else (UC-07).
-              //
-              // **The answer state, not the learned count.** This read
-              // `learnedCardCount > 0` — box 8, or a 128-day interval (BR-88)
-              // — and treated it as having been studied. A deck answered up to
-              // box 3 has zero learned cards and a full schedule, and it got an
-              // ordinary-looking row and a confirmation promising nothing to
-              // lose, for the operation that throws that schedule away.
-              // `firstAnsweredAt` is the column the reset itself clears
-              // (BR-44), which is what makes it the one describing the risk.
-              hasStudyProgress: summary.deck.firstAnsweredAt != null,
-              // Deleting from a list leaves the user on that list; there is
-              // nowhere to navigate back from — so the only thing left to do
-              // is say where the deck went and offer it back (BR-256, BR-263).
-              onDeleted: (batchId) =>
-                  showDeckMovedToTrash(context, ref, batchId: batchId),
-              onMoveEarlier: isManualSort && earlier != null
-                  ? () => ref
-                        .read(
-                          reorderDeckControllerProvider(
-                            summary.deck.id,
-                          ).notifier,
-                        )
-                        .submit(
-                          targetSiblingDeckId: earlier.deck.id,
-                          placement: DeckReorderPlacement.before,
-                        )
-                  : null,
-              onMoveLater: isManualSort && later != null
-                  ? () => ref
-                        .read(
-                          reorderDeckControllerProvider(
-                            summary.deck.id,
-                          ).notifier,
-                        )
-                        .submit(
-                          targetSiblingDeckId: later.deck.id,
-                          placement: DeckReorderPlacement.after,
-                        )
-                  : null,
-            ),
-          );
+  Widget _tileFor(BuildContext context, WidgetRef ref, DeckSummary summary) {
+    final manualIndex = manualSummaries.indexWhere(
+      (DeckSummary candidate) => candidate.deck.id == summary.deck.id,
+    );
+    final earlier = manualIndex > 0 ? manualSummaries[manualIndex - 1] : null;
+    final later = manualIndex >= 0 && manualIndex < manualSummaries.length - 1
+        ? manualSummaries[manualIndex + 1]
+        : null;
+
+    return DeckTileWidget(
+      summary: summary,
+      // By name, with the id as a path parameter. The literal path would
+      // work today and break silently the first time the route moves.
+      //
+      // `push`, not `go`: `go` replaces the one `/decks/:deckId` entry,
+      // so Back from level 5 landed on the root list. The breadcrumb
+      // keeps `go` — a jump *should* replace the stack (IT-NAV-003/004).
+      onTap: () => context.pushNamed(
+        RouteNames.deckDetail,
+        pathParameters: <String, String>{
+          RoutePathParams.deckId: summary.deck.id,
         },
+      ),
+      onActions: () => showDeckActions(
+        context,
+        deck: summary.deck,
+        // Reset belongs to a root (BR-05), so it is offered from the
+        // list where a root is a row and nowhere else (UC-07).
+        //
+        // **The answer state, not the learned count.** This read
+        // `learnedCardCount > 0` — box 8, or a 128-day interval (BR-88)
+        // — and treated it as having been studied. A deck answered up to
+        // box 3 has zero learned cards and a full schedule, and it got an
+        // ordinary-looking row and a confirmation promising nothing to
+        // lose, for the operation that throws that schedule away.
+        // `firstAnsweredAt` is the column the reset itself clears
+        // (BR-44), which is what makes it the one describing the risk.
+        hasStudyProgress: summary.deck.firstAnsweredAt != null,
+        // Deleting from a list leaves the user on that list; there is
+        // nowhere to navigate back from — so the only thing left to do
+        // is say where the deck went and offer it back (BR-256, BR-263).
+        onDeleted: (batchId) =>
+            showDeckMovedToTrash(context, ref, batchId: batchId),
+        onMoveEarlier: isManualSort && earlier != null
+            ? () => ref
+                  .read(reorderDeckControllerProvider(summary.deck.id).notifier)
+                  .submit(
+                    targetSiblingDeckId: earlier.deck.id,
+                    placement: DeckReorderPlacement.before,
+                  )
+            : null,
+        onMoveLater: isManualSort && later != null
+            ? () => ref
+                  .read(reorderDeckControllerProvider(summary.deck.id).notifier)
+                  .submit(
+                    targetSiblingDeckId: later.deck.id,
+                    placement: DeckReorderPlacement.after,
+                  )
+            : null,
       ),
     );
   }

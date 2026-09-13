@@ -6,16 +6,6 @@ import '../../core/theme/foundations/app_radius.dart';
 import '../../core/theme/foundations/app_sizing.dart';
 import 'mx_icon.dart';
 
-/// Handoff IconTile's tint: `primary` at 10%.
-///
-/// **Blended over the card surface, not washed** (design_audit R7). A
-/// translucent fill composites against whatever is behind it at paint time, so
-/// one tint renders as two values. The handoff draws the tile in rows on a
-/// raised card (`surface-raised`, `surfaceContainerLowest`), so the tint is
-/// resolved against that ground: the same pixels there, and one value
-/// everywhere else — the move `app_chip_theme.dart`'s `_tint` makes.
-const double _tintAlpha = 0.10;
-
 /// The three handoff sizes, each with the glyph step it holds (D4).
 enum MxIconTileSize {
   sm(AppSizing.iconTileSm, MxIconSize.xs),
@@ -38,6 +28,21 @@ class MxIconTile extends StatelessWidget {
     super.key,
   });
 
+  /// Handoff IconTile's tint: `primary` at 10%.
+  ///
+  /// **Blended over the card surface, not washed** (design_audit R7). A
+  /// translucent fill composites against whatever is behind it at paint
+  /// time, so one tint renders as two values. The handoff draws the tile in
+  /// rows on a raised card (`surface-raised`, `surfaceContainerLowest`), so
+  /// the tint is resolved against that ground: the same pixels there, and one
+  /// value everywhere else — the move `app_chip_theme.dart`'s `_tint` makes.
+  ///
+  /// Public because the approved palette derives the same ground from it
+  /// (`test/support/app_palette.dart`): the visual audit's closure rule takes
+  /// a declared colour only as an exact token, and a copied 0.10 there would
+  /// drift the first time this one moved.
+  static const double tintAlpha = 0.10;
+
   final IconData icon;
   final MxIconTileSize size;
 
@@ -48,7 +53,7 @@ class MxIconTile extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: Color.alphaBlend(
-            context.colors.primary.withValues(alpha: _tintAlpha),
+            context.colors.primary.withValues(alpha: tintAlpha),
             context.colors.surfaceContainerLowest,
           ),
           borderRadius: BorderRadius.circular(AppRadius.sm),

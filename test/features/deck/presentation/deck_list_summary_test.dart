@@ -92,16 +92,26 @@ void main() {
       );
     });
 
-    testWidgets('the row keeps the verb the panel gave up', (tester) async {
+    testWidgets('the rows do not take the verb back', (tester) async {
       await pumpDeckScreen(
         tester,
         repository: FakeDeckRepository.withSummaries(withDue()),
         screen: const DeckListScreen(),
       );
 
-      // Removing the hero only reads as a simplification if what it pointed at
-      // is still there. It is, once per deck with something to study.
-      expect(find.text(english.deckStudyAction), findsWidgets);
+      // **The verb left the root altogether** (owner decision 7, M100.91).
+      // Removing the hero read as a simplification while every row still
+      // carried Study; the rows gave it up too, so a session starts inside a
+      // deck — the next test — or from the Study tab. What this holds now is
+      // that no row quietly grows it back.
+      expect(find.byType(DeckTileWidget), findsWidgets);
+      expect(
+        find.descendant(
+          of: find.byType(DeckTileWidget),
+          matching: find.byType(ButtonStyleButton),
+        ),
+        findsNothing,
+      );
     });
 
     testWidgets('a deck level still promises the session it starts', (

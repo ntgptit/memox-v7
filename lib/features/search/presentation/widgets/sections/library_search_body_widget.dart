@@ -189,9 +189,8 @@ class LibrarySearchBodyWidget extends StatelessWidget {
       sliver: SliverList.separated(
         itemCount: children.length,
         itemBuilder: (BuildContext context, int index) => children[index],
-        // `lg`, which `AppSpacing` defines as "the gap between list items" and
-        // which `deck_list_sliver_widget.dart` already uses for the same kind
-        // of list. `sm` here was half the row's own 12dp vertical inset, so the
+        // `lg`, which `AppSpacing` defines as "the gap between list items".
+        // `sm` here was half the row's own 12dp vertical inset, so the
         // space between two rows was tighter than the space inside one and the
         // grouping cue pointed the wrong way.
         separatorBuilder: (BuildContext context, int index) =>

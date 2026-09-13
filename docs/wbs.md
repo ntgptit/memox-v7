@@ -770,6 +770,67 @@ không nhầm chúng là một phase.
     `selectionControl` đã làm: stroke của một component lấy từ bảng dimension của
     handoff (`40×3px`), không phải stroke riêng của một màn. Test ring đỏ đúng lý
     do (thiếu `AppStroke.ring`, `AppSizing.masteryRing`, widget) trước khi sửa.
+  - PLAN-DEV-15.1 — code của plan đặt hàng deck hai dòng: tên và workload.
+    UC-06 bước 2 (đóng băng) đòi tên, tổng số card trong cây và hai số BR-150,
+    nên hàng giữ `_DeckMetaLine` (`60 cards · 4 sub-decks`) giữa tên và chip.
+    Kết quả là ba dòng cách nhau `xs`; chip là nền riêng nên không gộp được vào
+    dòng số card. Test dùng helper thật (`fakeSummary`, `pumpDeckScreen`) thay
+    cho `summaryWith`/`pumpTile` của plan, như plan cho phép. Test đỏ 6/11 (không
+    tìm thấy `MxIconTile`) trước khi sửa.
+  - PLAN-DEV-15.2 — hàng bọc `MxPressable` trong `Semantics(button: true)`,
+    đúng cách `MxCard` đánh dấu card bấm được: `InkWell` thêm action tap nhưng
+    không thêm cờ button. Nhờ vậy nhãn của ring vẫn gộp vào node của hàng, và
+    test semantics ở `deck_list_level_test` giữ nguyên. `deckTileGutter` bị xoá:
+    hàng giữ inset `lg` ở mọi độ rộng, nên PLAN-DEV-4.3 không còn đối tượng; test
+    320×2.0 xanh, không tràn. `_chipMinHeight` giữ nguyên vì hàng vẫn vẽ chip
+    workload (PLAN-DEV-2.8 còn hiệu lực).
+  - PLAN-DEV-15.3 — test cũ được dời sang đối tượng mới, không xoá:
+    - `deck_list_level_test`: Study mang id deck → ring riêng của từng hàng.
+    - `deck_list_summary_test`: "row keeps the verb" → hàng không mọc lại nút.
+    - `app_navigation_shell_test`: hit-test nút Study cuối → nút overflow của
+      hàng cuối.
+    - `deck_workload_role_test`: fill tonal của Study → ring `primary` dưới 100%
+      và track `progressTrack`; nhóm "well" → `MxIconTile` cỡ `md`.
+    - `deck_summary_new_test`: thanh 100% của card → ring `isComplete`.
+    - `deck_icon_area_test` bị xoá; bảo đảm contrast 3:1 dời sang
+      `mx_icon_tile_test` (light + dark).
+    - `deck_summary_compact_geometry_test` về lại ba hàng nguyên vẹn trên bar,
+      đóng PLAN-DEV-2.9.
+
+    ARB bỏ bốn key chỉ tile cũ đọc (`deckStudyAction`,
+    `deckRowStudySemanticLabel`, `deckTileProgressLabel`,
+    `deckTileLearnedPercentLabel`) ở cả hai locale. Bước 6 của plan được kiểm
+    trước khi xoá nút: tab Study vẫn mở phiên cho từng deck
+    (`study_home_screen.dart` → `RouteNames.studyDeck`), và panel bên trong deck
+    vẫn có CTA (`RouteNames.deckStudy`). Grep `DeckStudyButton|deckStudy` trong
+    `integration_test` rỗng. `lib/features/deck/README.md` không có đoạn tả
+    tile nên không sửa.
+  - PLAN-DEV-15.4 — screen-audit mang tag golden nên không nằm trong host suite;
+    chạy nó trên host (`--tags screen-audit`) báo ba điều plan không nêu.
+    (a) Nền `MxIconTile` (`#EEF0FE` / `#1F274E`, blend `primary` 10% trên
+    `surfaceContainerLowest`) không phải token, và `PaletteClosureRule` chỉ nhận
+    màu declared khớp đúng token. Nền được thêm vào `test/support/app_palette.dart`
+    bằng cách tính từ chính các token đó và `MxIconTile.tintAlpha` (được công
+    khai). Luật không bị nới.
+    (b) `MxMasteryRingPainter` cần allowance `customPainter`: 2 ở root, 3 ở level.
+    (c) Số đếm deck đổi theo hàng. `filledButtons` 1→0 ở root và 3→1 ở level
+    (còn CTA của panel). Thanh tiến độ chỉ còn của panel: 3→1 và 4→1.
+  - PLAN-DEV-15.5 — cùng lần chạy, hai audit ngoài deck đỏ vì token Task 9/12,
+    không vì hàng deck:
+    - settings `_RenderInkFeatures` 7→8 và clip 5→6: link reset quay lại
+      viewport 1040.
+    - progress_deck `library_mixed` 5→4 và 3→2.
+
+    Kiểm bằng tiêm lỗi: trả `rowMinHeight` về 56 và pad card chuẩn về 16 thì cả
+    hai audit xanh với số cũ (8/8); sau đó hoàn nguyên bằng `git checkout --`,
+    diff rỗng. Số đếm được dời, comment ghi nguyên nhân đã đo. Lỗi này lẽ ra chỉ
+    lộ ở gate golden cuối phase.
+  - PLAN-DEV-15.6 — code của plan đặt tên deck `maxLines: 1`, theo ListRow chung
+    của handoff. Full host suite đỏ 5 case của `deck_text_fit_test` (360/393/412
+    × 1.3/1.5): cạnh ring và nút overflow, `Academic Word List` bị cắt. Spec
+    "ListTile · deck row" không quy định số dòng, còn gate đó cấm deck list làm
+    mất chữ của một tên bình thường, và ghi rõ `maxLines: 2` là quyết định. Tên
+    giữ ngân sách hai dòng; hàng vẫn tối thiểu 48 và cao theo nội dung.
 - **Editable documents:** `docs/wbs.md`,
   `docs/design-system/tokyo-component-mapping.md`,
   `docs/design-system/listtile-deck-row-spec.md`, `lib/features/deck/README.md`,

@@ -119,7 +119,12 @@ void main() {
         // 1070.2, so two rows *begin* on surface where the same fixture put one
         // at 772…936.4 and never built the second. One more `InkWell` host, one
         // more clip: 5 `_RenderInkFeatures` and 3 `CustomPaint (no painter)`.
-        tappableCards: 1,
+        //
+        // **Zero again since M100.91**, and measured the same way. The 20 card
+        // interior and 48 rows moved the sections, and the audit reads 4 ink
+        // layers and 2 clips. Putting `rowMinHeight` back to 56 and the
+        // standard card padding back to 16 restores 5 and 3, so the count
+        // follows the tokens, not a change to the row.
         pills: 2,
         // No search on this branch.
         hasSearchField: false,

@@ -1,10 +1,10 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 743,
-  "totalSites": 350,
+  "scannedFiles": 741,
+  "totalSites": 349,
   "byElementKind": {
     "other": 311,
-    "background": 27,
+    "background": 26,
     "border": 10,
     "shadow": 1,
     "text": 1
@@ -15,7 +15,7 @@
     "blend-source": 6,
     "Colors-material": 14,
     "hardcoded-literal": 108,
-    "theme-token": 30
+    "theme-token": 29
   },
   "sites": [
     {
@@ -3617,7 +3617,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 194,
+      "line": 190,
       "widget_context": "_ProgressRing",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3628,7 +3628,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 195,
+      "line": 191,
       "widget_context": "_ProgressRing",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -3647,17 +3647,6 @@
       "token": "colorScheme.secondaryContainer",
       "resolved_value_light": "#E3E6F7",
       "resolved_value_dark": "#343C78"
-    },
-    {
-      "file": "lib/features/deck/presentation/widgets/items/deck_icon_area_widget.dart",
-      "line": 81,
-      "widget_context": "DeckIconArea",
-      "element_kind": "background",
-      "source_kind": "theme-token",
-      "expression": "context.semanticColors.surfaceMuted",
-      "token": "semantic.surfaceMuted",
-      "resolved_value_light": "#E9EDF7",
-      "resolved_value_dark": "#232B5A"
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_subheader_widget.dart",
@@ -3804,18 +3793,18 @@
     },
     {
       "file": "lib/shared/widgets/mx_icon_tile.dart",
-      "line": 51,
+      "line": 56,
       "widget_context": "MxIconTile",
       "element_kind": "background",
       "source_kind": "blend-source",
-      "expression": "context.colors.primary.withValues(alpha: _tintAlpha)",
+      "expression": "context.colors.primary.withValues(alpha: tintAlpha)",
       "token": "colorScheme.primary",
       "resolved_value_light": "#5265F5",
       "resolved_value_dark": "#8B9AFF"
     },
     {
       "file": "lib/shared/widgets/mx_icon_tile.dart",
-      "line": 51,
+      "line": 56,
       "widget_context": "MxIconTile",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -3826,7 +3815,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_icon_tile.dart",
-      "line": 52,
+      "line": 57,
       "widget_context": "MxIconTile",
       "element_kind": "background",
       "source_kind": "theme-token",

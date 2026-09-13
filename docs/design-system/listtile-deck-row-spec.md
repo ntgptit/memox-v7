@@ -7,8 +7,8 @@
 | **Scope** | Hình học, icon, state matrix của riêng component này, và điểm nó xung đột với code/kiến trúc hiện tại. Ngoài phạm vi: giá trị token nền tảng (đã đóng băng, xem AD-14 và `v1-freeze.md`), quyết định có build lại màn Library hay không — đó là quyết định của chủ dự án, nêu ở §5 chứ không tự chốt ở đây |
 | **Source of truth for** | Bảng đối chiếu dimension/icon/state của "ListTile · deck row" so với `MxListTile` + `DeckIconArea` hiện có |
 | **Depends on** | `document-conventions.md` · `tokyo-component-mapping.md` §7 · `v1-freeze.md` §2/§3/§3a · `architecture.md` (AD-14, AD-15) |
-| **Updated by task** | chưa có task ID trong `wbs.md` — sinh từ prompt "ListTile · deck row" trên nhánh `claude/listtile-deck-row-spec-a9a136`, chưa gán WBS |
-| **Last updated** | 2026-09-12 |
+| **Updated by task** | M100.91 (§5 đã quyết) — bản gốc sinh từ prompt "ListTile · deck row" trên nhánh `claude/listtile-deck-row-spec-a9a136` |
+| **Last updated** | 2026-09-14 |
 
 ---
 
@@ -120,6 +120,19 @@ phải đề xuất.
 ---
 
 ## 5. Xung đột cần chủ dự án quyết định, không tự chốt ở đây
+
+**Đã quyết (M100.91, 2026-09-13):** chủ dự án chọn hàng theo handoff (owner
+decision 7, đảo M4.12). `DeckTileWidget` giờ là một hàng cao tối thiểu
+`AppSizing.rowMinHeight` (48). Các hàng gom trên một `MxCard` + `MxRowGroup`,
+mỗi hàng gồm: `MxIconTile` (36) · tên, dòng số card (UC-06), workload line ·
+`MxMasteryRing` · nút overflow.
+
+- Ring hiển thị `learnedFraction`. Ring chỉ đổi sang `mastery` khi
+  `isFullyLearned` (BR-88, D8).
+- Nút Study rời hàng. Phiên học mở từ tab Study hoặc từ bên trong deck.
+
+§5a–§5c bên dưới giữ nguyên làm bối cảnh lúc viết; chúng không còn là câu hỏi
+mở.
 
 ### 5a. "The backbone of Library" đối đầu trực tiếp với quyết định M4.12
 
