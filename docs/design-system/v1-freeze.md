@@ -7,8 +7,8 @@
 | **Scope** | Foundation, theme mapping, shared primitive contract, a11y floor, golden authoring policy. Ngoài phạm vi: **composition của từng màn hình nghiệp vụ** (không đóng băng), giá trị token cụ thể (AD-14), hợp đồng component-level (`.claude/skills/flutter-theme-design/`) |
 | **Source of truth for** | Freeze record của V1 · danh sách hợp đồng đóng băng · reopen trigger · bản đồ enforcement cho từng hợp đồng · ràng buộc lên task feature |
 | **Depends on** | `document-conventions.md` · `architecture.md` (AD-14, AD-15, AD-23) · `design-system/theme-architecture.md` · `reviews/a20-1-design-system-reconciliation.md` (bằng chứng lịch sử) |
-| **Updated by task** | M100.85 |
-| **Last updated** | 2026-09-13 |
+| **Updated by task** | M100.88 |
+| **Last updated** | 2026-09-14 |
 
 ---
 
@@ -228,11 +228,15 @@ PR bị đóng, không merge.
 - Bản ghi này không đụng tới thứ tự ưu tiên ở `tokyo-component-mapping.md` §1 hay
   mục *Material 3 first* của `CLAUDE.md`. Chỗ kit mâu thuẫn với role canonical
   của M3 — ví dụ fill `primary` so với `primaryContainer` của FAB, hay accent
-  theo mode học — SHOULD được hỏi chủ dự án theo từng ca, thay vì tự chọn một
-  phía.
+  theo mode học — đã được chủ dự án trả lời chung ngày 2026-09-13: kit thắng,
+  không hỏi lại từng ca (`tokyo-component-mapping.md` §9, quyết định 4 và 8).
+  Chỉ chỗ handoff im lặng mới cần một quyết định mới, và nó được ghi vào §9.
 
-**Nguồn thiết kế đang nằm ngoài repo.** Bản handoff hiện chỉ có trên máy của chủ
-dự án, nên session cloud không đọc được nó.
+**Nguồn thiết kế nằm trong repo từ M100.88:**
+`docs/design-system/handoff/memox-flutter-handoff.json` — bản sao nguyên byte của
+file chủ dự án đưa ngày 2026-09-13. Session cloud và subagent đọc được nó. Kế
+hoạch thực hiện: `docs/superpowers/plans/2026-09-13-tokyo-handoff-redesign.md`;
+các chỗ handoff im lặng được ghi ở `tokyo-component-mapping.md` §9.
 
 **Khi redesign xong,** V1 SHOULD được đóng băng lại bằng một freeze record mới ở
 §1. Khi đó §2 mô tả hệ thống đã redesign, không phải hệ thống trước M100.85.
