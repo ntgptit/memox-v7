@@ -705,6 +705,13 @@ không nhầm chúng là một phase.
   - PLAN-DEV-2.10 — `card_import_states_test.dart` bỏ khẳng định "không phải
     `sectionLabelSmall`" ngay ở Task 2 thay vì Task 11: D1 đưa hai rung về cùng
     caption 12px nên size không còn phân biệt được.
+  - PLAN-DEV-2.11 — audit UI trên golden đã author (P1): specimen
+    `/ɪˈfem(ə)rəl/` vẽ `ɪ` và `ˈ` thành ô lỗi, vì Plus Jakarta Sans không có
+    U+026A, U+02C8, U+0283, U+02D0 mà Inter từng mang. Theo tiền lệ M100.49
+    (kana, Han), IPA ngoài bundle là việc của nền tảng: IT-PLAT-009 thêm probe
+    IPA và xanh trên `emulator-5554`; specimen golden được viết lại bằng chữ
+    Latin trong bundle; doc `AppTypography.cjkFallbackFamily` và
+    `flutter_test_config.dart` ghi rõ.
   - PLAN-DEV-3.1 — plan nói không test nào ghim `stateLayerPressed`, nhưng
     `mx_action_button_composite_state_test.dart` ghim sàn contrast của nhãn
     khi nhấn mà chủ dự án chấp nhận ở M100.87 (3.9 / 4.1, đo với 10%). Với

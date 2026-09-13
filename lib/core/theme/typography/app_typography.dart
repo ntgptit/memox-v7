@@ -57,8 +57,9 @@ abstract final class AppTypography {
   /// the app. They were there to cover kana and Han. Android is the only
   /// release target and has shipped `NotoSansCJK-Regular.ttc` since Lollipop,
   /// so every phone was carrying those characters twice. `IT-PLAT-009` renders
-  /// all four scripts on a real device behind an *empty* fallback and reads the
-  /// raster back, against a private-use control so tofu cannot pass as a glyph.
+  /// those scripts, and IPA since M100.89, on a real device behind an *empty*
+  /// fallback and reads the raster back, against a private-use control so tofu
+  /// cannot pass as a glyph.
   ///
   /// **Korean stays because it is what the app is for.** The card prompt is set
   /// at 32 and Hangul is the text it exists to show; leaving the app's largest
@@ -73,6 +74,12 @@ abstract final class AppTypography {
   /// characters in Japanese forms for every reader — not a bug, but the best a
   /// fixed list can do, because it cannot know which convention a card belongs
   /// to and the platform can.
+  ///
+  /// **IPA joined the long tail at M100.89.** Inter carried IPA Extensions and
+  /// the spacing modifier letters; Plus Jakarta Sans does not (`ɪ`, `ˈ`, `ʃ`
+  /// and `ː` are missing), so a pronunciation typed in IPA draws those glyphs
+  /// from the platform. IT-PLAT-009 probes them on a device, and no golden
+  /// draws them, for the reason no golden draws kana or Han.
   ///
   /// **The face is subset, and what was dropped is a decision, not a default.**
   /// It keeps the Hangul syllables, the compatibility jamo, CJK punctuation and
