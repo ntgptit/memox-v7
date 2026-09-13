@@ -3,91 +3,91 @@
   "light": {
     "borderProminence": {
       "semantic.borderSubtle on card (colorScheme.surface)": {
-        "ratio": 1.1351908056380269,
+        "ratio": 1.530538483698375,
         "verdict": "in-band"
       },
       "semantic.borderSubtle on page (scaffoldBackgroundColor)": {
-        "ratio": 1.1351908056380269,
+        "ratio": 1.530538483698375,
         "verdict": "in-band"
       },
       "semantic.borderSubtle on muted tile (semantic.surfaceMuted)": {
-        "ratio": 1.0393328963783262,
-        "verdict": "invisible"
+        "ratio": 1.3758611044687459,
+        "verdict": "in-band"
       },
       "colorScheme.outline on card (colorScheme.surface)": {
-        "ratio": 3.7059335651693224,
+        "ratio": 3.437235896611215,
         "verdict": "too-heavy"
       },
       "colorScheme.outline on page (scaffoldBackgroundColor)": {
-        "ratio": 3.7059335651693224,
+        "ratio": 3.437235896611215,
         "verdict": "too-heavy"
       },
       "colorScheme.outline on muted tile (semantic.surfaceMuted)": {
-        "ratio": 3.392996707640056,
+        "ratio": 3.089866231657006,
         "verdict": "too-heavy"
       },
       "colorScheme.outlineVariant on card (colorScheme.surface)": {
-        "ratio": 1.1351908056380269,
+        "ratio": 1.530538483698375,
         "verdict": "in-band"
       },
       "colorScheme.outlineVariant on page (scaffoldBackgroundColor)": {
-        "ratio": 1.1351908056380269,
+        "ratio": 1.530538483698375,
         "verdict": "in-band"
       },
       "colorScheme.outlineVariant on muted tile (semantic.surfaceMuted)": {
-        "ratio": 1.0393328963783262,
-        "verdict": "invisible"
+        "ratio": 1.3758611044687459,
+        "verdict": "in-band"
       }
     },
     "backgroundTint": {
       "page": {
-        "hex": "#F2F5F9",
-        "hue": 214.28571428571414,
-        "saturation": 0.36842105263157826,
+        "hex": "#F7F9FE",
+        "hue": 222.85714285714292,
+        "saturation": 0.7777777777777809,
         "chroma": 0.027450980392156876,
         "isPureNeutral": false
       },
       "surface": {
-        "hex": "#F2F5F9",
-        "hue": 214.28571428571414,
-        "saturation": 0.36842105263157826,
+        "hex": "#F7F9FE",
+        "hue": 222.85714285714292,
+        "saturation": 0.7777777777777809,
         "chroma": 0.027450980392156876,
         "isPureNeutral": false
       }
     },
     "neutralFamilyCoherence": {
       "page": {
-        "hex": "#F2F5F9",
-        "hue": 214.28571428571414,
+        "hex": "#F7F9FE",
+        "hue": 222.85714285714292,
         "chroma": 0.027450980392156876
       },
       "surface": {
-        "hex": "#F2F5F9",
-        "hue": 214.28571428571414,
+        "hex": "#F7F9FE",
+        "hue": 222.85714285714292,
         "chroma": 0.027450980392156876
       },
       "surfaceMuted": {
-        "hex": "#E9EBEE",
-        "hue": 216.00000000000014,
-        "chroma": 0.019607843137254943
+        "hex": "#E9EDF7",
+        "hue": 222.8571428571428,
+        "chroma": 0.05490196078431375
       },
       "borderSubtle": {
-        "hex": "#E4E7EA",
-        "hue": 210.0,
-        "chroma": 0.0235294117647058
+        "hex": "#C5CBE3",
+        "hue": 228.00000000000006,
+        "chroma": 0.11764705882352933
       },
       "onSurfaceVariant": {
-        "hex": "#596680",
-        "hue": 220.0,
-        "chroma": 0.15294117647058825
+        "hex": "#4A5278",
+        "hue": 229.56521739130434,
+        "chroma": 0.18039215686274507
       }
     },
     "depthMechanism": {
       "surfaceVsPage": 1.0,
-      "borderVsSurface": 1.1351908056380269,
-      "borderVsPage": 1.1351908056380269,
+      "borderVsSurface": 1.530538483698375,
+      "borderVsPage": 1.530538483698375,
       "cardElevation": 1.0,
-      "boxShadowSitesInLib": 3,
+      "boxShadowSitesInLib": 1,
       "usesShadow": true,
       "shadowNote": "MxCard paints its own BoxShadow from AppElevation rather than going through Material elevation, so cardTheme.elevation stays 0 and the shadow site count is what says whether the app is flat. Light only: a dark shadow moves the page by dL* 0.26 against a surface step of 7.70, so dark keeps its ladder instead."
     }
@@ -95,91 +95,91 @@
   "dark": {
     "borderProminence": {
       "semantic.borderSubtle on card (colorScheme.surface)": {
-        "ratio": 1.4117591204006499,
+        "ratio": 1.584176685510173,
         "verdict": "in-band"
       },
       "semantic.borderSubtle on page (scaffoldBackgroundColor)": {
-        "ratio": 1.4117591204006499,
+        "ratio": 1.584176685510173,
         "verdict": "in-band"
       },
       "semantic.borderSubtle on muted tile (semantic.surfaceMuted)": {
-        "ratio": 1.0554269729461483,
-        "verdict": "invisible"
+        "ratio": 1.1188063571698583,
+        "verdict": "in-band"
       },
       "colorScheme.outline on card (colorScheme.surface)": {
-        "ratio": 4.679220125810139,
+        "ratio": 3.754698102584543,
         "verdict": "too-heavy"
       },
       "colorScheme.outline on page (scaffoldBackgroundColor)": {
-        "ratio": 4.679220125810139,
+        "ratio": 3.754698102584543,
         "verdict": "too-heavy"
       },
       "colorScheme.outline on muted tile (semantic.surfaceMuted)": {
-        "ratio": 3.4981712260735733,
+        "ratio": 2.6517118607084913,
         "verdict": "too-heavy"
       },
       "colorScheme.outlineVariant on card (colorScheme.surface)": {
-        "ratio": 1.4117591204006499,
+        "ratio": 1.584176685510173,
         "verdict": "in-band"
       },
       "colorScheme.outlineVariant on page (scaffoldBackgroundColor)": {
-        "ratio": 1.4117591204006499,
+        "ratio": 1.584176685510173,
         "verdict": "in-band"
       },
       "colorScheme.outlineVariant on muted tile (semantic.surfaceMuted)": {
-        "ratio": 1.0554269729461483,
-        "verdict": "invisible"
+        "ratio": 1.1188063571698583,
+        "verdict": "in-band"
       }
     },
     "backgroundTint": {
       "page": {
-        "hex": "#070C27",
-        "hue": 230.625,
-        "saturation": 0.6956521739130433,
-        "chroma": 0.12549019607843137,
+        "hex": "#0A0E27",
+        "hue": 231.7241379310345,
+        "saturation": 0.5918367346938777,
+        "chroma": 0.11372549019607844,
         "isPureNeutral": false
       },
       "surface": {
-        "hex": "#070C27",
-        "hue": 230.625,
-        "saturation": 0.6956521739130433,
-        "chroma": 0.12549019607843137,
+        "hex": "#0A0E27",
+        "hue": 231.7241379310345,
+        "saturation": 0.5918367346938777,
+        "chroma": 0.11372549019607844,
         "isPureNeutral": false
       }
     },
     "neutralFamilyCoherence": {
       "page": {
-        "hex": "#070C27",
-        "hue": 230.625,
-        "chroma": 0.12549019607843137
+        "hex": "#0A0E27",
+        "hue": 231.7241379310345,
+        "chroma": 0.11372549019607844
       },
       "surface": {
-        "hex": "#070C27",
-        "hue": 230.625,
-        "chroma": 0.12549019607843137
+        "hex": "#0A0E27",
+        "hue": 231.7241379310345,
+        "chroma": 0.11372549019607844
       },
       "surfaceMuted": {
-        "hex": "#21274C",
-        "hue": 231.62790697674419,
-        "chroma": 0.16862745098039214
+        "hex": "#232B5A",
+        "hue": 231.27272727272728,
+        "chroma": 0.21568627450980393
       },
       "borderSubtle": {
-        "hex": "#272C48",
-        "hue": 230.9090909090909,
-        "chroma": 0.12941176470588234
+        "hex": "#2A3267",
+        "hue": 232.1311475409836,
+        "chroma": 0.23921568627450981
       },
       "onSurfaceVariant": {
-        "hex": "#9395A2",
-        "hue": 231.99999999999991,
-        "chroma": 0.05882352941176472
+        "hex": "#A4ACD0",
+        "hue": 229.0909090909091,
+        "chroma": 0.17254901960784308
       }
     },
     "depthMechanism": {
       "surfaceVsPage": 1.0,
-      "borderVsSurface": 1.4117591204006499,
-      "borderVsPage": 1.4117591204006499,
+      "borderVsSurface": 1.584176685510173,
+      "borderVsPage": 1.584176685510173,
       "cardElevation": 1.0,
-      "boxShadowSitesInLib": 3,
+      "boxShadowSitesInLib": 1,
       "usesShadow": true,
       "shadowNote": "MxCard paints its own BoxShadow from AppElevation rather than going through Material elevation, so cardTheme.elevation stays 0 and the shadow site count is what says whether the app is flat. Light only: a dark shadow moves the page by dL* 0.26 against a surface step of 7.70, so dark keeps its ladder instead."
     }
