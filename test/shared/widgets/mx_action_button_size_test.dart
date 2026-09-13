@@ -52,7 +52,7 @@ void main() {
     expect(target, greaterThanOrEqualTo(AppSizing.touchTarget));
   });
 
-  testWidgets('compact draws 40', (tester) async {
+  testWidgets('compact draws 36', (tester) async {
     final (body, target) = await pump(tester, MxActionButtonSize.compact);
 
     expect(body, AppSizing.buttonCompact);
