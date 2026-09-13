@@ -260,6 +260,51 @@ void main() {
       expect(size.height, AppSizing.fab);
       expect(size.width, greaterThanOrEqualTo(AppSizing.touchTarget));
     });
+
+    testWidgets('the longest label fits a 320x568 phone at textScale 2.0', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(320, 568);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
+      // `deckCreateSubDeckAction` in Vietnamese: the longest label a screen
+      // gives the FAB.
+      const label = 'Bộ thẻ con mới';
+      await tester.pumpWidget(
+        host(
+          Builder(
+            builder: (context) => MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: const TextScaler.linear(2)),
+              child: Scaffold(
+                floatingActionButton: MxFab(
+                  icon: Icons.add,
+                  label: label,
+                  onPressed: () {},
+                ),
+                body: const SizedBox.shrink(),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      // Measured, not read off `takeException`: the SDK lays the extended
+      // FAB's row out unconstrained inside `_ChildOverflowBox` and centres it,
+      // so a label too long for the screen spills past both edges and raises
+      // no overflow error.
+      final fab = tester.getRect(find.byType(FloatingActionButton));
+      final text = tester.getRect(find.text(label));
+      expect(fab.left, greaterThanOrEqualTo(0));
+      expect(fab.right, lessThanOrEqualTo(320));
+      expect(text.left, greaterThanOrEqualTo(fab.left));
+      expect(text.right, lessThanOrEqualTo(fab.right));
+      expect(text.top, greaterThanOrEqualTo(fab.top));
+      expect(text.bottom, lessThanOrEqualTo(fab.bottom));
+    });
   });
 
   group('MxLoadingState', () {

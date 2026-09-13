@@ -701,6 +701,18 @@ không nhầm chúng là một phase.
     sách độ sâu"). FAB giờ để elevation Material `none` và `MxFab` vẽ
     `shadow-fab` ở mức `AppElevation.overlay`, nên pin tách riêng; wash của FAB
     theo `onPrimary`. `design_audit` đếm thêm hai site `opacity-modified-token`.
+- **Audit notes:**
+  - UI P1 (FAB chỉ có wash focus, `onPrimary` 10% trên `primary` đo 1.18–1.19:1)
+    đã có trả lời trong `tokyo-component-mapping.md` §8: FAB là ngoại lệ wash-only
+    được chấp nhận từ M100.36 (#451). Phase 2 chỉ đổi cặp màu theo owner decision
+    4, cơ chế giữ nguyên; handoff FAB không có state focus. Là debt, không sửa ở
+    phase này: nếu cần vòng focus riêng cho FAB thì chủ dự án quyết lại dòng §8.
+  - UI P2 (nhãn FAB chưa có pin ở 320×568, textScale 2.0): pin `getRect` riêng
+    trong nhóm `MxFab` của `mx_components_test.dart`, nhãn VI dài nhất
+    (`deckCreateSubDeckAction`): FAB nằm trong 320 và nhãn nằm trong FAB. Không
+    dùng `takeException`: SDK layout hàng của FAB extended trong
+    `_ChildOverflowBox` với ràng buộc rỗng, nên nhãn tràn không báo overflow —
+    lần fault-inject đầu với nhãn dài vẫn xanh.
 - **Editable documents:** `docs/wbs.md`,
   `docs/design-system/tokyo-component-mapping.md`,
   `docs/superpowers/plans/2026-09-13-tokyo-handoff-redesign.md` (ghi deviation).
