@@ -183,7 +183,7 @@ void main() {
         // to `MxIconTile` and are measured in `mx_icon_tile_test.dart`; a
         // state that wanted a red square would have to pass something here,
         // and the tile takes nothing but a glyph and a size.
-        expect(icon.size, MxIconTileSize.md);
+        expect(icon.size, MxIconTileSize.sm);
         expect(icon.icon, isNot(Icons.event_busy));
         expect(icon.icon, isNot(Icons.event));
       });

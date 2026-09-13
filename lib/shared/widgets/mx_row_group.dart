@@ -14,6 +14,11 @@ enum MxRowDividerInset {
 /// Handoff ListRow grouping: rows on one surface, a hairline between each
 /// pair, none after the last. The divider is the theme's (`outlineVariant`,
 /// hairline — D2); this widget only decides where it goes.
+///
+/// **A row that leads with a tile owes the [MxRowDividerInset.leading] indent
+/// its text column**: `AppSpacing.lg` inset, `MxIconTileSize.sm`, `AppSpacing.md`
+/// gap — 56, the handoff Divider's indent. `app_sizing_test` pins the sum; the
+/// Library, search and tag geometry tests pin each row's laid-out text on it.
 class MxRowGroup extends StatelessWidget {
   const MxRowGroup({
     required this.children,

@@ -27,9 +27,9 @@ import '../../../domain/models/tag_catalog_entry_model.dart';
 /// **Every row leads with the same tile, the same glyph, the same tone.** The
 /// handoff IconTile (M100.91) gives a long catalog a scannable left rhythm the
 /// way Card Detail's bands lead with a mark; it carries no per-tag colour and
-/// no meaning beyond
-/// "this is a tag", because a tag is a text identifier in v1 (M4.14 T9) and a
-/// tone that varied would invent a hierarchy BR-230 does not have.
+/// no meaning beyond "this is a tag", because a tag is a text identifier in v1
+/// (M4.14 T9) and a tone that varied would invent a hierarchy BR-230 does not
+/// have.
 ///
 /// **No chip, no colour, no card preview** (M4.14 T9). The only fact worth
 /// showing beside the name is the one that decides whether to rename it or
@@ -49,12 +49,17 @@ class TagCatalogRowWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      // `xs` on the trailing side, not `md`: the menu's 48dp anchor carries
-      // ~12dp of its own internal inset, so `xs` outside puts the glyph
-      // optically where `md` puts the well — and G4 measures the *target*
-      // against the row edge, which stays inside it either way.
+      // `xs` on the trailing side: the menu's 48dp anchor carries ~12dp of its
+      // own internal inset, so `xs` outside puts the glyph on the 16 gutter —
+      // and G4 measures the *target* against the row edge, which stays inside
+      // it either way.
+      //
+      // **`lg` leading, with the small tile**, the inset every grouped row
+      // shares: 16 + 28 + 12 puts the name on the handoff Divider's 56 indent
+      // (UI audit P2, M100.91). It was `md` beside the 36 tile, which left the
+      // text at 60 under a 56 hairline.
       padding: const EdgeInsets.fromLTRB(
-        AppSpacing.md,
+        AppSpacing.lg,
         AppSpacing.sm,
         AppSpacing.xs,
         AppSpacing.sm,
@@ -62,7 +67,7 @@ class TagCatalogRowWidget extends StatelessWidget {
       child: Row(
         children: <Widget>[
           // Decorative: the row's text says "tag" better than the glyph.
-          const MxIconTile(icon: Icons.sell_outlined),
+          const MxIconTile(icon: Icons.sell_outlined, size: MxIconTileSize.sm),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(

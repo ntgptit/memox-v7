@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/features/search/domain/models/search_page_model.dart';
 import 'package:memox/features/search/domain/models/search_query_model.dart';
 import 'package:memox/features/search/domain/models/search_cursor_model.dart';
@@ -338,6 +339,15 @@ void main() {
       expect(
         find.descendant(of: rows, matching: find.byType(MxIconTile)),
         findsNWidgets(3),
+      );
+      // The text column — one `md` past the tile — starts where the hairline
+      // does (UI audit P2, M100.91).
+      final hairline = tester.getRect(
+        find.descendant(of: rows, matching: find.byType(Divider)).first,
+      );
+      expect(
+        tester.getRect(find.byType(MxIconTile).first).right + AppSpacing.md,
+        hairline.left + AppSizing.listDividerIndent,
       );
       expect(
         tester.getSize(find.byType(CardResultTileWidget).first).height,

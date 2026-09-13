@@ -856,6 +856,18 @@ không nhầm chúng là một phase.
     layer và một clip như card bấm được trước đó, và nền tile đã có trong
     palette từ Task 15. Doc `AppSizing.controlDense` bỏ "catalog row" khỏi danh
     sách nơi dùng 32.
+  - PLAN-DEV-16.4 — plan cho hàng deck và hàng kết quả search dùng `MxIconTile`
+    cỡ mặc định `md` (36). UI audit pass 1 báo P2: hairline của `MxRowGroup` ở
+    56 (Divider handoff `indent 0 / 56` FIXED), còn cột chữ ở 64 (deck, search)
+    và 60 (tag). Handoff cố định tile 28/36/44, gutter 16, gap nhóm 12 và
+    indent 56; bốn giá trị chỉ khớp nhau ở tile `sm`: 16 + 28 + 12 = 56. Cả ba
+    hàng dùng tile `sm` và inset `lg` (hàng tag trước là `md`). Reviewer đề xuất
+    inset 8, nhưng 8 không phải vai trò inset của hàng trong thang spacing của
+    handoff, còn đẩy indent lên 64 thì trái giá trị FIXED. Pin: tổng số học ở
+    `app_sizing_test`; chữ đã layout nằm đúng mép hairline ở
+    `deck_tile_geometry_test`, `library_search_states_test` và
+    `tag_catalog_surface_test`. Test đỏ 7 lần trước khi sửa (chữ ở 80/76 thay
+    vì 72, tile `md` thay vì `sm`).
 - **Editable documents:** `docs/wbs.md`,
   `docs/design-system/tokyo-component-mapping.md`,
   `docs/design-system/listtile-deck-row-spec.md`, `lib/features/deck/README.md`,

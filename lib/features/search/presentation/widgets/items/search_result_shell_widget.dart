@@ -77,7 +77,9 @@ class SearchResultShellWidget extends StatelessWidget {
               child: ExcludeSemantics(
                 child: Row(
                   children: <Widget>[
-                    MxIconTile(icon: icon),
+                    // `sm`: with the 16 inset and 12 gap the text lands on
+                    // the 56 hairline its section card draws (UI audit P2).
+                    MxIconTile(icon: icon, size: MxIconTileSize.sm),
                     const SizedBox(width: AppSpacing.md),
                     Expanded(child: child),
                     const SizedBox(width: AppSpacing.sm),

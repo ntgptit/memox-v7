@@ -80,7 +80,9 @@ abstract final class AppSizing {
   static const double rowMinHeight = 48;
 
   /// Where a row divider starts when the rows lead with a tile (handoff
-  /// Divider `indent 0 / 56`): past the leading column, under the text.
+  /// Divider `indent 0 / 56`): past the leading column, under the text. It is
+  /// under the text only because `lg` + [iconTileSm] + `md` add up to it —
+  /// the sum `app_sizing_test` pins (UI audit P2, M100.91).
   static const double listDividerIndent = 56;
 
   /// Handoff MasteryRing extent (`40×3px`). A painted mark, not a control: the

@@ -113,6 +113,16 @@ void main() {
           AppSizing.listDividerIndent,
         );
       }
+
+      // And the text column starts exactly there (UI audit P2, M100.91): the
+      // row's inset, the tile and its gap add up to the handoff's 56.
+      expect(
+        tester.getRect(find.text('food')).left,
+        moreOrLessEquals(
+          surface.left + AppSizing.listDividerIndent,
+          epsilon: kTagEpsilon,
+        ),
+      );
     });
 
     testWidgets('an error arriving after data takes the search with it '

@@ -41,14 +41,19 @@ class DeckStatusIconWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The handoff IconTile at `md` (36) — `primary` at 10% under a `primary`
-    // glyph (M100.91). It replaced the feature's own 48 well, whose walk
-    // through seven recipes had already settled on the glyph as the one brand
-    // mark; the tile keeps that and takes the handoff's size.
+    // The handoff IconTile — `primary` at 10% under a `primary` glyph
+    // (M100.91). It replaced the feature's own 48 well, whose walk through
+    // seven recipes had already settled on the glyph as the one brand mark.
+    //
+    // **`sm` (28), because of the hairline, not the row.** The row's 16 inset
+    // and 12 gap put the text at 56 — the handoff Divider's indent — only with
+    // the small tile; at `md` the hairline started 8 short of the name (UI
+    // audit P2). `app_sizing_test` pins the sum.
     final tile = MxIconTile(
       icon: contentType == DeckContentType.card
           ? Icons.style_outlined
           : Icons.folder_outlined,
+      size: MxIconTileSize.sm,
     );
 
     if (status != DeckScheduleStatus.overdue) return tile;

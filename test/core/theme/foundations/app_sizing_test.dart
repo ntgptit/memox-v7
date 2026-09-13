@@ -120,4 +120,14 @@ void main() {
       });
     }
   });
+
+  test('a row that leads with a tile puts its text on the divider indent', () {
+    // The handoff fixes the icon tile steps, the 16 gutter, the 12 grouped gap
+    // and the Divider indent (`0 / 56`); they agree only at the small tile
+    // (UI audit P2, M100.91). A step that moves alone fails here.
+    expect(
+      AppSpacing.lg + AppSizing.iconTileSm + AppSpacing.md,
+      AppSizing.listDividerIndent,
+    );
+  });
 }

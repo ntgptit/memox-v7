@@ -81,7 +81,9 @@ void main() {
       final overflow = tester.getRect(onTile(find.byType(MxIconButton)));
 
       expect(tile.left - row.left, AppSpacing.lg);
-      expect(tile.size, const Size.square(AppSizing.iconTileMd));
+      // The small tile: with the 16 inset and the 12 gap it is the one step
+      // that puts the text on the handoff's 56 hairline (UI audit P2).
+      expect(tile.size, const Size.square(AppSizing.iconTileSm));
       // The text column starts one `md` past the tile, and every line of it
       // on that one axis.
       expect(title.left - tile.right, AppSpacing.md);
@@ -144,6 +146,13 @@ void main() {
       expect(
         tester.widget<Divider>(hairlines.first).indent,
         AppSizing.listDividerIndent,
+      );
+      // **The hairline starts under the text, not under the tile** (UI audit
+      // P2, M100.91). Pinned on the laid-out name, so a tile or inset that
+      // moves alone pulls the two apart here.
+      expect(
+        tester.getRect(find.text('Verbs')).left,
+        tester.getRect(hairlines.first).left + AppSizing.listDividerIndent,
       );
       // Nothing between two rows but the hairline.
       final hairline = tester.getRect(hairlines.first);
