@@ -253,12 +253,12 @@ void main() {
           inRow(find.textContaining(english.studyHomeOverdueWord)).first,
         );
 
-        expect(icon.height, AppIconSize.sm);
-        expect(icon.width, AppIconSize.sm);
+        expect(icon.height, AppIconSize.xs);
+        expect(icon.width, AppIconSize.xs);
         expect(label.left - well.right, AppSpacing.xs);
         // The glyph sits centred in its well, `xs` on every side — the shape
         // `MxMetricWell` fixes for all three screens.
-        expect(well.height, AppIconSize.sm + 2 * AppSpacing.xs);
+        expect(well.height, AppIconSize.xs + 2 * AppSpacing.xs);
         expect(icon.center.dy, well.center.dy);
         // The well rides the same band as the text it belongs to: the row is
         // baseline-aligned, so an anchor drifting off that band would read as a

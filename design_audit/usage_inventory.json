@@ -3309,7 +3309,7 @@
     },
     {
       "file": "lib/core/theme/states/app_interaction_states.dart",
-      "line": 218,
+      "line": 220,
       "widget_context": "AppInteractionStates",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -3320,7 +3320,7 @@
     },
     {
       "file": "lib/core/theme/states/app_interaction_states.dart",
-      "line": 221,
+      "line": 223,
       "widget_context": "AppInteractionStates",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -3331,7 +3331,7 @@
     },
     {
       "file": "lib/core/theme/states/app_interaction_states.dart",
-      "line": 224,
+      "line": 226,
       "widget_context": "AppInteractionStates",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",

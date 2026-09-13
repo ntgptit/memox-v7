@@ -98,9 +98,9 @@ ButtonStyle buildOutlinedIconButtonStyle(
   }),
   // A circle, because an edge makes the shape readable and the app's
   // `AppRadius.md` squircle then reads as a rounded box beside a round one.
-  // `pill` is the existing token for "as round as this box gets" — the same one
+  // `full` is the existing token for "as round as this box gets" — the same one
   // the progress track clips with — so this adds no radius value.
   shape: WidgetStateProperty.all(
-    RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.pill)),
+    RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.full)),
   ),
 );

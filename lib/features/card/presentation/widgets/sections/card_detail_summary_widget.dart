@@ -187,12 +187,12 @@ class _SchedulerBadge extends StatelessWidget {
           ),
           decoration: BoxDecoration(
             color: semantic.surfaceMuted,
-            borderRadius: BorderRadius.circular(AppRadius.pill),
+            borderRadius: BorderRadius.circular(AppRadius.full),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              const MxIcon(Icons.bolt, ink: AppInk.accent, size: MxIconSize.sm),
+              const MxIcon(Icons.bolt, ink: AppInk.accent, size: MxIconSize.xs),
               const SizedBox(width: AppSpacing.xs),
               // **No `Flexible` here, and that is deliberate.** This badge is a
               // non-flex child of the hero's `Row`, so it is measured against an
@@ -254,7 +254,7 @@ class _FlagChip extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: semantic.dueContainer,
-        borderRadius: BorderRadius.circular(AppRadius.pill),
+        borderRadius: BorderRadius.circular(AppRadius.full),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -262,7 +262,7 @@ class _FlagChip extends StatelessWidget {
           const MxIcon(
             Icons.flag,
             ink: AppInk.onDueContainer,
-            size: MxIconSize.sm,
+            size: MxIconSize.xs,
           ),
           const SizedBox(width: AppSpacing.xs),
           // `Flexible`, because a `Row` hands an unbounded main axis to a

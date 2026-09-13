@@ -458,7 +458,7 @@ class MxActionButton extends StatelessWidget {
   /// for the case where the button keeps its fill.
   static const Widget _spinner = RepaintBoundary(
     child: SizedBox.square(
-      dimension: AppIconSize.sm,
+      dimension: AppIconSize.xs,
       child: CircularProgressIndicator(strokeWidth: AppStroke.indicator),
     ),
   );
@@ -521,7 +521,7 @@ class MxActionButton extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         if (icon != null && iconSide == MxActionButtonIconSide.leading) ...[
-          Icon(icon, size: AppIconSize.sm),
+          Icon(icon, size: AppIconSize.xs),
           SizedBox(width: gap),
         ],
         text,
@@ -530,7 +530,7 @@ class MxActionButton extends StatelessWidget {
         // not depend on which side it stands on.
         if (icon != null && iconSide == MxActionButtonIconSide.trailing) ...[
           SizedBox(width: gap),
-          Icon(icon, size: AppIconSize.sm),
+          Icon(icon, size: AppIconSize.xs),
         ],
       ],
     );
@@ -573,7 +573,7 @@ class _ForegroundSpinner extends StatelessWidget {
   @override
   Widget build(BuildContext context) => RepaintBoundary(
     child: SizedBox.square(
-      dimension: AppIconSize.sm,
+      dimension: AppIconSize.xs,
       child: CircularProgressIndicator(
         strokeWidth: AppStroke.indicator,
         color: IconTheme.of(context).color,

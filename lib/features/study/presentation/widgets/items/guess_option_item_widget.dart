@@ -204,7 +204,7 @@ abstract final class AppGuessOption {
   );
 
   /// The verdict glyph's size, named once for the row and its measurement.
-  static const MxIconSize verdictGlyphSize = MxIconSize.sm;
+  static const MxIconSize verdictGlyphSize = MxIconSize.xs;
 
   /// The width a verdict takes beside the text: the gap, then the glyph.
   static double get verdictSlotWidth => AppSpacing.sm + verdictGlyphSize.dp;

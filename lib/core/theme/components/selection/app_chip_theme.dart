@@ -256,12 +256,12 @@ ChipThemeData buildChipTheme(
   // same height as the deck row's Study button, which is also fully rounded, and
   // two controls that size alike in one list should not shape differently.
   //
-  // `AppRadius.pill`, not `StadiumBorder`: same painted shape, but the pill
+  // `AppRadius.full`, not `StadiumBorder`: same painted shape, but the pill
   // radius is how every other fully-rounded control in the app says it
   // (`MxSearchField`, `MxMetricWell`, the progress bar), and one result should
   // not have two mechanisms.
   shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(AppRadius.pill),
+    borderRadius: BorderRadius.circular(AppRadius.full),
   ),
   labelStyle: _labelStyle(texts, scheme, semantic),
   // **The fall-through only, and it cannot be more than that.**

@@ -154,7 +154,7 @@ class _TagWell extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppRadius.sm),
         ),
         child: const Center(
-          child: MxIcon(Icons.sell_outlined, size: MxIconSize.sm),
+          child: MxIcon(Icons.sell_outlined, size: MxIconSize.xs),
         ),
       ),
     );

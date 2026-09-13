@@ -238,7 +238,7 @@ class _SourceOption extends StatelessWidget {
                 const MxIcon(
                   Icons.check_circle,
                   ink: AppInk.secondary,
-                  size: MxIconSize.sm,
+                  size: MxIconSize.xs,
                 ),
               ],
             ],
@@ -295,7 +295,7 @@ class _UploadPanel extends ConsumerWidget {
                 const MxIcon(
                   Icons.error_outline,
                   ink: AppInk.error,
-                  size: MxIconSize.sm,
+                  size: MxIconSize.xs,
                 ),
                 const SizedBox(width: AppSpacing.xs),
                 Expanded(
@@ -348,7 +348,7 @@ class _UploadPanel extends ConsumerWidget {
                 const MxIcon(
                   Icons.error_outline,
                   ink: AppInk.error,
-                  size: MxIconSize.sm,
+                  size: MxIconSize.xs,
                 ),
                 const SizedBox(width: AppSpacing.xs),
                 Expanded(
@@ -389,7 +389,7 @@ class _InfoPanel extends StatelessWidget {
         children: <Widget>[
           Row(
             children: <Widget>[
-              const MxIcon(Icons.info_outline, size: MxIconSize.sm),
+              const MxIcon(Icons.info_outline, size: MxIconSize.xs),
               const SizedBox(width: AppSpacing.xs),
               Expanded(
                 child: Text(

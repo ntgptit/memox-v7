@@ -125,7 +125,7 @@ class MxPillButton extends StatelessWidget {
         inMutuallyExclusiveGroup: true,
         child: _TapTarget(
           child: MxFocusRing(
-            borderRadius: BorderRadius.circular(AppRadius.pill),
+            borderRadius: BorderRadius.circular(AppRadius.full),
             child: ChoiceChip(
               // `semanticsLabel` on the Text rather than a `Semantics` wrapper
               // around the chip. Wrapping was tried and is wrong twice over:

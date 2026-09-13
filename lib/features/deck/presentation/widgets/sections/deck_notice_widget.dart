@@ -31,7 +31,7 @@ class DeckNoticeWidget extends StatelessWidget {
           const MxIcon(
             Icons.info_outline,
             ink: AppInk.info,
-            size: MxIconSize.sm,
+            size: MxIconSize.xs,
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(

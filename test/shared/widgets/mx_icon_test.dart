@@ -48,10 +48,10 @@ void main() {
   testWidgets('size is a step and ink is a name', (tester) async {
     await pump(
       tester,
-      const MxIcon(Icons.star, size: MxIconSize.sm, ink: AppInk.danger),
+      const MxIcon(Icons.star, size: MxIconSize.xs, ink: AppInk.danger),
     );
     final icon = tester.widget<Icon>(find.byType(Icon));
-    expect(icon.size, AppIconSize.sm);
+    expect(icon.size, AppIconSize.xs);
     final context = tester.element(find.byType(Icon));
     expect(icon.color, AppInk.danger.resolve(context));
   });

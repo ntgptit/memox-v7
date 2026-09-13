@@ -241,7 +241,7 @@ void main() {
       // indicator size. AUTHORITY: A20.1 P1-02.
       expect(
         tester.getSize(find.byType(CircularProgressIndicator)),
-        const Size.square(AppIconSize.sm),
+        const Size.square(AppIconSize.xs),
         reason: 'nothing balloons to the centered 88dp face mid-list',
       );
       expect(

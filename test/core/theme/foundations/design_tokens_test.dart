@@ -11,11 +11,13 @@ import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/core/theme/foundations/app_stroke.dart';
 import 'package:memox/core/theme/foundations/app_surface_colors.dart';
 import 'package:memox/core/theme/foundations/app_border_colors.dart';
+import 'package:memox/core/theme/states/app_interaction_states.dart';
+import 'package:memox/shared/widgets/mx_icon.dart';
 
 void main() {
   group('AppSpacing', () {
-    test('is exactly the 4/8/12/16/24/32 scale', () {
-      expect(AppSpacing.scale, <double>[4, 8, 12, 16, 24, 32]);
+    test("is exactly the handoff's 4/8/12/16/20/24/32/48 scale", () {
+      expect(AppSpacing.scale, <double>[4, 8, 12, 16, 20, 24, 32, 48]);
     });
 
     test('the scale is strictly increasing and has no duplicates', () {
@@ -34,8 +36,10 @@ void main() {
         AppSpacing.sm,
         AppSpacing.md,
         AppSpacing.lg,
+        AppSpacing.card,
         AppSpacing.xl,
         AppSpacing.xxl,
+        AppSpacing.xxxl,
       ];
 
       expect(declared.toSet(), AppSpacing.scale.toSet());
@@ -43,16 +47,41 @@ void main() {
   });
 
   group('required tokens exist', () {
-    test('radius, icon size, duration and breakpoint tokens are present', () {
-      expect(AppRadius.sm, lessThan(AppRadius.md));
-      expect(AppRadius.md, lessThan(AppRadius.lg));
-      expect(AppRadius.lg, lessThan(AppRadius.xl));
-      expect(AppRadius.pill, greaterThan(AppRadius.xl));
+    test("radius ladder is the handoff's", () {
+      expect(
+        <double>[
+          AppRadius.xs,
+          AppRadius.sm,
+          AppRadius.md,
+          AppRadius.lg,
+          AppRadius.card,
+          AppRadius.xl,
+          AppRadius.xxl,
+          AppRadius.full,
+        ],
+        <double>[4, 8, 12, 16, 20, 24, 28, 999],
+      );
+    });
 
-      expect(AppIconSize.sm, lessThan(AppIconSize.mdCompact));
-      expect(AppIconSize.mdCompact, lessThan(AppIconSize.md));
-      expect(AppIconSize.md, lessThan(AppIconSize.lg));
+    test("icon ladder is the handoff's", () {
+      expect(
+        <double>[
+          AppIconSize.xs,
+          AppIconSize.sm,
+          AppIconSize.md,
+          AppIconSize.lg,
+          AppIconSize.xl,
+        ],
+        <double>[16, 20, 24, 32, 40],
+      );
+      expect(MxIconSize.values.map((s) => s.dp), <double>[16, 20, 24, 32, 40]);
+    });
 
+    test('pressed state layer is the handoff op-press', () {
+      expect(AppStateOpacity.stateLayerPressed, 0.12);
+    });
+
+    test('duration and breakpoint tokens are present', () {
       expect(AppDurations.fast, lessThan(AppDurations.normal));
       expect(AppDurations.normal, lessThan(AppDurations.slow));
       // Motion during a review must not become something the user waits on.

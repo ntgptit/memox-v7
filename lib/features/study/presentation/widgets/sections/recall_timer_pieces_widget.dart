@@ -80,7 +80,7 @@ class _HiddenBar extends StatelessWidget {
             // the alpha does. Solid either way — `color_source_rules_test` R7
             // fails a fill that composites at paint time, and this one does not.
             color: context.semanticColors.borderControl,
-            borderRadius: BorderRadius.circular(AppRadius.pill),
+            borderRadius: BorderRadius.circular(AppRadius.full),
           ),
         ),
       ),

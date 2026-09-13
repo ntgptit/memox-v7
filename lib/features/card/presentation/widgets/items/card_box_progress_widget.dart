@@ -52,7 +52,7 @@ class CardBoxProgressWidget extends StatelessWidget {
                   0 => context.colors.primary,
                   _ => semantic.progressTrack,
                 },
-                borderRadius: BorderRadius.circular(AppRadius.pill),
+                borderRadius: BorderRadius.circular(AppRadius.full),
               ),
             ),
           ),

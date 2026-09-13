@@ -203,7 +203,7 @@ class _StepNode extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: state == _NodeState.completed
-                ? MxIcon(Icons.check, ink: foreground, size: MxIconSize.sm)
+                ? MxIcon(Icons.check, ink: foreground, size: MxIconSize.xs)
                 : Text(
                     '${index + 1}',
                     style: context.texts.labelMedium!.inked(

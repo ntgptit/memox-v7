@@ -283,7 +283,7 @@ class _HintLine extends StatelessWidget {
           // **The icon step, not the line's font size.** Tying it to the text
           // put a 12px glyph beside 12px copy, and a mark that small reads as
           // a speck rather than as the thing that classifies the sentence.
-          size: MxIconSize.sm,
+          size: MxIconSize.xs,
         ),
         const SizedBox(width: AppSpacing.sm),
         // `Flexible`, not `Expanded`: the row is centred, so a child that took

@@ -217,7 +217,7 @@ class _Section extends StatelessWidget {
     children: <Widget>[
       // `sm` is 16 — the same dimension `titleMedium`'s font size used to
       // supply, named instead of derived.
-      MxIcon(icon, ink: tone, size: MxIconSize.sm),
+      MxIcon(icon, ink: tone, size: MxIconSize.xs),
       const SizedBox(width: AppSpacing.md),
       Expanded(
         child: Column(

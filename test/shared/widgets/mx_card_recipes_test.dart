@@ -139,7 +139,7 @@ void main() {
         // Same role as `raised`, in both modes; the depth between them is
         // carried by the shadow in light and by the rim's width in dark.
         expect(decoration.color, scheme.surfaceContainerLowest);
-        expect(radiusOf(decoration), AppRadius.xl);
+        expect(radiusOf(decoration), AppRadius.card);
         expect(hasShadow(decoration), isTrue);
       });
 
@@ -160,7 +160,7 @@ void main() {
         // At rest it draws no edge either; the edge is what its *states* use,
         // asserted by the case below.
         expect(hasVisibleBorder(tester), isFalse);
-        expect(radiusOf(decoration), AppRadius.xl);
+        expect(radiusOf(decoration), AppRadius.card);
         expect(hasShadow(decoration), isFalse);
       });
 

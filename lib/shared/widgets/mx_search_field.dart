@@ -165,7 +165,7 @@ class _MxSearchFieldState extends State<MxSearchField> {
       constraints: const BoxConstraints(minHeight: AppSizing.touchTarget),
       decoration: BoxDecoration(
         color: _hasFocus ? colors.surface : semantic.surfaceMuted,
-        borderRadius: BorderRadius.circular(AppRadius.pill),
+        borderRadius: BorderRadius.circular(AppRadius.full),
         // `strokeAlignOutside` keeps the stroke out of the layout: a border
         // inside the box would make the pill 51 where the touch target needs
         // its 48, and at 320 wide with `textScaler` 2.0 the chrome has no two
@@ -185,7 +185,7 @@ class _MxSearchFieldState extends State<MxSearchField> {
         // content by its own rules, and a glyph centred in a 48-tall box does
         // not land where a line of text centred in one does.
         children: <Widget>[
-          const MxIcon(Icons.search, size: MxIconSize.sm),
+          const MxIcon(Icons.search, size: MxIconSize.xs),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Semantics(
@@ -264,7 +264,7 @@ class _MxSearchFieldState extends State<MxSearchField> {
               tooltip: widget.clearSemanticLabel,
               icon: Icon(
                 Icons.close,
-                size: AppIconSize.sm,
+                size: AppIconSize.xs,
                 semanticLabel: widget.clearSemanticLabel,
               ),
             ),

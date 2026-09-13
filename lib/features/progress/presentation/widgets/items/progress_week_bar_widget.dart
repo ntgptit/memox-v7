@@ -46,12 +46,12 @@ class ProgressWeekBarWidget extends StatelessWidget {
       child: SizedBox(
         height: trackHeight,
         child: ClipRRect(
-          // `pill`, the same token `MxProgressBar` uses. `sm` (8) rendered
+          // `full`, the same token `MxProgressBar` uses. `sm` (8) rendered
           // identically here only because `ClipRRect` clamps a radius to
           // half the box and the box is 6dp tall — a coincidence that
           // would stop being one the day `MxProgressBarSize.sm` grew past
-          // 16. `pill` is height-independent and says what the shape is.
-          borderRadius: BorderRadius.circular(AppRadius.pill),
+          // 16. `full` is height-independent and says what the shape is.
+          borderRadius: BorderRadius.circular(AppRadius.full),
           // **`DecoratedBox`, not `ColoredBox`.** They draw the same rectangle,
           // and only one of them is auditable: `ColoredBox`'s render object is
           // library-private and the strict visual audit classifies it as

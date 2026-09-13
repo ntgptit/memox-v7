@@ -64,7 +64,7 @@ enum MxIconButtonShape {
 /// `IconButtonThemeData`. [isCompact] is the one adjustment, and it moves the
 /// **glyph**, never the target. It exists for the study session's top bar, where
 /// the close button shares a row with a progress track that has to read as a
-/// measure — see `AppIconSize.mdCompact`.
+/// measure — see `AppIconSize.sm`.
 class MxIconButton extends StatelessWidget {
   const MxIconButton({
     required this.icon,
@@ -91,7 +91,7 @@ class MxIconButton extends StatelessWidget {
   /// two cannot drift apart.
   final String? tooltip;
 
-  /// Drops the glyph to [AppIconSize.mdCompact], for a control sharing a row
+  /// Drops the glyph to [AppIconSize.sm], for a control sharing a row
   /// with something that needs the width.
   ///
   /// **It does not make the button narrower, and it never did.** This used to
@@ -152,7 +152,7 @@ class MxIconButton extends StatelessWidget {
       padding: isCompact ? EdgeInsets.zero : null,
       icon: Icon(
         icon,
-        size: isCompact ? AppIconSize.mdCompact : AppIconSize.md,
+        size: isCompact ? AppIconSize.sm : AppIconSize.md,
         semanticLabel: semanticLabel,
       ),
     );

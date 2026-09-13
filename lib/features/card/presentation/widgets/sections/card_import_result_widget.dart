@@ -95,7 +95,7 @@ class CardImportResultWidget extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  const MxIcon(Icons.info_outline, size: MxIconSize.sm),
+                  const MxIcon(Icons.info_outline, size: MxIconSize.xs),
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Text(helperCopy, style: context.texts.bodySmall),

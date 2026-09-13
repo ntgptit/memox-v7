@@ -704,6 +704,11 @@ không nhầm chúng là một phase.
   - PLAN-DEV-2.10 — `card_import_states_test.dart` bỏ khẳng định "không phải
     `sectionLabelSmall`" ngay ở Task 2 thay vì Task 11: D1 đưa hai rung về cùng
     caption 12px nên size không còn phân biệt được.
+  - PLAN-DEV-3.1 — plan nói không test nào ghim `stateLayerPressed`, nhưng
+    `mx_action_button_composite_state_test.dart` ghim sàn contrast của nhãn
+    khi nhấn mà chủ dự án chấp nhận ở M100.87 (3.9 / 4.1, đo với 10%). Với
+    `op-press` 12% của handoff, số đo là 3.77 (primary) / 4.01 (destructive)
+    ở light và high-contrast light; sàn dời về 3.7 / 4.0, không gỡ gate.
 - **Editable documents:** `docs/wbs.md`,
   `docs/design-system/tokyo-component-mapping.md`,
   `docs/wireframes/m99-23-progress-overview.md` (X7).
