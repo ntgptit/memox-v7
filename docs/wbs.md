@@ -845,6 +845,19 @@ không nhầm chúng là một phase.
     - mapping §2 dòng Slider inactiveTrack đổi theo;
     - stress specimen thêm `MxSlider` và `MxSegmentedControl`;
     - `segmentedButtonTheme` giữ nguyên, vẫn planned.
+- **Audit (plan §4.4):**
+  - Architecture/logic, pass 1 tại `93fa2a86`: không có P0/P1/P2. Coverage
+    T17–T20 đủ, mỗi lệch plan có PLAN-DEV. P3 là bằng chứng fault-injection
+    cho guard viền text field; coordinator đã chạy rồi trả code về (tree
+    sạch):
+    - `outlineVariant` light → trắng: group `a text field edge on every
+      ground it is drawn on` đỏ; trả lại thì `+12`;
+    - `enabledBorder` → `scheme.outline`: `m3_role_binding_guard_test`
+      `TextField · enabledBorder` đỏ; trả lại thì `+4`.
+  - UI/UX, sweep 1 tại `93fa2a86`: không có P0/P1/P2, không có divergence
+    chưa duyệt; 88 PNG đều truy về T17–T19. P3 ghi nhận: golden
+    `mx_search_field_focused_*` có tay kéo con trỏ do `shouldAutofocus`, giống
+    hệt bản ở `4a626dbd`, nên không phải thay đổi của Phase 4.
 - **Editable documents:** `docs/wbs.md`,
   `docs/design-system/tokyo-component-mapping.md`,
   `docs/design-system/switch-spec.md`,
