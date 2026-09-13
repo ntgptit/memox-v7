@@ -32,12 +32,14 @@ abstract final class AppSizing {
   /// `chip.dart:1493` and nothing here said so).
   static const double touchTarget = 48;
 
-  /// A control that draws smaller than the target it keeps.
+  /// The handoff's compact button (`size-button-sm`): paints 36, and
+  /// `MaterialTapTargetSize.padded` restores [touchTarget] around it.
   ///
-  /// The deck tile's Study verb is the case it encodes: a button living in a
-  /// row of chips and gauges rather than in an action bar. It paints 40 and
-  /// `MaterialTapTargetSize.padded` restores [touchTarget] around it, so the
-  /// body comes down and the finger's floor does not.
+  /// The deck tile's Study verb is the case it encoded first: a button living
+  /// in a row of chips and gauges rather than in an action bar, so the body
+  /// comes down and the finger's floor does not. It painted 40 as
+  /// `controlCompact` (owner review, 2026-08-20) until M100.90 moved it to the
+  /// handoff's value.
   ///
   /// **Two heights, not a five-rung ladder.** 32 / 40 / 48 / 56 / 64 is the
   /// usual control scale and this app renders two of them; the other three
@@ -45,7 +47,7 @@ abstract final class AppSizing {
   /// the unrendered component themes in `app_theme.dart` already follow. It was a
   /// private `_kCompactHeight` in `mx_action_button.dart` until M100.30 — the
   /// one control dimension the design system could not see.
-  static const double controlCompact = 40;
+  static const double buttonCompact = 36;
 
   /// The dense tier — a chip's content box, the compact breadcrumb line, the
   /// 32 dp icon well beside a metric or a catalog row.

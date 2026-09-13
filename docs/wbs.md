@@ -7,7 +7,7 @@
 | **Scope** | Task đang mở · blocker · technical debt · quyết định descope/superseded. Ngoài phạm vi: entry đã `done` — chúng ở `wbs-archive/`, vẫn trong đồ thị dependency qua `_wbs_ledgers()` |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.89 |
+| **Updated by task** | M100.90 |
 | **Last updated** | 2026-09-14 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -653,6 +653,54 @@ migrate ở context thứ hai chứ không clean lại.
 Task do chủ dự án giao trực tiếp, không thuộc chuỗi phụ thuộc M0…M9. Đánh số từ
 99 để chúng không bao giờ tranh ID với một milestone thật, và để đọc bảng tiến độ
 không nhầm chúng là một phase.
+
+### M100.90 · Nút theo handoff: compact 36, tonal, icon button 36, FAB extended
+
+- **Status:** in-progress
+- **Owner:** Claude
+- **Goal:** Nút theo handoff: compact 36, tonal cho hành động phụ tiến tới, icon
+  button vòng 36 glyph 20, FAB extended 52 màu primary — Phase 2 của
+  `docs/superpowers/plans/2026-09-13-tokyo-handoff-redesign.md`.
+- **Nhánh / PR:** `claude/tokyo-redesign-phase-2`
+- **Scope:**
+  - Task 5 — nút compact vẽ 36 (`AppSizing.buttonCompact`), loading giữ bề
+    rộng với spinner 16.
+  - Task 6 — hành động phụ tiến tới thành Tonal; cancel/back/leave giữ
+    Outlined (D6).
+  - Task 7 — icon button: vòng mực 36, glyph 20 (bar 24, D16), đích chạm 48,
+    tint `primary` 8% / 14% dark.
+  - Task 8 — FAB extended cao 52, radius 16, `primary`/`onPrimary`,
+    `shadow-fab`; đuôi cuộn dưới FAB theo D15.
+- **Out of scope:** nút chấm điểm (Task 28), component section C–G.
+- **Plan deviations:**
+  - PLAN-DEV-5.1 — test loading của plan xanh ngay trước khi implement: nhánh
+    loading của `MxActionButton` đã giữ label trong cây (`Opacity(0)`) và vẽ
+    spinner `AppIconSize.xs`; test được giữ làm pin hồi quy.
+  - PLAN-DEV-5.2 — plan coi `mx_tonal_and_outlined_test.dart` chỉ cần đổi tên
+    hằng, nhưng icon button viền vẫn vẽ 40 (glyph 24 + padding 8) vì `minimumSize`
+    36 nhỏ hơn kích thước tự nhiên; pixel không đổi. Pin ghi đúng 40 bằng token;
+    Task 7 dời pin sang `AppSizing.iconButtonInk`.
+- **Editable documents:** `docs/wbs.md`,
+  `docs/design-system/tokyo-component-mapping.md`,
+  `docs/superpowers/plans/2026-09-13-tokyo-handoff-redesign.md` (ghi deviation).
+- **Output:** `lib/core/theme/foundations/app_sizing.dart`,
+  `lib/core/theme/states/app_interaction_states.dart`,
+  `lib/core/theme/components/actions/`, `lib/shared/widgets/mx_action_button.dart`,
+  `mx_icon_button.dart`, `mx_fab.dart`, call site đổi variant và placement.
+- **Acceptance criteria:**
+  - [ ] `MxActionButtonSize.compact` vẽ 36, đích chạm 48; loading giữ bề rộng.
+  - [ ] Tám call site hành động phụ tiến tới dùng `MxActionButtonVariant.tonal`.
+  - [ ] `MxIconButton` vẽ vòng 36, glyph 20 (bar 24), tint `primary` 8% / 14%.
+  - [ ] `MxFab` là FAB extended có nhãn, cao 52, `primary`, `shadow-fab`.
+  - [ ] `flutter analyze` 0/0 repo-wide; full host suite green; guard 0 findings
+  - [ ] `integration_test/` trên emulator xanh.
+  - [ ] Goldens re-authored on Linux, `TZ=UTC`; gallery republished at the pinned URL
+- **Dependencies:** M100.89
+- **Tests required:** `mx_action_button_size_test.dart`, `mx_components_test.dart`,
+  `app_sizing_test.dart`, `mx_icon_button_geometry_test.dart` (mới),
+  `mx_fab_test.dart` (mới), `mx_scroll_end_inset_test.dart`,
+  `m3_role_bindings.dart`, `component_depth_and_state_test.dart`.
+- **Checklist phases:** 7, 12, 13
 
 ### M99.29 · Daily Reminders v1
 

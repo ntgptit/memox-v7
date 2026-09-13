@@ -70,7 +70,9 @@ ButtonStyle buildOutlinedIconButtonStyle(
   ColorScheme scheme,
   AppSemanticColors semantic,
 ) => ButtonStyle(
-  // **40 drawn, 48 hit** (owner brief, 2026-09-10). The plain style takes the
+  // **40 drawn, 48 hit** (owner brief, 2026-09-10). Since M100.90 the minimum
+  // is the compact button's 36, and the 24 glyph with Material's padding keeps
+  // the circle at 40 until the icon button takes its own 36 ink (plan Task 7). The plain style takes the
   // whole 48 because there is nothing to see: an unfilled glyph has no edge,
   // so the box is invisible and its size is only the target. An outlined one
   // is a visible circle, and at 48 beside a 12px subtitle it is the largest
@@ -78,7 +80,7 @@ ButtonStyle buildOutlinedIconButtonStyle(
   // comes down — the same split `MxActionButtonSize.compact` has used since
   // 2026-08-20.
   minimumSize: const WidgetStatePropertyAll<Size>(
-    Size.square(AppSizing.controlCompact),
+    Size.square(AppSizing.buttonCompact),
   ),
   tapTargetSize: MaterialTapTargetSize.padded,
   backgroundColor: WidgetStateProperty.resolveWith((states) {

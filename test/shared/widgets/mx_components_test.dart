@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/foundations/app_sizing.dart';
 import 'package:memox/core/theme/components/actions/app_button_themes.dart';
 import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_theme.dart';
@@ -115,7 +116,7 @@ void main() {
       expect(size.width, greaterThanOrEqualTo(48));
     });
 
-    testWidgets('compact draws 40 and still hits 48', (tester) async {
+    testWidgets('compact draws 36 and still hits 48', (tester) async {
       // The size axis exists so the deck tile's chip-row verb could stop
       // hand-building a `FilledButton` — the geometry is only safe to share if
       // lowering the body cannot lower the target with it.
@@ -135,14 +136,14 @@ void main() {
 
       // What it paints: the Material inside the button. The outer box is the
       // wrong thing to measure — `padded` wraps it back up to the target, so
-      // asserting 40 there fails against the very mechanism under test.
+      // asserting 36 there fails against the very mechanism under test.
       final drawn = tester.getSize(
         find.descendant(
           of: find.byType(FilledButton),
           matching: find.byType(Material),
         ),
       );
-      expect(drawn.height, 40);
+      expect(drawn.height, AppSizing.buttonCompact);
 
       // What a finger gets: the padded outer box restores the floor.
       expect(

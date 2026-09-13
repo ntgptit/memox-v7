@@ -27,7 +27,7 @@ void main() {
       // opacity have scales of their own and are not covered by this rule.
       for (final (String name, double value) in <(String, double)>[
         ('touchTarget', AppSizing.touchTarget),
-        ('controlCompact', AppSizing.controlCompact),
+        ('buttonCompact', AppSizing.buttonCompact),
         ('floatingAction', AppSizing.floatingAction),
         ('buttonMinWidth', AppSizing.buttonMinWidth),
         // Not a control, and on the grid all the same: the rhythm is what
@@ -63,7 +63,7 @@ void main() {
       // The whole point of the compact tier: the body comes down, the finger's
       // floor does not. If these ever met, `MaterialTapTargetSize.padded` would
       // be doing nothing and the tier would be a second name for `standard`.
-      expect(AppSizing.controlCompact, lessThan(AppSizing.touchTarget));
+      expect(AppSizing.buttonCompact, lessThan(AppSizing.touchTarget));
     });
 
     test('the FAB clearance is derived from the FAB, not repeated', () {

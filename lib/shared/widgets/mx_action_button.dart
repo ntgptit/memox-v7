@@ -77,14 +77,15 @@ enum MxActionButtonSize {
   /// also the touch target.
   standard,
 
-  /// Drawn at 40, hit at 48 — `MaterialTapTargetSize.padded` keeps the floor.
+  /// Drawn at 36, hit at 48 — `MaterialTapTargetSize.padded` keeps the floor.
+  /// The handoff's `size-button-sm`; it drew 40 until M100.90.
   ///
   /// For a button living inside a row of chips and gauges rather than in an
   /// action bar. The deck tile's Study verb is the case it encodes (owner
   /// review, 2026-08-20: 40 is on the 4px grid and clears the 32 the pill used
   /// to paint), and its label steps down with the box: `label-md` re-weighted
   /// to 600 through [AppTypography.withWeight], because a 48-button's
-  /// `label-lg` on a 40 body reads as text escaping its control.
+  /// `label-lg` on a 36 body reads as text escaping its control.
   compact,
 
   /// Drawn at 32, hit at 48 — the same `padded` floor [compact] keeps.
@@ -352,14 +353,14 @@ class MxActionButton extends StatelessWidget {
           // Unreachable — `standard` returned above — but stated so the switch
           // stays exhaustive and a fourth size fails the build here.
           MxActionButtonSize.standard => AppSizing.touchTarget,
-          MxActionButtonSize.compact => AppSizing.controlCompact,
+          MxActionButtonSize.compact => AppSizing.buttonCompact,
           MxActionButtonSize.dense => AppSizing.controlDense,
         }),
       ),
       padding: const WidgetStatePropertyAll<EdgeInsets>(
         EdgeInsets.symmetric(horizontal: AppSpacing.md),
       ),
-      // 40 is what it paints; 48 is what a finger gets. `AppSpacing` calls the
+      // 36 is what it paints; 48 is what a finger gets. `AppSpacing` calls the
       // touch target a floor, and `padded` is how a smaller body keeps it.
       tapTargetSize: MaterialTapTargetSize.padded,
       // The compact rung, at the same weight the standard one wears

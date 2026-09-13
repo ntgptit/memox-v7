@@ -3,8 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/core/theme/components/actions/app_button_themes.dart';
 import 'package:memox/core/theme/components/actions/app_icon_button_theme.dart';
+import 'package:memox/core/theme/foundations/app_icon_size.dart';
 import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/core/theme/foundations/app_sizing.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/core/theme/foundations/app_stroke.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_icon_button.dart';
@@ -199,8 +201,11 @@ void main() {
             )
             .first,
       );
-      expect(drawn.width, AppSizing.controlCompact);
-      expect(drawn.height, AppSizing.controlCompact);
+      // Its own 24 glyph and Material's 8 padding, not the compact token: that
+      // moved to 36 (M100.90) and sits below what the glyph needs. Plan Task 7
+      // gives the icon button its own 36 ink and moves this pin with it.
+      expect(drawn.width, AppIconSize.md + 2 * AppSpacing.sm);
+      expect(drawn.height, AppIconSize.md + 2 * AppSpacing.sm);
 
       expect(
         tester.getRect(find.byType(IconButton)).height,
