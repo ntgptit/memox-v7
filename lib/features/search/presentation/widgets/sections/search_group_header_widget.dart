@@ -40,10 +40,7 @@ class SearchGroupHeaderWidget extends StatelessWidget {
     // heads, one weight step apart, so a group read as three peer caption lines
     // rather than a heading over a list.
     //
-    // **Not `small`, not `list`.** `MxSectionLabelRung.small` is
-    // `sectionLabelSmall` — labelSmall, 11px, the caption's own size — so it
-    // would keep the very defect this closes; it is reserved for a face label
-    // inside a card. `list` exists only because the deck toolbar's heading
+    // **Not `list`.** `list` exists only because the deck toolbar's heading
     // shares its row with the sort control (`app_typography.dart:151-160`).
     // This header has no control beside it, so `standard` is the rung.
     return MxSectionLabel(label: context.mxSearchGroupLabel(group));

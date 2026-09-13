@@ -229,7 +229,6 @@ void main() {
         'textStyles.heroNumeral': styles.heroNumeral,
         'textStyles.cardPrompt': styles.cardPrompt,
         'textStyles.sectionLabel': styles.sectionLabel,
-        'textStyles.sectionLabelSmall': styles.sectionLabelSmall,
         'filledButton.textStyle': resolve(
           theme.filledButtonTheme.style?.textStyle,
         ),

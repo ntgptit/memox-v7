@@ -709,10 +709,24 @@ không nhầm chúng là một phase.
     trong `lib/`. Tint được blend sẵn trên `surfaceContainerLowest`, bề mặt card
     raised mà handoff đặt tile lên, giống cách `app_chip_theme.dart` làm
     (`_tint`): trên nền đó pixel không đổi, và không cần thêm token.
+  - PLAN-DEV-11.1 — plan ghi 12 chỗ dùng `MxSectionLabelRung.` ở `dcd22f32` và
+    đề nghị `sed`. Repo hiện có 5 call site `rung: MxSectionLabelRung.small` và 2
+    chỗ đọc `textStyles.sectionLabelSmall`; đổi bằng tay thay vì `sed`. Lý do:
+    4 đoạn comment gọi tên rung đã bỏ, và `sed` sẽ để lại câu sai nghĩa (comment
+    ở `search_group_header_widget` còn ghi "11px", sai từ D1). Registry trong
+    `app_typography_test` bỏ key `sectionLabelSmall`. `labelMedium` và
+    `labelSmall` cùng là 12/600/1.4 và cả hai style cũ đều đè tracking 1.2, nên
+    `sectionLabel` dựng lại từ `labelSmall` không đổi pixel; golden compare cuối
+    phase xác nhận. Test "three rungs" (chỉ kiểm `isNotNull`) được thay bằng test
+    đo 12/w600/1.2 cho overline và 0.72 cho `list`; đỏ đúng lý do
+    (`hasLength(2)` nhận 3) trước khi sửa.
 - **Editable documents:** `docs/wbs.md`,
   `docs/design-system/tokyo-component-mapping.md`,
   `docs/design-system/listtile-deck-row-spec.md`, `lib/features/deck/README.md`,
-  `docs/superpowers/plans/2026-09-13-tokyo-handoff-redesign.md` (ghi deviation).
+  `docs/design-system/study-top-bar-spec.md` (một ô nhắc `sectionLabelSmall`),
+  `.claude/skills/flutter-theme-design/references/foundation.md` (danh sách vai
+  chữ), `docs/superpowers/plans/2026-09-13-tokyo-handoff-redesign.md` (ghi
+  deviation).
 - **Output:** `lib/core/theme/foundations/`, `lib/core/theme/components/surfaces/`,
   `lib/shared/widgets/` (`mx_card`, `mx_icon_tile`, `mx_section_label`,
   `mx_row_group`, `mx_status_badge`, `mx_mastery_ring`, `mx_progress_bar`),

@@ -108,9 +108,9 @@ void main() {
             'heading, one place',
       );
 
-      // The standard section rung. It was also asserted to be *not* the
-      // in-panel `sectionLabelSmall`, by size; D1 put both on the 12px caption
-      // (M100.89), so a size can no longer tell them apart.
+      // The section overline. It was also asserted to be *not* the in-panel
+      // `sectionLabelSmall`, by size; D1 put both on the 12px caption (M100.89)
+      // and M100.91 left one rung, so there is nothing left to tell apart.
       final AppTextStyles styles = tester.element(heading).textStyles;
       final double? renderedSize = tester.widget<Text>(heading).style?.fontSize;
       expect(renderedSize, styles.sectionLabel.fontSize);

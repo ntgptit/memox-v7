@@ -101,20 +101,16 @@ class _ResumeCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             // **The app's one face-label treatment** (D18), not a hand-set
-            // `labelMedium`. `MxSectionLabelRung.small` exists for exactly
-            // this position — a label on the face of a card — and five other
-            // sites already take it, the study prompt's own `QUESTION` among
-            // them. Drawn here by hand it was 12sp semibold at `stated`: the
+            // `labelMedium`: the section overline, which is also what a label
+            // on the face of a card takes — the study prompt's own `QUESTION`
+            // among them. Drawn here by hand it was 12sp semibold at `stated`: the
             // same ink and nearly the same weight as the deck name directly
             // under it, so the card opened with two dark bold lines and the
             // eyebrow competed with the thing it was introducing. Quiet caps
             // subordinate it, which is what an eyebrow is for, and the node
             // becomes a `header` a screen reader can jump to — the card had
             // none.
-            MxSectionLabel(
-              label: l10n.studyHomeResumeTitle,
-              rung: MxSectionLabelRung.small,
-            ),
+            MxSectionLabel(label: l10n.studyHomeResumeTitle),
             const SizedBox(height: AppSpacing.xs),
             // **`stated`, and now it is trivially right** (SC-C9-04). The pair
             // of lines below took `onSecondaryContainer` once — an ink
