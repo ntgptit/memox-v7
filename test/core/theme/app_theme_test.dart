@@ -194,12 +194,16 @@ void main() {
       // **Under 3:1 in light, by decision rather than by drift** (owner,
       // 2026-09-13). The handoff's `success` and `warning` stay verbatim for
       // dots, rings and containers, and in light they read under WCAG
-      // 1.4.11's 3:1 on the page. Each is pinned at the figure it was accepted
-      // at so the decision cannot quietly get worse; every other pair still
-      // owes the full 3:1.
+      // 1.4.11's 3:1 on both grounds a status fill lands on. Each pair is
+      // keyed by its ground and pinned at its own measured figure — success
+      // 2.97 on the card and 2.82 on the page, warning 2.15 and 2.04 — so
+      // neither ground can quietly get worse under the other's number; every
+      // other pair still owes the full 3:1.
       const accepted = <String, double>{
-        'light success': 2.8,
-        'light warning': 2.0,
+        'light success card': 2.9,
+        'light success page': 2.8,
+        'light warning card': 2.1,
+        'light warning page': 2.0,
       };
       for (final entry in themes.entries) {
         final semantic = entry.value.extension<AppSemanticColors>()!;
@@ -216,7 +220,9 @@ void main() {
           ]) {
             expect(
               contrast(pair.$2, ground.$2),
-              greaterThanOrEqualTo(accepted['${entry.key} ${pair.$1}'] ?? 3.0),
+              greaterThanOrEqualTo(
+                accepted['${entry.key} ${pair.$1} ${ground.$1}'] ?? 3.0,
+              ),
               reason: '${entry.key}: ${pair.$1} fill on ${ground.$1}',
             );
           }
