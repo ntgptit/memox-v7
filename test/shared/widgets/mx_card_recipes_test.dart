@@ -88,25 +88,26 @@ void main() {
       final scheme = theme.colorScheme;
       final semantic = theme.extension<AppSemanticColors>()!;
 
-      testWidgets('$themeName · flat: surface, no edge, lg, no shadow', (
-        tester,
-      ) async {
-        await pump(tester, const MxCard.flat(child: Text('x')), theme: theme);
+      testWidgets(
+        '$themeName · flat: surface, no edge, card corner, no shadow',
+        (tester) async {
+          await pump(tester, const MxCard.flat(child: Text('x')), theme: theme);
 
-        final decoration = decorationOf(tester);
-        expect(decoration.color, scheme.surfaceContainerLowest);
-        // **No edge, and that is M99.94.** Every card used to wear a
-        // `borderSubtle` hairline — 1.45:1 on its own fill in light — so a
-        // screen of cards read as a stack of frames. The reference concept
-        // draws none: its cards are pure white on a tinted page, and the
-        // boundary is a colour edge rather than a drawn line.
-        expect(hasVisibleBorder(tester), isFalse);
-        expect(radiusOf(decoration), AppRadius.lg);
-        expect(hasShadow(decoration), isFalse);
-      });
+          final decoration = decorationOf(tester);
+          expect(decoration.color, scheme.surfaceContainerLowest);
+          // **No edge, and that is M99.94.** Every card used to wear a
+          // `borderSubtle` hairline — 1.45:1 on its own fill in light — so a
+          // screen of cards read as a stack of frames. The reference concept
+          // draws none: its cards are pure white on a tinted page, and the
+          // boundary is a colour edge rather than a drawn line.
+          expect(hasVisibleBorder(tester), isFalse);
+          expect(radiusOf(decoration), AppRadius.card);
+          expect(hasShadow(decoration), isFalse);
+        },
+      );
 
       testWidgets(
-        '$themeName · raised: surface, lg, shadow in light, surfaceContainer in dark',
+        '$themeName · raised: surface, card corner, shadow in light, surfaceContainer in dark',
         (tester) async {
           await pump(
             tester,
@@ -123,7 +124,7 @@ void main() {
           // thickening with the level, which is paint rather than meaning.
           expect(decoration.color, scheme.surfaceContainerLowest);
           expect(hasVisibleBorder(tester), isFalse);
-          expect(radiusOf(decoration), AppRadius.lg);
+          expect(radiusOf(decoration), AppRadius.card);
           // Since M100.27 dark paints Tokyo's rim, so every lifted recipe
           // carries a BoxShadow in both modes.
           expect(hasShadow(decoration), isTrue);
@@ -201,7 +202,7 @@ void main() {
         final decoration = decorationOf(tester);
         expect(decoration.color, scheme.errorContainer);
         expect(hasShadow(decoration), isFalse);
-        expect(radiusOf(decoration), AppRadius.lg);
+        expect(radiusOf(decoration), AppRadius.card);
       });
 
       testWidgets('$themeName · muted: surfaceContainerHigh aside', (
@@ -211,7 +212,7 @@ void main() {
 
         final decoration = decorationOf(tester);
         expect(decoration.color, scheme.surfaceContainerHigh);
-        expect(radiusOf(decoration), AppRadius.lg);
+        expect(radiusOf(decoration), AppRadius.card);
         // **Flat, and it carried card-level depth until M99.95.** The fill sits
         // 3.16 L* *below* the page, so a shadow under it had the card claiming
         // "lifted" and "sunken" at once — visible on `card_import_source_light`
@@ -235,6 +236,7 @@ void main() {
         // and the alias holds in both modes.
         expect(decoration.color, semantic.surfaceEmphasis);
         expect(decoration.color, scheme.secondaryContainer);
+        expect(radiusOf(decoration), AppRadius.card);
         expect(hasShadow(decoration), isFalse);
       });
 
@@ -248,6 +250,7 @@ void main() {
         // edge, and its depth by the same shadow-or-rim the others use.
         expect(decoration.color, scheme.surfaceContainerLowest);
         expect(borderColorOf(tester), semantic.borderAccent);
+        expect(radiusOf(decoration), AppRadius.card);
         expect(hasShadow(decoration), isTrue);
       });
 
@@ -285,6 +288,7 @@ void main() {
         final decoration = decorationOf(tester);
         expect(decoration.color, scheme.surfaceContainerLowest);
         expect(borderColorOf(tester), semantic.borderOption);
+        expect(radiusOf(decoration), AppRadius.card);
         // **The option edge is the control edge again, by the handoff**
         // (M100.87). M100.2 split them because the old input border was an
         // untinted grey and a card on a page read wrong in it; the handoff's
@@ -304,7 +308,7 @@ void main() {
     final expectations = <MxCardPadding, double>{
       MxCardPadding.none: 0,
       MxCardPadding.compact: AppSpacing.md,
-      MxCardPadding.standard: AppSpacing.lg,
+      MxCardPadding.standard: AppSpacing.card,
     };
 
     for (final step in expectations.entries) {

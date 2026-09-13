@@ -186,7 +186,7 @@ class MxCard extends StatefulWidget {
     super.key,
   }) : _spec = const _MxCardSpec(
          elevation: AppElevation.none,
-         radius: AppRadius.lg,
+         radius: AppRadius.card,
        ),
        // Not an initializing formal: the field is private so a caller cannot
        // read the spec back, while the parameter has to be public to be named.
@@ -208,7 +208,7 @@ class MxCard extends StatefulWidget {
     super.key,
   }) : _spec = const _MxCardSpec(
          elevation: AppElevation.card,
-         radius: AppRadius.lg,
+         radius: AppRadius.card,
        ),
        // Not an initializing formal: the field is private so a caller cannot
        // read the spec back, while the parameter has to be public to be named.
@@ -274,7 +274,7 @@ class MxCard extends StatefulWidget {
     super.key,
   }) : _spec = const _MxCardSpec(
          elevation: AppElevation.none,
-         radius: AppRadius.lg,
+         radius: AppRadius.card,
          fill: _MxCardFill.feedback,
        ),
        padding = MxCardPadding.compact,
@@ -305,7 +305,7 @@ class MxCard extends StatefulWidget {
   const MxCard.muted({required this.child, super.key})
     : _spec = const _MxCardSpec(
         elevation: AppElevation.none,
-        radius: AppRadius.lg,
+        radius: AppRadius.card,
         fill: _MxCardFill.muted,
       ),
       padding = MxCardPadding.compact,
@@ -335,7 +335,7 @@ class MxCard extends StatefulWidget {
     super.key,
   }) : _spec = const _MxCardSpec(
          elevation: AppElevation.none,
-         radius: AppRadius.lg,
+         radius: AppRadius.card,
          fill: _MxCardFill.tonal,
        ),
        isSelected = null,
@@ -353,7 +353,7 @@ class MxCard extends StatefulWidget {
     super.key,
   }) : _spec = const _MxCardSpec(
          elevation: AppElevation.raised,
-         radius: AppRadius.lg,
+         radius: AppRadius.card,
          edge: _MxCardRestingEdge.accent,
        ),
        isSelected = null,
@@ -421,7 +421,7 @@ class MxCard extends StatefulWidget {
        isSelected = isSelected,
        _spec = const _MxCardSpec(
          elevation: AppElevation.none,
-         radius: AppRadius.lg,
+         radius: AppRadius.card,
          edge: _MxCardRestingEdge.option,
        ),
        padding = MxCardPadding.compact,
@@ -663,7 +663,7 @@ class _MxCardState extends State<MxCard> {
   EdgeInsetsGeometry get _paddingInsets => switch (widget.padding) {
     MxCardPadding.none => EdgeInsets.zero,
     MxCardPadding.compact => const EdgeInsets.all(AppSpacing.md),
-    MxCardPadding.standard => const EdgeInsets.all(AppSpacing.lg),
+    MxCardPadding.standard => const EdgeInsets.all(AppSpacing.card),
   };
 
   @override

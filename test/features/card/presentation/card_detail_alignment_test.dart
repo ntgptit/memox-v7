@@ -83,7 +83,9 @@ void main() {
         expect(historyHeading.left, hero.left);
       });
 
-      testWidgets('the summary insets its content by one `lg`', (tester) async {
+      testWidgets('the summary insets its content by the card interior', (
+        tester,
+      ) async {
         await pumpCardDetail(
           tester,
           loaded(),
@@ -94,7 +96,7 @@ void main() {
 
         expect(
           tester.getRect(find.text('안녕하세요')).left,
-          tester.getRect(heroCard()).left + AppSpacing.lg,
+          tester.getRect(heroCard()).left + AppSpacing.card,
         );
       });
 
@@ -115,8 +117,8 @@ void main() {
         final panel = tester.getRect(progressPanel());
         // The track runs the full inner width, so its first and last steps sit
         // on the same edges as every other row of the panel.
-        expect(track.left, panel.left + AppSpacing.lg);
-        expect(track.right, panel.right - AppSpacing.lg);
+        expect(track.left, panel.left + AppSpacing.card);
+        expect(track.right, panel.right - AppSpacing.card);
 
         final steps = tester
             .widgetList<Container>(

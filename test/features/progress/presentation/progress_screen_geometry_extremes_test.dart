@@ -304,7 +304,8 @@ void main() {
     // fails and the divergence is closed on purpose rather than by drift.
     //
     // Re-measured for M100.89 — Plus Jakarta Sans, and a 16 gutter at 320 —
-    // against a 64.0dp floor.
+    // against a 64.0dp floor; and again for M100.91, when the card interior
+    // became 20: the 8dp it took came out of the one flexible bar column.
     await pumpProgressScreen(
       tester,
       repository: seeded(totals: const <int>[0, 0, 0, 0, 0, 0, 1234]),
@@ -315,9 +316,9 @@ void main() {
 
     final Rect bar = tester.getRect(find.byType(ProgressWeekBarWidget).first);
     final double content =
-        rectOf(tester, ProgressWeekWidget).width - 2 * AppSpacing.lg;
+        rectOf(tester, ProgressWeekWidget).width - 2 * AppSpacing.card;
 
-    expect(bar.width, closeTo(61.9, 1));
+    expect(bar.width, closeTo(53.9, 1));
     expect(bar.width, lessThan(content / 4));
     expect(tester.takeException(), isNull);
   });

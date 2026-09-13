@@ -32,9 +32,9 @@ import '../../foundations/app_stroke.dart';
 ///   composes its own layers and a `CardThemeData` slot. §5 of the M100.35
 ///   brief asks these two to read as one product, not to share an
 ///   implementation;
-/// * `AppRadius.lg`, **not** M3's 12. Material owns the colour roles; memox
-///   owns its structural shape scale, and 16 is what an ordinary card wears
-///   here.
+/// * `AppRadius.card` (20), **not** M3's 12 — the handoff's roomiest common
+///   surface (`radius-card`, M100.91). Material owns the colour roles; memox
+///   owns its structural shape scale.
 ///
 /// `margin: zero` because inter-card spacing belongs to the screen's layout,
 /// which is the one place that knows what sits between two cards.
@@ -44,7 +44,7 @@ CardThemeData buildCardTheme(ColorScheme scheme) => CardThemeData(
   elevation: AppElevation.card,
   margin: EdgeInsets.zero,
   shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(AppRadius.lg),
+    borderRadius: BorderRadius.circular(AppRadius.card),
     side: _neutralSide(scheme),
   ),
 );

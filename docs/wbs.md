@@ -7,7 +7,7 @@
 | **Scope** | Task đang mở · blocker · technical debt · quyết định descope/superseded. Ngoài phạm vi: entry đã `done` — chúng ở `wbs-archive/`, vẫn trong đồ thị dependency qua `_wbs_ledgers()` |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.90 |
+| **Updated by task** | M100.91 |
 | **Last updated** | 2026-09-14 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -653,6 +653,72 @@ migrate ở context thứ hai chứ không clean lại.
 Task do chủ dự án giao trực tiếp, không thuộc chuỗi phụ thuộc M0…M9. Đánh số từ
 99 để chúng không bao giờ tranh ID với một milestone thật, và để đọc bảng tiến độ
 không nhầm chúng là một phase.
+
+### M100.91 · Bề mặt và hàng theo handoff: card 20, IconTile, overline, hàng 48, mastery, hàng deck
+
+- **Status:** in-progress
+- **Owner:** Claude
+- **Goal:** Bề mặt và hàng theo handoff: card 20, MxIconTile, overline caption,
+  hàng 48 gom trên một card, token mastery/status, MxMasteryRing, và hàng deck
+  của Library (đảo M4.12 theo quyết định chủ dự án) — Phase 3 của
+  `docs/superpowers/plans/2026-09-13-tokyo-handoff-redesign.md`.
+- **Nhánh / PR:** `claude/tokyo-redesign-phase-3`
+- **Scope:**
+  - Task 9 — card-surface recipe bo 20, pad 20 (`AppRadius.card`,
+    `AppSpacing.card`); `tile` giữ `md`.
+  - Task 10 — `MxIconTile` sm 28 / md 36 / lg 44, tint `primary` 10%.
+  - Task 11 — section header là overline caption; bỏ rung `small`.
+  - Task 12 — hàng tối thiểu 48, `MxRowGroup` với hairline, indent 56.
+  - Task 13 — token `mastery`/`status*`, `MxStatusBadge`, progress đầy thành
+    `mastery`.
+  - Task 14 — `MxMasteryRing` 40 × 3, `primary` dưới 100%, `mastery` ở 100% (D8).
+  - Task 15 — hàng deck của Library theo handoff (owner decision 7).
+  - Task 16 — kết quả search và tag catalog thành hàng gom trên một card.
+- **Out of scope:** input và selection (Phase 4), dialog/sheet (Phase 5).
+- **Plan deviations:**
+  - PLAN-DEV-9.1 — plan đề nghị thêm một test gộp (flat/raised/tonal/accent) đo
+    radius và padding bằng `find.ancestor(Padding)`. `mx_card_recipes_test.dart`
+    đã có một test cho mỗi recipe × 4 theme cùng helper `radiusOf`, và pin padding
+    đo offset nội dung. Pin được dời tại chỗ: 4 pin radius `lg` → `card`, pin
+    `MxCardPadding.standard` → `AppSpacing.card`, thêm pin radius cho `tonal`,
+    `accent`, `option` (trước đó chưa có). Test đỏ 29 lần (16 thay vì 20) trước khi
+    sửa. Spec Card của handoff tự mâu thuẫn: bảng dimension ghi `lg / md`, còn
+    state matrix và token `radius-card` / `space-card` đều là 20. Plan chọn 20;
+    token và state matrix thắng.
+  - PLAN-DEV-9.2 — plan chỉ nêu pin trong `mx_card_*`. Full host suite đỏ 19 test
+    ở 7 file feature, tất cả đo lề card. Pin gọi lề là `AppSpacing.lg` nhưng đo
+    `MxCardPadding.standard` được dời sang `AppSpacing.card` (card detail
+    alignment và badge, progress G5, fill answer, Study Home deck row và resume
+    card). Hai chỗ tính từ lề: `hero_action_width_test` viết lại
+    `32 - 32` thành `2 * AppSpacing.lg + 2 * AppSpacing.card`. Hai số đo được đo
+    lại: X7 của progress 61.9 → 53.9 (vẫn dưới sàn 64), và card deck thứ ba ở
+    Library nằm dưới thanh bar 3.4 → 11.4px (pin tạm của PLAN-DEV-2.9, trần
+    `AppSpacing.xs` → `AppSpacing.md`). Task 15 vẫn là nơi trả lại ba hàng deck
+    nguyên vẹn.
+- **Editable documents:** `docs/wbs.md`,
+  `docs/design-system/tokyo-component-mapping.md`,
+  `docs/design-system/listtile-deck-row-spec.md`, `lib/features/deck/README.md`,
+  `docs/superpowers/plans/2026-09-13-tokyo-handoff-redesign.md` (ghi deviation).
+- **Output:** `lib/core/theme/foundations/`, `lib/core/theme/components/surfaces/`,
+  `lib/shared/widgets/` (`mx_card`, `mx_icon_tile`, `mx_section_label`,
+  `mx_row_group`, `mx_status_badge`, `mx_mastery_ring`, `mx_progress_bar`),
+  `lib/features/deck`, `lib/features/card`, `lib/features/search`.
+- **Acceptance criteria:**
+  - [ ] Card-surface recipe bo 20 và pad 20; `tile` giữ 12.
+  - [ ] `MxIconTile`, `MxRowGroup`, `MxStatusBadge`, `MxMasteryRing` có test và
+    Widgetbook.
+  - [ ] Hàng deck của Library: tile · tên + workload · ring · overflow; vẫn học
+    được một deck từ tab Study; ring `mastery` chỉ khi `isFullyLearned` (BR-88).
+  - [ ] `flutter analyze` 0/0 repo-wide; full host suite green; guard 0 findings
+  - [ ] `integration_test/` trên emulator xanh.
+  - [ ] Goldens re-authored on Linux, `TZ=UTC`; gallery republished at the pinned URL
+- **Dependencies:** M100.90
+- **Tests required:** `mx_card_recipes_test.dart`, `mx_icon_tile_test.dart` (mới),
+  `mx_section_label_test.dart`, `mx_row_group_test.dart` (mới),
+  `app_semantic_colors_test.dart`, `mx_status_badge_test.dart` (mới),
+  `mx_progress_bar_test.dart`, `mx_mastery_ring_test.dart` (mới), các test hàng
+  deck, search và tag catalog.
+- **Checklist phases:** 7, 12, 13
 
 ### M99.29 · Daily Reminders v1
 

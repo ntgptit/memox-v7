@@ -135,6 +135,7 @@ void main() {
     // and the same library now leaves the third card 3.4px under the bar.
     // Task 15 of the Tokyo plan replaces this tile with the handoff's
     // 48-minimum row; putting "three whole" back is that change's to own.
+    // M100.91's card interior (20) adds 8 more: 11.4px, still interim.
     expect(
       rects.where((r) => r.bottom <= fold).length,
       greaterThanOrEqualTo(2),
@@ -142,10 +143,10 @@ void main() {
     );
     expect(
       rects[2].bottom - fold,
-      lessThanOrEqualTo(AppSpacing.xs),
+      lessThanOrEqualTo(AppSpacing.md),
       reason:
-          'the third card may sit under the bar by the 3.4px the handoff type '
-          'added, and no further',
+          'the third card may sit under the bar by the 11.4px the handoff type '
+          'and card interior added, and no further',
     );
   });
 

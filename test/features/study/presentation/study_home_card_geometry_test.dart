@@ -52,18 +52,18 @@ void main() {
         inRow(find.byType(StudyHomeWorkloadItemWidget)).first,
       );
 
-      expect(name.left - card.left, AppSpacing.lg);
-      expect(name.top - card.top, AppSpacing.lg);
+      expect(name.left - card.left, AppSpacing.card);
+      expect(name.top - card.top, AppSpacing.card);
       // The bottom is the workload/action band's — whichever of the two runs
       // lower. In the inline arrangement the counts may take two lines beside
       // a shorter verb, and measuring the verb alone would count the band's
       // internal centring as card padding (the first run read 18 for 16).
       final bandBottom = math.max(workload.bottom, action.bottom);
-      expect(card.bottom - bandBottom, AppSpacing.lg);
+      expect(card.bottom - bandBottom, AppSpacing.card);
       // The fourth side, which the first version of this test called "every
       // side" without measuring. `CrossAxisAlignment.stretch` makes the name's
       // right edge the content edge, so this is exact rather than incidental.
-      expect(card.right - name.right, AppSpacing.lg);
+      expect(card.right - name.right, AppSpacing.card);
     });
 
     testWidgets('the resume card pads its content the same way', (
@@ -95,10 +95,10 @@ void main() {
             .first,
       );
 
-      expect(heading.left - card.left, AppSpacing.lg);
-      expect(heading.top - card.top, AppSpacing.lg);
-      expect(card.right - heading.right, AppSpacing.lg);
-      expect(card.bottom - action.bottom, AppSpacing.lg);
+      expect(heading.left - card.left, AppSpacing.card);
+      expect(heading.top - card.top, AppSpacing.card);
+      expect(card.right - heading.right, AppSpacing.card);
+      expect(card.bottom - action.bottom, AppSpacing.card);
     });
 
     testWidgets('the identity block breaks at xs, then sm before the counts', (
@@ -140,7 +140,7 @@ void main() {
       expect(action.bottom, greaterThan(workload.top));
       // Trailing: the verb ends at the content edge, and the counts get
       // everything to its left minus one step.
-      expect(card.right - action.right, AppSpacing.lg);
+      expect(card.right - action.right, AppSpacing.card);
       expect(action.left - workload.right, greaterThanOrEqualTo(AppSpacing.md));
     });
 
@@ -204,8 +204,8 @@ void main() {
             .first,
       );
 
-      expect(action.left - card.left, AppSpacing.lg);
-      expect(card.right - action.right, AppSpacing.lg);
+      expect(action.left - card.left, AppSpacing.card);
+      expect(card.right - action.right, AppSpacing.card);
     });
 
     testWidgets('a roomy resume card keeps its primary intrinsic', (
@@ -229,10 +229,10 @@ void main() {
             .first,
       );
 
-      expect(action.left - card.left, AppSpacing.lg);
+      expect(action.left - card.left, AppSpacing.card);
       expect(
         card.right - action.right,
-        greaterThan(AppSpacing.lg),
+        greaterThan(AppSpacing.card),
         reason: 'a stretched primary at 393 is the wrong S17 branch',
       );
     });
