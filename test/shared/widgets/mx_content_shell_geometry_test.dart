@@ -99,7 +99,7 @@ void main() {
       expect(inset, AppSpacing.fabScrollClearance);
     });
 
-    testWidgets('is the ordinary gap without one, and outside a shell', (
+    testWidgets('is the page-end clearance without one, and outside a shell', (
       tester,
     ) async {
       late double inShell;

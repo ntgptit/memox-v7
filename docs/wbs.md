@@ -725,9 +725,20 @@ không nhầm chúng là một phase.
     xuống dòng làm band cao hơn, hàng deck nằm ngoài phần list đã build; test
     kéo hàng vào khung nhìn trước khi kiểm overflow, thay vì kiểm một hàng chưa
     từng được dựng.
+- **Audit:** hai audit độc lập trên `c7ee5103` — architecture/logic và UI/UX —
+  cùng CLEAN_STOP, không P0–P2. P3 đã xử lý trong phase: tên test
+  `mx_content_shell_geometry_test.dart` còn gọi đuôi cuộn là "ordinary gap"
+  (architecture); `deckTileGutter` (PLAN-DEV-4.3) được ghi vào Task 15 của plan
+  (UI). P3 để lại có lý do: thứ tự semantics của range pills sau `Row` → `Wrap`
+  vẫn trái sang phải khi một dòng, kiểm lại khi phase sau sửa selector; sàn
+  contrast nhãn khi nhấn không có trần là mẫu kế thừa từ M100.87. Integration
+  trên `emulator-5554` ở `c7ee5103`: 9 pass, 0 fail. Clean stop của UI còn chờ
+  soi PNG sau P4/P5.
 - **Editable documents:** `docs/wbs.md`,
   `docs/design-system/tokyo-component-mapping.md`,
-  `docs/wireframes/m99-23-progress-overview.md` (X7).
+  `docs/wireframes/m99-23-progress-overview.md` (X7),
+  `docs/superpowers/plans/2026-09-13-tokyo-handoff-redesign.md` (ghi deviation
+  cho Task 11, 15, 21, 30).
 - **Output:** `lib/core/theme/typography/`, `lib/core/theme/foundations/`,
   `lib/core/theme/schemes/`, `lib/shared/widgets/`, `pubspec.yaml`,
   `widgetbook/pubspec.yaml`, `widgetbook/lib/tokens/scale_sections.dart`; Inter
