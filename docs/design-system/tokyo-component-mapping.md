@@ -66,13 +66,14 @@ canonical M3 role  >  accessibility  >  MemoX structural system  >  Tokyo exact 
 
 | Component | Slot | M3 canonical | MemoX | Ghi chú |
 |---|---|---|---|---|
-| ChoiceChip | selected fill | `secondaryContainer` | = | guard AST |
+| ChoiceChip | selected fill | `secondaryContainer` | **`primaryContainer` — lệch có chủ đích** | M100.86: spec Chip của handoff đặt tên role thẳng; `design-system/chip-spec.md` ghi lý do và quyết định của chủ dự án. `m3_role_bindings.dart` đảo `requires`/`refuses` cho hai binding `ChoiceChip` |
+| ChoiceChip | selected label | `onSecondaryContainer` | **`onPrimaryContainer`** | đi theo fill ở trên, cùng M100.86 |
 | ChoiceChip (flat) | unselected fill | `null` | `surfaceContainerLow` — **theme khai, không phải variant** | `ChipThemeData.color` chặn `chipDefaults.color` trước khi variant được hỏi (`chip.dart:1529`); M100.36 sửa lại lời giải thích ở §4 |
 | ChoiceChip | side | `outlineVariant`, selected trong suốt | = | guard AST; width = `AppStroke.hairline` (test ghim); 1.24:1 trên giấy — **chấp nhận**, pill định danh bằng hình, nhãn, nhóm và tick (#434 P2-4) |
 | ChoiceChip | disabled fill | `onSurface @ 12%` — selected hay không | = (`disabledSurfaceTint`) | M100.36: trước đó selected+disabled blend thêm container, dark sáng *hơn* pill sống (#434 P2-3) |
 | ChoiceChip | elevation / pressElevation | 1 / 1 (M3) | **0 / 0** | AD-14 một cơ chế độ sâu; `pressElevation` từng để SDK → mỗi lần nhấn có bóng thật (#434 P1-2) |
 | ChoiceChip | hover / press / focus | state layer `onSurfaceVariant` | hover: fill tint (`RawChip` tắt `hoverColor` khi theme có `color`) · press: ripple SDK · focus: `MxFocusRing` | **một cơ chế mỗi state** (§4O). Fill *không* đổi khi press/focus |
-| MxPillButton (custom) | leading slot | — | 16dp luôn được layout: tick khi selected, `icon` của caller khi không | chọn có *hình*, không reflow (§4M); target 48 do widget tự nới **ngoài** ring |
+| MxPillButton (custom) | leading slot | — | 24dp (`AppIconSize.md`, M100.86) luôn được layout: tick khi selected, `icon` của caller khi không | chọn có *hình*, không reflow (§4M); target 48 do widget tự nới **ngoài** ring |
 | Checkbox | fill | `primary` / trong suốt theo `selected` | = | guard AST |
 | Switch | thumb | `outline` off / `onPrimary` on | = | guard AST |
 | Switch | track | `surfaceContainerHighest` off / `primary` on | = | guard AST |
@@ -220,7 +221,7 @@ Component theme sở hữu hình học **toàn cục**; shared widget chỉ thê
 |---|---|
 | `buildSharedButtonStyle` | chiều cao tối thiểu (`AppSizing.touchTarget`), bề rộng tối thiểu, padding, shape, weight nhãn. `MxActionButtonSize.compact` là **trục kích thước** của shared widget (40 vẽ / 48 chạm, `label-md`), không phải một feature nêu lại — ranh giới dưới áp cho feature |
 | `buildInputDecorationTheme` | content padding, radius, stroke (input; focus ở focused-error), hint style, suffix colour. `MxSearchField` là composition riêng: sở hữu rung `body-md` của nó (widget đóng, §4P) |
-| `buildChipTheme` | chiều cao pill, padding, radius, weight nhãn, side hairline, hai elevation = 0. `MxPillButton` sở hữu slot dẫn 16dp, tick khi chọn, ring quanh hình vẽ và target 48 nới ngoài ring (§4P: rung `label-md`) |
+| `buildChipTheme` | chiều cao pill, padding, radius, weight nhãn, side hairline, hai elevation = 0, fill/label khi chọn (`primaryContainer`/`onPrimaryContainer`, M100.86, `chip-spec.md`). `MxPillButton` sở hữu slot dẫn 24dp (M100.86), tick khi chọn, ring quanh hình vẽ và target 48 nới ngoài ring (§4P: rung `label-md`) |
 | `buildListTileTheme` | content padding, minVerticalPadding, `minTileHeight` (`AppSizing.rowMinHeight`), shape, ba rung chữ |
 | `buildDialogTheme` | shape |
 | `buildCardTheme` | shape, hairline |
