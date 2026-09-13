@@ -885,6 +885,27 @@ không nhầm chúng là một phase.
     landscape — giao cho lượt re-audit.
   - Golden: 124 PNG author lại trên Linux ở `a00e0270` (clone WSL riêng tại
     `38fc9d5a`, update 8/8 lát xanh). Gallery `ảnh 9f56e0cf`.
+  - Architecture/logic re-audit (`6a327b83`, subagent mới): không có P0–P2.
+    Đã đọc từng dòng source của Task 11 và Task 16. Đã xác nhận `a00e0270` chỉ
+    có 124 PNG, và tổng 16 + 28 + 12 = 56 khớp hằng số thật. Còn một P3: comment
+    ở `search_group_header_widget.dart` ghi `sectionLabel` là 12 / w500 / 1.1,
+    giá trị thật là 12 / w600 / 1.2. Đã sửa comment.
+  - UI/UX re-audit (`6a327b83`, subagent mới): P2 cũ đã đóng. Cả ba loại hàng
+    có chữ ở 56, và 39/39 pin do reviewer tự chạy đều xanh. Lượt này báo thêm:
+    - P2: màu `mastery`/`status*` chưa được kiểm dưới high contrast. Tra lại cho
+      thấy `highContrastSemantics` chỉ trỏ lại `borderControl`, `borderAccent`
+      và `onDisabled`. Fill và nền card/page giữ nguyên, nên floor light/dark
+      của `app_theme_test` áp nguyên cho HC. Chỗ thiếu thật hẹp hơn: test "must
+      not change" chỉ ghim bốn màu semantic. Test giờ ghim thêm năm token mới
+      và `surfaceContainerLowest`. Tiêm lỗi (`statusNew: scheme.primary` trong
+      HC) làm test đỏ, sau đó đã hoàn nguyên. Không thêm widget test HC trùng.
+    - P3: landscape, VI, 412 và 2.0 không đều trên hàng deck và hàng search.
+      Đã đóng bằng pin thật, không hoãn:
+      - `library_search_states_test`: 320 × 2.0 vi, 412 vi, landscape 852×393.
+      - `deck_tile_geometry_test`: 320 × 2.0, 412, landscape.
+
+      Mỗi case kiểm không overflow, chữ nằm trên hairline, hàng ≥ 48 hoặc nút
+      overflow ≥ 48. VI của hàng deck ở 360–412 do `deck_text_fit_test` phủ.
 - **Editable documents:** `docs/wbs.md`,
   `docs/design-system/tokyo-component-mapping.md`,
   `docs/design-system/listtile-deck-row-spec.md`, `lib/features/deck/README.md`,

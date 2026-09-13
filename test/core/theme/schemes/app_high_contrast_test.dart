@@ -235,6 +235,33 @@ void main() {
       }
     });
 
+    test('the mastery and lifecycle fills, and the card ground under them, are '
+        'untouched', () {
+      // **This is what carries the status floors into high contrast** (UI
+      // re-audit, M100.91). `app_theme_test` pins each fill against the card
+      // and the page in light and dark, including the two the owner accepted
+      // below 3:1; high contrast re-points only borders and disabled ink, so
+      // those same figures hold there by construction — as long as neither
+      // the fills nor the grounds move. A re-point of any of them in
+      // `highContrastSemantics` fails here instead of shipping unmeasured.
+      for (final entry in pairs.entries) {
+        final (base, hc) = entry.value;
+
+        expect(semanticOf(hc).mastery, semanticOf(base).mastery);
+        expect(semanticOf(hc).statusNew, semanticOf(base).statusNew);
+        expect(semanticOf(hc).statusLearning, semanticOf(base).statusLearning);
+        expect(
+          semanticOf(hc).statusReviewing,
+          semanticOf(base).statusReviewing,
+        );
+        expect(semanticOf(hc).statusMastered, semanticOf(base).statusMastered);
+        expect(
+          hc.colorScheme.surfaceContainerLowest,
+          base.colorScheme.surfaceContainerLowest,
+        );
+      }
+    });
+
     test('the filled button paints the same fill and label', () {
       // The four arguments `_light` and `_dark` carry are written once each,
       // and this is what says so from the outside: build them at two call

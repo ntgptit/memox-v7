@@ -381,4 +381,48 @@ void main() {
       );
     });
   });
+
+  group('the rows across the matrix (UI re-audit, M100.91)', () {
+    for (final (String label, Size surface, double scale, Locale locale)
+        in <(String, Size, double, Locale)>[
+          ('320 x 2.0 in vi', const Size(320, 640), 2, const Locale('vi')),
+          ('412 in vi', const Size(412, 915), 1, const Locale('vi')),
+          ('landscape', const Size(852, 393), 1, const Locale('en')),
+        ]) {
+      testWidgets('$label: rows fit and keep their text on the hairline', (
+        tester,
+      ) async {
+        await pumpSearchScreen(
+          tester,
+          repository: FakeLibrarySearchRepository.serving(
+            fakeSearchPage(
+              cards: <CardSearchHit>[
+                fakeCardHit(),
+                fakeCardHit(id: 'card-2', front: 'nouns'),
+              ],
+            ),
+          ),
+          surface: surface,
+          textScale: scale,
+          locale: locale,
+        );
+        await typeSearch(tester, 'noun');
+
+        expect(tester.takeException(), isNull);
+        final rows = find.byType(MxRowGroup);
+        expect(rows, findsOneWidget);
+        final hairline = tester.getRect(
+          find.descendant(of: rows, matching: find.byType(Divider)).first,
+        );
+        expect(
+          tester.getRect(find.byType(MxIconTile).first).right + AppSpacing.md,
+          hairline.left + AppSizing.listDividerIndent,
+        );
+        expect(
+          tester.getSize(find.byType(CardResultTileWidget).first).height,
+          greaterThanOrEqualTo(AppSizing.rowMinHeight),
+        );
+      });
+    }
+  });
 }

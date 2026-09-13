@@ -23,7 +23,7 @@ class SearchGroupHeaderWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // **The app's one section-heading treatment** (D18), at its default
-    // `standard` rung: `sectionLabel` = 12 / w500 / tracking 1.1, uppercased at
+    // `standard` rung: `sectionLabel` = 12 / w600 / tracking 1.2, uppercased at
     // paint, with the ARB sentence kept as the accessible name and the node
     // marked `header` — so the component supplies the `Semantics(header: true)`
     // this file used to wrap by hand.

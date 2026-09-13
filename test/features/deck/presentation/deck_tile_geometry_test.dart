@@ -244,4 +244,59 @@ void main() {
       );
     });
   });
+
+  group('the row across the matrix (UI re-audit, M100.91)', () {
+    // Vietnamese at 360–412 is `deck_text_fit_test`'s: it renders the real
+    // root list in `vi` and fails on any cut word. This group holds the
+    // geometry the fix put in place where that gate does not reach.
+    List<DeckSummary> three() => <DeckSummary>[
+      nouns(),
+      fakeSummary(
+        id: 'd2',
+        name: 'A deck with a deliberately long name that wraps',
+        totalCardCount: 8,
+        dueCardCount: 3,
+      ),
+      fakeSummary(id: 'd3', name: 'Kanji', totalCardCount: 3),
+    ];
+
+    for (final (String label, Size surface, double scale)
+        in <(String, Size, double)>[
+          ('320 x 2.0', const Size(320, 640), 2),
+          ('412', const Size(412, 915), 1),
+          ('landscape', const Size(852, 393), 1),
+        ]) {
+      testWidgets('$label: rows fit, text on the hairline, 48 targets', (
+        tester,
+      ) async {
+        await pumpDeckScreen(
+          tester,
+          repository: FakeDeckRepository.withSummaries(three()),
+          screen: const DeckListScreen(),
+          surface: surface,
+          textScale: scale,
+        );
+
+        expect(tester.takeException(), isNull);
+        final group = find.byType(MxRowGroup);
+        expect(group, findsOneWidget);
+        final hairline = tester.getRect(
+          find.descendant(of: group, matching: find.byType(Divider)).first,
+        );
+        expect(
+          tester.getRect(find.text('Nouns')).left,
+          hairline.left + AppSizing.listDividerIndent,
+        );
+        for (final element
+            in find
+                .descendant(of: group, matching: find.byType(MxIconButton))
+                .evaluate()) {
+          expect(
+            element.size!.height,
+            greaterThanOrEqualTo(AppSizing.touchTarget),
+          );
+        }
+      });
+    }
+  });
 }
