@@ -66,13 +66,10 @@ ThemeData _buildCompactScale(ThemeData base) {
           ),
         ),
     ],
-    listTileTheme: base.listTileTheme.copyWith(
-      // Horizontal only. The vertical rhythm is what keeps a row tappable.
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.xs,
-      ),
-    ),
+    // No `listTileTheme` clause. List rows gave up 4 a side here, in step with
+    // a screen gutter that stepped to `md` below the breakpoint; the handoff's
+    // gutter stays 16 (M100.89), and a row that still stepped would sit 4dp
+    // inside the field and the toggle above it on the same card.
 
     // Buttons keep their height and lose horizontal padding, which is the
     // opposite of what "make the button smaller" would do and the only version

@@ -97,11 +97,11 @@ class LibrarySearchBodyWidget extends StatelessWidget {
 
   Widget _results(BuildContext context) {
     // **The gutter comes from the shell, not from a literal.** The field lives
-    // in the shell's subheader, which takes `mxScreenGutter` — `md` below the
-    // compact breakpoint and `lg` above it. Three hardcoded `AppSpacing.lg`
-    // here made the rows sit 4dp inside the field at 320dp and match it at 390,
-    // which is exactly the drift W5/G1 exists to catch and exactly the mistake
-    // `deck_path_widget.dart` records having made once already.
+    // in the shell's subheader, which takes `mxScreenGutter`. Three hardcoded
+    // `AppSpacing.lg` here made the rows sit 4dp inside the field at 320dp
+    // while the gutter still stepped to `md` there, which is exactly the drift
+    // W5/G1 exists to catch and exactly the mistake `deck_path_widget.dart`
+    // records having made once already.
     final double gutter = mxScreenGutter(context);
 
     return CustomScrollView(

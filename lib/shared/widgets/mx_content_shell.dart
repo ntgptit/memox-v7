@@ -113,8 +113,8 @@ class MxContentShell extends StatefulWidget {
   /// short and letting it ellipsize.
   final Widget? titleSubline;
 
-  /// Screen padding. `null` resolves to the scale for the current width:
-  /// [AppSpacing.lg], or [AppSpacing.md] below [AppBreakpoints.compact].
+  /// Screen padding. `null` resolves to [mxScreenGutter] — [AppSpacing.lg] at
+  /// every width.
   final EdgeInsetsGeometry? padding;
 
   /// Opt-in: a body that already scrolls must not be nested inside another
@@ -448,8 +448,8 @@ class MxSubheaderBand extends StatelessWidget {
         //
         // Compact keeps all of it below. At 320 with `textScaler` 2.0 the chrome
         // and this strip together wanted four pixels more than the screen had —
-        // the same trade `app_compact_scale.dart` makes with gutters and button
-        // padding — and there is nothing left there to redistribute.
+        // the same trade `app_compact_scale.dart` makes with button padding —
+        // and there is nothing left there to redistribute.
         padding: EdgeInsets.only(
           left: gutter,
           right: gutter,
@@ -462,17 +462,15 @@ class MxSubheaderBand extends StatelessWidget {
   }
 }
 
-/// The screen gutter: 16 normally, 12 below [AppBreakpoints.compact] — the
-/// design uses the same two numbers at the same breakpoint.
+/// The screen gutter: 16 at every width. The handoff's compact-phone rule is
+/// "the content column narrows; the gutter stays 16" (M100.89) — it was 12
+/// below [AppBreakpoints.compact] until then.
 ///
 /// Public because a screen that opts out of [MxContentShell.padding] to let one
 /// band bleed to the edge still has to line the *rest* of itself up with every
-/// other screen. Re-deriving the breakpoint rule at the call site is how the two
-/// drift apart, and the drift only shows below 360 where nobody looks.
-double mxScreenGutter(BuildContext context) {
-  final isCompact = AppBreakpoints.isCompact(MediaQuery.sizeOf(context).width);
-  return isCompact ? AppSpacing.md : AppSpacing.lg;
-}
+/// other screen, and a literal at the call site is how the two drift apart the
+/// next time the gutter moves.
+double mxScreenGutter(BuildContext context) => AppSpacing.lg;
 
 EdgeInsets _defaultPadding(BuildContext context) =>
     EdgeInsets.all(mxScreenGutter(context));

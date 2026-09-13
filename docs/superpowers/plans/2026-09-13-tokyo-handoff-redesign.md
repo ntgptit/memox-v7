@@ -1822,7 +1822,7 @@ sed -i -E 's/MxSectionLabelRung\.small\b/MxSectionLabelRung.standard/g; s/\bsect
 flutter analyze --no-fatal-infos
 ```
 
-Delete any `rung: MxSectionLabelRung.standard,` argument the sed produced (it is the default). Two call sites then need a person, not the sed: `app_typography_test.dart`'s weight registry map holds `'textStyles.sectionLabel'` twice — delete the second entry; `card_import_states_test.dart:117` asserted the heading is *not* the small rung — with one rung left that line and the comment above it go (line 116, `expect(renderedSize, styles.sectionLabel.fontSize)`, still pins the heading).
+Delete any `rung: MxSectionLabelRung.standard,` argument the sed produced (it is the default). Two call sites then need a person, not the sed: `app_typography_test.dart`'s weight registry map holds `'textStyles.sectionLabel'` twice — delete the second entry; `card_import_states_test.dart`'s assertion that the heading is *not* the small rung already left in Phase 1 (PLAN-DEV-2.10: D1 made both rungs 12px); its `expect(renderedSize, styles.sectionLabel.fontSize)` still pins the heading.
 
 - [ ] **Step 4: Run + commit** — `flutter test test/shared test/features --exclude-tags golden`.
 
@@ -2381,7 +2381,7 @@ git commit -m "feat(design-system): MxMasteryRing (M100.xx)"
 - Modify: `lib/features/deck/presentation/widgets/sections/deck_list_sliver_widget.dart` (rows grouped on one card)
 - Delete: `deck_study_button_widget.dart`, `deck_icon_area_widget.dart` — only if Step 7's grep shows no other reader
 - Modify: `lib/l10n/app_en.arb`, `app_vi.arb` (remove keys Step 7 shows unused)
-- Test: rewrite `test/features/deck/presentation/deck_tile_counts_test.dart`, `deck_tile_geometry_test.dart`, `deck_tile_target_test.dart`, `deck_workload_role_test.dart`; modify `deck_list_level_test.dart:214`, `test/app/shell/app_navigation_shell_test.dart:243`
+- Test: rewrite `test/features/deck/presentation/deck_tile_counts_test.dart`, `deck_tile_geometry_test.dart`, `deck_tile_target_test.dart`, `deck_workload_role_test.dart`; modify `deck_list_level_test.dart:214`, `test/app/shell/app_navigation_shell_test.dart:243`, `deck_summary_compact_geometry_test.dart` (PLAN-DEV-2.9)
 - Docs: `docs/design-system/listtile-deck-row-spec.md` (§5 resolution note), `tokyo-component-mapping.md` §7, `lib/features/deck/README.md` (tile description)
 
 **Interfaces:**
@@ -2558,7 +2558,7 @@ grep -rnE "DeckStudyButtonWidget|DeckIconArea|deckTileLearnedPercentLabel|deckTi
 
 Delete each file and ARB key (both locales, with its `@key` metadata) that has no reader left. Run `flutter gen-l10n` if the project generates l10n outside `build_runner` (check `pubspec.yaml` `generate: true`), then `flutter analyze --no-fatal-infos`.
 
-- [ ] **Step 8: Move the remaining tests** — `deck_tile_geometry_test`, `deck_tile_target_test`, `deck_workload_role_test`: assert the new row (48 minimum, overflow button 48 target, workload line under the name). `deck_workload_role_test.dart` also has `group('the well: identity, not schedule (amends BR-161)'` (lines ~169–264) whose `pumpIcon` returns `DeckIconArea`: retarget it to the `MxIconTile` inside `DeckStatusIconWidget` and keep its identity assertions (glyph by content type, one well for every schedule state, overdue semantics); drop only assertions about `DeckIconArea`'s own fill, which `mx_icon_tile_test.dart` now covers. `deck_list_level_test.dart:214` and `app_navigation_shell_test.dart:243` used `DeckStudyButtonWidget` to start a session from the Library: switch them to the Study tab path found in Step 6. Run:
+- [ ] **Step 8: Move the remaining tests** — `deck_tile_geometry_test`, `deck_tile_target_test`, `deck_workload_role_test`: assert the new row (48 minimum, overflow button 48 target, workload line under the name). `deck_summary_compact_geometry_test.dart` goes back to **three whole deck rows above the bottom bar** (`greaterThanOrEqualTo(3)`) and drops the interim "third within 4px" pin Phase 1 measured (PLAN-DEV-2.9); if the row no longer draws the workload chip, its `_chipMinHeight` (PLAN-DEV-2.8) leaves with it. `deck_workload_role_test.dart` also has `group('the well: identity, not schedule (amends BR-161)'` (lines ~169–264) whose `pumpIcon` returns `DeckIconArea`: retarget it to the `MxIconTile` inside `DeckStatusIconWidget` and keep its identity assertions (glyph by content type, one well for every schedule state, overdue semantics); drop only assertions about `DeckIconArea`'s own fill, which `mx_icon_tile_test.dart` now covers. `deck_list_level_test.dart:214` and `app_navigation_shell_test.dart:243` used `DeckStudyButtonWidget` to start a session from the Library: switch them to the Study tab path found in Step 6. Run:
 
 ```bash
 flutter test test/features/deck test/app --exclude-tags golden
@@ -3590,14 +3590,13 @@ NavigationBarThemeData buildNavigationBarTheme(
           : scheme.onSurfaceVariant,
     ),
   ),
+  // PLAN-DEV-2.4: no selected re-weight — `labelMedium` is already 600 (D1),
+  // and component_theme_typography_test asserts both states are the rung.
   labelTextStyle: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
     if (!states.contains(WidgetState.selected)) {
       return texts.labelMedium!.copyWith(color: scheme.onSurfaceVariant);
     }
-    return AppTypography.withWeight(
-      texts.labelMedium!,
-      FontWeight.w600,
-    ).copyWith(color: semantic.accentInk);
+    return texts.labelMedium!.copyWith(color: semantic.accentInk);
   }),
   surfaceTintColor: Colors.transparent,
   elevation: AppElevation.none,
@@ -4930,7 +4929,7 @@ git commit -m "feat(study): session accent by kind — violet learning, indigo r
 - Test: `test/features/study/presentation/guess_option_item_test.dart` (or the file `grep -rl GuessOptionItem test` lists)
 
 **Interfaces:**
-- Produces: `open` / `dimmed` — `surfaceContainerLow` fill, `outlineVariant` hairline, no shadow; `correct` — `successContainer` fill, `success` edge at `AppStroke.control`; `chosenWrong` — `dangerContainer` fill, `error` edge at `AppStroke.control`. The handoff's "selected" state does not apply: a guess commits on tap (there is no pre-commit selection). Verdict glyphs and announcements unchanged. **This reverses M100.69** ("a resting row draws no edge", `guess_option_item_widget.dart:78-98`): the handoff ChoiceOption gives the resting row an `outlineVariant` border, and the redesign rule is kit over shipped code. Rewrite that doc comment, and move the test that pins the old resting state — `guess_answered_widget_test.dart:216-229` asserts the resting border `isNull`. Re-read `guess_option_height_test.dart:93`: an outside stroke does not change layout, so it should pass; its comment cites M100.69 and needs the same rewrite.
+- Produces: `open` / `dimmed` — `surfaceContainerLow` fill, `outlineVariant` hairline, no shadow; `correct` — `successContainer` fill, `success` edge at `AppStroke.control`; `chosenWrong` — `dangerContainer` fill, `error` edge at `AppStroke.control`. The handoff's "selected" state does not apply: a guess commits on tap (there is no pre-commit selection). Verdict glyphs and announcements unchanged. **This reverses M100.69** ("a resting row draws no edge", `guess_option_item_widget.dart:78-98`): the handoff ChoiceOption gives the resting row an `outlineVariant` border, and the redesign rule is kit over shipped code. Rewrite that doc comment, and move the test that pins the old resting state — `guess_answered_widget_test.dart:216-229` asserts the resting border `isNull`. Re-read `guess_option_height_test.dart:93`: an outside stroke does not change layout, so it should pass; its comment cites M100.69 and needs the same rewrite. Keep the verdict slot the row holds in every state and `AppGuessOption.verdictGlyphSize` (PLAN-DEV-2.7): `naturalHeightOf` measures the text beside that slot, which is what keeps it exact for all four states.
 
 - [ ] **Step 1: Write the failing test**:
 

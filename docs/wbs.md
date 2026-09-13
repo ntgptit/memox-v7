@@ -687,9 +687,10 @@ không nhầm chúng là một phase.
     `labelMedium` đã là 600. Task 21 không đưa lại `withWeight` ở slot này.
   - PLAN-DEV-2.5 — `MxSearchField._lineHeight` suy từ token của rung
     (14 × 1.5) thay vì literal 20; literal cũ làm pill cao 49.
-  - PLAN-DEV-2.6 — X7 của wireframe M99.23 đo lại: 1234 card nay rộng 69.9dp,
-    qua sàn 66.0; ghim chuyển sang 2000 card (53.5dp). Empty face của Progress
-    chỉ đo `xl` của cột chữ ở 320, như error face.
+  - PLAN-DEV-2.6 — X7 của wireframe M99.23 đo lại sau Task 2 và Task 4: với
+    Plus Jakarta Sans và gutter 16 ở 320, 1234 card rộng 61.9dp dưới sàn 64.0;
+    ghim giữ input 1234, số dời từ 63.8 sang 61.9. Empty face của Progress chỉ
+    đo `xl` của cột chữ ở 320, như error face.
   - PLAN-DEV-2.7 — hàng đáp án Guess giữ chỗ glyph verdict ở mọi state, và
     `AppGuessOption.naturalHeightOf` đo chữ bên cạnh chỗ đó. Trước đây hàng
     nghỉ nhường chỗ cho chữ còn hàng đã chấm lấy lại, nên với metric mới
@@ -709,6 +710,21 @@ không nhầm chúng là một phase.
     khi nhấn mà chủ dự án chấp nhận ở M100.87 (3.9 / 4.1, đo với 10%). Với
     `op-press` 12% của handoff, số đo là 3.77 (primary) / 4.01 (destructive)
     ở light và high-contrast light; sàn dời về 3.7 / 4.0, không gỡ gate.
+  - PLAN-DEV-4.1 — plan chỉ đổi `mxScreenGutter`; `applyCompactScale` còn hạ
+    `listTileTheme.contentPadding` ngang xuống `md` dưới 360dp, nên ở 320 các
+    hàng list của Settings và Reminder lệch 4dp khỏi field/toggle cùng card
+    (`settings_screen_geometry_test`, `reminder_settings_layout_test` bắt
+    được). Mệnh đề đó bị bỏ: hàng list giữ 16 ở mọi bề rộng.
+  - PLAN-DEV-4.2 — `ProgressRangeSelectorWidget` đổi `Row` sang `Wrap`: trong
+    gutter 16, hai pill ở 320dp × text scale 2.0 cần thêm 1.6px so với 288dp
+    của band (`progress_deck_row_test` báo overflow).
+  - PLAN-DEV-4.3 — `deckTileGutter` (padding trong của deck tile) vẫn bậc 12
+    dưới 360dp: đó là interior của card, không phải gutter màn hình; Task 9
+    (card interior 20) và Task 15 (hàng deck) quyết lại nó.
+  - PLAN-DEV-4.4 — `progress_deck_row_test.dart` (tên dài, 320dp × 2.0): pill
+    xuống dòng làm band cao hơn, hàng deck nằm ngoài phần list đã build; test
+    kéo hàng vào khung nhìn trước khi kiểm overflow, thay vì kiểm một hàng chưa
+    từng được dựng.
 - **Editable documents:** `docs/wbs.md`,
   `docs/design-system/tokyo-component-mapping.md`,
   `docs/wireframes/m99-23-progress-overview.md` (X7).

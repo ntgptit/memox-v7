@@ -71,9 +71,11 @@ void main() {
       expect(compact.textTheme.headlineMedium!.fontSize, 24);
     });
 
-    testWidgets('list rows lose horizontal padding, not vertical', (
+    testWidgets('list rows keep the screen gutter at every width', (
       tester,
     ) async {
+      // They gave up 4 a side below the breakpoint while the gutter did; the
+      // handoff's gutter stays 16 (M100.89), and the rows stay on it.
       final compact = await themeAt(tester, small);
       final roomy = await themeAt(tester, normal);
 
@@ -81,15 +83,17 @@ void main() {
           compact.listTileTheme.contentPadding! as EdgeInsets;
       final roomyPadding = roomy.listTileTheme.contentPadding! as EdgeInsets;
 
-      expect(compactPadding.left, AppSpacing.md);
+      expect(compactPadding.left, AppSpacing.lg);
       expect(roomyPadding.left, AppSpacing.lg);
       // Vertical rhythm is what keeps a row tappable.
       expect(compactPadding.vertical, roomyPadding.vertical);
     });
 
-    testWidgets('screen padding drops from lg to md', (tester) async {
+    testWidgets('screen padding stays lg at every width', (tester) async {
+      // It dropped to md below the compact breakpoint until the handoff's
+      // "the gutter stays 16" (M100.89).
       for (final entry in <Size, double>{
-        small: AppSpacing.md,
+        small: AppSpacing.lg,
         normal: AppSpacing.lg,
       }.entries) {
         tester.view.physicalSize = entry.key;

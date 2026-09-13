@@ -40,11 +40,11 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  // The two widths the gutter rule is written against: `AppBreakpoints.compact`
-  // is 360, so one case is on each side of it.
+  // One case on each side of `AppBreakpoints.compact` (360): the gutter used to
+  // step there, and since M100.89 it is 16 on both.
   for (final surface in <({Size size, double gutter})>[
     (size: const Size(393, 852), gutter: 16),
-    (size: const Size(320, 640), gutter: 12),
+    (size: const Size(320, 640), gutter: 16),
   ]) {
     testWidgets(
       'the body sits at the screen gutter at ${surface.size.width.toInt()}dp',

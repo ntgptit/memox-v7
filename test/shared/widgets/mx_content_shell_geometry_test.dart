@@ -112,7 +112,7 @@ void main() {
           },
         ),
       );
-      expect(inShell, AppSpacing.lg);
+      expect(inShell, AppSpacing.xxxl);
 
       late double bare;
       await tester.pumpWidget(
@@ -123,8 +123,31 @@ void main() {
           },
         ),
       );
-      expect(bare, AppSpacing.lg);
+      expect(bare, AppSpacing.xxxl);
     });
+  });
+
+  testWidgets('the gutter stays 16 on a compact phone (handoff Foundations)', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    late double gutter;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildLightTheme(),
+        home: Builder(
+          builder: (context) {
+            gutter = mxScreenGutter(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(gutter, AppSpacing.lg);
   });
 
   group('the reading column', () {

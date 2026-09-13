@@ -53,10 +53,10 @@ class CardListBodyWidget extends ConsumerWidget {
     const headerCount = 2;
 
     // **The shell's helper, not a literal `lg`.** The subheader directly above
-    // this scroll takes `mxScreenGutter`, which steps to `md` below 360dp; a
-    // fixed 16 here left the pills at 12 and every row at 16 — a 4dp step
-    // between two stacked regions of one screen, at the width that can least
-    // afford it (M4.11 G1).
+    // this scroll takes `mxScreenGutter`. While that stepped to `md` below
+    // 360dp, a fixed 16 here left the pills at 12 and every row at 16 — a 4dp
+    // step between two stacked regions of one screen (M4.11 G1); a literal
+    // drifts the same way the next time the gutter moves.
     final gutter = mxScreenGutter(context);
 
     return ListView.separated(
