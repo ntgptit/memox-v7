@@ -33,6 +33,10 @@ void main() {
         // Not a control, and on the grid all the same: the rhythm is what
         // keeps a mark aligned with the text it sits beside.
         ('statusDot', AppSizing.statusDot),
+        // Painted marks too: the handoff IconTile's three extents.
+        ('iconTileSm', AppSizing.iconTileSm),
+        ('iconTileMd', AppSizing.iconTileMd),
+        ('iconTileLg', AppSizing.iconTileLg),
       ]) {
         expect(
           value % 4,

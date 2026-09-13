@@ -695,6 +695,20 @@ không nhầm chúng là một phase.
     Library nằm dưới thanh bar 3.4 → 11.4px (pin tạm của PLAN-DEV-2.9, trần
     `AppSpacing.xs` → `AppSpacing.md`). Task 15 vẫn là nơi trả lại ba hàng deck
     nguyên vẹn.
+  - PLAN-DEV-10.1 — plan chỉ nêu test widget và mục Widgetbook cho `MxIconTile`.
+    Hai guard của repo cũng cần theo: `mx_stress_test` đòi mỗi file trong
+    `lib/shared/widgets` có một specimen (thêm `MxIconTile` vào
+    `mx_stress_specimens.dart`, không miễn trừ vì tile có layout riêng), và danh
+    mục 4dp grid của `app_sizing_test` nhận ba extent `iconTile*`. Mục Widgetbook
+    cần import `app_spacing.dart`. `widgetbook_coverage_test` và
+    `icon_ink_boundary_test` xanh không cần sửa (tile vẽ glyph qua
+    `MxIcon(ink: AppInk.accent)`). Handoff ghi tint "primary 10% · seed 12%";
+    không có token hay D-id nào định nghĩa "seed 12%", nên tile dùng `primary`
+    10% như plan. Code của plan tô `primary.withValues(alpha: 0.10)` thẳng làm
+    nền, và `design_audit` R7 (`color_rule_scope.dart`) chặn màu nền trong suốt
+    trong `lib/`. Tint được blend sẵn trên `surfaceContainerLowest`, bề mặt card
+    raised mà handoff đặt tile lên, giống cách `app_chip_theme.dart` làm
+    (`_tint`): trên nền đó pixel không đổi, và không cần thêm token.
 - **Editable documents:** `docs/wbs.md`,
   `docs/design-system/tokyo-component-mapping.md`,
   `docs/design-system/listtile-deck-row-spec.md`, `lib/features/deck/README.md`,

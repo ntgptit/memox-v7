@@ -111,4 +111,10 @@ abstract final class AppSizing {
   /// ladder asks for, and `app_sizing_test` holds it to the 4dp grid with the
   /// rest.
   static const double statusDot = 8;
+
+  /// Handoff IconTile extents — a row's tinted leading square. Painted marks,
+  /// not controls: the row carries the target, so no 48 floor applies.
+  static const double iconTileSm = 28;
+  static const double iconTileMd = 36;
+  static const double iconTileLg = 44;
 }

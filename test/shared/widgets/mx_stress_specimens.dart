@@ -16,6 +16,7 @@ import 'package:memox/shared/widgets/mx_form_dialog.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/shared/widgets/mx_fab.dart';
 import 'package:memox/shared/widgets/mx_icon.dart';
+import 'package:memox/shared/widgets/mx_icon_tile.dart';
 import 'package:memox/shared/widgets/mx_icon_button.dart';
 import 'package:memox/shared/widgets/mx_loading_state.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
@@ -156,6 +157,12 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
     // reaches semantics, not layout.
     name: 'MxIcon',
     build: () => const MxIcon(Icons.flag_outlined, semanticLabel: kLongLabel),
+  ),
+  MxStressSpecimen(
+    // A painted square with no copy: the stress is that its fixed extent holds
+    // at 320dp and 2.0x, where nothing may stretch it.
+    name: 'MxIconTile',
+    build: () => const MxIconTile(icon: Icons.folder_outlined),
   ),
   MxStressSpecimen(
     // The pressable owns no copy — the stress is that its 48 floor holds while

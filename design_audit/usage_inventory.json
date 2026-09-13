@@ -1,10 +1,10 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 739,
-  "totalSites": 332,
+  "scannedFiles": 740,
+  "totalSites": 335,
   "byElementKind": {
     "other": 296,
-    "background": 24,
+    "background": 27,
     "border": 10,
     "shadow": 1,
     "text": 1
@@ -12,10 +12,10 @@
   "bySourceKind": {
     "shared-constant": 161,
     "opacity-modified-token": 21,
-    "blend-source": 5,
+    "blend-source": 6,
     "Colors-material": 14,
     "hardcoded-literal": 104,
-    "theme-token": 27
+    "theme-token": 29
   },
   "sites": [
     {
@@ -3647,6 +3647,39 @@
       "token": "semantic.warningInk",
       "resolved_value_light": "#955E00",
       "resolved_value_dark": "#FFC658"
+    },
+    {
+      "file": "lib/shared/widgets/mx_icon_tile.dart",
+      "line": 51,
+      "widget_context": "MxIconTile",
+      "element_kind": "background",
+      "source_kind": "blend-source",
+      "expression": "context.colors.primary.withValues(alpha: _tintAlpha)",
+      "token": "colorScheme.primary",
+      "resolved_value_light": "#5265F5",
+      "resolved_value_dark": "#8B9AFF"
+    },
+    {
+      "file": "lib/shared/widgets/mx_icon_tile.dart",
+      "line": 51,
+      "widget_context": "MxIconTile",
+      "element_kind": "background",
+      "source_kind": "theme-token",
+      "expression": "context.colors.primary",
+      "token": "colorScheme.primary",
+      "resolved_value_light": "#5265F5",
+      "resolved_value_dark": "#8B9AFF"
+    },
+    {
+      "file": "lib/shared/widgets/mx_icon_tile.dart",
+      "line": 52,
+      "widget_context": "MxIconTile",
+      "element_kind": "background",
+      "source_kind": "theme-token",
+      "expression": "context.colors.surfaceContainerLowest",
+      "token": "colorScheme.surfaceContainerLowest",
+      "resolved_value_light": "unresolvable: colorScheme.surfaceContainerLowest not in the dumped theme",
+      "resolved_value_dark": "unresolvable: colorScheme.surfaceContainerLowest not in the dumped theme"
     },
     {
       "file": "lib/shared/widgets/mx_navigation_bar.dart",
