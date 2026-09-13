@@ -7,8 +7,8 @@
 | **Scope** | Dimension, icon, ma trận trạng thái của kit gốc đối chiếu với `lib/shared/widgets/mx_pill_button.dart` và `lib/core/theme/components/selection/app_chip_theme.dart`. Ngoài phạm vi: `SegmentedButton`/`NavigationBar` (đọc cùng cặp role cũ, không đổi trong task này), giá trị token nền (AD-14), vai trò M3 nào ánh xạ role nào ngoài Chip (đã có ở `tokyo-component-mapping.md`) |
 | **Source of truth for** | Kết quả đối chiếu spec Chip (kit) ↔ implementation; quyết định kit-vs-canonical cho selected fill/label |
 | **Depends on** | `document-conventions.md` · `design-system/v1-freeze.md` §3c (quyền hạn task này chạy dưới) · `design-system/tokyo-component-mapping.md` |
-| **Updated by task** | M100.86 |
-| **Last updated** | 2026-09-13 |
+| **Updated by task** | M100.88 |
+| **Last updated** | 2026-09-14 |
 
 ---
 
@@ -109,8 +109,11 @@ Flutter, và `m3_role_bindings.dart` từng ghim nó với `refuses: primaryCont
 tường minh. Cùng cặp role còn giữ "đang active" của Chip đồng nhất với
 `NavigationBar`'s indicator và `SegmentedButton`'s selected segment.
 
-`v1-freeze.md` §3c nói rõ: chỗ kit mâu thuẫn role canonical của M3 SHOULD được
-hỏi chủ dự án theo từng ca, không tự chọn một phía. Ba hướng được đặt ra:
+`v1-freeze.md` §3c khi quyết định này được đưa ra (M100.85) ghi: chỗ kit mâu
+thuẫn role canonical của M3 SHOULD được hỏi chủ dự án theo từng ca, không tự
+chọn một phía. Luật đó đã được thay ở M100.88 bằng một câu trả lời chung — kit
+thắng, không hỏi lại từng ca (`tokyo-component-mapping.md` §9, quyết định 4).
+Đoạn dưới là hồ sơ của ca Chip. Ba hướng được đặt ra:
 
 1. Giữ `secondaryContainer` — coi chữ "primaryContainer" trong spec là mô tả
    hình ảnh (nền tông brand), không phải tên role Flutter bắt buộc.
