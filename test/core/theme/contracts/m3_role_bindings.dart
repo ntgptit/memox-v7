@@ -39,21 +39,25 @@ const List<RoleBinding> roleBindings = <RoleBinding>[
     slot: 'backgroundColor',
     file: _fab,
     scope: 'buildFloatingActionButtonTheme',
-    requires: <String>['primaryContainer'],
-    refuses: <String>['primary', 'secondaryContainer', 'tertiaryContainer'],
+    requires: <String>['primary'],
+    refuses: <String>[
+      'primaryContainer',
+      'secondaryContainer',
+      'tertiaryContainer',
+    ],
     because:
-        '_FABDefaultsM3.backgroundColor is primaryContainer. It was `primary` '
-        'from an owner mockup (2026-08-20); if the FAB needs more brand, the '
-        'primaryContainer family moves — this slot does not.',
+        'The Tokyo handoff FAB is a primary fill with an onPrimary label; the '
+        'kit beats the canonical primaryContainer (owner decision 4, '
+        '2026-09-13).',
   ),
   RoleBinding(
     component: 'FloatingActionButton',
     slot: 'foregroundColor',
     file: _fab,
     scope: 'buildFloatingActionButtonTheme',
-    requires: <String>['onPrimaryContainer'],
-    refuses: <String>['onPrimary'],
-    because: '_FABDefaultsM3.foregroundColor is onPrimaryContainer.',
+    requires: <String>['onPrimary'],
+    refuses: <String>['onPrimaryContainer'],
+    because: 'The label that travels with a primary fill is onPrimary.',
   ),
   RoleBinding(
     component: 'Card',

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/foundations/app_elevation.dart';
 import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_theme.dart';
 
@@ -260,8 +261,10 @@ void main() {
         expect(theme.shadowColor, expected, reason: '${entry.key}: FAB');
         expect(
           theme.floatingActionButtonTheme.elevation,
-          greaterThan(0),
-          reason: '${entry.key}: the FAB floats',
+          AppElevation.none,
+          reason:
+              '${entry.key}: the FAB paints shadow-fab through MxFab, not a '
+              'Material elevation',
         );
         expect(
           theme.cardTheme.shadowColor,

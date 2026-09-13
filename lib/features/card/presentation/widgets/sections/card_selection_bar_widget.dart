@@ -144,12 +144,14 @@ class CardSelectionBarWidget extends ConsumerWidget {
               // fixed-width property this bar's own doc argues for.
               MxIconButton(
                 icon: Icons.drive_file_move_outlined,
+                placement: MxIconButtonPlacement.bar,
                 semanticLabel: l10n.cardSelectionMoveAction,
                 tooltip: l10n.cardSelectionMoveAction,
                 onPressed: canAct ? onMove : null,
               ),
               MxIconButton(
                 icon: Icons.sell_outlined,
+                placement: MxIconButtonPlacement.bar,
                 semanticLabel: l10n.cardSelectionAddTagAction,
                 tooltip: l10n.cardSelectionAddTagAction,
                 onPressed: canAct ? onAddTag : null,
@@ -162,6 +164,7 @@ class CardSelectionBarWidget extends ConsumerWidget {
               // role through `MxMenuAction(isDestructive: true)`.
               MxIconButton(
                 icon: Icons.select_all,
+                placement: MxIconButtonPlacement.bar,
                 semanticLabel: l10n.cardSelectAllAction,
                 tooltip: l10n.cardSelectAllAction,
                 onPressed: isBusy ? null : () => _takeAll(ref, deckId),

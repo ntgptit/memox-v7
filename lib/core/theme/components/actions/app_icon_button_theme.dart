@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../foundations/app_icon_size.dart';
 import '../../foundations/app_radius.dart';
 import '../../foundations/app_semantic_colors.dart';
 import '../../foundations/app_sizing.dart';
@@ -15,15 +16,19 @@ IconButtonThemeData buildIconButtonTheme(
 ) => IconButtonThemeData(
   style:
       IconButton.styleFrom(
-        // The 48×48 minimum lives here rather than in `MxIconButton`, so no
-        // screen can pass a smaller one — there is no parameter to pass.
-        minimumSize: const Size.square(AppSizing.touchTarget),
+        // **A 36 ink circle inside a 48 target** — the handoff IconButton
+        // (M100.90). `padded` restores [AppSizing.touchTarget] around the
+        // painted circle, so no screen can hand a finger less: there is no
+        // parameter to pass.
+        minimumSize: const Size.square(AppSizing.iconButtonInk),
+        fixedSize: const Size.square(AppSizing.iconButtonInk),
+        padding: EdgeInsets.zero,
+        tapTargetSize: MaterialTapTargetSize.padded,
+        iconSize: AppIconSize.sm,
         foregroundColor: scheme.onSurfaceVariant,
         // Named, not left to `defaultStyleOf` where no audit can see it.
         disabledForegroundColor: semantic.onDisabled,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.md),
-        ),
+        shape: const CircleBorder(),
       ).copyWith(
         // Hover, press and focus declared. Left null they came from
         // Material, which is neither the kit nor what every other control
@@ -70,7 +75,9 @@ ButtonStyle buildOutlinedIconButtonStyle(
   ColorScheme scheme,
   AppSemanticColors semantic,
 ) => ButtonStyle(
-  // **40 drawn, 48 hit** (owner brief, 2026-09-10). The plain style takes the
+  // **36 drawn, 48 hit.** The owner brief of 2026-09-10 drew this circle at
+  // 40; since M100.90 every icon button paints the handoff's 36 ink, and the
+  // outlined one is the same circle wearing an edge. The plain style takes the
   // whole 48 because there is nothing to see: an unfilled glyph has no edge,
   // so the box is invisible and its size is only the target. An outlined one
   // is a visible circle, and at 48 beside a 12px subtitle it is the largest
@@ -78,7 +85,7 @@ ButtonStyle buildOutlinedIconButtonStyle(
   // comes down — the same split `MxActionButtonSize.compact` has used since
   // 2026-08-20.
   minimumSize: const WidgetStatePropertyAll<Size>(
-    Size.square(AppSizing.controlCompact),
+    Size.square(AppSizing.iconButtonInk),
   ),
   tapTargetSize: MaterialTapTargetSize.padded,
   backgroundColor: WidgetStateProperty.resolveWith((states) {

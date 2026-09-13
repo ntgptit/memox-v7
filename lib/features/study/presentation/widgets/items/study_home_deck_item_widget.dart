@@ -152,7 +152,7 @@ class _WorkloadActionArea extends StatelessWidget {
       label: l10n.studyHomeStudyAction,
       semanticLabel: l10n.studyHomeStudySemanticLabel(deck.deckName),
       icon: Icons.play_arrow,
-      variant: MxActionButtonVariant.secondary,
+      variant: MxActionButtonVariant.tonal,
       size: MxActionButtonSize.compact,
       onPressed: onStudy,
     );

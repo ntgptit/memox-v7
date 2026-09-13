@@ -82,10 +82,11 @@ List<Widget> _chromeActions(
     // because a 24 glyph inside a 40 circle left 8 of ring on each side. No
     // circle, no reason.
     //
-    // What is left is what the bar had before — the theme's own icon button, at
-    // the app's 48 target with a 24 glyph.
+    // Handoff redesign: app-bar actions keep the 24 glyph (D16) inside the 36
+    // ink circle.
     MxIconButton(
       icon: Icons.search,
+      placement: MxIconButtonPlacement.bar,
       semanticLabel: context.l10n.librarySearchOpenLabel,
       tooltip: context.l10n.librarySearchOpenLabel,
       // **`push`, not `go`.** Search is a *sibling* of the deck-detail
@@ -101,6 +102,7 @@ List<Widget> _chromeActions(
     if (isRootLevel)
       MxIconButton(
         icon: Icons.more_vert,
+        placement: MxIconButtonPlacement.bar,
         semanticLabel: context.l10n.libraryActionsTitle,
         tooltip: context.l10n.libraryActionsTitle,
         onPressed: () => showLibraryMenu(
@@ -258,6 +260,7 @@ class _DeckLevel extends ConsumerWidget {
         if (parent != null)
           MxIconButton(
             icon: Icons.more_vert,
+            placement: MxIconButtonPlacement.bar,
             semanticLabel: context.l10n.deckActionsSemanticLabel,
             onPressed: () => showDeckActions(
               context,

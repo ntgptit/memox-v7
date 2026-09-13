@@ -167,7 +167,7 @@ void main() {
       expect(tester.widget<IconButton>(find.byType(IconButton)).style, isNull);
     });
 
-    testWidgets('draws 40 and still hands a finger 48', (tester) async {
+    testWidgets('draws 36 and still hands a finger 48', (tester) async {
       // The split this variant exists to make: a visible circle at 48 is the
       // largest object in a header whose subtitle is 12px, so the circle comes
       // down and the target does not. `mx_stress_test` measures the floor
@@ -199,8 +199,8 @@ void main() {
             )
             .first,
       );
-      expect(drawn.width, AppSizing.controlCompact);
-      expect(drawn.height, AppSizing.controlCompact);
+      expect(drawn.width, AppSizing.iconButtonInk);
+      expect(drawn.height, AppSizing.iconButtonInk);
 
       expect(
         tester.getRect(find.byType(IconButton)).height,

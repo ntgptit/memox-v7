@@ -35,6 +35,7 @@ class CardEditorSaveShortcutWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MxIconButton(
     icon: Icons.check,
+    placement: MxIconButtonPlacement.bar,
     semanticLabel: context.l10n.cardEditorSaveShortAction,
     onPressed: onSave,
   );

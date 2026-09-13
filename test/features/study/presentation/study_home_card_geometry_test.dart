@@ -161,12 +161,12 @@ void main() {
       },
     );
 
-    testWidgets('the compact verb draws 40 and still hits 48', (tester) async {
+    testWidgets('the compact verb draws 36 and still hits 48', (tester) async {
       // The deck tile's Study verb made this trade first (M99.74's audit):
-      // a 40 body on the 4px grid inside a dense row, with
-      // `MaterialTapTargetSize.padded` keeping the touch floor. The task-card
-      // arrangement borrows it for the same reason — the verb is furniture in
-      // a row, not a screen action.
+      // a smaller body inside a dense row, with `MaterialTapTargetSize.padded`
+      // keeping the touch floor. The task-card arrangement borrows it for the
+      // same reason — the verb is furniture in a row, not a screen action. The
+      // body is the handoff's compact button since M100.90 (it was 40).
       await harness.pump(tester);
 
       final drawn = tester.getSize(
@@ -177,7 +177,7 @@ void main() {
             )
             .first,
       );
-      expect(drawn.height, 40);
+      expect(drawn.height, AppSizing.buttonCompact);
       expect(
         tester.getSize(inRow(find.byType(MxActionButton)).first).height,
         greaterThanOrEqualTo(AppSizing.touchTarget),

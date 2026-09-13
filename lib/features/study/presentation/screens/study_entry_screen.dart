@@ -225,6 +225,7 @@ class _StudyEntryScreenState extends ConsumerState<StudyEntryScreen> {
       actions: <Widget>[
         MxIconButton(
           icon: Icons.tune,
+          placement: MxIconButtonPlacement.bar,
           semanticLabel: context.l10n.studyOptionsTitle,
           onPressed: () => unawaited(_openOptions(context)),
         ),

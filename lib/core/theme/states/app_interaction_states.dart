@@ -24,6 +24,12 @@ abstract final class AppStateOpacity {
   /// colour. Heavier than a row because the target is a fraction of the width.
   static const double hoverIcon = 0.08;
 
+  /// Handoff IconButton: the primary tint behind the glyph on hover and press.
+  static const double iconTintLight = 0.08;
+
+  /// The same tint in dark, where 8% of the lifted primary disappears.
+  static const double iconTintDark = 0.14;
+
   /// An outlined or text-weight control — `.mx-btn--secondary:hover`, 6% of the
   /// accent.
   static const double hoverControl = 0.06;
@@ -122,15 +128,29 @@ abstract final class AppInteractionStates {
         hoverAlpha: AppStateOpacity.hoverControl,
       );
 
-  /// Icon-only controls. Hover is the neutral, not the accent —
-  /// `.mx-iconbtn:hover` washes with the secondary text colour, so a row of
-  /// icons in an app bar does not light up in brand colour under the pointer.
+  /// Icon-only controls: the handoff IconButton's `primary` tint circle behind
+  /// the glyph, the same on hover and press — 8% light, 14% dark (M100.90).
+  ///
+  /// It used to wash hover with the secondary text colour (`.mx-iconbtn:hover`)
+  /// so a row of app-bar icons did not light up in brand colour; the handoff
+  /// draws the tint in `primary`, and on the release target there is no pointer
+  /// to hover with. Focus keeps the shared `primary` wash, ordered as
+  /// [_overlay] orders it: pressed before focused before hovered.
   static WidgetStateProperty<Color?> iconOverlay(ColorScheme scheme) =>
-      _overlay(
-        scheme,
-        hoverColor: scheme.onSurfaceVariant,
-        hoverAlpha: AppStateOpacity.hoverIcon,
-      );
+      WidgetStateProperty.resolveWith((states) {
+        final Color tint = scheme.primary.withValues(
+          alpha: scheme.brightness == Brightness.dark
+              ? AppStateOpacity.iconTintDark
+              : AppStateOpacity.iconTintLight,
+        );
+        if (states.contains(WidgetState.pressed)) return tint;
+        if (states.contains(WidgetState.focused)) {
+          return scheme.primary.withValues(alpha: AppStateOpacity.focus);
+        }
+        if (states.contains(WidgetState.hovered)) return tint;
+
+        return null;
+      });
 
   /// A tappable card.
   static WidgetStateProperty<Color?> cardOverlay(ColorScheme scheme) =>

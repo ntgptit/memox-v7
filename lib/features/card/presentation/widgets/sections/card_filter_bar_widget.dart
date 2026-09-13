@@ -226,7 +226,7 @@ class _TagsEntry extends ConsumerWidget {
       // The same glyph the catalog and its empty states use, so the two
       // surfaces read as one feature.
       icon: Icons.sell_outlined,
-      variant: MxActionButtonVariant.secondary,
+      variant: MxActionButtonVariant.tonal,
       size: MxActionButtonSize.compact,
       onPressed: isEnabled
           ? () => showCardTagFilterSheet(context, deckId)

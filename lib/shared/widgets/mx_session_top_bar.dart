@@ -166,7 +166,6 @@ class MxSessionTopBar extends StatelessWidget {
               icon: Icons.close,
               semanticLabel: closeLabel,
               onPressed: onClose,
-              isCompact: true,
             ),
             // **No spacer here, and that is the fix rather than a smaller
             // button.** The gap the eye sees is not spacing: the button centres

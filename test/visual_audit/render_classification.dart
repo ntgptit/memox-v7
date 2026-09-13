@@ -105,6 +105,12 @@ const Set<String> _privateAndTransparent = <String>{
   // inherits `RenderShiftedBox.paint`, which paints the child and nothing
   // else. Verifiable in this repository: lib/shared/widgets/mx_pill_button.dart.
   '_RenderTapTarget',
+  // The extended FAB's row box (M100.90). A `RenderAligningShiftedBox` that
+  // lays its row out unconstrained, clamps its own size and centres the row;
+  // it overrides only the intrinsics, `computeDryLayout` and `performLayout`,
+  // so `RenderShiftedBox.paint` paints the row and nothing else. Verified
+  // against the pinned SDK (3.44.8), material/floating_action_button.dart.
+  '_RenderChildOverflowBox',
   '_RenderCompositionCallback',
   '_RenderSizeChangedWithCallback',
   '_RenderAppBarTitleBox', // layout only; the title's own paragraph is read

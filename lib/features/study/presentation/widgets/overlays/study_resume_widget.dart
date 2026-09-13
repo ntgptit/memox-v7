@@ -71,13 +71,13 @@ class StudyResumeWidget extends StatelessWidget {
           MxActionButton(
             label: context.l10n.studyStartLearning,
             onPressed: () => onChoice(StudyResumeChoice.learn),
-            variant: MxActionButtonVariant.secondary,
+            variant: MxActionButtonVariant.tonal,
           ),
           const SizedBox(height: AppSpacing.sm),
           MxActionButton(
             label: context.l10n.studyStartReview,
             onPressed: () => onChoice(StudyResumeChoice.review),
-            variant: MxActionButtonVariant.secondary,
+            variant: MxActionButtonVariant.tonal,
           ),
         ],
       ),

@@ -47,6 +47,7 @@ class TrashScreen extends ConsumerWidget {
       leading: selection.isActive
           ? MxIconButton(
               icon: Icons.close,
+              placement: MxIconButtonPlacement.bar,
               semanticLabel: l10n.trashPurgeCancelAction,
               onPressed: () => _clearSelection(ref),
             )
@@ -69,6 +70,7 @@ class TrashScreen extends ConsumerWidget {
                 false))
           MxIconButton(
             icon: Icons.checklist,
+            placement: MxIconButtonPlacement.bar,
             semanticLabel: l10n.trashSelectAction,
             tooltip: l10n.trashSelectAction,
             onPressed: () => _beginSelection(ref, batches.value!, filter),

@@ -454,12 +454,13 @@ void main() {
       await pumpCardDetail(tester, loaded());
       await tester.pumpAndSettle();
 
-      // The glyph is 24dp; what has to clear 48 is the target around it.
+      // What has to clear 48 is the target around the glyph: the
+      // `IconButton`'s padded box, around a 36 ink circle since M100.90.
       final size = tester.getSize(
         find
             .ancestor(
               of: find.byIcon(Icons.edit_outlined),
-              matching: find.byType(InkWell),
+              matching: find.byType(IconButton),
             )
             .first,
       );

@@ -7,7 +7,7 @@
 | **Scope** | `lib/core/theme/components/**`. Ngoài phạm vi: giá trị token (AD-14), layering của `lib/core/theme/` (`theme-architecture.md`), API của `Mx*` widget |
 | **Source of truth for** | Ma trận component → canonical M3 role · ma trận dịch ý đồ Tokyo → MemoX · hồ sơ các sai lệch role đã sửa và mô hình bề mặt · quyết định của chủ dự án và mặc định D1–D27 của đợt redesign theo handoff (§9) |
 | **Depends on** | `document-conventions.md` · `architecture.md` (AD-14) · `design-system/theme-architecture.md` · `design-system/handoff/memox-flutter-handoff.json` |
-| **Updated by task** | M100.88 |
+| **Updated by task** | M100.88 · M100.90 |
 | **Last updated** | 2026-09-14 |
 
 ---
@@ -44,13 +44,13 @@ canonical M3 role  >  accessibility  >  MemoX structural system  >  Tokyo exact 
 | FilledButton | foreground | `onPrimary` (disabled: `onSurface`) | = | disabled dùng `semantic.onDisabled` |
 | FilledButton | overlay | `onPrimary` @ .08/.10/.10 | = | qua `MxFilledPair.stateLayerOf`; guard AST (M100.36). Trước đó là blend về `onSurface` **cộng** overlay `primary` — xem §6 |
 | FilledButton (destructive) | background / foreground / overlay | `error` / `onError` / `onError` | = | `MxFilledPair.destructive`; guard AST cả ba slot |
-| FilledTonalButton | — | `secondaryContainer` / `onSecondaryContainer` | **không dựng** | `MxActionButtonVariant.tonal` gỡ ở M100.36: 0 caller từ #384, và hệ thứ bậc chấm điểm (§4B) chốt bằng `secondary` |
+| FilledTonalButton | — | `secondaryContainer` / `onSecondaryContainer` | = (`MxActionButtonVariant.tonal`, handoff redesign D6: forward alternatives) | Gỡ ở M100.36, dựng lại ở M100.73; M100.90 đưa tám hành động phụ tiến tới về tonal. Cancel, back, clear, leave giữ Outlined; nút chấm điểm thuộc Task 28 |
 | OutlinedButton | foreground | `primary` | `semantic.accentInk` | M100.87: `primary` của kit chỉ đạt 3.95:1 làm chữ ở light; guard AST (`requiresSemantic`) |
 | OutlinedButton | side | `outline`, focus → `primary` | = | guard AST |
 | TextButton | foreground | `primary` | `semantic.accentInk` | M100.87, cùng lý do OutlinedButton; guard AST (`requiresSemantic`) |
-| IconButton | foreground | `onSurfaceVariant` | = | |
-| FAB | background | `primaryContainer` | = | sửa ở M100.32; guard AST |
-| FAB | foreground | `onPrimaryContainer` | = | sửa ở M100.32; guard AST |
+| IconButton | foreground | `onSurfaceVariant` | = | 36 ink `CircleBorder`, glyph 20 (bar 24, D16), hover/press `primary` 8% / 14% dark (M100.90) |
+| FAB | background | `primary` | = | extended 52, `shadow-fab` trong `MxFab`; kit thắng canonical `primaryContainer` (owner decision 4, M100.90); guard AST |
+| FAB | foreground | `onPrimary` | = | đi cùng fill `primary` (M100.90); guard AST |
 
 ### inputs/
 
@@ -138,7 +138,7 @@ canonical M3 role  >  accessibility  >  MemoX structural system  >  Tokyo exact 
 | `MuiPaper` paper | mặt giấy nổi | `ColorScheme.surfaceContainerLowest` (card, từ M100.87) | `surface` là nền, giấy là container | — |
 | `divider` `#272C48` | vạch rất khẽ | `scheme.outlineVariant` | `outlineVariant` | `AppStroke.hairline` |
 | Backdrop tối + blur | tách modal khỏi trang | `modalBarrierColor` (`scheme.scrim`) | scrim | alpha token; **blur chưa nhận** |
-| `MuiIconButton` radius 8 / pad 8 | chrome gọn | `AppRadius.md` + `AppSizing.touchTarget` | `onSurfaceVariant` | sàn 48 thắng pad 8 |
+| ~~`MuiIconButton` radius 8 / pad 8~~ | ~~chrome gọn~~ | ~~`AppRadius.md` + `AppSizing.touchTarget`~~ | ~~`onSurfaceVariant`~~ | Superseded ở M100.90 — xem §2 IconButton (vòng 36, glyph 20, đích chạm 48) |
 | `MuiTab` height 38 | nhịp điều hướng chặt | chưa áp dụng | `primary` | 38 dưới sàn; hoãn |
 
 **Blur của Backdrop chưa được nhận** (brief §32): nó cần một overlay recipe dùng
@@ -202,7 +202,9 @@ Năm slot (FAB ×2, Card, AppBar ×2) được ghim ở `m3_role_binding_guard_t
 ở mức **source**, nên đổi `surfaceContainerLow` thành `surface` là đỏ kể cả khi
 hai hex bằng nhau. **Từ M100.87 slot Card ghim `surfaceContainerLowest`** và từ
 chối `surfaceContainerLow`, `surface`, `surfaceContainer` — card trắng của
-handoff Tokyo; bảng trên giữ nguyên làm hồ sơ của M100.32.
+handoff Tokyo; bảng trên giữ nguyên làm hồ sơ của M100.32. **Superseded cho
+FAB ở M100.90:** slot FAB ghim `primary`/`onPrimary` theo handoff (owner
+decision 4), FAB extended 52 với `shadow-fab` vẽ trong `MxFab`.
 
 ### Một palette retune đi kèm
 
@@ -331,7 +333,7 @@ là vô hình. Không control nào có hai vòng, và không control nào chỉ 
 | FilledButton (`MxActionButton` primary/destructive) | `ButtonStyle.side` = `focusIndicatorOf(label)` | ngoài fill, không đổi kích thước | SDK (`ButtonStyleButton` chỉ nhận `focused` từ bàn phím) | `focus_ring_contrast_test` ≥ 3:1 trên fill |
 | OutlinedButton / TextButton (`MxActionButton` secondary, `MxTextButton`) | `ButtonStyle.side` = `focusIndicator(scheme)` | thay hairline khi focus | SDK | cùng test |
 | IconButton (`MxIconButton`, `MxMenuButton`) | `iconButtonTheme.side` khi focused | ngoài | SDK | cùng test |
-| FAB | `focusColor` (wash `onPrimaryContainer`) + shape | SDK | SDK | chấp nhận: FAB là control duy nhất trên màn của nó |
+| FAB (`MxFab`) | `floatingActionButtonTheme.shape` khi focused: `focusIndicatorOf(onPrimary)`, cùng câu trả lời của nút filled; wash `onPrimary` 10% giữ lại | trên mép shape, không đổi kích thước | SDK (`RawMaterialButton` resolve `shape` theo `focused`) | `focus_ring_contrast_test` ≥ 3:1 trên fill; `mx_fab_test` với Tab thật. M100.90 rút lại ngoại lệ wash-only của M100.36: wash một mình đo 1.18:1 (UI audit P1) |
 | ChoiceChip (`MxPillButton`) | `MxFocusRing` quanh **hình vẽ**; SDK `focusColor` wash bên trong | ngoài, target 48 nới ngoài ring | `MxFocusRing` (`addHighlightModeListener`) | `mx_pill_button_focus_test`: rect ring == rect Material |
 | `MxListTile` (interactive) | `MxFocusRing`; SDK wash `rowOverlay(focused)` | ngoài | `MxFocusRing` | `mx_list_tile_test` |
 | `MxPressable` | `MxFocusRing` theo shape | ngoài | `MxFocusRing` | `mx_pressable_test` |

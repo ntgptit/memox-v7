@@ -27,8 +27,8 @@ void main() {
       // opacity have scales of their own and are not covered by this rule.
       for (final (String name, double value) in <(String, double)>[
         ('touchTarget', AppSizing.touchTarget),
-        ('controlCompact', AppSizing.controlCompact),
-        ('floatingAction', AppSizing.floatingAction),
+        ('buttonCompact', AppSizing.buttonCompact),
+        ('fab', AppSizing.fab),
         ('buttonMinWidth', AppSizing.buttonMinWidth),
         // Not a control, and on the grid all the same: the rhythm is what
         // keeps a mark aligned with the text it sits beside.
@@ -63,7 +63,7 @@ void main() {
       // The whole point of the compact tier: the body comes down, the finger's
       // floor does not. If these ever met, `MaterialTapTargetSize.padded` would
       // be doing nothing and the tier would be a second name for `standard`.
-      expect(AppSizing.controlCompact, lessThan(AppSizing.touchTarget));
+      expect(AppSizing.buttonCompact, lessThan(AppSizing.touchTarget));
     });
 
     test('the FAB clearance is derived from the FAB, not repeated', () {
@@ -72,7 +72,7 @@ void main() {
       // so a FAB that ever changed size could not leave the clearance behind.
       expect(
         AppSpacing.fabScrollClearance,
-        AppSizing.floatingAction + AppSpacing.lg + AppSpacing.lg,
+        AppSizing.fab + AppSpacing.lg + AppSpacing.xxxl,
       );
     });
   });
@@ -95,12 +95,16 @@ void main() {
       });
 
       test('$mode: an icon button cannot be built below the target', () {
-        final Size? minimum = build().iconButtonTheme.style?.minimumSize
-            ?.resolve(const <WidgetState>{});
+        // The handoff IconButton paints a 36 ink circle (M100.90); the target
+        // is what `MaterialTapTargetSize.padded` restores around it, so the
+        // contract is the pair — never a smaller ink without the padding.
+        final ButtonStyle? style = build().iconButtonTheme.style;
+        final Size? minimum = style?.minimumSize?.resolve(
+          const <WidgetState>{},
+        );
 
-        expect(minimum, isNotNull);
-        expect(minimum!.height, AppSizing.touchTarget);
-        expect(minimum.width, AppSizing.touchTarget);
+        expect(minimum, const Size.square(AppSizing.iconButtonInk));
+        expect(style?.tapTargetSize, MaterialTapTargetSize.padded);
       });
     }
   });
