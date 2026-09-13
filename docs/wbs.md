@@ -688,6 +688,19 @@ không nhầm chúng là một phase.
     chạm, và hợp đồng theme thành cặp (`minimumSize` 36, `padded`). Trash G2:
     glyph kebab 20 (D16) kết thúc trong gutter 2dp; phần dư được ghim, khoảng
     hở với AppBar thành 6dp (4 của AppBar, 2 của glyph).
+  - PLAN-DEV-8.1 — FAB extended vẽ nhãn, nên 15 lượt chạm `find.text(...)` ở
+    năm test tạo deck (root, sub-deck, heading scheduler, rung tiêu đề sheet,
+    side-effect-once) khớp hai widget: nút mở của empty state và FAB. Các lượt
+    chạm chuyển sang `find.widgetWithText(FloatingActionButton, …)`; ma trận
+    BR-66 đếm hai widget cùng tên. `MxFab` bỏ tooltip vì nhãn đã hiện.
+  - PLAN-DEV-8.2 — `theme_coverage_test` chỉ nhận `Name(` / `Name<T>(`, nên
+    `FloatingActionButton.extended(` bị coi là không render và
+    `floatingActionButtonTheme` bị báo "theme không ai dùng". Regex nhận thêm
+    constructor có tên.
+  - PLAN-DEV-8.3 — `app_theme_test` so elevation FAB với snackbar ("một chính
+    sách độ sâu"). FAB giờ để elevation Material `none` và `MxFab` vẽ
+    `shadow-fab` ở mức `AppElevation.overlay`, nên pin tách riêng; wash của FAB
+    theo `onPrimary`. `design_audit` đếm thêm hai site `opacity-modified-token`.
 - **Editable documents:** `docs/wbs.md`,
   `docs/design-system/tokyo-component-mapping.md`,
   `docs/superpowers/plans/2026-09-13-tokyo-handoff-redesign.md` (ghi deviation).

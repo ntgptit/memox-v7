@@ -226,7 +226,7 @@ void main() {
   });
 
   group('MxFab', () {
-    testWidgets('label reaches tooltip and semantics; theme owns the look', (
+    testWidgets('label is painted and named; theme owns the look', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -242,12 +242,13 @@ void main() {
         ),
       );
 
-      // One string, two jobs: the long-press tooltip and the accessible name
-      // of a control that paints no text of its own.
+      // The handoff FAB is extended (M100.90): the label is on the button, so
+      // it is the accessible name too, and a tooltip would say it twice.
       final fab = tester.widget<FloatingActionButton>(
         find.byType(FloatingActionButton),
       );
-      expect(fab.tooltip, 'New deck');
+      expect(fab.tooltip, isNull);
+      expect(find.text('New deck'), findsOneWidget);
       expect(find.bySemanticsLabel('New deck'), findsOneWidget);
 
       // The wrapper passes no colour and no shape, so what renders is the
@@ -256,8 +257,8 @@ void main() {
       expect(fab.shape, isNull);
 
       final size = tester.getSize(find.byType(FloatingActionButton));
-      expect(size.height, greaterThanOrEqualTo(48));
-      expect(size.width, greaterThanOrEqualTo(48));
+      expect(size.height, AppSizing.fab);
+      expect(size.width, greaterThanOrEqualTo(AppSizing.touchTarget));
     });
   });
 

@@ -80,14 +80,12 @@ abstract final class AppSizing {
   /// controls that are only a target.
   static const double rowMinHeight = 56;
 
-  /// Material's floating action button, which declares no public constant for
-  /// its own size.
+  /// The handoff's extended FAB height (`size-fab`). Width is content-driven.
   ///
-  /// Read only to derive clearances — `AppSpacing.fabScrollClearance` — and
-  /// never to size a FAB: `FloatingActionButton` sizes itself, and a widget
-  /// that restated this number would be a second answer able to drift from the
-  /// SDK's.
-  static const double floatingAction = 56;
+  /// It was Material's 56 circle as `floatingAction` until M100.90; the kit has
+  /// no circular variant. The FAB theme sizes the button from it, and
+  /// `AppSpacing.fabScrollClearance` derives the list's tail from it.
+  static const double fab = 52;
 
   /// The narrowest a button is allowed to be, label notwithstanding.
   ///

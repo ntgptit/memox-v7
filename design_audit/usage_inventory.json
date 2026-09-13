@@ -1,9 +1,9 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
   "scannedFiles": 739,
-  "totalSites": 330,
+  "totalSites": 332,
   "byElementKind": {
-    "other": 294,
+    "other": 296,
     "background": 24,
     "border": 10,
     "shadow": 1,
@@ -11,7 +11,7 @@
   },
   "bySourceKind": {
     "shared-constant": 161,
-    "opacity-modified-token": 19,
+    "opacity-modified-token": 21,
     "blend-source": 5,
     "Colors-material": 14,
     "hardcoded-literal": 104,
@@ -174,36 +174,36 @@
     },
     {
       "file": "lib/core/theme/components/actions/app_fab_theme.dart",
-      "line": 40,
+      "line": 33,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
-      "expression": "scheme.onPrimaryContainer.withValues(alpha: AppStateOpacity.hoverControl)",
-      "token": "colorScheme.onPrimaryContainer",
-      "resolved_value_light": "#1A2580 @ alpha unresolvable",
-      "resolved_value_dark": "#D9DFFF @ alpha unresolvable"
+      "expression": "scheme.onPrimary.withValues(alpha: AppStateOpacity.hoverControl)",
+      "token": "colorScheme.onPrimary",
+      "resolved_value_light": "#FFFFFF @ alpha unresolvable",
+      "resolved_value_dark": "#11173A @ alpha unresolvable"
     },
     {
       "file": "lib/core/theme/components/actions/app_fab_theme.dart",
-      "line": 43,
+      "line": 34,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
-      "expression": "scheme.onPrimaryContainer.withValues(alpha: AppStateOpacity.focus)",
-      "token": "colorScheme.onPrimaryContainer",
-      "resolved_value_light": "#1A2580 @ alpha unresolvable",
-      "resolved_value_dark": "#D9DFFF @ alpha unresolvable"
+      "expression": "scheme.onPrimary.withValues(alpha: AppStateOpacity.focus)",
+      "token": "colorScheme.onPrimary",
+      "resolved_value_light": "#FFFFFF @ alpha unresolvable",
+      "resolved_value_dark": "#11173A @ alpha unresolvable"
     },
     {
       "file": "lib/core/theme/components/actions/app_fab_theme.dart",
-      "line": 46,
+      "line": 35,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
-      "expression": "scheme.onPrimaryContainer.withValues(alpha: AppStateOpacity.pressed)",
-      "token": "colorScheme.onPrimaryContainer",
-      "resolved_value_light": "#1A2580 @ alpha unresolvable",
-      "resolved_value_dark": "#D9DFFF @ alpha unresolvable"
+      "expression": "scheme.onPrimary.withValues(alpha: AppStateOpacity.pressed)",
+      "token": "colorScheme.onPrimary",
+      "resolved_value_light": "#FFFFFF @ alpha unresolvable",
+      "resolved_value_dark": "#11173A @ alpha unresolvable"
     },
     {
       "file": "lib/core/theme/components/content/app_scrollbar_theme.dart",
@@ -3309,18 +3309,18 @@
     },
     {
       "file": "lib/core/theme/states/app_interaction_states.dart",
-      "line": 220,
+      "line": 141,
       "widget_context": "AppInteractionStates",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
-      "expression": "scheme.primary.withValues(alpha: pressedAlpha)",
+      "expression": "scheme.primary.withValues(alpha: scheme.brightness == Brightness.dark ? AppStateOpacity...",
       "token": "colorScheme.primary",
       "resolved_value_light": "#5265F5 @ alpha unresolvable",
       "resolved_value_dark": "#8B9AFF @ alpha unresolvable"
     },
     {
       "file": "lib/core/theme/states/app_interaction_states.dart",
-      "line": 223,
+      "line": 148,
       "widget_context": "AppInteractionStates",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -3331,7 +3331,29 @@
     },
     {
       "file": "lib/core/theme/states/app_interaction_states.dart",
-      "line": 226,
+      "line": 240,
+      "widget_context": "AppInteractionStates",
+      "element_kind": "other",
+      "source_kind": "opacity-modified-token",
+      "expression": "scheme.primary.withValues(alpha: pressedAlpha)",
+      "token": "colorScheme.primary",
+      "resolved_value_light": "#5265F5 @ alpha unresolvable",
+      "resolved_value_dark": "#8B9AFF @ alpha unresolvable"
+    },
+    {
+      "file": "lib/core/theme/states/app_interaction_states.dart",
+      "line": 243,
+      "widget_context": "AppInteractionStates",
+      "element_kind": "other",
+      "source_kind": "opacity-modified-token",
+      "expression": "scheme.primary.withValues(alpha: AppStateOpacity.focus)",
+      "token": "colorScheme.primary",
+      "resolved_value_light": "#5265F5 @ alpha unresolvable",
+      "resolved_value_dark": "#8B9AFF @ alpha unresolvable"
+    },
+    {
+      "file": "lib/core/theme/states/app_interaction_states.dart",
+      "line": 246,
       "widget_context": "AppInteractionStates",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -3551,7 +3573,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_action_button.dart",
-      "line": 417,
+      "line": 418,
       "widget_context": "MxActionButton",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3639,7 +3661,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_session_top_bar.dart",
-      "line": 236,
+      "line": 235,
       "widget_context": "_Chip",
       "element_kind": "background",
       "source_kind": "theme-token",

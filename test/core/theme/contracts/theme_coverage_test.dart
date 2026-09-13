@@ -178,8 +178,12 @@ void main() {
       // and `showModalBottomSheet<bool>(` are how these are actually written,
       // and a name-then-paren pattern misses every generic call site — which
       // reported the radio and the bottom sheet as unrendered while both were
-      // on screen.
-      final call = RegExp('(?<![A-Za-z0-9_])$name\\s*(<[^()]*>)?\\s*\\(');
+      // on screen. The optional `.named` is the same bug for a named
+      // constructor: `FloatingActionButton.extended(` is the only FAB the app
+      // builds since M100.90.
+      final call = RegExp(
+        '(?<![A-Za-z0-9_])$name(\\.[a-z][A-Za-z0-9_]*)?\\s*(<[^()]*>)?\\s*\\(',
+      );
       if (sources.any(call.hasMatch)) found.add(name);
     }
 

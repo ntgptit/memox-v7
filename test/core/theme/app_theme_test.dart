@@ -403,19 +403,20 @@ void main() {
     // and every state default that component owns is yours to restate — M3's
     // are hardcoded to a pair, not derived from an override.
     //
-    // **The FAB stopped needing that at M100.32**, because it stopped being an
-    // override: it is `primaryContainer`/`onPrimaryContainer` again, which is
-    // what `_FABDefaultsM3` names. The washes are still declared rather than
-    // left null, and they still have to be the foreground — a restated default
-    // that agrees with M3 is a dependency on record, not a no-op.
+    // **The FAB needs it again since M100.90**: the Tokyo handoff pair is
+    // `primary`/`onPrimary`, an override of what `_FABDefaultsM3` names, whose
+    // washes hardcode `onPrimaryContainer`. So the washes are declared rather
+    // than left null, and they have to be the foreground.
     for (final entry in themes.entries) {
       test('${entry.key}: the FAB state washes are its own foreground', () {
         final ColorScheme scheme = entry.value.colorScheme;
         final FloatingActionButtonThemeData fab =
             entry.value.floatingActionButtonTheme;
 
-        expect(fab.backgroundColor, scheme.primaryContainer);
-        expect(fab.foregroundColor, scheme.onPrimaryContainer);
+        // The handoff pair over M3's canonical container (owner decision 4,
+        // M100.90); the washes below still follow whatever the pair is.
+        expect(fab.backgroundColor, scheme.primary);
+        expect(fab.foregroundColor, scheme.onPrimary);
         // The house corner, owned here since the deck list stopped stating it
         // per-site — M3's default is the 16dp squircle nothing else uses.
         expect(
@@ -438,7 +439,7 @@ void main() {
           );
           expect(
             wash!.withValues(alpha: 1),
-            scheme.onPrimaryContainer.withValues(alpha: 1),
+            scheme.onPrimary.withValues(alpha: 1),
             reason: '$state washes in a colour that is not the foreground',
           );
         }
@@ -455,10 +456,13 @@ void main() {
           // question, answered by `materialShadowColor`, and it is the only
           // one brightness is allowed to answer.
           expect(entry.value.snackBarTheme.elevation, AppElevation.overlay);
+          // The FAB left this comparison at M100.90: its depth is the
+          // handoff's `shadow-fab`, painted by `MxFab` at the same
+          // `AppElevation.overlay` level, and its Material elevation is none.
           expect(
             entry.value.floatingActionButtonTheme.elevation,
-            entry.value.snackBarTheme.elevation,
-            reason: 'two overlays, two depth policies — there is one',
+            AppElevation.none,
+            reason: 'a Material shadow under MxFab would paint the depth twice',
           );
         },
       );

@@ -4,6 +4,7 @@ import 'package:memox/shared/widgets/mx_async_view.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
 import 'package:memox/shared/widgets/mx_content_shell.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
+import 'package:memox/shared/widgets/mx_fab.dart';
 import 'package:memox/shared/widgets/mx_progress_bar.dart';
 import 'package:memox/shared/widgets/mx_search_field.dart';
 import 'package:memox/shared/widgets/mx_sheet_insets.dart';
@@ -66,9 +67,10 @@ WidgetbookComponent contentShellComponent() {
                   ]
                 : null,
             floatingActionButton: hasFab
-                ? const FloatingActionButton(
+                ? const MxFab(
+                    icon: Icons.add,
+                    label: 'New deck',
                     onPressed: _noop,
-                    child: Icon(Icons.add),
                   )
                 : null,
             body: Column(

@@ -48,15 +48,16 @@ abstract final class AppSpacing {
   ];
 
   /// The bottom inset a scrollable needs on a screen with a floating action
-  /// button, so the last row can scroll clear of it: the button itself plus a
-  /// [lg] gap on each side. Derived, not chosen — it is a clearance, not a step
-  /// on [scale], and any screen that grows a FAB reads it from here instead of
-  /// re-adding the same three numbers.
+  /// button, so the last row can scroll clear of it: the button, its 16
+  /// margin, and the handoff's 48 page-end clearance above pinned chrome (D15).
+  /// Derived, not chosen — it is a clearance, not a step on [scale], and any
+  /// screen that grows a FAB reads it from here instead of re-adding the same
+  /// three numbers.
   ///
   /// **The one member here that is not a gap, and it stays because it is one
   /// anyway.** What it measures is empty space at the foot of a list; the
-  /// button's own extent is [AppSizing.floatingAction], read rather than
+  /// button's own extent is [AppSizing.fab], read rather than
   /// repeated. The touch-target floor that used to sit beside it left for
   /// `AppSizing` at M100.29 — a control's height was never a gap.
-  static const double fabScrollClearance = AppSizing.floatingAction + lg + lg;
+  static const double fabScrollClearance = AppSizing.fab + lg + xxxl;
 }

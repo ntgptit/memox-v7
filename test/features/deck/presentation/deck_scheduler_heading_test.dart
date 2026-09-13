@@ -207,7 +207,9 @@ void main() {
       final handle = tester.ensureSemantics();
       await pumpDeckApp(tester, repository: FakeDeckRepository());
 
-      await tester.tap(find.text(english.deckCreateRootAction));
+      await tester.tap(
+        find.widgetWithText(FloatingActionButton, english.deckCreateRootAction),
+      );
       await tester.pumpAndSettle();
 
       // Scoped to the picker: the deck list behind the sheet carries its own

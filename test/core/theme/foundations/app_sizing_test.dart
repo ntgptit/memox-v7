@@ -28,7 +28,7 @@ void main() {
       for (final (String name, double value) in <(String, double)>[
         ('touchTarget', AppSizing.touchTarget),
         ('buttonCompact', AppSizing.buttonCompact),
-        ('floatingAction', AppSizing.floatingAction),
+        ('fab', AppSizing.fab),
         ('buttonMinWidth', AppSizing.buttonMinWidth),
         // Not a control, and on the grid all the same: the rhythm is what
         // keeps a mark aligned with the text it sits beside.
@@ -72,7 +72,7 @@ void main() {
       // so a FAB that ever changed size could not leave the clearance behind.
       expect(
         AppSpacing.fabScrollClearance,
-        AppSizing.floatingAction + AppSpacing.lg + AppSpacing.lg,
+        AppSizing.fab + AppSpacing.lg + AppSpacing.xxxl,
       );
     });
   });

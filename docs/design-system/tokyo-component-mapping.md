@@ -49,8 +49,8 @@ canonical M3 role  >  accessibility  >  MemoX structural system  >  Tokyo exact 
 | OutlinedButton | side | `outline`, focus → `primary` | = | guard AST |
 | TextButton | foreground | `primary` | `semantic.accentInk` | M100.87, cùng lý do OutlinedButton; guard AST (`requiresSemantic`) |
 | IconButton | foreground | `onSurfaceVariant` | = | 36 ink `CircleBorder`, glyph 20 (bar 24, D16), hover/press `primary` 8% / 14% dark (M100.90) |
-| FAB | background | `primaryContainer` | = | sửa ở M100.32; guard AST |
-| FAB | foreground | `onPrimaryContainer` | = | sửa ở M100.32; guard AST |
+| FAB | background | `primary` | = | extended 52, `shadow-fab` trong `MxFab`; kit thắng canonical `primaryContainer` (owner decision 4, M100.90); guard AST |
+| FAB | foreground | `onPrimary` | = | đi cùng fill `primary` (M100.90); guard AST |
 
 ### inputs/
 
@@ -202,7 +202,9 @@ Năm slot (FAB ×2, Card, AppBar ×2) được ghim ở `m3_role_binding_guard_t
 ở mức **source**, nên đổi `surfaceContainerLow` thành `surface` là đỏ kể cả khi
 hai hex bằng nhau. **Từ M100.87 slot Card ghim `surfaceContainerLowest`** và từ
 chối `surfaceContainerLow`, `surface`, `surfaceContainer` — card trắng của
-handoff Tokyo; bảng trên giữ nguyên làm hồ sơ của M100.32.
+handoff Tokyo; bảng trên giữ nguyên làm hồ sơ của M100.32. **Superseded cho
+FAB ở M100.90:** slot FAB ghim `primary`/`onPrimary` theo handoff (owner
+decision 4), FAB extended 52 với `shadow-fab` vẽ trong `MxFab`.
 
 ### Một palette retune đi kèm
 
@@ -331,7 +333,7 @@ là vô hình. Không control nào có hai vòng, và không control nào chỉ 
 | FilledButton (`MxActionButton` primary/destructive) | `ButtonStyle.side` = `focusIndicatorOf(label)` | ngoài fill, không đổi kích thước | SDK (`ButtonStyleButton` chỉ nhận `focused` từ bàn phím) | `focus_ring_contrast_test` ≥ 3:1 trên fill |
 | OutlinedButton / TextButton (`MxActionButton` secondary, `MxTextButton`) | `ButtonStyle.side` = `focusIndicator(scheme)` | thay hairline khi focus | SDK | cùng test |
 | IconButton (`MxIconButton`, `MxMenuButton`) | `iconButtonTheme.side` khi focused | ngoài | SDK | cùng test |
-| FAB | `focusColor` (wash `onPrimaryContainer`) + shape | SDK | SDK | chấp nhận: FAB là control duy nhất trên màn của nó |
+| FAB | `focusColor` (wash `onPrimary`, M100.90) + shape | SDK | SDK | chấp nhận: FAB là control duy nhất trên màn của nó |
 | ChoiceChip (`MxPillButton`) | `MxFocusRing` quanh **hình vẽ**; SDK `focusColor` wash bên trong | ngoài, target 48 nới ngoài ring | `MxFocusRing` (`addHighlightModeListener`) | `mx_pill_button_focus_test`: rect ring == rect Material |
 | `MxListTile` (interactive) | `MxFocusRing`; SDK wash `rowOverlay(focused)` | ngoài | `MxFocusRing` | `mx_list_tile_test` |
 | `MxPressable` | `MxFocusRing` theo shape | ngoài | `MxFocusRing` | `mx_pressable_test` |
