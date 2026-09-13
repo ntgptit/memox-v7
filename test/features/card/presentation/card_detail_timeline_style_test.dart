@@ -60,13 +60,15 @@ void main() {
 
     for (var index = 0; index < actions.length; index++) {
       final action = actions[index];
+      // The inks since M100.86: the badge's word sits in this colour, so the
+      // dot and the outline take the ink the word does.
       final expected = switch (action) {
-        StudyAction.forgotten || StudyAction.again => semantic.danger,
+        StudyAction.forgotten || StudyAction.again => semantic.dangerInk,
         // **`hard` is its own step.** It kept the card and cost effort doing
         // it; calling that a success flattens the only signal SM-2 has between
         // "fine" and "nearly lost it".
-        StudyAction.hard => semantic.warning,
-        _ => semantic.success,
+        StudyAction.hard => semantic.warningInk,
+        _ => semantic.successInk,
       };
       final row = find.byType(CardHistoryEventWidget).at(index);
 
