@@ -868,6 +868,23 @@ không nhầm chúng là một phase.
     `deck_tile_geometry_test`, `library_search_states_test` và
     `tag_catalog_surface_test`. Test đỏ 7 lần trước khi sửa (chữ ở 80/76 thay
     vì 72, tile `md` thay vì `sm`).
+- **Audit notes:**
+  - Architecture/logic pass 1 (`468c403f`): không có P0–P2. Reviewer tái hiện
+    chứ không chỉ đọc: `flutter analyze` sạch, khoảng 700 test ở vùng bị chạm
+    xanh (stress specimen 430/430, `architecture_boundary_test` 6/6), screen
+    audit 68/68. BR-88/D8 trỏ về `DeckSummary.isFullyLearned`; vẫn học được một
+    deck (`studyDeck`, `deckStudy`); bốn key ARB gỡ ở cả hai locale, không còn
+    reader. Tự ghi chưa phủ: đọc từng dòng source của Task 11 và Task 16 (mới
+    chạy test) — giao cho lượt re-audit.
+  - UI/UX pass 1 (`468c403f`): một P2, không P0/P1. Hairline của `MxRowGroup`
+    ở 56 (Divider handoff `indent 0 / 56` FIXED), còn cột chữ ở 64 (deck,
+    search) và 60 (tag); test cũ chỉ ghim token nên không bắt được. Sửa ở
+    `38fc9d5a` (PLAN-DEV-16.4). Reviewer đề xuất inset 8; không dùng vì 8
+    không phải inset hàng trong thang spacing của handoff. Tự ghi chưa phủ:
+    dark, high contrast, VI tại call site, textScale 2.0 ngoài các pin sẵn có,
+    landscape — giao cho lượt re-audit.
+  - Golden: 124 PNG author lại trên Linux ở `a00e0270` (clone WSL riêng tại
+    `38fc9d5a`, update 8/8 lát xanh). Gallery `ảnh 9f56e0cf`.
 - **Editable documents:** `docs/wbs.md`,
   `docs/design-system/tokyo-component-mapping.md`,
   `docs/design-system/listtile-deck-row-spec.md`, `lib/features/deck/README.md`,
