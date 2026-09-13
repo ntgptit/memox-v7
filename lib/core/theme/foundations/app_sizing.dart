@@ -97,6 +97,14 @@ abstract final class AppSizing {
   /// shell drops to 40 and its text wraps instead of truncating.
   static const double inputMultilineMin = 40;
 
+  /// Handoff Switch geometry (FIXED): a 44 × 26 track and a 20 thumb, 3 in
+  /// from the track's edge. A painted mark: the row around it carries the 48
+  /// target (`MxSwitchRow`).
+  static const double switchTrackWidth = 44;
+  static const double switchTrackHeight = 26;
+  static const double switchThumb = 20;
+  static const double switchThumbInset = 3;
+
   /// The handoff's extended FAB height (`size-fab`). Width is content-driven.
   ///
   /// It was Material's 56 circle as `floatingAction` until M100.90; the kit has

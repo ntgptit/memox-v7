@@ -170,8 +170,8 @@ void main() {
       test('Switch', () {
         final t = theme.switchTheme;
 
-        pin('off thumb', t.thumbColor!.resolve(resting), scheme.outline);
-        pin('on thumb', t.thumbColor!.resolve(selected), scheme.onPrimary);
+        pin('off thumb', t.thumbColor!.resolve(resting), scheme.surfaceBright);
+        pin('on thumb', t.thumbColor!.resolve(selected), scheme.surfaceBright);
         pin(
           'off track',
           t.trackColor!.resolve(resting),
@@ -181,7 +181,7 @@ void main() {
         pin(
           'off track outline',
           t.trackOutlineColor!.resolve(resting),
-          scheme.outline,
+          Colors.transparent,
         );
         pin(
           'on track outline',

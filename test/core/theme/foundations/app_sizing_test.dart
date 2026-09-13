@@ -44,6 +44,11 @@ void main() {
         // The handoff field: 52 single-line, 40 multi-line.
         ('input', AppSizing.input),
         ('inputMultilineMin', AppSizing.inputMultilineMin),
+        // The handoff Switch's track width and thumb. Its 26 track height and
+        // 3 inset are the kit's FIXED values and sit off the grid on purpose:
+        // (26 - 20) / 2 centres the thumb.
+        ('switchTrackWidth', AppSizing.switchTrackWidth),
+        ('switchThumb', AppSizing.switchThumb),
       ]) {
         expect(
           value % 4,

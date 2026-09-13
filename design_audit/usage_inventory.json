@@ -1,6 +1,6 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 741,
+  "scannedFiles": 742,
   "totalSites": 347,
   "byElementKind": {
     "other": 311,
@@ -339,7 +339,7 @@
     },
     {
       "file": "lib/core/theme/components/selection/app_toggle_themes.dart",
-      "line": 108,
+      "line": 82,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "Colors-material",
@@ -350,7 +350,7 @@
     },
     {
       "file": "lib/core/theme/components/selection/app_toggle_themes.dart",
-      "line": 175,
+      "line": 138,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -361,7 +361,7 @@
     },
     {
       "file": "lib/core/theme/components/selection/app_toggle_themes.dart",
-      "line": 181,
+      "line": 144,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",

@@ -7,6 +7,7 @@ import 'package:memox/shared/widgets/mx_list_tile.dart';
 import 'package:memox/shared/widgets/mx_menu_button.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
 import 'package:memox/shared/widgets/mx_radio_rows.dart';
+import 'package:memox/shared/widgets/mx_switch.dart';
 import 'package:memox/shared/widgets/mx_switch_row.dart';
 
 import 'mx_stress_specimens.dart';
@@ -49,6 +50,12 @@ List<MxStressSpecimen> selectionStressSpecimens() => <MxStressSpecimen>[
     build: () =>
         const MxSwitchRow(label: kLongTitle, isOn: true, onChanged: _noopBool),
     isInteractive: true,
+  ),
+  MxStressSpecimen(
+    // A painted mark with no gesture or semantics of its own: the row above
+    // carries the target and the toggle, so this is not interactive.
+    name: 'MxSwitch',
+    build: () => const MxSwitch(isOn: true, onChanged: _noopBool),
   ),
   MxStressSpecimen(
     name: 'MxCheckboxRow',

@@ -766,6 +766,39 @@ không nhầm chúng là một phase.
     `surfaceContainerLow`) làm 4 file audit xanh `+12`, rồi revert. Các
     allowance ghi đúng số chip và nêu cơ chế thật; rationale cũ ("transparent
     rest state") vốn sai.
+  - PLAN-DEV-19.1 — test của plan có hai chỗ không chạy được: `find.descendant`
+    không match chính root `AnimatedContainer`, nên cần `matchRoot: true`; và
+    3.44 không có `hasToggledState`, nên đọc `isToggled` / `isEnabled` dạng
+    `Tristate` như `mx_switch_row_test`. Thêm hai kiểm tra: màu thumb, và màu
+    từng slot khi disabled. Test đỏ đúng lý do: compile lỗi vì thiếu
+    `MxSwitch` và `switchThumb`.
+  - PLAN-DEV-19.2 — số đo thật:
+    - thumb `surfaceBright` trên `surfaceContainerHighest`: 1.32:1 (light),
+      1.36:1 (dark); trước đây `outline` đạt 2.74 / 1.96;
+    - track nghỉ so với page: 1.25 / 1.92;
+    - knob disabled: 2.32 / 2.83, to hơn knob đang bật ở cả hai mode.
+
+    Ghim theo owner decision 5 và D3: thumb nghỉ có sàn 1.3 / 1.3, track nghỉ
+    có sàn 1.2 / 1.9, knob disabled có trần 2.4 / 2.9. Test cặp M3 `outline`
+    được thay bằng test "track, không phải thumb, phân biệt on/off" ≥ 3:1.
+    Test ranh giới track trước đây đo outline trong suốt như màu đen (vì
+    `contrast` bỏ qua alpha); giờ composite trước khi đo.
+  - PLAN-DEV-19.3 — những chỗ plan không nêu:
+    - nhóm Switch trong `m3_combined_state_test`;
+    - finder `Switch` → `MxSwitch` trong `reminder_settings_layout_test` (9
+      chỗ) và `reminder_settings_screen_test` (12 chỗ);
+    - `theme_coverage_test`: `switchTheme` vào `allowedUnrendered` (lưới an
+      toàn cho `Switch` trần); test "scan thấy widget" dời sang `ChoiceChip`;
+    - bỏ `trackOutlineWidth`, vì outline đã trong suốt.
+
+    Widgetbook thêm use case `MxSwitch`.
+  - PLAN-DEV-19.4 — plan đặt tên tham số là `MxSwitch.value`. Guard
+    `memox.naming.boolean_reads_as_predicate` báo warning vì boolean phải đọc
+    như vị từ, nên đổi thành `isOn`, trùng tên với `MxSwitchRow.isOn`. Chín
+    chỗ `toggleOf(tester)` trong `reminder_settings_screen_test` đọc `isOn`.
+    Stress specimen thêm `MxSwitch` (không interactive, vì row mang target).
+    Audit reminder bỏ allowance `_SwitchPainter`, vì `MxSwitch` vẽ bằng
+    decorated box và audit đọc được trực tiếp.
 - **Editable documents:** `docs/wbs.md`,
   `docs/design-system/tokyo-component-mapping.md`,
   `docs/design-system/switch-spec.md`,

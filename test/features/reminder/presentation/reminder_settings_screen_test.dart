@@ -14,6 +14,7 @@ import 'package:memox/features/reminder/domain/models/reminder_time_model.dart';
 import 'package:memox/features/reminder/presentation/screens/reminder_settings_screen.dart';
 import 'package:memox/l10n/generated/app_localizations.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
+import 'package:memox/shared/widgets/mx_switch.dart';
 
 import '../support/fake_reminder_platform.dart';
 
@@ -82,14 +83,14 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  Switch toggleOf(WidgetTester tester) =>
-      tester.widget<Switch>(find.byType(Switch));
+  MxSwitch toggleOf(WidgetTester tester) =>
+      tester.widget<MxSwitch>(find.byType(MxSwitch));
 
   group('off (UC-17 S2, BR-218)', () {
     testWidgets('opens off, at 20:00, with both disclosures', (tester) async {
       await pumpScreen(tester);
 
-      expect(toggleOf(tester).value, isFalse);
+      expect(toggleOf(tester).isOn, isFalse);
       expect(find.text(english.reminderDueOnlyNote), findsOneWidget);
       expect(find.text(english.reminderPrivacyNote), findsOneWidget);
       // Nothing has been asked of the OS yet — the whole of BR-218.
@@ -114,13 +115,13 @@ void main() {
     ) async {
       await pumpScreen(tester);
 
-      await tester.tap(find.byType(Switch));
+      await tester.tap(find.byType(MxSwitch));
       await tester.pumpAndSettle();
 
       expect(platform.permissionRequests, 1);
       expect(settings.current.isEnabled, isTrue);
       expect(platform.scheduled.single, ReminderTime.suggested);
-      expect(toggleOf(tester).value, isTrue);
+      expect(toggleOf(tester).isOn, isTrue);
     });
 
     testWidgets('a refused permission leaves it off and explains (UC-17 E1)', (
@@ -129,10 +130,10 @@ void main() {
       platform.permission = ReminderPermission.denied;
       await pumpScreen(tester);
 
-      await tester.tap(find.byType(Switch));
+      await tester.tap(find.byType(MxSwitch));
       await tester.pumpAndSettle();
 
-      expect(toggleOf(tester).value, isFalse);
+      expect(toggleOf(tester).isOn, isFalse);
       expect(settings.current.isEnabled, isFalse);
       expect(find.text(english.reminderPermissionDeniedTitle), findsOneWidget);
       // The recovery is offered, so the flow does not dead-end.
@@ -145,10 +146,10 @@ void main() {
       platform.shouldFailSchedule = true;
       await pumpScreen(tester);
 
-      await tester.tap(find.byType(Switch));
+      await tester.tap(find.byType(MxSwitch));
       await tester.pumpAndSettle();
 
-      expect(toggleOf(tester).value, isFalse);
+      expect(toggleOf(tester).isOn, isFalse);
       expect(find.text(english.reminderScheduleErrorTitle), findsOneWidget);
     });
   });
@@ -166,12 +167,12 @@ void main() {
       settings.shouldFailWrite = true;
       await pumpScreen(tester);
 
-      await tester.tap(find.byType(Switch));
+      await tester.tap(find.byType(MxSwitch));
       await tester.pumpAndSettle();
 
       // Off, because off is what is stored. A toggle that stayed on would be
       // showing a choice the database refused.
-      expect(toggleOf(tester).value, isFalse);
+      expect(toggleOf(tester).isOn, isFalse);
       expect(find.text(english.reminderSaveErrorTitle), findsOneWidget);
       expect(find.text(english.reminderSaveErrorMessage), findsOneWidget);
       expect(find.text(english.retryAction), findsOneWidget);
@@ -182,7 +183,7 @@ void main() {
     ) async {
       settings.shouldFailWrite = true;
       await pumpScreen(tester);
-      await tester.tap(find.byType(Switch));
+      await tester.tap(find.byType(MxSwitch));
       await tester.pumpAndSettle();
 
       // The database recovers between the two attempts, which is what makes
@@ -191,7 +192,7 @@ void main() {
       await tester.tap(find.text(english.retryAction));
       await tester.pumpAndSettle();
 
-      expect(toggleOf(tester).value, isTrue);
+      expect(toggleOf(tester).isOn, isTrue);
       expect(find.text(english.reminderSaveErrorTitle), findsNothing);
       expect(settings.current.isEnabled, isTrue);
     });
@@ -212,7 +213,7 @@ void main() {
       expect(find.text(english.writeErrorMessage), findsOneWidget);
       expect(find.text(english.reminderSaveErrorTitle), findsNothing);
       expect(find.text(english.retryAction), findsOneWidget);
-      expect(find.byType(Switch), findsNothing);
+      expect(find.byType(MxSwitch), findsNothing);
     });
   });
 
@@ -248,7 +249,7 @@ void main() {
     testWidgets('shows the stored time and lets it be changed', (tester) async {
       await pumpScreen(tester);
 
-      expect(toggleOf(tester).value, isTrue);
+      expect(toggleOf(tester).isOn, isTrue);
       expect(find.text('7:30 AM'), findsOneWidget);
 
       await tester.tap(find.text(english.reminderTimeLabel));
@@ -267,7 +268,7 @@ void main() {
       platform.shouldFailCancel = true;
       await pumpScreen(tester);
 
-      await tester.tap(find.byType(Switch));
+      await tester.tap(find.byType(MxSwitch));
       await tester.pumpAndSettle();
 
       // The setting really did go off, so copy claiming nothing was turned on
@@ -282,7 +283,7 @@ void main() {
     ) async {
       platform.shouldFailCancel = true;
       await pumpScreen(tester);
-      await tester.tap(find.byType(Switch));
+      await tester.tap(find.byType(MxSwitch));
       await tester.pumpAndSettle();
 
       // A single hardwired retry turned "turning it off failed" into "turn it
@@ -292,7 +293,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(settings.current.isEnabled, isFalse);
-      expect(toggleOf(tester).value, isFalse);
+      expect(toggleOf(tester).isOn, isFalse);
       expect(platform.cancelCount, 1);
       expect(platform.permissionRequests, 0);
     });
@@ -300,7 +301,7 @@ void main() {
     testWidgets('turning it off cancels and keeps the time', (tester) async {
       await pumpScreen(tester);
 
-      await tester.tap(find.byType(Switch));
+      await tester.tap(find.byType(MxSwitch));
       await tester.pumpAndSettle();
 
       expect(settings.current.isEnabled, isFalse);
@@ -398,12 +399,12 @@ void main() {
       // command — so the rejection is gone and the stored 7:30 is what the
       // reminder is actually scheduled at.
       platform.shouldFailSchedule = false;
-      await tester.tap(find.byType(Switch));
+      await tester.tap(find.byType(MxSwitch));
       await tester.pumpAndSettle();
-      await tester.tap(find.byType(Switch));
+      await tester.tap(find.byType(MxSwitch));
       await tester.pumpAndSettle();
 
-      expect(toggleOf(tester).value, isTrue);
+      expect(toggleOf(tester).isOn, isTrue);
       expect(find.text('7:30 AM'), findsOneWidget);
       expect(find.text('9:00 AM'), findsNothing);
 
