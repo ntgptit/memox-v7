@@ -46,7 +46,7 @@ List<AuditRule> memoxAuditRules({required bool isDark}) {
   ];
 }
 
-/// **The control edges the owner accepted under 3:1** (M100.86): the Tokyo
+/// **The control edges the owner accepted under 3:1** (M100.87): the Tokyo
 /// handoff's `outline` on its inset rungs, at the figures
 /// `control_border_grounds_test.dart` pins for the same pairs.
 Map<(int, int), double> _acceptedControlEdges(

@@ -44,7 +44,7 @@ void main() {
         // this retune is safe: HC re-points the token to `onSurfaceVariant`
         // rather than deriving it from the base, so no accessibility floor
         // moves with it.
-        // Every cell below re-measured on the Tokyo handoff palette (M100.86).
+        // Every cell below re-measured on the Tokyo handoff palette (M100.87).
         expect(r(base.borderSubtle), isLight ? '1.53' : '1.58');
         // **No longer a swap at all** (M100.82, owner review). The hairline
         // was `onSurfaceVariant` — 5.28 / 6.47, the secondary *label* ink —

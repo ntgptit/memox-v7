@@ -14,7 +14,7 @@ import '../../../support/color_math.dart';
 /// `outline` on `surfaceContainerHighest` — is the version that reads fine as
 /// two token names and measures 2.79:1 as a pair. So every check below resolves
 /// both halves from the built theme and divides them.
-/// **The resting switch the owner accepted under 3:1** (2026-09-13, M100.86).
+/// **The resting switch the owner accepted under 3:1** (2026-09-13, M100.87).
 /// The handoff's `outline` on its `surfaceContainerHighest` track reads 2.74:1
 /// in light and 1.96:1 in dark; both are pinned at those figures so the
 /// accepted state cannot sink further. The Switch spec pass decides the thumb.
@@ -303,7 +303,7 @@ void main() {
         // report the disabled switch as the louder of the two.
         final disabledKnob = Color.alphaBlend(thumb(t, off), track(t, off));
 
-        // **Dark is inverted, and recorded rather than hidden** (M100.86).
+        // **Dark is inverted, and recorded rather than hidden** (M100.87).
         // With the handoff's resting thumb at 1.96:1, the disabled knob
         // (2.83:1) reads louder than a live one. Pinned at that figure until
         // the Switch spec pass lands the kit's own disabled treatment — the

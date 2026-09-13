@@ -215,7 +215,7 @@ void main() {
     testWidgets('selected is the brand ink on the edge and the label', (
       tester,
     ) async {
-      // The brand as text is `accentInk` since M100.86 — the handoff's
+      // The brand as text is `accentInk` since M100.87 — the handoff's
       // `primary` reads 3.95:1 as a label — and the edge takes the same ink
       // through `AppInk.accent`, so edge and label cannot disagree.
       await pumpTile(

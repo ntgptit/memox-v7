@@ -48,7 +48,7 @@ void main() {
     testWidgets("below 100% the fill is the handoff's primary tone", (
       tester,
     ) async {
-      // **`primary`, by the Tokyo handoff** (M100.86). Its LinearProgress spec
+      // **`primary`, by the Tokyo handoff** (M100.87). Its LinearProgress spec
       // names the tone `primary / mastery`, so the M99 rule that kept the bar
       // off the brand — "neither reads as the pressable one" — gives way to
       // the kit. `progressFill` stays the token, so a later spec can move it

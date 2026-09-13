@@ -28,7 +28,7 @@ import '../foundations/app_semantic_colors.dart';
 /// | `borderAccent` | 1.60 / 2.33 | `primary` — 4.39 / 7.39 | the Today card's edge is decoration at 1.60 |
 /// | `onDisabled` | 2.39 / 3.11 | the same ink at 62% — 4.91 / 6.42 | see below |
 ///
-/// **The table is the Tokyo handoff palette's (M100.86)**; the prose below
+/// **The table is the Tokyo handoff palette's (M100.87)**; the prose below
 /// quotes the figures each decision was originally taken on.
 ///
 /// Light figure first, dark second, each measured against `surface` and

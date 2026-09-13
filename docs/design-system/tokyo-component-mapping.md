@@ -7,7 +7,7 @@
 | **Scope** | `lib/core/theme/components/**`. Ngoài phạm vi: giá trị token (AD-14), layering của `lib/core/theme/` (`theme-architecture.md`), API của `Mx*` widget |
 | **Source of truth for** | Ma trận component → canonical M3 role · ma trận dịch ý đồ Tokyo → MemoX · hồ sơ các sai lệch role đã sửa và mô hình bề mặt |
 | **Depends on** | `document-conventions.md` · `architecture.md` (AD-14) · `design-system/theme-architecture.md` |
-| **Updated by task** | M100.86 |
+| **Updated by task** | M100.87 |
 | **Last updated** | 2026-09-13 |
 
 ---
@@ -45,9 +45,9 @@ canonical M3 role  >  accessibility  >  MemoX structural system  >  Tokyo exact 
 | FilledButton | overlay | `onPrimary` @ .08/.10/.10 | = | qua `MxFilledPair.stateLayerOf`; guard AST (M100.36). Trước đó là blend về `onSurface` **cộng** overlay `primary` — xem §6 |
 | FilledButton (destructive) | background / foreground / overlay | `error` / `onError` / `onError` | = | `MxFilledPair.destructive`; guard AST cả ba slot |
 | FilledTonalButton | — | `secondaryContainer` / `onSecondaryContainer` | **không dựng** | `MxActionButtonVariant.tonal` gỡ ở M100.36: 0 caller từ #384, và hệ thứ bậc chấm điểm (§4B) chốt bằng `secondary` |
-| OutlinedButton | foreground | `primary` | `semantic.accentInk` | M100.86: `primary` của kit chỉ đạt 3.95:1 làm chữ ở light; guard AST (`requiresSemantic`) |
+| OutlinedButton | foreground | `primary` | `semantic.accentInk` | M100.87: `primary` của kit chỉ đạt 3.95:1 làm chữ ở light; guard AST (`requiresSemantic`) |
 | OutlinedButton | side | `outline`, focus → `primary` | = | guard AST |
-| TextButton | foreground | `primary` | `semantic.accentInk` | M100.86, cùng lý do OutlinedButton; guard AST (`requiresSemantic`) |
+| TextButton | foreground | `primary` | `semantic.accentInk` | M100.87, cùng lý do OutlinedButton; guard AST (`requiresSemantic`) |
 | IconButton | foreground | `onSurfaceVariant` | = | |
 | FAB | background | `primaryContainer` | = | sửa ở M100.32; guard AST |
 | FAB | foreground | `onPrimaryContainer` | = | sửa ở M100.32; guard AST |
@@ -91,7 +91,7 @@ canonical M3 role  >  accessibility  >  MemoX structural system  >  Tokyo exact 
 | NavigationBar | indicator | `secondaryContainer` | = | guard AST |
 | NavigationBar | iconTheme | `onSecondaryContainer` / `onSurfaceVariant` | = | guard AST |
 | NavigationBar | labelTextStyle | `onSurface` / `onSurfaceVariant` | = | guard AST |
-| TabBar | labelColor | `primary` | `semantic.accentInk` | M100.86, label là chữ; indicator giữ `primary`; guard AST (`requiresSemantic`) |
+| TabBar | labelColor | `primary` | `semantic.accentInk` | M100.87, label là chữ; indicator giữ `primary`; guard AST (`requiresSemantic`) |
 | TabBar | indicatorColor | `primary` | = | guard AST |
 | AppBar | background | `surface` | = | `surface` *là* nền trang từ M100.32; guard AST |
 | AppBar | foreground | `onSurface` | = | |
@@ -100,11 +100,11 @@ canonical M3 role  >  accessibility  >  MemoX structural system  >  Tokyo exact 
 
 | Component | Slot | M3 canonical | MemoX | Ghi chú |
 |---|---|---|---|---|
-| Card | color | `surfaceContainerLow` | `surfaceContainerLowest` | M100.86: card trắng của handoff Tokyo; guard AST |
+| Card | color | `surfaceContainerLow` | `surfaceContainerLowest` | M100.87: card trắng của handoff Tokyo; guard AST |
 | Dialog | background | `surfaceContainerHigh` | = | |
 | BottomSheet | background | `surfaceContainerLow` | = | nay là mặt giấy, theo rung |
 | BottomSheet | dragHandle | `onSurfaceVariant` | = | + state layer, không đổi role |
-| ListTile | selectedColor | `primary` | `onPrimaryContainer` | M100.86: hàng chọn nằm trên `primaryContainer`, nơi `primary` chỉ đạt 4.32:1; guard AST |
+| ListTile | selectedColor | `primary` | `onPrimaryContainer` | M100.87: hàng chọn nằm trên `primaryContainer`, nơi `primary` chỉ đạt 4.32:1; guard AST |
 | ListTile | icon / title / subtitle / trailing text | `onSurfaceVariant` / `onSurface` / `onSurfaceVariant` / `onSurfaceVariant` | = | guard AST (M100.36). Trước đó theme đặt `textColor: onSurface`, thứ `ListTile` chép lên **cả** subtitle (`list_tile.dart:934`) — subtitle mọi hàng từng mang mực title (#431 P1-1) |
 | ListTile | selectedTileColor | *(null — M3 không có)* | `semantic.surfaceSelected` | Bề mặt "đã chọn" app-owned duy nhất, dùng chung với tint của `MxCard` (§4I, M100.36) |
 | ListTile | shape | `null` → `Border()` (hình chữ nhật) | = | M100.37: từng là `AppRadius.md`; hàng luôn nằm trong card/sheet đã sở hữu góc, 12-trong-16 chỉ hiện ra như lệch (#431 P2-11) |
@@ -113,7 +113,7 @@ canonical M3 role  >  accessibility  >  MemoX structural system  >  Tokyo exact 
 | ProgressIndicator | color | `primary` | = | |
 | ProgressIndicator | linearTrack | `secondaryContainer` | = | |
 | SnackBar | background | `inverseSurface` | = | |
-| SnackBar | action | `inversePrimary` | `semantic.inversePrimaryInk` | M100.86: `inversePrimary` của kit là fill; chữ dùng mực riêng |
+| SnackBar | action | `inversePrimary` | `semantic.inversePrimaryInk` | M100.87: `inversePrimary` của kit là fill; chữ dùng mực riêng |
 | SnackBar | content | `onInverseSurface` | = | |
 | Tooltip | — | `inverseSurface` / `onInverseSurface` | = | |
 | PopupMenu | color | `surfaceContainer` | = | |
@@ -132,9 +132,9 @@ canonical M3 role  >  accessibility  >  MemoX structural system  >  Tokyo exact 
 | `sizeMedium` `8px 20px` | nút chắc, không rỗng | `AppSpacing.xl` / `md` | — | 20 không có trên thang; giữ 24 |
 | `MuiButtonBase` radius 6 | góc control chặt | `AppRadius.md` (12) | — | tier, không phải px |
 | `general.borderRadius` 10 | góc mặt phẳng | `AppRadius.lg` (16) | — | tier |
-| `shadow-soft` / `shadow-card` / `shadow-fab` | card ngồi / panel nổi / overlay | `shadowsFor(card)` / `(raised)` / `(overlay)` | — | M100.86: một lớp mỗi mức — `0 1px 2px` @4%, `0 12px 32px` @10%, `0 8px 24px` @12%; màu qua `scheme.shadow` |
+| `shadow-soft` / `shadow-card` / `shadow-fab` | card ngồi / panel nổi / overlay | `shadowsFor(card)` / `(raised)` / `(overlay)` | — | M100.87: một lớp mỗi mức — `0 1px 2px` @4%, `0 12px 32px` @10%, `0 8px 24px` @12%; màu qua `scheme.shadow` |
 | `shadows.card` (dark) | rim thay shade | rim `outlineVariant` hairline + drop `shadow` @ 0.8 từ `raised` | `outlineVariant` | kit là mirror của Dart (A20.1 P1-06, OD1): `elevation.css` dark chép từ `shadowsFor`, gate so kit ↔ `ThemeData` |
-| `MuiPaper` paper | mặt giấy nổi | `ColorScheme.surfaceContainerLowest` (card, từ M100.86) | `surface` là nền, giấy là container | — |
+| `MuiPaper` paper | mặt giấy nổi | `ColorScheme.surfaceContainerLowest` (card, từ M100.87) | `surface` là nền, giấy là container | — |
 | `divider` `#272C48` | vạch rất khẽ | `scheme.outlineVariant` | `outlineVariant` | `AppStroke.hairline` |
 | Backdrop tối + blur | tách modal khỏi trang | `modalBarrierColor` (`scheme.scrim`) | scrim | alpha token; **blur chưa nhận** |
 | `MuiIconButton` radius 8 / pad 8 | chrome gọn | `AppRadius.md` + `AppSizing.touchTarget` | `onSurfaceVariant` | sàn 48 thắng pad 8 |

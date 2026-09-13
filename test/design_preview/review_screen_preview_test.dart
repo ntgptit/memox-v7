@@ -167,7 +167,7 @@ class _VerdictRow extends StatelessWidget {
             Expanded(
               child: VerdictAction(
                 label: 'Forgotten',
-                // Inks: the tint is the verdict's label and edge (M100.86).
+                // Inks: the tint is the verdict's label and edge (M100.87).
                 tint: semantic.dangerInk,
                 isSelected: selected == false,
               ),

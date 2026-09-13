@@ -163,7 +163,7 @@ void main() {
     });
 
     test('status inks read as text on card and page', () {
-      // **The inks, not the fills** (M100.86). A status word or glyph is drawn
+      // **The inks, not the fills** (M100.87). A status word or glyph is drawn
       // in its ink — `AppInk` resolves nothing else — so the ink is what owes
       // 4.5:1. The fills are the handoff's hex and are held in the next test.
       for (final entry in themes.entries) {
@@ -271,7 +271,7 @@ void main() {
       // number and are instead each held to their own pair. The colour measured
       // here is painted solid by the rim's 1 px spread (`app_elevation_test`
       // pins it), so the ratio is the ring's, not a blurred approximation.
-      // **5, not 6, since M100.86.** The handoff's list card is `shadow-soft`
+      // **5, not 6, since M100.87.** The handoff's list card is `shadow-soft`
       // — `0 1px 2px` at 4% — on a white card over a tinted page: 2.09 L\* of
       // surface step and 3.14 of shade, 5.24 in all. The kit is "flat and
       // quiet" on purpose; the floor still refuses a card that stops reading

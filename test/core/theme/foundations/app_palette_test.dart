@@ -55,7 +55,7 @@ void main() {
       // than a margin.
       const minimumStep = <String, double>{'dark': 2.0, 'light': 2.0};
       final ladders = <String, List<(String, Color)>>{
-        // **No `raised` rung in dark since M100.86**: the handoff's brightest
+        // **No `raised` rung in dark since M100.87**: the handoff's brightest
         // dark surface, `surfaceBright`, is one hex with `surfaceContainer` —
         // its tile — so a fourth step would measure the kit against a rung it
         // does not draw.
@@ -124,7 +124,7 @@ void main() {
 
   group('no dark surface reads as a coloured field', () {
     test('every dark surface stays under the tint ceiling', () {
-      // **The anchor is the page again, since M100.86.** Tokyo Nebula is navy
+      // **The anchor is the page again, since M100.87.** Tokyo Nebula is navy
       // on navy by design — the handoff's page sits at saturation 0.59 and its
       // card at 0.51 — so an absolute grey ceiling fails the kit on arrival.
       // What the rule protects is the order: nothing above the page may be
@@ -152,7 +152,7 @@ void main() {
       // anything about whether a tint is visible.
       const maximumTint = 0.06;
 
-      // **Fills only, since M100.86.** The handoff's lines carry the brand on
+      // **Fills only, since M100.87.** The handoff's lines carry the brand on
       // purpose — "every neutral carries a trace of indigo" — so its hairline
       // (`outlineVariant`, chroma 0.12) and control edge (`outline`, 0.18)
       // would fail a fill's budget by design. The surfaces a screen is built
@@ -236,7 +236,7 @@ void main() {
     // was holding a substitution in place: any agent restoring the canonical
     // role would have been failed by the suite for doing the right thing.
     test('is the brand as text — its ink', () {
-      // M100.86: the handoff's light `primary` reads 3.95:1 as a label, so the
+      // M100.87: the handoff's light `primary` reads 3.95:1 as a label, so the
       // outlined button's label is `accentInk` (see `AppColors`).
       for (final entry in <String, ThemeData>{
         'light': light,

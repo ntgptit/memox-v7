@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 /// The `ColorScheme` roles memox declares only because Material asks for them.
 ///
-/// **Every value here is the Tokyo handoff's, verbatim** (M100.86). The handoff
+/// **Every value here is the Tokyo handoff's, verbatim** (M100.87). The handoff
 /// (`memox-flutter-handoff.json`, generated 2026-09-13 from
 /// `ui_kits/mobile/flutter-prompt.html`) names 33 of the 45 roles in both
 /// themes. This file holds the ones `AppColors`, `AppBorderColors` and

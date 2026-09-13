@@ -43,7 +43,7 @@ void main() {
 
   group('light paints, dark does not', () {
     test("a light card gets the handoff's one soft shadow", () {
-      // **One layer since M100.86.** The two-layer float-and-contact shade was
+      // **One layer since M100.87.** The two-layer float-and-contact shade was
       // Tokyo-dashboard's; the handoff's Card spec gives a list card
       // `shadow-soft` — `0 1px 2px` at 4% — and nothing else. A tight, faint
       // shade is what the kit means by "flat and quiet".
@@ -134,7 +134,7 @@ void main() {
           )
           .reduce((double a, double b) => a > b ? a : b);
 
-      // **The dark ground is back at the bottom of the scale (M100.86).** The
+      // **The dark ground is back at the bottom of the scale (M100.87).** The
       // handoff's page is navy at L\* 4.7, and a generous 20% black shade over
       // it moves the ground by about 1.2 L\* — little enough that the kit
       // separates its dark card with a hairline rim rather than a shade, which

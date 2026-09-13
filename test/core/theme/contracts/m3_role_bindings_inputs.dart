@@ -181,6 +181,6 @@ const List<RoleBinding> inputRoleBindings = <RoleBinding>[
         'A picked row sits on surfaceSelected — the handoff\'s '
         'primaryContainer — where the brand reads 4.32:1 as text; its label '
         'takes the container\'s own ink, the pair the kit gives a selected '
-        'chip (M100.86).',
+        'chip (M100.87).',
   ),
 ];

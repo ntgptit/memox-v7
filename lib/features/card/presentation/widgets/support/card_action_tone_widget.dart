@@ -52,7 +52,7 @@ extension CardActionTonePresentation on BuildContext {
 
   /// The ink a tone is drawn in — the badge's outline and the timeline marker.
   ///
-  /// **The inks, not the fills** (M100.86). The badge is an outline on the
+  /// **The inks, not the fills** (M100.87). The badge is an outline on the
   /// card's surface with its word in the same colour, so the colour owes the
   /// 4.5:1 text bar; the Tokyo handoff's light `success` reads under 3:1 there,
   /// and each ink is that hue solved to clear 4.6. `card_detail_timeline_style

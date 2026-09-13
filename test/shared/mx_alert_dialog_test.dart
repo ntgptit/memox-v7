@@ -144,7 +144,7 @@ void main() {
     );
 
     expect(icon.icon, Icons.error_outline);
-    // The ink, not the fill: `AppInk` resolves only to inks since M100.86.
+    // The ink, not the fill: `AppInk` resolves only to inks since M100.87.
     expect(icon.color, const AppSemanticColors.light().dangerInk);
   });
 

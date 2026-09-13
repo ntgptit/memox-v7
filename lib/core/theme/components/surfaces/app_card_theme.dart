@@ -20,7 +20,7 @@ import '../../foundations/app_stroke.dart';
 ///
 /// * `surfaceContainerLowest` — the paper. `_CardDefaultsM3.color` is `Low`,
 ///   but the Tokyo handoff draws its card on `Lowest`, white above a tinted
-///   page, and the kit outranks the SDK here (M100.86);
+///   page, and the kit outranks the SDK here (M100.87);
 /// * `AppElevation.card` with `materialShadowColor`, so Material paints the
 ///   depth in the mode that has one and nothing in the mode that does not;
 /// * no neutral outline **in light**. A page-level card there separates by its

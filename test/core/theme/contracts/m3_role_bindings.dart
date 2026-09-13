@@ -65,7 +65,7 @@ const List<RoleBinding> roleBindings = <RoleBinding>[
     because:
         'The Tokyo handoff draws its card on surfaceContainerLowest — white '
         'above a tinted page. `Low` sits below the page in light, so a card on '
-        'it reads as a hole rather than a surface (M100.86, the kit outranks '
+        'it reads as a hole rather than a surface (M100.87, the kit outranks '
         '_CardDefaultsM3 by owner decision).',
   ),
   RoleBinding(
@@ -212,7 +212,7 @@ const List<RoleBinding> roleBindings = <RoleBinding>[
         'cue is the overlay.',
   ),
   // **The three brand *labels* read the brand's ink, and refuse the fill**
-  // (M100.86). M100.28 ruled that a text slot must read `primary` and the
+  // (M100.87). M100.28 ruled that a text slot must read `primary` and the
   // palette move when it failed; the owner reversed that for the Tokyo
   // handoff — its hex stays verbatim, and text takes an ink solved from it.
   // So these rows now require `semantic.accentInk` and refuse `scheme.primary`:
@@ -267,7 +267,7 @@ const List<RoleBinding> roleBindings = <RoleBinding>[
     requiresSemantic: <String>['accentInk'],
     refuses: <String>['primary', 'secondary', 'onSurfaceVariant'],
     because:
-        'The label is text on a page or a card — the brand\'s ink (M100.86). '
+        'The label is text on a page or a card — the brand\'s ink (M100.87). '
         'The retired `secondaryAction` token is still refused by name.',
   ),
   RoleBinding(

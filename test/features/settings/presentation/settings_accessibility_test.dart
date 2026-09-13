@@ -78,7 +78,7 @@ void main() {
         // **The band's Retry is in the band's own ink, not the brand.**
         // `MxFeedbackBand` resolves `onErrorContainer` for its action, so the
         // pair above is the one Retry is drawn in. The brand on this ground
-        // (3.91:1 light, 3.65 dark on the Tokyo palette, M100.86) is not on
+        // (3.91:1 light, 3.65 dark on the Tokyo palette, M100.87) is not on
         // screen, and this pins that it stays off it.
         expect(
           contrast(scheme.primary, scheme.errorContainer),

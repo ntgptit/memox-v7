@@ -341,7 +341,7 @@ TextButtonThemeData buildTextButtonTheme(
   TextTheme texts,
 ) {
   // The brand's *ink*, not its fill: the handoff's light `primary` reads
-  // 3.95:1 as bare text (M100.86, `AppColors.accentInkLight`).
+  // 3.95:1 as bare text (M100.87, `AppColors.accentInkLight`).
   final foreground = textLinkForeground(
     scheme,
     semantic,
@@ -413,7 +413,7 @@ OutlinedButtonThemeData buildOutlinedButtonTheme(
     foregroundColor: WidgetStateProperty.resolveWith((states) {
       if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
 
-      // The label is text, so it takes the brand's ink (M100.86).
+      // The label is text, so it takes the brand's ink (M100.87).
       return semantic.accentInk;
     }),
     side: WidgetStateProperty.resolveWith((states) {

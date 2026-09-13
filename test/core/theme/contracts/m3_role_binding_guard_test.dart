@@ -37,7 +37,7 @@ void main() {
       // **A slot that names an app token its row did not ask for is a
       // substitute.** `primaryInk` passed every runtime pin while it stood in
       // for `primary` (M100.27), because the two resolved to one value; only
-      // the source said which one the slot read. Since M100.86 a row may
+      // the source said which one the slot read. Since M100.87 a row may
       // *require* a semantic token — the brand's ink for a text slot — and
       // then that token, and only that one, is not a substitute.
       final Set<String> substitutes = reads.semanticReads.difference(
@@ -104,7 +104,7 @@ class RoleBinding {
   final String file;
 
   /// `semantic.<token>` reads the slot must perform — the brand's ink on a
-  /// text slot (M100.86). Empty for every role-only row.
+  /// text slot (M100.87). Empty for every role-only row.
   final List<String> requiresSemantic;
 
   /// The declaration the slot lives in — a top-level function name, or

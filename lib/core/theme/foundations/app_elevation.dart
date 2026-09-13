@@ -44,7 +44,7 @@ Color materialShadowColor(ColorScheme scheme) =>
     scheme.brightness == Brightness.dark ? Colors.transparent : scheme.shadow;
 
 /// The depth a [level] paints — the Tokyo handoff's shadows, one per level
-/// (M100.86).
+/// (M100.87).
 ///
 /// The handoff states three, in two places: its Card spec gives a card in a
 /// list `shadow-soft`, and its Foundations give a lifted surface `shadow-card`

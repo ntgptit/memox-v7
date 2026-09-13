@@ -9,7 +9,7 @@ import '../../states/app_interaction_states.dart';
 /// design.
 ///
 /// **The selected label is the brand's ink, and the indicator its fill**
-/// (M100.86). A tab's label is text on the page or a card, and the Tokyo
+/// (M100.87). A tab's label is text on the page or a card, and the Tokyo
 /// handoff's light `primary` reads 3.95:1 there, so the label takes
 /// `AppSemanticColors.accentInk` while the indicator — a graphic — keeps the
 /// kit's `primary`.

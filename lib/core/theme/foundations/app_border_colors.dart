@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
 /// Every line the app draws around or inside a component — the Tokyo
-/// handoff's (M100.86).
+/// handoff's (M100.87).
 ///
 /// **The hairline and the control edge are the kit's hex verbatim, and the
 /// control edge is recorded where it falls short.** `outlineVariant` is the

@@ -187,7 +187,7 @@ void main() {
     test('the selected label reads on the page it sits on', () {
       // A tab's label sits on the page, not on a container fill, which is why
       // `_TabBarDefaultsM3` inks it with the brand rather than an `on*` role —
-      // the brand's text ink since M100.86. The role identity is pinned in
+      // the brand's text ink since M100.87. The role identity is pinned in
       // `m3_role_contract_test.dart`; this asks whether it is readable where
       // it actually lands.
       for (final entry in themes.entries) {

@@ -98,7 +98,7 @@ void main() {
       });
     }
 
-    // `secondary` and `tertiary` are support inks. Since M100.86 each is its
+    // `secondary` and `tertiary` are support inks. Since M100.87 each is its
     // own solved ink (4.62 at worst in light) rather than the handoff's fill,
     // so they clear 4.5 on `surface`; the floor below stays at the 3:1 their
     // two callers (the import preview's status glyphs and counts) were

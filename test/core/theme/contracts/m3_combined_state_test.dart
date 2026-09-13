@@ -260,7 +260,7 @@ void main() {
         holds('side', side, <Set<WidgetState>>[focused], scheme.primary);
       });
 
-      // The brand as text, so its ink (M100.86) — see `m3_role_contract_test`.
+      // The brand as text, so its ink (M100.87) — see `m3_role_contract_test`.
       test('the label is the brand ink in every state', () {
         holds('foreground', fg, <Set<WidgetState>>[
           resting,

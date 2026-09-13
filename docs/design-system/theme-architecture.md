@@ -7,7 +7,7 @@
 | **Scope** | Cấu trúc thư mục, trách nhiệm từng tầng, public API của theme. Ngoài phạm vi: *giá trị* của token (AD-14), hợp đồng component-level (`.claude/skills/flutter-theme-design/`) |
 | **Source of truth for** | Layering của `lib/core/theme/` · chiều import giữa các tầng · ranh giới public/internal của theme · bảng "cần gì thì đọc ở đâu" · ma trận dịch Tokyo → MemoX |
 | **Depends on** | `document-conventions.md` · `architecture.md` (AD-14, AD-23) |
-| **Updated by task** | M100.86 |
+| **Updated by task** | M100.87 |
 | **Last updated** | 2026-09-13 |
 
 ---
@@ -102,7 +102,7 @@ memox từng làm ngược — gọi card là `surface`, để trang ngoài `Col
 component nào cần màu trang cũng phải được đưa một màu vào, vòng qua hệ role.
 Sửa ở M100.32 bằng cách dời hex qua thang, không đổi mapping component.
 
-**M100.86 dời card sang `surfaceContainerLowest`**, vì handoff Tokyo đặt card
+**M100.87 dời card sang `surfaceContainerLowest`**, vì handoff Tokyo đặt card
 trắng (`#FFFFFF`) lên trang tint và cho `surfaceContainerLowest` đúng giá trị đó.
 `MxCard.recessed` vẽ trên `surface` — chính màu trang.
 

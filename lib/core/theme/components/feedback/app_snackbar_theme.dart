@@ -13,7 +13,7 @@ SnackBarThemeData buildSnackBarTheme(
   backgroundColor: scheme.inverseSurface,
   contentTextStyle: texts.bodyMedium?.copyWith(color: scheme.onInverseSurface),
   behavior: SnackBarBehavior.floating,
-  // **The action is text, so it takes the snackbar's ink** (M100.86).
+  // **The action is text, so it takes the snackbar's ink** (M100.87).
   // The handoff's `inversePrimary` reads 4.32:1 on the slate in light and
   // 2.40:1 in dark; the slate does not flip, and neither does the ink.
   actionTextColor: semantic.inversePrimaryInk,

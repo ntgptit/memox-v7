@@ -67,7 +67,7 @@ void main() {
       // sentence. The surface stays exactly what an idle tile has.
       for (final label in <String>['front-a', 'back-a']) {
         expect(_fill(tester, label), _idleFill(tester));
-        // The ink, on the edge and the label alike (M100.86).
+        // The ink, on the edge and the label alike (M100.87).
         expect(_edge(tester, label).color, _semantic(tester).successInk);
         expect(_edge(tester, label).width, AppStroke.control);
         expect(

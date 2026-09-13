@@ -84,7 +84,7 @@ void main() {
         );
       }
 
-      // **The slate does not flip, by the handoff's design** (M100.86). Its
+      // **The slate does not flip, by the handoff's design** (M100.87). Its
       // `inverseSurface` is one value in both themes — a snackbar and a
       // tooltip are the same `#34395D` in light and dark — so this pins the
       // sameness rather than the inversion it used to ask for.

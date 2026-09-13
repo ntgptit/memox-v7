@@ -77,7 +77,7 @@ void main() {
     ).extension<AppSemanticColors>()!.successInk;
 
     // The inks: a verdict's edge and label both resolve through `AppInk`,
-    // which returns only inks since M100.86.
+    // which returns only inks since M100.87.
     Color dangerOf(WidgetTester tester) => Theme.of(
       tester.element(find.byType(GuessQuestionSectionWidget)),
     ).extension<AppSemanticColors>()!.dangerInk;

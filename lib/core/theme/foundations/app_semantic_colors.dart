@@ -11,7 +11,7 @@ import 'app_border_colors.dart';
 /// with the theme. A global `successColor` is correct in exactly one
 /// brightness, and wrong in the other on every screen at once.
 ///
-/// **A status colour comes as a fill and an ink** (M100.86). The fill is the
+/// **A status colour comes as a fill and an ink** (M100.87). The fill is the
 /// Tokyo handoff's hex, for a dot, a ring or a container; the ink is the same
 /// hue solved to read as text. `AppInk` hands features the inks. The reasoning
 /// and the measurements are in `AppColors`.

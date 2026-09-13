@@ -55,7 +55,7 @@ void main() {
     group('$mode · component slot resolves its canonical M3 role', () {
       final ThemeData theme = build();
       final ColorScheme scheme = theme.colorScheme;
-      // **The one departure, stated in this diff** (M100.86). The Tokyo
+      // **The one departure, stated in this diff** (M100.87). The Tokyo
       // handoff's light `primary` reads 3.95:1 as a label on the page, so the
       // brand *as text* — TextButton, OutlinedButton, the selected tab — is
       // `accentInk`. Every brand *fill* and *graphic* below keeps `primary`.

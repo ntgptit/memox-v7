@@ -128,7 +128,7 @@ void main() {
         greaterThanOrEqualTo(_kAaBodyText),
       );
       // The mode pill: the brand ink on `surfaceMuted` — its label is text, so
-      // it takes the ink (M100.86) — and §7.8's whole argument is that this
+      // it takes the ink (M100.87) — and §7.8's whole argument is that this
       // pair is the one the project already owns.
       expect(
         contrast(semantic.accentInk, semantic.surfaceMuted),

@@ -175,7 +175,7 @@ void main() {
       final accent = theme.extension<AppSemanticColors>()!.accentInk;
       final label = tester.widget<Text>(find.text('front-a'));
 
-      // The brand as a label on a surface takes its ink (M100.86): the
+      // The brand as a label on a surface takes its ink (M100.87): the
       // handoff's `primary` is a fill and reads under 4.5:1 as text.
       expect(label.style?.color, accent);
 

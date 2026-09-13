@@ -39,7 +39,7 @@ final List<Color> lightPaletteTokens = <Color>[
   AppColors.warningLight,
   AppColors.dangerLight,
   AppColors.infoLight,
-  // The text inks (M100.86): each fill's hue solved to read as text.
+  // The text inks (M100.87): each fill's hue solved to read as text.
   AppColors.accentInkLight,
   AppColors.successInkLight,
   AppColors.warningInkLight,

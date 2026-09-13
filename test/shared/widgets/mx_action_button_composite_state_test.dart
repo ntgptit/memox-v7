@@ -28,7 +28,7 @@ import '../../support/ink_probe.dart';
 /// layer in the fill's own `on` colour at 0.08 / 0.10 / 0.10. In this palette
 /// every `on` colour is white or near-black against its fill, so the layer
 /// moves lightness and leaves hue where it was.
-/// **Pressed labels the owner accepted under 4.5:1** (M100.86). The handoff's
+/// **Pressed labels the owner accepted under 4.5:1** (M100.87). The handoff's
 /// light `primary` and `error` carry white at 4.20 and 4.66 at rest; M3's 10%
 /// white press layer lightens the fill under the label for the press's
 /// duration. Pinned at the measured figure rather than tuned, because the

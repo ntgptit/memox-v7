@@ -27,7 +27,7 @@ import '../../../support/color_math.dart';
 /// against a pairing nothing draws is how a palette drifts bright, one
 /// defensive rounding at a time.
 /// **The grounds where the owner accepted the handoff's `outline` under 3:1**
-/// (2026-09-13, M100.86). Each is pinned at the figure it was accepted at, so
+/// (2026-09-13, M100.87). Each is pinned at the figure it was accepted at, so
 /// the decision holds rather than drifts; every other ground still owes the
 /// full floor.
 const Map<String, double> _acceptedBelowGraphic = <String, double>{
@@ -53,7 +53,7 @@ void main() {
   List<(String, Color)> groundsOf(ThemeData t) => <(String, Color)>[
     ('page', t.scaffoldBackgroundColor),
     ('surface', t.colorScheme.surface),
-    // The paper since M100.86 — every card, and the fields inside one.
+    // The paper since M100.87 — every card, and the fields inside one.
     ('surfaceContainerLowest', t.colorScheme.surfaceContainerLowest),
     ('surfaceContainer', t.colorScheme.surfaceContainer),
     // Two more a field is actually drawn on, found by the input audit (#433

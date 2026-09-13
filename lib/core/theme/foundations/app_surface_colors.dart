@@ -4,7 +4,7 @@ import 'app_material_roles.dart';
 
 /// Every surface the app paints, under the names its call sites mean.
 ///
-/// **Only the page is declared here** (M100.86). Every other surface is a role
+/// **Only the page is declared here** (M100.87). Every other surface is a role
 /// of the Tokyo handoff's ladder in `AppMaterialRoles`, spelled under the
 /// meaning a widget reaches for — so a retune moves one hex, and every meaning
 /// that shares it follows rather than drifting into a second value.

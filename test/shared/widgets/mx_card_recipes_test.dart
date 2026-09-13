@@ -153,7 +153,7 @@ void main() {
         );
 
         final decoration = decorationOf(tester);
-        // One rung *below* the paper. Since M100.86 the paper is the
+        // One rung *below* the paper. Since M100.87 the paper is the
         // handoff's white `surfaceContainerLowest`, so the recess is the page
         // itself — `surface` — the one ground darker than a white card.
         expect(decoration.color, scheme.surface);
@@ -227,7 +227,7 @@ void main() {
         await pump(tester, const MxCard.tonal(child: Text('x')), theme: theme);
 
         final decoration = decorationOf(tester);
-        // **`surfaceEmphasis` is `secondaryContainer` again** (M100.86). M99.98
+        // **`surfaceEmphasis` is `secondaryContainer` again** (M100.87). M99.98
         // split them because the old light `secondaryContainer` was a
         // near-neutral grey below the page, which made Study Home's resume
         // callout the greyest thing on it. The handoff's `#E3E6F7` / `#343C78`
@@ -286,7 +286,7 @@ void main() {
         expect(decoration.color, scheme.surfaceContainerLowest);
         expect(borderColorOf(tester), semantic.borderOption);
         // **The option edge is the control edge again, by the handoff**
-        // (M100.86). M100.2 split them because the old input border was an
+        // (M100.87). M100.2 split them because the old input border was an
         // untinted grey and a card on a page read wrong in it; the handoff's
         // `outline` already carries the brand's indigo, and `AppBorderColors`
         // aliases `borderOption` to it because an option *is* a control. High

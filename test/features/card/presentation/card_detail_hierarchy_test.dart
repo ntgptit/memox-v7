@@ -151,7 +151,7 @@ void main() {
         matching: find.text('3 / 8'),
       );
       expect(badge, findsOneWidget);
-      // The accent as text — its ink since M100.86 — and tabular figures so a
+      // The accent as text — its ink since M100.87 — and tabular figures so a
       // two-digit box does not shift the stroke beside it.
       expect(styleOf(tester, badge).color, semanticOf(tester).accentInk);
       expect(styleOf(tester, badge).fontFeatures, const <FontFeature>[

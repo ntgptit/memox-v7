@@ -37,7 +37,7 @@ void main() {
           greaterThanOrEqualTo(4.5),
           reason:
               'In ${entry.key}, the selected label sits on `selectedTileColor` '
-              '— `surfaceSelected`, the brand container since M100.86 — not '
+              '— `surfaceSelected`, the brand container since M100.87 — not '
               "on the page, so it takes that container's own ink.",
         );
         // The fill is the one app-owned "picked" surface, shared with the

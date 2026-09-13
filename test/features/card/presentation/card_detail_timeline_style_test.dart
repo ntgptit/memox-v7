@@ -60,7 +60,7 @@ void main() {
 
     for (var index = 0; index < actions.length; index++) {
       final action = actions[index];
-      // The inks since M100.86: the badge's word sits in this colour, so the
+      // The inks since M100.87: the badge's word sits in this colour, so the
       // dot and the outline take the ink the word does.
       final expected = switch (action) {
         StudyAction.forgotten || StudyAction.again => semantic.dangerInk,
@@ -210,7 +210,7 @@ void main() {
         // The badge is an outline on the card's own surface precisely so that
         // this holds for `warning` too — on `surfaceMuted` it is 4.00:1 in
         // light, which is why the concept's filled pill could not be copied.
-        // The inks, since M100.86: the badge's word and glyph take `AppInk`,
+        // The inks, since M100.87: the badge's word and glyph take `AppInk`,
         // and the handoff's light fills read under 4.5 as text.
         for (final ink in <Color>[
           semantic.successInk,

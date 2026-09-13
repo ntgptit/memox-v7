@@ -35,7 +35,7 @@ void main() {
     // by eye drifts off its fill's hue, and the drift is invisible until the two
     // appear side by side.
     //
-    // **6, not 5, since M100.86.** The handoff's light tertiary pair —
+    // **6, not 5, since M100.87.** The handoff's light tertiary pair —
     // `#8B6FF5` on `#EBE3FE` — sits 5.24 degrees apart, and its hex is verbatim
     // by owner decision. One degree of headroom records that pair; it is not
     // room for a hand-picked container.
@@ -187,7 +187,7 @@ void main() {
           neutrals.remove(paper);
         }
       }
-      // **Dark's shadow and scrim are pure black, by the handoff** (M100.86).
+      // **Dark's shadow and scrim are pure black, by the handoff** (M100.87).
       // Exempt by role, for the reason the light paper is: a rule cannot ask
       // for a tint the owner's kit rules out.
       if (mode.key == 'dark') {
@@ -249,7 +249,7 @@ void main() {
 
   test("R6 — the shadow tokens are the handoff's in both modes", () {
     // **Promoted from a report finding to a rule by a product decision, and
-    // re-stated at M100.86.** The rule used to hold both modes to a seed-tinted
+    // re-stated at M100.87.** The rule used to hold both modes to a seed-tinted
     // shadow and scrim. The Tokyo handoff draws light's from its navy ink
     // (`#0F1638`, `#0A0E27`) and dark's in pure black, by design — a dark
     // shade has no hue to lend at the bottom of the lightness scale. So light

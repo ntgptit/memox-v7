@@ -407,7 +407,7 @@ class MxActionButton extends StatelessWidget {
     // mean naming a colour that is not a role.
     if (variant == MxActionButtonVariant.secondary) {
       // The brand's ink and `outline`, the same pair the resting button draws
-      // (M100.86). This copy has been wrong three times for the same reason —
+      // (M100.87). This copy has been wrong three times for the same reason —
       // it is a second spelling of the theme's answer, and it does not move
       // when the theme does: `borderSubtle`, then `secondaryAction`, then
       // `primary` after the label moved to its ink. Each time a secondary

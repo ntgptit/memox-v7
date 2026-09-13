@@ -188,7 +188,7 @@ bool _isInFamily(Color color) {
   final h = hue(color);
   if (h == null) return true;
 
-  // **Re-derived from the Tokyo handoff at M100.86, not widened to let
+  // **Re-derived from the Tokyo handoff at M100.87, not widened to let
   // something through.** A band describes the families the palette actually
   // has; when the palette is replaced the bands are re-derived from it, or
   // they stop describing anything:

@@ -159,7 +159,7 @@ void main() {
         );
         expect(
           title.text.style?.color,
-          // The selected fill's own ink since M100.86 (`app_list_tile_theme`).
+          // The selected fill's own ink since M100.87 (`app_list_tile_theme`).
           selected == true
               ? theme.colorScheme.onPrimaryContainer
               : theme.colorScheme.onSurface,

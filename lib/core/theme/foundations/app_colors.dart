@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'app_material_roles.dart';
 
-/// Colour tokens — the Tokyo handoff's palette (M100.86), under the names the
+/// Colour tokens — the Tokyo handoff's palette (M100.87), under the names the
 /// app's call sites mean.
 ///
 /// **Two kinds of value live here, and the split is the owner's decision of

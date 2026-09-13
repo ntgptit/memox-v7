@@ -35,7 +35,7 @@ enum AppInk {
 
   /// The brand as *text* — `semanticColors.accentInk`, not `primary`. The
   /// handoff's light `primary` reads 3.95:1 on the grounds text lands on, so
-  /// its text takes the ink solved from it (M100.86, `AppColors`).
+  /// its text takes the ink solved from it (M100.87, `AppColors`).
   accent,
 
   /// The verdict and status family, as inks. Each is its fill's hue solved to

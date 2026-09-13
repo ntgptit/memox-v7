@@ -97,7 +97,7 @@ void main() {
         tester,
       ) async {
         final expected = <MxDialogTone, Color>{
-          // The inks: `AppInk` resolves only to inks since M100.86.
+          // The inks: `AppInk` resolves only to inks since M100.87.
           MxDialogTone.info: semantic.infoInk,
           MxDialogTone.success: semantic.successInk,
           MxDialogTone.warning: semantic.warningInk,
