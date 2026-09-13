@@ -251,7 +251,7 @@
     },
     {
       "file": "lib/core/theme/components/navigation/app_navigation_bar_theme.dart",
-      "line": 67,
+      "line": 62,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -3309,7 +3309,7 @@
     },
     {
       "file": "lib/core/theme/states/app_interaction_states.dart",
-      "line": 218,
+      "line": 220,
       "widget_context": "AppInteractionStates",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -3320,7 +3320,7 @@
     },
     {
       "file": "lib/core/theme/states/app_interaction_states.dart",
-      "line": 221,
+      "line": 223,
       "widget_context": "AppInteractionStates",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -3331,7 +3331,7 @@
     },
     {
       "file": "lib/core/theme/states/app_interaction_states.dart",
-      "line": 224,
+      "line": 226,
       "widget_context": "AppInteractionStates",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -3606,7 +3606,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_content_shell.dart",
-      "line": 424,
+      "line": 425,
       "widget_context": "MxSubheaderBand",
       "element_kind": "border",
       "source_kind": "theme-token",

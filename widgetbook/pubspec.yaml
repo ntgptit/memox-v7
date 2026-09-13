@@ -46,15 +46,12 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # The same two faces the app bundles, copied here because a font declared in
+  # The same face the app bundles, copied here because a font declared in
   # a dependency's pubspec is registered under a `packages/<pkg>/` prefixed
-  # family — memox's theme asks for plain `Inter` / `PlusJakartaSans`, so the
-  # catalog must register them under the plain names itself. The OFL licences
+  # family — memox's theme asks for plain `PlusJakartaSans`, so the
+  # catalog must register it under the plain name itself. The OFL licences
   # sit beside them, same as in the app.
   fonts:
-    - family: Inter
-      fonts:
-        - asset: assets/fonts/Inter-Variable.ttf
     - family: PlusJakartaSans
       fonts:
         - asset: assets/fonts/PlusJakartaSans-Variable.ttf

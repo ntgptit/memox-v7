@@ -130,12 +130,9 @@ void main() {
         await pump(tester);
 
         final hero = rectOf(tester, ProgressStreakHeroWidget);
-        // 320 is below `AppBreakpoints.compact`, where the gutter steps down —
-        // the same two numbers every other screen uses, resolved by
-        // `mxScreenGutter` rather than re-derived here.
-        final double gutter = viewport.size.width < 360
-            ? AppSpacing.md
-            : AppSpacing.lg;
+        // 16 at every width, 320 included (M100.89) — the number every other
+        // screen resolves through `mxScreenGutter`.
+        const double gutter = AppSpacing.lg;
 
         expect(hero.left, gutter);
         expect(hero.right, viewport.size.width - gutter);

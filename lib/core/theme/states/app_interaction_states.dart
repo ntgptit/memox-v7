@@ -71,7 +71,9 @@ abstract final class AppStateOpacity {
   /// (#432 §3.2). One mechanism, the canonical one, and the pair's own ink.
   static const double stateLayerHover = 0.08;
   static const double stateLayerFocus = 0.10;
-  static const double stateLayerPressed = 0.10;
+
+  /// The handoff's `op-press`.
+  static const double stateLayerPressed = 0.12;
 
   /// How far a text link's label moves toward the ink on hover —
   /// `.mx-textbtn:hover`, `color-mix(… 85%, var(--color-text-primary))`.

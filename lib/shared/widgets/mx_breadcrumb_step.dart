@@ -61,7 +61,7 @@ class _MxBreadcrumbStepState extends State<_MxBreadcrumbStep> {
   /// step — and left a bare word where the design's own recognisable mark goes.
   Widget? _icon(AppInk tint) => widget.icon == null
       ? null
-      : MxIcon(widget.icon!, ink: tint, size: MxIconSize.sm);
+      : MxIcon(widget.icon!, ink: tint, size: MxIconSize.xs);
 
   @override
   Widget build(BuildContext context) {

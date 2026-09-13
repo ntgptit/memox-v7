@@ -109,7 +109,7 @@ class CardImportContextWidget extends ConsumerWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                const MxIcon(Icons.style_outlined, size: MxIconSize.sm),
+                const MxIcon(Icons.style_outlined, size: MxIconSize.xs),
                 const SizedBox(width: AppSpacing.xs),
                 Flexible(
                   child: Text(

@@ -177,7 +177,7 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
         // The bar therefore needs a region that starts at the safe-area edge, the
         // way `AppBar` gives its leading icon one. `EdgeInsets.zero` here, and
         // `StudySessionFrameSectionWidget` gutters the context line, the body and
-        // the hint itself — from `mxScreenGutter`, so 320 still gets 12.
+        // the hint itself — from `mxScreenGutter`, so every width gets its 16.
         padding: EdgeInsets.zero,
         // The prompt is the task, and it is set at 30. A card face stretched
         // the width of a landscape phone is the one line in this app that

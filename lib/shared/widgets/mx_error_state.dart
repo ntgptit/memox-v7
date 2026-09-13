@@ -54,7 +54,7 @@ class MxErrorState extends StatelessWidget {
   /// the spinner centred over it, so the button's rect does not move by a pixel
   /// under the finger that just pressed it. `shouldKeepLabelWhileLoading` is the
   /// other trade — label and spinner side by side — and it widens the button by
-  /// `AppIconSize.sm + AppSpacing.sm`, which is exactly the jump this is
+  /// `AppIconSize.xs + AppSpacing.sm`, which is exactly the jump this is
   /// avoiding. The name survives for a screen reader through the button's own
   /// `alwaysIncludeSemantics`. All that was missing was passing the flag
   /// through.
@@ -71,7 +71,7 @@ class MxErrorState extends StatelessWidget {
             const MxIcon(
               Icons.error_outline,
               ink: AppInk.danger,
-              size: MxIconSize.lg,
+              size: MxIconSize.xl,
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(

@@ -299,7 +299,7 @@ class _Verdict extends StatelessWidget {
               children: <Widget>[
                 MxIcon(
                   isCorrect ? Icons.check_circle_outline : Icons.close,
-                  size: MxIconSize.sm,
+                  size: MxIconSize.xs,
                   ink: accent,
                 ),
                 const SizedBox(width: AppSpacing.sm),

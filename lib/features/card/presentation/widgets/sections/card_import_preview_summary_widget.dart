@@ -228,7 +228,7 @@ class _StatusChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            MxIcon(icon, ink: foreground, size: MxIconSize.sm),
+            MxIcon(icon, ink: foreground, size: MxIconSize.xs),
             const SizedBox(width: AppSpacing.xs),
             Text(
               context.l10n.cardImportStatusCountChip(label, count),

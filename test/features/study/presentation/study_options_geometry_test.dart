@@ -55,18 +55,15 @@ void main() {
     expect(screen.right - field.right, AppSpacing.lg);
   });
 
-  testWidgets('at 320dp the gutter steps down with the breakpoint', (
-    tester,
-  ) async {
+  testWidgets('at 320dp the gutter is still the screen gutter', (tester) async {
     await pumpOptions(tester, surface: const Size(320, 852));
 
     final screen = tester.getRect(find.byType(MaterialApp));
     final field = tester.getRect(find.byType(MxTextField));
 
-    // `mxScreenGutter` drops below `AppBreakpoints.compact`. With the old double
-    // inset this read 28 — wider than the 16 a 393dp screen got, which is the
-    // opposite of what a step-down is for.
-    expect(field.left - screen.left, AppSpacing.md);
+    // `mxScreenGutter`, 16 at every width since M100.89. With the old double
+    // inset this read 28 — the screen's gutter plus the field's own.
+    expect(field.left - screen.left, AppSpacing.lg);
   });
 
   testWidgets('the body starts on the same left edge as the app-bar title', (

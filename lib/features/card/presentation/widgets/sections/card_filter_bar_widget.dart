@@ -139,7 +139,7 @@ class _CardFilterBarWidgetState extends ConsumerState<CardFilterBarWidget> {
                     count: flagged,
                     // **A glyph, not a character.** The label used to open with
                     // `⚑` (U+2691) and no font in the bundle carries it —
-                    // Inter, PlusJakartaSans and NotoSansKR all miss it — so
+                    // PlusJakartaSans and NotoSansKR both miss it — so
                     // the shipped goldens rendered a tofu box in both themes.
                     // The card row beside it already uses `Icons.flag`; this
                     // is the same flag.

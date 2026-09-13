@@ -48,16 +48,12 @@ final Expando<ThemeData> _compactScaleCache = Expando<ThemeData>(
 );
 
 ThemeData _buildCompactScale(ThemeData base) {
-  final texts = base.textTheme;
   final styles = base.extension<AppTextStyles>();
 
+  // No `titleLarge` clause. The app bar title shrank 22 -> 20 here, because at
+  // 22 a real deck name truncated on a 320-wide screen; the handoff's title
+  // role is 20 at every width (M100.89), so the base already is that size.
   return base.copyWith(
-    textTheme: texts.copyWith(
-      // The app bar title. At 22 a real deck name truncates to "Academic
-      // Word ..." on a 320-wide screen; the name is the one thing that screen
-      // is about.
-      titleLarge: texts.titleLarge?.copyWith(fontSize: 20),
-    ),
     // The study card prompt, the app's one deliberately large style — its own
     // extension slot since it left `headlineMedium`, so the compact pass
     // re-sizes the prompt and no longer touches the M3 rung beside it.
@@ -70,13 +66,10 @@ ThemeData _buildCompactScale(ThemeData base) {
           ),
         ),
     ],
-    listTileTheme: base.listTileTheme.copyWith(
-      // Horizontal only. The vertical rhythm is what keeps a row tappable.
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.xs,
-      ),
-    ),
+    // No `listTileTheme` clause. List rows gave up 4 a side here, in step with
+    // a screen gutter that stepped to `md` below the breakpoint; the handoff's
+    // gutter stays 16 (M100.89), and a row that still stepped would sit 4dp
+    // inside the field and the toggle above it on the same card.
 
     // Buttons keep their height and lose horizontal padding, which is the
     // opposite of what "make the button smaller" would do and the only version

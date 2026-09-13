@@ -199,10 +199,10 @@ class _MxBreadcrumbState extends State<MxBreadcrumb> {
           child: LayoutBuilder(
             builder: (context, constraints) {
               final leading =
-                  (widget.upIcon == null ? 0 : AppIconSize.sm + AppSpacing.xs) +
+                  (widget.upIcon == null ? 0 : AppIconSize.xs + AppSpacing.xs) +
                   (widget.rootIcon == null
                       ? 0
-                      : AppIconSize.sm + AppSpacing.xs);
+                      : AppIconSize.xs + AppSpacing.xs);
               final shown = _stepsThatFit(
                 context,
                 items,
@@ -213,11 +213,11 @@ class _MxBreadcrumbState extends State<MxBreadcrumb> {
               return Row(
                 children: <Widget>[
                   if (widget.upIcon != null) ...<Widget>[
-                    MxIcon(widget.upIcon!, size: MxIconSize.sm),
+                    MxIcon(widget.upIcon!, size: MxIconSize.xs),
                     const SizedBox(width: AppSpacing.xs),
                   ],
                   if (widget.rootIcon != null) ...<Widget>[
-                    MxIcon(widget.rootIcon!, size: MxIconSize.sm),
+                    MxIcon(widget.rootIcon!, size: MxIconSize.xs),
                     const SizedBox(width: AppSpacing.xs),
                   ],
                   if (shown.length < items.length) ...<Widget>[
@@ -422,7 +422,7 @@ class _MxBreadcrumbFoldState extends State<_MxBreadcrumbFold> {
                 child: MxIcon(
                   Icons.more_horiz,
                   ink: _isHovered ? AppInk.stated : AppInk.quiet,
-                  size: MxIconSize.sm,
+                  size: MxIconSize.xs,
                 ),
               ),
             ),

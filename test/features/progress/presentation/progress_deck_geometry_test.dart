@@ -78,13 +78,11 @@ void main() {
       }
     });
 
-    testWidgets('the gutter narrows with the screen, like every other screen', (
-      tester,
-    ) async {
-      // `mxScreenGutter` is 12 below the compact breakpoint, not 16. Writing
-      // `AppSpacing.lg` here instead would inset this screen 4px further than
-      // Library and Study at 320dp - and cost the metric cells the 8px of width
-      // they are shortest of.
+    testWidgets('the gutter is the screen gutter at 320dp, like every other '
+        'screen', (tester) async {
+      // `mxScreenGutter` is 16 at every width since M100.89 (it was 12 below
+      // the compact breakpoint). Read through the helper's value rather than a
+      // literal, so this screen cannot sit 4px off Library and Study.
       await pumpProgressScreen(
         tester,
         repository: level(),
@@ -95,7 +93,7 @@ void main() {
       final summary = tester.getRect(find.byType(ProgressSummaryWidget));
       final row = tester.getRect(find.byType(ProgressDeckRowWidget).first);
 
-      expect(summary.left, AppSpacing.md);
+      expect(summary.left, AppSpacing.lg);
       expect(row.left, summary.left);
       expect(row.right, summary.right);
     });

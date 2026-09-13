@@ -198,12 +198,12 @@ class _MxTextButtonState extends State<MxTextButton> {
         mainAxisSize: MainAxisSize.min,
         spacing: AppSpacing.xs,
         children: <Widget>[
-          if (widget.icon != null) Icon(widget.icon, size: AppIconSize.sm),
+          if (widget.icon != null) Icon(widget.icon, size: AppIconSize.xs),
           Flexible(
             child: _StateStyledLabel(states: _states, label: widget.label),
           ),
           if (widget.trailingIcon != null)
-            Icon(widget.trailingIcon, size: AppIconSize.sm),
+            Icon(widget.trailingIcon, size: AppIconSize.xs),
         ],
       ),
     );

@@ -147,7 +147,7 @@ void main() {
       // `opacity 0` under the spinner by default, or beside it when
       // `shouldKeepLabelWhileLoading` is on. The first version of this
       // assertion could not tell those apart, so a change to the second shape —
-      // which widens the button by `AppIconSize.sm + AppSpacing.sm` under the
+      // which widens the button by `AppIconSize.xs + AppSpacing.sm` under the
       // finger that just pressed it — would have been invisible to the suite.
       //
       // The default is the right trade here: the rect must not move. Both halves

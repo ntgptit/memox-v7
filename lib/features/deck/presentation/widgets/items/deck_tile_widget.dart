@@ -494,8 +494,9 @@ class _DeckGauge extends StatelessWidget {
 /// column and the gauge all line up against it — a region that scaled alone
 /// would break the axis the geometry test pins.
 ///
-/// It scales for the same reason `mxScreenGutter` and `applyCompactScale` do:
-/// at 320 with `textScaler` 2.0 the gauge, the worded figure and the verb
+/// It scales where `mxScreenGutter` no longer does (M100.89) — this is the
+/// card's interior, not the screen's gutter: at 320 with `textScaler` 2.0 the
+/// gauge, the worded figure and the verb
 /// wanted 4.9px more than the card had, and one step off each side is the
 /// version that keeps all three rather than dropping one.
 double deckTileGutter(BuildContext context) =>

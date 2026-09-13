@@ -40,7 +40,7 @@ class CardExportScopeSummaryWidget extends StatelessWidget {
           MxIcon(switch (scope) {
             CardExportWholeDeckScope() => Icons.style_outlined,
             CardExportSelectionScope() => Icons.checklist,
-          }, size: MxIconSize.mdCompact),
+          }, size: MxIconSize.sm),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(

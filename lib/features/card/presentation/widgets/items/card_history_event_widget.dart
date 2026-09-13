@@ -171,7 +171,7 @@ class _ActionBadge extends StatelessWidget {
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(AppRadius.pill),
+        borderRadius: BorderRadius.circular(AppRadius.full),
         // `AppStroke.hairline` is `Border.all`'s own default, so it is not
         // restated — the analyzer rejects a redundant argument — and the
         // default *is* `AppStroke.hairline`: `app_stroke_test.dart` pins
@@ -185,7 +185,7 @@ class _ActionBadge extends StatelessWidget {
           MxIcon(
             context.cardActionToneIcon(tone),
             ink: context.cardActionToneInk(tone),
-            size: MxIconSize.sm,
+            size: MxIconSize.xs,
           ),
           const SizedBox(width: AppSpacing.xs),
           // `Flexible`, because a `Row` hands an unbounded main axis to a

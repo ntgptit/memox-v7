@@ -87,11 +87,11 @@ class SearchResultShellWidget extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    MxIcon(icon, size: MxIconSize.sm),
+                    MxIcon(icon, size: MxIconSize.xs),
                     const SizedBox(width: AppSpacing.md),
                     Expanded(child: child),
                     const SizedBox(width: AppSpacing.sm),
-                    const MxIcon(Icons.chevron_right, size: MxIconSize.sm),
+                    const MxIcon(Icons.chevron_right, size: MxIconSize.xs),
                   ],
                 ),
               ),

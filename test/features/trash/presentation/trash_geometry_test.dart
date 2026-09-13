@@ -106,21 +106,20 @@ void main() {
   /// The page gutters every contract below is written against, and how much of
   /// the trailing side the overflow button's own inset cannot give back.
   ///
-  /// **Two surfaces, not one.** `mxScreenGutter` steps down to `md` under
-  /// `AppBreakpoints.compact`, so a shared-edge contract measured at a single
-  /// width cannot see the tier where the edges actually come apart — which is
-  /// how the selection bar held a literal 16 while everything above it went
-  /// to 12.
+  /// **Two surfaces, not one.** `mxScreenGutter` stepped down to `md` under
+  /// `AppBreakpoints.compact` until M100.89, and a shared-edge contract measured
+  /// at a single width could not see the tier where the edges came apart —
+  /// which is how the selection bar held a literal 16 while everything above
+  /// it went to 12. The gutter is 16 on both now; both widths stay, so a step
+  /// that came back would be seen.
   ///
   /// The third figure is the trailing residue. The row buys its right edge by
   /// paying `xs` outside a button that centres a 24dp glyph in a 48dp box, so
-  /// 4 + 12 lands on 16 — exactly the gutter at regular width, and 4dp inside
-  /// it on the compact tier, where the button's half-box does not step down
-  /// with the gutter. `deck_tile_widget.dart:113-117` makes the same trade for
-  /// the same reason; buying the last 4dp would mean a zero trailing pad at
-  /// 320dp, which is a different decision from this one.
+  /// 4 + 12 lands on 16 — exactly the gutter, at both widths now. It was 4dp
+  /// inside the gutter on the compact tier while the gutter stepped and the
+  /// button's half-box did not.
   const List<(Size, double, double)> surfaces = <(Size, double, double)>[
-    (Size(320, 640), AppSpacing.md, AppSpacing.xs),
+    (Size(320, 640), AppSpacing.lg, 0),
     (Size(393, 852), AppSpacing.lg, 0),
   ];
 

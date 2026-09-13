@@ -190,11 +190,11 @@ void main() {
         'on the compact tier too (M6 R2)', (tester) async {
       // **Three widths, because the defect only existed on one tier.** The
       // toggle row and the hairline resolve `mxScreenGutter`; the time row
-      // takes its inset from `ListTileTheme.contentPadding`, which
-      // `applyCompactScale` steps to `md` below `AppBreakpoints.compact`. A
+      // takes its inset from `ListTileTheme.contentPadding`, which the compact
+      // pass stepped to `md` below `AppBreakpoints.compact` until M100.89. A
       // fixed `lg` on either of the first two held at 393 and split the card
       // into two left edges at 320 and at 359 — 4dp, which is exactly the size
-      // nothing catches by eye.
+      // nothing catches by eye. Both are 16 at every width now.
       for (final surface in <Size>[
         const Size(320, 568),
         const Size(359, 700),
@@ -219,7 +219,7 @@ void main() {
           ),
         );
 
-        final expected = surface.width < 360 ? AppSpacing.md : AppSpacing.lg;
+        const expected = AppSpacing.lg;
         expect(
           toggleLabel.left,
           closeTo(card.left + expected, 0.5),

@@ -45,7 +45,8 @@ void main() {
     await pump(tester, boldText: false);
     expect(wghtOf(tester, 'body'), 400);
     expect(wghtOf(tester, 'label'), lessThan(700));
-    expect(wghtOf(tester, 'hero'), 700);
+    // The stat role (D14).
+    expect(wghtOf(tester, 'hero'), 600);
   });
 
   testWidgets('with the setting, every rung resolves the wght axis to 700', (
@@ -55,7 +56,7 @@ void main() {
     for (final text in <String>['body', 'title', 'label']) {
       expect(wghtOf(tester, text), 700, reason: '$text did not embolden');
     }
-    // Already bold: unchanged, and its metrics (the cap-trim) untouched.
+    // Emboldened with its rung, and its metrics (the cap-trim) untouched.
     expect(wghtOf(tester, 'hero'), 700);
     final hero = tester.renderObject<RenderParagraph>(find.text('hero'));
     expect(

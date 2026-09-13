@@ -51,13 +51,14 @@ import '../../core/theme/extensions/app_ink.dart';
 /// documented *floor* into a ceiling: from `textScaler` 2.5 the placeholder
 /// was clipped to the box. The floor is a floor now.
 /// The inset that brings a one-line field to [AppSizing.touchTarget] at the
-/// default scale: (48 − 20) / 2. Off-grid on purpose — the target is the
+/// default scale: (48 − 21) / 2. Off-grid on purpose — the target is the
 /// contract, and the grid step above it would make the pill 52.
 const double _fieldInset = (AppSizing.touchTarget - _lineHeight) / 2;
 
-/// `body-md`'s line at the default scale — 14 × 1.43, rounded as the engine
-/// rounds it.
-const double _lineHeight = 20; // off-grid: a type metric, not a gap
+/// `body-md`'s line at the default scale — 14 × 1.5, the handoff's body role.
+/// Derived from the rung's tokens: a literal here stayed 20 while the rung's
+/// leading moved, and the pill quietly became 49.
+const double _lineHeight = AppTypography.bodySize * AppTypography.bodyHeight;
 
 class MxSearchField extends StatefulWidget {
   const MxSearchField({
@@ -164,7 +165,7 @@ class _MxSearchFieldState extends State<MxSearchField> {
       constraints: const BoxConstraints(minHeight: AppSizing.touchTarget),
       decoration: BoxDecoration(
         color: _hasFocus ? colors.surface : semantic.surfaceMuted,
-        borderRadius: BorderRadius.circular(AppRadius.pill),
+        borderRadius: BorderRadius.circular(AppRadius.full),
         // `strokeAlignOutside` keeps the stroke out of the layout: a border
         // inside the box would make the pill 51 where the touch target needs
         // its 48, and at 320 wide with `textScaler` 2.0 the chrome has no two
@@ -184,7 +185,7 @@ class _MxSearchFieldState extends State<MxSearchField> {
         // content by its own rules, and a glyph centred in a 48-tall box does
         // not land where a line of text centred in one does.
         children: <Widget>[
-          const MxIcon(Icons.search, size: MxIconSize.sm),
+          const MxIcon(Icons.search, size: MxIconSize.xs),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Semantics(
@@ -263,7 +264,7 @@ class _MxSearchFieldState extends State<MxSearchField> {
               tooltip: widget.clearSemanticLabel,
               icon: Icon(
                 Icons.close,
-                size: AppIconSize.sm,
+                size: AppIconSize.xs,
                 semanticLabel: widget.clearSemanticLabel,
               ),
             ),

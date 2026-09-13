@@ -135,7 +135,7 @@ class CardEditorFieldWidget extends StatelessWidget {
         if (icon != null) ...<Widget>[
           // MxIcon excludes itself from semantics when unlabeled, which is
           // what the ExcludeSemantics wrapper used to say by hand.
-          MxIcon(icon!, size: MxIconSize.sm),
+          MxIcon(icon!, size: MxIconSize.xs),
           const SizedBox(width: AppSpacing.xs),
         ],
         // **One flexible child, not two.** `Flexible(label)` beside a `Spacer`

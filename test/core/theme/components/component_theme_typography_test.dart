@@ -49,8 +49,8 @@ void main() {
     );
     expect(
       style.fontFamily,
-      anyOf(AppTypography.bodyFamily, AppTypography.displayFamily),
-      reason: '$slot is not set in one of the two app faces',
+      AppTypography.family,
+      reason: '$slot is not set in the app face',
     );
   }
 
@@ -161,12 +161,13 @@ void main() {
         }
       });
 
-      test('the navigation label is label-md, and selection re-weights it', () {
+      test('the navigation label is label-md in both states', () {
         // The bar resolves per state, so both faces have to be asked for.
-        // Unselected is the rung untouched; selected is the rung at 600 — and
-        // the axis assertion inside the helper is the whole point, because
-        // this slot shipped a `copyWith(fontWeight:)` that reported 600 and
-        // painted 500 (theme-composition review, 2026-08).
+        // Both are the rung untouched: selected was the rung re-weighted to
+        // 600 until the rung itself became 600 (D1, M100.89). The axis
+        // comparison inside the helper still matters — this slot once shipped
+        // a `copyWith(fontWeight:)` that reported 600 and painted 500
+        // (theme-composition review, 2026-08).
         final WidgetStateProperty<TextStyle?>? label =
             theme.navigationBarTheme.labelTextStyle;
         expect(label, isNotNull, reason: 'the bar declares no label style');
@@ -176,11 +177,10 @@ void main() {
           label!.resolve(const <WidgetState>{}),
           texts.labelMedium,
         );
-        expectRungReweighted(
+        expectSameRung(
           'navigationBarTheme.labelTextStyle (selected)',
           label.resolve(const <WidgetState>{WidgetState.selected}),
           texts.labelMedium,
-          FontWeight.w600,
         );
       });
 
@@ -233,8 +233,8 @@ void main() {
         );
         expect(
           theme.dialogTheme.titleTextStyle?.fontWeight,
-          FontWeight.w600,
-          reason: 'the dialog title is back on Material 3 title-md',
+          FontWeight.w500,
+          reason: 'the dialog title is title-md — body large, 16/500 (D1)',
         );
         expectSameRung(
           'dialogTheme.contentTextStyle',

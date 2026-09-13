@@ -219,7 +219,7 @@ class MxCard extends StatefulWidget {
 
   /// The focal surface a whole screen is built around: a study prompt.
   ///
-  /// [AppRadius.xl] because a card filling the screen reads tighter at the
+  /// [AppRadius.card] because a card filling the screen reads tighter at the
   /// same corner as a list row does, and [AppElevation.raised] because the
   /// prompt is deliberately lifted above its neighbours. Informational only —
   /// the study screens' controls are their own widgets, so the recipe grows a
@@ -230,7 +230,7 @@ class MxCard extends StatefulWidget {
     super.key,
   }) : _spec = const _MxCardSpec(
          elevation: AppElevation.raised,
-         radius: AppRadius.xl,
+         radius: AppRadius.card,
        ),
        isSelected = null,
        _selectionTreatment = MxCardSelectionTreatment.edge,
@@ -253,7 +253,7 @@ class MxCard extends StatefulWidget {
     super.key,
   }) : _spec = const _MxCardSpec(
          elevation: AppElevation.none,
-         radius: AppRadius.xl,
+         radius: AppRadius.card,
          fill: _MxCardFill.recessed,
        ),
        isSelected = null,

@@ -99,7 +99,7 @@ class MxProgressBar extends StatelessWidget {
               // **One shape.** A `flush` variant — the bar as a card's edge,
               // clipped by the caller — existed with zero callers (A20.1
               // P3-03); the deck tile seats the pill inside its own padding.
-              borderRadius: BorderRadius.circular(AppRadius.pill),
+              borderRadius: BorderRadius.circular(AppRadius.full),
               child: TweenAnimationBuilder<double>(
                 // The bar animates to its new value rather than jumping. `slow`
                 // is the app's ceiling and this is the one thing it is for: a

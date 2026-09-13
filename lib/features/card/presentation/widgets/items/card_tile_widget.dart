@@ -27,7 +27,7 @@ import '../support/card_tag_chip_widget.dart';
 /// (`onSurfaceVariant` clears 4.5:1 as text where the state hues do not on both
 /// themes). Tags and the due badge are quiet filled pills — the deck's chip
 /// language — rather than the colour-per-state the reference draws.
-// off-grid: between `AppIconSize.sm` (16) and `md` (24): the flag sits beside a 14 label and at 16 it read as punctuation
+// off-grid: between `AppIconSize.xs` (16) and `md` (24): the flag sits beside a 14 label and at 16 it read as punctuation
 const double _flagIconSize = 18;
 
 /// The state dot's diameter — small, because colour and position carry it, not

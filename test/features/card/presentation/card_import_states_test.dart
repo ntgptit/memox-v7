@@ -108,13 +108,12 @@ void main() {
             'heading, one place',
       );
 
-      // Standard rung, not the in-panel one: `sectionLabelSmall` is a face
-      // label inside a card, and at 11px it would read no louder than the
-      // captions underneath it.
+      // The standard section rung. It was also asserted to be *not* the
+      // in-panel `sectionLabelSmall`, by size; D1 put both on the 12px caption
+      // (M100.89), so a size can no longer tell them apart.
       final AppTextStyles styles = tester.element(heading).textStyles;
       final double? renderedSize = tester.widget<Text>(heading).style?.fontSize;
       expect(renderedSize, styles.sectionLabel.fontSize);
-      expect(renderedSize, isNot(styles.sectionLabelSmall.fontSize));
     });
   });
 

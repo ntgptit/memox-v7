@@ -45,7 +45,7 @@ void main() {
     await pump(tester, const MxLoadingState.inline(semanticsLabel: 'More'));
 
     final size = tester.getSize(find.byType(CircularProgressIndicator));
-    expect(size, const Size.square(AppIconSize.sm));
+    expect(size, const Size.square(AppIconSize.xs));
     expect(
       tester
           .widget<CircularProgressIndicator>(
