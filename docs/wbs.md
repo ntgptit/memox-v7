@@ -858,6 +858,20 @@ không nhầm chúng là một phase.
     chưa duyệt; 88 PNG đều truy về T17–T19. P3 ghi nhận: golden
     `mx_search_field_focused_*` có tay kéo con trỏ do `shouldAutofocus`, giống
     hệt bản ở `4a626dbd`, nên không phải thay đổi của Phase 4.
+  - UI/UX, sweep 2 tại `021a2bf7`: không có P0/P1; không có divergence chưa
+    duyệt.
+    - P2-1: hai `MxSwitchRow` ở preview của import (header, duplicate) chưa
+      có pin geometry hay semantics ở call site. Đã sửa bằng
+      `card_import_switch_rows_test.dart`: 390dp × 1 và 320dp × 2, EN và VI.
+      Test ghim target ≥ 48, switch 44 × 26 nằm trong hàng và bên phải nhãn,
+      một node toggled/enabled, và tap vào switch vẽ ra thì tới được hàng.
+      Fault-inject: hạ `minHeight` của hàng xuống `controlDense`, hoặc bỏ
+      `toggled`, đều làm test đỏ; trả lại thì xanh.
+    - P3-1 (trace): hai bộ số ghim theo owner decision 5 chỉ dựng light/dark.
+      Reviewer lần theo `app_high_contrast.dart` thì `borderSubtle` và các
+      role của switch không đổi dưới HC, nên hôm nay không có regression.
+    - Ghi chú: ở 320×640, search field cao 52 đẩy tâm hàng đầu của card list
+      xuống 641/640 (PLAN-DEV-18.4).
 - **Editable documents:** `docs/wbs.md`,
   `docs/design-system/tokyo-component-mapping.md`,
   `docs/design-system/switch-spec.md`,
