@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_card.dart';
 import '../../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../../shared/widgets/mx_empty_state.dart';
 import '../../../../../shared/widgets/mx_error_state.dart';
 import '../../../../../shared/widgets/mx_loading_state.dart';
+import '../../../../../shared/widgets/mx_row_group.dart';
 import '../../../domain/models/search_destination_model.dart';
 import '../../../domain/models/search_result_model.dart';
 import '../../states/library_search_state.dart';
@@ -186,16 +188,18 @@ class LibrarySearchBodyWidget extends StatelessWidget {
     ),
     SliverPadding(
       padding: EdgeInsets.symmetric(horizontal: gutter),
-      sliver: SliverList.separated(
-        itemCount: children.length,
-        itemBuilder: (BuildContext context, int index) => children[index],
-        // `lg`, which `AppSpacing` defines as "the gap between list items" and
-        // which `deck_list_sliver_widget.dart` already uses for the same kind
-        // of list. `sm` here was half the row's own 12dp vertical inset, so the
-        // space between two rows was tighter than the space inside one and the
-        // grouping cue pointed the wrong way.
-        separatorBuilder: (BuildContext context, int index) =>
-            const SizedBox(height: AppSpacing.lg),
+      // **One card per section, its results as rows on it** — the handoff's
+      // ListRow grouping (M100.91). The rows were cards `lg` apart; on one
+      // surface a hairline marks each boundary and there is no gap to space.
+      //
+      // ponytail: builds every loaded row eagerly — a page holds tens of
+      // results, not thousands. Move to a DecoratedSliver-backed list if a
+      // section ever measures slow.
+      sliver: SliverToBoxAdapter(
+        child: MxCard.raised(
+          padding: MxCardPadding.none,
+          child: MxRowGroup(children: children),
+        ),
       ),
     ),
   ];

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:memox/shared/widgets/mx_row_group.dart';
 import 'package:memox/shared/widgets/mx_badge.dart';
 import 'package:memox/shared/widgets/mx_checkbox_row.dart';
 import 'package:memox/shared/widgets/mx_dropdown.dart';
@@ -133,6 +134,18 @@ List<MxStressSpecimen> selectionStressSpecimens() => <MxStressSpecimen>[
       trailing: Icon(Icons.chevron_right),
       isEnabled: false,
       onTap: _noop,
+    ),
+  ),
+  MxStressSpecimen(
+    // Three long rows under one group: the hairlines must stay between rows
+    // and the rows must grow, not clip, at 320dp and 2.0x.
+    name: 'MxRowGroup',
+    build: () => const MxRowGroup(
+      children: <Widget>[
+        MxListTile(title: kLongTitle, subtitle: kLongLabel),
+        MxListTile(title: kLongTitle, subtitle: kLongLabel),
+        MxListTile(title: kLongTitle, subtitle: kLongLabel),
+      ],
     ),
   ),
   MxStressSpecimen(

@@ -104,7 +104,7 @@ class CardListBodyWidget extends ConsumerWidget {
                     context.l10n.cardListShowing(items.length, total),
                     // The 1.1 was `sectionLabelTracking` spelled as a bare
                     // number; the role names it.
-                    style: context.textStyles.sectionLabelSmall.inked(
+                    style: context.textStyles.sectionLabel.inked(
                       context,
                       AppInk.quiet,
                     ),

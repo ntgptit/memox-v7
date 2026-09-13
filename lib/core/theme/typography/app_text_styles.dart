@@ -18,7 +18,6 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
   const AppTextStyles({
     required this.cardPrompt,
     required this.sectionLabel,
-    required this.sectionLabelSmall,
     required this.stateChipLabel,
     required this.listHeading,
     required this.heroNumeral,
@@ -41,10 +40,7 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
         promptBase,
         AppTypography.cardPromptWeight,
       ),
-      sectionLabel: (texts.labelMedium ?? const TextStyle()).copyWith(
-        letterSpacing: AppTypography.sectionLabelTracking,
-      ),
-      sectionLabelSmall: (texts.labelSmall ?? const TextStyle()).copyWith(
+      sectionLabel: (texts.labelSmall ?? const TextStyle()).copyWith(
         letterSpacing: AppTypography.sectionLabelTracking,
       ),
       stateChipLabel: AppTypography.withWeight(
@@ -74,17 +70,17 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
   /// weight and leading (D13); the headline size under the compact pass.
   final TextStyle cardPrompt;
 
-  /// The uppercase label above a group of rows — `label-md` opened up to the
-  /// handoff's `ls-section`. A complete style rather than a tracking constant
-  /// callers re-assemble; colour stays with the caller, because the same
-  /// heading is brand ink over the Today panel and quiet ink over the list it
-  /// titles.
+  /// The uppercase overline above a group — the handoff SectionHeader, the
+  /// caption (`label-sm`, 12/600/1.4) at `ls-section`. A complete style rather
+  /// than a tracking constant callers re-assemble; colour stays with the
+  /// caller, because the same heading is brand ink over the Today panel and
+  /// quiet ink over the list it titles.
+  ///
+  /// **One rung since M100.91.** A `sectionLabelSmall` stood beside it for the
+  /// overline on a study face or under a toolbar; D1 put both on the 12px
+  /// caption, so they resolved to the same metrics and the name was a
+  /// distinction nobody could see.
   final TextStyle sectionLabel;
-
-  /// [sectionLabel] one rung down — the overline above a study face or under a
-  /// toolbar. Found as four hand-assembled copies (one spelling the tracking
-  /// token as a bare `1.1`) when M99.65 clustered the app's text restyles.
-  final TextStyle sectionLabelSmall;
 
   /// The uppercase state word inside a card tile's chip — `label-sm` at the
   /// label tracking and the emphatic 600.
@@ -105,14 +101,12 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
   AppTextStyles copyWith({
     TextStyle? cardPrompt,
     TextStyle? sectionLabel,
-    TextStyle? sectionLabelSmall,
     TextStyle? stateChipLabel,
     TextStyle? listHeading,
     TextStyle? heroNumeral,
   }) => AppTextStyles(
     cardPrompt: cardPrompt ?? this.cardPrompt,
     sectionLabel: sectionLabel ?? this.sectionLabel,
-    sectionLabelSmall: sectionLabelSmall ?? this.sectionLabelSmall,
     stateChipLabel: stateChipLabel ?? this.stateChipLabel,
     listHeading: listHeading ?? this.listHeading,
     heroNumeral: heroNumeral ?? this.heroNumeral,
@@ -125,11 +119,6 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     return AppTextStyles(
       cardPrompt: TextStyle.lerp(cardPrompt, other.cardPrompt, t)!,
       sectionLabel: TextStyle.lerp(sectionLabel, other.sectionLabel, t)!,
-      sectionLabelSmall: TextStyle.lerp(
-        sectionLabelSmall,
-        other.sectionLabelSmall,
-        t,
-      )!,
       stateChipLabel: TextStyle.lerp(stateChipLabel, other.stateChipLabel, t)!,
       listHeading: TextStyle.lerp(listHeading, other.listHeading, t)!,
       heroNumeral: TextStyle.lerp(heroNumeral, other.heroNumeral, t)!,

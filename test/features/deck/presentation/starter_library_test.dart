@@ -312,8 +312,8 @@ void main() {
         second.top - first.bottom,
         AppSpacing.lg,
         reason:
-            'two MxCard.raised rows are `lg` apart — the value '
-            'deck_list_sliver_widget.dart settled on for the same row',
+            'two MxCard.raised rows are `lg` apart — the list-item gap '
+            'app_spacing.dart defines',
       );
     });
 

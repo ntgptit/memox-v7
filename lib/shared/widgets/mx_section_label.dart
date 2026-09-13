@@ -5,11 +5,9 @@ import '../../core/theme/extensions/theme_context_extension.dart';
 
 /// Which rung a section label is set at.
 enum MxSectionLabelRung {
-  /// `sectionLabel` — the app's one section-heading treatment (D18).
+  /// `sectionLabel` — the handoff SectionHeader overline, and the app's one
+  /// section-heading treatment (D18): above a group, and on the face of a card.
   standard,
-
-  /// `sectionLabelSmall` — a face label inside a card, one step down.
-  small,
 
   /// `listHeading` — the heading over a list, one weight up.
   list,
@@ -59,7 +57,6 @@ class MxSectionLabel extends StatelessWidget {
     final styles = context.textStyles;
     final TextStyle base = switch (rung) {
       MxSectionLabelRung.standard => styles.sectionLabel,
-      MxSectionLabelRung.small => styles.sectionLabelSmall,
       MxSectionLabelRung.list => styles.listHeading,
     };
     final AppInk ink = switch (emphasis) {

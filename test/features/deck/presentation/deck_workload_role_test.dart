@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/extensions/app_ink.dart';
 // ignore: unused_import
 import 'package:memox/core/theme/foundations/app_colors.dart';
 // ignore: unused_import
@@ -9,11 +8,11 @@ import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/features/deck/domain/models/deck_content_type_model.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
-import 'package:memox/features/deck/presentation/widgets/items/deck_icon_area_widget.dart';
-import 'package:memox/features/deck/presentation/widgets/items/deck_study_button_widget.dart';
 import 'package:memox/features/deck/presentation/widgets/items/deck_tile_widget.dart';
 import 'package:memox/features/deck/presentation/widgets/items/deck_workload_line_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
+import 'package:memox/shared/widgets/mx_icon_tile.dart';
+import 'package:memox/shared/widgets/mx_mastery_ring.dart';
 
 // ignore: unused_import
 import '../../../support/color_math.dart';
@@ -107,68 +106,27 @@ void main() {
       expect(dueStyle?.fontWeight, FontWeight.w600);
       expect(newStyle?.fontWeight, FontWeight.w600);
 
-      // Study: the card's one primary verb (owner mockup, 2026-08-20) — the
-      // chips gave up their containers, so the brand fill no longer competes.
-      //
-      // Resolved widget-then-theme, the order Material itself uses: since the
-      // M99.61 migration to `MxActionButton` the widget carries geometry only,
-      // and the fill is the theme's — which is the ownership this test wants,
-      // stated where it used to read a per-widget style.
-      // **Study is filled and tonal — the end of a loop, not another step in
-      // it** (M100.75). The walk is recorded on the widget: outlined (the kit)
-      // → filled (owner) → tonal → filled again (2026-08-20) → outlined
-      // (M99.98) → filled (M100.71) → tonal. Six passes, because the enum had
-      // no tonal value and every pass had to pick between a fill that repeats
-      // four times in a viewport and an outline that says "alternative" on a
-      // row with nothing to be an alternative to. M100.73 added the weight M3
-      // defines for exactly this list.
-      //
-      // Two halves of the contract, and both are asserted here rather than
-      // one: it **is** a `FilledButton` — the row's verb is the action, not an
-      // alternative — and it is **not** the brand accent, because the screen
-      // shows four of these at once. With only the first assertion, a swing
-      // back to `primary` would pass; with only the second, an outline would.
-      //
-      // The rest of M99.98 still stands and is asserted above and below: the
-      // chips keep no containers, the well stays tonal.
-      final studyButton = find.descendant(
-        of: find.byType(DeckStudyButtonWidget),
-        matching: find.byType(FilledButton),
-      );
-      expect(
-        find.descendant(
-          of: find.byType(DeckStudyButtonWidget),
-          matching: find.byType(OutlinedButton),
-        ),
-        findsNothing,
-        reason: 'the row verb is the primary action, not an alternative',
-      );
-      final study = tester.widget<FilledButton>(studyButton);
-      final studyFill =
-          study.style?.backgroundColor?.resolve(<WidgetState>{}) ??
-          Theme.of(
-            tester.element(studyButton),
-          ).filledButtonTheme.style?.backgroundColor?.resolve(<WidgetState>{});
-      expect(
-        studyFill,
-        scheme.secondaryContainer,
-        reason:
-            'the tonal pair belongs to M3 — a fourth colour here would '
-            'make this a third accent rather than a third weight',
-      );
-      expect(
-        studyFill,
-        isNot(scheme.primary),
-        reason:
-            'four brand fills in one viewport is repetition, not emphasis — '
-            'the finding M99.98 made and M100.73 finally gave a home to',
-      );
-      expect(studyFill, isNot(semantic.streakContainer));
+      // **The ring, where the Study verb was** (owner decision 7, M100.91).
+      // Below 100% the arc is the brand colour, not `mastery`: completion is
+      // the one moment `mastery` marks (BR-88, D8), and a 37% deck is not it.
+      final ring =
+          tester
+                  .widget<CustomPaint>(
+                    find.descendant(
+                      of: find.byType(MxMasteryRing),
+                      matching: find.byType(CustomPaint),
+                    ),
+                  )
+                  .painter!
+              as MxMasteryRingPainter;
+      expect(ring.fill, scheme.primary);
+      expect(ring.fill, isNot(semantic.mastery));
+      expect(ring.track, semantic.progressTrack);
     });
   }
 
   group('the well: identity, not schedule (amends BR-161)', () {
-    Future<DeckIconArea> pumpIcon(
+    Future<MxIconTile> pumpIcon(
       WidgetTester tester, {
       required int due,
       required int newCards,
@@ -194,7 +152,12 @@ void main() {
         screen: const DeckListScreen(),
       );
 
-      return tester.widget<DeckIconArea>(find.byType(DeckIconArea));
+      return tester.widget<MxIconTile>(
+        find.descendant(
+          of: find.byType(DeckTileWidget),
+          matching: find.byType(MxIconTile),
+        ),
+      );
     }
 
     /// Every schedule state, one well. The chips carry urgency now, so a
@@ -205,7 +168,7 @@ void main() {
       ('due today', 7, 0),
       ('overdue', 5, 3),
     ]) {
-      testWidgets('$name keeps the brand well and the folder glyph', (
+      testWidgets('$name keeps the one tile and the folder glyph', (
         tester,
       ) async {
         final icon = await pumpIcon(
@@ -215,23 +178,14 @@ void main() {
           learned: 30,
           overdueDays: days,
         );
-        final semantic = Theme.of(
-          tester.element(find.byType(DeckIconArea)),
-        ).extension<AppSemanticColors>()!;
-
         expect(icon.icon, Icons.folder_outlined);
-        // The tint is an AppInk now (M99.67): the widget names the role and
-        // MxIcon resolves it, so the role — not a resolved Color — is the
-        // claim. `accent` has held since the well's fill first left
-        // `primaryContainer` (2026-09-10) and still holds now that the well
-        // has settled on `surfaceMuted` — the glyph names the brand colour on
-        // whatever neutral or bordered surface the well currently is.
-        expect(icon.tint, AppInk.accent);
-        // `wellColor` null means the neutral fill — no state override.
-        expect(icon.wellColor, isNull);
+        // One tile in every state (M100.91). Its ground and glyph ink belong
+        // to `MxIconTile` and are measured in `mx_icon_tile_test.dart`; a
+        // state that wanted a red square would have to pass something here,
+        // and the tile takes nothing but a glyph and a size.
+        expect(icon.size, MxIconTileSize.sm);
         expect(icon.icon, isNot(Icons.event_busy));
         expect(icon.icon, isNot(Icons.event));
-        expect(semantic.danger, isNotNull);
       });
     }
 
@@ -258,10 +212,19 @@ void main() {
       expect(find.byIcon(Icons.check_circle), findsNothing);
     });
 
-    testWidgets('new-only keeps Study on', (tester) async {
+    testWidgets('new-only grows no verb on the row', (tester) async {
       await pumpIcon(tester, due: 0, newCards: 14, learned: 22);
 
-      expect(find.byType(DeckStudyButtonWidget), findsOneWidget);
+      // A session starts from the Study tab or inside the deck (owner
+      // decision 7, M100.91): cards waiting is not a reason for the row to
+      // offer one.
+      expect(
+        find.descendant(
+          of: find.byType(DeckTileWidget),
+          matching: find.byType(ButtonStyleButton),
+        ),
+        findsNothing,
+      );
     });
   });
 

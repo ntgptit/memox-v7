@@ -67,7 +67,7 @@ void main() {
       // that is still listed here; 70 until M100.87 added the extension's eight
       // text inks, without which every `*Ink` call site reported as
       // unresolvable.
-      hasLength(78),
+      hasLength(83),
       reason:
           'a role added to Material and not listed in auditTokensOf is '
           'invisible to every later step',

@@ -204,6 +204,12 @@ void main() {
         'light success page': 2.8,
         'light warning card': 2.1,
         'light warning page': 2.0,
+        // The lifecycle dots (M100.91): `statusNew` measured 2.96 on the card and
+        // 2.81 on the page; `statusLearning` is the warning fill.
+        'light statusNew card': 2.9,
+        'light statusNew page': 2.8,
+        'light statusLearning card': 2.1,
+        'light statusLearning page': 2.0,
       };
       for (final entry in themes.entries) {
         final semantic = entry.value.extension<AppSemanticColors>()!;
@@ -217,6 +223,11 @@ void main() {
             ('warning', semantic.warning),
             ('danger', semantic.danger),
             ('info', semantic.info),
+            ('mastery', semantic.mastery),
+            ('statusNew', semantic.statusNew),
+            ('statusLearning', semantic.statusLearning),
+            ('statusReviewing', semantic.statusReviewing),
+            ('statusMastered', semantic.statusMastered),
           ]) {
             expect(
               contrast(pair.$2, ground.$2),

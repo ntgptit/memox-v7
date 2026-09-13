@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import '../../../../../core/theme/foundations/app_sizing.dart';
 import '../../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../../shared/widgets/mx_icon.dart';
-import '../../../../../shared/widgets/mx_card.dart';
+import '../../../../../shared/widgets/mx_icon_tile.dart';
+import '../../../../../shared/widgets/mx_pressable.dart';
 
-/// The frame every result row shares: the surface, the leading glyph, the
-/// trailing chevron, and the tap target.
+/// The frame every result row shares: the leading tile, the trailing chevron,
+/// and the tap target — a handoff ListRow on its section's card.
 ///
 /// **`chevron_right`, not `north_east`.** The trailing glyph was `north_east`,
 /// and it was the app's only one — the mark that conventionally says "this
@@ -16,24 +17,20 @@ import '../../../../../shared/widgets/mx_card.dart';
 /// `chevron_right` is what the rest of the app says for "there is a screen
 /// behind this" — the progress deck row, the settings reminder entry and the
 /// card editor's context row all use it, and `card_editor_details_widget.dart`
-/// states the rule outright. Same size step, same position, one glyph for one
-/// meaning.
+/// states the rule outright.
 ///
 /// **One frame for two row types, so they cannot drift apart.** A deck row and
-/// a card row differ in what they say and in nothing else — the same gutter, the
-/// same radius, the same 48 floor — and two files drawing that separately is how
+/// a card row differ in what they say and in nothing else — the same inset, the
+/// same tile, the same 48 floor — and two files drawing that separately is how
 /// one of them ends up a pixel out and stays that way.
 ///
-/// **`MxCard`, not a hand-drawn `Material` + `InkWell`.** It was the latter
-/// first, with the same `surface` fill, the same `AppRadius.lg` and the same
-/// `borderSubtle` edge — a manual copy of the shared card, and it inherited two
-/// defects from being one. It had no **focus ring**: the row declares itself a
-/// button, this screen is reached with the keyboard already in the field, and a
-/// bare `InkWell` falls back to a 10% wash that `AppStateOpacity.focus`'s own
-/// documentation measures at ~1.15:1 — below the 3:1 WCAG 1.4.11 asks of a focus
-/// indicator. And its press fell back to the theme's splash rather than
-/// `AppInteractionStates.cardOverlay`, which is the pressed value the design kit
-/// declares for a tappable card. `MxCard` carries both.
+/// **A row on its section's card, not a card per row** (M100.91). Each result
+/// was its own `MxCard`, `lg` apart; the handoff groups a section's results on
+/// one surface with a hairline between rows, so the section owns the card
+/// (`library_search_body_widget.dart`) and this owns the row. The focus ring
+/// the card carried comes from `MxPressable`'s `MxFocusRing` now — the shared
+/// indicator, where a bare `InkWell`'s 10% wash measures ~1.15:1 against the
+/// 3:1 WCAG 1.4.11 asks of a focus indicator.
 class SearchResultShellWidget extends StatelessWidget {
   const SearchResultShellWidget({
     required this.icon,
@@ -65,33 +62,28 @@ class SearchResultShellWidget extends StatelessWidget {
       child: Semantics(
         button: true,
         label: semanticLabel,
-        child: MxCard.raised(
-          // Flat: this card sits inside a list on the page's own surface, and a
-          // shadow per row would make the list read as a stack of sheets. The
-          // row's content area is its own — tighter ends than sides.
-          padding: MxCardPadding.none,
+        child: MxPressable(
           onTap: onOpen,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.lg,
-              vertical: AppSpacing.md,
+          shape: MxPressableShape.none,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: AppSizing.rowMinHeight,
             ),
-            child: ConstrainedBox(
-              // The row is taller than this at every scale that has been measured;
-              // the floor is here so a future single-line variant cannot fall under
-              // the target a finger needs.
-              constraints: const BoxConstraints(
-                minHeight: AppSizing.touchTarget,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.md,
               ),
               child: ExcludeSemantics(
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    MxIcon(icon, size: MxIconSize.xs),
+                    // `sm`: with the 16 inset and 12 gap the text lands on
+                    // the 56 hairline its section card draws (UI audit P2).
+                    MxIconTile(icon: icon, size: MxIconTileSize.sm),
                     const SizedBox(width: AppSpacing.md),
                     Expanded(child: child),
                     const SizedBox(width: AppSpacing.sm),
-                    const MxIcon(Icons.chevron_right, size: MxIconSize.xs),
+                    const MxIcon(Icons.chevron_right, size: MxIconSize.sm),
                   ],
                 ),
               ),

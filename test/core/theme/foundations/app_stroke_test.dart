@@ -22,6 +22,8 @@ void main() {
     () {
       expect(AppStroke.hairline, lessThan(AppStroke.control));
       expect(AppStroke.control, lessThan(AppStroke.focus));
+      // The ring is a painted mark, the one stroke heavier than focus.
+      expect(AppStroke.focus, lessThan(AppStroke.ring));
       expect(AppStroke.selectionControl, AppStroke.focus);
       // Material's 48 dp ring uses 4; the 16 dp spinner inside a button uses
       // half of that, and the number is named rather than typed.

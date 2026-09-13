@@ -60,11 +60,11 @@ void main() {
       expect(indicatorOf(tester).color, light.colorScheme.primary);
     });
 
-    testWidgets('at 100% the fill turns success', (tester) async {
+    testWidgets('at 100% the fill turns mastery', (tester) async {
       await pumpApp(tester, const MxProgressBar(value: 1));
       await tester.pumpAndSettle();
 
-      expect(indicatorOf(tester).color, semantic.success);
+      expect(indicatorOf(tester).color, semantic.mastery);
     });
 
     testWidgets('the track is the progress track token', (tester) async {
@@ -143,7 +143,7 @@ void main() {
       tester,
     ) async {
       // The accessibility contract removes movement, never information. A
-      // reduced-motion build that also dropped the success colour or the
+      // reduced-motion build that also dropped the mastery colour or the
       // announcement would be answering a different request.
       final handle = tester.ensureSemantics();
 
@@ -154,7 +154,7 @@ void main() {
       );
       await tester.pump();
 
-      expect(indicatorOf(tester).color, semantic.success);
+      expect(indicatorOf(tester).color, semantic.mastery);
       expect(find.bySemanticsLabel('20 of 20 learned'), findsOneWidget);
       handle.dispose();
     });

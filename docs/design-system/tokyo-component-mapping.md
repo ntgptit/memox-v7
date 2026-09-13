@@ -287,8 +287,8 @@ Không có một đáp án chung "mọi thứ là Card" hay "mọi thứ là Lis
 | Dựng bằng | Khi | Ví dụ production |
 |---|---|---|
 | `MxListTile` | hàng điều hướng / thiết lập / điều khiển / lựa chọn thông thường — một tiêu đề, một dòng phụ, glyph hai bên, một cú chạm | mục Reminders trong Settings, giờ nhắc, đích di chuyển / khôi phục, chọn chế độ / hướng học |
-| `MxCard` | một **thực thể** hoặc **mặt nội dung** mà nhóm và độ sâu của chính nó mang nghĩa | deck tile, card tile, mặt học, panel tóm tắt |
-| hàng thuộc feature | **chỉ khi** composition thật sự vượt quá ngữ nghĩa ListTile — vùng thứ ba trở lên, lưới số liệu, thân là widget, control lồng bên trong | `deck_tile_widget` (bốn vùng + nút Study), `progress_deck_row_widget` (tên + đường dẫn **+ lưới bốn số liệu**), `search_result_shell_widget` (thân là widget của từng loại kết quả) |
+| `MxCard` | một **thực thể** hoặc **mặt nội dung** mà nhóm và độ sâu của chính nó mang nghĩa | card tile, mặt học, panel tóm tắt, nền nhóm hàng deck của Library (M100.91) |
+| hàng thuộc feature | **chỉ khi** composition thật sự vượt quá ngữ nghĩa ListTile — vùng thứ ba trở lên, lưới số liệu, thân là widget, control lồng bên trong | `deck_tile_widget` (tile · tên, số card, workload · ring · overflow — một hàng trên `MxCard` + `MxRowGroup` từ M100.91), `progress_deck_row_widget` (tên + đường dẫn **+ lưới bốn số liệu**), `search_result_shell_widget` (thân là widget của từng loại kết quả) |
 
 Hai ứng viên #431 nêu để "đơn giản hoá" đã được xét theo quy tắc này và **ở
 lại Card**: hàng Progress mang một lưới số liệu dưới tiêu đề, và vỏ kết quả

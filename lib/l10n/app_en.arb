@@ -662,10 +662,6 @@
   "@deckCreateCardAction": {
     "description": "Action that would create a card in the current deck. Shown disabled in this build (UC-08, BR-61)."
   },
-  "deckStudyAction": "Study",
-  "@deckStudyAction": {
-    "description": "Label of the button on a deck card that starts a study session for that deck. Shown when the deck has due or new cards (BR-150) — hidden only when both sets are empty, because then there is nothing to start."
-  },
   "deckRowActionsSemanticLabel": "Deck actions for {deck}",
   "@deckRowActionsSemanticLabel": {
     "placeholders": {
@@ -674,15 +670,6 @@
       }
     },
     "description": "Screen-reader name for a LIST ROW's overflow button. Every row carries the same glyph, so the deck name is what tells them apart. The app bar keeps the unqualified deckActionsSemanticLabel: there is exactly one of it, and the title already names the deck."
-  },
-  "deckRowStudySemanticLabel": "Study {deck}",
-  "@deckRowStudySemanticLabel": {
-    "placeholders": {
-      "deck": {
-        "type": "String"
-      }
-    },
-    "description": "Screen-reader name for a list row's Study action, matching studyHomeStudySemanticLabel in the Study tab: every row paints the same word, and the deck name is what distinguishes them."
   },
   "deckActionsSemanticLabel": "Deck actions",
   "@deckActionsSemanticLabel": {
@@ -4408,19 +4395,6 @@
   "deckHeaderReadySemanticLabel": "Something is ready to study",
   "@deckHeaderReadySemanticLabel": {
     "description": "Spoken for the status dot beside the Library header count. The dot is only drawn when a level has new or due cards, and colour alone reaches neither a screen reader nor a reader who cannot separate this green from this grey."
-  },
-  "deckTileProgressLabel": "Progress",
-  "@deckTileProgressLabel": {
-    "description": "The left half of the deck tile gauge caption, opposite the percentage. A generic word on purpose: the figure beside it and the track below it both state the measurement, so a second statement of it here would be the duplication BR-88 removed from this card."
-  },
-  "deckTileLearnedPercentLabel": "{percent}% learned",
-  "@deckTileLearnedPercentLabel": {
-    "placeholders": {
-      "percent": {
-        "type": "int"
-      }
-    },
-    "description": "The tile gauge label, with the word so the number is not bare (\"21% learned\")."
   },
   "libraryActionsTitle": "Library actions",
   "@libraryActionsTitle": {

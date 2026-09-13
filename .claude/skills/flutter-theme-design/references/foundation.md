@@ -76,8 +76,9 @@ Hoặc `AppTextStyles`, nhưng feature không `.copyWith(fontSize: ...)`.
 
 **Đã ship (M99.66), theo nhánh `AppTextStyles`:** feature chọn rung rồi áp mực
 đóng — `texts.bodySmall!.inked(context, AppInk.quiet, isEmphasized:,
-isTabular:)` — hoặc vai đặt tên (`cardPrompt`, `sectionLabel`,
-`sectionLabelSmall`, `listHeading`, `stateChipLabel`, `heroNumeral`). Guard
+isTabular:)` — hoặc vai đặt tên (`cardPrompt`, `sectionLabel`, `listHeading`,
+`stateChipLabel`, `heroNumeral`; `sectionLabelSmall` gộp vào `sectionLabel` ở
+M100.91). Guard
 `no_text_restyle` cấm `texts.*.copyWith` lẫn đường vòng
 `withWeight(...).copyWith`; `withWeight` thuần (nhấn không đổi màu) vẫn hợp lệ.
 Tổ hợp nào hai API không nói được là một vai còn thiếu — thêm vào

@@ -186,7 +186,7 @@ class _ContextLine extends StatelessWidget {
       // rather than of whichever fragment a translator happened to shout, and
       // leaves the ARB holding words rather than styling.
       (extra == null ? base : '$base · $extra').toUpperCase(),
-      style: context.textStyles.sectionLabelSmall.inked(context, AppInk.quiet),
+      style: context.textStyles.sectionLabel.inked(context, AppInk.quiet),
       textAlign: TextAlign.center,
       maxLines: 2,
       overflow: TextOverflow.ellipsis,

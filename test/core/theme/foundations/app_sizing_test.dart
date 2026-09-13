@@ -33,6 +33,14 @@ void main() {
         // Not a control, and on the grid all the same: the rhythm is what
         // keeps a mark aligned with the text it sits beside.
         ('statusDot', AppSizing.statusDot),
+        // Painted marks too: the handoff IconTile's three extents.
+        ('iconTileSm', AppSizing.iconTileSm),
+        ('iconTileMd', AppSizing.iconTileMd),
+        ('iconTileLg', AppSizing.iconTileLg),
+        // Where a row divider starts past the leading column.
+        ('listDividerIndent', AppSizing.listDividerIndent),
+        // A painted mark: the handoff MasteryRing.
+        ('masteryRing', AppSizing.masteryRing),
       ]) {
         expect(
           value % 4,
@@ -43,13 +51,17 @@ void main() {
     });
 
     test(
-      'the reading row is above the touch floor, and the theme states it',
+      'the reading row sits on the touch floor, and the theme states it',
       () {
-        // 48 is a floor a finger needs; 56 is what a list the eye reads down
-        // wants (M100.36 4J). Owned here rather than left to Flutter's
-        // `_defaultTileHeight`, and put on the theme so every ListTile reads it.
-        expect(AppSizing.rowMinHeight, greaterThan(AppSizing.touchTarget));
-        expect(AppSizing.rowMinHeight, 56);
+        // The handoff ListRow: 48 MINIMUM, growing with its content (M100.91).
+        // It was 56 — Material's `_defaultTileHeight` — from M100.36 4J until
+        // the kit's list row replaced it. Owned here rather than left to
+        // Flutter, and put on the theme so every ListTile reads it.
+        expect(
+          AppSizing.rowMinHeight,
+          greaterThanOrEqualTo(AppSizing.touchTarget),
+        );
+        expect(AppSizing.rowMinHeight, 48);
         for (final build in <ThemeData Function()>[
           buildLightTheme,
           buildDarkTheme,
@@ -107,5 +119,15 @@ void main() {
         expect(style?.tapTargetSize, MaterialTapTargetSize.padded);
       });
     }
+  });
+
+  test('a row that leads with a tile puts its text on the divider indent', () {
+    // The handoff fixes the icon tile steps, the 16 gutter, the 12 grouped gap
+    // and the Divider indent (`0 / 56`); they agree only at the small tile
+    // (UI audit P2, M100.91). A step that moves alone fails here.
+    expect(
+      AppSpacing.lg + AppSizing.iconTileSm + AppSpacing.md,
+      AppSizing.listDividerIndent,
+    );
   });
 }

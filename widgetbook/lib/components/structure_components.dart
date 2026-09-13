@@ -4,6 +4,8 @@ import 'package:memox/shared/widgets/mx_async_view.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
 import 'package:memox/shared/widgets/mx_content_shell.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
+import 'package:memox/shared/widgets/mx_icon_tile.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/shared/widgets/mx_fab.dart';
 import 'package:memox/shared/widgets/mx_progress_bar.dart';
 import 'package:memox/shared/widgets/mx_search_field.dart';
@@ -350,6 +352,27 @@ WidgetbookComponent sheetInsetsComponent() {
             ),
           );
         },
+      ),
+    ],
+  );
+}
+
+WidgetbookComponent iconTileComponent() {
+  return WidgetbookComponent(
+    name: 'MxIconTile',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Sizes',
+        builder: (BuildContext context) => CatalogCenterPage(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: AppSpacing.lg,
+            children: <Widget>[
+              for (final size in MxIconTileSize.values)
+                MxIconTile(icon: Icons.folder_outlined, size: size),
+            ],
+          ),
+        ),
       ),
     ],
   );

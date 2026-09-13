@@ -307,12 +307,7 @@ class _PromptCard extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Center(
-            child: MxSectionLabel(
-              label: context.l10n.studyGuessOverline,
-              rung: MxSectionLabelRung.small,
-            ),
-          ),
+          Center(child: MxSectionLabel(label: context.l10n.studyGuessOverline)),
           const SizedBox(height: AppSpacing.md),
           Flexible(
             child: Text(

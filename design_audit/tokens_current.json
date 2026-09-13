@@ -510,6 +510,51 @@
       "lightnessStar": 49.12255922266553,
       "classifiedAs": "role-or-on-color"
     },
+    "semantic.mastery": {
+      "hex": "#1F8A5B",
+      "opaque": true,
+      "hue": 153.6448598130841,
+      "saturation": 0.6331360946745561,
+      "chroma": 0.41960784313725485,
+      "lightnessStar": 50.947781899677196,
+      "classifiedAs": "role-or-on-color"
+    },
+    "semantic.statusNew": {
+      "hex": "#8C95B8",
+      "opaque": true,
+      "hue": 227.72727272727272,
+      "saturation": 0.23655913978494614,
+      "chroma": 0.17254901960784308,
+      "lightnessStar": 62.1097332861561,
+      "classifiedAs": "role-or-on-color"
+    },
+    "semantic.statusLearning": {
+      "hex": "#F59E0B",
+      "opaque": true,
+      "hue": 37.69230769230769,
+      "saturation": 0.9212598425196851,
+      "chroma": 0.9176470588235295,
+      "lightnessStar": 72.15515233846723,
+      "classifiedAs": "role-or-on-color"
+    },
+    "semantic.statusReviewing": {
+      "hex": "#5265F5",
+      "opaque": true,
+      "hue": 233.00613496932516,
+      "saturation": 0.8907103825136613,
+      "chroma": 0.6392156862745098,
+      "lightnessStar": 49.12255922266553,
+      "classifiedAs": "role-or-on-color"
+    },
+    "semantic.statusMastered": {
+      "hex": "#1F8A5B",
+      "opaque": true,
+      "hue": 153.6448598130841,
+      "saturation": 0.6331360946745561,
+      "chroma": 0.41960784313725485,
+      "lightnessStar": 50.947781899677196,
+      "classifiedAs": "role-or-on-color"
+    },
     "semantic.accentInk": {
       "hex": "#425BE8",
       "opaque": true,
@@ -1287,6 +1332,51 @@
       "saturation": 0.9999999999999998,
       "chroma": 0.4549019607843138,
       "lightnessStar": 66.38229174538989,
+      "classifiedAs": "role-or-on-color"
+    },
+    "semantic.mastery": {
+      "hex": "#6FE0BD",
+      "opaque": true,
+      "hue": 161.41592920353983,
+      "saturation": 0.6457142857142857,
+      "chroma": 0.44313725490196076,
+      "lightnessStar": 82.03614961445832,
+      "classifiedAs": "role-or-on-color"
+    },
+    "semantic.statusNew": {
+      "hex": "#6B75A3",
+      "opaque": true,
+      "hue": 229.2857142857143,
+      "saturation": 0.23333333333333328,
+      "chroma": 0.21960784313725484,
+      "lightnessStar": 50.08835523496221,
+      "classifiedAs": "role-or-on-color"
+    },
+    "semantic.statusLearning": {
+      "hex": "#FFC658",
+      "opaque": true,
+      "hue": 39.52095808383233,
+      "saturation": 1.0000000000000002,
+      "chroma": 0.6549019607843137,
+      "lightnessStar": 83.10065408817445,
+      "classifiedAs": "role-or-on-color"
+    },
+    "semantic.statusReviewing": {
+      "hex": "#8B9AFF",
+      "opaque": true,
+      "hue": 232.24137931034483,
+      "saturation": 0.9999999999999998,
+      "chroma": 0.4549019607843138,
+      "lightnessStar": 66.38229174538989,
+      "classifiedAs": "role-or-on-color"
+    },
+    "semantic.statusMastered": {
+      "hex": "#6FE0BD",
+      "opaque": true,
+      "hue": 161.41592920353983,
+      "saturation": 0.6457142857142857,
+      "chroma": 0.44313725490196076,
+      "lightnessStar": 82.03614961445832,
       "classifiedAs": "role-or-on-color"
     },
     "semantic.accentInk": {

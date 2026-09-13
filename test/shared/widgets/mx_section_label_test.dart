@@ -43,16 +43,25 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('the three rungs resolve to the three heading styles', (
+  testWidgets('standard is the handoff overline, list is the ls-label heading', (
     tester,
   ) async {
-    for (final rung in MxSectionLabelRung.values) {
-      await pump(tester, MxSectionLabel(label: 'x', rung: rung));
-      final text = tester.widget<Text>(find.text('X'));
-      final styles = Theme.of(tester.element(find.text('X')));
-      expect(text.style, isNotNull, reason: '$rung');
-      expect(styles.textTheme, isNotNull);
-    }
+    // The handoff SectionHeader: the caption at 12/600, tracked 1.2 (M100.91).
+    // After D1 the old `small` rung resolved to the same metrics, so two names
+    // for one look were a distinction nobody could see; one rung remains.
+    await pump(tester, const MxSectionLabel(label: 'x'));
+    final overline = tester.widget<Text>(find.text('X')).style!;
+    expect(overline.fontSize, 12);
+    expect(overline.fontWeight, FontWeight.w600);
+    expect(overline.letterSpacing, 1.2);
+
+    await pump(
+      tester,
+      const MxSectionLabel(label: 'x', rung: MxSectionLabelRung.list),
+    );
+    final heading = tester.widget<Text>(find.text('X')).style!;
+    expect(heading.letterSpacing, 0.72);
+    expect(MxSectionLabelRung.values, hasLength(2));
   });
 
   testWidgets('a locale without case is the identity', (tester) async {

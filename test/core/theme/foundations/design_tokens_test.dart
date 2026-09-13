@@ -116,6 +116,8 @@ void main() {
       expect(AppStroke.hairline, 1);
       expect(AppStroke.control, 1.5);
       expect(AppStroke.focus, 2);
+      // The handoff MasteryRing's arc (`40×3px`, M100.91).
+      expect(AppStroke.ring, 3);
     });
   });
 
@@ -125,6 +127,38 @@ void main() {
     // the ceiling on motion, so parking a 500ms interaction delay there would
     // say the app may animate for half a second.
     expect(kTooltipWaitDuration, greaterThan(AppDurations.slow));
+  });
+
+  /// The appearance words a colour token may not be named after.
+  const physicalWords = <String>{
+    'red',
+    'green',
+    'blue',
+    'yellow',
+    'orange',
+    'purple',
+    'grey',
+    'gray',
+  };
+
+  /// Whether [name] carries an appearance word **as a word**.
+  ///
+  /// By camelCase word, not by substring (M100.91): `statusMasteredLight`
+  /// contains `red` inside `Mastered`, and a substring check called a meaning
+  /// name an appearance name — the same would happen to any `Registered`,
+  /// `Deferred` or `Covered`.
+  bool isAppearanceName(String name) => RegExp(r'[A-Z]?[a-z]+|[A-Z]+|\d+')
+      .allMatches(name)
+      .map((Match m) => m.group(0)!.toLowerCase())
+      .any(physicalWords.contains);
+
+  test('the appearance check reads words, not substrings', () {
+    // Probes, so the rule cannot pass by matching nothing.
+    expect(isAppearanceName('successGreenLight'), isTrue);
+    expect(isAppearanceName('redLight'), isTrue);
+    expect(isAppearanceName('onGreyContainer'), isTrue);
+    expect(isAppearanceName('statusMasteredLight'), isFalse);
+    expect(isAppearanceName('borderedSurfaceDark'), isFalse);
   });
 
   test('colour tokens are named for meaning, not appearance', () {
@@ -139,22 +173,11 @@ void main() {
 
     expect(declarations, isNotEmpty);
     for (final name in declarations) {
-      for (final physical in <String>[
-        'red',
-        'green',
-        'blue',
-        'yellow',
-        'orange',
-        'purple',
-        'grey',
-        'gray',
-      ]) {
-        expect(
-          name.toLowerCase(),
-          isNot(contains(physical)),
-          reason: '$name is named after its appearance',
-        );
-      }
+      expect(
+        isAppearanceName(name),
+        isFalse,
+        reason: '$name is named after its appearance',
+      );
     }
   });
 

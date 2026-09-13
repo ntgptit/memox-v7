@@ -54,7 +54,8 @@ abstract final class AppSizing {
   static const double iconButtonInk = 36;
 
   /// The dense tier — a chip's content box, the compact breadcrumb line, the
-  /// 32 dp icon well beside a metric or a catalog row.
+  /// 32 dp icon well beside a metric. The catalog row led with one too until
+  /// it took the handoff's `MxIconTile` (M100.91).
   ///
   /// **One owner for a number that had five spellings** (A20.1 P2-12):
   /// `app_chip_theme._containerHeight`, `MxBreadcrumb.compactLineHeight`,
@@ -68,17 +69,25 @@ abstract final class AppSizing {
   /// The scrollbar's thumb — Material's own 4, stated (A20.1 P3-09).
   static const double scrollbarThickness = 4;
 
-  /// The one-line reading or control row — `ListTile`'s own 56, stated.
+  /// The handoff's list row: 48 MINIMUM, grows with content. Text is never
+  /// clipped to hold it.
   ///
-  /// **A row is not a button** (M100.36 4J). [touchTarget] is the floor a
-  /// finger needs; a list the eye reads down wants more than the floor, and
-  /// Material's `_defaultTileHeight` gives it 56 for one line, 72 for two.
-  /// The number was Flutter's and nobody's here (#431 P2-1) — the kit says 48
-  /// for a desktop tile, and the app had been rendering 56 + 4 + 4 without a
-  /// token to say so. A *minimum*: a two-line row grows past it, and text is
-  /// never clipped to hold it. Compact mode keeps it; 48 is reserved for
-  /// controls that are only a target.
-  static const double rowMinHeight = 56;
+  /// **It was 56 until M100.91** — Material's `_defaultTileHeight`, stated at
+  /// M100.36 4J on the argument that a list the eye reads down wants more than
+  /// a finger's floor. The Tokyo handoff's ListRow and SettingsTile set the
+  /// row at the touch floor and let content grow it, and the redesign follows
+  /// the kit. A two-line row still grows past it.
+  static const double rowMinHeight = 48;
+
+  /// Where a row divider starts when the rows lead with a tile (handoff
+  /// Divider `indent 0 / 56`): past the leading column, under the text. It is
+  /// under the text only because `lg` + [iconTileSm] + `md` add up to it —
+  /// the sum `app_sizing_test` pins (UI audit P2, M100.91).
+  static const double listDividerIndent = 56;
+
+  /// Handoff MasteryRing extent (`40×3px`). A painted mark, not a control: the
+  /// row it sits in carries the target, so no 48 floor applies.
+  static const double masteryRing = 40;
 
   /// The handoff's extended FAB height (`size-fab`). Width is content-driven.
   ///
@@ -111,4 +120,10 @@ abstract final class AppSizing {
   /// ladder asks for, and `app_sizing_test` holds it to the 4dp grid with the
   /// rest.
   static const double statusDot = 8;
+
+  /// Handoff IconTile extents — a row's tinted leading square. Painted marks,
+  /// not controls: the row carries the target, so no 48 floor applies.
+  static const double iconTileSm = 28;
+  static const double iconTileMd = 36;
+  static const double iconTileLg = 44;
 }

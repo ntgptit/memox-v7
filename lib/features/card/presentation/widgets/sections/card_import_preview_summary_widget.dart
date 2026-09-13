@@ -69,10 +69,7 @@ class CardImportPreviewSummaryWidget extends ConsumerWidget {
           crossAxisAlignment: WrapCrossAlignment.end,
           spacing: AppSpacing.sm,
           children: <Widget>[
-            MxSectionLabel(
-              label: l10n.cardImportRowsHeading,
-              rung: MxSectionLabelRung.small,
-            ),
+            MxSectionLabel(label: l10n.cardImportRowsHeading),
             Text(
               l10n.cardImportPreviewReadyOfTotal(importable, preview.totalRows),
               style: context.texts.bodySmall!.inked(context, AppInk.quiet),
