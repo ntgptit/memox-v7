@@ -701,6 +701,13 @@ không nhầm chúng là một phase.
     sách độ sâu"). FAB giờ để elevation Material `none` và `MxFab` vẽ
     `shadow-fab` ở mức `AppElevation.overlay`, nên pin tách riêng; wash của FAB
     theo `onPrimary`. `design_audit` đếm thêm hai site `opacity-modified-token`.
+  - PLAN-DEV-8.4 — lượt author golden trên Linux đỏ 12 test `visual_audit`
+    (Card List `idle` ×2, Deck List ×10 state có FAB): `PASS_WITH_UNRESOLVED`
+    vì `_RenderChildOverflowBox` — hộp hàng của FAB extended — không có trong
+    danh sách render object không tự vẽ. Suite host loại tag `golden` nên không
+    thấy. Nó chỉ override intrinsics, `computeDryLayout` và `performLayout`
+    (SDK 3.44.8), nên được thêm vào `_privateAndTransparent` của
+    `render_classification.dart`; không nới allowance nào.
 - **Audit notes:**
   - UI P1 (FAB chỉ có wash focus, `onPrimary` 10% trên `primary` đo 1.18–1.19:1)
     đã có trả lời trong `tokyo-component-mapping.md` §8: FAB là ngoại lệ wash-only
