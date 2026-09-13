@@ -745,8 +745,11 @@ không nhầm chúng là một phase.
   (UI). P3 để lại có lý do: thứ tự semantics của range pills sau `Row` → `Wrap`
   vẫn trái sang phải khi một dòng, kiểm lại khi phase sau sửa selector; sàn
   contrast nhãn khi nhấn không có trần là mẫu kế thừa từ M100.87. Integration
-  trên `emulator-5554` ở `c7ee5103`: 9 pass, 0 fail. Clean stop của UI còn chờ
-  soi PNG sau P4/P5.
+  trên `emulator-5554` ở `c7ee5103`: 9 pass, 0 fail. Vòng UI trên golden đã
+  author (`f9447b22`) mở một P1: specimen IPA vẽ ô lỗi — sửa theo PLAN-DEV-2.11
+  (`81164f2e`, `5c75ab1c`); integration 9 pass, 0 fail lại ở `81164f2e`, có
+  probe IPA; re-audit UI trên `5c75ab1c` CLEAN_STOP. Golden compare Linux trên
+  `5c75ab1c`: 8/8 lát, 0 PNG bẩn. Gallery `ảnh b8e267a1`.
 - **Editable documents:** `docs/wbs.md`,
   `docs/design-system/tokyo-component-mapping.md`,
   `docs/wireframes/m99-23-progress-overview.md` (X7),

@@ -3606,7 +3606,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_content_shell.dart",
-      "line": 424,
+      "line": 425,
       "widget_context": "MxSubheaderBand",
       "element_kind": "border",
       "source_kind": "theme-token",
