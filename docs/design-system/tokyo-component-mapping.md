@@ -7,8 +7,8 @@
 | **Scope** | `lib/core/theme/components/**`. Ngoài phạm vi: giá trị token (AD-14), layering của `lib/core/theme/` (`theme-architecture.md`), API của `Mx*` widget |
 | **Source of truth for** | Ma trận component → canonical M3 role · ma trận dịch ý đồ Tokyo → MemoX · hồ sơ các sai lệch role đã sửa và mô hình bề mặt |
 | **Depends on** | `document-conventions.md` · `architecture.md` (AD-14) · `design-system/theme-architecture.md` |
-| **Updated by task** | M100.36 |
-| **Last updated** | 2026-09-03 |
+| **Updated by task** | M100.36 (FilledTonalButton row corrected ad-hoc — xem [`tonal-button-spec.md`](tonal-button-spec.md)) |
+| **Last updated** | 2026-09-13 |
 
 ---
 
@@ -44,7 +44,7 @@ canonical M3 role  >  accessibility  >  MemoX structural system  >  Tokyo exact 
 | FilledButton | foreground | `onPrimary` (disabled: `onSurface`) | = | disabled dùng `semantic.onDisabled` |
 | FilledButton | overlay | `onPrimary` @ .08/.10/.10 | = | qua `MxFilledPair.stateLayerOf`; guard AST (M100.36). Trước đó là blend về `onSurface` **cộng** overlay `primary` — xem §6 |
 | FilledButton (destructive) | background / foreground / overlay | `error` / `onError` / `onError` | = | `MxFilledPair.destructive`; guard AST cả ba slot |
-| FilledTonalButton | — | `secondaryContainer` / `onSecondaryContainer` | **không dựng** | `MxActionButtonVariant.tonal` gỡ ở M100.36: 0 caller từ #384, và hệ thứ bậc chấm điểm (§4B) chốt bằng `secondary` |
+| FilledTonalButton | — | `secondaryContainer` / `onSecondaryContainer` | = | `MxActionButtonVariant.tonal` gỡ ở M100.36 (0 caller từ #384, hệ thứ bậc §4B chốt bằng `secondary`), **re-admit ở M100.73** qua `v1-freeze.md` §3 điều kiện 6 (Library deck row cần trọng lượng thứ ba, không phải màu thứ ba); caller đầu ở M100.74 (`deck_study_button_widget.dart`). Chi tiết: [`tonal-button-spec.md`](tonal-button-spec.md) |
 | OutlinedButton | foreground | `primary` | = | guard AST |
 | OutlinedButton | side | `outline`, focus → `primary` | = | guard AST |
 | TextButton | foreground | `primary` | = | guard AST |

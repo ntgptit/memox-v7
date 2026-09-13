@@ -94,11 +94,15 @@ ButtonStyle buildSharedButtonStyle(
 /// below at source level, so a swap to a role that happens to share a hex
 /// still fails.
 ///
-/// **`tonal` left at M100.36.** It had no production caller since #384 took
-/// Card Detail's Edit back to an icon, and the study grading hierarchy (4B)
-/// was settled with `secondary` for the lower-emphasis grades. A variant kept
-/// for a use it might someday have is exactly what a closed API is for
-/// refusing.
+/// **`tonal` was removed at M100.36 and re-admitted at M100.73.** Between the
+/// two it had no production caller since #384 took Card Detail's Edit back to
+/// an icon, and the study grading hierarchy (4B) was settled with `secondary`
+/// for the lower-emphasis grades — a variant kept for a use it might someday
+/// have is exactly what a closed API is for refusing. M100.73 reopened
+/// `v1-freeze.md` §3 condition 6 for an owner-specified visual change (the
+/// Library deck row's Study verb needed a third weight, not a third colour —
+/// see [tonal]'s own doc comment); M100.74 gave it its first caller,
+/// `deck_study_button_widget.dart`.
 enum MxFilledPair {
   /// `primary` / `onPrimary` — `_FilledButtonDefaultsM3`'s own pair, and the
   /// screen's one call to action.
