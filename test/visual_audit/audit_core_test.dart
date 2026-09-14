@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
 
 import 'audit_model.dart';
+import 'audit_rules.dart';
 import 'screen_auditor.dart';
 
 /// Proves the harness measures what it claims to, on colours chosen so the
@@ -165,6 +166,50 @@ void main() {
   });
 
   group('raster', () {
+    testWidgets('reads the ground around a glyph that fills its own box', (
+      tester,
+    ) async {
+      // A filled glyph on a pill painted into the Material ink layer: no render
+      // object carries the pill, and the glyph covers most of its own box, so
+      // the band around the glyph is the only witness of its ground. Without
+      // that band the rule falls back to the white Material behind the pill
+      // and reports white on white (M100.93, the navigation bar's pill).
+      const pill = Color(0xFF283593);
+      final audit = await pump(
+        tester,
+        Material(
+          color: white,
+          child: Center(
+            child: Ink(
+              width: 64,
+              height: 32,
+              decoration: const ShapeDecoration(
+                color: pill,
+                shape: StadiumBorder(),
+              ),
+              child: const Center(
+                child: Icon(Icons.square, size: 24, color: white),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final grounds = audit.allPaints.where(
+        (paint) =>
+            paint.source == PaintSource.raster &&
+            paint.origin.startsWith('raster ring'),
+      );
+      expect(grounds.map((paint) => paint.color), contains(pill));
+      expect(
+        runAuditRules(audit, const <AuditRule>[
+          TextContrastRule(),
+        ]).where((finding) => finding.isBlocking),
+        isEmpty,
+        reason: 'the white glyph was judged against white, not its pill',
+      );
+    });
+
     testWidgets('sees an ink overlay that exists in no render object', (
       tester,
     ) async {

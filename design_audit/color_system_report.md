@@ -27,8 +27,8 @@ guess.
 | kind | sites |
 |---|---|
 | other | 311 |
-| background | 26 |
-| border | 9 |
+| background | 27 |
+| border | 8 |
 | shadow | 1 |
 | text | 1 |
 

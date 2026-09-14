@@ -160,6 +160,20 @@ void main() {
     });
   });
 
+  group('shadow-chrome (M100.93)', () {
+    test('chrome is the handoff shadow-chrome, pointing up', () {
+      final lightChrome = chromeShadowsFor(light).single;
+      expect(lightChrome.offset, const Offset(0, -2));
+      expect(lightChrome.blurRadius, 12);
+      expect(lightChrome.color.a, closeTo(0.05, 0.002));
+
+      final darkChrome = chromeShadowsFor(dark).single;
+      expect(darkChrome.offset, const Offset(0, -2));
+      expect(darkChrome.blurRadius, 14);
+      expect(darkChrome.color.a, closeTo(0.36, 0.002));
+    });
+  });
+
   group('the shadow itself', () {
     test('gets its colour from the theme, never from a literal', () {
       // Both layers, because "the shadow is the token" stops being true the

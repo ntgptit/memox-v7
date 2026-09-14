@@ -88,10 +88,10 @@ canonical M3 role  >  accessibility  >  MemoX structural system  >  Tokyo exact 
 
 | Component | Slot | M3 canonical | MemoX | Ghi chú |
 |---|---|---|---|---|
-| NavigationBar | background | `surfaceContainer` | = | guard AST |
-| NavigationBar | indicator | `secondaryContainer` | = | guard AST |
-| NavigationBar | iconTheme | `onSecondaryContainer` / `onSurfaceVariant` | = | guard AST |
-| NavigationBar | labelTextStyle | `onSurface` / `onSurfaceVariant` | = | guard AST |
+| NavigationBar | background | `surface` (D7) + `shadow-chrome` | = | guard AST |
+| NavigationBar | indicator | `primary` (owner decision 4) | = | guard AST |
+| NavigationBar | iconTheme | `onPrimary` / `onSurfaceVariant` | = | guard AST |
+| NavigationBar | labelTextStyle | `accentInk` / `onSurfaceVariant` | = | guard AST |
 | TabBar | labelColor | `primary` | `semantic.accentInk` | M100.87, label là chữ; indicator giữ `primary`; guard AST (`requiresSemantic`) |
 | TabBar | indicatorColor | `primary` | = | guard AST |
 | AppBar | background | `surface` | = | `surface` *là* nền trang từ M100.32; guard AST |

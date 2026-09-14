@@ -7,7 +7,7 @@
 | **Scope** | Task đang mở · blocker · technical debt · quyết định descope/superseded. Ngoài phạm vi: entry đã `done` — chúng ở `wbs-archive/`, vẫn trong đồ thị dependency qua `_wbs_ledgers()` |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M100.92 |
+| **Updated by task** | M100.93 |
 | **Last updated** | 2026-09-14 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -653,6 +653,103 @@ migrate ở context thứ hai chứ không clean lại.
 Task do chủ dự án giao trực tiếp, không thuộc chuỗi phụ thuộc M0…M9. Đánh số từ
 99 để chúng không bao giờ tranh ID với một milestone thật, và để đọc bảng tiến độ
 không nhầm chúng là một phase.
+
+### M100.93 · Chrome và overlay theo handoff: nav bar, breadcrumb, dialog, sheet, callout, state, skeleton, avatar
+
+- **Status:** in-progress
+- **Owner:** Claude
+- **Goal:** Chrome và overlay theo handoff: nav bar pill `primary` + shadow-chrome,
+  breadcrumb chevron, scrim 45%, dialog radius 20, sheet, callout và offline
+  banner, empty/error state trên card, `MxSkeleton` và `MxAvatar` dựng sẵn —
+  Phase 5 của
+  `docs/superpowers/plans/2026-09-13-tokyo-handoff-redesign.md`.
+- **Nhánh / PR:** `claude/tokyo-redesign-phase-5`
+- **Scope:**
+  - Task 21 — nav bar: nền `surface` (D7), indicator `primary`, glyph chọn
+    `onPrimary`, nhãn chọn `accentInk`; `shadow-chrome` thay hairline trên.
+  - Task 22 — breadcrumb: chevron 16 giữa các bước, bước hiện tại đậm.
+  - Task 23 — scrim 45%, dialog radius 20, rộng 320/340, scale-in.
+  - Task 24 — bottom sheet: `surfaceContainerHigh`, góc trên 20, grabber
+    36×4, trần 85%.
+  - Task 25 — callout theo tone và offline banner.
+  - Task 26 — empty/error state trên card có tile tint.
+  - Task 27 — `MxSkeleton`, `MxAvatar` (owner decision 10).
+- **Out of scope:** study widgets và data viz (Phase 6).
+- **Plan deviations:**
+  - PLAN-DEV-21.1 — plan dời 4 binding và 4 pin NavigationBar trong
+    `m3_role_contract_test`. Test mục tiêu (`test/core/theme`, `test/shared`,
+    `test/app`) ra `+1795 -4`; bốn test còn lại ghim hợp đồng cũ mà plan không
+    nêu:
+    - `m3_combined_state_test` (light, dark): glyph chọn là
+      `onSecondaryContainer` → `onPrimary`; nhãn chọn là `onSurface` →
+      `accentInk`;
+    - `m3_role_contract_test` "the selected state is not one ink": cùng hai
+      role đó. Kết quả vẫn là ba role khác nhau (chip `onPrimaryContainer`,
+      glyph `onPrimary`, nhãn `accentInk`);
+    - `app_unrendered_component_themes_test`: segment chọn của
+      `SegmentedButton` thô từng phải trùng `indicatorColor` của nav bar,
+      vì cả hai là `secondaryContainer`. Nav bar giờ là `primary` (owner
+      decision 4); plan Task 20 giữ nguyên theme `SegmentedButton` vì không
+      có gì render nó. Test giờ ghim role riêng của segment
+      (`secondaryContainer`) và giữ kiểm tra contrast.
+
+    Test đỏ đúng lý do trước khi sửa: compile lỗi `chromeShadowsFor`.
+  - PLAN-DEV-21.2 — plan Task 21 không chạy screen audit. Chạy thì 18 case
+    (`deck_list_screen` 16, `starter_library_screen` 2) báo blocking
+    `contrast.text [navigation_bar] #FFFFFF on #F7F9FE is 1.05:1`.
+
+    Đây không phải lỗi contrast thật, mà là điểm mù của harness:
+    - pill của `NavigationIndicator` là `Ink(ShapeDecoration)`, vẽ vào lớp ink
+      của `Material` và không có render object;
+    - glyph chọn đặc (`onPrimary`) phủ gần hết hộp 24 của nó, nên mẫu raster
+      trong hộp trùng màu glyph;
+    - `TextContrastRule` vì vậy rơi về fill khai báo nhỏ nhất, là `surface` của
+      thanh.
+
+    Trước M100.93, glyph `onSecondaryContainer` tối vẫn đủ contrast với
+    `surface`, nên audit chưa bao giờ đo glyph trên pill.
+
+    Đã loại hai hướng:
+    - đọc `debugInkFeatures`: phải gọi động (`avoid_dynamic_calls: error`), và
+      `RawChip` cũng tô nền bằng `Ink`, nên sẽ kéo lệch mọi allowance chip;
+    - lấy màu thứ hai trong hộp: `sample` lùi vào 4, và lõi 16×16 của glyph
+      đặc gần như chỉ có màu glyph.
+
+    Đã sửa: `RasterCapture.ringAround` đọc dải 2 ngay ngoài hộp chữ, và
+    `crossCheckAgainstRaster` chỉ dùng dải này khi mẫu trong hộp không dùng
+    được (trùng màu glyph hoặc phủ dưới 50%). Test mới trong
+    `audit_core_test.dart`: glyph trắng đặc trên pill `Ink` phải đo ra nền là
+    pill, và không có blocking. Fault-inject (bỏ `ringAround`) thì test đó
+    đỏ; trả lại thì xanh. Hai audit shell từ `-18` về `+18`.
+- **Editable documents:** `docs/wbs.md`,
+  `docs/design-system/tokyo-component-mapping.md`,
+  `docs/superpowers/plans/2026-09-13-tokyo-handoff-redesign.md` (ghi deviation
+  mà task sau đọc).
+- **Output:** `lib/core/theme/foundations/app_elevation.dart`,
+  `lib/core/theme/components/navigation/`, `lib/core/theme/components/surfaces/`,
+  `lib/shared/widgets/` (nav bar, breadcrumb, dialog, sheet, callout, state,
+  skeleton, avatar), test và golden đi kèm.
+- **Acceptance criteria:**
+  - [ ] Nav bar nền `surface`, pill `primary`, glyph chọn `onPrimary`, nhãn
+    chọn `accentInk`, `shadow-chrome` thay hairline; binding và contract dời
+    cùng commit.
+  - [ ] Breadcrumb dùng chevron 16, bước hiện tại đậm.
+  - [ ] Scrim 45%, dialog radius 20, rộng 320/340, scale-in, reduced motion.
+  - [ ] Bottom sheet `surfaceContainerHigh`, góc trên 20, grabber 36×4, trần
+    85% và cuộn bên trong.
+  - [ ] Callout theo tone, offline banner; empty/error state trên card có
+    tile tint.
+  - [ ] `MxSkeleton` và `MxAvatar` có test và Widgetbook.
+  - [ ] `flutter analyze` 0/0 repo-wide; full host suite green; guard 0
+    findings; integration 9/0.
+  - [ ] Goldens re-authored on Linux, `TZ=UTC`; gallery republished at the
+    pinned URL.
+- **Dependencies:** M100.92
+- **Tests required:** `app_elevation_test.dart`, `mx_navigation_bar_test.dart`,
+  `m3_role_contract_test.dart`, `m3_role_binding_guard_test.dart`,
+  `mx_breadcrumb_test.dart`, test dialog/sheet/callout/state/skeleton/avatar
+  theo plan Task 23–27, screen audit, integration suite.
+- **Checklist phases:** 7, 12, 13
 
 ### M99.29 · Daily Reminders v1
 

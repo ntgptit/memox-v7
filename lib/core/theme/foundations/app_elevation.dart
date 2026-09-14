@@ -92,6 +92,15 @@ List<BoxShadow> _darkDepth(double level, ColorScheme scheme) {
   return <BoxShadow>[rim, drop.paint(scheme.shadow, isDark: true)];
 }
 
+/// The handoff's `shadow-chrome`, for pinned chrome. Not a level on
+/// [AppElevation]: it points up, and nothing stacks on it.
+List<BoxShadow> chromeShadowsFor(ColorScheme scheme) => <BoxShadow>[
+  _Shadow.chrome.paint(
+    scheme.shadow,
+    isDark: scheme.brightness == Brightness.dark,
+  ),
+];
+
 /// The handoff's named shadows, as geometry and alpha per mode.
 enum _Shadow {
   /// `shadow-soft` — the Card spec's list card. Light only; dark has a rim.
@@ -122,6 +131,16 @@ enum _Shadow {
     darkY: 10,
     darkBlur: 28,
     darkAlpha: 0.5,
+  ),
+
+  /// `shadow-chrome` — pinned chrome (the bottom navigation) over content.
+  chrome(
+    lightY: -2,
+    lightBlur: 12,
+    lightAlpha: 0.05,
+    darkY: -2,
+    darkBlur: 14,
+    darkAlpha: 0.36,
   );
 
   const _Shadow({

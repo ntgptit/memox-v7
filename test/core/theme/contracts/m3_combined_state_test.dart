@@ -278,17 +278,20 @@ void main() {
       final bar = theme.navigationBarTheme;
 
       test('the active glyph and label keep their own roles under focus', () {
+        // The handoff bar since M100.93: the glyph sits in the `primary` pill
+        // and takes `onPrimary`; the label sits on the bar in the brand's text
+        // ink (owner decisions 2 and 4).
         holds(
           'icon',
           (s) => bar.iconTheme!.resolve(s)?.color,
           <Set<WidgetState>>[selected, selectedFocused],
-          scheme.onSecondaryContainer,
+          scheme.onPrimary,
         );
         holds(
           'label',
           (s) => bar.labelTextStyle!.resolve(s)?.color,
           <Set<WidgetState>>[selected, selectedFocused],
-          scheme.onSurface,
+          theme.extension<AppSemanticColors>()!.accentInk,
         );
       });
     });

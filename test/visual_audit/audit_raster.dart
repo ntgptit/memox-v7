@@ -97,8 +97,32 @@ class RasterCapture {
   /// exactly the token we meant*.
   ///
   /// [inset] pulls the sample away from the edges so a border does not vote.
-  RegionSample? sample(Rect global, {double inset = 4}) {
-    final counts = _histogram(global, inset);
+  RegionSample? sample(Rect global, {double inset = 4}) =>
+      _sampleOf(_histogram(global, inset));
+
+  /// The most common exact colour in the band just outside [global].
+  ///
+  /// What a glyph sits on when the glyph fills its own box. A filled icon in a
+  /// 32-tall pill covers most of its 24-tall box, so every pixel inside votes
+  /// for the glyph, and the pill — painted into the `Material` ink layer, with
+  /// no render object — is visible only around it. [width] stays narrow so the
+  /// band lands on the ground the glyph was drawn on, not on the surface
+  /// around that ground.
+  RegionSample? ringAround(Rect global, {double width = 2}) {
+    final band = _histogram(global.inflate(width), 0);
+    _histogram(global, 0).forEach((value, count) {
+      final left = (band[value] ?? 0) - count;
+      if (left > 0) {
+        band[value] = left;
+        return;
+      }
+      band.remove(value);
+    });
+
+    return _sampleOf(band);
+  }
+
+  RegionSample? _sampleOf(Map<int, int> counts) {
     if (counts.isEmpty) return null;
 
     var bestValue = 0;

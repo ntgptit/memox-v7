@@ -79,11 +79,14 @@ void main() {
   });
 
   group('segmented button', () {
-    test('the active segment wears the app selected pair, not M3 own', () {
-      // M3 uses `secondaryContainer` / `onSecondaryContainer`. The owner's
-      // review moved this app's active state to the brand container, and the
-      // navigation bar already renders it — a third answer here would make one
-      // question look different on three screens.
+    test('the active segment keeps its own selected role', () {
+      // **Until M100.93 this required the active segment to match the
+      // navigation indicator**, because both answered "selected" with
+      // `secondaryContainer`. The handoff bar moved its pill to `primary`
+      // (owner decision 4), while the raw `SegmentedButton` theme stays as it
+      // was — nothing renders it, and the handoff's segmented control is
+      // `MxSegmentedControl` (plan Task 20). So the segment pins its own role
+      // rather than borrowing a pill it no longer shares.
       for (final entry in themes.entries) {
         final t = entry.value;
         const on = <WidgetState>{WidgetState.selected};
@@ -91,8 +94,8 @@ void main() {
 
         expect(
           style.backgroundColor!.resolve(on),
-          t.navigationBarTheme.indicatorColor,
-          reason: '${entry.key}: the active segment left the house pair',
+          t.colorScheme.secondaryContainer,
+          reason: '${entry.key}: the active segment left its selected role',
         );
         expect(
           contrast(

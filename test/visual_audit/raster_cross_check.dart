@@ -52,6 +52,43 @@ void crossCheckAgainstRaster(AuditSink sink, RasterCapture raster) {
     );
   });
 
+  // **A glyph that fills its own box has no ground inside that box.** The
+  // sample above is taken inside the text's rect: for a filled icon the
+  // dominant colour is the glyph itself, and the rule behind it then falls back
+  // to the smallest *declared* fill — which misses anything painted into a
+  // `Material` ink layer, such as the navigation bar's selected pill (M100.93).
+  // Only then, the band just outside the glyph is read; a text rect whose own
+  // sample already names a ground keeps it.
+  final texts = sink.paints
+      .where(
+        (paint) =>
+            paint.role == PaintRole.text &&
+            paint.source == PaintSource.declared,
+      )
+      .toList();
+  for (final text in texts) {
+    final inside = measured[text.rect];
+    final isInsideUsable =
+        inside != null &&
+        inside.coverage >= usableAsBackground &&
+        inside.dominant.toARGB32() != text.color.toARGB32();
+    if (isInsideUsable) continue;
+
+    final ring = raster.ringAround(text.rect);
+    if (ring == null || ring.coverage < usableAsBackground) continue;
+    if (ring.dominant.toARGB32() == text.color.toARGB32()) continue;
+
+    sink.add(
+      AuditPaint(
+        role: PaintRole.fill,
+        color: ring.dominant,
+        rect: text.rect,
+        source: PaintSource.raster,
+        origin: 'raster ring ${(ring.coverage * 100).toStringAsFixed(0)}%',
+      ),
+    );
+  }
+
   for (final declared in declaredFills) {
     final sample = measured[declared.rect];
     if (sample == null) continue;

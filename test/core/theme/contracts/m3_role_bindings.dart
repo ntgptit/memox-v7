@@ -109,45 +109,45 @@ const List<RoleBinding> roleBindings = <RoleBinding>[
     slot: 'backgroundColor',
     file: _nav,
     scope: 'buildNavigationBarTheme',
-    requires: <String>['surfaceContainer'],
-    refuses: <String>['surface', 'surfaceContainerHigh'],
+    requires: <String>['surface'],
+    refuses: <String>['surfaceContainer', 'surfaceContainerHigh'],
     because:
-        '_NavigationBarDefaultsM3.backgroundColor is surfaceContainer; the '
-        'bar took the page colour until M100.22.',
+        'The handoff bar is solid surface, its own fallback for glass chrome '
+        '(D7), parted from content by shadow-chrome (owner decision 4).',
   ),
   RoleBinding(
     component: 'NavigationBar',
     slot: 'indicatorColor',
     file: _nav,
     scope: 'buildNavigationBarTheme',
-    requires: <String>['secondaryContainer'],
-    refuses: <String>['primaryContainer'],
+    requires: <String>['primary'],
+    refuses: <String>['secondaryContainer', 'primaryContainer'],
     because:
-        '_NavigationBarDefaultsM3.indicatorColor is secondaryContainer. If '
-        'the indicator does not read against the bar, move the tone in '
-        'AppMaterialRoles — not this binding.',
+        'The kit pill is primary; owner decision 4 lets the kit beat the '
+        'canonical secondaryContainer.',
   ),
   RoleBinding(
     component: 'NavigationBar',
     slot: 'iconTheme',
     file: _nav,
     scope: 'buildNavigationBarTheme',
-    requires: <String>['onSecondaryContainer', 'onSurfaceVariant'],
-    refuses: <String>['onPrimaryContainer'],
+    requires: <String>['onPrimary', 'onSurfaceVariant'],
+    refuses: <String>['onSecondaryContainer'],
     because:
-        'The active glyph sits inside the indicator and takes its `on` '
-        'role.',
+        'The active glyph sits inside the primary pill and takes its `on` '
+        'role (owner decision 4).',
   ),
   RoleBinding(
     component: 'NavigationBar',
     slot: 'labelTextStyle',
     file: _nav,
     scope: 'buildNavigationBarTheme',
-    requires: <String>['onSurface', 'onSurfaceVariant'],
-    refuses: <String>['onPrimaryContainer', 'onSecondaryContainer'],
+    requires: <String>['onSurfaceVariant'],
+    requiresSemantic: <String>['accentInk'],
+    refuses: <String>['onSecondaryContainer', 'onSurface'],
     because:
-        'The active label sits *below* the indicator, on the bar, so M3 '
-        'inks it onSurface rather than with the pill.',
+        'The active label sits below the pill, on the bar, and the kit inks '
+        'it with the brand: as text, accentInk (owner decisions 2 and 4).',
   ),
   RoleBinding(
     component: 'ChoiceChip',

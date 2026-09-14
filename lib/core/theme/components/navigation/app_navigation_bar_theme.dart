@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../foundations/app_elevation.dart';
+import '../../foundations/app_semantic_colors.dart';
 
 /// The bottom bar's whole appearance.
 ///
@@ -10,55 +11,34 @@ import '../../foundations/app_elevation.dart';
 /// 400-line guard.
 NavigationBarThemeData buildNavigationBarTheme(
   ColorScheme scheme,
+  AppSemanticColors semantic,
   TextTheme texts,
 ) => NavigationBarThemeData(
-  // `surfaceContainer`, which is `_NavigationBarDefaultsM3.backgroundColor`.
-  // It took the page colour before M100.22 — passed in as a `background`
-  // parameter, so the bar was the one surface in the app whose role could not
-  // be read off the theme. A bar painted the same colour as the page behind it
-  // is not a bar; the ladder has a rung for exactly this and it is this one.
-  backgroundColor: scheme.surfaceContainer,
-  // `secondaryContainer` — M3's indicator role, restored at M100.22.
-  //
-  // It was `primaryContainer` from the owner mockup of 2026-08-20, on the
-  // argument that the active tab should wear the brand. The argument was
-  // sound and the fix was in the wrong layer: `secondaryContainer` was too
-  // near the bar to read (4.22 L\* of step), so the component changed role
-  // instead of the role changing tone. M100.22 moved the tone —
-  // `AppMaterialRoles.secondaryContainerLight` carries the table — and the
-  // indicator now steps 7.33 L\* off the bar in light and 7.99 in dark,
-  // against the 7.16 the brand container gave.
-  indicatorColor: scheme.secondaryContainer,
+  // Solid `surface` — the handoff's own fallback for its glass chrome (D7).
+  // The bar parts from content with `shadow-chrome` (`MxNavigationBar`), not
+  // with a tier of its own.
+  backgroundColor: scheme.surface,
+  // **`primary`, the kit's pill, over M3's `secondaryContainer`** (owner
+  // decision 4: kit beats the canonical role). The glyph inside it takes the
+  // pill's `on` role.
+  indicatorColor: scheme.primary,
   iconTheme: WidgetStateProperty.resolveWith(
     (Set<WidgetState> states) => IconThemeData(
       color: states.contains(WidgetState.selected)
-          ? scheme.onSecondaryContainer
+          ? scheme.onPrimary
           : scheme.onSurfaceVariant,
     ),
   ),
-  // **The selected label is `onSurface`, which is M3's own answer and not the
-  // indicator's ink.** The glyph sits *inside* the pill and takes the pill's
-  // `on` colour; the label sits *below* it, on the bar, so it is read against
-  // `surfaceContainer` and `onSurfaceVariant`'s stronger sibling is what
-  // separates it from the three unselected words beside it — 15.65:1 in light
-  // and 13.49:1 in dark, against those words' 5.92 and 6.72.
-  //
-  // It carried `onPrimaryContainer` from the 2026-08-20 review, which read the
-  // label as part of the pill. `_NavigationBarDefaultsM3.labelTextStyle` does
-  // not, and neither does the render: there is no pill under the word.
-  //
-  // **No selected re-weight.** The selected label was re-set to `w600`
-  // through `AppTypography.withWeight` while `labelMedium` carried 500; the
-  // rung is the handoff's 12/600 label now (D1, M100.89), so that re-weight
-  // would be a second spelling of the rung's own value. Selection reads from
-  // the indicator and the ink.
-  labelTextStyle: WidgetStateProperty.resolveWith(
-    (Set<WidgetState> states) => texts.labelMedium!.copyWith(
-      color: states.contains(WidgetState.selected)
-          ? scheme.onSurface
-          : scheme.onSurfaceVariant,
-    ),
-  ),
+  // The active label sits *below* the pill, on the bar, and the kit inks it
+  // with the brand. As text it takes the brand's text ink, `accentInk`, not
+  // `primary` (owner decision 2). **No selected re-weight:** `labelMedium` is
+  // the handoff's 12/600 label already (D1, PLAN-DEV-2.4).
+  labelTextStyle: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+    if (!states.contains(WidgetState.selected)) {
+      return texts.labelMedium!.copyWith(color: scheme.onSurfaceVariant);
+    }
+    return texts.labelMedium!.copyWith(color: semantic.accentInk);
+  }),
   surfaceTintColor: Colors.transparent,
   elevation: AppElevation.none,
   // Labels always visible, on every destination. The M3 default hides the

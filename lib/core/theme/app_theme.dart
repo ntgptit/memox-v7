@@ -254,7 +254,7 @@ ThemeData _buildTheme(ColorScheme scheme, AppSemanticColors semantic) {
     // The chrome: the two bars that frame every screen, and the one action that
     // floats over them.
     appBarTheme: buildAppBarTheme(scheme),
-    navigationBarTheme: buildNavigationBarTheme(scheme, texts),
+    navigationBarTheme: buildNavigationBarTheme(scheme, semantic, texts),
     floatingActionButtonTheme: buildFloatingActionButtonTheme(scheme),
 
     cardTheme: buildCardTheme(scheme),

@@ -70,12 +70,12 @@ void main() {
       test('NavigationBar', () {
         final t = theme.navigationBarTheme;
 
-        pin('backgroundColor', t.backgroundColor, scheme.surfaceContainer);
-        pin('indicatorColor', t.indicatorColor, scheme.secondaryContainer);
+        pin('backgroundColor', t.backgroundColor, scheme.surface);
+        pin('indicatorColor', t.indicatorColor, scheme.primary);
         pin(
           'selected icon',
           t.iconTheme!.resolve(selected)!.color,
-          scheme.onSecondaryContainer,
+          scheme.onPrimary,
         );
         pin(
           'unselected icon',
@@ -85,7 +85,7 @@ void main() {
         pin(
           'selected label',
           t.labelTextStyle!.resolve(selected)!.color,
-          scheme.onSurface,
+          theme.extension<AppSemanticColors>()!.accentInk,
         );
         pin(
           'unselected label',
@@ -408,16 +408,20 @@ void main() {
           .resolve(selected)!
           .color;
 
+      // **The navigation rows changed with the handoff bar (M100.93)**: the
+      // glyph sits in the kit's `primary` pill (owner decision 4) and the
+      // label on the bar in the brand's text ink (owner decision 2). Still
+      // three components, three roles.
       expect(chipLabel, scheme.onPrimaryContainer);
-      expect(navGlyph, scheme.onSecondaryContainer);
+      expect(navGlyph, scheme.onPrimary);
       expect(
         navLabel,
         isNot(navGlyph),
         reason:
-            'the active tab label sits on the bar, not in the indicator — M3 '
-            'inks it `onSurface` and the glyph `onSecondaryContainer`',
+            'the active tab label sits on the bar, not in the pill — the kit '
+            'inks it with the brand text ink and the glyph `onPrimary`',
       );
-      expect(navLabel, scheme.onSurface);
+      expect(navLabel, theme.extension<AppSemanticColors>()!.accentInk);
     });
   });
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
+import 'package:memox/core/theme/foundations/app_elevation.dart';
+import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 
 /// `MxNavigationBar` on its own, with no router and no feature behind it.
@@ -68,6 +70,50 @@ void main() {
 
     return taps;
   }
+
+  group('handoff NavigationBar (A, M100.93)', () {
+    test('theme: surface bar, primary pill, onPrimary glyph, accentInk '
+        'label', () {
+      for (final theme in <ThemeData>[buildLightTheme(), buildDarkTheme()]) {
+        final nav = theme.navigationBarTheme;
+        final scheme = theme.colorScheme;
+        final semantic = theme.extension<AppSemanticColors>()!;
+        const selected = <WidgetState>{WidgetState.selected};
+
+        expect(nav.backgroundColor, scheme.surface);
+        expect(nav.indicatorColor, scheme.primary);
+        expect(nav.iconTheme!.resolve(selected)!.color, scheme.onPrimary);
+        expect(
+          nav.iconTheme!.resolve(<WidgetState>{})!.color,
+          scheme.onSurfaceVariant,
+        );
+        expect(
+          nav.labelTextStyle!.resolve(selected)!.color,
+          semantic.accentInk,
+        );
+      }
+    });
+
+    testWidgets('the bar paints shadow-chrome instead of a top border', (
+      tester,
+    ) async {
+      await pumpBar(tester);
+      final box = tester.widget<DecoratedBox>(
+        find
+            .descendant(
+              of: find.byType(MxNavigationBar),
+              matching: find.byType(DecoratedBox),
+            )
+            .first,
+      );
+      final decoration = box.decoration as BoxDecoration;
+      expect(decoration.border, isNull);
+      expect(
+        decoration.boxShadow,
+        chromeShadowsFor(buildLightTheme().colorScheme),
+      );
+    });
+  });
 
   group('rendering', () {
     testWidgets('shows every destination, label included', (tester) async {

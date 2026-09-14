@@ -4,8 +4,8 @@
   "totalSites": 348,
   "byElementKind": {
     "other": 311,
-    "background": 26,
-    "border": 9,
+    "background": 27,
+    "border": 8,
     "shadow": 1,
     "text": 1
   },
@@ -240,7 +240,7 @@
     },
     {
       "file": "lib/core/theme/components/navigation/app_navigation_bar_theme.dart",
-      "line": 62,
+      "line": 42,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -1054,7 +1054,7 @@
     },
     {
       "file": "lib/core/theme/foundations/app_elevation.dart",
-      "line": 144,
+      "line": 163,
       "widget_context": "<top-level>",
       "element_kind": "shadow",
       "source_kind": "opacity-modified-token",
@@ -3815,14 +3815,14 @@
     },
     {
       "file": "lib/shared/widgets/mx_navigation_bar.dart",
-      "line": 101,
+      "line": 96,
       "widget_context": "MxNavigationBar",
-      "element_kind": "border",
+      "element_kind": "background",
       "source_kind": "theme-token",
-      "expression": "context.semanticColors.borderSubtle",
-      "token": "semantic.borderSubtle",
-      "resolved_value_light": "#C5CBE3",
-      "resolved_value_dark": "#2A3267"
+      "expression": "context.colors.surface",
+      "token": "colorScheme.surface",
+      "resolved_value_light": "#F7F9FE",
+      "resolved_value_dark": "#0A0E27"
     },
     {
       "file": "lib/shared/widgets/mx_segmented_control.dart",

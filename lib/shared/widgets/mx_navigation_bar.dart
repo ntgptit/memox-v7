@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/extensions/theme_context_extension.dart';
+import '../../core/theme/foundations/app_elevation.dart';
 
 /// How much width one destination may claim before the row stops growing.
 ///
@@ -75,12 +76,12 @@ class MxNavigationBar extends StatelessWidget {
       'A navigation bar needs at least two destinations.',
     );
 
-    // **The hairline lives here, not in the theme**, because
-    // `NavigationBarThemeData` has no border slot. It is needed *because* of the
-    // choices above it: the bar paints the page colour and carries no elevation,
-    // so without a line the chrome and the content share an edge with nothing on
-    // it, and a list scrolled to the bottom runs straight into the tabs. The
-    // design draws the same 1px `--color-border-subtle` for the same reason.
+    // **Shadow-chrome, not a hairline** (handoff NavigationBar, M100.93). The
+    // bar is solid `surface` (D7), so something has to part it from content
+    // scrolling under it: the handoff draws `shadow-chrome` pointing up where
+    // V1 drew a 1px `borderSubtle` line. `NavigationBarThemeData` has no
+    // shadow slot, so the box around the bar carries it, filled with the
+    // bar's own `surface` so the full-width edge reads as one surface.
     //
     // Full width even though the destinations are capped at 120dp each — the
     // edge being marked is the screen's, not the row's.
@@ -90,16 +91,10 @@ class MxNavigationBar extends StatelessWidget {
     // body — the list then scrolled underneath it and the destinations stopped
     // hit-testing. A `Row` stretches only across, and takes its height from the
     // bar itself.
-    // `foreground`, not the default `background`: `NavigationBar` paints its own
-    // fill, so a border drawn behind it survives only either side of the
-    // destination row. The first render of this showed exactly that — a line at
-    // both edges and a gap in the middle where the bar sat on top of it.
     return DecoratedBox(
-      position: DecorationPosition.foreground,
       decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(color: context.semanticColors.borderSubtle),
-        ),
+        color: context.colors.surface,
+        boxShadow: chromeShadowsFor(context.colors),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,

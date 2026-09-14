@@ -781,24 +781,24 @@
       "carriesNoHue": false
     },
     "navigationBarTheme.backgroundColor": {
-      "hex": "#E9EDF7",
+      "hex": "#F7F9FE",
       "opaque": true,
-      "hue": 222.8571428571428,
-      "saturation": 0.4666666666666668,
-      "chroma": 0.05490196078431375,
-      "lightnessStar": 93.71368267497968,
+      "hue": 222.85714285714292,
+      "saturation": 0.7777777777777809,
+      "chroma": 0.027450980392156876,
+      "lightnessStar": 97.90584904109669,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 10.148992112182356,
-      "hueDistanceFromDarkSurfaceFamily": 8.866995073891701,
+      "hueDistanceFromDeclaredSeed": 10.148992112182242,
+      "hueDistanceFromDarkSurfaceFamily": 8.866995073891587,
       "carriesNoHue": false
     },
     "navigationBarTheme.indicatorColor": {
-      "hex": "#E3E6F7",
+      "hex": "#5265F5",
       "opaque": true,
-      "hue": 230.99999999999994,
-      "saturation": 0.5555555555555561,
-      "chroma": 0.07843137254901966,
-      "lightnessStar": 91.52305586320223,
+      "hue": 233.00613496932516,
+      "saturation": 0.8907103825136613,
+      "chroma": 0.6392156862745098,
+      "lightnessStar": 49.12255922266553,
       "classifiedAs": "role-or-on-color"
     },
     "dialogTheme.backgroundColor": {
@@ -1605,24 +1605,24 @@
       "carriesNoHue": false
     },
     "navigationBarTheme.backgroundColor": {
-      "hex": "#232B5A",
+      "hex": "#0A0E27",
       "opaque": true,
-      "hue": 231.27272727272728,
-      "saturation": 0.44,
-      "chroma": 0.21568627450980393,
-      "lightnessStar": 19.321718012165512,
+      "hue": 231.7241379310345,
+      "saturation": 0.5918367346938777,
+      "chroma": 0.11372549019607844,
+      "lightnessStar": 4.74313071186795,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 1.7334076965978795,
-      "hueDistanceFromDarkSurfaceFamily": 0.4514106583072248,
+      "hueDistanceFromDeclaredSeed": 1.2819970382906547,
+      "hueDistanceFromDarkSurfaceFamily": 0.0,
       "carriesNoHue": false
     },
     "navigationBarTheme.indicatorColor": {
-      "hex": "#343C78",
+      "hex": "#8B9AFF",
       "opaque": true,
-      "hue": 232.94117647058823,
-      "saturation": 0.3953488372093023,
-      "chroma": 0.26666666666666666,
-      "lightnessStar": 27.621770153536318,
+      "hue": 232.24137931034483,
+      "saturation": 0.9999999999999998,
+      "chroma": 0.4549019607843138,
+      "lightnessStar": 66.38229174538989,
       "classifiedAs": "role-or-on-color"
     },
     "dialogTheme.backgroundColor": {
