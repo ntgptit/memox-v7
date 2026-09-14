@@ -67,6 +67,11 @@ WidgetbookComponent feedbackBandComponent() {
             label: 'action',
             initialValue: true,
           );
+          final tone = context.knobs.object.dropdown<MxFeedbackTone>(
+            label: 'tone',
+            options: MxFeedbackTone.values,
+            labelBuilder: (MxFeedbackTone value) => value.name,
+          );
 
           return CatalogListPage(
             children: <Widget>[
@@ -75,10 +80,23 @@ WidgetbookComponent feedbackBandComponent() {
                 message: message,
                 actionLabel: hasAction ? 'Try again' : null,
                 onAction: hasAction ? _noop : null,
+                tone: tone,
               ),
             ],
           );
         },
+      ),
+      WidgetbookUseCase(
+        name: 'Offline',
+        builder: (context) => const CatalogListPage(
+          children: <Widget>[
+            MxFeedbackBand(
+              title: 'You are offline',
+              message: 'Changes stay on this phone until you reconnect.',
+              tone: MxFeedbackTone.offline,
+            ),
+          ],
+        ),
       ),
     ],
   );

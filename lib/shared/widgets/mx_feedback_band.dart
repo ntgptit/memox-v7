@@ -7,7 +7,7 @@ import 'mx_card.dart';
 import 'mx_icon.dart';
 import 'mx_text_button.dart';
 
-/// A failure the user has to read, in flow: an icon, a title, a message, and
+/// A message the user has to read, in flow: an icon, a title, a message, and
 /// optionally one action.
 ///
 /// **Six copies of this existed** (M99.96). `MxCard.feedback` deliberately
@@ -87,15 +87,24 @@ class MxFeedbackBand extends StatelessWidget {
     final texts = context.texts;
     final AppInk ink = switch (tone) {
       MxFeedbackTone.danger => AppInk.onErrorContainer,
-      MxFeedbackTone.warning => AppInk.onWarningContainer,
+      MxFeedbackTone.warning ||
+      MxFeedbackTone.offline => AppInk.onWarningContainer,
+      MxFeedbackTone.info => AppInk.onInfoContainer,
+      MxFeedbackTone.success => AppInk.onSuccessContainer,
     };
     final IconData icon = switch (tone) {
       MxFeedbackTone.danger => Icons.error_outline,
       MxFeedbackTone.warning => Icons.warning_amber_outlined,
+      MxFeedbackTone.info => Icons.info_outline,
+      MxFeedbackTone.success => Icons.check_circle_outline,
+      MxFeedbackTone.offline => Icons.cloud_off_outlined,
     };
     final MxCardFeedbackTone cardTone = switch (tone) {
       MxFeedbackTone.danger => MxCardFeedbackTone.danger,
-      MxFeedbackTone.warning => MxCardFeedbackTone.warning,
+      MxFeedbackTone.warning ||
+      MxFeedbackTone.offline => MxCardFeedbackTone.warning,
+      MxFeedbackTone.info => MxCardFeedbackTone.info,
+      MxFeedbackTone.success => MxCardFeedbackTone.success,
     };
 
     return Semantics(
@@ -142,7 +151,8 @@ class MxFeedbackBand extends StatelessWidget {
   }
 }
 
-/// The two things a feedback band can be.
+/// What a feedback band can say — the handoff callout's four tones and the
+/// offline band (M100.93).
 enum MxFeedbackTone {
   /// A failure: `errorContainer`, the error glyph.
   danger,
@@ -150,4 +160,16 @@ enum MxFeedbackTone {
   /// A condition to act on that has not failed: `warningContainer`, the
   /// warning glyph. Kept in the palette for this band (A20.1 §4Q / P1-13).
   warning,
+
+  /// Something worth knowing that asks nothing: `infoContainer`, the info
+  /// glyph.
+  info,
+
+  /// Something that went right: `successContainer`, the check glyph.
+  success,
+
+  /// Connectivity lost — non-blocking, gone on reconnect: the warning fill
+  /// with the cloud-off glyph. No connectivity stream is wired yet; the band
+  /// is built ahead of its feature (owner decision 10).
+  offline,
 }

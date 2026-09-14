@@ -840,6 +840,22 @@ không nhầm chúng là một phase.
     `ModalRoute.transitionDuration` của sheet. SDK đọc
     `sheetAnimationStyle?.duration` (`bottom_sheet.dart:1090`), nên test này
     đo đúng thứ D20 đặt.
+  - PLAN-DEV-25.1 — test của plan đọc `decoration.border!` trên
+    `DecoratedBox` đầu tiên của `MxCard`. Hộp đó là fill. Từ M100.33, viền của
+    card vẽ ở một lớp `DecorationPosition.foreground` riêng. Plan đã dự liệu
+    trường hợp này ("assert that channel"), nên test đọc lớp foreground, cùng
+    cách `edgeColorOf` của `mx_card_recipes_test` đang đọc. Test chạy cả light
+    lẫn dark.
+  - PLAN-DEV-25.2 — plan đặt test vào file đang phủ `MxFeedbackBand`. Trong
+    `test/shared` chưa có file nào như vậy, và `mx_card_recipes_test` đã 418
+    dòng. Test nằm ở file mới `test/shared/widgets/mx_feedback_band_test.dart`.
+  - PLAN-DEV-25.3 — handoff Banner / Callout ghi tone "warning (streak)".
+    Foundations của handoff không có màu streak riêng, nên viền warning là
+    `warning` (`#F59E0B` / `#FFC658`), như plan viết. Doc của
+    `_restingEdgeColor` từng nói feedback không vẽ viền vì app chưa có token
+    cho viền nhuộm theo fill; đoạn đó được viết lại cho hairline theo tone.
+    Doc lớp `MxFeedbackBand` đổi "A failure" thành "A message", vì band giờ
+    còn nói info và success.
 - **Editable documents:** `docs/wbs.md`,
   `docs/design-system/tokyo-component-mapping.md`,
   `docs/superpowers/plans/2026-09-13-tokyo-handoff-redesign.md` (ghi deviation

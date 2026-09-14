@@ -83,6 +83,14 @@ enum MxCardFeedbackTone {
   /// granted. `warningContainer`, the pair `AppSemanticColors` kept for
   /// exactly this band (A20.1 P1-13).
   warning,
+
+  /// Something worth knowing that asks nothing of the user: `infoContainer`,
+  /// the handoff callout's info tone (M100.93).
+  info,
+
+  /// Something that went right: `successContainer`, the handoff callout's ok
+  /// tone (M100.93).
+  success,
 }
 
 /// The surface a recipe fills with, named as a role.
@@ -601,6 +609,8 @@ class _MxCardState extends State<MxCard> {
       _MxCardFill.feedback => switch (widget._tone!) {
         MxCardFeedbackTone.danger => scheme.errorContainer,
         MxCardFeedbackTone.warning => semantic.warningContainer,
+        MxCardFeedbackTone.info => semantic.infoContainer,
+        MxCardFeedbackTone.success => semantic.successContainer,
       },
     };
   }
@@ -625,11 +635,10 @@ class _MxCardState extends State<MxCard> {
   /// control, and a control's edge says so before it is picked) and `.accent`
   /// (the edge is the entire recipe).
   ///
-  /// `.feedback` loses its line here too, and that is a smaller decision than
-  /// it looks: its hairline was the same neutral grey, on a fill that already
-  /// announces itself by hue. The concept gives its feedback panels an edge
-  /// *tinted to the fill* — `#CDE4DA` on `#EDF6F3` — which this app has no
-  /// token for. Adding one is a palette decision, not this change.
+  /// `.feedback` draws the handoff callout's "matching border" (M100.93): a
+  /// hairline in its tone's own colour — `error`, `warning`, `primary`,
+  /// `mastery` — on the tinted fill. Until then it drew none, because the
+  /// neutral grey it used to draw said nothing the fill had not.
   Color? _restingEdgeColor(BuildContext context) {
     final semantic = context.semanticColors;
     final colors = context.colors;
@@ -651,6 +660,15 @@ class _MxCardState extends State<MxCard> {
         return semantic.danger;
       case MxCardRecessedEdge.none:
         break;
+    }
+
+    if (widget._spec.fill == _MxCardFill.feedback) {
+      return switch (widget._tone!) {
+        MxCardFeedbackTone.danger => colors.error,
+        MxCardFeedbackTone.warning => semantic.warning,
+        MxCardFeedbackTone.info => colors.primary,
+        MxCardFeedbackTone.success => semantic.mastery,
+      };
     }
 
     return switch (widget._spec.edge) {
