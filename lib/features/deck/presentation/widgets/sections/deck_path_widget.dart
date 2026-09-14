@@ -82,7 +82,7 @@ class DeckPathWidget extends StatelessWidget {
       // level, long press opens every level. The steps below carry no `onTap`
       // — see `MxBreadcrumb.onUp` for why four small controls became one big
       // one.
-      upIcon: Icons.chevron_left,
+      upIcon: Icons.arrow_back,
       onUp: () => _goUp(context),
       onShowAll: () => showDeckAncestors(context, snapshot: snapshot),
       items: <MxBreadcrumbItem>[

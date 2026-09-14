@@ -155,6 +155,12 @@ abstract final class AppTypography {
   /// builds the prompt does not become a second file spelling `w700`.
   static const FontWeight cardPromptWeight = FontWeight.w700;
 
+  /// The handoff Breadcrumb's current step: the one word on the path that is
+  /// not a way somewhere, set bold (M100.93). Named for the same reason as
+  /// [cardPromptWeight] — the breadcrumb must not become another file spelling
+  /// `w700`.
+  static const FontWeight breadcrumbCurrentWeight = FontWeight.w700;
+
   /// The same prompt on a screen narrower than `AppBreakpoints.compact`: the
   /// headline size, so a two-word prompt at 320 wide does not push the answer
   /// below the fold — the one thing the study screen must not do.

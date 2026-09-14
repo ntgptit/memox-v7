@@ -92,7 +92,12 @@ class _MxBreadcrumbStepState extends State<_MxBreadcrumbStep> {
             ?_icon(AppInk.quiet),
             Text(
               widget.item.label,
-              style: context.texts.labelMedium!.inked(context, AppInk.quiet),
+              // The handoff's current step: bold and in full ink, the one
+              // word on the path that is not a way somewhere (M100.93).
+              style: AppTypography.withWeight(
+                context.texts.labelMedium!,
+                AppTypography.breadcrumbCurrentWeight,
+              ).inked(context, AppInk.stated),
               maxLines: 1,
             ),
           ],
@@ -173,21 +178,16 @@ class _MxBreadcrumbSeparator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // **A slash, not a chevron** (owner review, 2026-08-21). The header's way
-    // back is a `<`, and a `>` between every step put two arrows pointing
-    // opposite ways on one line — the eye reads them as controls in
-    // disagreement rather than as punctuation.
-    return ExcludeSemantics(
-      child: Text(
-        _kSeparator,
-        style: context.texts.bodySmall!.inked(context, AppInk.quiet),
-      ),
+    // **A 16 chevron** (handoff Breadcrumb, M100.93). It was a slash from the
+    // owner review of 2026-08-21, while the header's way up was a chevron too
+    // and two arrows pointed opposite ways on one line. The owner moved the
+    // up glyph to `arrow_back` on 2026-09-14, so the path takes the handoff's
+    // chevrons and the only arrow on the line is the way up.
+    return const ExcludeSemantics(
+      child: MxIcon(Icons.chevron_right, size: MxIconSize.xs),
     );
   }
 }
-
-/// Between two steps. A path is read, and a path is written with slashes.
-const String _kSeparator = '/';
 
 /// Stands in for the steps a narrow header could not fit.
 ///

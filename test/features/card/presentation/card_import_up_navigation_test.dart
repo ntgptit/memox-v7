@@ -120,7 +120,7 @@ void main() {
     );
     expect(strip.onUp, isNotNull);
     expect(strip.onShowAll, isNotNull);
-    expect(strip.upIcon, Icons.chevron_left);
+    expect(strip.upIcon, Icons.arrow_back);
     // `onUp` set is what makes `MxBreadcrumb` build the single-target row; the
     // legacy per-step strip is the one that renders an interactive ellipsis.
     expect(

@@ -184,11 +184,11 @@ void main() {
       expect(
         find.descendant(
           of: find.byType(MxBreadcrumb),
-          matching: find.byIcon(Icons.chevron_left),
+          matching: find.byIcon(Icons.arrow_back),
         ),
         findsOneWidget,
         reason:
-            '$label: the chevron is what says the strip is a control — '
+            '$label: the up arrow is what says the strip is a control — '
             'without it the whole-strip tap is invisible',
       );
       // The shell's own decision, not the route's: a subline means the title

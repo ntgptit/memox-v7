@@ -13,7 +13,7 @@ import '../overlays/card_ancestors_widget.dart';
 /// drags a deck entity into the card side.
 ///
 /// **Composed exactly as `deck_path_widget.dart` composes it** (SC-C4-06/10):
-/// the compact 32dp line of the header, a leading `chevron_left` saying what
+/// the compact 32dp line of the header, a leading `arrow_back` saying what
 /// tapping the strip does, and the open deck left off the end. It used to
 /// differ from the deck screen one tap above in all three at once — a 48dp
 /// band, no glyph, and the deck's own name as a trailing step — while its doc
@@ -47,11 +47,11 @@ class CardBreadcrumbWidget extends StatelessWidget {
       // for the deck path's reason, now that this strip rides the same
       // `MxContentShell.titleSubline` slot.
       lineHeight: MxBreadcrumb.compactLineHeight,
-      // **The chevron is what says the strip is a control.** Without it the
+      // **The up arrow is what says the strip is a control.** Without it the
       // whole-strip tap was invisible, and the bar drew the platform arrow
       // beside it — two up affordances on a screen the deck level answers
       // with one.
-      upIcon: Icons.chevron_left,
+      upIcon: Icons.arrow_back,
       // Kept a step tighter than the deck list's default of 4: this bar
       // carries up to three actions, so the line has less room than the deck
       // list's. It applies to the per-step strip only — with [onUp] set the

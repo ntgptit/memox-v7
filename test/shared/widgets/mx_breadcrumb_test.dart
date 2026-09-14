@@ -61,10 +61,31 @@ void main() {
     ) async {
       await pump(tester, path(3));
 
-      // A slash, not a chevron (owner review, 2026-08-21): the header's back
-      // affordance owns the only arrow on the line.
-      expect(find.text('/'), findsNWidgets(2));
-      expect(find.byIcon(Icons.chevron_right), findsNothing);
+      // A 16 chevron (handoff Breadcrumb, M100.93). The owner review of
+      // 2026-08-21 chose a slash so the header's up chevron was the only arrow
+      // on the line; the owner moved the up glyph to `arrow_back` on
+      // 2026-09-14, so the path takes the handoff's chevrons.
+      expect(find.byIcon(Icons.chevron_right), findsNWidgets(2));
+      expect(find.text('/'), findsNothing);
+    });
+
+    testWidgets('chevrons separate the steps; the current step is bold', (
+      tester,
+    ) async {
+      await pump(tester, <MxBreadcrumbItem>[
+        MxBreadcrumbItem(label: 'Korean', onTap: () {}),
+        MxBreadcrumbItem(label: 'Verbs', onTap: () {}),
+        const MxBreadcrumbItem(label: 'Week 1'),
+      ]);
+
+      expect(find.text('/'), findsNothing);
+      expect(find.byIcon(Icons.chevron_right), findsNWidgets(2));
+      final current = tester.widget<Text>(find.text('Week 1'));
+      expect(current.style!.fontWeight, FontWeight.w700);
+      expect(
+        find.ancestor(of: find.text('Week 1'), matching: find.byType(InkWell)),
+        findsNothing,
+      );
     });
 
     testWidgets('an empty path renders nothing at all', (tester) async {
@@ -72,7 +93,7 @@ void main() {
       // space, because the alternative is a blank strip above every root list.
       await pump(tester, const <MxBreadcrumbItem>[]);
 
-      expect(find.text('/'), findsNothing);
+      expect(find.byIcon(Icons.chevron_right), findsNothing);
       expect(
         tester.getSize(find.byType(MxBreadcrumb)),
         const Size(0, 0),
@@ -159,7 +180,9 @@ void main() {
 
       final style = styleOf(tester, 'Level 2');
       expect(style.decoration, isNot(TextDecoration.underline));
-      expect(style.color, buildLightTheme().colorScheme.onSurfaceVariant);
+      // The current step is bold and in full ink since M100.93 (handoff
+      // Breadcrumb); hovering it still changes nothing.
+      expect(style.color, buildLightTheme().colorScheme.onSurface);
     });
   });
 
@@ -300,7 +323,7 @@ void main() {
   });
 
   group('the header form folds instead of clipping', () {
-    /// The header variant: one target, a back chevron, a home glyph.
+    /// The header variant: one target, an up arrow, a home glyph.
     Future<void> pumpHeader(
       WidgetTester tester,
       List<String> labels, {
@@ -325,7 +348,7 @@ void main() {
                 ).copyWith(textScaler: TextScaler.linear(textScale)),
                 child: MxBreadcrumb(
                   lineHeight: MxBreadcrumb.compactLineHeight,
-                  upIcon: Icons.chevron_left,
+                  upIcon: Icons.arrow_back,
                   rootIcon: Icons.home_outlined,
                   onUp: () {},
                   items: <MxBreadcrumbItem>[
@@ -338,6 +361,14 @@ void main() {
         ),
       );
     }
+
+    testWidgets('the header separates its steps with chevrons', (tester) async {
+      await pumpHeader(tester, <String>['Korean', 'Verbs'], width: 400);
+
+      expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+      expect(find.byIcon(Icons.chevron_right), findsOneWidget);
+      expect(find.text('/'), findsNothing);
+    });
 
     /// Labels the renderer had to cut off.
     List<String> clipped(WidgetTester tester) {

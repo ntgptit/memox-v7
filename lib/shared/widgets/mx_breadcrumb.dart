@@ -139,8 +139,8 @@ class MxBreadcrumb extends StatefulWidget {
   final VoidCallback? onShowAll;
 
   /// Drawn before the first step when [onUp] is set, so the strip shows what
-  /// tapping it does. The back glyph is the only chevron on the line — the
-  /// separator between steps is a slash.
+  /// tapping it does. Steps are separated by a 16 chevron, so the up glyph
+  /// the callers pass is `arrow_back` — the only arrow on the line.
   final IconData? upIcon;
 
   /// Above this many steps the middle folds into an expandable ellipsis.
@@ -223,14 +223,14 @@ class _MxBreadcrumbState extends State<MxBreadcrumb> {
                   if (shown.length < items.length) ...<Widget>[
                     Text(_kFoldedSteps, style: style),
                     const SizedBox(width: AppSpacing.xs),
-                    Text(_kSeparator, style: style),
+                    const _MxBreadcrumbSeparator(),
                     const SizedBox(width: AppSpacing.xs),
                   ],
                   for (final (int index, MxBreadcrumbItem item)
                       in shown.indexed) ...<Widget>[
                     if (index > 0) ...<Widget>[
                       const SizedBox(width: AppSpacing.xs),
-                      Text(_kSeparator, style: style),
+                      const _MxBreadcrumbSeparator(),
                       const SizedBox(width: AppSpacing.xs),
                     ],
                     // **Only the deepest step is `Flexible`, and that is not a
@@ -291,7 +291,7 @@ class _MxBreadcrumbState extends State<MxBreadcrumb> {
       return painter.width;
     }
 
-    final separator = AppSpacing.xs * 2 + widthOf(_kSeparator);
+    const separator = AppSpacing.xs * 2 + AppIconSize.xs;
     // What a fold costs when it happens: the marker and one separator.
     final fold = widthOf(_kFoldedSteps) + separator;
 

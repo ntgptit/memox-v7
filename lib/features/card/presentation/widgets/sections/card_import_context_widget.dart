@@ -63,7 +63,7 @@ class CardImportContextWidget extends ConsumerWidget {
         MxBreadcrumb(
           semanticLabel: context.l10n.deckPathSemanticLabel,
           rootIcon: Icons.home_outlined,
-          upIcon: Icons.chevron_left,
+          upIcon: Icons.arrow_back,
           collapseAfter: 3,
           // **Up is the deck this import targets**, not that deck's parent:
           // the path reads `… / Deck / Import`, so one level up from the

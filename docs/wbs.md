@@ -721,6 +721,38 @@ không nhầm chúng là một phase.
     `audit_core_test.dart`: glyph trắng đặc trên pill `Ink` phải đo ra nền là
     pill, và không có blocking. Fault-inject (bỏ `ringAround`) thì test đó
     đỏ; trả lại thì xanh. Hai audit shell từ `-18` về `+18`.
+  - PLAN-DEV-22.1 — plan đổi dấu phân cách `/` thành chevron, nhưng không nói
+    tới nút lên cấp. Cả ba header (`deck_path_widget`, `card_breadcrumb_widget`,
+    `card_import_context_widget`) truyền `upIcon: Icons.chevron_left`, nên
+    header sẽ thành `‹ Deck › Sub`: đúng hai mũi tên ngược chiều mà owner
+    review 2026-08-21 đã bác khi chọn `/`. Coordinator hỏi chủ dự án
+    (`AskUserQuestion`). Ngày 2026-09-14 chủ dự án chọn: chevron `›` 16 theo
+    handoff, và nút lên cấp đổi sang `arrow_back`.
+
+    Test dời theo:
+    - `breadcrumb_grammar_test` "exactly one up affordance";
+    - `deck_path_test` (hai chỗ);
+    - `card_import_up_navigation_test`;
+    - harness `pumpHeader` của `mx_breadcrumb_test`.
+
+    Dạng header cũng dùng chevron (test mới "the header separates its steps
+    with chevrons"). Test đỏ đúng lý do trước khi sửa: `+37 -7`, cả 7 là test
+    của hợp đồng mới.
+  - PLAN-DEV-22.2 — plan bảo đo nhãn cuối bằng chữ đậm trong `_stepsThatFit`.
+    Hàm này chỉ phục vụ dạng header; bước cuối ở đó là deck tổ tiên, vẽ bằng
+    `bodySmall` thường, không phải bước hiện tại. Đo chữ đậm sẽ tính dư, nên
+    chỉ đổi độ rộng dấu phân cách thành `AppSpacing.xs * 2 + AppIconSize.xs`.
+    Bước hiện tại in đậm nằm ở dạng dải (`tap == null`).
+
+    Ghi chú PLAN-DEV-4.5 của plan chỉ áp dụng khi task đổi cỡ dải compact. Dải
+    vẫn cao `compactLineHeight` 32, nên `_allowedOffScale` (15.5) giữ nguyên.
+  - PLAN-DEV-22.3 — plan viết `FontWeight.w700` thẳng trong bước hiện tại.
+    Full host suite ra `-1`: registry A20.1 P1-10 (`app_typography_test` "the
+    sources that may spell w700 are exactly the named ones") chỉ cho phép
+    literal này ở `app_typography.dart`, `app_button_themes.dart` và
+    `app_bold_text.dart`. Registry giữ nguyên. Thêm hằng có tên
+    `AppTypography.breadcrumbCurrentWeight` (cùng dạng `cardPromptWeight`),
+    và breadcrumb dùng hằng đó qua `withWeight`.
 - **Editable documents:** `docs/wbs.md`,
   `docs/design-system/tokyo-component-mapping.md`,
   `docs/superpowers/plans/2026-09-13-tokyo-handoff-redesign.md` (ghi deviation

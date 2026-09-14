@@ -127,7 +127,7 @@ void main() {
         isNotNull,
         reason: 'inside a deck the whole line is the way out',
       );
-      expect(find.byIcon(Icons.chevron_left), findsOneWidget);
+      expect(find.byIcon(Icons.arrow_back), findsOneWidget);
     });
 
     testWidgets('the deck list itself has no path — it has figures', (
@@ -219,10 +219,10 @@ void main() {
       // search field out of this strip and onto its own screen. The claim is
       // unchanged and so is what it catches: a breadcrumb whose first step
       // carries its own leading padding sits inside the box rather than on it.
-      // The chevron is the first painted thing now — it says what tapping the
-      // line does — so it is the one that has to sit on the gutter.
+      // The up arrow is the first painted thing now — it says what tapping
+      // the line does — so it is the one that has to sit on the gutter.
       expect(
-        tester.getTopLeft(find.byIcon(Icons.chevron_left)).dx,
+        tester.getTopLeft(find.byIcon(Icons.arrow_back)).dx,
         tester.getRect(find.byType(DeckSubheaderWidget)).left,
         reason: 'the path starts on the strip it sits in, not centred in it',
       );
