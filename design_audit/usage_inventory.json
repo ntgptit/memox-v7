@@ -1,21 +1,21 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 741,
+  "scannedFiles": 744,
   "totalSites": 348,
   "byElementKind": {
     "other": 311,
-    "background": 25,
-    "border": 10,
+    "background": 26,
+    "border": 9,
     "shadow": 1,
     "text": 1
   },
   "bySourceKind": {
     "shared-constant": 171,
     "opacity-modified-token": 21,
-    "blend-source": 6,
+    "blend-source": 5,
     "Colors-material": 14,
     "hardcoded-literal": 108,
-    "theme-token": 28
+    "theme-token": 29
   },
   "sites": [
     {
@@ -228,17 +228,6 @@
       "resolved_value_dark": "#00000000"
     },
     {
-      "file": "lib/core/theme/components/inputs/app_input_theme.dart",
-      "line": 72,
-      "widget_context": "<top-level>",
-      "element_kind": "border",
-      "source_kind": "blend-source",
-      "expression": "scheme.outline.withValues(alpha: 0.5)",
-      "token": "colorScheme.outline",
-      "resolved_value_light": "#7C85AB",
-      "resolved_value_dark": "#5A6BAE"
-    },
-    {
       "file": "lib/core/theme/components/inputs/app_text_selection_theme.dart",
       "line": 11,
       "widget_context": "<top-level>",
@@ -339,7 +328,7 @@
     },
     {
       "file": "lib/core/theme/components/selection/app_slider_theme.dart",
-      "line": 61,
+      "line": 47,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -350,7 +339,7 @@
     },
     {
       "file": "lib/core/theme/components/selection/app_toggle_themes.dart",
-      "line": 108,
+      "line": 82,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "Colors-material",
@@ -361,7 +350,7 @@
     },
     {
       "file": "lib/core/theme/components/selection/app_toggle_themes.dart",
-      "line": 175,
+      "line": 138,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -372,7 +361,7 @@
     },
     {
       "file": "lib/core/theme/components/selection/app_toggle_themes.dart",
-      "line": 181,
+      "line": 144,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -3834,6 +3823,17 @@
       "token": "semantic.borderSubtle",
       "resolved_value_light": "#C5CBE3",
       "resolved_value_dark": "#2A3267"
+    },
+    {
+      "file": "lib/shared/widgets/mx_segmented_control.dart",
+      "line": 55,
+      "widget_context": "MxSegmentedControl",
+      "element_kind": "background",
+      "source_kind": "theme-token",
+      "expression": "context.colors.surfaceContainer",
+      "token": "colorScheme.surfaceContainer",
+      "resolved_value_light": "unresolvable: colorScheme.surfaceContainer not in the dumped theme",
+      "resolved_value_dark": "unresolvable: colorScheme.surfaceContainer not in the dumped theme"
     },
     {
       "file": "lib/shared/widgets/mx_session_top_bar.dart",

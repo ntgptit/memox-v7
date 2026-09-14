@@ -146,31 +146,11 @@ void main() {
       }
     });
 
-    test("M3's own pairing now passes, which retired the deviation", () {
-      // **The premise flipped, and this test is how it was noticed.** It used
-      // to assert the opposite — that `primary` on `secondaryContainer` failed
-      // 3:1 in dark, which was the whole justification for the slider reaching
-      // for a substitute token. M100.18 inverted the dark accent to tone 80
-      // and the Material default started passing, so the deviation stopped
-      // earning its keep and the slider draws `primary` like M3 says.
-      //
-      // Kept as an assertion in the other direction for the same reason it was
-      // written in the first: a palette that drifts back below the floor must
-      // fail here rather than quietly re-introduce a substitute.
-      for (final entry in themes.entries) {
-        final scheme = entry.value.colorScheme;
-
-        expect(
-          contrast(scheme.primary, scheme.secondaryContainer),
-          greaterThanOrEqualTo(graphic),
-          reason:
-              '${entry.key}: primary no longer clears 3:1 on '
-              'secondaryContainer, so a slider drawn in it is unbounded',
-        );
-      }
-    });
-
     test('the filled half separates from the empty half', () {
+      // Since M100.92 the empty half is the handoff's
+      // `surfaceContainerHighest`. This is the pair a test here guarded as
+      // M3's `primary` on `secondaryContainer` until then, read off the theme
+      // slots so a palette drifting under the floor fails either way.
       for (final entry in themes.entries) {
         final t = entry.value.sliderTheme;
 

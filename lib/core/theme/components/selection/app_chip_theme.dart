@@ -60,7 +60,7 @@ import '../../typography/app_typography.dart';
 /// palette where the two roles are what the guard in `m3_role_bindings.dart`
 /// says they are.)
 ///
-/// **Unselected is `surfaceContainerLow` — the paper — and this theme is what
+/// **Unselected is `surfaceContainer` (handoff Chip, M100.92), and this theme is what
 /// paints it** (M100.36, correcting M100.32). `_ChoiceChipDefaultsM3.color` is
 /// variant-dependent — a flat `ChoiceChip` has no unselected fill, the elevated
 /// one fills with `surfaceContainerLow` — and M100.32 reasoned that building
@@ -83,7 +83,7 @@ import '../../typography/app_typography.dart';
 /// (`AppMaterialRoles.secondaryContainerLight`), so the role now gives 10.50 and
 /// the chip can say what it is.
 Color _restingFill(ColorScheme scheme, {required bool isSelected}) =>
-    isSelected ? scheme.primaryContainer : scheme.surfaceContainerLow;
+    isSelected ? scheme.primaryContainer : scheme.surfaceContainer;
 
 /// The fill for [states], resolved to a solid colour over the ground that state
 /// actually has.

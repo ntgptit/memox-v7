@@ -13,6 +13,8 @@ import 'package:memox/shared/widgets/mx_menu_button.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 import 'package:memox/shared/widgets/mx_pressable.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
+import 'package:memox/shared/widgets/mx_segmented_control.dart';
+import 'package:memox/shared/widgets/mx_slider.dart';
 import 'package:memox/shared/widgets/mx_text_button.dart';
 import 'package:widgetbook/widgetbook.dart';
 
@@ -694,3 +696,62 @@ WidgetbookComponent navigationBarComponent() {
     ],
   );
 }
+
+/// The handoff SegmentedButton. No screen builds one yet (owner decision 10).
+WidgetbookComponent segmentedControlComponent() {
+  return WidgetbookComponent(
+    name: 'MxSegmentedControl',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Playground',
+        builder: (BuildContext context) {
+          final selected = context.knobs.int.slider(label: 'selected', max: 2);
+
+          return CatalogCenterPage(
+            child: MxSegmentedControl<int>(
+              segments: const <MxSegment<int>>[
+                MxSegment<int>(value: 0, label: 'Week'),
+                MxSegment<int>(value: 1, label: 'Month'),
+                MxSegment<int>(value: 2, label: 'Year'),
+              ],
+              selected: selected,
+              onChanged: _noopSelect,
+            ),
+          );
+        },
+      ),
+    ],
+  );
+}
+
+/// The handoff Slider. No screen builds one yet (owner decision 10).
+WidgetbookComponent sliderComponent() {
+  return WidgetbookComponent(
+    name: 'MxSlider',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Playground',
+        builder: (BuildContext context) {
+          final value = context.knobs.double.slider(
+            label: 'value',
+            initialValue: 0.5,
+          );
+          final isEnabled = context.knobs.boolean(
+            label: 'enabled',
+            initialValue: true,
+          );
+
+          return CatalogCenterPage(
+            child: MxSlider(
+              value: value,
+              onChanged: isEnabled ? _noopValue : null,
+              semanticLabel: 'Daily goal',
+            ),
+          );
+        },
+      ),
+    ],
+  );
+}
+
+void _noopValue(double _) {}

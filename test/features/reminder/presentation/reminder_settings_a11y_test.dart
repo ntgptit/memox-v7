@@ -1,8 +1,8 @@
 import 'package:flutter/semantics.dart';
 import 'dart:ui' show Tristate;
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
+import 'package:memox/shared/widgets/mx_switch_row.dart';
 
 import '../support/reminder_screen_harness.dart';
 
@@ -51,8 +51,8 @@ void main() {
       // NEW CONTRACT: the tile is named, the toggle is the switch's own
       // flag beneath it, and no node writes the state as text.
       // FLUTTER-A20.1 AUTHORITY: A20.1 P2-13 (one state channel);
-      // `SwitchListTile` keeps the switch node under the named tile on
-      // Flutter 3.44.
+      // `MxSwitchRow` merges the label and the toggle into one node
+      // (M100.92).
       //
       // Disposed at the end of the body rather than through `addTearDown`:
       // the framework verifies no handle is live *before* tear-downs run.
@@ -62,7 +62,7 @@ void main() {
       // Read off the control itself, not by label: the screen title is the
       // same words, so a label search would find two nodes and prove nothing
       // about which one carries the switch.
-      final node = tester.getSemantics(find.byType(SwitchListTile));
+      final node = tester.getSemantics(find.byType(MxSwitchRow));
 
       // The label lives on the control, not only on the Text beside it: a
       // reader that focuses the switch would otherwise hear "Off" with no idea

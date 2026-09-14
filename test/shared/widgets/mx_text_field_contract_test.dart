@@ -3,7 +3,10 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
+import 'package:memox/core/theme/foundations/app_sizing.dart';
+import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/core/theme/foundations/app_stroke.dart';
+import 'package:memox/core/theme/states/app_interaction_states.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_icon_button.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
@@ -83,7 +86,13 @@ void main() {
       final none = tester.getSize(find.byType(MxTextField).at(0)).height;
       final reserved = tester.getSize(find.byType(MxTextField).at(1)).height;
       expect(none, lessThan(reserved), reason: 'none still holds the line');
-      expect(none, 48, reason: 'the box alone is the touch floor');
+      // The box alone is the handoff field height since M100.92 (`size-input`
+      // 52); it was the 48 touch floor.
+      expect(
+        none,
+        AppSizing.input,
+        reason: 'the box alone is the field height',
+      );
     });
   });
 
@@ -226,9 +235,12 @@ void main() {
           ),
           semantic.dangerInk,
         );
+        // **Disabled keeps the resting ink** (M100.92): the handoff dims the
+        // whole field to 0.38, so a second dim on the glyph would read it at
+        // a fifth of its strength.
         expect(
           await suffixColorOf(tester, isEnabled: false, isDark: mode.$2),
-          semantic.onDisabled,
+          theme.colorScheme.onSurfaceVariant,
         );
       });
     }
@@ -264,7 +276,7 @@ void main() {
 
       final atRest = painted()! as OutlineInputBorder;
       expect(atRest.borderSide.color, scheme.error);
-      expect(atRest.borderSide.width, AppStroke.control);
+      expect(atRest.borderSide.width, AppStroke.hairline);
 
       await tester.tap(find.byType(TextField));
       await tester.pumpAndSettle();
@@ -302,6 +314,109 @@ void main() {
         findsOneWidget,
       );
       handle.dispose();
+    });
+  });
+
+  group('handoff TextField (D)', () {
+    Future<void> pumpField(WidgetTester tester, MxTextField field) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: buildLightTheme(),
+          home: Scaffold(body: Center(child: field)),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    test('theme: filled lowest, hairline edges, 52 minimum', () {
+      final theme = buildLightTheme();
+      final input = theme.inputDecorationTheme;
+      final scheme = theme.colorScheme;
+
+      expect(input.filled, isTrue);
+      expect(input.fillColor, scheme.surfaceContainerLowest);
+      expect(input.constraints?.minHeight, AppSizing.input);
+      for (final (InputBorder? border, Color color, double width)
+          in <(InputBorder?, Color, double)>[
+            (input.enabledBorder, scheme.outlineVariant, AppStroke.hairline),
+            (input.focusedBorder, scheme.primary, AppStroke.hairline),
+            (input.errorBorder, scheme.error, AppStroke.hairline),
+            // D27: focused and in error keeps the 2 stroke.
+            (input.focusedErrorBorder, scheme.error, AppStroke.focus),
+          ]) {
+        final side = (border! as OutlineInputBorder).borderSide;
+        expect(side.color, color);
+        expect(side.width, width);
+      }
+    });
+
+    testWidgets('an error is a caption row led by an alert glyph', (
+      tester,
+    ) async {
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      await pumpField(
+        tester,
+        MxTextField(
+          controller: controller,
+          label: 'Name',
+          errorText: 'Required',
+        ),
+      );
+
+      final row = find
+          .ancestor(of: find.text('Required'), matching: find.byType(Row))
+          .first;
+      expect(
+        find.descendant(of: row, matching: find.byIcon(Icons.error_outline)),
+        findsOneWidget,
+      );
+      expect(tester.widget<Text>(find.text('Required')).style!.fontSize, 12);
+    });
+
+    testWidgets('a disabled field is dimmed as a whole', (tester) async {
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      await pumpField(
+        tester,
+        MxTextField(controller: controller, label: 'Name', isEnabled: false),
+      );
+
+      final opacity = tester.widget<Opacity>(
+        find
+            .ancestor(
+              of: find.byType(TextField),
+              matching: find.byType(Opacity),
+            )
+            .first,
+      );
+      expect(opacity.opacity, AppStateOpacity.disabledContent);
+    });
+
+    testWidgets('a multi-line field drops to a 40 minimum', (tester) async {
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      await pumpField(
+        tester,
+        MxTextField(
+          controller: controller,
+          label: 'Notes',
+          minLines: 1,
+          maxLines: 4,
+        ),
+      );
+
+      final decoration = tester
+          .widget<TextField>(find.byType(TextField))
+          .decoration!;
+      expect(decoration.constraints?.minHeight, AppSizing.inputMultilineMin);
+      expect(
+        decoration.contentPadding,
+        const EdgeInsets.symmetric(
+          vertical: AppSpacing.sm,
+          horizontal: AppSpacing.md,
+        ),
+      );
     });
   });
 }

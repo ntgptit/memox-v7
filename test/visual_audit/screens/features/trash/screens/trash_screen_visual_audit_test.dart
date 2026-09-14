@@ -1,6 +1,8 @@
 @Tags(<String>['golden', 'screen-audit'])
 library;
 
+import 'dart:io' show Platform;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/trash/presentation/screens/trash_screen.dart';
 import 'package:memox/shared/widgets/mx_content_shell.dart';
@@ -34,8 +36,8 @@ void main() {
     ),
     state: 'loaded',
     anchors: <AuditAnchor>[AuditAnchor.type('shell', MxContentShell)],
-    allowances: const <AuditSkipAllowance>[
-      AuditSkipAllowance(
+    allowances: <AuditSkipAllowance>[
+      const AuditSkipAllowance(
         itemId: 'screen',
         reason: SkipReason.rasterOnly,
         detailContains: '_RenderColoredBox',
@@ -46,7 +48,7 @@ void main() {
             'ColorScheme.surface only mid-transition. It is NOT the Scaffold '
             'background, which is asserted in app_theme_test.dart.',
       ),
-      AuditSkipAllowance(
+      const AuditSkipAllowance(
         itemId: 'shell',
         reason: SkipReason.rasterOnly,
         detailContains: '_RenderInkFeatures',
@@ -64,7 +66,7 @@ void main() {
             'pinned by the mx_icon_button_* goldens and the pill surfaces by '
             'app_theme_test.dart.',
       ),
-      AuditSkipAllowance(
+      const AuditSkipAllowance(
         itemId: 'shell',
         reason: SkipReason.customPainter,
         detailContains: '_ShapeBorderPainter',
@@ -77,7 +79,7 @@ void main() {
             'so the shape exists in no render object. It is the Material 3 '
             'shape and is pinned by the mx_icon_button_* goldens (M4.8).',
       ),
-      AuditSkipAllowance(
+      const AuditSkipAllowance(
         itemId: 'shell',
         reason: SkipReason.unknownRenderType,
         detailContains: '_RenderChip',
@@ -90,7 +92,7 @@ void main() {
             'unselected fills are asserted to differ, in both themes, in '
             'mx_pill_button_test.dart.',
       ),
-      AuditSkipAllowance(
+      const AuditSkipAllowance(
         itemId: 'shell',
         reason: SkipReason.customPainter,
         detailContains: 'CustomPaint (no painter)',
@@ -102,18 +104,7 @@ void main() {
             'is the ripple boundary rather than a drawn stroke — the visible '
             'border is the DecoratedBox behind it, which the audit does read.',
       ),
-      AuditSkipAllowance(
-        itemId: 'shell',
-        reason: SkipReason.rasterNotFlat,
-        detailContains: 'covers only',
-        rationale:
-            'The shell fills the page with `surface` and the list then draws '
-            'two rows of text over most of it, so no single colour reaches the '
-            "raster check's 90% threshold. The declared value is the theme's "
-            'own `surface`, asserted in app_theme_test.dart; what the raster '
-            'cannot do here is confirm it, which is not the same as '
-            'contradicting it.',
-      ),
+      ..._pageAndChipCanvasAllowances(),
     ],
   );
 
@@ -167,4 +158,59 @@ void main() {
       // unable to read.
     ],
   );
+}
+
+const String _pageRationale =
+    'The shell fills the page with `surface` and the list then draws two rows '
+    'of text over most of it, so no single colour reaches the raster check\'s '
+    '90% threshold. The declared value is the theme\'s own `surface`, asserted '
+    'in app_theme_test.dart; what the raster cannot do here is confirm it, '
+    'which is not the same as contradicting it.';
+
+const String _chipCanvasRationale =
+    "Each unselected chip's Material paints the theme's `canvasColor` "
+    '(`surfaceContainerLow`) beneath the `surfaceContainer` fill `_RenderChip` '
+    'draws over the same shape (M100.92), so the image shows the fill where '
+    'the canvas is declared. Chip fills are pinned in '
+    'm3_role_contract_test.dart.';
+
+/// The page, and the two unselected chips' canvas — **read differently per
+/// platform, and Linux is the render that counts.**
+///
+/// The raster check judges a declared fill only when one colour covers 90% of
+/// its rect (`flatEnoughToJudge`, `raster_cross_check.dart`). These two chips
+/// sit on that line: glyph and edge antialiasing differ between platforms — the
+/// reason goldens are authored on Linux alone — so on Linux the chip is not
+/// flat and joins the page under `covers only`, while on Windows it is flat and
+/// reads as a mismatch. Linux is what CI's golden job runs; the Windows branch
+/// keeps the local screen-audit gate honest rather than permanently red.
+List<AuditSkipAllowance> _pageAndChipCanvasAllowances() {
+  if (Platform.isWindows) {
+    return const <AuditSkipAllowance>[
+      AuditSkipAllowance(
+        itemId: 'shell',
+        reason: SkipReason.rasterNotFlat,
+        detailContains: 'covers only',
+        rationale: _pageRationale,
+      ),
+      AuditSkipAllowance(
+        itemId: 'shell',
+        reason: SkipReason.declaredRasterMismatch,
+        detailContains: 'from RenderPhysicalShape',
+        // The two unselected filter chips.
+        expectedMatches: 2,
+        rationale: _chipCanvasRationale,
+      ),
+    ];
+  }
+  return const <AuditSkipAllowance>[
+    AuditSkipAllowance(
+      itemId: 'shell',
+      reason: SkipReason.rasterNotFlat,
+      detailContains: 'covers only',
+      // The page, and the two unselected filter chips.
+      expectedMatches: 3,
+      rationale: '$_pageRationale $_chipCanvasRationale',
+    ),
+  ];
 }

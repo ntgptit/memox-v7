@@ -99,10 +99,11 @@ void main() {
           selected,
           selectedFocused,
         ], scheme.primaryContainer);
+        // The handoff Chip rests on `surfaceContainer` since M100.92.
         holds('fill', fill, <Set<WidgetState>>[
           resting,
           focused,
-        ], scheme.surfaceContainerLow);
+        ], scheme.surfaceContainer);
       });
 
       test('the label ink stays with its container in every combination', () {
@@ -124,26 +125,29 @@ void main() {
       Color? track(Set<WidgetState> s) => sw.trackColor!.resolve(s);
       Color? edge(Set<WidgetState> s) => sw.trackOutlineColor!.resolve(s);
 
-      test('off keeps outline on surfaceContainerHighest under focus', () {
-        holds('thumb', thumb, <Set<WidgetState>>[
-          resting,
-          focused,
-        ], scheme.outline);
-        holds('track', track, <Set<WidgetState>>[
-          resting,
-          focused,
-        ], scheme.surfaceContainerHighest);
-        holds('trackOutline', edge, <Set<WidgetState>>[
-          resting,
-          focused,
-        ], scheme.outline);
-      });
+      test(
+        'off keeps surfaceBright on surfaceContainerHighest under focus',
+        () {
+          holds('thumb', thumb, <Set<WidgetState>>[
+            resting,
+            focused,
+          ], scheme.surfaceBright);
+          holds('track', track, <Set<WidgetState>>[
+            resting,
+            focused,
+          ], scheme.surfaceContainerHighest);
+          holds('trackOutline', edge, <Set<WidgetState>>[
+            resting,
+            focused,
+          ], Colors.transparent);
+        },
+      );
 
       test('on keeps its pair, and the edge stays gone under focus', () {
         holds('thumb', thumb, <Set<WidgetState>>[
           selected,
           selectedFocused,
-        ], scheme.onPrimary);
+        ], scheme.surfaceBright);
         holds('track', track, <Set<WidgetState>>[
           selected,
           selectedFocused,

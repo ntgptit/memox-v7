@@ -68,7 +68,7 @@ canonical M3 role  >  accessibility  >  MemoX structural system  >  Tokyo exact 
 |---|---|---|---|---|
 | ChoiceChip | selected fill | `secondaryContainer` | **`primaryContainer` — lệch có chủ đích** | M100.86: spec Chip của handoff đặt tên role thẳng; `design-system/chip-spec.md` ghi lý do và quyết định của chủ dự án. `m3_role_bindings.dart` đảo `requires`/`refuses` cho hai binding `ChoiceChip` |
 | ChoiceChip | selected label | `onSecondaryContainer` | **`onPrimaryContainer`** | đi theo fill ở trên, cùng M100.86 |
-| ChoiceChip (flat) | unselected fill | `null` | `surfaceContainerLow` — **theme khai, không phải variant** | `ChipThemeData.color` chặn `chipDefaults.color` trước khi variant được hỏi (`chip.dart:1529`); M100.36 sửa lại lời giải thích ở §4 |
+| ChoiceChip (flat) | unselected fill | `null` | `surfaceContainer` — **theme khai, không phải variant**; M100.92 theo spec Chip của handoff | `ChipThemeData.color` chặn `chipDefaults.color` trước khi variant được hỏi (`chip.dart:1529`); M100.36 sửa lại lời giải thích ở §4 |
 | ChoiceChip | side | `outlineVariant`, selected trong suốt | = | guard AST; width = `AppStroke.hairline` (test ghim); 1.24:1 trên giấy — **chấp nhận**, pill định danh bằng hình, nhãn, nhóm và tick (#434 P2-4) |
 | ChoiceChip | disabled fill | `onSurface @ 12%` — selected hay không | = (`disabledSurfaceTint`) | M100.36: trước đó selected+disabled blend thêm container, dark sáng *hơn* pill sống (#434 P2-3) |
 | ChoiceChip | elevation / pressElevation | 1 / 1 (M3) | **0 / 0** | AD-14 một cơ chế độ sâu; `pressElevation` từng để SDK → mỗi lần nhấn có bóng thật (#434 P1-2) |
@@ -80,7 +80,7 @@ canonical M3 role  >  accessibility  >  MemoX structural system  >  Tokyo exact 
 | Switch | trackOutline | `outline` off / trong suốt on | = | guard AST |
 | Radio | fill | `onSurfaceVariant` / `primary` | = | |
 | Slider | activeTrack | `primary` | = | |
-| Slider | inactiveTrack | `secondaryContainer` | = | |
+| Slider | inactiveTrack | `surfaceContainerHighest` | = | handoff Slider, M100.92 |
 | SegmentedButton | selected bg | `secondaryContainer` | = | guard AST |
 | SegmentedButton | side | `outline` | = | guard AST |
 

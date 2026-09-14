@@ -299,7 +299,24 @@ void main() {
           .widget<TextField>(find.byType(TextField))
           .decoration!;
       expect(decoration.helperMaxLines, 3);
-      expect(decoration.errorMaxLines, 3);
+
+      // **The error's budget is on its own text since M100.92.** The handoff
+      // error is a caption row led by an alert glyph, and `errorMaxLines`
+      // does nothing once `InputDecoration.error` is a widget — so the three
+      // lines are read off the painted message, not off a slot that no
+      // longer governs it.
+      const message =
+          'an error long enough to need more than one line on a narrow '
+          'phone, which would otherwise be cut mid-word';
+      await pump(
+        tester,
+        MxTextField(
+          controller: controller,
+          label: 'a field',
+          errorText: message,
+        ),
+      );
+      expect(tester.widget<Text>(find.text(message)).maxLines, 3);
     });
   });
 }

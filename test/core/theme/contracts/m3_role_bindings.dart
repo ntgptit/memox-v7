@@ -154,13 +154,14 @@ const List<RoleBinding> roleBindings = <RoleBinding>[
     slot: '_restingFill',
     file: _chip,
     scope: '_restingFill',
-    requires: <String>['primaryContainer', 'surfaceContainerLow'],
-    refuses: <String>['secondaryContainer'],
+    requires: <String>['primaryContainer', 'surfaceContainer'],
+    refuses: <String>['secondaryContainer', 'surfaceContainerLow'],
     because:
         'M100.86: the owner\'s Chip design spec names primaryContainer for '
         'the selected fill, a stated departure from '
         '_ChoiceChipDefaultsM3.color\'s own secondaryContainer — '
-        'design-system/chip-spec.md.',
+        'design-system/chip-spec.md. M100.92: the handoff Chip rests on '
+        'surface-container, not the paper.',
   ),
   RoleBinding(
     component: 'ChoiceChip',
@@ -293,12 +294,12 @@ const List<RoleBinding> roleBindings = <RoleBinding>[
     slot: 'thumbColor',
     file: _toggles,
     scope: 'buildSwitchTheme',
-    requires: <String>['outline', 'onPrimary'],
-    refuses: <String>['onSurfaceVariant'],
+    requires: <String>['surfaceBright'],
+    refuses: <String>['outline', 'onPrimary'],
     because:
-        '_SwitchDefaultsM3 rests the thumb on outline. It read '
-        'onSurfaceVariant to dodge a contrast failure that M100.22 fixed in the '
-        'palette instead.',
+        'The handoff thumb is surfaceBright in both states (M100.92) and the '
+        'track carries the state; outline and onPrimary are the M3 pair it '
+        'replaced.',
   ),
   RoleBinding(
     component: 'Switch',
@@ -316,12 +317,11 @@ const List<RoleBinding> roleBindings = <RoleBinding>[
     slot: 'trackOutlineColor',
     file: _toggles,
     scope: 'buildSwitchTheme',
-    requires: <String>['outline'],
-    refuses: <String>['primary'],
+    requires: <String>[],
+    refuses: <String>['primary', 'outline'],
     because:
-        '_SwitchDefaultsM3.trackOutlineColor is transparent when selected '
-        'and outline otherwise, with no focus branch. Reading focus first put a '
-        'focused-on switch on a boundary M3 says should not exist.',
+        'The handoff track has no outline in any state (M100.92). Reading focus '
+        'first once put a focused-on switch on a primary boundary (M100.23).',
   ),
   RoleBinding(
     component: 'Checkbox',

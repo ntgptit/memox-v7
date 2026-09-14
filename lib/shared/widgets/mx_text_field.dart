@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/theme/foundations/app_sizing.dart';
+import '../../core/theme/foundations/app_spacing.dart';
 import '../../core/theme/extensions/theme_context_extension.dart';
+import '../../core/theme/states/app_interaction_states.dart';
+import 'mx_icon.dart';
 import 'mx_icon_button.dart';
 import '../../core/theme/extensions/app_ink.dart';
 
@@ -250,55 +253,76 @@ class MxTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isDigits = content == MxTextFieldContent.digits;
+    final bool isMultiline = maxLines != 1;
 
-    return TextField(
-      controller: controller,
-      focusNode: focusNode,
-      style: switch (emphasis) {
-        MxTextFieldEmphasis.body => null,
-        MxTextFieldEmphasis.prominent => context.texts.titleLarge,
-      },
-      autofocus: shouldAutofocus,
-      enabled: isEnabled,
-      keyboardType: keyboardType ?? (isDigits ? TextInputType.number : null),
-      inputFormatters: isDigits
-          ? <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly]
-          : null,
-      textInputAction: textInputAction,
-      minLines: minLines,
-      maxLines: maxLines,
-      maxLength: maxLength,
-      buildCounter: _buildCounter,
-      onChanged: onChanged,
-      onSubmitted: onSubmitted,
-      decoration: InputDecoration(
-        labelText: switch (labelPlacement) {
-          MxTextFieldLabelPlacement.floating => label,
-          // Not painted, and not lost: the caller draws it and merges it.
-          MxTextFieldLabelPlacement.external => null,
+    // **Disabled dims the whole field** (handoff TextField, not `[INFERRED]`):
+    // 0.38 on the entire control, so the theme's edge, hint and suffix keep
+    // their resting values rather than dimming a second time.
+    return Opacity(
+      opacity: isEnabled ? 1 : AppStateOpacity.disabledContent,
+      child: TextField(
+        controller: controller,
+        focusNode: focusNode,
+        style: switch (emphasis) {
+          MxTextFieldEmphasis.body => null,
+          MxTextFieldEmphasis.prominent => context.texts.titleLarge,
         },
-        hintText: hintText,
-        // A single space holds the subtext row when the caller has nothing
-        // to say yet — `InputDecorator` lays the row out for any non-null
-        // helper, and this is the narrowest way to ask it to. The error
-        // replaces the helper in the same row, so its arrival moves nothing.
-        helperText: helperText ?? _reservedHelper,
-        helperMaxLines: _maxMessageLines,
-        errorText: errorText,
-        errorMaxLines: _maxMessageLines,
-        suffixIcon: _buildSuffix(),
-        // **Stated, because the default is 48 wide and 48 tall only by
-        // accident.** `InputDecorator` gives a suffix the field's own height
-        // when it has one to give, and a single-line field is shorter than the
-        // touch floor at small text scales — so the button would be tappable
-        // over a box narrower than the guideline asks for while looking exactly
-        // right.
-        suffixIconConstraints: trailingAction == null
-            ? null
-            : const BoxConstraints(
-                minWidth: AppSizing.touchTarget,
-                minHeight: AppSizing.touchTarget,
-              ),
+        autofocus: shouldAutofocus,
+        enabled: isEnabled,
+        keyboardType: keyboardType ?? (isDigits ? TextInputType.number : null),
+        inputFormatters: isDigits
+            ? <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly]
+            : null,
+        textInputAction: textInputAction,
+        minLines: minLines,
+        maxLines: maxLines,
+        maxLength: maxLength,
+        buildCounter: _buildCounter,
+        onChanged: onChanged,
+        onSubmitted: onSubmitted,
+        decoration: InputDecoration(
+          labelText: switch (labelPlacement) {
+            MxTextFieldLabelPlacement.floating => label,
+            // Not painted, and not lost: the caller draws it and merges it.
+            MxTextFieldLabelPlacement.external => null,
+          },
+          hintText: hintText,
+          // A single space holds the subtext row when the caller has nothing
+          // to say yet — `InputDecorator` lays the row out for any non-null
+          // helper, and this is the narrowest way to ask it to. The error
+          // replaces the helper in the same row, so its arrival moves nothing.
+          helperText: helperText ?? _reservedHelper,
+          helperMaxLines: _maxMessageLines,
+          // **The error is a caption row led by an alert glyph** (handoff
+          // TextField, error state). `errorMaxLines` does nothing once `error`
+          // is a widget, so the text carries the line budget itself; it replaces
+          // the reserved helper in the same row, so its arrival moves nothing.
+          error: errorText == null ? null : _ErrorRow(message: errorText!),
+          // The multi-line shell (handoff TextField): a 40 minimum and 8 / 12
+          // padding, with the text wrapping instead of truncating.
+          constraints: isMultiline
+              ? const BoxConstraints(minHeight: AppSizing.inputMultilineMin)
+              : null,
+          contentPadding: isMultiline
+              ? const EdgeInsets.symmetric(
+                  vertical: AppSpacing.sm,
+                  horizontal: AppSpacing.md,
+                )
+              : null,
+          suffixIcon: _buildSuffix(),
+          // **Stated, because the default is 48 wide and 48 tall only by
+          // accident.** `InputDecorator` gives a suffix the field's own height
+          // when it has one to give, and a single-line field is shorter than the
+          // touch floor at small text scales — so the button would be tappable
+          // over a box narrower than the guideline asks for while looking exactly
+          // right.
+          suffixIconConstraints: trailingAction == null
+              ? null
+              : const BoxConstraints(
+                  minWidth: AppSizing.touchTarget,
+                  minHeight: AppSizing.touchTarget,
+                ),
+        ),
       ),
     );
   }
@@ -367,3 +391,33 @@ class MxTextField extends StatelessWidget {
 
 /// From what fraction of [MxTextField.maxLength] the counter becomes visible.
 const double _counterVisibleFraction = 0.8;
+
+/// The field's error message: an alert glyph, then the text, in the danger ink.
+class _ErrorRow extends StatelessWidget {
+  const _ErrorRow({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: AppSpacing.xs,
+      children: <Widget>[
+        const MxIcon(
+          Icons.error_outline,
+          ink: AppInk.danger,
+          size: MxIconSize.xs,
+        ),
+        Flexible(
+          child: Text(
+            message,
+            maxLines: MxTextField._maxMessageLines,
+            overflow: TextOverflow.ellipsis,
+            style: context.texts.bodySmall!.inked(context, AppInk.danger),
+          ),
+        ),
+      ],
+    );
+  }
+}

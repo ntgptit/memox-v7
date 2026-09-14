@@ -80,13 +80,15 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('on a sheet the hairline is the only boundary, and it is there', (
+  testWidgets('on a sheet the pill keeps its hairline and its own fill', (
     tester,
   ) async {
-    // Inside a bottom sheet the ground *is* `surfaceContainerLow`, the same
-    // role as the pill's fill, so the side is the one thing separating them.
-    // 1.24:1 against the paper is accepted (#434 P2-4): the pill is identified
-    // by shape, label, group and tick, the exemption a card's edge takes.
+    // Inside a bottom sheet the ground is `surfaceContainerLow`. Until M100.92
+    // that was also the pill's fill, so the side was the one thing separating
+    // them; the handoff Chip rests on `surfaceContainer`, and the hairline
+    // stays. 1.24:1 against the paper is accepted (#434 P2-4): the pill is
+    // identified by shape, label, group and tick, the exemption a card's edge
+    // takes.
     final scheme = buildLightTheme().colorScheme;
     await pump(tester, ground: scheme.surfaceContainerLow);
 
@@ -94,10 +96,9 @@ void main() {
     final BorderSide side = (chip.side! as WidgetStateBorderSide).resolve(
       const <WidgetState>{},
     )!;
-    expect(
-      chip.color!.resolve(const <WidgetState>{}),
-      scheme.surfaceContainerLow,
-    );
+    final fill = chip.color!.resolve(const <WidgetState>{});
+    expect(fill, scheme.surfaceContainer);
+    expect(fill, isNot(scheme.surfaceContainerLow));
     expect(side.color, scheme.outlineVariant);
     expect(side.color, isNot(scheme.surfaceContainerLow));
     expect(side.width, greaterThan(0));

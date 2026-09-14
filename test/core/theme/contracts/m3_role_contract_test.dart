@@ -114,7 +114,8 @@ void main() {
         pin(
           'unselected fill',
           t.color!.resolve(resting),
-          scheme.surfaceContainerLow,
+          // Handoff Chip (M100.92): `surface-container fill`.
+          scheme.surfaceContainer,
         );
         pin(
           'selected label',
@@ -169,8 +170,8 @@ void main() {
       test('Switch', () {
         final t = theme.switchTheme;
 
-        pin('off thumb', t.thumbColor!.resolve(resting), scheme.outline);
-        pin('on thumb', t.thumbColor!.resolve(selected), scheme.onPrimary);
+        pin('off thumb', t.thumbColor!.resolve(resting), scheme.surfaceBright);
+        pin('on thumb', t.thumbColor!.resolve(selected), scheme.surfaceBright);
         pin(
           'off track',
           t.trackColor!.resolve(resting),
@@ -180,7 +181,7 @@ void main() {
         pin(
           'off track outline',
           t.trackOutlineColor!.resolve(resting),
-          scheme.outline,
+          Colors.transparent,
         );
         pin(
           'on track outline',
@@ -225,14 +226,14 @@ void main() {
         final t = theme.sliderTheme;
 
         pin('active track', t.activeTrackColor, scheme.primary);
-        pin('inactive track', t.inactiveTrackColor, scheme.secondaryContainer);
+        pin(
+          'inactive track',
+          t.inactiveTrackColor,
+          scheme.surfaceContainerHighest,
+        );
         pin('thumb', t.thumbColor, scheme.primary);
         pin('active tick', t.activeTickMarkColor, scheme.onPrimary);
-        pin(
-          'inactive tick',
-          t.inactiveTickMarkColor,
-          scheme.onSecondaryContainer,
-        );
+        pin('inactive tick', t.inactiveTickMarkColor, scheme.onSurfaceVariant);
         pin('value indicator', t.valueIndicatorColor, scheme.inverseSurface);
       });
 
@@ -246,10 +247,12 @@ void main() {
       test('TextField', () {
         final t = theme.inputDecorationTheme;
 
+        // The handoff TextField's ghost edge (D2, M100.92): the filled
+        // surface identifies the field, so the edge is the hairline role.
         pin(
           'enabled border',
           t.enabledBorder!.borderSide.color,
-          scheme.outline,
+          scheme.outlineVariant,
         );
         pin(
           'focused border',
@@ -264,24 +267,16 @@ void main() {
           t.focusedErrorBorder!.borderSide.color,
           scheme.error,
         );
-        // `disabledBorder` is the one input slot that is not a role: a solid
-        // blend of `outline` over the paper (MX-VIS-002 R7), stronger than
-        // M3's `onSurface @ 12%` because this field's whole identity is its
-        // edge. Pinned as *not a live role* and *opaque*, which is the shape
-        // of the decision rather than its value.
-        final disabledEdge = t.disabledBorder!.borderSide.color;
-        expect(disabledEdge.a, 1.0, reason: 'disabled edge is translucent');
-        for (final live in <Color>[
-          scheme.outline,
-          scheme.primary,
-          scheme.error,
-        ]) {
-          expect(
-            disabledEdge,
-            isNot(live),
-            reason: '$mode: a disabled field wears a live edge',
-          );
-        }
+        // **The disabled edge is the resting edge** (M100.92). The handoff
+        // dims a disabled field as a whole — 0.38 on the entire control,
+        // pinned by `mx_text_field_contract_test` — so the edge does not dim
+        // a second time. The blend of `outline` over the paper it replaced
+        // answered a field identified by its edge alone.
+        pin(
+          'disabled border',
+          t.disabledBorder!.borderSide.color,
+          scheme.outlineVariant,
+        );
       });
 
       test('Dialog', () {

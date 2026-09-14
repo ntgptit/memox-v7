@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -18,6 +17,8 @@ import 'package:memox/features/settings/presentation/widgets/sections/settings_r
 import 'package:memox/features/study/di/study_home_repository_provider.dart';
 import 'package:memox/features/study/di/study_repository_provider.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
+import 'package:memox/shared/widgets/mx_switch.dart';
+import 'package:memox/shared/widgets/mx_switch_row.dart';
 
 import '../../features/deck/presentation/support/fake_deck_repository.dart';
 import '../../features/reminder/support/fake_reminder_platform.dart';
@@ -127,12 +128,12 @@ void main() {
     // FLUTTER-A20.1 AUTHORITY: A20.1 P2-13; M6 R1 (the row says nothing
     // about whether the reminder is on).
     expect(
-      find.descendant(of: row, matching: find.byType(Switch)),
+      find.descendant(of: row, matching: find.byType(MxSwitch)),
       findsNothing,
       reason: 'the row must not mirror reminder state',
     );
     expect(
-      find.descendant(of: row, matching: find.byType(SwitchListTile)),
+      find.descendant(of: row, matching: find.byType(MxSwitchRow)),
       findsNothing,
       reason: 'the row must not mirror reminder state',
     );

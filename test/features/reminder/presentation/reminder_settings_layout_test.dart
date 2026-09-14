@@ -13,6 +13,7 @@ import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/features/reminder/presentation/widgets/items/reminder_toggle_row_widget.dart';
 import 'package:memox/features/reminder/presentation/widgets/sections/reminder_banner_section_widget.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
+import 'package:memox/shared/widgets/mx_switch.dart';
 import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 
 /// The M6 geometry contract (G1, G3, G4, G5, G7, G8), measured with `getRect`
@@ -33,7 +34,7 @@ void main() {
     ) async {
       harness.platform.permission = ReminderPermission.denied;
       await harness.pump(tester);
-      await tester.tap(find.byType(Switch));
+      await tester.tap(find.byType(MxSwitch));
       await tester.pumpAndSettle();
 
       // Schedule card, banner, quiet info panel — three surfaces once R11
@@ -119,7 +120,7 @@ void main() {
 
       final atRest = cardHeight();
 
-      await tester.tap(find.byType(Switch));
+      await tester.tap(find.byType(MxSwitch));
       await tester.pump();
       final whileSubmitting = cardHeight();
 
@@ -170,7 +171,7 @@ void main() {
           matching: find.text(english.reminderToggleLabel),
         ),
       );
-      final toggle = tester.getRect(find.byType(Switch));
+      final toggle = tester.getRect(find.byType(MxSwitch));
 
       expect(label.center.dy, closeTo(toggle.center.dy, 0.5));
     });
@@ -250,7 +251,7 @@ void main() {
     ) async {
       await harness.pump(tester);
 
-      expect(tester.getRect(find.byType(Switch)).height, greaterThan(0));
+      expect(tester.getRect(find.byType(MxSwitch)).height, greaterThan(0));
       expect(
         tester.getRect(find.text(english.reminderTimeLabel)).height,
         greaterThan(0),
@@ -302,7 +303,7 @@ void main() {
           textScale: 2,
           locale: locale,
         );
-        await tester.tap(find.byType(Switch));
+        await tester.tap(find.byType(MxSwitch));
         await tester.pumpAndSettle();
 
         // Schedule card + banner + the always-present info panel (R11).
@@ -324,7 +325,7 @@ void main() {
         permission: ReminderPermission.denied,
       );
       await harness.pump(tester);
-      await tester.tap(find.byType(Switch));
+      await tester.tap(find.byType(MxSwitch));
       await tester.pumpAndSettle();
 
       final BuildContext bannerContext = tester.element(
@@ -416,7 +417,7 @@ void main() {
           locale: locale,
         );
 
-        await tester.tap(find.byType(Switch));
+        await tester.tap(find.byType(MxSwitch));
         await tester.pumpAndSettle();
 
         expect(
@@ -446,7 +447,7 @@ void main() {
         permission: ReminderPermission.denied,
       );
       await harness.pump(tester);
-      await tester.tap(find.byType(Switch));
+      await tester.tap(find.byType(MxSwitch));
       await tester.pumpAndSettle();
 
       final BuildContext bannerContext = tester.element(
@@ -492,7 +493,7 @@ void main() {
         locale: const Locale('vi'),
         brightness: Brightness.dark,
       );
-      await tester.tap(find.byType(Switch));
+      await tester.tap(find.byType(MxSwitch));
       await tester.pumpAndSettle();
 
       expect(find.byType(MxCard), findsNWidgets(3));

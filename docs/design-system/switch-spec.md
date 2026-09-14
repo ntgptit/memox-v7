@@ -135,6 +135,19 @@ thumb/track outline) — chỉ là không đi qua chính composition `MxSwitchRo
 
 ## 5. Kết luận
 
+**Đã thực hiện theo handoff (M100.92).** Kết luận "không có task implement"
+bên dưới là quyết định trước Tokyo redesign. Từ M100.92:
+
+- `MxSwitch` tự vẽ track 44×26, thumb 20 cách mép 3, trượt 160ms
+  (`AppDurations.toggle`).
+- Thumb là `surfaceBright` ở cả off lẫn on; track outline trong suốt.
+- Disabled giữ màu riêng cho từng slot (D3).
+
+Thumb lúc nghỉ đo được 1.32:1 (light) và 1.36:1 (dark), dưới sàn 3:1. Chủ dự
+án chấp nhận theo owner decision 5, và `app_toggle_themes_test.dart` ghim đúng
+các con số này. `MxSwitchRow` là một node semantics có `toggled`. Theme
+`Switch` thô chỉ còn là lưới an toàn.
+
 Không có task implement.
 
 Track/thumb geometry và thời lượng chuyển động không đạt được qua

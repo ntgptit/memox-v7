@@ -14,13 +14,28 @@ import '../../../support/color_math.dart';
 /// `outline` on `surfaceContainerHighest` — is the version that reads fine as
 /// two token names and measures 2.79:1 as a pair. So every check below resolves
 /// both halves from the built theme and divides them.
-/// **The resting switch the owner accepted under 3:1** (2026-09-13, M100.87).
-/// The handoff's `outline` on its `surfaceContainerHighest` track reads 2.74:1
-/// in light and 1.96:1 in dark; both are pinned at those figures so the
-/// accepted state cannot sink further. The Switch spec pass decides the thumb.
+/// **The resting switch the owner accepted under 3:1** (M100.87, M100.92).
+/// The handoff thumb — `surfaceBright` on its `surfaceContainerHighest` track —
+/// reads 1.32:1 in light and 1.36:1 in dark (owner decision 5); both are
+/// pinned at those figures so the accepted state cannot sink further. Until
+/// the Switch pass it was `outline`, at 2.74:1 and 1.96:1.
 const Map<String, double> _acceptedRestingThumb = <String, double>{
-  'light': 2.7,
+  'light': 1.3,
+  'dark': 1.3,
+};
+
+/// The resting track against the page, accepted the same way: 1.25:1 in light
+/// and 1.92:1 in dark, with no outline drawn around it since M100.92.
+const Map<String, double> _acceptedRestingTrack = <String, double>{
+  'light': 1.2,
   'dark': 1.9,
+};
+
+/// How loud a disabled knob is allowed to read on its track: 2.32:1 in light
+/// and 2.83:1 in dark, measured at M100.92. A ceiling, not a floor.
+const Map<String, double> _disabledKnobCeiling = <String, double>{
+  'light': 2.4,
+  'dark': 2.9,
 };
 
 void main() {
@@ -69,60 +84,53 @@ void main() {
       }
     });
 
-    test('the M3 pairing is what clears the floor, not a substitute', () {
-      // **This test asserted the opposite until M100.22, and it is worth saying
-      // why rather than just flipping it.** It pinned that `outline` on the
-      // resting track measures *under* the floor — which was true, and which
-      // made the substitution (`onSurfaceVariant` on `surfaceMuted`) look
-      // load-bearing. What it actually did was hold the palette's failure in
-      // place: any agent restoring M3's own pairing would have been failed by
-      // the suite for it, and the only way to pass was to keep the component
-      // off its default.
-      //
-      // The floor is now cleared by the roles themselves — `borderControl`
-      // moved 5.07 L\* in light and 5.73 in dark — so the assertion can be what
-      // it should always have been: the canonical pairing works.
+    test('the track, not the thumb, tells on from off', () {
+      // **Until M100.92 this pinned M3's `outline` thumb on the resting track**
+      // — the pairing M100.22 retuned the palette to clear. The handoff thumb
+      // is `surfaceBright` in both states, so the thumb no longer changes with
+      // the state; the track does, and that change is what WCAG 1.4.11 asks
+      // 3:1 of.
       for (final entry in themes.entries) {
-        final scheme = entry.value.colorScheme;
+        final t = entry.value;
 
         expect(
-          contrast(scheme.outline, scheme.surfaceContainerHighest),
-          greaterThanOrEqualTo(_acceptedRestingThumb[entry.key]!),
-          reason:
-              '${entry.key}: M3 puts the resting thumb (`outline`) on the '
-              'resting track (`surfaceContainerHighest`). If this fails, the '
-              'fix is a tone in AppBorderColors — not a different role on the '
-              'switch.',
+          thumb(t, const {}),
+          thumb(t, const {WidgetState.selected}),
+          reason: '${entry.key}: the thumb changed role with the state',
+        );
+        expect(
+          contrast(track(t, const {WidgetState.selected}), track(t, const {})),
+          greaterThanOrEqualTo(graphic),
+          reason: '${entry.key}: the on and off tracks read as one colour',
         );
       }
     });
 
     test('the track is bounded against the surface in both states', () {
-      // Off, the fill is a near-surface tile and the outline does it. On, M3
-      // drops the outline entirely and the fill has to carry it alone —
-      // `primary` on the card is 7.27:1 in light and 10.01:1 in dark since
-      // M100.18, which is why the app stopped drawing an on-state edge at
-      // M100.22. Either half satisfies this; the point is that one of them
-      // must.
+      // No outline draws in either state since M100.92, so the fill is the
+      // boundary: `primary` clears 3:1 against the page when on, and the
+      // resting track holds its accepted figure. **The edge is composited
+      // before anything reads it** — `contrast` ignores alpha, and a
+      // transparent outline read raw is black, a boundary nothing paints.
       for (final entry in themes.entries) {
         final t = entry.value;
         final ground = t.colorScheme.surface;
 
-        for (final states in const <Set<WidgetState>>[
-          <WidgetState>{},
-          <WidgetState>{WidgetState.selected},
-        ]) {
-          final edge = contrast(trackEdge(t, states), ground);
-          final fill = contrast(track(t, states), ground);
-
-          expect(
-            edge >= graphic || fill >= graphic,
-            isTrue,
-            reason:
-                '${entry.key}: with states $states neither the track nor its '
-                'outline separates the switch from the card behind it',
-          );
-        }
+        expect(
+          Color.alphaBlend(trackEdge(t, const {}), ground),
+          ground,
+          reason: '${entry.key}: the resting track grew an outline again',
+        );
+        expect(
+          contrast(track(t, const {}), ground),
+          greaterThanOrEqualTo(_acceptedRestingTrack[entry.key]!),
+          reason: '${entry.key}: the resting track sank into the page',
+        );
+        expect(
+          contrast(track(t, const {WidgetState.selected}), ground),
+          greaterThanOrEqualTo(graphic),
+          reason: '${entry.key}: the selected track sank into the page',
+        );
       }
     });
 
@@ -303,23 +311,16 @@ void main() {
         // report the disabled switch as the louder of the two.
         final disabledKnob = Color.alphaBlend(thumb(t, off), track(t, off));
 
-        // **Dark is inverted, and recorded rather than hidden** (M100.87).
-        // With the handoff's resting thumb at 1.96:1, the disabled knob
-        // (2.83:1) reads louder than a live one. Pinned at that figure until
-        // the Switch spec pass lands the kit's own disabled treatment — the
-        // whole control at 38% — which is the fix, not a palette move.
-        if (entry.key == 'dark') {
-          expect(
-            contrast(disabledKnob, track(t, off)),
-            lessThanOrEqualTo(2.9),
-            reason: 'dark: the disabled switch got louder still',
-          );
-          continue;
-        }
+        // **Inverted in both modes, and recorded rather than hidden**
+        // (M100.87, M100.92). The handoff's resting thumb reads 1.32:1 and
+        // 1.36:1, and the disabled knob 2.32:1 and 2.83:1 — louder than a live
+        // one. D3 keeps a colour per disabled slot rather than the kit's whole
+        // control at 38%, so the figures are a ceiling the knob cannot grow
+        // past.
         expect(
           contrast(disabledKnob, track(t, off)),
-          lessThan(contrast(thumb(t, const {}), track(t, const {}))),
-          reason: '${entry.key}: the disabled switch is as loud as a live one',
+          lessThanOrEqualTo(_disabledKnobCeiling[entry.key]!),
+          reason: '${entry.key}: the disabled switch got louder still',
         );
       }
     });

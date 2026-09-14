@@ -6,10 +6,10 @@ import '../../core/theme/foundations/app_motion_policy.dart';
 import '../../core/theme/foundations/app_radius.dart';
 import '../../core/theme/foundations/app_sizing.dart';
 import '../../core/theme/foundations/app_spacing.dart';
-import '../../core/theme/foundations/app_stroke.dart';
 import '../../core/theme/typography/app_typography.dart';
 import '../../core/theme/extensions/theme_context_extension.dart';
 import 'mx_icon.dart';
+import 'mx_icon_button.dart';
 import '../../core/theme/extensions/app_ink.dart';
 
 /// The search bar that sits under an app bar.
@@ -25,15 +25,12 @@ import '../../core/theme/extensions/app_ink.dart';
 /// and the two want different result rows.
 ///
 /// **A custom filled mobile control, not an `InputDecorator` clone** (M100.36
-/// 4E). It keeps its own surface model — a well in the page at rest, the paper
-/// once focused — and takes its *boundary* from the same system every other
-/// control uses: `scheme.outline` at rest, `scheme.primary` with focus, at
-/// [AppStroke.control]. Until M100.36 the resting border was the fill's own
-/// colour, so the pill had no boundary at all: 1.09:1 against the light page,
-/// identified only by its glyph and placeholder (#433 §4.1). A control that is
-/// somewhere to type is identified by its edge, which is what WCAG 1.4.11 asks
-/// 3:1 of. No shadow: search is flat, and the fill and the edge each carry a
-/// different fact.
+/// 4E), **drawn to the handoff SearchField since M100.92**: `surfaceContainer`
+/// with a 1px `outlineVariant` ghost edge at rest; `surfaceContainerLowest` with
+/// a 1px `primary` edge and an accent search glyph while typing; radius 12; a
+/// 52 floor ([AppSizing.input]). The resting edge is the hairline the text field
+/// uses, whose ratios `control_border_grounds_test` pins (owner decision 5): the
+/// fill identifies the control. No shadow: search is flat.
 ///
 /// **Focus changes the fill and the border, never a size.** The border is drawn
 /// outside the box (`strokeAlignOutside`) so gaining a colour on focus moves
@@ -46,14 +43,13 @@ import '../../core/theme/extensions/app_ink.dart';
 /// [semanticLabel] is required and is the field's name in every state; the
 /// visible hint is excluded from semantics so the two are never read twice.
 ///
-/// **It grows with the text, from a floor of 48** (#433 F2). The pill used to
+/// **It grows with the text, from a floor of 52** (#433 F2). The pill used to
 /// be pinned at `AppSizing.touchTarget` with `expands: true`, which made a
 /// documented *floor* into a ceiling: from `textScaler` 2.5 the placeholder
 /// was clipped to the box. The floor is a floor now.
-/// The inset that brings a one-line field to [AppSizing.touchTarget] at the
-/// default scale: (48 − 21) / 2. Off-grid on purpose — the target is the
-/// contract, and the grid step above it would make the pill 52.
-const double _fieldInset = (AppSizing.touchTarget - _lineHeight) / 2;
+/// The inset that brings a one-line field to [AppSizing.input] at the default
+/// scale: (52 − 21) / 2. Off-grid on purpose — the field height is the contract.
+const double _fieldInset = (AppSizing.input - _lineHeight) / 2;
 
 /// `body-md`'s line at the default scale — 14 × 1.5, the handoff's body role.
 /// Derived from the rung's tokens: a literal here stayed 20 while the rung's
@@ -69,8 +65,13 @@ class MxSearchField extends StatefulWidget {
     required this.clearSemanticLabel,
     this.resultCount,
     this.shouldAutofocus = false,
+    this.onVoice,
+    this.voiceSemanticLabel,
     super.key,
-  });
+  }) : assert(
+         (onVoice == null) == (voiceSemanticLabel == null),
+         'A voice slot has a callback and a label, or it is absent.',
+       );
 
   final String value;
   final ValueChanged<String> onChanged;
@@ -100,6 +101,15 @@ class MxSearchField extends StatefulWidget {
   /// tap a second time into the field they just asked for is a step with no
   /// information in it. The HTML kit's `autofocus` attribute, as a parameter.
   final bool shouldAutofocus;
+
+  /// The handoff SearchField's trailing voice glyph, shown while the field is
+  /// empty (a query swaps it for clear). No production caller passes it yet
+  /// (owner decision 10); omit it and the slot is absent.
+  final VoidCallback? onVoice;
+
+  /// Already-localized name for the voice button. Given with [onVoice] or not
+  /// at all.
+  final String? voiceSemanticLabel;
 
   @override
   State<MxSearchField> createState() => _MxSearchFieldState();
@@ -137,7 +147,6 @@ class _MxSearchFieldState extends State<MxSearchField> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final semantic = context.semanticColors;
     final hasQuery = widget.value.isNotEmpty;
     final count = widget.resultCount;
     // **Its own rung, and it is the pill's to own** (M100.36 4P analogue). The
@@ -159,20 +168,21 @@ class _MxSearchFieldState extends State<MxSearchField> {
       // frame. Reduced motion drops the fade and keeps the state.
       duration: AppMotionPolicy.durationOf(context, AppDurations.fast),
       curve: AppDurations.standard,
-      // A floor, as `AppSizing` names it. The row inside grows with the text
-      // and the clear button already stands 48 tall, so the pill is 48 at the
-      // default scale and taller only when the text needs it.
-      constraints: const BoxConstraints(minHeight: AppSizing.touchTarget),
+      // A floor, as `AppSizing` names it: the handoff field's 52. The row
+      // inside grows with the text, so the pill is taller only when the text
+      // needs it.
+      constraints: const BoxConstraints(minHeight: AppSizing.input),
       decoration: BoxDecoration(
-        color: _hasFocus ? colors.surface : semantic.surfaceMuted,
-        borderRadius: BorderRadius.circular(AppRadius.full),
-        // `strokeAlignOutside` keeps the stroke out of the layout: a border
-        // inside the box would make the pill 51 where the touch target needs
-        // its 48, and at 320 wide with `textScaler` 2.0 the chrome has no two
-        // pixels to spare.
+        color: _hasFocus
+            ? colors.surfaceContainerLowest
+            : colors.surfaceContainer,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        // `strokeAlignOutside` keeps the stroke out of the layout, so gaining a
+        // colour on focus moves nothing beside the pill. The width is
+        // `Border.all`'s default 1 — the handoff's 1px, `AppStroke.hairline`,
+        // which `mx_search_field_test` pins.
         border: Border.all(
-          color: _hasFocus ? colors.primary : colors.outline,
-          width: AppStroke.control,
+          color: _hasFocus ? colors.primary : colors.outlineVariant,
           strokeAlign: BorderSide.strokeAlignOutside,
         ),
       ),
@@ -185,7 +195,11 @@ class _MxSearchFieldState extends State<MxSearchField> {
         // content by its own rules, and a glyph centred in a 48-tall box does
         // not land where a line of text centred in one does.
         children: <Widget>[
-          const MxIcon(Icons.search, size: MxIconSize.xs),
+          MxIcon(
+            Icons.search,
+            size: MxIconSize.xs,
+            ink: _hasFocus ? AppInk.accent : AppInk.quiet,
+          ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Semantics(
@@ -214,11 +228,16 @@ class _MxSearchFieldState extends State<MxSearchField> {
                   border: InputBorder.none,
                   enabledBorder: InputBorder.none,
                   focusedBorder: InputBorder.none,
+                  // The pill paints the fill and owns the height. The form
+                  // field theme is filled with a 52 floor since M100.92, and
+                  // `applyDefaults` would lay both inside the pill.
+                  filled: false,
+                  constraints: const BoxConstraints(),
                   // `isCollapsed`, not `isDense`: dense keeps some of the
                   // decorator's own vertical padding, and that padding is what
                   // biased the text off the glyph's line. The inset is stated
                   // on the field rather than the pill so the 48-tall clear
-                  // button does not add to it. **The field itself stands 48**
+                  // button does not add to it. **The field itself stands 52**
                   // (A20.1 P2-17): the pill was 48 while the field inside it
                   // was 44, and Android's target guideline reads the node
                   // that takes the tap, which is the field.
@@ -230,47 +249,67 @@ class _MxSearchFieldState extends State<MxSearchField> {
               ),
             ),
           ),
-          // The count and the clear button appear together, and only once
-          // something has been typed — an empty field with a clear button on it
-          // offers to undo nothing.
-          if (hasQuery) ...<Widget>[
-            if (count != null) ...<Widget>[
-              Text(
-                '$count',
-                // Through the wght axis — a bare `fontWeight:` paints the
-                // rung's old weight.
-                style:
-                    AppTypography.withWeight(
-                          context.texts.labelSmall!,
-                          FontWeight.w600,
-                        )
-                        .inked(context, AppInk.quiet)
-                        .copyWith(
-                          letterSpacing: AppTypography.sectionLabelTracking,
-                          // Tabular figures so a count ticking 9 -> 10 does not shift
-                          // the button beside it.
-                          fontFeatures: const <FontFeature>[
-                            FontFeature.tabularFigures(),
-                          ],
-                        ),
-              ),
-              const SizedBox(width: AppSpacing.xs),
-            ],
-            // The design's clear button is 32 square. This one is 48, because
-            // that is the floor the same design declares for anything a finger
-            // has to hit, and `mx_stress_test.dart` enforces it.
-            IconButton(
-              onPressed: () => widget.onChanged(''),
-              tooltip: widget.clearSemanticLabel,
-              icon: Icon(
-                Icons.close,
-                size: AppIconSize.xs,
-                semanticLabel: widget.clearSemanticLabel,
-              ),
-            ),
-          ],
+          ..._trailingControls(context, hasQuery: hasQuery, count: count),
         ],
       ),
     );
   }
+
+  /// What follows the field: the count and clear once there is a query, the
+  /// voice glyph while there is none.
+  ///
+  /// Split out of [build] at the guard's 100-line ceiling when the voice slot
+  /// arrived (M100.92); the order and the conditions are unchanged.
+  List<Widget> _trailingControls(
+    BuildContext context, {
+    required bool hasQuery,
+    required int? count,
+  }) => <Widget>[
+    // The count and the clear button appear together, and only once something
+    // has been typed — an empty field with a clear button on it offers to undo
+    // nothing.
+    if (hasQuery) ...<Widget>[
+      if (count != null) ...<Widget>[
+        Text(
+          '$count',
+          // Through the wght axis — a bare `fontWeight:` paints the rung's old
+          // weight.
+          style:
+              AppTypography.withWeight(
+                    context.texts.labelSmall!,
+                    FontWeight.w600,
+                  )
+                  .inked(context, AppInk.quiet)
+                  .copyWith(
+                    letterSpacing: AppTypography.sectionLabelTracking,
+                    // Tabular figures so a count ticking 9 -> 10 does not
+                    // shift the button beside it.
+                    fontFeatures: const <FontFeature>[
+                      FontFeature.tabularFigures(),
+                    ],
+                  ),
+        ),
+        const SizedBox(width: AppSpacing.xs),
+      ],
+      // The design's clear button is 32 square. This one is 48, because that is
+      // the floor the same design declares for anything a finger has to hit,
+      // and `mx_stress_test.dart` enforces it.
+      IconButton(
+        onPressed: () => widget.onChanged(''),
+        tooltip: widget.clearSemanticLabel,
+        icon: Icon(
+          Icons.close,
+          size: AppIconSize.xs,
+          semanticLabel: widget.clearSemanticLabel,
+        ),
+      ),
+    ],
+    // The handoff's voice glyph while empty; a query swaps it for clear.
+    if (!hasQuery && widget.onVoice != null)
+      MxIconButton(
+        icon: Icons.mic_none,
+        semanticLabel: widget.voiceSemanticLabel!,
+        onPressed: widget.onVoice,
+      ),
+  ];
 }
