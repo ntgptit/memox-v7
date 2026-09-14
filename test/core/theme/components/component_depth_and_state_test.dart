@@ -122,9 +122,16 @@ void main() {
 
   group('BottomSheet drag handle', () {
     // `_DragHandle` is `Semantics(button: true, onTap: …)` padded to
-    // `kMinInteractiveDimension`, so it is a control and 1.4.11's 3:1 applies.
-    // `borderSubtle` gave 1.45 and 2.04 on the sheet it sits on.
-    test('reads as a control on the sheet it sits on', () {
+    // `kMinInteractiveDimension`, so it is a control and 1.4.11 asks 3:1.
+    //
+    // **Under 3:1 since M100.93, by owner decision 5.** The handoff grabber is
+    // `outlineVariant` on `surfaceContainerHigh`: 1.30:1 in light and 1.05:1
+    // in dark. Control edges keep the kit hex even under 3:1 and the gate pins
+    // the measured figure as the floor, so a change that lowers it still fails
+    // here. Until M100.93 this was 3:1 on `onSurfaceVariant`.
+    const floors = <String, double>{'light': 1.30, 'dark': 1.05};
+
+    test('holds the measured floor on the sheet it sits on', () {
       for (final entry in themes.entries) {
         final theme = entry.value;
         final handle = WidgetStateProperty.resolveAs<Color?>(
@@ -134,7 +141,7 @@ void main() {
 
         expect(
           contrast(handle, theme.bottomSheetTheme.backgroundColor!),
-          greaterThanOrEqualTo(3),
+          greaterThanOrEqualTo(floors[entry.key]!),
           reason:
               '${entry.key}: the handle is the only thing saying this sheet '
               'can be dragged or dismissed',

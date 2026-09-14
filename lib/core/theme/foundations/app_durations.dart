@@ -17,6 +17,9 @@ abstract final class AppDurations {
   /// Handoff Switch: the track colour and the thumb's slide.
   static const Duration toggle = Duration(milliseconds: 160);
 
+  /// Handoff BottomSheet: a modal sheet's enter and exit (D20).
+  static const Duration sheet = Duration(milliseconds: 260);
+
   /// The app's two easing curves.
   ///
   /// Named for the same reason the durations are: a `Curves.decelerate` written

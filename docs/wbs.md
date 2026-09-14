@@ -800,6 +800,46 @@ không nhầm chúng là một phase.
     Test đỏ đúng lý do trước khi sửa: compile lỗi `mx_dialog_route.dart`,
     `showMxDialog` và `dialogMd`; barrier `0.48` ≠ `0.45`; radius `16` ≠
     `20`.
+  - PLAN-DEV-24.1 — plan truyền `constraints: BoxConstraints(maxHeight:
+    MediaQuery.sizeOf(context).height * 0.85)` với `context` của nơi gọi. Full
+    host suite ra `-41`, cả 41 test ở `test/features/deck/presentation`. Tap
+    vào item của sheet rơi ra ngoài view, ví dụ "Rename" ở `y = 1033` trên
+    view cao 852.
+
+    Nguyên nhân: harness `pumpDeckApp` bọc cả `MemoxApp` bằng một
+    `MediaQueryData(...)` tạo mới. Khi đã có `MediaQuery` phía trên,
+    `WidgetsApp` dùng lại nó thay vì đọc view, nên mọi route thấy màn hình
+    0×0 và trần sheet thành 0.
+
+    Đã sửa hai phía:
+    - `showMxSheet` đặt trần trong `builder` và đọc `MediaQuery.sizeOf` từ
+      `sheetContext`. Route nằm trên root navigator, nên đó là kích thước
+      view, bất kể nơi gọi đang ở dưới `MediaQuery` nào. Không truyền
+      `constraints:` nữa, nên mặc định `maxWidth: 640` của SDK
+      (`widget.constraints ?? theme ?? defaults`) được giữ.
+    - `pumpDeckApp` dùng `MediaQueryData.fromView(tester.view).copyWith(...)`,
+      đúng mẫu mà các test khác đã ghi chú.
+
+    Đã kiểm và loại một giả thuyết sai trong lúc chẩn đoán: `curve` của
+    `AnimationStyle` không phải nguyên nhân. Test chẩn đoán qua chính harness
+    deck cho action sheet lên đúng chỗ khi có curve (value 1.0, sheet ở
+    y 523–852), nên `Cubic(0.2,0,0,1)` của D20 được giữ.
+  - PLAN-DEV-24.2 — trần đặt trong `builder` chỉ giới hạn phần nội dung. SDK
+    xếp khe drag handle cao `kMinInteractiveDimension` (48) phía trên child,
+    nên test 85% của plan ra `772.2 > 724.2`. Trần nội dung trừ đi
+    `kMinInteractiveDimension`, để cả sheet dừng ở 85%.
+  - PLAN-DEV-24.3 — plan không nêu `component_depth_and_state_test` "reads as
+    a control on the sheet it sits on", test ghim handle ≥ 3:1. Grabber
+    `outlineVariant` trên `surfaceContainerHigh` đo được 1.30:1 (light) và
+    1.05:1 (dark). Owner decision 5: "Control edges and status dots keep the
+    kit hex even under 3:1; the gate pins the measured figure as the new
+    floor." Test giờ ghim sàn 1.30 / 1.05. Test "the grab is visible" (kéo
+    thì đậm lên) giữ nguyên và vẫn xanh. Dark 1.05:1 gần như không thấy;
+    ghi vào báo cáo phase.
+  - PLAN-DEV-24.4 — plan không có test cho 260ms. Thêm test đọc
+    `ModalRoute.transitionDuration` của sheet. SDK đọc
+    `sheetAnimationStyle?.duration` (`bottom_sheet.dart:1090`), nên test này
+    đo đúng thứ D20 đặt.
 - **Editable documents:** `docs/wbs.md`,
   `docs/design-system/tokyo-component-mapping.md`,
   `docs/superpowers/plans/2026-09-13-tokyo-handoff-redesign.md` (ghi deviation

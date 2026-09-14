@@ -75,6 +75,33 @@ void main() {
     });
   });
 
+  group('the bottom sheet (handoff BottomSheet, M100.93)', () {
+    test('container high, 20 top corners, a 36x4 outlineVariant grabber', () {
+      for (final entry in themes.entries) {
+        final sheet = entry.value.bottomSheetTheme;
+        final scheme = entry.value.colorScheme;
+
+        expect(sheet.backgroundColor, scheme.surfaceContainerHigh);
+        expect(sheet.dragHandleSize, const Size(36, 4));
+        expect(
+          WidgetStateProperty.resolveAs<Color?>(
+            sheet.dragHandleColor,
+            const <WidgetState>{},
+          ),
+          scheme.outlineVariant,
+          reason: entry.key,
+        );
+        expect(
+          (sheet.shape! as RoundedRectangleBorder).borderRadius,
+          const BorderRadius.vertical(top: Radius.circular(AppRadius.card)),
+        );
+        // D21: `shadow-chrome` is invisible over the scrim, and the theme has
+        // no `BoxShadow` slot.
+        expect(sheet.elevation, AppElevation.none, reason: entry.key);
+      }
+    });
+  });
+
   group('the dialog (handoff Dialog, M100.93)', () {
     test('radius 20, no edge, raised with the Material shadow (D19)', () {
       for (final entry in themes.entries) {

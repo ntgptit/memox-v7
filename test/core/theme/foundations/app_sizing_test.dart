@@ -52,6 +52,9 @@ void main() {
         // The handoff Dialog's two maximum widths (D5).
         ('dialogMd', AppSizing.dialogMd),
         ('dialogLg', AppSizing.dialogLg),
+        // The handoff BottomSheet grabber.
+        ('sheetHandleWidth', AppSizing.sheetHandleWidth),
+        ('sheetHandleHeight', AppSizing.sheetHandleHeight),
       ]) {
         expect(
           value % 4,

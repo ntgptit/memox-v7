@@ -67,8 +67,12 @@ Future<GoRouter> pumpDeckApp(
         deckRepositoryProvider.overrideWithValue(repository),
         clockProvider.overrideWithValue(() => deckTestNow),
       ],
+      // **The view's own data, copied** — never a fresh `MediaQueryData`. This
+      // wraps the whole app, so `WidgetsApp` adopts it instead of reading the
+      // view, and a fresh one tells every route the screen is 0x0. Sheets size
+      // their 85% cap from it (M100.93), which is how that surfaced.
       child: MediaQuery(
-        data: MediaQueryData(
+        data: MediaQueryData.fromView(tester.view).copyWith(
           textScaler: TextScaler.linear(textScale),
           platformBrightness: isDark ? Brightness.dark : Brightness.light,
         ),

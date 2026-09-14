@@ -372,7 +372,7 @@
     },
     {
       "file": "lib/core/theme/components/surfaces/app_bottom_sheet_theme.dart",
-      "line": 14,
+      "line": 19,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -383,7 +383,7 @@
     },
     {
       "file": "lib/core/theme/components/surfaces/app_bottom_sheet_theme.dart",
-      "line": 60,
+      "line": 58,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "blend-source",

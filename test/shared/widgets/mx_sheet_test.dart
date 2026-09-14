@@ -3,6 +3,7 @@ import 'dart:ui' show Tristate;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
+import 'package:memox/core/theme/foundations/app_durations.dart';
 import 'package:memox/shared/widgets/mx_sheet.dart';
 import 'package:memox/shared/widgets/mx_sheet_insets.dart';
 
@@ -120,6 +121,35 @@ void main() {
       expect(sheet.bottom, lessThanOrEqualTo(800 - 30));
     },
   );
+
+  testWidgets('a tall sheet stops at 85% of the view and scrolls inside', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(393, 852);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await pumpOpener(
+      tester,
+      builder: (_) =>
+          const SingleChildScrollView(child: SizedBox(height: 2000)),
+    );
+
+    expect(
+      tester.getSize(find.byType(BottomSheet)).height,
+      lessThanOrEqualTo(852 * 0.85),
+    );
+  });
+
+  testWidgets('the sheet enters over the handoff 260ms (D20)', (tester) async {
+    await pumpOpener(
+      tester,
+      builder: (_) => const MxSheetInsets(child: Text('sheet')),
+    );
+
+    final route = ModalRoute.of(tester.element(find.text('sheet')))!;
+    expect(route.transitionDuration, AppDurations.sheet);
+  });
 
   testWidgets('the barrier covers the view and dismisses', (tester) async {
     await pumpOpener(

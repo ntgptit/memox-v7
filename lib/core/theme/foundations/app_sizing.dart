@@ -110,6 +110,10 @@ abstract final class AppSizing {
   static const double dialogMd = 320;
   static const double dialogLg = 340;
 
+  /// Handoff BottomSheet grabber: 36 × 4.
+  static const double sheetHandleWidth = 36;
+  static const double sheetHandleHeight = 4;
+
   /// The handoff's extended FAB height (`size-fab`). Width is content-driven.
   ///
   /// It was Material's 56 circle as `floatingAction` until M100.90; the kit has

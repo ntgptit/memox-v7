@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/foundations/app_durations.dart';
 import '../../core/theme/foundations/app_motion_policy.dart';
 
 import '../../core/theme/extensions/app_ink.dart';
@@ -32,6 +33,14 @@ import '../../core/theme/foundations/app_spacing.dart';
 /// `mainAxisSize: min` column still takes only what it needs. There is no
 /// caller that wants the cap, so it is not a parameter.
 ///
+/// **The handoff caps it at 85% of the screen instead** (M100.93): taller
+/// content scrolls inside the sheet, so a body that can grow owns a scroll
+/// view. The cap is read from the sheet's own context, not the caller's: the
+/// route sits on the root navigator, so that is the view's size whatever
+/// `MediaQuery` the caller happens to be under — a caller wrapped in a fresh
+/// `MediaQueryData` reports a zero size and would cap the sheet at nothing.
+/// Passing `constraints:` instead would also drop the SDK's own 640 width.
+///
 /// **The handle, the surface, the radius and the depth are `bottomSheetTheme`'s.**
 /// Nothing here paints.
 Future<T?> showMxSheet<T>(
@@ -43,12 +52,30 @@ Future<T?> showMxSheet<T>(
     useRootNavigator: true,
     useSafeArea: true,
     isScrollControlled: true,
-    // Reduced motion reaches the route too. Nothing about the public signature
-    // changes — the caller still passes a builder and gets a future.
-    sheetAnimationStyle: AppMotionPolicy.animationStyleOf(context),
-    builder: builder,
+    // Reduced motion reaches the route too; otherwise the handoff's 260ms on
+    // the standard curve (D20). The public signature does not change.
+    sheetAnimationStyle:
+        AppMotionPolicy.animationStyleOf(context) ??
+        const AnimationStyle(
+          duration: AppDurations.sheet,
+          reverseDuration: AppDurations.sheet,
+          curve: AppDurations.standard,
+        ),
+    builder: (sheetContext) => ConstrainedBox(
+      // Less the drag handle's slot, which the SDK lays out above this child
+      // at `kMinInteractiveDimension`, so the whole sheet stops at the cap.
+      constraints: BoxConstraints(
+        maxHeight:
+            MediaQuery.sizeOf(sheetContext).height * _maxHeightFraction -
+            kMinInteractiveDimension,
+      ),
+      child: builder(sheetContext),
+    ),
   );
 }
+
+/// The handoff BottomSheet's height cap, as a fraction of the screen.
+const double _maxHeightFraction = 0.85;
 
 /// A sheet's title, announced as a heading.
 ///

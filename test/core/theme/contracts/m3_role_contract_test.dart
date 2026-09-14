@@ -290,11 +290,13 @@ void main() {
       test('BottomSheet', () {
         final t = theme.bottomSheetTheme;
 
-        pin('backgroundColor', t.backgroundColor, scheme.surfaceContainerLow);
+        // Handoff BottomSheet (M100.93): the container-high sheet and the
+        // kit's `outlineVariant` grabber (owner decision 5).
+        pin('backgroundColor', t.backgroundColor, scheme.surfaceContainerHigh);
         pin(
           'drag handle',
           (t.dragHandleColor! as WidgetStateProperty<Color?>).resolve(resting),
-          scheme.onSurfaceVariant,
+          scheme.outlineVariant,
         );
       });
 

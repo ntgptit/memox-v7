@@ -814,15 +814,15 @@
       "carriesNoHue": false
     },
     "bottomSheetTheme.backgroundColor": {
-      "hex": "#F1F4FB",
+      "hex": "#E2E7F3",
       "opaque": true,
-      "hue": 221.9999999999999,
-      "saturation": 0.5555555555555536,
-      "chroma": 0.039215686274509776,
-      "lightnessStar": 96.1488668078278,
+      "hue": 222.35294117647055,
+      "saturation": 0.41463414634146306,
+      "chroma": 0.06666666666666665,
+      "lightnessStar": 91.5912928356036,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 11.006134969325274,
-      "hueDistanceFromDarkSurfaceFamily": 9.724137931034619,
+      "hueDistanceFromDeclaredSeed": 10.653193792854609,
+      "hueDistanceFromDarkSurfaceFamily": 9.371196754563954,
       "carriesNoHue": false
     },
     "appBarTheme.backgroundColor": {
@@ -1638,15 +1638,15 @@
       "carriesNoHue": false
     },
     "bottomSheetTheme.backgroundColor": {
-      "hex": "#1B2249",
+      "hex": "#2C356E",
       "opaque": true,
-      "hue": 230.86956521739128,
-      "saturation": 0.46,
-      "chroma": 0.18039215686274507,
-      "lightnessStar": 14.724262510155448,
+      "hue": 231.8181818181818,
+      "saturation": 0.42857142857142855,
+      "chroma": 0.25882352941176473,
+      "lightnessStar": 24.345792841591113,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 2.1365697519338767,
-      "hueDistanceFromDarkSurfaceFamily": 0.854572713643222,
+      "hueDistanceFromDeclaredSeed": 1.187953151143347,
+      "hueDistanceFromDarkSurfaceFamily": 0.09404388714730771,
       "carriesNoHue": false
     },
     "appBarTheme.backgroundColor": {
