@@ -10,8 +10,7 @@ import '../../../support/color_math.dart';
 /// `dialogTheme`.
 ///
 /// **The first group asserts sameness, not correctness.** Every value there is
-/// already decided — `dialogTheme` spends paragraphs on why a dialog is
-/// `elevation: 0` with a hairline — and the only thing that could go wrong is
+/// already decided by `dialogTheme` — and the only thing that could go wrong is
 /// this component quietly keeping Material's own answer while the rest of the
 /// app moved. So the assertions compare the two themes to each other rather
 /// than to a constant: change `dialogTheme` and this either follows or fails.
@@ -36,8 +35,8 @@ void main() {
           picker.elevation,
           dialog.elevation,
           reason:
-              '${entry.key}: the time picker carries a shadow AD-14 does not '
-              'admit — Material default here is 6',
+              '${entry.key}: the time picker keeps its own shadow — Material '
+              'default here is 6',
         );
         expect(
           picker.shape,
@@ -59,10 +58,12 @@ void main() {
 
         expect(
           shape.borderRadius,
-          BorderRadius.circular(AppRadius.lg),
+          BorderRadius.circular(AppRadius.card),
           reason: '${entry.key}: not the app card radius',
         );
-        expect(entry.value.timePickerTheme.elevation, AppElevation.none);
+        // Until M100.93 this was none with a hairline; the handoff Dialog is
+        // raised with no edge.
+        expect(entry.value.timePickerTheme.elevation, AppElevation.raised);
       }
     });
   });

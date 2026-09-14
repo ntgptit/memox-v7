@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/foundations/app_motion_policy.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/state/submit_state.dart';
 import 'mx_confirm_dialog.dart';
 import 'mx_dialog_tone.dart';
+import 'mx_dialog_route.dart';
 
 /// When a confirmation that submits in place should take itself off screen.
 ///
@@ -213,10 +213,8 @@ Future<void> showMxAsyncConfirm(
 }) {
   reset(ProviderScope.containerOf(context));
 
-  return showDialog<void>(
-    // Reduced motion reaches the route as well; the signature is untouched.
-    animationStyle: AppMotionPolicy.animationStyleOf(context),
-    context: context,
+  return showMxDialog<void>(
+    context,
     builder: (dialogContext) =>
         builder(dialogContext, () => Navigator.of(dialogContext).pop()),
   );

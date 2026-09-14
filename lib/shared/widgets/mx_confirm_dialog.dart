@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-
-import '../../core/theme/foundations/app_motion_policy.dart';
+import '../../core/theme/foundations/app_sizing.dart';
 
 import 'mx_action_button.dart';
 import 'mx_button_pair.dart';
 import 'mx_dialog_metrics.dart';
 import 'mx_dialog_tone.dart';
+import 'mx_dialog_route.dart';
 
 /// Whether the confirmed action destroys something.
 ///
@@ -119,6 +119,8 @@ class MxConfirmDialog extends StatelessWidget {
       // here instead of being Material's default two indirections away — and
       // shared, so every dialog in the set is the same dialog.
       insetPadding: MxDialogMetrics.insetPadding,
+      // The handoff's md width (D5).
+      constraints: const BoxConstraints(maxWidth: AppSizing.dialogMd),
       actionsPadding: MxDialogMetrics.actionsPadding,
       // Scrollable because the alternative is silent truncation, not an error.
       // At textScaler 3.0 on a 320-wide screen a translated message clips
@@ -200,10 +202,8 @@ Future<bool> showMxConfirm(
   MxConfirmDialogVariant variant = MxConfirmDialogVariant.normal,
   MxDialogTone? tone,
 }) async {
-  final bool? confirmed = await showDialog<bool>(
-    // Reduced motion reaches the route as well; the signature is untouched.
-    animationStyle: AppMotionPolicy.animationStyleOf(context),
-    context: context,
+  final bool? confirmed = await showMxDialog<bool>(
+    context,
     builder: (dialogContext) => MxConfirmDialog(
       title: title,
       message: message,

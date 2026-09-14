@@ -105,6 +105,11 @@ abstract final class AppSizing {
   static const double switchThumb = 20;
   static const double switchThumbInset = 3;
 
+  /// Handoff Dialog maximum widths (D5): confirm, alert and async confirm are
+  /// `md`; the form dialog is `lg`.
+  static const double dialogMd = 320;
+  static const double dialogLg = 340;
+
   /// The handoff's extended FAB height (`size-fab`). Width is content-driven.
   ///
   /// It was Material's 56 circle as `floatingAction` until M100.90; the kit has

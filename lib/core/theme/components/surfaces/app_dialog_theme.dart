@@ -24,15 +24,16 @@ DialogThemeData buildDialogTheme(ColorScheme scheme, TextTheme texts) =>
       barrierColor: modalBarrierColor(scheme),
       backgroundColor: scheme.surfaceContainerHigh,
       surfaceTintColor: Colors.transparent,
-      // Zero, and nothing paints a shadow in its place: the dialog's depth
-      // is its scrim and its `outlineVariant` edge, and a Material elevation
-      // on top of that would be a second depth mechanism, which AD-14 does
-      // not admit. See F15. The FAB and the SnackBar are the two that keep a
-      // dp value, because their slots have nowhere else to state depth.
-      elevation: AppElevation.none,
+      // The handoff Dialog lifts on `shadow-card`, which has no
+      // `DialogThemeData` slot: the raised elevation's Material shadow stands
+      // in for it (D19), in `materialShadowColor`, which carries the scheme's
+      // shadow in light and nothing in dark. AD-14 makes depth a measured
+      // target per mode rather than one fixed mechanism, so the scrim and a
+      // light-mode shadow together are within it. Radius 20, no edge.
+      elevation: AppElevation.raised,
+      shadowColor: materialShadowColor(scheme),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        side: BorderSide(color: scheme.outlineVariant),
+        borderRadius: BorderRadius.circular(AppRadius.card),
       ),
       titleTextStyle: texts.titleMedium?.copyWith(color: scheme.onSurface),
       contentTextStyle: texts.bodyMedium?.copyWith(

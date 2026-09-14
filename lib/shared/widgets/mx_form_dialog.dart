@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../../core/theme/foundations/app_motion_policy.dart';
+import '../../core/theme/foundations/app_sizing.dart';
 
 import '../../core/theme/foundations/app_spacing.dart';
 import '../../core/theme/extensions/theme_context_extension.dart';
@@ -8,6 +7,7 @@ import 'mx_action_button.dart';
 import 'mx_button_pair.dart';
 import 'mx_dialog_metrics.dart';
 import 'mx_dialog_tone.dart';
+import 'mx_dialog_route.dart';
 import 'mx_text_field.dart';
 import '../../core/theme/extensions/app_ink.dart';
 
@@ -84,6 +84,8 @@ class MxFormDialog extends StatelessWidget {
       // overflows, and no gate says a word.
       insetPadding: MxDialogMetrics.insetPadding,
       actionsPadding: MxDialogMetrics.actionsPadding,
+      // A form is the handoff's lg dialog (D5).
+      constraints: const BoxConstraints(maxWidth: AppSizing.dialogLg),
       // Scrollable for the reason the confirm dialog is: at textScaler 3.0 on a
       // narrow screen the alternative is silent truncation, not an error.
       scrollable: true,
@@ -182,10 +184,8 @@ Future<T?> showMxPromptDialog<T extends Object>(
   String? hintText,
   int? maxLength,
   MxDialogTone? tone,
-}) => showDialog<T>(
-  // Reduced motion reaches the route as well; the signature is untouched.
-  animationStyle: AppMotionPolicy.animationStyleOf(context),
-  context: context,
+}) => showMxDialog<T>(
+  context,
   builder: (dialogContext) => _PromptDialog<T>(
     title: title,
     fieldLabel: fieldLabel,

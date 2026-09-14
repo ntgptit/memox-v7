@@ -22,10 +22,11 @@ DatePickerThemeData buildDatePickerTheme(
 ) {
   return DatePickerThemeData(
     backgroundColor: scheme.surfaceContainerHigh,
-    elevation: AppElevation.none,
+    // The handoff Dialog, as `dialogTheme` states it (M100.93).
+    elevation: AppElevation.raised,
+    shadowColor: materialShadowColor(scheme),
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(AppRadius.lg),
-      side: BorderSide(color: scheme.outlineVariant),
+      borderRadius: BorderRadius.circular(AppRadius.card),
     ),
     headerForegroundColor: scheme.onSurfaceVariant,
     weekdayStyle: texts.labelMedium?.copyWith(color: scheme.onSurfaceVariant),

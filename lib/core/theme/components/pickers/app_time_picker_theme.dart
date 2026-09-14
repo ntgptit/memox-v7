@@ -11,9 +11,7 @@ import '../../foundations/app_spacing.dart';
 /// `_TimePickerDefaultsM3` rather than from the theme every other dialog reads:
 /// elevation 6, a 28px radius and a `surfaceContainerHigh` background. So
 /// without this the reminder flow opened the single surface in the app that
-/// carries a Material shadow and a different corner — while `dialogTheme`
-/// spends a paragraph on why dialogs are `elevation: 0` with a hairline (see
-/// F15 and AD-14).
+/// carries a different shadow and a different corner from every other dialog.
 ///
 /// The values below are `dialogTheme`'s, restated in the slots this component
 /// happens to read. Nothing here is a new decision; every one of them is the
@@ -32,13 +30,12 @@ TimePickerThemeData buildTimePickerTheme(ColorScheme scheme, TextTheme texts) {
 
   return TimePickerThemeData(
     backgroundColor: scheme.surfaceContainerHigh,
-    // Zero, and a hairline instead — the same trade `dialogTheme` makes, for
-    // the same reason: AD-14 admits one depth mechanism and this app spends it
-    // on the surface ladder.
-    elevation: AppElevation.none,
+    // The handoff Dialog, as `dialogTheme` states it (M100.93): raised, radius
+    // 20, no edge. There is no shadow-colour slot here; the `Dialog` this
+    // picker builds reads `dialogTheme.shadowColor`, so dark stays shadowless.
+    elevation: AppElevation.raised,
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(AppRadius.lg),
-      side: BorderSide(color: scheme.outlineVariant),
+      borderRadius: BorderRadius.circular(AppRadius.card),
     ),
     padding: const EdgeInsets.all(AppSpacing.xl),
     helpTextStyle: texts.labelLarge?.copyWith(color: scheme.onSurfaceVariant),

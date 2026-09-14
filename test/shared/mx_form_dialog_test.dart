@@ -1,6 +1,9 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
+import 'package:memox/core/theme/foundations/app_sizing.dart';
 import 'package:memox/shared/widgets/mx_button_pair.dart';
 import 'package:memox/shared/widgets/mx_dialog_metrics.dart';
 import 'package:memox/shared/widgets/mx_form_dialog.dart';
@@ -225,7 +228,8 @@ void main() {
       // `MediaQuery`, so it passed without the layout being involved at all,
       // and would have kept passing if the footer were the full screen.
       //
-      // Measured against the real thing: `393 − 2×inset − 2×actionsInset`.
+      // Measured against the real thing: the dialog is `393 − 2×inset` capped
+      // at the handoff's lg width (M100.93), less `2×actionsInset`.
       // The **view**, not a wrapped `MediaQuery`: `showDialog` pushes onto the
       // Navigator inside `MaterialApp`, which builds its own `MediaQuery` from
       // the view and never sees a wrapper placed above it.
@@ -263,7 +267,8 @@ void main() {
 
       expect(
         width,
-        393 - MxDialogMetrics.inset * 2 - MxDialogMetrics.actionsInset * 2,
+        math.min(393 - MxDialogMetrics.inset * 2, AppSizing.dialogLg) -
+            MxDialogMetrics.actionsInset * 2,
         reason: 'the pair must get the dialog footer, not the screen',
       );
       expect(width, lessThan(393));

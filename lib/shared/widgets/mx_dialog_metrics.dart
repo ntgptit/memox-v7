@@ -20,12 +20,9 @@ import '../../core/theme/foundations/app_spacing.dart';
 /// #348 made one level down: the defect belonged to `MxButtonPair`, not to the
 /// dialog that happened to show it.
 abstract final class MxDialogMetrics {
-  /// How far a dialog sits in from each edge of the screen — Material's own
-  /// `AlertDialog` default.
-  ///
-  /// Off `AppSpacing.scale` on purpose: the scale stops at 32 and this is a
-  /// framework constant, not a design step. Naming it keeps that visible.
-  static const double inset = 40;
+  /// How far a dialog sits in from the sides of the screen: the handoff
+  /// Dialog's 24 (D5). It was Material's `AlertDialog` default of 40.
+  static const double inset = AppSpacing.xl;
 
   /// A dialog's own padding around its action row.
   ///
@@ -35,9 +32,10 @@ abstract final class MxDialogMetrics {
   static const double actionsInset = AppSpacing.xl;
 
   /// The padding a dialog passes to `AlertDialog.insetPadding`.
+  /// Horizontal [inset], vertical 20 — the handoff Dialog's 24 × 20 (D5).
   static const EdgeInsets insetPadding = EdgeInsets.symmetric(
     horizontal: inset,
-    vertical: AppSpacing.xl,
+    vertical: AppSpacing.card,
   );
 
   /// The padding a dialog passes to `AlertDialog.actionsPadding`, for the same

@@ -49,6 +49,9 @@ void main() {
         // (26 - 20) / 2 centres the thumb.
         ('switchTrackWidth', AppSizing.switchTrackWidth),
         ('switchThumb', AppSizing.switchThumb),
+        // The handoff Dialog's two maximum widths (D5).
+        ('dialogMd', AppSizing.dialogMd),
+        ('dialogLg', AppSizing.dialogLg),
       ]) {
         expect(
           value % 4,

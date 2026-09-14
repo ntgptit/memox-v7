@@ -1,6 +1,6 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 744,
+  "scannedFiles": 745,
   "totalSites": 348,
   "byElementKind": {
     "other": 311,
@@ -251,11 +251,11 @@
     },
     {
       "file": "lib/core/theme/components/overlays/app_backdrop_recipe.dart",
-      "line": 13,
+      "line": 15,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
-      "expression": "scheme.scrim.withValues(alpha: scheme.brightness == Brightness.dark ? 0.72 : 0.48)",
+      "expression": "scheme.scrim.withValues(alpha: _scrimAlpha)",
       "token": "colorScheme.scrim",
       "resolved_value_light": "#0A0E27 @ alpha unresolvable",
       "resolved_value_dark": "#000000 @ alpha unresolvable"
@@ -273,7 +273,7 @@
     },
     {
       "file": "lib/core/theme/components/pickers/app_time_picker_theme.dart",
-      "line": 113,
+      "line": 110,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "Colors-material",

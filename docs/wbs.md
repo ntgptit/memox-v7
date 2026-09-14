@@ -753,6 +753,53 @@ không nhầm chúng là một phase.
     `app_bold_text.dart`. Registry giữ nguyên. Thêm hằng có tên
     `AppTypography.breadcrumbCurrentWeight` (cùng dạng `cardPromptWeight`),
     và breadcrumb dùng hằng đó qua `withWeight`.
+  - PLAN-DEV-23.1 — plan Task 23 chỉ đổi theme dialog và bốn helper. Test mục
+    tiêu (`test/shared`, `test/core/theme`) ra `-3`, đều là hợp đồng "mọi
+    dialog cùng một lớp giấy" mà plan không nêu:
+    - `app_time_picker_theme_test` so elevation và shape của time picker với
+      `dialogTheme` (`0` ≠ `3`), và ghim riêng `AppRadius.lg` cùng
+      `AppElevation.none`;
+    - `app_unrendered_component_themes_test` so shape của date picker với
+      dialog (radius 16 có viền `outlineVariant` ≠ radius 20 không viền), và
+      ghim `AppElevation.none`;
+    - `mx_form_dialog_test` "the pair is laid out at the footer width" tính
+      `393 − 2×inset − 2×actionsInset` = 297. Dialog giờ bị trần `dialogLg`
+      340 chặn trước inset 24, nên footer rộng 292.
+
+    Đã sửa:
+    - `buildTimePickerTheme` và `buildDatePickerTheme` nhận đúng giá trị của
+      `dialogTheme`: raised, radius card, không viền. Date picker thêm
+      `shadowColor: materialShadowColor`. Time picker không có slot này;
+      `Dialog` nó dựng đọc `dialogTheme.shadowColor`, nên dark vẫn không có
+      shadow.
+    - Các phép so với `dialogTheme` giữ nguyên. Hai pin hằng của time picker
+      dời sang `AppRadius.card` và `AppElevation.raised`. Date picker so
+      `elevation` và `shadowColor` với dialog thay vì ghim `none`.
+    - Công thức footer thành `min(393 − 2×inset, dialogLg) − 2×actionsInset`.
+
+    AD-14 nguyên tắc 4 cho chiều sâu là mục tiêu đo theo mode (light có
+    shadow, dark không), nên shadow raised của D19 qua `materialShadowColor`
+    nằm trong AD-14. Comment cũ "AD-14 admits one depth mechanism" ở theme
+    dialog và time picker được viết lại.
+  - PLAN-DEV-23.2 — test của plan đo `getSize(find.byType(AlertDialog))`.
+    Render object gốc của `AlertDialog` là lớp padding inset phủ cả view, nên
+    test ra 800 dù dialog đúng 320. Test đo `Material` đầu tiên trong
+    `AlertDialog`, tức mặt giấy.
+  - PLAN-DEV-23.3 — `mx_stress_test` "no file in lib/shared/widgets is missing
+    from it" đỏ vì có file mới `mx_dialog_route.dart`. `MxDialogRoute` là
+    route và hàm push nó, không tự layout gì. Nó vào danh sách loại trừ kèm
+    lý do, cùng dạng với `MxFormSheet`; motion do `mx_dialog_route_test` phủ.
+  - PLAN-DEV-23.4 — plan bảo thêm `insetPadding` cho `mx_alert_dialog` nếu
+    thiếu. Alert thiếu cả `actionsPadding`, nên thêm cả hai để bốn dialog dùng
+    chung hình học `MxDialogMetrics`. Cả bốn helper bỏ tham số
+    `animationStyle: AppMotionPolicy.animationStyleOf(context)`, vì
+    `showMxDialog` tự trả `AnimationStyle.noAnimation` khi reduced motion.
+
+    Script áp dụng dừng ở pre-flight trước khi ghi file nào: một phép kiểm
+    đếm chuỗi nằm trong chính khối nó thay. Đã bỏ phép kiểm đó rồi chạy lại.
+    Test đỏ đúng lý do trước khi sửa: compile lỗi `mx_dialog_route.dart`,
+    `showMxDialog` và `dialogMd`; barrier `0.48` ≠ `0.45`; radius `16` ≠
+    `20`.
 - **Editable documents:** `docs/wbs.md`,
   `docs/design-system/tokyo-component-mapping.md`,
   `docs/superpowers/plans/2026-09-13-tokyo-handoff-redesign.md` (ghi deviation

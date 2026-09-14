@@ -239,12 +239,17 @@ void main() {
       //   shell's answer to how far a list ends from its edge. Nothing lays
       //   out; `mx_content_shell_geometry_test.dart` reads the answer under
       //   a real shell, with and without a floating action.
+      // * `MxDialogRoute` is a route and the function that pushes it. It lays
+      //   nothing out — the dialog it carries is stressed as `MxConfirmDialog`
+      //   — and what it owns, the enter motion and reduced motion, is time,
+      //   which `mx_dialog_route_test.dart` pumps frame by frame.
       expect(files.difference(covered), <String>{
         'MxAsyncConfirmDialog',
         'MxAsyncView',
         'MxBreadcrumbStep',
         'MxFocusRing',
         'MxDialogMetrics',
+        'MxDialogRoute',
         'MxDialogTone',
         'MxFailureLabelsWidget',
         'MxFormSheet',

@@ -35,14 +35,16 @@ void main() {
     test('is the same paper as every other dialog', () {
       // Same reason as the time picker: `_DatePickerDefaultsM3.backgroundColor`
       // is `surfaceContainerHigh` and the dialog carries Material's elevation,
-      // so an unthemed date picker is the one surface with a shadow.
+      // so an unthemed date picker has a shadow and a corner of its own. Since
+      // M100.93 the dialog is raised too, so the depth is compared, not zeroed.
       for (final entry in themes.entries) {
         final picker = entry.value.datePickerTheme;
         final dialog = entry.value.dialogTheme;
 
         expect(picker.backgroundColor, dialog.backgroundColor);
         expect(picker.shape, dialog.shape);
-        expect(picker.elevation, AppElevation.none);
+        expect(picker.elevation, dialog.elevation);
+        expect(picker.shadowColor, dialog.shadowColor);
       }
     });
 

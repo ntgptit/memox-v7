@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_theme.dart';
+import 'package:memox/core/theme/foundations/app_elevation.dart';
+import 'package:memox/core/theme/foundations/app_radius.dart';
 
 import '../../../support/color_math.dart';
 
@@ -59,14 +61,35 @@ void main() {
       }
     });
 
-    test('hides more in dark than in light', () {
-      // Not symmetry for its own sake. A 48% wash over `#F4F5F8` reads as a
-      // dimmed page; the same wash over `#0A082D` is nearly invisible, because
-      // the page is already almost as dark as the scrim.
-      final light = themes['light']!.dialogTheme.barrierColor!;
-      final dark = themes['dark']!.dialogTheme.barrierColor!;
+    test('is the handoff scrim, 45% in both modes', () {
+      // **Until M100.93 this asserted dark hides more than light** (48% and
+      // 72%). The handoff Scrim is the `scrim` role at 45% in both modes, and
+      // the dark page's own depth is the surface ladder's, not the barrier's.
+      for (final entry in themes.entries) {
+        final scheme = entry.value.colorScheme;
+        final expected = scheme.scrim.withValues(alpha: 0.45);
 
-      expect(dark.a, greaterThan(light.a));
+        expect(entry.value.dialogTheme.barrierColor, expected);
+        expect(entry.value.bottomSheetTheme.modalBarrierColor, expected);
+      }
+    });
+  });
+
+  group('the dialog (handoff Dialog, M100.93)', () {
+    test('radius 20, no edge, raised with the Material shadow (D19)', () {
+      for (final entry in themes.entries) {
+        final dialog = entry.value.dialogTheme;
+        final shape = dialog.shape! as RoundedRectangleBorder;
+
+        expect(shape.borderRadius, BorderRadius.circular(AppRadius.card));
+        expect(shape.side, BorderSide.none, reason: entry.key);
+        expect(dialog.elevation, AppElevation.raised, reason: entry.key);
+        expect(
+          dialog.shadowColor,
+          materialShadowColor(entry.value.colorScheme),
+          reason: entry.key,
+        );
+      }
     });
   });
 

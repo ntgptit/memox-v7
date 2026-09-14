@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-
-import '../../core/theme/foundations/app_motion_policy.dart';
+import '../../core/theme/foundations/app_sizing.dart';
 
 import 'mx_action_button.dart';
+import 'mx_dialog_metrics.dart';
 import 'mx_dialog_tone.dart';
+import 'mx_dialog_route.dart';
 
 /// Reports something. It asks nothing, so it has one button.
 ///
@@ -55,6 +56,10 @@ class MxAlertDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      // The dialog set's shared geometry, and the handoff's md width (D5).
+      insetPadding: MxDialogMetrics.insetPadding,
+      actionsPadding: MxDialogMetrics.actionsPadding,
+      constraints: const BoxConstraints(maxWidth: AppSizing.dialogMd),
       // Scrollable for the same reason as the confirm dialog: at a large text
       // scale on a narrow screen the alternative is silent truncation.
       scrollable: true,
@@ -91,10 +96,8 @@ Future<void> showMxAlert(
   required String message,
   required String dismissLabel,
   required MxDialogTone tone,
-}) => showDialog<void>(
-  // Reduced motion reaches the route as well; the signature is untouched.
-  animationStyle: AppMotionPolicy.animationStyleOf(context),
-  context: context,
+}) => showMxDialog<void>(
+  context,
   builder: (dialogContext) => MxAlertDialog(
     title: title,
     message: message,
