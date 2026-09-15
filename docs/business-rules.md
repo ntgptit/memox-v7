@@ -7,8 +7,8 @@
 | **Scope** | Luật nghiệp vụ, validation rule, state machine, edge case của phạm vi MVP. Ngoài phạm vi: quyết định kiến trúc (`architecture.md`), hình dạng dữ liệu (`data-model.md`), luồng người dùng (`use-cases.md`) |
 | **Source of truth for** | BR-xx · validation rule · entity state machine · edge case |
 | **Depends on** | `document-conventions.md`, `product.md`, `architecture.md` |
-| **Updated by task** | M100.10 — BR-268: thứ tự manual, sibling-only, atomic và không đụng dữ liệu cây/học; M99.33 — BR-256…BR-267: Trash và restore (soft-delete một transaction, loại khỏi bề mặt active, tombstone batch, restore hỏi target, undo một batch, retention 30×24h, purge cứng theo batch, chọn nhiều tách theo loại, riêng tư trong Trash); M99.32 — BR-247…BR-255: tìm kiếm toàn thư viện (phạm vi trường, chuẩn hoá dùng chung, debounce/zero-I/O, xếp hạng, nhóm, gộp trùng, keyset, chỉ-đọc và ranh giới điều hướng, cấm index không đo); M99.28 — BR-210…BR-217: Settings v1 (mặc định học toàn cục, theme, ngôn ngữ); M99.27 — BR-203…BR-209: chiều hỏi của self-assess; M5.26 — BR-200…BR-202: Study Home (đọc thư viện thật, workload toàn subtree, ba trạng thái đã tải); M99.24 — BR-182…BR-189: tiến độ theo deck (phạm vi metric, card-day, hai khoảng, quy-về-vị-trí-hiện-tại, phân hoạch Learning/Reviewing, thứ tự, chỉ-đọc, cập nhật trực tiếp); trước đó M99.23 — BR-190…BR-199: Progress overview v1 (hai khối đã đổi chỗ khi #301 và #302 gộp — số ở bảng dưới là số đúng) · M99.29 — BR-218…BR-229: nhắc học hằng ngày (opt-in, giờ địa phương, due-only, một tóm tắt, riêng tư, thứ tự cấp bách, inexact + idempotent scheduling, permission, capability) · M99.30 — BR-230…BR-238: quản lý tag và lọc theo nhiều tag · M99.31 — BR-239…BR-246: mặt đọc của một thẻ và lịch sử học |
-| **Last updated** | 2026-08-31 |
+| **Updated by task** | M100.95 — BR-270 thay BR-80 (bảy giá trị `end_reason`); ba state machine "Card study state", "khoá scheduler" và "Study session" theo BR-13, BR-144, BR-103, BR-164, BR-259 · M100.10 — BR-268: thứ tự manual, sibling-only, atomic và không đụng dữ liệu cây/học; M99.33 — BR-256…BR-267: Trash và restore (soft-delete một transaction, loại khỏi bề mặt active, tombstone batch, restore hỏi target, undo một batch, retention 30×24h, purge cứng theo batch, chọn nhiều tách theo loại, riêng tư trong Trash); M99.32 — BR-247…BR-255: tìm kiếm toàn thư viện (phạm vi trường, chuẩn hoá dùng chung, debounce/zero-I/O, xếp hạng, nhóm, gộp trùng, keyset, chỉ-đọc và ranh giới điều hướng, cấm index không đo); M99.28 — BR-210…BR-217: Settings v1 (mặc định học toàn cục, theme, ngôn ngữ); M99.27 — BR-203…BR-209: chiều hỏi của self-assess; M5.26 — BR-200…BR-202: Study Home (đọc thư viện thật, workload toàn subtree, ba trạng thái đã tải); M99.24 — BR-182…BR-189: tiến độ theo deck (phạm vi metric, card-day, hai khoảng, quy-về-vị-trí-hiện-tại, phân hoạch Learning/Reviewing, thứ tự, chỉ-đọc, cập nhật trực tiếp); trước đó M99.23 — BR-190…BR-199: Progress overview v1 (hai khối đã đổi chỗ khi #301 và #302 gộp — số ở bảng dưới là số đúng) · M99.29 — BR-218…BR-229: nhắc học hằng ngày (opt-in, giờ địa phương, due-only, một tóm tắt, riêng tư, thứ tự cấp bách, inexact + idempotent scheduling, permission, capability) · M99.30 — BR-230…BR-238: quản lý tag và lọc theo nhiều tag · M99.31 — BR-239…BR-246: mặt đọc của một thẻ và lịch sử học |
+| **Last updated** | 2026-09-16 |
 
 Format tuân theo `document-conventions.md` §6.2. Từ khoá MUST / SHOULD / MAY
 theo §3. Prose **không** chứa từ khoá là giải thích, không phải rule (§9).
@@ -336,7 +336,8 @@ phải lặp mấy lần mới nhớ — thứ cần để đánh giá chất l�
 | ID | Status | Rule | Enforced by | Related |
 |---|---|---|---|---|
 | BR-79 | active | `study_sessions.status` MUST có đúng năm giá trị: `in_progress`, `completed`, `abandoned`, `invalidated`, `failed`. | db + invariant Q12 | AD-11, UC-05 |
-| BR-80 | active | `study_sessions.end_reason` MUST có năm giá trị: `user_exit`, `scheduler_reset`, `stale_generation`, `persistence_error`, `interrupted`; NULL khi kết thúc bình thường hoặc chưa kết thúc. | db + invariant Q12 | AD-11, UC-05 |
+| BR-80 | superseded by BR-270 | `study_sessions.end_reason` MUST có năm giá trị: `user_exit`, `scheduler_reset`, `stale_generation`, `persistence_error`, `interrupted`; NULL khi kết thúc bình thường hoặc chưa kết thúc. | db + invariant Q12 | AD-11, UC-05 |
+| BR-270 | active | `study_sessions.end_reason` MUST có đúng bảy giá trị: `user_exit`, `interrupted`, `scheduler_reset`, `scheduler_changed`, `stale_generation`, `persistence_error`, `content_deleted`; NULL khi chưa kết thúc hoặc kết thúc bình thường. | db + invariant Q12 | AD-11, UC-05, BR-103, BR-164, BR-259 |
 | BR-81 | active | Hoàn thành toàn bộ queue MUST cho `completed`, `end_reason` NULL. | repository | UC-05 |
 | BR-82 | active | Người dùng chủ động thoát MUST cho `abandoned`, `end_reason = user_exit`. | repository | UC-05 |
 | BR-83 | active | Reset xảy ra khi session đang mở MUST cho `invalidated`, `end_reason = scheduler_reset`. | repository | UC-07 |
@@ -344,6 +345,12 @@ phải lặp mấy lần mới nhớ — thứ cần để đánh giá chất l�
 | BR-84 | active | Session thuộc generation cũ cố ghi lượt học MUST bị từ chối ghi, và MUST chuyển `invalidated`, `end_reason = stale_generation`. | repository | AD-09, UC-05 |
 | BR-85 | active | Lỗi không thể tiếp tục MUST cho `failed`, `end_reason = persistence_error`. | repository | UC-05 |
 | BR-86 | active | Các lượt học đã ghi thành công trước khi session kết thúc bất thường MUST được giữ, ở mọi trạng thái kết thúc. | repository | UC-05 |
+
+BR-270 thay BR-80 chỉ để đếm lại tập giá trị. BR-80 được viết khi `end_reason`
+có năm giá trị; `content_deleted` vào ở schema v8 cùng Trash (BR-259) và
+`scheduler_changed` vào ở schema v12 khi đổi scheduler tách khỏi reset (BR-164).
+CHECK trong `study.drift` và `StudySessionEndReason` đã nhận cả bảy từ lúc đó, còn
+BR-80 thì không được đếm lại — tài liệu nói năm trong khi database nhận bảy.
 
 BR-86 là điều phân biệt "session hỏng" với "mất tiến độ". Session chuyển sang
 `failed` hay `invalidated` không được kéo theo việc xoá các lượt đã ghi xong —
@@ -1031,26 +1038,29 @@ deck khác.
 
 ### Card study state
 
-Trạng thái suy ra từ `due_at`, không lưu cột riêng.
+Trạng thái suy ra từ `learned_at` và `due_at`, không lưu cột riêng. Đây là trục
+**lịch**; bốn nhãn hiển thị `new` · `beginning` · `reviewing` · `mastered` là một
+phép đọc khác của cùng dữ liệu (BR-89…BR-91).
 
 | Trạng thái | Điều kiện |
 |---|---|
-| `new` | `due_at IS NULL` |
-| `due` | `due_at <= now` |
-| `scheduled` | `due_at > now` |
+| `new` | `learned_at IS NULL` — khi đó `due_at` cũng NULL (BR-90, BR-149) |
+| `due` | `learned_at IS NOT NULL AND due_at <= now` |
+| `scheduled` | `learned_at IS NOT NULL AND due_at > now` |
 
 | From | To | Trigger |
 |---|---|---|
-| new | scheduled | lượt `scheduled` đầu tiên |
+| new | scheduled | thẻ hoàn tất chuỗi học mới — một sự kiện, không phải một lượt `scheduled` (BR-144) |
 | scheduled | due | thời gian trôi qua `due_at` |
-| due | scheduled | lượt `scheduled` |
-| bất kỳ | new | reset learning progress (BR-42) |
+| due | scheduled | lượt `scheduled`, chỉ có trong phiên `reviewing` (BR-77) |
+| bất kỳ | new | reset learning progress (BR-42, BR-152) |
 
 Reset là chuyển đổi duy nhất quay ngược về `new` — và nó đi kèm generation mới,
 nên card sau reset không bị nhầm với card chưa từng ôn ở chu kỳ trước.
 
 **Chuyển đổi không hợp lệ:** sửa nội dung card không đưa nó về `new` (BR-10);
-lượt `relearning` không gây chuyển trạng thái nào (BR-78).
+lượt `learning` (BR-143) và lượt `relearning` (BR-78) không gây chuyển trạng thái
+nào.
 
 ### Deck — trạng thái khoá scheduler
 
@@ -1061,7 +1071,7 @@ lượt `relearning` không gây chuyển trạng thái nào (BR-78).
 
 | From | To | Trigger |
 |---|---|---|
-| unlocked | locked | lượt `scheduled` đầu tiên ở generation hiện tại (BR-13) |
+| unlocked | locked | thẻ đầu tiên của generation hiện tại hoàn tất chuỗi học mới (BR-13, BR-144) |
 | locked | unlocked | reset learning progress (BR-44) |
 
 ### Study session
@@ -1069,8 +1079,8 @@ lượt `relearning` không gây chuyển trạng thái nào (BR-78).
 | From | To | Trigger |
 |---|---|---|
 | in_progress | completed | hết queue (BR-81) |
-| in_progress | abandoned | người dùng thoát (BR-82) |
-| in_progress | invalidated | reset khi đang mở (BR-83), hoặc ghi từ generation cũ (BR-84) |
+| in_progress | abandoned | người dùng thoát hoặc chọn đường mới thay vì tiếp tục (`user_exit`, BR-82, BR-103), hoặc phiên của ngày học trước không được tiếp tục (`interrupted`, BR-103) |
+| in_progress | invalidated | reset khi đang mở (`scheduler_reset`, BR-83), đổi scheduler khi chưa khoá (`scheduler_changed`, BR-164), ghi từ generation cũ (`stale_generation`, BR-84), hoặc nội dung của phiên vào Trash (`content_deleted`, BR-259) |
 | in_progress | failed | lỗi không thể tiếp tục (BR-85) |
 
 Trạng thái kết thúc là terminal — không có đường quay lại `in_progress`.

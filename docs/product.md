@@ -7,8 +7,8 @@
 | **Scope** | Vấn đề, người dùng, quyết định nền tảng, phạm vi MVP, luồng nghiệp vụ chính. Ngoài phạm vi: cách triển khai |
 | **Source of truth for** | Phạm vi MVP · phân loại must/should/nice/out · quyết định platform, data posture, auth, dữ liệu nhạy cảm |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.24 (Progress tốt nghiệp khỏi scaffold ở M99.23 và có thêm cấp deck ở M99.24; phần còn lại của S2 vẫn should-have) · M99.29 và M99.30 (N2 và N3 rời khỏi bảng nice-to-have chưa làm) |
-| **Last updated** | 2026-08-16 |
+| **Updated by task** | M100.95 (Settings, Export, bốn stage chấm điểm, S1 và S3 theo trạng thái đã triển khai; khoá scheduler theo BR-13) · M99.24 (Progress tốt nghiệp khỏi scaffold ở M99.23 và có thêm cấp deck ở M99.24; phần còn lại của S2 vẫn should-have) · M99.29 và M99.30 (N2 và N3 rời khỏi bảng nice-to-have chưa làm) |
+| **Last updated** | 2026-09-16 |
 
 ## Problem
 
@@ -95,7 +95,7 @@ phải chi tiết kỹ thuật:
 
 | Trục | Là gì | Ai chọn |
 |---|---|---|
-| **Thuật toán SRS** | `eight_box` · `sm2` — quyết định **khi nào** thẻ quay lại | chọn một lần lúc tạo root deck, khoá sau lượt học đầu (BR-13) |
+| **Thuật toán SRS** | `eight_box` · `sm2` — quyết định **khi nào** thẻ quay lại | chọn một lần lúc tạo root deck, khoá khi thẻ đầu tiên học xong chuỗi học mới (BR-13) |
 | **StudyMode** | `browse` · `self_assess` · `match` · `guess` · `recall` · `fill` — quyết định **cách** thẻ được hỏi | không ai chọn: một phiên chạy chuỗi stage cố định của thuật toán (BR-109, BR-110) |
 
 **Hai loại phiên, tách hẳn** (BR-142):
@@ -126,25 +126,26 @@ hiện cả hai mặt cùng lúc để làm quen, không chấm và không đổ
 `self_assess` che mặt sau cho tới khi người học lật, rồi nhận đánh giá của chính
 họ. Một cái tên ôm cả hai là thứ sẽ phải giải thích lại ở mọi test và mọi màn hình.
 
-**Phạm vi:** `browse` và `self_assess` thuộc MVP (M3). Bốn stage chấm điểm là **định hướng đã chốt
-về khái niệm, chưa phân loại must/should/nice** — chúng cần ngưỡng dữ liệu tối
-thiểu riêng và một câu trả lời cho việc một lượt của chúng ghi vào lịch thế nào.
-Kiến trúc chuẩn bị cho cả năm từ đầu; UI hiện đúng số mode đang có, và màn
-chọn mode chỉ xuất hiện khi có mode thứ hai.
+**Phạm vi:** cả sáu mode đã triển khai. `browse` và `self_assess` thuộc MVP (M3);
+bốn stage chấm điểm `match` · `guess` · `recall` · `fill` đã xây ở M5.4 và theo
+design ở M5.19–M5.20, cùng ngưỡng dữ liệu riêng của chúng (BR-121, BR-124, BR-153)
+và câu trả lời cho việc một chuỗi học mới ghi vào lịch thế nào (BR-141, BR-144).
+Màn chọn mode ôn tập chỉ xuất hiện khi thuật toán có từ hai mode ôn tập:
+`eight_box` có bốn, `sm2` chỉ có `self_assess` nên vào thẳng (BR-146).
 
 ## Should-have
 
 | # | Feature | Done when |
 |---|---|---|
-| S1 | Tìm kiếm card trong deck | Tìm theo nội dung mặt trước/sau |
+| S1 | Tìm kiếm card trong deck | **Đã triển khai** (M4.11, M4.11a): tìm theo nội dung mặt trước/sau trong deck đang mở, không phân biệt hoa thường và giữ dấu. Tìm toàn thư viện là UC-20 (M99.32) |
 | S2 | Thống kê ôn tập cơ bản | **Đã triển khai ở v1** (M99.23, UC-12, BR-190…BR-199): số card đã học hôm nay tách Learning/Reviewing, streak theo ngày, và hoạt động bảy ngày gần nhất. Phạm vi cố ý dừng ở đó — accuracy, longest streak, goal, XP, heatmap và lọc theo deck nằm ngoài v1 (BR-191) |
-| S3 | Đảo chiều card (nghĩa → từ) | Ôn được cả hai chiều |
+| S3 | Đảo chiều card (nghĩa → từ) | **Đã triển khai một phần** (M99.27, UC-15, BR-203…BR-209): chọn chiều hỏi trước lượt đầu, chỉ cho phiên ôn tập `self_assess` của deck `sm2`. `eight_box` và các mode còn lại chưa đảo chiều được |
 
 ## Nice-to-have
 
 | # | Feature | Notes |
 |---|---|---|
-| N1 | Import/export | Import CSV/TSV/XLSX **đã triển khai** (M99.19, UC-10, AD-20). Export **đang triển khai** (M99.21, UC-11, BR-174…BR-181) — export nội dung, không phải backup |
+| N1 | Import/export | Import CSV/TSV/XLSX **đã triển khai** (M99.19, UC-10, AD-20). Export **đã triển khai** (M99.21, UC-11, BR-174…BR-181) — export nội dung, không phải backup |
 | N2 | Nhắc nhở ôn tập hằng ngày | **Đã triển khai ở M99.29** (UC-17, BR-218…BR-229): opt-in, mặc định tắt, một tóm tắt mỗi ngày dựng từ workload đến hạn tại thời điểm hiện tại. Quyền notification chỉ được xin **sau** khi người dùng bật (BR-228) |
 | N3 | Tag/phân loại card | **Đã triển khai ở M99.30** (UC-18, BR-230…BR-238): catalog phạm vi library, lọc nhiều tag theo OR, đổi tên có gộp, và xoá. Ngoài phạm vi v1: tag phân cấp, màu tag, taxonomy chia sẻ |
 
@@ -171,9 +172,9 @@ Quyết định, ràng buộc placeholder và các phương án bị loại nằ
 - **Progress đã có màn hình thật** từ M99.23 (UC-12) và có thêm cấp deck ở
   M99.24 (UC-13): streak, hôm nay và bảy ngày gần nhất đọc từ lịch sử học thật,
   rồi bên dưới là hai khoảng 7/30 ngày, bảng tổng và một hàng cho mỗi deck với
-  drill-down xuống từng cấp. **Settings vẫn chỉ là scaffold/placeholder** — có
-  tab và route **không** có nghĩa feature đã hoàn thành, và tùy chọn ứng dụng
-  chưa có nghiệp vụ nào được chốt.
+  drill-down xuống từng cấp. **Settings cũng đã có màn hình thật** từ M99.28
+  (UC-16, BR-210…BR-217): mặc định học, theme và ngôn ngữ; nhắc học hằng ngày
+  (UC-17, M99.29) nằm trong branch Settings.
 - Thư viện starter (M6) là child flow bên trong tab Thư viện (branch Decks), không phải tab riêng.
 - Không có tab Profile chừng nào chưa có auth/profile domain — nhất quán với
   "Đăng nhập / tài khoản" ở Explicitly out of MVP.
@@ -197,7 +198,7 @@ trạng thái người dùng gặp thường xuyên nhất sau vài tuần).
 `sm2`. Mỗi deck **bắt buộc chọn một** khi tạo. Sub-deck kế thừa scheduler của
 root deck và không chọn riêng.
 
-**Scheduler bị khoá sau lượt học đầu tiên.** Trước đó đổi tự do; sau đó muốn
+**Scheduler bị khoá khi thẻ đầu tiên học xong chuỗi học mới** (BR-13). Trước đó đổi tự do; sau đó muốn
 đổi phải **Reset learning progress**. Lý do: đổi thuật toán giữa chừng đặt ra
 những câu hỏi không có câu trả lời trung thực — box 5 tương ứng ease factor nào,
 history theo luật cũ còn giá trị gì. Mọi ánh xạ đều là bịa đặt. Khoá-và-reset
@@ -240,7 +241,7 @@ người dùng thấy đầu tiên và nó định hình toàn bộ trải nghi�
 Nửa import của N1 đã triển khai ở M99.19 (UC-10, AD-20): thư
 viện starter giải quyết "app trống lúc mới cài", nhưng không giải quyết "bộ thẻ
 của tôi đang nằm trong một file" — và nhập tay từng card không phải câu trả lời
-cho một file nghìn dòng. Nửa export đang triển khai ở M99.21 (UC-11): mang bộ
+cho một file nghìn dòng. Nửa export đã triển khai ở M99.21 (UC-11): mang bộ
 thẻ ra khỏi app là điều kiện để "dữ liệu của tôi" không bị khoá trong một cài
 đặt duy nhất — nhưng nó là export **nội dung**, không phải backup, nên không
 thay thế được sync (AD-03).

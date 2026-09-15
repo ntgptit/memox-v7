@@ -31,7 +31,7 @@ abstraction, vì cả hai trả lời cùng một câu hỏi — "thuật toán 
 dùng làm gì". BR-30 đã cấm hardcode tập action; BR-97 là đúng câu đó cho tập mode.
 
 BR-100 tồn tại vì lối thoát duy nhất là có thật nhưng không được phép đề nghị:
-thuật toán khoá sau lượt `scheduled` đầu tiên (BR-13) và chỉ Reset mới mở, mà
+thuật toán khoá khi thẻ đầu tiên học xong chuỗi học mới (BR-13) và chỉ Reset mới mở, mà
 Reset xoá toàn bộ tiến độ học. Một dòng copy gợi ý điều đó đang đề nghị người
 dùng đánh đổi thứ họ không định đánh đổi.
 

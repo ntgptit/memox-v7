@@ -12,13 +12,13 @@ import '../entities/card_study_state_entity.dart';
 /// is defined and nothing persists them; a card sliding from [reviewing] back to
 /// [beginning] after a lapse is ordinary, not a violation.
 enum CardState {
-  /// No `scheduled` review yet (BR-90).
+  /// Has not finished the learning chain: `learnedAt` is null (BR-90).
   isNew,
 
-  /// Reviewed, and still on an interval under 8 days (BR-91).
+  /// Learned, and on an interval under 8 days (BR-91).
   beginning,
 
-  /// Reviewed, interval 8 days or more, and not yet mastered (BR-91).
+  /// Learned, interval 8 days or more, and not yet mastered (BR-91).
   reviewing,
 
   /// Box 8, or an SM-2 interval of 128 days or more (BR-88).

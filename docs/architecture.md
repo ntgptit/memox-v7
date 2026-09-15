@@ -7,8 +7,8 @@
 | **Scope** | Quyết định ràng buộc nhiều tài liệu hoặc nhiều layer. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), hình dạng dữ liệu (`data-model.md`) |
 | **Source of truth for** | AD-xx · đánh đổi kiến trúc · phương án đã bị loại · lý do pin toolchain |
 | **Depends on** | `document-conventions.md`, `product.md` |
-| **Updated by task** | M99.83 (AD-23 · shared surface/action API là tập đóng); M99.33 (AD-22 · mô hình tombstone/batch của Trash, retention 30 ngày, purge an toàn); M99.24 (AD-19 · rule placeholder gắn với tình trạng branch; Progress đã tốt nghiệp) · M99.28 (AD-19 · Settings rời trạng thái placeholder — không còn branch nào là placeholder) · M99.29 (AD-21 · nhắc học chạy trong background worker) |
-| **Last updated** | 2026-08-27 |
+| **Updated by task** | M100.95 (AD-06 · khoá khi thẻ đầu tiên học xong chuỗi học mới, khớp BR-13); M99.83 (AD-23 · shared surface/action API là tập đóng); M99.33 (AD-22 · mô hình tombstone/batch của Trash, retention 30 ngày, purge an toàn); M99.24 (AD-19 · rule placeholder gắn với tình trạng branch; Progress đã tốt nghiệp) · M99.28 (AD-19 · Settings rời trạng thái placeholder — không còn branch nào là placeholder) · M99.29 (AD-21 · nhắc học chạy trong background worker) |
+| **Last updated** | 2026-09-16 |
 
 Format theo `document-conventions.md` §6.1. AD xếp theo số; ID vĩnh viễn (§7).
 
@@ -217,9 +217,9 @@ retrofit.
 **Quyết định.** MVP hỗ trợ **hai** scheduler: `eight_box` và `sm2`. Mỗi deck
 **bắt buộc chọn một** khi tạo. Lựa chọn ở cấp deck, không phải cấp app.
 
-Scheduler đổi trực tiếp được **chừng nào deck chưa có lượt học nào**. Sau lượt
-học đầu tiên, `scheduler_type`, `scheduler_version` và `scheduler_config` của
-deck bị **khoá**. Muốn đổi sau đó, người dùng phải thực hiện **Reset learning
+Scheduler đổi trực tiếp được **chừng nào chưa có thẻ nào của generation hiện tại
+học xong chuỗi học mới** (BR-13). Từ lúc thẻ đầu tiên hoàn tất chuỗi,
+`scheduler_type`, `scheduler_version` và `scheduler_config` của deck bị **khoá**. Muốn đổi sau đó, người dùng phải thực hiện **Reset learning
 progress** (AD-09).
 
 ```dart
@@ -258,8 +258,8 @@ factor nào, study answers theo luật cũ còn giá trị gì cho chu kỳ mớ
 lại có khôi phục trạng thái cũ không. Mọi ánh xạ đều là bịa đặt và nó âm thầm làm
 hỏng lịch ôn.
 
-Khoá-và-reset thừa nhận điều đó thẳng thắn: trước lượt học đầu, không có gì để
-mất nên đổi tự do; sau đó, đổi nghĩa là bắt đầu lại, và người dùng biết rõ điều
+Khoá-và-reset thừa nhận điều đó thẳng thắn: trước khi thẻ đầu tiên học xong, chưa
+có lịch nào để mất nên đổi tự do; sau đó, đổi nghĩa là bắt đầu lại, và người dùng biết rõ điều
 mình đánh đổi.
 
 **Vì sao thuần khiết.** `next()` không đọc database, không gọi `DateTime.now()` —
