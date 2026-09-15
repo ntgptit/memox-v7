@@ -52,18 +52,18 @@ void main() {
         inRow(find.byType(StudyHomeWorkloadItemWidget)).first,
       );
 
-      expect(name.left - card.left, AppSpacing.card);
-      expect(name.top - card.top, AppSpacing.card);
+      expect(name.left - card.left, AppSpacing.lg);
+      expect(name.top - card.top, AppSpacing.lg);
       // The bottom is the workload/action band's — whichever of the two runs
       // lower. In the inline arrangement the counts may take two lines beside
       // a shorter verb, and measuring the verb alone would count the band's
       // internal centring as card padding (the first run read 18 for 16).
       final bandBottom = math.max(workload.bottom, action.bottom);
-      expect(card.bottom - bandBottom, AppSpacing.card);
+      expect(card.bottom - bandBottom, AppSpacing.lg);
       // The fourth side, which the first version of this test called "every
       // side" without measuring. `CrossAxisAlignment.stretch` makes the name's
       // right edge the content edge, so this is exact rather than incidental.
-      expect(card.right - name.right, AppSpacing.card);
+      expect(card.right - name.right, AppSpacing.lg);
     });
 
     testWidgets('the resume card pads its content the same way', (
@@ -95,10 +95,10 @@ void main() {
             .first,
       );
 
-      expect(heading.left - card.left, AppSpacing.card);
-      expect(heading.top - card.top, AppSpacing.card);
-      expect(card.right - heading.right, AppSpacing.card);
-      expect(card.bottom - action.bottom, AppSpacing.card);
+      expect(heading.left - card.left, AppSpacing.lg);
+      expect(heading.top - card.top, AppSpacing.lg);
+      expect(card.right - heading.right, AppSpacing.lg);
+      expect(card.bottom - action.bottom, AppSpacing.lg);
     });
 
     testWidgets('the identity block breaks at xs, then sm before the counts', (
@@ -140,7 +140,7 @@ void main() {
       expect(action.bottom, greaterThan(workload.top));
       // Trailing: the verb ends at the content edge, and the counts get
       // everything to its left minus one step.
-      expect(card.right - action.right, AppSpacing.card);
+      expect(card.right - action.right, AppSpacing.lg);
       expect(action.left - workload.right, greaterThanOrEqualTo(AppSpacing.md));
     });
 
@@ -161,12 +161,12 @@ void main() {
       },
     );
 
-    testWidgets('the compact verb draws 36 and still hits 48', (tester) async {
+    testWidgets('the compact verb draws 40 and still hits 48', (tester) async {
       // The deck tile's Study verb made this trade first (M99.74's audit):
-      // a smaller body inside a dense row, with `MaterialTapTargetSize.padded`
-      // keeping the touch floor. The task-card arrangement borrows it for the
-      // same reason — the verb is furniture in a row, not a screen action. The
-      // body is the handoff's compact button since M100.90 (it was 40).
+      // a 40 body on the 4px grid inside a dense row, with
+      // `MaterialTapTargetSize.padded` keeping the touch floor. The task-card
+      // arrangement borrows it for the same reason — the verb is furniture in
+      // a row, not a screen action.
       await harness.pump(tester);
 
       final drawn = tester.getSize(
@@ -177,7 +177,7 @@ void main() {
             )
             .first,
       );
-      expect(drawn.height, AppSizing.buttonCompact);
+      expect(drawn.height, 40);
       expect(
         tester.getSize(inRow(find.byType(MxActionButton)).first).height,
         greaterThanOrEqualTo(AppSizing.touchTarget),
@@ -204,8 +204,8 @@ void main() {
             .first,
       );
 
-      expect(action.left - card.left, AppSpacing.card);
-      expect(card.right - action.right, AppSpacing.card);
+      expect(action.left - card.left, AppSpacing.lg);
+      expect(card.right - action.right, AppSpacing.lg);
     });
 
     testWidgets('a roomy resume card keeps its primary intrinsic', (
@@ -229,10 +229,10 @@ void main() {
             .first,
       );
 
-      expect(action.left - card.left, AppSpacing.card);
+      expect(action.left - card.left, AppSpacing.lg);
       expect(
         card.right - action.right,
-        greaterThan(AppSpacing.card),
+        greaterThan(AppSpacing.lg),
         reason: 'a stretched primary at 393 is the wrong S17 branch',
       );
     });
@@ -253,12 +253,12 @@ void main() {
           inRow(find.textContaining(english.studyHomeOverdueWord)).first,
         );
 
-        expect(icon.height, AppIconSize.xs);
-        expect(icon.width, AppIconSize.xs);
+        expect(icon.height, AppIconSize.sm);
+        expect(icon.width, AppIconSize.sm);
         expect(label.left - well.right, AppSpacing.xs);
         // The glyph sits centred in its well, `xs` on every side — the shape
         // `MxMetricWell` fixes for all three screens.
-        expect(well.height, AppIconSize.xs + 2 * AppSpacing.xs);
+        expect(well.height, AppIconSize.sm + 2 * AppSpacing.xs);
         expect(icon.center.dy, well.center.dy);
         // The well rides the same band as the text it belongs to: the row is
         // baseline-aligned, so an anchor drifting off that band would read as a

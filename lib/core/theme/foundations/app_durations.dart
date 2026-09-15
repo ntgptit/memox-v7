@@ -14,9 +14,6 @@ abstract final class AppDurations {
   /// The longest anything in the app is allowed to take.
   static const Duration slow = Duration(milliseconds: 320);
 
-  /// Handoff Switch: the track colour and the thumb's slide.
-  static const Duration toggle = Duration(milliseconds: 160);
-
   /// The app's two easing curves.
   ///
   /// Named for the same reason the durations are: a `Curves.decelerate` written

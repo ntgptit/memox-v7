@@ -300,7 +300,7 @@ class _TitleWithGlyph extends StatelessWidget {
           isSelected
               ? Icons.radio_button_checked
               : Icons.radio_button_unchecked,
-          size: MxIconSize.sm,
+          size: MxIconSize.mdCompact,
           // The same selected-mark token the card tile's check uses: dark
           // primary fails contrast as a glyph on dark surfaces.
           ink: isSelected ? AppInk.secondary : AppInk.quiet,

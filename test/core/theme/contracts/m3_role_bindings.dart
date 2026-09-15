@@ -39,38 +39,33 @@ const List<RoleBinding> roleBindings = <RoleBinding>[
     slot: 'backgroundColor',
     file: _fab,
     scope: 'buildFloatingActionButtonTheme',
-    requires: <String>['primary'],
-    refuses: <String>[
-      'primaryContainer',
-      'secondaryContainer',
-      'tertiaryContainer',
-    ],
+    requires: <String>['primaryContainer'],
+    refuses: <String>['primary', 'secondaryContainer', 'tertiaryContainer'],
     because:
-        'The Tokyo handoff FAB is a primary fill with an onPrimary label; the '
-        'kit beats the canonical primaryContainer (owner decision 4, '
-        '2026-09-13).',
+        '_FABDefaultsM3.backgroundColor is primaryContainer. It was `primary` '
+        'from an owner mockup (2026-08-20); if the FAB needs more brand, the '
+        'primaryContainer family moves — this slot does not.',
   ),
   RoleBinding(
     component: 'FloatingActionButton',
     slot: 'foregroundColor',
     file: _fab,
     scope: 'buildFloatingActionButtonTheme',
-    requires: <String>['onPrimary'],
-    refuses: <String>['onPrimaryContainer'],
-    because: 'The label that travels with a primary fill is onPrimary.',
+    requires: <String>['onPrimaryContainer'],
+    refuses: <String>['onPrimary'],
+    because: '_FABDefaultsM3.foregroundColor is onPrimaryContainer.',
   ),
   RoleBinding(
     component: 'Card',
     slot: 'color',
     file: _card,
     scope: 'buildCardTheme',
-    requires: <String>['surfaceContainerLowest'],
-    refuses: <String>['surface', 'surfaceContainerLow', 'surfaceContainer'],
+    requires: <String>['surfaceContainerLow'],
+    refuses: <String>['surface', 'surfaceContainerLowest', 'surfaceContainer'],
     because:
-        'The Tokyo handoff draws its card on surfaceContainerLowest — white '
-        'above a tinted page. `Low` sits below the page in light, so a card on '
-        'it reads as a hole rather than a surface (M100.87, the kit outranks '
-        '_CardDefaultsM3 by owner decision).',
+        '_CardDefaultsM3.color is surfaceContainerLow. `surface` passed for as '
+        'long as the app read `surface` as the paper; it is the page since '
+        'M100.32, and the paper has its own rung.',
   ),
   RoleBinding(
     component: 'AppBar',
@@ -154,25 +149,21 @@ const List<RoleBinding> roleBindings = <RoleBinding>[
     slot: '_restingFill',
     file: _chip,
     scope: '_restingFill',
-    requires: <String>['primaryContainer', 'surfaceContainer'],
-    refuses: <String>['secondaryContainer', 'surfaceContainerLow'],
+    requires: <String>['secondaryContainer', 'surfaceContainerLow'],
+    refuses: <String>['primaryContainer'],
     because:
-        'M100.86: the owner\'s Chip design spec names primaryContainer for '
-        'the selected fill, a stated departure from '
-        '_ChoiceChipDefaultsM3.color\'s own secondaryContainer — '
-        'design-system/chip-spec.md. M100.92: the handoff Chip rests on '
-        'surface-container, not the paper.',
+        '_ChoiceChipDefaultsM3.color fills a selected chip with '
+        'secondaryContainer.',
   ),
   RoleBinding(
     component: 'ChoiceChip',
     slot: '_labelColorFor',
     file: _chip,
     scope: '_labelColorFor',
-    requires: <String>['onPrimaryContainer', 'onSurfaceVariant'],
-    refuses: <String>['onSecondaryContainer'],
+    requires: <String>['onSecondaryContainer', 'onSurfaceVariant'],
+    refuses: <String>['onPrimaryContainer'],
     because:
-        'M100.86: the label follows the fill to primaryContainer\'s own ink, '
-        'onPrimaryContainer — design-system/chip-spec.md.',
+        '_ChoiceChipDefaultsM3.labelStyle pairs the fill with its own ink.',
   ),
   RoleBinding(
     component: 'ChoiceChip',
@@ -219,43 +210,37 @@ const List<RoleBinding> roleBindings = <RoleBinding>[
         '_SegmentedButtonDefaultsM3.side has no focus branch. The keyboard '
         'cue is the overlay.',
   ),
-  // **The three brand *labels* read the brand's ink, and refuse the fill**
-  // (M100.87). M100.28 ruled that a text slot must read `primary` and the
-  // palette move when it failed; the owner reversed that for the Tokyo
-  // handoff — its hex stays verbatim, and text takes an ink solved from it.
-  // So these rows now require `semantic.accentInk` and refuse `scheme.primary`:
-  // a slot drifting back to the fill is back at 3.95:1. `accent` is the
-  // argument the text-link resolver takes its resting, hovered and pressed
-  // colour from, so it is the slot.
+  // **TextButton and TabBar are the two `primaryInk` reached first (M100.27),
+  // and neither had a row here.** The runtime contract compares resolved
+  // colours, so a token equal to `primary` passed it; only the source shows
+  // which name the slot reads. `accent` is the argument the text-link resolver
+  // takes its resting, hovered and pressed colour from, so it is the slot.
   RoleBinding(
     component: 'TextButton',
     slot: 'accent',
     file: _buttons,
     scope: 'buildTextButtonTheme',
-    requires: <String>[],
-    requiresSemantic: <String>['accentInk'],
-    refuses: <String>['primary', 'secondary', 'tertiary', 'onSurfaceVariant'],
+    requires: <String>['primary'],
+    refuses: <String>['secondary', 'tertiary', 'onSurfaceVariant'],
     because:
-        'A text link is bare text on a surface, and the handoff\'s light '
-        'primary reads 3.95:1 there — the label is the brand\'s ink.',
+        '_TextButtonDefaultsM3.foregroundColor is primary. A text link is bare '
+        'text on a surface; if the role fails 4.5:1 there, the palette moves.',
   ),
   RoleBinding(
     component: 'TabBar',
     slot: 'labelColor',
     file: _tabs,
     scope: 'buildTabBarTheme',
-    requires: <String>[],
-    requiresSemantic: <String>['accentInk'],
+    requires: <String>['primary'],
     refuses: <String>[
-      'primary',
       'secondary',
       'tertiary',
       'onSurfaceVariant',
       'onSecondaryContainer',
     ],
     because:
-        'The selected label sits on the page, not on a container, so it is '
-        'the brand as text — its ink, not its fill.',
+        '_TabBarDefaultsM3.labelColor is primary: the selected label sits on '
+        'the page, not on a container, so it is the accent as ink.',
   ),
   RoleBinding(
     component: 'TabBar',
@@ -271,12 +256,13 @@ const List<RoleBinding> roleBindings = <RoleBinding>[
     slot: 'foregroundColor',
     file: _buttons,
     scope: 'buildOutlinedButtonTheme',
-    requires: <String>[],
-    requiresSemantic: <String>['accentInk'],
-    refuses: <String>['primary', 'secondary', 'onSurfaceVariant'],
+    requires: <String>['primary'],
+    refuses: <String>['secondary', 'onSurfaceVariant'],
     because:
-        'The label is text on a page or a card — the brand\'s ink (M100.87). '
-        'The retired `secondaryAction` token is still refused by name.',
+        '_OutlinedButtonDefaultsM3.foregroundColor is primary. The retired '
+        '`secondaryAction` token was a second name for it, and M100.27\'s '
+        '`primaryInk` was another — a role that fails a ratio is answered by '
+        'retuning the palette (M100.28), never by a substitute token.',
   ),
   RoleBinding(
     component: 'OutlinedButton',
@@ -294,12 +280,12 @@ const List<RoleBinding> roleBindings = <RoleBinding>[
     slot: 'thumbColor',
     file: _toggles,
     scope: 'buildSwitchTheme',
-    requires: <String>['surfaceBright'],
-    refuses: <String>['outline', 'onPrimary'],
+    requires: <String>['outline', 'onPrimary'],
+    refuses: <String>['onSurfaceVariant'],
     because:
-        'The handoff thumb is surfaceBright in both states (M100.92) and the '
-        'track carries the state; outline and onPrimary are the M3 pair it '
-        'replaced.',
+        '_SwitchDefaultsM3 rests the thumb on outline. It read '
+        'onSurfaceVariant to dodge a contrast failure that M100.22 fixed in the '
+        'palette instead.',
   ),
   RoleBinding(
     component: 'Switch',
@@ -317,11 +303,12 @@ const List<RoleBinding> roleBindings = <RoleBinding>[
     slot: 'trackOutlineColor',
     file: _toggles,
     scope: 'buildSwitchTheme',
-    requires: <String>[],
-    refuses: <String>['primary', 'outline'],
+    requires: <String>['outline'],
+    refuses: <String>['primary'],
     because:
-        'The handoff track has no outline in any state (M100.92). Reading focus '
-        'first once put a focused-on switch on a primary boundary (M100.23).',
+        '_SwitchDefaultsM3.trackOutlineColor is transparent when selected '
+        'and outline otherwise, with no focus branch. Reading focus first put a '
+        'focused-on switch on a boundary M3 says should not exist.',
   ),
   RoleBinding(
     component: 'Checkbox',

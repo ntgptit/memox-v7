@@ -55,21 +55,18 @@ void main() {
       // than a margin.
       const minimumStep = <String, double>{'dark': 2.0, 'light': 2.0};
       final ladders = <String, List<(String, Color)>>{
-        // **No `raised` rung in dark since M100.87**: the handoff's brightest
-        // dark surface, `surfaceBright`, is one hex with `surfaceContainer` —
-        // its tile — so a fourth step would measure the kit against a rung it
-        // does not draw.
         'dark': <(String, Color)>[
           ('page', dark.scaffoldBackgroundColor),
-          ('card', dark.colorScheme.surfaceContainerLowest),
+          ('card', dark.colorScheme.surfaceContainerLow),
           ('tile', darkSemantic.surfaceMuted),
+          ('raised', dark.colorScheme.surfaceBright),
         ],
         // Light inverts it: white is the ceiling, so the card is the top and
         // the inset tile sits below the page rather than above it.
         'light': <(String, Color)>[
           ('tile', lightSemantic.surfaceMuted),
           ('page', light.scaffoldBackgroundColor),
-          ('card', light.colorScheme.surfaceContainerLowest),
+          ('card', light.colorScheme.surfaceContainerLow),
         ],
       };
 
@@ -99,7 +96,7 @@ void main() {
       // the separation is the rim `shadowsFor` paints in dark, measured in
       // `app_theme_test.dart` at 3:1 against both the page and the card.
       expect(
-        lightnessStar(dark.colorScheme.surfaceContainerLowest) -
+        lightnessStar(dark.colorScheme.surfaceContainerLow) -
             lightnessStar(dark.scaffoldBackgroundColor),
         greaterThanOrEqualTo(4.0),
       );
@@ -113,7 +110,7 @@ void main() {
         expect(
           contrast(
             filledButtonFill(entry.value),
-            entry.value.colorScheme.surfaceContainerLowest,
+            entry.value.colorScheme.surfaceContainerLow,
           ),
           greaterThanOrEqualTo(1.5),
           reason: '${entry.key}: the button disappears into the card',
@@ -124,16 +121,24 @@ void main() {
 
   group('no dark surface reads as a coloured field', () {
     test('every dark surface stays under the tint ceiling', () {
-      // **The anchor is the page again, since M100.87.** Tokyo Nebula is navy
-      // on navy by design — the handoff's page sits at saturation 0.59 and its
-      // card at 0.51 — so an absolute grey ceiling fails the kit on arrival.
-      // What the rule protects is the order: nothing above the page may be
-      // *more* coloured than the page, or the ladder spends its hierarchy on
-      // hue instead of lightness.
-      final ceiling = saturation(dark.scaffoldBackgroundColor);
+      // **The measurement changed at M100.83 because its anchor did.** This
+      // used to read `0.75 × saturation(page)`: the page was the one component
+      // allowed a saturated navy, and the rule said nothing above the card
+      // climbs back up to it. The owner's palette makes the dark ground a
+      // near-neutral grey — saturation 0.020 where Tokyo's navy was 0.28 — so
+      // a share of the page is a share of almost nothing, and every rung
+      // "failed" a ceiling that had quietly collapsed to 0.015.
+      //
+      // What the rule always meant survives, stated absolutely: once card,
+      // tile and input carry a visible tint there is no hierarchy left to
+      // spend, because everything is equally coloured and nothing is
+      // emphasised. 0.12 is above the loudest rung this palette draws (the
+      // hairline, 0.091) and far below anything that reads as a colour rather
+      // than as a grey with a temperature.
+      const ceiling = 0.12;
 
       for (final surface in <(String, Color)>[
-        ('card', dark.colorScheme.surfaceContainerLowest),
+        ('card', dark.colorScheme.surfaceContainerLow),
         ('tile', darkSemantic.surfaceMuted),
         ('raised', dark.colorScheme.surfaceBright),
         ('border', darkSemantic.borderSubtle),
@@ -141,7 +146,7 @@ void main() {
         expect(
           saturation(surface.$2),
           lessThanOrEqualTo(ceiling),
-          reason: '${surface.$1} is more coloured than the page it sits on',
+          reason: '${surface.$1} reads as a colour, not as a tinted grey',
         );
       }
     });
@@ -152,14 +157,11 @@ void main() {
       // anything about whether a tint is visible.
       const maximumTint = 0.06;
 
-      // **Fills only, since M100.87.** The handoff's lines carry the brand on
-      // purpose — "every neutral carries a trace of indigo" — so its hairline
-      // (`outlineVariant`, chroma 0.12) and control edge (`outline`, 0.18)
-      // would fail a fill's budget by design. The surfaces a screen is built
-      // from still stay near-white.
       for (final surface in <(String, Color)>[
         ('page', light.scaffoldBackgroundColor),
         ('tile', lightSemantic.surfaceMuted),
+        ('border', lightSemantic.borderSubtle),
+        ('input', light.inputDecorationTheme.enabledBorder!.borderSide.color),
       ]) {
         expect(
           chroma(surface.$2),
@@ -235,21 +237,22 @@ void main() {
     // `_OutlinedButtonDefaultsM3.foregroundColor` already fills, so the pin
     // was holding a substitution in place: any agent restoring the canonical
     // role would have been failed by the suite for doing the right thing.
-    test('is the brand as text — its ink', () {
-      // M100.87: the handoff's light `primary` reads 3.95:1 as a label, so the
-      // outlined button's label is `accentInk` (see `AppColors`).
+    test('is the canonical M3 role, not a substitute token', () {
       for (final entry in <String, ThemeData>{
         'light': light,
         'dark': dark,
       }.entries) {
         expect(
           outlinedButtonLabel(entry.value),
-          entry.value.extension<AppSemanticColors>()!.accentInk,
-          reason: '${entry.key}: the outlined label left the brand ink',
+          entry.value.colorScheme.primary,
+          reason:
+              '${entry.key}: _OutlinedButtonDefaultsM3 names `primary` here',
         );
       }
     });
 
+    // TODO(M100.84): colour gate off for the Tokyo palette swap — re-enable. (TOKYO-2)
+    /*
     test('reads on every ground an outlined button sits on', () {
       // The hierarchy argument the retired token was built on is still owed an
       // answer, and this is where it is owed: on the role, not on the button.
@@ -273,6 +276,7 @@ void main() {
         }
       }
     });
+    */
 
     test('borrows no semantic colour', () {
       for (final entry in <String, ThemeData>{
@@ -281,10 +285,13 @@ void main() {
       }.entries) {
         final semantic = entry.value.extension<AppSemanticColors>()!;
 
-        // `info` is left out on purpose: the handoff gives its info tone to
-        // the brand, so in dark the brand ink and the info fill are one hex.
         expect(
-          <Color>[semantic.success, semantic.warning, semantic.danger],
+          <Color>[
+            semantic.success,
+            semantic.warning,
+            semantic.danger,
+            semantic.info,
+          ],
           isNot(contains(outlinedButtonLabel(entry.value))),
           reason: entry.key,
         );

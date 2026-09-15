@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/foundations/app_radius.dart';
-import 'package:memox/core/theme/foundations/app_sizing.dart';
+import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 import 'package:memox/core/theme/foundations/app_stroke.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/shared/widgets/mx_search_field.dart';
@@ -9,6 +8,7 @@ import 'package:memox/shared/widgets/mx_search_field.dart';
 /// `MxSearchField` — the filled pill under an app bar.
 void main() {
   final light = buildLightTheme();
+  final semantic = light.extension<AppSemanticColors>()!;
 
   Future<void> pump(
     WidgetTester tester, {
@@ -16,7 +16,6 @@ void main() {
     int? resultCount,
     bool disableAnimations = false,
     ValueChanged<String>? onChanged,
-    VoidCallback? onVoice,
   }) => tester.pumpWidget(
     MaterialApp(
       theme: light,
@@ -36,8 +35,6 @@ void main() {
               semanticLabel: 'Search your library',
               resultCount: resultCount,
               clearSemanticLabel: 'Clear search',
-              onVoice: onVoice,
-              voiceSemanticLabel: onVoice == null ? null : 'Voice search',
             ),
           ),
         ),
@@ -73,30 +70,22 @@ void main() {
       await pump(tester);
       await tester.pumpAndSettle();
 
-      // Handoff SearchField (M100.92): at rest `surfaceContainer` with a ghost
-      // hairline, radius 12, and the field's 52.
-      final rest = decorationOf(tester);
-      expect(rest.color, light.colorScheme.surfaceContainer);
-      expect(rest.borderRadius, BorderRadius.circular(AppRadius.md));
-      expect(rest.border!.top.color, light.colorScheme.outlineVariant);
-      expect(rest.border!.top.width, AppStroke.hairline);
-      expect(
-        tester.getSize(find.byType(AnimatedContainer)).height,
-        greaterThanOrEqualTo(AppSizing.input),
-      );
+      expect(decorationOf(tester).color, semantic.surfaceMuted);
+      // The boundary is the control system's, not the fill's own colour: an
+      // edge at 1.09:1 identified nothing (#433 §4.1, M100.36 4E).
+      expect(decorationOf(tester).border!.top.color, light.colorScheme.outline);
+      expect(decorationOf(tester).border!.top.width, AppStroke.control);
 
       await tester.tap(find.byType(TextField));
       await tester.pumpAndSettle();
 
-      // Active: the lowest surface and a primary hairline.
-      final active = decorationOf(tester);
       expect(
-        active.color,
-        light.colorScheme.surfaceContainerLowest,
+        decorationOf(tester).color,
+        light.colorScheme.surface,
         reason: 'a field being typed into stops being a well in the page',
       );
-      expect(active.border!.top.color, light.colorScheme.primary);
-      expect(active.border!.top.width, AppStroke.hairline);
+      expect(decorationOf(tester).border!.top.color, light.colorScheme.primary);
+      expect(decorationOf(tester).border!.top.width, AppStroke.control);
     });
 
     testWidgets('the border is there at rest, so focus costs no layout', (
@@ -130,7 +119,7 @@ void main() {
 
       expect(
         paintedDecorationOf(tester).color,
-        isNot(light.colorScheme.surfaceContainerLowest),
+        isNot(light.colorScheme.surface),
         reason: 'the pill arrived before the transition had run',
       );
     });
@@ -144,10 +133,7 @@ void main() {
       await tester.tap(find.byType(TextField));
       await tester.pump();
 
-      expect(
-        paintedDecorationOf(tester).color,
-        light.colorScheme.surfaceContainerLowest,
-      );
+      expect(paintedDecorationOf(tester).color, light.colorScheme.surface);
       expect(
         paintedDecorationOf(tester).border!.top.color,
         light.colorScheme.primary,
@@ -235,7 +221,7 @@ void main() {
       );
     });
 
-    testWidgets('52 is a floor: the pill grows with the text and clips '
+    testWidgets('48 is a floor: the pill grows with the text and clips '
         'nothing', (tester) async {
       // #433 F2: `SizedBox(height: 48)` + `expands: true` turned a documented
       // floor into a ceiling, and from 2.5× the placeholder was clipped to
@@ -273,22 +259,12 @@ void main() {
           final text = tester.getRect(find.byType(EditableText));
           final why = '$width × $scale';
           expect(tester.takeException(), isNull, reason: why);
-          expect(
-            pill.height,
-            greaterThanOrEqualTo(AppSizing.input),
-            reason: why,
-          );
+          expect(pill.height, greaterThanOrEqualTo(48), reason: why);
           expect(text.top, greaterThanOrEqualTo(pill.top), reason: why);
           expect(text.bottom, lessThanOrEqualTo(pill.bottom), reason: why);
-          if (scale == 1.0) {
-            expect(pill.height, AppSizing.input, reason: why);
-          }
+          if (scale == 1.0) expect(pill.height, 48, reason: why);
           if (scale >= 2.5) {
-            expect(
-              pill.height,
-              greaterThan(AppSizing.input),
-              reason: '$why: still pinned',
-            );
+            expect(pill.height, greaterThan(48), reason: '$why: still pinned');
           }
         }
       }
@@ -332,28 +308,6 @@ void main() {
       // not read twice on an empty field.
       expect(find.bySemanticsLabel('Search your whole library'), findsNothing);
       handle.dispose();
-    });
-  });
-
-  group('voice slot (handoff SearchField, M100.92)', () {
-    testWidgets('empty with onVoice shows a mic; a query swaps it for clear', (
-      tester,
-    ) async {
-      await pump(tester, onVoice: () {});
-      await tester.pumpAndSettle();
-      expect(find.byIcon(Icons.mic_none), findsOneWidget);
-      expect(find.byIcon(Icons.close), findsNothing);
-
-      await pump(tester, value: 'kim', onVoice: () {});
-      await tester.pumpAndSettle();
-      expect(find.byIcon(Icons.mic_none), findsNothing);
-      expect(find.byIcon(Icons.close), findsOneWidget);
-    });
-
-    testWidgets('without onVoice there is no mic', (tester) async {
-      await pump(tester);
-      await tester.pumpAndSettle();
-      expect(find.byIcon(Icons.mic_none), findsNothing);
     });
   });
 }

@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
@@ -34,9 +33,7 @@ void main() {
       final repository = FakeDeckRepository();
       await pumpDeckApp(tester, repository: repository);
 
-      await tester.tap(
-        find.widgetWithText(FloatingActionButton, english.deckCreateRootAction),
-      );
+      await tester.tap(find.text(english.deckCreateRootAction));
       await tester.pumpAndSettle();
       await tester.enterText(deckFormField, 'Japanese N5');
       await tester.tap(find.text(english.schedulerSm2Label));
@@ -58,9 +55,7 @@ void main() {
       final repository = FakeDeckRepository();
       await pumpDeckApp(tester, repository: repository);
 
-      await tester.tap(
-        find.widgetWithText(FloatingActionButton, english.deckCreateRootAction),
-      );
+      await tester.tap(find.text(english.deckCreateRootAction));
       await tester.pumpAndSettle();
       await tester.enterText(deckFormField, 'Japanese N5');
       await tester.tap(find.text(english.deckFormSubmitAction));
@@ -76,9 +71,7 @@ void main() {
       final repository = FakeDeckRepository();
       await pumpDeckApp(tester, repository: repository);
 
-      await tester.tap(
-        find.widgetWithText(FloatingActionButton, english.deckCreateRootAction),
-      );
+      await tester.tap(find.text(english.deckCreateRootAction));
       await tester.pumpAndSettle();
       await tester.tap(find.text(english.schedulerEightBoxLabel));
       await tester.pumpAndSettle();
@@ -100,9 +93,7 @@ void main() {
       final repository = FakeDeckRepository();
       await pumpDeckApp(tester, repository: repository);
 
-      await tester.tap(
-        find.widgetWithText(FloatingActionButton, english.deckCreateRootAction),
-      );
+      await tester.tap(find.text(english.deckCreateRootAction));
       await tester.pumpAndSettle();
       await tester.tap(find.text(english.schedulerEightBoxLabel));
       await tester.pumpAndSettle();
@@ -125,9 +116,7 @@ void main() {
       final repository = FakeDeckRepository();
       await pumpDeckApp(tester, repository: repository);
 
-      await tester.tap(
-        find.widgetWithText(FloatingActionButton, english.deckCreateRootAction),
-      );
+      await tester.tap(find.text(english.deckCreateRootAction));
       await tester.pumpAndSettle();
       await tester.tap(find.text(english.schedulerEightBoxLabel));
       await tester.pumpAndSettle();
@@ -156,9 +145,7 @@ void main() {
       );
       await pumpDeckApp(tester, repository: repository);
 
-      await tester.tap(
-        find.widgetWithText(FloatingActionButton, english.deckCreateRootAction),
-      );
+      await tester.tap(find.text(english.deckCreateRootAction));
       await tester.pumpAndSettle();
       await tester.enterText(deckFormField, 'Japanese N5');
       await tester.tap(find.text(english.schedulerSm2Label));
@@ -178,9 +165,7 @@ void main() {
       // say so before it is made.
       await pumpDeckApp(tester, repository: FakeDeckRepository());
 
-      await tester.tap(
-        find.widgetWithText(FloatingActionButton, english.deckCreateRootAction),
-      );
+      await tester.tap(find.text(english.deckCreateRootAction));
       await tester.pumpAndSettle();
 
       expect(find.text(english.schedulerLockNotice), findsOneWidget);
@@ -193,9 +178,7 @@ void main() {
     ) async {
       await pumpDeckApp(tester, repository: FakeDeckRepository());
 
-      await tester.tap(
-        find.widgetWithText(FloatingActionButton, english.deckCreateRootAction),
-      );
+      await tester.tap(find.text(english.deckCreateRootAction));
       await tester.pumpAndSettle();
       await tester.enterText(deckFormField, 'Half typed');
       await tester.tap(find.text(english.commonCancelAction).first);
@@ -215,9 +198,7 @@ void main() {
       // it required.
       await pumpDeckApp(tester, repository: FakeDeckRepository());
 
-      await tester.tap(
-        find.widgetWithText(FloatingActionButton, english.deckCreateRootAction),
-      );
+      await tester.tap(find.text(english.deckCreateRootAction));
       await tester.pumpAndSettle();
       // No name typed — the pick is the only thing entered.
       await tester.tap(find.text(english.schedulerSm2Label));
@@ -233,9 +214,7 @@ void main() {
     ) async {
       await pumpDeckApp(tester, repository: FakeDeckRepository());
 
-      await tester.tap(
-        find.widgetWithText(FloatingActionButton, english.deckCreateRootAction),
-      );
+      await tester.tap(find.text(english.deckCreateRootAction));
       await tester.pumpAndSettle();
       await tester.tap(find.text(english.commonCancelAction));
       await tester.pumpAndSettle();
@@ -254,9 +233,7 @@ void main() {
       final handle = tester.ensureSemantics();
       await pumpDeckApp(tester, repository: FakeDeckRepository());
 
-      await tester.tap(
-        find.widgetWithText(FloatingActionButton, english.deckCreateRootAction),
-      );
+      await tester.tap(find.text(english.deckCreateRootAction));
       await tester.pumpAndSettle();
 
       // Scoped to the form: "New deck" is also the label of the action that

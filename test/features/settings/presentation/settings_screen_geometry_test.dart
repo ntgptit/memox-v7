@@ -271,11 +271,11 @@ void main() {
       tester,
     ) async {
       // The compact half of the '390' claim above, and the tier that claim
-      // cannot see. Below 360dp the screen gutter stepped to `md` until
-      // M100.89, and the choice rows and the reminder row stepped with it —
-      // the Study defaults card took `MxCardPadding.standard`'s fixed 16 and
-      // did not, so four cards sharing their outer edges held their content at
-      // three different x positions (W5). All four are on 16 now.
+      // cannot see. Below 360dp the screen gutter steps to `md`, and the
+      // choice rows and the reminder row step with it — the Study defaults
+      // card took `MxCardPadding.standard`'s fixed 16 and did not, so four
+      // cards sharing their outer edges held their content at three different
+      // x positions (W5).
       await pumpSettings(
         tester,
         FakeAppSettingsRepository(),
@@ -284,7 +284,7 @@ void main() {
       );
 
       final cardLeft = cardRects(tester).first.left;
-      final content = cardLeft + AppSpacing.lg;
+      final content = cardLeft + AppSpacing.md;
 
       // Study defaults: the field is the card's own content edge, and its
       // `block`-shaped rows carry no gutter of their own, so both land on it.
@@ -297,11 +297,12 @@ void main() {
       // card pads vertically only and each `list` row supplies the gutter.
       expect(
         tester.getRect(find.byType(RadioListTile<AppThemeMode>).first).left +
-            AppSpacing.lg,
+            AppSpacing.md,
         content,
       );
-      // The reminder row's gutter comes from `listTileTheme.contentPadding`,
-      // which is the value the other three agree with.
+      // The reminder row's gutter comes from `applyCompactScale`'s
+      // `listTileTheme.contentPadding`, which is the value the other three
+      // now agree with.
       expect(
         tester.getRect(find.byIcon(Icons.notifications_outlined)).left,
         content,
@@ -334,7 +335,7 @@ void main() {
 
       final rowContentLeft =
           tester.getRect(find.byType(RadioListTile<AppThemeMode>).first).left +
-          AppSpacing.lg;
+          AppSpacing.md;
 
       expect(tester.getRect(find.byType(MxFeedbackBand)).left, rowContentLeft);
     });

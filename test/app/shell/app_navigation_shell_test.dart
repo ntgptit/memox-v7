@@ -20,7 +20,7 @@ import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/features/deck/presentation/widgets/items/deck_tile_widget.dart';
-import 'package:memox/shared/widgets/mx_icon_button.dart';
+import 'package:memox/features/deck/presentation/widgets/items/deck_study_button_widget.dart';
 import 'package:memox/shared/widgets/mx_loading_state.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 import 'package:memox/features/settings/di/app_settings_repository_provider.dart';
@@ -229,7 +229,7 @@ void main() {
       // 2026-08-20). Create floats again, so the guarantee goes back to being
       // measured: an inset only reserves the *end* of the scroll, and the end
       // of the scroll is exactly where a reader looks for the last deck's
-      // own control.
+      // Study button.
       final action = tester.getRect(find.byType(FloatingActionButton));
       expect(lastRow.bottom, lessThanOrEqualTo(action.top));
 
@@ -240,24 +240,19 @@ void main() {
       // firing instead would leave the test just as green. So the question is
       // asked directly: does a hit at the button's centre arrive at the
       // button?
-      // The row's own control is its overflow since the Study button left
-      // the row (owner decision 7, M100.91).
-      final overflow = find.descendant(
-        of: find.byType(DeckTileWidget).last,
-        matching: find.byType(MxIconButton),
-      );
-      final target = tester.renderObject(overflow);
+      final study = find.byType(DeckStudyButtonWidget).last;
+      final target = tester.renderObject(study);
       final hit = HitTestResult();
       WidgetsBinding.instance.hitTestInView(
         hit,
-        tester.getCenter(overflow),
+        tester.getCenter(study),
         tester.view.viewId,
       );
 
       expect(
         hit.path.any((HitTestEntry<HitTestTarget> e) => e.target == target),
         isTrue,
-        reason: "the floating action covers the last row's overflow",
+        reason: 'the floating action covers the last Study button',
       );
       expect(tester.takeException(), isNull);
     });

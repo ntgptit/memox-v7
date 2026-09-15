@@ -69,7 +69,10 @@ class CardImportPreviewSummaryWidget extends ConsumerWidget {
           crossAxisAlignment: WrapCrossAlignment.end,
           spacing: AppSpacing.sm,
           children: <Widget>[
-            MxSectionLabel(label: l10n.cardImportRowsHeading),
+            MxSectionLabel(
+              label: l10n.cardImportRowsHeading,
+              rung: MxSectionLabelRung.small,
+            ),
             Text(
               l10n.cardImportPreviewReadyOfTotal(importable, preview.totalRows),
               style: context.texts.bodySmall!.inked(context, AppInk.quiet),
@@ -225,7 +228,7 @@ class _StatusChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            MxIcon(icon, ink: foreground, size: MxIconSize.xs),
+            MxIcon(icon, ink: foreground, size: MxIconSize.sm),
             const SizedBox(width: AppSpacing.xs),
             Text(
               context.l10n.cardImportStatusCountChip(label, count),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/features/search/domain/models/search_page_model.dart';
 import 'package:memox/features/search/domain/models/search_query_model.dart';
 import 'package:memox/features/search/domain/models/search_cursor_model.dart';
@@ -13,10 +12,6 @@ import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/shared/widgets/mx_loading_state.dart';
-import 'package:memox/core/theme/foundations/app_sizing.dart';
-import 'package:memox/shared/widgets/mx_card.dart';
-import 'package:memox/shared/widgets/mx_icon_tile.dart';
-import 'package:memox/shared/widgets/mx_row_group.dart';
 
 import 'support/fake_library_search_repository.dart';
 import 'support/search_screen_harness.dart';
@@ -246,7 +241,7 @@ void main() {
       // indicator size. AUTHORITY: A20.1 P1-02.
       expect(
         tester.getSize(find.byType(CircularProgressIndicator)),
-        const Size.square(AppIconSize.xs),
+        const Size.square(AppIconSize.sm),
         reason: 'nothing balloons to the centered 88dp face mid-list',
       );
       expect(
@@ -309,120 +304,5 @@ void main() {
     );
 
     expect(find.byType(LibrarySearchScreen), findsOneWidget);
-  });
-
-  group('the rows (handoff ListRow, M100.91)', () {
-    testWidgets("a group's results are rows on one card, a hairline between "
-        'each', (tester) async {
-      await pumpSearchScreen(
-        tester,
-        repository: FakeLibrarySearchRepository.serving(
-          fakeSearchPage(
-            cards: <CardSearchHit>[
-              fakeCardHit(),
-              fakeCardHit(id: 'card-2', front: 'nouns'),
-              fakeCardHit(id: 'card-3', front: 'pronoun'),
-            ],
-          ),
-        ),
-      );
-      await typeSearch(tester, 'noun');
-
-      expect(find.byType(MxCard), findsOneWidget);
-      final rows = find.byType(MxRowGroup);
-      expect(rows, findsOneWidget);
-      expect(
-        find.descendant(of: rows, matching: find.byType(Divider)),
-        findsNWidgets(2),
-        reason: 'none after the last row',
-      );
-      expect(
-        find.descendant(of: rows, matching: find.byType(MxIconTile)),
-        findsNWidgets(3),
-      );
-      // The text column — one `md` past the tile — starts where the hairline
-      // does (UI audit P2, M100.91).
-      final hairline = tester.getRect(
-        find.descendant(of: rows, matching: find.byType(Divider)).first,
-      );
-      expect(
-        tester.getRect(find.byType(MxIconTile).first).right + AppSpacing.md,
-        hairline.left + AppSizing.listDividerIndent,
-      );
-      expect(
-        tester.getSize(find.byType(CardResultTileWidget).first).height,
-        greaterThanOrEqualTo(AppSizing.rowMinHeight),
-      );
-    });
-
-    testWidgets('decks and cards are two sections, so two cards', (
-      tester,
-    ) async {
-      await pumpSearchScreen(
-        tester,
-        repository: FakeLibrarySearchRepository.serving(
-          fakeSearchPage(
-            decks: <DeckSearchHit>[fakeDeckHit()],
-            cards: <CardSearchHit>[fakeCardHit()],
-          ),
-        ),
-      );
-      await typeSearch(tester, 'noun');
-
-      expect(find.byType(MxCard), findsNWidgets(2));
-      expect(find.byType(MxRowGroup), findsNWidgets(2));
-      expect(
-        find.descendant(
-          of: find.byType(MxRowGroup),
-          matching: find.byType(Divider),
-        ),
-        findsNothing,
-        reason: 'one row per section here, so no boundary to mark',
-      );
-    });
-  });
-
-  group('the rows across the matrix (UI re-audit, M100.91)', () {
-    for (final (String label, Size surface, double scale, Locale locale)
-        in <(String, Size, double, Locale)>[
-          ('320 x 2.0 in vi', const Size(320, 640), 2, const Locale('vi')),
-          ('412 in vi', const Size(412, 915), 1, const Locale('vi')),
-          ('landscape', const Size(852, 393), 1, const Locale('en')),
-        ]) {
-      testWidgets('$label: rows fit and keep their text on the hairline', (
-        tester,
-      ) async {
-        await pumpSearchScreen(
-          tester,
-          repository: FakeLibrarySearchRepository.serving(
-            fakeSearchPage(
-              cards: <CardSearchHit>[
-                fakeCardHit(),
-                fakeCardHit(id: 'card-2', front: 'nouns'),
-              ],
-            ),
-          ),
-          surface: surface,
-          textScale: scale,
-          locale: locale,
-        );
-        await typeSearch(tester, 'noun');
-
-        expect(tester.takeException(), isNull);
-        final rows = find.byType(MxRowGroup);
-        expect(rows, findsOneWidget);
-        final hairline = tester.getRect(
-          find.descendant(of: rows, matching: find.byType(Divider)).first,
-        );
-        expect(
-          tester.getRect(find.byType(MxIconTile).first).right + AppSpacing.md,
-          hairline.left + AppSizing.listDividerIndent,
-        );
-        expect(
-          tester.getSize(find.byType(CardResultTileWidget).first).height,
-          greaterThanOrEqualTo(AppSizing.rowMinHeight),
-        );
-      });
-    }
   });
 }

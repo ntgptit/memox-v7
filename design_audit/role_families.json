@@ -6,23 +6,23 @@
       "primary": {
         "members": {
           "fill": {
-            "hex": "#5265F5",
-            "hue": 233.00613496932516
+            "hex": "#4454CC",
+            "hue": 232.94117647058823
           },
           "onFill": {
             "hex": "#FFFFFF",
             "hue": null
           },
           "container": {
-            "hex": "#E0E5FE",
-            "hue": 229.99999999999997
+            "hex": "#DADDF2",
+            "hue": 232.49999999999994
           },
           "onContainer": {
-            "hex": "#1A2580",
-            "hue": 233.52941176470588
+            "hex": "#141D5D",
+            "hue": 232.60273972602738
           }
         },
-        "hueSpreadExcludingOnColors": 3.0061349693251884,
+        "hueSpreadExcludingOnColors": 0.4411764705882888,
         "hasContainerPair": true,
         "hasBorderToken": false,
         "hasFocusToken": true
@@ -30,27 +30,27 @@
       "error/danger": {
         "members": {
           "fill": {
-            "hex": "#DC2D4E",
-            "hue": 348.6857142857143
+            "hex": "#CD0031",
+            "hue": 345.6585365853658
           },
           "onFill": {
             "hex": "#FFFFFF",
             "hue": null
           },
           "container": {
-            "hex": "#FBDDE3",
-            "hue": 348.00000000000006
+            "hex": "#F8DDE2",
+            "hue": 348.88888888888897
           },
           "onContainer": {
-            "hex": "#7A0A23",
-            "hue": 346.6071428571429
+            "hex": "#641423",
+            "hue": 348.75
           },
           "semanticDanger": {
-            "hex": "#DC2D4E",
-            "hue": 348.6857142857143
+            "hex": "#CD0031",
+            "hue": 345.6585365853658
           }
         },
-        "hueSpreadExcludingOnColors": 0.6857142857142549,
+        "hueSpreadExcludingOnColors": 3.230352303523148,
         "hasContainerPair": true,
         "hasBorderToken": false,
         "hasFocusToken": false
@@ -58,8 +58,8 @@
       "success": {
         "members": {
           "fill": {
-            "hex": "#2BA88B",
-            "hue": 166.07999999999998
+            "hex": "#2A7800",
+            "hue": 99.0
           }
         },
         "hueSpreadExcludingOnColors": 0.0,
@@ -70,8 +70,8 @@
       "warning": {
         "members": {
           "fill": {
-            "hex": "#F59E0B",
-            "hue": 37.69230769230769
+            "hex": "#A06200",
+            "hue": 36.75
           }
         },
         "hueSpreadExcludingOnColors": 0.0,
@@ -82,8 +82,8 @@
       "info": {
         "members": {
           "fill": {
-            "hex": "#5265F5",
-            "hue": 233.00613496932516
+            "hex": "#00729A",
+            "hue": 195.58441558441558
           }
         },
         "hueSpreadExcludingOnColors": 0.0,
@@ -96,23 +96,23 @@
       "primary": {
         "members": {
           "fill": {
-            "hex": "#8B9AFF",
-            "hue": 232.24137931034483
+            "hex": "#BCC2FF",
+            "hue": 234.6268656716418
           },
           "onFill": {
-            "hex": "#11173A",
-            "hue": 231.21951219512195
+            "hex": "#202771",
+            "hue": 234.8148148148148
           },
           "container": {
-            "hex": "#2D346A",
-            "hue": 233.11475409836066
+            "hex": "#252C6F",
+            "hue": 234.32432432432432
           },
           "onContainer": {
-            "hex": "#D9DFFF",
-            "hue": 230.52631578947367
+            "hex": "#D2D6FF",
+            "hue": 234.66666666666666
           }
         },
-        "hueSpreadExcludingOnColors": 0.8733747880158376,
+        "hueSpreadExcludingOnColors": 0.3025413473174865,
         "hasContainerPair": true,
         "hasBorderToken": false,
         "hasFocusToken": true
@@ -120,27 +120,27 @@
       "error/danger": {
         "members": {
           "fill": {
-            "hex": "#FF8FA3",
-            "hue": 349.2857142857143
+            "hex": "#FF768F",
+            "hue": 349.05109489051097
           },
           "onFill": {
-            "hex": "#52061B",
-            "hue": 343.42105263157896
+            "hex": "#2C1318",
+            "hue": 348.0
           },
           "container": {
-            "hex": "#7A2036",
-            "hue": 345.3333333333333
+            "hex": "#5E2832",
+            "hue": 348.8888888888889
           },
           "onContainer": {
-            "hex": "#FFD9DF",
-            "hue": 350.5263157894737
+            "hex": "#F4D3D9",
+            "hue": 349.0909090909091
           },
           "semanticDanger": {
-            "hex": "#FF8FA3",
-            "hue": 349.2857142857143
+            "hex": "#FF768F",
+            "hue": 349.05109489051097
           }
         },
-        "hueSpreadExcludingOnColors": 3.952380952380963,
+        "hueSpreadExcludingOnColors": 0.162206001622053,
         "hasContainerPair": true,
         "hasBorderToken": false,
         "hasFocusToken": false
@@ -148,8 +148,8 @@
       "success": {
         "members": {
           "fill": {
-            "hex": "#6FE0BD",
-            "hue": 161.41592920353983
+            "hex": "#57CA22",
+            "hue": 101.07142857142857
           }
         },
         "hueSpreadExcludingOnColors": 0.0,
@@ -160,8 +160,8 @@
       "warning": {
         "members": {
           "fill": {
-            "hex": "#FFC658",
-            "hue": 39.52095808383233
+            "hex": "#FFA319",
+            "hue": 36.0
           }
         },
         "hueSpreadExcludingOnColors": 0.0,
@@ -172,8 +172,8 @@
       "info": {
         "members": {
           "fill": {
-            "hex": "#8B9AFF",
-            "hue": 232.24137931034483
+            "hex": "#33C2FF",
+            "hue": 197.94117647058823
           }
         },
         "hueSpreadExcludingOnColors": 0.0,

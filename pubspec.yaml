@@ -175,10 +175,13 @@ flutter:
   # family, so weight is selected along the `wght` axis; app_typography.dart
   # sets it through `fontVariations` so it works the same on every renderer.
   fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Variable.ttf
     - family: PlusJakartaSans
       fonts:
         - asset: assets/fonts/PlusJakartaSans-Variable.ttf
-    # The Korean fallback behind the Latin face (see AppTypography.cjkFallback).
+    # The Korean fallback behind both Latin faces (see AppTypography.cjkFallback).
     # Subset to Hangul and kept VARIABLE: the app drives weight through
     # `fontVariations`, so a static instance would paint one weight while
     # reporting another.
@@ -208,9 +211,10 @@ flutter:
   # inspecting the app can read it.
   assets:
     - assets/templates/
-    # The OFL text of the two faces above. Listed one by one rather than as
+    # The OFL text of the three faces above. Listed one by one rather than as
     # `assets/fonts/`, which would bundle the `.ttf` a second time — the KR face
     # alone is 4.6 MB. `registerFontLicenses` reads these, and nothing else does.
+    - assets/fonts/OFL-Inter.txt
     - assets/fonts/OFL-PlusJakartaSans.txt
     - assets/fonts/OFL-NotoSansKR.txt
 

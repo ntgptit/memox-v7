@@ -58,7 +58,8 @@ class ProgressDeckListWidget extends StatelessWidget {
       sliver: SliverList.separated(
         itemCount: decks.length,
         // `lg`, the gap `app_spacing.dart` defines as *the* gap between
-        // list items, one card per row. It was `md`: 12 between two 16-padded cards
+        // list items, and the same step `deck_list_sliver_widget.dart` puts
+        // between two deck cards. It was `md`: 12 between two 16-padded cards
         // makes the space between them tighter than the space inside one, so
         // the card's own edge draws the louder boundary of the two (SC-C2-20).
         separatorBuilder: (BuildContext context, int index) =>

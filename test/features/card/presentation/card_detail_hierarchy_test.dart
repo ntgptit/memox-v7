@@ -151,9 +151,9 @@ void main() {
         matching: find.text('3 / 8'),
       );
       expect(badge, findsOneWidget);
-      // The accent as text — its ink since M100.87 — and tabular figures so a
-      // two-digit box does not shift the stroke beside it.
-      expect(styleOf(tester, badge).color, semanticOf(tester).accentInk);
+      // The accent, and tabular figures so a two-digit box does not shift the
+      // stroke beside it.
+      expect(styleOf(tester, badge).color, schemeOf(tester).primary);
       expect(styleOf(tester, badge).fontFeatures, const <FontFeature>[
         FontFeature.tabularFigures(),
       ]);
@@ -454,13 +454,12 @@ void main() {
       await pumpCardDetail(tester, loaded());
       await tester.pumpAndSettle();
 
-      // What has to clear 48 is the target around the glyph: the
-      // `IconButton`'s padded box, around a 36 ink circle since M100.90.
+      // The glyph is 24dp; what has to clear 48 is the target around it.
       final size = tester.getSize(
         find
             .ancestor(
               of: find.byIcon(Icons.edit_outlined),
-              matching: find.byType(IconButton),
+              matching: find.byType(InkWell),
             )
             .first,
       );

@@ -238,7 +238,6 @@ class _CardImportScreenState extends ConsumerState<CardImportScreen> {
             : context.l10n.cardImportTitle,
         leading: MxIconButton(
           icon: Icons.close,
-          placement: MxIconButtonPlacement.bar,
           // The action's name, not the screen's: a screen reader lands on
           // "Cancel", the same word the tooltip shows.
           semanticLabel: context.l10n.commonCancelAction,

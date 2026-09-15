@@ -186,7 +186,7 @@ class _ContextLine extends StatelessWidget {
       // rather than of whichever fragment a translator happened to shout, and
       // leaves the ARB holding words rather than styling.
       (extra == null ? base : '$base · $extra').toUpperCase(),
-      style: context.textStyles.sectionLabel.inked(context, AppInk.quiet),
+      style: context.textStyles.sectionLabelSmall.inked(context, AppInk.quiet),
       textAlign: TextAlign.center,
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
@@ -283,7 +283,7 @@ class _HintLine extends StatelessWidget {
           // **The icon step, not the line's font size.** Tying it to the text
           // put a 12px glyph beside 12px copy, and a mark that small reads as
           // a speck rather than as the thing that classifies the sentence.
-          size: MxIconSize.xs,
+          size: MxIconSize.sm,
         ),
         const SizedBox(width: AppSpacing.sm),
         // `Flexible`, not `Expanded`: the row is centred, so a child that took

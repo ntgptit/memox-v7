@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/features/deck/presentation/widgets/items/deck_study_button_widget.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/deck/domain/entities/deck_entity.dart';
 import 'package:memox/features/deck/domain/models/deck_content_type_model.dart';
@@ -16,7 +17,6 @@ import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
 
 import 'package:memox/shared/widgets/mx_loading_state.dart';
-import 'package:memox/shared/widgets/mx_mastery_ring.dart';
 
 import 'support/deck_screen_harness.dart';
 import 'support/fake_deck_repository.dart';
@@ -172,12 +172,12 @@ void main() {
       expect(find.text('Hiragana'), findsOneWidget);
     });
 
-    testWidgets('each child row carries its own ring, complete only where '
-        'every card is learned', (tester) async {
-      // **The Study button left the row** (owner decision 7, M100.91): a
-      // child's session starts inside it or from the Study tab. This test used
-      // to prove the verb carried its own deck's id; the ring is now the
-      // per-row fact that could be pinned on the wrong deck.
+    testWidgets('Study appears only where something is due, and answers', (
+      tester,
+    ) async {
+      // **The button is real before the feature is.** There is no study
+      // session until M5, so it says so rather than swallowing the tap. The
+      // layout under review is then the real one.
       await pumpLevel(
         tester,
         serving(
@@ -201,22 +201,20 @@ void main() {
         ),
       );
 
-      MxMasteryRing ringOn(String name) => tester.widget<MxMasteryRing>(
-        find.descendant(
-          of: find.widgetWithText(DeckTileWidget, name),
-          matching: find.byType(MxMasteryRing),
-        ),
+      // One deck has cards due; the other offers the figure in its place.
+      expect(find.text(english.deckStudyAction), findsOneWidget);
+      expect(
+        find.text(english.deckTileLearnedPercentLabel(100)),
+        findsOneWidget,
       );
 
-      expect(ringOn('Due').isComplete, isFalse);
-      expect(ringOn('Caught up').isComplete, isTrue);
-      expect(
-        find.descendant(
-          of: find.byType(DeckTileWidget),
-          matching: find.byType(ButtonStyleButton),
-        ),
-        findsNothing,
+      // The tap goes to a route this harness does not mount, so the assertion
+      // is that the button *is* the deck's own — the id it would carry. Where
+      // it lands is the router's contract and is asserted there.
+      final button = tester.widget<DeckStudyButtonWidget>(
+        find.byType(DeckStudyButtonWidget),
       );
+      expect(button.deckId, 'c1');
     });
 
     testWidgets('a child shows the same four facts a root deck does', (
@@ -288,8 +286,8 @@ void main() {
         findsNothing,
         reason: 'the learned caption is announced, never drawn on the card',
       );
-      // On the row's own node, not as a separate one: the row announces
-      // itself as one button, so everything inside it merges into that
+      // On the card's own node, not as a separate one: `MxCard` announces the
+      // whole card as one button, so everything inside it merges into that
       // label. That was already true of the header when it was painted — what
       // changed is only that the words are no longer also drawn.
       final handle = tester.ensureSemantics();

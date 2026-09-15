@@ -28,13 +28,13 @@ class MxScrollEndInsetScope extends InheritedWidget {
 ///
 /// Under a floating action it is the clearance the button needs plus the
 /// gesture inset — on a device with a home indicator the last row would
-/// otherwise end under it. Without one it is the handoff's page-end clearance,
-/// [AppSpacing.xxxl]. Outside a shell there is no button to clear, so a body
-/// pumped on its own gets that clearance too.
+/// otherwise end under it. Without one it is the ordinary end gap. Outside a
+/// shell there is no button to clear, so a body pumped on its own gets the
+/// ordinary gap too.
 double mxScrollEndInsetOf(BuildContext context) {
   final scope = context
       .dependOnInheritedWidgetOfExactType<MxScrollEndInsetScope>();
-  if (scope == null || !scope.hasFloatingAction) return AppSpacing.xxxl;
+  if (scope == null || !scope.hasFloatingAction) return AppSpacing.lg;
   return AppSpacing.fabScrollClearance +
       MediaQuery.viewPaddingOf(context).bottom;
 }

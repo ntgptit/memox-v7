@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:memox/shared/widgets/mx_row_group.dart';
 import 'package:memox/shared/widgets/mx_badge.dart';
 import 'package:memox/shared/widgets/mx_checkbox_row.dart';
 import 'package:memox/shared/widgets/mx_dropdown.dart';
@@ -7,9 +6,6 @@ import 'package:memox/shared/widgets/mx_list_tile.dart';
 import 'package:memox/shared/widgets/mx_menu_button.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
 import 'package:memox/shared/widgets/mx_radio_rows.dart';
-import 'package:memox/shared/widgets/mx_segmented_control.dart';
-import 'package:memox/shared/widgets/mx_slider.dart';
-import 'package:memox/shared/widgets/mx_switch.dart';
 import 'package:memox/shared/widgets/mx_switch_row.dart';
 
 import 'mx_stress_specimens.dart';
@@ -22,8 +18,6 @@ void _noop() {}
 void _noopIndex(int index) {}
 
 void _noopBool(bool value) {}
-
-void _noopDouble(double value) {}
 
 void _noopNullableIndex(int? index) {}
 
@@ -53,38 +47,6 @@ List<MxStressSpecimen> selectionStressSpecimens() => <MxStressSpecimen>[
     name: 'MxSwitchRow (announced)',
     build: () =>
         const MxSwitchRow(label: kLongTitle, isOn: true, onChanged: _noopBool),
-    isInteractive: true,
-  ),
-  MxStressSpecimen(
-    // A painted mark with no gesture or semantics of its own: the row above
-    // carries the target and the toggle, so this is not interactive.
-    name: 'MxSwitch',
-    build: () => const MxSwitch(isOn: true, onChanged: _noopBool),
-  ),
-  MxStressSpecimen(
-    // The label is the slider's name, not drawn text; the stress is the
-    // track's target at 2.0x.
-    name: 'MxSlider',
-    build: () => const MxSlider(
-      value: 0.5,
-      onChanged: _noopDouble,
-      semanticLabel: kLongLabel,
-    ),
-    isInteractive: true,
-  ),
-  MxStressSpecimen(
-    // Three long labels on a 320dp track: each ellipsizes inside its own
-    // segment, and every segment keeps its 48 target.
-    name: 'MxSegmentedControl',
-    build: () => MxSegmentedControl<int>(
-      segments: const <MxSegment<int>>[
-        MxSegment<int>(value: 0, label: kLongLabel),
-        MxSegment<int>(value: 1, label: kLongLabel),
-        MxSegment<int>(value: 2, label: kLongLabel),
-      ],
-      selected: 0,
-      onChanged: _noopIndex,
-    ),
     isInteractive: true,
   ),
   MxStressSpecimen(
@@ -171,18 +133,6 @@ List<MxStressSpecimen> selectionStressSpecimens() => <MxStressSpecimen>[
       trailing: Icon(Icons.chevron_right),
       isEnabled: false,
       onTap: _noop,
-    ),
-  ),
-  MxStressSpecimen(
-    // Three long rows under one group: the hairlines must stay between rows
-    // and the rows must grow, not clip, at 320dp and 2.0x.
-    name: 'MxRowGroup',
-    build: () => const MxRowGroup(
-      children: <Widget>[
-        MxListTile(title: kLongTitle, subtitle: kLongLabel),
-        MxListTile(title: kLongTitle, subtitle: kLongLabel),
-        MxListTile(title: kLongTitle, subtitle: kLongLabel),
-      ],
     ),
   ),
   MxStressSpecimen(

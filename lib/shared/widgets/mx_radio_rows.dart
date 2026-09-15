@@ -76,9 +76,8 @@ class MxRadioRows<T> extends StatelessWidget {
   ///
   /// **The gutter follows the shape** (M100.36 10I). A public
   /// `contentPadding` used to let the settings screen restate `AppSpacing.lg`
-  /// as a literal — a value the theme owns, and one that did not follow the
-  /// compact pass down to 12 at 320dp while it still stepped (#431 P2-6,
-  /// P2-17; the step left at M100.89). A `list`
+  /// as a literal — a value the theme owns and one that did not follow
+  /// `applyCompactScale` down to 12 at 320dp (#431 P2-6, P2-17). A `list`
   /// supplies the screen gutter itself so its ink and its dividers can run
   /// edge to edge across a card that pads vertically only; a `block` sits
   /// inside a card that already pads its content and supplies nothing. Two

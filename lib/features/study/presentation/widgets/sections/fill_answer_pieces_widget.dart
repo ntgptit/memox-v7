@@ -257,11 +257,6 @@ class _FillInput extends StatelessWidget {
 const InputDecoration _fillInputDecoration = InputDecoration(
   isCollapsed: true,
   filled: false,
-  // **No floor from the theme** (M100.92). The handoff text field's 52
-  // minimum lives in `InputDecorationTheme.constraints`, and `applyDefaults`
-  // hands it to any decoration that leaves `constraints` null — this field is
-  // the card's answer line, not a form field.
-  constraints: BoxConstraints(),
   contentPadding: EdgeInsets.zero,
   border: InputBorder.none,
   enabledBorder: InputBorder.none,
@@ -304,7 +299,7 @@ class _Verdict extends StatelessWidget {
               children: <Widget>[
                 MxIcon(
                   isCorrect ? Icons.check_circle_outline : Icons.close,
-                  size: MxIconSize.xs,
+                  size: MxIconSize.sm,
                   ink: accent,
                 ),
                 const SizedBox(width: AppSpacing.sm),

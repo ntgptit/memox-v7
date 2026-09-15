@@ -16,9 +16,8 @@ import '../typography/app_typography.dart';
 /// So the setting is answered where the axis lives: every rung of the text
 /// theme is re-set through `withWeight` at `w700`, and `AppTextStyles` is
 /// rebuilt from the emboldened rungs so the named roles follow. `heroNumeral`
-/// takes its stat rung's weight rather than restating it, so it follows to
-/// `w700` and keeps its derived cap-trim — bold text changes the weight of a
-/// rung, never its metrics.
+/// is already `w700` and keeps its derived cap-trim untouched — bold text
+/// changes the weight of a rung, never its metrics.
 ///
 /// Cached per base theme like `applyCompactScale`, and for the same reason:
 /// the wrapper rebuilds whenever `MediaQuery` changes.

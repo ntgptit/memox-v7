@@ -23,7 +23,7 @@ class SearchGroupHeaderWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // **The app's one section-heading treatment** (D18), at its default
-    // `standard` rung: `sectionLabel` = 12 / w600 / tracking 1.2, uppercased at
+    // `standard` rung: `sectionLabel` = 12 / w500 / tracking 1.1, uppercased at
     // paint, with the ARB sentence kept as the accessible name and the node
     // marked `header` — so the component supplies the `Semantics(header: true)`
     // this file used to wrap by hand.
@@ -40,7 +40,10 @@ class SearchGroupHeaderWidget extends StatelessWidget {
     // heads, one weight step apart, so a group read as three peer caption lines
     // rather than a heading over a list.
     //
-    // **Not `list`.** `list` exists only because the deck toolbar's heading
+    // **Not `small`, not `list`.** `MxSectionLabelRung.small` is
+    // `sectionLabelSmall` — labelSmall, 11px, the caption's own size — so it
+    // would keep the very defect this closes; it is reserved for a face label
+    // inside a card. `list` exists only because the deck toolbar's heading
     // shares its row with the sort control (`app_typography.dart:151-160`).
     // This header has no control beside it, so `standard` is the rung.
     return MxSectionLabel(label: context.mxSearchGroupLabel(group));

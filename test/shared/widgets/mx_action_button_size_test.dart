@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
-import 'package:memox/core/theme/foundations/app_icon_size.dart';
 import 'package:memox/core/theme/foundations/app_sizing.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 
@@ -41,8 +40,8 @@ void main() {
   test('the three bodies are the three tokens, in order', () {
     // Stated as an ordering rather than three numbers: what the enum promises
     // is a ladder, and a ladder that stops descending is the bug.
-    expect(AppSizing.controlDense, lessThan(AppSizing.buttonCompact));
-    expect(AppSizing.buttonCompact, lessThan(AppSizing.touchTarget));
+    expect(AppSizing.controlDense, lessThan(AppSizing.controlCompact));
+    expect(AppSizing.controlCompact, lessThan(AppSizing.touchTarget));
   });
 
   testWidgets('standard draws its target', (tester) async {
@@ -52,10 +51,10 @@ void main() {
     expect(target, greaterThanOrEqualTo(AppSizing.touchTarget));
   });
 
-  testWidgets('compact draws 36', (tester) async {
+  testWidgets('compact draws 40', (tester) async {
     final (body, target) = await pump(tester, MxActionButtonSize.compact);
 
-    expect(body, AppSizing.buttonCompact);
+    expect(body, AppSizing.controlCompact);
     expect(target, greaterThanOrEqualTo(AppSizing.touchTarget));
   });
 
@@ -104,66 +103,6 @@ void main() {
       );
     }
   });
-
-  testWidgets('compact paints 36 and keeps a 48 target (handoff button-sm)', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: light,
-        home: const Scaffold(
-          body: Center(
-            child: MxActionButton(
-              label: 'Study',
-              size: MxActionButtonSize.compact,
-              onPressed: _noop,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    final painted = find
-        .descendant(
-          of: find.byType(MxActionButton),
-          matching: find.byType(Material),
-        )
-        .first;
-    expect(tester.getSize(painted).height, AppSizing.buttonCompact);
-    expect(
-      tester.getSize(find.byType(MxActionButton)).height,
-      greaterThanOrEqualTo(AppSizing.touchTarget),
-    );
-  });
-
-  testWidgets(
-    'loading swaps the label for a 16px spinner and holds the width',
-    (tester) async {
-      Widget button({required bool isLoading}) => MaterialApp(
-        theme: light,
-        home: Scaffold(
-          body: Center(
-            child: MxActionButton(
-              label: 'Save changes',
-              isLoading: isLoading,
-              onPressed: _noop,
-            ),
-          ),
-        ),
-      );
-
-      await tester.pumpWidget(button(isLoading: false));
-      final width = tester.getSize(find.byType(MxActionButton)).width;
-
-      await tester.pumpWidget(button(isLoading: true));
-      await tester.pump();
-
-      expect(tester.getSize(find.byType(MxActionButton)).width, width);
-      final spinner = find.byType(CircularProgressIndicator);
-      expect(spinner, findsOneWidget);
-      expect(tester.getSize(spinner).width, AppIconSize.xs);
-    },
-  );
 }
 
 void _noop() {}

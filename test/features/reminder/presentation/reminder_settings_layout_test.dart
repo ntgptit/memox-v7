@@ -13,7 +13,6 @@ import 'package:memox/core/theme/foundations/app_spacing.dart';
 import 'package:memox/features/reminder/presentation/widgets/items/reminder_toggle_row_widget.dart';
 import 'package:memox/features/reminder/presentation/widgets/sections/reminder_banner_section_widget.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
-import 'package:memox/shared/widgets/mx_switch.dart';
 import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 
 /// The M6 geometry contract (G1, G3, G4, G5, G7, G8), measured with `getRect`
@@ -34,7 +33,7 @@ void main() {
     ) async {
       harness.platform.permission = ReminderPermission.denied;
       await harness.pump(tester);
-      await tester.tap(find.byType(MxSwitch));
+      await tester.tap(find.byType(Switch));
       await tester.pumpAndSettle();
 
       // Schedule card, banner, quiet info panel — three surfaces once R11
@@ -120,7 +119,7 @@ void main() {
 
       final atRest = cardHeight();
 
-      await tester.tap(find.byType(MxSwitch));
+      await tester.tap(find.byType(Switch));
       await tester.pump();
       final whileSubmitting = cardHeight();
 
@@ -171,7 +170,7 @@ void main() {
           matching: find.text(english.reminderToggleLabel),
         ),
       );
-      final toggle = tester.getRect(find.byType(MxSwitch));
+      final toggle = tester.getRect(find.byType(Switch));
 
       expect(label.center.dy, closeTo(toggle.center.dy, 0.5));
     });
@@ -191,11 +190,11 @@ void main() {
         'on the compact tier too (M6 R2)', (tester) async {
       // **Three widths, because the defect only existed on one tier.** The
       // toggle row and the hairline resolve `mxScreenGutter`; the time row
-      // takes its inset from `ListTileTheme.contentPadding`, which the compact
-      // pass stepped to `md` below `AppBreakpoints.compact` until M100.89. A
+      // takes its inset from `ListTileTheme.contentPadding`, which
+      // `applyCompactScale` steps to `md` below `AppBreakpoints.compact`. A
       // fixed `lg` on either of the first two held at 393 and split the card
       // into two left edges at 320 and at 359 — 4dp, which is exactly the size
-      // nothing catches by eye. Both are 16 at every width now.
+      // nothing catches by eye.
       for (final surface in <Size>[
         const Size(320, 568),
         const Size(359, 700),
@@ -220,7 +219,7 @@ void main() {
           ),
         );
 
-        const expected = AppSpacing.lg;
+        final expected = surface.width < 360 ? AppSpacing.md : AppSpacing.lg;
         expect(
           toggleLabel.left,
           closeTo(card.left + expected, 0.5),
@@ -251,7 +250,7 @@ void main() {
     ) async {
       await harness.pump(tester);
 
-      expect(tester.getRect(find.byType(MxSwitch)).height, greaterThan(0));
+      expect(tester.getRect(find.byType(Switch)).height, greaterThan(0));
       expect(
         tester.getRect(find.text(english.reminderTimeLabel)).height,
         greaterThan(0),
@@ -303,7 +302,7 @@ void main() {
           textScale: 2,
           locale: locale,
         );
-        await tester.tap(find.byType(MxSwitch));
+        await tester.tap(find.byType(Switch));
         await tester.pumpAndSettle();
 
         // Schedule card + banner + the always-present info panel (R11).
@@ -325,7 +324,7 @@ void main() {
         permission: ReminderPermission.denied,
       );
       await harness.pump(tester);
-      await tester.tap(find.byType(MxSwitch));
+      await tester.tap(find.byType(Switch));
       await tester.pumpAndSettle();
 
       final BuildContext bannerContext = tester.element(
@@ -417,7 +416,7 @@ void main() {
           locale: locale,
         );
 
-        await tester.tap(find.byType(MxSwitch));
+        await tester.tap(find.byType(Switch));
         await tester.pumpAndSettle();
 
         expect(
@@ -447,7 +446,7 @@ void main() {
         permission: ReminderPermission.denied,
       );
       await harness.pump(tester);
-      await tester.tap(find.byType(MxSwitch));
+      await tester.tap(find.byType(Switch));
       await tester.pumpAndSettle();
 
       final BuildContext bannerContext = tester.element(
@@ -493,7 +492,7 @@ void main() {
         locale: const Locale('vi'),
         brightness: Brightness.dark,
       );
-      await tester.tap(find.byType(MxSwitch));
+      await tester.tap(find.byType(Switch));
       await tester.pumpAndSettle();
 
       expect(find.byType(MxCard), findsNWidgets(3));

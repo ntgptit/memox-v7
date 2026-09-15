@@ -346,11 +346,6 @@ void main() {
         findsWidgets,
         reason: 'the first row never scrolled into view',
       );
-      // Built is not on screen: the list builds a row inside its cache extent
-      // below the fold, and a long-press there lands outside the viewport. The
-      // 52 search field (M100.92) put the first row's centre at 641 of 640.
-      await tester.ensureVisible(find.byType(CardTileWidget).first);
-      await tester.pumpAndSettle();
       await tester.longPress(find.byType(CardTileWidget).first);
       await tester.pumpAndSettle();
       // A RenderFlex overflow throws into the binding, so reaching here with
@@ -446,7 +441,9 @@ void main() {
     expect(
       second.top - first.bottom,
       moreOrLessEquals(AppSpacing.lg, epsilon: epsilon),
-      reason: 'app_spacing.dart defines lg as the gap between list items',
+      reason:
+          'app_spacing.dart defines lg as the gap between list items, and '
+          'deck_list_sliver_widget.dart separates the deck rows by it',
     );
   });
 

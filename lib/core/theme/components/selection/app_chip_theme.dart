@@ -39,28 +39,12 @@ import '../../typography/app_typography.dart';
 
 /// The resting fill for a pill, before any pointer or disabled state.
 ///
-/// **Selected is `primaryContainer` — a named departure from
-/// `_ChoiceChipDefaultsM3.color`'s own answer (`secondaryContainer`), taken at
-/// M100.86 implementing the Chip handoff spec** (`design-system/chip-spec.md`;
-/// authority for touching this frozen slot is `v1-freeze.md` §3c, the Tokyo
-/// redesign reopen). Before this, selected read `secondaryContainer` — the
-/// same pair `NavigationBar`'s indicator and `SegmentedButton` take, so "this
-/// one is active" looked the same whether it was a tab, a segment or a filter.
-/// That cross-component match is deliberately given up here, for Chip only —
-/// the owner was asked and chose Chip alone; `chip-spec.md` records the
-/// question and the answer. `m3_role_contract_test.dart` ("the selected state
-/// is not one ink") is the guard that would have caught an accidental
-/// collapse onto one token; it now pins the departure by name instead of the
-/// coincidence.
+/// Selected is `secondaryContainer` — `_ChoiceChipDefaultsM3.color`'s answer,
+/// and the same pair the navigation indicator and the segmented button take, so
+/// "this one is active" looks the same whether it is a tab, a segment or a
+/// filter.
 ///
-/// (Chip's selected fill was briefly `primaryContainer` once before, between
-/// the owner review of 2026-08-20 and M100.22 — see the note below on the
-/// contrast complaint that moved it away. That was an accident of `surface`
-/// still meaning the paper at the time; this is a stated choice against a
-/// palette where the two roles are what the guard in `m3_role_bindings.dart`
-/// says they are.)
-///
-/// **Unselected is `surfaceContainer` (handoff Chip, M100.92), and this theme is what
+/// **Unselected is `surfaceContainerLow` — the paper — and this theme is what
 /// paints it** (M100.36, correcting M100.32). `_ChoiceChipDefaultsM3.color` is
 /// variant-dependent — a flat `ChoiceChip` has no unselected fill, the elevated
 /// one fills with `surfaceContainerLow` — and M100.32 reasoned that building
@@ -83,7 +67,7 @@ import '../../typography/app_typography.dart';
 /// (`AppMaterialRoles.secondaryContainerLight`), so the role now gives 10.50 and
 /// the chip can say what it is.
 Color _restingFill(ColorScheme scheme, {required bool isSelected}) =>
-    isSelected ? scheme.primaryContainer : scheme.surfaceContainer;
+    isSelected ? scheme.secondaryContainer : scheme.surfaceContainerLow;
 
 /// The fill for [states], resolved to a solid colour over the ground that state
 /// actually has.
@@ -145,7 +129,7 @@ Color _labelColorFor(
     return semantic.onDisabled;
   }
   if (states.contains(WidgetState.selected)) {
-    return scheme.onPrimaryContainer;
+    return scheme.onSecondaryContainer;
   }
 
   return scheme.onSurfaceVariant;
@@ -256,12 +240,12 @@ ChipThemeData buildChipTheme(
   // same height as the deck row's Study button, which is also fully rounded, and
   // two controls that size alike in one list should not shape differently.
   //
-  // `AppRadius.full`, not `StadiumBorder`: same painted shape, but the pill
+  // `AppRadius.pill`, not `StadiumBorder`: same painted shape, but the pill
   // radius is how every other fully-rounded control in the app says it
   // (`MxSearchField`, `MxMetricWell`, the progress bar), and one result should
   // not have two mechanisms.
   shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(AppRadius.full),
+    borderRadius: BorderRadius.circular(AppRadius.pill),
   ),
   labelStyle: _labelStyle(texts, scheme, semantic),
   // **The fall-through only, and it cannot be more than that.**
@@ -272,18 +256,8 @@ ChipThemeData buildChipTheme(
   // own glyph in the resolved *label* colour instead, because a selected pill
   // printing brand ink beside a grey glyph is one control disagreeing with
   // itself. See the note at its `Icon`.
-  //
-  // **`AppIconSize.md`, not `.sm`** (M100.86). The Chip design spec states the
-  // glyph step as fixed at 24; `MxPillButton` matches it in the leading slot it
-  // composes so the check and the caller's icon stay the same size.
-  //
-  // **This slot is the fall-through for every Chip-family widget, not only
-  // `MxPillButton`.** The tag editor's delete `Chip` and its `+ Add tag`
-  // `ActionChip` (`card_tag_section_widget.dart`) read it too, so both grow
-  // the same 16→24 step. Checked rather than assumed: `card_editor_edit`'s
-  // golden shows the tag row at the new size and nothing clips or crowds.
   iconTheme: IconThemeData(
-    size: AppIconSize.md,
+    size: AppIconSize.sm,
     color: scheme.onSurfaceVariant,
   ),
   // **`labelPadding` zeroed, and that is the fix for the skew rather than a

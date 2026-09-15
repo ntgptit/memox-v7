@@ -32,7 +32,7 @@ void _selectSort(WidgetRef ref, String deckId, CardListSort sort) =>
 /// still painted here rather than hidden behind the control.
 ///
 /// **`label-md`, and it is a rung above the line it sits beside.** The count
-/// line is `sectionLabel`; a `TextButton` takes `label-lg` from Material,
+/// line is `sectionLabelSmall`; a `TextButton` takes `label-lg` from Material,
 /// which is the hierarchy the deck toolbar was rebuilt to fix, so `isCompact`
 /// brings it down to the deck control's rung. Landing one rung above the count
 /// line rather than on it is the accepted cost of one shape across the two

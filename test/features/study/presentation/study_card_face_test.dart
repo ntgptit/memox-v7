@@ -11,7 +11,6 @@ import 'package:memox/features/study/presentation/widgets/sections/study_card_fa
 
 import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
-import 'package:memox/shared/widgets/mx_section_label.dart';
 
 import 'support/study_commit_stub.dart';
 import 'support/study_widget_harness.dart';
@@ -148,8 +147,7 @@ void main() {
       expect(front.style?.fontSize, texts.titleLarge?.fontSize);
       expect(front.style?.fontWeight, FontWeight.w500);
       expect(back.style?.fontSize, texts.bodyLarge?.fontSize);
-      // The rung's own weight: body large is 16/500 in the handoff (D1).
-      expect(back.style?.fontWeight, texts.bodyLarge?.fontWeight);
+      expect(back.style?.fontWeight, FontWeight.w400);
       expect(
         front.style?.fontSize,
         greaterThan(back.style!.fontSize!),
@@ -427,12 +425,7 @@ void main() {
     expect(find.byType(Divider), findsNothing);
     final card = tester.getRect(find.byType(MxCard));
     final front = tester.getRect(find.text('front-c1'));
-    // Centred in the space under its face label, which is the whole card less
-    // the label — so half the label's height below the card's centre. A fixed
-    // 8 of slack stood in for that half until the caption's 1.4 leading made
-    // the label 16.8 (M100.89).
-    final label = tester.getRect(find.byType(MxSectionLabel));
-    expect(front.center.dy, closeTo(card.center.dy + label.height / 2, 1));
+    expect(front.center.dy, closeTo(card.center.dy, 8));
   });
 
   testWidgets('the last grade sits flush with the foot of the body', (

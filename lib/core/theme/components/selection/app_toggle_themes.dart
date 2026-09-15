@@ -31,42 +31,61 @@ import '../../foundations/app_stroke.dart';
 /// because the old dark fill tone reached only 2.90:1 against the card — and
 /// M100.18 closed that by inverting the tone rather than by keeping two inks.
 
-/// The raw `Switch`. The app draws every switch through `MxSwitchRow`, which
-/// paints `MxSwitch` (M100.92): the handoff's 44 × 26 track is a size no
-/// `SwitchThemeData` slot reaches. This theme keeps a bare or third-party
-/// `Switch` on the same roles all the same.
+/// The switch, as the reminder toggle and the importer's two `SwitchListTile`s
+/// render it.
 ///
-/// **The handoff Switch, and where it leaves `_SwitchDefaultsM3`** (M100.92):
+/// **Every slot is `_SwitchDefaultsM3`'s, and M100.22 is where the last three
+/// substitutions were given back.** The off state had drifted furthest:
 ///
-/// | slot | M3 | handoff, and now |
+/// | slot | was | M3, and now |
 /// |---|---|---|
-/// | thumb | `outline` off, `onPrimary` on | `surfaceBright` in both |
-/// | track | `surfaceContainerHighest` off, `primary` on | same |
-/// | track outline | `outline` off, transparent on | transparent in both |
+/// | off thumb | `onSurfaceVariant` | `outline` |
+/// | off track | `surfaceMuted` (= `surfaceContainerHigh`) | `surfaceContainerHighest` |
+/// | off track outline | `borderControl` | `outline` |
+/// | on track outline | `onPrimary` | transparent |
 ///
-/// **The resting thumb reads 1.32:1 in light and 1.36:1 in dark** on its
-/// track — under the 3:1 WCAG 1.4.11 asks of a control's state. The owner
-/// accepted the handoff's values (owner decision 5), and
-/// `app_toggle_themes_test.dart` pins those figures so the pair cannot sink
-/// further. The track is what tells on from off, and that change is pinned at
-/// 3:1. Until M100.92 every slot was M3's; the measurements behind that are in
-/// `docs/design-system/switch-spec.md`.
+/// **The reason the first three were substituted was real, and it was a palette
+/// fault.** `outline` on `surfaceContainerHighest` measured **2.79:1 in light
+/// and 2.54:1 in dark** — under the 3:1 WCAG 1.4.11 asks of the visual
+/// information identifying a control's state, and on a switch the thumb *is*
+/// the state. The theme answered by moving the component to a brighter ink and
+/// a lower track, which fixed the number and left `outline` failing for the
+/// next component to find. M100.22 moved the role instead:
+/// `AppBorderColors.borderControlLight`/`Dark` carry the derivation, and the
+/// pairing now reads **3.24:1 and 3.04:1** with every other `outline` ground
+/// improving as a side effect.
+///
+/// **The on-state outline is gone, and that is the same correction one state
+/// over.** M3 drops the track outline once the switch is on; this theme kept it
+/// and painted `onPrimary` there, because `primaryDark` used to sit at 2.90:1
+/// against a dark card and the pill needed an edge to be findable. M100.18
+/// inverted that tone — the on track now reads **10.01:1 on the dark card and
+/// 7.27:1 on the light one** — so the fill separates itself and the edge has
+/// nothing left to do. In light it was 1.03:1 white-on-near-white the whole
+/// time, which is to say the app was carrying a brightness-conditional
+/// workaround for a condition that no longer holds in either mode.
 SwitchThemeData buildSwitchTheme(
   ColorScheme scheme,
   AppSemanticColors semantic,
 ) => SwitchThemeData(
   thumbColor: WidgetStateProperty.resolveWith((states) {
-    // **`onDisabled`, never the track's own `disabledSurface`.** That shipped
-    // once and put the knob at 1:1 on the pill it sits on — a disabled switch
-    // drawn as a uniform blob, its stored state gone exactly while the user
-    // cannot change it. WCAG 1.4.11 exempts inactive controls from 3:1, so the
-    // requirement is *visible*: the knob reads 2.32:1 in light and 2.83:1 in
-    // dark on the disabled track, a colour per slot rather than one alpha (D3).
+    // **`onDisabled`, and it shipped as `disabledSurface` — the same value the
+    // track resolves to, which put the knob at 1:1 against the pill it sits
+    // on.** A disabled switch drawn that way is a uniform blob: the stored
+    // on/off state disappears exactly while the user cannot change it, which
+    // on the reminder toggle is the whole time a command is in flight.
+    //
+    // WCAG 1.4.11 does exempt inactive components from its 3:1 floor, so the
+    // requirement here is *visible*, not *3:1* — and 1:1 fails the weaker one.
+    // The ink at 38% reads 2.05:1 in light and 2.51:1 in dark on the disabled
+    // track (re-measured at M100.36; it was 2.29 / 2.90 on the pre-M100.22
+    // palette): plainly muted, plainly still there. It is also M3's own answer
+    // for an unselected disabled thumb, and the value the radio's disabled
+    // mark already takes.
     if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
+    if (states.contains(WidgetState.selected)) return scheme.onPrimary;
 
-    // One role in both states: the handoff thumb does not change with the
-    // state; the track does.
-    return scheme.surfaceBright;
+    return scheme.outline;
   }),
   trackColor: WidgetStateProperty.resolveWith((states) {
     if (states.contains(WidgetState.disabled)) return semantic.disabledSurface;
@@ -74,12 +93,30 @@ SwitchThemeData buildSwitchTheme(
 
     return scheme.surfaceContainerHighest;
   }),
-  // Transparent in every state (handoff Switch): the track's fill is its
-  // boundary. **No focus branch** (M100.23) — the keyboard cue is
-  // `overlayColor` below, `AppInteractionStates.controlOverlay` washing
-  // `primary` at `AppStateOpacity.focus` around the thumb, where
-  // `_SwitchDefaultsM3.overlayColor` puts it too.
-  trackOutlineColor: const WidgetStatePropertyAll<Color>(Colors.transparent),
+  // `_SwitchDefaultsM3.trackOutlineColor`'s own order: selected, then disabled,
+  // then the role. **No focus branch, and removing the one that was here is the
+  // point of M100.23.** It read focus first and returned `primary`, on the
+  // argument that a focused *on* switch still has to show where the keyboard
+  // is — which is true, and was answered in the wrong slot. The outline is the
+  // switch's canonical boundary role; a focused-on switch was being drawn with
+  // a boundary M3 says should not exist, in a colour that means something else.
+  //
+  // The keyboard cue is `overlayColor` below — `AppInteractionStates.controlOverlay`
+  // washes `primary` at `AppStateOpacity.focus` around the thumb, which is
+  // where `_SwitchDefaultsM3.overlayColor` puts it too.
+  trackOutlineColor: WidgetStateProperty.resolveWith((states) {
+    if (states.contains(WidgetState.selected)) return Colors.transparent;
+    if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
+
+    return scheme.outline;
+  }),
+  // One width in every state, and it is M3's 2.0 rather than a hairline. Focus
+  // moves the colour and not the weight, the same way an input's border does —
+  // and because `AppStroke.selectionControl` equals `AppStroke.focus`, the ring
+  // needs no second value here to be the right thickness.
+  trackOutlineWidth: const WidgetStatePropertyAll<double>(
+    AppStroke.selectionControl,
+  ),
   overlayColor: AppInteractionStates.controlOverlay(scheme),
 );
 

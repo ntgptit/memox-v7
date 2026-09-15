@@ -99,7 +99,7 @@ void main() {
       expect(inset, AppSpacing.fabScrollClearance);
     });
 
-    testWidgets('is the page-end clearance without one, and outside a shell', (
+    testWidgets('is the ordinary gap without one, and outside a shell', (
       tester,
     ) async {
       late double inShell;
@@ -112,7 +112,7 @@ void main() {
           },
         ),
       );
-      expect(inShell, AppSpacing.xxxl);
+      expect(inShell, AppSpacing.lg);
 
       late double bare;
       await tester.pumpWidget(
@@ -123,31 +123,8 @@ void main() {
           },
         ),
       );
-      expect(bare, AppSpacing.xxxl);
+      expect(bare, AppSpacing.lg);
     });
-  });
-
-  testWidgets('the gutter stays 16 on a compact phone (handoff Foundations)', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(320, 640);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
-
-    late double gutter;
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: buildLightTheme(),
-        home: Builder(
-          builder: (context) {
-            gutter = mxScreenGutter(context);
-            return const SizedBox();
-          },
-        ),
-      ),
-    );
-
-    expect(gutter, AppSpacing.lg);
   });
 
   group('the reading column', () {

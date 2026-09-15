@@ -18,9 +18,7 @@ import '../../foundations/app_stroke.dart';
 ///
 /// It now degrades toward `MxCard.raised`:
 ///
-/// * `surfaceContainerLowest` — the paper. `_CardDefaultsM3.color` is `Low`,
-///   but the Tokyo handoff draws its card on `Lowest`, white above a tinted
-///   page, and the kit outranks the SDK here (M100.87);
+/// * `surfaceContainerLow` — `_CardDefaultsM3.color`, the paper;
 /// * `AppElevation.card` with `materialShadowColor`, so Material paints the
 ///   depth in the mode that has one and nothing in the mode that does not;
 /// * no neutral outline **in light**. A page-level card there separates by its
@@ -32,19 +30,19 @@ import '../../foundations/app_stroke.dart';
 ///   composes its own layers and a `CardThemeData` slot. §5 of the M100.35
 ///   brief asks these two to read as one product, not to share an
 ///   implementation;
-/// * `AppRadius.card` (20), **not** M3's 12 — the handoff's roomiest common
-///   surface (`radius-card`, M100.91). Material owns the colour roles; memox
-///   owns its structural shape scale.
+/// * `AppRadius.lg`, **not** M3's 12. Material owns the colour roles; memox
+///   owns its structural shape scale, and 16 is what an ordinary card wears
+///   here.
 ///
 /// `margin: zero` because inter-card spacing belongs to the screen's layout,
 /// which is the one place that knows what sits between two cards.
 CardThemeData buildCardTheme(ColorScheme scheme) => CardThemeData(
-  color: scheme.surfaceContainerLowest,
+  color: scheme.surfaceContainerLow,
   shadowColor: materialShadowColor(scheme),
   elevation: AppElevation.card,
   margin: EdgeInsets.zero,
   shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(AppRadius.card),
+    borderRadius: BorderRadius.circular(AppRadius.lg),
     side: _neutralSide(scheme),
   ),
 );

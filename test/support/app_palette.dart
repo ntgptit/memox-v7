@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:memox/shared/widgets/mx_icon_tile.dart';
 import 'package:memox/core/theme/foundations/app_colors.dart';
 import 'package:memox/core/theme/foundations/app_material_roles.dart';
 import 'package:memox/core/theme/foundations/app_surface_colors.dart';
@@ -40,23 +39,6 @@ final List<Color> lightPaletteTokens = <Color>[
   AppColors.warningLight,
   AppColors.dangerLight,
   AppColors.infoLight,
-  AppColors.masteryLight,
-  AppColors.statusNewLight,
-  // The IconTile ground (M100.91): `primary` at the tile's tint over the raised
-  // card, derived here from the same tokens and alpha the widget blends, so it
-  // is approved as the one exact colour it is rather than as any blend.
-  Color.alphaBlend(
-    AppColors.primaryLight.withValues(alpha: MxIconTile.tintAlpha),
-    AppMaterialRoles.surfaceContainerLowestLight,
-  ),
-  // The text inks (M100.87): each fill's hue solved to read as text.
-  AppColors.accentInkLight,
-  AppColors.successInkLight,
-  AppColors.warningInkLight,
-  AppColors.dangerInkLight,
-  AppColors.secondaryInkLight,
-  AppColors.tertiaryInkLight,
-  AppColors.inversePrimaryInk,
   // The status containers (M100.21). `danger` has no pair here because it
   // reuses `errorContainer`/`onErrorContainer`, already listed above as the
   // Material roles they are.
@@ -138,16 +120,6 @@ final List<Color> darkPaletteTokens = <Color>[
   AppColors.warningDark,
   AppColors.dangerDark,
   AppColors.infoDark,
-  AppColors.masteryDark,
-  AppColors.statusNewDark,
-  // The IconTile ground — see the light list.
-  Color.alphaBlend(
-    AppColors.primaryDark.withValues(alpha: MxIconTile.tintAlpha),
-    AppMaterialRoles.surfaceContainerLowestDark,
-  ),
-  // Dark's inks are its fills, already listed — except the snackbar action,
-  // which sits on a slate that does not flip.
-  AppColors.inversePrimaryInk,
   AppColors.successContainerDark,
   AppColors.onSuccessContainerDark,
   AppColors.warningContainerDark,

@@ -212,12 +212,12 @@ void main() {
       );
     });
 
-    testWidgets('selected is the brand ink on the edge and the label', (
+    testWidgets('selected is primary on the edge and the label', (
       tester,
     ) async {
-      // The brand as text is `accentInk` since M100.87 — the handoff's
-      // `primary` reads 3.95:1 as a label — and the edge takes the same ink
-      // through `AppInk.accent`, so edge and label cannot disagree.
+      // `primary` — the canonical accent, as a label on a surface. It reads
+      // there because the palette was retuned to make it (M100.28), not
+      // because a second token stands in for it.
       await pumpTile(
         tester,
         text: term,
@@ -225,7 +225,9 @@ void main() {
         state: MatchTileState.selected,
       );
 
-      final accent = semanticOf(tester).accentInk;
+      final accent = Theme.of(
+        tester.element(find.text(term)),
+      ).colorScheme.primary;
       expect(skinOf(tester).border!.top.color, accent);
       expect(skinOf(tester).border!.top.width, AppStroke.control);
       expect(textOf(tester, term).style?.color, accent);
@@ -242,7 +244,7 @@ void main() {
         state: MatchTileState.wrong,
       );
 
-      final danger = semanticOf(tester).dangerInk;
+      final danger = semanticOf(tester).danger;
       expect(skinOf(tester).border!.top.color, danger);
       expect(skinOf(tester).border!.top.width, AppStroke.control);
       expect(textOf(tester, term).style?.color, danger);
@@ -259,7 +261,7 @@ void main() {
         state: MatchTileState.paired,
       );
 
-      final success = semanticOf(tester).successInk;
+      final success = semanticOf(tester).success;
       expect(skinOf(tester).border!.top.color, success);
       expect(skinOf(tester).border!.top.width, AppStroke.control);
       expect(textOf(tester, term).style?.color, success);

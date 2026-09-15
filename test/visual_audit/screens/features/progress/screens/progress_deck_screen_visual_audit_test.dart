@@ -119,12 +119,7 @@ void main() {
         // 1070.2, so two rows *begin* on surface where the same fixture put one
         // at 772…936.4 and never built the second. One more `InkWell` host, one
         // more clip: 5 `_RenderInkFeatures` and 3 `CustomPaint (no painter)`.
-        //
-        // **Zero again since M100.91**, and measured the same way. The 20 card
-        // interior and 48 rows moved the sections, and the audit reads 4 ink
-        // layers and 2 clips. Putting `rowMinHeight` back to 56 and the
-        // standard card padding back to 16 restores 5 and 3, so the count
-        // follows the tokens, not a change to the row.
+        tappableCards: 1,
         pills: 2,
         // No search on this branch.
         hasSearchField: false,
@@ -140,15 +135,13 @@ void main() {
         itemId: 'progress_screen',
         reason: SkipReason.rasterNotFlat,
         detailContains: 'covers only 0%',
-        // The two range pills.
-        expectedMatches: 2,
         rationale:
-            "Each chip's Material paints the theme's `canvasColor` "
-            '(`surfaceContainerLow`) beneath the fill `_RenderChip` draws over '
-            'the same shape, so the declared canvas covers none of its own '
-            'rect. One per chip since M100.92 moved the resting fill to '
-            '`surfaceContainer`; before that only the selected chip differed. '
-            'Chip fills are pinned in m3_role_contract_test.dart.',
+            'The unselected range pill declares a surface tint that its resting '
+            'state does not fill, and `_RenderChip` paints what it does fill '
+            'through a private render object. Same case the card list records '
+            'for its filter chips; the pill colours are pinned by the '
+            'mx_pill_button goldens and the selected/unselected fills are '
+            'asserted to differ, in both themes, in mx_pill_button_test.dart.',
       ),
     ],
   );
@@ -193,15 +186,8 @@ void main() {
         itemId: 'progress_screen',
         reason: SkipReason.rasterNotFlat,
         detailContains: 'covers only 0%',
-        // The two range pills, exactly as in the mixed state above.
-        expectedMatches: 2,
         rationale:
-            "Each chip's Material paints the theme's `canvasColor` "
-            '(`surfaceContainerLow`) beneath the fill `_RenderChip` draws over '
-            'the same shape, so the declared canvas covers none of its own '
-            'rect. One per chip since M100.92 moved the resting fill to '
-            '`surfaceContainer`; before that only the selected chip differed. '
-            'Chip fills are pinned in m3_role_contract_test.dart.',
+            'The unselected range pill, exactly as in the mixed state above.',
       ),
     ],
   );

@@ -54,8 +54,7 @@ class MxTextButton extends StatefulWidget {
   /// Drawn after the label — `Icons.expand_more` on the show-summary link.
   final IconData? trailingIcon;
 
-  /// Danger as a label: the text goes `semanticColors.dangerInk`, through
-  /// `AppInk.danger`.
+  /// Danger as a label: the text goes `semanticColors.danger`.
   final bool isDestructive;
 
   /// Drops the label to `label-md`, for a link sharing a row with a heading.
@@ -198,12 +197,12 @@ class _MxTextButtonState extends State<MxTextButton> {
         mainAxisSize: MainAxisSize.min,
         spacing: AppSpacing.xs,
         children: <Widget>[
-          if (widget.icon != null) Icon(widget.icon, size: AppIconSize.xs),
+          if (widget.icon != null) Icon(widget.icon, size: AppIconSize.sm),
           Flexible(
             child: _StateStyledLabel(states: _states, label: widget.label),
           ),
           if (widget.trailingIcon != null)
-            Icon(widget.trailingIcon, size: AppIconSize.xs),
+            Icon(widget.trailingIcon, size: AppIconSize.sm),
         ],
       ),
     );

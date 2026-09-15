@@ -1,50 +1,38 @@
 import 'package:flutter/material.dart';
 
-/// Typography tokens — the Tokyo handoff's seven type roles, in one face.
+/// Typography tokens.
 ///
-/// **One family, Plus Jakarta Sans** (owner decision 3, 2026-09-13). The
-/// handoff sets every role in it — figures, titles, body and captions — so
-/// Inter, which carried body and UI text until M100.89, left with that
-/// decision. One face means one set of metrics to measure and one variable
-/// axis to drive.
+/// Two families, each doing the job it is good at:
 ///
-/// The roles are the handoff's Foundations · Typography table, verbatim
-/// (`docs/design-system/handoff/memox-flutter-handoff.json`):
+/// * **Plus Jakarta Sans** for display and titles. Geometric with humanist
+///   stroke endings, so a single vocabulary word set large reads as designed
+///   rather than as default system text. This is the app's only visual
+///   signature.
+/// * **Inter** for body and UI. Drawn for screens — tall x-height, open
+///   apertures, unambiguous `l`/`I`/`1` — which is what a definition read at
+///   14sp on a phone actually needs.
 ///
-///     role        size  weight  leading  tracking
-///     caption     12    600     1.4      +1.2
-///     body        14    400     1.5      0
-///     body large  16    500     1.5      0
-///     title       20    700     1.2      -0.64
-///     headline    24    700     1.2      -0.64
-///     display     32    800     1.1      -0.64
-///     stat        40    600     1.0      -0.64
+/// Both are bundled (see `pubspec.yaml`) rather than fetched at runtime: a
+/// study app must render identically offline, and `google_fonts` would add a
+/// dependency and a first-run download for something that never changes.
 ///
-/// Material 3 has fifteen `TextTheme` slots for those seven roles; which slot
-/// wears which role is D1 in `docs/design-system/tokyo-component-mapping.md`
-/// §9. **12px is a hard floor**, and the sizes are deliberately not on the 4dp
-/// grid.
-///
-/// Bundled (see `pubspec.yaml`) rather than fetched at runtime: a study app
-/// must render identically offline, and `google_fonts` would add a dependency
-/// and a first-run download for something that never changes.
-///
-/// A **variable** font. `fontWeight` alone does not reliably move a variable
+/// Both are **variable** fonts. Google Fonts no longer ships static instances
+/// for either family, and `fontWeight` alone does not reliably move a variable
 /// font's `wght` axis across renderers — CanvasKit and Skia disagree. Weight is
 /// therefore set through `fontVariations` as well, and `fontWeight` is kept in
 /// step so that anything reading the style (a11y tooling, `copyWith` callers)
 /// still sees the right value.
 abstract final class AppTypography {
-  /// The one face.
-  static const String family = 'PlusJakartaSans';
+  static const String displayFamily = 'PlusJakartaSans';
+  static const String bodyFamily = 'Inter';
 
-  /// The CJK fallback face, behind the primary family on every text style.
+  /// The CJK fallback face, behind both primary families on every text style.
   ///
-  /// Plus Jakarta Sans is Latin-only, so a card whose content is Korean would
-  /// render as tofu boxes on any platform whose system font happens not to
-  /// cover Hangul — the web build most of all. Naming the face as
-  /// `fontFamilyFallback` on each style means Flutter reaches for it only for
-  /// the glyphs the primary lacks, so Latin UI text is untouched and the
+  /// Inter and Plus Jakarta Sans are Latin-only, so a card whose content is
+  /// Korean would render as tofu boxes on any platform whose system font
+  /// happens not to cover Hangul — the web build most of all. Naming the face
+  /// as `fontFamilyFallback` on each style means Flutter reaches for it only
+  /// for the glyphs the primary lacks, so Latin UI text is untouched and the
   /// fallback carries the vocabulary. It is a variable font with a `wght` axis,
   /// so the same [_wght] setting drives its weight too — which is why it is
   /// subset but *not* instanced to a static weight: a static fallback would
@@ -57,12 +45,11 @@ abstract final class AppTypography {
   /// the app. They were there to cover kana and Han. Android is the only
   /// release target and has shipped `NotoSansCJK-Regular.ttc` since Lollipop,
   /// so every phone was carrying those characters twice. `IT-PLAT-009` renders
-  /// those scripts, and IPA since M100.89, on a real device behind an *empty*
-  /// fallback and reads the raster back, against a private-use control so tofu
-  /// cannot pass as a glyph.
+  /// all four scripts on a real device behind an *empty* fallback and reads the
+  /// raster back, against a private-use control so tofu cannot pass as a glyph.
   ///
   /// **Korean stays because it is what the app is for.** The card prompt is set
-  /// at 32 and Hangul is the text it exists to show; leaving the app's largest
+  /// at 30 and Hangul is the text it exists to show; leaving the app's largest
   /// type to whatever face a ROM installed would let it wrap differently from
   /// one device to the next, and the system's Noto Sans CJK KR is a different
   /// design from this file with different metrics.
@@ -74,12 +61,6 @@ abstract final class AppTypography {
   /// characters in Japanese forms for every reader — not a bug, but the best a
   /// fixed list can do, because it cannot know which convention a card belongs
   /// to and the platform can.
-  ///
-  /// **IPA joined the long tail at M100.89.** Inter carried IPA Extensions and
-  /// the spacing modifier letters; Plus Jakarta Sans does not (`ɪ`, `ˈ`, `ʃ`
-  /// and `ː` are missing), so a pronunciation typed in IPA draws those glyphs
-  /// from the platform. IT-PLAT-009 probes them on a device, and no golden
-  /// draws them, for the reason no golden draws kana or Han.
   ///
   /// **The face is subset, and what was dropped is a decision, not a default.**
   /// It keeps the Hangul syllables, the compatibility jamo, CJK punctuation and
@@ -96,71 +77,28 @@ abstract final class AppTypography {
   /// a `TextStyle` takes — and because the platform supplies the rest of it.
   static const List<String> cjkFallback = <String>[cjkFallbackFamily];
 
-  // --- The handoff's sizes and leadings, named once ------------------------
-
-  static const double captionSize = 12;
-  static const double bodySize = 14;
-  static const double bodyLargeSize = 16;
-  static const double titleSize = 20;
-  static const double headlineSize = 24;
-  static const double displaySize = 32;
-  static const double statSize = 40;
-
-  static const double captionHeight = 1.4;
-  static const double bodyHeight = 1.5;
-  static const double headingHeight = 1.2;
-  static const double displayHeight = 1.1;
-  static const double statHeight = 1.0;
-
-  // --- Tracking --------------------------------------------------------------
-
-  /// `ls-heading` — title, headline, display and stat.
-  static const double headingTracking = -0.64;
-
-  /// `ls-label` — the tracking a 12px label carries.
-  static const double labelTracking = 0.72;
-
-  /// `ls-section` — the uppercase overline above a group of rows.
-  ///
-  /// Uppercase set small closes up; the handoff tracks it 1.2px for that, and
-  /// it is the one place in the app where a text style is opened up per use.
-  static const double sectionLabelTracking = 1.2;
-
-  /// The deck list's toolbar heading: the label tracking, not the section's.
-  ///
-  /// The heading shares its row with the sort control and nothing else, and at
-  /// [sectionLabelTracking] the two words spread wide enough to read as the
-  /// heavier half of the pair (owner review, 2026-08-25). It is the handoff's
-  /// `ls-label`, which is what that review measured by hand.
-  static const double listHeadingTracking = labelTracking;
-
-  /// The card tile's state chip: the label tracking, because the word sits
-  /// inside a pill, not over a list.
-  static const double stateChipTracking = labelTracking;
-
-  // --- The card prompt (D13) -------------------------------------------------
-
   /// The front of a review card — the one place the app deliberately gets
-  /// large, because that text is the task. The complete style is
+  /// large, because that text is the task. The three metrics live here as the
+  /// kit's `--text-card-prompt` values; the complete style is
   /// `AppTextStyles.cardPrompt`, not a `TextTheme` rung.
+  static const double cardPromptSize = 30;
+  static const double cardPromptHeight = 1.22;
+  static const double cardPromptTracking = -0.5;
+
+  /// The same prompt on a screen narrower than `AppBreakpoints.compact`. 30
+  /// forces a two-word prompt onto three lines at 320 wide, which pushes the
+  /// answer below the fold — the one thing the study screen must not do.
+  static const double compactCardPromptSize = 26;
+
+  /// Extra tracking on the uppercase label above a group of rows.
   ///
-  /// **The display size with the headline's weight and leading** (D13): the
-  /// 30 it used to be is off the handoff's scale, and the display weight (800)
-  /// is for a figure, not a word someone is trying to recall.
-  static const double cardPromptSize = displaySize;
-  static const double cardPromptHeight = headingHeight;
-  static const double cardPromptTracking = headingTracking;
+  /// Uppercase set at 11px closes up; the design tracks it 1.1px for that, and
+  /// it is the one place in the app where a text style is adjusted per use.
+  static const double sectionLabelTracking = 1.1;
 
-  /// The prompt's weight — the headline role's. Named, so the extension that
-  /// builds the prompt does not become a second file spelling `w700`.
-  static const FontWeight cardPromptWeight = FontWeight.w700;
-
-  /// The same prompt on a screen narrower than `AppBreakpoints.compact`: the
-  /// headline size, so a two-word prompt at 320 wide does not push the answer
-  /// below the fold — the one thing the study screen must not do.
-  static const double compactCardPromptSize = headlineSize;
-
-  // --- The hero numeral (D14) ------------------------------------------------
+  /// The card tile's state chip: tighter than a section label because the word
+  /// sits inside a pill, not over a list.
+  static const double stateChipTracking = 0.6;
 
   /// The hero numeral's line box, as a multiple of its own size.
   ///
@@ -178,14 +116,53 @@ abstract final class AppTypography {
   ///
   ///     1 - 2 * 8.3 / 32 = 0.481
   ///
-  /// **A ratio of the em, so it carries to the stat size** (D14): the numeral
-  /// moved from 32 to the handoff's stat role (40) at M100.89, and ascent and
-  /// cap height scale with the em together. It is pinned to Plus Jakarta Sans,
-  /// and it is the one place in the app where a glyph is positioned by a font
-  /// metric rather than by the grid. A font swap moves the `deck_list_*`
-  /// goldens, which is the signal to measure it again rather than to
-  /// regenerate and move on.
+  /// Measured back: 16.3px above the ink against 16 below the button. **It is
+  /// pinned to Plus Jakarta Sans**, and it is the one place in the app where a
+  /// glyph is positioned by a font metric rather than by the grid —
+  /// [sectionLabelTracking] is the other kind of the same admission. A font
+  /// swap moves the six `deck_list_*` goldens, which is the signal to measure
+  /// it again rather than to regenerate and move on.
   static const double heroNumeralCapTrim = 0.481;
+
+  /// The weight of the deck hero's numeral — **the app's fourth weight, and a
+  /// deliberate exception.**
+  ///
+  /// `headlineLarge` is `w600`, and the scale spends `w700` only on the two
+  /// display rungs (57 and 45), neither of which appears on the deck list —
+  /// the button label reaches `w700` too, through `buttonLabelWeight`, but
+  /// that is a component theme re-weighting a rung, not a rung. So this is a
+  /// feature overriding a type role, which is normally how a design system
+  /// stops being one.
+  ///
+  /// **The registry is a test, not this comment** (A20.1 P1-10):
+  /// `app_typography_test.dart` enumerates every weight the built theme can
+  /// reach and names each `w700` source.
+  ///
+  /// It is kept because the numeral is the screen's only level-one emphasis:
+  /// the deck list answers "what do I study today", and that answer is one
+  /// figure. Dropping to `w600` puts it at the same weight as the deck names
+  /// below it, and the eye then has to find the largest thing rather than the
+  /// heaviest.
+  ///
+  /// **Named rather than inlined because the review could not tell the
+  /// difference.** `deck_list_root.md` §6 scored the screen ❌ for four weights
+  /// and had to write "this *may* be needed" — the code said `w700` at a call
+  /// site and nothing said why, so an intentional exception and an accident
+  /// look identical from the outside. One name and this paragraph is the whole
+  /// cost of telling them apart. If a fifth weight ever appears, it should have
+  /// to justify itself here too.
+  static const FontWeight heroNumeralWeight = FontWeight.w700;
+
+  /// The deck list's heading, which is tracked tighter than the rest.
+  ///
+  /// **0.06em at `label-md`'s 12px, which is 0.72** (owner review, 2026-08-25).
+  /// The heading shares its row with the sort control and nothing else, and at
+  /// [sectionLabelTracking] the two words spread wide enough to read as the
+  /// heavier half of the pair — the opposite of the balance that row is for.
+  /// A second constant rather than a moved one: every other section label in
+  /// the app sits above a group of rows with no control beside it, and 1.1 is
+  /// still right there.
+  static const double listHeadingTracking = 0.72;
 
   /// Pairs a [FontWeight] with the matching variable-axis setting.
   static List<FontVariation> _wght(FontWeight weight) => <FontVariation>[
@@ -194,13 +171,13 @@ abstract final class AppTypography {
 
   /// The same rung of the scale, set in a different weight.
   ///
-  /// **`copyWith(fontWeight:)` alone is a silent no-op here.** The face and its
-  /// fallback are variable fonts and every rung carries a `wght` axis, which
-  /// the renderer consults *instead of* [TextStyle.fontWeight] once it is
-  /// present — so a style re-weighted by `fontWeight` alone reports the new
-  /// weight to every test and paints the old one on the device. That is the
-  /// same class of bug `component_theme_typography_test.dart` was opened for,
-  /// arriving from the opposite direction.
+  /// **`copyWith(fontWeight:)` alone is a silent no-op here.** Both faces are
+  /// variable fonts and every rung carries a `wght` axis, which the renderer
+  /// consults *instead of* [TextStyle.fontWeight] once it is present — so a
+  /// style re-weighted by `fontWeight` alone reports the new weight to every
+  /// test and paints the old one on the device. That is the same class of bug
+  /// `component_theme_typography_test.dart` was opened for, arriving from the
+  /// opposite direction.
   ///
   /// Deliberately not a general "restyle" helper: size, leading and tracking
   /// belong to the rung, and a component that needs different ones needs a
@@ -208,20 +185,44 @@ abstract final class AppTypography {
   static TextStyle withWeight(TextStyle style, FontWeight weight) =>
       style.copyWith(fontWeight: weight, fontVariations: _wght(weight));
 
-  /// One role on one slot.
+  /// One rung of the scale, in the display face.
   ///
-  /// **[size], [height] and [tracking] are stated, never inherited.** Material
-  /// 3's own scale is not the handoff's, and a slot left to it would move with
-  /// an SDK bump without a line of code changing. `app_typography_test.dart`
-  /// pins every slot against the handoff table by hand.
-  static TextStyle _role(
+  /// **[size], [height] and [tracking] are stated, never inherited.** Every
+  /// value here also exists in `design_system/tokens/typography.css`, which is
+  /// authoritative for token values since M4.10p — and until now this file
+  /// declared none of them. The two agreed because Material 3's own defaults
+  /// happen to equal the design's, which is a coincidence with a maintenance
+  /// bill: an SDK bump would have moved the whole app's type scale with no line
+  /// of code changing and no test noticing. `app_typography_test.dart` is what
+  /// notices now.
+  ///
+  /// [height] is the multiplier Flutter wants; the call sites write it as
+  /// `leading / size` so the leading the design states stays readable.
+  static TextStyle _display(
     TextStyle? base,
     FontWeight weight, {
     required double size,
     required double height,
     double tracking = 0,
   }) => (base ?? const TextStyle()).copyWith(
-    fontFamily: family,
+    fontFamily: displayFamily,
+    fontFamilyFallback: cjkFallback,
+    fontWeight: weight,
+    fontVariations: _wght(weight),
+    fontSize: size,
+    height: height,
+    letterSpacing: tracking,
+  );
+
+  /// One rung of the scale, in the body face. See [_display].
+  static TextStyle _body(
+    TextStyle? base,
+    FontWeight weight, {
+    required double size,
+    required double height,
+    double tracking = 0,
+  }) => (base ?? const TextStyle()).copyWith(
+    fontFamily: bodyFamily,
     fontFamilyFallback: cjkFallback,
     fontWeight: weight,
     fontVariations: _wght(weight),
@@ -231,81 +232,112 @@ abstract final class AppTypography {
   );
 
   static TextTheme buildTextTheme(TextTheme base) {
-    TextStyle stat(TextStyle? slot) => _role(
-      slot,
-      FontWeight.w600,
-      size: statSize,
-      height: statHeight,
-      tracking: headingTracking,
-    );
-    TextStyle display(TextStyle? slot) => _role(
-      slot,
-      FontWeight.w800,
-      size: displaySize,
-      height: displayHeight,
-      tracking: headingTracking,
-    );
-    TextStyle headline(TextStyle? slot) => _role(
-      slot,
-      FontWeight.w700,
-      size: headlineSize,
-      height: headingHeight,
-      tracking: headingTracking,
-    );
-    TextStyle bodyLarge(TextStyle? slot) =>
-        _role(slot, FontWeight.w500, size: bodyLargeSize, height: bodyHeight);
-    // D1: the body size at semibold — a derived pairing of handoff tokens for
-    // the slots Material uses for short emphasised labels.
-    TextStyle bodySemibold(TextStyle? slot) =>
-        _role(slot, FontWeight.w600, size: bodySize, height: bodyHeight);
-
     return base.copyWith(
-      displayLarge: stat(base.displayLarge),
-      displayMedium: stat(base.displayMedium),
-      displaySmall: display(base.displaySmall),
-      headlineLarge: display(base.headlineLarge),
-      headlineMedium: headline(base.headlineMedium),
-      headlineSmall: headline(base.headlineSmall),
-      titleLarge: _role(
-        base.titleLarge,
+      // --- Display: Plus Jakarta Sans ---
+      displayLarge: _display(
+        base.displayLarge,
         FontWeight.w700,
-        size: titleSize,
-        height: headingHeight,
-        tracking: headingTracking,
+        size: 57,
+        height: 64 / 57,
       ),
-      titleMedium: bodyLarge(base.titleMedium),
-      titleSmall: bodySemibold(base.titleSmall),
-      bodyLarge: bodyLarge(base.bodyLarge),
-      bodyMedium: _role(
+      displayMedium: _display(
+        base.displayMedium,
+        FontWeight.w700,
+        size: 45,
+        height: 52 / 45,
+      ),
+      displaySmall: _display(
+        base.displaySmall,
+        FontWeight.w600,
+        size: 36,
+        height: 44 / 36,
+      ),
+      headlineLarge: _display(
+        base.headlineLarge,
+        FontWeight.w600,
+        size: 32,
+        height: 40 / 32,
+      ),
+      // The Material 3 metric, restored: this rung carried the card prompt's
+      // 30/1.22/−0.5 until the prompt moved to `AppTextStyles.cardPrompt`,
+      // which meant any future widget reaching for `headlineMedium` *as a
+      // rung* would have inherited a component's private metrics.
+      headlineMedium: _display(
+        base.headlineMedium,
+        FontWeight.w400,
+        size: 28,
+        height: 36 / 28,
+      ),
+      headlineSmall: _display(
+        base.headlineSmall,
+        FontWeight.w600,
+        size: 24,
+        height: 32 / 24,
+      ),
+      titleLarge: _display(
+        base.titleLarge,
+        FontWeight.w600,
+        size: 22,
+        height: 28 / 22,
+      ),
+
+      // --- UI and body: Inter ---
+      titleMedium: _body(
+        base.titleMedium,
+        FontWeight.w600,
+        size: 16,
+        height: 24 / 16,
+        tracking: 0.15,
+      ),
+      titleSmall: _body(
+        base.titleSmall,
+        FontWeight.w600,
+        size: 14,
+        height: 20 / 14,
+        tracking: 0.1,
+      ),
+      bodyLarge: _body(
+        base.bodyLarge,
+        FontWeight.w400,
+        size: 16,
+        height: 24 / 16,
+        tracking: 0.5,
+      ),
+      // 1.45 keeps a two-line empty-state message readable without looking airy.
+      bodyMedium: _body(
         base.bodyMedium,
         FontWeight.w400,
-        size: bodySize,
-        height: bodyHeight,
+        size: 14,
+        height: 1.45,
+        tracking: 0.25,
       ),
-      // D1: the caption size and leading at the body weight — metadata is
-      // read as a sentence, so it takes neither the caption's 600 nor its
-      // overline tracking.
-      bodySmall: _role(
+      bodySmall: _body(
         base.bodySmall,
         FontWeight.w400,
-        size: captionSize,
-        height: captionHeight,
+        size: 12,
+        height: 16 / 12,
+        tracking: 0.4,
       ),
-      labelLarge: bodySemibold(base.labelLarge),
-      // D1: the caption at `ls-label`.
-      labelMedium: _role(
+      labelLarge: _body(
+        base.labelLarge,
+        FontWeight.w600,
+        size: 14,
+        height: 20 / 14,
+        tracking: 0.1,
+      ),
+      labelMedium: _body(
         base.labelMedium,
-        FontWeight.w600,
-        size: captionSize,
-        height: captionHeight,
-        tracking: labelTracking,
+        FontWeight.w500,
+        size: 12,
+        height: 16 / 12,
+        tracking: 0.5,
       ),
-      labelSmall: _role(
+      labelSmall: _body(
         base.labelSmall,
-        FontWeight.w600,
-        size: captionSize,
-        height: captionHeight,
-        tracking: sectionLabelTracking,
+        FontWeight.w500,
+        size: 11,
+        height: 16 / 11,
+        tracking: 0.5,
       ),
     );
   }

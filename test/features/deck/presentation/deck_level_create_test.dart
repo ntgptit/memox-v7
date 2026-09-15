@@ -102,12 +102,7 @@ void main() {
         // as a second, different action. BR-61 is a rule about what pressing
         // Create *shows*, not about what the opener is called, and what it
         // shows is asserted below and unchanged.
-        await tester.tap(
-          find.widgetWithText(
-            FloatingActionButton,
-            english.deckCreateSubDeckAction,
-          ),
-        );
+        await tester.tap(find.text(english.deckCreateSubDeckAction));
         await tester.pumpAndSettle();
 
         // **Scoped to the sheet, and it has to be now.** The opener behind it
@@ -159,17 +154,8 @@ void main() {
 
       expect(find.text(english.deckDetailEmptyDeckTitle), findsOneWidget);
       // BR-66: the type is settled, so Create names the one action it still
-      // has — no chooser, and no card option anywhere on the level. Two
-      // widgets carry that one name: the empty state's opener and the
-      // extended FAB, whose label is painted since M100.90.
-      expect(find.text(english.deckCreateSubDeckAction), findsNWidgets(2));
-      expect(
-        find.widgetWithText(
-          FloatingActionButton,
-          english.deckCreateSubDeckAction,
-        ),
-        findsOneWidget,
-      );
+      // has — no chooser, and no card option anywhere on the level.
+      expect(find.text(english.deckCreateSubDeckAction), findsOneWidget);
       expect(find.text(english.deckCreateChildAction), findsNothing);
       expect(find.text(english.deckCreateCardAction), findsNothing);
     });
@@ -207,12 +193,7 @@ void main() {
     /// On an `unset` deck the Create action asks which kind first (BR-61), so
     /// reaching the sub-deck form is two taps rather than one.
     Future<void> openSubDeckForm(WidgetTester tester) async {
-      await tester.tap(
-        find.widgetWithText(
-          FloatingActionButton,
-          english.deckCreateSubDeckAction,
-        ),
-      );
+      await tester.tap(find.text(english.deckCreateSubDeckAction));
       await tester.pumpAndSettle();
       // The sheet's own row rather than the opener behind it: both carry the
       // same string since SC-C3-05 gave this one action one name.

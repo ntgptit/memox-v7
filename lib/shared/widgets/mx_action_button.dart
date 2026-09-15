@@ -77,15 +77,14 @@ enum MxActionButtonSize {
   /// also the touch target.
   standard,
 
-  /// Drawn at 36, hit at 48 — `MaterialTapTargetSize.padded` keeps the floor.
-  /// The handoff's `size-button-sm`; it drew 40 until M100.90.
+  /// Drawn at 40, hit at 48 — `MaterialTapTargetSize.padded` keeps the floor.
   ///
   /// For a button living inside a row of chips and gauges rather than in an
   /// action bar. The deck tile's Study verb is the case it encodes (owner
   /// review, 2026-08-20: 40 is on the 4px grid and clears the 32 the pill used
   /// to paint), and its label steps down with the box: `label-md` re-weighted
   /// to 600 through [AppTypography.withWeight], because a 48-button's
-  /// `label-lg` on a 36 body reads as text escaping its control.
+  /// `label-lg` on a 40 body reads as text escaping its control.
   compact,
 
   /// Drawn at 32, hit at 48 — the same `padded` floor [compact] keeps.
@@ -353,14 +352,14 @@ class MxActionButton extends StatelessWidget {
           // Unreachable — `standard` returned above — but stated so the switch
           // stays exhaustive and a fourth size fails the build here.
           MxActionButtonSize.standard => AppSizing.touchTarget,
-          MxActionButtonSize.compact => AppSizing.buttonCompact,
+          MxActionButtonSize.compact => AppSizing.controlCompact,
           MxActionButtonSize.dense => AppSizing.controlDense,
         }),
       ),
       padding: const WidgetStatePropertyAll<EdgeInsets>(
         EdgeInsets.symmetric(horizontal: AppSpacing.md),
       ),
-      // 36 is what it paints; 48 is what a finger gets. `AppSpacing` calls the
+      // 40 is what it paints; 48 is what a finger gets. `AppSpacing` calls the
       // touch target a floor, and `padded` is how a smaller body keeps it.
       tapTargetSize: MaterialTapTargetSize.padded,
       // The compact rung, at the same weight the standard one wears
@@ -407,16 +406,15 @@ class MxActionButton extends StatelessWidget {
     // and leaves `backgroundColor` to the theme — naming a fill for it would
     // mean naming a colour that is not a role.
     if (variant == MxActionButtonVariant.secondary) {
-      // The brand's ink and `outline`, the same pair the resting button draws
-      // (M100.87). This copy has been wrong three times for the same reason —
-      // it is a second spelling of the theme's answer, and it does not move
-      // when the theme does: `borderSubtle`, then `secondaryAction`, then
-      // `primary` after the label moved to its ink. Each time a secondary
-      // button changed colour for the duration of a save.
+      // `primary` and `outline`, the same pair the resting button draws since
+      // M100.22. This copy has been wrong twice now for the same reason — it
+      // is a second spelling of the theme's answer, and it does not move when
+      // the theme does. It said `borderSubtle` while the theme drew the control
+      // edge, then `secondaryAction`/`borderControl` while the theme moved to
+      // the canonical roles; both times a secondary button changed colour for
+      // the duration of a save.
       return ButtonStyle(
-        foregroundColor: WidgetStatePropertyAll<Color>(
-          context.semanticColors.accentInk,
-        ),
+        foregroundColor: WidgetStatePropertyAll<Color>(colors.primary),
         side: WidgetStatePropertyAll<BorderSide>(
           BorderSide(color: colors.outline),
         ),
@@ -459,7 +457,7 @@ class MxActionButton extends StatelessWidget {
   /// for the case where the button keeps its fill.
   static const Widget _spinner = RepaintBoundary(
     child: SizedBox.square(
-      dimension: AppIconSize.xs,
+      dimension: AppIconSize.sm,
       child: CircularProgressIndicator(strokeWidth: AppStroke.indicator),
     ),
   );
@@ -522,7 +520,7 @@ class MxActionButton extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         if (icon != null && iconSide == MxActionButtonIconSide.leading) ...[
-          Icon(icon, size: AppIconSize.xs),
+          Icon(icon, size: AppIconSize.sm),
           SizedBox(width: gap),
         ],
         text,
@@ -531,7 +529,7 @@ class MxActionButton extends StatelessWidget {
         // not depend on which side it stands on.
         if (icon != null && iconSide == MxActionButtonIconSide.trailing) ...[
           SizedBox(width: gap),
-          Icon(icon, size: AppIconSize.xs),
+          Icon(icon, size: AppIconSize.sm),
         ],
       ],
     );
@@ -574,7 +572,7 @@ class _ForegroundSpinner extends StatelessWidget {
   @override
   Widget build(BuildContext context) => RepaintBoundary(
     child: SizedBox.square(
-      dimension: AppIconSize.xs,
+      dimension: AppIconSize.sm,
       child: CircularProgressIndicator(
         strokeWidth: AppStroke.indicator,
         color: IconTheme.of(context).color,

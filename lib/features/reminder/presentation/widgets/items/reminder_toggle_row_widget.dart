@@ -36,10 +36,9 @@ class ReminderToggleRowWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       // The screen gutter, not a fixed `lg`: the time row below takes its
-      // horizontal inset from `ListTileTheme.contentPadding`, and while the
-      // compact pass stepped that to 12 below 360dp a literal here left the
-      // two rows of one card on two left edges at 320dp (M6 R2). Both are 16
-      // at every width since M100.89; the helper keeps them one value.
+      // horizontal inset from `ListTileTheme.contentPadding`, which
+      // `applyCompactScale` steps down to 12 below 360dp. A literal here left
+      // the two rows of one card on two left edges at 320dp (M6 R2).
       padding: EdgeInsets.symmetric(
         horizontal: mxScreenGutter(context),
         vertical: AppSpacing.xs,

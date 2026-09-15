@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/app/app.dart';
 import 'package:memox/core/theme/app_theme.dart';
+import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 
 /// A20.1 P1-11, corrective pass — rendered proof: the text a *component*
 /// draws emboldens under `MediaQuery.boldText`, through the `wght` axis.
@@ -92,7 +93,7 @@ void main() {
       expectRenderedBold(tester, 'Label here');
     });
 
-    testWidgets('a disabled field keeps its resting hint ink, emboldened', (
+    testWidgets('a disabled field keeps its disabled hint ink, emboldened', (
       tester,
     ) async {
       await pumpBold(
@@ -106,12 +107,10 @@ void main() {
       );
       expectRenderedBold(tester, 'Faded hint');
       final context = tester.element(find.text('Faded hint'));
-      // The handoff dims a disabled field as a whole (`MxTextField`, 0.38),
-      // so the hint keeps its resting ink under bold text too (M100.92).
-      expect(
-        renderedStyle(tester, 'Faded hint').color,
-        Theme.of(context).colorScheme.onSurfaceVariant,
-      );
+      final disabledInk = Theme.of(
+        context,
+      ).extension<AppSemanticColors>()!.onDisabled;
+      expect(renderedStyle(tester, 'Faded hint').color, disabledInk);
     });
 
     testWidgets('Slider value indicator and time-picker dial', (tester) async {

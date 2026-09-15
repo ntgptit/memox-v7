@@ -207,19 +207,14 @@ double _inkBelowLabel = 0;
 /// `descent 3.19 + half the sort control's 48px target`.
 const double _minimumGroupingLead = AppSpacing.sm;
 
-/// Plus Jakarta Sans's cap height as a fraction of the em, for `YOUR DECKS`.
+/// Inter's cap height as a fraction of the em, for `YOUR DECKS`.
 ///
 /// **Pinned to the face, like [AppTypography.heroNumeralCapTrim].** Uppercase
 /// ink runs from the baseline to the cap, which is neither the font's ascent
-/// nor the line box — the face's ascent sits well above the caps, and
-/// counting that as ink puts every number here 4px out. If the family changes,
-/// this changes with it.
-///
-/// 0.741 is derived the way `AppTypography.heroNumeralCapTrim` records it —
-/// digit ink 23.7px in a 32px em — and replaced Inter's 0.727 when the body
-/// face left (M100.89). Re-measure it off the Linux golden if this file's
-/// band assertions move.
-const double _capHeight = 0.741;
+/// nor the line box — Inter's ascent leaves 4.09px above the caps at 12px, and
+/// counting that as ink puts every number here 4px out. If the body family
+/// changes, this changes with it.
+const double _interCapHeight = 0.727;
 
 /// One thing the screen stacks, and the box it occupies.
 typedef _Band = ({String name, Rect rect, bool isInFlow});
@@ -313,8 +308,8 @@ List<_Band> _bandsOf(WidgetTester tester) {
 /// Where `YOUR DECKS` actually puts ink: cap to baseline, not the line box.
 ///
 /// Uppercase has no descender, so the bottom of the ink *is* the baseline. The
-/// top is the baseline less the cap height — [_capHeight] of the em — and
-/// not the ascent, which at this size sits well above the capitals. Taking
+/// top is the baseline less the cap height — [_interCapHeight] of the em — and
+/// not the ascent, which at this size sits 4.09px above the capitals. Taking
 /// the ascent for ink is the same class of error as taking it for leading, and
 /// it puts every number here 4px out.
 Rect _labelInk(WidgetTester tester) {
@@ -334,7 +329,7 @@ Rect _labelInk(WidgetTester tester) {
 
   return Rect.fromLTRB(
     box.left,
-    baseline - style.fontSize! * _capHeight,
+    baseline - style.fontSize! * _interCapHeight,
     box.right,
     baseline,
   );
@@ -410,19 +405,7 @@ String _report(List<_Band> bands) {
 /// else and an entry with a reason beats a threshold that quietly widens.
 /// Keyed by the pair, so an entry cannot cover a second gap that drifts to the
 /// same value elsewhere on the screen.
-///
-/// **The next sum came from the type scale** (M100.89). The handoff's caption
-/// leading makes the subline 17px, and the bar centres it in
-/// `MxBreadcrumb.compactLineHeight`: 7.5 of air each side where a 16px line
-/// had 8. Both distances out of the subline are that half plus a token. Task
-/// 22 rebuilds the breadcrumb strip and owns putting them back on 16.
-const Map<String, String> _allowedOffScale = <String, String>{
-  'Title -> Subtitle':
-      'sm (8) + (compactLineHeight 32 - the 17px caption line) / 2 = 15.5',
-  'Subtitle -> Hero':
-      '(compactLineHeight 32 - the 17px caption line) / 2 + half the bar '
-      'leftover (8) = 15.5',
-};
+const Map<String, String> _allowedOffScale = <String, String>{};
 
 /// Whether a distance is one of the spacing steps, or an overlap.
 ///
@@ -544,7 +527,7 @@ class _RhythmRuler extends StatelessWidget {
         // harness default, which paints every glyph as a filled box — the
         // ruler's first two renders were unreadable for exactly that reason.
         style: TextStyle(
-          fontFamily: AppTypography.family,
+          fontFamily: AppTypography.bodyFamily,
           fontFamilyFallback: AppTypography.cjkFallback,
           color: _ink,
           fontSize: fontSize,

@@ -62,13 +62,4 @@ abstract final class AppStroke {
   /// does buy is that focus changes only the colour here, exactly as it does on
   /// an input — see `buildInputDecorationTheme`.
   static const double selectionControl = 2;
-
-  /// The arc of the handoff MasteryRing (`40×3px`, M100.91).
-  ///
-  /// **A sixth value, and the same narrow exception [selectionControl] made.**
-  /// The drift this file guards against is a per-screen stroke; this one is a
-  /// component's, stated in the handoff's dimension table for the ring and read
-  /// by nothing else. At 40dp the arc has to carry a percentage at a glance, so
-  /// it is one step heavier than the focus ring that merely outlines.
-  static const double ring = 3;
 }

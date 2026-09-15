@@ -122,30 +122,20 @@ void main() {
         screenIconButtons: 5,
         hasFloatingAction: true,
         screenItemId: 'deck_screen',
-        // Three deck rows, each an `MxPressable` on the one card (M100.91) —
-        // the same Material, InkWell and clip a tappable card contributes.
+        // Every row is a tappable card now rather than a ListTile.
         tappableCards: 3,
-        // **None, where this was one.** The row's Study action left with owner
-        // decision 7 (M100.91), and the panel's own CTA had already gone: at
-        // the root it promised a session it could not start (BR-101).
+        // **One, where this was two.** One deck in this fixture has cards due,
+        // so one Study action — and it is the filled one since 2026-09-10. The
+        // second used to be the panel's own CTA, which at the root promised a
+        // session it could not start (BR-101) and was removed rather than
+        // relabelled.
+        filledButtons: 1,
       ),
-      // One ring per deck row with cards (owner decision 7, M100.91): two of
-      // the three fixtures have cards.
-      const AuditSkipAllowance(
-        itemId: 'deck_screen',
-        reason: SkipReason.customPainter,
-        detailContains: 'MxMasteryRingPainter',
-        rationale:
-            'MxMasteryRing paints its track and arc in a CustomPainter, so no '
-            'render object carries either colour. mx_mastery_ring_test.dart '
-            'reads both off the painter — progressTrack, and primary below '
-            'complete or mastery at it — and the deck goldens hold the pixels.',
-        expectedMatches: 2,
-      ),
-      // **The panel's own level bar, and only it.** The rows measure with a
-      // ring since M100.91; the bar is the one figure they cannot state
-      // between them, because each ring measures its own deck and none of
-      // them measures the level.
+      // One progress bar per deck that has cards; two of the three fixtures do,
+      // **plus the panel's own level bar since 2026-09-10**. It spent a release
+      // behind the chevron and came back when the chevron went: it is the one
+      // figure the rows cannot state between them, because each row's bar
+      // measures its own deck and none of them measures the level.
       //
       // `LinearProgressIndicator` paints its track and its fill through
       // `_LinearProgressIndicatorPainter`, so neither colour exists on a render
@@ -163,6 +153,8 @@ void main() {
             'CustomPainter, so no render object carries either colour. Both are '
             'asserted in mx_progress_bar_test.dart and pinned by the '
             'mx_progress_bar_* goldens.',
+        // Two of the three fixtures have cards, plus the level summary's own.
+        expectedMatches: 3,
       ),
     ],
   );
@@ -335,15 +327,17 @@ void main() {
         screenItemId: 'deck_screen',
         hasFloatingAction: true,
         tappableCards: 3,
-        // The summary panel's Study CTA, and only it: the rows' own Study
-        // actions left with owner decision 7 (M100.91). Inside a deck the
-        // panel's CTA does start that deck's session, which is why this state
-        // keeps one where `root_loaded` has none.
-        filledButtons: 1,
+        // Two of the three children have cards due, and the summary panel's
+        // Study CTA makes a third filled action. **Unchanged by the 2026-09-10
+        // flatten**, and that is the point of keeping this state beside
+        // `root_loaded`: inside a deck the panel's CTA does start that deck's
+        // session, so only the root lost one.
+        filledButtons: 3,
         breadcrumbSteps: 3,
       ),
-      // **The level summary's own bar, and only it** — the rows measure with a
-      // ring since M100.91 (owner decision 7).
+      // Three cards, all with cards, **plus the level summary's own since
+      // 2026-09-10** — it spent a release behind the chevron and came back with
+      // it removed.
       // The count is exact on purpose — an allowance that said "any number" would
       // stop noticing when a bar appears on a row that should not have one.
       const AuditSkipAllowance(
@@ -355,19 +349,7 @@ void main() {
             'CustomPainter, so no render object carries either colour. Both are '
             'asserted in mx_progress_bar_test.dart and pinned by the '
             'mx_progress_bar_* goldens.',
-      ),
-      // One ring per deck row with cards (owner decision 7, M100.91): all
-      // three children have cards.
-      const AuditSkipAllowance(
-        itemId: 'deck_screen',
-        reason: SkipReason.customPainter,
-        detailContains: 'MxMasteryRingPainter',
-        rationale:
-            'MxMasteryRing paints its track and arc in a CustomPainter, so no '
-            'render object carries either colour. mx_mastery_ring_test.dart '
-            'reads both off the painter — progressTrack, and primary below '
-            'complete or mastery at it — and the deck goldens hold the pixels.',
-        expectedMatches: 3,
+        expectedMatches: 4,
       ),
     ],
   );

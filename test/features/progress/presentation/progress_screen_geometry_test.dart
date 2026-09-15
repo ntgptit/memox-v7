@@ -130,9 +130,12 @@ void main() {
         await pump(tester);
 
         final hero = rectOf(tester, ProgressStreakHeroWidget);
-        // 16 at every width, 320 included (M100.89) — the number every other
-        // screen resolves through `mxScreenGutter`.
-        const double gutter = AppSpacing.lg;
+        // 320 is below `AppBreakpoints.compact`, where the gutter steps down —
+        // the same two numbers every other screen uses, resolved by
+        // `mxScreenGutter` rather than re-derived here.
+        final double gutter = viewport.size.width < 360
+            ? AppSpacing.md
+            : AppSpacing.lg;
 
         expect(hero.left, gutter);
         expect(hero.right, viewport.size.width - gutter);
@@ -264,32 +267,29 @@ void main() {
     /// English only, and deliberately: these two measure `MxCard`'s padding and
     /// the `SizedBox` gaps between lines, neither of which depends on the words
     /// in them. The locale axis belongs to the wrap and overflow cases above.
-    testWidgets(
-      'the card pads its content by its interior on every side (G5)',
-      (tester) async {
-        await pumpProgressScreen(tester, repository: seeded());
+    testWidgets('the card pads its content by lg on every side (G5)', (
+      tester,
+    ) async {
+      await pumpProgressScreen(tester, repository: seeded());
 
-        final card = rectOf(tester, ProgressTodayWidget);
-        final label = tester.getRect(
-          find.descendant(
-            of: find.byType(ProgressTodayWidget),
-            matching: find.text(
-              english.progressTodaySectionLabel.toUpperCase(),
-            ),
-          ),
-        );
-        final note = tester.getRect(
-          find.descendant(
-            of: find.byType(ProgressTodayWidget),
-            matching: find.text(english.progressTodayPartitionNote),
-          ),
-        );
+      final card = rectOf(tester, ProgressTodayWidget);
+      final label = tester.getRect(
+        find.descendant(
+          of: find.byType(ProgressTodayWidget),
+          matching: find.text(english.progressTodaySectionLabel.toUpperCase()),
+        ),
+      );
+      final note = tester.getRect(
+        find.descendant(
+          of: find.byType(ProgressTodayWidget),
+          matching: find.text(english.progressTodayPartitionNote),
+        ),
+      );
 
-        expect(label.left - card.left, AppSpacing.card);
-        expect(label.top - card.top, AppSpacing.card);
-        expect(card.bottom - note.bottom, AppSpacing.card);
-      },
-    );
+      expect(label.left - card.left, AppSpacing.lg);
+      expect(label.top - card.top, AppSpacing.lg);
+      expect(card.bottom - note.bottom, AppSpacing.lg);
+    });
 
     testWidgets('the hero steps label → headline → support by sm then xs '
         '(G7)', (tester) async {

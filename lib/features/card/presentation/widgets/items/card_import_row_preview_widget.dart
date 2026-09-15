@@ -113,7 +113,7 @@ class CardImportRowPreviewWidget extends StatelessWidget {
                         // *spacing* token, and a fixed-size raw `Icon` besides
                         // — at 2.0x text it shrank relative to the words it
                         // annotates (review finding 1, 2026-08-28).
-                        MxIcon(reasonIcon, ink: reasonInk, size: MxIconSize.xs),
+                        MxIcon(reasonIcon, ink: reasonInk, size: MxIconSize.sm),
                         const SizedBox(width: AppSpacing.xs),
                         Expanded(
                           child: Text(
@@ -134,7 +134,7 @@ class CardImportRowPreviewWidget extends StatelessWidget {
           // The glyph is decoration over the words above; a screen reader
           // hears the status through the reason line and the summary chips.
           ExcludeSemantics(
-            child: MxIcon(statusIcon, ink: statusInk, size: MxIconSize.xs),
+            child: MxIcon(statusIcon, ink: statusInk, size: MxIconSize.sm),
           ),
         ],
       ),

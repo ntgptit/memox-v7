@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:memox/shared/widgets/mx_mastery_ring.dart';
-import 'package:memox/shared/widgets/mx_status_badge.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_action_sheet.dart';
 import 'package:memox/shared/widgets/mx_alert_dialog.dart';
@@ -18,7 +16,6 @@ import 'package:memox/shared/widgets/mx_form_dialog.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/shared/widgets/mx_fab.dart';
 import 'package:memox/shared/widgets/mx_icon.dart';
-import 'package:memox/shared/widgets/mx_icon_tile.dart';
 import 'package:memox/shared/widgets/mx_icon_button.dart';
 import 'package:memox/shared/widgets/mx_loading_state.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
@@ -161,12 +158,6 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
     build: () => const MxIcon(Icons.flag_outlined, semanticLabel: kLongLabel),
   ),
   MxStressSpecimen(
-    // A painted square with no copy: the stress is that its fixed extent holds
-    // at 320dp and 2.0x, where nothing may stretch it.
-    name: 'MxIconTile',
-    build: () => const MxIconTile(icon: Icons.folder_outlined),
-  ),
-  MxStressSpecimen(
     // The pressable owns no copy — the stress is that its 48 floor holds while
     // the child it wraps wraps.
     name: 'MxPressable',
@@ -208,24 +199,6 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
     name: 'MxProgressBar',
     build: () =>
         const MxProgressBar(value: 0.62, label: kLongLabel, valueLabel: '62%'),
-  ),
-  MxStressSpecimen(
-    // A painted mark with no copy: the stress is that its fixed 40 holds at
-    // 320dp and 2.0x, where nothing may stretch or clip it.
-    name: 'MxMasteryRing',
-    build: () => const MxMasteryRing(
-      value: 0.62,
-      isComplete: false,
-      semanticsLabel: kLongLabel,
-      semanticsValue: '62%',
-    ),
-  ),
-  MxStressSpecimen(
-    // A long state word in the pill: the badge must hold one line beside its
-    // dot or ellipsize, never push the dot off.
-    name: 'MxStatusBadge',
-    build: () =>
-        const MxStatusBadge(tone: MxStatusTone.reviewing, label: kLongLabel),
   ),
   MxStressSpecimen(
     // A mode name long enough to want the whole row is the case that breaks

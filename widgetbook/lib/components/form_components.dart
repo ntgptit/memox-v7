@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:memox/shared/widgets/mx_row_group.dart';
 import 'package:memox/shared/widgets/mx_badge.dart';
 import 'package:memox/core/theme/extensions/theme_context_extension.dart';
 import 'package:memox/core/theme/foundations/app_spacing.dart';
@@ -9,7 +8,6 @@ import 'package:memox/shared/widgets/mx_list_tile.dart';
 import 'package:memox/shared/widgets/mx_checkbox_row.dart';
 import 'package:memox/shared/widgets/mx_dropdown.dart';
 import 'package:memox/shared/widgets/mx_radio_rows.dart';
-import 'package:memox/shared/widgets/mx_switch.dart';
 import 'package:memox/shared/widgets/mx_switch_row.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
 import 'package:widgetbook/widgetbook.dart';
@@ -652,23 +650,6 @@ WidgetbookComponent selectionRowsComponent() {
         },
       ),
       WidgetbookUseCase(
-        name: 'MxSwitch',
-        builder: (BuildContext context) {
-          final isOn = context.knobs.boolean(label: 'on', initialValue: true);
-          final isEnabled = context.knobs.boolean(
-            label: 'enabled',
-            initialValue: true,
-          );
-
-          return CatalogCenterPage(
-            child: MxSwitch(
-              isOn: isOn,
-              onChanged: isEnabled ? _noopBool : null,
-            ),
-          );
-        },
-      ),
-      WidgetbookUseCase(
         name: 'MxCheckboxRow',
         builder: (BuildContext context) => CatalogCenterPage(
           child: MxCheckboxRow(
@@ -817,49 +798,6 @@ WidgetbookComponent badgeComponent() {
                 ),
               ),
             ),
-          );
-        },
-      ),
-    ],
-  );
-}
-
-WidgetbookComponent rowGroupComponent() {
-  return WidgetbookComponent(
-    name: 'MxRowGroup',
-    useCases: <WidgetbookUseCase>[
-      WidgetbookUseCase(
-        name: 'Playground',
-        builder: (BuildContext context) {
-          final inset = context.knobs.object.dropdown<MxRowDividerInset>(
-            label: 'inset',
-            options: MxRowDividerInset.values,
-            labelBuilder: (MxRowDividerInset value) => value.name,
-          );
-
-          return CatalogListPage(
-            children: <Widget>[
-              MxRowGroup(
-                inset: inset,
-                children: const <Widget>[
-                  MxListTile(
-                    title: 'Everyday Korean',
-                    subtitle: '120 cards',
-                    leading: Icon(Icons.folder_outlined),
-                  ),
-                  MxListTile(
-                    title: 'JLPT N5',
-                    subtitle: '84 cards',
-                    leading: Icon(Icons.folder_outlined),
-                  ),
-                  MxListTile(
-                    title: 'Travel phrases',
-                    subtitle: '36 cards',
-                    leading: Icon(Icons.folder_outlined),
-                  ),
-                ],
-              ),
-            ],
           );
         },
       ),

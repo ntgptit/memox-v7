@@ -273,15 +273,6 @@ void main() {
         textScale: 2,
       );
 
-      // At this scale the range pills wrap onto a second line (M100.89), and
-      // the taller band puts the row below what the list builds: bring it in,
-      // so what is asserted is a row that laid out, not one never built.
-      await tester.dragUntilVisible(
-        find.byType(ProgressDeckRowWidget),
-        find.byType(Scrollable).first,
-        const Offset(0, -100),
-      );
-
       // Nothing ellipsized into a lie and nothing overflowed: the metric cells
       // wrap and the row grows.
       expect(tester.takeException(), isNull);

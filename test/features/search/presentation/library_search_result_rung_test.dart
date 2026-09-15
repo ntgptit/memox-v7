@@ -64,11 +64,9 @@ void main() {
   });
 
   testWidgets('the rung swap moves no metric', (tester) async {
-    // Why nothing reflowed: D1 puts both slots on the handoff's body large
-    // (M100.89), so the swap moves no metric at all; until then they differed
-    // in weight and tracking only. Pinning that here means a future edit to
-    // the *scale* is what fails, at the place that explains the consequence,
-    // rather than four goldens.
+    // Why nothing reflowed: the two rungs differ in weight and tracking only.
+    // Pinning that here means a future edit to the *scale* is what fails, at
+    // the place that explains the consequence, rather than four goldens.
     await pumpBothRows(tester);
 
     final TextTheme texts = Theme.of(
@@ -79,8 +77,10 @@ void main() {
     expect(texts.titleMedium!.height, texts.bodyLarge!.height);
     expect(
       texts.titleMedium!.letterSpacing,
-      texts.bodyLarge!.letterSpacing,
-      reason: 'one role, one tracking — the swap cannot introduce a wrap',
+      lessThan(texts.bodyLarge!.letterSpacing!),
+      reason:
+          'tracking falls 0.5 -> 0.15, so the line gets narrower — the '
+          'direction that cannot introduce a wrap',
     );
   });
 

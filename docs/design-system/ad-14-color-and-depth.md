@@ -7,8 +7,8 @@
 | **Scope** | Seed, 45 role của `ColorScheme`, cue chiều sâu theo mode, nguồn giá trị token, lịch sử các lần áp lại luật. Ngoài phạm vi: quyết định AD khác, layering của `lib/core/theme/` (`theme-architecture.md`) |
 | **Source of truth for** | Suy luận đầy đủ, số đo và các phương án từng cân nhắc của AD-14 (quyết định và đánh đổi vẫn được tuyên bố ở `../architecture.md`) |
 | **Depends on** | `../architecture.md` (AD-14) · `../document-conventions.md` |
-| **Updated by task** | M100.87 |
-| **Last updated** | 2026-09-13 |
+| **Updated by task** | M100.65 |
+| **Last updated** | 2026-09-08 |
 
 ---
 
@@ -66,12 +66,6 @@ hiện 7.75 L\* ở light và 7.70 ở dark. Mỗi mode tự do dựng con số 
 |---|---|---|---|
 | light | 2.15 L\* | +5.6 L\* (alpha 0.07) | 1.50:1 |
 | dark | 7.70 L\* | **không có** | 1.82:1 |
-
-**Số của bảng trên là trước M100.87.** Handoff Tokyo đặt card trắng lên trang
-tint với `shadow-soft` (`0 1px 2px` @4%): ở light, bậc surface còn 2.09 L\* và
-shade 3.14, tổng 5.24 — sàn trong `app_theme_test.dart` hạ từ 6.0 xuống 5.0 theo
-quyết định giữ kit. Ở dark, trang navy của kit nằm ở L\* 4.75, nên card tách
-khỏi trang bằng rim hairline cộng drop của kit, không bằng shade.
 
 Dark không vẽ shadow vì **đo được**, không phải vì thẩm mỹ: trang dark nằm ở đáy
 thang lightness (L\* 3.86), nên một shadow ở alpha 0.20 chỉ dịch được 0.26 L\*.

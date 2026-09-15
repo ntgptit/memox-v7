@@ -41,7 +41,7 @@ class MxBadge extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: context.semanticColors.surfaceMuted,
-        borderRadius: BorderRadius.circular(AppRadius.full),
+        borderRadius: BorderRadius.circular(AppRadius.pill),
       ),
       child: Text(
         label,

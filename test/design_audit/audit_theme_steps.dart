@@ -97,22 +97,6 @@ Map<String, Color> auditTokensOf(ThemeData theme) {
     'semantic.warning': x.warning,
     'semantic.danger': x.danger,
     'semantic.info': x.info,
-    // Mastery and the lifecycle dots (M100.91), fills beside their families.
-    'semantic.mastery': x.mastery,
-    'semantic.statusNew': x.statusNew,
-    'semantic.statusLearning': x.statusLearning,
-    'semantic.statusReviewing': x.statusReviewing,
-    'semantic.statusMastered': x.statusMastered,
-    // The text inks (M100.87), dumped beside their fills so the audit can
-    // resolve every `*Ink` call site.
-    'semantic.accentInk': x.accentInk,
-    'semantic.successInk': x.successInk,
-    'semantic.warningInk': x.warningInk,
-    'semantic.dangerInk': x.dangerInk,
-    'semantic.infoInk': x.infoInk,
-    'semantic.secondaryInk': x.secondaryInk,
-    'semantic.tertiaryInk': x.tertiaryInk,
-    'semantic.inversePrimaryInk': x.inversePrimaryInk,
     'semantic.surfaceMuted': x.surfaceMuted,
     'semantic.borderSubtle': x.borderSubtle,
     'semantic.successContainer': x.successContainer,

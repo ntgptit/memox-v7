@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
-import 'package:memox/core/theme/foundations/app_semantic_colors.dart';
 
 /// **What role does this component slot read?** — pinned as identity, for every
 /// Material component the app themes.
@@ -55,11 +54,6 @@ void main() {
     group('$mode · component slot resolves its canonical M3 role', () {
       final ThemeData theme = build();
       final ColorScheme scheme = theme.colorScheme;
-      // **The one departure, stated in this diff** (M100.87). The Tokyo
-      // handoff's light `primary` reads 3.95:1 as a label on the page, so the
-      // brand *as text* — TextButton, OutlinedButton, the selected tab — is
-      // `accentInk`. Every brand *fill* and *graphic* below keeps `primary`.
-      final Color brandText = theme.extension<AppSemanticColors>()!.accentInk;
 
       const Set<WidgetState> selected = <WidgetState>{WidgetState.selected};
       const Set<WidgetState> resting = <WidgetState>{};
@@ -95,32 +89,23 @@ void main() {
       });
 
       test('ChoiceChip', () {
-        // **Selected fill and label are the one stated exception in this
-        // file** (M100.86, `design-system/chip-spec.md`; reopen authority is
-        // `v1-freeze.md` §3c). `_ChoiceChipDefaultsM3.color`
-        // answers `secondaryContainer`; the owner's Chip design spec named
-        // `primaryContainer` directly, and reopening the binding in
-        // `m3_role_bindings.dart` is the diff that says so, as this file's own
-        // header asks for. Unselected fill, both labels' other branch, and the
-        // outline are untouched — still the SDK's own answer.
         final t = theme.chipTheme;
         final label = t.labelStyle!.color! as WidgetStateColor;
 
         pin(
           'selected fill',
           t.color!.resolve(selected),
-          scheme.primaryContainer,
+          scheme.secondaryContainer,
         );
         pin(
           'unselected fill',
           t.color!.resolve(resting),
-          // Handoff Chip (M100.92): `surface-container fill`.
-          scheme.surfaceContainer,
+          scheme.surfaceContainerLow,
         );
         pin(
           'selected label',
           label.resolve(selected),
-          scheme.onPrimaryContainer,
+          scheme.onSecondaryContainer,
         );
         pin(
           'unselected label',
@@ -163,15 +148,15 @@ void main() {
       test('OutlinedButton', () {
         final s = theme.outlinedButtonTheme.style!;
 
-        pin('foreground', s.foregroundColor!.resolve(resting), brandText);
+        pin('foreground', s.foregroundColor!.resolve(resting), scheme.primary);
         pin('side', s.side!.resolve(resting)!.color, scheme.outline);
       });
 
       test('Switch', () {
         final t = theme.switchTheme;
 
-        pin('off thumb', t.thumbColor!.resolve(resting), scheme.surfaceBright);
-        pin('on thumb', t.thumbColor!.resolve(selected), scheme.surfaceBright);
+        pin('off thumb', t.thumbColor!.resolve(resting), scheme.outline);
+        pin('on thumb', t.thumbColor!.resolve(selected), scheme.onPrimary);
         pin(
           'off track',
           t.trackColor!.resolve(resting),
@@ -181,7 +166,7 @@ void main() {
         pin(
           'off track outline',
           t.trackOutlineColor!.resolve(resting),
-          Colors.transparent,
+          scheme.outline,
         );
         pin(
           'on track outline',
@@ -226,14 +211,14 @@ void main() {
         final t = theme.sliderTheme;
 
         pin('active track', t.activeTrackColor, scheme.primary);
-        pin(
-          'inactive track',
-          t.inactiveTrackColor,
-          scheme.surfaceContainerHighest,
-        );
+        pin('inactive track', t.inactiveTrackColor, scheme.secondaryContainer);
         pin('thumb', t.thumbColor, scheme.primary);
         pin('active tick', t.activeTickMarkColor, scheme.onPrimary);
-        pin('inactive tick', t.inactiveTickMarkColor, scheme.onSurfaceVariant);
+        pin(
+          'inactive tick',
+          t.inactiveTickMarkColor,
+          scheme.onSecondaryContainer,
+        );
         pin('value indicator', t.valueIndicatorColor, scheme.inverseSurface);
       });
 
@@ -247,12 +232,10 @@ void main() {
       test('TextField', () {
         final t = theme.inputDecorationTheme;
 
-        // The handoff TextField's ghost edge (D2, M100.92): the filled
-        // surface identifies the field, so the edge is the hairline role.
         pin(
           'enabled border',
           t.enabledBorder!.borderSide.color,
-          scheme.outlineVariant,
+          scheme.outline,
         );
         pin(
           'focused border',
@@ -267,16 +250,24 @@ void main() {
           t.focusedErrorBorder!.borderSide.color,
           scheme.error,
         );
-        // **The disabled edge is the resting edge** (M100.92). The handoff
-        // dims a disabled field as a whole — 0.38 on the entire control,
-        // pinned by `mx_text_field_contract_test` — so the edge does not dim
-        // a second time. The blend of `outline` over the paper it replaced
-        // answered a field identified by its edge alone.
-        pin(
-          'disabled border',
-          t.disabledBorder!.borderSide.color,
-          scheme.outlineVariant,
-        );
+        // `disabledBorder` is the one input slot that is not a role: a solid
+        // blend of `outline` over the paper (MX-VIS-002 R7), stronger than
+        // M3's `onSurface @ 12%` because this field's whole identity is its
+        // edge. Pinned as *not a live role* and *opaque*, which is the shape
+        // of the decision rather than its value.
+        final disabledEdge = t.disabledBorder!.borderSide.color;
+        expect(disabledEdge.a, 1.0, reason: 'disabled edge is translucent');
+        for (final live in <Color>[
+          scheme.outline,
+          scheme.primary,
+          scheme.error,
+        ]) {
+          expect(
+            disabledEdge,
+            isNot(live),
+            reason: '$mode: a disabled field wears a live edge',
+          );
+        }
       });
 
       test('Dialog', () {
@@ -362,14 +353,14 @@ void main() {
       test('TextButton', () {
         final s = theme.textButtonTheme.style!;
 
-        pin('foreground', s.foregroundColor!.resolve(resting), brandText);
-        pin('icon', s.iconColor!.resolve(resting), brandText);
+        pin('foreground', s.foregroundColor!.resolve(resting), scheme.primary);
+        pin('icon', s.iconColor!.resolve(resting), scheme.primary);
       });
 
       test('TabBar', () {
         final t = theme.tabBarTheme;
 
-        pin('label', t.labelColor, brandText);
+        pin('label', t.labelColor, scheme.primary);
         pin(
           'unselected label',
           t.unselectedLabelColor,
@@ -386,15 +377,6 @@ void main() {
       // The inverse of what `app_selected_ink_test.dart` pinned, and the reason
       // this file exists. If a future change collapses these back onto one
       // token "for consistency", this fails and says which M3 default it broke.
-      //
-      // **The chip's own row changed meaning at M100.86, not its value.**
-      // Before M100.86 `chipLabel` and `navGlyph` were the same *role*,
-      // `onSecondaryContainer`, arrived at independently by two different M3
-      // defaults — the coincidence this test was written to prove could
-      // diverge. Chip's stated departure to `onPrimaryContainer`
-      // (`design-system/chip-spec.md`) makes them diverge for real; the test
-      // still proves the same thing it always did — three components, three
-      // roles, none of them implicitly shared.
       final theme = buildLightTheme();
       final scheme = theme.colorScheme;
       const selected = <WidgetState>{WidgetState.selected};
@@ -408,7 +390,7 @@ void main() {
           .resolve(selected)!
           .color;
 
-      expect(chipLabel, scheme.onPrimaryContainer);
+      expect(chipLabel, scheme.onSecondaryContainer);
       expect(navGlyph, scheme.onSecondaryContainer);
       expect(
         navLabel,

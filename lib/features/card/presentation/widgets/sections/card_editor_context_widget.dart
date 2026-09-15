@@ -122,7 +122,7 @@ class CardEditorContextWidget extends StatelessWidget {
       child: Row(
         children: <Widget>[
           // MxIcon excludes itself from semantics when unlabeled.
-          const MxIcon(Icons.history, size: MxIconSize.xs),
+          const MxIcon(Icons.history, size: MxIconSize.sm),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
@@ -139,7 +139,7 @@ class CardEditorContextWidget extends StatelessWidget {
             child: MxIcon(
               Icons.chevron_right,
               ink: AppInk.accent,
-              size: MxIconSize.xs,
+              size: MxIconSize.sm,
             ),
           ),
         ],
@@ -158,7 +158,7 @@ class CardEditorContextWidget extends StatelessWidget {
         child: Row(
           children: <Widget>[
             const ExcludeSemantics(
-              child: MxIcon(Icons.layers_outlined, size: MxIconSize.xs),
+              child: MxIcon(Icons.layers_outlined, size: MxIconSize.sm),
             ),
             const SizedBox(width: AppSpacing.sm),
             Expanded(

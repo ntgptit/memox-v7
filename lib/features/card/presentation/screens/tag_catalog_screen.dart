@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/foundations/app_spacing.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_card.dart';
-import '../../../../shared/widgets/mx_row_group.dart';
 import '../../../../shared/widgets/mx_messenger.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
@@ -195,17 +194,32 @@ class _CatalogList extends StatelessWidget {
         child: MxReadingColumn(
           child: MxCard.raised(
             padding: MxCardPadding.none,
-            // The hairlines are the handoff ListRow's (M100.91): `MxRowGroup`
-            // draws one per boundary at the leading inset every grouped row
-            // list shares, rather than this screen deriving its own.
-            child: MxRowGroup(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                for (final tag in tags)
+                for (var index = 0; index < tags.length; index++) ...<Widget>[
+                  if (index > 0)
+                    // Inset to the text column at the head, so the line reads
+                    // as a row separator rather than the card being sliced
+                    // through. Card Detail's summary hairlines are full-bleed
+                    // — this list is the one that insets, because its rows
+                    // carry a leading well the summary's do not.
+                    const Divider(
+                      // Thickness and height are the theme's (one hairline,
+                      // no reserved space); only the inset is this list's.
+                      indent: _rowTextInset,
+                      // `xs`, the row's own trailing inset: the line then ends
+                      // exactly on the row's content edge. `md` ended it on
+                      // nothing — 8dp short of the content, 4dp past the menu
+                      // glyph, 12dp inside the card.
+                      endIndent: AppSpacing.xs,
+                    ),
                   TagCatalogRowWidget(
-                    entry: tag,
-                    onRename: () => _rename(context, tag),
-                    onDelete: () => _delete(context, tag),
+                    entry: tags[index],
+                    onRename: () => _rename(context, tags[index]),
+                    onDelete: () => _delete(context, tags[index]),
                   ),
+                ],
               ],
             ),
           ),
@@ -213,6 +227,12 @@ class _CatalogList extends StatelessWidget {
       ),
     );
   }
+
+  /// Where a row's text begins inside the card: the row's own leading inset,
+  /// the 32dp well, and the gap after it. Stated once so the separator and
+  /// the row cannot disagree about where the text column starts.
+  static const double _rowTextInset =
+      AppSpacing.md + TagCatalogRowWidget.wellSize + AppSpacing.md;
 
   /// Opened from a post-frame callback by `PopupMenuItem.onTap`, which fires
   /// after the menu route pops — so the sheet is pushed onto the screen rather
